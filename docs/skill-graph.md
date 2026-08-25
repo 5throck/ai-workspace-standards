@@ -142,5 +142,58 @@ Skills used in specific lifecycle phases (from `variant.json` `skill_manifest`):
 | `relates_to` | From SKILL.md `relates_to` field or overrides (skill ↔ skill) |
 | `used_by` | Agent ↔ skill relation (from `required_skills` or `used_by_agents`) |
 | `phase` | Skill used in a lifecycle phase (from `variant.json` `skill_manifest.phases`) |
-| `supersedes` | From overrides only (manual declaration of supersession) |
-| `references` | Backtick reference in SKILL.md or agent body prose |
+| `supersedes` | Supersession — overrides (manual) or decision-record prose labels |
+| `references` | Backtick reference in SKILL.md/agent/ADR body prose, or DEC `knowledge_refs[]` naming an ADR |
+| `cites_skill` | Decision record `skills_used[]` validated against the skill set (ADR-0061 amendment 2026-08-25) |
+
+## Decisions & ADRs
+
+| Document | Type | Cites skills | References | Supersedes |
+|----------|------|--------------|------------|------------|
+| `adr:0001` | adr | — | — | — |
+| `adr:0012` | adr | — | — | — |
+| `adr:0013` | adr | — | — | — |
+| `adr:0020` | adr | — | — | — |
+| `adr:0021` | adr | — | — | — |
+| `adr:0022` | adr | — | — | — |
+| `adr:0023` | adr | — | — | — |
+| `adr:0024` | adr | — | simulate-project-creation | — |
+| `adr:0025` | adr | — | — | — |
+| `adr:0026` | adr | — | — | — |
+| `adr:0027` | adr | — | design | — |
+| `adr:0028` | adr | — | — | — |
+| `adr:0029` | adr | — | version | — |
+| `adr:0031` | adr | — | — | — |
+| `adr:0032` | adr | — | meeting-facilitation, version | — |
+| `adr:0033` | adr | — | — | — |
+| `adr:0034` | adr | — | — | — |
+| `adr:0035` | adr | — | — | — |
+| `adr:0036` | adr | — | upgrade-project | — |
+| `adr:0037` | adr | — | — | — |
+| `adr:0038` | adr | — | — | — |
+| `adr:0039` | adr | — | — | — |
+| `adr:0040` | adr | — | — | — |
+| `adr:0041` | adr | — | meeting-facilitation | — |
+| `adr:0042` | adr | — | — | — |
+| `adr:0043` | adr | — | — | — |
+| `adr:0044` | adr | — | — | — |
+| `adr:0045` | adr | — | — | — |
+| `adr:0046` | adr | — | — | — |
+| `adr:0047` | adr | — | — | — |
+| `adr:0048` | adr | — | — | — |
+| `adr:0049` | adr | — | — | — |
+| `adr:0050` | adr | — | create-variant | — |
+| `adr:0051` | adr | — | version | — |
+| `adr:0052` | adr | — | — | — |
+| `adr:0053` | adr | — | — | — |
+| `adr:0054` | adr | — | — | — |
+| `adr:0055` | adr | — | — | — |
+| `adr:0056` | adr | — | — | — |
+| `adr:0057` | adr | — | k-dart, k-kosis, k-law, translate | — |
+| `adr:0058` | adr | — | k-dart, k-law | — |
+| `adr:0059` | adr | — | — | — |
+| `adr:0060` | adr | — | — | — |
+| `adr:0061` | adr | — | decision-record, evidence-ledger | — |
+| `adr:0062` | adr | — | — | — |
+| `dec:DEC-20260825-01` | decision | — | — | — |
+| `dec:DEC-20260825-02` | decision | `sync` | — | — |

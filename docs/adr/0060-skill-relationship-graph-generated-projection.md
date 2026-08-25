@@ -98,3 +98,19 @@ One graph file for the whole workspace, with each node carrying a `layer` field 
 - ADR-0013 — Committed generated-artifact pattern (README sync) that step 4.65 mirrors
 - ADR-0061 — Decision Record Standard (`skills_used[]` frontmatter consumes this graph's vocabulary)
 - ADR-0062 — Marker-Based Doc Propagation Domains (sibling ADR from the same 2026-08-24 design series)
+
+---
+
+## Amendment 2026-08-25 — Document Layer
+
+**Status**: Accepted (same-day amendment, implemented in the amending PR)
+**Design of record**: [2026-08-25-skill-graph-document-layer-design.md](../designs/2026-08-25-skill-graph-document-layer-design.md)
+
+The projection gains a document layer generalizing the co-newbiz multi-element pilot (project-local; see that project's `docs/designs/2026-08-24-multi-element-skill-graph-pilot-design.md`):
+
+- New node types `decision` (`dec:<stem>`, from `docs/decisions/DEC-YYYYMMDD-NN.md` per ADR-0061) and `adr` (`adr:<NNNN>` from `docs/adr/`), layer `L0`.
+- New edge type `cites_skill` — a decision record's `skills_used[]` entry validated against the known skill set. This is the vocabulary-enforcement payoff: decision records now draw their skill vocabulary FROM the graph, closing ADR-0061's cross-reference loop.
+- Reused advisory edges: `references` (a DEC `knowledge_refs[]` entry naming an ADR; backtick skill references inside ADR bodies) and `supersedes` (prose label `Supersedes: ADR-NNNN|DEC-…`).
+- **Not ported**: procedure/artifact/rule/evidence-var node types remain project-local strengths (co-newbiz); L0 has no generic registries behind them and the amendment refuses to fabricate empty structure. Revisit on first generic registry.
+
+All document edges are advisory like every other edge in this graph. Implementation: `generate-skill-graph.ts` 1.2.0 (shared `buildGraph()` — the verifier inherits the extension unchanged, verified passing at 257 nodes / 600 edges).
