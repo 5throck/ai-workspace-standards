@@ -1,4 +1,4 @@
-// @version 1.7.4
+// @version 1.7.5
 // v1.7.3: feat(pipeline): add step 4.65 skill graph gate (ADR-0060) — generates and
 //           verifies skill relationship graph before VERSION_MANIFEST generation
 // v1.7.2: fix(pipeline): forward --spec-exempt via SYNC_SPEC_EXEMPT env instead of shell
@@ -335,6 +335,36 @@ if (isWorkspaceRoot) {
             }
         } else {
             console.log(`${YELLOW}⚠️  L0→L1 publish failed — continuing sync${RESET}`);
+        }
+    }
+}
+
+// ── Step 4.52: Dependency version sync (root → templates/common) ──
+//     Aligns shared dependency versions from root package.json to
+//     templates/common/package.json and regenerates bun.lock.
+//     Runs after 4.5 (propagate never touches package.json) and before
+//     audit 4.9 so the dependency-mirror audit check passes on the
+//     self-healed state. Files written here are swept into the same
+//     commit by git add -A.
+if (isWorkspaceRoot) {
+    console.log('\n📦 Syncing dependency versions (root → templates/common)...');
+    try {
+        const depSyncRes = await $`bun scripts/sync-template-deps.ts --apply`.nothrow();
+        if (depSyncRes.exitCode !== 0) {
+            console.error(`${RED}❌ Dependency sync failed.${RESET}`);
+            if (depSyncRes.stderr) {
+                console.error(String(depSyncRes.stderr).trim());
+            }
+            if (import.meta.main) {
+                process.exit(1);
+            }
+        } else {
+            console.log(`${GREEN}✓ Dependency sync completed${RESET}`);
+        }
+    } catch (e) {
+        console.error(`${RED}❌ Dependency sync failed: ${e}${RESET}`);
+        if (import.meta.main) {
+            process.exit(1);
         }
     }
 }
