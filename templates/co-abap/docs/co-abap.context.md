@@ -105,6 +105,7 @@ Required env keys (see `.env.sample`):
 | Skill | Directory | Purpose | Status |
 |-------|-----------|---------|--------|
 | ABAP Development | `.agents/skills/abap-dev/` | Core SAP ABAP development workflow | active |
+| ABAP Code Review | `.agents/skills/abap-code-review/` | Clean ABAP review pass over naming, formatting, and anti-patterns with ATC cross-reference | active |
 | Desktop App Fallback | `.agents/skills/desktop-app-fallback/` | Manual post-write QA for Claude Code Desktop App | active |
 | Dump Monitoring | `.agents/skills/dump-monitor/` | Standardized ListDumps/GetDump health check routed to /triage | active |
 | Performance Tuning | `.agents/skills/performance-tuning/` | Standardized trace/SQL/call-graph analysis for slow programs and large-table access | active |

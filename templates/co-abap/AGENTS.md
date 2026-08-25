@@ -409,6 +409,7 @@ Variant-specific skills (`skills/` is the SSOT; propagated to `.claude/skills/`,
 |-------|----------|-------|---------|
 | **Agent Lifecycle Manager** | `.claude/skills/agent-lifecycle-manager/SKILL.md` | pm | Managing agent lifecycle, creating/retiring agents, validation (inherited from workspace root) |
 | **ABAP Development** | `skills/abap-dev/SKILL.md` | code-writer | BAPI exploration, transport management, unit testing, performance analysis |
+| **ABAP Code Review** | `skills/abap-code-review/SKILL.md` | code-writer | Clean ABAP review pass: naming, pretty-printer, anti-patterns, with ATC cross-reference |
 | **Post-Write Chain** | `skills/post-write-chain/SKILL.md` | test-runner | Mandatory SyntaxCheck → RunUnitTests → GetCodeCoverage → RunATCCheck after ABAP writes |
 | **Performance Tuning** | `skills/performance-tuning/SKILL.md` | dba | Trace/SQL/call-graph analysis for slow programs and large-table access |
 | **Dump Monitor** | `skills/dump-monitor/SKILL.md` | devops-admin | SAP short dump detection via ListDumps/GetDump, routed to /triage |
