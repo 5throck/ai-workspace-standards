@@ -21,3 +21,9 @@ author: <agent or role>
 2. **Immutable once accepted.** Reversal = a NEW record whose prose/frontmatter names its predecessor via `Supersedes:` — never delete or rewrite history.
 3. **Link the evidence.** Reference the artifacts (findings, ledgers, profiles) the ruling rested on.
 4. **Gate-moment rulings are dual-tracked**: gate approvals, escalations, and go/no-go calls additionally emit a decision record at `docs/decisions/DEC-YYYYMMDD-NN.md` — see the `decision-record` skill (workspace ADR-0061).
+
+## Variant Anchor — co-hr
+
+Registered rule: **[HR-R1]** — confirm the applicable jurisdiction with the client before any statutory work when no country profile is active (`co-hr.context.md`, Domain Rules).
+
+Likely first records: country-profile statute-family additions; metric-dictionary scope rulings; engagement-phase deliverable language defaults.
