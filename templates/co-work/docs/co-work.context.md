@@ -147,6 +147,7 @@ All numeric outputs in deliverables (aggregations, statistics, percentages, metr
 2. Stakeholder review comments must be tracked in the project coordination log.
 3. Publication artifacts must be version-controlled before distribution.
 4. Corporate document styles are SSOT'd at `docs/document-style-registry.json` - style bundles keyed by document type (memo, report, deck, reserved spreadsheet) for OOXML compilation. Agents producing OOXML deliverables MUST read the registry for the target document type rather than inventing styles; see `docs/document-style-registry.md` for the schema and consumption contract. **[WORK-R1]**
+5. Workflow connector contracts are SSOT'd at `docs/connector-schemas.json` - trigger/event and action node contracts per integration (n8n-style node typing) for coordination automations. `project-coordinator` automation proposals MUST cite a connector id + node id from the pack; contracts are planning artifacts, not executors. See `docs/connector-schemas.md` for the schema and consumption contract. **[WORK-R2]**
 
 ---
 
@@ -162,4 +163,4 @@ Key rules:
 
 ---
 
-*co-work.context.md version: 1.2 — document-style-registry referenced (Domain Rule 4)*
+*co-work.context.md version: 1.3 — connector-schemas referenced (Domain Rule 5)*

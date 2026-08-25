@@ -1,0 +1,345 @@
+{
+  "schema_version": "1.0.0",
+  "description": "Workflow connector contract pack for co-work: trigger/event and action node contracts per integration (n8n-style node typing), consumed by project-coordinator when proposing coordination automations.",
+  "conventions": {
+    "node_id_format": "<connector>.<event-or-action> in kebab-case, e.g. email.message-received",
+    "contract_semantics": "Contracts are planning artifacts: they describe the trigger event payload shape and the action input/output shape. They do not execute - the template ships no automation runner; scaffolded projects bind contracts to their chosen automation platform.",
+    "auth": "Every connector declares an auth envelope placeholder. Templates never store credentials; scaffolded projects bind real credentials via their own environment."
+  },
+  "connectors": [
+    {
+      "id": "email",
+      "name": "Email",
+      "category": "communication",
+      "auth": {
+        "type": "credentials-envelope",
+        "fields": ["smtp_host", "account_ref"]
+      },
+      "triggers": [
+        {
+          "id": "email.message-received",
+          "description": "Fires when a message lands in the monitored mailbox",
+          "emits": {
+            "fields": ["message_id", "from", "subject", "received_at", "body_excerpt"]
+          }
+        }
+      ],
+      "actions": [
+        {
+          "id": "email.send",
+          "description": "Sends an email message",
+          "inputs": {
+            "required": ["to", "subject", "body"],
+            "optional": ["cc", "attachments"]
+          },
+          "outputs": {
+            "fields": ["message_id", "status"]
+          }
+        },
+        {
+          "id": "email.fetch-thread",
+          "description": "Retrieves conversation thread for a message",
+          "inputs": {
+            "required": ["message_id"],
+            "optional": []
+          },
+          "outputs": {
+            "fields": ["thread_id", "messages", "participants"]
+          }
+        }
+      ],
+      "notes": "Used for stakeholder notifications and review coordination."
+    },
+    {
+      "id": "calendar",
+      "name": "Calendar",
+      "category": "coordination",
+      "auth": {
+        "type": "credentials-envelope",
+        "fields": ["calendar_api", "account_ref"]
+      },
+      "triggers": [
+        {
+          "id": "calendar.event-started",
+          "description": "Fires when a calendar event begins",
+          "emits": {
+            "fields": ["event_id", "title", "start_time", "attendees", "location"]
+          }
+        },
+        {
+          "id": "calendar.event-updated",
+          "description": "Fires when an event is modified",
+          "emits": {
+            "fields": ["event_id", "change_type", "updated_fields", "modified_by"]
+          }
+        }
+      ],
+      "actions": [
+        {
+          "id": "calendar.create-event",
+          "description": "Creates a new calendar event",
+          "inputs": {
+            "required": ["title", "start_time", "end_time"],
+            "optional": ["attendees", "location", "description"]
+          },
+          "outputs": {
+            "fields": ["event_id", "status", "calendar_url"]
+          }
+        },
+        {
+          "id": "calendar.list-busy-slots",
+          "description": "Queries availability for scheduling",
+          "inputs": {
+            "required": ["participants", "window_start", "window_end"],
+            "optional": ["meeting_duration"]
+          },
+          "outputs": {
+            "fields": ["available_slots", "conflicts", "timezone"]
+          }
+        },
+        {
+          "id": "calendar.send-invite",
+          "description": "Sends calendar invitation to attendees",
+          "inputs": {
+            "required": ["event_id", "attendee_list"],
+            "optional": ["message_body"]
+          },
+          "outputs": {
+            "fields": ["invite_id", "response_status"]
+          }
+        }
+      ],
+      "notes": "Coordinates meeting schedules and milestone reviews."
+    },
+    {
+      "id": "chat",
+      "name": "Chat",
+      "category": "communication",
+      "auth": {
+        "type": "credentials-envelope",
+        "fields": ["workspace_api", "channel_scope"]
+      },
+      "triggers": [
+        {
+          "id": "chat.message-posted",
+          "description": "Fires when a message is sent to a monitored channel",
+          "emits": {
+            "fields": ["message_id", "channel", "author", "timestamp", "content"]
+          }
+        }
+      ],
+      "actions": [
+        {
+          "id": "chat.post-message",
+          "description": "Posts a message to a channel",
+          "inputs": {
+            "required": ["channel", "content"],
+            "optional": ["thread_parent", "mentions"]
+          },
+          "outputs": {
+            "fields": ["message_id", "timestamp", "permalink"]
+          }
+        },
+        {
+          "id": "chat.create-channel",
+          "description": "Creates a new communication channel",
+          "inputs": {
+            "required": ["channel_name", "purpose"],
+            "optional": ["members", "private"]
+          },
+          "outputs": {
+            "fields": ["channel_id", "invite_link", "member_count"]
+          }
+        },
+        {
+          "id": "chat.add-reminder",
+          "description": "Sets a reminder for a message or deadline",
+          "inputs": {
+            "required": ["target", "reminder_time"],
+            "optional": ["reminder_text"]
+          },
+          "outputs": {
+            "fields": ["reminder_id", "scheduled_at"]
+          }
+        }
+      ],
+      "notes": "Enables rapid team communication and status broadcasts."
+    },
+    {
+      "id": "issue-tracker",
+      "name": "Issue Tracker",
+      "category": "project-management",
+      "auth": {
+        "type": "credentials-envelope",
+        "fields": ["tracker_api", "project_scope"]
+      },
+      "triggers": [
+        {
+          "id": "issue-tracker.issue-created",
+          "description": "Fires when a new issue is filed",
+          "emits": {
+            "fields": ["issue_id", "title", "priority", "reporter", "labels"]
+          }
+        },
+        {
+          "id": "issue-tracker.issue-updated",
+          "description": "Fires when an issue changes state or fields",
+          "emits": {
+            "fields": ["issue_id", "change_type", "old_value", "new_value", "changed_by"]
+          }
+        }
+      ],
+      "actions": [
+        {
+          "id": "issue-tracker.create-issue",
+          "description": "Creates a new issue or work item",
+          "inputs": {
+            "required": ["title", "description"],
+            "optional": ["priority", "assignee", "labels", "due_date"]
+          },
+          "outputs": {
+            "fields": ["issue_id", "status", "web_url"]
+          }
+        },
+        {
+          "id": "issue-tracker.comment",
+          "description": "Adds a comment to an existing issue",
+          "inputs": {
+            "required": ["issue_id", "comment_body"],
+            "optional": []
+          },
+          "outputs": {
+            "fields": ["comment_id", "posted_at"]
+          }
+        },
+        {
+          "id": "issue-tracker.transition-status",
+          "description": "Moves an issue to a new workflow state",
+          "inputs": {
+            "required": ["issue_id", "new_status"],
+            "optional": ["transition_comment"]
+          },
+          "outputs": {
+            "fields": ["issue_id", "previous_status", "current_status"]
+          }
+        }
+      ],
+      "notes": "Tracks action items and blockers from stakeholder reviews."
+    },
+    {
+      "id": "forms",
+      "name": "Forms",
+      "category": "data-collection",
+      "auth": {
+        "type": "credentials-envelope",
+        "fields": ["forms_api", "form_scope"]
+      },
+      "triggers": [
+        {
+          "id": "forms.response-submitted",
+          "description": "Fires when a form response is received",
+          "emits": {
+            "fields": ["response_id", "form_id", "submitted_at", "responses"]
+          }
+        }
+      ],
+      "actions": [
+        {
+          "id": "forms.create-form",
+          "description": "Creates a new data collection form",
+          "inputs": {
+            "required": ["form_title", "fields"],
+            "optional": ["description", "confirmation_message"]
+          },
+          "outputs": {
+            "fields": ["form_id", "form_url", "field_count"]
+          }
+        },
+        {
+          "id": "forms.fetch-responses",
+          "description": "Retrieves all responses for a form",
+          "inputs": {
+            "required": ["form_id"],
+            "optional": ["filters", "date_range"]
+          },
+          "outputs": {
+            "fields": ["response_count", "responses", "export_url"]
+          }
+        },
+        {
+          "id": "forms.send-reminder",
+          "description": "Sends reminder to incomplete respondents",
+          "inputs": {
+            "required": ["form_id", "recipient_list"],
+            "optional": ["reminder_message", "deadline"]
+          },
+          "outputs": {
+            "fields": ["reminder_id", "sent_count", "failed_recipients"]
+          }
+        }
+      ],
+      "notes": "Collects structured feedback from stakeholders and participants."
+    },
+    {
+      "id": "file-storage",
+      "name": "File Storage",
+      "category": "content-management",
+      "auth": {
+        "type": "credentials-envelope",
+        "fields": ["storage_api", "bucket_scope"]
+      },
+      "triggers": [
+        {
+          "id": "file-storage.file-created",
+          "description": "Fires when a file is uploaded or created",
+          "emits": {
+            "fields": ["file_id", "file_name", "uploader", "size_bytes", "mime_type"]
+          }
+        },
+        {
+          "id": "file-storage.folder-updated",
+          "description": "Fires when folder contents change",
+          "emits": {
+            "fields": ["folder_id", "change_type", "file_count", "modified_by"]
+          }
+        }
+      ],
+      "actions": [
+        {
+          "id": "file-storage.upload",
+          "description": "Uploads a file to storage",
+          "inputs": {
+            "required": ["file_path", "destination_folder"],
+            "optional": ["permissions", "metadata"]
+          },
+          "outputs": {
+            "fields": ["file_id", "download_url", "size_bytes"]
+          }
+        },
+        {
+          "id": "file-storage.share-link",
+          "description": "Creates a shareable link for a file or folder",
+          "inputs": {
+            "required": ["resource_id"],
+            "optional": ["expiration", "access_level", "password"]
+          },
+          "outputs": {
+            "fields": ["share_url", "access_token", "expires_at"]
+          }
+        },
+        {
+          "id": "file-storage.move",
+          "description": "Moves a file to a different location",
+          "inputs": {
+            "required": ["file_id", "target_folder"],
+            "optional": ["new_name"]
+          },
+          "outputs": {
+            "fields": ["file_id", "previous_path", "new_path"]
+          }
+        }
+      ],
+      "notes": "Manages document drafts, deliverables, and review artifacts."
+    }
+  ]
+}
