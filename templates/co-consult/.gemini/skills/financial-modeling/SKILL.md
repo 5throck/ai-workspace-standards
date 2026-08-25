@@ -6,11 +6,20 @@ description: >
   recommendations. Covers ROI analysis, NPV/IRR/Payback Period calculation,
   scenario sensitivity analysis, and explicitly includes change management cost
   category. Designed to work iteratively with technical-feasibility (max 2 loops).
-version: 1.0.0
-last_reviewed: 2026-06-13
+version: 1.0.1
+last_reviewed: 2026-08-26
 status: active
 owner: strategy-analyst
 prerequisites: technical-feasibility, org-readiness-assessment
+metadata:
+  type: domain
+  triggers:
+    - financial model
+    - financial modeling
+    - business case
+    - ROI analysis
+    - NPV IRR
+    - investment justification
 ---
 
 ## Context
@@ -29,6 +38,7 @@ Use in Phase 1-2 after technical-feasibility and org-readiness-assessment have p
    - Solution definition (from Engagement Leader brief)
    - `technical-feasibility` outputs: complexity grade, risk cost range lookup values, preconditions
    - `org-readiness-assessment` outputs: change management cost estimates, training requirements
+   - Baseline company financials (when available): consume a canonical financial model conforming to [docs/market-data-schema.json](../../docs/market-data-schema.json) — never re-key ad-hoc figures from disclosure PDFs ([CONSULT-R2])
 2. **Build Cost Model**:
    - Implementation costs (use technical-feasibility complexity grade as basis)
    - Change management costs (explicitly include — sourced from org-readiness-assessment):

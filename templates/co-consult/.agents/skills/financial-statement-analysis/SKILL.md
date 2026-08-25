@@ -14,7 +14,7 @@ description: >
   "financial metrics extraction", "corporate financial analysis".
 status: active
 owner: data-analyst
-version: 1.3.0
+version: 1.3.1
 last_reviewed: 2026-07-19
 prerequisites:
   - k-dart
@@ -89,7 +89,7 @@ execution protocol for the `data-analyst` agent is:
 |--------|-------------|--------|
 | Raw DART data | `deliverables/<company>/dart/` | JSON |
 | Validation report | `deliverables/<company>/validation/` | JSON |
-| Canonical model | `deliverables/<company>/canonical/` | JSON |
+| Canonical model | `deliverables/<company>/canonical/` | JSON — MUST conform to [docs/market-data-schema.json](../../docs/market-data-schema.json) (column/unit/currency contract; see [market-data-schema.md](../../docs/market-data-schema.md)) |
 | KPI report | `deliverables/<company>/kpi/` | JSON |
 | Driver tree | `deliverables/<company>/driver-tree/` | JSON |
 | Final report | `deliverables/reports/` | Markdown |
