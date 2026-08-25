@@ -1,7 +1,7 @@
 ---
 name: sync
 description: Runs the full project sync pipeline — lifecycle update, audit, L0→L1 publish, commit, push, and PR creation.
-version: 1.2.1
+version: 1.2.2
 last_reviewed: 2026-08-25
 status: active
 scope: common
@@ -88,6 +88,7 @@ Runs the full project sync pipeline (`scripts/dev-sync.ts`). This is the single 
 | 3.97 | Governance Reflection Gate | **FATAL** (L0) | Runs `verify-adr-governance.ts --strict` — blocks sync when post-cutoff Accepted ADRs lack governance-doc references (ADR-0059 Stages 2+2b: unlinked-ADR and marker-drift findings block); skipped in scaffolded projects (L0-only validator) |
 | 4.5 | L0 to L1 Publish | **FATAL** (L0) / non-fatal (L1) | Propagates scripts, skills, commands, docs via `propagate-to-templates.ts --apply`; fatal only in L0 context (context.md present) |
 | 4.52 | Template Dependency Sync | **FATAL** (L0) | Runs `sync-template-deps.ts --apply` — aligns shared dependency versions from root `package.json` into `templates/common/package.json` and regenerates `bun.lock` (shared keys only; root-only deps never added, template-only deps never removed); workspace-root gated |
+| 4.62 | Cascade Re-publish | **FATAL** (L0) / non-fatal (L1) | Re-runs propagate-to-templates.ts --apply after skill sync — heals template platform skill copies (templates/common/.claude/.gemini/.agents/skills) changed by step 4.6 within the same sync; same gating and fatality as step 4.5 |
 | 4.6 | Skill Sync to Platforms | non-fatal | Runs `sync-skills.ts` to distribute skills to `.claude/skills/`, `.gemini/skills/`, `.agents/skills/`; warnings only |
 | 4.7 | VERSION_MANIFEST.md Generation | **FATAL** | Generates `VERSION_MANIFEST.md` via `generate-version-manifest.ts` |
 | 4.9 | AUDIT GATE | **FATAL** | Runs `audit.ts` — must exit 0 before proceeding |

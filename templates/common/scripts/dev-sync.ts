@@ -1,4 +1,6 @@
-// @version 1.7.5
+// @version 1.7.6
+// v1.7.6: fix(pipeline): add step 4.62 cascade re-publish — heals template platform skill
+//           copies after sync-skills step 4.6 updates root platform dirs (mirrors 4.5 gating)
 // v1.7.3: feat(pipeline): add step 4.65 skill graph gate (ADR-0060) — generates and
 //           verifies skill relationship graph before VERSION_MANIFEST generation
 // v1.7.2: fix(pipeline): forward --spec-exempt via SYNC_SPEC_EXEMPT env instead of shell
@@ -408,6 +410,53 @@ const syncSkillsResult = await $`bun scripts/sync-skills.ts`.nothrow();
 if (syncSkillsResult.exitCode !== 0) {
     console.warn(`⚠️  Skill sync had warnings (exit ${syncSkillsResult.exitCode}), continuing...`);
     if (syncSkillsResult.stderr) console.warn(String(syncSkillsResult.stderr).trim());
+}
+
+// 4.62 Cascade re-publish — unconditional second L0→L1 pass after skill sync.
+//     Step 4.5 runs propagate-to-templates.ts --apply BEFORE step 4.6 sync-skills.ts
+//     updates root platform dirs (.claude/.gemini/.agents/skills). This causes a lag:
+//     4.5 compares stale platform copies to templates, then 4.6 updates platforms,
+//     leaving template platform copies stale until the NEXT sync. Fix: re-run
+//     propagate-to-templates.ts --apply unconditionally after 4.6 (new step 4.62).
+//     Transforms are directional and idempotent, so the converged pass copies nothing.
+//     Design doc: docs/designs/2026-08-25-pipeline-cascade-repass-design.md
+if (isWorkspaceRoot) {
+    console.log('📦 Step 4.62: Cascade re-publish (L0→L1 after skill sync)...');
+    try {
+        const repassRes = await $`bun scripts/propagate-to-templates.ts --apply`.nothrow();
+        if (repassRes.exitCode !== 0) {
+            if (isL0Context) {
+                console.log(`${RED}❌ Cascade re-publish failed — fatal in L0 context${RESET}`);
+                if (import.meta.main) {
+                    process.exit(1);
+                }
+            } else {
+                console.log(`${YELLOW}⚠️  Cascade re-publish failed — continuing sync${RESET}`);
+            }
+        } else {
+            const stdout = repassRes.stdout.toString();
+            if (stdout.includes('Nothing to apply')) {
+                console.log(`${GREEN}✓ Step 4.62: template mirrors already converged (nothing to apply)${RESET}`);
+            } else {
+                const match = stdout.match(/Done\. (\d+) file\(s\) copied\./);
+                if (match) {
+                    const n = match[1];
+                    console.log(`${GREEN}✓ Step 4.62: cascade re-publish complete — ${n} file(s) copied${RESET}`);
+                } else {
+                    console.log(`${GREEN}✓ Step 4.62: cascade re-publish complete${RESET}`);
+                }
+            }
+        }
+    } catch (e) {
+        if (isL0Context) {
+            console.log(`${RED}❌ Cascade re-publish failed — fatal in L0 context${RESET}`);
+            if (import.meta.main) {
+                process.exit(1);
+            }
+        } else {
+            console.log(`${YELLOW}⚠️  Cascade re-publish failed — continuing sync${RESET}`);
+        }
+    }
 }
 
 // 4.65 Skill Graph Gate — generates and verifies skill relationship graph (ADR-0060).

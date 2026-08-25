@@ -559,6 +559,15 @@
       "source": "manual",
       "created": "2026-08-25",
       "last_updated": "2026-08-25"
+    },
+    {
+      "id": "2026-08-25-pipeline-cascade-repass-design",
+      "title": "Pipeline cascade re-pass design (dev-sync step 4.62)",
+      "file": "docs/designs/2026-08-25-pipeline-cascade-repass-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-25",
+      "last_updated": "2026-08-25"
     }
   ]
 }
