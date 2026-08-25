@@ -14,6 +14,7 @@ This directory contains variant-specific skills for the `co-deck` template.
 | Measure | `measure/` | PDF layout preparation — relies on `prep-pdf` skill to validate the 4-layer spec merge and check fonts (Playwright-free) |
 | Prep PDF | `prep-pdf/` | PDF layout preparation — estimate-layout.ts auto-calibration loop before export |
 | PDF Export | `pdf-export/` | PDF generation from measured layout spec |
+| Layout Gate | `slide-layout-gate/` | Slide-content conformance gate — `estimate-layout.ts --lint` checks slidedata.json against the merged spec's `content_constraints`; FAIL (exit 1) blocks PDF export |
 | Theme Authoring | `theme-authoring/` | T-Stage pipeline — create new themes (template.html + theme.json) and styles (CSS variables) |
 | Handbook | `handbook/` | H-Stage pipeline — searchable, themed handbooks as static sites (standalone, companion, course) with dark mode and i18n |
 | Presenter Mode | `presenter-mode/` | Dual-window presenter state synchronization using browser BroadcastChannel API |
