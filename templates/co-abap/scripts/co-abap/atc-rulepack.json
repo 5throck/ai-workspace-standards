@@ -1,0 +1,51 @@
+{
+  "rulepack_version": "1.0.0",
+  "description": "Deterministic ATC check-selection rule pack for co-abap change types. Named, versioned, runnable selections per abapOpenChecks parity; executed via the VSP RunATCCheck tool in scaffolded projects. Closes docs/variant-benchmark-backlog.md section 11 'No codified static-check rule pack' (gap closed 2026-08-25).",
+  "change_types": {
+    "feature": {
+      "description": "New functionality: full gate - every family, blockers at Priority 1",
+      "checks": [
+        { "id": "syntax-all-objects", "tool": "SyntaxCheck", "atc_variant": "syntax", "severity_gate": "blocker", "owner": "code-writer", "source": "clean-abap-checklist.md section 12: Syntax check passes" },
+        { "id": "obsolete-language-elements", "tool": "RunATCCheck", "atc_variant": "obsolete-statements", "severity_gate": "blocker", "owner": "devops-admin", "source": "clean-abap-checklist.md section 12: Obsolete language elements avoided" },
+        { "id": "security-variants", "tool": "RunATCCheck", "atc_variant": "security", "severity_gate": "blocker", "owner": "security-monitor", "source": "clean-abap-checklist.md section 12: Security check passes" },
+        { "id": "atc-p1-findings", "tool": "RunATCCheck", "atc_variant": "default-p1-filter", "severity_gate": "blocker", "owner": "devops-admin", "source": "clean-abap-checklist.md section 12: Transport release requires zero P1 findings" },
+        { "id": "package-consistency", "tool": "RunATCCheck", "atc_variant": "package-interface", "severity_gate": "should", "owner": "devops-admin", "source": "clean-abap-checklist.md section 12: Package consistency" },
+        { "id": "unit-tests-pass", "tool": "RunUnitTests", "atc_variant": "none", "severity_gate": "blocker", "owner": "test-runner", "source": "clean-abap-checklist.md section 12: Unit tests pass" },
+        { "id": "code-coverage-threshold", "tool": "GetCodeCoverage", "atc_variant": "none", "severity_gate": "blocker", "owner": "test-runner", "source": "clean-abap-checklist.md section 12: Code coverage >=70% for new objects" }
+      ]
+    },
+    "refactor": {
+      "description": "Behavior-preserving change: same gate as feature (refactors must not regress any family)",
+      "checks": [
+        { "id": "syntax-all-objects", "tool": "SyntaxCheck", "atc_variant": "syntax", "severity_gate": "blocker", "owner": "code-writer", "source": "clean-abap-checklist.md section 12: Syntax check passes" },
+        { "id": "obsolete-language-elements", "tool": "RunATCCheck", "atc_variant": "obsolete-statements", "severity_gate": "blocker", "owner": "devops-admin", "source": "clean-abap-checklist.md section 12: Obsolete language elements avoided" },
+        { "id": "security-variants", "tool": "RunATCCheck", "atc_variant": "security", "severity_gate": "blocker", "owner": "security-monitor", "source": "clean-abap-checklist.md section 12: Security check passes" },
+        { "id": "atc-p1-findings", "tool": "RunATCCheck", "atc_variant": "default-p1-filter", "severity_gate": "blocker", "owner": "devops-admin", "source": "clean-abap-checklist.md section 12: Transport release requires zero P1 findings" },
+        { "id": "package-consistency", "tool": "RunATCCheck", "atc_variant": "package-interface", "severity_gate": "should", "owner": "devops-admin", "source": "clean-abap-checklist.md section 12: Package consistency" },
+        { "id": "unit-tests-pass", "tool": "RunUnitTests", "atc_variant": "none", "severity_gate": "blocker", "owner": "test-runner", "source": "clean-abap-checklist.md section 12: Unit tests pass" },
+        { "id": "code-coverage-threshold", "tool": "GetCodeCoverage", "atc_variant": "none", "severity_gate": "blocker", "owner": "test-runner", "source": "clean-abap-checklist.md section 12: Code coverage >=70% for new objects" }
+      ]
+    },
+    "hotfix": {
+      "description": "Urgent production fix: reduced set - syntax, obsolete elements, security variants, P1 findings; test-family checks still blockers when test classes exist",
+      "checks": [
+        { "id": "syntax-all-objects", "tool": "SyntaxCheck", "atc_variant": "syntax", "severity_gate": "blocker", "owner": "code-writer", "source": "clean-abap-checklist.md section 12: Syntax check passes" },
+        { "id": "obsolete-language-elements", "tool": "RunATCCheck", "atc_variant": "obsolete-statements", "severity_gate": "blocker", "owner": "devops-admin", "source": "clean-abap-checklist.md section 12: Obsolete language elements avoided" },
+        { "id": "security-variants", "tool": "RunATCCheck", "atc_variant": "security", "severity_gate": "blocker", "owner": "security-monitor", "source": "clean-abap-checklist.md section 12: Security check passes" },
+        { "id": "atc-p1-findings", "tool": "RunATCCheck", "atc_variant": "default-p1-filter", "severity_gate": "blocker", "owner": "devops-admin", "source": "clean-abap-checklist.md section 12: Transport release requires zero P1 findings" }
+      ]
+    },
+    "transport-release": {
+      "description": "Release gate (devops-admin): the full composition before ReleaseTransport - see docs/transport-release-checklist.md",
+      "checks": [
+        { "id": "syntax-all-objects", "tool": "SyntaxCheck", "atc_variant": "syntax", "severity_gate": "blocker", "owner": "code-writer", "source": "clean-abap-checklist.md section 12: Syntax check passes" },
+        { "id": "obsolete-language-elements", "tool": "RunATCCheck", "atc_variant": "obsolete-statements", "severity_gate": "blocker", "owner": "devops-admin", "source": "clean-abap-checklist.md section 12: Obsolete language elements avoided" },
+        { "id": "security-variants", "tool": "RunATCCheck", "atc_variant": "security", "severity_gate": "blocker", "owner": "security-monitor", "source": "clean-abap-checklist.md section 12: Security check passes" },
+        { "id": "atc-p1-findings", "tool": "RunATCCheck", "atc_variant": "default-p1-filter", "severity_gate": "blocker", "owner": "devops-admin", "source": "clean-abap-checklist.md section 12: Transport release requires zero P1 findings" },
+        { "id": "package-consistency", "tool": "RunATCCheck", "atc_variant": "package-interface", "severity_gate": "should", "owner": "devops-admin", "source": "clean-abap-checklist.md section 12: Package consistency" },
+        { "id": "unit-tests-pass", "tool": "RunUnitTests", "atc_variant": "none", "severity_gate": "blocker", "owner": "test-runner", "source": "clean-abap-checklist.md section 12: Unit tests pass" },
+        { "id": "code-coverage-threshold", "tool": "GetCodeCoverage", "atc_variant": "none", "severity_gate": "blocker", "owner": "test-runner", "source": "clean-abap-checklist.md section 12: Code coverage >=70% for new objects" }
+      ]
+    }
+  }
+}
