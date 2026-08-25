@@ -19,7 +19,7 @@
 | **Audio** | Web Audio API (procedural sound generation) |
 | **Build Tool** | Vite 6 |
 | **Testing** | Vitest 3 |
-| **Package Manager** | npm |
+| **Package Manager** | bun |
 | **Runtime Dependencies** | None (zero-dependency game) |
 
 ---
@@ -69,7 +69,7 @@
 ## Environment Setup
 
 - Copy `.env.sample` → `.env` and fill in all required values.
-- **Node.js**: `npm install` (in both root and `projects/pacman/` directories)
+- **Node.js**: `bun install` (in both root and `projects/pacman/` directories)
 - Required env keys (see `.env.sample`): *(fill in after project creation)*
 
 ---
@@ -125,7 +125,7 @@ PM → Game Designer (universal: core loop + difficulty + reward)
 
 <!-- VARIANT-INJECT: guidelines [REQUIRED] -->
 ## Coding Guidelines
-<!-- intentional-duplicate: workspace standards §8 — maintained locally for AI context proximity; source: docs/constitution/08-coding-guidelines.md; hash: de37df36 -->
+<!-- intentional-duplicate: workspace standards §8 — maintained locally for AI context proximity; source: docs/constitution/08-coding-guidelines.md; hash: d03bef2a -->
 
 ### Core Rules
 
@@ -167,6 +167,12 @@ Prefer OSI-approved licenses: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC.
 Avoid: GPL-3.0, AGPL-3.0, SSPL, BSL unless explicitly justified.
 
 <!-- END VARIANT-INJECT -->
+
+---
+
+## Computational Integrity
+
+All numeric outputs in deliverables (aggregations, statistics, percentages, metrics) must be computed by executed code (bun/TypeScript scripts) — never by the AI performing arithmetic directly. High-precision or safety-critical domains (Class A: aerospace, precision control, regulated finance) require validated external tools. See `docs/context.md` § Computational Integrity Standards for the full policy; label AI estimates **approximate**.
 
 ---
 

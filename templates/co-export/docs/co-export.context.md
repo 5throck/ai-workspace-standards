@@ -144,6 +144,12 @@ PM (Phase 0: triage + scope)
 
 ---
 
+## Computational Integrity
+
+All numeric outputs in deliverables (aggregations, statistics, percentages, metrics) must be computed by executed code (bun/TypeScript scripts) — never by the AI performing arithmetic directly. High-precision or safety-critical domains (Class A: aerospace, precision control, regulated finance) require validated external tools. See `docs/context.md` § Computational Integrity Standards for the full policy; label AI estimates **approximate**.
+
+---
+
 
 ## File Organization Policy
 

@@ -61,7 +61,7 @@ This ensures verification happens at the proper point in the workflow, after imp
 
 ```
 1. bash scripts/audit.sh           # documentation gate (exit 0 required)
-2. [project test command]          # e.g., pytest / npm test / go test ./...
+2. [project test command]          # e.g., pytest / bun test / go test ./...
 3. Check each acceptance criterion from the implementation plan
 4. Report
 ```

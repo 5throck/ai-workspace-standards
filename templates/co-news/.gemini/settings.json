@@ -2,7 +2,7 @@
   "_comment": "Variant-specific overrides vs L1 (templates/common). These are intentional L2 variant settings.",
   "mcpServers": {
     "codegraph": {
-      "command": "npx",
+      "command": "bunx",
       "args": [
         "@colbymchenry/codegraph@0.9.7",
         "serve"

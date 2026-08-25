@@ -177,7 +177,7 @@ Depending on the type of project you create, additional tools may be required:
 
 | Project Type | Required Tools | Installation |
 |-------------|---------------|--------------|
-| **Node.js** | Node.js + npm | [nodejs.org](https://nodejs.org/) |
+| **Node.js** | Bun >= 1.0 | [bun.sh](https://bun.sh/) |
 | **Python** | Python 3 + pip or uv | See Python 3 above |
 | **.NET** | .NET SDK | [dotnet.microsoft.com](https://dotnet.microsoft.com/download) |
 | **Rust** | Rust toolchain | `rustup` (rust-lang.org) |

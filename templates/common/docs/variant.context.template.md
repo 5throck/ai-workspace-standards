@@ -79,7 +79,7 @@ All scripts are TypeScript (`.ts`) executed via Bun — no `.sh`/`.ps1` counterp
 
 <!-- VARIANT-INJECT: environment-setup -->
 - Copy `.env.sample` — `.env` and fill in all required values.
-- **Node.js**: `pnpm install` (or `npm install`)
+- **Node.js**: `bun install`
 - **Python**: `python -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt`
 - Required env keys (see `.env.sample`): *(fill in after project creation)*
 <!-- END VARIANT-INJECT -->
@@ -125,12 +125,18 @@ Edit code
      co-security → ## Security Guidelines
      co-design  → ## Design Guidelines
      co-work    → ## Writing Guidelines -->
-<!-- intentional-duplicate: workspace standards §8 — maintained locally for AI context proximity; source: docs/constitution/08-coding-guidelines.md; hash: de37df36 -->
+<!-- intentional-duplicate: workspace standards §8 — maintained locally for AI context proximity; source: docs/constitution/08-coding-guidelines.md; hash: d03bef2a -->
 
 > Replace this placeholder with variant-specific guidelines.
 > This section is REQUIRED — audit.ts will flag its absence.
 
 <!-- END VARIANT-INJECT -->
+
+---
+
+## Computational Integrity
+
+All numeric outputs in deliverables (aggregations, statistics, percentages, metrics) must be computed by executed code (bun/TypeScript scripts) — never by the AI performing arithmetic directly. High-precision or safety-critical domains (Class A: aerospace, precision control, regulated finance) require validated external tools. See `docs/context.md` § Computational Integrity Standards for the full policy; label AI estimates **approximate**.
 
 ---
 

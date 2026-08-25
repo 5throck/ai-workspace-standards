@@ -89,7 +89,7 @@ Loop and correct — **maximum 3 iterations** before escalating to the user.
 | Command | What it does |
 |---|---|
 | `bun --version` | Verify the Bun runtime is available (required for all scripts) |
-| `npm install` | Install dependencies (run in workspace root **and** in `projects/<game>/`) |
+| `bun install` | Install dependencies (run in workspace root **and** in `projects/<game>/`) |
 | `bun scripts/audit.ts` | Run the QA gate manually (also runs automatically via PostToolUse hook on CLI) |
 | `/sync "feat(scope): message"` | Full pipeline: memlog → sync-md → changelog → audit → commit → push → PR |
 | `/changelog "..."` | Add a standalone `CHANGELOG.md [Unreleased]` entry |

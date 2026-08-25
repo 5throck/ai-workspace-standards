@@ -74,7 +74,7 @@ When adding or recommending dependencies:
 - **Prefer** packages with OSI-approved licenses: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC, MPL-2.0, LGPL-2.1+, PSF-2.0.
 - **Avoid** packages with proprietary, commercial-only, or copyleft licenses (GPL-3.0, AGPL-3.0, SSPL, BSL) unless the project's own license and legal context explicitly permit it.
 - **Always check** license compatibility when mixing packages (e.g., GPL in an MIT project requires careful review).
-- Run a license audit after `npm install` / `pip install` and review any flagged packages before committing.
+- Run a license audit after `bun install` / `pip install` and review any flagged packages before committing.
 - If a proprietary alternative exists alongside a viable OSS equivalent, default to the OSS option.
 - Document any intentional non-OSS dependency with a comment in `docs/context.md` explaining the justification.
 
@@ -130,3 +130,9 @@ When adding or recommending dependencies:
 #### 8.12 Variant Script Inheritance (ADR-0050)
 
 **Variant scripts inherit from `templates/common/`, never duplicate it.** ADR-0050 Part 1 codifies this: a script needed by more than one variant lives in `templates/common/scripts/` (or workspace-root `scripts/` for L0-only tooling); a `templates/co-*/scripts/` copy is only legitimate when genuinely variant-specific, and even then must compose common logic rather than re-implement it. `scripts/audit.ts`'s `checkVariantScriptDrift()` WARN check flags divergence from this rule.
+
+#### 8.13 Computational Integrity
+
+**Numeric outputs in deliverables must come from executed code, never from the model doing arithmetic.**
+
+All numeric outputs in deliverables (aggregations, statistics, percentages, metric computations, counts and sums) must be computed by executed code (bun/TypeScript scripts or an equivalent validated tool) — never by the LLM performing arithmetic directly. AI-produced figures are estimates until script-verified, and must be labeled **approximate** where shown. For high-precision or safety-critical computation (aerospace, precision control, regulated finance), delegate to validated external tools per `docs/context.md` § Computational Integrity Standards.

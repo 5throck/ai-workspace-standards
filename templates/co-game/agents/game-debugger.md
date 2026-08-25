@@ -82,7 +82,7 @@ You are a specialist agent that may ONLY be dispatched by the PM. If a user atte
 
 - Write vitest reproduction tests that demonstrate the bug before the fix
 - Verify the fix passes the reproduction tests
-- Verify no regressions in the existing test suite (`npx vitest run`)
+- Verify no regressions in the existing test suite (`bunx vitest run`)
 
 ## Domain Knowledge: Classic Pac-Man Reference Points
 
@@ -128,8 +128,8 @@ Use these as ground truth when analyzing bugs:
 ### Verification
 - [ ] Reproduction test fails before fix
 - [ ] Reproduction test passes after fix
-- [ ] `npx vitest run` — no regressions
-- [ ] `npx tsc --noEmit` — no type errors
+- [ ] `bunx vitest run` — no regressions
+- [ ] `bunx tsc --noEmit` — no type errors
 ```
 
 ## Coding Rules
