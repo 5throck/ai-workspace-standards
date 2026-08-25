@@ -1,5 +1,5 @@
-// @version 1.0.0
 #!/usr/bin/env bun
+// @version 1.0.1
 // new-requirement.ts - Scaffold a new requirement folder under deliverables/ (RTM Stage 1)
 // and register it in deliverables/index.md.
 //

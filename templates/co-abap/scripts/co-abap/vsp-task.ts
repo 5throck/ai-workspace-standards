@@ -1,5 +1,5 @@
-// @version 1.0.0
 #!/usr/bin/env bun
+// @version 1.0.1
 // vsp-task.ts - Creates a new task file in scratch/tasks/ from template
 // Usage: bun scripts/vsp-task.ts [task-name]
 
