@@ -1,8 +1,10 @@
-// @version 1.1.0 — OS-aware font search paths (Windows, macOS, Linux).
+// @version 1.2.0 — adds --lint layout gate: checks every slide in slidedata.json
+// against the merged spec's content_constraints; exits 1 on any violation.
+// v1.1.0: OS-aware font search paths (Windows, macOS, Linux).
 // Playwright-free PDF layout preparation — replaces measure-layout.ts.
 // Reads lecture-profile.md, resolves the 4-layer spec merge, validates fonts,
 // and outputs a summary for review. Optionally triggers a sample PDF.
-// Usage: bun scripts/co-deck/estimate-layout.ts --project presentations/<project> [--sample] [--font-dir presentations/assets/fonts/]
+// Usage: bun scripts/co-deck/estimate-layout.ts --project presentations/<project> [--sample] [--lint] [--font-dir presentations/assets/fonts/]
 // No Playwright dependency required.
 
 import { readFileSync, existsSync, mkdirSync, writeFileSync } from 'fs';
@@ -319,6 +321,124 @@ function generateSummary(
   return lines.join('\n');
 }
 
+// ── Slide content lint (--lint gate) ─────────────────────────────────────────
+
+interface SlideDataItem {
+  type?: string;
+  title?: string;
+  subtitle?: string;
+  sub?: string;
+  text?: string;
+  bullets?: (string | { text?: string })[];
+}
+
+/**
+ * Locate slidedata.json for a project; extract it from the deck HTML when absent.
+ * Returns the parsed slide array, or exits(1) with an explanatory error.
+ */
+async function loadSlideData(projectDir: string, workspaceRoot: string): Promise<SlideDataItem[]> {
+  const slidedataPath = join(projectDir, 'slidedata.json');
+  if (!existsSync(slidedataPath)) {
+    const htmlFiles = ['lecture_v1.html', 'lecture.html', 'lecture_slide.html'];
+    const htmlFile = htmlFiles.find(f => existsSync(join(projectDir, f)));
+    if (!htmlFile) {
+      console.error(`❌ slidedata.json not found and no HTML file detected for extraction.`);
+      console.error(`   Run html-build first, or place slidedata.json in ${projectDir}`);
+      process.exit(1);
+    }
+    console.log(`\n📊 Extracting slide data from ${htmlFile}...`);
+    const { execFileSync } = await import('child_process');
+    try {
+      execFileSync('bun', ['scripts/co-deck/extract_slidedata.mjs', join(projectDir, htmlFile)], {
+        cwd: workspaceRoot,
+        stdio: 'inherit',
+      });
+    } catch (e) {
+      console.error(`❌ extract_slidedata.mjs failed: ${(e as Error).message}`);
+      process.exit(1);
+    }
+  }
+  const slides: SlideDataItem[] = JSON.parse(readFileSync(slidedataPath, 'utf-8'));
+  if (!Array.isArray(slides) || slides.length === 0) {
+    console.error(`❌ slidedata.json is empty or malformed (expected a non-empty slide array).`);
+    process.exit(1);
+  }
+  return slides;
+}
+
+/**
+ * Lint slide content against the merged spec's content_constraints.
+ * FAIL (exit 1) on any over-bound check or a slide type missing from slide_types;
+ * WARN (pass) on slide types with no declared constraints.
+ */
+function lintSlideContent(slides: SlideDataItem[], merged: LayoutSpec, theme: string): void {
+  const constraints = merged.content_constraints ?? {};
+  const slideTypes = merged.slide_types ?? {};
+
+  const rows: string[] = [];
+  let passCount = 0;
+  let failCount = 0;
+  let warnSlides = 0;
+
+  slides.forEach((s, i) => {
+    const num = i + 1;
+    const type = s.type ?? 'standard';
+
+    if (!slideTypes[type]) {
+      rows.push(`| ${num} | ${type} | slide type declared in spec? | — | — | FAIL |`);
+      failCount++;
+      return;
+    }
+    const c = constraints[type];
+    if (!c || Object.keys(c).length === 0) {
+      rows.push(`| ${num} | ${type} | no content_constraints declared | — | — | WARN |`);
+      warnSlides++;
+      return;
+    }
+
+    const subtitle = s.subtitle ?? s.sub ?? '';
+    const bodyChars = (s.bullets?.length)
+      ? s.bullets.map(b => typeof b === 'string' ? b : (b.text ?? '')).join('').length
+      : (s.text ?? '').length;
+
+    const checks: Array<[string, number, number | undefined]> = [
+      ['title chars', (s.title ?? '').length, c.max_title_chars],
+      ['subtitle chars', subtitle.length, c.max_subtitle_chars],
+      ['desc chars', (s.sub ?? s.text ?? '').length, c.max_desc_chars],
+      ['bullet count', s.bullets?.length ?? 0, c.max_bullets],
+      ['body chars', bodyChars, c.max_body_chars],
+    ];
+
+    for (const [label, actual, limit] of checks) {
+      if (limit === undefined) continue; // constraint not declared for this type
+      if (actual > limit) {
+        rows.push(`| ${num} | ${type} | ${label} | ${actual} | ≤ ${limit} | FAIL |`);
+        failCount++;
+      } else {
+        passCount++;
+      }
+    }
+  });
+
+  console.log(`\n🚧 Layout Gate — content_constraints lint (${slides.length} slides, theme=${theme}):`);
+  console.log(`   | # | Type | Check | Actual | Limit | Verdict |`);
+  console.log(`   |---|------|-------|--------|-------|---------|`);
+  for (const r of rows) console.log(`   ${r}`);
+  console.log('');
+  console.log(`   ${passCount} check(s) passed, ${failCount} failed, ${warnSlides} slide(s) unconstrained (WARN)`);
+
+  if (failCount > 0) {
+    console.error(`\n❌ Layout gate FAILED (${failCount} violation${failCount > 1 ? 's' : ''}) — PDF export is blocked.`);
+    console.error(`   Remediation ladder (see skills/slide-layout-gate/SKILL.md):`);
+    console.error(`   1. Cut content — trim title/subtitle, tighten or merge bullets (preferred)`);
+    console.error(`   2. Split the slide into two standard slides`);
+    console.error(`   3. Reclassify the slide type (Uniform Layout Principle)`);
+    console.error(`   4. Record a justified layout_overrides entry in lecture-profile.md (last resort)`);
+    process.exit(1);
+  }
+  console.log(`✅ Layout gate passed.`);
+}
+
 // ── Main ─────────────────────────────────────────────────────────────────────
 
 async function main() {
@@ -328,16 +448,18 @@ async function main() {
 
   const projectArg = get('--project');
   if (!projectArg) {
-    console.error('Usage: bun scripts/co-deck/estimate-layout.ts --project presentations/<project> [--sample] [--font-dir presentations/assets/fonts/]');
+    console.error('Usage: bun scripts/co-deck/estimate-layout.ts --project presentations/<project> [--sample] [--lint] [--font-dir presentations/assets/fonts/]');
     console.error('');
     console.error('Options:');
     console.error('  --project    Project folder (relative to workspace root)');
     console.error('  --sample     Generate a 5-slide sample PDF after estimation');
+    console.error('  --lint       Layout gate: lint slidedata.json against merged content_constraints (exit 1 on violation)');
     console.error('  --font-dir   Custom font directory (default: presentations/assets/fonts/)');
     process.exit(1);
   }
 
   const wantSample = has('--sample');
+  const wantLint = has('--lint');
   const fontDirArg = get('--font-dir');
 
   const workspaceRoot = resolve(dirname(import.meta.path), '../..');
@@ -459,6 +581,12 @@ async function main() {
   console.log(`   Slide types: ${typeCount} (${Object.keys(merged.slide_types ?? {}).join(', ')})`);
   console.log(`   Active regions: ${regionCount}`);
 
+  // ── Layout gate (--lint) ─────────────────────────────────────────────────
+  if (wantLint) {
+    const slides = await loadSlideData(projectDir, workspaceRoot);
+    lintSlideContent(slides, merged, theme);
+  }
+
   // ── Optional sample PDF ──────────────────────────────────────────────────
   if (wantSample) {
     if (!preferred) {
@@ -467,29 +595,8 @@ async function main() {
       process.exit(1);
     }
 
-    // Check slidedata.json exists
-    const slidedataPath = join(projectDir, 'slidedata.json');
-    if (!existsSync(slidedataPath)) {
-      // Try extracting from HTML
-      const htmlFiles = ['lecture_v1.html', 'lecture.html', 'lecture_slide.html'];
-      const htmlFile = htmlFiles.find(f => existsSync(join(projectDir, f)));
-      if (htmlFile) {
-        console.log(`\n📊 Extracting slide data from ${htmlFile}...`);
-        const { execFileSync } = await import('child_process');
-        try {
-          execFileSync('bun', ['scripts/co-deck/extract_slidedata.mjs', join(projectDir, htmlFile)], {
-            cwd: workspaceRoot,
-            stdio: 'inherit',
-          });
-        } catch (e) {
-          console.error(`❌ extract_slidedata.mjs failed: ${(e as Error).message}`);
-          process.exit(1);
-        }
-      } else {
-        console.error(`\n❌ slidedata.json not found and no HTML file detected for extraction.`);
-        process.exit(1);
-      }
-    }
+    // Ensure slidedata.json exists (extract from deck HTML when absent)
+    await loadSlideData(projectDir, workspaceRoot);
 
     console.log(`\n📄 Generating 5-slide sample PDF...`);
     const { execFileSync } = await import('child_process');

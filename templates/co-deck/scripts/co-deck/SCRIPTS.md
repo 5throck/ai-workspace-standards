@@ -49,7 +49,7 @@ iterative calibration loop. Pre-built native binaries, no build step required.
 | `diagram-helpers.ts` | 1.2.0 | active | Shared SVG utilities for diagram generation: svgWrap, svgToPng, wrapText, colour palettes (DARK_AMBER, B2B_NAVY); imported by each project's diagram-defs.ts; **v1.2.0**: Default canvas matches pitch-enhanced right-panel aspect ratio; OS-aware system font candidates (platform()+homedir()) | (library — not invoked directly) |
 | `gen-visual-images.ts` | 3.2.0 | active | Infrastructure-only dispatcher: reads slidedata.json, dynamically imports presentations/\<project\>/diagram-defs.ts, renders SVG + PNG per slide; **slidedata.json `visualImage` always set to SVG path** (HTML primary delivery format); PNG sibling saved to shared pool for PDF use; gen-slides-pdf.ts imgPath() auto-derives PNG from SVG path — no manual path switching; legacy `images/` paths rewritten to `../assets/diagrams/<stem>.svg` | `bun scripts/co-deck/gen-visual-images.ts --project presentations/<proj>` |
 | `measure-layout.ts` | 1.1.0 | **deprecated** | ~~Measure HTML slide layout using Playwright~~ — replaced by estimate-layout.ts (Playwright-free). Output (layout_spec.json) was never consumed by gen-slides-pdf.ts. | `bun scripts/co-deck/measure-layout.ts <html_file> [output_dir]` |
-| `estimate-layout.ts` | 1.1.0 | active | Playwright-free PDF layout preparation: reads lecture-profile.md, resolves 4-layer spec merge (base→theme→style→overrides), validates fonts, outputs layout_summary.md; optional --sample flag generates 5-slide sample PDF; **v1.1.0**: OS-aware font search via getSystemFontDirs() and findFontFile() | `bun scripts/co-deck/estimate-layout.ts --project presentations/<proj> [--sample] [--font-dir presentations/assets/fonts/]` |
+| `estimate-layout.ts` | 1.2.0 | active | Playwright-free PDF layout preparation: reads lecture-profile.md, resolves 4-layer spec merge (base→theme→style→overrides), validates fonts, outputs layout_summary.md; optional --sample flag generates 5-slide sample PDF; **v1.2.0**: `--lint` layout gate — checks every slide in slidedata.json against the merged `content_constraints` (exit 1 on violation); v1.1.0: OS-aware font search via getSystemFontDirs() and findFontFile() | `bun scripts/co-deck/estimate-layout.ts --project presentations/<proj> [--sample] [--lint] [--font-dir presentations/assets/fonts/]` |
 | `auto-calibrate.ts` | 1.0.0 | active | Iterative auto-calibration loop: generates 5-page sample PDF → converts to images (pdf-to-png-converter v4) → numerically validates layout (font/line_height constraints) → auto-adjusts layout_overrides → repeats up to 3 iterations → prompts user for approval; outputs calibration report | `bun scripts/co-deck/auto-calibrate.ts --project presentations/<proj> [--max-iter 3] [--sample 5]` |
 | `snapshot.ts` | 1.0.0 | active | File version snapshot manager — save/list/restore versioned copies | `bun scripts/co-deck/snapshot.ts <files> --workspace presentations/<proj> --desc "..." --agent "..."` |
 | `validate-theme-styles.ts` | 2.0.0 | active | Validate html-themes structure for the unified region-based layout model (ADR-0045): shared-pool integrity, theme.json consistency, region schema + slide_type↔region cross-check, Layer-0 layout_base.json skeleton; **v2.0.0**: refactored to import from `lib/theme-utils.ts` | `bun scripts/co-deck/validate-theme-styles.ts [--root <path>]` |
@@ -155,7 +155,10 @@ bun scripts/co-deck/gen-slides-pdf.ts --project presentations/<project>
 # 8. (Optional) Prep + sample in one step
 bun scripts/co-deck/estimate-layout.ts --project presentations/<project> --sample
 
-# 9. Snapshot before edits
+# 9. Layout gate — lint slide content before full export (exit 1 blocks PDF)
+bun scripts/co-deck/estimate-layout.ts --project presentations/<project> --lint
+
+# 10. Snapshot before edits
 bun scripts/co-deck/snapshot.ts lecture.html --workspace presentations/<project> --desc "before chapter 3 edits" --agent content
 ```
 

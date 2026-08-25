@@ -1057,6 +1057,11 @@
       "layer": "L0"
     },
     {
+      "id": "slide-layout-gate",
+      "type": "skill",
+      "layer": "variant:co-deck"
+    },
+    {
       "id": "sme",
       "type": "agent",
       "layer": "variant:co-consult"
@@ -4361,6 +4366,24 @@
       "from": "skill-lifecycle-manager",
       "to": "version",
       "source": "prose"
+    },
+    {
+      "type": "requires",
+      "from": "slide-layout-gate",
+      "to": "html-build",
+      "source": "prerequisites"
+    },
+    {
+      "type": "used_by",
+      "from": "slide-layout-gate",
+      "to": "pdf-export",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "slide-layout-gate",
+      "to": "phase4",
+      "source": "skill_manifest"
     },
     {
       "type": "phase",
