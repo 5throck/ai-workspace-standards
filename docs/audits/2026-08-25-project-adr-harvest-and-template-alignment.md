@@ -32,3 +32,13 @@ Root reference point: `docs/adr/` 45 files; `verify-adr-governance.ts --strict` 
 
 - Back-porting project ADR *files* into templates: rejected — template is the upstream SSOT; instance history belongs to instances.
 - Editing Projects/* ADR formats for consistency: out of scope here (separate repos); recorded as backlog item (iii).
+
+## 5. Owner review (2026-08-25, post-merge)
+
+The §3 seed/anchor approach was reviewed and **rejected by the owner** — applying ADR machinery to templates was judged problematic:
+
+1. **Duplication/drift surface** — the seed README restated what the context.md convention subsection already says; two homes for one convention is exactly what ADR-0050 fights.
+2. **Speculative prescription** — "likely first records" taxed every future project with guidance about engagements that have not happened ("irrelevant content is a tax on variants that never needed it").
+3. **Misread evidence** — organic project practices (69/18/5 records with no seeds) proved seeding unnecessary: git does not track empty directories, so `docs/adr/` materializes when a project writes its first record.
+
+**Resolution**: all 12 seed READMEs and the 11 Variant Anchor sections removed; co-develop's `.gitkeep` restored; the convention lives ONCE in `templates/common/docs/context.md` → "Architecture Decision Records" subsection, which survives this rollback as the single source.
