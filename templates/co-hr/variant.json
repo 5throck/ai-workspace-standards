@@ -80,6 +80,10 @@
       "file": "skills/hr-metrics-analysis/SKILL.md"
     },
     {
+      "name": "labor-compliance-audit",
+      "file": "skills/labor-compliance-audit/SKILL.md"
+    },
+    {
       "name": "learning-curriculum-design",
       "file": "skills/learning-curriculum-design/SKILL.md"
     },
@@ -167,6 +171,18 @@
         "phases": [
           1,
           3
+        ]
+      },
+      {
+        "name": "labor-compliance-audit",
+        "used_by_agents": [
+          "labor-compliance-analyst",
+          "labor-relations-specialist",
+          "safety-health-officer"
+        ],
+        "phases": [
+          1,
+          2
         ]
       },
       {

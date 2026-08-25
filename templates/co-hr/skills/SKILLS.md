@@ -11,6 +11,7 @@ This directory contains variant-specific skills for the `co-hr` template.
 | consulting-report-writing | `consulting-report-writing/` | consulting-report-writing skill |
 | competency-modeling | `competency-modeling/` | competency-modeling skill |
 | hr-metrics-analysis | `hr-metrics-analysis/` | hr-metrics-analysis skill |
+| labor-compliance-audit | `labor-compliance-audit/` | labor-compliance-audit skill |
 | learning-curriculum-design | `learning-curriculum-design/` | learning-curriculum-design skill |
 | org-design-framework | `org-design-framework/` | org-design-framework skill |
 | org-readiness-assessment | `org-readiness-assessment/` | org-readiness-assessment skill |
