@@ -572,7 +572,7 @@ All numeric outputs in deliverables (aggregations, statistics, percentages, metr
 4. **`--workspace presentations/<project>`** must always be passed to snapshot.ts to scope backups
 5. **PDF requires layout preparation** — run Prep PDF (estimate-layout.ts) before Export Agent; optional auto-calibrate loop for iterative refinement
 6. **Playwright is optional** — only install for `measure-layout.ts`; `bun install` skips it by default
-7. **source-verifier is optional but recommended** — Trust Score < 70% (derived from `variant.json` `trust_score_thresholds.escalate`) should block storyline
+7. **source-verifier is optional but recommended** — Trust Score < 70% (derived from `variant.json` `trust_score_thresholds.escalate`) should block storyline **[DECK-R1]**
 8. **image-curator is optional** — skip if all slides use `image_role: none` or images are pre-supplied
 9. **Theme vs Style boundary**: Themes own DOM structure (`template.html`) and per-theme CSS extension (`theme.css`); styles own CSS variables only (`style.css`). Styles live in the shared `styles/` pool — never nest a style under a theme folder. Never modify DOM in a style file.
 10. **Shared asset pool**: Fonts and images live in `presentations/assets/` — not in per-project folders. Check existence before downloading; set `"reused": true` in manifest when reusing.

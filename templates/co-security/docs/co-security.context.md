@@ -203,7 +203,7 @@ All numeric outputs in deliverables (aggregations, statistics, percentages, metr
 
 ## Domain Rules
 
-1. **Authorization first**: No offensive work (recon, exploitation, PoC) begins without a signed authorization document.
+1. **Authorization first**: No offensive work (recon, exploitation, PoC) begins without a signed authorization document. **[SEC-R1]**
 2. **Scope compliance**: All agents must refuse work targeting out-of-scope hosts without PM re-authorization.
 3. **Dry-run mandatory**: Every new or modified Ansible playbook must pass `--check` before being applied.
 4. **Finding traceability**: Every remediation in PATCH_LOG.md must reference a `FIND-NNNN` ticket or CVE.

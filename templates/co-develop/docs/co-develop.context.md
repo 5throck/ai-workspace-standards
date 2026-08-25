@@ -164,7 +164,7 @@ All numeric outputs in deliverables (aggregations, statistics, percentages, metr
 <!-- co-develop variant specific rules —edit after project creation -->
 1. All implementation must have a corresponding test.
 2. Architecture changes require Architect agent ADR before implementation.
-3. Security Monitor must review before any PR targeting auth, secrets, or infra.
+3. Security Monitor must review before any PR targeting auth, secrets, or infra. **[DEVELOP-R1]**
 
 ---
 
