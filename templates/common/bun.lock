@@ -5,10 +5,10 @@
     "": {
       "name": "ai-workspace-scripts",
       "dependencies": {
-        "js-yaml": "^5.2.3",
+        "js-yaml": "^5.3.0",
       },
       "devDependencies": {
-        "@types/node": "^26.1.2",
+        "@types/node": "^26.2.0",
         "typescript": "^7.0.2",
       },
     },

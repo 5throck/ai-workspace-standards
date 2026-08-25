@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Skill Relationship Graph Generator
- * @version 1.1.0
+ * @version 1.2.0
  *
  * Generates a skill relationship graph from multiple sources:
  * - SKILL.md files (prerequisites, relates_to frontmatter fields)
@@ -33,12 +33,12 @@ const templatesDir = join(ROOT, 'templates');
 // Interfaces for the graph structure
 interface GraphNode {
   id: string;
-  type: 'skill' | 'agent';
+  type: 'skill' | 'agent' | 'decision' | 'adr';
   layer: 'L0' | 'common' | 'variant:string';
 }
 
 interface GraphEdge {
-  type: 'requires' | 'relates_to' | 'used_by' | 'phase' | 'supersedes' | 'references';
+  type: 'requires' | 'relates_to' | 'used_by' | 'phase' | 'supersedes' | 'references' | 'cites_skill';
   from: string;
   to: string;
   source: string;
@@ -444,6 +444,74 @@ export function buildGraph(): SkillGraph {
     }
   }
 
+  // Source 4.5: Document layer — decision records + ADRs (ADR-0060 amendment
+  // 2026-08-25, generalizing the co-newbiz multi-element pilot). Decision
+  // records (docs/decisions/DEC-*.md) and ADRs become graph nodes so the
+  // Agent -> Skill -> Knowledge -> Evidence -> Rule -> Decision chain of
+  // ADR-0061 is queryable from the same projection. All edges advisory.
+  const decisionsDir = join(ROOT, 'docs', 'decisions');
+  if (existsSync(decisionsDir)) {
+    for (const f of readdirSync(decisionsDir)) {
+      if (!/^DEC-\d{8}-\d{2}\.md$/.test(f)) continue;
+      const docId = `dec:${f.replace(/\.md$/, '')}`;
+      allNodes.set(docId, { id: docId, type: 'decision', layer: 'L0' });
+
+      const raw = readFileSync(join(decisionsDir, f), 'utf-8');
+      const frontmatter = parseFrontmatter(raw) as Record<string, unknown>;
+
+      // cites_skill: skills_used[] entries validated against the known skill set
+      const skillsUsed = frontmatter['skills_used'];
+      if (Array.isArray(skillsUsed)) {
+        for (const s of skillsUsed) {
+          if (typeof s === 'string' && skillNames.has(s)) {
+            edges.push({ type: 'cites_skill', from: docId, to: s, source: 'skills_used' });
+          }
+        }
+      }
+
+      const bodyParts = raw.split('---');
+      const body = bodyParts.length > 1 ? bodyParts.slice(1).join('---') : raw;
+
+      // references: knowledge_refs[] entries naming an ADR
+      const knowledgeRefs = frontmatter['knowledge_refs'];
+      if (Array.isArray(knowledgeRefs)) {
+        for (const ref of knowledgeRefs) {
+          const m = typeof ref === 'string' ? /^ADR-(\d{4})$/.exec(ref.trim()) : null;
+          if (m) {
+            edges.push({ type: 'references', from: docId, to: `adr:${m[1]}`, source: 'knowledge_refs' });
+          }
+        }
+      }
+
+      // supersedes/amends via prose labels (exact token match on same line)
+      for (const line of body.split('\n')) {
+        const m = /supersedes?:?\s*(ADR-\d{4}|DEC-\d{8}-\d{2})/i.exec(line);
+        if (m) {
+          const targetId = m[1].startsWith('ADR') ? `adr:${m[1].slice(4)}` : `dec:${m[1]}`;
+          if (targetId !== docId) {
+            edges.push({ type: 'supersedes', from: docId, to: targetId, source: 'prose' });
+          }
+        }
+      }
+    }
+  }
+
+  const adrsDir = join(ROOT, 'docs', 'adr');
+  if (existsSync(adrsDir)) {
+    for (const f of readdirSync(adrsDir)) {
+      const m = /^(\d{4})-.*\.md$/.exec(f);
+      if (!m) continue;
+      const adrId = `adr:${m[1]}`;
+      allNodes.set(adrId, { id: adrId, type: 'adr', layer: 'L0' });
+
+      const content = readFileSync(join(adrsDir, f), 'utf-8');
+      const refs = extractBacktickReferences(content, skillNames);
+      for (const ref of refs) {
+        edges.push({ type: 'references', from: adrId, to: ref, source: 'prose' });
+      }
+    }
+  }
+
   // Source 5: Overrides
   const overridesPath = join(ROOT, 'docs', 'skill-graph.overrides.json');
   let overrides: Overrides = { edges: [] };
@@ -600,9 +668,35 @@ function generateMarkdown(graph: SkillGraph): string {
   lines.push('| `relates_to` | From SKILL.md `relates_to` field or overrides (skill ↔ skill) |');
   lines.push('| `used_by` | Agent ↔ skill relation (from `required_skills` or `used_by_agents`) |');
   lines.push('| `phase` | Skill used in a lifecycle phase (from `variant.json` `skill_manifest.phases`) |');
-  lines.push('| `supersedes` | From overrides only (manual declaration of supersession) |');
-  lines.push('| `references` | Backtick reference in SKILL.md or agent body prose |');
+  lines.push('| `supersedes` | Supersession — overrides (manual) or decision-record prose labels |');
+  lines.push('| `references` | Backtick reference in SKILL.md/agent/ADR body prose, or DEC `knowledge_refs[]` naming an ADR |');
+  lines.push('| `cites_skill` | Decision record `skills_used[]` validated against the skill set (ADR-0061 amendment 2026-08-25) |');
   lines.push('');
+
+  // Decisions & ADRs section (ADR-0060 amendment 2026-08-25)
+  const docNodes = graph.nodes.filter(n => n.type === 'decision' || n.type === 'adr');
+  if (docNodes.length > 0) {
+    lines.push('## Decisions & ADRs');
+    lines.push('');
+    lines.push('| Document | Type | Cites skills | References | Supersedes |');
+    lines.push('|----------|------|--------------|------------|------------|');
+    for (const n of docNodes.sort((a, b) => a.id.localeCompare(b.id))) {
+      const cites = graph.edges
+        .filter(e => e.type === 'cites_skill' && e.from === n.id)
+        .map(e => `\`${e.to}\``)
+        .join(', ');
+      const refs = graph.edges
+        .filter(e => e.type === 'references' && e.from === n.id)
+        .map(e => e.to)
+        .join(', ');
+      const sup = graph.edges
+        .filter(e => e.type === 'supersedes' && e.from === n.id)
+        .map(e => e.to)
+        .join(', ');
+      lines.push(`| \`${n.id}\` | ${n.type} | ${cites || '—'} | ${refs || '—'} | ${sup || '—'} |`);
+    }
+    lines.push('');
+  }
 
   return lines.join('\n');
 }

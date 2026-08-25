@@ -541,6 +541,15 @@
       "source": "manual",
       "created": "2026-08-24",
       "last_updated": "2026-08-24"
+    },
+    {
+      "id": "2026-08-25-skill-graph-document-layer-design",
+      "title": "Skill graph document layer design",
+      "file": "docs/designs/2026-08-25-skill-graph-document-layer-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-25",
+      "last_updated": "2026-08-25"
     }
   ]
 }

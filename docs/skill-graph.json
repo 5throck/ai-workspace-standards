@@ -12,6 +12,231 @@
       "layer": "L0"
     },
     {
+      "id": "adr:0001",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
+      "id": "adr:0012",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
+      "id": "adr:0013",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
+      "id": "adr:0020",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
+      "id": "adr:0021",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
+      "id": "adr:0022",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
+      "id": "adr:0023",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
+      "id": "adr:0024",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
+      "id": "adr:0025",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
+      "id": "adr:0026",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
+      "id": "adr:0027",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
+      "id": "adr:0028",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
+      "id": "adr:0029",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
+      "id": "adr:0031",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
+      "id": "adr:0032",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
+      "id": "adr:0033",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
+      "id": "adr:0034",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
+      "id": "adr:0035",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
+      "id": "adr:0036",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
+      "id": "adr:0037",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
+      "id": "adr:0038",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
+      "id": "adr:0039",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
+      "id": "adr:0040",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
+      "id": "adr:0041",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
+      "id": "adr:0042",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
+      "id": "adr:0043",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
+      "id": "adr:0044",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
+      "id": "adr:0045",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
+      "id": "adr:0046",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
+      "id": "adr:0047",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
+      "id": "adr:0048",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
+      "id": "adr:0049",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
+      "id": "adr:0050",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
+      "id": "adr:0051",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
+      "id": "adr:0052",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
+      "id": "adr:0053",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
+      "id": "adr:0054",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
+      "id": "adr:0055",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
+      "id": "adr:0056",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
+      "id": "adr:0057",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
+      "id": "adr:0058",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
+      "id": "adr:0059",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
+      "id": "adr:0060",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
+      "id": "adr:0061",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
+      "id": "adr:0062",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
       "id": "agent-lifecycle-manager",
       "type": "skill",
       "layer": "L0"
@@ -165,6 +390,16 @@
       "id": "dba",
       "type": "agent",
       "layer": "variant:co-abap"
+    },
+    {
+      "id": "dec:DEC-20260825-01",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
+      "id": "dec:DEC-20260825-02",
+      "type": "decision",
+      "layer": "L0"
     },
     {
       "id": "decision-record",
@@ -1127,6 +1362,108 @@
     },
     {
       "type": "references",
+      "from": "adr:0024",
+      "to": "simulate-project-creation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0027",
+      "to": "design",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0029",
+      "to": "version",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0032",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0032",
+      "to": "version",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0036",
+      "to": "upgrade-project",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0041",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0050",
+      "to": "create-variant",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0051",
+      "to": "version",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0057",
+      "to": "k-dart",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0057",
+      "to": "k-kosis",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0057",
+      "to": "k-law",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0057",
+      "to": "translate",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0058",
+      "to": "k-dart",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0058",
+      "to": "k-law",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0061",
+      "to": "decision-record",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0061",
+      "to": "evidence-ledger",
+      "source": "prose"
+    },
+    {
+      "type": "references",
       "from": "ai-tell-reduction",
       "to": "financial-journalism-style",
       "source": "prose"
@@ -1580,6 +1917,12 @@
       "from": "customs-duty-drawback-workflow",
       "to": "phase4",
       "source": "skill_manifest"
+    },
+    {
+      "type": "cites_skill",
+      "from": "dec:DEC-20260825-02",
+      "to": "sync",
+      "source": "skills_used"
     },
     {
       "type": "references",
