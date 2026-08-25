@@ -14,7 +14,7 @@
   "teammateMode": "auto",
   "mcpServers": {
     "codegraph": {
-      "command": "npx",
+      "command": "bunx",
       "args": [
         "@colbymchenry/codegraph@0.9.7",
         "serve"

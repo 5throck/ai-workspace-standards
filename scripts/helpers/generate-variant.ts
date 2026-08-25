@@ -5,7 +5,7 @@
  * Generates variant project structure from reconciled manifest.
  * Creates variant.json, directory structure, agent overrides, and skill directories.
  *
- * @version 1.13.0
+ * @version 1.13.1
  * @phase 3: Variant Generation
  *
  * Dependencies:
@@ -1338,7 +1338,7 @@ function generateClaudeSettings(variantPath: string): string {
     teammateMode: 'auto',
     mcpServers: {
       codegraph: {
-        command: 'npx',
+        command: 'bunx',
         args: ['@colbymchenry/codegraph@0.9.7', 'serve'],
       },
     },
@@ -1432,7 +1432,7 @@ function generateGeminiSettings(variantPath: string): string {
       'Variant-specific overrides vs L1 (templates/common). These are intentional L2 variant settings.',
     mcpServers: {
       codegraph: {
-        command: 'npx',
+        command: 'bunx',
         args: ['@colbymchenry/codegraph@0.9.7', 'serve'],
       },
     },

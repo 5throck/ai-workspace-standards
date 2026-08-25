@@ -23,18 +23,18 @@ Run the following commands manually after each write operation:
 
 ```bash
 # 1. Lint / Type Check
-npm run lint        # or your project's linter
+bun run lint        # or your project's linter
 # or
 python -m pylint src/    # for Python
 
 # 2. Run Tests
-npm test            # or your project's test command
+bun test            # or your project's test command
 # or
 pytest              # for Python
 
 # 3. Additional Checks (if applicable)
-npm run type-check  # TypeScript
-npm run build       # Verify build succeeds
+bun run type-check  # TypeScript
+bun run build       # Verify build succeeds
 ```
 
 ## Expected Results

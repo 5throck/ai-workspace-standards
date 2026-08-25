@@ -274,7 +274,7 @@ Research results must follow the File Organization Policy:
 
 ## Computational Integrity Standards
 
-For domains requiring high-precision or safety-critical numerical computation, **AI must NOT perform calculations directly**. Delegate to validated external tools instead.
+For domains requiring high-precision or safety-critical numerical computation, **AI must NOT perform calculations directly**. Delegate to validated external tools instead. This applies to ALL reported numbers: aggregations, statistics, percentages, and metrics in any deliverable must be computed by executed code (bun/TypeScript scripts), never by the AI performing arithmetic directly.
 
 ### When External Tools Are Mandatory (Class A)
 
@@ -307,6 +307,7 @@ Use an external computation tool when the task involves ANY of the following:
 
 | Scenario | Approach |
 |----------|----------|
+| Aggregation / statistics / metrics in any deliverable (counts, sums, averages, percentages) | Executed code (bun/TypeScript script) — mandatory |
 | Order-of-magnitude check or hypothesis formation | AI direct — label clearly as **approximate** |
 | Any Class A domain computation | External tool — mandatory |
 | Result to be cited, reported, or acted upon | External tool — mandatory |

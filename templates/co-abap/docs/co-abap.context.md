@@ -468,7 +468,7 @@ For a full comparison of tool capabilities (Claude Code CLI vs Desktop App vs An
 <!-- VARIANT-INJECT: guidelines [REQUIRED] -->
 ## Coding Guidelines (ABAP Supplement)
 
-<!-- intentional-duplicate: workspace standards §8 — maintained locally for AI context proximity; source: docs/constitution/08-coding-guidelines.md; hash: de37df36 -->
+<!-- intentional-duplicate: workspace standards §8 — maintained locally for AI context proximity; source: docs/constitution/08-coding-guidelines.md; hash: d03bef2a -->
 
 ### 1. Think Before Coding
 - State assumptions explicitly before implementing. If uncertain, ask — don't guess silently.
@@ -487,6 +487,12 @@ For a full comparison of tool capabilities (Claude Code CLI vs Desktop App vs An
 - All **conversational** replies — **Korean** by default.
 - All code, config, commit messages, PR titles, branch names, **CHANGELOG.md**, and **memory/` logs — **English only**.
 <!-- END VARIANT-INJECT -->
+
+---
+
+## Computational Integrity
+
+All numeric outputs in deliverables (aggregations, statistics, percentages, metrics) must be computed by executed code (bun/TypeScript scripts) — never by the AI performing arithmetic directly. High-precision or safety-critical domains (Class A: aerospace, precision control, regulated finance) require validated external tools. See `docs/context.md` § Computational Integrity Standards for the full policy; label AI estimates **approximate**.
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 # co-deck — Variant Configuration
-# Last Updated: 2026-08-24
+# Last Updated: 2026-08-25
 ---
 
 > Extends docs/context.md. This file IS the customization layer for this project.
@@ -523,6 +523,12 @@ slideData[i].visualImage = "../assets/diagrams/<stem>.svg"   ← always SVG (gen
 - Gate 5: always generate 5-slide sample first; full PDF only after approval
 - Gate 1.5: if Trust Score < 70% (derived from `trust_score_thresholds.escalate` in `variant.json`), hold for re-research before advancing to storyline
 <!-- END VARIANT-INJECT -->
+
+---
+
+## Computational Integrity
+
+All numeric outputs in deliverables (aggregations, statistics, percentages, metrics) must be computed by executed code (bun/TypeScript scripts) — never by the AI performing arithmetic directly. High-precision or safety-critical domains (Class A: aerospace, precision control, regulated finance) require validated external tools. See `docs/context.md` § Computational Integrity Standards for the full policy; label AI estimates **approximate**.
 
 ---
 

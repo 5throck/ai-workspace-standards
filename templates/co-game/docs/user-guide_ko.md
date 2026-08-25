@@ -1,5 +1,5 @@
 ---
-translated_from_hash: 6eebfc36b4c42d211aa9a7020296d5d60efa714c46a8000835b6b6e5252831c8
+translated_from_hash: 2a98794143a4a2bad50b4903cdc6e5227d11aebf0e4746e0661769fa736ec5ab
 ---
 # co-game 사용자 가이드
 
@@ -92,7 +92,7 @@ PM → game-designer         (범용: 핵심 루프 + 난이도 + 보상)
 | 명령어 | 동작 |
 |---|---|
 | `bun --version` | Bun 런타임 사용 가능 여부 확인 (모든 스크립트에 필요) |
-| `npm install` | 의존성 설치 (워크스페이스 루트 **및** `projects/<game>/`에서 실행) |
+| `bun install` | 의존성 설치 (워크스페이스 루트 **및** `projects/<game>/`에서 실행) |
 | `bun scripts/audit.ts` | QA 게이트 수동 실행 (CLI에서는 PostToolUse 훅으로 자동 실행됨) |
 | `/sync "feat(scope): message"` | 전체 파이프라인: memlog → sync-md → changelog → audit → commit → push → PR |
 | `/changelog "..."` | 단독으로 `CHANGELOG.md [Unreleased]` 항목 추가 |

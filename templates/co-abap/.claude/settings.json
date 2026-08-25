@@ -24,10 +24,9 @@
       "url": "https://mcp-sap-docs.marianzeis.de/mcp"
     },
     "codegraph": {
-      "command": "npx",
+      "command": "bunx",
       "args": [
-        "-y",
-        "@colbymchenry/codegraph",
+        "@colbymchenry/codegraph@0.9.7",
         "serve"
       ]
     }

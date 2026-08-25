@@ -386,6 +386,7 @@ All agents, regardless of their role, must adhere to the following:
 - **Core Principles**: Always follow SOLID principles and write unit tests when creating functional code.
 - **Security Boundaries**: Never expose or log secrets (API keys, tokens). Do not modify CI/CD pipelines without explicit permission.
 - **Communication Style**: Keep explanations concise and use markdown formatting. Always explain "why", not just "what".
+- **Computational Integrity**: Never perform high-precision or safety-critical numerical calculations directly. For aerospace, aviation, precision control, or regulated financial computations, delegate to a validated external tool (Fortran, Python+NumPy/SciPy, Julia, etc.) via the `stack-setup` agent. Label any AI-generated numerical estimate explicitly as **approximate**. For all other reported numbers (aggregations, statistics, percentages, metrics), compute via executed code (bun/TypeScript scripts) — never by mental arithmetic.
 
 ## Error Recovery
 
@@ -437,4 +438,4 @@ When a new skill is created in `skills/` or `.claude/skills/`:
 
 ---
 
-*Last Updated: 2026-08-15 (co-abap v1.0.0)*
+*Last Updated: 2026-08-25 (co-abap v1.0.0)*

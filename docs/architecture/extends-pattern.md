@@ -891,7 +891,7 @@ git cherry-pick <phase-2-commit-hash>
 **Issue 2: "Circular reference detected"**
 - **Cause**: File extends itself or creates circular chain
 - **Solution**: Check extends chain for circular dependencies
-- **Verification**: Use `npm run validate:pm-extends` to check chain
+- **Verification**: Use `bun scripts/validate-pm-extends.ts` to check chain
 
 **Issue 3: "Maximum extends depth exceeded"**
 - **Cause**: Extends chain longer than 3 levels (L2→L1→L0)
