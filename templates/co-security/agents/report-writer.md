@@ -1,7 +1,7 @@
 ---
 name: report-writer
 version: "1.0.0"
-last_updated: "2026-06-01"
+last_updated: "2026-08-25"
 formal_name: Report Writer
 role: Pentest reports and executive summary documentation specialist
 tier:
@@ -24,12 +24,12 @@ status: active
 lifecycle:
   phase: production
   created: "2026-05-27"
-  last_updated: "2026-05-30"
+  last_updated: "2026-08-25"
   governance: docs/lifecycle/agents/report-writer.md
 phases: [5, 6]
 handoff_to: [pm]
 handoff_from: [patch-engineer]
-required_skills: []
+required_skills: [finding-reconciliation]
 ---
 
 ## Role
