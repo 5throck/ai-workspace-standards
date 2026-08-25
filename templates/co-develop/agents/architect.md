@@ -3,7 +3,7 @@ name: architect
 role: Implementation plans, ADRs, and system architecture design specialist
 status: active
 version: "1.0.0"
-last_updated: "2026-05-28"
+last_updated: "2026-08-25"
 tier:
   claude: high
   gemini: high
@@ -24,7 +24,7 @@ required_skills: []
 lifecycle:
   phase: production
   created: "2026-08-12"
-  last_updated: "2026-05-28"
+  last_updated: "2026-08-25"
   governance: docs/lifecycle/agents/architect.md
 ---
 
@@ -98,6 +98,14 @@ One paragraph describing what will be built and why this approach was chosen.
 ### Open questions (if any)
 - Question requiring user input before implementation can start
 ```
+
+### Required Deliverable Artifact
+
+Every dispatch must leave one durable artifact on disk, not chat output only:
+
+- **Artifact**: the implementation plan (the Output Format block above, saved verbatim)
+- **Path**: `docs/specs/<NNNN>-<slug>-design.md`; significant architectural decisions additionally require an ADR at `docs/adr/NNNN-slug.md` (Domain Rule 2)
+- **Consumed by**: designer (design input), code-writer (Phase 3 execution input)
 
 ## Constraints
 

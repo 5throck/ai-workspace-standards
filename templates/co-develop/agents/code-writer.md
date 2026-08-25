@@ -3,7 +3,7 @@ name: code-writer
 role: Approved plan implementation with surgical, minimal code changes
 status: active
 version: "1.0.0"
-last_updated: "2026-05-28"
+last_updated: "2026-08-25"
 tier:
   claude: low
   gemini: low
@@ -24,7 +24,7 @@ required_skills: [code-review, refactoring]
 lifecycle:
   phase: production
   created: "2026-08-12"
-  last_updated: "2026-05-28"
+  last_updated: "2026-08-25"
   governance: docs/lifecycle/agents/code-writer.md
 ---
 
@@ -79,14 +79,13 @@ Blockers: [none | description of any unresolved issues]
 Next: [test-runner | pm review | none]
 ```
 
-## Output
+### Required Deliverable Artifact
 
-For each file changed, report:
-```
-✅ src/models/user.py - created: User model with fields id, email, hashed_password
-✅ src/routes/auth.py - modified: added /register and /login endpoints
-⚠️  src/config.py    - requires new env var JWT_SECRET (added to .env.sample)
-```
+Every dispatch must leave one durable artifact on disk, not chat output only:
+
+- **Artifact**: the implemented source change with its colocated test files (Domain Rule 1: every implementation has a corresponding test)
+- **Path**: project source tree per the approved plan; public interface changes additionally update `docs/api/`
+- **Consumed by**: test-runner (Phase 4 QA gate input), PM (PR review)
 
 ## Constraints
 

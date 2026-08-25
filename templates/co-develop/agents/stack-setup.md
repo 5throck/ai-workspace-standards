@@ -3,7 +3,7 @@ name: stack-setup
 role: Unknown stack identification and secure setup procedure specialist
 status: active
 version: "1.0.0"
-last_updated: "2026-06-20"
+last_updated: "2026-08-25"
 tier:
   claude: low
   gemini: low
@@ -22,7 +22,7 @@ required_skills: []
 lifecycle:
   phase: production
   created: "2026-08-12"
-  last_updated: "2026-06-20"
+  last_updated: "2026-08-25"
   governance: docs/lifecycle/agents/stack-setup.md
 ---
 
@@ -225,6 +225,14 @@ After execution, report each step result:
 ⚠️  Step 2 — [description]: requires manual verification ([reason])
 ❌ Step 3 — [description]: failed — stopping, awaiting PM guidance
 ```
+
+### Required Deliverable Artifact
+
+Every dispatch must leave one durable artifact on disk, not chat output only:
+
+- **Artifact**: the approved setup record - plan, cited source URLs, per-step risk ratings, and execution results
+- **Path**: `memory/<YYYY-MM-DD>-stack-setup-<slug>.md`; verified stacks are additionally proposed as a permanent block in the project setup script (see Responsibilities)
+- **Consumed by**: PM (environment sign-off), future sessions (rebuild instructions)
 
 ## Constraints
 

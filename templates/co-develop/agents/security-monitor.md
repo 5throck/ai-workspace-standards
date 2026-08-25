@@ -3,7 +3,7 @@ name: security-monitor
 role: Security policy enforcement and secrets leak prevention specialist
 status: active
 version: "1.0.0"
-last_updated: "2026-06-20"
+last_updated: "2026-08-25"
 tier:
   claude: medium
   gemini: medium
@@ -25,7 +25,7 @@ required_skills: []
 lifecycle:
   phase: production
   created: "2026-08-12"
-  last_updated: "2026-06-20"
+  last_updated: "2026-08-25"
   governance: docs/lifecycle/agents/security-monitor.md
 ---
 
@@ -240,6 +240,14 @@ After each scan run, report a summary to PM:
 - Count of advisories resolved (Dependabot)
 - Count of files deleted (age cleanup)
 - List of any active CRITICAL advisories still open
+
+### Required Deliverable Artifact
+
+Every dispatch must leave one durable artifact on disk, not chat output only:
+
+- **Artifact**: one structured finding file per detected advisory (the frontmatter schema above) plus the scan summary reported to PM
+- **Path**: `security/YYYY-MM-DD-{slug}.md` (as specified above)
+- **Consumed by**: PM (security gate for auth/secrets/infra PRs, Domain Rule 3)
 
 ## Constraints
 
