@@ -195,7 +195,7 @@ All numeric outputs in deliverables (aggregations, statistics, percentages, metr
 
 1. All gameplay implementation must have a corresponding test.
 2. Ghost AI behavior changes require Game Designer specification update before implementation.
-3. Maze layout changes must be validated against ROM-accurate reference data.
+3. Maze layout changes must be validated against ROM-accurate reference data. **[GAME-R1]**
 4. Performance-sensitive code (rendering, collision) requires profiling data before optimization.
 5. Security Monitor must review before any PR targeting auth, secrets, or infra.
 

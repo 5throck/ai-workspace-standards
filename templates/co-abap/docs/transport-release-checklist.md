@@ -26,7 +26,7 @@ Run all four checks, in this order, before releasing:
 | 3 | `GetCodeCoverage` | ≥ 70% | devops-admin Constraints (QA chain) |
 | 4 | `RunATCCheck` | 0 Priority-1 findings | devops-admin Constraints (QA chain) + Behavior rule 1; abap-dev `sap:transport-manager` step 4 + golden rule |
 
-**Hard rule**: any failing row means NO release. Releasing a transport request with failing unit tests or Priority-1 ATC findings violates the core project governance rules (devops-admin Behavior rule 1). If a failure cannot be resolved, escalate to the PM - never release with Priority-1 ATC findings (abap-dev `sap:transport-manager` golden rule).
+**Hard rule**: any failing row means NO release **[ABAP-R1]**. Releasing a transport request with failing unit tests or Priority-1 ATC findings violates the core project governance rules (devops-admin Behavior rule 1). If a failure cannot be resolved, escalate to the PM - never release with Priority-1 ATC findings (abap-dev `sap:transport-manager` golden rule).
 
 ## Release Strategy Rules
 

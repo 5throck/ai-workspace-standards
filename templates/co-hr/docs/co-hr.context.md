@@ -120,7 +120,7 @@ All numeric outputs in deliverables (aggregations, statistics, percentages, metr
 ## Domain Rules
 
 <!-- VARIANT-INJECT: domain-rules -->
-Applicable statute families are defined by the active country profile (`docs/countries/<CODE>.md`; see `docs/countries/KR.md` for the KR profile's statute families — labor standards, trade union & labor relations adjustment, worker participation & cooperation, occupational safety and health, and serious-accident liability). Identify the active profile at Phase 0 intake; when no profile is active, confirm the applicable jurisdiction with the client before any statutory work.
+Applicable statute families are defined by the active country profile (`docs/countries/<CODE>.md`; see `docs/countries/KR.md` for the KR profile's statute families — labor standards, trade union & labor relations adjustment, worker participation & cooperation, occupational safety and health, and serious-accident liability). Identify the active profile at Phase 0 intake; when no profile is active, confirm the applicable jurisdiction with the client before any statutory work. **[HR-R1]**
 <!-- END VARIANT-INJECT -->
 
 <!-- COMMON-CONTEXT:START -->

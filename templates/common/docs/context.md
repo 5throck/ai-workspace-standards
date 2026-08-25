@@ -138,6 +138,14 @@ defaults, tooling) loaded at Phase 0 intake. With no country selected, the proje
 region-neutral: agents confirm the applicable jurisdiction with the client before
 assuming one. Convention: [`docs/country-profiles.md`](country-profiles.md).
 
+### Architecture Decision Records (`docs/adr/`)
+
+Project-level architecture decisions live in `docs/adr/NNNN-<slug>.md` (seeded with a
+README describing the format). One decision per file; immutable once accepted — reversal
+is a NEW record naming its predecessor via `Supersedes:`. Gate-moment rulings (gate
+approvals, escalations, go/no-go) additionally emit a decision record at
+`docs/decisions/DEC-YYYYMMDD-NN.md` — see the `decision-record` skill.
+
 ### Language Policy
 
 | Content | Language |
