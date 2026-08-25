@@ -78,3 +78,29 @@ describe('--check-drift CLI dispatch', () => {
     expect(stderr).toContain('not found in propagation-map.json');
   });
 });
+
+// Cascade re-publish convergence (dev-sync step 4.62 safety)
+// Pass 1 may pre-heal a drifted tree (identical to the official --apply behavior).
+// The copied counter is NOT a convergence signal because scrub rewrites are counted
+// (applyDiffs() labels in-sync mirrors 'scrubbed' when their raw source mentions
+// CONSTITUTION.md, and these count toward the copied total). Convergence is
+// verified by asserting ZERO per-file 'copied' lines in pass 2 — scrubbed
+// rewrites are byte-identical by design, so they should not appear.
+describe('cascade re-publish convergence (dev-sync step 4.62 safety)', () => {
+  test('consecutive --apply passes converge (no copied lines in pass 2)', () => {
+    const pass1 = runScript(['--apply']);
+    expect(pass1.exitCode).toBe(0);
+    // Pass 1 may copy files; pass 2 must be idempotent
+    const pass2 = runScript(['--apply']);
+    expect(pass2.exitCode).toBe(0);
+    // Terminal output confirms convergence (may be 'Nothing to apply' or 'Done. N file(s) copied.')
+    const stdout = pass2.stdout;
+    const hasNothing = stdout.includes('Nothing to apply');
+    const hasDone = stdout.includes('Done.');
+    expect(hasNothing || hasDone).toBe(true);
+    // Assert ZERO per-file 'copied' lines in pass 2 (scrubbed rewrites excluded)
+    const lines = stdout.split('\n');
+    const copiedLines = lines.filter(l => l.includes('copied  '));
+    expect(copiedLines.length).toBe(0);
+  });
+});
