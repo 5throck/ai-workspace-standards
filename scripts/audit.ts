@@ -1,4 +1,4 @@
-// @version 2.21.1
+// @version 2.22.0
 // v2.21.1: fix(lint+types): stripComment now strips trailing \r before matching — under
 //           core.autocrlf checkouts the $ anchors never matched, so the > nul lint flagged
 //           its own prose comments (ported from co-abap 2.21.2); validators import switched
@@ -183,6 +183,62 @@ if (fs.existsSync('CHANGELOG.md')) {
         Fail("CHANGELOG.md is missing '[Unreleased]' section");
     }
 }
+
+// 3.2. Decision records soft-check (ADR-0061): fires only when docs/decisions/
+// exists — adoption is per-project opt-in, never a day-one gate. Validates the
+// DEC frontmatter shape (required keys + status vocabulary) and warns, never
+// fails, so malformed prose cannot block a pipeline; it just becomes visible.
+if (fs.existsSync('docs/decisions') && fs.statSync('docs/decisions').isDirectory()) {
+    const decFiles = fs.readdirSync('docs/decisions')
+        .filter((f) => /^DEC-\d{8}-\d{2}\.md$/.test(f))
+        .sort();
+    if (decFiles.length === 0) {
+        Warn('Decision records: docs/decisions/ exists but holds no DEC-YYYYMMDD-NN.md files');
+    } else {
+        let decWarns = 0;
+        const REQUIRED_DEC_FIELDS = ['id', 'date', 'agent', 'decision', 'alternatives', 'status'];
+        for (const f of decFiles) {
+            const relPath = 'docs/decisions/' + f;
+            const raw = readUTF8File(relPath);
+            const fmMatch = /^---\r?\n([\s\S]*?)\r?\n---/.exec(raw);
+            if (!fmMatch) {
+                Warn(`Decision record ${f}: no frontmatter block`);
+                decWarns++;
+                continue;
+            }
+            // Deliberately regex-based, not yaml.load: audit.ts runs in L2/L3
+            // projects where js-yaml may not be installed, and every REQUIRED
+            // DEC field is a plain scalar line.
+            const fmText = fmMatch[1];
+            const scalar = (field: string): string | undefined => {
+                const m = new RegExp(`^${field}:\\s*(.*)$`, 'm').exec(fmText);
+                const v = m ? m[1].trim() : undefined;
+                return v && v !== '' && v !== '<...>' ? v : undefined;
+            };
+            const fm: Record<string, string | undefined> = {};
+            for (const field of REQUIRED_DEC_FIELDS) fm[field] = scalar(field);
+            for (const field of REQUIRED_DEC_FIELDS) {
+                if (fm[field] === undefined) {
+                    Warn(`Decision record ${f}: missing required field '${field}'`);
+                    decWarns++;
+                }
+            }
+            if (fm['id'] !== undefined && fm['id'] !== f.replace(/\.md$/, '')) {
+                Warn(`Decision record ${f}: frontmatter id does not match filename`);
+                decWarns++;
+            }
+            const status = fm['status'] ?? '';
+            if (status && !['proposed', 'accepted', 'superseded'].includes(status)) {
+                Warn(`Decision record ${f}: status '${status}' outside proposed|accepted|superseded`);
+                decWarns++;
+            }
+        }
+        if (decWarns === 0) {
+            Pass(`Decision records: ${decFiles.length} file(s), frontmatter shape valid`);
+        }
+    }
+}
+
 
 // 3.5. UTF-8 BOM check for Markdown files
 if (!LIFECYCLE_ONLY) {
