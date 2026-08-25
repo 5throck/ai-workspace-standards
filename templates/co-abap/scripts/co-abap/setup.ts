@@ -1,5 +1,5 @@
-// @version 1.0.0
 #!/usr/bin/env bun
+// @version 1.0.1
 // setup.ts - Post-scaffold environment setup
 // Detects OS and tech stack, installs dependencies, audits licenses, copies .env,
 // and makes initial commit.

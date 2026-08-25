@@ -1,5 +1,5 @@
-// @version 1.0.0
 #!/usr/bin/env bun
+// @version 1.0.1
 /**
  * Scratch Workspace Cleanup CLI
  * Manages scratch/ directory hygiene — temp purging, task archival, and status reporting.

@@ -1,5 +1,5 @@
-// @version 1.0.0
 #!/usr/bin/env bun
+// @version 1.0.1
 // install-bun.ts - Bun runtime installer
 // Usage: bun scripts/install-bun.ts
 // Note: This script requires Bun to already be installed (bootstrap paradox).
