@@ -697,6 +697,11 @@
       "layer": "variant:co-hr"
     },
     {
+      "id": "labor-compliance-audit",
+      "type": "skill",
+      "layer": "variant:co-hr"
+    },
+    {
       "id": "labor-relations-specialist",
       "type": "agent",
       "layer": "variant:co-hr"
@@ -2898,6 +2903,84 @@
       "type": "references",
       "from": "k-kosis",
       "to": "k-law",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "labor-compliance-audit",
+      "to": "consulting-report-writing",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "labor-compliance-audit",
+      "to": "hr-metrics-analysis",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "labor-compliance-audit",
+      "to": "k-law",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "labor-compliance-audit",
+      "to": "labor-compliance-analyst",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "labor-compliance-audit",
+      "to": "labor-compliance-analyst",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "labor-compliance-audit",
+      "to": "labor-relations-specialist",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "labor-compliance-audit",
+      "to": "labor-relations-specialist",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "labor-compliance-audit",
+      "to": "org-readiness-assessment",
+      "source": "prose"
+    },
+    {
+      "type": "phase",
+      "from": "labor-compliance-audit",
+      "to": "phase1",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "labor-compliance-audit",
+      "to": "phase2",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "labor-compliance-audit",
+      "to": "safety-health-officer",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "labor-compliance-audit",
+      "to": "safety-health-officer",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "labor-compliance-audit",
+      "to": "stakeholder-alignment",
       "source": "prose"
     },
     {

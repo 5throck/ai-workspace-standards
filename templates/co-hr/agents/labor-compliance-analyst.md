@@ -22,13 +22,13 @@ examples:
 phases: [1]
 handoff_to: [labor-relations-specialist, safety-health-officer]
 handoff_from: [pm]
-required_skills: []
+required_skills: [labor-compliance-audit]
 version: "1.0.0"
-last_updated: "2026-08-23"
+last_updated: "2026-08-25"
 lifecycle:
   phase: production
   created: "2026-08-23"
-  last_updated: "2026-08-23"
+  last_updated: "2026-08-25"
   governance: docs/lifecycle/agents/labor-compliance-analyst.md
 ---
 
