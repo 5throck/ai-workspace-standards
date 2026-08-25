@@ -2,6 +2,11 @@
   "version": 1,
   "nodes": [
     {
+      "id": "abap-code-review",
+      "type": "skill",
+      "layer": "variant:co-abap"
+    },
+    {
       "id": "abap-dev",
       "type": "skill",
       "layer": "variant:co-abap"
@@ -1293,6 +1298,60 @@
     }
   ],
   "edges": [
+    {
+      "type": "references",
+      "from": "abap-code-review",
+      "to": "code-review",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "abap-code-review",
+      "to": "code-writer",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "abap-code-review",
+      "to": "code-writer",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "abap-code-review",
+      "to": "dump-monitor",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "abap-code-review",
+      "to": "performance-tuning",
+      "source": "prose"
+    },
+    {
+      "type": "phase",
+      "from": "abap-code-review",
+      "to": "phase3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "abap-code-review",
+      "to": "phase4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "abap-code-review",
+      "to": "test-runner",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "abap-code-review",
+      "to": "test-runner",
+      "source": "skill_manifest"
+    },
     {
       "type": "used_by",
       "from": "abap-dev",

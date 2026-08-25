@@ -99,6 +99,10 @@
       "file": "skills/abap-dev/SKILL.md"
     },
     {
+      "name": "abap-code-review",
+      "file": "skills/abap-code-review/SKILL.md"
+    },
+    {
       "name": "post-write-chain",
       "file": "skills/post-write-chain/SKILL.md"
     },
@@ -150,6 +154,13 @@
         "layer": "variant",
         "used_by_agents": ["architect", "code-writer", "test-runner", "sap-investigator"],
         "phases": [1, 2, 3, 4],
+        "platform_parity": "required"
+      },
+      {
+        "name": "abap-code-review",
+        "layer": "variant",
+        "used_by_agents": ["code-writer", "test-runner"],
+        "phases": [3, 4],
         "platform_parity": "required"
       },
       {

@@ -18,10 +18,11 @@ examples:
     assistant: "Let me use the test-runner agent to run RunATCCheck."
   - user: "Verify the unit tests pass after the code-writer's changes"
     assistant: "I'll dispatch the test-runner agent for the Phase 3 validation."
+required_skills: [abap-code-review]
 lifecycle:
   phase: production
   created: "2026-08-15"
-  last_updated: "2026-08-21"
+  last_updated: "2026-08-25"
   governance: docs/lifecycle/agents/test-runner.md
 version: "1.0.0"
 ---
