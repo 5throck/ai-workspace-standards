@@ -31,14 +31,14 @@ examples:
 phases: [1, 2]
 handoff_to: [fta-origin-analyst, export-control-compliance-specialist, halal-certification-specialist]
 handoff_from: [pm]
-required_skills: [hs-classification-workflow]
+required_skills: [hs-classification-workflow, landed-cost-calculation]
 capabilities: [engagement-context, deliverable-standards, analysis, reporting]
 version: "1.1.0"
-last_updated: "2026-08-16"
+last_updated: "2026-08-25"
 lifecycle:
   phase: beta
   created: "2026-08-08"
-  last_updated: "2026-08-08"
+  last_updated: "2026-08-25"
   governance: docs/lifecycle/agents/hs-classification-specialist.md
 ---
 

@@ -12,6 +12,7 @@ This directory contains variant-specific skills for the `co-export` template.
 | fta-origin-determination | `fta-origin-determination/` | fta-origin-determination skill |
 | halal-certification-workflow | `halal-certification-workflow/` | halal-certification-workflow skill |
 | hs-classification-workflow | `hs-classification-workflow/` | hs-classification-workflow skill |
+| landed-cost-calculation | `landed-cost-calculation/` | landed-cost-calculation skill |
 | logistics-coordination | `logistics-coordination/` | logistics-coordination skill |
 | market-entry-strategy | `market-entry-strategy/` | market-entry-strategy skill |
 | roo-qualification-worksheet | `roo-qualification-worksheet/` | roo-qualification-worksheet skill |
