@@ -119,6 +119,27 @@ All content must pass a peer review before publication. Use the content review c
 All scripts are TypeScript (`.ts`) executed via Bun — no `.sh`/`.ps1` counterparts (ADR-0036).
 <!-- END VARIANT-INJECT -->
 
+## Automation Runbook — When to Script vs When to Hand Off
+
+Every recurring task in an engagement lands in exactly one of three lanes. Decide **before the second manual repetition**; record the decision (lane + one-line reason) in the engagement coordination log.
+
+| Lane | Use when | Owner | Artifact |
+|------|----------|-------|----------|
+| **1. Workspace script** | Inputs/outputs are workspace files; the transform is deterministic; reruns happen inside this engagement | any agent, via `bun scripts/...` (TypeScript only — ADR-0036) | script under `scripts/co-work/` + SCRIPTS.md row once it recurs |
+| **2. Platform automation (hand-off)** | Cross-system triggers or schedules that outlive the engagement; needs org credentials/tenancy; multi-step human approvals | `project-coordinator` PLANS it — connector id + node id cited from `docs/connector-schemas.json` **[WORK-R2]** | automation proposal; execution lands in the org's workflow platform (n8n / Power Automate class), never in this workspace |
+| **3. Human process** | Judgment-heavy, stakeholder-relations nuance, or ≤2 expected occurrences | the responsible agent | written runbook step in the engagement coordination doc |
+
+**Decision ladder** (first match wins):
+
+1. Does it touch systems outside the workspace (mail, chat, forms, ERP) or must it keep running after the engagement? → Lane 2.
+2. Would a script need credentials the workspace must not hold? → Lane 2.
+3. Is the expected occurrence count ≤2, or does quality depend on human judgment? → Lane 3.
+4. Otherwise → Lane 1.
+
+**Tie-breakers**: torn between Lanes 1 and 2, prefer Lane 1 for anything that produces deliverable content (Computational Integrity applies to it) and Lane 2 only for orchestration around that content. When a Lane 3 task reaches its third repetition, re-decide — it has usually become Lane 1 or 2 by then.
+
+**Hard boundaries**: connector contracts are planning artifacts, not executors (Domain Rule 5) — the workspace never runs a cross-system automation. Conversely, deliverable-producing computation never lives in an external platform, where it escapes version control and audit.
+
 ---
 
 ## Computational Integrity
@@ -148,6 +169,7 @@ All numeric outputs in deliverables (aggregations, statistics, percentages, metr
 3. Publication artifacts must be version-controlled before distribution.
 4. Corporate document styles are SSOT'd at `docs/document-style-registry.json` - style bundles keyed by document type (memo, report, deck, reserved spreadsheet) for OOXML compilation. Agents producing OOXML deliverables MUST read the registry for the target document type rather than inventing styles; see `docs/document-style-registry.md` for the schema and consumption contract. **[WORK-R1]**
 5. Workflow connector contracts are SSOT'd at `docs/connector-schemas.json` - trigger/event and action node contracts per integration (n8n-style node typing) for coordination automations. `project-coordinator` automation proposals MUST cite a connector id + node id from the pack; contracts are planning artifacts, not executors. See `docs/connector-schemas.md` for the schema and consumption contract. **[WORK-R2]**
+6. **Automation lane decisions follow the Automation Runbook** **[WORK-R3]**: before the second manual repetition of any recurring task, record a lane decision (workspace script / platform hand-off / human process) with a one-line reason in the engagement coordination log, per the decision ladder in the Automation Runbook section. Cross-system automations are planned via `docs/connector-schemas.json` and executed in the org's workflow platform — never from this workspace; deliverable-producing computation stays in workspace scripts.
 
 ---
 
@@ -164,3 +186,4 @@ Key rules:
 ---
 
 *co-work.context.md version: 1.3 — connector-schemas referenced (Domain Rule 5)*
+*co-work.context.md version: 1.4 — Automation Runbook section added + Domain Rule 6 [WORK-R3] (when to script vs when to hand off; backlog §8 Open row 14, closed 2026-08-26)*
