@@ -5,7 +5,7 @@ description: >
   rgb()/hsl() literals, raw px spacing) that bypass the tokens.json SSOT. Use when:
   reviewing generated UI code, auditing for hardcoded design values, or checking design
   token compliance in playground demos and handoff artifacts.
-version: 1.0.0
+version: 1.0.1
 scope: co-design
 status: active
 owner: pm
@@ -23,7 +23,7 @@ metadata:
 
 ## Context
 
-`tokens.json` is the single source of truth for the co-design design language: colors, typography, spacing, radii, and shadows. `scripts/compile-tokens.ts` compiles it into the two consumed forms, `tokens.css` (CSS custom properties such as `--color-primary`) and `tokens.ts` (typed constants plus `CSS_VARS`). Every styled surface must consume one of those forms, never a literal value.
+`tokens.json` is the single source of truth for the co-design design language: colors, typography, spacing, radii, and shadows. `scripts/compile-tokens.ts` compiles it into the two consumed forms, `tokens.css` (CSS custom properties such as `--color-primary`) and `tokens.ts` (typed constants plus `CSS_VARS`). Every styled surface must consume one of those forms, never a literal value. Theme presets live in the reserved top-level `themes` key (`dark`, `high-contrast`); the compiler emits each as a `[data-theme="<name>"]` CSS block after `:root` plus a `themes` export in `tokens.ts` — consumers switch themes via the `data-theme` attribute, never by re-declaring values.
 
 A hardcoded `#0066cc` or `padding: 12px` in a demo or prototype file forks the design language silently: it renders correctly today, but the next palette change in `tokens.json` never reaches it. This skill is the detection half of that contract; `templates/co-design/playground/README.md` binds demo authoring to it ("hardcoded hex/px values defeat the SSOT").
 
@@ -121,7 +121,7 @@ Classify every hit before acting on it.
 
 Remediation for should-be-token findings:
 
-1. Propose the token addition in `tokens.json` under the correct group (`color`, `typography`, `spacing`, `borderRadius`, `shadow`)
+1. Propose the token addition in `tokens.json` under the correct group (`color`, `typography`, `spacing`, `borderRadius`, `shadow`); theme-preset additions go under the reserved `themes` key and may override `color`/`shadow` only — layout tokens are theme-invariant ([DESIGN-R2])
 2. visual-designer reviews and approves the addition (see Escalation)
 3. Recompile with `bun run tokens` from `playground/` (or `bun scripts/compile-tokens.ts` with explicit `--input`, `--output-css`, `--output-ts` flags)
 4. Replace the literal with the `CSS_VARS` entry (TS/TSX) or the `var(--...)` custom property (CSS/HTML)

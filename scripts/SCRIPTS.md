@@ -66,7 +66,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `audit.ts` | L0 | 2.23.0 | active | —| —| L0+L1 | —|
 | `cleanup-completed-md.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `clear-pm-approval.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `compile-tokens.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
+| `compile-tokens.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `create-l3-scaffold.ts` | L0 | 1.12.1 | active | —| —| L0 | —|
 | `dev-sync.ts` | L0 | 1.7.6 | active | —| —| L0+L1 | —|
 | `dispatch-parallel.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
@@ -310,7 +310,7 @@ section presence (VARIANT-INJECT: guidelines [REQUIRED] marker enforcement).
 **Runs automatically**: `bun run dev-sync`
 
 #### `compile-tokens.ts`
-**Purpose**: Design token compiler for `co-design`. Reads `templates/co-design/tokens.json` and generates CSS custom properties (`:root { --color-primary: ... }`) and TypeScript constant types (`tokens.ts`) for design system consistency.
+**Purpose**: Design token compiler for `co-design`. Reads `templates/co-design/tokens.json` and generates CSS custom properties (`:root { --color-primary: ... }`) and TypeScript constant types (`tokens.ts`) for design system consistency. v1.1.0: a reserved top-level `themes` object (e.g. `dark`, `high-contrast`) compiles to `[data-theme="<name>"]` CSS blocks after `:root` plus a `themes` export in the TS output; a tokens file without `themes` compiles unchanged.
 **Usage**: `bun scripts/compile-tokens.ts [--input <path>] [--out-css <path>] [--out-ts <path>] [--watch] [--check]`
 
 #### `generate-ide-rules.ts`

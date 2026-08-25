@@ -144,8 +144,9 @@ All numeric outputs in deliverables (aggregations, statistics, percentages, metr
 
 <!-- co-design variant specific rules —edit after project creation -->
 1. Design tokens must be documented before implementation.
-2. All new components require design system review from Design Lead.
+2. All new components require design system review from Design Lead. **[DESIGN-R1]**
 3. User testing findings must be logged to memory/ before design decisions are finalized.
+4. Theme presets (`tokens.json` → `themes`) override color and shadow tokens only — layout tokens (typography, spacing, borderRadius) are theme-invariant. Adding or changing a theme preset requires visual-designer approval, same as the base palette. **[DESIGN-R2]**
 
 ---
 
@@ -161,4 +162,4 @@ Key rules:
 
 ---
 
-*co-design.context.md version: 1.1 — normalized to canonical template structure*
+*co-design.context.md version: 1.2 — theme-preset rule [DESIGN-R2] added, [DESIGN-R1] restored on Rule 2 (2026-08-25); previous: 1.1 normalized to canonical template structure*

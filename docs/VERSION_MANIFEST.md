@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-25T14:54:11.709Z
+**Generated**: 2026-08-25T15:26:04.541Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -88,7 +88,7 @@
 | audit.ts | 2.23.0 | scripts/audit.ts | bun |
 | cleanup-completed-md.ts | 1.1.0 | scripts/cleanup-completed-md.ts | N/A |
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | N/A |
-| compile-tokens.ts | 1.0.0 | scripts/compile-tokens.ts | N/A |
+| compile-tokens.ts | 1.1.0 | scripts/compile-tokens.ts | N/A |
 | create-l3-scaffold.ts | 1.12.1 | scripts/create-l3-scaffold.ts | N/A |
 | dev-sync.ts | 1.7.6 | scripts/dev-sync.ts | bun |
 | dispatch-parallel.ts | 1.0.1 | scripts/dispatch-parallel.ts | N/A |

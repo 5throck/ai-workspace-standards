@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-content_hash: 690f6389e85f79832c6473bf249a4f32c8fd5426ed757c2a6dcf84b961e1d810
+content_hash: 9a4a25829fe39c45c4a87b70c7a842322d70aba1747b3daa33cec7b5b6b5eef2
 ---
 
 # co-design
@@ -56,7 +56,7 @@ See [docs/user-guide.md](docs/user-guide.md) for a practical, task-oriented walk
 
 ### Design Tokens & Playground
 
-- **`tokens.json`** — the design-token SSOT (color, typography, spacing, borderRadius, shadow), compiled by `scripts/compile-tokens.ts` into CSS custom properties and typed TS constants.
+- **`tokens.json`** — the design-token SSOT (color, typography, spacing, borderRadius, shadow), compiled by `scripts/compile-tokens.ts` into CSS custom properties and typed TS constants. Theme presets (`dark`, `high-contrast`) live under the reserved `themes` key and compile to `[data-theme="<name>"]` CSS blocks — consumers switch themes via the `data-theme` attribute; layout tokens are theme-invariant ([DESIGN-R2]).
 - **`playground/`** — a minimal Vite dev server wired to the compiled tokens for live preview during design phases. See [playground/README.md](playground/README.md) for quickstart and the token wiring diagram; runs inside a scaffolded co-design project.
 
 ## How to Collaborate
@@ -92,4 +92,4 @@ This variant focuses on UI/UX design, design systems, prototyping, and design ha
 
 ---
 
-*Last Updated: 2026-08-24*
+*Last Updated: 2026-08-25*

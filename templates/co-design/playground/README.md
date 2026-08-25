@@ -30,6 +30,7 @@ src/main.ts  → renders every token group (colors, typography, spacing, radii, 
 
 - Generated outputs are **gitignored** — never commit `src/generated/tokens.{css,ts}`; regenerate with `bun run tokens`.
 - The demo page is structure-driven: add a new token group to `tokens.json`, recompile, and a new section renders automatically.
+- Theme presets compile to `[data-theme="..."]` blocks after `:root`. To preview a preset, set the attribute on the root element (`<html data-theme="dark">` or `document.documentElement.dataset.theme = "dark"`) — values never change per-component.
 
 ## Where it runs
 
