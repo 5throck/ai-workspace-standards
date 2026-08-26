@@ -40,8 +40,8 @@ Each variant is assessed with a five-step gap worksheet against one external ind
 | Gap | Classification | Improvement | Size | Priority | Status |
 |---|---|---|---|---|---|
 | No resolution-trajectory logging or eval harness (SWE-agent's core artifact is the scored trajectory) | skill | Extend `swe-solve` to emit a per-run trajectory log (issue, files touched, test outcomes, PR link) so resolve-rate is measurable | S | High | Done — #650 |
-| No benchmark fixture set to regression-test the pipeline itself (SWE-bench-style accepted/resolved counting) | doc | Add a small curated issue-fixture doc set with known-good resolutions for pipeline regression checks | M | Medium | Open |
-| No standardized per-role deliverable artifacts (MetaGPT's PRD/design/task artifacts per agent hand-off) | doc | Document the required output artifact per role in each agent file's Output Contract section | S | Medium | Open |
+| No benchmark fixture set to regression-test the pipeline itself (SWE-bench-style accepted/resolved counting) | doc | Add a small curated issue-fixture doc set with known-good resolutions for pipeline regression checks | M | Medium | Done — #708 |
+| No standardized per-role deliverable artifacts (MetaGPT's PRD/design/task artifacts per agent hand-off) | doc | Document the required output artifact per role in each agent file's Output Contract section | S | Medium | Done — #709 |
 | `designer` agent has no required-skills binding in the graph (no inbound skill edges) | agent | Bind `designer` to a UI/design skill or document why it stays prompt-only | S | Low | Done — #673 |
 
 **Top improvement**: Instrument `swe-solve` with trajectory logging so every autonomous run produces a scoreable record — the single SWE-agent capability whose absence makes the pipeline unmeasurable.
@@ -59,7 +59,7 @@ Each variant is assessed with a five-step gap worksheet against one external ind
 |---|---|---|---|---|---|
 | No component-primitive catalog (shadcn's registry of composable, token-bound components) | doc | Author a component-primitive catalog doc mapping each primitive to the token classes it must consume | M | High | Done — #656 |
 | No component playground in the template (roadmap §2 lists a Vite playground; `templates/co-design/` has no `scripts/` or playground dir) | config | Ship a minimal Vite playground scaffold wired to compiled tokens for live preview | M | Medium | Done — #669 |
-| No dark-mode/high-contrast token theme presets alongside the default palette | config | Add theme-preset variants to `tokens.json` with compiler support for `data-theme` scoping | S | Medium | Open |
+| No dark-mode/high-contrast token theme presets alongside the default palette | config | Add theme-preset variants to `tokens.json` with compiler support for `data-theme` scoping | S | Medium | Done — #710 |
 | No token-usage lint (detecting hardcoded colors/spacing that bypass the SSOT) | skill | Add a lint skill that greps generated code for raw hex/px values outside `tokens.ts` | S | Low | Done — #674 |
 
 **Top improvement**: Create the component-primitive catalog — it converts `tokens.json` from a palette definition into an actually reusable component system, which is the heart of shadcn/ui parity.
@@ -77,7 +77,7 @@ Each variant is assessed with a five-step gap worksheet against one external ind
 |---|---|---|---|---|---|
 | Data ingestion is DART-only (OpenBB's value is multi-provider market data abstraction) | skill | Generalize the disclosure-ingestion pattern into a provider-agnostic interface doc with DART as the KR reference implementation | M | High | Done — #657 |
 | No engagement kickoff artifact pack (McKinsey-style issue tree + hypothesis log templates) | doc | Add a standard issue-tree/hypothesis-log template pair to the deliverable-writer flow | S | Medium | Done — #668 |
-| No quantitative dataset schema convention for ingested market data (column contracts, units, currency) | config | Define a dataset schema convention consumed by `financial-modeling` and `financial-kpi.ts` | S | Medium | Open |
+| No quantitative dataset schema convention for ingested market data (column contracts, units, currency) | config | Define a dataset schema convention consumed by `financial-modeling` and `financial-kpi.ts` | S | Medium | Done — #711 |
 | No portfolio/backtest analytics capability (OpenBB's terminal-class feature) | skill | Scope a `portfolio-analytics` skill or explicitly record it out-of-domain in the context doc | S | Low | Done — #675 |
 
 **Top improvement**: Abstract the DART ingestion pattern into a provider-agnostic disclosure-ingestion contract so non-KR profiles can plug in their local data systems without new ad-hoc skills.
@@ -94,8 +94,8 @@ Each variant is assessed with a five-step gap worksheet against one external ind
 | Gap | Classification | Improvement | Size | Priority | Status |
 |---|---|---|---|---|---|
 | No PPTX export path (Slidev's key interop feature; current export terminates at PDF) | config | Add an OOXML `.pptx` export script or document the deliberate PDF-only boundary in the context doc | M | High | Done — #655 |
-| No live-reload authoring loop (Slidev's dev-server experience) | config | Add a watch mode that rebuilds the theme deck on save for authoring feedback | M | Medium | Open |
-| No slide-layout conformance lint (Marp enforces consistent directives; `estimate-layout.ts` measures but does not gate) | skill | Turn layout estimation into a gate skill that fails slides exceeding safe text/element bounds | S | Medium | Open |
+| No live-reload authoring loop (Slidev's dev-server experience) | config | Add a watch mode that rebuilds the theme deck on save for authoring feedback | M | Medium | Done — #706 |
+| No slide-layout conformance lint (Marp enforces consistent directives; `estimate-layout.ts` measures but does not gate) | skill | Turn layout estimation into a gate skill that fails slides exceeding safe text/element bounds | S | Medium | Done — #712 |
 | No speaker-notes export format for handoff to non-tool presenters | doc | Document a plain-text speaker-notes export convention alongside the PDF pipeline | S | Low | Done — #676 |
 
 **Top improvement**: Close the PPTX export gap — PowerPoint interop is the most common external handoff request and the only Slidev export capability with no template equivalent.
@@ -113,7 +113,7 @@ Each variant is assessed with a five-step gap worksheet against one external ind
 |---|---|---|---|---|---|
 | No single-file HTML game bundler (roadmap Phase-2 deliverable; no bundler script exists in the template) | config | Ship a bundler script that inlines the built game plus assets into one distributable HTML file | M | High | Done — #658 |
 | No scene-management convention (Phaser's core organizing abstraction) | doc | Document a scene-graph convention over the ECS core for multi-level games | S | Medium | Done — #666 |
-| No asset pipeline (sprite atlas packing, audio encoding checks) | config | Add an asset-manifest validation script mirroring co-deck's `validate-image-manifest.ts` pattern | M | Medium | Open |
+| No asset pipeline (sprite atlas packing, audio encoding checks) | config | Add an asset-manifest validation script mirroring co-deck's `validate-image-manifest.ts` pattern | M | Medium | Done — #707 |
 | No physics module beyond the ECS template (Phaser ships Arcade/Matter physics) | skill | Add a minimal velocity/collision system skill scoped to the ECS core, or record 2D-casual-only scope | M | Low | Done — #677 |
 
 **Top improvement**: Ship the promised single-file HTML bundler — it is the variant's distribution story and the one roadmap Phase-2 deliverable with no on-disk artifact.
@@ -131,7 +131,7 @@ Each variant is assessed with a five-step gap worksheet against one external ind
 |---|---|---|---|---|---|
 | No SAMM maturity self-assessment (SAMM's five business functions × three maturity levels — the benchmark's core artifact) | skill | Add an OWASP SAMM maturity-assessment skill producing a scored maturity roadmap per engagement | M | High | Done — #651 + #652 |
 | No SBOM/SPDX generation (roadmap §2 lists it under a `compliance-expert` agent that does not exist in the shipped roster; no SPDX/SBOM references anywhere in the template) | skill | Add a dependency-extraction + SPDX SBOM export skill, then register it in the roadmap matrix as the corrected roster | M | High | Done — #653 |
-| No finding deduplication/triage pipeline (DefectDojo's central value) | skill | Add a finding-reconciliation skill that merges duplicate SARIF/scan hits by code location | M | Medium | Open |
+| No finding deduplication/triage pipeline (DefectDojo's central value) | skill | Add a finding-reconciliation skill that merges duplicate SARIF/scan hits by code location | M | Medium | Done — #701 |
 | Roster lacks the governance-side roles the roadmap named (`compliance-expert`, `cloud-sec-architect`, `incident-responder`) | agent | Either add the missing roles or correct the roadmap §2 roster to the shipped six | S | Medium | Done — #653 |
 
 **Top improvement**: Land the SAMM maturity self-assessment skill — it moves engagements from one-off findings to a scored, comparable security posture, which is what the benchmark actually measures.
@@ -148,8 +148,8 @@ Each variant is assessed with a five-step gap worksheet against one external ind
 | Gap | Classification | Improvement | Size | Priority | Status |
 |---|---|---|---|---|---|
 | No `.pptx` output (POI parity requires the full Office trio; `md-to-ooxml.ts` handles docx/xlsx only — verified) | config | Extend `md-to-ooxml.ts` with a presentation package writer | L | High | Done — #654 |
-| No workflow connector schema library (n8n's trigger/action node contracts; roadmap §2 lists it, no schema assets exist) | config | Add a connector-schema pack (trigger/event contracts per integration) consumable by `project-coordinator` | M | Medium | Open |
-| No automation-runbook convention (when to script vs when to hand off) | doc | Document an automation decision framework in the context doc | S | Medium | Open |
+| No workflow connector schema library (n8n's trigger/action node contracts; roadmap §2 lists it, no schema assets exist) | config | Add a connector-schema pack (trigger/event contracts per integration) consumable by `project-coordinator` | M | Medium | Done — #702 |
+| No automation-runbook convention (when to script vs when to hand off) | doc | Document an automation decision framework in the context doc | S | Medium | Done — #713 |
 | No document template registry (reusable corporate doc/xlsx styles) | config | Add a style-template registry keyed by document type for OOXML compilation | S | Low | Done — #678 |
 
 **Top improvement**: Extend the OOXML compiler to `.pptx` — it completes native Office parity (the Apache POI side of the benchmark) with one well-understood pipeline extension.
@@ -167,7 +167,7 @@ Each variant is assessed with a five-step gap worksheet against one external ind
 |---|---|---|---|---|---|
 | No correction/transparent-error workflow (Reuters' published-corrections discipline) | doc | Add a corrections workflow doc defining how published errors are flagged, corrected, and annotated | S | High | Done — #661 |
 | No standards-as-code style lint (Reuters' handbook rules are enforceable prose) | skill | Encode the top style-guide rules as a lint checklist skill run by `style-editor` before publication | M | Medium | Done — #664 |
-| No wire-format output templates (agency dispatch structure: slug, dateline, source line) | doc | Add wire-format templates for the brief and article deliverables | S | Medium | Open |
+| No wire-format output templates (agency dispatch structure: slug, dateline, source line) | doc | Add wire-format templates for the brief and article deliverables | S | Medium | Done — #714 |
 | No legal-review escalation matrix (what must route to `legal-researcher` pre-publication) | doc | Document risk-tiered escalation triggers in the context doc | S | Low | Done — #679 |
 
 **Top improvement**: Author the corrections workflow — every journalism benchmark treats transparent error handling as non-negotiable, and the template currently has no answer.
@@ -184,7 +184,7 @@ Each variant is assessed with a five-step gap worksheet against one external ind
 | Gap | Classification | Improvement | Size | Priority | Status |
 |---|---|---|---|---|---|
 | No rules-of-origin qualification worksheet (WTO rule text → repeatable origin-determination artifact) | skill | Add a RoO worksheet skill producing a per-shipment origin qualification record from the FTA skill's rules | M | High | Done — #662 |
-| No landed-cost computation convention (duty + freight + insurance breakdown) | skill | Add a landed-cost computation skill with an explicit formula/assumption ledger | M | Medium | Open |
+| No landed-cost computation convention (duty + freight + insurance breakdown) | skill | Add a landed-cost computation skill with an explicit formula/assumption ledger | M | Medium | Done — #705 |
 | Only one country profile exists (KR); no profile template for onboarding a second jurisdiction | doc | Author a blank country-profile skeleton doc derived from the KR profile's five sections | S | Medium | Done — #665 |
 | No tariff-schedule dataset schema (HS code lookup needs a structured local dataset contract) | config | Define a tariff-dataset schema the classification skill can consume offline | S | Low | Done — #680 |
 
@@ -204,8 +204,8 @@ Each variant is assessed with a five-step gap worksheet against one external ind
 | Gap | Classification | Improvement | Size | Priority | Status |
 |---|---|---|---|---|---|
 | Zero "Clean ABAP" references in the template (verified by grep) — the style guide is the benchmark's core and is absent | doc | Author a Clean ABAP conformance checklist mapping each style-guide rule to the owning agent review step | M | High | Done — #659 |
-| No codified static-check rule pack (abapOpenChecks parity: named, versioned, runnable checks) | config | Encode an ATC check-selection config per change type so `vsp-audit.ts` runs a deterministic rule set | M | High | Open |
-| No ABAP-specific code-review skill (co-develop's `code-review` is general-purpose; naming conventions, pretty-printer, pattern compliance are ABAP-specific) | skill | Add an ABAP review skill covering naming, pretty-printer, and anti-pattern rules | M | Medium | Open |
+| No codified static-check rule pack (abapOpenChecks parity: named, versioned, runnable checks) | config | Encode an ATC check-selection config per change type so `vsp-audit.ts` runs a deterministic rule set | M | High | Done — #699 |
+| No ABAP-specific code-review skill (co-develop's `code-review` is general-purpose; naming conventions, pretty-printer, pattern compliance are ABAP-specific) | skill | Add an ABAP review skill covering naming, pretty-printer, and anti-pattern rules | M | Medium | Done — #703 |
 | No transport-release quality gate doc (release-strategy rules, import ordering) | doc | Document the transport release checklist consumed by `devops-admin` | S | Low | Done — #681 |
 
 **Top improvement**: Write the Clean ABAP conformance checklist — it is the cheapest high-impact artifact (pure documentation) and anchors every downstream static-check and review improvement.
@@ -225,7 +225,7 @@ Each variant is assessed with a five-step gap worksheet against one external ind
 |---|---|---|---|---|---|
 | Zero SHRM/ISO 30414 references in the template (verified by grep) — `hr-metrics-analysis` has no external reporting taxonomy to anchor to | doc | Map `hr-metrics-analysis` metric families onto the ISO 30414 human-capital reporting categories so dashboards become externally comparable | M | High | Done — #660 |
 | No competency-model framework skill (SHRM BoK's talent core) | skill | Add a competency-modeling skill covering definition, leveling, and assessment design | M | Medium | Done — #667 |
-| No HR-compliance audit skill mapped to a recognized framework | skill | Add a labor-compliance audit skill that instantiates the active country profile's statute table as a checklist | M | Medium | Open |
+| No HR-compliance audit skill mapped to a recognized framework | skill | Add a labor-compliance audit skill that instantiates the active country profile's statute table as a checklist | M | Medium | Done — #704 |
 | No metric-definition dictionary (calculation formulas, data sources, refresh cadence per metric) | config | Define a metric dictionary schema consumed by `hr-metrics-analysis` and `data-analyst` | S | Low | Done — #682 |
 
 **Top improvement**: Anchor `hr-metrics-analysis` to the ISO 30414 reporting taxonomy — it turns internally consistent dashboards into externally comparable human-capital reports, which is precisely what the benchmark standardizes.
@@ -261,8 +261,10 @@ The **Status** column tracks execution (marked 2026-08-25): `Done — #PR` refer
 
 Ordering rationale: items 1–3 harden already-shipped flagship capabilities (measurement, posture, supply-chain) that every scaffolded project inherits; items 4–8 close named benchmark-parity holes flagged by the roadmap itself; items 9–12 establish the benchmark anchors for the four variants outside the roadmap matrix; items 13–18 are the strongest Medium-priority items held back only by breadth of benefit.
 
-Execution note: the High-priority rows 1–12 were executed sequentially as the backlog execution series (2026-08-24 → 2026-08-25), one PR per row, PM-verified before each merge. Row 2 landed in two PRs (#651 delivered the SKILL.md via a parallel session's sync after the original dispatch died on an API usage limit; #652 completed registration and mirrors). Row 5 resolved via the documented-boundary option (PDF-only by design, markdown→pptx path documented) rather than a co-deck-local pptx pipeline. The Medium rows 13–18 followed in the same series (2026-08-25) as PRs #664–#669, PM-authored inline during an API usage-limit window (the same battery gates ran before every merge); row 16 (Vite playground) additionally passed a live compiler smoke test into the scaffold's generated dir. All 18 consolidated rows are now Done. The ten Low-priority rows followed (2026-08-25) as PRs #673–#682, one per row, specialist-dispatched and PM-verified before each merge. With that series complete, the per-variant tables in sections 2–12 carry a Status column; the 15 rows never selected into the consolidated table (one High: the co-abap ATC rule pack; fourteen Medium) remain Open for future passes.
+Execution note: the High-priority rows 1–12 were executed sequentially as the backlog execution series (2026-08-24 → 2026-08-25), one PR per row, PM-verified before each merge. Row 2 landed in two PRs (#651 delivered the SKILL.md via a parallel session's sync after the original dispatch died on an API usage limit; #652 completed registration and mirrors). Row 5 resolved via the documented-boundary option (PDF-only by design, markdown→pptx path documented) rather than a co-deck-local pptx pipeline. The Medium rows 13–18 followed in the same series (2026-08-25) as PRs #664–#669, PM-authored inline during an API usage-limit window (the same battery gates ran before every merge); row 16 (Vite playground) additionally passed a live compiler smoke test into the scaffold's generated dir. All 18 consolidated rows are now Done. The ten Low-priority rows followed (2026-08-25) as PRs #673–#682, one per row, specialist-dispatched and PM-verified before each merge.
+
+Final open-rows series (2026-08-26): the 15 rows never selected into the consolidated table (one High — the co-abap ATC rule pack; fourteen Medium) were executed as PRs #699, #701–#714, one row per PR, plus companion fix #700 (repairing six parse-breaking co-abap script headers found mid-series). All were PM-authored inline during an API usage-limit window — the full verification battery (validate-templates / validate-md-language / audit / spec-check --lifecycle-only / Hangul scan / mirror md5 parity / fixture smoke tests) ran before every merge. Series highlights: #706 (watch-deck live-reload) and #707 (validate-asset-manifest) shipped scripts with dedicated smoke tests; #709–#714 each added a stable rule ID ([DEVELOP-R2], [DESIGN-R2], [CONSULT-R2], [DECK-R2], [WORK-R3], [NEWS-R2]) to the #696 registry; #710 (compile-tokens themes) and #712 (estimate-layout --lint gate) carried backward-compat verification. With this series, every row across sections 2–12 is Done and no Open rows remain in this backlog.
 
 ---
 
-*Last reviewed: 2026-08-25. Re-run the §1 worksheet when any variant's skill manifest changes (see the maintenance note).*
+*Last reviewed: 2026-08-26. Re-run the §1 worksheet when any variant's skill manifest changes (see the maintenance note).*
