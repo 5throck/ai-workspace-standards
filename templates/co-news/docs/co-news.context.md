@@ -106,6 +106,7 @@ The five Core Principles under Newsroom Guidelines above are the binding rules (
 
 1. **Language split** — article content follows the assignment's target language (KR profile default: Korean); ALL git artifacts (commits, PR titles, branches) are English-only, always.
 2. **Figure formatting locale** — Korean numeral-grouping units (jo/eok/man) appear only in Korean-language articles; never mix grouping conventions within a single figure.
+3. **Wire headers on dispatch deliverables** — every `draft.md`, `final.md`, and brief under `deliverables/drafts/<article>/` carries the wire-format header (slug, dateline/source context, source line) defined in [`docs/wire-format.md`](wire-format.md); the slug is assigned at Phase 3 kickoff and stays stable through publication and corrections **[NEWS-R2]**
 
 <!-- COMMON-CONTEXT:START -->
 This project follows the workspace coding standards defined in the project's Coding Guidelines section.

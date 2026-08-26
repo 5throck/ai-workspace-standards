@@ -8,8 +8,8 @@ description: >
   tree) — this skill is narrative-oriented, not valuation-oriented, and
   produces structured data for a reporter, not a full financial model. Use
   when: Phase 1, immediately after an assignment names a target company.
-version: 1.0.0
-last_reviewed: 2026-08-10
+version: 1.0.1
+last_reviewed: 2026-08-26
 status: active
 owner: financial-analyst
 prerequisites: k-dart
@@ -37,6 +37,7 @@ This skill converts raw k-dart DART data into an article-ready narrative brief. 
 
 ## Output Format
 
+- Wire header comment per [`docs/wire-format.md`](../../docs/wire-format.md) — slug, register, language, desk, receipt count ([NEWS-R2])
 - `## Headline Numbers` table: metric | value | YoY/QoQ | receipt number
 - `## Context Notes`: 1-2 sentences per number
 - `## Flags for Legal Review`: bullet list, may be empty

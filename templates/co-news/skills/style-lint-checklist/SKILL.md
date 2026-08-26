@@ -7,8 +7,8 @@ description: >
   number/date/company-name notation, AI-tell patterns, and the zero-drift
   preservation hard constraints. Run by style-editor before publication;
   meaning-distortion findings block.
-version: 1.0.0
-last_reviewed: 2026-08-25
+version: 1.0.1
+last_reviewed: 2026-08-26
 status: active
 owner: style-editor
 prerequisites: financial-journalism-style
@@ -95,6 +95,7 @@ Scan the draft for the catalogued AI-tell patterns. Severity per the guide's tab
 
 - [ ] One register throughout (economic-daily accessible register vs IB-specialist dense register per the assignment's target audience) — mixed-register passages flagged with locations
 - [ ] Disclosure-citation phrasing uses natural attributed forms, not mechanical citation brackets
+- [ ] Wire header valid per `docs/wire-format.md` — slug present and matches ledger/corrections-triage references; register/language fields match the assignment; on `final.md` the wire comment is byte-stable vs `draft.md` (slug, register, language never change)
 
 ## Output Format
 
@@ -102,6 +103,7 @@ Scan the draft for the catalogued AI-tell patterns. Severity per the guide's tab
 ## Style Lint Report
 
 **Article**: [slug]  **Register**: [economic-daily / IB-specialist]  **Language**: [Korean / other]
+**Wire header**: [valid / slug mismatch / missing / not byte-stable]
 **Result**: PASS / PASS WITH WARNINGS / BLOCKED
 
 | # | Group | Finding | Severity | Location | Fix |
