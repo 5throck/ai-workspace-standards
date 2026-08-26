@@ -1,0 +1,22 @@
+# Skills Index — co-design
+
+This directory contains variant-specific skills for the `co-design` template.
+
+## Available Skills
+
+| skill | version | status | owner | last_reviewed | removal-date | notes |
+|-------|---------|--------|-------|---------------|--------------|-------|
+| `accessibility-audit` | 1.0.0 | active | pm | 2026-08-06 | — | Automated WCAG 2.1 AA accessibility evaluation using axe-core |
+| `service-design` | 1.0.0 | active | pm | 2026-07-19 | — | Migrated to SSOT from `.claude/skills/`-only (no prior `skills/` entry) during a full skill-lifecycle audit |
+| `token-usage-lint` | 1.0.0 | active | pm | 2026-08-25 | — | Greps generated code for raw hex/px values that bypass the `tokens.json` SSOT (backlog Low row) |
+| `ui-ux-design-intelligence` | 1.0.0 | active | pm | 2026-07-19 | — | Migrated to SSOT from `.claude/skills/`-only (no prior `skills/` entry) during a full skill-lifecycle audit |
+
+All other skills are inherited from `templates/common/skills/`. See the shared skills index for available platform-neutral skills.
+
+## Adding Variant-Specific Skills
+
+To add a co-design-specific skill:
+1. Create a subdirectory: `templates/co-design/skills/<skill-name>/`
+2. Add a `SKILL.md` with required frontmatter (`name`, `version`, `last_reviewed`)
+3. Register the skill in this SKILLS.md and in `templates/co-design/variant.json skills[]`
+4. Run `bun scripts/validate-templates.ts` to verify compliance
