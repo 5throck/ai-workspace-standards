@@ -87,6 +87,8 @@ describe('--check-drift CLI dispatch', () => {
 // verified by asserting ZERO per-file 'copied' lines in pass 2 — scrubbed
 // rewrites are byte-identical by design, so they should not appear.
 describe('cascade re-publish convergence (dev-sync step 4.62 safety)', () => {
+  // Two full propagate runs exceed bun's 5s default per-test ceiling under load —
+  // match runScript's own 30s subprocess budget (observed ~5.7s on a busy Windows host).
   test('consecutive --apply passes converge (no copied lines in pass 2)', () => {
     const pass1 = runScript(['--apply']);
     expect(pass1.exitCode).toBe(0);
@@ -102,5 +104,5 @@ describe('cascade re-publish convergence (dev-sync step 4.62 safety)', () => {
     const lines = stdout.split('\n');
     const copiedLines = lines.filter(l => l.includes('copied  '));
     expect(copiedLines.length).toBe(0);
-  });
+  }, 30000);
 });
