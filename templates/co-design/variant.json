@@ -13,12 +13,12 @@
   },
   "agents": [
     {
-      "name": "pm",
-      "file": "agents/pm.md"
-    },
-    {
       "name": "design-lead",
       "file": "agents/design-lead.md"
+    },
+    {
+      "name": "pm",
+      "file": "agents/pm.md"
     },
     {
       "name": "prototype-engineer",
@@ -46,39 +46,79 @@
     }
   ],
   "skills": [
-    { "name": "accessibility-audit", "file": "skills/accessibility-audit/SKILL.md" },
-    { "name": "service-design", "file": "skills/service-design/SKILL.md" },
-    { "name": "token-usage-lint", "file": "skills/token-usage-lint/SKILL.md" },
-    { "name": "ui-ux-design-intelligence", "file": "skills/ui-ux-design-intelligence/SKILL.md" }
+    {
+      "name": "accessibility-audit",
+      "file": "skills/accessibility-audit/SKILL.md"
+    },
+    {
+      "name": "service-design",
+      "file": "skills/service-design/SKILL.md"
+    },
+    {
+      "name": "token-usage-lint",
+      "file": "skills/token-usage-lint/SKILL.md"
+    },
+    {
+      "name": "ui-ux-design-intelligence",
+      "file": "skills/ui-ux-design-intelligence/SKILL.md"
+    }
   ],
   "agent_manifest": {
     "variant_agents_dir": "agents",
     "pipeline_order": [],
-    "optional": ["typography-expert"],
+    "optional": [
+      "typography-expert"
+    ],
     "notes": "storyteller: skip for purely functional/technical design work. typography-expert: skip if font decisions are pre-established by brand guidelines. System skills (agent-lifecycle-manager, platform-command-lifecycle-manager, platform-skill-lifecycle-manager, finishing-a-development-branch) are present in .claude/skills/ and .gemini/skills/ via workspace propagation — intentionally excluded from skills[] as they are workspace-level utilities, not co-design domain skills."
   },
   "skill_manifest": {
     "variant_specific": [
       {
         "name": "accessibility-audit",
-        "used_by_agents": ["ux-researcher", "visual-designer"],
-        "phases": [2, 4]
+        "used_by_agents": [
+          "ux-researcher",
+          "visual-designer"
+        ],
+        "phases": [
+          2,
+          4
+        ]
       },
       {
         "name": "service-design",
-        "used_by_agents": ["service-designer", "design-lead"],
-        "phases": [1, 2, 3]
+        "used_by_agents": [
+          "service-designer",
+          "design-lead"
+        ],
+        "phases": [
+          1,
+          2,
+          3
+        ]
       },
       {
         "name": "token-usage-lint",
-        "used_by_agents": ["prototype-engineer"],
-        "phases": [4]
+        "used_by_agents": [
+          "prototype-engineer"
+        ],
+        "phases": [
+          4
+        ]
       },
       {
         "name": "ui-ux-design-intelligence",
-        "used_by_agents": ["design-lead", "ux-researcher", "visual-designer"],
-        "phases": [1, 2, 3]
+        "used_by_agents": [
+          "design-lead",
+          "ux-researcher",
+          "visual-designer"
+        ],
+        "phases": [
+          1,
+          2,
+          3
+        ]
       }
     ]
-  }
+  },
+  "promotionChecklist": "PROMOTION_CHECKLIST.md"
 }

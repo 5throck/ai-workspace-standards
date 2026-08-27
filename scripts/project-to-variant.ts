@@ -214,10 +214,26 @@ if (!DRY_RUN) {
     const skillsDir = path.join(targetDir, 'skills');
     // {name, file} shape — matches the canonical variant.json schema (see e.g. templates/co-abap/variant.json)
     // and is required by regenerate-agents-md.ts's `variant.agents.map(a => a.name)`.
-    const agents = fs.existsSync(agentsDir)
-      ? fs.readdirSync(agentsDir).filter(f => f.endsWith('.md') && f !== 'README.md')
-          .map(f => ({ name: f.replace('.md', ''), file: `agents/${f}` }))
-      : [];
+    const agents = (() => {
+      if (!fs.existsSync(agentsDir)) return [] as Array<{ name: string; file: string }>;
+      const out: Array<{ name: string; file: string }> = [];
+      const walk = (dir: string) => {
+        for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+          const full = path.join(dir, e.name);
+          if (e.isDirectory()) {
+            walk(full);
+          } else if (e.name.endsWith('.md') && !/^README(_ko)?\.md$/.test(e.name)) {
+            // Preserve the real on-disk location (agents may be nested under
+            // domains/_core/_shared). Use a path relative to the variant root so
+            // the manifest always resolves regardless of directory depth.
+            const rel = path.relative(targetDir, full).replace(/\\/g, '/');
+            out.push({ name: e.name.replace('.md', ''), file: rel });
+          }
+        }
+      };
+      walk(agentsDir);
+      return out;
+    })();
     const skills = fs.existsSync(skillsDir)
       ? fs.readdirSync(skillsDir).filter(f => fs.statSync(path.join(skillsDir, f)).isDirectory())
           .map(f => ({ name: f, file: `skills/${f}/SKILL.md` }))
@@ -257,6 +273,7 @@ if (!DRY_RUN) {
       version: '0.1.0',
       agents,
       skills,
+      promotionChecklist: 'PROMOTION_CHECKLIST.md',
       description: `TODO: Describe the ${targetArg} variant`
     };
 
@@ -266,12 +283,66 @@ if (!DRY_RUN) {
 
     fs.writeFileSync(path.join(targetDir, 'variant.json'), JSON.stringify(variantJson, null, 2) + '\n', 'utf-8');
     console.log(`${GREEN}Generated templates/${targetArg}/variant.json${RESET}`);
+
+    // A valid variant must ship a PROMOTION_CHECKLIST.md (Variant Readiness Gate
+    // blocks the variant if it is missing). Generate a starter checklist so the
+    // lightweight pipeline yields a READY variant without manual scaffolding.
+    const promoPath = path.join(targetDir, 'PROMOTION_CHECKLIST.md');
+    if (!fs.existsSync(promoPath)) {
+      const promo = `# ${targetArg} Promotion Checklist
+
+**Variant:** ${targetArg}
+**Current Status:** beta
+**Beta Since:** ${new Date().toISOString().slice(0, 10)}
+**Phase A Complete:** false
+
+## Promotion Criteria (beta -> stable)
+
+| # | Criterion | Status | Evidence / Notes |
+|---|-----------|--------|-----------------|
+| 1 | **Phase A complete** | Pending | agent manifest (${agents.length}), skill manifest (${skills.length}), documentation present. |
+| 2 | **Agent roster completeness** | Pending | All ${agents.length} agents defined; verify each agent file has substantive content. |
+| 3 | **Skills coverage** | Pending | ${skills.length} variant-specific skills; verify each SKILL.md is complete and operational. |
+| 4 | **Documentation completeness** | Pending | README.md present and accurate; AGENTS.md reflects the actual roster; variant.json fields accurate. |
+| 5 | **Audit pass rate** | Pending | \`bun scripts/audit.ts\` passes with 0 errors. |
+| 6 | **Real engagements** | Pending | Minimum 1 successful end-to-end engagement. |
+| 7 | **README accuracy** | Pending | README reflects current capability set and agent roster. |
+| 8 | **Minimum beta duration** | Pending | 3 months in beta status. |
+| 9 | **Zero unresolved bugs** | Pending | 0 open bug reports at promotion time. |
+| 10 | **User feedback** | Pending | Positive feedback from beta users; no critical complaints. |
+
+## Review History
+
+| Date | Reviewer | Outcome | Notes |
+|------|----------|---------|-------|
+| | | | |
+`;
+      fs.writeFileSync(promoPath, promo, 'utf-8');
+      console.log(`${GREEN}Generated templates/${targetArg}/PROMOTION_CHECKLIST.md${RESET}`);
+    }
   }
   const validateTs = path.join(WORKSPACE_ROOT, 'scripts', 'validate-templates.ts');
   if (fs.existsSync(validateTs)) {
     console.log(`\n${CYAN}Running validate-templates.ts...${RESET}`);
     try { execFileSync(process.execPath, [validateTs], { cwd: WORKSPACE_ROOT, stdio: 'inherit' }); }
     catch { console.log(`${YELLOW}Validation reported issues -- review above${RESET}`); }
+  }
+
+  // Variant Readiness Gate (VRG): a freshly variant-ized template must be READY
+  // before it is accepted/merged. Block unless --force.
+  const gateTs = path.join(WORKSPACE_ROOT, 'scripts', 'validate-variant-readiness.ts');
+  if (fs.existsSync(gateTs)) {
+    console.log(`\n${gateTs ? '\x1b[36m' : ''}Running Variant Readiness Gate...${'\x1b[0m'}`);
+    try {
+      execFileSync(process.execPath, [gateTs, '--dir', targetDir], { cwd: WORKSPACE_ROOT, stdio: 'inherit' });
+      console.log(`${GREEN}Variant Readiness Gate passed.${RESET}`);
+    } catch {
+      if (!FORCE) {
+        fail('Variant Readiness Gate FAILED — the generated variant is not ready. ' +
+          'Fix the issues above or re-run with --force.');
+      }
+      console.log(`${YELLOW}Variant Readiness Gate reported issues but --force passed; proceeding.${RESET}`);
+    }
   }
 }
 

@@ -175,6 +175,23 @@ Key checks that will run:
 - **VA-03**: `.claude/skills/` ↔ `.gemini/skills/` parity
 - **WS-03**: Common skills must be present in variant `.claude/skills/`
 
+### Variant Readiness Gate (mandatory)
+
+A variant is only accepted/usable once it passes the **Variant Readiness Gate**. This is enforced
+automatically by `project-to-variant.ts`, `new-project.ts`, and `upgrade-project.ts`, but you should
+run it explicitly before opening a PR:
+
+```bash
+bun scripts/validate-variant-readiness.ts --variant <your-variant>
+```
+
+It blocks (exit 1) when any of these fail: `variant.json` schema/status valid; every
+`agents[].file` and `skills[].file` resolves to a real on-disk file (nested agent paths such as
+`agents/domains/functional/...` are expected); `PROMOTION_CHECKLIST.md` exists; `README.md` and a
+non-stub `AGENTS.md` (with `VARIANT-*` markers) exist; and — if `docs/countries/` exists —
+`country_config.supported` covers the shipped profiles. See
+[`docs/designs/variant-readiness-gate.md`](designs/variant-readiness-gate.md).
+
 ---
 
 ## Checklist
@@ -189,6 +206,9 @@ Before opening a PR for a new variant:
 - [ ] Variant-specific skills exist in both `.claude/skills/` and `.gemini/skills/`
 - [ ] `docs/phase-definitions.md` created for the variant
 - [ ] `bun scripts/validate-templates.ts --variant <name>` passes with 0 errors
+- [ ] `bun scripts/validate-variant-readiness.ts --variant <name>` passes with 0 errors (no blocking checks)
+- [ ] `PROMOTION_CHECKLIST.md` exists and is referenced by `variant.json` `promotionChecklist`
+- [ ] `variant.json` `agents[].file` paths are nested real on-disk paths (not flat `agents/<name>.md`)
 - [ ] *(if variant has custom scripts)* Scripts placed in `scripts/<variant>/`, NOT `scripts/` top-level
 - [ ] *(if variant has custom scripts)* `variant.json` declares `script_manifest.local` entries
 - [ ] *(if variant has custom scripts)* `templates/co-<variant>/package.json` created with npm script entries

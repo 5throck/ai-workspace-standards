@@ -14,12 +14,40 @@
   },
   "agents": [
     {
-      "name": "pm",
-      "file": "agents/pm.md"
+      "name": "design",
+      "file": "agents/design.md"
     },
     {
-      "name": "version",
-      "file": "agents/version.md"
+      "name": "diagram-specialist",
+      "file": "agents/diagram-specialist.md"
+    },
+    {
+      "name": "handbook-reviewer",
+      "file": "agents/handbook-reviewer.md"
+    },
+    {
+      "name": "handbook-writer",
+      "file": "agents/handbook-writer.md"
+    },
+    {
+      "name": "html-build",
+      "file": "agents/html-build.md"
+    },
+    {
+      "name": "image-curator",
+      "file": "agents/image-curator.md"
+    },
+    {
+      "name": "measure",
+      "file": "agents/measure.md"
+    },
+    {
+      "name": "pdf-export",
+      "file": "agents/pdf-export.md"
+    },
+    {
+      "name": "pm",
+      "file": "agents/pm.md"
     },
     {
       "name": "research",
@@ -34,37 +62,8 @@
       "file": "agents/storyline.md"
     },
     {
-      "name": "design",
-      "file": "agents/design.md"
-    },
-    {
-      "name": "image-curator",
-      "file": "agents/image-curator.md"
-    },
-    {
-      "name": "diagram-specialist",
-      "file": "agents/diagram-specialist.md"
-    },
-    {
-      "name": "html-build",
-      "file": "agents/html-build.md"
-    },
-    {
-      "name": "measure",
-      "file": "agents/measure.md",
-      "role": "PDF layout preparation (Playwright-free)"
-    },
-    {
-      "name": "pdf-export",
-      "file": "agents/pdf-export.md"
-    },
-    {
-      "name": "handbook-writer",
-      "file": "agents/handbook-writer.md"
-    },
-    {
-      "name": "handbook-reviewer",
-      "file": "agents/handbook-reviewer.md"
+      "name": "version",
+      "file": "agents/version.md"
     }
   ],
   "agent_manifest": {
@@ -110,20 +109,12 @@
   },
   "skills": [
     {
-      "name": "version",
-      "file": "skills/version/SKILL.md"
-    },
-    {
-      "name": "research",
-      "file": "skills/research/SKILL.md"
-    },
-    {
-      "name": "storyline",
-      "file": "skills/storyline/SKILL.md"
-    },
-    {
       "name": "design",
       "file": "skills/design/SKILL.md"
+    },
+    {
+      "name": "handbook",
+      "file": "skills/handbook/SKILL.md"
     },
     {
       "name": "html-build",
@@ -134,28 +125,36 @@
       "file": "skills/measure/SKILL.md"
     },
     {
+      "name": "pdf-export",
+      "file": "skills/pdf-export/SKILL.md"
+    },
+    {
       "name": "prep-pdf",
       "file": "skills/prep-pdf/SKILL.md"
     },
     {
-      "name": "pdf-export",
-      "file": "skills/pdf-export/SKILL.md"
+      "name": "presenter-mode",
+      "file": "skills/presenter-mode/SKILL.md"
+    },
+    {
+      "name": "research",
+      "file": "skills/research/SKILL.md"
     },
     {
       "name": "slide-layout-gate",
       "file": "skills/slide-layout-gate/SKILL.md"
     },
     {
+      "name": "storyline",
+      "file": "skills/storyline/SKILL.md"
+    },
+    {
       "name": "theme-authoring",
       "file": "skills/theme-authoring/SKILL.md"
     },
     {
-      "name": "handbook",
-      "file": "skills/handbook/SKILL.md"
-    },
-    {
-      "name": "presenter-mode",
-      "file": "skills/presenter-mode/SKILL.md"
+      "name": "version",
+      "file": "skills/version/SKILL.md"
     }
   ],
   "skill_manifest": {

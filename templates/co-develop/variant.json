@@ -13,10 +13,6 @@
   },
   "agents": [
     {
-      "name": "pm",
-      "file": "agents/pm.md"
-    },
-    {
       "name": "architect",
       "file": "agents/architect.md"
     },
@@ -27,6 +23,10 @@
     {
       "name": "designer",
       "file": "agents/designer.md"
+    },
+    {
+      "name": "pm",
+      "file": "agents/pm.md"
     },
     {
       "name": "security-monitor",
@@ -122,5 +122,6 @@
       "stack-setup"
     ],
     "notes": "designer: skip if no UI/UX component in scope. stack-setup: skip for projects with an existing configured stack."
-  }
+  },
+  "promotionChecklist": "PROMOTION_CHECKLIST.md"
 }

@@ -13,64 +13,79 @@
   },
   "agents": [
     {
-      "name": "pm",
-      "file": "agents/pm.md"
+      "name": "arcade-designer",
+      "file": "agents/arcade-designer.md"
     },
     {
       "name": "architect",
       "file": "agents/architect.md"
     },
     {
-      "name": "game-designer",
-      "file": "agents/game-designer.md"
-    },
-    {
-      "name": "arcade-designer",
-      "file": "agents/arcade-designer.md"
-    },
-    {
-      "name": "puzzle-designer",
-      "file": "agents/puzzle-designer.md"
-    },
-    {
       "name": "designer",
       "file": "agents/designer.md"
-    },
-    {
-      "name": "game-developer",
-      "file": "agents/game-developer.md"
-    },
-    {
-      "name": "visual-artist",
-      "file": "agents/visual-artist.md"
-    },
-    {
-      "name": "sound-designer",
-      "file": "agents/sound-designer.md"
     },
     {
       "name": "game-debugger",
       "file": "agents/game-debugger.md"
     },
     {
-      "name": "test-runner",
-      "file": "agents/test-runner.md"
+      "name": "game-designer",
+      "file": "agents/game-designer.md"
+    },
+    {
+      "name": "game-developer",
+      "file": "agents/game-developer.md"
+    },
+    {
+      "name": "pm",
+      "file": "agents/pm.md"
+    },
+    {
+      "name": "puzzle-designer",
+      "file": "agents/puzzle-designer.md"
     },
     {
       "name": "security-monitor",
       "file": "agents/security-monitor.md"
     },
     {
+      "name": "sound-designer",
+      "file": "agents/sound-designer.md"
+    },
+    {
       "name": "stack-setup",
       "file": "agents/stack-setup.md"
+    },
+    {
+      "name": "test-runner",
+      "file": "agents/test-runner.md"
+    },
+    {
+      "name": "visual-artist",
+      "file": "agents/visual-artist.md"
     }
   ],
   "skills": [
-    { "name": "arcade-physics", "file": "skills/arcade-physics/SKILL.md" },
-    { "name": "code-review", "file": "skills/code-review/SKILL.md" },
-    { "name": "refactoring", "file": "skills/refactoring/SKILL.md" },
-    { "name": "test-driven-development", "file": "skills/test-driven-development/SKILL.md" },
-    { "name": "sound-synth", "file": "skills/sound-synth/SKILL.md" }
+    {
+      "name": "arcade-physics",
+      "file": "skills/arcade-physics/SKILL.md"
+    },
+    {
+      "name": "code-review",
+      "file": "skills/code-review/SKILL.md"
+    },
+    {
+      "name": "refactoring",
+      "file": "skills/refactoring/SKILL.md"
+    },
+    {
+      "name": "sound-synth",
+      "file": "skills/sound-synth/SKILL.md"
+    },
+    {
+      "name": "test-driven-development",
+      "file": "skills/test-driven-development/SKILL.md"
+    }
   ],
   "agent_manifest": {
     "variant_agents_dir": "agents",
@@ -98,28 +113,56 @@
     "variant_specific": [
       {
         "name": "arcade-physics",
-        "used_by_agents": ["game-developer", "game-debugger"],
-        "phases": [4]
+        "used_by_agents": [
+          "game-developer",
+          "game-debugger"
+        ],
+        "phases": [
+          4
+        ]
       },
       {
         "name": "sound-synth",
-        "used_by_agents": ["sound-designer"],
-        "phases": [3, 4]
+        "used_by_agents": [
+          "sound-designer"
+        ],
+        "phases": [
+          3,
+          4
+        ]
       },
       {
         "name": "code-review",
-        "used_by_agents": ["game-debugger", "game-developer"],
-        "phases": [3, 5]
+        "used_by_agents": [
+          "game-debugger",
+          "game-developer"
+        ],
+        "phases": [
+          3,
+          5
+        ]
       },
       {
         "name": "refactoring",
-        "used_by_agents": ["game-developer", "game-debugger"],
-        "phases": [3, 5]
+        "used_by_agents": [
+          "game-developer",
+          "game-debugger"
+        ],
+        "phases": [
+          3,
+          5
+        ]
       },
       {
         "name": "test-driven-development",
-        "used_by_agents": ["game-developer", "test-runner"],
-        "phases": [3, 5]
+        "used_by_agents": [
+          "game-developer",
+          "test-runner"
+        ],
+        "phases": [
+          3,
+          5
+        ]
       }
     ]
   },
@@ -137,5 +180,6 @@
     "promotedOn": "2026-08-12",
     "previousStatus": "beta",
     "promotionReason": "Variant matured with 2 complete game implementations (pacman, bubble-bobble), 12 agents, 4 skills, and comprehensive test suites."
-  }
+  },
+  "promotionChecklist": "PROMOTION_CHECKLIST.md"
 }
