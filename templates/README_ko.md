@@ -25,7 +25,8 @@ templates/
 ├── co-news/             # 경제/금융 저널리즘 variant (beta)
 ├── co-abap/             # SAP ABAP 개발 variant (stable)
 ├── co-hr/               # 노무/HR 컨설팅 variant (beta)
-└── co-safety/           # EHS/GxP 컴플라이언스 플랫폼 variant (beta)
+├── co-safety/           # EHS/GxP 컴플라이언스 플랫폼 variant (beta)
+└── co-price/           # 가격 관리 및 컨설팅 variant (beta)
 ```
 
 **동작 방식:** 새 프로젝트를 스캐폴딩할 때, 스크립트는 먼저 `templates/common/`(공유 인프라)을 복사한 다음 선택된 variant를 덮어씁니다(variant 전용 파일이 공통 파일을 재정의).

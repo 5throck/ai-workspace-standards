@@ -19,6 +19,7 @@ templates/
 ├── co-work/             # Collaboration variant
 ├── co-security/         # Security engagement variant
 ├── co-consult/          # Strategy consulting variant
+├── co-price/           # Pricing management & consulting variant (beta)
 ├── co-deck/             # Lecture/presentation variant (beta)
 ├── co-game/             # Game development variant
 ├── co-export/           # Import/export trade compliance variant (beta)
@@ -41,6 +42,7 @@ templates/
 | [`co-work`](co-work/) | ✅ Stable | General collaboration workflow with 7 agents (pm, analyst, content-writer, ms365-expert, etc.) |
 | [`co-security`](co-security/) | ✅ Stable | Security engagement workflow with 6 agents (pm, red-team-lead, pentester, threat-modeler, etc.) |
 | [`co-consult`](co-consult/) | ✅ Stable | Strategy consulting with 11 agents and 16 domain skills |
+| [`co-price`](co-price/) | ⚠️ Beta | K-Beauty pricing management & consulting simulator with 15 agents (PM, finance-strategy-lead, cpa-auditor, pricing-strategist, market-intelligence-analyst, engagement-director) and 21 skills (harness-verification, trade-promotion-roi, pricing-governance, map-channel-enforcement) |
 | [`co-deck`](co-deck/) | 🔶 Beta | Lecture/presentation production with 13 agents and multi-theme HTML-to-PDF pipeline |
 | [`co-game`](co-game/) | ✅ Stable | Game development for HTML5 Canvas with Vanilla TypeScript and 13 agents |
 | [`co-export`](co-export/) | 🔶 Beta | Import/export trade-compliance workflow with 8 agents (HS classification, export control, FTA origin, duty drawback, logistics, market entry, foreign regulation monitoring, trade documentation) |

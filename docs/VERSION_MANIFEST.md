@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-27T06:00:33.014Z
+**Generated**: 2026-08-27T12:38:13.253Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 8
 - **Skills**: 37
-- **Scripts**: 82
+- **Scripts**: 83
 - **Commands**: 8
 
 ---
@@ -136,6 +136,7 @@
 | test-new-project.ts | 1.0.4 | scripts/test-new-project.ts | bun |
 | test-platform-parity.ts | 0.2.4 | scripts/test-platform-parity.ts | fs, path |
 | test-runner.ts | 1.1.0 | scripts/test-runner.ts | fs, os, path |
+| test-variant-readiness.ts | 1.0.0 | scripts/test-variant-readiness.ts | N/A |
 | ticket.ts | 1.1.0 | scripts/ticket.ts | N/A |
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, fs, path |
 | upgrade-project.ts | 1.10.1 | scripts/upgrade-project.ts | N/A |
