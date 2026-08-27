@@ -189,7 +189,8 @@ C:\git\ (raíz del workspace - este repo)
     ├── co-export/           # 🔶 Beta — equipo de agentes para cumplimiento de comercio exterior
     ├── co-news/             # 🔶 Beta — equipo de agentes para periodismo empresarial/financiero (perfil de país KR incluido)
     ├── co-abap/             # ✅ Estable — equipo de agentes para desarrollo SAP ABAP
-    └── co-hr/               # 🔶 Beta — equipo de agentes para consultoría de RR. HH. y relaciones laborales (perfil de país KR incluido)
+    ├── co-hr/               # 🔶 Beta — equipo de agentes para consultoría de RR. HH. y relaciones laborales (perfil de país KR incluido)
+    └── co-safety/           # 🔶 Beta — equipo de agentes para plataforma de cumplimiento EHS/GxP
 ```
 
 Cada subproyecto vive en su propio directorio y repositorio git:
@@ -234,6 +235,7 @@ Cada variante de plantilla en este workspace proporciona un **flujo de trabajo m
 - **co-news**: Un flujo de trabajo de periodismo empresarial/financiero para reporteros de economía que cubren empresas cotizadas — investigación de disclosures financieros (DART vía k-dart bajo el perfil de país KR), investigación de derecho mercantil (k-law, perfil KR), verificación de hechos con libro de citas, reducción de marcas de IA y generación de infografías financieras. Las fuentes de datos y el derecho específicos de cada jurisdicción se incorporan mediante perfiles de país bajo docs/countries/
 - **co-abap**: Un flujo de desarrollo SAP ABAP de 6 fases con orquestación dirigida por PM, seis analistas de módulos SAP (SD, MM, FI, CO, PP, LE), agentes de ejecución técnica y cadenas de QA automatizadas (SyntaxCheck → RunUnitTests → GetCodeCoverage → RunATCCheck)
 - **co-hr**: Un flujo de consultoría de RR. HH. y relaciones laborales de 4 fases que cubre admisión del encargo, auditoría de cumplimiento de la legislación laboral de la jurisdicción objetivo (perfiles de país bajo docs/countries/ — perfil KR incluido), diseño de HRM/HRD y reestructuración organizativa/gestión del cambio, con integración de investigación regulatoria k-law/k-kosis (habilidades de alcance KR, adjuntas solo a proyectos con país KR) en un equipo de 12 agentes
+- **co-safety**: A 6-phase EHS/GxP compliance workflow covering Korean occupational safety (OSHA-KR, SAPA), process safety management (PSM), GxP pharmaceutical quality (GMP/GLP/GDP/GCP/GVP), medical device safety (KGMP-MD, ISO 13485), and 15 industry-specific domains (chemical, construction, semiconductor, battery, shipbuilding, steelmaking, etc.) across a 40+ agent roster
 
 **💡 Cómo revisar los detalles del flujo de trabajo**
 Las plantillas de agentes específicas y las fases de gobernanza se gestionan dentro de los documentos de cada proyecto generado. Después de crear un proyecto, revise:
@@ -259,6 +261,7 @@ Los nuevos proyectos se generan a partir de variantes de plantillas versionadas.
 | `co-news` | 🔶 Beta | Periodismo empresarial/financiero — PM, Reportero, Verificador de Hechos, Analista Financiero, Investigador Legal, Editor de Estilo, Editor Visual. Datos de jurisdicción mediante perfiles de país (perfil KR incluido) |
 | `co-abap` | ✅ Estable | Flujo de desarrollo SAP ABAP — PM, Arquitecto, Programador, Ejecutor de Pruebas, DBA, Admin DevOps, Investigadores SAP, Analistas de Módulos (SD, MM, FI, CO, PP, LE), Expertos Interface/Fiori/Form, Monitor de Seguridad |
 | `co-hr` | 🔶 Beta | Consultoría de RR. HH. y relaciones laborales — PM, Analista de Cumplimiento Laboral, Especialista en Relaciones Laborales, Oficial de Seguridad y Salud, Especialista en Adquisición de Talento, Analista de Compensación y Beneficios, Consultor de Gestión del Desempeño, Especialista en L&D, Consultor de Carrera y Sucesión, Consultor de Diseño Organizacional, Socio de Gestión del Cambio, Analista de Datos. Alcance del derecho laboral mediante perfiles de país (perfil KR incluido) |
+| `co-safety` | 🔶 Beta | EHS/GxP compliance platform workflow — PM/CSO, 40+ specialist agents (emergency, compliance, legal, training, PSM, risk, audit, 15 industry domains, 5 GxP domains), k-law regulatory research integration (KR-scoped) |
 
 ### Selección de versión y variante
 

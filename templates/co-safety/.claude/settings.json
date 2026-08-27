@@ -1,0 +1,71 @@
+{
+  "effortLevel": "high",
+  "mcpServers": {
+    "kr_safety": {
+      "command": "bun",
+      "args": ["run", "--env-file", ".env", "./mcp/kr-safety-regs/index.ts"]
+    }
+  },
+  "permissions": {
+    "allow": [
+      "Bash(bun scripts/audit.ts *)",
+      "Bash(bun scripts/safety-audit.ts *)",
+      "Bash(bun scripts/lifecycle-sync-audit.ts *)",
+      "Bash(bun run agent:verify *)",
+      "Bash(bun scripts/validate-templates.ts *)"
+    ],
+    "deny": [
+      "Bash(git push --force*)",
+      "Bash(git push --force-with-lease*)",
+      "Bash(*--no-verify*)",
+      "Bash(rm -rf *)"
+    ]
+  },
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
+  "teammateMode": "auto",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun scripts/safety-audit.ts",
+            "timeout": 60,
+            "async": true,
+            "statusMessage": "Running Safety OS legal_basis check..."
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "git config core.hooksPath .githooks",
+            "async": true,
+            "statusMessage": "Configuring git hooks..."
+          }
+        ]
+      }
+    ],
+    "TaskCompleted": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun scripts/safety-audit.ts",
+            "timeout": 120,
+            "async": true,
+            "statusMessage": "Running Safety OS QA audit on task completion..."
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,280 @@
+{
+  "name": "co-safety",
+  "description": "EHS (Environmental Health & Safety) AI Agent platform for South Korea regulatory compliance",
+  "variant_type": "safety",
+  "status": "beta",
+  "version": "0.1.0",
+  "inherits_common": "templates/common",
+  "created_at": "2026-08-26T23:17:59.587Z",
+  "lifecycle": {
+    "statusSince": "2026-06-04",
+    "lastTransition": "Phase A completed on 2026-08-06",
+    "stablePromotedOn": null
+  },
+  "agents": [
+    {
+      "name": "msds-agent",
+      "file": "agents/msds-agent.md"
+    },
+    {
+      "name": "psm-agent",
+      "file": "agents/psm-agent.md"
+    },
+    {
+      "name": "training-agent",
+      "file": "agents/training-agent.md"
+    },
+    {
+      "name": "battery-agent",
+      "file": "agents/battery-agent.md"
+    },
+    {
+      "name": "biotech-agent",
+      "file": "agents/biotech-agent.md"
+    },
+    {
+      "name": "cosmetics-agent",
+      "file": "agents/cosmetics-agent.md"
+    },
+    {
+      "name": "datacenter-agent",
+      "file": "agents/datacenter-agent.md"
+    },
+    {
+      "name": "defense-agent",
+      "file": "agents/defense-agent.md"
+    },
+    {
+      "name": "ehschem-agent",
+      "file": "agents/ehschem-agent.md"
+    },
+    {
+      "name": "ehsconst-agent",
+      "file": "agents/ehsconst-agent.md"
+    },
+    {
+      "name": "food-agent",
+      "file": "agents/food-agent.md"
+    },
+    {
+      "name": "gasterm-agent",
+      "file": "agents/gasterm-agent.md"
+    },
+    {
+      "name": "gcp-agent",
+      "file": "agents/gcp-agent.md"
+    },
+    {
+      "name": "gdp-agent",
+      "file": "agents/gdp-agent.md"
+    },
+    {
+      "name": "glp-agent",
+      "file": "agents/glp-agent.md"
+    },
+    {
+      "name": "gmp-agent",
+      "file": "agents/gmp-agent.md"
+    },
+    {
+      "name": "gvp-agent",
+      "file": "agents/gvp-agent.md"
+    },
+    {
+      "name": "logistics-agent",
+      "file": "agents/logistics-agent.md"
+    },
+    {
+      "name": "meddevice-agent",
+      "file": "agents/meddevice-agent.md"
+    },
+    {
+      "name": "powergen-agent",
+      "file": "agents/powergen-agent.md"
+    },
+    {
+      "name": "railway-agent",
+      "file": "agents/railway-agent.md"
+    },
+    {
+      "name": "semicon-agent",
+      "file": "agents/semicon-agent.md"
+    },
+    {
+      "name": "shipbuilding-agent",
+      "file": "agents/shipbuilding-agent.md"
+    },
+    {
+      "name": "steelmaking-agent",
+      "file": "agents/steelmaking-agent.md"
+    },
+    {
+      "name": "waste-agent",
+      "file": "agents/waste-agent.md"
+    },
+    {
+      "name": "safety-governance-manager",
+      "file": "agents/safety-governance-manager.md"
+    },
+    {
+      "name": "safety-workflow-manager",
+      "file": "agents/safety-workflow-manager.md"
+    },
+    {
+      "name": "asset-integrity-agent",
+      "file": "agents/asset-integrity-agent.md"
+    },
+    {
+      "name": "audit-agent",
+      "file": "agents/audit-agent.md"
+    },
+    {
+      "name": "compliance-agent",
+      "file": "agents/compliance-agent.md"
+    },
+    {
+      "name": "contractor-safety-agent",
+      "file": "agents/contractor-safety-agent.md"
+    },
+    {
+      "name": "disaster-response-agent",
+      "file": "agents/disaster-response-agent.md"
+    },
+    {
+      "name": "docs-writer",
+      "file": "agents/docs-writer.md"
+    },
+    {
+      "name": "emergency-agent",
+      "file": "agents/emergency-agent.md"
+    },
+    {
+      "name": "incident-investigation-agent",
+      "file": "agents/incident-investigation-agent.md"
+    },
+    {
+      "name": "legal-agent",
+      "file": "agents/legal-agent.md"
+    },
+    {
+      "name": "occupational-health-agent",
+      "file": "agents/occupational-health-agent.md"
+    },
+    {
+      "name": "reporting-agent",
+      "file": "agents/reporting-agent.md"
+    },
+    {
+      "name": "risk-assessment-agent",
+      "file": "agents/risk-assessment-agent.md"
+    }
+  ],
+  "skills": [
+    {
+      "name": "compliance-gap"
+    },
+    {
+      "name": "permit-to-work"
+    },
+    {
+      "name": "risk-assessment"
+    },
+    {
+      "name": "emergency-response"
+    }
+  ],
+  "displayName": "Safety OS",
+  "country_config": {
+    "profiles_dir": "docs/countries",
+    "supported": [
+      "KR"
+    ],
+    "default": "KR",
+    "locales": [
+      "ko"
+    ]
+  },
+  "agent_overrides": {
+    "pm": {
+      "type": "additive",
+      "reason": "co-safety overrides PM with CSO (Chief Safety Officer) role — enforces legal_basis gate on all workflows, routes strategy to SGM and operations to SWM",
+      "since": "2026-06-04",
+      "reviewed_by": "architect",
+      "overrides": [
+        "agent-roster",
+        "governance-workflow",
+        "dispatch-protocol"
+      ]
+    }
+  },
+  "skill_manifest": {
+    "variant_specific": [
+      {
+        "name": "risk-assessment",
+        "layer": "root",
+        "used_by_agents": [
+          "risk-assessment-agent",
+          "safety-workflow-manager"
+        ],
+        "legal_basis": [
+          "산업안전보건법 제36조 (위험성평가 의무)",
+          "중대재해처벌법 제4조 (안전·보건 확보 의무)",
+          "산업안전보건법 시행규칙 제37조 (위험성평가의 실시 및 기록·보존)",
+          "고용노동부 고시 「사업장 위험성평가에 관한 지침」 (위험성평가 방법 등)"
+        ],
+        "platform_parity": "not-required"
+      },
+      {
+        "name": "permit-to-work",
+        "layer": "root",
+        "used_by_agents": [
+          "safety-workflow-manager",
+          "risk-assessment-agent"
+        ],
+        "legal_basis": [
+          "산업안전보건법 제38조 (안전조치)",
+          "산업안전보건법 제39조 (건강조치)",
+          "중대재해처벌법 제4조 (안전·보건 확보 의무)"
+        ],
+        "platform_parity": "not-required"
+      },
+      {
+        "name": "emergency-response",
+        "layer": "root",
+        "used_by_agents": [
+          "emergency-agent"
+        ],
+        "legal_basis": [
+          "산업안전보건법 제54조 (중대재해 발생 시 조치)",
+          "중대재해처벌법 제3조 (중대재해 처리 기준)",
+          "산업안전보건법 제38조 (안전조치)"
+        ],
+        "platform_parity": "not-required"
+      },
+      {
+        "name": "compliance-gap",
+        "layer": "root",
+        "used_by_agents": [
+          "compliance-agent"
+        ],
+        "legal_basis": [
+          "산업안전보건법 제36조 (위험성평가 의무)",
+          "산업안전보건법 제57조 (사고 기록·보고)",
+          "중대재해처벌법 제4조 (안전·보건 확보 의무)"
+        ],
+        "platform_parity": "not-required"
+      }
+    ]
+  },
+  "createdAt": "2026-06-04",
+  "phaseAComplete": true,
+  "promotionChecklist": "PROMOTION_CHECKLIST.md",
+  "betaLifecycleSummary": {
+    "betaEngagements": 0,
+    "betaBugs": 0,
+    "betaAgeInMonths": 0,
+    "promotionEligible": false,
+    "missingCriteria": [],
+    "lastSynced": "2026-08-26T23:18:00.672Z"
+  }
+}

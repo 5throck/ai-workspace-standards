@@ -193,7 +193,8 @@ C:\git\ (ワークスペースルート - このリポジトリ)
     ├── co-export/           # 🔶 ベータ — 輸出入貿易コンプライアンスエージェントチーム
     ├── co-news/             # 🔶 ベータ — 経済・金融ジャーナリズムエージェントチーム（KR国プロファイル同梱）
     ├── co-abap/             # ✅ 安定 — SAP ABAP開発エージェントチーム
-    └── co-hr/               # 🔶 ベータ — 労務・HRコンサルティングエージェントチーム（KR国プロファイル同梱）
+    ├── co-hr/               # 🔶 ベータ — 労務・HRコンサルティングエージェントチーム（KR国プロファイル同梱）
+    └── co-safety/           # 🔶 ベータ — EHS/GxPコンプライアンスプラットフォームエージェントチーム
 ```
 
 各サブプロジェクトは独自のディレクトリとGitリポジトリに存在します：
@@ -238,6 +239,7 @@ C:\git\
 - **co-news**: 上場企業を担当する経済記者向けの経済・金融ジャーナリズムワークフロー — 金融開示リサーチ（DART、KR国プロファイルのk-dart経由）、商法リサーチ（k-law、KRプロファイル）、引用台帳ベースのファクトチェック、AIっぽさの低減、金融インフォグラフィック生成。管轄固有のデータソース・法令はdocs/countries/配下の国プロファイル経由で付加されます（KRプロファイル同梱、他国はプロファイル追加）
 - **co-abap**: PM主導のオーケストレーション、6つのSAPモジュールアナリスト（SD、MM、FI、CO、PP、LE）、技術実行エージェント、自動化QAチェーン（SyntaxCheck → RunUnitTests → GetCodeCoverage → RunATCCheck）を備えた6段階のSAP ABAP開発ワークフロー
 - **co-hr**: 案件インテーク、対象管轄の労働法コンプライアンス監査（docs/countries/配下の国プロファイル — KRプロファイル同梱）、HRM/HRD設計、組織再編・変革管理を網羅する4段階の労務・HRコンサルティングワークフロー（k-law/k-kosis規制リサーチ連携 — KRスコープのスキルでKR対象プロジェクトのみに付加、12エージェントロスター）
+- **co-safety**: A 6-phase EHS/GxP compliance workflow covering Korean occupational safety (OSHA-KR, SAPA), process safety management (PSM), GxP pharmaceutical quality (GMP/GLP/GDP/GCP/GVP), medical device safety (KGMP-MD, ISO 13485), and 15 industry-specific domains (chemical, construction, semiconductor, battery, shipbuilding, steelmaking, etc.) across a 40+ agent roster
 
 **💡 ワークフローの詳細確認方法**
 特定のエージェントロスターとガバナンスフェーズは、各生成プロジェクトのドキュメント内で管理されます。プロジェクトをスキャフォールド後、以下を確認してください：
@@ -263,6 +265,7 @@ C:\git\
 | `co-news` | 🔶 ベータ | 経済・金融ジャーナリズム — PM、リポーター、ファクトチェッカー、財務アナリスト、法務リサーチャー、スタイル編集者、ビジュアル編集者。管轄データは国プロファイル経由（KRプロファイル同梱） |
 | `co-abap` | ✅ 安定 | SAP ABAP開発ワークフロー — PM、アーキテクト、コーダー、テスト実行者、DBA、DevOps管理者、SAP調査担当、モジュールアナリスト（SD、MM、FI、CO、PP、LE）、Interface/Fiori/Form専門家、セキュリティモニター |
 | `co-hr` | 🔶 ベータ | 労務・HRコンサルティングワークフロー — PM、労務コンプライアンスアナリスト、労働関係スペシャリスト、安全衛生担当、採用スペシャリスト、報酬・給与アナリスト、人事評価コンサルタント、L&Dスペシャリスト、キャリア・後継コンサルタント、組織設計コンサルタント、変革管理パートナー、データアナリスト。労働法の適用範囲は国プロファイル経由（KRプロファイル同梱） |
+| `co-safety` | 🔶 ベータ | EHS/GxP compliance platform workflow — PM/CSO, 40+ specialist agents (emergency, compliance, legal, training, PSM, risk, audit, 15 industry domains, 5 GxP domains), k-law regulatory research integration (KR-scoped) |
 
 ### バージョンとバリアントの選択
 
@@ -342,4 +345,4 @@ AGPL-3.0 - [LICENSE](LICENSE)を参照
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-08-23*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-08-27*

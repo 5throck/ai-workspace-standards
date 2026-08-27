@@ -1,0 +1,13 @@
+{
+  "entries": [
+    {
+      "path": "skills"
+    },
+    {
+      "path": "../skills"
+    },
+    {
+      "path": "c:/git/ai_workspace/Projects/safety_os/skills"
+    }
+  ]
+}

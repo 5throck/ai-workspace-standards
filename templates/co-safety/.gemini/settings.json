@@ -1,0 +1,33 @@
+{
+  "_comment": "Safety OS project settings — variant-specific overrides vs L1 (templates/common). The former '#' header comment broke strict JSON parity validation (P-01 parses both platform settings with JSON.parse).",
+  "mcpServers": {
+    "kr_safety": {
+      "command": "bun",
+      "args": ["run", "--env-file", ".env", "./mcp/kr-safety-regs/index.ts"]
+    }
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "type": "command",
+        "command": "git config core.hooksPath .githooks",
+        "statusMessage": "Configuring git hooks..."
+      }
+    ]
+  },
+  "terminal.executionPolicy": "Auto",
+  "artifact.reviewPolicy": "Request Review",
+  "mcp.toolApproval": "Manual",
+  "terminal.denyList": [
+    "rm -rf",
+    "rm -r /",
+    "chmod -R 777",
+    "git push --force",
+    "git reset --hard",
+    "reboot",
+    "shutdown",
+    "format",
+    "fdisk",
+    "mkfs"
+  ]
+}

@@ -192,7 +192,8 @@ C:\git\ (workspace root - this repo)
     ├── co-export/           # 🔶 Beta — import/export trade compliance agent team
     ├── co-news/             # 🔶 Beta — business/finance journalism agent team (KR country profile included)
     ├── co-abap/             # ✅ Stable — SAP ABAP development agent team
-    └── co-hr/                # 🔶 Beta — HR & labor-relations consulting agent team (KR country profile included)
+    ├── co-hr/                # 🔶 Beta — HR & labor-relations consulting agent team (KR country profile included)
+    └── co-safety/            # 🔶 Beta — EHS/GxP compliance platform agent team
 ```
 
 Each sub-project lives in its own directory and git repository:
@@ -237,6 +238,7 @@ Each template variant in this workspace provides a highly optimized, specialized
 - **co-news**: A business/finance journalism workflow for economics reporters covering listed companies — financial-disclosure research (DART via k-dart under the KR country profile), commercial-law research (k-law, KR profile), fact-checking with citation ledger, AI-tell reduction, and financial infographic generation. Jurisdiction-specific data sources and law attach via country profiles under docs/countries/
 - **co-abap**: A 6-phase SAP ABAP development workflow with PM-led orchestration, six SAP module analysts (SD, MM, FI, CO, PP, LE), technical execution agents, and automated QA chains (SyntaxCheck → RunUnitTests → GetCodeCoverage → RunATCCheck)
 - **co-hr**: A 4-phase HR & labor-relations consulting workflow covering engagement intake, labor-law compliance audit for the target jurisdiction (country profiles under docs/countries/ — KR profile included), HRM/HRD system design, and org restructuring/change management, with k-law/k-kosis regulatory research integration (KR-scoped skills, attached only to KR-country projects) across a 12-agent roster
+- **co-safety**: A 6-phase EHS/GxP compliance workflow covering Korean occupational safety (OSHA-KR, SAPA), process safety management (PSM), GxP pharmaceutical quality (GMP/GLP/GDP/GCP/GVP), medical device safety (KGMP-MD, ISO 13485), and 15 industry-specific domains (chemical, construction, semiconductor, battery, shipbuilding, steelmaking, etc.) across a 40+ agent roster
 
 **💡 How to Check Workflow Details**
 Specific agent rosters and governance phases are managed within the documents of each generated project. After scaffolding a project, check:
@@ -262,6 +264,7 @@ New projects are scaffolded from versioned template variants. Templates are tagg
 | `co-news` | 🔶 Beta | Business/finance journalism — PM, Reporter, Fact-Checker, Financial Analyst, Legal Researcher, Style Editor, Visual Editor. Jurisdiction data via country profiles (KR profile included) |
 | `co-abap` | ✅ Stable | SAP ABAP development workflow — PM, Architect, Code Writer, Test Runner, DBA, DevOps Admin, SAP Investigators, Module Analysts (SD, MM, FI, CO, PP, LE), Interface/Fiori/Form Experts, Security Monitor |
 | `co-hr` | 🔶 Beta | HR & labor-relations consulting workflow — PM, Labor Compliance Analyst, Labor Relations Specialist, Safety & Health Officer, Talent Acquisition Specialist, Compensation & Benefits Analyst, Performance Management Consultant, L&D Specialist, Career & Succession Consultant, Org Design Consultant, Change Management Partner, Data Analyst. Labor-law scope via country profiles (KR profile included) |
+| `co-safety` | 🔶 Beta | EHS/GxP compliance platform workflow — PM/CSO, 40+ specialist agents (emergency, compliance, legal, training, PSM, risk, audit, 15 industry domains, 5 GxP domains), k-law regulatory research integration (KR-scoped) |
 
 ### Selecting a version and variant
 
@@ -341,4 +344,4 @@ AGPL-3.0 - see [LICENSE](LICENSE)
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-08-24*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-08-27*
