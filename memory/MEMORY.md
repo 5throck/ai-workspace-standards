@@ -4,6 +4,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-08-27](2026-08-27.md) | feat(workspace): language validator 1.7.0 variant-aware exemption + co-safety variant regen |
 | [2026-08-26](2026-08-26.md) | feat(co-design): dark-mode and high-contrast theme presets with data-theme compiler scoping (backlog row 11) |
 | [2026-08-25](2026-08-25.md) | feat(co-game): single-file HTML game bundler script + tests + script_manifest registration (PR19 of backlog execution series) |
 | [2026-08-24](2026-08-24.md) | feat(co-deck): port CSP-safe copy buttons with localized labels and hardened link checker from handbook repos |

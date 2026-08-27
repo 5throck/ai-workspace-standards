@@ -5,7 +5,7 @@
  *
  * Policy: Official documents and governance files must contain English sentences.
  * Validates only allowlisted paths: agents/, AGENTS.md, CLAUDE.md, GEMINI.md,
- * CONSTITUTION.md, CHANGELOG.md, docs/constitution/, docs/governance/, skills/,
+ * context.md, CHANGELOG.md, docs/constitution/, docs/governance/, skills/,
  * .claude/skills/, .gemini/skills/, .claude/commands/, .gemini/commands/,
  * templates/, and SECURITY.md.
  *
@@ -15,8 +15,8 @@
  * Locale-only content in excluded paths is acceptable. Mixed-language content
  * is acceptable in all paths.
  *
- * Reference: CONSTITUTION.md §3 - Mandatory English Git & PR Artifacts
- *            CONSTITUTION.md §4 - Internationalization (I18N)
+ * Reference: context.md §3 - Mandatory English Git & PR Artifacts
+ *            context.md §4 - Internationalization (I18N)
  *
  * Usage: bun run scripts/validate-md-language.ts
  * Exit codes: 0 (pass), 1 (violation found)
@@ -100,7 +100,7 @@ function parseFrontmatterLang(content: string): { lang?: string; lang_reason?: s
  *
  * Only validates these allowlisted paths:
  * - agents/ (subdirectories)
- * - AGENTS.md, CLAUDE.md, GEMINI.md, CONSTITUTION.md, CHANGELOG.md, SECURITY.md
+ * - AGENTS.md, CLAUDE.md, GEMINI.md, context.md, CHANGELOG.md, SECURITY.md
  * - docs/constitution/ (subdirectories)
  * - docs/governance/ (subdirectories)
  * - skills/ (subdirectories)

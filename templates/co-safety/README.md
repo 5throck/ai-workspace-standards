@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-content_hash: 2032822a73550ce082b02fc1848ef873caef2a5b009282a1b8bed359290eae0f
+content_hash: 52f913038b6f8d5897dd3bbca578f65efc0357c7f0566dbd8370223a0fc6b5b0
 ---
 
 # co-safety
