@@ -14,10 +14,6 @@
   },
   "agents": [
     {
-      "name": "pm",
-      "file": "agents/pm.md"
-    },
-    {
       "name": "fact-checker",
       "file": "agents/fact-checker.md"
     },
@@ -28,6 +24,10 @@
     {
       "name": "legal-researcher",
       "file": "agents/legal-researcher.md"
+    },
+    {
+      "name": "pm",
+      "file": "agents/pm.md"
     },
     {
       "name": "reporter",
@@ -84,7 +84,9 @@
   },
   "country_config": {
     "profiles_dir": "docs/countries",
-    "supported": ["KR"],
+    "supported": [
+      "KR"
+    ],
     "default": null
   },
   "skill_manifest": {

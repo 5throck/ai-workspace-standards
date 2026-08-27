@@ -259,7 +259,12 @@
     {
       "id": "api-documentation",
       "type": "skill",
-      "layer": "variant:co-work"
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "arc-flash-analyzer",
+      "type": "skill",
+      "layer": "variant:co-safety"
     },
     {
       "id": "arcade-designer",
@@ -277,6 +282,16 @@
       "layer": "L0"
     },
     {
+      "id": "asset-integrity-check",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "audit-preparation",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
       "id": "audit-workspace",
       "type": "skill",
       "layer": "L0"
@@ -292,6 +307,16 @@
       "layer": "L0"
     },
     {
+      "id": "benefit-risk-assessor",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "bsl-lab-aerosol-control-planner",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
       "id": "career-path-succession-planning",
       "type": "skill",
       "layer": "variant:co-hr"
@@ -302,6 +327,11 @@
       "layer": "variant:co-hr"
     },
     {
+      "id": "change-control",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
       "id": "change-impact-assessment",
       "type": "skill",
       "layer": "variant:co-consult"
@@ -310,6 +340,11 @@
       "id": "change-management-partner",
       "type": "agent",
       "layer": "variant:co-consult"
+    },
+    {
+      "id": "chemical-risk-assessment",
+      "type": "skill",
+      "layer": "variant:co-safety"
     },
     {
       "id": "co-analyst",
@@ -325,6 +360,11 @@
       "id": "code-writer",
       "type": "agent",
       "layer": "variant:co-abap"
+    },
+    {
+      "id": "coke-oven-pah-heat-stress-planner",
+      "type": "skill",
+      "layer": "variant:co-safety"
     },
     {
       "id": "communications-lead",
@@ -357,6 +397,21 @@
       "layer": "variant:co-consult"
     },
     {
+      "id": "completion-inspection",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "compliance-gap",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "construction-permit-overview",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
       "id": "consulting-report-writing",
       "type": "skill",
       "layer": "variant:co-consult"
@@ -372,6 +427,16 @@
       "layer": "L0"
     },
     {
+      "id": "contractor-onboarding",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "cosmetics-solvent-exposure-monitor",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
       "id": "create-variant",
       "type": "skill",
       "layer": "L0"
@@ -385,6 +450,11 @@
       "id": "customs-duty-drawback-workflow",
       "type": "skill",
       "layer": "variant:co-export"
+    },
+    {
+      "id": "dangerous-cargo-handling-planner",
+      "type": "skill",
+      "layer": "variant:co-safety"
     },
     {
       "id": "data-analyst",
@@ -437,6 +507,11 @@
       "layer": "variant:co-abap"
     },
     {
+      "id": "deviation-capa",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
       "id": "devops-admin",
       "type": "agent",
       "layer": "variant:co-abap"
@@ -454,12 +529,32 @@
     {
       "id": "documentation-writing",
       "type": "skill",
-      "layer": "variant:co-work"
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "dts-verification",
+      "type": "skill",
+      "layer": "variant:co-safety"
     },
     {
       "id": "dump-monitor",
       "type": "skill",
       "layer": "variant:co-abap"
+    },
+    {
+      "id": "emergency-response",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "environmental-compliance-checker",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "ess-fire-risk-assessor",
+      "type": "skill",
+      "layer": "variant:co-safety"
     },
     {
       "id": "evidence-ledger",
@@ -490,6 +585,11 @@
       "id": "fact-checker",
       "type": "agent",
       "layer": "variant:co-news"
+    },
+    {
+      "id": "fall-hazard-assessor",
+      "type": "skill",
+      "layer": "variant:co-safety"
     },
     {
       "id": "fi-analyst",
@@ -530,6 +630,11 @@
       "id": "finding-reconciliation",
       "type": "skill",
       "layer": "variant:co-security"
+    },
+    {
+      "id": "finishing-a-development-branch",
+      "type": "skill",
+      "layer": "variant:co-safety"
     },
     {
       "id": "fiori-developer",
@@ -577,9 +682,44 @@
       "layer": "variant:co-game"
     },
     {
+      "id": "gas-dispersion-analyzer",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
       "id": "gateguard",
       "type": "skill",
       "layer": "L0"
+    },
+    {
+      "id": "ghs-classifier",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "glp-data-integrity-checker",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "glp-study-protocol-validator",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "gmp-change-control",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "gmp-deviation-capa",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "gmp-qrm",
+      "type": "skill",
+      "layer": "variant:co-safety"
     },
     {
       "id": "gui-scripter",
@@ -612,6 +752,11 @@
       "layer": "variant:co-deck"
     },
     {
+      "id": "hazop-analysis",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
       "id": "hr-metrics-analysis",
       "type": "skill",
       "layer": "variant:co-hr"
@@ -630,6 +775,11 @@
       "id": "html-build",
       "type": "agent",
       "layer": "variant:co-deck"
+    },
+    {
+      "id": "hv-cell-formation-electrical-safety-planner",
+      "type": "skill",
+      "layer": "variant:co-safety"
     },
     {
       "id": "hwp-document-processing",
@@ -677,6 +827,11 @@
       "layer": "variant:co-abap"
     },
     {
+      "id": "iso14971-risk-scorer",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
       "id": "k-dart",
       "type": "skill",
       "layer": "common"
@@ -710,6 +865,11 @@
       "id": "landed-cost-calculation",
       "type": "skill",
       "layer": "variant:co-export"
+    },
+    {
+      "id": "landfill-methane-anaerobic-explosion-planner",
+      "type": "skill",
+      "layer": "variant:co-safety"
     },
     {
       "id": "le-analyst",
@@ -747,6 +907,11 @@
       "layer": "variant:co-export"
     },
     {
+      "id": "loto",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
       "id": "market-entry-strategist",
       "type": "agent",
       "layer": "variant:co-export"
@@ -767,9 +932,19 @@
       "layer": "L0"
     },
     {
+      "id": "meeting",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
       "id": "meeting-facilitation",
       "type": "skill",
       "layer": "L0"
+    },
+    {
+      "id": "mid-construction-inspection",
+      "type": "skill",
+      "layer": "variant:co-safety"
     },
     {
       "id": "mm-analyst",
@@ -777,9 +952,24 @@
       "layer": "variant:co-abap"
     },
     {
+      "id": "moc",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
       "id": "ms365-expert",
       "type": "agent",
       "layer": "variant:co-work"
+    },
+    {
+      "id": "msds-parser",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "munitions-magazine-storage-safety-planner",
+      "type": "skill",
+      "layer": "variant:co-safety"
     },
     {
       "id": "narrative-framework",
@@ -800,6 +990,11 @@
       "id": "org-readiness-assessment",
       "type": "skill",
       "layer": "variant:co-consult"
+    },
+    {
+      "id": "painting-coating-fire-toxic-planner",
+      "type": "skill",
+      "layer": "variant:co-safety"
     },
     {
       "id": "patch-engineer",
@@ -832,6 +1027,21 @@
       "layer": "variant:co-abap"
     },
     {
+      "id": "permit-to-work",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "platform-command-lifecycle-manager",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "platform-skill-lifecycle-manager",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
       "id": "pm",
       "type": "agent",
       "layer": "L0"
@@ -847,6 +1057,11 @@
       "layer": "variant:co-abap"
     },
     {
+      "id": "pre-construction-technical-review",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
       "id": "prep-pdf",
       "type": "skill",
       "layer": "variant:co-deck"
@@ -855,6 +1070,11 @@
       "id": "presenter-mode",
       "type": "skill",
       "layer": "L0"
+    },
+    {
+      "id": "process-hazard-screening",
+      "type": "skill",
+      "layer": "variant:co-safety"
     },
     {
       "id": "project-coordinator",
@@ -882,14 +1102,44 @@
       "layer": "L0"
     },
     {
+      "id": "protocol-deviation-analyzer",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
       "id": "prototype-engineer",
       "type": "agent",
       "layer": "variant:co-design"
     },
     {
+      "id": "psm-loto",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "psm-moc",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
       "id": "puzzle-designer",
       "type": "agent",
       "layer": "variant:co-game"
+    },
+    {
+      "id": "pyrophoric-gas-emergency-responder",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "qrm",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "rack-fall-protection-planner",
+      "type": "skill",
+      "layer": "variant:co-safety"
     },
     {
       "id": "read-only-analyst",
@@ -934,7 +1184,17 @@
     {
       "id": "research-analysis",
       "type": "skill",
-      "layer": "variant:co-work"
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "risk-assessment",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "rolling-stock-maintenance-loto-planner",
+      "type": "skill",
+      "layer": "variant:co-safety"
     },
     {
       "id": "roo-qualification-worksheet",
@@ -942,9 +1202,24 @@
       "layer": "variant:co-export"
     },
     {
+      "id": "root-cause-analysis",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "sae-causality-assessor",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
       "id": "safety-health-officer",
       "type": "agent",
       "layer": "variant:co-hr"
+    },
+    {
+      "id": "safety-inspection-validator",
+      "type": "skill",
+      "layer": "variant:co-safety"
     },
     {
       "id": "samm-maturity",
@@ -1040,6 +1315,11 @@
       "id": "service-designer",
       "type": "agent",
       "layer": "variant:co-design"
+    },
+    {
+      "id": "signal-detector",
+      "type": "skill",
+      "layer": "variant:co-safety"
     },
     {
       "id": "simulate-l3-to-variant-promotion",
@@ -1177,6 +1457,16 @@
       "layer": "variant:co-hr"
     },
     {
+      "id": "tank-integrity-validator",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "tar-planning",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
       "id": "team-builder",
       "type": "skill",
       "layer": "L0"
@@ -1197,6 +1487,11 @@
       "layer": "variant:co-consult"
     },
     {
+      "id": "temperature-excursion-analyzer",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
       "id": "test-driven-development",
       "type": "skill",
       "layer": "variant:co-develop"
@@ -1212,6 +1507,11 @@
       "layer": "variant:co-deck"
     },
     {
+      "id": "thermal-burn-prevention-planner",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
       "id": "threat-modeler",
       "type": "agent",
       "layer": "variant:co-security"
@@ -1225,6 +1525,11 @@
       "id": "token-usage-lint",
       "type": "skill",
       "layer": "variant:co-design"
+    },
+    {
+      "id": "tool-box-meeting",
+      "type": "skill",
+      "layer": "variant:co-safety"
     },
     {
       "id": "trade-documentation-checklist",
@@ -1614,6 +1919,18 @@
       "source": "prose"
     },
     {
+      "type": "references",
+      "from": "bsl-lab-aerosol-control-planner",
+      "to": "permit-to-work",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "bsl-lab-aerosol-control-planner",
+      "to": "tool-box-meeting",
+      "source": "prose"
+    },
+    {
       "type": "used_by",
       "from": "career-path-succession-planning",
       "to": "career-succession-consultant",
@@ -1720,6 +2037,30 @@
       "from": "code-review",
       "to": "phase5",
       "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "coke-oven-pah-heat-stress-planner",
+      "to": "chemical-risk-assessment",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "coke-oven-pah-heat-stress-planner",
+      "to": "ghs-classifier",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "coke-oven-pah-heat-stress-planner",
+      "to": "permit-to-work",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "coke-oven-pah-heat-stress-planner",
+      "to": "tool-box-meeting",
+      "source": "prose"
     },
     {
       "type": "used_by",
@@ -1896,6 +2237,42 @@
       "source": "skill_manifest"
     },
     {
+      "type": "references",
+      "from": "completion-inspection",
+      "to": "construction-permit-overview",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "completion-inspection",
+      "to": "mid-construction-inspection",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "compliance-gap",
+      "to": "k-law",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "construction-permit-overview",
+      "to": "completion-inspection",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "construction-permit-overview",
+      "to": "mid-construction-inspection",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "construction-permit-overview",
+      "to": "pre-construction-technical-review",
+      "source": "prose"
+    },
+    {
       "type": "used_by",
       "from": "consulting-report-writing",
       "to": "communications-lead",
@@ -1935,6 +2312,30 @@
       "type": "references",
       "from": "context-commonization-review",
       "to": "create-variant",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "cosmetics-solvent-exposure-monitor",
+      "to": "chemical-risk-assessment",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "cosmetics-solvent-exposure-monitor",
+      "to": "ghs-classifier",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "cosmetics-solvent-exposure-monitor",
+      "to": "msds-parser",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "cosmetics-solvent-exposure-monitor",
+      "to": "tool-box-meeting",
       "source": "prose"
     },
     {
@@ -1996,6 +2397,30 @@
       "from": "customs-duty-drawback-workflow",
       "to": "phase4",
       "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "dangerous-cargo-handling-planner",
+      "to": "ghs-classifier",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "dangerous-cargo-handling-planner",
+      "to": "msds-parser",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "dangerous-cargo-handling-planner",
+      "to": "permit-to-work",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "dangerous-cargo-handling-planner",
+      "to": "tool-box-meeting",
+      "source": "prose"
     },
     {
       "type": "cites_skill",
@@ -2110,6 +2535,12 @@
       "from": "desktop-app-fallback",
       "to": "test-runner",
       "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "deviation-capa",
+      "to": "change-control",
+      "source": "prose"
     },
     {
       "type": "used_by",
@@ -2550,6 +2981,12 @@
       "source": "skill_manifest"
     },
     {
+      "type": "references",
+      "from": "gmp-deviation-capa",
+      "to": "change-control",
+      "source": "prose"
+    },
+    {
       "type": "used_by",
       "from": "halal-certification-workflow",
       "to": "halal-certification-specialist",
@@ -2733,6 +3170,30 @@
       "type": "references",
       "from": "html-build",
       "to": "version",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "hv-cell-formation-electrical-safety-planner",
+      "to": "arc-flash-analyzer",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "hv-cell-formation-electrical-safety-planner",
+      "to": "permit-to-work",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "hv-cell-formation-electrical-safety-planner",
+      "to": "psm-loto",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "hv-cell-formation-electrical-safety-planner",
+      "to": "tool-box-meeting",
       "source": "prose"
     },
     {
@@ -3067,6 +3528,30 @@
     },
     {
       "type": "references",
+      "from": "landfill-methane-anaerobic-explosion-planner",
+      "to": "environmental-compliance-checker",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "landfill-methane-anaerobic-explosion-planner",
+      "to": "gas-dispersion-analyzer",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "landfill-methane-anaerobic-explosion-planner",
+      "to": "permit-to-work",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "landfill-methane-anaerobic-explosion-planner",
+      "to": "tool-box-meeting",
+      "source": "prose"
+    },
+    {
+      "type": "references",
       "from": "learning-curriculum-design",
       "to": "career-path-succession-planning",
       "source": "prose"
@@ -3116,6 +3601,18 @@
     {
       "type": "references",
       "from": "lifecycle-manager",
+      "to": "platform-command-lifecycle-manager",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "lifecycle-manager",
+      "to": "platform-skill-lifecycle-manager",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "lifecycle-manager",
       "to": "script-lifecycle-manager",
       "source": "prose"
     },
@@ -3154,6 +3651,18 @@
       "from": "logistics-coordination",
       "to": "phase4",
       "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "loto",
+      "to": "permit-to-work",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "loto",
+      "to": "tank-integrity-validator",
+      "source": "prose"
     },
     {
       "type": "used_by",
@@ -3265,6 +3774,12 @@
     },
     {
       "type": "references",
+      "from": "meeting",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
       "from": "meeting-facilitation",
       "to": "project-review",
       "source": "prose"
@@ -3276,6 +3791,36 @@
       "source": "prose"
     },
     {
+      "type": "references",
+      "from": "mid-construction-inspection",
+      "to": "completion-inspection",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "mid-construction-inspection",
+      "to": "construction-permit-overview",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "mid-construction-inspection",
+      "to": "pre-construction-technical-review",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "munitions-magazine-storage-safety-planner",
+      "to": "permit-to-work",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "munitions-magazine-storage-safety-planner",
+      "to": "tool-box-meeting",
+      "source": "prose"
+    },
+    {
       "type": "used_by",
       "from": "narrative-framework",
       "to": "communications-lead",
@@ -3358,6 +3903,30 @@
       "from": "org-readiness-assessment",
       "to": "phase2",
       "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "painting-coating-fire-toxic-planner",
+      "to": "ghs-classifier",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "painting-coating-fire-toxic-planner",
+      "to": "msds-parser",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "painting-coating-fire-toxic-planner",
+      "to": "permit-to-work",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "painting-coating-fire-toxic-planner",
+      "to": "tool-box-meeting",
+      "source": "prose"
     },
     {
       "type": "references",
@@ -3475,6 +4044,18 @@
     },
     {
       "type": "references",
+      "from": "permit-to-work",
+      "to": "psm-loto",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "permit-to-work",
+      "to": "risk-assessment",
+      "source": "prose"
+    },
+    {
+      "type": "references",
       "from": "pm",
       "to": "decision-record",
       "source": "prose"
@@ -3508,6 +4089,18 @@
       "from": "post-write-chain",
       "to": "test-runner",
       "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "pre-construction-technical-review",
+      "to": "construction-permit-overview",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "pre-construction-technical-review",
+      "to": "mid-construction-inspection",
+      "source": "prose"
     },
     {
       "type": "references",
@@ -3637,6 +4230,60 @@
     },
     {
       "type": "references",
+      "from": "psm-loto",
+      "to": "permit-to-work",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "psm-loto",
+      "to": "tank-integrity-validator",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "pyrophoric-gas-emergency-responder",
+      "to": "emergency-response",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "pyrophoric-gas-emergency-responder",
+      "to": "gas-dispersion-analyzer",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "pyrophoric-gas-emergency-responder",
+      "to": "root-cause-analysis",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "qrm",
+      "to": "gmp-qrm",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "rack-fall-protection-planner",
+      "to": "fall-hazard-assessor",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "rack-fall-protection-planner",
+      "to": "permit-to-work",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "rack-fall-protection-planner",
+      "to": "tool-box-meeting",
+      "source": "prose"
+    },
+    {
+      "type": "references",
       "from": "red-team-lead",
       "to": "verify-authorization",
       "source": "prose"
@@ -3712,6 +4359,30 @@
       "from": "research-analysis",
       "to": "analyst",
       "source": "required_skills"
+    },
+    {
+      "type": "references",
+      "from": "rolling-stock-maintenance-loto-planner",
+      "to": "fall-hazard-assessor",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "rolling-stock-maintenance-loto-planner",
+      "to": "permit-to-work",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "rolling-stock-maintenance-loto-planner",
+      "to": "psm-loto",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "rolling-stock-maintenance-loto-planner",
+      "to": "tool-box-meeting",
+      "source": "prose"
     },
     {
       "type": "used_by",
@@ -4789,6 +5460,12 @@
     },
     {
       "type": "references",
+      "from": "tar-planning",
+      "to": "psm-loto",
+      "source": "prose"
+    },
+    {
+      "type": "references",
       "from": "team-builder",
       "to": "agent-lifecycle-manager",
       "source": "prose"
@@ -4939,6 +5616,24 @@
     },
     {
       "type": "references",
+      "from": "thermal-burn-prevention-planner",
+      "to": "emergency-response",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "thermal-burn-prevention-planner",
+      "to": "psm-loto",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "thermal-burn-prevention-planner",
+      "to": "tool-box-meeting",
+      "source": "prose"
+    },
+    {
+      "type": "references",
       "from": "threat-modeler",
       "to": "verify-authorization",
       "source": "prose"
@@ -4960,6 +5655,30 @@
       "from": "token-usage-lint",
       "to": "prototype-engineer",
       "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "tool-box-meeting",
+      "to": "k-law",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "tool-box-meeting",
+      "to": "permit-to-work",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "tool-box-meeting",
+      "to": "psm-loto",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "tool-box-meeting",
+      "to": "risk-assessment",
+      "source": "prose"
     },
     {
       "type": "phase",

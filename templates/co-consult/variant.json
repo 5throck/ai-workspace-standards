@@ -13,10 +13,6 @@
   },
   "agents": [
     {
-      "name": "pm",
-      "file": "agents/pm.md"
-    },
-    {
       "name": "change-management-partner",
       "file": "agents/change-management-partner.md"
     },
@@ -35,6 +31,10 @@
     {
       "name": "industry-expert",
       "file": "agents/industry-expert.md"
+    },
+    {
+      "name": "pm",
+      "file": "agents/pm.md"
     },
     {
       "name": "sme",
@@ -63,6 +63,10 @@
       "file": "skills/change-impact-assessment/SKILL.md"
     },
     {
+      "name": "company-intelligence",
+      "file": "skills/company-intelligence/SKILL.md"
+    },
+    {
       "name": "competitive-intelligence",
       "file": "skills/competitive-intelligence/SKILL.md"
     },
@@ -79,8 +83,20 @@
       "file": "skills/financial-modeling/SKILL.md"
     },
     {
+      "name": "financial-statement-analysis",
+      "file": "skills/financial-statement-analysis/SKILL.md"
+    },
+    {
+      "name": "hwp-document-processing",
+      "file": "skills/hwp-document-processing/SKILL.md"
+    },
+    {
       "name": "insight-synthesis",
       "file": "skills/insight-synthesis/SKILL.md"
+    },
+    {
+      "name": "mece-logic-auditor",
+      "file": "skills/mece-logic-auditor/SKILL.md"
     },
     {
       "name": "narrative-framework",
@@ -93,6 +109,10 @@
     {
       "name": "project-delivery",
       "file": "skills/project-delivery/SKILL.md"
+    },
+    {
+      "name": "sample-driven-report-writing",
+      "file": "skills/sample-driven-report-writing/SKILL.md"
     },
     {
       "name": "solution-design",
@@ -109,32 +129,13 @@
     {
       "name": "technical-feasibility",
       "file": "skills/technical-feasibility/SKILL.md"
-    },
-    {
-      "name": "company-intelligence",
-      "file": "skills/company-intelligence/SKILL.md"
-    },
-    {
-      "name": "financial-statement-analysis",
-      "version": "1.3.0",
-      "file": "skills/financial-statement-analysis/SKILL.md"
-    },
-    {
-      "name": "mece-logic-auditor",
-      "file": "skills/mece-logic-auditor/SKILL.md"
-    },
-    {
-      "name": "hwp-document-processing",
-      "file": "skills/hwp-document-processing/SKILL.md"
-    },
-    {
-      "name": "sample-driven-report-writing",
-      "file": "skills/sample-driven-report-writing/SKILL.md"
     }
   ],
   "country_config": {
     "profiles_dir": "docs/countries",
-    "supported": ["KR"],
+    "supported": [
+      "KR"
+    ],
     "default": null
   },
   "skill_manifest": {
@@ -410,5 +411,6 @@
       }
     ],
     "external": []
-  }
+  },
+  "promotionChecklist": "PROMOTION_CHECKLIST.md"
 }

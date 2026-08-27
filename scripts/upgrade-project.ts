@@ -185,6 +185,23 @@ if (!validVariants.includes(variant)) {
   }
 }
 
+// Variant Readiness Gate (pre-flight): refuse to upgrade against a template
+// variant that is not READY (broken agent/skill manifest paths, missing
+// PROMOTION_CHECKLIST.md, missing README/AGENTS.md, inconsistent country_config).
+const gateScript = join(workspaceRoot, 'scripts', 'validate-variant-readiness.ts');
+if (existsSync(gateScript) && import.meta.main) {
+  console.log(`\nRunning Variant Readiness Gate for template variant '${variant}'...`);
+  const gateResult = spawnSync(process.execPath, [gateScript, '--variant', variant], { encoding: 'utf8' });
+  if (gateResult.status !== 0) {
+    console.error(`\nERROR: Template variant '${variant}' failed the Variant Readiness Gate.`);
+    console.error('   A project may only be upgraded against a READY variant.');
+    console.error(`   Run: bun scripts/validate-variant-readiness.ts --variant ${variant}`);
+    process.exit(1);
+  } else {
+    console.log(`✅ Template variant '${variant}' passed the Variant Readiness Gate.`);
+  }
+}
+
 const templatesDir = join(workspaceRoot, 'templates', variant);
 const commonDir = join(workspaceRoot, 'templates', 'common');
 

@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-26T11:16:31.942Z
+**Generated**: 2026-08-27T05:39:07.366Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 8
 - **Skills**: 37
-- **Scripts**: 81
+- **Scripts**: 82
 - **Commands**: 8
 
 ---
@@ -103,7 +103,7 @@
 | generate-version-manifest.ts | 1.2.0 | scripts/generate-version-manifest.ts | bun, js-yaml |
 | ingest-external-skills.ts | 1.1.0 | scripts/ingest-external-skills.ts | N/A |
 | ingest-security-frameworks.ts | 1.1.0 | scripts/ingest-security-frameworks.ts | N/A |
-| l3-to-variant-pipeline.ts | 1.12.1 | scripts/l3-to-variant-pipeline.ts | fs, path |
+| l3-to-variant-pipeline.ts | 1.12.1 | scripts/l3-to-variant-pipeline.ts | child_process, fs, path |
 | lifecycle-sync-audit.ts | 1.4.9 | scripts/lifecycle-sync-audit.ts | N/A |
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
 | md-to-ooxml.ts | 1.2.0 | scripts/md-to-ooxml.ts | fs, path |
@@ -142,11 +142,12 @@
 | validate-agents.ts | 1.0.5 | scripts/validate-agents.ts | N/A |
 | validate-doc-folder.ts | 1.1.0 | scripts/validate-doc-folder.ts | fs, path |
 | validate-docs-links.ts | 1.0.0 | scripts/validate-docs-links.ts | fs, path |
-| validate-md-language.ts | 1.6.1 | scripts/validate-md-language.ts | fs |
+| validate-md-language.ts | 1.7.0 | scripts/validate-md-language.ts | fs |
 | validate-model-registry.ts | N/A | scripts/validate-model-registry.ts | N/A |
 | validate-pm-extends.ts | 0.3.1 | scripts/validate-pm-extends.ts | N/A |
 | validate-skills.ts | 1.0.3 | scripts/validate-skills.ts | N/A |
 | validate-templates.ts | 1.13.0 | scripts/validate-templates.ts | js-yaml |
+| validate-variant-readiness.ts | 1.0.0 | scripts/validate-variant-readiness.ts | N/A |
 | variant-feature.ts | 1.0.0 | scripts/variant-feature.ts | N/A |
 | verify-adr-governance.ts | 1.4.0 | scripts/verify-adr-governance.ts | N/A |
 | verify-agent-deliverables.ts | 1.0.1 | scripts/verify-agent-deliverables.ts | fs |

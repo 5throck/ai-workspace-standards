@@ -79,6 +79,7 @@
 
 import { join, basename, dirname } from 'path';
 import { existsSync, mkdirSync, readFileSync } from 'fs';
+import { execFileSync } from 'child_process';
 import { readUTF8File } from './lib/encoding-utils.ts';
 import { scanL3Project, L3ScanResult } from './helpers/scan-l3-project.ts';
 import {
@@ -1198,6 +1199,7 @@ async function main() {
   // surface, making phase 3.0/3.5 auto-fix unreachable from a shell run
   const autoFixAgentsMdArg = args.includes('--auto-fix-agents-md');
   const autoFixPmMdArg = args.includes('--auto-fix-pm-md');
+  const forceArg = args.includes('--force');
 
   if (!l3PathArg || !nameArg || !typeArg || !descArg) {
     console.error('Usage: bun scripts/l3-to-variant-pipeline.ts \\');
@@ -1212,6 +1214,7 @@ async function main() {
     console.error('  [--status=<beta|stable|deprecated>] (default: beta) \\');
     console.error('  [--auto-fix-agents-md] (phase 3.5: regenerate AGENTS.md on marker misalignment) \\');
     console.error('  [--auto-fix-pm-md] (phase 3.0: emit pm.md slimming guidance)');
+    console.error('  [--force] (skip the Variant Readiness Gate — see PHASE 8)');
     process.exit(1);
   }
 
@@ -1247,6 +1250,27 @@ async function main() {
     const result = await executeL3ToVariantPipeline(config);
 
     if (result.success) {
+      // Variant Readiness Gate (VRG): a freshly generated variant must be READY
+      // before it is accepted. Block unless --force. Mirrors project-to-variant.ts.
+      const gateTs = join(import.meta.dir, 'validate-variant-readiness.ts');
+      if (!forceArg && existsSync(gateTs) && result.variantPath) {
+        console.log(`\n${'─'.repeat(60)}`);
+        console.log(`PHASE 8: Variant Readiness Gate`);
+        console.log(`${'─'.repeat(60)}`);
+        try {
+          execFileSync(process.execPath, [gateTs, '--dir', result.variantPath], {
+            cwd: join(import.meta.dir, '..'),
+            stdio: 'inherit',
+          });
+          console.log(`✅ Variant Readiness Gate passed.`);
+        } catch {
+          console.error(`\n❌ Variant Readiness Gate FAILED — the generated variant is not ready.`);
+          console.error(`   Fix the issues above or re-run with --force.`);
+          process.exit(1);
+        }
+      } else if (forceArg) {
+        console.log(`\n⚠️  Variant Readiness Gate skipped (--force).`);
+      }
       console.log('\n✅ Pipeline execution successful');
       process.exit(0);
     } else {

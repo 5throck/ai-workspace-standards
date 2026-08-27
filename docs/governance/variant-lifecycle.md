@@ -38,6 +38,7 @@ The lifecycle status is stored in each variant's `variant.json` under the `statu
 
 **Characteristics:**
 - 100% required files present and validated
+- Variant Readiness Gate passing (`scripts/validate-variant-readiness.ts`) — see below
 - PostToolUse audit hook enabled in `.claude/settings.json`
 - All A-04 verification checks passing
 - Verify-authorization skill implemented (for security variants)
@@ -115,13 +116,45 @@ The lifecycle status is stored in each variant's `variant.json` under the `statu
 
 ---
 
+## Variant Readiness Gate (VRG)
+
+A variant is only considered a valid, usable variant once it passes the **Variant Readiness Gate**
+(`scripts/validate-variant-readiness.ts`). The gate is enforced from three lifecycle perspectives
+so that an improperly variant-ized template can never be reflected, scaffolded, or upgraded:
+
+| Perspective | Script | Enforcement |
+|-------------|--------|-------------|
+| **variant-ization** | `scripts/project-to-variant.ts` (lightweight) · `scripts/l3-to-variant-pipeline.ts` (full) | **Blocked** on failure (unless `--force`) |
+| **new-project** | `scripts/new-project.ts` | **Blocked pre-flight** — a project may only be scaffolded from a READY variant |
+| **upgrade-project** | `scripts/upgrade-project.ts` | **Blocked pre-flight** — a project may only be upgraded against a READY template variant |
+
+### Blocking checks (exit 1 if any fail)
+- `variant.json` exists with required fields (`name`, `description`, `status`) and a valid `status` value.
+- Every `agents[].file` resolves to an existing file on disk (paths must be the real on-disk location, including nested `agents/domains/`, `agents/_core/`, `agents/_shared/`).
+- Every `skills[].file` resolves to an existing `SKILL.md`.
+- `PROMOTION_CHECKLIST.md` exists (referenced by `variant.json` `promotionChecklist`).
+- `README.md` exists.
+- `AGENTS.md` exists, is non-stub, and carries `VARIANT-*` injection markers.
+- If `docs/countries/` exists, `country_config` must be present and its `supported` list must cover the shipped profiles.
+
+### Run it
+```bash
+bun scripts/validate-variant-readiness.ts --variant co-safety
+bun scripts/validate-variant-readiness.ts --dir templates/co-safety --json
+```
+
+The gate complements `validate-templates.ts` (which validates structure/schema across all templates)
+by asserting that a *specific* variant is internally consistent and ready for use.
+
+---
+
 ## variant.json Status Field Schema
 
 ```json
 {
   "name": "co-<variant>",
   "description": "...",
-  "status": "draft|beta|stable|deprecated",
+  "status": "draft|beta|stable|deprecated|planned",
   "version": "X.Y.Z",
   "lifecycle": {
     "statusSince": "YYYY-MM-DD",
@@ -134,7 +167,7 @@ The lifecycle status is stored in each variant's `variant.json` under the `statu
 
 **Field Definitions:**
 
-- **status:** Current lifecycle stage (one of: `draft`, `beta`, `stable`, `deprecated`)
+- **status:** Current lifecycle stage (one of: `draft`, `beta`, `stable`, `deprecated`, `planned`)
 - **lifecycle.statusSince:** Date when current status was entered
 - **lifecycle.lastTransition:** Human-readable description of last status change
 - **lifecycle.betaEngagements:** Count of successful engagements during beta phase

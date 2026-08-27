@@ -14,10 +14,6 @@
   },
   "agents": [
     {
-      "name": "pm",
-      "file": "agents/pm.md"
-    },
-    {
       "name": "customs-duty-drawback-specialist",
       "file": "agents/customs-duty-drawback-specialist.md"
     },
@@ -50,22 +46,59 @@
       "file": "agents/market-entry-strategist.md"
     },
     {
+      "name": "pm",
+      "file": "agents/pm.md"
+    },
+    {
       "name": "trade-documentation-specialist",
       "file": "agents/trade-documentation-specialist.md"
     }
   ],
   "skills": [
-    { "name": "customs-duty-drawback-workflow", "file": "skills/customs-duty-drawback-workflow/SKILL.md" },
-    { "name": "export-control-screening", "file": "skills/export-control-screening/SKILL.md" },
-    { "name": "foreign-regulation-monitoring", "file": "skills/foreign-regulation-monitoring/SKILL.md" },
-    { "name": "fta-origin-determination", "file": "skills/fta-origin-determination/SKILL.md" },
-    { "name": "halal-certification-workflow", "file": "skills/halal-certification-workflow/SKILL.md" },
-    { "name": "hs-classification-workflow", "file": "skills/hs-classification-workflow/SKILL.md" },
-    { "name": "landed-cost-calculation", "file": "skills/landed-cost-calculation/SKILL.md" },
-    { "name": "logistics-coordination", "file": "skills/logistics-coordination/SKILL.md" },
-    { "name": "market-entry-strategy", "file": "skills/market-entry-strategy/SKILL.md" },
-    { "name": "roo-qualification-worksheet", "file": "skills/roo-qualification-worksheet/SKILL.md" },
-    { "name": "trade-documentation-checklist", "file": "skills/trade-documentation-checklist/SKILL.md" }
+    {
+      "name": "customs-duty-drawback-workflow",
+      "file": "skills/customs-duty-drawback-workflow/SKILL.md"
+    },
+    {
+      "name": "export-control-screening",
+      "file": "skills/export-control-screening/SKILL.md"
+    },
+    {
+      "name": "foreign-regulation-monitoring",
+      "file": "skills/foreign-regulation-monitoring/SKILL.md"
+    },
+    {
+      "name": "fta-origin-determination",
+      "file": "skills/fta-origin-determination/SKILL.md"
+    },
+    {
+      "name": "halal-certification-workflow",
+      "file": "skills/halal-certification-workflow/SKILL.md"
+    },
+    {
+      "name": "hs-classification-workflow",
+      "file": "skills/hs-classification-workflow/SKILL.md"
+    },
+    {
+      "name": "landed-cost-calculation",
+      "file": "skills/landed-cost-calculation/SKILL.md"
+    },
+    {
+      "name": "logistics-coordination",
+      "file": "skills/logistics-coordination/SKILL.md"
+    },
+    {
+      "name": "market-entry-strategy",
+      "file": "skills/market-entry-strategy/SKILL.md"
+    },
+    {
+      "name": "roo-qualification-worksheet",
+      "file": "skills/roo-qualification-worksheet/SKILL.md"
+    },
+    {
+      "name": "trade-documentation-checklist",
+      "file": "skills/trade-documentation-checklist/SKILL.md"
+    }
   ],
   "displayName": "Co Export",
   "agent_overrides": {
@@ -83,7 +116,9 @@
   },
   "country_config": {
     "profiles_dir": "docs/countries",
-    "supported": ["KR"],
+    "supported": [
+      "KR"
+    ],
     "default": null
   },
   "skill_manifest": {
@@ -216,5 +251,6 @@
     "promotionEligible": false,
     "missingCriteria": [],
     "lastSynced": "2026-08-09T03:13:04.029Z"
-  }
+  },
+  "promotionChecklist": "PROMOTION_CHECKLIST.md"
 }

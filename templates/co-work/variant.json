@@ -13,10 +13,6 @@
   },
   "agents": [
     {
-      "name": "pm",
-      "file": "agents/pm.md"
-    },
-    {
       "name": "analyst",
       "file": "agents/analyst.md"
     },
@@ -27,6 +23,10 @@
     {
       "name": "ms365-expert",
       "file": "agents/ms365-expert.md"
+    },
+    {
+      "name": "pm",
+      "file": "agents/pm.md"
     },
     {
       "name": "project-coordinator",
@@ -82,5 +82,6 @@
         "platform_parity": "required"
       }
     ]
-  }
+  },
+  "promotionChecklist": "PROMOTION_CHECKLIST.md"
 }

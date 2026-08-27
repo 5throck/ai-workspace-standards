@@ -13,16 +13,16 @@
   },
   "agents": [
     {
-      "name": "pm",
-      "file": "agents/pm.md"
-    },
-    {
       "name": "patch-engineer",
       "file": "agents/patch-engineer.md"
     },
     {
       "name": "pentester",
       "file": "agents/pentester.md"
+    },
+    {
+      "name": "pm",
+      "file": "agents/pm.md"
     },
     {
       "name": "red-team-lead",
@@ -38,61 +38,123 @@
     }
   ],
   "skills": [
-    { "name": "finding-reconciliation", "file": "skills/finding-reconciliation/SKILL.md" },
-    { "name": "samm-maturity", "file": "skills/samm-maturity/SKILL.md" },
-    { "name": "sarif-exporter", "file": "skills/sarif-exporter/SKILL.md" },
-    { "name": "spdx-sbom", "file": "skills/spdx-sbom/SKILL.md" },
-    { "name": "stride-threat-matrix", "file": "skills/stride-threat-matrix/SKILL.md" },
-    { "name": "verify-authorization", "file": "skills/verify-authorization/SKILL.md" }
+    {
+      "name": "finding-reconciliation",
+      "file": "skills/finding-reconciliation/SKILL.md"
+    },
+    {
+      "name": "samm-maturity",
+      "file": "skills/samm-maturity/SKILL.md"
+    },
+    {
+      "name": "sarif-exporter",
+      "file": "skills/sarif-exporter/SKILL.md"
+    },
+    {
+      "name": "spdx-sbom",
+      "file": "skills/spdx-sbom/SKILL.md"
+    },
+    {
+      "name": "stride-threat-matrix",
+      "file": "skills/stride-threat-matrix/SKILL.md"
+    },
+    {
+      "name": "verify-authorization",
+      "file": "skills/verify-authorization/SKILL.md"
+    }
   ],
   "skill_manifest": {
     "variant_specific": [
       {
         "name": "samm-maturity",
         "layer": "workspace",
-        "used_by_agents": ["threat-modeler"],
-        "phases": [1, 2],
+        "used_by_agents": [
+          "threat-modeler"
+        ],
+        "phases": [
+          1,
+          2
+        ],
         "platform_parity": "required"
       },
       {
         "name": "stride-threat-matrix",
         "layer": "workspace",
-        "used_by_agents": ["threat-modeler"],
-        "phases": [1, 2],
+        "used_by_agents": [
+          "threat-modeler"
+        ],
+        "phases": [
+          1,
+          2
+        ],
         "platform_parity": "required"
       },
       {
         "name": "sarif-exporter",
         "layer": "workspace",
-        "used_by_agents": ["pentester", "report-writer"],
-        "phases": [3, 5],
+        "used_by_agents": [
+          "pentester",
+          "report-writer"
+        ],
+        "phases": [
+          3,
+          5
+        ],
         "platform_parity": "required"
       },
       {
         "name": "spdx-sbom",
         "layer": "workspace",
-        "used_by_agents": ["patch-engineer", "report-writer"],
-        "phases": [3, 5],
+        "used_by_agents": [
+          "patch-engineer",
+          "report-writer"
+        ],
+        "phases": [
+          3,
+          5
+        ],
         "platform_parity": "required"
       },
       {
         "name": "finding-reconciliation",
         "layer": "workspace",
-        "used_by_agents": ["pentester", "report-writer"],
-        "phases": [3, 5, 6],
+        "used_by_agents": [
+          "pentester",
+          "report-writer"
+        ],
+        "phases": [
+          3,
+          5,
+          6
+        ],
         "platform_parity": "required"
       },
       {
         "name": "verify-authorization",
-        "used_by_agents": ["red-team-lead", "pentester"],
-        "phases": [1, 3]
+        "used_by_agents": [
+          "red-team-lead",
+          "pentester"
+        ],
+        "phases": [
+          1,
+          3
+        ]
       }
     ]
   },
   "agent_manifest": {
     "variant_agents_dir": "agents",
-    "pipeline_order": ["red-team-lead", "threat-modeler", "pentester", "patch-engineer", "report-writer"],
-    "optional": ["patch-engineer"],
+    "pipeline_order": [
+      "red-team-lead",
+      "threat-modeler",
+      "pentester",
+      "patch-engineer",
+      "report-writer"
+    ],
+    "optional": [
+      "patch-engineer"
+    ],
     "notes": "patch-engineer: skip for report-only engagements where remediation is out of scope."
-  }
+  },
+  "promotionChecklist": "PROMOTION_CHECKLIST.md"
 }

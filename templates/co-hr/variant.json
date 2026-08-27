@@ -50,6 +50,10 @@
       "file": "agents/performance-management-consultant.md"
     },
     {
+      "name": "pm",
+      "file": "agents/pm.md"
+    },
+    {
       "name": "safety-health-officer",
       "file": "agents/safety-health-officer.md"
     },
@@ -246,7 +250,9 @@
   },
   "country_config": {
     "profiles_dir": "docs/countries",
-    "supported": ["KR"],
+    "supported": [
+      "KR"
+    ],
     "default": null
   },
   "phaseAComplete": true,

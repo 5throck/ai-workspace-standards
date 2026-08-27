@@ -218,6 +218,24 @@ if (existsSync(variantJsonPath)) {
   }
 }
 
+// Variant Readiness Gate (pre-flight): refuse to scaffold from a variant that is
+// not READY (broken agent/skill manifest paths, missing PROMOTION_CHECKLIST.md,
+// missing README/AGENTS.md, inconsistent country_config). A project may only be
+// created from a validated variant.
+const gateScript = join(workspaceRoot, 'scripts', 'validate-variant-readiness.ts');
+if (existsSync(gateScript)) {
+  console.log(`\nRunning Variant Readiness Gate for variant '${variant}'...`);
+  const gateResult = spawnSync(process.execPath, [gateScript, '--variant', variant], { encoding: 'utf8' });
+  if (gateResult.status !== 0) {
+    console.error(`\n❌ Variant '${variant}' failed the Variant Readiness Gate.`);
+    console.error('   A project may only be created from a READY variant.');
+    console.error(`   Run: bun scripts/validate-variant-readiness.ts --variant ${variant}`);
+    if (import.meta.main) process.exit(1);
+  } else {
+    console.log(`✅ Variant '${variant}' passed the Variant Readiness Gate.`);
+  }
+}
+
 // ── Country/jurisdiction selection ──────────────────────────────────────────────
 let selectedCountry = '';
 const autoYes = process.argv.includes('--yes') || process.argv.includes('-y') || process.env.CI === 'true' || process.env.CI === '1';

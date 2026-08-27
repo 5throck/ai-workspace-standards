@@ -13,44 +13,16 @@
   },
   "agents": [
     {
-      "name": "pm",
-      "file": "agents/pm.md"
-    },
-    {
-      "name": "sd-analyst",
-      "file": "agents/sd-analyst.md"
-    },
-    {
-      "name": "mm-analyst",
-      "file": "agents/mm-analyst.md"
-    },
-    {
-      "name": "fi-analyst",
-      "file": "agents/fi-analyst.md"
+      "name": "architect",
+      "file": "agents/architect.md"
     },
     {
       "name": "co-analyst",
       "file": "agents/co-analyst.md"
     },
     {
-      "name": "pp-analyst",
-      "file": "agents/pp-analyst.md"
-    },
-    {
-      "name": "le-analyst",
-      "file": "agents/le-analyst.md"
-    },
-    {
-      "name": "architect",
-      "file": "agents/architect.md"
-    },
-    {
       "name": "code-writer",
       "file": "agents/code-writer.md"
-    },
-    {
-      "name": "test-runner",
-      "file": "agents/test-runner.md"
     },
     {
       "name": "dba",
@@ -61,8 +33,8 @@
       "file": "agents/devops-admin.md"
     },
     {
-      "name": "interface-expert",
-      "file": "agents/interface-expert.md"
+      "name": "fi-analyst",
+      "file": "agents/fi-analyst.md"
     },
     {
       "name": "fiori-developer",
@@ -73,62 +45,90 @@
       "file": "agents/form-expert.md"
     },
     {
-      "name": "security-monitor",
-      "file": "agents/security-monitor.md"
-    },
-    {
       "name": "gui-scripter",
       "file": "agents/gui-scripter.md"
     },
     {
-      "name": "sap-investigator",
-      "file": "agents/sap-investigator.md"
+      "name": "interface-expert",
+      "file": "agents/interface-expert.md"
+    },
+    {
+      "name": "le-analyst",
+      "file": "agents/le-analyst.md"
+    },
+    {
+      "name": "mm-analyst",
+      "file": "agents/mm-analyst.md"
+    },
+    {
+      "name": "pm",
+      "file": "agents/pm.md"
+    },
+    {
+      "name": "pp-analyst",
+      "file": "agents/pp-analyst.md"
     },
     {
       "name": "read-only-analyst",
       "file": "agents/read-only-analyst.md"
     },
     {
+      "name": "sap-investigator",
+      "file": "agents/sap-investigator.md"
+    },
+    {
       "name": "schema-inspector",
       "file": "agents/schema-inspector.md"
+    },
+    {
+      "name": "sd-analyst",
+      "file": "agents/sd-analyst.md"
+    },
+    {
+      "name": "security-monitor",
+      "file": "agents/security-monitor.md"
+    },
+    {
+      "name": "test-runner",
+      "file": "agents/test-runner.md"
     }
   ],
   "skills": [
-    {
-      "name": "abap-dev",
-      "file": "skills/abap-dev/SKILL.md"
-    },
     {
       "name": "abap-code-review",
       "file": "skills/abap-code-review/SKILL.md"
     },
     {
-      "name": "post-write-chain",
-      "file": "skills/post-write-chain/SKILL.md"
-    },
-    {
-      "name": "performance-tuning",
-      "file": "skills/performance-tuning/SKILL.md"
-    },
-    {
-      "name": "dump-monitor",
-      "file": "skills/dump-monitor/SKILL.md"
+      "name": "abap-dev",
+      "file": "skills/abap-dev/SKILL.md"
     },
     {
       "name": "desktop-app-fallback",
       "file": "skills/desktop-app-fallback/SKILL.md"
     },
     {
-      "name": "source-command-celebrate",
-      "file": "skills/source-command-celebrate/SKILL.md"
+      "name": "dump-monitor",
+      "file": "skills/dump-monitor/SKILL.md"
     },
     {
-      "name": "sap-sd",
-      "file": "skills/sap-sd/SKILL.md"
+      "name": "performance-tuning",
+      "file": "skills/performance-tuning/SKILL.md"
+    },
+    {
+      "name": "post-write-chain",
+      "file": "skills/post-write-chain/SKILL.md"
+    },
+    {
+      "name": "sap-co",
+      "file": "skills/sap-co/SKILL.md"
     },
     {
       "name": "sap-fi",
       "file": "skills/sap-fi/SKILL.md"
+    },
+    {
+      "name": "sap-le",
+      "file": "skills/sap-le/SKILL.md"
     },
     {
       "name": "sap-mm",
@@ -139,12 +139,12 @@
       "file": "skills/sap-pp/SKILL.md"
     },
     {
-      "name": "sap-le",
-      "file": "skills/sap-le/SKILL.md"
+      "name": "sap-sd",
+      "file": "skills/sap-sd/SKILL.md"
     },
     {
-      "name": "sap-co",
-      "file": "skills/sap-co/SKILL.md"
+      "name": "source-command-celebrate",
+      "file": "skills/source-command-celebrate/SKILL.md"
     }
   ],
   "skill_manifest": {
@@ -152,92 +152,181 @@
       {
         "name": "abap-dev",
         "layer": "variant",
-        "used_by_agents": ["architect", "code-writer", "test-runner", "sap-investigator"],
-        "phases": [1, 2, 3, 4],
+        "used_by_agents": [
+          "architect",
+          "code-writer",
+          "test-runner",
+          "sap-investigator"
+        ],
+        "phases": [
+          1,
+          2,
+          3,
+          4
+        ],
         "platform_parity": "required"
       },
       {
         "name": "abap-code-review",
         "layer": "variant",
-        "used_by_agents": ["code-writer", "test-runner"],
-        "phases": [3, 4],
+        "used_by_agents": [
+          "code-writer",
+          "test-runner"
+        ],
+        "phases": [
+          3,
+          4
+        ],
         "platform_parity": "required"
       },
       {
         "name": "post-write-chain",
         "layer": "variant",
-        "used_by_agents": ["code-writer", "test-runner", "pm"],
-        "phases": [3, 4],
+        "used_by_agents": [
+          "code-writer",
+          "test-runner",
+          "pm"
+        ],
+        "phases": [
+          3,
+          4
+        ],
         "platform_parity": "required"
       },
       {
         "name": "performance-tuning",
         "layer": "variant",
-        "used_by_agents": ["dba", "sap-investigator", "architect"],
-        "phases": [1, 2, 4],
+        "used_by_agents": [
+          "dba",
+          "sap-investigator",
+          "architect"
+        ],
+        "phases": [
+          1,
+          2,
+          4
+        ],
         "platform_parity": "required"
       },
       {
         "name": "dump-monitor",
         "layer": "variant",
-        "used_by_agents": ["pm", "devops-admin"],
-        "phases": [1, 6],
+        "used_by_agents": [
+          "pm",
+          "devops-admin"
+        ],
+        "phases": [
+          1,
+          6
+        ],
         "platform_parity": "required"
       },
       {
         "name": "desktop-app-fallback",
         "layer": "variant",
-        "used_by_agents": ["code-writer", "test-runner"],
-        "phases": [3, 4],
+        "used_by_agents": [
+          "code-writer",
+          "test-runner"
+        ],
+        "phases": [
+          3,
+          4
+        ],
         "platform_parity": "required"
       },
       {
         "name": "source-command-celebrate",
         "layer": "variant",
-        "used_by_agents": ["pm"],
-        "phases": [6],
+        "used_by_agents": [
+          "pm"
+        ],
+        "phases": [
+          6
+        ],
         "platform_parity": "required"
       },
       {
         "name": "sap-sd",
         "layer": "variant",
-        "used_by_agents": ["sd-analyst", "architect", "dba"],
-        "phases": [1, 2],
+        "used_by_agents": [
+          "sd-analyst",
+          "architect",
+          "dba"
+        ],
+        "phases": [
+          1,
+          2
+        ],
         "platform_parity": "required"
       },
       {
         "name": "sap-fi",
         "layer": "variant",
-        "used_by_agents": ["fi-analyst", "architect", "dba"],
-        "phases": [1, 2],
+        "used_by_agents": [
+          "fi-analyst",
+          "architect",
+          "dba"
+        ],
+        "phases": [
+          1,
+          2
+        ],
         "platform_parity": "required"
       },
       {
         "name": "sap-mm",
         "layer": "variant",
-        "used_by_agents": ["mm-analyst", "architect", "dba"],
-        "phases": [1, 2],
+        "used_by_agents": [
+          "mm-analyst",
+          "architect",
+          "dba"
+        ],
+        "phases": [
+          1,
+          2
+        ],
         "platform_parity": "required"
       },
       {
         "name": "sap-pp",
         "layer": "variant",
-        "used_by_agents": ["pp-analyst", "architect", "dba"],
-        "phases": [1, 2],
+        "used_by_agents": [
+          "pp-analyst",
+          "architect",
+          "dba"
+        ],
+        "phases": [
+          1,
+          2
+        ],
         "platform_parity": "required"
       },
       {
         "name": "sap-le",
         "layer": "variant",
-        "used_by_agents": ["le-analyst", "architect", "dba"],
-        "phases": [1, 2],
+        "used_by_agents": [
+          "le-analyst",
+          "architect",
+          "dba"
+        ],
+        "phases": [
+          1,
+          2
+        ],
         "platform_parity": "required"
       },
       {
         "name": "sap-co",
         "layer": "variant",
-        "used_by_agents": ["co-analyst", "architect", "dba"],
-        "phases": [1, 2],
+        "used_by_agents": [
+          "co-analyst",
+          "architect",
+          "dba"
+        ],
+        "phases": [
+          1,
+          2
+        ],
         "platform_parity": "required"
       }
     ]
@@ -316,5 +405,6 @@
       }
     ],
     "external": []
-  }
+  },
+  "promotionChecklist": "PROMOTION_CHECKLIST.md"
 }
