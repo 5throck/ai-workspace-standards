@@ -32,6 +32,10 @@ never be reflected, scaffolded, or upgraded:
 | **new-project** | `scripts/new-project.ts` | **Blocked pre-flight** — a project may only be scaffolded from a READY variant |
 | **upgrade-project** | `scripts/upgrade-project.ts` | **Blocked pre-flight** — a project may only be upgraded against a READY template variant |
 
+A fourth, continuous enforcement point backs these up: `scripts/validate-templates.ts` runs the
+gate for **every** variant (check `VRG-01`) on each validation run. This catches a non-READY
+variant even when it was edited directly (not regenerated), so the fix cannot silently regress.
+
 ## 3. Canonical implementation
 
 `scripts/validate-variant-readiness.ts`
