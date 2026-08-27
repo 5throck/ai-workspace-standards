@@ -43,9 +43,9 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 <!-- removal-date: YYYY-MM-DD (required when status=deprecated) or —-->
 <!-- security-advisory: CVE-XXXX or —-->
 <!-- Layer column values (ONLY 2 TYPES USED). L0/L1/L2/L3 here follow
-     CONSTITUTION.md's Terminology Definition (L1=templates/common, L2=templates/co-*,
+     context.md's Terminology Definition (L1=templates/common, L2=templates/co-*,
      L3=Projects/*); these Layer values predate that document and use L2 to mean
-     "reaches a scaffolded project," which CONSTITUTION.md calls L3 — not renamed here
+     "reaches a scaffolded project," which context.md calls L3 — not renamed here
      since layer-filter.ts and verify-scripts.ts parse these literal strings:
   L0           = workspace root only; must NOT be copied to templates/common/ or L3 projects
   L0+L1        = exists in scripts/ AND templates/common/scripts/; scaffold-copies to L3 at new-project time
