@@ -96,3 +96,5 @@ These are implemented; the gate then verifies the output independently.
 - `docs/governance/variant-lifecycle.md` (lifecycle stages; VRG is a beta→stable prerequisite)
 - `docs/creating-a-variant.md` (authoring guide; Step 6 includes the gate)
 - `docs/lifecycle/skills/project-to-variant.md` (lightweight pipeline; gate is enforced)
+- `scripts/test-variant-readiness.ts` — VRG regression test: a well-formed variant exits 0 (READY);
+  a variant missing `PROMOTION_CHECKLIST.md` or with an unresolved `agents[].file` exits 1 (NOT READY)

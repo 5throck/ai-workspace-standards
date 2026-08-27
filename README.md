@@ -193,7 +193,8 @@ C:\git\ (workspace root - this repo)
     ├── co-news/             # 🔶 Beta — business/finance journalism agent team (KR country profile included)
     ├── co-abap/             # ✅ Stable — SAP ABAP development agent team
     ├── co-hr/                # 🔶 Beta — HR & labor-relations consulting agent team (KR country profile included)
-    └── co-safety/            # 🔶 Beta — EHS/GxP compliance platform agent team
+    ├── co-safety/            # 🔶 Beta — EHS/GxP compliance platform agent team
+    └── co-price/            # ⚠️ Beta — K-Beauty pricing management & consulting simulator
 ```
 
 Each sub-project lives in its own directory and git repository:
