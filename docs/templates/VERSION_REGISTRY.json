@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "last_updated": "2026-08-24",
+  "last_updated": "2026-08-26",
   "description": "Central version registry for all template variants",
   "variants": {
     "co-develop": {
@@ -115,6 +115,13 @@
       "changelog": [
         "2026-08-22: Initial release as beta variant (v0.1.0) — promoted from Projects/co-hr with 12 agents, 1 variant-specific skill (k-law)"
       ],
+      "security_advisories": [],
+      "migration_guides": []
+    },
+    "co-safety": {
+      "latest": "0.1.0",
+      "status": "beta",
+      "released": "2026-08-26",
       "security_advisories": [],
       "migration_guides": []
     }

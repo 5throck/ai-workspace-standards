@@ -15,7 +15,7 @@
 
 ## Error Handling Standard (ADR-0054)
 
-> **Policy (2026-08-16)**: Error and exit paths in all scripts MUST use `scripts/lib/error-handling.ts` (`die()`, `fatalError()` + `logError()`, `withSyncErrorHandling()`). Migration is **incremental** — a script migrates when it is otherwise modified (no pure-consistency rewrites). When migrating an L0+L1 script, sync the change to `templates/common/scripts/` in the same commit. See [ADR-0054](../docs/adr/0054-error-handling-standardization.md) and the coding guidelines §8.11.
+> **Policy (2026-08-16)**: Error and exit paths in all scripts MUST use `scripts/lib/error-handling.ts` (`die()`, `fatalError()` + `logError()`, `withSyncErrorHandling()`). Migration is **incremental** — a script migrates when it is otherwise modified (no pure-consistency rewrites). When migrating an L0+L1 script, sync the change to `templates/common/scripts/` in the same commit. See [ADR-0054](../docs/adr/0054-error-handling-standardization.md) and `docs/context.md` §8.11.
 
 All scripts in this workspace are written in TypeScript and executed via `bun`. There is no longer a distinction between "bootstrap" and "ops" tiers — Bun is a hard prerequisite for the workspace and is assumed to be installed before any script runs.
 
@@ -43,9 +43,9 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 <!-- removal-date: YYYY-MM-DD (required when status=deprecated) or —-->
 <!-- security-advisory: CVE-XXXX or —-->
 <!-- Layer column values (ONLY 2 TYPES USED). L0/L1/L2/L3 here follow
-     workspace Terminology Definition (L1=templates/common, L2=templates/co-*,
+     context.md's Terminology Definition (L1=templates/common, L2=templates/co-*,
      L3=Projects/*); these Layer values predate that document and use L2 to mean
-     "reaches a scaffolded project," which the current terminology calls L3 — not renamed here
+     "reaches a scaffolded project," which context.md calls L3 — not renamed here
      since layer-filter.ts and verify-scripts.ts parse these literal strings:
   L0           = workspace root only; must NOT be copied to templates/common/ or L3 projects
   L0+L1        = exists in scripts/ AND templates/common/scripts/; scaffold-copies to L3 at new-project time
@@ -76,28 +76,39 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `gen-pr-body.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `generate-ide-rules.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `generate-l3-readme.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
+| `generate-scripts-readme.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
 | `generate-skill-graph.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
+| `generate-version-manifest.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
+| `dispatch-parallel.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
+| `dispatch-serial.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
+| `dispatch.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
+| `fix-script-versions.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
+| `gen-pr-body.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
+| `generate-ide-rules.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
+| `generate-l3-readme.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
 | `generate-scripts-readme.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
 | `generate-version-manifest.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `helpers/beta-lifecycle.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
-| `helpers/generate-variant.ts` | L0 | 1.11.0 | active | —| —| L0 | —|
+| `helpers/generate-variant.ts` | L0 | 1.13.1 | active | —| —| L0 | —|
 | `helpers/agent-promote.ts` | L0 | 0.1.1 | experimental | —| —| L0 | —|
 | `helpers/agent-similarity-analyzer.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `helpers/golden-reference-loader.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `helpers/inject-skills.ts` | L0 | 1.0.2 | active | —| —| L0 | —|
 | `helpers/integration-helpers.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `helpers/layer-filter.ts` | L0 | 1.4.1 | active | —| —| L0 | —|
-| `helpers/lifecycle-governance.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `helpers/lifecycle-governance.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `helpers/extends-validator.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
+| `helpers/upgrade-versions.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `helpers/merge-frontmatter.ts` | L0 | 1.8.6 | active | —| —| L0+L1 | —|
 | `helpers/security-validator.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `helpers/context-sections.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
+| `helpers/markers.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/pm-md-parser.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `helpers/variant-governance-rules.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
-| `helpers/registries/variant-type-registry.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `helpers/registries/capability-registry.ts` | L0 | 1.0.2 | active | —| —| L0 | —|
-| `helpers/registries/promotion-policy.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `helpers/registries/validation-policy.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
+| `helpers/registries/variant-type-registry.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
+| `helpers/registries/capability-registry.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
+| `helpers/registries/promotion-policy.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
+| `helpers/registries/validation-policy.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `helpers/registries/index.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/plugins/variant-plugin.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/plugins/game-plugin.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
@@ -111,21 +122,22 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `helpers/workspace-integration.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/reconcile-with-l0-l1.ts` | L0 | 1.3.0 | active | —| —| L0 | —|
 | `helpers/normalize-agent-skills.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
+| `helpers/prune-country-scoped-assets.ts` | L0 | 0.2.0 | active | —| —| L0 | —|
 | `helpers/scan-l3-project.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
-| `helpers/substitute-placeholders.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
+| `helpers/substitute-placeholders.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `helpers/template-utils.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
 | `helpers/rollback-partial-project.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/template-validation.ts` | L0 | 1.0.2 | active | —| —| L0 | —|
 | `helpers/update-variant-lifecycle.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `helpers/validate-output.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `helpers/validate-platform-parity.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
-| `helpers/ticket-schema.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `helpers/ticket-store.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `helpers/ticket-schema.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
+| `helpers/ticket-store.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `validators/types.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `validators/variant-json-validator.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `validators/extends-validator-wrapper.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `validators/capability-validator.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `validators/schema-validator.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
+| `validators/schema-validator.ts` | L0 | 1.3.0 | active | —| —| L0 | —|
 | `validators/orphan-reference-validator.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `validators/duplicate-validator.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `validators/platform-parity-validator.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
@@ -140,9 +152,10 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `hooks/pre-push.ts` | L0 | 1.2.9 | active | —| —| L0+L1 | —|
 | `ingest-external-skills.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `ingest-security-frameworks.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `l3-to-variant-pipeline.ts` | L0 | 1.10.5 | active | —| —| L0 | —|
-| `regenerate-agents-md.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
+| `l3-to-variant-pipeline.ts` | L0 | 1.12.1 | active | —| —| L0 | —|
+| `regenerate-agents-md.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `lib/agent-override-merge.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
+| `lib/context-md-schema.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `lib/auth.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/encoding-utils.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `lib/error-handling.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
@@ -154,18 +167,20 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `lifecycle-sync-audit.ts` | L0 | 1.4.9 | active | —| —| L0+L1 | —|
 | `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `md-to-ooxml.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
-| `new-project.ts` | L0 | 1.5.3 | active | —| —| L0 | —|
+| `new-project.ts` | L0 | 1.8.0 | active | —| —| L0 | —|
 | `remove-project.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `resolve-variants.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
-| `project-to-variant.ts` | L0 | 1.0.3 | active | `--source`, `--target`, `--dry-run` | —| L0 | —|
-| `propagate-to-templates.ts` | L0 | 2.4.0 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs`, `--include-disabled` | —| L0 | —|
+| `project-to-variant.ts` | L0 | 1.2.0 | active | `--source`, `--target`, `--dry-run`, `--force`, `--design-doc`, `--threshold-files`, `--threshold-dirs` | —| L0 | —|
+| `promote-context-section.ts` | L0 | 1.0.0 | active | `--heading`, `--variants`, `--source`, `--after-heading`, `--dry-run` | —| L0 | —|
+| `propagate-to-templates.ts` | L0 | 2.5.1 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs`, `--include-disabled`, `--marker-rewrite` | —| L0 | —|
 | `qa-gate.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `readme-lifecycle-audit.ts` | L0 | 1.0.4 | active | —| —| L0+L1 | —|
 | `render-pdf-deck.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `retry-handler.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `setup-github-branch-protection.ts` | L0 | 1.0.1 | active | `--repo`, `--branch`, `--check` (repeatable), `--dry-run` | —| L0+L1 | —|
 | `skill-dependency-analysis.ts` | L0 | 1.0.2 | active | —| —| L0 | —|
-| `spec-register.ts` | L0 | 1.0.1 | active | `--file`, `--source`, `--update`, `--status`, `--list`, `--ref` | —| L0 | —|
+| `spec-backfill.ts` | L0 | 1.0.0 | active | `--dry-run`, `--check` | —| L0 | —|
+| `spec-register.ts` | L0 | 1.1.0 | active | `--file`, `--source`, `--update`, `--status`, `--list`, `--ref`, `--id` | —| L0 | —|
 | `skill-lifecycle-audit.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
 | `sync-agent-status.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `sync-md.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
@@ -175,29 +190,32 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `sync-skills.ts` | L0 | 1.4.1 | active | `--dir <path>`, `--all-variants` | — | L0+L1 | — |
 | `tag-template.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `team-builder.ts` | L0 | 1.2.1 | active | —| —| L0+L1 | —|
+| `test-platform-parity.ts` | L0 | 0.2.4 | active | —| —| L0 | —|
 | `test-new-project.ts` | L0 | 1.0.4 | active | —| —| L0 | —|
 | `test-extends-validator.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
-| `test-l3-to-variant-promotion.ts` | L0 | 1.0.2 | active | —| —| L0 | —|
+| `test-l3-to-variant-promotion.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `test-runner.ts` | L0 | 1.1.0 | active | `--parallel`, `--sequential`, `--concurrency <n>`, `--timeout <ms>` | —| L0+L1 | —|
 | `translate-readme.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `ticket.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `upgrade-project.ts` | L0 | 1.7.1 | active | `--variant`, `--platform`, `--dry-run`, `--prune-removed`, `--rollback`, `--yes` | —| L0 | —|
+| `ticket.ts` | L0 | 1.1.0 | active | `create --not-before`, `list --kind`, `list --ready` | —| L0 | —|
+| `upgrade-project.ts` | L0 | 1.10.1 | active | `--variant`, `--platform`, `--dry-run`, `--prune-removed`, `--rollback`, `--yes` | —| L0 | —|
 | `variant-feature.ts` | L0 | 1.0.0 | active | `--variant`, `--feature`, `--type` | —| L0 | —|
 | `validate-agents.ts` | L0 | 1.0.5 | active | —| —| L0+L1 | —|
 | `validate-doc-folder.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `validate-docs-links.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `validate-md-language.ts` | L0 | 1.6.1 | active | —| —| L0+L1 | —|
+| `validate-md-language.ts` | L0 | 1.7.0 | active | —| —| L0+L1 | —|
 | `validate-model-registry.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `validate-skills.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
-| `validate-templates.ts` | L0 | 1.5.18 | active | —| —| L0 | —|
+| `validate-templates.ts` | L0 | 1.13.0 | active | —| —| L0 | —|
+| `verify-country-prune.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `verify-adr-governance.ts` | L0 | 1.4.0 | active | —| —| L0 | —|
 | `verify-agent-deliverables.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
+| `verify-skill-graph.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `verify-memory.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `verify-new-project-tests.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
 | `verify-platform-lifecycle.ts` | L0 | 1.1.2 | active | —| —| L0+L1 | —|
 | `verify-readme-sync.ts` | L0 | 1.4.0 | active | —| —| L0+L1 | —|
 | `verify-scripts.ts` | L0 | 1.4.1 | active | —| —| L0+L1 | —|
 | `verify-skills.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
-| `verify-skill-graph.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `verify-template-integrity.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `validate-pm-extends.ts` | L0 | 0.3.1 | active | —| —| L0+L1 | —|
 
@@ -400,7 +418,7 @@ to ensure Claude Code, Antigravity, and Antigravity CLI pick up the update.
 **Sync policy**:
 - Shared deps (present in both root and template): aligned to root version
 - Root-only deps: NOT auto-added to template (e.g., semver, @types/js-yaml)
-- Template-only deps: NOT auto-added or auto-removed (manual decision required)
+- Template-only deps: NOT auto-removed (manual decision required)
 - engines: aligned if shared fields differ
 
 #### `sync-skills-to-l2.ts`
@@ -412,6 +430,13 @@ to ensure Claude Code, Antigravity, and Antigravity CLI pick up the update.
 **Usage**: `bun scripts/resolve-variants.ts [--force] [--variant co-develop]`
 **Idempotency**: files already marked `# @resolved-from:` are skipped unless `--force` is passed.
 **Note**: L0 script (workspace infrastructure only). Not copied to `templates/common/scripts/`.
+
+#### `verify-readme-sync.ts`
+**Purpose**: Validates README.md / README_ko.md hash synchronization for workspace root and templates.
+Audits user-guide.md / user-guide_ko.md translated_from_hash synchronization (FAIL stage per ADR-0055 playbook after WARN soak).
+**Usage**: `bun scripts/verify-readme-sync.ts [--pre-commit] [--update-hashes]`
+**v1.4.0**: Promoted user-guide translated_from_hash gate from WARN to FAIL (promoted 2026-08-24 after WARN soak through PR #647 with zero warnings observed); now returns failure count and affects exit code.
+**v1.3.0**: Added user-guide translated_from_hash WARN-stage audit — detects missing/stale hashes in KO guides; --update-hashes now also seeds translated_from_hash in user-guide_ko.md frontmatter.
 
 #### `verify-memory.ts`
 **Purpose**: Validates `memory/*.md` session logs for mandatory 4-section format compliance
@@ -448,6 +473,16 @@ agent's output as input to the next.
 **Usage**: `import { withRetry } from './retry-handler.ts'` (library module)
 
 ---
+
+### Platform Parity Scripts (Bun / TypeScript)
+
+#### `test-platform-parity.ts`
+**Purpose**: Validates platform parity between L0 workspace files and their L1/L2 counterparts per ADR-0033.
+Compares CLAUDE.md, GEMINI.md, and agents/pm.md across workspace root, templates/common/, and all L2 variants.
+**Usage**: `bun scripts/test-platform-parity.ts [--verbose]`
+**Runs automatically**: As part of audit.ts (non-lifecycle-only mode)
+**Exit codes**: 0 (pass), 1 (errors), 2 (warnings)
+**See also**: `docs/platform-parity-rules.md` for detailed parity rules
 
 #### `validate-pm-extends.ts`
 **Purpose**: Validates pm.md extends chains for correctness and compliance per ADR-0033.
@@ -534,4 +569,4 @@ When modifying a script:
 ---
 
 *SCRIPTS.md maintained by: workspace maintainer (L0 SSOT)*
-*Last updated: 2026-08-24 — L0→L1 sync: md-to-ooxml v1.2.0 (PR15: .pptx presentation writer per backlog §8 co-work row 4 — `compileToPresentationML()` emits the full OOXML presentation package in single-file Flat OPC form; H1 → slide mapping with title/body placeholders; `--type pptx` + `.pptx` extension inference; row + usage paragraph refreshed; byte-identical L0 copy); previous: 2026-08-24 — L0→L1 sync: verify-readme-sync v1.4.0 (PR10: user-guide translated_from_hash gate promoted WARN → FAIL per ADR-0055 playbook after soak — failures increment totalErrors and exit 1; byte-identical L0 copy); previous: 2026-08-24 — L0→L1 sync: verify-readme-sync v1.3.0 (PR8: user-guide translated_from_hash WARN-stage audit per ADR-0055 playbook — detects missing/stale hashes in KO guides; --update-hashes now also seeds translated_from_hash in user-guide_ko.md frontmatter; preserves CRLF/LF line endings and UTF-8-no-BOM; WARN does not affect exit code); previous: 2026-08-24 — L0→L1 sync: validate-md-language v1.6.1 (removed the hardcoded 15-locale fallback in the L1 copy too — locale list comes solely from docs/workspace-schema.json `i18n.locale_codes`, ko-only degraded mode when absent) and registry-row refresh for create-l3-scaffold v1.12.1 (the manual L1 row had drifted at v1.9.2 since the 2026-08-15 rename; also now writes `.claude/template-version.txt` with `country=` at scaffold time); previous: 2026-08-15 — Renamed the 4 scripts whose `l2`-prefixed names/flags predated the L3 layer terminology: `create-l2-scaffold.ts`→`create-l3-scaffold.ts` (v1.9.2), `generate-l2-readme.ts`→`generate-l3-readme.ts` (v1.0.3, `--l2-path`→`--l3-path`), `l2-to-variant-pipeline.ts`→`l3-to-variant-pipeline.ts` (v1.10.5, `executeL2ToVariantPipeline()`→`executeL3ToVariantPipeline()`, `PipelineConfig.l2ProjectPath`→`l3ProjectPath`), `test-l2-promotion.ts`→`test-l3-to-variant-promotion.ts` (v1.0.2); also renamed the `simulate-l2-promotion` skill to `simulate-l3-to-variant-promotion`. Historical ADRs, dated design docs, and memory archives were left unchanged (they document what was true at the time); previous: Version bumps for generate-l2-readme (new v1.0.0: self-service Phase A README regeneration sharing the generate-variant.ts renderer), create-l2-scaffold v1.9.0 (render README.md/README_ko.md from the standard template instead of hardcoded heredocs; _ORIGIN.md checklist + printSummary now point at generate-l2-readme.ts), generate-variant v1.10.0 (export generateReadme/generateReadmeKo/buildReadmeSubstitutions; relocate extractAgentRoster/extractSkills/normalizeRelPath here from l2-to-variant-pipeline.ts), l2-to-variant-pipeline v1.10.2 (import the three relocated functions from generate-variant.ts instead of defining them locally); previous: Version bumps for validate-templates v1.5.17 (new Check WS-08: README standard conformance, policy-driven WARN via variantValidationPolicy.warningOnly), generate-variant v1.9.0 (render README.md/README_ko.md from templates/common/docs/README.template.md via applyTemplate; readmeNarrative? override; deleted Generated/MVP footer), template-utils v1.1.0 (extracted generic applyTemplate(); applyContextTemplate delegates to it), readme-lifecycle-audit v1.0.3 (ownership comment: WS-08 is sole templates/ README standard enforcer); previous: Version bumps for validate-templates v1.5.16 (new Check WS-07: variants must not carry local docs/context.md), generate-variant v1.8.1 (fix Windows path-separator so SKIP_IN_COPY actually excludes docs/context.md during promotion), new-project v1.5.3 (defense-in-depth: variant overlay skips docs/context.md); previous: Version bump for l2-to-variant-pipeline v1.10.1 (Issue Set A fixes: consolidated SKIP_AGENT_FILES, fixed missingOptionalSections JSON field, removed process.exit(1) from executeL2ToVariantPipeline, registry-driven canonicalExtensionSource for lecture type, deleted dead VariantPlugin.goldenReference()); previous: Version bumps for l2-to-variant-pipeline v1.10.0, generate-variant v1.8.0, pm-md-parser v1.1.0, create-l2-scaffold v1.8.0, reconcile-with-l0-l1 v1.2.2, golden-reference-loader v1.1.0, capability-registry v1.0.2, consulting-plugin v1.1.0, agent-verify v1.0.2 (feature + bugfix changes: scan L1-match classification, lean variant templates, ADR-0048 pm.md).*
+*Last updated: 2026-08-24 — Version bump for md-to-ooxml v1.2.0 (PR15: .pptx presentation writer per backlog §8 co-work row 4 — new `compileToPresentationML()` completes the Office trio by emitting the full OOXML presentation package in the same single-file form as the docx/xlsx writers (Flat OPC `pkg:package` embedding `[Content_Types].xml`, `_rels/.rels`, `ppt/presentation.xml` + rels, slideMaster1 + rels, slideLayout1 + rels, theme1, and per-slide `slideN.xml` + rels); markdown mapping: each `# ` H1 starts a slide (heading text → title placeholder), list items → bullets (indent depth → `lvl`), `##`/`###` → bold lead-ins, paragraphs/tables/code blocks → plain-text body lines; `--type pptx`, `.pptx` extension inference, `--check` parity, plus unsupported-type guard; new `tests/md-to-ooxml-pptx.test.ts`); previous: 2026-08-24 — Version bump for verify-readme-sync v1.4.0 (PR10: user-guide translated_from_hash gate promoted WARN → FAIL per ADR-0055 playbook after soak — runUserGuideHashAudit() returns the failure count and increments totalErrors; missing/stale hashes now exit 1; soak evidence: zero warnings from PR #646 seeding through #647; tests assert FAIL behavior); previous: 2026-08-24 — Version bump for verify-readme-sync v1.3.0 (PR8: user-guide translated_from_hash WARN-stage audit per ADR-0055 playbook — detects missing/stale hashes in KO guides; --update-hashes now also seeds translated_from_hash in user-guide_ko.md frontmatter; preserves CRLF/LF line endings and UTF-8-no-BOM; WARN does not affect exit code); previous: 2026-08-24 — Version bumps for validate-templates v1.13.0 (country-profile lifecycle enforcement per docs/country-profiles.md "Profile Freshness & Ownership": profile frontmatter `status` must be one of active/draft/stale — hard FAIL on anything else; auto-stale WARN when an `active` profile's `last_verified` passes the 12-month line, recommending `status: stale`; new cross-variant Check B-05 WARN when the same `<CC>.md` carries divergent `last_verified` dates across variants; renumbered the duplicate per-variant skill-lifecycle check ID B-05 → B-09), validate-md-language v1.6.1 (L0+L1: removed the hardcoded 15-locale fallback — the locale list now comes solely from docs/workspace-schema.json `i18n.locale_codes`, degrading to ko-only with a warning when the schema is absent), and create-l3-scaffold v1.12.1 (writes `.claude/template-version.txt` at scaffold time — variant/version/platform/country/created, mirroring new-project.ts §5.6 — so L3 drafts carry country provenance from day one); previous: 2026-08-24 — Version bumps for upgrade-project v1.10.1 (country-profile awareness on the upgrade path: registry-driven prune of country-scoped skills after all skill-copy passes with an isLocallyModified conflict guard for legacy forks + dry-run parity; preserves `country=` in .claude/template-version.txt instead of erasing it) and l3-to-variant-pipeline v1.12.1 (new Phase 2.5: country-scoped skill exclusion — drops country_scoped_assets.skills entries from keepInVariant and the variant.json skill manifest so a --country KR draft cannot fork k-* skills into templates/<variant>/skills/); previous: 2026-08-23 — Version bump for validate-templates v1.10.0 (new Checks WS-11: bilingual user-guide pair per variant — hard FAIL, not common-satisfiable; WS-12: variant index coverage across the 6 README index files — EN/KO FAIL, es/ja WARN); previous: 2026-08-15 — Renamed the 4 scripts whose `l2`-prefixed names/flags predated the L3 layer terminology: `create-l2-scaffold.ts`→`create-l3-scaffold.ts` (v1.9.2), `generate-l2-readme.ts`→`generate-l3-readme.ts` (v1.0.3, `--l2-path`→`--l3-path`), `l2-to-variant-pipeline.ts`→`l3-to-variant-pipeline.ts` (v1.10.5, `executeL2ToVariantPipeline()`→`executeL3ToVariantPipeline()`, `PipelineConfig.l2ProjectPath`→`l3ProjectPath`), `test-l2-promotion.ts`→`test-l3-to-variant-promotion.ts` (v1.0.2); also renamed the `simulate-l2-promotion` skill to `simulate-l3-to-variant-promotion`. Historical ADRs, dated design docs, and memory archives were left unchanged (they document what was true at the time); previous: Version bumps for generate-l2-readme (new v1.0.0: self-service Phase A README regeneration sharing the generate-variant.ts renderer), create-l2-scaffold v1.9.0 (render README.md/README_ko.md from the standard template instead of hardcoded heredocs; _ORIGIN.md checklist + printSummary now point at generate-l2-readme.ts), generate-variant v1.10.0 (export generateReadme/generateReadmeKo/buildReadmeSubstitutions; relocate extractAgentRoster/extractSkills/normalizeRelPath here from l2-to-variant-pipeline.ts), l2-to-variant-pipeline v1.10.2 (import the three relocated functions from generate-variant.ts instead of defining them locally); previous: Version bumps for validate-templates v1.5.17 (new Check WS-08: README standard conformance, policy-driven WARN via variantValidationPolicy.warningOnly), generate-variant v1.9.0 (render README.md/README_ko.md from templates/common/docs/README.template.md via applyTemplate; readmeNarrative? override; deleted Generated/MVP footer), template-utils v1.1.0 (extracted generic applyTemplate(); applyContextTemplate delegates to it), readme-lifecycle-audit v1.0.3 (ownership comment: WS-08 is sole templates/ README standard enforcer); previous: Version bumps for validate-templates v1.5.16 (new Check WS-07: variants must not carry local docs/context.md), generate-variant v1.8.1 (fix Windows path-separator so SKIP_IN_COPY actually excludes docs/context.md during promotion), new-project v1.5.3 (defense-in-depth: variant overlay skips docs/context.md); previous: Version bump for l2-to-variant-pipeline v1.10.1 (Issue Set A fixes: consolidated SKIP_AGENT_FILES, fixed missingOptionalSections JSON field, removed process.exit(1) from executeL2ToVariantPipeline, registry-driven canonicalExtensionSource for lecture type, deleted dead VariantPlugin.goldenReference()); previous: Version bumps for l2-to-variant-pipeline v1.10.0, generate-variant v1.8.0, pm-md-parser v1.1.0, create-l2-scaffold v1.8.0, reconcile-with-l0-l1 v1.2.2, golden-reference-loader v1.1.0, capability-registry v1.0.2, consulting-plugin v1.1.0, agent-verify v1.0.2 (feature + bugfix changes: scan L1-match classification, lean variant templates, ADR-0048 pm.md).*

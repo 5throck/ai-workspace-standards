@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.6.1
+// @version 1.7.0
 /**
  * Markdown Language Validation Script with I18N Support
  *
@@ -256,6 +256,28 @@ async function validateMarkdownLanguage(): Promise<void> {
     }
   } catch { /* ignore scan errors */ }
 
+  // Collect templates/<variant>/ directories whose variant.json has country_config.locales
+  // Files under those variants are exempt from Korean language validation
+  const variantLocaleExemptions = new Map<string, Set<string>>(); // variantDir -> Set<locale>
+  try {
+    const templatesDir = join(cwd, 'templates');
+    if (existsSync(templatesDir)) {
+      const { readdirSync } = await import('fs');
+      for (const entry of readdirSync(templatesDir, { withFileTypes: true })) {
+        if (!entry.isDirectory()) continue;
+        const vf = join(templatesDir, entry.name, 'variant.json');
+        if (!existsSync(vf)) continue;
+        try {
+          const vjson = JSON.parse(readFileSync(vf, 'utf-8'));
+          const locales: string[] = vjson?.country_config?.locales ?? [];
+          if (locales.length > 0) {
+            variantLocaleExemptions.set(entry.name + '/', new Set(locales));
+          }
+        } catch { /* ignore parse errors */ }
+      }
+    }
+  } catch { /* ignore scan errors */ }
+
   const mdFiles = allFiles.filter((f) => {
     const normalized = f.replace(/\\/g, "/");
     if (normalized.includes("node_modules/") ||
@@ -285,6 +307,23 @@ async function validateMarkdownLanguage(): Promise<void> {
     }
 
     officialCount++;
+
+    // Check variant locale exemption (templates/<variant>/ with country_config.locales)
+    const normed = file.replace(/\\/g, "/");
+    let variantExempt = false;
+    if (normed.startsWith("templates/")) {
+      const afterTemplates = normed.slice("templates/".length);
+      const slashIdx = afterTemplates.indexOf('/');
+      if (slashIdx > 0) {
+        const variantDir = afterTemplates.slice(0, slashIdx + 1);
+        const exemptLocales = variantLocaleExemptions.get(variantDir);
+        if (exemptLocales?.has('ko')) {
+          variantExempt = true;
+        }
+      }
+    }
+    if (variantExempt) continue;
+
     const violation = analyzeFile(file);
     if (violation) {
       violations.push(violation);

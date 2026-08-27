@@ -57,6 +57,10 @@ export const VARIANT_TYPE_REGISTRY = {
     name: 'abap-development',
     description: 'SAP ABAP development against NetWeaver via ADT REST APIs, with module analysts (SD/MM/FI/CO/PP/LE) and technical execution agents',
   },
+  safety: {
+    name: 'safety',
+    description: 'EHS/GxP compliance platform for Korean occupational safety, pharmaceutical quality, and medical device regulation',
+  },
 } as const;
 
 /**
