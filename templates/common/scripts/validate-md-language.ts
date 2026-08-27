@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.7.0
+// @version 1.8.0
 /**
  * Markdown Language Validation Script with I18N Support
  *
@@ -24,7 +24,26 @@
 
 import { readFileSync, existsSync } from "fs";
 import { join, dirname } from "node:path";
+import { execFileSync } from "node:child_process";
 import { die } from "./lib/error-handling.ts";
+
+const _TRACKED_CO_VARIANTS: Set<string> | null = (() => {
+  try {
+    const out = execFileSync('git', ['ls-files', '--cached', '--', 'templates/'], { encoding: 'utf-8' }).trim();
+    const dirs = new Set<string>();
+    if (!out) return dirs;
+    for (const line of out.split('\n')) {
+      const m = line.match(/^templates\/(co-[^/]+)\//);
+      if (m) dirs.add(m[1]);
+    }
+    return dirs;
+  } catch { return null; }
+})();
+
+function isCoVariantTracked(name: string): boolean {
+  if (!_TRACKED_CO_VARIANTS) return true;
+  return _TRACKED_CO_VARIANTS.has(name);
+}
 
 /**
  * Supported locale codes are loaded from docs/workspace-schema.json (i18n.locale_codes).
@@ -288,6 +307,15 @@ async function validateMarkdownLanguage(): Promise<void> {
     // Exclude root-level generated project directories
     for (const dir of rootProjectDirs) {
       if (normalized.startsWith(dir)) return false;
+    }
+    // Skip untracked template variants (WIP scaffolds on disk)
+    if (normalized.startsWith("templates/co-")) {
+      const afterTemplates = normalized.slice("templates/".length);
+      const slashIdx = afterTemplates.indexOf('/');
+      if (slashIdx > 0) {
+        const variantName = afterTemplates.slice(0, slashIdx);
+        if (!isCoVariantTracked(variantName)) return false;
+      }
     }
     return true;
   });

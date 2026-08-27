@@ -1,4 +1,7 @@
-// @version 2.23.0
+// @version 2.25.0
+// v2.25.0: Variant-scanning checks now skip untracked templates/co-* directories so
+//           WIP template scaffolds on disk do not block commits. Tracked variant set
+//           is computed once via git ls-files at module load.
 // v2.21.1: fix(lint+types): stripComment now strips trailing \r before matching — under
 //           core.autocrlf checkouts the $ anchors never matched, so the > nul lint flagged
 //           its own prose comments (ported from co-abap 2.21.2); validators import switched
@@ -32,6 +35,24 @@ import { sourceShellInjectionPatterns } from './helpers/security-validator.ts';
 import { splitIntoSections, getContentLines } from './helpers/context-sections.ts';
 import * as url from 'node:url';
 import { detectEncoding, detectHomoglyphs, detectZeroWidthChars, readUTF8File } from './lib/encoding-utils.ts';
+
+const _TRACKED_CO_VARIANTS: Set<string> | null = (() => {
+  try {
+    const out = execFileSync('git', ['ls-files', '--cached', '--', 'templates/'], { encoding: 'utf-8' }).trim();
+    const dirs = new Set<string>();
+    if (!out) return dirs;
+    for (const line of out.split('\n')) {
+      const m = line.match(/^templates\/(co-[^/]+)\//);
+      if (m) dirs.add(m[1]);
+    }
+    return dirs;
+  } catch { return null; }
+})();
+
+function isCoVariantTracked(name: string): boolean {
+  if (!_TRACKED_CO_VARIANTS) return true;
+  return _TRACKED_CO_VARIANTS.has(name);
+}
 
 // Check for --lifecycle-only flag
 const LIFECYCLE_ONLY = process.argv.includes('--lifecycle-only');
@@ -590,7 +611,7 @@ if (hasBun) {
         const { runAllValidators } = await import(validatorsUrl);
         let validatorErrors = 0;
         let validatorWarnings = 0;
-        for (const variant of fs.readdirSync('templates').filter(d => d.startsWith('co-'))) {
+        for (const variant of fs.readdirSync('templates').filter(d => d.startsWith('co-') && isCoVariantTracked(d))) {
             const variantDir = path.join('templates', variant);
             const vjPath = path.join(variantDir, 'variant.json');
             if (!fs.existsSync(vjPath)) continue;
@@ -841,7 +862,7 @@ function checkL2VariantIntegrity() {
   if (!fs.existsSync(templatesDir)) return;
 
   const variants = fs.readdirSync(templatesDir)
-    .filter(d => d.startsWith('co-') && fs.statSync(path.join(templatesDir, d)).isDirectory());
+    .filter(d => d.startsWith('co-') && fs.statSync(path.join(templatesDir, d)).isDirectory() && isCoVariantTracked(d));
 
   if (variants.length === 0) return;
 
@@ -895,7 +916,7 @@ function checkVariantContextGuidelinesSection() {
   if (!fs.existsSync(templatesDir)) return;
 
   const variants = fs.readdirSync(templatesDir)
-    .filter(d => d.startsWith('co-') && fs.statSync(path.join(templatesDir, d)).isDirectory());
+    .filter(d => d.startsWith('co-') && fs.statSync(path.join(templatesDir, d)).isDirectory() && isCoVariantTracked(d));
 
   if (variants.length === 0) return;
 
@@ -941,7 +962,7 @@ function checkVariantAgentSections() {
   if (!fs.existsSync(templatesDir)) return;
 
   const variants = fs.readdirSync(templatesDir)
-    .filter(d => d.startsWith('co-') && fs.statSync(path.join(templatesDir, d)).isDirectory());
+    .filter(d => d.startsWith('co-') && fs.statSync(path.join(templatesDir, d)).isDirectory() && isCoVariantTracked(d));
 
   if (variants.length === 0) return;
 
@@ -984,7 +1005,7 @@ function checkVariantSkillSections() {
   if (!fs.existsSync(templatesDir)) return;
 
   const variants = fs.readdirSync(templatesDir)
-    .filter(d => d.startsWith('co-') && fs.statSync(path.join(templatesDir, d)).isDirectory());
+    .filter(d => d.startsWith('co-') && fs.statSync(path.join(templatesDir, d)).isDirectory() && isCoVariantTracked(d));
 
   if (variants.length === 0) return;
 
@@ -1038,7 +1059,7 @@ function checkVariantJsonSchema() {
   if (!fs.existsSync(schemaPath) || !fs.existsSync(templatesDir)) return;
 
   const variants = fs.readdirSync(templatesDir)
-    .filter(d => d.startsWith('co-') && fs.statSync(path.join(templatesDir, d)).isDirectory());
+    .filter(d => d.startsWith('co-') && fs.statSync(path.join(templatesDir, d)).isDirectory() && isCoVariantTracked(d));
 
   if (variants.length === 0) return;
 
@@ -1276,7 +1297,7 @@ function checkShellInjectionPatterns() {
     const scanRoots = ['scripts'];
     if (fs.existsSync('templates')) {
         for (const variant of fs.readdirSync('templates')) {
-            if (!variant.startsWith('co-')) continue;
+            if (!variant.startsWith('co-') || !isCoVariantTracked(variant)) continue;
             const variantScriptsDir = path.join('templates', variant, 'scripts');
             if (fs.existsSync(variantScriptsDir)) scanRoots.push(variantScriptsDir);
         }
@@ -1393,7 +1414,7 @@ function checkVariantScriptDrift() {
     const templatesDir = path.join('templates');
     if (fs.existsSync(templatesDir)) {
         for (const variant of fs.readdirSync(templatesDir)) {
-            if (!variant.startsWith('co-')) continue;
+            if (!variant.startsWith('co-') || !isCoVariantTracked(variant)) continue;
             const variantScriptsDir = path.join(templatesDir, variant, 'scripts');
             if (!fs.existsSync(variantScriptsDir)) continue;
 
@@ -1454,7 +1475,7 @@ function checkVariantContextCommonization() {
     if (!fs.existsSync(templatesDir)) return;
 
     const variants = fs.readdirSync(templatesDir)
-        .filter(d => d.startsWith('co-') && fs.statSync(path.join(templatesDir, d)).isDirectory());
+        .filter(d => d.startsWith('co-') && fs.statSync(path.join(templatesDir, d)).isDirectory() && isCoVariantTracked(d));
     if (variants.length < 2) return; // nothing to compare cross-variant
 
     type Section = { variant: string; heading: string; lines: Set<string> };
@@ -1537,7 +1558,7 @@ function checkStalePromotedContent() {
     const templatesDir = 'templates';
     if (!fs.existsSync(templatesDir)) return;
     const variants = fs.readdirSync(templatesDir)
-        .filter(d => d.startsWith('co-') && fs.statSync(path.join(templatesDir, d)).isDirectory());
+        .filter(d => d.startsWith('co-') && fs.statSync(path.join(templatesDir, d)).isDirectory() && isCoVariantTracked(d));
     if (variants.length === 0) return;
 
     const commonSections = splitIntoSections(readUTF8File(commonContextPath));
@@ -1634,7 +1655,7 @@ if (IS_WORKSPACE_ROOT && fs.existsSync('AGENTS.md')) {
         let checkedVariants = 0;
         if (fs.existsSync(templatesDir)) {
             for (const entry of fs.readdirSync(templatesDir)) {
-                if (!entry.startsWith('co-')) continue;
+                if (!entry.startsWith('co-') || !isCoVariantTracked(entry)) continue;
                 const variantAgentsMd = path.join(templatesDir, entry, 'AGENTS.md');
                 if (!fs.existsSync(variantAgentsMd)) continue;
                 const variantContent = readUTF8File(variantAgentsMd);
@@ -1892,6 +1913,8 @@ if (!LIFECYCLE_ONLY && fs.existsSync('templates')) {
             const stat = fs.statSync(itemPath);
             if (stat.isDirectory()) {
                 if (SKIP_DIRS.has(item)) continue;
+                const dirName = path.basename(itemPath);
+                if (dirName.startsWith('co-') && !isCoVariantTracked(dirName)) continue;
                 checkLeakage(itemPath);
             } else if (stat.isFile() && itemPath.endsWith('.md')) {
                 const content = readUTF8File(itemPath);
@@ -1947,7 +1970,7 @@ if (fs.existsSync('templates')) {
     const templatesDir = 'templates';
 
     for (const entry of fs.readdirSync(templatesDir)) {
-        if (!entry.startsWith('co-')) continue;
+        if (!entry.startsWith('co-') || !isCoVariantTracked(entry)) continue;
         const variantAgentsDir = path.join(templatesDir, entry, 'agents');
         if (!fs.existsSync(variantAgentsDir)) continue;
 
@@ -2150,7 +2173,7 @@ if (!LIFECYCLE_ONLY && IS_WORKSPACE_ROOT) {
         const templatesDir = 'templates';
         if (fs.existsSync(templatesDir)) {
             const variants = fs.readdirSync(templatesDir)
-                .filter(d => d.startsWith('co-') && fs.statSync(path.join(templatesDir, d)).isDirectory());
+                .filter(d => d.startsWith('co-') && fs.statSync(path.join(templatesDir, d)).isDirectory() && isCoVariantTracked(d));
 
             for (const variant of variants) {
                 const l2PmPath = path.join(templatesDir, variant, 'agents', 'pm.md');
