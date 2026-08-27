@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.13.0
+ * @version 1.14.0
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -14,6 +14,7 @@
 
 import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { join, dirname, resolve } from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { load } from 'js-yaml';
 import { getScriptLayer, getSkillLayer, includeScriptInL1, parseScriptLayers, parseSkillLayers } from './helpers/layer-filter.ts';
@@ -2827,6 +2828,53 @@ function checkAgentLifecycleFrontmatter(variant: string): void {
 
 // Main
 // A-10: propagation-map.json schema validation
+/**
+ * VRG-01: Variant Readiness Gate (continuous enforcement)
+ *
+ * Runs `validate-variant-readiness.ts` for every variant under templates/ so that a
+ * non-READY variant (flat/unresolved agent or skill paths, missing PROMOTION_CHECKLIST.md,
+ * missing README/AGENTS.md, inconsistent country_config) is surfaced here — not only at
+ * variant-ization / new-project / upgrade-project time. Complements the structural checks
+ * above by asserting each variant is internally consistent and usable.
+ */
+function checkVariantReadinessGate(): void {
+  if (!JSON_MODE) console.log('\n=== VRG-01: Variant Readiness Gate (all variants) ===');
+  const gateTs = join(__dirname, 'validate-variant-readiness.ts');
+  if (!existsSync(gateTs)) {
+    warn('root', 'vrg-missing', 'validate-variant-readiness.ts not found — skipping VRG check');
+    return;
+  }
+  let dirs: string[] = [];
+  try {
+    dirs = readdirSync(TEMPLATES_DIR, { withFileTypes: true })
+      .filter((e) => e.isDirectory())
+      .map((e) => e.name)
+      .filter((name) => existsSync(join(TEMPLATES_DIR, name, 'variant.json')));
+  } catch {
+    return;
+  }
+  let checked = 0;
+  for (const name of dirs) {
+    if (variantArg !== 'all' && name !== variantArg) continue;
+    const dir = join(TEMPLATES_DIR, name);
+    const res = spawnSync(process.execPath, [gateTs, '--dir', dir, '--json'], { encoding: 'utf8' });
+    let parsed: { findings?: Array<{ severity: string; code: string; message: string }> } = {};
+    try {
+      parsed = JSON.parse(res.stdout || '{}');
+    } catch {
+      continue;
+    }
+    const findings = parsed.findings || [];
+    for (const f of findings) {
+      if (f.severity === 'error') {
+        fail(name, `vrg:${f.code}`, `VRG: ${f.message}`, `Run: bun scripts/validate-variant-readiness.ts --variant ${name}`);
+      }
+    }
+    checked++;
+  }
+  if (checked > 0 && !JSON_MODE) pass(`VRG checked ${checked} variant(s)`);
+}
+
 function checkPropagationMapSchema(): void {
   if (!JSON_MODE) console.log('\n=== Check PM-01: propagation-map.json schema ===');
   const mapPath = join(ROOT, 'scripts', 'propagation-map.json');
@@ -2926,6 +2974,7 @@ function main() {
   checkPlatformDocumentationParity();
   checkRootCommonCommandsParity();
   checkPropagationMapSchema();
+  checkVariantReadinessGate();   // VRG-01: continuous Variant Readiness Gate enforcement
 
   // B-07: Sync validated variant info back to VERSION_REGISTRY.json
   if (!JSON_MODE) console.log('\n=== B-07: VERSION_REGISTRY.json sync ===');

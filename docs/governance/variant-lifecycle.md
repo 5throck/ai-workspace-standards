@@ -127,6 +127,7 @@ so that an improperly variant-ized template can never be reflected, scaffolded, 
 | **variant-ization** | `scripts/project-to-variant.ts` (lightweight) · `scripts/l3-to-variant-pipeline.ts` (full) | **Blocked** on failure (unless `--force`) |
 | **new-project** | `scripts/new-project.ts` | **Blocked pre-flight** — a project may only be scaffolded from a READY variant |
 | **upgrade-project** | `scripts/upgrade-project.ts` | **Blocked pre-flight** — a project may only be upgraded against a READY template variant |
+| **continuous (backstop)** | `scripts/validate-templates.ts` (check `VRG-01`) | **Fails the template validation** if any variant is non-READY — catches direct edits that bypass the lifecycle scripts |
 
 ### Blocking checks (exit 1 if any fail)
 - `variant.json` exists with required fields (`name`, `description`, `status`) and a valid `status` value.
