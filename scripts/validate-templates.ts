@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.14.0
+ * @version 1.15.0
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -13,6 +13,25 @@
  */
 
 import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+
+const _TRACKED_CO_VARIANTS: Set<string> | null = (() => {
+  try {
+    const out = execFileSync('git', ['ls-files', '--cached', '--', 'templates/'], { encoding: 'utf-8' }).trim();
+    const dirs = new Set<string>();
+    if (!out) return dirs;
+    for (const line of out.split('\n')) {
+      const m = line.match(/^templates\/(co-[^/]+)\//);
+      if (m) dirs.add(m[1]);
+    }
+    return dirs;
+  } catch { return null; }
+})();
+
+function isCoVariantTracked(name: string): boolean {
+  if (!_TRACKED_CO_VARIANTS) return true;
+  return _TRACKED_CO_VARIANTS.has(name);
+}
 import { join, dirname, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -286,7 +305,8 @@ function checkVariantManifests(): Map<string, VariantManifest> {
   const entries = readdirSync(TEMPLATES_DIR);
   const variantDirs = entries.filter(e => {
     const fullPath = join(TEMPLATES_DIR, e);
-    return statSync(fullPath).isDirectory() && !e.startsWith('.') && e !== 'common';
+    return statSync(fullPath).isDirectory() && !e.startsWith('.') && e !== 'common'
+      && (e.startsWith('co-') ? isCoVariantTracked(e) : true);
   });
 
   if (variantDirs.length === 0) {
@@ -1305,6 +1325,7 @@ function checkPlatformDocumentationParity(): void {
   const templatesDir = readdirSync(TEMPLATES_DIR);
   for (const tpl of templatesDir) {
     if (tpl === 'common' || tpl.startsWith('.')) continue;
+    if (tpl.startsWith('co-') && !isCoVariantTracked(tpl)) continue;
     const tplPath = join(TEMPLATES_DIR, tpl);
     if (!statSync(tplPath).isDirectory()) continue;
     
@@ -2849,6 +2870,7 @@ function checkVariantReadinessGate(): void {
     dirs = readdirSync(TEMPLATES_DIR, { withFileTypes: true })
       .filter((e) => e.isDirectory())
       .map((e) => e.name)
+      .filter((name) => name.startsWith('co-') ? isCoVariantTracked(name) : true)
       .filter((name) => existsSync(join(TEMPLATES_DIR, name, 'variant.json')));
   } catch {
     return;

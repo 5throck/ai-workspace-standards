@@ -98,3 +98,7 @@ These are implemented; the gate then verifies the output independently.
 - `docs/lifecycle/skills/project-to-variant.md` (lightweight pipeline; gate is enforced)
 - `scripts/test-variant-readiness.ts` — VRG regression test: a well-formed variant exits 0 (READY);
   a variant missing `PROMOTION_CHECKLIST.md` or with an unresolved `agents[].file` exits 1 (NOT READY)
+- `scripts/audit.ts` (v2.25.0), `scripts/validate-md-language.ts` (v1.8.0),
+  `scripts/validate-templates.ts` (v1.15.0) — variant-scanning checks skip untracked
+  `templates/co-*` directories so WIP template scaffolds on disk do not block commits;
+  the tracked variant set is computed once via `git ls-files` at module load

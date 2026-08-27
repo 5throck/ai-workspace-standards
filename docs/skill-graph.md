@@ -38,6 +38,7 @@
 | `context-commonization-review` | L0 | — | — | — |
 | `contractor-onboarding` | variant:co-safety | — | — | — |
 | `cosmetics-solvent-exposure-monitor` | variant:co-safety | — | — | — |
+| `cost-shock-analysis` | variant:co-price | — | — | — |
 | `create-variant` | L0 | — | — | — |
 | `customs-duty-drawback-workflow` | variant:co-export | customs-duty-drawback-specialist, customs-duty-drawback-specialist | phase3, phase4 | — |
 | `dangerous-cargo-handling-planner` | variant:co-safety | — | — | — |
@@ -45,12 +46,14 @@
 | `desktop-app-fallback` | variant:co-abap | code-writer, test-runner | phase3, phase4 | — |
 | `deviation-capa` | variant:co-safety | — | — | — |
 | `documentation-writing` | variant:co-safety | content-writer, technical-writer | — | — |
+| `double-entry-reconciliation` | variant:co-price | — | — | — |
 | `dts-verification` | variant:co-safety | — | — | — |
 | `dump-monitor` | variant:co-abap | devops-admin, pm | phase1, phase6 | — |
 | `emergency-response` | variant:co-safety | — | — | — |
 | `environmental-compliance-checker` | variant:co-safety | — | — | — |
 | `ess-fire-risk-assessor` | variant:co-safety | — | — | — |
 | `evidence-ledger` | common | — | — | — |
+| `excel-export` | variant:co-price | — | — | — |
 | `executive-presentation` | variant:co-consult | communications-lead, communications-lead | phase3 | — |
 | `explain-me` | L0 | — | — | — |
 | `export-control-screening` | variant:co-export | export-control-compliance-specialist, export-control-compliance-specialist | phase1, phase2 | — |
@@ -60,10 +63,12 @@
 | `financial-modeling` | variant:co-consult | data-analyst, data-analyst, strategy-analyst, strategy-analyst | phase1, phase3 | — |
 | `financial-narrative-brief` | variant:co-news | financial-analyst, financial-analyst | phase1 | — |
 | `financial-statement-analysis` | variant:co-consult | data-analyst, data-analyst | phase1, phase3 | — |
+| `financial-statement-prep` | variant:co-price | — | — | — |
 | `finding-reconciliation` | variant:co-security | pentester, pentester, report-writer, report-writer | phase3, phase5, phase6 | — |
 | `finishing-a-development-branch` | variant:co-safety | — | — | — |
 | `foreign-regulation-monitoring` | variant:co-export | foreign-regulatory-intelligence-analyst, foreign-regulatory-intelligence-analyst | phase1 | — |
 | `fta-origin-determination` | variant:co-export | fta-origin-analyst, fta-origin-analyst | phase1, phase2 | — |
+| `gabor-granger` | variant:co-price | — | — | — |
 | `gas-dispersion-analyzer` | variant:co-safety | — | — | — |
 | `gateguard` | L0 | — | — | — |
 | `ghs-classifier` | variant:co-safety | — | — | — |
@@ -74,11 +79,13 @@
 | `gmp-qrm` | variant:co-safety | — | — | — |
 | `halal-certification-workflow` | variant:co-export | halal-certification-specialist, halal-certification-specialist | phase1, phase2 | — |
 | `handbook` | variant:co-deck | handbook-reviewer, handbook-reviewer, handbook-writer, handbook-writer | phaseH-2, phaseH-3, phaseH-4, phaseH-5 | — |
+| `harness-verification` | variant:co-price | — | — | — |
 | `hazop-analysis` | variant:co-safety | — | — | — |
 | `hr-metrics-analysis` | variant:co-hr | data-analyst | phase1, phase3 | — |
 | `hs-classification-workflow` | variant:co-export | hs-classification-specialist, hs-classification-specialist | phase1, phase2 | — |
 | `hv-cell-formation-electrical-safety-planner` | variant:co-safety | — | — | — |
 | `hwp-document-processing` | variant:co-consult | communications-lead | phase3, phase4 | — |
+| `i18n-audit` | variant:co-price | — | — | — |
 | `i18n-formatting` | common | — | — | — |
 | `i18n-layout` | common | — | — | — |
 | `i18n-locale-config` | common | — | — | — |
@@ -93,7 +100,9 @@
 | `learning-curriculum-design` | variant:co-hr | learning-development-specialist, learning-development-specialist | phase2 | — |
 | `logistics-coordination` | variant:co-export | logistics-coordinator, logistics-coordinator | phase3, phase4 | — |
 | `loto` | variant:co-safety | — | — | — |
+| `map-channel-enforcement` | variant:co-price | — | — | — |
 | `market-entry-strategy` | variant:co-export | market-entry-strategist, market-entry-strategist | phase1, phase3, phase4 | — |
+| `math-function-plotter` | variant:co-price | — | — | — |
 | `mece-logic-auditor` | L0 | strategy-analyst | phase1 | — |
 | `meeting` | variant:co-safety | — | — | — |
 | `meeting-facilitation` | L0 | — | — | — |
@@ -114,6 +123,10 @@
 | `pre-construction-technical-review` | variant:co-safety | — | — | — |
 | `prep-pdf` | variant:co-deck | measure, measure, pdf-export | phase4 | — |
 | `presenter-mode` | L0 | html-build | phase4 | — |
+| `price-waterfall-analysis` | variant:co-price | — | — | — |
+| `pricing-governance` | variant:co-price | — | — | — |
+| `pricing-playbook` | variant:co-price | — | — | — |
+| `prisma-7` | variant:co-price | — | — | — |
 | `process-hazard-screening` | variant:co-safety | — | — | — |
 | `project-delivery` | variant:co-consult | delivery-manager, delivery-manager, workstream-lead, workstream-lead | phase4 | — |
 | `project-review` | L0 | — | — | — |
@@ -142,9 +155,11 @@
 | `sap-pp` | variant:co-abap | architect, dba, pp-analyst | phase1, phase2 | — |
 | `sap-sd` | variant:co-abap | architect, dba, sd-analyst | phase1, phase2 | — |
 | `sarif-exporter` | L0 | pentester, report-writer | phase3, phase5 | — |
+| `scenario-comparison` | variant:co-price | — | — | — |
 | `script-lifecycle-manager` | L0 | — | — | — |
 | `security-scan` | L0 | — | — | — |
 | `service-design` | variant:co-design | design-lead, design-lead, service-designer, service-designer | phase1, phase2, phase3 | — |
+| `sheet-model` | variant:co-price | — | — | — |
 | `signal-detector` | variant:co-safety | — | — | — |
 | `simulate-l3-to-variant-promotion` | L0 | — | — | — |
 | `simulate-project-creation` | L0 | — | — | — |
@@ -175,11 +190,14 @@
 | `token-usage-lint` | variant:co-design | prototype-engineer, prototype-engineer | phase4 | — |
 | `tool-box-meeting` | variant:co-safety | — | — | — |
 | `trade-documentation-checklist` | variant:co-export | trade-documentation-specialist, trade-documentation-specialist | phase3 | — |
+| `trade-promotion-roi` | variant:co-price | — | — | — |
 | `translate` | L0 | — | — | — |
+| `ui-component-design` | variant:co-price | — | — | — |
 | `ui-ux-design-intelligence` | variant:co-design | design-lead, design-lead, ux-researcher, visual-designer, visual-designer | phase1, phase2, phase3 | — |
 | `update-bun-packages` | L0 | — | — | — |
 | `upgrade-project` | L0 | — | — | — |
 | `validate-docs-links` | L0 | — | — | — |
+| `van-westendorp-psm` | variant:co-price | — | — | — |
 | `variant-feature` | L0 | — | — | — |
 | `verify-authorization` | variant:co-security | pentester, red-team-lead | phase1, phase3 | — |
 | `zod-contract-gate` | L0 | — | — | — |

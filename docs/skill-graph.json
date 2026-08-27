@@ -432,9 +432,29 @@
       "layer": "variant:co-safety"
     },
     {
+      "id": "core-engine-dev",
+      "type": "agent",
+      "layer": "variant:co-price"
+    },
+    {
       "id": "cosmetics-solvent-exposure-monitor",
       "type": "skill",
       "layer": "variant:co-safety"
+    },
+    {
+      "id": "cost-asset-mgmt",
+      "type": "agent",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "cost-shock-analysis",
+      "type": "skill",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "cpa-auditor",
+      "type": "agent",
+      "layer": "variant:co-price"
     },
     {
       "id": "create-variant",
@@ -532,6 +552,11 @@
       "layer": "variant:co-safety"
     },
     {
+      "id": "double-entry-reconciliation",
+      "type": "skill",
+      "layer": "variant:co-price"
+    },
+    {
       "id": "dts-verification",
       "type": "skill",
       "layer": "variant:co-safety"
@@ -547,6 +572,11 @@
       "layer": "variant:co-safety"
     },
     {
+      "id": "engagement-director",
+      "type": "agent",
+      "layer": "variant:co-price"
+    },
+    {
       "id": "environmental-compliance-checker",
       "type": "skill",
       "layer": "variant:co-safety"
@@ -560,6 +590,11 @@
       "id": "evidence-ledger",
       "type": "skill",
       "layer": "common"
+    },
+    {
+      "id": "excel-export",
+      "type": "skill",
+      "layer": "variant:co-price"
     },
     {
       "id": "executive-presentation",
@@ -597,6 +632,11 @@
       "layer": "variant:co-abap"
     },
     {
+      "id": "finance-strategy-lead",
+      "type": "agent",
+      "layer": "variant:co-price"
+    },
+    {
       "id": "financial-analyst",
       "type": "agent",
       "layer": "variant:co-news"
@@ -625,6 +665,11 @@
       "id": "financial-statement-analysis",
       "type": "skill",
       "layer": "variant:co-consult"
+    },
+    {
+      "id": "financial-statement-prep",
+      "type": "skill",
+      "layer": "variant:co-price"
     },
     {
       "id": "finding-reconciliation",
@@ -665,6 +710,11 @@
       "id": "fta-origin-determination",
       "type": "skill",
       "layer": "variant:co-export"
+    },
+    {
+      "id": "gabor-granger",
+      "type": "skill",
+      "layer": "variant:co-price"
     },
     {
       "id": "game-debugger",
@@ -752,6 +802,11 @@
       "layer": "variant:co-deck"
     },
     {
+      "id": "harness-verification",
+      "type": "skill",
+      "layer": "variant:co-price"
+    },
+    {
       "id": "hazop-analysis",
       "type": "skill",
       "layer": "variant:co-safety"
@@ -785,6 +840,11 @@
       "id": "hwp-document-processing",
       "type": "skill",
       "layer": "variant:co-consult"
+    },
+    {
+      "id": "i18n-audit",
+      "type": "skill",
+      "layer": "variant:co-price"
     },
     {
       "id": "i18n-formatting",
@@ -847,6 +907,11 @@
       "layer": "common"
     },
     {
+      "id": "l10n-auditor",
+      "type": "agent",
+      "layer": "variant:co-price"
+    },
+    {
       "id": "labor-compliance-analyst",
       "type": "agent",
       "layer": "variant:co-hr"
@@ -875,6 +940,11 @@
       "id": "le-analyst",
       "type": "agent",
       "layer": "variant:co-abap"
+    },
+    {
+      "id": "lead-architect",
+      "type": "agent",
+      "layer": "variant:co-price"
     },
     {
       "id": "learning-curriculum-design",
@@ -912,6 +982,11 @@
       "layer": "variant:co-safety"
     },
     {
+      "id": "map-channel-enforcement",
+      "type": "skill",
+      "layer": "variant:co-price"
+    },
+    {
       "id": "market-entry-strategist",
       "type": "agent",
       "layer": "variant:co-export"
@@ -920,6 +995,16 @@
       "id": "market-entry-strategy",
       "type": "skill",
       "layer": "variant:co-export"
+    },
+    {
+      "id": "market-intelligence-analyst",
+      "type": "agent",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "math-function-plotter",
+      "type": "skill",
+      "layer": "variant:co-price"
     },
     {
       "id": "measure",
@@ -1072,6 +1157,31 @@
       "layer": "L0"
     },
     {
+      "id": "price-waterfall-analysis",
+      "type": "skill",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "pricing-governance",
+      "type": "skill",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "pricing-playbook",
+      "type": "skill",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "pricing-strategist",
+      "type": "agent",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "prisma-7",
+      "type": "skill",
+      "layer": "variant:co-price"
+    },
+    {
       "id": "process-hazard-screening",
       "type": "skill",
       "layer": "variant:co-safety"
@@ -1130,6 +1240,11 @@
       "id": "pyrophoric-gas-emergency-responder",
       "type": "skill",
       "layer": "variant:co-safety"
+    },
+    {
+      "id": "qa-tester",
+      "type": "agent",
+      "layer": "variant:co-price"
     },
     {
       "id": "qrm",
@@ -1277,6 +1392,11 @@
       "layer": "L0"
     },
     {
+      "id": "scenario-comparison",
+      "type": "skill",
+      "layer": "variant:co-price"
+    },
+    {
       "id": "schema-inspector",
       "type": "agent",
       "layer": "variant:co-abap"
@@ -1290,6 +1410,11 @@
       "id": "sd-analyst",
       "type": "agent",
       "layer": "variant:co-abap"
+    },
+    {
+      "id": "security-auditor",
+      "type": "agent",
+      "layer": "variant:co-price"
     },
     {
       "id": "security-expert",
@@ -1315,6 +1440,11 @@
       "id": "service-designer",
       "type": "agent",
       "layer": "variant:co-design"
+    },
+    {
+      "id": "sheet-model",
+      "type": "skill",
+      "layer": "variant:co-price"
     },
     {
       "id": "signal-detector",
@@ -1542,6 +1672,11 @@
       "layer": "variant:co-export"
     },
     {
+      "id": "trade-promotion-roi",
+      "type": "skill",
+      "layer": "variant:co-price"
+    },
+    {
       "id": "translate",
       "type": "skill",
       "layer": "L0"
@@ -1550,6 +1685,11 @@
       "id": "typography-expert",
       "type": "agent",
       "layer": "variant:co-design"
+    },
+    {
+      "id": "ui-component-design",
+      "type": "skill",
+      "layer": "variant:co-price"
     },
     {
       "id": "ui-ux-design-intelligence",
@@ -1572,9 +1712,19 @@
       "layer": "variant:co-design"
     },
     {
+      "id": "ux-specialist",
+      "type": "agent",
+      "layer": "variant:co-price"
+    },
+    {
       "id": "validate-docs-links",
       "type": "skill",
       "layer": "L0"
+    },
+    {
+      "id": "van-westendorp-psm",
+      "type": "skill",
+      "layer": "variant:co-price"
     },
     {
       "id": "variant-feature",
@@ -2340,6 +2490,12 @@
     },
     {
       "type": "references",
+      "from": "cpa-auditor",
+      "to": "double-entry-reconciliation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
       "from": "create-variant",
       "to": "design",
       "source": "prose"
@@ -2580,6 +2736,12 @@
     },
     {
       "type": "references",
+      "from": "engagement-director",
+      "to": "pdf-export",
+      "source": "prose"
+    },
+    {
+      "type": "references",
       "from": "evidence-ledger",
       "to": "decision-record",
       "source": "prose"
@@ -2655,6 +2817,12 @@
       "from": "export-control-screening",
       "to": "phase2",
       "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "finance-strategy-lead",
+      "to": "price-waterfall-analysis",
+      "source": "prose"
     },
     {
       "type": "references",
@@ -3665,6 +3833,12 @@
       "source": "prose"
     },
     {
+      "type": "references",
+      "from": "map-channel-enforcement",
+      "to": "pricing-governance",
+      "source": "prose"
+    },
+    {
       "type": "used_by",
       "from": "market-entry-strategy",
       "to": "market-entry-strategist",
@@ -3693,6 +3867,12 @@
       "from": "market-entry-strategy",
       "to": "phase4",
       "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "market-intelligence-analyst",
+      "to": "trade-promotion-roi",
+      "source": "prose"
     },
     {
       "type": "references",
@@ -4173,6 +4353,24 @@
       "from": "presenter-mode",
       "to": "phase4",
       "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "price-waterfall-analysis",
+      "to": "pricing-governance",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "pricing-strategist",
+      "to": "map-channel-enforcement",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "pricing-strategist",
+      "to": "pricing-governance",
+      "source": "prose"
     },
     {
       "type": "used_by",
@@ -5697,6 +5895,12 @@
       "from": "trade-documentation-checklist",
       "to": "trade-documentation-specialist",
       "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "trade-promotion-roi",
+      "to": "insight-synthesis",
+      "source": "prose"
     },
     {
       "type": "used_by",
