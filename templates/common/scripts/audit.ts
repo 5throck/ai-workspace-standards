@@ -1,4 +1,4 @@
-// @version 2.25.0
+// @version 2.25.1
 // v2.25.0: Variant-scanning checks now skip untracked templates/co-* directories so
 //           WIP template scaffolds on disk do not block commits. Tracked variant set
 //           is computed once via git ls-files at module load.
@@ -2202,11 +2202,18 @@ if (!LIFECYCLE_ONLY && IS_WORKSPACE_ROOT) {
                     return false;
                 }
 
-                // L2 YAML should NOT have L0-only fields
+                // L2 YAML should NOT have L0-only fields, except `lifecycle:` for variants
+                // that ship their own recursive validate-agents.ts requiring
+                // lifecycle.phase/lifecycle.governance on every agents/**/*.md file
+                // (e.g. co-safety) — see docs/architecture/extends-pattern.md schema table.
+                const variantsAllowingLifecycle = new Set(['co-safety']);
+                const l2OnlyFields = variantsAllowingLifecycle.has(variant)
+                    ? l0OnlyFields.filter(f => f !== 'lifecycle:')
+                    : l0OnlyFields;
                 const l2YamlMatch = l2Content.match(/^---\n([\s\S]+?)\n---/);
                 if (l2YamlMatch) {
                     const l2Yaml = l2YamlMatch[1];
-                    for (const field of l0OnlyFields) {
+                    for (const field of l2OnlyFields) {
                         const fieldRegex = new RegExp(`^${field}`, 'm');
                         if (fieldRegex.test(l2Yaml)) {
                             Fail(`L2 ${variant}/agents/pm.md: contains L0-only field "${field}"`);

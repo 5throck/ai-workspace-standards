@@ -408,7 +408,7 @@ Since ADR-0048 (June 2026), all variant pm.md files follow a frontmatter-only ex
 | `description` | No | L0, L1 | Agent description with trigger phrases |
 | `examples` | No | L0, L1 | Usage example pairs (`user` / `assistant`) |
 | `role` | No | L0 | Role classification (e.g. `orchestrator`) |
-| `lifecycle` | No | L0 | Lifecycle metadata (phase, created, last_updated, governance path) |
+| `lifecycle` | No | L0, L2 | Lifecycle metadata (phase, created, last_updated, governance path). L2 usage: variants that ship their own `validate-agents.ts` recursively requiring `lifecycle.phase`/`lifecycle.governance` on every `agents/**/*.md` (e.g. co-safety) carry this field on the L2 extends stub too, since the field is evaluated per-file, not inherited through `extends` |
 
 ### Inheritance Rules
 

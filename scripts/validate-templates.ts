@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.15.0
+ * @version 1.15.1
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -2015,10 +2015,13 @@ function checkCommonContract(): void {
         // `variant_overrides` are the ADR-0039/ADR-0034 override mechanism consumed
         // at scaffold time by merge-frontmatter.ts; `status` is documented optional
         // at all levels; `owner` and `capabilities` are pass-through agent metadata
-        // read by other validators (capability-validator.ts reads pm's capabilities).
+        // read by other validators (capability-validator.ts reads pm's capabilities);
+        // `lifecycle` is required L2 metadata for variants shipping their own
+        // recursive validate-agents.ts (e.g. co-safety) that enforces
+        // lifecycle.phase/lifecycle.governance per-file, independent of `extends`.
         const allowedWithExtends = new Set([
           'extends', 'name', 'variant', 'version', 'last_updated', 'status',
-          'remove_sections', 'variant_overrides', 'owner', 'capabilities',
+          'remove_sections', 'variant_overrides', 'owner', 'capabilities', 'lifecycle',
         ]);
         const fieldKeys = Object.keys(variantFields);
         const unexpectedKeys = fieldKeys.filter(k => !allowedWithExtends.has(k));

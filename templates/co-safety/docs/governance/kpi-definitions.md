@@ -1,6 +1,6 @@
 # Safety Governance KPI Definitions
 
-Owner: `safety-governance-manager` (SGM). Referenced by `agents/_core/safety-governance-manager.md`
+Owner: `safety-governance-manager` (SGM). Referenced by `agents/safety-governance-manager.md`
 §Responsibilities ("Define compliance KPI targets aligned with regulatory requirements") and
 `docs/_meta/blueprint/03-governance.md`. Previously undefined — this file establishes the
 initial KPI set; SGM should extend it as new industry profiles and workflows are added.
@@ -16,7 +16,7 @@ initial KPI set; SGM should extend it as new industry profiles and workflows are
   SGM should calibrate per selected industry profile in `industry-profiles/`).
 - **Reporting cadence**: Monthly, rolled up quarterly for CSO review.
 - **Escalation**: Any month where LTIFR exceeds 2× the target triggers an SGM policy
-  review per `agents/_core/safety-governance-manager.md` Core Workflow.
+  review per `agents/safety-governance-manager.md` Core Workflow.
 
 ## 2. Audit Pass Rate
 

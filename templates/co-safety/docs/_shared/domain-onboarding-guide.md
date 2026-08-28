@@ -24,7 +24,7 @@ Use this guide when introducing a new regulatory or operational domain to Safety
 |--------|-----------|----------|
 | GxP family | lowercase | `gmp`, `gdp`, `glp`, `gcp`, `gvp` |
 | EHS family | `ehs<industry-abbrev>` | `ehsmfg`, `ehsconst`, `semicon` |
-| Common/shared | underscore prefix | `_shared`, `_meta`, `_core` |
+| Common/shared | underscore prefix | `_shared`, `_meta` |
 
 ## 3. Folder Structure Per Top-Level Directory
 
@@ -32,7 +32,7 @@ Every domain touches these top-level directories with a consistent `<top-level>/
 
 ```
 agents/
-├── _core/                         # Governance/operational agents (pm, sgm, swm)
+├── pm.md, safety-governance-manager.md, safety-workflow-manager.md  # Flat governance/operational agents (pm, sgm, swm)
 ├── _shared/                       # Cross-domain service agents
 └── domains/
     ├── functional/<name>/
@@ -117,7 +117,7 @@ mkdir -p workflows/domains/<tier>/<name>
 Or automate this and Steps 3-6/9 in one command: `bun scripts/new-domain.ts <name> <tier> [profile]`.
 
 ### Step 3: Author the Agent
-Create `agents/domains/<tier>/<name>/<name>-agent.md` following the template in `_core/` agents. Required sections:
+Create `agents/domains/<tier>/<name>/<name>-agent.md` following the template in the flat core agents (`agents/pm.md`, `agents/safety-governance-manager.md`, `agents/safety-workflow-manager.md`). Required sections:
 - Section A — Legal Basis (multi-source; min 3 regulatory references with Primary + Adjacent structure)
 - Section B — Role & Responsibilities (with explicit scope limitations)
 - Section C — Operational Protocols & Escalation Rules
@@ -207,7 +207,7 @@ When migrating an existing flat-structured domain to the new pattern:
 ## 7. Verification Checklist
 
 - [ ] All domain files under `<top-level>/domains/<tier>/<name>/`
-- [ ] `_shared/`, `_meta/`, `_core/` underscore prefix consistently applied
+- [ ] `_shared/`, `_meta/` underscore prefix consistently applied
 - [ ] `schema.yaml` files have `legal_basis`, `status: active`, `applicability: mandatory`
 - [ ] Evidence models have valid `$ref` paths (relative)
 - [ ] `bun scripts/safety-audit.ts` passes with 0 errors

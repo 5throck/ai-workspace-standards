@@ -122,7 +122,7 @@
     },
     {
       "name": "pm",
-      "file": "agents/_core/pm.md"
+      "file": "agents/pm.md"
     },
     {
       "name": "powergen-agent",
@@ -146,11 +146,11 @@
     },
     {
       "name": "safety-governance-manager",
-      "file": "agents/_core/safety-governance-manager.md"
+      "file": "agents/safety-governance-manager.md"
     },
     {
       "name": "safety-workflow-manager",
-      "file": "agents/_core/safety-workflow-manager.md"
+      "file": "agents/safety-workflow-manager.md"
     },
     {
       "name": "semicon-agent",

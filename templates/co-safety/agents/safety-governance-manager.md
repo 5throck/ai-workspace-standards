@@ -3,6 +3,7 @@ name: safety-governance-manager
 alias: SGM
 role: specialist
 status: active
+version: "1.0.0"
 tier:
   claude: high
   gemini: high
