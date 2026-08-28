@@ -1,0 +1,6 @@
+variant: co-price
+version: 0.5.3
+platform: both
+date: 2026-08-25
+origin: scenario-b-conversion
+workspace_ref: ai_workspace@145adb4d

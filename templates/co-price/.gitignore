@@ -1,0 +1,66 @@
+﻿<!-- WORKSPACE-MANAGED -->
+# Secrets ??never commit
+.env
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+dist/
+*.egg-info/
+
+# Node.js
+node_modules/
+.next/
+dist/
+build/
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Local AI settings (personal overrides ??never shared)
+.claude/settings.local.json
+.gemini/settings.local.json
+.mcp.local.json
+
+# Crypto / certificates ??never commit private key material
+*.pem
+*.key
+*.p12
+*.pfx
+*.cer
+*.crt
+*.der
+*.jks
+*.keystore
+
+# Temp / build artifacts
+*.log
+*.bak
+*.tmp
+
+# Databases
+*.sqlite
+*.db
+
+# CodeGraph Index
+.codegraph/
+
+.env.local
+
+# session artifacts (PR bodies, batch payloads)
+tmp/
+
+# Generated / scratch (template build artifacts)
+src/generated/
+scratch/
+tsconfig.tsbuildinfo
+
+<!-- END WORKSPACE-MANAGED -->

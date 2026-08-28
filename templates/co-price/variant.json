@@ -1,0 +1,187 @@
+{
+  "name": "co-price",
+  "displayName": "AIG Pricing Management & Consulting Platform",
+  "description": "Financial simulation and pricing consulting variant: multi-product, multi-channel pricing management with double-entry P&L projection, benchmark diagnostics, market research analytics (Van Westendorp / Gabor-Granger), cost-shock sensitivity, distribution trade-line management, and an on-rails multi-provider AI copilot.",
+  "variant_type": "consulting",
+  "status": "beta",
+  "version": "4.1.0",
+  "inherits_common": "templates/common",
+  "designDoc": "memory/co-price-plan.md",
+  "specId": null,
+  "origin_scenario": "B — existing project converted to variant-based governance (2026-08-25)",
+  "agents": [
+    { "name": "pm", "file": "agents/pm.md" },
+    { "name": "lead-architect", "file": "agents/lead-architect.md" },
+    { "name": "core-engine-dev", "file": "agents/core-engine-dev.md" },
+    { "name": "cpa-auditor", "file": "agents/cpa-auditor.md" },
+    { "name": "security-auditor", "file": "agents/security-auditor.md" },
+    { "name": "finance-strategy-lead", "file": "agents/finance-strategy-lead.md" },
+    { "name": "cost-asset-mgmt", "file": "agents/cost-asset-mgmt.md" },
+    { "name": "ux-specialist", "file": "agents/ux-specialist.md" },
+    { "name": "l10n-auditor", "file": "agents/l10n-auditor.md" },
+    { "name": "qa-tester", "file": "agents/qa-tester.md" },
+    { "name": "devops-admin", "file": "agents/devops-admin.md" },
+    { "name": "security-monitor", "file": "agents/security-monitor.md" },
+    { "name": "pricing-strategist", "file": "agents/pricing-strategist.md" },
+    { "name": "market-intelligence-analyst", "file": "agents/market-intelligence-analyst.md" },
+    { "name": "engagement-director", "file": "agents/engagement-director.md" }
+  ],
+  "skills": [
+    { "name": "harness-verification", "file": "skills/harness-verification/SKILL.md" },
+    { "name": "double-entry-reconciliation", "file": "skills/double-entry-reconciliation/SKILL.md" },
+    { "name": "i18n-audit", "file": "skills/i18n-audit/SKILL.md" },
+    { "name": "excel-export", "file": "skills/excel-export/SKILL.md" },
+    { "name": "pdf-export", "file": "skills/pdf-export/SKILL.md" },
+    { "name": "financial-statement-prep", "file": "skills/financial-statement-prep/SKILL.md" },
+    { "name": "math-function-plotter", "file": "skills/math-function-plotter/SKILL.md" },
+    { "name": "sheet-model", "file": "skills/sheet-model/SKILL.md" },
+    { "name": "prisma-7", "file": "skills/prisma-7/SKILL.md" },
+    { "name": "ui-component-design", "file": "skills/ui-component-design/SKILL.md" },
+    { "name": "van-westendorp-psm", "file": "skills/van-westendorp-psm/SKILL.md" },
+    { "name": "gabor-granger", "file": "skills/gabor-granger/SKILL.md" },
+    { "name": "competitive-intelligence", "file": "skills/competitive-intelligence/SKILL.md" },
+    { "name": "scenario-comparison", "file": "skills/scenario-comparison/SKILL.md" },
+    { "name": "insight-synthesis", "file": "skills/insight-synthesis/SKILL.md" },
+    { "name": "executive-presentation", "file": "skills/executive-presentation/SKILL.md" },
+    { "name": "trade-promotion-roi", "file": "skills/trade-promotion-roi/SKILL.md" },
+    { "name": "pricing-playbook", "file": "skills/pricing-playbook/SKILL.md" },
+    { "name": "price-waterfall-analysis", "file": "skills/price-waterfall-analysis/SKILL.md" },
+    { "name": "pricing-governance", "file": "skills/pricing-governance/SKILL.md" },
+    { "name": "map-channel-enforcement", "file": "skills/map-channel-enforcement/SKILL.md" }
+  ],
+  "agent_overrides": {
+    "pm": {
+      "type": "additive",
+      "reason": "PM additionally orchestrates the consulting engagement lifecycle (Diagnose → Design → Validate → Deliver) alongside the standard AIG 5-phase build lifecycle.",
+      "since": "2026-08-25",
+      "reviewed_by": "lead-architect",
+      "overrides": [
+        "adds consulting engagement dispatch protocol",
+        "adds Phase 3-F trade-line governance boundaries"
+      ]
+    }
+  },
+  "skill_manifest": {
+    "variant_specific": [
+      {
+        "name": "harness-verification",
+        "file": "skills/harness-verification/SKILL.md"
+      },
+      {
+        "name": "double-entry-reconciliation",
+        "file": "skills/double-entry-reconciliation/SKILL.md"
+      },
+      {
+        "name": "i18n-audit",
+        "file": "skills/i18n-audit/SKILL.md"
+      },
+      {
+        "name": "excel-export",
+        "file": "skills/excel-export/SKILL.md"
+      },
+      {
+        "name": "pdf-export",
+        "file": "skills/pdf-export/SKILL.md"
+      },
+      {
+        "name": "financial-statement-prep",
+        "file": "skills/financial-statement-prep/SKILL.md"
+      },
+      {
+        "name": "math-function-plotter",
+        "file": "skills/math-function-plotter/SKILL.md"
+      },
+      {
+        "name": "sheet-model",
+        "file": "skills/sheet-model/SKILL.md"
+      },
+      {
+        "name": "prisma-7",
+        "file": "skills/prisma-7/SKILL.md"
+      },
+      {
+        "name": "ui-component-design",
+        "file": "skills/ui-component-design/SKILL.md"
+      },
+      {
+        "name": "van-westendorp-psm",
+        "file": "skills/van-westendorp-psm/SKILL.md"
+      },
+      {
+        "name": "gabor-granger",
+        "file": "skills/gabor-granger/SKILL.md"
+      },
+      {
+        "name": "competitive-intelligence",
+        "file": "skills/competitive-intelligence/SKILL.md"
+      },
+      {
+        "name": "scenario-comparison",
+        "file": "skills/scenario-comparison/SKILL.md"
+      },
+      {
+        "name": "insight-synthesis",
+        "file": "skills/insight-synthesis/SKILL.md"
+      },
+      {
+        "name": "executive-presentation",
+        "file": "skills/executive-presentation/SKILL.md"
+      },
+      {
+        "name": "trade-promotion-roi",
+        "file": "skills/trade-promotion-roi/SKILL.md"
+      },
+      {
+        "name": "pricing-playbook",
+        "file": "skills/pricing-playbook/SKILL.md"
+      },
+      {
+        "name": "price-waterfall-analysis",
+        "file": "skills/price-waterfall-analysis/SKILL.md"
+      },
+      {
+        "name": "pricing-governance",
+        "file": "skills/pricing-governance/SKILL.md"
+      },
+      {
+        "name": "map-channel-enforcement",
+        "file": "skills/map-channel-enforcement/SKILL.md"
+      }
+    ],
+    "planned_v10_1": [
+      "pricing-diagnostic",
+      "copilot-onrails-audit"
+    ]
+  },
+  "agent_manifest": {
+    "existing": [
+      "pm",
+      "lead-architect",
+      "core-engine-dev",
+      "cpa-auditor",
+      "security-auditor",
+      "finance-strategy-lead",
+      "cost-asset-mgmt",
+      "ux-specialist",
+      "l10n-auditor",
+      "qa-tester",
+      "devops-admin",
+      "security-monitor"
+    ],
+    "planned_v10_1": [
+      "pricing-strategist",
+      "market-intelligence-analyst",
+      "engagement-director"
+    ]
+  },
+  "lifecycle": {
+    "phase": "development",
+    "statusSince": "2026-08-25",
+    "lastTransition": "2026-08-25",
+    "phaseA_complete": false,
+    "promotion_checklist_passed": false,
+    "notes": "Phase B conversion in progress (PR #1). Phase C template promotion deferred until v10.1 feature phases land."
+  },
+  "created_at": "2026-08-25",
+  "promotionChecklist": "PROMOTION_CHECKLIST.md"
+}
