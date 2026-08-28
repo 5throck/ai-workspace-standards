@@ -7,8 +7,10 @@ Safety OS 에이전트 정의 — 전체 로스터와 디스패치 규칙은
 
 ```
 agents/
-├── pm.md                      # CSO 오버라이드 (templates/common pm.md 확장)
-├── _core/                     # 오케스트레이션 & 안전 관리
+├── pm.md                      # CSO 오버라이드 (templates/common pm.md 확장); CSO 전용
+│                               #   Section A/B/C 내용은 docs/co-safety.context.md에 있음
+├── safety-governance-manager.md  # SGM — flat, 자체완결형 (공통 템플릿 대응 파일 없음)
+├── safety-workflow-manager.md    # SWM — flat, 자체완결형 (공통 템플릿 대응 파일 없음)
 ├── _shared/                   # 공통 전문 에이전트
 └── domains/
     ├── functional/            # psm, msds, training

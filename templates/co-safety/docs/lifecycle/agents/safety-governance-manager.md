@@ -1,6 +1,6 @@
 # Governance Record: safety-governance-manager
 
-Runtime definition: `agents/_core/safety-governance-manager.md`
+Runtime definition: `agents/safety-governance-manager.md`
 Agent tier: High (claude / gemini-cli / antigravity per runtime frontmatter)
 
 ## Phase History
@@ -11,7 +11,7 @@ Agent tier: High (claude / gemini-cli / antigravity per runtime frontmatter)
 
 ## Acceptance Criteria
 
-- [x] Runtime definition (`agents/_core/safety-governance-manager.md`) carries `lifecycle.phase` and `lifecycle.governance` frontmatter fields
+- [x] Runtime definition (`agents/safety-governance-manager.md`) carries `lifecycle.phase` and `lifecycle.governance` frontmatter fields
 - [x] Agent scope and responsibilities are documented in the runtime definition's Section A/B (or equivalent)
 - [x] Agent is listed in `AGENTS.md` roster
 - [x] Strategic-layer scope defined: SGM establishes standards (industry profiles, KPI targets, policies) and never executes operational workflows; dispatch restricted to PM-only

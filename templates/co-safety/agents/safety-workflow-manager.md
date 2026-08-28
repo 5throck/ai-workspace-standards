@@ -3,6 +3,7 @@ name: safety-workflow-manager
 alias: SWM
 role: orchestrator
 status: active
+version: "1.0.0"
 tier:
   claude: high
   gemini: high

@@ -22,7 +22,6 @@
 | `benefit-risk-assessor` | variant:co-safety | — | — | — |
 | `bsl-lab-aerosol-control-planner` | variant:co-safety | — | — | — |
 | `career-path-succession-planning` | variant:co-hr | career-succession-consultant, career-succession-consultant | phase2 | — |
-| `change-control` | variant:co-safety | — | — | — |
 | `change-impact-assessment` | variant:co-consult | change-management-partner, change-management-partner | phase1, phase2 | — |
 | `chemical-risk-assessment` | variant:co-safety | — | — | — |
 | `code-review` | variant:co-develop | code-writer, game-debugger, game-developer | phase3, phase4, phase5 | — |
@@ -44,7 +43,6 @@
 | `dangerous-cargo-handling-planner` | variant:co-safety | — | — | — |
 | `decision-record` | common | — | — | — |
 | `desktop-app-fallback` | variant:co-abap | code-writer, test-runner | phase3, phase4 | — |
-| `deviation-capa` | variant:co-safety | — | — | — |
 | `documentation-writing` | variant:co-safety | content-writer, technical-writer | — | — |
 | `double-entry-reconciliation` | variant:co-price | — | — | — |
 | `dts-verification` | variant:co-safety | — | — | — |
@@ -116,7 +114,7 @@
 | `painting-coating-fire-toxic-planner` | variant:co-safety | — | — | — |
 | `performance-system-design` | variant:co-hr | performance-management-consultant, performance-management-consultant | phase2 | — |
 | `performance-tuning` | variant:co-abap | architect, dba, sap-investigator | phase1, phase2, phase4 | — |
-| `permit-to-work` | variant:co-safety | — | — | — |
+| `permit-to-work` | variant:co-safety | safety-workflow-manager | — | — |
 | `platform-command-lifecycle-manager` | variant:co-safety | — | — | — |
 | `platform-skill-lifecycle-manager` | variant:co-safety | — | — | — |
 | `post-write-chain` | variant:co-abap | code-writer, pm, test-runner | phase3, phase4 | — |
@@ -136,11 +134,10 @@
 | `psm-loto` | variant:co-safety | — | — | — |
 | `psm-moc` | variant:co-safety | — | — | — |
 | `pyrophoric-gas-emergency-responder` | variant:co-safety | — | — | — |
-| `qrm` | variant:co-safety | — | — | — |
 | `rack-fall-protection-planner` | variant:co-safety | — | — | — |
 | `refactoring` | variant:co-develop | code-writer, game-debugger, game-developer | phase3, phase4, phase5 | — |
 | `research-analysis` | variant:co-safety | analyst | — | — |
-| `risk-assessment` | variant:co-safety | — | — | — |
+| `risk-assessment` | variant:co-safety | safety-workflow-manager | — | — |
 | `rolling-stock-maintenance-loto-planner` | variant:co-safety | — | — | — |
 | `roo-qualification-worksheet` | variant:co-export | fta-origin-analyst | phase1, phase2 | — |
 | `root-cause-analysis` | variant:co-safety | — | — | — |

@@ -327,11 +327,6 @@
       "layer": "variant:co-hr"
     },
     {
-      "id": "change-control",
-      "type": "skill",
-      "layer": "variant:co-safety"
-    },
-    {
       "id": "change-impact-assessment",
       "type": "skill",
       "layer": "variant:co-consult"
@@ -525,11 +520,6 @@
       "id": "desktop-app-fallback",
       "type": "skill",
       "layer": "variant:co-abap"
-    },
-    {
-      "id": "deviation-capa",
-      "type": "skill",
-      "layer": "variant:co-safety"
     },
     {
       "id": "devops-admin",
@@ -1247,11 +1237,6 @@
       "layer": "variant:co-price"
     },
     {
-      "id": "qrm",
-      "type": "skill",
-      "layer": "variant:co-safety"
-    },
-    {
       "id": "rack-fall-protection-planner",
       "type": "skill",
       "layer": "variant:co-safety"
@@ -1327,6 +1312,11 @@
       "layer": "variant:co-safety"
     },
     {
+      "id": "safety-governance-manager",
+      "type": "agent",
+      "layer": "variant:co-safety"
+    },
+    {
       "id": "safety-health-officer",
       "type": "agent",
       "layer": "variant:co-hr"
@@ -1334,6 +1324,11 @@
     {
       "id": "safety-inspection-validator",
       "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "safety-workflow-manager",
+      "type": "agent",
       "layer": "variant:co-safety"
     },
     {
@@ -2687,12 +2682,6 @@
       "source": "skill_manifest"
     },
     {
-      "type": "references",
-      "from": "deviation-capa",
-      "to": "change-control",
-      "source": "prose"
-    },
-    {
       "type": "used_by",
       "from": "documentation-writing",
       "to": "content-writer",
@@ -3141,12 +3130,6 @@
       "from": "fta-origin-determination",
       "to": "phase2",
       "source": "skill_manifest"
-    },
-    {
-      "type": "references",
-      "from": "gmp-deviation-capa",
-      "to": "change-control",
-      "source": "prose"
     },
     {
       "type": "used_by",
@@ -4187,6 +4170,12 @@
       "source": "prose"
     },
     {
+      "type": "used_by",
+      "from": "permit-to-work",
+      "to": "safety-workflow-manager",
+      "source": "skill_manifest"
+    },
+    {
       "type": "references",
       "from": "pm",
       "to": "decision-record",
@@ -4404,12 +4393,6 @@
     },
     {
       "type": "references",
-      "from": "qrm",
-      "to": "gmp-qrm",
-      "source": "prose"
-    },
-    {
-      "type": "references",
       "from": "rack-fall-protection-planner",
       "to": "fall-hazard-assessor",
       "source": "prose"
@@ -4505,6 +4488,12 @@
       "source": "required_skills"
     },
     {
+      "type": "used_by",
+      "from": "risk-assessment",
+      "to": "safety-workflow-manager",
+      "source": "skill_manifest"
+    },
+    {
       "type": "references",
       "from": "rolling-stock-maintenance-loto-planner",
       "to": "fall-hazard-assessor",
@@ -4568,6 +4557,12 @@
       "type": "references",
       "from": "roo-qualification-worksheet",
       "to": "trade-documentation-checklist",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "safety-governance-manager",
+      "to": "k-law",
       "source": "prose"
     },
     {

@@ -1,6 +1,6 @@
 # Governance Record: safety-workflow-manager
 
-Runtime definition: `agents/_core/safety-workflow-manager.md`
+Runtime definition: `agents/safety-workflow-manager.md`
 Agent tier: High (claude / gemini-cli / antigravity per runtime frontmatter)
 
 ## Phase History
@@ -11,7 +11,7 @@ Agent tier: High (claude / gemini-cli / antigravity per runtime frontmatter)
 
 ## Acceptance Criteria
 
-- [x] Runtime definition (`agents/_core/safety-workflow-manager.md`) carries `lifecycle.phase` and `lifecycle.governance` frontmatter fields
+- [x] Runtime definition (`agents/safety-workflow-manager.md`) carries `lifecycle.phase` and `lifecycle.governance` frontmatter fields
 - [x] Agent scope and responsibilities are documented in the runtime definition's Section A/B (or equivalent)
 - [x] Agent is listed in `AGENTS.md` roster
 - [x] Operational orchestrator scope defined: SWM selects workflows from the `workflows/` library, assembles agent teams dynamically, and routes completed outputs to the Audit Agent — dispatch restricted to PM-only with a structured context block (`industry`, `task_type`, `site_id`, `urgency`, `legal_basis`)

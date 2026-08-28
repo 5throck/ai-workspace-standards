@@ -1,6 +1,9 @@
 # Governance Record: pm
 
-Runtime definition: `agents/_core/pm.md`
+Runtime definition: `agents/pm.md` (extends stub — inherits generic PM Gateway mechanics from
+the workspace-common `agents/pm.md`) + `docs/co-safety.context.md` "CSO Runtime Definition"
+(CSO-specific Section A/B/C content: Legal Basis, Role & Responsibilities, Operational
+Protocols)
 Agent tier: High (claude / gemini-cli / antigravity per runtime frontmatter)
 
 ## Phase History
@@ -11,8 +14,8 @@ Agent tier: High (claude / gemini-cli / antigravity per runtime frontmatter)
 
 ## Acceptance Criteria
 
-- [x] Runtime definition (`agents/_core/pm.md`) carries `lifecycle.phase` and `lifecycle.governance` frontmatter fields
-- [x] Agent scope and responsibilities are documented in the runtime definition's Section A/B (or equivalent)
+- [x] Runtime definition (`agents/pm.md`) carries `lifecycle.phase` and `lifecycle.governance` frontmatter fields
+- [x] Agent scope and responsibilities are documented in `docs/co-safety.context.md` Section A/B (CSO-specific content — `agents/pm.md` itself is an extends stub and does not duplicate it)
 - [x] Agent is listed in `AGENTS.md` roster
 - [x] PM is the single user-facing entry point: routing table directs Policy/KPI/Profile requests to SGM (strategic layer), workflow execution to SWM (operational layer), and emergency events to the Emergency Agent via documented direct-dispatch override (logged with timestamp and rationale)
 - [x] Execution plan requirement defined: any dispatch of 2+ agents requires an execution plan table declaring Task/Agent/Tier/Model, with explicit `Agent(model:)` short-alias mapping rules (High=opus, Medium=sonnet, Low=haiku) to prevent silent model inheritance
