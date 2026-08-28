@@ -47,7 +47,7 @@
 | `finding-reconciliation` | variant:co-security | pentester, pentester, report-writer, report-writer | phase3, phase5, phase6 | — | — | — |
 | `foreign-regulation-monitoring` | variant:co-export | foreign-regulatory-intelligence-analyst, foreign-regulatory-intelligence-analyst | phase1 | — | — | — |
 | `fta-origin-determination` | variant:co-export | fta-origin-analyst, fta-origin-analyst | phase1, phase2 | — | — | — |
-| `gabor-granger` | variant:co-price | — | — | — | — | — |
+| `gabor-granger` | variant:co-price | — | — | pricing-playbook (enables), van-westendorp-psm (composes_with) | survey-responses-gg | demand-curve, optimal-price, elasticity-reading |
 | `gateguard` | L0 | — | — | — | — | — |
 | `halal-certification-workflow` | variant:co-export | halal-certification-specialist, halal-certification-specialist | phase1, phase2 | — | — | — |
 | `handbook` | variant:co-deck | handbook-reviewer, handbook-reviewer, handbook-writer, handbook-writer | phaseH-2, phaseH-3, phaseH-4, phaseH-5 | — | — | — |
@@ -81,8 +81,8 @@
 | `prep-pdf` | variant:co-deck | measure, measure, pdf-export | phase4 | — | — | — |
 | `presenter-mode` | L0 | html-build | phase4 | — | — | — |
 | `price-waterfall-analysis` | variant:co-price | — | — | — | — | — |
-| `pricing-governance` | variant:co-price | — | — | — | — | — |
-| `pricing-playbook` | variant:co-price | — | — | — | — | — |
+| `pricing-governance` | variant:co-price | — | — | — | approval-record | exception-log, guardrail-status |
+| `pricing-playbook` | variant:co-price | — | — | scenario-comparison (enables) | elasticity-reading, price-corridor | pricing-policy-set, scenario-snapshots |
 | `prisma-7` | variant:co-price | — | — | — | — | — |
 | `project-delivery` | variant:co-consult | delivery-manager, delivery-manager, workstream-lead, workstream-lead | phase4 | — | — | — |
 | `project-review` | L0 | — | — | — | — | — |
@@ -100,7 +100,7 @@
 | `sap-pp` | variant:co-abap | architect, dba, pp-analyst | phase1, phase2 | — | — | — |
 | `sap-sd` | variant:co-abap | architect, dba, sd-analyst | phase1, phase2 | — | — | — |
 | `sarif-exporter` | L0 | pentester, report-writer | phase3, phase5 | — | — | — |
-| `scenario-comparison` | variant:co-price | — | — | — | — | — |
+| `scenario-comparison` | variant:co-price | — | — | pricing-governance (enables) | scenario-snapshots | tri-view-comparison, approval-record |
 | `script-lifecycle-manager` | L0 | — | — | — | — | — |
 | `security-scan` | L0 | — | — | — | — | — |
 | `service-design` | variant:co-design | design-lead, design-lead, service-designer, service-designer | phase1, phase2, phase3 | — | — | — |
@@ -108,7 +108,7 @@
 | `simulate-l3-to-variant-promotion` | L0 | — | — | — | — | — |
 | `simulate-project-creation` | L0 | — | — | — | — | — |
 | `skill-lifecycle-manager` | L0 | — | — | — | — | — |
-| `slide-layout-gate` | variant:co-deck | pdf-export | phase4 | — | — | — |
+| `slide-layout-gate` | variant:co-deck | pdf-export | phase4 | pdf-export (composes_with) | slide-html | layout-gate-status |
 | `solution-design` | variant:co-consult | solutions-architect, solutions-architect, technology-specialist, technology-specialist | phase3, phase4 | — | — | — |
 | `sound-synth` | L0 | sound-designer | phase3, phase4 | — | — | — |
 | `source-command-celebrate` | variant:co-abap | pm | phase6 | — | — | — |
@@ -136,7 +136,7 @@
 | `update-bun-packages` | L0 | — | — | — | — | — |
 | `upgrade-project` | L0 | — | — | — | — | — |
 | `validate-docs-links` | L0 | — | — | — | — | — |
-| `van-westendorp-psm` | variant:co-price | — | — | — | — | — |
+| `van-westendorp-psm` | variant:co-price | — | — | pricing-playbook (enables) | survey-responses-vw | price-corridor, opp-price-point |
 | `variant-feature` | L0 | — | — | — | — | — |
 | `verify-authorization` | variant:co-security | pentester, red-team-lead | phase1, phase3 | — | — | — |
 | `zod-contract-gate` | L0 | — | — | — | — | — |

@@ -4,7 +4,14 @@
     {
       "id": "design",
       "type": "agent",
-      "layer": "variant:co-deck"
+      "layer": "variant:co-deck",
+      "inputs": [
+        "storyline-outline"
+      ],
+      "outputs": [
+        "design-spec",
+        "theme-lock"
+      ]
     },
     {
       "id": "diagram-specialist",
@@ -34,7 +41,14 @@
     {
       "id": "html-build",
       "type": "agent",
-      "layer": "variant:co-deck"
+      "layer": "variant:co-deck",
+      "inputs": [
+        "slide-deck-draft",
+        "design-spec"
+      ],
+      "outputs": [
+        "slide-html"
+      ]
     },
     {
       "id": "i18n-layout",
@@ -54,7 +68,13 @@
     {
       "id": "pdf-export",
       "type": "agent",
-      "layer": "variant:co-deck"
+      "layer": "variant:co-deck",
+      "inputs": [
+        "slide-html"
+      ],
+      "outputs": [
+        "final-pdf"
+      ]
     },
     {
       "id": "pm",
@@ -84,12 +104,21 @@
     {
       "id": "research",
       "type": "agent",
-      "layer": "variant:co-deck"
+      "layer": "variant:co-deck",
+      "outputs": [
+        "research-notes"
+      ]
     },
     {
       "id": "slide-layout-gate",
       "type": "skill",
-      "layer": "variant:co-deck"
+      "layer": "variant:co-deck",
+      "inputs": [
+        "slide-html"
+      ],
+      "outputs": [
+        "layout-gate-status"
+      ]
     },
     {
       "id": "source-verifier",
@@ -99,7 +128,14 @@
     {
       "id": "storyline",
       "type": "agent",
-      "layer": "variant:co-deck"
+      "layer": "variant:co-deck",
+      "inputs": [
+        "research-notes"
+      ],
+      "outputs": [
+        "storyline-outline",
+        "slide-deck-draft"
+      ]
     },
     {
       "id": "theme-authoring",
@@ -124,6 +160,17 @@
       "from": "design",
       "to": "design",
       "source": "skill_manifest"
+    },
+    {
+      "type": "enables",
+      "from": "design",
+      "to": "html-build",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-deck/skills/design/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     },
     {
       "type": "references",
@@ -258,6 +305,17 @@
       "from": "html-build",
       "to": "html-build",
       "source": "skill_manifest"
+    },
+    {
+      "type": "follows",
+      "from": "html-build",
+      "to": "pdf-export",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-deck/skills/html-build/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     },
     {
       "type": "phase",
@@ -412,6 +470,17 @@
       "source": "skill_manifest"
     },
     {
+      "type": "follows",
+      "from": "research",
+      "to": "storyline",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-deck/skills/research/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "requires",
       "from": "slide-layout-gate",
       "to": "html-build",
@@ -419,6 +488,18 @@
       "provenance": {
         "file": "templates/co-deck/skills/slide-layout-gate/SKILL.md",
         "field": "prerequisites"
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "slide-layout-gate",
+      "to": "pdf-export",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-deck/skills/slide-layout-gate/SKILL.md",
+        "field": "relates_to",
+        "index": 0
       }
     },
     {
@@ -432,6 +513,17 @@
       "from": "slide-layout-gate",
       "to": "phase4",
       "source": "skill_manifest"
+    },
+    {
+      "type": "follows",
+      "from": "storyline",
+      "to": "design",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-deck/skills/storyline/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     },
     {
       "type": "phase",

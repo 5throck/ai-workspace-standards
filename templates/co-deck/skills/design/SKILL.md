@@ -10,6 +10,11 @@ status: active
 owner: design
 last_reviewed: 2026-08-24
 prerequisites: storyline
+relates_to:
+  - skill: html-build
+    type: enables
+inputs: [storyline-outline]
+outputs: [design-spec, theme-lock]
 ---
 
 ## Context

@@ -439,7 +439,14 @@
     {
       "id": "design",
       "type": "agent",
-      "layer": "variant:co-deck"
+      "layer": "variant:co-deck",
+      "inputs": [
+        "storyline-outline"
+      ],
+      "outputs": [
+        "design-spec",
+        "theme-lock"
+      ]
     },
     {
       "id": "design-lead",
@@ -627,7 +634,15 @@
     {
       "id": "gabor-granger",
       "type": "skill",
-      "layer": "variant:co-price"
+      "layer": "variant:co-price",
+      "inputs": [
+        "survey-responses-gg"
+      ],
+      "outputs": [
+        "demand-curve",
+        "optimal-price",
+        "elasticity-reading"
+      ]
     },
     {
       "id": "game-debugger",
@@ -702,7 +717,14 @@
     {
       "id": "html-build",
       "type": "agent",
-      "layer": "variant:co-deck"
+      "layer": "variant:co-deck",
+      "inputs": [
+        "slide-deck-draft",
+        "design-spec"
+      ],
+      "outputs": [
+        "slide-html"
+      ]
     },
     {
       "id": "hwp-document-processing",
@@ -917,7 +939,13 @@
     {
       "id": "pdf-export",
       "type": "agent",
-      "layer": "variant:co-deck"
+      "layer": "variant:co-deck",
+      "inputs": [
+        "slide-html"
+      ],
+      "outputs": [
+        "final-pdf"
+      ]
     },
     {
       "id": "pentester",
@@ -972,12 +1000,27 @@
     {
       "id": "pricing-governance",
       "type": "skill",
-      "layer": "variant:co-price"
+      "layer": "variant:co-price",
+      "inputs": [
+        "approval-record"
+      ],
+      "outputs": [
+        "exception-log",
+        "guardrail-status"
+      ]
     },
     {
       "id": "pricing-playbook",
       "type": "skill",
-      "layer": "variant:co-price"
+      "layer": "variant:co-price",
+      "inputs": [
+        "elasticity-reading",
+        "price-corridor"
+      ],
+      "outputs": [
+        "pricing-policy-set",
+        "scenario-snapshots"
+      ]
     },
     {
       "id": "pricing-strategist",
@@ -1067,7 +1110,10 @@
     {
       "id": "research",
       "type": "agent",
-      "layer": "variant:co-deck"
+      "layer": "variant:co-deck",
+      "outputs": [
+        "research-notes"
+      ]
     },
     {
       "id": "research-analysis",
@@ -1152,7 +1198,14 @@
     {
       "id": "scenario-comparison",
       "type": "skill",
-      "layer": "variant:co-price"
+      "layer": "variant:co-price",
+      "inputs": [
+        "scenario-snapshots"
+      ],
+      "outputs": [
+        "tri-view-comparison",
+        "approval-record"
+      ]
     },
     {
       "id": "schema-inspector",
@@ -1222,7 +1275,13 @@
     {
       "id": "slide-layout-gate",
       "type": "skill",
-      "layer": "variant:co-deck"
+      "layer": "variant:co-deck",
+      "inputs": [
+        "slide-html"
+      ],
+      "outputs": [
+        "layout-gate-status"
+      ]
     },
     {
       "id": "sme",
@@ -1292,7 +1351,14 @@
     {
       "id": "storyline",
       "type": "agent",
-      "layer": "variant:co-deck"
+      "layer": "variant:co-deck",
+      "inputs": [
+        "research-notes"
+      ],
+      "outputs": [
+        "storyline-outline",
+        "slide-deck-draft"
+      ]
     },
     {
       "id": "storyteller",
@@ -1457,7 +1523,14 @@
     {
       "id": "van-westendorp-psm",
       "type": "skill",
-      "layer": "variant:co-price"
+      "layer": "variant:co-price",
+      "inputs": [
+        "survey-responses-vw"
+      ],
+      "outputs": [
+        "price-corridor",
+        "opp-price-point"
+      ]
     },
     {
       "id": "variant-feature",
@@ -2343,6 +2416,17 @@
       "source": "skill_manifest"
     },
     {
+      "type": "enables",
+      "from": "design",
+      "to": "html-build",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-deck/skills/design/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "references",
       "from": "design",
       "to": "html-build",
@@ -3057,6 +3141,29 @@
       "source": "skill_manifest"
     },
     {
+      "type": "enables",
+      "from": "gabor-granger",
+      "to": "pricing-playbook",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-price/skills/gabor-granger/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "gabor-granger",
+      "to": "van-westendorp-psm",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-price/skills/gabor-granger/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "used_by",
       "from": "halal-certification-workflow",
       "to": "halal-certification-specialist",
@@ -3256,6 +3363,17 @@
       "from": "html-build",
       "to": "html-build",
       "source": "skill_manifest"
+    },
+    {
+      "type": "follows",
+      "from": "html-build",
+      "to": "pdf-export",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-deck/skills/html-build/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     },
     {
       "type": "phase",
@@ -4228,6 +4346,17 @@
       "source": "prose"
     },
     {
+      "type": "enables",
+      "from": "pricing-playbook",
+      "to": "scenario-comparison",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-price/skills/pricing-playbook/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "references",
       "from": "pricing-strategist",
       "to": "map-channel-enforcement",
@@ -4383,6 +4512,17 @@
       "from": "research",
       "to": "research",
       "source": "skill_manifest"
+    },
+    {
+      "type": "follows",
+      "from": "research",
+      "to": "storyline",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-deck/skills/research/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -4998,6 +5138,17 @@
       "source": "prose"
     },
     {
+      "type": "enables",
+      "from": "scenario-comparison",
+      "to": "pricing-governance",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-price/skills/scenario-comparison/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "used_by",
       "from": "service-design",
       "to": "design-lead",
@@ -5081,6 +5232,18 @@
       "provenance": {
         "file": "templates/co-deck/skills/slide-layout-gate/SKILL.md",
         "field": "prerequisites"
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "slide-layout-gate",
+      "to": "pdf-export",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-deck/skills/slide-layout-gate/SKILL.md",
+        "field": "relates_to",
+        "index": 0
       }
     },
     {
@@ -5378,6 +5541,17 @@
       "from": "standup-synthesizer",
       "to": "project-coordinator",
       "source": "skill_manifest"
+    },
+    {
+      "type": "follows",
+      "from": "storyline",
+      "to": "design",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-deck/skills/storyline/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     },
     {
       "type": "phase",
@@ -5849,6 +6023,17 @@
       "from": "ui-ux-design-intelligence",
       "to": "visual-designer",
       "source": "skill_manifest"
+    },
+    {
+      "type": "enables",
+      "from": "van-westendorp-psm",
+      "to": "pricing-playbook",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-price/skills/van-westendorp-psm/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     },
     {
       "type": "used_by",

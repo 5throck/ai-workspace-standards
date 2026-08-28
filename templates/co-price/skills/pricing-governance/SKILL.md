@@ -7,6 +7,8 @@ last_reviewed: 2026-08-25
 status: active
 owner: pricing-strategist
 prerequisites: a draft TradeTerm / ConsumerPricePlan under review
+inputs: [approval-record]
+outputs: [exception-log, guardrail-status]
 lang: ko
 lang_reason: proper-noun
 ---
