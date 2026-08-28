@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-content_hash: 28bfc9a2179213655292cb273ced505df6101ee4152d46d2e4fc7d792352b59e
+content_hash: aa1981c026c8f0ac67b27630062223cddf3b23cdded132fbae4a9a3f736b3549
 ---
 
 **Languages**: [English](README.md) · [한국어](README_ko.md) · [Español](README_es.md) · [日本語](README_ja.md)
@@ -193,7 +193,7 @@ C:\git\ (workspace root - this repo)
     ├── co-news/             # 🔶 Beta — business/finance journalism agent team (KR country profile included)
     ├── co-abap/             # ✅ Stable — SAP ABAP development agent team
     ├── co-hr/               # 🔶 Beta — HR & labor-relations consulting agent team (KR country profile included)
-    ├── co-safety/           # 🔶 Beta — EHS/GxP compliance platform agent team
+    ├── co-safety/           # 🔶 Beta — EHS/GxP compliance platform agent team (KR country profile included)
     └── co-price/            # 🔶 Beta — pricing management & consulting simulator (K-Beauty sample dataset)
 ```
 

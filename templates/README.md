@@ -26,7 +26,7 @@ templates/
 ├── co-news/             # business/finance journalism variant (beta)
 ├── co-abap/             # SAP ABAP development variant (stable)
 ├── co-hr/               # HR & labor-relations consulting variant (beta)
-└── co-safety/           # EHS/GxP compliance platform variant (beta)
+└── co-safety/           # EHS/GxP compliance platform variant (beta, KR country profile included)
 ```
 
 **How it works:** When scaffolding a new project, the script first copies `templates/common/` (shared infrastructure), then overlays the selected variant (variant-specific files override common files).

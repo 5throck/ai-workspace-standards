@@ -64,6 +64,14 @@ ess-fire-risk-assessor, tank-integrity-validator, etc.). Full list: `AGENTS.md`.
 5. **Computational integrity**: skills performing safety-critical calculations
    (arc-flash IEEE 1584, gas dispersion, tank integrity, ESS thermal runaway)
    MUST delegate to external tools — never estimate directly
+6. **Country profile**: co-safety currently supports only the KR jurisdiction
+   (`variant.json` `country_config.supported: ["KR"]`, default `KR`) — see
+   `docs/countries/KR.md` for the active profile and `common/docs/country-profiles.md`
+   for the mechanism. `regulations/KR/` holds Korea-specific regulation metadata
+   (`regulations/international/` is jurisdiction-neutral and always ships); the
+   `k-law` skill (inherited from `templates/common/`, KR-scoped per
+   `docs/workspace-schema.json`'s `country_scoped_assets`) provides statutory
+   research and is pruned from region-neutral scaffolds
 <!-- END VARIANT-INJECT -->
 
 ## File Organization Policy
@@ -75,9 +83,10 @@ co-safety/
 ├── skills/              # Reusable workflow skills (SSOT for all platforms)
 ├── workflows/           # Per-domain workflow schema.yaml + README.md pairs
 ├── evidence-models/     # JSON schemas for evidence records
-├── regulations/         # Regulatory reference data (KR/*.yaml)
+├── regulations/         # Regulatory reference data (KR/*.yaml — KR country profile; international/ is jurisdiction-neutral)
 ├── industry-profiles/   # Industry-specific profile configs (26 profiles)
 ├── policies/            # CSO-approved governance policy documents
+├── docs/countries/      # KR.md — active country profile (see docs/countries/KR.md, common/docs/country-profiles.md)
 ├── docs/                # context.md (SSOT) + co-safety.context.md (this file)
 ├── scripts/              # Automation scripts (TypeScript via bun)
 ├── memory/               # Session logs (MEMORY.md index + daily logs)
