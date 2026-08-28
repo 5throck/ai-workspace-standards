@@ -201,7 +201,7 @@ declare `lang: ko` + a valid `lang_reason` in frontmatter.
 - `SKILL.md` itself stays English-only and simply points to the reference file (e.g. "See `references/terms-ko.json` for the Korean-original DART terminology mapping").
 - This is the general mechanism for any skill needing source-language reference data — not specific to Korean.
 
-See [docs/context.md](docs/context.md) for the skill-lifecycle registration details.
+See [docs/context.md](context.md) for the skill-lifecycle registration details.
 
 #### Pluggable Variant Audit Hook
 
