@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-content_hash: aa1981c026c8f0ac67b27630062223cddf3b23cdded132fbae4a9a3f736b3549
+content_hash: f6d19bf96deb19a50efd207e1644fa2afc38cfd01a0bbc29c7d3754db2116072
 ---
 
 **Languages**: [English](README.md) · [한국어](README_ko.md) · [Español](README_es.md) · [日本語](README_ja.md)
@@ -208,6 +208,16 @@ C:\git\
 │   └── GEMINI.md            # Project-level Gemini overrides
 └── another-project\         # Another independent git repo
 ```
+
+> **`Projects/` directory (if present)**: some workspace clones keep example/reference
+> projects nested at `Projects/<name>/` inside this repo's own working tree, purely for
+> local convenience. Each one is still a fully independent git repository (its own
+> `.git/`, remote, history) scaffolded from `templates/co-*/` — nesting them here does
+> not make them part of *this* repo. They are out of scope for this repo's own tooling:
+> workspace-level scripts, tests, and audits must not read from, write to, or recurse
+> into `Projects/*` (e.g. a bare `bun test` at the workspace root will otherwise pick up
+> every nested project's test suite — scope test/build commands to this repo's own
+> directories, such as `bun run test` → `tests/`, instead of unscoped recursive globs).
 
 ---
 

@@ -206,6 +206,18 @@ C:\git\
 └── otro-proyecto\           # Otro repo git independiente
 ```
 
+> **Directorio `Projects/` (si está presente)**: algunos clones del workspace mantienen
+> proyectos de ejemplo/referencia anidados en `Projects/<name>/` dentro del árbol de
+> trabajo de este repo, únicamente por conveniencia local. Cada uno sigue siendo un
+> repositorio git totalmente independiente (su propio `.git/`, remoto, historial)
+> generado a partir de `templates/co-*/` — anidarlos aquí no los convierte en parte de
+> *este* repo. Están fuera del alcance de las herramientas de este repo: los scripts,
+> pruebas y auditorías a nivel de workspace no deben leer, escribir ni recorrer
+> recursivamente `Projects/*` (por ejemplo, un `bun test` sin ámbito definido en la raíz
+> del workspace recogería también la suite de pruebas de cada proyecto anidado — use
+> comandos con ámbito definido a los directorios propios de este repo, como
+> `bun run test` → `tests/`, en lugar de globs recursivos sin ámbito).
+
 ---
 
 ## Lista de Verificación de Inicio de Sesión
