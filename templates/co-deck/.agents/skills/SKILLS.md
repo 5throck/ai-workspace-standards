@@ -11,7 +11,6 @@ This directory contains variant-specific skills for the `co-deck` template.
 | Storyline | `storyline/` | Storyline design and slide deck composition |
 | Design | `design/` | Visual style locking — layout, color palette, fonts |
 | HTML Build | `html-build/` | HTML slide generation from slide_deck.md + design_spec.md |
-| Measure | `measure/` | PDF layout preparation — relies on `prep-pdf` skill to validate the 4-layer spec merge and check fonts (Playwright-free) |
 | Prep PDF | `prep-pdf/` | PDF layout preparation — estimate-layout.ts auto-calibration loop before export |
 | PDF Export | `pdf-export/` | PDF generation from measured layout spec |
 | Layout Gate | `slide-layout-gate/` | Slide-content conformance gate — `estimate-layout.ts --lint` checks slidedata.json against the merged spec's `content_constraints`; FAIL (exit 1) blocks PDF export |

@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "last_updated": "2026-08-27",
+  "last_updated": "2026-08-28",
   "description": "Central version registry for all template variants",
   "variants": {
     "co-develop": {
@@ -56,7 +56,7 @@
       "migration_guides": []
     },
     "co-deck": {
-      "latest": "0.2.2",
+      "latest": "0.2.3",
       "released": "2026-06-17",
       "status": "beta",
       "source_project": "Projects/co-deck_prototype",

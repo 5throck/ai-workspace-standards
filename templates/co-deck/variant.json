@@ -3,7 +3,7 @@
   "description": "Lecture and presentation material production variant — 11-stage AI workflow from research to print-ready PDF, plus an independent H-Stage handbook pipeline. Includes 13 agents (1 PM orchestrator + 10 slide-pipeline specialists + 2 handbook specialists) covering research, source verification, content, design, image curation, diagram/chart generation, HTML build (5 themes), layout measurement, PDF export, and handbook authoring/review.",
   "variant_type": "lecture",
   "status": "beta",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "inherits_common": "templates/common",
   "created_at": "2026-06-17T08:35:00.906Z",
   "lifecycle": {
@@ -119,10 +119,6 @@
     {
       "name": "html-build",
       "file": "skills/html-build/SKILL.md"
-    },
-    {
-      "name": "measure",
-      "file": "skills/measure/SKILL.md"
     },
     {
       "name": "pdf-export",
