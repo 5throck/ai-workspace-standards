@@ -1,7 +1,7 @@
 ---
 name: dangerous-cargo-handling-planner
 owner: logistics-agent
-scope: workspace
+scope: co-safety
 status: active
 description: Plan IMDG-classed dangerous-cargo port handling — class segregation, stowage assignment, vapor-emission control, leak response, PPE matrix by IMDG class. Covers class 1-9 dangerous goods at port stevedoring, stowage compliance, EmS/MFAG response, contractor SAPA Art 5 safety management.
 version: "1.0"

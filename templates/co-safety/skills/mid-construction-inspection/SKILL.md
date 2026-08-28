@@ -1,7 +1,7 @@
 ---
 name: mid-construction-inspection
 owner: gasterm-agent
-scope: workspace
+scope: co-safety
 status: active
 description: >
   Execute KGS on-site mid-construction inspection for gas terminal facilities

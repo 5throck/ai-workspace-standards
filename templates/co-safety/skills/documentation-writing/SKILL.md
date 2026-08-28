@@ -1,4 +1,5 @@
 ---
+scope: co-safety
 name: documentation-writing
 description: >
   Creates clear, accessible documentation and communications for diverse audiences.

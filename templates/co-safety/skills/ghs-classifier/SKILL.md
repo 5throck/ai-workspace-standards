@@ -1,7 +1,7 @@
 ---
 name: ghs-classifier
 owner: msds-agent
-scope: workspace
+scope: co-safety
 status: active
 description: Apply GHS Rev 9 (2021) classification rules to chemical substances and mixtures per OSHA-KR Article 104 (유해인자의 분류기준; 산업안전보건법 시행규칙 별표 18). Outputs hazard classes, categories, H/P-Statements, label elements.
 version: "1.0"

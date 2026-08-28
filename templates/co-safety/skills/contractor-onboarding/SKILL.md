@@ -2,7 +2,7 @@
 name: contractor-onboarding
 version: 1.0.0
 owner: contractor-safety-agent
-scope: workspace
+scope: co-safety
 status: active
 description: Manage EHS onboarding and compliance verification for contractors
 metadata:

@@ -1,7 +1,7 @@
 ---
 name: ess-fire-risk-assessor
 owner: powergen-agent
-scope: workspace
+scope: co-safety
 status: active
 description: Lithium-ion ESS (Energy Storage System) fire risk assessment. Thermal runaway prediction, suppression strategy, gas emission analysis.
 version: "1.0"

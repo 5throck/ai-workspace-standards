@@ -2,7 +2,7 @@
 name: asset-integrity-check
 version: 1.0.0
 owner: asset-integrity-agent
-scope: workspace
+scope: co-safety
 status: active
 description: Coordinate mechanical integrity and preventative maintenance checks
 metadata:

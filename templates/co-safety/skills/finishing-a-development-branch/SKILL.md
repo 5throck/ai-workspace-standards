@@ -1,4 +1,5 @@
 ---
+scope: co-safety
 name: finishing-a-development-branch
 description: Workspace override — redirects all branch completion to /sync pipeline which enforces CHANGELOG, memlog, audit, and PR creation gates.
 version: 1.0.0

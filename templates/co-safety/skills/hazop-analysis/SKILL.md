@@ -4,7 +4,7 @@ version: 1.1.0
 created: 2026-06-04
 last_updated: 2026-08-23
 owner: psm-agent
-scope: workspace
+scope: co-safety
 status: active
 description: Facilitate Hazard and Operability (HAZOP) analysis for process safety management
 metadata:

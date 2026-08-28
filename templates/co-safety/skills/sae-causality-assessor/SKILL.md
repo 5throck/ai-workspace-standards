@@ -1,7 +1,7 @@
 ---
 name: sae-causality-assessor
 owner: gcp-agent
-scope: workspace
+scope: co-safety
 status: active
 description: Assess SAE causality using ImPACT criteria. Supports investigator and sponsor determinations for regulatory reporting.
 version: "1.0"

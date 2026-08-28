@@ -1,7 +1,7 @@
 ---
 name: rack-fall-protection-planner
 owner: datacenter-agent
-scope: workspace
+scope: co-safety
 status: active
 description: Plan fall protection for datacenter white-space work-at-height — 42U-52U server-rack install, overhead cable trays, top-of-rack switching, raised-floor tile access. Anchor selection, ladder vs. rolling work-platform, restraint vs. arrest systems.
 version: "1.0"

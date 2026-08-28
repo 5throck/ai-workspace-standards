@@ -1,7 +1,7 @@
 ---
 name: hv-cell-formation-electrical-safety-planner
 owner: battery-agent
-scope: workspace
+scope: co-safety
 status: active
 description: Plan high-voltage DC electrical safety for lithium-ion cell formation, charging, aging, and large ESS charge/discharge facilities. Busbar LOTO, formation-charger grounding, aging-room interlock, ESS arc-flash boundary, DC arc-flash PPE selection, 전기안전관리자 sign-off per ESCA Art 22.
 version: "1.0"

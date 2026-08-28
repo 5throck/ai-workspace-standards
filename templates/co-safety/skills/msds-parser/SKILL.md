@@ -1,7 +1,7 @@
 ---
 name: msds-parser
 owner: msds-agent
-scope: workspace
+scope: co-safety
 status: active
 description: "Parse MSDS/SDS documents into structured GHS 16-section records. Hybrid: Mode 1 rule-based (top 5 Korean suppliers) + Mode 2 ML fallback (external LLM API) when confidence <80%."
 version: "1.0"

@@ -1,7 +1,7 @@
 ---
 name: signal-detector
 owner: gvp-agent
-scope: workspace
+scope: co-safety
 status: active
 description: Statistical signal detection in pharmacovigilance case database. Implements PRR, ROR, BCPNN, EBGM disproportionality methods.
 version: "1.0"

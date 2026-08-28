@@ -1,4 +1,5 @@
 ---
+scope: co-safety
 name: platform-skill-lifecycle-manager
 status: active
 version: 1.0.0

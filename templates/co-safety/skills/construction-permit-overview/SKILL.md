@@ -1,7 +1,7 @@
 ---
 name: construction-permit-overview
 owner: gasterm-agent
-scope: workspace
+scope: co-safety
 status: active
 description: >
   Orchestrate full construction/permit lifecycle for gas terminal facilities

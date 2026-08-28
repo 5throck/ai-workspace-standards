@@ -1,7 +1,7 @@
 ---
 name: iso14971-risk-scorer
 owner: meddevice-agent
-scope: workspace
+scope: co-safety
 status: active
 description: ISO 14971 risk estimation and scoring for medical devices. Severity × Probability matrix, residual risk evaluation.
 version: "1.1"

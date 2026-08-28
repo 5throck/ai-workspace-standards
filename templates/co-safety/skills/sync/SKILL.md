@@ -1,7 +1,7 @@
 ---
 name: sync
 status: active
-scope: common
+scope: co-safety
 description: >
   Runs the full project sync pipeline: memory session log, CHANGELOG verification,
   safety audit, commit, push, and GitHub PR creation. Use when: user wants to

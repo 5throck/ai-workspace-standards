@@ -12,7 +12,7 @@ lifecycle:
   created: 2026-05-30
   last_updated: 2026-05-30
 status: active
-scope: common
+scope: co-safety
 metadata:
   type: process
   triggers:

@@ -2,7 +2,7 @@
 name: audit-preparation
 version: 1.0.0
 owner: audit-agent
-scope: workspace
+scope: co-safety
 status: active
 description: Prepare documentation and evidence for regulatory EHS audits
 metadata:

@@ -20,7 +20,7 @@ metadata:
     - 산업안전보건법 (Occupational Safety and Health Act — all articles)
     - 중대재해처벌법 (Serious Accidents Punishment Act — all articles)
     - 산업안전보건법 시행규칙 (OSHA-KR Enforcement Regulation)
-scope: workspace
+scope: co-safety
 ---
 
 audit_exception: safety-os-skill-structure — Safety OS skills use the legal_basis-gated SSOT skill format (validated by scripts/skill-lifecycle-audit.ts and scripts/validate-skills.ts), not the generic template 5-section/7-frontmatter schema

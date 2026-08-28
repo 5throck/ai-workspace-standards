@@ -20,7 +20,7 @@ metadata:
     - 산업안전보건법 제38조 (안전조치)
     - 산업안전보건법 제39조 (건강조치)
     - 중대재해처벌법 제4조 (사업주와 경영책임자등의 안전 및 보건 확보의무)
-scope: workspace
+scope: co-safety
 ---
 
 audit_exception: safety-os-skill-structure — Safety OS skills use the legal_basis-gated SSOT skill format (validated by scripts/skill-lifecycle-audit.ts and scripts/validate-skills.ts), not the generic template 5-section/7-frontmatter schema

@@ -1,7 +1,7 @@
 ---
 name: pyrophoric-gas-emergency-responder
 owner: semicon-agent
-scope: workspace
+scope: co-safety
 status: active
 description: Plan and execute emergency response for pyrophoric and toxic special-gas leaks in semiconductor fabs — silane (SiH4), arsine (AsH3), phosphine (PH3), diborane (B2H6). Detection-alarm response, gas-cabinet isolation, sub-fab evacuation zoning, suppression, post-incident investigation.
 version: "1.0"
