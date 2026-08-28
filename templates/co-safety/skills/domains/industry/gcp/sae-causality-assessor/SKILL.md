@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: sae-causality-assessor
 owner: gcp-agent
 scope: co-safety

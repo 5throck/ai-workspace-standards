@@ -4,7 +4,7 @@
 
 본 가이드는 2026-06-17에 채택된 폴더 구조 규칙(회의 `memory/meeting-2026-06-17-folder-structure-redesign.md` 기준)을 문서화하며, 2026-06-20에 채택된 `functional/`/`industry/` 2-tier 분리(`docs/_shared/domain-classification-guide_ko.md` §6 Phase 2 참조)를 반영해 갱신되었습니다.
 
-> **자동화 사용 가능**: `bun scripts/new-domain.ts <name> <tier:functional|industry> [profile]`가 아래 Step 1-2-3-4-5-6-9를 자동으로 스캐폴딩합니다 (디렉터리 구조, agent/profile/workflow/evidence-model/scope 템플릿에 TODO 플레이스홀더 포함). Step 7, 8, 10, 11(스킬, 규제, 감사, 체인지로그)은 여전히 수동입니다. Step 1-6/9를 수동으로 하기보다 스크립트 실행을 우선하세요.
+> **자동화 사용 가능**: `bun scripts/co-safety/new-domain.ts <name> <tier:functional|industry> [profile]`가 아래 Step 1-2-3-4-5-6-9를 자동으로 스캐폴딩합니다 (디렉터리 구조, agent/profile/workflow/evidence-model/scope 템플릿에 TODO 플레이스홀더 포함). Step 7, 8, 10, 11(스킬, 규제, 감사, 체인지로그)은 여전히 수동입니다. Step 1-6/9를 수동으로 하기보다 스크립트 실행을 우선하세요.
 
 ---
 
@@ -114,7 +114,7 @@ mkdir -p skills/domains/<tier>/<name>
 mkdir -p workflows/domains/<tier>/<name>
 ```
 
-또는 위 Step 2와 3-6/9를 한 번에 자동화: `bun scripts/new-domain.ts <name> <tier> [profile]`.
+또는 위 Step 2와 3-6/9를 한 번에 자동화: `bun scripts/co-safety/new-domain.ts <name> <tier> [profile]`.
 
 ### Step 3: 에이전트 작성
 flat core 에이전트(`agents/pm.md`, `agents/safety-governance-manager.md`, `agents/safety-workflow-manager.md`)의 템플릿에 따라 `agents/domains/<tier>/<name>/<name>-agent.md`를 작성합니다. 필수 섹션:
@@ -150,7 +150,7 @@ v1 범위, 제외 항목, KPI, 컴플라이언스 게이트를 문서화하는 `
 
 ### Step 10: 감사 실행
 ```bash
-bun scripts/safety-audit.ts
+bun scripts/co-safety/safety-audit.ts
 ```
 0건의 오류로 통과해야 합니다. 감사는 재귀적 walkDir을 통해 신규 도메인을 자동 인식합니다.
 
@@ -210,6 +210,6 @@ bun scripts/safety-audit.ts
 - [ ] `_shared/`, `_meta/` 언더스코어 접두어 일관적 적용
 - [ ] `schema.yaml` 파일에 `legal_basis`, `status: active`, `applicability: mandatory` 포함
 - [ ] 증거 모델이 유효한 `$ref` 경로(상대 경로) 보유
-- [ ] `bun scripts/safety-audit.ts`가 0건의 오류로 통과
+- [ ] `bun scripts/co-safety/safety-audit.ts`가 0건의 오류로 통과
 - [ ] 상기 Section 5 레지스트리에 도메인 추가
 - [ ] CHANGELOG 및 메모리 로그 갱신

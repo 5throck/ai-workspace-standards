@@ -64,7 +64,7 @@ function printHelp(): void {
     console.log(`training-ingest v1.0.0 - CSV -> TRAIN-* JSON ingestion for worker safety-training completion records.
 
 Usage:
-  bun scripts/training-ingest.ts --input <file.csv> [--type <enum>] [--dry-run] [--no-dedupe] [--report <path.md>]
+  bun scripts/co-safety/training-ingest.ts --input <file.csv> [--type <enum>] [--dry-run] [--no-dedupe] [--report <path.md>]
 
 Options:
   --input <file.csv>    (required) UTF-8 CSV with a header row; embedded commas/quotes/CRLF supported

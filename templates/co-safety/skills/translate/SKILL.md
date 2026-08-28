@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: translate
 description: Translation helper for README and documentation files with diff preview and guidance
 version: 1.0.0

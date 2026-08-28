@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: emergency-agent
 role: specialist
 status: active

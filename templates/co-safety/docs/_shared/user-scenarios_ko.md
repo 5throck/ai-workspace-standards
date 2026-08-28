@@ -11,7 +11,7 @@
 bun install
 
 # 2. 시스템 무결성 확인
-bun scripts/safety-audit.ts    # 443+ 파일, 0 오류
+bun scripts/co-safety/safety-audit.ts    # 443+ 파일, 0 오류
 
 # 3. 도메인 탐색
 ls workflows/domains/functional/   # 기능 서비스 (PSM, MSDS, GxP)
@@ -336,13 +336,13 @@ memory/에 증거 기록 생성
 
 ```bash
 # 감사 (sync 전 반드시 통과해야 함)
-bun scripts/safety-audit.ts
+bun scripts/co-safety/safety-audit.ts
 
 # 도메인별 테스트
-bun scripts/test-pharma-general-profile.ts        # GMP
-bun scripts/test-chemical-handling-profile.ts     # MSDS
-bun scripts/test-cross-domain-integration.ts      # 전체 도메인
-bun scripts/test-domain-scenarios.ts              # 5개 실전 시나리오
+bun scripts/co-safety/test-pharma-general-profile.ts        # GMP
+bun scripts/co-safety/test-chemical-handling-profile.ts     # MSDS
+bun scripts/co-safety/test-cross-domain-integration.ts      # 전체 도메인
+bun scripts/co-safety/test-domain-scenarios.ts              # 5개 실전 시나리오
 
 # 스킬 실행 (rule-based)
 bun skills/domains/industry/gmp/qrm/fmea-scoring.ts                    # FMEA 위해 평가

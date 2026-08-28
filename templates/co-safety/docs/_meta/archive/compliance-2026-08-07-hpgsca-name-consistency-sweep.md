@@ -119,7 +119,7 @@ No other deleted-Art-14 citations remain in scope (powergen and steelmaking work
 | AGENTS.md:357 | Glossary table identifier row (no article number) |
 
 ## Audit results
-- `bun scripts/safety-audit.ts` → **exit 0** (872 files checked, 0 errors)
+- `bun scripts/co-safety/safety-audit.ts` → **exit 0** (872 files checked, 0 errors)
 - `bun scripts/audit.ts` → **exit 0** (all checks passed: agents, skills, scripts, memory, safety-os, language, parity)
 
 ## Counts

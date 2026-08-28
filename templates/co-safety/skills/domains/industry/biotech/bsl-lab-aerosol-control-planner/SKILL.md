@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: bsl-lab-aerosol-control-planner
 owner: biotech-agent
 scope: co-safety

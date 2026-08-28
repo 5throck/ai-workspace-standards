@@ -10,12 +10,12 @@
 bun install
 
 # Verify system integrity
-bun scripts/safety-audit.ts
+bun scripts/co-safety/safety-audit.ts
 
 # Run domain-specific tests
-bun scripts/test-pharma-general-profile.ts          # GMP
-bun scripts/test-chemical-handling-profile.ts       # MSDS
-bun scripts/test-cross-domain-integration.ts        # Cross-domain
+bun scripts/co-safety/test-pharma-general-profile.ts          # GMP
+bun scripts/co-safety/test-chemical-handling-profile.ts       # MSDS
+bun scripts/co-safety/test-cross-domain-integration.ts        # Cross-domain
 ```
 
 ## 2. Finding Your Domain
@@ -157,7 +157,7 @@ Some workflows don't execute directly — they **dispatch** to another agent:
 The Safety Governance Manager (SGM) operates at the strategic layer — it defines policy and KPI targets that operational agents (SWM and specialist agents) execute against:
 
 - **`policies/`** — approved safety policy documents (organization-wide standards, industry-profile-linked commitments). See `policies/README.md` for the naming convention and structure.
-- **`docs/governance/kpi-definitions.md`** — current KPI set: **LTIFR** (Lost Time Injury Frequency Rate), **Audit Pass Rate** (from `bun scripts/safety-audit.ts` output), and **Corrective Action Closure Rate** (from `memory/corrective-actions/*.json` records). Each KPI definition includes its formula, data source, target threshold, and escalation trigger.
+- **`docs/governance/kpi-definitions.md`** — current KPI set: **LTIFR** (Lost Time Injury Frequency Rate), **Audit Pass Rate** (from `bun scripts/co-safety/safety-audit.ts` output), and **Corrective Action Closure Rate** (from `memory/corrective-actions/*.json` records). Each KPI definition includes its formula, data source, target threshold, and escalation trigger.
 - **Traceability chain**: `memory/findings/FIND-YYYY-NNNN.json` → `memory/corrective-actions/CA-YYYY-NNNN.json`, conforming to `evidence-models/_shared/base/finding.schema.json` and `corrective-action.schema.json`.
 
 ## 8. Legal Disclaimer

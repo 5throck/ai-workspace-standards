@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: temperature-excursion-analyzer
 owner: gdp-agent
 scope: co-safety

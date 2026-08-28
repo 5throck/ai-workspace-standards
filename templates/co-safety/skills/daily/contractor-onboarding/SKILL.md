@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: contractor-onboarding
 version: 1.0.0
 owner: contractor-safety-agent

@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: thermal-burn-prevention-planner
 owner: food-agent
 scope: co-safety

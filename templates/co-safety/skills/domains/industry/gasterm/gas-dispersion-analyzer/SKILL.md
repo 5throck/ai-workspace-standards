@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: gas-dispersion-analyzer
 owner: gasterm-agent
 scope: co-safety

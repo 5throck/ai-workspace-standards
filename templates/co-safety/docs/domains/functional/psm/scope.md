@@ -144,10 +144,10 @@ PSM is consumed by industry domains via standard reference fields:
 
 | Gate | Verification |
 |------|--------------|
-| `legal_basis` field present in all PSM workflow schemas | `bun scripts/safety-audit.ts` |
-| `applicable_industries` declared in all workflow schemas | `bun scripts/safety-audit.ts` |
-| Evidence model `$ref` depth correct (`../../../`) | `bun scripts/safety-audit.ts` |
-| MOC skill exists at `skills/domains/functional/psm/moc/` | `bun scripts/safety-audit.ts` T-08 |
+| `legal_basis` field present in all PSM workflow schemas | `bun scripts/co-safety/safety-audit.ts` |
+| `applicable_industries` declared in all workflow schemas | `bun scripts/co-safety/safety-audit.ts` |
+| Evidence model `$ref` depth correct (`../../../`) | `bun scripts/co-safety/safety-audit.ts` |
+| MOC skill exists at `skills/domains/functional/psm/moc/` | `bun scripts/co-safety/safety-audit.ts` T-08 |
 
 ## 9. Legal Disclaimer
 

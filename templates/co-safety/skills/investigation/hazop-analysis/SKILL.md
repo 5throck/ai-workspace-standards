@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: hazop-analysis
 version: 1.1.0
 created: 2026-06-04

@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: safety-inspection-validator
 owner: ehsconst-agent
 scope: co-safety

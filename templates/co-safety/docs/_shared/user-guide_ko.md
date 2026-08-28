@@ -10,12 +10,12 @@
 bun install
 
 # 시스템 무결성 확인
-bun scripts/safety-audit.ts
+bun scripts/co-safety/safety-audit.ts
 
 # 도메인별 테스트 실행
-bun scripts/test-pharma-general-profile.ts          # GMP
-bun scripts/test-chemical-handling-profile.ts       # MSDS
-bun scripts/test-cross-domain-integration.ts        # 크로스 도메인
+bun scripts/co-safety/test-pharma-general-profile.ts          # GMP
+bun scripts/co-safety/test-chemical-handling-profile.ts       # MSDS
+bun scripts/co-safety/test-cross-domain-integration.ts        # 크로스 도메인
 ```
 
 ## 2. 소속 도메인 찾기
@@ -157,7 +157,7 @@ workflows/domains/industry/ehschem/plant-operation-safety/
 안전거버넌스관리자(SGM)는 전략 계층에서 운영되며, SWM과 전문 에이전트가 실행할 정책과 KPI 목표를 정의합니다:
 
 - **`policies/`** — 승인된 안전 정책 문서(조직 전체 표준, 산업 프로파일 연계 약속). 명명 규칙과 구조는 `policies/README.md` 참조.
-- **`docs/governance/kpi-definitions.md`** — 현재 KPI 세트: **LTIFR** (휴업재해율), **감사 통과율** (`bun scripts/safety-audit.ts` 출력 기반), **시정조치 완료율** (`memory/corrective-actions/*.json` 레코드 기반). 각 KPI 정의에는 산식, 데이터 소스, 목표 임계값, 에스컬레이션 트리거가 포함됩니다.
+- **`docs/governance/kpi-definitions.md`** — 현재 KPI 세트: **LTIFR** (휴업재해율), **감사 통과율** (`bun scripts/co-safety/safety-audit.ts` 출력 기반), **시정조치 완료율** (`memory/corrective-actions/*.json` 레코드 기반). 각 KPI 정의에는 산식, 데이터 소스, 목표 임계값, 에스컬레이션 트리거가 포함됩니다.
 - **추적성 체인**: `memory/findings/FIND-YYYY-NNNN.json` → `memory/corrective-actions/CA-YYYY-NNNN.json`, `evidence-models/_shared/base/finding.schema.json` 및 `corrective-action.schema.json` 준수.
 
 ## 8. 법적 고지사항

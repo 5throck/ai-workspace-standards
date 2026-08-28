@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: compliance-gap
 description: Trigger compliance gap analysis against applicable EHS regulations
 owner: compliance-agent

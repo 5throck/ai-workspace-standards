@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: biotech-agent
 role: specialist
 status: active

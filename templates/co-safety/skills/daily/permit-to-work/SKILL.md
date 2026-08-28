@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: permit-to-work
 description: Trigger permit-to-work (PTW) issuance workflow for high-risk or non-routine work
 owner: safety-workflow-manager

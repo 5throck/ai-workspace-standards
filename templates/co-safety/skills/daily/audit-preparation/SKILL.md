@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: audit-preparation
 version: 1.0.0
 owner: audit-agent

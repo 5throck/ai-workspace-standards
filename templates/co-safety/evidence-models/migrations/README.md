@@ -88,7 +88,7 @@ not require a migration script. No breaking (rename/type-change/new-required/rem
   would be a no-op. The same bump also made additive-only enum extensions with no migration
   impact: `industry_profile` expanded from 5 to 21 values (all `applicable_industries` declared
   across `workflows/domains/functional/risk-assessment/*/schema.yaml` plus the KNOWN_INDUSTRIES
-  vocabulary in `scripts/domain-config.ts`) and `psychosocial` added to `hazard_category`.
+  vocabulary in `scripts/co-safety/domain-config.ts`) and `psychosocial` added to `hazard_category`.
   The schema also now carries the normative risk-band table (1-5 Low / 6-12 Medium /
   13-19 High / 20-25 Critical, escalation >= 13) as the single source of truth on
   `risk_score_before`.
@@ -131,7 +131,7 @@ not require a migration script. No breaking (rename/type-change/new-required/rem
 - `domains/functional/risk-assessment/risk-assessment-record.json` is at **v2.1.0** (2026-08-24):
   additive-only minor bump — new optional `facility_id` property (string, description mirrored from
   `risk-register-record.json`'s facility identifier) linking an assessment to its facility/work area
-  so `scripts/risk-register-rollup.ts` can group assessments into per-facility registers. Not added
+  so `scripts/co-safety/risk-register-rollup.ts` can group assessments into per-facility registers. Not added
   to `required[]`; no field renamed, re-typed, or removed; no `$ref` target changed. No migration
   script needed: a search of `memory/` on 2026-08-24 confirmed zero RA- record instances exist, so
   existing records (none) remain valid unmodified and all future records can adopt the field at

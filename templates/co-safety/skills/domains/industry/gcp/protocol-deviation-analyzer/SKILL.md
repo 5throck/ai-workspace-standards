@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: protocol-deviation-analyzer
 owner: gcp-agent
 scope: co-safety

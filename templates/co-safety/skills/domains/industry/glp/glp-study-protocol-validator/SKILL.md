@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: glp-study-protocol-validator
 owner: glp-agent
 scope: co-safety

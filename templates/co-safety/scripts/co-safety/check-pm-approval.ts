@@ -10,7 +10,7 @@
  * Read-only Bash commands are always allowed (audit, validate, git log, etc.)
  *
  * Usage (configured in settings.json):
- *   "command": "bun scripts/check-pm-approval.ts"
+ *   "command": "bun scripts/co-safety/check-pm-approval.ts"
  *
  * Exit codes:
  *   0 = allow

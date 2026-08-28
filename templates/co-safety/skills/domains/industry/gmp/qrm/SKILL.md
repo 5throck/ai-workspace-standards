@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: gmp-qrm
 owner: gmp-agent
 scope: co-safety

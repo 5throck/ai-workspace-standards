@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: gvp-agent
 role: specialist
 status: active

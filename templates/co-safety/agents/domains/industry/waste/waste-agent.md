@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: waste-agent
 role: specialist
 status: active

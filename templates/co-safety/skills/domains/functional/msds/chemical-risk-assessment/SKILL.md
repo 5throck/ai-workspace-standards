@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: chemical-risk-assessment
 owner: msds-agent
 scope: co-safety

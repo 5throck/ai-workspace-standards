@@ -42,7 +42,7 @@
 | `agents/domains/industry/gasterm/gasterm-agent.md` | Add construction/permit legal basis (Section A), update responsibilities & scope (Section B), update dispatch triggers (PM-ONLY INVOCATION) |
 | `regulations/KR/LPG-Safety-Business.yaml` | Add Articles 27-2, 45 |
 | `regulations/KR/High-Pressure-Gas-Safety.yaml` | Add Article 22-2 |
-| `scripts/domain-config.ts` | Add construction-phase cross-domain refs |
+| `scripts/co-safety/domain-config.ts` | Add construction-phase cross-domain refs |
 | `AGENTS.md` | Add construction-permit skill entries to Specialist Agent Roster and Skills table |
 
 ---
@@ -880,7 +880,7 @@ git commit -m "docs(gasterm): update scope with construction/permit workflows an
 ### Task 9: Update Audit Config — domain-config.ts
 
 **Files:**
-- Modify: `scripts/domain-config.ts`
+- Modify: `scripts/co-safety/domain-config.ts`
 
 - [ ] **Step 1: Add construction-phase cross-domain references**
 
@@ -900,7 +900,7 @@ Expected: ✅ 0 errors (cross-domain refs validated — may show warnings for ta
 
 ```bash
 cd .worktrees/feat/gasterm-construction-permit
-git add scripts/domain-config.ts
+git add scripts/co-safety/domain-config.ts
 git commit -m "feat(audit): add gasterm construction-phase cross-domain refs to domain-config"
 ```
 

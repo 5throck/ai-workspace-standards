@@ -134,7 +134,7 @@ These are stale/inconsistent HPGSCA citations found during verification that are
 
 ## 7. Audit
 
-- `bun scripts/safety-audit.ts` — result reported in final agent message (run after this report is written).
+- `bun scripts/co-safety/safety-audit.ts` — result reported in final agent message (run after this report is written).
 
 ---
 
@@ -196,7 +196,7 @@ semicon and steelmaking READMEs verified CLEAN (number-only citations, or alread
 ### 10.4 PM verification
 - Wrong-label grep: 0 matches for `Article 11(안전관리자)` / `safety officer Article 11` and variants in shipbuilding (verified).
 - Deleted-Art-14 grep (`고압가스...Article 14/제14조`): 0 matches across `workflows/domains`.
-- `bun scripts/audit.ts` + `bun scripts/safety-audit.ts`: run by PM before commit (see PR).
+- `bun scripts/audit.ts` + `bun scripts/co-safety/safety-audit.ts`: run by PM before commit (see PR).
 
 ### 10.5 Boiler-steam-system-safety Art-17 Resolution (follow-up PR, compliance-agent)
 
@@ -221,7 +221,7 @@ Resolves the §10.3 deferred item. (Heading numbered §10.5 rather than §10.4 a
 Three defects fixed in one edit: (a) HPGSCA Art 17 removed (topic mismatch); (b) 산안법 제98조 → 제44조(PSM) to match schema; (c) 발전설비 안전관리 규정 added (was in schema but missing from README §1). legal_basis count remains 3 (≥3 ✓); README↔schema verbatim-aligned ✓. Scope strictly limited to `powergen/boiler-steam-system-safety`; no other workflow touched.
 
 **Verification:**
-- `bun scripts/safety-audit.ts` → exit 0 (872 files checked, 0 errors).
+- `bun scripts/co-safety/safety-audit.ts` → exit 0 (872 files checked, 0 errors).
 - `bun scripts/audit.ts` → exit 0 (all checks passed).
 - Post-fix grep: 0 matches for `고압가스...제17조` / `고압가스안전관리법` / `제98조` within `boiler-steam-system-safety/`.
 

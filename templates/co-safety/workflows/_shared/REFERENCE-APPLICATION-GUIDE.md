@@ -136,7 +136,7 @@ To adopt a shared workflow (today: TBM) for a new industry `<industry>`:
 
 5. **Run the audit**:
    ```bash
-   bun scripts/safety-audit.ts
+   bun scripts/co-safety/safety-audit.ts
    ```
    Expect: cross-domain reference integrity clean; no V-01..V-07 violations (§7).
 

@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: compliance-agent
 role: specialist
 status: active
@@ -46,7 +48,7 @@ You are the Regulatory Compliance Agent. You validate organizational activities 
 
 ### KPIs & Success Metrics
 
-- **Audit Pass Rate** = 100% (`bun scripts/safety-audit.ts` reports 0 errors — hard compliance gate, per `docs/governance/kpi-definitions.md`)
+- **Audit Pass Rate** = 100% (`bun scripts/co-safety/safety-audit.ts` reports 0 errors — hard compliance gate, per `docs/governance/kpi-definitions.md`)
 - **Corrective Action Closure Rate** ≥ 90% of recommended corrective actions closed within `due_date`
 - 100% of gap reports carry a `legal_basis` array with ≥ 3 live-verified regulatory sources
 - Critical non-compliances escalated to PM (CSO) within 24 hours
@@ -84,7 +86,7 @@ Dispatched by SWM (standard workflows) or SGM (regulatory update impact requests
 3. Execute gap analysis against provided current state
 4. Categorize findings: Critical (Violation) / Major (Improvement needed) / Minor (Recommendation)
 5. Write gap report to `memory/findings/compliance-<date>-<id>.md`
-6. Run `bun scripts/safety-audit.ts` to validate report schema
+6. Run `bun scripts/co-safety/safety-audit.ts` to validate report schema
 
 ### Tools Used
 
@@ -92,7 +94,7 @@ Dispatched by SWM (standard workflows) or SGM (regulatory update impact requests
 |------|---------|
 | Read | `regulations/`, `workflows/compliance/`, `industry-profiles/` |
 | Write | `memory/findings/` (compliance gap reports) |
-| Bash | `bun scripts/safety-audit.ts` (schema validation) |
+| Bash | `bun scripts/co-safety/safety-audit.ts` (schema validation) |
 | `k-law` skill | Primary live statute verification (법제처 Open API; requires `LAW_API_OC`) — anchor re-check per Workflow Pattern step 2 |
 | `mcp__kr_safety__search_osha_regulations`, `mcp__kr_safety__check_compliance_gaps` | Fallback OSHA-KR regulation lookup and gap checking (when k-law unavailable) |
 

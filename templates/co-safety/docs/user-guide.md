@@ -19,7 +19,7 @@ Every task starts the same way: **talk to the PM/CSO, never invoke a specialist 
    | `/sync "feat(tar): pre-TAR package"` — audit + commit + push + PR | pm | High | `sync` |
 
 4. **You approve (or adjust) the plan.** PM dispatches specialists — serially for anything that writes files, in parallel only for read-only research/analysis.
-5. **PM verifies the output** against your original ask and runs the quality gates: `bun scripts/audit.ts` (documentation/structure) and `bun scripts/safety-audit.ts` (legal_basis, ≥3 sources per workflow, 0 errors required).
+5. **PM verifies the output** against your original ask and runs the quality gates: `bun scripts/audit.ts` (documentation/structure) and `bun scripts/co-safety/safety-audit.ts` (legal_basis, ≥3 sources per workflow, 0 errors required).
 6. **You close out the work with `/sync "type: description"`** — the only supported path to committing and opening a PR. Direct `git commit`/`git push` calls are blocked by the pre-commit hook.
 
 **Rule of thumb:** if you find yourself typing "hey msds-agent, can you..." — stop, and ask the PM/CSO instead. The PM is the single point of entry; specialists are dispatched, not chatted with directly.
@@ -83,7 +83,7 @@ Design Approval (execution plan table, ends with /sync)
 
 | Command | What it does |
 |---------|--------------|
-| `bun scripts/safety-audit.ts` | legal_basis gate — ≥3 regulatory sources per workflow/evidence model, 0 errors required (1,077+ files checked) |
+| `bun scripts/co-safety/safety-audit.ts` | legal_basis gate — ≥3 regulatory sources per workflow/evidence model, 0 errors required (1,077+ files checked) |
 | `bun scripts/audit.ts` | workspace-standards audit (structure, lifecycle, encoding, skills registry) |
 | `bun scripts/agent-verify.ts` | agent roster integrity (AGENTS.md ↔ agents/ files) |
 | `/sync "type: description"` | the ONLY supported commit path — runs the full pipeline and opens a PR |

@@ -21,7 +21,7 @@ This document defines the v1 scope of the Good Manufacturing Practice (GMP) modu
 | Evidence Models | `evidence-models/domains/functional/psm/psm-*.json` (11) | `evidence-models/domains/industry/gmp/gmp-*.json` (10) |
 | Skills | `skills/domains/functional/psm/moc/` (1) | `skills/domains/industry/gmp/change-control/`, `skills/domains/industry/gmp/deviation-capa/`, `skills/domains/industry/gmp/qrm/` (3) |
 
-**Pattern upgrade**: Unlike PSM (which uses flat `.md` files), GMP v1 uses the **directory + `schema.yaml` pattern** to be audit-compliant with `scripts/safety-audit.ts`.
+**Pattern upgrade**: Unlike PSM (which uses flat `.md` files), GMP v1 uses the **directory + `schema.yaml` pattern** to be audit-compliant with `scripts/co-safety/safety-audit.ts`.
 
 ## 3. Regulatory Scope
 
@@ -81,9 +81,9 @@ All include ALCOA+ audit trail fields. Common schema extensions defined in `evid
 
 | Gate | Verification |
 |------|--------------|
-| Multi-source legal_basis (≥3 references per workflow) | `bun scripts/safety-audit.ts` |
-| E-signature required fields enforced | `bun scripts/safety-audit.ts` GMP extension |
-| QRM methodology enumerated (5 ICH Q9 techniques) | `bun scripts/safety-audit.ts` GMP extension |
+| Multi-source legal_basis (≥3 references per workflow) | `bun scripts/co-safety/safety-audit.ts` |
+| E-signature required fields enforced | `bun scripts/co-safety/safety-audit.ts` GMP extension |
+| QRM methodology enumerated (5 ICH Q9 techniques) | `bun scripts/co-safety/safety-audit.ts` GMP extension |
 | Nomenclature dual declaration (KO + EN) | JSON schema validation |
 | EHS/Quality role separation (risk-assessment-agent vs gmp-qrm) | Manual review in Section B |
 

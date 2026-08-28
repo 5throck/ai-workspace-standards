@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: occupational-health-agent
 role: specialist
 status: active

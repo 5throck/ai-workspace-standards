@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: tool-box-meeting
 description: Trigger pre-work Tool Box Meeting (TBM) — cross-industry safety briefing with per-domain legal profiles
 owner: safety-workflow-manager

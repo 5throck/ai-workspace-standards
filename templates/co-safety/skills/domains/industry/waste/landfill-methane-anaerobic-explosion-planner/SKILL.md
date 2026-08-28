@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: landfill-methane-anaerobic-explosion-planner
 owner: waste-agent
 scope: co-safety

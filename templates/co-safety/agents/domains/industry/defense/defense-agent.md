@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: defense-agent
 role: specialist
 status: active

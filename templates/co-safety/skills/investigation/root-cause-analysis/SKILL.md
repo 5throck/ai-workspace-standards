@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: root-cause-analysis
 version: 1.0.0
 owner: incident-investigation-agent

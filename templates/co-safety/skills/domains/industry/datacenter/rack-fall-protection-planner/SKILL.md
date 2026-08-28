@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: rack-fall-protection-planner
 owner: datacenter-agent
 scope: co-safety

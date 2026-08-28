@@ -126,6 +126,54 @@ template), and warn on missing per-skill READMEs (inherited from templates).
 - co-safety language-gate owner decision (separate, still pending).
 - Promoting co-deck's allowlist fork into the stock template (separate proposal).
 
+## Execution Follow-Up (same day, user-directed)
+
+All three follow-ups were executed; this section records them as amendments to this design.
+
+### F1 — Per-skill README backlog completed (project layer)
+
+All **571 project-layer skill folders** (11 projects) received `README.md` + `README_ko.md`
+seeded from each SKILL.md's frontmatter (same generator as the template pass; per-project
+PRs). Coverage is now 100% at every layer (template 206/206, projects 571/571). co-safety
+domain-skill README.md files additionally carry `lang: ko` declarations (their descriptions
+contain official Korean statute names).
+
+### F2 — co-safety language gate resolved via glossary separation
+
+The previously-open "co-safety language-gate owner decision" was resolved as the
+`lang: ko` exception route (option b of the documented decision):
+
+- New `Projects/co-safety/docs/glossary/kr-safety-glossary.md` (`lang: ko` +
+  `lang_reason: legal`): KO routing keywords, domain descriptors, and the full official
+  statute registry moved verbatim out of AGENTS.md (statute names are Korean proper nouns
+  required for `k-law` Open API queries).
+- AGENTS.md / CLAUDE.md / GEMINI.md de-Koreanized (0 Hangul; English routing tables +
+  glossary pointer).
+- `lang: ko` + `lang_reason: legal` declared on the 91 flagged domain skills/agents
+  (Korean citations and KO dispatch triggers are intrinsic to this Korea-only EHS variant).
+- **Back-ported to `templates/co-safety/`** (project → template direction): glossary file
+  copied, template AGENTS.md de-Koreanized with the same pointer, and `lang: ko` declared
+  on 108 template domain files.
+
+### F3 — scripts/<variant> layout applied to co-safety (template + project)
+
+The adopted layout convention was enforced on the one remaining variant carrying
+variant-specific scripts at the `scripts/` root:
+
+- `templates/co-safety/scripts/co-safety/` created; 15 variant-specific scripts moved
+  (`safety-audit.ts`, `audit-variant.ts`, `domain-config.ts`, `new-domain.ts`,
+  `scaffold-industry.ts`, `training-ingest.ts`, `start-mcp.ts`, `risk-register-rollup.ts`,
+  `check-pm-approval.ts`, `migrate-registry-to-coordinates.ts`, and 5 `test-*.ts` suites).
+- 67 template files' `scripts/<name>.ts` references rewritten to `scripts/co-safety/<name>.ts`
+  (AGENTS.md, .claude/.gemini commands+settings+skills, READMEs); `SCRIPTS.md` registry
+  created for the nested dir.
+- **Project `Projects/co-safety`**: same move + reference rewrite (116 files) + registry
+  path updates; `.github/workflows/safety-audit.yml` and regulation YAML comments updated.
+- The other 8 variants without variant-specific scripts (co-design, co-develop, co-export,
+  co-hr, co-news, co-price, co-security, co-work) correctly remain without the directory
+  (convention: optional to have, mandatory to be correct when present); co-abap/co-consult/
+  co-deck/co-game already conformed.
+
 ## References
 
 - Leakage evidence: workspace commit af6d8f87 (2026-08-06, PR #450); co-consult 627f05a;

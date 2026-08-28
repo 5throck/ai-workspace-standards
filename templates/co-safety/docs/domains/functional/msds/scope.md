@@ -115,7 +115,7 @@ Per meeting 2026-06-17, MSDS workflows require **minimum 3 sources** (stricter t
 
 | Gate | Verification |
 |------|--------------|
-| Multi-source legal_basis (≥3 entries per workflow) | `bun scripts/safety-audit.ts` v2.3.0 |
+| Multi-source legal_basis (≥3 entries per workflow) | `bun scripts/co-safety/safety-audit.ts` v2.3.0 |
 | `ghs_version` field in all msds-*.json | JSON schema validation |
 | GHS 16 sections completeness in msds-record.json | JSON schema validation |
 | Reference workflow has `workflow_type: reference` + `target_agent` | schema.yaml check |

@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: fall-hazard-assessor
 owner: ehsconst-agent
 scope: co-safety

@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: dangerous-cargo-handling-planner
 owner: logistics-agent
 scope: co-safety

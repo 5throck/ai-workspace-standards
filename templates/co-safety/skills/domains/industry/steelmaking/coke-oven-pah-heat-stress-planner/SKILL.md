@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: coke-oven-pah-heat-stress-planner
 owner: steelmaking-agent
 scope: co-safety

@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: signal-detector
 owner: gvp-agent
 scope: co-safety

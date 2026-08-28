@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: cosmetics-solvent-exposure-monitor
 owner: cosmetics-agent
 scope: co-safety

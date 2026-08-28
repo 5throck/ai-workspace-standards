@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: psm-moc
 owner: psm-agent
 scope: co-safety

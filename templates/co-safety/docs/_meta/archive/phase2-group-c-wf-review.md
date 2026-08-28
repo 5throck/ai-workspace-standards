@@ -2,11 +2,11 @@
 
 **Author**: Safety Workflow Manager (SWM)
 **Date**: 2026-08-07
-**Scope**: Expert review of proposed industry-unique workflow candidates for the 4 Group C industries (railway, shipbuilding, steelmaking, waste) — the last 4 Tier-1 industries, each currently at 3 WFs and needing +2 to reach the Tier-2 threshold of 5. Output feeds the automation-engineer (Task C-1b successor) which runs `scripts/scaffold-industry.ts` verbatim with the `--unique-wfs` lists below.
+**Scope**: Expert review of proposed industry-unique workflow candidates for the 4 Group C industries (railway, shipbuilding, steelmaking, waste) — the last 4 Tier-1 industries, each currently at 3 WFs and needing +2 to reach the Tier-2 threshold of 5. Output feeds the automation-engineer (Task C-1b successor) which runs `scripts/co-safety/scaffold-industry.ts` verbatim with the `--unique-wfs` lists below.
 **Method**: Read each existing `workflows/domains/industry/<industry>/<wf>/schema.yaml` (title + `legal_basis` + `signature_hazard` + `evidence_model`) to map actual scope; cross-checked against `regulations/KR/industry-regulatory-anchors.yaml` (primary + adjacent + SAPA statutes, plus each industry's `unverified` array); identified anchor-cited articles NOT cited by any existing WF (the "uncited gap" signal pioneered in Group A and refined in Group B). Live-verified key articles via `kr_safety.search_osha_regulations` this session. Rejected any candidate whose scope overlaps an existing WF, the shared TBM base, or another candidate.
 **Predecessors**: `memory/findings/phase1-group-a-wf-review.md` (methodology), `memory/findings/phase2-group-b-wf-review.md` (format and rigor reference — reviewed 8 candidates, rejected 6 duplicates).
 
-## Generator mechanics (confirmed from `scripts/scaffold-industry.ts` v0.1.1)
+## Generator mechanics (confirmed from `scripts/co-safety/scaffold-industry.ts` v0.1.1)
 
 - `--unique-wfs <a,b>` creates ONLY industry-unique workflow dirs. Each produces `schema.yaml` + `README.md` (KO) + `README.e.md` (EN) + one EM skeleton (`evidence-models/domains/industry/<industry>/<industry>-<slug>-record.json`).
 - **TBM handling for Group C** — all 4 industries already have a full per-industry `tbm-pre-work-briefing/` override (own `signature_hazard` + `legal_basis` + `industry_profile` + `agent`) and **no** `references:` block. The generator will therefore use `tbmAction: add-ref-to-existing` for all 4 — it appends a `references: - shared: ../../../../_shared/tbm` block to each existing schema (idempotent — skips if `references:` already present, which it does NOT for these 4). Identical to Groups A and B.
@@ -161,20 +161,20 @@ Before proposing candidates, here is each industry's full signature-hazard profi
 
 ## Consolidated generator commands (Task C-1b successor)
 
-The automation-engineer should run these verbatim. TBM handling is automatic in all 4 cases (`add-ref-to-existing`). Recommended: run with `--dry-run` first to inspect planned file tree, then without for real generation, then `bun scripts/safety-audit.ts` to validate.
+The automation-engineer should run these verbatim. TBM handling is automatic in all 4 cases (`add-ref-to-existing`). Recommended: run with `--dry-run` first to inspect planned file tree, then without for real generation, then `bun scripts/co-safety/safety-audit.ts` to validate.
 
 ```bash
 # railway (+2 unique WFs; TBM add-ref-to-existing) — RSA Art 45/48 + OSHA Art 99 [LIVE-VERIFIED]
-bun scripts/scaffold-industry.ts --industry railway --unique-wfs railway-rolling-stock-maintenance-loto,railway-bridge-viaduct-fall-prevention
+bun scripts/co-safety/scaffold-industry.ts --industry railway --unique-wfs railway-rolling-stock-maintenance-loto,railway-bridge-viaduct-fall-prevention
 
 # shipbuilding (+2 unique WFs; TBM add-ref-to-existing) — DSSMA Art 5/27 + HPGSCA Art 14/28 + OSHA Art 101 [LIVE-VERIFIED via kr_safety this session; HPGSCA carries [UNVERIFIED-via-legalize-kr] from anchor — non-blocking]
-bun scripts/scaffold-industry.ts --industry shipbuilding --unique-wfs shipbuilding-painting-coating-fire-toxic,shipbuilding-welding-fume-gas-safety
+bun scripts/co-safety/scaffold-industry.ts --industry shipbuilding --unique-wfs shipbuilding-painting-coating-fire-toxic,shipbuilding-welding-fume-gas-safety
 
 # steelmaking (+2 unique WFs; TBM add-ref-to-existing) — OSHA Art 100/125/130 + DSSMA Art 5 [LIVE-VERIFIED]
-bun scripts/scaffold-industry.ts --industry steelmaking --unique-wfs steelmaking-coke-oven-pah-heat-stress,steelmaking-hot-rolling-mill-crush-burn
+bun scripts/co-safety/scaffold-industry.ts --industry steelmaking --unique-wfs steelmaking-coke-oven-pah-heat-stress,steelmaking-hot-rolling-mill-crush-burn
 
 # waste (+2 unique WFs; TBM add-ref-to-existing) — WCA Art 25 + BFS Art 16 + CCA Art 23 [LIVE-VERIFIED; no phantom-statute-file gap in Group C]
-bun scripts/scaffold-industry.ts --industry waste --unique-wfs waste-designated-hazardous-chemical-treatment,waste-landfill-methane-anaerobic-explosion
+bun scripts/co-safety/scaffold-industry.ts --industry waste --unique-wfs waste-designated-hazardous-chemical-treatment,waste-landfill-methane-anaerobic-explosion
 ```
 
 ---

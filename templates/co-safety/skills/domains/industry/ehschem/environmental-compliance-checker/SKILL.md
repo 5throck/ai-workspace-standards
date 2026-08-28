@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: environmental-compliance-checker
 owner: ehschem-agent
 scope: co-safety

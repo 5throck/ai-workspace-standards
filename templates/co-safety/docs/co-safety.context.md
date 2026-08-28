@@ -51,7 +51,7 @@ ess-fire-risk-assessor, tank-integrity-validator, etc.). Full list: `AGENTS.md`.
 2. Specialist executes workflow (risk assessment, PTW, TBM, audit, etc.)
 3. Evidence records written to `evidence-models/` with semver'd schemas
 4. Every workflow record MUST include `legal_basis` (>=3 Korean EHS law articles)
-5. `scripts/safety-audit.ts` validates `legal_basis` gate on audit runs
+5. `scripts/co-safety/safety-audit.ts` validates `legal_basis` gate on audit runs
 <!-- END VARIANT-INJECT -->
 
 <!-- VARIANT-INJECT: guidelines [REQUIRED] -->
@@ -229,7 +229,7 @@ dispatch triggers: `AGENTS.md` Specialist Agent Roster.
 | Agent | Dispatch SGM, SWM, Emergency Agent, Audit Agent |
 | TaskCreate, TaskUpdate | Track multi-step safety workflow plans |
 | Write, Edit | `memory/*.md` session records only |
-| Bash | Read-only: `git status`, `bun scripts/audit.ts`, `bun scripts/safety-audit.ts` |
+| Bash | Read-only: `git status`, `bun scripts/audit.ts`, `bun scripts/co-safety/safety-audit.ts` |
 
 **Antigravity Integration**: Use `activate_skill` to invoke safety governance or workflow skills. Use `agent_manager` to dispatch SGM, SWM, Emergency Agent, or Audit Agent.
 

@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: asset-integrity-agent
 role: specialist
 status: active

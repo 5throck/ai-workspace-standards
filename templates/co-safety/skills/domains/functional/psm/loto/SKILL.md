@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: psm-loto
 owner: psm-agent
 scope: co-safety

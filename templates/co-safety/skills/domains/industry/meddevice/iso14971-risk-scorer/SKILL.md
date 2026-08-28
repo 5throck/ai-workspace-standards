@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: iso14971-risk-scorer
 owner: meddevice-agent
 scope: co-safety

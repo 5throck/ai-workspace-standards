@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: painting-coating-fire-toxic-planner
 owner: shipbuilding-agent
 scope: co-safety

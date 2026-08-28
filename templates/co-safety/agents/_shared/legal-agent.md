@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: legal-agent
 role: specialist
 status: active

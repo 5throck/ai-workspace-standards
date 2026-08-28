@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: msds-parser
 owner: msds-agent
 scope: co-safety

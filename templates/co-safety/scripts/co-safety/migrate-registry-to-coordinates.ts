@@ -222,7 +222,7 @@ async function main() {
   const args = parseArgs(process.argv);
 
   if (!args.file) {
-    fail('Usage: bun scripts/migrate-registry-to-coordinates.ts <file.yaml> [--write] [--out <dir>] [--oc <key>]');
+    fail('Usage: bun scripts/co-safety/migrate-registry-to-coordinates.ts <file.yaml> [--write] [--out <dir>] [--oc <key>]');
     process.exit(1);
   }
 

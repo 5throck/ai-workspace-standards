@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: construction-permit-overview
 owner: gasterm-agent
 scope: co-safety
