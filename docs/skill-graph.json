@@ -2615,12 +2615,6 @@
       "source": "prose"
     },
     {
-      "type": "references",
-      "from": "design",
-      "to": "measure",
-      "source": "prose"
-    },
-    {
       "type": "phase",
       "from": "design",
       "to": "phase3",
@@ -3323,12 +3317,6 @@
       "source": "skill_manifest"
     },
     {
-      "type": "references",
-      "from": "html-build",
-      "to": "measure",
-      "source": "prose"
-    },
-    {
       "type": "phase",
       "from": "html-build",
       "to": "phase4",
@@ -3876,42 +3864,6 @@
     },
     {
       "type": "references",
-      "from": "measure",
-      "to": "html-build",
-      "source": "prose"
-    },
-    {
-      "type": "requires",
-      "from": "measure",
-      "to": "html-build",
-      "source": "prerequisites"
-    },
-    {
-      "type": "used_by",
-      "from": "measure",
-      "to": "measure",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "references",
-      "from": "measure",
-      "to": "pdf-export",
-      "source": "prose"
-    },
-    {
-      "type": "phase",
-      "from": "measure",
-      "to": "phase4",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "references",
-      "from": "measure",
-      "to": "version",
-      "source": "prose"
-    },
-    {
-      "type": "references",
       "from": "mece-logic-auditor",
       "to": "consulting-report-writing",
       "source": "prose"
@@ -4293,12 +4245,6 @@
       "from": "prep-pdf",
       "to": "html-build",
       "source": "prerequisites"
-    },
-    {
-      "type": "references",
-      "from": "prep-pdf",
-      "to": "measure",
-      "source": "prose"
     },
     {
       "type": "used_by",
@@ -6021,12 +5967,6 @@
       "from": "version",
       "to": "image-curator",
       "source": "skill_manifest"
-    },
-    {
-      "type": "references",
-      "from": "version",
-      "to": "measure",
-      "source": "prose"
     },
     {
       "type": "used_by",
