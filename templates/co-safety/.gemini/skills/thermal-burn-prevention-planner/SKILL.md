@@ -4,7 +4,7 @@ owner: food-agent
 scope: workspace
 status: active
 description: Plan worker thermal-burn and cooking-oil fire-risk prevention for industrial fryers, cookers, steam lines, and hot surfaces in food manufacturing. Thermal-zone mapping, PPE selection, Class F/K cooking-oil fire response, steam-line LOTO points.
-version: "1.0"
+version: "1.0.0"
 created: "2026-08-07"
 last_updated: "2026-08-07"
 metadata:

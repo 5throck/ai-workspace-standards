@@ -4,7 +4,7 @@ owner: ehsconst-agent
 scope: workspace
 status: active
 description: Assess fall hazards at construction sites. Leading edge identification, protection hierarchy recommendation, rescue plan generation.
-version: "1.0"
+version: "1.0.0"
 created: "2026-06-18"
 last_updated: "2026-06-18"
 metadata:

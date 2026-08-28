@@ -4,7 +4,7 @@ owner: powergen-agent
 scope: workspace
 status: active
 description: Lithium-ion ESS (Energy Storage System) fire risk assessment. Thermal runaway prediction, suppression strategy, gas emission analysis.
-version: "1.0"
+version: "1.0.0"
 created: "2026-06-18"
 last_updated: "2026-06-18"
 metadata:

@@ -4,7 +4,7 @@ owner: gcp-agent
 scope: workspace
 status: active
 description: Analyze clinical trial protocol deviations per ICH E6(R3). Classifies severity, identifies trends, recommends CAPA.
-version: "1.0"
+version: "1.0.0"
 created: 2026-06-17
 last_updated: "2026-06-17"
 metadata:

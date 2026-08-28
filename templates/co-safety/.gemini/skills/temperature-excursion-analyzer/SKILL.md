@@ -4,7 +4,7 @@ owner: gdp-agent
 scope: workspace
 status: active
 description: Analyze temperature excursion events in cold chain pharmaceutical distribution. Determines product quality impact per Stability + GDP guidelines.
-version: "1.0"
+version: "1.0.0"
 created: 2026-06-17
 last_updated: 2026-06-17
 metadata:

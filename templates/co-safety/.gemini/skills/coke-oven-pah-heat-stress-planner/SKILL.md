@@ -4,7 +4,7 @@ owner: steelmaking-agent
 scope: workspace
 status: active
 description: Plan coke-oven battery worker safety — coal-tar-pitch-volatile PAH (IARC Group 1 carcinogen) inhalation exposure, oven-top extreme-heat stress, coke-oven-gas leak. Industrial-hygiene exposure-assessment discipline distinct from byproduct-gas equipment-leak. OSHA Art 125 (작업환경측정 — uncited) + OSHA Art 130 (특수건강진단 — uncited) + DSSMA Art 5 (코크스 — uncited) + OSHA Art 38 + SAPA Art 4.
-version: "1.0"
+version: "1.0.0"
 created: "2026-08-07"
 last_updated: "2026-08-07"
 metadata:

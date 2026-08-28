@@ -4,7 +4,7 @@ owner: gcp-agent
 scope: workspace
 status: active
 description: Assess SAE causality using ImPACT criteria. Supports investigator and sponsor determinations for regulatory reporting.
-version: "1.0"
+version: "1.0.0"
 created: 2026-06-17
 last_updated: "2026-06-17"
 metadata:

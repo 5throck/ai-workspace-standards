@@ -4,7 +4,7 @@ owner: semicon-agent
 scope: workspace
 status: active
 description: Plan and execute emergency response for pyrophoric and toxic special-gas leaks in semiconductor fabs — silane (SiH4), arsine (AsH3), phosphine (PH3), diborane (B2H6). Detection-alarm response, gas-cabinet isolation, sub-fab evacuation zoning, suppression, post-incident investigation.
-version: "1.0"
+version: "1.0.0"
 created: "2026-08-07"
 last_updated: "2026-08-07"
 metadata:

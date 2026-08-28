@@ -4,7 +4,7 @@ owner: gvp-agent
 scope: workspace
 status: active
 description: Integrated benefit-risk assessment per EU GVP Module 12. Supports PrOACT-URL, BRAT, MCDA frameworks.
-version: "1.0"
+version: "1.0.0"
 created: "2026-06-17"
 last_updated: "2026-06-17"
 metadata:

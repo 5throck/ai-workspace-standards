@@ -4,7 +4,7 @@ owner: gmp-agent
 scope: workspace
 status: active
 description: Manage GMP Deviation (이상관리) and CAPA (시정예방조치) workflows per 총리령 「의약품 등의 안전에 관한 규칙」 별표 1 제7.3호 + ICH Q10.
-version: "1.0"
+version: "1.0.0"
 created: 2026-06-17
 last_updated: 2026-08-26
 metadata:

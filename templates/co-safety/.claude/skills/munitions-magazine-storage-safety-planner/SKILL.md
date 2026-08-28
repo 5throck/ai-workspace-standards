@@ -4,7 +4,7 @@ owner: defense-agent
 scope: workspace
 status: active
 description: Plan munitions magazine storage operations — quantity-distance (Q-D) siting, UN hazard-division (HD 1.1-1.6) and compatibility-group segregation, magazine lightning/static control, sympathetic-detonation prevention, 화약류안전관리자 oversight per FSESA Art 23.
-version: "1.0"
+version: "1.0.0"
 created: "2026-08-07"
 last_updated: "2026-08-07"
 metadata:

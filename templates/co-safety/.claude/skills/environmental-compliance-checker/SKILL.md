@@ -4,7 +4,7 @@ owner: ehschem-agent
 scope: workspace
 status: active
 description: Check environmental discharge compliance for chemical plants. Air (SOx/NOx/VOC/PM), water (BOD/COD/heavy metals), noise/vibration.
-version: "1.0"
+version: "1.0.0"
 created: "2026-06-18"
 last_updated: "2026-06-18"
 metadata:

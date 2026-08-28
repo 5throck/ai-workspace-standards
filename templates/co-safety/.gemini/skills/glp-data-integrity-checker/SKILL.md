@@ -4,7 +4,7 @@ owner: glp-agent
 scope: workspace
 status: active
 description: Validate ALCOA+ data integrity principles for GLP raw data per OECD GLP Section 9.
-version: "1.0"
+version: "1.0.0"
 created: 2026-06-17
 last_updated: 2026-06-17
 metadata:

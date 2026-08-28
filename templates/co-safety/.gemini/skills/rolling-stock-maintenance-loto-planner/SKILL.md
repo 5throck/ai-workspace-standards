@@ -4,7 +4,7 @@ owner: railway-agent
 scope: workspace
 status: active
 description: Plan rolling-stock depot maintenance safety — EMU/coach/locomotive vehicle-movement lockout (wheel chock + derail + brake scotch), bogey heavy-lift rigging, undercarriage pit work, and fall protection from rolling-stock roof. Vehicle-LOTO distinct from fixed-plant LOTO. RSA Art 48 + OSHA Art 92 (LOTO 정지) + OSHA Art 99 (추락 방지 — uncited by existing railway WFs) + SAPA Art 4.
-version: "1.0"
+version: "1.0.0"
 created: "2026-08-07"
 last_updated: "2026-08-07"
 metadata:

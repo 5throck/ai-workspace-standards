@@ -4,7 +4,7 @@ owner: msds-agent
 scope: workspace
 status: active
 description: "Parse MSDS/SDS documents into structured GHS 16-section records. Hybrid: Mode 1 rule-based (top 5 Korean suppliers) + Mode 2 ML fallback (external LLM API) when confidence <80%."
-version: "1.0"
+version: "1.0.0"
 created: 2026-06-17
 last_updated: 2026-06-17
 metadata:

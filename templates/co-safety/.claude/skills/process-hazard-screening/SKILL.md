@@ -4,7 +4,7 @@ owner: ehschem-agent
 scope: workspace
 status: active
 description: Initial hazard screening for chemical plant processes. Identifies PSM-applicable processes and dispatches detailed PHA to functional PSM service.
-version: "1.0"
+version: "1.0.0"
 created: "2026-06-18"
 last_updated: "2026-08-26"
 metadata:

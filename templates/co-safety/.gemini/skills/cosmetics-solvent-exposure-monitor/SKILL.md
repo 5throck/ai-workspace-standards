@@ -4,7 +4,7 @@ owner: cosmetics-agent
 scope: workspace
 status: active
 description: Plan and assess worker inhalation-exposure monitoring for solvents (ethanol, isopropanol, methanol) and volatile raw materials in cosmetics manufacturing. Air-sampling strategy, OEL comparison, ventilation verification, respiratory-PPE selection, biological monitoring.
-version: "1.0"
+version: "1.0.0"
 created: "2026-08-07"
 last_updated: "2026-08-07"
 metadata:
