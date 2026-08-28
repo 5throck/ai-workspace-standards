@@ -279,3 +279,61 @@ could conflict with existing conventions into this pass.
 
 Implementation: `generate-skill-graph.ts` 1.4.0, `verify-skill-graph.ts` 1.2.0,
 `new-project.ts` 1.9.0.
+
+---
+
+## Amendment 2026-08-29 — Inference-Derived Graph Strategy (Amendment 4)
+
+**Status**: Accepted (documentation-only)
+**Design of record**: [2026-08-29-inference-derived-graph-strategy-design.md](../designs/2026-08-29-inference-derived-graph-strategy-design.md)
+
+Following Amendment 3, a proposed "Phase 1.5" experiment (apply the declarative typed
+`relates_to` schema to real workflows before building Phase 2 governance) targeted
+`Projects/co-newbiz`. The premise didn't fit: co-newbiz doesn't use `relates_to`
+frontmatter at all — it has its own independently designed, complete, more richly-typed
+graph system, `scripts/co-newbiz/graph.ts` (v0.4.0), which infers 7 node types and 12 edge
+types purely from existing structured SSOTs (`procedures/_shared/*/schema.yaml` step
+tables, `procedures/_kill-criteria/*.json` rule predicates, `docs/adr/`,
+`docs/decisions/`) with zero new frontmatter declared. This matures exactly what the
+2026-08-25 Document Layer amendment deferred ("procedure/artifact/rule/evidence-var node
+types remain project-local strengths... revisit on first generic registry").
+
+**This amendment does not prescribe a graph-construction mechanism — it recognizes that
+ADR-0060's principle (a relationship graph generated as a projection of existing SSOTs,
+never a hand-maintained master store) admits two valid strategies:**
+
+| Strategy | SSOT of the relationship | Right fit when |
+|----------|---------------------------|-----------------|
+| **Declarative** (Amendment 3) | `SKILL.md` frontmatter (`relates_to`, `prerequisites`) | No other structured data describes execution order/relations |
+| **Inferential** (Amendment 4, co-newbiz precedent) | Existing structured data (procedure schemas, rule predicates, decision docs) | The project already has rich structured execution-order/rule data |
+
+**Normative rule (load-bearing line of this amendment)**: An inferential graph MUST NOT
+introduce a second hand-maintained declaration of facts already authoritative elsewhere —
+the same anti-pattern ADR-0060's "generated projection, not hand-maintained master graph"
+principle exists to prevent, applied one level deeper.
+
+**Provenance by construction**: unlike Amendment 3's declarative edges, which need
+`provenance: {file, field, index?}` bolted on as separate metadata, an inferential edge's
+provenance is inherent in the extraction event itself (co-newbiz's `source_ref` on every
+edge) — it is derived directly from the SSOT location that produced it, not declared
+alongside the relationship.
+
+**Graph-to-agent consumption precedent (forward reference only)**: co-newbiz's `context
+--skill <name>` / `context --gate <Name>` commands are a working precedent for consuming a
+generated graph as session-time agent context — recorded for a future Phase 4 ("Graph
+Intelligence") to draw from, not something this amendment asks the parent workspace to
+build now.
+
+**co-newbiz is recognized precedent, not promoted standard** — cited as the working example
+the Inferential branch is named after, not adopted as an L0 default or a requirement for
+other projects.
+
+**Three-stage revisit criterion** (deliberately stronger than "a second project exists"):
+(1) one project today — local precedent only, no action; (2) a second independent `co-*`
+project builds its own inferential extractor — compare the two extraction contracts, still
+no action; (3) only if that comparison confirms a sufficiently common contract, consider
+generalizing the pattern into `generate-skill-graph.ts` as an **opt-in** extraction mode —
+never a requirement that other projects adopt the inferential strategy.
+
+Implementation: none (documentation-only recognition of existing co-newbiz
+`scripts/co-newbiz/graph.ts` v0.4.0, a separate repository — no code changes here or there).
