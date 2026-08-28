@@ -1,0 +1,376 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "id": "finding-reconciliation",
+      "type": "skill",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "patch-engineer",
+      "type": "agent",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "pentester",
+      "type": "agent",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "pm",
+      "type": "agent",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "README",
+      "type": "agent",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "README_ko",
+      "type": "agent",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "red-team-lead",
+      "type": "agent",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "report-writer",
+      "type": "agent",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "samm-maturity",
+      "type": "skill",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "sarif-exporter",
+      "type": "skill",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "security-scan",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
+      "id": "spdx-sbom",
+      "type": "skill",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "stride-threat-matrix",
+      "type": "skill",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "threat-modeler",
+      "type": "agent",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "verify-authorization",
+      "type": "skill",
+      "layer": "variant:co-security"
+    }
+  ],
+  "edges": [
+    {
+      "type": "used_by",
+      "from": "finding-reconciliation",
+      "to": "pentester",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "finding-reconciliation",
+      "to": "pentester",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "finding-reconciliation",
+      "to": "phase3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "finding-reconciliation",
+      "to": "phase5",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "finding-reconciliation",
+      "to": "phase6",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "finding-reconciliation",
+      "to": "report-writer",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "finding-reconciliation",
+      "to": "report-writer",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "finding-reconciliation",
+      "to": "sarif-exporter",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "finding-reconciliation",
+      "to": "security-scan",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "finding-reconciliation",
+      "to": "stride-threat-matrix",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "finding-reconciliation",
+      "to": "verify-authorization",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "patch-engineer",
+      "to": "verify-authorization",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "pentester",
+      "to": "verify-authorization",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "README",
+      "to": "verify-authorization",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "README_ko",
+      "to": "verify-authorization",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "red-team-lead",
+      "to": "verify-authorization",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "report-writer",
+      "to": "verify-authorization",
+      "source": "prose"
+    },
+    {
+      "type": "phase",
+      "from": "samm-maturity",
+      "to": "phase1",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "samm-maturity",
+      "to": "phase2",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "samm-maturity",
+      "to": "sarif-exporter",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "samm-maturity",
+      "to": "security-scan",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "samm-maturity",
+      "to": "stride-threat-matrix",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "samm-maturity",
+      "to": "threat-modeler",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "sarif-exporter",
+      "to": "finding-reconciliation",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "sarif-exporter",
+      "to": "pentester",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "sarif-exporter",
+      "to": "phase3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "sarif-exporter",
+      "to": "phase5",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "sarif-exporter",
+      "to": "report-writer",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "sarif-exporter",
+      "to": "security-scan",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "sarif-exporter",
+      "to": "stride-threat-matrix",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "sarif-exporter",
+      "to": "verify-authorization",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "spdx-sbom",
+      "to": "patch-engineer",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "spdx-sbom",
+      "to": "phase3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "spdx-sbom",
+      "to": "phase5",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "spdx-sbom",
+      "to": "report-writer",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "spdx-sbom",
+      "to": "samm-maturity",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "spdx-sbom",
+      "to": "sarif-exporter",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "spdx-sbom",
+      "to": "security-scan",
+      "source": "prose"
+    },
+    {
+      "type": "phase",
+      "from": "stride-threat-matrix",
+      "to": "phase1",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "stride-threat-matrix",
+      "to": "phase2",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "stride-threat-matrix",
+      "to": "sarif-exporter",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "stride-threat-matrix",
+      "to": "security-scan",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "stride-threat-matrix",
+      "to": "threat-modeler",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "stride-threat-matrix",
+      "to": "verify-authorization",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "threat-modeler",
+      "to": "verify-authorization",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "verify-authorization",
+      "to": "pentester",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "verify-authorization",
+      "to": "phase1",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "verify-authorization",
+      "to": "phase3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "verify-authorization",
+      "to": "red-team-lead",
+      "source": "skill_manifest"
+    }
+  ]
+}

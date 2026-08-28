@@ -1,27 +1,30 @@
 #!/usr/bin/env bun
 /**
  * Skill Relationship Graph Verification Script
- * @version 1.0.1
+ * @version 1.1.0
  *
  * Verifies that the committed skill graph files match the current state.
  * Re-derives the graph and compares against docs/skill-graph.json.
+ *
+ * With --scope <common|co-*>: verifies the scope-local artifact at
+ * templates/<scope>/docs/skill-graph.json instead (ADR-0060 Amendment 2).
  *
  * Also validates:
  * - No country marks in relation fields (ADR-0060 invariant)
  * - No unknown targets in relates_to or overrides
  * - Staleness warnings for overrides (last_reviewed > 12 months)
  *
- * Usage: bun scripts/verify-skill-graph.ts
+ * Usage: bun scripts/verify-skill-graph.ts [--scope <common|co-*>]
  *
  * Exit codes:
  * - 0: Verification passed
  * - 1: Drift detected or validation failed
  */
 
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { buildGraph } from './generate-skill-graph.ts';
+import { buildGraph, buildScopeGraph } from './generate-skill-graph.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -364,7 +367,105 @@ function validateRelations(
 /**
  * Main verification logic
  */
+/**
+ * Verify a scope-local graph artifact (templates/<scope>/docs/skill-graph.json)
+ * against a re-derived buildScopeGraph(). Same drift-diff semantics as the L0
+ * check; invariants reduced to what a scope graph can express: unknown targets
+ * (phase* pseudo-targets exempt) and country marks in relation fields.
+ * @version 1.1.0
+ */
+async function verifyScopeGraph(scope: string): Promise<void> {
+  const committedPath = join(ROOT, 'templates', scope, 'docs', 'skill-graph.json');
+  if (!existsSync(committedPath)) {
+    console.log(`✓ No committed scope graph found for ${scope} (first run)`);
+    console.log(`  Run: bun scripts/generate-skill-graph.ts --scope ${scope}`);
+    process.exit(0);
+  }
+
+  const committed: SkillGraph = JSON.parse(readFileSync(committedPath, 'utf-8'));
+  const derived = buildScopeGraph(scope);
+
+  const { equal, missingNodes, extraNodes, missingEdges, extraEdges } = compareGraphs(derived, committed);
+  if (!equal) {
+    console.log('');
+    console.log(`❌ Scope graph drift detected for ${scope}`);
+    console.log('');
+    const diff = formatDiff(missingNodes, extraNodes, missingEdges, extraEdges);
+    console.log(diff);
+    console.log('');
+    console.log(`Remedy: run \`bun scripts/generate-skill-graph.ts --scope ${scope}\`, then commit`);
+    process.exit(1);
+  }
+
+  // Unknown-target invariant: every edge endpoint must be a node in the graph
+  // (phase<N> pseudo-targets exempt — same carve-out as the L0 check).
+  const nodeIds = new Set(derived.nodes.map(n => n.id));
+  const unknownTargets: string[] = [];
+  for (const edge of derived.edges) {
+    if (edge.type === 'phase') continue;
+    if (!nodeIds.has(edge.from)) unknownTargets.push(`${edge.type}: ${edge.from} -> ${edge.to} (unknown source)`);
+    if (!nodeIds.has(edge.to)) unknownTargets.push(`${edge.type}: ${edge.from} -> ${edge.to} (unknown target)`);
+  }
+  if (unknownTargets.length > 0) {
+    console.log('');
+    console.log(`❌ Unknown targets found in scope ${scope}:`);
+    for (const target of unknownTargets.slice(0, 20)) {
+      console.log(`   ${target}`);
+    }
+    if (unknownTargets.length > 20) {
+      console.log(`   ... and ${unknownTargets.length - 20} more`);
+    }
+    process.exit(1);
+  }
+
+  // Country-mark invariant over the scope's relation fields (ADR-0060)
+  const countryCodes = loadCountryCodes();
+  const violations: string[] = [];
+  const scopeSkillsDir = join(ROOT, 'templates', scope, 'skills');
+  if (existsSync(scopeSkillsDir)) {
+    for (const e of readdirSync(scopeSkillsDir, { withFileTypes: true })) {
+      if (!e.isDirectory()) continue;
+      const skillPath = join(scopeSkillsDir, e.name, 'SKILL.md');
+      if (!existsSync(skillPath)) continue;
+      const content = readFileSync(skillPath, 'utf-8');
+      const frontmatterBlock = content.split('---')[1] ?? '';
+      for (const line of frontmatterBlock.split('\n')) {
+        if (/^\s*(prerequisites|relates_to):/i.test(line) && hasCountryMark(line, countryCodes)) {
+          violations.push(`templates/${scope}/skills/${e.name}: relation field contains country mark`);
+        }
+      }
+    }
+  }
+  if (violations.length > 0) {
+    console.log('');
+    console.log(`❌ Country-mark violations found in scope ${scope}:`);
+    for (const violation of violations) {
+      console.log(`   ${violation}`);
+    }
+    console.log('');
+    console.log('   Country marks must ONLY be in docs/workspace-schema.json country_scoped_assets (ADR-0060).');
+    process.exit(1);
+  }
+
+  console.log(`✓ Scope graph verification passed: ${scope}`);
+  console.log(`  ${derived.nodes.length} nodes, ${derived.edges.length} edges`);
+  process.exit(0);
+}
+
 async function main(): Promise<void> {
+  const args = process.argv.slice(2);
+  const scopeIdx = args.indexOf('--scope');
+
+  if (scopeIdx !== -1) {
+    const scope = args[scopeIdx + 1];
+    if (!scope || (scope !== 'common' && !scope.startsWith('co-'))) {
+      console.error(`ERROR: --scope must be 'common' or a co-* variant name (got: ${scope ?? '(missing)'})`);
+      process.exit(1);
+    }
+    await verifyScopeGraph(scope);
+    return;
+  }
+
   console.log('Verifying skill relationship graph...');
 
   const committedPath = join(ROOT, 'docs', 'skill-graph.json');

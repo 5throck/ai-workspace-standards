@@ -1,0 +1,336 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ai-tell-reduction",
+      "type": "skill",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "evidence-ledger",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "fact-checker",
+      "type": "agent",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "financial-analyst",
+      "type": "agent",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "financial-infographic-svg",
+      "type": "skill",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "financial-journalism-style",
+      "type": "skill",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "financial-narrative-brief",
+      "type": "skill",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "i18n-formatting",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "k-dart",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "k-law",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "legal-researcher",
+      "type": "agent",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "pm",
+      "type": "agent",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "README",
+      "type": "agent",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "README_ko",
+      "type": "agent",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "reporter",
+      "type": "agent",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "source-verification-ledger",
+      "type": "skill",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "style-editor",
+      "type": "agent",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "style-lint-checklist",
+      "type": "skill",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "visual-editor",
+      "type": "agent",
+      "layer": "variant:co-news"
+    }
+  ],
+  "edges": [
+    {
+      "type": "references",
+      "from": "ai-tell-reduction",
+      "to": "financial-journalism-style",
+      "source": "prose"
+    },
+    {
+      "type": "phase",
+      "from": "ai-tell-reduction",
+      "to": "phase4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "ai-tell-reduction",
+      "to": "style-editor",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "ai-tell-reduction",
+      "to": "style-editor",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "financial-analyst",
+      "to": "k-dart",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "financial-infographic-svg",
+      "to": "financial-narrative-brief",
+      "source": "prose"
+    },
+    {
+      "type": "requires",
+      "from": "financial-infographic-svg",
+      "to": "financial-narrative-brief",
+      "source": "prerequisites"
+    },
+    {
+      "type": "references",
+      "from": "financial-infographic-svg",
+      "to": "i18n-formatting",
+      "source": "prose"
+    },
+    {
+      "type": "phase",
+      "from": "financial-infographic-svg",
+      "to": "phase5",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "financial-infographic-svg",
+      "to": "visual-editor",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "financial-infographic-svg",
+      "to": "visual-editor",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "financial-journalism-style",
+      "to": "phase3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "financial-journalism-style",
+      "to": "phase4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "financial-journalism-style",
+      "to": "reporter",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "financial-journalism-style",
+      "to": "reporter",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "financial-journalism-style",
+      "to": "style-editor",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "financial-journalism-style",
+      "to": "style-editor",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "financial-narrative-brief",
+      "to": "financial-analyst",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "financial-narrative-brief",
+      "to": "financial-analyst",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "financial-narrative-brief",
+      "to": "k-dart",
+      "source": "prose"
+    },
+    {
+      "type": "requires",
+      "from": "financial-narrative-brief",
+      "to": "k-dart",
+      "source": "prerequisites"
+    },
+    {
+      "type": "phase",
+      "from": "financial-narrative-brief",
+      "to": "phase1",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "legal-researcher",
+      "to": "k-law",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "reporter",
+      "to": "financial-journalism-style",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "source-verification-ledger",
+      "to": "evidence-ledger",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "source-verification-ledger",
+      "to": "fact-checker",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "source-verification-ledger",
+      "to": "fact-checker",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "source-verification-ledger",
+      "to": "k-dart",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "source-verification-ledger",
+      "to": "k-law",
+      "source": "prose"
+    },
+    {
+      "type": "phase",
+      "from": "source-verification-ledger",
+      "to": "phase2",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "style-editor",
+      "to": "ai-tell-reduction",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "style-editor",
+      "to": "financial-journalism-style",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "style-lint-checklist",
+      "to": "ai-tell-reduction",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "style-lint-checklist",
+      "to": "financial-journalism-style",
+      "source": "prose"
+    },
+    {
+      "type": "requires",
+      "from": "style-lint-checklist",
+      "to": "financial-journalism-style",
+      "source": "prerequisites"
+    },
+    {
+      "type": "phase",
+      "from": "style-lint-checklist",
+      "to": "phase4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "style-lint-checklist",
+      "to": "source-verification-ledger",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "style-lint-checklist",
+      "to": "style-editor",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "visual-editor",
+      "to": "financial-infographic-svg",
+      "source": "prose"
+    }
+  ]
+}

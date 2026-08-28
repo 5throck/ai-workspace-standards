@@ -1,0 +1,268 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "id": "competitive-intelligence",
+      "type": "skill",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "core-engine-dev",
+      "type": "agent",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "cost-asset-mgmt",
+      "type": "agent",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "cost-shock-analysis",
+      "type": "skill",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "cpa-auditor",
+      "type": "agent",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "devops-admin",
+      "type": "agent",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "double-entry-reconciliation",
+      "type": "skill",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "engagement-director",
+      "type": "agent",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "excel-export",
+      "type": "skill",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "executive-presentation",
+      "type": "skill",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "finance-strategy-lead",
+      "type": "agent",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "financial-statement-prep",
+      "type": "skill",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "gabor-granger",
+      "type": "skill",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "harness-verification",
+      "type": "skill",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "i18n-audit",
+      "type": "skill",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "insight-synthesis",
+      "type": "skill",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "l10n-auditor",
+      "type": "agent",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "lead-architect",
+      "type": "agent",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "map-channel-enforcement",
+      "type": "skill",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "market-intelligence-analyst",
+      "type": "agent",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "math-function-plotter",
+      "type": "skill",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "pdf-export",
+      "type": "skill",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "pm",
+      "type": "agent",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "price-waterfall-analysis",
+      "type": "skill",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "pricing-governance",
+      "type": "skill",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "pricing-playbook",
+      "type": "skill",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "pricing-strategist",
+      "type": "agent",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "prisma-7",
+      "type": "skill",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "qa-tester",
+      "type": "agent",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "README",
+      "type": "agent",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "README_ko",
+      "type": "agent",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "scenario-comparison",
+      "type": "skill",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "security-auditor",
+      "type": "agent",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "security-monitor",
+      "type": "agent",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "sheet-model",
+      "type": "skill",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "trade-promotion-roi",
+      "type": "skill",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "ui-component-design",
+      "type": "skill",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "ux-specialist",
+      "type": "agent",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "van-westendorp-psm",
+      "type": "skill",
+      "layer": "variant:co-price"
+    }
+  ],
+  "edges": [
+    {
+      "type": "references",
+      "from": "competitive-intelligence",
+      "to": "gabor-granger",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "competitive-intelligence",
+      "to": "van-westendorp-psm",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "cpa-auditor",
+      "to": "double-entry-reconciliation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "engagement-director",
+      "to": "pdf-export",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "finance-strategy-lead",
+      "to": "price-waterfall-analysis",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "map-channel-enforcement",
+      "to": "pricing-governance",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "market-intelligence-analyst",
+      "to": "trade-promotion-roi",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "price-waterfall-analysis",
+      "to": "pricing-governance",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "pricing-strategist",
+      "to": "map-channel-enforcement",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "pricing-strategist",
+      "to": "pricing-governance",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "trade-promotion-roi",
+      "to": "insight-synthesis",
+      "source": "prose"
+    }
+  ]
+}

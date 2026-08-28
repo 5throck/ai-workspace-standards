@@ -1,0 +1,556 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "id": "career-path-succession-planning",
+      "type": "skill",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "career-succession-consultant",
+      "type": "agent",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "change-management-partner",
+      "type": "agent",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "compensation-benchmarking",
+      "type": "skill",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "compensation-benefits-analyst",
+      "type": "agent",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "competency-modeling",
+      "type": "skill",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "consulting-report-writing",
+      "type": "skill",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "data-analyst",
+      "type": "agent",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "hr-metrics-analysis",
+      "type": "skill",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "k-law",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "labor-compliance-analyst",
+      "type": "agent",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "labor-compliance-audit",
+      "type": "skill",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "labor-relations-specialist",
+      "type": "agent",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "learning-curriculum-design",
+      "type": "skill",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "learning-development-specialist",
+      "type": "agent",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "org-design-consultant",
+      "type": "agent",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "org-design-framework",
+      "type": "skill",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "org-readiness-assessment",
+      "type": "skill",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "performance-management-consultant",
+      "type": "agent",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "performance-system-design",
+      "type": "skill",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "pm",
+      "type": "agent",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "README",
+      "type": "agent",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "README_ko",
+      "type": "agent",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "safety-health-officer",
+      "type": "agent",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "stakeholder-alignment",
+      "type": "skill",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "talent-acquisition-specialist",
+      "type": "agent",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "talent-acquisition-strategy",
+      "type": "skill",
+      "layer": "variant:co-hr"
+    }
+  ],
+  "edges": [
+    {
+      "type": "used_by",
+      "from": "career-path-succession-planning",
+      "to": "career-succession-consultant",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "career-path-succession-planning",
+      "to": "career-succession-consultant",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "career-path-succession-planning",
+      "to": "compensation-benchmarking",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "career-path-succession-planning",
+      "to": "hr-metrics-analysis",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "career-path-succession-planning",
+      "to": "learning-curriculum-design",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "career-path-succession-planning",
+      "to": "org-design-framework",
+      "source": "prose"
+    },
+    {
+      "type": "phase",
+      "from": "career-path-succession-planning",
+      "to": "phase2",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "compensation-benchmarking",
+      "to": "compensation-benefits-analyst",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "compensation-benchmarking",
+      "to": "compensation-benefits-analyst",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "compensation-benchmarking",
+      "to": "org-design-framework",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "compensation-benchmarking",
+      "to": "performance-system-design",
+      "source": "prose"
+    },
+    {
+      "type": "phase",
+      "from": "compensation-benchmarking",
+      "to": "phase2",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "compensation-benchmarking",
+      "to": "talent-acquisition-strategy",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "competency-modeling",
+      "to": "career-path-succession-planning",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "competency-modeling",
+      "to": "career-succession-consultant",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "competency-modeling",
+      "to": "hr-metrics-analysis",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "competency-modeling",
+      "to": "learning-curriculum-design",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "competency-modeling",
+      "to": "learning-development-specialist",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "competency-modeling",
+      "to": "org-design-framework",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "competency-modeling",
+      "to": "performance-management-consultant",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "competency-modeling",
+      "to": "performance-system-design",
+      "source": "prose"
+    },
+    {
+      "type": "phase",
+      "from": "competency-modeling",
+      "to": "phase2",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "consulting-report-writing",
+      "to": "phase3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "consulting-report-writing",
+      "to": "pm",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "hr-metrics-analysis",
+      "to": "data-analyst",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "hr-metrics-analysis",
+      "to": "data-analyst",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "hr-metrics-analysis",
+      "to": "org-design-framework",
+      "source": "prose"
+    },
+    {
+      "type": "phase",
+      "from": "hr-metrics-analysis",
+      "to": "phase1",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "hr-metrics-analysis",
+      "to": "phase3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "labor-compliance-audit",
+      "to": "consulting-report-writing",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "labor-compliance-audit",
+      "to": "hr-metrics-analysis",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "labor-compliance-audit",
+      "to": "k-law",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "labor-compliance-audit",
+      "to": "labor-compliance-analyst",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "labor-compliance-audit",
+      "to": "labor-compliance-analyst",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "labor-compliance-audit",
+      "to": "labor-relations-specialist",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "labor-compliance-audit",
+      "to": "labor-relations-specialist",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "labor-compliance-audit",
+      "to": "org-readiness-assessment",
+      "source": "prose"
+    },
+    {
+      "type": "phase",
+      "from": "labor-compliance-audit",
+      "to": "phase1",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "labor-compliance-audit",
+      "to": "phase2",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "labor-compliance-audit",
+      "to": "safety-health-officer",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "labor-compliance-audit",
+      "to": "safety-health-officer",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "labor-compliance-audit",
+      "to": "stakeholder-alignment",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "learning-curriculum-design",
+      "to": "career-path-succession-planning",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "learning-curriculum-design",
+      "to": "learning-development-specialist",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "learning-curriculum-design",
+      "to": "learning-development-specialist",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "learning-curriculum-design",
+      "to": "org-design-framework",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "learning-curriculum-design",
+      "to": "performance-system-design",
+      "source": "prose"
+    },
+    {
+      "type": "phase",
+      "from": "learning-curriculum-design",
+      "to": "phase2",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "org-design-framework",
+      "to": "org-design-consultant",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "org-design-framework",
+      "to": "org-design-consultant",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "org-design-framework",
+      "to": "phase2",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "org-design-framework",
+      "to": "phase3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "org-readiness-assessment",
+      "to": "change-management-partner",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "org-readiness-assessment",
+      "to": "change-management-partner",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "org-readiness-assessment",
+      "to": "phase1",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "org-readiness-assessment",
+      "to": "phase2",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "performance-system-design",
+      "to": "compensation-benchmarking",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "performance-system-design",
+      "to": "performance-management-consultant",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "performance-system-design",
+      "to": "performance-management-consultant",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "performance-system-design",
+      "to": "phase2",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "stakeholder-alignment",
+      "to": "change-management-partner",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "stakeholder-alignment",
+      "to": "change-management-partner",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "stakeholder-alignment",
+      "to": "phase1",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "stakeholder-alignment",
+      "to": "phase2",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "talent-acquisition-strategy",
+      "to": "compensation-benchmarking",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "talent-acquisition-strategy",
+      "to": "org-design-framework",
+      "source": "prose"
+    },
+    {
+      "type": "phase",
+      "from": "talent-acquisition-strategy",
+      "to": "phase2",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "talent-acquisition-strategy",
+      "to": "talent-acquisition-specialist",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "talent-acquisition-strategy",
+      "to": "talent-acquisition-specialist",
+      "source": "skill_manifest"
+    }
+  ]
+}

@@ -1,0 +1,349 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "id": "_COMMON",
+      "type": "agent",
+      "layer": "common"
+    },
+    {
+      "id": "accessibility-audit",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "agent-lifecycle-manager",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "api-documentation",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "decision-record",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "documentation-writing",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "evidence-ledger",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "explain-me",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "gateguard",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "i18n-formatting",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "i18n-layout",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "i18n-locale-config",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "i18n-specialist",
+      "type": "agent",
+      "layer": "common"
+    },
+    {
+      "id": "k-dart",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "k-kosis",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "k-law",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "mece-logic-auditor",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "meeting-facilitation",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "pm",
+      "type": "agent",
+      "layer": "common"
+    },
+    {
+      "id": "presenter-mode",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "project-review",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "research-analysis",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "sarif-exporter",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "script-lifecycle-manager",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "security-scan",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "skill-lifecycle-manager",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "sound-synth",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "standup-synthesizer",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "stride-threat-matrix",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "swe-solve",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "sync",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "team-builder",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "translate",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "update-bun-packages",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "validate-docs-links",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "zod-contract-gate",
+      "type": "skill",
+      "layer": "common"
+    }
+  ],
+  "edges": [
+    {
+      "type": "references",
+      "from": "decision-record",
+      "to": "evidence-ledger",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "evidence-ledger",
+      "to": "decision-record",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "i18n-formatting",
+      "to": "i18n-layout",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "i18n-formatting",
+      "to": "i18n-locale-config",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "i18n-formatting",
+      "to": "translate",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "i18n-layout",
+      "to": "i18n-formatting",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "i18n-layout",
+      "to": "i18n-locale-config",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "i18n-layout",
+      "to": "translate",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "i18n-locale-config",
+      "to": "i18n-formatting",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "i18n-locale-config",
+      "to": "i18n-layout",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "i18n-locale-config",
+      "to": "translate",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "i18n-specialist",
+      "to": "i18n-formatting",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "i18n-specialist",
+      "to": "i18n-layout",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "i18n-specialist",
+      "to": "i18n-locale-config",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "i18n-specialist",
+      "to": "translate",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "k-kosis",
+      "to": "k-dart",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "k-kosis",
+      "to": "k-law",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "meeting-facilitation",
+      "to": "project-review",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "meeting-facilitation",
+      "to": "team-builder",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "pm",
+      "to": "decision-record",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "presenter-mode",
+      "to": "explain-me",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "sarif-exporter",
+      "to": "security-scan",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "sarif-exporter",
+      "to": "stride-threat-matrix",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "stride-threat-matrix",
+      "to": "sarif-exporter",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "stride-threat-matrix",
+      "to": "security-scan",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "team-builder",
+      "to": "agent-lifecycle-manager",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "team-builder",
+      "to": "skill-lifecycle-manager",
+      "source": "prose"
+    }
+  ]
+}

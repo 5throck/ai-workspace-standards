@@ -1,0 +1,100 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "id": "agent-lifecycle-manager",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "k-law",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "meeting-facilitation",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "pm",
+      "type": "agent",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "project-review",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "README",
+      "type": "agent",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "README_ko",
+      "type": "agent",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "safety-governance-manager",
+      "type": "agent",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "safety-workflow-manager",
+      "type": "agent",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "script-lifecycle-manager",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "simulate-project-creation",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "skill-lifecycle-manager",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "sync",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "team-builder",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "translate",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    }
+  ],
+  "edges": [
+    {
+      "type": "references",
+      "from": "safety-governance-manager",
+      "to": "k-law",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "team-builder",
+      "to": "agent-lifecycle-manager",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "team-builder",
+      "to": "skill-lifecycle-manager",
+      "source": "prose"
+    }
+  ]
+}

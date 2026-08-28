@@ -1,0 +1,464 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "id": "customs-duty-drawback-specialist",
+      "type": "agent",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "customs-duty-drawback-workflow",
+      "type": "skill",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "export-control-compliance-specialist",
+      "type": "agent",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "export-control-screening",
+      "type": "skill",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "foreign-regulation-monitoring",
+      "type": "skill",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "foreign-regulatory-intelligence-analyst",
+      "type": "agent",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "fta-origin-analyst",
+      "type": "agent",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "fta-origin-determination",
+      "type": "skill",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "halal-certification-specialist",
+      "type": "agent",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "halal-certification-workflow",
+      "type": "skill",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "hs-classification-specialist",
+      "type": "agent",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "hs-classification-workflow",
+      "type": "skill",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "landed-cost-calculation",
+      "type": "skill",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "logistics-coordination",
+      "type": "skill",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "logistics-coordinator",
+      "type": "agent",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "market-entry-strategist",
+      "type": "agent",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "market-entry-strategy",
+      "type": "skill",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "pm",
+      "type": "agent",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "README",
+      "type": "agent",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "README_ko",
+      "type": "agent",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "roo-qualification-worksheet",
+      "type": "skill",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "trade-documentation-checklist",
+      "type": "skill",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "trade-documentation-specialist",
+      "type": "agent",
+      "layer": "variant:co-export"
+    }
+  ],
+  "edges": [
+    {
+      "type": "used_by",
+      "from": "customs-duty-drawback-workflow",
+      "to": "customs-duty-drawback-specialist",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "customs-duty-drawback-workflow",
+      "to": "customs-duty-drawback-specialist",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "requires",
+      "from": "customs-duty-drawback-workflow",
+      "to": "hs-classification-workflow",
+      "source": "prerequisites"
+    },
+    {
+      "type": "phase",
+      "from": "customs-duty-drawback-workflow",
+      "to": "phase3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "customs-duty-drawback-workflow",
+      "to": "phase4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "export-control-screening",
+      "to": "export-control-compliance-specialist",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "export-control-screening",
+      "to": "export-control-compliance-specialist",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "export-control-screening",
+      "to": "phase1",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "export-control-screening",
+      "to": "phase2",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "foreign-regulation-monitoring",
+      "to": "foreign-regulatory-intelligence-analyst",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "foreign-regulation-monitoring",
+      "to": "foreign-regulatory-intelligence-analyst",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "foreign-regulation-monitoring",
+      "to": "phase1",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "fta-origin-determination",
+      "to": "fta-origin-analyst",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "fta-origin-determination",
+      "to": "fta-origin-analyst",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "requires",
+      "from": "fta-origin-determination",
+      "to": "hs-classification-workflow",
+      "source": "prerequisites"
+    },
+    {
+      "type": "phase",
+      "from": "fta-origin-determination",
+      "to": "phase1",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "fta-origin-determination",
+      "to": "phase2",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "halal-certification-workflow",
+      "to": "halal-certification-specialist",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "halal-certification-workflow",
+      "to": "halal-certification-specialist",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "requires",
+      "from": "halal-certification-workflow",
+      "to": "hs-classification-workflow",
+      "source": "prerequisites"
+    },
+    {
+      "type": "phase",
+      "from": "halal-certification-workflow",
+      "to": "phase1",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "halal-certification-workflow",
+      "to": "phase2",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "hs-classification-workflow",
+      "to": "hs-classification-specialist",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "hs-classification-workflow",
+      "to": "hs-classification-specialist",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "hs-classification-workflow",
+      "to": "phase1",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "hs-classification-workflow",
+      "to": "phase2",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "landed-cost-calculation",
+      "to": "customs-duty-drawback-workflow",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "landed-cost-calculation",
+      "to": "fta-origin-determination",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "landed-cost-calculation",
+      "to": "hs-classification-specialist",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "landed-cost-calculation",
+      "to": "hs-classification-specialist",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "landed-cost-calculation",
+      "to": "hs-classification-workflow",
+      "source": "prose"
+    },
+    {
+      "type": "requires",
+      "from": "landed-cost-calculation",
+      "to": "hs-classification-workflow",
+      "source": "prerequisites"
+    },
+    {
+      "type": "references",
+      "from": "landed-cost-calculation",
+      "to": "logistics-coordination",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "landed-cost-calculation",
+      "to": "logistics-coordinator",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "landed-cost-calculation",
+      "to": "logistics-coordinator",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "landed-cost-calculation",
+      "to": "phase1",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "landed-cost-calculation",
+      "to": "phase2",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "landed-cost-calculation",
+      "to": "roo-qualification-worksheet",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "logistics-coordination",
+      "to": "logistics-coordinator",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "logistics-coordination",
+      "to": "logistics-coordinator",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "logistics-coordination",
+      "to": "phase3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "logistics-coordination",
+      "to": "phase4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "market-entry-strategy",
+      "to": "market-entry-strategist",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "market-entry-strategy",
+      "to": "market-entry-strategist",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "market-entry-strategy",
+      "to": "phase1",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "market-entry-strategy",
+      "to": "phase3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "market-entry-strategy",
+      "to": "phase4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "roo-qualification-worksheet",
+      "to": "fta-origin-analyst",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "roo-qualification-worksheet",
+      "to": "fta-origin-determination",
+      "source": "prose"
+    },
+    {
+      "type": "requires",
+      "from": "roo-qualification-worksheet",
+      "to": "fta-origin-determination",
+      "source": "prerequisites"
+    },
+    {
+      "type": "references",
+      "from": "roo-qualification-worksheet",
+      "to": "hs-classification-workflow",
+      "source": "prose"
+    },
+    {
+      "type": "phase",
+      "from": "roo-qualification-worksheet",
+      "to": "phase1",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "roo-qualification-worksheet",
+      "to": "phase2",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "roo-qualification-worksheet",
+      "to": "trade-documentation-checklist",
+      "source": "prose"
+    },
+    {
+      "type": "phase",
+      "from": "trade-documentation-checklist",
+      "to": "phase3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "trade-documentation-checklist",
+      "to": "trade-documentation-specialist",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "trade-documentation-checklist",
+      "to": "trade-documentation-specialist",
+      "source": "skill_manifest"
+    }
+  ]
+}

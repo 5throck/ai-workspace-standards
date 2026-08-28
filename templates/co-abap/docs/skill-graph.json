@@ -1,0 +1,794 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "id": "abap-code-review",
+      "type": "skill",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "abap-dev",
+      "type": "skill",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "architect",
+      "type": "agent",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "co-analyst",
+      "type": "agent",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "code-writer",
+      "type": "agent",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "dba",
+      "type": "agent",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "desktop-app-fallback",
+      "type": "skill",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "devops-admin",
+      "type": "agent",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "dump-monitor",
+      "type": "skill",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "fi-analyst",
+      "type": "agent",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "fiori-developer",
+      "type": "agent",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "form-expert",
+      "type": "agent",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "gui-scripter",
+      "type": "agent",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "interface-expert",
+      "type": "agent",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "le-analyst",
+      "type": "agent",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "mm-analyst",
+      "type": "agent",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "performance-tuning",
+      "type": "skill",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "pm",
+      "type": "agent",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "post-write-chain",
+      "type": "skill",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "pp-analyst",
+      "type": "agent",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "read-only-analyst",
+      "type": "agent",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "README",
+      "type": "agent",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "README_ko",
+      "type": "agent",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "sap-co",
+      "type": "skill",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "sap-fi",
+      "type": "skill",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "sap-investigator",
+      "type": "agent",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "sap-le",
+      "type": "skill",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "sap-mm",
+      "type": "skill",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "sap-pp",
+      "type": "skill",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "sap-sd",
+      "type": "skill",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "schema-inspector",
+      "type": "agent",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "sd-analyst",
+      "type": "agent",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "security-monitor",
+      "type": "agent",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "source-command-celebrate",
+      "type": "skill",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "test-runner",
+      "type": "agent",
+      "layer": "variant:co-abap"
+    }
+  ],
+  "edges": [
+    {
+      "type": "used_by",
+      "from": "abap-code-review",
+      "to": "code-writer",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "abap-code-review",
+      "to": "code-writer",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "abap-code-review",
+      "to": "dump-monitor",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "abap-code-review",
+      "to": "performance-tuning",
+      "source": "prose"
+    },
+    {
+      "type": "phase",
+      "from": "abap-code-review",
+      "to": "phase3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "abap-code-review",
+      "to": "phase4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "abap-code-review",
+      "to": "test-runner",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "abap-code-review",
+      "to": "test-runner",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "abap-dev",
+      "to": "architect",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "abap-dev",
+      "to": "code-writer",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "abap-dev",
+      "to": "phase1",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "abap-dev",
+      "to": "phase2",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "abap-dev",
+      "to": "phase3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "abap-dev",
+      "to": "phase4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "abap-dev",
+      "to": "sap-investigator",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "abap-dev",
+      "to": "test-runner",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "desktop-app-fallback",
+      "to": "code-writer",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "desktop-app-fallback",
+      "to": "phase3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "desktop-app-fallback",
+      "to": "phase4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "desktop-app-fallback",
+      "to": "test-runner",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "dump-monitor",
+      "to": "devops-admin",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "dump-monitor",
+      "to": "phase1",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "dump-monitor",
+      "to": "phase6",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "dump-monitor",
+      "to": "pm",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "performance-tuning",
+      "to": "architect",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "performance-tuning",
+      "to": "dba",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "performance-tuning",
+      "to": "phase1",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "performance-tuning",
+      "to": "phase2",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "performance-tuning",
+      "to": "phase4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "performance-tuning",
+      "to": "sap-investigator",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "post-write-chain",
+      "to": "code-writer",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "post-write-chain",
+      "to": "phase3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "post-write-chain",
+      "to": "phase4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "post-write-chain",
+      "to": "pm",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "post-write-chain",
+      "to": "test-runner",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "sap-co",
+      "to": "abap-dev",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "sap-co",
+      "to": "architect",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "sap-co",
+      "to": "co-analyst",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "sap-co",
+      "to": "dba",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "sap-co",
+      "to": "performance-tuning",
+      "source": "prose"
+    },
+    {
+      "type": "phase",
+      "from": "sap-co",
+      "to": "phase1",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "sap-co",
+      "to": "phase2",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "sap-co",
+      "to": "post-write-chain",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "sap-co",
+      "to": "sap-fi",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "sap-co",
+      "to": "sap-pp",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "sap-co",
+      "to": "sap-sd",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "sap-fi",
+      "to": "abap-dev",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "sap-fi",
+      "to": "architect",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "sap-fi",
+      "to": "dba",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "sap-fi",
+      "to": "fi-analyst",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "sap-fi",
+      "to": "performance-tuning",
+      "source": "prose"
+    },
+    {
+      "type": "phase",
+      "from": "sap-fi",
+      "to": "phase1",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "sap-fi",
+      "to": "phase2",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "sap-fi",
+      "to": "post-write-chain",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "sap-fi",
+      "to": "sap-co",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "sap-fi",
+      "to": "sap-mm",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "sap-fi",
+      "to": "sap-sd",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "sap-le",
+      "to": "abap-dev",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "sap-le",
+      "to": "architect",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "sap-le",
+      "to": "dba",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "sap-le",
+      "to": "le-analyst",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "sap-le",
+      "to": "performance-tuning",
+      "source": "prose"
+    },
+    {
+      "type": "phase",
+      "from": "sap-le",
+      "to": "phase1",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "sap-le",
+      "to": "phase2",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "sap-le",
+      "to": "post-write-chain",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "sap-le",
+      "to": "sap-fi",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "sap-le",
+      "to": "sap-mm",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "sap-le",
+      "to": "sap-sd",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "sap-mm",
+      "to": "abap-dev",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "sap-mm",
+      "to": "architect",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "sap-mm",
+      "to": "dba",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "sap-mm",
+      "to": "mm-analyst",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "sap-mm",
+      "to": "performance-tuning",
+      "source": "prose"
+    },
+    {
+      "type": "phase",
+      "from": "sap-mm",
+      "to": "phase1",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "sap-mm",
+      "to": "phase2",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "sap-mm",
+      "to": "post-write-chain",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "sap-mm",
+      "to": "sap-co",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "sap-mm",
+      "to": "sap-fi",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "sap-mm",
+      "to": "sap-pp",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "sap-pp",
+      "to": "abap-dev",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "sap-pp",
+      "to": "architect",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "sap-pp",
+      "to": "dba",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "sap-pp",
+      "to": "performance-tuning",
+      "source": "prose"
+    },
+    {
+      "type": "phase",
+      "from": "sap-pp",
+      "to": "phase1",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "sap-pp",
+      "to": "phase2",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "sap-pp",
+      "to": "post-write-chain",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "sap-pp",
+      "to": "pp-analyst",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "sap-pp",
+      "to": "sap-co",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "sap-pp",
+      "to": "sap-mm",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "sap-pp",
+      "to": "sap-sd",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "sap-sd",
+      "to": "abap-dev",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "sap-sd",
+      "to": "architect",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "sap-sd",
+      "to": "dba",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "sap-sd",
+      "to": "performance-tuning",
+      "source": "prose"
+    },
+    {
+      "type": "phase",
+      "from": "sap-sd",
+      "to": "phase1",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "sap-sd",
+      "to": "phase2",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "sap-sd",
+      "to": "post-write-chain",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "sap-sd",
+      "to": "sap-fi",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "sap-sd",
+      "to": "sap-le",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "sap-sd",
+      "to": "sd-analyst",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "source-command-celebrate",
+      "to": "phase6",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "source-command-celebrate",
+      "to": "pm",
+      "source": "skill_manifest"
+    }
+  ]
+}

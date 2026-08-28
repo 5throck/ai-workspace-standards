@@ -1,0 +1,873 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "id": "change-impact-assessment",
+      "type": "skill",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "change-management-partner",
+      "type": "agent",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "communications-lead",
+      "type": "agent",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "company-intelligence",
+      "type": "skill",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "competitive-intelligence",
+      "type": "skill",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "consulting-report-writing",
+      "type": "skill",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "data-analyst",
+      "type": "agent",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "delivery-manager",
+      "type": "agent",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "executive-presentation",
+      "type": "skill",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "financial-modeling",
+      "type": "skill",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "financial-statement-analysis",
+      "type": "skill",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "hwp-document-processing",
+      "type": "skill",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "i18n-layout",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "industry-expert",
+      "type": "agent",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "insight-synthesis",
+      "type": "skill",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "k-dart",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "k-law",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "mece-logic-auditor",
+      "type": "skill",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "narrative-framework",
+      "type": "skill",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "org-readiness-assessment",
+      "type": "skill",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "pm",
+      "type": "agent",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "project-delivery",
+      "type": "skill",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "README",
+      "type": "agent",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "README_ko",
+      "type": "agent",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "sample-driven-report-writing",
+      "type": "skill",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "sme",
+      "type": "agent",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "solution-design",
+      "type": "skill",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "solutions-architect",
+      "type": "agent",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "stakeholder-alignment",
+      "type": "skill",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "stakeholder-review-management",
+      "type": "skill",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "strategy-analyst",
+      "type": "agent",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "technical-feasibility",
+      "type": "skill",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "technology-specialist",
+      "type": "agent",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "workstream-lead",
+      "type": "agent",
+      "layer": "variant:co-consult"
+    }
+  ],
+  "edges": [
+    {
+      "type": "used_by",
+      "from": "change-impact-assessment",
+      "to": "change-management-partner",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "change-impact-assessment",
+      "to": "change-management-partner",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "requires",
+      "from": "change-impact-assessment",
+      "to": "org-readiness-assessment",
+      "source": "prerequisites"
+    },
+    {
+      "type": "phase",
+      "from": "change-impact-assessment",
+      "to": "phase1",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "change-impact-assessment",
+      "to": "phase2",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "company-intelligence",
+      "to": "data-analyst",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "company-intelligence",
+      "to": "industry-expert",
+      "source": "required_skills"
+    },
+    {
+      "type": "phase",
+      "from": "company-intelligence",
+      "to": "phase1",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "company-intelligence",
+      "to": "pm",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "company-intelligence",
+      "to": "sme",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "company-intelligence",
+      "to": "strategy-analyst",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "company-intelligence",
+      "to": "strategy-analyst",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "competitive-intelligence",
+      "to": "industry-expert",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "competitive-intelligence",
+      "to": "industry-expert",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "competitive-intelligence",
+      "to": "insight-synthesis",
+      "source": "prose"
+    },
+    {
+      "type": "phase",
+      "from": "competitive-intelligence",
+      "to": "phase1",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "competitive-intelligence",
+      "to": "phase2",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "competitive-intelligence",
+      "to": "strategy-analyst",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "competitive-intelligence",
+      "to": "strategy-analyst",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "consulting-report-writing",
+      "to": "communications-lead",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "consulting-report-writing",
+      "to": "communications-lead",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "requires",
+      "from": "consulting-report-writing",
+      "to": "narrative-framework",
+      "source": "prerequisites"
+    },
+    {
+      "type": "phase",
+      "from": "consulting-report-writing",
+      "to": "phase3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "executive-presentation",
+      "to": "communications-lead",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "executive-presentation",
+      "to": "communications-lead",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "requires",
+      "from": "executive-presentation",
+      "to": "financial-modeling",
+      "source": "prerequisites"
+    },
+    {
+      "type": "requires",
+      "from": "executive-presentation",
+      "to": "org-readiness-assessment",
+      "source": "prerequisites"
+    },
+    {
+      "type": "phase",
+      "from": "executive-presentation",
+      "to": "phase3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "requires",
+      "from": "executive-presentation",
+      "to": "technical-feasibility",
+      "source": "prerequisites"
+    },
+    {
+      "type": "used_by",
+      "from": "financial-modeling",
+      "to": "data-analyst",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "financial-modeling",
+      "to": "data-analyst",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "financial-modeling",
+      "to": "executive-presentation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "financial-modeling",
+      "to": "org-readiness-assessment",
+      "source": "prose"
+    },
+    {
+      "type": "requires",
+      "from": "financial-modeling",
+      "to": "org-readiness-assessment",
+      "source": "prerequisites"
+    },
+    {
+      "type": "phase",
+      "from": "financial-modeling",
+      "to": "phase1",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "financial-modeling",
+      "to": "phase3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "financial-modeling",
+      "to": "strategy-analyst",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "financial-modeling",
+      "to": "strategy-analyst",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "financial-modeling",
+      "to": "technical-feasibility",
+      "source": "prose"
+    },
+    {
+      "type": "requires",
+      "from": "financial-modeling",
+      "to": "technical-feasibility",
+      "source": "prerequisites"
+    },
+    {
+      "type": "used_by",
+      "from": "financial-statement-analysis",
+      "to": "data-analyst",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "financial-statement-analysis",
+      "to": "data-analyst",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "financial-statement-analysis",
+      "to": "k-dart",
+      "source": "prose"
+    },
+    {
+      "type": "phase",
+      "from": "financial-statement-analysis",
+      "to": "phase1",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "financial-statement-analysis",
+      "to": "phase3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "hwp-document-processing",
+      "to": "communications-lead",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "hwp-document-processing",
+      "to": "consulting-report-writing",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "hwp-document-processing",
+      "to": "i18n-layout",
+      "source": "prose"
+    },
+    {
+      "type": "phase",
+      "from": "hwp-document-processing",
+      "to": "phase3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "hwp-document-processing",
+      "to": "phase4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "insight-synthesis",
+      "to": "data-analyst",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "insight-synthesis",
+      "to": "data-analyst",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "insight-synthesis",
+      "to": "phase1",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "insight-synthesis",
+      "to": "phase3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "insight-synthesis",
+      "to": "strategy-analyst",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "insight-synthesis",
+      "to": "strategy-analyst",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "mece-logic-auditor",
+      "to": "consulting-report-writing",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "mece-logic-auditor",
+      "to": "executive-presentation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "mece-logic-auditor",
+      "to": "insight-synthesis",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "mece-logic-auditor",
+      "to": "narrative-framework",
+      "source": "prose"
+    },
+    {
+      "type": "phase",
+      "from": "mece-logic-auditor",
+      "to": "phase1",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "mece-logic-auditor",
+      "to": "solution-design",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "mece-logic-auditor",
+      "to": "strategy-analyst",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "narrative-framework",
+      "to": "communications-lead",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "narrative-framework",
+      "to": "communications-lead",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "narrative-framework",
+      "to": "phase3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "org-readiness-assessment",
+      "to": "change-management-partner",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "org-readiness-assessment",
+      "to": "change-management-partner",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "org-readiness-assessment",
+      "to": "phase1",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "org-readiness-assessment",
+      "to": "phase2",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "project-delivery",
+      "to": "delivery-manager",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "project-delivery",
+      "to": "delivery-manager",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "project-delivery",
+      "to": "phase4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "requires",
+      "from": "project-delivery",
+      "to": "solution-design",
+      "source": "prerequisites"
+    },
+    {
+      "type": "used_by",
+      "from": "project-delivery",
+      "to": "workstream-lead",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "project-delivery",
+      "to": "workstream-lead",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "sample-driven-report-writing",
+      "to": "communications-lead",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "sample-driven-report-writing",
+      "to": "company-intelligence",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "sample-driven-report-writing",
+      "to": "competitive-intelligence",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "sample-driven-report-writing",
+      "to": "consulting-report-writing",
+      "source": "prose"
+    },
+    {
+      "type": "requires",
+      "from": "sample-driven-report-writing",
+      "to": "consulting-report-writing",
+      "source": "prerequisites"
+    },
+    {
+      "type": "references",
+      "from": "sample-driven-report-writing",
+      "to": "financial-statement-analysis",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "sample-driven-report-writing",
+      "to": "hwp-document-processing",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "sample-driven-report-writing",
+      "to": "insight-synthesis",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "sample-driven-report-writing",
+      "to": "k-dart",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "sample-driven-report-writing",
+      "to": "k-law",
+      "source": "prose"
+    },
+    {
+      "type": "phase",
+      "from": "sample-driven-report-writing",
+      "to": "phase3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "sample-driven-report-writing",
+      "to": "phase4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "solution-design",
+      "to": "phase3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "solution-design",
+      "to": "phase4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "solution-design",
+      "to": "solutions-architect",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "solution-design",
+      "to": "solutions-architect",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "solution-design",
+      "to": "technology-specialist",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "solution-design",
+      "to": "technology-specialist",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "stakeholder-alignment",
+      "to": "change-management-partner",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "stakeholder-alignment",
+      "to": "change-management-partner",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "stakeholder-alignment",
+      "to": "phase1",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "stakeholder-alignment",
+      "to": "phase2",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "stakeholder-alignment",
+      "to": "phase4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "stakeholder-alignment",
+      "to": "workstream-lead",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "stakeholder-alignment",
+      "to": "workstream-lead",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "requires",
+      "from": "stakeholder-review-management",
+      "to": "consulting-report-writing",
+      "source": "prerequisites"
+    },
+    {
+      "type": "used_by",
+      "from": "stakeholder-review-management",
+      "to": "delivery-manager",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "stakeholder-review-management",
+      "to": "delivery-manager",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "stakeholder-review-management",
+      "to": "phase4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "requires",
+      "from": "stakeholder-review-management",
+      "to": "stakeholder-alignment",
+      "source": "prerequisites"
+    },
+    {
+      "type": "phase",
+      "from": "technical-feasibility",
+      "to": "phase1",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "technical-feasibility",
+      "to": "phase2",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "technical-feasibility",
+      "to": "phase3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "technical-feasibility",
+      "to": "phase4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "technical-feasibility",
+      "to": "sme",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "technical-feasibility",
+      "to": "sme",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "technical-feasibility",
+      "to": "solutions-architect",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "technical-feasibility",
+      "to": "solutions-architect",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "technical-feasibility",
+      "to": "technology-specialist",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "technical-feasibility",
+      "to": "technology-specialist",
+      "source": "skill_manifest"
+    }
+  ]
+}
