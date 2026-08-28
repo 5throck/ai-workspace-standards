@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-content_hash: f295143e63e3671318db42ef87582991d2593ce96cf52a7a7db6dc78393b1015
+content_hash: 28bfc9a2179213655292cb273ced505df6101ee4152d46d2e4fc7d792352b59e
 ---
 
 **Languages**: [English](README.md) · [한국어](README_ko.md) · [Español](README_es.md) · [日本語](README_ja.md)
@@ -192,9 +192,9 @@ C:\git\ (workspace root - this repo)
     ├── co-export/           # 🔶 Beta — import/export trade compliance agent team
     ├── co-news/             # 🔶 Beta — business/finance journalism agent team (KR country profile included)
     ├── co-abap/             # ✅ Stable — SAP ABAP development agent team
-    ├── co-hr/                # 🔶 Beta — HR & labor-relations consulting agent team (KR country profile included)
-    ├── co-safety/            # 🔶 Beta — EHS/GxP compliance platform agent team
-    └── co-price/            # ⚠️ Beta — pricing management & consulting simulator (K-Beauty sample dataset)
+    ├── co-hr/               # 🔶 Beta — HR & labor-relations consulting agent team (KR country profile included)
+    ├── co-safety/           # 🔶 Beta — EHS/GxP compliance platform agent team
+    └── co-price/            # 🔶 Beta — pricing management & consulting simulator (K-Beauty sample dataset)
 ```
 
 Each sub-project lives in its own directory and git repository:
