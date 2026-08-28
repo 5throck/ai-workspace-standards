@@ -74,6 +74,6 @@ Provides a structured 4-stage autonomous software engineering workflow for resol
 ```
 
 ## Related Skills
-- [test-driven-development](../test-driven-development/SKILL.md) — TDD workflow guidelines
-- [systematic-debugging](../systematic-debugging/SKILL.md) — Diagnostic and root cause analysis techniques
+- `superpowers:test-driven-development` (global plugin skill) — TDD workflow guidelines
+- `superpowers:systematic-debugging` (global plugin skill) — Diagnostic and root cause analysis techniques
 - [sync](../sync/SKILL.md) — Commit and PR submission pipeline
