@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-content_hash: f6d19bf96deb19a50efd207e1644fa2afc38cfd01a0bbc29c7d3754db2116072
+content_hash: d409ecd6517467b65655f531cc45228e2e590fd8b4ca8909b4ec42d6d8a73bd5
 ---
 
 **Languages**: [English](README.md) · [한국어](README_ko.md) · [Español](README_es.md) · [日本語](README_ja.md)
@@ -187,7 +187,7 @@ C:\git\ (workspace root - this repo)
     ├── co-work/             # ✅ Stable — general collaboration and documentation agent team
     ├── co-security/         # ✅ Stable — red team and threat modeling agent team
     ├── co-consult/          # ✅ Stable — strategy consulting and analysis agent team
-    ├── co-deck/             # 🔶 Beta — lecture and presentation material production agent team
+    ├── co-deck/             # ✅ Stable — lecture and presentation material production agent team
     ├── co-game/             # ✅ Stable — HTML5 Canvas game development agent team
     ├── co-export/           # 🔶 Beta — import/export trade compliance agent team
     ├── co-news/             # 🔶 Beta — business/finance journalism agent team (KR country profile included)
@@ -269,7 +269,7 @@ New projects are scaffolded from versioned template variants. Templates are tagg
 | `co-work` | ✅ Stable | General collaboration workflow — PM, Analyst, Technical Writer, Content Writer, Project Coordinator, Storyteller, MS365 Expert |
 | `co-security` | ✅ Stable | Security engagement workflow — PM, Red Team Lead, Pentester, Threat Modeler, Patch Engineer, Report Writer |
 | `co-consult` | ✅ Stable | Strategy consulting workflow — Engagement Leader, Strategy Analyst, Industry Expert, Change Management Partner, Communications Lead, Solutions Architect, and more |
-| `co-deck` | 🔶 Beta | Lecture material production workflow — PM, Version, Research, Storyline, Design, Build, Measure, Export |
+| `co-deck` | ✅ Stable | Lecture material production workflow — PM, Version, Research, Storyline, Design, Build, Measure, Export |
 | `co-game` | ✅ Stable | HTML5 Canvas game development workflow — PM, Game Designer, Arcade/Puzzle Designers, Visual Artist, Sound Designer, Game Developer, Game Debugger, Test Runner, Security Monitor |
 | `co-export` | 🔶 Beta | Import/export trade-compliance AI agent team — HS classification, export control & sanctions screening, FTA origin determination, customs duty drawback, logistics coordination, market entry strategy, foreign regulation monitoring, trade documentation |
 | `co-news` | 🔶 Beta | Business/finance journalism — PM, Reporter, Fact-Checker, Financial Analyst, Legal Researcher, Style Editor, Visual Editor. Jurisdiction data via country profiles (KR profile included) |

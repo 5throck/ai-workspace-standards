@@ -42,7 +42,7 @@ templates/
 | [`co-work`](co-work/) | ✅ Stable | 7개 에이전트(pm, analyst, content-writer, ms365-expert 등)를 갖춘 일반 협업 워크플로우 |
 | [`co-security`](co-security/) | ✅ Stable | 6개 에이전트(pm, red-team-lead, pentester, threat-modeler 등)를 갖춘 보안 점검 워크플로우 |
 | [`co-consult`](co-consult/) | ✅ Stable | 11개 에이전트 및 16개 도메인 스킬을 갖춘 전략 컨설팅 워크플로우 |
-| [`co-deck`](co-deck/) | 🔶 Beta | 13개 에이전트 및 다중 테마 HTML-to-PDF 파이프라인을 갖춘 강의/발표 자료 제작 워크플로우 |
+| [`co-deck`](co-deck/) | ✅ Stable | 13개 에이전트 및 다중 테마 HTML-to-PDF 파이프라인을 갖춘 강의/발표 자료 제작 워크플로우 |
 | [`co-game`](co-game/) | ✅ Stable | Vanilla TypeScript 기반 HTML5 Canvas 게임 개발을 위한 13개 에이전트 워크플로우 |
 | [`co-export`](co-export/) | 🔶 Beta | 8개 에이전트를 갖춘 수출입 무역 컴플라이언스 워크플로우 (HS 분류, 수출통제·제재 스크리닝, FTA 원산지, 관세 환급, 물류, 시장 진입, 해외 규제 모니터링, 무역 서류) |
 | [`co-news`](co-news/) | 🔶 Beta | 7개 에이전트(pm, fact-checker, financial-analyst, legal-researcher, reporter, style-editor, visual-editor)와 DART/규제 리서치 연동을 갖춘 경제/금융 저널리즘 워크플로우 (국가 프로필 경로 연동 — KR 프로필에 DART/k-dart + k-law 포함) |
@@ -109,4 +109,4 @@ bun scripts/validate-templates.ts  # 드리프트 없음 확인
 - **Minor** 범프: 신규 에이전트, 신규 variant stable 승격, 구조적 섹션 변경
 - **Patch** 범프: 문서 및 설명 업데이트
 
-*Last Updated: 2026-08-27*
+*Last Updated: 2026-08-28*
