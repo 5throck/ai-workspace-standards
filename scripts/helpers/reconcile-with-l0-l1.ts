@@ -5,7 +5,7 @@
  * Compares L3 scan results with L0/L1 versions and determines
  * which files to keep in variant, move to common, or discard.
  *
- * @version 1.3.0
+ * @version 1.3.1
  * @phase 2: L0/L1 Reconciliation
  *
  * Dependencies:
@@ -174,6 +174,20 @@ function reconcileFile(
   conflict?: ConflictResolution;
 } {
   const { relativePath, classification, l0Version, l1Version, l3Version, existsInL0, existsInL1 } = file;
+
+  // Case 1.5: Governance artifacts (LICENSE) are preserved even when identical to
+  // L0/L1. Every variant template must ship its own LICENSE so variant-scoped
+  // scaffolds and upgrades carry it; discarding the "identical to common" copy
+  // during L3→variant promotion silently stripped the license from regenerated
+  // variants (docs/designs/2026-08-28-agpl-license-template-rollout-design.md).
+  const normalizedPath = relativePath.replace(/\\/g, '/');
+  if (classification === 'identical' && normalizedPath === 'LICENSE') {
+    return {
+      decision: 'keep',
+      reason: 'Governance artifact (LICENSE) — variants must ship their own copy even when identical to L1',
+      sourceLayer: 'L3',
+    };
+  }
 
   // Case 1: New file (only in L3)
   if (classification === 'new') {
