@@ -1,7 +1,7 @@
 # Design: Variant Registry Architecture
 
 **Date**: 2026-07-08
-**Status**: Proposed
+**Status**: Implemented
 **Spec ID**: 2026-07-08-variant-registry-architecture
 **Scope**: scripts/helpers/registries/, scripts/helpers/plugins/, scripts/helpers/workspace-integration.ts, scripts/validators/, scripts/l2-to-variant-pipeline.ts, scripts/validate-templates.ts
 

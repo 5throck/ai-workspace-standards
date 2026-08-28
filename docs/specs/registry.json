@@ -5,28 +5,28 @@
       "id": "2026-06-24-workflow-integrated-methodology-design",
       "title": "workflow integrated methodology design",
       "file": "docs/designs/workflow-integrated-methodology-design.md",
-      "status": "approved",
+      "status": "implemented",
       "source": "brainstorming",
       "created": "2026-06-24",
-      "last_updated": "2026-06-24"
+      "last_updated": "2026-08-28"
     },
     {
       "id": "2026-06-28-execution-plan-design-gate",
       "title": "execution plan design gate",
       "file": "docs/designs/execution-plan-design-gate-design.md",
-      "status": "approved",
+      "status": "implemented",
       "source": "brainstorming",
       "created": "2026-06-28",
-      "last_updated": "2026-06-28"
+      "last_updated": "2026-08-28"
     },
     {
       "id": "2026-07-08-variant-registry-architecture",
       "title": "variant registry architecture",
       "file": "docs/designs/variant-registry-architecture-design.md",
-      "status": "approved",
+      "status": "implemented",
       "source": "pm-orchestration",
       "created": "2026-07-08",
-      "last_updated": "2026-07-08"
+      "last_updated": "2026-08-28"
     },
     {
       "id": "2026-08-09-l2-pipeline-governance-fixes",
