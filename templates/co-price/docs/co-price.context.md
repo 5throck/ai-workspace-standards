@@ -177,3 +177,21 @@ Use `bun scripts/dev-sync.ts "feat: …"` (or the `/sync` slash command) to comm
 - Channel strategy & Deal Desk process owned by `engagement-director` + `cpa-auditor` (exception log).
 - The LLM copilot cites engine-computed figures only; it never computes its own numbers.
 - Educational simulator only — no real customer/financial data; all samples are synthetic.
+
+## Review Model
+
+Three-stage review everywhere: AI 1st (formal) → AI 2nd (cross-domain AI) →
+human final. A same-domain second review is void. Silence is never approval.
+Per-PR verification chain: `cpa-auditor` · `security-auditor` · `security-monitor` ·
+`l10n-auditor` (+ `qa-tester` after UI; `copilot-onrails-audit` after AI-layer writes).
+
+## Lifecycle Rules
+
+| Modified file | Required follow-up |
+|---|---|
+| `docs/biz_logic.md` | new/updated `[Ref:]` tests before implementation |
+| `prisma/schema.prisma` | Zod sync via `security-auditor`; user approval pre-required |
+| `src/lib/simulation.ts`, `engine/*` | run `harness-verification` skill |
+| `src/lib/ai/**` | run `copilot-onrails-audit` skill |
+| `locales/*.json` | run `i18n-audit` skill |
+| UI components | `qa-tester` mounting checks; update user guides if flows changed |
