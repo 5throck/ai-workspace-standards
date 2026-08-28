@@ -12,6 +12,8 @@ status: active
 owner: pdf-export
 last_reviewed: 2026-08-25
 prerequisites: prep-pdf
+inputs: [slide-html]
+outputs: [final-pdf]
 ---
 
 ## Context

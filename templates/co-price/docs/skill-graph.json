@@ -64,7 +64,15 @@
     {
       "id": "gabor-granger",
       "type": "skill",
-      "layer": "variant:co-price"
+      "layer": "variant:co-price",
+      "inputs": [
+        "survey-responses-gg"
+      ],
+      "outputs": [
+        "demand-curve",
+        "optimal-price",
+        "elasticity-reading"
+      ]
     },
     {
       "id": "harness-verification",
@@ -124,12 +132,27 @@
     {
       "id": "pricing-governance",
       "type": "skill",
-      "layer": "variant:co-price"
+      "layer": "variant:co-price",
+      "inputs": [
+        "approval-record"
+      ],
+      "outputs": [
+        "exception-log",
+        "guardrail-status"
+      ]
     },
     {
       "id": "pricing-playbook",
       "type": "skill",
-      "layer": "variant:co-price"
+      "layer": "variant:co-price",
+      "inputs": [
+        "elasticity-reading",
+        "price-corridor"
+      ],
+      "outputs": [
+        "pricing-policy-set",
+        "scenario-snapshots"
+      ]
     },
     {
       "id": "pricing-strategist",
@@ -159,7 +182,14 @@
     {
       "id": "scenario-comparison",
       "type": "skill",
-      "layer": "variant:co-price"
+      "layer": "variant:co-price",
+      "inputs": [
+        "scenario-snapshots"
+      ],
+      "outputs": [
+        "tri-view-comparison",
+        "approval-record"
+      ]
     },
     {
       "id": "security-auditor",
@@ -194,7 +224,14 @@
     {
       "id": "van-westendorp-psm",
       "type": "skill",
-      "layer": "variant:co-price"
+      "layer": "variant:co-price",
+      "inputs": [
+        "survey-responses-vw"
+      ],
+      "outputs": [
+        "price-corridor",
+        "opp-price-point"
+      ]
     }
   ],
   "edges": [
@@ -229,6 +266,29 @@
       "source": "prose"
     },
     {
+      "type": "enables",
+      "from": "gabor-granger",
+      "to": "pricing-playbook",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-price/skills/gabor-granger/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "gabor-granger",
+      "to": "van-westendorp-psm",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-price/skills/gabor-granger/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "references",
       "from": "map-channel-enforcement",
       "to": "pricing-governance",
@@ -247,6 +307,17 @@
       "source": "prose"
     },
     {
+      "type": "enables",
+      "from": "pricing-playbook",
+      "to": "scenario-comparison",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-price/skills/pricing-playbook/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "references",
       "from": "pricing-strategist",
       "to": "map-channel-enforcement",
@@ -259,10 +330,32 @@
       "source": "prose"
     },
     {
+      "type": "enables",
+      "from": "scenario-comparison",
+      "to": "pricing-governance",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-price/skills/scenario-comparison/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "references",
       "from": "trade-promotion-roi",
       "to": "insight-synthesis",
       "source": "prose"
+    },
+    {
+      "type": "enables",
+      "from": "van-westendorp-psm",
+      "to": "pricing-playbook",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-price/skills/van-westendorp-psm/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     }
   ]
 }

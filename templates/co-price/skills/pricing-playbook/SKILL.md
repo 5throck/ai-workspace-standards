@@ -7,6 +7,11 @@ last_reviewed: 2026-08-25
 status: active
 owner: pricing-strategist
 prerequisites: biz_logic.md §9; PricingPolicy persistence; snapshot comparison actions
+relates_to:
+  - skill: scenario-comparison
+    type: enables
+inputs: [elasticity-reading, price-corridor]
+outputs: [pricing-policy-set, scenario-snapshots]
 ---
 
 # Pricing Strategy Playbook Skill

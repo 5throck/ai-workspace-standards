@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Skill Relationship Graph Generator
- * @version 1.3.0
+ * @version 1.4.0
  *
  * Generates a skill relationship graph from multiple sources:
  * - SKILL.md files (prerequisites, relates_to frontmatter fields)
@@ -24,16 +24,26 @@
  * tagged L0; inside a project (no templates/ dir) they are tagged L3, so a
  * project-local graph labels its own skills/agents correctly.
  *
+ * Typed relation vocabulary (ADR-0060 Amendment 3, 2026-08-29): `relates_to`
+ * accepts either a bare string array (legacy, generic `relates_to` edges) or an
+ * array of typed `{skill, type}` objects using `composes_with`/`follows`/
+ * `enables` (plus the existing generic `relates_to` as an explicit type value).
+ * Mixing bare strings and typed objects in the same array is a schema-validation
+ * error, not a YAML-parse error. Frontmatter parsing uses `js-yaml`, scoped
+ * strictly to the text between the `---`/`---` delimiters — the Markdown body is
+ * untouched. See docs/designs/2026-08-28-skill-graph-typed-relations-design.md.
+ *
  * Usage: bun scripts/generate-skill-graph.ts [--scope <common|co-*>]
  *
  * Exit codes:
  * - 0: Success
- * - 1: Operational failure (missing files, parse errors)
+ * - 1: Operational failure (missing files, parse errors, schema-validation errors)
  */
 
 import { readFileSync, existsSync, readdirSync, writeFileSync, mkdirSync } from 'node:fs';
-import { join, resolve, dirname } from 'node:path';
+import { join, resolve, dirname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { load as yamlLoad } from 'js-yaml';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -49,14 +59,38 @@ interface GraphNode {
   id: string;
   type: 'skill' | 'agent' | 'decision' | 'adr';
   layer: 'L0' | 'L3' | 'common' | 'variant:string';
+  /** Opaque input/output labels from SKILL.md frontmatter (skill nodes only). */
+  inputs?: string[];
+  outputs?: string[];
+}
+
+type EdgeType =
+  | 'requires' | 'relates_to' | 'used_by' | 'phase' | 'supersedes' | 'references' | 'cites_skill'
+  // ADR-0060 Amendment 3 (2026-08-29): typed relation vocabulary
+  | 'composes_with' | 'follows' | 'enables';
+
+// Typed `relates_to` entry shape is a *forward-open* object: {skill, type} are
+// the only two fields Phase 1 interprets. Any additional key (e.g. a future
+// `status`/`version`/`confidence`) is preserved unmodified and passed through
+// on `extra`, never validated or acted on by this phase. See Amendment 3 §C.
+interface EdgeProvenance {
+  file: string;
+  field: string;
+  index?: number;
 }
 
 interface GraphEdge {
-  type: 'requires' | 'relates_to' | 'used_by' | 'phase' | 'supersedes' | 'references' | 'cites_skill';
+  type: EdgeType;
   from: string;
   to: string;
   source: string;
   reason?: string;
+  /** `composes_with` is symmetric: stored as one directed edge, traversable both ways. */
+  symmetric?: true;
+  /** Unknown keys on a typed relates_to entry beyond {skill, type} — pass-through, unvalidated. */
+  extra?: Record<string, unknown>;
+  /** Exactly which frontmatter field/entry produced this edge (JSON-only; not rendered in .md). */
+  provenance?: EdgeProvenance;
 }
 
 interface SkillGraph {
@@ -82,7 +116,12 @@ interface Overrides {
 interface SkillFrontmatter {
   name?: string;
   prerequisites?: string;
-  relates_to?: string[];
+  relates_to?: unknown[];
+  /** Opaque input/output labels (ADR-0060 Amendment 3) — not skill references,
+   *  not "artifacts". Rendered per-skill in docs/skill-graph.md; not resolved
+   *  against any node type in Phase 1 (see Phase 4 roadmap). */
+  inputs?: string[];
+  outputs?: string[];
 }
 
 interface AgentFrontmatter {
@@ -98,27 +137,52 @@ interface SkillManifestEntry {
 }
 
 /**
- * Parse YAML frontmatter from a markdown file
+ * Parse YAML frontmatter from a markdown file.
+ *
+ * @version 1.4.0 (ADR-0060 Amendment 3, 2026-08-29): backed by `js-yaml` instead
+ * of the previous hand-rolled single-line regex parser, so nested typed
+ * `relates_to: - skill: ... type: ...` blocks parse correctly. Scoped strictly
+ * to the text between the `---`/`---` delimiters — everything after the second
+ * delimiter (the Markdown body) is never touched by the YAML parser, matching
+ * the original regex parser's boundary exactly. Verified byte-identical output
+ * for all pre-existing single-line/inline-array frontmatter across all ~164
+ * SKILL.md files (see Verification: parser regression, semantic-equality pass).
  */
-function parseFrontmatter(content: string): Record<string, any> | null {
+export function parseFrontmatter(content: string): Record<string, any> | null {
   const frontmatterRegex = /^---\r?\n([\s\S]*?)\r?\n---/;
   const match = content.match(frontmatterRegex);
   if (!match) return null;
 
   const yamlText = match[1];
-  const result: Record<string, any> = {};
+  try {
+    const parsed = yamlLoad(yamlText);
+    if (parsed === null || parsed === undefined || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      return {};
+    }
+    return parsed as Record<string, any>;
+  } catch {
+    // Fallback for pre-existing frontmatter blocks that are not strict YAML
+    // (e.g. some docs/decisions/DEC-*.md prose values contain unescaped
+    // "key: value"-shaped colons) — out of this pass's scope (SKILL.md typed
+    // relates_to). Mirrors the previous hand-rolled single-line parser exactly
+    // so non-SKILL.md consumers of parseFrontmatter see zero behavior change.
+    return legacyParseFrontmatterLines(yamlText);
+  }
+}
 
+/** Pre-1.4.0 hand-rolled single-line `key: value` / inline `[a, b]` parser (fallback only). */
+function legacyParseFrontmatterLines(yamlText: string): Record<string, any> {
+  const result: Record<string, any> = {};
   const lines = yamlText.split('\n');
   for (const line of lines) {
     const colonIdx = line.indexOf(':');
     if (colonIdx === -1) continue;
 
     const key = line.slice(0, colonIdx).trim();
-    let value = line.slice(colonIdx + 1).trim();
+    let value: any = line.slice(colonIdx + 1).trim();
 
-    // Handle array values
     if (value.startsWith('[') && value.endsWith(']')) {
-      value = value.slice(1, -1).split(',').map(v => v.trim()).filter(v => v);
+      value = value.slice(1, -1).split(',').map((v: string) => v.trim()).filter((v: string) => v);
     } else if (value === 'true') {
       value = true;
     } else if (value === 'false') {
@@ -127,8 +191,72 @@ function parseFrontmatter(content: string): Record<string, any> | null {
 
     result[key] = value;
   }
-
   return result;
+}
+
+/**
+ * Schema-validate + normalize a `relates_to` field into typed relation entries.
+ *
+ * Legacy form (bare string array) → generic `relates_to` edges, unchanged
+ * behavior. Typed form (array of `{skill, type, ...}` objects) → the declared
+ * edge type, with `composes_with` marked `symmetric: true` and any keys beyond
+ * `{skill, type}` preserved on `extra` (forward-open, pass-through, unvalidated
+ * — Phase 2's contract to interpret). Mixing bare strings and typed objects in
+ * the same array is a schema-validation error (not a YAML-parse error — the
+ * array itself is syntactically valid YAML) with the exact message specified
+ * in ADR-0060 Amendment 3.
+ *
+ * @version 1.4.0
+ */
+const TYPED_RELATION_TYPES = new Set<EdgeType>(['relates_to', 'composes_with', 'follows', 'enables']);
+
+interface ParsedRelation {
+  to: string;
+  type: EdgeType;
+  symmetric?: true;
+  extra?: Record<string, unknown>;
+  index: number;
+}
+
+export function parseRelatesTo(raw: unknown, filePath: string): ParsedRelation[] {
+  if (!raw) return [];
+  if (!Array.isArray(raw) || raw.length === 0) return [];
+
+  const isStringEntry = (e: unknown): e is string => typeof e === 'string';
+  const isTypedEntry = (e: unknown): e is Record<string, unknown> =>
+    typeof e === 'object' && e !== null && !Array.isArray(e) && 'skill' in (e as object) && 'type' in (e as object);
+
+  const allStrings = raw.every(isStringEntry);
+  const allTyped = raw.every(isTypedEntry);
+
+  if (!allStrings && !allTyped) {
+    throw new Error(
+      `${filePath}: relates_to must contain either all string entries or all typed relation objects; mixed entries are not allowed`
+    );
+  }
+
+  if (allStrings) {
+    return (raw as string[]).map((to, index) => ({ to, type: 'relates_to' as EdgeType, index }));
+  }
+
+  return (raw as Record<string, unknown>[]).map((entry, index) => {
+    const { skill, type, ...rest } = entry;
+    if (typeof skill !== 'string' || typeof type !== 'string' || !TYPED_RELATION_TYPES.has(type as EdgeType)) {
+      throw new Error(
+        `${filePath}: relates_to[${index}] is not a valid typed relation object (expected {skill, type} with type one of ${Array.from(TYPED_RELATION_TYPES).join('|')})`
+      );
+    }
+    const parsed: ParsedRelation = { to: skill, type: type as EdgeType, index };
+    if (type === 'composes_with') parsed.symmetric = true;
+    if (Object.keys(rest).length > 0) parsed.extra = rest;
+    return parsed;
+  });
+}
+
+/** Build the `{file, field, index?}` provenance object for a generated edge. */
+function prov(absPath: string, field: string, index?: number): EdgeProvenance {
+  const file = relative(ROOT, absPath).split('\\').join('/');
+  return index === undefined ? { file, field } : { file, field, index };
 }
 
 /**
@@ -344,19 +472,35 @@ export function buildGraph(): SkillGraph {
     const content = readFileSync(skillPath, 'utf-8');
     const frontmatter = parseFrontmatter(content) as SkillFrontmatter;
 
+    if (Array.isArray(frontmatter?.inputs) || Array.isArray(frontmatter?.outputs)) {
+      const skillNode = allNodes.get(skillName);
+      if (skillNode) {
+        if (Array.isArray(frontmatter.inputs)) skillNode.inputs = frontmatter.inputs.filter((x: unknown) => typeof x === 'string');
+        if (Array.isArray(frontmatter.outputs)) skillNode.outputs = frontmatter.outputs.filter((x: unknown) => typeof x === 'string');
+      }
+    }
+
     if (frontmatter?.prerequisites) {
       const prereqs = parsePrerequisites(frontmatter.prerequisites, skillNames);
       for (const prereq of prereqs) {
         if (skillNames.has(prereq)) {
-          edges.push({ type: 'requires', from: skillName, to: prereq, source: 'prerequisites' });
+          edges.push({ type: 'requires', from: skillName, to: prereq, source: 'prerequisites', provenance: prov(skillPath, 'prerequisites') });
         }
       }
     }
 
-    if (frontmatter?.relates_to && Array.isArray(frontmatter.relates_to)) {
-      for (const related of frontmatter.relates_to) {
-        if (skillNames.has(related)) {
-          edges.push({ type: 'relates_to', from: skillName, to: related, source: 'relates_to' });
+    if (frontmatter?.relates_to) {
+      for (const rel of parseRelatesTo(frontmatter.relates_to, skillPath)) {
+        if (skillNames.has(rel.to)) {
+          edges.push({
+            type: rel.type,
+            from: skillName,
+            to: rel.to,
+            source: 'relates_to',
+            ...(rel.symmetric ? { symmetric: true as const } : {}),
+            ...(rel.extra ? { extra: rel.extra } : {}),
+            provenance: prov(skillPath, 'relates_to', rel.index)
+          });
         }
       }
     }
@@ -374,11 +518,11 @@ export function buildGraph(): SkillGraph {
     const frontmatter = parseFrontmatter(content) as AgentFrontmatter;
 
     if (frontmatter?.required_skills && Array.isArray(frontmatter.required_skills)) {
-      for (const skill of frontmatter.required_skills) {
+      frontmatter.required_skills.forEach((skill: string, index: number) => {
         if (skillNames.has(skill)) {
-          edges.push({ type: 'used_by', from: skill, to: agentName, source: 'required_skills' });
+          edges.push({ type: 'used_by', from: skill, to: agentName, source: 'required_skills', provenance: prov(agentPath, 'required_skills', index) });
         }
-      }
+      });
     }
   }
 
@@ -669,21 +813,37 @@ export function buildScopeGraph(scope: string): SkillGraph {
     const content = readFileSync(skillPath, 'utf-8');
     const frontmatter = parseFrontmatter(content) as SkillFrontmatter;
 
+    if (Array.isArray(frontmatter?.inputs) || Array.isArray(frontmatter?.outputs)) {
+      const skillNode = allNodes.get(name);
+      if (skillNode) {
+        if (Array.isArray(frontmatter.inputs)) skillNode.inputs = frontmatter.inputs.filter((x: unknown) => typeof x === 'string');
+        if (Array.isArray(frontmatter.outputs)) skillNode.outputs = frontmatter.outputs.filter((x: unknown) => typeof x === 'string');
+      }
+    }
+
     if (frontmatter?.prerequisites) {
       const prereqs = parsePrerequisites(frontmatter.prerequisites, targetSkills);
       for (const prereq of prereqs) {
         if (prereq !== name && targetSkills.has(prereq)) {
           reference(prereq);
-          edges.push({ type: 'requires', from: name, to: prereq, source: 'prerequisites' });
+          edges.push({ type: 'requires', from: name, to: prereq, source: 'prerequisites', provenance: prov(skillPath, 'prerequisites') });
         }
       }
     }
 
-    if (frontmatter?.relates_to && Array.isArray(frontmatter.relates_to)) {
-      for (const related of frontmatter.relates_to) {
-        if (typeof related === 'string' && related !== name && targetSkills.has(related)) {
-          reference(related);
-          edges.push({ type: 'relates_to', from: name, to: related, source: 'relates_to' });
+    if (frontmatter?.relates_to) {
+      for (const rel of parseRelatesTo(frontmatter.relates_to, skillPath)) {
+        if (rel.to !== name && targetSkills.has(rel.to)) {
+          reference(rel.to);
+          edges.push({
+            type: rel.type,
+            from: name,
+            to: rel.to,
+            source: 'relates_to',
+            ...(rel.symmetric ? { symmetric: true as const } : {}),
+            ...(rel.extra ? { extra: rel.extra } : {}),
+            provenance: prov(skillPath, 'relates_to', rel.index)
+          });
         }
       }
     }
@@ -789,7 +949,7 @@ function generateMarkdown(graph: SkillGraph): string {
   // Build skill relation lookup
   const skillRelations = new Map<string, {
     requires: string[];
-    relates_to: string[];
+    relates_to: string[]; // includes generic relates_to + typed composes_with/follows/enables (labeled)
     used_by_agents: string[];
     phases: string[];
   }>();
@@ -799,11 +959,17 @@ function generateMarkdown(graph: SkillGraph): string {
     skillRelations.set(node.id, { requires: [], relates_to: [], used_by_agents: [], phases: [] });
   }
 
+  const TYPED_LABEL: Partial<Record<EdgeType, string>> = {
+    composes_with: 'composes_with', follows: 'follows', enables: 'enables'
+  };
+
   for (const edge of graph.edges) {
     if (edge.type === 'requires' && skillRelations.has(edge.from)) {
       skillRelations.get(edge.from)!.requires.push(edge.to);
     } else if (edge.type === 'relates_to' && skillRelations.has(edge.from)) {
       skillRelations.get(edge.from)!.relates_to.push(edge.to);
+    } else if (TYPED_LABEL[edge.type] && skillRelations.has(edge.from)) {
+      skillRelations.get(edge.from)!.relates_to.push(`${edge.to} (${TYPED_LABEL[edge.type]})`);
     } else if (edge.type === 'used_by' && skillRelations.has(edge.from)) {
       skillRelations.get(edge.from)!.used_by_agents.push(edge.to);
     } else if (edge.type === 'phase' && skillRelations.has(edge.from)) {
@@ -812,8 +978,8 @@ function generateMarkdown(graph: SkillGraph): string {
   }
 
   // Output per-skill table
-  lines.push('| Skill | Layer | Required-by Agents | Phases | Relates-to |');
-  lines.push('|-------|-------|-------------------|--------|------------|');
+  lines.push('| Skill | Layer | Required-by Agents | Phases | Relates-to | Inputs | Outputs |');
+  lines.push('|-------|-------|-------------------|--------|------------|--------|---------|');
 
   const allSkills = Array.from(skillRelations.keys()).sort();
   for (const skillId of allSkills) {
@@ -824,8 +990,10 @@ function generateMarkdown(graph: SkillGraph): string {
     const agents = relations.used_by_agents.sort().join(', ') || '—';
     const phases = relations.phases.sort().join(', ') || '—';
     const relates = relations.relates_to.sort().join(', ') || '—';
+    const inputs = ((node as GraphNode).inputs ?? []).join(', ') || '—';
+    const outputs = ((node as GraphNode).outputs ?? []).join(', ') || '—';
 
-    lines.push(`| \`${skillId}\` | ${node.layer} | ${agents} | ${phases} | ${relates} |`);
+    lines.push(`| \`${skillId}\` | ${node.layer} | ${agents} | ${phases} | ${relates} | ${inputs} | ${outputs} |`);
   }
 
   lines.push('');
@@ -863,6 +1031,16 @@ function generateMarkdown(graph: SkillGraph): string {
   lines.push('| `supersedes` | Supersession — overrides (manual) or decision-record prose labels |');
   lines.push('| `references` | Backtick reference in SKILL.md/agent/ADR body prose, or DEC `knowledge_refs[]` naming an ADR |');
   lines.push('| `cites_skill` | Decision record `skills_used[]` validated against the skill set (ADR-0061 amendment 2026-08-25) |');
+  lines.push('| `composes_with` | Typed `relates_to` entry — symmetric, used together in the same phase/workflow (ADR-0060 Amendment 3) |');
+  lines.push('| `follows` | Typed `relates_to` entry — sequential/ordering relation, no dependency implication (ADR-0060 Amendment 3) |');
+  lines.push('| `enables` | Typed `relates_to` entry — this skill\'s output unlocks another skill/workflow (ADR-0060 Amendment 3) |');
+  lines.push('');
+  lines.push('`composes_with` edges carry `symmetric: true` in the JSON and are stored once');
+  lines.push('(source→target as declared); consumers MUST treat them as traversable both ways.');
+  lines.push('Every edge additionally carries a JSON-only `provenance: {file, field, index?}`');
+  lines.push('object recording exactly which frontmatter field/entry produced it (not rendered');
+  lines.push('in this table). `inputs`/`outputs` are opaque per-skill labels, shown in the Skill');
+  lines.push('Catalog table above — not skill references and not yet resolved as graph edges.');
   lines.push('');
 
   // Decisions & ADRs section (ADR-0060 amendment 2026-08-25)

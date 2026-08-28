@@ -203,6 +203,12 @@
       "source": "prose"
     },
     {
+      "type": "used_by",
+      "from": "i18n-formatting",
+      "to": "i18n-specialist",
+      "source": "required_skills"
+    },
+    {
       "type": "references",
       "from": "i18n-formatting",
       "to": "translate",
@@ -221,6 +227,12 @@
       "source": "prose"
     },
     {
+      "type": "used_by",
+      "from": "i18n-layout",
+      "to": "i18n-specialist",
+      "source": "required_skills"
+    },
+    {
       "type": "references",
       "from": "i18n-layout",
       "to": "translate",
@@ -237,6 +249,12 @@
       "from": "i18n-locale-config",
       "to": "i18n-layout",
       "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "i18n-locale-config",
+      "to": "i18n-specialist",
+      "source": "required_skills"
     },
     {
       "type": "references",

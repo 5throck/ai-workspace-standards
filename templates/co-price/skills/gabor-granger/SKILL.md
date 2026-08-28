@@ -7,6 +7,13 @@ last_reviewed: 2026-08-25
 status: active
 owner: market-intelligence-analyst
 prerequisites: SurveyResponse rows (method='gg') ingested via actions/market; at least two tested price points with responses
+relates_to:
+  - skill: van-westendorp-psm
+    type: composes_with
+  - skill: pricing-playbook
+    type: enables
+inputs: [survey-responses-gg]
+outputs: [demand-curve, optimal-price, elasticity-reading]
 ---
 
 # Gabor-Granger Demand Analysis Skill

@@ -7,6 +7,11 @@ last_reviewed: 2026-08-25
 status: active
 owner: market-intelligence-analyst
 prerequisites: SurveyResponse rows (method='vw') ingested via actions/market; thresholds strictly increasing per row
+relates_to:
+  - skill: pricing-playbook
+    type: enables
+inputs: [survey-responses-vw]
+outputs: [price-corridor, opp-price-point]
 ---
 
 # Van Westendorp PSM Analysis Skill

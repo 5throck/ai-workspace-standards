@@ -7,6 +7,11 @@ last_reviewed: 2026-08-25
 status: active
 owner: engagement-director
 prerequisites: two approved ScenarioSnapshots; engine re-simulation via compareSnapshotsAction
+relates_to:
+  - skill: pricing-governance
+    type: enables
+inputs: [scenario-snapshots]
+outputs: [tri-view-comparison, approval-record]
 ---
 
 # Scenario Comparison Validation Skill

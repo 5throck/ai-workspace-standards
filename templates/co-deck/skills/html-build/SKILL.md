@@ -13,6 +13,11 @@ status: active
 owner: html-build
 last_reviewed: 2026-06-24
 prerequisites: design
+relates_to:
+  - skill: pdf-export
+    type: follows
+inputs: [slide-deck-draft, design-spec]
+outputs: [slide-html]
 ---
 
 ## Context

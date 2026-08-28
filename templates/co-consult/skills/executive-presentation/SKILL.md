@@ -11,6 +11,15 @@ last_reviewed: 2026-06-13
 status: active
 owner: communications-lead
 prerequisites: technical-feasibility, org-readiness-assessment, financial-modeling
+relates_to:
+  - skill: technical-feasibility
+    type: composes_with
+  - skill: org-readiness-assessment
+    type: composes_with
+  - skill: financial-modeling
+    type: composes_with
+inputs: [complexity-grades, business-case, readiness-scores]
+outputs: [executive-deck]
 metadata:
   type: process
   triggers:

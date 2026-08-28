@@ -134,7 +134,11 @@
       "type": "requires",
       "from": "customs-duty-drawback-workflow",
       "to": "hs-classification-workflow",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-export/skills/customs-duty-drawback-workflow/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "phase",
@@ -206,7 +210,11 @@
       "type": "requires",
       "from": "fta-origin-determination",
       "to": "hs-classification-workflow",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-export/skills/fta-origin-determination/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "phase",
@@ -236,7 +244,11 @@
       "type": "requires",
       "from": "halal-certification-workflow",
       "to": "hs-classification-workflow",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-export/skills/halal-certification-workflow/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "phase",
@@ -308,7 +320,11 @@
       "type": "requires",
       "from": "landed-cost-calculation",
       "to": "hs-classification-workflow",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-export/skills/landed-cost-calculation/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "references",
@@ -416,7 +432,11 @@
       "type": "requires",
       "from": "roo-qualification-worksheet",
       "to": "fta-origin-determination",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-export/skills/roo-qualification-worksheet/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "references",

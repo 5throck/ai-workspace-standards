@@ -138,7 +138,11 @@
       "type": "requires",
       "from": "financial-infographic-svg",
       "to": "financial-narrative-brief",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-news/skills/financial-infographic-svg/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "references",
@@ -222,7 +226,11 @@
       "type": "requires",
       "from": "financial-narrative-brief",
       "to": "k-dart",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-news/skills/financial-narrative-brief/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "phase",
@@ -306,7 +314,11 @@
       "type": "requires",
       "from": "style-lint-checklist",
       "to": "financial-journalism-style",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-news/skills/style-lint-checklist/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "phase",

@@ -44,12 +44,30 @@
     {
       "id": "executive-presentation",
       "type": "skill",
-      "layer": "variant:co-consult"
+      "layer": "variant:co-consult",
+      "inputs": [
+        "complexity-grades",
+        "business-case",
+        "readiness-scores"
+      ],
+      "outputs": [
+        "executive-deck"
+      ]
     },
     {
       "id": "financial-modeling",
       "type": "skill",
-      "layer": "variant:co-consult"
+      "layer": "variant:co-consult",
+      "inputs": [
+        "complexity-grades",
+        "readiness-scores",
+        "change-mgmt-cost-estimates"
+      ],
+      "outputs": [
+        "roi-analysis",
+        "npv-irr-payback",
+        "business-case"
+      ]
     },
     {
       "id": "financial-statement-analysis",
@@ -99,7 +117,12 @@
     {
       "id": "org-readiness-assessment",
       "type": "skill",
-      "layer": "variant:co-consult"
+      "layer": "variant:co-consult",
+      "outputs": [
+        "readiness-scores",
+        "capability-gap-analysis",
+        "change-mgmt-cost-estimates"
+      ]
     },
     {
       "id": "pm",
@@ -159,7 +182,12 @@
     {
       "id": "technical-feasibility",
       "type": "skill",
-      "layer": "variant:co-consult"
+      "layer": "variant:co-consult",
+      "outputs": [
+        "complexity-grades",
+        "risk-cost-ranges",
+        "preconditions"
+      ]
     },
     {
       "id": "technology-specialist",
@@ -189,7 +217,11 @@
       "type": "requires",
       "from": "change-impact-assessment",
       "to": "org-readiness-assessment",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-consult/skills/change-impact-assessment/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "phase",
@@ -303,7 +335,11 @@
       "type": "requires",
       "from": "consulting-report-writing",
       "to": "narrative-framework",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-consult/skills/consulting-report-writing/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "phase",
@@ -324,16 +360,48 @@
       "source": "skill_manifest"
     },
     {
+      "type": "composes_with",
+      "from": "executive-presentation",
+      "to": "financial-modeling",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/executive-presentation/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
       "type": "requires",
       "from": "executive-presentation",
       "to": "financial-modeling",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-consult/skills/executive-presentation/SKILL.md",
+        "field": "prerequisites"
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "executive-presentation",
+      "to": "org-readiness-assessment",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/executive-presentation/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
     },
     {
       "type": "requires",
       "from": "executive-presentation",
       "to": "org-readiness-assessment",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-consult/skills/executive-presentation/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "phase",
@@ -342,10 +410,26 @@
       "source": "skill_manifest"
     },
     {
+      "type": "composes_with",
+      "from": "executive-presentation",
+      "to": "technical-feasibility",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/executive-presentation/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "requires",
       "from": "executive-presentation",
       "to": "technical-feasibility",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-consult/skills/executive-presentation/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "used_by",
@@ -358,6 +442,17 @@
       "from": "financial-modeling",
       "to": "data-analyst",
       "source": "skill_manifest"
+    },
+    {
+      "type": "enables",
+      "from": "financial-modeling",
+      "to": "executive-presentation",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-consult/skills/financial-modeling/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
     },
     {
       "type": "references",
@@ -375,7 +470,11 @@
       "type": "requires",
       "from": "financial-modeling",
       "to": "org-readiness-assessment",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-consult/skills/financial-modeling/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "phase",
@@ -402,6 +501,18 @@
       "source": "skill_manifest"
     },
     {
+      "type": "composes_with",
+      "from": "financial-modeling",
+      "to": "technical-feasibility",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/financial-modeling/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "references",
       "from": "financial-modeling",
       "to": "technical-feasibility",
@@ -411,7 +522,11 @@
       "type": "requires",
       "from": "financial-modeling",
       "to": "technical-feasibility",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-consult/skills/financial-modeling/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "used_by",
@@ -430,6 +545,16 @@
       "from": "financial-statement-analysis",
       "to": "k-dart",
       "source": "prose"
+    },
+    {
+      "type": "requires",
+      "from": "financial-statement-analysis",
+      "to": "k-dart",
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-consult/skills/financial-statement-analysis/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "phase",
@@ -582,6 +707,17 @@
       "source": "skill_manifest"
     },
     {
+      "type": "enables",
+      "from": "org-readiness-assessment",
+      "to": "financial-modeling",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-consult/skills/org-readiness-assessment/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "phase",
       "from": "org-readiness-assessment",
       "to": "phase1",
@@ -615,7 +751,11 @@
       "type": "requires",
       "from": "project-delivery",
       "to": "solution-design",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-consult/skills/project-delivery/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "used_by",
@@ -657,7 +797,11 @@
       "type": "requires",
       "from": "sample-driven-report-writing",
       "to": "consulting-report-writing",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-consult/skills/sample-driven-report-writing/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "references",
@@ -783,7 +927,11 @@
       "type": "requires",
       "from": "stakeholder-review-management",
       "to": "consulting-report-writing",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-consult/skills/stakeholder-review-management/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "used_by",
@@ -807,7 +955,22 @@
       "type": "requires",
       "from": "stakeholder-review-management",
       "to": "stakeholder-alignment",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-consult/skills/stakeholder-review-management/SKILL.md",
+        "field": "prerequisites"
+      }
+    },
+    {
+      "type": "enables",
+      "from": "technical-feasibility",
+      "to": "executive-presentation",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-consult/skills/technical-feasibility/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     },
     {
       "type": "phase",
