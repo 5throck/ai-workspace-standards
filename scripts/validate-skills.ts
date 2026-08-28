@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Skill Lifecycle Validation Script
- * @version 1.0.3
+ * @version 1.1.0
  */
 // Validates skills/*/SKILL.md files for required frontmatter
 // and checks governance records in docs/lifecycle/skills/*.md
@@ -169,6 +169,33 @@ function validateRuntimeDefinitions(): void {
   }
 }
 
+// Part 1b: Layer placement — variant-exclusive skills must NOT live in skills/
+// (DEC-20260829-02, ADR-0032 Amendment 1: variant scope = L0+L2, owned-variant only).
+// Guarded to the workspace root: scaffolded projects legitimately carry
+// variant-scoped skills under skills/ (copied via the variant overlay).
+function validateLayerPlacement(): void {
+  if (!existsSync(join(ROOT, 'templates', 'common'))) return;
+  if (!JSON_MODE) console.log(`\n${colors.cyan}📋 Part 1b: Layer Placement Validation (variant-scoped skills must not live in skills/)${colors.reset}`);
+
+  const skillDirs = readdirSync(SKILLS_DIR, { withFileTypes: true })
+    .filter(dirent => dirent.isDirectory())
+    .map(dirent => dirent.name);
+
+  for (const skillDir of skillDirs) {
+    const skillFile = join(SKILLS_DIR, skillDir, 'SKILL.md');
+    if (!existsSync(skillFile)) continue;
+    const scope = readFileSync(skillFile, 'utf-8').match(/^scope:\s*(\S+)/m)?.[1] ?? '';
+    if (scope && scope !== 'workspace' && scope !== 'common') {
+      fail(
+        skillDir,
+        'layer-placement',
+        `${skillDir}: variant-exclusive skill (scope: ${scope}) must not live in skills/`,
+        `Move it to templates/${scope}/skills/${skillDir}/ — variant-exclusive skills are L0+L2 (DEC-20260829-02, ADR-0032 Amendment 1)`
+      );
+    }
+  }
+}
+
 // Part 2: Validate governance records (docs/lifecycle/skills/*.md)
 function validateGovernanceRecords(): void {
   if (!JSON_MODE) console.log(`\n${colors.cyan}📋 Part 2: Governance Record Validation (docs/lifecycle/skills/*.md)${colors.reset}`);
@@ -223,6 +250,7 @@ function main() {
   }
 
   validateRuntimeDefinitions();
+  validateLayerPlacement();
   validateGovernanceRecords();
 
   const errors = issues.filter(i => i.level === 'error');

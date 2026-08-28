@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Single Source of Truth for workspace-wide invariants. All dependent documents must match these values. Validated by scripts/validate-templates.ts at pre-commit.",
   "workflow": {
     "phases": {
@@ -84,7 +84,12 @@
   },
   "variant_scoped_skills": {
     "description": "Skills whose function is exclusive to ONE variant. Registry-only SSOT (owner-curated — heuristics cannot distinguish these from genuinely common skills). If such a skill is found in templates/common/skills/ it is a promotion mistake: validate-templates FAILs and upgrade-project prunes it from projects whose variant does not own it (skills/ + .claude/.gemini/.agents mirrors). sound-synth (co-game) leaked this way on 2026-08-06 into 10 of 11 projects.",
-    "co-game": ["sound-synth"]
+    "co-game": ["sound-synth"],
+    "co-design": ["accessibility-audit"],
+    "co-consult": ["mece-logic-auditor"],
+    "co-deck": ["presenter-mode"],
+    "co-security": ["sarif-exporter", "stride-threat-matrix"],
+    "co-develop": ["swe-solve"]
   },
   "rootAllowlist": {
     "description": "Whitelist of files and directories permitted in the workspace root. Anything not in these lists triggers a stray-artifact audit failure.",

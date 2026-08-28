@@ -96,7 +96,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `helpers/golden-reference-loader.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `helpers/inject-skills.ts` | L0 | 1.0.2 | active | —| —| L0 | —|
 | `helpers/integration-helpers.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
-| `helpers/layer-filter.ts` | L0 | 1.4.2 | active | —| —| L0 | —|
+| `helpers/layer-filter.ts` | L0 | 1.5.0 | active | —| —| L0 | —|
 | `helpers/lifecycle-governance.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `helpers/extends-validator.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `helpers/upgrade-versions.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
@@ -173,7 +173,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `resolve-variants.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `project-to-variant.ts` | L0 | 1.2.1 | active | `--source`, `--target`, `--dry-run`, `--force`, `--design-doc`, `--threshold-files`, `--threshold-dirs` | —| L0 | —|
 | `promote-context-section.ts` | L0 | 1.0.0 | active | `--heading`, `--variants`, `--source`, `--after-heading`, `--dry-run` | —| L0 | —|
-| `propagate-to-templates.ts` | L0 | 2.5.2 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs`, `--include-disabled`, `--marker-rewrite` | —| L0 | —|
+| `propagate-to-templates.ts` | L0 | 2.6.0 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs`, `--include-disabled`, `--marker-rewrite` | —| L0 | —|
 | `qa-gate.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `readme-lifecycle-audit.ts` | L0 | 1.0.4 | active | —| —| L0+L1 | —|
 | `render-pdf-deck.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
@@ -206,8 +206,8 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `validate-docs-links.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `validate-md-language.ts` | L0 | 1.8.0 | active | —| —| L0+L1 | —|
 | `validate-model-registry.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
-| `validate-skills.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
-| `validate-templates.ts` | L0 | 1.16.0 | active | —| —| L0 | —|
+| `validate-skills.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
+| `validate-templates.ts` | L0 | 1.19.0 | active | —| —| L0 | —|
 | `validate-variant-readiness.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `verify-country-prune.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `verify-adr-governance.ts` | L0 | 1.4.0 | active | —| —| L0 | —|
@@ -218,7 +218,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `verify-platform-lifecycle.ts` | L0 | 1.1.2 | active | —| —| L0+L1 | —|
 | `verify-readme-sync.ts` | L0 | 1.4.0 | active | —| —| L0+L1 | —|
 | `verify-scripts.ts` | L0 | 1.4.1 | active | —| —| L0+L1 | —|
-| `verify-skills.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
+| `verify-skills.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
 | `verify-template-integrity.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `validate-pm-extends.ts` | L0 | 0.3.1 | active | —| —| L0+L1 | —|
 

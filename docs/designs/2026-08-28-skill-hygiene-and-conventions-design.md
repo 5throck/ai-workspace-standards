@@ -3,7 +3,7 @@
 | Field | Value |
 |-------|-------|
 | Date | 2026-08-28 |
-| Status | accepted (user-approved; decisions on record: README mandatory, scripts/<variant> convention adopted, full execution) |
+| Status | accepted, **partially superseded 2026-08-29** — the per-skill README mandatory standard was reversed by `docs/decisions/DEC-20260829-01.md` (SKILL.md is the sole required file; README sections of this design are historical). The cross-variant leak guard (B-11/`variant_scoped_skills`) and `scripts/<variant>/` layout decisions remain in force. |
 | Spec ID | `skillhygiene` |
 | Governing anchor | ADR-0031 (fork model); CONSTITUTION §6.2 (skill frontmatter); ADR-0057/0058 (scoped-asset prune precedent) |
 | Related | `docs/designs/2026-08-28-skill-graph-template-rollout-design.md`; `docs/designs/2026-08-28-nested-skill-dir-check-design.md` |

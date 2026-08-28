@@ -204,7 +204,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `validate-docs-links.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `validate-md-language.ts` | L0 | 1.8.0 | active | —| —| L0+L1 | —|
 | `validate-model-registry.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
-| `validate-skills.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
+| `validate-skills.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `validate-templates.ts` | L0 | 1.16.0 | active | —| —| L0 | —|
 | `verify-country-prune.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `verify-adr-governance.ts` | L0 | 1.4.0 | active | —| —| L0 | —|
@@ -215,7 +215,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `verify-platform-lifecycle.ts` | L0 | 1.1.2 | active | —| —| L0+L1 | —|
 | `verify-readme-sync.ts` | L0 | 1.4.0 | active | —| —| L0+L1 | —|
 | `verify-scripts.ts` | L0 | 1.4.1 | active | —| —| L0+L1 | —|
-| `verify-skills.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
+| `verify-skills.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
 | `verify-template-integrity.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `validate-pm-extends.ts` | L0 | 0.3.1 | active | —| —| L0+L1 | —|
 

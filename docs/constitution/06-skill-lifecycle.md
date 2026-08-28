@@ -18,7 +18,7 @@ Skills follow the same L0/L1/L2/L3 model as scripts:
 
 **Propagation rule**: Develop at L0 (`skills/`). Run `bun run propagate:apply` to distribute to `.claude/skills/` and `.gemini/skills/` and publish to the L1 template snapshot. Propagation filtering is controlled exclusively by SKILL.md frontmatter (`l2_propagate`/`scope`) — skills with `l2_propagate: false` or `scope: workspace` are excluded at the L0→L1 stage and never enter `templates/common/`. L3 projects snapshot L1 (plus any L2 variant overlay) at creation time — no automatic back-propagation.
 
-> **Field-name note**: The `l2_propagate` frontmatter field and the `"L0+L1+L2"` scope value below (from `scripts/helpers/layer-filter.ts`'s `LayerValue` type) are literal code identifiers that predate this document's L3 layer — their `L2` denotes "propagates all the way to a scaffolded project," which this document now calls L3. Do not rename these identifiers from this doc alone; that would require a coordinated code change to `layer-filter.ts` and every `SKILL.md` using the field.
+> **Field-name note**: The `l2_propagate` frontmatter field is a literal code identifier that predates this document's L3 layer — its `L2` denotes "propagates all the way to a scaffolded project," which this document now calls L3. Skill layer values come from `scripts/helpers/layer-filter.ts`'s `LayerValue` type: skills resolve to `L0`, `L0+L1`, or (since DEC-20260829-02 / layer-filter 1.5.0) **`L0+L2`** for variant-exclusive skills. `L0+L1+L2` remains a valid LayerValue for **scripts only** (SCRIPTS.md byte-identical sync model) and is no longer produced by skill scope parsing. Do not rename these identifiers from this doc alone; that would require a coordinated code change to `layer-filter.ts` and every `SKILL.md` using the field.
 
 > **Workspace Root vs. Individual Projects**:
 > - **Workspace Root** (`ai-workspace-standards`): Skills focus on template maintenance and scaffolding validation (e.g., `simulate-project-creation`, `security-scan`, `audit-workspace`).
@@ -81,22 +81,17 @@ version: 1.0.0
 fails `validate-templates.ts`), and `version` must be full semver `X.Y.Z` — 2-part
 versions (`"1.0"`) are rejected.
 
-**Skill Folder Standard Structure (mandatory since 2026-08-28)**: every skill directory
-carries, next to `SKILL.md`:
-
-| File | Required | Content |
-|------|----------|---------|
-| `SKILL.md` | ✅ | Standard frontmatter + instructions |
-| `README.md` | ✅ | English: purpose, when-to-trigger, prerequisites, usage example |
-| `README_ko.md` | ✅ | Korean translation of README.md |
-
-Enforcement: `validate-templates.ts` FAILs on missing per-skill READMEs at the template
-layer (L0/L1/L2). Generated projects (L3) get a WARN grace period and author their
-backlog (581 folders as of 2026-08-28) during subsequent upgrade cycles, after which the
-project-side gate flips to FAIL. `SKILL.md` alone is no longer a complete skill folder.
+**Skill Folder Standard Structure**: every skill directory requires only `SKILL.md`
+(standard frontmatter + instructions). The per-skill `README.md`/`README_ko.md`
+pair — mandated 2026-08-28 — was **retired 2026-08-29 (DEC-20260829-01)**: SKILL.md is
+the authoritative, machine-consumed definition and per-skill READMEs were seeded
+boilerplate duplicating its frontmatter. Existing per-skill README files in templates
+were removed; authors may still add a hand-written README where a skill genuinely
+needs a human-facing page, but none is gated. The variant-level `README.md`/
+`README_ko.md` (VARIANT_CONTRACT, WS-08) is unaffected and remains mandatory.
 
 
-**`scope` allowed values**: `workspace` (L0-only), `common` (L0+L1, shared unmodified across all variants), `variant` (generic placeholder), or the **literal name of the variant the skill belongs to** (e.g. `scope: co-consult`) — a domain-only skill with a variant override and no `templates/common/` base. `scripts/helpers/layer-filter.ts` treats any value other than `workspace`/`common` as a variant-name marker and propagates the skill to L0+L1+L2. `scripts/skill-lifecycle-audit.ts` validates `scope` against `workspace | common | variant | <current project's own directory name>` — run the audit from inside the variant directory (e.g. `cd templates/co-consult && bun ../../scripts/skill-lifecycle-audit.ts`) so it can resolve the variant name correctly.
+**`scope` allowed values**: `workspace` (L0-only), `common` (L0+L1, shared unmodified across all variants), or the **literal name of the variant the skill belongs to** (e.g. `scope: co-consult`) — a **variant-exclusive** skill living only in `templates/co-*/skills/` (no workspace-root or `templates/common/` base; since DEC-20260829-02 the L0 dev-home copies of variant-exclusive skills have been removed). `scripts/helpers/layer-filter.ts` treats any value other than `workspace`/`common` as a variant-name marker and assigns the skill layer **L0+L2** — it ships to L3 projects of its owning variant via the variant overlay and never enters `templates/common/` (DEC-20260829-02; LayerValue change in layer-filter 1.5.0). `scripts/skill-lifecycle-audit.ts` validates `scope` against `workspace | common | variant | <current project's own directory name>` — run the audit from inside the variant directory (e.g. `cd templates/co-consult && bun ../../scripts/skill-lifecycle-audit.ts`) so it can resolve the variant name correctly.
 
 #### `l2_propagate` (L1/L3) Propagation Control
 

@@ -14,7 +14,7 @@
     {
       "id": "accessibility-audit",
       "type": "skill",
-      "layer": "L0"
+      "layer": "variant:co-design"
     },
     {
       "id": "adr:0001",
@@ -423,6 +423,16 @@
     },
     {
       "id": "dec:DEC-20260825-02",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
+      "id": "dec:DEC-20260829-01",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
+      "id": "dec:DEC-20260829-02",
       "type": "decision",
       "layer": "L0"
     },
@@ -889,7 +899,7 @@
     {
       "id": "mece-logic-auditor",
       "type": "skill",
-      "layer": "L0"
+      "layer": "variant:co-consult"
     },
     {
       "id": "meeting-facilitation",
@@ -990,7 +1000,7 @@
     {
       "id": "presenter-mode",
       "type": "skill",
-      "layer": "L0"
+      "layer": "variant:co-deck"
     },
     {
       "id": "price-waterfall-analysis",
@@ -1188,7 +1198,7 @@
     {
       "id": "sarif-exporter",
       "type": "skill",
-      "layer": "L0"
+      "layer": "variant:co-security"
     },
     {
       "id": "scaffolding-expert",
@@ -1306,7 +1316,7 @@
     {
       "id": "sound-synth",
       "type": "skill",
-      "layer": "L0"
+      "layer": "variant:co-game"
     },
     {
       "id": "source-command-celebrate",
@@ -1373,7 +1383,7 @@
     {
       "id": "stride-threat-matrix",
       "type": "skill",
-      "layer": "L0"
+      "layer": "variant:co-security"
     },
     {
       "id": "style-editor",
@@ -1388,7 +1398,7 @@
     {
       "id": "swe-solve",
       "type": "skill",
-      "layer": "L0"
+      "layer": "variant:co-develop"
     },
     {
       "id": "sync",
@@ -2390,6 +2400,18 @@
       "type": "cites_skill",
       "from": "dec:DEC-20260825-02",
       "to": "sync",
+      "source": "skills_used"
+    },
+    {
+      "type": "cites_skill",
+      "from": "dec:DEC-20260829-01",
+      "to": "decision-record",
+      "source": "skills_used"
+    },
+    {
+      "type": "cites_skill",
+      "from": "dec:DEC-20260829-02",
+      "to": "decision-record",
       "source": "skills_used"
     },
     {
@@ -5088,6 +5110,12 @@
       "from": "sap-sd",
       "to": "sd-analyst",
       "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "sarif-exporter",
+      "to": "finding-reconciliation",
+      "source": "prose"
     },
     {
       "type": "used_by",

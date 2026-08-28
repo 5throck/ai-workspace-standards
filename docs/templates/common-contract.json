@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12",
-  "version": "1.4.0",
-  "description": "Declares the common layer contract: which agents and skills are provided by templates/common/, their versions, and override governance rules. Variants inherit these via new-project.ts and may declare overrides in their variant.json.",
+  "version": "1.5.0",
+  "description": "Declares the common layer contract: which agents and skills are provided by templates/common/, their versions, and override governance rules. Variants inherit these via new-project.ts and may declare overrides in their variant.json. Country-scoped skills (k-law/k-dart/k-kosis, tracked in workspace-schema.json country_scoped_assets) and variant-scoped skills (tracked in variant_scoped_skills, living in templates/co-*/skills/) are deliberately out of this contract.",
   "governance": {
     "anti_swelling_threshold": 0.5,
     "anti_swelling_note": "If >= 50% of variants override the same agent, the common definition should be updated instead",
@@ -42,15 +42,16 @@
     }
   },
   "common_skills": {
+
     "project-review": {
       "source": "skills/project-review/SKILL.md",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "overridable": false,
       "description": "Comprehensive parallel project review — universal across all variants"
     },
     "meeting-facilitation": {
       "source": "skills/meeting-facilitation/SKILL.md",
-      "version": "1.0.0",
+      "version": "1.4.0",
       "overridable": false,
       "description": "Structured multi-agent meeting facilitation"
     },
@@ -62,7 +63,7 @@
     },
     "skill-lifecycle-manager": {
       "source": "skills/skill-lifecycle-manager/SKILL.md",
-      "version": "1.2.0",
+      "version": "1.2.1",
       "overridable": false,
       "description": "Skill lifecycle management"
     },
@@ -86,13 +87,13 @@
     },
     "sync": {
       "source": "skills/sync/SKILL.md",
-      "version": "1.0.0",
+      "version": "1.2.2",
       "overridable": false,
       "description": "Runs the full project sync pipeline"
     },
     "team-builder": {
       "source": "skills/team-builder/SKILL.md",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "overridable": false,
       "description": "Guides building a new AI agent team"
     },
@@ -104,13 +105,13 @@
     },
     "evidence-ledger": {
       "source": "skills/evidence-ledger/SKILL.md",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "overridable": false,
       "description": "Fixed-column evidence ledger with variant overlays (ADR-0061)"
     },
     "decision-record": {
       "source": "skills/decision-record/SKILL.md",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "overridable": false,
       "description": "Decision record format for gate-moment rulings (ADR-0061)"
     },
@@ -131,6 +132,54 @@
       "version": "1.0.0",
       "overridable": false,
       "description": "Character encoding (UTF-8/CP949/BOM), RTL/bidi, script-specific fonts, hwp pointers (constitution §4.4)"
+    },
+    "api-documentation": {
+      "source": "skills/api-documentation/SKILL.md",
+      "version": "1.0.0",
+      "overridable": false,
+      "description": "Creates comprehensive API documentation: endpoints, parameters, auth, request/response schemas, code examples"
+    },
+    "documentation-writing": {
+      "source": "skills/documentation-writing/SKILL.md",
+      "version": "1.0.0",
+      "overridable": false,
+      "description": "Creates clear, accessible documentation and communications for diverse audiences"
+    },
+    "explain-me": {
+      "source": "skills/explain-me/SKILL.md",
+      "version": "1.0.0",
+      "overridable": false,
+      "description": "Single-file interactive HTML report generation (experimental)"
+    },
+    "gateguard": {
+      "source": "skills/gateguard/SKILL.md",
+      "version": "1.0.0",
+      "overridable": false,
+      "description": "Pre-edit fact-forcing quality gate - investigate importers, schemas, scope constraints before editing"
+    },
+    "research-analysis": {
+      "source": "skills/research-analysis/SKILL.md",
+      "version": "1.0.0",
+      "overridable": false,
+      "description": "Systematic research, data synthesis, and evidence-based analysis"
+    },
+    "standup-synthesizer": {
+      "source": "skills/standup-synthesizer/SKILL.md",
+      "version": "1.0.0",
+      "overridable": false,
+      "description": "Daily standup digest synthesizer aggregating commits, issues, PRs, and blockers"
+    },
+    "update-bun-packages": {
+      "source": "skills/update-bun-packages/SKILL.md",
+      "version": "1.3.0",
+      "overridable": false,
+      "description": "Scans, updates, and upgrades Bun dependencies with lockfile and security compliance"
+    },
+    "zod-contract-gate": {
+      "source": "skills/zod-contract-gate/SKILL.md",
+      "version": "1.0.0",
+      "overridable": false,
+      "description": "Zod runtime schema validation patterns and contract safety rules"
     }
   },
   "common_commands": {

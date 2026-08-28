@@ -29,7 +29,6 @@ Generated: 2026-08-11T05:17:34.294Z
 - [stakeholder-alignment](skills/stakeholder-alignment/SKILL.md)
 - [stakeholder-review-management](skills/stakeholder-review-management/SKILL.md)
 - [standup-synthesizer](skills/standup-synthesizer/SKILL.md)
-- [swe-solve](skills/swe-solve/SKILL.md)
 - [sync](skills/sync/SKILL.md)
 - [technical-feasibility](skills/technical-feasibility/SKILL.md)
 - [translate](skills/translate/SKILL.md)
