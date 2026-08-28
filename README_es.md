@@ -190,7 +190,7 @@ C:\git\ (raíz del workspace - este repo)
     ├── co-news/             # 🔶 Beta — equipo de agentes para periodismo empresarial/financiero (perfil de país KR incluido)
     ├── co-abap/             # ✅ Estable — equipo de agentes para desarrollo SAP ABAP
     ├── co-hr/               # 🔶 Beta — equipo de agentes para consultoría de RR. HH. y relaciones laborales (perfil de país KR incluido)
-    ├── co-safety/           # 🔶 Beta — equipo de agentes para plataforma de cumplimiento EHS/GxP
+    ├── co-safety/           # 🔶 Beta — equipo de agentes para plataforma de cumplimiento EHS/GxP (incluye perfil de país KR)
     └── co-price/            # 🔶 Beta — simulador de gestión y consultoría de precios multi-industria (incluye dataset de muestra K-Beauty)
 ```
 
