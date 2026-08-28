@@ -259,7 +259,7 @@
     {
       "id": "api-documentation",
       "type": "skill",
-      "layer": "variant:co-safety"
+      "layer": "L0"
     },
     {
       "id": "arcade-designer",
@@ -474,7 +474,7 @@
     {
       "id": "documentation-writing",
       "type": "skill",
-      "layer": "variant:co-safety"
+      "layer": "L0"
     },
     {
       "id": "double-entry-reconciliation",
@@ -575,11 +575,6 @@
       "id": "finding-reconciliation",
       "type": "skill",
       "layer": "variant:co-security"
-    },
-    {
-      "id": "finishing-a-development-branch",
-      "type": "skill",
-      "layer": "variant:co-safety"
     },
     {
       "id": "fiori-developer",
@@ -922,16 +917,6 @@
       "layer": "variant:co-abap"
     },
     {
-      "id": "platform-command-lifecycle-manager",
-      "type": "skill",
-      "layer": "variant:co-safety"
-    },
-    {
-      "id": "platform-skill-lifecycle-manager",
-      "type": "skill",
-      "layer": "variant:co-safety"
-    },
-    {
       "id": "pm",
       "type": "agent",
       "layer": "L0"
@@ -1064,7 +1049,7 @@
     {
       "id": "research-analysis",
       "type": "skill",
-      "layer": "variant:co-safety"
+      "layer": "L0"
     },
     {
       "id": "roo-qualification-worksheet",
@@ -3292,18 +3277,6 @@
       "type": "references",
       "from": "lifecycle-manager",
       "to": "agent-lifecycle-manager",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "lifecycle-manager",
-      "to": "platform-command-lifecycle-manager",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "lifecycle-manager",
-      "to": "platform-skill-lifecycle-manager",
       "source": "prose"
     },
     {

@@ -43,18 +43,6 @@
   ],
   "skills": [
     {
-      "name": "api-documentation",
-      "file": "skills/api-documentation/SKILL.md"
-    },
-    {
-      "name": "documentation-writing",
-      "file": "skills/documentation-writing/SKILL.md"
-    },
-    {
-      "name": "research-analysis",
-      "file": "skills/research-analysis/SKILL.md"
-    },
-    {
       "name": "standup-synthesizer",
       "file": "skills/standup-synthesizer/SKILL.md"
     }
