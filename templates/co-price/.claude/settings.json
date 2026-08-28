@@ -13,13 +13,6 @@
     "internal-knowledge-base": {
       "type": "http",
       "url": "https://mcp-kb.company.internal/mcp"
-    },
-    "codegraph": {
-      "command": "npx",
-      "args": [
-        "@colbymchenry/codegraph@0.9.7",
-        "serve"
-      ]
     }
   }
 }

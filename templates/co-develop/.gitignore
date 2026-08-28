@@ -55,8 +55,6 @@ NUL
 *.sqlite
 *.db
 
-# CodeGraph Index
-.codegraph/
 
 # Antigravity/ZCode session-local state (plans, config — never shared)
 .zcode/

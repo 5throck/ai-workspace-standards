@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.0.1
+// @version 1.0.2
 // setup.ts - Post-scaffold environment setup
 // Detects OS and tech stack, installs dependencies, audits licenses, copies .env,
 // and makes initial commit.
@@ -19,7 +19,7 @@
 //              Makefile              → info only (not run automatically)
 //   Unknown    (none of the above)   → stack-setup agent invocation required
 //
-// Usage: bun scripts/setup.ts [--skip-install] [--skip-license-check] [--skip-commit] [--with-gemini-plugins] [--with-codegraph]
+// Usage: bun scripts/setup.ts [--skip-install] [--skip-license-check] [--skip-commit] [--with-gemini-plugins]
 
 import path from "node:path";
 import * as fs from "node:fs";
@@ -45,7 +45,6 @@ const SKIP_LICENSE = args.includes("--skip-license-check");
 const SKIP_COMMIT = args.includes("--skip-commit");
 // Remote-code installs are opt-in: they clone/download and execute third-party code.
 const WITH_GEMINI_PLUGINS = args.includes("--with-gemini-plugins");
-const WITH_CODEGRAPH = args.includes("--with-codegraph");
 
 function pass(msg: string) {
   console.log(`${GREEN}[PASS]${RESET} ${msg}`);
@@ -429,17 +428,7 @@ async function main() {
     info("Skipping rtk installation (Windows native is not fully supported).");
   }
 
-  // ── 5. Initialize CodeGraph MCP (opt-in: --with-codegraph) ──────────────────
-  if (WITH_CODEGRAPH && (await cmdExists("bunx"))) {
-    info("Initializing and indexing CodeGraph for AI context...");
-    await $`bunx @colbymchenry/codegraph@0.9.7 init`.quiet().nothrow();
-    await $`bunx @colbymchenry/codegraph@0.9.7 index`.quiet().nothrow();
-    pass("CodeGraph initialized successfully");
-  } else {
-    info("Skipping CodeGraph initialization (pass --with-codegraph to enable; requires bunx).");
-  }
-
-  // ── 5b. Install githooks ─────────────────────────────────────────────────────
+  // ── 5. Install githooks ─────────────────────────────────────────────────────
   const githooksDir = path.join(projectRoot, ".githooks");
   if (fs.existsSync(githooksDir)) {
     const { exitCode: hookDir } = await $`git config core.hooksPath .githooks`.quiet().nothrow();

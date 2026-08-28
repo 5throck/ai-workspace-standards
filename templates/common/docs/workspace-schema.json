@@ -4,50 +4,65 @@
   "description": "Single Source of Truth for workspace-wide invariants. All dependent documents must match these values. Validated by scripts/validate-templates.ts at pre-commit.",
   "workflow": {
     "phases": {
-      "canonical": ["0", "1-2", "3", "4", "5", "6"],
+      "canonical": [
+        "0",
+        "1-2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ],
       "count": 6,
-      "pm_owned": ["0", "1-2", "5"],
-      "autonomous": ["3", "4", "6"],
+      "pm_owned": [
+        "0",
+        "1-2",
+        "5"
+      ],
+      "autonomous": [
+        "3",
+        "4",
+        "6"
+      ],
       "definitions": {
-        "0":   "Project Initiation",
-        "1-2": "Planning & Architecture",
-        "3":   "Design Handoff",
-        "4":   "Execution",
-        "5":   "Lifecycle Finalization",
-        "6":   "Quality Assurance & Finalization"
+        "0": "Project Initiation",
+        "3": "Design Handoff",
+        "4": "Execution",
+        "5": "Lifecycle Finalization",
+        "6": "Quality Assurance & Finalization",
+        "1-2": "Planning & Architecture"
       }
     }
   },
   "agent_tiers": {
-    "pm":                  "high",
-    "architect":           "high",
-    "auditor":             "medium",
-    "docs-writer":         "medium",
+    "pm": "high",
+    "architect": "high",
+    "auditor": "medium",
+    "docs-writer": "medium",
     "automation-engineer": "low",
-    "scaffolding-expert":  "low",
-    "lifecycle-manager":   "medium",
-    "security-expert":     "medium"
+    "scaffolding-expert": "low",
+    "lifecycle-manager": "medium",
+    "security-expert": "medium"
   },
   "models": {
     "claude": {
-      "high":   "claude-opus-5-0",
+      "high": "claude-opus-5-0",
       "medium": "claude-sonnet-5-0",
-      "low":    "claude-haiku-4-5"
+      "low": "claude-haiku-4-5"
     },
     "gemini": {
-      "high":   "gemini-3.1-pro",
+      "high": "gemini-3.1-pro",
       "medium": "gemini-3.7-flash",
-      "low":    "gemini-3.7-flash"
+      "low": "gemini-3.7-flash"
     },
     "antigravity": {
-      "high":   "gemini-3.1-pro",
+      "high": "gemini-3.1-pro",
       "medium": "gemini-3.7-flash",
-      "low":    "gemini-3.7-flash"
+      "low": "gemini-3.7-flash"
     },
     "gemini-cli": {
-      "high":   "gemini-3.1-pro",
+      "high": "gemini-3.1-pro",
       "medium": "gemini-3.7-flash",
-      "low":    "gemini-3.7-flash"
+      "low": "gemini-3.7-flash"
     }
   },
   "variant_lifecycle": {
@@ -68,7 +83,24 @@
   },
   "i18n": {
     "description": "Internationalization policy. locale_codes defines all language codes recognized as valid translation zones. Files inside <lang-code>/ or locales/<lang-code>/ directories are exempt from the English-only documentation rule.",
-    "locale_codes": ["ko", "ja", "zh-CN", "zh-TW", "de", "es", "fr", "pt", "vi", "ms", "id", "th", "ru", "it", "ar", "en"],
+    "locale_codes": [
+      "ko",
+      "ja",
+      "zh-CN",
+      "zh-TW",
+      "de",
+      "es",
+      "fr",
+      "pt",
+      "vi",
+      "ms",
+      "id",
+      "th",
+      "ru",
+      "it",
+      "ar",
+      "en"
+    ],
     "translation_zone_patterns": [
       "<lang-code>/",
       "locales/<lang-code>/"
@@ -77,9 +109,17 @@
   },
   "country_scoped_assets": {
     "description": "Skills, scripts, and env keys whose function is specific to one country/region because they access that country's data systems (NOT language-based). Pruned from generated projects/L3 drafts at scaffold time unless the project's target country matches. Registry-only SSOT — do not mark skills in SKILL.md frontmatter. Never register language skills (translate etc.) here.",
-    "skills": { "k-law": "KR", "k-dart": "KR", "k-kosis": "KR" },
+    "skills": {
+      "k-law": "KR",
+      "k-dart": "KR",
+      "k-kosis": "KR"
+    },
     "scripts": {},
-    "env": { "DART_API_KEY": "KR", "LAW_API_OC": "KR", "KOSIS_API_KEY": "KR" }
+    "env": {
+      "DART_API_KEY": "KR",
+      "LAW_API_OC": "KR",
+      "KOSIS_API_KEY": "KR"
+    }
   },
   "rootAllowlist": {
     "description": "Whitelist of files and directories permitted in the workspace root. Anything not in these lists triggers a stray-artifact audit failure.",
@@ -125,7 +165,6 @@
       ".git",
       "node_modules",
       ".antigravitycli",
-      ".codegraph",
       ".codex",
       ".github",
       "Projects",
@@ -162,40 +201,73 @@
       "_note": "Documentation-only cross-reference. $ref values here are NOT machine-validated JSON Schema refs. For standard JSON Schema, use $defs pattern instead.",
       "agent_manifest": {
         "description": "Agent roster metadata and optional pipeline configuration. Available in all variants.",
-        "required_fields": ["variant_agents_dir", "optional", "notes"],
-        "optional_fields": ["pipeline_order", "retry_policy"],
+        "required_fields": [
+          "variant_agents_dir",
+          "optional",
+          "notes"
+        ],
+        "optional_fields": [
+          "pipeline_order",
+          "retry_policy"
+        ],
         "notes": "pipeline_order: omit or use [] for variants with parallel/free-form agent dispatch. retry_policy: declares on_fail routing and max_retries per agent. optional[]: agents that can be skipped by PM."
       },
       "country_config": {
         "description": "Country/jurisdiction profile configuration. supported[] lists ISO 3166-1 alpha-2 or well-known region codes (EU, ASEAN; pattern ^[A-Z]{2,4}$) for profiles shipped under profiles_dir. default MUST be null (region-neutral) — a non-null default region-locks the variant and triggers a validator warning.",
-        "required_fields": ["profiles_dir", "supported"],
+        "required_fields": [
+          "profiles_dir",
+          "supported"
+        ],
         "notes": "profiles_dir is 'docs/countries' in all current variants. Each supported code must have <profiles_dir>/<CODE>.md with frontmatter code/name/status/last_verified. Profiles are advisory jurisdiction knowledge (loaded at engagement start), never auto-executed. Country != language — language policy remains i18n.locale_codes."
       }
     },
     "co-consult": {
-      "agent_manifest": { "$ref": "_shared.agent_manifest" }
+      "agent_manifest": {
+        "$ref": "_shared.agent_manifest"
+      }
     },
     "co-design": {
-      "agent_manifest": { "$ref": "_shared.agent_manifest" }
+      "agent_manifest": {
+        "$ref": "_shared.agent_manifest"
+      }
     },
     "co-develop": {
-      "agent_manifest": { "$ref": "_shared.agent_manifest" }
+      "agent_manifest": {
+        "$ref": "_shared.agent_manifest"
+      }
     },
     "co-work": {
-      "agent_manifest": { "$ref": "_shared.agent_manifest" }
+      "agent_manifest": {
+        "$ref": "_shared.agent_manifest"
+      }
     },
     "co-security": {
-      "agent_manifest": { "$ref": "_shared.agent_manifest" }
+      "agent_manifest": {
+        "$ref": "_shared.agent_manifest"
+      }
     },
     "co-deck": {
       "agent_manifest": {
         "description": "Strict pipeline order, optional flags, skippable flags, and retry policy for lecture workflow agents",
-        "required_fields": ["variant_agents_dir", "optional", "notes"],
-        "optional_fields": ["pipeline_order", "retry_policy"],
+        "required_fields": [
+          "variant_agents_dir",
+          "optional",
+          "notes"
+        ],
+        "optional_fields": [
+          "pipeline_order",
+          "retry_policy"
+        ],
         "sub_fields": {
           "retry_policy": {
             "description": "Per-agent failure routing. on_fail names the agent to return to. max_retries caps loops. failure_condition is an expression evaluated by PM.",
-            "example": { "source-verifier": { "on_fail": "research", "max_retries": 2, "failure_condition": "trust_score < 0.9 OR core_message_source_failed" } }
+            "example": {
+              "source-verifier": {
+                "on_fail": "research",
+                "max_retries": 2,
+                "failure_condition": "trust_score < 0.9 OR core_message_source_failed"
+              }
+            }
           },
           "optional": "Agent names that can be entirely omitted from the workflow run.",
           "skippable": "Agent names that run but whose failure is non-blocking (--skip-verify pattern)."
@@ -204,12 +276,21 @@
       },
       "theme_manifest": {
         "description": "HTML theme definitions for lecture slides",
-        "required_fields": ["themes_dir", "base_css", "available", "default", "overrides_dir"],
+        "required_fields": [
+          "themes_dir",
+          "base_css",
+          "available",
+          "default",
+          "overrides_dir"
+        ],
         "notes": "CSS variable override themes. DOM structure immutable across all themes."
       },
       "lecture_profile": {
         "description": "Lecture profile template metadata",
-        "required_fields": ["template_path", "required_fields"],
+        "required_fields": [
+          "template_path",
+          "required_fields"
+        ],
         "notes": "Scaffolded on new-project creation. Agents load this file at stage start."
       }
     }

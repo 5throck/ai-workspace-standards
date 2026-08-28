@@ -118,8 +118,6 @@ __pycache__/
 !tickets/
 !schemas/
 
-# --- CodeGraph Index ---
-.codegraph/
 nul
 NUL
 

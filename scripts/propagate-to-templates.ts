@@ -5,7 +5,7 @@
  * Replaces publish-to-template.ts (deprecated v1.8.0). Single authoritative script
  * for all L0→L1 propagation. Config-driven via propagation-map.json (SSOT for exclusions).
  *
- * @version 2.5.1
+ * @version 2.5.2
  *
  * Usage:
  *   bun scripts/propagate-to-templates.ts [--dry-run|--apply] [--domain <name>] [flags]
@@ -190,7 +190,7 @@ function checkFileEncoding(filePath: string): EncodingViolation[] {
   return violations;
 }
 
-const ENCODING_SKIP_DIRS = new Set(['node_modules', '.git', 'Projects', '.antigravitycli', '.codegraph']);
+const ENCODING_SKIP_DIRS = new Set(['node_modules', '.git', 'Projects', '.antigravitycli']);
 
 function walkFilesForEncoding(dir: string): string[] {
   const results: string[] = [];
