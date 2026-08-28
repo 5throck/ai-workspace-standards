@@ -1,4 +1,10 @@
-// @version 2.25.1
+// @version 2.26.0
+// v2.26.0: New checkProjectDocMarkerDrift() (WARN-only, local-only) — detects when a
+//           Projects/co-*/CLAUDE.md or GEMINI.md has fewer COMMON-CLAUDE/COMMON-GEMINI managed
+//           blocks than templates/common/{CLAUDE,GEMINI}.md, meaning upgrade-project.ts has lost
+//           its merge point for that file (happened to co-price/co-abap in 2026-08 when both
+//           files were hand-rewritten without preserving the marker comments).
+// v2.25.1: (previous)
 // v2.25.0: Variant-scanning checks now skip untracked templates/co-* directories so
 //           WIP template scaffolds on disk do not block commits. Tracked variant set
 //           is computed once via git ls-files at module load.
@@ -1463,6 +1469,64 @@ function checkVariantScriptDrift() {
     }
 }
 checkVariantScriptDrift();
+
+// Project CLAUDE.md / GEMINI.md managed-block drift detection (WARN-only, local-only).
+// upgrade-project.ts syncs the COMMON-CLAUDE:START/END and COMMON-GEMINI:START/END managed
+// blocks in each project's CLAUDE.md / GEMINI.md against templates/common/{CLAUDE,GEMINI}.md.
+// If a project's file is ever hand-rewritten without preserving those markers (as happened to
+// co-price and co-abap in 2026-08), upgrade-project.ts silently loses its merge point and the
+// file drifts out of sync forever after. Projects/ is gitignored and not present in CI, so this
+// only runs against whatever `Projects/co-*` checkouts exist on the local machine.
+function checkProjectDocMarkerDrift() {
+    const projectsDir = 'Projects';
+    if (!fs.existsSync(projectsDir)) {
+        Pass('Project CLAUDE.md/GEMINI.md marker drift check: Projects/ not present locally, skipped');
+        return;
+    }
+
+    function countMarkers(filePath: string, markerLabel: string): number {
+        if (!fs.existsSync(filePath)) return -1; // file absent, not a drift signal
+        try {
+            const content = readUTF8File(filePath);
+            const matches = content.match(new RegExp(`<!-- ${markerLabel}:START -->`, 'g'));
+            return matches ? matches.length : 0;
+        } catch {
+            return -1;
+        }
+    }
+
+    const expectedClaude = countMarkers(path.join('templates', 'common', 'CLAUDE.md'), 'COMMON-CLAUDE');
+    const expectedGemini = countMarkers(path.join('templates', 'common', 'GEMINI.md'), 'COMMON-GEMINI');
+
+    let warnCount = 0;
+    for (const entry of fs.readdirSync(projectsDir)) {
+        if (!entry.startsWith('co-')) continue;
+        const projectDir = path.join(projectsDir, entry);
+        if (!fs.statSync(projectDir).isDirectory()) continue;
+
+        if (expectedClaude > 0) {
+            const actual = countMarkers(path.join(projectDir, 'CLAUDE.md'), 'COMMON-CLAUDE');
+            if (actual >= 0 && actual < expectedClaude) {
+                Warn(`CLAUDE.md drift: Projects/${entry}/CLAUDE.md has ${actual}/${expectedClaude} COMMON-CLAUDE managed blocks vs templates/common/CLAUDE.md — run 'bun scripts/upgrade-project.ts Projects/${entry}' or verify markers were not stripped by a hand rewrite.`);
+                warnCount++;
+            }
+        }
+        if (expectedGemini > 0) {
+            const actual = countMarkers(path.join(projectDir, 'GEMINI.md'), 'COMMON-GEMINI');
+            if (actual >= 0 && actual < expectedGemini) {
+                Warn(`GEMINI.md drift: Projects/${entry}/GEMINI.md has ${actual}/${expectedGemini} COMMON-GEMINI managed blocks vs templates/common/GEMINI.md — run 'bun scripts/upgrade-project.ts Projects/${entry}' or verify markers were not stripped by a hand rewrite.`);
+                warnCount++;
+            }
+        }
+    }
+
+    if (warnCount === 0) {
+        Pass('Project CLAUDE.md/GEMINI.md marker drift check: no drift found');
+    } else {
+        Warn(`Project CLAUDE.md/GEMINI.md marker drift check: ${warnCount} project file(s) drifted from the template baseline`);
+    }
+}
+checkProjectDocMarkerDrift();
 
 // Cross-variant context commonization check (WARN-only, first-pass heuristic).
 // Flags docs/<variant>.context.md sections that duplicate the SAME-heading section in

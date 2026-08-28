@@ -1,4 +1,8 @@
-// @version 1.2.0
+// @version 1.2.1
+// v1.2.1: Corrected the manual review checklist's CLAUDE.md/GEMINI.md line — most variants
+//          ship neither (scaffolded from templates/common instead); if one does, the checklist
+//          now points at verifying COMMON-CLAUDE/COMMON-GEMINI marker integrity instead of the
+//          previous vague "update variant context" wording.
 /**
  * project-to-variant.ts
  *
@@ -372,7 +376,9 @@ if (designDocArg && !DRY_RUN) {
 console.log(`
 ${CYAN}=== Manual Review Checklist ===${RESET}
   [ ] templates/${targetArg}/agents/pm.md -- verify PM overrides
-  [ ] templates/${targetArg}/CLAUDE.md and GEMINI.md -- update variant context${specRegistered ? '' : `
+  [ ] templates/${targetArg}/CLAUDE.md and GEMINI.md -- most variants ship neither (scaffolded from
+      templates/common/{CLAUDE,GEMINI}.md instead); if this variant DOES ship one, verify its
+      COMMON-CLAUDE/COMMON-GEMINI marker pairs are intact (bun scripts/audit.ts warns on drift)${specRegistered ? '' : `
   [ ] Register spec: bun scripts/spec-register.ts --file <design-doc> --source manual (or re-run with --design-doc <path>)`}
   [ ] templates/${targetArg}/docs/countries/ profiles contain jurisdiction knowledge (not project-specific data); ACTIVE.md excluded
   [ ] variant.json country_config.supported matches shipped profiles (validate-templates country-config check)
