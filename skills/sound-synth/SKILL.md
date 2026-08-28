@@ -6,8 +6,8 @@ description: >
 version: 1.0.0
 last_reviewed: 2026-08-06
 status: active
-scope: common
-l2_propagate: true
+scope: co-game
+l2_propagate: false
 owner: sound-designer
 prerequisites: Web Audio API standard support (browser context or node/bun audio polyfill)
 metadata:

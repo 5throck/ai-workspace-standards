@@ -1,5 +1,11 @@
 #!/usr/bin/env bun
-// @version 1.12.0
+// @version 1.13.0
+// v1.13.0: New VARIANT-SCOPE SKILL PRUNE pass — a skill present in
+//           templates/common/skills/ AND in exactly one templates/co-*/skills/ is a
+//           variant-exclusive skill mistakenly duplicated into common; removed from
+//           projects whose variant is not the owner (skills/ SSOT + platform mirrors).
+//           Closes the sound-synth leak class (docs/designs/2026-08-28-skill-hygiene-
+//           and-conventions-design.md).
 // v1.12.0: New GOVERNANCE FILES SYNC pass — add-if-missing delivery of top-level
 //           governance files (LICENSE) that fell through every other pass (the
 //           LOCKED/MERGE/DOCS/SYNC passes are path-specific and VARIANT ASSET DIRS
@@ -1389,6 +1395,53 @@ let countryPrunedSkills = 0;
     console.log('  (no country-scoped skills registered — nothing to check)');
   } else if (countryPrunedSkills === 0) {
     console.log('  (no country-scoped skills needed pruning)');
+  }
+}
+console.log('');
+
+// ── VARIANT-SCOPE SKILL PRUNE (docs/designs/2026-08-28-skill-hygiene-and-conventions-design.md)
+// Owner-curated registry: docs/workspace-schema.json `variant_scoped_skills` maps
+// variant → skills exclusive to that variant. If such a skill reaches a project whose
+// variant does not own it (typically via a mistaken promotion into templates/common
+// followed by the SYNC_IF_NEWER skills pass), prune it from the project's skills/
+// SSOT + the three platform mirrors. Registry-driven (ADR-0057/0058 pattern) —
+// heuristics cannot safely distinguish variant-exclusive skills from genuinely
+// common ones.
+console.log('--- VARIANT-SCOPE SKILL PRUNE ---');
+{
+  const schemaPath = join(workspaceRoot, 'docs', 'workspace-schema.json');
+  const ownedByOther: Array<{ skill: string; owner: string }> = [];
+  if (existsSync(schemaPath)) {
+    try {
+      const schema = JSON.parse(readFileSync(schemaPath, 'utf-8'));
+      const map = schema?.variant_scoped_skills || {};
+      for (const [ownerVariant, skills] of Object.entries(map as Record<string, string[]>)) {
+        if (ownerVariant === 'description' || !Array.isArray(skills)) continue;
+        if (ownerVariant === variant) continue;
+        for (const skill of skills as string[]) ownedByOther.push({ skill, owner: ownerVariant });
+      }
+    } catch (err) {
+      console.log(`  ⚠️  could not parse docs/workspace-schema.json — skipping prune (${String(err)})`);
+    }
+  }
+  if (ownedByOther.length === 0) {
+    console.log('  (no variant_scoped_skills registered for other variants — nothing to check)');
+  } else {
+    let foreignPruned = 0;
+    for (const { skill, owner } of ownedByOther) {
+      for (const dir of ['skills', '.claude/skills', '.gemini/skills', '.agents/skills']) {
+        const target = join(projectDir, dir, skill);
+        if (!existsSync(target)) continue;
+        console.log(`  ${dryTag}PRUNE  ${dir}/${skill}/  (owning variant: ${owner})`);
+        if (!dryRun) {
+          const gitRm = spawnSync('git', ['-C', projectDir, 'rm', '-rf', '--quiet', `${dir}/${skill}`], { encoding: 'utf8' });
+          if (gitRm.status !== 0) rmSync(target, { recursive: true, force: true });
+        }
+        foreignPruned++;
+      }
+    }
+    if (foreignPruned === 0) console.log('  (project clean — no foreign variant skills present)');
+    syncChanged += foreignPruned;
   }
 }
 console.log('');

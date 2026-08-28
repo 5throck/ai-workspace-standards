@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.15.2
+ * @version 1.16.0
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -1444,6 +1444,11 @@ function collectSkillDirs(dir: string, skillsDir: string): string[] {
 }
 
 // Check B-09: Per-variant skill lifecycle (presence-driven)
+// Per-skill README enforcement switch (CONSTITUTION §6.2, 2026-08-28): flip to true
+// once template-layer README authoring completes (roadmap PR2). Until then missing
+// per-skill READMEs are WARN (grace).
+const SKILL_README_ENFORCE = false;
+
 function checkVariantSkills(variant: string): void {
   const skillsDir = join(TEMPLATES_DIR, variant, 'skills');
   if (!existsSync(skillsDir)) {
@@ -1474,6 +1479,26 @@ function checkVariantSkills(variant: string): void {
     if (!('name' in fields) || !('description' in fields)) {
       fail(variant, 'skill-lifecycle', `${variant}/skills/${skillName}/SKILL.md missing required frontmatter (name, description)`);
     }
+    // Scope field required (CONSTITUTION §6.2)
+    if (!('scope' in fields)) {
+      fail(variant, 'skill-lifecycle', `${variant}/skills/${skillName}/SKILL.md missing required frontmatter (scope)`, `Add 'scope: ${variant}' (variant-exclusive) or 'scope: common'`);
+    }
+    // Version must be full semver X.Y.Z (2-part versions break tooling that compares versions)
+    const verLine = content.split('\n').find(l => l.startsWith('version:'));
+    const verVal = verLine ? verLine.slice(verLine.indexOf(':') + 1).trim().replace(/^["']|["']$/g, '') : '';
+    if (verVal && !/^\d+\.\d+\.\d+$/.test(verVal)) {
+      fail(variant, 'skill-lifecycle', `${variant}/skills/${skillName}/SKILL.md version is not semver: '${verVal}'`, `Use X.Y.Z (e.g. 'version: 1.0.0')`);
+    }
+    // Per-skill README.md + README_ko.md mandatory (CONSTITUTION §6.2, 2026-08-28 standard adoption).
+    // Template layer: FAIL. Project layer: WARN grace until the follow-up authoring cycle.
+    for (const readmeName of ['README.md', 'README_ko.md']) {
+      if (!existsSync(join(skillsDir, skillName, readmeName))) {
+        const msg = `${variant}/skills/${skillName}/${readmeName} missing (per-skill README mandatory since 2026-08-28)`;
+        const fix = `Author ${readmeName}: purpose, when-to-trigger, prerequisites, usage example (CONSTITUTION §6.2)`;
+        if (SKILL_README_ENFORCE) fail(variant, 'skill-readme', msg, fix);
+        else warn(variant, 'skill-readme', msg + ' [WARN grace — flips to FAIL when SKILL_README_ENFORCE=true]', fix);
+      }
+    }
     if ('status' in fields) {
       const statusLine = content.split('\n').find(l => l.startsWith('status:'));
       const statusVal = statusLine ? statusLine.slice(statusLine.indexOf(':') + 1).trim() : '';
@@ -1488,6 +1513,89 @@ function checkVariantSkills(variant: string): void {
       pass(`${variant}/skills/: ${dirs.length} skill(s) OK, no deprecated`);
     }
   }
+}
+
+// Check B-10: scripts/<variant>/ layout convention (optional-to-have, mandatory-to-be-correct).
+// A variant template MAY carry variant-specific scripts under scripts/<variant>/; when present:
+//   - the subfolder must be named after the template's own variant (no foreign-variant or
+//     generic nested script folders),
+//   - no nested scripts/ recursion (scripts/<variant>/scripts/…),
+//   - every .ts inside carries an @version header and is registered in the variant's
+//     scripts/SCRIPTS.md registry when that registry exists.
+// Adopted 2026-08-28 (docs/designs/2026-08-28-skill-hygiene-and-conventions-design.md).
+function checkVariantScriptsLayout(variant: string): void {
+  const variantScriptsDir = join(TEMPLATES_DIR, variant, 'scripts', variant);
+  if (!existsSync(variantScriptsDir)) {
+    pass(`${variant}/scripts/${variant}/: not present (OK — layout convention optional)`);
+    return;
+  }
+  if (!JSON_MODE) console.log(`\n=== Check B-10: scripts/${variant}/ layout in ${variant} ===`);
+  let layoutErrors = 0;
+  // 1. No foreign-variant or generic nested script folders next to scripts/<variant>/
+  const scriptsRoot = join(TEMPLATES_DIR, variant, 'scripts');
+  for (const e of readdirSync(scriptsRoot, { withFileTypes: true })) {
+    if (!e.isDirectory()) continue;
+    if (e.name === variant || e.name === 'helpers' || e.name === 'hooks' || e.name === 'lib' || e.name === 'node_modules' || e.name.startsWith('.')) continue;
+    if (existsSync(join(scriptsRoot, e.name, 'scripts'))) {
+      fail(variant, 'scripts-layout', `${variant}/scripts/${e.name}/ contains a nested scripts/ directory — recursion forbidden`);
+      layoutErrors++;
+    } else if (/^co-/.test(e.name)) {
+      fail(variant, 'scripts-layout', `${variant}/scripts/${e.name}/ is a foreign-variant script folder`, `Move to templates/${e.name}/scripts/${e.name}/ or delete`);
+      layoutErrors++;
+    }
+  }
+  // 2. No recursion inside scripts/<variant>/
+  if (existsSync(join(variantScriptsDir, 'scripts'))) {
+    fail(variant, 'scripts-layout', `${variant}/scripts/${variant}/scripts/ nested recursion forbidden`);
+    layoutErrors++;
+  }
+  // 3. Registry coverage (when the variant ships its own SCRIPTS.md next to the folder)
+  const regPath = join(variantScriptsDir, 'SCRIPTS.md');
+  if (existsSync(regPath)) {
+    const regContent = readFileSync(regPath, 'utf-8');
+    const walk = (dir: string): void => {
+      for (const e of readdirSync(dir, { withFileTypes: true })) {
+        const p = join(dir, e.name);
+        if (e.isDirectory()) { walk(p, regContent); continue; }
+        if (!e.name.endsWith('.ts')) continue;
+        const rel = p.slice(variantScriptsDir.length + 1).replace(/\\/g, '/');
+        if (!regContent.includes(`\`${rel}\``) && !regContent.includes(`\`${e.name}\``)) {
+          fail(variant, 'scripts-layout', `${variant}/scripts/${variant}/${rel} not registered in scripts/${variant}/SCRIPTS.md`);
+          layoutErrors++;
+        }
+      }
+    };
+    walk(variantScriptsDir, regContent);
+  }
+  if (layoutErrors === 0) {
+    pass(`${variant}/scripts/${variant}/: layout convention OK`);
+  }
+}
+
+// Check B-11: variant_scoped_skills must not leak into templates/common/skills/
+// (registry: docs/workspace-schema.json variant_scoped_skills — see the sound-synth
+// leak of 2026-08-06 that reached 10 of 11 projects via common-promotion + upgrade).
+function checkVariantScopedSkillLeak(): void {
+  if (!JSON_MODE) console.log(`\n=== Check B-11: variant-scoped skills must not live in templates/common ===`);
+  const schemaPath = join(ROOT, 'docs', 'workspace-schema.json');
+  if (!existsSync(schemaPath)) {
+    warn('root', 'B-11', 'docs/workspace-schema.json not found — variant_scoped_skills check skipped');
+    return;
+  }
+  const schema = JSON.parse(readFileSync(schemaPath, 'utf-8'));
+  const map = schema?.variant_scoped_skills || {};
+  let leaks = 0;
+  for (const [ownerVariant, skills] of Object.entries(map as Record<string, string[]>)) {
+    if (ownerVariant === 'description' || !Array.isArray(skills)) continue;
+    for (const skill of skills as string[]) {
+      const leaked = join(TEMPLATES_DIR, 'common', 'skills', skill, 'SKILL.md');
+      if (existsSync(leaked)) {
+        fail('root', 'B-11', `variant-exclusive skill '${skill}' (owner: ${ownerVariant}) exists in templates/common/skills/`, `Delete templates/common/skills/${skill}/ — it would be copied into every project by upgrade-project`);
+        leaks++;
+      }
+    }
+  }
+  if (leaks === 0) pass('templates/common/skills/: no variant-scoped skill leaks');
 }
 
 // Check 11: Variant Contract compliance
@@ -2960,6 +3068,7 @@ function main() {
   // Check common/ commands and parity
   checkCommands('common');
   // Script parity check removed (dead code after ADR-0036 TypeScript migration)
+  checkVariantScopedSkillLeak();  // B-11: variant_scoped_skills must not live in common
 
   let variantsChecked = 0;
   for (const [variant, manifest] of manifests) {
@@ -2969,6 +3078,7 @@ function main() {
     checkVariantContract(variant);
     checkSecurityGateSkills(variant);          // B-03
     checkVariantSkills(variant);               // B-09: presence-driven skill lifecycle
+    checkVariantScriptsLayout(variant);        // B-10: scripts/<variant>/ layout convention
     checkDeprecatedVersionBump(variant, manifest); // B-08: deprecated → version bump warning
 
     if (manifest.status === 'stable') {

@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.12.1
+// @version 1.12.2
 /**
  * create-l3-scaffold.ts
  *
@@ -1064,6 +1064,44 @@ function main(): void {
     log(`\n✅ Project scaffold verified: Projects/${args.variant}/`);
   } catch {
     log('\n⚠️  Project scaffolded but audit found issues — review above before continuing.');
+  }
+
+  // Step 9b: skill/scripts layout guard — detect foreign-variant skills and recursive
+  // scripts/<variant>/ nesting at scaffold time instead of letting the defects surface
+  // later in audits (docs/designs/2026-08-28-skill-hygiene-and-conventions-design.md).
+  {
+    const issues: string[] = [];
+    const skillsDir = path.join(projectDir, "skills");
+    if (fs.existsSync(skillsDir)) {
+      // Foreign-variant skills: a skill whose scope names a DIFFERENT variant.
+      const walkSkills = (dir: string): string[] => {
+        const found: string[] = [];
+        for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+          if (!e.isDirectory()) continue;
+          const sm = path.join(dir, e.name, "SKILL.md");
+          if (fs.existsSync(sm)) found.push(sm);
+          else found.push(...walkSkills(path.join(dir, e.name)));
+        }
+        return found;
+      };
+      for (const sm of walkSkills(skillsDir)) {
+        const content = fs.readFileSync(sm, "utf8");
+        const scope = (/^scope:\s*(\S+)/m.exec(content) || [])[1];
+        if (scope && /^co-/.test(scope) && scope !== args.variant) {
+          issues.push(`foreign-variant skill (scope: ${scope}): ${path.relative(projectDir, sm)}`);
+        }
+      }
+    }
+    const nestedScripts = path.join(projectDir, "scripts", toVariantSlug(args.variant), "scripts");
+    if (fs.existsSync(nestedScripts)) {
+      issues.push(`recursive scripts/${toVariantSlug(args.variant)}/scripts/ nesting detected`);
+    }
+    if (issues.length > 0) {
+      log(`\n⚠️  Layout guard findings (${issues.length}) — review before first commit:`);
+      for (const issue of issues) log(`   - ${issue}`);
+    } else {
+      log(`\n✅ Layout guard clean: no foreign-variant skills, no scripts/ recursion`);
+    }
   }
 
   // Step 10: summary
