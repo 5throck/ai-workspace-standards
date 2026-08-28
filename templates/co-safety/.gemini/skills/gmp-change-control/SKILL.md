@@ -4,7 +4,7 @@ owner: gmp-agent
 scope: workspace
 status: active
 description: Manage GMP Change Control (변경관리) workflows per 총리령 「의약품 등의 안전에 관한 규칙」 별표 1 제12호 (변경관리) + ICH Q10. Pattern reused from psm-moc with quality impact assessment extension.
-version: "1.0"
+version: "1.0.0"
 created: 2026-06-17
 last_updated: 2026-08-26
 metadata:

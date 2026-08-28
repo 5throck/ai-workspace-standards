@@ -1,4 +1,4 @@
-// @version 2.26.1
+// @version 2.27.0
 // v2.26.0: New checkProjectDocMarkerDrift() (WARN-only, local-only) — detects when a
 //           Projects/co-*/CLAUDE.md or GEMINI.md has fewer COMMON-CLAUDE/COMMON-GEMINI managed
 //           blocks than templates/common/{CLAUDE,GEMINI}.md, meaning upgrade-project.ts has lost
@@ -585,8 +585,8 @@ for (const skillsDir of ['skills', path.join('.claude', 'skills')]) {
                 const skillMd = path.join(fullDir, 'SKILL.md');
                 if (fs.existsSync(skillMd)) {
                     Pass(`skill exists: ${skillMd}`);
-                } else if (hasSkillMdRecursive(fullDir)) {
-                    Pass(`skill category directory: ${fullDir}${path.sep}`);
+                } else if (dir === '_meta' || hasSkillMdRecursive(fullDir)) {
+                    Pass(`skill category/metadata directory: ${fullDir}${path.sep}`);
                 } else {
                     Fail(`skill directory missing SKILL.md: ${fullDir}${path.sep}`);
                 }

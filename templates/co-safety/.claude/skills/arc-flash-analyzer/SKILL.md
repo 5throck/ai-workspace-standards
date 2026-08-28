@@ -4,7 +4,7 @@ owner: powergen-agent
 scope: workspace
 status: active
 description: Arc flash hazard analysis per IEEE 1584. Computes incident energy, arc flash boundary, PPE category for high voltage work.
-version: "1.0"
+version: "1.0.0"
 created: "2026-06-18"
 last_updated: "2026-08-26"
 metadata:

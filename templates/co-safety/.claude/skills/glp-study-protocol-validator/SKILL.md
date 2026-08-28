@@ -4,7 +4,7 @@ owner: glp-agent
 scope: workspace
 status: active
 description: Validate study protocol compliance with OECD GLP Section 8 requirements.
-version: "1.0"
+version: "1.0.0"
 created: 2026-06-17
 last_updated: 2026-06-17
 metadata:

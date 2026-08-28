@@ -4,7 +4,7 @@ owner: gdp-agent
 scope: workspace
 status: active
 description: Verify DTS (Drug Tracking System) barcode/RFID scans against manufacturer and MFDS records per Korean DTS regulations.
-version: "1.0"
+version: "1.0.0"
 created: 2026-06-17
 last_updated: 2026-06-17
 metadata:

@@ -4,7 +4,7 @@ owner: battery-agent
 scope: workspace
 status: active
 description: Plan high-voltage DC electrical safety for lithium-ion cell formation, charging, aging, and large ESS charge/discharge facilities. Busbar LOTO, formation-charger grounding, aging-room interlock, ESS arc-flash boundary, DC arc-flash PPE selection, 전기안전관리자 sign-off per ESCA Art 22.
-version: "1.0"
+version: "1.0.0"
 created: "2026-08-07"
 last_updated: "2026-08-07"
 metadata:

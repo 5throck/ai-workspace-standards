@@ -4,7 +4,7 @@ owner: ehsconst-agent
 scope: workspace
 status: active
 description: Validate construction safety inspections per OSHA-KR construction provisions. Findings classification, severity assessment, action recommendation.
-version: "1.0"
+version: "1.0.0"
 created: "2026-06-18"
 last_updated: "2026-06-18"
 metadata:

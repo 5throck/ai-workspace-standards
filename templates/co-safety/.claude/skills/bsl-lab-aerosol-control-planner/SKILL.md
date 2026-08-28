@@ -4,7 +4,7 @@ owner: biotech-agent
 scope: workspace
 status: active
 description: Plan bioaerosol and sharps-injury control for BSL-2/3 laboratory handling of biohazardous agents — inoculation, centrifugation, pipetting, biological safety cabinet (BSC) operation. BSC selection/certification, sealed centrifuge cups, engineered sharps, PI/IRB governance per BSA Art 13 [UNVERIFIED-flagged], exposure medical surveillance.
-version: "1.0"
+version: "1.0.0"
 created: "2026-08-07"
 last_updated: "2026-08-07"
 metadata:

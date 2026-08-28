@@ -4,7 +4,7 @@ owner: msds-agent
 scope: workspace
 status: active
 description: Scenario-based chemical risk assessment combining hazard data (GHS classification) with exposure evaluation. Outputs risk characterization with control recommendations.
-version: "1.1"
+version: "1.1.0"
 created: 2026-06-17
 last_updated: 2026-08-26
 metadata:

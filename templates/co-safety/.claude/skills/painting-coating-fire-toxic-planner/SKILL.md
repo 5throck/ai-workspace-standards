@@ -4,7 +4,7 @@ owner: shipbuilding-agent
 scope: workspace
 status: active
 description: Plan shipyard painting/coating bay safety — combustible paint-vapor LEL explosion control, solvent-vapor inhalation (toluene/xylene/MEK), confined-area painting O2 deficiency, paint-shop fire response. Covers Korea's iconic shipbuilding fatal-fire cause (2015 Samsung Heavy, 2019 Hyundai Heavy painting-bay fires). DSSMA Art 5 + Art 27 (both uncited by existing shipbuilding WFs) + OSHA Art 38 + Art 110 (MSDS) + SAPA Art 4/5.
-version: "1.0"
+version: "1.0.0"
 created: "2026-08-07"
 last_updated: "2026-08-07"
 metadata:

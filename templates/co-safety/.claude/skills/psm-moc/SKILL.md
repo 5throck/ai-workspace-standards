@@ -4,7 +4,7 @@ owner: psm-agent
 scope: workspace
 status: active
 description: Manage Process Safety Management (PSM) Management of Change (MOC) workflows
-version: "1.0"
+version: "1.0.0"
 created: 2026-06-15
 last_updated: 2026-07-09
 metadata:

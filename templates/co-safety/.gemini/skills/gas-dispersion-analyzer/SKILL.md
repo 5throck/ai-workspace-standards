@@ -4,7 +4,7 @@ owner: gasterm-agent
 scope: workspace
 status: active
 description: Model gas dispersion after leak for emergency response. LNG/LPG/수소 특성 반영.
-version: "1.0"
+version: "1.0.0"
 created: "2026-06-18"
 last_updated: "2026-06-18"
 metadata:
