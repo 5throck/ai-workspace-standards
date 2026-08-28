@@ -9,6 +9,11 @@
 
 This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, individual agent definitions, PM Gateway workflow, and execution plan templates.
 
+
+> **KO Routing Glossary**: Korean routing keywords, domain descriptors, and the official
+> statute registry live in [docs/glossary/kr-safety-glossary.md](docs/glossary/kr-safety-glossary.md)
+> (`lang: ko` declared). Consult it when matching Korean user queries or resolving Korean
+> statute names for `k-law` queries.
 ---
 
 ## §1: Agent Ecosystem Overview
@@ -29,10 +34,10 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 | **cosmetics-agent** | [`agents/cosmetics-agent.md`](agents/cosmetics-agent.md) | Medium | Cosmetics Safety specialist — manages cosmetics quality systems, CGMP batch release, ingredient safety assessment, and s |
 | **datacenter-agent** | [`agents/datacenter-agent.md`](agents/datacenter-agent.md) | Medium | Data Center Safety specialist — manages hyperscale IT infrastructure safety, lithium-ion UPS/ESS fire safety, high-volta |
 | **defense-agent** | [`agents/defense-agent.md`](agents/defense-agent.md) | Medium | Defense & Explosives Safety specialist — manages ammunition propellant mixing ESD, missile cryogenic fuel, and high-pres |
-| **ehschem-agent** | [`agents/ehschem-agent.md`](agents/ehschem-agent.md) | Medium | Chemical Plant Safety specialist (`화학공장` `안전`) — `정유`/`석유화학`/`정밀화학` plant operations. Matrix model: industry coordinator referenci |
-| **ehsconst-agent** | [`agents/ehsconst-agent.md`](agents/ehsconst-agent.md) | Medium | Construction Safety specialist (`건설안전`) — Korean construction industry safety management per OSHA-KR construction provisio |
+| **ehschem-agent** | [`agents/ehschem-agent.md`](agents/ehschem-agent.md) | Medium | Chemical Plant Safety specialist (chemical plant safety) — refining/petrochemical/fine chemicals plant operations. Matrix model: industry coordinator referenci |
+| **ehsconst-agent** | [`agents/ehsconst-agent.md`](agents/ehsconst-agent.md) | Medium | Construction Safety specialist (construction safety) — Korean construction industry safety management per OSHA-KR construction provisio |
 | **food-agent** | [`agents/food-agent.md`](agents/food-agent.md) | Medium | Food & Beverage Safety specialist — manages food safety systems, HACCP CCP monitoring, food mixer LOTO, and worker EHS c |
-| **gasterm-agent** | [`agents/gasterm-agent.md`](agents/gasterm-agent.md) | Medium | Gas Terminal Safety specialist (`가스터미널` `안전`) — LNG/LPG/`수소` `기지` `및` `충전소` `안전` `관리` per `고압가스안전관리법` + `LPG법` + `수소법` + `위험물안전관리법`. |
+| **gasterm-agent** | [`agents/gasterm-agent.md`](agents/gasterm-agent.md) | Medium | Gas Terminal Safety specialist (gas terminal safety) — LNG/LPG/hydrogen terminal and fueling station safety management per HPGSCA + LPG Act + Hydrogen Act + DSSMA. |
 | **gcp-agent** | [`agents/gcp-agent.md`](agents/gcp-agent.md) | Medium | Good Clinical Practice specialist — clinical trial management, IRB, informed consent, monitoring, SAE reporting per KGCP |
 | **gdp-agent** | [`agents/gdp-agent.md`](agents/gdp-agent.md) | Medium | Good Distribution Practice specialist — pharmaceutical supply chain, storage, transportation, DTS tracking, recalls per  |
 | **glp-agent** | [`agents/glp-agent.md`](agents/glp-agent.md) | Medium | Good Laboratory Practice specialist — non-clinical safety studies, MFDS + ME + OECD GLP compliance, QAU inspections, Stu |
@@ -40,7 +45,7 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 | **gvp-agent** | [`agents/gvp-agent.md`](agents/gvp-agent.md) | Medium | Good Pharmacovigilance Practice specialist — post-market drug safety surveillance, ICSR management, signal detection, PB |
 | **logistics-agent** | [`agents/logistics-agent.md`](agents/logistics-agent.md) | Medium | Port Logistics & Automated Warehouse Safety specialist — manages port crane lifting, AGV worker collision prevention, an |
 | **meddevice-agent** | [`agents/meddevice-agent.md`](agents/meddevice-agent.md) | Medium | Medical Device Safety specialist — KGMP-MD + ISO 13485 + ISO 14971. Industry coordinator for medical device manufacturin |
-| **powergen-agent** | [`agents/powergen-agent.md`](agents/powergen-agent.md) | Medium | Power Generation Safety specialist (`발전설비` `안전`) — `화력`/`신재생` `발전소` `안전` `관리` per `전기사업법` + `전기안전관리법` + `신재생에너지법`. `원자력` `제외`. |
+| **powergen-agent** | [`agents/powergen-agent.md`](agents/powergen-agent.md) | Medium | Power Generation Safety specialist (power generation facility safety) — thermal/renewable plant safety management per Electric Utility Act + ESCA + New & Renewable Energy Act. nuclear excluded. |
 | **railway-agent** | [`agents/railway-agent.md`](agents/railway-agent.md) | Medium | Railway & Transit Infrastructure Safety specialist — manages 25kV catenary high-voltage electrification safety, night tr |
 | **semicon-agent** | [`agents/semicon-agent.md`](agents/semicon-agent.md) | Medium | Semiconductor & Display Safety specialist — manages cleanroom EHS, special gas handling (NF3, SiH4, WF6), hydrofluoric a |
 | **shipbuilding-agent** | [`agents/shipbuilding-agent.md`](agents/shipbuilding-agent.md) | Medium | Shipbuilding & Offshore Safety specialist — manages ship tank confined space asphyxiation prevention, heavy crane liftin |
@@ -147,7 +152,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/ehschem-agent.md`](agents/ehschem-agent.md) |
 | **Tier** | medium |
 | **Phases** | — |
-| **Role** | Chemical Plant Safety specialist (`화학공장` `안전`) — `정유`/`석유화학`/`정밀화학` plant operations. Matrix model: industry coordinator referencing PSM/MSDS/Emergency functional services. |
+| **Role** | Chemical Plant Safety specialist (chemical plant safety) — refining/petrochemical/fine chemicals plant operations. Matrix model: industry coordinator referencing PSM/MSDS/Emergency functional services. |
 
 ### ehsconst-agent
 
@@ -156,7 +161,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/ehsconst-agent.md`](agents/ehsconst-agent.md) |
 | **Tier** | medium |
 | **Phases** | — |
-| **Role** | Construction Safety specialist (`건설안전`) — Korean construction industry safety management per OSHA-KR construction provisions, SAPA Article 5 (`도급`·`하도급` `확보의무`), Construction Technology Promotion Act. |
+| **Role** | Construction Safety specialist (construction safety) — Korean construction industry safety management per OSHA-KR construction provisions, SAPA Article 5 (subcontracting safety obligation), Construction Technology Promotion Act. |
 
 ### food-agent
 
@@ -174,7 +179,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/gasterm-agent.md`](agents/gasterm-agent.md) |
 | **Tier** | medium |
 | **Phases** | — |
-| **Role** | Gas Terminal Safety specialist (`가스터미널` `안전`) — LNG/LPG/`수소` `기지` `및` `충전소` `안전` `관리` per `고압가스안전관리법` + `LPG법` + `수소법` + `위험물안전관리법`. |
+| **Role** | Gas Terminal Safety specialist (gas terminal safety) — LNG/LPG/hydrogen terminal and fueling station safety management per HPGSCA + LPG Act + Hydrogen Act + DSSMA. |
 
 ### gcp-agent
 
@@ -246,7 +251,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/powergen-agent.md`](agents/powergen-agent.md) |
 | **Tier** | medium |
 | **Phases** | — |
-| **Role** | Power Generation Safety specialist (`발전설비` `안전`) — `화력`/`신재생` `발전소` `안전` `관리` per `전기사업법` + `전기안전관리법` + `신재생에너지법`. `원자력` `제외`. |
+| **Role** | Power Generation Safety specialist (power generation facility safety) — thermal/renewable plant safety management per Electric Utility Act + ESCA + New & Renewable Energy Act. nuclear excluded. |
 
 ### railway-agent
 
@@ -564,10 +569,10 @@ Before assigning an agent to any task, PM MUST classify the deliverable type:
 | Cosmetics Safety specialist — manages cosmetics quality systems, CGMP batch rele | Phase 4 | `cosmetics-agent` | medium | |
 | Data Center Safety specialist — manages hyperscale IT infrastructure safety, lit | Phase 4 | `datacenter-agent` | medium | |
 | Defense & Explosives Safety specialist — manages ammunition propellant mixing ES | Phase 4 | `defense-agent` | medium | |
-| Chemical Plant Safety specialist (``화학공장`` ``안전``) — ``정유``/``석유화학``/``정밀화학`` plant operations | Phase 4 | `ehschem-agent` | medium | |
-| Construction Safety specialist (``건설안전``) — Korean construction industry safety mana | Phase 4 | `ehsconst-agent` | medium | |
+| Chemical Plant Safety specialist (`KO term (see glossary)` `KO term (see glossary)`) — `KO term (see glossary)`/`KO term (see glossary)`/`KO term (see glossary)` plant operations | Phase 4 | `ehschem-agent` | medium | |
+| Construction Safety specialist (`construction safety`) — Korean construction industry safety mana | Phase 4 | `ehsconst-agent` | medium | |
 | Food & Beverage Safety specialist — manages food safety systems, HACCP CCP monit | Phase 4 | `food-agent` | medium | |
-| Gas Terminal Safety specialist (``가스터미널`` ``안전``) — LNG/LPG/수소 기지 및 충전소 안전 관리 per 고압가스안전 | Phase 4 | `gasterm-agent` | medium | |
+| Gas Terminal Safety specialist (`KO term (see glossary)` `KO term (see glossary)KO term (see glossary)gasterm-agent` | medium | |
 | Good Clinical Practice specialist — clinical trial management, IRB, informed con | Phase 4 | `gcp-agent` | medium | |
 | Good Distribution Practice specialist — pharmaceutical supply chain, storage, tr | Phase 4 | `gdp-agent` | medium | |
 | Good Laboratory Practice specialist — non-clinical safety studies, MFDS + ME + O | Phase 4 | `glp-agent` | medium | |
@@ -575,7 +580,7 @@ Before assigning an agent to any task, PM MUST classify the deliverable type:
 | Good Pharmacovigilance Practice specialist — post-market drug safety surveillanc | Phase 4 | `gvp-agent` | medium | |
 | Port Logistics & Automated Warehouse Safety specialist — manages port crane lift | Phase 4 | `logistics-agent` | medium | |
 | Medical Device Safety specialist — KGMP-MD + ISO 13485 + ISO 14971 | Phase 4 | `meddevice-agent` | medium | |
-| Power Generation Safety specialist (``발전설비`` ``안전``) — 화력/신재생 발전소 안전 관리 per ``전기사업법`` + 전기안전 | Phase 4 | `powergen-agent` | medium | |
+| Power Generation Safety specialist (`KO term (see glossary)` `KO term (see glossary)KO term (see glossary)Electric Utility ActKO term (see glossary)powergen-agent` | medium | |
 | Railway & Transit Infrastructure Safety specialist — manages 25kV catenary high- | Phase 4 | `railway-agent` | medium | |
 | Semiconductor & Display Safety specialist — manages cleanroom EHS, special gas h | Phase 4 | `semicon-agent` | medium | |
 | Shipbuilding & Offshore Safety specialist — manages ship tank confined space asp | Phase 4 | `shipbuilding-agent` | medium | |
@@ -674,7 +679,7 @@ lang_reason: legal   # legal | source-material | proper-noun
 
 ### Pluggable Variant Audit Hooks and Integrity Protection
 - **Core Script Standardization**: The core synchronization and validation scripts (`scripts/dev-sync.ts` and `scripts/audit.ts`) must remain standardized and identical across all templates and variants. Direct modification of these core scripts in L2 projects is strictly forbidden.
-- **Variant-Specific Audit Hook**: Variant projects requiring custom verification checks must implement them in a pluggable hook script located at `scripts/audit-variant.ts`.
+- **Variant-Specific Audit Hook**: Variant projects requiring custom verification checks must implement them in a pluggable hook script located at `scripts/co-safety/audit-variant.ts`.
 - **Integrity Enforcement**: During template reconciliation (`l3-to-variant-pipeline.ts`), any modified core scripts will be automatically detected and will fail the reconciliation.
 <!-- COMMON-AGENTS:END -->
 
@@ -834,10 +839,10 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 | Cosmetics Safety specialist — manages cosmetics quality systems, CGMP batch rele | `cosmetics-agent` | `pm` |
 | Data Center Safety specialist — manages hyperscale IT infrastructure safety, lit | `datacenter-agent` | `pm` |
 | Defense & Explosives Safety specialist — manages ammunition propellant mixing ES | `defense-agent` | `pm` |
-| Chemical Plant Safety specialist (``화학공장`` ``안전``) — ``정유``/``석유화학``/``정밀화학`` plant operations | `ehschem-agent` | `pm` |
-| Construction Safety specialist (``건설안전``) — Korean construction industry safety mana | `ehsconst-agent` | `pm` |
+| Chemical Plant Safety specialist (`KO term (see glossary)` `KO term (see glossary)`) — `KO term (see glossary)`/`KO term (see glossary)`/`KO term (see glossary)` plant operations | `ehschem-agent` | `pm` |
+| Construction Safety specialist (`construction safety`) — Korean construction industry safety mana | `ehsconst-agent` | `pm` |
 | Food & Beverage Safety specialist — manages food safety systems, HACCP CCP monit | `food-agent` | `pm` |
-| Gas Terminal Safety specialist (``가스터미널`` ``안전``) — LNG/LPG/수소 기지 및 충전소 안전 관리 per 고압가스안전 | `gasterm-agent` | `pm` |
+| Gas Terminal Safety specialist (`KO term (see glossary)` `KO term (see glossary)KO term (see glossary)gasterm-agent` | `pm` |
 | Good Clinical Practice specialist — clinical trial management, IRB, informed con | `gcp-agent` | `pm` |
 | Good Distribution Practice specialist — pharmaceutical supply chain, storage, tr | `gdp-agent` | `pm` |
 | Good Laboratory Practice specialist — non-clinical safety studies, MFDS + ME + O | `glp-agent` | `pm` |
@@ -845,7 +850,7 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 | Good Pharmacovigilance Practice specialist — post-market drug safety surveillanc | `gvp-agent` | `pm` |
 | Port Logistics & Automated Warehouse Safety specialist — manages port crane lift | `logistics-agent` | `pm` |
 | Medical Device Safety specialist — KGMP-MD + ISO 13485 + ISO 14971 | `meddevice-agent` | `pm` |
-| Power Generation Safety specialist (``발전설비`` ``안전``) — 화력/신재생 발전소 안전 관리 per ``전기사업법`` + 전기안전 | `powergen-agent` | `pm` |
+| Power Generation Safety specialist (`KO term (see glossary)` `KO term (see glossary)KO term (see glossary)Electric Utility ActKO term (see glossary)powergen-agent` | `pm` |
 | Railway & Transit Infrastructure Safety specialist — manages 25kV catenary high- | `railway-agent` | `pm` |
 | Semiconductor & Display Safety specialist — manages cleanroom EHS, special gas h | `semicon-agent` | `pm` |
 | Shipbuilding & Offshore Safety specialist — manages ship tank confined space asp | `shipbuilding-agent` | `pm` |

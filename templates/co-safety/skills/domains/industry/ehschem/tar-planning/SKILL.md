@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: tar-planning
 owner: ehschem-agent
 scope: co-safety

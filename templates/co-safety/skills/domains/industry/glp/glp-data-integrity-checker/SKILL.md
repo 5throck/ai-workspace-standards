@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: glp-data-integrity-checker
 owner: glp-agent
 scope: co-safety

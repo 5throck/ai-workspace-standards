@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: ess-fire-risk-assessor
 owner: powergen-agent
 scope: co-safety

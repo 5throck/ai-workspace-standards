@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: completion-inspection
 owner: gasterm-agent
 scope: co-safety

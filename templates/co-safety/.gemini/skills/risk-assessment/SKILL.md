@@ -64,7 +64,7 @@ Date: YYYY-MM-DD
 ## Legal Notes
 
 - Runtime records (structured JSON + human-readable summary) are written under `memory/assessments/` — never into `evidence-models/`, which holds schemas only. This mirrors the audit-agent FIND/CA precedent (`memory/findings/`, `memory/corrective-actions/`).
-- Facility-level living risk registers are produced by rolling up RA instances via `bun scripts/risk-register-rollup.ts`; register rollups (`RR-*.json`) are written under `memory/registers/`.
+- Facility-level living risk registers are produced by rolling up RA instances via `bun scripts/co-safety/risk-register-rollup.ts`; register rollups (`RR-*.json`) are written under `memory/registers/`.
 - 산업안전보건법 제36조 requires employers to conduct risk assessments and implement control measures for all identified hazards.
 - 중대재해처벌법 제4조 imposes enterprise-level obligation to establish and maintain safety management systems including risk assessment.
 - 산업안전보건법 시행규칙 제37조 requires recording and preserving risk assessment results; 고용노동부 고시 「사업장 위험성평가에 관한 지침」 defines the risk assessment methodology, documentation requirements, and control hierarchy.

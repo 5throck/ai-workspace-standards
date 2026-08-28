@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: training-agent
 role: specialist
 status: active
@@ -53,7 +55,7 @@ lifecycle:
 2. **Gap Analysis**: Compare existing `training-record.json` `completion_date`, `hours_completed` vs `required_hours`, and `next_training_due` fields against OSHA-KR Article 29 (제29조) and Article 36 (위험성평가) requirements, validating every record's `legal_basis` array against `regulations/KR/legal-glossary.yaml`. Flag workers who have not received training on updated risk assessment results for their assigned tasks.
 3. **Dynamic Generation**: If gaps exist, dynamically generate tailored safety training curricula based on the worker's role and identified hazards.
 4. **Record Sync**: Prepare updated training plans and requirements for dispatch to the Safety Workflow Manager.
-5. **Bulk Ingestion**: For HR/LMS export batches, ingest worker training completions via `bun scripts/training-ingest.ts` (CSV input; strict e-signature policy — rows missing `signer_id`/`signed_at` are rejected). Records land in `memory/training/` and are machine-validated by `scripts/safety-audit.ts`.
+5. **Bulk Ingestion**: For HR/LMS export batches, ingest worker training completions via `bun scripts/co-safety/training-ingest.ts` (CSV input; strict e-signature policy — rows missing `signer_id`/`signed_at` are rejected). Records land in `memory/training/` and are machine-validated by `scripts/co-safety/safety-audit.ts`.
 
 ### Escalation Triggers
 - Escalate to PM (CSO) and Safety Workflow Manager immediately if a worker is identified as operating without the mandated safety training (Article 29 violation).

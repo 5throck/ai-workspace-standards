@@ -2,7 +2,7 @@
  * Evidence Validator Library
  *
  * Hand-rolled JSON Schema draft-07 subset validator for Safety OS evidence
- * records (extracted from scripts/safety-audit.ts v4.5.0 — behavior-neutral).
+ * records (extracted from scripts/co-safety/safety-audit.ts v4.5.0 — behavior-neutral).
  * Supports exactly the keywords used by the evidence-model schemas: $ref,
  * type, required, properties, enum, pattern, format (date/date-time),
  * minItems, items. Unknown keywords are ignored. No external dependencies.

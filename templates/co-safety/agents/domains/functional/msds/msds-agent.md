@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: msds-agent
 role: specialist
 status: active

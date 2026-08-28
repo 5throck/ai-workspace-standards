@@ -18,4 +18,4 @@ Agent tier: Medium (claude / gemini-cli / antigravity per runtime frontmatter)
 - [x] Record write targets exist: `memory/findings/` and `memory/corrective-actions/` directories are present; CA linkage rule (`CA.finding_id` MUST equal linked `FIND.id`) documented in workflow pattern
 - [x] Schema-change governance defined: semver bump + migration script at `evidence-models/migrations/v<N>-to-v<N+1>.ts` required before merge; `evidence-models/migrations/` directory exists with README
 - [x] Owned skill `audit-preparation` exists at `skills/daily/audit-preparation/SKILL.md` (AGENTS.md skills table, owner audit-agent)
-- [x] Validation loop is executable: workflow pattern step 7 mandates `bun scripts/safety-audit.ts` after each record batch (script present); severity escalation thresholds (Critical >= 1 → immediate PM; Major >= 3 → 24 h; Minor >= 10 → flagged) are explicit
+- [x] Validation loop is executable: workflow pattern step 7 mandates `bun scripts/co-safety/safety-audit.ts` after each record batch (script present); severity escalation thresholds (Critical >= 1 → immediate PM; Major >= 3 → 24 h; Minor >= 10 → flagged) are explicit

@@ -50,7 +50,7 @@ This skill oversees the GMP Change Control process to ensure that changes to fac
 
 ## Evidence Generation
 Generate evidence to `memory/` using `evidence-models/domains/industry/gmp/gmp-change-control-record.json`. Required common fields:
-- `legal_basis`: array with min 3 sources (universal DEFAULT_MIN_LEGAL_BASIS, `scripts/domain-config.ts`; Korean statutory + international)
+- `legal_basis`: array with min 3 sources (universal DEFAULT_MIN_LEGAL_BASIS, `scripts/co-safety/domain-config.ts`; Korean statutory + international)
 - `e_signature`: schema-only in v1 (cryptographic_hash: null)
 - `qrm_assessment`: link to gmp-qrm assessment
 - `nomenclature`: multilingual declaration

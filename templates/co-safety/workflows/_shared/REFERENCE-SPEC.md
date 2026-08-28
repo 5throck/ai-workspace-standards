@@ -198,7 +198,7 @@ tier2_count = (unique workflows in workflows/domains/industry/<industry>/)
 
 ## 7. Validation Checklist (for scaffold generator + audit scripts)
 
-The scaffold generator (Task A-01) and `scripts/safety-audit.ts` SHOULD enforce the following on every industry `schema.yaml` that contains a `references:` block:
+The scaffold generator (Task A-01) and `scripts/co-safety/safety-audit.ts` SHOULD enforce the following on every industry `schema.yaml` that contains a `references:` block:
 
 - [ ] **V-01** `references[].shared` path resolves to a directory containing `schema.yaml` with `shared: true`.
 - [ ] **V-02** The shared workflow directory also contains `README.md`.

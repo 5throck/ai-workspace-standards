@@ -13,10 +13,10 @@ const GREEN = '\x1b[32m';
 const RESET = '\x1b[0m';
 
 // 1. Safety OS CSO gate: legal_basis >= 3 on workflows/evidence-models
-if (fs.existsSync('variant.json') && fs.existsSync('scripts/safety-audit.ts')) {
-    const res = await $`bun scripts/safety-audit.ts`.nothrow();
+if (fs.existsSync('variant.json') && fs.existsSync('scripts/co-safety/safety-audit.ts')) {
+    const res = await $`bun scripts/co-safety/safety-audit.ts`.nothrow();
     if (res.exitCode !== 0) {
-        console.error(`${RED}✗ Safety OS audit detected issues (run 'bun scripts/safety-audit.ts' to see details)${RESET}`);
+        console.error(`${RED}✗ Safety OS audit detected issues (run 'bun scripts/co-safety/safety-audit.ts' to see details)${RESET}`);
         process.exit(1);
     }
     console.log(`${GREEN}✓ Safety OS audit: legal_basis and domain checks passed${RESET}`);
@@ -24,11 +24,11 @@ if (fs.existsSync('variant.json') && fs.existsSync('scripts/safety-audit.ts')) {
 
 // 2. Domain-specific test suites (variant only, run when present)
 const testScripts = [
-    'scripts/test-pharma-general-profile.ts',
-    'scripts/test-chemical-handling-profile.ts',
-    'scripts/test-cross-domain-integration.ts',
-    'scripts/test-domain-scenarios.ts',
-    'scripts/test-runtime-tools.ts',
+    'scripts/co-safety/test-pharma-general-profile.ts',
+    'scripts/co-safety/test-chemical-handling-profile.ts',
+    'scripts/co-safety/test-cross-domain-integration.ts',
+    'scripts/co-safety/test-domain-scenarios.ts',
+    'scripts/co-safety/test-runtime-tools.ts',
 ];
 for (const testScript of testScripts) {
     if (fs.existsSync(testScript)) {

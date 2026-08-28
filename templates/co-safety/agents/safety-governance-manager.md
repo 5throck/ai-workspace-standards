@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: safety-governance-manager
 alias: SGM
 role: specialist
@@ -75,8 +77,8 @@ SGM is dispatched by PM only. Do not accept direct user requests.
 1. Each quarter, re-validate every `regulations/KR/*.yaml` against live law via the `k-law` skill (법제처 Open API), recording MST + `시행일자` per the coordinate-registry protocol
 2. Execute verification by dispatching Compliance Agent's live-verification step (per `agents/_shared/compliance-agent.md` Workflow Pattern step 2) — SGM does not interpret law text itself
 3. Log detected drift (amended/repealed articles) as FIND records under `memory/findings/`
-4. Re-verify the `checked_at` freshness of every `regulations/KR/*.yaml` coordinate registry each quarter via the `k-law` skill (법제처 Open API list search per statute → confirm latest `시행일자`); refresh stale registries so the coordinate-registry freshness WARN from `scripts/safety-audit.ts` clears
-5. Review staleness warnings emitted by `scripts/safety-audit.ts` each quarter and schedule affected-file refreshes
+4. Re-verify the `checked_at` freshness of every `regulations/KR/*.yaml` coordinate registry each quarter via the `k-law` skill (법제처 Open API list search per statute → confirm latest `시행일자`); refresh stale registries so the coordinate-registry freshness WARN from `scripts/co-safety/safety-audit.ts` clears
+5. Review staleness warnings emitted by `scripts/co-safety/safety-audit.ts` each quarter and schedule affected-file refreshes
 6. Report quarterly regulatory-watch outcome to PM
 
 ### Tools Used
@@ -87,7 +89,7 @@ SGM is dispatched by PM only. Do not accept direct user requests.
 | Write | `policies/`, `industry-profiles/` (new or updated configs) |
 | Glob | Discover available regulation files and profiles |
 | Grep | Locate staleness-warning targets inside `regulations/`, `policies/`, `industry-profiles/` |
-| Bash | Read-only: `bun scripts/safety-audit.ts` — review emitted staleness warnings (Regulatory Watch step 4) |
+| Bash | Read-only: `bun scripts/co-safety/safety-audit.ts` — review emitted staleness warnings (Regulatory Watch step 4) |
 | Agent | Dispatch Compliance Agent for gap analysis if needed |
 
 ---

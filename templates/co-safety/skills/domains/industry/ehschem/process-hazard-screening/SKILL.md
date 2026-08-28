@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: process-hazard-screening
 owner: ehschem-agent
 scope: co-safety

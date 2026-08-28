@@ -11,7 +11,7 @@
 bun install
 
 # 2. Verify system integrity
-bun scripts/safety-audit.ts    # 443+ files, 0 errors
+bun scripts/co-safety/safety-audit.ts    # 443+ files, 0 errors
 
 # 3. Explore your domain
 ls workflows/domains/functional/   # Functional services (PSM, MSDS, GxP)
@@ -346,13 +346,13 @@ Emergency/Compliance notified if escalation triggered
 
 ```bash
 # Audit (must pass before any sync)
-bun scripts/safety-audit.ts
+bun scripts/co-safety/safety-audit.ts
 
 # Domain-specific tests
-bun scripts/test-pharma-general-profile.ts        # GMP
-bun scripts/test-chemical-handling-profile.ts     # MSDS
-bun scripts/test-cross-domain-integration.ts      # All domains
-bun scripts/test-domain-scenarios.ts              # 5 real-world scenarios
+bun scripts/co-safety/test-pharma-general-profile.ts        # GMP
+bun scripts/co-safety/test-chemical-handling-profile.ts     # MSDS
+bun scripts/co-safety/test-cross-domain-integration.ts      # All domains
+bun scripts/co-safety/test-domain-scenarios.ts              # 5 real-world scenarios
 
 # Skill execution (rule-based)
 bun skills/domains/industry/gmp/qrm/fmea-scoring.ts        # FMEA risk scoring

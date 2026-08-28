@@ -1,5 +1,5 @@
 ---
-translated_from_hash: c4c571017c0a0fc200a7c361efd1a54dffb9005f778521f3a54b932f67179e9a
+translated_from_hash: 9caedcbefc1b637e5da996c68cf8644e84be75fb8fdbc143a8f4f93a1645223e
 ---
 # Safety OS 사용자 가이드
 
@@ -22,7 +22,7 @@ translated_from_hash: c4c571017c0a0fc200a7c361efd1a54dffb9005f778521f3a54b932f67
    | `/sync "feat(tar): pre-TAR package"` — 감사 + 커밋 + 푸시 + PR | pm | High | `sync` |
 
 4. **계획을 승인(또는 조정)합니다.** PM은 전문가를 배치합니다 — 파일을 쓰는 작업은 순차, 읽기 전용 리서치/분석은 병렬.
-5. **PM이 결과를 검증**하고 품질 게이트를 실행합니다: `bun scripts/audit.ts`(문서/구조) 및 `bun scripts/safety-audit.ts`(legal_basis — 워크플로당 근거 3건 이상, 0 오류 필수).
+5. **PM이 결과를 검증**하고 품질 게이트를 실행합니다: `bun scripts/audit.ts`(문서/구조) 및 `bun scripts/co-safety/safety-audit.ts`(legal_basis — 워크플로당 근거 3건 이상, 0 오류 필수).
 6. **`/sync "type: description"`으로 작업을 마무리**합니다 — 커밋과 PR을 여는 유일한 경로입니다. 직접 `git commit`/`git push`는 pre-commit 훅이 차단합니다.
 
 **경험칙**: "msds-agent, ~해줄 수 있어..."라고 입력하려 한다면 — 멈추고 PM/CSO에게 요청하세요. PM이 유일한 진입점입니다. 전문가는 디스패치 대상이지, 직접 대화하는 대상이 아닙니다.
@@ -86,7 +86,7 @@ PM이 어떤 전문가를 투입할지 가늠하는 표입니다 — 에이전�
 
 | 명령 | 기능 |
 |------|------|
-| `bun scripts/safety-audit.ts` | legal_basis 게이트 — 워크플로/증거모델당 규제 근거 3건 이상, 0 오류 필수 (1,077+ 파일 검사) |
+| `bun scripts/co-safety/safety-audit.ts` | legal_basis 게이트 — 워크플로/증거모델당 규제 근거 3건 이상, 0 오류 필수 (1,077+ 파일 검사) |
 | `bun scripts/audit.ts` | 워크스페이스 표준 감사 (구조, 라이프사이클, 인코딩, 스킬 레지스트리) |
 | `bun scripts/agent-verify.ts` | 에이전트 로스터 무결성 (AGENTS.md ↔ agents/ 파일) |
 | `/sync "type: description"` | 유일하게 지원되는 커밋 경로 — 전체 파이프라인 실행 후 PR 생성 |

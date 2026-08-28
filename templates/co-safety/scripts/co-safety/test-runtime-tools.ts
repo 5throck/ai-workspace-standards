@@ -4,9 +4,9 @@
  *
  * End-to-end validation of the memory-record runtime toolchain in an isolated
  * sandbox built fresh under the OS temp dir on every run:
- *   - scripts/training-ingest.ts      CSV -> TRAIN-* JSON ingestion
- *   - scripts/risk-register-rollup.ts RA-* -> RR-* register rollup
- *   - scripts/safety-audit.ts         memory-bucket record validation
+ *   - scripts/co-safety/training-ingest.ts      CSV -> TRAIN-* JSON ingestion
+ *   - scripts/co-safety/risk-register-rollup.ts RA-* -> RR-* register rollup
+ *   - scripts/co-safety/safety-audit.ts         memory-bucket record validation
  *
  * Sandbox layout (copied from this repo):
  *   evidence-models/_shared/base/*.json
@@ -258,7 +258,7 @@ console.log(`${CYAN}[T-01 ~ T-03] training-ingest happy path${RESET}`);
 const happyCsv = sb('fixtures', 'training-happy.csv');
 writeCsv(happyCsv, [CSV_HEADER, CSV_ROW_REGULAR, CSV_ROW_SUPERVISOR]);
 
-const runHappy = runTool('scripts/training-ingest.ts', ['--input', happyCsv]);
+const runHappy = runTool('scripts/co-safety/training-ingest.ts', ['--input', happyCsv]);
 record('T-01', 'happy-path ingestion exits 0', runHappy.exitCode === 0,
     `exit=${runHappy.exitCode}; out=${clip(runHappy.stdout)}; err=${clip(runHappy.stderr)}`);
 
@@ -276,7 +276,7 @@ console.log(`\n${CYAN}[T-04] Strict signature rejection (missing signed_at)${RES
 const badCsv = sb('fixtures', 'training-missing-signed-at.csv');
 writeCsv(badCsv, [CSV_HEADER, CSV_ROW_REGULAR, CSV_ROW_MISSING_SIGNED_AT]);
 
-const runBad = runTool('scripts/training-ingest.ts', ['--input', badCsv]);
+const runBad = runTool('scripts/co-safety/training-ingest.ts', ['--input', badCsv]);
 const badOutput = runBad.stdout + runBad.stderr;
 record('T-04', 'row without signed_at rejected (exit 1, still 2 records, error names signed_at)',
     runBad.exitCode === 1 && trainRecords().length === 2 && badOutput.includes('signed_at'),
@@ -284,7 +284,7 @@ record('T-04', 'row without signed_at rejected (exit 1, still 2 records, error n
 
 // T-05: dedupe
 console.log(`\n${CYAN}[T-05] Dedupe rerun${RESET}`);
-const runDup = runTool('scripts/training-ingest.ts', ['--input', happyCsv]);
+const runDup = runTool('scripts/co-safety/training-ingest.ts', ['--input', happyCsv]);
 const dupSummaryOk = runDup.stdout.includes('0 written, 2 skipped, 0 failed');
 record('T-05', 'duplicate rerun skips both rows and writes nothing (exit 0)',
     runDup.exitCode === 0 && dupSummaryOk && trainRecords().length === 2,
@@ -295,12 +295,12 @@ console.log(`\n${CYAN}[T-06 ~ T-08] Risk register rollup + audit${RESET}`);
 writeRa('RA-2026-0001', 'Unguarded rotating pump coupling', 'mechanical', 16);
 writeRa('RA-2026-0002', 'Solvent vapor accumulation in mixing room', 'chemical', 22);
 
-const runNoSignoff = runTool('scripts/risk-register-rollup.ts', ['--facility', 'SITE-A']);
+const runNoSignoff = runTool('scripts/co-safety/risk-register-rollup.ts', ['--facility', 'SITE-A']);
 record('T-06', 'rollup without manager sign-off args exits 1 and writes nothing',
     runNoSignoff.exitCode === 1 && registers().length === 0,
     `exit=${runNoSignoff.exitCode}; registers=${registers().length}; err=${clip(runNoSignoff.stderr)}`);
 
-const runRollup = runTool('scripts/risk-register-rollup.ts', ROLLUP_SIGNOFF_ARGS);
+const runRollup = runTool('scripts/co-safety/risk-register-rollup.ts', ROLLUP_SIGNOFF_ARGS);
 record('T-07a', 'rollup with manager sign-off exits 0', runRollup.exitCode === 0,
     `exit=${runRollup.exitCode}; out=${clip(runRollup.stdout)}; err=${clip(runRollup.stderr)}`);
 
@@ -329,7 +329,7 @@ if (regFiles.length === 1) {
     record('T-07e', 'next_review_date ~ +364 days', false, 'register file missing');
 }
 
-const runAudit = runTool('scripts/safety-audit.ts', []);
+const runAudit = runTool('scripts/co-safety/safety-audit.ts', []);
 const auditOut = runAudit.stdout + runAudit.stderr;
 record('T-08a', 'safety-audit passes the sandbox (exit 0)', runAudit.exitCode === 0,
     `exit=${runAudit.exitCode}; out=${clip(auditOut, 900)}`);
@@ -352,7 +352,7 @@ fs.writeFileSync(
 );
 writeRa('RA-2026-0003', 'Noise exposure near compressor room', 'noise', 8);
 
-const runMerge = runTool('scripts/risk-register-rollup.ts', ROLLUP_SIGNOFF_ARGS);
+const runMerge = runTool('scripts/co-safety/risk-register-rollup.ts', ROLLUP_SIGNOFF_ARGS);
 record('T-09a', 'merge rerun exits 0', runMerge.exitCode === 0,
     `exit=${runMerge.exitCode}; out=${clip(runMerge.stdout)}; err=${clip(runMerge.stderr)}`);
 

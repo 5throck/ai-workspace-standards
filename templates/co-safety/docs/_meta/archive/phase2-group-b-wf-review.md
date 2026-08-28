@@ -2,11 +2,11 @@
 
 **Author**: Safety Workflow Manager (SWM)
 **Date**: 2026-08-07
-**Scope**: Expert review of proposed industry-unique workflow candidates for the 4 Group B industries (battery, biotech, defense, logistics) against the **existing** workflow inventory. Output feeds the automation-engineer (Task 18 successor) which runs `scripts/scaffold-industry.ts` verbatim with the `--unique-wfs` lists below.
+**Scope**: Expert review of proposed industry-unique workflow candidates for the 4 Group B industries (battery, biotech, defense, logistics) against the **existing** workflow inventory. Output feeds the automation-engineer (Task 18 successor) which runs `scripts/co-safety/scaffold-industry.ts` verbatim with the `--unique-wfs` lists below.
 **Method**: Read each existing `workflows/domains/industry/<industry>/<wf>/schema.yaml` (title + `legal_basis` + `signature_hazard` + `evidence_model`) to map actual scope; cross-checked against `regulations/KR/industry-regulatory-anchors.yaml` (primary + adjacent + SAPA statutes, plus the `unverified` array per industry); confirmed anchor-cited articles that are NOT cited by any existing WF (the "uncited gap" signal pioneered in the Group A review). Rejected any candidate whose scope overlaps an existing WF or duplicates the shared TBM base.
 **Predecessor**: `memory/findings/phase1-group-a-wf-review.md` (methodology template and output-format reference).
 
-## Generator mechanics (confirmed from `scripts/scaffold-industry.ts`)
+## Generator mechanics (confirmed from `scripts/co-safety/scaffold-industry.ts`)
 
 - `--unique-wfs <a,b>` creates ONLY industry-unique workflow dirs. Each produces `schema.yaml` + `README.md` (KO) + `README.e.md` (EN) + one EM skeleton (`evidence-models/domains/industry/<industry>/<industry>-<slug>-record.json`).
 - **TBM handling for Group B** — all 4 industries already have a full per-industry `tbm-pre-work-briefing/` override (own `signature_hazard` + `legal_basis` + `industry_profile` + `agent`) and **no** `references:` block yet. The generator will therefore use `tbmAction: add-ref-to-existing` for all 4 — it appends a `references: - shared: ../../../../_shared/tbm` block to each existing schema (idempotent — skips if `references:` already present, which it does NOT for these 4). This is the same behavior as datacenter/food/semicon in Group A.
@@ -148,20 +148,20 @@ Tier 2 = ≥5 workflows, ≥1 skill, ≥5 EMs, agent ≥50 lines. Current state 
 
 ## Consolidated generator commands (Task 18 successor)
 
-The automation-engineer should run these verbatim. TBM handling is automatic in all 4 cases (`add-ref-to-existing`). Recommended: run with `--dry-run` first to inspect planned file tree, then without for real generation, then `bun scripts/safety-audit.ts` to validate.
+The automation-engineer should run these verbatim. TBM handling is automatic in all 4 cases (`add-ref-to-existing`). Recommended: run with `--dry-run` first to inspect planned file tree, then without for real generation, then `bun scripts/co-safety/safety-audit.ts` to validate.
 
 ```bash
 # battery (+2 unique WFs; TBM add-ref-to-existing)
-bun scripts/scaffold-industry.ts --industry battery --unique-wfs battery-cell-formation-electrical-safety,battery-cathode-powder-dust-control
+bun scripts/co-safety/scaffold-industry.ts --industry battery --unique-wfs battery-cell-formation-electrical-safety,battery-cathode-powder-dust-control
 
 # biotech (+2 unique WFs; TBM add-ref-to-existing) — BSA citations [UNVERIFIED], compliance-agent must pre-screen
-bun scripts/scaffold-industry.ts --industry biotech --unique-wfs biotech-bsl-lab-aerosol-control,biotech-biological-spill-response
+bun scripts/co-safety/scaffold-industry.ts --industry biotech --unique-wfs biotech-bsl-lab-aerosol-control,biotech-biological-spill-response
 
 # defense (+2 unique WFs; TBM add-ref-to-existing) — DAA Art 28/53 [UNVERIFIED-via-legalize-kr-full-text]
-bun scripts/scaffold-industry.ts --industry defense --unique-wfs defense-munitions-storage-magazine-safety,defense-weapons-assembly-composite-solvent
+bun scripts/co-safety/scaffold-industry.ts --industry defense --unique-wfs defense-munitions-storage-magazine-safety,defense-weapons-assembly-composite-solvent
 
 # logistics (+2 unique WFs; TBM add-ref-to-existing) — PSSA statute file is a phantom-file gap (see Anchor risks)
-bun scripts/scaffold-industry.ts --industry logistics --unique-wfs logistics-dangerous-cargo-handling,logistics-forklift-pedestrian-strike-prevention
+bun scripts/co-safety/scaffold-industry.ts --industry logistics --unique-wfs logistics-dangerous-cargo-handling,logistics-forklift-pedestrian-strike-prevention
 ```
 
 ---

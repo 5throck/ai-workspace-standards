@@ -119,7 +119,7 @@ Canonical statute-name form (citations) = **long form**: `고압가스 안전 �
 
 | Script | Exit code | Result |
 |--------|-----------|--------|
-| `bun scripts/safety-audit.ts` | **0** | 872 files checked, 0 errors |
+| `bun scripts/co-safety/safety-audit.ts` | **0** | 872 files checked, 0 errors |
 | `bun scripts/audit.ts` | **0** | All checks passed (agent/skill/script/memory/language/parity) |
 
 Post-edit verification grep: no residual `고압가스안전관리법` (short form) or deleted `Art 14`/`제14조` citations remain in any edited source file.

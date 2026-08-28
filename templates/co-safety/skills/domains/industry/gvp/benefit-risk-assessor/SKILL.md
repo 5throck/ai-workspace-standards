@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: benefit-risk-assessor
 owner: gvp-agent
 scope: co-safety

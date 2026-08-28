@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: tank-integrity-validator
 owner: gasterm-agent
 scope: co-safety

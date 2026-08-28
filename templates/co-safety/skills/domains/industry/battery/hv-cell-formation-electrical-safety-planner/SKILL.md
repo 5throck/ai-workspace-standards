@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: hv-cell-formation-electrical-safety-planner
 owner: battery-agent
 scope: co-safety

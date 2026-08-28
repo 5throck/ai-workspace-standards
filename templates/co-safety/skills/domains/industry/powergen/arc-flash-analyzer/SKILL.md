@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: arc-flash-analyzer
 owner: powergen-agent
 scope: co-safety

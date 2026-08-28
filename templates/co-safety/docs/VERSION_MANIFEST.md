@@ -104,21 +104,21 @@
 
 | Name | Version | Location | Dependencies |
 |------|---------|----------|--------------|
-| audit-variant.ts | 1.0.0 | scripts/audit-variant.ts | bun |
-| check-pm-approval.ts | 1.0.1 | scripts/check-pm-approval.ts | N/A |
-| domain-config.ts | 1.5.0 | scripts/domain-config.ts | N/A |
-| migrate-registry-to-coordinates.ts | N/A | scripts/migrate-registry-to-coordinates.ts | js-yaml |
-| new-domain.ts | 1.0.1 | scripts/new-domain.ts | N/A |
-| risk-register-rollup.ts | 1.0.0 | scripts/risk-register-rollup.ts | N/A |
-| safety-audit.ts | 4.10.1 | scripts/safety-audit.ts | js-yaml |
-| scaffold-industry.ts | 0.1.1 | scripts/scaffold-industry.ts | js-yaml |
-| start-mcp.ts | 1.0.0 | scripts/start-mcp.ts | child_process, path |
-| test-chemical-handling-profile.ts | 1.0.0 | scripts/test-chemical-handling-profile.ts | js-yaml |
-| test-cross-domain-integration.ts | 1.0.0 | scripts/test-cross-domain-integration.ts | js-yaml |
-| test-domain-scenarios.ts | 1.1.0 | scripts/test-domain-scenarios.ts | N/A |
-| test-pharma-general-profile.ts | 1.0.0 | scripts/test-pharma-general-profile.ts | js-yaml |
-| test-runtime-tools.ts | 1.0.0 | scripts/test-runtime-tools.ts | N/A |
-| training-ingest.ts | 1.0.0 | scripts/training-ingest.ts | N/A |
+| audit-variant.ts | 1.0.0 | scripts/co-safety/audit-variant.ts | bun |
+| check-pm-approval.ts | 1.0.1 | scripts/co-safety/check-pm-approval.ts | N/A |
+| domain-config.ts | 1.5.0 | scripts/co-safety/domain-config.ts | N/A |
+| migrate-registry-to-coordinates.ts | N/A | scripts/co-safety/migrate-registry-to-coordinates.ts | js-yaml |
+| new-domain.ts | 1.0.1 | scripts/co-safety/new-domain.ts | N/A |
+| risk-register-rollup.ts | 1.0.0 | scripts/co-safety/risk-register-rollup.ts | N/A |
+| safety-audit.ts | 4.10.1 | scripts/co-safety/safety-audit.ts | js-yaml |
+| scaffold-industry.ts | 0.1.1 | scripts/co-safety/scaffold-industry.ts | js-yaml |
+| start-mcp.ts | 1.0.0 | scripts/co-safety/start-mcp.ts | child_process, path |
+| test-chemical-handling-profile.ts | 1.0.0 | scripts/co-safety/test-chemical-handling-profile.ts | js-yaml |
+| test-cross-domain-integration.ts | 1.0.0 | scripts/co-safety/test-cross-domain-integration.ts | js-yaml |
+| test-domain-scenarios.ts | 1.1.0 | scripts/co-safety/test-domain-scenarios.ts | N/A |
+| test-pharma-general-profile.ts | 1.0.0 | scripts/co-safety/test-pharma-general-profile.ts | js-yaml |
+| test-runtime-tools.ts | 1.0.0 | scripts/co-safety/test-runtime-tools.ts | N/A |
+| training-ingest.ts | 1.0.0 | scripts/co-safety/training-ingest.ts | N/A |
 
 ---
 

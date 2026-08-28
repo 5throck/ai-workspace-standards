@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: munitions-magazine-storage-safety-planner
 owner: defense-agent
 scope: co-safety

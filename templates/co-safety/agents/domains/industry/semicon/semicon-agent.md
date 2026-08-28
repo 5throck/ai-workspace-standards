@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: semicon-agent
 role: specialist
 status: active

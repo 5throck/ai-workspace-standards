@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: gcp-agent
 role: specialist
 status: active

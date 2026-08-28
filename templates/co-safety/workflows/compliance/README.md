@@ -13,7 +13,7 @@ directly against `regulations/KR/legal-glossary.yaml` and per-domain
 
 ## Audit Coverage
 
-`scripts/safety-audit.ts` treats this tree the same as `workflows/daily/**` and
+`scripts/co-safety/safety-audit.ts` treats this tree the same as `workflows/daily/**` and
 `workflows/emergency/**`: any `schema.yaml` added here is validated for a
 `legal_basis` array with `minItems >= 3`. Add compliance workflows here when a
 checklist becomes standalone enough to warrant its own `README.md` +

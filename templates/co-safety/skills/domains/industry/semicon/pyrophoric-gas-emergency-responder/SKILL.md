@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: pyrophoric-gas-emergency-responder
 owner: semicon-agent
 scope: co-safety

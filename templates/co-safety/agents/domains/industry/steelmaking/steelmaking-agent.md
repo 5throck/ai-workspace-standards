@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: steelmaking-agent
 role: specialist
 status: active

@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: docs-writer
 role: specialist
 status: active

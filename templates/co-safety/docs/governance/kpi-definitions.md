@@ -20,8 +20,8 @@ initial KPI set; SGM should extend it as new industry profiles and workflows are
 
 ## 2. Audit Pass Rate
 
-- **Formula**: `(bun scripts/safety-audit.ts total files checked − errors found) / total files checked × 100%`
-- **Data source**: `scripts/safety-audit.ts` output (see `scripts/SCRIPTS.md` for version
+- **Formula**: `(bun scripts/co-safety/safety-audit.ts total files checked − errors found) / total files checked × 100%`
+- **Data source**: `scripts/co-safety/safety-audit.ts` output (see `scripts/SCRIPTS.md` for version
   history). Each CI/local run's error count and total-checked count should be logged to
   `memory/YYYY-MM-DD.md` for trend tracking.
 - **Target threshold**: 100% (0 errors) — this is a hard compliance gate, not an

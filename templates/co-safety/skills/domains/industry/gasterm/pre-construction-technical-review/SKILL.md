@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: pre-construction-technical-review
 owner: gasterm-agent
 scope: co-safety

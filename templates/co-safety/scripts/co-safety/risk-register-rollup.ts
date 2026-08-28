@@ -25,7 +25,7 @@
  * (single source of truth): 1-5 low / 6-12 medium / 13-19 high / 20-25 critical.
  *
  * Usage:
- *   bun scripts/risk-register-rollup.ts --facility <id> --manager-id <id> \
+ *   bun scripts/co-safety/risk-register-rollup.ts --facility <id> --manager-id <id> \
  *       --signer-id <id> --signed-at <YYYY-MM-DD> \
  *       [--year YYYY] [--control-status planned|in_progress|implemented|overdue|not_required|na] \
  *       [--dry-run]
@@ -56,7 +56,7 @@ interface Options {
 
 function usage(): string {
     return `
-Usage: bun scripts/risk-register-rollup.ts <options>
+Usage: bun scripts/co-safety/risk-register-rollup.ts <options>
 
 Required:
   --facility <id>         Facility or work area identifier to roll up

@@ -2,10 +2,10 @@
 
 **Author**: Safety Workflow Manager (SWM)
 **Date**: 2026-08-07
-**Scope**: Expert review of proposed unique-workflow candidates for the 4 Group A industries (datacenter, food, semicon, cosmetics) against the **existing** workflow inventory. Output feeds the automation-engineer (Task A-04) which runs `scripts/scaffold-industry.ts` verbatim with the `--unique-wfs` lists below.
+**Scope**: Expert review of proposed unique-workflow candidates for the 4 Group A industries (datacenter, food, semicon, cosmetics) against the **existing** workflow inventory. Output feeds the automation-engineer (Task A-04) which runs `scripts/co-safety/scaffold-industry.ts` verbatim with the `--unique-wfs` lists below.
 **Method**: Read each existing `workflows/domains/industry/<industry>/<wf>/schema.yaml` (title + `legal_basis` + `signature_hazard`) to map actual scope; cross-checked against `regulations/KR/industry-regulatory-anchors.yaml` (primary + adjacent + SAPA statutes) and the hazard profile in each industry's `notes` block; rejected any candidate whose scope overlaps an existing WF.
 
-## Generator mechanics (confirmed from `scripts/scaffold-industry.ts`)
+## Generator mechanics (confirmed from `scripts/co-safety/scaffold-industry.ts`)
 
 - `--unique-wfs <a,b>` creates ONLY industry-unique workflow dirs. Each produces `schema.yaml` + `README.md` (KO) + `README.e.md` (EN) + one EM skeleton (`evidence-models/domains/industry/<industry>/<industry>-<slug>-record.json`).
 - **TBM is handled separately and automatically** — do NOT pass TBM in `--unique-wfs`:
@@ -102,20 +102,20 @@ Tier 2 = ≥5 workflows, ≥1 skill, ≥5 EMs, agent ≥50 lines. Current state 
 
 ## Consolidated generator commands (Task A-04)
 
-The automation-engineer should run these verbatim. TBM handling is automatic in all 4 cases. Recommended: run with `--dry-run` first to inspect planned file tree, then without for real generation, then `bun scripts/safety-audit.ts` to validate.
+The automation-engineer should run these verbatim. TBM handling is automatic in all 4 cases. Recommended: run with `--dry-run` first to inspect planned file tree, then without for real generation, then `bun scripts/co-safety/safety-audit.ts` to validate.
 
 ```bash
 # datacenter (+1 unique WF; TBM no-op — references block already present)
-bun scripts/scaffold-industry.ts --industry datacenter --unique-wfs rack-cabling-fall-protection
+bun scripts/co-safety/scaffold-industry.ts --industry datacenter --unique-wfs rack-cabling-fall-protection
 
 # food (+1 unique WF; TBM no-op)
-bun scripts/scaffold-industry.ts --industry food --unique-wfs thermal-hazard-control
+bun scripts/co-safety/scaffold-industry.ts --industry food --unique-wfs thermal-hazard-control
 
 # semicon (+1 unique WF; TBM no-op)
-bun scripts/scaffold-industry.ts --industry semicon --unique-wfs silane-gas-leak-response
+bun scripts/co-safety/scaffold-industry.ts --industry semicon --unique-wfs silane-gas-leak-response
 
 # cosmetics (+2 unique WFs; generator auto-creates thin tbm/ reference dir)
-bun scripts/scaffold-industry.ts --industry cosmetics --unique-wfs solvent-exposure-control,powder-dust-control
+bun scripts/co-safety/scaffold-industry.ts --industry cosmetics --unique-wfs solvent-exposure-control,powder-dust-control
 ```
 
 ## Summary of meeting-candidate dispositions

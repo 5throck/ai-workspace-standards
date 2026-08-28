@@ -62,7 +62,7 @@ description: |
 #   For each industry domain scaffold, copy `primary_statute.key_articles`,
 #   every `adjacent_laws[].key_articles`, plus `sapa` and `osha_kr_anchor`
 #   into the domain's `legal_basis` array. This guarantees the DEFAULT_MIN
-#   LEGAL_BASIS = 3 invariant (scripts/domain-config.ts) is satisfied.
+#   LEGAL_BASIS = 3 invariant (scripts/co-safety/domain-config.ts) is satisfied.
 ###############################################################################
 
 metadata:
@@ -75,7 +75,7 @@ metadata:
     - kr_safety.search_osha_regulations
     - legalize_kr.parse_law_structure
     - legalize_kr.compare_versions
-  min_legal_basis: 3  # scripts/domain-config.ts DEFAULT_MIN_LEGAL_BASIS
+  min_legal_basis: 3  # scripts/co-safety/domain-config.ts DEFAULT_MIN_LEGAL_BASIS
 
 # ---------------------------------------------------------------------------
 # Universal anchors (referenced by every industry below via YAML alias)

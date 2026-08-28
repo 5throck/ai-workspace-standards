@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: dts-verification
 owner: gdp-agent
 scope: co-safety

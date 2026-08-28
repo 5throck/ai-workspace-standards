@@ -6,10 +6,10 @@
  * docs/_shared/domain-onboarding-guide.md.
  *
  * Usage:
- *   bun scripts/new-domain.ts <name> <tier> [industry-profile]
+ *   bun scripts/co-safety/new-domain.ts <name> <tier> [industry-profile]
  *
  * Example:
- *   bun scripts/new-domain.ts cosmetics industry cosmetics
+ *   bun scripts/co-safety/new-domain.ts cosmetics industry cosmetics
  *
  * @version 1.0.1
  * v1.0.1 (2026-07-11): Fixed stale agent-template comment claiming "min 2 for
@@ -31,8 +31,8 @@ const tier = process.argv[3] as 'functional' | 'industry';
 const profile = process.argv[4] || name;
 
 if (!name || !tier || !['functional', 'industry'].includes(tier)) {
-    console.error(`${RED}Usage: bun scripts/new-domain.ts <name> <tier:functional|industry> [profile]${RESET}`);
-    console.error(`${YELLOW}Example: bun scripts/new-domain.ts cosmetics industry cosmetics${RESET}`);
+    console.error(`${RED}Usage: bun scripts/co-safety/new-domain.ts <name> <tier:functional|industry> [profile]${RESET}`);
+    console.error(`${YELLOW}Example: bun scripts/co-safety/new-domain.ts cosmetics industry cosmetics${RESET}`);
     process.exit(1);
 }
 
@@ -76,7 +76,7 @@ lifecycle: {phase: production, created: "${new Date().toISOString().split('T')[0
 ---
 
 ## Section A — Legal Basis
-<!-- Add regulatory references (min 3 sources, both functional and industry tiers — see scripts/domain-config.ts DEFAULT_MIN_LEGAL_BASIS) -->
+<!-- Add regulatory references (min 3 sources, both functional and industry tiers — see scripts/co-safety/domain-config.ts DEFAULT_MIN_LEGAL_BASIS) -->
 
 ## Section B — Role & Responsibilities
 
@@ -210,6 +210,6 @@ console.log(`  3. Replace placeholder workflow with actual workflows`);
 console.log(`  4. Replace placeholder evidence model`);
 console.log(`  5. Edit scope: docs/domains/${tierPath}/${name}/scope.md`);
 console.log(`  6. Add regulation file: regulations/KR/<Regulator>-<Framework>.yaml`);
-console.log(`  7. Run audit: bun scripts/safety-audit.ts`);
+console.log(`  7. Run audit: bun scripts/co-safety/safety-audit.ts`);
 console.log(`  8. Update Active Domains Registry in domain-onboarding-guide.md`);
 console.log(`  9. Update CHANGELOG.md and memory log`);

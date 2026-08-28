@@ -1,3 +1,8 @@
+---
+lang: ko
+lang_reason: legal
+---
+
 # rolling-stock-maintenance-loto-planner
 
 > **Seeded from `SKILL.md` frontmatter (2026-08-28 per-skill README standard, CONSTITUTION §6.2).** Refine freely — this file is not auto-regenerated.

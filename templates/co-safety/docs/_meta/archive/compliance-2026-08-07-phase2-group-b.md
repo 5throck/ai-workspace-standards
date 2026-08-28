@@ -180,6 +180,6 @@ Pre-existing error in an existing WF (not a Group B candidate). Documented in `p
 
 ## 5. Audit result
 
-**Result**: `bun scripts/safety-audit.ts` → **844 files checked, 0 errors** ✅
+**Result**: `bun scripts/co-safety/safety-audit.ts` → **844 files checked, 0 errors** ✅
 
 All 8 flipped workflows pass the `legal_basis ≥3` check. The 5 PSSA topic corrections in the anchor file do not affect audit output (audit reads `legal_basis` count, not topic strings). The 4 industry agent-lines, EM scaffolds, and TBM references are outside the compliance-agent scope (separate Group B tasks own them) and are not regressions introduced by this task.

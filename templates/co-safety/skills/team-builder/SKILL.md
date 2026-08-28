@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: team-builder
 description: >
   Guides the Engagement Leader through building a new AI agent team for any consulting domain.

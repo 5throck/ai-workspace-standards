@@ -5,7 +5,7 @@
 - **Scope**: 5 industry-unique workflows under `workflows/domains/industry/`
 - **Branch**: `pr/20260807-013117-maturity-phase1-group-a`
 - **Task spec**: Task 11 — Group A compliance sign-off + status flip
-- **Floor**: `DEFAULT_MIN_LEGAL_BASIS = 3` verified sources (`scripts/domain-config.ts`)
+- **Floor**: `DEFAULT_MIN_LEGAL_BASIS = 3` verified sources (`scripts/co-safety/domain-config.ts`)
 
 ## Executive Summary
 

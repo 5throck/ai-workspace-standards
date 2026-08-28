@@ -79,7 +79,7 @@
         "medical_device",
         "pharma"
       ],
-      "description": "Industry sector. Canonical forms: 'meddevice' and 'pharmaceutical'. The values 'medical_device' and 'pharma' are DEPRECATED aliases retained only for backward compatibility with records authored before vocabulary unification — do not use them in new or updated records; migrate to the canonical forms on next write. Vocabulary otherwise covers every value used in `applicable_industries` across `workflows/domains/functional/risk-assessment/*/schema.yaml` plus the KNOWN_INDUSTRIES vocabulary in `scripts/domain-config.ts` (which still carries both alias forms until unified)."
+      "description": "Industry sector. Canonical forms: 'meddevice' and 'pharmaceutical'. The values 'medical_device' and 'pharma' are DEPRECATED aliases retained only for backward compatibility with records authored before vocabulary unification — do not use them in new or updated records; migrate to the canonical forms on next write. Vocabulary otherwise covers every value used in `applicable_industries` across `workflows/domains/functional/risk-assessment/*/schema.yaml` plus the KNOWN_INDUSTRIES vocabulary in `scripts/co-safety/domain-config.ts` (which still carries both alias forms until unified)."
     },
     "hazards": {
       "type": "array",

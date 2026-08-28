@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: psm-agent
 role: specialist
 status: active
@@ -64,7 +66,7 @@ lifecycle:
 > - **General aging equipment inspection outside PSM-covered scope** → handled by `asset-integrity-agent`
 > - **LNG/LPG storage tank structural integrity (구조 건전성) at gas terminal facilities** → handled by the `tank-integrity-validator` skill (gasterm domain), even when the tank is also PSM-covered under Article 44. `mi-inspection` here is limited to process-equipment mechanical integrity (corrosion monitoring, relief/vent system function, ESD system testing); tank-integrity-validator owns pressure/temperature/corrosion/fatigue structural validation for the vessel itself. When both apply to the same tank, cross-reference the other domain's finding rather than duplicating the inspection.
 >
-> Role separation mirrors the existing boundary between `risk-assessment-agent` and the `gmp-qrm` skill, and is enforced the same way by `scripts/safety-audit.ts` — see the risk-assessment-agent ↔ psm-agent check added 2026-07-11.
+> Role separation mirrors the existing boundary between `risk-assessment-agent` and the `gmp-qrm` skill, and is enforced the same way by `scripts/co-safety/safety-audit.ts` — see the risk-assessment-agent ↔ psm-agent check added 2026-07-11.
 
 ## Section C — Operational Protocols & Escalation Rules
 - **Operational Procedures**:

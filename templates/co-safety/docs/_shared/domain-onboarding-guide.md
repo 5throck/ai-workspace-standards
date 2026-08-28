@@ -4,7 +4,7 @@
 
 This guide documents the folder structure convention adopted on 2026-06-17 (per meeting `memory/meeting-2026-06-17-folder-structure-redesign.md`), updated for the 2-tier `functional/`/`industry/` split adopted 2026-06-20 (per `docs/_shared/domain-classification-guide.md` §6 Phase 2).
 
-> **Automation available**: `bun scripts/new-domain.ts <name> <tier:functional|industry> [profile]` scaffolds Steps 1-2-3-4-5-6-9 below automatically (directory structure, agent/profile/workflow/evidence-model/scope templates with TODO placeholders). Steps 7, 8, 10, 11 (skills, regulations, audit, changelog) are still manual. Prefer running the script over doing Steps 1-6/9 by hand.
+> **Automation available**: `bun scripts/co-safety/new-domain.ts <name> <tier:functional|industry> [profile]` scaffolds Steps 1-2-3-4-5-6-9 below automatically (directory structure, agent/profile/workflow/evidence-model/scope templates with TODO placeholders). Steps 7, 8, 10, 11 (skills, regulations, audit, changelog) are still manual. Prefer running the script over doing Steps 1-6/9 by hand.
 
 ---
 
@@ -114,7 +114,7 @@ mkdir -p skills/domains/<tier>/<name>
 mkdir -p workflows/domains/<tier>/<name>
 ```
 
-Or automate this and Steps 3-6/9 in one command: `bun scripts/new-domain.ts <name> <tier> [profile]`.
+Or automate this and Steps 3-6/9 in one command: `bun scripts/co-safety/new-domain.ts <name> <tier> [profile]`.
 
 ### Step 3: Author the Agent
 Create `agents/domains/<tier>/<name>/<name>-agent.md` following the template in the flat core agents (`agents/pm.md`, `agents/safety-governance-manager.md`, `agents/safety-workflow-manager.md`). Required sections:
@@ -150,7 +150,7 @@ Create `docs/domains/<tier>/<name>/scope.md` documenting v1 scope, exclusions, K
 
 ### Step 10: Run Audit
 ```bash
-bun scripts/safety-audit.ts
+bun scripts/co-safety/safety-audit.ts
 ```
 Must pass with 0 errors. The audit auto-recognizes new domains via recursive walkDir.
 
@@ -210,6 +210,6 @@ When migrating an existing flat-structured domain to the new pattern:
 - [ ] `_shared/`, `_meta/` underscore prefix consistently applied
 - [ ] `schema.yaml` files have `legal_basis`, `status: active`, `applicability: mandatory`
 - [ ] Evidence models have valid `$ref` paths (relative)
-- [ ] `bun scripts/safety-audit.ts` passes with 0 errors
+- [ ] `bun scripts/co-safety/safety-audit.ts` passes with 0 errors
 - [ ] Domain added to Section 5 registry above
 - [ ] CHANGELOG and memory log updated

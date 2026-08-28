@@ -9,7 +9,7 @@
   "permissions": {
     "allow": [
       "Bash(bun scripts/audit.ts *)",
-      "Bash(bun scripts/safety-audit.ts *)",
+      "Bash(bun scripts/co-safety/safety-audit.ts *)",
       "Bash(bun scripts/lifecycle-sync-audit.ts *)",
       "Bash(bun run agent:verify *)",
       "Bash(bun scripts/validate-templates.ts *)"
@@ -32,7 +32,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bun scripts/safety-audit.ts",
+            "command": "bun scripts/co-safety/safety-audit.ts",
             "timeout": 60,
             "async": true,
             "statusMessage": "Running Safety OS legal_basis check..."
@@ -59,7 +59,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bun scripts/safety-audit.ts",
+            "command": "bun scripts/co-safety/safety-audit.ts",
             "timeout": 120,
             "async": true,
             "statusMessage": "Running Safety OS QA audit on task completion..."

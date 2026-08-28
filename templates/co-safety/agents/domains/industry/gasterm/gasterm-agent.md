@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: gasterm-agent
 role: specialist
 status: active

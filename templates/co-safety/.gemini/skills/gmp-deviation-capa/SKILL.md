@@ -57,7 +57,7 @@ This skill manages the end-to-end lifecycle of GMP deviations and corresponding 
 - `gmp-capa-record.json` — one per CAPA (a deviation may have multiple CAPAs)
 
 Common fields required:
-- `legal_basis`: array with min 3 sources (universal DEFAULT_MIN_LEGAL_BASIS, `scripts/domain-config.ts`) — e.g., 총리령 「의약품 등의 안전에 관한 규칙」 별표 1 제7.3호 + ICH Q10 + 약사법 Article 37
+- `legal_basis`: array with min 3 sources (universal DEFAULT_MIN_LEGAL_BASIS, `scripts/co-safety/domain-config.ts`) — e.g., 총리령 「의약품 등의 안전에 관한 규칙」 별표 1 제7.3호 + ICH Q10 + 약사법 Article 37
 - `e_signature`, `qrm_assessment`, `nomenclature`, `audit_trail`
 
 ## Integration Points

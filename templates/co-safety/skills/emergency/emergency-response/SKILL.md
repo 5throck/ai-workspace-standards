@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: emergency-response
 description: Trigger emergency response protocol on incident, fire, spill, or injury report
 owner: emergency-agent

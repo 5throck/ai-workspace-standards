@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: rolling-stock-maintenance-loto-planner
 owner: railway-agent
 scope: co-safety

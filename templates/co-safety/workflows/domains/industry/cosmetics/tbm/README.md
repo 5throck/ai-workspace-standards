@@ -7,7 +7,7 @@
 ## 산업별 Override
 - `signature_hazard`, `legal_basis.add` 등은 본 디렉토리의 `schema.yaml`에 있는
   `references.overrides` 블록에서 선언합니다.
-- 생성: `scripts/scaffold-industry.ts` (Task A-01, Phase 0).
+- 생성: `scripts/co-safety/scaffold-industry.ts` (Task A-01, Phase 0).
 
 ---
 _법적 고지: 규제 해석은 사용자 책임입니다._

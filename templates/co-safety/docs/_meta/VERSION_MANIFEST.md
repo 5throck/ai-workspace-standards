@@ -88,7 +88,7 @@
 | audit.ts | 2.5.3 | scripts/audit.ts | bun |
 | auto-executor.ts | N/A | scripts/lib/auto-executor.ts | N/A |
 | beta-lifecycle.ts | N/A | scripts/helpers/beta-lifecycle.ts | fs, path |
-| check-pm-approval.ts | N/A | scripts/check-pm-approval.ts | N/A |
+| check-pm-approval.ts | N/A | scripts/co-safety/check-pm-approval.ts | N/A |
 | checkpoint-manager.ts | N/A | scripts/lib/checkpoint-manager.ts | N/A |
 | clear-pm-approval.ts | N/A | scripts/clear-pm-approval.ts | N/A |
 | dev-sync.ts | 1.2.2 | scripts/dev-sync.ts | bun |
@@ -125,11 +125,11 @@
 | readme-lifecycle-audit.ts | N/A | scripts/readme-lifecycle-audit.ts | N/A |
 | reconcile-with-l0-l1.ts | N/A | scripts/helpers/reconcile-with-l0-l1.ts | fs, path, semver |
 | retry-handler.ts | N/A | scripts/retry-handler.ts | N/A |
-| safety-audit.ts | N/A | scripts/safety-audit.ts | js-yaml |
+| safety-audit.ts | N/A | scripts/co-safety/safety-audit.ts | js-yaml |
 | scan-l2-project.ts | N/A | scripts/helpers/scan-l2-project.ts | crypto, fs, path |
 | skill-dependency-analysis.ts | N/A | scripts/skill-dependency-analysis.ts | N/A |
 | skill-lifecycle-audit.ts | N/A | scripts/skill-lifecycle-audit.ts | N/A |
-| start-mcp.ts | N/A | scripts/start-mcp.ts | child_process, path |
+| start-mcp.ts | N/A | scripts/co-safety/start-mcp.ts | child_process, path |
 | substitute-placeholders.ts | N/A | scripts/helpers/substitute-placeholders.ts | N/A |
 | sync-agent-status.ts | N/A | scripts/sync-agent-status.ts | N/A |
 | sync-md.ts | 1.2.0 | scripts/sync-md.ts | N/A |

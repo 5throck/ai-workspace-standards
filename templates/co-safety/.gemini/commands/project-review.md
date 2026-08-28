@@ -73,7 +73,7 @@ If `mcp__base-map__review_code` is available, run it alongside the agent dispatc
 ```
 Key scripts to review (adjust based on project structure):
 - scripts/dev-sync.ts (sync pipeline orchestrator)
-- scripts/safety-audit.ts (audit tool)
+- scripts/co-safety/safety-audit.ts (audit tool)
 - scripts/sync-skills.ts (skill sync)
 - scripts/generate-version-manifest.ts (version management)
 ```

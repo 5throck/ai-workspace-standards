@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: mid-construction-inspection
 owner: gasterm-agent
 scope: co-safety
