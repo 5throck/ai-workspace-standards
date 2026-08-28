@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "explosive-propellant-record.json",
+  "title": "Explosive Propellant Handling Record",
+  "description": "Evidence model for Munitions Propellant Mixing Room Anti-Static ESD Grounding and Humidity Monitoring.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "bay_id",
+    "grounding_resistance_ohms",
+    "legal_basis",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^DEF-EXP-[0-9]{4}-[0-9]{4}$"
+    },
+    "bay_id": {
+      "type": "string"
+    },
+    "grounding_resistance_ohms": {
+      "type": "number"
+    },
+    "relative_humidity_percent": {
+      "type": "number"
+    },
+    "anti_static_ppe_verified": {
+      "type": "boolean"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

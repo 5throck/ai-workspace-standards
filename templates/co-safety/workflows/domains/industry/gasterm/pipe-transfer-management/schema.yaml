@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: pipe-transfer-management
+title: "배관 이송 관리 (Pipe Transfer Management)"
+status: active
+applicability: mandatory
+workflow_type: core
+
+legal_basis:
+  - 고압가스 안전 관리 및 사업법 Article 13
+  - 도시가스사업법
+  - 산업안전보건법 Article 44 (PSM)
+industry_profile: gas-facility
+agent: gasterm-agent
+evidence_model: gasterm-pipe-transfer-record.json

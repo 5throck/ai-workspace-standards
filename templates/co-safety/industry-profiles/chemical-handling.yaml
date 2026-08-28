@@ -1,0 +1,67 @@
+# Chemical Handling Industry Profile — MSDS Domain (v1)
+profile_id: chemical-handling
+name: chemical-handling
+display_name: "화학물질 취급 (Chemical Handling — MSDS Domain)"
+version: "1.0"
+status: active
+last_updated: 2026-08-06
+industry_tier: functional
+agent: msds-agent
+legal_basis:
+  - 산업안전보건법 (OSHA-KR) Articles 110-114 (MSDS)
+  - 산업안전보건법 (OSHA-KR) Article 243 (GHS classification)
+  - 화학물질등록 및 평가 등에 관한 법률 (K-REACH) Articles 10-14
+  - 유해화학물질 관리법 (TCCL)
+  - UN GHS Rev 9 (2021)
+key_hazards:
+  - chemical_exposure_toxic_substances
+  - hazardous_chemical_spill
+  - ghs_misclassification
+workflows:
+  msds:
+    - msds-intake
+    - ghs-classification
+    - chemical-approval
+    - chemical-inventory
+    - kreach-registration
+    - hazard-labeling
+    - chemical-spill-reference
+uses_functional_services: []
+description: General chemical handling operations under OSHA-KR MSDS provisions, K-REACH, and GHS Rev 9. Applicable across industries (manufacturing, construction, semiconductor, pharmaceutical, laboratory) where chemical substances are handled.
+regulatory_reference: regulations/KR/OSHA-KR-MSDS.md
+regulatory_thresholds:
+  kreach_registration_tonnage_ton_year: 1.0
+  kreach_new_chemical_lead_time_days: 90
+  msds_annual_review_required: true
+msds_pillars:
+  - msds_lifecycle (intake, parsing, posting)
+  - ghs_classification (Rev 9 baseline)
+  - chemical_approval (prohibited/permission verification)
+  - inventory_management (K-REACH Article 10 reporting)
+  - kreach_registration (Article 11)
+  - hazard_labeling (GHS pictograms, signal words)
+ghs_version_current: "rev9"
+ghs_version_transition_plan:
+  rev10:
+    un_issued: "2025-07-01"
+    kr_mandation_estimated: "2027-01-01"
+v1_scope:
+  includes:
+    - msds_document_management
+    - ghs_rev9_classification
+    - chemical_introduction_approval
+    - monthly_inventory_reporting
+    - kreach_registration
+    - ghs_labeling
+    - chemical_spill_data_provision (reference workflow)
+  excludes:
+    - spill_response_execution (emergency-agent)
+    - chemical_transport (위험물운송법)
+    - waste_disposal (폐기물법)
+    - ghs_rev10_migration (~2027)
+    - ml_parser_internalization (v2)
+cross_domain_consumers:
+  - psm (psi-management references msds-record)
+  - gmp (cleaning-validation, supplier-qualification reference msds-record)
+  - occupational-health-agent (references OEL/PEL from msds Section 8)
+  - emergency-agent (consumes Section 6 via spill-reference)

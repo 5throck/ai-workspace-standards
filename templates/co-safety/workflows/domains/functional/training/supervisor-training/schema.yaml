@@ -1,0 +1,10 @@
+schema_version: "1.0"
+workflow_id: supervisor-training
+title: "관리감독자 교육 (Supervisor Training)"
+status: active
+applicability: mandatory
+applicable_industries: [chemical, gas_terminal, power_generation, construction, medical_device, pharma, manufacturing]
+legal_basis: [산업안전보건법 Article 32, 중대재해처벌법 Article 7, 중대재해처벌법 Article 8]
+industry_profile: training-management
+agent: training-agent
+evidence_model: training-record.json

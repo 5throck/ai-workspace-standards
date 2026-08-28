@@ -1,0 +1,476 @@
+source_verification:
+  method: manual-curation
+  checked_at: "2026-08-26"
+# Legal & Regulatory Glossary — Safety OS
+# Single source of truth: Korean statute proper noun → English gloss + abbreviation + article citations.
+# Consumed by: validate-md-language.ts (Korean allowlist via `statutes` keys), authors (citation consistency).
+# Korean statute names are preserved per CLAUDE.md §4 — never translated.
+# This file is structured reference data (legitimate bilingual mapping), not prose.
+#
+# Provenance: All entries and article numbers are mined from actual codebase usage
+# (agents/*.md Section A Legal Basis blocks, workflows/**/schema.yaml legal_basis fields,
+# regulations/KR/*.yaml). Articles NOT referenced anywhere in the codebase are omitted;
+# accuracy over completeness. Unverified entries are explicitly commented.
+version: 1.0.8
+last_updated: 2026-08-24
+
+# =============================================================================
+# KOREAN STATUTES (validator allowlist — keys are the exact Korean strings used
+# in codebase citations). NOTE: citation forms vary (제NN조 vs Article NN);
+# the `articles[].number` field uses the Korean 제NN조 form as canonical.
+# =============================================================================
+statutes:
+  항만안전특별법:
+    english: Port Safety Special Act
+    abbreviation: PSSA
+    regulator: MOF (해양수산부)
+    statute_file: Port-Safety-Special-Act.yaml
+    note: |
+      Full 17-article structure (Arts 1-17) VERIFIED via legalize_kr.parse_law_structure
+      (MST 283835, lawIdCode 014131, last amended 2026-03-10 via law #21443).
+      CRITICAL (Phase 0 correction): Art 4 (다른 법률과의 관계) is PROCEDURAL —
+      it only declares PSSA's priority over other statutes (except OSHA-KR) and
+      is NOT a substantive safety-obligation basis. The SUBSTANTIVE port-safety
+      obligation article is Art 6 (항만운송 참여자의 안전확보 의무). Logistics
+      workflows must cite Art 6 (not Art 4) for the safety-obligation legal_basis.
+      "DSSMA Art 20" citations for dangerous-goods transport refer to
+      위험물안전관리법 (DSSMA), NOT PSSA — PSSA stops at Art 17.
+    articles:
+      - { number: "제4조", topic_en: "PROCEDURAL — Relationship to other laws (다른 법률과의 관계); PSSA priority-of-application clause only. NOT a substantive safety obligation — do not cite as workflow safety-obligation basis (use Art 6)." }
+      - { number: "제4조의2", topic_en: "Port Safety Basic Plan establishment and implementation (항만안전기본계획 등 수립·시행) — 신설 2026.3.10" }
+      - { number: "제4조의3", topic_en: "Port disaster and safety fact-finding survey (항만재해 및 항만안전 실태조사) — 신설 2026.3.10" }
+      - { number: "제5조", topic_en: "Port transport participants' basic obligations — 3 accident-prevention principles (항만운송 참여자의 기본 의무)" }
+      - { number: "제6조", topic_en: "SUBSTANTIVE — Port transport participants' safety assurance obligations (항만운송 참여자의 안전확보 의무 등): safe working environment, state/Local cooperation, MOF-MOEL 중대재해 cooperation" }
+      - { number: "제7조", topic_en: "Port Safety Council establishment and operation (항만안전협의체의 구성·운영)" }
+      - { number: "제8조", topic_en: "Safety education for port transport workers (안전교육)" }
+      - { number: "제9조", topic_en: "Self-safety management plan establishment and approval (자체안전관리계획의 수립·승인 등)" }
+      - { number: "제12조", topic_en: "Business suspension / registration cancellation — SAPA cross-reference (사업정지 등; violates SAPA Art 4/5 causing 항만안전사고, or SAPA Art 6 벌금형 확정)" }
+      - { number: "제15조", topic_en: "Penalty — up to 1yr imprisonment or 10M KRW fine (자체안전관리계획 위반 벌칙)" }
+      - { number: "제16조", topic_en: "Dual liability (양벌규정)" }
+      - { number: "제17조", topic_en: "Administrative fine — up to 3M KRW (과태료; 안전교육 미실시, 검사 거부 등)" }
+  철도안전법:
+    english: Rail Safety Act
+    abbreviation: RSA
+    regulator: MOLIT (국토교통부)
+    articles:
+      - { number: "제45조", topic_en: "Restrictions on acts within railway protection zones (철도보호지구)" }
+      - { number: "제48조", topic_en: "Prohibited acts for railway protection and order maintenance" }
+  하수도법:
+    english: Sewerage Act
+    abbreviation: SA
+    regulator: ME (환경부)
+    articles:
+      - { number: "제19조", topic_en: "Public sewerage operation/maintenance; damage prohibition" }
+      - { number: "제20조", topic_en: "Technical diagnosis and inspection of sewerage facilities" }
+  총포·도검·화약류 등의 안전관리에 관한 법률:
+    english: Act on the Safety Management of Firearms, Swords, Explosives, etc.
+    abbreviation: FSESA
+    regulator: NPA (경찰청)
+    articles:
+      - { number: "제9조",  topic_en: "Permission for import/export of firearms/swords/explosives" }
+      - { number: "제23조", topic_en: "Reporting on discovery/pickup of regulated items" }
+  방위사업법:
+    english: Defense Acquisition Act
+    abbreviation: DAA
+    regulator: DAPA (방위사업청)
+    note: "Article 18 (전문연구기관 및 방위산업체 지정) was deleted on 2020.3.31. REMEDIATED 2026-08-06: codebase references migrated to active Art.28 (품질보증) and Art.53 (군용 화약류 제조 특례)."
+    articles:
+      - { number: "제28조", topic_en: "Quality assurance for munitions (replaced deleted Art.18)" }
+      - { number: "제53조", topic_en: "Special provisions for manufacture of military firearms/explosives" }
+  산업안전보건법:
+    english: Occupational Safety and Health Act
+    abbreviation: OSHA-KR
+    regulator: MOEL (고용노동부)
+    articles:
+      - { number: "제13조",  topic_en: "Technical and work-environment standards issued/guided by MOEL (기술 또는 작업환경에 관한 표준) — NOT first-aid/emergency education" }
+      - { number: "제14조",  topic_en: "Annual safety/health plan — board report & approval (안전·보건 계획 이사회 보고·승인); SHM regulations are Arts 25-26" }
+      - { number: "제15조",  topic_en: "Safety and Health Management Supervisor (안전보건관리책임자) duties" }
+      - { number: "제16조",  topic_en: "Management Supervisor (관리감독자) duties" }
+      - { number: "제17조",  topic_en: "Safety Manager appointment" }
+      - { number: "제24조",  topic_en: "Occupational Safety and Health Committee" }
+      - { number: "제29조",  topic_en: "Worker safety and health education (근로자 안전보건교육); special education for hazardous work = Art 29(3) + OSHSR §26" }
+      - { number: "제31조",  topic_en: "Construction-industry basic safety and health education for day laborers (건설업 기초안전보건교육) — NOT special education" }
+      - { number: "제32조",  topic_en: "Job-related education for safety/health management supervisors, safety/health managers, officers (안전보건관리책임자 등 직무교육; 관리감독자 excluded)" }
+      - { number: "제36조",  topic_en: "Risk assessment (위험성평가 실시)" }
+      - { number: "제38조",  topic_en: "Safety measures (안전조치) — general basis for fall/collapse/electrical hazard prevention; technical detail in OSHSR" }
+      - { number: "제39조",  topic_en: "Health measures (보건조치)" }
+      - { number: "제42조",  topic_en: "Preparation/submission of hazard-prevention plans for construction (유해위험방지계획서의 작성·제출)" }
+      - { number: "제44조",  topic_en: "Process Safety Management (PSM) for covered processes" }
+      - { number: "제51조",  topic_en: "Suspension of Work by Employer" }
+      - { number: "제52조",  topic_en: "Suspension of Work by Workers" }
+      - { number: "제54조",  topic_en: "Action upon Serious Accidents (stop work, evacuate, prevent recurrence)" }
+      - { number: "제57조",  topic_en: "Incident Recording & Reporting (retain 3 years)" }
+      - { number: "제61조",  topic_en: "Safety and Health Measures in Contracted Projects" }
+      - { number: "제62조",  topic_en: "Safety/health cooperation obligations" }
+      - { number: "제63조",  topic_en: "Ordering party's safety and health measures (도급인의 안전보건조치)" }
+      - { number: "제89조",  topic_en: "Voluntary safety confirmation — declaration (자율안전확인의 신고; Arts 89-92)" }
+      - { number: "제93조",  topic_en: "Safety inspection (안전검사)" }
+      - { number: "제98조",  topic_en: "Safety inspection under voluntary inspection programs (자율검사프로그램에 따른 안전검사) — NOT permit-to-work" }
+      - { number: "제99조",  topic_en: "Revocation of voluntary-inspection-program recognition (자율검사프로그램 인정의 취소 등) — NOT fall prevention" }
+      - { number: "제100조", topic_en: "Voluntary safety inspection institutions (자율안전검사기관) — NOT collapse prevention" }
+      - { number: "제101조", topic_en: "Performance tests, etc. (성능시험 등) — NOT electrical hazard prevention" }
+      - { number: "제103조", topic_en: "Comprehensive management of machinery safety information (유해·위험기계등 안전 정보 종합관리) — NOT SHM plan" }
+      - { number: "제104조", topic_en: "Hazard-factor classification criteria (유해인자의 분류기준) — statutory GHS anchor, delegated detail in 산업안전보건법 시행규칙 별표 18" }
+      - { number: "제108조", topic_en: "Hazard investigation of new chemical substances (신규화학물질의 유해성·위험성 조사); voluntary safety confirmation is Arts 89-92" }
+      - { number: "제110조", topic_en: "MSDS preparation & submission to MOEL (물질안전보건자료의 작성·제출); posting/keeping = Art 114" }
+      - { number: "제111조", topic_en: "MSDS provision duty to transferees/recipients (물질안전보건자료의 제공)" }
+      - { number: "제112조", topic_en: "Partial non-disclosure approval for trade secrets (일부 비공개 승인 등); MSDS format/content = OSHSR §156" }
+      - { number: "제113조", topic_en: "Information submission by agents appointed by overseas manufacturers (국외제조자 선임 대리인 정보제출); substance bans/permits = Arts 117-118" }
+      - { number: "제114조", topic_en: "MSDS posting & worker education (물질안전보건자료의 게시 및 교육); warning labels = Art 115" }
+      - { number: "제115조", topic_en: "Warning labels on containers of MSDS-subject substances (용기 등의 경고표시)" }
+      - { number: "제117조", topic_en: "Prohibition of manufacture/import etc. of hazardous/dangerous substances (유해·위험물질의 제조 등 금지)" }
+      - { number: "제118조", topic_en: "Permission for manufacture/import etc. of hazardous/dangerous substances (유해·위험물질의 제조 등 허가)" }
+      - { number: "제125조", topic_en: "Work Environment Measurement" }
+      - { number: "제129조", topic_en: "Worker Health Examination — General" }
+      - { number: "제130조", topic_en: "Worker Health Examination — Special" }
+      - { number: "제155조", topic_en: "MOEL workplace inspection authority" }
+    note: "KOSHA GUIDE Z-40-2022 (Lockout/Tagout — 자물쇠와 표지판 작업) supplements OSHA-KR equipment safety provisions. 2026-08-24 SGM arbitration: legacy pre-2008-numbering drift corrected — 제13조 (was first-aid), 제31조 (was special education), 제32조 (was supervisor education), 제98-103 (were fall/collapse/electrical/PTW/SHM-plan), 제110-114 (MSDS topic off-by-one), 제243 removed (non-existent; statute ends at Art 175). GHS anchor = Art 104 + 시행규칙 별표18; MSDS procedures = 시행규칙 §156-169."
+
+  중대재해처벌법:
+    english: Serious Accidents Punishment Act
+    abbreviation: SAPA
+    regulator: MOEL (고용노동부)
+    note: "Full 16-article structure: Ch.1 General (Art 1-2), Ch.2 Serious Industrial Accidents (Art 3-9), Ch.3 Serious Civic Disasters (Art 10-11), Ch.4 Supplementary (Art 12-16). Verified via kr_safety MCP (MST=228817)."
+    articles:
+      - { number: "제3조",  topic_en: "Scope — application to business owners and management responsible persons (경영책임자등의 범위)" }
+      - { number: "제4조",  topic_en: "Safety and health assurance obligation — management system establishment (사업주와 경영책임자등의 안전 및 보건 확보의무)" }
+      - { number: "제5조",  topic_en: "Obligations for Contract, Lease, and Outsourcing (도급·용역·위탁 등 관계에서의 안전·보건 확보의무)" }
+      - { number: "제6조",  topic_en: "Punishment for serious industrial accidents (중대산업재해 사업주와 경영책임자등의 처벌)" }
+      - { number: "제7조",  topic_en: "Dual liability for serious industrial accidents — corporate penalty (중대산업재해의 양벌규정)" }
+      - { number: "제8조",  topic_en: "Mandatory safety and health education attendance (안전보건교육의 수강)" }
+      - { number: "제9조",  topic_en: "Safety and health assurance obligation for civic disasters (중대시민재해 사업주와 경영책임자등의 안전 및 보건 확보의무)" }
+      - { number: "제10조", topic_en: "Punishment for serious civic disasters (중대시민재해 사업주와 경영책임자등의 처벌)" }
+      - { number: "제11조", topic_en: "Dual liability for serious civic disasters — corporate penalty (중대시민재해의 양벌규정)" }
+      - { number: "제12조", topic_en: "Notification of final conviction (형 확정 사실의 통보)" }
+      - { number: "제13조", topic_en: "Public disclosure of serious industrial accident occurrence (중대산업재해 발생사실 공표)" }
+      - { number: "제14조", topic_en: "Special procedural rules for trials (심리절차에 관한 특례)" }
+      - { number: "제15조", topic_en: "Damages liability (손해배상의 책임)" }
+      - { number: "제16조", topic_en: "Government support and reporting requirements (정부의 사업주 등에 대한 지원 및 보고)" }
+
+  안전보건기준에관한규칙:
+    english: Occupational Safety and Health Standards Rules
+    abbreviation: OSHA-KR-Rules
+    regulator: MOEL (고용노동부)
+    note: "MOEL administrative rule (고용노동부령) under OSHA-KR. Also cited in codebase as '산업안전보건기준에 관한 규칙' — same rule, formal spaced-key variant; see subordinate_rules for cross-reference."
+    articles:
+      - { number: "제92조", topic_en: "Stopping operation during maintenance etc. — Lockout/Tagout (정비 등의 작업 시의 운전정지 등)" }
+      - { number: "제618조", topic_en: "Confined space — definitions (밀폐공간, 유해가스, 적정공기, 산소결핍)" }
+      - { number: "제623조", topic_en: "Confined space — watcher/monitor assignment (감시인의 배치 등)" }
+
+  약사법:
+    english: Pharmaceutical Affairs Act
+    abbreviation: PAA
+    regulator: MFDS (식품의약품안전처)
+    articles:
+      - { number: "제34조",     topic_en: "Clinical trial plan approval (임상시험의 계획 승인 등)" }
+      - { number: "제37조",     topic_en: "Manufacturing management obligation for pharmaceuticals, etc. (의약품등의 제조 관리의무) — statutory GMP manufacturing anchor" }
+      - { number: "제43조의2",  topic_en: "Mandatory pharmaceutical distribution management (의약품 유통관리 의무화)" }
+      - { number: "제43조의3",  topic_en: "Pharmaceutical recall duty (의약품 회수 의무)" }
+      - { number: "제69조",     topic_en: "Clinical Trial Application (CTA) approval required" }
+      - { number: "제73조의2",  topic_en: "SAE reporting / ADR reporting (의약품 안전사용 관리)" }
+      - { number: "제73조의3",  topic_en: "Pharmaceutical re-evaluation (의약품 재평가)" }
+      - { number: "제34조의3",  topic_en: "Designation of non-clinical test-conducting institutions (비임상시험실시기관 지정)" }
+
+  의약품등의안전에관한규칙:
+    english: Rule on the Safety of Pharmaceuticals, etc. (Presidential Decree; Annex 1 hosts KP-GMP)
+    abbreviation: KP-GMP
+    regulator: MFDS (식품의약품안전처)
+    note: "총리령 under 약사법 Article 37. Manufacturing-quality requirements are codified in Annex 1 (별표 1 「의약품 제조 및 품질관리기준」) using 호-numbering; operational detail is delegated to MFDS Notice No. 2024-87 (「의약품 제조 및 품질관리에 관한 규정」). Re-keyed 2026-08-24 from the retired '의약품등기준규정' 조12~20 scheme; see regulations/KR/MFDS-GMP.yaml for the full annex structure."
+    articles:
+      - { number: "별표 1 제6호",   topic_en: "Validation & Qualification incl. cleaning and CSV (밸리데이션·적격성평가)" }
+      - { number: "별표 1 제7호",   topic_en: "Quality Control (품질관리)" }
+      - { number: "별표 1 제7.2호", topic_en: "Stability Testing (안정성시험)" }
+      - { number: "별표 1 제7.3호", topic_en: "Product Quality Review — deviation/CAPA records regulated here (제품품질평가)" }
+      - { number: "별표 1 제8호",   topic_en: "Manufacturing Control (제조관리)" }
+      - { number: "별표 1 제10호",  topic_en: "Raw Material & Product Management (원자재 및 제품의 관리)" }
+      - { number: "별표 1 제12호",  topic_en: "Change Control (변경관리)" }
+      - { number: "별표 1 제13호",  topic_en: "Self-Inspection (자율점검)" }
+
+  의약품등기준규정:
+    english: Standards and Specifications for Pharmaceuticals, etc. (RETIRED citation alias — do not cite in new work)
+    abbreviation: KP-GMP (legacy)
+    regulator: MFDS (식품의약품안전처)
+    note: "Retired legacy instrument name formerly cited as 'delegated regulation under 약사법 Article 34' with a 조12~20 article scheme. Its GMP text now resides in 총리령 「의약품 등의 안전에 관한 규칙」 별표 1 (see that entry); operational detail moved to MFDS Notice No. 2024-87. Key retained solely as a citation-compatibility alias so historical strings (CHANGELOG, memory archives) keep stripping cleanly in validate-md-language.ts."
+
+  화학물질관리법:
+    english: Chemicals Control Act
+    abbreviation: CCA
+    regulator: ME (환경부) / MOEL shared
+    note: "Cited in agents as TCCL-integrated toxic/accident-preparedness chemical management."
+    articles:
+      - { number: "제20조", topic_en: "Harmful chemicals (유해화학물질)" }
+      - { number: "제23조", topic_en: "Accident-preparedness substances (사고대비물질)" }
+
+  화학물질등록 및 평가 등에 관한 법률:
+    english: Act on Registration and Evaluation of Chemicals
+    abbreviation: K-REACH
+    regulator: ME (환경부)
+    note: "Also abbreviated ARECS. Cited in MSDS and GLP (K-REACH hazard testing) contexts."
+    articles:
+      - { number: "제10조", topic_en: "Chemical registration — monthly reporting" }
+      - { number: "제11조", topic_en: "Registration for substances ≥ 1 ton/year" }
+      - { number: "제13조", topic_en: "Chemical evaluation" }
+
+  의료기기법:
+    english: Medical Device Act
+    abbreviation: K-MDA
+    regulator: MFDS (식품의약품안전처)
+    articles:
+      - { number: "제12조", topic_en: "Medical device manufacturing/import licensing" }
+      - { number: "제16조", topic_en: "Medical device GMP / quality management (KGMP-MD)" }
+      - { number: "제20조", topic_en: "Medical device PMS / recall" }
+      - { number: "제23조", topic_en: "Medical device distribution / supply chain" }
+      - { number: "제83조", topic_en: "Post-market surveillance (PMS) framework" }
+    note: "의료기기법 Article 83 was mistakenly mapped from EU MDR Article 83 (PMS system). Korea's PMS equivalent is '시판 후 조사' under separate provisions. Schema corrected to cite 'EU MDR Article 83' explicitly."
+
+  고압가스안전관리법:
+    english: High-Pressure Gas Safety Control Act
+    abbreviation: HPGSCA
+    regulator: MOTIE (산업통상자원부) / KGS (한국가스안전공사)
+    articles:
+      - { number: "제11조", topic_en: "Safety management regulations (안전관리규정 — written plan submission)" }
+      - { number: "제13조", topic_en: "Facility and container safety maintenance (시설·용기의 안전유지)" }
+      - { number: "제15조", topic_en: "Safety Manager appointment (안전관리자 선임)" }
+      - { number: "제22조의2", topic_en: "Delegation of detailed facility/technical/inspection standards to KGS Code" }
+      - { number: "제24조", topic_en: "Licensing-authority corrective measures (suspension, relocation, disposal)" }
+      - { number: "제26조", topic_en: "Accident notification (death, injury, explosion, fire, leak)" }
+    note: "2026-08-07 (Group C-1b remediation): previous entries Art 14 (deleted 1999.2.8), Art 17 (actually 용기등의 검사), Art 28 (actually 한국가스안전공사의 설립) were stale mis-citations. Replaced with live articles verified via legalize_kr.parse_law_structure."
+
+  액화석유가스의 안전관리 및 사업법:
+    english: LPG Safety Control and Business Act
+    abbreviation: LPG-SCBA
+    regulator: KGS (한국가스안전공사)
+    note: "Often abbreviated in schemas as 'LPG 안전관리법'."
+    articles:
+      - { number: "제29조", topic_en: "LPG charging business safety management" }
+      - { number: "제30조", topic_en: "LPG hazardous zone / leak response" }
+      - { number: "제37조", topic_en: "LPG tank / facility safety" }
+
+  수소경제 육성 및 수소안전관리에 관한 법률:
+    english: Hydrogen Economy Promotion and Hydrogen Safety Management Act
+    abbreviation: HEPHSMA
+    regulator: MOTIE (산업통상자원부) / KGS
+    note: "Often abbreviated as 수소법 (2021)."
+    articles:
+      - { number: "제32조", topic_en: "Construction and operation of comprehensive information management system (종합정보관리시스템의 구축·운영)" }
+      - { number: "제33조", topic_en: "Designation of hydrogen industry promotion agency (수소산업진흥전담기관의 지정 등)" }
+
+  전기사업법:
+    english: Electric Utility Act
+    abbreviation: EUA
+    regulator: MOTIE (산업통상자원부)
+    articles:
+      - { number: "제46조", topic_en: "Power generation facility installation permission" }
+      - { number: "제47조", topic_en: "Generation facility safety management" }
+      - { number: "제65조", topic_en: "Electrical facility safety" }
+
+  전기안전관리법:
+    english: Electrical Safety Control Act
+    abbreviation: ESCA
+    regulator: MOTIE (산업통상자원부) / KESCO
+    note: "Cited in powergen-agent as 전기안전관리법 (sometimes informally 전기안전법)."
+    articles:
+      - { number: "제16조", topic_en: "Electrical facility safety inspection" }
+      - { number: "제29조", topic_en: "Electrical Safety Manager appointment (전기안전관리자 선임)" }
+
+  건설기술진흥법:
+    english: Construction Technology Promotion Act
+    abbreviation: CTPA
+    regulator: MOLIT (국토교통부)
+    articles:
+      - { number: "제24조", topic_en: "Construction safety management / independent safety supervision" }
+      - { number: "제25조", topic_en: "Construction safety management / independent safety supervision" }
+
+  대기환경보전법:
+    english: Clean Air Conservation Act
+    abbreviation: CACA
+    regulator: ME (환경부)
+    note: "Referenced without specific article in ehschem environmental-monitoring (배출 허용 기준)."
+    articles: []
+
+  수질환경보전법:
+    english: Water Environment Conservation Act
+    abbreviation: WECA
+    regulator: ME (환경부)
+    note: "Referenced without specific article in ehschem environmental-monitoring. Statute formally now 수질및생태환경보전법; codebase uses 수질환경보전법 — preserved as-cited."
+    articles: []
+
+  위험물안전관리법:
+    english: Dangerous Substances Safety Management Act
+    abbreviation: DSSMA
+    regulator: NFA / MOIS
+    note: "Referenced across gasterm and ehschem workflows (위험물 저장/취급, 지정수량 이상)."
+    articles:
+      - { number: "제5조",     topic_en: "Storage and handling restrictions and technical standards" }
+      - { number: "제6조",     topic_en: "Installation and modification of hazardous-materials facilities" }
+      - { number: "제13조",    topic_en: "Administrative surcharge (penalty) for violations" }
+      - { number: "제18조",    topic_en: "Periodic inspection and examination of facilities" }
+      - { number: "제22조의2", topic_en: "Accident investigation for leaks/spills" }
+      - { number: "제27조",    topic_en: "Emergency measures, notification, and corrective orders" }
+
+  도시가스사업법:
+    english: City Gas Business Act
+    abbreviation: CGBA
+    regulator: MOTIE (산업통상자원부)
+    note: "Referenced in gasterm pipe-transfer-management (도시가스 배관/저장) without specific articles."
+    articles: []
+
+  식품위생법:
+    english: Food Sanitation Act
+    abbreviation: FSA
+    regulator: MFDS (식품의약품안전처)
+    articles:
+      - { number: "제12조의2", topic_en: "Labeling of genetically modified foods (유전자변형식품 표시)" }
+      - { number: "제48조",   topic_en: "HACCP certification and maintenance duty (식품안전관리인증기준)" }
+
+  화장품법:
+    english: Cosmetics Act
+    abbreviation: CA
+    regulator: MFDS (식품의약품안전처)
+    articles:
+      - { number: "제5조", topic_en: "Manufacturing and Quality Control Standards (CGMP)" }
+
+  폐기물관리법:
+    english: Wastes Control Act
+    abbreviation: WCA
+    regulator: ME (환경부)
+    note: "Referenced in powergen ash-chemical-waste-management without specific articles."
+    articles:
+      - { number: "제13조", topic_en: "Standards for waste treatment (collection, transport, disposal)" }
+      - { number: "제25조", topic_en: "Waste treatment business licensing and operation" }
+
+  환경보건법:
+    english: Environmental Health Act
+    abbreviation: EHA
+    regulator: ME (환경부)
+    note: "Verified as active Korean law on law.go.kr (법률 제20384호, 2024.3.19 개정). Covers environmental health impact assessment, environmental health monitoring, and hazardous substance exposure management."
+    articles: []
+
+  생명윤리법:
+    english: Bioethics and Safety Act
+    abbreviation: BSA
+    regulator: MOHW (보건복지부)
+    note: "Cited in GCP workflows (informed-consent, irb-review, sae-reporting-reference) governing IRB/생명윤리심의위원회. Canonical statute name is 생명윤리 및 안전에 관한 법률."
+    articles:
+      - { number: "제13조", topic_en: "Institutional Review Board (IRB) support and operation" }
+      - { number: "제16조", topic_en: "Informed consent for human subjects research" }
+
+  건설산업기본법:
+    english: Construction Industry Basic Act
+    abbreviation: CIBA
+    regulator: MOLIT (국토교통부)
+    note: "Verified as active Korean law via legalize_kr (MST 273435). Art.83 (등록말소) was previously mis-cited as TBM basis (FIND-2026-0003, corrected)."
+    articles:
+      - { number: "제29조의2", topic_en: "Management of construction subcontracting (건설공사의 하도급관리)" }
+      - { number: "제45조",   topic_en: "Management rationalization efforts (safety management cost)" }
+      - { number: "제83조",   topic_en: "Cancellation of construction business registration (administrative penalty)" }
+
+  재난 및 안전관리 기본법:
+    english: Framework Act on the Management of Disasters and Safety
+    abbreviation: FAMDS
+    regulator: MOIS (행정안전부)
+    note: "Verified as active Korean law via legalize_kr (MST 283851). Canonical name for what several workflows informally cited as '재난관리기본법'. Article-level detail pending future verification."
+    articles: []
+
+  유전자변형생물체의 국가간 이동 등에 관한 법률:
+    english: Act on the Transboundary Movement, etc. of Living Modified Organisms
+    abbreviation: LMO-Act
+    regulator: ME (환경부)
+    note: "Governs LMO containment, BSL facility operation, and labeling. Cited in biotech domain (LMO biohazard containment)."
+    articles:
+      - { number: "제22조", topic_en: "Installation and operation of LMO research facilities (containment)" }
+      - { number: "제24조", topic_en: "Labeling of LMO-containing products" }
+
+  독성시험 책임자 규정:
+    english: Toxicity Study Director Regulation
+    note: "Cited in workflows/domains/industry/glp/personnel-qualification/schema.yaml. Appears to be an internal MFDS rule reference (cf. '비임상시험 관리기준 (MFDS 고시)' pattern documented in regulations/KR/MFDS-GLP.yaml) rather than a standalone statute. Abbreviation, regulator, and article-level detail unverified — not fabricated pending confirmation."
+    articles: []
+
+  소방기본법:
+    english: Basic Fire Services Act
+    abbreviation: BFS
+    regulator: NFA (소방청)
+    note: "Cited in emergency workflows (confined-space-rescue, high-angle-rescue) as '소방기본법 (구조)'."
+    articles:
+      - { number: "제16조", topic_en: "Fire-fighting and rescue operations (소방활동)" }
+
+  응급의료에 관한 법률:
+    english: Emergency Medical Service Act
+    regulator: MOHW (보건복지부)
+    note: "Cited in workflows/emergency/medical-emergency/schema.yaml. Abbreviation and article-level detail unverified."
+    articles: []
+
+# =============================================================================
+# SUBORDINATE RULES (MOEL/other ministry administrative rules & decrees that are
+# NOT statutes but are cited in codebase with article-level granularity.
+# Keys are the formal Korean names as they appear in codebase citations.)
+# =============================================================================
+subordinate_rules:
+  산업안전보건기준에 관한 규칙:
+    english: Occupational Safety and Health Standards Rules
+    abbreviation: OSHA-KR-Rules
+    regulator: MOEL (고용노동부)
+    note: "MOEL administrative rule (고용노동부령) under OSHA-KR. This is the formal spaced-key name variant; the compact form 안전보건기준에관한규칙 is the statutes-section canonical key."
+    articles:
+      - { number: "제92조", topic_en: "Stopping operation during maintenance etc. — Lockout/Tagout (정비 등의 작업 시의 운전정지 등)" }
+      - { number: "제618조", topic_en: "Confined space — definitions (밀폐공간, 유해가스, 적정공기, 산소결핍)" }
+      - { number: "제623조", topic_en: "Confined space — watcher/monitor assignment (감시인의 배치 등)" }
+
+# =============================================================================
+# INTERNATIONAL STANDARDS (reference only — NOT part of the Korean allowlist)
+# =============================================================================
+international_standards:
+  GHS:
+    full_name: Globally Harmonized System of Classification and Labelling of Chemicals
+    version: "Rev 9 (2021)"
+    kr_mandation_date: "2023-01-01"
+    un_reference: "UN GHS Rev 9"
+  ICH_E6:
+    full_name: "ICH Harmonised Guideline E6(R3) — Good Clinical Practice"
+    codebase_variants: ["ICH E6", "ICH E6(R2)", "ICH E6(R3)"]
+  ICH_E2:
+    full_name: "ICH E2 series — Pharmacovigilance / Clinical Safety Data Management"
+  ICH_E3:
+    full_name: "ICH E3 — Structure and Content of Clinical Study Reports"
+  ICH_E9:
+    full_name: "ICH E9(R1) — Statistical Principles for Clinical Trials"
+  ICH_Q1:
+    full_name: "ICH Q1 series (Q1A/Q1E) — Stability Testing"
+  ICH_Q7:
+    full_name: "ICH Q7 — Active Pharmaceutical Ingredients (GMP for APIs)"
+  ICH_Q9:
+    full_name: "ICH Q9 — Quality Risk Management"
+  ICH_Q10:
+    full_name: "ICH Q10 — Pharmaceutical Quality System"
+  OECD_GLP:
+    full_name: "OECD Principles of Good Laboratory Practice (MAD)"
+    codebase_variants: ["OECD GLP", "OECD MAD"]
+  PICS_GDP:
+    full_name: "PIC/S Guide to Good Distribution Practice for Medicinal Products"
+    codebase_variants: ["PIC/S GDP"]
+  PICS_GMP:
+    full_name: "PIC/S GMP Guide PE 009 (with Annexes)"
+    codebase_variants: ["PIC/S PE 009"]
+  ISO_13485:
+    full_name: "ISO 13485 — Medical devices Quality Management Systems"
+  ISO_14971:
+    full_name: "ISO 14971 — Application of risk management to medical devices"
+  ISO_11135:
+    full_name: "ISO 11135 — Ethylene oxide sterilization of medical devices"
+  ISO_11137:
+    full_name: "ISO 11137 — Sterilization of health care products (radiation)"
+  ISO_17025:
+    full_name: "ISO/IEC 17025 — Competence of testing and calibration laboratories"
+  EU_MDR:
+    full_name: "EU Medical Device Regulation (MDR 2017/745)"
+    note: "Cited alongside 의료기기법 in meddevice workflows (Annex XIV, Article 83/87)."
+  CFR_21_PART_11:
+    full_name: "21 CFR Part 11 — FDA Electronic Records / Electronic Signatures"
+  GAMP_5:
+    full_name: "GAMP 5 — Risk-based approach to compliant GxP computerized systems"
+  EU_GDP:
+    full_name: "EU Guidelines on Good Distribution Practice of medicinal products for human use (2013/C 343/01)"
+    note: "Cited across most GDP workflows; documented as international_alignment in regulations/KR/MFDS-GDP.yaml."
+  EU_GVP:
+    full_name: "EU Good Pharmacovigilance Practices — Modules I-XVI"
+    note: "Cited across most GVP workflows; documented as international_alignment in regulations/KR/MFDS-GVP.yaml."

@@ -1,0 +1,27 @@
+schema_version: "1.0"
+workflow_id: waste-landfill-methane-anaerobic-explosion
+title: "Waste (Treatment, recycling, incineration) — waste-landfill-methane-anaerobic-explosion"
+status: active
+applicability: mandatory
+workflow_type: core
+industry_profile: waste
+agent: waste-agent
+signature_hazard: "매립지(landfill) 및 혐기소화(anaerobic digestion) 시설 메탄(CH4) 가스 폭발 한계(LEL) 관리, 침출수(leachate) 화학적 위해, 사면(slope) 붕괴, 및 매립지 화재 소방 대응 (Landfill + anaerobic-digestion facility: methane LEL explosion management, leachate chemical hazard, slope collapse, landfill-fire firefighting response)"
+
+# Auto-filled from regulations/KR/industry-regulatory-anchors.yaml (Task A-03).
+# Entries marked [UNVERIFIED] originate from the anchor table and require specialist re-verification.
+legal_basis:
+  - 산업안전보건법 Article 36
+  - 산업안전보건법 Article 57
+  - 중대재해처벌법 Article 4
+  - 중대재해처벌법 Article 5
+  - 중대재해처벌법 Article 6
+  - 중대재해처벌법 Article 7
+  - 폐기물관리법 Article 13
+  - 폐기물관리법 Article 25
+  - 소방기본법 Article 16
+  - 화학물질관리법 Article 23
+
+# Industry-unique workflow. NOT a shared-workflow reference (no `references:` block).
+# Evidence model skeleton — see evidence-models/domains/industry/waste/waste-waste-landfill-methane-anaerobic-explosion-record.json.
+evidence_model: waste-waste-landfill-methane-anaerobic-explosion-record.json

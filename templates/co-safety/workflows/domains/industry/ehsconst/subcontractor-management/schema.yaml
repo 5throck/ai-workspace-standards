@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: subcontractor-management
+title: "협력업체 안전 관리 (Subcontractor Safety Management)"
+status: active
+applicability: mandatory
+workflow_type: core
+
+legal_basis:
+  - 중대재해처벌법 Article 13
+  - 산업안전보건법 Article 15
+  - 건설산업기본법 Article 29-2 (건설공사의 하도급관리)
+industry_profile: construction
+agent: ehsconst-agent
+evidence_model: ehsconst-subcontractor-record.json

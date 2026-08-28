@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: labeling-update
+title: "안전성 표기 갱신 (Safety Labeling Update)"
+status: active
+applicability: mandatory
+workflow_type: core
+
+legal_basis:
+  - 약사법 Article 73의2
+  - 의약품 이상반응 보고 규정 (MFDS 고시)
+  - EU GVP Module 15
+industry_profile: pharmacovigilance
+agent: gvp-agent
+evidence_model: gvp-labeling-record.json

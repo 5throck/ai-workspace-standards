@@ -1,0 +1,27 @@
+schema_version: "1.0"
+workflow_id: waste-designated-hazardous-chemical-treatment
+title: "Waste (Treatment, recycling, incineration) — waste-designated-hazardous-chemical-treatment"
+status: active
+applicability: mandatory
+workflow_type: core
+industry_profile: waste
+agent: waste-agent
+signature_hazard: "지정폐기물(지폐) 처리시설(중화·고화·소각 등) 운영 시 유해화학물질(중금속·유기용제·산알칼리) 노출, 누출 사고 대응, 처리시설 허가·운영 기준 준수 (Designated-waste treatment facility — neutralization / solidification / incineration operations: hazardous-chemical — heavy-metal / solvent / acid-alkali — exposure, leak-incident response, treatment-facility licensing and operation compliance)"
+
+# Auto-filled from regulations/KR/industry-regulatory-anchors.yaml (Task A-03).
+# Entries marked [UNVERIFIED] originate from the anchor table and require specialist re-verification.
+legal_basis:
+  - 산업안전보건법 Article 36
+  - 산업안전보건법 Article 57
+  - 중대재해처벌법 Article 4
+  - 중대재해처벌법 Article 5
+  - 중대재해처벌법 Article 6
+  - 중대재해처벌법 Article 7
+  - 폐기물관리법 Article 13
+  - 폐기물관리법 Article 25
+  - 소방기본법 Article 16
+  - 화학물질관리법 Article 23
+
+# Industry-unique workflow. NOT a shared-workflow reference (no `references:` block).
+# Evidence model skeleton — see evidence-models/domains/industry/waste/waste-waste-designated-hazardous-chemical-treatment-record.json.
+evidence_model: waste-waste-designated-hazardous-chemical-treatment-record.json

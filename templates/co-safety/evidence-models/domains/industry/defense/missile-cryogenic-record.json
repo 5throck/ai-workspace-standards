@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "missile-cryogenic-record.json",
+  "title": "Missile Cryogenic and High-Pressure Gas Record",
+  "description": "Evidence model for Missile Liquid Propellant Loading Pressure Integrity and Cryogenic Thermal Protection.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "fueling_rig_id",
+    "pressure_bar",
+    "legal_basis",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^DEF-CRY-[0-9]{4}-[0-9]{4}$"
+    },
+    "fueling_rig_id": {
+      "type": "string"
+    },
+    "pressure_bar": {
+      "type": "number"
+    },
+    "cryogenic_ppe_verified": {
+      "type": "boolean"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

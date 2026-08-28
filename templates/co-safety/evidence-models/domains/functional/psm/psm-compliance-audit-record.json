@@ -1,0 +1,86 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "psm-compliance-audit-record.json",
+  "title": "PSM Compliance Audit Record",
+  "description": "Evidence model for 3-year cycle PSM compliance audit records per OSHA-KR Article 44.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "version",
+    "record_id",
+    "timestamp",
+    "agent_id",
+    "workflow_id",
+    "legal_basis"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "default": "1.0.0"
+    },
+    "record_id": {
+      "type": "string",
+      "pattern": "^PSM-AUD-[0-9]{4}-[0-9]{4}$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when the record was created"
+    },
+    "agent_id": {
+      "type": "string",
+      "description": "ID of the agent that generated this record"
+    },
+    "workflow_id": {
+      "type": "string",
+      "description": "ID of the workflow execution"
+    },
+    "audit_cycle": {
+      "type": "integer",
+      "description": "3-year cycle"
+    },
+    "audit_start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "audit_end_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "auditor_team": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "findings_count": {
+      "type": "integer"
+    },
+    "critical_findings": {
+      "type": "integer"
+    },
+    "corrective_actions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_audit_due": {
+      "type": "string",
+      "format": "date"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "description": "Multi-source legal basis. Primary: OSHA-KR Article 44 (PSM — compliance audit). Adjacent laws may include: SAPA Article 4 (safety management system verification), OSHA-KR Article 15 (risk assessment compliance for hazardous facilities).",
+      "examples": [
+        "산업안전보건법 Article 44 (공정안전관리 — 규정준수평가)",
+        "중대재해처벌법 Article 4 (경영책임자 안전보건확보 의무)",
+        "산업안전보건법 Article 15 (유해·위험방지계획 수립)"
+      ]
+    }
+  }
+}

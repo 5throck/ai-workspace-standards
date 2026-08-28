@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: catenary-high-voltage-safety
+title: "철도 25kV 전차선 고전압 정비 감전 예방 및 접지 안전 (Railway Catenary High-Voltage Safety)"
+status: active
+applicability: mandatory
+workflow_type: core
+legal_basis:
+  - 철도안전법 Article 45
+  - 산업안전보건법 Article 38
+  - 전기안전관리법 Article 16
+  - 중대재해처벌법 Article 4
+industry_profile: railway-transit
+agent: railway-agent
+evidence_model: catenary-high-voltage-record.json

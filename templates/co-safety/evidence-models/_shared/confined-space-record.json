@@ -1,0 +1,347 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "confined-space-record.json",
+  "title": "Cross-Industry Confined Space Entry (CSE) Record — Shared Base",
+  "description": "Shared base evidence model for Confined Space Entry (밀폐공간 작업, CSE) records across high-risk industries. Derived from ship-confined-space-record.json, rail-track-confined-record.json, sewage-confined-h2s-record.json, and emergency-rescue-record.json (confined_space_rescue type). Satisfies ADR-001 promotion criteria: 4 domains (shipbuilding, railway, waste-water, emergency), 8+ common fields, parameterizable by space_type and industry_profile. Domain-specific provisions go in industry_specific_fields. Dedicated domain models (e.g., ship-confined-space-record.json, rail-track-confined-record.json, sewage-confined-h2s-record.json, emergency-rescue-record.json) are preserved for domain-specific procedures and remain authoritative for their respective domains. This shared base is an optional template for future adoption; existing workflows are NOT migrated.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "industry_profile",
+    "entry_date",
+    "space_type",
+    "atmospheric_checks",
+    "attendant_watchman_id",
+    "legal_basis",
+    "e_signature",
+    "nomenclature",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^CSE-[A-Z]{2,8}-[0-9]{4}-[0-9]{4}$",
+      "description": "Format: CSE-<DOMAIN>-YYYY-NNNN (e.g., CSE-SHIPBD-2026-0001, CSE-RAILWY-2026-0042, CSE-WASTEW-2026-0003)"
+    },
+    "industry_profile": {
+      "type": "string",
+      "enum": [
+        "ehschem",
+        "gasterm",
+        "steelmaking",
+        "shipbuilding",
+        "powergen",
+        "waste",
+        "defense",
+        "semicon",
+        "battery",
+        "biotech",
+        "datacenter",
+        "logistics",
+        "railway",
+        "food",
+        "construction"
+      ],
+      "description": "Industry profile determines the legal_basis template and industry_specific_fields schema"
+    },
+    "entry_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of confined space entry."
+    },
+    "entry_time": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Exact date-time when personnel entered the confined space."
+    },
+    "exit_time": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Exact date-time when all personnel exited the confined space. Null if entry is still in progress."
+    },
+    "space_type": {
+      "type": "string",
+      "enum": [
+        "ship_tank",
+        "tunnel",
+        "manhole",
+        "sewer",
+        "silo",
+        "boiler",
+        "reactor",
+        "other"
+      ],
+      "description": "Type of confined space per 산업안전보건기준에관한규칙 Art.618 definitions. 'ship_tank' for shipbuilding double-hull/cofferdam, 'tunnel' for rail/road tunnels, 'manhole' for utility/sewage access, 'sewer' for sewage treatment, 'silo' for grain/storage, 'boiler' for powergen/steelmaking, 'reactor' for chemical/biotech, 'other' for atypical spaces."
+    },
+    "space_id": {
+      "type": "string",
+      "description": "Identifier of the specific confined space (tank ID, tunnel segment, manhole number, etc.)."
+    },
+    "space_description": {
+      "type": "string",
+      "description": "Human-readable description of the confined space and its location."
+    },
+    "atmospheric_checks": {
+      "type": "object",
+      "description": "Pre-entry and continuous atmospheric monitoring results per 산업안전보건기준에관한규칙 Art.623 (감시인의 배치 등). Must verify oxygen, flammability, and toxic gases before entry.",
+      "properties": {
+        "oxygen_pct": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 25,
+          "description": "Oxygen concentration (%). Normal range: 19.5–23.5%. Below 19.5% or above 23.5% is hazardous."
+        },
+        "lel_pct": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Lower Explosive Limit percentage. Must be < 10% for safe entry (preferably 0%)."
+        },
+        "h2s_ppm": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Hydrogen sulfide concentration (ppm). PEL: 10 ppm, STEL: 15 ppm, IDLH: 100 ppm."
+        },
+        "co_ppm": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Carbon monoxide concentration (ppm). PEL: 50 ppm, IDLH: 1,200 ppm."
+        },
+        "other_gases": {
+          "type": "array",
+          "description": "Additional gas measurements beyond the standard four. Use for domain-specific toxic gases (e.g., NH3, CH4, VOC, benzene).",
+          "items": {
+            "type": "object",
+            "properties": {
+              "gas_name": {
+                "type": "string",
+                "description": "Name of the gas measured (e.g., 'NH3', 'CH4', 'benzene')."
+              },
+              "value": {
+                "type": "number",
+                "description": "Measured concentration value."
+              },
+              "unit": {
+                "type": "string",
+                "description": "Unit of measurement (e.g., 'ppm', '%LEL', 'mg/m3')."
+              },
+              "limit": {
+                "type": "string",
+                "description": "Applicable exposure limit for reference (e.g., 'PEL 25 ppm')."
+              }
+            },
+            "required": [
+              "gas_name",
+              "value",
+              "unit"
+            ]
+          }
+        },
+        "monitoring_instrument_id": {
+          "type": "string",
+          "description": "ID of the gas detector / multi-gas monitor used for atmospheric testing."
+        },
+        "last_calibration_date": {
+          "type": ["string", "null"],
+          "format": "date",
+          "description": "Last calibration date of the monitoring instrument. Per Art.623, instruments must be calibrated per manufacturer schedule."
+        },
+        "continuous_monitoring_active": {
+          "type": "boolean",
+          "description": "Whether continuous atmospheric monitoring is active during the entry, as required by Art.623 for high-risk spaces."
+        },
+        "pre_entry_test_timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp of the pre-entry atmospheric test."
+        }
+      },
+      "required": [
+        "oxygen_pct",
+        "lel_pct",
+        "h2s_ppm",
+        "co_ppm"
+      ]
+    },
+    "ventilation": {
+      "type": "object",
+      "description": "Ventilation measures applied before and during confined space entry per 산업안전보건기준에관한규칙 Art.618/623.",
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": [
+            "forced_exhaust",
+            "forced_supply",
+            "combination",
+            "natural",
+            "none_required"
+          ],
+          "description": "Ventilation method employed. 'forced_exhaust' pulls air out, 'forced_supply' pushes fresh air in, 'combination' uses both."
+        },
+        "rate_cfm": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Ventilation rate in cubic feet per minute (CFM). Null if natural ventilation or not applicable."
+        },
+        "confirmed": {
+          "type": "boolean",
+          "description": "Confirms ventilation has been established and verified effective before entry."
+        },
+        "pre_ventilation_duration_minutes": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Duration of pre-entry ventilation in minutes before entry was authorized. Null if not applicable."
+        }
+      },
+      "required": [
+        "method",
+        "confirmed"
+      ]
+    },
+    "entry_permit_ref": {
+      "type": ["string", "null"],
+      "description": "Reference to the Permit-to-Work (PTW) or Confined Space Entry Permit governing this entry. Links to PTW record (e.g., ehsconst-ptw-record.json or domain-specific PTW)."
+    },
+    "attendant_watchman_id": {
+      "type": "string",
+      "description": "ID of the attendant watchman (감시인) stationed outside the confined space, as required by 산업안전보건기준에관한규칙 Art.623 (감시인의 배치 등). The watchman must maintain continuous communication with entrants and be trained in emergency notification."
+    },
+    "entrants": {
+      "type": "array",
+      "description": "List of personnel entering the confined space.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "entrant_id": {
+            "type": "string",
+            "description": "Employee or contractor ID of the entrant."
+          },
+          "entrant_name": {
+            "type": "string",
+            "description": "Full name of the entrant."
+          },
+          "role": {
+            "type": "string",
+            "description": "Role of the entrant in the confined space operation."
+          },
+          "rescue_harness_attached": {
+            "type": "boolean",
+            "description": "Confirms the entrant is wearing a rescue harness with retrieval line attached."
+          }
+        },
+        "required": [
+          "entrant_id",
+          "entrant_name"
+        ]
+      }
+    },
+    "communication_method": {
+      "type": "string",
+      "enum": [
+        "radio",
+        "hardwired",
+        "visual_signal",
+        "continuous_visual",
+        "other"
+      ],
+      "description": "Method of continuous communication between entrants and the attendant watchman per Art.623."
+    },
+    "rescue_plan_ref": {
+      "type": ["string", "null"],
+      "description": "Reference to the emergency rescue plan for this confined space entry. May reference emergency-rescue-record.json or domain-specific rescue procedures."
+    },
+    "rescue_equipment_available": {
+      "type": "array",
+      "description": "Rescue equipment staged and ready at the entry point per Art.623.",
+      "items": {
+        "type": "string",
+        "enum": [
+          "tripod_hoist",
+          "winch",
+          "retrieval_line",
+          "scba",
+          "air_line_respirator",
+          "first_aid_kit",
+          "aed",
+          "gas_detector",
+          "communication_device",
+          "lighting",
+          "other"
+        ]
+      }
+    },
+    "isolation_verification": {
+      "type": "object",
+      "description": "Energy isolation and isolation verification for the confined space (e.g., blanking, double block and bleed, lockout). Cross-references LOTO record where applicable.",
+      "properties": {
+        "isolation_required": {
+          "type": "boolean",
+          "description": "Whether energy isolation (pipelines, electrical, mechanical) was required for this confined space entry."
+        },
+        "isolation_performed": {
+          "type": "boolean",
+          "description": "Confirms energy isolation was completed and verified."
+        },
+        "loto_ref": {
+          "type": ["string", "null"],
+          "description": "Reference to the associated LOTO record (e.g., LOTO-GASTERM-2026-0001 or _shared/loto-record.json) if lockout/tagout was applied."
+        },
+        "blanking_blind_installed": {
+          "type": "boolean",
+          "description": "Confirms positive isolation via blinding/blinds (맹판) for pipeline-connected confined spaces."
+        }
+      },
+      "required": [
+        "isolation_required"
+      ]
+    },
+    "tbm_ref": {
+      "type": ["string", "null"],
+      "description": "Reference to the pre-entry Tool Box Meeting (합동 TBM) record where the entry plan, hazards, and rescue procedures were reviewed. May reference _shared/tbm-record.json or domain-specific TBM record."
+    },
+    "risk_assessment_ref": {
+      "type": ["string", "null"],
+      "description": "Reference to the risk assessment record identifying confined space hazards and control measures for this specific space and task."
+    },
+    "industry_specific_fields": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Domain-specific extension fields (e.g., {tank_type: 'double_hull', vessel_id: 'VLCC-007'} for shipbuilding, {tunnel_segment: 'S-42', track_interlock: true} for railway, {sewage_level_m: 1.2, sludge_density: 'high'} for waste-water, {rescue_method: 'vertical_lowering', victim_condition: 'unconscious_breathing'} for emergency rescue)"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "description": "Multi-source legal basis. Must cite >= 3 regulatory sources. Common cross-industry base: OSHA-KR Art.15 (safety management system), OSHA-KR Art.38 (safety measures for hazardous work), 안전보건기준에관한규칙 Art.618 (밀폐공간 작업 — definitions and requirements), 안전보건기준에관한규칙 Art.623 (감시인의 배치 등 — attendant/watchman duties), SAPA Art.4 (중대재해처벌법 — safety management system obligation). Industry-specific laws are added per the domain's legal_basis template (e.g., 철도안전법 for railway, 하수도법 for waste-water, 소방기본법 for emergency rescue).",
+      "examples": [
+        [
+          "산업안전보건법 Article 15 (안전관리체계)",
+          "산업안전보건법 Article 38 (안전조치)",
+          "안전보건기준에관한규칙 Article 618 (밀폐공간 작업)",
+          "안전보건기준에관한규칙 Article 623 (감시인의 배치 등)"
+        ],
+        [
+          "안전보건기준에관한규칙 Article 618 (밀폐공간 작업)",
+          "안전보건기준에관한규칙 Article 623 (감시인의 배치 등)",
+          "중대재해처벌법 Article 4 (경영책임자 등의 안전확보 의무)"
+        ],
+        [
+          "안전보건기준에관한규칙 Article 618 (밀폐공간 작업)",
+          "안전보건기준에관한규칙 Article 623 (감시인의 배치 등)",
+          "SAPA Article 4 (safety management system obligation)"
+        ]
+      ]
+    },
+    "e_signature": {
+      "$ref": "base/common.schema.json#/definitions/e_signature"
+    },
+    "nomenclature": {
+      "$ref": "base/common.schema.json#/definitions/nomenclature"
+    },
+    "audit_trail": {
+      "$ref": "base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

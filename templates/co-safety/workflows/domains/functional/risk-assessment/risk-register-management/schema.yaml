@@ -1,0 +1,10 @@
+schema_version: "1.0"
+workflow_id: risk-register-management
+title: "위험 등록부 관리 — 정기 검토 및 갱신 (Risk Register Management)"
+status: active
+applicability: mandatory
+applicable_industries: [manufacturing, chemical, construction, gas_terminal, power_generation, pharmaceutical, food, semiconductor, battery, shipbuilding, steelmaking, logistics, railway, waste, defense, biotech, meddevice, datacenter]
+legal_basis: [산업안전보건법 Article 36, 중대재해처벌법 Article 4, 산업안전보건법 Article 15]
+industry_profile: risk-assessment
+agent: risk-assessment-agent
+evidence_model: risk-register-record.json

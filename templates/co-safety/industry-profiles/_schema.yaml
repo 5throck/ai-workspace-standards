@@ -1,0 +1,96 @@
+# Canonical Industry Profile Schema v1.0
+# All industry-profiles/*.yaml MUST conform to this structure.
+#
+# VALIDATION: Run `bun industry-profiles/_validate.ts` to verify compliance.
+#
+# FIELD ORDER (canonical):
+#   1. profile_id
+#   2. name
+#   3. display_name
+#   4. version
+#   5. status
+#   6. last_updated
+#   7. industry_tier
+#   8. agent
+#   9. legal_basis
+#  10. key_hazards
+#  11. workflows
+#  12. uses_functional_services
+#  13. <extension fields> (domain-specific)
+#
+# LEGACY MAPPING:
+#   Pattern A — had: name, display_name, status, last_updated, workflows, agent
+#   Pattern B — had: profile_id, name (lacked status, last_updated, workflows, agent, legal_basis)
+#   Pattern C — had: profile_name, legal_basis (array), psm_elements
+#   All patterns unified into this canonical form on 2026-08-06.
+
+# --- REQUIRED FIELDS ---
+
+# profile_id: <string, required, kebab-case>
+#   MUST match the filename (e.g., logistics-port.yaml -> profile_id: logistics-port)
+profile_id: <string, required>
+
+# name: <string, required>
+#   Human-readable domain name (English). Keep concise.
+name: <string, required>
+
+# version: <string, required>
+#   Semantic version of the profile definition. Default: "1.0"
+version: <string, required, default: "1.0">
+
+# status: <enum, required>
+#   One of: active | inactive | deprecated | draft
+status: <enum: active | inactive | deprecated | draft, required>
+
+# last_updated: <date, required>
+#   ISO 8601 date (YYYY-MM-DD)
+last_updated: <date, required, format: YYYY-MM-DD>
+
+# industry_tier: <enum, required>
+#   industry     — vertical industry domain (e.g., chemical-plant, railway-transit)
+#   functional   — cross-cutting functional service (e.g., psm, msds, emergency)
+#   cross-cutting — shared infrastructure or training (e.g., training-management)
+industry_tier: <enum: industry | functional | cross-cutting, required>
+
+# agent: <string, required>
+#   The owning domain agent name (e.g., "railway-agent", "ehschem-agent")
+agent: <string, required>
+
+# legal_basis: <array of strings, required, minItems: 3>
+#   Primary statutes/regulations governing this domain.
+#   Prefer Korean law names with article references where possible.
+legal_basis:
+  - <string>
+  # minItems: 3
+
+# key_hazards: <array of strings, required, minItems: 1>
+#   The domain's signature hazard categories or specific high-risk hazards.
+key_hazards:
+  - <string>
+
+# --- OPTIONAL FIELDS ---
+
+# display_name: <string, optional>
+#   Bilingual display name format: "Korean (English)"
+display_name: <string, optional>
+
+# workflows: <object or array, optional>
+#   List of workflow_ids owned by this domain.
+#   Can be flat array or grouped by workflow category.
+workflows: <array | object, optional>
+
+# uses_functional_services: <array of strings, optional>
+#   Functional services dispatched to (e.g., ["psm", "msds", "emergency"])
+uses_functional_services:
+  - <string>
+
+# --- EXTENSION FIELDS ---
+# Domain-specific fields are permitted after the canonical fields above.
+# Examples of valid extension fields:
+#   description, applicable_laws (renamed to legal_basis), pillars,
+#   regulatory_reference, international_alignment, v1_scope,
+#   cross_domain_consumers, ghs_version_current, temperature_zones,
+#   certification_authorities, etc.
+# NOTE: If a legacy file used `applicable_laws`, it is mapped to `legal_basis`.
+#       If both exist, `legal_basis` takes precedence and `applicable_laws`
+#       is kept as an extension field for backward compatibility.

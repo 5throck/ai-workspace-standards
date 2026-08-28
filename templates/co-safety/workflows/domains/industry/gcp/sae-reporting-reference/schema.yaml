@@ -1,0 +1,26 @@
+schema_version: "1.0"
+workflow_id: sae-reporting-reference
+title: "중증 이상반응 긴급 참조 (Severe SAE Emergency Reference)"
+status: active
+applicability: mandatory
+workflow_type: reference
+target_agent: emergency-agent
+data_provided:
+  - sae_details
+  - participant_medical_history
+  - investigational_product_batch
+  - protocol_excerpts
+handoff_protocol:
+  trigger: severe_sae_safety_signal
+  dispatch_to: emergency-agent
+  include_data:
+    - sae_classification
+    - causality_assessment
+    - ip_batch_information
+legal_basis:
+  - 약사법 Article 73의2
+  - ICH E2A
+  - 생명윤리법
+industry_profile: clinical-research
+agent: gcp-agent
+evidence_model: gcp-sae-record.json

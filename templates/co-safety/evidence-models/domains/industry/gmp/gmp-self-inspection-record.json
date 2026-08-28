@@ -1,0 +1,184 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "gmp-self-inspection-record.json",
+  "title": "GMP Self-Inspection Record",
+  "description": "Evidence model for GMP Self-Inspection (자체점검) records. v1 per KP-GMP 「의약품 등의 안전에 관한 규칙」 별표 1 제13호 (자율점검) + PIC/S PE 009 Chapter 9. Includes risk-based frequency adjustment per meeting 2026-06-17.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "inspection_id",
+    "scope",
+    "frequency",
+    "findings_count",
+    "status",
+    "legal_basis",
+    "e_signature",
+    "qrm_assessment",
+    "nomenclature",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^GMP-SI-[0-9]{4}-[0-9]{4}$"
+    },
+    "inspection_id": {
+      "type": "string"
+    },
+    "scope": {
+      "type": "string"
+    },
+    "area_category": {
+      "type": "string",
+      "enum": [
+        "high_risk",
+        "medium_risk",
+        "low_risk"
+      ]
+    },
+    "frequency": {
+      "type": "object",
+      "properties": {
+        "default": {
+          "type": "string",
+          "enum": [
+            "annual"
+          ]
+        },
+        "applied": {
+          "type": "string",
+          "enum": [
+            "quarterly",
+            "semi-annual",
+            "annual"
+          ]
+        },
+        "risk_based_adjustment": {
+          "type": "object",
+          "properties": {
+            "high_risk_areas": {
+              "type": "string",
+              "enum": [
+                "quarterly"
+              ]
+            },
+            "medium_risk_areas": {
+              "type": "string",
+              "enum": [
+                "semi-annual"
+              ]
+            },
+            "low_risk_areas": {
+              "type": "string",
+              "enum": [
+                "annual"
+              ]
+            }
+          }
+        },
+        "risk_classification_logic": {
+          "type": "string"
+        },
+        "last_inspection": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "next_due": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "inspection_team": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "inspection_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "findings_count": {
+      "type": "integer"
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "finding_id": {
+            "type": "string"
+          },
+          "classification": {
+            "type": "string",
+            "enum": [
+              "critical",
+              "major",
+              "minor",
+              "observation"
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "capa_ref": {
+            "type": "string",
+            "pattern": "^GMP-CAPA-[0-9]{4}-[0-9]{4}$"
+          }
+        }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "planned",
+        "in_progress",
+        "completed",
+        "closed"
+      ]
+    },
+    "management_review_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "description": "Multi-source legal basis. Primary: Pharmaceutical Affairs Act (약사법) Article 37 (manufacturing management obligation for pharmaceuticals, 의약품등의 제조 관리의무) and Presidential Decree Annex 1 (총리령 「의약품 등의 안전에 관한 규칙」 별표 1; operational detail in MFDS Notice No. 2024-87). Adjacent laws may include: ICH Q7 (API GMP), ICH Q9 (Quality Risk Management), ICH Q10 (Pharmaceutical Quality System), PIC/S PE 009 (harmonized GMP).",
+      "examples": [
+        [
+          "약사법 Art.37",
+          "의약품 등의 안전에 관한 규칙 별표 1 제8호",
+          "ICH Q7"
+        ],
+        [
+          "약사법 Art.37",
+          "의약품 등의 안전에 관한 규칙 별표 1 제6호",
+          "ICH Q10"
+        ],
+        [
+          "약사법 Art.37",
+          "PIC/S PE 009-1",
+          "ICH Q9"
+        ]
+      ]
+    },
+    "e_signature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/e_signature"
+    },
+    "qrm_assessment": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/qrm_assessment"
+    },
+    "nomenclature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/nomenclature"
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

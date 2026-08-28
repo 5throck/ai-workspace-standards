@@ -1,0 +1,9 @@
+schema_version: "1.0"
+workflow_id: "safety-patrol"
+title: "안전순찰 (Safety Patrol)"
+status: "active"
+applicability: "mandatory"
+legal_basis:
+  - "산업안전보건법 제15조 (안전보건관리책임자 직무)"
+  - "산업안전보건법 제16조 (관리감독자 직무)"
+  - "중대재해처벌법 제4조 (안전보건관리체계 구축 의무)"

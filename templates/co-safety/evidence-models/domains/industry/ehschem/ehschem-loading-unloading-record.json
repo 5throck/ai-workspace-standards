@@ -1,0 +1,118 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "ehschem-loading-unloading-record.json",
+  "title": "Chemical Loading Unloading Record",
+  "description": "적하/하역 작업 기록.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "plant_category",
+    "psm_applicable",
+    "chemical_category",
+    "legal_basis",
+    "e_signature",
+    "nomenclature",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^CHEM-LD-[0-9]{4}-[0-9]{4}$"
+    },
+    "plant_category": {
+      "type": "string",
+      "enum": [
+        "refining",
+        "petrochemical",
+        "specialty_chemicals"
+      ]
+    },
+    "psm_applicable": {
+      "type": "boolean",
+      "default": true
+    },
+    "environmental_permit_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "chemical_category": {
+      "type": "string",
+      "enum": [
+        "hydrocarbon",
+        "polymer",
+        "specialty_intermediate",
+        "other"
+      ]
+    },
+    "facility_id": {
+      "type": "string"
+    },
+    "operation_type": {
+      "type": "string",
+      "enum": [
+        "tank_truck",
+        "rail_car",
+        "ship_barge",
+        "pipeline"
+      ]
+    },
+    "substance_transferred": {
+      "type": "string"
+    },
+    "quantity_transferred_tons": {
+      "type": "number"
+    },
+    "operator_id": {
+      "type": "string"
+    },
+    "grounding_verified": {
+      "type": "boolean"
+    },
+    "bonding_verified": {
+      "type": "boolean"
+    },
+    "emergency_stop_tested": {
+      "type": "boolean"
+    },
+    "spill_containment_ready": {
+      "type": "boolean"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "description": "Multi-source legal basis. Primary: OSHA-KR Article 44 (PSM for chemical plants) and Article 36 (risk assessment). Adjacent laws may include: CCA (화학물질관리법) Articles 20/23 (toxic/accident-preparedness chemicals), SAPA Article 4 (management safety obligation), 위험물안전관리법 (hazardous materials storage/handling), 대기환경보전법/수질환경보전법 (emission standards).",
+      "examples": [
+        [
+          "OSHA-KR Art.44 §1",
+          "CCA Art.20",
+          "SAPA Art.4"
+        ],
+        [
+          "OSHA-KR Art.36 §1",
+          "위험물안전관리법 Art.13",
+          "SAPA Art.4"
+        ],
+        [
+          "OSHA-KR Art.44 §1",
+          "대기환경보전법 Art.15",
+          "SAPA Art.7"
+        ]
+      ]
+    },
+    "e_signature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/e_signature"
+    },
+    "nomenclature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/nomenclature"
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

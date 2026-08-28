@@ -1,0 +1,292 @@
+# ── Registry schema v2 (mode: coordinates) ───────────────────────────────────
+# This file maps article numbers to official titles ONLY. Article content is
+# never cached here — fetch live from the 법제처 k-law API at point of use.
+# Migrated by migrate-registry-to-coordinates.ts on 2026-08-26
+schema_version: 2
+mode: coordinates
+jurisdiction: KR
+framework: Firearms-Swords-Explosives-Safety
+law_name: 총포ㆍ도검ㆍ화약류 등의 안전관리에 관한 법률
+law_name_en: null
+abbreviation: null
+mst: "268135"
+enforced_from: null
+agency: null
+tier: 1
+regulator: NPA (경찰청) / Defense Acquisition Program Administration (방위사업청)
+articles:
+  - "no": "1"
+    title: 목적
+    checked_at: "2026-08-26"
+  - "no": "2"
+    title: 정의
+    checked_at: "2026-08-26"
+  - "no": "3"
+    title: 적용의 배제
+    checked_at: "2026-08-26"
+  - "no": "3"
+    title: 총포 및 화약류 안전관리 계획의 수립
+    checked_at: "2026-08-26"
+  - "no": "4"
+    title: 제조업의 허가
+    checked_at: "2026-08-26"
+  - "no": "4"
+    title: 제조업자의 지위승계
+    checked_at: "2026-08-26"
+  - "no": "5"
+    title: 제조업자의 결격사유
+    checked_at: "2026-08-26"
+  - "no": "6"
+    title: 판매업의 허가
+    checked_at: "2026-08-26"
+  - "no": "6"
+    title: 판매업의 변경허가 등
+    checked_at: "2026-08-26"
+  - "no": "6"
+    title: 예술소품용 총포 등의 임대업 허가 등
+    checked_at: "2026-08-26"
+  - "no": "6"
+    title: 판매업자 및 임대업자의 지위승계
+    checked_at: "2026-08-26"
+  - "no": "7"
+    title: 판매업자 및 임대업자의 결격사유
+    checked_at: "2026-08-26"
+  - "no": "8"
+    title: 옥외 등에서의 판매ㆍ임대ㆍ광고의 금지
+    checked_at: "2026-08-26"
+  - "no": "8"
+    title: 인터넷 등을 통한 총포ㆍ화약류 제조방법 등의 게시ㆍ유포 금지
+    checked_at: "2026-08-26"
+  - "no": "9"
+    title: 수출입의 허가 등
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 소지의 금지
+    checked_at: "2026-08-26"
+  - "no": "11"
+    title: 모의총포 등의 제조ㆍ판매ㆍ소지의 금지
+    checked_at: "2026-08-26"
+  - "no": "12"
+    title: 총포ㆍ도검ㆍ화약류ㆍ분사기ㆍ전자충격기ㆍ석궁의 소지허가
+    checked_at: "2026-08-26"
+  - "no": "13"
+    title: 총포ㆍ도검ㆍ화약류ㆍ분사기ㆍ전자충격기ㆍ석궁 소지자의 결격사유 등
+    checked_at: "2026-08-26"
+  - "no": "14"
+    title: 일시 출입국 하는 사람 등에 대한 허가의 특례
+    checked_at: "2026-08-26"
+  - "no": "14"
+    title: 총포의 보관
+    checked_at: "2026-08-26"
+  - "no": "15"
+    title: 총포 소지허가에 대한 특례
+    checked_at: "2026-08-26"
+  - "no": "16"
+    title: 총포ㆍ도검ㆍ분사기ㆍ전자충격기ㆍ석궁 소지허가의 갱신
+    checked_at: "2026-08-26"
+  - "no": "17"
+    title: 총포ㆍ도검ㆍ분사기ㆍ전자충격기ㆍ석궁의 휴대ㆍ운반ㆍ사용 및 개조 등의 제한
+    checked_at: "2026-08-26"
+  - "no": "18"
+    title: 화약류의 사용
+    checked_at: "2026-08-26"
+  - "no": "19"
+    title: 취급 금지
+    checked_at: "2026-08-26"
+  - "no": "20"
+    title: 총포ㆍ화약류의 폐기
+    checked_at: "2026-08-26"
+  - "no": "21"
+    title: 양도ㆍ양수 등의 제한
+    checked_at: "2026-08-26"
+  - "no": "22"
+    title: 교육의 실시
+    checked_at: "2026-08-26"
+  - "no": "23"
+    title: 발견ㆍ습득의 신고 등
+    checked_at: "2026-08-26"
+  - "no": "24"
+    title: 화약류의 저장
+    checked_at: "2026-08-26"
+  - "no": "25"
+    title: 화약류저장소 설치허가
+    checked_at: "2026-08-26"
+  - "no": "25"
+    title: 화약류저장소설치자의 지위승계
+    checked_at: "2026-08-26"
+  - "no": "26"
+    title: 화약류의 운반
+    checked_at: "2026-08-26"
+  - "no": "27"
+    title: 화약류제조보안책임자 및 화약류관리보안책임자의 선임
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: 화약류제조보안책임자 및 화약류관리보안책임자의 면허
+    checked_at: "2026-08-26"
+  - "no": "29"
+    title: 화약류제조보안책임자 및 화약류관리보안책임자의 결격사유
+    checked_at: "2026-08-26"
+  - "no": "30"
+    title: 면허의 취소ㆍ정지
+    checked_at: "2026-08-26"
+  - "no": "31"
+    title: 화약류제조보안책임자 및 화약류관리보안책임자의 의무 등
+    checked_at: "2026-08-26"
+  - "no": "32"
+    title: 화약류의 안정도 시험
+    checked_at: "2026-08-26"
+  - "no": "33"
+    title: 남은 화약류에 대한 조치
+    checked_at: "2026-08-26"
+  - "no": "34"
+    title: 화약류의 포장 등
+    checked_at: "2026-08-26"
+  - "no": "35"
+    title: 도난ㆍ분실의 신고 등
+    checked_at: "2026-08-26"
+  - "no": "36"
+    title: 응급조치 등
+    checked_at: "2026-08-26"
+  - "no": "37"
+    title: 화기취급 및 흡연의 금지 등
+    checked_at: "2026-08-26"
+  - "no": "38"
+    title: 위해예방규정
+    checked_at: "2026-08-26"
+  - "no": "39"
+    title: 자체안전교육
+    checked_at: "2026-08-26"
+  - "no": "40"
+    title: 자체안전점검
+    checked_at: "2026-08-26"
+  - "no": "41"
+    title: 정기안전검사
+    checked_at: "2026-08-26"
+  - "no": "42"
+    title: 총포ㆍ분사기ㆍ전자충격기ㆍ석궁의 검사
+    checked_at: "2026-08-26"
+  - "no": "43"
+    title: 완성검사
+    checked_at: "2026-08-26"
+  - "no": "44"
+    title: 출입ㆍ검사 등
+    checked_at: "2026-08-26"
+  - "no": "45"
+    title: 제조업자 등에 대한 행정처분
+    checked_at: "2026-08-26"
+  - "no": "45"
+    title: 행정처분 효과의 승계
+    checked_at: "2026-08-26"
+  - "no": "46"
+    title: 총포 등의 소지허가를 받은 자 등에 대한 행정처분
+    checked_at: "2026-08-26"
+  - "no": "46"
+    title: 결격사유 확인을 위한 개인정보의 통보
+    checked_at: "2026-08-26"
+  - "no": "46"
+    title: 청문
+    checked_at: "2026-08-26"
+  - "no": "47"
+    title: 공공의 안전을 위한 조치 등
+    checked_at: "2026-08-26"
+  - "no": "48"
+    title: 총포ㆍ화약안전기술협회의 설립
+    checked_at: "2026-08-26"
+  - "no": "49"
+    title: 회원
+    checked_at: "2026-08-26"
+  - "no": "50"
+    title: 지부 등의 설치
+    checked_at: "2026-08-26"
+  - "no": "51"
+    title: 정관
+    checked_at: "2026-08-26"
+  - "no": "52"
+    title: 사업
+    checked_at: "2026-08-26"
+  - "no": "53"
+    title: 임원
+    checked_at: "2026-08-26"
+  - "no": "54"
+    title: 임원의 임무
+    checked_at: "2026-08-26"
+  - "no": "55"
+    title: 임원의 결격사유
+    checked_at: "2026-08-26"
+  - "no": "56"
+    title: 이사회
+    checked_at: "2026-08-26"
+  - "no": "57"
+    title: 직원
+    checked_at: "2026-08-26"
+  - "no": "58"
+    title: 재정
+    checked_at: "2026-08-26"
+  - "no": "59"
+    title: 사업계획의 승인 등
+    checked_at: "2026-08-26"
+  - "no": "60"
+    title: 결산서의 제출
+    checked_at: "2026-08-26"
+  - "no": "61"
+    title: 감독
+    checked_at: "2026-08-26"
+  - "no": "62"
+    title: 「민법」의 준용
+    checked_at: "2026-08-26"
+  - "no": "63"
+    title: 장부의 비치와 기록
+    checked_at: "2026-08-26"
+  - "no": "64"
+    title: 간판 등
+    checked_at: "2026-08-26"
+  - "no": "65"
+    title: 허가증 등
+    checked_at: "2026-08-26"
+  - "no": "66"
+    title: 폐업 및 휴업 신고 등
+    checked_at: "2026-08-26"
+  - "no": "67"
+    title: 수수료
+    checked_at: "2026-08-26"
+  - "no": "68"
+    title: 권한의 위임
+    checked_at: "2026-08-26"
+  - "no": "69"
+    title: 식별표지 및 정보의 제공
+    checked_at: "2026-08-26"
+  - "no": "70"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "70"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "70"
+    title: 상습범
+    checked_at: "2026-08-26"
+  - "no": "71"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "72"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "73"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "74"
+    title: 과태료
+    checked_at: "2026-08-26"
+  - "no": "75"
+    title: 형의 병과
+    checked_at: "2026-08-26"
+  - "no": "76"
+    title: 양벌규정
+    checked_at: "2026-08-26"
+source_verification:
+  method: k-law-live
+  checked_at: "2026-08-26"
+  next_review: "2027-02-22"
+last_updated: "2026-08-26"
+related_rule:
+  name_ko: FSESA 시행령 / 시행규칙
+  abbreviation: FSESA-Enforcement

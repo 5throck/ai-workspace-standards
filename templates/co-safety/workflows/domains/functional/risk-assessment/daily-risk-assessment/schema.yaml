@@ -1,0 +1,10 @@
+schema_version: "1.0"
+workflow_id: daily-risk-assessment
+title: "일상적 위험성평가 — 4M 기법 (Daily Risk Assessment — 4M Method)"
+status: active
+applicability: mandatory
+applicable_industries: [manufacturing, chemical, construction, gas_terminal, power_generation, pharmaceutical, food, cosmetics, semiconductor, battery, shipbuilding, steelmaking, logistics, railway, waste, defense, biotech, meddevice, datacenter]
+legal_basis: [산업안전보건법 Article 36, 중대재해처벌법 Article 4, MOEL 위험성평가 고시]
+industry_profile: risk-assessment
+agent: risk-assessment-agent
+evidence_model: risk-assessment-record.json

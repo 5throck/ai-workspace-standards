@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: pms-study-management
+title: "PMS 연구 관리 (Post-Marketing Surveillance Study)"
+status: active
+applicability: mandatory
+workflow_type: core
+
+legal_basis:
+  - 약사법 Article 73의2
+  - 의약품 재평가 규정
+  - 의약품 이상반응 보고 규정 (MFDS 고시)
+industry_profile: pharmacovigilance
+agent: gvp-agent
+evidence_model: gvp-pms-record.json

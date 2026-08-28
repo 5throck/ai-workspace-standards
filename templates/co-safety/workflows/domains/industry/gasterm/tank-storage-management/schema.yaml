@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: tank-storage-management
+title: "저장탱크 운영 안전 (Tank Storage Management)"
+status: active
+applicability: mandatory
+workflow_type: core
+
+legal_basis:
+  - 고압가스 안전 관리 및 사업법 Article 13
+  - 고압가스 안전 관리 및 사업법 Article 15
+  - 산업안전보건법 Article 44 (PSM)
+industry_profile: gas-facility
+agent: gasterm-agent
+evidence_model: gasterm-tank-storage-record.json

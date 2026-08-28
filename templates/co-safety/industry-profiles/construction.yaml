@@ -1,0 +1,19 @@
+# Construction Industry Profile (legacy — Pattern C stub, migrated v1)
+profile_id: construction
+name: construction
+display_name: "건설업 (Construction)"
+version: "1.0"
+status: active
+last_updated: 2026-08-06
+industry_tier: industry
+agent: ehsconst-agent
+legal_basis:
+  - 산업안전보건법 (OSHA-KR) Article 38, 39, 63
+  - 중대재해처벌법 (SAPA) Article 5
+  - 건설기술진흥법 Article 34
+key_hazards:
+  - falls
+  - heavy_equipment
+description: Construction industry profile.
+risk_level: High
+psm_required: false

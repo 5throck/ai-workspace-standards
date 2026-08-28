@@ -1,0 +1,175 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "tbm-record.json",
+  "title": "Cross-Industry TBM (Tool Box Meeting) Record — Shared Base",
+  "description": "Shared base evidence model for pre-work Tool Box Meetings (TBM, 작업 전 안전점검회의) across high-risk industries. Domain-specific fields go in industry_specific_fields. Construction retains its dedicated ehsconst-tbm-record.json for construction-only provisions (SAPA Art.5, contractor tier).",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "industry_profile",
+    "meeting_date",
+    "legal_basis",
+    "e_signature",
+    "nomenclature",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^TBM-[A-Z]{2,8}-[0-9]{4}-[0-9]{4}$",
+      "description": "Format: TBM-<DOMAIN>-YYYY-NNNN (e.g., TBM-RAILWY-2026-0001, TBM-SHIPBD-2026-0001)"
+    },
+    "industry_profile": {
+      "type": "string",
+      "enum": [
+        "ehschem",
+        "gasterm",
+        "steelmaking",
+        "shipbuilding",
+        "powergen",
+        "waste",
+        "defense",
+        "semicon",
+        "battery",
+        "biotech",
+        "datacenter",
+        "logistics",
+        "railway",
+        "food",
+        "construction"
+      ],
+      "description": "Industry profile determines the legal_basis template and industry_specific_fields schema"
+    },
+    "meeting_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "meeting_time": {
+      "type": "string"
+    },
+    "duration_minutes": {
+      "type": "integer",
+      "minimum": 5,
+      "maximum": 120
+    },
+    "topics_covered": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "previous_day_incidents",
+          "today_hazards",
+          "ppe_inspection",
+          "safety_rules",
+          "tool_inspection",
+          "subcontractor_coordination",
+          "emergency_procedures",
+          "worker_suggestions",
+          "weather_alerts",
+          "confined_space_checks",
+          "energy_isolation_loto",
+          "gas_leak_procedures",
+          "hot_work_permit",
+          "working_at_heights",
+          "electrical_safety",
+          "biological_hazard",
+          "radiological_hazard"
+        ]
+      },
+      "minItems": 1
+    },
+    "presenter_id": {
+      "type": "string",
+      "description": "TBM 진행자 ID (safety officer or supervisor)"
+    },
+    "expected_attendees": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "actual_attendees": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "attendee_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true,
+      "description": "Structured attendee list — worker IDs or TRAIN-* training-record.json references (attendance traceability)"
+    },
+    "attendance_rate_pct": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "KPI: target >= 95%"
+    },
+    "signatures_collected": {
+      "type": "boolean"
+    },
+    "photographic_evidence": {
+      "type": "boolean"
+    },
+    "absentees_follow_up": {
+      "type": "boolean",
+      "description": "결근자 별도 교육 실시 여부"
+    },
+    "makeup_training_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Reference to the training-record.json instance (TRAIN-*) covering absentees' make-up briefing (결근자 별도교육); required when absentees_follow_up=true"
+    },
+    "risk_assessment_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Reference to the applicable 위험성평가 (risk assessment) record per OSHA-KR Article 36 discussed in this TBM"
+    },
+    "permit_to_work_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Reference to the associated Permit-to-Work (PTW) record if this TBM precedes a PTW-governed task"
+    },
+    "industry_specific_fields": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Domain-specific extension fields (e.g., {voltage_class: '25kV'} for railway, {gas_type: 'LNG'} for gasterm, {explosive_class: 'Class 1.1'} for defense)"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "description": "Multi-source legal basis. Must cite >= 3 regulatory sources. Common base: OSHA-KR Articles 15/17 (safety management), Article 36 (risk assessment), Article 38 (safety measures). Industry-specific additions per the workflow's legal_basis template. SAPA Article 4 or Article 5/7 as applicable.",
+      "examples": [
+        [
+          "OSHA-KR Art.15",
+          "OSHA-KR Art.36",
+          "SAPA Art.4",
+          "고압가스 안전 관리 및 사업법 Art.17"
+        ],
+        [
+          "OSHA-KR Art.15",
+          "OSHA-KR Art.36",
+          "철도안전법 Art.45"
+        ]
+      ]
+    },
+    "e_signature": {
+      "$ref": "base/common.schema.json#/definitions/e_signature"
+    },
+    "nomenclature": {
+      "$ref": "base/common.schema.json#/definitions/nomenclature"
+    },
+    "audit_trail": {
+      "$ref": "base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

@@ -1,0 +1,217 @@
+# ── Registry schema v2 (mode: coordinates) ───────────────────────────────────
+# This file maps article numbers to official titles ONLY. Article content is
+# never cached here — fetch live from the 법제처 k-law API at point of use.
+# Migrated by migrate-registry-to-coordinates.ts on 2026-08-26
+schema_version: 2
+mode: coordinates
+jurisdiction: KR
+framework: Cosmetics-Act
+law_name: 화장품법
+law_name_en: null
+abbreviation: null
+mst: "270323"
+enforced_from: null
+agency: null
+tier: 1
+regulator: MFDS (식품의약품안전처) / KFDA
+articles:
+  - "no": "1"
+    title: 목적
+    checked_at: "2026-08-26"
+  - "no": "2"
+    title: 정의
+    checked_at: "2026-08-26"
+  - "no": "2"
+    title: 영업의 종류
+    checked_at: "2026-08-26"
+  - "no": "2"
+    title: 화장품의 날
+    checked_at: "2026-08-26"
+  - "no": "3"
+    title: 영업의 등록
+    checked_at: "2026-08-26"
+  - "no": "3"
+    title: 맞춤형화장품판매업의 신고
+    checked_at: "2026-08-26"
+  - "no": "3"
+    title: 결격사유
+    checked_at: "2026-08-26"
+  - "no": "3"
+    title: 맞춤형화장품조제관리사 자격시험
+    checked_at: "2026-08-26"
+  - "no": "3"
+    title: 맞춤형화장품조제관리사의 결격사유
+    checked_at: "2026-08-26"
+  - "no": "3"
+    title: 자격증 대여 등의 금지
+    checked_at: "2026-08-26"
+  - "no": "3"
+    title: 유사명칭의 사용금지
+    checked_at: "2026-08-26"
+  - "no": "3"
+    title: 맞춤형화장품조제관리사 자격의 취소
+    checked_at: "2026-08-26"
+  - "no": "4"
+    title: 기능성화장품의 심사 등
+    checked_at: "2026-08-26"
+  - "no": "4"
+    title: 영유아 또는 어린이 사용 화장품의 관리
+    checked_at: "2026-08-26"
+  - "no": "5"
+    title: 영업자의 의무 등
+    checked_at: "2026-08-26"
+  - "no": "5"
+    title: 위해화장품의 회수
+    checked_at: "2026-08-26"
+  - "no": "6"
+    title: 폐업 등의 신고
+    checked_at: "2026-08-26"
+  - "no": "7"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "8"
+    title: 화장품 안전기준 등
+    checked_at: "2026-08-26"
+  - "no": "9"
+    title: 안전용기ㆍ포장 등
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 화장품의 기재사항
+    checked_at: "2026-08-26"
+  - "no": "11"
+    title: 화장품의 가격표시
+    checked_at: "2026-08-26"
+  - "no": "12"
+    title: 기재ㆍ표시상의 주의
+    checked_at: "2026-08-26"
+  - "no": "13"
+    title: 부당한 표시ㆍ광고 행위 등의 금지
+    checked_at: "2026-08-26"
+  - "no": "14"
+    title: 표시ㆍ광고 내용의 실증 등
+    checked_at: "2026-08-26"
+  - "no": "14"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "14"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "14"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "14"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "15"
+    title: 영업의 금지
+    checked_at: "2026-08-26"
+  - "no": "15"
+    title: 동물실험을 실시한 화장품 등의 유통판매 금지
+    checked_at: "2026-08-26"
+  - "no": "16"
+    title: 판매 등의 금지
+    checked_at: "2026-08-26"
+  - "no": "17"
+    title: 단체 설립
+    checked_at: "2026-08-26"
+  - "no": "18"
+    title: 보고와 검사 등
+    checked_at: "2026-08-26"
+  - "no": "18"
+    title: 소비자화장품안전관리감시원
+    checked_at: "2026-08-26"
+  - "no": "19"
+    title: 시정명령
+    checked_at: "2026-08-26"
+  - "no": "20"
+    title: 검사명령
+    checked_at: "2026-08-26"
+  - "no": "21"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "22"
+    title: 개수명령
+    checked_at: "2026-08-26"
+  - "no": "23"
+    title: 회수ㆍ폐기명령 등
+    checked_at: "2026-08-26"
+  - "no": "23"
+    title: 위해화장품의 공표
+    checked_at: "2026-08-26"
+  - "no": "24"
+    title: 등록의 취소 등
+    checked_at: "2026-08-26"
+  - "no": "24"
+    title: 기능성화장품의 인정 취소
+    checked_at: "2026-08-26"
+  - "no": "25"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "26"
+    title: 영업자의 지위 승계
+    checked_at: "2026-08-26"
+  - "no": "26"
+    title: 행정제재처분 효과의 승계
+    checked_at: "2026-08-26"
+  - "no": "27"
+    title: 청문
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: 과징금처분
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: 위반사실의 공표
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: 직접구매 해외화장품에 대한 검사 및 관계 기관 정보 제공
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: 직접구매 해외화장품에 대한 실태조사
+    checked_at: "2026-08-26"
+  - "no": "29"
+    title: 자발적 관리의 지원
+    checked_at: "2026-08-26"
+  - "no": "30"
+    title: 수출용 제품의 예외
+    checked_at: "2026-08-26"
+  - "no": "31"
+    title: 등록필증 등의 재교부
+    checked_at: "2026-08-26"
+  - "no": "32"
+    title: 수수료
+    checked_at: "2026-08-26"
+  - "no": "33"
+    title: 화장품산업의 지원
+    checked_at: "2026-08-26"
+  - "no": "33"
+    title: 국제협력
+    checked_at: "2026-08-26"
+  - "no": "34"
+    title: 권한 등의 위임ㆍ위탁
+    checked_at: "2026-08-26"
+  - "no": "35"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "36"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "37"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "38"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "39"
+    title: 양벌규정
+    checked_at: "2026-08-26"
+  - "no": "40"
+    title: 과태료
+    checked_at: "2026-08-26"
+source_verification:
+  method: k-law-live
+  checked_at: "2026-08-26"
+  next_review: "2027-02-22"
+last_updated: "2026-08-26"
+related_rule:
+  name_ko: 화장품법 시행령 / 시행규칙
+  abbreviation: CA-Enforcement

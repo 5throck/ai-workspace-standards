@@ -1,0 +1,82 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "oh-tar-health-record.json",
+  "title": "TAR Health Screening Record",
+  "description": "대정비 (Major Turnaround, TAR) 건강검진 관리 기록.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "tar_id",
+    "special_health_exam_completion_rate",
+    "legal_basis",
+    "e_signature",
+    "nomenclature",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^OH-TARHEALTH-[0-9]{4}-[0-9]{4}$"
+    },
+    "tar_id": {
+      "type": "string",
+      "description": "대상 대정비(Turnaround) 이벤트 ID — contractor-tar-surge-record.json의 tar_id와 연계"
+    },
+    "special_health_exam_completion_rate": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "TAR 투입 인력 중 특수건강진단 이수율 (0-1)"
+    },
+    "heat_exposure_monitoring": {
+      "type": "boolean",
+      "description": "고열 노출 모니터링 체계 가동 여부"
+    },
+    "confined_space_clearance": {
+      "type": "boolean",
+      "description": "밀폐공간 작업 대상자 사전 건강 적합성 확인 및 출입 허가 여부"
+    },
+    "contractor_surge_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "contractor-safety-agent가 관리하는 contractor-tar-surge-record.json의 record_id 참조 (양방향 상호 참조)"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "description": "Multi-source legal basis. Primary: OSHA-KR Article 130 (special health examination) and Article 125 (work environment measurement). Adjacent laws may include: SAPA Article 4 (employer safety and health assurance obligation), OSHA-KR Article 29 (safety education including health hazards), 산업보건기준에관한규칙 (MOEL ordinance — occupational health standards).",
+      "examples": [
+        [
+          "OSHA-KR Art.130 §1",
+          "SAPA Art.4",
+          "OSHA-KR Art.125 §1"
+        ],
+        [
+          "OSHA-KR Art.125 §1",
+          "산업보건기준에관한규칙",
+          "SAPA Art.4"
+        ],
+        [
+          "OSHA-KR Art.130 §1",
+          "OSHA-KR Art.29 §1",
+          "SAPA Art.4"
+        ]
+      ]
+    },
+    "e_signature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/e_signature"
+    },
+    "nomenclature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/nomenclature"
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

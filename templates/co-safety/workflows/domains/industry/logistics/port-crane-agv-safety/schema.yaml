@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: port-crane-agv-safety
+title: "항만 크레인 인양 및 자동화 AGV 근로자 충돌 예방 (Port Crane and AGV Safety)"
+status: active
+applicability: mandatory
+workflow_type: core
+legal_basis:
+  - 항만안전특별법 Article 6
+  - 산업안전보건법 Article 38
+  - 산업안전보건법 Article 63
+  - 중대재해처벌법 Article 5
+industry_profile: logistics-port
+agent: logistics-agent
+evidence_model: port-crane-agv-record.json

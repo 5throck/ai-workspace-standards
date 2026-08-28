@@ -1,0 +1,73 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "waste-designated-waste-manifest-record.json",
+  "title": "Designated-Waste (Jijeong-Paegimul) Manifest Chain-of-Custody Record",
+  "description": "Evidence model for the cradle-to-grave electronic manifest ( - ) chain-of-custody record for designated waste (Jijeong-Paegimul /  ) transported off-site from a generator facility to a licensed treatment or disposal facility. The manifest captures generator, transporter, and receiver licensing; waste classification; net weight; and 3-way signature block. Distinct from the designated-waste chemical-treatment PROCESS record (which governs on-site neutralization/solidification chemistry under CCA Art 23); this record governs the REGULATORY CHAIN-OF-CUSTODY for transport off-site under WCA Art 25 licensing. Required by Korea's ALLBARO electronic-manifest system ( -  ) overseen by the Ministry of Environment.",
+  "version": "1.0.0",
+  "status": "active",
+  "type": "object",
+  "required": [
+    "record_id",
+    "manifest_tracking_number",
+    "waste_category_code",
+    "generator_license_id",
+    "transporter_license_id",
+    "receiver_license_id",
+    "net_weight_kg",
+    "chain_of_custody_signed",
+    "legal_basis",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^WST-MAN-[0-9]{4}-[0-9]{4}$",
+      "description": "Unique record identifier (WST-MAN-YYYY-NNNN)."
+    },
+    "manifest_tracking_number": {
+      "type": "string",
+      "description": "Korea ALLBARO system electronic-manifest tracking number ( ) issued by the Ministry of Environment for the designated-waste shipment."
+    },
+    "waste_category_code": {
+      "type": "string",
+      "description": "Korea designated-waste category code per WCA Enforcement Rule Schedule 1 (e.g., ' ' waste-organic-solvent, ' ' waste-acid, ' ' waste-alkali, ' ' waste-oil, ' ' designated-infectious-waste, ' ' dust-treatment-residue)."
+    },
+    "generator_license_id": {
+      "type": "string",
+      "description": "WCA Art 25 generator-facility license number ( -  ). The facility that generated and is releasing the designated waste."
+    },
+    "transporter_license_id": {
+      "type": "string",
+      "description": "WCA Art 25 waste-transporter license number ( -  ). The licensed carrier moving the waste off-site."
+    },
+    "receiver_license_id": {
+      "type": "string",
+      "description": "WCA Art 25 treatment/disposal facility license number ( -  ). The licensed facility that receives, treats, or disposes of the waste."
+    },
+    "net_weight_kg": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Net weight of the designated-waste shipment (kilograms). Must reconcile against weighbridge tickets at generator exit and receiver entry within tolerance."
+    },
+    "pickup_timestamp_iso": {
+      "type": "string",
+      "description": "Pickup timestamp at the generator facility (ISO 8601). Driver must confirm correspondence to the receiver-delivery timestamp to close the manifest."
+    },
+    "chain_of_custody_signed": {
+      "type": "boolean",
+      "description": "True if the 3-way signature block (generator + transporter + receiver) is complete, confirming cradle-to-grave custody with no gap. Required to close the ALLBARO manifest within the regulatory period."
+    },
+    "cca_chemical_accident_prevention_plan_ref": {
+      "type": "string",
+      "description": "Reference to the CCA Art 23 Chemical Accident Prevention Management Plan ( ) under which the designated-waste shipment is managed, when the waste class is a CCA-regulated hazardous chemical."
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 3
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

@@ -1,0 +1,25 @@
+schema_version: "1.0"
+workflow_id: chemical-spill-reference
+title: "화학물질 누출 참조 (데이터 제공) (Chemical Spill Reference (Data Provider))"
+status: active
+applicability: mandatory
+workflow_type: reference
+target_agent: emergency-agent
+data_provided:
+  - msds_section_6_accidental_release_measures
+  - recommended_ppe
+  - reporting_authorities
+handoff_protocol:
+  trigger: chemical_spill_event
+  dispatch_to: emergency-agent
+  include_data:
+    - msds_section_6
+    - ghs_classification
+legal_basis:
+  - OSHA-KR Article 110
+  - 위험물안전관리법
+  - UN GHS Rev 9 (2021)
+  - 화학물질관리법 (CCA) Article 23
+industry_profile: chemical-handling
+agent: msds-agent
+evidence_model: msds-record.json

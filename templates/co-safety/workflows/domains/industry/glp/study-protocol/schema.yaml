@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: study-protocol
+title: "시험계획서 (Study Protocol)"
+status: active
+applicability: mandatory
+workflow_type: core
+
+legal_basis:
+  - MFDS 비임상시험 관리기준
+  - OECD GLP Section 8
+  - 약사법 Article 34-3
+industry_profile: pharma-laboratory
+agent: glp-agent
+evidence_model: glp-study-protocol-record.json

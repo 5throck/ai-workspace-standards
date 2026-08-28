@@ -1,0 +1,39 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "high-voltage-facility-record.json",
+  "title": "High-Voltage Substation Facility Safety Record",
+  "description": "Evidence model for Data Center Substation Electrical Safety and Arc Flash Boundary Checks.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "substation_id",
+    "legal_basis",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^DC-HV-[0-9]{4}-[0-9]{4}$"
+    },
+    "substation_id": {
+      "type": "string"
+    },
+    "voltage_kv": {
+      "type": "number"
+    },
+    "arc_flash_ppe_category": {
+      "type": "integer"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

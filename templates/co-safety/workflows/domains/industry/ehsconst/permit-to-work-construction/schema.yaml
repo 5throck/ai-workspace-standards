@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: permit-to-work-construction
+title: "건설 작업허가서 (Construction Permit to Work)"
+status: active
+applicability: mandatory
+workflow_type: core
+
+legal_basis:
+  - 산업안전보건법 Article 38 (안전조치 — 작업허가의 일반 근거)
+  - 건설공사 작업허가제 기준
+  - 중대재해처벌법 Article 7
+industry_profile: construction
+agent: ehsconst-agent
+evidence_model: ehsconst-ptw-record.json

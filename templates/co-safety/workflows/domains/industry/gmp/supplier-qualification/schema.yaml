@@ -1,0 +1,15 @@
+schema_version: "1.0"
+workflow_id: supplier-qualification
+title: "공급자 자격부여 (Supplier Qualification)"
+status: active
+applicability: mandatory
+workflow_type: core
+legal_basis:
+  - 약사법 Article 37
+  - 의약품 등의 안전에 관한 규칙 별표 1 제10호 (원자재 및 제품의 관리)
+  - PIC/S PE 009 Chapter 5 (Production)
+  - ICH Q7 (API GMP)
+industry_profile: pharma-general
+agent: gmp-agent
+evidence_model: gmp-supplier-record.json
+psm_equivalent: workflows/psm/contractor-management.md

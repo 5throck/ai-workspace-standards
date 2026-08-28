@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "emergency-disaster-record.json",
+  "title": "Emergency Disaster Response Record",
+  "description": "Natural disaster response (typhoon/flood/earthquake/snow).",
+  "version": "1.2.0",
+  "type": "object",
+  "required": ["record_id", "incident_id", "incident_type", "severity", "response_status", "legal_basis", "e_signature", "nomenclature", "audit_trail"],
+  "properties": {
+    "record_id": { "type": "string", "pattern": "^EMRG-DIS-[0-9]{4}-[0-9]{4}$" },
+    "incident_id": { "type": "string", "description": "Unique incident identifier" },
+    "workflow_id": { "$ref": "../_shared/base/common.schema.json#/definitions/workflow_id", "description": "Optional workflow execution reference ('<slug>' or '<domain>/<slug>', e.g. 'emergency-response' or 'emergency/disaster-response'). Never invent an ID to satisfy this field." },
+    "incident_type": {
+      "type": "string",
+      "enum": ["typhoon", "flood", "earthquake", "heavy_snow", "landslide", "wind_storm", "extreme_heat", "extreme_cold"]
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["minor", "moderate", "serious", "critical", "fatal"]
+    },
+    "incident_datetime": { "type": "string", "format": "date-time" },
+    "location": { "type": "string" },
+    "casualties": {
+      "type": "object",
+      "properties": {
+        "fatalities": { "type": "integer", "default": 0 },
+        "serious_injuries": { "type": "integer", "default": 0 },
+        "minor_injuries": { "type": "integer", "default": 0 },
+        "missing": { "type": "integer", "default": 0 }
+      }
+    },
+    "response_status": {
+      "type": "string",
+      "enum": ["reported", "active_response", "contained", "resolved", "under_investigation", "closed"]
+    },
+    "sapa_qualifying": { "type": "boolean", "description": "중대재해처벌법 적용 여부" },
+    "disaster_severity_alert": {
+      "type": "string",
+      "enum": ["advisory", "warning", "alert", "severe"]
+    },
+    "weather_data_ref": { "type": "string", "description": "KMA (Korea Meteorological Administration) alert ref" },
+    "evacuation_executed": { "type": "boolean" },
+    "work_suspension_period": { "type": "string" },
+    "property_damage_estimate_krw": { "type": "number" },
+    "restoration_plan_ref": { "type": ["string", "null"] },
+    "incident_investigation_agent_dispatched": { "type": "boolean", "description": "Handoff confirmation per emergency-agent.md §Handoff Protocols" },
+
+    "legal_basis": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 3
+    },
+    "e_signature": { "$ref": "../_shared/base/common.schema.json#/definitions/e_signature" },
+    "nomenclature": { "$ref": "../_shared/base/common.schema.json#/definitions/nomenclature" },
+    "audit_trail": { "$ref": "../_shared/base/common.schema.json#/definitions/audit_trail" }
+  }
+}

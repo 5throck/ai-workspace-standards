@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "training-compliance-record.json",
+  "title": "Training Compliance Record",
+  "description": "Training compliance tracking (completion rate, overdue, gaps).",
+  "version": "1.0.0",
+  "type": "object",
+  "required": ["record_id", "period", "compliance_rate_pct", "total_workers", "trained_workers", "legal_basis"],
+  "properties": {
+    "record_id": { "type": "string", "pattern": "^TRAIN-COMP-[0-9]{4}-[0-9]{4}$" },
+    "period": { "type": "string", "description": "YYYY-MM or YYYY-Qn" },
+    "compliance_rate_pct": { "type": "number", "minimum": 0, "maximum": 100 },
+    "total_workers": { "type": "integer" },
+    "trained_workers": { "type": "integer" },
+    "overdue_workers": { "type": "integer" },
+    "by_training_type": {
+      "type": "object",
+      "properties": {
+        "regular": { "type": "object", "properties": { "required": { "type": "integer" }, "completed": { "type": "integer" }, "overdue": { "type": "integer" } } },
+        "special": { "type": "object", "properties": { "required": { "type": "integer" }, "completed": { "type": "integer" }, "overdue": { "type": "integer" } } },
+        "supervisor": { "type": "object", "properties": { "required": { "type": "integer" }, "completed": { "type": "integer" }, "overdue": { "type": "integer" } } },
+        "new_hire": { "type": "object", "properties": { "required": { "type": "integer" }, "completed": { "type": "integer" }, "overdue": { "type": "integer" } } },
+        "job_transfer": { "type": "object", "properties": { "required": { "type": "integer" }, "completed": { "type": "integer" }, "overdue": { "type": "integer" } } },
+        "first_aid": { "type": "object", "properties": { "required": { "type": "integer" }, "completed": { "type": "integer" }, "overdue": { "type": "integer" } } },
+        "msds": { "type": "object", "properties": { "required": { "type": "integer" }, "completed": { "type": "integer" }, "overdue": { "type": "integer" } } }
+      }
+    },
+    "overdue_worker_list": { "type": "array", "items": { "type": "object", "properties": { "worker_id": { "type": "string" }, "training_type": { "type": "string" }, "days_overdue": { "type": "integer" } } } },
+    "sapa_risk_flagged": { "type": "boolean", "description": "중대재해처벌법 위반 위험 (미이수자 존재)" },
+    "legal_basis": {
+      "type": "array",
+      "description": "Multi-source legal basis. Primary: OSHA-KR Article 29 (training compliance monitoring) or Article 29 §3 + 시행규칙 §26 (special education compliance). Adjacent laws may include: SAPA Article 4 (employer safety and health assurance obligation — non-compliance triggers SAPA liability), SAPA Article 5 (contract/subcontractor safety obligations compliance). Records with sapa_risk_flagged=true MUST cite SAPA. overdue_worker_list contains worker identifiers (PIPA 개인정보보호법 applies): collection/use grounds (Art 15) and third-party provision restrictions when reports are shared externally (Art 17) — see regulations/KR/PIPA.yaml.",
+      "items": { "type": "string" },
+      "minItems": 3,
+      "examples": [
+        ["OSHA-KR Art.29 §3", "산업안전보건법 시행규칙 Art.26 §1", "SAPA Art.4"],
+        ["OSHA-KR Art.29 §1", "OSHA-KR Art.32 §1", "SAPA Art.4"],
+        ["OSHA-KR Art.29 §1", "SAPA Art.4", "SAPA Art.5"],
+        ["OSHA-KR Art.29 §1", "SAPA Art.4", "PIPA Art.15 §1", "PIPA Art.17 §1"]
+      ]
+    },
+    "e_signature": { "$ref": "../../../_shared/base/common.schema.json#/definitions/e_signature" },
+    "nomenclature": { "$ref": "../../../_shared/base/common.schema.json#/definitions/nomenclature" },
+    "audit_trail": { "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail" }
+  }
+}

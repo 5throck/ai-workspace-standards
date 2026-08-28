@@ -1,0 +1,25 @@
+schema_version: "1.0"
+workflow_id: major-gas-incident-reference
+title: "대형 가스 사고 긴급 참조 (Major Gas Incident Emergency Reference)"
+status: active
+applicability: mandatory
+workflow_type: reference
+target_agent: emergency-agent
+data_provided:
+  - gas_type_and_concentration
+  - facility_layout
+  - evacuation_zones
+  - kgs_notification_required
+handoff_protocol:
+  trigger: major_gas_incident
+  dispatch_to: emergency-agent
+  include_data:
+    - gas_dispersion_model
+    - affected_facilities
+legal_basis:
+  - 고압가스 안전 관리 및 사업법 Article 26
+  - 중대재해처벌법 Article 7
+  - 재난관리기본법
+industry_profile: gas-facility
+agent: gasterm-agent
+evidence_model: gasterm-leak-detection-record.json

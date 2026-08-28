@@ -1,0 +1,39 @@
+# Chemical Plant Industry Profile — ehschem Domain (v1)
+profile_id: chemical-plant
+name: chemical-plant
+display_name: "화학공장 (Chemical Plant — Refining/Petrochemical/Specialty)"
+version: "1.0"
+status: active
+last_updated: 2026-08-06
+industry_tier: industry
+agent: ehschem-agent
+legal_basis:
+  - 산업안전보건법 (OSHA-KR) — PSM (Art 44), 위험성평가 (Art 36)
+  - 중대재해처벌법 (SAPA)
+  - 화학물질관리법 (CCA)
+  - 위험물안전관리법
+  - K-REACH
+  - 대기환경보전법 / 수질환경보전법
+key_hazards:
+  - chemical_release_toxic_gas
+  - explosion_vapor_cloud
+  - fire_pool_fire
+  - process_upset_overpressure
+workflows:
+  ehschem:
+    - plant-operation-safety
+    - batch-process-safety
+    - continuous-process-safety
+    - chemical-storage-management
+    - loading-unloading-safety
+    - turnaround-shutdown-planning
+    - environmental-monitoring
+    - major-chemical-incident-reference
+uses_functional_services:
+  - psm (11 workflows: PHA, MOC, MI, PSSR, PSI, SOP, contractor, EAP, audit, investigation, trade_secrets)
+  - msds (7 workflows: chemical data, GHS, inventory, K-REACH, labeling)
+  - emergency (chemical-release, explosion-gas-response, disaster-response)
+description: Chemical plant operations for 정유/석유화학/정밀화학. Industry coordinator in 2-Tier matrix — references PSM/MSDS/Emergency functional services.
+v1_scope:
+  includes: [refining, petrochemical, specialty_chemicals]
+  excludes: [inorganic_chemicals, pharmaceutical_chemicals]

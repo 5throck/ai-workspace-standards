@@ -1,0 +1,93 @@
+# ── Registry schema v2 (mode: coordinates) ───────────────────────────────────
+# This file maps article numbers to official titles ONLY. Article content is
+# never cached here — fetch live from the 법제처 k-law API at point of use.
+# Spec: docs/_meta/registry-schema-v2.md
+schema_version: 2
+mode: coordinates
+
+jurisdiction: KR
+regulator: MOEL / KOSHA
+framework: OSHA-KR
+law_name: 산업안전보건법
+law_name_en: Occupational Safety and Health Act
+abbreviation: OSHA-KR
+mst: null            # 법제처 법령일련번호 — filled by first k-law live pull (Phase 4)
+enforced_from: null  # not recorded in prior cache — Phase 4 live pull fills
+agency: 고용노동부
+tier: 1
+
+description: >
+  Cross-domain base coordinate registry consolidating every 산업안전보건법 article cited
+  anywhere in the Safety OS codebase (workflows/**/schema.yaml legal_basis fields,
+  agents/*.md Section A blocks). Domain sub-variant files narrow this set per domain.
+  Content authority is the k-law live API — this file asserts existence and title only.
+
+articles:
+  - { no: "13",  title: "기술 또는 작업환경에 관한 표준", checked_at: "2026-08-26" }
+  - { no: "14",  title: "안전·보건 계획 수립 및 이사회 보고·승인", checked_at: "2026-08-26" }
+  - { no: "15",  title: "안전보건관리책임자 직무", checked_at: "2026-08-26" }
+  - { no: "16",  title: "관리감독자 직무", checked_at: "2026-08-26" }
+  - { no: "17",  title: "안전관리자 선임", checked_at: "2026-08-26" }
+  - { no: "24",  title: "산업안전보건위원회", checked_at: "2026-08-26" }
+  - { no: "29",  title: "근로자 안전보건교육", checked_at: "2026-08-26" }
+  - { no: "31",  title: "건설업 기초안전보건교육", checked_at: "2026-08-26" }
+  - { no: "32",  title: "안전보건관리책임자 등에 대한 직무교육", checked_at: "2026-08-26" }
+  - { no: "36",  title: "위험성평가 실시", checked_at: "2026-08-26" }
+  - { no: "38",  title: "안전조치", checked_at: "2026-08-26" }
+  - { no: "39",  title: "보건조치", checked_at: "2026-08-26" }
+  - { no: "42",  title: "유해위험방지계획서의 작성·제출 (건설)", checked_at: "2026-08-26" }
+  - { no: "44",  title: "공정안전관리", checked_at: "2026-08-26" }
+  - { no: "51",  title: "사업주에 의한 작업중지", checked_at: "2026-08-26" }
+  - { no: "52",  title: "근로자에 의한 작업중지", checked_at: "2026-08-26" }
+  - { no: "54",  title: "중대재해 발생 시 조치", checked_at: "2026-08-26" }
+  - { no: "57",  title: "산업재해 기록·보고 (3년 보존)", checked_at: "2026-08-26" }
+  - { no: "61",  title: "도급 사업 안전보건 조치", checked_at: "2026-08-26" }
+  - { no: "62",  title: "안전보건 협조 의무", checked_at: "2026-08-26" }
+  - { no: "63",  title: "도급인의 안전보건조치", checked_at: "2026-08-26" }
+  - { no: "89",  title: "자율안전확인의 신고", checked_at: "2026-08-26" }
+  - { no: "93",  title: "안전검사", checked_at: "2026-08-26" }
+  - { no: "98",  title: "자율검사프로그램에 따른 안전검사", checked_at: "2026-08-26" }
+  - { no: "99",  title: "자율검사프로그램 인정의 취소 등", checked_at: "2026-08-26" }
+  - { no: "100", title: "자율안전검사기관", checked_at: "2026-08-26" }
+  - { no: "101", title: "성능시험 등", checked_at: "2026-08-26" }
+  - { no: "103", title: "유해·위험기계등의 안전 관련 정보의 종합관리", checked_at: "2026-08-26" }
+  - { no: "104", title: "유해인자의 분류기준 (시행규칙 별표18)", checked_at: "2026-08-26" }
+  - { no: "108", title: "신규화학물질의 유해성·위험성 조사", checked_at: "2026-08-26" }
+  - { no: "110", title: "물질안전보건자료(MSDS) 작성·제출", checked_at: "2026-08-26" }
+  - { no: "111", title: "물질안전보건자료의 제공", checked_at: "2026-08-26" }
+  - { no: "112", title: "물질안전보건자료 일부 비공개 승인 등", checked_at: "2026-08-26" }
+  - { no: "113", title: "국외제조자가 선임한 자에 의한 정보 제출 등", checked_at: "2026-08-26" }
+  - { no: "114", title: "물질안전보건자료의 게시 및 교육", checked_at: "2026-08-26" }
+  - { no: "115", title: "물질안전보건자료대상물질 용기 등의 경고표시", checked_at: "2026-08-26" }
+  - { no: "117", title: "유해·위험물질의 제조 등 금지", checked_at: "2026-08-26" }
+  - { no: "118", title: "유해·위험물질의 제조 등 허가", checked_at: "2026-08-26" }
+  - { no: "125", title: "작업환경측정", checked_at: "2026-08-26" }
+  - { no: "129", title: "일반건강진단", checked_at: "2026-08-26" }
+  - { no: "130", title: "특수건강진단", checked_at: "2026-08-26" }
+  - { no: "155", title: "고용노동부 작업장 감독 권한", checked_at: "2026-08-26" }
+
+related_rule:
+  name_ko: 안전보건기준에관한규칙
+  abbreviation: OSHA-KR-Rules
+  note: Also cited as '산업안전보건기준에 관한 규칙' (OSHSR) — same rule, name-string variant.
+  articles:
+    - { no: "92",  title: "제로에너지상태 확보 (LOTO)", checked_at: "2026-08-26" }
+    - { no: "618", title: "밀폐공간 정의", checked_at: "2026-08-26" }
+    - { no: "623", title: "감시인의 배치 등", checked_at: "2026-08-26" }
+
+domain_sub_variants:
+  - regulations/KR/OSHA-KR-Construction.yaml
+  - regulations/KR/OSHA-KR-MSDS.yaml
+  - regulations/KR/OSHA-KR-Training.yaml
+
+related_decree:
+  name_ko: 산업안전보건법 시행령
+  name_en: Enforcement Decree of the Occupational Safety and Health Act
+  abbreviation: OSHA-KR-Decree
+  file: regulations/KR/OSHA-KR-Decree.yaml
+
+source_verification:
+  method: cache-arbitration   # verified against cached statute truth 2026-08-26; k-law live re-check pending (Phase 4)
+  checked_at: "2026-08-26"
+
+last_updated: "2026-08-26"

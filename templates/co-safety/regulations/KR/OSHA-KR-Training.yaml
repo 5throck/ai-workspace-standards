@@ -1,0 +1,574 @@
+# ── Registry schema v2 (mode: coordinates) ───────────────────────────────────
+# This file maps article numbers to official titles ONLY. Article content is
+# never cached here — fetch live from the 법제처 k-law API at point of use.
+# Migrated by migrate-registry-to-coordinates.ts on 2026-08-26
+schema_version: 2
+mode: coordinates
+jurisdiction: KR
+framework: OSHA-KR-Training
+law_name: 산업안전보건법
+law_name_en: null
+abbreviation: null
+mst: "283449"
+enforced_from: null
+agency: null
+tier: 1
+regulator: MOEL / KOSHA
+articles:
+  - "no": "1"
+    title: 목적
+    checked_at: "2026-08-26"
+  - "no": "2"
+    title: 정의
+    checked_at: "2026-08-26"
+  - "no": "3"
+    title: 적용 범위
+    checked_at: "2026-08-26"
+  - "no": "4"
+    title: 정부의 책무
+    checked_at: "2026-08-26"
+  - "no": "4"
+    title: 지방자치단체의 책무
+    checked_at: "2026-08-26"
+  - "no": "4"
+    title: 지방자치단체의 산업재해 예방 활동 등
+    checked_at: "2026-08-26"
+  - "no": "5"
+    title: 사업주 등의 의무
+    checked_at: "2026-08-26"
+  - "no": "6"
+    title: 근로자의 의무
+    checked_at: "2026-08-26"
+  - "no": "7"
+    title: 산업재해 예방에 관한 기본계획의 수립ㆍ공표
+    checked_at: "2026-08-26"
+  - "no": "8"
+    title: 협조 요청 등
+    checked_at: "2026-08-26"
+  - "no": "9"
+    title: 산업재해 예방 통합정보시스템 구축ㆍ운영 등
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 산업재해 발생건수 등의 공표
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 안전보건 현황 공시
+    checked_at: "2026-08-26"
+  - "no": "11"
+    title: 산업재해 예방시설의 설치ㆍ운영
+    checked_at: "2026-08-26"
+  - "no": "12"
+    title: 산업재해 예방의 재원
+    checked_at: "2026-08-26"
+  - "no": "13"
+    title: 기술 또는 작업환경에 관한 표준
+    checked_at: "2026-08-26"
+  - "no": "14"
+    title: 이사회 보고 및 승인 등
+    checked_at: "2026-08-26"
+  - "no": "15"
+    title: 안전보건관리책임자
+    checked_at: "2026-08-26"
+  - "no": "16"
+    title: 관리감독자
+    checked_at: "2026-08-26"
+  - "no": "17"
+    title: 안전관리자
+    checked_at: "2026-08-26"
+  - "no": "18"
+    title: 보건관리자
+    checked_at: "2026-08-26"
+  - "no": "19"
+    title: 안전보건관리담당자
+    checked_at: "2026-08-26"
+  - "no": "20"
+    title: 안전관리자 등의 지도ㆍ조언
+    checked_at: "2026-08-26"
+  - "no": "21"
+    title: 안전관리전문기관 등
+    checked_at: "2026-08-26"
+  - "no": "22"
+    title: 산업보건의
+    checked_at: "2026-08-26"
+  - "no": "23"
+    title: 명예산업안전감독관
+    checked_at: "2026-08-26"
+  - "no": "24"
+    title: 산업안전보건위원회
+    checked_at: "2026-08-26"
+  - "no": "25"
+    title: 안전보건관리규정의 작성
+    checked_at: "2026-08-26"
+  - "no": "26"
+    title: 안전보건관리규정의 작성ㆍ변경 절차
+    checked_at: "2026-08-26"
+  - "no": "27"
+    title: 안전보건관리규정의 준수
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: 다른 법률의 준용
+    checked_at: "2026-08-26"
+  - "no": "29"
+    title: 근로자에 대한 안전보건교육
+    checked_at: "2026-08-26"
+  - "no": "30"
+    title: 근로자에 대한 안전보건교육의 면제 등
+    checked_at: "2026-08-26"
+  - "no": "31"
+    title: 건설업 기초안전보건교육
+    checked_at: "2026-08-26"
+  - "no": "32"
+    title: 안전보건관리책임자 등에 대한 직무교육
+    checked_at: "2026-08-26"
+  - "no": "33"
+    title: 안전보건교육기관
+    checked_at: "2026-08-26"
+  - "no": "34"
+    title: 법령 요지 등의 게시 등
+    checked_at: "2026-08-26"
+  - "no": "35"
+    title: 근로자대표의 통지 요청
+    checked_at: "2026-08-26"
+  - "no": "36"
+    title: 위험성평가의 실시
+    checked_at: "2026-08-26"
+  - "no": "37"
+    title: 안전보건표지의 설치ㆍ부착
+    checked_at: "2026-08-26"
+  - "no": "38"
+    title: 안전조치
+    checked_at: "2026-08-26"
+  - "no": "39"
+    title: 보건조치
+    checked_at: "2026-08-26"
+  - "no": "40"
+    title: 근로자의 안전조치 및 보건조치 준수
+    checked_at: "2026-08-26"
+  - "no": "41"
+    title: 고객의 폭언 등으로 인한 건강장해 예방조치 등
+    checked_at: "2026-08-26"
+  - "no": "42"
+    title: 유해위험방지계획서의 작성ㆍ제출 등
+    checked_at: "2026-08-26"
+  - "no": "43"
+    title: 유해위험방지계획서 이행의 확인 등
+    checked_at: "2026-08-26"
+  - "no": "44"
+    title: 공정안전보고서의 작성ㆍ제출
+    checked_at: "2026-08-26"
+  - "no": "45"
+    title: 공정안전보고서의 심사 등
+    checked_at: "2026-08-26"
+  - "no": "46"
+    title: 공정안전보고서의 이행 등
+    checked_at: "2026-08-26"
+  - "no": "47"
+    title: 안전보건진단
+    checked_at: "2026-08-26"
+  - "no": "48"
+    title: 안전보건진단기관
+    checked_at: "2026-08-26"
+  - "no": "49"
+    title: 안전보건개선계획의 수립ㆍ시행 명령
+    checked_at: "2026-08-26"
+  - "no": "50"
+    title: 안전보건개선계획서의 제출 등
+    checked_at: "2026-08-26"
+  - "no": "51"
+    title: 사업주의 작업중지
+    checked_at: "2026-08-26"
+  - "no": "52"
+    title: 근로자의 작업중지
+    checked_at: "2026-08-26"
+  - "no": "53"
+    title: 고용노동부장관의 시정조치 등
+    checked_at: "2026-08-26"
+  - "no": "54"
+    title: 중대재해 발생 시 사업주의 조치
+    checked_at: "2026-08-26"
+  - "no": "55"
+    title: 중대재해 발생 시 고용노동부장관의 작업중지 조치
+    checked_at: "2026-08-26"
+  - "no": "56"
+    title: 중대재해등의 원인조사 등
+    checked_at: "2026-08-26"
+  - "no": "56"
+    title: 재해조사보고서의 작성ㆍ공개
+    checked_at: "2026-08-26"
+  - "no": "57"
+    title: 산업재해 발생 은폐 금지 및 보고 등
+    checked_at: "2026-08-26"
+  - "no": "58"
+    title: 유해한 작업의 도급금지
+    checked_at: "2026-08-26"
+  - "no": "59"
+    title: 도급의 승인
+    checked_at: "2026-08-26"
+  - "no": "60"
+    title: 도급의 승인 시 하도급 금지
+    checked_at: "2026-08-26"
+  - "no": "61"
+    title: 적격 수급인 선정 의무
+    checked_at: "2026-08-26"
+  - "no": "62"
+    title: 안전보건총괄책임자
+    checked_at: "2026-08-26"
+  - "no": "63"
+    title: 도급인의 안전조치 및 보건조치
+    checked_at: "2026-08-26"
+  - "no": "64"
+    title: 도급에 따른 산업재해 예방조치
+    checked_at: "2026-08-26"
+  - "no": "65"
+    title: 도급인의 안전 및 보건에 관한 정보 제공 등
+    checked_at: "2026-08-26"
+  - "no": "66"
+    title: 도급인의 관계수급인에 대한 시정조치
+    checked_at: "2026-08-26"
+  - "no": "67"
+    title: 건설공사발주자의 산업재해 예방 조치
+    checked_at: "2026-08-26"
+  - "no": "68"
+    title: 안전보건조정자
+    checked_at: "2026-08-26"
+  - "no": "69"
+    title: 공사기간 단축 및 공법변경 금지
+    checked_at: "2026-08-26"
+  - "no": "70"
+    title: 건설공사 기간의 연장
+    checked_at: "2026-08-26"
+  - "no": "71"
+    title: 설계변경의 요청
+    checked_at: "2026-08-26"
+  - "no": "72"
+    title: 건설공사 등의 산업안전보건관리비 계상 등
+    checked_at: "2026-08-26"
+  - "no": "73"
+    title: 건설공사의 산업재해 예방 지도
+    checked_at: "2026-08-26"
+  - "no": "74"
+    title: 건설재해예방전문지도기관
+    checked_at: "2026-08-26"
+  - "no": "75"
+    title: 안전 및 보건에 관한 협의체 등의 구성ㆍ운영에 관한 특례
+    checked_at: "2026-08-26"
+  - "no": "76"
+    title: 기계ㆍ기구 등에 대한 건설공사도급인의 안전조치
+    checked_at: "2026-08-26"
+  - "no": "77"
+    title: 특수형태근로종사자에 대한 안전조치 및 보건조치 등
+    checked_at: "2026-08-26"
+  - "no": "78"
+    title: 배달종사자에 대한 안전조치
+    checked_at: "2026-08-26"
+  - "no": "79"
+    title: 가맹본부의 산업재해 예방 조치
+    checked_at: "2026-08-26"
+  - "no": "80"
+    title: 유해하거나 위험한 기계ㆍ기구에 대한 방호조치
+    checked_at: "2026-08-26"
+  - "no": "81"
+    title: 기계ㆍ기구 등의 대여자 등의 조치
+    checked_at: "2026-08-26"
+  - "no": "82"
+    title: 타워크레인 설치ㆍ해체업의 등록 등
+    checked_at: "2026-08-26"
+  - "no": "83"
+    title: 안전인증기준
+    checked_at: "2026-08-26"
+  - "no": "84"
+    title: 안전인증
+    checked_at: "2026-08-26"
+  - "no": "85"
+    title: 안전인증의 표시 등
+    checked_at: "2026-08-26"
+  - "no": "86"
+    title: 안전인증의 취소 등
+    checked_at: "2026-08-26"
+  - "no": "87"
+    title: 안전인증대상기계등의 제조 등의 금지 등
+    checked_at: "2026-08-26"
+  - "no": "88"
+    title: 안전인증기관
+    checked_at: "2026-08-26"
+  - "no": "89"
+    title: 자율안전확인의 신고
+    checked_at: "2026-08-26"
+  - "no": "90"
+    title: 자율안전확인의 표시 등
+    checked_at: "2026-08-26"
+  - "no": "91"
+    title: 자율안전확인표시의 사용 금지 등
+    checked_at: "2026-08-26"
+  - "no": "92"
+    title: 자율안전확인대상기계등의 제조 등의 금지 등
+    checked_at: "2026-08-26"
+  - "no": "93"
+    title: 안전검사
+    checked_at: "2026-08-26"
+  - "no": "94"
+    title: 안전검사합격증명서 발급 등
+    checked_at: "2026-08-26"
+  - "no": "95"
+    title: 안전검사대상기계등의 사용 금지
+    checked_at: "2026-08-26"
+  - "no": "96"
+    title: 안전검사기관
+    checked_at: "2026-08-26"
+  - "no": "97"
+    title: 안전검사기관의 보고의무
+    checked_at: "2026-08-26"
+  - "no": "98"
+    title: 자율검사프로그램에 따른 안전검사
+    checked_at: "2026-08-26"
+  - "no": "99"
+    title: 자율검사프로그램 인정의 취소 등
+    checked_at: "2026-08-26"
+  - "no": "100"
+    title: 자율안전검사기관
+    checked_at: "2026-08-26"
+  - "no": "101"
+    title: 성능시험 등
+    checked_at: "2026-08-26"
+  - "no": "102"
+    title: 유해ㆍ위험기계등 제조사업 등의 지원
+    checked_at: "2026-08-26"
+  - "no": "103"
+    title: 유해ㆍ위험기계등의 안전 관련 정보의 종합관리
+    checked_at: "2026-08-26"
+  - "no": "104"
+    title: 유해인자의 분류기준
+    checked_at: "2026-08-26"
+  - "no": "105"
+    title: 유해인자의 유해성ㆍ위험성 평가 및 관리
+    checked_at: "2026-08-26"
+  - "no": "106"
+    title: 유해인자의 노출기준 설정
+    checked_at: "2026-08-26"
+  - "no": "107"
+    title: 유해인자 허용기준의 준수
+    checked_at: "2026-08-26"
+  - "no": "108"
+    title: 신규화학물질의 유해성ㆍ위험성 조사
+    checked_at: "2026-08-26"
+  - "no": "109"
+    title: 중대한 건강장해 우려 화학물질의 유해성ㆍ위험성 조사
+    checked_at: "2026-08-26"
+  - "no": "110"
+    title: 물질안전보건자료의 작성 및 제출
+    checked_at: "2026-08-26"
+  - "no": "111"
+    title: 물질안전보건자료의 제공
+    checked_at: "2026-08-26"
+  - "no": "112"
+    title: 물질안전보건자료의 일부 비공개 승인 등
+    checked_at: "2026-08-26"
+  - "no": "112"
+    title: 물질안전보건자료 일부 비공개 승인 등에 대한 이의신청 특례
+    checked_at: "2026-08-26"
+  - "no": "113"
+    title: 국외제조자가 선임한 자에 의한 정보 제출 등
+    checked_at: "2026-08-26"
+  - "no": "114"
+    title: 물질안전보건자료의 게시 및 교육
+    checked_at: "2026-08-26"
+  - "no": "115"
+    title: 물질안전보건자료대상물질 용기 등의 경고표시
+    checked_at: "2026-08-26"
+  - "no": "116"
+    title: 물질안전보건자료와 관련된 자료의 제공
+    checked_at: "2026-08-26"
+  - "no": "117"
+    title: 유해ㆍ위험물질의 제조 등 금지
+    checked_at: "2026-08-26"
+  - "no": "118"
+    title: 유해ㆍ위험물질의 제조 등 허가
+    checked_at: "2026-08-26"
+  - "no": "119"
+    title: 석면조사
+    checked_at: "2026-08-26"
+  - "no": "120"
+    title: 석면조사기관
+    checked_at: "2026-08-26"
+  - "no": "121"
+    title: 석면해체ㆍ제거업의 등록 등
+    checked_at: "2026-08-26"
+  - "no": "122"
+    title: 석면의 해체ㆍ제거
+    checked_at: "2026-08-26"
+  - "no": "123"
+    title: 석면해체ㆍ제거 작업기준의 준수
+    checked_at: "2026-08-26"
+  - "no": "124"
+    title: 석면농도기준의 준수
+    checked_at: "2026-08-26"
+  - "no": "125"
+    title: 작업환경측정
+    checked_at: "2026-08-26"
+  - "no": "126"
+    title: 작업환경측정기관
+    checked_at: "2026-08-26"
+  - "no": "127"
+    title: 작업환경측정 신뢰성 평가
+    checked_at: "2026-08-26"
+  - "no": "128"
+    title: 작업환경전문연구기관의 지정
+    checked_at: "2026-08-26"
+  - "no": "128"
+    title: 휴게시설의 설치
+    checked_at: "2026-08-26"
+  - "no": "129"
+    title: 일반건강진단
+    checked_at: "2026-08-26"
+  - "no": "130"
+    title: 특수건강진단 등
+    checked_at: "2026-08-26"
+  - "no": "131"
+    title: 임시건강진단 명령 등
+    checked_at: "2026-08-26"
+  - "no": "132"
+    title: 건강진단에 관한 사업주의 의무
+    checked_at: "2026-08-26"
+  - "no": "133"
+    title: 건강진단에 관한 근로자의 의무
+    checked_at: "2026-08-26"
+  - "no": "134"
+    title: 건강진단기관 등의 결과보고 의무
+    checked_at: "2026-08-26"
+  - "no": "135"
+    title: 특수건강진단기관
+    checked_at: "2026-08-26"
+  - "no": "136"
+    title: 유해인자별 특수건강진단 전문연구기관의 지정
+    checked_at: "2026-08-26"
+  - "no": "137"
+    title: 건강관리카드
+    checked_at: "2026-08-26"
+  - "no": "138"
+    title: 질병자의 근로 금지ㆍ제한
+    checked_at: "2026-08-26"
+  - "no": "139"
+    title: 유해ㆍ위험작업에 대한 근로시간 제한 등
+    checked_at: "2026-08-26"
+  - "no": "140"
+    title: 자격 등에 의한 취업 제한 등
+    checked_at: "2026-08-26"
+  - "no": "141"
+    title: 역학조사
+    checked_at: "2026-08-26"
+  - "no": "142"
+    title: 산업안전지도사 등의 직무
+    checked_at: "2026-08-26"
+  - "no": "143"
+    title: 지도사의 자격 및 시험
+    checked_at: "2026-08-26"
+  - "no": "144"
+    title: 부정행위자에 대한 제재
+    checked_at: "2026-08-26"
+  - "no": "145"
+    title: 지도사의 등록
+    checked_at: "2026-08-26"
+  - "no": "146"
+    title: 지도사의 교육
+    checked_at: "2026-08-26"
+  - "no": "147"
+    title: 지도사에 대한 지도 등
+    checked_at: "2026-08-26"
+  - "no": "148"
+    title: 손해배상의 책임
+    checked_at: "2026-08-26"
+  - "no": "149"
+    title: 유사명칭의 사용 금지
+    checked_at: "2026-08-26"
+  - "no": "150"
+    title: 품위유지와 성실의무 등
+    checked_at: "2026-08-26"
+  - "no": "151"
+    title: 금지 행위
+    checked_at: "2026-08-26"
+  - "no": "152"
+    title: 관계 장부 등의 열람 신청
+    checked_at: "2026-08-26"
+  - "no": "153"
+    title: 자격대여행위 및 대여알선행위 등의 금지
+    checked_at: "2026-08-26"
+  - "no": "154"
+    title: 등록의 취소 등
+    checked_at: "2026-08-26"
+  - "no": "155"
+    title: 근로감독관의 권한
+    checked_at: "2026-08-26"
+  - "no": "156"
+    title: 공단 소속 직원의 검사 및 지도 등
+    checked_at: "2026-08-26"
+  - "no": "157"
+    title: 감독기관에 대한 신고
+    checked_at: "2026-08-26"
+  - "no": "158"
+    title: 산업재해 예방활동의 보조ㆍ지원
+    checked_at: "2026-08-26"
+  - "no": "159"
+    title: 영업정지의 요청 등
+    checked_at: "2026-08-26"
+  - "no": "160"
+    title: 업무정지 처분을 대신하여 부과하는 과징금 처분
+    checked_at: "2026-08-26"
+  - "no": "161"
+    title: 도급금지 등 의무위반에 따른 과징금 부과
+    checked_at: "2026-08-26"
+  - "no": "162"
+    title: 비밀 유지
+    checked_at: "2026-08-26"
+  - "no": "162"
+    title: 벌칙 적용에서 공무원 의제
+    checked_at: "2026-08-26"
+  - "no": "163"
+    title: 청문 및 처분기준
+    checked_at: "2026-08-26"
+  - "no": "164"
+    title: 서류의 보존
+    checked_at: "2026-08-26"
+  - "no": "165"
+    title: 권한 등의 위임ㆍ위탁
+    checked_at: "2026-08-26"
+  - "no": "166"
+    title: 수수료 등
+    checked_at: "2026-08-26"
+  - "no": "166"
+    title: 현장실습생에 대한 특례
+    checked_at: "2026-08-26"
+  - "no": "167"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "168"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "169"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "170"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "170"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "171"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "172"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "173"
+    title: 양벌규정
+    checked_at: "2026-08-26"
+  - "no": "174"
+    title: 형벌과 수강명령 등의 병과
+    checked_at: "2026-08-26"
+  - "no": "175"
+    title: 과태료
+    checked_at: "2026-08-26"
+source_verification:
+  method: k-law-live
+  checked_at: "2026-08-26"
+  next_review: "2027-02-22"
+last_updated: "2026-08-26"

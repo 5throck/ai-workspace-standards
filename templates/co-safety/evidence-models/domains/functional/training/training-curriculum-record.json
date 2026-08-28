@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "training-curriculum-record.json",
+  "title": "Training Curriculum Record",
+  "description": "Training curriculum definition per OSHA-KR requirements.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": ["record_id", "training_type", "title", "duration_hours", "target_audience", "legal_basis"],
+  "properties": {
+    "record_id": { "type": "string", "pattern": "^TRAIN-CURR-[0-9]{4}-[0-9]{4}$" },
+    "training_type": { "type": "string", "enum": ["regular", "special", "supervisor", "new_hire", "job_transfer", "first_aid", "msds"] },
+    "title": { "type": "string" },
+    "description": { "type": "string" },
+    "version": { "type": "string" },
+    "duration_hours": { "type": "number" },
+    "target_audience": { "type": "array", "items": { "type": "string" } },
+    "modules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "module_id": { "type": "string" },
+          "module_title": { "type": "string" },
+          "duration_minutes": { "type": "number" },
+          "content_type": { "type": "string", "enum": ["lecture", "video", "practical", "assessment", "case_study"] }
+        }
+      }
+    },
+    "assessment_required": { "type": "boolean" },
+    "passing_score": { "type": ["number", "null"] },
+    "refresh_cycle_months": { "type": "number", "description": "Retraining interval (12 = annual)" },
+    "legal_basis": {
+      "type": "array",
+      "description": "Multi-source legal basis. Primary: OSHA-KR Article 29 (curriculum content requirements for regular/new-hire/job-transfer education) or Article 29 §3 (special curriculum for hazardous work, per 규칙 §26) or Article 114 (MSDS curriculum content). Adjacent laws may include: SAPA Article 4 (employer safety and health assurance obligation — training provision), OSHA-KR Article 36 (risk assessment results must be included in training curriculum for affected tasks). Curricula store no direct PII, but target_audience definitions may identify worker groups/individuals; cite PIPA (개인정보보호법) minimum-necessary principle (Art 16) when audiences reference identifiable persons — see regulations/KR/PIPA.yaml.",
+      "items": { "type": "string" },
+      "minItems": 3,
+      "examples": [
+        ["OSHA-KR Art.29 §1", "OSHA-KR Art.36 §1", "SAPA Art.4"],
+        ["OSHA-KR Art.29 §3", "산업안전보건법 시행규칙 Art.26 §1", "SAPA Art.4"],
+        ["OSHA-KR Art.114 §1", "OSHA-KR Art.29 §1", "SAPA Art.4"],
+        ["OSHA-KR Art.29 §1", "OSHA-KR Art.36 §1", "PIPA Art.16 §1"]
+      ]
+    },
+    "e_signature": { "$ref": "../../../_shared/base/common.schema.json#/definitions/e_signature" },
+    "nomenclature": { "$ref": "../../../_shared/base/common.schema.json#/definitions/nomenclature" },
+    "audit_trail": { "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail" }
+  }
+}

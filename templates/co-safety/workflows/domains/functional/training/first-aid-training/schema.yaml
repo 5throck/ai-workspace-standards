@@ -1,0 +1,10 @@
+schema_version: "1.0"
+workflow_id: first-aid-training
+title: "응급조치교육 (First Aid Training)"
+status: active
+applicability: mandatory
+applicable_industries: [chemical, gas_terminal, power_generation, construction, medical_device, pharma, manufacturing]
+legal_basis: [산업안전보건법 Article 13, 중대재해처벌법 Article 7, 산업안전보건법 Article 29]
+industry_profile: training-management
+agent: training-agent
+evidence_model: training-record.json

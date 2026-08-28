@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: byproduct-gas-leak-prevent
+title: "제철 부생가스(CO/N2) 누출 방지 및 안전 점검 (Byproduct Gas Leak Prevention)"
+status: active
+applicability: mandatory
+workflow_type: core
+legal_basis:
+  - 고압가스 안전 관리 및 사업법 Article 13
+  - 산업안전보건법 Article 36
+  - 산업안전보건법 Article 38
+  - 중대재해처벌법 Article 4
+industry_profile: steelmaking-heavy
+agent: steelmaking-agent
+evidence_model: steel-byproduct-gas-record.json

@@ -1,0 +1,17 @@
+schema_version: "1.0"
+workflow_id: special-gas-handling
+title: "반도체 특수가스 안전 관리 (Special Gas Handling & Cabinet Safety)"
+status: active
+applicability: mandatory
+workflow_type: core
+legal_basis:
+  - 고압가스 안전관리 및 사업법 Article 11
+  - 고압가스 안전관리 및 사업법 Article 13
+  - 고압가스 안전관리 및 사업법 Article 15
+  - 고압가스 안전관리 및 사업법 Article 24
+  - 고압가스 안전관리 및 사업법 Article 26
+  - 화학물질관리법 Article 23
+  - 산업안전보건법 Article 36
+industry_profile: semicon-cleanroom
+agent: semicon-agent
+evidence_model: semicon-special-gas-record.json

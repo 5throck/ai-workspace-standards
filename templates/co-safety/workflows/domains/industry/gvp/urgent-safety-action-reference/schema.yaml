@@ -1,0 +1,26 @@
+schema_version: "1.0"
+workflow_id: urgent-safety-action-reference
+title: "긴급 안전조치 참조 (Urgent Safety Action Reference)"
+status: active
+applicability: mandatory
+workflow_type: reference
+target_agent: emergency-agent
+data_provided:
+  - signal_summary
+  - affected_batches
+  - patient_population_at_risk
+  - regulatory_recommendations
+handoff_protocol:
+  trigger: urgent_safety_action_required
+  dispatch_to: emergency-agent
+  include_data:
+    - signal_classification
+    - affected_products
+    - mfds_communication_required
+legal_basis:
+  - 약사법 Article 73의2
+  - EU GVP Module 16
+  - 의약품 재평가 규정
+industry_profile: pharmacovigilance
+agent: gvp-agent
+evidence_model: gvp-icsr-record.json

@@ -1,0 +1,65 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "railway-thermite-welding-hot-work-record.json",
+  "title": "Railway Thermite Welding Hot-Work Safety Record",
+  "description": "Evidence model for aluminothermic (thermite) rail welding hot-work records: pre-ignition atmosphere verification, fire-watch, welder qualification, thermite charge control, and track-possession window closure. The thermite reaction produces ~2,500 C molten steel in-situ on the running rail, creating right-of-way fire ignition, UV/IR radiation, and molten-metal splatter hazards distinct from workshop welding. Performed during scheduled track-possession windows on Korail/SR main lines.",
+  "version": "1.0.0",
+  "status": "active",
+  "type": "object",
+  "required": [
+    "record_id",
+    "weld_location_kp",
+    "thermite_charge_grams",
+    "pre_ignition_lel_percent",
+    "fire_watch_posted",
+    "welder_certification_id",
+    "legal_basis",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^RLW-TW-[0-9]{4}-[0-9]{4}$",
+      "description": "Unique record identifier (RLW-TW-YYYY-NNNN)."
+    },
+    "weld_location_kp": {
+      "type": "string",
+      "description": "Weld site identifier: line name + kilometer post + track number (e.g., 'Jungang-Line KP 127.450 Track-2')."
+    },
+    "thermite_charge_grams": {
+      "type": "number",
+      "minimum": 1000,
+      "description": "Net weight of the aluminothermic charge (grams). Standard 60kg-rail portion kit is ~5,000g; lighter charges indicate a non-standard kit and require engineering review."
+    },
+    "pre_ignition_lel_percent": {
+      "type": "number",
+      "maximum": 0,
+      "description": "Lower Explosive Limit (%) measured at the weld crucible base BEFORE thermite ignition. Must read 0% LEL; any positive reading aborts the ignition."
+    },
+    "fire_watch_posted": {
+      "type": "boolean",
+      "description": "True if a dedicated fire-watch attendant with charged extinguisher was posted for the duration of molten-metal flow and cool-down."
+    },
+    "welder_certification_id": {
+      "type": "string",
+      "description": "Aluminothermic welder qualification certificate number (KorRail-approved or supplier-approved thermite welder competency ID)."
+    },
+    "cooling_time_minutes": {
+      "type": "number",
+      "minimum": 15,
+      "description": "Elapsed minutes between thermite tap completion and restoration of rail traffic. Minimum 15 min per KorRail aluminothermic welding procedure to ensure metallurgical set of the weld collar."
+    },
+    "possession_window_end_iso": {
+      "type": "string",
+      "description": "Track-possession window closing time (ISO 8601, e.g., '2026-08-07T03:10:00+09:00'). Rail traffic may only be restored AFTER this timestamp AND cooling_time_minutes have both elapsed."
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 3
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

@@ -1,0 +1,9 @@
+schema_version: "1.0"
+workflow_id: "contractor-management"
+title: "도급사업 안전보건관리 (Contractor Management)"
+status: "active"
+applicability: "mandatory"
+legal_basis:
+  - "산업안전보건법 제63조 (도급인의 안전보건조치)"
+  - "산업안전보건법 제61조 (도급 사업 안전보건 조치)"
+  - "중대재해처벌법 제5조 (도급·용역·위탁 등 관계에서의 안전·보건 확보의무)"

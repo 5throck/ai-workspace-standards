@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: cold-storage-refrigerant-safety
+title: "냉동창고 암모니아 냉매가스 누출 예방 및 갇힘 질식 방지 (Cold Storage Refrigerant Safety)"
+status: active
+applicability: mandatory
+workflow_type: core
+legal_basis:
+  - 고압가스 안전 관리 및 사업법 Article 13
+  - 산업안전보건법 Article 39
+  - 산업안전보건법 Article 618
+  - 중대재해처벌법 Article 4
+industry_profile: logistics-port
+agent: logistics-agent
+evidence_model: cold-storage-refrigerant-record.json

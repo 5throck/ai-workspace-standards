@@ -1,0 +1,13 @@
+schema_version: "1.0"
+workflow_id: mechanical-accident
+title: "기계 사고 대응 (Mechanical Accident Response)"
+status: active
+applicability: mandatory
+
+legal_basis:
+  - 산업안전보건법 Article 38 (안전조치)
+  - 중대재해처벌법 Article 4
+  - 안전보건기준에관한규칙 제2편 제1장 (기계·기구 등의 위험예방)
+industry_profile: all
+agent: emergency-agent
+evidence_model: emergency-mechanical-record.json

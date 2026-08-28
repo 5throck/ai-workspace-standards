@@ -1,0 +1,54 @@
+source_verification:
+  method: manual-curation
+  checked_at: "2026-08-26"
+jurisdiction: international
+regulator: ICH (International Council for Harmonisation)
+framework: ICH-E2
+title_en: ICH E2 Series — Pharmacovigilance and Safety Data Management
+title_ko: ICH E2 계열 — 약물감시 및 안전성 데이터 관리
+guidelines:
+  E2A:
+    title: Clinical Safety Data Management — Definitions and Standards for Expedited Reporting
+    year: "1994"
+    scope: SAE/SUSAR definitions, reporting timelines
+  E2B(R3):
+    title: Electronic Transmission of Individual Case Safety Reports (ICSRs)
+    year: "2001 (R3 2016)"
+    scope: Electronic format for ICSR transmission (HL7 message)
+  E2C(R2):
+    title: Periodic Benefit-Risk Evaluation Report (PBRER)
+    year: "2012"
+    scope: Annual aggregate safety report structure
+  E2D:
+    title: Post-approval Safety Data Management
+    year: "2003"
+    scope: Definitions and standards for expedited post-market reporting
+  E2E:
+    title: Pharmacovigilance Planning
+    year: "2004"
+    scope: Safety Specification and Pharmacovigilance Plan (RMP foundation)
+  E2F:
+    title: Development Safety Update Report (DSUR)
+    year: "2010"
+    scope: Annual safety report during clinical development
+key_concepts:
+  - adverse_event
+  - adverse_drug_reaction (ADR)
+  - serious_adverse_event (SAE)
+  - suspected_unexpected_serious_adverse_reaction (SUSAR)
+  - individual_case_safety_report (ICSR)
+  - periodic_benefit_risk_evaluation_report (PBRER)
+  - development_safety_update_report (DSUR)
+  - signal
+  - signal_detection
+  - risk_management_plan (RMP)
+meddra_integration:
+  description: Medical Dictionary for Regulatory Activities
+  use: Standard terminology for ADR coding
+  hierarchy: SOC → HLGT → HLT → PT → LLT
+  korean_version: MedDRA/J or Asian-language versions
+korean_adoption:
+  - Full ICH E2 series adopted in Korean KGVP
+  - E2B(R3) — Korea uses ICH ICSR format for global transmission
+  - E2C(R2) — Annual PBRER submission to MFDS
+last_updated: "2026-06-17"

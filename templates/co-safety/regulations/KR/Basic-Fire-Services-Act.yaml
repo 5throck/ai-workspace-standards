@@ -1,0 +1,82 @@
+# ── Registry schema v2 (mode: coordinates) ───────────────────────────────────
+# This file maps article numbers to official titles ONLY. Article content is
+# never cached here — fetch live from the 법제처 k-law API at point of use.
+# Migrated by migrate-registry-to-coordinates.ts on 2026-08-26
+schema_version: 2
+mode: coordinates
+jurisdiction: KR
+framework: Basic-Fire-Services-Act
+law_name: 소방공무원 보건안전 및 복지 기본법
+law_name_en: null
+abbreviation: null
+mst: "270329"
+enforced_from: null
+agency: null
+tier: 1
+regulator: NFA (소방청) / local fire departments
+articles:
+  - "no": "1"
+    title: 목적
+    checked_at: "2026-08-26"
+  - "no": "2"
+    title: 정의
+    checked_at: "2026-08-26"
+  - "no": "3"
+    title: 국가 등의 책무
+    checked_at: "2026-08-26"
+  - "no": "4"
+    title: 소방관서의 장의 의무
+    checked_at: "2026-08-26"
+  - "no": "5"
+    title: 소방공무원의 의무
+    checked_at: "2026-08-26"
+  - "no": "6"
+    title: 다른 법률과의 관계
+    checked_at: "2026-08-26"
+  - "no": "7"
+    title: 소방공무원 보건안전 및 복지 기본계획 등의 수립ㆍ시행
+    checked_at: "2026-08-26"
+  - "no": "8"
+    title: 소방공무원 보건안전 및 복지 집행계획의 수립ㆍ시행
+    checked_at: "2026-08-26"
+  - "no": "9"
+    title: 소방공무원 보건안전 및 복지 정책심의위원회
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 소방공무원의 건강관리 등
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 중앙 및 시ㆍ도 소방심리지원단 설치 등
+    checked_at: "2026-08-26"
+  - "no": "11"
+    title: 소방보건의
+    checked_at: "2026-08-26"
+  - "no": "12"
+    title: 복지시설 등의 설치ㆍ운영
+    checked_at: "2026-08-26"
+  - "no": "13"
+    title: 퇴직소방공무원 취업 등 지원
+    checked_at: "2026-08-26"
+  - "no": "14"
+    title: 소방공무원 보건안전관리 규정 등
+    checked_at: "2026-08-26"
+  - "no": "15"
+    title: 소방업무환경측정 등
+    checked_at: "2026-08-26"
+  - "no": "16"
+    title: 소방공무원의 특수건강진단
+    checked_at: "2026-08-26"
+  - "no": "17"
+    title: 역학조사
+    checked_at: "2026-08-26"
+  - "no": "18"
+    title: 질병소견자에 대한 소방업무 수행의 제한
+    checked_at: "2026-08-26"
+source_verification:
+  method: k-law-live
+  checked_at: "2026-08-26"
+  next_review: "2027-02-22"
+last_updated: "2026-08-26"
+related_rule:
+  name_ko: 소방기본법 시행령 / 시행규칙 / 소방력기준에관한규칙
+  abbreviation: BFS-Enforcement

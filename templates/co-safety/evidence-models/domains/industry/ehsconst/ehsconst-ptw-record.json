@@ -1,0 +1,143 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "ehsconst-ptw-record.json",
+  "title": "Construction Permit-to-Work Record",
+  "description": "건설 작업허가서 — 화기/밀폐/고소/전기 작업.",
+  "version": "2.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "sapa_article_5_compliance",
+    "project_id",
+    "contractor_tier",
+    "safety_officer_in_charge",
+    "legal_basis",
+    "e_signature",
+    "nomenclature",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^EHSC-PTW-[0-9]{4}-[0-9]{4}$"
+    },
+    "sapa_article_5_compliance": {
+      "type": "boolean",
+      "description": "SAPA Article 5 (도급·하도급 안전보건 확보의무) 준수"
+    },
+    "project_id": {
+      "type": "string",
+      "description": "건설공사 번호 (Construction project number)"
+    },
+    "contractor_tier": {
+      "type": "string",
+      "enum": [
+        "ordering_party",
+        "prime_contractor",
+        "first_subcontractor",
+        "second_subcontractor_below"
+      ],
+      "description": "발주처/원도급/1차 하도급/2차 이하"
+    },
+    "safety_officer_in_charge": {
+      "type": "string",
+      "description": "안전관리자 ID"
+    },
+    "permit_number": {
+      "type": "string"
+    },
+    "work_type": {
+      "type": "string",
+      "enum": [
+        "hot_work",
+        "confined_space",
+        "work_at_height",
+        "electrical",
+        "excavation",
+        "lifting",
+        "demolition"
+      ]
+    },
+    "work_description": {
+      "type": "string"
+    },
+    "work_location": {
+      "type": "string"
+    },
+    "validity_start": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "validity_end": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "risk_assessment_ref": {
+      "type": "string"
+    },
+    "control_measures": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "isolation_verified",
+          "gas_test_performed",
+          "fire_watch_assigned",
+          "ppe_confirmed",
+          "communication_established",
+          "emergency_equipment_present",
+          "grounding_verified"
+        ]
+      }
+    },
+    "permitted_workers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "issuing_authority_id": {
+      "type": "string"
+    },
+    "performing_authority_id": {
+      "type": "string"
+    },
+    "closeout_signed": {
+      "type": "boolean"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "description": "Multi-source legal basis. Primary: OSHA-KR Articles 38/42/72 (safety measures, hazard-prevention plan, construction safety budget; fall/collapse detail in OSHSR Ch.6). Adjacent laws may include: SAPA Article 5 (contract/subcontractor safety obligations), 건설산업기본법 Articles 45/83 (subcontractor management), 건설기술진흥법 Articles 24/25 (safety supervision).",
+      "examples": [
+        [
+          "OSHA-KR Art.15 §1",
+          "SAPA Art.5",
+          "건설산업기본법 Art.45"
+        ],
+        [
+          "OSHA-KR Art.38 §1",
+          "SAPA Art.5",
+          "건설기술진흥법 Art.24"
+        ],
+        [
+          "OSHA-KR Art.17 §1",
+          "SAPA Art.5",
+          "건설산업기본법 Art.83"
+        ]
+      ]
+    },
+    "e_signature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/e_signature"
+    },
+    "nomenclature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/nomenclature"
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

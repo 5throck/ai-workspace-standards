@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: missile-cryogenic-high-pressure
+title: "유도무기/항공 극저온 액체연료(LN2/LOX) 및 고압 분사제 가스 안전 (Missile Cryogenic and High-Pressure Gas Safety)"
+status: active
+applicability: mandatory
+workflow_type: core
+legal_basis:
+  - 고압가스 안전 관리 및 사업법 Article 13
+  - 방위사업법 Article 28
+  - 산업안전보건법 Article 38
+  - 중대재해처벌법 Article 4
+industry_profile: defense-aerospace
+agent: defense-agent
+evidence_model: missile-cryogenic-record.json

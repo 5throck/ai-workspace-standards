@@ -1,0 +1,27 @@
+schema_version: "1.0"
+workflow_id: tbm-pre-work-briefing
+title: "철도 TBM (Tool Box Meeting)"
+status: active
+applicability: mandatory
+workflow_type: core
+
+legal_basis:
+  - 산업안전보건법 Article 15
+  - 산업안전보건법 Article 36
+  - 산업안전보건법 Article 38
+  - 철도안전법 Article 45
+  - 철도안전법 Article 48
+  - 중대재해처벌법 Article 4
+industry_profile: railway
+agent: railway-agent
+evidence_model: ../../../../evidence-models/_shared/tbm-record.json
+signature_hazard: 25kV 전차선 활선작업 및 선로/터널 정비 전 TBM
+
+
+# ── Shared TBM reference (added by scaffold-industry.ts Task A-01) ──
+# Declares this workflow also consumes the shared TBM base
+# (workflows/_shared/REFERENCE-SPEC.md §3.1 minimal form). Existing
+# top-level fields (signature_hazard, legal_basis, agent) serve as the
+# effective schema; the shared base supplies the common statutory floor.
+references:
+  - shared: ../../../../_shared/tbm

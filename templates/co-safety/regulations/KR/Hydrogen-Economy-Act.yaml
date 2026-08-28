@@ -1,0 +1,232 @@
+# ── Registry schema v2 (mode: coordinates) ───────────────────────────────────
+# This file maps article numbers to official titles ONLY. Article content is
+# never cached here — fetch live from the 법제처 k-law API at point of use.
+# Migrated by migrate-registry-to-coordinates.ts on 2026-08-26
+schema_version: 2
+mode: coordinates
+jurisdiction: KR
+framework: Hydrogen-Economy-Act
+law_name: 수소경제 육성 및 수소 안전관리에 관한 법률
+law_name_en: null
+abbreviation: null
+mst: "276545"
+enforced_from: null
+agency: null
+tier: 1
+regulator: MCEE (기후에너지환경부)
+articles:
+  - "no": "1"
+    title: 목적
+    checked_at: "2026-08-26"
+  - "no": "2"
+    title: 정의
+    checked_at: "2026-08-26"
+  - "no": "3"
+    title: 국가ㆍ지방자치단체 및 사업자의 책무
+    checked_at: "2026-08-26"
+  - "no": "4"
+    title: 다른 법률과의 관계
+    checked_at: "2026-08-26"
+  - "no": "5"
+    title: 수소경제 이행 기본계획의 수립
+    checked_at: "2026-08-26"
+  - "no": "6"
+    title: 수소경제위원회
+    checked_at: "2026-08-26"
+  - "no": "7"
+    title: 수소경제 이행 촉진을 위한 재원의 확충
+    checked_at: "2026-08-26"
+  - "no": "8"
+    title: 수소경제 이행 관계 법령의 개선 권고 등
+    checked_at: "2026-08-26"
+  - "no": "9"
+    title: 수소전문기업에 대한 지원
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 보조ㆍ융자
+    checked_at: "2026-08-26"
+  - "no": "11"
+    title: 수소전문기업의 확인
+    checked_at: "2026-08-26"
+  - "no": "12"
+    title: 수소전문기업 확인의 취소
+    checked_at: "2026-08-26"
+  - "no": "13"
+    title: 수소전문투자회사
+    checked_at: "2026-08-26"
+  - "no": "14"
+    title: 수소전문투자회사의 등록에 관한 협의
+    checked_at: "2026-08-26"
+  - "no": "15"
+    title: 자산운용의 방법
+    checked_at: "2026-08-26"
+  - "no": "16"
+    title: 수소전문기업 등에 대한 기금의 투자
+    checked_at: "2026-08-26"
+  - "no": "17"
+    title: 조세 및 부담금의 감면
+    checked_at: "2026-08-26"
+  - "no": "18"
+    title: 국유재산ㆍ공유재산의 대부ㆍ사용 등
+    checked_at: "2026-08-26"
+  - "no": "19"
+    title: 수소연료공급시설 설치 등
+    checked_at: "2026-08-26"
+  - "no": "20"
+    title: 수소 수급계획의 제출
+    checked_at: "2026-08-26"
+  - "no": "21"
+    title: 연료전지 설치 등
+    checked_at: "2026-08-26"
+  - "no": "22"
+    title: 수소특화단지의 지정 등
+    checked_at: "2026-08-26"
+  - "no": "23"
+    title: 수소특화단지의 지정 해제
+    checked_at: "2026-08-26"
+  - "no": "24"
+    title: 시범사업의 실시
+    checked_at: "2026-08-26"
+  - "no": "25"
+    title: 수소발전용 천연가스 요금체계 수립
+    checked_at: "2026-08-26"
+  - "no": "25"
+    title: 청정수소의 인증 등
+    checked_at: "2026-08-26"
+  - "no": "25"
+    title: 청정수소 생산량 등의 신고
+    checked_at: "2026-08-26"
+  - "no": "25"
+    title: 청정수소인증기관의 지정 등
+    checked_at: "2026-08-26"
+  - "no": "25"
+    title: 청정수소의 판매ㆍ사용 의무 등
+    checked_at: "2026-08-26"
+  - "no": "25"
+    title: 수소발전량 구매ㆍ공급 등
+    checked_at: "2026-08-26"
+  - "no": "25"
+    title: 입찰시장 관리기관의 지정 등
+    checked_at: "2026-08-26"
+  - "no": "25"
+    title: 과징금
+    checked_at: "2026-08-26"
+  - "no": "26"
+    title: 전문인력의 양성
+    checked_at: "2026-08-26"
+  - "no": "27"
+    title: 수소관련 제품 등 표준화
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: 수소산업 관련 통계의 작성
+    checked_at: "2026-08-26"
+  - "no": "29"
+    title: 국제협력과 해외시장 진출 지원 등
+    checked_at: "2026-08-26"
+  - "no": "30"
+    title: 수소산업 관련 기술개발의 촉진
+    checked_at: "2026-08-26"
+  - "no": "31"
+    title: 사회적 공감대 형성
+    checked_at: "2026-08-26"
+  - "no": "31"
+    title: 수소의 날
+    checked_at: "2026-08-26"
+  - "no": "32"
+    title: 종합정보관리시스템의 구축ㆍ운영
+    checked_at: "2026-08-26"
+  - "no": "33"
+    title: 수소산업진흥전담기관의 지정 등
+    checked_at: "2026-08-26"
+  - "no": "34"
+    title: 수소유통전담기관의 지정 등
+    checked_at: "2026-08-26"
+  - "no": "35"
+    title: 수소안전전담기관의 지정 등
+    checked_at: "2026-08-26"
+  - "no": "36"
+    title: 수소용품 제조사업 허가
+    checked_at: "2026-08-26"
+  - "no": "37"
+    title: 결격사유
+    checked_at: "2026-08-26"
+  - "no": "38"
+    title: 외국수소용품의 제조등록 등
+    checked_at: "2026-08-26"
+  - "no": "39"
+    title: 사업 개시 등의 신고
+    checked_at: "2026-08-26"
+  - "no": "40"
+    title: 사업자의 지위 승계
+    checked_at: "2026-08-26"
+  - "no": "41"
+    title: 안전관리규정
+    checked_at: "2026-08-26"
+  - "no": "42"
+    title: 안전관리자
+    checked_at: "2026-08-26"
+  - "no": "43"
+    title: 수소용품 제조시설의 완성검사
+    checked_at: "2026-08-26"
+  - "no": "44"
+    title: 수소용품의 수입 및 검사
+    checked_at: "2026-08-26"
+  - "no": "45"
+    title: 수소용품의 안전성 확보
+    checked_at: "2026-08-26"
+  - "no": "46"
+    title: 안전교육
+    checked_at: "2026-08-26"
+  - "no": "47"
+    title: 수소연료사용시설의 검사
+    checked_at: "2026-08-26"
+  - "no": "48"
+    title: 상세기준
+    checked_at: "2026-08-26"
+  - "no": "49"
+    title: 허가 및 등록의 취소 등
+    checked_at: "2026-08-26"
+  - "no": "50"
+    title: 수소판매가격의 보고ㆍ공개 및 표시
+    checked_at: "2026-08-26"
+  - "no": "51"
+    title: 보험가입
+    checked_at: "2026-08-26"
+  - "no": "52"
+    title: 금지행위
+    checked_at: "2026-08-26"
+  - "no": "53"
+    title: 자료제출 및 검사 등
+    checked_at: "2026-08-26"
+  - "no": "54"
+    title: 청문
+    checked_at: "2026-08-26"
+  - "no": "55"
+    title: 수수료 등
+    checked_at: "2026-08-26"
+  - "no": "56"
+    title: 권한의 위임ㆍ위탁
+    checked_at: "2026-08-26"
+  - "no": "57"
+    title: 벌칙 적용에서 공무원 의제
+    checked_at: "2026-08-26"
+  - "no": "58"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "59"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "60"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "61"
+    title: 양벌규정
+    checked_at: "2026-08-26"
+  - "no": "62"
+    title: 과태료
+    checked_at: "2026-08-26"
+source_verification:
+  method: k-law-live
+  checked_at: "2026-08-26"
+  next_review: "2027-02-22"
+last_updated: "2026-08-26"

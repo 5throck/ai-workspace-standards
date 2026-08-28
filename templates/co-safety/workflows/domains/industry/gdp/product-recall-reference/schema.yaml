@@ -1,0 +1,26 @@
+schema_version: "1.0"
+workflow_id: product-recall-reference
+title: "의약품 회수 참조 (Product Recall Reference)"
+status: active
+applicability: mandatory
+workflow_type: reference
+target_agent: emergency-agent
+data_provided:
+  - batch_identification
+  - distribution_history
+  - recall_classification
+  - affected_customers
+handoff_protocol:
+  trigger: product_recall_event
+  dispatch_to: emergency-agent
+  include_data:
+    - batch_ids
+    - distribution_chain
+    - customer_contacts
+legal_basis:
+  - 약사법 Article 43의3
+  - PIC/S GDP Ch.5
+  - EU GDP Ch.5
+industry_profile: pharma-distribution
+agent: gdp-agent
+evidence_model: gdp-goods-receipt-record.json

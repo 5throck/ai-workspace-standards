@@ -1,0 +1,165 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "powergen-emergency-power-record.json",
+  "title": "Power Plant Emergency Power Record",
+  "description": "발전설치 비상전력 및 자가발전 운영 기록 (outage, partial failure, load shedding, grid instability events).",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "plant_type",
+    "emergency_type",
+    "backup_power_source",
+    "activation_time_iso",
+    "duration_minutes",
+    "critical_loads_maintained",
+    "root_cause",
+    "legal_basis",
+    "e_signature",
+    "nomenclature",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^PWRG-EP-[0-9]{4}-[0-9]{4}$"
+    },
+    "plant_type": {
+      "type": "string",
+      "enum": [
+        "thermal_coal",
+        "thermal_LNG",
+        "thermal_oil",
+        "wind",
+        "solar",
+        "hydro",
+        "geothermal",
+        "biomass",
+        "fuel_cell",
+        "ess"
+      ]
+    },
+    "kesa_inspection_status": {
+      "type": "string",
+      "enum": [
+        "certified",
+        "pending",
+        "failed",
+        "expired"
+      ],
+      "description": "한국전기안전공사 (KESCO) 인증 상태"
+    },
+    "voltage_class": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "extra_high",
+        "not_applicable"
+      ],
+      "description": "low (≤400V) / medium (400V-22kV) / high (22-154kV) / extra_high (>154kV)"
+    },
+    "psm_applicable": {
+      "type": "boolean",
+      "description": "대규모 발전시설 (보일러/가스) PSM 적용 여부 (OSHA-KR Art 44)"
+    },
+    "emergency_type": {
+      "type": "string",
+      "enum": [
+        "outage",
+        "partial_failure",
+        "load_shedding",
+        "grid_instability"
+      ],
+      "description": "Type of emergency power event: full outage, partial failure, deliberate load shedding, or grid instability"
+    },
+    "backup_power_source": {
+      "type": "string",
+      "enum": [
+        "diesel_generator",
+        "gas_turbine",
+        "battery_ess",
+        "ups",
+        "external_grid"
+      ],
+      "description": "Type of backup/emergency power source activated"
+    },
+    "activation_time_iso": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of emergency power system activation"
+    },
+    "restoration_time_iso": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of normal power restoration (null if not yet restored)"
+    },
+    "duration_minutes": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Duration of emergency power operation in minutes"
+    },
+    "critical_loads_maintained": {
+      "type": "boolean",
+      "description": "Whether critical safety loads were maintained during the emergency"
+    },
+    "affected_areas": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of facility areas affected by the emergency power event"
+    },
+    "root_cause": {
+      "type": "string",
+      "description": "Description of the root cause of the emergency power event"
+    },
+    "corrective_action": {
+      "type": "string",
+      "description": "Corrective action taken or planned to prevent recurrence"
+    },
+    "equipment_id": {
+      "type": "string",
+      "description": "Reference ID of the affected equipment or asset"
+    },
+    "incident_report_ref": {
+      "type": "string",
+      "description": "Cross-domain reference to the incident report record"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "description": "Multi-source legal basis. Primary: OSHA-KR Art.44 (process safety management for power generation), 전기사업법 Art.46 (electrical facility safety obligations), SAPA Art.4 (safety assessment and accident prevention). Adjacent laws may include: 전기안전관리법 Articles 16/29 (inspection, safety manager), 발전설비 안전관리 규정 (MOTIE inspection standards).",
+      "examples": [
+        [
+          "OSHA-KR Art.44 §1",
+          "전기사업법 Art.46",
+          "SAPA Art.4"
+        ],
+        [
+          "전기사업법 Art.46",
+          "전기안전관리법 Art.16",
+          "OSHA-KR Art.44 §2"
+        ],
+        [
+          "SAPA Art.4",
+          "전기사업법 Art.47",
+          "OSHA-KR Art.44 §1"
+        ]
+      ]
+    },
+    "e_signature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/e_signature"
+    },
+    "nomenclature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/nomenclature"
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

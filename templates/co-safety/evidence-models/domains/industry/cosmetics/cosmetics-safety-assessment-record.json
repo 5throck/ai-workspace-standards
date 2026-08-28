@@ -1,0 +1,39 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "cosmetics-safety-assessment-record.json",
+  "title": "Cosmetics Ingredient Safety Assessment Record",
+  "description": "Evidence model for Cosmetics Raw Material Safety Assessment Records.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "ingredient_name",
+    "legal_basis",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^COSM-SAFETY-[0-9]{4}-[0-9]{4}$"
+    },
+    "ingredient_name": {
+      "type": "string"
+    },
+    "safety_margin": {
+      "type": "number"
+    },
+    "toxicology_passed": {
+      "type": "boolean"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

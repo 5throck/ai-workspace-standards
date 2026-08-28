@@ -1,0 +1,12 @@
+schema_version: "1.0"
+workflow_id: device-pms
+title: "시판후관리 (Post-Market Surveillance)"
+status: active
+applicability: mandatory
+workflow_type: core
+uses_functional_services: [functional/msds, industry/glp, emergency]
+
+legal_basis: [의료기기법 Article 20, EU MDR Article 83 (PMS system), KGMP-MD]
+industry_profile: medical-device
+agent: meddevice-agent
+evidence_model: meddevice-pms-record.json

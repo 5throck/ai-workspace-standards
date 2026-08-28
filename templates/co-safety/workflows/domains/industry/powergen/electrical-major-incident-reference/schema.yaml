@@ -1,0 +1,26 @@
+schema_version: "1.0"
+workflow_id: electrical-major-incident-reference
+title: "대형 전기 사고 긴급 참조 (Major Electrical Incident Emergency Reference)"
+status: active
+applicability: mandatory
+workflow_type: reference
+target_agent: emergency-agent
+data_provided:
+  - electrical_system_state
+  - voltage_class
+  - arc_flash_hazard_data
+  - isolation_status
+handoff_protocol:
+  trigger: major_electrical_incident
+  dispatch_to: emergency-agent
+  include_data:
+    - incident_classification
+    - affected_grid_section
+    - regulatory_notification_required
+legal_basis:
+  - 전기사업법 Article 65
+  - 중대재해처벌법 Article 7
+  - 전기안전관리법 Article 16
+industry_profile: power-generation
+agent: powergen-agent
+evidence_model: powergen-high-voltage-record.json

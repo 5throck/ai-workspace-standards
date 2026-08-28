@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Corrective Action",
+  "description": "Corrective action record linked to a Safety Finding",
+  "version": "3.0.0",
+  "type": "object",
+  "required": ["id", "finding_id", "legal_basis", "date_assigned", "description", "responsible_party", "due_date", "status", "audit_trail"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^CA-[0-9]{4}-[0-9]{4}$" },
+    "finding_id": { "type": "string", "pattern": "^FIND-[0-9]{4}-[0-9]{4}$" },
+    "legal_basis": { "type": "array", "items": { "type": "string" }, "minItems": 3, "description": "Applicable law articles — minimum 3 regulatory sources, inherited from linked finding" },
+    "date_assigned": { "type": "string", "format": "date" },
+    "description": { "type": "string" },
+    "responsible_party": { "type": "string" },
+    "agent_id": { "$ref": "common.schema.json#/definitions/agent_id", "description": "Optional (v2.1): agent attribution. Legacy records were authored in audit sessions with no dispatching agent; their audit_trail.created_by holds a git-history author, not an agent id (zero-fabrication rule)." },
+    "workflow_id": { "$ref": "common.schema.json#/definitions/workflow_id", "description": "Optional (v2.1): workflow execution reference. Corrective actions are tracked per finding, not per workflow dispatch — never invent an ID to satisfy this field." },
+    "due_date": { "type": "string", "format": "date" },
+    "completed_date": { "type": "string", "format": "date" },
+    "status": { "type": "string", "enum": ["assigned", "in-progress", "completed", "verified", "overdue"] },
+    "verification_note": { "type": "string" },
+    "audit_trail": { "$ref": "common.schema.json#/definitions/audit_trail", "description": "ALCOA+ audit trail — created_at/created_by/record_status enforce the AGENTS.md timestamp-in-every-record rule for corrective actions. Legacy (pre-v3) records carry a backfilled trail derived from git history — see evidence-models/migrations/README.md." }
+  }
+}

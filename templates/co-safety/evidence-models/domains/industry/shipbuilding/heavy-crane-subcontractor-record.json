@@ -1,0 +1,39 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "heavy-crane-subcontractor-record.json",
+  "title": "Heavy Crane Lifting & Subcontractor Safety Record",
+  "description": "Evidence model for Goliath Crane Lifting Operations and SAPA Subcontractor Safety Monitoring.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "crane_id",
+    "legal_basis",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^SHIP-CRANE-[0-9]{4}-[0-9]{4}$"
+    },
+    "crane_id": {
+      "type": "string"
+    },
+    "block_weight_tons": {
+      "type": "number"
+    },
+    "signalman_assigned": {
+      "type": "boolean"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

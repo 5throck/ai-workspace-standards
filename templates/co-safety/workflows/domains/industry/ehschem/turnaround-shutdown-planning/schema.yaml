@@ -1,0 +1,15 @@
+schema_version: "1.0"
+workflow_id: turnaround-shutdown-planning
+title: "정기보수 가동중지 계획 (Turnaround Shutdown Planning)"
+status: active
+applicability: mandatory
+workflow_type: core
+uses_functional_services: [functional/psm, functional/msds, emergency]
+
+legal_basis:
+  - 산업안전보건법 Article 44 (PSM)
+  - 중대재해처벌법 Article 7
+  - 산업안전보건법 Article 36
+industry_profile: chemical-plant
+agent: ehschem-agent
+evidence_model: ehschem-turnaround-record.json

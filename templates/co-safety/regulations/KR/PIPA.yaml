@@ -1,0 +1,400 @@
+# ── Registry schema v2 (mode: coordinates) ───────────────────────────────────
+# This file maps article numbers to official titles ONLY. Article content is
+# never cached here — fetch live from the 법제처 k-law API at point of use.
+# Migrated by migrate-registry-to-coordinates.ts on 2026-08-26
+schema_version: 2
+mode: coordinates
+jurisdiction: KR
+framework: PIPA
+law_name: 개인정보 보호법
+law_name_en: null
+abbreviation: null
+mst: "270351"
+enforced_from: null
+agency: null
+tier: 1
+regulator: PIPC (개인정보보호위원회)
+articles:
+  - "no": "1"
+    title: 목적
+    checked_at: "2026-08-26"
+  - "no": "2"
+    title: 정의
+    checked_at: "2026-08-26"
+  - "no": "3"
+    title: 개인정보 보호 원칙
+    checked_at: "2026-08-26"
+  - "no": "4"
+    title: 정보주체의 권리
+    checked_at: "2026-08-26"
+  - "no": "5"
+    title: 국가 등의 책무
+    checked_at: "2026-08-26"
+  - "no": "6"
+    title: 다른 법률과의 관계
+    checked_at: "2026-08-26"
+  - "no": "7"
+    title: 개인정보 보호위원회
+    checked_at: "2026-08-26"
+  - "no": "7"
+    title: 보호위원회의 구성 등
+    checked_at: "2026-08-26"
+  - "no": "7"
+    title: 위원장
+    checked_at: "2026-08-26"
+  - "no": "7"
+    title: 위원의 임기
+    checked_at: "2026-08-26"
+  - "no": "7"
+    title: 위원의 신분보장
+    checked_at: "2026-08-26"
+  - "no": "7"
+    title: 겸직금지 등
+    checked_at: "2026-08-26"
+  - "no": "7"
+    title: 결격사유
+    checked_at: "2026-08-26"
+  - "no": "7"
+    title: 보호위원회의 소관 사무
+    checked_at: "2026-08-26"
+  - "no": "7"
+    title: 보호위원회의 심의ㆍ의결 사항 등
+    checked_at: "2026-08-26"
+  - "no": "7"
+    title: 회의
+    checked_at: "2026-08-26"
+  - "no": "7"
+    title: 위원의 제척ㆍ기피ㆍ회피
+    checked_at: "2026-08-26"
+  - "no": "7"
+    title: 소위원회
+    checked_at: "2026-08-26"
+  - "no": "7"
+    title: 사무처
+    checked_at: "2026-08-26"
+  - "no": "7"
+    title: 운영 등
+    checked_at: "2026-08-26"
+  - "no": "8"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "8"
+    title: 개인정보 침해요인 평가
+    checked_at: "2026-08-26"
+  - "no": "9"
+    title: 기본계획
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 시행계획
+    checked_at: "2026-08-26"
+  - "no": "11"
+    title: 자료제출 요구 등
+    checked_at: "2026-08-26"
+  - "no": "11"
+    title: 개인정보 보호수준 평가
+    checked_at: "2026-08-26"
+  - "no": "12"
+    title: 개인정보 보호지침
+    checked_at: "2026-08-26"
+  - "no": "13"
+    title: 자율규제의 촉진 및 지원
+    checked_at: "2026-08-26"
+  - "no": "13"
+    title: 개인정보 보호의 날
+    checked_at: "2026-08-26"
+  - "no": "14"
+    title: 국제협력
+    checked_at: "2026-08-26"
+  - "no": "15"
+    title: 개인정보의 수집ㆍ이용
+    checked_at: "2026-08-26"
+  - "no": "16"
+    title: 개인정보의 수집 제한
+    checked_at: "2026-08-26"
+  - "no": "17"
+    title: 개인정보의 제공
+    checked_at: "2026-08-26"
+  - "no": "18"
+    title: 개인정보의 목적 외 이용ㆍ제공 제한
+    checked_at: "2026-08-26"
+  - "no": "19"
+    title: 개인정보를 제공받은 자의 이용ㆍ제공 제한
+    checked_at: "2026-08-26"
+  - "no": "20"
+    title: 정보주체 이외로부터 수집한 개인정보의 수집 출처 등 통지
+    checked_at: "2026-08-26"
+  - "no": "20"
+    title: 개인정보 이용ㆍ제공 내역의 통지
+    checked_at: "2026-08-26"
+  - "no": "21"
+    title: 개인정보의 파기
+    checked_at: "2026-08-26"
+  - "no": "22"
+    title: 동의를 받는 방법
+    checked_at: "2026-08-26"
+  - "no": "22"
+    title: 아동의 개인정보 보호
+    checked_at: "2026-08-26"
+  - "no": "23"
+    title: 민감정보의 처리 제한
+    checked_at: "2026-08-26"
+  - "no": "24"
+    title: 고유식별정보의 처리 제한
+    checked_at: "2026-08-26"
+  - "no": "24"
+    title: 주민등록번호 처리의 제한
+    checked_at: "2026-08-26"
+  - "no": "25"
+    title: 고정형 영상정보처리기기의 설치ㆍ운영 제한
+    checked_at: "2026-08-26"
+  - "no": "25"
+    title: 이동형 영상정보처리기기의 운영 제한
+    checked_at: "2026-08-26"
+  - "no": "26"
+    title: 업무위탁에 따른 개인정보의 처리 제한
+    checked_at: "2026-08-26"
+  - "no": "27"
+    title: 영업양도 등에 따른 개인정보의 이전 제한
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: 개인정보취급자에 대한 감독
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: 가명정보의 처리 등
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: 가명정보의 결합 제한
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: 가명정보에 대한 안전조치의무 등
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: 가명정보 처리 시 금지의무 등
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: 적용범위
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: 개인정보의 국외 이전
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: 개인정보의 국외 이전 중지 명령
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: 상호주의
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: 준용규정
+    checked_at: "2026-08-26"
+  - "no": "29"
+    title: 안전조치의무
+    checked_at: "2026-08-26"
+  - "no": "30"
+    title: 개인정보 처리방침의 수립 및 공개
+    checked_at: "2026-08-26"
+  - "no": "30"
+    title: 개인정보 처리방침의 평가 및 개선권고
+    checked_at: "2026-08-26"
+  - "no": "31"
+    title: 개인정보 보호책임자의 지정 등
+    checked_at: "2026-08-26"
+  - "no": "31"
+    title: 국내대리인의 지정
+    checked_at: "2026-08-26"
+  - "no": "32"
+    title: 개인정보파일의 등록 및 공개
+    checked_at: "2026-08-26"
+  - "no": "32"
+    title: 개인정보 보호 인증
+    checked_at: "2026-08-26"
+  - "no": "33"
+    title: 개인정보 영향평가
+    checked_at: "2026-08-26"
+  - "no": "34"
+    title: 개인정보 유출 등의 통지ㆍ신고
+    checked_at: "2026-08-26"
+  - "no": "34"
+    title: 노출된 개인정보의 삭제ㆍ차단
+    checked_at: "2026-08-26"
+  - "no": "35"
+    title: 개인정보의 열람
+    checked_at: "2026-08-26"
+  - "no": "35"
+    title: 개인정보의 전송 요구
+    checked_at: "2026-08-26"
+  - "no": "35"
+    title: 개인정보관리 전문기관
+    checked_at: "2026-08-26"
+  - "no": "35"
+    title: 개인정보 전송 관리 및 지원
+    checked_at: "2026-08-26"
+  - "no": "36"
+    title: 개인정보의 정정ㆍ삭제
+    checked_at: "2026-08-26"
+  - "no": "37"
+    title: 개인정보의 처리정지 등
+    checked_at: "2026-08-26"
+  - "no": "37"
+    title: 자동화된 결정에 대한 정보주체의 권리 등
+    checked_at: "2026-08-26"
+  - "no": "38"
+    title: 권리행사의 방법 및 절차
+    checked_at: "2026-08-26"
+  - "no": "39"
+    title: 손해배상책임
+    checked_at: "2026-08-26"
+  - "no": "39"
+    title: 법정손해배상의 청구
+    checked_at: "2026-08-26"
+  - "no": "39"
+    title: 자료의 제출
+    checked_at: "2026-08-26"
+  - "no": "39"
+    title: 비밀유지명령
+    checked_at: "2026-08-26"
+  - "no": "39"
+    title: 비밀유지명령의 취소
+    checked_at: "2026-08-26"
+  - "no": "39"
+    title: 소송기록 열람 등의 청구 통지 등
+    checked_at: "2026-08-26"
+  - "no": "39"
+    title: 손해배상의 보장
+    checked_at: "2026-08-26"
+  - "no": "40"
+    title: 설치 및 구성
+    checked_at: "2026-08-26"
+  - "no": "41"
+    title: 위원의 신분보장
+    checked_at: "2026-08-26"
+  - "no": "42"
+    title: 위원의 제척ㆍ기피ㆍ회피
+    checked_at: "2026-08-26"
+  - "no": "43"
+    title: 조정의 신청 등
+    checked_at: "2026-08-26"
+  - "no": "44"
+    title: 처리기간
+    checked_at: "2026-08-26"
+  - "no": "45"
+    title: 자료의 요청 및 사실조사 등
+    checked_at: "2026-08-26"
+  - "no": "45"
+    title: 진술의 원용 제한
+    checked_at: "2026-08-26"
+  - "no": "46"
+    title: 조정 전 합의 권고
+    checked_at: "2026-08-26"
+  - "no": "47"
+    title: 분쟁의 조정
+    checked_at: "2026-08-26"
+  - "no": "48"
+    title: 조정의 거부 및 중지
+    checked_at: "2026-08-26"
+  - "no": "49"
+    title: 집단분쟁조정
+    checked_at: "2026-08-26"
+  - "no": "50"
+    title: 조정절차 등
+    checked_at: "2026-08-26"
+  - "no": "50"
+    title: 개선의견의 통보
+    checked_at: "2026-08-26"
+  - "no": "51"
+    title: 단체소송의 대상 등
+    checked_at: "2026-08-26"
+  - "no": "52"
+    title: 전속관할
+    checked_at: "2026-08-26"
+  - "no": "53"
+    title: 소송대리인의 선임
+    checked_at: "2026-08-26"
+  - "no": "54"
+    title: 소송허가신청
+    checked_at: "2026-08-26"
+  - "no": "55"
+    title: 소송허가요건 등
+    checked_at: "2026-08-26"
+  - "no": "56"
+    title: 확정판결의 효력
+    checked_at: "2026-08-26"
+  - "no": "57"
+    title: 「민사소송법」의 적용 등
+    checked_at: "2026-08-26"
+  - "no": "58"
+    title: 적용의 일부 제외
+    checked_at: "2026-08-26"
+  - "no": "58"
+    title: 적용제외
+    checked_at: "2026-08-26"
+  - "no": "59"
+    title: 금지행위
+    checked_at: "2026-08-26"
+  - "no": "60"
+    title: 비밀유지 등
+    checked_at: "2026-08-26"
+  - "no": "61"
+    title: 의견제시 및 개선권고
+    checked_at: "2026-08-26"
+  - "no": "62"
+    title: 침해 사실의 신고 등
+    checked_at: "2026-08-26"
+  - "no": "63"
+    title: 자료제출 요구 및 검사
+    checked_at: "2026-08-26"
+  - "no": "63"
+    title: 사전 실태점검
+    checked_at: "2026-08-26"
+  - "no": "64"
+    title: 시정조치 등
+    checked_at: "2026-08-26"
+  - "no": "64"
+    title: 과징금의 부과
+    checked_at: "2026-08-26"
+  - "no": "65"
+    title: 고발 및 징계권고
+    checked_at: "2026-08-26"
+  - "no": "66"
+    title: 결과의 공표
+    checked_at: "2026-08-26"
+  - "no": "67"
+    title: 연차보고
+    checked_at: "2026-08-26"
+  - "no": "68"
+    title: 권한의 위임ㆍ위탁
+    checked_at: "2026-08-26"
+  - "no": "69"
+    title: 벌칙 적용 시의 공무원 의제
+    checked_at: "2026-08-26"
+  - "no": "70"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "71"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "72"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "73"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "74"
+    title: 양벌규정
+    checked_at: "2026-08-26"
+  - "no": "74"
+    title: 몰수ㆍ추징 등
+    checked_at: "2026-08-26"
+  - "no": "75"
+    title: 과태료
+    checked_at: "2026-08-26"
+  - "no": "76"
+    title: 과태료에 관한 규정 적용의 특례
+    checked_at: "2026-08-26"
+source_verification:
+  method: k-law-live
+  checked_at: "2026-08-26"
+  next_review: "2027-02-22"
+last_updated: "2026-08-26"

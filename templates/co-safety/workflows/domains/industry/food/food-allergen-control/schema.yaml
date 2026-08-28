@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: food-allergen-control
+title: "식품 알레르기 유발물질 교차오염 방지 및 세척 검증 (Food Allergen Cross-Contamination Control)"
+status: active
+applicability: mandatory
+workflow_type: core
+legal_basis:
+  - 식품위생법 Article 12_2
+  - 식품안전관리인증기준 (MFDS Notice)
+  - Codex Alimentarius HACCP Annex
+  - 중대재해처벌법 Article 4
+industry_profile: food-gxp
+agent: food-agent
+evidence_model: food-allergen-record.json

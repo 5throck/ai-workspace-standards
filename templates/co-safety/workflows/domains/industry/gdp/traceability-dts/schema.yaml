@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: traceability-dts
+title: "의약품 추적관리(DTS) (Drug Tracking System)"
+status: active
+applicability: mandatory
+workflow_type: core
+
+legal_basis:
+  - 약사법 Article 43의2
+  - 의약품 추적관리에 관한 규정
+  - PIC/S GDP Ch.6
+industry_profile: pharma-distribution
+agent: gdp-agent
+evidence_model: gdp-dts-tracking-record.json

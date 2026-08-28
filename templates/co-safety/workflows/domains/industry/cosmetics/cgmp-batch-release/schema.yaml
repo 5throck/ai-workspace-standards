@@ -1,0 +1,13 @@
+schema_version: "1.0"
+workflow_id: cgmp-batch-release
+title: "화장품 CGMP 배치 출하 승인 (Cosmetics CGMP Batch Release)"
+status: active
+applicability: mandatory
+workflow_type: core
+legal_basis:
+  - 화장품법 Article 5
+  - 우수화장품 제조 및 품질관리기준 (MFDS Notice)
+  - ISO 22716
+industry_profile: cosmetics-cgmp
+agent: cosmetics-agent
+evidence_model: cgmp-batch-record.json

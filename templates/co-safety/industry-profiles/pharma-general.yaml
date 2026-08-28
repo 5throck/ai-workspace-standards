@@ -1,0 +1,57 @@
+# Pharmaceutical Manufacturing Industry Profile — General GMP (v1)
+profile_id: pharma-general
+name: pharma-general
+display_name: "제약 (Pharmaceutical Manufacturing - General GMP)"
+version: "1.0"
+status: active
+last_updated: 2026-08-24
+industry_tier: industry
+agent: gmp-agent
+legal_basis:
+  - 약사법 (Pharmaceutical Affairs Act) Article 37
+  - 의약품 등의 안전에 관한 규칙 별표 1 (Presidential Decree — Pharmaceutical Manufacturing and Quality Control Standards)
+  - 의약품 제조 및 품질관리에 관한 규정 (MFDS Notice No. 2024-87)
+  - ICH Q7 (API GMP)
+  - ICH Q9 (Quality Risk Management)
+  - ICH Q10 (Pharmaceutical Quality System)
+  - PIC/S PE 009 (Harmonized GMP)
+key_hazards:
+  - cross_contamination
+  - deviation_capa_nonclosure
+  - equipment_qualification_gap
+  - cleaning_validation_failure
+workflows:
+  gmp:
+    - change-control
+    - deviation-capa
+    - equipment-qualification
+    - batch-mfg
+    - supplier-qualification
+    - stability
+    - self-inspection
+    - cleaning-validation
+    - csv-validation
+    - pqr
+description: General pharmaceutical manufacturing operations under KP-GMP, applicable to oral solids, non-sterile liquids, and basic APIs. v1 scope excludes sterile manufacturing, biologics, and advanced APIs.
+regulatory_reference: regulations/KR/MFDS-GMP.md
+international_alignment:
+  - framework: PIC/S
+    level: harmonized
+  - framework: ICH
+    guidelines: [Q7, Q9, Q10]
+gmp_pillars:
+  - quality_system (ICH Q10)
+  - personnel_hygiene
+  - premises_equipment
+  - documentation_records
+  - self_inspection
+v1_scope:
+  includes:
+    - general_oral_solid_dosage
+    - non_sterile_liquids
+    - basic_api
+  excludes:
+    - sterile_manufacturing
+    - biologics
+    - advanced_api
+    - medical_devices

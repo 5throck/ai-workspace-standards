@@ -1,0 +1,334 @@
+# ── Registry schema v2 (mode: coordinates) ───────────────────────────────────
+# This file maps article numbers to official titles ONLY. Article content is
+# never cached here — fetch live from the 법제처 k-law API at point of use.
+# Migrated by migrate-registry-to-coordinates.ts on 2026-08-26
+schema_version: 2
+mode: coordinates
+jurisdiction: KR
+framework: Emergency-Medical-Service-Act
+law_name: 응급의료에 관한 법률
+law_name_en: null
+abbreviation: null
+mst: "280429"
+enforced_from: null
+agency: null
+tier: 1
+regulator: MOHW (보건복지부) / National Emergency Medical Center (중앙응급의료센터)
+articles:
+  - "no": "1"
+    title: 목적
+    checked_at: "2026-08-26"
+  - "no": "2"
+    title: 정의
+    checked_at: "2026-08-26"
+  - "no": "3"
+    title: 응급의료를 받을 권리
+    checked_at: "2026-08-26"
+  - "no": "4"
+    title: 응급의료에 관한 알 권리
+    checked_at: "2026-08-26"
+  - "no": "5"
+    title: 응급환자에 대한 신고 및 협조 의무
+    checked_at: "2026-08-26"
+  - "no": "5"
+    title: 선의의 응급의료에 대한 면책
+    checked_at: "2026-08-26"
+  - "no": "6"
+    title: 응급의료의 거부금지 등
+    checked_at: "2026-08-26"
+  - "no": "7"
+    title: 응급환자가 아닌 사람에 대한 조치
+    checked_at: "2026-08-26"
+  - "no": "8"
+    title: 응급환자에 대한 우선 응급의료 등
+    checked_at: "2026-08-26"
+  - "no": "9"
+    title: 응급의료의 설명ㆍ동의
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 응급의료 중단의 금지
+    checked_at: "2026-08-26"
+  - "no": "11"
+    title: 응급환자의 이송
+    checked_at: "2026-08-26"
+  - "no": "12"
+    title: 응급의료 등의 방해 금지
+    checked_at: "2026-08-26"
+  - "no": "13"
+    title: 응급의료의 제공
+    checked_at: "2026-08-26"
+  - "no": "13"
+    title: 응급의료기본계획 및 연차별 시행계획
+    checked_at: "2026-08-26"
+  - "no": "13"
+    title: 지역응급의료시행계획
+    checked_at: "2026-08-26"
+  - "no": "13"
+    title: 응급의료계획에 대한 협조
+    checked_at: "2026-08-26"
+  - "no": "13"
+    title: 중앙응급의료위원회
+    checked_at: "2026-08-26"
+  - "no": "13"
+    title: 시ㆍ도응급의료위원회
+    checked_at: "2026-08-26"
+  - "no": "13"
+    title: 응급의료 실태조사
+    checked_at: "2026-08-26"
+  - "no": "14"
+    title: 구조 및 응급처치에 관한 교육
+    checked_at: "2026-08-26"
+  - "no": "15"
+    title: 응급의료정보통신망의 구축
+    checked_at: "2026-08-26"
+  - "no": "15"
+    title: 응급의료조사통계사업
+    checked_at: "2026-08-26"
+  - "no": "15"
+    title: 비상대응매뉴얼
+    checked_at: "2026-08-26"
+  - "no": "16"
+    title: 재정 지원
+    checked_at: "2026-08-26"
+  - "no": "17"
+    title: 응급의료기관등에 대한 평가
+    checked_at: "2026-08-26"
+  - "no": "18"
+    title: 환자가 여러 명 발생한 경우의 조치
+    checked_at: "2026-08-26"
+  - "no": "19"
+    title: 응급의료기금의 설치 및 관리ㆍ운용
+    checked_at: "2026-08-26"
+  - "no": "20"
+    title: 기금의 조성
+    checked_at: "2026-08-26"
+  - "no": "21"
+    title: 기금의 사용
+    checked_at: "2026-08-26"
+  - "no": "22"
+    title: 미수금의 대지급
+    checked_at: "2026-08-26"
+  - "no": "22"
+    title: 자료의 제공
+    checked_at: "2026-08-26"
+  - "no": "22"
+    title: 구상권의 시효
+    checked_at: "2026-08-26"
+  - "no": "23"
+    title: 응급의료수가의 지급기준
+    checked_at: "2026-08-26"
+  - "no": "24"
+    title: 이송처치료
+    checked_at: "2026-08-26"
+  - "no": "25"
+    title: 중앙응급의료센터
+    checked_at: "2026-08-26"
+  - "no": "26"
+    title: 권역응급의료센터의 지정
+    checked_at: "2026-08-26"
+  - "no": "27"
+    title: 응급의료지원센터의 설치 및 운영
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: 응급의료지원센터에 대한 협조 등
+    checked_at: "2026-08-26"
+  - "no": "29"
+    title: 전문응급의료센터의 지정
+    checked_at: "2026-08-26"
+  - "no": "30"
+    title: 지역응급의료센터의 지정
+    checked_at: "2026-08-26"
+  - "no": "30"
+    title: 권역외상센터의 지정
+    checked_at: "2026-08-26"
+  - "no": "30"
+    title: 지역외상센터의 지정
+    checked_at: "2026-08-26"
+  - "no": "30"
+    title: 권역외상센터 및 지역외상센터에 대한 지원
+    checked_at: "2026-08-26"
+  - "no": "30"
+    title: 정신질환자응급의료센터의 지정 등
+    checked_at: "2026-08-26"
+  - "no": "31"
+    title: 지역응급의료기관의 지정
+    checked_at: "2026-08-26"
+  - "no": "31"
+    title: 응급의료기관의 운영
+    checked_at: "2026-08-26"
+  - "no": "31"
+    title: 응급의료기관의 재지정
+    checked_at: "2026-08-26"
+  - "no": "31"
+    title: 환자의 중증도 분류 및 감염병 의심환자 등의 선별
+    checked_at: "2026-08-26"
+  - "no": "31"
+    title: 응급실 출입 제한
+    checked_at: "2026-08-26"
+  - "no": "32"
+    title: 비상진료체계
+    checked_at: "2026-08-26"
+  - "no": "33"
+    title: 예비병상의 확보
+    checked_at: "2026-08-26"
+  - "no": "33"
+    title: 응급실 체류 제한
+    checked_at: "2026-08-26"
+  - "no": "34"
+    title: 당직의료기관의 지정
+    checked_at: "2026-08-26"
+  - "no": "34"
+    title: 야간ㆍ휴일 소아 진료기관의 지정
+    checked_at: "2026-08-26"
+  - "no": "35"
+    title: 응급의료기관의 지정 취소 등
+    checked_at: "2026-08-26"
+  - "no": "35"
+    title: 응급의료기관 외의 의료기관
+    checked_at: "2026-08-26"
+  - "no": "36"
+    title: 응급구조사의 자격
+    checked_at: "2026-08-26"
+  - "no": "36"
+    title: 응급구조사 자격증의 교부 등
+    checked_at: "2026-08-26"
+  - "no": "36"
+    title: 응급구조사 실태 등의 신고
+    checked_at: "2026-08-26"
+  - "no": "36"
+    title: 응급구조사 양성대학 등 지정
+    checked_at: "2026-08-26"
+  - "no": "37"
+    title: 결격사유
+    checked_at: "2026-08-26"
+  - "no": "38"
+    title: 부정행위에 대한 제재
+    checked_at: "2026-08-26"
+  - "no": "39"
+    title: 응급구조사의 준수 사항
+    checked_at: "2026-08-26"
+  - "no": "40"
+    title: 비밀 준수 의무
+    checked_at: "2026-08-26"
+  - "no": "41"
+    title: 응급구조사의 업무
+    checked_at: "2026-08-26"
+  - "no": "41"
+    title: 응급구조사 업무지침의 개발 및 보급
+    checked_at: "2026-08-26"
+  - "no": "42"
+    title: 업무의 제한
+    checked_at: "2026-08-26"
+  - "no": "43"
+    title: 응급구조사의 보수교육 등
+    checked_at: "2026-08-26"
+  - "no": "43"
+    title: 응급구조학을 전공하는 학생의 응급처치 허용
+    checked_at: "2026-08-26"
+  - "no": "44"
+    title: 구급차등의 운용자
+    checked_at: "2026-08-26"
+  - "no": "44"
+    title: 구급차등의 운용신고 등
+    checked_at: "2026-08-26"
+  - "no": "44"
+    title: 구급차등의 말소신고 등
+    checked_at: "2026-08-26"
+  - "no": "44"
+    title: 구급차등의 운용자의 명의이용 금지
+    checked_at: "2026-08-26"
+  - "no": "45"
+    title: 다른 용도에의 사용 금지
+    checked_at: "2026-08-26"
+  - "no": "46"
+    title: 구급차등의 기준
+    checked_at: "2026-08-26"
+  - "no": "46"
+    title: 구급차 운행연한
+    checked_at: "2026-08-26"
+  - "no": "46"
+    title: 응급의료 전용헬기
+    checked_at: "2026-08-26"
+  - "no": "47"
+    title: 구급차등의 장비
+    checked_at: "2026-08-26"
+  - "no": "47"
+    title: 심폐소생을 위한 응급장비의 구비 등의 의무
+    checked_at: "2026-08-26"
+  - "no": "47"
+    title: 여객항공기 등에서의 응급장비 및 응급처치 의약품의 구비
+    checked_at: "2026-08-26"
+  - "no": "48"
+    title: 응급구조사 등의 탑승의무
+    checked_at: "2026-08-26"
+  - "no": "48"
+    title: 수용능력 확인 등
+    checked_at: "2026-08-26"
+  - "no": "48"
+    title: 응급의료 전용회선 운영 등
+    checked_at: "2026-08-26"
+  - "no": "49"
+    title: 출동 및 처치 기록 등
+    checked_at: "2026-08-26"
+  - "no": "50"
+    title: 지도ㆍ감독
+    checked_at: "2026-08-26"
+  - "no": "51"
+    title: 이송업의 허가 등
+    checked_at: "2026-08-26"
+  - "no": "52"
+    title: 지도의사
+    checked_at: "2026-08-26"
+  - "no": "53"
+    title: 휴업 등의 신고
+    checked_at: "2026-08-26"
+  - "no": "54"
+    title: 영업의 승계
+    checked_at: "2026-08-26"
+  - "no": "54"
+    title: 유인ㆍ알선 등 금지
+    checked_at: "2026-08-26"
+  - "no": "54"
+    title: 대규모 행사에서의 응급의료 인력 등 확보 의무
+    checked_at: "2026-08-26"
+  - "no": "55"
+    title: 응급의료종사자의 면허ㆍ자격 정지 등
+    checked_at: "2026-08-26"
+  - "no": "56"
+    title: 청문
+    checked_at: "2026-08-26"
+  - "no": "57"
+    title: 과징금
+    checked_at: "2026-08-26"
+  - "no": "58"
+    title: 권한의 위임
+    checked_at: "2026-08-26"
+  - "no": "59"
+    title: 유사명칭 사용 금지
+    checked_at: "2026-08-26"
+  - "no": "59"
+    title: 업무 검사와 보고 등
+    checked_at: "2026-08-26"
+  - "no": "60"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "61"
+    title: 양벌규정
+    checked_at: "2026-08-26"
+  - "no": "62"
+    title: 과태료
+    checked_at: "2026-08-26"
+  - "no": "63"
+    title: 응급처치 및 의료행위에 대한 형의 감면
+    checked_at: "2026-08-26"
+  - "no": "64"
+    title: 「형법」상 감경규정에 관한 특례
+    checked_at: "2026-08-26"
+source_verification:
+  method: k-law-live
+  checked_at: "2026-08-26"
+  next_review: "2027-02-22"
+last_updated: "2026-08-26"
+related_rule:
+  name_ko: 응급의료에 관한 법률 시행령 / 시행규칙
+  abbreviation: EMS-Enforcement

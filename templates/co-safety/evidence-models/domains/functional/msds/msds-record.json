@@ -1,0 +1,583 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "msds-record.json",
+  "title": "MSDS Record (GHS 16 Sections)",
+  "description": "Evidence model for Material Safety Data Sheet records per OSHA-KR Articles 104, 110-112 + 산업안전보건법 시행규칙 제156조 + UN GHS Rev 9. Includes full 16-section structure for international compatibility.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "msds_id",
+    "product_name",
+    "supplier_id",
+    "ghs_version",
+    "legal_basis",
+    "sections",
+    "e_signature",
+    "nomenclature",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^MSDS-[0-9]{4}-[0-9]{4}$"
+    },
+    "msds_id": {
+      "type": "string",
+      "description": "Supplier MSDS identifier"
+    },
+    "product_name": {
+      "type": "string"
+    },
+    "cas_number": {
+      "type": "string"
+    },
+    "supplier_id": {
+      "type": "string"
+    },
+    "ghs_version": {
+      "type": "string",
+      "enum": [
+        "rev8",
+        "rev9",
+        "rev10"
+      ],
+      "description": "GHS revision this record is classified under. v1 baseline: rev9 (Korean standard since 2023)."
+    },
+    "ghs_version_migration": {
+      "type": "object",
+      "properties": {
+        "current_rev": {
+          "type": "string",
+          "enum": [
+            "rev8",
+            "rev9",
+            "rev10"
+          ]
+        },
+        "target_rev": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "rev9",
+            "rev10",
+            null
+          ]
+        },
+        "migration_due_date": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        }
+      }
+    },
+    "kreach_registration_number": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "approval_record_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^MSDS-APR-[0-9]{4}-[0-9]{4}$"
+    },
+    "sections": {
+      "type": "object",
+      "description": "GHS standard 16 sections",
+      "required": [
+        "s1_identification",
+        "s2_hazard_identification",
+        "s3_composition",
+        "s4_first_aid",
+        "s5_fire_fighting",
+        "s6_accidental_release",
+        "s7_handling_storage",
+        "s8_exposure_controls",
+        "s9_physical_chemical",
+        "s10_stability_reactivity",
+        "s11_toxicological",
+        "s12_ecological",
+        "s13_disposal",
+        "s14_transport",
+        "s15_regulatory",
+        "s16_other"
+      ],
+      "properties": {
+        "s1_identification": {
+          "type": "object",
+          "properties": {
+            "product_identifier": {
+              "type": "string"
+            },
+            "other_means_of_identification": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "recommended_use": {
+              "type": "string"
+            },
+            "supplier_name": {
+              "type": "string"
+            },
+            "supplier_address": {
+              "type": "string"
+            },
+            "emergency_phone": {
+              "type": "string"
+            }
+          }
+        },
+        "s2_hazard_identification": {
+          "type": "object",
+          "properties": {
+            "ghs_classification": {
+              "type": "string"
+            },
+            "ghs_label_elements": {
+              "type": "object",
+              "properties": {
+                "signal_word": {
+                  "type": "string",
+                  "enum": [
+                    "Danger",
+                    "Warning",
+                    "None"
+                  ]
+                },
+                "hazard_statements": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "precautionary_statements": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "pictograms": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "GHS01",
+                      "GHS02",
+                      "GHS03",
+                      "GHS04",
+                      "GHS05",
+                      "GHS06",
+                      "GHS07",
+                      "GHS08",
+                      "GHS09"
+                    ]
+                  }
+                }
+              }
+            },
+            "other_hazards": {
+              "type": "string"
+            }
+          }
+        },
+        "s3_composition": {
+          "type": "object",
+          "properties": {
+            "substances": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "chemical_name": {
+                    "type": "string"
+                  },
+                  "cas_number": {
+                    "type": "string"
+                  },
+                  "concentration_pct": {
+                    "type": "number"
+                  },
+                  "common_name": {
+                    "type": "string"
+                  },
+                  "trade_secret_claim": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "s4_first_aid": {
+          "type": "object",
+          "properties": {
+            "inhalation": {
+              "type": "string"
+            },
+            "skin_contact": {
+              "type": "string"
+            },
+            "eye_contact": {
+              "type": "string"
+            },
+            "ingestion": {
+              "type": "string"
+            },
+            "most_important_symptoms": {
+              "type": "string"
+            },
+            "immediate_medical_attention": {
+              "type": "boolean"
+            }
+          }
+        },
+        "s5_fire_fighting": {
+          "type": "object",
+          "properties": {
+            "suitable_extinguishing_media": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "unsuitable_extinguishing_media": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "specific_hazards": {
+              "type": "string"
+            },
+            "special_protective_equipment": {
+              "type": "string"
+            }
+          }
+        },
+        "s6_accidental_release": {
+          "type": "object",
+          "description": "Critical for chemical-spill-reference workflow",
+          "properties": {
+            "personal_precautions": {
+              "type": "string"
+            },
+            "environmental_precautions": {
+              "type": "string"
+            },
+            "containment_cleanup": {
+              "type": "string"
+            },
+            "evacuation_distance": {
+              "type": "string"
+            }
+          }
+        },
+        "s7_handling_storage": {
+          "type": "object",
+          "properties": {
+            "safe_handling": {
+              "type": "string"
+            },
+            "storage_conditions": {
+              "type": "string"
+            },
+            "incompatible_materials": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "s8_exposure_controls": {
+          "type": "object",
+          "description": "Critical for occupational-health-agent reference",
+          "properties": {
+            "oel_kr": {
+              "type": "string",
+              "description": "Korean Occupational Exposure Limit (산업안전보건법상 직업성 노출한도)"
+            },
+            "oel_un": {
+              "type": "string"
+            },
+            "pel_osha": {
+              "type": "string",
+              "description": "US OSHA Permissible Exposure Limit"
+            },
+            "tlv_acgih": {
+              "type": "string",
+              "description": "ACGIH Threshold Limit Value"
+            },
+            "biological_limits": {
+              "type": "string"
+            },
+            "ppe_recommendations": {
+              "type": "object",
+              "properties": {
+                "respiratory": {
+                  "type": "string"
+                },
+                "hand": {
+                  "type": "string"
+                },
+                "eye": {
+                  "type": "string"
+                },
+                "skin": {
+                  "type": "string"
+                }
+              }
+            },
+            "engineering_controls": {
+              "type": "string"
+            }
+          }
+        },
+        "s9_physical_chemical": {
+          "type": "object",
+          "properties": {
+            "appearance": {
+              "type": "string"
+            },
+            "odor": {
+              "type": "string"
+            },
+            "ph": {
+              "type": [
+                "string",
+                "number"
+              ]
+            },
+            "melting_point": {
+              "type": "string"
+            },
+            "boiling_point": {
+              "type": "string"
+            },
+            "flash_point": {
+              "type": "string"
+            },
+            "flammability": {
+              "type": "string"
+            },
+            "vapor_pressure": {
+              "type": "string"
+            },
+            "specific_gravity": {
+              "type": [
+                "string",
+                "number"
+              ]
+            },
+            "solubility": {
+              "type": "string"
+            }
+          }
+        },
+        "s10_stability_reactivity": {
+          "type": "object",
+          "properties": {
+            "stability": {
+              "type": "string"
+            },
+            "hazardous_reactions": {
+              "type": "string"
+            },
+            "conditions_to_avoid": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "incompatible_materials": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "hazardous_decomposition_products": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "s11_toxicological": {
+          "type": "object",
+          "description": "Critical for occupational-health-agent (special health exam targeting)",
+          "properties": {
+            "acute_toxicity": {
+              "type": "string"
+            },
+            "skin_corrosion_irritation": {
+              "type": "string"
+            },
+            "eye_damage_irritation": {
+              "type": "string"
+            },
+            "respiratory_sensitization": {
+              "type": "string"
+            },
+            "skin_sensitization": {
+              "type": "string"
+            },
+            "germ_cell_mutagenicity": {
+              "type": "string"
+            },
+            "carcinogenicity": {
+              "type": "string"
+            },
+            "reproductive_toxicity": {
+              "type": "string"
+            },
+            "specific_target_organ_single": {
+              "type": "string"
+            },
+            "specific_target_organ_repeated": {
+              "type": "string"
+            },
+            "aspiration_hazard": {
+              "type": "string"
+            }
+          }
+        },
+        "s12_ecological": {
+          "type": "object",
+          "properties": {
+            "aquatic_toxicity": {
+              "type": "string"
+            },
+            "persistence_degradability": {
+              "type": "string"
+            },
+            "bioaccumulative_potential": {
+              "type": "string"
+            },
+            "mobility_in_soil": {
+              "type": "string"
+            }
+          }
+        },
+        "s13_disposal": {
+          "type": "object",
+          "properties": {
+            "disposal_methods": {
+              "type": "string"
+            },
+            "contaminated_packaging": {
+              "type": "string"
+            }
+          }
+        },
+        "s14_transport": {
+          "type": "object",
+          "properties": {
+            "un_number": {
+              "type": "string"
+            },
+            "un_proper_shipping_name": {
+              "type": "string"
+            },
+            "transport_hazard_class": {
+              "type": "string"
+            },
+            "packing_group": {
+              "type": "string"
+            },
+            "marine_pollutant": {
+              "type": "boolean"
+            }
+          }
+        },
+        "s15_regulatory": {
+          "type": "object",
+          "properties": {
+            "osha_kr_msds_required": {
+              "type": "boolean"
+            },
+            "kreach_registered": {
+              "type": "boolean"
+            },
+            "tccl_designation": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "prohibited_substance": {
+              "type": "boolean"
+            },
+            "permission_required": {
+              "type": "boolean"
+            }
+          }
+        },
+        "s16_other": {
+          "type": "object",
+          "properties": {
+            "revision_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "revision_history": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "abbreviations": {
+              "type": "string"
+            },
+            "disclaimer": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "description": "Multi-source legal basis. Primary: OSHA-KR Article 110 (MSDS preparation/submission) or Article 104 (hazard-factor/GHS classification basis) or Article 111/112 (provision to transferees / partial non-disclosure approval); format & content per 산업안전보건법 시행규칙 제156조. Adjacent laws may include: K-REACH Articles 10-14 (chemical registration/evaluation), TCCL/CCA (화학물질관리법 — toxic chemical management), UN GHS Rev 9 (2021) (international classification standard).",
+      "examples": [
+        [
+          "OSHA-KR Art.110 §1",
+          "K-REACH Art.10",
+          "UN GHS Rev 9"
+        ],
+        [
+          "OSHA-KR Art.104 §1",
+          "CCA Art.20",
+          "UN GHS Rev 9"
+        ],
+        [
+          "산업안전보건법 시행규칙 Art.156 §1",
+          "K-REACH Art.13",
+          "UN GHS Rev 9"
+        ]
+      ]
+    },
+    "e_signature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/e_signature"
+    },
+    "nomenclature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/nomenclature"
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

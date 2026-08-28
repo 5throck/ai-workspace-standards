@@ -1,0 +1,237 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "gasterm-completion-inspection-record.json",
+  "title": "Gas Terminal Completion Inspection Record",
+  "description": "KGS 입회 완성검사 결과 기록. 전체 시설 종합 검사 후 지자체 허가증 발급 및 운영 개시.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "facility_type",
+    "kgs_inspection_status",
+    "psm_applicable",
+    "gas_type",
+    "legal_basis",
+    "e_signature",
+    "nomenclature",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^GTRM-COMP-[0-9]{4}-[0-9]{4}$"
+    },
+    "facility_type": {
+      "type": "string",
+      "enum": [
+        "LNG_terminal",
+        "LPG_charging",
+        "hydrogen_charging",
+        "city_gas_storage",
+        "pipe_transfer"
+      ]
+    },
+    "kgs_inspection_status": {
+      "type": "string",
+      "enum": [
+        "certified",
+        "pending",
+        "failed",
+        "expired"
+      ]
+    },
+    "psm_applicable": {
+      "type": "boolean",
+      "description": "대규모 가스터미널 PSM 적용 여부"
+    },
+    "gas_type": {
+      "type": "string",
+      "enum": [
+        "LNG",
+        "LPG",
+        "hydrogen",
+        "natural_gas",
+        "other"
+      ]
+    },
+    "project_id": {
+      "type": "string"
+    },
+    "mid_construction_inspection_id": {
+      "type": "string",
+      "description": "Phase 2 중간검사 합격증 ID"
+    },
+    "kgs_inspector": {
+      "type": "string",
+      "description": "KGS 입회 검사관 성명"
+    },
+    "inspection_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "pressure_test_result": {
+      "type": "object",
+      "properties": {
+        "test_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "test_pressure_bar": {
+          "type": "number"
+        },
+        "holding_time_min": {
+          "type": "integer"
+        },
+        "result": {
+          "type": "string",
+          "enum": [
+            "pass",
+            "fail"
+          ]
+        }
+      }
+    },
+    "leak_test_result": {
+      "type": "object",
+      "properties": {
+        "test_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "test_medium": {
+          "type": "string",
+          "enum": [
+            "nitrogen",
+            "air",
+            "gas",
+            "water"
+          ]
+        },
+        "result": {
+          "type": "string",
+          "enum": [
+            "pass",
+            "fail"
+          ]
+        }
+      }
+    },
+    "safety_device_test": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "device": {
+            "type": "string"
+          },
+          "test_result": {
+            "type": "string",
+            "enum": [
+              "pass",
+              "fail"
+            ]
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "deficiencies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "item": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "critical",
+              "major",
+              "minor"
+            ]
+          },
+          "corrective_action": {
+            "type": "string"
+          },
+          "reinspection_date": {
+            "type": "string",
+            "format": "date"
+          }
+        },
+        "required": [
+          "item",
+          "severity"
+        ]
+      }
+    },
+    "inspection_result": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "supplement_required",
+        "fail"
+      ]
+    },
+    "permit_granted": {
+      "type": "boolean"
+    },
+    "permit_granted_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "permit_number": {
+      "type": "string"
+    },
+    "local_government": {
+      "type": "string"
+    },
+    "operation_start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "safety_manager_appointed": {
+      "type": "boolean"
+    },
+    "next_periodic_inspection_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "description": "Multi-source legal basis. Primary: 고압가스안전관리법 (facility/installation/inspection), 액화석유가스의 안전관리 및 사업법 (LPG safety), 도시가스사업법 (city gas pipeline/storage). Adjacent laws may include: 위험물안전관리법 (flammable storage), OSHA-KR Article 44 (PSM for large-scale terminals), 수소경제 육성 및 수소안전관리에 관한 법률 (hydrogen facilities).",
+      "examples": [
+        [
+          "고압가스 안전 관리 및 사업법 Art.22-2",
+          "액법 Art.27-2",
+          "위험물안전관리법 Art.13"
+        ],
+        [
+          "고압가스 안전 관리 및 사업법 Art.13",
+          "도시가스사업법 Art.17-5",
+          "OSHA-KR Art.44 §1"
+        ],
+        [
+          "액법 Art.45",
+          "고압가스 안전 관리 및 사업법 Art.13",
+          "수소안전관리법 Art.32"
+        ]
+      ]
+    },
+    "e_signature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/e_signature"
+    },
+    "nomenclature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/nomenclature"
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

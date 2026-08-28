@@ -1,0 +1,26 @@
+schema_version: "1.0"
+workflow_id: tbm-pre-work-briefing
+title: "식품가공 TBM (Tool Box Meeting)"
+status: active
+applicability: mandatory
+workflow_type: core
+
+legal_basis:
+  - 산업안전보건법 Article 15
+  - 산업안전보건법 Article 36
+  - 산업안전보건법 Article 92
+  - 식품위생법 Article 48
+  - 중대재해처벌법 Article 4
+industry_profile: food
+agent: food-agent
+evidence_model: ../../../../evidence-models/_shared/tbm-record.json
+signature_hazard: 믹서/교반기 청소·정비 LOTO 및 HACCP CCP 이탈 대응 전 TBM
+
+
+# ── Shared TBM reference (added by scaffold-industry.ts Task A-01) ──
+# Declares this workflow also consumes the shared TBM base
+# (workflows/_shared/REFERENCE-SPEC.md §3.1 minimal form). Existing
+# top-level fields (signature_hazard, legal_basis, agent) serve as the
+# effective schema; the shared base supplies the common statutory floor.
+references:
+  - shared: ../../../../_shared/tbm

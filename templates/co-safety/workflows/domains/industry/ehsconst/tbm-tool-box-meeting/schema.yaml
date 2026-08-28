@@ -1,0 +1,15 @@
+schema_version: "1.0"
+workflow_id: tbm-tool-box-meeting
+title: "TBM 일일 안전회보 (Tool Box Meeting)"
+status: active
+applicability: mandatory
+workflow_type: core
+
+legal_basis:
+  - 산업안전보건법 Article 15
+  - 산업안전보건법 Article 36
+  - 중대재해처벌법 Article 5
+  - 건설기술진흥법 Article 24
+industry_profile: construction
+agent: ehsconst-agent
+evidence_model: ehsconst-tbm-record.json

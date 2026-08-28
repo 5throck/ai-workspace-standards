@@ -1,0 +1,110 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "contractor-tar-surge-record.json",
+  "title": "TAR Contractor Surge Management Record",
+  "description": "대정비 (Major Turnaround, TAR) 계약자 급증 관리 기록.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "tar_id",
+    "contractor_tier",
+    "surge_headcount",
+    "prequalification_completed",
+    "legal_basis",
+    "e_signature",
+    "nomenclature",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^CTR-TARSURGE-[0-9]{4}-[0-9]{4}$"
+    },
+    "tar_id": {
+      "type": "string",
+      "description": "대상 대정비(Turnaround) 이벤트 ID — ehschem-turnaround-record.json의 turnaround_id와 연계"
+    },
+    "contractor_tier": {
+      "type": "string",
+      "enum": [
+        "ordering_party",
+        "prime_contractor",
+        "first_subcontractor",
+        "second_subcontractor_below"
+      ],
+      "description": "발주처/원도급/1차 하도급/2차 이하"
+    },
+    "safety_history_score": {
+      "type": "number",
+      "description": "과거 안전이력 평가"
+    },
+    "prequalification_completed": {
+      "type": "boolean"
+    },
+    "prequalification_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "surge_headcount": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "해당 계약자가 TAR 기간 중 투입하는 인력 수"
+    },
+    "worker_training_completed": {
+      "type": "object",
+      "properties": {
+        "new_hire_training": {
+          "type": "boolean"
+        },
+        "periodic_training": {
+          "type": "boolean"
+        },
+        "special_work_training": {
+          "type": "boolean"
+        }
+      }
+    },
+    "health_screening_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "occupational-health-agent가 관리하는 oh-tar-health-record.json의 record_id 참조 (양방향 상호 참조)"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "description": "Multi-source legal basis. Primary: OSHA-KR Article 29 (contractor safety education) and 산업안전보건법 시행령 제15조 (관리감독자 응급조치·보고 업무 — via 법 제16조). Adjacent laws may include: SAPA Article 5 (contractor safety management obligation), OSHA-KR Article 38 (pre-work safety measures for contractors), SAPA Article 3 (management responsibility for contractor safety).",
+      "examples": [
+        [
+          "OSHA-KR Art.29 §1",
+          "SAPA Art.5",
+          "OSHA-KR Art.38 §1"
+        ],
+        [
+          "산업안전보건법 시행령 제15조 (관리감독자 응급조치)",
+          "SAPA Art.3",
+          "OSHA-KR Art.29 §1"
+        ],
+        [
+          "OSHA-KR Art.38 §1",
+          "SAPA Art.5",
+          "산업안전보건법 시행령 제15조 (관리감독자 응급조치)"
+        ]
+      ]
+    },
+    "e_signature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/e_signature"
+    },
+    "nomenclature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/nomenclature"
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

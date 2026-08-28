@@ -1,0 +1,36 @@
+# Food & Beverage GxP Industry Profile — HACCP & EHS (v1)
+profile_id: food-gxp
+name: food-gxp
+display_name: "식품 (Food & Beverage GxP - HACCP)"
+version: "1.0"
+status: active
+last_updated: 2026-08-06
+industry_tier: industry
+agent: food-agent
+legal_basis:
+  - 식품위생법 (Food Sanitation Act) Article 48
+  - 식품안전관리인증기준 (MFDS Notice - HACCP)
+  - 산업안전보건법 (OSHA-KR) Article 36, 38, 92
+  - 중대재해처벌법 (SAPA) Article 4
+key_hazards:
+  - ccp_hazard_analysis
+  - hygiene_and_sanitation
+  - equipment_safety_loto
+  - cold_chain_refrigerant_safety
+workflows:
+  food:
+    - haccp-ccp-monitoring
+    - food-mixer-loto
+description: Food and beverage manufacturing operations under HACCP and Korean Food Sanitation Act, covering CCP monitoring, mixer LOTO, and cold-storage safety.
+regulatory_reference: regulations/KR/MFDS-HACCP.md
+international_alignment:
+  - framework: Codex Alimentarius
+    level: harmonized
+v1_scope:
+  includes:
+    - processed_food_manufacturing
+    - beverage_processing
+    - ccp_monitoring
+    - food_mixer_loto
+  excludes:
+    - slaughterhouse_meat_processing

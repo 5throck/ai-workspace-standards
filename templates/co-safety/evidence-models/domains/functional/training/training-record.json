@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "training-record.json",
+  "title": "Training Record",
+  "description": "Safety training completion record per OSHA-KR Articles 29, 31, 32, 114. Emergency-response (응급조치) education anchors to Article 29(3)-related provisions; the legacy Article 13 citation is invalid (current 제13조 = 기술·작업환경 표준 — see training-agent.md 2026-08-24 anchor correction).",
+  "version": "1.0.0",
+  "type": "object",
+  "required": ["record_id", "training_type", "trainee_id", "completion_date", "hours_completed", "result", "legal_basis", "e_signature", "nomenclature", "audit_trail"],
+  "properties": {
+    "record_id": { "type": "string", "pattern": "^TRAIN-[A-Z]+-[0-9]{4}-[0-9]{4}$" },
+    "training_type": {
+      "type": "string",
+      "enum": ["regular", "special", "supervisor", "new_hire", "job_transfer", "first_aid", "msds"],
+      "description": "정기/특별/관리감독자/신규채용/직무전환/응급조치/MSDS"
+    },
+    "trainee_id": { "type": "string", "description": "Worker ID" },
+    "trainee_name": { "type": "string" },
+    "trainee_role": { "type": "string", "description": "Job title/role" },
+    "completion_date": { "type": "string", "format": "date" },
+    "hours_completed": { "type": "number", "description": "Training hours completed" },
+    "required_hours": { "type": "number", "description": "Legally required minimum hours" },
+    "result": { "type": "string", "enum": ["passed", "failed", "incomplete", "in_progress"] },
+    "score": { "type": ["number", "null"], "description": "Test score (0-100) if applicable" },
+    "instructor_id": { "type": "string" },
+    "instructor_qualification_ref": { "type": ["string", "null"] },
+    "curriculum_ref": { "type": "string", "description": "Reference to training-curriculum-record.json" },
+    "industry_specific": { "type": ["string", "null"], "description": "If industry-specific (e.g., construction TBM)" },
+    "next_training_due": { "type": "string", "format": "date" },
+    "retraining_required": { "type": "boolean" },
+    "contractor_flag": { "type": "boolean", "default": false, "description": "True if trainee is a subcontractor/contractor worker (도급·하도급 인력) — reverse-intake from contractor-safety-agent; SAPA Article 5 traceability" },
+    "company_name": { "type": ["string", "null"], "description": "Trainee employer name (협력업체명) — required when contractor_flag=true" },
+    "training_location": { "type": "string" },
+    "training_method": { "type": "string", "enum": ["classroom", "online", "on_the_job", "field", "vr_ar"] },
+    "legal_basis": {
+      "type": "array",
+      "description": "Multi-source legal basis. Primary: OSHA-KR Article 29 (worker safety education) or Article 29 §3 + 시행규칙 §26 (special education for hazardous work) or Article 32 (job education for safety/health management supervisors etc.) or Article 114 (MSDS education) or Article 36 (risk assessment communication). Adjacent laws may include: SAPA Article 4 (employer safety and health assurance obligation), SAPA Article 5 (contract/subcontractor safety obligations). Records contain worker PII (trainee_name, trainee_id, instructor_id, e_signature signer IDs) and MUST additionally cite PIPA (개인정보보호법): collection/use grounds (Art 15), minimum-necessary collection (Art 16), third-party provision restrictions (Arts 17-18), destruction after retention (Art 21) — see regulations/KR/PIPA.yaml.",
+      "items": { "type": "string" },
+      "minItems": 3,
+      "examples": [
+        ["OSHA-KR Art.29 §1", "OSHA-KR Art.36 §1", "SAPA Art.4"],
+        ["OSHA-KR Art.29 §3", "산업안전보건법 시행규칙 Art.26 §1", "SAPA Art.4"],
+        ["OSHA-KR Art.114 §1", "OSHA-KR Art.29 §1", "SAPA Art.5"],
+        ["OSHA-KR Art.29 §1", "SAPA Art.4", "PIPA Art.15 §1", "PIPA Art.21 §1"]
+      ]
+    },
+    "agent_id": { "$ref": "../../../_shared/base/common.schema.json#/definitions/agent_id", "description": "Optional: agent attribution (e.g., training-agent). Omit when unknown — zero-fabrication rule; must match audit_trail.created_by when an audit trail is present." },
+    "workflow_id": { "$ref": "../../../_shared/base/common.schema.json#/definitions/workflow_id", "description": "Optional: originating workflow execution (e.g., 'functional/training'). Never invent an ID to satisfy this field." },
+    "e_signature": { "$ref": "../../../_shared/base/common.schema.json#/definitions/e_signature" },
+    "nomenclature": { "$ref": "../../../_shared/base/common.schema.json#/definitions/nomenclature" },
+    "audit_trail": { "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail" }
+  }
+}

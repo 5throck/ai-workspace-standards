@@ -1,0 +1,13 @@
+schema_version: "1.0"
+workflow_id: moc-process
+title: "Management of Change (MOC)"
+status: active
+applicability: mandatory
+applicable_industries: [chemical, gas_terminal, power_generation]
+legal_basis:
+  - OSHA-KR Article 44
+  - OSHA-KR Article 14 (annual safety/health plan — board report & approval)
+  - 중대재해처벌법 Article 4
+industry_profile: chemical-processing
+agent: psm-agent
+evidence_model: psm-moc-record.json

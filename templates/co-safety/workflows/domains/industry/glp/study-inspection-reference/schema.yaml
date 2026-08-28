@@ -1,0 +1,25 @@
+schema_version: "1.0"
+workflow_id: study-inspection-reference
+title: "규제기관 감사 참조 (Regulatory Inspection Reference)"
+status: active
+applicability: mandatory
+workflow_type: reference
+target_agent: compliance-agent
+data_provided:
+  - study_records_index
+  - raw_data_index
+  - qau_inspection_history
+  - personnel_qualification_records
+handoff_protocol:
+  trigger: regulatory_glp_inspection
+  dispatch_to: compliance-agent
+  include_data:
+    - facility_glp_certification
+    - study_list_for_audit
+legal_basis:
+  - MFDS GLP 인증제
+  - OECD MAD (C(97)186/Final)
+  - ME GLP 적합성 확인
+industry_profile: pharma-laboratory
+agent: glp-agent
+evidence_model: glp-qau-inspection-record.json

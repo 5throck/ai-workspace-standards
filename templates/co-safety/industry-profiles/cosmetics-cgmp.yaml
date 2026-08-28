@@ -1,0 +1,37 @@
+# Cosmetics GxP Industry Profile — CGMP & ISO 22716 (v1)
+profile_id: cosmetics-cgmp
+name: cosmetics-cgmp
+display_name: "화장품 (Cosmetics GxP - CGMP & ISO 22716)"
+version: "1.0"
+status: active
+last_updated: 2026-08-06
+industry_tier: industry
+agent: cosmetics-agent
+legal_basis:
+  - 화장품법 (Cosmetics Act) Article 5
+  - 우수화장품 제조 및 품질관리기준 (MFDS Notice - CGMP)
+  - ISO 22716 (Cosmetics GMP)
+  - 산업안전보건법 (OSHA-KR) Article 36, 110
+  - 화학물질관리법 (CCA) Article 20
+key_hazards:
+  - quality_system_cgmp
+  - raw_material_safety_assessment
+  - batch_manufacturing_records
+  - local_exhaust_ventilation
+workflows:
+  cosmetics:
+    - cgmp-batch-release
+    - cosmetics-safety-assessment
+description: Cosmetics manufacturing operations under MFDS CGMP Notice and ISO 22716, covering batch release, ingredient safety assessment, and solvent mixing safety.
+regulatory_reference: regulations/KR/MFDS-CGMP.md
+international_alignment:
+  - framework: ISO 22716
+    level: harmonized
+v1_scope:
+  includes:
+    - skincare_cosmetics
+    - makeup_manufacturing
+    - ingredient_safety_assessment
+    - cgmp_batch_release
+  excludes:
+    - quasi_drugs_sanitizers

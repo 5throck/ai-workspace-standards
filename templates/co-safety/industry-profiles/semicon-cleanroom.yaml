@@ -1,0 +1,36 @@
+# Semiconductor & Display Manufacturing Industry Profile — Cleanroom & Special Gas (v1)
+profile_id: semicon-cleanroom
+name: semicon-cleanroom
+display_name: "반도체 및 디스플레이 (Semiconductor & Display Manufacturing)"
+version: "1.0"
+status: active
+last_updated: 2026-08-06
+industry_tier: industry
+agent: semicon-agent
+legal_basis:
+  - 고압가스 안전 관리 및 사업법 (HPGSCA) Article 13, 17
+  - 화학물질관리법 (CCA) Article 20, 23
+  - 산업안전보건법 (OSHA-KR) Article 36, 110
+  - 중대재해처벌법 (SAPA) Article 4
+key_hazards:
+  - special_gas_safety
+  - cleanroom_chemical_management
+  - toxic_substance_monitoring
+  - contractor_cleanroom_ptw
+workflows:
+  semicon:
+    - special-gas-handling
+    - cleanroom-chemical-safety
+description: High-tech semiconductor and display manufacturing operations under HPGSCA and CCA, covering special gas handling, HF/chemical safety, and cleanroom EHS.
+regulatory_reference: regulations/KR/KGS-CODE.md
+international_alignment:
+  - framework: SEMI S2/S8
+    level: harmonized
+v1_scope:
+  includes:
+    - semiconductor_wafer_fab
+    - display_panel_manufacturing
+    - special_gas_cabinet_management
+    - hf_acid_handling
+  excludes:
+    - outdoor_assembly

@@ -1,0 +1,469 @@
+# ── Registry schema v2 (mode: coordinates) ───────────────────────────────────
+# This file maps article numbers to official titles ONLY. Article content is
+# never cached here — fetch live from the 법제처 k-law API at point of use.
+# Migrated by migrate-registry-to-coordinates.ts on 2026-08-26
+schema_version: 2
+mode: coordinates
+jurisdiction: KR
+framework: Rail-Safety-Act
+law_name: 철도안전법
+law_name_en: null
+abbreviation: null
+mst: "280129"
+enforced_from: null
+agency: null
+tier: 1
+regulator: MOLIT (국토교통부) / KR Rail Authority (국가철도공단)
+articles:
+  - "no": "1"
+    title: 목적
+    checked_at: "2026-08-26"
+  - "no": "2"
+    title: 정의
+    checked_at: "2026-08-26"
+  - "no": "3"
+    title: 다른 법률과의 관계
+    checked_at: "2026-08-26"
+  - "no": "3"
+    title: 조약과의 관계
+    checked_at: "2026-08-26"
+  - "no": "4"
+    title: 국가 등의 책무
+    checked_at: "2026-08-26"
+  - "no": "5"
+    title: 철도안전 종합계획
+    checked_at: "2026-08-26"
+  - "no": "6"
+    title: 시행계획
+    checked_at: "2026-08-26"
+  - "no": "6"
+    title: 철도안전투자의 공시
+    checked_at: "2026-08-26"
+  - "no": "7"
+    title: 안전관리체계의 승인
+    checked_at: "2026-08-26"
+  - "no": "8"
+    title: 안전관리체계의 유지 등
+    checked_at: "2026-08-26"
+  - "no": "9"
+    title: 승인의 취소 등
+    checked_at: "2026-08-26"
+  - "no": "9"
+    title: 과징금
+    checked_at: "2026-08-26"
+  - "no": "9"
+    title: 철도운영자등에 대한 안전관리 수준평가
+    checked_at: "2026-08-26"
+  - "no": "9"
+    title: 철도안전 우수운영자 지정
+    checked_at: "2026-08-26"
+  - "no": "9"
+    title: 우수운영자 지정의 취소
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 철도차량 운전면허
+    checked_at: "2026-08-26"
+  - "no": "11"
+    title: 운전면허의 결격사유 등
+    checked_at: "2026-08-26"
+  - "no": "12"
+    title: 운전면허의 신체검사
+    checked_at: "2026-08-26"
+  - "no": "13"
+    title: 신체검사 실시 의료기관
+    checked_at: "2026-08-26"
+  - "no": "14"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "15"
+    title: 운전적성검사
+    checked_at: "2026-08-26"
+  - "no": "15"
+    title: 운전적성검사기관의 지정취소 및 업무정지
+    checked_at: "2026-08-26"
+  - "no": "16"
+    title: 운전교육훈련
+    checked_at: "2026-08-26"
+  - "no": "17"
+    title: 운전면허시험
+    checked_at: "2026-08-26"
+  - "no": "18"
+    title: 운전면허증의 발급 등
+    checked_at: "2026-08-26"
+  - "no": "19"
+    title: 운전면허의 갱신
+    checked_at: "2026-08-26"
+  - "no": "19"
+    title: 운전면허증의 대여 등 금지
+    checked_at: "2026-08-26"
+  - "no": "20"
+    title: 운전면허의 취소ㆍ정지 등
+    checked_at: "2026-08-26"
+  - "no": "21"
+    title: 운전업무 실무수습
+    checked_at: "2026-08-26"
+  - "no": "21"
+    title: 무자격자의 운전업무 금지 등
+    checked_at: "2026-08-26"
+  - "no": "21"
+    title: 관제자격증명
+    checked_at: "2026-08-26"
+  - "no": "21"
+    title: 관제자격증명의 결격사유
+    checked_at: "2026-08-26"
+  - "no": "21"
+    title: 관제자격증명의 신체검사
+    checked_at: "2026-08-26"
+  - "no": "21"
+    title: 관제적성검사
+    checked_at: "2026-08-26"
+  - "no": "21"
+    title: 관제교육훈련
+    checked_at: "2026-08-26"
+  - "no": "21"
+    title: 관제자격증명시험
+    checked_at: "2026-08-26"
+  - "no": "21"
+    title: 관제자격증명서의 발급 및 관제자격증명의 갱신 등
+    checked_at: "2026-08-26"
+  - "no": "21"
+    title: 관제자격증명서의 대여 등 금지
+    checked_at: "2026-08-26"
+  - "no": "21"
+    title: 관제자격증명의 취소ㆍ정지 등
+    checked_at: "2026-08-26"
+  - "no": "22"
+    title: 관제업무 실무수습
+    checked_at: "2026-08-26"
+  - "no": "22"
+    title: 무자격자의 관제업무 금지 등
+    checked_at: "2026-08-26"
+  - "no": "23"
+    title: 운전업무종사자 등의 관리
+    checked_at: "2026-08-26"
+  - "no": "24"
+    title: 철도종사자에 대한 안전 및 직무교육
+    checked_at: "2026-08-26"
+  - "no": "24"
+    title: 철도차량정비기술자의 인정 등
+    checked_at: "2026-08-26"
+  - "no": "24"
+    title: 철도차량정비기술자의 명의 대여금지 등
+    checked_at: "2026-08-26"
+  - "no": "24"
+    title: 철도차량정비기술교육훈련
+    checked_at: "2026-08-26"
+  - "no": "24"
+    title: 철도차량정비기술자의 인정취소 등
+    checked_at: "2026-08-26"
+  - "no": "25"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "25"
+    title: 승하차용 출입문 설비의 설치
+    checked_at: "2026-08-26"
+  - "no": "26"
+    title: 철도차량 형식승인
+    checked_at: "2026-08-26"
+  - "no": "26"
+    title: 형식승인의 취소 등
+    checked_at: "2026-08-26"
+  - "no": "26"
+    title: 철도차량 제작자승인
+    checked_at: "2026-08-26"
+  - "no": "26"
+    title: 결격사유
+    checked_at: "2026-08-26"
+  - "no": "26"
+    title: 승계
+    checked_at: "2026-08-26"
+  - "no": "26"
+    title: 철도차량 완성검사
+    checked_at: "2026-08-26"
+  - "no": "26"
+    title: 철도차량 제작자승인의 취소 등
+    checked_at: "2026-08-26"
+  - "no": "26"
+    title: 준용규정
+    checked_at: "2026-08-26"
+  - "no": "27"
+    title: 철도용품 형식승인
+    checked_at: "2026-08-26"
+  - "no": "27"
+    title: 철도용품 제작자승인
+    checked_at: "2026-08-26"
+  - "no": "27"
+    title: 검사 업무의 위탁
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "29"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "30"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "31"
+    title: 형식승인 등의 사후관리
+    checked_at: "2026-08-26"
+  - "no": "32"
+    title: 제작 또는 판매 중지 등
+    checked_at: "2026-08-26"
+  - "no": "33"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "34"
+    title: 표준화
+    checked_at: "2026-08-26"
+  - "no": "35"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "36"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "37"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "38"
+    title: 종합시험운행
+    checked_at: "2026-08-26"
+  - "no": "38"
+    title: 철도차량의 개조 등
+    checked_at: "2026-08-26"
+  - "no": "38"
+    title: 철도차량의 운행제한
+    checked_at: "2026-08-26"
+  - "no": "38"
+    title: 준용규정
+    checked_at: "2026-08-26"
+  - "no": "38"
+    title: 철도차량의 이력관리
+    checked_at: "2026-08-26"
+  - "no": "38"
+    title: 철도차량정비 등
+    checked_at: "2026-08-26"
+  - "no": "38"
+    title: 철도차량 정비조직인증
+    checked_at: "2026-08-26"
+  - "no": "38"
+    title: 결격사유
+    checked_at: "2026-08-26"
+  - "no": "38"
+    title: 인증정비조직의 준수사항
+    checked_at: "2026-08-26"
+  - "no": "38"
+    title: 인증정비조직의 인증 취소 등
+    checked_at: "2026-08-26"
+  - "no": "38"
+    title: 준용규정
+    checked_at: "2026-08-26"
+  - "no": "38"
+    title: 철도차량 정밀안전진단
+    checked_at: "2026-08-26"
+  - "no": "38"
+    title: 정밀안전진단기관의 지정 등
+    checked_at: "2026-08-26"
+  - "no": "38"
+    title: 정밀안전진단 결과의 평가
+    checked_at: "2026-08-26"
+  - "no": "38"
+    title: 준용규정
+    checked_at: "2026-08-26"
+  - "no": "39"
+    title: 철도차량의 운행
+    checked_at: "2026-08-26"
+  - "no": "39"
+    title: 철도교통관제
+    checked_at: "2026-08-26"
+  - "no": "39"
+    title: 영상기록장치의 설치ㆍ운영 등
+    checked_at: "2026-08-26"
+  - "no": "40"
+    title: 열차운행의 일시 중지
+    checked_at: "2026-08-26"
+  - "no": "40"
+    title: 철도종사자의 준수사항
+    checked_at: "2026-08-26"
+  - "no": "40"
+    title: 철도종사자의 흡연 금지
+    checked_at: "2026-08-26"
+  - "no": "41"
+    title: 철도종사자의 음주 제한 등
+    checked_at: "2026-08-26"
+  - "no": "42"
+    title: 위해물품의 휴대 금지
+    checked_at: "2026-08-26"
+  - "no": "43"
+    title: 위험물의 운송위탁 및 운송 금지
+    checked_at: "2026-08-26"
+  - "no": "44"
+    title: 위험물의 운송 등
+    checked_at: "2026-08-26"
+  - "no": "44"
+    title: 위험물 포장 및 용기의 검사 등
+    checked_at: "2026-08-26"
+  - "no": "44"
+    title: 위험물취급에 관한 교육 등
+    checked_at: "2026-08-26"
+  - "no": "45"
+    title: 철도보호지구에서의 행위제한 등
+    checked_at: "2026-08-26"
+  - "no": "46"
+    title: 손실보상
+    checked_at: "2026-08-26"
+  - "no": "47"
+    title: 여객열차에서의 금지행위
+    checked_at: "2026-08-26"
+  - "no": "48"
+    title: 철도 보호 및 질서유지를 위한 금지행위
+    checked_at: "2026-08-26"
+  - "no": "48"
+    title: 여객 등의 안전 및 보안
+    checked_at: "2026-08-26"
+  - "no": "48"
+    title: 보안검색장비의 성능인증 등
+    checked_at: "2026-08-26"
+  - "no": "48"
+    title: 시험기관의 지정 등
+    checked_at: "2026-08-26"
+  - "no": "48"
+    title: 직무장비의 휴대 및 사용 등
+    checked_at: "2026-08-26"
+  - "no": "49"
+    title: 철도종사자의 직무상 지시 준수
+    checked_at: "2026-08-26"
+  - "no": "50"
+    title: 사람 또는 물건에 대한 퇴거 조치 등
+    checked_at: "2026-08-26"
+  - "no": "51"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "52"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "53"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "54"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "55"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "56"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "57"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "58"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "59"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "60"
+    title: 철도사고등의 발생 시 조치
+    checked_at: "2026-08-26"
+  - "no": "61"
+    title: 철도사고등 의무보고
+    checked_at: "2026-08-26"
+  - "no": "61"
+    title: 철도차량 등에 발생한 고장 등 보고 의무
+    checked_at: "2026-08-26"
+  - "no": "61"
+    title: 철도안전 자율보고
+    checked_at: "2026-08-26"
+  - "no": "62"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "63"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "64"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "65"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "66"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "67"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "68"
+    title: 철도안전기술의 진흥
+    checked_at: "2026-08-26"
+  - "no": "69"
+    title: 철도안전 전문기관 등의 육성
+    checked_at: "2026-08-26"
+  - "no": "69"
+    title: 철도운행안전관리자의 배치 등
+    checked_at: "2026-08-26"
+  - "no": "69"
+    title: 철도안전 전문인력의 정기교육
+    checked_at: "2026-08-26"
+  - "no": "69"
+    title: 철도안전 전문인력 분야별 자격의 대여 등 금지
+    checked_at: "2026-08-26"
+  - "no": "69"
+    title: 철도안전 전문인력 분야별 자격의 취소ㆍ정지
+    checked_at: "2026-08-26"
+  - "no": "70"
+    title: 철도안전 지식의 보급 등
+    checked_at: "2026-08-26"
+  - "no": "71"
+    title: 철도안전 정보의 종합관리 등
+    checked_at: "2026-08-26"
+  - "no": "72"
+    title: 재정지원
+    checked_at: "2026-08-26"
+  - "no": "72"
+    title: 철도횡단교량 개축ㆍ개량 지원
+    checked_at: "2026-08-26"
+  - "no": "73"
+    title: 보고 및 검사
+    checked_at: "2026-08-26"
+  - "no": "74"
+    title: 수수료
+    checked_at: "2026-08-26"
+  - "no": "75"
+    title: 청문
+    checked_at: "2026-08-26"
+  - "no": "75"
+    title: 통보 및 징계권고
+    checked_at: "2026-08-26"
+  - "no": "76"
+    title: 벌칙 적용에서 공무원 의제
+    checked_at: "2026-08-26"
+  - "no": "77"
+    title: 권한의 위임ㆍ위탁
+    checked_at: "2026-08-26"
+  - "no": "78"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "79"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "80"
+    title: 형의 가중
+    checked_at: "2026-08-26"
+  - "no": "81"
+    title: 양벌규정
+    checked_at: "2026-08-26"
+  - "no": "82"
+    title: 과태료
+    checked_at: "2026-08-26"
+  - "no": "83"
+    title: 과태료 규정의 적용 특례
+    checked_at: "2026-08-26"
+source_verification:
+  method: k-law-live
+  checked_at: "2026-08-26"
+  next_review: "2027-02-22"
+last_updated: "2026-08-26"
+related_rule:
+  name_ko: 철도안전법 시행령 / 시행규칙
+  abbreviation: RSA-Enforcement

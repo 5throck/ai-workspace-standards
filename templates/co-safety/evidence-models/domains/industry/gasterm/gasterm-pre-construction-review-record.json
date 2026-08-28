@@ -1,0 +1,141 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "gasterm-pre-construction-review-record.json",
+  "title": "Gas Terminal Pre-Construction Technical Review Record",
+  "description": "KGS Code 준거 사전기술검토 결과 기록. 가스 3법에 따른 시설기준·기술기준 적합성 심사.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "facility_type",
+    "kgs_inspection_status",
+    "psm_applicable",
+    "gas_type",
+    "legal_basis",
+    "e_signature",
+    "nomenclature",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^GTRM-PREV-[0-9]{4}-[0-9]{4}$"
+    },
+    "facility_type": {
+      "type": "string",
+      "enum": [
+        "LNG_terminal",
+        "LPG_charging",
+        "hydrogen_charging",
+        "city_gas_storage",
+        "pipe_transfer"
+      ]
+    },
+    "kgs_inspection_status": {
+      "type": "string",
+      "enum": [
+        "certified",
+        "pending",
+        "failed",
+        "expired"
+      ]
+    },
+    "psm_applicable": {
+      "type": "boolean",
+      "description": "대규모 가스터미널 PSM 적용 여부"
+    },
+    "gas_type": {
+      "type": "string",
+      "enum": [
+        "LNG",
+        "LPG",
+        "hydrogen",
+        "natural_gas",
+        "other"
+      ]
+    },
+    "project_id": {
+      "type": "string"
+    },
+    "review_type": {
+      "type": "string",
+      "enum": [
+        "new_construction",
+        "modification",
+        "expansion"
+      ]
+    },
+    "kgs_code_references": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "적용된 KGS Code 항목 (예: KGS AC211, KGS FA121 등)"
+    },
+    "application_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "review_result": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "supplement_required",
+        "fail"
+      ]
+    },
+    "supplement_items": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "보완 요구 항목"
+    },
+    "kgs_review_id": {
+      "type": "string",
+      "description": "KGS 기술검토 접수번호"
+    },
+    "local_gov_submission_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "local_government": {
+      "type": "string",
+      "description": "관할 지자체"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "description": "Multi-source legal basis. Primary: 고압가스안전관리법 (facility/installation/inspection), 액화석유가스의 안전관리 및 사업법 (LPG safety), 도시가스사업법 (city gas pipeline/storage). Adjacent laws may include: 위험물안전관리법 (flammable storage), OSHA-KR Article 44 (PSM for large-scale terminals), 수소경제 육성 및 수소안전관리에 관한 법률 (hydrogen facilities).",
+      "examples": [
+        [
+          "고압가스 안전 관리 및 사업법 Art.22-2",
+          "액법 Art.27-2",
+          "위험물안전관리법 Art.13"
+        ],
+        [
+          "고압가스 안전 관리 및 사업법 Art.28",
+          "도시가스사업법 Art.17-5",
+          "OSHA-KR Art.44 §1"
+        ],
+        [
+          "액법 Art.45",
+          "고압가스 안전 관리 및 사업법 Art.17",
+          "수소안전관리법 Art.32"
+        ]
+      ]
+    },
+    "e_signature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/e_signature"
+    },
+    "nomenclature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/nomenclature"
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

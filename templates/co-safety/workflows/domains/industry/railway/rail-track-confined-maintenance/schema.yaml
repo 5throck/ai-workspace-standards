@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: rail-track-confined-maintenance
+title: "야간 선로 정비 작업 열차 접촉 방지 및 터널 밀폐공간 안전 (Rail Track Confined Maintenance)"
+status: active
+applicability: mandatory
+workflow_type: core
+legal_basis:
+  - 철도안전법 Article 48
+  - 산업안전보건법 Article 38
+  - 산업안전보건법 Article 618
+  - 중대재해처벌법 Article 4
+industry_profile: railway-transit
+agent: railway-agent
+evidence_model: rail-track-confined-record.json

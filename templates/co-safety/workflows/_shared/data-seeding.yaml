@@ -1,0 +1,17 @@
+name: Industry Profile Data Seeding
+description: Initial data seeding workflow for IndustryProfile nodes.
+legal_basis: SAPA Article 4
+trigger: manual
+steps:
+  - step: 1
+    action: inspect_data
+    agent: compliance-agent
+    description: The compliance-agent inspects the data before it is ingested to ensure regulatory alignment.
+  - step: 2
+    action: ingest_data
+    agent: automation-engineer
+    description: Ingests the data into the IndustryProfile nodes.
+  - step: 3
+    action: cross_validate
+    agent: auditor
+    description: The auditor cross-validates the ingested data to ensure accuracy and traceability.

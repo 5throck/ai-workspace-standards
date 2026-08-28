@@ -1,0 +1,33 @@
+schema_version: "1.0"
+workflow_id: steelmaking-coke-oven-pah-heat-stress
+title: "Steelmaking (Integrated steel mills) — steelmaking-coke-oven-pah-heat-stress"
+status: active
+applicability: mandatory
+workflow_type: core
+industry_profile: steelmaking
+agent: steelmaking-agent
+signature_hazard: "코크스로(coke-oven battery) 작업 시 코올타르피치 휘발성 유기화합물(PAH 발암물질 — IARC Group 1) 흡입 노출, 노정(oven-top) 극고온 열스트레스, 코크스로 가스 누출 (Coke-oven worker: coal-tar-pitch-volatile PAH carcinogen — IARC Group 1 — inhalation, oven-top extreme-heat stress, coke-oven-gas leak)"
+
+# Auto-filled from regulations/KR/industry-regulatory-anchors.yaml (Task A-03).
+# Entries marked [UNVERIFIED] originate from the anchor table and require specialist re-verification.
+legal_basis:
+  - 산업안전보건법 Article 36
+  - 산업안전보건법 Article 57
+  - 중대재해처벌법 Article 4
+  - 중대재해처벌법 Article 5
+  - 중대재해처벌법 Article 6
+  - 중대재해처벌법 Article 7
+  - 산업안전보건법 Article 38 (추락 등 위해 방지 안전조치)
+  - 안전보건기준에관한규칙 제6장 제2절 (붕괴 등에 의한 위험 방지)
+  - 안전보건기준에관한규칙 (감전 등 전기 재해 방지 기준)
+  - 고압가스 안전관리 및 사업법 Article 11
+  - 고압가스 안전관리 및 사업법 Article 13
+  - 고압가스 안전관리 및 사업법 Article 15
+  - 고압가스 안전관리 및 사업법 Article 24
+  - 고압가스 안전관리 및 사업법 Article 26
+  - 위험물안전관리법 Article 5
+  - 위험물안전관리법 Article 27
+
+# Industry-unique workflow. NOT a shared-workflow reference (no `references:` block).
+# Evidence model skeleton — see evidence-models/domains/industry/steelmaking/steelmaking-steelmaking-coke-oven-pah-heat-stress-record.json.
+evidence_model: steelmaking-steelmaking-coke-oven-pah-heat-stress-record.json

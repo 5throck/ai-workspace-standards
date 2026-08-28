@@ -1,0 +1,86 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "preventive-maintenance-record.json",
+  "title": "Preventive Maintenance Record",
+  "description": "Preventive maintenance record for safety-critical equipment per OSHA-KR Article 36/38 and KOSHA Guide M-155-2022. Documents scheduled PM tasks, execution, and deferred item tracking.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "equipment_id",
+    "equipment_tag",
+    "pm_date",
+    "pm_type",
+    "pm_tasks",
+    "next_pm_date",
+    "technician_id",
+    "legal_basis",
+    "e_signature",
+    "nomenclature",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^PM-[0-9]{4}-[0-9]{6}$"
+    },
+    "equipment_id": { "type": "string" },
+    "equipment_tag": { "type": "string", "description": "Plant tag number (KKS/ISA-5.1)" },
+    "equipment_category": {
+      "type": "string",
+      "enum": ["pressure_vessel", "rotating_machinery", "electrical", "instrumentation", "piping", "lifting", "fire_system", "process_control", "other"]
+    },
+    "pm_date": { "type": "string", "format": "date" },
+    "pm_type": {
+      "type": "string",
+      "enum": ["routine", "seasonal", "statutory", "predictive", "condition_based"]
+    },
+    "pm_tasks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["task_id", "task_description", "result"],
+        "properties": {
+          "task_id": { "type": "string" },
+          "task_description": { "type": "string" },
+          "result": { "type": "string", "enum": ["pass", "fail", "deferred", "na"] },
+          "finding": { "type": ["string", "null"] },
+          "work_order_ref": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "deferred_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["item_id", "description", "risk_level", "target_completion_date"],
+        "properties": {
+          "item_id": { "type": "string" },
+          "description": { "type": "string" },
+          "risk_level": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
+          "target_completion_date": { "type": "string", "format": "date" }
+        }
+      }
+    },
+    "next_pm_date": { "type": "string", "format": "date" },
+    "technician_id": { "type": "string" },
+    "loto_record_ref": {
+      "type": ["string", "null"],
+      "description": "Reference to PSM LOTO record for this PM activity"
+    },
+    "tar_id": {
+      "type": ["string", "null"],
+      "description": "TAR event reference if this PM was performed during a major turnaround"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 3,
+      "examples": [["산업안전보건법 Article 36", "산업안전보건법 Article 38", "KOSHA Guide M-155-2022"]]
+    },
+    "e_signature": { "$ref": "../../../_shared/base/common.schema.json#/definitions/e_signature" },
+    "nomenclature": { "$ref": "../../../_shared/base/common.schema.json#/definitions/nomenclature" },
+    "audit_trail": { "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail" }
+  }
+}

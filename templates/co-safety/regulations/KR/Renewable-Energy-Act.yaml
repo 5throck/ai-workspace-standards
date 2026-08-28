@@ -1,0 +1,193 @@
+# ── Registry schema v2 (mode: coordinates) ───────────────────────────────────
+# This file maps article numbers to official titles ONLY. Article content is
+# never cached here — fetch live from the 법제처 k-law API at point of use.
+# Migrated by migrate-registry-to-coordinates.ts on 2026-08-26
+schema_version: 2
+mode: coordinates
+jurisdiction: KR
+framework: Renewable-Energy-Act
+law_name: 신에너지 및 재생에너지 개발ㆍ이용ㆍ보급 촉진법
+law_name_en: null
+abbreviation: null
+mst: "268793"
+enforced_from: null
+agency: null
+tier: 1
+regulator: MCEE (기후에너지환경부) / KEA (한국에너지공단)
+articles:
+  - "no": "1"
+    title: 목적
+    checked_at: "2026-08-26"
+  - "no": "2"
+    title: 정의
+    checked_at: "2026-08-26"
+  - "no": "3"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "4"
+    title: 시책과 장려 등
+    checked_at: "2026-08-26"
+  - "no": "5"
+    title: 기본계획의 수립
+    checked_at: "2026-08-26"
+  - "no": "6"
+    title: 연차별 실행계획
+    checked_at: "2026-08-26"
+  - "no": "7"
+    title: 신ㆍ재생에너지 기술개발 등에 관한 계획의 사전협의
+    checked_at: "2026-08-26"
+  - "no": "8"
+    title: 신ㆍ재생에너지정책심의회
+    checked_at: "2026-08-26"
+  - "no": "9"
+    title: 신ㆍ재생에너지 기술개발 및 이용ㆍ보급 사업비의 조성
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 조성된 사업비의 사용
+    checked_at: "2026-08-26"
+  - "no": "11"
+    title: 사업의 실시
+    checked_at: "2026-08-26"
+  - "no": "12"
+    title: 신ㆍ재생에너지사업에의 투자권고 및 신ㆍ재생에너지 이용의무화 등
+    checked_at: "2026-08-26"
+  - "no": "12"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "12"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "12"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "12"
+    title: 신ㆍ재생에너지 공급의무화 등
+    checked_at: "2026-08-26"
+  - "no": "12"
+    title: 신ㆍ재생에너지 공급 불이행에 대한 과징금
+    checked_at: "2026-08-26"
+  - "no": "12"
+    title: 신ㆍ재생에너지 공급인증서 등
+    checked_at: "2026-08-26"
+  - "no": "12"
+    title: 공급인증기관의 지정 등
+    checked_at: "2026-08-26"
+  - "no": "12"
+    title: 공급인증기관의 업무 등
+    checked_at: "2026-08-26"
+  - "no": "12"
+    title: 공급인증기관 지정의 취소 등
+    checked_at: "2026-08-26"
+  - "no": "12"
+    title: 신ㆍ재생에너지 연료 품질기준
+    checked_at: "2026-08-26"
+  - "no": "12"
+    title: 신ㆍ재생에너지 연료 품질검사
+    checked_at: "2026-08-26"
+  - "no": "13"
+    title: 신ㆍ재생에너지 설비의 인증 등
+    checked_at: "2026-08-26"
+  - "no": "13"
+    title: 보험ㆍ공제 가입
+    checked_at: "2026-08-26"
+  - "no": "14"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "15"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "16"
+    title: 수수료
+    checked_at: "2026-08-26"
+  - "no": "17"
+    title: 신ㆍ재생에너지 발전 기준가격의 고시 및 차액 지원
+    checked_at: "2026-08-26"
+  - "no": "18"
+    title: 지원 중단 등
+    checked_at: "2026-08-26"
+  - "no": "19"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "20"
+    title: 신ㆍ재생에너지 기술의 국제표준화 지원
+    checked_at: "2026-08-26"
+  - "no": "21"
+    title: 신ㆍ재생에너지 설비 및 그 부품의 공용화
+    checked_at: "2026-08-26"
+  - "no": "22"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "22"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "23"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "23"
+    title: 신ㆍ재생에너지 연료 혼합의무 등
+    checked_at: "2026-08-26"
+  - "no": "23"
+    title: 의무 불이행에 대한 과징금
+    checked_at: "2026-08-26"
+  - "no": "23"
+    title: 관리기관의 지정
+    checked_at: "2026-08-26"
+  - "no": "23"
+    title: 관리기관의 업무
+    checked_at: "2026-08-26"
+  - "no": "23"
+    title: 관리기관의 지정 취소 등
+    checked_at: "2026-08-26"
+  - "no": "24"
+    title: 청문
+    checked_at: "2026-08-26"
+  - "no": "25"
+    title: 관련 통계의 작성 등
+    checked_at: "2026-08-26"
+  - "no": "26"
+    title: 국유재산ㆍ공유재산의 임대 등
+    checked_at: "2026-08-26"
+  - "no": "27"
+    title: 보급사업
+    checked_at: "2026-08-26"
+  - "no": "27"
+    title: 신ㆍ재생에너지 발전사업에 대한 주민 참여
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: 신ㆍ재생에너지 기술의 사업화
+    checked_at: "2026-08-26"
+  - "no": "29"
+    title: 재정상 조치 등
+    checked_at: "2026-08-26"
+  - "no": "30"
+    title: 신ㆍ재생에너지의 교육ㆍ홍보 및 전문인력 양성
+    checked_at: "2026-08-26"
+  - "no": "30"
+    title: 신ㆍ재생에너지사업자의 공제조합 가입 등
+    checked_at: "2026-08-26"
+  - "no": "30"
+    title: 하자보수
+    checked_at: "2026-08-26"
+  - "no": "30"
+    title: 신ㆍ재생에너지 설비에 대한 사후관리
+    checked_at: "2026-08-26"
+  - "no": "31"
+    title: 신ㆍ재생에너지센터
+    checked_at: "2026-08-26"
+  - "no": "32"
+    title: 권한의 위임ㆍ위탁
+    checked_at: "2026-08-26"
+  - "no": "33"
+    title: 벌칙 적용 시의 공무원 의제
+    checked_at: "2026-08-26"
+  - "no": "34"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "35"
+    title: 과태료
+    checked_at: "2026-08-26"
+source_verification:
+  method: k-law-live
+  checked_at: "2026-08-26"
+  next_review: "2027-02-22"
+last_updated: "2026-08-26"

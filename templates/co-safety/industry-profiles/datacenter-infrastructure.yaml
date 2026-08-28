@@ -1,0 +1,36 @@
+# Data Center & IT Infrastructure Profile (v1)
+profile_id: datacenter-infrastructure
+name: datacenter-infrastructure
+display_name: "데이터센터 및 IT 인프라 (Data Center & IT Infrastructure)"
+version: "1.0"
+status: active
+last_updated: 2026-08-06
+industry_tier: industry
+agent: datacenter-agent
+legal_basis:
+  - 전기안전관리법 (ESCA) Article 16, 29
+  - 전기사업법 (EUA) Article 65
+  - 산업안전보건법 (OSHA-KR) Article 36, 101
+  - 중대재해처벌법 (SAPA) Article 4
+key_hazards:
+  - lithium_ups_ess_fire_safety
+  - high_voltage_electrical_safety
+  - emergency_generator_diesel_fuel_management
+  - arc_flash_hazard_protection
+workflows:
+  datacenter:
+    - datacenter-ups-fire-safety
+    - high-voltage-facility-safety
+description: Hyperscale data center and critical IT infrastructure operations under ESCA and EUA, covering lithium-ion UPS/ESS fire safety, high-voltage facility electrical safety, and BCP.
+regulatory_reference: regulations/KR/KESCO-EUA.md
+international_alignment:
+  - framework: IEEE 1584 / NFPA 855
+    level: harmonized
+v1_scope:
+  includes:
+    - hyperscale_data_center
+    - enterprise_server_room
+    - lithium_ups_room
+    - high_voltage_substation
+  excludes:
+    - small_office_lan_closet

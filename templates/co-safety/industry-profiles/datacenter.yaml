@@ -1,0 +1,22 @@
+# Data Center Industry Profile (legacy — Pattern C stub, migrated v1)
+# NOTE: The canonical detailed profile is datacenter-infrastructure.yaml.
+#       This file is retained for backward compatibility.
+profile_id: datacenter
+name: datacenter
+display_name: "데이터센터 (Data Center)"
+version: "1.0"
+status: deprecated
+last_updated: 2026-08-06
+industry_tier: industry
+agent: datacenter-agent
+legal_basis:
+  - 전기안전관리법 (ESCA) Article 16, 29
+  - 전기사업법 (EUA) Article 65
+  - 중대재해처벌법 (SAPA) Article 4
+key_hazards:
+  - power_outage
+  - fire
+  - service_interruption
+description: Data center facility and IT operations.
+risk_level: High
+psm_required: false

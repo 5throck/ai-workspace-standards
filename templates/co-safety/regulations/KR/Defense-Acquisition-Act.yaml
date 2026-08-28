@@ -1,0 +1,283 @@
+# ── Registry schema v2 (mode: coordinates) ───────────────────────────────────
+# This file maps article numbers to official titles ONLY. Article content is
+# never cached here — fetch live from the 법제처 k-law API at point of use.
+# Migrated by migrate-registry-to-coordinates.ts on 2026-08-26
+schema_version: 2
+mode: coordinates
+jurisdiction: KR
+framework: Defense-Acquisition-Act
+law_name: 방위사업법
+law_name_en: null
+abbreviation: null
+mst: "281867"
+enforced_from: null
+agency: null
+tier: 1
+regulator: DAPA (방위사업청) / MND (국방부)
+articles:
+  - "no": "1"
+    title: 목적
+    checked_at: "2026-08-26"
+  - "no": "2"
+    title: 기본이념
+    checked_at: "2026-08-26"
+  - "no": "3"
+    title: 정의
+    checked_at: "2026-08-26"
+  - "no": "4"
+    title: 다른 법률과의 관계
+    checked_at: "2026-08-26"
+  - "no": "5"
+    title: 정책실명제 및 정보공개
+    checked_at: "2026-08-26"
+  - "no": "6"
+    title: 청렴서약제 및 옴부즈만제도
+    checked_at: "2026-08-26"
+  - "no": "6"
+    title: 방산업체 지정취소 확인 등을 위한 범죄경력조회의 요청
+    checked_at: "2026-08-26"
+  - "no": "7"
+    title: 보직자격제
+    checked_at: "2026-08-26"
+  - "no": "8"
+    title: 방위사업에 대한 법률적 문제 등 검토
+    checked_at: "2026-08-26"
+  - "no": "9"
+    title: 방위사업추진위원회
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 분과위원회, 실무위원회 및 전문위원
+    checked_at: "2026-08-26"
+  - "no": "11"
+    title: 방위력개선사업 수행의 기본원칙
+    checked_at: "2026-08-26"
+  - "no": "12"
+    title: 통합사업관리제
+    checked_at: "2026-08-26"
+  - "no": "13"
+    title: 국방중기계획 등
+    checked_at: "2026-08-26"
+  - "no": "14"
+    title: 예산편성 및 집행
+    checked_at: "2026-08-26"
+  - "no": "14"
+    title: 사업타당성조사
+    checked_at: "2026-08-26"
+  - "no": "15"
+    title: 소요결정
+    checked_at: "2026-08-26"
+  - "no": "15"
+    title: 신속소요의 결정 등
+    checked_at: "2026-08-26"
+  - "no": "15"
+    title: 사전개념연구의 수행
+    checked_at: "2026-08-26"
+  - "no": "16"
+    title: 소요의 수정
+    checked_at: "2026-08-26"
+  - "no": "17"
+    title: 방위력개선사업의 추진방법 등
+    checked_at: "2026-08-26"
+  - "no": "17"
+    title: 시범사업의 실시 등
+    checked_at: "2026-08-26"
+  - "no": "18"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "19"
+    title: 구매
+    checked_at: "2026-08-26"
+  - "no": "20"
+    title: 절충교역
+    checked_at: "2026-08-26"
+  - "no": "21"
+    title: 시험평가
+    checked_at: "2026-08-26"
+  - "no": "22"
+    title: 성능개량
+    checked_at: "2026-08-26"
+  - "no": "23"
+    title: 분석ㆍ평가의 실시
+    checked_at: "2026-08-26"
+  - "no": "24"
+    title: 분석ㆍ평가 결과의 활용
+    checked_at: "2026-08-26"
+  - "no": "25"
+    title: 조달계획 및 방법
+    checked_at: "2026-08-26"
+  - "no": "26"
+    title: 표준화
+    checked_at: "2026-08-26"
+  - "no": "27"
+    title: 군수품목록정보
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: 품질보증
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: 위조부품등의 정의 및 취급 금지
+    checked_at: "2026-08-26"
+  - "no": "29"
+    title: 품질경영
+    checked_at: "2026-08-26"
+  - "no": "29"
+    title: 품질경영체제인증
+    checked_at: "2026-08-26"
+  - "no": "29"
+    title: 품질경영인증의 취소
+    checked_at: "2026-08-26"
+  - "no": "29"
+    title: 인증업체에 대한 인센티브 부여
+    checked_at: "2026-08-26"
+  - "no": "30"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "31"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "31"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "32"
+    title: 국방기술품질원의 설립
+    checked_at: "2026-08-26"
+  - "no": "32"
+    title: 군수품ㆍ국유재산 및 공유재산의 사용허가 등에 관한 특례
+    checked_at: "2026-08-26"
+  - "no": "32"
+    title: 국방ㆍ군사시설사업에 관한 특례
+    checked_at: "2026-08-26"
+  - "no": "33"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "34"
+    title: 방산물자의 지정
+    checked_at: "2026-08-26"
+  - "no": "35"
+    title: 방산업체의 지정 등
+    checked_at: "2026-08-26"
+  - "no": "36"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "37"
+    title: 보호육성
+    checked_at: "2026-08-26"
+  - "no": "38"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "39"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "40"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "41"
+    title: 방위산업지원
+    checked_at: "2026-08-26"
+  - "no": "42"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "43"
+    title: 보증기관의 지정
+    checked_at: "2026-08-26"
+  - "no": "44"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "45"
+    title: 국유재산의 양여 또는 대부 등
+    checked_at: "2026-08-26"
+  - "no": "46"
+    title: 계약의 특례 등
+    checked_at: "2026-08-26"
+  - "no": "46"
+    title: 착수금 및 중도금
+    checked_at: "2026-08-26"
+  - "no": "46"
+    title: 핵심기술 등의 적용에 대한 인센티브
+    checked_at: "2026-08-26"
+  - "no": "46"
+    title: 지체상금의 부과 및 감면
+    checked_at: "2026-08-26"
+  - "no": "46"
+    title: 계약의 변경
+    checked_at: "2026-08-26"
+  - "no": "47"
+    title: 방산업체 지정의 결격사유
+    checked_at: "2026-08-26"
+  - "no": "48"
+    title: 지정의 취소 등
+    checked_at: "2026-08-26"
+  - "no": "49"
+    title: 시설의 개체ㆍ보완ㆍ확장 또는 이전
+    checked_at: "2026-08-26"
+  - "no": "50"
+    title: 비밀의 엄수
+    checked_at: "2026-08-26"
+  - "no": "50"
+    title: 국가 전략무기사업 등 참여의 승인
+    checked_at: "2026-08-26"
+  - "no": "51"
+    title: 방산물자의 생산 및 매매계약에 관한 협의 등
+    checked_at: "2026-08-26"
+  - "no": "51"
+    title: 수수료
+    checked_at: "2026-08-26"
+  - "no": "52"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "53"
+    title: 군용총포ㆍ도검ㆍ화약류 등의 제조 등에 관한 특례
+    checked_at: "2026-08-26"
+  - "no": "54"
+    title: 매도명령 등
+    checked_at: "2026-08-26"
+  - "no": "55"
+    title: 원자재의 비축
+    checked_at: "2026-08-26"
+  - "no": "56"
+    title: 휴업 및 폐업
+    checked_at: "2026-08-26"
+  - "no": "57"
+    title: 수출 허가 등
+    checked_at: "2026-08-26"
+  - "no": "57"
+    title: 군수품무역대리업의 등록
+    checked_at: "2026-08-26"
+  - "no": "57"
+    title: 군수품무역대리업의 등록취소
+    checked_at: "2026-08-26"
+  - "no": "57"
+    title: 중개수수료의 신고 등
+    checked_at: "2026-08-26"
+  - "no": "58"
+    title: 부당이득의 환수 등
+    checked_at: "2026-08-26"
+  - "no": "59"
+    title: 입찰참가자격 제한 등
+    checked_at: "2026-08-26"
+  - "no": "59"
+    title: 방산업체 취업심사대상자에 대한 확인 등
+    checked_at: "2026-08-26"
+  - "no": "60"
+    title: 공무원 의제 등
+    checked_at: "2026-08-26"
+  - "no": "61"
+    title: 권한의 위임ㆍ위탁
+    checked_at: "2026-08-26"
+  - "no": "62"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "63"
+    title: 양벌규정
+    checked_at: "2026-08-26"
+  - "no": "64"
+    title: 과태료
+    checked_at: "2026-08-26"
+source_verification:
+  method: k-law-live
+  checked_at: "2026-08-26"
+  next_review: "2027-02-22"
+last_updated: "2026-08-26"
+related_rule:
+  name_ko: 방위사업법 시행령 / 시행규칙
+  abbreviation: DAA-Enforcement

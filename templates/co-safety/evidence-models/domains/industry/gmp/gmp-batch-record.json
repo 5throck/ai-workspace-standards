@@ -1,0 +1,164 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "gmp-batch-record.json",
+  "title": "GMP Batch Record",
+  "description": "Evidence model for GMP Batch Manufacturing Record (제조 및 포장기록) records. v1 per KP-GMP 「의약품 등의 안전에 관한 규칙」 별표 1 제8호 (제조관리) + ICH Q7.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "batch_id",
+    "product_code",
+    "disposition",
+    "legal_basis",
+    "e_signature",
+    "qrm_assessment",
+    "nomenclature",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^GMP-BATCH-[0-9]{4}-[0-9]{4}$"
+    },
+    "batch_id": {
+      "type": "string"
+    },
+    "product_code": {
+      "type": "string"
+    },
+    "product_name": {
+      "type": "string"
+    },
+    "batch_size": {
+      "type": "string"
+    },
+    "manufacturing_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expiry_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "bmr_ref": {
+      "type": "string"
+    },
+    "in_process_controls": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "parameter": {
+            "type": "string"
+          },
+          "specification": {
+            "type": "string"
+          },
+          "result": {
+            "type": "string"
+          },
+          "result_status": {
+            "type": "string",
+            "enum": [
+              "pass",
+              "fail",
+              "oot"
+            ]
+          }
+        }
+      }
+    },
+    "yield": {
+      "type": "object",
+      "properties": {
+        "theoretical": {
+          "type": "number"
+        },
+        "actual": {
+          "type": "number"
+        },
+        "percentage": {
+          "type": "number"
+        },
+        "within_spec": {
+          "type": "boolean"
+        }
+      }
+    },
+    "deviation_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^GMP-DEV-[0-9]{4}-[0-9]{4}$"
+      }
+    },
+    "qa_review": {
+      "type": "object",
+      "properties": {
+        "reviewer_id": {
+          "type": "string"
+        },
+        "review_date": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "days_to_review": {
+          "type": "integer"
+        },
+        "within_30_days": {
+          "type": "boolean"
+        }
+      }
+    },
+    "disposition": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected",
+        "conditional"
+      ]
+    },
+    "disposition_rationale": {
+      "type": "string"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "description": "Multi-source legal basis. Primary: Pharmaceutical Affairs Act (약사법) Article 37 (manufacturing management obligation for pharmaceuticals, 의약품등의 제조 관리의무) and Presidential Decree Annex 1 (총리령 「의약품 등의 안전에 관한 규칙」 별표 1; operational detail in MFDS Notice No. 2024-87). Adjacent laws may include: ICH Q7 (API GMP), ICH Q9 (Quality Risk Management), ICH Q10 (Pharmaceutical Quality System), PIC/S PE 009 (harmonized GMP).",
+      "examples": [
+        [
+          "약사법 Art.37",
+          "의약품 등의 안전에 관한 규칙 별표 1 제8호",
+          "ICH Q7"
+        ],
+        [
+          "약사법 Art.37",
+          "의약품 등의 안전에 관한 규칙 별표 1 제6호",
+          "ICH Q10"
+        ],
+        [
+          "약사법 Art.37",
+          "PIC/S PE 009-1",
+          "ICH Q9"
+        ]
+      ]
+    },
+    "e_signature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/e_signature"
+    },
+    "qrm_assessment": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/qrm_assessment"
+    },
+    "nomenclature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/nomenclature"
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

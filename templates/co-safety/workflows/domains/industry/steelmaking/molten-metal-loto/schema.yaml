@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: molten-metal-loto
+title: "용융물 및 가열로 정비 LOTO 안전 조치 (Molten Metal Furnace LOTO Safety)"
+status: active
+applicability: mandatory
+workflow_type: core
+legal_basis:
+  - 산업안전보건법 Article 36
+  - 산업안전보건법 Article 38
+  - 산업안전보건법 Article 92
+  - 중대재해처벌법 Article 4
+industry_profile: steelmaking-heavy
+agent: steelmaking-agent
+evidence_model: steel-molten-metal-loto-record.json

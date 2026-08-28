@@ -1,0 +1,15 @@
+schema_version: "1.0"
+workflow_id: explosive-propellant-handling
+title: "화약류 및 추진제 정전기(ESD) 방지 및 혼합 정조 안전 (Explosive Propellant Handling)"
+status: active
+applicability: mandatory
+workflow_type: core
+legal_basis:
+  - 총포·도검·화약류 등의 안전관리에 관한 법률 Article 9
+  - 방위사업법 Article 28
+  - 방위사업법 Article 53
+  - 산업안전보건법 Article 38
+  - 중대재해처벌법 Article 4
+industry_profile: defense-aerospace
+agent: defense-agent
+evidence_model: explosive-propellant-record.json

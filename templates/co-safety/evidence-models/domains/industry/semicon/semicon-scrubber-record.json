@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "semicon-scrubber-record.json",
+  "title": "Semiconductor Scrubber Maintenance Record",
+  "description": "Evidence model for Cleanroom Scrubber Unit Maintenance and Gas Exhaust Clearance Records.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "scrubber_unit_id",
+    "gas_removal_efficiency",
+    "legal_basis",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^SMC-SCB-[0-9]{4}-[0-9]{4}$"
+    },
+    "scrubber_unit_id": {
+      "type": "string"
+    },
+    "gas_removal_efficiency": {
+      "type": "number"
+    },
+    "bypass_valve_sealed": {
+      "type": "boolean"
+    },
+    "maintenance_status": {
+      "type": "string",
+      "enum": ["completed", "in_progress", "failed_verification"]
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

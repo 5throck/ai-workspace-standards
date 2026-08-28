@@ -1,0 +1,56 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "emergency-rescue-record.json",
+  "title": "Emergency Rescue Operation Record",
+  "description": "Specialized rescue: confined space and high-angle. Shared schema.",
+  "version": "1.2.0",
+  "type": "object",
+  "required": ["record_id", "incident_id", "incident_type", "severity", "response_status", "legal_basis", "e_signature", "nomenclature", "audit_trail"],
+  "properties": {
+    "record_id": { "type": "string", "pattern": "^EMRG-RESC-[0-9]{4}-[0-9]{4}$" },
+    "incident_id": { "type": "string", "description": "Unique incident identifier" },
+    "workflow_id": { "$ref": "../_shared/base/common.schema.json#/definitions/workflow_id", "description": "Optional workflow execution reference ('<slug>' or '<domain>/<slug>', e.g. 'emergency-response' or 'emergency/rescue'). Never invent an ID to satisfy this field." },
+    "incident_type": {
+      "type": "string",
+      "enum": ["confined_space_rescue", "high_angle_rescue", "trench_rescue", "structural_collapse_rescue", "water_rescue"]
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["minor", "moderate", "serious", "critical", "fatal"]
+    },
+    "incident_datetime": { "type": "string", "format": "date-time" },
+    "location": { "type": "string" },
+    "casualties": {
+      "type": "object",
+      "properties": {
+        "fatalities": { "type": "integer", "default": 0 },
+        "serious_injuries": { "type": "integer", "default": 0 },
+        "minor_injuries": { "type": "integer", "default": 0 },
+        "missing": { "type": "integer", "default": 0 }
+      }
+    },
+    "response_status": {
+      "type": "string",
+      "enum": ["reported", "active_response", "contained", "resolved", "under_investigation", "closed"]
+    },
+    "sapa_qualifying": { "type": "boolean", "description": "중대재해처벌법 적용 여부" },
+    "victim_id": { "type": "string" },
+    "rescue_team_id": { "type": "string" },
+    "rescue_method": { "type": "string", "enum": ["vertical_lowering", "vertical_lifting", "horizontal_extraction", "cutting", "rope_system", "mechanical_lift", "other"] },
+    "rescue_equipment": { "type": "array", "items": { "type": "string" } },
+    "rescue_duration_minutes": { "type": "integer" },
+    "victim_condition_pre_rescue": { "type": "string", "enum": ["conscious", "unconscious_breathing", "unconscious_not_breathing", "unknown"] },
+    "victim_condition_post_rescue": { "type": "string", "enum": ["stable", "critical", "fatal"] },
+    "atmospheric_test_performed": { "type": "boolean", "description": "For confined space" },
+    "incident_investigation_agent_dispatched": { "type": "boolean", "description": "Handoff confirmation per emergency-agent.md §Handoff Protocols" },
+
+    "legal_basis": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 3
+    },
+    "e_signature": { "$ref": "../_shared/base/common.schema.json#/definitions/e_signature" },
+    "nomenclature": { "$ref": "../_shared/base/common.schema.json#/definitions/nomenclature" },
+    "audit_trail": { "$ref": "../_shared/base/common.schema.json#/definitions/audit_trail" }
+  }
+}

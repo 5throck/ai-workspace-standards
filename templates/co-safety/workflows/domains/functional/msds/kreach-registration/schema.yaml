@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: kreach-registration
+title: "K-REACH 화학물질 등록 (K-REACH Chemical Registration)"
+status: active
+applicability: mandatory
+workflow_type: core
+
+legal_basis:
+  - K-REACH Article 11
+  - 환경부 고시 (ME Notice)
+  - UN GHS Rev 9 (2021)
+industry_profile: chemical-handling
+agent: msds-agent
+evidence_model: kreach-registration-record.json

@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: equipment-calibration
+title: "설비 교정 (Equipment Calibration)"
+status: active
+applicability: mandatory
+workflow_type: core
+
+legal_basis:
+  - MFDS 비임상시험 관리기준
+  - OECD GLP Section 5
+  - ISO 17025
+industry_profile: pharma-laboratory
+agent: glp-agent
+evidence_model: glp-equipment-record.json

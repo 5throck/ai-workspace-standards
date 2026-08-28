@@ -1,0 +1,308 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "risk-assessment-record.json",
+  "title": "Workplace Risk Assessment Record",
+  "description": "Structured risk assessment record per OSHA-KR Article 36 (위험성평가 실시). Documents hazard identification, risk scoring, and control measures for workplace tasks.",
+  "version": "3.1.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "assessment_scope",
+    "assessment_date",
+    "assessor_id",
+    "legal_basis",
+    "hazards",
+    "e_signature",
+    "nomenclature",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^RA-[0-9]{4}-[0-9]{4}$"
+    },
+    "assessment_scope": {
+      "type": "string",
+      "description": "Work area, task, or process being assessed"
+    },
+    "facility_id": {
+      "type": "string",
+      "description": "Facility or work area identifier"
+    },
+    "assessment_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "assessment_type": {
+      "type": "string",
+      "enum": [
+        "initial",
+        "periodic",
+        "task_specific",
+        "change_driven",
+        "post_incident"
+      ],
+      "description": "Type of risk assessment (초기/정기/작업별/변경/사후)"
+    },
+    "assessor_id": {
+      "type": "string",
+      "description": "Risk assessor ID"
+    },
+    "assessor_name": {
+      "type": "string"
+    },
+    "assessor_role": {
+      "type": "string"
+    },
+    "industry_profile": {
+      "type": "string",
+      "enum": [
+        "manufacturing",
+        "construction",
+        "chemical",
+        "gas_terminal",
+        "power_generation",
+        "pharmaceutical",
+        "food",
+        "cosmetics",
+        "semiconductor",
+        "battery",
+        "shipbuilding",
+        "steelmaking",
+        "logistics",
+        "railway",
+        "waste",
+        "defense",
+        "biotech",
+        "meddevice",
+        "datacenter",
+        "medical_device",
+        "pharma"
+      ],
+      "description": "Industry sector. Canonical forms: 'meddevice' and 'pharmaceutical'. The values 'medical_device' and 'pharma' are DEPRECATED aliases retained only for backward compatibility with records authored before vocabulary unification — do not use them in new or updated records; migrate to the canonical forms on next write. Vocabulary otherwise covers every value used in `applicable_industries` across `workflows/domains/functional/risk-assessment/*/schema.yaml` plus the KNOWN_INDUSTRIES vocabulary in `scripts/domain-config.ts` (which still carries both alias forms until unified)."
+    },
+    "hazards": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "hazard_id": {
+            "type": "string",
+            "description": "Unique hazard identifier"
+          },
+          "hazard_description": {
+            "type": "string",
+            "description": "Description of the identified hazard"
+          },
+          "hazard_category": {
+            "type": "string",
+            "enum": [
+              "mechanical",
+              "electrical",
+              "chemical",
+              "thermal",
+              "fall",
+              "collapse",
+              "confined_space",
+              "biological",
+              "ergonomic",
+              "psychosocial",
+              "noise",
+              "radiation",
+              "other"
+            ],
+            "description": "Hazard classification"
+          },
+          "likelihood_before": {
+            "type": "string",
+            "enum": [
+              "rare",
+              "unlikely",
+              "possible",
+              "likely",
+              "almost_certain"
+            ],
+            "description": "Likelihood without controls"
+          },
+          "severity_before": {
+            "type": "string",
+            "enum": [
+              "negligible",
+              "minor",
+              "moderate",
+              "major",
+              "catastrophic"
+            ],
+            "description": "Severity without controls"
+          },
+          "risk_level_before": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ],
+            "description": "Risk level before controls. Qualitative band derived from `risk_score_before` via the normative band table defined on that property."
+          },
+          "risk_score_before": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 25,
+            "description": "Numeric Likelihood x Severity product (1-25 scale) before controls, alongside the qualitative risk_level_before band. Added v1.1.0 to enable quantitative trend analysis and cross-record aggregation. Normative band table (single source of truth for all score/band fields in this schema): 1-5 Low, 6-12 Medium, 13-19 High, 20-25 Critical; any score >= 13 (High or Critical) requires escalation (`escalate: true`, SWM review)."
+          },
+          "control_measures": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "control_type": {
+                  "type": "string",
+                  "enum": [
+                    "elimination",
+                    "substitution",
+                    "engineering",
+                    "administrative",
+                    "ppe"
+                  ],
+                  "description": "Hierarchy of controls level"
+                },
+                "control_description": {
+                  "type": "string"
+                },
+                "responsible_party": {
+                  "type": "string"
+                },
+                "implementation_date": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "date"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "planned",
+                    "in_progress",
+                    "implemented",
+                    "overdue",
+                    "not_required",
+                    "na"
+                  ],
+                  "description": "Implementation status. Canonical lifecycle vocabulary unified with risk-register-record.json `control_status` in v3.1.0: planned -> in_progress -> implemented, with overdue for missed target dates and not_required / na for excluded controls."
+                }
+              },
+              "required": [
+                "control_type",
+                "control_description",
+                "status"
+              ]
+            }
+          },
+          "risk_level_after": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ],
+            "description": "Residual risk level after controls. Qualitative band derived from `risk_score_after` via the normative band table defined on `risk_score_before`."
+          },
+          "risk_score_after": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 25,
+            "description": "Numeric Likelihood x Severity product (1-25 scale) after controls, alongside the qualitative risk_level_after band. Added v1.1.0. Bands identical to the normative table defined on `risk_score_before`."
+          }
+        },
+        "required": [
+          "hazard_id",
+          "hazard_description",
+          "hazard_category",
+          "likelihood_before",
+          "severity_before",
+          "risk_level_before",
+          "risk_score_before",
+          "risk_level_after",
+          "risk_score_after"
+        ]
+      },
+      "minItems": 1
+    },
+    "overall_risk_level": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "description": "Highest risk level across all assessed hazards"
+    },
+    "worker_communication_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date",
+      "description": "Date risk assessment results were communicated to workers (per Art 36 + Art 29)"
+    },
+    "training_record_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Reference to training-record.json for risk assessment communication training"
+    },
+    "incident_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Reference to the originating incident/RCA record (e.g. memory/incidents/ or FIND-YYYY-NNNN), required in practice when assessment_type is 'post_incident'. Added v1.1.0."
+    },
+    "related_assessment_ref": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "References to related specialist assessment outputs (e.g. fall-hazard-assessor, ess-fire-risk-assessor, psm-agent HAZOP/PHA records) that inform or overlap with this assessment. Added v1.1.0. Nullable union normalized to plain array in v3.0.0 (field is optional; absence conveys none)."
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "description": "Multi-source legal basis. Primary: OSHA-KR Article 36 (risk assessment obligation). Adjacent laws may include: SAPA Article 4 (safety and health assurance obligation — management system must include risk assessment), SAPA Article 5 (safety and health assurance obligation in contracted/outsourced work), MOEL workplace risk assessment guidelines (고용노동부 고시).",
+      "examples": [
+        [
+          "OSHA-KR Art.36 §1",
+          "SAPA Art.4",
+          "MOEL 위험성평가 고시"
+        ],
+        [
+          "OSHA-KR Art.36 §1",
+          "산업안전보건법 시행규칙 Article 37",
+          "MOEL 위험성평가 고시"
+        ],
+        [
+          "OSHA-KR Art.36 §1",
+          "SAPA Art.4",
+          "SAPA Art.5"
+        ]
+      ]
+    },
+    "e_signature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/e_signature"
+    },
+    "nomenclature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/nomenclature"
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

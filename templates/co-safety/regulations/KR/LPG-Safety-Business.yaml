@@ -1,0 +1,286 @@
+# ── Registry schema v2 (mode: coordinates) ───────────────────────────────────
+# This file maps article numbers to official titles ONLY. Article content is
+# never cached here — fetch live from the 법제처 k-law API at point of use.
+# Migrated by migrate-registry-to-coordinates.ts on 2026-08-26
+schema_version: 2
+mode: coordinates
+jurisdiction: KR
+framework: LPG-Safety-Business
+law_name: 액화석유가스의 안전관리 및 사업법
+law_name_en: null
+abbreviation: null
+mst: "276549"
+enforced_from: null
+agency: null
+tier: 1
+regulator: 산업통상부 / KGS
+articles:
+  - "no": "1"
+    title: 목적
+    checked_at: "2026-08-26"
+  - "no": "2"
+    title: 정의
+    checked_at: "2026-08-26"
+  - "no": "3"
+    title: 액화석유가스 수급상황에 대한 예측
+    checked_at: "2026-08-26"
+  - "no": "3"
+    title: 액화석유가스 이용ㆍ보급 시책
+    checked_at: "2026-08-26"
+  - "no": "4"
+    title: 다른 법률과의 관계
+    checked_at: "2026-08-26"
+  - "no": "5"
+    title: 사업의 허가 등
+    checked_at: "2026-08-26"
+  - "no": "6"
+    title: 허가의 기준
+    checked_at: "2026-08-26"
+  - "no": "7"
+    title: 결격사유
+    checked_at: "2026-08-26"
+  - "no": "8"
+    title: 저장소의 설치 허가
+    checked_at: "2026-08-26"
+  - "no": "9"
+    title: 액화석유가스 위탁운송사업자의 등록
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 외국가스용품의 제조등록
+    checked_at: "2026-08-26"
+  - "no": "11"
+    title: 사업 개시 등의 신고
+    checked_at: "2026-08-26"
+  - "no": "12"
+    title: 사업자등의 지위 승계
+    checked_at: "2026-08-26"
+  - "no": "13"
+    title: 허가ㆍ등록의 취소 등
+    checked_at: "2026-08-26"
+  - "no": "14"
+    title: 과징금
+    checked_at: "2026-08-26"
+  - "no": "15"
+    title: 외국가스용품 제조자의 등록 취소 등
+    checked_at: "2026-08-26"
+  - "no": "16"
+    title: 처분효과의 승계
+    checked_at: "2026-08-26"
+  - "no": "17"
+    title: 액화석유가스 수출입업의 등록
+    checked_at: "2026-08-26"
+  - "no": "18"
+    title: 조건부 등록
+    checked_at: "2026-08-26"
+  - "no": "19"
+    title: 사업의 개시ㆍ휴업 및 폐업의 신고
+    checked_at: "2026-08-26"
+  - "no": "20"
+    title: 액화석유가스 비축의무
+    checked_at: "2026-08-26"
+  - "no": "21"
+    title: 등록의 취소 등
+    checked_at: "2026-08-26"
+  - "no": "22"
+    title: 과징금
+    checked_at: "2026-08-26"
+  - "no": "23"
+    title: 충전량 등의 표시
+    checked_at: "2026-08-26"
+  - "no": "23"
+    title: 액화석유가스 충전사업자의 정량 공급 의무 등
+    checked_at: "2026-08-26"
+  - "no": "24"
+    title: 판매 등의 방법
+    checked_at: "2026-08-26"
+  - "no": "25"
+    title: 공급규정
+    checked_at: "2026-08-26"
+  - "no": "26"
+    title: 액화석유가스의 품질 유지
+    checked_at: "2026-08-26"
+  - "no": "27"
+    title: 액화석유가스의 품질검사
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "29"
+    title: 자동차에 대한 액화석유가스 충전행위의 제한
+    checked_at: "2026-08-26"
+  - "no": "30"
+    title: 공급자의 의무
+    checked_at: "2026-08-26"
+  - "no": "30"
+    title: 가스사용시설의 안전관리업무 대행
+    checked_at: "2026-08-26"
+  - "no": "31"
+    title: 안전관리규정
+    checked_at: "2026-08-26"
+  - "no": "32"
+    title: 시설과 용기의 안전 유지
+    checked_at: "2026-08-26"
+  - "no": "33"
+    title: 시설의 개선과 안전 유지
+    checked_at: "2026-08-26"
+  - "no": "34"
+    title: 안전관리자
+    checked_at: "2026-08-26"
+  - "no": "34"
+    title: 시설공사계획의 승인 등
+    checked_at: "2026-08-26"
+  - "no": "34"
+    title: 공공용 토지의 사용
+    checked_at: "2026-08-26"
+  - "no": "35"
+    title: 시설의 시공ㆍ관리 및 시공기록 등의 보존ㆍ제출
+    checked_at: "2026-08-26"
+  - "no": "36"
+    title: 안전성 확인 및 완성검사
+    checked_at: "2026-08-26"
+  - "no": "36"
+    title: 시공감리
+    checked_at: "2026-08-26"
+  - "no": "37"
+    title: 정기검사 및 수시검사
+    checked_at: "2026-08-26"
+  - "no": "38"
+    title: 정밀안전진단 및 안전성평가
+    checked_at: "2026-08-26"
+  - "no": "39"
+    title: 가스용품의 수입 및 검사
+    checked_at: "2026-08-26"
+  - "no": "40"
+    title: 가스용품의 안전성 확보 등
+    checked_at: "2026-08-26"
+  - "no": "41"
+    title: 안전교육
+    checked_at: "2026-08-26"
+  - "no": "42"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "43"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "44"
+    title: 액화석유가스 사용시설의 설치와 검사 등
+    checked_at: "2026-08-26"
+  - "no": "44"
+    title: 사용시설의 안전장치 등
+    checked_at: "2026-08-26"
+  - "no": "45"
+    title: 상세기준
+    checked_at: "2026-08-26"
+  - "no": "46"
+    title: 안전 관리 등의 개선을 위한 지원
+    checked_at: "2026-08-26"
+  - "no": "47"
+    title: 액화석유가스 소형저장탱크와 배관망 설치 사업 및 안전관리 체계 조성의 지원
+    checked_at: "2026-08-26"
+  - "no": "48"
+    title: 허가관청 등의 조치
+    checked_at: "2026-08-26"
+  - "no": "49"
+    title: 액화석유가스 자동차 충전사업소에서의 흡연 금지
+    checked_at: "2026-08-26"
+  - "no": "49"
+    title: 액화석유가스배관에 대한 정보 지원
+    checked_at: "2026-08-26"
+  - "no": "49"
+    title: 액화석유가스배관 매설상황 확인
+    checked_at: "2026-08-26"
+  - "no": "49"
+    title: 가스안전 영향평가
+    checked_at: "2026-08-26"
+  - "no": "49"
+    title: 굴착공사의 협의ㆍ순회점검
+    checked_at: "2026-08-26"
+  - "no": "49"
+    title: 액화석유가스배관 손상방지기준의 준수
+    checked_at: "2026-08-26"
+  - "no": "49"
+    title: 액화석유가스배관의 안전조치 등
+    checked_at: "2026-08-26"
+  - "no": "50"
+    title: 사업자단체의 설립
+    checked_at: "2026-08-26"
+  - "no": "51"
+    title: 사업
+    checked_at: "2026-08-26"
+  - "no": "52"
+    title: 공제사업
+    checked_at: "2026-08-26"
+  - "no": "53"
+    title: 조정명령
+    checked_at: "2026-08-26"
+  - "no": "54"
+    title: 지도ㆍ감독
+    checked_at: "2026-08-26"
+  - "no": "55"
+    title: 보고와 조사 등
+    checked_at: "2026-08-26"
+  - "no": "56"
+    title: 사고의 통보 등
+    checked_at: "2026-08-26"
+  - "no": "57"
+    title: 보험가입
+    checked_at: "2026-08-26"
+  - "no": "57"
+    title: 다른 자의 토지 사용
+    checked_at: "2026-08-26"
+  - "no": "58"
+    title: 판매가격의 보고 및 공개 등
+    checked_at: "2026-08-26"
+  - "no": "59"
+    title: 청문
+    checked_at: "2026-08-26"
+  - "no": "60"
+    title: 수수료 등
+    checked_at: "2026-08-26"
+  - "no": "61"
+    title: 권한의 위임ㆍ위탁
+    checked_at: "2026-08-26"
+  - "no": "62"
+    title: 처분의 요구 등
+    checked_at: "2026-08-26"
+  - "no": "63"
+    title: 벌칙 적용에서의 공무원 의제
+    checked_at: "2026-08-26"
+  - "no": "64"
+    title: 「석유 및 석유대체연료 사업법」의 준용
+    checked_at: "2026-08-26"
+  - "no": "65"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "66"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "67"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "68"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "69"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "69"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "70"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "71"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "72"
+    title: 양벌규정
+    checked_at: "2026-08-26"
+  - "no": "73"
+    title: 과태료
+    checked_at: "2026-08-26"
+source_verification:
+  method: k-law-live
+  checked_at: "2026-08-26"
+  next_review: "2027-02-22"
+last_updated: "2026-08-26"

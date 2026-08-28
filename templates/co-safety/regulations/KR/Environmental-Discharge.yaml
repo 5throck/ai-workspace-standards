@@ -1,0 +1,15 @@
+source_verification:
+  method: manual-curation
+  checked_at: "2026-08-26"
+jurisdiction: KR
+regulator: ME (환경부) / 지자체
+framework: Environmental-Discharge
+title_ko: 대기환경보전법·물환경보전법 (배출 기준)
+title_en: Environmental Conservation Act (Discharge Standards)
+scope:
+  air: 대기오염물질 (SOx, NOx, PM, VOC)
+  water: 수질오염물질 (BOD, COD, 중금속, 유기화합물)
+  noise_vibration: 소음·진동
+permit_required: true
+self_monitoring: "시설 규모별 상이 (대기: 대기환경보전법 시행규칙 별표 11 비고 횟수 산정; 수질: 법령상 고정 주기 없음 — 측정기기 상시측정 또는 사업자 재량 측정)"
+last_updated: "2026-08-24"

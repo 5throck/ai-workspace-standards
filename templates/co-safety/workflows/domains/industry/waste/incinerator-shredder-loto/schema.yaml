@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: incinerator-shredder-loto
+title: "소각로 및 파쇄기 정비 LOTO 및 바이포가스 폭발 예방 (Incinerator and Shredder LOTO)"
+status: active
+applicability: mandatory
+workflow_type: core
+legal_basis:
+  - 폐기물관리법 Article 13
+  - 산업안전보건법 Article 92
+  - 하수도법 Article 20
+  - 중대재해처벌법 Article 4
+industry_profile: waste-water-environmental
+agent: waste-agent
+evidence_model: incinerator-shredder-loto-record.json

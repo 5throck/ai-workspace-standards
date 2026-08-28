@@ -1,0 +1,27 @@
+schema_version: "1.0"
+workflow_id: sapa-serious-accident-reference
+title: "중대재해 긴급 참조 (Serious Accident Emergency Reference)"
+status: active
+applicability: mandatory
+workflow_type: reference
+target_agent: emergency-agent
+data_provided:
+  - incident_details
+  - project_information
+  - contractor_chain
+  - safety_management_plan_ref
+handoff_protocol:
+  trigger: serious_construction_accident
+  dispatch_to: emergency-agent
+  include_data:
+    - sapa_classification
+    - project_id
+    - contractor_responsibilities
+legal_basis:
+  - 중대재해처벌법 Article 3
+  - 중대재해처벌법 Article 5
+  - 중대재해처벌법 Article 6
+  - 산업안전보건법 Article 54
+industry_profile: construction
+agent: ehsconst-agent
+evidence_model: ehsconst-inspection-record.json

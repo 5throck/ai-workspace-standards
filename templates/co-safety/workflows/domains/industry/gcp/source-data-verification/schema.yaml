@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: source-data-verification
+title: "원천자료 검증(SDV) (Source Data Verification)"
+status: active
+applicability: mandatory
+workflow_type: core
+
+legal_basis:
+  - 의약품 임상시험 관리기준 (KGCP)
+  - ICH E6(R3) Section 9
+  - ALCOA+ Principles
+industry_profile: clinical-research
+agent: gcp-agent
+evidence_model: gcp-source-data-record.json

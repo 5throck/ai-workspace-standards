@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: stability
+title: "안정성 시험 (Stability Testing)"
+status: active
+applicability: mandatory
+workflow_type: core
+legal_basis:
+  - 약사법 Article 37
+  - 의약품 등의 안전에 관한 규칙 별표 1 제7.2호 (안정성 시험)
+  - ICH Q1A (Stability Testing of New Drug Substances and Products)
+  - ICH Q1E (Evaluation of Stability Data)
+industry_profile: pharma-general
+agent: gmp-agent
+evidence_model: gmp-stability-record.json

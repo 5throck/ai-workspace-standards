@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: ship-tank-confined-space
+title: "선박 탱크 밀폐공간 질식 재해 예방 (Ship Tank Confined Space Safety)"
+status: active
+applicability: mandatory
+workflow_type: core
+legal_basis:
+  - 산업안전보건법 Article 38
+  - 산업안전보건법 Article 39
+  - 산업안전보건기준에 관한 규칙 Article 618
+  - 산업안전보건기준에 관한 규칙 Article 623
+industry_profile: shipbuilding-heavy
+agent: shipbuilding-agent
+evidence_model: ship-confined-space-record.json

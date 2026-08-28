@@ -1,0 +1,180 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "gasterm-mid-construction-inspection-record.json",
+  "title": "Gas Terminal Mid-Construction Inspection Record",
+  "description": "KGS 입회 중간검사 결과 기록. 공사 진행 중 시공 품질 및 KGS Code 준수 확인.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "facility_type",
+    "kgs_inspection_status",
+    "psm_applicable",
+    "gas_type",
+    "legal_basis",
+    "e_signature",
+    "nomenclature",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^GTRM-MINS-[0-9]{4}-[0-9]{4}$"
+    },
+    "facility_type": {
+      "type": "string",
+      "enum": [
+        "LNG_terminal",
+        "LPG_charging",
+        "hydrogen_charging",
+        "city_gas_storage",
+        "pipe_transfer"
+      ]
+    },
+    "kgs_inspection_status": {
+      "type": "string",
+      "enum": [
+        "certified",
+        "pending",
+        "failed",
+        "expired"
+      ]
+    },
+    "psm_applicable": {
+      "type": "boolean",
+      "description": "대규모 가스터미널 PSM 적용 여부"
+    },
+    "gas_type": {
+      "type": "string",
+      "enum": [
+        "LNG",
+        "LPG",
+        "hydrogen",
+        "natural_gas",
+        "other"
+      ]
+    },
+    "project_id": {
+      "type": "string"
+    },
+    "pre_construction_review_id": {
+      "type": "string",
+      "description": "Phase 1 사전기술검토 합격증 ID"
+    },
+    "construction_progress_pct": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "kgs_inspector": {
+      "type": "string",
+      "description": "KGS 입회 검사관 성명"
+    },
+    "inspection_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "inspected_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "item": {
+            "type": "string"
+          },
+          "result": {
+            "type": "string",
+            "enum": [
+              "pass",
+              "fail",
+              "na"
+            ]
+          },
+          "notes": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "item",
+          "result"
+        ]
+      },
+      "description": "검사 항목별 결과 (배관 용접, 토목 기초, 탱크 설치 등)"
+    },
+    "deficiencies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "item": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "critical",
+              "major",
+              "minor"
+            ]
+          },
+          "corrective_action": {
+            "type": "string"
+          },
+          "due_date": {
+            "type": "string",
+            "format": "date"
+          }
+        },
+        "required": [
+          "item",
+          "severity"
+        ]
+      }
+    },
+    "inspection_result": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "supplement_required",
+        "fail"
+      ]
+    },
+    "local_government": {
+      "type": "string"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "description": "Multi-source legal basis. Primary: 고압가스안전관리법 (facility/installation/inspection), 액화석유가스의 안전관리 및 사업법 (LPG safety), 도시가스사업법 (city gas pipeline/storage). Adjacent laws may include: 위험물안전관리법 (flammable storage), OSHA-KR Article 44 (PSM for large-scale terminals), 수소경제 육성 및 수소안전관리에 관한 법률 (hydrogen facilities).",
+      "examples": [
+        [
+          "고압가스 안전 관리 및 사업법 Art.22-2",
+          "액법 Art.27-2",
+          "위험물안전관리법 Art.13"
+        ],
+        [
+          "고압가스 안전 관리 및 사업법 Art.28",
+          "도시가스사업법 Art.17-5",
+          "OSHA-KR Art.44 §1"
+        ],
+        [
+          "액법 Art.45",
+          "고압가스 안전 관리 및 사업법 Art.17",
+          "수소안전관리법 Art.32"
+        ]
+      ]
+    },
+    "e_signature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/e_signature"
+    },
+    "nomenclature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/nomenclature"
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

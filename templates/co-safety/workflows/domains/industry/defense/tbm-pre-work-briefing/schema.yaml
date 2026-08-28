@@ -1,0 +1,27 @@
+schema_version: "1.0"
+workflow_id: tbm-pre-work-briefing
+title: "방위산업 TBM (Tool Box Meeting)"
+status: active
+applicability: mandatory
+workflow_type: core
+
+legal_basis:
+  - 산업안전보건법 Article 15
+  - 산업안전보건법 Article 36
+  - 산업안전보건법 Article 38
+  - 총포·도검·화약류 등의 안전관리에 관한 법률 Article 9
+  - 방위사업법 Article 53
+  - 중대재해처벌법 Article 4
+industry_profile: defense
+agent: defense-agent
+evidence_model: ../../../../evidence-models/_shared/tbm-record.json
+signature_hazard: 화약/추진제 취급 및 유도무기 극저온 연료 작업 전 TBM (ESD 점화 방지)
+
+
+# ── Shared TBM reference (added by scaffold-industry.ts Task A-01) ──
+# Declares this workflow also consumes the shared TBM base
+# (workflows/_shared/REFERENCE-SPEC.md §3.1 minimal form). Existing
+# top-level fields (signature_hazard, legal_basis, agent) serve as the
+# effective schema; the shared base supplies the common statutory floor.
+references:
+  - shared: ../../../../_shared/tbm

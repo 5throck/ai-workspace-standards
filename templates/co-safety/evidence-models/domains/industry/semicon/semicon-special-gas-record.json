@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "semicon-special-gas-record.json",
+  "title": "Semiconductor Special Gas Cabinet Record",
+  "description": "Evidence model for Special Gas Cabinet Leak Detection and Shutoff Valve Checks.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "cabinet_id",
+    "legal_basis",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^SEMI-GAS-[0-9]{4}-[0-9]{4}$"
+    },
+    "cabinet_id": {
+      "type": "string"
+    },
+    "gas_type": {
+      "type": "string",
+      "enum": ["NF3", "SiH4", "WF6", "BCL3"]
+    },
+    "leak_detected": {
+      "type": "boolean"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

@@ -1,0 +1,13 @@
+schema_version: "1.0"
+workflow_id: medical-emergency
+title: "의료 응급 대응 (Medical Emergency Response)"
+status: active
+applicability: mandatory
+
+legal_basis:
+  - 응급의료에 관한 법률
+  - 안전보건기준에관한규칙 제82조 (구급용구)
+  - 중대재해처벌법 Article 4
+industry_profile: all
+agent: emergency-agent
+evidence_model: emergency-medical-record.json

@@ -1,0 +1,47 @@
+source_verification:
+  method: manual-curation
+  checked_at: "2026-08-26"
+jurisdiction: international
+regulator: OECD (Organisation for Economic Co-operation and Development)
+framework: OECD-GLP
+title_en: OECD Principles of Good Laboratory Practice
+title_ko: OECD GLP 원칙
+reference_document: OECD C(97)186/Final
+adoption_history:
+  - "1981: OECD Council Decision on Mutual Acceptance of Data (MAD)"
+  - "1997: Revision of GLP Principles (current version)"
+  - "1997: OECD Council Decision on Adherence of non-member countries to MAD"
+key_principles:
+  - test_facility_management
+  - quality_assurance_programme
+  - study_director_responsibility
+  - principal_investigator_for_multi_site
+  - study_protocol
+  - test_and_reference_articles
+  - standard_operating_procedures
+  - raw_data_integrity
+  - final_report
+  - records_retention
+sections:
+  - "Section 1: Introduction"
+  - "Section 2: Test Facility Management and Personnel"
+  - "Section 3: Quality Assurance Programme"
+  - "Section 4: Facilities"
+  - "Section 5: Apparatus, Material, and Reagents"
+  - "Section 6: Test Systems"
+  - "Section 7: Test and Reference Articles"
+  - "Section 8: Standard Operating Procedures"
+  - "Section 9: Study Performance"
+  - "Section 10: Reporting of Study Results"
+  - "Section 11: Storage and Retention of Records and Materials"
+mutual_acceptance_of_data:
+  - signatories: OECD member countries (38 as of 2026)
+  - scope: GLP-compliant safety data must be accepted by all member countries
+  - korea_accession: 2005 (OECD membership)
+  - benefits: Eliminates duplicate testing across jurisdictions
+test_categories:
+  - physicochemical_properties
+  - toxicity_studies (acute, sub-chronic, chronic, carcinogenicity, reproductive)
+  - environmental_toxicity (aquatic, terrestrial)
+  - ecotoxicology
+last_updated: "2026-06-17"

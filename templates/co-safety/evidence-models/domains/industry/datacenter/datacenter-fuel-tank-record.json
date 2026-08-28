@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "datacenter-fuel-tank-record.json",
+  "title": "DataCenter Diesel Fuel Tank Safety Record",
+  "description": "Evidence model for DataCenter Emergency Generator Diesel Fuel Storage Tank Safety Inspection.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "tank_id",
+    "fuel_level_percent",
+    "legal_basis",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^DC-FLT-[0-9]{4}-[0-9]{4}$"
+    },
+    "tank_id": {
+      "type": "string"
+    },
+    "fuel_level_percent": {
+      "type": "number"
+    },
+    "leak_detection_status": {
+      "type": "string",
+      "enum": ["normal", "warning", "leak_detected"]
+    },
+    "fire_suppression_ready": {
+      "type": "boolean"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

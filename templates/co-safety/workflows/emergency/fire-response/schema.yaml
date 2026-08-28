@@ -1,0 +1,13 @@
+schema_version: "1.0"
+workflow_id: fire-response
+title: "화재 대응 (Fire Response)"
+status: active
+applicability: mandatory
+
+legal_basis:
+  - "산업안전보건법 제51조 (Suspension of Work by Employer)"
+  - "산업안전보건법 제52조 (Suspension of Work by Workers)"
+  - "산업안전보건법 제54조 (Action upon Serious Accidents — stop work, evacuate, prevent recurrence)"
+industry_profile: all
+agent: emergency-agent
+evidence_model: emergency-fire-response-record.json

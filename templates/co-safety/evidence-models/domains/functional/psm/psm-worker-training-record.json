@@ -1,0 +1,110 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "psm-worker-training-record.json",
+  "title": "PSM Worker Training Record",
+  "description": "Evidence model for PSM Worker Training records per OSHA-KR Article 44.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "version",
+    "record_id",
+    "timestamp",
+    "agent_id",
+    "workflow_id",
+    "legal_basis",
+    "worker_id",
+    "training_type",
+    "psm_elements_covered",
+    "trainer_id",
+    "completion_status",
+    "test_score",
+    "retraining_due_date",
+    "acknowledgment_signature"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Schema version.",
+      "default": "1.0.0"
+    },
+    "record_id": {
+      "type": "string",
+      "pattern": "^PSM-WT-[0-9]{4}-[0-9]{4}$",
+      "description": "Unique identifier for the training record"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when the record was created"
+    },
+    "agent_id": {
+      "type": "string",
+      "description": "ID of the agent that generated this record"
+    },
+    "workflow_id": {
+      "type": "string",
+      "description": "ID of the workflow execution"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "description": "Multi-source legal basis. Primary: OSHA-KR Article 44 (PSM — training). Adjacent laws may include: OSHA-KR Article 29 (safety and health education), SAPA Article 4 (education as part of safety system), Occupational Safety and Health Standards Rule Article 92 (LOTO training per KOSHA GUIDE Z-40-2022).",
+      "examples": [
+        "산업안전보건법 Article 44 (공정안전관리 — 안전교육)",
+        "산업안전보건법 Article 29 (안전보건교육)",
+        "안전보건기준에관한규칙 Article 92 (LOTO 교육 — KOSHA GUIDE Z-40-2022)"
+      ]
+    },
+    "worker_id": {
+      "type": "string",
+      "description": "Unique identifier for the worker who received training."
+    },
+    "training_type": {
+      "type": "string",
+      "enum": [
+        "initial",
+        "refresher",
+        "incident-based"
+      ],
+      "description": "Type of training session delivered."
+    },
+    "psm_elements_covered": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of PSM element names covered during this training session."
+    },
+    "trainer_id": {
+      "type": "string",
+      "description": "Unique identifier for the trainer who delivered the session."
+    },
+    "completion_status": {
+      "type": "string",
+      "enum": [
+        "completed",
+        "incomplete",
+        "failed"
+      ],
+      "description": "Overall completion status for the training session."
+    },
+    "test_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Competency assessment score as a percentage."
+    },
+    "retraining_due_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date by which refresher or retraining must be completed (3-year cycle or earlier if triggered)."
+    },
+    "acknowledgment_signature": {
+      "type": "string",
+      "description": "Worker's signed acknowledgment of participation and understanding (name or digital signature reference)."
+    }
+  }
+}

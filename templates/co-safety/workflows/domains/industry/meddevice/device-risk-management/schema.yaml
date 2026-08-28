@@ -1,0 +1,12 @@
+schema_version: "1.0"
+workflow_id: device-risk-management
+title: "의료기기 위해관리 (Device Risk Management)"
+status: active
+applicability: mandatory
+workflow_type: core
+uses_functional_services: [functional/msds, industry/glp, emergency]
+
+legal_basis: [의료기기법 Article 16, ISO 14971, KGMP-MD]
+industry_profile: medical-device
+agent: meddevice-agent
+evidence_model: meddevice-risk-record.json

@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "biotech-bsc-certification-record.json",
+  "title": "Biological Safety Cabinet Field Certification Record",
+  "description": "Evidence model for annual field certification of Biological Safety Cabinets (BSC) used in BSL-2/3 laboratory work — HEPA integrity (PAO/DOP challenge), face velocity, and airflow smoke-pattern verification. Equipment-level performance record distinct from facility-level LMO containment and from bench-level aerosol work-practice controls.",
+  "version": "1.0.0",
+  "status": "active",
+  "type": "object",
+  "required": [
+    "record_id",
+    "bsc_unit_id",
+    "bsc_class",
+    "face_velocity_fpm",
+    "hepa_integrity_passed",
+    "legal_basis",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^BIO-BSC-[0-9]{4}-[0-9]{4}$"
+    },
+    "bsc_unit_id": {
+      "type": "string"
+    },
+    "bsc_class": {
+      "type": "string",
+      "enum": ["II-A2", "II-B1", "II-B2", "III"]
+    },
+    "face_velocity_fpm": {
+      "type": "number",
+      "description": "Measured intake face velocity (feet per minute) at the work opening."
+    },
+    "hepa_integrity_passed": {
+      "type": "boolean",
+      "description": "True if the downstream PAO/DOP challenge scan detected no penetration above 0.01%."
+    },
+    "smoke_pattern_tested": {
+      "type": "boolean"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

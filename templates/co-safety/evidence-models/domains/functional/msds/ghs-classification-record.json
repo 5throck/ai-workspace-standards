@@ -1,0 +1,221 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "ghs-classification-record.json",
+  "title": "GHS Classification Record",
+  "description": "Evidence model for GHS Rev 9 hazard classification records per OSHA-KR Article 104 (유해인자의 분류기준; 시행규칙 별표18).",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "substance_id",
+    "ghs_version",
+    "hazard_classes",
+    "label_elements",
+    "confidence",
+    "legal_basis",
+    "e_signature",
+    "nomenclature",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^MSDS-GHS-[0-9]{4}-[0-9]{4}$"
+    },
+    "substance_id": {
+      "type": "string"
+    },
+    "substance_name": {
+      "type": "string"
+    },
+    "cas_number": {
+      "type": "string"
+    },
+    "ghs_version": {
+      "type": "string",
+      "enum": [
+        "rev8",
+        "rev9",
+        "rev10"
+      ]
+    },
+    "ghs_version_migration": {
+      "type": "object",
+      "properties": {
+        "current_rev": {
+          "type": "string"
+        },
+        "target_rev": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "migration_due_date": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        }
+      }
+    },
+    "hazard_classes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "class": {
+            "type": "string",
+            "description": "e.g., flammable_liquids, acute_toxicity_oral"
+          },
+          "category": {
+            "type": "string",
+            "description": "e.g., category_1, category_2"
+          },
+          "classification_basis": {
+            "type": "string",
+            "enum": [
+              "test_data",
+              "read_across",
+              "expert_judgment",
+              "calculation"
+            ]
+          },
+          "supporting_data_ref": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "h_statements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "pattern": "^H[0-9]{3}([A-Z]?)$"
+          },
+          "text_ko": {
+            "type": "string"
+          },
+          "text_en": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "p_statements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "pattern": "^P[0-9]{3}([+P[0-9]{3}]*)([A-Z]?)$"
+          },
+          "text_ko": {
+            "type": "string"
+          },
+          "text_en": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "label_elements": {
+      "type": "object",
+      "properties": {
+        "signal_word": {
+          "type": "string",
+          "enum": [
+            "Danger",
+            "Warning",
+            "None"
+          ]
+        },
+        "pictograms": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "GHS01",
+              "GHS02",
+              "GHS03",
+              "GHS04",
+              "GHS05",
+              "GHS06",
+              "GHS07",
+              "GHS08",
+              "GHS09"
+            ]
+          }
+        }
+      }
+    },
+    "confidence": {
+      "type": "object",
+      "properties": {
+        "overall": {
+          "type": "string",
+          "enum": [
+            "high",
+            "medium",
+            "low"
+          ]
+        },
+        "score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "manual_review_required": {
+          "type": "boolean"
+        }
+      }
+    },
+    "classification_method": {
+      "type": "string",
+      "enum": [
+        "ghs-classifier_skill",
+        "manual_expert",
+        "supplier_provided"
+      ]
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "description": "Multi-source legal basis. Primary: OSHA-KR Article 110 (MSDS preparation/submission) or Article 104 (hazard-factor/GHS classification basis) or Article 111/112 (provision to transferees / partial non-disclosure approval); format & content per 산업안전보건법 시행규칙 제156조. Adjacent laws may include: K-REACH Articles 10-14 (chemical registration/evaluation), TCCL/CCA (화학물질관리법 — toxic chemical management), UN GHS Rev 9 (2021) (international classification standard).",
+      "examples": [
+        [
+          "OSHA-KR Art.110 §1",
+          "K-REACH Art.10",
+          "UN GHS Rev 9"
+        ],
+        [
+          "OSHA-KR Art.104 §1",
+          "CCA Art.20",
+          "UN GHS Rev 9"
+        ],
+        [
+          "산업안전보건법 시행규칙 Art.156 §1",
+          "K-REACH Art.13",
+          "UN GHS Rev 9"
+        ]
+      ]
+    },
+    "e_signature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/e_signature"
+    },
+    "nomenclature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/nomenclature"
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

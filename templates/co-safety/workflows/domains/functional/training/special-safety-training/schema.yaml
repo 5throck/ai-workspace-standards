@@ -1,0 +1,10 @@
+schema_version: "1.0"
+workflow_id: special-safety-training
+title: "특별안전보건교육 (Special Safety Training)"
+status: active
+applicability: mandatory
+applicable_industries: [chemical, gas_terminal, power_generation, construction, medical_device, pharma, manufacturing]
+legal_basis: [산업안전보건법 Article 29 제3항, 산업안전보건법 시행규칙 제26조, 중대재해처벌법 Article 7]
+industry_profile: training-management
+agent: training-agent
+evidence_model: training-record.json

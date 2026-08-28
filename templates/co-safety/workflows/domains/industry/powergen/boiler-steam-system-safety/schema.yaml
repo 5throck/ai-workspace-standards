@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: boiler-steam-system-safety
+title: "보일러 증기 시스템 안전 (Boiler and Steam System Safety)"
+status: active
+applicability: mandatory
+workflow_type: core
+
+legal_basis:
+  - 전기사업법 Article 47
+  - 발전설비 안전관리 규정
+  - 산업안전보건법 Article 44 (PSM)
+industry_profile: power-generation
+agent: powergen-agent
+evidence_model: powergen-boiler-steam-record.json

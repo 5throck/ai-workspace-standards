@@ -1,0 +1,10 @@
+schema_version: "1.0"
+workflow_id: equipment-failure-analysis
+title: "설비 고장 분석 — RCM 기법 (Equipment Failure Analysis — RCM)"
+status: active
+applicability: optional
+applicable_industries: [chemical, gas_terminal, power_generation, semiconductor, battery, shipbuilding, steelmaking, railway, defense]
+legal_basis: [산업안전보건법 Article 38, 산업안전보건법 Article 36, KOSHA Guide M-155-2022]
+industry_profile: asset-integrity
+agent: asset-integrity-agent
+evidence_model: equipment-integrity-record.json

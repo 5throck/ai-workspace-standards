@@ -1,0 +1,103 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "psm-employee-participation-record.json",
+  "title": "PSM Employee Participation Record",
+  "description": "Evidence model for PSM Employee Participation records per OSHA-KR Article 44.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "version",
+    "record_id",
+    "timestamp",
+    "agent_id",
+    "workflow_id",
+    "legal_basis",
+    "activity_type",
+    "participants",
+    "psm_element_discussed",
+    "recommendations_submitted",
+    "management_response",
+    "implementation_status"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Schema version.",
+      "default": "1.0.0"
+    },
+    "record_id": {
+      "type": "string",
+      "pattern": "^PSM-EP-[0-9]{4}-[0-9]{4}$",
+      "description": "Unique identifier for the employee participation record"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when the record was created"
+    },
+    "agent_id": {
+      "type": "string",
+      "description": "ID of the agent that generated this record"
+    },
+    "workflow_id": {
+      "type": "string",
+      "description": "ID of the workflow execution"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "description": "Multi-source legal basis. Primary: OSHA-KR Article 44 (PSM — employee participation). Adjacent laws may include: OSHA-KR Article 24 (safety and health committee), SAPA Article 4 (worker participation in safety system).",
+      "examples": [
+        "산업안전보건법 Article 44 (공정안전관리 — 근로자 참여)",
+        "산업안전보건법 Article 24 (산업안전보건위원회)",
+        "중대재해처벌법 Article 4 (경영책임자 안전보건확보 의무)"
+      ]
+    },
+    "activity_type": {
+      "type": "string",
+      "enum": [
+        "pha-participation",
+        "incident-review",
+        "audit-participation",
+        "procedure-review",
+        "safety-committee"
+      ],
+      "description": "Type of PSM activity in which employees participated."
+    },
+    "participants": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Array of worker IDs who participated in the activity."
+    },
+    "psm_element_discussed": {
+      "type": "string",
+      "description": "The PSM element that was the focus of the participation activity."
+    },
+    "recommendations_submitted": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of recommendations submitted by workers during the activity."
+    },
+    "management_response": {
+      "type": "string",
+      "description": "Management's formal written response to the recommendations submitted."
+    },
+    "implementation_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "in-progress",
+        "completed",
+        "rejected"
+      ],
+      "description": "Current implementation status of the worker recommendations."
+    }
+  }
+}

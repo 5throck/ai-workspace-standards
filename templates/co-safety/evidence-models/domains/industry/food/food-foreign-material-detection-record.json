@@ -1,0 +1,73 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "food-foreign-material-detection-record.json",
+  "title": "Food Foreign-Material Detection Equipment Verification Record",
+  "description": "Evidence model for shift-opening and periodic verification of metal-detection and X-ray inspection equipment used on food processing lines to detect and reject foreign-material contaminants (ferrous/non-ferrous metal, stainless steel, glass, dense plastic). This is a HACCP prerequisite program (21 CFR 117 Subpart B / Codex CAC/RCP 1-1969) and is distinct from HACCP-CCP process-control monitoring: CCP records control a process parameter at a critical control point, whereas this record verifies the detection/rejection equipment itself is capable of isolating the hazard.",
+  "version": "1.0.0",
+  "status": "active",
+  "type": "object",
+  "required": [
+    "record_id",
+    "line_id",
+    "equipment_type",
+    "legal_basis",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^FOOD-FM-[0-9]{4}-[0-9]{4}$",
+      "description": "Format: FOOD-FM-YYYY-NNNN (Food Foreign-Material)"
+    },
+    "line_id": {
+      "type": "string",
+      "description": "Processing line identifier where the detection equipment is installed"
+    },
+    "equipment_type": {
+      "type": "string",
+      "enum": ["metal-detector", "x-ray", "both"],
+      "description": "Detection technology verified"
+    },
+    "test_piece_ferrous_verified": {
+      "type": "boolean",
+      "description": "Ferrous test-piece successfully detected and rejected"
+    },
+    "test_piece_nonferrous_verified": {
+      "type": "boolean",
+      "description": "Non-ferrous test-piece successfully detected and rejected"
+    },
+    "test_piece_stainless_verified": {
+      "type": "boolean",
+      "description": "Stainless-steel (non-magnetic) test-piece successfully detected and rejected"
+    },
+    "reject_confirm_tested": {
+      "type": "boolean",
+      "description": "Reject mechanism (pusher/air-blast/diverter) confirmed to remove the test piece from the accept flow"
+    },
+    "line_stop_interlock_verified": {
+      "type": "boolean",
+      "description": "Line-stop or alarm interlock verified to trigger on consecutive rejects or detector fault"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["verified", "deviation", "corrected"],
+      "description": "Verification outcome for the shift/period"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "default": [
+        "식품위생법 Article 48",
+        "건강기능식품에 관한 법률 Article 13",
+        "산업안전보건법 Article 36",
+        "중대재해처벌법 Article 4"
+      ]
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

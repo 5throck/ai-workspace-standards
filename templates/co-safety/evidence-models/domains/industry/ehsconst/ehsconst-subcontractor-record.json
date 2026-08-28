@@ -1,0 +1,140 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "ehsconst-subcontractor-record.json",
+  "title": "Construction Subcontractor Safety Management Record",
+  "description": "협력업체 안전 관리 기록.",
+  "version": "2.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "sapa_article_5_compliance",
+    "project_id",
+    "contractor_tier",
+    "safety_officer_in_charge",
+    "legal_basis",
+    "e_signature",
+    "nomenclature",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^EHSC-SUB-[0-9]{4}-[0-9]{4}$"
+    },
+    "sapa_article_5_compliance": {
+      "type": "boolean",
+      "description": "SAPA Article 5 (도급·하도급 안전보건 확보의무) 준수"
+    },
+    "project_id": {
+      "type": "string",
+      "description": "건설공사 번호 (Construction project number)"
+    },
+    "contractor_tier": {
+      "type": "string",
+      "enum": [
+        "ordering_party",
+        "prime_contractor",
+        "first_subcontractor",
+        "second_subcontractor_below"
+      ],
+      "description": "발주처/원도급/1차 하도급/2차 이하"
+    },
+    "safety_officer_in_charge": {
+      "type": "string",
+      "description": "안전관리자 ID"
+    },
+    "subcontractor_id": {
+      "type": "string"
+    },
+    "subcontractor_name": {
+      "type": "string"
+    },
+    "parent_contractor_id": {
+      "type": "string"
+    },
+    "tier_level": {
+      "type": "integer",
+      "description": "1=원하도급, 2=2차 하도급, etc."
+    },
+    "prequalification_completed": {
+      "type": "boolean"
+    },
+    "prequalification_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "safety_history_score": {
+      "type": "number",
+      "description": "과거 안전이력 평가"
+    },
+    "safety_agreement_signed": {
+      "type": "boolean"
+    },
+    "safety_budget_transfer_confirmed": {
+      "type": "boolean"
+    },
+    "worker_training_completed": {
+      "type": "object",
+      "properties": {
+        "new_hire_training": {
+          "type": "boolean"
+        },
+        "periodic_training": {
+          "type": "boolean"
+        },
+        "special_work_training": {
+          "type": "boolean"
+        }
+      }
+    },
+    "ongoing_supervision": {
+      "type": "object",
+      "properties": {
+        "weekly_inspection_count": {
+          "type": "integer"
+        },
+        "last_joint_inspection_date": {
+          "type": "string",
+          "format": "date"
+        }
+      }
+    },
+    "violations_count": {
+      "type": "integer"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "description": "Multi-source legal basis. Primary: OSHA-KR Articles 38/42/72 (safety measures, hazard-prevention plan, construction safety budget; fall/collapse detail in OSHSR Ch.6). Adjacent laws may include: SAPA Article 5 (contract/subcontractor safety obligations), 건설산업기본법 Articles 45/83 (subcontractor management), 건설기술진흥법 Articles 24/25 (safety supervision).",
+      "examples": [
+        [
+          "OSHA-KR Art.15 §1",
+          "SAPA Art.5",
+          "건설산업기본법 Art.45"
+        ],
+        [
+          "OSHA-KR Art.38 §1",
+          "SAPA Art.5",
+          "건설기술진흥법 Art.24"
+        ],
+        [
+          "OSHA-KR Art.17 §1",
+          "SAPA Art.5",
+          "건설산업기본법 Art.83"
+        ]
+      ]
+    },
+    "e_signature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/e_signature"
+    },
+    "nomenclature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/nomenclature"
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

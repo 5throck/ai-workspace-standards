@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: study-conduct
+title: "시험 수행 (Study Conduct)"
+status: active
+applicability: mandatory
+workflow_type: core
+
+legal_basis:
+  - MFDS 비임상시험 관리기준
+  - OECD GLP Section 9
+  - OECD GLP Section 10
+industry_profile: pharma-laboratory
+agent: glp-agent
+evidence_model: glp-study-conduct-record.json

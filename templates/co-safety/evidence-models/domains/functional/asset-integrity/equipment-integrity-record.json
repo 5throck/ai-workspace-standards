@@ -1,0 +1,97 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "equipment-integrity-record.json",
+  "title": "Equipment Integrity Record",
+  "description": "Equipment integrity assessment record per OSHA-KR Article 38 and applicable statutory inspection laws. Documents aging assessment, fitness-for-service evaluation, and remaining life estimation.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "equipment_id",
+    "equipment_tag",
+    "assessment_date",
+    "equipment_age_years",
+    "design_life_years",
+    "inspection_findings",
+    "fitness_for_service",
+    "recommended_actions",
+    "next_inspection_date",
+    "legal_basis",
+    "e_signature",
+    "nomenclature",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^EI-[0-9]{4}-[0-9]{4}$"
+    },
+    "equipment_id": { "type": "string" },
+    "equipment_tag": { "type": "string" },
+    "equipment_category": {
+      "type": "string",
+      "enum": ["pressure_vessel", "rotating_machinery", "electrical", "piping", "structural", "lifting", "fire_system", "other"]
+    },
+    "assessment_date": { "type": "string", "format": "date" },
+    "equipment_age_years": { "type": "number", "minimum": 0 },
+    "design_life_years": { "type": ["number", "null"], "minimum": 0 },
+    "remaining_life_estimate_years": { "type": ["number", "null"] },
+    "statutory_inspection_due": {
+      "type": "boolean",
+      "description": "Whether statutory inspection is overdue or due within 30 days"
+    },
+    "statutory_inspection_body": {
+      "type": ["string", "null"],
+      "description": "Certification body (e.g., KOSHA, KGS)"
+    },
+    "inspection_findings": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["finding_id", "description", "severity"],
+        "properties": {
+          "finding_id": { "type": "string" },
+          "description": { "type": "string" },
+          "severity": { "type": "string", "enum": ["informational", "minor", "major", "critical"] },
+          "location": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "fitness_for_service": {
+      "type": "string",
+      "enum": ["fit", "fit_with_restrictions", "unfit_requires_repair", "decommission"],
+      "description": "API 579-1/ASME FFS-1 기반 평가 결과"
+    },
+    "recommended_actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["action_description", "priority", "target_date"],
+        "properties": {
+          "action_description": { "type": "string" },
+          "priority": { "type": "string", "enum": ["immediate", "short_term", "long_term"] },
+          "target_date": { "type": "string", "format": "date" }
+        }
+      }
+    },
+    "next_inspection_date": { "type": "string", "format": "date" },
+    "risk_assessment_ref": {
+      "type": ["string", "null"],
+      "description": "Reference to risk-assessment-record linked to this equipment"
+    },
+    "psm_psi_ref": {
+      "type": ["string", "null"],
+      "description": "Reference to PSM Process Safety Information (for covered processes)"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 3,
+      "examples": [["산업안전보건법 Article 36", "산업안전보건법 Article 38", "고압가스 안전 관리 및 사업법 Article 17"]]
+    },
+    "e_signature": { "$ref": "../../../_shared/base/common.schema.json#/definitions/e_signature" },
+    "nomenclature": { "$ref": "../../../_shared/base/common.schema.json#/definitions/nomenclature" },
+    "audit_trail": { "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail" }
+  }
+}

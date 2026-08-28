@@ -1,0 +1,153 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "ehschem-turnaround-record.json",
+  "title": "Chemical Plant Turnaround Record",
+  "description": "정기보수 (TAR) 가동중지 계획 기록.",
+  "version": "1.1.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "plant_category",
+    "psm_applicable",
+    "chemical_category",
+    "legal_basis",
+    "e_signature",
+    "nomenclature",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^CHEM-TAR-[0-9]{4}-[0-9]{4}$"
+    },
+    "plant_category": {
+      "type": "string",
+      "enum": [
+        "refining",
+        "petrochemical",
+        "specialty_chemicals"
+      ]
+    },
+    "psm_applicable": {
+      "type": "boolean",
+      "default": true
+    },
+    "environmental_permit_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "chemical_category": {
+      "type": "string",
+      "enum": [
+        "hydrocarbon",
+        "polymer",
+        "specialty_intermediate",
+        "other"
+      ]
+    },
+    "facility_id": {
+      "type": "string"
+    },
+    "turnaround_id": {
+      "type": "string"
+    },
+    "planned_start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "planned_end_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "duration_days": {
+      "type": "integer"
+    },
+    "contractors_involved": {
+      "type": "integer"
+    },
+    "permit_to_work_count": {
+      "type": "integer"
+    },
+    "psm_pssr_required": {
+      "type": "boolean",
+      "default": true
+    },
+    "pre_tar_risk_assessment": {
+      "type": "boolean"
+    },
+    "post_tar_pssr_completed": {
+      "type": "boolean"
+    },
+    "contractor_surge_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "contractor-safety-agent가 관리하는 contractor-tar-surge-record.json의 record_id 참조. 이 파일의 turnaround_id와 contractor-tar-surge-record.json의 tar_id는 동일한 대정비(Turnaround) 이벤트를 가리키는 동일 값이다."
+    },
+    "health_screening_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "occupational-health-agent가 관리하는 oh-tar-health-record.json의 record_id 참조. 이 파일의 turnaround_id와 oh-tar-health-record.json의 tar_id는 동일한 대정비(Turnaround) 이벤트를 가리키는 동일 값이다."
+    },
+    "non_psm_equipment_handoff_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "asset-integrity-agent로의 '비-PSM 설비 목록(non-PSM equipment list)' 전달(C-04 handoff) 완료 여부 또는 참조 메모. 별도 evidence-model 파일이 아직 없어 자유 텍스트 참조로 기록한다."
+    },
+    "loto_records_ref": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "이 TAR 기간 중 발급된 psm-loto-record.json 레코드들의 record_id 배열 (설비/격리 지점별로 다수의 개별 LOTO 허가가 발생하므로 단일 참조가 아닌 배열)."
+    },
+    "pssr_ref": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "이 TAR 기간 수행된 psm-pssr-record.json 레코드들의 record_id 배열 (PSM-PSSR-YYYY-####; 단위공정/재시작 단계별로 다수의 PSSR이 수행될 수 있으므로 단일 참조가 아닌 배열). pssr-review 워크플로우의 산출물을 참조하며, post_tar_pssr_completed = true 설정 시 최소 1개 이상의 참조가 존재해야 한다."
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "description": "Multi-source legal basis. Primary: OSHA-KR Article 44 (PSM for chemical plants) and Article 36 (risk assessment). Adjacent laws may include: CCA (화학물질관리법) Articles 20/23 (toxic/accident-preparedness chemicals), SAPA Article 4 (management safety obligation), 위험물안전관리법 (hazardous materials storage/handling), 대기환경보전법/수질환경보전법 (emission standards).",
+      "examples": [
+        [
+          "OSHA-KR Art.44 §1",
+          "CCA Art.20",
+          "SAPA Art.4"
+        ],
+        [
+          "OSHA-KR Art.36 §1",
+          "위험물안전관리법 Art.13",
+          "SAPA Art.4"
+        ],
+        [
+          "OSHA-KR Art.44 §1",
+          "대기환경보전법 Art.15",
+          "SAPA Art.7"
+        ]
+      ]
+    },
+    "e_signature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/e_signature"
+    },
+    "nomenclature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/nomenclature"
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

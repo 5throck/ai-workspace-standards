@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: eap-emergency-planning
+title: "비상조치계획 (Emergency Action Plan)"
+status: active
+applicability: mandatory
+applicable_industries: [chemical, gas_terminal, power_generation]
+
+legal_basis:
+  - OSHA-KR Article 44 (PSM Element 12)
+  - 산업안전보건법 Article 54
+  - 중대재해처벌법 Article 4
+industry_profile: chemical-processing
+agent: psm-agent
+evidence_model: psm-eap-record.json

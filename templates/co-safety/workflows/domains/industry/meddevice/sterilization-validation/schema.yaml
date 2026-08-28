@@ -1,0 +1,12 @@
+schema_version: "1.0"
+workflow_id: sterilization-validation
+title: "멸균 밸리데이션 (Sterilization Validation)"
+status: active
+applicability: mandatory
+workflow_type: core
+uses_functional_services: [functional/msds, industry/glp, emergency]
+
+legal_basis: [의료기기법 Article 16, ISO 11135/11137, KGMP-MD]
+industry_profile: medical-device
+agent: meddevice-agent
+evidence_model: meddevice-sterilization-record.json

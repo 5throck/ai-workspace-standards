@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "sewage-confined-h2s-record.json",
+  "title": "Sewage Confined Space H2S Prevention Record",
+  "description": "Evidence model for Sewage Sludge Tank and Manhole Gas Measurement and Forced Ventilation.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "manhole_tank_id",
+    "h2s_ppm",
+    "legal_basis",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^WST-H2S-[0-9]{4}-[0-9]{4}$"
+    },
+    "manhole_tank_id": {
+      "type": "string"
+    },
+    "oxygen_percent": {
+      "type": "number"
+    },
+    "h2s_ppm": {
+      "type": "number"
+    },
+    "forced_ventilation_active": {
+      "type": "boolean"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

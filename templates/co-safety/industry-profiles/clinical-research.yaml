@@ -1,0 +1,81 @@
+# Clinical Research Industry Profile — GCP Domain (v1)
+profile_id: clinical-research
+name: clinical-research
+display_name: "임상시험 기관 (Clinical Research — GCP Domain)"
+version: "1.0"
+status: active
+last_updated: 2026-08-06
+industry_tier: industry
+agent: gcp-agent
+legal_basis:
+  - 약사법 Article 69 (CTA)
+  - 약사법 Article 73의2 (SAE reporting)
+  - 의약품 임상시험 관리기준 (MFDS 고시 / KGCP)
+  - 생명윤리법 (IRB, informed consent)
+  - ICH E6(R3) (2025)
+  - Declaration of Helsinki (2013)
+  - ICH E2A / E2D (safety reporting)
+key_hazards:
+  - susar_underreporting
+  - informed_consent_deficiency
+  - protocol_deviation_unmonitored
+  - source_data_integrity_breach
+workflows:
+  gcp:
+    - protocol-management
+    - irb-review
+    - informed-consent
+    - participant-enrollment
+    - monitoring-visits
+    - sae-reporting
+    - source-data-verification
+    - sae-reporting-reference
+description: Clinical trial operations per KGCP and ICH E6(R3). Covers IRB submission, informed consent, monitoring visits, SAE reporting, source data verification.
+ich_guidelines:
+  - E6(R3) — GCP
+  - E2A — Clinical Safety Data Management
+  - E2D — Post-approval Safety Data Management
+  - E3 — Clinical Study Report structure
+  - E8(R1) — General Considerations for Clinical Studies
+  - E9(R1) — Statistical Principles
+clinical_phases:
+  - phase_1 — first-in-human, safety
+  - phase_2 — efficacy, dose-finding
+  - phase_3 — pivotal, registration
+  - phase_4 — post-marketing surveillance
+irb_requirements:
+  korean_name: 생명윤리심의위원회
+  authority: 식약처 인증 IRB (MFDS-certified)
+  review_types:
+    - full_review (심의)
+    - expedited_review (신속심의)
+    - exempt (면제)
+  independence_required: true
+safety_reporting_timelines:
+  SUSAR_fatal: "7 days to MFDS"
+  SUSAR_other_serious: "15 days total"
+  SAE_annual: "Annual safety report (PSUR)"
+regulatory_references:
+  kr_mfds: regulations/KR/MFDS-GCP.yaml
+  international: regulations/international/ICH-E6.yaml
+v1_scope:
+  includes:
+    - protocol_lifecycle_management
+    - irb_submission_and_review
+    - informed_consent_version_control
+    - participant_enrollment
+    - cra_monitoring_visits
+    - sae_susar_reporting
+    - source_data_verification_ALCOA
+    - clinical_study_report
+    - safety_signal_dispatch (reference workflow)
+  excludes:
+    - electronic_data_capture_edc (v2)
+    - risk_based_monitoring_ml (v2)
+    - adaptive_trial_design (v2)
+    - real_world_evidence_integration (v2)
+cross_domain_consumers:
+  - glp (pre-clinical data → IND → clinical trial)
+  - gmp (IMP quality data)
+  - gvp (post-market safety, when implemented)
+  - emergency-agent (SAE dispatch via reference)

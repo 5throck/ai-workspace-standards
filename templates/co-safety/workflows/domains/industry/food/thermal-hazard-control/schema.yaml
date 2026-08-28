@@ -1,0 +1,26 @@
+schema_version: "1.0"
+workflow_id: thermal-hazard-control
+title: "Food (Food manufacturing and processing) — thermal-hazard-control (scaffold — specialist review required)"
+status: active
+applicability: mandatory
+workflow_type: core
+industry_profile: food
+agent: food-agent
+signature_hazard: "[Food (Food manufacturing and processing)] FSA (Food Sanitation Act) — 대표 위해요인 (specialist review required)"
+
+# Auto-filled from regulations/KR/industry-regulatory-anchors.yaml (Task A-03).
+# Entries marked [UNVERIFIED] originate from the anchor table and require specialist re-verification.
+legal_basis:
+  - 산업안전보건법 Article 36
+  - 산업안전보건법 Article 57
+  - 중대재해처벌법 Article 4
+  - 중대재해처벌법 Article 5
+  - 중대재해처벌법 Article 6
+  - 중대재해처벌법 Article 7
+  - 식품위생법 Article 48
+  - 건강기능식품에 관한 법률 Article 13
+  - 소방기본법 Article 16
+
+# Industry-unique workflow. NOT a shared-workflow reference (no `references:` block).
+# Evidence model skeleton — see evidence-models/domains/industry/food/food-thermal-hazard-control-record.json.
+evidence_model: food-thermal-hazard-control-record.json

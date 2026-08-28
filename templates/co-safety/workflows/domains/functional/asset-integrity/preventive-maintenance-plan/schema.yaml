@@ -1,0 +1,10 @@
+schema_version: "1.0"
+workflow_id: preventive-maintenance-plan
+title: "예방 정비 계획 수립 및 실행 (Preventive Maintenance Plan & Execution)"
+status: active
+applicability: mandatory
+applicable_industries: [manufacturing, chemical, gas_terminal, power_generation, semiconductor, battery, shipbuilding, steelmaking, logistics, railway, waste, defense, biotech, datacenter]
+legal_basis: [산업안전보건법 Article 36, 산업안전보건법 Article 38, KOSHA Guide M-155-2022]
+industry_profile: asset-integrity
+agent: asset-integrity-agent
+evidence_model: preventive-maintenance-record.json

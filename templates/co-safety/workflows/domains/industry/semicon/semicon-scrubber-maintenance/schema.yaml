@@ -1,0 +1,18 @@
+schema_version: "1.0"
+workflow_id: semicon-scrubber-maintenance
+title: "반도체 칠러/스크러버(Scrubber) 유해가스 세정 정비 및 바이패스 안전점검 (Semiconductor Scrubber Maintenance)"
+status: active
+applicability: mandatory
+workflow_type: core
+legal_basis:
+  - 화학물질관리법 Article 24
+  - 고압가스 안전관리 및 사업법 Article 11
+  - 고압가스 안전관리 및 사업법 Article 13
+  - 고압가스 안전관리 및 사업법 Article 15
+  - 고압가스 안전관리 및 사업법 Article 24
+  - 고압가스 안전관리 및 사업법 Article 26
+  - SEMI S2 Safety Guideline for Semiconductor Manufacturing Equipment
+  - 중대재해처벌법 Article 4
+industry_profile: semicon-cleanroom
+agent: semicon-agent
+evidence_model: semicon-scrubber-record.json

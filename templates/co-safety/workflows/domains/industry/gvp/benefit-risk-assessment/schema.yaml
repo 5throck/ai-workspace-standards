@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: benefit-risk-assessment
+title: "유효성-안전성 평가 (Benefit-Risk Assessment)"
+status: active
+applicability: mandatory
+workflow_type: core
+
+legal_basis:
+  - 약사법 Article 73의3
+  - ICH E2C(R2)
+  - EU GVP Module 12
+industry_profile: pharmacovigilance
+agent: gvp-agent
+evidence_model: gvp-br-record.json
