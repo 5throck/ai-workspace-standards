@@ -230,3 +230,4 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `adr:0062` | adr | — | — | — |
 | `dec:DEC-20260825-01` | decision | — | — | — |
 | `dec:DEC-20260825-02` | decision | `sync` | — | — |
+| `dec:DEC-20260829-01` | decision | `decision-record` | — | — |

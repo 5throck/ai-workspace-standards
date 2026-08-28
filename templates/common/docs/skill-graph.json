@@ -7,11 +7,6 @@
       "layer": "common"
     },
     {
-      "id": "accessibility-audit",
-      "type": "skill",
-      "layer": "common"
-    },
-    {
       "id": "agent-lifecycle-manager",
       "type": "skill",
       "layer": "common"
@@ -82,11 +77,6 @@
       "layer": "common"
     },
     {
-      "id": "mece-logic-auditor",
-      "type": "skill",
-      "layer": "common"
-    },
-    {
       "id": "meeting-facilitation",
       "type": "skill",
       "layer": "common"
@@ -97,22 +87,12 @@
       "layer": "common"
     },
     {
-      "id": "presenter-mode",
-      "type": "skill",
-      "layer": "common"
-    },
-    {
       "id": "project-review",
       "type": "skill",
       "layer": "common"
     },
     {
       "id": "research-analysis",
-      "type": "skill",
-      "layer": "common"
-    },
-    {
-      "id": "sarif-exporter",
       "type": "skill",
       "layer": "common"
     },
@@ -133,16 +113,6 @@
     },
     {
       "id": "standup-synthesizer",
-      "type": "skill",
-      "layer": "common"
-    },
-    {
-      "id": "stride-threat-matrix",
-      "type": "skill",
-      "layer": "common"
-    },
-    {
-      "id": "swe-solve",
       "type": "skill",
       "layer": "common"
     },
@@ -314,36 +284,6 @@
       "type": "references",
       "from": "pm",
       "to": "decision-record",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "presenter-mode",
-      "to": "explain-me",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "sarif-exporter",
-      "to": "security-scan",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "sarif-exporter",
-      "to": "stride-threat-matrix",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "stride-threat-matrix",
-      "to": "sarif-exporter",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "stride-threat-matrix",
-      "to": "security-scan",
       "source": "prose"
     },
     {

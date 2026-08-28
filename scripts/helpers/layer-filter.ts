@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * layer-filter.ts — Single Layer Filter Engine
- * @version 1.4.2
+ * @version 1.5.0
  * @status active
  *
  * Reads SCRIPTS.md layer column (for scripts) and SKILL.md frontmatter (for skills)
@@ -12,8 +12,11 @@
  * L1 = templates/common, L2 = templates/co-*):
  *   L0        = workspace root only
  *   L0+L1     = templates/common + all L3 (scaffolded) projects, identically
- *   L0+L1+L2  = variant-specific (common base + co-* override); reaches its
- *               own variant's L3 projects too, not just the L2 template itself
+ *   L0+L2     = variant-specific; lives in the owning variant's template skills
+ *               dir only (no templates/common base) — reaches its own variant's
+ *               L3 projects via the variant overlay, never other variants'
+ *   L0+L1+L2  = scripts only (byte-identical L0→L1→L2 sync); no longer produced
+ *               by skill scope parsing
  */
 
 import * as fs from "fs";
@@ -23,7 +26,7 @@ import * as path from "path";
 // Types
 // ─────────────────────────────────────────────────────────────────────────────
 
-export type LayerValue = "L0" | "L0+L1" | "L0+L1+L2";
+export type LayerValue = "L0" | "L0+L1" | "L0+L2" | "L0+L1+L2";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Backward-compat mapping
@@ -34,6 +37,7 @@ function normalizeLayer(raw: string): LayerValue {
   if (v === "L0-only" || v === "L0") return "L0";
   if (v === "common" || v === "L0+L1") return "L0+L1";
   if (v === "L0+L1+L2") return "L0+L1+L2";
+  if (v === "L0+L2") return "L0+L2";
   // L0+L1-ws was retired — any stale value falls through to L0+L1 (treated as common)
   // Default unrecognized values to L0+L1 (safe — keeps script in template)
   return "L0+L1";
@@ -167,9 +171,11 @@ function _walkSkillDirs(dir: string, skillsDir: string, result: Map<string, Laye
           if (scope === "workspace") layer = "L0";
           else if (scope === "common") layer = "L0+L1";
           // Any other explicit scope value names the variant the skill belongs to
-          // (e.g. `scope: co-consult`) — a domain-only skill with a variant override
-          // and no templates/common/ base. See ADR-0032 §7 and skills/SKILLS.md.
-          else layer = "L0+L1+L2";
+          // (e.g. `scope: co-consult`) — a variant-specific skill with no
+          // templates/common/ base. It lives in templates/co-*/skills/ and reaches
+          // L3 projects via the variant overlay, never other variants' projects.
+          // See ADR-0032 §7 and skills/SKILLS.md.
+          else layer = "L0+L2";
         }
         // l2_propagate: false overrides scope — skill stays in L0 only
         if (/^\s*l2_propagate\s*:\s*false\b/.test(fmLine)) {
@@ -258,6 +264,7 @@ export function includeSkillInL1(
   layers?: Map<string, LayerValue>,
 ): boolean {
   const layer = getSkillLayer(skillName, layers);
+  // Variant-specific skills (L0+L2) skip L1 — they ship via the co-* overlay.
   return layer === "L0+L1" || layer === "L0+L1+L2";
 }
 

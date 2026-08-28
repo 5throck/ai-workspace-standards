@@ -5,7 +5,7 @@
  * Replaces publish-to-template.ts (deprecated v1.8.0). Single authoritative script
  * for all L0→L1 propagation. Config-driven via propagation-map.json (SSOT for exclusions).
  *
- * @version 2.5.2
+ * @version 2.6.0
  *
  * Usage:
  *   bun scripts/propagate-to-templates.ts [--dry-run|--apply] [--domain <name>] [flags]
@@ -435,13 +435,15 @@ function collectDiffs(mapPath: string): FileDiff[] {
         if (!includeScriptInL1(scriptKey, scriptLayers)) continue;
       }
 
-      // Skip workspace-scoped platform skills — they must not propagate to L1
+      // Skip workspace-scoped AND variant-scoped platform skills — only
+      // common-layer skills (scope: common or unspecified) reach L1 mirrors
       if (domainName === 'claude-skills' || domainName === 'gemini-skills' || domainName === 'agents-skills') {
         const skillName = relPath.split('/')[0].split('\\')[0];
         const skillMdPath = join(domain.source, skillName, 'SKILL.md');
         if (existsSync(skillMdPath)) {
           const content = readFileSync(skillMdPath, 'utf-8');
-          if (extractSkillFrontmatterScope(content) === 'workspace') continue;
+          const mirrorScope = extractSkillFrontmatterScope(content);
+          if (mirrorScope === 'workspace' || (mirrorScope !== undefined && mirrorScope !== 'common')) continue;
         }
       }
 

@@ -4,10 +4,6 @@
 
 Generated: 2026-08-11T05:17:34.294Z
 
-## Accessibility-testing
-
-- [accessibility-audit](skills/accessibility-audit/SKILL.md)
-
 ## Process
 
 - [agent-lifecycle-manager](skills/agent-lifecycle-manager/SKILL.md)
@@ -29,7 +25,6 @@ Generated: 2026-08-11T05:17:34.294Z
 - [stakeholder-alignment](skills/stakeholder-alignment/SKILL.md)
 - [stakeholder-review-management](skills/stakeholder-review-management/SKILL.md)
 - [standup-synthesizer](skills/standup-synthesizer/SKILL.md)
-- [swe-solve](skills/swe-solve/SKILL.md)
 - [sync](skills/sync/SKILL.md)
 - [technical-feasibility](skills/technical-feasibility/SKILL.md)
 - [translate](skills/translate/SKILL.md)
@@ -59,22 +54,6 @@ Generated: 2026-08-11T05:17:34.294Z
 ## Strategic-reasoning
 
 - [mece-logic-auditor](skills/mece-logic-auditor/SKILL.md)
-
-## Presentation-sync
-
-- [presenter-mode](skills/presenter-mode/SKILL.md)
-
-## Security-reporting
-
-- [sarif-exporter](skills/sarif-exporter/SKILL.md)
-
-## Audio-synthesis
-
-- [sound-synth](skills/sound-synth/SKILL.md)
-
-## Threat-modeling
-
-- [stride-threat-matrix](skills/stride-threat-matrix/SKILL.md)
 
 ## Contract-safety
 

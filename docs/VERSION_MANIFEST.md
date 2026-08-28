@@ -1,7 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-28T21:56:04.347Z
-**Generated**: 2026-08-28T17:26:14.545Z
+**Generated**: 2026-08-28T22:24:17.389Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -65,7 +64,7 @@
 | source-command-commit-push-pr | 1.0.1 | active | .claude/skills/source-command-commit-push-pr/SKILL.md | both | commit-push-pr, commit and push, create PR | N/A |
 | standup-synthesizer | 1.0.0 | active | skills/standup-synthesizer/SKILL.md | workspace | standup digest, daily standup, synthesize standup, work summary | pm |
 | stride-threat-matrix | 1.0.0 | active | skills/stride-threat-matrix/SKILL.md | workspace | stride-threat-matrix, /stride-threat-matrix, threat modeling, dread risk scoring, stride matrix | security-expert |
-| swe-solve | 1.0.0 | active | skills/swe-solve/SKILL.md | workspace | swe-solve, solve issue, autonomous issue resolution, issue to pr | pm |
+| swe-solve | 1.1.1 | active | skills/swe-solve/SKILL.md | workspace | swe-solve, solve issue, autonomous issue resolution, issue to pr | pm |
 | sync | 1.2.2 | active | skills/sync/SKILL.md | workspace | sync, /sync, commit and push, create PR | pm |
 | team-builder | 1.1.0 | active | skills/team-builder/SKILL.md | workspace | build new agent team, create agent team, agent team setup, team builder | pm |
 | ticket-run | 1.0.0 | active | skills/ticket-run/SKILL.md | workspace | ticket-run, process ticket queue, run next ticket | automation-engineer |
@@ -115,7 +114,7 @@
 | new-project.ts | 1.9.0 | scripts/new-project.ts | js-yaml |
 | project-to-variant.ts | 1.2.1 | scripts/project-to-variant.ts | N/A |
 | promote-context-section.ts | 1.0.0 | scripts/promote-context-section.ts | N/A |
-| propagate-to-templates.ts | 2.5.2 | scripts/propagate-to-templates.ts | js-yaml |
+| propagate-to-templates.ts | 2.6.0 | scripts/propagate-to-templates.ts | js-yaml |
 | qa-gate.ts | N/A | scripts/qa-gate.ts | bun |
 | readme-lifecycle-audit.ts | 1.0.4 | scripts/readme-lifecycle-audit.ts | N/A |
 | regenerate-agents-md.ts | 1.1.0 | scripts/regenerate-agents-md.ts | fs, path |
@@ -152,7 +151,7 @@
 | validate-model-registry.ts | N/A | scripts/validate-model-registry.ts | N/A |
 | validate-pm-extends.ts | 0.3.1 | scripts/validate-pm-extends.ts | N/A |
 | validate-skills.ts | 1.0.3 | scripts/validate-skills.ts | N/A |
-| validate-templates.ts | 1.16.0 | scripts/validate-templates.ts | js-yaml |
+| validate-templates.ts | 1.18.0 | scripts/validate-templates.ts | js-yaml |
 | validate-variant-readiness.ts | 1.0.0 | scripts/validate-variant-readiness.ts | N/A |
 | variant-feature.ts | 1.0.0 | scripts/variant-feature.ts | N/A |
 | verify-adr-governance.ts | 1.4.0 | scripts/verify-adr-governance.ts | N/A |

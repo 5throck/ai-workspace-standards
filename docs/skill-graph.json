@@ -427,6 +427,11 @@
       "layer": "L0"
     },
     {
+      "id": "dec:DEC-20260829-01",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
       "id": "decision-record",
       "type": "skill",
       "layer": "common"
@@ -2390,6 +2395,12 @@
       "type": "cites_skill",
       "from": "dec:DEC-20260825-02",
       "to": "sync",
+      "source": "skills_used"
+    },
+    {
+      "type": "cites_skill",
+      "from": "dec:DEC-20260829-01",
+      "to": "decision-record",
       "source": "skills_used"
     },
     {

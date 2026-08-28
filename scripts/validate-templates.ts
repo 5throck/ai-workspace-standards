@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.16.0
+ * @version 1.18.0
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -1444,11 +1444,6 @@ function collectSkillDirs(dir: string, skillsDir: string): string[] {
 }
 
 // Check B-09: Per-variant skill lifecycle (presence-driven)
-// Per-skill README enforcement switch (CONSTITUTION §6.2, 2026-08-28): flip to true
-// once template-layer README authoring completes (roadmap PR2). Until then missing
-// per-skill READMEs are WARN (grace).
-const SKILL_README_ENFORCE = true;
-
 function checkVariantSkills(variant: string): void {
   const skillsDir = join(TEMPLATES_DIR, variant, 'skills');
   if (!existsSync(skillsDir)) {
@@ -1489,16 +1484,9 @@ function checkVariantSkills(variant: string): void {
     if (verVal && !/^\d+\.\d+\.\d+$/.test(verVal)) {
       fail(variant, 'skill-lifecycle', `${variant}/skills/${skillName}/SKILL.md version is not semver: '${verVal}'`, `Use X.Y.Z (e.g. 'version: 1.0.0')`);
     }
-    // Per-skill README.md + README_ko.md mandatory (CONSTITUTION §6.2, 2026-08-28 standard adoption).
-    // Template layer: FAIL. Project layer: WARN grace until the follow-up authoring cycle.
-    for (const readmeName of ['README.md', 'README_ko.md']) {
-      if (!existsSync(join(skillsDir, skillName, readmeName))) {
-        const msg = `${variant}/skills/${skillName}/${readmeName} missing (per-skill README mandatory since 2026-08-28)`;
-        const fix = `Author ${readmeName}: purpose, when-to-trigger, prerequisites, usage example (CONSTITUTION §6.2)`;
-        if (SKILL_README_ENFORCE) fail(variant, 'skill-readme', msg, fix);
-        else warn(variant, 'skill-readme', msg + ' [WARN grace — flips to FAIL when SKILL_README_ENFORCE=true]', fix);
-      }
-    }
+    // Per-skill README.md/README_ko.md requirement retired 2026-08-29 (DEC-20260829-01):
+    // SKILL.md is the authoritative, machine-consumed definition; per-skill READMEs
+    // were seeded boilerplate and are no longer gated.
     if ('status' in fields) {
       const statusLine = content.split('\n').find(l => l.startsWith('status:'));
       const statusVal = statusLine ? statusLine.slice(statusLine.indexOf(':') + 1).trim() : '';
@@ -2629,9 +2617,9 @@ function checkL0L1ScriptsNotInVariants(variant: string, scriptLayerMap: Map<stri
   }
 }
 
-// Check WS-06: Skills in templates/co-*/skills/ must be L0+L1+L2
+// Check WS-06: Skills in templates/co-*/skills/ must be variant-scoped (L0+L2)
 function checkVariantSkillsLayer(variant: string, _skillLayerMap: Map<string, import('./helpers/layer-filter.js').LayerValue>): void {
-  if (!JSON_MODE) console.log(`\n=== Check WS-06: Variant skills must be L0+L1+L2 in ${variant}/skills/ ===`);
+  if (!JSON_MODE) console.log(`\n=== Check WS-06: Variant skills must be L0+L2 in ${variant}/skills/ ===`);
 
   const variantSkillsDir = join(TEMPLATES_DIR, variant, 'skills');
   if (!existsSync(variantSkillsDir)) return;
@@ -2645,8 +2633,8 @@ function checkVariantSkillsLayer(variant: string, _skillLayerMap: Map<string, im
 
   for (const entry of collectSkillDirs(variantSkillsDir, variantSkillsDir)) {
     const layer = getSkillLayer(entry, variantSkillLayerMap);
-    if (layer !== 'L0+L1+L2') {
-      warn(variant, 'WS-06', `templates/${variant}/skills/${entry} is not declared L0+L1+L2`, `Add 'scope: ${variant}' to templates/${variant}/skills/${entry}/SKILL.md if it's a genuine domain-specific skill, or move it to templates/common/skills/${basename(entry)}/ if it should be shared across all variants`);
+    if (layer !== 'L0+L2') {
+      warn(variant, 'WS-06', `templates/${variant}/skills/${entry} is not declared L0+L2`, `Add 'scope: ${variant}' to templates/${variant}/skills/${entry}/SKILL.md if it's a genuine domain-specific skill, or move it to templates/common/skills/${basename(entry)}/ if it should be shared across all variants`);
     }
   }
 }

@@ -44,7 +44,7 @@ Skills with a `skills/<name>/` directory in the workspace root. These are the pr
 | `mece-logic-auditor` | 1.0.0 | active | strategy-analyst | 2026-08-06 | — | MECE issue tree auditing and strategic reasoning evaluation rules |
 | `sound-synth` | 1.0.0 | active | sound-designer | 2026-08-06 | — | Web Audio API / jsfxr procedural 8-bit retro sound effect generation rules |
 | `standup-synthesizer` | 1.0.0 | active | pm | 2026-08-06 | — | Daily standup digest synthesizer aggregating commits, issues, PRs, and blockers |
-| `swe-solve` | 1.0.0 | active | pm | 2026-08-06 | — | Autonomous 4-stage issue-to-PR resolution pipeline for software engineering tasks |
+| `swe-solve` | 1.1.1 | active | pm | 2026-08-25 | — | Autonomous 5-stage issue-to-PR resolution pipeline with resolution-trajectory logging. co-develop-exclusive (variant_scoped_skills registry) |
 | `api-documentation` | 1.0.0 | active | pm | 2026-08-28 | — | Promoted from co-work/co-safety duplicate copies — generic REST/GraphQL/SDK documentation generation, not domain-specific |
 | `documentation-writing` | 1.0.0 | active | pm | 2026-08-28 | — | Promoted from co-work/co-safety duplicate copies — generic guide/manual/tutorial writing, not domain-specific |
 | `research-analysis` | 1.0.0 | active | pm | 2026-08-28 | — | Promoted from co-work/co-safety duplicate copies — generic research synthesis and evidence gathering, not domain-specific |
