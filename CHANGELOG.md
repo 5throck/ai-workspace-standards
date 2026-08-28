@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+- **[2026-08-28]**: docs(readme): co-price was branded as a "K-Beauty pricing management & consulting simulator" in the top-level `README.md`/`README_ko.md`/`README_es.md`/`README_ja.md` and `templates/README.md`, but K-Beauty is only a bundled sample dataset (`getKBeautySampleState`) — co-price's own `README.md` and docs describe it as a multi-industry pricing simulator. Reworded all six occurrences across the four language READMEs and `templates/README.md` to "multi-industry pricing management & consulting simulator (K-Beauty sample dataset included)".
+
 ### Added
 - **[2026-08-25]**: feat(governance): **Evidence layer made real — `evidence-ledger` skill 1.0.0 → 1.1.0 gains the registry-backed overlay form, and the workspace's FIRST live ledger opens with four verified rows wired into both seeded decision records.** Gap #3 of the chain follow-through: the Evidence layer existed as a standard with zero instances. Three moves close it. **(1) Overlay forms codified**: the skill's Variant Overlays section now names the second legitimate overlay form alongside co-news's prose ledger — **registry-backed variants** carrying their evidence plane as formal variables in a schema-governed registry (row-per-VARIABLE, verification metadata, reversal via the registry's own amendment protocol), with the invariant that DEC `evidence_refs[]` must resolve INSIDE whichever form a variant uses. This retroactively legitimizes exactly how co-newbiz already operates. **(2) First live ledger**: `docs/evidence/ledger.md` opens with four VERIFIED rows (EV-20260825-001…004) documenting this week's real rulings and findings — the rootAllowlist stray-file gate firing, the direct-commit denial → /sync routing, consumes-inference precision 1/1 corroborated by a kill-criteria predicate, and the human-role registry resolution — each with source, ref, and verification method. **(3) DEC loop closed in practice**: DEC-20260825-01/02 `evidence_refs[]` now cite EV-001/EV-002 instead of empty arrays — the first decision records whose evidence citations resolve to a real ledger. Platform mirrors refreshed by the sync pipeline; no contract pins affected.
 - **[2026-08-25]**: revert(governance): **ADR seeds and Variant Anchor sections removed from templates — owner review found the application problematic (#691 follow-up; rationale recorded in `docs/audits/2026-08-25-…md` §5).** Three defects acknowledged: the seed README duplicated the context.md convention subsection (two homes for one rule = ADR-0050's drift problem); "likely first records" taxed every future project with speculative guidance about engagements that have not happened; and the organic project practices (69/18/5 records, no seeds) had been misread as a seeding need when they proved the opposite — git tracks no empty directories, so `docs/adr/` materializes exactly when a first record exists. Removed: 11 variant `docs/adr/README.md`, common seed README, all Variant Anchor sections. Restored: co-develop `.gitkeep` (pre-existing), common `.gitkeep` (untouched). Survives: the **Architecture Decision Records** subsection in `templates/common/docs/context.md` — now the single home of the convention — and the audit notes document, which gains a §5 owner-review postscript so the reversal reasoning outlives the session.
@@ -1338,7 +1341,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-*Last Updated: 2026-08-26*
+*Last Updated: 2026-08-28*
 
 
 
