@@ -1,0 +1,609 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "id": "design",
+      "type": "agent",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "diagram-specialist",
+      "type": "agent",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "explain-me",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
+      "id": "handbook",
+      "type": "skill",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "handbook-reviewer",
+      "type": "agent",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "handbook-writer",
+      "type": "agent",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "html-build",
+      "type": "agent",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "i18n-layout",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "image-curator",
+      "type": "agent",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "measure",
+      "type": "agent",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "pdf-export",
+      "type": "agent",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "pm",
+      "type": "agent",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "prep-pdf",
+      "type": "skill",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "presenter-mode",
+      "type": "skill",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "README",
+      "type": "agent",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "README_ko",
+      "type": "agent",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "research",
+      "type": "agent",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "slide-layout-gate",
+      "type": "skill",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "source-verifier",
+      "type": "agent",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "storyline",
+      "type": "agent",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "theme-authoring",
+      "type": "skill",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "version",
+      "type": "agent",
+      "layer": "variant:co-deck"
+    }
+  ],
+  "edges": [
+    {
+      "type": "used_by",
+      "from": "design",
+      "to": "design",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "design",
+      "to": "design",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "design",
+      "to": "html-build",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "design",
+      "to": "i18n-layout",
+      "source": "prose"
+    },
+    {
+      "type": "phase",
+      "from": "design",
+      "to": "phase3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "design",
+      "to": "prep-pdf",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "design",
+      "to": "storyline",
+      "source": "prose"
+    },
+    {
+      "type": "requires",
+      "from": "design",
+      "to": "storyline",
+      "source": "prerequisites"
+    },
+    {
+      "type": "used_by",
+      "from": "handbook",
+      "to": "handbook-reviewer",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "handbook",
+      "to": "handbook-reviewer",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "handbook",
+      "to": "handbook-writer",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "handbook",
+      "to": "handbook-writer",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "handbook",
+      "to": "phaseH-2",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "handbook",
+      "to": "phaseH-3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "handbook",
+      "to": "phaseH-4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "handbook",
+      "to": "phaseH-5",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "handbook",
+      "to": "research",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "handbook",
+      "to": "storyline",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "handbook",
+      "to": "theme-authoring",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "html-build",
+      "to": "design",
+      "source": "prose"
+    },
+    {
+      "type": "requires",
+      "from": "html-build",
+      "to": "design",
+      "source": "prerequisites"
+    },
+    {
+      "type": "used_by",
+      "from": "html-build",
+      "to": "html-build",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "html-build",
+      "to": "html-build",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "html-build",
+      "to": "phase4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "html-build",
+      "to": "version",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "image-curator",
+      "to": "html-build",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "pdf-export",
+      "to": "pdf-export",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "pdf-export",
+      "to": "pdf-export",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "pdf-export",
+      "to": "phase4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "pdf-export",
+      "to": "phase5",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "pdf-export",
+      "to": "prep-pdf",
+      "source": "prose"
+    },
+    {
+      "type": "requires",
+      "from": "pdf-export",
+      "to": "prep-pdf",
+      "source": "prerequisites"
+    },
+    {
+      "type": "references",
+      "from": "pdf-export",
+      "to": "version",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "prep-pdf",
+      "to": "html-build",
+      "source": "prose"
+    },
+    {
+      "type": "requires",
+      "from": "prep-pdf",
+      "to": "html-build",
+      "source": "prerequisites"
+    },
+    {
+      "type": "used_by",
+      "from": "prep-pdf",
+      "to": "measure",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "prep-pdf",
+      "to": "measure",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "prep-pdf",
+      "to": "pdf-export",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "prep-pdf",
+      "to": "pdf-export",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "prep-pdf",
+      "to": "phase4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "prep-pdf",
+      "to": "version",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "presenter-mode",
+      "to": "explain-me",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "presenter-mode",
+      "to": "html-build",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "presenter-mode",
+      "to": "phase4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "research",
+      "to": "phase1",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "research",
+      "to": "research",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "research",
+      "to": "research",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "requires",
+      "from": "slide-layout-gate",
+      "to": "html-build",
+      "source": "prerequisites"
+    },
+    {
+      "type": "used_by",
+      "from": "slide-layout-gate",
+      "to": "pdf-export",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "slide-layout-gate",
+      "to": "phase4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "storyline",
+      "to": "phase2",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "storyline",
+      "to": "phase3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "requires",
+      "from": "storyline",
+      "to": "research",
+      "source": "prerequisites"
+    },
+    {
+      "type": "used_by",
+      "from": "storyline",
+      "to": "storyline",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "storyline",
+      "to": "storyline",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "theme-authoring",
+      "to": "design",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "theme-authoring",
+      "to": "html-build",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "theme-authoring",
+      "to": "pm",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "theme-authoring",
+      "to": "storyline",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "version",
+      "to": "design",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "version",
+      "to": "design",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "version",
+      "to": "diagram-specialist",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "version",
+      "to": "handbook-reviewer",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "version",
+      "to": "handbook-writer",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "version",
+      "to": "html-build",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "version",
+      "to": "html-build",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "version",
+      "to": "image-curator",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "version",
+      "to": "measure",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "version",
+      "to": "pdf-export",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "version",
+      "to": "phase0",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "version",
+      "to": "phase1",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "version",
+      "to": "phase2",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "version",
+      "to": "phase3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "version",
+      "to": "phase4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "version",
+      "to": "phase5",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "version",
+      "to": "phase6",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "version",
+      "to": "research",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "version",
+      "to": "research",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "version",
+      "to": "source-verifier",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "version",
+      "to": "storyline",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "version",
+      "to": "storyline",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "version",
+      "to": "version",
+      "source": "required_skills"
+    }
+  ]
+}

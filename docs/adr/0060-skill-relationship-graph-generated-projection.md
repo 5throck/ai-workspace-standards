@@ -114,3 +114,34 @@ The projection gains a document layer generalizing the co-newbiz multi-element p
 - **Not ported**: procedure/artifact/rule/evidence-var node types remain project-local strengths (co-newbiz); L0 has no generic registries behind them and the amendment refuses to fabricate empty structure. Revisit on first generic registry.
 
 All document edges are advisory like every other edge in this graph. Implementation: `generate-skill-graph.ts` 1.2.0 (shared `buildGraph()` — the verifier inherits the extension unchanged, verified passing at 257 nodes / 600 edges).
+
+---
+
+## Amendment 2026-08-28 — Per-Template Graph Artifacts + Project-Local Generation (Amendment 2)
+
+**Status**: Accepted (owner decision overturning the original rejection of per-layer graph files for the template layer)
+**Design of record**: [2026-08-28-skill-graph-template-rollout-design.md](../designs/2026-08-28-skill-graph-template-rollout-design.md)
+
+The original Rejected Alternatives section declined per-layer graph files ("triples the gate
+count, makes cross-layer edges awkward joins, duplicates the drift check"). The owner has now
+confirmed a scoped reversal for the template layer, with two distinct mechanisms:
+
+- **Template layer — scoped artifacts**: `templates/common` and every `templates/co-*` ship
+  their own `docs/skill-graph.json`, generated at L0 by `generate-skill-graph.ts --scope` and
+  drift-gated per /sync by the extended step 4.65 (`verify-skill-graph.ts --scope`). These are
+  **scoped views, not replacements**: the L0 unified graph remains the workspace SSOT; scope
+  files carry only scope-local nodes (tagged `common` / `variant:co-*`) plus the upstream
+  targets their relations actually reference. Cross-layer joins stay awkward by design —
+  exactly one edge, both endpoints materialized.
+- **Project layer — local generation, not propagation**: projects never receive a copy of any
+  upstream graph. They run the (already L0+L1-promoted) generator in their own context, where
+  run-context auto-detection labels local assets `L3` instead of the previous mislabel `L0`,
+  and the existing dev-sync step 4.65 `existsSync` gate maintains the project-local artifact.
+  This is the mechanism the 2026-08-25 amendment already anticipated; Amendment 2 makes it the
+  contractual path and fixes the layer-labeling defect that would have corrupted project graphs.
+
+The original unified-graph decision stands for the workspace layer; the gate-count concern is
+answered by deriving every scope artifact from the same `buildScopeGraph()`/`buildGraph()`
+engines and gating all of them inside the single existing step 4.65 rather than adding new
+pipeline stages. Implementation: `generate-skill-graph.ts` 1.3.0, `verify-skill-graph.ts`
+1.1.0, `dev-sync.ts` 1.7.8.

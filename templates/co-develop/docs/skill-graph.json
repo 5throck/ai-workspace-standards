@@ -1,0 +1,162 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "id": "architect",
+      "type": "agent",
+      "layer": "variant:co-develop"
+    },
+    {
+      "id": "code-review",
+      "type": "skill",
+      "layer": "variant:co-develop"
+    },
+    {
+      "id": "code-writer",
+      "type": "agent",
+      "layer": "variant:co-develop"
+    },
+    {
+      "id": "designer",
+      "type": "agent",
+      "layer": "variant:co-develop"
+    },
+    {
+      "id": "pm",
+      "type": "agent",
+      "layer": "variant:co-develop"
+    },
+    {
+      "id": "README",
+      "type": "agent",
+      "layer": "variant:co-develop"
+    },
+    {
+      "id": "README_ko",
+      "type": "agent",
+      "layer": "variant:co-develop"
+    },
+    {
+      "id": "refactoring",
+      "type": "skill",
+      "layer": "variant:co-develop"
+    },
+    {
+      "id": "security-monitor",
+      "type": "agent",
+      "layer": "variant:co-develop"
+    },
+    {
+      "id": "stack-setup",
+      "type": "agent",
+      "layer": "variant:co-develop"
+    },
+    {
+      "id": "swe-solve",
+      "type": "skill",
+      "layer": "variant:co-develop"
+    },
+    {
+      "id": "test-driven-development",
+      "type": "skill",
+      "layer": "variant:co-develop"
+    },
+    {
+      "id": "test-runner",
+      "type": "agent",
+      "layer": "variant:co-develop"
+    }
+  ],
+  "edges": [
+    {
+      "type": "used_by",
+      "from": "code-review",
+      "to": "code-writer",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "code-review",
+      "to": "code-writer",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "code-review",
+      "to": "phase4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "designer",
+      "to": "code-review",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "designer",
+      "to": "refactoring",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "designer",
+      "to": "swe-solve",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "designer",
+      "to": "test-driven-development",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "refactoring",
+      "to": "code-writer",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "refactoring",
+      "to": "code-writer",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "refactoring",
+      "to": "phase4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "swe-solve",
+      "to": "phase4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "swe-solve",
+      "to": "pm",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "test-driven-development",
+      "to": "phase4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "test-driven-development",
+      "to": "test-runner",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "test-driven-development",
+      "to": "test-runner",
+      "source": "skill_manifest"
+    }
+  ]
+}

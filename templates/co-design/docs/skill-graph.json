@@ -1,0 +1,209 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "id": "accessibility-audit",
+      "type": "skill",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "design-lead",
+      "type": "agent",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "pm",
+      "type": "agent",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "prototype-engineer",
+      "type": "agent",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "README",
+      "type": "agent",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "README_ko",
+      "type": "agent",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "service-design",
+      "type": "skill",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "service-designer",
+      "type": "agent",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "storyteller",
+      "type": "agent",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "token-usage-lint",
+      "type": "skill",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "typography-expert",
+      "type": "agent",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "ui-ux-design-intelligence",
+      "type": "skill",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "ux-researcher",
+      "type": "agent",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "visual-designer",
+      "type": "agent",
+      "layer": "variant:co-design"
+    }
+  ],
+  "edges": [
+    {
+      "type": "phase",
+      "from": "accessibility-audit",
+      "to": "phase2",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "accessibility-audit",
+      "to": "phase4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "accessibility-audit",
+      "to": "ux-researcher",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "accessibility-audit",
+      "to": "visual-designer",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "service-design",
+      "to": "design-lead",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "service-design",
+      "to": "design-lead",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "service-design",
+      "to": "phase1",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "service-design",
+      "to": "phase2",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "service-design",
+      "to": "phase3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "service-design",
+      "to": "service-designer",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "service-design",
+      "to": "service-designer",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "token-usage-lint",
+      "to": "phase4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "token-usage-lint",
+      "to": "prototype-engineer",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "token-usage-lint",
+      "to": "prototype-engineer",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "ui-ux-design-intelligence",
+      "to": "design-lead",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "ui-ux-design-intelligence",
+      "to": "design-lead",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "ui-ux-design-intelligence",
+      "to": "phase1",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "ui-ux-design-intelligence",
+      "to": "phase2",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "ui-ux-design-intelligence",
+      "to": "phase3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "ui-ux-design-intelligence",
+      "to": "ux-researcher",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "ui-ux-design-intelligence",
+      "to": "visual-designer",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "ui-ux-design-intelligence",
+      "to": "visual-designer",
+      "source": "skill_manifest"
+    }
+  ]
+}

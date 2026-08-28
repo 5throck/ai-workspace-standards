@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Skill Relationship Graph Generator
- * @version 1.2.0
+ * @version 1.3.0
  *
  * Generates a skill relationship graph from multiple sources:
  * - SKILL.md files (prerequisites, relates_to frontmatter fields)
@@ -14,7 +14,17 @@
  * - docs/skill-graph.json (machine-readable, committed)
  * - docs/skill-graph.md (human-readable catalog, committed)
  *
- * Usage: bun scripts/generate-skill-graph.ts
+ * With --scope <common|co-*>: generates a scope-local graph for a single template
+ * layer instead, written to templates/<scope>/docs/skill-graph.json (JSON only —
+ * the .md catalog stays L0-exclusive). Scope-local nodes carry the scope's layer
+ * tag; relations naming an upstream (L0/common) skill materialize that target as a
+ * cross-layer node. See ADR-0060 Amendment 2 (2026-08-28).
+ *
+ * Run context: at the L0 workspace root (ROOT/templates exists) local assets are
+ * tagged L0; inside a project (no templates/ dir) they are tagged L3, so a
+ * project-local graph labels its own skills/agents correctly.
+ *
+ * Usage: bun scripts/generate-skill-graph.ts [--scope <common|co-*>]
  *
  * Exit codes:
  * - 0: Success
@@ -29,12 +39,16 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const ROOT = resolve(__dirname, '..');
 const templatesDir = join(ROOT, 'templates');
+// Run-context detection: the workspace root is the only context that has a
+// templates/ directory. Everywhere else (scaffolded project) local assets are
+// the project's own copies and must be tagged L3, not L0.
+const localLayer: 'L0' | 'L3' = existsSync(templatesDir) ? 'L0' : 'L3';
 
 // Interfaces for the graph structure
 interface GraphNode {
   id: string;
   type: 'skill' | 'agent' | 'decision' | 'adr';
-  layer: 'L0' | 'common' | 'variant:string';
+  layer: 'L0' | 'L3' | 'common' | 'variant:string';
 }
 
 interface GraphEdge {
@@ -205,7 +219,7 @@ function discoverNodes(): { skills: Map<string, GraphNode>, agents: Map<string, 
       if (entry.isDirectory()) {
         const skillFile = join(skillsDir, entry.name, 'SKILL.md');
         if (existsSync(skillFile)) {
-          skills.set(entry.name, { id: entry.name, type: 'skill', layer: 'L0' });
+          skills.set(entry.name, { id: entry.name, type: 'skill', layer: localLayer });
         }
       }
     }
@@ -253,7 +267,7 @@ function discoverNodes(): { skills: Map<string, GraphNode>, agents: Map<string, 
     for (const entry of entries) {
       if (entry.endsWith('.md') && entry !== 'handoff-spec.md') {
         const name = entry.replace('.md', '');
-        agents.set(name, { id: name, type: 'agent', layer: 'L0' });
+        agents.set(name, { id: name, type: 'agent', layer: localLayer });
       }
     }
   }
@@ -321,9 +335,9 @@ export function buildGraph(): SkillGraph {
 
   // Source 1: SKILL.md prerequisites field
   for (const [skillName, node] of skills) {
-    const skillPath = node.layer === 'L0' ? join(ROOT, 'skills', skillName, 'SKILL.md')
-      : node.layer === 'common' ? join(ROOT, 'templates', 'common', 'skills', skillName, 'SKILL.md')
-      : join(templatesDir, node.layer.replace('variant:', ''), 'skills', skillName, 'SKILL.md');
+    const skillPath = node.layer === 'common' ? join(ROOT, 'templates', 'common', 'skills', skillName, 'SKILL.md')
+      : node.layer.startsWith('variant:') ? join(templatesDir, node.layer.replace('variant:', ''), 'skills', skillName, 'SKILL.md')
+      : join(ROOT, 'skills', skillName, 'SKILL.md');
 
     if (!existsSync(skillPath)) continue;
 
@@ -350,8 +364,9 @@ export function buildGraph(): SkillGraph {
 
   // Source 2: Agent required_skills
   for (const [agentName, node] of agents) {
-    const agentPath = node.layer === 'L0' ? join(ROOT, 'agents', `${agentName}.md`)
-      : join(templatesDir, node.layer.replace('variant:', ''), 'agents', `${agentName}.md`);
+    const agentPath = node.layer === 'common' ? join(ROOT, 'templates', 'common', 'agents', `${agentName}.md`)
+      : node.layer.startsWith('variant:') ? join(templatesDir, node.layer.replace('variant:', ''), 'agents', `${agentName}.md`)
+      : join(ROOT, 'agents', `${agentName}.md`);
 
     if (!existsSync(agentPath)) continue;
 
@@ -410,9 +425,9 @@ export function buildGraph(): SkillGraph {
 
   // Source 4: Prose backtick references
   for (const [skillName, node] of skills) {
-    const skillPath = node.layer === 'L0' ? join(ROOT, 'skills', skillName, 'SKILL.md')
-      : node.layer === 'common' ? join(ROOT, 'templates', 'common', 'skills', skillName, 'SKILL.md')
-      : join(templatesDir, node.layer.replace('variant:', ''), 'skills', skillName, 'SKILL.md');
+    const skillPath = node.layer === 'common' ? join(ROOT, 'templates', 'common', 'skills', skillName, 'SKILL.md')
+      : node.layer.startsWith('variant:') ? join(templatesDir, node.layer.replace('variant:', ''), 'skills', skillName, 'SKILL.md')
+      : join(ROOT, 'skills', skillName, 'SKILL.md');
 
     if (!existsSync(skillPath)) continue;
 
@@ -429,8 +444,9 @@ export function buildGraph(): SkillGraph {
   }
 
   for (const [agentName, node] of agents) {
-    const agentPath = node.layer === 'L0' ? join(ROOT, 'agents', `${agentName}.md`)
-      : join(templatesDir, node.layer.replace('variant:', ''), 'agents', `${agentName}.md`);
+    const agentPath = node.layer === 'common' ? join(ROOT, 'templates', 'common', 'agents', `${agentName}.md`)
+      : node.layer.startsWith('variant:') ? join(templatesDir, node.layer.replace('variant:', ''), 'agents', `${agentName}.md`)
+      : join(ROOT, 'agents', `${agentName}.md`);
 
     if (!existsSync(agentPath)) continue;
 
@@ -454,7 +470,7 @@ export function buildGraph(): SkillGraph {
     for (const f of readdirSync(decisionsDir)) {
       if (!/^DEC-\d{8}-\d{2}\.md$/.test(f)) continue;
       const docId = `dec:${f.replace(/\.md$/, '')}`;
-      allNodes.set(docId, { id: docId, type: 'decision', layer: 'L0' });
+      allNodes.set(docId, { id: docId, type: 'decision', layer: localLayer });
 
       const raw = readFileSync(join(decisionsDir, f), 'utf-8');
       const frontmatter = parseFrontmatter(raw) as Record<string, unknown>;
@@ -502,7 +518,7 @@ export function buildGraph(): SkillGraph {
       const m = /^(\d{4})-.*\.md$/.exec(f);
       if (!m) continue;
       const adrId = `adr:${m[1]}`;
-      allNodes.set(adrId, { id: adrId, type: 'adr', layer: 'L0' });
+      allNodes.set(adrId, { id: adrId, type: 'adr', layer: localLayer });
 
       const content = readFileSync(join(adrsDir, f), 'utf-8');
       const refs = extractBacktickReferences(content, skillNames);
@@ -563,6 +579,182 @@ export function buildGraph(): SkillGraph {
   }
 
   // Sort deterministically
+  const sortedNodes = Array.from(allNodes.values()).sort((a, b) => a.id.localeCompare(b.id));
+  const sortedEdges = edges.sort((a, b) => {
+    const fromCompare = a.from.localeCompare(b.from);
+    if (fromCompare !== 0) return fromCompare;
+    const toCompare = a.to.localeCompare(b.to);
+    if (toCompare !== 0) return toCompare;
+    return a.type.localeCompare(b.type);
+  });
+
+  return {
+    version: 1,
+    nodes: sortedNodes,
+    edges: sortedEdges
+  };
+}
+
+/**
+ * Build a scope-local graph for a single template layer (templates/<scope>).
+ *
+ * Scope-local nodes carry the scope's own layer tag (`common` / `variant:<scope>`).
+ * Relations that name a skill defined upstream (L0 or common) resolve as
+ * cross-layer edges and the referenced target is materialized as a node with its
+ * upstream layer, keeping the verifier's unknown-target invariant intact without
+ * pulling the whole upstream catalog into the scope file. Overrides and the
+ * document layer are L0-only concerns and are not part of scope graphs.
+ * Phase targets (`phase<N>`) are pseudo-nodes, matching full-graph behavior.
+ *
+ * ADR-0060 Amendment 2 (2026-08-28).
+ * @version 1.3.0
+ */
+export function buildScopeGraph(scope: string): SkillGraph {
+  const scopeDir = join(templatesDir, scope);
+  const layer: GraphNode['layer'] = scope === 'common' ? 'common' : `variant:${scope}`;
+
+  // Upstream skill names (L0 first, then common) available as cross-layer targets
+  const upstream = new Map<string, GraphNode['layer']>();
+  const upstreamDirs: Array<[string, GraphNode['layer']]> = [
+    [join(ROOT, 'skills'), 'L0'],
+    [join(ROOT, 'templates', 'common', 'skills'), 'common'],
+  ];
+  for (const [dir, upstreamLayer] of upstreamDirs) {
+    if (!existsSync(dir)) continue;
+    for (const e of readdirSync(dir, { withFileTypes: true })) {
+      if (e.isDirectory() && !upstream.has(e.name) && existsSync(join(dir, e.name, 'SKILL.md'))) {
+        upstream.set(e.name, upstreamLayer);
+      }
+    }
+  }
+
+  const allNodes = new Map<string, GraphNode>();
+  const edges: GraphEdge[] = [];
+  const scopeSkills = new Set<string>();
+  const scopeAgents = new Set<string>();
+  // Every name an edge may legally point at: scope-local + upstream skills
+  const targetSkills = new Set<string>(upstream.keys());
+
+  const skillsDir = join(scopeDir, 'skills');
+  if (existsSync(skillsDir)) {
+    for (const e of readdirSync(skillsDir, { withFileTypes: true })) {
+      if (!e.isDirectory() || !existsSync(join(skillsDir, e.name, 'SKILL.md'))) continue;
+      allNodes.set(e.name, { id: e.name, type: 'skill', layer });
+      scopeSkills.add(e.name);
+      targetSkills.add(e.name);
+    }
+  }
+
+  const agentsDir = join(scopeDir, 'agents');
+  if (existsSync(agentsDir)) {
+    for (const f of readdirSync(agentsDir)) {
+      if (!f.endsWith('.md') || f === 'handoff-spec.md') continue;
+      const name = f.replace(/\.md$/, '');
+      allNodes.set(name, { id: name, type: 'agent', layer });
+      scopeAgents.add(name);
+    }
+  }
+
+  // Materialize an upstream node on first reference (cross-layer edge support)
+  const reference = (name: string): void => {
+    if (allNodes.has(name)) return;
+    const upstreamLayer = upstream.get(name);
+    if (upstreamLayer) allNodes.set(name, { id: name, type: 'skill', layer: upstreamLayer });
+  };
+
+  // Source 1 + 4 (skills): prerequisites, relates_to, prose backtick references
+  for (const name of scopeSkills) {
+    const skillPath = join(skillsDir, name, 'SKILL.md');
+    if (!existsSync(skillPath)) continue;
+    const content = readFileSync(skillPath, 'utf-8');
+    const frontmatter = parseFrontmatter(content) as SkillFrontmatter;
+
+    if (frontmatter?.prerequisites) {
+      const prereqs = parsePrerequisites(frontmatter.prerequisites, targetSkills);
+      for (const prereq of prereqs) {
+        if (prereq !== name && targetSkills.has(prereq)) {
+          reference(prereq);
+          edges.push({ type: 'requires', from: name, to: prereq, source: 'prerequisites' });
+        }
+      }
+    }
+
+    if (frontmatter?.relates_to && Array.isArray(frontmatter.relates_to)) {
+      for (const related of frontmatter.relates_to) {
+        if (typeof related === 'string' && related !== name && targetSkills.has(related)) {
+          reference(related);
+          edges.push({ type: 'relates_to', from: name, to: related, source: 'relates_to' });
+        }
+      }
+    }
+
+    const bodyParts = content.split('---');
+    const body = bodyParts.length > 1 ? bodyParts.slice(1).join('---') : content;
+    for (const ref of extractBacktickReferences(body, targetSkills)) {
+      if (ref !== name) {
+        reference(ref);
+        edges.push({ type: 'references', from: name, to: ref, source: 'prose' });
+      }
+    }
+  }
+
+  // Source 2 + 4 (agents): required_skills, prose backtick references
+  for (const name of scopeAgents) {
+    const agentPath = join(agentsDir, `${name}.md`);
+    if (!existsSync(agentPath)) continue;
+    const content = readFileSync(agentPath, 'utf-8');
+    const frontmatter = parseFrontmatter(content) as AgentFrontmatter;
+
+    if (frontmatter?.required_skills && Array.isArray(frontmatter.required_skills)) {
+      for (const skill of frontmatter.required_skills) {
+        if (typeof skill === 'string' && targetSkills.has(skill)) {
+          reference(skill);
+          edges.push({ type: 'used_by', from: skill, to: name, source: 'required_skills' });
+        }
+      }
+    }
+
+    const bodyParts = content.split('---');
+    const body = bodyParts.length > 1 ? bodyParts.slice(1).join('---') : content;
+    for (const ref of extractBacktickReferences(body, targetSkills)) {
+      reference(ref);
+      edges.push({ type: 'references', from: name, to: ref, source: 'prose' });
+    }
+  }
+
+  // Source 3: variant.json skill_manifest (variant scopes only)
+  const variantJsonPath = join(scopeDir, 'variant.json');
+  if (scope.startsWith('co-') && existsSync(variantJsonPath)) {
+    try {
+      const variantJson = JSON.parse(readFileSync(variantJsonPath, 'utf-8'));
+      const variantSpecific = variantJson?.skill_manifest?.variant_specific;
+      if (Array.isArray(variantSpecific)) {
+        for (const entry of variantSpecific) {
+          const manifest = entry as SkillManifestEntry;
+          if (!targetSkills.has(manifest.name)) continue;
+          reference(manifest.name);
+
+          if (manifest.used_by_agents && Array.isArray(manifest.used_by_agents)) {
+            for (const agent of manifest.used_by_agents) {
+              if (scopeAgents.has(agent)) {
+                edges.push({ type: 'used_by', from: manifest.name, to: agent, source: 'skill_manifest' });
+              }
+            }
+          }
+
+          if (manifest.phases && Array.isArray(manifest.phases)) {
+            for (const phase of manifest.phases) {
+              edges.push({ type: 'phase', from: manifest.name, to: `phase${phase}`, source: 'skill_manifest' });
+            }
+          }
+        }
+      }
+    } catch {
+      // Invalid JSON, skip manifest
+    }
+  }
+
+  // Sort deterministically (same ordering as buildGraph)
   const sortedNodes = Array.from(allNodes.values()).sort((a, b) => a.id.localeCompare(b.id));
   const sortedEdges = edges.sort((a, b) => {
     const fromCompare = a.from.localeCompare(b.from);
@@ -705,6 +897,42 @@ function generateMarkdown(graph: SkillGraph): string {
  * Main execution
  */
 async function main(): Promise<void> {
+  const args = process.argv.slice(2);
+  const scopeIdx = args.indexOf('--scope');
+
+  // ── Scope mode: single template layer → templates/<scope>/docs/skill-graph.json ──
+  if (scopeIdx !== -1) {
+    const scope = args[scopeIdx + 1];
+    if (!scope || (scope !== 'common' && !scope.startsWith('co-')) || !existsSync(join(templatesDir, scope))) {
+      console.error(`ERROR: --scope must be 'common' or an existing templates/co-* directory (got: ${scope ?? '(missing)'})`);
+      process.exit(1);
+    }
+
+    console.log(`Generating skill relationship graph for scope: ${scope}`);
+    const graph = buildScopeGraph(scope);
+
+    const outDir = join(templatesDir, scope, 'docs');
+    if (!existsSync(outDir)) {
+      mkdirSync(outDir, { recursive: true });
+    }
+    const jsonPath = join(outDir, 'skill-graph.json');
+    writeFileSync(jsonPath, JSON.stringify(graph, null, 2));
+    console.log(`✓ Generated: ${jsonPath}`);
+
+    const skillNodes = graph.nodes.filter(n => n.type === 'skill');
+    console.log('');
+    console.log('Statistics:');
+    console.log(`  Nodes: ${graph.nodes.length} total (${skillNodes.length} skills, ${graph.nodes.length - skillNodes.length} agents)`);
+    const nodesByLayer = new Map<string, number>();
+    for (const node of graph.nodes) {
+      nodesByLayer.set(node.layer, (nodesByLayer.get(node.layer) || 0) + 1);
+    }
+    for (const [nodeLayer, count] of Array.from(nodesByLayer.entries()).sort()) {
+      console.log(`    - ${nodeLayer}: ${count}`);
+    }
+    return;
+  }
+
   console.log('Generating skill relationship graph...');
 
   const graph = buildGraph();

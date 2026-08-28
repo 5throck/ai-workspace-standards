@@ -1,0 +1,251 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "id": "arcade-designer",
+      "type": "agent",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "arcade-physics",
+      "type": "skill",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "architect",
+      "type": "agent",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "code-review",
+      "type": "skill",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "designer",
+      "type": "agent",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "game-debugger",
+      "type": "agent",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "game-designer",
+      "type": "agent",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "game-developer",
+      "type": "agent",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "pm",
+      "type": "agent",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "puzzle-designer",
+      "type": "agent",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "README",
+      "type": "agent",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "README_ko",
+      "type": "agent",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "refactoring",
+      "type": "skill",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "security-monitor",
+      "type": "agent",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "sound-designer",
+      "type": "agent",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "sound-synth",
+      "type": "skill",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "stack-setup",
+      "type": "agent",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "test-driven-development",
+      "type": "skill",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "test-runner",
+      "type": "agent",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "visual-artist",
+      "type": "agent",
+      "layer": "variant:co-game"
+    }
+  ],
+  "edges": [
+    {
+      "type": "references",
+      "from": "arcade-physics",
+      "to": "code-review",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "arcade-physics",
+      "to": "game-debugger",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "arcade-physics",
+      "to": "game-developer",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "arcade-physics",
+      "to": "game-developer",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "arcade-physics",
+      "to": "phase4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "arcade-physics",
+      "to": "sound-synth",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "arcade-physics",
+      "to": "test-driven-development",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "code-review",
+      "to": "game-debugger",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "code-review",
+      "to": "game-developer",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "code-review",
+      "to": "phase3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "code-review",
+      "to": "phase5",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "refactoring",
+      "to": "game-debugger",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "refactoring",
+      "to": "game-developer",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "refactoring",
+      "to": "phase3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "refactoring",
+      "to": "phase5",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "sound-synth",
+      "to": "phase3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "sound-synth",
+      "to": "phase4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "sound-synth",
+      "to": "sound-designer",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "test-driven-development",
+      "to": "game-debugger",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "test-driven-development",
+      "to": "game-developer",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "test-driven-development",
+      "to": "phase3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "test-driven-development",
+      "to": "phase5",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "test-driven-development",
+      "to": "test-runner",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "test-driven-development",
+      "to": "test-runner",
+      "source": "skill_manifest"
+    }
+  ]
+}

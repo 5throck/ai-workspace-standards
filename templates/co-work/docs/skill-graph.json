@@ -1,0 +1,108 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "id": "analyst",
+      "type": "agent",
+      "layer": "variant:co-work"
+    },
+    {
+      "id": "api-documentation",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
+      "id": "content-writer",
+      "type": "agent",
+      "layer": "variant:co-work"
+    },
+    {
+      "id": "documentation-writing",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
+      "id": "ms365-expert",
+      "type": "agent",
+      "layer": "variant:co-work"
+    },
+    {
+      "id": "pm",
+      "type": "agent",
+      "layer": "variant:co-work"
+    },
+    {
+      "id": "project-coordinator",
+      "type": "agent",
+      "layer": "variant:co-work"
+    },
+    {
+      "id": "README",
+      "type": "agent",
+      "layer": "variant:co-work"
+    },
+    {
+      "id": "README_ko",
+      "type": "agent",
+      "layer": "variant:co-work"
+    },
+    {
+      "id": "research-analysis",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
+      "id": "standup-synthesizer",
+      "type": "skill",
+      "layer": "variant:co-work"
+    },
+    {
+      "id": "storyteller",
+      "type": "agent",
+      "layer": "variant:co-work"
+    },
+    {
+      "id": "technical-writer",
+      "type": "agent",
+      "layer": "variant:co-work"
+    }
+  ],
+  "edges": [
+    {
+      "type": "used_by",
+      "from": "api-documentation",
+      "to": "technical-writer",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "documentation-writing",
+      "to": "content-writer",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "documentation-writing",
+      "to": "technical-writer",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "research-analysis",
+      "to": "analyst",
+      "source": "required_skills"
+    },
+    {
+      "type": "phase",
+      "from": "standup-synthesizer",
+      "to": "phase4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "standup-synthesizer",
+      "to": "project-coordinator",
+      "source": "skill_manifest"
+    }
+  ]
+}
