@@ -4,7 +4,7 @@
 
 ## 목적
 
-Queries the Korean Financial Supervisory Service (FSS) DART OpenAPI for corporate disclosures, company profiles, financial statements, and major event reports. Includes structured parsing rules, data normalization, and accounting line-item extraction for consulting intelligence. Requires DART_API_KEY environment variable.
+한국 금융감독원(FSS) DART OpenAPI를 조회하여 기업 공시, 회사 개황, 재무제표, 주요사항 보고서를 가져옵니다. 컨설팅 인텔리전스를 위한 구조화된 파싱 규칙, 데이터 정규화, 회계 항목 추출을 포함합니다. DART_API_KEY 환경 변수가 필요합니다.
 
 - **스코프(scope)**: `common`
 - **버전**: 2.0.0

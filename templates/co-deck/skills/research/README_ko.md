@@ -4,7 +4,7 @@
 
 ## 목적
 
-Source collection and ideation for lecture materials. After confirming topic/audience/purpose, performs web research (Korean and English by default, adjusted to the engagement's target market and audience when they differ) and writes research_notes.md. Responds to "research topic", "collect sources" . Stage 1 of the lecture workflow.
+강의 자료를 위한 자료 수집과 아이디어 발굴입니다. 주제/청중/목적을 확인한 뒤, 웹 리서치(기본은 한국어와 영어이며, 참여 대상 시장과 청중이 다를 경우 이에 맞춰 조정)를 수행하고 research_notes.md를 작성합니다. '주제 리서치', '자료 수집' 요청에 응답합니다. 강의 워크플로우의 1단계입니다.
 
 - **스코프(scope)**: `co-deck`
 - **버전**: 1.2.1

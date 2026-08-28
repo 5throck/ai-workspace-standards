@@ -4,7 +4,7 @@
 
 ## 목적
 
-Guides the Performance Management Consultant through evaluation framework selection, goal cascade design, rating/calibration process design, feedback cadence design, and compensation-linkage design. Use when: performance management system design, goal-setting framework (KPI/OKR) design, calibration process design, or merit-linkage design is required.
+Performance Management Consultant가 평가 프레임워크 선정, 목표 캐스케이드 설계, 등급/캘리브레이션 프로세스 설계, 피드백 주기 설계, 보상 연계 설계를 수행하도록 안내합니다. 성과관리 체계 설계, 목표설정 프레임워크(KPI/OKR) 설계, 캘리브레이션 프로세스 설계, 성과급 연계 설계가 필요할 때 사용합니다.
 
 - **스코프(scope)**: `co-hr`
 - **버전**: 1.0.0

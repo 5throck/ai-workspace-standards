@@ -4,7 +4,7 @@
 
 ## 목적
 
-Dual-window presenter state synchronization using browser BroadcastChannel API, syncing slide index, speaker notes, timer, current/next slide preview.
+브라우저 BroadcastChannel API를 사용한 듀얼 윈도우 발표자 상태 동기화 기능으로, 슬라이드 인덱스, 발표자 노트, 타이머, 현재/다음 슬라이드 미리보기를 동기화합니다. syncing slide index, speaker notes, timer, current/next slide preview.
 
 - **스코프(scope)**: `co-deck`
 - **버전**: 1.0.1

@@ -4,7 +4,7 @@
 
 ## 목적
 
-Instantiates the active country profile's statute-families table as a per-engagement compliance audit checklist: one checklist section per statute family, audit items derived from each family's domain notes, statutory text verified through the profile's mandated lookup tool, and gaps severity-ranked by the profile's enforcement context. Use when: labor-law compliance assessment, work-rules or working-conditions audit, OSH compliance review, or pre-acquisition/restructuring labor due diligence is required.
+활성화된 국가 프로필의 법령군(statute-families) 테이블을 프로젝트별 컴플라이언스 감사 체크리스트로 구체화합니다: 법령군별로 체크리스트 섹션을 하나씩 두고, 각 법령군의 도메인 노트에서 감사 항목을 도출하며, 프로필이 지정한 조회 도구로 법령 원문을 검증하고, 프로필의 집행 맥락에 따라 격차를 심각도별로 순위화합니다. 노동법 컴플라이언스 평가, 취업규칙/근로조건 감사, 산업안전보건(OSH) 컴플라이언스 검토, 인수·구조조정 노무 실사가 필요할 때 사용합니다.
 
 - **스코프(scope)**: `co-hr`
 - **버전**: 1.0.0

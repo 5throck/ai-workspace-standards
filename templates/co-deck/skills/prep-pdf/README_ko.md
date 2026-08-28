@@ -4,7 +4,7 @@
 
 ## 목적
 
-Playwright-free PDF preparation. Reads lecture-profile.md, resolves the 4-layer spec merge, validates fonts, outputs a layout summary, and optionally generates a sample PDF. Replaces the deprecated measure skill (Playwright-dependent). Responds to "prep for PDF", "estimate layout", "check PDF layout". Stages 9-10 of the lecture workflow (simplified).
+Playwright 없이 PDF를 준비합니다. lecture-profile.md를 읽어 4계층 스펙 병합을 해석하고, 폰트를 검증하고, 레이아웃 요약을 출력하며, 선택적으로 샘플 PDF를 생성합니다. Playwright 의존성이 있던 폐기된 measure 스킬을 대체합니다. 'PDF 준비', '레이아웃 추정', 'PDF 레이아웃 확인' 요청에 응답합니다. 강의 워크플로우의 9~10단계(간소화됨)입니다.
 
 - **스코프(scope)**: `co-deck`
 - **버전**: 2.0.0

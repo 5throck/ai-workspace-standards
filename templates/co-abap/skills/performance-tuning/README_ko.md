@@ -4,7 +4,7 @@
 
 ## 목적
 
-Use when investigating slow ABAP programs, expensive SQL statements, or reviewing performance risk on large tables (VBAK, BSEG, ACDOCA, etc.). Provides a standardized workflow using TraceExecution, ListSQLTraces, and GetCallGraph to diagnose and document performance issues before they reach production.
+느린 ABAP 프로그램, 고비용 SQL 문을 조사하거나 대용량 테이블(VBAK, BSEG, ACDOCA 등)의 성능 리스크를 검토할 때 사용합니다. TraceExecution, ListSQLTraces, GetCallGraph를 활용해 프로덕션 반영 전에 성능 이슈를 진단하고 문서화하는 표준화된 워크플로우를 제공합니다.
 
 - **스코프(scope)**: `co-abap`
 - **버전**: 1.0.0

@@ -4,7 +4,7 @@
 
 ## 목적
 
-Performs end-to-end (E2E) testing of the project scaffolding scripts to verify cross-platform functionality and encoding integrity.
+프로젝트 스캐폴딩 스크립트의 종단간(E2E) 테스트를 수행하여 크로스 플랫폼 동작과 인코딩 무결성을 검증합니다.
 
 - **스코프(scope)**: `co-safety`
 - **버전**: 1.0.0
