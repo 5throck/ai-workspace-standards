@@ -176,19 +176,19 @@
   "skills": [
     {
       "name": "compliance-gap",
-      "file": "skills/compliance-gap/SKILL.md"
+      "file": "skills/daily/compliance-gap/SKILL.md"
     },
     {
       "name": "emergency-response",
-      "file": "skills/emergency-response/SKILL.md"
+      "file": "skills/emergency/emergency-response/SKILL.md"
     },
     {
       "name": "permit-to-work",
-      "file": "skills/permit-to-work/SKILL.md"
+      "file": "skills/daily/permit-to-work/SKILL.md"
     },
     {
       "name": "risk-assessment",
-      "file": "skills/risk-assessment/SKILL.md"
+      "file": "skills/daily/risk-assessment/SKILL.md"
     }
   ],
   "displayName": "Safety OS",

@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.15.1
+ * @version 1.15.2
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -32,7 +32,7 @@ function isCoVariantTracked(name: string): boolean {
   if (!_TRACKED_CO_VARIANTS) return true;
   return _TRACKED_CO_VARIANTS.has(name);
 }
-import { join, dirname, resolve } from 'node:path';
+import { join, dirname, resolve, basename } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { load } from 'js-yaml';
@@ -1422,6 +1422,27 @@ function checkRootCommonCommandsParity(): void {
   }
 }
 
+// Recursively collect skill directories under a skills/ root, returning paths
+// relative to skillsDir (e.g. "change-control" for a flat layout, or
+// "domains/industry/gmp/change-control" for a nested layout like co-safety's).
+// A directory is a "skill" the moment it contains a direct SKILL.md; category
+// directories (daily/, domains/, investigation/, emergency/, _meta/, etc.)
+// have no SKILL.md of their own and are walked into instead of flagged.
+function collectSkillDirs(dir: string, skillsDir: string): string[] {
+  const results: string[] = [];
+  for (const entry of readdirSync(dir)) {
+    if (entry === '_archive' || entry === 'local' || entry === 'external' || entry.startsWith('_')) continue;
+    const fullPath = join(dir, entry);
+    if (!statSync(fullPath).isDirectory()) continue;
+    if (existsSync(join(fullPath, 'SKILL.md'))) {
+      results.push(fullPath.slice(skillsDir.length + 1).replace(/\\/g, '/'));
+    } else {
+      results.push(...collectSkillDirs(fullPath, skillsDir));
+    }
+  }
+  return results;
+}
+
 // Check B-09: Per-variant skill lifecycle (presence-driven)
 function checkVariantSkills(variant: string): void {
   const skillsDir = join(TEMPLATES_DIR, variant, 'skills');
@@ -1432,9 +1453,7 @@ function checkVariantSkills(variant: string): void {
 
   if (!JSON_MODE) console.log(`\n=== Check B-09: Skill lifecycle in ${variant} ===`);
 
-  const dirs = readdirSync(skillsDir).filter(d =>
-    d !== '_archive' && d !== 'local' && d !== 'external' && statSync(join(skillsDir, d)).isDirectory()
-  );
+  const dirs = collectSkillDirs(skillsDir, skillsDir);
 
   if (dirs.length === 0) {
     warn(variant, 'skill-lifecycle', `${variant}/skills/ exists but contains no skill directories`);
@@ -2516,13 +2535,10 @@ function checkVariantSkillsLayer(variant: string, _skillLayerMap: Map<string, im
   // rather than the workspace-root skill map, which never contains these files.
   const variantSkillLayerMap = parseSkillLayers(variantSkillsDir);
 
-  for (const entry of readdirSync(variantSkillsDir)) {
-    if (entry === '_archive' || entry === 'local' || entry === 'external') continue;
-    const fullPath = join(variantSkillsDir, entry);
-    if (!statSync(fullPath).isDirectory()) continue;
+  for (const entry of collectSkillDirs(variantSkillsDir, variantSkillsDir)) {
     const layer = getSkillLayer(entry, variantSkillLayerMap);
     if (layer !== 'L0+L1+L2') {
-      warn(variant, 'WS-06', `templates/${variant}/skills/${entry} is not declared L0+L1+L2`, `Add 'scope: ${variant}' to templates/${variant}/skills/${entry}/SKILL.md if it's a genuine domain-specific skill, or move it to templates/common/skills/${entry}/ if it should be shared across all variants`);
+      warn(variant, 'WS-06', `templates/${variant}/skills/${entry} is not declared L0+L1+L2`, `Add 'scope: ${variant}' to templates/${variant}/skills/${entry}/SKILL.md if it's a genuine domain-specific skill, or move it to templates/common/skills/${basename(entry)}/ if it should be shared across all variants`);
     }
   }
 }

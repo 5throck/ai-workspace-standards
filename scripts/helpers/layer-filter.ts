@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * layer-filter.ts — Single Layer Filter Engine
- * @version 1.4.1
+ * @version 1.4.2
  * @status active
  *
  * Reads SCRIPTS.md layer column (for scripts) and SKILL.md frontmatter (for skills)
@@ -122,22 +122,31 @@ export function parseSkillLayers(
   return _parseSkillLayersFromFrontmatter(skillsDir);
 }
 
-function _parseSkillLayersFromFrontmatter(skillsDir: string): Map<string, LayerValue> {
-  const result = new Map<string, LayerValue>();
-
-  if (!fs.existsSync(skillsDir)) return result;
-
+// Recursively walks skillsDir. A directory is treated as a skill the moment it
+// contains a direct SKILL.md; directories without one (category dirs like
+// daily/, domains/industry/gmp/, etc. — the co-safety-style nested layout) are
+// walked into instead of skipped, so nesting depth doesn't matter. Each found
+// skill is registered under both its full relative path (e.g.
+// "domains/industry/gmp/change-control", matching validate-templates.ts's
+// collectSkillDirs) and its bare basename (e.g. "change-control", preserving
+// the original flat-layout lookup key for existing callers).
+function _walkSkillDirs(dir: string, skillsDir: string, result: Map<string, LayerValue>): void {
   let entries: fs.Dirent[];
   try {
-    entries = fs.readdirSync(skillsDir, { withFileTypes: true });
+    entries = fs.readdirSync(dir, { withFileTypes: true });
   } catch {
-    return result;
+    return;
   }
 
   for (const entry of entries) {
     if (!entry.isDirectory()) continue;
-    const skillMdPath = path.join(skillsDir, entry.name, "SKILL.md");
-    if (!fs.existsSync(skillMdPath)) continue;
+    if (entry.name === "_archive" || entry.name === "local" || entry.name === "external" || entry.name.startsWith("_")) continue;
+    const fullPath = path.join(dir, entry.name);
+    const skillMdPath = path.join(fullPath, "SKILL.md");
+    if (!fs.existsSync(skillMdPath)) {
+      _walkSkillDirs(fullPath, skillsDir, result);
+      continue;
+    }
 
     let content: string;
     try {
@@ -169,9 +178,16 @@ function _parseSkillLayersFromFrontmatter(skillsDir: string): Map<string, LayerV
       }
     }
 
-    result.set(entry.name, layer);
+    const relPath = fullPath.slice(skillsDir.length + 1).replace(/\\/g, "/");
+    result.set(relPath, layer);
+    if (!result.has(entry.name)) result.set(entry.name, layer);
   }
+}
 
+function _parseSkillLayersFromFrontmatter(skillsDir: string): Map<string, LayerValue> {
+  const result = new Map<string, LayerValue>();
+  if (!fs.existsSync(skillsDir)) return result;
+  _walkSkillDirs(skillsDir, skillsDir, result);
   return result;
 }
 
