@@ -191,7 +191,7 @@ C:\git\ (워크스페이스 루트 - 현재 저장소)
     ├── co-abap/             # ✅ Stable — SAP ABAP 개발 에이전트 팀
     ├── co-hr/                # 🔶 Beta — 노무/HR 컨설팅 에이전트 팀 (KR 국가 프로필 포함)
     ├── co-safety/            # 🔶 Beta — EHS/GxP 컴플라이언스 플랫폼 에이전트 팀
-    └── co-price/            # ⚠️ Beta — K-Beauty 가격 관리 및 컨설팅 시뮬레이터
+    └── co-price/            # ⚠️ Beta — 가격 관리 및 컨설팅 시뮬레이터 (K-Beauty 샘플 데이터셋 포함)
 ```
 
 각 하위 프로젝트는 자체 디렉토리 및 개별 Git 저장소로 관리됩니다:
@@ -341,4 +341,4 @@ AGPL-3.0 - [LICENSE](LICENSE) 파일 참조
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-08-27*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-08-28*

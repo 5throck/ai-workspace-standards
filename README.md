@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-content_hash: 0afda165940a46f3788db21a9d8047ae41e5294219472b5e2c9289d4b8835f3b
+content_hash: f295143e63e3671318db42ef87582991d2593ce96cf52a7a7db6dc78393b1015
 ---
 
 **Languages**: [English](README.md) · [한국어](README_ko.md) · [Español](README_es.md) · [日本語](README_ja.md)
@@ -194,7 +194,7 @@ C:\git\ (workspace root - this repo)
     ├── co-abap/             # ✅ Stable — SAP ABAP development agent team
     ├── co-hr/                # 🔶 Beta — HR & labor-relations consulting agent team (KR country profile included)
     ├── co-safety/            # 🔶 Beta — EHS/GxP compliance platform agent team
-    └── co-price/            # ⚠️ Beta — K-Beauty pricing management & consulting simulator
+    └── co-price/            # ⚠️ Beta — pricing management & consulting simulator (K-Beauty sample dataset)
 ```
 
 Each sub-project lives in its own directory and git repository:
@@ -345,4 +345,4 @@ AGPL-3.0 - see [LICENSE](LICENSE)
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-08-27*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-08-28*
