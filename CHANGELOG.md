@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Fixed
+- **[2026-08-28]**: docs(readme): co-price used the ⚠️ warning icon for its Beta status in `README.md`/`README_ko.md`/`README_es.md`/`README_ja.md`/`templates/README.md` while every other Beta variant (co-deck, co-export, co-news, co-hr, co-safety) uses 🔶; standardized all 7 co-price occurrences to 🔶. Also fixed comment-column misalignment in the repository-structure tree blocks: `co-hr`/`co-safety` had one extra leading space in `README.md`/`README_ko.md`, and `co-price` had one missing space in `templates/README.md`.
 - **[2026-08-28]**: docs(readme): co-price was branded as a "K-Beauty pricing management & consulting simulator" in the top-level `README.md`/`README_ko.md`/`README_es.md`/`README_ja.md` and `templates/README.md`, but K-Beauty is only a bundled sample dataset (`getKBeautySampleState`) — co-price's own `README.md` and docs describe it as a multi-industry pricing simulator. Reworded all six occurrences across the four language READMEs and `templates/README.md` to "multi-industry pricing management & consulting simulator (K-Beauty sample dataset included)".
 
 ### Added
