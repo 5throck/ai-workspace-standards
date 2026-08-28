@@ -1,5 +1,12 @@
 #!/usr/bin/env bun
-// @version 1.11.0
+// @version 1.12.0
+// v1.12.0: New GOVERNANCE FILES SYNC pass — add-if-missing delivery of top-level
+//           governance files (LICENSE) that fell through every other pass (the
+//           LOCKED/MERGE/DOCS/SYNC passes are path-specific and VARIANT ASSET DIRS
+//           SYNC only discovers directories). Source: variant template, then
+//           templates/common. Strictly add-if-missing: an existing project file is
+//           always preserved (licenses are intentionally forkable — co-price's
+//           commercial appendix, co-safety's filled-in copyright line).
 // v1.11.0: New VARIANT ASSET DIRS SYNC pass — generically discovers and hash-syncs any
 //           top-level variant template directory not already covered by the existing
 //           agents/skills/scripts/docs passes (e.g. co-safety's workflows/, regulations/,
@@ -1292,6 +1299,37 @@ if (variantAssetDirs.length > 0) {
   console.log('  (project-only files under these directories are preserved — not deleted; run with --prune-removed awareness manually if needed)');
   console.log('');
 }
+
+// ── GOVERNANCE FILES SYNC: top-level add-if-missing files (LICENSE, …) ────────
+// Templates ship top-level governance files (LICENSE) that no other pass covers:
+// LOCKED/MERGE/DOCS_*/VARIANT_DOCS_SYNC/SYNC_IF_NEWER all operate on hardcoded or
+// directory paths, and VARIANT ASSET DIRS SYNC only discovers directories — a
+// top-level file fell through every pass and never reached legacy projects. The
+// source is the variant template first, then templates/common (scaffold parity).
+// Semantics are strictly ADD-IF-MISSING: a project that already has the file keeps
+// its own — licenses are intentionally forkable (co-price carries a commercial
+// appendix, co-safety a filled-in copyright line), so an existing file is never
+// overwritten, never conflict-checked, and never updated to the template version.
+console.log('--- GOVERNANCE FILES SYNC (add-if-missing) ---');
+const GOVERNANCE_FILES = ['LICENSE'];
+let govFilesCopied = 0;
+for (const fileName of GOVERNANCE_FILES) {
+  const src = existsSync(join(templatesDir, fileName))
+    ? join(templatesDir, fileName)
+    : join(commonDir, fileName);
+  const dst = join(projectDir, fileName);
+  if (!existsSync(src)) continue;
+  if (existsSync(dst)) {
+    console.log(`  OK     ${fileName}  (project-owned — preserved)`);
+    continue;
+  }
+  console.log(`  NEW    ${fileName}  (from ${existsSync(join(templatesDir, fileName)) ? 'variant template' : 'templates/common'})`);
+  if (!dryRun) copyFileSync(src, dst);
+  console.log(`  ${dryTag}COPIED: ${fileName}`);
+  govFilesCopied++;
+  syncChanged++;
+}
+console.log('');
 
 // ── COUNTRY-SCOPED SKILL PRUNE (ADR-0057/0058) ────────────────────────────────
 // The skill-copy passes above sync from templates/common/skills/ and, for variant

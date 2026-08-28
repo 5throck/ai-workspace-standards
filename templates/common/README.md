@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-content_hash: df7fb53fafe8bd94e70ba35c127c203f8ab0d5e4ed497a714cb1c802f1bf69a6
+content_hash: 01860a1689156aecaa551873c56ea08ab6275f157ea95ea821faed89395fcd26
 ---
 
 # [Project Name]
@@ -42,4 +42,4 @@ bun install
 
 ## License
 
-[License name] - see [LICENSE](LICENSE)
+GNU Affero General Public License v3.0 (AGPL-3.0) - see [LICENSE](LICENSE)
