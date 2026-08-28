@@ -1,11 +1,12 @@
 #!/usr/bin/env bun
 /**
  * Skill Verification Script
- * @version 1.2.0
+ * @version 1.3.0
  * Verifies all skills in skills/ directory are loadable and properly formatted
  */
 
 import path from "node:path";
+import { existsSync, readdirSync } from "node:fs";
 
 const scriptDir = path.dirname(import.meta.path);
 const projectRoot = path.resolve(scriptDir, "..");
@@ -64,6 +65,45 @@ async function checkSkillsMdSchema(): Promise<SkillCheck | null> {
   }
 }
 
+// Catalog sync (2026-08-29, DEC-20260829-02 follow-up): every skills/*/SKILL.md must
+// have a Workspace Skills row in skills/SKILLS.md whose version matches frontmatter.
+// Workspace-root only: scaffolded projects carry variant-overlay skills that the
+// root catalog intentionally does not list.
+async function checkSkillsCatalogSync(): Promise<SkillCheck | null> {
+  const { existsSync, readdirSync } = await import('node:fs');
+  if (!existsSync(path.join(projectRoot, 'templates', 'common'))) return null;
+  const skillsMdPath = path.join(projectRoot, 'skills', 'SKILLS.md');
+  if (!existsSync(skillsMdPath)) return null;
+
+  const content = await Bun.file(skillsMdPath).text();
+  const rows: Record<string, string> = {};
+  for (const line of content.split('\n')) {
+    const m = line.match(/^\|\s*`([a-z0-9-]+)`\s*\|\s*"?([0-9][0-9.]*)"?\s*\|/);
+    if (m) rows[m[1]] = m[2];
+  }
+
+  const issues: string[] = [];
+  for (const dir of readdirSync(path.join(projectRoot, 'skills'))) {
+    const skillMd = path.join(projectRoot, 'skills', dir, 'SKILL.md');
+    if (!existsSync(skillMd)) continue;
+    const fm = (await Bun.file(skillMd).text()).split('---')[1] ?? '';
+    const version = fm.match(/^version:\s*"?([0-9][0-9.]*)"?/m)?.[1];
+    if (!version) continue; // frontmatter completeness is validate-skills' domain
+    if (!(dir in rows)) {
+      issues.push(`skills/SKILLS.md has no row for '${dir}' (frontmatter version ${version}) — add it to the Workspace Skills table`);
+    } else if (rows[dir] !== version) {
+      issues.push(`skills/SKILLS.md version drift for '${dir}': catalog=${rows[dir]}, SKILL.md=${version} — update the catalog row`);
+    }
+  }
+  if (issues.length === 0) return null;
+  return {
+    name: 'SKILLS.md catalog sync',
+    path: skillsMdPath,
+    status: 'FAIL',
+    issues,
+  };
+}
+
 async function main(): Promise<void> {
   console.log("🔍 Verifying Skills\n");
 
@@ -72,6 +112,10 @@ async function main(): Promise<void> {
   // B-03: Check SKILLS.md for stale 'layer' column
   const skillsMdCheck = await checkSkillsMdSchema();
   if (skillsMdCheck) checks.push(skillsMdCheck);
+
+  // Catalog sync: SKILLS.md rows must exist and match frontmatter versions
+  const catalogSyncCheck = await checkSkillsCatalogSync();
+  if (catalogSyncCheck) checks.push(catalogSyncCheck);
 
   for (const check of checks) {
     const icon = check.status === "PASS" ? "✅" : check.status === "WARN" ? "⚠️" : "❌";
@@ -94,8 +138,17 @@ async function main(): Promise<void> {
     console.log("✅ All skills verified");
   }
 
-  // Generate skills index
-  await generateSkillsIndex(checks);
+  // Legacy auto-index writer — SKIP when the curated lifecycle catalog is in place.
+  // skills/SKILLS.md is a hand-maintained SSOT registry (header "# SKILLS.md — Skill
+  // Lifecycle Registry"); only the legacy "# Skills Index" stub may be regenerated.
+  const skillsMdPath = path.join(projectRoot, "skills", "SKILLS.md");
+  const { readFileSync } = await import("node:fs");
+  const isLegacyIndex =
+    !existsSync(skillsMdPath) ||
+    readFileSync(skillsMdPath, "utf-8").startsWith("# Skills Index");
+  if (isLegacyIndex) {
+    await generateSkillsIndex(checks);
+  }
 }
 
 async function scanSkills(): Promise<SkillCheck[]> {
@@ -103,15 +156,14 @@ async function scanSkills(): Promise<SkillCheck[]> {
 
   // Use native filesystem API for cross-platform compatibility
   async function scanDirectory(dir: string): Promise<string[]> {
-    const files: string[] = [];
     const skillsPath = path.isAbsolute(dir) ? dir : path.join(projectRoot, dir);
+    if (!existsSync(skillsPath)) return [];
 
-    for await (const entry of Bun.glob(`${skillsPath}/**/*`)) {
-      if (entry.endsWith("SKILL.md")) {
-        files.push(entry);
-      }
-    }
-    return files;
+    // Bun.glob is unavailable in some Bun versions — plain recursive readdir (fixed 2026-08-29)
+    const entries = readdirSync(skillsPath, { recursive: true });
+    return entries
+      .filter((entry) => entry.endsWith("SKILL.md"))
+      .map((entry) => path.join(skillsPath, entry));
   }
 
   const skillFiles = await scanDirectory("skills");

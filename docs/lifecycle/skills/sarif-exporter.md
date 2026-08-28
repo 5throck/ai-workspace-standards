@@ -11,6 +11,7 @@
 Exports security scan results, threat matrices, and vulnerability findings into standard SARIF v2.1.0 (Static Analysis Results Interchange Format) JSON reports.
 
 ## Changelog
+- 2026-08-29: L0 dev-home copy (`skills/sarif-exporter/`) removed per DEC-20260829-02 — the skill is variant-exclusive to co-security; the variant copy is authoritative (1.0.1); L0 drift resolved by removal. Registered in `variant_scoped_skills` (docs/workspace-schema.json 1.5.0).
 - 2026-08-16: Lifecycle document created from SKILL.md frontmatter (backfill)
 
 ## Dependencies

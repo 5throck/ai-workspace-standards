@@ -10,7 +10,7 @@
 |-------|-------|-------------------|--------|------------|--------|---------|
 | `abap-code-review` | variant:co-abap | code-writer, code-writer, test-runner, test-runner | phase3, phase4 | — | — | — |
 | `abap-dev` | variant:co-abap | architect, code-writer, sap-investigator, test-runner | phase1, phase2, phase3, phase4 | — | — | — |
-| `accessibility-audit` | L0 | ux-researcher, visual-designer | phase2, phase4 | — | — | — |
+| `accessibility-audit` | variant:co-design | ux-researcher, visual-designer | phase2, phase4 | — | — | — |
 | `agent-lifecycle-manager` | L0 | — | — | — | — | — |
 | `ai-tell-reduction` | variant:co-news | style-editor, style-editor | phase4 | — | — | — |
 | `api-documentation` | L0 | technical-writer | — | — | — | — |
@@ -70,7 +70,7 @@
 | `map-channel-enforcement` | variant:co-price | — | — | — | — | — |
 | `market-entry-strategy` | variant:co-export | market-entry-strategist, market-entry-strategist | phase1, phase3, phase4 | — | — | — |
 | `math-function-plotter` | variant:co-price | — | — | — | — | — |
-| `mece-logic-auditor` | L0 | strategy-analyst | phase1 | — | — | — |
+| `mece-logic-auditor` | variant:co-consult | strategy-analyst | phase1 | — | — | — |
 | `meeting-facilitation` | L0 | — | — | — | — | — |
 | `narrative-framework` | variant:co-consult | communications-lead, communications-lead | phase3 | — | — | — |
 | `org-design-framework` | variant:co-hr | org-design-consultant, org-design-consultant | phase2, phase3 | — | — | — |
@@ -79,7 +79,7 @@
 | `performance-tuning` | variant:co-abap | architect, dba, sap-investigator | phase1, phase2, phase4 | — | — | — |
 | `post-write-chain` | variant:co-abap | code-writer, pm, test-runner | phase3, phase4 | — | — | — |
 | `prep-pdf` | variant:co-deck | measure, measure, pdf-export | phase4 | — | — | — |
-| `presenter-mode` | L0 | html-build | phase4 | — | — | — |
+| `presenter-mode` | variant:co-deck | html-build | phase4 | — | — | — |
 | `price-waterfall-analysis` | variant:co-price | — | — | — | — | — |
 | `pricing-governance` | variant:co-price | — | — | — | approval-record | exception-log, guardrail-status |
 | `pricing-playbook` | variant:co-price | — | — | scenario-comparison (enables) | elasticity-reading, price-corridor | pricing-policy-set, scenario-snapshots |
@@ -99,7 +99,7 @@
 | `sap-mm` | variant:co-abap | architect, dba, mm-analyst | phase1, phase2 | — | — | — |
 | `sap-pp` | variant:co-abap | architect, dba, pp-analyst | phase1, phase2 | — | — | — |
 | `sap-sd` | variant:co-abap | architect, dba, sd-analyst | phase1, phase2 | — | — | — |
-| `sarif-exporter` | L0 | pentester, report-writer | phase3, phase5 | — | — | — |
+| `sarif-exporter` | variant:co-security | pentester, report-writer | phase3, phase5 | — | — | — |
 | `scenario-comparison` | variant:co-price | — | — | pricing-governance (enables) | scenario-snapshots | tri-view-comparison, approval-record |
 | `script-lifecycle-manager` | L0 | — | — | — | — | — |
 | `security-scan` | L0 | — | — | — | — | — |
@@ -110,16 +110,16 @@
 | `skill-lifecycle-manager` | L0 | — | — | — | — | — |
 | `slide-layout-gate` | variant:co-deck | pdf-export | phase4 | pdf-export (composes_with) | slide-html | layout-gate-status |
 | `solution-design` | variant:co-consult | solutions-architect, solutions-architect, technology-specialist, technology-specialist | phase3, phase4 | — | — | — |
-| `sound-synth` | L0 | sound-designer | phase3, phase4 | — | — | — |
+| `sound-synth` | variant:co-game | sound-designer | phase3, phase4 | — | — | — |
 | `source-command-celebrate` | variant:co-abap | pm | phase6 | — | — | — |
 | `source-verification-ledger` | variant:co-news | fact-checker, fact-checker | phase2 | — | — | — |
 | `spdx-sbom` | variant:co-security | patch-engineer, report-writer | phase3, phase5 | — | — | — |
 | `stakeholder-alignment` | variant:co-consult | change-management-partner, change-management-partner, change-management-partner, workstream-lead, workstream-lead | phase1, phase1, phase2, phase2, phase4 | — | — | — |
 | `stakeholder-review-management` | variant:co-consult | delivery-manager, delivery-manager | phase4 | — | — | — |
 | `standup-synthesizer` | L0 | project-coordinator | phase4 | — | — | — |
-| `stride-threat-matrix` | L0 | threat-modeler | phase1, phase2 | — | — | — |
+| `stride-threat-matrix` | variant:co-security | threat-modeler | phase1, phase2 | — | — | — |
 | `style-lint-checklist` | variant:co-news | style-editor | phase4 | — | — | — |
-| `swe-solve` | L0 | pm | phase4 | — | — | — |
+| `swe-solve` | variant:co-develop | pm | phase4 | — | — | — |
 | `sync` | L0 | — | — | — | — | — |
 | `talent-acquisition-strategy` | variant:co-hr | talent-acquisition-specialist, talent-acquisition-specialist | phase2 | — | — | — |
 | `team-builder` | L0 | — | — | — | — | — |
@@ -231,3 +231,4 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `dec:DEC-20260825-01` | decision | — | — | — |
 | `dec:DEC-20260825-02` | decision | `sync` | — | — |
 | `dec:DEC-20260829-01` | decision | `decision-record` | — | — |
+| `dec:DEC-20260829-02` | decision | `decision-record` | — | — |

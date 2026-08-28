@@ -287,3 +287,46 @@ The following table shows the correct Layer classification for representative sc
 - Enable blocking enforcement in pre-commit hook for missing Layer values.
 
 **Full enforcement active**: After Phase 2 and Phase 3 are both complete. Until then, missing Layer values are reported as warnings by `audit.ts` rather than blocking errors.
+
+---
+
+## Amendment 1 (2026-08-29): Skill Layer Semantics — `L0+L2` introduced, variant-exclusive skills leave the L0 and common layers
+
+**Supersedes** the skill rows of the Structural Rules table and decision tree Q4 above
+for **skills only** (the script layer model, including `L0+L1+L2`, is unchanged).
+Recorded in `docs/decisions/DEC-20260829-02.md`; implemented in
+`scripts/helpers/layer-filter.ts` 1.5.0.
+
+**What changed**:
+
+- New LayerValue **`L0+L2`**: a variant-exclusive skill lives ONLY in its owning
+  variant's `templates/co-*/skills/` directory — no workspace-root (`skills/`) copy and
+  no `templates/common/skills/` base. It reaches L3 projects of its owning variant via
+  the variant overlay and never enters other variants' projects.
+- A scope value naming a variant (e.g. `scope: co-consult`) now maps to `L0+L2`
+  (previously `L0+L1+L2`: root base + common base + variant override). The old model
+  made the root/common copies the propagation source while variant copies evolved
+  independently — the resulting drift (4 of 7 variant-scoped skills diverged by
+  2026-08-29) is what motivated this amendment.
+- `L0+L1+L2` remains a valid LayerValue **for scripts only** (SCRIPTS.md byte-identical
+  sync model, §Structural Rules script rows unchanged). It is no longer produced by
+  skill scope parsing.
+- The drift-prone "base version + variant override" pattern for skills is retired:
+  variant-specific evolution now happens in exactly one place.
+- Enforced by: `validate-templates.ts` WS-06 (variant skills must be `L0+L2`),
+  WS-02/B-11 (`variant_scoped_skills` registry in `docs/workspace-schema.json` —
+  leaks into `templates/common/skills/` FAIL), and `includeSkillInL1()` excluding
+  `L0+L2` from L0→L1 skill propagation.
+
+**Structural Rules for skills (amended)**:
+
+| Directory | Permitted Layer | Notes |
+|-----------|----------------|-------|
+| `skills/` (root) | L0, L0+L1 | Common- and workspace-scoped skills only |
+| `templates/common/skills/` | L0+L1 only | No variant-scoped skills (B-11) |
+| `templates/co-*/skills/` | L0+L2 | Variant-exclusive; single authoritative copy |
+
+**Decision-tree Q4 (skills, amended)**: if the behavior is not identical across all
+variants, the skill is variant-exclusive → `L0+L2`, authored directly in
+`templates/co-<variant>/skills/`. Do not create an L0 or common base "for later";
+promote to `L0+L1` only when a second variant genuinely needs the skill.

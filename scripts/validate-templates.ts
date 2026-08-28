@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.18.0
+ * @version 1.19.0
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -1987,6 +1987,20 @@ function checkCommonContract(): void {
       fail('common', 'C-CM-01', `common-contract.json lists common skill '${skillName}' but templates/common/skills/${skillName}/SKILL.md is missing`, `Create templates/common/skills/${skillName}/SKILL.md`);
     } else {
       pass(`C-CM-01: common skill '${skillName}' → SKILL.md present`);
+    }
+  }
+
+  // C-CM-03 (ERROR): contract common_skills versions must match templates/common/skills/ frontmatter
+  // (added 2026-08-29 after the sync 1.0.0-vs-1.2.2 stale-entry find; DEC-20260829-02 follow-up)
+  for (const [skillName, entry] of Object.entries(contract.common_skills as Record<string, { version?: string; source?: string }>)) {
+    const skillPath = join(TEMPLATES_DIR, 'common', 'skills', skillName, 'SKILL.md');
+    if (!existsSync(skillPath)) continue; // C-CM-01 already flagged this
+    const fmVersion = readFileSync(skillPath, 'utf-8').match(/^version:\s*"?([0-9][0-9.]*)"?/m)?.[1];
+    const contractVersion = entry.version;
+    if (!contractVersion) {
+      fail('common', 'C-CM-03', `common-contract.json entry '${skillName}' has no version`, `Set "version" to the SKILL.md frontmatter version (${fmVersion ?? 'X.Y.Z'})`);
+    } else if (fmVersion && contractVersion !== fmVersion) {
+      fail('common', 'C-CM-03', `common-contract.json version mismatch for '${skillName}': contract=${contractVersion}, SKILL.md=${fmVersion}`, `Update common-contract.json "version" to ${fmVersion}`);
     }
   }
 
