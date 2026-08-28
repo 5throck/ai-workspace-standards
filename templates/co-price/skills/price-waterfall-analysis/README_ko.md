@@ -4,10 +4,10 @@
 
 ## 목적
 
-Pocket margin analysis and price waterfall diagnostics
+Pocket Margin 분석 및 가격 워터폴 진단
 
 - **스코프(scope)**: `co-price`
-- **버전**: 1.0.0"
+- **버전**: 1.0.0
 
 ## 사용 시점
 

@@ -4,7 +4,7 @@
 
 ## 목적
 
-Guides the Change Management Partner through systematically mapping how a proposed change affects specific organizational layers, processes, roles, and individuals. Produces layer-by-layer impact maps that feed directly into communications-lead's stakeholder messaging strategy.
+Change Management Partner가 제안된 변경 사항이 조직의 특정 계층, 프로세스, 역할, 개인에게 미치는 영향을 체계적으로 매핑하도록 안내합니다. communications-lead의 이해관계자 메시징 전략에 직접 반영되는 계층별 영향 맵을 산출합니다. proposed change affects specific organizational layers, processes, roles, and individuals. Produces layer-by-layer impact maps that feed directly into communications-lead's stakeholder messaging strategy.
 
 - **스코프(scope)**: `co-consult`
 - **버전**: 1.0.0

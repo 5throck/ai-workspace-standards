@@ -4,10 +4,10 @@
 
 ## 목적
 
-Pricing governance framework and corridor management
+가격 거버넌스 프레임워크 및 가격 회랑 관리
 
 - **스코프(scope)**: `co-price`
-- **버전**: 1.0.0"
+- **버전**: 1.0.0
 
 ## 사용 시점
 

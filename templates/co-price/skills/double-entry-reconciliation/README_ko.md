@@ -4,10 +4,10 @@
 
 ## 목적
 
-Double-entry bookkeeping integrity verification
+복식부기 정합성 검증
 
 - **스코프(scope)**: `co-price`
-- **버전**: 2.0.0"
+- **버전**: 2.0.0
 
 ## 사용 시점
 

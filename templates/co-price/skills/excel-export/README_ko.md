@@ -4,10 +4,10 @@
 
 ## 목적
 
-Structured Excel workbook generation from engine data
+엔진 데이터를 기반으로 한 구조화된 Excel 워크북 생성
 
 - **스코프(scope)**: `co-price`
-- **버전**: 2.0.0"
+- **버전**: 2.0.0
 
 ## 사용 시점
 

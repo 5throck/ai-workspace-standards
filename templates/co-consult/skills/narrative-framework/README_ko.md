@@ -4,7 +4,7 @@
 
 ## 목적
 
-Guides Communications Lead (and Solutions Architect for technical presentations) through constructing persuasive narrative structures for client deliverables. Converts analytical findings into compelling stories using proven storytelling frameworks. Shared skill between communications-lead and solutions-architect.
+Communications Lead(기술 발표의 경우 Solutions Architect도 포함)가 클라이언트 제출물을 위한 설득력 있는 내러티브 구조를 구성하도록 안내합니다. 검증된 스토리텔링 프레임워크를 활용해 분석 결과를 설득력 있는 이야기로 전환합니다. communications-lead와 solutions-architect가 공유하는 스킬입니다. presentations) through constructing persuasive narrative structures for client deliverables. Converts analytical findings into compelling stories using proven storytelling frameworks. Shared skill between communications-lead and solutions-architect.
 
 - **스코프(scope)**: `co-consult`
 - **버전**: 1.0.0

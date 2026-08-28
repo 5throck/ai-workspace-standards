@@ -4,7 +4,7 @@
 
 ## 목적
 
-Scans Markdown documentation for dead links and file reference errors.
+Markdown 문서에서 깨진 링크와 파일 참조 오류를 스캔합니다.
 
 - **스코프(scope)**: `common`
 - **버전**: 1.0.0

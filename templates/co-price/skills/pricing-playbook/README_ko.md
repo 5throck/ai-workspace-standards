@@ -4,10 +4,10 @@
 
 ## 목적
 
-Standardized pricing methodology and process guide
+표준화된 가격 책정 방법론 및 프로세스 가이드
 
 - **스코프(scope)**: `co-price`
-- **버전**: 1.0.0"
+- **버전**: 1.0.0
 
 ## 사용 시점
 

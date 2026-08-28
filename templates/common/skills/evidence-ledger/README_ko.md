@@ -4,7 +4,7 @@
 
 ## 목적
 
-Fixed-column evidence ledger that traces every claim a decision depends on to a source, a reference, and a verification state. Use when: building or updating an evidence or citation ledger, verifying claims ahead of a gate ruling, or linking evidence into a decision record (ADR-0061).
+의사결정이 근거하는 모든 주장을 출처, 참조, 검증 상태에 매핑하는 고정 컬럼형 근거 원장(evidence ledger)입니다. 근거/인용 원장을 작성하거나 업데이트할 때, 게이트 판정 전에 주장을 검증할 때, 또는 근거를 의사결정 기록(ADR-0061)에 연결할 때 사용합니다. to a source, a reference, and a verification state. Use when: building or updating an evidence or citation ledger, verifying claims ahead of a gate ruling, or linking evidence into a decision record (ADR-0061).
 
 - **스코프(scope)**: `common`
 - **버전**: 1.1.0

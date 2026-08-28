@@ -1,5 +1,5 @@
 ---
-name: ABAP Development Skills
+name: abap-dev
 description: Use when working on SAP ABAP development tasks — provides specialized workflows for BAPI exploration, transport management, unit testing, performance analysis, impact architecture analysis, and documentation audits. Trigger on any SAP/ABAP coding, debugging, or system analysis task.
 version: 1.1.0
 last_reviewed: 2026-08-15

@@ -1,5 +1,5 @@
 ---
-name: SAP CO Module — Controlling
+name: sap-co
 description: Use when working on CO module tasks — cost center accounting, internal orders, CO-PA profitability analysis, or cost allocation. Provides process flows, key table relationships, common query patterns, field notes, SAP quirks, and customizing tables for the CO module.
 version: 1.0.0
 last_reviewed: 2026-08-15

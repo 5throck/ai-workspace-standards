@@ -4,10 +4,10 @@
 
 ## 목적
 
-16-locale translation parity and glossary adherence
+16개 로케일 번역 정합성 및 용어집 준수 검증
 
 - **스코프(scope)**: `co-price`
-- **버전**: 2.0.0"
+- **버전**: 2.0.0
 
 ## 사용 시점
 

@@ -4,10 +4,10 @@
 
 ## 목적
 
-Systematic market and competitive analysis
+체계적인 시장 및 경쟁 분석
 
 - **스코프(scope)**: `co-price`
-- **버전**: 1.0.0"
+- **버전**: 1.0.0
 
 ## 사용 시점
 

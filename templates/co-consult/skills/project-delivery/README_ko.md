@@ -4,7 +4,7 @@
 
 ## 목적
 
-Guides the Delivery Manager through planning and managing consulting engagement delivery. Standardizes milestone design, issue logs, risk registers, and weekly status reporting for all co-consult engagements. Converts solution-design roadmap and dependency map into an actionable execution plan.
+Delivery Manager가 컨설팅 프로젝트 수행의 계획과 관리를 하도록 안내합니다. 모든 co-consult 프로젝트에 대해 마일스톤 설계, 이슈 로그, 리스크 레지스터, 주간 현황 보고를 표준화합니다. solution-design의 로드맵과 의존성 맵을 실행 가능한 실행 계획으로 전환합니다. delivery. Standardizes milestone design, issue logs, risk registers, and weekly status reporting for all co-consult engagements. Converts solution-design roadmap and dependency map into an actionable execution plan.
 
 - **스코프(scope)**: `co-consult`
 - **버전**: 1.0.0

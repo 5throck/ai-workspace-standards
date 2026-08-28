@@ -4,10 +4,10 @@
 
 ## 목적
 
-Spreadsheet-style data modeling and scenario analysis
+스프레드시트 방식의 데이터 모델링 및 시나리오 분석
 
 - **스코프(scope)**: `co-price`
-- **버전**: 2.0.0"
+- **버전**: 2.0.0
 
 ## 사용 시점
 

@@ -4,10 +4,10 @@
 
 ## 목적
 
-C-level presentation and decision deck design
+C-레벨 발표 자료 및 의사결정 덱 설계
 
 - **스코프(scope)**: `co-price`
-- **버전**: 1.0.0"
+- **버전**: 1.0.0
 
 ## 사용 시점
 

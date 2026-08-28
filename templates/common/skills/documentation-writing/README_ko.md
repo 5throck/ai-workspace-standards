@@ -4,7 +4,7 @@
 
 ## 목적
 
-Creates clear, accessible documentation and communications for diverse audiences. Use when: writing guides, creating documentation, drafting communications, or synthesizing complex information for technical and non-technical audiences.
+다양한 독자를 위한 명확하고 접근하기 쉬운 문서와 커뮤니케이션 자료를 작성합니다. 가이드 작성, 문서화, 커뮤니케이션 초안 작성, 기술/비기술 독자를 위한 복잡한 정보 정리 시 사용합니다. Use when: writing guides, creating documentation, drafting communications, or synthesizing complex information for technical and non-technical audiences.
 
 - **스코프(scope)**: `common`
 - **버전**: 1.0.0

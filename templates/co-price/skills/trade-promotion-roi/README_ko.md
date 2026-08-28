@@ -4,10 +4,10 @@
 
 ## 목적
 
-Trade promotion ROI evaluation with netROI gate
+netROI 게이트를 포함한 유통 프로모션 ROI 평가
 
 - **스코프(scope)**: `co-price`
-- **버전**: 1.0.0"
+- **버전**: 1.0.0
 
 ## 사용 시점
 

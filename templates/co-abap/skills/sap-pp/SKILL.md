@@ -1,5 +1,5 @@
 ---
-name: SAP PP Module — Production Planning
+name: sap-pp
 description: Use when working on PP module tasks — BOM, routing, production orders, MRP, or work center management. Provides process flows, key table relationships, common query patterns, field notes, SAP quirks, and customizing tables for the PP module.
 version: 1.0.0
 last_reviewed: 2026-08-15

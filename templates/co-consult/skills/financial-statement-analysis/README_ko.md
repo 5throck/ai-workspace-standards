@@ -4,7 +4,7 @@
 
 ## 목적
 
-Comprehensive financial statement analysis pipeline for the home-jurisdiction disclosure system (KR profile: DART). Collects DART data, validates accounting integrity, normalizes to canonical financial model, extracts KPIs (profitability, growth, leverage, cash flow), builds a 5+ level ROIC value driver tree, and generates a structured Markdown report.
+관할 공시 시스템(KR 프로필: DART)을 위한 종합 재무제표 분석 파이프라인입니다. DART 데이터를 수집하고, 회계 정합성을 검증하고, 표준 재무 모델로 정규화하며, KPI(수익성, 성장성, 레버리지, 현금흐름)를 추출하고, 5단계 이상의 ROIC 가치동인 트리를 구축하여 구조화된 Markdown 보고서를 생성합니다. system (KR profile: DART). Collects DART data, validates accounting integrity, normalizes to canonical financial model, extracts KPIs (profitability, growth, leverage, cash flow), builds a 5+ level ROIC value driver tree, and generates a structured Markdown report.
 
 - **스코프(scope)**: `co-consult`
 - **버전**: 1.3.1

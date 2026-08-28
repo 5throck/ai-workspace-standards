@@ -4,7 +4,7 @@
 
 ## 목적
 
-Guides the Delivery Manager through managing stakeholder review cycles for consulting deliverables. Standardizes reviewer selection, feedback collection, conflict resolution, and change history tracking. Accounts for 30-40% of Phase 4 schedule and must be planned accordingly.
+Delivery Manager가 컨설팅 산출물에 대한 이해관계자 검토 사이클을 관리하도록 안내합니다. 검토자 선정, 피드백 수집, 갈등 해결, 변경 이력 추적을 표준화합니다. Phase 4 일정의 30~40%를 차지하므로 이를 고려해 계획해야 합니다. consulting deliverables. Standardizes reviewer selection, feedback collection, conflict resolution, and change history tracking. Accounts for 30-40% of Phase 4 schedule and must be planned accordingly.
 
 - **스코프(scope)**: `co-consult`
 - **버전**: 1.0.0

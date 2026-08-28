@@ -4,7 +4,7 @@
 
 ## 목적
 
-Guides the Engagement Leader through building a new AI agent team for any consulting domain. Covers requirements interview, web benchmarking, current team diagnosis, proposal generation, and user approval gate. Outputs an approved proposal JSON for scripts/team-builder.ts to execute. Triggered by: "build new agent team".
+Engagement Leader가 모든 컨설팅 도메인을 위한 새로운 AI 에이전트 팀을 구축하도록 안내합니다. 요구사항 인터뷰, 웹 벤치마킹, 현재 팀 진단, 제안 생성, 사용자 승인 게이트를 다룹니다. scripts/team-builder.ts가 실행할 승인된 제안 JSON을 산출합니다. '새 에이전트 팀 구축' 요청 시 트리거됩니다. Covers requirements interview, web benchmarking, current team diagnosis, proposal generation, and user approval gate. Outputs an approved proposal JSON for scripts/team-builder.ts to execute. Triggered by: "build new agent team".
 
 - **스코프(scope)**: `common`
 - **버전**: 1.1.0
