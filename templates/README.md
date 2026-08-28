@@ -43,7 +43,7 @@ templates/
 | [`co-security`](co-security/) | ✅ Stable | Security engagement workflow with 6 agents (pm, red-team-lead, pentester, threat-modeler, etc.) |
 | [`co-consult`](co-consult/) | ✅ Stable | Strategy consulting with 11 agents and 16 domain skills |
 | [`co-price`](co-price/) | 🔶 Beta | Multi-industry pricing management & consulting simulator (bundled K-Beauty sample dataset) with 15 agents (PM, finance-strategy-lead, cpa-auditor, pricing-strategist, market-intelligence-analyst, engagement-director) and 21 skills (harness-verification, trade-promotion-roi, pricing-governance, map-channel-enforcement) |
-| [`co-deck`](co-deck/) | 🔶 Beta | Lecture/presentation production with 13 agents and multi-theme HTML-to-PDF pipeline |
+| [`co-deck`](co-deck/) | ✅ Stable | Lecture/presentation production with 13 agents and multi-theme HTML-to-PDF pipeline |
 | [`co-game`](co-game/) | ✅ Stable | Game development for HTML5 Canvas with Vanilla TypeScript and 13 agents |
 | [`co-export`](co-export/) | 🔶 Beta | Import/export trade-compliance workflow with 8 agents (HS classification, export control, FTA origin, duty drawback, logistics, market entry, foreign regulation monitoring, trade documentation) |
 | [`co-news`](co-news/) | 🔶 Beta | Business/finance journalism with 7 agents (pm, fact-checker, financial-analyst, legal-researcher, reporter, style-editor, visual-editor) and DART/regulatory research integration via country profiles (KR profile ships DART/k-dart + k-law) |

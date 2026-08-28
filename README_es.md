@@ -184,7 +184,7 @@ C:\git\ (raíz del workspace - este repo)
     ├── co-work/             # ✅ Estable — equipo de agentes para colaboración general y documentación
     ├── co-security/         # ✅ Estable — equipo de agentes para red team y modelado de amenazas
     ├── co-consult/          # ✅ Estable — equipo de agentes para consultoría estratégica y análisis
-    ├── co-deck/             # 🔶 Beta — equipo de agentes para producción de material de lectura y presentaciones
+    ├── co-deck/             # ✅ Estable — equipo de agentes para producción de material de lectura y presentaciones
     ├── co-game/             # ✅ Estable — equipo de agentes para desarrollo de juegos en HTML5 Canvas
     ├── co-export/           # 🔶 Beta — equipo de agentes para cumplimiento de comercio exterior
     ├── co-news/             # 🔶 Beta — equipo de agentes para periodismo empresarial/financiero (perfil de país KR incluido)
@@ -268,7 +268,7 @@ Los nuevos proyectos se generan a partir de variantes de plantillas versionadas.
 | `co-work` | ✅ Estable | Flujo de colaboración general — PM, Analista, Redactor Técnico, Redactor de Contenido, Coordinador de Proyecto, Storyteller, Experto en MS365 |
 | `co-security` | ✅ Estable | Flujo de compromiso de seguridad — PM, Líder de Red Team, Pentester, Modelador de Amenazas, Ingeniero de Parches, Redactor de Informes |
 | `co-consult` | ✅ Estable | Flujo de consultoría estratégica — Líder de Compromiso, Analista de Estrategia, Experto en la Industria, Socio de Gestión del Cambio, Líder de Comunicaciones, Arquitecto de Soluciones, y más |
-| `co-deck` | 🔶 Beta | Flujo de producción de material de lectura — PM, Versión, Investigación, Guion, Diseño, Construcción, Medición, Exportación |
+| `co-deck` | ✅ Estable | Flujo de producción de material de lectura — PM, Versión, Investigación, Guion, Diseño, Construcción, Medición, Exportación |
 | `co-game` | ✅ Estable | Flujo de desarrollo de juegos HTML5 Canvas — PM, Diseñador de Juegos, Diseñadores Arcade/Puzzle, Artista Visual, Diseñador de Sonido, Desarrollador de Juegos, Depurador de Juegos, Ejecutor de Pruebas, Monitor de Seguridad |
 | `co-export` | 🔶 Beta | Cumplimiento de comercio exterior — clasificación arancelaria, control de exportaciones y sanciones, origen TLC, devolución de aranceles, logística, entrada en mercados, seguimiento regulatorio, documentación comercial |
 | `co-news` | 🔶 Beta | Periodismo empresarial/financiero — PM, Reportero, Verificador de Hechos, Analista Financiero, Investigador Legal, Editor de Estilo, Editor Visual. Datos de jurisdicción mediante perfiles de país (perfil KR incluido) |
