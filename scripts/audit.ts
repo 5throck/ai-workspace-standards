@@ -1,4 +1,4 @@
-// @version 2.26.0
+// @version 2.26.1
 // v2.26.0: New checkProjectDocMarkerDrift() (WARN-only, local-only) — detects when a
 //           Projects/co-*/CLAUDE.md or GEMINI.md has fewer COMMON-CLAUDE/COMMON-GEMINI managed
 //           blocks than templates/common/{CLAUDE,GEMINI}.md, meaning upgrade-project.ts has lost
@@ -565,7 +565,18 @@ if (!LIFECYCLE_ONLY && fs.existsSync(path.join('scripts', 'SCRIPTS.md'))) {
     }
 }
 
-// Skills registry cross-check
+// Skills registry cross-check (nested-layout aware: variants like co-safety group
+// skills under category directories — daily/, domains/<axis>/<domain>/, … — that
+// carry no SKILL.md themselves. A directory with no direct SKILL.md whose subtree
+// contains one is a category directory, not a broken skill.)
+function hasSkillMdRecursive(dir: string): boolean {
+    for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+        if (!e.isDirectory()) continue;
+        if (fs.existsSync(path.join(dir, e.name, 'SKILL.md'))) return true;
+        if (hasSkillMdRecursive(path.join(dir, e.name))) return true;
+    }
+    return false;
+}
 for (const skillsDir of ['skills', path.join('.claude', 'skills')]) {
     if (fs.existsSync(skillsDir)) {
         for (const dir of fs.readdirSync(skillsDir)) {
@@ -574,6 +585,8 @@ for (const skillsDir of ['skills', path.join('.claude', 'skills')]) {
                 const skillMd = path.join(fullDir, 'SKILL.md');
                 if (fs.existsSync(skillMd)) {
                     Pass(`skill exists: ${skillMd}`);
+                } else if (hasSkillMdRecursive(fullDir)) {
+                    Pass(`skill category directory: ${fullDir}${path.sep}`);
                 } else {
                     Fail(`skill directory missing SKILL.md: ${fullDir}${path.sep}`);
                 }
