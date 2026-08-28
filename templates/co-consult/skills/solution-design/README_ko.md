@@ -4,7 +4,7 @@
 
 ## 목적
 
-Guides the Solutions Architect through converting business requirements into a full technical solution design. Covers requirements decomposition, architecture option comparison, trade-off analysis, and implementation roadmap with explicit dependency mapping and risk levels. Mandatory output includes dependency map and risk register for handoff to delivery-manager.
+Solutions Architect가 비즈니스 요구사항을 완전한 기술 솔루션 설계로 전환하도록 안내합니다. 요구사항 분해, 아키텍처 옵션 비교, 트레이드오프 분석, 명시적 의존성 매핑과 리스크 수준을 포함한 구현 로드맵을 다룹니다. delivery-manager로 인계하기 위한 의존성 맵과 리스크 레지스터 산출이 필수입니다. full technical solution design. Covers requirements decomposition, architecture option comparison, trade-off analysis, and implementation roadmap with explicit dependency mapping and risk levels. Mandatory output includes dependency map and risk register for handoff to delivery-manager.
 
 - **스코프(scope)**: `co-consult`
 - **버전**: 1.0.0

@@ -4,7 +4,7 @@
 
 ## 목적
 
-Implements software using Test-Driven Development (TDD) methodology with red-green-refactor cycle. Use when: developing new features, fixing bugs with tests, or ensuring code reliability through test-first approach.
+레드-그린-리팩터 사이클을 활용한 테스트 주도 개발(TDD) 방법론으로 소프트웨어를 구현합니다. 새 기능을 개발할 때, 테스트로 버그를 수정할 때, 테스트 우선 접근으로 코드 신뢰성을 확보할 때 사용합니다.
 
 - **스코프(scope)**: `co-game`
 - **버전**: 1.0.0

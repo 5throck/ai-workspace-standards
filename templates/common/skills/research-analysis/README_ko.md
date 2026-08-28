@@ -4,7 +4,7 @@
 
 ## 목적
 
-Conducts systematic research, data synthesis, and evidence-based analysis to support decision-making and documentation. Use when: analyzing topics, synthesizing research, gathering evidence, or investigating questions for documentation or strategy.
+의사결정과 문서화를 지원하기 위한 체계적인 리서치, 데이터 종합, 증거 기반 분석을 수행합니다. 주제를 분석할 때, 리서치를 종합할 때, 근거를 수집할 때, 문서화나 전략을 위한 질문을 조사할 때 사용합니다. decision-making and documentation. Use when: analyzing topics, synthesizing research, gathering evidence, or investigating questions for documentation or strategy.
 
 - **스코프(scope)**: `common`
 - **버전**: 1.0.0

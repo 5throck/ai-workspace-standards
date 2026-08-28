@@ -4,7 +4,7 @@
 
 ## 목적
 
-Defines automated WCAG 2.1 Level AA accessibility evaluation rules, DOM audit patterns, and remediation guidance using axe-core for UI components, templates, and web applications.
+UI 컴포넌트, 템플릿, 웹 애플리케이션을 대상으로 axe-core를 활용한 자동화된 WCAG 2.1 Level AA 접근성 평가 규칙, DOM 감사 패턴, 개선 가이드를 정의합니다. and remediation guidance using axe-core for UI components, templates, and web applications.
 
 - **스코프(scope)**: `co-design`
 - **버전**: 1.0.0

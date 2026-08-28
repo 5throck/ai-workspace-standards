@@ -4,7 +4,7 @@
 
 ## 목적
 
-Manages the creation, versioning, deprecation, and maintenance of automation scripts across the workspace and templates. Use when: creating new scripts, updating script versions, deprecating scripts, or managing script dependencies in SCRIPTS.md.
+워크스페이스와 템플릿 전반의 자동화 스크립트 생성, 버전 관리, 폐기, 유지관리를 담당합니다. 새 스크립트를 생성할 때, 스크립트 버전을 업데이트할 때, 스크립트를 폐기할 때, SCRIPTS.md의 스크립트 의존성을 관리할 때 사용합니다.
 
 - **스코프(scope)**: `co-safety`
 - **버전**: 1.2.0

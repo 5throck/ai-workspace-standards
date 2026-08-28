@@ -4,10 +4,10 @@
 
 ## 목적
 
-Prisma 7 ORM schema management and migration
+Prisma 7 ORM 스키마 관리 및 마이그레이션
 
 - **스코프(scope)**: `co-price`
-- **버전**: 2.0.0"
+- **버전**: 2.0.0
 
 ## 사용 시점
 

@@ -4,7 +4,7 @@
 
 ## 목적
 
-Procedural 8-bit retro sound effect and audio synthesis rules using Web Audio API and jsfxr parameter specifications for games and interactive web apps.
+게임과 인터랙티브 웹 앱을 위해 Web Audio API와 jsfxr 파라미터 명세를 사용한 절차적 8비트 레트로 사운드 이펙트 및 오디오 합성 규칙입니다.
 
 - **스코프(scope)**: `co-game`
 - **버전**: 1.0.0

@@ -4,7 +4,7 @@
 
 ## 목적
 
-Creates comprehensive API documentation including endpoints, parameters, authentication, request/response schemas, and code examples. Use when: documenting REST APIs, GraphQL interfaces, SDKs, or developer-facing technical specifications.
+엔드포인트, 파라미터, 인증, 요청/응답 스키마, 코드 예제를 포함한 포괄적인 API 문서를 작성합니다. REST API, GraphQL 인터페이스, SDK, 개발자 대상 기술 명세를 문서화할 때 사용합니다. request/response schemas, and code examples. Use when: documenting REST APIs, GraphQL interfaces, SDKs, or developer-facing technical specifications.
 
 - **스코프(scope)**: `common`
 - **버전**: 1.0.0

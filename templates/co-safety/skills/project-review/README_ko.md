@@ -4,7 +4,7 @@
 
 ## 목적
 
-Performs a comprehensive parallel review of the current project using all available specialist agents. Auto-detects project type and agent roster, generates an execution plan, dispatches agents in parallel, and produces a prioritized improvement plan (Critical/High/Medium/Low). Use when: user requests a full project review ("/project-review" or "do a full project review"); PM detects structural changes (3+ agent files modified, phase schema changes, variant.json modified, new domain added); QA escalation from auditor (safety-audit.ts ERROR >= 3 or Critical finding).
+현재 프로젝트에 대해 사용 가능한 모든 전문 에이전트를 활용한 종합적인 병렬 리뷰를 수행합니다. 프로젝트 유형과 에이전트 로스터를 자동 감지하고, 실행 계획을 생성하고, 에이전트를 병렬로 배치하며, 우선순위가 매겨진 개선 계획(Critical/High/Medium/Low)을 산출합니다. 사용자가 전체 프로젝트 리뷰를 요청할 때('/project-review' 또는 '전체 프로젝트 리뷰 실행'), PM이 구조적 변경을 감지할 때(에이전트 파일 3개 이상 수정, 페이즈 스키마 변경, variant.json 수정, 새 도메인 추가), auditor로부터 QA 에스컬레이션이 발생할 때(safety-audit.ts ERROR 3건 이상 또는 Critical 발견) 사용합니다.
 
 - **스코프(scope)**: `co-safety`
 - **버전**: 1.1.0

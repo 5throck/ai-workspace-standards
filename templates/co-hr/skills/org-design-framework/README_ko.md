@@ -4,7 +4,7 @@
 
 ## 목적
 
-Guides the Org Design Consultant through organizational design principle definition, job architecture design, headcount/workforce planning by scenario, and restructuring process design. Use when: org structure design, job architecture design, workforce planning, or restructuring/voluntary-retirement process design is required.
+Org Design Consultant가 조직 설계 원칙 정의, 직무 구조 설계, 시나리오별 인원/인력 계획, 구조조정 프로세스 설계를 수행하도록 안내합니다. 조직 구조 설계, 직무 구조 설계, 인력 계획, 구조조정/희망퇴직 프로세스 설계가 필요할 때 사용합니다.
 
 - **스코프(scope)**: `co-hr`
 - **버전**: 1.0.0

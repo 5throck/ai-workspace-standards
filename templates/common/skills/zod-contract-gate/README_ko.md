@@ -4,7 +4,7 @@
 
 ## 목적
 
-Defines Zod runtime schema validation patterns, interface boundaries, and contract safety rules for multi-agent architecture, IPC channels, and API endpoints.
+멀티 에이전트 아키텍처, IPC 채널, API 엔드포인트를 위한 Zod 런타임 스키마 검증 패턴, 인터페이스 경계, 계약 안전 규칙을 정의합니다. and contract safety rules for multi-agent architecture, IPC channels, and API endpoints.
 
 - **스코프(scope)**: `common`
 - **버전**: 1.0.0

@@ -4,7 +4,7 @@
 
 ## 목적
 
-Guides the Compensation & Benefits Analyst through job evaluation, market benchmarking, pay structure design, incentive plan design, benefits design, and pay equity checks. Use when: pay band design, market pricing, incentive/bonus plan design, benefits design, or pay equity analysis is required.
+Compensation & Benefits Analyst가 직무 평가, 시장 벤치마킹, 급여 체계 설계, 인센티브 제도 설계, 복리후생 설계, 임금 공정성 점검을 수행하도록 안내합니다. 급여 밴드 설계, 시장 가격 책정, 인센티브/보너스 제도 설계, 복리후생 설계, 임금 공정성 분석이 필요할 때 사용합니다.
 
 - **스코프(scope)**: `co-hr`
 - **버전**: 1.0.0

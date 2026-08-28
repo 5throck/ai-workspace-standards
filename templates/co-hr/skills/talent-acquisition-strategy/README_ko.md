@@ -4,7 +4,7 @@
 
 ## 목적
 
-Guides the Talent Acquisition Specialist through role/headcount intake, sourcing channel strategy, selection process design with bias-mitigation checks, and pipeline funnel metrics. Use when: hiring plan design, sourcing strategy, interview/selection process design, or recruiting funnel analysis is required.
+Talent Acquisition Specialist가 직무/인원 인테이크, 소싱 채널 전략, 편향 완화 점검이 포함된 선발 프로세스 설계, 채용 퍼널 지표를 수행하도록 안내합니다. 채용 계획 설계, 소싱 전략, 면접/선발 프로세스 설계, 채용 퍼널 분석이 필요할 때 사용합니다.
 
 - **스코프(scope)**: `co-hr`
 - **버전**: 1.0.0

@@ -4,7 +4,7 @@
 
 ## 목적
 
-Celebrate the successful completion of a task to boost team morale.
+작업의 성공적인 완료를 축하하여 팀 사기를 높입니다.
 
 - **스코프(scope)**: `co-abap`
 - **버전**: 1.0.0

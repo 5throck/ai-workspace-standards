@@ -79,7 +79,7 @@ Harness Pass Certificate block (gates passed, seed hash, tolerances) or a reject
 failing `[Ref:]` anchors.
 ## Context
 
-See [docs/co-price.context.md](../docs/co-price.context.md) for project context and the consulting engagement lifecycle.
+See [docs/co-price.context.md](../../docs/co-price.context.md) for project context and the consulting engagement lifecycle.
 
 ## When to Use
 

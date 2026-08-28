@@ -4,7 +4,7 @@
 
 ## 목적
 
-Translation helper for README and documentation files with diff preview and guidance
+README 및 문서 파일을 위한 번역 도우미로, diff 미리보기와 가이드를 제공합니다.
 
 - **스코프(scope)**: `common`
 - **버전**: 1.0.1

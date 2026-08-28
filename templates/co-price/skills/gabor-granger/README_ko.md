@@ -4,10 +4,10 @@
 
 ## 목적
 
-Gabor-Granger direct pricing research methodology
+Gabor-Granger 직접 가격 조사 방법론
 
 - **스코프(scope)**: `co-price`
-- **버전**: 1.0.0"
+- **버전**: 1.0.0
 
 ## 사용 시점
 

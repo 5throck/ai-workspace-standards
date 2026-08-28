@@ -4,7 +4,7 @@
 
 ## 목적
 
-Pre-edit fact-forcing quality gate. Ensures agents investigate a file's importers, schemas, and scope constraints before making changes. Part of the 3-layer enforcement model (Hook → Prompt → Skill).
+사전 편집 사실 강제 품질 게이트입니다. 에이전트가 파일을 수정하기 전에 해당 파일의 임포터, 스키마, 범위 제약을 조사하도록 보장합니다. 3계층 강제 모델(Hook → Prompt → Skill)의 일부입니다.
 
 - **스코프(scope)**: `common`
 - **버전**: 1.0.0

@@ -4,7 +4,7 @@
 
 ## 목적
 
-Designs lecture storyline and slide deck composition. Given research_notes.md (or direct topic input), produces storyline.md and slide_deck.md. Responds to "make storyline", "compose slide deck", "structure chapters" (Korean: "make storyline", "compose slide deck", "restructure chapters"). Stages 2-3 of the lecture workflow.
+강의 스토리라인과 슬라이드 덱 구성을 설계합니다. research_notes.md(또는 직접 입력한 주제)를 바탕으로 storyline.md와 slide_deck.md를 산출합니다. '스토리라인 작성', '슬라이드 덱 구성', '챕터 구조화' 요청에 응답합니다. 강의 워크플로우의 2~3단계입니다.
 
 - **스코프(scope)**: `co-deck`
 - **버전**: 1.2.0

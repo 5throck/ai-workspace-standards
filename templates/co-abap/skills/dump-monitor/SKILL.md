@@ -1,5 +1,5 @@
 ---
-name: Dump Monitoring
+name: dump-monitor
 description: Use when checking SAP system health, investigating reported errors, or performing a periodic operational health check. Provides a standardized workflow using ListDumps/GetDump to detect ABAP short dumps and route new findings into /triage for investigation.
 version: 1.0.0
 last_reviewed: 2026-08-15

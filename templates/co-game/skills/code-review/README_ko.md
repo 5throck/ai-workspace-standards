@@ -4,7 +4,7 @@
 
 ## 목적
 
-Conducts thorough code reviews focusing on correctness, maintainability, security, and best practices. Use when: reviewing pull requests, evaluating code quality, providing constructive feedback, or ensuring code standards compliance.
+정확성, 유지보수성, 보안, 모범 사례에 중점을 둔 철저한 코드 리뷰를 수행합니다. 풀 리퀘스트를 검토할 때, 코드 품질을 평가할 때, 건설적인 피드백을 제공할 때, 코드 표준 준수를 보장할 때 사용합니다.
 
 - **스코프(scope)**: `co-game`
 - **버전**: 1.0.0

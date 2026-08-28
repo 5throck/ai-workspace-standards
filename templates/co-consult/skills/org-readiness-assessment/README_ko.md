@@ -4,7 +4,7 @@
 
 ## 목적
 
-Guides the Change Management Partner through diagnosing an organization's capacity to absorb and sustain change. Produces readiness scores, capability gap analysis, and change management cost estimates that feed into financial-modeling.
+Change Management Partner가 조직의 변화 수용 및 지속 역량을 진단하도록 안내합니다. 준비도 점수, 역량 격차 분석, financial-modeling에 반영되는 변화관리 비용 추정치를 산출합니다. capacity to absorb and sustain change. Produces readiness scores, capability gap analysis, and change management cost estimates that feed into financial-modeling.
 
 - **스코프(scope)**: `co-consult`
 - **버전**: 1.0.0

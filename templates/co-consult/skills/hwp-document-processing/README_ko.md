@@ -4,7 +4,7 @@
 
 ## 목적
 
-Handles two distinct Korean office formats with different capability profiles: HWP 5.0 (binary, read/validate only) and HWPX (open XML/ZIP, full read/write/generate/validate via python-hwpx). Use when: a government/institutional deliverable references a .hwp template but must be delivered as .hwpx, or when validating chapter structure, guideline-slot completeness, or page count of a drafted deliverable.
+서로 다른 기능 프로필을 가진 두 가지 한글 오피스 형식을 처리합니다: HWP 5.0(바이너리, 읽기/검증만 가능)과 HWPX(개방형 XML/ZIP, python-hwpx를 통한 전체 읽기/쓰기/생성/검증 지원). 정부/기관 산출물이 .hwp 템플릿을 참조하지만 .hwpx로 제출해야 할 때, 또는 초안 산출물의 챕터 구조, 가이드라인 슬롯 완결성, 페이지 수를 검증할 때 사용합니다. (binary, read/validate only) and HWPX (open XML/ZIP, full read/write/generate/validate via python-hwpx). Use when: a government/institutional deliverable references a .hwp template but must be delivered as .hwpx, or when validating chapter structure, guideline-slot completeness, or page count of a drafted deliverable.
 
 - **스코프(scope)**: `co-consult`
 - **버전**: 2.0.1

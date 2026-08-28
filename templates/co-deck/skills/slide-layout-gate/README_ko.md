@@ -4,7 +4,7 @@
 
 ## 목적
 
-Slide content conformance gate. Runs estimate-layout.ts --lint to check every slide in slidedata.json against the merged 4-layer spec's content_constraints (per slide type: title/subtitle/desc chars, bullet count, body chars). Exit 1 blocks PDF export. Responds to "layout gate", "lint slides", "check slide bounds", "slide content conformance".
+슬라이드 콘텐츠 준수 게이트입니다. estimate-layout.ts --lint을 실행하여 slidedata.json의 모든 슬라이드를 병합된 4계층 스펙의 content_constraints(슬라이드 유형별 제목/부제/설명 글자 수, 불릿 개수, 본문 글자 수)와 대조 검사합니다. Exit 1이면 PDF 내보내기가 차단됩니다. '레이아웃 게이트', '슬라이드 린트', '슬라이드 범위 확인', '슬라이드 콘텐츠 준수' 요청에 응답합니다.
 
 - **스코프(scope)**: `co-deck`
 - **버전**: 1.0.0

@@ -4,7 +4,7 @@
 
 ## 목적
 
-Guides the Strategy Analyst through building a full business case for consulting recommendations. Covers ROI analysis, NPV/IRR/Payback Period calculation, scenario sensitivity analysis, and explicitly includes change management cost category. Designed to work iteratively with technical-feasibility (max 2 loops).
+Strategy Analyst가 컨설팅 권고안에 대한 전체 비즈니스 케이스를 구축하도록 안내합니다. ROI 분석, NPV/IRR/투자회수기간 계산, 시나리오 민감도 분석을 다루며 변화관리 비용 항목을 명시적으로 포함합니다. technical-feasibility와 반복적으로(최대 2회) 연동하도록 설계되었습니다. recommendations. Covers ROI analysis, NPV/IRR/Payback Period calculation, scenario sensitivity analysis, and explicitly includes change management cost category. Designed to work iteratively with technical-feasibility (max 2 loops).
 
 - **스코프(scope)**: `co-consult`
 - **버전**: 1.0.1

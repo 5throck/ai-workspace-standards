@@ -4,7 +4,7 @@
 
 ## 목적
 
-Entry point for creating a new co-deck theme or style. PM dispatches the appropriate workflow (Style Workflow or T-Stage) based on user request. Responds to: "create a new theme", "add a new style", "make a dark theme", "create a dark style", "add zen theme".
+새로운 co-deck 테마 또는 스타일을 만들기 위한 진입점입니다. 사용자 요청에 따라 PM이 적절한 워크플로우(스타일 워크플로우 또는 T-Stage)를 배정합니다. 다음과 같은 요청에 응답합니다: '새 테마 만들기', '새 스타일 추가', '다크 테마 만들기', '다크 스타일 만들기', 'zen 테마 추가'.
 
 - **스코프(scope)**: `co-deck`
 - **버전**: 1.0.1

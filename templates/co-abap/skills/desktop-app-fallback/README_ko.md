@@ -4,7 +4,7 @@
 
 ## 목적
 
-Manual Post-Write QA chain for Claude Code Desktop App (hooks don't fire)
+Claude Code Desktop App용 수동 Post-Write QA 체인입니다(훅이 실행되지 않는 환경 대응).
 
 - **스코프(scope)**: `co-abap`
 - **버전**: 1.0.0

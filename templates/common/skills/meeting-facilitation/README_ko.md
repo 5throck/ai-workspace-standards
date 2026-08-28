@@ -4,7 +4,7 @@
 
 ## 목적
 
-Facilitates structured multi-agent meetings using the /meeting command for collaborative decision-making and problem resolution. Use when: running agent meetings, coordinating multi-agent discussions, or facilitating collaborative problem-solving sessions.
+/meeting 명령을 사용하여 협업적 의사결정과 문제 해결을 위한 구조화된 다중 에이전트 회의를 진행합니다. 에이전트 회의를 진행할 때, 다중 에이전트 논의를 조율할 때, 협업적 문제 해결 세션을 진행할 때 사용합니다. decision-making and problem resolution. Use when: running agent meetings, coordinating multi-agent discussions, or facilitating collaborative problem-solving sessions.
 
 - **스코프(scope)**: `common`
 - **버전**: 1.4.0

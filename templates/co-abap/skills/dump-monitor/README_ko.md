@@ -4,7 +4,7 @@
 
 ## 목적
 
-Use when checking SAP system health, investigating reported errors, or performing a periodic operational health check. Provides a standardized workflow using ListDumps/GetDump to detect ABAP short dumps and route new findings into /triage for investigation.
+SAP 시스템 상태를 점검하거나, 보고된 오류를 조사하거나, 정기 운영 헬스체크를 수행할 때 사용합니다. ListDumps/GetDump를 활용해 ABAP 숏덤프를 탐지하고 새 발견 사항을 /triage로 라우팅하는 표준화된 워크플로우를 제공합니다.
 
 - **스코프(scope)**: `co-abap`
 - **버전**: 1.0.0

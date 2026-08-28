@@ -4,7 +4,7 @@
 
 ## 목적
 
-Manages the creation, validation, and maintenance of AI agent files across the project. Use when: creating new agents, updating agent metadata/frontmatter, validating agent structures, or managing agent roles and 3-tier configurations.
+프로젝트 전반의 AI 에이전트 파일 생성, 검증, 유지관리를 담당합니다. 새 에이전트 생성, 에이전트 메타데이터/프론트매터 업데이트, 에이전트 구조 검증, 에이전트 역할 및 3단계(tier) 구성 관리 시 사용합니다.
 
 - **스코프(scope)**: `common`
 - **버전**: 1.0.0
