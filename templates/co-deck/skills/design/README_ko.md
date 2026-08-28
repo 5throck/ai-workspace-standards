@@ -4,7 +4,7 @@
 
 ## 목적
 
-Locks visual design style. Decides layout, color palette, font family and saves design_spec.md. Can analyze reference URLs/images. Responds to "lock design", "pick colors/fonts", "make design spec" . Stage 4 of the workflow.
+시각적 디자인 스타일을 확정합니다. 레이아웃, 색상 팔레트, 폰트 패밀리를 결정하고 design_spec.md로 저장합니다. 참조 URL/이미지 분석이 가능합니다. '디자인 확정', '색상/폰트 선택', '디자인 스펙 작성' 요청에 응답합니다. 워크플로우의 4단계입니다.
 
 - **스코프(scope)**: `co-deck`
 - **버전**: 1.2.1

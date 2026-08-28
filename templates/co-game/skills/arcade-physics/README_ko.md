@@ -4,7 +4,7 @@
 
 ## 목적
 
-Minimal Arcade-class 2D physics over the zero-dependency ECS core: velocity integration, gravity, damping, and AABB collision detection plus response. Use when: implementing movement, gravity, or collision response on the ECS core; wiring the game loop system order; or fixing tunneling/clamping bugs.
+무의존성 ECS 코어 위에서 동작하는 최소한의 아케이드급 2D 물리 엔진입니다: 속도 적분, 중력, 감쇠, AABB 충돌 감지 및 반응을 포함합니다. ECS 코어에서 이동, 중력, 충돌 반응을 구현할 때, 게임 루프 시스템 순서를 배선할 때, 또는 터널링/클램핑 버그를 수정할 때 사용합니다.
 
 - **스코프(scope)**: `co-game`
 - **버전**: 1.0.0

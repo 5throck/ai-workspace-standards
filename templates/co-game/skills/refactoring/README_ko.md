@@ -4,7 +4,7 @@
 
 ## 목적
 
-Improves code structure and design while preserving behavior using systematic refactoring techniques. Use when: cleaning up code, reducing duplication, improving maintainability, or paying down technical debt.
+체계적인 리팩토링 기법을 사용해 동작을 유지하면서 코드 구조와 설계를 개선합니다. 코드를 정리할 때, 중복을 줄일 때, 유지보수성을 개선할 때, 기술 부채를 상환할 때 사용합니다.
 
 - **스코프(scope)**: `co-game`
 - **버전**: 1.0.0

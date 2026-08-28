@@ -4,7 +4,7 @@
 
 ## 목적
 
-Use when reviewing ABAP source for Clean ABAP conformance before object activation, transport release, or after importing foreign code. Covers the three ABAP-specific dimensions that general-purpose review skills do not - naming conventions, pretty-printer formatting, and anti-pattern compliance - against docs/clean-abap-checklist.md. Trigger on "review the ABAP code", "Clean ABAP check", "naming convention review", "pretty printer check", "anti-pattern scan".
+객체 활성화, 트랜스포트 릴리즈 전이나 외부 코드를 임포트한 후 ABAP 소스의 Clean ABAP 준수 여부를 검토할 때 사용합니다. 일반 코드 리뷰 스킬이 다루지 않는 ABAP 전용 3가지 차원 — 네이밍 규칙, Pretty-Printer 포맷팅, 안티패턴 준수 — 을 docs/clean-abap-checklist.md 기준으로 검사합니다. 'ABAP 코드 리뷰', 'Clean ABAP 체크', '네이밍 규칙 리뷰', 'pretty printer 체크', '안티패턴 스캔' 요청 시 트리거됩니다.
 
 - **스코프(scope)**: `co-abap`
 - **버전**: 1.0.0

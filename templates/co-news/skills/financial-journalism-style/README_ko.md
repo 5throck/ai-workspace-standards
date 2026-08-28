@@ -4,7 +4,7 @@
 
 ## 목적
 
-Guides style-editor (and reporter during drafting) through house-style conventions for Korean business/finance journalism, drawing on general conventions associated with Sedaily (general economic-daily tone) and TheBell (IB/PE/capital-markets specialist tone). Default output language is Korean; non-Korean assignments use general business-journalism conventions instead. Use when: Phase 4, by style-editor on the reporter's draft; also referenced by reporter during Phase 3 drafting.
+style-editor(및 초안 작성 중인 reporter)가 한국 경제/금융 저널리즘의 하우스 스타일 관행을 따르도록 안내합니다 — 서울경제(일반 경제지 톤)와 더벨(IB/PE/자본시장 전문 톤)에서 통용되는 일반적인 관례를 참고합니다. 기본 출력 언어는 한국어이며, 비한국어 과제는 일반적인 비즈니스 저널리즘 관례를 대신 사용합니다. Phase 4에서 style-editor가 기자의 초안에 적용할 때, 그리고 Phase 3 초안 작성 중 reporter가 참고할 때 사용합니다.
 
 - **스코프(scope)**: `co-news`
 - **버전**: 1.0.0

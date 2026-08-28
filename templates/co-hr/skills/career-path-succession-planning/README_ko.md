@@ -4,7 +4,7 @@
 
 ## 목적
 
-Guides the Career & Succession Consultant through career path architecture, 9-box talent review, succession bench strength assessment, leadership pipeline development, and retention risk flagging. Use when: career path design, talent review, succession planning, leadership pipeline design, or retention risk assessment is required.
+Career & Succession Consultant가 경력 경로 설계, 9박스 인재 리뷰, 승계 후보군 역량 평가, 리더십 파이프라인 개발, 이직 위험 플래깅을 수행하도록 안내합니다. 경력 경로 설계, 인재 리뷰, 승계 계획, 리더십 파이프라인 설계, 이직 위험 평가가 필요할 때 사용합니다.
 
 - **스코프(scope)**: `co-hr`
 - **버전**: 1.0.0

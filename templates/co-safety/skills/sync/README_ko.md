@@ -4,7 +4,7 @@
 
 ## 목적
 
-Runs the full project sync pipeline: memory session log, CHANGELOG verification, safety audit, commit, push, and GitHub PR creation. Use when: user wants to commit and push changes, create a PR, or sync work to GitHub ("/sync", "commit and push", "create PR").
+전체 프로젝트 동기화 파이프라인을 실행합니다: 메모리 세션 로그, CHANGELOG 검증, safety audit, 커밋, 푸시, GitHub PR 생성을 포함합니다. 사용자가 변경사항을 커밋·푸시하거나, PR을 생성하거나, 작업을 GitHub에 동기화하고자 할 때 사용합니다('/sync', '커밋 후 푸시', 'PR 생성').
 
 - **스코프(scope)**: `co-safety`
 - **버전**: 1.1.0

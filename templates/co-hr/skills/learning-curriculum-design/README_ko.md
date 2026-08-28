@@ -4,7 +4,7 @@
 
 ## 목적
 
-Guides the Learning & Development Specialist through training needs analysis, competency model design, curriculum architecture, and Kirkpatrick-based program evaluation planning. Use when: training needs analysis, competency model design, curriculum design, or learning program evaluation planning is required.
+Learning & Development Specialist가 교육 니즈 분석, 역량 모델 설계, 커리큘럼 아키텍처, Kirkpatrick 기반 프로그램 평가 계획을 수행하도록 안내합니다. 교육 니즈 분석, 역량 모델 설계, 커리큘럼 설계, 학습 프로그램 평가 계획이 필요할 때 사용합니다.
 
 - **스코프(scope)**: `co-hr`
 - **버전**: 1.0.0

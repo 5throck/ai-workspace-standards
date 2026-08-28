@@ -4,7 +4,7 @@
 
 ## 목적
 
-Guides visual-editor through turning a financial-narrative-brief's structured data into inline SVG for readers who benefit from visualizing complex financial concepts (capital structure changes, ownership timelines, YoY comparisons) rather than parsing prose alone. Use when: Phase 5, after the reporter's draft and financial-analyst's brief both exist.
+visual-editor가 financial-narrative-brief의 구조화된 데이터를 인라인 SVG로 전환하도록 안내합니다 — 자본구조 변화, 지분 타임라인, 전년 대비 비교 등 복잡한 금융 개념을 글만으로 파악하기보다 시각화했을 때 더 잘 이해하는 독자를 위한 것입니다. Phase 5에서, 기자의 초안과 financial-analyst의 브리프가 모두 존재한 뒤에 사용합니다.
 
 - **스코프(scope)**: `co-news`
 - **버전**: 1.0.1

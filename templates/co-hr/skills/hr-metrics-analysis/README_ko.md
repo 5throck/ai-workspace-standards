@@ -4,7 +4,7 @@
 
 ## 목적
 
-Guides the HR Data Analyst through defining reproducible HR metrics, labeling causal driver hypotheses, specifying dashboards, and applying benchmarking guardrails. Use when: workforce statistics analysis, turnover/conversion analysis, labor-cost analysis, or HR dashboard/people-analytics work is required.
+HR Data Analyst가 재현 가능한 HR 지표를 정의하고, 인과적 동인 가설에 라벨을 붙이고, 대시보드를 명세하고, 벤치마킹 가드레일을 적용하도록 안내합니다. 인력 통계 분석, 이직/전환 분석, 인건비 분석, HR 대시보드/피플 애널리틱스 작업이 필요할 때 사용합니다.
 
 - **스코프(scope)**: `co-hr`
 - **버전**: 1.0.1

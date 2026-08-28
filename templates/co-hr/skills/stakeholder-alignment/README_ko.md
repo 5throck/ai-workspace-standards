@@ -4,7 +4,7 @@
 
 ## 목적
 
-Guides the Change Management Partner through systematic stakeholder mapping, resistance analysis, influence-interest prioritization, and communication strategy development for HR/labor consulting engagements.
+Change Management Partner가 HR/노무 컨설팅 프로젝트를 위한 체계적인 이해관계자 매핑, 저항 분석, 영향력-관심도 우선순위화, 커뮤니케이션 전략 수립을 하도록 안내합니다.
 
 - **스코프(scope)**: `co-hr`
 - **버전**: 1.0.0
