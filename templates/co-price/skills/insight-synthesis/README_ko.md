@@ -4,10 +4,10 @@
 
 ## 목적
 
-Multi-specialist analysis integration into strategic insight
+여러 전문 분석을 전략적 인사이트로 통합
 
 - **스코프(scope)**: `co-price`
-- **버전**: 1.0.0"
+- **버전**: 1.0.0
 
 ## 사용 시점
 

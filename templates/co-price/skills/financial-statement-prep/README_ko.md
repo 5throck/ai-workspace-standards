@@ -4,10 +4,10 @@
 
 ## 목적
 
-Financial statement preparation and formatting
+재무제표 작성 및 포맷팅
 
 - **스코프(scope)**: `co-price`
-- **버전**: 2.0.0"
+- **버전**: 2.0.0
 
 ## 사용 시점
 

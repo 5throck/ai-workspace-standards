@@ -4,7 +4,7 @@
 
 ## 목적
 
-Guides Communications Lead through writing McKinsey/BCG-style consulting reports. Covers issue tree structure, MECE principle application, slide/page design logic, and recommendation framing with impact-feasibility assessment. Sets the quality floor for all client-facing deliverables.
+Communications Lead가 맥킨지/BCG 스타일의 컨설팅 보고서를 작성하도록 안내합니다. 이슈 트리 구조, MECE 원칙 적용, 슬라이드/페이지 설계 로직, 영향도-실행가능성 평가를 반영한 권고안 구성을 다룹니다. 모든 클라이언트 제출물의 품질 기준선을 설정합니다. reports. Covers issue tree structure, MECE principle application, slide/page design logic, and recommendation framing with impact-feasibility assessment. Sets the quality floor for all client-facing deliverables.
 
 - **스코프(scope)**: `co-consult`
 - **버전**: 1.0.0

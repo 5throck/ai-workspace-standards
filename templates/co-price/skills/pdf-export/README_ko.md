@@ -4,10 +4,10 @@
 
 ## 목적
 
-PDF report generation for client-facing deliverables
+클라이언트 제출용 산출물을 위한 PDF 보고서 생성
 
 - **스코프(scope)**: `co-price`
-- **버전**: 1.1.0"
+- **버전**: 1.1.0
 
 ## 사용 시점
 

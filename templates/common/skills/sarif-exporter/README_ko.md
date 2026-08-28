@@ -4,7 +4,7 @@
 
 ## 목적
 
-Exports security scan results, threat matrices, and vulnerability findings into standard SARIF v2.1.0 (Static Analysis Results Interchange Format) JSON reports.
+보안 스캔 결과, 위협 매트릭스, 취약점 발견 사항을 표준 SARIF v2.1.0(정적 분석 결과 교환 형식) JSON 보고서로 내보냅니다.
 
 - **스코프(scope)**: `co-security`
 - **버전**: 1.0.0

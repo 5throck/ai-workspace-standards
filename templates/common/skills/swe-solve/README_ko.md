@@ -4,7 +4,7 @@
 
 ## 목적
 
-Autonomous 4-stage issue-to-PR resolution pipeline for software engineering tasks, featuring test-driven validation and pull-request synthesis.
+소프트웨어 엔지니어링 작업을 위한 자율 4단계 이슈-to-PR 해결 파이프라인으로, 테스트 주도 검증과 풀 리퀘스트 합성을 특징으로 합니다.
 
 - **스코프(scope)**: `common`
 - **버전**: 1.0.0

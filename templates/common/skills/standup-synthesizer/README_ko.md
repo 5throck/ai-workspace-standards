@@ -4,7 +4,7 @@
 
 ## 목적
 
-Automated daily standup digest synthesizer aggregating git commit logs, issue status updates, pull request reviews, and ticket queue events over a 24-hour window.
+24시간 동안의 git 커밋 로그, 이슈 상태 업데이트, 풀 리퀘스트 리뷰, 티켓 큐 이벤트를 취합하는 자동화된 일일 스탠드업 다이제스트 합성 도구입니다.
 
 - **스코프(scope)**: `common`
 - **버전**: 1.0.0

@@ -4,10 +4,10 @@
 
 ## 목적
 
-Van Westendorp Price Sensitivity Meter survey analysis
+Van Westendorp 가격 민감도 측정(PSM) 설문 분석
 
 - **스코프(scope)**: `co-price`
-- **버전**: 1.0.0"
+- **버전**: 1.0.0
 
 ## 사용 시점
 

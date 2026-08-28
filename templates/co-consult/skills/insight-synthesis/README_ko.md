@@ -4,7 +4,7 @@
 
 ## 목적
 
-Guides the Strategy Analyst through integrating outputs from multiple specialist analyses (competitive research, organizational diagnostics, technical assessments) into a single unified strategic insight. Includes a mandatory cultural filtering step to ensure organizational context is not omitted.
+Strategy Analyst가 여러 전문 분석(경쟁 리서치, 조직 진단, 기술 평가)의 산출물을 하나의 통합된 전략적 인사이트로 결합하도록 안내합니다. 조직의 맥락이 누락되지 않도록 하는 필수 문화적 필터링 단계를 포함합니다. analyses (competitive research, organizational diagnostics, technical assessments) into a single unified strategic insight. Includes a mandatory cultural filtering step to ensure organizational context is not omitted.
 
 - **스코프(scope)**: `co-consult`
 - **버전**: 1.0.0

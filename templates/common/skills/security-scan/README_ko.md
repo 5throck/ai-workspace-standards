@@ -4,7 +4,7 @@
 
 ## 목적
 
-Runs static analysis and secret detection (via gitleaks) across the workspace.
+워크스페이스 전체에 대해 정적 분석과 시크릿 탐지(gitleaks 기반)를 실행합니다.
 
 - **스코프(scope)**: `common`
 - **버전**: 1.0.0

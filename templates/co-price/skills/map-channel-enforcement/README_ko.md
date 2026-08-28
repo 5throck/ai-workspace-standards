@@ -4,10 +4,10 @@
 
 ## 목적
 
-MAP policy enforcement and channel conflict resolution
+MAP 정책 강제 및 채널 충돌 해결
 
 - **스코프(scope)**: `co-price`
-- **버전**: 1.0.0"
+- **버전**: 1.0.0
 
 ## 사용 시점
 

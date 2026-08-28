@@ -4,10 +4,10 @@
 
 ## 목적
 
-Onyx 2.0 component design patterns
+Onyx 2.0 컴포넌트 디자인 패턴
 
 - **스코프(scope)**: `co-price`
-- **버전**: 2.0.0"
+- **버전**: 2.0.0
 
 ## 사용 시점
 

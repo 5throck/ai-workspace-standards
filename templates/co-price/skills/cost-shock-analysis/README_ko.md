@@ -4,10 +4,10 @@
 
 ## 목적
 
-Raw-material cost shock sensitivity analysis
+원자재 비용 충격 민감도 분석
 
 - **스코프(scope)**: `co-price`
-- **버전**: 1.0.0"
+- **버전**: 1.0.0
 
 ## 사용 시점
 

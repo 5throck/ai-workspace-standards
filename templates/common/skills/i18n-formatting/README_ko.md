@@ -4,7 +4,7 @@
 
 ## 목적
 
-Locale-specific formatting rules: date/time notation, number and currency formatting, units of measure, Korean-scale numerals, and print paper sizes. Use when: writing dates or numbers for a specific locale, formatting currency for a market, choosing metric or imperial units, applying Korean large-number scales, or picking a paper size.
+로케일별 포맷팅 규칙: 날짜/시간 표기, 숫자 및 통화 포맷, 측정 단위, 한국식 수 단위(만/억), 인쇄 용지 크기를 다룹니다. 특정 로케일에 맞춰 날짜나 숫자를 작성할 때, 시장에 맞는 통화 포맷을 적용할 때, 미터법/야드파운드법 단위를 선택할 때, 한국식 큰 수 단위를 적용할 때, 용지 크기를 선택할 때 사용합니다. currency formatting, units of measure, Korean-scale numerals, and print paper sizes. Use when: writing dates or numbers for a specific locale, formatting currency for a market, choosing metric or imperial units, applying Korean large-number scales, or picking a paper size.
 
 - **스코프(scope)**: `common`
 - **버전**: 1.0.0

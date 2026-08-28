@@ -4,7 +4,7 @@
 
 ## 목적
 
-MECE (Mutually Exclusive, Collectively Exhaustive) issue tree auditing and strategic reasoning evaluation rules for consulting problem-solving frameworks.
+컨설팅 문제 해결 프레임워크를 위한 MECE(상호 배타적이고 전체를 포괄하는) 이슈 트리 감사 및 전략적 추론 평가 규칙입니다.
 
 - **스코프(scope)**: `co-consult`
 - **버전**: 1.0.0

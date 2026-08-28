@@ -4,7 +4,7 @@
 
 ## 목적
 
-Guides Communications Lead through designing and building C-level strategy presentations and decision decks. Uses Pyramid Principle structure, "So What?" message extraction, and one-page summary design. The business case section requires inputs from all three prerequisite skills.
+Communications Lead가 C-레벨 전략 발표 자료와 의사결정용 덱을 설계하고 제작하도록 안내합니다. 피라미드 원칙 구조, "So What?" 메시지 추출, 한 페이지 요약 설계를 활용합니다. 비즈니스 케이스 섹션은 3개의 선행 스킬 모두의 산출물을 필요로 합니다. presentations and decision decks. Uses Pyramid Principle structure, "So What?" message extraction, and one-page summary design. The business case section requires inputs from all three prerequisite skills.
 
 - **스코프(scope)**: `co-consult`
 - **버전**: 1.0.0

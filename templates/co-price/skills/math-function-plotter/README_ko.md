@@ -4,10 +4,10 @@
 
 ## 목적
 
-Mathematical function visualization for pricing curves
+가격 곡선을 위한 수학 함수 시각화
 
 - **스코프(scope)**: `co-price`
-- **버전**: 2.0.0"
+- **버전**: 2.0.0
 
 ## 사용 시점
 

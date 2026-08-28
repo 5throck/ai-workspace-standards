@@ -4,7 +4,7 @@
 
 ## 목적
 
-Text layout and encoding guidance: character encoding (UTF-8, legacy Korean code pages, BOM hazards), line endings, RTL/bidi handling, and script-specific font selection (Hangul focus). Use when: encoding is corrupted or mojibake appears, an RTL locale must render correctly, fonts must be chosen for a script, or CRLF/BOM issues surface.
+텍스트 레이아웃 및 인코딩 가이드: 문자 인코딩(UTF-8, 레거시 한글 코드페이지, BOM 관련 위험), 줄바꿈 방식, RTL/양방향(bidi) 처리, 문자 체계별 폰트 선택(한글 중심)을 다룹니다. 인코딩이 깨지거나 문자가 깨져 보일 때, RTL 로케일이 올바르게 렌더링되어야 할 때, 특정 문자 체계에 맞는 폰트를 선택해야 할 때, CRLF/BOM 문제가 발생할 때 사용합니다. Korean code pages, BOM hazards), line endings, RTL/bidi handling, and script-specific font selection (Hangul focus). Use when: encoding is corrupted or mojibake appears, an RTL locale must render correctly, fonts must be chosen for a script, or CRLF/BOM issues surface.
 
 - **스코프(scope)**: `common`
 - **버전**: 1.0.0

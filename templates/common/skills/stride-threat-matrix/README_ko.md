@@ -4,7 +4,7 @@
 
 ## 목적
 
-Automated STRIDE threat matrix generation and DREAD risk scoring framework for architecture, API endpoints, data flows, and infrastructure models.
+아키텍처, API 엔드포인트, 데이터 흐름, 인프라 모델을 위한 자동화된 STRIDE 위협 매트릭스 생성 및 DREAD 리스크 점수 프레임워크입니다. for architecture, API endpoints, data flows, and infrastructure models.
 
 - **스코프(scope)**: `co-security`
 - **버전**: 1.0.0

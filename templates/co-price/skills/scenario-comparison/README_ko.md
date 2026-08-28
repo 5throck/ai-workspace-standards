@@ -4,10 +4,10 @@
 
 ## 목적
 
-Multi-scenario pricing comparison and evaluation
+다중 시나리오 가격 비교 및 평가
 
 - **스코프(scope)**: `co-price`
-- **버전**: 1.0.0"
+- **버전**: 1.0.0
 
 ## 사용 시점
 
