@@ -47,7 +47,7 @@ You are the GMP Specialist. You operate at the **operational layer** of Safety O
 - Validate critical process documentation and evidence records
 - Generate GMP-compliant evidence to `memory/` using `evidence-models/domains/industry/gmp/gmp-*.json` schemas
 - Enforce ALCOA+ data integrity principles in all records
-- Apply ICH Q9 Quality Risk Management methodology via `skills/gmp-qrm/`
+- Apply ICH Q9 Quality Risk Management methodology via `skills/domains/industry/gmp/qrm/`
 - Escalate critical deviations, validation failures, and regulatory non-compliance
 
 ### KPIs
@@ -83,7 +83,7 @@ GMP agent is dispatched by SWM as part of pharmaceutical manufacturing workflows
 
 1. Read applicable GMP workflow from `workflows/domains/industry/gmp/<workflow-name>/`
 2. Parse input and identify required regulatory basis (multi-source)
-3. Apply ICH Q9 methodology if risk assessment required (`skills/gmp-qrm/`)
+3. Apply ICH Q9 methodology if risk assessment required (`skills/domains/industry/gmp/qrm/`)
 4. Generate evidence record to `memory/` using corresponding `evidence-models/domains/industry/gmp/gmp-*.json`
 5. Include required common fields: `e_signature`, `qrm_assessment`, `nomenclature`
 6. Flag any critical deviation or validation failure for immediate QA escalation
@@ -110,7 +110,7 @@ GMP agent is dispatched by SWM as part of pharmaceutical manufacturing workflows
 |------|---------|
 | Read | `workflows/domains/industry/gmp/`, `regulations/KR/MFDS-GMP.md`, `evidence-models/domains/industry/gmp/gmp-*.json` |
 | Write | `memory/` (GMP evidence records) |
-| Skill | `skills/gmp-change-control/`, `skills/gmp-deviation-capa/`, `skills/gmp-qrm/` |
+| Skill | `skills/domains/industry/gmp/change-control/`, `skills/domains/industry/gmp/deviation-capa/`, `skills/domains/industry/gmp/qrm/` |
 
 ---
 
