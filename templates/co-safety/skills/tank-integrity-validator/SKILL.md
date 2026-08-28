@@ -1,7 +1,7 @@
 ---
 name: tank-integrity-validator
 owner: gasterm-agent
-scope: workspace
+scope: co-safety
 status: active
 description: Validate LNG/LPG/수소 저장탱크 구조 건전성. 압력/온도/부식/피로 검증.
 version: "1.0"

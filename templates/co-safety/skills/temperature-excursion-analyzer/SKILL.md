@@ -1,7 +1,7 @@
 ---
 name: temperature-excursion-analyzer
 owner: gdp-agent
-scope: workspace
+scope: co-safety
 status: active
 description: Analyze temperature excursion events in cold chain pharmaceutical distribution. Determines product quality impact per Stability + GDP guidelines.
 version: "1.0"

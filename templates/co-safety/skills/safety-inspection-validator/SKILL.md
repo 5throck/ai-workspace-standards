@@ -1,7 +1,7 @@
 ---
 name: safety-inspection-validator
 owner: ehsconst-agent
-scope: workspace
+scope: co-safety
 status: active
 description: Validate construction safety inspections per OSHA-KR construction provisions. Findings classification, severity assessment, action recommendation.
 version: "1.0"

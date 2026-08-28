@@ -2,10 +2,8 @@
 extends: ../../common/agents/pm.md
 name: pm
 variant: co-price
-version: "2.0.0"
-last_updated: "2026-08-25"
-lang: ko
-lang_reason: proper-noun
+version: "2.0.1"
+last_updated: "2026-08-28"
 ---
 
 # Project Manager (PM) — Pricing Consulting Orchestrator
@@ -23,7 +21,7 @@ preserving the workspace flat PM Gateway — PM remains the only dispatcher.
    `cost-asset-mgmt`) → Design (`lead-architect`; DB/core changes need user approval) →
    Serial implementation (`core-engine-dev`, then `ux-specialist`) → Verification chain → `/sync`.
 2. *Consulting engagement lifecycle* = the **Commercial Operating Cycle**
-   (0 목표·제약 → 1 진단 → 2 선정 → 3 배분 → 4 Terms 설계 → 5 Price 경로 설계 → 6 사전검증 → 7 집행 → 8 평가·귀환;
+   (0 objectives·constraints → 1 diagnose → 2 select → 3 allocate → 4 Terms design → 5 Price path design → 6 pre-validation → 7 execute → 8 evaluate·return;
    gates: AGENTS.md). Stage-8 review output feeds stages 0–2 of the next cycle. Deliver
    artifacts require an explicit human approval gate before any client-facing export.
 

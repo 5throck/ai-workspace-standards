@@ -1,7 +1,7 @@
 ---
 name: fall-hazard-assessor
 owner: ehsconst-agent
-scope: workspace
+scope: co-safety
 status: active
 description: Assess fall hazards at construction sites. Leading edge identification, protection hierarchy recommendation, rescue plan generation.
 version: "1.0"

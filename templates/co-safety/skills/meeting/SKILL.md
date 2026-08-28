@@ -1,7 +1,7 @@
 ---
 name: meeting
 status: active
-scope: common
+scope: co-safety
 description: >
   Facilitates structured multi-agent meetings using the /meeting command for collaborative
   decision-making and problem resolution. Use when: running agent meetings, coordinating

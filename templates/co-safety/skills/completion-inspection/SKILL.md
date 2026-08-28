@@ -1,7 +1,7 @@
 ---
 name: completion-inspection
 owner: gasterm-agent
-scope: workspace
+scope: co-safety
 status: active
 description: >
   Execute KGS on-site completion inspection and permit issuance for gas terminal

@@ -1,7 +1,7 @@
 ---
 name: arc-flash-analyzer
 owner: powergen-agent
-scope: workspace
+scope: co-safety
 status: active
 description: Arc flash hazard analysis per IEEE 1584. Computes incident energy, arc flash boundary, PPE category for high voltage work.
 version: "1.0"

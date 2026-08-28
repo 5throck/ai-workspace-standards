@@ -1,7 +1,7 @@
 ---
 name: glp-data-integrity-checker
 owner: glp-agent
-scope: workspace
+scope: co-safety
 status: active
 description: Validate ALCOA+ data integrity principles for GLP raw data per OECD GLP Section 9.
 version: "1.0"

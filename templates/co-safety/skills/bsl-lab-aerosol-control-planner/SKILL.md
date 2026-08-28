@@ -1,7 +1,7 @@
 ---
 name: bsl-lab-aerosol-control-planner
 owner: biotech-agent
-scope: workspace
+scope: co-safety
 status: active
 description: Plan bioaerosol and sharps-injury control for BSL-2/3 laboratory handling of biohazardous agents — inoculation, centrifugation, pipetting, biological safety cabinet (BSC) operation. BSC selection/certification, sealed centrifuge cups, engineered sharps, PI/IRB governance per BSA Art 13 [UNVERIFIED-flagged], exposure medical surveillance.
 version: "1.0"

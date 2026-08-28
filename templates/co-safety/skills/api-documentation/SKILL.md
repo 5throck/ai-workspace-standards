@@ -1,4 +1,5 @@
 ---
+scope: co-safety
 name: api-documentation
 description: >
   Creates comprehensive API documentation including endpoints, parameters, authentication,

@@ -1,4 +1,5 @@
 ---
+scope: co-safety
 name: research-analysis
 description: >
   Conducts systematic research, data synthesis, and evidence-based analysis to support

@@ -2,7 +2,7 @@
 name: root-cause-analysis
 version: 1.0.0
 owner: incident-investigation-agent
-scope: workspace
+scope: co-safety
 status: active
 description: Conduct Root Cause Analysis (RCA) for safety incidents
 metadata:

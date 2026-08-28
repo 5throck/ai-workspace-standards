@@ -1,7 +1,7 @@
 ---
 name: gas-dispersion-analyzer
 owner: gasterm-agent
-scope: workspace
+scope: co-safety
 status: active
 description: Model gas dispersion after leak for emergency response. LNG/LPG/수소 특성 반영.
 version: "1.0"

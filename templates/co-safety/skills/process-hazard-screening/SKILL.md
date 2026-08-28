@@ -1,7 +1,7 @@
 ---
 name: process-hazard-screening
 owner: ehschem-agent
-scope: workspace
+scope: co-safety
 status: active
 description: Initial hazard screening for chemical plant processes. Identifies PSM-applicable processes and dispatches detailed PHA to functional PSM service.
 version: "1.0"

@@ -1,7 +1,7 @@
 ---
 name: chemical-risk-assessment
 owner: msds-agent
-scope: workspace
+scope: co-safety
 status: active
 description: Scenario-based chemical risk assessment combining hazard data (GHS classification) with exposure evaluation. Outputs risk characterization with control recommendations.
 version: "1.1"

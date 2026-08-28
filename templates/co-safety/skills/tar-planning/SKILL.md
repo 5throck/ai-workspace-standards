@@ -1,7 +1,7 @@
 ---
 name: tar-planning
 owner: ehschem-agent
-scope: workspace
+scope: co-safety
 status: active
 description: >
   Chemical plant turnaround (TAR) shutdown planning — pre-TAR risk assessment,

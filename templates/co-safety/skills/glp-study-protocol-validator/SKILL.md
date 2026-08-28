@@ -1,7 +1,7 @@
 ---
 name: glp-study-protocol-validator
 owner: glp-agent
-scope: workspace
+scope: co-safety
 status: active
 description: Validate study protocol compliance with OECD GLP Section 8 requirements.
 version: "1.0"

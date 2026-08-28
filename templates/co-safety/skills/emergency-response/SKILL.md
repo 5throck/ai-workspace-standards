@@ -21,7 +21,7 @@ metadata:
     - 산업안전보건법 제54조 (중대재해 발생 시 조치)
     - 중대재해처벌법 제3조 (중대재해 처리 기준)
     - 산업안전보건법 제38조 (안전조치)
-scope: workspace
+scope: co-safety
 ---
 
 audit_exception: safety-os-skill-structure — Safety OS skills use the legal_basis-gated SSOT skill format (validated by scripts/skill-lifecycle-audit.ts and scripts/validate-skills.ts), not the generic template 5-section/7-frontmatter schema

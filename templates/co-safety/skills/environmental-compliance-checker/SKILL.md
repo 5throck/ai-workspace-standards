@@ -1,7 +1,7 @@
 ---
 name: environmental-compliance-checker
 owner: ehschem-agent
-scope: workspace
+scope: co-safety
 status: active
 description: Check environmental discharge compliance for chemical plants. Air (SOx/NOx/VOC/PM), water (BOD/COD/heavy metals), noise/vibration.
 version: "1.0"

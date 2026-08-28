@@ -1,7 +1,7 @@
 ---
 name: psm-loto
 owner: psm-agent
-scope: workspace
+scope: co-safety
 status: active
 description: >
   Execute Lockout/Tagout (LOTO) procedure verification per KOSHA GUIDE Z-40-2022 and

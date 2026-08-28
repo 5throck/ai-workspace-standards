@@ -1,7 +1,7 @@
 ---
 name: psm-moc
 owner: psm-agent
-scope: workspace
+scope: co-safety
 status: active
 description: Manage Process Safety Management (PSM) Management of Change (MOC) workflows
 version: "1.0"

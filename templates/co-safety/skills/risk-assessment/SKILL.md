@@ -18,7 +18,7 @@ metadata:
     - 중대재해처벌법 제4조 (안전·보건 확보 의무)
     - 산업안전보건법 시행규칙 제37조 (위험성평가의 실시 및 기록·보존)
     - 고용노동부 고시 「사업장 위험성평가에 관한 지침」 (위험성평가 방법 등)
-scope: workspace
+scope: co-safety
 ---
 
 audit_exception: safety-os-skill-structure — Safety OS skills use the legal_basis-gated SSOT skill format (validated by scripts/skill-lifecycle-audit.ts and scripts/validate-skills.ts), not the generic template 5-section/7-frontmatter schema

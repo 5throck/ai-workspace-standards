@@ -1,7 +1,7 @@
 ---
 name: thermal-burn-prevention-planner
 owner: food-agent
-scope: workspace
+scope: co-safety
 status: active
 description: Plan worker thermal-burn and cooking-oil fire-risk prevention for industrial fryers, cookers, steam lines, and hot surfaces in food manufacturing. Thermal-zone mapping, PPE selection, Class F/K cooking-oil fire response, steam-line LOTO points.
 version: "1.0"

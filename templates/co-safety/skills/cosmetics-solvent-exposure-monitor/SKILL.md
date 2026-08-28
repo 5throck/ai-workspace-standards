@@ -1,7 +1,7 @@
 ---
 name: cosmetics-solvent-exposure-monitor
 owner: cosmetics-agent
-scope: workspace
+scope: co-safety
 status: active
 description: Plan and assess worker inhalation-exposure monitoring for solvents (ethanol, isopropanol, methanol) and volatile raw materials in cosmetics manufacturing. Air-sampling strategy, OEL comparison, ventilation verification, respiratory-PPE selection, biological monitoring.
 version: "1.0"

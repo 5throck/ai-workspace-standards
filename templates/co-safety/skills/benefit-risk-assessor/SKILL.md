@@ -1,7 +1,7 @@
 ---
 name: benefit-risk-assessor
 owner: gvp-agent
-scope: workspace
+scope: co-safety
 status: active
 description: Integrated benefit-risk assessment per EU GVP Module 12. Supports PrOACT-URL, BRAT, MCDA frameworks.
 version: "1.0"

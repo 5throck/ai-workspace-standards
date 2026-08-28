@@ -1,7 +1,7 @@
 ---
 name: protocol-deviation-analyzer
 owner: gcp-agent
-scope: workspace
+scope: co-safety
 status: active
 description: Analyze clinical trial protocol deviations per ICH E6(R3). Classifies severity, identifies trends, recommends CAPA.
 version: "1.0"
