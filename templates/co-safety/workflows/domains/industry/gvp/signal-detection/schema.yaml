@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: signal-detection
+title: "신호 탐지 (Signal Detection)"
+status: active
+applicability: mandatory
+workflow_type: core
+
+legal_basis:
+  - 약사법 Article 73의2
+  - ICH E2E
+  - EU GVP Module 9
+industry_profile: pharmacovigilance
+agent: gvp-agent
+evidence_model: gvp-signal-record.json

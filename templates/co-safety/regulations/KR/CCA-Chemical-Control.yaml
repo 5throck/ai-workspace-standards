@@ -1,0 +1,259 @@
+# ── Registry schema v2 (mode: coordinates) ───────────────────────────────────
+# This file maps article numbers to official titles ONLY. Article content is
+# never cached here — fetch live from the 법제처 k-law API at point of use.
+# Migrated by migrate-registry-to-coordinates.ts on 2026-08-26
+schema_version: 2
+mode: coordinates
+jurisdiction: KR
+framework: CCA
+law_name: 화학물질관리법
+law_name_en: null
+abbreviation: null
+mst: "276815"
+enforced_from: null
+agency: null
+tier: 1
+regulator: ME (환경부)
+articles:
+  - "no": "1"
+    title: 목적
+    checked_at: "2026-08-26"
+  - "no": "2"
+    title: 정의
+    checked_at: "2026-08-26"
+  - "no": "3"
+    title: 적용범위
+    checked_at: "2026-08-26"
+  - "no": "4"
+    title: 국가 및 지방자치단체의 책무
+    checked_at: "2026-08-26"
+  - "no": "5"
+    title: 화학물질 취급자의 책무
+    checked_at: "2026-08-26"
+  - "no": "6"
+    title: 화학물질의 관리에 관한 기본계획
+    checked_at: "2026-08-26"
+  - "no": "7"
+    title: 화학물질관리위원회
+    checked_at: "2026-08-26"
+  - "no": "7"
+    title: 화학물질의 관리에 관한 조례의 제정
+    checked_at: "2026-08-26"
+  - "no": "8"
+    title: 주요 시책 등의 협의
+    checked_at: "2026-08-26"
+  - "no": "9"
+    title: 화학물질확인
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 화학물질 통계조사 및 정보체계 구축ㆍ운영
+    checked_at: "2026-08-26"
+  - "no": "11"
+    title: 화학물질 배출량조사
+    checked_at: "2026-08-26"
+  - "no": "11"
+    title: 화학물질 배출저감계획서의 작성ㆍ제출 등
+    checked_at: "2026-08-26"
+  - "no": "12"
+    title: 화학물질 조사결과 및 정보의 공개
+    checked_at: "2026-08-26"
+  - "no": "13"
+    title: 유해화학물질 취급기준
+    checked_at: "2026-08-26"
+  - "no": "14"
+    title: 취급자의 개인보호장구 착용
+    checked_at: "2026-08-26"
+  - "no": "15"
+    title: 유해화학물질의 진열량ㆍ보관량 제한 등
+    checked_at: "2026-08-26"
+  - "no": "16"
+    title: 유해화학물질의 표시 등
+    checked_at: "2026-08-26"
+  - "no": "16"
+    title: 소비자에 대한 특례
+    checked_at: "2026-08-26"
+  - "no": "17"
+    title: 유해화학물질등의 제조ㆍ수입 등의 중지 등
+    checked_at: "2026-08-26"
+  - "no": "18"
+    title: 금지물질의 취급금지 및 제한물질의 취급제한
+    checked_at: "2026-08-26"
+  - "no": "19"
+    title: 허가물질의 제조ㆍ수입ㆍ사용 허가 등
+    checked_at: "2026-08-26"
+  - "no": "20"
+    title: 인체급성유해성물질 등의 수입신고
+    checked_at: "2026-08-26"
+  - "no": "21"
+    title: 제한물질 또는 금지물질의 수출승인 등
+    checked_at: "2026-08-26"
+  - "no": "22"
+    title: 환각물질의 흡입 등의 금지
+    checked_at: "2026-08-26"
+  - "no": "23"
+    title: 화학사고예방관리계획서의 작성ㆍ제출
+    checked_at: "2026-08-26"
+  - "no": "23"
+    title: 화학사고예방관리계획서 이행 등
+    checked_at: "2026-08-26"
+  - "no": "23"
+    title: 화학사고예방관리계획서의 지역사회 고지
+    checked_at: "2026-08-26"
+  - "no": "23"
+    title: 지역화학사고대응계획의 수립 등
+    checked_at: "2026-08-26"
+  - "no": "24"
+    title: 취급시설의 배치ㆍ설치 및 관리 기준 등
+    checked_at: "2026-08-26"
+  - "no": "25"
+    title: 취급시설 개선명령 등
+    checked_at: "2026-08-26"
+  - "no": "26"
+    title: 취급시설 등의 자체 점검
+    checked_at: "2026-08-26"
+  - "no": "27"
+    title: 유해화학물질 영업의 구분
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: 유해화학물질 영업허가 등
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: 유해화학물질 통신판매
+    checked_at: "2026-08-26"
+  - "no": "29"
+    title: 유해화학물질 영업허가 등의 면제
+    checked_at: "2026-08-26"
+  - "no": "29"
+    title: 유해화학물질등 판매자의 고지의무
+    checked_at: "2026-08-26"
+  - "no": "29"
+    title: 시약 판매업 또는 취급시설 없는 유해화학물질 판매업의 신고
+    checked_at: "2026-08-26"
+  - "no": "30"
+    title: 유해화학물질 영업자의 결격사유
+    checked_at: "2026-08-26"
+  - "no": "31"
+    title: 유해화학물질 취급의 도급신고 등
+    checked_at: "2026-08-26"
+  - "no": "32"
+    title: 유해화학물질관리자
+    checked_at: "2026-08-26"
+  - "no": "33"
+    title: 유해화학물질 안전교육
+    checked_at: "2026-08-26"
+  - "no": "34"
+    title: 유해화학물질 취급중단 및 휴업ㆍ폐업 등
+    checked_at: "2026-08-26"
+  - "no": "34"
+    title: 유해화학물질 영업자에 대한 개선명령
+    checked_at: "2026-08-26"
+  - "no": "35"
+    title: 유해화학물질 영업허가의 취소 등
+    checked_at: "2026-08-26"
+  - "no": "36"
+    title: 영업정지 처분을 갈음하여 부과하는 과징금 처분
+    checked_at: "2026-08-26"
+  - "no": "37"
+    title: 권리ㆍ의무의 승계
+    checked_at: "2026-08-26"
+  - "no": "38"
+    title: 유해화학물질관리자 및 취급시설의 공동 활용 승인 등
+    checked_at: "2026-08-26"
+  - "no": "39"
+    title: 사고대비물질의 지정
+    checked_at: "2026-08-26"
+  - "no": "40"
+    title: 사고대비물질의 관리기준
+    checked_at: "2026-08-26"
+  - "no": "41"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "41"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "42"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "43"
+    title: 화학사고 발생신고 등
+    checked_at: "2026-08-26"
+  - "no": "44"
+    title: 화학사고 현장 대응
+    checked_at: "2026-08-26"
+  - "no": "44"
+    title: 화학사고 발생 시설에 대한 가동중지명령
+    checked_at: "2026-08-26"
+  - "no": "45"
+    title: 화학사고 영향조사
+    checked_at: "2026-08-26"
+  - "no": "46"
+    title: 조치명령 등
+    checked_at: "2026-08-26"
+  - "no": "47"
+    title: 화학사고 특별관리지역의 지정
+    checked_at: "2026-08-26"
+  - "no": "48"
+    title: 화학물질 종합정보시스템 구축ㆍ운영
+    checked_at: "2026-08-26"
+  - "no": "48"
+    title: 전자민원창구의 설치ㆍ운영
+    checked_at: "2026-08-26"
+  - "no": "48"
+    title: 자료 제공의 요청
+    checked_at: "2026-08-26"
+  - "no": "48"
+    title: 국외제조ㆍ생산자가 선임한 자에 의한 업무 수행
+    checked_at: "2026-08-26"
+  - "no": "49"
+    title: 보고 및 검사 등
+    checked_at: "2026-08-26"
+  - "no": "50"
+    title: 서류의 기록ㆍ보존
+    checked_at: "2026-08-26"
+  - "no": "51"
+    title: 청문
+    checked_at: "2026-08-26"
+  - "no": "52"
+    title: 자료의 보호
+    checked_at: "2026-08-26"
+  - "no": "53"
+    title: 화학물질 관리에 관한 협회
+    checked_at: "2026-08-26"
+  - "no": "54"
+    title: 수수료
+    checked_at: "2026-08-26"
+  - "no": "55"
+    title: 권한의 위임ㆍ위탁
+    checked_at: "2026-08-26"
+  - "no": "56"
+    title: 벌칙 적용에서의 공무원 의제
+    checked_at: "2026-08-26"
+  - "no": "57"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "58"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "59"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "60"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "61"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "62"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "63"
+    title: 양벌규정
+    checked_at: "2026-08-26"
+  - "no": "64"
+    title: 과태료
+    checked_at: "2026-08-26"
+source_verification:
+  method: k-law-live
+  checked_at: "2026-08-26"
+  next_review: "2027-02-22"
+last_updated: "2026-08-26"

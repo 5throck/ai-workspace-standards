@@ -1,0 +1,87 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "psm-incident-investigation-record.json",
+  "title": "PSM Incident Investigation Record",
+  "description": "Evidence model for PSM incident investigation records per OSHA-KR Article 44 (48-hour initiation requirement).",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "version",
+    "record_id",
+    "timestamp",
+    "agent_id",
+    "workflow_id",
+    "legal_basis"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "default": "1.0.0"
+    },
+    "record_id": {
+      "type": "string",
+      "pattern": "^PSM-INC-[0-9]{4}-[0-9]{4}$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when the record was created"
+    },
+    "agent_id": {
+      "type": "string",
+      "description": "ID of the agent that generated this record"
+    },
+    "workflow_id": {
+      "type": "string",
+      "description": "ID of the workflow execution"
+    },
+    "incident_id": {
+      "type": "string"
+    },
+    "incident_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "investigation_started_within_48h": {
+      "type": "boolean"
+    },
+    "root_cause_analysis_method": {
+      "type": "string",
+      "enum": [
+        "taproot",
+        "fishbone",
+        "5_whys",
+        "fault_tree"
+      ]
+    },
+    "root_causes_identified": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "recommendations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "report_completion_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "description": "Multi-source legal basis. Primary: OSHA-KR Article 44 (PSM — incident investigation). Adjacent laws may include: OSHA-KR Article 54 (action upon serious accidents — stop work, evacuation, recurrence prevention) and OSHA-KR Article 57 (incident recording and reporting, retain 3 years).",
+      "examples": [
+        "산업안전보건법 Article 44 (공정안전관리 — 사고조사)",
+        "산업안전보건법 Article 54 (중대재해 발생 시 조치)",
+        "산업안전보건법 Article 57 (산업재해 기록·보고)"
+      ]
+    }
+  }
+}

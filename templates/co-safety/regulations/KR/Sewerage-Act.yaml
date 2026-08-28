@@ -1,0 +1,322 @@
+# ── Registry schema v2 (mode: coordinates) ───────────────────────────────────
+# This file maps article numbers to official titles ONLY. Article content is
+# never cached here — fetch live from the 법제처 k-law API at point of use.
+# Migrated by migrate-registry-to-coordinates.ts on 2026-08-26
+schema_version: 2
+mode: coordinates
+jurisdiction: KR
+framework: Sewerage-Act
+law_name: 하수도법
+law_name_en: null
+abbreviation: null
+mst: "276803"
+enforced_from: null
+agency: null
+tier: 1
+regulator: ME (환경부) / local public sewerage authorities
+articles:
+  - "no": "1"
+    title: 목적
+    checked_at: "2026-08-26"
+  - "no": "2"
+    title: 정의
+    checked_at: "2026-08-26"
+  - "no": "3"
+    title: 국가 및 지방자치단체의 책무
+    checked_at: "2026-08-26"
+  - "no": "4"
+    title: 국가하수도종합계획의 수립
+    checked_at: "2026-08-26"
+  - "no": "4"
+    title: 유역하수도정비계획의 수립
+    checked_at: "2026-08-26"
+  - "no": "4"
+    title: 하수도정비중점관리지역의 지정 등
+    checked_at: "2026-08-26"
+  - "no": "4"
+    title: 하수관로 유지관리계획 수립 등
+    checked_at: "2026-08-26"
+  - "no": "5"
+    title: 하수도정비기본계획의 수립권자 등
+    checked_at: "2026-08-26"
+  - "no": "6"
+    title: 하수도정비기본계획의 수립 등
+    checked_at: "2026-08-26"
+  - "no": "7"
+    title: 방류수수질기준
+    checked_at: "2026-08-26"
+  - "no": "8"
+    title: 타인토지의 출입 등
+    checked_at: "2026-08-26"
+  - "no": "9"
+    title: 손실보상
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 토지 등의 수용 및 사용
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 토지의 지하부분 사용에 대한 보상 등
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 구분지상권의 설정등기 등
+    checked_at: "2026-08-26"
+  - "no": "11"
+    title: 공공하수도의 설치 등
+    checked_at: "2026-08-26"
+  - "no": "12"
+    title: 설치기준 등
+    checked_at: "2026-08-26"
+  - "no": "13"
+    title: 겸용공작물에 관한 공사 등의 시행
+    checked_at: "2026-08-26"
+  - "no": "14"
+    title: 타공사의 시행
+    checked_at: "2026-08-26"
+  - "no": "15"
+    title: 사용의 공고 등
+    checked_at: "2026-08-26"
+  - "no": "16"
+    title: 공공하수도관리청이 아닌 자의 공사시행 등
+    checked_at: "2026-08-26"
+  - "no": "17"
+    title: 인가ㆍ허가 등의 의제
+    checked_at: "2026-08-26"
+  - "no": "18"
+    title: 공공하수도관리청
+    checked_at: "2026-08-26"
+  - "no": "19"
+    title: 공공하수도의 운영ㆍ관리 및 손괴ㆍ방해행위 금지 등
+    checked_at: "2026-08-26"
+  - "no": "19"
+    title: 공공하수도 관리대행업 등
+    checked_at: "2026-08-26"
+  - "no": "19"
+    title: 결격사유
+    checked_at: "2026-08-26"
+  - "no": "19"
+    title: 등록취소 등
+    checked_at: "2026-08-26"
+  - "no": "19"
+    title: 관리대행 계약체결 및 계약해지
+    checked_at: "2026-08-26"
+  - "no": "19"
+    title: 관리대행업자의 지위승계
+    checked_at: "2026-08-26"
+  - "no": "20"
+    title: 기술진단 등
+    checked_at: "2026-08-26"
+  - "no": "20"
+    title: 기술진단의 대행 등
+    checked_at: "2026-08-26"
+  - "no": "20"
+    title: 기술진단전문기관 등록의 결격사유
+    checked_at: "2026-08-26"
+  - "no": "20"
+    title: 기술진단전문기관의 등록취소 등
+    checked_at: "2026-08-26"
+  - "no": "21"
+    title: 기술진단전문기관의 지위승계
+    checked_at: "2026-08-26"
+  - "no": "22"
+    title: 사용의 제한 등
+    checked_at: "2026-08-26"
+  - "no": "23"
+    title: 제해시설의 설치 등
+    checked_at: "2026-08-26"
+  - "no": "24"
+    title: 점용허가
+    checked_at: "2026-08-26"
+  - "no": "25"
+    title: 공사의 중지명령 등
+    checked_at: "2026-08-26"
+  - "no": "26"
+    title: 조치명령 및 허가의 취소 등
+    checked_at: "2026-08-26"
+  - "no": "27"
+    title: 배수설비의 설치 등
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: 공공하수도 유입제외
+    checked_at: "2026-08-26"
+  - "no": "29"
+    title: 타인의 토지 또는 배수설비의 사용
+    checked_at: "2026-08-26"
+  - "no": "30"
+    title: 배수설비 등에 대한 조치명령
+    checked_at: "2026-08-26"
+  - "no": "31"
+    title: 배수설비 등의 검사
+    checked_at: "2026-08-26"
+  - "no": "32"
+    title: 개인하수도 설치의 지원 등
+    checked_at: "2026-08-26"
+  - "no": "33"
+    title: 특정공산품의 사용제한 등
+    checked_at: "2026-08-26"
+  - "no": "34"
+    title: 개인하수처리시설의 설치
+    checked_at: "2026-08-26"
+  - "no": "34"
+    title: 개인하수도관리지역 지정 등
+    checked_at: "2026-08-26"
+  - "no": "35"
+    title: 건물등의 증축 등에 대한 특례
+    checked_at: "2026-08-26"
+  - "no": "36"
+    title: 오수ㆍ폐수 등의 병합처리에 관한 특례
+    checked_at: "2026-08-26"
+  - "no": "37"
+    title: 개인하수처리시설의 준공검사 등
+    checked_at: "2026-08-26"
+  - "no": "38"
+    title: 개인하수처리시설의 설계ㆍ시공
+    checked_at: "2026-08-26"
+  - "no": "39"
+    title: 개인하수처리시설의 운영ㆍ관리
+    checked_at: "2026-08-26"
+  - "no": "40"
+    title: 개인하수처리시설에 대한 개선명령
+    checked_at: "2026-08-26"
+  - "no": "41"
+    title: 분뇨처리 의무
+    checked_at: "2026-08-26"
+  - "no": "42"
+    title: 분뇨의 광역관리 등
+    checked_at: "2026-08-26"
+  - "no": "43"
+    title: 분뇨의 처리
+    checked_at: "2026-08-26"
+  - "no": "44"
+    title: 분뇨의 재활용
+    checked_at: "2026-08-26"
+  - "no": "45"
+    title: 분뇨수집ㆍ운반업
+    checked_at: "2026-08-26"
+  - "no": "46"
+    title: 분뇨수집ㆍ운반업자의 지위 승계
+    checked_at: "2026-08-26"
+  - "no": "47"
+    title: 분뇨수집ㆍ운반업자의 준수사항
+    checked_at: "2026-08-26"
+  - "no": "48"
+    title: 결격사유
+    checked_at: "2026-08-26"
+  - "no": "49"
+    title: 허가의 취소 등
+    checked_at: "2026-08-26"
+  - "no": "50"
+    title: 과징금
+    checked_at: "2026-08-26"
+  - "no": "51"
+    title: 개인하수처리시설설계ㆍ시공업
+    checked_at: "2026-08-26"
+  - "no": "52"
+    title: 개인하수처리시설제조업
+    checked_at: "2026-08-26"
+  - "no": "53"
+    title: 개인하수처리시설관리업
+    checked_at: "2026-08-26"
+  - "no": "54"
+    title: 등록의 취소 등
+    checked_at: "2026-08-26"
+  - "no": "55"
+    title: 등록취소 또는 영업정지 처분을 받은 처리시설설계ㆍ시공업자의 계속공사
+    checked_at: "2026-08-26"
+  - "no": "56"
+    title: 휴업ㆍ폐업 등의 신고
+    checked_at: "2026-08-26"
+  - "no": "56"
+    title: 분뇨수집ㆍ운반업자에 대한 폐업지원
+    checked_at: "2026-08-26"
+  - "no": "57"
+    title: 비용부담의 원칙
+    checked_at: "2026-08-26"
+  - "no": "58"
+    title: 비용분담
+    checked_at: "2026-08-26"
+  - "no": "59"
+    title: 시ㆍ군에 대한 부담명령
+    checked_at: "2026-08-26"
+  - "no": "60"
+    title: 겸용공작물에 관한 공사 등의 비용부담
+    checked_at: "2026-08-26"
+  - "no": "61"
+    title: 원인자부담금 등
+    checked_at: "2026-08-26"
+  - "no": "62"
+    title: 타공사의 비용부담
+    checked_at: "2026-08-26"
+  - "no": "63"
+    title: 국고보조
+    checked_at: "2026-08-26"
+  - "no": "64"
+    title: 국유지의 무상대여ㆍ양여
+    checked_at: "2026-08-26"
+  - "no": "65"
+    title: 사용료 등
+    checked_at: "2026-08-26"
+  - "no": "66"
+    title: 기술관리인
+    checked_at: "2026-08-26"
+  - "no": "67"
+    title: 교육
+    checked_at: "2026-08-26"
+  - "no": "68"
+    title: 장부의 기록ㆍ보존
+    checked_at: "2026-08-26"
+  - "no": "68"
+    title: 하수도 정보시스템 구축 등
+    checked_at: "2026-08-26"
+  - "no": "68"
+    title: 유역하수도지원센터의 설립ㆍ운영
+    checked_at: "2026-08-26"
+  - "no": "69"
+    title: 보고ㆍ검사
+    checked_at: "2026-08-26"
+  - "no": "69"
+    title: 공공하수도 운영ㆍ관리실태점검
+    checked_at: "2026-08-26"
+  - "no": "70"
+    title: 수수료
+    checked_at: "2026-08-26"
+  - "no": "71"
+    title: 영업허가의 취소 요청 등
+    checked_at: "2026-08-26"
+  - "no": "72"
+    title: 청문
+    checked_at: "2026-08-26"
+  - "no": "73"
+    title: 강제징수 등
+    checked_at: "2026-08-26"
+  - "no": "74"
+    title: 권한 또는 업무의 위임ㆍ위탁 등
+    checked_at: "2026-08-26"
+  - "no": "74"
+    title: 벌칙 적용 시의 공무원 의제
+    checked_at: "2026-08-26"
+  - "no": "75"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "76"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "77"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "78"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "79"
+    title: 양벌규정
+    checked_at: "2026-08-26"
+  - "no": "80"
+    title: 과태료
+    checked_at: "2026-08-26"
+source_verification:
+  method: k-law-live
+  checked_at: "2026-08-26"
+  next_review: "2027-02-22"
+last_updated: "2026-08-26"
+related_rule:
+  name_ko: 하수도법 시행령 / 시행규칙
+  abbreviation: SA-Enforcement

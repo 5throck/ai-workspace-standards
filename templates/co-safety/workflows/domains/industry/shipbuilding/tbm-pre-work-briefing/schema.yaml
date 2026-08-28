@@ -1,0 +1,26 @@
+schema_version: "1.0"
+workflow_id: tbm-pre-work-briefing
+title: "조선 TBM (Tool Box Meeting)"
+status: active
+applicability: mandatory
+workflow_type: core
+
+legal_basis:
+  - 산업안전보건법 Article 15
+  - 산업안전보건법 Article 36
+  - 산업안전보건기준에관한규칙 Article 618
+  - 산업안전보건기준에관한규칙 Article 623
+  - 중대재해처벌법 Article 5
+industry_profile: shipbuilding
+agent: shipbuilding-agent
+evidence_model: ../../../../evidence-models/_shared/tbm-record.json
+signature_hazard: 선박 탱크 밀폐공간 진입 전 TBM (KOSHA GUIDE 의무)
+
+
+# ── Shared TBM reference (added by scaffold-industry.ts Task A-01) ──
+# Declares this workflow also consumes the shared TBM base
+# (workflows/_shared/REFERENCE-SPEC.md §3.1 minimal form). Existing
+# top-level fields (signature_hazard, legal_basis, agent) serve as the
+# effective schema; the shared base supplies the common statutory floor.
+references:
+  - shared: ../../../../_shared/tbm

@@ -1,0 +1,382 @@
+# ── Registry schema v2 (mode: coordinates) ───────────────────────────────────
+# This file maps article numbers to official titles ONLY. Article content is
+# never cached here — fetch live from the 법제처 k-law API at point of use.
+# Migrated by migrate-registry-to-coordinates.ts on 2026-08-26
+schema_version: 2
+mode: coordinates
+jurisdiction: KR
+framework: City-Gas-Business
+law_name: 도시가스사업법
+law_name_en: null
+abbreviation: null
+mst: "276497"
+enforced_from: null
+agency: null
+tier: 1
+regulator: MOTIE (산업통상자원부) / KGS (한국가스안전공사)
+articles:
+  - "no": "1"
+    title: 목적
+    checked_at: "2026-08-26"
+  - "no": "2"
+    title: 정의
+    checked_at: "2026-08-26"
+  - "no": "3"
+    title: 사업의 허가
+    checked_at: "2026-08-26"
+  - "no": "4"
+    title: 결격 사유
+    checked_at: "2026-08-26"
+  - "no": "5"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "6"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "7"
+    title: 사업의 승계 등
+    checked_at: "2026-08-26"
+  - "no": "7"
+    title: 처분효과의 승계
+    checked_at: "2026-08-26"
+  - "no": "8"
+    title: 사업의 개시 등의 신고
+    checked_at: "2026-08-26"
+  - "no": "8"
+    title: 합성천연가스제조사업자의 자가소비 대상물량
+    checked_at: "2026-08-26"
+  - "no": "8"
+    title: 나프타부생가스ㆍ바이오가스제조사업자 등의 처분제한
+    checked_at: "2026-08-26"
+  - "no": "8"
+    title: 액화천연가스냉열이용자의 천연가스 처분제한
+    checked_at: "2026-08-26"
+  - "no": "9"
+    title: 허가의 취소 등
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 과징금
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 천연가스수출입업의 등록 등
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 조건부 등록
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 사업의 개시ㆍ휴업 및 폐업의 신고
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 천연가스의 수출입 승인 등
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 자가소비용직수입자 등의 처분 제한
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 등록의 취소 등
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 과징금
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 자가소비용직수입 천연가스 대상물량
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 천연가스 비축의무
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 선박용천연가스사업의 등록 등
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 사업의 개시ㆍ휴업 및 폐업의 신고
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 선박용천연가스의 수출입 신고ㆍ변경신고
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 선박용천연가스사업자의 처분제한
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 등록의 취소 등
+    checked_at: "2026-08-26"
+  - "no": "11"
+    title: 시설공사계획의 승인 등
+    checked_at: "2026-08-26"
+  - "no": "11"
+    title: 비상공급시설의 설치 등
+    checked_at: "2026-08-26"
+  - "no": "11"
+    title: 공공용 토지의 사용
+    checked_at: "2026-08-26"
+  - "no": "12"
+    title: 가스시설의 시공ㆍ관리
+    checked_at: "2026-08-26"
+  - "no": "12"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "12"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "12"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "13"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "14"
+    title: 시공기록등의 보존ㆍ제출
+    checked_at: "2026-08-26"
+  - "no": "15"
+    title: 시공 감리 등
+    checked_at: "2026-08-26"
+  - "no": "16"
+    title: 공급시설의 임시사용
+    checked_at: "2026-08-26"
+  - "no": "17"
+    title: 정기검사 및 수시검사
+    checked_at: "2026-08-26"
+  - "no": "17"
+    title: 정밀안전진단 및 안전성평가의 실시 등
+    checked_at: "2026-08-26"
+  - "no": "17"
+    title: 안전관리수준평가
+    checked_at: "2026-08-26"
+  - "no": "17"
+    title: 도시가스배관의 안전관리
+    checked_at: "2026-08-26"
+  - "no": "17"
+    title: 상세기준
+    checked_at: "2026-08-26"
+  - "no": "18"
+    title: 가스의 공급계획
+    checked_at: "2026-08-26"
+  - "no": "18"
+    title: 가스의 수급계획
+    checked_at: "2026-08-26"
+  - "no": "18"
+    title: 가스공급시설 공사계획
+    checked_at: "2026-08-26"
+  - "no": "18"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "19"
+    title: 도시가스사업자의 공급 의무
+    checked_at: "2026-08-26"
+  - "no": "19"
+    title: 가스공급시설 설치비용의 분담
+    checked_at: "2026-08-26"
+  - "no": "19"
+    title: 가스공급시설 설치비용의 지원
+    checked_at: "2026-08-26"
+  - "no": "19"
+    title: 도시가스충전사업자의 안전점검의무 등
+    checked_at: "2026-08-26"
+  - "no": "20"
+    title: 공급규정
+    checked_at: "2026-08-26"
+  - "no": "20"
+    title: 공급규정의 비치 및 교부
+    checked_at: "2026-08-26"
+  - "no": "20"
+    title: 도시가스요금의 경감
+    checked_at: "2026-08-26"
+  - "no": "20"
+    title: 관계 기관에 대한 협조 요청
+    checked_at: "2026-08-26"
+  - "no": "21"
+    title: 가스공급량 측정의 적정성 확보
+    checked_at: "2026-08-26"
+  - "no": "22"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "23"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "24"
+    title: 가스사용의 제한 등
+    checked_at: "2026-08-26"
+  - "no": "25"
+    title: 도시가스의 품질 유지
+    checked_at: "2026-08-26"
+  - "no": "25"
+    title: 도시가스의 품질검사
+    checked_at: "2026-08-26"
+  - "no": "26"
+    title: 안전관리규정
+    checked_at: "2026-08-26"
+  - "no": "26"
+    title: 가스시설의 안전유지
+    checked_at: "2026-08-26"
+  - "no": "27"
+    title: 가스시설의 개선명령 등
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: 가스사용시설의 안전관리업무 대행
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: 가스사용시설 변경에 따른 안전조치
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: 건축물 공사에 따른 안전조치
+    checked_at: "2026-08-26"
+  - "no": "29"
+    title: 안전관리자
+    checked_at: "2026-08-26"
+  - "no": "30"
+    title: 안전교육
+    checked_at: "2026-08-26"
+  - "no": "30"
+    title: 굴착공사정보지원센터의 설치
+    checked_at: "2026-08-26"
+  - "no": "30"
+    title: 도시가스배관 매설상황 확인
+    checked_at: "2026-08-26"
+  - "no": "30"
+    title: 가스안전 영향평가
+    checked_at: "2026-08-26"
+  - "no": "30"
+    title: 협의ㆍ순회점검
+    checked_at: "2026-08-26"
+  - "no": "30"
+    title: 도시가스배관 손상방지기준의 준수
+    checked_at: "2026-08-26"
+  - "no": "30"
+    title: 도시가스배관의 안전조치 등
+    checked_at: "2026-08-26"
+  - "no": "31"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "32"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "33"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "34"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "35"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "36"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "37"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "38"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "39"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "39"
+    title: 시설공사계획의 승인 등
+    checked_at: "2026-08-26"
+  - "no": "39"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "39"
+    title: 가스의 수급계획
+    checked_at: "2026-08-26"
+  - "no": "39"
+    title: 준용 규정
+    checked_at: "2026-08-26"
+  - "no": "39"
+    title: 가스공급시설의 공동이용
+    checked_at: "2026-08-26"
+  - "no": "39"
+    title: 금지행위
+    checked_at: "2026-08-26"
+  - "no": "39"
+    title: 배관시설이용규정 등
+    checked_at: "2026-08-26"
+  - "no": "40"
+    title: 조정명령 등
+    checked_at: "2026-08-26"
+  - "no": "40"
+    title: 회계 처리
+    checked_at: "2026-08-26"
+  - "no": "40"
+    title: 지도ㆍ감독
+    checked_at: "2026-08-26"
+  - "no": "41"
+    title: 보고 등
+    checked_at: "2026-08-26"
+  - "no": "42"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "42"
+    title: 다른 자의 토지 사용
+    checked_at: "2026-08-26"
+  - "no": "43"
+    title: 보험 가입
+    checked_at: "2026-08-26"
+  - "no": "43"
+    title: 가스안전 장치의 보급
+    checked_at: "2026-08-26"
+  - "no": "43"
+    title: 안전관리를 위한 투자
+    checked_at: "2026-08-26"
+  - "no": "43"
+    title: 청문
+    checked_at: "2026-08-26"
+  - "no": "44"
+    title: 수수료 등
+    checked_at: "2026-08-26"
+  - "no": "44"
+    title: 위반사실의 통보 등
+    checked_at: "2026-08-26"
+  - "no": "45"
+    title: 권한의 위임ㆍ위탁
+    checked_at: "2026-08-26"
+  - "no": "45"
+    title: 벌칙 적용 시의 공무원 의제
+    checked_at: "2026-08-26"
+  - "no": "46"
+    title: 다른 법률과의 관계
+    checked_at: "2026-08-26"
+  - "no": "47"
+    title: 도시가스충전사업자 등에 대한 적용배제
+    checked_at: "2026-08-26"
+  - "no": "48"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "49"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "50"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "51"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "52"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "53"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "53"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "53"
+    title: 양벌규정
+    checked_at: "2026-08-26"
+  - "no": "54"
+    title: 과태료
+    checked_at: "2026-08-26"
+  - "no": "55"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "56"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "57"
+    title: ""
+    checked_at: "2026-08-26"
+source_verification:
+  method: k-law-live
+  checked_at: "2026-08-26"
+  next_review: "2027-02-22"
+last_updated: "2026-08-26"

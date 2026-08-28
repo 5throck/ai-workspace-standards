@@ -1,0 +1,166 @@
+# ── Registry schema v2 (mode: coordinates) ───────────────────────────────────
+# This file maps article numbers to official titles ONLY. Article content is
+# never cached here — fetch live from the 법제처 k-law API at point of use.
+# Migrated by migrate-registry-to-coordinates.ts on 2026-08-26
+schema_version: 2
+mode: coordinates
+jurisdiction: KR
+framework: Wastes-Control-Act
+law_name: 방사성폐기물 관리법
+law_name_en: null
+abbreviation: null
+mst: "276509"
+enforced_from: null
+agency: null
+tier: 1
+regulator: ME (환경부) / KOEMCO (한국환경공단)
+articles:
+  - "no": "1"
+    title: 목적
+    checked_at: "2026-08-26"
+  - "no": "2"
+    title: 정의
+    checked_at: "2026-08-26"
+  - "no": "3"
+    title: 다른 법률과의 관계
+    checked_at: "2026-08-26"
+  - "no": "4"
+    title: 국가 및 지방자치단체의 책무
+    checked_at: "2026-08-26"
+  - "no": "5"
+    title: 방사성폐기물 관리사업자 및 발생자 등의 책무
+    checked_at: "2026-08-26"
+  - "no": "6"
+    title: 방사성폐기물 관리 기본계획
+    checked_at: "2026-08-26"
+  - "no": "6"
+    title: 공론화 등
+    checked_at: "2026-08-26"
+  - "no": "7"
+    title: 방사성폐기물 관리 시행계획
+    checked_at: "2026-08-26"
+  - "no": "8"
+    title: 방사성폐기물의 조사 등
+    checked_at: "2026-08-26"
+  - "no": "9"
+    title: 방사성폐기물 관리사업
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 방사성폐기물 관리사업자
+    checked_at: "2026-08-26"
+  - "no": "11"
+    title: 방사성폐기물 관리시설의 운영기준
+    checked_at: "2026-08-26"
+  - "no": "12"
+    title: 정보의 공개
+    checked_at: "2026-08-26"
+  - "no": "13"
+    title: 방사성폐기물의 인도
+    checked_at: "2026-08-26"
+  - "no": "14"
+    title: 방사성폐기물의 관리비용
+    checked_at: "2026-08-26"
+  - "no": "15"
+    title: 사용후핵연료관리부담금
+    checked_at: "2026-08-26"
+  - "no": "16"
+    title: 관리비용 또는 부담금의 선납
+    checked_at: "2026-08-26"
+  - "no": "17"
+    title: 원자력발전소 해체비용의 적립 등
+    checked_at: "2026-08-26"
+  - "no": "18"
+    title: 한국원자력환경공단의 설립
+    checked_at: "2026-08-26"
+  - "no": "19"
+    title: 임원
+    checked_at: "2026-08-26"
+  - "no": "20"
+    title: 사업
+    checked_at: "2026-08-26"
+  - "no": "21"
+    title: 자금의 조달
+    checked_at: "2026-08-26"
+  - "no": "21"
+    title: 출연금 등
+    checked_at: "2026-08-26"
+  - "no": "22"
+    title: 자금의 차입
+    checked_at: "2026-08-26"
+  - "no": "23"
+    title: 국유재산의 무상 대부
+    checked_at: "2026-08-26"
+  - "no": "24"
+    title: 예산 등
+    checked_at: "2026-08-26"
+  - "no": "25"
+    title: 업무의 위탁
+    checked_at: "2026-08-26"
+  - "no": "26"
+    title: 「민법」의 준용
+    checked_at: "2026-08-26"
+  - "no": "27"
+    title: 업무의 지도ㆍ감독
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: 방사성폐기물관리기금의 설치
+    checked_at: "2026-08-26"
+  - "no": "29"
+    title: 기금의 조성
+    checked_at: "2026-08-26"
+  - "no": "30"
+    title: 기금의 용도 등
+    checked_at: "2026-08-26"
+  - "no": "31"
+    title: 기금의 관리ㆍ운용
+    checked_at: "2026-08-26"
+  - "no": "32"
+    title: 기금의 회계기관
+    checked_at: "2026-08-26"
+  - "no": "33"
+    title: 기금의 이익 및 결손의 처리
+    checked_at: "2026-08-26"
+  - "no": "34"
+    title: 보고와 검사 등
+    checked_at: "2026-08-26"
+  - "no": "35"
+    title: 방사성폐기물 발생자등에 대한 조치명령
+    checked_at: "2026-08-26"
+  - "no": "36"
+    title: 대집행
+    checked_at: "2026-08-26"
+  - "no": "37"
+    title: 권한의 위탁
+    checked_at: "2026-08-26"
+  - "no": "38"
+    title: 벌칙 적용 시의 공무원 의제
+    checked_at: "2026-08-26"
+  - "no": "39"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "40"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "41"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "42"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "43"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "44"
+    title: 양벌규정
+    checked_at: "2026-08-26"
+  - "no": "45"
+    title: 과태료
+    checked_at: "2026-08-26"
+source_verification:
+  method: k-law-live
+  checked_at: "2026-08-26"
+  next_review: "2027-02-22"
+last_updated: "2026-08-26"
+related_rule:
+  name_ko: 폐기물관리법 시행령 / 시행규칙 (기후에너지환경부령)
+  abbreviation: WCA-Enforcement

@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "steel-byproduct-gas-record.json",
+  "title": "Steelworks Byproduct Gas Leak Prevention Record",
+  "description": "Evidence model for Byproduct Gas (CO/N2) Piping Leak Inspection and Purge Records.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "pipeline_section",
+    "legal_basis",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^STEEL-GAS-[0-9]{4}-[0-9]{4}$"
+    },
+    "pipeline_section": {
+      "type": "string"
+    },
+    "co_ppm": {
+      "type": "number"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

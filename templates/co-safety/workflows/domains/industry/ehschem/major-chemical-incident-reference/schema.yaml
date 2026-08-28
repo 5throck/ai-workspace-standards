@@ -1,0 +1,25 @@
+schema_version: "1.0"
+workflow_id: major-chemical-incident-reference
+title: "대형 화학사고 긴급 참조 (Major Chemical Incident Reference)"
+status: active
+applicability: mandatory
+workflow_type: reference
+uses_functional_services: [functional/psm, functional/msds, emergency]
+target_agent: emergency-agent
+data_provided:
+  - chemical_inventory
+  - process_hazard_summary
+  - environmental_release_risk
+handoff_protocol:
+  trigger: major_chemical_incident
+  dispatch_to: emergency-agent
+  include_data:
+    - affected_chemicals
+    - psm_psi_ref
+legal_basis:
+  - 중대재해처벌법 Article 7
+  - 화학물질관리법 Article 23
+  - 재난관리기본법
+industry_profile: chemical-plant
+agent: ehschem-agent
+evidence_model: ehschem-plant-operation-record.json

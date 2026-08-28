@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: test-article-management
+title: "시험물질 관리 (Test Article Management)"
+status: active
+applicability: mandatory
+workflow_type: core
+
+legal_basis:
+  - MFDS 비임상시험 관리기준
+  - OECD GLP Section 7
+  - K-REACH
+industry_profile: pharma-laboratory
+agent: glp-agent
+evidence_model: glp-test-article-record.json

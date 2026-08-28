@@ -1,0 +1,189 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "psm-moc-record.json",
+  "title": "PSM MOC Record",
+  "description": "Evidence model for Management of Change (MOC) records per OSHA-KR Article 44. v1 aligned with GMP change-control pattern.",
+  "version": "2.1.0",
+  "type": "object",
+  "required": [
+    "version",
+    "record_id",
+    "change_id",
+    "title",
+    "description",
+    "status",
+    "legal_basis",
+    "agent_id",
+    "workflow_id",
+    "hazard_review",
+    "approval_chain"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Schema version.",
+      "default": "2.1.0"
+    },
+    "record_id": {
+      "type": "string",
+      "pattern": "^PSM-MOC-[0-9]{4}-[0-9]{4}$",
+      "description": "Unique identifier for the MOC record"
+    },
+    "change_id": {
+      "type": "string",
+      "description": "Unique identifier for the change request"
+    },
+    "title": {
+      "type": "string",
+      "description": "Title of the proposed change."
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed description of the change."
+    },
+    "change_type": {
+      "type": "string",
+      "enum": [
+        "temporary",
+        "permanent",
+        "emergency"
+      ],
+      "description": "Classification of the change duration."
+    },
+    "classification": {
+      "type": "string",
+      "enum": [
+        "minor",
+        "major",
+        "critical"
+      ],
+      "description": "Risk-based classification of the change."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "initiated",
+        "under_review",
+        "approved",
+        "implemented",
+        "closed",
+        "rejected"
+      ],
+      "description": "Current status of the MOC."
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "description": "Multi-source legal basis. Primary: OSHA-KR Article 44 (PSM — management of change). Adjacent laws may include: SAPA Article 4 (change management as part of safety system), OSHA-KR Article 38 (safety measures before work), Occupational Safety and Health Standards Rule Article 92 (equipment isolation for changes).",
+      "examples": [
+        "산업안전보건법 Article 44 (공정안전관리 — 변경관리)",
+        "산업안전보건법 Article 38 (작업 전 안전조치)",
+        "안전보건기준에관한규칙 Article 92 (정비 등 작업 시 운전정지 등)"
+      ]
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when the record was created"
+    },
+    "agent_id": {
+      "type": "string",
+      "description": "ID of the agent that generated this record"
+    },
+    "workflow_id": {
+      "type": "string",
+      "description": "ID of the workflow execution"
+    },
+    "hazard_review": {
+      "type": "object",
+      "properties": {
+        "assessment_type": {
+          "type": "string",
+          "description": "Type of hazard assessment performed (e.g. HAZOP, What-if, FMEA)"
+        },
+        "findings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of hazard findings"
+        },
+        "completed_by": {
+          "type": "string",
+          "description": "ID of the person who completed the hazard review"
+        },
+        "completion_date": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Date when the hazard review was completed"
+        }
+      },
+      "required": [
+        "assessment_type",
+        "findings",
+        "completed_by",
+        "completion_date"
+      ]
+    },
+    "hazard_ref": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^FIND-[0-9]{4}-[0-9]{4}$"
+      },
+      "description": "Optional (v2.1.0): cross-references from this MOC's hazard_review.findings to formal finding records (id pattern per _shared/base/finding.schema.json). Each entry is a FIND-YYYY-NNNN record raised from the review; free-text findings remain in hazard_review.findings — this field adds traceability, it does not replace them."
+    },
+    "corrective_action_ref": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^CA-[0-9]{4}-[0-9]{4}$"
+      },
+      "description": "Optional (v2.1.0): cross-references to corrective-action records (id pattern per _shared/base/corrective-action.schema.json) that close the findings listed in hazard_ref. MOC closure requires every referenced corrective action to reach 'verified' status."
+    },
+    "approval_chain": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "description": "Approver role (e.g. Process Engineer, Safety Manager, Plant Manager)"
+          },
+          "approver_id": {
+            "type": "string",
+            "description": "ID of the approver"
+          },
+          "approval_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Date of approval decision"
+          },
+          "decision": {
+            "type": "string",
+            "enum": [
+              "approved",
+              "rejected",
+              "pending"
+            ],
+            "description": "Approval decision status"
+          },
+          "comments": {
+            "type": "string",
+            "description": "Approver comments or conditions"
+          }
+        },
+        "required": [
+          "role",
+          "approver_id",
+          "approval_date",
+          "decision"
+        ]
+      }
+    }
+  }
+}

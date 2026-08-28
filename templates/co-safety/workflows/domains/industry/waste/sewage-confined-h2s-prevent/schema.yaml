@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: sewage-confined-h2s-prevent
+title: "하수처리장 및 맨홀 밀폐공간 황화수소(H2S) 질식 예방 (Sewage Confined Space H2S Prevention)"
+status: active
+applicability: mandatory
+workflow_type: core
+legal_basis:
+  - 하수도법 Article 19
+  - 산업안전보건법 Article 618
+  - 폐기물관리법 Article 13
+  - 중대재해처벌법 Article 4
+industry_profile: waste-water-environmental
+agent: waste-agent
+evidence_model: sewage-confined-h2s-record.json

@@ -1,0 +1,13 @@
+schema_version: "1.0"
+workflow_id: confined-space-rescue
+title: "밀폐공간 구조 (Confined Space Rescue)"
+status: active
+applicability: mandatory
+
+legal_basis:
+  - 산업안전보건기준에 관한 규칙 Article 623 (감시인의 배치 등)
+  - 중대재해처벌법 Article 4
+  - 소방기본법 (구조)
+industry_profile: all
+agent: emergency-agent
+evidence_model: emergency-rescue-record.json

@@ -1,0 +1,15 @@
+schema_version: "1.0"
+workflow_id: collapse-prevention
+title: "붕괴 방지 (Collapse Prevention)"
+status: active
+applicability: mandatory
+workflow_type: core
+
+legal_basis:
+  - 산업안전보건법 Article 38 (안전조치)
+  - 안전보건기준에관한규칙 제6장 제2절 (붕괴 등에 의한 위험 방지)
+  - 거푸집/가설/굴착 안전기준 (MOEL 고시)
+  - 중대재해처벌법 Article 6
+industry_profile: construction
+agent: ehsconst-agent
+evidence_model: ehsconst-collapse-prevention-record.json

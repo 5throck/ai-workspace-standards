@@ -1,0 +1,43 @@
+source_verification:
+  method: manual-curation
+  checked_at: "2026-08-26"
+jurisdiction: international
+regulator: ICH (International Council for Harmonisation)
+framework: ICH-E6
+title_en: ICH E6 — Good Clinical Practice (R3)
+title_ko: ICH E6 — 임상시험 관리기준 (R3)
+reference_documents:
+  - "ICH E6(R1) (1996): original GCP"
+  - "ICH E6(R2) (2016): added eClinical / risk-based"
+  - "ICH E6(R3) (2025): current version — risk-proportionate, QMS-focused"
+key_principles:
+  - rights_safety_welfare_of_subjects (Helsinki)
+  - scientific_integrity
+  - data_alcoa_plus
+  - risk_proportionate_approach
+  - quality_management_system
+sections:
+  - "Section I: Principles of GCP"
+  - "Section II: Roles and Responsibilities (Sponsor, Investigator, IRB, Monitor)"
+  - "Section III: Protocol"
+  - "Section IV: Investigator's Brochure"
+  - "Section V: Essential Documents"
+key_actors:
+  - sponsor: 최종 책임, 품질 보증
+  - investigator: 시험 실시 책임
+  - irb: 독립적 심의 기관
+  - monitor: 시험 모니터링 (CRA)
+  - regulatory_authority: 식약처 (MFDS in Korea)
+essential_documents:
+  - protocol_and_amendments
+  - investigator_brochure
+  - informed_consent_form
+  - case_report_form
+  - source_documents
+  - audit_reports
+  - clinical_study_report
+korean_adoption:
+  - "Korea adopted ICH GCP since 2001"
+  - "KGCP는 ICH E6 기반으로 제정"
+  - "Korean MFDS submission requires ICH E6(R3) compliance"
+last_updated: "2026-06-17"

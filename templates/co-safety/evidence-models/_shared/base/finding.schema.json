@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Safety Finding",
+  "description": "Audit finding record for Safety OS evidence trail",
+  "version": "3.0.0",
+  "type": "object",
+  "required": ["id", "date", "type", "description", "legal_basis", "severity", "status", "audit_trail"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^FIND-[0-9]{4}-[0-9]{4}$" },
+    "date": { "type": "string", "format": "date" },
+    "type": { "type": "string", "enum": ["hazard", "non-conformance", "near-miss", "incident"] },
+    "description": { "type": "string" },
+    "legal_basis": { "type": "array", "items": { "type": "string" }, "minItems": 3, "description": "Applicable law articles — minimum 3 regulatory sources" },
+    "severity": { "type": "string", "enum": ["critical", "major", "minor", "observation"] },
+    "location": { "type": "string" },
+    "responsible_party": { "type": "string" },
+    "agent_id": { "$ref": "common.schema.json#/definitions/agent_id", "description": "Optional (v2.1): agent attribution. Legacy records were authored in audit sessions with no dispatching agent; their audit_trail.created_by holds a git-history author, not an agent id (zero-fabrication rule)." },
+    "workflow_id": { "$ref": "common.schema.json#/definitions/workflow_id", "description": "Optional (v2.1): workflow execution reference. Findings originate from audit sessions, not dispatched workflows — never invent an ID to satisfy this field." },
+    "status": { "type": "string", "enum": ["open", "in-progress", "closed", "verified"] },
+    "corrective_action_id": { "type": "string", "pattern": "^CA-[0-9]{4}-[0-9]{4}$" },
+    "audit_trail": { "$ref": "common.schema.json#/definitions/audit_trail", "description": "ALCOA+ audit trail — created_at/created_by/record_status enforce the AGENTS.md timestamp-in-every-record rule for findings. Legacy (pre-v3) records carry a backfilled trail derived from git history — see evidence-models/migrations/README.md." }
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "risk-register-record.json",
+  "title": "Risk Register Record",
+  "description": "Consolidated risk register for ongoing hazard tracking and periodic review per OSHA-KR Article 36 and MOEL 위험성평가 고시. Aggregates individual risk assessments into a living register.",
+  "version": "1.2.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "facility_id",
+    "register_date",
+    "next_review_date",
+    "responsible_manager_id",
+    "legal_basis",
+    "risk_entries",
+    "e_signature",
+    "nomenclature",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^RR-[0-9]{4}-[0-9]{4}$"
+    },
+    "facility_id": {
+      "type": "string",
+      "description": "Facility or work area identifier"
+    },
+    "register_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date register was established or last updated"
+    },
+    "next_review_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Scheduled next periodic review date (매 1년 이내, Art.36)"
+    },
+    "responsible_manager_id": {
+      "type": "string",
+      "description": "EHS manager responsible for the register"
+    },
+    "risk_entries": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["entry_id", "hazard_description", "current_risk_level", "control_status", "source_assessment_ref"],
+        "properties": {
+          "entry_id": { "type": "string" },
+          "hazard_description": { "type": "string" },
+          "hazard_category": {
+            "type": "string",
+            "enum": ["mechanical", "electrical", "chemical", "thermal", "fall", "collapse", "confined_space", "biological", "ergonomic", "psychosocial", "noise", "radiation", "other"]
+          },
+          "current_risk_level": {
+            "type": "string",
+            "enum": ["low", "medium", "high", "critical"]
+          },
+          "control_status": {
+            "type": "string",
+            "enum": ["planned", "in_progress", "implemented", "overdue", "not_required", "na"],
+            "description": "Control implementation status. Canonical lifecycle vocabulary unified with risk-assessment-record.json control_measures[].status in v1.2.0: planned -> in_progress -> implemented, with overdue for missed target dates and not_required / na for excluded controls. New entries default to planned (conservative: never overstate progress)."
+          },
+          "source_assessment_ref": {
+            "type": "string",
+            "description": "Reference to originating risk-assessment-record (RA-YYYY-NNNN)"
+          },
+          "last_updated": { "type": "string", "format": "date" },
+          "incident_ref": {
+            "type": ["string", "null"],
+            "description": "Reference to any related incident investigation record"
+          }
+        }
+      }
+    },
+    "high_critical_count": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Total count of High + Critical risk entries requiring escalation"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 3,
+      "examples": [["산업안전보건법 Article 36", "중대재해처벌법 Article 4", "MOEL 위험성평가 고시"]]
+    },
+    "e_signature": { "$ref": "../../../_shared/base/common.schema.json#/definitions/e_signature" },
+    "nomenclature": { "$ref": "../../../_shared/base/common.schema.json#/definitions/nomenclature" },
+    "audit_trail": { "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail" }
+  }
+}

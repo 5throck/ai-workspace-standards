@@ -1,0 +1,162 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "gmp-stability-record.json",
+  "title": "GMP Stability Testing Record",
+  "description": "Evidence model for GMP Stability Testing (안정성 시험) records. v1 per KP-GMP 「의약품 등의 안전에 관한 규칙」 별표 1 제7.2호 (안정성시험) + ICH Q1A/Q1E.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "protocol_id",
+    "product_code",
+    "conclusion",
+    "legal_basis",
+    "e_signature",
+    "qrm_assessment",
+    "nomenclature",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^GMP-STAB-[0-9]{4}-[0-9]{4}$"
+    },
+    "protocol_id": {
+      "type": "string"
+    },
+    "study_type": {
+      "type": "string",
+      "enum": [
+        "registration",
+        "commitment",
+        "ongoing"
+      ]
+    },
+    "product_code": {
+      "type": "string"
+    },
+    "product_name": {
+      "type": "string"
+    },
+    "batch_id": {
+      "type": "string"
+    },
+    "storage_conditions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "condition": {
+            "type": "string",
+            "enum": [
+              "long_term_25C_60RH",
+              "intermediate_30C_65RH",
+              "accelerated_40C_75RH",
+              "custom"
+            ]
+          },
+          "temperature_c": {
+            "type": "number"
+          },
+          "humidity_pct": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "timepoints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "month": {
+            "type": "integer"
+          },
+          "test_date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "parameter": {
+                  "type": "string"
+                },
+                "specification": {
+                  "type": "string"
+                },
+                "result": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "pass",
+                    "fail",
+                    "oot"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "chamber_id": {
+      "type": "string"
+    },
+    "shelf_life_recommended_months": {
+      "type": "integer"
+    },
+    "storage_label_recommendation": {
+      "type": "string"
+    },
+    "conclusion": {
+      "type": "string",
+      "enum": [
+        "meets_specification",
+        "failure",
+        "ongoing"
+      ]
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "description": "Multi-source legal basis. Primary: Pharmaceutical Affairs Act (약사법) Article 37 (manufacturing management obligation for pharmaceuticals, 의약품등의 제조 관리의무) and Presidential Decree Annex 1 (총리령 「의약품 등의 안전에 관한 규칙」 별표 1; operational detail in MFDS Notice No. 2024-87). Adjacent laws may include: ICH Q7 (API GMP), ICH Q9 (Quality Risk Management), ICH Q10 (Pharmaceutical Quality System), PIC/S PE 009 (harmonized GMP).",
+      "examples": [
+        [
+          "약사법 Art.37",
+          "의약품 등의 안전에 관한 규칙 별표 1 제8호",
+          "ICH Q7"
+        ],
+        [
+          "약사법 Art.37",
+          "의약품 등의 안전에 관한 규칙 별표 1 제6호",
+          "ICH Q10"
+        ],
+        [
+          "약사법 Art.37",
+          "PIC/S PE 009-1",
+          "ICH Q9"
+        ]
+      ]
+    },
+    "e_signature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/e_signature"
+    },
+    "qrm_assessment": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/qrm_assessment"
+    },
+    "nomenclature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/nomenclature"
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

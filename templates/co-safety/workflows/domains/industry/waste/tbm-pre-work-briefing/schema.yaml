@@ -1,0 +1,27 @@
+schema_version: "1.0"
+workflow_id: tbm-pre-work-briefing
+title: "폐기물/하수처리 TBM (Tool Box Meeting)"
+status: active
+applicability: mandatory
+workflow_type: core
+
+legal_basis:
+  - 산업안전보건법 Article 15
+  - 산업안전보건법 Article 36
+  - 산업안전보건법 Article 618
+  - 폐기물관리법 Article 25
+  - 하수도법 Article 19
+  - 중대재해처벌법 Article 4
+industry_profile: waste
+agent: waste-agent
+evidence_model: ../../../../evidence-models/_shared/tbm-record.json
+signature_hazard: 하수 맨홀/소각로 밀폐공간 진입 전 H2S/메탄 측정 TBM
+
+
+# ── Shared TBM reference (added by scaffold-industry.ts Task A-01) ──
+# Declares this workflow also consumes the shared TBM base
+# (workflows/_shared/REFERENCE-SPEC.md §3.1 minimal form). Existing
+# top-level fields (signature_hazard, legal_basis, agent) serve as the
+# effective schema; the shared base supplies the common statutory floor.
+references:
+  - shared: ../../../../_shared/tbm

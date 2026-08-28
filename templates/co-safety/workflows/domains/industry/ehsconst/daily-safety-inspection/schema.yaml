@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: daily-safety-inspection
+title: "일일 안전점검 (Daily Safety Inspection)"
+status: active
+applicability: mandatory
+workflow_type: core
+
+legal_basis:
+  - 산업안전보건법 Article 15
+  - 중대재해처벌법 Article 7
+  - 건설기술진흥법 Article 24
+industry_profile: construction
+agent: ehsconst-agent
+evidence_model: ehsconst-inspection-record.json

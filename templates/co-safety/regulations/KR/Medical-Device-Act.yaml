@@ -1,0 +1,310 @@
+# ── Registry schema v2 (mode: coordinates) ───────────────────────────────────
+# This file maps article numbers to official titles ONLY. Article content is
+# never cached here — fetch live from the 법제처 k-law API at point of use.
+# Migrated by migrate-registry-to-coordinates.ts on 2026-08-26
+schema_version: 2
+mode: coordinates
+jurisdiction: KR
+framework: KGMP-MD
+law_name: 의료기기법
+law_name_en: null
+abbreviation: null
+mst: "281933"
+enforced_from: null
+agency: null
+tier: 1
+regulator: MFDS (식품의약품안전처)
+articles:
+  - "no": "1"
+    title: 목적
+    checked_at: "2026-08-26"
+  - "no": "2"
+    title: 정의
+    checked_at: "2026-08-26"
+  - "no": "2"
+    title: 의료기기의 날
+    checked_at: "2026-08-26"
+  - "no": "3"
+    title: 등급분류와 지정
+    checked_at: "2026-08-26"
+  - "no": "4"
+    title: 다른 법률과의 관계
+    checked_at: "2026-08-26"
+  - "no": "4"
+    title: 의료기기 안전관리 종합계획 등
+    checked_at: "2026-08-26"
+  - "no": "5"
+    title: 의료기기위원회
+    checked_at: "2026-08-26"
+  - "no": "6"
+    title: 제조업의 허가 등
+    checked_at: "2026-08-26"
+  - "no": "6"
+    title: 품질책임자 준수사항 등
+    checked_at: "2026-08-26"
+  - "no": "6"
+    title: 제조허가 등의 제한
+    checked_at: "2026-08-26"
+  - "no": "6"
+    title: 기술문서심사기관의 지정 등
+    checked_at: "2026-08-26"
+  - "no": "7"
+    title: 조건부허가 등
+    checked_at: "2026-08-26"
+  - "no": "8"
+    title: 신개발의료기기 등의 시판 후 조사
+    checked_at: "2026-08-26"
+  - "no": "8"
+    title: 신개발의료기기 등의 시판 후 조사에 따른 후속조치
+    checked_at: "2026-08-26"
+  - "no": "9"
+    title: 재평가
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 임상시험계획의 승인 등
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 비임상시험실시기관의 지정 등
+    checked_at: "2026-08-26"
+  - "no": "11"
+    title: 제조 허가ㆍ신고 등의 사전 검토
+    checked_at: "2026-08-26"
+  - "no": "12"
+    title: 변경허가 등
+    checked_at: "2026-08-26"
+  - "no": "13"
+    title: 제조업자 등의 의무
+    checked_at: "2026-08-26"
+  - "no": "13"
+    title: 경제적 이익등 제공 내역에 관한 지출보고서 제출 등
+    checked_at: "2026-08-26"
+  - "no": "14"
+    title: 폐업ㆍ휴업 등의 신고
+    checked_at: "2026-08-26"
+  - "no": "15"
+    title: 수입업허가 등
+    checked_at: "2026-08-26"
+  - "no": "15"
+    title: 희소ㆍ긴급도입 필요 의료기기의 공급 및 정보 제공 등
+    checked_at: "2026-08-26"
+  - "no": "16"
+    title: 수리업의 신고
+    checked_at: "2026-08-26"
+  - "no": "17"
+    title: 판매업 등의 신고
+    checked_at: "2026-08-26"
+  - "no": "18"
+    title: 판매업자 등의 준수사항
+    checked_at: "2026-08-26"
+  - "no": "18"
+    title: 의료기기 판촉영업자 신고
+    checked_at: "2026-08-26"
+  - "no": "18"
+    title: 의료기기 판촉영업자에 대한 교육
+    checked_at: "2026-08-26"
+  - "no": "18"
+    title: 의료기기 판촉영업자의 준수사항
+    checked_at: "2026-08-26"
+  - "no": "18"
+    title: 개봉 판매 금지
+    checked_at: "2026-08-26"
+  - "no": "18"
+    title: 의료기기 판매질서 실태조사
+    checked_at: "2026-08-26"
+  - "no": "19"
+    title: 기준규격
+    checked_at: "2026-08-26"
+  - "no": "20"
+    title: 용기 등의 기재사항
+    checked_at: "2026-08-26"
+  - "no": "21"
+    title: 외부포장 등의 기재사항
+    checked_at: "2026-08-26"
+  - "no": "22"
+    title: 첨부문서의 기재사항
+    checked_at: "2026-08-26"
+  - "no": "23"
+    title: 기재 시 주의사항
+    checked_at: "2026-08-26"
+  - "no": "23"
+    title: 시각장애인 등을 위한 정보제공
+    checked_at: "2026-08-26"
+  - "no": "24"
+    title: 기재 및 광고의 금지 등
+    checked_at: "2026-08-26"
+  - "no": "25"
+    title: 광고의 자율심의
+    checked_at: "2026-08-26"
+  - "no": "25"
+    title: 자율심의기구 구성ㆍ운영 등
+    checked_at: "2026-08-26"
+  - "no": "25"
+    title: 의료기기광고에 관한 심의위원회
+    checked_at: "2026-08-26"
+  - "no": "25"
+    title: 의료기기광고 모니터링
+    checked_at: "2026-08-26"
+  - "no": "25"
+    title: 봉함
+    checked_at: "2026-08-26"
+  - "no": "26"
+    title: 일반행위의 금지
+    checked_at: "2026-08-26"
+  - "no": "27"
+    title: 시험검사
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: 제조 및 품질관리체계에 대한 적합성인정
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: 제조 및 품질관리체계 심사원 등
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: 적합성인정 대행기관의 지정 등
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: 적합성인정의 취소 등
+    checked_at: "2026-08-26"
+  - "no": "29"
+    title: 추적관리대상 의료기기
+    checked_at: "2026-08-26"
+  - "no": "30"
+    title: 기록의 작성 및 보존 등
+    checked_at: "2026-08-26"
+  - "no": "31"
+    title: 부작용 관리
+    checked_at: "2026-08-26"
+  - "no": "31"
+    title: 의료기기 공급내역 보고 등
+    checked_at: "2026-08-26"
+  - "no": "31"
+    title: 의료기기통합정보시스템 구축 등
+    checked_at: "2026-08-26"
+  - "no": "31"
+    title: 의료기기통합정보센터 지정ㆍ운영 등
+    checked_at: "2026-08-26"
+  - "no": "31"
+    title: 의료기기 이물 발견 보고 등
+    checked_at: "2026-08-26"
+  - "no": "32"
+    title: 보고와 검사 등
+    checked_at: "2026-08-26"
+  - "no": "32"
+    title: 해외제조소에 대한 현지실사 등
+    checked_at: "2026-08-26"
+  - "no": "33"
+    title: 검사명령
+    checked_at: "2026-08-26"
+  - "no": "34"
+    title: 판매중지ㆍ회수ㆍ폐기 및 공표 명령 등
+    checked_at: "2026-08-26"
+  - "no": "35"
+    title: 사용중지명령 등
+    checked_at: "2026-08-26"
+  - "no": "35"
+    title: 시정명령
+    checked_at: "2026-08-26"
+  - "no": "36"
+    title: 허가 등의 취소와 업무의 정지 등
+    checked_at: "2026-08-26"
+  - "no": "37"
+    title: 지정의 취소 등
+    checked_at: "2026-08-26"
+  - "no": "38"
+    title: 과징금처분
+    checked_at: "2026-08-26"
+  - "no": "38"
+    title: 위해 의료기기 제조 등에 대한 과징금 부과 등
+    checked_at: "2026-08-26"
+  - "no": "38"
+    title: 위반사실 공표
+    checked_at: "2026-08-26"
+  - "no": "39"
+    title: 청문
+    checked_at: "2026-08-26"
+  - "no": "40"
+    title: 의료기기 감시원
+    checked_at: "2026-08-26"
+  - "no": "40"
+    title: 소비자의료기기감시원
+    checked_at: "2026-08-26"
+  - "no": "41"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "42"
+    title: 한국의료기기안전정보원의 설립
+    checked_at: "2026-08-26"
+  - "no": "43"
+    title: 정보원의 사업
+    checked_at: "2026-08-26"
+  - "no": "43"
+    title: 의료기기 제조허가 등의 취소
+    checked_at: "2026-08-26"
+  - "no": "43"
+    title: 정보원의 지도ㆍ감독 등
+    checked_at: "2026-08-26"
+  - "no": "43"
+    title: 자료제공의 요청
+    checked_at: "2026-08-26"
+  - "no": "43"
+    title: 인과관계조사관
+    checked_at: "2026-08-26"
+  - "no": "43"
+    title: 보험가입 등
+    checked_at: "2026-08-26"
+  - "no": "44"
+    title: 권한의 위임 및 위탁
+    checked_at: "2026-08-26"
+  - "no": "44"
+    title: 벌칙 적용에서 공무원 의제
+    checked_at: "2026-08-26"
+  - "no": "45"
+    title: 제출자료의 보호
+    checked_at: "2026-08-26"
+  - "no": "46"
+    title: 동물용 의료기기에 대한 특례
+    checked_at: "2026-08-26"
+  - "no": "46"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "47"
+    title: 제조업자등의 지위 승계 등
+    checked_at: "2026-08-26"
+  - "no": "48"
+    title: 행정제재처분 효과의 승계
+    checked_at: "2026-08-26"
+  - "no": "49"
+    title: 제조허가등의 갱신
+    checked_at: "2026-08-26"
+  - "no": "50"
+    title: 수수료
+    checked_at: "2026-08-26"
+  - "no": "51"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "52"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "53"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "53"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "54"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "54"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "55"
+    title: 양벌규정
+    checked_at: "2026-08-26"
+  - "no": "56"
+    title: 과태료
+    checked_at: "2026-08-26"
+source_verification:
+  method: k-law-live
+  checked_at: "2026-08-26"
+  next_review: "2027-02-22"
+last_updated: "2026-08-26"

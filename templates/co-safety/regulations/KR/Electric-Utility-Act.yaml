@@ -1,0 +1,187 @@
+# ── Registry schema v2 (mode: coordinates) ───────────────────────────────────
+# This file maps article numbers to official titles ONLY. Article content is
+# never cached here — fetch live from the 법제처 k-law API at point of use.
+# Migrated by migrate-registry-to-coordinates.ts on 2026-08-26
+schema_version: 2
+mode: coordinates
+jurisdiction: KR
+framework: Electric-Utility-Act
+law_name: 전기공사업법
+law_name_en: null
+abbreviation: null
+mst: "271253"
+enforced_from: null
+agency: null
+tier: 1
+regulator: MCEE (기후에너지환경부) / KPXC (한국전력거래소) / KEPCO (한국전력)
+articles:
+  - "no": "1"
+    title: 목적
+    checked_at: "2026-08-26"
+  - "no": "2"
+    title: 정의
+    checked_at: "2026-08-26"
+  - "no": "3"
+    title: 전기공사의 제한 등
+    checked_at: "2026-08-26"
+  - "no": "4"
+    title: 공사업의 등록
+    checked_at: "2026-08-26"
+  - "no": "5"
+    title: 결격사유
+    checked_at: "2026-08-26"
+  - "no": "6"
+    title: 영업정지처분 등을 받은 후의 계속공사
+    checked_at: "2026-08-26"
+  - "no": "7"
+    title: 공사업의 양도 등
+    checked_at: "2026-08-26"
+  - "no": "8"
+    title: 공사업 양도의 제한
+    checked_at: "2026-08-26"
+  - "no": "9"
+    title: 등록사항의 변경신고 등
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 공사업 등록증 등의 대여금지 등
+    checked_at: "2026-08-26"
+  - "no": "11"
+    title: 전기공사 및 시공책임형 전기공사관리의 분리발주
+    checked_at: "2026-08-26"
+  - "no": "12"
+    title: 전기공사의 도급계약 등
+    checked_at: "2026-08-26"
+  - "no": "13"
+    title: 수급자격의 추가제한 금지
+    checked_at: "2026-08-26"
+  - "no": "14"
+    title: 하도급의 제한 등
+    checked_at: "2026-08-26"
+  - "no": "15"
+    title: 하수급인의 변경 요구 등
+    checked_at: "2026-08-26"
+  - "no": "15"
+    title: 전기공사 수급인의 하자담보책임
+    checked_at: "2026-08-26"
+  - "no": "16"
+    title: 전기공사의 시공관리
+    checked_at: "2026-08-26"
+  - "no": "17"
+    title: 시공관리책임자의 지정
+    checked_at: "2026-08-26"
+  - "no": "17"
+    title: 전기공사기술자의 인정
+    checked_at: "2026-08-26"
+  - "no": "18"
+    title: 전기공사기술자의 의무
+    checked_at: "2026-08-26"
+  - "no": "18"
+    title: 경력수첩의 대여 금지 등
+    checked_at: "2026-08-26"
+  - "no": "19"
+    title: 전기공사기술자의 양성교육훈련
+    checked_at: "2026-08-26"
+  - "no": "20"
+    title: 지정 내용의 변경신고
+    checked_at: "2026-08-26"
+  - "no": "21"
+    title: 지정교육훈련기관의 지정취소
+    checked_at: "2026-08-26"
+  - "no": "22"
+    title: 전기공사의 시공
+    checked_at: "2026-08-26"
+  - "no": "22"
+    title: 전기공사의 공사비 산정기준
+    checked_at: "2026-08-26"
+  - "no": "22"
+    title: 공사업자의 손해보험 가입 등
+    checked_at: "2026-08-26"
+  - "no": "23"
+    title: 공사업자 표시의 제한
+    checked_at: "2026-08-26"
+  - "no": "24"
+    title: 전기공사 표지의 게시 등
+    checked_at: "2026-08-26"
+  - "no": "25"
+    title: 공사업자단체의 설립
+    checked_at: "2026-08-26"
+  - "no": "26"
+    title: 「민법」의 준용
+    checked_at: "2026-08-26"
+  - "no": "27"
+    title: 시정명령 등
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: 등록취소 등
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: 전기공사기술자의 인정취소 등
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: 관할 구역 외의 지역에서의 위반행위에 대한 행정처분 요청
+    checked_at: "2026-08-26"
+  - "no": "29"
+    title: 이해관계인에 의한 조치의 요구
+    checked_at: "2026-08-26"
+  - "no": "29"
+    title: 공사업자의 실태조사 등
+    checked_at: "2026-08-26"
+  - "no": "30"
+    title: 청문
+    checked_at: "2026-08-26"
+  - "no": "31"
+    title: 공사업 관련 정보의 종합관리 등
+    checked_at: "2026-08-26"
+  - "no": "32"
+    title: 권한의 위임ㆍ위탁
+    checked_at: "2026-08-26"
+  - "no": "33"
+    title: 벌칙 적용 시의 공무원 의제 등
+    checked_at: "2026-08-26"
+  - "no": "34"
+    title: 노임에 대한 압류의 금지
+    checked_at: "2026-08-26"
+  - "no": "35"
+    title: 수수료
+    checked_at: "2026-08-26"
+  - "no": "36"
+    title: 비밀누설 금지
+    checked_at: "2026-08-26"
+  - "no": "37"
+    title: 업무수행 중 알게 된 사실의 누설 금지
+    checked_at: "2026-08-26"
+  - "no": "38"
+    title: 공사업의 진흥시책
+    checked_at: "2026-08-26"
+  - "no": "39"
+    title: 중소공사업자 지원을 위한 조치
+    checked_at: "2026-08-26"
+  - "no": "40"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "41"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "41"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "42"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "43"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "44"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "45"
+    title: 양벌규정
+    checked_at: "2026-08-26"
+  - "no": "46"
+    title: 과태료
+    checked_at: "2026-08-26"
+source_verification:
+  method: k-law-live
+  checked_at: "2026-08-26"
+  next_review: "2027-02-22"
+last_updated: "2026-08-26"

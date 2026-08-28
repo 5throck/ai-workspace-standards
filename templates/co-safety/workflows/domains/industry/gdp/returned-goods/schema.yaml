@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: returned-goods
+title: "반품 처리 (Returned Goods)"
+status: active
+applicability: mandatory
+workflow_type: core
+
+legal_basis:
+  - 의약품 유통관리 기준
+  - PIC/S GDP Ch.10
+  - EU GDP Ch.10
+industry_profile: pharma-distribution
+agent: gdp-agent
+evidence_model: gdp-returned-goods-record.json

@@ -1,0 +1,144 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "common.schema.json",
+  "title": "Safety OS Common Fields",
+  "description": "Common fields shared across all Safety OS evidence models (v1). Includes electronic signature schema (v1: schema-only, cryptography deferred to v2), ICH Q9 Quality Risk Management reference, and multilingual nomenclature per meeting decisions 2026-06-17.",
+  "version": "1.2.0",
+  "type": "object",
+  "definitions": {
+    "agent_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$",
+      "description": "Kebab-case identifier of the Safety OS agent that created or owns the record (e.g. audit-agent, compliance-agent, docs-writer). Must match audit_trail.created_by when an audit trail is present."
+    },
+    "workflow_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*(/[a-z][a-z0-9-]*)?$",
+      "description": "Identifier of the workflow execution that produced the record: workflow directory slug, optionally domain-qualified ('<slug>' or '<domain>/<slug>', e.g. 'psm/pha-hazop'). Optional for record types that do not originate from a dispatched workflow."
+    },
+    "e_signature": {
+      "type": "object",
+      "description": "Electronic signature per 21 CFR Part 11 / KP-GMP equivalent. v1 includes schema-only; cryptographic_hash is null until v2 PKI/HSM integration.",
+      "properties": {
+        "required": {
+          "type": "boolean",
+          "default": true
+        },
+        "signer_id": {
+          "type": "string",
+          "description": "Employee identifier of signer (personal data — PIPA 개인정보보호법 applies)"
+        },
+        "signer_role": {
+          "type": "string",
+          "description": "Organizational role of the signer. GxP records use QA/QC/production roles; EHS and emergency-response records may use safety_manager, emergency_response_lead, incident_commander, or field_responder.",
+          "enum": ["QA_manager", "production_manager", "QC_analyst", "reviewer", "RP", "safety_manager", "emergency_response_lead", "incident_commander", "field_responder", "other"]
+        },
+        "signature_timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO-8601 timestamp with timezone"
+        },
+        "signature_meaning": {
+          "type": "string",
+          "enum": ["approval", "review", "verification", "execution"]
+        },
+        "cryptographic_hash": {
+          "type": ["string", "null"],
+          "description": "v1: null (cryptography deferred). v2: PKI-based hash."
+        }
+      },
+      "required": ["required", "signer_id", "signer_role", "signature_timestamp", "signature_meaning"]
+    },
+    "qrm_assessment": {
+      "type": "object",
+      "description": "ICH Q9 Quality Risk Management assessment reference per skills/domains/industry/gmp/qrm/SKILL.md.",
+      "properties": {
+        "methodology": {
+          "type": "string",
+          "enum": ["FMEA", "HACCP", "FTA", "cQRM-HAZOP", "PHA"]
+        },
+        "risk_level": {
+          "type": "string",
+          "enum": ["low", "medium", "high", "critical"]
+        },
+        "assessment_ref": {
+          "type": "string",
+          "pattern": "^gmp-qrm-[A-Z0-9-]+$"
+        },
+        "mitigation_status": {
+          "type": "string",
+          "enum": ["open", "closed", "monitoring"]
+        }
+      },
+      "required": ["methodology", "risk_level", "assessment_ref", "mitigation_status"]
+    },
+    "nomenclature": {
+      "type": "object",
+      "description": "Multilingual terminology declaration. JSON keys remain English; display names support Korean + English + regulatory term.",
+      "properties": {
+        "key_en": {
+          "type": "string",
+          "description": "Programmatic English key (snake_case)"
+        },
+        "display_name_ko": {
+          "type": "string",
+          "description": "Korean display name"
+        },
+        "display_name_en": {
+          "type": "string",
+          "description": "English display name"
+        },
+        "regulatory_term_ko": {
+          "type": "string",
+          "description": "Korean regulatory term with MFDS notice reference"
+        },
+        "synonyms": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "required": ["key_en", "display_name_ko", "display_name_en"]
+    },
+    "audit_trail": {
+      "type": "object",
+      "description": "ALCOA+ audit trail metadata.",
+      "properties": {
+        "created_at": { "type": "string", "format": "date-time" },
+        "created_by": { "type": "string" },
+        "last_modified_at": { "type": "string", "format": "date-time" },
+        "last_modified_by": { "type": "string" },
+        "record_status": {
+          "type": "string",
+          "enum": ["draft", "active", "superseded", "archived"]
+        }
+      },
+      "required": ["created_at", "created_by", "record_status"]
+    },
+    "risk_assessment_ref": {
+      "type": "object",
+      "description": "Reference to a workplace risk assessment (위험성평가) per OSHA-KR Article 36. Used to trace evidence records back to the originating risk assessment.",
+      "properties": {
+        "assessment_id": {
+          "type": "string",
+          "pattern": "^RA-[0-9]{4}-[0-9]{4}$",
+          "description": "Risk assessment record ID"
+        },
+        "assessment_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Date the risk assessment was completed"
+        },
+        "risk_level": {
+          "type": "string",
+          "enum": ["low", "medium", "high", "critical"],
+          "description": "Overall risk level from the assessment"
+        },
+        "assessor_id": {
+          "type": "string",
+          "description": "ID of the person who performed the assessment"
+        }
+      },
+      "required": ["assessment_id", "assessment_date"]
+    }
+  }
+}

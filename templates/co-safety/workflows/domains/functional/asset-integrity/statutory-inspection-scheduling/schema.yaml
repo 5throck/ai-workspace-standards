@@ -1,0 +1,10 @@
+schema_version: "1.0"
+workflow_id: statutory-inspection-scheduling
+title: "법정 검사 및 자체 검사 일정 관리 (Statutory & Self-Inspection Scheduling)"
+status: active
+applicability: mandatory
+applicable_industries: [manufacturing, chemical, gas_terminal, power_generation, semiconductor, battery, shipbuilding, steelmaking, railway, waste, defense, biotech]
+legal_basis: [산업안전보건법 Article 93 (안전검사), 산업안전보건법 Article 96 (안전검사기관), 고압가스 안전 관리 및 사업법 Article 13]
+industry_profile: asset-integrity
+agent: asset-integrity-agent
+evidence_model: equipment-integrity-record.json

@@ -1,0 +1,85 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "incident-report-record.json",
+  "title": "Incident Initial Report Record",
+  "description": "Initial incident report and classification record per OSHA-KR Article 57 (사고 조사 의무) and Article 54 (중대재해 보고). Documents the immediate facts, severity classification, and regulatory reporting obligations.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "incident_date",
+    "incident_location",
+    "incident_description",
+    "severity_classification",
+    "injured_persons",
+    "immediate_cause",
+    "initial_response",
+    "legal_basis",
+    "regulatory_report_required",
+    "e_signature",
+    "nomenclature",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^INC-[0-9]{4}-[0-9]{4}$"
+    },
+    "incident_date": { "type": "string", "format": "date-time" },
+    "incident_location": { "type": "string" },
+    "incident_description": { "type": "string" },
+    "severity_classification": {
+      "type": "string",
+      "enum": ["near_miss", "first_aid", "medical_treatment", "lost_time", "permanent_disability", "fatality"],
+      "description": "ILO/OSHA-KR severity classification"
+    },
+    "sapa_serious_accident": {
+      "type": "boolean",
+      "description": "중대재해처벌법 해당 여부 (fatality or 3+ simultaneously injured)"
+    },
+    "injured_persons": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["person_id", "employment_type", "injury_type"],
+        "properties": {
+          "person_id": { "type": "string" },
+          "employment_type": { "type": "string", "enum": ["direct", "contractor", "temp"] },
+          "injury_type": { "type": "string" },
+          "days_lost": { "type": ["integer", "null"], "minimum": 0 }
+        }
+      }
+    },
+    "immediate_cause": { "type": "string" },
+    "contributing_factors": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "initial_response": { "type": "string", "description": "Emergency response actions taken immediately" },
+    "rca_ref": {
+      "type": ["string", "null"],
+      "description": "Reference to subsequent RCA record (RCA-YYYY-NNNN)"
+    },
+    "regulatory_report_required": {
+      "type": "boolean",
+      "description": "True if MOEL reporting required within 1 working day (Art.57)"
+    },
+    "regulatory_report_date": {
+      "type": ["string", "null"],
+      "format": "date"
+    },
+    "risk_assessment_triggered_ref": {
+      "type": ["string", "null"],
+      "description": "Reference to post-incident risk assessment (RA-YYYY-NNNN)"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 3,
+      "examples": [["산업안전보건법 Article 57", "중대재해처벌법 Article 5", "산업안전보건법 Article 54"]]
+    },
+    "e_signature": { "$ref": "../../../_shared/base/common.schema.json#/definitions/e_signature" },
+    "nomenclature": { "$ref": "../../../_shared/base/common.schema.json#/definitions/nomenclature" },
+    "audit_trail": { "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail" }
+  }
+}

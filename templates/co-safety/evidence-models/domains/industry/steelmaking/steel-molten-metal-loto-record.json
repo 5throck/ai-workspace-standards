@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "steel-molten-metal-loto-record.json",
+  "title": "Steelmaking Molten Metal Furnace LOTO Record",
+  "description": "Evidence model for Blast Furnace/Electric Arc Furnace LOTO Isolation and Moisture Control Records.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "furnace_id",
+    "legal_basis",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^STEEL-LOTO-[0-9]{4}-[0-9]{4}$"
+    },
+    "furnace_id": {
+      "type": "string"
+    },
+    "zero_energy_isolated": {
+      "type": "boolean"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

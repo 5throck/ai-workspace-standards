@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: temperature-monitoring
+title: "온도 모니터링 (Temperature Monitoring)"
+status: active
+applicability: mandatory
+workflow_type: core
+
+legal_basis:
+  - 의약품 유통관리 기준
+  - PIC/S GDP Ch.3
+  - EU GDP Ch.7
+industry_profile: pharma-distribution
+agent: gdp-agent
+evidence_model: gdp-temperature-monitoring-record.json

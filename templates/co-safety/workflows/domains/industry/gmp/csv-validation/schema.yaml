@@ -1,0 +1,15 @@
+schema_version: "1.0"
+workflow_id: csv-validation
+title: "컴퓨터 시스템 적합성평가 (Computer System Validation)"
+status: active
+applicability: mandatory
+workflow_type: core
+legal_basis:
+  - 약사법 Article 37
+  - 의약품 등의 안전에 관한 규칙 별표 1 제6호 (컴퓨터시스템 밸리데이션)
+  - 21 CFR Part 11 (Electronic Records / Electronic Signatures)
+  - GAMP 5 (Risk-Based Approach to Compliant GxP Computerized Systems)
+  - ICH Q9 (Quality Risk Management)
+industry_profile: pharma-general
+agent: gmp-agent
+evidence_model: gmp-csv-record.json

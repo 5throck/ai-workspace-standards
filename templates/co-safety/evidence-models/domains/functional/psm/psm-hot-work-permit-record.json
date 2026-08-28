@@ -1,0 +1,120 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "psm-hot-work-permit-record.json",
+  "title": "PSM Hot Work Permit Record",
+  "description": "Evidence model for PSM Hot Work Permit records per OSHA-KR Article 44.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "version",
+    "record_id",
+    "timestamp",
+    "agent_id",
+    "workflow_id",
+    "legal_basis",
+    "permit_number",
+    "work_location",
+    "work_description",
+    "fire_hazard_assessment",
+    "authorized_by",
+    "fire_watch_required",
+    "fire_watch_name",
+    "permit_expiry",
+    "closure_signature"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Schema version.",
+      "default": "1.0.0"
+    },
+    "record_id": {
+      "type": "string",
+      "pattern": "^PSM-HWP-[0-9]{4}-[0-9]{4}$",
+      "description": "Unique identifier for the hot work permit record"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when the record was created"
+    },
+    "agent_id": {
+      "type": "string",
+      "description": "ID of the agent that generated this record"
+    },
+    "workflow_id": {
+      "type": "string",
+      "description": "ID of the workflow execution"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "description": "Multi-source legal basis. Primary: OSHA-KR Article 44 (PSM — hot work permit). Adjacent laws may include: OSHA-KR Article 38 (safety measures before hazardous work), Hazardous Materials Safety Act Article 18 (hot work regulation for hazardous material facilities), Occupational Safety and Health Standards Rule Article 158 (welding/cutting safety).",
+      "examples": [
+        "산업안전보건법 Article 44 (공정안전관리 — 화기작업)",
+        "산업안전보건법 Article 38 (작업 전 안전조치)",
+        "위험물안전관리법 Article 18 (화기작업 등 규제)"
+      ]
+    },
+    "permit_number": {
+      "type": "string",
+      "description": "Unique permit number assigned to this hot work authorization."
+    },
+    "work_location": {
+      "type": "string",
+      "description": "Specific location within the facility where hot work will be performed."
+    },
+    "work_description": {
+      "type": "string",
+      "description": "Description of the hot work activity to be performed (e.g., welding, cutting, grinding)."
+    },
+    "fire_hazard_assessment": {
+      "type": "object",
+      "description": "Pre-work gas-free verification and fire hazard evaluation.",
+      "properties": {
+        "flammable_gas_test": {
+          "type": "string",
+          "description": "Name or type of gas detector instrument used for measurement."
+        },
+        "gas_concentration_ppm": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Measured flammable gas concentration in parts per million (ppm)."
+        },
+        "safe_to_proceed": {
+          "type": "boolean",
+          "description": "Confirmation that gas concentration is below acceptable threshold and work may proceed."
+        }
+      },
+      "required": [
+        "flammable_gas_test",
+        "gas_concentration_ppm",
+        "safe_to_proceed"
+      ]
+    },
+    "authorized_by": {
+      "type": "string",
+      "description": "Name or ID of the supervisor who authorized the hot work permit."
+    },
+    "fire_watch_required": {
+      "type": "boolean",
+      "description": "Indicates whether a fire watch attendant is required for this hot work."
+    },
+    "fire_watch_name": {
+      "type": "string",
+      "description": "Name or ID of the assigned fire watch attendant (required when fire_watch_required is true)."
+    },
+    "permit_expiry": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date and time at which the permit expires and work must stop unless renewed."
+    },
+    "closure_signature": {
+      "type": "string",
+      "description": "Signature or name of the person who closed the permit upon work completion."
+    }
+  }
+}

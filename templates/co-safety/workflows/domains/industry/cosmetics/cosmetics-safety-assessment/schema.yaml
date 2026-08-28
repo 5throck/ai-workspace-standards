@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: cosmetics-safety-assessment
+title: "화장품 원료 안전성 평가 (Cosmetics Ingredient Safety Assessment)"
+status: active
+applicability: mandatory
+workflow_type: core
+legal_basis:
+  - 화장품법 Article 5
+  - 산업안전보건법 Article 110
+  - 화학물질관리법 Article 20
+  - ISO 22716
+industry_profile: cosmetics-cgmp
+agent: cosmetics-agent
+evidence_model: cosmetics-safety-assessment-record.json

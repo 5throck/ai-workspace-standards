@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: food-mixer-loto
+title: "식품 교반기 및 혼합기 LOTO 절차 (Food Mixer Lockout/Tagout)"
+status: active
+applicability: mandatory
+workflow_type: core
+legal_basis:
+  - 산업안전보건법 Article 36
+  - 산업안전보건법 Article 92
+  - KOSHA GUIDE Z-40-2022
+  - 중대재해처벌법 Article 4
+industry_profile: food-gxp
+agent: food-agent
+evidence_model: food-mixer-loto-record.json

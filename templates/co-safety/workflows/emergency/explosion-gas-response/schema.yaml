@@ -1,0 +1,13 @@
+schema_version: "1.0"
+workflow_id: explosion-gas-response
+title: "폭발/가스 누출 대응 (Explosion and Gas Response)"
+status: active
+applicability: mandatory
+
+legal_basis:
+  - 고압가스 안전관리법
+  - 액화석유가스 안전관리법
+  - 산업안전보건법 Article 38 (안전조치)
+industry_profile: all
+agent: emergency-agent
+evidence_model: emergency-explosion-gas-record.json

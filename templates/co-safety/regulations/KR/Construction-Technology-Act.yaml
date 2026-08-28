@@ -1,0 +1,364 @@
+# ── Registry schema v2 (mode: coordinates) ───────────────────────────────────
+# This file maps article numbers to official titles ONLY. Article content is
+# never cached here — fetch live from the 법제처 k-law API at point of use.
+# Migrated by migrate-registry-to-coordinates.ts on 2026-08-26
+schema_version: 2
+mode: coordinates
+jurisdiction: KR
+framework: Construction-Technology-Act
+law_name: 건설기술 진흥법
+law_name_en: null
+abbreviation: null
+mst: "276921"
+enforced_from: null
+agency: null
+tier: 1
+regulator: MOLIT (국토교통부)
+articles:
+  - "no": "1"
+    title: 목적
+    checked_at: "2026-08-26"
+  - "no": "2"
+    title: 정의
+    checked_at: "2026-08-26"
+  - "no": "3"
+    title: 건설기술진흥 기본계획
+    checked_at: "2026-08-26"
+  - "no": "4"
+    title: 건설기술과 관련된 중요 정책 등의 조정
+    checked_at: "2026-08-26"
+  - "no": "5"
+    title: 건설기술심의위원회
+    checked_at: "2026-08-26"
+  - "no": "6"
+    title: 기술자문위원회
+    checked_at: "2026-08-26"
+  - "no": "7"
+    title: 건설기술 연구ㆍ개발 사업
+    checked_at: "2026-08-26"
+  - "no": "8"
+    title: 건설기술의 연구ㆍ개발 등의 권고
+    checked_at: "2026-08-26"
+  - "no": "9"
+    title: 공동 연구ㆍ개발 등
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 연구시설 및 장비의 지원 등
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 융ㆍ복합건설기술의 활성화
+    checked_at: "2026-08-26"
+  - "no": "11"
+    title: 기술평가기관
+    checked_at: "2026-08-26"
+  - "no": "12"
+    title: 시범사업의 실시
+    checked_at: "2026-08-26"
+  - "no": "13"
+    title: 개발기술의 활용 권고
+    checked_at: "2026-08-26"
+  - "no": "14"
+    title: 신기술의 지정ㆍ활용 등
+    checked_at: "2026-08-26"
+  - "no": "14"
+    title: 신기술사용협약
+    checked_at: "2026-08-26"
+  - "no": "15"
+    title: 신기술 지정의 취소
+    checked_at: "2026-08-26"
+  - "no": "16"
+    title: 외국 도입 건설기술의 관리
+    checked_at: "2026-08-26"
+  - "no": "17"
+    title: 국제 교류 및 협력
+    checked_at: "2026-08-26"
+  - "no": "18"
+    title: 건설기술정보체계의 구축
+    checked_at: "2026-08-26"
+  - "no": "19"
+    title: 건설공사 지원 통합정보체계의 구축
+    checked_at: "2026-08-26"
+  - "no": "20"
+    title: 건설기술인의 육성
+    checked_at: "2026-08-26"
+  - "no": "20"
+    title: 교육ㆍ훈련의 대행
+    checked_at: "2026-08-26"
+  - "no": "20"
+    title: 교육ㆍ훈련 대행의 유효기간 및 갱신
+    checked_at: "2026-08-26"
+  - "no": "20"
+    title: 교육ㆍ훈련 대행의 취소
+    checked_at: "2026-08-26"
+  - "no": "20"
+    title: 교육ㆍ훈련의 관리
+    checked_at: "2026-08-26"
+  - "no": "20"
+    title: 교육ㆍ훈련 업무의 위탁
+    checked_at: "2026-08-26"
+  - "no": "21"
+    title: 건설기술인의 신고
+    checked_at: "2026-08-26"
+  - "no": "22"
+    title: 건설기술인의 국가 간 상호 인정
+    checked_at: "2026-08-26"
+  - "no": "22"
+    title: 건설기술인의 업무수행 등
+    checked_at: "2026-08-26"
+  - "no": "22"
+    title: 부당한 요구 등의 신고 등
+    checked_at: "2026-08-26"
+  - "no": "23"
+    title: 건설기술인의 명의 대여 금지 등
+    checked_at: "2026-08-26"
+  - "no": "24"
+    title: 건설기술인의 업무정지 등
+    checked_at: "2026-08-26"
+  - "no": "25"
+    title: 건설엔지니어링업의 육성
+    checked_at: "2026-08-26"
+  - "no": "26"
+    title: 건설엔지니어링업의 등록 등
+    checked_at: "2026-08-26"
+  - "no": "27"
+    title: 결격사유
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: 건설엔지니어링사업자 등의 의무
+    checked_at: "2026-08-26"
+  - "no": "29"
+    title: 건설엔지니어링사업자의 영업 양도 등
+    checked_at: "2026-08-26"
+  - "no": "30"
+    title: 건설엔지니어링의 실적 관리
+    checked_at: "2026-08-26"
+  - "no": "31"
+    title: 건설엔지니어링사업자의 등록취소 등
+    checked_at: "2026-08-26"
+  - "no": "32"
+    title: 과징금
+    checked_at: "2026-08-26"
+  - "no": "33"
+    title: 등록취소처분 등을 받은 건설엔지니어링사업자의 업무 계속
+    checked_at: "2026-08-26"
+  - "no": "34"
+    title: 건설엔지니어링사업자의 손해배상 및 하자보증
+    checked_at: "2026-08-26"
+  - "no": "35"
+    title: 발주청이 시행하는 건설엔지니어링사업
+    checked_at: "2026-08-26"
+  - "no": "36"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "37"
+    title: 건설엔지니어링 대가
+    checked_at: "2026-08-26"
+  - "no": "38"
+    title: 건설엔지니어링사업자의 지도ㆍ감독 등
+    checked_at: "2026-08-26"
+  - "no": "39"
+    title: 건설사업관리 등의 시행
+    checked_at: "2026-08-26"
+  - "no": "39"
+    title: 시공단계의 건설사업관리계획 등
+    checked_at: "2026-08-26"
+  - "no": "39"
+    title: 건설사업관리 중 실정보고 등
+    checked_at: "2026-08-26"
+  - "no": "39"
+    title: 건설사업관리 업무에 대한 부당간섭 배제 등
+    checked_at: "2026-08-26"
+  - "no": "40"
+    title: 건설사업관리 중 공사중지 명령 등
+    checked_at: "2026-08-26"
+  - "no": "40"
+    title: 불이익조치의 금지
+    checked_at: "2026-08-26"
+  - "no": "40"
+    title: 면책
+    checked_at: "2026-08-26"
+  - "no": "41"
+    title: 총괄관리자의 선정 등
+    checked_at: "2026-08-26"
+  - "no": "42"
+    title: 다른 법률과의 관계
+    checked_at: "2026-08-26"
+  - "no": "43"
+    title: 설계 등의 표준화
+    checked_at: "2026-08-26"
+  - "no": "44"
+    title: 설계 및 시공 기준
+    checked_at: "2026-08-26"
+  - "no": "44"
+    title: 건설기준의 관리
+    checked_at: "2026-08-26"
+  - "no": "45"
+    title: 건설공사 공사비 산정기준
+    checked_at: "2026-08-26"
+  - "no": "45"
+    title: 공사기간 산정기준
+    checked_at: "2026-08-26"
+  - "no": "46"
+    title: 건설공사의 시행과정
+    checked_at: "2026-08-26"
+  - "no": "47"
+    title: 건설공사의 타당성 조사
+    checked_at: "2026-08-26"
+  - "no": "48"
+    title: 설계도서의 작성 등
+    checked_at: "2026-08-26"
+  - "no": "49"
+    title: 건설공사감독자의 감독 의무
+    checked_at: "2026-08-26"
+  - "no": "50"
+    title: 건설엔지니어링 및 시공 평가 등
+    checked_at: "2026-08-26"
+  - "no": "51"
+    title: 우수건설엔지니어링사업자 등의 선정
+    checked_at: "2026-08-26"
+  - "no": "52"
+    title: 건설공사의 사후평가
+    checked_at: "2026-08-26"
+  - "no": "52"
+    title: 사후평가 관리 등
+    checked_at: "2026-08-26"
+  - "no": "53"
+    title: 건설공사 등의 부실 측정
+    checked_at: "2026-08-26"
+  - "no": "54"
+    title: 건설공사현장 등의 점검
+    checked_at: "2026-08-26"
+  - "no": "55"
+    title: 건설공사의 품질관리
+    checked_at: "2026-08-26"
+  - "no": "56"
+    title: 품질관리 비용의 계상 및 집행
+    checked_at: "2026-08-26"
+  - "no": "57"
+    title: 건설자재ㆍ부재의 품질 확보 등
+    checked_at: "2026-08-26"
+  - "no": "58"
+    title: 철강구조물공장의 공장인증
+    checked_at: "2026-08-26"
+  - "no": "59"
+    title: 공장인증의 취소 등
+    checked_at: "2026-08-26"
+  - "no": "60"
+    title: 품질검사의 대행 등
+    checked_at: "2026-08-26"
+  - "no": "61"
+    title: 품질검사의 대행에 대한 평가기관
+    checked_at: "2026-08-26"
+  - "no": "62"
+    title: 건설공사의 안전관리
+    checked_at: "2026-08-26"
+  - "no": "62"
+    title: 소규모 건설공사의 안전관리
+    checked_at: "2026-08-26"
+  - "no": "62"
+    title: 스마트 안전관리 보조ㆍ지원
+    checked_at: "2026-08-26"
+  - "no": "63"
+    title: 안전관리비용
+    checked_at: "2026-08-26"
+  - "no": "64"
+    title: 건설공사의 안전관리조직
+    checked_at: "2026-08-26"
+  - "no": "65"
+    title: 건설공사의 안전교육
+    checked_at: "2026-08-26"
+  - "no": "65"
+    title: 일요일 건설공사 시행의 제한
+    checked_at: "2026-08-26"
+  - "no": "66"
+    title: 건설공사의 환경관리
+    checked_at: "2026-08-26"
+  - "no": "67"
+    title: 건설공사 현장의 사고조사 등
+    checked_at: "2026-08-26"
+  - "no": "68"
+    title: 건설사고조사위원회
+    checked_at: "2026-08-26"
+  - "no": "69"
+    title: 협회의 설립
+    checked_at: "2026-08-26"
+  - "no": "70"
+    title: 협회의 설립인가 등
+    checked_at: "2026-08-26"
+  - "no": "71"
+    title: 보고 등
+    checked_at: "2026-08-26"
+  - "no": "72"
+    title: 지도ㆍ감독 등
+    checked_at: "2026-08-26"
+  - "no": "73"
+    title: 다른 법률의 준용
+    checked_at: "2026-08-26"
+  - "no": "74"
+    title: 공제조합의 설립 등
+    checked_at: "2026-08-26"
+  - "no": "75"
+    title: 공제조합의 사업
+    checked_at: "2026-08-26"
+  - "no": "76"
+    title: 조사 및 검사 등
+    checked_at: "2026-08-26"
+  - "no": "77"
+    title: 지도ㆍ감독 등
+    checked_at: "2026-08-26"
+  - "no": "78"
+    title: 다른 법률의 준용
+    checked_at: "2026-08-26"
+  - "no": "79"
+    title: 수수료
+    checked_at: "2026-08-26"
+  - "no": "80"
+    title: 시정명령
+    checked_at: "2026-08-26"
+  - "no": "80"
+    title: 제척기간
+    checked_at: "2026-08-26"
+  - "no": "81"
+    title: 비밀의 누설 등 금지
+    checked_at: "2026-08-26"
+  - "no": "82"
+    title: 권한 등의 위임ㆍ위탁
+    checked_at: "2026-08-26"
+  - "no": "83"
+    title: 청문
+    checked_at: "2026-08-26"
+  - "no": "84"
+    title: 벌칙 적용 시의 공무원 의제
+    checked_at: "2026-08-26"
+  - "no": "85"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "86"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "87"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "87"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "88"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "89"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "90"
+    title: 양벌규정
+    checked_at: "2026-08-26"
+  - "no": "91"
+    title: 과태료
+    checked_at: "2026-08-26"
+  - "no": "91"
+    title: 과태료 부과 유예 특례
+    checked_at: "2026-08-26"
+source_verification:
+  method: k-law-live
+  checked_at: "2026-08-26"
+  next_review: "2027-02-22"
+last_updated: "2026-08-26"

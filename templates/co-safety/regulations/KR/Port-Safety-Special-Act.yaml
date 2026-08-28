@@ -1,0 +1,76 @@
+# ── Registry schema v2 (mode: coordinates) ───────────────────────────────────
+# This file maps article numbers to official titles ONLY. Article content is
+# never cached here — fetch live from the 법제처 k-law API at point of use.
+# Migrated by migrate-registry-to-coordinates.ts on 2026-08-26
+schema_version: 2
+mode: coordinates
+jurisdiction: KR
+framework: Port-Safety-Special-Act
+law_name: 항만안전특별법
+law_name_en: null
+abbreviation: null
+mst: "234457"
+enforced_from: null
+agency: null
+tier: 1
+regulator: MOF (해양수산부) / 해양경찰관서 (Korea Coast Guard, port-safety enforcement support)
+articles:
+  - "no": "1"
+    title: 목적
+    checked_at: "2026-08-26"
+  - "no": "2"
+    title: 정의
+    checked_at: "2026-08-26"
+  - "no": "3"
+    title: 국가 등의 책무
+    checked_at: "2026-08-26"
+  - "no": "4"
+    title: 다른 법률과의 관계
+    checked_at: "2026-08-26"
+  - "no": "5"
+    title: 항만운송 참여자의 기본 의무
+    checked_at: "2026-08-26"
+  - "no": "6"
+    title: 항만운송 참여자의 안전확보 의무
+    checked_at: "2026-08-26"
+  - "no": "7"
+    title: 항만안전협의체의 구성ㆍ운영
+    checked_at: "2026-08-26"
+  - "no": "8"
+    title: 안전교육
+    checked_at: "2026-08-26"
+  - "no": "9"
+    title: 자체안전관리계획의 수립ㆍ승인 등
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 항만안전에 관한 정보공개 등
+    checked_at: "2026-08-26"
+  - "no": "11"
+    title: 관계기관의 협조
+    checked_at: "2026-08-26"
+  - "no": "12"
+    title: 사업정지 등
+    checked_at: "2026-08-26"
+  - "no": "13"
+    title: 과징금 등
+    checked_at: "2026-08-26"
+  - "no": "14"
+    title: 권한의 위임 및 위탁
+    checked_at: "2026-08-26"
+  - "no": "15"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "16"
+    title: 양벌규정
+    checked_at: "2026-08-26"
+  - "no": "17"
+    title: 과태료
+    checked_at: "2026-08-26"
+source_verification:
+  method: k-law-live
+  checked_at: "2026-08-26"
+  next_review: "2027-02-22"
+last_updated: "2026-08-26"
+related_rule:
+  name_ko: 항만안전특별법 시행령 / 시행규칙 (해양수산부령)
+  abbreviation: PSSA-Enforcement

@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: safety-management-plan
+title: "안전보건관리계획 (Safety Management Plan)"
+status: active
+applicability: mandatory
+workflow_type: core
+
+legal_basis:
+  - 산업안전보건법 Article 42 (유해위험방지계획서의 작성·제출)
+  - 안전보건관리계획 작성 기준 (MOEL 고시)
+  - 중대재해처벌법 Article 7
+industry_profile: construction
+agent: ehsconst-agent
+evidence_model: ehsconst-safety-plan-record.json

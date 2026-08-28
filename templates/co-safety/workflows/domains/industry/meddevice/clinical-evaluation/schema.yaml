@@ -1,0 +1,12 @@
+schema_version: "1.0"
+workflow_id: clinical-evaluation
+title: "임상평가 (Clinical Evaluation)"
+status: active
+applicability: mandatory
+workflow_type: core
+uses_functional_services: [functional/msds, industry/glp, emergency]
+
+legal_basis: [의료기기법 Article 16, MDR Annex XIV, KGMP-MD]
+industry_profile: medical-device
+agent: meddevice-agent
+evidence_model: meddevice-clinical-eval-record.json

@@ -1,0 +1,15 @@
+schema_version: "1.0"
+workflow_id: high-voltage-facility-safety
+title: "고전압 수전 설비 전기안전 및 Arc Flash 방지 (High-Voltage Facility Safety)"
+status: active
+applicability: mandatory
+workflow_type: core
+legal_basis:
+  - 전기안전관리법 Article 29
+  - 전기사업법 Article 65
+  - 산업안전보건법 Article 38 (안전조치)
+  - 안전보건기준에관한규칙 (감전 등 전기 재해 방지 기준)
+  - IEEE 1584
+industry_profile: datacenter-infrastructure
+agent: datacenter-agent
+evidence_model: high-voltage-facility-record.json

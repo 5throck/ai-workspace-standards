@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: participant-enrollment
+title: "참가자 등록 (Participant Enrollment)"
+status: active
+applicability: mandatory
+workflow_type: core
+
+legal_basis:
+  - 약사법 Article 69
+  - 의약품 임상시험 관리기준 (KGCP)
+  - ICH E6(R3) Section 7
+industry_profile: clinical-research
+agent: gcp-agent
+evidence_model: gcp-participant-record.json

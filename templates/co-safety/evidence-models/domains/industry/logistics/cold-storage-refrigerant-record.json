@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "cold-storage-refrigerant-record.json",
+  "title": "Cold Storage Refrigerant Safety Record",
+  "description": "Evidence model for Cold Storage Ammonia Refrigerant Leak Monitoring and Escape Door Integrity.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "chamber_id",
+    "refrigerant_gas_ppm",
+    "legal_basis",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^LGS-RFG-[0-9]{4}-[0-9]{4}$"
+    },
+    "chamber_id": {
+      "type": "string"
+    },
+    "refrigerant_gas_ppm": {
+      "type": "number"
+    },
+    "escape_latch_tested": {
+      "type": "boolean"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

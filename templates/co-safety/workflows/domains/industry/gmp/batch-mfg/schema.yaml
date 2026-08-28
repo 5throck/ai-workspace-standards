@@ -1,0 +1,13 @@
+schema_version: "1.0"
+workflow_id: batch-mfg
+title: "제조 및 포장기록 (Batch Manufacturing Records)"
+status: active
+applicability: mandatory
+workflow_type: core
+legal_basis:
+  - 약사법 Article 37
+  - 의약품 등의 안전에 관한 규칙 별표 1 제8호 (제조관리)
+  - ICH Q7 (API GMP)
+industry_profile: pharma-general
+agent: gmp-agent
+evidence_model: gmp-batch-record.json

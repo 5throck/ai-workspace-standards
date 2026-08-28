@@ -1,0 +1,27 @@
+schema_version: "1.0"
+workflow_id: railway-bridge-viaduct-fall-prevention
+title: "Railway (Operations and maintenance) — railway-bridge-viaduct-fall-prevention"
+status: active
+applicability: mandatory
+workflow_type: core
+industry_profile: railway
+agent: railway-agent
+signature_hazard: "철도 교량/고가구조물 점검·정비 시 추락 방지, 강물/계곡 수난 구조 대응, 및 풍속/기상 작업 제한 (Railway bridge/viaduct inspection and maintenance: fall prevention, water/gorge rescue contingency, wind-speed/weather work limits)"
+
+# Auto-filled from regulations/KR/industry-regulatory-anchors.yaml (Task A-03).
+# Entries marked [UNVERIFIED] originate from the anchor table and require specialist re-verification.
+legal_basis:
+  - 산업안전보건법 Article 36
+  - 산업안전보건법 Article 57
+  - 중대재해처벌법 Article 4
+  - 중대재해처벌법 Article 5
+  - 중대재해처벌법 Article 6
+  - 중대재해처벌법 Article 7
+  - 철도안전법 Article 45
+  - 철도안전법 Article 48
+  - 산업안전보건법 Article 38 (추락 등 위해 방지 안전조치)
+  - 안전보건기준에관한규칙 (감전 등 전기 재해 방지 기준)
+
+# Industry-unique workflow. NOT a shared-workflow reference (no `references:` block).
+# Evidence model skeleton — see evidence-models/domains/industry/railway/railway-railway-bridge-viaduct-fall-prevention-record.json.
+evidence_model: railway-railway-bridge-viaduct-fall-prevention-record.json

@@ -1,0 +1,135 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "gcp-participant-record.json",
+  "title": "GCP Participant Enrollment Record",
+  "description": "Participant enrollment per protocol inclusion/exclusion criteria.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "irb_approval_ref",
+    "ich_e6_compliance",
+    "protocol_ref",
+    "site_id",
+    "legal_basis",
+    "e_signature",
+    "nomenclature",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^GCP-PART-[0-9]{4}-[0-9]{4}$"
+    },
+    "irb_approval_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "IRB approval record ID"
+    },
+    "ich_e6_compliance": {
+      "type": "boolean",
+      "description": "Compliant with ICH E6(R3)"
+    },
+    "protocol_ref": {
+      "type": "string",
+      "description": "Study protocol record reference"
+    },
+    "site_id": {
+      "type": "string",
+      "description": "Investigational site identifier"
+    },
+    "participant_id": {
+      "type": "string"
+    },
+    "screening_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "enrollment_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "randomization_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "treatment_assignment": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "inclusion_criteria_met": {
+      "type": "boolean"
+    },
+    "exclusion_criteria_absent": {
+      "type": "boolean"
+    },
+    "withdrawal": {
+      "type": "object",
+      "properties": {
+        "withdrawn": {
+          "type": "boolean"
+        },
+        "date": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "ip_stopped": {
+          "type": "boolean"
+        },
+        "follow_up_continued": {
+          "type": "boolean"
+        }
+      }
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "description": "Multi-source legal basis. Primary: 약사법 Article 69 (clinical trial application) and Article 73의2 (SAE reporting). Adjacent laws may include: 생명윤리법 (Bioethics Act — IRB, informed consent), ICH E6(R3) (international GCP standard), Declaration of Helsinki (ethical principles).",
+      "examples": [
+        [
+          "약사법 Art.69",
+          "생명윤리법 Art.16",
+          "ICH E6(R3)"
+        ],
+        [
+          "약사법 Art.73의2",
+          "ICH E6(R3) §5",
+          "Declaration of Helsinki"
+        ],
+        [
+          "약사법 Art.69",
+          "ICH E6(R3) §8",
+          "생명윤리법 Art.13"
+        ]
+      ]
+    },
+    "e_signature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/e_signature"
+    },
+    "nomenclature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/nomenclature"
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

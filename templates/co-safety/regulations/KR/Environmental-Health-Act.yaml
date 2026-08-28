@@ -1,0 +1,187 @@
+# ── Registry schema v2 (mode: coordinates) ───────────────────────────────────
+# This file maps article numbers to official titles ONLY. Article content is
+# never cached here — fetch live from the 법제처 k-law API at point of use.
+# Migrated by migrate-registry-to-coordinates.ts on 2026-08-26
+schema_version: 2
+mode: coordinates
+jurisdiction: KR
+framework: Environmental-Health-Act
+law_name: 환경보건법
+law_name_en: null
+abbreviation: null
+mst: "279803"
+enforced_from: null
+agency: null
+tier: 1
+regulator: ME (환경부)
+articles:
+  - "no": "1"
+    title: 목적
+    checked_at: "2026-08-26"
+  - "no": "2"
+    title: 정의
+    checked_at: "2026-08-26"
+  - "no": "3"
+    title: 적용범위
+    checked_at: "2026-08-26"
+  - "no": "4"
+    title: 기본이념
+    checked_at: "2026-08-26"
+  - "no": "5"
+    title: 국가 등의 책무
+    checked_at: "2026-08-26"
+  - "no": "6"
+    title: 환경보건종합계획의 수립
+    checked_at: "2026-08-26"
+  - "no": "6"
+    title: 지역환경보건계획의 수립
+    checked_at: "2026-08-26"
+  - "no": "7"
+    title: 종합계획 등의 시행
+    checked_at: "2026-08-26"
+  - "no": "8"
+    title: 계획 수립의 협조
+    checked_at: "2026-08-26"
+  - "no": "9"
+    title: 환경보건위원회
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 위원회의 구성 및 운영
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 지역환경보건위원회
+    checked_at: "2026-08-26"
+  - "no": "11"
+    title: 환경유해인자의 위해성평가 및 관리
+    checked_at: "2026-08-26"
+  - "no": "12"
+    title: 새로운 기술 및 물질의 적용 또는 사용 제한
+    checked_at: "2026-08-26"
+  - "no": "13"
+    title: 건강영향 항목의 추가ㆍ평가 등
+    checked_at: "2026-08-26"
+  - "no": "14"
+    title: 국민환경보건 기초조사 등
+    checked_at: "2026-08-26"
+  - "no": "14"
+    title: 민감계층 활동공간 등에 대한 실태조사
+    checked_at: "2026-08-26"
+  - "no": "15"
+    title: 환경 관련 건강피해의 건강영향조사 등
+    checked_at: "2026-08-26"
+  - "no": "16"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "17"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "17"
+    title: 조사 결과에 따른 조치
+    checked_at: "2026-08-26"
+  - "no": "18"
+    title: 개인정보 등의 보호
+    checked_at: "2026-08-26"
+  - "no": "19"
+    title: 환경성질환에 대한 배상책임
+    checked_at: "2026-08-26"
+  - "no": "20"
+    title: 국가 등의 지원
+    checked_at: "2026-08-26"
+  - "no": "20"
+    title: 환경보건 지원사업의 실시
+    checked_at: "2026-08-26"
+  - "no": "20"
+    title: 환경보건이용권의 발급 등
+    checked_at: "2026-08-26"
+  - "no": "20"
+    title: 전담기관 지정
+    checked_at: "2026-08-26"
+  - "no": "20"
+    title: 전담기관 지정의 취소
+    checked_at: "2026-08-26"
+  - "no": "20"
+    title: 과징금 처분
+    checked_at: "2026-08-26"
+  - "no": "21"
+    title: 환경보건 지표의 개발
+    checked_at: "2026-08-26"
+  - "no": "22"
+    title: 환경보건 정보와 통계의 관리
+    checked_at: "2026-08-26"
+  - "no": "23"
+    title: 어린이활동공간의 위해성 관리
+    checked_at: "2026-08-26"
+  - "no": "23"
+    title: 검사기관의 지정 등
+    checked_at: "2026-08-26"
+  - "no": "23"
+    title: 교육
+    checked_at: "2026-08-26"
+  - "no": "23"
+    title: 어린이활동공간 환경안심 인증 등
+    checked_at: "2026-08-26"
+  - "no": "24"
+    title: 어린이 용도 유해물질 관리
+    checked_at: "2026-08-26"
+  - "no": "24"
+    title: 관련 사업자의 보고의무
+    checked_at: "2026-08-26"
+  - "no": "24"
+    title: 자가관리계획의 수립
+    checked_at: "2026-08-26"
+  - "no": "25"
+    title: 어린이 위해성 정보의 제공
+    checked_at: "2026-08-26"
+  - "no": "25"
+    title: 어린이에 대한 진료 지원
+    checked_at: "2026-08-26"
+  - "no": "26"
+    title: 환경보건센터의 지정ㆍ운영
+    checked_at: "2026-08-26"
+  - "no": "26"
+    title: 환경보건센터의 평가
+    checked_at: "2026-08-26"
+  - "no": "27"
+    title: 환경보건센터의 지정취소 등
+    checked_at: "2026-08-26"
+  - "no": "27"
+    title: 환경성질환 예방ㆍ관리센터의 설치ㆍ운영 등
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: 환경보건 전문인력의 육성 및 지원
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: 환경보건종합정보시스템의 구축ㆍ운영
+    checked_at: "2026-08-26"
+  - "no": "29"
+    title: 보고와 검사 등
+    checked_at: "2026-08-26"
+  - "no": "29"
+    title: 수수료
+    checked_at: "2026-08-26"
+  - "no": "29"
+    title: 청문
+    checked_at: "2026-08-26"
+  - "no": "30"
+    title: 위임 및 위탁
+    checked_at: "2026-08-26"
+  - "no": "31"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "31"
+    title: 형의 감면
+    checked_at: "2026-08-26"
+  - "no": "32"
+    title: 양벌규정
+    checked_at: "2026-08-26"
+  - "no": "33"
+    title: 과태료
+    checked_at: "2026-08-26"
+source_verification:
+  method: k-law-live
+  checked_at: "2026-08-26"
+  next_review: "2027-02-22"
+last_updated: "2026-08-26"
+related_rule:
+  name_ko: 환경보건법 시행령 / 시행규칙
+  abbreviation: EHA-Enforcement

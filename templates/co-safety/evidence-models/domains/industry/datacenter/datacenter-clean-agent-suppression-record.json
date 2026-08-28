@@ -1,0 +1,75 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "datacenter-clean-agent-suppression-record.json",
+  "title": "Datacenter Clean-Agent Fire Suppression System Inspection Record",
+  "description": "Evidence model for inspection and function-test of clean-agent (FM-200 / Novec 1230 / Inergen / CO2) fire suppression systems protecting IT-equipment rooms. These systems use inert or halocarbon gases instead of water to avoid damaging electronic equipment, but the discharged gas itself poses an asphyxiation hazard to workers during testing, maintenance, or accidental discharge. Records agent cylinder integrity, room integrity (hold) test, occupant warning/evacuation interlocks, and discharge-test scheduling.",
+  "version": "1.0.0",
+  "status": "active",
+  "type": "object",
+  "required": [
+    "record_id",
+    "protected_room_id",
+    "agent_type",
+    "legal_basis",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^DC-CAS-[0-9]{4}-[0-9]{4}$",
+      "description": "Format: DC-CAS-YYYY-NNNN (DataCenter Clean-Agent Suppression)"
+    },
+    "protected_room_id": {
+      "type": "string",
+      "description": "Identifier of the IT/server room or whitespace protected by the system"
+    },
+    "agent_type": {
+      "type": "string",
+      "enum": ["FM-200", "Novec-1230", "Inergen", "CO2", "other"],
+      "description": "Clean agent medium; CO2 flagged for acute asphyxiation hazard at design concentration"
+    },
+    "agent_cylinder_weight_kg": {
+      "type": "number",
+      "description": "Measured cylinder agent mass; compared against nominal to detect leakage"
+    },
+    "design_concentration_pct": {
+      "type": "number",
+      "description": "Design volumetric concentration of agent in protected room at discharge (volume %)"
+    },
+    "room_integrity_test_passed": {
+      "type": "boolean",
+      "description": "Door-fan / integrity test result confirming the room enclosure can hold the design concentration for the required hold time (typically >=10 min)"
+    },
+    "occupant_warning_interlock_tested": {
+      "type": "boolean",
+      "description": "Pre-discharge alarm, time delay, and audible/visual evacuation signals verified functional"
+    },
+    "discharge_test_due_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Next scheduled full-discharge or inspector-witness functional test date"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["passed", "failed", "pending-retest"],
+      "description": "Inspection outcome for the period"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "default": [
+        "소방기본법 Article 16",
+        "위험물안전관리법 Article 27",
+        "전기안전관리법 Article 16",
+        "산업안전보건법 Article 36",
+        "중대재해처벌법 Article 4"
+      ]
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

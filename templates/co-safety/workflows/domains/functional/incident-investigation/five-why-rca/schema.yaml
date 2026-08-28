@@ -1,0 +1,10 @@
+schema_version: "1.0"
+workflow_id: five-why-rca
+title: "5-Why 근본원인분석 (5-Why Root Cause Analysis)"
+status: active
+applicability: mandatory
+applicable_industries: [manufacturing, chemical, construction, gas_terminal, power_generation, pharmaceutical, food, semiconductor, battery, shipbuilding, steelmaking, logistics, railway, waste, defense, biotech, meddevice, datacenter]
+legal_basis: [산업안전보건법 Article 57, 중대재해처벌법 Article 5, 산업안전보건법 Article 36]
+industry_profile: incident-investigation
+agent: incident-investigation-agent
+evidence_model: rca-record.json

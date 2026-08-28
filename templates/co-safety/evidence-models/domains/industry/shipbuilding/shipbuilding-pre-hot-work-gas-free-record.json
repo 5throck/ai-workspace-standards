@@ -1,0 +1,73 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "shipbuilding-pre-hot-work-gas-free-record.json",
+  "title": "Shipbuilding Pre-Hot-Work Gas-Free Certificate Record",
+  "description": "Evidence model for the pre-hot-work gas-free certificate (Inert-Gas / Cargo / Ballast / Bunker tank atmosphere verification) issued before any welding, cutting, grinding, or other ignition-source work on or near a shipyard tank or compartment. Verifies flammable-vapor LEL is 0%, oxygen is within the 19.5-23.5% safe range, and toxic residuals (benzene, H2S, CO) are below PEL. Distinct from the ship-tank confined-space ENTRY record (which authorizes personnel entry); this record specifically authorizes IGNITION-SOURCE hot work in the certified atmosphere. Korea's HD Hyundai Heavy, Samsung Heavy, and Hanwha Ocean require this certificate per task, consistent with OSHA-KR Art 38 hot-work safety measures and DSSMA Art 5 flammable-vapor handling.",
+  "version": "1.0.0",
+  "status": "active",
+  "type": "object",
+  "required": [
+    "record_id",
+    "compartment_id",
+    "lel_percent",
+    "oxygen_percent",
+    "gas_tester_certification_id",
+    "test_timestamp_iso",
+    "legal_basis",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^SHIP-GF-[0-9]{4}-[0-9]{4}$",
+      "description": "Unique record identifier (SHIP-GF-YYYY-NNNN)."
+    },
+    "compartment_id": {
+      "type": "string",
+      "description": "Tank or compartment identifier (e.g., 'Hull-1234 No.3 COT-Port', 'Bunker-Tank-Stbd', 'Fore-Peak-Ballast')."
+    },
+    "lel_percent": {
+      "type": "number",
+      "maximum": 0,
+      "description": "Lower Explosive Limit (%) reading of the compartment atmosphere. MUST read 0% LEL before any ignition-source work is authorized. Any positive reading invalidates the hot-work permit."
+    },
+    "oxygen_percent": {
+      "type": "number",
+      "minimum": 19.5,
+      "maximum": 23.5,
+      "description": "Oxygen concentration (%) in the compartment. Safe range is 19.5-23.5%. Below 19.5% is asphyxiation risk; above 23.5% is fire-promotion risk."
+    },
+    "benzene_ppm": {
+      "type": "number",
+      "description": "Benzene vapor concentration (ppm) — residual aromatic hydrocarbon common in crude/slop/bunker tanks. Korea OSHA-KR PEL = 1 ppm TWA; readings at or above PEL require supplied-air respiratory protection."
+    },
+    "h2s_ppm": {
+      "type": "number",
+      "description": "Hydrogen sulfide concentration (ppm) — residual sour-crane / slop-tank toxic gas. Korea OSHA-KR PEL = 10 ppm TWA; 15 ppm STEL; 100 ppm is IDLH."
+    },
+    "co_ppm": {
+      "type": "number",
+      "description": "Carbon monoxide concentration (ppm) — residual inert-gas / pyrolysis product. Korea OSHA-KR PEL = 25 ppm TWA."
+    },
+    "gas_tester_certification_id": {
+      "type": "string",
+      "description": "Certificate number of the Marine Chemist or Competent Person who performed the atmosphere test (Korea: 한국산업안전보건공단 certified gas-measurement assessor, or classification-society-approved marine chemist)."
+    },
+    "test_timestamp_iso": {
+      "type": "string",
+      "description": "Atmosphere-measurement timestamp (ISO 8601). Certificate is valid for a maximum of 4 hours from this timestamp per Korea shipyard hot-work procedure; re-test required if exceeded."
+    },
+    "hot_work_permit_authorized": {
+      "type": "boolean",
+      "description": "True if the companion hot-work permit has been countersigned by the shipyard safety officer based on this gas-free certificate."
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 3
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

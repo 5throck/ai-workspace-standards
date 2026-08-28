@@ -1,0 +1,137 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "ehsconst-tbm-record.json",
+  "title": "Construction TBM (Tool Box Meeting) Record",
+  "description": "일일 작업 전 안전회보 기록.",
+  "version": "2.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "sapa_article_5_compliance",
+    "project_id",
+    "contractor_tier",
+    "safety_officer_in_charge",
+    "legal_basis",
+    "e_signature",
+    "nomenclature",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^EHSC-TBM-[0-9]{4}-[0-9]{4}$"
+    },
+    "sapa_article_5_compliance": {
+      "type": "boolean",
+      "description": "SAPA Article 5 (도급·하도급 안전보건 확보의무) 준수"
+    },
+    "project_id": {
+      "type": "string",
+      "description": "건설공사 번호 (Construction project number)"
+    },
+    "contractor_tier": {
+      "type": "string",
+      "enum": [
+        "ordering_party",
+        "prime_contractor",
+        "first_subcontractor",
+        "second_subcontractor_below"
+      ],
+      "description": "발주처/원도급/1차 하도급/2차 이하"
+    },
+    "safety_officer_in_charge": {
+      "type": "string",
+      "description": "안전관리자 ID"
+    },
+    "meeting_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "meeting_time": {
+      "type": "string"
+    },
+    "duration_minutes": {
+      "type": "integer"
+    },
+    "topics_covered": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "previous_day_incidents",
+          "today_hazards",
+          "ppe_inspection",
+          "safety_rules",
+          "weather_alerts",
+          "tool_inspection",
+          "subcontractor_coordination",
+          "emergency_procedures",
+          "worker_suggestions"
+        ]
+      }
+    },
+    "presenter_id": {
+      "type": "string"
+    },
+    "expected_attendees": {
+      "type": "integer"
+    },
+    "actual_attendees": {
+      "type": "integer"
+    },
+    "attendance_rate_pct": {
+      "type": "number"
+    },
+    "signatures_collected": {
+      "type": "boolean"
+    },
+    "photographic_evidence": {
+      "type": "boolean"
+    },
+    "absentees_follow_up": {
+      "type": "boolean",
+      "description": "결근자 별도 교육 실시"
+    },
+    "risk_assessment_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Reference to the applicable 위험성평가 (risk assessment) record per OSHA-KR Article 36 discussed in this TBM"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "description": "Multi-source legal basis. Primary: OSHA-KR Articles 38/42/72 (safety measures, hazard-prevention plan, construction safety budget; fall/collapse detail in OSHSR Ch.6). Adjacent laws may include: SAPA Article 5 (contract/subcontractor safety obligations), 건설산업기본법 Articles 45/83 (subcontractor management), 건설기술진흥법 Articles 24/25 (safety supervision).",
+      "examples": [
+        [
+          "OSHA-KR Art.15 §1",
+          "SAPA Art.5",
+          "건설산업기본법 Art.45"
+        ],
+        [
+          "OSHA-KR Art.38 §1",
+          "SAPA Art.5",
+          "건설기술진흥법 Art.24"
+        ],
+        [
+          "OSHA-KR Art.17 §1",
+          "SAPA Art.5",
+          "건설산업기본법 Art.83"
+        ]
+      ]
+    },
+    "e_signature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/e_signature"
+    },
+    "nomenclature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/nomenclature"
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

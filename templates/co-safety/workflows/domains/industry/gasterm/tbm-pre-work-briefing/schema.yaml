@@ -1,0 +1,16 @@
+schema_version: "1.0"
+workflow_id: tbm-pre-work-briefing
+title: "가스터미널 TBM (Tool Box Meeting)"
+status: active
+applicability: mandatory
+workflow_type: core
+
+legal_basis:
+  - 산업안전보건법 Article 15
+  - 산업안전보건법 Article 36
+  - 고압가스 안전 관리 및 사업법 Article 11
+  - 중대재해처벌법 Article 7
+industry_profile: gasterm
+agent: gasterm-agent
+evidence_model: ../../../../evidence-models/_shared/tbm-record.json
+signature_hazard: 가스 배관 개방 및 고압가스 취급 전 TBM

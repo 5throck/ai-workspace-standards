@@ -1,0 +1,15 @@
+schema_version: "1.0"
+workflow_id: high-voltage-electrical-safety
+title: "고압 전기 안전 (High Voltage Electrical Safety)"
+status: active
+applicability: mandatory
+workflow_type: core
+
+legal_basis:
+  - 전기사업법 Article 65
+  - 전기안전관리법 Article 16
+  - 산업안전보건법 Article 38 (안전조치)
+  - 안전보건기준에관한규칙 (감전 등 전기 재해 방지 기준)
+industry_profile: power-generation
+agent: powergen-agent
+evidence_model: powergen-high-voltage-record.json

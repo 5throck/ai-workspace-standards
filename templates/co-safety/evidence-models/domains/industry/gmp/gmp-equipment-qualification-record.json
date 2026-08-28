@@ -1,0 +1,193 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "gmp-equipment-qualification-record.json",
+  "title": "GMP Equipment Qualification Record",
+  "description": "Evidence model for GMP Equipment Qualification (설비 적격성평가) records. v1 per KP-GMP 「의약품 등의 안전에 관한 규칙」 별표 1 제6호 (적격성평가) + ICH Q7/Q10.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "equipment_id",
+    "iq_oq_pq_status",
+    "legal_basis",
+    "e_signature",
+    "qrm_assessment",
+    "nomenclature",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^GMP-EQ-[0-9]{4}-[0-9]{4}$"
+    },
+    "equipment_id": {
+      "type": "string"
+    },
+    "equipment_name": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string"
+    },
+    "urs_ref": {
+      "type": "string"
+    },
+    "dq": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "complete",
+            "n/a"
+          ]
+        },
+        "completion_date": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "iq": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "complete",
+            "failed"
+          ]
+        },
+        "completion_date": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "protocol_ref": {
+          "type": "string"
+        }
+      }
+    },
+    "oq": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "complete",
+            "failed"
+          ]
+        },
+        "completion_date": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "protocol_ref": {
+          "type": "string"
+        }
+      }
+    },
+    "pq": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "complete",
+            "failed"
+          ]
+        },
+        "completion_date": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "protocol_ref": {
+          "type": "string"
+        },
+        "runs_completed": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "iq_oq_pq_status": {
+      "type": "string",
+      "enum": [
+        "not_started",
+        "in_progress",
+        "qualified",
+        "requalification_required"
+      ],
+      "description": "Overall qualification status"
+    },
+    "calibration": {
+      "type": "object",
+      "properties": {
+        "last_calibration": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "calibration_due": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "frequency": {
+          "type": "string"
+        }
+      }
+    },
+    "preventive_maintenance": {
+      "type": "object",
+      "properties": {
+        "last_pm": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "next_pm_due": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "description": "Multi-source legal basis. Primary: Pharmaceutical Affairs Act (약사법) Article 37 (manufacturing management obligation for pharmaceuticals, 의약품등의 제조 관리의무) and Presidential Decree Annex 1 (총리령 「의약품 등의 안전에 관한 규칙」 별표 1; operational detail in MFDS Notice No. 2024-87). Adjacent laws may include: ICH Q7 (API GMP), ICH Q9 (Quality Risk Management), ICH Q10 (Pharmaceutical Quality System), PIC/S PE 009 (harmonized GMP).",
+      "examples": [
+        [
+          "약사법 Art.37",
+          "의약품 등의 안전에 관한 규칙 별표 1 제8호",
+          "ICH Q7"
+        ],
+        [
+          "약사법 Art.37",
+          "의약품 등의 안전에 관한 규칙 별표 1 제6호",
+          "ICH Q10"
+        ],
+        [
+          "약사법 Art.37",
+          "PIC/S PE 009-1",
+          "ICH Q9"
+        ]
+      ]
+    },
+    "e_signature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/e_signature"
+    },
+    "qrm_assessment": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/qrm_assessment"
+    },
+    "nomenclature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/nomenclature"
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

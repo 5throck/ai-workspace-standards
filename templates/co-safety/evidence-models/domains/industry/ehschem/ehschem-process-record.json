@@ -1,0 +1,122 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "ehschem-process-record.json",
+  "title": "Chemical Process Record (Batch/Continuous)",
+  "description": "회분식/연속 공정 운영 기록 (PSM reference).",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "plant_category",
+    "psm_applicable",
+    "chemical_category",
+    "legal_basis",
+    "e_signature",
+    "nomenclature",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^CHEM-PROC-[0-9]{4}-[0-9]{4}$"
+    },
+    "plant_category": {
+      "type": "string",
+      "enum": [
+        "refining",
+        "petrochemical",
+        "specialty_chemicals"
+      ]
+    },
+    "psm_applicable": {
+      "type": "boolean",
+      "default": true
+    },
+    "environmental_permit_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "chemical_category": {
+      "type": "string",
+      "enum": [
+        "hydrocarbon",
+        "polymer",
+        "specialty_intermediate",
+        "other"
+      ]
+    },
+    "facility_id": {
+      "type": "string"
+    },
+    "process_type": {
+      "type": "string",
+      "enum": [
+        "batch",
+        "continuous",
+        "semi_batch"
+      ]
+    },
+    "process_unit_id": {
+      "type": "string"
+    },
+    "design_capacity_tons_per_day": {
+      "type": "number"
+    },
+    "actual_production_tons": {
+      "type": "number"
+    },
+    "operating_temperature_c": {
+      "type": "number"
+    },
+    "operating_pressure_bar": {
+      "type": "number"
+    },
+    "psm_pha_ref": {
+      "type": "string",
+      "description": "PSM PHA record ID (functional service)"
+    },
+    "psm_psi_ref": {
+      "type": "string",
+      "description": "PSM PSI record ID"
+    },
+    "deviation_from_design": {
+      "type": "boolean"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "description": "Multi-source legal basis. Primary: OSHA-KR Article 44 (PSM for chemical plants) and Article 36 (risk assessment). Adjacent laws may include: CCA (화학물질관리법) Articles 20/23 (toxic/accident-preparedness chemicals), SAPA Article 4 (management safety obligation), 위험물안전관리법 (hazardous materials storage/handling), 대기환경보전법/수질환경보전법 (emission standards).",
+      "examples": [
+        [
+          "OSHA-KR Art.44 §1",
+          "CCA Art.20",
+          "SAPA Art.4"
+        ],
+        [
+          "OSHA-KR Art.36 §1",
+          "위험물안전관리법 Art.13",
+          "SAPA Art.4"
+        ],
+        [
+          "OSHA-KR Art.44 §1",
+          "대기환경보전법 Art.15",
+          "SAPA Art.7"
+        ]
+      ]
+    },
+    "e_signature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/e_signature"
+    },
+    "nomenclature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/nomenclature"
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

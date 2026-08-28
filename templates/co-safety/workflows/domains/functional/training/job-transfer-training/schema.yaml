@@ -1,0 +1,10 @@
+schema_version: "1.0"
+workflow_id: job-transfer-training
+title: "직무전환 교육 (Job Transfer Training)"
+status: active
+applicability: mandatory
+applicable_industries: [chemical, gas_terminal, power_generation, construction, medical_device, pharma, manufacturing]
+legal_basis: [산업안전보건법 Article 29, 중대재해처벌법 Article 7, 중대재해처벌법 Article 8]
+industry_profile: training-management
+agent: training-agent
+evidence_model: training-record.json

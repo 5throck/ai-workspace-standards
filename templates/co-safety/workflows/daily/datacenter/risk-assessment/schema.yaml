@@ -1,0 +1,13 @@
+schema_version: "1.0"
+workflow_id: "risk-assessment"
+title: "위험성평가 (Risk Assessment)"
+status: "active"
+applicability: "mandatory"
+applicable_industries: [datacenter]
+legal_basis:
+  - "산업안전보건법 제36조 (위험성평가 실시)"
+  - "산업안전보건법 제38조 (안전조치)"
+  - "중대재해처벌법 제4조 (안전보건관리체계 구축 의무)"
+industry_profile: risk-assessment
+agent: risk-assessment-agent
+evidence_model: risk-assessment-record.json

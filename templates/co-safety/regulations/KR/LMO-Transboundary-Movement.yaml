@@ -1,0 +1,178 @@
+# ── Registry schema v2 (mode: coordinates) ───────────────────────────────────
+# This file maps article numbers to official titles ONLY. Article content is
+# never cached here — fetch live from the 법제처 k-law API at point of use.
+# Migrated by migrate-registry-to-coordinates.ts on 2026-08-26
+schema_version: 2
+mode: coordinates
+jurisdiction: KR
+framework: LMO-Transboundary-Movement
+law_name: 유전자변형생물체의 국가간 이동 등에 관한 법률
+law_name_en: null
+abbreviation: null
+mst: "276569"
+enforced_from: null
+agency: null
+tier: 1
+regulator: ME (환경부) / KCDC (질병관리청)
+articles:
+  - "no": "1"
+    title: 목적
+    checked_at: "2026-08-26"
+  - "no": "2"
+    title: 정의
+    checked_at: "2026-08-26"
+  - "no": "3"
+    title: 적용 범위
+    checked_at: "2026-08-26"
+  - "no": "4"
+    title: 다른 법률과의 관계
+    checked_at: "2026-08-26"
+  - "no": "5"
+    title: 국가 등의 책무
+    checked_at: "2026-08-26"
+  - "no": "6"
+    title: 국가책임기관 등
+    checked_at: "2026-08-26"
+  - "no": "7"
+    title: 유전자변형생물체 안전관리계획의 수립ㆍ시행
+    checked_at: "2026-08-26"
+  - "no": "7"
+    title: 신규 유전자변형생물체에 대한 위해성심사
+    checked_at: "2026-08-26"
+  - "no": "8"
+    title: 수입승인 등
+    checked_at: "2026-08-26"
+  - "no": "9"
+    title: 시험ㆍ연구용 등의 유전자변형생물체의 수입
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 수입검사
+    checked_at: "2026-08-26"
+  - "no": "11"
+    title: 수입항구 등의 지정
+    checked_at: "2026-08-26"
+  - "no": "12"
+    title: 생산승인 등
+    checked_at: "2026-08-26"
+  - "no": "13"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "14"
+    title: 수입 또는 생산의 금지 등
+    checked_at: "2026-08-26"
+  - "no": "15"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "16"
+    title: 「대외무역법」에 따른 수입승인 의제 등
+    checked_at: "2026-08-26"
+  - "no": "17"
+    title: 승인취소
+    checked_at: "2026-08-26"
+  - "no": "18"
+    title: 재심사
+    checked_at: "2026-08-26"
+  - "no": "19"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "20"
+    title: 수출 통보
+    checked_at: "2026-08-26"
+  - "no": "21"
+    title: 경유 신고
+    checked_at: "2026-08-26"
+  - "no": "22"
+    title: 연구시설의 설치ㆍ운영
+    checked_at: "2026-08-26"
+  - "no": "22"
+    title: 유전자변형생물체의 개발ㆍ실험
+    checked_at: "2026-08-26"
+  - "no": "22"
+    title: 생산공정이용시설의 설치ㆍ운영
+    checked_at: "2026-08-26"
+  - "no": "22"
+    title: 유전자변형생물체의 이용
+    checked_at: "2026-08-26"
+  - "no": "23"
+    title: 허가취소 등
+    checked_at: "2026-08-26"
+  - "no": "23"
+    title: 폐기ㆍ반송 명령
+    checked_at: "2026-08-26"
+  - "no": "24"
+    title: 표시
+    checked_at: "2026-08-26"
+  - "no": "25"
+    title: 취급관리
+    checked_at: "2026-08-26"
+  - "no": "26"
+    title: 관리ㆍ운영기록의 보존
+    checked_at: "2026-08-26"
+  - "no": "26"
+    title: 유전자변형생물체로 인한 환경영향 등의 조사
+    checked_at: "2026-08-26"
+  - "no": "27"
+    title: 위해방지 조치
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: 정보 보호
+    checked_at: "2026-08-26"
+  - "no": "29"
+    title: 정보 이용 및 정보 제공의 제한
+    checked_at: "2026-08-26"
+  - "no": "30"
+    title: 정보취급기관 임직원의 의무
+    checked_at: "2026-08-26"
+  - "no": "31"
+    title: 바이오안전성위원회
+    checked_at: "2026-08-26"
+  - "no": "32"
+    title: 바이오안전성정보센터
+    checked_at: "2026-08-26"
+  - "no": "33"
+    title: 자금 등의 지원
+    checked_at: "2026-08-26"
+  - "no": "34"
+    title: 재원 확보
+    checked_at: "2026-08-26"
+  - "no": "35"
+    title: 수수료
+    checked_at: "2026-08-26"
+  - "no": "36"
+    title: 보고 및 검사
+    checked_at: "2026-08-26"
+  - "no": "37"
+    title: 청문
+    checked_at: "2026-08-26"
+  - "no": "37"
+    title: 권한의 위임ㆍ위탁
+    checked_at: "2026-08-26"
+  - "no": "38"
+    title: 벌칙 적용 시의 공무원 의제
+    checked_at: "2026-08-26"
+  - "no": "39"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "40"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "41"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "42"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "43"
+    title: 양벌규정
+    checked_at: "2026-08-26"
+  - "no": "44"
+    title: 과태료
+    checked_at: "2026-08-26"
+source_verification:
+  method: k-law-live
+  checked_at: "2026-08-26"
+  next_review: "2027-02-22"
+last_updated: "2026-08-26"
+related_rule:
+  name_ko: LMO Act 시행령 / 시행규칙
+  abbreviation: LMO-Enforcement

@@ -1,0 +1,13 @@
+schema_version: "1.0"
+workflow_id: self-inspection
+title: "자체점검 (Self-Inspection)"
+status: active
+applicability: mandatory
+workflow_type: core
+legal_basis:
+  - 약사법 Article 37
+  - 의약품 등의 안전에 관한 규칙 별표 1 제13호 (자율점검)
+  - PIC/S PE 009 Chapter 9 (Self-Inspection)
+industry_profile: pharma-general
+agent: gmp-agent
+evidence_model: gmp-self-inspection-record.json

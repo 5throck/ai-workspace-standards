@@ -1,0 +1,25 @@
+# Medical Device Manufacturing Industry Profile (v1)
+profile_id: medical-device
+name: medical-device
+display_name: "의료기기 제조 (Medical Device Manufacturing)"
+version: "1.0"
+status: active
+last_updated: 2026-08-06
+industry_tier: industry
+agent: meddevice-agent
+legal_basis:
+  - 의료기기법
+  - KGMP-MD
+  - ISO 13485
+  - ISO 14971
+  - MDR (EU)
+  - FDA QSR
+key_hazards:
+  - design_control_failure
+  - device_risk_management_gap
+  - sterilization_validation_deficiency
+  - labeling_noncompliance
+workflows:
+  meddevice: [design-control, device-risk-management, clinical-evaluation, device-pms, device-labeling, kgmp-md-quality, sterilization-validation, device-recall-reference]
+uses_functional_services: [functional/msds, functional/glp, emergency]
+description: Medical device manufacturing per KGMP-MD + ISO 13485 + ISO 14971.

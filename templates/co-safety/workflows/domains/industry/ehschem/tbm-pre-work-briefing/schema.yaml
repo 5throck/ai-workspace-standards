@@ -1,0 +1,17 @@
+schema_version: "1.0"
+workflow_id: tbm-pre-work-briefing
+title: "화학공장 TBM (Tool Box Meeting)"
+status: active
+applicability: mandatory
+workflow_type: core
+
+legal_basis:
+  - 산업안전보건법 Article 15
+  - 산업안전보건법 Article 36
+  - 산업안전보건법 Article 44
+  - 중대재해처벌법 Article 7
+  - 위험물안전관리법 Article 18
+industry_profile: ehschem
+agent: ehschem-agent
+evidence_model: ../../../../evidence-models/_shared/tbm-record.json
+signature_hazard: TAR (Turnaround) 계획정비 기간 고위험 작업 집중

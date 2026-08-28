@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: charging-operation-safety
+title: "충전 작업 안전 (Charging Operation Safety)"
+status: active
+applicability: mandatory
+workflow_type: core
+
+legal_basis:
+  - LPG 안전관리법 Article 29
+  - 수소법 Article 32
+  - 고압가스 안전 관리 및 사업법 Article 13
+industry_profile: gas-facility
+agent: gasterm-agent
+evidence_model: gasterm-charging-operation-record.json

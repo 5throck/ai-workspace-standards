@@ -1,0 +1,24 @@
+# Environmental Waste & Water Treatment Safety Profile (v1)
+profile_id: waste-water-environmental
+name: waste-water-environmental
+display_name: "폐기물 및 수처리 안전 (Environmental Waste & Water Treatment Safety)"
+version: "1.0"
+status: active
+last_updated: 2026-08-06
+industry_tier: industry
+agent: waste-agent
+legal_basis:
+  - 폐기물관리법 (WCA) Article 13 & Article 25
+  - 하수도법 (SA) Article 19 & Article 20
+  - 산업안전보건법 (OSHA-KR) Article 618
+  - 중대재해처벌법 (SAPA) Article 4
+key_hazards:
+  - Sewage manhole and sludge tank Hydrogen Sulfide (H2S) asphyxiation
+  - Waste incinerator and industrial shredder maintenance LOTO failure
+  - Biogas digester Methane (CH4) gas explosion and toxic leachate exposure
+description: "EHS safety profile for municipal sewage treatment plants, waste incinerators, industrial shredders, and biogas recovery facilities."
+applicable_laws:
+  - 폐기물관리법 Article 13
+  - 하수도법 Article 19
+  - 산업안전보건법 Article 618
+  - 중대재해처벌법 Article 4

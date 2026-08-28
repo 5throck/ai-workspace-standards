@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: turbine-generator-maintenance
+title: "터빈 발전기 정비 안전 (Turbine Generator Maintenance)"
+status: active
+applicability: mandatory
+workflow_type: core
+
+legal_basis:
+  - 전기사업법 Article 47
+  - 발전설비 안전관리 규정
+  - 산업안전보건법 Article 32 (기계위해 방지)
+industry_profile: power-generation
+agent: powergen-agent
+evidence_model: powergen-turbine-record.json

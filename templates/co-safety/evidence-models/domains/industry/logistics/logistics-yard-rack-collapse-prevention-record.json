@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "logistics-yard-rack-collapse-prevention-record.json",
+  "title": "Logistics Yard Cargo Rack Collapse Prevention Record",
+  "description": "Evidence model for yard and warehouse selective-pallet-rack structural integrity, load-capacity labeling, baseplate anchoring, and stacking-height collapse-prevention inspection. Covers the OSHA-KR Art 100 (붕괴 방지 — yard cargo stacking) hazard that is distinct from refrigerant-gas asphyxiation, crane/AGV lifting mechanics, IMDG dangerous-cargo inhalation, and forklift pedestrian-strike hazards.",
+  "version": "1.0.0",
+  "status": "active",
+  "type": "object",
+  "required": [
+    "record_id",
+    "rack_zone_id",
+    "baseplate_anchored",
+    "legal_basis",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^LGS-RACK-[0-9]{4}-[0-9]{4}$"
+    },
+    "rack_zone_id": {
+      "type": "string"
+    },
+    "max_load_kg_per_beam": {
+      "type": "number",
+      "description": "Rated maximum load capacity (kg) per beam level per the manufacturer's load plate."
+    },
+    "load_label_intact": {
+      "type": "boolean",
+      "description": "True if the manufacturer's load-capacity plate is present and legible on the rack bay."
+    },
+    "baseplate_anchored": {
+      "type": "boolean",
+      "description": "True if all column baseplates are anchored to the slab and shims are in place."
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

@@ -1,0 +1,15 @@
+schema_version: "1.0"
+workflow_id: fall-prevention
+title: "추락 방지 (Fall Prevention)"
+status: active
+applicability: mandatory
+workflow_type: core
+
+legal_basis:
+  - 산업안전보건법 Article 38 (안전조치)
+  - 안전보건기준에관한규칙 제6장 제1절 (추락에 의한 위험 방지)
+  - 추락방지 기준 (MOEL 고시)
+  - 중대재해처벌법 Article 6
+industry_profile: construction
+agent: ehsconst-agent
+evidence_model: ehsconst-fall-prevention-record.json

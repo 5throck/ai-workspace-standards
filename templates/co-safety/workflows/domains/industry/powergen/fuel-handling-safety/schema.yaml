@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: fuel-handling-safety
+title: "연료 취급 안전 (Fuel Handling Safety)"
+status: active
+applicability: mandatory
+workflow_type: core
+
+legal_basis:
+  - 전기사업법 Article 47
+  - 위험물안전관리법 Article 5
+  - 산업안전보건법 Article 44 (PSM)
+industry_profile: power-generation
+agent: powergen-agent
+evidence_model: powergen-fuel-handling-record.json

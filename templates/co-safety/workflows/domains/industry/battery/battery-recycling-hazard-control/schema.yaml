@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: battery-recycling-hazard-control
+title: "폐배터리 리사이클링 유해화학물질 관리 (Battery Recycling Hazard Control)"
+status: active
+applicability: mandatory
+workflow_type: core
+legal_basis:
+  - 화학물질관리법 Article 20
+  - 화학물질관리법 Article 23
+  - 산업안전보건법 Article 110
+  - 중대재해처벌법 Article 4
+industry_profile: battery-manufacturing
+agent: battery-agent
+evidence_model: battery-recycling-hazard-record.json

@@ -1,0 +1,13 @@
+schema_version: "1.0"
+workflow_id: heavy-crane-subcontractor-safety
+title: "대형 크레인 인양 및 수급업체 안전 관리 (Heavy Crane & Subcontractor Safety)"
+status: active
+applicability: mandatory
+workflow_type: core
+legal_basis:
+  - 산업안전보건법 Article 38
+  - 산업안전보건법 Article 63
+  - 중대재해처벌법 Article 5
+industry_profile: shipbuilding-heavy
+agent: shipbuilding-agent
+evidence_model: heavy-crane-subcontractor-record.json

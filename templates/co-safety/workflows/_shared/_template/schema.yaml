@@ -1,0 +1,11 @@
+# Workflow schema — machine-readable metadata
+version: "1.0"
+required_fields:
+  - legal_basis
+  - trigger_conditions
+  - agent_assignments
+  - evidence_requirements
+status_values:
+  - draft
+  - active
+  - deprecated

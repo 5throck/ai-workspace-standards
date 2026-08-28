@@ -1,0 +1,117 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "rca-record.json",
+  "title": "Root Cause Analysis Record",
+  "description": "Root cause analysis record using 5-Why or Bow-Tie methodology per OSHA-KR Article 57. Documents causal chain, barrier failures, and systemic factors leading to the incident.",
+  "version": "2.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "incident_ref",
+    "rca_method",
+    "rca_team",
+    "analysis_date",
+    "direct_cause",
+    "root_causes",
+    "contributing_factors",
+    "capa_ref",
+    "legal_basis",
+    "e_signature",
+    "nomenclature",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^RCA-[0-9]{4}-[0-9]{4}$"
+    },
+    "incident_ref": {
+      "type": "string",
+      "description": "Reference to incident-report-record (INC-YYYY-NNNN)"
+    },
+    "rca_method": {
+      "type": "string",
+      "enum": ["five_why", "bow_tie", "fishbone", "fault_tree", "combined"],
+      "description": "RCA methodology applied"
+    },
+    "rca_team": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["member_id", "role"],
+        "properties": {
+          "member_id": { "type": "string" },
+          "role": { "type": "string" }
+        }
+      }
+    },
+    "analysis_date": { "type": "string", "format": "date" },
+    "direct_cause": { "type": "string", "description": "Immediate/direct cause of the incident" },
+    "five_why_chain": {
+      "type": "array",
+      "description": "5-Why causal chain (up to 5 levels)",
+      "items": {
+        "type": "object",
+        "required": ["level", "why", "answer"],
+        "properties": {
+          "level": { "type": "integer", "minimum": 1, "maximum": 5 },
+          "why": { "type": "string" },
+          "answer": { "type": "string" }
+        }
+      }
+    },
+    "bow_tie_threats": {
+      "type": "array",
+      "description": "Bow-Tie threat events (left side)",
+      "items": { "type": "string" }
+    },
+    "bow_tie_consequences": {
+      "type": "array",
+      "description": "Bow-Tie consequence events (right side)",
+      "items": { "type": "string" }
+    },
+    "failed_barriers": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Safety barriers that failed or were absent"
+    },
+    "root_causes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["cause_id", "cause_description", "cause_category"],
+        "properties": {
+          "cause_id": { "type": "string" },
+          "cause_description": { "type": "string" },
+          "cause_category": {
+            "type": "string",
+            "enum": ["human_factor", "management_system", "equipment_failure", "environmental", "procedure_deficiency", "training_gap"]
+          }
+        }
+      }
+    },
+    "contributing_factors": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "capa_ref": {
+      "type": "string",
+      "description": "Reference to CAPA record (CAPA-YYYY-NNNN)"
+    },
+    "risk_assessment_update_ref": {
+      "type": ["string", "null"],
+      "description": "Reference to updated post-incident risk assessment"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 3,
+      "examples": [["산업안전보건법 Article 57", "중대재해처벌법 Article 5", "산업안전보건법 Article 36"]]
+    },
+    "e_signature": { "$ref": "../../../_shared/base/common.schema.json#/definitions/e_signature" },
+    "nomenclature": { "$ref": "../../../_shared/base/common.schema.json#/definitions/nomenclature" },
+    "audit_trail": { "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail" }
+  }
+}

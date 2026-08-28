@@ -1,0 +1,17 @@
+schema_version: "1.0"
+workflow_id: device-recall-reference
+title: "의료기기 회수 긴급 참조 (Device Recall Reference)"
+status: active
+applicability: mandatory
+workflow_type: reference
+uses_functional_services: [functional/msds, industry/glp, emergency]
+target_agent: emergency-agent
+data_provided: [device_identification, affected_batches, hazard_classification]
+handoff_protocol:
+  trigger: device_recall_or_fscf
+  dispatch_to: emergency-agent
+  include_data: [device_class, recall_classification]
+legal_basis: [의료기기법 Article 20, 약사법 Article 43조의3, EU MDR Article 87 (Field Safety Corrective Actions)]
+industry_profile: medical-device
+agent: meddevice-agent
+evidence_model: meddevice-pms-record.json

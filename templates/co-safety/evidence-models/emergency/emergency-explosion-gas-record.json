@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "emergency-explosion-gas-record.json",
+  "title": "Emergency Explosion and Gas Response Record",
+  "description": "Explosion and gas leak response.",
+  "version": "1.2.0",
+  "type": "object",
+  "required": ["record_id", "incident_id", "incident_type", "severity", "response_status", "legal_basis", "e_signature", "nomenclature", "audit_trail"],
+  "properties": {
+    "record_id": { "type": "string", "pattern": "^EMRG-EXP-[0-9]{4}-[0-9]{4}$" },
+    "incident_id": { "type": "string", "description": "Unique incident identifier" },
+    "workflow_id": { "$ref": "../_shared/base/common.schema.json#/definitions/workflow_id", "description": "Optional workflow execution reference ('<slug>' or '<domain>/<slug>', e.g. 'emergency-response' or 'emergency/explosion-gas'). Never invent an ID to satisfy this field." },
+    "incident_type": {
+      "type": "string",
+      "enum": ["gas_leak", "explosion", "pressure_vessel_failure", "dust_explosion", "chemical_explosion"]
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["minor", "moderate", "serious", "critical", "fatal"]
+    },
+    "incident_datetime": { "type": "string", "format": "date-time" },
+    "location": { "type": "string" },
+    "casualties": {
+      "type": "object",
+      "properties": {
+        "fatalities": { "type": "integer", "default": 0 },
+        "serious_injuries": { "type": "integer", "default": 0 },
+        "minor_injuries": { "type": "integer", "default": 0 },
+        "missing": { "type": "integer", "default": 0 }
+      }
+    },
+    "response_status": {
+      "type": "string",
+      "enum": ["reported", "active_response", "contained", "resolved", "under_investigation", "closed"]
+    },
+    "sapa_qualifying": { "type": "boolean", "description": "중대재해처벌법 적용 여부" },
+    "gas_type": { "type": ["string", "null"], "description": "LPG/LNG/hydrogen/other" },
+    "lel_measured_pct": { "type": ["number", "null"], "description": "Lower Explosive Limit %" },
+    "ignition_source_identified": { "type": ["string", "null"] },
+    "blast_radius_m": { "type": ["number", "null"] },
+    "evacuation_zone_m": { "type": "number" },
+    "fire_department_response": { "type": "boolean" },
+    "gas_isolated": { "type": "boolean", "description": "Source valve closed" },
+    "incident_investigation_agent_dispatched": { "type": "boolean", "description": "Handoff confirmation per emergency-agent.md §Handoff Protocols" },
+
+    "legal_basis": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 3
+    },
+    "e_signature": { "$ref": "../_shared/base/common.schema.json#/definitions/e_signature" },
+    "nomenclature": { "$ref": "../_shared/base/common.schema.json#/definitions/nomenclature" },
+    "audit_trail": { "$ref": "../_shared/base/common.schema.json#/definitions/audit_trail" }
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "emergency-medical-record.json",
+  "title": "Emergency Medical Response Record",
+  "description": "Medical emergency response (cardiac arrest/allergy/severe injury).",
+  "version": "1.2.0",
+  "type": "object",
+  "required": ["record_id", "incident_id", "incident_type", "severity", "response_status", "legal_basis", "e_signature", "nomenclature", "audit_trail"],
+  "properties": {
+    "record_id": { "type": "string", "pattern": "^EMRG-MED-[0-9]{4}-[0-9]{4}$" },
+    "incident_id": { "type": "string", "description": "Unique incident identifier" },
+    "workflow_id": { "$ref": "../_shared/base/common.schema.json#/definitions/workflow_id", "description": "Optional workflow execution reference ('<slug>' or '<domain>/<slug>', e.g. 'emergency-response' or 'emergency/medical'). Never invent an ID to satisfy this field." },
+    "incident_type": {
+      "type": "string",
+      "enum": ["cardiac_arrest", "anaphylaxis", "severe_burn", "severe_laceration", "heat_stroke", "hypothermia", "chemical_poisoning", "stroke", "other"]
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["minor", "moderate", "serious", "critical", "fatal"]
+    },
+    "incident_datetime": { "type": "string", "format": "date-time" },
+    "location": { "type": "string" },
+    "casualties": {
+      "type": "object",
+      "properties": {
+        "fatalities": { "type": "integer", "default": 0 },
+        "serious_injuries": { "type": "integer", "default": 0 },
+        "minor_injuries": { "type": "integer", "default": 0 },
+        "missing": { "type": "integer", "default": 0 }
+      }
+    },
+    "response_status": {
+      "type": "string",
+      "enum": ["reported", "active_response", "contained", "resolved", "under_investigation", "closed"]
+    },
+    "sapa_qualifying": { "type": "boolean", "description": "중대재해처벌법 적용 여부" },
+    "patient_id": { "type": "string" },
+    "patient_conscious": { "type": "boolean" },
+    "patient_breathing": { "type": "boolean" },
+    "aed_used": { "type": "boolean" },
+    "cpr_performed": { "type": "boolean" },
+    "first_responder_id": { "type": "string" },
+    "ambulance_dispatched": { "type": "boolean" },
+    "hospital_destination": { "type": ["string", "null"] },
+    "arrival_time_at_hospital": { "type": ["string", "null"], "format": "date-time" },
+    "incident_investigation_agent_dispatched": { "type": "boolean", "description": "Handoff confirmation per emergency-agent.md §Handoff Protocols" },
+
+    "legal_basis": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 3
+    },
+    "e_signature": { "$ref": "../_shared/base/common.schema.json#/definitions/e_signature" },
+    "nomenclature": { "$ref": "../_shared/base/common.schema.json#/definitions/nomenclature" },
+    "audit_trail": { "$ref": "../_shared/base/common.schema.json#/definitions/audit_trail" }
+  }
+}

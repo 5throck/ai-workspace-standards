@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "training-plan-record.json",
+  "title": "Training Plan Record",
+  "description": "Annual/quarterly training plan per OSHA-KR.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": ["record_id", "plan_year", "plan_type", "target_headcount", "legal_basis"],
+  "properties": {
+    "record_id": { "type": "string", "pattern": "^TRAIN-PLAN-[0-9]{4}-[0-9]{4}$" },
+    "plan_year": { "type": "integer" },
+    "plan_type": { "type": "string", "enum": ["annual", "quarterly", "monthly", "project_based"] },
+    "target_headcount": { "type": "integer" },
+    "planned_sessions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "session_id": { "type": "string" },
+          "training_type": { "type": "string" },
+          "scheduled_month": { "type": "string" },
+          "target_count": { "type": "integer" },
+          "instructor_id": { "type": "string" }
+        }
+      }
+    },
+    "budget_krw": { "type": ["number", "null"] },
+    "approved_by": { "type": "string" },
+    "legal_basis": {
+      "type": "array",
+      "description": "Multi-source legal basis. Primary: OSHA-KR Article 29 (training plan establishment obligation). Adjacent laws may include: SAPA Article 4 (employer obligation to establish safety and health management system incl. training), SAPA Article 8 (mandatory safety and health education attendance), OSHA-KR Article 29 §3 (special education planning for hazardous work — 규칙 §26). Plans reference instructor IDs and approver identity (planned_sessions.instructor_id, approved_by) and MUST additionally cite PIPA (개인정보보호법) when individual identifiers are included: collection/use grounds (Art 15), minimum-necessary planning data (Art 16) — see regulations/KR/PIPA.yaml.",
+      "items": { "type": "string" },
+      "minItems": 3,
+      "examples": [
+        ["OSHA-KR Art.29 §1", "SAPA Art.4", "SAPA Art.8"],
+        ["OSHA-KR Art.29 §3", "산업안전보건법 시행규칙 Art.26 §1", "SAPA Art.4"],
+        ["OSHA-KR Art.29 §1", "OSHA-KR Art.32 §1", "SAPA Art.4"],
+        ["OSHA-KR Art.29 §1", "SAPA Art.4", "PIPA Art.15 §1", "PIPA Art.16 §1"]
+      ]
+    },
+    "e_signature": { "$ref": "../../../_shared/base/common.schema.json#/definitions/e_signature" },
+    "nomenclature": { "$ref": "../../../_shared/base/common.schema.json#/definitions/nomenclature" },
+    "audit_trail": { "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail" }
+  }
+}

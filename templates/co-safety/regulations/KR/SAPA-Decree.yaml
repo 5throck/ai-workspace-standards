@@ -1,0 +1,61 @@
+# ── Registry schema v2 (mode: coordinates) ───────────────────────────────────
+# This file maps article numbers to official titles ONLY. Article content is
+# never cached here — fetch live from the 법제처 k-law API at point of use.
+# Migrated by migrate-registry-to-coordinates.ts on 2026-08-26
+schema_version: 2
+mode: coordinates
+jurisdiction: KR
+framework: SAPA-Decree
+law_name: 중대재해 처벌 등에 관한 법률 시행령
+law_name_en: null
+abbreviation: null
+mst: "277417"
+enforced_from: null
+agency: null
+tier: 1
+regulator: MOEL (고용노동부)
+articles:
+  - "no": "1"
+    title: 목적
+    checked_at: "2026-08-26"
+  - "no": "2"
+    title: 직업성 질병자
+    checked_at: "2026-08-26"
+  - "no": "3"
+    title: 공중이용시설
+    checked_at: "2026-08-26"
+  - "no": "4"
+    title: 안전보건관리체계의 구축 및 이행 조치
+    checked_at: "2026-08-26"
+  - "no": "5"
+    title: 안전ㆍ보건 관계 법령에 따른 의무이행에 필요한 관리상의 조치
+    checked_at: "2026-08-26"
+  - "no": "6"
+    title: 안전보건교육의 실시 등
+    checked_at: "2026-08-26"
+  - "no": "7"
+    title: 과태료의 부과기준
+    checked_at: "2026-08-26"
+  - "no": "8"
+    title: 원료ㆍ제조물 관련 안전보건관리체계의 구축 및 이행 조치
+    checked_at: "2026-08-26"
+  - "no": "9"
+    title: 원료ㆍ제조물 관련 안전ㆍ보건 관계 법령에 따른 의무이행에 필요한 관리상의 조치
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 공중이용시설ㆍ공중교통수단 관련 안전보건관리체계 구축 및 이행에 관한 조치
+    checked_at: "2026-08-26"
+  - "no": "11"
+    title: 공중이용시설ㆍ공중교통수단 관련 안전ㆍ보건 관계 법령에 따른 의무이행에 필요한 관리상의 조치
+    checked_at: "2026-08-26"
+  - "no": "12"
+    title: 중대산업재해 발생사실의 공표
+    checked_at: "2026-08-26"
+  - "no": "13"
+    title: 조치 등의 이행사항에 관한 서면의 보관
+    checked_at: "2026-08-26"
+source_verification:
+  method: k-law-live
+  checked_at: "2026-08-26"
+  next_review: "2027-02-22"
+last_updated: "2026-08-26"

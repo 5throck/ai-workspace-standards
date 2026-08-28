@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: battery-thermal-runaway-prevent
+title: "이차전지 제조 공정 열폭주 방지 및 NMP 회수 (Battery Thermal Runaway Prevention)"
+status: active
+applicability: mandatory
+workflow_type: core
+legal_basis:
+  - 위험물안전관리법 Article 5
+  - 위험물안전관리법 Article 27
+  - 산업안전보건법 Article 36
+  - 중대재해처벌법 Article 4
+industry_profile: battery-manufacturing
+agent: battery-agent
+evidence_model: battery-thermal-runaway-record.json

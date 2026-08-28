@@ -1,0 +1,34 @@
+# Steelmaking & Heavy Metals Industry Profile (v1)
+profile_id: steelmaking-heavy
+name: steelmaking-heavy
+display_name: "철강 및 금속 제련 (Steelmaking & Heavy Metals)"
+version: "1.0"
+status: active
+last_updated: 2026-08-06
+industry_tier: industry
+agent: steelmaking-agent
+legal_basis:
+  - 산업안전보건법 (OSHA-KR) Article 36, 38, 92
+  - 고압가스 안전 관리 및 사업법 (HPGSCA) Article 17
+  - 중대재해처벌법 (SAPA) Article 4
+key_hazards:
+  - molten_metal_explosion_loto
+  - byproduct_gas_leak_prevention
+  - heavy_material_handling_safety
+  - furnace_maintenance_safety
+workflows:
+  steelmaking:
+    - molten-metal-loto
+    - byproduct-gas-leak-prevent
+description: Integrated steelworks and heavy metal smelting operations under OSHA-KR, HPGSCA, and SAPA, covering molten metal furnace LOTO, blast furnace safety, and byproduct gas leak prevention.
+regulatory_reference: regulations/KR/MOEL-STEEL.md
+international_alignment:
+  - framework: ISO 45001 Heavy Metals Annex
+    level: harmonized
+v1_scope:
+  includes:
+    - blast_furnace_steelmaking
+    - electric_arc_furnace
+    - rolling_mill_operations
+  excludes:
+    - precious_metal_jewelry

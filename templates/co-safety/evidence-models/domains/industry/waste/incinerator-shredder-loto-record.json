@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "incinerator-shredder-loto-record.json",
+  "title": "Incinerator and Shredder LOTO Record",
+  "description": "Evidence model for Waste Incinerator Hopper and Industrial Shredder LOTO Maintenance Isolation.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "equipment_id",
+    "energy_isolation_verified",
+    "legal_basis",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^WST-LOT-[0-9]{4}-[0-9]{4}$"
+    },
+    "equipment_id": {
+      "type": "string"
+    },
+    "energy_isolation_verified": {
+      "type": "boolean"
+    },
+    "zero_energy_state_confirmed": {
+      "type": "boolean"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

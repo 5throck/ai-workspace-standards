@@ -1,0 +1,144 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "glp-equipment-record.json",
+  "title": "GLP Equipment Record",
+  "description": "Equipment calibration per OECD GLP Section 5.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "study_director_id",
+    "glp_certification_authority",
+    "oecd_mad_applicable",
+    "legal_basis",
+    "e_signature",
+    "nomenclature",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^GLP-EQ-[0-9]{4}-[0-9]{4}$"
+    },
+    "study_director_id": {
+      "type": "string",
+      "description": "OECD GLP requires designated Study Director (Section 1.2)"
+    },
+    "glp_certification_authority": {
+      "type": "string",
+      "enum": [
+        "MFDS",
+        "ME",
+        "both",
+        "OECD_MAD_only"
+      ],
+      "description": "Which authority's GLP certification applies"
+    },
+    "oecd_mad_applicable": {
+      "type": "boolean",
+      "description": "Whether data is eligible for OECD Mutual Acceptance of Data"
+    },
+    "msds_record_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "MSDS record ID for test article (when applicable)"
+    },
+    "equipment_id": {
+      "type": "string"
+    },
+    "equipment_name": {
+      "type": "string"
+    },
+    "manufacturer": {
+      "type": "string"
+    },
+    "serial_number": {
+      "type": "string"
+    },
+    "qualification_status": {
+      "type": "object",
+      "properties": {
+        "iq": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "complete",
+            "failed"
+          ]
+        },
+        "oq": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "complete",
+            "failed"
+          ]
+        },
+        "pq": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "complete",
+            "failed"
+          ]
+        }
+      }
+    },
+    "calibration": {
+      "type": "object",
+      "properties": {
+        "last_calibration_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "next_calibration_due": {
+          "type": "string",
+          "format": "date"
+        },
+        "standard_traceability": {
+          "type": "string",
+          "description": "ISO 17025 reference"
+        }
+      }
+    },
+    "maintenance_records_ref": {
+      "type": "string"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "description": "Multi-source legal basis. Primary: 약사법 (Pharmaceutical Affairs Act — basis for MFDS GLP) and 비임상시험 관리기준 (MFDS GLP standards). Adjacent laws may include: K-REACH (chemical hazard assessment requires GLP studies), 화학물질 위해성평가 시험기관 관리기준 (ME/환경부 GLP), OECD GLP Principles C(97)186/Final (international MAD).",
+      "examples": [
+        [
+          "약사법 Art.34-3",
+          "MFDS GLP 고시",
+          "OECD GLP C(97)186"
+        ],
+        [
+          "약사법 Art.34-3",
+          "K-REACH Art.13",
+          "OECD GLP C(97)186"
+        ],
+        [
+          "MFDS GLP 고시",
+          "환경부 GLP 기준",
+          "OECD GLP C(97)186"
+        ]
+      ]
+    },
+    "e_signature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/e_signature"
+    },
+    "nomenclature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/nomenclature"
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

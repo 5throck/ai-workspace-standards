@@ -1,0 +1,867 @@
+###############################################################################
+# Industry Regulatory Anchor Table (Action Item A-03, Phase 0)
+###############################################################################
+source_verification:
+  method: manual-curation
+  checked_at: "2026-08-26"
+jurisdiction: KR
+regulator: MOEL (고용노동부) / ME (환경부) / NFDS (소방청) / industry-specific
+framework: Industry-Regulatory-Anchors
+title_ko: 산업별 규제 앵커 표 (Industry Regulatory Anchor Table)
+title_en: Industry Regulatory Anchor Table
+description: |
+  Composite anchor table mapping each of the 12 Tier-1 industries to its
+  primary regulatory statute(s), adjacent laws, SAPA anchor, and OSHA-KR
+  anchor. Consumed by the scaffold generator (Task A-01) to auto-fill
+  `legal_basis` arrays for new industry domains.
+# Purpose:
+#   Per-industry regulatory anchor table for the 12 Tier-1 industries in the
+#   industry-maturity program. Each anchor provides >=3 legal sources
+#   (primary industry statute + adjacent/relevant law + SAPA) so the scaffold
+#   generator (Task A-01) can auto-fill `legal_basis` templates for new domains.
+#
+# Verification protocol (this file):
+#   - Article numbers were VERIFY-LIVE via the kr_safety and legalize_kr MCP
+#     tools wherever the statute was indexed. This project has a documented
+#     history of mis-citations (see memory/findings/compliance-gap-2026-07-05),
+#     so memory-based citations are NOT acceptable.
+#   - Each industry's `verification` block records HOW each article was
+#     verified: `legalize-kr` (parse_law_structure full text),
+#     `kr-safety-catalog` (search_osha_regulations catalog match),
+#     or `statute-file-only` (regulations/KR/<statute>.yaml sourced from
+#     mcp-kr-legislation in a prior pass but NOT re-verifiable via legalize_kr
+#     this session because the statute is not indexed under the queried name).
+#   - Articles that could NOT be verified live are marked `[UNVERIFIED]` in
+#     the topic text and listed under the industry's `unverified` array.
+#
+# Universal anchors (apply to every industry):
+#   osha_kr_anchor  : 산업안전보건법 (OSHA-KR) Art 36 + Art 57
+#   sapa            : 중대재해처벌법 (SAPA) Art 4 + Art 5
+# SAPA is industry-agnostic: the same 16-article structure (Arts 1-16) applies
+# to every industry. Art 4 = universal safety-assurance obligation; Art 5 =
+# outsourcing/contract safety obligation (most relevant for logistics,
+# shipbuilding, construction-style industries with heavy subcontracting).
+#
+# Glossary discrepancies discovered during verification:
+#   - ESCA (전기안전관리법): glossary says Art 16/29, but live law shows
+#     Art 16 = 전기재해 예방을 위한 안전조치, Art 22 = 전기안전관리자 선임,
+#     Art 29 = 전기안전관리업무 실태조사. The glossary's "Art 29 safety
+#     manager" topic is WRONG; the correct article is Art 22. Flagged for
+#     glossary reconciliation. This file cites the VERIFIED-correct articles.
+#   - CCA (화학물질관리법): glossary cites Art 20/23, but live law shows
+#     Art 20 = 인체급성유해성물질 수입신고 (import notification, NOT safety
+#     management), Art 23 = 화학사고예방관리계획서 (Chemical Accident
+#     Prevention Plan), Art 24 = 취급시설 배치/설치/관리 기준. This file
+#     cites Art 23 + Art 24 as the chemical-safety anchors (not Art 20).
+#   - DSSMA (위험물안전관리법): glossary cites Art 5/27 — both correct
+#     (storage restrictions + emergency response), but the primary
+#     safety-manager article is Art 15 (위험물안전관리자). This file adds
+#     Art 15 + Art 17 (예방규정) alongside the glossary articles.
+#
+# Consume (Task A-01 scaffold generator):
+#   For each industry domain scaffold, copy `primary_statute.key_articles`,
+#   every `adjacent_laws[].key_articles`, plus `sapa` and `osha_kr_anchor`
+#   into the domain's `legal_basis` array. This guarantees the DEFAULT_MIN
+#   LEGAL_BASIS = 3 invariant (scripts/domain-config.ts) is satisfied.
+###############################################################################
+
+metadata:
+  file: regulations/KR/industry-regulatory-anchors.yaml
+  task: A-03-phase0
+  generated_for: industry-maturity-program
+  tier_1_industries: 12
+  last_verified: "2026-08-07"
+  verification_tools:
+    - kr_safety.search_osha_regulations
+    - legalize_kr.parse_law_structure
+    - legalize_kr.compare_versions
+  min_legal_basis: 3  # scripts/domain-config.ts DEFAULT_MIN_LEGAL_BASIS
+
+# ---------------------------------------------------------------------------
+# Universal anchors (referenced by every industry below via YAML alias)
+# ---------------------------------------------------------------------------
+universal_anchors:
+  osha_kr:
+    statute_file: OSHA-KR.yaml
+    name_ko: 산업안전보건법
+    abbreviation: OSHA-KR
+    key_articles:
+      - article: "36"
+        topic_ko: 위험성평가 (risk assessment — mandatory for all workplaces)
+        topic_en: Risk assessment
+      - article: "57"
+        topic_ko: 산업재해 조사·기록 (incident investigation and recording)
+        topic_en: Incident investigation and recording
+    verification:
+      verified_via: legalize-kr
+      note: Full OSHA-KR structure (Arts 13-243) verified in prior session; stable.
+
+  sapa:
+    statute_file: SAPA.yaml
+    name_ko: 중대재해처벌법
+    abbreviation: SAPA
+    key_articles:
+      - article: "4"
+        topic_ko: 사업주의 안전보건 확보 의무 (universal safety-assurance obligation)
+        topic_en: Universal safety-assurance obligation
+      - article: "5"
+        topic_ko: 도급·하도급 사업주의 안전보건 확보 의무 (outsourcing/contract safety)
+        topic_en: Outsourcing and contract safety obligation
+      - article: "6"
+        topic_ko: 벌칙 (punishment — imprisonment for serious injury/death)
+        topic_en: Punishment
+      - article: "7"
+        topic_ko: 법인 등의 벌금 (dual liability — corporate fine)
+        topic_en: Corporate dual liability fine
+    verification:
+      verified_via: legalize-kr
+      note: |
+        SAPA structure verified stable via compare_versions (0 changes since
+        2024-01-01). Industry-agnostic — same 16-article structure applies to
+        all industries. Art 4 is the universal anchor for every industry.
+
+# ---------------------------------------------------------------------------
+# Industry anchor table (12 Tier-1 industries)
+# ---------------------------------------------------------------------------
+industries:
+
+  # =========================================================================
+  battery:
+    display_name: Battery (Lithium-ion secondary cells)
+    has_dedicated_statute_file: false
+    primary_statute:
+      name_ko: 위험물안전관리법
+      abbreviation: DSSMA
+      statute_file: Hazardous-Materials-Safety-Control.yaml
+      key_articles:
+        - article: "5"
+          topic_ko: 위험물의 저장 및 취급 제한 + 기술기준
+          topic_en: Dangerous-goods storage/handling restrictions and technical standards
+        - article: "15"
+          topic_ko: 위험물안전관리자 선임
+          topic_en: Dangerous-goods Safety Manager appointment
+        - article: "27"
+          topic_ko: 응급조치·통보 및 조치명령 (유출/화재/폭발 대응)
+          topic_en: Emergency response, notification, and corrective orders
+    adjacent_laws:
+      - name_ko: 화학물질의 등록 및 평가 등에 관한 법률 (화학물질관리법)
+        abbreviation: CCA
+        statute_file: CCA-Chemical-Control.yaml
+        key_articles:
+          - article: "23"
+            topic_ko: 화학사고예방관리계획서 작성·제출
+            topic_en: Chemical Accident Prevention Management Plan
+          - article: "24"
+            topic_ko: 취급시설의 배치·설치 및 관리 기준
+            topic_en: Handling-facility layout, installation, and management standards
+      - name_ko: 전기안전관리법
+        abbreviation: ESCA
+        statute_file: Electrical-Safety-Act.yaml
+        key_articles:
+          - article: "16"
+            topic_ko: 전기재해 예방을 위한 안전조치
+            topic_en: Electrical-disaster prevention safety measures
+          - article: "22"
+            topic_ko: 전기안전관리자 선임 등
+            topic_en: Electrical Safety Manager appointment
+    sapa:
+      ref: universal_anchors.sapa
+      note: Battery manufacturing involves significant contractor/subcontractor activity — SAPA Art 5 (outsourcing) is highly relevant.
+    osha_kr_anchor:
+      ref: universal_anchors.osha_kr
+    notes: |
+      Lithium-ion battery manufacturing is not governed by a single dedicated
+      statute. The composite anchor is DSSMA (flammable electrolyte solvents),
+      CCA (chemical accident prevention), and ESCA (high-voltage formation,
+      charging, testing). Also strongly relevant: OSHA-KR Art 38 (site safety
+      measures; fall/electrical detail in OSHSR Ch.6 — 추락 §42, 감전 §301-323)
+      for cell-stack assembly.
+    verification:
+      verified_via:
+        - legalize-kr  # DSSMA, CCA, ESCA Arts confirmed via parse_law_structure
+      unverified: []
+
+  # =========================================================================
+  biotech:
+    display_name: Biotech (Life-science R&D and biomanufacturing)
+    has_dedicated_statute_file: true
+    primary_statute:
+      name_ko: 생명윤리 및 안전에 관한 법률
+      abbreviation: BSA (Bioethics and Safety Act)
+      statute_file: Bioethics-and-Safety-Act.yaml
+      key_articles:
+        - article: "13"
+          topic_ko: 기관생명윤리위원회(IRB) 심의
+          topic_en: Institutional Review Board (IRB) review
+        - article: "16"
+          topic_ko: 연구대상자의 동의 (informed consent)
+          topic_en: Informed consent of research subjects
+    adjacent_laws:
+      - name_ko: 유전자변형생물체의 국가간 이동 등에 관한 법률 (LMO법)
+        abbreviation: LMO-Act
+        statute_file: LMO-Transboundary-Movement.yaml
+        key_articles:
+          - article: "22"
+            topic_ko: LMO 연구시설 밀폐관리
+            topic_en: LMO research facility containment
+          - article: "24"
+            topic_ko: LMO 표시 의무
+            topic_en: LMO labeling obligation
+      - name_ko: 약사법 및 GMP/GCP 규정
+        abbreviation: MFDS-GMP
+        statute_file: MFDS-GMP.yaml
+        key_articles:
+          - article: GMP
+            topic_ko: 우수의약품 제조 및 품질관리 기준
+            topic_en: Good Manufacturing Practice
+    sapa:
+      ref: universal_anchors.sapa
+    osha_kr_anchor:
+      ref: universal_anchors.osha_kr
+    notes: |
+      Biotech spans R&D (BSA, LMO-Act) and biomanufacturing (MFDS-GMP).
+      GCP/GLP/GMP workflows are already scaffolded in the existing codebase
+      (gcp, gvp, glp domains). This anchor complements those for biotech-specific
+      hazards (biological agents, LMO containment, IRB governance).
+    verification:
+      verified_via:
+        - statute-file-only  # Bioethics-Act.yaml, LMO-Transboundary-Movement.yaml
+      unverified:
+        - "BSA Art 13, Art 16 [UNVERIFIED-via-legalize-kr] — legalize_kr.parse_law_structure returned [] under formal name '생명윤리 및 안전에 관한 법률'; articles sourced from Bioethics-and-Safety-Act.yaml (originally from mcp-kr-legislation). Recommend re-verify when statute is indexed."
+        - "LMO-Act Art 22, Art 24 [UNVERIFIED-via-legalize-kr] — legalize_kr returned [] under '유전자변형생물체의 국가간 이동 등에 관한 법률'; sourced from LMO-Transboundary-Movement.yaml. Recommend re-verify."
+
+  # =========================================================================
+  cosmetics:
+    display_name: Cosmetics
+    has_dedicated_statute_file: true
+    primary_statute:
+      name_ko: 화장품법
+      abbreviation: CA (Cosmetics Act)
+      statute_file: Cosmetics-Act.yaml
+      key_articles:
+        - article: "5"
+          topic_ko: 화장품 제조·수입업 등의 등록 및 시설 기준
+          topic_en: Cosmetics manufacturing/import registration and facility standards
+    adjacent_laws:
+      - name_ko: 화학물질의 등록 및 평가 등에 관한 법률 (K-REACH)
+        abbreviation: K-REACH
+        statute_file: K-REACH.yaml
+        key_articles:
+          - article: "10"
+            topic_ko: 기존화학물질 등록
+            topic_en: Existing-chemical registration
+      - name_ko: 산업안전보건법 MSDS 규정
+        abbreviation: OSHA-KR-MSDS
+        statute_file: OSHA-KR-MSDS.yaml
+        key_articles:
+          - article: "110"
+            topic_ko: MSDS 작성·비치 의무
+            topic_en: Material Safety Data Sheet preparation and retention
+    sapa:
+      ref: universal_anchors.sapa
+    osha_kr_anchor:
+      ref: universal_anchors.osha_kr
+    notes: |
+      Cosmetics manufacturing involves solvent handling, aerosol filling, and
+      powder mixing — all covered by OSHA-KR + DSSMA-style controls rather than
+      a cosmetics-specific safety statute. The Cosmetics Act itself is primarily
+      a product-quality registration regime (MFDS-enforced), with facility
+      standards in Art 5 that have safety overlap.
+    verification:
+      verified_via:
+        - legalize-kr  # Cosmetics Act Art 5 VERIFIED via parse_law_structure (full chapter confirmed)
+      unverified: []
+
+  # =========================================================================
+  datacenter:
+    display_name: Datacenter
+    has_dedicated_statute_file: false
+    primary_statute:
+      name_ko: 전기안전관리법
+      abbreviation: ESCA
+      statute_file: Electrical-Safety-Act.yaml
+      key_articles:
+        - article: "16"
+          topic_ko: 전기재해 예방을 위한 안전조치
+          topic_en: Electrical-disaster prevention safety measures
+        - article: "22"
+          topic_ko: 전기안전관리자 선임 등
+          topic_en: Electrical Safety Manager appointment
+    adjacent_laws:
+      - name_ko: 위험물안전관리법
+        abbreviation: DSSMA
+        statute_file: Hazardous-Materials-Safety-Control.yaml
+        key_articles:
+          - article: "5"
+            topic_ko: 위험물의 저장 및 취급 (backup-power diesel, UPS batteries)
+            topic_en: Dangerous-goods storage/handling (backup-power fuel, UPS batteries)
+          - article: "27"
+            topic_ko: 응급조치·통보 및 조치명령
+            topic_en: Emergency response, notification, and corrective orders
+      - name_ko: 소방기본법
+        abbreviation: BFS
+        statute_file: Basic-Fire-Services-Act.yaml
+        key_articles:
+          - article: "16"
+            topic_ko: 소방활동 (화재 진압·구조·구급)
+            topic_en: Firefighting activity (suppression, rescue, EMS)
+    sapa:
+      ref: universal_anchors.sapa
+      note: Datacenter construction and operation is heavily outsourced — SAPA Art 5 is highly relevant.
+    osha_kr_anchor:
+      ref: universal_anchors.osha_kr
+    notes: |
+      No dedicated datacenter statute. Composite anchor: ESCA (high-voltage
+      electrical safety for UPS, switchgear, transformers), DSSMA (diesel fuel
+      for backup generators, lead-acid/lithium UPS batteries), BFS (fire
+      suppression systems, smoke management). Also relevant: OSHA-KR Art 38
+      (site safety measures — 감전 §301-323·누전차단기 §304, 추락 §42 per OSHSR
+      Ch.6) during racking/cabling work.
+    verification:
+      verified_via:
+        - legalize-kr  # ESCA, DSSMA, BFS Arts confirmed via parse_law_structure
+      unverified: []
+
+  # =========================================================================
+  defense:
+    display_name: Defense (Defense-industry manufacturing)
+    has_dedicated_statute_file: true
+    primary_statute:
+      name_ko: 방위사업법
+      abbreviation: DAA (Defense Acquisition Act)
+      statute_file: Defense-Acquisition-Act.yaml
+      key_articles:
+        - article: "28"
+          topic_ko: 군수품 품질보증
+          topic_en: Munitions quality assurance
+        - article: "53"
+          topic_ko: 방위산업체 안전관리
+          topic_en: Defense-industry contractor safety management
+    adjacent_laws:
+      - name_ko: 총포·도검·화약류 등 단속법
+        abbreviation: FSESA
+        statute_file: Firearms-Swords-Explosives-Safety.yaml
+        key_articles:
+          - article: "9"
+            topic_ko: 화약류 취급제한
+            topic_en: Explosives handling restrictions
+          - article: "23"
+            topic_ko: 화약류 안전관리자
+            topic_en: Explosives Safety Manager
+    sapa:
+      ref: universal_anchors.sapa
+    osha_kr_anchor:
+      ref: universal_anchors.osha_kr
+    notes: |
+      Defense manufacturing involves explosives, propellants, and pyrotechnics
+      (FSESA) plus specialized munitions QA (DAA Art 28). Note: DAA Art 18
+      was deleted 2020.3.31 (resolved in prior compliance remediation); the
+      current safety-management anchor is Art 53.
+    verification:
+      verified_via:
+        - kr-safety-catalog  # DAA Art 28/53, FSESA Art 9/23 confirmed via search_osha_regulations
+      unverified:
+        - "DAA Art 28, Art 53 [UNVERIFIED-via-legalize-kr-full-text] — confirmed present in kr_safety catalog but not re-verified via parse_law_structure this session. Article numbers sourced from Defense-Acquisition-Act.yaml (mcp-kr-legislation)."
+
+  # =========================================================================
+  food:
+    display_name: Food (Food manufacturing and processing)
+    has_dedicated_statute_file: true
+    primary_statute:
+      name_ko: 식품위생법
+      abbreviation: FSA (Food Sanitation Act)
+      statute_file: Food-Sanitation-Act.yaml
+      key_articles:
+        - article: "48"
+          topic_ko: 식품위생 검사기관 및 HACCP 적용
+          topic_en: Food sanitation inspection and HACCP application
+    adjacent_laws:
+      - name_ko: 건강기능식품에 관한 법률
+        abbreviation: HSF-Act
+        statute_file: null  # No dedicated file; cite by reference
+        key_articles:
+          - article: "13"
+            topic_ko: 건강기능식품 제조업 등의 시설 기준
+            topic_en: Health-functional-food manufacturing facility standards
+      - name_ko: 소방기본법
+        abbreviation: BFS
+        statute_file: Basic-Fire-Services-Act.yaml
+        key_articles:
+          - article: "16"
+            topic_ko: 소방활동 (화재 진압·구조 — cooking-oil/dryer fire risk)
+            topic_en: Firefighting activity (cooking-oil and dryer fire risk)
+    sapa:
+      ref: universal_anchors.sapa
+    osha_kr_anchor:
+      ref: universal_anchors.osha_kr
+    notes: |
+      Food safety is primarily a product-quality regime (FSA HACCP) overlaid
+      on standard OSHA-KR worker-safety controls. Key worker hazards:
+      cooking-oil burns, dryer-fire, cold-storage asphyxiation, repetitive-strain
+      in packing lines.
+    verification:
+      verified_via:
+        - kr-safety-catalog  # FSA Art 48 HACCP confirmed
+      unverified:
+        - "FSA Art 48 [UNVERIFIED-via-legalize-kr-full-text] — confirmed present in kr_safety catalog; sourced from Food-Sanitation-Act.yaml (mcp-kr-legislation)."
+
+  # =========================================================================
+  logistics:
+    display_name: Logistics (Port and freight handling)
+    has_dedicated_statute_file: false  # PSSA has no dedicated yaml file — GAP
+    primary_statute:
+      name_ko: 항만안전특별법
+      abbreviation: PSSA (Port Safety Special Act)
+      statute_file: null  # GAP — no dedicated yaml file
+      key_articles:
+        - article: "4"
+          topic_ko: 다른 법률과의 관계 (절차조항 — 우선적용 규정)
+          topic_en: Relationship with other laws (procedural — priority-of-application clause)
+          substantive: false  # Procedural; substantive safety basis is Art 6
+        - article: "5"
+          topic_ko: 항만운송 참여자의 기본 의무
+          topic_en: Basic obligations of port-transport participants
+        - article: "6"
+          topic_ko: 항만운송 참여자의 안전확보 의무 등
+          topic_en: Safety-securing obligations of port-transport participants, etc.
+          substantive: true  # SUBSTANTIVE safety-obligation article (verified via legalize_kr parse_law_structure)
+        - article: "8"
+          topic_ko: 안전교육
+          topic_en: Safety education
+        - article: "9"
+          topic_ko: 자체안전관리계획의 수립ㆍ승인 등
+          topic_en: Establishment and approval of self-safety-management plan
+    adjacent_laws:
+      - name_ko: 산업안전보건법 (적하하역 작업 관련)
+        abbreviation: OSHA-KR
+        statute_file: OSHA-KR.yaml
+        key_articles:
+          - article: "38"
+            topic_ko: "안전조치 (적하하역·야드 적치 추락·붕괴 방지 — 세부기준 규칙 Ch.6: 추락 §42, 붕괴/굴착 §154·339)"
+            topic_en: Safety measures for crane/handling and yard-stacking hazards (fall §42, collapse §154·339 per OSHSR Ch.6)
+      - name_ko: 위험물안전관리법
+        abbreviation: DSSMA
+        statute_file: Hazardous-Materials-Safety-Control.yaml
+        key_articles:
+          - article: "20"
+            topic_ko: 위험물의 운반
+            topic_en: Dangerous-goods transport
+    sapa:
+      ref: universal_anchors.sapa
+      note: Port logistics involves extensive subcontracting (terminal operators, trucking, stevedoring) — SAPA Art 5 is highly relevant.
+    osha_kr_anchor:
+      ref: universal_anchors.osha_kr
+    notes: |
+      PSSA is the primary port-safety statute. No dedicated yaml file exists
+      yet — see `gaps` section. Worker hazards: crane falls, container crush,
+      forklift/powered-truck strikes, hazardous-cargo inhalation.
+    verification:
+      verified_via:
+        - legalize-kr  # PSSA Art 4/5/6/8/9 VERIFIED via parse_law_structure (full structure confirmed)
+      unverified: []
+
+  # =========================================================================
+  railway:
+    display_name: Railway (Operations and maintenance)
+    has_dedicated_statute_file: true
+    primary_statute:
+      name_ko: 철도안전법
+      abbreviation: RSA (Railway Safety Act)
+      statute_file: Rail-Safety-Act.yaml
+      key_articles:
+        - article: "45"
+          topic_ko: 철도보호지구에서의 행위제한 등
+          topic_en: Restrictions on acts within railway protection zones
+        - article: "48"
+          topic_ko: 철도 보호 및 질서유지를 위한 금지행위
+          topic_en: Prohibited acts for railway protection and order
+    adjacent_laws:
+      - name_ko: 산업안전보건법 (궤도 작업 관련)
+        abbreviation: OSHA-KR
+        statute_file: OSHA-KR.yaml
+        key_articles:
+          - article: "38"
+            topic_ko: "안전조치 (전차선/선로 작업 추락·감전 방지 — 세부기준 규칙 Ch.6: 추락 §42, 감전 §301-323·누전차단기 §304)"
+            topic_en: Safety measures for catenary/track work (fall §42, electric-shock §301-323·ELCB §304 per OSHSR Ch.6)
+    sapa:
+      ref: universal_anchors.sapa
+    osha_kr_anchor:
+      ref: universal_anchors.osha_kr
+    notes: |
+      Railway safety is governed by RSA (operations/protection zones) overlaid
+      on OSHA-KR for maintenance-worker safety. Key hazards: 25kV catenary
+      electrocution, track-worker struck-by, tunnel confined-space asphyxiation,
+      train-approach entrapment.
+    verification:
+      verified_via:
+        - kr-safety-catalog  # RSA Art 45/48 confirmed
+      unverified:
+        - "RSA Art 45, Art 48 [UNVERIFIED-via-legalize-kr-full-text] — confirmed present in kr_safety catalog; sourced from Rail-Safety-Act.yaml (mcp-kr-legislation)."
+
+  # =========================================================================
+  semicon:
+    display_name: Semiconductor (Fabrication)
+    has_dedicated_statute_file: false
+    primary_statute:
+      name_ko: 화학물질의 등록 및 평가 등에 관한 법률 (화학물질관리법)
+      abbreviation: CCA
+      statute_file: CCA-Chemical-Control.yaml
+      key_articles:
+        - article: "39"
+          topic_ko: 사고대비물질의 지정
+          topic_en: Designation of accident-preparedness substances
+        - article: "40"
+          topic_ko: 사고대비물질의 관리기준 (취급시설의 배치·설치 및 관리 포함)
+          topic_en: Accident-preparedness substance management standards (incl. handling-facility layout, installation, and management)
+    adjacent_laws:
+      - name_ko: 고압가스 안전관리 및 사업법
+        abbreviation: HPGSCA
+        statute_file: High-Pressure-Gas-Safety.yaml
+        key_articles:
+          - article: "11"
+            topic_ko: 안전관리규정 (실란/특수가스 시설 안전유지 계획 제출)
+            topic_en: Safety management regulations (silane/specialty-gas facility safety-plan submission)
+            substantive: true
+          - article: "13"
+            topic_ko: 시설·용기의 안전유지 (실린더 충전 전 용기 점검 포함)
+            topic_en: Facility and container safety maintenance (incl. pre-charge cylinder check)
+            substantive: true
+          - article: "15"
+            topic_ko: 안전관리자 선임
+            topic_en: Safety Manager appointment
+            substantive: true
+          - article: "24"
+            topic_ko: 허가관청 등의 조치 (사용정지·이전·폐기 명령)
+            topic_en: Licensing-authority corrective measures (suspension, relocation, disposal orders)
+            substantive: true
+          - article: "26"
+            topic_ko: 사고의 통보 등 (가스 누출·폭발·화재 통보)
+            topic_en: Accident notification (gas leak, explosion, fire)
+            substantive: true
+      - name_ko: 위험물안전관리법
+        abbreviation: DSSMA
+        statute_file: Hazardous-Materials-Safety-Control.yaml
+        key_articles:
+          - article: "5"
+            topic_ko: 위험물의 저장 및 취급
+            topic_en: Dangerous-goods storage/handling
+          - article: "27"
+            topic_ko: 응급조치·통보 및 조치명령
+            topic_en: Emergency response and corrective orders
+    sapa:
+      ref: universal_anchors.sapa
+    osha_kr_anchor:
+      ref: universal_anchors.osha_kr
+    notes: |
+      Semiconductor fabs are chemical-intensive (CCA), gas-intensive (HPGSCA —
+      silane, arsine, phosphine, hydrogen), and dangerous-goods-intensive
+      (DSSMA — pyrophoric liquids, combustible metals). No dedicated statute —
+      composite anchor required. Also relevant: OSHA-KR Art 38 (site safety
+      measures — electrical/fall detail in OSHSR Ch.6: 감전 §301-323·§304,
+      추락 §42) during tool install/maintenance.
+    verification:
+      verified_via:
+        - legalize-kr  # CCA Art 39/40 + HPGSCA Art 11/13/15/24/26 confirmed via parse_law_structure (HPGSCA indexed under "고압가스안전관리법"; MST 283919, lawIdCode 001850)
+      unverified: []
+      remediation_note: |
+        2026-08-07 (semicon HPGSCA remediation): HPGSCA articles re-verified live — Art 14 (deleted 1999.2.8),
+        Art 17 (용기등의 검사, NOT Safety Manager), Art 28 (한국가스안전공사의 설립, NOT emergency).
+        Replaced with live articles Art 11/13/15/24/26. See
+        memory/findings/compliance-2026-08-07-semicon-hpgsca-remediation.md.
+
+  # =========================================================================
+  shipbuilding:
+    display_name: Shipbuilding (Ship construction and repair)
+    has_dedicated_statute_file: false
+    primary_statute:
+      name_ko: 산업안전보건법 (조선 특례 — OSHA-KR is the de facto primary statute)
+      abbreviation: OSHA-KR
+      statute_file: OSHA-KR.yaml
+      key_articles:
+        - article: "38"
+          topic_ko: "안전조치 (도크/선체 추락·블록 탑재 붕괴·용접/절단 감전 방지 — 세부기준 규칙 Ch.6: 추락 §42, 붕괴 §154·339, 감전 §301-323·누전차단기 §304)"
+          topic_en: Site safety measures for dock/hull falls, block-erection collapse, and welding/cutting shock (OSHSR Ch.6 — fall §42, collapse §154·339, electric-shock §301-323·ELCB §304)
+    adjacent_laws:
+      - name_ko: 위험물안전관리법
+        abbreviation: DSSMA
+        statute_file: Hazardous-Materials-Safety-Control.yaml
+        key_articles:
+          - article: "5"
+            topic_ko: 도장/도포 작업 위험물 취급
+            topic_en: Painting/coating dangerous-goods handling
+          - article: "27"
+            topic_ko: 응급조치 (화재/폭발 대응)
+            topic_en: Emergency response (fire/explosion)
+      - name_ko: 고압가스 안전관리 및 사업법
+        abbreviation: HPGSCA
+        statute_file: High-Pressure-Gas-Safety.yaml
+        key_articles:
+          - article: "11"
+            topic_ko: 안전관리규정 (절단/용접용 가스 시설 안전유지 계획 제출)
+            topic_en: Safety management regulations (cutting/welding gas facility safety-plan submission)
+            substantive: true
+          - article: "13"
+            topic_ko: 시설·용기의 안전유지 (충전 전 용기 점검 포함)
+            topic_en: Facility and container safety maintenance (incl. pre-charge container check)
+            substantive: true
+          - article: "15"
+            topic_ko: 안전관리자 선임
+            topic_en: Safety Manager appointment
+            substantive: true
+          - article: "24"
+            topic_ko: 허가관청 등의 조치 (사용정지·이전·폐기 명령)
+            topic_en: Licensing-authority corrective measures (suspension, relocation, disposal orders)
+            substantive: true
+          - article: "26"
+            topic_ko: 사고의 통보 등 (사망·부상·폭발·화재·누출 통보)
+            topic_en: Accident notification (death, injury, explosion, fire, leak)
+            substantive: true
+    sapa:
+      ref: universal_anchors.sapa
+      note: Shipbuilding has the highest outsourcing intensity of any Tier-1 industry (block fabrication, outfitting, painting subcontractors) — SAPA Art 5 is critical.
+    osha_kr_anchor:
+      ref: universal_anchors.osha_kr
+    notes: |
+      No dedicated shipbuilding safety statute. OSHA-KR is the de facto primary
+      (heavily used for shipyard-specific fall/collapse/electrical). DSSMA and
+      HPGSCA cover painting/coating and welding/cutting gas hazards.
+    verification:
+      verified_via:
+        - legalize-kr  # DSSMA + HPGSCA confirmed via parse_law_structure (HPGSCA now indexed under "고압가스안전관리법"; MST 283919, lawIdCode 001850)
+      unverified: []
+      remediation_note: |
+        2026-08-07 (Group C-1b): HPGSCA articles re-verified live — Art 14 (deleted 1999.2.8),
+        Art 17 (용기등의 검사, NOT Safety Manager), Art 28 (한국가스안전공사의 설립, NOT emergency).
+        Replaced with live articles Art 11/13/15/24/26. See
+        memory/findings/compliance-2026-08-07-phase2-group-c-anchors.md §3.1.
+
+  # =========================================================================
+  steelmaking:
+    display_name: Steelmaking (Integrated steel mills)
+    has_dedicated_statute_file: false
+    primary_statute:
+      name_ko: 산업안전보건법 (제철 특례 — OSHA-KR is the de facto primary statute)
+      abbreviation: OSHA-KR
+      statute_file: OSHA-KR.yaml
+      key_articles:
+        - article: "38"
+          topic_ko: "안전조치 (고로/전로 추락·원료 야드 붕괴·고전압 설비 감전 방지 — 세부기준 규칙 Ch.6: 추락 §42, 붕괴 §154·339, 감전 §301-323·누전차단기 §304)"
+          topic_en: Site safety measures for furnace falls, raw-material-yard collapse, and high-voltage shock (OSHSR Ch.6 — fall §42, collapse §154·339, electric-shock §301-323·ELCB §304)
+    adjacent_laws:
+      - name_ko: 고압가스 안전관리 및 사업법
+        abbreviation: HPGSCA
+        statute_file: High-Pressure-Gas-Safety.yaml
+        key_articles:
+          - article: "11"
+            topic_ko: 안전관리규정 (O2/N2/H2 시설 안전유지 계획 제출)
+            topic_en: Safety management regulations (O2/N2/H2 facility safety-plan submission)
+            substantive: true
+          - article: "13"
+            topic_ko: 시설·용기의 안전유지 (제강 가스 충전 시설 기준)
+            topic_en: Facility and container safety maintenance (steelmaking gas-charging standards)
+            substantive: true
+          - article: "15"
+            topic_ko: 안전관리자 선임
+            topic_en: Safety Manager appointment
+            substantive: true
+          - article: "24"
+            topic_ko: 허가관청 등의 조치 (사용정지·이전·폐기 명령)
+            topic_en: Licensing-authority corrective measures (suspension, relocation, disposal orders)
+            substantive: true
+          - article: "26"
+            topic_ko: 사고의 통보 등 (가스 누출·폭발·화재 통보)
+            topic_en: Accident notification (gas leak, explosion, fire)
+            substantive: true
+      - name_ko: 위험물안전관리법
+        abbreviation: DSSMA
+        statute_file: Hazardous-Materials-Safety-Control.yaml
+        key_articles:
+          - article: "5"
+            topic_ko: 위험물 저장·취급 (코크스/중유/가스)
+            topic_en: Dangerous-goods storage/handling (coke/heavy-oil/gas)
+          - article: "27"
+            topic_ko: 응급조치·통보 및 조치명령
+            topic_en: Emergency response and corrective orders
+    sapa:
+      ref: universal_anchors.sapa
+    osha_kr_anchor:
+      ref: universal_anchors.osha_kr
+    notes: |
+      No dedicated steelmaking safety statute. OSHA-KR is the de facto primary.
+      HPGSCA covers oxygen/nitrogen/hydrogen gas systems (BOF lance, EAF,
+      hydrogen-annealing furnaces). DSSMA covers coke/heavy-oil/gas fuels.
+      Also relevant: OSHA-KR Art 44 (PSM) for major-hazard installations.
+    verification:
+      verified_via:
+        - legalize-kr  # DSSMA + HPGSCA confirmed via parse_law_structure (HPGSCA now indexed under "고압가스안전관리법"; MST 283919, lawIdCode 001850)
+      unverified: []
+      remediation_note: |
+        2026-08-07 (Group C-1b): HPGSCA articles re-verified live — Art 14 (deleted 1999.2.8),
+        Art 17 (용기등의 검사, NOT Safety Manager), Art 28 (한국가스안전공사의 설립, NOT emergency).
+        Replaced with live articles Art 11/13/15/24/26. See
+        memory/findings/compliance-2026-08-07-phase2-group-c-anchors.md §3.1.
+
+  # =========================================================================
+  waste:
+    display_name: Waste (Treatment, recycling, incineration)
+    has_dedicated_statute_file: true
+    primary_statute:
+      name_ko: 폐기물관리법
+      abbreviation: WCA (Wastes Control Act)
+      statute_file: Wastes-Control-Act.yaml
+      key_articles:
+        - article: "13"
+          topic_ko: 폐기물의 처리 기준 (수집·운반·처리)
+          topic_en: Waste-treatment standards (collection, transport, disposal)
+        - article: "25"
+          topic_ko: 폐기물처리업 허가 및 운영
+          topic_en: Waste-treatment business licensing and operation
+    adjacent_laws:
+      - name_ko: 소방기본법
+        abbreviation: BFS
+        statute_file: Basic-Fire-Services-Act.yaml
+        key_articles:
+          - article: "16"
+            topic_ko: 소방활동 (소각로 화재/폭발 대응)
+            topic_en: Firefighting activity (incinerator fire/explosion response)
+      - name_ko: 화학물질의 등록 및 평가 등에 관한 법률 (화학물질관리법)
+        abbreviation: CCA
+        statute_file: CCA-Chemical-Control.yaml
+        key_articles:
+          - article: "23"
+            topic_ko: 화학사고예방관리계획서 (지정폐기물 처리시설)
+            topic_en: Chemical Accident Prevention Plan (designated-waste treatment facilities)
+    sapa:
+      ref: universal_anchors.sapa
+    osha_kr_anchor:
+      ref: universal_anchors.osha_kr
+    notes: |
+      Waste treatment is governed by WCA overlaid on BFS (incinerator fire
+      risk) and CCA (designated-waste chemical hazard). Key worker hazards:
+      incinerator fire/explosion, shredder entanglement/amputation, biogas
+      methane explosion, toxic-gas exposure (H2S, CO) during treatment.
+    verification:
+      verified_via:
+        - kr-safety-catalog  # WCA Art 13/25 confirmed
+        - legalize-kr  # CCA Art 23, BFS Art 16 confirmed
+      unverified:
+        - "WCA Art 13, Art 25 [UNVERIFIED-via-legalize-kr-full-text] — confirmed present in kr_safety catalog; sourced from Wastes-Control-Act.yaml (mcp-kr-legislation)."
+
+# ---------------------------------------------------------------------------
+# Gaps for SGM/PM triage
+# ---------------------------------------------------------------------------
+gaps:
+  - industry: logistics
+    issue: No dedicated regulations/KR yaml file for 항만안전특별법 (PSSA)
+    impact: |
+      PSSA is the primary port-safety statute and was VERIFIED LIVE via
+      legalize_kr this session. Article numbers (Art 4/5/6/8/9) are reliable.
+      But there is no Port-Safety-Special-Act.yaml in regulations/KR/, so the
+      scaffold generator cannot reference a statute-file by filename.
+    recommendation: |
+      Register a new statute file regulations/KR/Port-Safety-Special-Act.yaml
+      (Phantom Statute precedent — commit 5bbc6b4). The anchor data is already
+      verified in this file's `industries.logistics.primary_statute` block.
+
+  - industry: shipbuilding
+    issue: No dedicated statute file; OSHA-KR is the de facto primary
+    impact: |
+      Shipbuilding has no single dedicated safety statute in Korea. The
+      composite anchor (OSHA-KR + DSSMA + HPGSCA) is sufficient for the >=3
+      legal_sources invariant, but a Shipbuilding-Safety.yaml convenience file
+      could group the shipyard-specific OSHA-KR articles (Art 38 + OSHSR Ch.6) and
+      document the block-erection, dry-dock, and painting hazards.
+    recommendation: Optional — no action required for Phase 0. Consider in Phase 2 if shipbuilding-domain workflows need a unified reference.
+
+  - industry: steelmaking
+    issue: No dedicated statute file; OSHA-KR is the de facto primary
+    impact: Similar to shipbuilding.
+    recommendation: Optional — same as shipbuilding.
+
+  - industry: semicon
+    issue: No dedicated statute file; composite CCA + HPGSCA + DSSMA
+    impact: Similar to shipbuilding.
+    recommendation: Optional — same as shipbuilding.
+
+  - industry: datacenter
+    issue: No dedicated statute file; composite ESCA + DSSMA + BFS
+    impact: Similar to shipbuilding.
+    recommendation: Optional — same as shipbuilding.
+
+  - industry: battery
+    issue: No dedicated statute file; composite DSSMA + CCA + ESCA
+    impact: Similar to shipbuilding.
+    recommendation: Optional — same as shipbuilding.
+
+  - statute: HPGSCA (고압가스 안전관리 및 사업법)
+    issue: RESOLVED for shipbuilding/steelmaking/semicon (2026-08-07)
+    impact: |
+      Prior session flag was "not indexed in legalize_kr" — STALE as of 2026-08-07.
+      legalize_kr.get_law_metadata("고압가스안전관리법") succeeds (MST 283919, lawIdCode 001850),
+      and parse_law_structure full-text revealed that Art 14 (deleted 1999.2.8), Art 17 (용기등의
+      검사), and Art 28 (한국가스안전공사의 설립) were ALL mis-cited in the prior anchor data.
+      Affects semicon, shipbuilding, steelmaking, battery — HPGSCA is cited in 4 industries.
+    resolution: |
+      2026-08-07 (Group C-1b remediation): shipbuilding + steelmaking anchor blocks now cite
+      the verified-current article set Art 11/13/15/24/26; High-Pressure-Gas-Safety.yaml and
+      legal-glossary.yaml HPGSCA entries reconciled to the same set. See
+      memory/findings/compliance-2026-08-07-phase2-group-c-anchors.md §3.1-3.2.
+      2026-08-07 (semicon follow-up remediation): semicon anchor block + 4 semicon workflow
+      schemas + 2 silane READMEs remediated to the same Art 11/13/15/24/26 set. See
+      memory/findings/compliance-2026-08-07-semicon-hpgsca-remediation.md.
+    open_followup: |
+      battery industry does NOT cite HPGSCA in its anchor (uses DSSMA + CCA + ESCA) — no
+      HPGSCA remediation needed for battery. All 3 HPGSCA-citing industries (shipbuilding,
+      steelmaking, semicon) now use the verified Art 11/13/15/24/26 set.
+
+  - statute: Bioethics Act (생명윤리 및 안전에 관한 법률)
+    issue: Not indexed in legalize_kr under the formal name
+    impact: |
+      BSA Art 13 (IRB) and Art 16 (informed consent) sourced from
+      Bioethics-and-Safety-Act.yaml but could not be re-verified live. Affects
+      biotech industry only.
+    recommendation: Same as HPGSCA — re-verify when legalize_kr index expands.
+
+  - statute: LMO Act (유전자변형생물체의 국가간 이동 등에 관한 법률)
+    issue: Not indexed in legalize_kr under any name variant tried
+    impact: |
+      LMO-Act Art 22 (containment) and Art 24 (labeling) sourced from
+      LMO-Transboundary-Movement.yaml but could not be re-verified live.
+      Affects biotech industry only.
+    recommendation: Same as HPGSCA — re-verify when legalize_kr index expands.
+
+  - glossary: ESCA (전기안전관리법) article-number discrepancy
+    issue: |
+      regulations/KR/legal-glossary.yaml cites ESCA Art 29 for "전기안전관리자
+      선임" (safety manager appointment), but live law shows Art 29 =
+      "전기안전관리업무에 대한 실태조사 등" (fact-finding survey). The actual
+      safety-manager article is Art 22.
+    impact: |
+      Affects datacenter and battery industry anchors (and any other domain
+      that consumes the ESCA glossary entry). This anchor file uses the
+      VERIFIED-correct articles (Art 16 + Art 22), but the glossary remains
+      wrong and will continue to mislead other consumers.
+    recommendation: |
+      SGM/PM should reconcile legal-glossary.yaml ESCA entry to match the
+      live law. Out of scope for this task (A-03 — anchor table only).
+
+  - glossary: CCA (화학물질관리법) article-number imprecision
+    issue: |
+      Glossary cites CCA Art 20/23, but live law shows Art 20 = import
+      notification (not safety management). The real chemical-safety anchors
+      are Art 23 (화학사고예방관리계획서) and Art 24 (취급시설 기준).
+    impact: Affects battery, semicon, waste industry anchors.
+    recommendation: SGM/PM should reconcile legal-glossary.yaml CCA entry. Out of scope for this task.
+
+  - glossary: DSSMA (위험물안전관리법) article-number incompleteness
+    issue: |
+      Glossary cites DSSMA Art 5/27 but omits Art 15 (위험물안전관리자 — the
+      actual safety-manager appointment article) and Art 17 (예방규정).
+    impact: Affects battery, datacenter, semicon, shipbuilding, steelmaking, waste.
+    recommendation: SGM/PM should add Art 15 and Art 17 to legal-glossary.yaml DSSMA entry. Out of scope for this task.
+
+last_updated: "2026-08-24"
+
+###############################################################################
+# End of file
+###############################################################################

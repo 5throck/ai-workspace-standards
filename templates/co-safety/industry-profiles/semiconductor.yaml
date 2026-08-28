@@ -1,0 +1,30 @@
+# Semiconductor Manufacturing Industry Profile (legacy — Pattern C, migrated v1)
+# NOTE: The canonical detailed profile is semicon-cleanroom.yaml.
+#       This file is retained for backward compatibility.
+profile_id: semiconductor
+name: semiconductor
+display_name: "반도체 제조 (Semiconductor Manufacturing)"
+version: "1.0"
+status: deprecated
+last_updated: 2026-08-06
+industry_tier: industry
+agent: semicon-agent
+legal_basis:
+  - OSHA-KR Article 44 (PSM)
+  - 고압가스 안전 관리 및 사업법 (HPGSCA) Article 13
+  - 화학물질관리법 (CCA) Article 20
+key_hazards:
+  - chemical_gas_hazard_information
+  - cleanroom_hazard_analysis
+  - specialized_sop_noncompliance
+  - tool_installation_moc
+description: High-tech manufacturing profile focusing on cleanroom environments and special gas hazards.
+psm_elements:
+  - element: Chemical & Gas Hazard Information
+  - element: Cleanroom Hazard Analysis
+  - element: Specialized Standard Operating Procedures
+  - element: Technical Training & Certification
+  - element: Cleanroom Contractor Management
+  - element: Facility & Tool Mechanical Integrity
+  - element: Cleanroom Work Permits
+  - element: Tool Installation & Hook-up MOC

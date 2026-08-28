@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: gas-emergency-preparedness
+title: "가스 비상 대비 (Gas Emergency Preparedness)"
+status: active
+applicability: mandatory
+workflow_type: core
+
+legal_basis:
+  - 고압가스 안전 관리 및 사업법 Article 26
+  - 위험물안전관리법 Article 27
+  - 재난관리기본법
+industry_profile: gas-facility
+agent: gasterm-agent
+evidence_model: gasterm-emergency-preparedness-record.json

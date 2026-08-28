@@ -1,0 +1,24 @@
+# Railway & Transit Infrastructure Safety Profile (v1)
+profile_id: railway-transit
+name: railway-transit
+display_name: "철도 및 궤도교통 (Railway & Transit Infrastructure Safety)"
+version: "1.0"
+status: active
+last_updated: 2026-08-06
+industry_tier: industry
+agent: railway-agent
+legal_basis:
+  - 철도안전법 (RSA) Article 45 & Article 48
+  - 산업안전보건법 (OSHA-KR) Article 38 & Article 39
+  - 전기안전관리법 (ESMA) Article 16
+  - 중대재해처벌법 (SAPA) Article 4
+key_hazards:
+  - 25kV catenary high-voltage electric shock and Arc Flash
+  - Night track maintenance worker train collision
+  - Train bogie maintenance wheel pinching and heavy component drops
+description: "EHS safety profile for railway electrification, high-voltage overhead catenary systems, track maintenance, and subway tunnel operations."
+applicable_laws:
+  - 철도안전법 Article 45
+  - 산업안전보건법 Article 38
+  - 산업안전보건법 Article 39
+  - 중대재해처벌법 Article 4

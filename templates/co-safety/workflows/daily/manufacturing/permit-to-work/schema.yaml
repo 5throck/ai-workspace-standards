@@ -1,0 +1,9 @@
+schema_version: "1.0"
+workflow_id: "permit-to-work"
+title: "안전작업허가 (Permit to Work)"
+status: "active"
+applicability: "mandatory"
+legal_basis:
+  - "산업안전보건법 제38조 (안전조치 — 작업허가의 일반 근거)"
+  - "산업안전보건법 제38조 (안전조치)"
+  - "중대재해처벌법 제4조 (안전보건관리체계 구축 의무)"

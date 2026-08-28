@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: datacenter-ups-fire-safety
+title: "데이터센터 리튬이온 UPS/ESS 화재 예방 (Data Center UPS Fire Safety)"
+status: active
+applicability: mandatory
+workflow_type: core
+legal_basis:
+  - 전기안전관리법 Article 16
+  - 산업안전보건법 Article 36
+  - 중대재해처벌법 Article 4
+  - NFPA 855
+industry_profile: datacenter-infrastructure
+agent: datacenter-agent
+evidence_model: datacenter-ups-fire-record.json

@@ -1,0 +1,15 @@
+schema_version: "1.0"
+workflow_id: continuous-process-safety
+title: "연속 공정 안전 (Continuous Process Safety)"
+status: active
+applicability: mandatory
+workflow_type: core
+uses_functional_services: [functional/psm, functional/msds, emergency]
+
+legal_basis:
+  - 산업안전보건법 Article 44 (PSM)
+  - 중대재해처벌법 Article 7
+  - 화학물질관리법 Article 20
+industry_profile: chemical-plant
+agent: ehschem-agent
+evidence_model: ehschem-process-record.json

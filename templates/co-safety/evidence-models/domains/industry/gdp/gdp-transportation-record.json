@@ -1,0 +1,133 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "gdp-transportation-record.json",
+  "title": "GDP Transportation Record",
+  "description": "Evidence for pharmaceutical transportation per KGDP.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "legal_basis",
+    "gdp_certification_status",
+    "temperature_condition",
+    "e_signature",
+    "nomenclature",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^GDP-TR-[0-9]{4}-[0-9]{4}$"
+    },
+    "gdp_certification_status": {
+      "type": "string",
+      "enum": [
+        "certified",
+        "pending",
+        "suspended",
+        "expired"
+      ],
+      "description": "KGDP certification status at time of record"
+    },
+    "temperature_condition": {
+      "type": "string",
+      "enum": [
+        "cold_chain_2_8C",
+        "frozen_below_minus_15C",
+        "controlled_room_15_25C",
+        "ambient_30C_max",
+        "not_applicable"
+      ]
+    },
+    "batch_disposition_approved_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "GMP batch-record ID (for goods receipt from manufacturing)"
+    },
+    "shipment_id": {
+      "type": "string"
+    },
+    "carrier_id": {
+      "type": "string"
+    },
+    "origin_location": {
+      "type": "string"
+    },
+    "destination_location": {
+      "type": "string"
+    },
+    "departure_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "arrival_time": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "packaging_type": {
+      "type": "string"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "batch_id": {
+            "type": "string"
+          },
+          "product_code": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "in_transit_temp_logger_id": {
+      "type": "string"
+    },
+    "delivery_confirmation": {
+      "type": "boolean"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "description": "Multi-source legal basis. Primary: 약사법 Article 43의2 (distribution management obligation) and Article 43의3 (recall duty). Adjacent laws may include: 의약품 유통관리 기준 (MFDS KGDP standards), PIC/S GDP PE 009 (harmonized GDP), EU GDP 2013/C 343/01 (reference framework).",
+      "examples": [
+        [
+          "약사법 Art.43의2",
+          "KGDP 기준",
+          "PIC/S GDP PE 009"
+        ],
+        [
+          "약사법 Art.43의3",
+          "EU GDP 2013/C 343/01",
+          "KGDP 기준"
+        ],
+        [
+          "약사법 Art.43의2",
+          "KGDP DTS 규정",
+          "PIC/S GDP PE 009"
+        ]
+      ]
+    },
+    "e_signature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/e_signature"
+    },
+    "nomenclature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/nomenclature"
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

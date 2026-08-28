@@ -1,0 +1,493 @@
+# ── Registry schema v2 (mode: coordinates) ───────────────────────────────────
+# This file maps article numbers to official titles ONLY. Article content is
+# never cached here — fetch live from the 법제처 k-law API at point of use.
+# Migrated by migrate-registry-to-coordinates.ts on 2026-08-26
+schema_version: 2
+mode: coordinates
+jurisdiction: KR
+framework: Framework-Act-Disaster-Safety
+law_name: 재난 및 안전관리 기본법
+law_name_en: null
+abbreviation: null
+mst: "282883"
+enforced_from: null
+agency: null
+tier: 1
+regulator: MOIS (행정안전부) / National Disaster Management Institute
+articles:
+  - "no": "1"
+    title: 목적
+    checked_at: "2026-08-26"
+  - "no": "2"
+    title: 기본이념
+    checked_at: "2026-08-26"
+  - "no": "3"
+    title: 정의
+    checked_at: "2026-08-26"
+  - "no": "4"
+    title: 국가 등의 책무
+    checked_at: "2026-08-26"
+  - "no": "5"
+    title: 국민의 책무
+    checked_at: "2026-08-26"
+  - "no": "6"
+    title: 재난 및 안전관리 업무의 총괄ㆍ조정
+    checked_at: "2026-08-26"
+  - "no": "7"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "8"
+    title: 다른 법률과의 관계 등
+    checked_at: "2026-08-26"
+  - "no": "9"
+    title: 중앙안전관리위원회
+    checked_at: "2026-08-26"
+  - "no": "9"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 안전정책조정위원회
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 재난 및 안전관리 사업예산의 사전협의 등
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 재난 및 안전관리 사업에 대한 평가
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 지방자치단체의 재난 및 안전관리 사업예산의 사전검토 등
+    checked_at: "2026-08-26"
+  - "no": "11"
+    title: 지역위원회
+    checked_at: "2026-08-26"
+  - "no": "12"
+    title: 재난방송협의회
+    checked_at: "2026-08-26"
+  - "no": "12"
+    title: 안전관리민관협력위원회
+    checked_at: "2026-08-26"
+  - "no": "12"
+    title: 중앙민관협력위원회의 기능 등
+    checked_at: "2026-08-26"
+  - "no": "13"
+    title: 지역위원회 등에 대한 지원 및 지도
+    checked_at: "2026-08-26"
+  - "no": "14"
+    title: 중앙재난안전대책본부 등
+    checked_at: "2026-08-26"
+  - "no": "14"
+    title: 수습지원단 파견 등
+    checked_at: "2026-08-26"
+  - "no": "15"
+    title: 중앙대책본부장의 권한 등
+    checked_at: "2026-08-26"
+  - "no": "15"
+    title: 중앙 및 지역사고수습본부
+    checked_at: "2026-08-26"
+  - "no": "16"
+    title: 지역재난안전대책본부
+    checked_at: "2026-08-26"
+  - "no": "16"
+    title: 지방자치단체의 장의 재난안전관리교육
+    checked_at: "2026-08-26"
+  - "no": "17"
+    title: 지역대책본부장의 권한 등
+    checked_at: "2026-08-26"
+  - "no": "17"
+    title: 재난현장 통합자원봉사지원단의 설치 등
+    checked_at: "2026-08-26"
+  - "no": "17"
+    title: 대책지원본부
+    checked_at: "2026-08-26"
+  - "no": "18"
+    title: 재난안전상황실
+    checked_at: "2026-08-26"
+  - "no": "19"
+    title: 재난 신고 등
+    checked_at: "2026-08-26"
+  - "no": "20"
+    title: 재난상황의 보고
+    checked_at: "2026-08-26"
+  - "no": "21"
+    title: 해외재난상황의 보고 및 관리
+    checked_at: "2026-08-26"
+  - "no": "22"
+    title: 국가안전관리기본계획의 수립 등
+    checked_at: "2026-08-26"
+  - "no": "22"
+    title: 국가안전관리기본계획의 내용
+    checked_at: "2026-08-26"
+  - "no": "23"
+    title: 집행계획
+    checked_at: "2026-08-26"
+  - "no": "23"
+    title: 국가안전관리기본계획 등과의 연계
+    checked_at: "2026-08-26"
+  - "no": "24"
+    title: 시ㆍ도안전관리계획의 수립
+    checked_at: "2026-08-26"
+  - "no": "25"
+    title: 시ㆍ군ㆍ구안전관리계획의 수립
+    checked_at: "2026-08-26"
+  - "no": "25"
+    title: 집행계획 등 추진실적의 제출 및 보고
+    checked_at: "2026-08-26"
+  - "no": "25"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "25"
+    title: 재난관리책임기관의 장의 재난예방조치 등
+    checked_at: "2026-08-26"
+  - "no": "26"
+    title: 국가핵심기반의 지정 등
+    checked_at: "2026-08-26"
+  - "no": "26"
+    title: 국가핵심기반의 관리 등
+    checked_at: "2026-08-26"
+  - "no": "27"
+    title: 특정관리대상지역의 지정 및 관리 등
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: 지방자치단체에 대한 지원 등
+    checked_at: "2026-08-26"
+  - "no": "29"
+    title: 재난방지시설의 관리
+    checked_at: "2026-08-26"
+  - "no": "29"
+    title: 재난안전분야 종사자 교육
+    checked_at: "2026-08-26"
+  - "no": "30"
+    title: 재난예방을 위한 긴급안전점검 등
+    checked_at: "2026-08-26"
+  - "no": "31"
+    title: 재난예방을 위한 안전조치
+    checked_at: "2026-08-26"
+  - "no": "31"
+    title: 안전취약계층에 대한 안전 환경 지원
+    checked_at: "2026-08-26"
+  - "no": "31"
+    title: 재난안전분야 제도개선
+    checked_at: "2026-08-26"
+  - "no": "32"
+    title: 정부합동 안전 점검
+    checked_at: "2026-08-26"
+  - "no": "32"
+    title: 사법경찰권
+    checked_at: "2026-08-26"
+  - "no": "32"
+    title: 집중 안전점검 기간 운영 등
+    checked_at: "2026-08-26"
+  - "no": "33"
+    title: 안전관리전문기관에 대한 자료요구 등
+    checked_at: "2026-08-26"
+  - "no": "33"
+    title: 재난관리체계 등에 대한 평가 등
+    checked_at: "2026-08-26"
+  - "no": "33"
+    title: 재난관리 실태 공시 등
+    checked_at: "2026-08-26"
+  - "no": "34"
+    title: 재난관리자원의 관리
+    checked_at: "2026-08-26"
+  - "no": "34"
+    title: 재난현장 긴급통신수단의 마련
+    checked_at: "2026-08-26"
+  - "no": "34"
+    title: 국가재난관리기준의 제정ㆍ운용 등
+    checked_at: "2026-08-26"
+  - "no": "34"
+    title: 기능별 재난대응 활동계획의 작성ㆍ활용
+    checked_at: "2026-08-26"
+  - "no": "34"
+    title: 재난분야 위기관리 매뉴얼 작성ㆍ운용
+    checked_at: "2026-08-26"
+  - "no": "34"
+    title: 다중이용시설 등의 위기상황 매뉴얼 작성ㆍ관리 및 훈련
+    checked_at: "2026-08-26"
+  - "no": "34"
+    title: 안전기준의 등록 및 심의 등
+    checked_at: "2026-08-26"
+  - "no": "34"
+    title: 재난안전통신망의 구축ㆍ운영
+    checked_at: "2026-08-26"
+  - "no": "34"
+    title: 재난대비훈련 기본계획 수립
+    checked_at: "2026-08-26"
+  - "no": "35"
+    title: 재난대비훈련 실시
+    checked_at: "2026-08-26"
+  - "no": "36"
+    title: 재난사태 선포
+    checked_at: "2026-08-26"
+  - "no": "37"
+    title: 응급조치
+    checked_at: "2026-08-26"
+  - "no": "38"
+    title: 위기경보의 발령 등
+    checked_at: "2026-08-26"
+  - "no": "38"
+    title: 재난 예보ㆍ경보체계 구축ㆍ운영 등
+    checked_at: "2026-08-26"
+  - "no": "39"
+    title: 동원명령 등
+    checked_at: "2026-08-26"
+  - "no": "40"
+    title: 대피명령
+    checked_at: "2026-08-26"
+  - "no": "41"
+    title: 위험구역의 설정
+    checked_at: "2026-08-26"
+  - "no": "42"
+    title: 강제대피조치
+    checked_at: "2026-08-26"
+  - "no": "43"
+    title: 통행제한 등
+    checked_at: "2026-08-26"
+  - "no": "44"
+    title: 응원
+    checked_at: "2026-08-26"
+  - "no": "45"
+    title: 응급부담
+    checked_at: "2026-08-26"
+  - "no": "46"
+    title: 시ㆍ도지사가 실시하는 응급조치 등
+    checked_at: "2026-08-26"
+  - "no": "47"
+    title: 재난관리책임기관의 장의 응급조치
+    checked_at: "2026-08-26"
+  - "no": "48"
+    title: 지역통제단장의 응급조치 등
+    checked_at: "2026-08-26"
+  - "no": "49"
+    title: 중앙긴급구조통제단
+    checked_at: "2026-08-26"
+  - "no": "50"
+    title: 지역긴급구조통제단
+    checked_at: "2026-08-26"
+  - "no": "51"
+    title: 긴급구조
+    checked_at: "2026-08-26"
+  - "no": "52"
+    title: 긴급구조 현장지휘
+    checked_at: "2026-08-26"
+  - "no": "52"
+    title: 긴급대응협력관
+    checked_at: "2026-08-26"
+  - "no": "53"
+    title: 긴급구조활동에 대한 평가
+    checked_at: "2026-08-26"
+  - "no": "54"
+    title: 긴급구조대응계획의 수립
+    checked_at: "2026-08-26"
+  - "no": "54"
+    title: 긴급구조 관련 특수번호 전화서비스의 통합ㆍ연계
+    checked_at: "2026-08-26"
+  - "no": "55"
+    title: 재난대비능력 보강
+    checked_at: "2026-08-26"
+  - "no": "55"
+    title: 긴급구조지원기관의 능력에 대한 평가
+    checked_at: "2026-08-26"
+  - "no": "56"
+    title: 해상에서의 긴급구조
+    checked_at: "2026-08-26"
+  - "no": "57"
+    title: 항공기 등 조난사고 시의 긴급구조 등
+    checked_at: "2026-08-26"
+  - "no": "58"
+    title: 재난피해 신고 및 조사
+    checked_at: "2026-08-26"
+  - "no": "58"
+    title: 실태조사
+    checked_at: "2026-08-26"
+  - "no": "59"
+    title: 재난복구계획의 수립ㆍ시행
+    checked_at: "2026-08-26"
+  - "no": "59"
+    title: 재난복구계획에 따라 시행하는 사업의 관리
+    checked_at: "2026-08-26"
+  - "no": "60"
+    title: 특별재난지역의 선포
+    checked_at: "2026-08-26"
+  - "no": "61"
+    title: 특별재난지역에 대한 지원
+    checked_at: "2026-08-26"
+  - "no": "61"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "62"
+    title: 비용 부담의 원칙
+    checked_at: "2026-08-26"
+  - "no": "63"
+    title: 응급지원에 필요한 비용
+    checked_at: "2026-08-26"
+  - "no": "64"
+    title: 손실보상
+    checked_at: "2026-08-26"
+  - "no": "65"
+    title: 치료 및 보상
+    checked_at: "2026-08-26"
+  - "no": "65"
+    title: 포상
+    checked_at: "2026-08-26"
+  - "no": "66"
+    title: 재난지역에 대한 국고보조 등의 지원
+    checked_at: "2026-08-26"
+  - "no": "66"
+    title: 복구비 등의 선지급
+    checked_at: "2026-08-26"
+  - "no": "66"
+    title: 복구비등의 반환
+    checked_at: "2026-08-26"
+  - "no": "66"
+    title: 안전문화 진흥을 위한 시책의 추진
+    checked_at: "2026-08-26"
+  - "no": "66"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "66"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "66"
+    title: 국민안전의 날 등
+    checked_at: "2026-08-26"
+  - "no": "66"
+    title: 안전관리헌장
+    checked_at: "2026-08-26"
+  - "no": "66"
+    title: 안전정보의 구축ㆍ활용
+    checked_at: "2026-08-26"
+  - "no": "66"
+    title: 안전지수의 공표 및 안전진단의 실시 등
+    checked_at: "2026-08-26"
+  - "no": "66"
+    title: 지역축제 개최 시 안전관리조치
+    checked_at: "2026-08-26"
+  - "no": "66"
+    title: 다중운집 시 재난 등 예방조치
+    checked_at: "2026-08-26"
+  - "no": "66"
+    title: 안전사업지구의 지정 및 지원
+    checked_at: "2026-08-26"
+  - "no": "66"
+    title: 안전신고 통합정보시스템 구축ㆍ운영
+    checked_at: "2026-08-26"
+  - "no": "66"
+    title: 재난 및 안전관리를 위한 특별교부세 교부
+    checked_at: "2026-08-26"
+  - "no": "67"
+    title: 재난관리기금의 적립
+    checked_at: "2026-08-26"
+  - "no": "68"
+    title: 재난관리기금의 운용 등
+    checked_at: "2026-08-26"
+  - "no": "69"
+    title: 재난원인조사
+    checked_at: "2026-08-26"
+  - "no": "70"
+    title: 재난상황의 기록 관리
+    checked_at: "2026-08-26"
+  - "no": "71"
+    title: 재난 및 안전관리에 필요한 과학기술의 진흥 등
+    checked_at: "2026-08-26"
+  - "no": "71"
+    title: 재난 및 안전관리기술개발 종합계획의 수립 등
+    checked_at: "2026-08-26"
+  - "no": "72"
+    title: 연구개발사업 성과의 사업화 지원
+    checked_at: "2026-08-26"
+  - "no": "72"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "73"
+    title: 기술료 등의 사용
+    checked_at: "2026-08-26"
+  - "no": "73"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "73"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "73"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "74"
+    title: 재난관리정보통신체계의 구축ㆍ운영
+    checked_at: "2026-08-26"
+  - "no": "74"
+    title: 재난관리정보의 공동이용
+    checked_at: "2026-08-26"
+  - "no": "74"
+    title: 정보 제공 요청 등
+    checked_at: "2026-08-26"
+  - "no": "74"
+    title: 재난안전데이터의 수집 등
+    checked_at: "2026-08-26"
+  - "no": "74"
+    title: 영상정보처리기기 통합관제센터
+    checked_at: "2026-08-26"
+  - "no": "75"
+    title: 안전관리자문단의 구성ㆍ운영
+    checked_at: "2026-08-26"
+  - "no": "75"
+    title: 안전책임관
+    checked_at: "2026-08-26"
+  - "no": "75"
+    title: 공인재난관리사 자격증 교부 등
+    checked_at: "2026-08-26"
+  - "no": "75"
+    title: 재난관리 전문인력의 배치 등
+    checked_at: "2026-08-26"
+  - "no": "76"
+    title: 재난안전 관련 보험ㆍ공제의 개발ㆍ보급 등
+    checked_at: "2026-08-26"
+  - "no": "76"
+    title: 재난안전의무보험에 관한 법령이 갖추어야 할 기준 등
+    checked_at: "2026-08-26"
+  - "no": "76"
+    title: 재난안전의무보험의 평가 및 개선권고 등
+    checked_at: "2026-08-26"
+  - "no": "76"
+    title: 재난안전의무보험 종합정보시스템의 구축ㆍ운영 등
+    checked_at: "2026-08-26"
+  - "no": "76"
+    title: 재난취약시설 보험ㆍ공제의 가입 등
+    checked_at: "2026-08-26"
+  - "no": "77"
+    title: 재난관리 의무 위반에 대한 징계 요구 등
+    checked_at: "2026-08-26"
+  - "no": "77"
+    title: 적극행정에 대한 면책
+    checked_at: "2026-08-26"
+  - "no": "78"
+    title: 권한의 위임 및 위탁
+    checked_at: "2026-08-26"
+  - "no": "78"
+    title: 벌칙 적용 시의 공무원 의제
+    checked_at: "2026-08-26"
+  - "no": "78"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "78"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "79"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "80"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "81"
+    title: 양벌규정
+    checked_at: "2026-08-26"
+  - "no": "82"
+    title: 과태료
+    checked_at: "2026-08-26"
+source_verification:
+  method: k-law-live
+  checked_at: "2026-08-26"
+  next_review: "2027-02-22"
+last_updated: "2026-08-26"
+related_rule:
+  name_ko: 재난 및 안전관리 기본법 시행령 / 시행규칙
+  abbreviation: FAMDS-Enforcement

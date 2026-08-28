@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: deviation-capa
+title: "이상관리 및 시정예방조치 (Deviation Management and CAPA)"
+status: active
+applicability: mandatory
+workflow_type: core
+legal_basis:
+  - 약사법 Article 37
+  - 의약품 등의 안전에 관한 규칙 별표 1 제7.3호 (이상관리 및 시정조치)
+  - ICH Q10 (Pharmaceutical Quality System)
+industry_profile: pharma-general
+agent: gmp-agent
+evidence_model: gmp-deviation-record.json, gmp-capa-record.json
+skill_ref: skills/gmp-deviation-capa/SKILL.md

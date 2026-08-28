@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: cleaning-validation
+title: "세정 밸리데이션 (Cleaning Validation)"
+status: active
+applicability: mandatory
+workflow_type: core
+legal_basis:
+  - 약사법 Article 37
+  - 의약품 등의 안전에 관한 규칙 별표 1 제6호 (세척 밸리데이션)
+  - PIC/S PE 009 Annex (Cleaning Validation)
+  - ICH Q9 (Quality Risk Management)
+industry_profile: pharma-general
+agent: gmp-agent
+evidence_model: gmp-cleaning-validation-record.json

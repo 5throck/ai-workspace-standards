@@ -1,0 +1,142 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "gvp-signal-record.json",
+  "title": "GVP Signal Record",
+  "description": "Signal detection and validation per ICH E2E and EU GVP Module 9.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "ich_e2_compliance",
+    "pbrer_cycle_ref",
+    "product_id",
+    "legal_basis",
+    "e_signature",
+    "nomenclature",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^GVP-SIG-[0-9]{4}-[0-9]{4}$"
+    },
+    "ich_e2_compliance": {
+      "type": "boolean",
+      "description": "Compliant with relevant ICH E2 series guideline"
+    },
+    "pbrer_cycle_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "PBRER cycle identifier (annual reporting cycle)"
+    },
+    "product_id": {
+      "type": "string",
+      "description": "Drug product identifier (GTIN or Korean product code)"
+    },
+    "rmp_version_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Risk Management Plan version reference (when applicable)"
+    },
+    "signal_id": {
+      "type": "string"
+    },
+    "product_name": {
+      "type": "string"
+    },
+    "ae_term_meddra_pt": {
+      "type": "string"
+    },
+    "detection_method": {
+      "type": "string",
+      "enum": [
+        "PRR",
+        "ROR",
+        "BCPNN",
+        "EBGM",
+        "case_series",
+        "literature_review",
+        "clinical_review"
+      ]
+    },
+    "statistical_threshold_met": {
+      "type": "boolean"
+    },
+    "statistical_value": {
+      "type": "number"
+    },
+    "cases_in_signal": {
+      "type": "integer"
+    },
+    "validation_status": {
+      "type": "string",
+      "enum": [
+        "identified",
+        "under_validation",
+        "validated",
+        "rejected"
+      ]
+    },
+    "validation_due_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "validated_signal": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "actions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "update_rmp",
+          "submit_pbrer_addendum",
+          "labeling_change",
+          "mfds_notification",
+          "urgent_action"
+        ]
+      }
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "description": "Multi-source legal basis. Primary: 약사법 Article 73의2 (mandatory ADR reporting) and Article 73의3 (re-evaluation). Adjacent laws may include: 의약품 이상반응 보고 규정 (MFDS KGVP standards), ICH E2 series (clinical safety data management), EU GVP Modules (pharmacovigilance processes).",
+      "examples": [
+        [
+          "약사법 Art.73의2",
+          "KGVP 규정",
+          "ICH E2A"
+        ],
+        [
+          "약사법 Art.73의3",
+          "EU GVP Module IX",
+          "ICH E2E"
+        ],
+        [
+          "약사법 Art.73의2",
+          "KGVP 규정",
+          "ICH E2B(R3)"
+        ]
+      ]
+    },
+    "e_signature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/e_signature"
+    },
+    "nomenclature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/nomenclature"
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: datacenter-fuel-tank-safety
+title: "데이터센터 비상발전용 경유 저장탱크 안전점검 및 위험물 관리 (DataCenter Diesel Fuel Tank Safety)"
+status: active
+applicability: mandatory
+workflow_type: core
+legal_basis:
+  - 위험물안전관리법 Article 5
+  - 전기안전관리법 Article 16
+  - NFPA 110 Standard for Emergency Power Systems
+  - 중대재해처벌법 Article 4
+industry_profile: datacenter-infrastructure
+agent: datacenter-agent
+evidence_model: datacenter-fuel-tank-record.json

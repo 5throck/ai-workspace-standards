@@ -1,0 +1,181 @@
+# ── Registry schema v2 (mode: coordinates) ───────────────────────────────────
+# This file maps article numbers to official titles ONLY. Article content is
+# never cached here — fetch live from the 법제처 k-law API at point of use.
+# Migrated by migrate-registry-to-coordinates.ts on 2026-08-26
+schema_version: 2
+mode: coordinates
+jurisdiction: KR
+framework: Electrical-Safety-Act
+law_name: 전기안전관리법
+law_name_en: null
+abbreviation: null
+mst: "268805"
+enforced_from: null
+agency: null
+tier: 1
+regulator: KESCO (한국전기안전공사)
+articles:
+  - "no": "1"
+    title: 목적
+    checked_at: "2026-08-26"
+  - "no": "2"
+    title: 정의
+    checked_at: "2026-08-26"
+  - "no": "3"
+    title: 국가의 책무
+    checked_at: "2026-08-26"
+  - "no": "4"
+    title: 다른 법률과의 관계
+    checked_at: "2026-08-26"
+  - "no": "5"
+    title: 전기안전관리 기본계획 수립 등
+    checked_at: "2026-08-26"
+  - "no": "6"
+    title: 전기안전자문기구의 설치
+    checked_at: "2026-08-26"
+  - "no": "7"
+    title: 전기안전관리 관련 기술의 연구ㆍ개발
+    checked_at: "2026-08-26"
+  - "no": "8"
+    title: 자가용전기설비의 공사계획의 인가 또는 신고
+    checked_at: "2026-08-26"
+  - "no": "9"
+    title: 사용전검사
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 자가용전기설비의 임시사용
+    checked_at: "2026-08-26"
+  - "no": "11"
+    title: 정기검사
+    checked_at: "2026-08-26"
+  - "no": "12"
+    title: 일반용전기설비의 점검
+    checked_at: "2026-08-26"
+  - "no": "12"
+    title: 관제센터의 설치ㆍ운영
+    checked_at: "2026-08-26"
+  - "no": "13"
+    title: 여러 사람이 이용하는 시설 등에 대한 전기안전점검
+    checked_at: "2026-08-26"
+  - "no": "14"
+    title: 공동주택 등의 안전점검
+    checked_at: "2026-08-26"
+  - "no": "15"
+    title: 특별안전점검 및 응급조치
+    checked_at: "2026-08-26"
+  - "no": "16"
+    title: 전기재해 예방을 위한 안전조치
+    checked_at: "2026-08-26"
+  - "no": "17"
+    title: 안전등급 지정 등
+    checked_at: "2026-08-26"
+  - "no": "18"
+    title: 검사ㆍ점검의 방법ㆍ절차 등
+    checked_at: "2026-08-26"
+  - "no": "19"
+    title: 전기설비의 유지
+    checked_at: "2026-08-26"
+  - "no": "20"
+    title: 적합명령
+    checked_at: "2026-08-26"
+  - "no": "21"
+    title: 정보의 공개
+    checked_at: "2026-08-26"
+  - "no": "22"
+    title: 전기안전관리자의 선임 등
+    checked_at: "2026-08-26"
+  - "no": "23"
+    title: 전기안전관리자의 선임 및 해임신고 등
+    checked_at: "2026-08-26"
+  - "no": "24"
+    title: 전기안전관리자의 성실의무 등
+    checked_at: "2026-08-26"
+  - "no": "25"
+    title: 전기안전관리자의 교육 등
+    checked_at: "2026-08-26"
+  - "no": "26"
+    title: 전기안전관리업무를 전문으로 하는 자 등의 등록
+    checked_at: "2026-08-26"
+  - "no": "27"
+    title: 등록의 결격사유 및 취소 등
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: 청문
+    checked_at: "2026-08-26"
+  - "no": "29"
+    title: 전기안전관리업무에 대한 실태조사 등
+    checked_at: "2026-08-26"
+  - "no": "30"
+    title: 한국전기안전공사의 설립
+    checked_at: "2026-08-26"
+  - "no": "31"
+    title: 안전공사의 운영 등
+    checked_at: "2026-08-26"
+  - "no": "32"
+    title: 임원
+    checked_at: "2026-08-26"
+  - "no": "33"
+    title: 사업
+    checked_at: "2026-08-26"
+  - "no": "34"
+    title: 다른 법률과의 관계
+    checked_at: "2026-08-26"
+  - "no": "35"
+    title: 감독
+    checked_at: "2026-08-26"
+  - "no": "36"
+    title: 유사명칭의 사용 금지
+    checked_at: "2026-08-26"
+  - "no": "37"
+    title: 비밀 유지의 의무
+    checked_at: "2026-08-26"
+  - "no": "38"
+    title: 전기안전종합정보시스템의 구축ㆍ운영 등
+    checked_at: "2026-08-26"
+  - "no": "39"
+    title: 보고
+    checked_at: "2026-08-26"
+  - "no": "40"
+    title: 중대한 사고의 통보ㆍ조사
+    checked_at: "2026-08-26"
+  - "no": "41"
+    title: 전기재해통계의 작성
+    checked_at: "2026-08-26"
+  - "no": "42"
+    title: 수수료 등
+    checked_at: "2026-08-26"
+  - "no": "43"
+    title: 권한의 위임ㆍ위탁
+    checked_at: "2026-08-26"
+  - "no": "44"
+    title: 관리ㆍ감독
+    checked_at: "2026-08-26"
+  - "no": "45"
+    title: 벌칙 적용에서 공무원 의제
+    checked_at: "2026-08-26"
+  - "no": "46"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "47"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "48"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "49"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "50"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "51"
+    title: 양벌규정
+    checked_at: "2026-08-26"
+  - "no": "52"
+    title: 과태료
+    checked_at: "2026-08-26"
+source_verification:
+  method: k-law-live
+  checked_at: "2026-08-26"
+  next_review: "2027-02-22"
+last_updated: "2026-08-26"

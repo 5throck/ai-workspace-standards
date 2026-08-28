@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: cleanroom-chemical-safety
+title: "클린룸 유해화학물질 및 불산 안전 관리 (Cleanroom Chemical Safety)"
+status: active
+applicability: mandatory
+workflow_type: core
+legal_basis:
+  - 화학물질관리법 Article 20
+  - 산업안전보건법 Article 36
+  - 산업안전보건법 Article 110
+  - 중대재해처벌법 Article 4
+industry_profile: semicon-cleanroom
+agent: semicon-agent
+evidence_model: semicon-cleanroom-chemical-record.json

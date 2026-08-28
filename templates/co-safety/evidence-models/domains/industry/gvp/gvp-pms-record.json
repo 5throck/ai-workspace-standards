@@ -1,0 +1,142 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "gvp-pms-record.json",
+  "title": "GVP PMS Study Record",
+  "description": "Korean Post-Marketing Surveillance study management.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "ich_e2_compliance",
+    "pbrer_cycle_ref",
+    "product_id",
+    "legal_basis",
+    "e_signature",
+    "nomenclature",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^GVP-PMS-[0-9]{4}-[0-9]{4}$"
+    },
+    "ich_e2_compliance": {
+      "type": "boolean",
+      "description": "Compliant with relevant ICH E2 series guideline"
+    },
+    "pbrer_cycle_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "PBRER cycle identifier (annual reporting cycle)"
+    },
+    "product_id": {
+      "type": "string",
+      "description": "Drug product identifier (GTIN or Korean product code)"
+    },
+    "rmp_version_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Risk Management Plan version reference (when applicable)"
+    },
+    "study_number": {
+      "type": "string"
+    },
+    "study_design": {
+      "type": "string",
+      "enum": [
+        "observational_cohort",
+        "case_control",
+        "registry",
+        "cross_sectional"
+      ]
+    },
+    "enrollment_target": {
+      "type": "integer"
+    },
+    "enrollment_actual": {
+      "type": "integer"
+    },
+    "study_start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "study_end_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "follow_up_duration_months": {
+      "type": "integer"
+    },
+    "primary_endpoints": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "interim_analysis_planned": {
+      "type": "boolean"
+    },
+    "interim_analysis_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "final_report_submitted": {
+      "type": "boolean"
+    },
+    "final_report_submission_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "reevaluation_target": {
+      "type": "boolean",
+      "description": "Feeds into drug re-evaluation"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "description": "Multi-source legal basis. Primary: 약사법 Article 73의2 (mandatory ADR reporting) and Article 73의3 (re-evaluation). Adjacent laws may include: 의약품 이상반응 보고 규정 (MFDS KGVP standards), ICH E2 series (clinical safety data management), EU GVP Modules (pharmacovigilance processes).",
+      "examples": [
+        [
+          "약사법 Art.73의2",
+          "KGVP 규정",
+          "ICH E2A"
+        ],
+        [
+          "약사법 Art.73의3",
+          "EU GVP Module IX",
+          "ICH E2E"
+        ],
+        [
+          "약사법 Art.73의2",
+          "KGVP 규정",
+          "ICH E2B(R3)"
+        ]
+      ]
+    },
+    "e_signature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/e_signature"
+    },
+    "nomenclature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/nomenclature"
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

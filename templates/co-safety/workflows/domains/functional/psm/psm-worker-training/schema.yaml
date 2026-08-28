@@ -1,0 +1,13 @@
+schema_version: "1.0"
+workflow_id: psm-worker-training
+title: "PSM Worker Training (Element 4)"
+status: active
+applicability: mandatory
+applicable_industries: [chemical, gas_terminal, power_generation]
+legal_basis:
+  - OSHA-KR Article 44
+  - OSHA-KR Article 29 (근로자 안전보건교육, Worker Safety and Health Education)
+  - 중대재해처벌법 Article 4
+industry_profile: chemical-processing
+agent: psm-agent
+evidence_model: psm-worker-training-record.json

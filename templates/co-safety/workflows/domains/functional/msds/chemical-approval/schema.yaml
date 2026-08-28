@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: chemical-approval
+title: "신규 화학물질 도입 승인 (New Chemical Introduction Approval)"
+status: active
+applicability: mandatory
+workflow_type: core
+
+legal_basis:
+  - OSHA-KR Article 113
+  - 화학물질관리법 (CCA) Article 20
+  - UN GHS Rev 9 (2021)
+industry_profile: chemical-handling
+agent: msds-agent
+evidence_model: chemical-approval-record.json

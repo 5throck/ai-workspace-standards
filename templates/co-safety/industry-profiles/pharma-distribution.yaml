@@ -1,0 +1,86 @@
+# Pharmaceutical Distribution Industry Profile — GDP Domain (v1)
+profile_id: pharma-distribution
+name: pharma-distribution
+display_name: "의약품 유통 (Pharmaceutical Distribution — GDP Domain)"
+version: "1.0"
+status: active
+last_updated: 2026-08-06
+industry_tier: industry
+agent: gdp-agent
+legal_basis:
+  - 약사법 Article 43의2 (유통관리 의무)
+  - 약사법 Article 43의3 (회수 의무)
+  - 의약품 유통관리 기준 (MFDS 고시)
+  - 의약품 추적관리에 관한 규정 (MFDS 고시)
+  - GDP 인증제 (MFDS)
+  - PIC/S GDP
+  - EU GDP 2013/C 343/01
+key_hazards:
+  - cold_chain_excursion
+  - temperature_deviation
+  - traceability_gap
+  - counterfeit_product_infiltration
+workflows:
+  gdp:
+    - goods-receipt
+    - storage-management
+    - temperature-monitoring
+    - transportation
+    - traceability-dts
+    - returned-goods
+    - gdp-self-inspection
+    - product-recall-reference
+description: Pharmaceutical distribution operations under KGDP, including wholesale, cold chain logistics, DTS tracking, and supply chain integrity.
+regulatory_reference: regulations/KR/MFDS-GDP.md
+dts_reference: regulations/KR/DTS.yaml
+gdp_pillars:
+  - goods_receipt_and_acceptance
+  - storage_and_warehousing
+  - temperature_control_cold_chain
+  - transportation_and_shipping
+  - traceability_dts
+  - returned_goods_management
+  - self_inspection
+  - recall_management
+temperature_zones:
+  cold_chain_2_8C:
+    range: "2-8°C"
+    use_case: "Biologics, vaccines, insulin"
+  frozen_below_minus_15C:
+    range: "≤ -15°C"
+    use_case: "Some biologics, plasma"
+  controlled_room_15_25C:
+    range: "15-25°C"
+    use_case: "Most oral solids"
+  ambient_30C_max:
+    range: "≤ 30°C"
+    use_case: "General storage"
+gdp_certification:
+  mandatory_since: "2020-01-01"
+  renewal_cycle_years: 3
+  authority: MFDS
+dts_mandated_items:
+  - 전문의약품 (Ethical drugs)
+  - 항생제 (Antibiotics)
+  - 부작용 모니터링 의약품
+  - 마약류 (Narcotics)
+  - 17개 지정 품목군
+v1_scope:
+  includes:
+    - goods_receipt_from_manufacturers
+    - warehouse_storage_with_temperature_zones
+    - temperature_monitoring_with_data_analysis
+    - transportation_with_route_tracking
+    - dts_compliance
+    - returned_goods_processing
+    - self_inspection
+    - recall_data_provision (reference workflow)
+  excludes:
+    - real_time_iot_sensor_integration (v2)
+    - gps_telematics_tracking (v2)
+    - international_customs (v2)
+    - ml_demand_forecasting (v2)
+cross_domain_consumers:
+  - gmp (batch_disposition_approved_ref interface)
+  - msds (hazardous drug storage references)
+  - emergency-agent (recall execution via reference)

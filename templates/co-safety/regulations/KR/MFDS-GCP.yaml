@@ -1,0 +1,73 @@
+# ── Registry schema v2 (mode: coordinates) ───────────────────────────────────
+# This file maps article numbers to official titles ONLY. Article content is
+# never cached here — fetch live from the 법제처 k-law API at point of use.
+# Migrated by migrate-registry-to-coordinates.ts on 2026-08-26
+schema_version: 2
+mode: coordinates
+jurisdiction: KR
+framework: KGCP
+law_name: 동물 약국 및 동물용 의약품등의 제조업ㆍ수입자와 판매업의 시설 기준령
+law_name_en: null
+abbreviation: null
+mst: "256347"
+enforced_from: null
+agency: null
+tier: 1
+regulator: MFDS (식품의약품안전처)
+articles:
+  - "no": "1"
+    title: 목적
+    checked_at: "2026-08-26"
+  - "no": "2"
+    title: 정의
+    checked_at: "2026-08-26"
+  - "no": "3"
+    title: 동물 약국의 시설 기준
+    checked_at: "2026-08-26"
+  - "no": "4"
+    title: 동물용 의약품 제조소의 시설 기준 등
+    checked_at: "2026-08-26"
+  - "no": "5"
+    title: 동물용 의약품 작업소의 시설 기준
+    checked_at: "2026-08-26"
+  - "no": "6"
+    title: 완제품 동물용 의약품 작업소의 시설 기준
+    checked_at: "2026-08-26"
+  - "no": "7"
+    title: 무균제제 작업소의 시설 기준
+    checked_at: "2026-08-26"
+  - "no": "8"
+    title: 생물학적제제 작업소의 시설 기준
+    checked_at: "2026-08-26"
+  - "no": "9"
+    title: 원료 동물용 의약품 작업소의 시설 기준
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 동물용 의약품 보관소의 시설 기준
+    checked_at: "2026-08-26"
+  - "no": "11"
+    title: 동물용 의약품 시험실의 시설 기준
+    checked_at: "2026-08-26"
+  - "no": "12"
+    title: 동물용 의약외품 제조소의 시설 기준
+    checked_at: "2026-08-26"
+  - "no": "13"
+    title: 동물용 의약품등의 제조 또는 시험의 위탁
+    checked_at: "2026-08-26"
+  - "no": "14"
+    title: 제조시설 및 기구의 다른 용도 이용
+    checked_at: "2026-08-26"
+  - "no": "15"
+    title: 동물용 의약품등 수입자의 시설 기준
+    checked_at: "2026-08-26"
+  - "no": "16"
+    title: 동물용 의약품 도매상 시설 기준
+    checked_at: "2026-08-26"
+  - "no": "17"
+    title: 시설 및 기구의 종류 등
+    checked_at: "2026-08-26"
+source_verification:
+  method: k-law-live
+  checked_at: "2026-08-26"
+  next_review: "2027-02-22"
+last_updated: "2026-08-26"

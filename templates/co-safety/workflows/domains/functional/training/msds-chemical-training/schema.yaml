@@ -1,0 +1,10 @@
+schema_version: "1.0"
+workflow_id: msds-chemical-training
+title: "MSDS 화학물질 교육 (MSDS Chemical Training)"
+status: active
+applicability: mandatory
+applicable_industries: [chemical, gas_terminal, power_generation, construction, medical_device, pharma, manufacturing]
+legal_basis: [산업안전보건법 Article 114, 중대재해처벌법 Article 7, 산업안전보건법 Article 29]
+industry_profile: training-management
+agent: training-agent
+evidence_model: training-record.json

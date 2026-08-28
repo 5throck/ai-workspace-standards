@@ -1,0 +1,12 @@
+schema_version: "1.0"
+workflow_id: design-control
+title: "설계관리 (Design Control)"
+status: active
+applicability: mandatory
+workflow_type: core
+uses_functional_services: [functional/msds, industry/glp, emergency]
+
+legal_basis: [의료기기법 Article 16, ISO 13485 Section 7.3, KGMP-MD]
+industry_profile: medical-device
+agent: meddevice-agent
+evidence_model: meddevice-design-control-record.json

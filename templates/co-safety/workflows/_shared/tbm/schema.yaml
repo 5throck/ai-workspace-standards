@@ -1,0 +1,54 @@
+schema_version: "1.0"
+workflow_id: tbm
+title: "TBM (Tool Box Meeting) — Shared Base"
+status: active
+applicability: mandatory
+workflow_type: core
+shared: true
+
+# Shared canonical TBM (Tool Box Meeting, 작업전 안전점검회의) workflow.
+# Industries reference this base via a `references:` block in their own
+# schema.yaml (see ../REFERENCE-SPEC.md). Per-industry duplicates are NOT
+# maintained here — only the cross-industry common base.
+consumed_by:
+  note: >
+    Industries reference this shared base instead of duplicating content.
+    Each consuming industry declares a `references:` block pointing here and
+    overrides signature_hazard + industry-specific legal_basis.
+    Migration of existing per-industry TBM variants happens in Phase 1/2.
+  industries:
+    - battery
+    - biotech
+    - cosmetics
+    - datacenter
+    - defense
+    - ehschem
+    - ehsconst   # partial override — preserves ehsconst-tbm-record.json + construction provisions
+    - food
+    - gasterm
+    - logistics
+    - powergen
+    - railway
+    - semicon
+    - shipbuilding
+    - steelmaking
+    - waste
+
+# Common minimum legal basis — applies to ALL consuming industries.
+# Industries ADD their own statutes via references.overrides.legal_basis.add
+# (never replace — see REFERENCE-SPEC.md §Override Semantics).
+legal_basis:
+  - 산업안전보건법 Article 15     # OSHA-KR — Safety & Health Management Director
+  - 산업안전보건법 Article 36     # OSHA-KR — Safety & Health Management Regulations
+  - 중대재해처벌법 Article 4      # SAPA — General duty to secure safety and health
+
+# Shared cross-industry evidence model. Industries override this only when an
+# industry-specific record exists (e.g. ehsconst → ehsconst-tbm-record.json).
+evidence_model: ../../../evidence-models/_shared/tbm-record.json
+
+# Fields an industry MUST/MAY override via references.overrides:
+#   signature_hazard   (required) — industry-specific representative hazard
+#   industry_profile   (required) — industry identifier
+#   agent              (required) — assigned industry agent
+#   legal_basis.add    (optional) — industry-specific statutes (additive)
+#   evidence_model     (optional) — industry-specific evidence override

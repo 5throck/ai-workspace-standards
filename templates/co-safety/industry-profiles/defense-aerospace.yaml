@@ -1,0 +1,24 @@
+# Defense & Explosives Safety Profile (v1)
+profile_id: defense-aerospace
+name: defense-aerospace
+display_name: "방위산업 및 폭발물 (Defense & Explosives Safety)"
+version: "1.0"
+status: active
+last_updated: 2026-08-06
+industry_tier: industry
+agent: defense-agent
+legal_basis:
+  - 총포·도검·화약류 등의 안전관리에 관한 법률 (FSESA) Article 9 & Article 23
+  - 방위사업법 (DAA) Article 28 & Article 53
+  - 고압가스 안전 관리 및 사업법 (HPGSCA) Article 13
+  - 중대재해처벌법 (SAPA) Article 4
+key_hazards:
+  - Ammunition propellant mixing Electrostatic Discharge (ESD) explosion
+  - Missile cryogenic liquid propellant (LN2/LOX) leaks and high-pressure gas bursts
+  - Defense aircraft NDT non-destructive testing radiation exposure
+description: "EHS safety profile for munitions manufacturing, explosive propellants, missile cryogenic liquid fuels, and defense aerospace NDT radiation testing."
+applicable_laws:
+  - 총포·도검·화약류 등의 안전관리에 관한 법률 Article 9
+  - 방위사업법 Article 18
+  - 고압가스 안전 관리 및 사업법 Article 13
+  - 중대재해처벌법 Article 4

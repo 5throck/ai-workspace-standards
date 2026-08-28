@@ -1,0 +1,69 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "steelmaking-continuous-casting-cooling-water-record.json",
+  "title": "Steelmaking Continuous-Casting Cooling-Water Integrity Record",
+  "description": "Evidence model for the continuous-casting machine (CCM) mold and strand cooling-water system integrity verification, performed before each casting sequence (tundish open) to prevent the water-to-molten-steel steam explosion that occurs when a mold cooling-jacket leak or secondary-spray fault allows water to contact the molten-steel strand. Distinct from molten-metal-furnace repair LOTO + refractory-moisture control (which governs furnace repair lockout); this record governs the continuous-caster cooling-water SYSTEM in the running (non-isolated) state immediately before tap-into-tundish. Applicable to POSCO Gwangyang/Pohang, Hyundai Steel Dangjin, and Dongkuk MCS continuous casters.",
+  "version": "1.0.0",
+  "status": "active",
+  "type": "object",
+  "required": [
+    "record_id",
+    "caster_strand_id",
+    "mold_cooling_water_flow_lpm",
+    "mold_water_inlet_pressure_bar",
+    "hydrostatic_leak_test_passed",
+    "pre_cast_inspector_id",
+    "legal_basis",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^STEEL-CC-[0-9]{4}-[0-9]{4}$",
+      "description": "Unique record identifier (STEEL-CC-YYYY-NNNN)."
+    },
+    "caster_strand_id": {
+      "type": "string",
+      "description": "Continuous caster and strand identifier (e.g., 'CCM#2-Strand-B', 'No.3 Billet-Caster-Strand-1')."
+    },
+    "mold_cooling_water_flow_lpm": {
+      "type": "number",
+      "minimum": 200,
+      "description": "Mold cooling-water flow rate (liters/minute). Must meet or exceed the mold-design minimum flow (typically 300-600 lpm for slab molds, 200+ lpm for billet molds). Below-minimum flow risks mold-shell breakout and molten-steel water contact."
+    },
+    "mold_water_inlet_pressure_bar": {
+      "type": "number",
+      "minimum": 3,
+      "description": "Mold cooling-water inlet pressure (bar). Verified within the design band (typically 3-8 bar) to confirm no blockage in the mold-cooling channels."
+    },
+    "mold_water_temperature_delta_c": {
+      "type": "number",
+      "minimum": 5,
+      "description": "Temperature rise ( C) of mold cooling water between inlet and outlet. A delta below 5 C during a hot standby indicates no heat extraction (channel blockage); an abnormally high delta indicates insufficient flow."
+    },
+    "secondary_cooling_spray_active": {
+      "type": "boolean",
+      "description": "True if all strand secondary-cooling spray banks (footroll, bending, straightening zones) are confirmed active and atomizing. A dry spray zone allows strand-breakout shell re-melt and molten-steel water-contact in the lower banks."
+    },
+    "hydrostatic_leak_test_passed": {
+      "type": "boolean",
+      "description": "True if the pre-shift mold/copper-plate hydrostatic leak test passed (no water-to-molten-metal path). Site PTW practice under OSHA-KR Article 38 (안전조치) and KOSHA guidance requires this verification before casting (anchor corrected from legacy Art 98 on 2026-08-24)."
+    },
+    "pre_cast_inspector_id": {
+      "type": "string",
+      "description": "Identifier of the continuous-caster shift inspector who certified the cooling-water system (caster-crew qualification ID or safety-department assessor ID)."
+    },
+    "verification_timestamp_iso": {
+      "type": "string",
+      "description": "Pre-cast verification timestamp (ISO 8601). Must be within the same shift as the tundish-open that follows it."
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 3
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

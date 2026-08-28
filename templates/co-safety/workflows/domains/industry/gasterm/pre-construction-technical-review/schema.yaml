@@ -1,0 +1,15 @@
+schema_version: "1.0"
+workflow_id: pre-construction-technical-review
+title: "사전기술검토 (Pre-Construction Technical Review)"
+status: active
+applicability: mandatory
+workflow_type: core
+
+legal_basis:
+  - 고압가스 안전 관리 및 사업법 Article 22-2
+  - 고압가스 안전 관리 및 사업법 시행규칙 Article 7
+  - 액화석유가스의 안전관리 및 사업법 Article 27-2
+  - 도시가스사업법 Article 17-5
+industry_profile: gas-facility
+agent: gasterm-agent
+evidence_model: gasterm-pre-construction-review-record.json

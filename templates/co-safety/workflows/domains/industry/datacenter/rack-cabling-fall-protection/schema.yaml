@@ -1,0 +1,28 @@
+schema_version: "1.0"
+workflow_id: rack-cabling-fall-protection
+title: "Datacenter — rack-cabling-fall-protection (scaffold — specialist review required)"
+status: active
+applicability: mandatory
+workflow_type: core
+industry_profile: datacenter
+agent: datacenter-agent
+signature_hazard: "[Datacenter] ESCA — 대표 위해요인 (specialist review required)"
+
+# Auto-filled from regulations/KR/industry-regulatory-anchors.yaml (Task A-03).
+# Entries marked [UNVERIFIED] originate from the anchor table and require specialist re-verification.
+legal_basis:
+  - 산업안전보건법 Article 36
+  - 산업안전보건법 Article 57
+  - 중대재해처벌법 Article 4
+  - 중대재해처벌법 Article 5
+  - 중대재해처벌법 Article 6
+  - 중대재해처벌법 Article 7
+  - 전기안전관리법 Article 16
+  - 전기안전관리법 Article 22
+  - 위험물안전관리법 Article 5
+  - 위험물안전관리법 Article 27
+  - 소방기본법 Article 16
+
+# Industry-unique workflow. NOT a shared-workflow reference (no `references:` block).
+# Evidence model skeleton — see evidence-models/domains/industry/datacenter/datacenter-rack-cabling-fall-protection-record.json.
+evidence_model: datacenter-rack-cabling-fall-protection-record.json

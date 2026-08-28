@@ -1,0 +1,27 @@
+schema_version: "1.0"
+workflow_id: defense-munitions-storage-magazine-safety
+title: "Defense (Defense-industry manufacturing) — defense-munitions-storage-magazine-safety"
+status: active
+applicability: mandatory
+workflow_type: core
+industry_profile: defense
+agent: defense-agent
+signature_hazard: "[Defense (Defense-industry manufacturing)] DAA (Defense Acquisition Act) — 대표 위해요인 (specialist review required)"
+
+# Auto-filled from regulations/KR/industry-regulatory-anchors.yaml (Task A-03).
+# Entries marked [UNVERIFIED] originate from the anchor table and require specialist re-verification.
+legal_basis:
+  - 산업안전보건법 Article 36
+  - 산업안전보건법 Article 57
+  - 중대재해처벌법 Article 4
+  - 중대재해처벌법 Article 5
+  - 중대재해처벌법 Article 6
+  - 중대재해처벌법 Article 7
+  - 방위사업법 Article 28
+  - 방위사업법 Article 53
+  - 총포·도검·화약류 등 단속법 Article 9
+  - 총포·도검·화약류 등 단속법 Article 23
+
+# Industry-unique workflow. NOT a shared-workflow reference (no `references:` block).
+# Evidence model skeleton — see evidence-models/domains/industry/defense/defense-defense-munitions-storage-magazine-safety-record.json.
+evidence_model: defense-defense-munitions-storage-magazine-safety-record.json

@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: cosmetics-stability-testing
+title: "화장품 안정성(Stability) 시험 검증 및 보관조건 점검 (Cosmetics Stability Testing)"
+status: active
+applicability: mandatory
+workflow_type: core
+legal_basis:
+  - 화장품법 Article 5
+  - 화장품 우수제조기준 (MFDS CGMP Notice)
+  - ISO 22716 Cosmetics GMP Clause 8
+  - 중대재해처벌법 Article 4
+industry_profile: cosmetics-cgmp
+agent: cosmetics-agent
+evidence_model: cosmetics-stability-record.json

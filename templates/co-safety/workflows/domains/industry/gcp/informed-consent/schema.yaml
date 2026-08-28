@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: informed-consent
+title: "동의서(ICF) 관리 (Informed Consent Form Management)"
+status: active
+applicability: mandatory
+workflow_type: core
+
+legal_basis:
+  - 생명윤리법
+  - 헬싱키 선언 (2013)
+  - ICH E6(R3) Section 5
+industry_profile: clinical-research
+agent: gcp-agent
+evidence_model: gcp-informed-consent-record.json

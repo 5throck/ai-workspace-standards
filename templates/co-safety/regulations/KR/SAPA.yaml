@@ -1,0 +1,59 @@
+# ── Registry schema v2 (mode: coordinates) ───────────────────────────────────
+# This file maps article numbers to official titles ONLY. Article content is
+# never cached here — fetch live from the 법제처 k-law API at point of use.
+# Spec: docs/_meta/registry-schema-v2.md
+schema_version: 2
+mode: coordinates
+
+jurisdiction: KR
+regulator: MOEL / MOJ
+framework: SAPA
+law_name: 중대재해처벌법
+law_name_en: Serious Accidents Punishment Act
+abbreviation: SAPA
+mst: "228817"        # 법제처 법령일련번호 — from prior kr_safety MCP verification 2026-08-26; Phase 4 live pull re-confirms
+enforced_from: null  # not recorded in prior cache — Phase 4 live pull fills
+agency: 고용노동부
+tier: 1
+
+description: >
+  Cross-domain base coordinate registry consolidating the full 16-article structure
+  (Arts 1-16) of 중대재해처벌법 as cited anywhere in the Safety OS codebase. Domain
+  sub-variant files narrow this set per domain. Content authority is the k-law live
+  API — this file asserts existence and title only.
+
+structure_note: Ch.1 General (Art 1-2), Ch.2 Serious Industrial Accidents (Art 3-9), Ch.3 Serious Civic Disasters (Art 10-11), Ch.4 Supplementary (Art 12-16).
+
+articles:
+  - { no: "1",  title: "목적", checked_at: "2026-08-26" }
+  - { no: "2",  title: "정의", checked_at: "2026-08-26" }
+  - { no: "3",  title: "적용범위", checked_at: "2026-08-26" }
+  - { no: "4",  title: "사업주와 경영책임자등의 안전 및 보건 확보의무", checked_at: "2026-08-26" }
+  - { no: "5",  title: "도급·용역·위탁 등 관계에서의 안전·보건 확보의무", checked_at: "2026-08-26" }
+  - { no: "6",  title: "중대산업재해 사업주와 경영책임자등의 처벌", checked_at: "2026-08-26" }
+  - { no: "7",  title: "중대산업재해의 양벌규정", checked_at: "2026-08-26" }
+  - { no: "8",  title: "안전보건교육의 수강", checked_at: "2026-08-26" }
+  - { no: "9",  title: "중대시민재해 사업주와 경영책임자등의 안전 및 보건 확보의무", checked_at: "2026-08-26" }
+  - { no: "10", title: "중대시민재해 사업주와 경영책임자등의 처벌", checked_at: "2026-08-26" }
+  - { no: "11", title: "중대시민재해의 양벌규정", checked_at: "2026-08-26" }
+  - { no: "12", title: "형 확정 사실의 통보", checked_at: "2026-08-26" }
+  - { no: "13", title: "중대산업재해 발생사실 공표", checked_at: "2026-08-26" }
+  - { no: "14", title: "심리절차에 관한 특례", checked_at: "2026-08-26" }
+  - { no: "15", title: "손해배상의 책임", checked_at: "2026-08-26" }
+  - { no: "16", title: "정부의 사업주 등에 대한 지원 및 보고", checked_at: "2026-08-26" }
+
+domain_sub_variants:
+  - regulations/KR/SAPA-Construction.yaml
+  - regulations/KR/SAPA-Training.yaml
+
+related_decree:
+  name_ko: 중대재해 처벌 등에 관한 법률 시행령
+  name_en: Enforcement Decree of the Serious Accidents Punishment Act
+  abbreviation: SAPA-Decree
+  file: regulations/KR/SAPA-Decree.yaml
+
+source_verification:
+  method: cache-arbitration   # verified against cached statute truth 2026-08-26; k-law live re-check pending (Phase 4)
+  checked_at: "2026-08-26"
+
+last_updated: "2026-08-26"

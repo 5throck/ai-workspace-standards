@@ -1,0 +1,10 @@
+schema_version: "1.0"
+workflow_id: training-compliance-tracking
+title: "교육 이수 추적 및 준수 관리 (Training Compliance Tracking)"
+status: active
+applicability: mandatory
+applicable_industries: [chemical, gas_terminal, power_generation, construction, medical_device, pharma, manufacturing]
+legal_basis: [산업안전보건법 Article 29, 중대재해처벌법 Article 7, 산업안전보건법 Article 15]
+industry_profile: training-management
+agent: training-agent
+evidence_model: training-compliance-record.json

@@ -1,0 +1,17 @@
+schema_version: "1.0"
+workflow_id: tbm-pre-work-briefing
+title: "발전설비 TBM (Tool Box Meeting)"
+status: active
+applicability: mandatory
+workflow_type: core
+
+legal_basis:
+  - 산업안전보건법 Article 15
+  - 산업안전보건법 Article 36
+  - 전기사업법 Article 46
+  - 전기안전관리법 Article 16
+  - 중대재해처벌법 Article 4
+industry_profile: powergen
+agent: powergen-agent
+evidence_model: ../../../../evidence-models/_shared/tbm-record.json
+signature_hazard: 고압 전기설비 작업 및 보일러/터빈 정비 전 TBM

@@ -1,0 +1,126 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "meddevice-kgmp-record.json",
+  "title": "KGMP-MD Quality Record",
+  "description": "KGMP-MD quality management system.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "device_class",
+    "kgmp_certification_status",
+    "iso_13485_compliance",
+    "legal_basis",
+    "e_signature",
+    "nomenclature",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^MDDEV-QMS-[0-9]{4}-[0-9]{4}$"
+    },
+    "device_class": {
+      "type": "string",
+      "enum": [
+        "class_1",
+        "class_2",
+        "class_3",
+        "class_4"
+      ]
+    },
+    "kgmp_certification_status": {
+      "type": "string",
+      "enum": [
+        "certified",
+        "pending",
+        "expired"
+      ]
+    },
+    "iso_13485_compliance": {
+      "type": "boolean"
+    },
+    "iso_14971_risk_management": {
+      "type": "boolean"
+    },
+    "device_id": {
+      "type": "string"
+    },
+    "audit_type": {
+      "type": "string",
+      "enum": [
+        "initial",
+        "surveillance",
+        "renewal",
+        "for_cause"
+      ]
+    },
+    "audit_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "finding_id": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "critical",
+              "major",
+              "minor"
+            ]
+          },
+          "capa_ref": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "certification_valid_until": {
+      "type": "string",
+      "format": "date"
+    },
+    "quality_manual_version": {
+      "type": "string"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "description": "Multi-source legal basis. Primary: 의료기기법 Articles 12/16/20/23 (device registration, manufacturing, clinical trials, labeling). Adjacent laws may include: 의료기기 제조 및 품질관리 기준 (KGMP-MD / MFDS 고시), ISO 13485 (QMS), ISO 14971 (Risk Management), EU MDR 2017/745, FDA QSR 21 CFR 820.",
+      "examples": [
+        [
+          "의료기기법 Art.16",
+          "KGMP-MD",
+          "ISO 13485"
+        ],
+        [
+          "의료기기법 Art.20",
+          "ISO 14971",
+          "KGMP-MD"
+        ],
+        [
+          "의료기기법 Art.12",
+          "EU MDR 2017/745",
+          "ISO 14971"
+        ]
+      ]
+    },
+    "e_signature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/e_signature"
+    },
+    "nomenclature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/nomenclature"
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

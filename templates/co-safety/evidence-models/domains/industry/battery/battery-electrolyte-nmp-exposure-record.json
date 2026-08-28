@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "battery-electrolyte-nmp-exposure-record.json",
+  "title": "Battery Electrolyte NMP Exposure Monitoring Record",
+  "description": "Evidence model for N-Methyl-2-pyrrolidone (NMP) vapor inhalation exposure monitoring and local-exhaust-ventilation verification during lithium-ion electrolyte mixing, filling, and solvent recovery operations. NMP is a reproductive toxicant regulated under CCA and OSHA-KR MSDS provisions.",
+  "version": "1.0.0",
+  "status": "active",
+  "type": "object",
+  "required": [
+    "record_id",
+    "mixing_station_id",
+    "nmp_twa_ppm",
+    "local_exhaust_ventilation_active",
+    "legal_basis",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^BATT-NMP-[0-9]{4}-[0-9]{4}$"
+    },
+    "mixing_station_id": {
+      "type": "string"
+    },
+    "nmp_twa_ppm": {
+      "type": "number",
+      "description": "8-hour time-weighted average NMP vapor concentration (ppm) at the operator breathing zone."
+    },
+    "local_exhaust_ventilation_active": {
+      "type": "boolean"
+    },
+    "respiratory_ppe_worn": {
+      "type": "boolean",
+      "description": "True if supplied-air or organic-vapor respirator was worn during the task."
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

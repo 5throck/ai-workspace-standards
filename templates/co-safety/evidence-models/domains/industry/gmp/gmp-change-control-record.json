@@ -1,0 +1,160 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "gmp-change-control-record.json",
+  "title": "GMP Change Control Record",
+  "description": "Evidence model for GMP Change Control (변경관리) records. v1 per KP-GMP 「의약품 등의 안전에 관한 규칙」 별표 1 제12호 (변경관리) + ICH Q10.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "change_id",
+    "title",
+    "status",
+    "legal_basis",
+    "e_signature",
+    "qrm_assessment",
+    "nomenclature",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^GMP-CC-[0-9]{4}-[0-9]{4}$"
+    },
+    "change_id": {
+      "type": "string",
+      "description": "Unique identifier for the change"
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "change_type": {
+      "type": "string",
+      "enum": [
+        "temporary",
+        "permanent",
+        "emergency"
+      ]
+    },
+    "classification": {
+      "type": "string",
+      "enum": [
+        "minor",
+        "major",
+        "critical"
+      ]
+    },
+    "impact_assessment": {
+      "type": "object",
+      "properties": {
+        "product_quality": {
+          "type": "boolean"
+        },
+        "validated_state": {
+          "type": "boolean"
+        },
+        "regulatory_filing": {
+          "type": "boolean"
+        },
+        "stability": {
+          "type": "boolean"
+        },
+        "supplier": {
+          "type": "boolean"
+        }
+      }
+    },
+    "approval_chain": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string"
+          },
+          "approver_id": {
+            "type": "string"
+          },
+          "approval_date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "decision": {
+            "type": "string",
+            "enum": [
+              "approved",
+              "rejected",
+              "pending"
+            ]
+          }
+        },
+        "required": [
+          "role",
+          "approver_id",
+          "approval_date",
+          "decision"
+        ]
+      }
+    },
+    "implementation_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "effectiveness_check_due": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "initiated",
+        "under_review",
+        "approved",
+        "implemented",
+        "effectiveness_check",
+        "closed",
+        "rejected"
+      ]
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "description": "Multi-source legal basis. Primary: 약사법 Article 37 (GMP manufacturing management obligation) and ICH Q10 §3.2.4 (change management in pharmaceutical quality system). Adjacent laws may include: ICH Q9 (quality risk management for change impact assessment), 총리령 「의약품 등의 안전에 관한 규칙」 별표 1 제12호 (change control), PIC/S PE 009 (harmonized GMP change management).",
+      "examples": [
+        [
+          "약사법 Art.37",
+          "ICH Q10 §3.2.4",
+          "ICH Q9"
+        ],
+        [
+          "약사법 Art.37",
+          "의약품 등의 안전에 관한 규칙 별표 1 제7.3호",
+          "ICH Q10"
+        ],
+        [
+          "ICH Q10 §3.2.4",
+          "PIC/S PE 009-1",
+          "의약품 등의 안전에 관한 규칙 별표 1 제7.2호"
+        ]
+      ]
+    },
+    "e_signature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/e_signature"
+    },
+    "qrm_assessment": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/qrm_assessment"
+    },
+    "nomenclature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/nomenclature"
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

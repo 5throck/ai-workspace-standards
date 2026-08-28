@@ -1,0 +1,27 @@
+schema_version: "1.0"
+workflow_id: railway-rolling-stock-maintenance-loto
+title: "Railway (Operations and maintenance) — railway-rolling-stock-maintenance-loto"
+status: active
+applicability: mandatory
+workflow_type: core
+industry_profile: railway
+agent: railway-agent
+signature_hazard: "차량사업소(기지) 내 차량(EMU/객차/기관사) 정비 시 차량 이동 잠금, 대차(bogey) 중량 리프팅, 밑바닥(pit) 작업 LOTO 및 접근 통제 (Rolling-stock depot maintenance: vehicle-movement lockout, bogey heavy-lift, undercarriage pit work, and access control)"
+
+# Auto-filled from regulations/KR/industry-regulatory-anchors.yaml (Task A-03).
+# Entries marked [UNVERIFIED] originate from the anchor table and require specialist re-verification.
+legal_basis:
+  - 산업안전보건법 Article 36
+  - 산업안전보건법 Article 57
+  - 중대재해처벌법 Article 4
+  - 중대재해처벌법 Article 5
+  - 중대재해처벌법 Article 6
+  - 중대재해처벌법 Article 7
+  - 철도안전법 Article 45
+  - 철도안전법 Article 48
+  - 산업안전보건법 Article 38 (추락 등 위해 방지 안전조치)
+  - 안전보건기준에관한규칙 (감전 등 전기 재해 방지 기준)
+
+# Industry-unique workflow. NOT a shared-workflow reference (no `references:` block).
+# Evidence model skeleton — see evidence-models/domains/industry/railway/railway-railway-rolling-stock-maintenance-loto-record.json.
+evidence_model: railway-railway-rolling-stock-maintenance-loto-record.json

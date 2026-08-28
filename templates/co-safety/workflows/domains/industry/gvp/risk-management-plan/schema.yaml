@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: risk-management-plan
+title: "리스크 관리 계획(RMP) (Risk Management Plan)"
+status: active
+applicability: mandatory
+workflow_type: core
+
+legal_basis:
+  - 약사법 Article 73의2
+  - ICH E2E
+  - EU GVP Module 5
+industry_profile: pharmacovigilance
+agent: gvp-agent
+evidence_model: gvp-rmp-record.json

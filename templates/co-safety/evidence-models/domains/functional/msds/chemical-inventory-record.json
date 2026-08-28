@@ -1,0 +1,141 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "chemical-inventory-record.json",
+  "title": "Chemical Inventory Record",
+  "description": "Evidence model for monthly chemical inventory snapshots per K-REACH Article 10 + OSHA-KR Article 110.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "snapshot_date",
+    "items",
+    "legal_basis",
+    "e_signature",
+    "nomenclature",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^MSDS-INV-[0-9]{4}-[0-9]{4}$"
+    },
+    "snapshot_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "period": {
+      "type": "string",
+      "enum": [
+        "monthly",
+        "quarterly",
+        "annual"
+      ]
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "substance_id": {
+            "type": "string"
+          },
+          "cas_number": {
+            "type": "string"
+          },
+          "quantity_kg": {
+            "type": "number"
+          },
+          "storage_location": {
+            "type": "string"
+          },
+          "annual_tonnage_running": {
+            "type": "number"
+          },
+          "kreach_threshold_exceeded": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "reconciliation": {
+      "type": "object",
+      "properties": {
+        "physical_count_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "discrepancies_pct": {
+          "type": "number"
+        },
+        "discrepancy_tolerance_met": {
+          "type": "boolean"
+        }
+      }
+    },
+    "tonnage_summary": {
+      "type": "object",
+      "properties": {
+        "substances_under_0_5_ton": {
+          "type": "integer"
+        },
+        "substances_0_5_to_1_ton": {
+          "type": "integer"
+        },
+        "substances_1_to_10_ton": {
+          "type": "integer"
+        },
+        "substances_10_to_100_ton": {
+          "type": "integer"
+        },
+        "substances_over_100_ton": {
+          "type": "integer"
+        }
+      }
+    },
+    "kreach_reporting_required": {
+      "type": "boolean"
+    },
+    "ghs_version": {
+      "type": "string",
+      "enum": [
+        "rev8",
+        "rev9",
+        "rev10"
+      ]
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "description": "Multi-source legal basis. Primary: OSHA-KR Article 110 (MSDS preparation/submission) or Article 104 (hazard-factor/GHS classification basis) or Article 111/112 (provision to transferees / partial non-disclosure approval); format & content per 산업안전보건법 시행규칙 제156조. Adjacent laws may include: K-REACH Articles 10-14 (chemical registration/evaluation), TCCL/CCA (화학물질관리법 — toxic chemical management), UN GHS Rev 9 (2021) (international classification standard).",
+      "examples": [
+        [
+          "OSHA-KR Art.110 §1",
+          "K-REACH Art.10",
+          "UN GHS Rev 9"
+        ],
+        [
+          "OSHA-KR Art.104 §1",
+          "CCA Art.20",
+          "UN GHS Rev 9"
+        ],
+        [
+          "산업안전보건법 시행규칙 Art.156 §1",
+          "K-REACH Art.13",
+          "UN GHS Rev 9"
+        ]
+      ]
+    },
+    "e_signature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/e_signature"
+    },
+    "nomenclature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/nomenclature"
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

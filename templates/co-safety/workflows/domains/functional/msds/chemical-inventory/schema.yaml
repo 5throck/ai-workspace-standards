@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: chemical-inventory
+title: "화학물질 재고 관리 (Chemical Inventory Management)"
+status: active
+applicability: mandatory
+workflow_type: core
+
+legal_basis:
+  - K-REACH Article 10
+  - OSHA-KR Article 110
+  - UN GHS Rev 9 (2021)
+industry_profile: chemical-handling
+agent: msds-agent
+evidence_model: chemical-inventory-record.json

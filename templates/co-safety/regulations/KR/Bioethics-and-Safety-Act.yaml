@@ -1,0 +1,250 @@
+# ── Registry schema v2 (mode: coordinates) ───────────────────────────────────
+# This file maps article numbers to official titles ONLY. Article content is
+# never cached here — fetch live from the 법제처 k-law API at point of use.
+# Migrated by migrate-registry-to-coordinates.ts on 2026-08-26
+schema_version: 2
+mode: coordinates
+jurisdiction: KR
+framework: Bioethics-and-Safety-Act
+law_name: 생명윤리 및 안전에 관한 법률
+law_name_en: null
+abbreviation: null
+mst: "276665"
+enforced_from: null
+agency: null
+tier: 1
+regulator: MOHW (보건복지부) / National Bioethics Committee (국가생명윤리심의위원회)
+articles:
+  - "no": "1"
+    title: 목적
+    checked_at: "2026-08-26"
+  - "no": "2"
+    title: 정의
+    checked_at: "2026-08-26"
+  - "no": "3"
+    title: 기본 원칙
+    checked_at: "2026-08-26"
+  - "no": "4"
+    title: 적용 범위
+    checked_at: "2026-08-26"
+  - "no": "5"
+    title: 국가와 지방자치단체의 책무
+    checked_at: "2026-08-26"
+  - "no": "6"
+    title: 생명윤리정책연구센터의 지정
+    checked_at: "2026-08-26"
+  - "no": "7"
+    title: 국가생명윤리심의위원회의 설치 및 기능
+    checked_at: "2026-08-26"
+  - "no": "8"
+    title: 국가위원회의 구성
+    checked_at: "2026-08-26"
+  - "no": "9"
+    title: 국가위원회의 운영
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 기관생명윤리위원회의 설치 및 기능
+    checked_at: "2026-08-26"
+  - "no": "11"
+    title: 기관위원회의 구성 및 운영 등
+    checked_at: "2026-08-26"
+  - "no": "12"
+    title: 공용기관생명윤리위원회의 지정 및 기관위원회의 공동 운영
+    checked_at: "2026-08-26"
+  - "no": "13"
+    title: 기관위원회의 지원 등
+    checked_at: "2026-08-26"
+  - "no": "14"
+    title: 기관위원회의 평가 및 인증
+    checked_at: "2026-08-26"
+  - "no": "15"
+    title: 인간대상연구의 심의
+    checked_at: "2026-08-26"
+  - "no": "16"
+    title: 인간대상연구의 동의
+    checked_at: "2026-08-26"
+  - "no": "17"
+    title: 연구대상자에 대한 안전대책
+    checked_at: "2026-08-26"
+  - "no": "18"
+    title: 개인정보의 제공
+    checked_at: "2026-08-26"
+  - "no": "19"
+    title: 기록의 유지와 정보의 공개
+    checked_at: "2026-08-26"
+  - "no": "20"
+    title: 인간복제의 금지
+    checked_at: "2026-08-26"
+  - "no": "21"
+    title: 이종 간의 착상 등의 금지
+    checked_at: "2026-08-26"
+  - "no": "22"
+    title: 배아생성의료기관의 지정 등
+    checked_at: "2026-08-26"
+  - "no": "23"
+    title: 배아의 생성에 관한 준수사항
+    checked_at: "2026-08-26"
+  - "no": "24"
+    title: 배아의 생성 등에 관한 동의
+    checked_at: "2026-08-26"
+  - "no": "25"
+    title: 배아의 보존 및 폐기
+    checked_at: "2026-08-26"
+  - "no": "26"
+    title: 잔여배아 및 잔여난자의 제공
+    checked_at: "2026-08-26"
+  - "no": "27"
+    title: 생식세포 기증자의 보호 등
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: 배아생성의료기관의 준수사항 등
+    checked_at: "2026-08-26"
+  - "no": "29"
+    title: 잔여배아 연구
+    checked_at: "2026-08-26"
+  - "no": "30"
+    title: 배아연구계획서의 승인
+    checked_at: "2026-08-26"
+  - "no": "31"
+    title: 체세포복제배아등의 연구
+    checked_at: "2026-08-26"
+  - "no": "32"
+    title: 배아연구기관 등의 준수사항
+    checked_at: "2026-08-26"
+  - "no": "33"
+    title: 배아줄기세포주의 등록
+    checked_at: "2026-08-26"
+  - "no": "34"
+    title: 배아줄기세포주의 제공
+    checked_at: "2026-08-26"
+  - "no": "35"
+    title: 배아줄기세포주의 이용
+    checked_at: "2026-08-26"
+  - "no": "36"
+    title: 인체유래물연구의 심의
+    checked_at: "2026-08-26"
+  - "no": "37"
+    title: 인체유래물연구의 동의
+    checked_at: "2026-08-26"
+  - "no": "38"
+    title: 인체유래물등의 제공
+    checked_at: "2026-08-26"
+  - "no": "39"
+    title: 인체유래물등의 보존 및 폐기
+    checked_at: "2026-08-26"
+  - "no": "40"
+    title: 인체유래물연구자의 준수사항
+    checked_at: "2026-08-26"
+  - "no": "41"
+    title: 인체유래물은행의 허가 및 신고
+    checked_at: "2026-08-26"
+  - "no": "42"
+    title: 인체유래물 채취 시의 동의
+    checked_at: "2026-08-26"
+  - "no": "42"
+    title: 잔여검체의 제공 등
+    checked_at: "2026-08-26"
+  - "no": "42"
+    title: 잔여검체의 관리
+    checked_at: "2026-08-26"
+  - "no": "43"
+    title: 인체유래물등의 제공
+    checked_at: "2026-08-26"
+  - "no": "44"
+    title: 인체유래물은행의 준수사항
+    checked_at: "2026-08-26"
+  - "no": "45"
+    title: 인체유래물은행에 대한 지원
+    checked_at: "2026-08-26"
+  - "no": "46"
+    title: 유전정보에 의한 차별 금지 등
+    checked_at: "2026-08-26"
+  - "no": "47"
+    title: 유전자치료 및 연구
+    checked_at: "2026-08-26"
+  - "no": "48"
+    title: 유전자치료기관
+    checked_at: "2026-08-26"
+  - "no": "49"
+    title: 유전자검사기관
+    checked_at: "2026-08-26"
+  - "no": "49"
+    title: 유전자검사기관의 평가 및 인증
+    checked_at: "2026-08-26"
+  - "no": "49"
+    title: 유전자검사교육
+    checked_at: "2026-08-26"
+  - "no": "50"
+    title: 유전자검사의 제한 등
+    checked_at: "2026-08-26"
+  - "no": "51"
+    title: 유전자검사의 동의
+    checked_at: "2026-08-26"
+  - "no": "52"
+    title: 기록 보관 및 정보의 공개
+    checked_at: "2026-08-26"
+  - "no": "53"
+    title: 검사대상물의 제공과 폐기 등
+    checked_at: "2026-08-26"
+  - "no": "54"
+    title: 보고와 조사
+    checked_at: "2026-08-26"
+  - "no": "55"
+    title: 폐기 및 개선 명령
+    checked_at: "2026-08-26"
+  - "no": "56"
+    title: 등록 등의 취소와 업무의 정지
+    checked_at: "2026-08-26"
+  - "no": "56"
+    title: 시설의 폐쇄 등
+    checked_at: "2026-08-26"
+  - "no": "57"
+    title: 청문
+    checked_at: "2026-08-26"
+  - "no": "58"
+    title: 과징금
+    checked_at: "2026-08-26"
+  - "no": "59"
+    title: 수수료
+    checked_at: "2026-08-26"
+  - "no": "60"
+    title: 국고 보조
+    checked_at: "2026-08-26"
+  - "no": "61"
+    title: 위임 및 위탁 등
+    checked_at: "2026-08-26"
+  - "no": "62"
+    title: 벌칙 적용 시의 공무원 의제
+    checked_at: "2026-08-26"
+  - "no": "63"
+    title: 비밀 누설 등의 금지
+    checked_at: "2026-08-26"
+  - "no": "64"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "65"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "66"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "67"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "68"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "69"
+    title: 양벌규정
+    checked_at: "2026-08-26"
+  - "no": "70"
+    title: 과태료
+    checked_at: "2026-08-26"
+source_verification:
+  method: k-law-live
+  checked_at: "2026-08-26"
+  next_review: "2027-02-22"
+last_updated: "2026-08-26"
+related_rule:
+  name_ko: 생명윤리 및 안전에 관한 법률 시행령 / 시행규칙
+  abbreviation: BSA-Enforcement

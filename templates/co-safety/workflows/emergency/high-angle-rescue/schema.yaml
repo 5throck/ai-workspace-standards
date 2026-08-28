@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: high-angle-rescue
+title: "고소 구조 (High-Angle Rescue)"
+status: active
+applicability: mandatory
+
+legal_basis:
+  - 산업안전보건법 Article 38 (안전조치)
+  - 안전보건기준에관한규칙 제6장 제1절 (추락에 의한 위험 방지)
+  - 중대재해처벌법 Article 4
+  - 소방기본법 (구조)
+industry_profile: all
+agent: emergency-agent
+evidence_model: emergency-rescue-record.json

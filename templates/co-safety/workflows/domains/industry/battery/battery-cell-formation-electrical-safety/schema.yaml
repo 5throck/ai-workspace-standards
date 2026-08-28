@@ -1,0 +1,30 @@
+schema_version: "1.0"
+workflow_id: battery-cell-formation-electrical-safety
+title: "Battery (Lithium-ion secondary cells) — battery-cell-formation-electrical-safety"
+status: active
+applicability: mandatory
+workflow_type: core
+industry_profile: battery
+agent: battery-agent
+signature_hazard: "[Battery (Lithium-ion secondary cells)] DSSMA — 대표 위해요인 (specialist review required)"
+
+# Auto-filled from regulations/KR/industry-regulatory-anchors.yaml (Task A-03).
+# Entries marked [UNVERIFIED] originate from the anchor table and require specialist re-verification.
+legal_basis:
+  - 산업안전보건법 Article 36
+  - 산업안전보건법 Article 57
+  - 중대재해처벌법 Article 4
+  - 중대재해처벌법 Article 5
+  - 중대재해처벌법 Article 6
+  - 중대재해처벌법 Article 7
+  - 위험물안전관리법 Article 5
+  - 위험물안전관리법 Article 15
+  - 위험물안전관리법 Article 27
+  - 화학물질의 등록 및 평가 등에 관한 법률 Article 23
+  - 화학물질의 등록 및 평가 등에 관한 법률 Article 24
+  - 전기안전관리법 Article 16
+  - 전기안전관리법 Article 22
+
+# Industry-unique workflow. NOT a shared-workflow reference (no `references:` block).
+# Evidence model skeleton — see evidence-models/domains/industry/battery/battery-battery-cell-formation-electrical-safety-record.json.
+evidence_model: battery-battery-cell-formation-electrical-safety-record.json

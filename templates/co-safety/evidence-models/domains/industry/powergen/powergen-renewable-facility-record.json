@@ -1,0 +1,182 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "powergen-renewable-facility-record.json",
+  "title": "Renewable Energy Facility Record",
+  "description": "신재생에너지 (풍력/태양광/수력/ESS) 설비 기록.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "plant_type",
+    "kesa_inspection_status",
+    "voltage_class",
+    "legal_basis",
+    "e_signature",
+    "nomenclature",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^PWRG-REN-[0-9]{4}-[0-9]{4}$"
+    },
+    "plant_type": {
+      "type": "string",
+      "enum": [
+        "thermal_coal",
+        "thermal_LNG",
+        "thermal_oil",
+        "wind",
+        "solar",
+        "hydro",
+        "geothermal",
+        "biomass",
+        "fuel_cell",
+        "ess"
+      ]
+    },
+    "kesa_inspection_status": {
+      "type": "string",
+      "enum": [
+        "certified",
+        "pending",
+        "failed",
+        "expired"
+      ],
+      "description": "한국전기안전공사 (KESCO) 인증 상태"
+    },
+    "voltage_class": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "extra_high",
+        "not_applicable"
+      ],
+      "description": "low (≤400V) / medium (400V-22kV) / high (22-154kV) / extra_high (>154kV)"
+    },
+    "psm_applicable": {
+      "type": "boolean",
+      "description": "대규모 발전시설 (보일러/가스) PSM 적용 여부 (OSHA-KR Art 44)"
+    },
+    "renewable_category": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "wind",
+        "solar",
+        "hydro",
+        "geothermal",
+        "biomass",
+        "fuel_cell",
+        "ess",
+        null
+      ]
+    },
+    "facility_id": {
+      "type": "string"
+    },
+    "facility_subtype": {
+      "type": "string",
+      "enum": [
+        "wind_onshore",
+        "wind_offshore",
+        "solar_PV",
+        "hydro",
+        "geothermal",
+        "biomass",
+        "fuel_cell",
+        "ess"
+      ]
+    },
+    "capacity_mw": {
+      "type": "number"
+    },
+    "installation_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "wind_turbine_count": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "solar_panel_count": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "ess_battery_chemistry": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "LFP",
+        "NMC",
+        "NCA",
+        "LCO",
+        "other",
+        null
+      ]
+    },
+    "ess_capacity_kwh": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "fire_suppression_system": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "fire_incidents_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "panel_inspection_completed": {
+      "type": "boolean"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "description": "Multi-source legal basis. Primary: 전기사업법 Articles 46/47/65 (facility installation, safety management) and 전기안전관리법 Articles 16/29 (inspection, safety manager). Adjacent laws may include: 신에너지 및 재생에너지법 Article 12 (renewable facility safety), OSHA-KR Article 44 (PSM for thermal power), 발전설비 안전관리 규정 (MOTIE inspection standards).",
+      "examples": [
+        [
+          "전기사업법 Art.46",
+          "전기안전관리법 Art.16",
+          "OSHA-KR Art.44 §1"
+        ],
+        [
+          "전기사업법 Art.65",
+          "MOTIE 발전설비 규정",
+          "OSHA-KR Art.44 §1"
+        ],
+        [
+          "신에너지법 Art.12",
+          "전기안전관리법 Art.29",
+          "전기사업법 Art.47"
+        ]
+      ]
+    },
+    "e_signature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/e_signature"
+    },
+    "nomenclature": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/nomenclature"
+    },
+    "audit_trail": {
+      "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

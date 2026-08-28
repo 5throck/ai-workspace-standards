@@ -1,0 +1,15 @@
+schema_version: "1.0"
+workflow_id: loto-lockout-tagout
+title: "Lockout/Tagout (LOTO)"
+status: active
+applicability: mandatory
+applicable_industries: [chemical, gas_terminal, power_generation, construction]
+legal_basis:
+  - "OSHA-KR Article 44 (공정안전관리 — 위험에너지 통제/LOTO)"
+  - "OSHA-KR Article 38 (안전조치)"
+  - "안전보건기준에관한규칙 제92조 (정비 등의 작업 시의 운전정지 등 — confirmed via KOSHA GUIDE Z-40-2022 개정 이력)"
+  - "SAPA Article 4 (안전보건관리체계 구축 의무)"
+  - "SAPA Article 5 (제3자/도급 근로자 안전조치 의무 — per KOSHA GUIDE Z-40-2022 §7.4)"
+industry_profile: chemical-processing
+agent: psm-agent
+evidence_model: psm-loto-record.json

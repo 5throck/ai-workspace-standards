@@ -1,0 +1,28 @@
+schema_version: "1.0"
+workflow_id: biotech-bsl-lab-aerosol-control
+title: "Biotech (Life-science R&D and biomanufacturing) — biotech-bsl-lab-aerosol-control"
+status: active
+applicability: mandatory
+workflow_type: core
+industry_profile: biotech
+agent: biotech-agent
+signature_hazard: "[Biotech (Life-science R&D and biomanufacturing)] BSA (Bioethics and Safety Act) — 대표 위해요인 (specialist review required)"
+
+# Auto-filled from regulations/KR/industry-regulatory-anchors.yaml (Task A-03).
+# Entries marked [UNVERIFIED] originate from the anchor table and require specialist re-verification.
+legal_basis:
+  - 산업안전보건법 Article 36
+  - 산업안전보건법 Article 57
+  - 중대재해처벌법 Article 4
+  - 중대재해처벌법 Article 5
+  - 중대재해처벌법 Article 6
+  - 중대재해처벌법 Article 7
+  - 생명윤리 및 안전에 관한 법률 Article 13  # [UNVERIFIED] — see anchor table
+  - 생명윤리 및 안전에 관한 법률 Article 16  # [UNVERIFIED] — see anchor table
+  - 유전자변형생물체의 국가간 이동 등에 관한 법률 Article 22  # [UNVERIFIED] — see anchor table
+  - 유전자변형생물체의 국가간 이동 등에 관한 법률 Article 24  # [UNVERIFIED] — see anchor table
+  - 약사법 및 GMP/GCP 규정 Article GMP
+
+# Industry-unique workflow. NOT a shared-workflow reference (no `references:` block).
+# Evidence model skeleton — see evidence-models/domains/industry/biotech/biotech-biotech-bsl-lab-aerosol-control-record.json.
+evidence_model: biotech-biotech-bsl-lab-aerosol-control-record.json

@@ -1,0 +1,14 @@
+schema_version: "1.0"
+workflow_id: hazardous-zone-management
+title: "위해 구역 관리 (Hazardous Zone Management)"
+status: active
+applicability: mandatory
+workflow_type: core
+
+legal_basis:
+  - 고압가스 안전 관리 및 사업법 Article 13
+  - LPG 안전관리법 Article 30
+  - 수소법 Article 32
+industry_profile: gas-facility
+agent: gasterm-agent
+evidence_model: gasterm-hazardous-zone-record.json

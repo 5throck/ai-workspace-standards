@@ -1,0 +1,309 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "loto-record.json",
+  "title": "Cross-Industry LOTO (Lockout/Tagout) Record — Shared Base",
+  "description": "Shared base evidence model for Lockout/Tagout (LOTO, 잠금/표지) records across high-risk industries. Derived from psm-loto-record.json (the most complete domain-specific LOTO model). Domain-specific provisions go in industry_specific_fields. Dedicated domain models (e.g., psm-loto-record.json) are preserved for domain-specific procedures and remain authoritative for their respective domains.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "industry_profile",
+    "lock_date",
+    "equipment_tag",
+    "energy_sources",
+    "isolation_points",
+    "locks_applied",
+    "legal_basis",
+    "e_signature",
+    "nomenclature",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^LOTO-[A-Z]{2,8}-[0-9]{4}-[0-9]{4}$",
+      "description": "Format: LOTO-<DOMAIN>-YYYY-NNNN (e.g., LOTO-GASTERM-2026-0001, LOTO-POWER-2026-0142)"
+    },
+    "industry_profile": {
+      "type": "string",
+      "enum": [
+        "ehschem",
+        "gasterm",
+        "steelmaking",
+        "shipbuilding",
+        "powergen",
+        "waste",
+        "defense",
+        "semicon",
+        "battery",
+        "biotech",
+        "datacenter",
+        "logistics",
+        "railway",
+        "food",
+        "construction"
+      ],
+      "description": "Industry profile determines the legal_basis template and industry_specific_fields schema"
+    },
+    "lock_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the LOTO permit was issued / lock applied."
+    },
+    "lock_timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Exact date-time when the lock was first applied."
+    },
+    "equipment_tag": {
+      "type": "string",
+      "description": "Identifier of the equipment being isolated (equipment_id / equipment_tag)."
+    },
+    "equipment_description": {
+      "type": "string",
+      "description": "Human-readable description of the equipment and its location."
+    },
+    "energy_sources": {
+      "type": "array",
+      "description": "Hazardous energy source types isolated for this LOTO.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "electrical",
+              "mechanical",
+              "hydraulic",
+              "pneumatic",
+              "thermal",
+              "chemical",
+              "gravitational",
+              "radiological",
+              "kinetic",
+              "stored_pressure"
+            ],
+            "description": "Energy source type."
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the specific energy source (e.g., '480V motor MCC-3', 'steam at 150psi')."
+          },
+          "magnitude": {
+            "type": "string",
+            "description": "Energy magnitude if applicable (e.g., '480VAC/3ph', '150 psig', '350 C')."
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "minItems": 1
+    },
+    "isolation_points": {
+      "type": "array",
+      "description": "Isolation points (locks/tags) applied for this LOTO, supporting multiple simultaneous locks (Group LOTO). Per KOSHA GUIDE Z-40-2022 §6.2, the tag must remain attached to the lock and identify the person, work window, and contact information.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "point_id": {
+            "type": "string",
+            "description": "Identifier of the isolation point (e.g., breaker, valve, disconnect)."
+          },
+          "location": {
+            "type": "string",
+            "description": "Physical location of the isolation point."
+          },
+          "lock_applied_by": {
+            "type": "string",
+            "description": "Name or ID of the person who applied the lock at this isolation point."
+          },
+          "lock_id": {
+            "type": "string",
+            "description": "Unique identifier of the lock applied at this isolation point."
+          },
+          "contact_info": {
+            "type": "string",
+            "description": "Contact information for the person who applied the lock, as required on the tag (꼬리표) per KOSHA GUIDE Z-40-2022 §3.5 and §6.2."
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Date and time the lock was applied."
+          }
+        },
+        "required": [
+          "point_id",
+          "location",
+          "lock_applied_by",
+          "lock_id"
+        ]
+      }
+    },
+    "locks_applied": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Total number of locks applied across all isolation points."
+    },
+    "group_isolation": {
+      "type": "object",
+      "description": "Present when this LOTO uses group isolation locking (그룹잠금) per KOSHA GUIDE Z-40-2022 §3.4 — 2+ isolation points or 2+ work teams (e.g., multi-contractor TAR). Null under personal_lock or individual_locking.",
+      "properties": {
+        "group_leader_id": {
+          "type": "string",
+          "description": "ID of the group isolation leader responsible for coordinating all locks."
+        },
+        "group_lock_list": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of all lock_ids included in this group isolation."
+        },
+        "total_participants": {
+          "type": "integer",
+          "minimum": 2
+        }
+      },
+      "required": [
+        "group_leader_id",
+        "group_lock_list"
+      ]
+    },
+    "verification": {
+      "type": "object",
+      "description": "Zero-energy verification record. Per KOSHA GUIDE Z-40-2022 §6.1.3, verification must confirm zero-energy state before work begins.",
+      "properties": {
+        "verified_zero_energy": {
+          "type": "boolean",
+          "description": "Confirms zero-energy state was verified before work began."
+        },
+        "verified_by": {
+          "type": "string",
+          "description": "Name or ID of the person who confirmed zero-energy state."
+        },
+        "verification_method": {
+          "type": "string",
+          "enum": [
+            "try_start",
+            "voltage_test",
+            "pressure_gauge",
+            "temperature_check",
+            "visual_inspection",
+            "combination"
+          ],
+          "description": "Method used to verify zero-energy state."
+        },
+        "verification_timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp of zero-energy verification."
+        },
+        "supervisor_confirmed": {
+          "type": "boolean",
+          "description": "관리감독자 (supervisor) confirmed lock/tag safety measures are in place, per KOSHA GUIDE Z-40-2022 §5.2."
+        },
+        "supervisor_id": {
+          "type": "string",
+          "description": "ID of the supervisor who confirmed."
+        }
+      },
+      "required": [
+        "verified_zero_energy",
+        "verified_by"
+      ]
+    },
+    "removal": {
+      "type": "object",
+      "description": "Lock/tag removal record. Per KOSHA GUIDE Z-40-2022 §6.1.4/§8.5, only the person who applied a given lock may remove it under normal conditions.",
+      "properties": {
+        "removal_confirmed_by": {
+          "type": "string",
+          "description": "Name or ID of the person who confirmed all locks were removed."
+        },
+        "reenergize_notified": {
+          "type": "boolean",
+          "description": "Confirms all related personnel were notified of the expected re-energize time before lock/tag removal, per KOSHA GUIDE Z-40-2022 §6.1.3(3)(사)."
+        },
+        "removal_timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when locks were removed and equipment restored."
+        }
+      },
+      "required": [
+        "removal_confirmed_by"
+      ]
+    },
+    "emergency_removal": {
+      "type": ["object", "null"],
+      "description": "Present only if a lock was removed without its owner present, per KOSHA GUIDE Z-40-2022 §6.3 (emergency lock removal procedure). Null under normal lock-removal conditions.",
+      "properties": {
+        "reason": {
+          "type": "string",
+          "description": "Documented reason the emergency removal was necessary."
+        },
+        "authorized_by": {
+          "type": "string",
+          "description": "Supervisor/department head who authorized the emergency removal after confirming worker evacuation/safety."
+        },
+        "signage_posted": {
+          "type": "boolean",
+          "description": "Confirms warning signage/a monitor was placed at the isolation point so the returning lock owner is not exposed to an unexpected re-energized state, per §6.3.3."
+        }
+      },
+      "required": [
+        "reason",
+        "authorized_by",
+        "signage_posted"
+      ]
+    },
+    "tbm_ref": {
+      "type": ["string", "null"],
+      "description": "Reference to the joint Tool Box Meeting (합동 TBM) record where all involved parties (including contractors) determined the lock scope, per KOSHA GUIDE Z-40-2022 §6.1.2(1) and §8.2/§8.4. May reference an _shared/tbm-record.json or domain-specific TBM record."
+    },
+    "last_periodic_review_date": {
+      "type": ["string", "null"],
+      "format": "date",
+      "description": "Date this equipment's lock/tag procedure was last reviewed, per KOSHA GUIDE Z-40-2022 §9.1 (minimum annual review). Null if not yet reviewed."
+    },
+    "risk_assessment_ref": {
+      "type": ["string", "null"],
+      "description": "Reference to the risk assessment record identifying which energy sources are hazardous for this equipment."
+    },
+    "industry_specific_fields": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Domain-specific extension fields (e.g., {voltage_class: '25kV'} for powergen, {gas_type: 'LNG'} for gasterm, {explosive_class: 'Class 1.1'} for defense, {radiation_source: 'Co-60'} for biotech)"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "description": "Multi-source legal basis. Must cite >= 3 regulatory sources. Common cross-industry base: OSHA-KR Art.15/92 (안전보건기준에관한규칙 Art.92 — zero energy state / lockout-tagout per KOSHA GUIDE Z-40-2022), 산업안전보건법 Art.44 (PSM — hazardous energy isolation). Adjacent: SAPA Art.4 (safety management system obligation), SAPA Art.5 (third-party/contractor safety duty — KOSHA GUIDE Z-40-2022 §7.4 for contractor LOTO training). Industry-specific laws are added per the domain's legal_basis template.",
+      "examples": [
+        [
+          "산업안전보건법 Article 44 (공정안전관리 — 위험에너지 통제/LOTO)",
+          "안전보건기준에관한규칙 Article 92 (정비 등 작업 시 운전정지 — KOSHA GUIDE Z-40-2022)",
+          "중대재해처벌법 Article 5 (도급 근로자 안전조치 의무)"
+        ],
+        [
+          "산업안전보건법 Article 44 (PSM hazardous energy control)",
+          "안전보건기준에관한규칙 Article 92 (lockout-tagout)",
+          "SAPA Article 4 (safety management system obligation)"
+        ]
+      ]
+    },
+    "e_signature": {
+      "$ref": "base/common.schema.json#/definitions/e_signature"
+    },
+    "nomenclature": {
+      "$ref": "base/common.schema.json#/definitions/nomenclature"
+    },
+    "audit_trail": {
+      "$ref": "base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

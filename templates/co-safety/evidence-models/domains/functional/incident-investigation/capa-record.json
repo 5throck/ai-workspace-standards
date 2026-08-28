@@ -1,0 +1,93 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "capa-record.json",
+  "title": "Corrective and Preventive Action Record",
+  "description": "CAPA record for systematic closure of incident root causes per OSHA-KR Article 57 and MOEL 사고재발방지 지침. Tracks action assignment, implementation verification, and effectiveness review.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "rca_ref",
+    "capa_type",
+    "corrective_actions",
+    "preventive_actions",
+    "overall_status",
+    "legal_basis",
+    "e_signature",
+    "nomenclature",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^CAPA-[0-9]{4}-[0-9]{4}$"
+    },
+    "rca_ref": {
+      "type": "string",
+      "description": "Reference to RCA record (RCA-YYYY-NNNN)"
+    },
+    "capa_type": {
+      "type": "string",
+      "enum": ["corrective_only", "preventive_only", "both"],
+      "description": "시정조치만 / 예방조치만 / 시정+예방조치"
+    },
+    "corrective_actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["action_id", "description", "responsible_id", "due_date", "status"],
+        "properties": {
+          "action_id": { "type": "string" },
+          "description": { "type": "string" },
+          "responsible_id": { "type": "string" },
+          "due_date": { "type": "string", "format": "date" },
+          "completion_date": { "type": ["string", "null"], "format": "date" },
+          "status": { "type": "string", "enum": ["open", "in_progress", "completed", "verified", "overdue"] },
+          "evidence_ref": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "preventive_actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["action_id", "description", "responsible_id", "due_date", "status"],
+        "properties": {
+          "action_id": { "type": "string" },
+          "description": { "type": "string" },
+          "responsible_id": { "type": "string" },
+          "due_date": { "type": "string", "format": "date" },
+          "completion_date": { "type": ["string", "null"], "format": "date" },
+          "status": { "type": "string", "enum": ["open", "in_progress", "completed", "verified", "overdue"] },
+          "evidence_ref": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "effectiveness_review_date": {
+      "type": ["string", "null"],
+      "format": "date",
+      "description": "Date CAPA effectiveness was verified (권장: 시행 후 3개월)"
+    },
+    "effectiveness_result": {
+      "type": ["string", "null"],
+      "enum": ["effective", "partially_effective", "ineffective", null]
+    },
+    "training_record_ref": {
+      "type": ["string", "null"],
+      "description": "Reference to training record if CAPA triggered new training"
+    },
+    "overall_status": {
+      "type": "string",
+      "enum": ["open", "in_progress", "closed", "overdue"]
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 3,
+      "examples": [["산업안전보건법 Article 57", "중대재해처벌법 Article 5", "산업안전보건법 Article 36"]]
+    },
+    "e_signature": { "$ref": "../../../_shared/base/common.schema.json#/definitions/e_signature" },
+    "nomenclature": { "$ref": "../../../_shared/base/common.schema.json#/definitions/nomenclature" },
+    "audit_trail": { "$ref": "../../../_shared/base/common.schema.json#/definitions/audit_trail" }
+  }
+}

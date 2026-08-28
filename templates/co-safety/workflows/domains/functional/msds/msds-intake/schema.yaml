@@ -1,0 +1,15 @@
+schema_version: "1.0"
+workflow_id: msds-intake
+title: "MSDS 접수 및 파싱 (MSDS Intake and Parsing)"
+status: active
+applicability: mandatory
+workflow_type: core
+
+legal_basis:
+  - OSHA-KR Article 110 (물질안전보건자료 작성·제출)
+  - 산업안전보건법 시행규칙 제156조 (MSDS 작성방법 및 기재사항)
+  - OSHA-KR Article 114 (게시)
+  - UN GHS Rev 9 (2021)
+industry_profile: chemical-handling
+agent: msds-agent
+evidence_model: msds-record.json

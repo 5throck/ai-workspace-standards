@@ -1,0 +1,30 @@
+# Safety Training Management Industry Profile (v1)
+profile_id: training-management
+name: training-management
+display_name: "안전보건교육 관리 (Safety Training Management)"
+version: "1.0"
+status: active
+last_updated: 2026-08-06
+industry_tier: cross-cutting
+agent: training-agent
+legal_basis:
+  - 산업안전보건법 Article 13, 29, 31, 32, 114
+  - 중대재해처벌법 Article 7
+  - 산업안전보건교육기준에 관한 규칙
+key_hazards:
+  - insufficient_safety_training
+  - untrained_new_hire_exposure
+  - supervisor_competency_gap
+  - msds_chemical_handling_untrained
+workflows:
+  training:
+    - regular-safety-training
+    - special-safety-training
+    - supervisor-training
+    - new-hire-training
+    - job-transfer-training
+    - first-aid-training
+    - msds-chemical-training
+    - training-compliance-tracking
+description: Cross-industry safety training per OSHA-KR + SAPA.
+training_types: [regular, special, supervisor, new_hire, job_transfer, first_aid, msds]

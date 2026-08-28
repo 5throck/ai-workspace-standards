@@ -1,0 +1,256 @@
+# ── Registry schema v2 (mode: coordinates) ───────────────────────────────────
+# This file maps article numbers to official titles ONLY. Article content is
+# never cached here — fetch live from the 법제처 k-law API at point of use.
+# Migrated by migrate-registry-to-coordinates.ts on 2026-08-26
+schema_version: 2
+mode: coordinates
+jurisdiction: KR
+framework: High-Pressure-Gas-Safety
+law_name: 고압가스 안전관리법
+law_name_en: null
+abbreviation: null
+mst: "283919"
+enforced_from: null
+agency: null
+tier: 1
+regulator: MOTIE (산업통상자원부) / KGS (한국가스안전공사)
+articles:
+  - "no": "1"
+    title: 목적
+    checked_at: "2026-08-26"
+  - "no": "2"
+    title: 적용 범위
+    checked_at: "2026-08-26"
+  - "no": "3"
+    title: 정의
+    checked_at: "2026-08-26"
+  - "no": "3"
+    title: 가스안전관리에 관한 기본계획의 수립
+    checked_at: "2026-08-26"
+  - "no": "3"
+    title: 고압가스등의 안전 기술 및 기준에 관한 연구ㆍ개발사업
+    checked_at: "2026-08-26"
+  - "no": "4"
+    title: 고압가스의 제조허가 등
+    checked_at: "2026-08-26"
+  - "no": "5"
+    title: 용기ㆍ냉동기 및 특정설비의 제조등록 등
+    checked_at: "2026-08-26"
+  - "no": "5"
+    title: 외국용기등의 제조등록
+    checked_at: "2026-08-26"
+  - "no": "5"
+    title: 고압가스 수입업자의 등록
+    checked_at: "2026-08-26"
+  - "no": "5"
+    title: 고압가스 운반자의 등록
+    checked_at: "2026-08-26"
+  - "no": "6"
+    title: 결격사유
+    checked_at: "2026-08-26"
+  - "no": "7"
+    title: 사업 개시 등의 신고
+    checked_at: "2026-08-26"
+  - "no": "8"
+    title: 승계
+    checked_at: "2026-08-26"
+  - "no": "9"
+    title: 허가ㆍ등록의 취소 등
+    checked_at: "2026-08-26"
+  - "no": "9"
+    title: 과징금
+    checked_at: "2026-08-26"
+  - "no": "9"
+    title: 외국용기등 제조자의 등록취소 등
+    checked_at: "2026-08-26"
+  - "no": "10"
+    title: 공급자의 의무 등
+    checked_at: "2026-08-26"
+  - "no": "11"
+    title: 안전관리규정
+    checked_at: "2026-08-26"
+  - "no": "11"
+    title: 용기등의 표시
+    checked_at: "2026-08-26"
+  - "no": "12"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "13"
+    title: 시설ㆍ용기의 안전유지
+    checked_at: "2026-08-26"
+  - "no": "13"
+    title: 안전성 평가 등
+    checked_at: "2026-08-26"
+  - "no": "14"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "15"
+    title: 안전관리자
+    checked_at: "2026-08-26"
+  - "no": "16"
+    title: 검사 등
+    checked_at: "2026-08-26"
+  - "no": "16"
+    title: 정기검사 및 수시검사
+    checked_at: "2026-08-26"
+  - "no": "16"
+    title: 정밀안전검진의 실시
+    checked_at: "2026-08-26"
+  - "no": "17"
+    title: 용기등의 검사
+    checked_at: "2026-08-26"
+  - "no": "18"
+    title: 용기등의 품질보장 등
+    checked_at: "2026-08-26"
+  - "no": "18"
+    title: 고압가스의 품질유지
+    checked_at: "2026-08-26"
+  - "no": "18"
+    title: 고압가스의 품질검사
+    checked_at: "2026-08-26"
+  - "no": "18"
+    title: 안전설비의 인증
+    checked_at: "2026-08-26"
+  - "no": "19"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "20"
+    title: 사용신고 등
+    checked_at: "2026-08-26"
+  - "no": "21"
+    title: 수입신고
+    checked_at: "2026-08-26"
+  - "no": "22"
+    title: 운반 등
+    checked_at: "2026-08-26"
+  - "no": "22"
+    title: 상세기준
+    checked_at: "2026-08-26"
+  - "no": "23"
+    title: 안전교육
+    checked_at: "2026-08-26"
+  - "no": "23"
+    title: 고압가스배관에 대한 정보지원
+    checked_at: "2026-08-26"
+  - "no": "23"
+    title: 고압가스배관 매설상황 확인
+    checked_at: "2026-08-26"
+  - "no": "23"
+    title: 굴착공사의 협의
+    checked_at: "2026-08-26"
+  - "no": "23"
+    title: 고압가스배관 손상방지기준의 준수
+    checked_at: "2026-08-26"
+  - "no": "23"
+    title: 고압가스배관의 안전조치 등
+    checked_at: "2026-08-26"
+  - "no": "24"
+    title: 허가관청 등의 조치
+    checked_at: "2026-08-26"
+  - "no": "25"
+    title: 보험 가입
+    checked_at: "2026-08-26"
+  - "no": "26"
+    title: 사고의 통보 등
+    checked_at: "2026-08-26"
+  - "no": "26"
+    title: 가스사고조사위원회
+    checked_at: "2026-08-26"
+  - "no": "26"
+    title: 지도ㆍ감독
+    checked_at: "2026-08-26"
+  - "no": "27"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: 한국가스안전공사의 설립
+    checked_at: "2026-08-26"
+  - "no": "28"
+    title: 유사명칭의 사용금지
+    checked_at: "2026-08-26"
+  - "no": "29"
+    title: 공사의 운영 등
+    checked_at: "2026-08-26"
+  - "no": "30"
+    title: 임원
+    checked_at: "2026-08-26"
+  - "no": "30"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "31"
+    title: 감독
+    checked_at: "2026-08-26"
+  - "no": "32"
+    title: 정관의 기재사항 등
+    checked_at: "2026-08-26"
+  - "no": "33"
+    title: 「민법」의 준용
+    checked_at: "2026-08-26"
+  - "no": "33"
+    title: 가스기술기준위원회
+    checked_at: "2026-08-26"
+  - "no": "34"
+    title: 수수료 등
+    checked_at: "2026-08-26"
+  - "no": "34"
+    title: 안전관리부담금
+    checked_at: "2026-08-26"
+  - "no": "34"
+    title: 부담금 및 가산금 징수 사무의 위탁
+    checked_at: "2026-08-26"
+  - "no": "35"
+    title: 검사기관의 지정
+    checked_at: "2026-08-26"
+  - "no": "35"
+    title: 지정의 취소
+    checked_at: "2026-08-26"
+  - "no": "35"
+    title: 청문
+    checked_at: "2026-08-26"
+  - "no": "36"
+    title: 업무의 위탁
+    checked_at: "2026-08-26"
+  - "no": "36"
+    title: 처분의 요구 등
+    checked_at: "2026-08-26"
+  - "no": "37"
+    title: 다른 법률과의 관계
+    checked_at: "2026-08-26"
+  - "no": "37"
+    title: 벌칙 적용에서 공무원 의제
+    checked_at: "2026-08-26"
+  - "no": "38"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "39"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "40"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "41"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "42"
+    title: 벌칙
+    checked_at: "2026-08-26"
+  - "no": "42"
+    title: 양벌규정
+    checked_at: "2026-08-26"
+  - "no": "43"
+    title: 과태료
+    checked_at: "2026-08-26"
+  - "no": "44"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "45"
+    title: ""
+    checked_at: "2026-08-26"
+  - "no": "46"
+    title: ""
+    checked_at: "2026-08-26"
+source_verification:
+  method: k-law-live
+  checked_at: "2026-08-26"
+  next_review: "2027-02-22"
+last_updated: "2026-08-26"
