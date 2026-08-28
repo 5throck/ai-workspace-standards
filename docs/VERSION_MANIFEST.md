@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-28T02:50:40.833Z
+**Generated**: 2026-08-28T03:07:58.248Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -139,7 +139,7 @@
 | test-variant-readiness.ts | 1.0.0 | scripts/test-variant-readiness.ts | N/A |
 | ticket.ts | 1.1.0 | scripts/ticket.ts | N/A |
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, fs, path |
-| upgrade-project.ts | 1.10.1 | scripts/upgrade-project.ts | N/A |
+| upgrade-project.ts | 1.11.0 | scripts/upgrade-project.ts | N/A |
 | validate-agents.ts | 1.0.5 | scripts/validate-agents.ts | N/A |
 | validate-doc-folder.ts | 1.1.0 | scripts/validate-doc-folder.ts | fs, path |
 | validate-docs-links.ts | 1.0.0 | scripts/validate-docs-links.ts | fs, path |

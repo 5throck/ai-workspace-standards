@@ -1,5 +1,14 @@
 #!/usr/bin/env bun
-// @version 1.10.1
+// @version 1.11.0
+// v1.11.0: New VARIANT ASSET DIRS SYNC pass — generically discovers and hash-syncs any
+//           top-level variant template directory not already covered by the existing
+//           agents/skills/scripts/docs passes (e.g. co-safety's workflows/, regulations/,
+//           evidence-models/, industry-profiles/). Previously such directories had no
+//           upgrade path at all: a project scaffolded before the directory existed in the
+//           template (or missing it from a promotion gap) never received it, and template
+//           updates to that content never reached existing projects. New/changed files are
+//           copied; project-only files are left alone (no deletion — that stays a manual or
+//           future --prune-removed extension).
 // v1.10.1: Country-profile awareness (ADR-0057/0058) on the UPGRADE path — previously
 //           only the scaffold path (new-project.ts / create-l3-scaffold.ts) knew about
 //           country-scoped assets, so:
@@ -1224,6 +1233,63 @@ if (existsSync(variantSkillsSrc)) {
       }
     }
   }
+  console.log('');
+}
+
+// ── VARIANT ASSET DIRS SYNC: any other top-level variant-owned directory ──────
+// Some variants ship top-level asset directories beyond agents/skills/scripts/docs
+// (e.g. co-safety's workflows/, regulations/, evidence-models/, industry-profiles/ —
+// EHS workflow schemas, regulation YAMLs, evidence-record JSON schemas, industry
+// profile configs). Those directories are project-owned in Projects/<name>/ and were
+// historically synced to templates/<variant>/ only by a one-off manual `cp -r`
+// during Phase B promotion (see templates/co-safety's own history) — with no upgrade
+// path, a project scaffolded before such a directory existed in the template, or one
+// missing it due to a promotion gap, never received it via `upgrade-project`. This
+// section discovers any such directory generically (not hardcoded to co-safety) so
+// the fix covers every current and future variant that grows one.
+const VARIANT_ASSET_DIR_SKIP = new Set([
+  'agents', 'skills', 'scripts', 'docs',
+  '.claude', '.gemini', '.agents', '.git', '.github', '.githooks',
+  'memory', 'node_modules',
+]);
+const variantAssetDirs = existsSync(templatesDir)
+  ? readdirSync(templatesDir, { withFileTypes: true })
+      .filter(e => e.isDirectory() && !VARIANT_ASSET_DIR_SKIP.has(e.name))
+      .map(e => e.name)
+  : [];
+if (variantAssetDirs.length > 0) {
+  console.log(`--- VARIANT ASSET DIRS: ${variantAssetDirs.join(', ')} ---`);
+  const syncAssetDir = (srcDir: string, dstDir: string, label: string): void => {
+    for (const entry of readdirSync(srcDir, { withFileTypes: true })) {
+      if (entry.name === '.git' || entry.name === 'node_modules') continue;
+      const srcPath = join(srcDir, entry.name);
+      const dstPath = join(dstDir, entry.name);
+      const relPath = `${label}/${entry.name}`;
+      if (entry.isDirectory()) {
+        syncAssetDir(srcPath, dstPath, relPath);
+        continue;
+      }
+      if (!existsSync(dstPath)) {
+        console.log(`  NEW    ${relPath}`);
+        if (!dryRun) { mkdirSync(dirname(dstPath), { recursive: true }); copyFileSync(srcPath, dstPath); }
+        console.log(`  ${dryTag}COPIED: ${relPath}`);
+        syncChanged++;
+      } else if (fileHash(srcPath) !== fileHash(dstPath)) {
+        if (isLocallyModified(dstPath)) {
+          console.log(`  ⚠️  CONFLICT ${relPath}  (content changed, local modifications exist — template will overwrite)`);
+        } else {
+          console.log(`  UPDATE ${relPath}  (content changed)`);
+        }
+        if (!dryRun) copyFileSync(srcPath, dstPath);
+        console.log(`  ${dryTag}COPIED: ${relPath}`);
+        syncChanged++;
+      }
+    }
+  };
+  for (const dirName of variantAssetDirs) {
+    syncAssetDir(join(templatesDir, dirName), join(projectDir, dirName), dirName);
+  }
+  console.log('  (project-only files under these directories are preserved — not deleted; run with --prune-removed awareness manually if needed)');
   console.log('');
 }
 

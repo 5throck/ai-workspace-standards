@@ -1,10 +1,16 @@
 #!/usr/bin/env bun
-// @version 0.2.0
+// @version 0.3.0
+// v0.3.0: New "dirs" registry category — prunes whole variant asset directories (e.g.
+//         co-safety's regulations/KR/) whose content is country-specific, the same way
+//         "skills"/"scripts"/"env" already do. Needed because new-project.ts's region-neutral
+//         path (--yes with no --country, or interactive "Region-neutral" selection) is reachable
+//         even for single-country variants like co-safety, and country-specific regulation
+//         data has no other pruning mechanism (unlike skills, which had k-law/k-dart/k-kosis).
 /**
  * prune-country-scoped-assets.ts
  *
- * Prunes country-specific skills, scripts, and env key blocks from generated
- * projects/L3 drafts based on the target country. Reads the country_scoped_assets
+ * Prunes country-specific skills, scripts, env key blocks, and asset directories from
+ * generated projects/L3 drafts based on the target country. Reads the country_scoped_assets
  * registry from workspace schema (SSOT) and removes assets whose registered country != target.
  *
  * Usage: bun scripts/helpers/prune-country-scoped-assets.ts <target-dir> <country|none>
@@ -15,6 +21,7 @@
  * Pruning rules:
  * - Skills: removes <target>/{skills,.claude/skills,.gemini/skills,.agents/skills}/<name>/
  * - Scripts: removes <target>/scripts/<name>*
+ * - Dirs: removes <target>/<relPath>/ wholesale (e.g. "regulations/KR")
  * - Env keys: parses <target>/.env.sample for # >>> country-scoped:<CODE> marker blocks
  *             and deletes blocks whose CODE != target country. For "none", deletes ALL blocks.
  *             Marker format: # >>> country-scoped:<CODE> opens, # <<< country-scoped:<CODE> closes.
@@ -53,10 +60,11 @@ if (!existsSync(targetDir)) {
 const workspaceRoot = resolve(__dirname, '../..');
 const schemaPath = join(workspaceRoot, 'docs', 'workspace-schema.json');
 
-let registry: { skills: Record<string, string>; scripts: Record<string, string>; env: Record<string, string> } = {
+let registry: { skills: Record<string, string>; scripts: Record<string, string>; env: Record<string, string>; dirs: Record<string, string> } = {
   skills: {},
   scripts: {},
-  env: {}
+  env: {},
+  dirs: {}
 };
 
 if (existsSync(schemaPath)) {
@@ -69,6 +77,7 @@ if (existsSync(schemaPath)) {
       registry.skills = (countryScoped.skills as Record<string, string>) || {};
       registry.scripts = (countryScoped.scripts as Record<string, string>) || {};
       registry.env = (countryScoped.env as Record<string, string>) || {};
+      registry.dirs = (countryScoped.dirs as Record<string, string>) || {};
     }
   } catch (error) {
     console.warn(`⚠️  Warning: Could not read workspace schema at ${schemaPath}. Proceeding with empty registry.`);
@@ -164,6 +173,23 @@ function pruneScript(scriptName: string, scopedCountry: string): void {
 }
 
 /**
+ * Prune a variant asset directory (relative path from project root) whose content
+ * is scoped to one country, e.g. "regulations/KR".
+ */
+function pruneDir(relPath: string, scopedCountry: string): void {
+  // Prune if target country doesn't match (including region-neutral case)
+  if (countryArg !== 'none' && countryArg !== '' && countryArg === scopedCountry) {
+    return; // Keep the directory - country matches
+  }
+
+  const dirPath = join(targetDir, relPath);
+  if (safeRemove(dirPath)) {
+    console.log(`Pruned ${scopedCountry}-scoped directory: ${relPath}/`);
+    prunedCount++;
+  }
+}
+
+/**
  * Prune env key marker blocks from .env.sample
  */
 function pruneEnvBlocks(): void {
@@ -255,6 +281,11 @@ for (const [skillName, scopedCountry] of Object.entries(registry.skills)) {
 // Prune scripts
 for (const [scriptName, scopedCountry] of Object.entries(registry.scripts)) {
   pruneScript(scriptName, scopedCountry);
+}
+
+// Prune variant asset directories
+for (const [dirRelPath, scopedCountry] of Object.entries(registry.dirs)) {
+  pruneDir(dirRelPath, scopedCountry);
 }
 
 // Prune env marker blocks
