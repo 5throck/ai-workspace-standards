@@ -16,9 +16,9 @@
 | **스킬** | **102** — 재사용 16 + 신규 86 |
 | **팀 목적** | 3축 — A 거버넌스 소유·운영 / B 시스템 구현·유지보수 / **C 딜 검토 수행** |
 | **실행 순서** | 문서 우선 6단계 (Stage 0 → 1 → 2 → 2.5 → 3 → 4 → 5) |
-| **검토 체계** | **3단** — AI 1차(형식) → AI 2차(교차 도메인) → **사람 최종(판단·승인)** |
+| **검토 체계** | **3단** — AI 1차(형식) → AI 2차(교차 도메인) → **사람 최종(판단·승인)**. ⚠️ 2026-08-28 점검: 저장 스키마(`review_stage`, `analysis_task`)는 존재하나 실제로 채워진 적 없음 — 실무 가동 실적은 AI 1·2차까지만 검증됨(§20.3, §20.4) |
 | **추정** | AI ~230~250세션 / 사람 ~15~18검토일 + 파일럿 3주 · 캘린더 **2~3개월**(전담) / **4~5개월**(주 2.5일) · ±50% |
-| **ADR** | 0001~0067 |
+| **ADR** | 0001~0067 계획 → **실행 중 0072까지 진행**(2026-08-28 기준, co-newbiz 저장소 `docs/adr/`) — 이 문서의 범위 예측을 초과했으나 정상적인 ADR 거버넌스 프로세스로 확인됨(§20) |
 | **착수 조건** | 검토자 **주 2.5일 이상** 확보 (O-16) |
 | **조기 필요 입력** | 수기 파일럿용 **실제 딜 1건** (O-3) |
 
@@ -34,6 +34,7 @@
 | **개정** | 검토 체계 | **3단 검토** 도입 — 병목 37일 → 15~18일 |
 | **확정** | 정합성 검증 | 에이전트 33→**34**, 스킬 총계 **102** 로 보정 |
 | **Stage 1 (2026-08-20)** | 미팅 12건을 실제 로스터로 실행 | RAG·프록시 등급·M&A 연결·부지 선정을 구체적 수치로 확정, 설계 기본값 2건 정정(§17) |
+| **실행 현황 점검 (2026-08-28)** | 설계 대 실제 격차 감사 | 웹 스택 문서 드리프트 수정(Hono→Next.js, §20.1), `agents/` 물리 구조 대신 논리적 그룹화가 의도적 결정이었음을 확인(§20.2), 3단 검토 영속화 계층 미사용(§20.3)·human-final 승인 미기록(§20.4) 확인 — 두 갭 모두 co-newbiz 저장소에 후속 작업 필요 |
 
 ---
 
@@ -98,7 +99,7 @@ Green Field(신규 설립)와 Brown Field(M&A) 양쪽을 다루는 신사업 검
 | DB | SQLite (`bun:sqlite`, WAL) — Postgres 이전 가능하도록 벤더 중립 설계 | 사내 서버 5~20명 규모에 충분, 무설치 |
 | 버전 관리 | 전수 스냅샷 + 귀인분석, 보고서·시뮬레이션 포함 전면 | |
 | 문서 출력 | Python (python-docx / reportlab / python-hwpx) | 외부 바이너리(LibreOffice·MS Word·GTK) 의존 제거 |
-| 웹 스택 | Hono(API) + React/Vite + ECharts | Hono는 `package.json` `overrides` 에 이미 고정, Bun 네이티브 |
+| 웹 스택 | ~~Hono(API) + React/Vite + ECharts~~ → **Next.js(App Router/Route Handlers) + Prisma + Tailwind + Recharts**(ADR-0069/0070, 2026-08-26 승인, §20.1) | Hono는 `package.json` `overrides` 에 이미 고정, Bun 네이티브(원 결정 근거 — 이후 `Projects/co-price` 패턴에 맞춰 전환됨) |
 | 운영 형태 | 사내 서버, 5~20명 동시 | |
 | MCP | REST API 경유 + stdio | 권한·감사를 단일 지점에서 집행 |
 | 팀 편성 | 4개 도메인(기능·기술·산업·지역) + PM 통괄, **34 agents** | `Projects/safety_os` 패턴 차용 |
@@ -1904,3 +1905,40 @@ Stage 5 시스템 파일럿(§18 이후, `Projects/co-newbiz/docs/pilots/pilot-0
 - co-newbiz 저장소 스킬 인벤토리(설계 §9.3, Stage 5 Wave 5.8 신규 86개 스킬 목록)에 없는 축이었음을 확인 — 신규 스킬(가칭 `investment-vehicle-structuring`, 재무·시뮬레이션 그룹 또는 M&A 특수 그룹) 추가가 필요하며, 이미 존재하는 `investment-feasibility-modeling`(NPV/IRR 계산)·`jv-structuring`(파트너십 JV 거버넌스)과는 명확히 다른 관심사(어떤 그릇에 담을지 vs 그 안의 숫자·거버넌스)로 구분한다.
 - ADR 필요 여부: 이 결정이 딜 구조 가설의 산출물 정의를 바꾸므로 co-newbiz 저장소 자체의 ADR 트리거 목록(정책/절차 개정) 기준으로 co-newbiz 저장소에 별도 ADR을 남긴다 — 이 설계 문서 차원에서는 신규 ADR 없이 이 부록으로 결정을 기록한다.
 - 상세 구현(스킬 파일, ADR, 절차 스키마 확장)은 `Projects/co-newbiz/`에서 진행하며, 이 부록은 설계 원본에 이 축을 공식 기록하는 것이 목적이다.
+
+## 20. 실행 현황 점검 부록 (2026-08-28)
+
+설계 확정(2026-08-19) 9일 경과 시점에 실제 co-newbiz 저장소 상태를 이 설계 문서와 대조 점검했다. 정량 지표(에이전트·스킬 수·ADR·거버넌스 인프라·스테이지 게이트)는 설계를 충족하거나 초과했으나, 점검 과정에서 발견된 4가지 사항을 기록한다. 상세 구현/수정은 `Projects/co-newbiz/` 저장소에서 진행했다.
+
+### 20.1 웹 스택 — Hono/React-Vite/ECharts에서 Next.js/Prisma로 전환 (문서 드리프트 수정)
+
+§3 확정 사항 표는 여전히 "Hono(API) + React/Vite + ECharts"로 기재돼 있으나, 실제로는 `Projects/co-newbiz/docs/adr/0069-adopt-nextjs-prisma-web-stack.md`(Accepted 2026-08-26)가 ADR-0010을 대체하며 Next.js(App Router, Route Handlers) + Prisma + `@prisma/adapter-better-sqlite3` + Tailwind CSS + Recharts로 전면 이관했다(`app/server`(Hono) 및 구 `app/web`(Vite SPA) 삭제, PR #141/#142). ADR 자체는 정상적으로 남아 있었으나, `agents/backend-engineer.md`·`agents/frontend-engineer.md`·`README.md`/`README_ko.md`·`package.json`·`docs/co-newbiz.context.md` 등 최상위 문서 다수가 이관 이후에도 구 스택을 계속 서술하고 있었다 — ADR은 기록됐지만 그 파급이 로스터/문서 계층까지 전파되지 않은 **문서 드리프트**였다. co-newbiz 저장소에서 해당 문서 전부를 Next.js/Prisma 표기로 수정하고, 사용되지 않는 `hono` 의존성을 `package.json`에서 제거했다(2026-08-28).
+
+**이 설계 문서 §3의 "웹 스택" 행은 역사적 기록으로 보존한다** — 이 부록이 현재 스택의 정정 참조다.
+
+### 20.2 `agents/` 디렉터리 물리 구조 — 의도적으로 논리적 그룹화로 대체됨
+
+§5.2가 제시한 물리적 트리(`agents/_core/`, `agents/domains/{functional,technical,industry,region}/`, `agents/_shared/`)는 채택되지 않았고, 실제로는 34개 에이전트 파일 전부가 `agents/*.md`에 평면적으로 존재한다. 조사 결과 이는 방치가 아니라 실행 단계의 의도적 결정으로 확인됐다:
+
+- ADR-0013/0043(2026-08-20, meeting M0에서 비준)이 "4-domain 구조"를 결정하지만, 이는 물리적 디렉토리가 아니라 **코디네이션 모델**(PM Gateway 유지, 도메인 리드는 디스패처가 아닌 설계/검토 오너)에 대한 결정이었다.
+- 34개 에이전트 파일 전부가 YAML frontmatter의 `domain:`/`subdomain:` 필드(예: `agents/compliance-officer.md`의 `domain: functional` / `subdomain: governance`)로 설계가 원했던 도메인/서브도메인 그룹핑을 물리적 서브디렉토리 없이 논리적으로 표현한다.
+- `agents/README.md`(readiness audit 2026-08-23)가 34개 에이전트를 "4 classes"(Domain leads / Deal-review specialists / Build-run / Non-deal support)로 서술하며 "the classes, not the individual names, are the stable contract"라 명시 — 평면 배치를 전제로 한 정착된 설계임을 보여준다.
+- 워크스페이스 공통 스캐폴드 툴(`scripts/agent-create.ts`의 `agentsDir = path.join(projectRoot, "agents")`)도 하드코딩된 평면 루트만 지원해 애초에 물리적 중첩 트리와 맞지 않았다.
+
+**결론**: §5.2의 물리 디렉토리 제안은 실행 단계에서 툴링 제약과 실용성을 고려해 frontmatter 기반 논리적 태깅으로 대체됐다. 이 설계 문서 §5.2의 디렉토리 트리는 **의도를 나타내는 참조 구조**로 재해석하고, 실제 구현 계약은 `agents/README.md`의 "4 classes" 서술을 따른다.
+
+### 20.3 3단 검토 체계의 영속화 계층 — 스키마는 존재하나 미사용 (알려진 갭)
+
+§10.1-2가 요구하는 두 속성 — (a) 사람 최종 검토 화면에 "PASS 스탬프 없음", 검증됨/검증불가/판단필요 3분류, (b) 2차 검토자가 1차 작성자와 다른 도메인이어야 함 — 을 점검한 결과, DB 스키마 수준(`review_stage` 테이블 — `stage IN ('ai_1st','ai_2nd','human_final')`, `unverified_items_json`, `reviewer_domain` 컬럼, `db/migrations/0011_dd_finding_and_remaining_tables.sql` 및 `app/web-next/prisma/schema.prisma`)에는 준비돼 있으나, 이를 채우거나 읽는 리포지토리·API 라우트·UI 컴포넌트가 전무하다 — 3분류 문자열("검증됨"/"검증불가"/"판단필요")이 `app/web-next/components/**`, `app/web-next/app/**` 어디에도 등장하지 않는다.
+
+이는 조용히 방치된 상태가 아니라 명시적으로 플래그된 갭이다: `procedures/_kill-criteria/entity-ic-review__analysis_task_reviewed_by_null_on_required_deliverable.json`이 "declared in YAML, not yet executable — predicate null by design until thresholds are set"라 기록하고 있다. 다만 이 kill-criteria predicate 계산 로직 자체는 `review_stage` 테이블의 CRUD/UI 구현과는 별개다 — 후자는 아직 착수되지 않았다. `skills/agent-output-provenance/SKILL.md`가 "analysis_task 테이블이 아직 마이그레이션되지 않았다"고 기술한 부분은 실제로는 이미 마이그레이션됐으므로(§20.4 참조) stale 상태이며, co-newbiz 저장소에서 별도 정정이 필요하다.
+
+### 20.4 사람 최종 승인(human final) — 테이블은 존재하나 한 번도 채워진 적이 없음 (경계 #2의 실무 미가동)
+
+CLAUDE.md 경계 #2("게이트 승인과 투자 결정은 사람이 한다")를 실제로 기록할 유일한 지정 메커니즘은 `analysis_task.reviewed_by`다. 직접 재확인한 결과 `analysis_task` 테이블 자체는 `db/migrations/0011_dd_finding_and_remaining_tables.sql:358-364`에 **이미 존재**한다(`id, project_id, deliverable_type, reviewed_by, reviewed_at`). `db/lib/snapshot-filler.ts:822-831`이 이 테이블을 읽어 `COUNT(*) WHERE project_id=? AND reviewed_by IS NULL`을 kill-criteria 변수로 계산하는 코드도 있다.
+
+**그러나 이 테이블에 실제로 행을 써넣는 코드 경로가 어디에도 없다** — `db/repositories/`, `app/web-next/app/api/**`, `scripts/` 전체를 대상으로 `INSERT INTO analysis_task`를 검색해도 마이그레이션 자체의 데이터 이관용 INSERT(`0033_pk_not_null_rebuild.sql`) 외에는 없다. 즉 이 테이블은 항상 비어 있고, kill-criteria가 계산하는 "미검토 건수"는 실제 딜에 대해서가 아니라 **행이 하나도 없어서 0을 반환하는 것**이다 — 검토를 통과한 것이 아니라 애초에 검사 대상 자체가 생성되지 않는 구조다. `skills/agent-output-provenance/SKILL.md`의 "analysis_task 테이블이 아직 마이그레이션되지 않았다"는 서술도 이 재확인 결과와 어긋나므로 stale하다 — 테이블은 있고, 채우는 코드가 없다는 것이 정확한 현재 상태다.
+
+`memory/meeting-2026-08-22-rag-formalization-review.md`가 기록한 F8 항목에 따르면 파일럿 011-014조차 `project_policy_pin` 백필 누락으로 분류 미비 하드블록 상태였다 — 정상 게이트 진행조차 못한 상태였다.
+
+**결론**: 축 C(딜 검토)가 파일럿 다수(002~004, 011~014)로 실행 중인 것은 맞지만, 이는 현재 AI 1차·2차 검토까지만 실질적으로 작동하고 있다는 뜻이며, 3단 검토의 마지막 단계인 "사람 최종 승인"은 저장 메커니즘이 있어도 한 번도 실제로 채워진 적이 없다. §0의 "검토 체계: 3단"이라는 확정 요약은 **설계·시스템 구현 목표로는 유효**하지만, **실무 가동 실적으로는 아직 검증되지 않았다**는 점을 이 부록으로 명시한다. co-newbiz 저장소에서 (a) `analysis_task` 행을 생성·업데이트하는 API/UI 경로 구현, (b) human-final 승인이 실제로 최소 1건 기록될 때까지는 축 C의 "실제 딜 검토 수행" 주장을 AI 검토 단계로 한정해 서술할 것을 권고한다.
