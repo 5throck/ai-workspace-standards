@@ -19,9 +19,9 @@
 
 | Name | File | Tier | Model | Last Modified |
 |------|------|------|-------|---------------|
-| _core/pm | agents/_core/pm.md | high | opus | 2026-08-23 |
-| _core/safety-governance-manager | agents/_core/safety-governance-manager.md | high | opus | 2026-08-24 |
-| _core/safety-workflow-manager | agents/_core/safety-workflow-manager.md | high | opus | 2026-08-19 |
+| pm | agents/pm.md | high | opus | 2026-08-28 |
+| safety-governance-manager | agents/safety-governance-manager.md | high | opus | 2026-08-28 |
+| safety-workflow-manager | agents/safety-workflow-manager.md | high | opus | 2026-08-28 |
 | _shared/asset-integrity-agent | agents/_shared/asset-integrity-agent.md | medium | sonnet | 2026-08-23 |
 | _shared/audit-agent | agents/_shared/audit-agent.md | medium | sonnet | 2026-08-23 |
 | _shared/compliance-agent | agents/_shared/compliance-agent.md | medium | sonnet | 2026-08-23 |

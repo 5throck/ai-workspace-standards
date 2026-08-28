@@ -24,7 +24,7 @@ Safety OS에 신규 규제 또는 운영 도메인을 도입할 때 본 가이�
 |--------|-----------|----------|
 | GxP 계열 | 소문자 | `gmp`, `gdp`, `glp`, `gcp`, `gvp` |
 | EHS 계열 | `ehs<산업-약어>` | `ehsmfg`, `ehsconst`, `semicon` |
-| 공통/공유 | 언더스코어 접두어 | `_shared`, `_meta`, `_core` |
+| 공통/공유 | 언더스코어 접두어 | `_shared`, `_meta` |
 
 ## 3. 최상위 디렉토리별 폴더 구조
 
@@ -32,7 +32,7 @@ Safety OS에 신규 규제 또는 운영 도메인을 도입할 때 본 가이�
 
 ```
 agents/
-├── _core/                         # 거버넌스/운영 에이전트 (pm, sgm, swm)
+├── pm.md, safety-governance-manager.md, safety-workflow-manager.md  # 거버넌스/운영 에이전트 (pm, sgm, swm, flat 배치)
 ├── _shared/                       # 크로스 도메인 서비스 에이전트
 └── domains/
     ├── functional/<name>/
@@ -117,7 +117,7 @@ mkdir -p workflows/domains/<tier>/<name>
 또는 위 Step 2와 3-6/9를 한 번에 자동화: `bun scripts/new-domain.ts <name> <tier> [profile]`.
 
 ### Step 3: 에이전트 작성
-`_core/` 에이전트의 템플릿에 따라 `agents/domains/<tier>/<name>/<name>-agent.md`를 작성합니다. 필수 섹션:
+flat core 에이전트(`agents/pm.md`, `agents/safety-governance-manager.md`, `agents/safety-workflow-manager.md`)의 템플릿에 따라 `agents/domains/<tier>/<name>/<name>-agent.md`를 작성합니다. 필수 섹션:
 - Section A — Legal Basis (다중 출처; 최소 3개 규제 참조)
 - Section B — Role & Responsibilities (명시적 범위 제한 포함)
 - Section C — Operational Protocols & Escalation Rules
@@ -207,7 +207,7 @@ bun scripts/safety-audit.ts
 ## 7. 검증 체크리스트
 
 - [ ] 모든 도메인 파일이 `<top-level>/domains/<tier>/<name>/` 하위에 위치
-- [ ] `_shared/`, `_meta/`, `_core/` 언더스코어 접두어 일관적 적용
+- [ ] `_shared/`, `_meta/` 언더스코어 접두어 일관적 적용
 - [ ] `schema.yaml` 파일에 `legal_basis`, `status: active`, `applicability: mandatory` 포함
 - [ ] 증거 모델이 유효한 `$ref` 경로(상대 경로) 보유
 - [ ] `bun scripts/safety-audit.ts`가 0건의 오류로 통과

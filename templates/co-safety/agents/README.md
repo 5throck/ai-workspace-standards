@@ -7,8 +7,10 @@ This variant uses a **nested roster layout**:
 
 ```
 agents/
-├── pm.md                      # CSO override (extends templates/common pm.md)
-├── _core/                     # Orchestration & safety management
+├── pm.md                      # CSO override (extends templates/common pm.md); CSO-specific
+│                               #   Section A/B/C content lives in docs/co-safety.context.md
+├── safety-governance-manager.md  # SGM — flat, self-contained (no common-template counterpart)
+├── safety-workflow-manager.md    # SWM — flat, self-contained (no common-template counterpart)
 ├── _shared/                   # Cross-cutting specialists
 └── domains/
     ├── functional/            # psm, msds, training
