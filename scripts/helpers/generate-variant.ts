@@ -5,7 +5,7 @@
  * Generates variant project structure from reconciled manifest.
  * Creates variant.json, directory structure, agent overrides, and skill directories.
  *
- * @version 1.13.1
+ * @version 1.13.2
  * @phase 3: Variant Generation
  *
  * Dependencies:
@@ -1336,12 +1336,6 @@ function generateClaudeSettings(variantPath: string): string {
       CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: '1',
     },
     teammateMode: 'auto',
-    mcpServers: {
-      codegraph: {
-        command: 'bunx',
-        args: ['@colbymchenry/codegraph@0.9.7', 'serve'],
-      },
-    },
     hooks: {
       SessionStart: [
         {
@@ -1421,7 +1415,7 @@ function generateClaudeSettings(variantPath: string): string {
 }
 
 /**
- * Generate .gemini/settings.json with mcpServers, PostToolUse hook, and security policies.
+ * Generate .gemini/settings.json with PostToolUse hook and security policies.
  * Produces the same structure as other stable variants.
  * @version 1.0.0
  */
@@ -1430,12 +1424,6 @@ function generateGeminiSettings(variantPath: string): string {
   const settings: Record<string, unknown> = {
     _comment:
       'Variant-specific overrides vs L1 (templates/common). These are intentional L2 variant settings.',
-    mcpServers: {
-      codegraph: {
-        command: 'bunx',
-        args: ['@colbymchenry/codegraph@0.9.7', 'serve'],
-      },
-    },
     hooks: {
       SessionStart: [
         {

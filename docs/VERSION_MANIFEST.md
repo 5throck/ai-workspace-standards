@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-28T08:25:29.457Z
+**Generated**: 2026-08-28T10:34:45.855Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -113,7 +113,7 @@
 | new-project.ts | 1.8.0 | scripts/new-project.ts | js-yaml |
 | project-to-variant.ts | 1.2.1 | scripts/project-to-variant.ts | N/A |
 | promote-context-section.ts | 1.0.0 | scripts/promote-context-section.ts | N/A |
-| propagate-to-templates.ts | 2.5.1 | scripts/propagate-to-templates.ts | js-yaml |
+| propagate-to-templates.ts | 2.5.2 | scripts/propagate-to-templates.ts | js-yaml |
 | qa-gate.ts | N/A | scripts/qa-gate.ts | bun |
 | readme-lifecycle-audit.ts | 1.0.4 | scripts/readme-lifecycle-audit.ts | N/A |
 | regenerate-agents-md.ts | 1.1.0 | scripts/regenerate-agents-md.ts | fs, path |

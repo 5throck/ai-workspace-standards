@@ -14,6 +14,6 @@
 | `vsp-publish.ts` | 1.0.0 | Package and publish core framework assets to the plugin repository | L2 |
 | `new-requirement.ts` | 1.0.1 | Scaffold deliverables/REQ-NNN-slug/01_srs.md and register RTM row | L2 |
 | `scratch-cleanup.ts` | 1.0.1 | Scratch workspace hygiene (temp purge, task archival, status) | L2 |
-| `setup.ts` | 1.0.1 | Project environment setup | L2 |
+| `setup.ts` | 1.0.2 | Project environment setup | L2 |
 | `install-vsp.ts` | 1.0.1 | VSP (VS Code extension) installation | L2 |
 | `install-bun.ts` | 1.0.1 | Bun runtime installation | L2 |
