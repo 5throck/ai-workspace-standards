@@ -568,6 +568,15 @@
       "source": "manual",
       "created": "2026-08-25",
       "last_updated": "2026-08-25"
+    },
+    {
+      "id": "2026-08-28-project-doc-marker-drift-detection-design",
+      "title": "project doc marker drift detection design",
+      "file": "docs/designs/2026-08-28-project-doc-marker-drift-detection-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-28",
+      "last_updated": "2026-08-28"
     }
   ]
 }

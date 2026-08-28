@@ -70,16 +70,23 @@ These security-critical files are ALWAYS overwritten, regardless of local modifi
 
 #### 🔀 MERGE Files (Section-Based Merge)
 
-These files use `<!-- WORKSPACE-MANAGED -->` markers for safe section replacement:
+These files use HTML-comment marker pairs for safe section replacement — everything between a
+`START`/`END` pair is treated as workspace-managed and resynced from the template; content
+outside marker pairs (e.g. a project's own `## <Variant> Context` tail section) is left alone:
 
-> ⚠️ **Current Status**: WORKSPACE-MANAGED markers are not yet present in template files. The MERGE mechanism is non-functional in the current version. These files will be silently skipped during upgrade until markers are added.
+| File | Marker | Status |
+|------|--------|--------|
+| CLAUDE.md | `<!-- COMMON-CLAUDE:START --> ... <!-- COMMON-CLAUDE:END -->` | ✅ Active (since v1.3.0) |
+| GEMINI.md | `<!-- COMMON-GEMINI:START --> ... <!-- COMMON-GEMINI:END -->` | ✅ Active (since v1.3.0) |
+| .gitignore | `<!-- WORKSPACE-MANAGED -->` | ⏳ Pending marker implementation |
+| agents/pm.md | Extends pattern (`extends:` frontmatter, not markers) | ✅ Active (ADR-0033) |
 
-| File | Status |
-|------|--------|
-| CLAUDE.md | ⏳ Pending marker implementation |
-| GEMINI.md | ⏳ Pending marker implementation |
-| .gitignore | ⏳ Pending marker implementation |
-| agents/pm.md | ⏳ Pending marker implementation |
+> ⚠️ **Failure mode**: if a project's CLAUDE.md or GEMINI.md is ever hand-rewritten and the
+> `COMMON-CLAUDE`/`COMMON-GEMINI` marker comments are not preserved around the copied sections,
+> `upgrade-project.ts` loses its merge point for that file — the MERGE step silently no-ops for
+> it on every future upgrade, and the file drifts out of sync permanently. This happened to
+> `Projects/co-price` and `Projects/co-abap` in 2026-08 (CLAUDE.md rewritten with 0-1 of 9
+> expected markers, GEMINI.md with 0-1 of 4). See §6 and §7 below.
 
 #### 🔄 SYNC_IF_NEWER Files (Version-Based Update)
 
@@ -219,7 +226,8 @@ Was the workspace template updated?
 | Limitation | Impact | Workaround |
 |-----------|--------|-----------|
 | No 3-way merge for SYNC files | Local modifications to scripts/agents are silently overwritten | Commit local changes before upgrade; manually merge after |
-| MERGE mechanism non-functional | CLAUDE.md, GEMINI.md, .gitignore updates don't propagate | Manual copy of needed sections |
+| `.gitignore` MERGE mechanism non-functional | `.gitignore` updates don't propagate | Manual copy of needed sections |
+| CLAUDE.md/GEMINI.md MERGE requires markers | If a project's file was ever hand-rewritten without preserving `COMMON-CLAUDE`/`COMMON-GEMINI` markers, the merge point is silently lost and the file drifts permanently (2026-08 co-price/co-abap incident) | `bun scripts/audit.ts` at the workspace root WARNs on marker-count drift for any `Projects/co-*` checked out locally; re-add the missing marker pairs manually (compare against `templates/common/CLAUDE.md`/`GEMINI.md`) |
 | No deleted file handling | Stale files from old templates accumulate | Periodic manual cleanup |
 | No `--rollback` flag | Must know to use `git stash pop` | Keep this guide handy |
 | Script subdirectories hardcoded | New script directories in future templates may be missed | Report missing dirs after upgrade |
@@ -230,7 +238,11 @@ Was the workspace template updated?
 
 ### "Template has no WORKSPACE-MANAGED markers — skipping"
 
-This is expected for MERGE files. The markers haven't been added to templates yet. These files won't be updated during upgrade. If you need updates from the template, manually copy the relevant sections.
+This is expected for `.gitignore` (the one remaining MERGE file without markers). This file won't be updated during upgrade — manually copy the relevant sections if needed.
+
+### CLAUDE.md/GEMINI.md not picking up template changes after upgrade
+
+Check whether the project's file still has its `COMMON-CLAUDE:START`/`COMMON-GEMINI:START` marker comments intact: `grep -c "COMMON-CLAUDE:START" CLAUDE.md` (expect it to roughly match `templates/common/CLAUDE.md`'s count). If the count is 0 or noticeably lower, the file was likely hand-rewritten at some point without preserving the markers — `upgrade-project.ts` has had nothing to merge into ever since. Fix by manually re-wrapping the corresponding sections with `<!-- COMMON-CLAUDE:START -->` / `<!-- COMMON-CLAUDE:END -->` (or `COMMON-GEMINI`) to match `templates/common/CLAUDE.md`/`GEMINI.md`, then re-run the upgrade. `bun scripts/audit.ts` at the workspace root flags this automatically (WARN-only) for any `Projects/co-*` present on the local machine.
 
 ### "SKIP (no template)" for agent files
 

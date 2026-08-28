@@ -11,8 +11,11 @@
  *   bun scripts/lifecycle-sync-audit.ts --json
  *   bun scripts/lifecycle-sync-audit.ts --fix
  *
- * @version 1.4.9
- * @last_updated 2026-08-25
+ * @version 1.5.0
+ * @last_updated 2026-08-28
+ * v1.5.0: Added 'audit:upgrade-project' to INTENTIONAL_CROSS_REFS — audit.ts's new
+ *          checkProjectDocMarkerDrift() mentions upgrade-project.ts in a WARN hint, guarded by
+ *          existsSync('Projects') (same shape as the other existsSync-guarded L0-only refs).
  * @license MIT
  */
 
@@ -364,6 +367,7 @@ const INTENTIONAL_CROSS_REFS = new Set([
   'pre-commit:fix-script-versions',             // pre-commit.ts: guarded by existsSync — string in error hint only
   'verify-skills:upgrade-project',              // verify-skills.ts: warning string mention only
   'audit:spec-register',                          // audit.ts: string mention in warning message only (--spec-check mode)
+  'audit:upgrade-project',                        // audit.ts: guarded by existsSync('Projects') — checkProjectDocMarkerDrift skips entirely when Projects/ is absent (gitignored, L0-dev-machine-only directory; scaffolded/L1 projects have no Projects/ to check)
   'audit:test-platform-parity',                   // audit.ts: guarded by existsSync — skipped when L0 script absent (L3/L1 projects have no templates/ to test parity on)
   'dev-sync:verify-adr-governance',               // dev-sync.ts step 3.97: guarded by existsSync — skipped when L0 validator absent (ADR-0059 Stage 2 gate; scaffolded projects have no docs/adr corpus)
   'dev-sync:generate-skill-graph',                // dev-sync.ts step 4.65: guarded by existsSync — skipped when L0 generator absent (ADR-0060 skill graph gate; scaffolded projects ship no skill graph tooling)
