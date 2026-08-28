@@ -1447,7 +1447,7 @@ function collectSkillDirs(dir: string, skillsDir: string): string[] {
 // Per-skill README enforcement switch (CONSTITUTION §6.2, 2026-08-28): flip to true
 // once template-layer README authoring completes (roadmap PR2). Until then missing
 // per-skill READMEs are WARN (grace).
-const SKILL_README_ENFORCE = false;
+const SKILL_README_ENFORCE = true;
 
 function checkVariantSkills(variant: string): void {
   const skillsDir = join(TEMPLATES_DIR, variant, 'skills');

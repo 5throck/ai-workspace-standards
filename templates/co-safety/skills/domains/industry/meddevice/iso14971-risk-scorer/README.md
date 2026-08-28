@@ -1,0 +1,26 @@
+# iso14971-risk-scorer
+
+> **Seeded from `SKILL.md` frontmatter (2026-08-28 per-skill README standard, CONSTITUTION §6.2).** Refine freely — this file is not auto-regenerated.
+
+## Purpose
+
+ISO 14971 risk estimation and scoring for medical devices. Severity × Probability matrix, residual risk evaluation.
+
+- **Scope**: `co-safety`
+- **Version**: 1.1.0"
+
+## When to Use
+
+- Load when the task matches the purpose above (see `SKILL.md` description).
+
+## Prerequisites
+
+(none)
+
+## Usage
+
+```
+bun <invocation per SKILL.md — or load as an AI skill via the platform skill registry>
+```
+
+See [SKILL.md](SKILL.md) for the authoritative instructions and frontmatter.
