@@ -1,3 +1,4 @@
+// @version 2.0.0
 // scripts/co-deck/handbook/check-search.ts
 // Check ④: search-manifest.json must contain all primary HTML files in docs/,
 // every manifest entry must point to an existing file, and search-data.js

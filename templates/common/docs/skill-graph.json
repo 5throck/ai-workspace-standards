@@ -132,11 +132,6 @@
       "layer": "common"
     },
     {
-      "id": "sound-synth",
-      "type": "skill",
-      "layer": "common"
-    },
-    {
       "id": "standup-synthesizer",
       "type": "skill",
       "layer": "common"

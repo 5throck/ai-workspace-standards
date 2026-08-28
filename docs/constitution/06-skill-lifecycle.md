@@ -77,6 +77,25 @@ version: 1.0.0
 ---
 ```
 
+**Mandatory `scope` and semver**: `scope` is required in every SKILL.md (missing `scope`
+fails `validate-templates.ts`), and `version` must be full semver `X.Y.Z` — 2-part
+versions (`"1.0"`) are rejected.
+
+**Skill Folder Standard Structure (mandatory since 2026-08-28)**: every skill directory
+carries, next to `SKILL.md`:
+
+| File | Required | Content |
+|------|----------|---------|
+| `SKILL.md` | ✅ | Standard frontmatter + instructions |
+| `README.md` | ✅ | English: purpose, when-to-trigger, prerequisites, usage example |
+| `README_ko.md` | ✅ | Korean translation of README.md |
+
+Enforcement: `validate-templates.ts` FAILs on missing per-skill READMEs at the template
+layer (L0/L1/L2). Generated projects (L3) get a WARN grace period and author their
+backlog (581 folders as of 2026-08-28) during subsequent upgrade cycles, after which the
+project-side gate flips to FAIL. `SKILL.md` alone is no longer a complete skill folder.
+
+
 **`scope` allowed values**: `workspace` (L0-only), `common` (L0+L1, shared unmodified across all variants), `variant` (generic placeholder), or the **literal name of the variant the skill belongs to** (e.g. `scope: co-consult`) — a domain-only skill with a variant override and no `templates/common/` base. `scripts/helpers/layer-filter.ts` treats any value other than `workspace`/`common` as a variant-name marker and propagates the skill to L0+L1+L2. `scripts/skill-lifecycle-audit.ts` validates `scope` against `workspace | common | variant | <current project's own directory name>` — run the audit from inside the variant directory (e.g. `cd templates/co-consult && bun ../../scripts/skill-lifecycle-audit.ts`) so it can resolve the variant name correctly.
 
 #### `l2_propagate` (L1/L3) Propagation Control

@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+// @version 1.0.0
 // scripts/co-deck/handbook/check-i18n-parity.ts
 // Check ③: Cross-language content parity for localized handbook pages.
 // Groups docs/**/*.html by base name (X.html + X_en/X_ja/X_es.html) and fails on:
