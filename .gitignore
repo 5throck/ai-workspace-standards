@@ -108,6 +108,7 @@ __pycache__/
 !skills/
 !templates/common/
 !templates/co-consult/
+!templates/co-price/
 !templates/co-design/
 !templates/co-develop/
 !templates/co-game/

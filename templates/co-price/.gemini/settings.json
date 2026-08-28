@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "pricing-sim": {
+      "command": "node",
+      "args": ["scripts/mcp-server.mjs"],
+      "env": {
+        "DB_URL": "file:./prisma/dev.db",
+        "MCP_MODE": "read-only"
+      }
+    },
+    "internal-knowledge-base": {
+      "type": "http",
+      "url": "https://mcp-kb.company.internal/mcp"
+    },
+    "codegraph": {
+      "command": "npx",
+      "args": ["-y", "@colbymchenry/codegraph", "serve"]
+    }
+  }
+}
