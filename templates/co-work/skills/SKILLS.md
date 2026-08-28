@@ -6,10 +6,9 @@ This directory contains variant-specific skills for the `co-work` template.
 
 | Skill | Directory | Purpose |
 |-------|-----------|---------|
-| API Documentation | `api-documentation/` | Creates comprehensive API documentation — endpoints, parameters, authentication, request/response schemas, and code examples |
-| Documentation Writing | `documentation-writing/` | Creates clear, accessible documentation and communications for diverse technical and non-technical audiences |
-| Research Analysis | `research-analysis/` | Conducts systematic research, data synthesis, and evidence-based analysis to support decision-making and documentation |
 | Standup Synthesizer | `standup-synthesizer/` | Aggregates git commit logs, issue status, PR reviews, and ticket queue events into a 24-hour daily standup digest |
+
+> API Documentation, Documentation Writing, and Research Analysis were promoted to `templates/common/skills/` (scope: common) — inherited automatically, no longer listed here as variant-local skills.
 
 ## Usage
 

@@ -13,7 +13,7 @@
 | `accessibility-audit` | L0 | ux-researcher, visual-designer | phase2, phase4 | — |
 | `agent-lifecycle-manager` | L0 | — | — | — |
 | `ai-tell-reduction` | variant:co-news | style-editor, style-editor | phase4 | — |
-| `api-documentation` | variant:co-safety | technical-writer | — | — |
+| `api-documentation` | L0 | technical-writer | — | — |
 | `arcade-physics` | variant:co-game | game-debugger, game-developer, game-developer | phase4 | — |
 | `audit-workspace` | L0 | — | — | — |
 | `career-path-succession-planning` | variant:co-hr | career-succession-consultant, career-succession-consultant | phase2 | — |
@@ -30,7 +30,7 @@
 | `customs-duty-drawback-workflow` | variant:co-export | customs-duty-drawback-specialist, customs-duty-drawback-specialist | phase3, phase4 | — |
 | `decision-record` | common | — | — | — |
 | `desktop-app-fallback` | variant:co-abap | code-writer, test-runner | phase3, phase4 | — |
-| `documentation-writing` | variant:co-safety | content-writer, technical-writer | — | — |
+| `documentation-writing` | L0 | content-writer, technical-writer | — | — |
 | `double-entry-reconciliation` | variant:co-price | — | — | — |
 | `dump-monitor` | variant:co-abap | devops-admin, pm | phase1, phase6 | — |
 | `evidence-ledger` | common | — | — | — |
@@ -45,7 +45,6 @@
 | `financial-statement-analysis` | variant:co-consult | data-analyst, data-analyst | phase1, phase3 | — |
 | `financial-statement-prep` | variant:co-price | — | — | — |
 | `finding-reconciliation` | variant:co-security | pentester, pentester, report-writer, report-writer | phase3, phase5, phase6 | — |
-| `finishing-a-development-branch` | variant:co-safety | — | — | — |
 | `foreign-regulation-monitoring` | variant:co-export | foreign-regulatory-intelligence-analyst, foreign-regulatory-intelligence-analyst | phase1 | — |
 | `fta-origin-determination` | variant:co-export | fta-origin-analyst, fta-origin-analyst | phase1, phase2 | — |
 | `gabor-granger` | variant:co-price | — | — | — |
@@ -78,8 +77,6 @@
 | `org-readiness-assessment` | variant:co-consult | change-management-partner, change-management-partner, change-management-partner | phase1, phase1, phase2, phase2 | — |
 | `performance-system-design` | variant:co-hr | performance-management-consultant, performance-management-consultant | phase2 | — |
 | `performance-tuning` | variant:co-abap | architect, dba, sap-investigator | phase1, phase2, phase4 | — |
-| `platform-command-lifecycle-manager` | variant:co-safety | — | — | — |
-| `platform-skill-lifecycle-manager` | variant:co-safety | — | — | — |
 | `post-write-chain` | variant:co-abap | code-writer, pm, test-runner | phase3, phase4 | — |
 | `prep-pdf` | variant:co-deck | measure, measure, pdf-export | phase4 | — |
 | `presenter-mode` | L0 | html-build | phase4 | — |
@@ -92,7 +89,7 @@
 | `project-to-variant` | L0 | — | — | — |
 | `promote-variant` | L0 | — | — | — |
 | `refactoring` | variant:co-develop | code-writer, game-debugger, game-developer | phase3, phase4, phase5 | — |
-| `research-analysis` | variant:co-safety | analyst | — | — |
+| `research-analysis` | L0 | analyst | — | — |
 | `roo-qualification-worksheet` | variant:co-export | fta-origin-analyst | phase1, phase2 | — |
 | `samm-maturity` | variant:co-security | threat-modeler | phase1, phase2 | — |
 | `sample-driven-report-writing` | variant:co-consult | communications-lead | phase3, phase4 | — |
