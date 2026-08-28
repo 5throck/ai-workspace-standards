@@ -1,4 +1,9 @@
-// @version 1.7.6
+// @version 1.7.7
+// v1.7.7: fix(pipeline): step 3.95 QA pre-check ran bare `bun test` instead of `bun run test`
+//           (the package.json script) — bare `bun test` recursively scans the whole CWD tree,
+//           pulling in every nested Projects/*/ repo's test suite (Playwright visual regression,
+//           MCP integration tests, etc.), turning a non-fatal check into a multi-minute noisy
+//           detour. `bun run test` correctly delegates to the scoped `test-runner.ts integration`.
 // v1.7.6: fix(pipeline): add step 4.62 cascade re-publish — heals template platform skill
 //           copies after sync-skills step 4.6 updates root platform dirs (mirrors 4.5 gating)
 // v1.7.3: feat(pipeline): add step 4.65 skill graph gate (ADR-0060) — generates and
@@ -75,7 +80,7 @@ const msg = (msgArgs.join(' ') || "chore: update")
 // silently swallowed by the PR-creation fallback below). Shared detector also catches
 // Japanese/Chinese, not just Korean — see scripts/lib/language-guard.ts.
 if (hasNonEnglish(msg)) {
-    console.log(`${RED}❌ Commit message / PR title must be written in English (CONSTITUTION.md §3).${RESET}`);
+    console.log(`${RED}❌ Commit message / PR title must be written in English (context.md §3).${RESET}`);
     console.log(`${YELLOW}   Translate the message and re-run: /sync "<english message>"${RESET}`);
     if (import.meta.main) {
       process.exit(1);
@@ -276,7 +281,15 @@ if (fs.existsSync('package.json')) {
     try {
         const pkg = JSON.parse(fs.readFileSync('package.json', 'utf-8'));
         if (pkg.scripts?.test) {
-            const testResult = await $`bun test`.nothrow();
+            // Bare `bun test` (no path) recursively scans the entire CWD tree for *.test.ts,
+            // which includes every nested Projects/*/ repo (separate git repos scaffolded
+            // from templates/ — see README.md § Repository Structure). That pulled in
+            // unrelated suites (Playwright visual-regression, MCP integration, etc.) from
+            // other projects, making this non-fatal check take many minutes and print noise
+            // irrelevant to this repo. `bun run test` invokes the actual package.json script
+            // (`bun scripts/test-runner.ts integration`), which is already correctly scoped
+            // to this repo's own tests/ directory.
+            const testResult = await $`bun run test`.nothrow();
             if (testResult.exitCode !== 0) {
                 console.warn(`⚠️  Project tests failed (non-blocking, exit ${testResult.exitCode})`);
                 if (testResult.stderr) console.warn(String(testResult.stderr).trim());
