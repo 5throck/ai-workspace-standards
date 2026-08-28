@@ -11,6 +11,10 @@ last_reviewed: 2026-06-13
 status: active
 owner: change-management-partner
 prerequisites: none
+relates_to:
+  - skill: financial-modeling
+    type: enables
+outputs: [readiness-scores, capability-gap-analysis, change-mgmt-cost-estimates]
 metadata:
   type: domain
   triggers:

@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Skill Relationship Graph Verification Script
- * @version 1.1.0
+ * @version 1.2.0
  *
  * Verifies that the committed skill graph files match the current state.
  * Re-derives the graph and compares against docs/skill-graph.json.
@@ -13,6 +13,10 @@
  * - No country marks in relation fields (ADR-0060 invariant)
  * - No unknown targets in relates_to or overrides
  * - Staleness warnings for overrides (last_reviewed > 12 months)
+ * - Typed `relates_to` schema (ADR-0060 Amendment 3, 2026-08-29): legacy vs.
+ *   typed {skill, type} forms via the shared `parseRelatesTo()`, including the
+ *   legacy/typed no-mixing rule (a mixed array is a reported finding, not a
+ *   silent parse failure).
  *
  * Usage: bun scripts/verify-skill-graph.ts [--scope <common|co-*>]
  *
@@ -24,7 +28,7 @@
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { buildGraph, buildScopeGraph } from './generate-skill-graph.ts';
+import { buildGraph, buildScopeGraph, parseFrontmatter, parseRelatesTo } from './generate-skill-graph.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -274,27 +278,10 @@ function validateRelations(
       if (!require('node:fs').existsSync(skillFile)) continue;
 
       const content = readFileSync(skillFile, 'utf-8');
-      const lines = content.split('\n');
-      let inFrontmatter = false;
-      let frontmatterText = '';
 
-      for (const line of lines) {
-        if (line.trim() === '---') {
-          if (!inFrontmatter) {
-            inFrontmatter = true;
-            continue;
-          } else {
-            inFrontmatter = false;
-            break;
-          }
-        }
-        if (inFrontmatter) {
-          frontmatterText += line + '\n';
-        }
-      }
-
-      // Check prerequisites field
-      const prereqMatch = frontmatterText.match(/prerequisites:\s*(.+)/);
+      // Check prerequisites field (still free text; scanned as raw line, unchanged)
+      const frontmatterBlock = content.split('---')[1] ?? '';
+      const prereqMatch = frontmatterBlock.match(/prerequisites:\s*(.+)/);
       if (prereqMatch) {
         const prereqText = prereqMatch[1].trim();
         if (hasCountryMark(prereqText, countryCodes)) {
@@ -302,30 +289,26 @@ function validateRelations(
         }
       }
 
-      // Check relates_to field (both inline array and YAML list formats)
-      const relatesInlineMatch = frontmatterText.match(/relates_to:\s*\[(.+?)\]/);
-      const relatesListMatch = frontmatterText.match(/relates_to:\s*\n((?:\s*-\s*[^\n]+\n?)+)/);
-
-      let relatesArray: string[] = [];
-
-      if (relatesInlineMatch) {
-        // Inline array format: relates_to: [skill1, skill2]
-        relatesArray = relatesInlineMatch[1].split(',').map(s => s.trim().replace(/'/g, '').replace(/"/g, ''));
-      } else if (relatesListMatch) {
-        // YAML list format: relates_to:\n  - skill1\n  - skill2
-        const listText = relatesListMatch[1];
-        const itemMatches = listText.matchAll(/-\s*([^\n]+)/g);
-        for (const match of itemMatches) {
-          relatesArray.push(match[1].trim().replace(/'/g, '').replace(/"/g, ''));
+      // relates_to: parsed via the real YAML parser + schema validator (ADR-0060
+      // Amendment 3) so both legacy string-array and typed {skill, type} entries
+      // are checked correctly — the previous line-regex scan mis-tokenized typed
+      // multi-line entries (only their first `- skill: ...` line matched).
+      const frontmatter = parseFrontmatter(content) as { relates_to?: unknown[] } | null;
+      if (frontmatter?.relates_to) {
+        let relations: ReturnType<typeof parseRelatesTo> = [];
+        try {
+          relations = parseRelatesTo(frontmatter.relates_to, skillFile);
+        } catch (err) {
+          unknownTargets.push(`skills/${entry.name}/SKILL.md: ${(err as Error).message}`);
+          relations = [];
         }
-      }
-
-      for (const related of relatesArray) {
-        if (hasCountryMark(related, countryCodes)) {
-          countryMarkViolations.push(`skills/${entry.name}/SKILL.md relates_to contains country mark: ${related}`);
-        }
-        if (!allNodeIds.has(related) && related) {
-          unknownTargets.push(`skills/${entry.name}/SKILL.md relates_to unknown target: ${related}`);
+        for (const rel of relations) {
+          if (hasCountryMark(rel.to, countryCodes)) {
+            countryMarkViolations.push(`skills/${entry.name}/SKILL.md relates_to contains country mark: ${rel.to}`);
+          }
+          if (!allNodeIds.has(rel.to)) {
+            unknownTargets.push(`skills/${entry.name}/SKILL.md relates_to unknown target: ${rel.to}`);
+          }
         }
       }
     }

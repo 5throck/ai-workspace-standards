@@ -159,7 +159,11 @@
       "type": "requires",
       "from": "design",
       "to": "storyline",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-deck/skills/design/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "used_by",
@@ -237,7 +241,11 @@
       "type": "requires",
       "from": "html-build",
       "to": "design",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-deck/skills/html-build/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "used_by",
@@ -303,7 +311,11 @@
       "type": "requires",
       "from": "pdf-export",
       "to": "prep-pdf",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-deck/skills/pdf-export/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "references",
@@ -321,7 +333,11 @@
       "type": "requires",
       "from": "prep-pdf",
       "to": "html-build",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-deck/skills/prep-pdf/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "used_by",
@@ -399,7 +415,11 @@
       "type": "requires",
       "from": "slide-layout-gate",
       "to": "html-build",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-deck/skills/slide-layout-gate/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "used_by",
@@ -429,7 +449,11 @@
       "type": "requires",
       "from": "storyline",
       "to": "research",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-deck/skills/storyline/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "used_by",

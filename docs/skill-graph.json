@@ -504,7 +504,15 @@
     {
       "id": "executive-presentation",
       "type": "skill",
-      "layer": "variant:co-consult"
+      "layer": "variant:co-consult",
+      "inputs": [
+        "complexity-grades",
+        "business-case",
+        "readiness-scores"
+      ],
+      "outputs": [
+        "executive-deck"
+      ]
     },
     {
       "id": "explain-me",
@@ -554,7 +562,17 @@
     {
       "id": "financial-modeling",
       "type": "skill",
-      "layer": "variant:co-consult"
+      "layer": "variant:co-consult",
+      "inputs": [
+        "complexity-grades",
+        "readiness-scores",
+        "change-mgmt-cost-estimates"
+      ],
+      "outputs": [
+        "roi-analysis",
+        "npv-irr-payback",
+        "business-case"
+      ]
     },
     {
       "id": "financial-narrative-brief",
@@ -884,7 +902,12 @@
     {
       "id": "org-readiness-assessment",
       "type": "skill",
-      "layer": "variant:co-consult"
+      "layer": "variant:co-consult",
+      "outputs": [
+        "readiness-scores",
+        "capability-gap-analysis",
+        "change-mgmt-cost-estimates"
+      ]
     },
     {
       "id": "patch-engineer",
@@ -1324,7 +1347,12 @@
     {
       "id": "technical-feasibility",
       "type": "skill",
-      "layer": "variant:co-consult"
+      "layer": "variant:co-consult",
+      "outputs": [
+        "complexity-grades",
+        "risk-cost-ranges",
+        "preconditions"
+      ]
     },
     {
       "id": "technical-writer",
@@ -1483,7 +1511,12 @@
       "type": "used_by",
       "from": "abap-code-review",
       "to": "code-writer",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-abap/agents/code-writer.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -1519,7 +1552,12 @@
       "type": "used_by",
       "from": "abap-code-review",
       "to": "test-runner",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-abap/agents/test-runner.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -1691,6 +1729,36 @@
     },
     {
       "type": "references",
+      "from": "adr:0060",
+      "to": "executive-presentation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0060",
+      "to": "financial-modeling",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0060",
+      "to": "org-readiness-assessment",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0060",
+      "to": "technical-feasibility",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0060",
+      "to": "version",
+      "source": "prose"
+    },
+    {
+      "type": "references",
       "from": "adr:0061",
       "to": "decision-record",
       "source": "prose"
@@ -1717,7 +1785,12 @@
       "type": "used_by",
       "from": "ai-tell-reduction",
       "to": "style-editor",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-news/agents/style-editor.md",
+        "field": "required_skills",
+        "index": 1
+      }
     },
     {
       "type": "used_by",
@@ -1729,7 +1802,12 @@
       "type": "used_by",
       "from": "api-documentation",
       "to": "technical-writer",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-work/agents/technical-writer.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "references",
@@ -1747,7 +1825,12 @@
       "type": "used_by",
       "from": "arcade-physics",
       "to": "game-developer",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-game/agents/game-developer.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -1777,7 +1860,12 @@
       "type": "used_by",
       "from": "career-path-succession-planning",
       "to": "career-succession-consultant",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-hr/agents/career-succession-consultant.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -1819,7 +1907,12 @@
       "type": "used_by",
       "from": "change-impact-assessment",
       "to": "change-management-partner",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-consult/agents/change-management-partner.md",
+        "field": "required_skills",
+        "index": 2
+      }
     },
     {
       "type": "used_by",
@@ -1831,7 +1924,11 @@
       "type": "requires",
       "from": "change-impact-assessment",
       "to": "org-readiness-assessment",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-consult/skills/change-impact-assessment/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "phase",
@@ -1885,13 +1982,23 @@
       "type": "used_by",
       "from": "company-intelligence",
       "to": "data-analyst",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-consult/agents/data-analyst.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
       "from": "company-intelligence",
       "to": "industry-expert",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-consult/agents/industry-expert.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "phase",
@@ -1909,13 +2016,23 @@
       "type": "used_by",
       "from": "company-intelligence",
       "to": "sme",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-consult/agents/sme.md",
+        "field": "required_skills",
+        "index": 1
+      }
     },
     {
       "type": "used_by",
       "from": "company-intelligence",
       "to": "strategy-analyst",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-consult/agents/strategy-analyst.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -1927,7 +2044,12 @@
       "type": "used_by",
       "from": "compensation-benchmarking",
       "to": "compensation-benefits-analyst",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-hr/agents/compensation-benefits-analyst.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -2017,7 +2139,12 @@
       "type": "used_by",
       "from": "competitive-intelligence",
       "to": "industry-expert",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-consult/agents/industry-expert.md",
+        "field": "required_skills",
+        "index": 1
+      }
     },
     {
       "type": "used_by",
@@ -2047,7 +2174,12 @@
       "type": "used_by",
       "from": "competitive-intelligence",
       "to": "strategy-analyst",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-consult/agents/strategy-analyst.md",
+        "field": "required_skills",
+        "index": 1
+      }
     },
     {
       "type": "used_by",
@@ -2059,7 +2191,12 @@
       "type": "used_by",
       "from": "consulting-report-writing",
       "to": "communications-lead",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-consult/agents/communications-lead.md",
+        "field": "required_skills",
+        "index": 1
+      }
     },
     {
       "type": "used_by",
@@ -2071,7 +2208,11 @@
       "type": "requires",
       "from": "consulting-report-writing",
       "to": "narrative-framework",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-consult/skills/consulting-report-writing/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "phase",
@@ -2137,7 +2278,12 @@
       "type": "used_by",
       "from": "customs-duty-drawback-workflow",
       "to": "customs-duty-drawback-specialist",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-export/agents/customs-duty-drawback-specialist.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -2149,7 +2295,11 @@
       "type": "requires",
       "from": "customs-duty-drawback-workflow",
       "to": "hs-classification-workflow",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-export/skills/customs-duty-drawback-workflow/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "phase",
@@ -2179,7 +2329,12 @@
       "type": "used_by",
       "from": "design",
       "to": "design",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-deck/agents/design.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -2221,7 +2376,11 @@
       "type": "requires",
       "from": "design",
       "to": "storyline",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-deck/skills/design/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "references",
@@ -2275,13 +2434,23 @@
       "type": "used_by",
       "from": "documentation-writing",
       "to": "content-writer",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-work/agents/content-writer.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
       "from": "documentation-writing",
       "to": "technical-writer",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-work/agents/technical-writer.md",
+        "field": "required_skills",
+        "index": 1
+      }
     },
     {
       "type": "used_by",
@@ -2329,7 +2498,12 @@
       "type": "used_by",
       "from": "executive-presentation",
       "to": "communications-lead",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-consult/agents/communications-lead.md",
+        "field": "required_skills",
+        "index": 2
+      }
     },
     {
       "type": "used_by",
@@ -2338,16 +2512,48 @@
       "source": "skill_manifest"
     },
     {
+      "type": "composes_with",
+      "from": "executive-presentation",
+      "to": "financial-modeling",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/executive-presentation/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
       "type": "requires",
       "from": "executive-presentation",
       "to": "financial-modeling",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-consult/skills/executive-presentation/SKILL.md",
+        "field": "prerequisites"
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "executive-presentation",
+      "to": "org-readiness-assessment",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/executive-presentation/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
     },
     {
       "type": "requires",
       "from": "executive-presentation",
       "to": "org-readiness-assessment",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-consult/skills/executive-presentation/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "phase",
@@ -2356,10 +2562,26 @@
       "source": "skill_manifest"
     },
     {
+      "type": "composes_with",
+      "from": "executive-presentation",
+      "to": "technical-feasibility",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/executive-presentation/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "requires",
       "from": "executive-presentation",
       "to": "technical-feasibility",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-consult/skills/executive-presentation/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "references",
@@ -2371,7 +2593,12 @@
       "type": "used_by",
       "from": "export-control-screening",
       "to": "export-control-compliance-specialist",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-export/agents/export-control-compliance-specialist.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -2413,7 +2640,11 @@
       "type": "requires",
       "from": "financial-infographic-svg",
       "to": "financial-narrative-brief",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-news/skills/financial-infographic-svg/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "references",
@@ -2431,7 +2662,12 @@
       "type": "used_by",
       "from": "financial-infographic-svg",
       "to": "visual-editor",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-news/agents/visual-editor.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -2455,7 +2691,12 @@
       "type": "used_by",
       "from": "financial-journalism-style",
       "to": "reporter",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-news/agents/reporter.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -2467,7 +2708,12 @@
       "type": "used_by",
       "from": "financial-journalism-style",
       "to": "style-editor",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-news/agents/style-editor.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -2479,13 +2725,29 @@
       "type": "used_by",
       "from": "financial-modeling",
       "to": "data-analyst",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-consult/agents/data-analyst.md",
+        "field": "required_skills",
+        "index": 1
+      }
     },
     {
       "type": "used_by",
       "from": "financial-modeling",
       "to": "data-analyst",
       "source": "skill_manifest"
+    },
+    {
+      "type": "enables",
+      "from": "financial-modeling",
+      "to": "executive-presentation",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-consult/skills/financial-modeling/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
     },
     {
       "type": "references",
@@ -2503,7 +2765,11 @@
       "type": "requires",
       "from": "financial-modeling",
       "to": "org-readiness-assessment",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-consult/skills/financial-modeling/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "phase",
@@ -2521,13 +2787,30 @@
       "type": "used_by",
       "from": "financial-modeling",
       "to": "strategy-analyst",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-consult/agents/strategy-analyst.md",
+        "field": "required_skills",
+        "index": 2
+      }
     },
     {
       "type": "used_by",
       "from": "financial-modeling",
       "to": "strategy-analyst",
       "source": "skill_manifest"
+    },
+    {
+      "type": "composes_with",
+      "from": "financial-modeling",
+      "to": "technical-feasibility",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/financial-modeling/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     },
     {
       "type": "references",
@@ -2539,13 +2822,22 @@
       "type": "requires",
       "from": "financial-modeling",
       "to": "technical-feasibility",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-consult/skills/financial-modeling/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "used_by",
       "from": "financial-narrative-brief",
       "to": "financial-analyst",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-news/agents/financial-analyst.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -2569,7 +2861,11 @@
       "type": "requires",
       "from": "financial-narrative-brief",
       "to": "k-dart",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-news/skills/financial-narrative-brief/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "phase",
@@ -2581,7 +2877,12 @@
       "type": "used_by",
       "from": "financial-statement-analysis",
       "to": "data-analyst",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-consult/agents/data-analyst.md",
+        "field": "required_skills",
+        "index": 2
+      }
     },
     {
       "type": "used_by",
@@ -2594,6 +2895,16 @@
       "from": "financial-statement-analysis",
       "to": "k-dart",
       "source": "prose"
+    },
+    {
+      "type": "requires",
+      "from": "financial-statement-analysis",
+      "to": "k-dart",
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-consult/skills/financial-statement-analysis/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "phase",
@@ -2611,7 +2922,12 @@
       "type": "used_by",
       "from": "finding-reconciliation",
       "to": "pentester",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-security/agents/pentester.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -2641,7 +2957,12 @@
       "type": "used_by",
       "from": "finding-reconciliation",
       "to": "report-writer",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-security/agents/report-writer.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -2677,7 +2998,12 @@
       "type": "used_by",
       "from": "foreign-regulation-monitoring",
       "to": "foreign-regulatory-intelligence-analyst",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-export/agents/foreign-regulatory-intelligence-analyst.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -2695,7 +3021,12 @@
       "type": "used_by",
       "from": "fta-origin-determination",
       "to": "fta-origin-analyst",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-export/agents/fta-origin-analyst.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -2707,7 +3038,11 @@
       "type": "requires",
       "from": "fta-origin-determination",
       "to": "hs-classification-workflow",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-export/skills/fta-origin-determination/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "phase",
@@ -2725,7 +3060,12 @@
       "type": "used_by",
       "from": "halal-certification-workflow",
       "to": "halal-certification-specialist",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-export/agents/halal-certification-specialist.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -2737,7 +3077,11 @@
       "type": "requires",
       "from": "halal-certification-workflow",
       "to": "hs-classification-workflow",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-export/skills/halal-certification-workflow/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "phase",
@@ -2755,7 +3099,12 @@
       "type": "used_by",
       "from": "handbook",
       "to": "handbook-reviewer",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-deck/agents/handbook-reviewer.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -2767,7 +3116,12 @@
       "type": "used_by",
       "from": "handbook",
       "to": "handbook-writer",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-deck/agents/handbook-writer.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -2845,7 +3199,12 @@
       "type": "used_by",
       "from": "hs-classification-workflow",
       "to": "hs-classification-specialist",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-export/agents/hs-classification-specialist.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -2875,13 +3234,22 @@
       "type": "requires",
       "from": "html-build",
       "to": "design",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-deck/skills/html-build/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "used_by",
       "from": "html-build",
       "to": "html-build",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-deck/agents/html-build.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -2944,6 +3312,17 @@
       "source": "prose"
     },
     {
+      "type": "used_by",
+      "from": "i18n-formatting",
+      "to": "i18n-specialist",
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/common/agents/i18n-specialist.md",
+        "field": "required_skills",
+        "index": 1
+      }
+    },
+    {
       "type": "references",
       "from": "i18n-formatting",
       "to": "translate",
@@ -2974,6 +3353,17 @@
       "source": "prose"
     },
     {
+      "type": "used_by",
+      "from": "i18n-layout",
+      "to": "i18n-specialist",
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/common/agents/i18n-specialist.md",
+        "field": "required_skills",
+        "index": 2
+      }
+    },
+    {
       "type": "references",
       "from": "i18n-layout",
       "to": "theme-authoring",
@@ -2996,6 +3386,17 @@
       "from": "i18n-locale-config",
       "to": "i18n-layout",
       "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "i18n-locale-config",
+      "to": "i18n-specialist",
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/common/agents/i18n-specialist.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "references",
@@ -3037,7 +3438,12 @@
       "type": "used_by",
       "from": "insight-synthesis",
       "to": "data-analyst",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-consult/agents/data-analyst.md",
+        "field": "required_skills",
+        "index": 3
+      }
     },
     {
       "type": "used_by",
@@ -3061,7 +3467,12 @@
       "type": "used_by",
       "from": "insight-synthesis",
       "to": "strategy-analyst",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-consult/agents/strategy-analyst.md",
+        "field": "required_skills",
+        "index": 3
+      }
     },
     {
       "type": "used_by",
@@ -3103,7 +3514,12 @@
       "type": "used_by",
       "from": "labor-compliance-audit",
       "to": "labor-compliance-analyst",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-hr/agents/labor-compliance-analyst.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -3115,7 +3531,12 @@
       "type": "used_by",
       "from": "labor-compliance-audit",
       "to": "labor-relations-specialist",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-hr/agents/labor-relations-specialist.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -3145,7 +3566,12 @@
       "type": "used_by",
       "from": "labor-compliance-audit",
       "to": "safety-health-officer",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-hr/agents/safety-health-officer.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -3175,7 +3601,12 @@
       "type": "used_by",
       "from": "landed-cost-calculation",
       "to": "hs-classification-specialist",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-export/agents/hs-classification-specialist.md",
+        "field": "required_skills",
+        "index": 1
+      }
     },
     {
       "type": "used_by",
@@ -3193,7 +3624,11 @@
       "type": "requires",
       "from": "landed-cost-calculation",
       "to": "hs-classification-workflow",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-export/skills/landed-cost-calculation/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "references",
@@ -3205,7 +3640,12 @@
       "type": "used_by",
       "from": "landed-cost-calculation",
       "to": "logistics-coordinator",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-export/agents/logistics-coordinator.md",
+        "field": "required_skills",
+        "index": 1
+      }
     },
     {
       "type": "used_by",
@@ -3241,7 +3681,12 @@
       "type": "used_by",
       "from": "learning-curriculum-design",
       "to": "learning-development-specialist",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-hr/agents/learning-development-specialist.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -3301,7 +3746,12 @@
       "type": "used_by",
       "from": "logistics-coordination",
       "to": "logistics-coordinator",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-export/agents/logistics-coordinator.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -3331,7 +3781,12 @@
       "type": "used_by",
       "from": "market-entry-strategy",
       "to": "market-entry-strategist",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-export/agents/market-entry-strategist.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -3421,7 +3876,12 @@
       "type": "used_by",
       "from": "narrative-framework",
       "to": "communications-lead",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-consult/agents/communications-lead.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -3439,7 +3899,12 @@
       "type": "used_by",
       "from": "org-design-framework",
       "to": "org-design-consultant",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-hr/agents/org-design-consultant.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -3463,7 +3928,12 @@
       "type": "used_by",
       "from": "org-readiness-assessment",
       "to": "change-management-partner",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-consult/agents/change-management-partner.md",
+        "field": "required_skills",
+        "index": 1
+      }
     },
     {
       "type": "used_by",
@@ -3476,6 +3946,17 @@
       "from": "org-readiness-assessment",
       "to": "change-management-partner",
       "source": "skill_manifest"
+    },
+    {
+      "type": "enables",
+      "from": "org-readiness-assessment",
+      "to": "financial-modeling",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-consult/skills/org-readiness-assessment/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     },
     {
       "type": "phase",
@@ -3511,7 +3992,12 @@
       "type": "used_by",
       "from": "pdf-export",
       "to": "pdf-export",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-deck/agents/pdf-export.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -3541,7 +4027,11 @@
       "type": "requires",
       "from": "pdf-export",
       "to": "prep-pdf",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-deck/skills/pdf-export/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "references",
@@ -3565,7 +4055,12 @@
       "type": "used_by",
       "from": "performance-system-design",
       "to": "performance-management-consultant",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-hr/agents/performance-management-consultant.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -3661,13 +4156,22 @@
       "type": "requires",
       "from": "prep-pdf",
       "to": "html-build",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-deck/skills/prep-pdf/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "used_by",
       "from": "prep-pdf",
       "to": "measure",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-deck/agents/measure.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -3739,7 +4243,12 @@
       "type": "used_by",
       "from": "project-delivery",
       "to": "delivery-manager",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-consult/agents/delivery-manager.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -3757,13 +4266,22 @@
       "type": "requires",
       "from": "project-delivery",
       "to": "solution-design",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-consult/skills/project-delivery/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "used_by",
       "from": "project-delivery",
       "to": "workstream-lead",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-consult/agents/workstream-lead.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -3853,7 +4371,12 @@
       "type": "used_by",
       "from": "research",
       "to": "research",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-deck/agents/research.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -3865,7 +4388,12 @@
       "type": "used_by",
       "from": "research-analysis",
       "to": "analyst",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-work/agents/analyst.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -3883,7 +4411,11 @@
       "type": "requires",
       "from": "roo-qualification-worksheet",
       "to": "fta-origin-determination",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-export/skills/roo-qualification-worksheet/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "references",
@@ -3979,7 +4511,11 @@
       "type": "requires",
       "from": "sample-driven-report-writing",
       "to": "consulting-report-writing",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-consult/skills/sample-driven-report-writing/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "references",
@@ -4465,7 +5001,12 @@
       "type": "used_by",
       "from": "service-design",
       "to": "design-lead",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-design/agents/design-lead.md",
+        "field": "required_skills",
+        "index": 1
+      }
     },
     {
       "type": "used_by",
@@ -4495,7 +5036,12 @@
       "type": "used_by",
       "from": "service-design",
       "to": "service-designer",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-design/agents/service-designer.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -4531,7 +5077,11 @@
       "type": "requires",
       "from": "slide-layout-gate",
       "to": "html-build",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-deck/skills/slide-layout-gate/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "used_by",
@@ -4561,7 +5111,12 @@
       "type": "used_by",
       "from": "solution-design",
       "to": "solutions-architect",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-consult/agents/solutions-architect.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -4573,7 +5128,12 @@
       "type": "used_by",
       "from": "solution-design",
       "to": "technology-specialist",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-consult/agents/technology-specialist.md",
+        "field": "required_skills",
+        "index": 1
+      }
     },
     {
       "type": "used_by",
@@ -4621,7 +5181,12 @@
       "type": "used_by",
       "from": "source-verification-ledger",
       "to": "fact-checker",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-news/agents/fact-checker.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -4693,7 +5258,12 @@
       "type": "used_by",
       "from": "stakeholder-alignment",
       "to": "change-management-partner",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-consult/agents/change-management-partner.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -4741,7 +5311,12 @@
       "type": "used_by",
       "from": "stakeholder-alignment",
       "to": "workstream-lead",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-consult/agents/workstream-lead.md",
+        "field": "required_skills",
+        "index": 1
+      }
     },
     {
       "type": "used_by",
@@ -4753,13 +5328,22 @@
       "type": "requires",
       "from": "stakeholder-review-management",
       "to": "consulting-report-writing",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-consult/skills/stakeholder-review-management/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "used_by",
       "from": "stakeholder-review-management",
       "to": "delivery-manager",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-consult/agents/delivery-manager.md",
+        "field": "required_skills",
+        "index": 1
+      }
     },
     {
       "type": "used_by",
@@ -4777,7 +5361,11 @@
       "type": "requires",
       "from": "stakeholder-review-management",
       "to": "stakeholder-alignment",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-consult/skills/stakeholder-review-management/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "phase",
@@ -4807,13 +5395,22 @@
       "type": "requires",
       "from": "storyline",
       "to": "research",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-deck/skills/storyline/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "used_by",
       "from": "storyline",
       "to": "storyline",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-deck/agents/storyline.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -4885,7 +5482,11 @@
       "type": "requires",
       "from": "style-lint-checklist",
       "to": "financial-journalism-style",
-      "source": "prerequisites"
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-news/skills/style-lint-checklist/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "phase",
@@ -4939,7 +5540,12 @@
       "type": "used_by",
       "from": "talent-acquisition-strategy",
       "to": "talent-acquisition-specialist",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-hr/agents/talent-acquisition-specialist.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -4972,6 +5578,17 @@
       "source": "prose"
     },
     {
+      "type": "enables",
+      "from": "technical-feasibility",
+      "to": "executive-presentation",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-consult/skills/technical-feasibility/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "phase",
       "from": "technical-feasibility",
       "to": "phase1",
@@ -4999,7 +5616,12 @@
       "type": "used_by",
       "from": "technical-feasibility",
       "to": "sme",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-consult/agents/sme.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -5011,7 +5633,12 @@
       "type": "used_by",
       "from": "technical-feasibility",
       "to": "solutions-architect",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-consult/agents/solutions-architect.md",
+        "field": "required_skills",
+        "index": 1
+      }
     },
     {
       "type": "used_by",
@@ -5023,7 +5650,12 @@
       "type": "used_by",
       "from": "technical-feasibility",
       "to": "technology-specialist",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-consult/agents/technology-specialist.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -5035,7 +5667,12 @@
       "type": "used_by",
       "from": "test-driven-development",
       "to": "game-debugger",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-game/agents/game-debugger.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -5113,7 +5750,12 @@
       "type": "used_by",
       "from": "token-usage-lint",
       "to": "prototype-engineer",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-design/agents/prototype-engineer.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -5131,7 +5773,12 @@
       "type": "used_by",
       "from": "trade-documentation-checklist",
       "to": "trade-documentation-specialist",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-export/agents/trade-documentation-specialist.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -5149,7 +5796,12 @@
       "type": "used_by",
       "from": "ui-ux-design-intelligence",
       "to": "design-lead",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-design/agents/design-lead.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -5185,7 +5837,12 @@
       "type": "used_by",
       "from": "ui-ux-design-intelligence",
       "to": "visual-designer",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-design/agents/visual-designer.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -5353,7 +6010,12 @@
       "type": "used_by",
       "from": "version",
       "to": "version",
-      "source": "required_skills"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-deck/agents/version.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "references",

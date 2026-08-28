@@ -12,6 +12,10 @@ last_reviewed: 2026-06-13
 status: active
 owner: solutions-architect
 prerequisites: none
+relates_to:
+  - skill: executive-presentation
+    type: enables
+outputs: [complexity-grades, risk-cost-ranges, preconditions]
 metadata:
   type: process
   triggers:

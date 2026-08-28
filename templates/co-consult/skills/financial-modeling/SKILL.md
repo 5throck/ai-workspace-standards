@@ -11,6 +11,13 @@ last_reviewed: 2026-08-26
 status: active
 owner: strategy-analyst
 prerequisites: technical-feasibility, org-readiness-assessment
+relates_to:
+  - skill: technical-feasibility
+    type: composes_with
+  - skill: executive-presentation
+    type: enables
+inputs: [complexity-grades, readiness-scores, change-mgmt-cost-estimates]
+outputs: [roi-analysis, npv-irr-payback, business-case]
 metadata:
   type: domain
   triggers:

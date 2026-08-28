@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.8.0
+// @version 1.9.0
 // new-project.ts — Scaffold a new project under the workspace root
 // Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z] [--country <CODE>]
 //
@@ -988,6 +988,42 @@ function bunInstall(dir: string): void {
   }
 }
 bunInstall(projectDir);
+
+// ── 7.6. Scaffold-time skill graph generation (ADR-0060 Amendment 3, 2026-08-29) ──
+// Generates the project's own docs/skill-graph.json immediately at scaffold time,
+// instead of waiting for the first /sync (where dev-sync.ts step 4.65 would
+// otherwise generate it for the first time). Runs the already-propagated
+// generate-skill-graph.ts INSIDE the new project directory (cwd = projectDir) —
+// same plain, non-scope invocation dev-sync.ts's step 4.65 already uses — so the
+// generator's own run-context auto-detection (no templates/ dir present) tags
+// every discovered skill/agent L3, matching a project-local run. This does NOT
+// copy any upstream (L0/template) graph — "projects never receive a copy of any
+// upstream graph" (Amendment 2) — it derives fresh from whatever the variant
+// overlay just placed in projectDir/skills, projectDir/agents.
+// Non-fatal: a missing bun, a missing generator script, or any generation error
+// degrades gracefully to the existing lazy behavior (first /sync still runs
+// step 4.65 regardless) rather than blocking project creation.
+console.log('\nGenerating initial skill graph…');
+try {
+  const projectGeneratorScript = join(projectDir, 'scripts', 'generate-skill-graph.ts');
+  if (!existsSync(projectGeneratorScript)) {
+    console.log('  ⚠️  scripts/generate-skill-graph.ts not found in scaffolded project — skipping (will run on first /sync)');
+  } else {
+    const bunCheck = spawnSync('bun', ['--version'], { encoding: 'utf8', stdio: 'pipe' });
+    if (bunCheck.error || bunCheck.status !== 0) {
+      console.log('  ⚠️  bun not available — skipping initial skill graph generation (will run on first /sync)');
+    } else {
+      const genResult = spawnSync('bun', [projectGeneratorScript], { stdio: 'inherit', cwd: projectDir });
+      if (genResult.status === 0) {
+        console.log('  ✅ Initial docs/skill-graph.json generated (L3)');
+      } else {
+        console.log('  ⚠️  Skill graph generation failed (non-fatal — will run on first /sync)');
+      }
+    }
+  }
+} catch (err) {
+  console.log(`  ⚠️  Skill graph generation errored (non-fatal): ${(err as Error).message}`);
+}
 
 // ── 6.5. Security Bootstrap Verification ──────────────────────────────────────
 console.log('\nRunning security bootstrap verification…');

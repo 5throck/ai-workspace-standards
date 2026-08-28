@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-28T15:06:04.308Z
+**Generated**: 2026-08-28T15:33:40.875Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -102,7 +102,7 @@
 | generate-ide-rules.ts | 1.0.0 | scripts/generate-ide-rules.ts | N/A |
 | generate-l3-readme.ts | 1.0.3 | scripts/generate-l3-readme.ts | fs, path |
 | generate-scripts-readme.ts | 1.0.3 | scripts/generate-scripts-readme.ts | N/A |
-| generate-skill-graph.ts | 1.3.0 | scripts/generate-skill-graph.ts | N/A |
+| generate-skill-graph.ts | 1.4.0 | scripts/generate-skill-graph.ts | js-yaml |
 | generate-version-manifest.ts | 1.2.0 | scripts/generate-version-manifest.ts | bun, js-yaml |
 | ingest-external-skills.ts | 1.1.0 | scripts/ingest-external-skills.ts | N/A |
 | ingest-security-frameworks.ts | 1.1.0 | scripts/ingest-security-frameworks.ts | N/A |
@@ -110,7 +110,7 @@
 | lifecycle-sync-audit.ts | 1.5.0 | scripts/lifecycle-sync-audit.ts | N/A |
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
 | md-to-ooxml.ts | 1.2.0 | scripts/md-to-ooxml.ts | fs, path |
-| new-project.ts | 1.8.0 | scripts/new-project.ts | js-yaml |
+| new-project.ts | 1.9.0 | scripts/new-project.ts | js-yaml |
 | project-to-variant.ts | 1.2.1 | scripts/project-to-variant.ts | N/A |
 | promote-context-section.ts | 1.0.0 | scripts/promote-context-section.ts | N/A |
 | propagate-to-templates.ts | 2.5.2 | scripts/propagate-to-templates.ts | js-yaml |
@@ -161,7 +161,7 @@
 | verify-platform-lifecycle.ts | 1.1.2 | scripts/verify-platform-lifecycle.ts | N/A |
 | verify-readme-sync.ts | 1.4.0 | scripts/verify-readme-sync.ts | bun, fs, path |
 | verify-scripts.ts | 1.4.1 | scripts/verify-scripts.ts | fs, path |
-| verify-skill-graph.ts | 1.1.0 | scripts/verify-skill-graph.ts | N/A |
+| verify-skill-graph.ts | 1.2.0 | scripts/verify-skill-graph.ts | N/A |
 | verify-skills.ts | 1.2.0 | scripts/verify-skills.ts | N/A |
 | verify-template-integrity.ts | 1.0.0 | scripts/verify-template-integrity.ts | crypto, fs, path |
 

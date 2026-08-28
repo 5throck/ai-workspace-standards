@@ -145,3 +145,137 @@ answered by deriving every scope artifact from the same `buildScopeGraph()`/`bui
 engines and gating all of them inside the single existing step 4.65 rather than adding new
 pipeline stages. Implementation: `generate-skill-graph.ts` 1.3.0, `verify-skill-graph.ts`
 1.1.0, `dev-sync.ts` 1.7.8.
+
+---
+
+## Amendment 2026-08-29 — Typed Relation Vocabulary + Scaffold-Time Project Graph (Amendment 3)
+
+**Status**: Accepted (Phase 1 of a 5-phase roadmap; user-confirmed via 3-option AskUserQuestion)
+**Design of record**: [2026-08-28-skill-graph-typed-relations-design.md](../designs/2026-08-28-skill-graph-typed-relations-design.md)
+
+Two gaps remained after Amendment 2: `relates_to` was schema-only (zero skills used it,
+`prerequisites` stayed unstructured free text, and there was no `composes_with`/`follows`/
+`enables` or `inputs`/`outputs` concept), and project graphs were generated lazily at the
+first `/sync` rather than at scaffold time. This amendment closes both (Phase 1 of a
+5-phase roadmap — §D below), and records a schema-evolution boundary (§C) so nothing built
+now blocks the deferred phases.
+
+### A. Typed relation vocabulary
+
+`relates_to` now accepts either a bare string array (**legacy** — unchanged generic
+`relates_to` edges, zero migration required) or an array of typed `{skill, type}` objects
+using three new edge types alongside the existing `requires | relates_to | used_by | phase |
+supersedes | references | cites_skill`:
+
+- **`requires`** (from `prerequisites`, unchanged): A requires B = B is a mandatory
+  prerequisite for A, direction A→B. Deliberately loose on *how* satisfied (existence vs.
+  prior execution) — Phase 4 artifact nodes need the same edge type to work for both
+  skill→skill and skill→artifact targets without redefinition.
+- **`enables`** (typed `relates_to`): A enables C = A's output makes C possible/unlocked,
+  direction A→C. Not the inverse of `requires` — C may still be usable without A having run.
+- **`follows`**: A follows B = pure sequencing/ordering (workflow position), no dependency
+  implication either direction.
+- **`composes_with`**: symmetric — declared once from either skill's frontmatter, always
+  interpreted as true in both directions. **Materialization**: stored as a single directed
+  edge (source→target as declared) carrying `symmetric: true` in its edge metadata, not two
+  edges. Normative: **consumers MUST interpret an edge marked `symmetric: true` as
+  traversable in both directions, while the graph preserves only the single stored
+  source→target representation.**
+- **Legacy vs. typed `relates_to` — no mixed arrays.** Within one skill's `relates_to`,
+  entries are either all bare strings or all typed objects, never mixed. **Rejection happens
+  at the schema-validation layer, not the YAML-parse layer** — a mixed array is
+  syntactically valid YAML, so parsing succeeds; a separate validation step
+  (`parseRelatesTo()`, shared by generator and verifier) then rejects it with:
+  `"relates_to must contain either all string entries or all typed relation objects; mixed entries are not allowed"`.
+
+`inputs`/`outputs` are new optional frontmatter fields (`inputs: [label, ...]` / `outputs:
+[label, ...]`), documented as plain **input/output labels** — not "artifacts" — so Phase 4's
+promotion to first-class artifact nodes isn't pre-constrained by naming used today. Rendered
+per-skill in `docs/skill-graph.md`; treated as opaque strings, not resolved against any node
+type in Phase 1.
+
+**Parser**: `parseFrontmatter()` swapped from a hand-rolled single-line-`key:
+value`/inline-`[a,b]`-array regex parser to `js-yaml`, scoped strictly to the text between
+the `---`/`---` delimiters (Markdown body untouched — verified by a fenced-code-block
+fixture). `js-yaml` was already a dependency of both the root and `templates/common`
+`package.json` (used by four other scripts); no new dependency was added. A small number of
+pre-existing `docs/decisions/DEC-*.md` frontmatter blocks are not strict YAML (unescaped
+`key: value`-shaped colons inside prose, tolerated by the old regex parser); `parseFrontmatter()`
+falls back to the legacy line parser on a YAML parse failure so non-SKILL.md consumers see
+zero behavior change — fixing those records' YAML is out of this pass's scope.
+
+**Edge provenance**: every edge derived from SKILL.md `prerequisites`/`relates_to` and agent
+`required_skills` gains `provenance: {file, field, index?}` (JSON-only, not rendered in
+`docs/skill-graph.md`), recording exactly which frontmatter field/entry produced it — cheap
+at generation time (the generator already has the file path and array index in hand) and a
+direct prerequisite for Phase 5's audit-trail goal ("where was this edge defined?").
+
+Proof-of-concept applied to 4 co-consult skills (`executive-presentation`,
+`technical-feasibility`, `org-readiness-assessment`, `financial-modeling`) — **not** a mass
+migration across the ~164-skill catalog, matching the original ADR's "separate future
+effort" framing for `relates_to` itself.
+
+### B. Scaffold-time project graph generation
+
+`new-project.ts` now runs the propagated `generate-skill-graph.ts` **inside the new project
+directory** immediately after dependency install, so a scaffolded project gets an initial
+`docs/skill-graph.json` tagged `L3` at creation time instead of waiting for the first
+`/sync`. Does not copy any upstream graph (Amendment 2's "projects never receive a copy of
+any upstream graph" stands) — derives fresh from whatever the variant overlay just placed.
+Non-fatal: any failure (missing `bun`, missing script, generation error) warns and
+continues; the existing `dev-sync.ts` step 4.65 gate still covers the artifact on first
+`/sync` regardless.
+
+### C. Schema-evolution boundary (documented now, not implemented)
+
+- The typed `relates_to` entry shape (`{skill, type}`) is a **forward-open object**, not a
+  closed 2-field record. Future fields (`status`, `version`, `valid_from`, `valid_until`,
+  `confidence`, `evidence`) can be added later without a breaking migration. **Unknown-field
+  tolerance is a Phase 1 parser contract, decided now**: a typed entry carrying keys beyond
+  `{skill, type}` does not error — unrecognized keys are preserved unmodified on the parsed
+  entry and passed through into the generated JSON edge (`extra: {...}`), unvalidated and
+  uninterpreted by Phase 1 code. Phase 2 is responsible for defining validation semantics for
+  each future field before anything reads or acts on them.
+- **SSOT principle restated as non-negotiable across all future phases**: the graph JSON is
+  always a generated projection of `skills/`, `agents/`, `variant.json` (plus, later,
+  wherever lifecycle/version metadata actually lives) — never hand-edited to carry lifecycle
+  state itself. Any future lifecycle/version field must be authored in source files and
+  merely *read* by the generator, exactly as `prerequisites`/`relates_to` are today.
+- **Three separate governance units are declared now, even though only one has behavior
+  today**: Node (skill), Edge (relationship), and Graph (template/project graph as a whole)
+  are independently lifecycle-able and independently versionable/ownable — a skill reaching
+  `PRODUCTION` does not imply every edge off it is `active`, and a graph's own version is not
+  derived by summing its skills' versions. Concretely: Phase 2 must add a `lifecycle.phase`
+  field (`DISCOVER→RETIRE`) *distinct from* the existing `status: active|deprecated` column
+  in `skills/SKILLS.md` (not merged — `status` is a simpler operational flag already relied
+  on elsewhere; `lifecycle.phase` is a richer, separate axis). Same separation applies to an
+  edge's future `status` (`proposed→validated→active→deprecated→removed`) versus the skill
+  node's own status. An `owner` field is likewise named as applicable independently at all
+  three levels, mirroring the `owner` field skills already carry today.
+
+### D. Phase 2+ roadmap (documented, not implemented)
+
+- **Phase 2 — Graph Governance**: the four dimensions from §C as separate axes — skill
+  lifecycle state machine, relationship (edge) lifecycle state machine on the forward-open
+  `relates_to` entry, skill/edge versioning, owner at skill/edge/graph level. Needs
+  reconciliation with existing conventions (the `status` column, skills' existing `owner`
+  field) before adding as new dimensions.
+- **Phase 3 — Graph Migration**: template/project graph versioning (Standards → Template →
+  Project version chain, each project pinned to the template graph version it was scaffolded
+  from); graph diff; reverse-traversal dependency impact analysis from a deprecated
+  skill/edge to every dependent skill/template graph/downstream project; migration plans
+  (`migration: {from, to, strategy, deadline}`); per-project compatibility checks.
+- **Phase 4 — Graph Intelligence**: promote `inputs`/`outputs` labels (§A) to first-class
+  artifact nodes with `produces`/`consumed_by` edges; graph traversal for skill routing,
+  workflow planning, agent-team generation from a template's graph topology.
+- **Phase 5 — Graph Audit**: execution-time snapshot storage as an audit trail (`Result →
+  Workflow → Agent → Skill Version → Graph Snapshot → Evidence`); relationship confidence
+  scoring; graph learning/feedback into skill updates.
+
+Each phase needs its own dedicated design session per the ADR-0060 precedent (every prior
+amendment was scoped to one coherent change) — recording the sequence now gives the next
+design conversation a concrete starting point without rushing governance machinery that
+could conflict with existing conventions into this pass.
+
+Implementation: `generate-skill-graph.ts` 1.4.0, `verify-skill-graph.ts` 1.2.0,
+`new-project.ts` 1.9.0.
