@@ -337,3 +337,47 @@ never a requirement that other projects adopt the inferential strategy.
 
 Implementation: none (documentation-only recognition of existing co-newbiz
 `scripts/co-newbiz/graph.ts` v0.4.0, a separate repository — no code changes here or there).
+
+## Amendment 2026-08-29 — Procedure-Derived Nodes and Edges (Amendment 5)
+
+**Status**: Accepted
+**Decision of record**: [ADR-0063](0063-procedure-schema-canonical-workflow-source.md)
+**Design of record**: [2026-08-29-procedure-schema-design.md](../designs/2026-08-29-procedure-schema-design.md),
+[2026-08-29-procedure-coverage-and-l0-design.md](../designs/2026-08-29-procedure-coverage-and-l0-design.md)
+
+Amendment 4 recognized two graph-construction strategies and cited co-newbiz's
+procedure-schema-driven graph as the inferential precedent. This amendment adopts that
+pattern for the parent workspace: procedure schemas (`procedures/<name>/schema.yaml`,
+one set per variant template plus the root `l0` namespace) are now a first-class edge
+source of `generate-skill-graph.ts`.
+
+**What is derived**:
+
+- Node types added: `procedure` (`procedure.<namespace>.<name>`), `output_type`
+  (`output_type.<type>`).
+- Edge types added: `step_uses_skill` (procedure → skill), `step_by_agent`
+  (procedure → agent), `produces` (procedure or skill → output_type, single-edge
+  rule per output type), plus the ADR-0060 Amendment 3 typed vocabulary
+  (`follows` / `enables` / `composes_with`) for procedure-level relations.
+- Sources: `templates/<variant>/procedures/` in `buildGraph()` and
+  `buildScopeGraph()` (per-scope graphs are self-contained — each variant's
+  `docs/skill-graph.json` carries its own procedure realization), and the root
+  `procedures/` (`l0` namespace) in `buildGraph()`.
+
+**Canonical source discipline (extends Amendment 4's normative rule)**: the procedure
+YAML is the SSOT; procedure-derived nodes/edges carry `source: procedure_schema` and
+MUST NOT be hand-maintained — including via `docs/skill-graph.overrides.json`. Repair
+the procedure and regenerate. `verify-skill-graph.ts` enforces this with
+procedure-invariant checks (orphan-procedure detection, endpoint checks) and the
+`--determinism` mode (two consecutive builds must serialize exactly equal).
+
+**Verification**: at adoption, the graph held 541 nodes / 1343 edges across 65
+procedures (13 variants + 5 L0 lifecycle), with semantic-regression (all pre-existing
+nodes/edges preserved) and determinism (exact-diff 0) both green, and full CI pass.
+
+**Relation to Amendment 4**: this is the parent workspace acting on the *inferential
+side of the table* — procedure schemas are existing structured data describing
+execution order, so the graph is inferred from them by construction (provenance via
+`source: procedure_schema`), not declared in new frontmatter. The three-stage
+generalization criterion of Amendment 4 remains the gate for co-newbiz's richer
+extractor (rule predicates, decision docs) to ever inform this script.
