@@ -4,7 +4,7 @@
  * UTF-8 encoding helpers for cross-platform file operations.
  * Addresses Risk #3: UTF-8 Encoding.
  *
- * @version 1.1.0
+ * @version 1.2.0
  * @Risk #3: UTF-8 Encoding (P0 - Critical)
  */
 
@@ -258,10 +258,10 @@ export interface HomoglyphMatch {
  * Scans for characters in common confusable Unicode ranges that could
  * be used to disguise malicious identifiers or URLs. Covers:
  *   - Cyrillic look-alikes: U+0400–U+04FF
- *   - Greek look-alikes: U+0370–U+03FF
+ *   - Greek Latin-confusables (v1.2.0 narrowed; math Greek like ΔΠε allowed)
  *   - Fullwidth forms: U+FF01–U+FF5E
  *
- * @version 1.1.0
+ * @version 1.2.0
  */
 export function detectHomoglyphs(content: string): HomoglyphMatch[] {
   const matches: HomoglyphMatch[] = [];
@@ -270,7 +270,18 @@ export function detectHomoglyphs(content: string): HomoglyphMatch[] {
   // Cyrillic: U+0400-U+04FF (e.g. U+0430 vs U+0061 'a', U+043E vs U+006F 'o', U+0435 vs U+0065 'e')
   // Greek: U+0370-U+03FF (e.g. U+03BF vs U+006F 'o', U+03BD vs U+0076 'v')
   // Fullwidth: U+FF01-U+FF5E (e.g. U+FF21 vs U+0041 'A')
-  const confusablePattern = /[\u0400-\u04FF\u0370-\u03FF\uFF01-\uFF5E]/g;
+  // v1.2.0: the Greek range is narrowed from the whole block (U+0370-U+03FF)
+  // to the Latin-confusable subset — the Greek letters Unicode's confusables
+  // data maps onto a Latin look-alike: capitals Alpha Beta Epsilon Zeta Eta
+  // Iota Kappa Mu Nu Omicron Rho Tau Upsilon Chi (U+0391 0392 0395 0396 0397
+  // 0399 039A 039C 039D 039F 03A1 03A4 03A5 03A7) and lowercase alpha iota
+  // omicron nu rho final-sigma sigma tau upsilon chi (U+03B1 03B9 03BF 03BD
+  // 03C1 03C2 03C3 03C4 03C5 03C7). The rest of the Greek block — Delta, Pi,
+  // epsilon, Sigma, mu, lambda, Omega, theta, pi, gamma etc. — is legitimate
+  // math/science notation and is no longer flagged (co-price's pricing skills
+  // use Delta/Pi/epsilon in formula prose; observed 2026-08-29).
+  const confusablePattern =
+    /[\u0400-\u04FF\uFF01-\uFF5E\u0391\u0392\u0395\u0396\u0397\u0399\u039A\u039C\u039D\u039F\u03A1\u03A4\u03A5\u03A7\u03B1\u03B9\u03BF\u03BD\u03C1\u03C2\u03C3\u03C4\u03C5\u03C7]/g;
 
   for (let lineIdx = 0; lineIdx < lines.length; lineIdx++) {
     const line = lines[lineIdx];
@@ -311,7 +322,7 @@ export function detectHomoglyphs(content: string): HomoglyphMatch[] {
 
 /**
  * Result of zero-width character detection.
- * @version 1.1.0
+ * @version 1.2.0
  */
 export interface ZeroWidthMatch {
   char: string;
@@ -335,7 +346,7 @@ export interface ZeroWidthMatch {
  *   - Word joiner (U+2060)
  *   - BOM / zero-width no-break space (U+FEFF)
  *
- * @version 1.1.0
+ * @version 1.2.0
  */
 export function detectZeroWidthChars(content: string): ZeroWidthMatch[] {
   const matches: ZeroWidthMatch[] = [];
