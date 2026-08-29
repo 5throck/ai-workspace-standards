@@ -7,6 +7,11 @@ last_reviewed: 2026-08-25
 status: active
 owner: ux-specialist
 prerequisites: docs/design.md token sheet; i18n keys prepared for new strings
+relates_to:
+  - skill: cost-shock-analysis
+    type: follows
+  - skill: financial-statement-prep
+    type: follows
 ---
 
 # UI Component Design Skill (`ui-component-design`)

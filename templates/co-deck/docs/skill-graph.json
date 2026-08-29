@@ -238,6 +238,17 @@
       }
     },
     {
+      "type": "follows",
+      "from": "design",
+      "to": "html-build",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-deck/skills/design/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
       "type": "references",
       "from": "design",
       "to": "html-build",
@@ -256,6 +267,18 @@
       "source": "procedure_schema"
     },
     {
+      "type": "composes_with",
+      "from": "design",
+      "to": "pdf-export",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-deck/skills/design/SKILL.md",
+        "field": "relates_to",
+        "index": 3
+      }
+    },
+    {
       "type": "phase",
       "from": "design",
       "to": "phase3",
@@ -266,6 +289,18 @@
       "from": "design",
       "to": "prep-pdf",
       "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "design",
+      "to": "research",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-deck/skills/design/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
     },
     {
       "type": "references",
@@ -390,6 +425,18 @@
       "source": "procedure_schema"
     },
     {
+      "type": "composes_with",
+      "from": "html-build",
+      "to": "pdf-export",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-deck/skills/html-build/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
       "type": "follows",
       "from": "html-build",
       "to": "pdf-export",
@@ -405,6 +452,41 @@
       "from": "html-build",
       "to": "phase4",
       "source": "skill_manifest"
+    },
+    {
+      "type": "composes_with",
+      "from": "html-build",
+      "to": "research",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-deck/skills/html-build/SKILL.md",
+        "field": "relates_to",
+        "index": 3
+      }
+    },
+    {
+      "type": "follows",
+      "from": "html-build",
+      "to": "slide-layout-gate",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-deck/skills/html-build/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "html-build",
+      "to": "storyline",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-deck/skills/html-build/SKILL.md",
+        "field": "relates_to",
+        "index": 4
+      }
     },
     {
       "type": "references",
@@ -459,6 +541,30 @@
       }
     },
     {
+      "type": "composes_with",
+      "from": "pdf-export",
+      "to": "research",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-deck/skills/pdf-export/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "pdf-export",
+      "to": "storyline",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-deck/skills/pdf-export/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
       "type": "references",
       "from": "pdf-export",
       "to": "version",
@@ -509,6 +615,17 @@
       "from": "prep-pdf",
       "to": "phase4",
       "source": "skill_manifest"
+    },
+    {
+      "type": "follows",
+      "from": "prep-pdf",
+      "to": "version",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-deck/skills/prep-pdf/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     },
     {
       "type": "references",
@@ -793,6 +910,17 @@
         "file": "templates/co-deck/skills/slide-layout-gate/SKILL.md",
         "field": "relates_to",
         "index": 0
+      }
+    },
+    {
+      "type": "follows",
+      "from": "slide-layout-gate",
+      "to": "pdf-export",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-deck/skills/slide-layout-gate/SKILL.md",
+        "field": "relates_to",
+        "index": 1
       }
     },
     {

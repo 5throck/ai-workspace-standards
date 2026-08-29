@@ -246,6 +246,17 @@
       }
     },
     {
+      "type": "follows",
+      "from": "customs-duty-drawback-workflow",
+      "to": "landed-cost-calculation",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-export/skills/customs-duty-drawback-workflow/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "phase",
       "from": "customs-duty-drawback-workflow",
       "to": "phase3",
@@ -268,6 +279,65 @@
       "from": "export-control-screening",
       "to": "export-control-compliance-specialist",
       "source": "skill_manifest"
+    },
+    {
+      "type": "composes_with",
+      "from": "export-control-screening",
+      "to": "fta-origin-determination",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-export/skills/export-control-screening/SKILL.md",
+        "field": "relates_to",
+        "index": 4
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "export-control-screening",
+      "to": "halal-certification-workflow",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-export/skills/export-control-screening/SKILL.md",
+        "field": "relates_to",
+        "index": 5
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "export-control-screening",
+      "to": "hs-classification-workflow",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-export/skills/export-control-screening/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "follows",
+      "from": "export-control-screening",
+      "to": "hs-classification-workflow",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-export/skills/export-control-screening/SKILL.md",
+        "field": "relates_to",
+        "index": 3
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "export-control-screening",
+      "to": "market-entry-strategy",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-export/skills/export-control-screening/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
     },
     {
       "type": "produces",
@@ -294,6 +364,29 @@
       "source": "skill_manifest"
     },
     {
+      "type": "composes_with",
+      "from": "export-control-screening",
+      "to": "roo-qualification-worksheet",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-export/skills/export-control-screening/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "follows",
+      "from": "foreign-regulation-monitoring",
+      "to": "export-control-screening",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-export/skills/foreign-regulation-monitoring/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "used_by",
       "from": "foreign-regulation-monitoring",
       "to": "foreign-regulatory-intelligence-analyst",
@@ -304,6 +397,42 @@
       "from": "foreign-regulation-monitoring",
       "to": "foreign-regulatory-intelligence-analyst",
       "source": "skill_manifest"
+    },
+    {
+      "type": "composes_with",
+      "from": "foreign-regulation-monitoring",
+      "to": "fta-origin-determination",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-export/skills/foreign-regulation-monitoring/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "foreign-regulation-monitoring",
+      "to": "halal-certification-workflow",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-export/skills/foreign-regulation-monitoring/SKILL.md",
+        "field": "relates_to",
+        "index": 3
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "foreign-regulation-monitoring",
+      "to": "hs-classification-workflow",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-export/skills/foreign-regulation-monitoring/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
     },
     {
       "type": "produces",
@@ -330,6 +459,17 @@
       "source": "skill_manifest"
     },
     {
+      "type": "follows",
+      "from": "fta-origin-determination",
+      "to": "halal-certification-workflow",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-export/skills/fta-origin-determination/SKILL.md",
+        "field": "relates_to",
+        "index": 3
+      }
+    },
+    {
       "type": "requires",
       "from": "fta-origin-determination",
       "to": "hs-classification-workflow",
@@ -337,6 +477,30 @@
       "provenance": {
         "file": "templates/co-export/skills/fta-origin-determination/SKILL.md",
         "field": "prerequisites"
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "fta-origin-determination",
+      "to": "logistics-coordination",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-export/skills/fta-origin-determination/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "fta-origin-determination",
+      "to": "market-entry-strategy",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-export/skills/fta-origin-determination/SKILL.md",
+        "field": "relates_to",
+        "index": 2
       }
     },
     {
@@ -364,6 +528,28 @@
       "source": "skill_manifest"
     },
     {
+      "type": "follows",
+      "from": "fta-origin-determination",
+      "to": "trade-documentation-checklist",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-export/skills/fta-origin-determination/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "follows",
+      "from": "halal-certification-workflow",
+      "to": "export-control-screening",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-export/skills/halal-certification-workflow/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
       "type": "used_by",
       "from": "halal-certification-workflow",
       "to": "halal-certification-specialist",
@@ -376,6 +562,18 @@
       "source": "skill_manifest"
     },
     {
+      "type": "composes_with",
+      "from": "halal-certification-workflow",
+      "to": "hs-classification-workflow",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-export/skills/halal-certification-workflow/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "requires",
       "from": "halal-certification-workflow",
       "to": "hs-classification-workflow",
@@ -383,6 +581,18 @@
       "provenance": {
         "file": "templates/co-export/skills/halal-certification-workflow/SKILL.md",
         "field": "prerequisites"
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "halal-certification-workflow",
+      "to": "market-entry-strategy",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-export/skills/halal-certification-workflow/SKILL.md",
+        "field": "relates_to",
+        "index": 2
       }
     },
     {
@@ -410,6 +620,17 @@
       "source": "skill_manifest"
     },
     {
+      "type": "follows",
+      "from": "hs-classification-workflow",
+      "to": "fta-origin-determination",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-export/skills/hs-classification-workflow/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
       "type": "used_by",
       "from": "hs-classification-workflow",
       "to": "hs-classification-specialist",
@@ -420,6 +641,30 @@
       "from": "hs-classification-workflow",
       "to": "hs-classification-specialist",
       "source": "skill_manifest"
+    },
+    {
+      "type": "composes_with",
+      "from": "hs-classification-workflow",
+      "to": "logistics-coordination",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-export/skills/hs-classification-workflow/SKILL.md",
+        "field": "relates_to",
+        "index": 3
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "hs-classification-workflow",
+      "to": "market-entry-strategy",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-export/skills/hs-classification-workflow/SKILL.md",
+        "field": "relates_to",
+        "index": 4
+      }
     },
     {
       "type": "produces",
@@ -450,6 +695,29 @@
       "from": "hs-classification-workflow",
       "to": "phase2",
       "source": "skill_manifest"
+    },
+    {
+      "type": "follows",
+      "from": "hs-classification-workflow",
+      "to": "roo-qualification-worksheet",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-export/skills/hs-classification-workflow/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "hs-classification-workflow",
+      "to": "trade-documentation-checklist",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-export/skills/hs-classification-workflow/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
     },
     {
       "type": "references",
@@ -546,6 +814,17 @@
       "source": "skill_manifest"
     },
     {
+      "type": "follows",
+      "from": "logistics-coordination",
+      "to": "market-entry-strategy",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-export/skills/logistics-coordination/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "produces",
       "from": "logistics-coordination",
       "to": "output_type.shipment_plan",
@@ -562,6 +841,17 @@
       "from": "logistics-coordination",
       "to": "phase4",
       "source": "skill_manifest"
+    },
+    {
+      "type": "follows",
+      "from": "market-entry-strategy",
+      "to": "foreign-regulation-monitoring",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-export/skills/market-entry-strategy/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -898,6 +1188,17 @@
       }
     },
     {
+      "type": "follows",
+      "from": "roo-qualification-worksheet",
+      "to": "halal-certification-workflow",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-export/skills/roo-qualification-worksheet/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "references",
       "from": "roo-qualification-worksheet",
       "to": "hs-classification-workflow",
@@ -920,6 +1221,17 @@
       "from": "roo-qualification-worksheet",
       "to": "trade-documentation-checklist",
       "source": "prose"
+    },
+    {
+      "type": "follows",
+      "from": "trade-documentation-checklist",
+      "to": "logistics-coordination",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-export/skills/trade-documentation-checklist/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     },
     {
       "type": "phase",

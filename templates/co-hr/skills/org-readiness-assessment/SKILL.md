@@ -11,6 +11,15 @@ last_reviewed: 2026-08-23
 status: active
 owner: change-management-partner
 prerequisites: none
+relates_to:
+  - skill: labor-compliance-audit
+    type: follows
+  - skill: stakeholder-alignment
+    type: composes_with
+  - skill: talent-acquisition-strategy
+    type: composes_with
+  - skill: performance-system-design
+    type: composes_with
 metadata:
   type: domain
   triggers:

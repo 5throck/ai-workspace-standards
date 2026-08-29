@@ -10,6 +10,21 @@ status: active
 scope: co-price
 owner: cpa-auditor
 prerequisites: docs/biz_logic.md section anchors exist; ACME baseline seed available
+relates_to:
+  - skill: double-entry-reconciliation
+    type: follows
+  - skill: i18n-audit
+    type: composes_with
+  - skill: pricing-playbook
+    type: composes_with
+  - skill: i18n-audit
+    type: composes_with
+  - skill: scenario-comparison
+    type: composes_with
+  - skill: prisma-7
+    type: composes_with
+  - skill: ui-component-design
+    type: composes_with
 metadata:
   type: quality
   triggers:

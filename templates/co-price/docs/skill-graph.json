@@ -381,6 +381,18 @@
   ],
   "edges": [
     {
+      "type": "composes_with",
+      "from": "competitive-intelligence",
+      "to": "gabor-granger",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-price/skills/competitive-intelligence/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
       "type": "references",
       "from": "competitive-intelligence",
       "to": "gabor-granger",
@@ -393,10 +405,80 @@
       "source": "procedure_schema"
     },
     {
+      "type": "composes_with",
+      "from": "competitive-intelligence",
+      "to": "price-waterfall-analysis",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-price/skills/competitive-intelligence/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
+      "type": "follows",
+      "from": "competitive-intelligence",
+      "to": "van-westendorp-psm",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-price/skills/competitive-intelligence/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "references",
       "from": "competitive-intelligence",
       "to": "van-westendorp-psm",
       "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "cost-shock-analysis",
+      "to": "double-entry-reconciliation",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-price/skills/cost-shock-analysis/SKILL.md",
+        "field": "relates_to",
+        "index": 4
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "cost-shock-analysis",
+      "to": "financial-statement-prep",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-price/skills/cost-shock-analysis/SKILL.md",
+        "field": "relates_to",
+        "index": 6
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "cost-shock-analysis",
+      "to": "harness-verification",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-price/skills/cost-shock-analysis/SKILL.md",
+        "field": "relates_to",
+        "index": 3
+      }
+    },
+    {
+      "type": "follows",
+      "from": "cost-shock-analysis",
+      "to": "harness-verification",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-price/skills/cost-shock-analysis/SKILL.md",
+        "field": "relates_to",
+        "index": 5
+      }
     },
     {
       "type": "produces",
@@ -411,10 +493,93 @@
       "source": "procedure_schema"
     },
     {
+      "type": "composes_with",
+      "from": "cost-shock-analysis",
+      "to": "price-waterfall-analysis",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-price/skills/cost-shock-analysis/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "cost-shock-analysis",
+      "to": "pricing-governance",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-price/skills/cost-shock-analysis/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "cost-shock-analysis",
+      "to": "pricing-playbook",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-price/skills/cost-shock-analysis/SKILL.md",
+        "field": "relates_to",
+        "index": 7
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "cost-shock-analysis",
+      "to": "prisma-7",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-price/skills/cost-shock-analysis/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "references",
       "from": "cpa-auditor",
       "to": "double-entry-reconciliation",
       "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "double-entry-reconciliation",
+      "to": "financial-statement-prep",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-price/skills/double-entry-reconciliation/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "double-entry-reconciliation",
+      "to": "harness-verification",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-price/skills/double-entry-reconciliation/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "follows",
+      "from": "double-entry-reconciliation",
+      "to": "i18n-audit",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-price/skills/double-entry-reconciliation/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     },
     {
       "type": "produces",
@@ -423,16 +588,74 @@
       "source": "procedure_schema"
     },
     {
+      "type": "composes_with",
+      "from": "double-entry-reconciliation",
+      "to": "pricing-playbook",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-price/skills/double-entry-reconciliation/SKILL.md",
+        "field": "relates_to",
+        "index": 3
+      }
+    },
+    {
       "type": "references",
       "from": "engagement-director",
       "to": "pdf-export",
       "source": "prose"
     },
     {
+      "type": "follows",
+      "from": "executive-presentation",
+      "to": "harness-verification",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-price/skills/executive-presentation/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "references",
       "from": "finance-strategy-lead",
       "to": "price-waterfall-analysis",
       "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "financial-statement-prep",
+      "to": "harness-verification",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-price/skills/financial-statement-prep/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "follows",
+      "from": "financial-statement-prep",
+      "to": "harness-verification",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-price/skills/financial-statement-prep/SKILL.md",
+        "field": "relates_to",
+        "index": 5
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "financial-statement-prep",
+      "to": "i18n-audit",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-price/skills/financial-statement-prep/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
     },
     {
       "type": "produces",
@@ -447,10 +670,56 @@
       "source": "procedure_schema"
     },
     {
+      "type": "follows",
+      "from": "financial-statement-prep",
+      "to": "pricing-playbook",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-price/skills/financial-statement-prep/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "financial-statement-prep",
+      "to": "prisma-7",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-price/skills/financial-statement-prep/SKILL.md",
+        "field": "relates_to",
+        "index": 4
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "financial-statement-prep",
+      "to": "scenario-comparison",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-price/skills/financial-statement-prep/SKILL.md",
+        "field": "relates_to",
+        "index": 3
+      }
+    },
+    {
       "type": "produces",
       "from": "gabor-granger",
       "to": "output_type.demand_curve",
       "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "gabor-granger",
+      "to": "price-waterfall-analysis",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-price/skills/gabor-granger/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
     },
     {
       "type": "enables",
@@ -473,6 +742,41 @@
         "file": "templates/co-price/skills/gabor-granger/SKILL.md",
         "field": "relates_to",
         "index": 0
+      }
+    },
+    {
+      "type": "follows",
+      "from": "harness-verification",
+      "to": "double-entry-reconciliation",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-price/skills/harness-verification/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "harness-verification",
+      "to": "i18n-audit",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-price/skills/harness-verification/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "harness-verification",
+      "to": "i18n-audit",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-price/skills/harness-verification/SKILL.md",
+        "field": "relates_to",
+        "index": 3
       }
     },
     {
@@ -500,10 +804,81 @@
       "source": "procedure_schema"
     },
     {
+      "type": "composes_with",
+      "from": "harness-verification",
+      "to": "pricing-playbook",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-price/skills/harness-verification/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "harness-verification",
+      "to": "prisma-7",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-price/skills/harness-verification/SKILL.md",
+        "field": "relates_to",
+        "index": 5
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "harness-verification",
+      "to": "scenario-comparison",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-price/skills/harness-verification/SKILL.md",
+        "field": "relates_to",
+        "index": 4
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "harness-verification",
+      "to": "ui-component-design",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-price/skills/harness-verification/SKILL.md",
+        "field": "relates_to",
+        "index": 6
+      }
+    },
+    {
+      "type": "follows",
+      "from": "i18n-audit",
+      "to": "cost-shock-analysis",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-price/skills/i18n-audit/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "produces",
       "from": "i18n-audit",
       "to": "output_type.localization_report",
       "source": "procedure_schema"
+    },
+    {
+      "type": "composes_with",
+      "from": "i18n-audit",
+      "to": "pricing-playbook",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-price/skills/i18n-audit/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
     },
     {
       "type": "references",
@@ -536,10 +911,68 @@
       "source": "prose"
     },
     {
+      "type": "composes_with",
+      "from": "price-waterfall-analysis",
+      "to": "prisma-7",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-price/skills/price-waterfall-analysis/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "follows",
+      "from": "price-waterfall-analysis",
+      "to": "ui-component-design",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-price/skills/price-waterfall-analysis/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "price-waterfall-analysis",
+      "to": "van-westendorp-psm",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-price/skills/price-waterfall-analysis/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
       "type": "produces",
       "from": "pricing-governance",
       "to": "output_type.governance_rules_build",
       "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "pricing-governance",
+      "to": "price-waterfall-analysis",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-price/skills/pricing-governance/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "pricing-governance",
+      "to": "ui-component-design",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-price/skills/pricing-governance/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
     },
     {
       "type": "enables",
@@ -569,6 +1002,29 @@
       "from": "prisma-7",
       "to": "output_type.solution_architecture",
       "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "prisma-7",
+      "to": "pricing-governance",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-price/skills/prisma-7/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "prisma-7",
+      "to": "ui-component-design",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-price/skills/prisma-7/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
     },
     {
       "type": "step_by_agent",
@@ -936,10 +1392,55 @@
       }
     },
     {
+      "type": "follows",
+      "from": "scenario-comparison",
+      "to": "prisma-7",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-price/skills/scenario-comparison/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "scenario-comparison",
+      "to": "ui-component-design",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-price/skills/scenario-comparison/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
       "type": "references",
       "from": "trade-promotion-roi",
       "to": "insight-synthesis",
       "source": "prose"
+    },
+    {
+      "type": "follows",
+      "from": "ui-component-design",
+      "to": "cost-shock-analysis",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-price/skills/ui-component-design/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "follows",
+      "from": "ui-component-design",
+      "to": "financial-statement-prep",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-price/skills/ui-component-design/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
     },
     {
       "type": "produces",
@@ -952,6 +1453,17 @@
       "from": "ui-component-design",
       "to": "output_type.ux_flows",
       "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "van-westendorp-psm",
+      "to": "gabor-granger",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-price/skills/van-westendorp-psm/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
     },
     {
       "type": "produces",

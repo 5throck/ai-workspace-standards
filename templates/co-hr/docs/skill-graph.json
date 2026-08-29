@@ -256,6 +256,18 @@
       "source": "skill_manifest"
     },
     {
+      "type": "composes_with",
+      "from": "career-path-succession-planning",
+      "to": "compensation-benchmarking",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-hr/skills/career-path-succession-planning/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
       "type": "references",
       "from": "career-path-succession-planning",
       "to": "compensation-benchmarking",
@@ -268,16 +280,52 @@
       "source": "prose"
     },
     {
+      "type": "composes_with",
+      "from": "career-path-succession-planning",
+      "to": "learning-curriculum-design",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-hr/skills/career-path-succession-planning/SKILL.md",
+        "field": "relates_to",
+        "index": 3
+      }
+    },
+    {
       "type": "references",
       "from": "career-path-succession-planning",
       "to": "learning-curriculum-design",
       "source": "prose"
     },
     {
+      "type": "composes_with",
+      "from": "career-path-succession-planning",
+      "to": "org-design-framework",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-hr/skills/career-path-succession-planning/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "references",
       "from": "career-path-succession-planning",
       "to": "org-design-framework",
       "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "career-path-succession-planning",
+      "to": "org-readiness-assessment",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-hr/skills/career-path-succession-planning/SKILL.md",
+        "field": "relates_to",
+        "index": 5
+      }
     },
     {
       "type": "produces",
@@ -292,6 +340,29 @@
       "source": "skill_manifest"
     },
     {
+      "type": "follows",
+      "from": "career-path-succession-planning",
+      "to": "stakeholder-alignment",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-hr/skills/career-path-succession-planning/SKILL.md",
+        "field": "relates_to",
+        "index": 4
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "career-path-succession-planning",
+      "to": "talent-acquisition-strategy",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-hr/skills/career-path-succession-planning/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
       "type": "used_by",
       "from": "compensation-benchmarking",
       "to": "compensation-benefits-analyst",
@@ -304,10 +375,68 @@
       "source": "skill_manifest"
     },
     {
+      "type": "composes_with",
+      "from": "compensation-benchmarking",
+      "to": "consulting-report-writing",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-hr/skills/compensation-benchmarking/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "follows",
+      "from": "compensation-benchmarking",
+      "to": "hr-metrics-analysis",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-hr/skills/compensation-benchmarking/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "follows",
+      "from": "compensation-benchmarking",
+      "to": "learning-curriculum-design",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-hr/skills/compensation-benchmarking/SKILL.md",
+        "field": "relates_to",
+        "index": 3
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "compensation-benchmarking",
+      "to": "org-design-framework",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-hr/skills/compensation-benchmarking/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
       "type": "references",
       "from": "compensation-benchmarking",
       "to": "org-design-framework",
       "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "compensation-benchmarking",
+      "to": "org-readiness-assessment",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-hr/skills/compensation-benchmarking/SKILL.md",
+        "field": "relates_to",
+        "index": 6
+      }
     },
     {
       "type": "produces",
@@ -322,6 +451,18 @@
       "source": "procedure_schema"
     },
     {
+      "type": "composes_with",
+      "from": "compensation-benchmarking",
+      "to": "performance-system-design",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-hr/skills/compensation-benchmarking/SKILL.md",
+        "field": "relates_to",
+        "index": 4
+      }
+    },
+    {
       "type": "references",
       "from": "compensation-benchmarking",
       "to": "performance-system-design",
@@ -332,6 +473,18 @@
       "from": "compensation-benchmarking",
       "to": "phase2",
       "source": "skill_manifest"
+    },
+    {
+      "type": "composes_with",
+      "from": "compensation-benchmarking",
+      "to": "stakeholder-alignment",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-hr/skills/compensation-benchmarking/SKILL.md",
+        "field": "relates_to",
+        "index": 5
+      }
     },
     {
       "type": "references",
@@ -404,6 +557,17 @@
       "from": "consulting-report-writing",
       "to": "pm",
       "source": "skill_manifest"
+    },
+    {
+      "type": "follows",
+      "from": "hr-metrics-analysis",
+      "to": "consulting-report-writing",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-hr/skills/hr-metrics-analysis/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -490,6 +654,17 @@
       "source": "skill_manifest"
     },
     {
+      "type": "follows",
+      "from": "labor-compliance-audit",
+      "to": "org-readiness-assessment",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-hr/skills/labor-compliance-audit/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "references",
       "from": "labor-compliance-audit",
       "to": "org-readiness-assessment",
@@ -526,6 +701,18 @@
       "source": "skill_manifest"
     },
     {
+      "type": "composes_with",
+      "from": "labor-compliance-audit",
+      "to": "stakeholder-alignment",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-hr/skills/labor-compliance-audit/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
       "type": "references",
       "from": "labor-compliance-audit",
       "to": "stakeholder-alignment",
@@ -550,16 +737,51 @@
       "source": "skill_manifest"
     },
     {
+      "type": "composes_with",
+      "from": "learning-curriculum-design",
+      "to": "org-design-framework",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-hr/skills/learning-curriculum-design/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "references",
       "from": "learning-curriculum-design",
       "to": "org-design-framework",
       "source": "prose"
     },
     {
+      "type": "composes_with",
+      "from": "learning-curriculum-design",
+      "to": "org-readiness-assessment",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-hr/skills/learning-curriculum-design/SKILL.md",
+        "field": "relates_to",
+        "index": 4
+      }
+    },
+    {
       "type": "produces",
       "from": "learning-curriculum-design",
       "to": "output_type.learning_roadmap",
       "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "learning-curriculum-design",
+      "to": "performance-system-design",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-hr/skills/learning-curriculum-design/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
     },
     {
       "type": "references",
@@ -574,6 +796,41 @@
       "source": "skill_manifest"
     },
     {
+      "type": "composes_with",
+      "from": "learning-curriculum-design",
+      "to": "stakeholder-alignment",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-hr/skills/learning-curriculum-design/SKILL.md",
+        "field": "relates_to",
+        "index": 3
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "learning-curriculum-design",
+      "to": "talent-acquisition-strategy",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-hr/skills/learning-curriculum-design/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "follows",
+      "from": "org-design-framework",
+      "to": "hr-metrics-analysis",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-hr/skills/org-design-framework/SKILL.md",
+        "field": "relates_to",
+        "index": 4
+      }
+    },
+    {
       "type": "used_by",
       "from": "org-design-framework",
       "to": "org-design-consultant",
@@ -584,6 +841,30 @@
       "from": "org-design-framework",
       "to": "org-design-consultant",
       "source": "skill_manifest"
+    },
+    {
+      "type": "composes_with",
+      "from": "org-design-framework",
+      "to": "org-readiness-assessment",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-hr/skills/org-design-framework/SKILL.md",
+        "field": "relates_to",
+        "index": 3
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "org-design-framework",
+      "to": "performance-system-design",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-hr/skills/org-design-framework/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
     },
     {
       "type": "phase",
@@ -598,6 +879,29 @@
       "source": "skill_manifest"
     },
     {
+      "type": "composes_with",
+      "from": "org-design-framework",
+      "to": "stakeholder-alignment",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-hr/skills/org-design-framework/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
+      "type": "follows",
+      "from": "org-design-framework",
+      "to": "talent-acquisition-strategy",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-hr/skills/org-design-framework/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "used_by",
       "from": "org-readiness-assessment",
       "to": "change-management-partner",
@@ -608,6 +912,17 @@
       "from": "org-readiness-assessment",
       "to": "change-management-partner",
       "source": "skill_manifest"
+    },
+    {
+      "type": "follows",
+      "from": "org-readiness-assessment",
+      "to": "labor-compliance-audit",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-hr/skills/org-readiness-assessment/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     },
     {
       "type": "produces",
@@ -622,6 +937,18 @@
       "source": "procedure_schema"
     },
     {
+      "type": "composes_with",
+      "from": "org-readiness-assessment",
+      "to": "performance-system-design",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-hr/skills/org-readiness-assessment/SKILL.md",
+        "field": "relates_to",
+        "index": 3
+      }
+    },
+    {
       "type": "phase",
       "from": "org-readiness-assessment",
       "to": "phase1",
@@ -632,6 +959,41 @@
       "from": "org-readiness-assessment",
       "to": "phase2",
       "source": "skill_manifest"
+    },
+    {
+      "type": "composes_with",
+      "from": "org-readiness-assessment",
+      "to": "stakeholder-alignment",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-hr/skills/org-readiness-assessment/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "org-readiness-assessment",
+      "to": "talent-acquisition-strategy",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-hr/skills/org-readiness-assessment/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
+      "type": "follows",
+      "from": "performance-system-design",
+      "to": "career-path-succession-planning",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-hr/skills/performance-system-design/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
     },
     {
       "type": "references",
@@ -662,6 +1024,30 @@
       "from": "performance-system-design",
       "to": "phase2",
       "source": "skill_manifest"
+    },
+    {
+      "type": "composes_with",
+      "from": "performance-system-design",
+      "to": "stakeholder-alignment",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-hr/skills/performance-system-design/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "performance-system-design",
+      "to": "talent-acquisition-strategy",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-hr/skills/performance-system-design/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     },
     {
       "type": "step_uses_skill",
@@ -928,6 +1314,17 @@
       "source": "skill_manifest"
     },
     {
+      "type": "follows",
+      "from": "stakeholder-alignment",
+      "to": "org-readiness-assessment",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-hr/skills/stakeholder-alignment/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
       "type": "produces",
       "from": "stakeholder-alignment",
       "to": "output_type.change_readiness_map",
@@ -950,6 +1347,29 @@
       "from": "stakeholder-alignment",
       "to": "phase2",
       "source": "skill_manifest"
+    },
+    {
+      "type": "composes_with",
+      "from": "stakeholder-alignment",
+      "to": "talent-acquisition-strategy",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-hr/skills/stakeholder-alignment/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "follows",
+      "from": "talent-acquisition-strategy",
+      "to": "compensation-benchmarking",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-hr/skills/talent-acquisition-strategy/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     },
     {
       "type": "references",

@@ -7,6 +7,13 @@ last_reviewed: 2026-08-25
 status: active
 owner: market-intelligence-analyst
 prerequisites: CompetitorPrice observations ingested; diagnostics GTN band available
+relates_to:
+  - skill: van-westendorp-psm
+    type: follows
+  - skill: gabor-granger
+    type: composes_with
+  - skill: price-waterfall-analysis
+    type: composes_with
 ---
 
 # Competitive Intelligence Skill

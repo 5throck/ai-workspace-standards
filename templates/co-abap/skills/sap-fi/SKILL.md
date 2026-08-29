@@ -7,6 +7,17 @@ status: active
 scope: co-abap
 owner: fi-analyst
 prerequisites: vsp MCP server
+relates_to:
+  - skill: sap-co
+    type: follows
+  - skill: sap-sd
+    type: composes_with
+  - skill: sap-mm
+    type: composes_with
+  - skill: sap-le
+    type: composes_with
+  - skill: sap-pp
+    type: composes_with
 metadata:
   type: module
   triggers:

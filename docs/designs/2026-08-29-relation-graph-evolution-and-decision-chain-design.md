@@ -212,3 +212,35 @@ Marker-based regeneration extending the WORKSPACE-MANAGED pattern (ADR-0062 doma
 3. `bun scripts/generate-skill-graph.ts` then `bun scripts/verify-skill-graph.ts --determinism` → 0 drift.
 4. `bun scripts/audit.ts` → 0 errors.
 5. `/sync` opens the PR with regenerated manifests.
+
+## Addendum (2026-08-29, same day): Variant Mass-Adoption Wave
+
+User approved extending typed `relates_to` to all variant templates
+(`templates/co-*/skills/`), ending the §3.3 mass-migration deferral early.
+
+**Derivation instead of hand-authoring.** 74 additional skills / 201 edges were
+derived mechanically from the Procedure Schema corpus (`tests/add-variant-relations.ts`,
+idempotent — re-runnable as new procedures are authored):
+
+| Rule | Relation |
+|------|----------|
+| Consecutive distinct steps `i → i+1` in a procedure | `follows` (pure sequencing — no dependency implication, per Amendment 3 semantics) |
+| Two skills co-used in one procedure, non-consecutive | `composes_with` (symmetric; declared once from the alphabetically-first source) |
+| Skill already declares `relates_to` | append only edges not already present; keep all pre-existing declarations |
+
+**Direction policy (user-corrected):** relations flow **variant skill → L1
+(`templates/common/skills/`) or same-variant targets**. Sources are variant-local
+skills only — variant-specific edges are never written into L1 common skills.
+Procedures that reference L0-only skills as sources are skipped.
+
+**Validator scope widened.** `validate-skills.ts` 1.2.0 → 1.3.0: Part 1c now scans
+every `templates/*/skills/` tree in addition to L0 `skills/`, with recursive
+discovery (co-safety's nested `daily/<name>`, `domains/<name>` skills are checked
+and targeted as slash-relative names).
+
+**Result:** 175 skills now carry typed `relates_to` (15 L0 + 4 prior co-consult
+pilot + 74 derived variant + appended entries); graph at 542 nodes / 1,548 edges,
+determinism-verified; `audit.ts` passes.
+
+**Remaining deferral:** `suggest-skill-relations.ts` (similarity-based candidates
+into overrides) — unchanged from §3.3.

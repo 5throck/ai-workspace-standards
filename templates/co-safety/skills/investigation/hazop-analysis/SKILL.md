@@ -9,6 +9,9 @@ owner: psm-agent
 scope: co-safety
 status: active
 description: Facilitate Hazard and Operability (HAZOP) analysis for process safety management
+relates_to:
+  - skill: daily/risk-assessment
+    type: follows
 metadata:
   triggers:
     - HAZOP 분석

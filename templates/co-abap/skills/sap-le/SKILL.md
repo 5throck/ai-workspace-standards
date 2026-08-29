@@ -7,6 +7,11 @@ status: active
 scope: co-abap
 owner: le-analyst
 prerequisites: vsp MCP server
+relates_to:
+  - skill: sap-sd
+    type: composes_with
+  - skill: sap-pp
+    type: follows
 metadata:
   type: module
   triggers:

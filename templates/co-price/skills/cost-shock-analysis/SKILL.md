@@ -7,6 +7,23 @@ last_reviewed: 2026-08-25
 status: active
 owner: cost-asset-mgmt
 prerequisites: BOM composition per product; current supply prices; export quotes for FX overlay
+relates_to:
+  - skill: prisma-7
+    type: composes_with
+  - skill: pricing-governance
+    type: composes_with
+  - skill: price-waterfall-analysis
+    type: composes_with
+  - skill: harness-verification
+    type: composes_with
+  - skill: double-entry-reconciliation
+    type: composes_with
+  - skill: harness-verification
+    type: follows
+  - skill: financial-statement-prep
+    type: composes_with
+  - skill: pricing-playbook
+    type: composes_with
 ---
 
 # Cost Shock Analysis Skill

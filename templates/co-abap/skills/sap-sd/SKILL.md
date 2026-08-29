@@ -7,6 +7,9 @@ status: active
 scope: co-abap
 owner: sd-analyst
 prerequisites: vsp MCP server
+relates_to:
+  - skill: sap-mm
+    type: follows
 metadata:
   type: module
   triggers:

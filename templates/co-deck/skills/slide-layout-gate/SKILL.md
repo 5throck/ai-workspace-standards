@@ -15,6 +15,8 @@ prerequisites: html-build
 relates_to:
   - skill: pdf-export
     type: composes_with
+  - skill: pdf-export
+    type: follows
 inputs: [slide-html]
 outputs: [layout-gate-status]
 ---

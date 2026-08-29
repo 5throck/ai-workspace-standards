@@ -10,6 +10,10 @@ prerequisites: two approved ScenarioSnapshots; engine re-simulation via compareS
 relates_to:
   - skill: pricing-governance
     type: enables
+  - skill: prisma-7
+    type: follows
+  - skill: ui-component-design
+    type: composes_with
 inputs: [scenario-snapshots]
 outputs: [tri-view-comparison, approval-record]
 ---

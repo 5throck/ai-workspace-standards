@@ -12,6 +12,8 @@ relates_to:
     type: composes_with
   - skill: pricing-playbook
     type: enables
+  - skill: price-waterfall-analysis
+    type: follows
 inputs: [survey-responses-gg]
 outputs: [demand-curve, optimal-price, elasticity-reading]
 ---

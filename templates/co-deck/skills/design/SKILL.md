@@ -13,6 +13,12 @@ prerequisites: storyline
 relates_to:
   - skill: html-build
     type: enables
+  - skill: research
+    type: composes_with
+  - skill: html-build
+    type: follows
+  - skill: pdf-export
+    type: composes_with
 inputs: [storyline-outline]
 outputs: [design-spec, theme-lock]
 ---

@@ -7,6 +7,9 @@ last_reviewed: 2026-08-25
 status: active
 owner: ux-specialist
 prerequisites: engagement-director approval entry; all figures ledger-cited
+relates_to:
+  - skill: harness-verification
+    type: follows
 ---
 
 # Executive Presentation Skill

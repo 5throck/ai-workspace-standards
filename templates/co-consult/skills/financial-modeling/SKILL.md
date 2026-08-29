@@ -16,6 +16,10 @@ relates_to:
     type: composes_with
   - skill: executive-presentation
     type: enables
+  - skill: insight-synthesis
+    type: follows
+  - skill: stakeholder-alignment
+    type: follows
 inputs: [complexity-grades, readiness-scores, change-mgmt-cost-estimates]
 outputs: [roi-analysis, npv-irr-payback, business-case]
 metadata:

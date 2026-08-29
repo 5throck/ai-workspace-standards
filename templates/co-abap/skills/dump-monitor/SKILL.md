@@ -7,6 +7,21 @@ status: active
 scope: co-abap
 owner: devops-admin
 prerequisites: vsp MCP server
+relates_to:
+  - skill: sap-fi
+    type: composes_with
+  - skill: sap-co
+    type: composes_with
+  - skill: sap-sd
+    type: composes_with
+  - skill: sap-mm
+    type: composes_with
+  - skill: sap-le
+    type: composes_with
+  - skill: abap-dev
+    type: follows
+  - skill: research-analysis
+    type: composes_with
 metadata:
   type: core
   triggers:

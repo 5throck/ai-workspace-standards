@@ -7,6 +7,11 @@ last_reviewed: 2026-08-29
 status: active
 owner: l10n-auditor
 prerequisites: locales/*.json present; docs/glossary.md maintained
+relates_to:
+  - skill: cost-shock-analysis
+    type: follows
+  - skill: pricing-playbook
+    type: composes_with
 ---
 
 # I18N Audit & Synchronization Protocol (co-price specialization)

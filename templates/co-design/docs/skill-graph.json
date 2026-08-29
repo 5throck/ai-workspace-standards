@@ -14,7 +14,7 @@
     {
       "id": "documentation-writing",
       "type": "skill",
-      "layer": "variant:co-design"
+      "layer": "L0"
     },
     {
       "id": "output_type.accessibility_report",
@@ -393,6 +393,17 @@
       "source": "procedure_schema"
     },
     {
+      "type": "follows",
+      "from": "service-design",
+      "to": "accessibility-audit",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-design/skills/service-design/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "used_by",
       "from": "service-design",
       "to": "design-lead",
@@ -447,6 +458,28 @@
       "source": "skill_manifest"
     },
     {
+      "type": "follows",
+      "from": "service-design",
+      "to": "token-usage-lint",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-design/skills/service-design/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
+      "type": "follows",
+      "from": "service-design",
+      "to": "ui-ux-design-intelligence",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-design/skills/service-design/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
       "type": "produces",
       "from": "token-usage-lint",
       "to": "output_type.type_system",
@@ -471,6 +504,17 @@
       "source": "skill_manifest"
     },
     {
+      "type": "follows",
+      "from": "token-usage-lint",
+      "to": "ui-ux-design-intelligence",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-design/skills/token-usage-lint/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "used_by",
       "from": "ui-ux-design-intelligence",
       "to": "design-lead",
@@ -481,6 +525,17 @@
       "from": "ui-ux-design-intelligence",
       "to": "design-lead",
       "source": "skill_manifest"
+    },
+    {
+      "type": "follows",
+      "from": "ui-ux-design-intelligence",
+      "to": "documentation-writing",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-design/skills/ui-ux-design-intelligence/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     },
     {
       "type": "produces",
@@ -511,6 +566,17 @@
       "from": "ui-ux-design-intelligence",
       "to": "phase3",
       "source": "skill_manifest"
+    },
+    {
+      "type": "follows",
+      "from": "ui-ux-design-intelligence",
+      "to": "service-design",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-design/skills/ui-ux-design-intelligence/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
     },
     {
       "type": "used_by",

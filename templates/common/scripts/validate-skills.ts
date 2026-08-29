@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Skill Lifecycle Validation Script
- * @version 1.2.0
+ * @version 1.3.0
  */
 // Validates skills/*/SKILL.md files for required frontmatter
 // and checks governance records in docs/lifecycle/skills/*.md
@@ -236,13 +236,34 @@ function extractRelatesTo(rawContent: string): { entries: unknown[] } | null {
 function validateRelationMetadata(knownSkills: Set<string>): void {
   if (!JSON_MODE) console.log(`\n${colors.cyan}📋 Part 1c: Relation Metadata Validation (relates_to)${colors.reset}`);
 
-  const skillDirs = readdirSync(SKILLS_DIR, { withFileTypes: true })
-    .filter(dirent => dirent.isDirectory())
-    .map(dirent => dirent.name);
+  // Scan L0 (skills/) and every variant template (templates/*/skills/), including
+  // nested skill directories (collected as slash-relative names).
+  const scanDirs: string[] = [SKILLS_DIR];
+  const templatesDir = join(ROOT, 'templates');
+  if (existsSync(templatesDir)) {
+    for (const dirent of readdirSync(templatesDir, { withFileTypes: true })) {
+      const skillsDir = join(templatesDir, dirent.name, 'skills');
+      if (dirent.isDirectory() && existsSync(skillsDir)) scanDirs.push(skillsDir);
+    }
+  }
 
-  for (const skillDir of skillDirs) {
-    const skillFile = join(SKILLS_DIR, skillDir, 'SKILL.md');
-    if (!existsSync(skillFile)) continue;
+  const collectSkillFiles = (base: string, rel: string, out: Array<{ name: string; file: string }>) => {
+    for (const dirent of readdirSync(base, { withFileTypes: true })) {
+      if (!dirent.isDirectory()) continue;
+      const childRel = rel ? `${rel}/${dirent.name}` : dirent.name;
+      if (existsSync(join(base, dirent.name, 'SKILL.md'))) {
+        out.push({ name: childRel, file: join(base, dirent.name, 'SKILL.md') });
+      } else {
+        collectSkillFiles(join(base, dirent.name), childRel, out);
+      }
+    }
+  };
+
+  for (const baseDir of scanDirs) {
+    const skillFiles: Array<{ name: string; file: string }> = [];
+    collectSkillFiles(baseDir, '', skillFiles);
+
+    for (const { name: skillDir, file: skillFile } of skillFiles) {
     const raw = readFileSync(skillFile, 'utf-8');
     if (!/^relates_to:/m.test(normalizeContent(raw))) continue;
 
@@ -288,6 +309,7 @@ function validateRelationMetadata(knownSkills: Set<string>): void {
     }
     if (entryErrors === 0) {
       pass(`${skillDir}: relates_to (typed form, ${extracted.entries.length} entries)`);
+    }
     }
   }
 }
@@ -338,23 +360,31 @@ function validateGovernanceRecords(): void {
   }
 }
 
-// Collect every known skill name across L0 (skills/) and variant templates
-// (templates/*/skills/) so relation targets can be existence-checked.
+// Collect every known skill name across L0 (skills/), L1 (templates/common/skills/),
+// and variant templates (templates/co-*/skills/) so relation targets can be
+// existence-checked. Nested skill directories (e.g. co-safety daily/<name>) are
+// collected as slash-relative names.
 function collectKnownSkillNames(): Set<string> {
   const names = new Set<string>();
-  const addFrom = (base: string) => {
-    if (!existsSync(base)) return;
+  const walk = (base: string, rel: string) => {
     for (const dirent of readdirSync(base, { withFileTypes: true })) {
-      if (dirent.isDirectory() && existsSync(join(base, dirent.name, 'SKILL.md'))) {
-        names.add(dirent.name);
+      const childRel = rel ? `${rel}/${dirent.name}` : dirent.name;
+      if (!dirent.isDirectory()) continue;
+      if (existsSync(join(base, dirent.name, 'SKILL.md'))) {
+        names.add(childRel);
+      } else {
+        walk(join(base, dirent.name), childRel);
       }
     }
   };
-  addFrom(SKILLS_DIR);
+  if (existsSync(SKILLS_DIR)) walk(SKILLS_DIR, '');
   const templatesDir = join(ROOT, 'templates');
   if (existsSync(templatesDir)) {
     for (const dirent of readdirSync(templatesDir, { withFileTypes: true })) {
-      if (dirent.isDirectory()) addFrom(join(templatesDir, dirent.name, 'skills'));
+      if (dirent.isDirectory()) {
+        const skillsDir = join(templatesDir, dirent.name, 'skills');
+        if (existsSync(skillsDir)) walk(skillsDir, '');
+      }
     }
   }
   return names;

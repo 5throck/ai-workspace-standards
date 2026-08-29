@@ -337,16 +337,62 @@
       "source": "skill_manifest"
     },
     {
+      "type": "composes_with",
+      "from": "change-impact-assessment",
+      "to": "solution-design",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/change-impact-assessment/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "used_by",
       "from": "company-intelligence",
       "to": "data-analyst",
       "source": "required_skills"
     },
     {
+      "type": "follows",
+      "from": "company-intelligence",
+      "to": "financial-modeling",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-consult/skills/company-intelligence/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
       "type": "used_by",
       "from": "company-intelligence",
       "to": "industry-expert",
       "source": "required_skills"
+    },
+    {
+      "type": "follows",
+      "from": "company-intelligence",
+      "to": "insight-synthesis",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-consult/skills/company-intelligence/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "company-intelligence",
+      "to": "org-readiness-assessment",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/company-intelligence/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
     },
     {
       "type": "produces",
@@ -568,6 +614,17 @@
       "source": "prose"
     },
     {
+      "type": "follows",
+      "from": "financial-modeling",
+      "to": "insight-synthesis",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-consult/skills/financial-modeling/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
       "type": "references",
       "from": "financial-modeling",
       "to": "org-readiness-assessment",
@@ -606,6 +663,17 @@
       "from": "financial-modeling",
       "to": "phase3",
       "source": "skill_manifest"
+    },
+    {
+      "type": "follows",
+      "from": "financial-modeling",
+      "to": "stakeholder-alignment",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-consult/skills/financial-modeling/SKILL.md",
+        "field": "relates_to",
+        "index": 3
+      }
     },
     {
       "type": "used_by",
@@ -730,6 +798,17 @@
       "source": "skill_manifest"
     },
     {
+      "type": "follows",
+      "from": "insight-synthesis",
+      "to": "org-readiness-assessment",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-consult/skills/insight-synthesis/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "produces",
       "from": "insight-synthesis",
       "to": "output_type.delivery_review_notes",
@@ -746,6 +825,18 @@
       "from": "insight-synthesis",
       "to": "phase3",
       "source": "skill_manifest"
+    },
+    {
+      "type": "composes_with",
+      "from": "insight-synthesis",
+      "to": "solution-design",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/insight-synthesis/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
     },
     {
       "type": "used_by",
@@ -1147,6 +1238,17 @@
       }
     },
     {
+      "type": "follows",
+      "from": "project-delivery",
+      "to": "technical-feasibility",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-consult/skills/project-delivery/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "used_by",
       "from": "project-delivery",
       "to": "workstream-lead",
@@ -1235,6 +1337,17 @@
       "source": "skill_manifest"
     },
     {
+      "type": "follows",
+      "from": "solution-design",
+      "to": "financial-modeling",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-consult/skills/solution-design/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "phase",
       "from": "solution-design",
       "to": "phase3",
@@ -1259,6 +1372,29 @@
       "source": "skill_manifest"
     },
     {
+      "type": "composes_with",
+      "from": "solution-design",
+      "to": "stakeholder-alignment",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/solution-design/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "follows",
+      "from": "solution-design",
+      "to": "technical-feasibility",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-consult/skills/solution-design/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
       "type": "used_by",
       "from": "solution-design",
       "to": "technology-specialist",
@@ -1281,6 +1417,17 @@
       "from": "stakeholder-alignment",
       "to": "change-management-partner",
       "source": "skill_manifest"
+    },
+    {
+      "type": "follows",
+      "from": "stakeholder-alignment",
+      "to": "insight-synthesis",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-consult/skills/stakeholder-alignment/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     },
     {
       "type": "produces",
@@ -1357,6 +1504,17 @@
       }
     },
     {
+      "type": "follows",
+      "from": "technical-feasibility",
+      "to": "change-impact-assessment",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-consult/skills/technical-feasibility/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
       "type": "enables",
       "from": "technical-feasibility",
       "to": "executive-presentation",
@@ -1402,6 +1560,17 @@
       "from": "technical-feasibility",
       "to": "phase4",
       "source": "skill_manifest"
+    },
+    {
+      "type": "follows",
+      "from": "technical-feasibility",
+      "to": "project-delivery",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-consult/skills/technical-feasibility/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
     },
     {
       "type": "used_by",
