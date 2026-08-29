@@ -235,6 +235,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `adr:0060` | adr | — | executive-presentation, financial-modeling, org-readiness-assessment, technical-feasibility, version | — |
 | `adr:0061` | adr | — | decision-record, evidence-ledger | — |
 | `adr:0062` | adr | — | — | — |
+| `adr:0063` | adr | — | — | — |
 | `dec:DEC-20260825-01` | decision | — | — | — |
 | `dec:DEC-20260825-02` | decision | `sync` | — | — |
 | `dec:DEC-20260829-01` | decision | `decision-record` | — | — |

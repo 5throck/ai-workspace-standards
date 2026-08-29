@@ -4,6 +4,7 @@
 - **Date**: 2026-08-29
 - **Status**: Approved
 - **Owner**: architect
+- **Decision record**: ADR-0063 (`docs/adr/0063-procedure-schema-canonical-workflow-source.md`)
 - **Related**: ADR-0060 (typed skill relations), `scripts/experiments/infer-graph-from-phases.ts`, co-newbiz `procedures/` (L2 precedent, not propagated)
 
 ---
