@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Skill Lifecycle Validation Script
- * @version 1.3.0
+ * @version 1.3.1
  */
 // Validates skills/*/SKILL.md files for required frontmatter
 // and checks governance records in docs/lifecycle/skills/*.md
@@ -240,6 +240,13 @@ function validateRelationMetadata(knownSkills: Set<string>): void {
   // nested skill directories (collected as slash-relative names).
   const scanDirs: string[] = [SKILLS_DIR];
   const templatesDir = join(ROOT, 'templates');
+  const l1SkillsDir = join(templatesDir, 'common', 'skills');
+  const l1Names = new Set<string>();
+  if (existsSync(l1SkillsDir)) {
+    for (const d of readdirSync(l1SkillsDir, { withFileTypes: true })) {
+      if (d.isDirectory() && existsSync(join(l1SkillsDir, d.name, 'SKILL.md'))) l1Names.add(d.name);
+    }
+  }
   if (existsSync(templatesDir)) {
     for (const dirent of readdirSync(templatesDir, { withFileTypes: true })) {
       const skillsDir = join(templatesDir, dirent.name, 'skills');
@@ -305,6 +312,14 @@ function validateRelationMetadata(knownSkills: Set<string>): void {
       if (e.skill === skillDir) {
         fail(skillDir, 'relation-self', `${skillDir}: relates_to references itself`, 'Remove the self-reference');
         entryErrors++;
+        continue;
+      }
+      // Propagation-coupling guard (ADR-0060 Amendment 6B): a skill published to
+      // L1 (templates/common/skills) must not relate to targets absent from L1 —
+      // those edges would dangle in every propagated copy.
+      const onL1Surface = baseDir === l1SkillsDir || (baseDir === SKILLS_DIR && l1Names.has(skillDir));
+      if (onL1Surface && !l1Names.has(e.skill)) {
+        warn(skillDir, 'relation-target-not-in-l1', `${skillDir}: relates_to target "${e.skill}" does not exist in templates/common/skills — the edge dangles in L1/L2 copies`, 'Remove the relation or pick a target that propagates');
       }
     }
     if (entryErrors === 0) {
