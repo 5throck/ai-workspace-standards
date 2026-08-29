@@ -307,6 +307,17 @@
           4
         ],
         "platform_parity": "required"
+      },
+      {
+        "name": "handbook-sync-audit",
+        "layer": "workspace",
+        "used_by_agents": [
+          "handbook-reviewer"
+        ],
+        "phases": [
+          "H-6"
+        ],
+        "platform_parity": "required"
       }
     ]
   },

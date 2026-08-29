@@ -34,6 +34,11 @@
       "layer": "variant:co-deck"
     },
     {
+      "id": "handbook-sync-audit",
+      "type": "skill",
+      "layer": "variant:co-deck"
+    },
+    {
       "id": "handbook-writer",
       "type": "agent",
       "layer": "variant:co-deck"
@@ -157,6 +162,11 @@
       "layer": "variant:co-deck"
     },
     {
+      "id": "project-review",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
       "id": "README",
       "type": "agent",
       "layer": "variant:co-deck"
@@ -206,6 +216,11 @@
       "id": "theme-authoring",
       "type": "skill",
       "layer": "variant:co-deck"
+    },
+    {
+      "id": "validate-docs-links",
+      "type": "skill",
+      "layer": "L0"
     },
     {
       "id": "version",
@@ -382,6 +397,36 @@
       "type": "references",
       "from": "handbook",
       "to": "theme-authoring",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "handbook-sync-audit",
+      "to": "handbook",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "handbook-sync-audit",
+      "to": "handbook-reviewer",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "handbook-sync-audit",
+      "to": "phaseH-6",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "handbook-sync-audit",
+      "to": "project-review",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "handbook-sync-audit",
+      "to": "validate-docs-links",
       "source": "prose"
     },
     {

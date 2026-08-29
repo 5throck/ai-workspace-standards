@@ -54,6 +54,7 @@
 | `gateguard` | L0 | — | — | — | — | — |
 | `halal-certification-workflow` | variant:co-export | halal-certification-specialist, halal-certification-specialist | phase1, phase2 | export-control-screening (follows), hs-classification-workflow (composes_with), market-entry-strategy (composes_with) | — | — |
 | `handbook` | variant:co-deck | handbook-reviewer, handbook-reviewer, handbook-writer, handbook-writer | phaseH-2, phaseH-3, phaseH-4, phaseH-5 | — | — | — |
+| `handbook-sync-audit` | variant:co-deck | handbook-reviewer | phaseH-6 | — | — | — |
 | `harness-verification` | variant:co-price | — | — | double-entry-reconciliation (follows), i18n-audit (composes_with), i18n-audit (composes_with), pricing-playbook (composes_with), prisma-7 (composes_with), scenario-comparison (composes_with), ui-component-design (composes_with) | — | — |
 | `hr-metrics-analysis` | variant:co-hr | data-analyst | phase1, phase3 | consulting-report-writing (follows) | — | — |
 | `hs-classification-workflow` | variant:co-export | hs-classification-specialist, hs-classification-specialist | phase1, phase2 | fta-origin-determination (follows), landed-cost-calculation (composes_with), logistics-coordination (composes_with), market-entry-strategy (composes_with), roo-qualification-worksheet (follows), trade-documentation-checklist (composes_with) | — | — |
@@ -160,6 +161,7 @@ Skills used in specific lifecycle phases (from `variant.json` `skill_manifest`):
 - **phaseH-3**: handbook
 - **phaseH-4**: handbook
 - **phaseH-5**: handbook
+- **phaseH-6**: handbook-sync-audit
 
 ## Edge Types
 
