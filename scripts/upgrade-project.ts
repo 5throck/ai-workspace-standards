@@ -1,5 +1,10 @@
 #!/usr/bin/env bun
-// @version 1.15.0
+// @version 1.16.0
+// v1.16.0: New project asset allowlist gate — SYNC_IF_NEWER add-if-missing of common skills/agents now
+//           consults the project variant.json (skill_manifest.allowlist / agents[].file) and SKIPS
+//           unregistered NEW assets instead of injecting them (0.6.0 i18n wave tripped audit-variant
+//           allowlist/parity checks in 3 projects). Existing-file updates stay ungated; variant-skills
+//           pass is exempt (variant template is the authority); projects without variant.json ungated.
 // v1.15.0: New PROCEDURES SYNC pass — add-if-missing delivery of the variant workflow corpus (ADR-0063); legacy projects scaffolded before the procedures wave receive procedures/ entries with project-owned preservation.
 // v1.13.0: New VARIANT-SCOPE SKILL PRUNE pass — a skill present in
 //           templates/common/skills/ AND in exactly one templates/co-*/skills/ is a
@@ -1048,6 +1053,33 @@ if (existsSync(variantScriptsSrc)) {
   console.log('');
 }
 
+// ── Project asset allowlist (v1.16.0) ────────────────────────────────────────
+// The project's own variant.json is the SSOT for which assets the project wants
+// (skill_manifest.allowlist for skills/, agents[].file for agents/). Without
+// this gate, add-if-missing delivery of NEW common assets (e.g. the 0.6.0
+// i18n-specialist agent and i18n-* skills) landed in projects whose variant
+// rosters never registered them — tripping audit-variant allowlist/parity
+// failures on the project's very next audit. Existing project files are always
+// updated (registration is only consulted for brand-new additions), and
+// projects without a variant.json keep the ungated behavior.
+function loadProjectAssetGate(): { skills: Set<string>; agents: Set<string> } | null {
+  const gatePath = join(projectDir, 'variant.json');
+  if (!existsSync(gatePath)) return null;
+  try {
+    const v = JSON.parse(readFileSync(gatePath, 'utf8'));
+    const allow = Array.isArray(v?.skill_manifest?.allowlist) ? v.skill_manifest.allowlist as string[] : [];
+    const agents = Array.isArray(v?.agents) ? (v.agents as Array<{ file?: string }>) : [];
+    if (allow.length === 0 && agents.length === 0) return null;
+    return {
+      skills: new Set(allow),
+      agents: new Set(agents.map((a) => (a.file ?? '').replace(/^agents\//, '')).filter(Boolean)),
+    };
+  } catch {
+    return null; // invalid JSON — don't let the gate break the upgrade
+  }
+}
+const assetGate = loadProjectAssetGate();
+
 // ── SYNC_IF_NEWER: agents/ ────────────────────────────────────────────────────
 // Writes the template agent content over the project file, preserving the
 // project's local `lifecycle:` frontmatter block (L3 governance records).
@@ -1081,6 +1113,10 @@ for (const agentsDir of tplAgentsDirs) {
     if (!tplVer) { console.log(`  SKIP (no version): ${rel}`); continue; }
     const projVer = extractFrontmatterVersion(projFile);
     if (!existsSync(projFile)) {
+      if (assetGate && !assetGate.agents.has(fname)) {
+        console.log(`  SKIP (not in variant.json agent registry): ${rel}`);
+        continue;
+      }
       console.log(`  NEW   ${rel}  (none) → ${tplVer}`);
       if (!dryRun) { mkdirSync(dirname(projFile), { recursive: true }); copyFileSync(tplFile, projFile); }
       console.log(`  ${dryTag}COPIED: ${rel}`);
@@ -1130,6 +1166,10 @@ if (existsSync(tplSkillsDir)) {
     if (tplVer) {
       const projVer = extractFrontmatterVersion(projSkillFile);
       if (!existsSync(projSkillFile)) {
+        if (assetGate && !assetGate.skills.has(skillName)) {
+          console.log(`  SKIP (not in variant.json skill allowlist): skills/${skillName}/SKILL.md`);
+          continue;
+        }
         console.log(`  NEW   skills/${skillName}/SKILL.md  (none) → ${tplVer}`);
         if (!dryRun) { mkdirSync(dirname(projSkillFile), { recursive: true }); copyFileSync(tplSkillFile, projSkillFile); }
         console.log(`  ${dryTag}COPIED: skills/${skillName}/SKILL.md`);
@@ -1152,6 +1192,10 @@ if (existsSync(tplSkillsDir)) {
       const tplHash = fileHash(tplSkillFile);
       const projHash = fileHash(projSkillFile);
       if (!existsSync(projSkillFile)) {
+        if (assetGate && !assetGate.skills.has(skillName)) {
+          console.log(`  SKIP (not in variant.json skill allowlist): skills/${skillName}/SKILL.md`);
+          continue;
+        }
         console.log(`  NEW   skills/${skillName}/SKILL.md  (hash-based)`);
         if (!dryRun) { mkdirSync(dirname(projSkillFile), { recursive: true }); copyFileSync(tplSkillFile, projSkillFile); }
         console.log(`  ${dryTag}COPIED: skills/${skillName}/SKILL.md`);
