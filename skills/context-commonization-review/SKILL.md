@@ -15,6 +15,8 @@ last_reviewed: 2026-08-21
 relates_to:
   - skill: promote-variant
     type: follows
+  - skill: meeting-facilitation
+    type: follows
 metadata:
   type: process
   triggers:

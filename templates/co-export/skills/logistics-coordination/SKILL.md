@@ -14,6 +14,8 @@ prerequisites: none
 relates_to:
   - skill: market-entry-strategy
     type: follows
+  - skill: landed-cost-calculation
+    type: composes_with
 ---
 
 ## Context

@@ -14,6 +14,10 @@ prerequisites: org-readiness-assessment
 relates_to:
   - skill: solution-design
     type: composes_with
+  - skill: stakeholder-alignment
+    type: composes_with
+  - skill: org-readiness-assessment
+    type: composes_with
 metadata:
   type: process
   triggers:

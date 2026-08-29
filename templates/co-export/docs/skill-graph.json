@@ -645,6 +645,18 @@
     {
       "type": "composes_with",
       "from": "hs-classification-workflow",
+      "to": "landed-cost-calculation",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-export/skills/hs-classification-workflow/SKILL.md",
+        "field": "relates_to",
+        "index": 5
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "hs-classification-workflow",
       "to": "logistics-coordination",
       "source": "relates_to",
       "symmetric": true,
@@ -744,6 +756,18 @@
       "source": "skill_manifest"
     },
     {
+      "type": "composes_with",
+      "from": "landed-cost-calculation",
+      "to": "hs-classification-workflow",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-export/skills/landed-cost-calculation/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "references",
       "from": "landed-cost-calculation",
       "to": "hs-classification-workflow",
@@ -757,6 +781,18 @@
       "provenance": {
         "file": "templates/co-export/skills/landed-cost-calculation/SKILL.md",
         "field": "prerequisites"
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "landed-cost-calculation",
+      "to": "logistics-coordination",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-export/skills/landed-cost-calculation/SKILL.md",
+        "field": "relates_to",
+        "index": 1
       }
     },
     {
@@ -800,6 +836,18 @@
       "from": "landed-cost-calculation",
       "to": "roo-qualification-worksheet",
       "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "logistics-coordination",
+      "to": "landed-cost-calculation",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-export/skills/logistics-coordination/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
     },
     {
       "type": "used_by",

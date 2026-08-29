@@ -22,6 +22,8 @@ relates_to:
     type: composes_with
   - skill: market-entry-strategy
     type: composes_with
+  - skill: landed-cost-calculation
+    type: composes_with
 ---
 
 ## Context

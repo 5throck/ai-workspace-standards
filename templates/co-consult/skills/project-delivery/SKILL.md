@@ -14,6 +14,10 @@ prerequisites: solution-design
 relates_to:
   - skill: technical-feasibility
     type: follows
+  - skill: stakeholder-review-management
+    type: composes_with
+  - skill: stakeholder-alignment
+    type: composes_with
 metadata:
   type: process
   triggers:

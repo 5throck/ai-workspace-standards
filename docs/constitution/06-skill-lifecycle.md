@@ -142,6 +142,8 @@ Per ADR-0060 (Amendments 3–6) and the `reledgev` design (`docs/designs/2026-08
 
 **Direction policy (ADR-0060 Amendment 6B)**: relations flow variant skill → L1 (`templates/common/skills/`) or same-variant targets only. Variant-specific edges are never written into L1 common skills, and L0-only skills are never targets of variant edges.
 
+**Derivation sources (ADR-0060 Amendments 6 & 8)**: typed relations are derived, in order of precedence, from (1) procedure step adjacency — consecutive steps → `follows`, co-use within one procedure → `composes_with` (declared once, alphabetically-first skill), and (2) **agent co-use** (Amendment 8) — skills co-declared in one agent's `required_skills` → `composes_with`, declared on **both** sides. `tests/add-variant-relations.ts` is the idempotent migrator for both template and project (`--project <path>`) surfaces; already-declared relations are never overwritten.
+
 **Pipeline integration**: the relation graph is regenerated at every lifecycle boundary — L0 `/sync` step 4.65 (all scopes), L3 scaffold (`new-project.ts` step 7.6), L3→variant promotion (`l3-to-variant-pipeline.ts` Phase 6.5), and project upgrade (`upgrade-project.ts` post-upgrade step). `validate-skills.ts` and `validate-decisions.ts` (ADR-0061 chain) run as fail-closed gates in `/sync` step 3.96.
 
 #### 6.3 Skill Body Structure

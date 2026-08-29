@@ -18,6 +18,10 @@ relates_to:
     type: composes_with
   - skill: financial-modeling
     type: composes_with
+  - skill: narrative-framework
+    type: composes_with
+  - skill: consulting-report-writing
+    type: composes_with
 inputs: [complexity-grades, business-case, readiness-scores]
 outputs: [executive-deck]
 metadata:

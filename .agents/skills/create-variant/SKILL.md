@@ -12,6 +12,8 @@ last_reviewed: 2026-08-24
 relates_to:
   - skill: promote-variant
     type: enables
+  - skill: documentation-writing
+    type: follows
 metadata:
   type: process
   triggers:

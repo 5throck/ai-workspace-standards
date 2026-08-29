@@ -19,6 +19,8 @@ relates_to:
     type: follows
   - skill: change-impact-assessment
     type: follows
+  - skill: company-intelligence
+    type: composes_with
 outputs: [complexity-grades, risk-cost-ranges, preconditions]
 metadata:
   type: process
