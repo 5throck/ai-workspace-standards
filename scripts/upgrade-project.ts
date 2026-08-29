@@ -1,9 +1,12 @@
 #!/usr/bin/env bun
-// @version 1.17.0
+// @version 1.17.1
 // v1.17.0: Identity-separated fork support — a project whose variant.json self-declares a variant
 //           with no templates/<variant>/ dir (e.g. co-architect from co-work) is accepted in
 //           "common-only" sync mode: templates/common + project-owned files only, no readiness
 //           gate against a nonexistent variant template, variant-template passes no-op.
+// v1.17.1: Country-prune safety — a skill the project variant.json registers in
+//           skill_manifest.variant_specific is kept (with a KEEP notice) even when the detected
+//           country doesn't match its scope; manifest adoption beats country inference.
 // v1.16.0: New project asset allowlist gate — SYNC_IF_NEWER add-if-missing of common skills/agents now
 //           consults the project variant.json (skill_manifest.allowlist / agents[].file) and SKIPS
 //           unregistered NEW assets instead of injecting them (0.6.0 i18n wave tripped audit-variant
@@ -1101,6 +1104,19 @@ function loadProjectAssetGate(): { skills: Set<string>; agents: Set<string> } | 
 }
 const assetGate = loadProjectAssetGate();
 
+// Skills the project's own variant.json deliberately registers in
+// skill_manifest.variant_specific (v1.17.1) — the country-prune pass must not
+// delete these even when the detected country doesn't match the skill's scope.
+const projectManifestSkills: Set<string> = (() => {
+  try {
+    const v = JSON.parse(readFileSync(join(projectDir, 'variant.json'), 'utf8'));
+    const list = Array.isArray(v?.skill_manifest?.variant_specific)
+      ? v.skill_manifest.variant_specific as Array<{ name?: string }>
+      : [];
+    return new Set(list.map((e) => e.name ?? '').filter(Boolean));
+  } catch { return new Set(); }
+})();
+
 // ── SYNC_IF_NEWER: agents/ ────────────────────────────────────────────────────
 // Writes the template agent content over the project file, preserving the
 // project's local `lifecycle:` frontmatter block (L3 governance records).
@@ -1484,6 +1500,14 @@ let countryPrunedSkills = 0;
 
   for (const [skillName, scopedCountry] of Object.entries(scopedSkills)) {
     if (detectedCountry !== 'none' && detectedCountry === scopedCountry) continue; // country matches — keep
+    // SAFETY (v1.17.1): a skill the project's own variant.json deliberately
+    // registers in skill_manifest.variant_specific is an adopted asset, not
+    // scaffold residue (observed 2026-08-29: co-newbiz's manifest declares
+    // k-law, yet an upgrade with an undetected country silently pruned it).
+    if (projectManifestSkills.has(skillName)) {
+      console.log(`  ⚠️  KEEP ${skillName}/  (${scopedCountry}-scoped, project country ${detectedCountry})  — declared in the project variant.json skill_manifest`);
+      continue;
+    }
     for (const skillBase of ['skills', '.claude/skills', '.gemini/skills', '.agents/skills']) {
       const projSkillDir = join(projectDir, skillBase, skillName);
       if (!existsSync(projSkillDir)) continue;
