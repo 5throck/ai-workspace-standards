@@ -5770,14 +5770,13 @@
       "source": "prose"
     },
     {
-      "type": "relates_to",
+      "type": "requires",
       "from": "financial-statement-analysis",
       "to": "k-dart",
-      "source": "relates_to",
+      "source": "prerequisites",
       "provenance": {
         "file": "templates/co-consult/skills/financial-statement-analysis/SKILL.md",
-        "field": "relates_to",
-        "index": 3
+        "field": "prerequisites"
       }
     },
     {
