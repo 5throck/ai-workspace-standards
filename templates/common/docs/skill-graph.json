@@ -57,6 +57,16 @@
       "layer": "common"
     },
     {
+      "id": "handbook",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "handbook-sync-audit",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
       "id": "i18n-audit",
       "type": "skill",
       "layer": "common"
@@ -213,6 +223,24 @@
       "type": "references",
       "from": "evidence-ledger",
       "to": "decision-record",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "handbook-sync-audit",
+      "to": "handbook",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "handbook-sync-audit",
+      "to": "project-review",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "handbook-sync-audit",
+      "to": "validate-docs-links",
       "source": "prose"
     },
     {

@@ -712,7 +712,7 @@
     {
       "id": "handbook",
       "type": "skill",
-      "layer": "variant:co-deck"
+      "layer": "common"
     },
     {
       "id": "handbook-reviewer",
@@ -722,7 +722,7 @@
     {
       "id": "handbook-sync-audit",
       "type": "skill",
-      "layer": "variant:co-deck"
+      "layer": "common"
     },
     {
       "id": "handbook-writer",
@@ -6308,12 +6308,6 @@
     {
       "type": "used_by",
       "from": "handbook",
-      "to": "handbook-reviewer",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "used_by",
-      "from": "handbook",
       "to": "handbook-writer",
       "source": "required_skills",
       "provenance": {
@@ -6321,36 +6315,6 @@
         "field": "required_skills",
         "index": 0
       }
-    },
-    {
-      "type": "used_by",
-      "from": "handbook",
-      "to": "handbook-writer",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "phase",
-      "from": "handbook",
-      "to": "phaseH-2",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "phase",
-      "from": "handbook",
-      "to": "phaseH-3",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "phase",
-      "from": "handbook",
-      "to": "phaseH-4",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "phase",
-      "from": "handbook",
-      "to": "phaseH-5",
-      "source": "skill_manifest"
     },
     {
       "type": "references",
@@ -6375,18 +6339,6 @@
       "from": "handbook-sync-audit",
       "to": "handbook",
       "source": "prose"
-    },
-    {
-      "type": "used_by",
-      "from": "handbook-sync-audit",
-      "to": "handbook-reviewer",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "phase",
-      "from": "handbook-sync-audit",
-      "to": "phaseH-6",
-      "source": "skill_manifest"
     },
     {
       "type": "references",

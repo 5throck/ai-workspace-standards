@@ -4,6 +4,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-08-30](2026-08-30.md) | feat(skills): promote handbook and handbook-sync-audit skills from co-deck to common |
 | [2026-08-29](2026-08-29.md) | feat(skills+templates): co-safety glossary back-port, project README backlog, scripts/co-safety layout (F1-F3) |
 | [2026-08-28](2026-08-28.md) | fix(audit): skip untracked template variants in variant-scanning checks |
 | [2026-08-27](2026-08-27.md) | feat(workspace): language validator 1.7.0 variant-aware exemption + co-safety variant regen |

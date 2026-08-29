@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Security Validator - Extends Chain Security Protection
- * @version 1.1.0
+ * @version 1.1.1
  *
  * Implements A-11 security requirements for extends chain validation.
  * Prevents path traversal attacks, arbitrary code injection, and DoS vulnerabilities.
@@ -407,7 +407,7 @@ export function validateOverrideSecurity(
 //     both safe. The three bugs patched in commit bd4312f62 that DID reach an
 //     interpolated shell string did so through a locally-defined wrapper
 //     function (e.g. a `run(cmd)` helper in
-//     templates/co-deck/scripts/co-deck/handbook/deploy-handbook.ts), not a
+//     templates/common/scripts/handbook/deploy-handbook.ts), not a
 //     bare subprocess-spawn call. The pattern below therefore also matches
 //     calls to any function whose name contains a subprocess/shell-invocation
 //     keyword (case-insensitive) -- confirmed via survey to add zero
