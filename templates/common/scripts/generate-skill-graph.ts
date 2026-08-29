@@ -1,7 +1,15 @@
 #!/usr/bin/env bun
 /**
  * Skill Relationship Graph Generator
- * @version 1.7.1
+ * @version 1.8.3
+ *
+ * v1.8.3 (2026-08-29): upstreams the three co-newbiz fork adaptations so
+ * scaffolded projects no longer need a local generator fork:
+ * 1. L0/L3 detection keys on `templates/common` (projects may carry content
+ *    template dirs like templates/deliverables/ without being the L0 root).
+ * 2. Source 3b: a scaffolded project's own variant.json skill_manifest now
+ *    yields used_by/phase edges (previously only templates/co-* manifests did).
+ * 3. Agent discovery skips README*.md and _*.md files in agents/.
  *
  * Generates a skill relationship graph from multiple sources:
  * - SKILL.md files (prerequisites, relates_to frontmatter fields)
@@ -52,9 +60,11 @@ const __dirname = dirname(__filename);
 const ROOT = resolve(__dirname, '..');
 const templatesDir = join(ROOT, 'templates');
 // Run-context detection: the workspace root is the only context that has a
-// templates/ directory. Everywhere else (scaffolded project) local assets are
-// the project's own copies and must be tagged L3, not L0.
-const localLayer: 'L0' | 'L3' = existsSync(templatesDir) ? 'L0' : 'L3';
+// templates/common (platform template layer) directory. Scaffolded projects may
+// carry their own content template dirs (e.g. templates/deliverables/) without
+// being the L0 root — key on templates/common so local assets there are tagged
+// L3, not L0.
+const localLayer: 'L0' | 'L3' = existsSync(join(templatesDir, 'common')) ? 'L0' : 'L3';
 
 // Interfaces for the graph structure
 interface GraphNode {
@@ -403,7 +413,9 @@ function discoverNodes(): { skills: Map<string, GraphNode>, agents: Map<string, 
   if (existsSync(agentsDir)) {
     const entries = readdirSync(agentsDir);
     for (const entry of entries) {
-      if (entry.endsWith('.md') && entry !== 'handoff-spec.md') {
+      // Exclude folder READMEs and _-prefixed files — scaffolded projects'
+      // agents/ dirs carry them and they were being counted as agent nodes.
+      if (entry.endsWith('.md') && entry !== 'handoff-spec.md' && !/^README/.test(entry) && !entry.startsWith('_')) {
         const name = entry.replace('.md', '');
         agents.set(name, { id: name, type: 'agent', layer: localLayer });
       }
@@ -690,6 +702,43 @@ export function buildGraph(): SkillGraph {
       } catch {
         // Invalid JSON, skip this variant
       }
+    }
+  }
+
+  // Source 3b: project-local variant.json. The loop above only fires at the
+  // workspace root, where templates/co-* directories live; a scaffolded project
+  // ships its own variant.json with the same skill_manifest shape
+  // (used_by_agents, phases), but no templates/co-* copy — so without this
+  // branch its manifest edges never materialize (same shape as the L0 loop;
+  // targets validated against the project's local skill/agent sets).
+  const projectVariantJsonPath = join(ROOT, 'variant.json');
+  if (existsSync(projectVariantJsonPath)) {
+    try {
+      const variantJson = JSON.parse(readFileSync(projectVariantJsonPath, 'utf-8'));
+      const variantSpecific = variantJson?.skill_manifest?.variant_specific;
+
+      if (Array.isArray(variantSpecific)) {
+        for (const entry of variantSpecific) {
+          const manifest = entry as SkillManifestEntry;
+          if (!skillNames.has(manifest.name)) continue;
+
+          if (manifest.used_by_agents && Array.isArray(manifest.used_by_agents)) {
+            for (const agent of manifest.used_by_agents) {
+              if (agentNames.has(agent)) {
+                edges.push({ type: 'used_by', from: manifest.name, to: agent, source: 'skill_manifest' });
+              }
+            }
+          }
+
+          if (manifest.phases && Array.isArray(manifest.phases)) {
+            for (const phase of manifest.phases) {
+              edges.push({ type: 'phase', from: manifest.name, to: `phase${phase}`, source: 'skill_manifest' });
+            }
+          }
+        }
+      }
+    } catch {
+      // Invalid JSON, skip project manifest
     }
   }
 

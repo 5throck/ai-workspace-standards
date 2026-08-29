@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-29T07:49:30.970Z
+**Generated**: 2026-08-29T10:28:12.118Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -95,7 +95,7 @@
 | generate-ide-rules.ts | 1.0.0 | scripts/generate-ide-rules.ts | N/A |
 | generate-l3-readme.ts | 1.0.3 | scripts/generate-l3-readme.ts | fs, path |
 | generate-scripts-readme.ts | 1.0.3 | scripts/generate-scripts-readme.ts | N/A |
-| generate-skill-graph.ts | 1.7.1 | scripts/generate-skill-graph.ts | js-yaml |
+| generate-skill-graph.ts | 1.8.3 | scripts/generate-skill-graph.ts | js-yaml |
 | generate-version-manifest.ts | 1.2.0 | scripts/generate-version-manifest.ts | bun, js-yaml |
 | infer-graph-from-phases.ts | 0.1.0 | scripts/experiments/infer-graph-from-phases.ts | N/A |
 | ingest-external-skills.ts | 1.1.0 | scripts/ingest-external-skills.ts | N/A |
