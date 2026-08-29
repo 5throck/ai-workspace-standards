@@ -6,6 +6,9 @@ status: active
 scope: workspace
 owner: scaffolding-expert
 last_reviewed: 2026-08-23
+relates_to:
+  - skill: promote-variant
+    type: composes_with
 metadata:
   type: scaffolding
   triggers:

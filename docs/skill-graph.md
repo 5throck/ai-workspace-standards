@@ -11,11 +11,11 @@
 | `abap-code-review` | variant:co-abap | code-writer, code-writer, test-runner, test-runner | phase3, phase4 | — | — | — |
 | `abap-dev` | variant:co-abap | architect, code-writer, sap-investigator, test-runner | phase1, phase2, phase3, phase4 | — | — | — |
 | `accessibility-audit` | variant:co-design | ux-researcher, visual-designer | phase2, phase4 | — | — | — |
-| `agent-lifecycle-manager` | L0 | — | — | — | — | — |
+| `agent-lifecycle-manager` | L0 | — | — | skill-lifecycle-manager (composes_with) | — | — |
 | `ai-tell-reduction` | variant:co-news | style-editor, style-editor | phase4 | — | — | — |
 | `api-documentation` | L0 | technical-writer | — | — | — | — |
 | `arcade-physics` | variant:co-game | game-debugger, game-developer, game-developer | phase4 | — | — | — |
-| `audit-workspace` | L0 | — | — | — | — | — |
+| `audit-workspace` | L0 | — | — | security-scan (composes_with) | — | — |
 | `career-path-succession-planning` | variant:co-hr | career-succession-consultant, career-succession-consultant | phase2 | — | — | — |
 | `change-impact-assessment` | variant:co-consult | change-management-partner, change-management-partner | phase1, phase2 | — | — | — |
 | `code-review` | variant:co-develop | code-writer, game-debugger, game-developer | phase3, phase4, phase5 | — | — | — |
@@ -24,9 +24,9 @@
 | `competency-modeling` | variant:co-hr | career-succession-consultant, learning-development-specialist, performance-management-consultant | phase2 | — | — | — |
 | `competitive-intelligence` | variant:co-consult | industry-expert, industry-expert, strategy-analyst, strategy-analyst | phase1, phase2 | — | — | — |
 | `consulting-report-writing` | variant:co-consult | communications-lead, communications-lead, pm | phase3, phase3 | — | — | — |
-| `context-commonization-review` | L0 | — | — | — | — | — |
+| `context-commonization-review` | L0 | — | — | promote-variant (follows) | — | — |
 | `cost-shock-analysis` | variant:co-price | — | — | — | — | — |
-| `create-variant` | L0 | — | — | — | — | — |
+| `create-variant` | L0 | — | — | promote-variant (enables) | — | — |
 | `customs-duty-drawback-workflow` | variant:co-export | customs-duty-drawback-specialist, customs-duty-drawback-specialist | phase3, phase4 | — | — | — |
 | `daily/audit-preparation` | variant:co-safety | — | — | — | — | — |
 | `daily/compliance-gap` | variant:co-safety | — | — | — | — | — |
@@ -58,7 +58,7 @@
 | `hr-metrics-analysis` | variant:co-hr | data-analyst | phase1, phase3 | — | — | — |
 | `hs-classification-workflow` | variant:co-export | hs-classification-specialist, hs-classification-specialist | phase1, phase2 | — | — | — |
 | `hwp-document-processing` | variant:co-consult | communications-lead | phase3, phase4 | — | — | — |
-| `i18n-audit` | variant:co-price | — | — | — | — | — |
+| `i18n-audit` | common | i18n-specialist | — | — | — | — |
 | `i18n-formatting` | common | i18n-specialist | — | — | — | — |
 | `i18n-layout` | common | i18n-specialist | — | — | — | — |
 | `i18n-locale-config` | common | i18n-specialist | — | — | — | — |
@@ -90,10 +90,10 @@
 | `prisma-7` | variant:co-price | — | — | — | — | — |
 | `project-delivery` | variant:co-consult | delivery-manager, delivery-manager, workstream-lead, workstream-lead | phase4 | — | — | — |
 | `project-review` | L0 | — | — | — | — | — |
-| `project-to-variant` | L0 | — | — | — | — | — |
-| `promote-variant` | L0 | — | — | — | — | — |
+| `project-to-variant` | L0 | — | — | promote-variant (composes_with) | — | — |
+| `promote-variant` | L0 | — | — | create-variant (follows) | — | — |
 | `refactoring` | variant:co-develop | code-writer, game-debugger, game-developer | phase3, phase4, phase5 | — | — | — |
-| `research-analysis` | L0 | analyst | — | — | — | — |
+| `research-analysis` | L0 | analyst | — | documentation-writing (enables) | — | — |
 | `roo-qualification-worksheet` | variant:co-export | fta-origin-analyst | phase1, phase2 | — | — | — |
 | `samm-maturity` | variant:co-security | threat-modeler | phase1, phase2 | — | — | — |
 | `sample-driven-report-writing` | variant:co-consult | communications-lead | phase3, phase4 | — | — | — |
@@ -109,9 +109,9 @@
 | `security-scan` | L0 | — | — | — | — | — |
 | `service-design` | variant:co-design | design-lead, design-lead, service-designer, service-designer | phase1, phase2, phase3 | — | — | — |
 | `sheet-model` | variant:co-price | — | — | — | — | — |
-| `simulate-l3-to-variant-promotion` | L0 | — | — | — | — | — |
+| `simulate-l3-to-variant-promotion` | L0 | — | — | project-to-variant (follows) | — | — |
 | `simulate-project-creation` | L0 | — | — | — | — | — |
-| `skill-lifecycle-manager` | L0 | — | — | — | — | — |
+| `skill-lifecycle-manager` | L0 | — | — | script-lifecycle-manager (composes_with) | — | — |
 | `slide-layout-gate` | variant:co-deck | pdf-export | phase4 | pdf-export (composes_with) | slide-html | layout-gate-status |
 | `solution-design` | variant:co-consult | solutions-architect, solutions-architect, technology-specialist, technology-specialist | phase3, phase4 | — | — | — |
 | `sound-synth` | variant:co-game | sound-designer | phase3, phase4 | — | — | — |
@@ -124,9 +124,9 @@
 | `stride-threat-matrix` | variant:co-security | threat-modeler | phase1, phase2 | — | — | — |
 | `style-lint-checklist` | variant:co-news | style-editor | phase4 | — | — | — |
 | `swe-solve` | variant:co-develop | pm | phase4 | — | — | — |
-| `sync` | L0 | — | — | — | — | — |
+| `sync` | L0 | — | — | audit-workspace (composes_with) | — | — |
 | `talent-acquisition-strategy` | variant:co-hr | talent-acquisition-specialist, talent-acquisition-specialist | phase2 | — | — | — |
-| `team-builder` | L0 | — | — | — | — | — |
+| `team-builder` | L0 | — | — | create-variant (enables) | — | — |
 | `technical-feasibility` | variant:co-consult | sme, sme, solutions-architect, solutions-architect, technology-specialist, technology-specialist | phase1, phase2, phase3, phase4 | executive-presentation (enables) | — | complexity-grades, risk-cost-ranges, preconditions |
 | `test-driven-development` | variant:co-develop | game-debugger, game-developer, test-runner, test-runner | phase3, phase4, phase5 | — | — | — |
 | `theme-authoring` | variant:co-deck | pm | — | — | — | — |
@@ -134,14 +134,14 @@
 | `token-usage-lint` | variant:co-design | prototype-engineer, prototype-engineer | phase4 | — | — | — |
 | `trade-documentation-checklist` | variant:co-export | trade-documentation-specialist, trade-documentation-specialist | phase3 | — | — | — |
 | `trade-promotion-roi` | variant:co-price | — | — | — | — | — |
-| `translate` | L0 | — | — | — | — | — |
+| `translate` | L0 | — | — | documentation-writing (composes_with) | — | — |
 | `ui-component-design` | variant:co-price | — | — | — | — | — |
 | `ui-ux-design-intelligence` | variant:co-design | design-lead, design-lead, ux-researcher, visual-designer, visual-designer | phase1, phase2, phase3 | — | — | — |
 | `update-bun-packages` | L0 | — | — | — | — | — |
-| `upgrade-project` | L0 | — | — | — | — | — |
-| `validate-docs-links` | L0 | — | — | — | — | — |
+| `upgrade-project` | L0 | — | — | promote-variant (follows) | — | — |
+| `validate-docs-links` | L0 | — | — | audit-workspace (composes_with) | — | — |
 | `van-westendorp-psm` | variant:co-price | — | — | pricing-playbook (enables) | survey-responses-vw | price-corridor, opp-price-point |
-| `variant-feature` | L0 | — | — | — | — | — |
+| `variant-feature` | L0 | — | — | upgrade-project (composes_with) | — | — |
 | `verify-authorization` | variant:co-security | pentester, red-team-lead | phase1, phase3 | — | — | — |
 | `zod-contract-gate` | L0 | — | — | — | — | — |
 

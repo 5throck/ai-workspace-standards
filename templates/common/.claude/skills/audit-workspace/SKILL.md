@@ -8,6 +8,9 @@ scope: common
 l2_propagate: false
 owner: auditor
 prerequisites: PowerShell or Bash
+relates_to:
+  - skill: security-scan
+    type: composes_with
 metadata:
   type: process
   triggers:

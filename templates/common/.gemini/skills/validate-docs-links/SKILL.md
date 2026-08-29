@@ -7,6 +7,9 @@ status: active
 scope: common
 owner: pm
 prerequisites: Python or grep
+relates_to:
+  - skill: audit-workspace
+    type: composes_with
 metadata:
   type: process
   triggers:

@@ -9,6 +9,9 @@ description: >
 owner: pm
 version: 1.0.0
 last_reviewed: 2026-05-30
+relates_to:
+  - skill: skill-lifecycle-manager
+    type: composes_with
 metadata:
   type: process
   triggers:

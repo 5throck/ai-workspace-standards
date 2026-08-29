@@ -17,6 +17,16 @@
       "layer": "common"
     },
     {
+      "id": "audit-workspace",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
+      "id": "create-variant",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
       "id": "decision-record",
       "type": "skill",
       "layer": "common"
@@ -38,6 +48,11 @@
     },
     {
       "id": "gateguard",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "i18n-audit",
       "type": "skill",
       "layer": "common"
     },
@@ -149,6 +164,18 @@
   ],
   "edges": [
     {
+      "type": "composes_with",
+      "from": "agent-lifecycle-manager",
+      "to": "skill-lifecycle-manager",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/common/skills/agent-lifecycle-manager/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "references",
       "from": "decision-record",
       "to": "evidence-ledger",
@@ -162,6 +189,30 @@
     },
     {
       "type": "references",
+      "from": "i18n-audit",
+      "to": "i18n-formatting",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "i18n-audit",
+      "to": "i18n-layout",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "i18n-audit",
+      "to": "i18n-locale-config",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "i18n-audit",
+      "to": "i18n-specialist",
+      "source": "required_skills"
+    },
+    {
+      "type": "references",
       "from": "i18n-formatting",
       "to": "i18n-layout",
       "source": "prose"
@@ -235,6 +286,12 @@
     {
       "type": "references",
       "from": "i18n-specialist",
+      "to": "i18n-audit",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "i18n-specialist",
       "to": "i18n-formatting",
       "source": "prose"
     },
@@ -248,6 +305,24 @@
       "type": "references",
       "from": "i18n-specialist",
       "to": "i18n-locale-config",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "i18n-specialist",
+      "to": "k-dart",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "i18n-specialist",
+      "to": "k-kosis",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "i18n-specialist",
+      "to": "k-law",
       "source": "prose"
     },
     {
@@ -287,16 +362,86 @@
       "source": "prose"
     },
     {
+      "type": "enables",
+      "from": "research-analysis",
+      "to": "documentation-writing",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/common/skills/research-analysis/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "skill-lifecycle-manager",
+      "to": "script-lifecycle-manager",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/common/skills/skill-lifecycle-manager/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "sync",
+      "to": "audit-workspace",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/common/skills/sync/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "references",
       "from": "team-builder",
       "to": "agent-lifecycle-manager",
       "source": "prose"
     },
     {
+      "type": "enables",
+      "from": "team-builder",
+      "to": "create-variant",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/common/skills/team-builder/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "references",
       "from": "team-builder",
       "to": "skill-lifecycle-manager",
       "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "translate",
+      "to": "documentation-writing",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/common/skills/translate/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "validate-docs-links",
+      "to": "audit-workspace",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/common/skills/validate-docs-links/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     }
   ]
 }

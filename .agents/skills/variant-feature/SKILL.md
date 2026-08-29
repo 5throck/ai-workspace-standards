@@ -6,6 +6,9 @@ status: active
 scope: workspace
 owner: scaffolding-expert
 last_reviewed: 2026-07-31
+relates_to:
+  - skill: upgrade-project
+    type: composes_with
 metadata:
   type: scaffolding
   triggers:

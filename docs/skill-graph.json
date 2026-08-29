@@ -764,7 +764,7 @@
     {
       "id": "i18n-audit",
       "type": "skill",
-      "layer": "variant:co-price"
+      "layer": "common"
     },
     {
       "id": "i18n-formatting",
@@ -3149,6 +3149,18 @@
       "source": "prose"
     },
     {
+      "type": "composes_with",
+      "from": "agent-lifecycle-manager",
+      "to": "skill-lifecycle-manager",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "skills/agent-lifecycle-manager/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "references",
       "from": "ai-tell-reduction",
       "to": "financial-journalism-style",
@@ -3282,6 +3294,18 @@
       "from": "audit-workspace",
       "to": "output_type.promotion_checklist_result",
       "source": "procedure_schema"
+    },
+    {
+      "type": "composes_with",
+      "from": "audit-workspace",
+      "to": "security-scan",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "skills/audit-workspace/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -3732,6 +3756,17 @@
       "source": "procedure_schema"
     },
     {
+      "type": "follows",
+      "from": "context-commonization-review",
+      "to": "promote-variant",
+      "source": "relates_to",
+      "provenance": {
+        "file": "skills/context-commonization-review/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "produces",
       "from": "cost-shock-analysis",
       "to": "output_type.cost_assurance_notes",
@@ -3772,6 +3807,17 @@
       "from": "create-variant",
       "to": "k-law",
       "source": "prose"
+    },
+    {
+      "type": "enables",
+      "from": "create-variant",
+      "to": "promote-variant",
+      "source": "relates_to",
+      "provenance": {
+        "file": "skills/create-variant/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     },
     {
       "type": "references",
@@ -5090,6 +5136,35 @@
       "source": "skill_manifest"
     },
     {
+      "type": "references",
+      "from": "i18n-audit",
+      "to": "i18n-formatting",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "i18n-audit",
+      "to": "i18n-layout",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "i18n-audit",
+      "to": "i18n-locale-config",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "i18n-audit",
+      "to": "i18n-specialist",
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/common/agents/i18n-specialist.md",
+        "field": "required_skills",
+        "index": 3
+      }
+    },
+    {
       "type": "produces",
       "from": "i18n-audit",
       "to": "output_type.localization_report",
@@ -5203,6 +5278,12 @@
     {
       "type": "references",
       "from": "i18n-specialist",
+      "to": "i18n-audit",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "i18n-specialist",
       "to": "i18n-formatting",
       "source": "prose"
     },
@@ -5216,6 +5297,24 @@
       "type": "references",
       "from": "i18n-specialist",
       "to": "i18n-locale-config",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "i18n-specialist",
+      "to": "k-dart",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "i18n-specialist",
+      "to": "k-kosis",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "i18n-specialist",
+      "to": "k-law",
       "source": "prose"
     },
     {
@@ -9433,6 +9532,29 @@
       "source": "procedure_schema"
     },
     {
+      "type": "composes_with",
+      "from": "project-to-variant",
+      "to": "promote-variant",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "skills/project-to-variant/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "follows",
+      "from": "promote-variant",
+      "to": "create-variant",
+      "source": "relates_to",
+      "provenance": {
+        "file": "skills/promote-variant/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "references",
       "from": "red-team-lead",
       "to": "verify-authorization",
@@ -9540,6 +9662,17 @@
       "provenance": {
         "file": "templates/co-work/agents/analyst.md",
         "field": "required_skills",
+        "index": 0
+      }
+    },
+    {
+      "type": "enables",
+      "from": "research-analysis",
+      "to": "documentation-writing",
+      "source": "relates_to",
+      "provenance": {
+        "file": "skills/research-analysis/SKILL.md",
+        "field": "relates_to",
         "index": 0
       }
     },
@@ -10299,6 +10432,17 @@
       "source": "prose"
     },
     {
+      "type": "follows",
+      "from": "simulate-l3-to-variant-promotion",
+      "to": "project-to-variant",
+      "source": "relates_to",
+      "provenance": {
+        "file": "skills/simulate-l3-to-variant-promotion/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "references",
       "from": "simulate-l3-to-variant-promotion",
       "to": "promote-variant",
@@ -10309,6 +10453,18 @@
       "from": "simulate-l3-to-variant-promotion",
       "to": "simulate-project-creation",
       "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "skill-lifecycle-manager",
+      "to": "script-lifecycle-manager",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "skills/skill-lifecycle-manager/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     },
     {
       "type": "references",
@@ -10863,6 +11019,18 @@
       "source": "skill_manifest"
     },
     {
+      "type": "composes_with",
+      "from": "sync",
+      "to": "audit-workspace",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "skills/sync/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "references",
       "from": "talent-acquisition-strategy",
       "to": "compensation-benchmarking",
@@ -10908,6 +11076,17 @@
       "from": "team-builder",
       "to": "agent-lifecycle-manager",
       "source": "prose"
+    },
+    {
+      "type": "enables",
+      "from": "team-builder",
+      "to": "create-variant",
+      "source": "relates_to",
+      "provenance": {
+        "file": "skills/team-builder/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     },
     {
       "type": "references",
@@ -11185,6 +11364,18 @@
       "source": "prose"
     },
     {
+      "type": "composes_with",
+      "from": "translate",
+      "to": "documentation-writing",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "skills/translate/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "produces",
       "from": "ui-component-design",
       "to": "output_type.ui_build",
@@ -11267,6 +11458,29 @@
       "source": "skill_manifest"
     },
     {
+      "type": "follows",
+      "from": "upgrade-project",
+      "to": "promote-variant",
+      "source": "relates_to",
+      "provenance": {
+        "file": "skills/upgrade-project/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "validate-docs-links",
+      "to": "audit-workspace",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "skills/validate-docs-links/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "produces",
       "from": "van-westendorp-psm",
       "to": "output_type.wtp_findings",
@@ -11279,6 +11493,18 @@
       "source": "relates_to",
       "provenance": {
         "file": "templates/co-price/skills/van-westendorp-psm/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "variant-feature",
+      "to": "upgrade-project",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "skills/variant-feature/SKILL.md",
         "field": "relates_to",
         "index": 0
       }

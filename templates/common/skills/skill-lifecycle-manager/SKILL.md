@@ -9,6 +9,9 @@ description: >
 owner: pm
 version: 1.2.1
 last_reviewed: 2026-08-29
+relates_to:
+  - skill: script-lifecycle-manager
+    type: composes_with
 metadata:
   type: process
   triggers:

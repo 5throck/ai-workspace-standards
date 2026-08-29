@@ -9,6 +9,9 @@ l2_propagate: false
 version: 1.4.1
 owner: pm
 last_reviewed: 2026-08-24
+relates_to:
+  - skill: promote-variant
+    type: enables
 metadata:
   type: process
   triggers:

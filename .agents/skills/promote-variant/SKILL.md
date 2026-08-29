@@ -9,6 +9,9 @@ l2_propagate: false
 version: 1.2.1
 owner: pm
 last_reviewed: 2026-08-24
+relates_to:
+  - skill: create-variant
+    type: follows
 metadata:
   type: process
   triggers:

@@ -47,6 +47,38 @@
       "type": "string",
       "description": "Prerequisites for using this skill"
     },
+    "relates_to": {
+      "type": "array",
+      "description": "Skill relations. Entries must be homogeneous: either ALL legacy bare strings (generic relates_to edges) or ALL typed {skill, type} objects. Mixed forms are rejected by the validator (parseRelatesTo), not by this schema. Types: relates_to (generic), composes_with (symmetric), follows (ordering), enables (output unlocks target).",
+      "items": {
+        "oneOf": [
+          { "type": "string" },
+          {
+            "type": "object",
+            "required": ["skill", "type"],
+            "additionalProperties": true,
+            "properties": {
+              "skill": { "type": "string", "description": "Target skill name" },
+              "type": {
+                "type": "string",
+                "enum": ["relates_to", "composes_with", "follows", "enables"],
+                "description": "Relation type per ADR-0060 Amendment 3"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "inputs": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Opaque input labels consumed by this skill (not artifact identity)"
+    },
+    "outputs": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Opaque output labels produced by this skill (not artifact identity)"
+    },
     "metadata": {
       "type": "object",
       "description": "Skill classification metadata",

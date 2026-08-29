@@ -8,6 +8,9 @@ scope: common
 l2_propagate: true
 owner: pm
 prerequisites: Bun runtime
+relates_to:
+  - skill: audit-workspace
+    type: composes_with
 metadata:
   type: process
   triggers:
