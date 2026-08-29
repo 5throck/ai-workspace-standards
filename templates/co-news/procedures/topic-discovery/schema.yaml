@@ -1,0 +1,38 @@
+schema_version: "1.0"
+procedure_id: co-news-topic-discovery
+variant: co-news
+version: "1.0.0"
+title: Topic Discovery
+phase: 1
+status: active
+owner_agent: financial-analyst
+purpose: >
+  Surface and frame market-moving topics with legal risk screened before any
+  reporting effort is committed.
+inputs: []
+preconditions:
+  - "Editorial calendar open for pitches."
+steps:
+  - id: 1
+    agent_key: financial-analyst
+    skill_key: financial-narrative-brief
+    output_type: story_candidates
+    description: >
+      Screen market data and filings for story-worthy topics and frame the
+      narrative angles.
+  - id: 2
+    agent_key: legal-researcher
+    skill_key: source-verification-ledger
+    output_type: legal_risk_precheck
+    description: >
+      Pre-check candidate topics for defamation and disclosure risk.
+outputs:
+  - type: story_candidates
+relations:
+  - type: enables
+    target: procedure.co-news.fact-checked-article
+quality_gates:
+  - "Every pitched topic carries a legal risk precheck before brief writing."
+evidence: []
+failure_modes:
+  - "Legal risk too high on all angles - drop the topic rather than framing around the risk."

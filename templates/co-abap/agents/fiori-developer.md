@@ -1,5 +1,6 @@
 ---
 name: fiori-developer
+phases: [3]
 role: SAP Fiori & UI5 Implementation Specialist
 model: inherit
 color: cyan

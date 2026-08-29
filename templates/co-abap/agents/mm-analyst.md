@@ -1,5 +1,6 @@
 ---
 name: mm-analyst
+phases: [1]
 role: MM Module Analyst
 model: inherit
 color: yellow

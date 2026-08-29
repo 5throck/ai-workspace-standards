@@ -26,6 +26,13 @@ steps:
     output_type: implementation_commit
     description: >
       Implement the feature increment by increment until all tests pass.
+  - id: 2.5
+    agent_key: designer
+    skill_key: documentation-writing
+    output_type: ui_specification
+    description: >
+      Specify UI behavior and states for user-facing increments before
+      implementation.
   - id: 3
     agent_key: security-monitor
     skill_key: code-review

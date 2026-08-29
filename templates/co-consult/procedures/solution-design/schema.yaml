@@ -1,0 +1,44 @@
+schema_version: "1.0"
+procedure_id: co-consult-solution-design
+variant: co-consult
+version: "1.0.0"
+title: Solution Design
+phase: 2
+status: active
+owner_agent: strategy-analyst
+purpose: >
+  Convert the diagnosis into a solution architecture with expert review and
+  change impact assessment.
+inputs:
+  - diagnosis_findings
+preconditions:
+  - "Current state diagnosis accepted by the client sponsor."
+steps:
+  - id: 1
+    agent_key: industry-expert
+    skill_key: solution-design
+    output_type: solution_options
+    description: >
+      Shape solution options grounded in industry practice.
+  - id: 2
+    agent_key: sme
+    skill_key: technical-feasibility
+    output_type: feasibility_notes
+    description: >
+      Stress-test each option for feasibility in the client context.
+  - id: 3
+    agent_key: change-management-partner
+    skill_key: change-impact-assessment
+    output_type: change_impact_map
+    description: >
+      Map the organizational impact of each option to inform selection.
+outputs:
+  - type: solution_options
+relations:
+  - type: follows
+    target: procedure.co-consult.current-state-diagnosis
+quality_gates:
+  - "Every option has feasibility notes and a change impact map before selection."
+evidence: []
+failure_modes:
+  - "Options all infeasible - return to diagnosis with a narrowed problem statement."

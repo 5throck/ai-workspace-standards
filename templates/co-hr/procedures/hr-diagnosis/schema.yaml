@@ -1,0 +1,49 @@
+schema_version: "1.0"
+procedure_id: co-hr-hr-diagnosis
+variant: co-hr
+version: "1.0.0"
+title: HR Diagnosis
+phase: 1
+status: active
+owner_agent: org-design-consultant
+purpose: >
+  Diagnose the client organization across labor relations, compliance, and
+  workforce risk before any HR solution is designed.
+inputs: []
+preconditions:
+  - "Engagement scope agreed and data access granted."
+steps:
+  - id: 1
+    agent_key: labor-compliance-analyst
+    skill_key: labor-compliance-audit
+    output_type: compliance_findings
+    description: >
+      Audit labor law compliance posture and surface violations.
+  - id: 2
+    agent_key: labor-relations-specialist
+    skill_key: org-readiness-assessment
+    output_type: relations_landscape
+    description: >
+      Map labor relations: unions, agreements, and dispute history.
+  - id: 3
+    agent_key: safety-health-officer
+    skill_key: labor-compliance-audit
+    output_type: safety_baseline
+    description: >
+      Baseline safety and health obligations for the workforce.
+  - id: 4
+    agent_key: change-management-partner
+    skill_key: stakeholder-alignment
+    output_type: change_readiness_map
+    description: >
+      Gauge stakeholder alignment and readiness for HR change.
+outputs:
+  - type: compliance_findings
+relations:
+  - type: enables
+    target: procedure.co-hr.hr-solution-design
+quality_gates:
+  - "Diagnosis covers compliance, relations, safety, and readiness dimensions."
+evidence: []
+failure_modes:
+  - "Compliance violations found requiring immediate action - escalate before continuing the diagnosis."

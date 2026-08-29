@@ -1,5 +1,6 @@
 ---
 name: gui-scripter
+phases: [3]
 role: SAP GUI Scripting & Automation Specialist (LAST RESORT)
 model: inherit
 color: yellow

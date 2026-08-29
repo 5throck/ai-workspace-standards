@@ -1,0 +1,49 @@
+schema_version: "1.0"
+procedure_id: co-game-game-concept-design
+variant: co-game
+version: "1.0.0"
+title: Game Concept Design
+phase: 1
+status: active
+owner_agent: game-designer
+purpose: >
+  Research and shape the game concept: core loop, level archetypes, and
+  technical feasibility.
+inputs: []
+preconditions:
+  - "Genre and target platform agreed with pm."
+steps:
+  - id: 1
+    agent_key: game-designer
+    skill_key: arcade-physics
+    output_type: concept_document
+    description: >
+      Define the core loop, mechanics, and physics feel targets.
+  - id: 2
+    agent_key: puzzle-designer
+    skill_key: arcade-physics
+    output_type: level_archetypes
+    description: >
+      Sketch level and puzzle archetypes that exercise the core loop.
+  - id: 3
+    agent_key: architect
+    skill_key: research-analysis
+    output_type: feasibility_findings
+    description: >
+      Assess engine, tooling, and platform feasibility for the concept.
+  - id: 4
+    agent_key: arcade-designer
+    skill_key: arcade-physics
+    output_type: arcade_reference_notes
+    description: >
+      Supply arcade-feel references that anchor the concept playtests.
+outputs:
+  - type: concept_document
+relations:
+  - type: enables
+    target: procedure.co-game.game-architecture-design
+quality_gates:
+  - "Core loop playtested on paper prototypes and feasibility findings documented."
+evidence: []
+failure_modes:
+  - "Core loop does not hold up in playtesting - iterate the concept rather than freezing it."

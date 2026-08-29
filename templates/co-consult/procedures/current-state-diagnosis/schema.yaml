@@ -1,0 +1,44 @@
+schema_version: "1.0"
+procedure_id: co-consult-current-state-diagnosis
+variant: co-consult
+version: "1.0.0"
+title: Current State Diagnosis
+phase: 1
+status: active
+owner_agent: strategy-analyst
+purpose: >
+  Establish a fact-based picture of the client organization: market position,
+  expert judgment, and change readiness.
+inputs: []
+preconditions:
+  - "Engagement kickoff completed and access to client data granted."
+steps:
+  - id: 1
+    agent_key: industry-expert
+    skill_key: company-intelligence
+    output_type: diagnosis_findings
+    description: >
+      Collect company and industry facts to anchor the diagnosis.
+  - id: 2
+    agent_key: sme
+    skill_key: insight-synthesis
+    output_type: diagnosis_findings
+    description: >
+      Contribute subject-matter judgment on the diagnosed problem area.
+  - id: 3
+    agent_key: change-management-partner
+    skill_key: org-readiness-assessment
+    output_type: readiness_baseline
+    description: >
+      Assess organizational readiness for change so recommendations are
+      implementable, not just correct.
+outputs:
+  - type: diagnosis_findings
+relations:
+  - type: composes_with
+    target: procedure.co-consult.diagnosis-to-recommendation
+quality_gates:
+  - "Diagnosis findings cite verifiable sources and are reviewed by strategy-analyst."
+evidence: []
+failure_modes:
+  - "Client data access blocked - escalate to delivery-manager instead of diagnosing on assumptions."

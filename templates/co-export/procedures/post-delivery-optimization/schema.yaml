@@ -1,0 +1,38 @@
+schema_version: "1.0"
+procedure_id: co-export-post-delivery-optimization
+variant: co-export
+version: "1.0.0"
+title: Post-Delivery Optimization
+phase: 4
+status: active
+owner_agent: logistics-coordinator
+purpose: >
+  Optimize the ongoing trade lane after first delivery: logistics tuning and
+  market entry follow-through.
+inputs:
+  - shipment_plan
+preconditions:
+  - "First deliveries completed and actuals available."
+steps:
+  - id: 1
+    agent_key: logistics-coordinator
+    skill_key: logistics-coordination
+    output_type: lane_optimization_plan
+    description: >
+      Tune routing, consolidation, and lead times from delivery actuals.
+  - id: 2
+    agent_key: market-entry-strategist
+    skill_key: market-entry-strategy
+    output_type: market_expansion_plan
+    description: >
+      Update the market expansion plan from realized performance.
+outputs:
+  - type: lane_optimization_plan
+relations:
+  - type: follows
+    target: procedure.co-export.shipment-execution
+quality_gates:
+  - "Optimization plan backed by delivery actuals, not estimates."
+evidence: []
+failure_modes:
+  - "Actuals unavailable or unreliable - defer optimization rather than tuning on noise."

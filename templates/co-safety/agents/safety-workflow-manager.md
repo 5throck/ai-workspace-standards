@@ -1,5 +1,6 @@
 ---
 name: safety-workflow-manager
+phases: [3]
 alias: SWM
 role: orchestrator
 status: active

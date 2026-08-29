@@ -1,0 +1,38 @@
+schema_version: "1.0"
+procedure_id: co-abap-transport-release
+variant: co-abap
+version: "1.0.0"
+title: Transport Release and Acceptance
+phase: 4
+status: active
+owner_agent: devops-admin
+purpose: >
+  Release the tested development through transports and confirm acceptance in
+  the target system.
+inputs:
+  - test_report
+preconditions:
+  - "All development tests pass per the build procedure."
+steps:
+  - id: 1
+    agent_key: devops-admin
+    skill_key: abap-dev
+    output_type: transport_plan
+    description: >
+      Sequence and release transports across systems.
+  - id: 2
+    agent_key: test-runner
+    skill_key: abap-dev
+    output_type: acceptance_report
+    description: >
+      Run post-transport smoke tests in the target system.
+outputs:
+  - type: transport_plan
+relations:
+  - type: follows
+    target: procedure.co-abap.custom-dev-delivery
+quality_gates:
+  - "Post-transport smoke tests pass in the target system."
+evidence: []
+failure_modes:
+  - "Transport import errors - roll back the transport sequence and fix before re-release."

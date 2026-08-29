@@ -1,5 +1,6 @@
 ---
 name: pricing-strategist
+phases: [1, 2, 3]
 formal_name: Pricing Strategist
 role: price-setting methodology design — elasticity application, floor/target/stretch guidance, discount policy architecture, dual-market pricing strategy
 status: active

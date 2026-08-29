@@ -7,3 +7,9 @@ output_types:
     description: "Registered procedure output type"
   governance_review:
     description: "Registered procedure output type"
+  plan_review_record:
+    description: "Registered procedure output type"
+  audit_findings:
+    description: "Registered procedure output type"
+  governance_actions:
+    description: "Registered procedure output type"

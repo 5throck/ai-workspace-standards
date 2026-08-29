@@ -1,5 +1,6 @@
 ---
 name: architect
+phases: [1, 2]
 role: SAP Technical Architect
 model: inherit
 color: blue

@@ -92,6 +92,86 @@
       "layer": "variant:co-hr"
     },
     {
+      "id": "output_type.benchmark_report",
+      "type": "output_type",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "output_type.change_readiness_map",
+      "type": "output_type",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "output_type.change_roadmap",
+      "type": "output_type",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "output_type.compensation_framework",
+      "type": "output_type",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "output_type.compliance_findings",
+      "type": "output_type",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "output_type.gap_analysis",
+      "type": "output_type",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "output_type.implementation_metrics",
+      "type": "output_type",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "output_type.implementation_milestones",
+      "type": "output_type",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "output_type.learning_roadmap",
+      "type": "output_type",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "output_type.market_dataset",
+      "type": "output_type",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "output_type.org_design_options",
+      "type": "output_type",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "output_type.performance_system_design",
+      "type": "output_type",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "output_type.relations_landscape",
+      "type": "output_type",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "output_type.safety_baseline",
+      "type": "output_type",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "output_type.succession_framework",
+      "type": "output_type",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "output_type.talent_plan",
+      "type": "output_type",
+      "layer": "variant:co-hr"
+    },
+    {
       "id": "performance-management-consultant",
       "type": "agent",
       "layer": "variant:co-hr"
@@ -104,6 +184,26 @@
     {
       "id": "pm",
       "type": "agent",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "procedure.co-hr.compensation-benchmarking",
+      "type": "procedure",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "procedure.co-hr.hr-diagnosis",
+      "type": "procedure",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "procedure.co-hr.hr-solution-design",
+      "type": "procedure",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "procedure.co-hr.org-implementation",
+      "type": "procedure",
       "layer": "variant:co-hr"
     },
     {
@@ -175,6 +275,12 @@
       "source": "prose"
     },
     {
+      "type": "produces",
+      "from": "career-path-succession-planning",
+      "to": "output_type.succession_framework",
+      "source": "procedure_schema"
+    },
+    {
       "type": "phase",
       "from": "career-path-succession-planning",
       "to": "phase2",
@@ -197,6 +303,18 @@
       "from": "compensation-benchmarking",
       "to": "org-design-framework",
       "source": "prose"
+    },
+    {
+      "type": "produces",
+      "from": "compensation-benchmarking",
+      "to": "output_type.compensation_framework",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "compensation-benchmarking",
+      "to": "output_type.market_dataset",
+      "source": "procedure_schema"
     },
     {
       "type": "references",
@@ -301,6 +419,18 @@
       "source": "prose"
     },
     {
+      "type": "produces",
+      "from": "hr-metrics-analysis",
+      "to": "output_type.gap_analysis",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "hr-metrics-analysis",
+      "to": "output_type.implementation_metrics",
+      "source": "procedure_schema"
+    },
+    {
       "type": "phase",
       "from": "hr-metrics-analysis",
       "to": "phase1",
@@ -361,6 +491,12 @@
       "source": "prose"
     },
     {
+      "type": "produces",
+      "from": "labor-compliance-audit",
+      "to": "output_type.safety_baseline",
+      "source": "procedure_schema"
+    },
+    {
       "type": "phase",
       "from": "labor-compliance-audit",
       "to": "phase1",
@@ -415,6 +551,12 @@
       "source": "prose"
     },
     {
+      "type": "produces",
+      "from": "learning-curriculum-design",
+      "to": "output_type.learning_roadmap",
+      "source": "procedure_schema"
+    },
+    {
       "type": "references",
       "from": "learning-curriculum-design",
       "to": "performance-system-design",
@@ -463,6 +605,12 @@
       "source": "skill_manifest"
     },
     {
+      "type": "produces",
+      "from": "org-readiness-assessment",
+      "to": "output_type.relations_landscape",
+      "source": "procedure_schema"
+    },
+    {
       "type": "phase",
       "from": "org-readiness-assessment",
       "to": "phase1",
@@ -481,6 +629,12 @@
       "source": "prose"
     },
     {
+      "type": "produces",
+      "from": "performance-system-design",
+      "to": "output_type.performance_system_design",
+      "source": "procedure_schema"
+    },
+    {
       "type": "used_by",
       "from": "performance-system-design",
       "to": "performance-management-consultant",
@@ -499,6 +653,246 @@
       "source": "skill_manifest"
     },
     {
+      "type": "step_uses_skill",
+      "from": "procedure.co-hr.compensation-benchmarking",
+      "to": "compensation-benchmarking",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-hr.compensation-benchmarking",
+      "to": "compensation-benefits-analyst",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-hr.compensation-benchmarking",
+      "to": "compensation-benefits-analyst",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-hr.compensation-benchmarking",
+      "to": "consulting-report-writing",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-hr.compensation-benchmarking",
+      "to": "data-analyst",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-hr.compensation-benchmarking",
+      "to": "hr-metrics-analysis",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-hr.compensation-benchmarking",
+      "to": "output_type.benchmark_report",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-hr.hr-diagnosis",
+      "to": "change-management-partner",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-hr.hr-diagnosis",
+      "to": "labor-compliance-analyst",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-hr.hr-diagnosis",
+      "to": "labor-compliance-audit",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-hr.hr-diagnosis",
+      "to": "labor-compliance-audit",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-hr.hr-diagnosis",
+      "to": "labor-relations-specialist",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-hr.hr-diagnosis",
+      "to": "org-readiness-assessment",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-hr.hr-diagnosis",
+      "to": "output_type.compliance_findings",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "enables",
+      "from": "procedure.co-hr.hr-diagnosis",
+      "to": "procedure.co-hr.hr-solution-design",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-hr.hr-diagnosis",
+      "to": "safety-health-officer",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-hr.hr-diagnosis",
+      "to": "stakeholder-alignment",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-hr.hr-solution-design",
+      "to": "career-path-succession-planning",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-hr.hr-solution-design",
+      "to": "career-succession-consultant",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-hr.hr-solution-design",
+      "to": "change-management-partner",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-hr.hr-solution-design",
+      "to": "compensation-benchmarking",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-hr.hr-solution-design",
+      "to": "compensation-benefits-analyst",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-hr.hr-solution-design",
+      "to": "learning-curriculum-design",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-hr.hr-solution-design",
+      "to": "learning-development-specialist",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-hr.hr-solution-design",
+      "to": "org-design-consultant",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-hr.hr-solution-design",
+      "to": "org-design-framework",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-hr.hr-solution-design",
+      "to": "output_type.org_design_options",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-hr.hr-solution-design",
+      "to": "performance-management-consultant",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-hr.hr-solution-design",
+      "to": "performance-system-design",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-hr.hr-solution-design",
+      "to": "procedure.co-hr.hr-diagnosis",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "enables",
+      "from": "procedure.co-hr.hr-solution-design",
+      "to": "procedure.co-hr.org-implementation",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-hr.hr-solution-design",
+      "to": "stakeholder-alignment",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-hr.hr-solution-design",
+      "to": "talent-acquisition-specialist",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-hr.hr-solution-design",
+      "to": "talent-acquisition-strategy",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-hr.org-implementation",
+      "to": "data-analyst",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-hr.org-implementation",
+      "to": "hr-metrics-analysis",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-hr.org-implementation",
+      "to": "org-design-consultant",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-hr.org-implementation",
+      "to": "org-design-framework",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-hr.org-implementation",
+      "to": "output_type.implementation_milestones",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-hr.org-implementation",
+      "to": "procedure.co-hr.hr-solution-design",
+      "source": "procedure_schema"
+    },
+    {
       "type": "used_by",
       "from": "stakeholder-alignment",
       "to": "change-management-partner",
@@ -509,6 +903,18 @@
       "from": "stakeholder-alignment",
       "to": "change-management-partner",
       "source": "skill_manifest"
+    },
+    {
+      "type": "produces",
+      "from": "stakeholder-alignment",
+      "to": "output_type.change_readiness_map",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "stakeholder-alignment",
+      "to": "output_type.change_roadmap",
+      "source": "procedure_schema"
     },
     {
       "type": "phase",
@@ -533,6 +939,12 @@
       "from": "talent-acquisition-strategy",
       "to": "org-design-framework",
       "source": "prose"
+    },
+    {
+      "type": "produces",
+      "from": "talent-acquisition-strategy",
+      "to": "output_type.talent_plan",
+      "source": "procedure_schema"
     },
     {
       "type": "phase",

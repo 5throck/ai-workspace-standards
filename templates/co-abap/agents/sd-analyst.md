@@ -1,5 +1,6 @@
 ---
 name: sd-analyst
+phases: [1]
 role: SD Module Analyst
 model: inherit
 color: yellow

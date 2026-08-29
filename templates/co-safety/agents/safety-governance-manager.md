@@ -2,6 +2,7 @@
 lang: ko
 lang_reason: legal
 name: safety-governance-manager
+phases: [2, 6]
 alias: SGM
 role: specialist
 status: active

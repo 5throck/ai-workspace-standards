@@ -11,3 +11,15 @@ output_types:
     description: "Registered procedure output type"
   final_article:
     description: "Registered procedure output type"
+  story_candidates:
+    description: "Registered procedure output type"
+  legal_risk_precheck:
+    description: "Registered procedure output type"
+  final_verification:
+    description: "Registered procedure output type"
+  legal_signoff:
+    description: "Registered procedure output type"
+  publish_ready_article:
+    description: "Registered procedure output type"
+  visual_asset_set:
+    description: "Registered procedure output type"

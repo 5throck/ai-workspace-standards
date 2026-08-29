@@ -66,6 +66,46 @@
       "layer": "variant:co-deck"
     },
     {
+      "id": "output_type.design_spec",
+      "type": "output_type",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "output_type.html_deck",
+      "type": "output_type",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "output_type.layout_report",
+      "type": "output_type",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "output_type.pdf_deck",
+      "type": "output_type",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "output_type.publish_package",
+      "type": "output_type",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "output_type.research_pack",
+      "type": "output_type",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "output_type.storyline_outline",
+      "type": "output_type",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "output_type.version_record",
+      "type": "output_type",
+      "layer": "variant:co-deck"
+    },
+    {
       "id": "pdf-export",
       "type": "agent",
       "layer": "variant:co-deck",
@@ -89,6 +129,31 @@
     {
       "id": "presenter-mode",
       "type": "skill",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "procedure.co-deck.deck-build-and-export",
+      "type": "procedure",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "procedure.co-deck.deck-publish-and-version",
+      "type": "procedure",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "procedure.co-deck.lecture-deck-production",
+      "type": "procedure",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "procedure.co-deck.source-research",
+      "type": "procedure",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "procedure.co-deck.storyline-development",
+      "type": "procedure",
       "layer": "variant:co-deck"
     },
     {
@@ -183,6 +248,12 @@
       "from": "design",
       "to": "i18n-layout",
       "source": "prose"
+    },
+    {
+      "type": "produces",
+      "from": "design",
+      "to": "output_type.design_spec",
+      "source": "procedure_schema"
     },
     {
       "type": "phase",
@@ -305,6 +376,18 @@
       "from": "html-build",
       "to": "html-build",
       "source": "skill_manifest"
+    },
+    {
+      "type": "produces",
+      "from": "html-build",
+      "to": "output_type.html_deck",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "html-build",
+      "to": "output_type.html_deck",
+      "source": "procedure_schema"
     },
     {
       "type": "follows",
@@ -452,6 +535,210 @@
       "source": "skill_manifest"
     },
     {
+      "type": "step_by_agent",
+      "from": "procedure.co-deck.deck-build-and-export",
+      "to": "html-build",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-deck.deck-build-and-export",
+      "to": "html-build",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-deck.deck-build-and-export",
+      "to": "measure",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-deck.deck-build-and-export",
+      "to": "output_type.pdf_deck",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-deck.deck-build-and-export",
+      "to": "pdf-export",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-deck.deck-build-and-export",
+      "to": "pdf-export",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-deck.deck-build-and-export",
+      "to": "procedure.co-deck.storyline-development",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-deck.deck-build-and-export",
+      "to": "slide-layout-gate",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-deck.deck-publish-and-version",
+      "to": "output_type.publish_package",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-deck.deck-publish-and-version",
+      "to": "pdf-export",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-deck.deck-publish-and-version",
+      "to": "prep-pdf",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-deck.deck-publish-and-version",
+      "to": "procedure.co-deck.deck-build-and-export",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-deck.deck-publish-and-version",
+      "to": "version",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-deck.deck-publish-and-version",
+      "to": "version",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-deck.lecture-deck-production",
+      "to": "design",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-deck.lecture-deck-production",
+      "to": "design",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-deck.lecture-deck-production",
+      "to": "html-build",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-deck.lecture-deck-production",
+      "to": "html-build",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-deck.lecture-deck-production",
+      "to": "output_type.pdf_deck",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-deck.lecture-deck-production",
+      "to": "pdf-export",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-deck.lecture-deck-production",
+      "to": "pdf-export",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-deck.lecture-deck-production",
+      "to": "research",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-deck.lecture-deck-production",
+      "to": "research",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-deck.lecture-deck-production",
+      "to": "storyline",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-deck.lecture-deck-production",
+      "to": "storyline",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-deck.source-research",
+      "to": "output_type.research_pack",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "enables",
+      "from": "procedure.co-deck.source-research",
+      "to": "procedure.co-deck.storyline-development",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-deck.source-research",
+      "to": "research",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-deck.source-research",
+      "to": "research",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-deck.storyline-development",
+      "to": "output_type.storyline_outline",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-deck.storyline-development",
+      "to": "procedure.co-deck.source-research",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-deck.storyline-development",
+      "to": "storyline",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-deck.storyline-development",
+      "to": "storyline",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "research",
+      "to": "output_type.research_pack",
+      "source": "procedure_schema"
+    },
+    {
       "type": "phase",
       "from": "research",
       "to": "phase1",
@@ -491,6 +778,12 @@
       }
     },
     {
+      "type": "produces",
+      "from": "slide-layout-gate",
+      "to": "output_type.layout_report",
+      "source": "procedure_schema"
+    },
+    {
       "type": "composes_with",
       "from": "slide-layout-gate",
       "to": "pdf-export",
@@ -524,6 +817,12 @@
         "field": "relates_to",
         "index": 0
       }
+    },
+    {
+      "type": "produces",
+      "from": "storyline",
+      "to": "output_type.storyline_outline",
+      "source": "procedure_schema"
     },
     {
       "type": "phase",
@@ -636,6 +935,12 @@
       "from": "version",
       "to": "measure",
       "source": "skill_manifest"
+    },
+    {
+      "type": "produces",
+      "from": "version",
+      "to": "output_type.version_record",
+      "source": "procedure_schema"
     },
     {
       "type": "used_by",

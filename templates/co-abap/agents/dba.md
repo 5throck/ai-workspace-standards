@@ -1,5 +1,6 @@
 ---
 name: dba
+phases: [2]
 role: SAP DBA (Database Agent)
 model: inherit
 color: magenta

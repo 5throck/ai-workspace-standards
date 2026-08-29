@@ -1,0 +1,39 @@
+schema_version: "1.0"
+procedure_id: co-develop-environment-bootstrap
+variant: co-develop
+version: "1.0.0"
+title: Environment Bootstrap
+phase: 0
+status: active
+owner_agent: stack-setup
+purpose: >
+  Prepare a secure, reproducible development environment before any planning
+  or implementation work.
+inputs: []
+preconditions:
+  - "Project scope agreed and target stack identified."
+steps:
+  - id: 1
+    agent_key: stack-setup
+    skill_key: test-driven-development
+    output_type: environment_manifest
+    description: >
+      Provision the toolchain and project skeleton with the test runner in
+      place.
+  - id: 2
+    agent_key: security-monitor
+    skill_key: code-review
+    output_type: security_baseline
+    description: >
+      Establish the security baseline: dependency sources, secret handling,
+      and scan hooks.
+outputs:
+  - type: environment_manifest
+relations:
+  - type: enables
+    target: procedure.co-develop.technical-planning
+quality_gates:
+  - "Test runner executes green on the empty skeleton and security hooks are active."
+evidence: []
+failure_modes:
+  - "Toolchain cannot be provisioned reproducibly - halt rather than continuing on a snowflake environment."

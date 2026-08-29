@@ -1,0 +1,38 @@
+schema_version: "1.0"
+procedure_id: co-deck-deck-publish-and-version
+variant: co-deck
+version: "1.0.0"
+title: Deck Publish and Versioning
+phase: 5
+status: active
+owner_agent: pdf-export
+purpose: >
+  Publish the exported deck for presentation and register its version so
+  revisions stay traceable.
+inputs:
+  - pdf_deck
+preconditions:
+  - "Deck PDF exported and layout gate clean."
+steps:
+  - id: 1
+    agent_key: pdf-export
+    skill_key: prep-pdf
+    output_type: publish_package
+    description: >
+      Prepare the publication-ready PDF package for the venue.
+  - id: 2
+    agent_key: version
+    skill_key: version
+    output_type: version_record
+    description: >
+      Register the deck version with source hashes for future revisions.
+outputs:
+  - type: publish_package
+relations:
+  - type: follows
+    target: procedure.co-deck.deck-build-and-export
+quality_gates:
+  - "Published package hash matches the registered version record."
+evidence: []
+failure_modes:
+  - "Venue requirements change late - re-run deck-build-and-export rather than patching the exported PDF."

@@ -1,0 +1,39 @@
+schema_version: "1.0"
+procedure_id: co-design-design-definition
+variant: co-design
+version: "1.0.0"
+title: Design Definition
+phase: 2
+status: active
+owner_agent: design-lead
+purpose: >
+  Turn discovery outputs into an agreed design direction: information
+  architecture, narrative structure, and success criteria.
+inputs:
+  - research_findings
+  - narrative_brief
+preconditions:
+  - "UX discovery and narrative discovery complete."
+steps:
+  - id: 1
+    agent_key: design-lead
+    skill_key: ui-ux-design-intelligence
+    output_type: design_direction
+    description: >
+      Synthesize findings into the design direction and success criteria.
+  - id: 2
+    agent_key: storyteller
+    skill_key: documentation-writing
+    output_type: narrative_brief
+    description: >
+      Align the narrative structure with the chosen design direction.
+outputs:
+  - type: design_direction
+relations:
+  - type: follows
+    target: procedure.co-design.ux-discovery
+quality_gates:
+  - "Design direction approved at the phase 2 gate before implementation."
+evidence: []
+failure_modes:
+  - "Direction conflicts with research findings - resolve with ux-researcher before proceeding."

@@ -1,0 +1,44 @@
+schema_version: "1.0"
+procedure_id: co-design-visual-implementation
+variant: co-design
+version: "1.0.0"
+title: Visual and Service Implementation
+phase: 3
+status: active
+owner_agent: visual-designer
+purpose: >
+  Execute the approved direction across visual design, typography, and
+  service touchpoints.
+inputs:
+  - design_direction
+preconditions:
+  - "Design direction approved at the phase 2 gate."
+steps:
+  - id: 1
+    agent_key: service-designer
+    skill_key: service-design
+    output_type: touchpoint_specs
+    description: >
+      Detail the service blueprint into concrete touchpoint specifications.
+  - id: 2
+    agent_key: typography-expert
+    skill_key: token-usage-lint
+    output_type: type_system
+    description: >
+      Establish the type system and verify token usage compliance.
+  - id: 3
+    agent_key: visual-designer
+    skill_key: ui-ux-design-intelligence
+    output_type: visual_design_set
+    description: >
+      Produce the visual design set following the direction and type system.
+outputs:
+  - type: visual_design_set
+relations:
+  - type: follows
+    target: procedure.co-design.design-definition
+quality_gates:
+  - "Token usage lint passes and design-lead reviews the full set."
+evidence: []
+failure_modes:
+  - "Accessibility constraints violated - halt and consult accessibility-audit before continuing."

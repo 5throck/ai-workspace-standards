@@ -1,5 +1,6 @@
 ---
 name: ux-specialist
+phases: [2, 3]
 formal_name: Dashboard & Visual Specialist
 role: Onyx 2.0 UI components, dashboard visualization, user guides, and copilot panel experience
 status: active

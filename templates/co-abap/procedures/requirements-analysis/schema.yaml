@@ -1,0 +1,85 @@
+schema_version: "1.0"
+procedure_id: co-abap-requirements-analysis
+variant: co-abap
+version: "1.0.0"
+title: SAP Requirements Analysis
+phase: 1
+status: active
+owner_agent: co-analyst
+purpose: >
+  Analyze functional requirements across SAP modules and system state before
+  any build decision.
+inputs: []
+preconditions:
+  - "Business requirement documented and scoped by pm."
+steps:
+  - id: 1
+    agent_key: co-analyst
+    skill_key: abap-dev
+    output_type: functional_requirement
+    description: >
+      Consolidate the business requirement into a functional specification.
+  - id: 2
+    agent_key: fi-analyst
+    skill_key: sap-fi
+    output_type: module_impact_notes
+    description: >
+      Assess FI impact of the requirement.
+  - id: 3
+    agent_key: co-analyst
+    skill_key: sap-co
+    output_type: module_impact_notes
+    description: >
+      Assess CO impact of the requirement.
+  - id: 4
+    agent_key: sd-analyst
+    skill_key: sap-sd
+    output_type: module_impact_notes
+    description: >
+      Assess SD impact of the requirement.
+  - id: 5
+    agent_key: mm-analyst
+    skill_key: sap-mm
+    output_type: module_impact_notes
+    description: >
+      Assess MM impact of the requirement.
+  - id: 6
+    agent_key: le-analyst
+    skill_key: sap-le
+    output_type: module_impact_notes
+    description: >
+      Assess LE/WM impact of the requirement.
+  - id: 7
+    agent_key: pp-analyst
+    skill_key: sap-pp
+    output_type: module_impact_notes
+    description: >
+      Assess PP impact of the requirement.
+  - id: 8
+    agent_key: read-only-analyst
+    skill_key: dump-monitor
+    output_type: system_state_report
+    description: >
+      Inspect current system behavior and configuration without changes.
+  - id: 9
+    agent_key: schema-inspector
+    skill_key: abap-dev
+    output_type: data_model_report
+    description: >
+      Inspect tables and data model touched by the requirement.
+  - id: 10
+    agent_key: architect
+    skill_key: research-analysis
+    output_type: feasibility_findings
+    description: >
+      Judge build-vs-configure feasibility at the analysis level.
+outputs:
+  - type: functional_requirement
+relations:
+  - type: enables
+    target: procedure.co-abap.solution-blueprint
+quality_gates:
+  - "All impacted modules have impact notes before the solution blueprint."
+evidence: []
+failure_modes:
+  - "Requirement spans unanalyzed modules - expand the analysis rather than assuming impact."

@@ -1,5 +1,6 @@
 ---
 name: schema-inspector
+phases: [1]
 role: SAP Data Schema & Dependency Inspector (read-only)
 model: inherit
 color: magenta

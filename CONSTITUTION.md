@@ -217,6 +217,15 @@ Scripts have three statuses: **active** (version bump required on change), **dep
 
 ---
 
+### 6.7 Procedure Lifecycle Management → [Full details](docs/constitution/06.7-procedure-lifecycle.md)
+
+Procedures (`schema.yaml` per workflow) are the canonical source for
+workflow-shaped agent/skill/output orchestration across variants and the L0
+lifecycle. They validate via `scripts/validate-procedures.ts` (L1–L8) and
+derive procedure/output_type graph nodes; coverage gaps are human judgment
+targets tracked as governance tickets. See
+`docs/constitution/06.7-procedure-lifecycle.md`.
+
 ### 6.6 VERSION_MANIFEST System → [Full details](docs/adr/0012-version-manifest-schema.md)
 
 The **VERSION_MANIFEST** is the single source of truth (SSOT) for lifecycle artifact versions across the workspace. It provides centralized visibility into agents, skills, scripts, and commands, along with platform parity status and drift detection.
@@ -641,4 +650,4 @@ Agent, skill, and command frontmatter structures are validated against JSON Sche
 
 ---
 
-*Last Updated: 2026-08-25*
+*Last Updated: 2026-08-29*

@@ -1,0 +1,32 @@
+schema_version: "1.0"
+procedure_id: co-deck-source-research
+variant: co-deck
+version: "1.0.0"
+title: Deck Source Research
+phase: 1
+status: active
+owner_agent: research
+purpose: >
+  Collect and verify the lecture source material that every later deck
+  artifact depends on.
+inputs: []
+preconditions:
+  - "Lecture topic and audience profile agreed with pm."
+steps:
+  - id: 1
+    agent_key: research
+    skill_key: research
+    output_type: research_pack
+    description: >
+      Gather candidate sources, verify claims, and assemble the research
+      pack.
+outputs:
+  - type: research_pack
+relations:
+  - type: enables
+    target: procedure.co-deck.storyline-development
+quality_gates:
+  - "Every key claim in the research pack carries a verified source."
+evidence: []
+failure_modes:
+  - "Sources cannot be verified - flag gaps to pm instead of carrying unverified claims forward."

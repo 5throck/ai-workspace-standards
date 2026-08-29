@@ -27,6 +27,11 @@
       "layer": "variant:co-game"
     },
     {
+      "id": "documentation-writing",
+      "type": "skill",
+      "layer": "variant:co-game"
+    },
+    {
       "id": "game-debugger",
       "type": "agent",
       "layer": "variant:co-game"
@@ -42,8 +47,118 @@
       "layer": "variant:co-game"
     },
     {
+      "id": "output_type.approved_implementation_plan",
+      "type": "output_type",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "output_type.arcade_reference_notes",
+      "type": "output_type",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "output_type.audio_asset_set",
+      "type": "output_type",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "output_type.concept_document",
+      "type": "output_type",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "output_type.content_integration_notes",
+      "type": "output_type",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "output_type.defect_report",
+      "type": "output_type",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "output_type.defect_sweep_report",
+      "type": "output_type",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "output_type.feasibility_findings",
+      "type": "output_type",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "output_type.feel_requirements",
+      "type": "output_type",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "output_type.go_nogo_record",
+      "type": "output_type",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "output_type.implementation_commit",
+      "type": "output_type",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "output_type.level_archetypes",
+      "type": "output_type",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "output_type.level_plan",
+      "type": "output_type",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "output_type.regression_report",
+      "type": "output_type",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "output_type.sprite_asset_set",
+      "type": "output_type",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "output_type.tuning_parameters",
+      "type": "output_type",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "output_type.tuning_plan",
+      "type": "output_type",
+      "layer": "variant:co-game"
+    },
+    {
       "id": "pm",
       "type": "agent",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "procedure.co-game.game-architecture-design",
+      "type": "procedure",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "procedure.co-game.game-concept-design",
+      "type": "procedure",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "procedure.co-game.game-content-production",
+      "type": "procedure",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "procedure.co-game.game-release-verification",
+      "type": "procedure",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "procedure.co-game.gameplay-feature-loop",
+      "type": "procedure",
       "layer": "variant:co-game"
     },
     {
@@ -63,6 +178,11 @@
     },
     {
       "id": "refactoring",
+      "type": "skill",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "research-analysis",
       "type": "skill",
       "layer": "variant:co-game"
     },
@@ -128,6 +248,42 @@
       "source": "skill_manifest"
     },
     {
+      "type": "produces",
+      "from": "arcade-physics",
+      "to": "output_type.arcade_reference_notes",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "arcade-physics",
+      "to": "output_type.feel_requirements",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "arcade-physics",
+      "to": "output_type.level_archetypes",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "arcade-physics",
+      "to": "output_type.level_plan",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "arcade-physics",
+      "to": "output_type.tuning_parameters",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "arcade-physics",
+      "to": "output_type.tuning_plan",
+      "source": "procedure_schema"
+    },
+    {
       "type": "phase",
       "from": "arcade-physics",
       "to": "phase4",
@@ -158,6 +314,18 @@
       "source": "skill_manifest"
     },
     {
+      "type": "produces",
+      "from": "code-review",
+      "to": "output_type.defect_report",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "code-review",
+      "to": "output_type.defect_sweep_report",
+      "source": "procedure_schema"
+    },
+    {
       "type": "phase",
       "from": "code-review",
       "to": "phase3",
@@ -168,6 +336,276 @@
       "from": "code-review",
       "to": "phase5",
       "source": "skill_manifest"
+    },
+    {
+      "type": "produces",
+      "from": "documentation-writing",
+      "to": "output_type.content_integration_notes",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-game.game-architecture-design",
+      "to": "arcade-designer",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-game.game-architecture-design",
+      "to": "arcade-physics",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-game.game-architecture-design",
+      "to": "arcade-physics",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-game.game-architecture-design",
+      "to": "arcade-physics",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-game.game-architecture-design",
+      "to": "architect",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-game.game-architecture-design",
+      "to": "code-review",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-game.game-architecture-design",
+      "to": "game-designer",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-game.game-architecture-design",
+      "to": "output_type.approved_implementation_plan",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-game.game-architecture-design",
+      "to": "procedure.co-game.game-concept-design",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "enables",
+      "from": "procedure.co-game.game-architecture-design",
+      "to": "procedure.co-game.gameplay-feature-loop",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-game.game-architecture-design",
+      "to": "puzzle-designer",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-game.game-concept-design",
+      "to": "arcade-designer",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-game.game-concept-design",
+      "to": "arcade-physics",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-game.game-concept-design",
+      "to": "arcade-physics",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-game.game-concept-design",
+      "to": "arcade-physics",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-game.game-concept-design",
+      "to": "architect",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-game.game-concept-design",
+      "to": "game-designer",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-game.game-concept-design",
+      "to": "output_type.concept_document",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "enables",
+      "from": "procedure.co-game.game-concept-design",
+      "to": "procedure.co-game.game-architecture-design",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-game.game-concept-design",
+      "to": "puzzle-designer",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-game.game-concept-design",
+      "to": "research-analysis",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-game.game-content-production",
+      "to": "arcade-physics",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-game.game-content-production",
+      "to": "designer",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-game.game-content-production",
+      "to": "documentation-writing",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-game.game-content-production",
+      "to": "output_type.sprite_asset_set",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-game.game-content-production",
+      "to": "procedure.co-game.game-architecture-design",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-game.game-content-production",
+      "to": "sound-designer",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-game.game-content-production",
+      "to": "sound-synth",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-game.game-content-production",
+      "to": "visual-artist",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-game.game-release-verification",
+      "to": "code-review",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-game.game-release-verification",
+      "to": "code-review",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-game.game-release-verification",
+      "to": "game-debugger",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-game.game-release-verification",
+      "to": "game-developer",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-game.game-release-verification",
+      "to": "output_type.go_nogo_record",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-game.game-release-verification",
+      "to": "procedure.co-game.gameplay-feature-loop",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-game.game-release-verification",
+      "to": "test-driven-development",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-game.game-release-verification",
+      "to": "test-runner",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-game.gameplay-feature-loop",
+      "to": "arcade-physics",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-game.gameplay-feature-loop",
+      "to": "code-review",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-game.gameplay-feature-loop",
+      "to": "game-debugger",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-game.gameplay-feature-loop",
+      "to": "game-designer",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-game.gameplay-feature-loop",
+      "to": "game-developer",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-game.gameplay-feature-loop",
+      "to": "output_type.implementation_commit",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-game.gameplay-feature-loop",
+      "to": "test-driven-development",
+      "source": "procedure_schema"
     },
     {
       "type": "used_by",
@@ -192,6 +630,18 @@
       "from": "refactoring",
       "to": "phase5",
       "source": "skill_manifest"
+    },
+    {
+      "type": "produces",
+      "from": "research-analysis",
+      "to": "output_type.feasibility_findings",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "sound-synth",
+      "to": "output_type.audio_asset_set",
+      "source": "procedure_schema"
     },
     {
       "type": "phase",
@@ -222,6 +672,12 @@
       "from": "test-driven-development",
       "to": "game-developer",
       "source": "skill_manifest"
+    },
+    {
+      "type": "produces",
+      "from": "test-driven-development",
+      "to": "output_type.regression_report",
+      "source": "procedure_schema"
     },
     {
       "type": "phase",

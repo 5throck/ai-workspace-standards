@@ -27,6 +27,12 @@ steps:
     description: >
       Validate modeled threats against observed findings and reconcile
       duplicates.
+  - id: 2.5
+    agent_key: red-team-lead
+    skill_key: finding-reconciliation
+    output_type: exploitation_notes
+    description: >
+      Prioritize exploitation paths that the validation steps must cover.
   - id: 3
     agent_key: report-writer
     skill_key: sarif-exporter

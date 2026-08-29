@@ -1,0 +1,57 @@
+schema_version: "1.0"
+procedure_id: co-price-engine-implementation
+variant: co-price
+version: "1.0.0"
+title: Pricing Engine Implementation
+phase: 3
+status: active
+owner_agent: lead-architect
+purpose: >
+  Build the pricing engine that realizes the selected scenarios end to end.
+inputs:
+  - scenario_set
+preconditions:
+  - "Scenario modeling accepted at the phase 2 gate."
+steps:
+  - id: 1
+    agent_key: core-engine-dev
+    skill_key: prisma-7
+    output_type: engine_build
+    description: >
+      Implement the pricing engine data layer and services.
+  - id: 2
+    agent_key: lead-architect
+    skill_key: pricing-governance
+    output_type: governance_rules_build
+    description: >
+      Encode the pricing governance rules into the engine.
+  - id: 3
+    agent_key: pricing-strategist
+    skill_key: price-waterfall-analysis
+    output_type: waterfall_checks
+    description: >
+      Verify engine outputs reconcile with waterfall economics.
+  - id: 4
+    agent_key: ux-specialist
+    skill_key: ui-component-design
+    output_type: ui_build
+    description: >
+      Implement the price-setting and approval interfaces.
+  - id: 5
+    agent_key: cost-asset-mgmt
+    skill_key: cost-shock-analysis
+    output_type: cost_stress_results
+    description: >
+      Stress the engine against cost shock scenarios.
+outputs:
+  - type: engine_build
+relations:
+  - type: follows
+    target: procedure.co-price.scenario-modeling
+  - type: enables
+    target: procedure.co-price.release-assurance
+quality_gates:
+  - "Engine outputs reconcile with waterfall checks within tolerance."
+evidence: []
+failure_modes:
+  - "Waterfall reconciliation fails - fix the engine rather than adjusting the analysis."

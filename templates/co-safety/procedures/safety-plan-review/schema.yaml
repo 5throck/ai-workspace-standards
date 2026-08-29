@@ -1,0 +1,31 @@
+schema_version: "1.0"
+procedure_id: co-safety-safety-plan-review
+variant: co-safety
+version: "1.0.0"
+title: Safety Plan Review
+phase: 2
+status: active
+owner_agent: safety-governance-manager
+purpose: >
+  Review planned work and its risk assessment plans against governance and
+  regulatory requirements before execution.
+inputs: []
+preconditions:
+  - "Draft work plan and hazard inventory available for review."
+steps:
+  - id: 1
+    agent_key: safety-governance-manager
+    skill_key: daily/audit-preparation
+    output_type: plan_review_record
+    description: >
+      Review the plan against applicable regulation and governance rules.
+outputs:
+  - type: plan_review_record
+relations:
+  - type: enables
+    target: procedure.co-safety.daily-risk-assessment
+quality_gates:
+  - "Plan review finds zero unresolved regulatory conflicts."
+evidence: []
+failure_modes:
+  - "Regulatory conflict unresolved - halt the plan until redesigned."

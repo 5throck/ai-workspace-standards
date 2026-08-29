@@ -1,0 +1,37 @@
+schema_version: "1.0"
+procedure_id: co-develop-technical-planning
+variant: co-develop
+version: "1.0.0"
+title: Technical Planning
+phase: 1
+status: active
+owner_agent: architect
+purpose: >
+  Research constraints and shape the technical approach that the architecture
+  phase will detail.
+inputs: []
+preconditions:
+  - "Environment bootstrap complete."
+steps:
+  - id: 1
+    agent_key: architect
+    skill_key: research-analysis
+    output_type: technical_findings
+    description: >
+      Research stack options, constraints, and integration risks.
+  - id: 2
+    agent_key: stack-setup
+    skill_key: refactoring
+    output_type: tooling_adjustments
+    description: >
+      Adjust tooling and project layout to fit the emerging approach.
+outputs:
+  - type: technical_findings
+relations:
+  - type: follows
+    target: procedure.co-develop.environment-bootstrap
+quality_gates:
+  - "Constraints and risks documented before architecture design starts."
+evidence: []
+failure_modes:
+  - "No viable stack option - escalate to the design gate with findings instead of picking silently."

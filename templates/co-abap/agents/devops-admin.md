@@ -1,5 +1,6 @@
 ---
 name: devops-admin
+phases: [4]
 role: SAP DevOps / Admin
 model: inherit
 color: yellow

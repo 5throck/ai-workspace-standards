@@ -1,5 +1,6 @@
 ---
 name: finance-strategy-lead
+phases: [2, 4]
 formal_name: Finance Strategy & Channel Lead
 role: P&L strategy, channel logic, pricing business rules, and LaTeX specification authorship across industries
 status: active

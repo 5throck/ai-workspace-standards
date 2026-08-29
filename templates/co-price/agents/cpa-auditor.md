@@ -1,5 +1,6 @@
 ---
 name: cpa-auditor
+phases: [4]
 formal_name: P&L Engine Auditor (CPA)
 role: double-entry integrity verification, Vitest harness authorship, and BIZ_LOGIC traceability enforcement
 status: active

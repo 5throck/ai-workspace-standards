@@ -128,6 +128,8 @@ Skills in `skills/` are propagated to `templates/common/skills/` (L1) by `propag
 
 **Inter-skill relations are also out of scope**: SKILLS.md does not track skill-to-skill relationships (prerequisites, related skills). Relations live in the generated skill graph (`docs/skill-graph.json` / `docs/skill-graph.md`), derived from SKILL.md frontmatter and agent/variant manifests per ADR-0060 — never as a SKILLS.md column.
 
+The graph also derives `procedure`/`output_type` nodes and step edges from procedure schemas (`procedures/*/schema.yaml`); see [6.7 Procedure Lifecycle Management](06.7-procedure-lifecycle.md).
+
 #### 6.3 Skill Body Structure
 
 ```markdown

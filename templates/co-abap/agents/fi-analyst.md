@@ -1,5 +1,6 @@
 ---
 name: fi-analyst
+phases: [1]
 role: FI Module Analyst
 model: inherit
 color: yellow

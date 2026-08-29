@@ -115,6 +115,126 @@
       "layer": "variant:co-price"
     },
     {
+      "id": "output_type.audit_reconciliation",
+      "type": "output_type",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "output_type.client_review_deck",
+      "type": "output_type",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "output_type.cost_assurance_notes",
+      "type": "output_type",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "output_type.cost_stress_results",
+      "type": "output_type",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "output_type.demand_curve",
+      "type": "output_type",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "output_type.deployment_readiness",
+      "type": "output_type",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "output_type.engine_build",
+      "type": "output_type",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "output_type.finance_impact_model",
+      "type": "output_type",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "output_type.finance_signoff",
+      "type": "output_type",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "output_type.governance_rules_build",
+      "type": "output_type",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "output_type.localization_report",
+      "type": "output_type",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "output_type.market_baseline",
+      "type": "output_type",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "output_type.price_recommendation",
+      "type": "output_type",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "output_type.release_decision",
+      "type": "output_type",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "output_type.scenario_set",
+      "type": "output_type",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "output_type.security_attestation",
+      "type": "output_type",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "output_type.security_review_notes",
+      "type": "output_type",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "output_type.solution_architecture",
+      "type": "output_type",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "output_type.test_summary",
+      "type": "output_type",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "output_type.ui_build",
+      "type": "output_type",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "output_type.ux_flows",
+      "type": "output_type",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "output_type.waterfall_checks",
+      "type": "output_type",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "output_type.waterfall_model",
+      "type": "output_type",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "output_type.wtp_findings",
+      "type": "output_type",
+      "layer": "variant:co-price"
+    },
+    {
       "id": "pdf-export",
       "type": "skill",
       "layer": "variant:co-price"
@@ -162,6 +282,31 @@
     {
       "id": "prisma-7",
       "type": "skill",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "procedure.co-price.engagement-review",
+      "type": "procedure",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "procedure.co-price.engine-implementation",
+      "type": "procedure",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "procedure.co-price.pricing-analysis",
+      "type": "procedure",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "procedure.co-price.release-assurance",
+      "type": "procedure",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "procedure.co-price.scenario-modeling",
+      "type": "procedure",
       "layer": "variant:co-price"
     },
     {
@@ -242,16 +387,40 @@
       "source": "prose"
     },
     {
+      "type": "produces",
+      "from": "competitive-intelligence",
+      "to": "output_type.market_baseline",
+      "source": "procedure_schema"
+    },
+    {
       "type": "references",
       "from": "competitive-intelligence",
       "to": "van-westendorp-psm",
       "source": "prose"
     },
     {
+      "type": "produces",
+      "from": "cost-shock-analysis",
+      "to": "output_type.cost_assurance_notes",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "cost-shock-analysis",
+      "to": "output_type.cost_stress_results",
+      "source": "procedure_schema"
+    },
+    {
       "type": "references",
       "from": "cpa-auditor",
       "to": "double-entry-reconciliation",
       "source": "prose"
+    },
+    {
+      "type": "produces",
+      "from": "double-entry-reconciliation",
+      "to": "output_type.audit_reconciliation",
+      "source": "procedure_schema"
     },
     {
       "type": "references",
@@ -264,6 +433,24 @@
       "from": "finance-strategy-lead",
       "to": "price-waterfall-analysis",
       "source": "prose"
+    },
+    {
+      "type": "produces",
+      "from": "financial-statement-prep",
+      "to": "output_type.finance_impact_model",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "financial-statement-prep",
+      "to": "output_type.finance_signoff",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "gabor-granger",
+      "to": "output_type.demand_curve",
+      "source": "procedure_schema"
     },
     {
       "type": "enables",
@@ -289,6 +476,36 @@
       }
     },
     {
+      "type": "produces",
+      "from": "harness-verification",
+      "to": "output_type.deployment_readiness",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "harness-verification",
+      "to": "output_type.security_attestation",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "harness-verification",
+      "to": "output_type.security_review_notes",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "harness-verification",
+      "to": "output_type.test_summary",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "i18n-audit",
+      "to": "output_type.localization_report",
+      "source": "procedure_schema"
+    },
+    {
       "type": "references",
       "from": "map-channel-enforcement",
       "to": "pricing-governance",
@@ -301,10 +518,28 @@
       "source": "prose"
     },
     {
+      "type": "produces",
+      "from": "price-waterfall-analysis",
+      "to": "output_type.waterfall_checks",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "price-waterfall-analysis",
+      "to": "output_type.waterfall_model",
+      "source": "procedure_schema"
+    },
+    {
       "type": "references",
       "from": "price-waterfall-analysis",
       "to": "pricing-governance",
       "source": "prose"
+    },
+    {
+      "type": "produces",
+      "from": "pricing-governance",
+      "to": "output_type.governance_rules_build",
+      "source": "procedure_schema"
     },
     {
       "type": "enables",
@@ -330,6 +565,366 @@
       "source": "prose"
     },
     {
+      "type": "produces",
+      "from": "prisma-7",
+      "to": "output_type.solution_architecture",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-price.engagement-review",
+      "to": "engagement-director",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-price.engagement-review",
+      "to": "executive-presentation",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-price.engagement-review",
+      "to": "harness-verification",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-price.engagement-review",
+      "to": "output_type.client_review_deck",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-price.engagement-review",
+      "to": "procedure.co-price.release-assurance",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-price.engagement-review",
+      "to": "security-auditor",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-price.engine-implementation",
+      "to": "core-engine-dev",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-price.engine-implementation",
+      "to": "cost-asset-mgmt",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-price.engine-implementation",
+      "to": "cost-shock-analysis",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-price.engine-implementation",
+      "to": "lead-architect",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-price.engine-implementation",
+      "to": "output_type.engine_build",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-price.engine-implementation",
+      "to": "price-waterfall-analysis",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-price.engine-implementation",
+      "to": "pricing-governance",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-price.engine-implementation",
+      "to": "pricing-strategist",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-price.engine-implementation",
+      "to": "prisma-7",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "enables",
+      "from": "procedure.co-price.engine-implementation",
+      "to": "procedure.co-price.release-assurance",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-price.engine-implementation",
+      "to": "procedure.co-price.scenario-modeling",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-price.engine-implementation",
+      "to": "ui-component-design",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-price.engine-implementation",
+      "to": "ux-specialist",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-price.pricing-analysis",
+      "to": "competitive-intelligence",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-price.pricing-analysis",
+      "to": "gabor-granger",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-price.pricing-analysis",
+      "to": "market-intelligence-analyst",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-price.pricing-analysis",
+      "to": "output_type.price_recommendation",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-price.pricing-analysis",
+      "to": "price-waterfall-analysis",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "enables",
+      "from": "procedure.co-price.pricing-analysis",
+      "to": "pricing-governance",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-price.pricing-analysis",
+      "to": "pricing-strategist",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-price.pricing-analysis",
+      "to": "pricing-strategist",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-price.pricing-analysis",
+      "to": "pricing-strategist",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-price.pricing-analysis",
+      "to": "van-westendorp-psm",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-price.release-assurance",
+      "to": "cost-asset-mgmt",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-price.release-assurance",
+      "to": "cost-shock-analysis",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-price.release-assurance",
+      "to": "cpa-auditor",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-price.release-assurance",
+      "to": "devops-admin",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-price.release-assurance",
+      "to": "double-entry-reconciliation",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-price.release-assurance",
+      "to": "engagement-director",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-price.release-assurance",
+      "to": "finance-strategy-lead",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-price.release-assurance",
+      "to": "financial-statement-prep",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-price.release-assurance",
+      "to": "harness-verification",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-price.release-assurance",
+      "to": "harness-verification",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-price.release-assurance",
+      "to": "i18n-audit",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-price.release-assurance",
+      "to": "l10n-auditor",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-price.release-assurance",
+      "to": "output_type.release_decision",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-price.release-assurance",
+      "to": "pricing-playbook",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "enables",
+      "from": "procedure.co-price.release-assurance",
+      "to": "procedure.co-price.engagement-review",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-price.release-assurance",
+      "to": "procedure.co-price.engine-implementation",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-price.release-assurance",
+      "to": "qa-tester",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-price.scenario-modeling",
+      "to": "finance-strategy-lead",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-price.scenario-modeling",
+      "to": "financial-statement-prep",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-price.scenario-modeling",
+      "to": "harness-verification",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-price.scenario-modeling",
+      "to": "lead-architect",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-price.scenario-modeling",
+      "to": "output_type.scenario_set",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-price.scenario-modeling",
+      "to": "pricing-strategist",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-price.scenario-modeling",
+      "to": "prisma-7",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "enables",
+      "from": "procedure.co-price.scenario-modeling",
+      "to": "procedure.co-price.engine-implementation",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-price.scenario-modeling",
+      "to": "procedure.co-price.pricing-analysis",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-price.scenario-modeling",
+      "to": "scenario-comparison",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-price.scenario-modeling",
+      "to": "security-auditor",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-price.scenario-modeling",
+      "to": "ui-component-design",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-price.scenario-modeling",
+      "to": "ux-specialist",
+      "source": "procedure_schema"
+    },
+    {
       "type": "enables",
       "from": "scenario-comparison",
       "to": "pricing-governance",
@@ -345,6 +940,24 @@
       "from": "trade-promotion-roi",
       "to": "insight-synthesis",
       "source": "prose"
+    },
+    {
+      "type": "produces",
+      "from": "ui-component-design",
+      "to": "output_type.ui_build",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "ui-component-design",
+      "to": "output_type.ux_flows",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "van-westendorp-psm",
+      "to": "output_type.wtp_findings",
+      "source": "procedure_schema"
     },
     {
       "type": "enables",

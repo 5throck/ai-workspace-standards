@@ -1,0 +1,23 @@
+schemaVersion: 1
+id: T-20260829-016
+kind: manual
+title: 'Coverage gap: co-price / security-monitor @ phase 0'
+inputs:
+  source: procedure-coverage
+  coverage_key: co-price:security-monitor:0
+  variant: co-price
+  agent_key: security-monitor
+  phase: '0'
+  resolution: >-
+    PROCEDURE_REQUIRED or N/A_JUSTIFIED (human judgment — see
+    docs/designs/2026-08-29-procedure-coverage-and-l0-design.md §2)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-08-29T05:20:11.692Z'
+history:
+  - at: '2026-08-29T05:20:11.692Z'
+    from: null
+    to: backlog
+result: null
+error: null

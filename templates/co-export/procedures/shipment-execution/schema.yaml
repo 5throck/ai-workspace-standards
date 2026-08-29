@@ -1,0 +1,38 @@
+schema_version: "1.0"
+procedure_id: co-export-shipment-execution
+variant: co-export
+version: "1.0.0"
+title: Shipment Execution
+phase: 3
+status: active
+owner_agent: logistics-coordinator
+purpose: >
+  Execute shipment operations once compliance determinations are complete:
+  drawback positioning and coordinated logistics.
+inputs:
+  - origin_determination
+preconditions:
+  - "Compliance determinations complete and document set in progress."
+steps:
+  - id: 1
+    agent_key: customs-duty-drawback-specialist
+    skill_key: customs-duty-drawback-workflow
+    output_type: drawback_positioning
+    description: >
+      Position the shipment for duty drawback opportunities.
+  - id: 2
+    agent_key: market-entry-strategist
+    skill_key: landed-cost-calculation
+    output_type: landed_cost_model
+    description: >
+      Model landed cost against the market entry plan.
+outputs:
+  - type: drawback_positioning
+relations:
+  - type: composes_with
+    target: procedure.co-export.export-shipment-compliance
+quality_gates:
+  - "Landed cost model reconciles with the commercial quote."
+evidence: []
+failure_modes:
+  - "Landed cost breaks the commercial case - return to market entry assessment with findings."

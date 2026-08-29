@@ -1,5 +1,6 @@
 ---
 name: interface-expert
+phases: [2]
 role: SAP Interface Expert
 model: inherit
 color: cyan

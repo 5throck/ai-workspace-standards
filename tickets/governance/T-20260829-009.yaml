@@ -1,0 +1,23 @@
+schemaVersion: 1
+id: T-20260829-009
+kind: manual
+title: 'Coverage gap: co-design / design-lead @ phase 3'
+inputs:
+  source: procedure-coverage
+  coverage_key: co-design:design-lead:3
+  variant: co-design
+  agent_key: design-lead
+  phase: '3'
+  resolution: >-
+    PROCEDURE_REQUIRED or N/A_JUSTIFIED (human judgment — see
+    docs/designs/2026-08-29-procedure-coverage-and-l0-design.md §2)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-08-29T05:20:11.677Z'
+history:
+  - at: '2026-08-29T05:20:11.677Z'
+    from: null
+    to: backlog
+result: null
+error: null

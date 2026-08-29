@@ -1,0 +1,53 @@
+schema_version: "1.0"
+procedure_id: co-export-compliance-determination
+variant: co-export
+version: "1.0.0"
+title: Compliance Determination
+phase: 2
+status: active
+owner_agent: fta-origin-analyst
+purpose: >
+  Produce the binding compliance determinations for a shipment: origin,
+  certification, and control screening.
+inputs:
+  - classification_groundwork
+preconditions:
+  - "Market entry assessment accepted and shipment specifics received."
+steps:
+  - id: 1
+    agent_key: hs-classification-specialist
+    skill_key: hs-classification-workflow
+    output_type: hs_classification
+    description: >
+      Finalize HS classification for the concrete shipment items.
+  - id: 2
+    agent_key: fta-origin-analyst
+    skill_key: roo-qualification-worksheet
+    output_type: origin_determination
+    description: >
+      Determine preferential origin with the ROO qualification worksheet.
+  - id: 3
+    agent_key: halal-certification-specialist
+    skill_key: halal-certification-workflow
+    output_type: certification_requirements
+    description: >
+      Determine certification requirements where the destination market
+      demands them.
+  - id: 4
+    agent_key: export-control-compliance-specialist
+    skill_key: export-control-screening
+    output_type: export_control_clearance
+    description: >
+      Complete export control screening for the shipment.
+outputs:
+  - type: origin_determination
+relations:
+  - type: follows
+    target: procedure.co-export.market-entry-assessment
+  - type: enables
+    target: procedure.co-export.export-shipment-compliance
+quality_gates:
+  - "All determinations documented with rationale before shipment planning."
+evidence: []
+failure_modes:
+  - "Control screening not cleared - halt and record the compliance stop."

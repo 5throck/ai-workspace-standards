@@ -35,6 +35,24 @@ steps:
     description: >
       Self-review the implementation against the Clean ABAP checklist before
       handing to test.
+  - id: 3.5
+    agent_key: fiori-developer
+    skill_key: abap-dev
+    output_type: ui_enhancement
+    description: >
+      Implement the Fiori/UI layer where the solution touches user interfaces.
+  - id: 3.6
+    agent_key: form-expert
+    skill_key: abap-dev
+    output_type: form_outputs
+    description: >
+      Implement SAPscript/Adobe form outputs required by the solution.
+  - id: 3.7
+    agent_key: gui-scripter
+    skill_key: abap-dev
+    output_type: automation_scripts
+    description: >
+      Add GUI automation where legacy transactions need automation support.
   - id: 4
     agent_key: test-runner
     skill_key: abap-dev

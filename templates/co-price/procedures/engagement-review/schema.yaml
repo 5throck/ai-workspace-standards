@@ -1,0 +1,38 @@
+schema_version: "1.0"
+procedure_id: co-price-engagement-review
+variant: co-price
+version: "1.0.0"
+title: Engagement Review
+phase: 5
+status: active
+owner_agent: engagement-director
+purpose: >
+  Review the released pricing solution with the client and record security
+  posture for operations handover.
+inputs:
+  - release_decision
+preconditions:
+  - "Release assurance signed off."
+steps:
+  - id: 1
+    agent_key: engagement-director
+    skill_key: executive-presentation
+    output_type: client_review_deck
+    description: >
+      Present release outcomes and next steps to client leadership.
+  - id: 2
+    agent_key: security-auditor
+    skill_key: harness-verification
+    output_type: security_attestation
+    description: >
+      Attest the production security posture for the handover record.
+outputs:
+  - type: client_review_deck
+relations:
+  - type: follows
+    target: procedure.co-price.release-assurance
+quality_gates:
+  - "Client acceptance recorded and security attestation filed."
+evidence: []
+failure_modes:
+  - "Client rejects release outcomes - reopen the scenario modeling with the feedback."

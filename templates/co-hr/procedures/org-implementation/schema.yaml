@@ -1,0 +1,37 @@
+schema_version: "1.0"
+procedure_id: co-hr-org-implementation
+variant: co-hr
+version: "1.0.0"
+title: Organization Implementation
+phase: 3
+status: active
+owner_agent: org-design-consultant
+purpose: >
+  Implement the approved HR solution and quantify its effects with data.
+inputs:
+  - org_design_options
+preconditions:
+  - "Client approved the HR solution at the phase 2 gate."
+steps:
+  - id: 1
+    agent_key: org-design-consultant
+    skill_key: org-design-framework
+    output_type: implementation_milestones
+    description: >
+      Sequence the implementation into milestones with owners.
+  - id: 2
+    agent_key: data-analyst
+    skill_key: hr-metrics-analysis
+    output_type: implementation_metrics
+    description: >
+      Stand up the metrics that will verify implementation effects.
+outputs:
+  - type: implementation_milestones
+relations:
+  - type: follows
+    target: procedure.co-hr.hr-solution-design
+quality_gates:
+  - "Every milestone has an owner, a date, and a verifying metric."
+evidence: []
+failure_modes:
+  - "Adoption stalling - trigger the change roadmap instead of pushing the schedule."

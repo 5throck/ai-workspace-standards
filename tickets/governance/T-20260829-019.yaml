@@ -1,0 +1,23 @@
+schemaVersion: 1
+id: T-20260829-019
+kind: manual
+title: 'Coverage gap: co-security / pentester @ phase 6'
+inputs:
+  source: procedure-coverage
+  coverage_key: co-security:pentester:6
+  variant: co-security
+  agent_key: pentester
+  phase: '6'
+  resolution: >-
+    PROCEDURE_REQUIRED or N/A_JUSTIFIED (human judgment — see
+    docs/designs/2026-08-29-procedure-coverage-and-l0-design.md §2)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-08-29T05:20:11.698Z'
+history:
+  - at: '2026-08-29T05:20:11.698Z'
+    from: null
+    to: backlog
+result: null
+error: null

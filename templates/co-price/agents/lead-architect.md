@@ -1,5 +1,6 @@
 ---
 name: lead-architect
+phases: [2, 3]
 formal_name: Lead Architect & Data Guard
 role: database design, Prisma schema modeling, API boundaries, and system architecture
 status: active

@@ -1,0 +1,37 @@
+schema_version: "1.0"
+procedure_id: co-work-project-intake-analysis
+variant: co-work
+version: "1.0.0"
+title: Project Intake and Analysis
+phase: 1
+status: active
+owner_agent: analyst
+purpose: >
+  Take a new work request from intake to a verified analytical foundation for
+  the document team.
+inputs: []
+preconditions:
+  - "Request scoped by project-coordinator with audience and deadline."
+steps:
+  - id: 1
+    agent_key: analyst
+    skill_key: evidence-ledger
+    output_type: evidence_pack
+    description: >
+      Collect and verify the facts and figures the work depends on.
+  - id: 2
+    agent_key: storyteller
+    skill_key: research-analysis
+    output_type: angle_options
+    description: >
+      Propose narrative angles that fit the audience and evidence.
+outputs:
+  - type: evidence_pack
+relations:
+  - type: enables
+    target: procedure.co-work.document-production
+quality_gates:
+  - "Evidence pack entries all carry sources before writing starts."
+evidence: []
+failure_modes:
+  - "Evidence insufficient - flag open questions instead of writing on assumptions."

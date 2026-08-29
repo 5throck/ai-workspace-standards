@@ -1,0 +1,52 @@
+schema_version: "1.0"
+procedure_id: co-game-game-architecture-design
+variant: co-game
+version: "1.0.0"
+title: Game Architecture Design
+phase: 2
+status: active
+owner_agent: architect
+purpose: >
+  Design the technical architecture and detailed content plans for the
+  approved concept.
+inputs:
+  - concept_document
+preconditions:
+  - "Concept approved at the phase 2 gate."
+steps:
+  - id: 1
+    agent_key: architect
+    skill_key: code-review
+    output_type: approved_implementation_plan
+    description: >
+      Design scenes, entities, and data flow; author the implementation plan.
+  - id: 2
+    agent_key: game-designer
+    skill_key: arcade-physics
+    output_type: tuning_plan
+    description: >
+      Plan tuning parameters and difficulty curves per milestone.
+  - id: 3
+    agent_key: puzzle-designer
+    skill_key: arcade-physics
+    output_type: level_plan
+    description: >
+      Plan the level sequence and progression gates.
+  - id: 4
+    agent_key: arcade-designer
+    skill_key: arcade-physics
+    output_type: feel_requirements
+    description: >
+      Translate arcade-feel references into architecture-level requirements.
+outputs:
+  - type: approved_implementation_plan
+relations:
+  - type: follows
+    target: procedure.co-game.game-concept-design
+  - type: enables
+    target: procedure.co-game.gameplay-feature-loop
+quality_gates:
+  - "Implementation plan approved at the design gate."
+evidence: []
+failure_modes:
+  - "Architecture cannot support the tuning plan - revise the plan instead of hacking the architecture later."

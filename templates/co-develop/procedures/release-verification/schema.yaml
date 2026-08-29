@@ -1,0 +1,38 @@
+schema_version: "1.0"
+procedure_id: co-develop-release-verification
+variant: co-develop
+version: "1.0.0"
+title: Release Verification
+phase: 4
+status: active
+owner_agent: test-runner
+purpose: >
+  Verify the integrated implementation end to end and finalize release
+  documentation.
+inputs:
+  - implementation_commit
+preconditions:
+  - "Feature implementation merged with review findings resolved."
+steps:
+  - id: 1
+    agent_key: test-runner
+    skill_key: test-driven-development
+    output_type: regression_report
+    description: >
+      Run the full regression suite across supported environments.
+  - id: 2
+    agent_key: code-writer
+    skill_key: documentation-writing
+    output_type: release_notes
+    description: >
+      Finalize release notes and update user-facing documentation.
+outputs:
+  - type: regression_report
+relations:
+  - type: follows
+    target: procedure.co-develop.feature-implementation
+quality_gates:
+  - "Zero regressions and release notes complete before tagging."
+evidence: []
+failure_modes:
+  - "Regressions found - return to feature-implementation rather than patching on the release branch."

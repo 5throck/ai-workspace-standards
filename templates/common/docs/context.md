@@ -364,6 +364,10 @@ All scripts are TypeScript (`.ts`) executed via Bun — no `.sh`/`.ps1` counterp
 
 This workspace follows explicit lifecycle management practices for Agents, Skills, and Scripts to ensure consistency and maintainability.
 
+### Procedure Graph
+
+Each template layer owns structured procedures in `procedures/<name>/schema.yaml` (authoring skeleton: `templates/common/procedures/_template/`). Procedures are the canonical source for the workflow graph — validate with `bun scripts/validate-procedures.ts --all`, check coverage with `bun scripts/procedure-coverage.ts` (gaps become governance tickets via `--tickets`). Never hand-edit procedure-derived graph nodes. See `docs/procedure-schema-spec.md` and constitution §6.7.
+
 ### Common Principles
 
 - **Agent / Skill / Script** each have explicit lifecycle states (active, deprecated, retired/archived)
