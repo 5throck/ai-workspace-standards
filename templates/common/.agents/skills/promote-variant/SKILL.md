@@ -6,7 +6,7 @@ description: >
 status: active
 scope: common
 l2_propagate: false
-version: 1.2.1
+version: 1.3.0
 owner: pm
 last_reviewed: 2026-08-24
 relates_to:
@@ -33,6 +33,11 @@ Use this skill after all `PROMOTION_CHECKLIST.md` conditions are satisfied in `P
 - `bun scripts/audit.ts` passes (0 errors)
 - `bun run agent:verify` passes (0 errors)
 - User has reviewed `_ORIGIN.md §Manual Phase B Steps`
+- **No promotion hold**: the source project's `variant.json` must NOT contain
+  `promotionHold: { hold: true }`. A hold blocks `l3-to-variant-pipeline.ts`
+  (Phase 0.5) and `project-to-variant.ts` mechanically and cannot be bypassed
+  with `--force` — the owner removes the hold only after the user approves the
+  promotion in plain language. Green readiness checks are not an approval.
 
 ---
 

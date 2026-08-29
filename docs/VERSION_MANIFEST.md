@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-29T11:10:11.317Z
+**Generated**: 2026-08-29T11:21:09.796Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -49,7 +49,7 @@
 | platform-skill-lifecycle-manager | 1.0.0 | active | .claude/skills/platform-skill-lifecycle-manager/SKILL.md | both | create platform skill, new .claude skill, new .gemini skill, platform skill version, platform skill lifecycle, update platform skill | pm |
 | project-review | 1.1.0 | active | skills/project-review/SKILL.md | workspace | project review, review project, audit project, quality review | pm |
 | project-to-variant | 1.3.0 | active | skills/project-to-variant/SKILL.md | workspace | convert project to variant, create variant from project, project to template, promote project to variant | scaffolding-expert |
-| promote-variant | 1.2.1 | active | skills/promote-variant/SKILL.md | workspace | promote variant, Phase B, variant promotion, promote to template, create template from prototype | pm |
+| promote-variant | 1.3.0 | active | skills/promote-variant/SKILL.md | workspace | promote variant, Phase B, variant promotion, promote to template, create template from prototype | pm |
 | research-analysis | 1.0.0 | active | skills/research-analysis/SKILL.md | workspace | research, analyze, investigate, synthesize, evidence gathering, data analysis, literature review | pm |
 | script-lifecycle-manager | 1.2.0 | active | skills/script-lifecycle-manager/SKILL.md | workspace | create script, update script, deprecate script, script lifecycle, manage scripts | pm |
 | security-scan | 1.0.0 | active | skills/security-scan/SKILL.md | workspace | security scan, scan for vulnerabilities, security check, run security | pm |
@@ -100,13 +100,13 @@
 | infer-graph-from-phases.ts | 0.1.0 | scripts/experiments/infer-graph-from-phases.ts | N/A |
 | ingest-external-skills.ts | 1.1.0 | scripts/ingest-external-skills.ts | N/A |
 | ingest-security-frameworks.ts | 1.1.0 | scripts/ingest-security-frameworks.ts | N/A |
-| l3-to-variant-pipeline.ts | 1.13.0 | scripts/l3-to-variant-pipeline.ts | child_process, fs, path, process |
+| l3-to-variant-pipeline.ts | 1.14.0 | scripts/l3-to-variant-pipeline.ts | child_process, fs, path, process |
 | lifecycle-sync-audit.ts | 1.5.0 | scripts/lifecycle-sync-audit.ts | N/A |
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
 | md-to-ooxml.ts | 1.2.0 | scripts/md-to-ooxml.ts | fs, path |
 | new-project.ts | 1.9.0 | scripts/new-project.ts | js-yaml |
 | procedure-coverage.ts | 1.0.0 | scripts/procedure-coverage.ts | js-yaml |
-| project-to-variant.ts | 1.2.1 | scripts/project-to-variant.ts | N/A |
+| project-to-variant.ts | 1.3.0 | scripts/project-to-variant.ts | N/A |
 | promote-context-section.ts | 1.0.0 | scripts/promote-context-section.ts | N/A |
 | propagate-to-templates.ts | 2.6.0 | scripts/propagate-to-templates.ts | js-yaml |
 | qa-gate.ts | N/A | scripts/qa-gate.ts | bun |
@@ -148,7 +148,7 @@
 | validate-procedures.ts | 1.1.0 | scripts/validate-procedures.ts | js-yaml |
 | validate-skills.ts | 1.3.1 | scripts/validate-skills.ts | N/A |
 | validate-templates.ts | 1.19.0 | scripts/validate-templates.ts | js-yaml |
-| validate-variant-readiness.ts | 1.0.0 | scripts/validate-variant-readiness.ts | N/A |
+| validate-variant-readiness.ts | 1.1.0 | scripts/validate-variant-readiness.ts | N/A |
 | variant-feature.ts | 1.0.0 | scripts/variant-feature.ts | N/A |
 | verify-adr-governance.ts | 1.4.0 | scripts/verify-adr-governance.ts | N/A |
 | verify-agent-deliverables.ts | 1.0.1 | scripts/verify-agent-deliverables.ts | fs |

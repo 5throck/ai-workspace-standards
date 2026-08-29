@@ -1,4 +1,4 @@
-// @version 1.2.1
+// @version 1.3.0
 // v1.2.1: Corrected the manual review checklist's CLAUDE.md/GEMINI.md line — most variants
 //          ship neither (scaffolded from templates/common instead); if one does, the checklist
 //          now points at verifying COMMON-CLAUDE/COMMON-GEMINI marker integrity instead of the
@@ -64,6 +64,28 @@ if (!/^co-[a-z][a-z0-9-]{1,30}$/.test(targetArg)) {
 
 const sourceDir = path.isAbsolute(sourceArg) ? sourceArg : path.join(WORKSPACE_ROOT, sourceArg);
 if (!fs.existsSync(sourceDir)) fail(`Source project not found: ${sourceDir}`);
+
+// Promotion hold — governance pre-flight (v1.3.0, 2026-08-29). A source project
+// may declare `promotionHold: { hold: true, ... }` in variant.json to block
+// conversion until the user grants explicit permission. No bypass flag: the
+// owner removes the hold from variant.json after approving.
+const srcVariantJson = path.join(sourceDir, 'variant.json');
+if (fs.existsSync(srcVariantJson)) {
+  try {
+    const src = JSON.parse(fs.readFileSync(srcVariantJson, 'utf-8')) as {
+      promotionHold?: { hold?: boolean; reason?: string };
+    };
+    if (src.promotionHold?.hold === true) {
+      fail(
+        `PROMOTION HOLD on ${path.relative(WORKSPACE_ROOT, sourceDir)} — variant promotion requires ` +
+          `explicit user permission. Remove the promotionHold block from variant.json only after ` +
+          `the user approves.${src.promotionHold.reason ? ` Reason: ${src.promotionHold.reason}` : ''}`,
+      );
+    }
+  } catch {
+    // Unparseable variant.json — later validation reports it.
+  }
+}
 
 const targetDir = path.join(WORKSPACE_ROOT, 'templates', targetArg);
 

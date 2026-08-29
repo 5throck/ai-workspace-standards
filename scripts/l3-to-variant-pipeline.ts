@@ -11,8 +11,13 @@
  * - Wave 3: Platform parity validation (validate-platform-parity.ts)
  * - Wave 3: Workspace integration (integration-helpers.ts)
  *
- * @version 1.13.0
+ * @version 1.14.0
  * @phase: Complete pipeline orchestration
+ *
+ * v1.14.0 (2026-08-29): Phase 0.5 pre-flight PROMOTION HOLD — reads the SOURCE project's
+ *          variant.json promotionHold before any write and aborts; no --force bypass (the owner
+ *          removes the hold after explicit user approval). Phase 8's gate alone ran too late —
+ *          on the generated copy, after the workspace tree was already modified.
  *
  * v1.12.1: PHASE 2.5 (new) — country-scoped skill exclusion. reconcileWithL0L1()
  *          only discards files IDENTICAL to L1, so a --country KR draft whose
@@ -227,6 +232,43 @@ export async function executeL3ToVariantPipeline(config: PipelineConfig): Promis
   console.log(`${'='.repeat(60)}\n`);
 
   const errors: Array<{ phase: string; error: string }> = [];
+
+  // ============================================================================
+  // PHASE 0.5: PROMOTION HOLD — pre-flight governance block (v1.14.0)
+  // ============================================================================
+  // A source project may declare `promotionHold: { hold: true, ... }` in its
+  // variant.json (standing directive 2026-08-29: co-newbiz / co-architect must
+  // not become variant templates without explicit user permission). Checked
+  // HERE, before any write, because the Phase 8 readiness gate runs on the
+  // generated template copy *after* the workspace tree has already been
+  // modified — too late to count as consent. There is no --force bypass for
+  // the hold: the owner must remove the promotionHold block from variant.json.
+  const srcVariantJsonPath = join(config.l3ProjectPath, 'variant.json');
+  if (existsSync(srcVariantJsonPath)) {
+    try {
+      const src = JSON.parse(readFileSync(srcVariantJsonPath, 'utf-8')) as {
+        promotionHold?: { hold?: boolean; reason?: string };
+      };
+      if (src.promotionHold?.hold === true) {
+        const msg =
+          `PROMOTION HOLD on ${config.l3ProjectPath}: variant promotion requires explicit user ` +
+          `permission before running this pipeline. Remove the promotionHold block from the ` +
+          `project's variant.json only after the user approves the promotion in plain language.` +
+          (src.promotionHold.reason ? ` Reason: ${src.promotionHold.reason}` : '');
+        console.error(`\n❌ ${msg}`);
+        return {
+          success: false,
+          variantPath: undefined,
+          phases,
+          executionTime: Date.now() - startTime,
+          errors: [{ phase: 'promotion-hold', error: msg }],
+        };
+      }
+    } catch {
+      // Unparseable source variant.json — let Phase 1's own validation report it.
+    }
+  }
+
   const phases: PipelineResult['phases'] = {
     scan: { success: false },
     reconcile: { success: false },
