@@ -12,6 +12,9 @@ last_reviewed: 2026-08-23
 status: active
 owner: talent-acquisition-specialist
 prerequisites: none
+relates_to:
+  - skill: compensation-benchmarking
+    type: follows
 metadata:
   type: domain
   triggers:

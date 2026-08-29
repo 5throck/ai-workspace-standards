@@ -6,6 +6,9 @@ description: Trigger risk assessment workflow for hazard identification and scor
 owner: risk-assessment-agent
 status: active
 version: 1.0.0
+relates_to:
+  - skill: daily/audit-preparation
+    type: follows
 metadata:
   triggers:
     - 위험성평가

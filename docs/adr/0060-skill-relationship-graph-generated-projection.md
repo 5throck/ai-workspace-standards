@@ -381,3 +381,61 @@ execution order, so the graph is inferred from them by construction (provenance 
 `source: procedure_schema`), not declared in new frontmatter. The three-stage
 generalization criterion of Amendment 4 remains the gate for co-newbiz's richer
 extractor (rule predicates, decision docs) to ever inform this script.
+
+## Amendment 2026-08-29 — Variant Mass-Adoption of Typed Relations + Direction Policy (Amendment 6)
+
+Design: `docs/designs/2026-08-29-relation-graph-evolution-and-decision-chain-design.md`
+(spec `reledgev`, §3 + addendum). Amendment 3 left typed `relates_to` at a 4-skill
+co-consult proof-of-concept and explicitly deferred mass adoption. This amendment
+records the approved adoption wave and its guardrails.
+
+### A. Derivation-based mass adoption
+
+74 variant skills across 12 variants gained typed `relates_to` (201 edges), derived
+mechanically from the Procedure Schema corpus rather than hand-authored — the same
+inferential posture as Amendment 5, but written into declarative frontmatter:
+
+- Consecutive distinct procedure steps (`i → i+1`): `follows` (pure sequencing, no
+  dependency implication — Amendment 3 semantics preserved).
+- Non-consecutive co-used skills in one procedure: `composes_with` (symmetric;
+  declared once from the alphabetically-first source).
+- Idempotent migration (`tests/add-variant-relations.ts`): skills with pre-existing
+  declarations only receive edges not already present; re-runnable as new procedures
+  are authored.
+
+### B. Direction policy (normative)
+
+Relations flow **variant skill → L1 (`templates/common/skills/`) or same-variant
+targets only**:
+
+1. Variant-specific edges are **never written into L1 common skills** — common stays
+   variant-agnostic, per the L1 non-propagation discipline (ADR-0043).
+2. L0-only skills (present in `skills/` but not propagated to L1) are never related
+   targets of variant edges.
+3. Validators enforce target existence across L0 + all template scopes, including
+   recursive (slash-relative) nested skills such as co-safety's `daily/<name>`.
+
+### C. Enforcement widening
+
+`validate-skills.ts` v1.3.0 Part 1c: form homogeneity (legacy vs typed, never mixed),
+relation-type vocabulary, target existence, and self-reference checks now run on every
+`templates/*/skills/` tree in addition to L0 `skills/`.
+
+**Verification**: 175 skills carry typed relations; graph at 542 nodes / 1,548 edges;
+`verify-skill-graph.ts --determinism` exact-diff 0; `audit.ts` full pass.
+
+### D. Experimental layer (L-B) made operational per scope (reledgev §3)
+
+The 3-layer flexibility model (declarative frontmatter / overrides / derived
+projection) is now enforced end-to-end:
+
+- **Per-scope overrides**: scope graphs read `templates/<scope>/docs/skill-graph.overrides.json`
+  in addition to the L0 `docs/` file (`generate-skill-graph.ts` v1.7.0; previously
+  overrides were L0-only). All 13 variant scopes carry seeded empty files.
+- **`suppress: true` entries**: remove matching frontmatter-derived edges
+  (`from` + `to`, `type` optional) instead of adding one; override-vs-override
+  suppression is not supported.
+- **Fail-closed field policy** (`verify-skill-graph.ts` v1.5.0): `reason` and `since`
+  are required on every entry (missing → verification failure); `since` older than
+  90 days → warning (promote to frontmatter `relates_to` or drop). The legacy
+  `last_reviewed` 12-month staleness warning remains for pre-existing entries.

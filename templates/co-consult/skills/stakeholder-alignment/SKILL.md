@@ -10,6 +10,9 @@ last_reviewed: 2026-06-13
 status: active
 owner: change-management-partner
 prerequisites: none
+relates_to:
+  - skill: insight-synthesis
+    type: follows
 metadata:
   type: process
   triggers:

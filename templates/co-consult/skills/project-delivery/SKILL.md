@@ -11,6 +11,9 @@ last_reviewed: 2026-06-13
 status: active
 owner: delivery-manager
 prerequisites: solution-design
+relates_to:
+  - skill: technical-feasibility
+    type: follows
 metadata:
   type: process
   triggers:

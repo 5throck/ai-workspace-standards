@@ -7,6 +7,11 @@ status: active
 scope: co-abap
 owner: code-writer
 prerequisites: vsp MCP server
+relates_to:
+  - skill: abap-dev
+    type: composes_with
+  - skill: abap-dev
+    type: follows
 metadata:
   type: core
   triggers:

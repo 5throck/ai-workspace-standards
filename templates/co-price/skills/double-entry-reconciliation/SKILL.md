@@ -7,6 +7,15 @@ last_reviewed: 2026-08-25
 status: active
 owner: cpa-auditor
 prerequisites: simulation output with MonthlyData series available
+relates_to:
+  - skill: i18n-audit
+    type: follows
+  - skill: harness-verification
+    type: composes_with
+  - skill: financial-statement-prep
+    type: composes_with
+  - skill: pricing-playbook
+    type: composes_with
 ---
 
 # Skill: Double-Entry Reconciliation

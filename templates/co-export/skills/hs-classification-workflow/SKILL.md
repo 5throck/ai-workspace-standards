@@ -11,6 +11,17 @@ last_reviewed: 2026-08-25
 status: active
 owner: hs-classification-specialist
 prerequisites: none
+relates_to:
+  - skill: roo-qualification-worksheet
+    type: follows
+  - skill: fta-origin-determination
+    type: follows
+  - skill: trade-documentation-checklist
+    type: composes_with
+  - skill: logistics-coordination
+    type: composes_with
+  - skill: market-entry-strategy
+    type: composes_with
 ---
 
 ## Context

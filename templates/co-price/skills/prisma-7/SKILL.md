@@ -7,6 +7,11 @@ last_reviewed: 2026-08-25
 status: active
 owner: lead-architect
 prerequisites: user approval for schema changes (AGENTS.md §4.2)
+relates_to:
+  - skill: pricing-governance
+    type: follows
+  - skill: ui-component-design
+    type: composes_with
 ---
 
 # Prisma 7 Specialized Skill (`prisma-7`)

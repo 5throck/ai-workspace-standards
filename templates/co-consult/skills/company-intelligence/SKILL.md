@@ -10,6 +10,13 @@ last_reviewed: 2026-07-19
 status: active
 owner: pm
 prerequisites: none
+relates_to:
+  - skill: insight-synthesis
+    type: follows
+  - skill: org-readiness-assessment
+    type: composes_with
+  - skill: financial-modeling
+    type: follows
 metadata:
   source: workspace
   type: research

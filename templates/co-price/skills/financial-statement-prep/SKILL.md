@@ -7,6 +7,19 @@ last_reviewed: 2026-08-25
 status: active
 owner: finance-strategy-lead
 prerequisites: statement schema defined in docs/biz_logic.md and docs/erd.md
+relates_to:
+  - skill: harness-verification
+    type: composes_with
+  - skill: i18n-audit
+    type: composes_with
+  - skill: pricing-playbook
+    type: follows
+  - skill: scenario-comparison
+    type: composes_with
+  - skill: prisma-7
+    type: composes_with
+  - skill: harness-verification
+    type: follows
 ---
 
 # Financial Statement Preparation Skill (`finance:financial-statements`)

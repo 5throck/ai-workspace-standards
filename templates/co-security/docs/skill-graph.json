@@ -224,6 +224,18 @@
       "source": "skill_manifest"
     },
     {
+      "type": "composes_with",
+      "from": "finding-reconciliation",
+      "to": "sarif-exporter",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-security/skills/finding-reconciliation/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
       "type": "references",
       "from": "finding-reconciliation",
       "to": "sarif-exporter",
@@ -234,6 +246,17 @@
       "from": "finding-reconciliation",
       "to": "security-scan",
       "source": "prose"
+    },
+    {
+      "type": "follows",
+      "from": "finding-reconciliation",
+      "to": "spdx-sbom",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-security/skills/finding-reconciliation/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     },
     {
       "type": "references",
@@ -566,10 +589,33 @@
       "source": "skill_manifest"
     },
     {
+      "type": "follows",
+      "from": "sarif-exporter",
+      "to": "samm-maturity",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-security/skills/sarif-exporter/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "references",
       "from": "sarif-exporter",
       "to": "security-scan",
       "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "sarif-exporter",
+      "to": "stride-threat-matrix",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-security/skills/sarif-exporter/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
     },
     {
       "type": "references",
@@ -630,6 +676,17 @@
       "from": "spdx-sbom",
       "to": "security-scan",
       "source": "prose"
+    },
+    {
+      "type": "follows",
+      "from": "stride-threat-matrix",
+      "to": "finding-reconciliation",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-security/skills/stride-threat-matrix/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     },
     {
       "type": "produces",
@@ -702,6 +759,17 @@
       "from": "verify-authorization",
       "to": "red-team-lead",
       "source": "skill_manifest"
+    },
+    {
+      "type": "follows",
+      "from": "verify-authorization",
+      "to": "stride-threat-matrix",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-security/skills/verify-authorization/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     }
   ]
 }

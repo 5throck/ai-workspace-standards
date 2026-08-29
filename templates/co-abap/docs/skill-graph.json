@@ -224,7 +224,7 @@
     {
       "id": "research-analysis",
       "type": "skill",
-      "layer": "variant:co-abap"
+      "layer": "L0"
     },
     {
       "id": "sap-co",
@@ -288,6 +288,29 @@
     }
   ],
   "edges": [
+    {
+      "type": "composes_with",
+      "from": "abap-code-review",
+      "to": "abap-dev",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-abap/skills/abap-code-review/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "follows",
+      "from": "abap-code-review",
+      "to": "abap-dev",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-abap/skills/abap-code-review/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
     {
       "type": "used_by",
       "from": "abap-code-review",
@@ -353,6 +376,18 @@
       "from": "abap-dev",
       "to": "code-writer",
       "source": "skill_manifest"
+    },
+    {
+      "type": "composes_with",
+      "from": "abap-dev",
+      "to": "dump-monitor",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-abap/skills/abap-dev/SKILL.md",
+        "field": "relates_to",
+        "index": 6
+      }
     },
     {
       "type": "produces",
@@ -433,10 +468,165 @@
       "source": "skill_manifest"
     },
     {
+      "type": "composes_with",
+      "from": "abap-dev",
+      "to": "research-analysis",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-abap/skills/abap-dev/SKILL.md",
+        "field": "relates_to",
+        "index": 7
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "abap-dev",
+      "to": "sap-co",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-abap/skills/abap-dev/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "abap-dev",
+      "to": "sap-co",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-abap/skills/abap-dev/SKILL.md",
+        "field": "relates_to",
+        "index": 9
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "abap-dev",
+      "to": "sap-fi",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-abap/skills/abap-dev/SKILL.md",
+        "field": "relates_to",
+        "index": 8
+      }
+    },
+    {
+      "type": "follows",
+      "from": "abap-dev",
+      "to": "sap-fi",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-abap/skills/abap-dev/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "used_by",
       "from": "abap-dev",
       "to": "sap-investigator",
       "source": "skill_manifest"
+    },
+    {
+      "type": "composes_with",
+      "from": "abap-dev",
+      "to": "sap-le",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-abap/skills/abap-dev/SKILL.md",
+        "field": "relates_to",
+        "index": 4
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "abap-dev",
+      "to": "sap-le",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-abap/skills/abap-dev/SKILL.md",
+        "field": "relates_to",
+        "index": 12
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "abap-dev",
+      "to": "sap-mm",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-abap/skills/abap-dev/SKILL.md",
+        "field": "relates_to",
+        "index": 3
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "abap-dev",
+      "to": "sap-mm",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-abap/skills/abap-dev/SKILL.md",
+        "field": "relates_to",
+        "index": 11
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "abap-dev",
+      "to": "sap-pp",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-abap/skills/abap-dev/SKILL.md",
+        "field": "relates_to",
+        "index": 5
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "abap-dev",
+      "to": "sap-pp",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-abap/skills/abap-dev/SKILL.md",
+        "field": "relates_to",
+        "index": 13
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "abap-dev",
+      "to": "sap-sd",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-abap/skills/abap-dev/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "abap-dev",
+      "to": "sap-sd",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-abap/skills/abap-dev/SKILL.md",
+        "field": "relates_to",
+        "index": 10
+      }
     },
     {
       "type": "used_by",
@@ -469,6 +659,17 @@
       "source": "skill_manifest"
     },
     {
+      "type": "follows",
+      "from": "dump-monitor",
+      "to": "abap-dev",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-abap/skills/dump-monitor/SKILL.md",
+        "field": "relates_to",
+        "index": 5
+      }
+    },
+    {
       "type": "used_by",
       "from": "dump-monitor",
       "to": "devops-admin",
@@ -497,6 +698,78 @@
       "from": "dump-monitor",
       "to": "pm",
       "source": "skill_manifest"
+    },
+    {
+      "type": "composes_with",
+      "from": "dump-monitor",
+      "to": "research-analysis",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-abap/skills/dump-monitor/SKILL.md",
+        "field": "relates_to",
+        "index": 6
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "dump-monitor",
+      "to": "sap-co",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-abap/skills/dump-monitor/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "dump-monitor",
+      "to": "sap-fi",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-abap/skills/dump-monitor/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "dump-monitor",
+      "to": "sap-le",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-abap/skills/dump-monitor/SKILL.md",
+        "field": "relates_to",
+        "index": 4
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "dump-monitor",
+      "to": "sap-mm",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-abap/skills/dump-monitor/SKILL.md",
+        "field": "relates_to",
+        "index": 3
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "dump-monitor",
+      "to": "sap-sd",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-abap/skills/dump-monitor/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
     },
     {
       "type": "used_by",
@@ -949,10 +1222,57 @@
       "source": "prose"
     },
     {
+      "type": "composes_with",
+      "from": "sap-co",
+      "to": "sap-le",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-abap/skills/sap-co/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "sap-co",
+      "to": "sap-mm",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-abap/skills/sap-co/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "sap-co",
+      "to": "sap-pp",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-abap/skills/sap-co/SKILL.md",
+        "field": "relates_to",
+        "index": 3
+      }
+    },
+    {
       "type": "references",
       "from": "sap-co",
       "to": "sap-pp",
       "source": "prose"
+    },
+    {
+      "type": "follows",
+      "from": "sap-co",
+      "to": "sap-sd",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-abap/skills/sap-co/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     },
     {
       "type": "references",
@@ -1015,16 +1335,75 @@
       "source": "prose"
     },
     {
+      "type": "follows",
+      "from": "sap-fi",
+      "to": "sap-co",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-abap/skills/sap-fi/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "references",
       "from": "sap-fi",
       "to": "sap-co",
       "source": "prose"
     },
     {
+      "type": "composes_with",
+      "from": "sap-fi",
+      "to": "sap-le",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-abap/skills/sap-fi/SKILL.md",
+        "field": "relates_to",
+        "index": 3
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "sap-fi",
+      "to": "sap-mm",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-abap/skills/sap-fi/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
       "type": "references",
       "from": "sap-fi",
       "to": "sap-mm",
       "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "sap-fi",
+      "to": "sap-pp",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-abap/skills/sap-fi/SKILL.md",
+        "field": "relates_to",
+        "index": 4
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "sap-fi",
+      "to": "sap-sd",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-abap/skills/sap-fi/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
     },
     {
       "type": "references",
@@ -1099,6 +1478,29 @@
       "source": "prose"
     },
     {
+      "type": "follows",
+      "from": "sap-le",
+      "to": "sap-pp",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-abap/skills/sap-le/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "sap-le",
+      "to": "sap-sd",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-abap/skills/sap-le/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "references",
       "from": "sap-le",
       "to": "sap-sd",
@@ -1171,6 +1573,29 @@
       "source": "prose"
     },
     {
+      "type": "follows",
+      "from": "sap-mm",
+      "to": "sap-le",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-abap/skills/sap-mm/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "sap-mm",
+      "to": "sap-pp",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-abap/skills/sap-mm/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
       "type": "references",
       "from": "sap-mm",
       "to": "sap-pp",
@@ -1193,6 +1618,17 @@
       "from": "sap-pp",
       "to": "dba",
       "source": "skill_manifest"
+    },
+    {
+      "type": "follows",
+      "from": "sap-pp",
+      "to": "dump-monitor",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-abap/skills/sap-pp/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
     },
     {
       "type": "produces",
@@ -1241,6 +1677,18 @@
       "from": "sap-pp",
       "to": "sap-mm",
       "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "sap-pp",
+      "to": "sap-sd",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-abap/skills/sap-pp/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     },
     {
       "type": "references",
@@ -1307,6 +1755,17 @@
       "from": "sap-sd",
       "to": "sap-le",
       "source": "prose"
+    },
+    {
+      "type": "follows",
+      "from": "sap-sd",
+      "to": "sap-mm",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-abap/skills/sap-sd/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     },
     {
       "type": "used_by",

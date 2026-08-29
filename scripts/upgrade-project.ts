@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.13.0
+// @version 1.14.0
 // v1.13.0: New VARIANT-SCOPE SKILL PRUNE pass — a skill present in
 //           templates/common/skills/ AND in exactly one templates/co-*/skills/ is a
 //           variant-exclusive skill mistakenly duplicated into common; removed from
@@ -1579,6 +1579,27 @@ if (syncChanged > 0 && existsSync(syncSkillsScript)) {
     }
   } else {
     console.log('  [DRY RUN] Would run: bun scripts/sync-skills.ts');
+  }
+  console.log('');
+}
+
+// ── Post-upgrade: regenerate the project skill graph ──────────────────────────
+// The upgrade just refreshed skills/agents/scripts, so the project-local graph
+// is stale until the next /sync — regenerate now (reledgev pipeline-coverage
+// review 2026-08-29). Non-fatal: missing bun/generator warns and continues.
+const graphGenScript = join(projectDir, 'scripts', 'generate-skill-graph.ts');
+if (existsSync(graphGenScript)) {
+  console.log('--- Post-upgrade: Regenerating docs/skill-graph.json ---');
+  if (!dryRun) {
+    const graphGen = spawnSync('bun', ['scripts/generate-skill-graph.ts'], { cwd: projectDir, encoding: 'utf8', timeout: 60000 });
+    if (graphGen.status === 0) {
+      console.log('  ✅ Project skill graph regenerated');
+    } else {
+      console.log(`  ⚠️  generate-skill-graph.ts exited with status ${graphGen.status} — the project's next /sync (step 4.65) will regenerate it`);
+      if (graphGen.stderr) console.log(`  STDERR: ${graphGen.stderr.trim()}`);
+    }
+  } else {
+    console.log('  [DRY RUN] Would run: bun scripts/generate-skill-graph.ts');
   }
   console.log('');
 }

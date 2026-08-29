@@ -11,6 +11,11 @@ last_reviewed: 2026-06-13
 status: active
 owner: strategy-analyst
 prerequisites: none
+relates_to:
+  - skill: org-readiness-assessment
+    type: follows
+  - skill: solution-design
+    type: composes_with
 metadata:
   type: process
   triggers:

@@ -29,7 +29,7 @@
     {
       "id": "documentation-writing",
       "type": "skill",
-      "layer": "variant:co-game"
+      "layer": "L0"
     },
     {
       "id": "game-debugger",
@@ -189,7 +189,7 @@
     {
       "id": "research-analysis",
       "type": "skill",
-      "layer": "variant:co-game"
+      "layer": "L0"
     },
     {
       "id": "security-monitor",
@@ -229,10 +229,34 @@
   ],
   "edges": [
     {
+      "type": "composes_with",
+      "from": "arcade-physics",
+      "to": "code-review",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-game/skills/arcade-physics/SKILL.md",
+        "field": "relates_to",
+        "index": 4
+      }
+    },
+    {
       "type": "references",
       "from": "arcade-physics",
       "to": "code-review",
       "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "arcade-physics",
+      "to": "documentation-writing",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-game/skills/arcade-physics/SKILL.md",
+        "field": "relates_to",
+        "index": 3
+      }
     },
     {
       "type": "used_by",
@@ -295,16 +319,62 @@
       "source": "skill_manifest"
     },
     {
+      "type": "composes_with",
+      "from": "arcade-physics",
+      "to": "research-analysis",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-game/skills/arcade-physics/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "follows",
+      "from": "arcade-physics",
+      "to": "sound-synth",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-game/skills/arcade-physics/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
       "type": "references",
       "from": "arcade-physics",
       "to": "sound-synth",
       "source": "prose"
     },
     {
+      "type": "composes_with",
+      "from": "arcade-physics",
+      "to": "test-driven-development",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-game/skills/arcade-physics/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
       "type": "references",
       "from": "arcade-physics",
       "to": "test-driven-development",
       "source": "prose"
+    },
+    {
+      "type": "follows",
+      "from": "code-review",
+      "to": "arcade-physics",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-game/skills/code-review/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -341,6 +411,17 @@
       "from": "code-review",
       "to": "phase5",
       "source": "skill_manifest"
+    },
+    {
+      "type": "follows",
+      "from": "code-review",
+      "to": "test-driven-development",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-game/skills/code-review/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
     },
     {
       "type": "produces",
@@ -655,6 +736,17 @@
       "source": "procedure_schema"
     },
     {
+      "type": "follows",
+      "from": "sound-synth",
+      "to": "documentation-writing",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-game/skills/sound-synth/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "produces",
       "from": "sound-synth",
       "to": "output_type.audio_asset_set",
@@ -677,6 +769,17 @@
       "from": "sound-synth",
       "to": "sound-designer",
       "source": "skill_manifest"
+    },
+    {
+      "type": "follows",
+      "from": "test-driven-development",
+      "to": "code-review",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-game/skills/test-driven-development/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     },
     {
       "type": "used_by",

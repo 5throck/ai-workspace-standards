@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Skill Relationship Graph Verification Script
- * @version 1.4.0
+ * @version 1.5.0
  *
  * Verifies that the committed skill graph files match the current state.
  * Re-derives the graph and compares against docs/skill-graph.json.
@@ -64,8 +64,10 @@ interface OverrideEdge {
   from: string;
   to: string;
   reason: string;
-  last_reviewed: string;
+  since?: string;
+  last_reviewed?: string;
   expires_at?: string;
+  suppress?: boolean;
 }
 
 interface Overrides {
@@ -319,37 +321,73 @@ function validateRelations(
     }
   }
 
-  // Check overrides file
-  const overridesPath = join(ROOT, 'docs', 'skill-graph.overrides.json');
-  if (existsSync(overridesPath)) {
-    try {
-      const overrides: Overrides = JSON.parse(readFileSync(overridesPath, 'utf-8'));
-
-      for (const override of overrides.edges) {
-        // Check reason field for country marks
-        if (hasCountryMark(override.reason, countryCodes)) {
-          countryMarkViolations.push(`Override ${override.from} -> ${override.to} reason contains country mark`);
-        }
-
-        // Check for unknown targets
-        if (override.from && !allNodeIds.has(override.from)) {
-          unknownTargets.push(`Override references unknown from node: ${override.from}`);
-        }
-        if (override.to && !allNodeIds.has(override.to)) {
-          unknownTargets.push(`Override references unknown to node: ${override.to}`);
-        }
-
-        // Check staleness
-        if (isStaleOverride(override)) {
-          staleWarnings.push(`Override ${override.from} -> ${override.to} last reviewed ${override.last_reviewed} (> 12 months)`);
-        }
-      }
-    } catch {
-      // Invalid overrides JSON, will be caught by graph generation
-    }
-  }
+  // Check overrides file (L0)
+  checkOverridesFile(join(ROOT, 'docs', 'skill-graph.overrides.json'), allNodeIds, countryCodes, {
+    countryMarkViolations,
+    unknownTargets,
+    staleWarnings,
+  });
 
   return { countryMarkViolations, unknownTargets, staleWarnings };
+}
+
+/**
+ * Policy checks for one skill-graph.overrides.json file (reledgev §3 L-B layer):
+ * - `reason` required (fail) + country-mark scan
+ * - `since` required and must be a date (fail) — the experimental-layer admission date
+ * - `since` older than 90 days → warning (overrides are a waiting room, not a home:
+ *   promote to frontmatter or drop)
+ * - unknown endpoints → fail
+ * - legacy `last_reviewed` staleness (> 12 months) → warning (kept for pre-reledgev entries)
+ */
+function checkOverridesFile(
+  overridesPath: string,
+  allNodeIds: Set<string>,
+  countryCodes: string[],
+  sink: { countryMarkViolations: string[]; unknownTargets: string[]; staleWarnings: string[] }
+): void {
+  if (!existsSync(overridesPath)) return;
+  let overrides: Overrides;
+  try {
+    overrides = JSON.parse(readFileSync(overridesPath, 'utf-8'));
+  } catch {
+    // Invalid overrides JSON, will be caught by graph generation
+    return;
+  }
+
+  const NOW = Date.now();
+  const NINETY_DAYS = 90 * 24 * 60 * 60 * 1000;
+
+  for (const override of overrides.edges) {
+    const label = `Override ${override.from} -> ${override.to}`;
+
+    // reason is required (fail) + country-mark scan
+    if (!override.reason || typeof override.reason !== 'string') {
+      sink.unknownTargets.push(`${overridesPath}: ${label} is missing required field "reason"`);
+    } else if (hasCountryMark(override.reason, countryCodes)) {
+      sink.countryMarkViolations.push(`${label} reason contains country mark`);
+    }
+
+    // since is required (fail) + 90-day review warning
+    if (!override.since || Number.isNaN(new Date(override.since).getTime())) {
+      sink.unknownTargets.push(`${overridesPath}: ${label} is missing required field "since" (YYYY-MM-DD)`);
+    } else if (NOW - new Date(override.since).getTime() > NINETY_DAYS) {
+      sink.staleWarnings.push(`${label} has been in overrides since ${override.since} (> 90 days) — promote to frontmatter relates_to or drop it`);
+    }
+
+    // Check for unknown endpoints
+    if (override.from && !allNodeIds.has(override.from)) {
+      sink.unknownTargets.push(`Override references unknown from node: ${override.from}`);
+    }
+    if (override.to && !allNodeIds.has(override.to)) {
+      sink.unknownTargets.push(`Override references unknown to node: ${override.to}`);
+    }
+
+    // Legacy staleness (pre-reledgev entries carrying last_reviewed)
+    if (override.last_reviewed && isStaleOverride(override)) {
+      sink.staleWarnings.push(`${label} last reviewed ${override.last_reviewed} (> 12 months)`);
+    }
+  }
 }
 
 /**
@@ -433,6 +471,23 @@ async function verifyScopeGraph(scope: string): Promise<void> {
     console.log('');
     console.log('   Country marks must ONLY be in docs/workspace-schema.json country_scoped_assets (ADR-0060).');
     process.exit(1);
+  }
+
+  // Scope overrides policy checks (reledgev §3 L-B layer): reason/since required,
+  // 90-day review warning, country marks, endpoint existence
+  const scopeOverridesPath = join(ROOT, 'templates', scope, 'docs', 'skill-graph.overrides.json');
+  if (existsSync(scopeOverridesPath)) {
+    const scopeSink = { countryMarkViolations: [] as string[], unknownTargets: [] as string[], staleWarnings: [] as string[] };
+    checkOverridesFile(scopeOverridesPath, new Set(derived.nodes.map(n => n.id)), countryCodes, scopeSink);
+    if (scopeSink.unknownTargets.length > 0) {
+      console.log('');
+      console.log(`❌ Override violations in templates/${scope}/docs/skill-graph.overrides.json:`);
+      for (const t of scopeSink.unknownTargets.slice(0, 20)) console.log(`   ${t}`);
+      process.exit(1);
+    }
+    if (scopeSink.staleWarnings.length > 0) {
+      for (const w of scopeSink.staleWarnings) console.log(`⚠️  ${w}`);
+    }
   }
 
   console.log(`✓ Scope graph verification passed: ${scope}`);

@@ -10,6 +10,9 @@ status: active
 owner: pm
 last_reviewed: 2026-07-19
 prerequisites: none
+relates_to:
+  - skill: documentation-writing
+    type: enables
 gemini-parity: skip
 metadata:
   type: process

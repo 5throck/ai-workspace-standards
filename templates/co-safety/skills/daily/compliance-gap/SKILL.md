@@ -6,6 +6,9 @@ description: Trigger compliance gap analysis against applicable EHS regulations
 owner: compliance-agent
 status: active
 version: 1.0.0
+relates_to:
+  - skill: meeting-facilitation
+    type: follows
 metadata:
   triggers:
     - 컴플라이언스 갭

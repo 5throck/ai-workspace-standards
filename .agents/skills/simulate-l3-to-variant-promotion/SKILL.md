@@ -7,6 +7,9 @@ status: active
 scope: workspace
 owner: automation-engineer
 prerequisites: Bun (bun scripts/test-l3-to-variant-promotion.ts, per ADR-0036)
+relates_to:
+  - skill: project-to-variant
+    type: follows
 metadata:
   type: process
   triggers:

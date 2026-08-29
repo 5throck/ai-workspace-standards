@@ -7,6 +7,11 @@ last_reviewed: 2026-08-25
 status: active
 owner: pricing-strategist
 prerequisites: a draft TradeTerm / ConsumerPricePlan under review
+relates_to:
+  - skill: price-waterfall-analysis
+    type: follows
+  - skill: ui-component-design
+    type: composes_with
 inputs: [approval-record]
 outputs: [exception-log, guardrail-status]
 lang: ko

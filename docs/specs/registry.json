@@ -586,6 +586,15 @@
       "source": "manual",
       "created": "2026-08-28",
       "last_updated": "2026-08-29"
+    },
+    {
+      "id": "2026-08-29-relation-graph-evolution-and-decision-chain",
+      "title": "relation graph evolution and decision chain design",
+      "file": "docs/designs/2026-08-29-relation-graph-evolution-and-decision-chain-design.md",
+      "status": "implemented",
+      "source": "architect",
+      "created": "2026-08-29",
+      "last_updated": "2026-08-29"
     }
   ]
 }

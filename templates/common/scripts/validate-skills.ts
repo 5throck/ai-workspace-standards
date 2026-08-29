@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Skill Lifecycle Validation Script
- * @version 1.1.0
+ * @version 1.3.0
  */
 // Validates skills/*/SKILL.md files for required frontmatter
 // and checks governance records in docs/lifecycle/skills/*.md
@@ -196,6 +196,124 @@ function validateLayerPlacement(): void {
   }
 }
 
+// Part 1c: Relation metadata validation (relates_to per ADR-0060 Amendment 3).
+// Form homogeneity (all-legacy-strings or all-typed-objects, never mixed),
+// typed relation vocabulary, target existence, and self-reference.
+const RELATION_TYPES = ['relates_to', 'composes_with', 'follows', 'enables'];
+
+function extractRelatesTo(rawContent: string): { entries: unknown[] } | null {
+  const content = normalizeContent(rawContent);
+  const match = content.match(/^---\n([\s\S]*?)\n---/);
+  if (!match) return null;
+  const lines = match[1].split('\n');
+  let inField = false;
+  const entries: unknown[] = [];
+  for (const line of lines) {
+    if (/^relates_to:\s*$/.test(line)) {
+      inField = true;
+      continue;
+    }
+    if (!inField) continue;
+    if (/^\s*-\s+skill:\s*(\S+)\s*$/.test(line)) {
+      entries.push({ skill: line.match(/^\s*-\s+skill:\s*(\S+)\s*$/)![1], kind: 'typed-start' });
+      continue;
+    }
+    if (/^\s+type:\s*(\S+)\s*$/.test(line) && entries.length > 0) {
+      const last = entries[entries.length - 1] as { type?: string };
+      if (last && typeof last === 'object' && 'kind' in last) last['type'] = line.match(/^\s+type:\s*(\S+)\s*$/)![1];
+      continue;
+    }
+    if (/^\s*-\s+(?!skill:)\S/.test(line)) {
+      entries.push(line.replace(/^\s*-\s+/, '').trim());
+      continue;
+    }
+    // Any other non-indented key ends the field
+    if (/^\S/.test(line)) break;
+  }
+  return { entries };
+}
+
+function validateRelationMetadata(knownSkills: Set<string>): void {
+  if (!JSON_MODE) console.log(`\n${colors.cyan}📋 Part 1c: Relation Metadata Validation (relates_to)${colors.reset}`);
+
+  // Scan L0 (skills/) and every variant template (templates/*/skills/), including
+  // nested skill directories (collected as slash-relative names).
+  const scanDirs: string[] = [SKILLS_DIR];
+  const templatesDir = join(ROOT, 'templates');
+  if (existsSync(templatesDir)) {
+    for (const dirent of readdirSync(templatesDir, { withFileTypes: true })) {
+      const skillsDir = join(templatesDir, dirent.name, 'skills');
+      if (dirent.isDirectory() && existsSync(skillsDir)) scanDirs.push(skillsDir);
+    }
+  }
+
+  const collectSkillFiles = (base: string, rel: string, out: Array<{ name: string; file: string }>) => {
+    for (const dirent of readdirSync(base, { withFileTypes: true })) {
+      if (!dirent.isDirectory()) continue;
+      const childRel = rel ? `${rel}/${dirent.name}` : dirent.name;
+      if (existsSync(join(base, dirent.name, 'SKILL.md'))) {
+        out.push({ name: childRel, file: join(base, dirent.name, 'SKILL.md') });
+      } else {
+        collectSkillFiles(join(base, dirent.name), childRel, out);
+      }
+    }
+  };
+
+  for (const baseDir of scanDirs) {
+    const skillFiles: Array<{ name: string; file: string }> = [];
+    collectSkillFiles(baseDir, '', skillFiles);
+
+    for (const { name: skillDir, file: skillFile } of skillFiles) {
+    const raw = readFileSync(skillFile, 'utf-8');
+    if (!/^relates_to:/m.test(normalizeContent(raw))) continue;
+
+    const extracted = extractRelatesTo(raw);
+    if (!extracted || extracted.entries.length === 0) {
+      warn(skillDir, 'relation-empty', `${skillDir}: relates_to present but no entries parsed`, 'Remove the empty relates_to field or add entries');
+      continue;
+    }
+
+    const allStrings = extracted.entries.every(e => typeof e === 'string');
+    const allTyped = extracted.entries.every(e => typeof e === 'object' && e !== null);
+    if (!allStrings && !allTyped) {
+      fail(
+        skillDir,
+        'relation-mixed-forms',
+        `${skillDir}: relates_to must contain either all string entries or all typed {skill, type} objects; mixed entries are not allowed`,
+        'Convert every entry to the typed form: - skill: <name>\\n  type: relates_to|composes_with|follows|enables'
+      );
+      continue;
+    }
+
+    if (allStrings) {
+      pass(`${skillDir}: relates_to (legacy string form, ${extracted.entries.length} entries)`);
+      continue;
+    }
+
+    let entryErrors = 0;
+    for (const e of extracted.entries as Array<{ skill: string; type?: string }>) {
+      if (!e.type || !RELATION_TYPES.includes(e.type)) {
+        fail(skillDir, 'relation-type-invalid', `${skillDir}: relation to "${e.skill}" has missing/unknown type "${e.type ?? ''}"`, `Use one of: ${RELATION_TYPES.join(', ')}`);
+        entryErrors++;
+        continue;
+      }
+      if (!knownSkills.has(e.skill)) {
+        fail(skillDir, 'relation-target-unknown', `${skillDir}: relates_to target skill "${e.skill}" does not exist`, 'Check the target skill name (L0 skills/ or templates/<variant>/skills/)');
+        entryErrors++;
+        continue;
+      }
+      if (e.skill === skillDir) {
+        fail(skillDir, 'relation-self', `${skillDir}: relates_to references itself`, 'Remove the self-reference');
+        entryErrors++;
+      }
+    }
+    if (entryErrors === 0) {
+      pass(`${skillDir}: relates_to (typed form, ${extracted.entries.length} entries)`);
+    }
+    }
+  }
+}
+
 // Part 2: Validate governance records (docs/lifecycle/skills/*.md)
 function validateGovernanceRecords(): void {
   if (!JSON_MODE) console.log(`\n${colors.cyan}📋 Part 2: Governance Record Validation (docs/lifecycle/skills/*.md)${colors.reset}`);
@@ -242,6 +360,36 @@ function validateGovernanceRecords(): void {
   }
 }
 
+// Collect every known skill name across L0 (skills/), L1 (templates/common/skills/),
+// and variant templates (templates/co-*/skills/) so relation targets can be
+// existence-checked. Nested skill directories (e.g. co-safety daily/<name>) are
+// collected as slash-relative names.
+function collectKnownSkillNames(): Set<string> {
+  const names = new Set<string>();
+  const walk = (base: string, rel: string) => {
+    for (const dirent of readdirSync(base, { withFileTypes: true })) {
+      const childRel = rel ? `${rel}/${dirent.name}` : dirent.name;
+      if (!dirent.isDirectory()) continue;
+      if (existsSync(join(base, dirent.name, 'SKILL.md'))) {
+        names.add(childRel);
+      } else {
+        walk(join(base, dirent.name), childRel);
+      }
+    }
+  };
+  if (existsSync(SKILLS_DIR)) walk(SKILLS_DIR, '');
+  const templatesDir = join(ROOT, 'templates');
+  if (existsSync(templatesDir)) {
+    for (const dirent of readdirSync(templatesDir, { withFileTypes: true })) {
+      if (dirent.isDirectory()) {
+        const skillsDir = join(templatesDir, dirent.name, 'skills');
+        if (existsSync(skillsDir)) walk(skillsDir, '');
+      }
+    }
+  }
+  return names;
+}
+
 // Main
 function main() {
   if (!JSON_MODE) {
@@ -251,6 +399,7 @@ function main() {
 
   validateRuntimeDefinitions();
   validateLayerPlacement();
+  validateRelationMetadata(collectKnownSkillNames());
   validateGovernanceRecords();
 
   const errors = issues.filter(i => i.level === 'error');

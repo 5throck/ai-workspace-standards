@@ -199,6 +199,8 @@ Skills are reusable workflows defined as `skills/<name>/SKILL.md` or `.claude/sk
 
 **Cross-Platform Skill Availability**: The `skills/<name>/` directory is the Single Source of Truth (SSOT) for all skill definitions. Every skill defined in `skills/` MUST be available on all supported AI platforms (Claude Code, Claude Desktop App, Gemini CLI, Antigravity, Antigravity CLI). Platform-specific distribution directories (`.claude/skills/`, `.gemini/skills/`, `.agents/skills/`) serve as derived copies only — they MUST NOT be the sole location of any skill. Variant templates MUST maintain skill parity across all three platform directories. Platform-specific configuration files (`skills.json`) register these directories for discovery, but the canonical definition always resides in `skills/`.
 
+**Skill Relationship Graph (ADR-0060, Amendments 1–6)**: Skill-to-skill relations are managed in three layers — typed `relates_to` frontmatter (permanent), per-scope `skill-graph.overrides.json` (experimental; `reason`/`since` required, 90-day review, `suppress` markers), and the always-regenerated `docs/skill-graph.json` projection. Relations flow variant skill → L1 or same-variant targets only; the graph is regenerated at every lifecycle boundary (scaffold, promotion, upgrade, `/sync` step 4.65) and `validate-skills.ts` / `validate-decisions.ts` run as fail-closed `/sync` gates (step 3.96). → Details: [§6.2.1 Skill Relation System](docs/constitution/06-skill-lifecycle.md).
+
 ---
 
 ### 6.5 Script Lifecycle Management → [Full details](docs/constitution/06.5-script-lifecycle.md)

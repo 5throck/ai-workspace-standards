@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-29T05:58:33.055Z
+**Generated**: 2026-08-29T07:00:57.334Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 8
 - **Skills**: 33
-- **Scripts**: 86
+- **Scripts**: 87
 - **Commands**: 8
 
 ---
@@ -86,7 +86,7 @@
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | N/A |
 | compile-tokens.ts | 1.1.0 | scripts/compile-tokens.ts | N/A |
 | create-l3-scaffold.ts | 1.12.3 | scripts/create-l3-scaffold.ts | N/A |
-| dev-sync.ts | 1.7.8 | scripts/dev-sync.ts | bun |
+| dev-sync.ts | 1.8.0 | scripts/dev-sync.ts | bun |
 | dispatch-parallel.ts | 1.0.1 | scripts/dispatch-parallel.ts | N/A |
 | dispatch-serial.ts | 1.0.1 | scripts/dispatch-serial.ts | N/A |
 | dispatch.ts | 1.0.0 | scripts/dispatch.ts | N/A |
@@ -95,12 +95,12 @@
 | generate-ide-rules.ts | 1.0.0 | scripts/generate-ide-rules.ts | N/A |
 | generate-l3-readme.ts | 1.0.3 | scripts/generate-l3-readme.ts | fs, path |
 | generate-scripts-readme.ts | 1.0.3 | scripts/generate-scripts-readme.ts | N/A |
-| generate-skill-graph.ts | 1.6.0 | scripts/generate-skill-graph.ts | js-yaml |
+| generate-skill-graph.ts | 1.7.0 | scripts/generate-skill-graph.ts | js-yaml |
 | generate-version-manifest.ts | 1.2.0 | scripts/generate-version-manifest.ts | bun, js-yaml |
 | infer-graph-from-phases.ts | 0.1.0 | scripts/experiments/infer-graph-from-phases.ts | N/A |
 | ingest-external-skills.ts | 1.1.0 | scripts/ingest-external-skills.ts | N/A |
 | ingest-security-frameworks.ts | 1.1.0 | scripts/ingest-security-frameworks.ts | N/A |
-| l3-to-variant-pipeline.ts | 1.12.1 | scripts/l3-to-variant-pipeline.ts | child_process, fs, path |
+| l3-to-variant-pipeline.ts | 1.13.0 | scripts/l3-to-variant-pipeline.ts | child_process, fs, path, process |
 | lifecycle-sync-audit.ts | 1.5.0 | scripts/lifecycle-sync-audit.ts | N/A |
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
 | md-to-ooxml.ts | 1.2.0 | scripts/md-to-ooxml.ts | fs, path |
@@ -137,15 +137,16 @@
 | test-variant-readiness.ts | 1.0.0 | scripts/test-variant-readiness.ts | N/A |
 | ticket.ts | 1.1.0 | scripts/ticket.ts | N/A |
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, fs, path |
-| upgrade-project.ts | 1.13.0 | scripts/upgrade-project.ts | N/A |
+| upgrade-project.ts | 1.14.0 | scripts/upgrade-project.ts | N/A |
 | validate-agents.ts | 1.0.5 | scripts/validate-agents.ts | N/A |
+| validate-decisions.ts | 1.0.0 | scripts/validate-decisions.ts | js-yaml |
 | validate-doc-folder.ts | 1.1.0 | scripts/validate-doc-folder.ts | fs, path |
 | validate-docs-links.ts | 1.0.0 | scripts/validate-docs-links.ts | fs, path |
 | validate-md-language.ts | 1.8.0 | scripts/validate-md-language.ts | fs |
 | validate-model-registry.ts | N/A | scripts/validate-model-registry.ts | N/A |
 | validate-pm-extends.ts | 0.3.1 | scripts/validate-pm-extends.ts | N/A |
 | validate-procedures.ts | 1.1.0 | scripts/validate-procedures.ts | js-yaml |
-| validate-skills.ts | 1.1.0 | scripts/validate-skills.ts | N/A |
+| validate-skills.ts | 1.3.0 | scripts/validate-skills.ts | N/A |
 | validate-templates.ts | 1.19.0 | scripts/validate-templates.ts | js-yaml |
 | validate-variant-readiness.ts | 1.0.0 | scripts/validate-variant-readiness.ts | N/A |
 | variant-feature.ts | 1.0.0 | scripts/variant-feature.ts | N/A |
@@ -157,7 +158,7 @@
 | verify-platform-lifecycle.ts | 1.1.2 | scripts/verify-platform-lifecycle.ts | N/A |
 | verify-readme-sync.ts | 1.4.0 | scripts/verify-readme-sync.ts | bun, fs, path |
 | verify-scripts.ts | 1.4.1 | scripts/verify-scripts.ts | fs, path |
-| verify-skill-graph.ts | 1.4.0 | scripts/verify-skill-graph.ts | N/A |
+| verify-skill-graph.ts | 1.5.0 | scripts/verify-skill-graph.ts | N/A |
 | verify-skills.ts | 1.3.0 | scripts/verify-skills.ts | N/A |
 | verify-template-integrity.ts | 1.0.0 | scripts/verify-template-integrity.ts | crypto, fs, path |
 

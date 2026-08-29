@@ -7,6 +7,11 @@ status: active
 scope: co-abap
 owner: pp-analyst
 prerequisites: vsp MCP server
+relates_to:
+  - skill: sap-sd
+    type: composes_with
+  - skill: dump-monitor
+    type: follows
 metadata:
   type: module
   triggers:

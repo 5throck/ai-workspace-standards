@@ -12,6 +12,9 @@ l2_propagate: false
 version: "1.1.0"
 owner: architect
 last_reviewed: 2026-08-21
+relates_to:
+  - skill: promote-variant
+    type: follows
 metadata:
   type: process
   triggers:

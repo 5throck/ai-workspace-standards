@@ -15,6 +15,10 @@ prerequisites: none
 relates_to:
   - skill: executive-presentation
     type: enables
+  - skill: project-delivery
+    type: follows
+  - skill: change-impact-assessment
+    type: follows
 outputs: [complexity-grades, risk-cost-ranges, preconditions]
 metadata:
   type: process

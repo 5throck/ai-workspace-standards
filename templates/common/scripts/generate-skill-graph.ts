@@ -1,14 +1,16 @@
 #!/usr/bin/env bun
 /**
  * Skill Relationship Graph Generator
- * @version 1.6.0
+ * @version 1.7.0
  *
  * Generates a skill relationship graph from multiple sources:
  * - SKILL.md files (prerequisites, relates_to frontmatter fields)
  * - Agent frontmatter (required_skills)
  * - variant.json skill_manifest (used_by_agents, phases)
  * - Prose backtick references in SKILL.md and agent bodies
- * - Hand-maintained overrides in docs/skill-graph.overrides.json
+ * - Hand-maintained overrides (per scope: docs/skill-graph.overrides.json at L0
+ *   and templates/<scope>/docs/skill-graph.overrides.json for scope graphs;
+ *   reledgev §3 L-B layer — reason/since required, expires_at, suppress markers)
  *
  * Outputs:
  * - docs/skill-graph.json (machine-readable, committed)
@@ -108,8 +110,12 @@ interface OverrideEdge {
   from: string;
   to: string;
   reason: string;
-  last_reviewed: string;
+  since?: string;
+  last_reviewed?: string;
   expires_at?: string;
+  /** Suppress marker (reledgev §3, L-B layer): remove matching frontmatter-derived
+   *  edges instead of adding an edge. `type` optional — omit to suppress all types. */
+  suppress?: boolean;
 }
 
 interface Overrides {
@@ -803,55 +809,9 @@ export function buildGraph(): SkillGraph {
   // Workspace-root lifecycle procedures (l0 namespace).
   deriveProceduresFromDir(join(ROOT, 'procedures'), 'l0', localLayer, allNodes, edges);
 
-  // Source 5: Overrides
-  const overridesPath = join(ROOT, 'docs', 'skill-graph.overrides.json');
-  let overrides: Overrides = { edges: [] };
-
-  if (existsSync(overridesPath)) {
-    try {
-      overrides = JSON.parse(readFileSync(overridesPath, 'utf-8'));
-    } catch {
-      console.warn(`Warning: Failed to parse ${overridesPath}, using empty overrides`);
-    }
-  } else {
-    // Create seed file
-    const docsDir = join(ROOT, 'docs');
-    if (!existsSync(docsDir)) {
-      mkdirSync(docsDir, { recursive: true });
-    }
-    writeFileSync(overridesPath, JSON.stringify({ edges: [] }, null, 2));
-    console.log(`Created seed file: ${overridesPath}`);
-  }
-
-  const now = new Date();
-  for (const override of overrides.edges) {
-    // Check expiration
-    if (override.expires_at) {
-      const expiresAt = new Date(override.expires_at);
-      if (expiresAt < now) {
-        console.log(`Note: Override ${override.from} -> ${override.to} expired on ${override.expires_at}, skipping`);
-        continue;
-      }
-    }
-
-    // Validate target nodes exist
-    if (override.from && !allNodes.has(override.from)) {
-      console.warn(`Warning: Override references unknown node: ${override.from}`);
-      continue;
-    }
-    if (override.to && !allNodes.has(override.to)) {
-      console.warn(`Warning: Override references unknown node: ${override.to}`);
-      continue;
-    }
-
-    edges.push({
-      type: override.type as GraphEdge['type'],
-      from: override.from,
-      to: override.to,
-      source: 'override',
-      reason: override.reason
-    });
-  }
+  // Source 5: Overrides (L0) — loaded and applied via shared helper
+  const { overrides } = loadOverridesFile(join(ROOT, 'docs'));
+  applyOverrides(overrides, allNodes, edges);
 
   // Sort deterministically
   const sortedNodes = Array.from(allNodes.values()).sort((a, b) => a.id.localeCompare(b.id));
@@ -871,15 +831,89 @@ export function buildGraph(): SkillGraph {
 }
 
 /**
+ * Load (and seed, if missing) a skill-graph.overrides.json from the given docs dir.
+ * reledgev §3 L-B layer: each scope (L0 docs/ or templates/<scope>/docs/) owns its
+ * own experimental-relation file.
+ */
+function loadOverridesFile(docsDir: string): { path: string; overrides: Overrides } {
+  const overridesPath = join(docsDir, 'skill-graph.overrides.json');
+  let overrides: Overrides = { edges: [] };
+
+  if (existsSync(overridesPath)) {
+    try {
+      overrides = JSON.parse(readFileSync(overridesPath, 'utf-8'));
+    } catch {
+      console.warn(`Warning: Failed to parse ${overridesPath}, using empty overrides`);
+    }
+  } else if (docsDir === join(ROOT, 'docs') || existsSync(docsDir)) {
+    if (!existsSync(docsDir)) mkdirSync(docsDir, { recursive: true });
+    writeFileSync(overridesPath, JSON.stringify({ edges: [] }, null, 2));
+    console.log(`Created seed file: ${overridesPath}`);
+  }
+
+  return { path: overridesPath, overrides };
+}
+
+/**
+ * Apply override edges: add non-suppress entries (expiry + unknown-node guarded),
+ * and honor `suppress: true` entries by removing matching frontmatter-derived edges
+ * (source !== 'override'; override-vs-override suppression is not supported).
+ * reledgev §3 L-B layer.
+ */
+function applyOverrides(overrides: Overrides, allNodes: Map<string, GraphNode>, edges: GraphEdge[]): void {
+  const now = new Date();
+  for (const override of overrides.edges) {
+    // Check expiration
+    if (override.expires_at) {
+      const expiresAt = new Date(override.expires_at);
+      if (expiresAt < now) {
+        console.log(`Note: Override ${override.from} -> ${override.to} expired on ${override.expires_at}, skipping`);
+        continue;
+      }
+    }
+
+    // Validate endpoint nodes exist
+    if (override.from && !allNodes.has(override.from)) {
+      console.warn(`Warning: Override references unknown node: ${override.from}`);
+      continue;
+    }
+    if (override.to && !allNodes.has(override.to)) {
+      console.warn(`Warning: Override references unknown node: ${override.to}`);
+      continue;
+    }
+
+    if (override.suppress) {
+      for (let i = edges.length - 1; i >= 0; i--) {
+        const e = edges[i];
+        if (e.source === 'override') continue;
+        if (e.from === override.from && e.to === override.to && (!override.type || e.type === override.type)) {
+          edges.splice(i, 1);
+        }
+      }
+      continue;
+    }
+
+    edges.push({
+      type: override.type as GraphEdge['type'],
+      from: override.from,
+      to: override.to,
+      source: 'override',
+      reason: override.reason
+    });
+  }
+}
+
+/**
  * Build a scope-local graph for a single template layer (templates/<scope>).
  *
  * Scope-local nodes carry the scope's own layer tag (`common` / `variant:<scope>`).
  * Relations that name a skill defined upstream (L0 or common) resolve as
  * cross-layer edges and the referenced target is materialized as a node with its
  * upstream layer, keeping the verifier's unknown-target invariant intact without
- * pulling the whole upstream catalog into the scope file. Overrides and the
- * document layer are L0-only concerns and are not part of scope graphs.
- * Phase targets (`phase<N>`) are pseudo-nodes, matching full-graph behavior.
+ * pulling the whole upstream catalog into the scope file. The document layer is an
+ * L0-only concern; overrides are per-scope (templates/<scope>/docs/) since the
+ * reledgev addendum. Phase targets (`phase<N>`) are pseudo-nodes, matching full-graph
+ * behavior.
  *
  * ADR-0060 Amendment 2 (2026-08-28).
  * @version 1.3.0
@@ -1047,6 +1081,11 @@ export function buildScopeGraph(scope: string): SkillGraph {
 
   // Source 4.7 (scope): procedures owned by this scope.
   deriveProceduresFromDir(join(scopeDir, 'procedures'), scope, layer, allNodes, edges);
+
+  // Source 5 (scope): overrides from templates/<scope>/docs/skill-graph.overrides.json
+  // (reledgev addendum — previously L0-only; each scope now owns its experimental layer)
+  const { overrides: scopeOverrides } = loadOverridesFile(join(scopeDir, 'docs'));
+  applyOverrides(scopeOverrides, allNodes, edges);
 
   // Sort deterministically (same ordering as buildGraph)
   const sortedNodes = Array.from(allNodes.values()).sort((a, b) => a.id.localeCompare(b.id));

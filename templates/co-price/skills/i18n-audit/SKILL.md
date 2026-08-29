@@ -1,17 +1,25 @@
 ---
 name: i18n-audit
 scope: co-price
-description: 16-locale translation parity and glossary adherence
-version: "2.0.0"
-last_reviewed: 2026-08-25
+description: co-price specialization of the common i18n-audit skill — 16-locale translation parity and glossary adherence
+version: "2.1.0"
+last_reviewed: 2026-08-29
 status: active
 owner: l10n-auditor
 prerequisites: locales/*.json present; docs/glossary.md maintained
+relates_to:
+  - skill: cost-shock-analysis
+    type: follows
+  - skill: pricing-playbook
+    type: composes_with
 ---
 
-# I18N Audit & Synchronization Protocol
+# I18N Audit & Synchronization Protocol (co-price specialization)
 
-This skill dictates how to ensure language parity and glossary synchronization across all locales.
+Variant specialization of the common `i18n-audit` skill
+(`templates/common/skills/i18n-audit/SKILL.md`). The common skill owns the generic
+master-key parity / glossary / parity-certificate procedure; this file keeps the
+co-price-specific 16-locale matrix, Vitest harness, and `l10n-auditor` ownership.
 
 ## Trigger
 Execute this chain whenever translation keys are added, removed, or modified, or when `glossary.md` changes.

@@ -7,6 +7,13 @@ last_reviewed: 2026-08-25
 status: active
 owner: finance-strategy-lead
 prerequisites: a populated simulation state (wholesaleParams + consumerParams + costs)
+relates_to:
+  - skill: prisma-7
+    type: composes_with
+  - skill: ui-component-design
+    type: follows
+  - skill: van-westendorp-psm
+    type: composes_with
 ---
 
 # Price Waterfall Analysis Skill

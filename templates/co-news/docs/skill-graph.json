@@ -244,6 +244,18 @@
       "source": "skill_manifest"
     },
     {
+      "type": "composes_with",
+      "from": "financial-journalism-style",
+      "to": "financial-narrative-brief",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-news/skills/financial-journalism-style/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "phase",
       "from": "financial-journalism-style",
       "to": "phase3",
@@ -266,6 +278,18 @@
       "from": "financial-journalism-style",
       "to": "reporter",
       "source": "skill_manifest"
+    },
+    {
+      "type": "composes_with",
+      "from": "financial-journalism-style",
+      "to": "source-verification-ledger",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-news/skills/financial-journalism-style/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
     },
     {
       "type": "used_by",
@@ -318,6 +342,17 @@
       "from": "financial-narrative-brief",
       "to": "phase1",
       "source": "skill_manifest"
+    },
+    {
+      "type": "follows",
+      "from": "financial-narrative-brief",
+      "to": "source-verification-ledger",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-news/skills/financial-narrative-brief/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     },
     {
       "type": "references",

@@ -7,6 +7,9 @@ owner: audit-agent
 scope: co-safety
 status: active
 description: Prepare documentation and evidence for regulatory EHS audits
+relates_to:
+  - skill: investigation/hazop-analysis
+    type: composes_with
 metadata:
   triggers:
     - 감사 준비

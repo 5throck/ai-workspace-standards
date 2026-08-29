@@ -10,6 +10,8 @@ prerequisites: SurveyResponse rows (method='vw') ingested via actions/market; th
 relates_to:
   - skill: pricing-playbook
     type: enables
+  - skill: gabor-granger
+    type: follows
 inputs: [survey-responses-vw]
 outputs: [price-corridor, opp-price-point]
 ---

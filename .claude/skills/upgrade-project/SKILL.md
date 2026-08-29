@@ -6,6 +6,9 @@ status: active
 scope: workspace
 owner: pm
 last_reviewed: 2026-08-21
+relates_to:
+  - skill: promote-variant
+    type: follows
 metadata:
   type: scaffolding
   triggers:

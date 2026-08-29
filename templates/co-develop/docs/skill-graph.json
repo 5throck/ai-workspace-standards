@@ -459,6 +459,17 @@
       "source": "skill_manifest"
     },
     {
+      "type": "follows",
+      "from": "test-driven-development",
+      "to": "code-review",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-develop/skills/test-driven-development/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "produces",
       "from": "test-driven-development",
       "to": "output_type.test_scaffold",

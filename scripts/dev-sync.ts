@@ -1,4 +1,4 @@
-// @version 1.7.8
+// @version 1.8.0
 // v1.7.8: feat(skill-graph): step 4.65 scope loop (ADR-0060 Amendment 2) — after the L0
 //           unified graph gate, generate+verify every template scope (templates/common +
 //           templates/co-*) so each variant template ships its own docs/skill-graph.json;
@@ -306,6 +306,33 @@ if (fs.existsSync('package.json')) {
 // Check 2: README_ko pair
 if (fs.existsSync('README.md') && !fs.existsSync('README_ko.md')) {
     console.warn('⚠️  README_ko.md missing (non-blocking)');
+}
+
+// 3.96 Skill & decision-chain validators (fail-closed gates, ADR-0055/0061; reledgev
+//      pipeline-coverage review 2026-08-29). Both are L0-scoped — scaffolded projects
+//      skip via existsSync guards. Previously standalone-only (manual invocation),
+//      which let relation/decision drift land unnoticed between syncs.
+if (fs.existsSync('scripts/validate-skills.ts')) {
+    console.log('📋 Step 3.96a: Skill lifecycle & relation validation...');
+    const skillsRes = await $`bun scripts/validate-skills.ts`.nothrow();
+    if (skillsRes.exitCode !== 0) {
+        console.error(`${RED}❌ Step 3.96a: validate-skills.ts FAILED (exit ${skillsRes.exitCode})${RESET}`);
+        console.error(`${YELLOW}   Fix: review relation metadata errors (form homogeneity, type vocabulary, target existence) in skills/ and templates/*/skills/, then re-run /sync.${RESET}`);
+        if (import.meta.main) process.exit(1);
+    } else {
+        console.log(`${GREEN}✓ Skill lifecycle & relation validation passed${RESET}`);
+    }
+}
+if (fs.existsSync('docs/decisions') && fs.existsSync('scripts/validate-decisions.ts')) {
+    console.log('📋 Step 3.96b: Decision record chain validation...');
+    const decRes = await $`bun scripts/validate-decisions.ts`.nothrow();
+    if (decRes.exitCode !== 0) {
+        console.error(`${RED}❌ Step 3.96b: validate-decisions.ts FAILED (exit ${decRes.exitCode})${RESET}`);
+        console.error(`${YELLOW}   Fix: repair DEC frontmatter/chain links (evidence_refs ⊆ ledger, knowledge_refs existence) per ADR-0061, then re-run /sync.${RESET}`);
+        if (import.meta.main) process.exit(1);
+    } else {
+        console.log(`${GREEN}✓ Decision record chain validation passed${RESET}`);
+    }
 }
 
 // 3.97 ADR governance linkage gate (blocking — Stage 2 of ADR-0059).
