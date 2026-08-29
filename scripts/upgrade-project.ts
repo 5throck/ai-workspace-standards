@@ -1,5 +1,9 @@
 #!/usr/bin/env bun
-// @version 1.16.0
+// @version 1.17.0
+// v1.17.0: Identity-separated fork support — a project whose variant.json self-declares a variant
+//           with no templates/<variant>/ dir (e.g. co-architect from co-work) is accepted in
+//           "common-only" sync mode: templates/common + project-owned files only, no readiness
+//           gate against a nonexistent variant template, variant-template passes no-op.
 // v1.16.0: New project asset allowlist gate — SYNC_IF_NEWER add-if-missing of common skills/agents now
 //           consults the project variant.json (skill_manifest.allowlist / agents[].file) and SKIPS
 //           unregistered NEW assets instead of injecting them (0.6.0 i18n wave tripped audit-variant
@@ -201,15 +205,32 @@ if (countryFromVersionFile && (countryFromVersionFile === 'none' || /^[A-Z]{2,4}
 }
 console.log(`Country profile: ${detectedCountry === 'none' ? 'region-neutral' : detectedCountry}`);
 
-// Validate variant
+// Validate variant. A project whose variant.json declares itself as a variant
+// with no template directory (identity-separated fork, e.g. co-architect from
+// co-work) is accepted in "common-only" mode: it syncs from templates/common
+// and its own files, and never from a variant template it did not come from.
 const validVariants = existsSync(join(workspaceRoot, 'templates'))
   ? readdirSync(join(workspaceRoot, 'templates')).filter(d => d.startsWith('co-')).sort()
   : [];
+let commonOnlySync = false;
 if (!validVariants.includes(variant)) {
-  console.error(`ERROR: Invalid variant: ${variant}`);
-  console.error(`   Valid variants: ${validVariants.join(' ')}`);
-  if (import.meta.main) {
-    process.exit(1);
+  const selfDeclared = (() => {
+    try {
+      const vj = JSON.parse(readFileSync(join(projectDir, 'variant.json'), 'utf8'));
+      return vj?.name === variant;
+    } catch { return false; }
+  })();
+  if (selfDeclared) {
+    commonOnlySync = true;
+    console.log(`NOTE: variant '${variant}' has no templates/<variant>/ directory — ` +
+      `project self-declares this identity (variant.json name), so this upgrade syncs from ` +
+      `templates/common + project-owned files only (variant-template passes will no-op).`);
+  } else {
+    console.error(`ERROR: Invalid variant: ${variant}`);
+    console.error(`   Valid variants: ${validVariants.join(' ')}`);
+    if (import.meta.main) {
+      process.exit(1);
+    }
   }
 }
 
@@ -217,7 +238,7 @@ if (!validVariants.includes(variant)) {
 // variant that is not READY (broken agent/skill manifest paths, missing
 // PROMOTION_CHECKLIST.md, missing README/AGENTS.md, inconsistent country_config).
 const gateScript = join(workspaceRoot, 'scripts', 'validate-variant-readiness.ts');
-if (existsSync(gateScript) && import.meta.main) {
+if (existsSync(gateScript) && import.meta.main && !commonOnlySync) {
   console.log(`\nRunning Variant Readiness Gate for template variant '${variant}'...`);
   const gateResult = spawnSync(process.execPath, [gateScript, '--variant', variant], { encoding: 'utf8' });
   if (gateResult.status !== 0) {
@@ -234,7 +255,7 @@ const templatesDir = join(workspaceRoot, 'templates', variant);
 const commonDir = join(workspaceRoot, 'templates', 'common');
 
 if (import.meta.main) {
-  if (!existsSync(templatesDir)) { console.error(`ERROR: Template variant not found: ${templatesDir}`); process.exit(1); }
+  if (!commonOnlySync && !existsSync(templatesDir)) { console.error(`ERROR: Template variant not found: ${templatesDir}`); process.exit(1); }
 }
 if (import.meta.main) {
   if (!existsSync(commonDir)) { console.error(`ERROR: Common templates directory not found: ${commonDir}`); process.exit(1); }

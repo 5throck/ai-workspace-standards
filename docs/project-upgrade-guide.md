@@ -120,6 +120,19 @@ upgrade. Rationale: without this gate the 0.6.0 i18n wave injected
 them, tripping `audit-variant.ts` allowlist/parity checks. See
 `docs/designs/2026-08-29-upgrade-asset-allowlist-gate-design.md`.
 
+##### Identity-Separated Forks (Common-Only Sync Mode)
+
+A project may self-declare a variant identity that has no template directory —
+e.g. `Projects/co-architect` was scaffolded from `templates/co-work/` but is
+managed as its own `co-architect` variant. When `template-version.txt`'s
+`variant=` names a variant that (a) has no `templates/<variant>/` directory and
+(b) matches the project's own `variant.json` `name`, the upgrade accepts it in
+**common-only sync mode**: it syncs from `templates/common` plus the project's
+own files; variant-template passes (variant skills, `scripts/<variant>/`,
+readiness gate) no-op. This keeps the project from silently re-inheriting the
+origin template's variant-specific assets after the identities diverged.
+Record the split with a `derivedFrom` field in the project's `variant.json`.
+
 #### 🛡️ PRESERVE Files (Never Touched)
 
 These files are always preserved — local modifications are safe:
