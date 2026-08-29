@@ -152,6 +152,11 @@
       "layer": "variant:co-hr"
     },
     {
+      "id": "output_type.relations_impact_notes",
+      "type": "output_type",
+      "layer": "variant:co-hr"
+    },
+    {
       "id": "output_type.relations_landscape",
       "type": "output_type",
       "layer": "variant:co-hr"
@@ -607,6 +612,12 @@
     {
       "type": "produces",
       "from": "org-readiness-assessment",
+      "to": "output_type.relations_impact_notes",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "org-readiness-assessment",
       "to": "output_type.relations_landscape",
       "source": "procedure_schema"
     },
@@ -785,6 +796,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "step_by_agent",
+      "from": "procedure.co-hr.hr-solution-design",
+      "to": "labor-relations-specialist",
+      "source": "procedure_schema"
+    },
+    {
       "type": "step_uses_skill",
       "from": "procedure.co-hr.hr-solution-design",
       "to": "learning-curriculum-design",
@@ -806,6 +823,12 @@
       "type": "step_uses_skill",
       "from": "procedure.co-hr.hr-solution-design",
       "to": "org-design-framework",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-hr.hr-solution-design",
+      "to": "org-readiness-assessment",
       "source": "procedure_schema"
     },
     {

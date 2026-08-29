@@ -17,7 +17,7 @@ description: >
 examples:
   - user: "Implement the plan in docs/adr/0002-auth-model.md"
     assistant: "Implementing the approved authentication data model - starting with the schema migration."
-phases: [4]
+phases: [3, 4]
 handoff_to: [test-runner]
 handoff_from: [designer, architect]
 required_skills: [code-review, refactoring]

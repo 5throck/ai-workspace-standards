@@ -37,3 +37,5 @@ output_types:
     description: "Registered procedure output type"
   feel_requirements:
     description: "Registered procedure output type"
+  prototyping_environment:
+    description: "Registered procedure output type"

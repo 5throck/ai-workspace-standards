@@ -12,12 +12,21 @@ inputs:
     PROCEDURE_REQUIRED or N/A_JUSTIFIED (human judgment — see
     docs/designs/2026-08-29-procedure-coverage-and-l0-design.md §2)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-08-29T05:20:11.689Z'
 history:
   - at: '2026-08-29T05:20:11.689Z'
     from: null
     to: backlog
+  - at: '2026-08-29T05:50:16.185Z'
+    from: backlog
+    to: waiting
+  - at: '2026-08-29T05:50:16.191Z'
+    from: waiting
+    to: review
+  - at: '2026-08-29T05:50:16.200Z'
+    from: review
+    to: done
 result: null
 error: null

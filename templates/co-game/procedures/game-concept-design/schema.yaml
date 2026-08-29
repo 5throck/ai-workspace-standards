@@ -37,6 +37,12 @@ steps:
     output_type: arcade_reference_notes
     description: >
       Supply arcade-feel references that anchor the concept playtests.
+  - id: 5
+    agent_key: stack-setup
+    skill_key: test-driven-development
+    output_type: prototyping_environment
+    description: >
+      Prepare the prototyping environment for concept playtests.
 outputs:
   - type: concept_document
 relations:

@@ -32,6 +32,12 @@ steps:
     output_type: visual_design_set
     description: >
       Produce the visual design set following the direction and type system.
+  - id: 4
+    agent_key: design-lead
+    skill_key: ui-ux-design-intelligence
+    output_type: design_review_record
+    description: >
+      Review the full visual set against the approved direction.
 outputs:
   - type: visual_design_set
 relations:
