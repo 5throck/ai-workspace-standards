@@ -439,3 +439,32 @@ projection) is now enforced end-to-end:
   are required on every entry (missing → verification failure); `since` older than
   90 days → warning (promote to frontmatter `relates_to` or drop). The legacy
   `last_reviewed` 12-month staleness warning remains for pre-existing entries.
+
+## Amendment 2026-08-29 — Generator v1.8.3: Upstreaming the co-newbiz Fork Adaptations (Amendment 7)
+
+`generate-skill-graph.ts` 1.7.1 → 1.8.3 upstreams the three adaptations
+co-newbiz had carried as a project-local fork (v1.8.2; local ADR-0073 §b), so
+scaffolded projects no longer maintain a generator fork:
+
+1. **L0/L3 run-context detection keys on `templates/common`** instead of
+   `templates/` — projects carrying content template directories
+   (co-newbiz's `templates/deliverables/`) were being mis-tagged L0 in their
+   own project graphs.
+2. **Source 3b — project-local `variant.json`**: the manifest loop previously
+   read `templates/co-*` only, which exist solely at the workspace root, so a
+   scaffolded project's own `skill_manifest` never yielded `used_by`/`phase`
+   edges. Source 3b now reads the project-local manifest in project context
+   (targets validated against the project's local skill/agent sets).
+3. **Agent discovery excludes `README*.md` and `_*` files** — project `agents/`
+   directories carry folder READMEs that were counted as phantom agent nodes.
+
+**Propagation and verification**: propagated to `templates/common/scripts/`;
+co-newbiz's fork replaced with the canonical L0 copy (logic diff 0; the
+project's ADR-0073 "re-apply when re-copying upstream" maintenance rule for
+these three adaptations is retired). L0 + all 14 scope graphs regenerate
+byte-identical (0 drift, 542 nodes / 1,545 edges); the co-newbiz project graph
+regenerates and verifies at 223 nodes / 661 edges with manifest edges
+(`used_by` 117, `phase` 71) preserved by the upstreamed Source 3b. Remaining
+Projects/co-* projects pick up Source 3b edges on their next project-local
+regeneration. Adoption record:
+`docs/designs/2026-08-29-skill-graph-generator-upstream-design.md`.
