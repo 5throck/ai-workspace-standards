@@ -29,7 +29,7 @@ This document tracks approved external references, repositories, and frameworks 
 - **[beret21/teachme](https://github.com/beret21/teachme)**
   - **Description**: Themed, searchable handbook/study material generation skill for AI agents.
   - **License**: MIT (Copyright © 2026 beret21)
-  - **Usage**: Inspired the `templates/co-deck/skills/handbook/` skill. Multi-stage
+  - **Usage**: Inspired the `templates/common/skills/handbook/` skill (promoted from co-deck). Multi-stage
     handbook generation with multi-agent verification concept was adapted.
     All code is self-authored; built from scratch.
 

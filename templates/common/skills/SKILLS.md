@@ -51,6 +51,8 @@ Skills with a `skills/<name>/` directory in the workspace root. These are the pr
 | `i18n-layout` | 1.0.0 | active | pm | 2026-08-24 | — | Character encoding, RTL/bidi, script fonts, hwp pointers (scope: common); i18n asset suite per constitution §4.4 — never country-scoped (§4.3) |
 
 
+| `handbook` | 0.4.0 | active | pm | 2026-08-30 | — | Document Production Workflow — searchable, themed handbook static sites (standalone / companion / course, dark mode, i18n; H-Stage pipeline); promoted from co-deck (scope: common) |
+| `handbook-sync-audit` | 1.0.0 | active | handbook-reviewer | 2026-08-29 | — | Handbook drift audit — workspace content reflection, structural/cross-handbook linkage, section-level language parity; promoted from co-deck (scope: common) |
 | `context-commonization-review` | 1.1.0 | active | architect | 2026-08-21 | — | Cross-variant docs/<variant>.context.md duplication review — promotes shared content into common docs/context.md (ADR-0050 Part 3) |
 | `gateguard` | 1.0.0 | active | pm | 2026-08-01 | — | Pre-edit fact-forcing quality gate — investigate importers, schemas, and scope constraints before editing (Hook-Prompt-Skill 3-layer enforcement) |
 | `simulate-l3-to-variant-promotion` | 1.0.0 | active | automation-engineer | 2026-08-09 | — | E2E smoke test of the L3 scaffold to variant promotion pipeline |

@@ -11,7 +11,7 @@
 |---|-----------|--------|-----------------|
 | 1 | **Phase A complete** | Done | `phaseAComplete: true` in variant.json; agent manifest, skill manifest, script manifest, and documentation present. |
 | 2 | **Agent roster completeness** | Pending | All 13 agents defined (pm, version, research, source-verifier, storyline, design, image-curator, diagram-specialist, html-build, measure, pdf-export, handbook-writer, handbook-reviewer). Verify each agent file has substantive content. |
-| 3 | **Skills coverage** | Pending | 11 variant-specific skills (version, research, storyline, design, html-build, measure, prep-pdf, pdf-export, theme-authoring, handbook, presenter-mode). Verify each SKILL.md is complete and operational. |
+| 3 | **Skills coverage** | Pending | 9 variant-specific skills (version, research, storyline, design, html-build, prep-pdf, pdf-export, theme-authoring, presenter-mode) + 2 common skills from templates/common (handbook, handbook-sync-audit — promoted 2026-08-30). Verify each SKILL.md is complete and operational. |
 | 4 | **Documentation completeness** | Pending | README.md present and accurate; context.md complete; AGENTS.md reflects actual 13-agent roster; variant.json fields accurate; theme_manifest and lecture_profile documented. |
 | 5 | **Audit pass rate** | Pending | `bun scripts/audit.ts` passes with 0 errors. Deprecated scripts (measure-layout) documented and not in active pipeline use. |
 | 6 | **Real engagements** | Pending | Minimum 1 successful slide pipeline engagement (research -> storyline -> design -> html-build -> measure -> pdf-export end-to-end). |

@@ -1,6 +1,6 @@
 {
   "name": "co-deck",
-  "description": "Lecture and presentation material production variant — 11-stage AI workflow from research to print-ready PDF, plus an independent H-Stage handbook pipeline. Includes 13 agents (1 PM orchestrator + 10 slide-pipeline specialists + 2 handbook specialists) covering research, source verification, content, design, image curation, diagram/chart generation, HTML build (5 themes), layout measurement, PDF export, and handbook authoring/review.",
+  "description": "Lecture and presentation material production variant — 11-stage AI workflow from research to print-ready PDF. Includes 13 agents (1 PM orchestrator + 10 slide-pipeline specialists + 2 handbook specialists) covering research, source verification, content, design, image curation, diagram/chart generation, HTML build (5 themes), layout measurement, and PDF export. The H-Stage handbook pipeline (skills + scripts) is provided by the common template (promoted 2026-08-30); the handbook-writer/handbook-reviewer agents remain variant-defined (ADR-0043).",
   "variant_type": "lecture",
   "status": "beta",
   "version": "0.2.3",
@@ -104,17 +104,13 @@
       "handbook-writer",
       "handbook-reviewer"
     ],
-    "entry_skill": "skills/handbook",
-    "notes": "handbook-writer authors chapter structure/prose per AUTHORING_GUIDELINES; handbook-reviewer runs validation scripts (validate-nav, check-authoring, handbook-doctor) and applies fixes. Triggered via the handbook skill, not the 11-Stage slide agent_manifest."
+    "entry_skill": "templates/common/skills/handbook (common; resolves via inherits_common)",
+    "notes": "handbook-writer authors chapter structure/prose per AUTHORING_GUIDELINES; handbook-reviewer runs validation scripts (validate-nav, check-authoring, handbook-doctor) and applies fixes. Triggered via the common `handbook` skill (templates/common/skills/, promoted from this variant 2026-08-30) and common `handbook-sync-audit` skill; scripts live in templates/common/scripts/handbook/. Not part of the 11-Stage slide agent_manifest."
   },
   "skills": [
     {
       "name": "design",
       "file": "skills/design/SKILL.md"
-    },
-    {
-      "name": "handbook",
-      "file": "skills/handbook/SKILL.md"
     },
     {
       "name": "html-build",
@@ -283,21 +279,6 @@
         "platform_parity": "required"
       },
       {
-        "name": "handbook",
-        "layer": "workspace",
-        "used_by_agents": [
-          "handbook-writer",
-          "handbook-reviewer"
-        ],
-        "phases": [
-          "H-2",
-          "H-3",
-          "H-4",
-          "H-5"
-        ],
-        "platform_parity": "required"
-      },
-      {
         "name": "presenter-mode",
         "layer": "workspace",
         "used_by_agents": [
@@ -305,17 +286,6 @@
         ],
         "phases": [
           4
-        ],
-        "platform_parity": "required"
-      },
-      {
-        "name": "handbook-sync-audit",
-        "layer": "workspace",
-        "used_by_agents": [
-          "handbook-reviewer"
-        ],
-        "phases": [
-          "H-6"
         ],
         "platform_parity": "required"
       }
@@ -392,50 +362,6 @@
       {
         "name": "html-to-pdf",
         "path": "scripts/co-deck/html-to-pdf.ts"
-      },
-      {
-        "name": "apply-handbook-theme",
-        "path": "scripts/co-deck/handbook/apply-handbook-theme.ts"
-      },
-      {
-        "name": "check-authoring",
-        "path": "scripts/co-deck/handbook/check-authoring.ts"
-      },
-      {
-        "name": "check-i18n-parity",
-        "path": "scripts/co-deck/handbook/check-i18n-parity.ts"
-      },
-      {
-        "name": "check-labels",
-        "path": "scripts/co-deck/handbook/check-labels.ts"
-      },
-      {
-        "name": "check-links",
-        "path": "scripts/co-deck/handbook/check-links.ts"
-      },
-      {
-        "name": "check-search",
-        "path": "scripts/co-deck/handbook/check-search.ts"
-      },
-      {
-        "name": "check-symmetry",
-        "path": "scripts/co-deck/handbook/check-symmetry.ts"
-      },
-      {
-        "name": "handbook-doctor",
-        "path": "scripts/co-deck/handbook/handbook-doctor.ts"
-      },
-      {
-        "name": "nav-utils",
-        "path": "scripts/co-deck/handbook/nav-utils.ts"
-      },
-      {
-        "name": "scaffold-handbook",
-        "path": "scripts/co-deck/handbook/scaffold-handbook.ts"
-      },
-      {
-        "name": "validate-nav",
-        "path": "scripts/co-deck/handbook/validate-nav.ts"
       }
     ],
     "external": []

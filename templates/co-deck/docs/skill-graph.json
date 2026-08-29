@@ -26,16 +26,11 @@
     {
       "id": "handbook",
       "type": "skill",
-      "layer": "variant:co-deck"
+      "layer": "common"
     },
     {
       "id": "handbook-reviewer",
       "type": "agent",
-      "layer": "variant:co-deck"
-    },
-    {
-      "id": "handbook-sync-audit",
-      "type": "skill",
       "layer": "variant:co-deck"
     },
     {
@@ -162,11 +157,6 @@
       "layer": "variant:co-deck"
     },
     {
-      "id": "project-review",
-      "type": "skill",
-      "layer": "L0"
-    },
-    {
       "id": "README",
       "type": "agent",
       "layer": "variant:co-deck"
@@ -216,11 +206,6 @@
       "id": "theme-authoring",
       "type": "skill",
       "layer": "variant:co-deck"
-    },
-    {
-      "id": "validate-docs-links",
-      "type": "skill",
-      "layer": "L0"
     },
     {
       "id": "version",
@@ -342,92 +327,8 @@
     {
       "type": "used_by",
       "from": "handbook",
-      "to": "handbook-reviewer",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "used_by",
-      "from": "handbook",
       "to": "handbook-writer",
       "source": "required_skills"
-    },
-    {
-      "type": "used_by",
-      "from": "handbook",
-      "to": "handbook-writer",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "phase",
-      "from": "handbook",
-      "to": "phaseH-2",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "phase",
-      "from": "handbook",
-      "to": "phaseH-3",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "phase",
-      "from": "handbook",
-      "to": "phaseH-4",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "phase",
-      "from": "handbook",
-      "to": "phaseH-5",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "references",
-      "from": "handbook",
-      "to": "research",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "handbook",
-      "to": "storyline",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "handbook",
-      "to": "theme-authoring",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "handbook-sync-audit",
-      "to": "handbook",
-      "source": "prose"
-    },
-    {
-      "type": "used_by",
-      "from": "handbook-sync-audit",
-      "to": "handbook-reviewer",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "phase",
-      "from": "handbook-sync-audit",
-      "to": "phaseH-6",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "references",
-      "from": "handbook-sync-audit",
-      "to": "project-review",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "handbook-sync-audit",
-      "to": "validate-docs-links",
-      "source": "prose"
     },
     {
       "type": "references",
