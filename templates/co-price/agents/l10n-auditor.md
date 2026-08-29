@@ -1,5 +1,6 @@
 ---
 name: l10n-auditor
+phases: [4]
 formal_name: Global Strategy & L10N Auditor
 role: translation key parity, i18n harness enforcement, glossary consistency across 16 locales
 status: active

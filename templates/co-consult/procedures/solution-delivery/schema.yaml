@@ -1,0 +1,50 @@
+schema_version: "1.0"
+procedure_id: co-consult-solution-delivery
+variant: co-consult
+version: "1.0.0"
+title: Solution Delivery
+phase: 3
+status: active
+owner_agent: delivery-manager
+purpose: >
+  Deliver the selected solution: workstream execution, supporting analysis,
+  and stakeholder communication.
+inputs:
+  - solution_options
+preconditions:
+  - "Client selected a solution option at the phase 2 gate."
+steps:
+  - id: 1
+    agent_key: solutions-architect
+    skill_key: solution-design
+    output_type: implementation_blueprint
+    description: >
+      Detail the selected solution into an implementation blueprint.
+  - id: 2
+    agent_key: data-analyst
+    skill_key: financial-modeling
+    output_type: supporting_analysis
+    description: >
+      Produce the quantitative analyses that back the implementation.
+  - id: 3
+    agent_key: communications-lead
+    skill_key: stakeholder-alignment
+    output_type: communication_plan
+    description: >
+      Plan and run stakeholder communication for the delivery.
+  - id: 4
+    agent_key: sme
+    skill_key: insight-synthesis
+    output_type: delivery_review_notes
+    description: >
+      Provide subject-matter review of delivered artifacts during execution.
+outputs:
+  - type: implementation_blueprint
+relations:
+  - type: follows
+    target: procedure.co-consult.solution-design
+quality_gates:
+  - "Workstream reviews confirm blueprint and analyses are consistent."
+evidence: []
+failure_modes:
+  - "Stakeholder resistance blocks delivery - escalate via stakeholder-review-management before proceeding."

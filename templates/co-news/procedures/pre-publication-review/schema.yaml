@@ -1,0 +1,38 @@
+schema_version: "1.0"
+procedure_id: co-news-pre-publication-review
+variant: co-news
+version: "1.0.0"
+title: Pre-Publication Review
+phase: 2
+status: active
+owner_agent: fact-checker
+purpose: >
+  Independently verify the draft before style work: claims, sources, and
+  legal exposure in their final context.
+inputs:
+  - draft_article
+preconditions:
+  - "Draft complete with cited sources."
+steps:
+  - id: 1
+    agent_key: fact-checker
+    skill_key: source-verification-ledger
+    output_type: final_verification
+    description: >
+      Re-verify every claim in context and finalize the verification ledger.
+  - id: 2
+    agent_key: legal-researcher
+    skill_key: source-verification-ledger
+    output_type: legal_signoff
+    description: >
+      Grant or withhold legal sign-off on the near-final text.
+outputs:
+  - type: final_verification
+relations:
+  - type: composes_with
+    target: procedure.co-news.fact-checked-article
+quality_gates:
+  - "Legal sign-off granted and ledger fully verified."
+evidence: []
+failure_modes:
+  - "Legal sign-off withheld - rework the draft rather than publishing with reservations."

@@ -1,5 +1,6 @@
 ---
 name: market-intelligence-analyst
+phases: [1]
 formal_name: Market Intelligence Analyst
 role: competitive price intelligence, survey analytics (Van Westendorp / Gabor-Granger), and benchmark curation
 status: active

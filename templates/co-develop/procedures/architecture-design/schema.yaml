@@ -1,0 +1,35 @@
+schema_version: "1.0"
+procedure_id: co-develop-architecture-design
+variant: co-develop
+version: "1.0.0"
+title: Architecture Design
+phase: 2
+status: active
+owner_agent: architect
+purpose: >
+  Produce the approved implementation plan and module architecture for the
+  feature work.
+inputs:
+  - technical_findings
+preconditions:
+  - "Technical planning findings reviewed."
+steps:
+  - id: 1
+    agent_key: architect
+    skill_key: code-review
+    output_type: approved_implementation_plan
+    description: >
+      Design the module architecture and author the implementation plan for
+      the phase 2 approval gate.
+outputs:
+  - type: approved_implementation_plan
+relations:
+  - type: follows
+    target: procedure.co-develop.technical-planning
+  - type: enables
+    target: procedure.co-develop.feature-implementation
+quality_gates:
+  - "Implementation plan approved at the design gate."
+evidence: []
+failure_modes:
+  - "Plan rejected at the gate - iterate the design rather than implementing an unapproved plan."

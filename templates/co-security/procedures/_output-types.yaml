@@ -9,3 +9,21 @@ output_types:
     description: "Registered procedure output type"
   engagement_report:
     description: "Registered procedure output type"
+  authorization_record:
+    description: "Registered procedure output type"
+  threat_landscape_brief:
+    description: "Registered procedure output type"
+  attack_hypotheses:
+    description: "Registered procedure output type"
+  test_objectives:
+    description: "Registered procedure output type"
+  exploitation_notes:
+    description: "Registered procedure output type"
+  remediation_plan:
+    description: "Registered procedure output type"
+  sbom_update:
+    description: "Registered procedure output type"
+  sarif_export:
+    description: "Registered procedure output type"
+  maturity_assessment:
+    description: "Registered procedure output type"

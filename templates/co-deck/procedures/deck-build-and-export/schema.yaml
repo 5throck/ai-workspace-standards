@@ -1,0 +1,44 @@
+schema_version: "1.0"
+procedure_id: co-deck-deck-build-and-export
+variant: co-deck
+version: "1.0.0"
+title: Deck Build and Export
+phase: 4
+status: active
+owner_agent: html-build
+purpose: >
+  Build the approved design into HTML slides, measure readability, and export
+  the deliverable PDF.
+inputs:
+  - design_spec
+preconditions:
+  - "Design spec approved and storyline locked."
+steps:
+  - id: 1
+    agent_key: html-build
+    skill_key: html-build
+    output_type: html_deck
+    description: >
+      Build the deck as HTML slides from the design spec and outline.
+  - id: 2
+    agent_key: measure
+    skill_key: slide-layout-gate
+    output_type: layout_report
+    description: >
+      Run the layout gate and readability measure on every slide.
+  - id: 3
+    agent_key: pdf-export
+    skill_key: pdf-export
+    output_type: pdf_deck
+    description: >
+      Export the passing deck to the deliverable PDF.
+outputs:
+  - type: pdf_deck
+relations:
+  - type: follows
+    target: procedure.co-deck.storyline-development
+quality_gates:
+  - "Layout gate passes with zero violations before export."
+evidence: []
+failure_modes:
+  - "Layout gate failures persist - return to design rather than exporting degraded slides."

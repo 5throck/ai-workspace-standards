@@ -1,5 +1,6 @@
 ---
 name: devops-admin
+phases: [4]
 formal_name: DevOps & CI/CD Admin
 role: build pipelines, Docker deployment, git hooks, bun toolchain, and infrastructure operations
 status: active

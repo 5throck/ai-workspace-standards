@@ -7,3 +7,25 @@ output_types:
     description: "Registered procedure output type"
   recommendation_set:
     description: "Registered procedure output type"
+  readiness_baseline:
+    description: "Registered procedure output type"
+  solution_options:
+    description: "Registered procedure output type"
+  feasibility_notes:
+    description: "Registered procedure output type"
+  change_impact_map:
+    description: "Registered procedure output type"
+  implementation_blueprint:
+    description: "Registered procedure output type"
+  supporting_analysis:
+    description: "Registered procedure output type"
+  communication_plan:
+    description: "Registered procedure output type"
+  closeout_record:
+    description: "Registered procedure output type"
+  handover_notes:
+    description: "Registered procedure output type"
+  delivery_review_notes:
+    description: "Registered procedure output type"
+  closeout_signoff:
+    description: "Registered procedure output type"

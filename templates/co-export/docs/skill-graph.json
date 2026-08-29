@@ -87,8 +87,113 @@
       "layer": "variant:co-export"
     },
     {
+      "id": "output_type.certification_requirements",
+      "type": "output_type",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "output_type.classification_groundwork",
+      "type": "output_type",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "output_type.document_set",
+      "type": "output_type",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "output_type.drawback_positioning",
+      "type": "output_type",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "output_type.export_control_clearance",
+      "type": "output_type",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "output_type.export_control_precheck",
+      "type": "output_type",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "output_type.fta_opportunity_scan",
+      "type": "output_type",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "output_type.halal_market_requirements",
+      "type": "output_type",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "output_type.hs_classification",
+      "type": "output_type",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "output_type.landed_cost_model",
+      "type": "output_type",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "output_type.lane_optimization_plan",
+      "type": "output_type",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "output_type.market_entry_assessment",
+      "type": "output_type",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "output_type.market_expansion_plan",
+      "type": "output_type",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "output_type.origin_determination",
+      "type": "output_type",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "output_type.regulatory_landscape",
+      "type": "output_type",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "output_type.shipment_plan",
+      "type": "output_type",
+      "layer": "variant:co-export"
+    },
+    {
       "id": "pm",
       "type": "agent",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "procedure.co-export.compliance-determination",
+      "type": "procedure",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "procedure.co-export.export-shipment-compliance",
+      "type": "procedure",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "procedure.co-export.market-entry-assessment",
+      "type": "procedure",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "procedure.co-export.post-delivery-optimization",
+      "type": "procedure",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "procedure.co-export.shipment-execution",
+      "type": "procedure",
       "layer": "variant:co-export"
     },
     {
@@ -165,6 +270,18 @@
       "source": "skill_manifest"
     },
     {
+      "type": "produces",
+      "from": "export-control-screening",
+      "to": "output_type.export_control_clearance",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "export-control-screening",
+      "to": "output_type.export_control_precheck",
+      "source": "procedure_schema"
+    },
+    {
       "type": "phase",
       "from": "export-control-screening",
       "to": "phase1",
@@ -187,6 +304,12 @@
       "from": "foreign-regulation-monitoring",
       "to": "foreign-regulatory-intelligence-analyst",
       "source": "skill_manifest"
+    },
+    {
+      "type": "produces",
+      "from": "foreign-regulation-monitoring",
+      "to": "output_type.regulatory_landscape",
+      "source": "procedure_schema"
     },
     {
       "type": "phase",
@@ -215,6 +338,18 @@
         "file": "templates/co-export/skills/fta-origin-determination/SKILL.md",
         "field": "prerequisites"
       }
+    },
+    {
+      "type": "produces",
+      "from": "fta-origin-determination",
+      "to": "output_type.fta_opportunity_scan",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "fta-origin-determination",
+      "to": "output_type.origin_determination",
+      "source": "procedure_schema"
     },
     {
       "type": "phase",
@@ -251,6 +386,18 @@
       }
     },
     {
+      "type": "produces",
+      "from": "halal-certification-workflow",
+      "to": "output_type.certification_requirements",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "halal-certification-workflow",
+      "to": "output_type.halal_market_requirements",
+      "source": "procedure_schema"
+    },
+    {
       "type": "phase",
       "from": "halal-certification-workflow",
       "to": "phase1",
@@ -273,6 +420,24 @@
       "from": "hs-classification-workflow",
       "to": "hs-classification-specialist",
       "source": "skill_manifest"
+    },
+    {
+      "type": "produces",
+      "from": "hs-classification-workflow",
+      "to": "output_type.classification_groundwork",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "hs-classification-workflow",
+      "to": "output_type.hs_classification",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "hs-classification-workflow",
+      "to": "output_type.hs_classification",
+      "source": "procedure_schema"
     },
     {
       "type": "phase",
@@ -345,6 +510,12 @@
       "source": "skill_manifest"
     },
     {
+      "type": "produces",
+      "from": "landed-cost-calculation",
+      "to": "output_type.landed_cost_model",
+      "source": "procedure_schema"
+    },
+    {
       "type": "phase",
       "from": "landed-cost-calculation",
       "to": "phase1",
@@ -375,6 +546,12 @@
       "source": "skill_manifest"
     },
     {
+      "type": "produces",
+      "from": "logistics-coordination",
+      "to": "output_type.shipment_plan",
+      "source": "procedure_schema"
+    },
+    {
       "type": "phase",
       "from": "logistics-coordination",
       "to": "phase3",
@@ -399,6 +576,12 @@
       "source": "skill_manifest"
     },
     {
+      "type": "produces",
+      "from": "market-entry-strategy",
+      "to": "output_type.market_expansion_plan",
+      "source": "procedure_schema"
+    },
+    {
       "type": "phase",
       "from": "market-entry-strategy",
       "to": "phase1",
@@ -415,6 +598,282 @@
       "from": "market-entry-strategy",
       "to": "phase4",
       "source": "skill_manifest"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-export.compliance-determination",
+      "to": "export-control-compliance-specialist",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-export.compliance-determination",
+      "to": "export-control-screening",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-export.compliance-determination",
+      "to": "fta-origin-analyst",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-export.compliance-determination",
+      "to": "halal-certification-specialist",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-export.compliance-determination",
+      "to": "halal-certification-workflow",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-export.compliance-determination",
+      "to": "hs-classification-specialist",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-export.compliance-determination",
+      "to": "hs-classification-workflow",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-export.compliance-determination",
+      "to": "output_type.origin_determination",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "enables",
+      "from": "procedure.co-export.compliance-determination",
+      "to": "procedure.co-export.export-shipment-compliance",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-export.compliance-determination",
+      "to": "procedure.co-export.market-entry-assessment",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-export.compliance-determination",
+      "to": "roo-qualification-worksheet",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-export.export-shipment-compliance",
+      "to": "fta-origin-analyst",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-export.export-shipment-compliance",
+      "to": "fta-origin-determination",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-export.export-shipment-compliance",
+      "to": "hs-classification-specialist",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-export.export-shipment-compliance",
+      "to": "hs-classification-workflow",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-export.export-shipment-compliance",
+      "to": "logistics-coordination",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-export.export-shipment-compliance",
+      "to": "logistics-coordinator",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-export.export-shipment-compliance",
+      "to": "output_type.document_set",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-export.export-shipment-compliance",
+      "to": "trade-documentation-checklist",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-export.export-shipment-compliance",
+      "to": "trade-documentation-specialist",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-export.market-entry-assessment",
+      "to": "export-control-compliance-specialist",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-export.market-entry-assessment",
+      "to": "export-control-screening",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-export.market-entry-assessment",
+      "to": "foreign-regulation-monitoring",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-export.market-entry-assessment",
+      "to": "foreign-regulatory-intelligence-analyst",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-export.market-entry-assessment",
+      "to": "fta-origin-analyst",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-export.market-entry-assessment",
+      "to": "fta-origin-determination",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-export.market-entry-assessment",
+      "to": "halal-certification-specialist",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-export.market-entry-assessment",
+      "to": "halal-certification-workflow",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-export.market-entry-assessment",
+      "to": "hs-classification-specialist",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-export.market-entry-assessment",
+      "to": "hs-classification-workflow",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-export.market-entry-assessment",
+      "to": "market-entry-strategist",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-export.market-entry-assessment",
+      "to": "market-entry-strategy",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-export.market-entry-assessment",
+      "to": "output_type.market_entry_assessment",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "enables",
+      "from": "procedure.co-export.market-entry-assessment",
+      "to": "procedure.co-export.compliance-determination",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-export.post-delivery-optimization",
+      "to": "logistics-coordination",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-export.post-delivery-optimization",
+      "to": "logistics-coordinator",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-export.post-delivery-optimization",
+      "to": "market-entry-strategist",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-export.post-delivery-optimization",
+      "to": "market-entry-strategy",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-export.post-delivery-optimization",
+      "to": "output_type.lane_optimization_plan",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-export.post-delivery-optimization",
+      "to": "procedure.co-export.shipment-execution",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-export.shipment-execution",
+      "to": "customs-duty-drawback-specialist",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-export.shipment-execution",
+      "to": "customs-duty-drawback-workflow",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-export.shipment-execution",
+      "to": "landed-cost-calculation",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-export.shipment-execution",
+      "to": "market-entry-strategist",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-export.shipment-execution",
+      "to": "output_type.drawback_positioning",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "composes_with",
+      "from": "procedure.co-export.shipment-execution",
+      "to": "procedure.co-export.export-shipment-compliance",
+      "source": "procedure_schema"
     },
     {
       "type": "used_by",

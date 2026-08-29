@@ -1,0 +1,43 @@
+schema_version: "1.0"
+procedure_id: co-game-game-content-production
+variant: co-game
+version: "1.0.0"
+title: Game Content Production
+phase: 3
+status: active
+owner_agent: designer
+purpose: >
+  Produce the audiovisual content layer that the gameplay code consumes.
+inputs:
+  - approved_implementation_plan
+preconditions:
+  - "Architecture approved and art direction agreed."
+steps:
+  - id: 1
+    agent_key: visual-artist
+    skill_key: arcade-physics
+    output_type: sprite_asset_set
+    description: >
+      Produce sprites, tiles, and effects aligned to the art direction.
+  - id: 2
+    agent_key: sound-designer
+    skill_key: sound-synth
+    output_type: audio_asset_set
+    description: >
+      Synthesize music and SFX within the audio budget.
+  - id: 3
+    agent_key: designer
+    skill_key: documentation-writing
+    output_type: content_integration_notes
+    description: >
+      Document asset integration requirements for the development team.
+outputs:
+  - type: sprite_asset_set
+relations:
+  - type: follows
+    target: procedure.co-game.game-architecture-design
+quality_gates:
+  - "Assets pass integration checks in the target engine format."
+evidence: []
+failure_modes:
+  - "Assets exceed the performance budget - re-work assets instead of shipping frame drops."

@@ -1,0 +1,70 @@
+schema_version: "1.0"
+procedure_id: co-hr-hr-solution-design
+variant: co-hr
+version: "1.0.0"
+title: HR Solution Design
+phase: 2
+status: active
+owner_agent: org-design-consultant
+purpose: >
+  Design the integrated HR solution across the diagnosed dimensions:
+  organization, talent, compensation, learning, and performance.
+inputs:
+  - compliance_findings
+preconditions:
+  - "HR diagnosis accepted by the client sponsor."
+steps:
+  - id: 1
+    agent_key: org-design-consultant
+    skill_key: org-design-framework
+    output_type: org_design_options
+    description: >
+      Design organizational structure and role architecture options.
+  - id: 2
+    agent_key: talent-acquisition-specialist
+    skill_key: talent-acquisition-strategy
+    output_type: talent_plan
+    description: >
+      Plan acquisition and sourcing against the target organization.
+  - id: 3
+    agent_key: compensation-benefits-analyst
+    skill_key: compensation-benchmarking
+    output_type: compensation_framework
+    description: >
+      Design the compensation and benefits framework on the benchmark data.
+  - id: 4
+    agent_key: learning-development-specialist
+    skill_key: learning-curriculum-design
+    output_type: learning_roadmap
+    description: >
+      Design the learning and development roadmap for capability gaps.
+  - id: 5
+    agent_key: performance-management-consultant
+    skill_key: performance-system-design
+    output_type: performance_system_design
+    description: >
+      Design the performance management system and cadence.
+  - id: 6
+    agent_key: career-succession-consultant
+    skill_key: career-path-succession-planning
+    output_type: succession_framework
+    description: >
+      Design career paths and succession coverage for critical roles.
+  - id: 7
+    agent_key: change-management-partner
+    skill_key: stakeholder-alignment
+    output_type: change_roadmap
+    description: >
+      Package the solution with a change adoption roadmap.
+outputs:
+  - type: org_design_options
+relations:
+  - type: follows
+    target: procedure.co-hr.hr-diagnosis
+  - type: enables
+    target: procedure.co-hr.org-implementation
+quality_gates:
+  - "Solution components mutually consistent and cover all diagnosed gaps."
+evidence: []
+failure_modes:
+  - "Solution components conflict (e.g. compensation vs structure) - reconcile before client presentation."

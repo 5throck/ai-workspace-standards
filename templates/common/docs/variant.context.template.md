@@ -56,6 +56,10 @@
 
 ---
 
+## Procedures
+
+Optional: document this variant's structured workflows (`procedures/<name>/schema.yaml`). Author with `templates/common/procedures/_template/`, validate with `scripts/validate-procedures.ts`, and check agent-phase coverage with `scripts/procedure-coverage.ts`.
+
 ## Scripts
 
 <!-- Source Layer: L0 = templates/common (SSOT) | L1 = workspace root | L2 = project-local -->

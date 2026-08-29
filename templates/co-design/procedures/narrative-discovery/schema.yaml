@@ -1,0 +1,30 @@
+schema_version: "1.0"
+procedure_id: co-design-narrative-discovery
+variant: co-design
+version: "1.0.0"
+title: Narrative Discovery
+phase: 1
+status: active
+owner_agent: storyteller
+purpose: >
+  Capture the story and brand voice constraints that design work must express.
+inputs: []
+preconditions:
+  - "Project brief available with audience and goals."
+steps:
+  - id: 1
+    agent_key: storyteller
+    skill_key: documentation-writing
+    output_type: narrative_brief
+    description: >
+      Distill the brand story and voice constraints into a narrative brief.
+outputs:
+  - type: narrative_brief
+relations:
+  - type: composes_with
+    target: procedure.co-design.ux-discovery
+quality_gates:
+  - "Narrative brief reviewed by design-lead before design definition."
+evidence: []
+failure_modes:
+  - "Brand voice undefined - interview stakeholders before writing the brief."

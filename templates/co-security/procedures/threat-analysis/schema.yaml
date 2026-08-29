@@ -1,0 +1,38 @@
+schema_version: "1.0"
+procedure_id: co-security-threat-analysis
+variant: co-security
+version: "1.0.0"
+title: Threat Analysis
+phase: 2
+status: active
+owner_agent: threat-modeler
+purpose: >
+  Deepen the threat model into attack hypotheses and prioritized test
+  objectives for the engagement.
+inputs:
+  - authorization_record
+preconditions:
+  - "Engagement planning complete with verified authorization."
+steps:
+  - id: 1
+    agent_key: threat-modeler
+    skill_key: stride-threat-matrix
+    output_type: attack_hypotheses
+    description: >
+      Derive attack hypotheses and priorities from the threat matrix.
+  - id: 2
+    agent_key: red-team-lead
+    skill_key: finding-reconciliation
+    output_type: test_objectives
+    description: >
+      Turn hypotheses into test objectives and success criteria.
+outputs:
+  - type: attack_hypotheses
+relations:
+  - type: follows
+    target: procedure.co-security.engagement-planning
+quality_gates:
+  - "Every test objective traces to a modeled threat."
+evidence: []
+failure_modes:
+  - "Scope questions arise - resolve with red-team-lead before testing, never after."

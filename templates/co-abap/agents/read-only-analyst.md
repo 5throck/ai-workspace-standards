@@ -1,5 +1,6 @@
 ---
 name: read-only-analyst
+phases: [1]
 role: SAP Business Data Analyst (read-only)
 model: inherit
 color: magenta

@@ -7,6 +7,66 @@
       "layer": "variant:co-security"
     },
     {
+      "id": "output_type.attack_hypotheses",
+      "type": "output_type",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "output_type.authorization_record",
+      "type": "output_type",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "output_type.engagement_report",
+      "type": "output_type",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "output_type.exploitation_notes",
+      "type": "output_type",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "output_type.maturity_assessment",
+      "type": "output_type",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "output_type.remediation_plan",
+      "type": "output_type",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "output_type.sarif_export",
+      "type": "output_type",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "output_type.sbom_update",
+      "type": "output_type",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "output_type.test_objectives",
+      "type": "output_type",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "output_type.threat_landscape_brief",
+      "type": "output_type",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "output_type.threat_model",
+      "type": "output_type",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "output_type.validated_findings",
+      "type": "output_type",
+      "layer": "variant:co-security"
+    },
+    {
       "id": "patch-engineer",
       "type": "agent",
       "layer": "variant:co-security"
@@ -19,6 +79,31 @@
     {
       "id": "pm",
       "type": "agent",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "procedure.co-security.engagement-planning",
+      "type": "procedure",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "procedure.co-security.remediation-support",
+      "type": "procedure",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "procedure.co-security.security-reporting",
+      "type": "procedure",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "procedure.co-security.threat-analysis",
+      "type": "procedure",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "procedure.co-security.threat-model-and-report",
+      "type": "procedure",
       "layer": "variant:co-security"
     },
     {
@@ -78,6 +163,24 @@
     }
   ],
   "edges": [
+    {
+      "type": "produces",
+      "from": "finding-reconciliation",
+      "to": "output_type.exploitation_notes",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "finding-reconciliation",
+      "to": "output_type.test_objectives",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "finding-reconciliation",
+      "to": "output_type.validated_findings",
+      "source": "procedure_schema"
+    },
     {
       "type": "used_by",
       "from": "finding-reconciliation",
@@ -157,6 +260,210 @@
       "source": "prose"
     },
     {
+      "type": "produces",
+      "from": "procedure.co-security.engagement-planning",
+      "to": "output_type.authorization_record",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "enables",
+      "from": "procedure.co-security.engagement-planning",
+      "to": "procedure.co-security.threat-model-and-report",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-security.engagement-planning",
+      "to": "red-team-lead",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-security.engagement-planning",
+      "to": "stride-threat-matrix",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-security.engagement-planning",
+      "to": "threat-modeler",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-security.engagement-planning",
+      "to": "verify-authorization",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-security.remediation-support",
+      "to": "finding-reconciliation",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-security.remediation-support",
+      "to": "output_type.remediation_plan",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-security.remediation-support",
+      "to": "patch-engineer",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-security.remediation-support",
+      "to": "patch-engineer",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-security.remediation-support",
+      "to": "procedure.co-security.threat-model-and-report",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-security.remediation-support",
+      "to": "spdx-sbom",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-security.security-reporting",
+      "to": "output_type.sarif_export",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-security.security-reporting",
+      "to": "procedure.co-security.remediation-support",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-security.security-reporting",
+      "to": "report-writer",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-security.security-reporting",
+      "to": "report-writer",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-security.security-reporting",
+      "to": "samm-maturity",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-security.security-reporting",
+      "to": "sarif-exporter",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-security.threat-analysis",
+      "to": "finding-reconciliation",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-security.threat-analysis",
+      "to": "output_type.attack_hypotheses",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-security.threat-analysis",
+      "to": "procedure.co-security.engagement-planning",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-security.threat-analysis",
+      "to": "red-team-lead",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-security.threat-analysis",
+      "to": "stride-threat-matrix",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-security.threat-analysis",
+      "to": "threat-modeler",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-security.threat-model-and-report",
+      "to": "finding-reconciliation",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-security.threat-model-and-report",
+      "to": "finding-reconciliation",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-security.threat-model-and-report",
+      "to": "output_type.threat_model",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-security.threat-model-and-report",
+      "to": "pentester",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-security.threat-model-and-report",
+      "to": "red-team-lead",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-security.threat-model-and-report",
+      "to": "report-writer",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-security.threat-model-and-report",
+      "to": "sarif-exporter",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-security.threat-model-and-report",
+      "to": "stride-threat-matrix",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-security.threat-model-and-report",
+      "to": "threat-modeler",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-security.threat-model-and-report",
+      "to": "verify-authorization",
+      "source": "procedure_schema"
+    },
+    {
       "type": "references",
       "from": "README",
       "to": "verify-authorization",
@@ -179,6 +486,12 @@
       "from": "report-writer",
       "to": "verify-authorization",
       "source": "prose"
+    },
+    {
+      "type": "produces",
+      "from": "samm-maturity",
+      "to": "output_type.maturity_assessment",
+      "source": "procedure_schema"
     },
     {
       "type": "phase",
@@ -223,6 +536,12 @@
       "source": "prose"
     },
     {
+      "type": "produces",
+      "from": "sarif-exporter",
+      "to": "output_type.engagement_report",
+      "source": "procedure_schema"
+    },
+    {
       "type": "used_by",
       "from": "sarif-exporter",
       "to": "pentester",
@@ -265,6 +584,12 @@
       "source": "prose"
     },
     {
+      "type": "produces",
+      "from": "spdx-sbom",
+      "to": "output_type.sbom_update",
+      "source": "procedure_schema"
+    },
+    {
       "type": "used_by",
       "from": "spdx-sbom",
       "to": "patch-engineer",
@@ -305,6 +630,12 @@
       "from": "spdx-sbom",
       "to": "security-scan",
       "source": "prose"
+    },
+    {
+      "type": "produces",
+      "from": "stride-threat-matrix",
+      "to": "output_type.threat_landscape_brief",
+      "source": "procedure_schema"
     },
     {
       "type": "phase",

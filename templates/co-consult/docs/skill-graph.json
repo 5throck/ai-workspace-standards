@@ -125,8 +125,103 @@
       ]
     },
     {
+      "id": "output_type.change_impact_map",
+      "type": "output_type",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "output_type.closeout_record",
+      "type": "output_type",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "output_type.closeout_signoff",
+      "type": "output_type",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "output_type.communication_plan",
+      "type": "output_type",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "output_type.delivery_review_notes",
+      "type": "output_type",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "output_type.diagnosis_findings",
+      "type": "output_type",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "output_type.feasibility_notes",
+      "type": "output_type",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "output_type.handover_notes",
+      "type": "output_type",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "output_type.implementation_blueprint",
+      "type": "output_type",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "output_type.quantitative_baseline",
+      "type": "output_type",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "output_type.readiness_baseline",
+      "type": "output_type",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "output_type.recommendation_set",
+      "type": "output_type",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "output_type.solution_options",
+      "type": "output_type",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "output_type.supporting_analysis",
+      "type": "output_type",
+      "layer": "variant:co-consult"
+    },
+    {
       "id": "pm",
       "type": "agent",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "procedure.co-consult.current-state-diagnosis",
+      "type": "procedure",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "procedure.co-consult.diagnosis-to-recommendation",
+      "type": "procedure",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "procedure.co-consult.engagement-closeout",
+      "type": "procedure",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "procedure.co-consult.solution-delivery",
+      "type": "procedure",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "procedure.co-consult.solution-design",
+      "type": "procedure",
       "layer": "variant:co-consult"
     },
     {
@@ -224,6 +319,12 @@
       }
     },
     {
+      "type": "produces",
+      "from": "change-impact-assessment",
+      "to": "output_type.change_impact_map",
+      "source": "procedure_schema"
+    },
+    {
       "type": "phase",
       "from": "change-impact-assessment",
       "to": "phase1",
@@ -246,6 +347,12 @@
       "from": "company-intelligence",
       "to": "industry-expert",
       "source": "required_skills"
+    },
+    {
+      "type": "produces",
+      "from": "company-intelligence",
+      "to": "output_type.diagnosis_findings",
+      "source": "procedure_schema"
     },
     {
       "type": "phase",
@@ -477,6 +584,18 @@
       }
     },
     {
+      "type": "produces",
+      "from": "financial-modeling",
+      "to": "output_type.quantitative_baseline",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "financial-modeling",
+      "to": "output_type.supporting_analysis",
+      "source": "procedure_schema"
+    },
+    {
       "type": "phase",
       "from": "financial-modeling",
       "to": "phase1",
@@ -611,6 +730,12 @@
       "source": "skill_manifest"
     },
     {
+      "type": "produces",
+      "from": "insight-synthesis",
+      "to": "output_type.delivery_review_notes",
+      "source": "procedure_schema"
+    },
+    {
       "type": "phase",
       "from": "insight-synthesis",
       "to": "phase1",
@@ -718,6 +843,12 @@
       }
     },
     {
+      "type": "produces",
+      "from": "org-readiness-assessment",
+      "to": "output_type.readiness_baseline",
+      "source": "procedure_schema"
+    },
+    {
       "type": "phase",
       "from": "org-readiness-assessment",
       "to": "phase1",
@@ -730,6 +861,258 @@
       "source": "skill_manifest"
     },
     {
+      "type": "step_by_agent",
+      "from": "procedure.co-consult.current-state-diagnosis",
+      "to": "change-management-partner",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-consult.current-state-diagnosis",
+      "to": "company-intelligence",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-consult.current-state-diagnosis",
+      "to": "industry-expert",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-consult.current-state-diagnosis",
+      "to": "insight-synthesis",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-consult.current-state-diagnosis",
+      "to": "org-readiness-assessment",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-consult.current-state-diagnosis",
+      "to": "output_type.diagnosis_findings",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "composes_with",
+      "from": "procedure.co-consult.current-state-diagnosis",
+      "to": "procedure.co-consult.diagnosis-to-recommendation",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-consult.current-state-diagnosis",
+      "to": "sme",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-consult.diagnosis-to-recommendation",
+      "to": "company-intelligence",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "enables",
+      "from": "procedure.co-consult.diagnosis-to-recommendation",
+      "to": "consulting-report-writing",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-consult.diagnosis-to-recommendation",
+      "to": "data-analyst",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-consult.diagnosis-to-recommendation",
+      "to": "financial-modeling",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-consult.diagnosis-to-recommendation",
+      "to": "industry-expert",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-consult.diagnosis-to-recommendation",
+      "to": "insight-synthesis",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-consult.diagnosis-to-recommendation",
+      "to": "output_type.recommendation_set",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-consult.diagnosis-to-recommendation",
+      "to": "strategy-analyst",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-consult.engagement-closeout",
+      "to": "delivery-manager",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-consult.engagement-closeout",
+      "to": "output_type.closeout_record",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-consult.engagement-closeout",
+      "to": "procedure.co-consult.solution-delivery",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-consult.engagement-closeout",
+      "to": "project-delivery",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-consult.engagement-closeout",
+      "to": "project-delivery",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-consult.engagement-closeout",
+      "to": "technical-feasibility",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-consult.engagement-closeout",
+      "to": "technology-specialist",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-consult.engagement-closeout",
+      "to": "workstream-lead",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-consult.solution-delivery",
+      "to": "communications-lead",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-consult.solution-delivery",
+      "to": "data-analyst",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-consult.solution-delivery",
+      "to": "financial-modeling",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-consult.solution-delivery",
+      "to": "insight-synthesis",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-consult.solution-delivery",
+      "to": "output_type.implementation_blueprint",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-consult.solution-delivery",
+      "to": "procedure.co-consult.solution-design",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-consult.solution-delivery",
+      "to": "sme",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-consult.solution-delivery",
+      "to": "solution-design",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-consult.solution-delivery",
+      "to": "solutions-architect",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-consult.solution-delivery",
+      "to": "stakeholder-alignment",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-consult.solution-design",
+      "to": "change-impact-assessment",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-consult.solution-design",
+      "to": "change-management-partner",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-consult.solution-design",
+      "to": "industry-expert",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-consult.solution-design",
+      "to": "output_type.solution_options",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-consult.solution-design",
+      "to": "procedure.co-consult.current-state-diagnosis",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-consult.solution-design",
+      "to": "sme",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-consult.solution-design",
+      "to": "solution-design",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-consult.solution-design",
+      "to": "technical-feasibility",
+      "source": "procedure_schema"
+    },
+    {
       "type": "used_by",
       "from": "project-delivery",
       "to": "delivery-manager",
@@ -740,6 +1123,12 @@
       "from": "project-delivery",
       "to": "delivery-manager",
       "source": "skill_manifest"
+    },
+    {
+      "type": "produces",
+      "from": "project-delivery",
+      "to": "output_type.closeout_signoff",
+      "source": "procedure_schema"
     },
     {
       "type": "phase",
@@ -894,6 +1283,12 @@
       "source": "skill_manifest"
     },
     {
+      "type": "produces",
+      "from": "stakeholder-alignment",
+      "to": "output_type.communication_plan",
+      "source": "procedure_schema"
+    },
+    {
       "type": "phase",
       "from": "stakeholder-alignment",
       "to": "phase1",
@@ -971,6 +1366,18 @@
         "field": "relates_to",
         "index": 0
       }
+    },
+    {
+      "type": "produces",
+      "from": "technical-feasibility",
+      "to": "output_type.feasibility_notes",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "technical-feasibility",
+      "to": "output_type.handover_notes",
+      "source": "procedure_schema"
     },
     {
       "type": "phase",

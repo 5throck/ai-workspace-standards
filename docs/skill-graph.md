@@ -29,6 +29,7 @@
 | `create-variant` | L0 | — | — | — | — | — |
 | `customs-duty-drawback-workflow` | variant:co-export | customs-duty-drawback-specialist, customs-duty-drawback-specialist | phase3, phase4 | — | — | — |
 | `daily/audit-preparation` | variant:co-safety | — | — | — | — | — |
+| `daily/compliance-gap` | variant:co-safety | — | — | — | — | — |
 | `daily/risk-assessment` | variant:co-safety | — | — | — | — | — |
 | `decision-record` | common | — | — | — | — | — |
 | `desktop-app-fallback` | variant:co-abap | code-writer, test-runner | phase3, phase4 | — | — | — |

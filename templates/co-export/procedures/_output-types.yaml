@@ -11,3 +11,27 @@ output_types:
     description: "Registered procedure output type"
   shipment_plan:
     description: "Registered procedure output type"
+  market_entry_assessment:
+    description: "Registered procedure output type"
+  regulatory_landscape:
+    description: "Registered procedure output type"
+  export_control_precheck:
+    description: "Registered procedure output type"
+  export_control_clearance:
+    description: "Registered procedure output type"
+  classification_groundwork:
+    description: "Registered procedure output type"
+  certification_requirements:
+    description: "Registered procedure output type"
+  landed_cost_model:
+    description: "Registered procedure output type"
+  drawback_positioning:
+    description: "Registered procedure output type"
+  lane_optimization_plan:
+    description: "Registered procedure output type"
+  market_expansion_plan:
+    description: "Registered procedure output type"
+  fta_opportunity_scan:
+    description: "Registered procedure output type"
+  halal_market_requirements:
+    description: "Registered procedure output type"

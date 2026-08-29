@@ -1,0 +1,32 @@
+schema_version: "1.0"
+procedure_id: co-news-editorial-finalization
+variant: co-news
+version: "1.0.0"
+title: Editorial Finalization
+phase: 4
+status: active
+owner_agent: style-editor
+purpose: >
+  Apply the final editorial pass that makes a verified draft publishable:
+  headline, structure, and style compliance.
+inputs:
+  - final_verification
+preconditions:
+  - "Verification ledger complete and legal sign-off granted."
+steps:
+  - id: 1
+    agent_key: style-editor
+    skill_key: style-lint-checklist
+    output_type: publish_ready_article
+    description: >
+      Edit headline and structure and clear the style lint checklist.
+outputs:
+  - type: publish_ready_article
+relations:
+  - type: follows
+    target: procedure.co-news.fact-checked-article
+quality_gates:
+  - "Style lint checklist passes with zero unresolved flags."
+evidence: []
+failure_modes:
+  - "Edits introduce new claims - route them back through verification rather than publishing unverified text."

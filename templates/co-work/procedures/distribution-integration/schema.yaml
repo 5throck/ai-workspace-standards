@@ -1,0 +1,38 @@
+schema_version: "1.0"
+procedure_id: co-work-distribution-integration
+variant: co-work
+version: "1.0.0"
+title: Distribution Integration
+phase: 4
+status: active
+owner_agent: project-coordinator
+purpose: >
+  Integrate the finalized document into the client's working environment and
+  close out the request.
+inputs:
+  - final_document
+preconditions:
+  - "Final document accepted at the production gate."
+steps:
+  - id: 1
+    agent_key: ms365-expert
+    skill_key: documentation-writing
+    output_type: integrated_document
+    description: >
+      Place and format the document in Microsoft 365 with correct permissions.
+  - id: 2
+    agent_key: project-coordinator
+    skill_key: standup-synthesizer
+    output_type: closure_record
+    description: >
+      Confirm stakeholder notification and record request closure.
+outputs:
+  - type: integrated_document
+relations:
+  - type: follows
+    target: procedure.co-work.document-production
+quality_gates:
+  - "Access permissions verified and stakeholders notified."
+evidence: []
+failure_modes:
+  - "Permission model mismatch - halt distribution until access is corrected."

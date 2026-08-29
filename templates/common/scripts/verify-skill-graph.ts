@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Skill Relationship Graph Verification Script
- * @version 1.3.0
+ * @version 1.4.0
  *
  * Verifies that the committed skill graph files match the current state.
  * Re-derives the graph and compares against docs/skill-graph.json.

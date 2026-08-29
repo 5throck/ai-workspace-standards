@@ -1,0 +1,44 @@
+schema_version: "1.0"
+procedure_id: co-consult-engagement-closeout
+variant: co-consult
+version: "1.0.0"
+title: Engagement Closeout
+phase: 4
+status: active
+owner_agent: delivery-manager
+purpose: >
+  Close the engagement: final deliverable integration, technology handover,
+  and workstream wrap-up.
+inputs:
+  - implementation_blueprint
+preconditions:
+  - "Solution delivery workstreams completed their final reviews."
+steps:
+  - id: 1
+    agent_key: workstream-lead
+    skill_key: project-delivery
+    output_type: closeout_record
+    description: >
+      Consolidate workstream outputs and confirm acceptance criteria are met.
+  - id: 2
+    agent_key: technology-specialist
+    skill_key: technical-feasibility
+    output_type: handover_notes
+    description: >
+      Complete the technology handover notes for client teams.
+  - id: 3
+    agent_key: delivery-manager
+    skill_key: project-delivery
+    output_type: closeout_signoff
+    description: >
+      Give the final delivery-manager sign-off on the closeout record.
+outputs:
+  - type: closeout_record
+relations:
+  - type: follows
+    target: procedure.co-consult.solution-delivery
+quality_gates:
+  - "Client sign-off recorded on all acceptance criteria."
+evidence: []
+failure_modes:
+  - "Acceptance criteria unmet - keep the engagement open rather than closing on partial delivery."

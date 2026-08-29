@@ -1,0 +1,30 @@
+schema_version: "1.0"
+procedure_id: l0-alpha
+variant: l0
+version: "1.0.0"
+title: Root Alpha
+phase: 3
+status: active
+owner_agent: root-agent
+purpose: >
+  Fixture for the l0 root namespace.
+inputs: []
+preconditions:
+  - "P."
+steps:
+  - id: 1
+    agent_key: root-agent
+    skill_key: root-skill
+    output_type: variant_scaffold
+    description: >
+      Do the thing.
+outputs:
+  - type: variant_scaffold
+relations:
+  - type: enables
+    target: procedure.l0.alpha
+quality_gates:
+  - "G."
+evidence: []
+failure_modes:
+  - "F."

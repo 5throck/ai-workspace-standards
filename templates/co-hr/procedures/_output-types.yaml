@@ -7,3 +7,31 @@ output_types:
     description: "Registered procedure output type"
   benchmark_report:
     description: "Registered procedure output type"
+  readiness_baseline:
+    description: "Registered procedure output type"
+  relations_landscape:
+    description: "Registered procedure output type"
+  safety_baseline:
+    description: "Registered procedure output type"
+  change_readiness_map:
+    description: "Registered procedure output type"
+  org_design_options:
+    description: "Registered procedure output type"
+  talent_plan:
+    description: "Registered procedure output type"
+  compensation_framework:
+    description: "Registered procedure output type"
+  learning_roadmap:
+    description: "Registered procedure output type"
+  performance_system_design:
+    description: "Registered procedure output type"
+  succession_framework:
+    description: "Registered procedure output type"
+  change_roadmap:
+    description: "Registered procedure output type"
+  implementation_milestones:
+    description: "Registered procedure output type"
+  implementation_metrics:
+    description: "Registered procedure output type"
+  compliance_findings:
+    description: "Registered procedure output type"

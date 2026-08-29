@@ -1,5 +1,6 @@
 ---
 name: code-writer
+phases: [3]
 role: SAP ABAP Code Implementation Specialist
 model: inherit
 color: green

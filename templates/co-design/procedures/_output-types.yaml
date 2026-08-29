@@ -7,3 +7,17 @@ output_types:
     description: "Registered procedure output type"
   discovery_review:
     description: "Registered procedure output type"
+  narrative_brief:
+    description: "Registered procedure output type"
+  design_direction:
+    description: "Registered procedure output type"
+  touchpoint_specs:
+    description: "Registered procedure output type"
+  type_system:
+    description: "Registered procedure output type"
+  visual_design_set:
+    description: "Registered procedure output type"
+  prototype_build:
+    description: "Registered procedure output type"
+  accessibility_report:
+    description: "Registered procedure output type"

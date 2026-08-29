@@ -1,0 +1,43 @@
+schema_version: "1.0"
+procedure_id: co-game-game-release-verification
+variant: co-game
+version: "1.0.0"
+title: Game Release Verification
+phase: 4
+status: active
+owner_agent: game-debugger
+purpose: >
+  Verify the milestone build: defect sweep, full test pass, and go/no-go.
+inputs:
+  - implementation_commit
+preconditions:
+  - "Milestone feature work complete with reviews resolved."
+steps:
+  - id: 1
+    agent_key: game-debugger
+    skill_key: code-review
+    output_type: defect_sweep_report
+    description: >
+      Sweep the build for defects across scenes and gameplay paths.
+  - id: 2
+    agent_key: test-runner
+    skill_key: test-driven-development
+    output_type: regression_report
+    description: >
+      Run the automated regression suite on the milestone build.
+  - id: 3
+    agent_key: game-developer
+    skill_key: code-review
+    output_type: go_nogo_record
+    description: >
+      Consolidate findings into the go/no-go record for the milestone.
+outputs:
+  - type: go_nogo_record
+relations:
+  - type: follows
+    target: procedure.co-game.gameplay-feature-loop
+quality_gates:
+  - "No open P0/P1 defects at go/no-go."
+evidence: []
+failure_modes:
+  - "P0 defects remain - no-go is recorded and the milestone re-enters the feature loop."

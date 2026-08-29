@@ -11,3 +11,9 @@ output_types:
     description: "Registered procedure output type"
   pdf_deck:
     description: "Registered procedure output type"
+  layout_report:
+    description: "Registered procedure output type"
+  publish_package:
+    description: "Registered procedure output type"
+  version_record:
+    description: "Registered procedure output type"

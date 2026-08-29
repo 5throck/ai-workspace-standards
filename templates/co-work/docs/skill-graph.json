@@ -17,9 +17,19 @@
       "layer": "variant:co-work"
     },
     {
+      "id": "decision-record",
+      "type": "skill",
+      "layer": "variant:co-work"
+    },
+    {
       "id": "documentation-writing",
       "type": "skill",
       "layer": "L0"
+    },
+    {
+      "id": "evidence-ledger",
+      "type": "skill",
+      "layer": "variant:co-work"
     },
     {
       "id": "ms365-expert",
@@ -27,8 +37,68 @@
       "layer": "variant:co-work"
     },
     {
+      "id": "output_type.angle_options",
+      "type": "output_type",
+      "layer": "variant:co-work"
+    },
+    {
+      "id": "output_type.closure_record",
+      "type": "output_type",
+      "layer": "variant:co-work"
+    },
+    {
+      "id": "output_type.draft_document",
+      "type": "output_type",
+      "layer": "variant:co-work"
+    },
+    {
+      "id": "output_type.evidence_pack",
+      "type": "output_type",
+      "layer": "variant:co-work"
+    },
+    {
+      "id": "output_type.final_document",
+      "type": "output_type",
+      "layer": "variant:co-work"
+    },
+    {
+      "id": "output_type.integrated_document",
+      "type": "output_type",
+      "layer": "variant:co-work"
+    },
+    {
+      "id": "output_type.narrative_outline",
+      "type": "output_type",
+      "layer": "variant:co-work"
+    },
+    {
+      "id": "output_type.narrative_review",
+      "type": "output_type",
+      "layer": "variant:co-work"
+    },
+    {
       "id": "pm",
       "type": "agent",
+      "layer": "variant:co-work"
+    },
+    {
+      "id": "procedure.co-work.distribution-integration",
+      "type": "procedure",
+      "layer": "variant:co-work"
+    },
+    {
+      "id": "procedure.co-work.document-production",
+      "type": "procedure",
+      "layer": "variant:co-work"
+    },
+    {
+      "id": "procedure.co-work.narrative-design",
+      "type": "procedure",
+      "layer": "variant:co-work"
+    },
+    {
+      "id": "procedure.co-work.project-intake-analysis",
+      "type": "procedure",
       "layer": "variant:co-work"
     },
     {
@@ -81,16 +151,196 @@
       "source": "required_skills"
     },
     {
+      "type": "produces",
+      "from": "documentation-writing",
+      "to": "output_type.draft_document",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "documentation-writing",
+      "to": "output_type.narrative_review",
+      "source": "procedure_schema"
+    },
+    {
       "type": "used_by",
       "from": "documentation-writing",
       "to": "technical-writer",
       "source": "required_skills"
     },
     {
+      "type": "produces",
+      "from": "evidence-ledger",
+      "to": "output_type.evidence_pack",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-work.distribution-integration",
+      "to": "documentation-writing",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-work.distribution-integration",
+      "to": "ms365-expert",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-work.distribution-integration",
+      "to": "output_type.integrated_document",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-work.distribution-integration",
+      "to": "procedure.co-work.document-production",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-work.distribution-integration",
+      "to": "project-coordinator",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-work.distribution-integration",
+      "to": "standup-synthesizer",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-work.document-production",
+      "to": "analyst",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-work.document-production",
+      "to": "content-writer",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-work.document-production",
+      "to": "decision-record",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-work.document-production",
+      "to": "documentation-writing",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-work.document-production",
+      "to": "documentation-writing",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-work.document-production",
+      "to": "evidence-ledger",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-work.document-production",
+      "to": "output_type.final_document",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-work.document-production",
+      "to": "storyteller",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-work.document-production",
+      "to": "technical-writer",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-work.narrative-design",
+      "to": "decision-record",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-work.narrative-design",
+      "to": "output_type.narrative_outline",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-work.narrative-design",
+      "to": "procedure.co-work.project-intake-analysis",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-work.narrative-design",
+      "to": "storyteller",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-work.project-intake-analysis",
+      "to": "analyst",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-work.project-intake-analysis",
+      "to": "evidence-ledger",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-work.project-intake-analysis",
+      "to": "output_type.evidence_pack",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "enables",
+      "from": "procedure.co-work.project-intake-analysis",
+      "to": "procedure.co-work.document-production",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-work.project-intake-analysis",
+      "to": "research-analysis",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-work.project-intake-analysis",
+      "to": "storyteller",
+      "source": "procedure_schema"
+    },
+    {
       "type": "used_by",
       "from": "research-analysis",
       "to": "analyst",
       "source": "required_skills"
+    },
+    {
+      "type": "produces",
+      "from": "research-analysis",
+      "to": "output_type.angle_options",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "standup-synthesizer",
+      "to": "output_type.closure_record",
+      "source": "procedure_schema"
     },
     {
       "type": "phase",

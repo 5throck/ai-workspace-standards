@@ -9,3 +9,31 @@ output_types:
     description: "Registered procedure output type"
   defect_report:
     description: "Registered procedure output type"
+  concept_document:
+    description: "Registered procedure output type"
+  level_archetypes:
+    description: "Registered procedure output type"
+  feasibility_findings:
+    description: "Registered procedure output type"
+  tuning_plan:
+    description: "Registered procedure output type"
+  level_plan:
+    description: "Registered procedure output type"
+  sprite_asset_set:
+    description: "Registered procedure output type"
+  audio_asset_set:
+    description: "Registered procedure output type"
+  content_integration_notes:
+    description: "Registered procedure output type"
+  defect_sweep_report:
+    description: "Registered procedure output type"
+  regression_report:
+    description: "Registered procedure output type"
+  go_nogo_record:
+    description: "Registered procedure output type"
+  approved_implementation_plan:
+    description: "Registered procedure output type"
+  arcade_reference_notes:
+    description: "Registered procedure output type"
+  feel_requirements:
+    description: "Registered procedure output type"

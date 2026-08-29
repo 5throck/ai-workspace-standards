@@ -1,0 +1,38 @@
+schema_version: "1.0"
+procedure_id: co-design-prototype-validation
+variant: co-design
+version: "1.0.0"
+title: Prototype Validation
+phase: 4
+status: active
+owner_agent: prototype-engineer
+purpose: >
+  Validate the implemented design with a working prototype and accessibility
+  checks before delivery.
+inputs:
+  - visual_design_set
+preconditions:
+  - "Visual design set approved by design-lead."
+steps:
+  - id: 1
+    agent_key: prototype-engineer
+    skill_key: service-design
+    output_type: prototype_build
+    description: >
+      Build the interactive prototype from the touchpoint specs.
+  - id: 2
+    agent_key: prototype-engineer
+    skill_key: accessibility-audit
+    output_type: accessibility_report
+    description: >
+      Audit the prototype against accessibility standards and fix findings.
+outputs:
+  - type: prototype_build
+relations:
+  - type: follows
+    target: procedure.co-design.visual-implementation
+quality_gates:
+  - "Accessibility report shows zero critical findings."
+evidence: []
+failure_modes:
+  - "Critical accessibility findings require redesign - return to visual-implementation."

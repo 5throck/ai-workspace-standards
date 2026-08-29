@@ -1,0 +1,32 @@
+schema_version: "1.0"
+procedure_id: co-news-visual-news-production
+variant: co-news
+version: "1.0.0"
+title: Visual News Production
+phase: 5
+status: active
+owner_agent: visual-editor
+purpose: >
+  Produce the visual layer of the story - charts and infographics - in wire
+  format alongside the finalized article.
+inputs:
+  - publish_ready_article
+preconditions:
+  - "Article publish-ready with data claims verified."
+steps:
+  - id: 1
+    agent_key: visual-editor
+    skill_key: financial-infographic-svg
+    output_type: visual_asset_set
+    description: >
+      Produce SVG charts and infographics that render the verified data.
+outputs:
+  - type: visual_asset_set
+relations:
+  - type: follows
+    target: procedure.co-news.editorial-finalization
+quality_gates:
+  - "Visuals trace to the same verified data as the article text."
+evidence: []
+failure_modes:
+  - "Data behind a visual cannot be verified - cut the visual rather than publishing it."

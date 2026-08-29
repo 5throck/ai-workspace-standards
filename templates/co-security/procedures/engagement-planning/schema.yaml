@@ -1,0 +1,38 @@
+schema_version: "1.0"
+procedure_id: co-security-engagement-planning
+variant: co-security
+version: "1.0.0"
+title: Engagement Planning
+phase: 1
+status: active
+owner_agent: red-team-lead
+purpose: >
+  Plan an authorized offensive engagement: scope, rules of engagement, and
+  threat landscape briefing.
+inputs:
+  - engagement_scope
+preconditions:
+  - "Client request received; authorization document pending verification."
+steps:
+  - id: 1
+    agent_key: red-team-lead
+    skill_key: verify-authorization
+    output_type: authorization_record
+    description: >
+      Verify written authorization and define rules of engagement.
+  - id: 2
+    agent_key: threat-modeler
+    skill_key: stride-threat-matrix
+    output_type: threat_landscape_brief
+    description: >
+      Brief the target threat landscape to focus planning.
+outputs:
+  - type: authorization_record
+relations:
+  - type: enables
+    target: procedure.co-security.threat-model-and-report
+quality_gates:
+  - "No planning output is produced before authorization is verified."
+evidence: []
+failure_modes:
+  - "Authorization unverifiable - halt the engagement before any reconnaissance."

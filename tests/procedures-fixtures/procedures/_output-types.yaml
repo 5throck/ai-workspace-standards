@@ -1,0 +1,5 @@
+schema_version: "1.0"
+variant: l0
+output_types:
+  variant_scaffold:
+    description: "L3 scaffold created"

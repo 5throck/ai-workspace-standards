@@ -1,0 +1,32 @@
+schema_version: "1.0"
+procedure_id: co-deck-storyline-development
+variant: co-deck
+version: "1.0.0"
+title: Storyline Development
+phase: 2
+status: active
+owner_agent: storyline
+purpose: >
+  Shape the verified research into a per-slide narrative before any visual
+  design starts.
+inputs:
+  - research_pack
+preconditions:
+  - "Research pack accepted as complete by pm."
+steps:
+  - id: 1
+    agent_key: storyline
+    skill_key: storyline
+    output_type: storyline_outline
+    description: >
+      Produce the per-slide storyline outline from the research pack.
+outputs:
+  - type: storyline_outline
+relations:
+  - type: follows
+    target: procedure.co-deck.source-research
+quality_gates:
+  - "Narrative arc review passed - each slide advances exactly one idea."
+evidence: []
+failure_modes:
+  - "Research too thin for the target depth - return to source-research rather than padding the storyline."

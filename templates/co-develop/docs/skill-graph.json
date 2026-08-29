@@ -22,8 +22,93 @@
       "layer": "variant:co-develop"
     },
     {
+      "id": "documentation-writing",
+      "type": "skill",
+      "layer": "variant:co-develop"
+    },
+    {
+      "id": "output_type.approved_implementation_plan",
+      "type": "output_type",
+      "layer": "variant:co-develop"
+    },
+    {
+      "id": "output_type.environment_manifest",
+      "type": "output_type",
+      "layer": "variant:co-develop"
+    },
+    {
+      "id": "output_type.implementation_commit",
+      "type": "output_type",
+      "layer": "variant:co-develop"
+    },
+    {
+      "id": "output_type.regression_report",
+      "type": "output_type",
+      "layer": "variant:co-develop"
+    },
+    {
+      "id": "output_type.release_notes",
+      "type": "output_type",
+      "layer": "variant:co-develop"
+    },
+    {
+      "id": "output_type.review_findings",
+      "type": "output_type",
+      "layer": "variant:co-develop"
+    },
+    {
+      "id": "output_type.security_baseline",
+      "type": "output_type",
+      "layer": "variant:co-develop"
+    },
+    {
+      "id": "output_type.technical_findings",
+      "type": "output_type",
+      "layer": "variant:co-develop"
+    },
+    {
+      "id": "output_type.test_scaffold",
+      "type": "output_type",
+      "layer": "variant:co-develop"
+    },
+    {
+      "id": "output_type.tooling_adjustments",
+      "type": "output_type",
+      "layer": "variant:co-develop"
+    },
+    {
+      "id": "output_type.ui_specification",
+      "type": "output_type",
+      "layer": "variant:co-develop"
+    },
+    {
       "id": "pm",
       "type": "agent",
+      "layer": "variant:co-develop"
+    },
+    {
+      "id": "procedure.co-develop.architecture-design",
+      "type": "procedure",
+      "layer": "variant:co-develop"
+    },
+    {
+      "id": "procedure.co-develop.environment-bootstrap",
+      "type": "procedure",
+      "layer": "variant:co-develop"
+    },
+    {
+      "id": "procedure.co-develop.feature-implementation",
+      "type": "procedure",
+      "layer": "variant:co-develop"
+    },
+    {
+      "id": "procedure.co-develop.release-verification",
+      "type": "procedure",
+      "layer": "variant:co-develop"
+    },
+    {
+      "id": "procedure.co-develop.technical-planning",
+      "type": "procedure",
       "layer": "variant:co-develop"
     },
     {
@@ -38,6 +123,11 @@
     },
     {
       "id": "refactoring",
+      "type": "skill",
+      "layer": "variant:co-develop"
+    },
+    {
+      "id": "research-analysis",
       "type": "skill",
       "layer": "variant:co-develop"
     },
@@ -81,6 +171,18 @@
       "source": "skill_manifest"
     },
     {
+      "type": "produces",
+      "from": "code-review",
+      "to": "output_type.review_findings",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "code-review",
+      "to": "output_type.security_baseline",
+      "source": "procedure_schema"
+    },
+    {
       "type": "phase",
       "from": "code-review",
       "to": "phase4",
@@ -111,6 +213,216 @@
       "source": "prose"
     },
     {
+      "type": "produces",
+      "from": "documentation-writing",
+      "to": "output_type.release_notes",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "documentation-writing",
+      "to": "output_type.ui_specification",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-develop.architecture-design",
+      "to": "architect",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-develop.architecture-design",
+      "to": "code-review",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-develop.architecture-design",
+      "to": "output_type.approved_implementation_plan",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "enables",
+      "from": "procedure.co-develop.architecture-design",
+      "to": "procedure.co-develop.feature-implementation",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-develop.architecture-design",
+      "to": "procedure.co-develop.technical-planning",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-develop.environment-bootstrap",
+      "to": "code-review",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-develop.environment-bootstrap",
+      "to": "output_type.environment_manifest",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "enables",
+      "from": "procedure.co-develop.environment-bootstrap",
+      "to": "procedure.co-develop.technical-planning",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-develop.environment-bootstrap",
+      "to": "security-monitor",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-develop.environment-bootstrap",
+      "to": "stack-setup",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-develop.environment-bootstrap",
+      "to": "test-driven-development",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-develop.feature-implementation",
+      "to": "architect",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-develop.feature-implementation",
+      "to": "code-review",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-develop.feature-implementation",
+      "to": "code-writer",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-develop.feature-implementation",
+      "to": "designer",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-develop.feature-implementation",
+      "to": "documentation-writing",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-develop.feature-implementation",
+      "to": "output_type.implementation_commit",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-develop.feature-implementation",
+      "to": "refactoring",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-develop.feature-implementation",
+      "to": "security-monitor",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-develop.feature-implementation",
+      "to": "test-driven-development",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-develop.feature-implementation",
+      "to": "test-driven-development",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-develop.release-verification",
+      "to": "code-writer",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-develop.release-verification",
+      "to": "documentation-writing",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-develop.release-verification",
+      "to": "output_type.regression_report",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-develop.release-verification",
+      "to": "procedure.co-develop.feature-implementation",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-develop.release-verification",
+      "to": "test-driven-development",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-develop.release-verification",
+      "to": "test-runner",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-develop.technical-planning",
+      "to": "architect",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-develop.technical-planning",
+      "to": "output_type.technical_findings",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-develop.technical-planning",
+      "to": "procedure.co-develop.environment-bootstrap",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-develop.technical-planning",
+      "to": "refactoring",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-develop.technical-planning",
+      "to": "research-analysis",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-develop.technical-planning",
+      "to": "stack-setup",
+      "source": "procedure_schema"
+    },
+    {
       "type": "used_by",
       "from": "refactoring",
       "to": "code-writer",
@@ -121,6 +433,12 @@
       "from": "refactoring",
       "to": "code-writer",
       "source": "skill_manifest"
+    },
+    {
+      "type": "produces",
+      "from": "refactoring",
+      "to": "output_type.tooling_adjustments",
+      "source": "procedure_schema"
     },
     {
       "type": "phase",
@@ -139,6 +457,12 @@
       "from": "swe-solve",
       "to": "pm",
       "source": "skill_manifest"
+    },
+    {
+      "type": "produces",
+      "from": "test-driven-development",
+      "to": "output_type.test_scaffold",
+      "source": "procedure_schema"
     },
     {
       "type": "phase",

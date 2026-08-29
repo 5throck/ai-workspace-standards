@@ -1,5 +1,6 @@
 ---
 name: engagement-director
+phases: [4, 5]
 formal_name: Engagement Director
 role: client-engagement lifecycle management, deliverable orchestration, and trade-line scorecard governance
 status: active

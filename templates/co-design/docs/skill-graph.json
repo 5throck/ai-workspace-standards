@@ -12,8 +12,88 @@
       "layer": "variant:co-design"
     },
     {
+      "id": "documentation-writing",
+      "type": "skill",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "output_type.accessibility_report",
+      "type": "output_type",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "output_type.design_direction",
+      "type": "output_type",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "output_type.discovery_review",
+      "type": "output_type",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "output_type.narrative_brief",
+      "type": "output_type",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "output_type.prototype_build",
+      "type": "output_type",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "output_type.research_findings",
+      "type": "output_type",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "output_type.service_blueprint",
+      "type": "output_type",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "output_type.touchpoint_specs",
+      "type": "output_type",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "output_type.type_system",
+      "type": "output_type",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "output_type.visual_design_set",
+      "type": "output_type",
+      "layer": "variant:co-design"
+    },
+    {
       "id": "pm",
       "type": "agent",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "procedure.co-design.design-definition",
+      "type": "procedure",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "procedure.co-design.narrative-discovery",
+      "type": "procedure",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "procedure.co-design.prototype-validation",
+      "type": "procedure",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "procedure.co-design.ux-discovery",
+      "type": "procedure",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "procedure.co-design.visual-implementation",
+      "type": "procedure",
       "layer": "variant:co-design"
     },
     {
@@ -74,6 +154,12 @@
   ],
   "edges": [
     {
+      "type": "produces",
+      "from": "accessibility-audit",
+      "to": "output_type.accessibility_report",
+      "source": "procedure_schema"
+    },
+    {
       "type": "phase",
       "from": "accessibility-audit",
       "to": "phase2",
@@ -98,6 +184,198 @@
       "source": "skill_manifest"
     },
     {
+      "type": "produces",
+      "from": "documentation-writing",
+      "to": "output_type.narrative_brief",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-design.design-definition",
+      "to": "design-lead",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-design.design-definition",
+      "to": "documentation-writing",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-design.design-definition",
+      "to": "output_type.design_direction",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-design.design-definition",
+      "to": "procedure.co-design.ux-discovery",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-design.design-definition",
+      "to": "storyteller",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-design.design-definition",
+      "to": "ui-ux-design-intelligence",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-design.narrative-discovery",
+      "to": "documentation-writing",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-design.narrative-discovery",
+      "to": "output_type.narrative_brief",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "composes_with",
+      "from": "procedure.co-design.narrative-discovery",
+      "to": "procedure.co-design.ux-discovery",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-design.narrative-discovery",
+      "to": "storyteller",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-design.prototype-validation",
+      "to": "accessibility-audit",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-design.prototype-validation",
+      "to": "output_type.prototype_build",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-design.prototype-validation",
+      "to": "procedure.co-design.visual-implementation",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-design.prototype-validation",
+      "to": "prototype-engineer",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-design.prototype-validation",
+      "to": "prototype-engineer",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-design.prototype-validation",
+      "to": "service-design",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-design.ux-discovery",
+      "to": "design-lead",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-design.ux-discovery",
+      "to": "output_type.research_findings",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-design.ux-discovery",
+      "to": "service-design",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-design.ux-discovery",
+      "to": "service-designer",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-design.ux-discovery",
+      "to": "ui-ux-design-intelligence",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-design.ux-discovery",
+      "to": "ui-ux-design-intelligence",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-design.ux-discovery",
+      "to": "ux-researcher",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-design.visual-implementation",
+      "to": "output_type.visual_design_set",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-design.visual-implementation",
+      "to": "procedure.co-design.design-definition",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-design.visual-implementation",
+      "to": "service-design",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-design.visual-implementation",
+      "to": "service-designer",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-design.visual-implementation",
+      "to": "token-usage-lint",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-design.visual-implementation",
+      "to": "typography-expert",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-design.visual-implementation",
+      "to": "ui-ux-design-intelligence",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-design.visual-implementation",
+      "to": "visual-designer",
+      "source": "procedure_schema"
+    },
+    {
       "type": "used_by",
       "from": "service-design",
       "to": "design-lead",
@@ -108,6 +386,18 @@
       "from": "service-design",
       "to": "design-lead",
       "source": "skill_manifest"
+    },
+    {
+      "type": "produces",
+      "from": "service-design",
+      "to": "output_type.service_blueprint",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "service-design",
+      "to": "output_type.touchpoint_specs",
+      "source": "procedure_schema"
     },
     {
       "type": "phase",
@@ -140,6 +430,12 @@
       "source": "skill_manifest"
     },
     {
+      "type": "produces",
+      "from": "token-usage-lint",
+      "to": "output_type.type_system",
+      "source": "procedure_schema"
+    },
+    {
       "type": "phase",
       "from": "token-usage-lint",
       "to": "phase4",
@@ -168,6 +464,12 @@
       "from": "ui-ux-design-intelligence",
       "to": "design-lead",
       "source": "skill_manifest"
+    },
+    {
+      "type": "produces",
+      "from": "ui-ux-design-intelligence",
+      "to": "output_type.discovery_review",
+      "source": "procedure_schema"
     },
     {
       "type": "phase",

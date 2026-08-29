@@ -1,0 +1,38 @@
+schema_version: "1.0"
+procedure_id: co-safety-governance-audit
+variant: co-safety
+version: "1.0.0"
+title: Safety Governance Audit
+phase: 6
+status: active
+owner_agent: safety-governance-manager
+purpose: >
+  Periodically audit executed safety workflows and close the governance loop
+  with pm.
+inputs:
+  - risk_assessment_record
+preconditions:
+  - "Audit period elapsed or triggered by an incident flag."
+steps:
+  - id: 1
+    agent_key: safety-governance-manager
+    skill_key: daily/compliance-gap
+    output_type: audit_findings
+    description: >
+      Audit completed assessments for compliance gaps and recurring hazards.
+  - id: 2
+    agent_key: pm
+    skill_key: meeting-facilitation
+    output_type: governance_actions
+    description: >
+      Decide corrective actions and owners with the governance stakeholders.
+outputs:
+  - type: audit_findings
+relations:
+  - type: follows
+    target: procedure.co-safety.daily-risk-assessment
+quality_gates:
+  - "Every audit finding has a corrective action with an owner."
+evidence: []
+failure_modes:
+  - "Critical compliance gap found - trigger the emergency workflow immediately."

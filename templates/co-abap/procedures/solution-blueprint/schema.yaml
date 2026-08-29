@@ -1,0 +1,46 @@
+schema_version: "1.0"
+procedure_id: co-abap-solution-blueprint
+variant: co-abap
+version: "1.0.0"
+title: SAP Solution Blueprint
+phase: 2
+status: active
+owner_agent: architect
+purpose: >
+  Design the technical solution shape: data model, interfaces, and platform
+  constraints, feeding the build procedure.
+inputs:
+  - functional_requirement
+preconditions:
+  - "Requirements analysis complete with module impacts."
+steps:
+  - id: 1
+    agent_key: architect
+    skill_key: abap-dev
+    output_type: solution_blueprint
+    description: >
+      Design the overall technical solution and enhancement strategy.
+  - id: 2
+    agent_key: dba
+    skill_key: abap-dev
+    output_type: data_layer_design
+    description: >
+      Design tables, indexes, and data migration needs.
+  - id: 3
+    agent_key: interface-expert
+    skill_key: abap-dev
+    output_type: interface_design
+    description: >
+      Design inbound/outbound interfaces and IDoc/API touchpoints.
+outputs:
+  - type: solution_blueprint
+relations:
+  - type: follows
+    target: procedure.co-abap.requirements-analysis
+  - type: enables
+    target: procedure.co-abap.custom-dev-delivery
+quality_gates:
+  - "Blueprint reviewed against every module impact note."
+evidence: []
+failure_modes:
+  - "Blueprint conflicts with module impacts - return to requirements analysis."

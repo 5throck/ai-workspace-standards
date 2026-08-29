@@ -1,0 +1,61 @@
+schema_version: "1.0"
+procedure_id: co-export-market-entry-assessment
+variant: co-export
+version: "1.0.0"
+title: Market Entry Assessment
+phase: 1
+status: active
+owner_agent: market-entry-strategist
+purpose: >
+  Assess a destination market end to end: regulatory posture, certification
+  needs, and classification groundwork before any shipment is planned.
+inputs: []
+preconditions:
+  - "Target market and product category proposed by the client."
+steps:
+  - id: 1
+    agent_key: market-entry-strategist
+    skill_key: market-entry-strategy
+    output_type: market_entry_assessment
+    description: >
+      Assess demand channels, competitors, and entry routes for the market.
+  - id: 2
+    agent_key: foreign-regulatory-intelligence-analyst
+    skill_key: foreign-regulation-monitoring
+    output_type: regulatory_landscape
+    description: >
+      Map the destination regulatory landscape and monitoring obligations.
+  - id: 3
+    agent_key: export-control-compliance-specialist
+    skill_key: export-control-screening
+    output_type: export_control_precheck
+    description: >
+      Pre-screen the product category against export control regimes.
+  - id: 4
+    agent_key: hs-classification-specialist
+    skill_key: hs-classification-workflow
+    output_type: classification_groundwork
+    description: >
+      Prepare HS classification groundwork for the product category.
+  - id: 5
+    agent_key: fta-origin-analyst
+    skill_key: fta-origin-determination
+    output_type: fta_opportunity_scan
+    description: >
+      Scan applicable FTAs and origin opportunities for the market.
+  - id: 6
+    agent_key: halal-certification-specialist
+    skill_key: halal-certification-workflow
+    output_type: halal_market_requirements
+    description: >
+      Scan halal certification demand where the destination market requires it.
+outputs:
+  - type: market_entry_assessment
+relations:
+  - type: enables
+    target: procedure.co-export.compliance-determination
+quality_gates:
+  - "Assessment covers regulatory, certification, and classification dimensions before go-ahead."
+evidence: []
+failure_modes:
+  - "Market assessed as blocked by sanctions or controls - record the stop decision instead of continuing."

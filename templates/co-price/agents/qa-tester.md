@@ -1,5 +1,6 @@
 ---
 name: qa-tester
+phases: [4]
 formal_name: End-to-End QA Engineer
 role: E2E flows, React component mounting, browser assertions, and cross-feature regression
 status: active

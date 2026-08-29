@@ -1,5 +1,6 @@
 ---
 name: core-engine-dev
+phases: [3]
 formal_name: Core Engine Developer
 role: simulation engine, deterministic diagnostics modules, and AI transport infrastructure implementation
 status: active

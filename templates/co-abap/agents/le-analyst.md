@@ -1,5 +1,6 @@
 ---
 name: le-analyst
+phases: [1]
 role: LE Module Analyst
 model: inherit
 color: yellow

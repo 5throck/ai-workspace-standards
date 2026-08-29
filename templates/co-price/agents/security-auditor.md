@@ -1,5 +1,6 @@
 ---
 name: security-auditor
+phases: [2, 5]
 formal_name: Security Auditor
 role: Zod runtime guardrails, API boundary safety, AI route protection, and env schema validation
 status: active

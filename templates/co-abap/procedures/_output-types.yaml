@@ -11,3 +11,27 @@ output_types:
     description: "Registered procedure output type"
   test_report:
     description: "Registered procedure output type"
+  module_impact_notes:
+    description: "Registered procedure output type"
+  system_state_report:
+    description: "Registered procedure output type"
+  data_model_report:
+    description: "Registered procedure output type"
+  feasibility_findings:
+    description: "Registered procedure output type"
+  solution_blueprint:
+    description: "Registered procedure output type"
+  data_layer_design:
+    description: "Registered procedure output type"
+  interface_design:
+    description: "Registered procedure output type"
+  ui_enhancement:
+    description: "Registered procedure output type"
+  form_outputs:
+    description: "Registered procedure output type"
+  automation_scripts:
+    description: "Registered procedure output type"
+  transport_plan:
+    description: "Registered procedure output type"
+  acceptance_report:
+    description: "Registered procedure output type"

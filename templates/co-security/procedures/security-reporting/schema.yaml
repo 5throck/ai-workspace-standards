@@ -1,0 +1,39 @@
+schema_version: "1.0"
+procedure_id: co-security-security-reporting
+variant: co-security
+version: "1.0.0"
+title: Security Reporting
+phase: 5
+status: active
+owner_agent: report-writer
+purpose: >
+  Produce the consolidated engagement report and machine-readable exports for
+  client systems.
+inputs:
+  - validated_findings
+  - remediation_plan
+preconditions:
+  - "Findings validated and remediation status current."
+steps:
+  - id: 1
+    agent_key: report-writer
+    skill_key: sarif-exporter
+    output_type: sarif_export
+    description: >
+      Export findings in SARIF for client tooling ingestion.
+  - id: 2
+    agent_key: report-writer
+    skill_key: samm-maturity
+    output_type: maturity_assessment
+    description: >
+      Score the organization against the SAMM maturity model for the report.
+outputs:
+  - type: sarif_export
+relations:
+  - type: follows
+    target: procedure.co-security.remediation-support
+quality_gates:
+  - "Report findings match the reconciled finding set exactly."
+evidence: []
+failure_modes:
+  - "Finding set drifts during writing - freeze findings before reporting."

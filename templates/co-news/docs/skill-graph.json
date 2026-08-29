@@ -57,8 +57,83 @@
       "layer": "variant:co-news"
     },
     {
+      "id": "output_type.draft_article",
+      "type": "output_type",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "output_type.final_article",
+      "type": "output_type",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "output_type.final_verification",
+      "type": "output_type",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "output_type.legal_review_note",
+      "type": "output_type",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "output_type.legal_risk_precheck",
+      "type": "output_type",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "output_type.legal_signoff",
+      "type": "output_type",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "output_type.publish_ready_article",
+      "type": "output_type",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "output_type.story_candidates",
+      "type": "output_type",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "output_type.verification_ledger",
+      "type": "output_type",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "output_type.visual_asset_set",
+      "type": "output_type",
+      "layer": "variant:co-news"
+    },
+    {
       "id": "pm",
       "type": "agent",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "procedure.co-news.editorial-finalization",
+      "type": "procedure",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "procedure.co-news.fact-checked-article",
+      "type": "procedure",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "procedure.co-news.pre-publication-review",
+      "type": "procedure",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "procedure.co-news.topic-discovery",
+      "type": "procedure",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "procedure.co-news.visual-news-production",
+      "type": "procedure",
       "layer": "variant:co-news"
     },
     {
@@ -233,6 +308,12 @@
       }
     },
     {
+      "type": "produces",
+      "from": "financial-narrative-brief",
+      "to": "output_type.draft_article",
+      "source": "procedure_schema"
+    },
+    {
       "type": "phase",
       "from": "financial-narrative-brief",
       "to": "phase1",
@@ -243,6 +324,180 @@
       "from": "legal-researcher",
       "to": "k-law",
       "source": "prose"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-news.editorial-finalization",
+      "to": "output_type.publish_ready_article",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-news.editorial-finalization",
+      "to": "procedure.co-news.fact-checked-article",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-news.editorial-finalization",
+      "to": "style-editor",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-news.editorial-finalization",
+      "to": "style-lint-checklist",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-news.fact-checked-article",
+      "to": "fact-checker",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-news.fact-checked-article",
+      "to": "financial-journalism-style",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-news.fact-checked-article",
+      "to": "financial-narrative-brief",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-news.fact-checked-article",
+      "to": "legal-researcher",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-news.fact-checked-article",
+      "to": "output_type.final_article",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-news.fact-checked-article",
+      "to": "reporter",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-news.fact-checked-article",
+      "to": "source-verification-ledger",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-news.fact-checked-article",
+      "to": "source-verification-ledger",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-news.fact-checked-article",
+      "to": "style-editor",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-news.pre-publication-review",
+      "to": "fact-checker",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-news.pre-publication-review",
+      "to": "legal-researcher",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-news.pre-publication-review",
+      "to": "output_type.final_verification",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "composes_with",
+      "from": "procedure.co-news.pre-publication-review",
+      "to": "procedure.co-news.fact-checked-article",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-news.pre-publication-review",
+      "to": "source-verification-ledger",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-news.pre-publication-review",
+      "to": "source-verification-ledger",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-news.topic-discovery",
+      "to": "financial-analyst",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-news.topic-discovery",
+      "to": "financial-narrative-brief",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-news.topic-discovery",
+      "to": "legal-researcher",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-news.topic-discovery",
+      "to": "output_type.story_candidates",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "enables",
+      "from": "procedure.co-news.topic-discovery",
+      "to": "procedure.co-news.fact-checked-article",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-news.topic-discovery",
+      "to": "source-verification-ledger",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-news.visual-news-production",
+      "to": "financial-infographic-svg",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-news.visual-news-production",
+      "to": "output_type.visual_asset_set",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-news.visual-news-production",
+      "to": "procedure.co-news.editorial-finalization",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-news.visual-news-production",
+      "to": "visual-editor",
+      "source": "procedure_schema"
     },
     {
       "type": "references",
@@ -279,6 +534,30 @@
       "from": "source-verification-ledger",
       "to": "k-law",
       "source": "prose"
+    },
+    {
+      "type": "produces",
+      "from": "source-verification-ledger",
+      "to": "output_type.legal_review_note",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "source-verification-ledger",
+      "to": "output_type.legal_risk_precheck",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "source-verification-ledger",
+      "to": "output_type.legal_signoff",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "source-verification-ledger",
+      "to": "output_type.verification_ledger",
+      "source": "procedure_schema"
     },
     {
       "type": "phase",

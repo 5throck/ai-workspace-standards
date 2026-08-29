@@ -1,5 +1,6 @@
 ---
 name: cost-asset-mgmt
+phases: [3, 4]
 formal_name: Cost & Asset Management
 role: cost structures, depreciation schedules, asset lifecycle rules, and OPEX/CAPEX modeling
 status: active

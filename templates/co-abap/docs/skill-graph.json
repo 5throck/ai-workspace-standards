@@ -82,6 +82,91 @@
       "layer": "variant:co-abap"
     },
     {
+      "id": "output_type.acceptance_report",
+      "type": "output_type",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "output_type.automation_scripts",
+      "type": "output_type",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "output_type.data_layer_design",
+      "type": "output_type",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "output_type.data_model_report",
+      "type": "output_type",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "output_type.feasibility_findings",
+      "type": "output_type",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "output_type.form_outputs",
+      "type": "output_type",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "output_type.functional_requirement",
+      "type": "output_type",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "output_type.implementation_package",
+      "type": "output_type",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "output_type.interface_design",
+      "type": "output_type",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "output_type.module_impact_notes",
+      "type": "output_type",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "output_type.review_findings",
+      "type": "output_type",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "output_type.solution_blueprint",
+      "type": "output_type",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "output_type.system_state_report",
+      "type": "output_type",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "output_type.technical_analysis",
+      "type": "output_type",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "output_type.test_report",
+      "type": "output_type",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "output_type.transport_plan",
+      "type": "output_type",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "output_type.ui_enhancement",
+      "type": "output_type",
+      "layer": "variant:co-abap"
+    },
+    {
       "id": "performance-tuning",
       "type": "skill",
       "layer": "variant:co-abap"
@@ -102,6 +187,26 @@
       "layer": "variant:co-abap"
     },
     {
+      "id": "procedure.co-abap.custom-dev-delivery",
+      "type": "procedure",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "procedure.co-abap.requirements-analysis",
+      "type": "procedure",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "procedure.co-abap.solution-blueprint",
+      "type": "procedure",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "procedure.co-abap.transport-release",
+      "type": "procedure",
+      "layer": "variant:co-abap"
+    },
+    {
       "id": "read-only-analyst",
       "type": "agent",
       "layer": "variant:co-abap"
@@ -114,6 +219,11 @@
     {
       "id": "README_ko",
       "type": "agent",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "research-analysis",
+      "type": "skill",
       "layer": "variant:co-abap"
     },
     {
@@ -197,6 +307,12 @@
       "source": "prose"
     },
     {
+      "type": "produces",
+      "from": "abap-code-review",
+      "to": "output_type.review_findings",
+      "source": "procedure_schema"
+    },
+    {
       "type": "references",
       "from": "abap-code-review",
       "to": "performance-tuning",
@@ -237,6 +353,60 @@
       "from": "abap-dev",
       "to": "code-writer",
       "source": "skill_manifest"
+    },
+    {
+      "type": "produces",
+      "from": "abap-dev",
+      "to": "output_type.acceptance_report",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "abap-dev",
+      "to": "output_type.automation_scripts",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "abap-dev",
+      "to": "output_type.data_layer_design",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "abap-dev",
+      "to": "output_type.data_model_report",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "abap-dev",
+      "to": "output_type.form_outputs",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "abap-dev",
+      "to": "output_type.interface_design",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "abap-dev",
+      "to": "output_type.technical_analysis",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "abap-dev",
+      "to": "output_type.test_report",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "abap-dev",
+      "to": "output_type.ui_enhancement",
+      "source": "procedure_schema"
     },
     {
       "type": "phase",
@@ -303,6 +473,12 @@
       "from": "dump-monitor",
       "to": "devops-admin",
       "source": "skill_manifest"
+    },
+    {
+      "type": "produces",
+      "from": "dump-monitor",
+      "to": "output_type.system_state_report",
+      "source": "procedure_schema"
     },
     {
       "type": "phase",
@@ -389,6 +565,330 @@
       "source": "skill_manifest"
     },
     {
+      "type": "step_uses_skill",
+      "from": "procedure.co-abap.custom-dev-delivery",
+      "to": "abap-code-review",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-abap.custom-dev-delivery",
+      "to": "abap-dev",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-abap.custom-dev-delivery",
+      "to": "abap-dev",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-abap.custom-dev-delivery",
+      "to": "abap-dev",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-abap.custom-dev-delivery",
+      "to": "abap-dev",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-abap.custom-dev-delivery",
+      "to": "abap-dev",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-abap.custom-dev-delivery",
+      "to": "abap-dev",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-abap.custom-dev-delivery",
+      "to": "abap-dev",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-abap.custom-dev-delivery",
+      "to": "code-writer",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-abap.custom-dev-delivery",
+      "to": "code-writer",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-abap.custom-dev-delivery",
+      "to": "fiori-developer",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-abap.custom-dev-delivery",
+      "to": "form-expert",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-abap.custom-dev-delivery",
+      "to": "gui-scripter",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-abap.custom-dev-delivery",
+      "to": "output_type.implementation_package",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-abap.custom-dev-delivery",
+      "to": "sap-investigator",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-abap.custom-dev-delivery",
+      "to": "test-runner",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-abap.requirements-analysis",
+      "to": "abap-dev",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-abap.requirements-analysis",
+      "to": "abap-dev",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-abap.requirements-analysis",
+      "to": "architect",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-abap.requirements-analysis",
+      "to": "co-analyst",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-abap.requirements-analysis",
+      "to": "co-analyst",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-abap.requirements-analysis",
+      "to": "dump-monitor",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-abap.requirements-analysis",
+      "to": "fi-analyst",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-abap.requirements-analysis",
+      "to": "le-analyst",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-abap.requirements-analysis",
+      "to": "mm-analyst",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-abap.requirements-analysis",
+      "to": "output_type.functional_requirement",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-abap.requirements-analysis",
+      "to": "pp-analyst",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "enables",
+      "from": "procedure.co-abap.requirements-analysis",
+      "to": "procedure.co-abap.solution-blueprint",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-abap.requirements-analysis",
+      "to": "read-only-analyst",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-abap.requirements-analysis",
+      "to": "research-analysis",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-abap.requirements-analysis",
+      "to": "sap-co",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-abap.requirements-analysis",
+      "to": "sap-fi",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-abap.requirements-analysis",
+      "to": "sap-le",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-abap.requirements-analysis",
+      "to": "sap-mm",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-abap.requirements-analysis",
+      "to": "sap-pp",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-abap.requirements-analysis",
+      "to": "sap-sd",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-abap.requirements-analysis",
+      "to": "schema-inspector",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-abap.requirements-analysis",
+      "to": "sd-analyst",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-abap.solution-blueprint",
+      "to": "abap-dev",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-abap.solution-blueprint",
+      "to": "abap-dev",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-abap.solution-blueprint",
+      "to": "abap-dev",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-abap.solution-blueprint",
+      "to": "architect",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-abap.solution-blueprint",
+      "to": "dba",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-abap.solution-blueprint",
+      "to": "interface-expert",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-abap.solution-blueprint",
+      "to": "output_type.solution_blueprint",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "enables",
+      "from": "procedure.co-abap.solution-blueprint",
+      "to": "procedure.co-abap.custom-dev-delivery",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-abap.solution-blueprint",
+      "to": "procedure.co-abap.requirements-analysis",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-abap.transport-release",
+      "to": "abap-dev",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-abap.transport-release",
+      "to": "abap-dev",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-abap.transport-release",
+      "to": "devops-admin",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-abap.transport-release",
+      "to": "output_type.transport_plan",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-abap.transport-release",
+      "to": "procedure.co-abap.custom-dev-delivery",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-abap.transport-release",
+      "to": "test-runner",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "research-analysis",
+      "to": "output_type.feasibility_findings",
+      "source": "procedure_schema"
+    },
+    {
       "type": "references",
       "from": "sap-co",
       "to": "abap-dev",
@@ -411,6 +911,12 @@
       "from": "sap-co",
       "to": "dba",
       "source": "skill_manifest"
+    },
+    {
+      "type": "produces",
+      "from": "sap-co",
+      "to": "output_type.module_impact_notes",
+      "source": "procedure_schema"
     },
     {
       "type": "references",
@@ -479,6 +985,12 @@
       "source": "skill_manifest"
     },
     {
+      "type": "produces",
+      "from": "sap-fi",
+      "to": "output_type.module_impact_notes",
+      "source": "procedure_schema"
+    },
+    {
       "type": "references",
       "from": "sap-fi",
       "to": "performance-tuning",
@@ -543,6 +1055,12 @@
       "from": "sap-le",
       "to": "le-analyst",
       "source": "skill_manifest"
+    },
+    {
+      "type": "produces",
+      "from": "sap-le",
+      "to": "output_type.module_impact_notes",
+      "source": "procedure_schema"
     },
     {
       "type": "references",
@@ -611,6 +1129,12 @@
       "source": "skill_manifest"
     },
     {
+      "type": "produces",
+      "from": "sap-mm",
+      "to": "output_type.module_impact_notes",
+      "source": "procedure_schema"
+    },
+    {
       "type": "references",
       "from": "sap-mm",
       "to": "performance-tuning",
@@ -669,6 +1193,12 @@
       "from": "sap-pp",
       "to": "dba",
       "source": "skill_manifest"
+    },
+    {
+      "type": "produces",
+      "from": "sap-pp",
+      "to": "output_type.module_impact_notes",
+      "source": "procedure_schema"
     },
     {
       "type": "references",
@@ -735,6 +1265,12 @@
       "from": "sap-sd",
       "to": "dba",
       "source": "skill_manifest"
+    },
+    {
+      "type": "produces",
+      "from": "sap-sd",
+      "to": "output_type.module_impact_notes",
+      "source": "procedure_schema"
     },
     {
       "type": "references",

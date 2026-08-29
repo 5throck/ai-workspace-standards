@@ -1,5 +1,6 @@
 ---
 name: co-analyst
+phases: [1]
 role: CO Module Analyst
 model: inherit
 color: yellow

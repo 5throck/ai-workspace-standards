@@ -1,5 +1,6 @@
 ---
 name: form-expert
+phases: [3]
 role: SAP Document Output & Form Specialist
 model: inherit
 color: cyan

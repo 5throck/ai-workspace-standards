@@ -1,0 +1,58 @@
+schema_version: "1.0"
+procedure_id: co-price-scenario-modeling
+variant: co-price
+version: "1.0.0"
+title: Pricing Scenario Modeling
+phase: 2
+status: active
+owner_agent: lead-architect
+purpose: >
+  Design and stress the pricing solution scenarios that implementation will
+  build.
+inputs:
+  - price_recommendation
+preconditions:
+  - "Pricing analysis accepted and objectives locked."
+steps:
+  - id: 1
+    agent_key: pricing-strategist
+    skill_key: scenario-comparison
+    output_type: scenario_set
+    description: >
+      Define the pricing scenarios and their business assumptions.
+  - id: 2
+    agent_key: lead-architect
+    skill_key: prisma-7
+    output_type: solution_architecture
+    description: >
+      Design the data and service architecture that realizes the scenarios.
+  - id: 3
+    agent_key: ux-specialist
+    skill_key: ui-component-design
+    output_type: ux_flows
+    description: >
+      Design the price-setting and approval user flows.
+  - id: 4
+    agent_key: finance-strategy-lead
+    skill_key: financial-statement-prep
+    output_type: finance_impact_model
+    description: >
+      Model the P&L and balance-sheet impact of each scenario.
+  - id: 5
+    agent_key: security-auditor
+    skill_key: harness-verification
+    output_type: security_review_notes
+    description: >
+      Review the scenario design for data protection and access risks.
+outputs:
+  - type: scenario_set
+relations:
+  - type: follows
+    target: procedure.co-price.pricing-analysis
+  - type: enables
+    target: procedure.co-price.engine-implementation
+quality_gates:
+  - "Each scenario carries finance impact and security review before build."
+evidence: []
+failure_modes:
+  - "Scenario assumptions unverifiable - halt and re-run the pricing analysis."

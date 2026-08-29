@@ -11,3 +11,41 @@ output_types:
     description: "Registered procedure output type"
   price_recommendation:
     description: "Registered procedure output type"
+  scenario_set:
+    description: "Registered procedure output type"
+  solution_architecture:
+    description: "Registered procedure output type"
+  ux_flows:
+    description: "Registered procedure output type"
+  finance_impact_model:
+    description: "Registered procedure output type"
+  security_review_notes:
+    description: "Registered procedure output type"
+  engine_build:
+    description: "Registered procedure output type"
+  governance_rules_build:
+    description: "Registered procedure output type"
+  waterfall_checks:
+    description: "Registered procedure output type"
+  ui_build:
+    description: "Registered procedure output type"
+  cost_stress_results:
+    description: "Registered procedure output type"
+  test_summary:
+    description: "Registered procedure output type"
+  audit_reconciliation:
+    description: "Registered procedure output type"
+  localization_report:
+    description: "Registered procedure output type"
+  cost_assurance_notes:
+    description: "Registered procedure output type"
+  deployment_readiness:
+    description: "Registered procedure output type"
+  finance_signoff:
+    description: "Registered procedure output type"
+  release_decision:
+    description: "Registered procedure output type"
+  client_review_deck:
+    description: "Registered procedure output type"
+  security_attestation:
+    description: "Registered procedure output type"

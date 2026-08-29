@@ -1,5 +1,6 @@
 ---
 name: security-monitor
+phases: [0, 5]
 formal_name: Security Monitor
 role: vulnerability scanning, advisory watch, secret-leak prevention, and dependency policy enforcement
 status: active

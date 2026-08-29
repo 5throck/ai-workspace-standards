@@ -1,5 +1,6 @@
 ---
 name: pp-analyst
+phases: [1]
 role: PP Module Analyst
 model: inherit
 color: yellow
