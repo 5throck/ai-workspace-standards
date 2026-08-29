@@ -77,7 +77,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `generate-ide-rules.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `generate-l3-readme.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
 | `generate-scripts-readme.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
-| `generate-skill-graph.ts` | L0 | 1.7.0 | active | —| —| L0+L1 | —|
+| `generate-skill-graph.ts` | L0 | 1.7.1 | active | —| —| L0+L1 | —|
 | `generate-version-manifest.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `dispatch-parallel.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `dispatch-serial.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
@@ -124,7 +124,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `helpers/reconcile-with-l0-l1.ts` | L0 | 1.3.1 | active | —| —| L0 | —|
 | `helpers/normalize-agent-skills.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `helpers/prune-country-scoped-assets.ts` | L0 | 0.3.0 | active | —| —| L0 | —|
-| `helpers/scan-l3-project.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
+| `helpers/scan-l3-project.ts` | L0 | 1.3.0 | active | —| —| L0 | —|
 | `helpers/substitute-placeholders.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `helpers/template-utils.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
 | `helpers/rollback-partial-project.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
@@ -199,7 +199,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `test-runner.ts` | L0 | 1.1.0 | active | `--parallel`, `--sequential`, `--concurrency <n>`, `--timeout <ms>` | —| L0+L1 | —|
 | `translate-readme.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `ticket.ts` | L0 | 1.1.0 | active | `create --not-before`, `list --kind`, `list --ready` | —| L0 | —|
-| `upgrade-project.ts` | L0 | 1.14.0 | active | `--variant`, `--platform`, `--dry-run`, `--prune-removed`, `--rollback`, `--yes` | —| L0 | —|
+| `upgrade-project.ts` | L0 | 1.15.0 | active | `--variant`, `--platform`, `--dry-run`, `--prune-removed`, `--rollback`, `--yes` | —| L0 | —|
 | `variant-feature.ts` | L0 | 1.0.0 | active | `--variant`, `--feature`, `--type` | —| L0 | —|
 | `validate-agents.ts` | L0 | 1.0.5 | active | —| —| L0+L1 | —|
 | `validate-doc-folder.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|

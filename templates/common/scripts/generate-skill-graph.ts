@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Skill Relationship Graph Generator
- * @version 1.7.0
+ * @version 1.7.1
  *
  * Generates a skill relationship graph from multiple sources:
  * - SKILL.md files (prerequisites, relates_to frontmatter fields)
@@ -484,7 +484,17 @@ function deriveProceduresFromDir(
     }
     if (!data || typeof data !== 'object') continue;
 
-    const procId: string = `procedure.${namespace}.${entry.name}`;
+    // Namespace resolution: prefer the procedure_id's variant/l0 prefix so node ids
+    // match the `procedure.<ns>.<name>` targets used in relations[] — critical for
+    // project-local runs, where ROOT/procedures is scanned with the fallback 'l0'
+    // namespace but the schemas still carry their variant-prefixed procedure_ids
+    // (e.g. "co-abap-custom-dev-delivery" → procedure.co-abap.custom-dev-delivery).
+    const pidField = typeof data.procedure_id === 'string' ? data.procedure_id : '';
+    const ns = pidField.endsWith(`-${entry.name}`)
+      ? pidField.slice(0, pidField.length - entry.name.length - 1)
+      : namespace;
+
+    const procId: string = `procedure.${ns}.${entry.name}`;
     allNodes.set(procId, { id: procId, type: 'procedure', layer });
 
     const ensureOutputType = (type: string): void => {

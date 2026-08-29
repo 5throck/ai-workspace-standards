@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+- **[2026-08-29]**: feat(procedures): **Procedures guaranteed at every project lifecycle boundary (reledgev Addendum 3).** (1) `upgrade-project.ts` 1.14.0 → 1.15.0: new PROCEDURES SYNC pass — add-if-missing delivery of the variant procedure corpus (`procedures/` entries with project-owned preservation, `_output-types.yaml` seeding). (2) `scan-l3-project.ts`: new `procedures` scan category (`.yaml/.yml/.ts`) so the L3→variant promotion carries the workflow corpus. (3) `generate-skill-graph.ts` 1.7.0 → 1.7.1: namespace fix — procedure node ids now derive from `procedure_id` (strip trailing dirname) instead of the caller fallback, so project-local runs produce `procedure.co-abap.<name>` matching relations[] targets instead of ghost `l0`-namespace orphans; workspace graph unchanged at 542 nodes / 1,545 edges (identity-preserving), all 5 Projects/co-* graphs now verify with procedure nodes + step edges. (4) `tests/reflect-skill-graph-to-project.ts` extended with procedures adoption + context.md §Procedures; adopted into co-abap/co-consult/co-deck/co-price/co-safety (PRs #112/#21/#65/#76/#124, all merged).
+
 ### Fixed
 - **[2026-08-29]**: fix(skills): **Propagation-coupling fix during Projects/co-* adoption wave.** Removed three relation edges whose targets are L0-only (do not propagate to L1/L2): `sync→audit-workspace`, `validate-docs-links→audit-workspace`, `team-builder→create-variant` — they dangled as unknown targets in every project copy. `validate-skills.ts` gains the `relation-target-not-in-l1` warning enforcing ADR-0060 Amendment 6B for the L1 surface; L0-only skill pairs are unaffected. New `tests/reflect-skill-graph-to-project.ts` mirrors the graph feature into Projects/co-* repos (scripts, selective SKILL.md relates_to refresh, context.md section, per-project adoption ADR, graph regeneration + determinism verification).
 

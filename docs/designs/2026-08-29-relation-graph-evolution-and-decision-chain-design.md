@@ -261,3 +261,27 @@ propagated L1/L2 copy. Three edges from the L0 wave were removed for this reason
 (`sync→audit-workspace`, `validate-docs-links→audit-workspace`,
 `team-builder→create-variant`; targets are L0-only skills). L0-only skills may
 still relate among themselves — their frontmatter never propagates.
+
+### Addendum 3 (2026-08-29): Procedures in Every Lifecycle Path + Project Namespace Fix
+
+User mandate: `procedures/` MUST be present at every project lifecycle boundary.
+- **New project creation** (`new-project.ts`): already covered — the generic common
+  copy + variant overlay include `procedures/` (common `procedures/_template` ships
+  as the authoring skeleton).
+- **L3 scaffold** (`create-l3-scaffold.ts`): covered by the default-include overlay.
+- **Project upgrade** (`upgrade-project.ts` v1.15.0): new PROCEDURES SYNC pass —
+  add-if-missing delivery of the variant workflow corpus with project-owned
+  preservation and `_output-types.yaml` seeding.
+- **L3→variant promotion** (`scan-l3-project.ts`): new `procedures` scan category
+  (`.yaml/.yml/.ts`) so the workflow corpus survives promotion into the variant
+  template.
+- **Project adoption** (`tests/reflect-skill-graph-to-project.ts`): copies missing
+  procedures into Projects/co-* repos.
+
+**Generator namespace fix** (`generate-skill-graph.ts` v1.7.1): project-local runs
+scanned `ROOT/procedures` with the fallback `l0` namespace while schemas carry
+variant-prefixed `procedure_id`s — relations[] referencing `procedure.<variant>.*`
+materialized ghost orphans. The namespace is now derived from `procedure_id`
+(strip the trailing `.<dirname>`), which is identity-preserving for the workspace
+graph and fixes project graphs (co-abap/co-consult/co-deck/co-price/co-safety all
+verify with procedure nodes + step edges).
