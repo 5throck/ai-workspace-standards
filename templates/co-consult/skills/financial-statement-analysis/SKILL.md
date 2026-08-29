@@ -17,6 +17,7 @@ owner: data-analyst
 version: 1.3.1
 last_reviewed: 2026-07-19
 prerequisites:
+  - k-dart
 relates_to:
   - skill: company-intelligence
     type: composes_with
@@ -24,8 +25,6 @@ relates_to:
     type: composes_with
   - skill: insight-synthesis
     type: composes_with
-  - skill: k-dart
-    type: relates_to
 metadata:
   type: analysis
   tier: medium
