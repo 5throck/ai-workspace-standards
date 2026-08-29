@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
-// @version 1.14.0
+// @version 1.15.0
+// v1.15.0: New PROCEDURES SYNC pass — add-if-missing delivery of the variant workflow corpus (ADR-0063); legacy projects scaffolded before the procedures wave receive procedures/ entries with project-owned preservation.
 // v1.13.0: New VARIANT-SCOPE SKILL PRUNE pass — a skill present in
 //           templates/common/skills/ AND in exactly one templates/co-*/skills/ is a
 //           variant-exclusive skill mistakenly duplicated into common; removed from
@@ -71,7 +72,7 @@
 // Migrated from upgrade-project.sh/ps1 per ADR-0036. No file permission manipulation.
 
 import {
-  existsSync, mkdirSync, copyFileSync, readFileSync, writeFileSync,
+  existsSync, mkdirSync, copyFileSync, cpSync, readFileSync, writeFileSync,
   readdirSync, statSync, rmSync,
 } from 'node:fs';
 import { resolve, join, dirname, basename, isAbsolute, relative } from 'node:path';
@@ -1334,6 +1335,58 @@ for (const fileName of GOVERNANCE_FILES) {
   console.log(`  ${dryTag}COPIED: ${fileName}`);
   govFilesCopied++;
   syncChanged++;
+}
+console.log('');
+
+// ── PROCEDURES SYNC: variant workflow corpus (add-if-missing) ─────────────────
+// Procedures (ADR-0063) are the canonical workflow source and MUST be present in
+// every project (reledgev pipeline-coverage review 2026-08-29). Legacy projects
+// scaffolded before the procedures wave lack them entirely, and no other pass
+// covers the procedures/ directory. Semantics: ADD-IF-MISSING per procedure entry —
+// a project that already has `procedures/<name>/` keeps its own (project-local
+// workflow edits are intentional); missing entries are copied whole from the
+// variant template first, then templates/common. `_output-types.yaml` is seeded
+// if absent (it is the closed output-type vocabulary validators rely on).
+console.log('--- PROCEDURES SYNC (add-if-missing) ---');
+let proceduresCopied = 0;
+{
+  const projProcDir = join(projectDir, 'procedures');
+  const variantProcDir = join(templatesDir, 'procedures');
+  const commonProcDir = join(commonDir, 'procedures');
+  const sources = [variantProcDir, commonProcDir];
+
+  // Seed _output-types.yaml if the project has no procedures vocabulary at all
+  if (!dryRun && !existsSync(projProcDir)) mkdirSync(projProcDir, { recursive: true });
+  const otypesDst = join(projProcDir, '_output-types.yaml');
+  if (!existsSync(otypesDst)) {
+    for (const srcDir of sources) {
+      const otypesSrc = join(srcDir, '_output-types.yaml');
+      if (existsSync(otypesSrc)) {
+        console.log(`  NEW    procedures/_output-types.yaml`);
+        if (!dryRun) copyFileSync(otypesSrc, otypesDst);
+        proceduresCopied++;
+        syncChanged++;
+        break;
+      }
+    }
+  }
+
+  for (const srcDir of sources) {
+    if (!existsSync(srcDir)) continue;
+    for (const entry of readdirSync(srcDir, { withFileTypes: true })) {
+      if (!entry.isDirectory() || entry.name.startsWith('_')) continue; // _template stays template-only
+      const dst = join(projProcDir, entry.name);
+      if (existsSync(dst)) {
+        console.log(`  OK     procedures/${entry.name}/  (project-owned — preserved)`);
+        continue;
+      }
+      console.log(`  NEW    procedures/${entry.name}/  (from ${srcDir === variantProcDir ? 'variant template' : 'templates/common'})`);
+      if (!dryRun) cpSync(join(srcDir, entry.name), dst, { recursive: true });
+      proceduresCopied++;
+      syncChanged++;
+    }
+  }
+  if (proceduresCopied === 0) console.log('  OK     procedures/ already in sync');
 }
 console.log('');
 

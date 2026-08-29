@@ -5,7 +5,7 @@
  * Recursively scans L3 project directories and classifies files
  * for variant conversion pipeline.
  *
- * @version 1.2.0
+ * @version 1.3.0
  * @phase 1: L3 Analysis
  *
  * Dependencies:
@@ -87,6 +87,9 @@ const SCAN_CATEGORIES = {
   configs: ['.claude', '.gemini'],
   scripts: ['scripts'],
   docs: ['docs'],
+  // Procedure Schema YAML workflows (ADR-0063) — MUST survive L3→variant promotion
+  // so promoted variants carry their (agent, phase) workflow corpus.
+  procedures: ['procedures'],
   root: ['CLAUDE.md', 'GEMINI.md', 'README.md', 'CHANGELOG.md', 'package.json'],
 } as const;
 
@@ -350,6 +353,7 @@ export async function scanL3Project(l3ProjectPath: string): Promise<L3ScanResult
         // Scan directory recursively
         const extensions = category === 'scripts' ? ['.ts', '.sh', '.ps1'] :
                          category === 'agents' || category === 'skills' ? ['.md'] :
+                         category === 'procedures' ? ['.yaml', '.yml', '.ts'] :
                          ['.md', '.json'];
         filesToScan = scanDirectoryRecursively(fullScanPath, l3ProjectPath, extensions);
       } else {

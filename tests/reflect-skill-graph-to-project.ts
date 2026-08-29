@@ -61,6 +61,34 @@ Skill relations are the generated projection per ADR-0060: \`docs/skill-graph.js
     writeFileSync(ctxPath, c);
     contextUpdated = true;
   }
+  if (!c.includes('## Procedures') && /\n## Scripts/.test(c)) {
+    const proc = `## Procedures
+
+Structured workflows live in \`procedures/<name>/schema.yaml\` (ADR-0063, canonical workflow source). Validate with \`bun scripts/validate-procedures.ts\`; the skill graph derives procedure/output_type nodes and step edges from them.
+`;
+    c = c.replace(/\n## Scripts/, '\n' + proc + '\n## Scripts');
+    writeFileSync(ctxPath, c);
+    contextUpdated = true;
+  }
+}
+
+// 3b. procedures/ adoption (add-if-missing per entry; project-owned preserved)
+let proceduresCopied = 0;
+const projProcDir = join(projectPath, 'procedures');
+const variantProcDir = join(ROOT, 'templates', variant, 'procedures');
+if (!existsSync(projProcDir)) mkdirSync(projProcDir, { recursive: true });
+for (const srcDir of [variantProcDir, join(ROOT, 'templates', 'common', 'procedures')]) {
+  if (!existsSync(srcDir)) continue;
+  for (const entry of readdirSync(srcDir, { withFileTypes: true })) {
+    if (!entry.isDirectory() || entry.name.startsWith('_')) continue;
+    const dst = join(projProcDir, entry.name);
+    if (existsSync(dst)) continue;
+    cpSync(join(srcDir, entry.name), dst, { recursive: true });
+    proceduresCopied++;
+  }
+  const otypesSrc = join(srcDir, '_output-types.yaml');
+  const otypesDst = join(projProcDir, '_output-types.yaml');
+  if (existsSync(otypesSrc) && !existsSync(otypesDst)) { cpSync(otypesSrc, otypesDst); proceduresCopied++; }
 }
 
 // 4. Regenerate + verify project graph (project-local run auto-tags L3)
@@ -75,7 +103,8 @@ const skillsWithRel = relEdges.length;
 const adrDir = join(projectPath, 'docs', 'adr');
 mkdirSync(adrDir, { recursive: true });
 const existing = existsSync(adrDir) ? readdirSync(adrDir).filter(f => /^\d{4}-/.test(f)).sort() : [];
-const nextNum = String(existing.length + 1).padStart(4, '0');
+const priorAdoption = existing.find(f => f.includes('skill-graph-adoption'));
+const nextNum = priorAdoption ? priorAdoption.slice(0, 4) : String(existing.length + 1).padStart(4, '0');
 const date = new Date().toISOString().slice(0, 10);
 const adr = `---
 status: "Accepted"
@@ -129,6 +158,14 @@ Adopt the upstream skill-graph feature into this project:
 - ai_workspace \`docs/designs/2026-08-29-relation-graph-evolution-and-decision-chain-design.md\`
 - ai_workspace ADR-0063 — Procedure Schema as canonical workflow source
 `;
-writeFileSync(join(adrDir, `${nextNum}-skill-graph-adoption.md`), adr);
+const adoptionFile = join(adrDir, `${nextNum}-skill-graph-adoption.md`);
+if (!priorAdoption) writeFileSync(adoptionFile, adr);
 
-console.log(`[${proj}] scripts=4, skillsUpdated=${skillsUpdated}, contextUpdated=${contextUpdated}, graph=${graph.nodes.length}n/${graph.edges.length}e, adr=${nextNum}-skill-graph-adoption.md, verify-exit=${ver.status}`);
+// Addendum: record procedures adoption on an existing adoption ADR
+if (proceduresCopied > 0) {
+  const adrFile = join(adrDir, `${nextNum}-skill-graph-adoption.md`);
+  const addendum = `\n## Addendum (${date}): Procedures Adoption\n\nCopied ${proceduresCopied} procedure(s)/vocabulary file(s) from the variant template into \`procedures/\` (add-if-missing; project-owned entries preserved). Procedure/output_type nodes and step edges now participate in the regenerated graph. Upgrade projects carry the same corpus via the PROCEDURES SYNC pass (upgrade-project v1.15.0).\n`;
+  writeFileSync(adrFile, readFileSync(adrFile, 'utf-8') + addendum);
+}
+
+console.log(`[${proj}] scripts=4, skillsUpdated=${skillsUpdated}, proceduresCopied=${proceduresCopied}, contextUpdated=${contextUpdated}, graph=${graph.nodes.length}n/${graph.edges.length}e, adr=${nextNum}-skill-graph-adoption.md, verify-exit=${ver.status}`);
