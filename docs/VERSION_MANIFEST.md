@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-29T04:04:54.267Z
+**Generated**: 2026-08-29T04:21:59.342Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -143,7 +143,7 @@
 | validate-md-language.ts | 1.8.0 | scripts/validate-md-language.ts | fs |
 | validate-model-registry.ts | N/A | scripts/validate-model-registry.ts | N/A |
 | validate-pm-extends.ts | 0.3.1 | scripts/validate-pm-extends.ts | N/A |
-| validate-procedures.ts | 1.0.0 | scripts/validate-procedures.ts | js-yaml |
+| validate-procedures.ts | 1.0.1 | scripts/validate-procedures.ts | js-yaml |
 | validate-skills.ts | 1.1.0 | scripts/validate-skills.ts | N/A |
 | validate-templates.ts | 1.19.0 | scripts/validate-templates.ts | js-yaml |
 | validate-variant-readiness.ts | 1.0.0 | scripts/validate-variant-readiness.ts | N/A |

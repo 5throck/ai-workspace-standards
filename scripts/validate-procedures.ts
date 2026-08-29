@@ -13,7 +13,7 @@
  * This script is a validator only — it never mutates procedure files.
  *
  * @usage bun scripts/validate-procedures.ts [--variant co-design] [--all] [--root <dir>]
- * @version 1.0.0
+ * @version 1.0.1
  */
 
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
@@ -315,14 +315,14 @@ function validateCrossFile(
 
 export function validateAll(root: string, onlyVariant?: string): Issue[] {
   const issues: Issue[] = [];
-  const variants = discoverVariants(root).filter((v) => !onlyVariant || v === onlyVariant);
+  const variants = discoverVariants(root).filter((v) => !onlyVariant || v === onlyVariant).sort();
   const all: LoadedProcedure[] = [];
 
   for (const variant of variants) {
     const variantDir = join(root, 'templates', variant);
     const outputTypeMap = loadOutputTypes(variantDir);
     const outputTypes = new Set(outputTypeMap.keys());
-    const procDirs = listProcedureDirs(variantDir);
+    const procDirs = listProcedureDirs(variantDir).sort();
 
     if (procDirs.length > 0 && outputTypeMap.size === 0) {
       issues.push({

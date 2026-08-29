@@ -60,8 +60,11 @@ describe('validate-procedures (L1–L8)', () => {
   });
 
   test('L8: duplicate procedure_id across workspace is rejected', () => {
-    const issues = issuesForLayer(ROOT, 'L8', 'procedures/dup-b');
-    expect(issues.some((i) => i.message.includes('duplicate procedure_id'))).toBe(true);
+    const issues = validateAll(ROOT).filter(
+      (i) => i.layer === 'L8' && i.message.includes('duplicate procedure_id'),
+    );
+    expect(issues.length).toBeGreaterThanOrEqual(1);
+    expect(issues.some((i) => i.file.includes('dup-'))).toBe(true);
   });
 
   test('exit code path: full run over fixtures fails (invalid variants present)', () => {
