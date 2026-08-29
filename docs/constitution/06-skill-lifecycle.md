@@ -130,6 +130,20 @@ Skills in `skills/` are propagated to `templates/common/skills/` (L1) by `propag
 
 The graph also derives `procedure`/`output_type` nodes and step edges from procedure schemas (`procedures/*/schema.yaml`); see [6.7 Procedure Lifecycle Management](06.7-procedure-lifecycle.md).
 
+#### 6.2.1 Skill Relation System (3-Layer Flexibility Model)
+
+Per ADR-0060 (Amendments 3–6) and the `reledgev` design (`docs/designs/2026-08-29-relation-graph-evolution-and-decision-chain-design.md`), skill relations are managed in three layers:
+
+| Layer | Location | Persistence | Rules |
+|-------|----------|-------------|-------|
+| **L-A Explicit** | `relates_to` in SKILL.md frontmatter (typed `{skill, type}` form; types: `relates_to`, `composes_with`, `follows`, `enables`) | Permanent by intent | Legacy string arrays and typed objects must never be mixed within one skill. `validate-skills.ts` (Part 1c) enforces form homogeneity, type vocabulary, target existence (L0 + all `templates/*/skills/`, nested skills as slash-relative names), and rejects self-references. |
+| **L-B Experimental** | `skill-graph.overrides.json` — per scope: `docs/` (L0) and `templates/<scope>/docs/` | Ephemeral by intent | `reason` and `since` are required (missing → verification failure). `since` older than 90 days → warning: promote into frontmatter `relates_to` or drop the entry. `suppress: true` entries remove matching frontmatter-derived edges. Overrides are a waiting room, not a second home. |
+| **L-C Projection** | `docs/skill-graph.json` (+ `templates/<scope>/docs/skill-graph.json`) | Always regenerated | Derived artifact — never hand-edited. `verify-skill-graph.ts --determinism` enforces exact reproducibility. |
+
+**Direction policy (ADR-0060 Amendment 6B)**: relations flow variant skill → L1 (`templates/common/skills/`) or same-variant targets only. Variant-specific edges are never written into L1 common skills, and L0-only skills are never targets of variant edges.
+
+**Pipeline integration**: the relation graph is regenerated at every lifecycle boundary — L0 `/sync` step 4.65 (all scopes), L3 scaffold (`new-project.ts` step 7.6), L3→variant promotion (`l3-to-variant-pipeline.ts` Phase 6.5), and project upgrade (`upgrade-project.ts` post-upgrade step). `validate-skills.ts` and `validate-decisions.ts` (ADR-0061 chain) run as fail-closed gates in `/sync` step 3.96.
+
 #### 6.3 Skill Body Structure
 
 ```markdown

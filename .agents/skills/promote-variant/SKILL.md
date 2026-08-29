@@ -244,3 +244,12 @@ ls Projects/my-test-project/
 ## Previous Skill
 
 <- `skills/create-variant/SKILL.md` — Phase A creation process
+
+## Skill Graph Note
+
+Since `l3-to-variant-pipeline.ts` v1.13.0, Phase 6.5 regenerates and verifies the
+promoted variant's scope skill graph automatically. If it reports non-zero (e.g. older
+generator in the promoted output), run manually:
+`bun scripts/generate-skill-graph.ts --scope co-<name> && bun scripts/verify-skill-graph.ts --scope co-<name>`
+(ADR-0060 Amendment 6; `tests/add-variant-relations.ts` can backfill typed relations
+from the variant's new procedure corpus — idempotent).

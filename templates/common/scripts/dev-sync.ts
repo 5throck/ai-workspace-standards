@@ -1,4 +1,4 @@
-// @version 1.7.8
+// @version 1.8.0
 // v1.7.8: feat(skill-graph): step 4.65 scope loop (ADR-0060 Amendment 2) — after the L0
 //           unified graph gate, generate+verify every template scope (templates/common +
 //           templates/co-*) so each variant template ships its own docs/skill-graph.json;
@@ -308,6 +308,33 @@ if (fs.existsSync('README.md') && !fs.existsSync('README_ko.md')) {
     console.warn('⚠️  README_ko.md missing (non-blocking)');
 }
 
+// 3.96 Skill & decision-chain validators (fail-closed gates, ADR-0055/0061; reledgev
+//      pipeline-coverage review 2026-08-29). Both are L0-scoped — scaffolded projects
+//      skip via existsSync guards. Previously standalone-only (manual invocation),
+//      which let relation/decision drift land unnoticed between syncs.
+if (fs.existsSync('scripts/validate-skills.ts')) {
+    console.log('📋 Step 3.96a: Skill lifecycle & relation validation...');
+    const skillsRes = await $`bun scripts/validate-skills.ts`.nothrow();
+    if (skillsRes.exitCode !== 0) {
+        console.error(`${RED}❌ Step 3.96a: validate-skills.ts FAILED (exit ${skillsRes.exitCode})${RESET}`);
+        console.error(`${YELLOW}   Fix: review relation metadata errors (form homogeneity, type vocabulary, target existence) in skills/ and templates/*/skills/, then re-run /sync.${RESET}`);
+        if (import.meta.main) process.exit(1);
+    } else {
+        console.log(`${GREEN}✓ Skill lifecycle & relation validation passed${RESET}`);
+    }
+}
+if (fs.existsSync('docs/decisions') && fs.existsSync('scripts/validate-decisions.ts')) {
+    console.log('📋 Step 3.96b: Decision record chain validation...');
+    const decRes = await $`bun scripts/validate-decisions.ts`.nothrow();
+    if (decRes.exitCode !== 0) {
+        console.error(`${RED}❌ Step 3.96b: validate-decisions.ts FAILED (exit ${decRes.exitCode})${RESET}`);
+        console.error(`${YELLOW}   Fix: repair DEC frontmatter/chain links (evidence_refs ⊆ ledger, knowledge_refs existence) per ADR-0061, then re-run /sync.${RESET}`);
+        if (import.meta.main) process.exit(1);
+    } else {
+        console.log(`${GREEN}✓ Decision record chain validation passed${RESET}`);
+    }
+}
+
 // 3.97 ADR governance linkage gate (blocking — Stage 2 of ADR-0059).
 //     The validator is L0-only (no docs/adr corpus exists in generated projects),
 //     so this step is guarded by existsSync — scaffolded projects skip it.
@@ -317,7 +344,7 @@ if (fs.existsSync('scripts/verify-adr-governance.ts')) {
     if (govRes.exitCode !== 0) {
         console.error(`${RED}❌ ADR governance linkage check failed.${RESET}`);
         console.error(`${YELLOW}   One or more post-cutoff Accepted ADRs lack governance-doc references, or marker-drift findings exist.${RESET}`);
-        console.error(`${YELLOW}   For linkage: Add ADR-00NN pointers to CONSTITUTION.md, docs/constitution/, or docs/governance/ per docs/adr/0059 and re-run /sync.${RESET}`);
+        console.error(`${YELLOW}   For linkage: Add ADR-00NN pointers to context.md, docs/constitution/, or docs/governance/ per docs/adr/0059 and re-run /sync.${RESET}`);
         console.error(`${YELLOW}   For marker-drift: Review the duplicated section, update it if stale, then re-seed with: bun scripts/verify-adr-governance.ts --update-marker-hashes${RESET}`);
         if (import.meta.main) {
             process.exit(1);
@@ -333,14 +360,14 @@ if (fs.existsSync('scripts/verify-adr-governance.ts')) {
 //     is applied to templates/common/ files before the L0-leakage check.
 const isWorkspaceRoot = fs.existsSync('templates/common') && fs.existsSync('scripts/propagation-map.json');
 // L0 context: context.md exists at workspace root — publish failures are fatal here.
-const isL0Context = fs.existsSync('CONSTITUTION.md');
+const isL0Context = fs.existsSync('context.md');
 if (isWorkspaceRoot) {
     console.log('\n📦 Publishing L0→L1 (scripts, skills, commands)...');
     try {
         const publishRes = await $`bun scripts/propagate-to-templates.ts --apply`.nothrow();
         if (publishRes.exitCode !== 0) {
             if (isL0Context) {
-                console.log(`${RED}❌ L0→L1 publish failed — fatal in L0 context (CONSTITUTION.md present)${RESET}`);
+                console.log(`${RED}❌ L0→L1 publish failed — fatal in L0 context (context.md present)${RESET}`);
                 if (import.meta.main) {
                   process.exit(1);
                 }
@@ -350,7 +377,7 @@ if (isWorkspaceRoot) {
         }
     } catch (e) {
         if (isL0Context) {
-            console.log(`${RED}❌ L0→L1 publish failed — fatal in L0 context (CONSTITUTION.md present)${RESET}`);
+            console.log(`${RED}❌ L0→L1 publish failed — fatal in L0 context (context.md present)${RESET}`);
             if (import.meta.main) {
               process.exit(1);
             }

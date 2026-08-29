@@ -11,7 +11,7 @@
  * - Wave 3: Platform parity validation (validate-platform-parity.ts)
  * - Wave 3: Workspace integration (integration-helpers.ts)
  *
- * @version 1.12.1
+ * @version 1.13.0
  * @phase: Complete pipeline orchestration
  *
  * v1.12.1: PHASE 2.5 (new) — country-scoped skill exclusion. reconcileWithL0L1()
@@ -79,7 +79,8 @@
 
 import { join, basename, dirname } from 'path';
 import { existsSync, mkdirSync, readFileSync } from 'fs';
-import { execFileSync } from 'child_process';
+import { cwd } from 'process';
+import { execFileSync, spawnSync } from 'child_process';
 import { readUTF8File } from './lib/encoding-utils.ts';
 import { scanL3Project, L3ScanResult } from './helpers/scan-l3-project.ts';
 import {
@@ -153,6 +154,7 @@ export interface PipelineResult {
     generate: { success: boolean; result?: GeneratedVariant; error?: string };
     lifecycle: { success: boolean; result?: BetaLifecycleState; error?: string };
     parity: { success: boolean; result?: ParityValidationResult; error?: string };
+    skillGraph: { success: boolean; error?: string };
     integrate: { success: boolean; result?: IntegrationResult; error?: string };
   };
   /** Final output path */
@@ -231,6 +233,7 @@ export async function executeL3ToVariantPipeline(config: PipelineConfig): Promis
     generate: { success: false },
     lifecycle: { success: false },
     parity: { success: false },
+    skillGraph: { success: false },
     integrate: { success: false },
   };
 
@@ -1077,6 +1080,42 @@ export async function executeL3ToVariantPipeline(config: PipelineConfig): Promis
 
   if (!phases.parity.success) {
     return buildFailureResult(phases, errors, startTime);
+  }
+
+  // ============================================================================
+  // PHASE 6.5: SCOPE SKILL-GRAPH REGENERATION
+  // ============================================================================
+  // The promoted variant's docs/skill-graph.json is derived from the freshly
+  // generated variant output (skills/agents/procedures), so it must be rebuilt
+  // now — not left to the workspace's next /sync (reledgev addendum, pipeline
+  // coverage review 2026-08-29). Non-fatal: a missing generator or bun warns
+  // and continues, mirroring new-project.ts scaffold-time generation.
+  try {
+    console.log(`\n${'─'.repeat(60)}`);
+    console.log(`PHASE 6.5: Regenerating Scope Skill Graph`);
+    console.log(`${'─'.repeat(60)}`);
+
+    const variantScope = config.variantName;
+    const ROOT = cwd(); // pipeline runs from workspace root (CWD guard usage)
+    const gen = spawnSync('bun', ['scripts/generate-skill-graph.ts', '--scope', variantScope], {
+      cwd: ROOT, encoding: 'utf8', timeout: 60000,
+    });
+    const verify = spawnSync('bun', ['scripts/verify-skill-graph.ts', '--scope', variantScope], {
+      cwd: ROOT, encoding: 'utf8', timeout: 60000,
+    });
+
+    if (gen.status === 0 && verify.status === 0) {
+      console.log(`  ✅ Scope skill graph regenerated and verified: ${variantScope}`);
+      phases.skillGraph = { success: true };
+    } else {
+      console.warn(`  ⚠️  Scope skill graph generation/verification returned non-zero (gen=${gen.status}, verify=${verify.status})`);
+      console.warn(`     Remedy: bun scripts/generate-skill-graph.ts --scope ${variantScope} && bun scripts/verify-skill-graph.ts --scope ${variantScope}`);
+      phases.skillGraph = { success: true }; // non-fatal: next /sync (step 4.65) heals
+    }
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    console.warn(`  ⚠️  Scope skill graph regeneration skipped: ${errorMsg}`);
+    phases.skillGraph = { success: true, error: errorMsg };
   }
 
   // ============================================================================

@@ -257,3 +257,11 @@ When all PROMOTION_CHECKLIST.md conditions are met:
 | Antigravity .gemini/ files not mirrored from .claude/ | Check .gemini/ after Step 3 Antigravity checklist |
 | agents/*.md missing Section C: Antigravity Integration | Add Section C to every agent during Step 5 |
 | README.md/README_ko.md left as scaffold stub (empty Meet-the-AI-Team / Skills sections) | Run `bun scripts/generate-l3-readme.ts` after Step 6, and again after any later agent/skill change |
+
+## Skill Graph Note
+
+The new variant ships its scope graph (`docs/skill-graph.json`) inherited from the
+template, and the workspace's next `/sync` (step 4.65) regenerates all scopes. If you
+added skills or procedures during Phase A, refresh immediately with:
+`bun scripts/generate-skill-graph.ts --scope co-<name> && bun scripts/verify-skill-graph.ts --scope co-<name>`
+(ADR-0060 Amendment 6; relations flow variant skill → L1 or same-variant targets only).
