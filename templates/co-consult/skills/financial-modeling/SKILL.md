@@ -20,6 +20,10 @@ relates_to:
     type: follows
   - skill: stakeholder-alignment
     type: follows
+  - skill: financial-statement-analysis
+    type: composes_with
+  - skill: competitive-intelligence
+    type: composes_with
 inputs: [complexity-grades, readiness-scores, change-mgmt-cost-estimates]
 outputs: [roi-analysis, npv-irr-payback, business-case]
 metadata:

@@ -12,6 +12,8 @@ last_reviewed: 2026-08-24
 relates_to:
   - skill: create-variant
     type: follows
+  - skill: sync
+    type: follows
 metadata:
   type: process
   triggers:

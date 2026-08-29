@@ -10,6 +10,9 @@ status: active
 scope: common
 owner: pm
 prerequisites: none
+relates_to:
+  - skill: create-variant
+    type: follows
 last_reviewed: 2026-06-13
 metadata:
   type: process

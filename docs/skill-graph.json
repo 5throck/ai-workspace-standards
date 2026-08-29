@@ -3351,6 +3351,18 @@
       }
     },
     {
+      "type": "composes_with",
+      "from": "ai-tell-reduction",
+      "to": "financial-journalism-style",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-news/skills/ai-tell-reduction/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "references",
       "from": "ai-tell-reduction",
       "to": "financial-journalism-style",
@@ -3533,6 +3545,18 @@
       "source": "prose"
     },
     {
+      "type": "composes_with",
+      "from": "audit-workspace",
+      "to": "create-variant",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "skills/audit-workspace/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
       "type": "produces",
       "from": "audit-workspace",
       "to": "output_type.promotion_checklist_result",
@@ -3547,6 +3571,29 @@
     {
       "type": "composes_with",
       "from": "audit-workspace",
+      "to": "project-to-variant",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "skills/audit-workspace/SKILL.md",
+        "field": "relates_to",
+        "index": 3
+      }
+    },
+    {
+      "type": "follows",
+      "from": "audit-workspace",
+      "to": "promote-variant",
+      "source": "relates_to",
+      "provenance": {
+        "file": "skills/audit-workspace/SKILL.md",
+        "field": "relates_to",
+        "index": 4
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "audit-workspace",
       "to": "security-scan",
       "source": "relates_to",
       "symmetric": true,
@@ -3554,6 +3601,42 @@
         "file": "skills/audit-workspace/SKILL.md",
         "field": "relates_to",
         "index": 0
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "audit-workspace",
+      "to": "sync",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "skills/audit-workspace/SKILL.md",
+        "field": "relates_to",
+        "index": 5
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "audit-workspace",
+      "to": "team-builder",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "skills/audit-workspace/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "audit-workspace",
+      "to": "upgrade-project",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "skills/audit-workspace/SKILL.md",
+        "field": "relates_to",
+        "index": 6
       }
     },
     {
@@ -3698,6 +3781,18 @@
       "source": "skill_manifest"
     },
     {
+      "type": "composes_with",
+      "from": "change-impact-assessment",
+      "to": "org-readiness-assessment",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/change-impact-assessment/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
       "type": "requires",
       "from": "change-impact-assessment",
       "to": "org-readiness-assessment",
@@ -3735,6 +3830,18 @@
         "file": "templates/co-consult/skills/change-impact-assessment/SKILL.md",
         "field": "relates_to",
         "index": 0
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "change-impact-assessment",
+      "to": "stakeholder-alignment",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/change-impact-assessment/SKILL.md",
+        "field": "relates_to",
+        "index": 1
       }
     },
     {
@@ -3798,6 +3905,30 @@
       "source": "skill_manifest"
     },
     {
+      "type": "composes_with",
+      "from": "code-review",
+      "to": "refactoring",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-develop/skills/code-review/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "company-intelligence",
+      "to": "competitive-intelligence",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/company-intelligence/SKILL.md",
+        "field": "relates_to",
+        "index": 4
+      }
+    },
+    {
       "type": "used_by",
       "from": "company-intelligence",
       "to": "data-analyst",
@@ -3817,6 +3948,18 @@
         "file": "templates/co-consult/skills/company-intelligence/SKILL.md",
         "field": "relates_to",
         "index": 2
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "company-intelligence",
+      "to": "financial-statement-analysis",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/company-intelligence/SKILL.md",
+        "field": "relates_to",
+        "index": 3
       }
     },
     {
@@ -3898,6 +4041,18 @@
       "from": "company-intelligence",
       "to": "strategy-analyst",
       "source": "skill_manifest"
+    },
+    {
+      "type": "composes_with",
+      "from": "company-intelligence",
+      "to": "technical-feasibility",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/company-intelligence/SKILL.md",
+        "field": "relates_to",
+        "index": 5
+      }
     },
     {
       "type": "used_by",
@@ -4089,6 +4244,30 @@
       "source": "skill_manifest"
     },
     {
+      "type": "composes_with",
+      "from": "competitive-intelligence",
+      "to": "company-intelligence",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/competitive-intelligence/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "competitive-intelligence",
+      "to": "financial-modeling",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/competitive-intelligence/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
       "type": "used_by",
       "from": "competitive-intelligence",
       "to": "industry-expert",
@@ -4104,6 +4283,18 @@
       "from": "competitive-intelligence",
       "to": "industry-expert",
       "source": "skill_manifest"
+    },
+    {
+      "type": "composes_with",
+      "from": "competitive-intelligence",
+      "to": "insight-synthesis",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/competitive-intelligence/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
     },
     {
       "type": "references",
@@ -4164,6 +4355,30 @@
       "source": "skill_manifest"
     },
     {
+      "type": "composes_with",
+      "from": "consulting-report-writing",
+      "to": "executive-presentation",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/consulting-report-writing/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "consulting-report-writing",
+      "to": "narrative-framework",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/consulting-report-writing/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "requires",
       "from": "consulting-report-writing",
       "to": "narrative-framework",
@@ -4196,6 +4411,17 @@
       "from": "context-commonization-review",
       "to": "create-variant",
       "source": "prose"
+    },
+    {
+      "type": "follows",
+      "from": "context-commonization-review",
+      "to": "meeting-facilitation",
+      "source": "relates_to",
+      "provenance": {
+        "file": "skills/context-commonization-review/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
     },
     {
       "type": "produces",
@@ -4332,6 +4558,17 @@
       "from": "create-variant",
       "to": "design",
       "source": "prose"
+    },
+    {
+      "type": "follows",
+      "from": "create-variant",
+      "to": "documentation-writing",
+      "source": "relates_to",
+      "provenance": {
+        "file": "skills/create-variant/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
     },
     {
       "type": "references",
@@ -4606,6 +4843,17 @@
       "source": "skill_manifest"
     },
     {
+      "type": "follows",
+      "from": "documentation-writing",
+      "to": "audit-workspace",
+      "source": "relates_to",
+      "provenance": {
+        "file": "skills/documentation-writing/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
       "type": "used_by",
       "from": "documentation-writing",
       "to": "content-writer",
@@ -4651,6 +4899,18 @@
       "from": "documentation-writing",
       "to": "output_type.ui_specification",
       "source": "procedure_schema"
+    },
+    {
+      "type": "composes_with",
+      "from": "documentation-writing",
+      "to": "team-builder",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "skills/documentation-writing/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -4873,6 +5133,18 @@
     {
       "type": "composes_with",
       "from": "executive-presentation",
+      "to": "consulting-report-writing",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/executive-presentation/SKILL.md",
+        "field": "relates_to",
+        "index": 4
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "executive-presentation",
       "to": "financial-modeling",
       "source": "relates_to",
       "symmetric": true,
@@ -4890,6 +5162,18 @@
       "provenance": {
         "file": "templates/co-consult/skills/executive-presentation/SKILL.md",
         "field": "prerequisites"
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "executive-presentation",
+      "to": "narrative-framework",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/executive-presentation/SKILL.md",
+        "field": "relates_to",
+        "index": 3
       }
     },
     {
@@ -5120,6 +5404,18 @@
     {
       "type": "composes_with",
       "from": "financial-journalism-style",
+      "to": "ai-tell-reduction",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-news/skills/financial-journalism-style/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "financial-journalism-style",
       "to": "financial-narrative-brief",
       "source": "relates_to",
       "symmetric": true,
@@ -5188,6 +5484,18 @@
       "source": "skill_manifest"
     },
     {
+      "type": "composes_with",
+      "from": "financial-modeling",
+      "to": "competitive-intelligence",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/financial-modeling/SKILL.md",
+        "field": "relates_to",
+        "index": 5
+      }
+    },
+    {
       "type": "used_by",
       "from": "financial-modeling",
       "to": "data-analyst",
@@ -5220,6 +5528,18 @@
       "from": "financial-modeling",
       "to": "executive-presentation",
       "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "financial-modeling",
+      "to": "financial-statement-analysis",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/financial-modeling/SKILL.md",
+        "field": "relates_to",
+        "index": 4
+      }
     },
     {
       "type": "follows",
@@ -5391,6 +5711,18 @@
       }
     },
     {
+      "type": "composes_with",
+      "from": "financial-statement-analysis",
+      "to": "company-intelligence",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/financial-statement-analysis/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "used_by",
       "from": "financial-statement-analysis",
       "to": "data-analyst",
@@ -5408,19 +5740,44 @@
       "source": "skill_manifest"
     },
     {
+      "type": "composes_with",
+      "from": "financial-statement-analysis",
+      "to": "financial-modeling",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/financial-statement-analysis/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "financial-statement-analysis",
+      "to": "insight-synthesis",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/financial-statement-analysis/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
       "type": "references",
       "from": "financial-statement-analysis",
       "to": "k-dart",
       "source": "prose"
     },
     {
-      "type": "requires",
+      "type": "relates_to",
       "from": "financial-statement-analysis",
       "to": "k-dart",
-      "source": "prerequisites",
+      "source": "relates_to",
       "provenance": {
         "file": "templates/co-consult/skills/financial-statement-analysis/SKILL.md",
-        "field": "prerequisites"
+        "field": "relates_to",
+        "index": 3
       }
     },
     {
@@ -6194,6 +6551,18 @@
     {
       "type": "composes_with",
       "from": "hs-classification-workflow",
+      "to": "landed-cost-calculation",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-export/skills/hs-classification-workflow/SKILL.md",
+        "field": "relates_to",
+        "index": 5
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "hs-classification-workflow",
       "to": "logistics-coordination",
       "source": "relates_to",
       "symmetric": true,
@@ -6608,6 +6977,18 @@
       "source": "prose"
     },
     {
+      "type": "composes_with",
+      "from": "insight-synthesis",
+      "to": "competitive-intelligence",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/insight-synthesis/SKILL.md",
+        "field": "relates_to",
+        "index": 3
+      }
+    },
+    {
       "type": "used_by",
       "from": "insight-synthesis",
       "to": "data-analyst",
@@ -6623,6 +7004,18 @@
       "from": "insight-synthesis",
       "to": "data-analyst",
       "source": "skill_manifest"
+    },
+    {
+      "type": "composes_with",
+      "from": "insight-synthesis",
+      "to": "financial-statement-analysis",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/insight-synthesis/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
     },
     {
       "type": "follows",
@@ -6852,6 +7245,18 @@
       "source": "skill_manifest"
     },
     {
+      "type": "composes_with",
+      "from": "landed-cost-calculation",
+      "to": "hs-classification-workflow",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-export/skills/landed-cost-calculation/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "references",
       "from": "landed-cost-calculation",
       "to": "hs-classification-workflow",
@@ -6865,6 +7270,18 @@
       "provenance": {
         "file": "templates/co-export/skills/landed-cost-calculation/SKILL.md",
         "field": "prerequisites"
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "landed-cost-calculation",
+      "to": "logistics-coordination",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-export/skills/landed-cost-calculation/SKILL.md",
+        "field": "relates_to",
+        "index": 1
       }
     },
     {
@@ -7051,6 +7468,18 @@
       "source": "prose"
     },
     {
+      "type": "composes_with",
+      "from": "logistics-coordination",
+      "to": "landed-cost-calculation",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-export/skills/logistics-coordination/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
       "type": "used_by",
       "from": "logistics-coordination",
       "to": "logistics-coordinator",
@@ -7203,6 +7632,17 @@
       "source": "skill_manifest"
     },
     {
+      "type": "follows",
+      "from": "meeting-facilitation",
+      "to": "context-commonization-review",
+      "source": "relates_to",
+      "provenance": {
+        "file": "skills/meeting-facilitation/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "produces",
       "from": "meeting-facilitation",
       "to": "output_type.governance_actions",
@@ -7236,6 +7676,30 @@
       "from": "narrative-framework",
       "to": "communications-lead",
       "source": "skill_manifest"
+    },
+    {
+      "type": "composes_with",
+      "from": "narrative-framework",
+      "to": "consulting-report-writing",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/narrative-framework/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "narrative-framework",
+      "to": "executive-presentation",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/narrative-framework/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
     },
     {
       "type": "phase",
@@ -7331,6 +7795,18 @@
       }
     },
     {
+      "type": "composes_with",
+      "from": "org-readiness-assessment",
+      "to": "change-impact-assessment",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/org-readiness-assessment/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
       "type": "used_by",
       "from": "org-readiness-assessment",
       "to": "change-management-partner",
@@ -7405,6 +7881,18 @@
       "from": "org-readiness-assessment",
       "to": "phase2",
       "source": "skill_manifest"
+    },
+    {
+      "type": "composes_with",
+      "from": "org-readiness-assessment",
+      "to": "stakeholder-alignment",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/org-readiness-assessment/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
     },
     {
       "type": "references",
@@ -11105,6 +11593,30 @@
       }
     },
     {
+      "type": "composes_with",
+      "from": "project-delivery",
+      "to": "stakeholder-alignment",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/project-delivery/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "project-delivery",
+      "to": "stakeholder-review-management",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/project-delivery/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
       "type": "follows",
       "from": "project-delivery",
       "to": "technical-feasibility",
@@ -11180,10 +11692,33 @@
       }
     },
     {
+      "type": "follows",
+      "from": "promote-variant",
+      "to": "sync",
+      "source": "relates_to",
+      "provenance": {
+        "file": "skills/promote-variant/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
       "type": "references",
       "from": "red-team-lead",
       "to": "verify-authorization",
       "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "refactoring",
+      "to": "code-review",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-develop/skills/refactoring/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -12665,6 +13200,18 @@
       "source": "prose"
     },
     {
+      "type": "composes_with",
+      "from": "stakeholder-alignment",
+      "to": "change-impact-assessment",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/stakeholder-alignment/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
       "type": "used_by",
       "from": "stakeholder-alignment",
       "to": "change-management-partner",
@@ -12696,6 +13243,18 @@
         "file": "templates/co-consult/skills/stakeholder-alignment/SKILL.md",
         "field": "relates_to",
         "index": 0
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "stakeholder-alignment",
+      "to": "org-readiness-assessment",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/stakeholder-alignment/SKILL.md",
+        "field": "relates_to",
+        "index": 1
       }
     },
     {
@@ -12747,6 +13306,18 @@
       "source": "skill_manifest"
     },
     {
+      "type": "composes_with",
+      "from": "stakeholder-alignment",
+      "to": "project-delivery",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/stakeholder-alignment/SKILL.md",
+        "field": "relates_to",
+        "index": 3
+      }
+    },
+    {
       "type": "used_by",
       "from": "stakeholder-alignment",
       "to": "workstream-lead",
@@ -12795,6 +13366,18 @@
       "from": "stakeholder-review-management",
       "to": "phase4",
       "source": "skill_manifest"
+    },
+    {
+      "type": "composes_with",
+      "from": "stakeholder-review-management",
+      "to": "project-delivery",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/stakeholder-review-management/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     },
     {
       "type": "requires",
@@ -13056,6 +13639,17 @@
       "source": "prose"
     },
     {
+      "type": "follows",
+      "from": "team-builder",
+      "to": "create-variant",
+      "source": "relates_to",
+      "provenance": {
+        "file": "skills/team-builder/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "references",
       "from": "team-builder",
       "to": "insight-synthesis",
@@ -13088,6 +13682,18 @@
         "file": "templates/co-consult/skills/technical-feasibility/SKILL.md",
         "field": "relates_to",
         "index": 2
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "technical-feasibility",
+      "to": "company-intelligence",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/technical-feasibility/SKILL.md",
+        "field": "relates_to",
+        "index": 3
       }
     },
     {

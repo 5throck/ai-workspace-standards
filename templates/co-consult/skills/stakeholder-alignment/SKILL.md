@@ -13,6 +13,12 @@ prerequisites: none
 relates_to:
   - skill: insight-synthesis
     type: follows
+  - skill: org-readiness-assessment
+    type: composes_with
+  - skill: change-impact-assessment
+    type: composes_with
+  - skill: project-delivery
+    type: composes_with
 metadata:
   type: process
   triggers:

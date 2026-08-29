@@ -11,6 +11,18 @@ prerequisites: PowerShell or Bash
 relates_to:
   - skill: security-scan
     type: composes_with
+  - skill: team-builder
+    type: composes_with
+  - skill: create-variant
+    type: composes_with
+  - skill: project-to-variant
+    type: composes_with
+  - skill: promote-variant
+    type: follows
+  - skill: sync
+    type: composes_with
+  - skill: upgrade-project
+    type: composes_with
 metadata:
   type: process
   triggers:

@@ -11,6 +11,9 @@ last_reviewed: 2026-06-13
 status: active
 owner: delivery-manager
 prerequisites: stakeholder-alignment, consulting-report-writing
+relates_to:
+  - skill: project-delivery
+    type: composes_with
 metadata:
   type: process
   triggers:

@@ -14,6 +14,10 @@ prerequisites: none
 relates_to:
   - skill: financial-modeling
     type: enables
+  - skill: stakeholder-alignment
+    type: composes_with
+  - skill: change-impact-assessment
+    type: composes_with
 outputs: [readiness-scores, capability-gap-analysis, change-mgmt-cost-estimates]
 metadata:
   type: domain

@@ -17,6 +17,21 @@
       "layer": "common"
     },
     {
+      "id": "audit-workspace",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
+      "id": "context-commonization-review",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
+      "id": "create-variant",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
       "id": "decision-record",
       "type": "skill",
       "layer": "common"
@@ -170,6 +185,29 @@
       "from": "decision-record",
       "to": "evidence-ledger",
       "source": "prose"
+    },
+    {
+      "type": "follows",
+      "from": "documentation-writing",
+      "to": "audit-workspace",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/common/skills/documentation-writing/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "documentation-writing",
+      "to": "team-builder",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/common/skills/documentation-writing/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     },
     {
       "type": "references",
@@ -334,6 +372,17 @@
       "source": "prose"
     },
     {
+      "type": "follows",
+      "from": "meeting-facilitation",
+      "to": "context-commonization-review",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/common/skills/meeting-facilitation/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "references",
       "from": "meeting-facilitation",
       "to": "project-review",
@@ -379,6 +428,17 @@
       "from": "team-builder",
       "to": "agent-lifecycle-manager",
       "source": "prose"
+    },
+    {
+      "type": "follows",
+      "from": "team-builder",
+      "to": "create-variant",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/common/skills/team-builder/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     },
     {
       "type": "references",

@@ -189,6 +189,18 @@
       "source": "skill_manifest"
     },
     {
+      "type": "composes_with",
+      "from": "code-review",
+      "to": "refactoring",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-develop/skills/code-review/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "references",
       "from": "designer",
       "to": "code-review",
@@ -421,6 +433,18 @@
       "from": "procedure.co-develop.technical-planning",
       "to": "stack-setup",
       "source": "procedure_schema"
+    },
+    {
+      "type": "composes_with",
+      "from": "refactoring",
+      "to": "code-review",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-develop/skills/refactoring/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     },
     {
       "type": "used_by",

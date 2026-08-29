@@ -20,6 +20,8 @@ relates_to:
     type: composes_with
   - skill: source-verification-ledger
     type: composes_with
+  - skill: ai-tell-reduction
+    type: composes_with
 ---
 
 ## Context

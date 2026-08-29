@@ -16,6 +16,10 @@ relates_to:
     type: follows
   - skill: solution-design
     type: composes_with
+  - skill: financial-statement-analysis
+    type: composes_with
+  - skill: competitive-intelligence
+    type: composes_with
 metadata:
   type: process
   triggers:

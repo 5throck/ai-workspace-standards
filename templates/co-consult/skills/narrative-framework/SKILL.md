@@ -12,6 +12,11 @@ last_reviewed: 2026-06-13
 status: active
 owner: communications-lead
 prerequisites: none
+relates_to:
+  - skill: consulting-report-writing
+    type: composes_with
+  - skill: executive-presentation
+    type: composes_with
 metadata:
   type: process
   triggers:

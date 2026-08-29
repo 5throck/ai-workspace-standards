@@ -17,6 +17,12 @@ relates_to:
     type: composes_with
   - skill: financial-modeling
     type: follows
+  - skill: financial-statement-analysis
+    type: composes_with
+  - skill: competitive-intelligence
+    type: composes_with
+  - skill: technical-feasibility
+    type: composes_with
 metadata:
   source: workspace
   type: research
