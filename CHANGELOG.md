@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+- **[2026-08-29]**: feat(graph): **ADR-0060 Amendment 8 — agent co-use `composes_with` derivation + project backfill mode.** `tests/add-variant-relations.ts` gains `--project <path>` mode (recursive procedure walk incl. entity/region overrides; inline `[a, b]` and block `required_skills` both parsed; CRLF-normalized) and the Amendment 8 derivation: skills co-declared in one agent's `required_skills` gain a symmetric `composes_with`, declared on both sides. Applied: co-newbiz coverage 52 → 72/125 skills (+400 edges; 232n/1,029e), co-architect 4 → 10/32 (+9 edges); both graphs verify clean, co-newbiz's `graph-map --check` bidirectional contract holds; two legacy bare-string `relates_to` entries normalized to typed form. ADR-0060 Amendment 8 section added.
+
 ### Fixed
 - **[2026-08-29]**: fix(upgrade): **`upgrade-project.ts` 1.17.1 → 1.17.2 — equal-version core-script drift reconciliation.** SYNC_IF_NEWER skipped scripts whose version matched the project's even when content differed, so locally forked core scripts stayed invisible to every future upgrade (audit across Projects/co-* found drifted forks in 7 of 8 projects, e.g. `sync-md`, `team-builder`, `dispatch`, `gen-pr-body`). Same-version scripts are now hash-compared and the canonical L1 copy is restored with a `⚠️ DRIFT … restored to canonical` notice. This closes the promotion-integrity hole: drifted core scripts hard-fail the L3→variant pipeline's integrity check.
 

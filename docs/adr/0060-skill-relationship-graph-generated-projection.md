@@ -468,3 +468,26 @@ regenerates and verifies at 223 nodes / 661 edges with manifest edges
 Projects/co-* projects pick up Source 3b edges on their next project-local
 regeneration. Adoption record:
 `docs/designs/2026-08-29-skill-graph-generator-upstream-design.md`.
+
+## Amendment 2026-08-29 — Agent Co-use Derivation + Project Backfill Mode (Amendment 8)
+
+Coverage review showed the Amendment 6 ruleset exhausts at procedure
+participants (co-newbiz 52/116, co-architect 4/32 skills with typed
+`relates_to`). Amendment 8 adds a third derivation source and makes the
+migrator project-aware:
+
+1. **Agent co-use rule (new derivation)**: skills co-declared in one agent's
+   `required_skills` frontmatter gain a symmetric `composes_with` relation,
+   declared on **both** sides (Amendment 6's single-side convention was for
+   dedup; both-sides is what raises per-skill coverage). Pair is skipped if a
+   directional `follows` already exists between the two skills.
+2. **Project mode** (`tests/add-variant-relations.ts --project <path>`): the
+   migrator now accepts a scaffolded project — procedures walked recursively
+   (shared + entity/region overrides), inline `[a, b]` and block
+   `required_skills` forms both parsed, CRLF-normalized.
+
+**Applied**: co-newbiz coverage 52 → **72**/125 skills (+400 edges; 232 nodes /
+1,029 edges); co-architect 4 → **10**/32 (+9 edges). Both graphs regenerate and
+verify clean; co-newbiz's `graph-map --check` bidirectional contract holds.
+Two legacy bare-string `relates_to` entries surfaced by the backfill were
+normalized to typed form (`type: relates_to`).
