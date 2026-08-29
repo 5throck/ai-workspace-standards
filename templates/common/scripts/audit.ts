@@ -1,4 +1,6 @@
-// @version 2.27.0
+// @version 2.28.0
+// v2.28.0: nul-redirect lint no longer scans .bat/.cmd — cmd.exe `>nul` targets the NUL device and
+//           is the idiomatic, safe Windows batch redirect; the literal-file hazard is POSIX-only.
 // v2.26.0: New checkProjectDocMarkerDrift() (WARN-only, local-only) — detects when a
 //           Projects/co-*/CLAUDE.md or GEMINI.md has fewer COMMON-CLAUDE/COMMON-GEMINI managed
 //           blocks than templates/common/{CLAUDE,GEMINI}.md, meaning upgrade-project.ts has lost
@@ -1928,7 +1930,12 @@ if (IS_WORKSPACE_ROOT) {
 // discuss `> nul` at length).
 if (!LIFECYCLE_ONLY) {
     const NUL_REDIRECT = /(?:^|[^\w/])(?:[12]|&)?>\s*nul(?![\w./\\-])/i;
-    const LINT_EXTS = ['.ts', '.js', '.mjs', '.sh', '.ps1', '.cmd', '.bat'];
+    // .bat/.cmd are excluded: cmd.exe `>nul` redirects to the NUL *device* and
+    // can never materialize a file named `nul` — the hazard this lint targets
+    // only exists in POSIX shells (bash creates a literal file). Flagging the
+    // idiomatic Windows batch redirect was a false positive (observed on
+    // co-architect's setup.bat, 2026-08-29).
+    const LINT_EXTS = ['.ts', '.js', '.mjs', '.sh', '.ps1'];
     const LINT_SKIP_DIRS = new Set(['node_modules', '.git', '.venv', '.bun', 'dist', 'build', '.next', 'coverage', 'Projects']);
     const LINT_ROOTS = ['scripts', 'templates', '.githooks', 'tests'];
 
