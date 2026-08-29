@@ -96,6 +96,30 @@ Scripts, agents, and skills are updated only when the template version is newer:
 - **Agents** (`.md` files): Compared via YAML frontmatter `version:` field
 - **Skills** (`SKILL.md`): Compared via YAML frontmatter `version:` or MD5 hash
 
+##### Project Asset Allowlist Gate (v1.16.0)
+
+Brand-**new** common assets are only injected when the project's own
+`variant.json` registers them — the project registry is the SSOT for what the
+project wants:
+
+| Asset | Registry consulted | Behavior when unregistered |
+|-------|--------------------|----------------------------|
+| Common skill (`templates/common/skills/`) | `skill_manifest.allowlist` | `SKIP (not in variant.json skill allowlist)` |
+| Common agent (`templates/common/agents/`) | `agents[].file` | `SKIP (not in variant.json agent registry)` |
+
+- Updates to **already-present** assets are never gated; registration is
+  consulted only for brand-new additions.
+- The variant-skills pass (`templates/<variant>/skills/` → `skills/`) is exempt —
+  the variant template is the authority for variant-owned skills.
+- Projects without a `variant.json` keep the ungated behavior.
+
+To adopt a new common asset, add its slug to `variant.json`
+(`skill_manifest.allowlist`) or the agent file to `agents[]`, then re-run the
+upgrade. Rationale: without this gate the 0.6.0 i18n wave injected
+`i18n-specialist` / `i18n-audit` into projects whose rosters never registered
+them, tripping `audit-variant.ts` allowlist/parity checks. See
+`docs/designs/2026-08-29-upgrade-asset-allowlist-gate-design.md`.
+
 #### 🛡️ PRESERVE Files (Never Touched)
 
 These files are always preserved — local modifications are safe:
