@@ -124,9 +124,9 @@
 | `stride-threat-matrix` | variant:co-security | threat-modeler | phase1, phase2 | finding-reconciliation (follows) | — | — |
 | `style-lint-checklist` | variant:co-news | style-editor | phase4 | — | — | — |
 | `swe-solve` | variant:co-develop | pm | phase4 | — | — | — |
-| `sync` | L0 | — | — | audit-workspace (composes_with) | — | — |
+| `sync` | L0 | — | — | — | — | — |
 | `talent-acquisition-strategy` | variant:co-hr | talent-acquisition-specialist, talent-acquisition-specialist | phase2 | compensation-benchmarking (follows) | — | — |
-| `team-builder` | L0 | — | — | create-variant (enables) | — | — |
+| `team-builder` | L0 | — | — | — | — | — |
 | `technical-feasibility` | variant:co-consult | sme, sme, solutions-architect, solutions-architect, technology-specialist, technology-specialist | phase1, phase2, phase3, phase4 | change-impact-assessment (follows), executive-presentation (enables), project-delivery (follows) | — | complexity-grades, risk-cost-ranges, preconditions |
 | `test-driven-development` | variant:co-develop | game-debugger, game-developer, test-runner, test-runner | phase3, phase4, phase5 | code-review (follows) | — | — |
 | `theme-authoring` | variant:co-deck | pm | — | — | — | — |
@@ -139,7 +139,7 @@
 | `ui-ux-design-intelligence` | variant:co-design | design-lead, design-lead, ux-researcher, visual-designer, visual-designer | phase1, phase2, phase3 | documentation-writing (follows), service-design (follows) | — | — |
 | `update-bun-packages` | L0 | — | — | — | — | — |
 | `upgrade-project` | L0 | — | — | promote-variant (follows) | — | — |
-| `validate-docs-links` | L0 | — | — | audit-workspace (composes_with) | — | — |
+| `validate-docs-links` | L0 | — | — | — | — | — |
 | `van-westendorp-psm` | variant:co-price | — | — | gabor-granger (follows), pricing-playbook (enables) | survey-responses-vw | price-corridor, opp-price-point |
 | `variant-feature` | L0 | — | — | upgrade-project (composes_with) | — | — |
 | `verify-authorization` | variant:co-security | pentester, red-team-lead | phase1, phase3 | stride-threat-matrix (follows) | — | — |

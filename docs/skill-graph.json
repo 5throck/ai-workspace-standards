@@ -12998,18 +12998,6 @@
       "source": "skill_manifest"
     },
     {
-      "type": "composes_with",
-      "from": "sync",
-      "to": "audit-workspace",
-      "source": "relates_to",
-      "symmetric": true,
-      "provenance": {
-        "file": "skills/sync/SKILL.md",
-        "field": "relates_to",
-        "index": 0
-      }
-    },
-    {
       "type": "follows",
       "from": "talent-acquisition-strategy",
       "to": "compensation-benchmarking",
@@ -13066,17 +13054,6 @@
       "from": "team-builder",
       "to": "agent-lifecycle-manager",
       "source": "prose"
-    },
-    {
-      "type": "enables",
-      "from": "team-builder",
-      "to": "create-variant",
-      "source": "relates_to",
-      "provenance": {
-        "file": "skills/team-builder/SKILL.md",
-        "field": "relates_to",
-        "index": 0
-      }
     },
     {
       "type": "references",
@@ -13553,18 +13530,6 @@
       "source": "relates_to",
       "provenance": {
         "file": "skills/upgrade-project/SKILL.md",
-        "field": "relates_to",
-        "index": 0
-      }
-    },
-    {
-      "type": "composes_with",
-      "from": "validate-docs-links",
-      "to": "audit-workspace",
-      "source": "relates_to",
-      "symmetric": true,
-      "provenance": {
-        "file": "skills/validate-docs-links/SKILL.md",
         "field": "relates_to",
         "index": 0
       }

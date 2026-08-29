@@ -250,3 +250,14 @@ determinism-verified; `audit.ts` passes.
 
 **Remaining deferral:** `suggest-skill-relations.ts` (similarity-based candidates
 into overrides) — unchanged from §3.3.
+
+### Addendum 2 (2026-08-29): Propagation-Coupling Rule
+
+Project-level verification (Projects/co-* adoption wave) surfaced a fourth
+constraint, now enforced as a validator warning (`validate-skills.ts` Part 1c,
+`relation-target-not-in-l1`): **a skill published to L1 (`templates/common/skills`)
+must not relate to targets absent from L1** — the edge would dangle in every
+propagated L1/L2 copy. Three edges from the L0 wave were removed for this reason
+(`sync→audit-workspace`, `validate-docs-links→audit-workspace`,
+`team-builder→create-variant`; targets are L0-only skills). L0-only skills may
+still relate among themselves — their frontmatter never propagates.

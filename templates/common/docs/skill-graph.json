@@ -17,16 +17,6 @@
       "layer": "common"
     },
     {
-      "id": "audit-workspace",
-      "type": "skill",
-      "layer": "L0"
-    },
-    {
-      "id": "create-variant",
-      "type": "skill",
-      "layer": "L0"
-    },
-    {
       "id": "decision-record",
       "type": "skill",
       "layer": "common"
@@ -385,33 +375,10 @@
       }
     },
     {
-      "type": "composes_with",
-      "from": "sync",
-      "to": "audit-workspace",
-      "source": "relates_to",
-      "symmetric": true,
-      "provenance": {
-        "file": "templates/common/skills/sync/SKILL.md",
-        "field": "relates_to",
-        "index": 0
-      }
-    },
-    {
       "type": "references",
       "from": "team-builder",
       "to": "agent-lifecycle-manager",
       "source": "prose"
-    },
-    {
-      "type": "enables",
-      "from": "team-builder",
-      "to": "create-variant",
-      "source": "relates_to",
-      "provenance": {
-        "file": "templates/common/skills/team-builder/SKILL.md",
-        "field": "relates_to",
-        "index": 0
-      }
     },
     {
       "type": "references",
@@ -427,18 +394,6 @@
       "symmetric": true,
       "provenance": {
         "file": "templates/common/skills/translate/SKILL.md",
-        "field": "relates_to",
-        "index": 0
-      }
-    },
-    {
-      "type": "composes_with",
-      "from": "validate-docs-links",
-      "to": "audit-workspace",
-      "source": "relates_to",
-      "symmetric": true,
-      "provenance": {
-        "file": "templates/common/skills/validate-docs-links/SKILL.md",
         "field": "relates_to",
         "index": 0
       }
