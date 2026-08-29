@@ -49,6 +49,12 @@ vision. The remaining gaps, per area:
 
 ## 3. Relation Flexibility — Three-Layer Model (Normative)
 
+> **Implementation status (2026-08-29, same-day follow-up)**: this section is fully
+> implemented — per-scope overrides files (`generate-skill-graph.ts` v1.7.0 reads
+> `templates/<scope>/docs/skill-graph.overrides.json`), `suppress: true` removal
+> markers, and fail-closed `reason`/`since` enforcement with the 90-day warning
+> (`verify-skill-graph.ts` v1.5.0). Recorded as ADR-0060 Amendment 6 §D.
+
 | Layer | Location | Persistence | Use for |
 |-------|----------|-------------|---------|
 | L-A Explicit | `relates_to` in SKILL.md frontmatter (typed `{skill, type}` form) | Permanent by intent | Stable, reviewed relations; `provenance` on derived edges |

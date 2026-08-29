@@ -423,3 +423,19 @@ relation-type vocabulary, target existence, and self-reference checks now run on
 
 **Verification**: 175 skills carry typed relations; graph at 542 nodes / 1,548 edges;
 `verify-skill-graph.ts --determinism` exact-diff 0; `audit.ts` full pass.
+
+### D. Experimental layer (L-B) made operational per scope (reledgev §3)
+
+The 3-layer flexibility model (declarative frontmatter / overrides / derived
+projection) is now enforced end-to-end:
+
+- **Per-scope overrides**: scope graphs read `templates/<scope>/docs/skill-graph.overrides.json`
+  in addition to the L0 `docs/` file (`generate-skill-graph.ts` v1.7.0; previously
+  overrides were L0-only). All 13 variant scopes carry seeded empty files.
+- **`suppress: true` entries**: remove matching frontmatter-derived edges
+  (`from` + `to`, `type` optional) instead of adding one; override-vs-override
+  suppression is not supported.
+- **Fail-closed field policy** (`verify-skill-graph.ts` v1.5.0): `reason` and `since`
+  are required on every entry (missing → verification failure); `since` older than
+  90 days → warning (promote to frontmatter `relates_to` or drop). The legacy
+  `last_reviewed` 12-month staleness warning remains for pre-existing entries.
