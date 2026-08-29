@@ -1,4 +1,4 @@
-// @version 1.0.0
+// @version 1.1.0
 /**
  * validate-variant-readiness.ts
  *
@@ -93,6 +93,19 @@ if (missingFields.length) {
 
 if (typeof vj.status === 'string' && !VALID_STATUS.includes(vj.status)) {
   err('variant-status', `variant.json status "${vj.status}" is invalid (allowed: ${VALID_STATUS.join(', ')})`);
+}
+
+// Promotion hold — governance gate (v1.1.0, 2026-08-29). A project may declare
+// `promotionHold: { hold: true, ... }` in variant.json to block variant
+// promotion until the user grants explicit permission. Technical readiness
+// (all other checks) never overrides this: green checks ≠ an approval. The
+// L3→variant pipeline runs this gate, so a hold blocks promotion mechanically.
+const hold = vj.promotionHold as { hold?: boolean; reason?: string } | undefined;
+if (hold && hold.hold === true) {
+  err(
+    'promotion-hold',
+    `promotion is ON HOLD by the project owner — explicit user permission is required before promoting${hold.reason ? `: ${hold.reason}` : ''}`,
+  );
 }
 
 const agents = Array.isArray(vj.agents) ? (vj.agents as Array<{ name?: string; file?: string }>) : [];
