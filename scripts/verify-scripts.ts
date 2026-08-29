@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * verify-scripts.ts — Script Lifecycle Registry Verifier
- * @version 1.4.1
+ * @version 1.4.2
  *
  * Validates that scripts/SCRIPTS.md Registry is in sync with actual script files,
  * enforces deprecation removal dates, and blocks on security advisories.
@@ -188,8 +188,12 @@ function parseRegistry(content: string): RegistryEntry[] {
 function walkScripts(dir: string): string[] {
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
     if (entry.isDirectory()) {
-      // Skip variant subdirectories (co-*) — they have separate sub-registries (scripts/<variant>/SCRIPTS.md)
-      if (entry.name.startsWith("co-")) return [];
+      // A variant directory with its OWN SCRIPTS.md sub-registry governs itself
+      // (the main registry doesn't list its files). Without a sub-registry, the
+      // variant's scripts belong to the main registry via their `co-*/…` relative
+      // paths (existing rows like `co-newbiz/graph.ts`) — recurse so nested
+      // variant-specific structures stay governed instead of escaping the scan.
+      if (entry.name.startsWith("co-") && existsSync(join(dir, entry.name, "SCRIPTS.md"))) return [];
       return walkScripts(join(dir, entry.name));
     }
     return SCRIPT_EXTENSIONS.some((ext) => entry.name.endsWith(ext)) && entry.name !== SCRIPTS_MD_FILENAME
