@@ -1,0 +1,13 @@
+schema_version: "1.0"
+variant: co-export
+output_types:
+  commercial_invoice_data:
+    description: "Registered procedure output type"
+  hs_classification:
+    description: "Registered procedure output type"
+  origin_determination:
+    description: "Registered procedure output type"
+  document_set:
+    description: "Registered procedure output type"
+  shipment_plan:
+    description: "Registered procedure output type"

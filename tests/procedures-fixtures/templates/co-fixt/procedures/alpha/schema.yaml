@@ -1,0 +1,31 @@
+schema_version: "1.0"
+procedure_id: co-fixt-alpha
+variant: co-fixt
+version: "1.0.0"
+title: Alpha Procedure
+phase: 1
+status: active
+owner_agent: researcher
+purpose: >
+  Validate the happy path.
+inputs:
+  - research_findings
+preconditions:
+  - "Kickoff done."
+steps:
+  - id: 1
+    agent_key: researcher
+    skill_key: discovery
+    output_type: persona_set
+    description: >
+      Discover.
+outputs:
+  - type: persona_set
+relations:
+  - type: enables
+    target: skill.discovery
+quality_gates:
+  - "Reviewed."
+evidence: []
+failure_modes:
+  - "Halt."

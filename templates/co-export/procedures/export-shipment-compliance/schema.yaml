@@ -1,0 +1,51 @@
+schema_version: "1.0"
+procedure_id: co-export-export-shipment-compliance
+variant: co-export
+version: "1.0.0"
+title: Export Shipment Compliance
+phase: 3
+status: active
+owner_agent: pm
+purpose: >
+  Take an export shipment from HS classification through origin determination
+  and documentation to logistics coordination.
+inputs:
+  - commercial_invoice_data
+preconditions:
+  - "Shipment commercial data received and destination confirmed."
+steps:
+  - id: 1
+    agent_key: hs-classification-specialist
+    skill_key: hs-classification-workflow
+    output_type: hs_classification
+    description: >
+      Classify goods under the correct HS codes with documented rationale.
+  - id: 2
+    agent_key: fta-origin-analyst
+    skill_key: fta-origin-determination
+    output_type: origin_determination
+    description: >
+      Determine preferential origin and prepare the ROO qualification
+      worksheet for the applicable FTA.
+  - id: 3
+    agent_key: trade-documentation-specialist
+    skill_key: trade-documentation-checklist
+    output_type: document_set
+    description: >
+      Assemble and verify the full export document set against the checklist.
+  - id: 4
+    agent_key: logistics-coordinator
+    skill_key: logistics-coordination
+    output_type: shipment_plan
+    description: >
+      Coordinate booking and shipment plan based on cleared documentation.
+outputs:
+  - type: document_set
+relations: []
+quality_gates:
+  - "Export control screening cleared for all destination jurisdictions."
+  - "Document set passes checklist with zero missing mandatory fields."
+evidence:
+  - "docs/tariff-dataset-schema.md"
+failure_modes:
+  - "Export control hit - halt shipment planning and escalate to export-control-compliance-specialist immediately."

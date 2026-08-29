@@ -1,0 +1,9 @@
+schema_version: "1.0"
+variant: co-consult
+output_types:
+  diagnosis_findings:
+    description: "Registered procedure output type"
+  quantitative_baseline:
+    description: "Registered procedure output type"
+  recommendation_set:
+    description: "Registered procedure output type"

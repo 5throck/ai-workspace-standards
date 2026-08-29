@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Skill Relationship Graph Verification Script
- * @version 1.2.0
+ * @version 1.3.0
  *
  * Verifies that the committed skill graph files match the current state.
  * Re-derives the graph and compares against docs/skill-graph.json.
@@ -12,13 +12,18 @@
  * Also validates:
  * - No country marks in relation fields (ADR-0060 invariant)
  * - No unknown targets in relates_to or overrides
- * - Staleness warnings for overrides (last_reviewed > 12 months)
+ * - Stale override warnings (last_reviewed > 12 months)
  * - Typed `relates_to` schema (ADR-0060 Amendment 3, 2026-08-29): legacy vs.
  *   typed {skill, type} forms via the shared `parseRelatesTo()`, including the
  *   legacy/typed no-mixing rule (a mixed array is a reported finding, not a
  *   silent parse failure).
+ * - Procedure-derived graph invariants (Procedure Schema v1.0, 2026-08-29):
+ *   orphan procedure detection, invalid procedure relation endpoints, and
+ *   `--determinism` mode (two consecutive builds must produce exactly equal
+ *   normalized graphs — INV-5 of
+ *   docs/designs/2026-08-29-procedure-schema-design.md).
  *
- * Usage: bun scripts/verify-skill-graph.ts [--scope <common|co-*>]
+ * Usage: bun scripts/verify-skill-graph.ts [--scope <common|co-*>] [--determinism]
  *
  * Exit codes:
  * - 0: Verification passed
@@ -438,6 +443,7 @@ async function verifyScopeGraph(scope: string): Promise<void> {
 async function main(): Promise<void> {
   const args = process.argv.slice(2);
   const scopeIdx = args.indexOf('--scope');
+  const determinism = args.includes('--determinism');
 
   if (scopeIdx !== -1) {
     const scope = args[scopeIdx + 1];
@@ -463,6 +469,65 @@ async function main(): Promise<void> {
 
   // Derive current graph from sources
   const derived = buildGraph();
+
+  // ── Determinism check (INV-5): two consecutive builds of the same source set
+  // must serialize to exactly the same normalized artifact. Run before any
+  // drift comparison — this is a property of the generator, not the committed
+  // file.
+  if (determinism) {
+    const second = buildGraph();
+    const first = JSON.stringify(derived);
+    const secondJson = JSON.stringify(second);
+    if (first !== secondJson) {
+      console.error('❌ Determinism check failed: two consecutive graph builds differ.');
+      // Show a bounded, useful hint about where they diverge.
+      const a = derived.edges.length, b = second.edges.length;
+      console.error(`   Edges: build#1=${a}, build#2=${b}; Nodes: build#1=${derived.nodes.length}, build#2=${second.nodes.length}`);
+      process.exit(1);
+    }
+    console.log('✓ Determinism check passed: two consecutive builds are exactly equal');
+  }
+
+  // ── Procedure-derived graph invariants (Procedure Schema v1.0) ──
+  // The procedure YAML is the canonical source; these checks only assert that
+  // the derivation is well-formed (INV-1: repair procedures, never the graph).
+  const nodeIds = new Set(derived.nodes.map(n => n.id));
+  const procedureErrors: string[] = [];
+
+  const PROC_DERIVED_EDGE_TYPES = new Set([
+    'step_uses_skill', 'step_by_agent', 'produces', 'follows', 'enables', 'composes_with',
+  ]);
+  for (const edge of derived.edges) {
+    if (edge.source !== 'procedure_schema' && !PROC_DERIVED_EDGE_TYPES.has(edge.type as never)) continue;
+    if (edge.source === 'procedure_schema') {
+      if (!nodeIds.has(edge.from)) procedureErrors.push(`${edge.type}: unknown source node ${edge.from}`);
+      if (!nodeIds.has(edge.to)) procedureErrors.push(`${edge.type}: unknown target node ${edge.to}`);
+    }
+  }
+
+  const orphanProcedures = derived.nodes
+    .filter(n => n.type === 'procedure')
+    .filter(p => !derived.edges.some(e => e.from === p.id && (e.type === 'step_uses_skill' || e.type === 'step_by_agent')));
+  for (const orphan of orphanProcedures) {
+    procedureErrors.push(`orphan procedure "${orphan.id}" has no step_uses_skill/step_by_agent edges`);
+  }
+
+  if (procedureErrors.length > 0) {
+    console.log('');
+    console.log('❌ Procedure graph invariant violations:');
+    for (const err of procedureErrors.slice(0, 20)) {
+      console.log(`   ${err}`);
+    }
+    if (procedureErrors.length > 20) {
+      console.log(`   ... and ${procedureErrors.length - 20} more`);
+    }
+    console.log('');
+    console.log('   Fix the procedure schema files (canonical source), never skill-graph.json (INV-1).');
+    process.exit(1);
+  }
+  if (derived.nodes.some(n => n.type === 'procedure')) {
+    console.log(`  Procedure invariants: ${derived.nodes.filter(n => n.type === 'procedure').length} procedures checked (orphans/endpoints OK)`);
+  }
 
   // Compare graphs
   const { equal, missingNodes, extraNodes, missingEdges, extraEdges } = compareGraphs(derived, committed);

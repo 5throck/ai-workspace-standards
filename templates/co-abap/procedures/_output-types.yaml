@@ -1,0 +1,13 @@
+schema_version: "1.0"
+variant: co-abap
+output_types:
+  functional_requirement:
+    description: "Registered procedure output type"
+  technical_analysis:
+    description: "Registered procedure output type"
+  implementation_package:
+    description: "Registered procedure output type"
+  review_findings:
+    description: "Registered procedure output type"
+  test_report:
+    description: "Registered procedure output type"

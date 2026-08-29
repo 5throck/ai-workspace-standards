@@ -1,0 +1,27 @@
+schema_version: "1.0"
+procedure_id: co-bad-dup-a
+variant: co-bad
+version: "1.0.0"
+title: dup-a
+phase: 1
+status: active
+owner_agent: known-agent
+purpose: >
+  Fixture.
+inputs: []
+preconditions:
+  - "P."
+steps:
+  - id: 1
+    agent_key: known-agent
+    skill_key: x
+    output_type: known_type
+    description: >
+      S.
+outputs: []
+relations: []
+quality_gates:
+  - "G."
+evidence: []
+failure_modes:
+  - "F."

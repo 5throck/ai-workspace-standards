@@ -1,0 +1,55 @@
+schema_version: "1.0"
+procedure_id: co-abap-custom-dev-delivery
+variant: co-abap
+version: "1.0.0"
+title: Custom ABAP Development Delivery
+phase: 3
+status: active
+owner_agent: code-writer
+purpose: >
+  Deliver a custom ABAP development request from investigation through tested,
+  reviewed code following Clean ABAP standards.
+inputs:
+  - functional_requirement
+preconditions:
+  - "Requirement clarified with the functional analyst and scoped by pm."
+steps:
+  - id: 1
+    agent_key: sap-investigator
+    skill_key: abap-dev
+    output_type: technical_analysis
+    description: >
+      Investigate standard SAP behavior, tables, and exits to decide build vs
+      configure before any code is written.
+  - id: 2
+    agent_key: code-writer
+    skill_key: abap-dev
+    output_type: implementation_package
+    description: >
+      Implement the development following Clean ABAP checklist and workspace
+      coding standards.
+  - id: 3
+    agent_key: code-writer
+    skill_key: abap-code-review
+    output_type: review_findings
+    description: >
+      Self-review the implementation against the Clean ABAP checklist before
+      handing to test.
+  - id: 4
+    agent_key: test-runner
+    skill_key: abap-dev
+    output_type: test_report
+    description: >
+      Execute unit and integration tests; record results in the test report.
+outputs:
+  - type: implementation_package
+relations:
+  - type: follows
+    target: skill.abap-dev
+quality_gates:
+  - "Clean ABAP checklist review completed with no open critical findings."
+  - "All automated tests pass before handoff to transport release."
+evidence:
+  - "docs/handoff-spec.md"
+failure_modes:
+  - "Standard SAP already covers the requirement - halt and return a configuration recommendation instead of code."

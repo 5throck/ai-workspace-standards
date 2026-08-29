@@ -407,6 +407,16 @@
       "layer": "variant:co-export"
     },
     {
+      "id": "daily/audit-preparation",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "daily/risk-assessment",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
       "id": "data-analyst",
       "type": "agent",
       "layer": "variant:co-consult"
@@ -787,6 +797,11 @@
       "layer": "variant:co-abap"
     },
     {
+      "id": "investigation/hazop-analysis",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
       "id": "k-dart",
       "type": "skill",
       "layer": "common"
@@ -942,6 +957,231 @@
       ]
     },
     {
+      "id": "output_type.benchmark_report",
+      "type": "output_type",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "output_type.defect_report",
+      "type": "output_type",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "output_type.demand_curve",
+      "type": "output_type",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "output_type.design_spec",
+      "type": "output_type",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "output_type.diagnosis_findings",
+      "type": "output_type",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "output_type.discovery_review",
+      "type": "output_type",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "output_type.document_set",
+      "type": "output_type",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "output_type.draft_article",
+      "type": "output_type",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "output_type.draft_document",
+      "type": "output_type",
+      "layer": "variant:co-work"
+    },
+    {
+      "id": "output_type.engagement_report",
+      "type": "output_type",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "output_type.evidence_pack",
+      "type": "output_type",
+      "layer": "variant:co-work"
+    },
+    {
+      "id": "output_type.final_article",
+      "type": "output_type",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "output_type.final_document",
+      "type": "output_type",
+      "layer": "variant:co-work"
+    },
+    {
+      "id": "output_type.gap_analysis",
+      "type": "output_type",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "output_type.governance_review",
+      "type": "output_type",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "output_type.hazard_inventory",
+      "type": "output_type",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "output_type.hs_classification",
+      "type": "output_type",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "output_type.html_deck",
+      "type": "output_type",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "output_type.implementation_commit",
+      "type": "output_type",
+      "layer": "variant:co-develop"
+    },
+    {
+      "id": "output_type.implementation_package",
+      "type": "output_type",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "output_type.legal_review_note",
+      "type": "output_type",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "output_type.market_baseline",
+      "type": "output_type",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "output_type.market_dataset",
+      "type": "output_type",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "output_type.narrative_review",
+      "type": "output_type",
+      "layer": "variant:co-work"
+    },
+    {
+      "id": "output_type.origin_determination",
+      "type": "output_type",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "output_type.pdf_deck",
+      "type": "output_type",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "output_type.price_recommendation",
+      "type": "output_type",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "output_type.quantitative_baseline",
+      "type": "output_type",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "output_type.recommendation_set",
+      "type": "output_type",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "output_type.research_findings",
+      "type": "output_type",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "output_type.research_pack",
+      "type": "output_type",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "output_type.review_findings",
+      "type": "output_type",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "output_type.risk_assessment_record",
+      "type": "output_type",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "output_type.service_blueprint",
+      "type": "output_type",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "output_type.shipment_plan",
+      "type": "output_type",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "output_type.storyline_outline",
+      "type": "output_type",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "output_type.technical_analysis",
+      "type": "output_type",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "output_type.test_report",
+      "type": "output_type",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "output_type.test_scaffold",
+      "type": "output_type",
+      "layer": "variant:co-develop"
+    },
+    {
+      "id": "output_type.threat_model",
+      "type": "output_type",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "output_type.tuning_parameters",
+      "type": "output_type",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "output_type.validated_findings",
+      "type": "output_type",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "output_type.verification_ledger",
+      "type": "output_type",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "output_type.waterfall_model",
+      "type": "output_type",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "output_type.wtp_findings",
+      "type": "output_type",
+      "layer": "variant:co-price"
+    },
+    {
       "id": "patch-engineer",
       "type": "agent",
       "layer": "variant:co-security"
@@ -1041,6 +1281,71 @@
       "id": "prisma-7",
       "type": "skill",
       "layer": "variant:co-price"
+    },
+    {
+      "id": "procedure.co-abap.custom-dev-delivery",
+      "type": "procedure",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "procedure.co-consult.diagnosis-to-recommendation",
+      "type": "procedure",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "procedure.co-deck.lecture-deck-production",
+      "type": "procedure",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "procedure.co-design.ux-discovery",
+      "type": "procedure",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "procedure.co-develop.feature-implementation",
+      "type": "procedure",
+      "layer": "variant:co-develop"
+    },
+    {
+      "id": "procedure.co-export.export-shipment-compliance",
+      "type": "procedure",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "procedure.co-game.gameplay-feature-loop",
+      "type": "procedure",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "procedure.co-hr.compensation-benchmarking",
+      "type": "procedure",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "procedure.co-news.fact-checked-article",
+      "type": "procedure",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "procedure.co-price.pricing-analysis",
+      "type": "procedure",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "procedure.co-safety.daily-risk-assessment",
+      "type": "procedure",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "procedure.co-security.threat-model-and-report",
+      "type": "procedure",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "procedure.co-work.document-production",
+      "type": "procedure",
+      "layer": "variant:co-work"
     },
     {
       "id": "project-coordinator",
@@ -1614,6 +1919,12 @@
       "source": "prose"
     },
     {
+      "type": "produces",
+      "from": "abap-code-review",
+      "to": "output_type.review_findings",
+      "source": "procedure_schema"
+    },
+    {
       "type": "references",
       "from": "abap-code-review",
       "to": "performance-tuning",
@@ -1659,6 +1970,18 @@
       "from": "abap-dev",
       "to": "code-writer",
       "source": "skill_manifest"
+    },
+    {
+      "type": "produces",
+      "from": "abap-dev",
+      "to": "output_type.technical_analysis",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "abap-dev",
+      "to": "output_type.test_report",
+      "source": "procedure_schema"
     },
     {
       "type": "phase",
@@ -1922,6 +2245,12 @@
       "source": "skill_manifest"
     },
     {
+      "type": "produces",
+      "from": "arcade-physics",
+      "to": "output_type.tuning_parameters",
+      "source": "procedure_schema"
+    },
+    {
       "type": "phase",
       "from": "arcade-physics",
       "to": "phase4",
@@ -2044,6 +2373,18 @@
       "source": "skill_manifest"
     },
     {
+      "type": "produces",
+      "from": "code-review",
+      "to": "output_type.defect_report",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "code-review",
+      "to": "output_type.review_findings",
+      "source": "procedure_schema"
+    },
+    {
       "type": "phase",
       "from": "code-review",
       "to": "phase3",
@@ -2082,6 +2423,12 @@
         "field": "required_skills",
         "index": 0
       }
+    },
+    {
+      "type": "produces",
+      "from": "company-intelligence",
+      "to": "output_type.diagnosis_findings",
+      "source": "procedure_schema"
     },
     {
       "type": "phase",
@@ -2145,6 +2492,12 @@
       "from": "compensation-benchmarking",
       "to": "org-design-framework",
       "source": "prose"
+    },
+    {
+      "type": "produces",
+      "from": "compensation-benchmarking",
+      "to": "output_type.market_dataset",
+      "source": "procedure_schema"
     },
     {
       "type": "references",
@@ -2240,6 +2593,12 @@
       "from": "competitive-intelligence",
       "to": "insight-synthesis",
       "source": "prose"
+    },
+    {
+      "type": "produces",
+      "from": "competitive-intelligence",
+      "to": "output_type.market_baseline",
+      "source": "procedure_schema"
     },
     {
       "type": "phase",
@@ -2397,6 +2756,12 @@
       "source": "skill_manifest"
     },
     {
+      "type": "produces",
+      "from": "daily/audit-preparation",
+      "to": "output_type.governance_review",
+      "source": "procedure_schema"
+    },
+    {
       "type": "cites_skill",
       "from": "dec:DEC-20260825-02",
       "to": "sync",
@@ -2459,6 +2824,12 @@
       "from": "design",
       "to": "i18n-layout",
       "source": "prose"
+    },
+    {
+      "type": "produces",
+      "from": "design",
+      "to": "output_type.design_spec",
+      "source": "procedure_schema"
     },
     {
       "type": "phase",
@@ -2548,6 +2919,18 @@
       }
     },
     {
+      "type": "produces",
+      "from": "documentation-writing",
+      "to": "output_type.draft_document",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "documentation-writing",
+      "to": "output_type.narrative_review",
+      "source": "procedure_schema"
+    },
+    {
       "type": "used_by",
       "from": "documentation-writing",
       "to": "technical-writer",
@@ -2593,6 +2976,12 @@
       "from": "evidence-ledger",
       "to": "decision-record",
       "source": "prose"
+    },
+    {
+      "type": "produces",
+      "from": "evidence-ledger",
+      "to": "output_type.evidence_pack",
+      "source": "procedure_schema"
     },
     {
       "type": "references",
@@ -2878,6 +3267,12 @@
       }
     },
     {
+      "type": "produces",
+      "from": "financial-modeling",
+      "to": "output_type.quantitative_baseline",
+      "source": "procedure_schema"
+    },
+    {
       "type": "phase",
       "from": "financial-modeling",
       "to": "phase1",
@@ -2974,6 +3369,12 @@
       }
     },
     {
+      "type": "produces",
+      "from": "financial-narrative-brief",
+      "to": "output_type.draft_article",
+      "source": "procedure_schema"
+    },
+    {
       "type": "phase",
       "from": "financial-narrative-brief",
       "to": "phase1",
@@ -3023,6 +3424,12 @@
       "from": "financial-statement-analysis",
       "to": "phase3",
       "source": "skill_manifest"
+    },
+    {
+      "type": "produces",
+      "from": "finding-reconciliation",
+      "to": "output_type.validated_findings",
+      "source": "procedure_schema"
     },
     {
       "type": "used_by",
@@ -3151,6 +3558,12 @@
       }
     },
     {
+      "type": "produces",
+      "from": "fta-origin-determination",
+      "to": "output_type.origin_determination",
+      "source": "procedure_schema"
+    },
+    {
       "type": "phase",
       "from": "fta-origin-determination",
       "to": "phase1",
@@ -3161,6 +3574,12 @@
       "from": "fta-origin-determination",
       "to": "phase2",
       "source": "skill_manifest"
+    },
+    {
+      "type": "produces",
+      "from": "gabor-granger",
+      "to": "output_type.demand_curve",
+      "source": "procedure_schema"
     },
     {
       "type": "enables",
@@ -3313,6 +3732,12 @@
       "source": "prose"
     },
     {
+      "type": "produces",
+      "from": "hr-metrics-analysis",
+      "to": "output_type.gap_analysis",
+      "source": "procedure_schema"
+    },
+    {
       "type": "phase",
       "from": "hr-metrics-analysis",
       "to": "phase1",
@@ -3340,6 +3765,12 @@
       "from": "hs-classification-workflow",
       "to": "hs-classification-specialist",
       "source": "skill_manifest"
+    },
+    {
+      "type": "produces",
+      "from": "hs-classification-workflow",
+      "to": "output_type.hs_classification",
+      "source": "procedure_schema"
     },
     {
       "type": "phase",
@@ -3385,6 +3816,12 @@
       "from": "html-build",
       "to": "html-build",
       "source": "skill_manifest"
+    },
+    {
+      "type": "produces",
+      "from": "html-build",
+      "to": "output_type.html_deck",
+      "source": "procedure_schema"
     },
     {
       "type": "follows",
@@ -3619,6 +4056,12 @@
       "from": "insight-synthesis",
       "to": "strategy-analyst",
       "source": "skill_manifest"
+    },
+    {
+      "type": "produces",
+      "from": "investigation/hazop-analysis",
+      "to": "output_type.hazard_inventory",
+      "source": "procedure_schema"
     },
     {
       "type": "references",
@@ -3898,6 +4341,12 @@
       "from": "logistics-coordination",
       "to": "logistics-coordinator",
       "source": "skill_manifest"
+    },
+    {
+      "type": "produces",
+      "from": "logistics-coordination",
+      "to": "output_type.shipment_plan",
+      "source": "procedure_schema"
     },
     {
       "type": "phase",
@@ -4362,6 +4811,12 @@
       "source": "skill_manifest"
     },
     {
+      "type": "produces",
+      "from": "price-waterfall-analysis",
+      "to": "output_type.waterfall_model",
+      "source": "procedure_schema"
+    },
+    {
       "type": "references",
       "from": "price-waterfall-analysis",
       "to": "pricing-governance",
@@ -4389,6 +4844,666 @@
       "from": "pricing-strategist",
       "to": "pricing-governance",
       "source": "prose"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-abap.custom-dev-delivery",
+      "to": "abap-code-review",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-abap.custom-dev-delivery",
+      "to": "abap-dev",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-abap.custom-dev-delivery",
+      "to": "abap-dev",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-abap.custom-dev-delivery",
+      "to": "abap-dev",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-abap.custom-dev-delivery",
+      "to": "abap-dev",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-abap.custom-dev-delivery",
+      "to": "code-writer",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-abap.custom-dev-delivery",
+      "to": "code-writer",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-abap.custom-dev-delivery",
+      "to": "output_type.implementation_package",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-abap.custom-dev-delivery",
+      "to": "sap-investigator",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-abap.custom-dev-delivery",
+      "to": "test-runner",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-consult.diagnosis-to-recommendation",
+      "to": "company-intelligence",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "enables",
+      "from": "procedure.co-consult.diagnosis-to-recommendation",
+      "to": "consulting-report-writing",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-consult.diagnosis-to-recommendation",
+      "to": "data-analyst",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-consult.diagnosis-to-recommendation",
+      "to": "financial-modeling",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-consult.diagnosis-to-recommendation",
+      "to": "industry-expert",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-consult.diagnosis-to-recommendation",
+      "to": "insight-synthesis",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-consult.diagnosis-to-recommendation",
+      "to": "output_type.recommendation_set",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-consult.diagnosis-to-recommendation",
+      "to": "strategy-analyst",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-deck.lecture-deck-production",
+      "to": "design",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-deck.lecture-deck-production",
+      "to": "design",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-deck.lecture-deck-production",
+      "to": "html-build",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-deck.lecture-deck-production",
+      "to": "html-build",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-deck.lecture-deck-production",
+      "to": "output_type.pdf_deck",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-deck.lecture-deck-production",
+      "to": "pdf-export",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-deck.lecture-deck-production",
+      "to": "pdf-export",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-deck.lecture-deck-production",
+      "to": "research",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-deck.lecture-deck-production",
+      "to": "research",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-deck.lecture-deck-production",
+      "to": "storyline",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-deck.lecture-deck-production",
+      "to": "storyline",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-design.ux-discovery",
+      "to": "design-lead",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-design.ux-discovery",
+      "to": "output_type.research_findings",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-design.ux-discovery",
+      "to": "service-design",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-design.ux-discovery",
+      "to": "service-designer",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-design.ux-discovery",
+      "to": "ui-ux-design-intelligence",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-design.ux-discovery",
+      "to": "ui-ux-design-intelligence",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-design.ux-discovery",
+      "to": "ux-researcher",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-develop.feature-implementation",
+      "to": "architect",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-develop.feature-implementation",
+      "to": "code-review",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-develop.feature-implementation",
+      "to": "code-writer",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-develop.feature-implementation",
+      "to": "output_type.implementation_commit",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-develop.feature-implementation",
+      "to": "refactoring",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-develop.feature-implementation",
+      "to": "security-monitor",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-develop.feature-implementation",
+      "to": "test-driven-development",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-develop.feature-implementation",
+      "to": "test-driven-development",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-export.export-shipment-compliance",
+      "to": "fta-origin-analyst",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-export.export-shipment-compliance",
+      "to": "fta-origin-determination",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-export.export-shipment-compliance",
+      "to": "hs-classification-specialist",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-export.export-shipment-compliance",
+      "to": "hs-classification-workflow",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-export.export-shipment-compliance",
+      "to": "logistics-coordination",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-export.export-shipment-compliance",
+      "to": "logistics-coordinator",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-export.export-shipment-compliance",
+      "to": "output_type.document_set",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-export.export-shipment-compliance",
+      "to": "trade-documentation-checklist",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-export.export-shipment-compliance",
+      "to": "trade-documentation-specialist",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-game.gameplay-feature-loop",
+      "to": "arcade-physics",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-game.gameplay-feature-loop",
+      "to": "code-review",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-game.gameplay-feature-loop",
+      "to": "game-debugger",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-game.gameplay-feature-loop",
+      "to": "game-designer",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-game.gameplay-feature-loop",
+      "to": "game-developer",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-game.gameplay-feature-loop",
+      "to": "output_type.implementation_commit",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-game.gameplay-feature-loop",
+      "to": "test-driven-development",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-hr.compensation-benchmarking",
+      "to": "compensation-benchmarking",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-hr.compensation-benchmarking",
+      "to": "compensation-benefits-analyst",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-hr.compensation-benchmarking",
+      "to": "compensation-benefits-analyst",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-hr.compensation-benchmarking",
+      "to": "consulting-report-writing",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-hr.compensation-benchmarking",
+      "to": "data-analyst",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-hr.compensation-benchmarking",
+      "to": "hr-metrics-analysis",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-hr.compensation-benchmarking",
+      "to": "output_type.benchmark_report",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-news.fact-checked-article",
+      "to": "fact-checker",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-news.fact-checked-article",
+      "to": "financial-journalism-style",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-news.fact-checked-article",
+      "to": "financial-narrative-brief",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-news.fact-checked-article",
+      "to": "legal-researcher",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-news.fact-checked-article",
+      "to": "output_type.final_article",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-news.fact-checked-article",
+      "to": "reporter",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-news.fact-checked-article",
+      "to": "source-verification-ledger",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-news.fact-checked-article",
+      "to": "source-verification-ledger",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-news.fact-checked-article",
+      "to": "style-editor",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-price.pricing-analysis",
+      "to": "competitive-intelligence",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-price.pricing-analysis",
+      "to": "gabor-granger",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-price.pricing-analysis",
+      "to": "market-intelligence-analyst",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-price.pricing-analysis",
+      "to": "output_type.price_recommendation",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-price.pricing-analysis",
+      "to": "price-waterfall-analysis",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "enables",
+      "from": "procedure.co-price.pricing-analysis",
+      "to": "pricing-governance",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-price.pricing-analysis",
+      "to": "pricing-strategist",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-price.pricing-analysis",
+      "to": "pricing-strategist",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-price.pricing-analysis",
+      "to": "pricing-strategist",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-price.pricing-analysis",
+      "to": "van-westendorp-psm",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-safety.daily-risk-assessment",
+      "to": "daily/audit-preparation",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-safety.daily-risk-assessment",
+      "to": "daily/risk-assessment",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-safety.daily-risk-assessment",
+      "to": "investigation/hazop-analysis",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-safety.daily-risk-assessment",
+      "to": "output_type.risk_assessment_record",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-safety.daily-risk-assessment",
+      "to": "safety-governance-manager",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-safety.daily-risk-assessment",
+      "to": "safety-workflow-manager",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-safety.daily-risk-assessment",
+      "to": "safety-workflow-manager",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-security.threat-model-and-report",
+      "to": "finding-reconciliation",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-security.threat-model-and-report",
+      "to": "output_type.threat_model",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-security.threat-model-and-report",
+      "to": "pentester",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-security.threat-model-and-report",
+      "to": "report-writer",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-security.threat-model-and-report",
+      "to": "sarif-exporter",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-security.threat-model-and-report",
+      "to": "stride-threat-matrix",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-security.threat-model-and-report",
+      "to": "threat-modeler",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-security.threat-model-and-report",
+      "to": "verify-authorization",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-work.document-production",
+      "to": "analyst",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-work.document-production",
+      "to": "content-writer",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-work.document-production",
+      "to": "decision-record",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-work.document-production",
+      "to": "documentation-writing",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-work.document-production",
+      "to": "documentation-writing",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-work.document-production",
+      "to": "evidence-ledger",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-work.document-production",
+      "to": "output_type.final_document",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-work.document-production",
+      "to": "storyteller",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-work.document-production",
+      "to": "technical-writer",
+      "source": "procedure_schema"
     },
     {
       "type": "used_by",
@@ -4511,6 +5626,12 @@
       "from": "reporter",
       "to": "financial-journalism-style",
       "source": "prose"
+    },
+    {
+      "type": "produces",
+      "from": "research",
+      "to": "output_type.research_pack",
+      "source": "procedure_schema"
     },
     {
       "type": "phase",
@@ -5118,6 +6239,12 @@
       "source": "prose"
     },
     {
+      "type": "produces",
+      "from": "sarif-exporter",
+      "to": "output_type.engagement_report",
+      "source": "procedure_schema"
+    },
+    {
       "type": "used_by",
       "from": "sarif-exporter",
       "to": "pentester",
@@ -5192,6 +6319,12 @@
       "from": "service-design",
       "to": "design-lead",
       "source": "skill_manifest"
+    },
+    {
+      "type": "produces",
+      "from": "service-design",
+      "to": "output_type.service_blueprint",
+      "source": "procedure_schema"
     },
     {
       "type": "phase",
@@ -5398,6 +6531,18 @@
       "source": "prose"
     },
     {
+      "type": "produces",
+      "from": "source-verification-ledger",
+      "to": "output_type.legal_review_note",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "source-verification-ledger",
+      "to": "output_type.verification_ledger",
+      "source": "procedure_schema"
+    },
+    {
       "type": "phase",
       "from": "source-verification-ledger",
       "to": "phase2",
@@ -5580,6 +6725,12 @@
         "field": "relates_to",
         "index": 0
       }
+    },
+    {
+      "type": "produces",
+      "from": "storyline",
+      "to": "output_type.storyline_outline",
+      "source": "procedure_schema"
     },
     {
       "type": "phase",
@@ -5883,6 +7034,12 @@
       "source": "skill_manifest"
     },
     {
+      "type": "produces",
+      "from": "test-driven-development",
+      "to": "output_type.test_scaffold",
+      "source": "procedure_schema"
+    },
+    {
       "type": "phase",
       "from": "test-driven-development",
       "to": "phase3",
@@ -6012,6 +7169,12 @@
       "source": "skill_manifest"
     },
     {
+      "type": "produces",
+      "from": "ui-ux-design-intelligence",
+      "to": "output_type.discovery_review",
+      "source": "procedure_schema"
+    },
+    {
       "type": "phase",
       "from": "ui-ux-design-intelligence",
       "to": "phase1",
@@ -6051,6 +7214,12 @@
       "from": "ui-ux-design-intelligence",
       "to": "visual-designer",
       "source": "skill_manifest"
+    },
+    {
+      "type": "produces",
+      "from": "van-westendorp-psm",
+      "to": "output_type.wtp_findings",
+      "source": "procedure_schema"
     },
     {
       "type": "enables",

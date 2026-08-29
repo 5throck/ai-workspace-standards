@@ -1,0 +1,11 @@
+schema_version: "1.0"
+variant: co-game
+output_types:
+  feature_spec:
+    description: "Registered procedure output type"
+  tuning_parameters:
+    description: "Registered procedure output type"
+  implementation_commit:
+    description: "Registered procedure output type"
+  defect_report:
+    description: "Registered procedure output type"

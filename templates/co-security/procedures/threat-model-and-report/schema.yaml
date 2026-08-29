@@ -1,0 +1,46 @@
+schema_version: "1.0"
+procedure_id: co-security-threat-model-and-report
+variant: co-security
+version: "1.0.0"
+title: Threat Model and Report
+phase: 3
+status: active
+owner_agent: threat-modeler
+purpose: >
+  Produce a STRIDE threat model for a target system and consolidate findings
+  into an authorized engagement report.
+inputs:
+  - engagement_scope
+preconditions:
+  - "Written authorization verified for the engagement scope."
+steps:
+  - id: 1
+    agent_key: threat-modeler
+    skill_key: stride-threat-matrix
+    output_type: threat_model
+    description: >
+      Build the STRIDE threat matrix for the in-scope system.
+  - id: 2
+    agent_key: pentester
+    skill_key: finding-reconciliation
+    output_type: validated_findings
+    description: >
+      Validate modeled threats against observed findings and reconcile
+      duplicates.
+  - id: 3
+    agent_key: report-writer
+    skill_key: sarif-exporter
+    output_type: engagement_report
+    description: >
+      Produce the engagement report and machine-readable SARIF export.
+outputs:
+  - type: threat_model
+relations:
+  - type: follows
+    target: skill.verify-authorization
+quality_gates:
+  - "Authorization scope matches every tested component - no out-of-scope findings included."
+evidence:
+  - "docs/co-security.context.md"
+failure_modes:
+  - "Authorization cannot be verified - halt all testing before any packet is sent."

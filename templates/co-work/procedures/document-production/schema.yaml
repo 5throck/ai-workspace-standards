@@ -1,0 +1,50 @@
+schema_version: "1.0"
+procedure_id: co-work-document-production
+variant: co-work
+version: "1.0.0"
+title: Document Production
+phase: 3
+status: active
+owner_agent: technical-writer
+purpose: >
+  Produce a polished business document from analysis through reviewed final
+  draft.
+inputs: []
+preconditions:
+  - "Document request scoped by project-coordinator with audience and deadline."
+steps:
+  - id: 1
+    agent_key: analyst
+    skill_key: evidence-ledger
+    output_type: evidence_pack
+    description: >
+      Assemble verified facts and figures into an evidence pack for the
+      document.
+  - id: 2
+    agent_key: content-writer
+    skill_key: documentation-writing
+    output_type: draft_document
+    description: >
+      Draft the document from the evidence pack in the agreed narrative
+      structure.
+  - id: 3
+    agent_key: storyteller
+    skill_key: documentation-writing
+    output_type: narrative_review
+    description: >
+      Strengthen the narrative arc and executive readability of the draft.
+  - id: 4
+    agent_key: technical-writer
+    skill_key: decision-record
+    output_type: final_document
+    description: >
+      Finalize formatting, consistency, and record key content decisions.
+outputs:
+  - type: final_document
+relations: []
+quality_gates:
+  - "Every factual statement traces to the evidence pack."
+evidence:
+  - "docs/document-style-registry.md"
+failure_modes:
+  - "Evidence gaps found at review - mark claims as open questions instead of publishing unsupported statements."

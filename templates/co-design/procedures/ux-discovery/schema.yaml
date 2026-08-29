@@ -1,0 +1,44 @@
+schema_version: "1.0"
+procedure_id: co-design-ux-discovery
+variant: co-design
+version: "1.0.0"
+title: UX Discovery
+phase: 1
+status: active
+owner_agent: ux-researcher
+purpose: >
+  Establish evidence-based understanding of users and service context to feed
+  design work.
+inputs: []
+preconditions:
+  - "Discovery scope agreed with design-lead and stakeholders identified."
+steps:
+  - id: 1
+    agent_key: ux-researcher
+    skill_key: ui-ux-design-intelligence
+    output_type: research_findings
+    description: >
+      Plan and run user research; synthesize findings with design
+      intelligence heuristics.
+  - id: 2
+    agent_key: service-designer
+    skill_key: service-design
+    output_type: service_blueprint
+    description: >
+      Map findings into a service blueprint covering touchpoints and actors.
+  - id: 3
+    agent_key: design-lead
+    skill_key: ui-ux-design-intelligence
+    output_type: discovery_review
+    description: >
+      Review research findings and blueprint; approve entry into design
+      definition.
+outputs:
+  - type: research_findings
+relations: []
+quality_gates:
+  - "Design-lead review recorded before any visual design work starts."
+evidence:
+  - "docs/co-design.context.md"
+failure_modes:
+  - "Stakeholder access blocked - halt and renegotiate scope instead of assuming user needs."

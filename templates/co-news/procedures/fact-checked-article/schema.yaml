@@ -1,0 +1,53 @@
+schema_version: "1.0"
+procedure_id: co-news-fact-checked-article
+variant: co-news
+version: "1.0.0"
+title: Fact-Checked Article Production
+phase: 3
+status: active
+owner_agent: pm
+purpose: >
+  Produce a publishable article in which every claim is verified and the style
+  passes the financial journalism checklist.
+inputs:
+  - story_brief
+preconditions:
+  - "Story brief approved at the pitch review."
+steps:
+  - id: 1
+    agent_key: reporter
+    skill_key: financial-narrative-brief
+    output_type: draft_article
+    description: >
+      Draft the article from the approved brief with cited sources.
+  - id: 2
+    agent_key: fact-checker
+    skill_key: source-verification-ledger
+    output_type: verification_ledger
+    description: >
+      Verify every factual claim and record it in the source verification
+      ledger.
+  - id: 3
+    agent_key: legal-researcher
+    skill_key: source-verification-ledger
+    output_type: legal_review_note
+    description: >
+      Review defamation, market-manipulation, and disclosure risk for
+      sensitive claims.
+  - id: 4
+    agent_key: style-editor
+    skill_key: financial-journalism-style
+    output_type: final_article
+    description: >
+      Edit to the financial journalism style guide and clear the style lint
+      checklist.
+outputs:
+  - type: final_article
+relations: []
+quality_gates:
+  - "Every claim in the final article has a ledger entry with verified status."
+  - "Style lint checklist passes with zero unresolved flags."
+evidence:
+  - "docs/wire-format.md"
+failure_modes:
+  - "Claim cannot be verified - cut the claim or mark it unverified; publication never proceeds on a single anonymous source."

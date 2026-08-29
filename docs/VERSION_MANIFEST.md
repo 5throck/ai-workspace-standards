@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-29T00:15:27.808Z
+**Generated**: 2026-08-29T04:04:54.267Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 8
 - **Skills**: 33
-- **Scripts**: 84
+- **Scripts**: 85
 - **Commands**: 8
 
 ---
@@ -95,7 +95,7 @@
 | generate-ide-rules.ts | 1.0.0 | scripts/generate-ide-rules.ts | N/A |
 | generate-l3-readme.ts | 1.0.3 | scripts/generate-l3-readme.ts | fs, path |
 | generate-scripts-readme.ts | 1.0.3 | scripts/generate-scripts-readme.ts | N/A |
-| generate-skill-graph.ts | 1.4.0 | scripts/generate-skill-graph.ts | js-yaml |
+| generate-skill-graph.ts | 1.5.0 | scripts/generate-skill-graph.ts | js-yaml |
 | generate-version-manifest.ts | 1.2.0 | scripts/generate-version-manifest.ts | bun, js-yaml |
 | infer-graph-from-phases.ts | 0.1.0 | scripts/experiments/infer-graph-from-phases.ts | N/A |
 | ingest-external-skills.ts | 1.1.0 | scripts/ingest-external-skills.ts | N/A |
@@ -143,6 +143,7 @@
 | validate-md-language.ts | 1.8.0 | scripts/validate-md-language.ts | fs |
 | validate-model-registry.ts | N/A | scripts/validate-model-registry.ts | N/A |
 | validate-pm-extends.ts | 0.3.1 | scripts/validate-pm-extends.ts | N/A |
+| validate-procedures.ts | 1.0.0 | scripts/validate-procedures.ts | js-yaml |
 | validate-skills.ts | 1.1.0 | scripts/validate-skills.ts | N/A |
 | validate-templates.ts | 1.19.0 | scripts/validate-templates.ts | js-yaml |
 | validate-variant-readiness.ts | 1.0.0 | scripts/validate-variant-readiness.ts | N/A |
@@ -155,7 +156,7 @@
 | verify-platform-lifecycle.ts | 1.1.2 | scripts/verify-platform-lifecycle.ts | N/A |
 | verify-readme-sync.ts | 1.4.0 | scripts/verify-readme-sync.ts | bun, fs, path |
 | verify-scripts.ts | 1.4.1 | scripts/verify-scripts.ts | fs, path |
-| verify-skill-graph.ts | 1.2.0 | scripts/verify-skill-graph.ts | N/A |
+| verify-skill-graph.ts | 1.3.0 | scripts/verify-skill-graph.ts | N/A |
 | verify-skills.ts | 1.3.0 | scripts/verify-skills.ts | N/A |
 | verify-template-integrity.ts | 1.0.0 | scripts/verify-template-integrity.ts | crypto, fs, path |
 
