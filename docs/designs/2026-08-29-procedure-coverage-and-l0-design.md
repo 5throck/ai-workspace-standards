@@ -4,6 +4,7 @@
 - **Date**: 2026-08-29
 - **Status**: Approved
 - **Owner**: architect
+- **Decision record**: ADR-0063 (`docs/adr/0063-procedure-schema-canonical-workflow-source.md`)
 - **Predecessor**: `2026-08-29-procedure-schema-design.md` (Procedure Schema v1.0 — merged via PR #758)
 
 ---
@@ -183,3 +184,22 @@ Single PR. Sequential: design → validator/graph integration → coverage
 engine → L0 procedures → variant workflow analysis & authoring → governance
 docs → skill docs → `/sync` (lifecycle + audit + graph regeneration +
 verification + CI).
+
+---
+
+## Addendum (2026-08-29, post-merge review)
+
+Phase-declaration review across all 13 variants corrected three
+under-declarations to match actual workflow participation (`co-develop
+code-writer` [4]→[3,4], `co-game game-developer` [4]→[3,4], `co-abap
+test-runner` [4]→[3,4] — the extra pairs were already step-covered) and
+closed three coverable gaps with workflow-natural steps (co-design
+`visual-implementation` design-lead review, co-hr `hr-solution-design`
+labor-relations impact review, co-game `game-concept-design` prototyping
+environment). Resolved tickets T-20260829-009/014/015 moved to done. The
+remaining 17 uncovered pairs are continuous/cross-cutting roles
+(security-monitor 0/5, stack-setup@0, version 0–6, co-security phase-6
+retest) legitimately held as `N/A_JUSTIFIED` tickets. Agent `phases:`
+frontmatter is hereby normative as the machine-readable coverage requirement
+source (ADR-0063 §Governance); declarations must be reviewed whenever
+procedures change.
