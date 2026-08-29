@@ -1,9 +1,12 @@
 #!/usr/bin/env bun
-// @version 1.17.1
+// @version 1.17.2
 // v1.17.0: Identity-separated fork support — a project whose variant.json self-declares a variant
 //           with no templates/<variant>/ dir (e.g. co-architect from co-work) is accepted in
 //           "common-only" sync mode: templates/common + project-owned files only, no readiness
 //           gate against a nonexistent variant template, variant-template passes no-op.
+// v1.17.2: Equal-version content-drift reconciliation — SYNC_IF_NEWER scripts pass now hashes
+//           same-version files and restores the canonical L1 copy when content differs (drifted
+//           local forks were invisible to version-gated sync forever).
 // v1.17.1: Country-prune safety — a skill the project variant.json registers in
 //           skill_manifest.variant_specific is kept (with a KEEP notice) even when the detected
 //           country doesn't match its scope; manifest adoption beats country inference.
@@ -975,6 +978,17 @@ for (const subDir of scriptSubDirs) {
         console.log(`  UPDATE ${rel}  ${projVer} → ${tplVer}`);
       }
       if (!dryRun) { copyFileSync(tplFile, projFile); reconcileScriptRegistry(rel); }
+      console.log(`  ${dryTag}COPIED: ${rel}`);
+      syncChanged++;
+    } else if (tplVer === projVer && fileHash(tplFile) !== fileHash(projFile)) {
+      // v1.17.2 drift reconciliation: equal version but content differs means a
+      // locally forked core script that upgrades could never see (version-gated
+      // sync skipped it forever — found across Projects/co-* on 2026-08-29 with
+      // 11 drifted forks in a single project). Core scripts are canonical: the
+      // template copy wins, unconditionally (the integrity rule "core scripts
+      // must not be modified" already forbids the local fork).
+      console.log(`  ⚠️  DRIFT  ${rel}  ${projVer} (content differs from L1 at same version) — restored to canonical`);
+      if (!dryRun) copyFileSync(tplFile, projFile);
       console.log(`  ${dryTag}COPIED: ${rel}`);
       syncChanged++;
     } else {
