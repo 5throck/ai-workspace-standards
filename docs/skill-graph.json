@@ -1162,6 +1162,11 @@
       "layer": "variant:co-design"
     },
     {
+      "id": "output_type.design_review_record",
+      "type": "output_type",
+      "layer": "variant:co-design"
+    },
+    {
       "id": "output_type.design_spec",
       "type": "output_type",
       "layer": "variant:co-deck"
@@ -1512,6 +1517,11 @@
       "layer": "variant:co-design"
     },
     {
+      "id": "output_type.prototyping_environment",
+      "type": "output_type",
+      "layer": "variant:co-game"
+    },
+    {
       "id": "output_type.publish_package",
       "type": "output_type",
       "layer": "variant:co-deck"
@@ -1545,6 +1555,11 @@
       "id": "output_type.regulatory_landscape",
       "type": "output_type",
       "layer": "variant:co-export"
+    },
+    {
+      "id": "output_type.relations_impact_notes",
+      "type": "output_type",
+      "layer": "variant:co-hr"
     },
     {
       "id": "output_type.relations_landscape",
@@ -5791,6 +5806,12 @@
     {
       "type": "produces",
       "from": "org-readiness-assessment",
+      "to": "output_type.relations_impact_notes",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "org-readiness-assessment",
       "to": "output_type.relations_landscape",
       "source": "procedure_schema"
     },
@@ -7023,6 +7044,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "step_by_agent",
+      "from": "procedure.co-design.visual-implementation",
+      "to": "design-lead",
+      "source": "procedure_schema"
+    },
+    {
       "type": "produces",
       "from": "procedure.co-design.visual-implementation",
       "to": "output_type.visual_design_set",
@@ -7056,6 +7083,12 @@
       "type": "step_by_agent",
       "from": "procedure.co-design.visual-implementation",
       "to": "typography-expert",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-design.visual-implementation",
+      "to": "ui-ux-design-intelligence",
       "source": "procedure_schema"
     },
     {
@@ -7671,6 +7704,18 @@
       "source": "procedure_schema"
     },
     {
+      "type": "step_by_agent",
+      "from": "procedure.co-game.game-concept-design",
+      "to": "stack-setup",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-game.game-concept-design",
+      "to": "test-driven-development",
+      "source": "procedure_schema"
+    },
+    {
       "type": "step_uses_skill",
       "from": "procedure.co-game.game-content-production",
       "to": "arcade-physics",
@@ -7941,6 +7986,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "step_by_agent",
+      "from": "procedure.co-hr.hr-solution-design",
+      "to": "labor-relations-specialist",
+      "source": "procedure_schema"
+    },
+    {
       "type": "step_uses_skill",
       "from": "procedure.co-hr.hr-solution-design",
       "to": "learning-curriculum-design",
@@ -7962,6 +8013,12 @@
       "type": "step_uses_skill",
       "from": "procedure.co-hr.hr-solution-design",
       "to": "org-design-framework",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-hr.hr-solution-design",
+      "to": "org-readiness-assessment",
       "source": "procedure_schema"
     },
     {
@@ -10989,6 +11046,12 @@
     {
       "type": "produces",
       "from": "test-driven-development",
+      "to": "output_type.prototyping_environment",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "test-driven-development",
       "to": "output_type.regression_report",
       "source": "procedure_schema"
     },
@@ -11144,6 +11207,12 @@
       "from": "ui-ux-design-intelligence",
       "to": "design-lead",
       "source": "skill_manifest"
+    },
+    {
+      "type": "produces",
+      "from": "ui-ux-design-intelligence",
+      "to": "output_type.design_review_record",
+      "source": "procedure_schema"
     },
     {
       "type": "produces",

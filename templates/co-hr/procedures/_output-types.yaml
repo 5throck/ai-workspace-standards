@@ -35,3 +35,5 @@ output_types:
     description: "Registered procedure output type"
   compliance_findings:
     description: "Registered procedure output type"
+  relations_impact_notes:
+    description: "Registered procedure output type"

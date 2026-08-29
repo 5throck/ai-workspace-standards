@@ -56,6 +56,12 @@ steps:
     output_type: change_roadmap
     description: >
       Package the solution with a change adoption roadmap.
+  - id: 8
+    agent_key: labor-relations-specialist
+    skill_key: org-readiness-assessment
+    output_type: relations_impact_notes
+    description: >
+      Review the solution for labor relations consequences before packaging.
 outputs:
   - type: org_design_options
 relations:

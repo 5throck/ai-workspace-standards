@@ -1,6 +1,6 @@
 ---
 name: test-runner
-phases: [4]
+phases: [3, 4]
 role: SAP Quality Assurance Specialist
 model: inherit
 color: red

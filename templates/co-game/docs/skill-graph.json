@@ -112,6 +112,11 @@
       "layer": "variant:co-game"
     },
     {
+      "id": "output_type.prototyping_environment",
+      "type": "output_type",
+      "layer": "variant:co-game"
+    },
+    {
       "id": "output_type.regression_report",
       "type": "output_type",
       "layer": "variant:co-game"
@@ -470,6 +475,18 @@
       "source": "procedure_schema"
     },
     {
+      "type": "step_by_agent",
+      "from": "procedure.co-game.game-concept-design",
+      "to": "stack-setup",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-game.game-concept-design",
+      "to": "test-driven-development",
+      "source": "procedure_schema"
+    },
+    {
       "type": "step_uses_skill",
       "from": "procedure.co-game.game-content-production",
       "to": "arcade-physics",
@@ -672,6 +689,12 @@
       "from": "test-driven-development",
       "to": "game-developer",
       "source": "skill_manifest"
+    },
+    {
+      "type": "produces",
+      "from": "test-driven-development",
+      "to": "output_type.prototyping_environment",
+      "source": "procedure_schema"
     },
     {
       "type": "produces",

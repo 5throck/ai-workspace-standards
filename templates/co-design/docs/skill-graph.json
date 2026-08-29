@@ -27,6 +27,11 @@
       "layer": "variant:co-design"
     },
     {
+      "id": "output_type.design_review_record",
+      "type": "output_type",
+      "layer": "variant:co-design"
+    },
+    {
       "id": "output_type.discovery_review",
       "type": "output_type",
       "layer": "variant:co-design"
@@ -328,6 +333,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "step_by_agent",
+      "from": "procedure.co-design.visual-implementation",
+      "to": "design-lead",
+      "source": "procedure_schema"
+    },
+    {
       "type": "produces",
       "from": "procedure.co-design.visual-implementation",
       "to": "output_type.visual_design_set",
@@ -361,6 +372,12 @@
       "type": "step_by_agent",
       "from": "procedure.co-design.visual-implementation",
       "to": "typography-expert",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-design.visual-implementation",
+      "to": "ui-ux-design-intelligence",
       "source": "procedure_schema"
     },
     {
@@ -464,6 +481,12 @@
       "from": "ui-ux-design-intelligence",
       "to": "design-lead",
       "source": "skill_manifest"
+    },
+    {
+      "type": "produces",
+      "from": "ui-ux-design-intelligence",
+      "to": "output_type.design_review_record",
+      "source": "procedure_schema"
     },
     {
       "type": "produces",

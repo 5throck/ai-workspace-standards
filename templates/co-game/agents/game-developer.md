@@ -22,7 +22,7 @@ description: >
 examples:
   - user: "Implement the ghost chase AI from the ghost-ai-spec.md"
     assistant: "Implementing Blinky direct chase behavior with tile-based pathfinding."
-phases: [4]
+phases: [3, 4]
 handoff_to: [test-runner]
 handoff_from: [architect, game-designer, visual-artist]
 required_skills: [arcade-physics]
