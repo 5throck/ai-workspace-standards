@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Fixed
+- **[2026-08-29]**: fix(upgrade): **`upgrade-project.ts` 1.17.1 → 1.17.2 — equal-version core-script drift reconciliation.** SYNC_IF_NEWER skipped scripts whose version matched the project's even when content differed, so locally forked core scripts stayed invisible to every future upgrade (audit across Projects/co-* found drifted forks in 7 of 8 projects, e.g. `sync-md`, `team-builder`, `dispatch`, `gen-pr-body`). Same-version scripts are now hash-compared and the canonical L1 copy is restored with a `⚠️ DRIFT … restored to canonical` notice. This closes the promotion-integrity hole: drifted core scripts hard-fail the L3→variant pipeline's integrity check.
+
+### Fixed
 - **[2026-08-29]**: fix(upgrade): **`upgrade-project.ts` 1.17.0 → 1.17.1 — country-prune safety for manifest-declared skills.** The country-scoped prune pass deleted skills registered in the workspace `country_scoped_assets` registry whenever the project's detected country didn't match — including skills the project's own `variant.json` `skill_manifest.variant_specific` deliberately declares (surfaced when co-newbiz, lacking `template-version.txt`, would have had `k-law` — a manifest-declared KR asset — silently pruned). The prune now KEEPS manifest-declared skills with a `KEEP` notice; manifest adoption beats country inference. Plus project-side hardening in `Projects/co-newbiz`: `template-version.txt` created (`variant=co-newbiz, country=KR` — upgrades now run common-only mode and preserve KR assets), `docs/countries/ACTIVE.md` pointer added, `k-dart`/`k-kosis` added to the skill manifest alongside `k-law`, and a dangling `translate → documentation-writing` edge removed.
 
 ### Fixed
