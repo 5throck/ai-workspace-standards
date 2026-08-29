@@ -5,7 +5,7 @@
 | Date | 2026-08-29 |
 | Status | accepted (user-approved plan; items re-scoped after re-exploration) |
 | Spec ID | `reledgev` |
-| Governing anchors | [ADR-0060](../adr/0060-skill-relationship-graph-generated-projection.md) (+ Amendments 3–5), [ADR-0061](../adr/0061-decision-record-standard.md), [ADR-0063](../adr/0063-procedure-schema-canonical-workflow-source.md) |
+| Governing anchors | [ADR-0060](../adr/0060-skill-relationship-graph-generated-projection.md) (+ Amendments 3–6), [ADR-0061](../adr/0061-decision-record-standard.md), [ADR-0063](../adr/0063-procedure-schema-canonical-workflow-source.md) |
 | Related designs | `2026-08-28-skill-graph-typed-relations-design.md`, `2026-08-29-procedure-schema-design.md`, `2026-08-29-procedure-coverage-and-l0-design.md`, `2026-08-24-decision-chain-standard-design.md` |
 
 ## 1. Problem Statement

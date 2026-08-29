@@ -92,6 +92,7 @@ Hard gates get **stable rule IDs** (e.g. `NEWS-R1: two-source rule`) that ledger
 | `skills/evidence-ledger/SKILL.md` | New common skill — fixed-column ledger + variant-overlay contract (lands in follow-up PRs) |
 | `skills/decision-record/SKILL.md` | New common skill — decision record format and when to log (lands in follow-up PRs) |
 | `scripts/audit.ts` | Soft-check when `docs/decisions/` exists (lands in follow-up PRs) |
+| `scripts/validate-decisions.ts` | Fail-closed chain validator (v1.0.0, 2026-08-29): required frontmatter, id/filename alignment, status vocabulary, `evidence_refs` ⊆ ledger row IDs, `knowledge_refs` existence, `rules_applied` ID format, `skills_used` resolution — complements the audit.ts soft-check per the §5 WARN→FAIL ladder |
 | Variant context.md files | Rule-ID registries (e.g. `NEWS-R1`) (lands in follow-up PRs, variant-by-variant) |
 | `docs/constitution/05-multi-agent-architecture.md` | Pointer in §5.4: gate-moment decisions must emit a decision record per this ADR (this PR) |
 
