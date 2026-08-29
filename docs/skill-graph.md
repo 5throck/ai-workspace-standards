@@ -28,6 +28,8 @@
 | `cost-shock-analysis` | variant:co-price | — | — | — | — | — |
 | `create-variant` | L0 | — | — | — | — | — |
 | `customs-duty-drawback-workflow` | variant:co-export | customs-duty-drawback-specialist, customs-duty-drawback-specialist | phase3, phase4 | — | — | — |
+| `daily/audit-preparation` | variant:co-safety | — | — | — | — | — |
+| `daily/risk-assessment` | variant:co-safety | — | — | — | — | — |
 | `decision-record` | common | — | — | — | — | — |
 | `desktop-app-fallback` | variant:co-abap | code-writer, test-runner | phase3, phase4 | — | — | — |
 | `documentation-writing` | L0 | content-writer, technical-writer | — | — | — | — |
@@ -60,6 +62,7 @@
 | `i18n-layout` | common | i18n-specialist | — | — | — | — |
 | `i18n-locale-config` | common | i18n-specialist | — | — | — | — |
 | `insight-synthesis` | variant:co-consult | data-analyst, data-analyst, strategy-analyst, strategy-analyst | phase1, phase3 | — | — | — |
+| `investigation/hazop-analysis` | variant:co-safety | — | — | — | — | — |
 | `k-dart` | common | — | — | — | — | — |
 | `k-kosis` | common | — | — | — | — | — |
 | `k-law` | common | — | — | — | — | — |
@@ -171,6 +174,9 @@ Skills used in specific lifecycle phases (from `variant.json` `skill_manifest`):
 | `composes_with` | Typed `relates_to` entry — symmetric, used together in the same phase/workflow (ADR-0060 Amendment 3) |
 | `follows` | Typed `relates_to` entry — sequential/ordering relation, no dependency implication (ADR-0060 Amendment 3) |
 | `enables` | Typed `relates_to` entry — this skill's output unlocks another skill/workflow (ADR-0060 Amendment 3) |
+| `step_uses_skill` | Procedure step → skill, derived from procedure schema.yaml (Procedure Schema v1.0) |
+| `step_by_agent` | Procedure step → agent, derived from procedure schema.yaml (Procedure Schema v1.0) |
+| `produces` | Procedure or skill → output_type node, derived per the INV-4 rule (Procedure Schema v1.0) |
 
 `composes_with` edges carry `symmetric: true` in the JSON and are stored once
 (source→target as declared); consumers MUST treat them as traversable both ways.

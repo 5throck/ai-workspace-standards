@@ -1,0 +1,54 @@
+schema_version: "1.0"
+procedure_id: co-price-pricing-analysis
+variant: co-price
+version: "1.0.0"
+title: Pricing Analysis
+phase: 1
+status: active
+owner_agent: pricing-strategist
+purpose: >
+  Produce a quantified price recommendation from willingness-to-pay methods
+  and waterfall economics, governed by the pricing governance rules.
+inputs: []
+preconditions:
+  - "Engagement scope confirmed and client transaction data ingested."
+steps:
+  - id: 1
+    agent_key: market-intelligence-analyst
+    skill_key: competitive-intelligence
+    output_type: market_baseline
+    description: >
+      Establish the competitive and market baseline the pricing methods will
+      anchor against.
+  - id: 2
+    agent_key: pricing-strategist
+    skill_key: van-westendorp-psm
+    output_type: wtp_findings
+    description: >
+      Run Van Westendorp price sensitivity measurement to bound acceptable
+      price ranges.
+  - id: 3
+    agent_key: pricing-strategist
+    skill_key: gabor-granger
+    output_type: demand_curve
+    description: >
+      Quantify demand at candidate price points with Gabor-Granger.
+  - id: 4
+    agent_key: pricing-strategist
+    skill_key: price-waterfall-analysis
+    output_type: waterfall_model
+    description: >
+      Model list-to-net waterfall economics to reconcile headline price with
+      realized margin.
+outputs:
+  - type: price_recommendation
+relations:
+  - type: enables
+    target: skill.pricing-governance
+quality_gates:
+  - "Recommendation reconciles with the waterfall model within tolerance."
+  - "Scenario comparison run across at least three price points."
+evidence:
+  - "docs/pricing-governance-rules.md"
+failure_modes:
+  - "Client data quality below ingestion contract - halt analysis rather than fitting models to bad inputs."

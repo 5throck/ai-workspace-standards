@@ -1,0 +1,45 @@
+schema_version: "1.0"
+procedure_id: co-develop-feature-implementation
+variant: co-develop
+version: "1.0.0"
+title: Feature Implementation
+phase: 3
+status: active
+owner_agent: code-writer
+purpose: >
+  Implement an approved feature with test-first discipline, review, and
+  security monitoring.
+inputs:
+  - approved_implementation_plan
+preconditions:
+  - "Implementation plan approved at the phase 2 design gate."
+steps:
+  - id: 1
+    agent_key: architect
+    skill_key: test-driven-development
+    output_type: test_scaffold
+    description: >
+      Break the plan into testable increments and scaffold failing tests.
+  - id: 2
+    agent_key: code-writer
+    skill_key: test-driven-development
+    output_type: implementation_commit
+    description: >
+      Implement the feature increment by increment until all tests pass.
+  - id: 3
+    agent_key: security-monitor
+    skill_key: code-review
+    output_type: review_findings
+    description: >
+      Review the implementation for correctness and security concerns.
+outputs:
+  - type: implementation_commit
+relations:
+  - type: follows
+    target: skill.refactoring
+quality_gates:
+  - "All tests green and code review findings resolved before merge."
+evidence:
+  - "docs/handoff-spec.md"
+failure_modes:
+  - "Architecture assumption breaks during implementation - halt and return to the design gate."

@@ -1,0 +1,11 @@
+schema_version: "1.0"
+variant: co-security
+output_types:
+  engagement_scope:
+    description: "Registered procedure output type"
+  threat_model:
+    description: "Registered procedure output type"
+  validated_findings:
+    description: "Registered procedure output type"
+  engagement_report:
+    description: "Registered procedure output type"

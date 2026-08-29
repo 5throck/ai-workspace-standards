@@ -5,10 +5,10 @@
     "": {
       "name": "ai-workspace-scripts",
       "dependencies": {
-        "js-yaml": "^5.3.0",
+        "js-yaml": "^5.4.1",
       },
       "devDependencies": {
-        "@types/node": "^26.2.0",
+        "@types/node": "^26.4.0",
         "typescript": "^7.0.2",
       },
     },
@@ -18,7 +18,7 @@
     "hono": ">=4.12.25",
   },
   "packages": {
-    "@types/node": ["@types/node@26.2.0", "", { "dependencies": { "undici-types": "~8.3.0" } }, "sha512-5IviulTZeRNp2vAJ514cc/HUlY5nZ9fCbq9DMyC52BrhFZACo3nI0R7qBxhQmo/d27NFe96ur/b7Wwxklda+kg=="],
+    "@types/node": ["@types/node@26.4.0", "", { "dependencies": { "undici-types": "~8.3.0" } }, "sha512-faiGnoIrLH/V8cibOMEAZ8pMw6oXqSukl29ra4mN8GdaB2ZewzeaLj+INpV5N+Z1eKWzY+IzaIZH2EIR6YZRNQ=="],
 
     "@typescript/typescript-aix-ppc64": ["@typescript/typescript-aix-ppc64@7.0.2", "", { "os": "aix", "cpu": "ppc64" }, "sha512-MTKKkWB7p/0E9xi1d1tHtZ5PiLkGEMIq88pK2CubZjOsLtYTLqhgIgi6zepFa+9GHZ6h05NMCkQxGKiPXMxXtQ=="],
 
@@ -62,7 +62,7 @@
 
     "argparse": ["argparse@2.0.1", "", {}, "sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q=="],
 
-    "js-yaml": ["js-yaml@5.3.0", "", { "dependencies": { "argparse": "^2.0.1" }, "bin": { "js-yaml": "bin/js-yaml.mjs" } }, "sha512-muutsYr+e2+d3rTgUGslq5rxbBlUy3cJ61IsHag2QNDQV+7zXWjkUpmALIajhrlLlrgRUiymj6U3zUr/TMK84Q=="],
+    "js-yaml": ["js-yaml@5.4.1", "", { "dependencies": { "argparse": "^2.0.1" }, "bin": { "js-yaml": "bin/js-yaml.mjs" } }, "sha512-28R/k+NAjeuf7+CKlTxWZVExJGwVVLwY06DgEnOMz2gEpfNkDcD7QvyiVPT0xy0XXhU8vHsd4Ot42OOPdJG7dQ=="],
 
     "typescript": ["typescript@7.0.2", "", { "optionalDependencies": { "@typescript/typescript-aix-ppc64": "7.0.2", "@typescript/typescript-darwin-arm64": "7.0.2", "@typescript/typescript-darwin-x64": "7.0.2", "@typescript/typescript-freebsd-arm64": "7.0.2", "@typescript/typescript-freebsd-x64": "7.0.2", "@typescript/typescript-linux-arm": "7.0.2", "@typescript/typescript-linux-arm64": "7.0.2", "@typescript/typescript-linux-loong64": "7.0.2", "@typescript/typescript-linux-mips64el": "7.0.2", "@typescript/typescript-linux-ppc64": "7.0.2", "@typescript/typescript-linux-riscv64": "7.0.2", "@typescript/typescript-linux-s390x": "7.0.2", "@typescript/typescript-linux-x64": "7.0.2", "@typescript/typescript-netbsd-arm64": "7.0.2", "@typescript/typescript-netbsd-x64": "7.0.2", "@typescript/typescript-openbsd-arm64": "7.0.2", "@typescript/typescript-openbsd-x64": "7.0.2", "@typescript/typescript-sunos-x64": "7.0.2", "@typescript/typescript-win32-arm64": "7.0.2", "@typescript/typescript-win32-x64": "7.0.2" }, "bin": { "tsc": "bin/tsc" } }, "sha512-8FYau96o3NKOhbjKi/qNvG/W5jhzxkbdm5sj9AbZ/5T5sWqn3hJgLfGx27sRKZWTvyzCP8dLRBTf5tBTSRVUNA=="],
 

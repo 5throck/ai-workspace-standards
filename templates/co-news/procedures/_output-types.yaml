@@ -1,0 +1,13 @@
+schema_version: "1.0"
+variant: co-news
+output_types:
+  story_brief:
+    description: "Registered procedure output type"
+  draft_article:
+    description: "Registered procedure output type"
+  verification_ledger:
+    description: "Registered procedure output type"
+  legal_review_note:
+    description: "Registered procedure output type"
+  final_article:
+    description: "Registered procedure output type"

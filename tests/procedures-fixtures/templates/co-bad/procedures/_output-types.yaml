@@ -1,0 +1,5 @@
+schema_version: "1.0"
+variant: co-bad
+output_types:
+  known_type:
+    description: "Known"

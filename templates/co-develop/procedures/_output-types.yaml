@@ -1,0 +1,11 @@
+schema_version: "1.0"
+variant: co-develop
+output_types:
+  approved_implementation_plan:
+    description: "Registered procedure output type"
+  test_scaffold:
+    description: "Registered procedure output type"
+  implementation_commit:
+    description: "Registered procedure output type"
+  review_findings:
+    description: "Registered procedure output type"

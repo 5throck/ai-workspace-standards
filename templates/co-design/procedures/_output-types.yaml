@@ -1,0 +1,9 @@
+schema_version: "1.0"
+variant: co-design
+output_types:
+  research_findings:
+    description: "Registered procedure output type"
+  service_blueprint:
+    description: "Registered procedure output type"
+  discovery_review:
+    description: "Registered procedure output type"

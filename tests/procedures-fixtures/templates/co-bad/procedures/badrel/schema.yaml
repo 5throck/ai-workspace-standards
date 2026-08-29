@@ -1,0 +1,29 @@
+schema_version: "1.0"
+procedure_id: co-bad-badrel
+variant: co-bad
+version: "1.0.0"
+title: badrel
+phase: 1
+status: active
+owner_agent: known-agent
+purpose: >
+  Fixture.
+inputs: []
+preconditions:
+  - "P."
+steps:
+  - id: 1
+    agent_key: known-agent
+    skill_key: x
+    output_type: known_type
+    description: >
+      S.
+outputs: []
+relations:
+  - type: loves
+    target: procedure.co-missing.thing
+quality_gates:
+  - "G."
+evidence: []
+failure_modes:
+  - "F."

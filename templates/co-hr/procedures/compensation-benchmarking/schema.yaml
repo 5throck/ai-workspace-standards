@@ -1,0 +1,44 @@
+schema_version: "1.0"
+procedure_id: co-hr-compensation-benchmarking
+variant: co-hr
+version: "1.0.0"
+title: Compensation Benchmarking
+phase: 1
+status: active
+owner_agent: compensation-benefits-analyst
+purpose: >
+  Produce a defensible compensation benchmark comparing client pay positions
+  against market data.
+inputs: []
+preconditions:
+  - "Job architecture and benchmark roles agreed with the client."
+steps:
+  - id: 1
+    agent_key: data-analyst
+    skill_key: compensation-benchmarking
+    output_type: market_dataset
+    description: >
+      Assemble and normalize market pay data for the agreed benchmark roles.
+  - id: 2
+    agent_key: compensation-benefits-analyst
+    skill_key: hr-metrics-analysis
+    output_type: gap_analysis
+    description: >
+      Compare client positions to the market dataset and quantify gaps by
+      role and level.
+  - id: 3
+    agent_key: compensation-benefits-analyst
+    skill_key: consulting-report-writing
+    output_type: benchmark_report
+    description: >
+      Write the benchmark report with methodology, findings, and pay-range
+      recommendations.
+outputs:
+  - type: benchmark_report
+relations: []
+quality_gates:
+  - "Data sources disclosed and every figure traceable to the market dataset."
+evidence:
+  - "docs/iso-30414-metrics-mapping.md"
+failure_modes:
+  - "Market data coverage too thin for a role - mark it no-benchmark rather than interpolating silently."

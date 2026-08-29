@@ -1,0 +1,13 @@
+schema_version: "1.0"
+variant: co-deck
+output_types:
+  research_pack:
+    description: "Registered procedure output type"
+  storyline_outline:
+    description: "Registered procedure output type"
+  design_spec:
+    description: "Registered procedure output type"
+  html_deck:
+    description: "Registered procedure output type"
+  pdf_deck:
+    description: "Registered procedure output type"

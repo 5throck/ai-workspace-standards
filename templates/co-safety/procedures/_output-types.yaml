@@ -1,0 +1,9 @@
+schema_version: "1.0"
+variant: co-safety
+output_types:
+  hazard_inventory:
+    description: "Registered procedure output type"
+  risk_assessment_record:
+    description: "Registered procedure output type"
+  governance_review:
+    description: "Registered procedure output type"

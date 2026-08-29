@@ -1,0 +1,32 @@
+# Procedure Schema v1.0 — authoring skeleton
+# Copy this directory to templates/<variant>/procedures/<kebab-name>/schema.yaml
+# and replace every placeholder. See templates/common/docs/procedure-schema-spec.md
+# for authoring rules and docs/designs/2026-08-29-procedure-schema-design.md
+# for the normative design.
+schema_version: "1.0"
+procedure_id: <variant>-<kebab-name>   # must match "<variant>-<directory-name>"
+variant: <variant>                     # e.g. co-design
+version: "0.1.0"                       # semver; bump on substantive change
+title: "<Human-readable procedure title>"
+phase: 1                               # integer 0–6 (common phase vocabulary)
+status: draft                          # draft | active | deprecated
+owner_agent: <agent-key>               # must exist: agents/<agent-key>.md
+purpose: >
+  One paragraph: what this procedure accomplishes and when it is used.
+inputs: []                             # output types consumed; register in _output-types.yaml
+preconditions:
+  - "<Condition that must hold before step 1 runs.>"
+steps:
+  - id: 1                              # integer or fractional (2.5) for insertion
+    agent_key: <agent-key>             # must exist: agents/<agent-key>.md
+    skill_key: <skill-key>             # must exist: skills/<skill-key>/SKILL.md
+    output_type: <output-type>         # must be registered in _output-types.yaml
+    description: >
+      What this step does and why it is ordered here.
+outputs: []                            # procedure-level production; one entry per type
+relations: []                          # {type: follows|enables|composes_with, target}
+quality_gates:
+  - "<Condition under which this procedure's output is accepted.>"
+evidence: []                           # pointers to where the output lands
+failure_modes:
+  - "<What halts or escalates this procedure, and how.>"

@@ -1,0 +1,55 @@
+schema_version: "1.0"
+procedure_id: co-deck-lecture-deck-production
+variant: co-deck
+version: "1.0.0"
+title: Lecture Deck Production
+phase: 3
+status: active
+owner_agent: pm
+purpose: >
+  Produce a lecture slide deck end to end: research, storyline, visual design,
+  HTML build, and PDF export.
+inputs: []
+preconditions:
+  - "Lecture profile confirmed and source materials collected."
+steps:
+  - id: 1
+    agent_key: research
+    skill_key: research
+    output_type: research_pack
+    description: >
+      Collect and verify lecture source material into a research pack.
+  - id: 2
+    agent_key: storyline
+    skill_key: storyline
+    output_type: storyline_outline
+    description: >
+      Convert the research pack into a per-slide storyline outline.
+  - id: 3
+    agent_key: design
+    skill_key: design
+    output_type: design_spec
+    description: >
+      Lock visual design style and produce the design spec for the build.
+  - id: 4
+    agent_key: html-build
+    skill_key: html-build
+    output_type: html_deck
+    description: >
+      Build the deck as HTML slides from the storyline outline and design spec.
+  - id: 5
+    agent_key: pdf-export
+    skill_key: pdf-export
+    output_type: pdf_deck
+    description: >
+      Export the finished HTML deck to PDF and run the measure gate.
+outputs:
+  - type: pdf_deck
+relations: []
+quality_gates:
+  - "Slide layout gate passes on every slide before export."
+  - "Measure check confirms readability at target projector resolution."
+evidence:
+  - "docs/co-deck.context.md"
+failure_modes:
+  - "Source material cannot be verified - halt research and flag gaps to pm rather than presenting unverified claims."

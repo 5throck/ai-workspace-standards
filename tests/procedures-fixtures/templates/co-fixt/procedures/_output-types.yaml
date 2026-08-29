@@ -1,0 +1,7 @@
+schema_version: "1.0"
+variant: co-fixt
+output_types:
+  research_findings:
+    description: "Synthesized findings"
+  persona_set:
+    description: "Persona set"

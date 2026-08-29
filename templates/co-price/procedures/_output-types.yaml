@@ -1,0 +1,13 @@
+schema_version: "1.0"
+variant: co-price
+output_types:
+  market_baseline:
+    description: "Registered procedure output type"
+  wtp_findings:
+    description: "Registered procedure output type"
+  demand_curve:
+    description: "Registered procedure output type"
+  waterfall_model:
+    description: "Registered procedure output type"
+  price_recommendation:
+    description: "Registered procedure output type"

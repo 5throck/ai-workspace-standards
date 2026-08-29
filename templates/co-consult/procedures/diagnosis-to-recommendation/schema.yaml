@@ -1,0 +1,48 @@
+schema_version: "1.0"
+procedure_id: co-consult-diagnosis-to-recommendation
+variant: co-consult
+version: "1.0.0"
+title: Diagnosis to Recommendation
+phase: 1
+status: active
+owner_agent: strategy-analyst
+purpose: >
+  Move from company and market diagnosis to a MECE-structured recommendation
+  set validated by evidence and stakeholder review.
+inputs: []
+preconditions:
+  - "Engagement kickoff completed and problem statement confirmed by the client."
+steps:
+  - id: 1
+    agent_key: industry-expert
+    skill_key: company-intelligence
+    output_type: diagnosis_findings
+    description: >
+      Gather company, industry, and market intelligence to ground the
+      diagnosis in verifiable facts.
+  - id: 2
+    agent_key: data-analyst
+    skill_key: financial-modeling
+    output_type: quantitative_baseline
+    description: >
+      Build the quantitative baseline and scenario models that recommendations
+      must reconcile against.
+  - id: 3
+    agent_key: strategy-analyst
+    skill_key: insight-synthesis
+    output_type: recommendation_set
+    description: >
+      Synthesize diagnosis and baseline into a MECE recommendation set audited
+      for logic before client presentation.
+outputs:
+  - type: recommendation_set
+relations:
+  - type: enables
+    target: skill.consulting-report-writing
+quality_gates:
+  - "Every recommendation traces to at least one verified evidence item."
+  - "Logic audit passes before executive presentation."
+evidence:
+  - "docs/engagement-orchestration.md"
+failure_modes:
+  - "Client data unavailable or contradictory - escalate to delivery-manager before proceeding on assumptions."

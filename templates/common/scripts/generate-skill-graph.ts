@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Skill Relationship Graph Generator
- * @version 1.4.0
+ * @version 1.5.0
  *
  * Generates a skill relationship graph from multiple sources:
  * - SKILL.md files (prerequisites, relates_to frontmatter fields)
@@ -57,7 +57,7 @@ const localLayer: 'L0' | 'L3' = existsSync(templatesDir) ? 'L0' : 'L3';
 // Interfaces for the graph structure
 interface GraphNode {
   id: string;
-  type: 'skill' | 'agent' | 'decision' | 'adr';
+  type: 'skill' | 'agent' | 'decision' | 'adr' | 'procedure' | 'output_type';
   layer: 'L0' | 'L3' | 'common' | 'variant:string';
   /** Opaque input/output labels from SKILL.md frontmatter (skill nodes only). */
   inputs?: string[];
@@ -67,7 +67,11 @@ interface GraphNode {
 type EdgeType =
   | 'requires' | 'relates_to' | 'used_by' | 'phase' | 'supersedes' | 'references' | 'cites_skill'
   // ADR-0060 Amendment 3 (2026-08-29): typed relation vocabulary
-  | 'composes_with' | 'follows' | 'enables';
+  | 'composes_with' | 'follows' | 'enables'
+  // Procedure Schema v1.0 (2026-08-29): procedure-derived edges (canonical
+  // source = templates/<variant>/procedures/<name>/schema.yaml — INV-1, see
+  // docs/designs/2026-08-29-procedure-schema-design.md)
+  | 'step_uses_skill' | 'step_by_agent' | 'produces';
 
 // Typed `relates_to` entry shape is a *forward-open* object: {skill, type} are
 // the only two fields Phase 1 interprets. Any additional key (e.g. a future
@@ -672,6 +676,104 @@ export function buildGraph(): SkillGraph {
     }
   }
 
+  // Source 4.7: Procedures — derived from templates/<variant>/procedures/<name>/schema.yaml
+  // (Procedure Schema v1.0). The procedure YAML is the canonical source; these
+  // nodes/edges are pure derivation and MUST NOT be hand-maintained (INV-1,
+  // docs/designs/2026-08-29-procedure-schema-design.md). Produces-edge rule:
+  // procedure-level outputs[] → procedure → output_type; step output_type NOT in
+  // outputs[] → the step's skill → output_type (INV-4).
+  if (existsSync(templatesDir)) {
+    const variants = readdirSync(templatesDir, { withFileTypes: true });
+    for (const variant of variants) {
+      if (!variant.isDirectory() || !variant.name.startsWith('co-')) continue;
+      const procDir = join(templatesDir, variant.name, 'procedures');
+      if (!existsSync(procDir)) continue;
+
+      for (const entry of readdirSync(procDir, { withFileTypes: true })) {
+        if (!entry.isDirectory() || entry.name.startsWith('_')) continue;
+        const schemaPath = join(procDir, entry.name, 'schema.yaml');
+        if (!existsSync(schemaPath)) continue;
+
+        let data: any;
+        try {
+          data = yamlLoad(readFileSync(schemaPath, 'utf-8'));
+        } catch {
+          console.warn(`Warning: cannot parse ${schemaPath}, skipping`);
+          continue;
+        }
+        if (!data || typeof data !== 'object') continue;
+
+        const procId: string = `procedure.${variant.name}.${entry.name}`;
+        allNodes.set(procId, { id: procId, type: 'procedure', layer: `variant:${variant.name}` });
+
+        const ensureOutputType = (type: string): void => {
+          const id = `output_type.${type}`;
+          if (!allNodes.has(id)) {
+            allNodes.set(id, { id, type: 'output_type', layer: `variant:${variant.name}` });
+          }
+        };
+        // Nested skill keys (e.g. co-safety `daily/risk-assessment`) exist on
+        // disk below the flat discovery depth — materialize them as skill nodes
+        // so the unknown-target invariant holds.
+        const ensureSkill = (key: string): void => {
+          if (!allNodes.has(key)) {
+            allNodes.set(key, { id: key, type: 'skill', layer: `variant:${variant.name}` });
+          }
+        };
+
+        const procedureOutputs = new Set<string>();
+        if (Array.isArray(data.outputs)) {
+          for (const o of data.outputs) {
+            const type = o && typeof o === 'object' ? o.type : o;
+            if (typeof type === 'string' && type) {
+              procedureOutputs.add(type);
+              ensureOutputType(type);
+              edges.push({ type: 'produces', from: procId, to: `output_type.${type}`, source: 'procedure_schema' });
+            }
+          }
+        }
+
+        if (Array.isArray(data.steps)) {
+          for (const step of data.steps) {
+            if (!step || typeof step !== 'object') continue;
+            if (typeof step.skill_key === 'string' && step.skill_key) {
+              ensureSkill(step.skill_key);
+              edges.push({ type: 'step_uses_skill', from: procId, to: step.skill_key, source: 'procedure_schema' });
+              if (typeof step.output_type === 'string' && step.output_type && !procedureOutputs.has(step.output_type)) {
+                ensureOutputType(step.output_type);
+                edges.push({ type: 'produces', from: step.skill_key, to: `output_type.${step.output_type}`, source: 'procedure_schema' });
+              }
+            }
+            if (typeof step.agent_key === 'string' && step.agent_key && allNodes.has(step.agent_key)) {
+              edges.push({ type: 'step_by_agent', from: procId, to: step.agent_key, source: 'procedure_schema' });
+            }
+          }
+        }
+
+        if (Array.isArray(data.relations)) {
+          for (const rel of data.relations) {
+            if (!rel || typeof rel !== 'object') continue;
+            const { type, target } = rel;
+            if (type !== 'follows' && type !== 'enables' && type !== 'composes_with') continue;
+            if (typeof target !== 'string' || !target) continue;
+            const procMatch = /^procedure\.([a-z0-9-]+)\.([a-z0-9-]+)$/.exec(target);
+            const skillMatch = /^skill\.(.+)$/.exec(target);
+            if (procMatch) {
+              const targetId = target;
+              if (!allNodes.has(targetId)) {
+                allNodes.set(targetId, { id: targetId, type: 'procedure', layer: `variant:${procMatch[1]}` });
+              }
+              edges.push({ type, from: procId, to: targetId, source: 'procedure_schema' });
+            } else if (skillMatch) {
+              ensureSkill(skillMatch[1]);
+              edges.push({ type, from: procId, to: skillMatch[1], source: 'procedure_schema' });
+            }
+          }
+        }
+      }
+    }
+  }
+
   // Source 5: Overrides
   const overridesPath = join(ROOT, 'docs', 'skill-graph.overrides.json');
   let overrides: Overrides = { edges: [] };
@@ -1034,6 +1136,9 @@ function generateMarkdown(graph: SkillGraph): string {
   lines.push('| `composes_with` | Typed `relates_to` entry — symmetric, used together in the same phase/workflow (ADR-0060 Amendment 3) |');
   lines.push('| `follows` | Typed `relates_to` entry — sequential/ordering relation, no dependency implication (ADR-0060 Amendment 3) |');
   lines.push('| `enables` | Typed `relates_to` entry — this skill\'s output unlocks another skill/workflow (ADR-0060 Amendment 3) |');
+  lines.push('| `step_uses_skill` | Procedure step → skill, derived from procedure schema.yaml (Procedure Schema v1.0) |');
+  lines.push('| `step_by_agent` | Procedure step → agent, derived from procedure schema.yaml (Procedure Schema v1.0) |');
+  lines.push('| `produces` | Procedure or skill → output_type node, derived per the INV-4 rule (Procedure Schema v1.0) |');
   lines.push('');
   lines.push('`composes_with` edges carry `symmetric: true` in the JSON and are stored once');
   lines.push('(source→target as declared); consumers MUST treat them as traversable both ways.');

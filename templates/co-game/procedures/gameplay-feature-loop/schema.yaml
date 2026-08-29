@@ -1,0 +1,44 @@
+schema_version: "1.0"
+procedure_id: co-game-gameplay-feature-loop
+variant: co-game
+version: "1.0.0"
+title: Gameplay Feature Loop
+phase: 3
+status: active
+owner_agent: game-developer
+purpose: >
+  Implement one gameplay feature through design, test-first development,
+  debugging, and physics verification.
+inputs:
+  - feature_spec
+preconditions:
+  - "Feature spec approved by game-designer and scoped in the milestone."
+steps:
+  - id: 1
+    agent_key: game-designer
+    skill_key: arcade-physics
+    output_type: tuning_parameters
+    description: >
+      Specify gameplay tuning parameters, including physics behavior targets.
+  - id: 2
+    agent_key: game-developer
+    skill_key: test-driven-development
+    output_type: implementation_commit
+    description: >
+      Implement the feature with test-first discipline against the tuning
+      parameters.
+  - id: 3
+    agent_key: game-debugger
+    skill_key: code-review
+    output_type: defect_report
+    description: >
+      Reproduce, isolate, and report defects found in the new feature.
+outputs:
+  - type: implementation_commit
+relations: []
+quality_gates:
+  - "All tests pass and no open P0/P1 defects remain in the feature."
+evidence:
+  - "docs/scene-management.md"
+failure_modes:
+  - "Playtest shows the feature breaks core loop feel - halt and return tuning to game-designer."

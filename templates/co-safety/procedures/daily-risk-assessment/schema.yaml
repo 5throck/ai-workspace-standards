@@ -1,0 +1,45 @@
+schema_version: "1.0"
+procedure_id: co-safety-daily-risk-assessment
+variant: co-safety
+version: "1.0.0"
+title: Daily Risk Assessment
+phase: 3
+status: active
+owner_agent: safety-workflow-manager
+purpose: >
+  Execute the daily risk assessment workflow for a site, producing the
+  assessment record and required controls.
+inputs: []
+preconditions:
+  - "Site profile and applicable industry workflow selected."
+steps:
+  - id: 1
+    agent_key: safety-workflow-manager
+    skill_key: investigation/hazop-analysis
+    output_type: hazard_inventory
+    description: >
+      Enumerate site hazards for the work of the day from the domain workflow
+      checklist.
+  - id: 2
+    agent_key: safety-workflow-manager
+    skill_key: daily/risk-assessment
+    output_type: risk_assessment_record
+    description: >
+      Score hazards and determine controls following the daily workflow
+      schema.
+  - id: 3
+    agent_key: safety-governance-manager
+    skill_key: daily/audit-preparation
+    output_type: governance_review
+    description: >
+      Confirm the assessment satisfies applicable regulatory and governance
+      requirements.
+outputs:
+  - type: risk_assessment_record
+relations: []
+quality_gates:
+  - "Every identified hazard has a scored risk and an assigned control."
+evidence:
+  - "workflows/_INDEX.md"
+failure_modes:
+  - "Uncontrolled high-severity hazard - halt work authorization and trigger the emergency workflow."
