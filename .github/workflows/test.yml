@@ -25,6 +25,11 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
+        # Kept despite no setup-node step: the matrix value is part of the job
+        # name and must match the branch-protection required check contexts
+        # (`test (ubuntu-latest, 18.x)` etc.). Removing it silently blocks all
+        # PR merges. See docs/designs/2026-08-30-project-review-remediation-design.md.
+        node-version: [18.x]
 
     steps:
       - name: Checkout repository
