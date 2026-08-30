@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.12.4
+// @version 1.12.5
 /**
  * create-l3-scaffold.ts
  *
@@ -650,7 +650,7 @@ ${variantMarkers}
 
 const DOMAIN_DOC_DIRS: Record<string, string[]> = {
   development: ["docs/drafts", "docs/reports", "docs/research"],
-  design: ["docs/drafts", "docs/reports", "docs/research"],
+  design: ["docs/specs", "docs/prototypes", "docs/reports"],
   security: ["docs/drafts", "docs/reports", "docs/research"],
   game: ["docs/drafts", "docs/reports", "docs/research"],
   consulting: ["deliverables/reports", "deliverables/drafts", "deliverables/research", "deliverables/presentations"],

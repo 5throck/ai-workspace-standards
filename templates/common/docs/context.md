@@ -93,6 +93,14 @@ Standard package managers for each platform:
 
 ## Documentation Standards
 
+### Design Foundation
+
+UI-bearing projects derive their own design system via the Design Foundation framework — see
+`docs/design-foundation.md` (specification) and `docs/design-tokens.template.css` (token scaffold).
+The project's design system SSOT is `docs/design.md`, which must contain a `design_decisions`
+record; token architecture is Primitive → Semantic (`[data-theme]` mapping) → Component.
+The `design-foundation` skill walks through the derivation procedure.
+
 ### Session Log Format (`memory/YYYY-MM-DD.md`)
 
 Every session log entry MUST include the following four sections:

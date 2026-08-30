@@ -1,0 +1,185 @@
+/* ============================================================================
+   design-tokens.template.css — Project Token Scaffold
+   ============================================================================
+   Companion scaffold for docs/design-foundation.md. Copy into your project
+   (e.g. as `styles/design-tokens.css`), replace every <value> placeholder
+   with decisions recorded in your docs/design.md `design_decisions` block.
+
+   ARCHITECTURE (normative — see design-foundation.md §5):
+
+     Primitive tokens   --color-*              theme-neutral values
+        ↓ references only primitives
+     Semantic tokens    --background, --border, …
+                        theme-mapped via [data-theme] (NOT a .dark class)
+        ↓ references only semantics
+     Component tokens   --button-*, --card-*, …
+        ↓
+     UI components      consume component tokens; raw values are a lint violation
+
+   Theme contract: default theme on :root, plus at least one alternate theme
+   (typically dark). Every theme must supply the FULL semantic set, including
+   bg/fg/border triplets for status colors.
+
+   Reference implementation: templates/co-design/tokens.json
+   + templates/co-design/scripts/compile-tokens.ts (JSON → CSS/TS compiler,
+   themes emitted as [data-theme] blocks).
+   ========================================================================== */
+
+
+/* ---------------------------------------------------------------------------
+   1. PRIMITIVE TOKENS — theme-neutral. One value each. Never themed here.
+   --------------------------------------------------------------------------- */
+:root {
+  /* Brand ramp — pick a hue appropriate to your domain; keep the step scale */
+  --color-primary-50:  <value>;
+  --color-primary-100: <value>;
+  --color-primary-300: <value>;
+  --color-primary-500: <value>;
+  --color-primary-700: <value>;
+  --color-primary-900: <value>;
+
+  /* Neutral ramp */
+  --color-neutral-50:  <value>;
+  --color-neutral-100: <value>;
+  --color-neutral-200: <value>;
+  --color-neutral-300: <value>;
+  --color-neutral-500: <value>;
+  --color-neutral-700: <value>;
+  --color-neutral-900: <value>;
+  --color-neutral-950: <value>;
+
+  /* Status primitives — hues chosen for domain connotation (see design.md) */
+  --color-success-500: <value>;
+  --color-warning-500: <value>;
+  --color-danger-500:  <value>;
+  --color-info-500:    <value>;
+
+  /* Typography primitives — chosen per project (see design.md typography roles) */
+  --font-body:    <value>;  /* primary reading face  */
+  --font-heading: <value>;  /* display/heading face  */
+  --font-numeric: <value>;  /* MUST support tabular-nums when figures are domain-critical */
+
+  --text-xs:  <value>;
+  --text-sm:  <value>;
+  --text-md:  <value>;
+  --text-lg:  <value>;
+  --text-xl:  <value>;
+
+  --font-weight-regular:  <value>;
+  --font-weight-bold:     <value>;
+  --font-weight-heading:  <value>;
+
+  /* Spacing scale — base unit per design.md (4px or 8px family) */
+  --space-xs:  <value>;
+  --space-sm:  <value>;
+  --space-md:  <value>;
+  --space-lg:  <value>;
+  --space-xl:  <value>;
+
+  /* Radius scale */
+  --radius-sm:  <value>;
+  --radius-md:  <value>;
+  --radius-lg:  <value>;
+  --radius-full: <value>;
+
+  /* Shadow scale */
+  --shadow-sm: <value>;
+  --shadow-md: <value>;
+  --shadow-lg: <value>;
+
+  /* Motion — shared easing + duration policy */
+  --ease-standard: <value>;   /* e.g. cubic-bezier(...) */
+  --duration-fast:   <value>;
+  --duration-normal: <value>;
+}
+
+
+/* ---------------------------------------------------------------------------
+   2. SEMANTIC TOKENS — THEME-MAPPED LAYER.
+   All theme variation happens HERE. Semantic tokens reference ONLY primitives.
+   --------------------------------------------------------------------------- */
+
+/* --- Default (light) theme ------------------------------------------------- */
+:root {
+  /* Surfaces & text */
+  --background:        var(--color-neutral-100);
+  --surface:           <primitive>;
+  --surface-elevated:  <primitive>;
+  --foreground:        var(--color-neutral-900);
+  --muted-fg:          <primitive>;
+  --border:            <primitive>;
+
+  /* Brand roles */
+  --primary:           var(--color-primary-500);
+  --primary-fg:        <primitive>;
+
+  /* Status triplets — bg/fg/border. Status is NEVER color-only:
+     pair each with an icon + text label in the UI. */
+  --success-bg: <primitive>;  --success-fg: <primitive>;  --success-border: <primitive>;
+  --warning-bg: <primitive>;  --warning-fg: <primitive>;  --warning-border: <primitive>;
+  --danger-bg:  <primitive>;  --danger-fg:  <primitive>;  --danger-border:  <primitive>;
+  --info-bg:    <primitive>;  --info-fg:    <primitive>;  --info-border:    <primitive>;
+
+  /* Interaction states */
+  --focus-ring:        <primitive>;   /* visible :focus-visible is REQUIRED (WCAG AA) */
+  --hover-bg:          <primitive>;
+  --input-bg:          <primitive>;
+  --placeholder-fg:    <primitive>;
+}
+
+/* --- Alternate theme(s) — remap semantics ONLY, never primitives ----------- */
+[data-theme="dark"] {
+  --background:        var(--color-neutral-950);
+  --surface:           <primitive>;
+  --surface-elevated:  <primitive>;
+  --foreground:        var(--color-neutral-100);
+  --muted-fg:          <primitive>;
+  --border:            <primitive>;
+
+  --primary:           <primitive>;  /* often a lighter step of the same ramp */
+  --primary-fg:        <primitive>;
+
+  --success-bg: <primitive>;  --success-fg: <primitive>;  --success-border: <primitive>;
+  --warning-bg: <primitive>;  --warning-fg: <primitive>;  --warning-border: <primitive>;
+  --danger-bg:  <primitive>;  --danger-fg:  <primitive>;  --danger-border:  <primitive>;
+  --info-bg:    <primitive>;  --info-fg:    <primitive>;  --info-border:    <primitive>;
+
+  --focus-ring:        <primitive>;
+  --hover-bg:          <primitive>;
+  --input-bg:          <primitive>;
+  --placeholder-fg:    <primitive>;
+}
+
+/* Add further named themes (e.g. [data-theme="high-contrast"]) the same way:
+   remap the semantic layer only. */
+
+
+/* ---------------------------------------------------------------------------
+   3. COMPONENT TOKENS — reference ONLY semantic (or primitive-for-shape)
+   tokens. Never raw values. Components consume these.
+   --------------------------------------------------------------------------- */
+:root {
+  --button-primary-bg:    var(--primary);
+  --button-primary-fg:    var(--primary-fg);
+  --button-secondary-bg:  var(--surface-elevated);
+  --button-secondary-fg:  var(--foreground);
+  --card-bg:              var(--surface);
+  --card-border:          var(--border);
+  --input-border:         var(--border);
+  --tooltip-bg:           <semantic>;
+  --tooltip-fg:           <semantic>;
+
+  /* Numeric display: use wherever figures are domain-critical */
+  --numeric-font: var(--font-numeric);            /* pair with:
+                                                     font-variant-numeric: tabular-nums; */
+}
+
+
+/* ---------------------------------------------------------------------------
+   VALIDATION (see design-foundation.md §7 — review-enforced contract):
+   [Required]    default + alternate theme, bg/fg/border triplets, typography
+                 roles, icon library declared in design.md, WCAG AA declared,
+                 focus state, non-color state encoding
+   [Consistency] no layer bypass, aria-label on icon-only buttons, tabular
+                 numerals in numeric UI, no hard-coded values in components
+   ========================================================================== */
