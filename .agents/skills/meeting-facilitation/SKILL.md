@@ -10,9 +10,6 @@ owner: pm
 version: 1.4.0
 last_reviewed: 2026-06-05
 prerequisites: []
-relates_to:
-  - skill: context-commonization-review
-    type: follows
 metadata:
   type: process
   triggers:

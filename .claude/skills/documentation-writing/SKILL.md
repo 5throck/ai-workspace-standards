@@ -13,8 +13,6 @@ prerequisites: none
 relates_to:
   - skill: team-builder
     type: composes_with
-  - skill: audit-workspace
-    type: follows
 gemini-parity: skip
 metadata:
   type: implementation
