@@ -403,6 +403,12 @@
       }
     },
     {
+      "type": "references",
+      "from": "security-scan",
+      "to": "update-bun-packages",
+      "source": "prose"
+    },
+    {
       "type": "composes_with",
       "from": "skill-lifecycle-manager",
       "to": "script-lifecycle-manager",

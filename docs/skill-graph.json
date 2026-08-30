@@ -12729,6 +12729,12 @@
       }
     },
     {
+      "type": "references",
+      "from": "security-scan",
+      "to": "update-bun-packages",
+      "source": "prose"
+    },
+    {
       "type": "follows",
       "from": "service-design",
       "to": "accessibility-audit",

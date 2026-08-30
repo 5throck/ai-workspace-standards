@@ -65,15 +65,23 @@ describe('post-write-lifecycle-check hook script', () => {
     expect(result.exitCode).toBe(0);
   });
 
-  test('Claude mode (no --platform) — reads git diff', () => {
-    const input = JSON.stringify({
-      tool_name: 'Write',
-      tool_input: { file_path: 'some-file.ts', content: 'test' },
-    });
-    // Claude mode ignores stdin and reads git diff — may take longer
-    const result = runHook(input);
+  // Claude mode always spawns `bun scripts/audit.ts` as a child (network I/O
+  // included), so total latency can exceed bun's default 5s test timeout —
+  // observed flaking on windows-latest CI (2026-08-30, PR #785). Match the
+  // 30s spawnSync budget already used by runHook.
+  test(
+    'Claude mode (no --platform) — reads git diff',
+    () => {
+      const input = JSON.stringify({
+        tool_name: 'Write',
+        tool_input: { file_path: 'some-file.ts', content: 'test' },
+      });
+      // Claude mode ignores stdin and reads git diff — may take longer
+      const result = runHook(input);
 
-    // Non-blocking: exit 0
-    expect(result.exitCode).toBe(0);
-  });
+      // Non-blocking: exit 0
+      expect(result.exitCode).toBe(0);
+    },
+    30000,
+  );
 });
