@@ -14,16 +14,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **[2026-08-29]**: feat(graph): **ADR-0060 Amendment 8 — agent co-use `composes_with` derivation + project backfill mode.** `tests/add-variant-relations.ts` gains `--project <path>` mode (recursive procedure walk incl. entity/region overrides; inline `[a, b]` and block `required_skills` both parsed; CRLF-normalized) and the Amendment 8 derivation: skills co-declared in one agent's `required_skills` gain a symmetric `composes_with`, declared on both sides. Applied: co-newbiz coverage 52 → 72/125 skills (+400 edges; 232n/1,029e), co-architect 4 → 10/32 (+9 edges); both graphs verify clean, co-newbiz's `graph-map --check` bidirectional contract holds; two legacy bare-string `relates_to` entries normalized to typed form. ADR-0060 Amendment 8 section added.
 
 ### Fixed
+- **[2026-08-30]**: fix(workspace): **Follow-up remediation wave 2 — lifecycle record scoping, CHANGELOG heading hygiene, and health-check failure visibility.** (1) Moved 8 stale L0 `docs/lifecycle/skills/` records for variant-scoped skills to their owning templates' `docs/lifecycle/skills/` (accessibility-audit → co-design, mece-logic-auditor → co-consult, presenter-mode → co-deck, sarif-exporter + stride-threat-matrix → co-security, sound-synth → co-game, swe-solve → co-develop, i18n-audit → templates/common) so L0 governance no longer claims ownership of L1/L2-only skills. (2) CHANGELOG `[Unreleased]`: merged the leading duplicate `### Fixed` sections into one (entries preserved verbatim, 895/895 entry lines verified identical; kept the file's date-interleaved convention below the block after a full type-grouped restructure was rejected — reordering exposed Korean content through an unbalanced-backtick entry's cross-entry inline-code pairing). (3) `weekly-health-check.yml`: added `issues: write` permission and an `if: failure()` step that opens a GitHub issue on failure, so a silently failing Friday cron check is visible without watching Actions. Verified: `audit.ts` exit 0, `validate-templates.ts` 0 errors, language validation clean.
 - **[2026-08-30]**: fix(workspace): **Project-review remediation — governance/contract corrections, variant AGENTS.md drift fixes, and promotion-pipeline hardening (7-domain parallel review + variant AGENTS.md audit follow-up).** (1) Governance: `co-safety/agents/pm.md` `extends` re-pointed from L0 root to `../../common/agents/pm.md` (restores the L0→L1→L2 chain); stale PM phase numbering fixed in `AGENTS.md` §1 and `common-contract.json` ("Phase 6" → "Phase 5", "0, 2, 6" → "0, 1-2, 5"); stale `CLAUDE.md §5 / GEMINI.md §5` cross-references replaced with actual heading names; `variant-contract.json` no longer requires variant-local `CLAUDE.md`/`GEMINI.md` (removed by design in `2d860f05`, L1 fallback); `PROMOTION_CHECKLIST-template.md` gate updated to match; `templates/CHANGELOG.md` gained the missing `## [0.6.0]` section; `lang: ko`/`source-material` exception added to the relation-graph design doc. (2) Variant AGENTS.md: Korean PM communication templates → English in 7 variants (co-consult/co-deck/co-design/co-develop/co-game/co-security/co-work); copy-paste `Workspace Root Agent Ecosystem` titles fixed in co-hr/co-safety; dangling `skill-modification-checklist.md` links replaced with L1 inline wording in 7 variants; co-safety roster links remapped to actual `agents/domains/…` and `agents/_shared/…` paths (25 links), non-existent `i18n-specialist.md` row removed, PM phase wording fixed; `COMMON-AGENTS` Language Policy block inserted into co-abap. (3) Pipeline: `create-l3-scaffold.ts` stub now emits the §-structure H1, 6 `VARIANT-*` markers, and the COMMON-AGENTS block (fresh scaffolds pass Phase 3.5 without auto-fix); `l3-to-variant-pipeline.ts` Phase 3.5 additionally blocks on H1 title, COMMON-AGENTS markers, and unresolvable roster links; `generate-version-manifest.ts` now scans `templates/common/skills/` (registers handbook 0.4.0 / handbook-sync-audit 1.0.0, platform `common`, parity-exempt). CI: `bun-version` pinned to 1.4.0 in both workflows, unused `node-version` matrix dropped, `concurrency` group added. Verified: `audit.ts` exit 0, `validate-templates.ts` 0 errors; pre-existing `apply-handbook-theme` test failures unchanged. Design: docs/designs/2026-08-30-project-review-remediation-design.md.
 - **[2026-08-30]**: fix(co-deck): **Completed the co-deck beta → stable transition in `variant.json` — `VERSION_REGISTRY.json` recorded stable but the scaffold gate still read `status: beta` and warned on every `new-project.ts` run.** Set `status: stable`, `stablePromotedOn: 2026-08-30`, and updated `statusSince`/`lastTransition`. Flipping to stable activated validate-templates' stable-only checks, which surfaced two latent co-deck errors, both fixed: (1) `skill_manifest.variant_specific` still listed the `measure` skill removed in PR #727 (entry dropped, stale `.agents/skills/measure/` mirror deleted — the `measure` agent itself remains valid); (2) `docs/co-deck.context.md` Skills table was missing `skills/handbook/SKILL.md` and `.claude/skills/agent-lifecycle-manager/SKILL.md` (rows added, stale `measure` row removed). `validate-templates.ts`: 0 errors across 8 stable variants; `audit.ts` passes.
 - **[2026-08-30]**: fix(skills): **Removed dangling `relates_to` edges at the L0 source — the previous template-only fix was overwritten by the L0→L1 propagate step.** PR #779 pruned the stale edges only in `templates/common/skills/`, but the next `/sync`'s propagate step re-copied the untouched L0 `skills/` copies (and `sync-skills.ts` re-spread them into `.claude`/`.gemini`/`.agents` mirrors), so the re-scaffolded co-consult still failed its skill validation. The edges are now removed at the propagation source: `documentation-writing` → `audit-workspace`, `meeting-facilitation` → `context-commonization-review`, `team-builder` → `create-variant` (all targets are L0-only skills that don't exist in L1/L2 projects). Propagated to all platform mirrors; root `validate-skills.ts` 0 errors / 0 warnings, re-scaffolded `co-consult` `audit.ts` all green.
 - **[2026-08-30]**: fix(templates): **Scaffold audit fixes propagated into L1/L2 templates after the co-consult post-scaffold audit found 7 failures.** Registered the 23 `handbook/*.ts` + 3 `tests/*.test.ts` scripts in `templates/common/scripts/SCRIPTS.md` (never present in the L1 registry, so every scaffold produced unregistered-script audit failures) and stamped `// @version` headers on the 7 scripts missing them; pruned stale `relates_to` edges in `documentation-writing` (→ `audit-workspace`), `meeting-facilitation` (→ `context-commonization-review`), and `team-builder` (→ `create-variant`) — all three target L0-only skills absent from L2; added required `lifecycle.phase`/`lifecycle.governance` frontmatter to `templates/common/agents/i18n-specialist.md` plus its governance record in `templates/co-consult/docs/lifecycle/agents/`; replaced fullwidth `！` (U+FF01) in `handbook` `copy-code.js` ja labels to satisfy the homoglyph audit. Verified: scaffolded `co-consult` audit 7 fails → 0; root `validate-templates` 0 errors.
 - **[2026-08-29]**: fix(upgrade): **`upgrade-project.ts` 1.17.1 → 1.17.2 — equal-version core-script drift reconciliation.** SYNC_IF_NEWER skipped scripts whose version matched the project's even when content differed, so locally forked core scripts stayed invisible to every future upgrade (audit across Projects/co-* found drifted forks in 7 of 8 projects, e.g. `sync-md`, `team-builder`, `dispatch`, `gen-pr-body`). Same-version scripts are now hash-compared and the canonical L1 copy is restored with a `⚠️ DRIFT … restored to canonical` notice. This closes the promotion-integrity hole: drifted core scripts hard-fail the L3→variant pipeline's integrity check.
-
-### Fixed
 - **[2026-08-29]**: fix(upgrade): **`upgrade-project.ts` 1.17.0 → 1.17.1 — country-prune safety for manifest-declared skills.** The country-scoped prune pass deleted skills registered in the workspace `country_scoped_assets` registry whenever the project's detected country didn't match — including skills the project's own `variant.json` `skill_manifest.variant_specific` deliberately declares (surfaced when co-newbiz, lacking `template-version.txt`, would have had `k-law` — a manifest-declared KR asset — silently pruned). The prune now KEEPS manifest-declared skills with a `KEEP` notice; manifest adoption beats country inference. Plus project-side hardening in `Projects/co-newbiz`: `template-version.txt` created (`variant=co-newbiz, country=KR` — upgrades now run common-only mode and preserve KR assets), `docs/countries/ACTIVE.md` pointer added, `k-dart`/`k-kosis` added to the skill manifest alongside `k-law`, and a dangling `translate → documentation-writing` edge removed.
-
-### Fixed
 - **[2026-08-29]**: fix(registry): **`verify-scripts.ts` 1.4.1 → 1.4.2 — recursive governance for variant-specific scripts (`scripts/co-*/`).** The file walker skipped any top-level `co-*` directory on the assumption of a separate `scripts/<variant>/SCRIPTS.md` sub-registry that no project actually has — so variant scripts nested in subdirectories (e.g. `scripts/co-newbiz/lib/*.ts`) silently escaped registration/version checks. Now the skip applies only when the variant directory genuinely carries its own `SCRIPTS.md` sub-registry; otherwise the walker recurses and the existing `co-*/…` relative-path registry rows (already the convention) govern nested files too. Verified across all 6 Projects/co-* registries; probe test confirms an unregistered nested file now fails the gate. Delivered to projects via the common-only upgrade path (`upgrade-project.ts 1.17.0`).
 
 ### Added
@@ -355,7 +352,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **[2026-08-18]**: fix(co-deck): `templates/co-deck/scripts/co-deck/handbook/deploy-handbook.ts` still used an `execSync`-based `run()` helper with shell command strings for `gh auth status`, the secret-scan grep, `git rev-parse`, and `git push` — the same shell-invocation pattern eliminated from both Handbooks repos during their project-review fixes. Converted all 4 call sites to the script's existing `runArgs()` helper (`execFileSync` argument arrays, injection-resistant regardless of input content) and removed the now-unused `run()`/`execSync` import; the secret-scan error-message matcher was updated for the new error prefix. Verified: `bun build` clean, `grep execSync` → 0 matches, `bun test scripts/co-deck/tests/deploy-readme-patch.test.ts` → 8 pass.
 
 - **[2026-08-18]**: fix(templates): `templates/co-abap/scripts/co-abap/dispatch-parallel.ts` and `dispatch-serial.ts` (ADR-0050 variant wrappers) imported the common dispatchers via `../../dispatch-*.ts` — from their `scripts/co-abap/` location this resolves to the *project root*, one level above the common copies at `scripts/`, so the wrappers were unimportable in every scaffolded co-abap project (verified: `bun scripts/co-abap/dispatch-parallel.ts --help` fails with "Cannot find module" in `Projects/co-abap`, which carries the same broken import). Corrected to `../dispatch-*.ts`. Found while aligning `Projects/co-abap-plugin` with the template — that project's copies and `Projects/co-abap`'s copies were fixed in the same pass.
-
 
 - **[2026-08-18]**: fix(git): eliminate recurring CHANGELOG.md / memory/*.md merge conflicts by adding git's built-in `merge=union` union merge driver to `.gitattributes` for the append-only pipeline files (`CHANGELOG.md`, `templates/CHANGELOG.md`, `memory/*.md`, `docs/VERSION_MANIFEST.md`, `scripts/README.md`). These files are touched on every `/sync` commit (CHANGELOG `[Unreleased]` entries, daily session summaries, regenerated manifests), so parallel PR branches always edit the same anchor lines and the second merge always conflicted — the sequential-branch process rule (docs/designs/sequential-pr-merge-policy-design.md) was proven insufficient. Union merge auto-combines both sides' lines instead of raising conflict markers; verified by simulation (both branches' entries preserved, zero conflict markers). Transient duplicate rows in fully-regenerated files are overwritten at the next sync. Propagated to `templates/common/.gitattributes` (inherited by all new projects), `templates/co-deck/.gitattributes` (variant overlay), and all 8 live `Projects/*/.gitattributes`. Design: `docs/designs/2026-08-18-changelog-memory-conflict-fix-design.md`.
 
@@ -1134,7 +1130,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **[2026-05-24]**: scripts/*.ps1, 	emplates/scripts/*.ps1: Fixed critical Windows CP949 encoding corruption bug by enforcing -Encoding UTF8 on all Get-Content calls.
 - **[2026-05-24]**: 	emplates/AGENTS.md, 	emplates/CLAUDE.md, 	emplates/GEMINI.md, 	emplates/docs/context.md: Deduplicated behavioral rules into context.md and restored 3-tier strategy references. Removed Em Dashes to prevent encoding errors.
 
-
 ### Added
 - **[2026-05-23]**: `templates/docs/context.md`, `templates/agents/pm.md`, `templates/agents/*.md`: PM-first multi-agent workflow enforcement. Added "Multi-Agent Workflow" section to context.md as single source of truth; PM agent declared as SINGLE ENTRY POINT; all specialist agents (architect, designer, code-writer, test-runner, security-monitor, stack-setup) now refuse direct invocation and redirect to PM.
 - **[2026-05-23]**: `templates/CLAUDE.md`, `templates/GEMINI.md`: Added brief "Multi-Agent Workflow" reference pointing to docs/context.md; eliminated duplication.
@@ -1152,7 +1147,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Removed
 - **[2026-05-23]**: `README.md` / `README_ko.md`: Remove obsolete manual "Multi-Agent Kickoff" instruction text (automated in the background via post-checkout hook).
 
-
 ### Added -Go/Rust/Elixir stack support + unknown-stack security agent
 - **[2026-05-23]**: `templates/scripts/setup.sh` + `setup.ps1`: Go (`go mod download` + `go-licenses`), Rust (`cargo fetch` + `cargo-license`), Elixir (`mix deps.get`) stacks added; unknown-stack detection block prints a security banner pointing users to `agents/stack-setup.md` and blocks accidental installs
 - **[2026-05-23]**: `templates/agents/stack-setup.md` (NEW): 6-phase security-conscious agent for unrecognized stacks -Stack ID -Web Research -Mandatory Security Review (?/?/? risk levels, HIGH requires `CONFIRM HIGH RISK`) -Present Plan -Execute via sub-agent -Persist to setup.sh/ps1
@@ -1163,7 +1157,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **[2026-05-23]**: `CONSTITUTION.md` §8.5: Open-Source Package Policy -prefer OSI-approved licenses, document non-OSS exceptions
 - **[2026-05-23]**: `templates/docs/context.md`: Coding Guidelines §5 Open-Source Package Policy added
 - **[2026-05-23]**: `scripts/new-project.sh` + `new-project.ps1`: step 9 prints directory-change banner with exact `cd <path>` command
-
 
 ### Changed -Antigravity 2.0 / Gemini CLI session start config (workspace + templates + 4 sub-projects)
 
@@ -1444,30 +1437,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 *Last Updated: 2026-08-30*
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ### Changed
 - **[2026-06-06]**: chore: update validate-templates.ts and SKILLS.md - improve template validation checks and skill registration consistency
