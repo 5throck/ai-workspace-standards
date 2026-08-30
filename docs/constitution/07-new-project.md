@@ -41,6 +41,13 @@ live there as **real, editable files** (not embedded strings).
 
 > **Extension templates** - ADR, analyst agent, skill, and daily log formats are **not**
 > generated at project init. Find ready-to-copy examples in [`templates/_examples/`](templates/_examples/).
+> **Design Foundation (ADR-0064)**: UI-bearing projects derive their own design system — the
+> methodology ships from L1 (`templates/common/docs/design-foundation.md` spec,
+> `docs/design-tokens.template.css` scaffold, `design-foundation` skill, `l2_propagate: false`).
+> The project's `docs/design.md` is the design-system SSOT and must carry a `design_decisions`
+> record; theme variation lives in semantic-token `[data-theme]` mapping (primitives stay
+> theme-neutral). See [ADR-0064](../adr/0064-design-foundation-style-neutral-derivation.md).
+
 
 #### 7.3 L3 Exclusion Rules
 
