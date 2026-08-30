@@ -25,3 +25,17 @@
 | `test-pharma-general-profile.ts` | 1.0.0 | Pharma general profile test suite |
 | `test-runtime-tools.ts` | 1.0.0 | Runtime tools test suite |
 | `training-ingest.ts` | 1.0.0 | Training record CSV ingestion → TRAIN-* JSON |
+
+## Internal Libraries (`lib/`)
+
+> Helper modules imported by the scripts above; never run standalone
+> (except `plan-parser.ts`, which has a CLI entry point).
+
+| Module | Version | Purpose |
+|--------|---------|---------|
+| `lib/auto-executor.ts` | 1.0.0 | Auto-mode workflow orchestrator (phase groups, checkpoints, rollback) |
+| `lib/checkpoint-manager.ts` | 1.0.0 | Session-only in-memory checkpoint manager |
+| `lib/evidence-validator.ts` | 1.0.0 | Evidence record validation (used by safety-audit, risk-register-rollup, training-ingest) |
+| `lib/mcp-cache.ts` | 1.0.0 | Caching layer for MCP OpenAPI calls |
+| `lib/plan-parser.ts` | 1.0.0 | Markdown plan-file parser (CLI: `bun run plan-parser.ts <plan-file>`) |
+| `lib/platform-dispatcher.ts` | 1.0.0 | Cross-platform agent dispatch abstraction |
