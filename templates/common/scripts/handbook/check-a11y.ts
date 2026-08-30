@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+// @version 1.0.0
 // scripts/handbook/check-a11y.ts
 // L2 — Accessibility checks for handbook HTML files.
 // Validates basic a11y requirements without external tools:

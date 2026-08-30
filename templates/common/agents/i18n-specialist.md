@@ -9,6 +9,11 @@ tier:
   antigravity: medium   # gemini-3.7-flash
   gemini-cli: medium    # gemini-3.7-flash
 model: inherit
+lifecycle:
+  phase: production
+  created: "2026-08-24"
+  last_updated: "2026-08-24"
+  governance: docs/lifecycle/agents/i18n-specialist.md
 version: "1.0.0"
 last_reviewed: "2026-08-24"
 color: cyan

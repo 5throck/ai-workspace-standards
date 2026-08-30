@@ -88,6 +88,29 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `generate-l3-readme.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
 | `generate-scripts-readme.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
 | `generate-version-manifest.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
+| `handbook/apply-handbook-theme.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `handbook/build-search-index.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `handbook/check-a11y.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `handbook/check-authoring.ts` | L0 | 1.2.0 | active | — | — | common | — |
+| `handbook/check-external-links.ts` | L0 | 1.2.0 | active | — | — | common | — |
+| `handbook/check-i18n-parity.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `handbook/check-labels.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `handbook/check-links.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `handbook/check-lint.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `handbook/check-search.ts` | L0 | 2.0.0 | active | — | — | common | — |
+| `handbook/check-spell.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `handbook/check-structure.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `handbook/check-symmetry.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `handbook/check-tables.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `handbook/deploy-handbook.ts` | L0 | 1.1.0 | active | — | — | common | — |
+| `handbook/extract-copycode.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `handbook/handbook-doctor.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `handbook/handbook-sync-audit.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `handbook/nav-utils.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `handbook/scaffold-handbook.ts` | L0 | 1.2.0 | active | — | — | common | — |
+| `handbook/update-footers.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `handbook/validate-handbook.ts` | L0 | 1.1.0 | active | — | — | common | — |
+| `handbook/validate-nav.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `helpers/beta-lifecycle.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `helpers/generate-variant.ts` | L0 | 1.13.1 | active | —| —| L0 | —|
 | `helpers/agent-promote.ts` | L0 | 0.1.1 | experimental | —| —| L0 | —|
@@ -133,6 +156,9 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `helpers/validate-platform-parity.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `helpers/ticket-schema.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `helpers/ticket-store.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
+| `tests/apply-handbook-theme.test.ts` | L0 | 1.0.1 | active | — | — | common | — |
+| `tests/check-structure.test.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `tests/deploy-readme-patch.test.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `validators/types.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `validators/variant-json-validator.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `validators/extends-validator-wrapper.ts` | L0 | 1.0.0 | active | —| —| L0 | —|

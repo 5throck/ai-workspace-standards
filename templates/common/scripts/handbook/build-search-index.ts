@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+// @version 1.0.0
 // scripts/handbook/build-search-index.ts
 // Reads docs/search-manifest.json and generates docs/assets/search-data.js
 // containing the DOCS array and LABELS object consumed by site-search.js.

@@ -3,7 +3,7 @@ var COPY_LABELS = {
   en: ['Copied!', 'Failed'],
   ko: ['완료!', '실패!'],
   es: ['¡Copiado!', 'Error'],
-  ja: ['コピーしました！', '失敗！']
+  ja: ['コピーしました', '失敗']
 };
 var COPY_LABEL = COPY_LABELS[document.documentElement.lang] || COPY_LABELS.en;
 

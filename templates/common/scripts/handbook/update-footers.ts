@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+// @version 1.0.0
 // scripts/handbook/update-footers.ts
 // Syncs the localized site footer into every HTML page under docs/.
 // Vendored from Handbooks/multi-agent-harness-handbook/scripts/update-footers.ts

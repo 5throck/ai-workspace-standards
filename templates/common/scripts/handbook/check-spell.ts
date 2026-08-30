@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+// @version 1.0.0
 // scripts/handbook/check-spell.ts
 // L3 — Basic spell checker for English handbook HTML files.
 // Validates visible text content against a built-in list of common
