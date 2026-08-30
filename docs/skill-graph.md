@@ -33,7 +33,7 @@
 | `daily/risk-assessment` | variant:co-safety | — | — | — | — | — |
 | `decision-record` | common | — | — | — | — | — |
 | `desktop-app-fallback` | variant:co-abap | code-writer, test-runner | phase3, phase4 | — | — | — |
-| `documentation-writing` | L0 | content-writer, technical-writer | — | audit-workspace (follows), team-builder (composes_with) | — | — |
+| `documentation-writing` | L0 | content-writer, technical-writer | — | team-builder (composes_with) | — | — |
 | `double-entry-reconciliation` | variant:co-price | — | — | financial-statement-prep (composes_with), harness-verification (composes_with), i18n-audit (follows), pricing-playbook (composes_with) | — | — |
 | `dump-monitor` | variant:co-abap | devops-admin, pm | phase1, phase6 | abap-dev (follows), research-analysis (composes_with), sap-co (composes_with), sap-fi (composes_with), sap-le (composes_with), sap-mm (composes_with), sap-sd (composes_with) | — | — |
 | `evidence-ledger` | common | — | — | — | — | — |
@@ -76,7 +76,7 @@
 | `market-entry-strategy` | variant:co-export | market-entry-strategist, market-entry-strategist | phase1, phase3, phase4 | foreign-regulation-monitoring (follows) | — | — |
 | `math-function-plotter` | variant:co-price | — | — | — | — | — |
 | `mece-logic-auditor` | variant:co-consult | strategy-analyst | phase1 | — | — | — |
-| `meeting-facilitation` | L0 | — | — | context-commonization-review (follows) | — | — |
+| `meeting-facilitation` | L0 | — | — | — | — | — |
 | `narrative-framework` | variant:co-consult | communications-lead, communications-lead | phase3 | consulting-report-writing (composes_with), executive-presentation (composes_with) | — | — |
 | `org-design-framework` | variant:co-hr | org-design-consultant, org-design-consultant | phase2, phase3 | hr-metrics-analysis (follows), org-readiness-assessment (composes_with), performance-system-design (composes_with), stakeholder-alignment (composes_with), talent-acquisition-strategy (follows) | — | — |
 | `org-readiness-assessment` | variant:co-consult | change-management-partner, change-management-partner, change-management-partner | phase1, phase1, phase2, phase2 | change-impact-assessment (composes_with), financial-modeling (enables), stakeholder-alignment (composes_with) | — | readiness-scores, capability-gap-analysis, change-mgmt-cost-estimates |
@@ -127,7 +127,7 @@
 | `swe-solve` | variant:co-develop | pm | phase4 | — | — | — |
 | `sync` | L0 | — | — | — | — | — |
 | `talent-acquisition-strategy` | variant:co-hr | talent-acquisition-specialist, talent-acquisition-specialist | phase2 | compensation-benchmarking (follows) | — | — |
-| `team-builder` | L0 | — | — | create-variant (follows) | — | — |
+| `team-builder` | L0 | — | — | — | — | — |
 | `technical-feasibility` | variant:co-consult | sme, sme, solutions-architect, solutions-architect, technology-specialist, technology-specialist | phase1, phase2, phase3, phase4 | change-impact-assessment (follows), company-intelligence (composes_with), executive-presentation (enables), project-delivery (follows) | — | complexity-grades, risk-cost-ranges, preconditions |
 | `test-driven-development` | variant:co-develop | game-debugger, game-developer, test-runner, test-runner | phase3, phase4, phase5 | code-review (follows) | — | — |
 | `theme-authoring` | variant:co-deck | pm | — | — | — | — |

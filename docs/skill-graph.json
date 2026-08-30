@@ -4848,17 +4848,6 @@
       "source": "skill_manifest"
     },
     {
-      "type": "follows",
-      "from": "documentation-writing",
-      "to": "audit-workspace",
-      "source": "relates_to",
-      "provenance": {
-        "file": "skills/documentation-writing/SKILL.md",
-        "field": "relates_to",
-        "index": 1
-      }
-    },
-    {
       "type": "used_by",
       "from": "documentation-writing",
       "to": "content-writer",
@@ -7616,17 +7605,6 @@
       "from": "mece-logic-auditor",
       "to": "strategy-analyst",
       "source": "skill_manifest"
-    },
-    {
-      "type": "follows",
-      "from": "meeting-facilitation",
-      "to": "context-commonization-review",
-      "source": "relates_to",
-      "provenance": {
-        "file": "skills/meeting-facilitation/SKILL.md",
-        "field": "relates_to",
-        "index": 0
-      }
     },
     {
       "type": "produces",
@@ -13623,17 +13601,6 @@
       "from": "team-builder",
       "to": "agent-lifecycle-manager",
       "source": "prose"
-    },
-    {
-      "type": "follows",
-      "from": "team-builder",
-      "to": "create-variant",
-      "source": "relates_to",
-      "provenance": {
-        "file": "skills/team-builder/SKILL.md",
-        "field": "relates_to",
-        "index": 0
-      }
     },
     {
       "type": "references",
