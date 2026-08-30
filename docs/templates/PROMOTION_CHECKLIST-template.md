@@ -119,8 +119,7 @@ Use this checklist to verify your variant is ready for promotion from Phase A (P
 **Objective**: All required documentation present and up-to-date.
 
 **Checklist**:
-- [ ] `CLAUDE.md` exists with variant context
-- [ ] `GEMINI.md` exists with platform parity to CLAUDE.md
+- [ ] Platform config (`CLAUDE.md` / `GEMINI.md`) inherited from `templates/common/` (no variant-local copies — removed by design in commit `2d860f05`)
 - [ ] `AGENTS.md` includes variant agent roster
 - [ ] `CHANGELOG.md` exists with [Unreleased] section
 - [ ] `memory/[variant-name]-plan.md` (design document) complete
@@ -183,4 +182,4 @@ Use this checklist to verify your variant is ready for promotion from Phase A (P
 ---
 
 *Template Owner: pm*
-*Last Updated: 2026-08-23*
+*Last Updated: 2026-08-30*

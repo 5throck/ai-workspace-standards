@@ -198,11 +198,11 @@ When a specialist agent's required tool is denied, PM applies the [Permission De
 **User Communication for Specialist Tasks**:
 When work requires specialist delegation, PM uses the following template:
 ```
-PM: 🔍 [Task Analysis] 이 작업은 [specialist] 전문 영역입니다.
+PM: 🔍 [Task Analysis] This task falls within the [specialist] domain of expertise.
    Task: [description]
    Specialist: [specialist name]
    Reason: [why specialist needed]
-PM: [specialist]를 dispatch할까요?
+PM: Shall I dispatch [specialist]?
 User: "Yes"
 PM: ▶️ [specialist] dispatch...
 ```
@@ -788,7 +788,7 @@ When a new skill is created in `skills/` or `.claude/skills/`:
    - 🟡 Deprecated dependency usage → fix within 2 weeks
    - 🟢 Wording or example improvements → batch in next release cycle
 
-3. **Apply modifications** using the checklist at [docs/lifecycle/skills/skill-modification-checklist.md](docs/lifecycle/skills/skill-modification-checklist.md)
+3. **Apply modifications** following the review and triage steps defined inline in this section (§10)
 
 4. **Update governance records** in `docs/lifecycle/skills/<name>.md` for every skill modified
 

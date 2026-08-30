@@ -19,7 +19,7 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 
 | Agent | File | Tier | Role |
 |-------|------|------|------|
-| **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) (L0) → [`templates/common/agents/pm.md`](templates/common/agents/pm.md) (L1) → [`templates/<variant>/agents/pm.md`](templates/co-design/agents/pm.md) (L2) | High | Three-level inheritance architecture: L0 (workspace root base) → L1 (common template pure-extends) → L2 (variant YAML overrides). Orchestrates team assembly (Phase 0), design validation (Phase 2), and lifecycle finalization (Phase 6). **PM does NOT execute code or documentation directly — all specialist work dispatched through PM.** See [L0→L1→L2 PM Agent Architecture](#l0→l1→l2-pm-agent-architecture) for details. |
+| **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) (L0) → [`templates/common/agents/pm.md`](templates/common/agents/pm.md) (L1) → [`templates/<variant>/agents/pm.md`](templates/co-design/agents/pm.md) (L2) | High | Three-level inheritance architecture: L0 (workspace root base) → L1 (common template pure-extends) → L2 (variant YAML overrides). Orchestrates team assembly (Phase 0), design validation (Phase 1-2), and lifecycle finalization (Phase 5). **PM does NOT execute code or documentation directly — all specialist work dispatched through PM.** See [L0→L1→L2 PM Agent Architecture](#l0→l1→l2-pm-agent-architecture) for details. |
 | Consistency Auditor | [`agents/auditor.md`](agents/auditor.md) | Medium | Workspace-root-only cross-domain consistency auditor; detects structural inconsistencies scripts miss; NOT dispatched in variant projects |
 | **Lifecycle Manager** | [`agents/lifecycle-manager.md`](agents/lifecycle-manager.md) | Medium | **Workspace root only — L0-only agent**. Lifecycle state monitor and governance record keeper for the workspace root (8 domains × 3 layers); core duties include L0->L1 template publishing and L1->L2 explicitly requested skill/script synchronization; syncs governance docs after changes. Lifecycle finalization is handled automatically by `/sync` — PM does NOT need a separate N-1 dispatch step. **NOT available in variant templates** — this agent operates exclusively at workspace root level. |
 
@@ -422,7 +422,7 @@ When modifying files that affect both CLAUDE.md and GEMINI.md:
 
 **Platform Column**: `Claude` / `Antigravity` / `Both` / `L0-only`
 
-**Note**: See execution plan boilerplate in CLAUDE.md §5, GEMINI.md §5, and agents/pm.md for the Platform column definition.
+**Note**: See execution plan boilerplate in CLAUDE.md ("### 5. Agent Dispatch Rules" and "## Execution Plan Boilerplate"), GEMINI.md (identical headings), and agents/pm.md for the Platform column definition.
 
 ### §5.3 Example Execution Plans
 

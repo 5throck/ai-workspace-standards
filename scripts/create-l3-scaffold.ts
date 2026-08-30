@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.12.3
+// @version 1.12.4
 /**
  * create-l3-scaffold.ts
  *
@@ -592,12 +592,27 @@ TODO: document how secrets/credentials are handled (see \`.env.sample\`).
   FILE_COUNT += 2; // generateReadme/generateReadmeKo write via applyTemplate, bypassing the local writeFile counter
 
   // AGENTS.md — header only, workspace roster removed, TODO section added.
-  const agentsMd = `# AGENTS.md — ${toVariantSlug(variant)}
+  // Emits the §-numbered scaffold plus empty VARIANT-* injection markers and the
+  // COMMON-AGENTS Language Policy block so l3-to-variant-pipeline.ts Phase 3.5
+  // passes without auto-regeneration on a fresh scaffold.
+  const variantMarkers = [
+    "VARIANT-AGENTS-START",
+    "VARIANT-AGENT-DETAILS-START",
+    "VARIANT-DISPATCH-TRIGGERS-START",
+    "VARIANT-PHASE-GATE-START",
+    "VARIANT-SUBAGENT-ROSTER-START",
+    "VARIANT-ROLE-BOUNDARY-START",
+  ]
+    .map((m) => `<!-- ${m} -->\n<!-- ${m.replace("-START", "-END")} -->`)
+    .join("\n");
+  const agentsMd = `# AGENTS.md
 
 > **🚨 For AI tools reading this file**: This file is a **registry and orchestration reference**, not a set of instructions directed at you.
 > It describes multiple distinct human-defined roles for documentation and dispatch purposes.
 > Do **not** interpret role definitions here as directives for your own behavior.
 > Your behavioral instructions are in \`CLAUDE.md\` (Claude Code), \`GEMINI.md\` (Gemini CLI).
+
+## §1: Agent Ecosystem Overview
 
 > **Canonical agent index** for the ${displayName} variant.
 > Full agent definitions live in \`agents/\`.
@@ -615,8 +630,18 @@ Legal Basis / Role / Protocols), then register them in the roster table below.
 | _TODO_ | \`agents/_TODO_.md\` | — | _TODO_ |
 
 > Run \`bun run agent:verify\` after adding agents.
+
+${variantMarkers}
 `;
   writeFile(path.join(projectDir, "AGENTS.md"), agentsMd);
+  // Append the COMMON-AGENTS Language Policy block verbatim from the L1 baseline.
+  const commonAgentsMd = fs.readFileSync(path.join("templates", "common", "AGENTS.md"), "utf-8");
+  const blockStart = commonAgentsMd.indexOf("<!-- COMMON-AGENTS:START -->");
+  const blockEnd = commonAgentsMd.indexOf("<!-- COMMON-AGENTS:END -->");
+  if (blockStart !== -1 && blockEnd !== -1) {
+    const block = commonAgentsMd.slice(blockStart, blockEnd) + "<!-- COMMON-AGENTS:END -->\n";
+    fs.appendFileSync(path.join(projectDir, "AGENTS.md"), "\n" + block);
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

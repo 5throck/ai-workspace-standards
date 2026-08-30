@@ -10,7 +10,7 @@ lifecycle:
   created: 2026-06-04
   last_updated: 2026-08-28
   governance: docs/lifecycle/agents/pm.md
-extends: ../../../agents/pm.md
+extends: ../../common/agents/pm.md
 remove_sections:
   - "## Governance Workflow"
   - "## Updated Role"

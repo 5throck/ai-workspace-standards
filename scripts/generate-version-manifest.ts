@@ -1,4 +1,4 @@
-// @version 1.2.0
+// @version 1.3.0
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { $ } from 'bun';
@@ -166,7 +166,7 @@ async function collectAgents(): Promise<AgentInfo[]> {
 // skills/ is the SSOT; .claude/skills/ carries platform-specific-only skills.
 // Each unique skill name is reported exactly once (fixes duplicate drift-issue
 // reporting that previously emitted one row/issue per distribution copy).
-const SKILL_SCAN_DIRS = ['skills', path.join('.claude', 'skills')];
+const SKILL_SCAN_DIRS = ['skills', path.join('.claude', 'skills'), path.join('templates', 'common', 'skills')];
 
 async function collectSkills(): Promise<SkillInfo[]> {
     const seen = new Map<string, SkillInfo>();
@@ -186,9 +186,11 @@ async function collectSkills(): Promise<SkillInfo[]> {
             const inWorkspace = fs.existsSync(path.join('skills', dir, 'SKILL.md'));
             const inClaude = fs.existsSync(path.join('.claude', 'skills', dir, 'SKILL.md'));
             const inGemini = fs.existsSync(path.join('.gemini', 'skills', dir, 'SKILL.md'));
+            const inCommonTemplate = skillsDir.startsWith(path.join('templates', 'common'));
 
             let platform = 'workspace';
-            if (!inWorkspace && inClaude && inGemini) platform = 'both';
+            if (inCommonTemplate && !inWorkspace) platform = 'common';
+            else if (!inWorkspace && inClaude && inGemini) platform = 'both';
             else if (!inWorkspace && inClaude) platform = 'claude';
 
             seen.set(dir, {
@@ -412,7 +414,7 @@ async function generateManifest() {
 **Checked**: Claude (.claude/) vs Gemini (.gemini/)
 
 - **Commands with parity**: ${commands.filter(c => c.platform === 'both').length} / ${commands.length}
-- **Skills with parity**: ${skills.filter(s => s.platform === 'both').length} / ${skills.length}
+- **Skills with parity**: ${skills.filter(s => s.platform === 'both').length} / ${skills.filter(s => s.platform !== 'common').length} (common-template skills are parity-exempt)
 
 ---
 

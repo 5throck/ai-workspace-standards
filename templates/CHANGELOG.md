@@ -2,6 +2,12 @@
 
 All notable changes to the template variants are documented here.
 
+## [0.6.0] - 2026-08-28
+### Added
+- **[2026-08-28]**: LICENSE rollout — template license mechanism introduced via `a5714968` (AGPL license template rollout across templates and variants).
+- **[2026-08-28]**: Promoted 6 generic skills from `co-safety`/`co-work` to `templates/common/skills/` (`70fef8bf`).
+- **[2026-08-30]**: Promoted `handbook` (0.4.0) and `handbook-sync-audit` (1.0.0) skills from `co-deck` to `templates/common/skills/` (`1653a84f`).
+
 ## [Unreleased]
 ### Changed
 - **[2026-06-01]**: `co-security` variant: Redesigned workflow by merging Phase 1 and 2 into "Recon & Threat Modeling"
