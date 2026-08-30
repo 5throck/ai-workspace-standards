@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+// @version 1.0.0
 // scripts/handbook/check-lint.ts
 // L5 — Basic HTML lint for handbook files without stylelint/eslint.
 // Validates HTML quality using only regex-based checks:

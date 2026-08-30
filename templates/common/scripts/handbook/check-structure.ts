@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+// @version 1.0.0
 // scripts/handbook/check-structure.ts
 // HTML structure validator — the well-formedness layer of the handbook toolkit.
 // Ported from intro-to-ai-harness/scripts/validate-structure.py (stack-based).
