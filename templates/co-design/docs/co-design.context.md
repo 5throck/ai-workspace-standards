@@ -112,7 +112,7 @@ Design PM
 
 ### Design System
 
-Maintain component library consistency: reuse existing components before creating new ones. Document any new components in `docs/design-system/`.
+Maintain component library consistency: reuse existing components before creating new ones. Document new components in `docs/specs/` (see Recommended Folder Structure below). Component-to-token bindings are defined in `docs/component-primitives.md`; token values live in `tokens.json` (SSOT).
 
 ### Hybrid Scripting
 

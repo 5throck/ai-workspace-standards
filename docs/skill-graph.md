@@ -32,6 +32,7 @@
 | `daily/compliance-gap` | variant:co-safety | — | — | — | — | — |
 | `daily/risk-assessment` | variant:co-safety | — | — | — | — | — |
 | `decision-record` | common | — | — | — | — | — |
+| `design-foundation` | L0 | — | — | accessibility-audit (composes_with), token-usage-lint (composes_with), ui-ux-design-intelligence (enables) | — | — |
 | `desktop-app-fallback` | variant:co-abap | code-writer, test-runner | phase3, phase4 | — | — | — |
 | `documentation-writing` | L0 | content-writer, technical-writer | — | team-builder (composes_with) | — | — |
 | `double-entry-reconciliation` | variant:co-price | — | — | financial-statement-prep (composes_with), harness-verification (composes_with), i18n-audit (follows), pricing-playbook (composes_with) | — | — |

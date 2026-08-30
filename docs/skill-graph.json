@@ -479,6 +479,11 @@
       ]
     },
     {
+      "id": "design-foundation",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
       "id": "design-lead",
       "type": "agent",
       "layer": "variant:co-design"
@@ -4798,6 +4803,59 @@
         "file": "templates/co-deck/skills/design/SKILL.md",
         "field": "prerequisites"
       }
+    },
+    {
+      "type": "composes_with",
+      "from": "design-foundation",
+      "to": "accessibility-audit",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "skills/design-foundation/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
+      "type": "references",
+      "from": "design-foundation",
+      "to": "accessibility-audit",
+      "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "design-foundation",
+      "to": "token-usage-lint",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "skills/design-foundation/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "references",
+      "from": "design-foundation",
+      "to": "token-usage-lint",
+      "source": "prose"
+    },
+    {
+      "type": "enables",
+      "from": "design-foundation",
+      "to": "ui-ux-design-intelligence",
+      "source": "relates_to",
+      "provenance": {
+        "file": "skills/design-foundation/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "references",
+      "from": "design-foundation",
+      "to": "ui-ux-design-intelligence",
+      "source": "prose"
     },
     {
       "type": "references",
