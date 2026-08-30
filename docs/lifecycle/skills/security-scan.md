@@ -33,5 +33,5 @@
 
 - **Current Phase**: production
 - **Owner**: security-expert
-- **Last Updated**: 2026-05-29
+- **Last Updated**: 2026-08-30 (SKILL.md 1.0.0 → 1.1.0: mandated explicit `--config .gitleaks.toml` on all gitleaks invocations — subdirectory scans without it silently fall back to the default ruleset and lose workspace allowlists)
 - **Last Reviewer**: lifecycle-manager
