@@ -1,6 +1,6 @@
 ---
 # co-deck — Variant Configuration
-# Last Updated: 2026-08-25
+# Last Updated: 2026-08-30
 ---
 
 > Extends docs/context.md. This file IS the customization layer for this project.
@@ -80,10 +80,11 @@ Three flags control agent execution in the co-deck pipeline:
 | storyline | `skills/storyline/SKILL.md` | storyline | active |
 | design | `skills/design/SKILL.md` | design | active |
 | html-build | `skills/html-build/SKILL.md` | html-build | active |
-| measure | `skills/measure/SKILL.md` | measure | active |
 | prep-pdf | `skills/prep-pdf/SKILL.md` | measure | active |
 | pdf-export | `skills/pdf-export/SKILL.md` | pdf-export | active |
 | theme-authoring | `skills/theme-authoring/SKILL.md` | PM (T-Stage + Style Workflow entry point) | active |
+| handbook | `skills/handbook/SKILL.md` | handbook-writer, handbook-reviewer | active |
+| agent-lifecycle-manager | `.claude/skills/agent-lifecycle-manager/SKILL.md` | PM | active |
 <!-- END VARIANT-INJECT -->
 
 > `source-verifier` and `image-curator` agents have no skill trigger files (PM-dispatched only; no user-facing trigger phrases).

@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "last_updated": "2026-08-28",
+  "last_updated": "2026-08-30",
   "description": "Central version registry for all template variants",
   "variants": {
     "co-develop": {
@@ -58,7 +58,7 @@
     "co-deck": {
       "latest": "0.2.3",
       "released": "2026-06-17",
-      "status": "beta",
+      "status": "stable",
       "source_project": "Projects/co-deck_prototype",
       "promoted_via": "l2-to-variant-pipeline.ts",
       "changelog": [
