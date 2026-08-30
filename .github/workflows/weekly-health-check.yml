@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: read
+  issues: write
 
 jobs:
   health-check:
@@ -23,7 +24,8 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
-          bun-version: latest
+          # Pinned to match test.yml and the locally verified Bun version.
+          bun-version: 1.4.0
 
       - name: Install dependencies
         run: bun install
@@ -58,3 +60,24 @@ jobs:
             exit 1
           fi
           echo "Security check passed (no high/critical vulnerabilities)."
+
+      # A silently failing scheduled health check defeats its purpose — surface
+      # failures as a GitHub issue so they are visible without checking Actions.
+      - name: Open issue on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          created=$(gh issue create \
+            --title "Weekly Health Check failed — $(date -u +%Y-%m-%d)" \
+            --body "The scheduled weekly health check run failed. See the full log: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            --label "ci-failure" 2>&1) || created=""
+          if [ -z "$created" ]; then
+            echo "Issue creation returned nothing (label may not exist) — retrying without label"
+            gh issue create \
+              --title "Weekly Health Check failed — $(date -u +%Y-%m-%d)" \
+              --body "The scheduled weekly health check run failed. See the full log: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" || true
+          else
+            echo "Issue created: $created"
+          fi

@@ -1,3 +1,8 @@
+---
+lang: ko
+lang_reason: source-material
+---
+
 # Skill Relation Graph Evolution + Decision Chain Validator + I18N Audit Consolidation
 
 | Field | Value |

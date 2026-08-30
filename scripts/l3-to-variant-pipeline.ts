@@ -11,7 +11,7 @@
  * - Wave 3: Platform parity validation (validate-platform-parity.ts)
  * - Wave 3: Workspace integration (integration-helpers.ts)
  *
- * @version 1.14.0
+ * @version 1.15.0
  * @phase: Complete pipeline orchestration
  *
  * v1.14.0 (2026-08-29): Phase 0.5 pre-flight PROMOTION HOLD — reads the SOURCE project's
@@ -554,13 +554,29 @@ export async function executeL3ToVariantPipeline(config: PipelineConfig): Promis
       ];
       const missingMarkers = requiredMarkers.filter(m => !agentsMdContent.includes(`<!-- ${m} -->`));
       const hasSectionedStructure = agentsMdContent.includes('## §1:') && agentsMdContent.includes('## §3:');
+      const hasValidTitle = /^#\s+AGENTS\.md\s*$/m.test(agentsMdContent);
+      const hasCommonAgentsBlock = agentsMdContent.includes('<!-- COMMON-AGENTS:START -->')
+        && agentsMdContent.includes('<!-- COMMON-AGENTS:END -->');
 
-      if (missingMarkers.length === 0 && hasSectionedStructure) {
-        console.log(`✅ AGENTS.md structure OK — all VARIANT-* markers present, §-numbered sections found`);
+      // Roster link validity: every referenced agents/*.md must exist relative
+      // to the L3 source root (drifted flat paths were the co-safety failure mode).
+      const unresolvedAgentRefs = new Set<string>();
+      for (const refMatch of agentsMdContent.matchAll(/agents\/[A-Za-z0-9_/-]+\.md/g)) {
+        const rel = refMatch[0];
+        if (!ex35(j35(config.l3ProjectPath, ...rel.split('/')))) {
+          unresolvedAgentRefs.add(rel);
+        }
+      }
+
+      if (missingMarkers.length === 0 && hasSectionedStructure && hasValidTitle && hasCommonAgentsBlock && unresolvedAgentRefs.size === 0) {
+        console.log(`✅ AGENTS.md structure OK — all VARIANT-* markers present, §-numbered sections found, title valid, roster links resolve`);
       } else {
         const issues: string[] = [];
         if (!hasSectionedStructure) issues.push('missing §-numbered section structure (§1/§3)');
         if (missingMarkers.length > 0) issues.push(`missing VARIANT-* markers: ${missingMarkers.join(', ')}`);
+        if (!hasValidTitle) issues.push('H1 title must be exactly `# AGENTS.md` (found a copied workspace-root title)');
+        if (!hasCommonAgentsBlock) issues.push('missing COMMON-AGENTS:START/END Language Policy block');
+        if (unresolvedAgentRefs.size > 0) issues.push(`unresolvable agent links: ${[...unresolvedAgentRefs].join(', ')}`);
 
         console.warn(`⚠️  PHASE 3.5: AGENTS.md structure misaligned with L1 template:`);
         for (const issue of issues) console.warn(`   - ${issue}`);
@@ -603,7 +619,7 @@ export async function executeL3ToVariantPipeline(config: PipelineConfig): Promis
           console.error(`   Phase 4 injectVariantPlaceholders() will find no markers → uninjected output.`);
           console.error(`   Fix: bun scripts/regenerate-agents-md.ts --variant ${config.variantName}`);
           console.error(`   Or re-run pipeline with autoFixAgentsMd:true\n`);
-          errors.push({ phase: '3.5', error: 'AGENTS.md is missing injection anchors (VARIANT-* markers or §-structure)' });
+          errors.push({ phase: '3.5', error: `AGENTS.md structure check failed: ${issues.join('; ')}` });
           return buildFailureResult(phases, errors, startTime);
         }
       }

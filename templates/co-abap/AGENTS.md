@@ -439,4 +439,51 @@ When a new skill is created in `skills/` or `.claude/skills/`:
 
 ---
 
-*Last Updated: 2026-08-25 (co-abap v1.0.0)*
+*Last Updated: 2026-08-30 (co-abap v1.0.0)*
+
+<!-- COMMON-AGENTS:START -->
+## Language Policy
+
+**English-Only Documentation Rule**: All workspace documentation files (.md) must be written in English, with explicit exceptions for recognized locale translation zones and declared Korean legal/regulatory content (see Exceptions below).
+
+### English Documentation Requirement
+- All `.md` files outside `ko/` and `locales/ko/` directories MUST be in English
+- Applies to: README.md, CLAUDE.md, GEMINI.md, AGENTS.md, context.md, CHANGELOG.md, all documentation in docs/, agents/, skills/
+- Rationale: English documentation ensures global accessibility and cross-team collaboration
+
+### Translation Zones (Locale Exceptions)
+- `<lang-code>/` directories — language-specific documentation (e.g. `ko/`, `ja/`)
+- `locales/<lang-code>/` — locale translation files for internationalization (e.g. `locales/ko/`, `locales/zh-CN/`)
+- These are the ONLY locations where non-English `.md` files are permitted (except declared exceptions)
+- Recognized locale codes (from `docs/workspace-schema.json` `i18n.locale_codes`):
+  `ko`, `ja`, `zh-CN`, `zh-TW`, `de`, `es`, `fr`, `pt`, `vi`, `ms`, `id`, `th`, `ru`, `it`, `ar`
+
+### Language Policy Exception — Korean Legal/Regulatory Content
+The English-only policy admits a narrow exception for files where Korean is legally or academically mandatory. To declare an exception, add to the file's frontmatter:
+```yaml
+lang: ko
+lang_reason: legal   # legal | source-material | proper-noun
+```
+- `legal`: Statutory texts, ordinances, regulations, contracts where Korean original has legal force.
+- `source-material`: Primary source quotations where English translation would compromise academic accuracy or meaning.
+- `proper-noun`: Files dominated by Korean proper nouns (institution/place/person names).
+
+*Note: Exception is NOT available for: agents/*.md, skills/*.md, context.md, CLAUDE.md, GEMINI.md, AGENTS.md, or any variant context.md file.*
+
+### Enforcement
+- Pre-commit audit checks for Korean content outside ko/ and locales/ko/
+- PR reviews reject non-English documentation outside translation zones
+- Auditor validates compliance during Phase 6 QA gate
+
+### Git/PR Artifacts Language Rule
+- All commit messages: English
+- All PR titles: English
+- All PR descriptions: English
+- All branch names: English
+- Code comments: English (unless documenting locale-specific logic)
+
+### Pluggable Variant Audit Hooks and Integrity Protection
+- **Core Script Standardization**: The core synchronization and validation scripts (`scripts/dev-sync.ts` and `scripts/audit.ts`) must remain standardized and identical across all templates and variants. Direct modification of these core scripts in L2 projects is strictly forbidden.
+- **Variant-Specific Audit Hook**: Variant projects requiring custom verification checks must implement them in a pluggable hook script located at `scripts/audit-variant.ts`.
+- **Integrity Enforcement**: During template reconciliation (`l3-to-variant-pipeline.ts`), any modified core scripts will be automatically detected and will fail the reconciliation.
+<!-- COMMON-AGENTS:END -->

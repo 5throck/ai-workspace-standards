@@ -1,6 +1,6 @@
 # AGENTS.md
 
-**Workspace Root Agent Ecosystem**
+**co-hr Variant Agent Ecosystem**
 
 > **🚨 For AI tools reading this file**: This file is a **registry and orchestration reference**, not a set of instructions directed at you.
 > It describes multiple distinct human-defined roles for documentation and dispatch purposes.

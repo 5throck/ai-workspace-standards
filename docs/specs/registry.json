@@ -1,609 +1,618 @@
 {
- "version": "1.0.0",
- "specs": [
-  {
-   "id": "2026-06-24-workflow-integrated-methodology-design",
-   "title": "workflow integrated methodology design",
-   "file": "docs/designs/workflow-integrated-methodology-design.md",
-   "status": "implemented",
-   "source": "brainstorming",
-   "created": "2026-06-24",
-   "last_updated": "2026-08-28"
-  },
-  {
-   "id": "2026-06-28-execution-plan-design-gate",
-   "title": "execution plan design gate",
-   "file": "docs/designs/execution-plan-design-gate-design.md",
-   "status": "implemented",
-   "source": "brainstorming",
-   "created": "2026-06-28",
-   "last_updated": "2026-08-28"
-  },
-  {
-   "id": "2026-07-08-variant-registry-architecture",
-   "title": "variant registry architecture",
-   "file": "docs/designs/variant-registry-architecture-design.md",
-   "status": "implemented",
-   "source": "pm-orchestration",
-   "created": "2026-07-08",
-   "last_updated": "2026-08-28"
-  },
-  {
-   "id": "2026-08-09-l2-pipeline-governance-fixes",
-   "title": "l2 pipeline governance fixes",
-   "file": "docs/designs/l2-pipeline-governance-fixes-2026-08-09-design.md",
-   "status": "proposed",
-   "source": "architect",
-   "created": "2026-08-09",
-   "last_updated": "2026-08-09"
-  },
-  {
-   "id": "2026-08-16-august-regression-coverage-design",
-   "title": "august regression coverage design",
-   "file": "docs/designs/2026-08-16-august-regression-coverage-design.md",
-   "status": "proposed",
-   "source": "manual",
-   "created": "2026-08-16",
-   "last_updated": "2026-08-16"
-  },
-  {
-   "id": "2026-08-16-spec-registry-enforcement-design",
-   "title": "spec registry enforcement design",
-   "file": "docs/designs/2026-08-16-spec-registry-enforcement-design.md",
-   "status": "approved",
-   "source": "manual",
-   "created": "2026-08-16",
-   "last_updated": "2026-08-16"
-  },
-  {
-   "id": "2026-06-07-adr-0033-implementation-summary",
-   "title": "adr 0033 implementation summary",
-   "file": "docs/designs/adr-0033-implementation-summary.md",
-   "status": "implemented",
-   "source": "manual",
-   "created": "2026-08-16",
-   "last_updated": "2026-08-16"
-  },
-  {
-   "id": "2026-06-10-agents-md-final-structure",
-   "title": "agents md final structure",
-   "file": "docs/designs/agents-md-final-structure.md",
-   "status": "implemented",
-   "source": "manual",
-   "created": "2026-08-16",
-   "last_updated": "2026-08-16"
-  },
-  {
-   "id": "2026-06-10-agents-md-section-integration-design",
-   "title": "agents md section integration design",
-   "file": "docs/designs/agents-md-section-integration-design.md",
-   "status": "implemented",
-   "source": "manual",
-   "created": "2026-08-16",
-   "last_updated": "2026-08-16"
-  },
-  {
-   "id": "2026-07-16-ai-workspace-service-platform-roadmap",
-   "title": "ai workspace service platform roadmap",
-   "file": "docs/designs/ai-workspace-service-platform-roadmap.md",
-   "status": "proposed",
-   "source": "manual",
-   "created": "2026-08-16",
-   "last_updated": "2026-08-16"
-  },
-  {
-   "id": "2026-07-11-beta-lifecycle-variant-sync-design",
-   "title": "beta lifecycle variant sync design",
-   "file": "docs/designs/beta-lifecycle-variant-sync-design.md",
-   "status": "approved",
-   "source": "manual",
-   "created": "2026-08-16",
-   "last_updated": "2026-08-16"
-  },
-  {
-   "id": "2026-06-25-co-deck-theme-reduction-design",
-   "title": "co deck theme reduction design",
-   "file": "docs/designs/co-deck-theme-reduction-design.md",
-   "status": "approved",
-   "source": "manual",
-   "created": "2026-08-16",
-   "last_updated": "2026-08-16"
-  },
-  {
-   "id": "2026-06-25-co-deck-theme-reduction-plan",
-   "title": "co deck theme reduction plan",
-   "file": "docs/designs/co-deck-theme-reduction-plan.md",
-   "status": "implemented",
-   "source": "manual",
-   "created": "2026-08-16",
-   "last_updated": "2026-08-16"
-  },
-  {
-   "id": "2026-06-12-consolidate-propagation-scripts-plan",
-   "title": "consolidate propagation scripts plan",
-   "file": "docs/designs/consolidate-propagation-scripts-plan.md",
-   "status": "drifted",
-   "source": "manual",
-   "created": "2026-08-16",
-   "last_updated": "2026-08-16"
-  },
-  {
-   "id": "2026-06-13-create-l2-scaffold-design",
-   "title": "create l2 scaffold design",
-   "file": "docs/designs/create-l2-scaffold-design.md",
-   "status": "implemented",
-   "source": "manual",
-   "created": "2026-08-16",
-   "last_updated": "2026-08-16"
-  },
-  {
-   "id": "2026-06-09-deploy-to-l1-script-design",
-   "title": "deploy to l1 script design",
-   "file": "docs/designs/deploy-to-l1-script-design.md",
-   "status": "implemented",
-   "source": "manual",
-   "created": "2026-08-16",
-   "last_updated": "2026-08-16"
-  },
-  {
-   "id": "2026-08-01-ecc-phase1-governance-design",
-   "title": "ecc phase1 governance design",
-   "file": "docs/designs/ecc-phase1-governance-design.md",
-   "status": "approved",
-   "source": "manual",
-   "created": "2026-08-16",
-   "last_updated": "2026-08-16"
-  },
-  {
-   "id": "2026-08-01-ecc-phase2-governance-hardening-design",
-   "title": "ecc phase2 governance hardening design",
-   "file": "docs/designs/ecc-phase2-governance-hardening-design.md",
-   "status": "approved",
-   "source": "manual",
-   "created": "2026-08-16",
-   "last_updated": "2026-08-16"
-  },
-  {
-   "id": "2026-08-01-ecc-phase3-governance-maturation-design",
-   "title": "ecc phase3 governance maturation design",
-   "file": "docs/designs/ecc-phase3-governance-maturation-design.md",
-   "status": "approved",
-   "source": "manual",
-   "created": "2026-08-16",
-   "last_updated": "2026-08-16"
-  },
-  {
-   "id": "2026-08-03-explain-me-skill-design",
-   "title": "explain me skill design",
-   "file": "docs/designs/explain-me-skill-design.md",
-   "status": "approved",
-   "source": "manual",
-   "created": "2026-08-16",
-   "last_updated": "2026-08-16"
-  },
-  {
-   "id": "2026-06-22-extract-slidedata-fix-plan",
-   "title": "extract slidedata fix plan",
-   "file": "docs/designs/extract-slidedata-fix-plan.md",
-   "status": "implemented",
-   "source": "manual",
-   "created": "2026-08-16",
-   "last_updated": "2026-08-16"
-  },
-  {
-   "id": "2026-07-11-governance-docs-consolidation-design",
-   "title": "governance docs consolidation design",
-   "file": "docs/designs/governance-docs-consolidation-design.md",
-   "status": "approved",
-   "source": "manual",
-   "created": "2026-08-16",
-   "last_updated": "2026-08-16"
-  },
-  {
-   "id": "2026-07-08-l0-l2-deployment-audit-design",
-   "title": "l0 l2 deployment audit design",
-   "file": "docs/designs/l0-l2-deployment-audit-design.md",
-   "status": "proposed",
-   "source": "manual",
-   "created": "2026-08-16",
-   "last_updated": "2026-08-16"
-  },
-  {
-   "id": "2026-06-19-l1-agent-format-spec",
-   "title": "l1 agent format spec",
-   "file": "docs/designs/l1-agent-format-spec.md",
-   "status": "implemented",
-   "source": "manual",
-   "created": "2026-08-16",
-   "last_updated": "2026-08-16"
-  },
-  {
-   "id": "2026-06-03-l2-to-variant-conversion-pipeline",
-   "title": "l2 to variant conversion pipeline",
-   "file": "docs/designs/l2-to-variant-conversion-pipeline.md",
-   "status": "draft",
-   "source": "manual",
-   "created": "2026-08-16",
-   "last_updated": "2026-08-16"
-  },
-  {
-   "id": "2026-06-03-l2-to-variant-pipeline-design-checklist",
-   "title": "l2 to variant pipeline design checklist",
-   "file": "docs/designs/l2-to-variant-pipeline-design-checklist.md",
-   "status": "implemented",
-   "source": "manual",
-   "created": "2026-08-16",
-   "last_updated": "2026-08-16"
-  },
-  {
-   "id": "2026-06-03-l2-to-variant-pipeline-executive-summary",
-   "title": "l2 to variant pipeline executive summary",
-   "file": "docs/designs/l2-to-variant-pipeline-executive-summary.md",
-   "status": "approved",
-   "source": "manual",
-   "created": "2026-08-16",
-   "last_updated": "2026-08-16"
-  },
-  {
-   "id": "2026-07-11-m11-m12-m15-and-beta-lifecycle-design",
-   "title": "m11 m12 m15 and beta lifecycle design",
-   "file": "docs/designs/m11-m12-m15-and-beta-lifecycle-design.md",
-   "status": "approved",
-   "source": "manual",
-   "created": "2026-08-16",
-   "last_updated": "2026-08-16"
-  },
-  {
-   "id": "2026-06-03-mvp-wave-1-summary",
-   "title": "mvp wave 1 summary",
-   "file": "docs/designs/mvp-wave-1-summary.md",
-   "status": "implemented",
-   "source": "manual",
-   "created": "2026-08-16",
-   "last_updated": "2026-08-16"
-  },
-  {
-   "id": "2026-06-23-narration-engine-tts-design",
-   "title": "narration engine tts design",
-   "file": "docs/designs/narration-engine-tts-design.md",
-   "status": "approved",
-   "source": "manual",
-   "created": "2026-08-16",
-   "last_updated": "2026-08-16"
-  },
-  {
-   "id": "2026-06-09-pm-md-group-type-mapping-spec",
-   "title": "pm md group type mapping spec",
-   "file": "docs/designs/pm-md-group-type-mapping-spec.md",
-   "status": "implemented",
-   "source": "manual",
-   "created": "2026-08-16",
-   "last_updated": "2026-08-16"
-  },
-  {
-   "id": "2026-06-09-pm-md-operations-guide",
-   "title": "pm md operations guide",
-   "file": "docs/designs/pm-md-operations-guide.md",
-   "status": "implemented",
-   "source": "manual",
-   "created": "2026-08-16",
-   "last_updated": "2026-08-16"
-  },
-  {
-   "id": "2026-06-09-pm-md-variant-specific-content-injection-design",
-   "title": "pm md variant specific content injection design",
-   "file": "docs/designs/pm-md-variant-specific-content-injection-design.md",
-   "status": "drifted",
-   "source": "manual",
-   "created": "2026-08-16",
-   "last_updated": "2026-08-16"
-  },
-  {
-   "id": "2026-07-03-project-review-2026-07-03-improvement-plan",
-   "title": "project review 2026 07 03 improvement plan",
-   "file": "docs/designs/project-review-2026-07-03-improvement-plan.md",
-   "status": "approved",
-   "source": "manual",
-   "created": "2026-08-16",
-   "last_updated": "2026-08-16"
-  },
-  {
-   "id": "2026-08-12-project-review-fixes-design",
-   "title": "project review fixes design",
-   "file": "docs/designs/project-review-fixes-design.md",
-   "status": "implemented",
-   "source": "manual",
-   "created": "2026-08-16",
-   "last_updated": "2026-08-16"
-  },
-  {
-   "id": "2026-07-02-retry-handler-fail-fast-design",
-   "title": "retry handler fail fast design",
-   "file": "docs/designs/retry-handler-fail-fast-design.md",
-   "status": "proposed",
-   "source": "manual",
-   "created": "2026-08-16",
-   "last_updated": "2026-08-16"
-  },
-  {
-   "id": "2026-07-11-sequential-pr-merge-policy-design",
-   "title": "sequential pr merge policy design",
-   "file": "docs/designs/sequential-pr-merge-policy-design.md",
-   "status": "approved",
-   "source": "manual",
-   "created": "2026-08-16",
-   "last_updated": "2026-08-16"
-  },
-  {
-   "id": "2026-06-23-thumbnail-to-headline-nav-design",
-   "title": "thumbnail to headline nav design",
-   "file": "docs/designs/thumbnail-to-headline-nav-design.md",
-   "status": "implemented",
-   "source": "manual",
-   "created": "2026-08-16",
-   "last_updated": "2026-08-16"
-  },
-  {
-   "id": "2026-06-24-thumbnail-to-headline-nav-plan",
-   "title": "thumbnail to headline nav plan",
-   "file": "docs/designs/thumbnail-to-headline-nav-plan.md",
-   "status": "implemented",
-   "source": "manual",
-   "created": "2026-08-16",
-   "last_updated": "2026-08-16"
-  },
-  {
-   "id": "2026-06-23-tts-autoplay-separation-design",
-   "title": "tts autoplay separation design",
-   "file": "docs/designs/tts-autoplay-separation-design.md",
-   "status": "implemented",
-   "source": "manual",
-   "created": "2026-08-16",
-   "last_updated": "2026-08-16"
-  },
-  {
-   "id": "2026-06-24-tts-autoplay-separation-plan",
-   "title": "tts autoplay separation plan",
-   "file": "docs/designs/tts-autoplay-separation-plan.md",
-   "status": "implemented",
-   "source": "manual",
-   "created": "2026-08-16",
-   "last_updated": "2026-08-16"
-  },
-  {
-   "id": "2026-06-24-upgrade-project-content-sync-plan",
-   "title": "upgrade project content sync plan",
-   "file": "docs/designs/upgrade-project-content-sync-plan.md",
-   "status": "implemented",
-   "source": "manual",
-   "created": "2026-08-16",
-   "last_updated": "2026-08-17"
-  },
-  {
-   "id": "2026-06-19-variant-specialist-agent-structure",
-   "title": "variant specialist agent structure",
-   "file": "docs/designs/variant-specialist-agent-structure.md",
-   "status": "implemented",
-   "source": "manual",
-   "created": "2026-08-16",
-   "last_updated": "2026-08-16"
-  },
-  {
-   "id": "2026-06-19-variant-specialist-skill-structure",
-   "title": "variant specialist skill structure",
-   "file": "docs/designs/variant-specialist-skill-structure.md",
-   "status": "implemented",
-   "source": "manual",
-   "created": "2026-08-16",
-   "last_updated": "2026-08-16"
-  },
-  {
-   "id": "2026-08-06-variant-templates-advancement-design",
-   "title": "variant templates advancement design",
-   "file": "docs/designs/variant-templates-advancement-design.md",
-   "status": "implemented",
-   "source": "manual",
-   "created": "2026-08-16",
-   "last_updated": "2026-08-16"
-  },
-  {
-   "id": "2026-08-06-variant-templates-sync-design",
-   "title": "variant templates sync design",
-   "file": "docs/designs/variant-templates-sync-design.md",
-   "status": "implemented",
-   "source": "manual",
-   "created": "2026-08-16",
-   "last_updated": "2026-08-16"
-  },
-  {
-   "id": "2026-06-01-version-manifest-implementation-plan",
-   "title": "version manifest implementation plan",
-   "file": "docs/designs/version-manifest-implementation-plan.md",
-   "status": "implemented",
-   "source": "manual",
-   "created": "2026-08-16",
-   "last_updated": "2026-08-16"
-  },
-  {
-   "id": "2026-07-11-workspace-hardening-design",
-   "title": "workspace hardening design",
-   "file": "docs/designs/workspace-hardening-design.md",
-   "status": "implemented",
-   "source": "manual",
-   "created": "2026-08-16",
-   "last_updated": "2026-08-16"
-  },
-  {
-   "id": "2026-08-06-workspace-q3-improvements-design",
-   "title": "workspace q3 improvements design",
-   "file": "docs/designs/workspace-q3-improvements-design.md",
-   "status": "implemented",
-   "source": "manual",
-   "created": "2026-08-16",
-   "last_updated": "2026-08-16"
-  },
-  {
-   "id": "2026-08-16-governance-backlog-design",
-   "title": "governance backlog design",
-   "file": "docs/designs/2026-08-16-governance-backlog-design.md",
-   "status": "approved",
-   "source": "manual",
-   "created": "2026-08-16",
-   "last_updated": "2026-08-16"
-  },
-  {
-   "id": "2026-08-18-changelog-memory-conflict-fix-design",
-   "title": "changelog memory conflict fix design",
-   "file": "docs/designs/2026-08-18-changelog-memory-conflict-fix-design.md",
-   "status": "draft",
-   "source": "manual",
-   "created": "2026-08-17",
-   "last_updated": "2026-08-17"
-  },
-  {
-   "id": "2026-08-19-co-newbiz-design-ko",
-   "title": "co newbiz design_ko",
-   "file": "docs/designs/2026-08-19-co-newbiz-design_ko.md",
-   "status": "approved",
-   "source": "meeting",
-   "created": "2026-08-19",
-   "last_updated": "2026-08-19",
-   "meeting_ref": "memory/meeting-2026-08-19-co-newbiz-plan-review.md"
-  },
-  {
-   "id": "2026-08-24-skill-relationship-graph-infrastructure-design",
-   "title": "skill relationship graph infrastructure design",
-   "file": "docs/designs/2026-08-24-skill-relationship-graph-infrastructure-design.md",
-   "status": "implemented",
-   "source": "manual",
-   "created": "2026-08-23",
-   "last_updated": "2026-08-23"
-  },
-  {
-   "id": "2026-08-24-decision-chain-standard-design",
-   "title": "decision chain standard design",
-   "file": "docs/designs/2026-08-24-decision-chain-standard-design.md",
-   "status": "implemented",
-   "source": "manual",
-   "created": "2026-08-23",
-   "last_updated": "2026-08-23"
-  },
-  {
-   "id": "2026-08-24-i18n-specialist-suite-design",
-   "title": "i18n specialist suite design",
-   "file": "docs/designs/2026-08-24-i18n-specialist-suite-design.md",
-   "status": "implemented",
-   "source": "manual",
-   "created": "2026-08-23",
-   "last_updated": "2026-08-23"
-  },
-  {
-   "id": "2026-08-24-variant-i18n-consolidation-design",
-   "title": "variant i18n consolidation design",
-   "file": "docs/designs/2026-08-24-variant-i18n-consolidation-design.md",
-   "status": "implemented",
-   "source": "manual",
-   "created": "2026-08-24",
-   "last_updated": "2026-08-24"
-  },
-  {
-   "id": "2026-08-24-marker-propagation-engine-design",
-   "title": "marker propagation engine design",
-   "file": "docs/designs/2026-08-24-marker-propagation-engine-design.md",
-   "status": "implemented",
-   "source": "manual",
-   "created": "2026-08-24",
-   "last_updated": "2026-08-24"
-  },
-  {
-   "id": "2026-08-24-user-guide-hash-gate-design",
-   "title": "user guide translated_from_hash gate design",
-   "file": "docs/designs/2026-08-24-user-guide-hash-gate-design.md",
-   "status": "implemented",
-   "source": "manual",
-   "created": "2026-08-24",
-   "last_updated": "2026-08-24"
-  },
-  {
-   "id": "2026-08-24-handbook-i18n-parity-gate-design",
-   "title": "handbook i18n parity gate design",
-   "file": "docs/designs/2026-08-24-handbook-i18n-parity-gate-design.md",
-   "status": "implemented",
-   "source": "manual",
-   "created": "2026-08-24",
-   "last_updated": "2026-08-24"
-  },
-  {
-   "id": "2026-08-24-pptx-writer-design",
-   "title": "pptx presentation writer design",
-   "file": "docs/designs/2026-08-24-pptx-writer-design.md",
-   "status": "implemented",
-   "source": "manual",
-   "created": "2026-08-24",
-   "last_updated": "2026-08-24"
-  },
-  {
-   "id": "2026-08-25-skill-graph-document-layer-design",
-   "title": "Skill graph document layer design (incl. L0+L1 promotion)",
-   "file": "docs/designs/2026-08-25-skill-graph-document-layer-design.md",
-   "status": "implemented",
-   "source": "manual",
-   "created": "2026-08-25",
-   "last_updated": "2026-08-25"
-  },
-  {
-   "id": "2026-08-25-template-dep-auto-sync-design",
-   "title": "Template dependency auto-sync design (sync-template-deps, dev-sync 4.52, audit mirror gate)",
-   "file": "docs/designs/2026-08-25-template-dep-auto-sync-design.md",
-   "status": "implemented",
-   "source": "manual",
-   "created": "2026-08-25",
-   "last_updated": "2026-08-25"
-  },
-  {
-   "id": "2026-08-25-pipeline-cascade-repass-design",
-   "title": "Pipeline cascade re-pass design (dev-sync step 4.62)",
-   "file": "docs/designs/2026-08-25-pipeline-cascade-repass-design.md",
-   "status": "implemented",
-   "source": "manual",
-   "created": "2026-08-25",
-   "last_updated": "2026-08-25"
-  },
-  {
-   "id": "2026-08-28-project-doc-marker-drift-detection-design",
-   "title": "project doc marker drift detection design",
-   "file": "docs/designs/2026-08-28-project-doc-marker-drift-detection-design.md",
-   "status": "implemented",
-   "source": "manual",
-   "created": "2026-08-28",
-   "last_updated": "2026-08-28"
-  },
-  {
-   "id": "skillhygiene",
-   "title": "skill hygiene and layer conventions: cross-variant leak, per-skill README standard, scripts/<variant> layout",
-   "file": "docs/designs/2026-08-28-skill-hygiene-and-conventions-design.md",
-   "status": "implemented",
-   "source": "manual",
-   "created": "2026-08-28",
-   "last_updated": "2026-08-29"
-  },
-  {
-   "id": "2026-08-29-relation-graph-evolution-and-decision-chain",
-   "title": "relation graph evolution and decision chain design",
-   "file": "docs/designs/2026-08-29-relation-graph-evolution-and-decision-chain-design.md",
-   "status": "implemented",
-   "source": "architect",
-   "created": "2026-08-29",
-   "last_updated": "2026-08-29"
-  },
-  {
-   "id": "2026-08-30-handbook-common-promotion-design",
-   "title": "handbook common promotion design",
-   "file": "docs/designs/2026-08-30-handbook-common-promotion-design.md",
-   "status": "implemented",
-   "source": "brainstorming",
-   "created": "2026-08-30",
-   "last_updated": "2026-08-30"
-  }
- ]
+  "version": "1.0.0",
+  "specs": [
+    {
+      "id": "2026-06-24-workflow-integrated-methodology-design",
+      "title": "workflow integrated methodology design",
+      "file": "docs/designs/workflow-integrated-methodology-design.md",
+      "status": "implemented",
+      "source": "brainstorming",
+      "created": "2026-06-24",
+      "last_updated": "2026-08-28"
+    },
+    {
+      "id": "2026-06-28-execution-plan-design-gate",
+      "title": "execution plan design gate",
+      "file": "docs/designs/execution-plan-design-gate-design.md",
+      "status": "implemented",
+      "source": "brainstorming",
+      "created": "2026-06-28",
+      "last_updated": "2026-08-28"
+    },
+    {
+      "id": "2026-07-08-variant-registry-architecture",
+      "title": "variant registry architecture",
+      "file": "docs/designs/variant-registry-architecture-design.md",
+      "status": "implemented",
+      "source": "pm-orchestration",
+      "created": "2026-07-08",
+      "last_updated": "2026-08-28"
+    },
+    {
+      "id": "2026-08-09-l2-pipeline-governance-fixes",
+      "title": "l2 pipeline governance fixes",
+      "file": "docs/designs/l2-pipeline-governance-fixes-2026-08-09-design.md",
+      "status": "proposed",
+      "source": "architect",
+      "created": "2026-08-09",
+      "last_updated": "2026-08-09"
+    },
+    {
+      "id": "2026-08-16-august-regression-coverage-design",
+      "title": "august regression coverage design",
+      "file": "docs/designs/2026-08-16-august-regression-coverage-design.md",
+      "status": "proposed",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-08-16-spec-registry-enforcement-design",
+      "title": "spec registry enforcement design",
+      "file": "docs/designs/2026-08-16-spec-registry-enforcement-design.md",
+      "status": "approved",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-07-adr-0033-implementation-summary",
+      "title": "adr 0033 implementation summary",
+      "file": "docs/designs/adr-0033-implementation-summary.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-10-agents-md-final-structure",
+      "title": "agents md final structure",
+      "file": "docs/designs/agents-md-final-structure.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-10-agents-md-section-integration-design",
+      "title": "agents md section integration design",
+      "file": "docs/designs/agents-md-section-integration-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-07-16-ai-workspace-service-platform-roadmap",
+      "title": "ai workspace service platform roadmap",
+      "file": "docs/designs/ai-workspace-service-platform-roadmap.md",
+      "status": "proposed",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-07-11-beta-lifecycle-variant-sync-design",
+      "title": "beta lifecycle variant sync design",
+      "file": "docs/designs/beta-lifecycle-variant-sync-design.md",
+      "status": "approved",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-25-co-deck-theme-reduction-design",
+      "title": "co deck theme reduction design",
+      "file": "docs/designs/co-deck-theme-reduction-design.md",
+      "status": "approved",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-25-co-deck-theme-reduction-plan",
+      "title": "co deck theme reduction plan",
+      "file": "docs/designs/co-deck-theme-reduction-plan.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-12-consolidate-propagation-scripts-plan",
+      "title": "consolidate propagation scripts plan",
+      "file": "docs/designs/consolidate-propagation-scripts-plan.md",
+      "status": "drifted",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-13-create-l2-scaffold-design",
+      "title": "create l2 scaffold design",
+      "file": "docs/designs/create-l2-scaffold-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-09-deploy-to-l1-script-design",
+      "title": "deploy to l1 script design",
+      "file": "docs/designs/deploy-to-l1-script-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-08-01-ecc-phase1-governance-design",
+      "title": "ecc phase1 governance design",
+      "file": "docs/designs/ecc-phase1-governance-design.md",
+      "status": "approved",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-08-01-ecc-phase2-governance-hardening-design",
+      "title": "ecc phase2 governance hardening design",
+      "file": "docs/designs/ecc-phase2-governance-hardening-design.md",
+      "status": "approved",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-08-01-ecc-phase3-governance-maturation-design",
+      "title": "ecc phase3 governance maturation design",
+      "file": "docs/designs/ecc-phase3-governance-maturation-design.md",
+      "status": "approved",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-08-03-explain-me-skill-design",
+      "title": "explain me skill design",
+      "file": "docs/designs/explain-me-skill-design.md",
+      "status": "approved",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-22-extract-slidedata-fix-plan",
+      "title": "extract slidedata fix plan",
+      "file": "docs/designs/extract-slidedata-fix-plan.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-07-11-governance-docs-consolidation-design",
+      "title": "governance docs consolidation design",
+      "file": "docs/designs/governance-docs-consolidation-design.md",
+      "status": "approved",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-07-08-l0-l2-deployment-audit-design",
+      "title": "l0 l2 deployment audit design",
+      "file": "docs/designs/l0-l2-deployment-audit-design.md",
+      "status": "proposed",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-19-l1-agent-format-spec",
+      "title": "l1 agent format spec",
+      "file": "docs/designs/l1-agent-format-spec.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-03-l2-to-variant-conversion-pipeline",
+      "title": "l2 to variant conversion pipeline",
+      "file": "docs/designs/l2-to-variant-conversion-pipeline.md",
+      "status": "draft",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-03-l2-to-variant-pipeline-design-checklist",
+      "title": "l2 to variant pipeline design checklist",
+      "file": "docs/designs/l2-to-variant-pipeline-design-checklist.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-03-l2-to-variant-pipeline-executive-summary",
+      "title": "l2 to variant pipeline executive summary",
+      "file": "docs/designs/l2-to-variant-pipeline-executive-summary.md",
+      "status": "approved",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-07-11-m11-m12-m15-and-beta-lifecycle-design",
+      "title": "m11 m12 m15 and beta lifecycle design",
+      "file": "docs/designs/m11-m12-m15-and-beta-lifecycle-design.md",
+      "status": "approved",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-03-mvp-wave-1-summary",
+      "title": "mvp wave 1 summary",
+      "file": "docs/designs/mvp-wave-1-summary.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-23-narration-engine-tts-design",
+      "title": "narration engine tts design",
+      "file": "docs/designs/narration-engine-tts-design.md",
+      "status": "approved",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-09-pm-md-group-type-mapping-spec",
+      "title": "pm md group type mapping spec",
+      "file": "docs/designs/pm-md-group-type-mapping-spec.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-09-pm-md-operations-guide",
+      "title": "pm md operations guide",
+      "file": "docs/designs/pm-md-operations-guide.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-09-pm-md-variant-specific-content-injection-design",
+      "title": "pm md variant specific content injection design",
+      "file": "docs/designs/pm-md-variant-specific-content-injection-design.md",
+      "status": "drifted",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-07-03-project-review-2026-07-03-improvement-plan",
+      "title": "project review 2026 07 03 improvement plan",
+      "file": "docs/designs/project-review-2026-07-03-improvement-plan.md",
+      "status": "approved",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-08-12-project-review-fixes-design",
+      "title": "project review fixes design",
+      "file": "docs/designs/project-review-fixes-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-07-02-retry-handler-fail-fast-design",
+      "title": "retry handler fail fast design",
+      "file": "docs/designs/retry-handler-fail-fast-design.md",
+      "status": "proposed",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-07-11-sequential-pr-merge-policy-design",
+      "title": "sequential pr merge policy design",
+      "file": "docs/designs/sequential-pr-merge-policy-design.md",
+      "status": "approved",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-23-thumbnail-to-headline-nav-design",
+      "title": "thumbnail to headline nav design",
+      "file": "docs/designs/thumbnail-to-headline-nav-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-24-thumbnail-to-headline-nav-plan",
+      "title": "thumbnail to headline nav plan",
+      "file": "docs/designs/thumbnail-to-headline-nav-plan.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-23-tts-autoplay-separation-design",
+      "title": "tts autoplay separation design",
+      "file": "docs/designs/tts-autoplay-separation-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-24-tts-autoplay-separation-plan",
+      "title": "tts autoplay separation plan",
+      "file": "docs/designs/tts-autoplay-separation-plan.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-24-upgrade-project-content-sync-plan",
+      "title": "upgrade project content sync plan",
+      "file": "docs/designs/upgrade-project-content-sync-plan.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-17"
+    },
+    {
+      "id": "2026-06-19-variant-specialist-agent-structure",
+      "title": "variant specialist agent structure",
+      "file": "docs/designs/variant-specialist-agent-structure.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-19-variant-specialist-skill-structure",
+      "title": "variant specialist skill structure",
+      "file": "docs/designs/variant-specialist-skill-structure.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-08-06-variant-templates-advancement-design",
+      "title": "variant templates advancement design",
+      "file": "docs/designs/variant-templates-advancement-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-08-06-variant-templates-sync-design",
+      "title": "variant templates sync design",
+      "file": "docs/designs/variant-templates-sync-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-01-version-manifest-implementation-plan",
+      "title": "version manifest implementation plan",
+      "file": "docs/designs/version-manifest-implementation-plan.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-07-11-workspace-hardening-design",
+      "title": "workspace hardening design",
+      "file": "docs/designs/workspace-hardening-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-08-06-workspace-q3-improvements-design",
+      "title": "workspace q3 improvements design",
+      "file": "docs/designs/workspace-q3-improvements-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-08-16-governance-backlog-design",
+      "title": "governance backlog design",
+      "file": "docs/designs/2026-08-16-governance-backlog-design.md",
+      "status": "approved",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-08-18-changelog-memory-conflict-fix-design",
+      "title": "changelog memory conflict fix design",
+      "file": "docs/designs/2026-08-18-changelog-memory-conflict-fix-design.md",
+      "status": "draft",
+      "source": "manual",
+      "created": "2026-08-17",
+      "last_updated": "2026-08-17"
+    },
+    {
+      "id": "2026-08-19-co-newbiz-design-ko",
+      "title": "co newbiz design_ko",
+      "file": "docs/designs/2026-08-19-co-newbiz-design_ko.md",
+      "status": "approved",
+      "source": "meeting",
+      "created": "2026-08-19",
+      "last_updated": "2026-08-19",
+      "meeting_ref": "memory/meeting-2026-08-19-co-newbiz-plan-review.md"
+    },
+    {
+      "id": "2026-08-24-skill-relationship-graph-infrastructure-design",
+      "title": "skill relationship graph infrastructure design",
+      "file": "docs/designs/2026-08-24-skill-relationship-graph-infrastructure-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-23",
+      "last_updated": "2026-08-23"
+    },
+    {
+      "id": "2026-08-24-decision-chain-standard-design",
+      "title": "decision chain standard design",
+      "file": "docs/designs/2026-08-24-decision-chain-standard-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-23",
+      "last_updated": "2026-08-23"
+    },
+    {
+      "id": "2026-08-24-i18n-specialist-suite-design",
+      "title": "i18n specialist suite design",
+      "file": "docs/designs/2026-08-24-i18n-specialist-suite-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-23",
+      "last_updated": "2026-08-23"
+    },
+    {
+      "id": "2026-08-24-variant-i18n-consolidation-design",
+      "title": "variant i18n consolidation design",
+      "file": "docs/designs/2026-08-24-variant-i18n-consolidation-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-24",
+      "last_updated": "2026-08-24"
+    },
+    {
+      "id": "2026-08-24-marker-propagation-engine-design",
+      "title": "marker propagation engine design",
+      "file": "docs/designs/2026-08-24-marker-propagation-engine-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-24",
+      "last_updated": "2026-08-24"
+    },
+    {
+      "id": "2026-08-24-user-guide-hash-gate-design",
+      "title": "user guide translated_from_hash gate design",
+      "file": "docs/designs/2026-08-24-user-guide-hash-gate-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-24",
+      "last_updated": "2026-08-24"
+    },
+    {
+      "id": "2026-08-24-handbook-i18n-parity-gate-design",
+      "title": "handbook i18n parity gate design",
+      "file": "docs/designs/2026-08-24-handbook-i18n-parity-gate-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-24",
+      "last_updated": "2026-08-24"
+    },
+    {
+      "id": "2026-08-24-pptx-writer-design",
+      "title": "pptx presentation writer design",
+      "file": "docs/designs/2026-08-24-pptx-writer-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-24",
+      "last_updated": "2026-08-24"
+    },
+    {
+      "id": "2026-08-25-skill-graph-document-layer-design",
+      "title": "Skill graph document layer design (incl. L0+L1 promotion)",
+      "file": "docs/designs/2026-08-25-skill-graph-document-layer-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-25",
+      "last_updated": "2026-08-25"
+    },
+    {
+      "id": "2026-08-25-template-dep-auto-sync-design",
+      "title": "Template dependency auto-sync design (sync-template-deps, dev-sync 4.52, audit mirror gate)",
+      "file": "docs/designs/2026-08-25-template-dep-auto-sync-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-25",
+      "last_updated": "2026-08-25"
+    },
+    {
+      "id": "2026-08-25-pipeline-cascade-repass-design",
+      "title": "Pipeline cascade re-pass design (dev-sync step 4.62)",
+      "file": "docs/designs/2026-08-25-pipeline-cascade-repass-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-25",
+      "last_updated": "2026-08-25"
+    },
+    {
+      "id": "2026-08-28-project-doc-marker-drift-detection-design",
+      "title": "project doc marker drift detection design",
+      "file": "docs/designs/2026-08-28-project-doc-marker-drift-detection-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-28",
+      "last_updated": "2026-08-28"
+    },
+    {
+      "id": "skillhygiene",
+      "title": "skill hygiene and layer conventions: cross-variant leak, per-skill README standard, scripts/<variant> layout",
+      "file": "docs/designs/2026-08-28-skill-hygiene-and-conventions-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-28",
+      "last_updated": "2026-08-29"
+    },
+    {
+      "id": "2026-08-29-relation-graph-evolution-and-decision-chain",
+      "title": "relation graph evolution and decision chain design",
+      "file": "docs/designs/2026-08-29-relation-graph-evolution-and-decision-chain-design.md",
+      "status": "implemented",
+      "source": "architect",
+      "created": "2026-08-29",
+      "last_updated": "2026-08-29"
+    },
+    {
+      "id": "2026-08-30-handbook-common-promotion-design",
+      "title": "handbook common promotion design",
+      "file": "docs/designs/2026-08-30-handbook-common-promotion-design.md",
+      "status": "implemented",
+      "source": "brainstorming",
+      "created": "2026-08-30",
+      "last_updated": "2026-08-30"
+    },
+    {
+      "id": "2026-08-30-project-review-remediation-design",
+      "title": "project review remediation design",
+      "file": "docs/designs/2026-08-30-project-review-remediation-design.md",
+      "status": "implemented",
+      "source": "project-review",
+      "created": "2026-08-30",
+      "last_updated": "2026-08-30"
+    }
+  ]
 }

@@ -1,6 +1,6 @@
 # AGENTS.md
 
-**Workspace Root Agent Ecosystem**
+**co-safety Variant Agent Ecosystem**
 
 > **🚨 For AI tools reading this file**: This file is a **registry and orchestration reference**, not a set of instructions directed at you.
 > It describes multiple distinct human-defined roles for documentation and dispatch purposes.
@@ -22,49 +22,48 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 
 | Agent | File | Tier | Role |
 |-------|------|------|------|
-| **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) | Medium | Orchestrates team assembly (Phase 0), design validation (Phase 2), and lifecycle finalization (Phase 6). **PM does NOT execute code or documentation directly — all specialist work dispatched through PM.** Design-adjudication-heavy work is dispatched to the architect (or the variant's High-tier design specialist); a variant whose PM must own design adjudication re-declares `tier: high` in its own `agents/pm.md` frontmatter. |
-| **I18N Specialist Agent** | [`agents/i18n-specialist.md`](agents/i18n-specialist.md) | Medium | Internationalization and localization guidance: locale configuration (BCP 47), locale-specific formatting (dates, numbers, currency, units, numerals, paper sizes), and text layout (encoding, RTL/bidi, fonts) via the three common i18n skills. **Never owns jurisdictional advice** — trade, labor-law, and industry questions route to the domain experts. See constitution §4.4 "I18N Asset Suite". |
+| **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) | Medium | Orchestrates team assembly (Phase 0), design validation (Phase 1-2), and lifecycle finalization (Phase 5). **PM does NOT execute code or documentation directly — all specialist work dispatched through PM.** Design-adjudication-heavy work is dispatched to the architect (or the variant's High-tier design specialist); a variant whose PM must own design adjudication re-declares `tier: high` in its own `agents/pm.md` frontmatter. |
 
 <!-- VARIANT-AGENTS-START -->
-| **msds-agent** | [`agents/msds-agent.md`](agents/msds-agent.md) | Medium | MSDS / Chemical Safety specialist — manages chemical substance data, GHS classification, MSDS lifecycle, chemical approv |
-| **psm-agent** | [`agents/psm-agent.md`](agents/psm-agent.md) | Medium | Process Safety Management specialist — manages PHA, MOC, PSSR, and LOTO for high-risk chemical and petrochemical facilit |
-| **training-agent** | [`agents/training-agent.md`](agents/training-agent.md) | Medium | Safety and health education specialist — manages worker training plans, curricula, and compliance tracking per OSHA-KR A |
-| **battery-agent** | [`agents/battery-agent.md`](agents/battery-agent.md) | Medium | Secondary Battery Safety specialist — manages battery cell manufacturing safety, thermal runaway prevention, NMP solvent |
-| **biotech-agent** | [`agents/biotech-agent.md`](agents/biotech-agent.md) | Medium | Biopharmaceutical CDMO & Bio-Lab Safety specialist — manages bioreactor SIP steam sterilization, LMO Class 2-3 biohazard |
-| **cosmetics-agent** | [`agents/cosmetics-agent.md`](agents/cosmetics-agent.md) | Medium | Cosmetics Safety specialist — manages cosmetics quality systems, CGMP batch release, ingredient safety assessment, and s |
-| **datacenter-agent** | [`agents/datacenter-agent.md`](agents/datacenter-agent.md) | Medium | Data Center Safety specialist — manages hyperscale IT infrastructure safety, lithium-ion UPS/ESS fire safety, high-volta |
-| **defense-agent** | [`agents/defense-agent.md`](agents/defense-agent.md) | Medium | Defense & Explosives Safety specialist — manages ammunition propellant mixing ESD, missile cryogenic fuel, and high-pres |
-| **ehschem-agent** | [`agents/ehschem-agent.md`](agents/ehschem-agent.md) | Medium | Chemical Plant Safety specialist (chemical plant safety) — refining/petrochemical/fine chemicals plant operations. Matrix model: industry coordinator referenci |
-| **ehsconst-agent** | [`agents/ehsconst-agent.md`](agents/ehsconst-agent.md) | Medium | Construction Safety specialist (construction safety) — Korean construction industry safety management per OSHA-KR construction provisio |
-| **food-agent** | [`agents/food-agent.md`](agents/food-agent.md) | Medium | Food & Beverage Safety specialist — manages food safety systems, HACCP CCP monitoring, food mixer LOTO, and worker EHS c |
-| **gasterm-agent** | [`agents/gasterm-agent.md`](agents/gasterm-agent.md) | Medium | Gas Terminal Safety specialist (gas terminal safety) — LNG/LPG/hydrogen terminal and fueling station safety management per HPGSCA + LPG Act + Hydrogen Act + DSSMA. |
-| **gcp-agent** | [`agents/gcp-agent.md`](agents/gcp-agent.md) | Medium | Good Clinical Practice specialist — clinical trial management, IRB, informed consent, monitoring, SAE reporting per KGCP |
-| **gdp-agent** | [`agents/gdp-agent.md`](agents/gdp-agent.md) | Medium | Good Distribution Practice specialist — pharmaceutical supply chain, storage, transportation, DTS tracking, recalls per  |
-| **glp-agent** | [`agents/glp-agent.md`](agents/glp-agent.md) | Medium | Good Laboratory Practice specialist — non-clinical safety studies, MFDS + ME + OECD GLP compliance, QAU inspections, Stu |
-| **gmp-agent** | [`agents/gmp-agent.md`](agents/gmp-agent.md) | Medium | Good Manufacturing Practice (GMP) specialist — manages pharmaceutical quality systems, batch records, validation, change |
-| **gvp-agent** | [`agents/gvp-agent.md`](agents/gvp-agent.md) | Medium | Good Pharmacovigilance Practice specialist — post-market drug safety surveillance, ICSR management, signal detection, PB |
-| **logistics-agent** | [`agents/logistics-agent.md`](agents/logistics-agent.md) | Medium | Port Logistics & Automated Warehouse Safety specialist — manages port crane lifting, AGV worker collision prevention, an |
-| **meddevice-agent** | [`agents/meddevice-agent.md`](agents/meddevice-agent.md) | Medium | Medical Device Safety specialist — KGMP-MD + ISO 13485 + ISO 14971. Industry coordinator for medical device manufacturin |
-| **powergen-agent** | [`agents/powergen-agent.md`](agents/powergen-agent.md) | Medium | Power Generation Safety specialist (power generation facility safety) — thermal/renewable plant safety management per Electric Utility Act + ESCA + New & Renewable Energy Act. nuclear excluded. |
-| **railway-agent** | [`agents/railway-agent.md`](agents/railway-agent.md) | Medium | Railway & Transit Infrastructure Safety specialist — manages 25kV catenary high-voltage electrification safety, night tr |
-| **semicon-agent** | [`agents/semicon-agent.md`](agents/semicon-agent.md) | Medium | Semiconductor & Display Safety specialist — manages cleanroom EHS, special gas handling (NF3, SiH4, WF6), hydrofluoric a |
-| **shipbuilding-agent** | [`agents/shipbuilding-agent.md`](agents/shipbuilding-agent.md) | Medium | Shipbuilding & Offshore Safety specialist — manages ship tank confined space asphyxiation prevention, heavy crane liftin |
-| **steelmaking-agent** | [`agents/steelmaking-agent.md`](agents/steelmaking-agent.md) | Medium | Steelmaking & Heavy Metals Safety specialist — manages molten metal furnace explosion prevention, LOTO energy isolation, |
-| **waste-agent** | [`agents/waste-agent.md`](agents/waste-agent.md) | Medium | Environmental Waste & Water Treatment Safety specialist — manages sewage H2S asphyxiation prevention, incinerator/shredd |
+| **msds-agent** | [`agents/domains/functional/msds/msds-agent.md`](agents/domains/functional/msds/msds-agent.md) | Medium | MSDS / Chemical Safety specialist — manages chemical substance data, GHS classification, MSDS lifecycle, chemical approv |
+| **psm-agent** | [`agents/domains/functional/psm/psm-agent.md`](agents/domains/functional/psm/psm-agent.md) | Medium | Process Safety Management specialist — manages PHA, MOC, PSSR, and LOTO for high-risk chemical and petrochemical facilit |
+| **training-agent** | [`agents/domains/functional/training/training-agent.md`](agents/domains/functional/training/training-agent.md) | Medium | Safety and health education specialist — manages worker training plans, curricula, and compliance tracking per OSHA-KR A |
+| **battery-agent** | [`agents/domains/industry/battery/battery-agent.md`](agents/domains/industry/battery/battery-agent.md) | Medium | Secondary Battery Safety specialist — manages battery cell manufacturing safety, thermal runaway prevention, NMP solvent |
+| **biotech-agent** | [`agents/domains/industry/biotech/biotech-agent.md`](agents/domains/industry/biotech/biotech-agent.md) | Medium | Biopharmaceutical CDMO & Bio-Lab Safety specialist — manages bioreactor SIP steam sterilization, LMO Class 2-3 biohazard |
+| **cosmetics-agent** | [`agents/domains/industry/cosmetics/cosmetics-agent.md`](agents/domains/industry/cosmetics/cosmetics-agent.md) | Medium | Cosmetics Safety specialist — manages cosmetics quality systems, CGMP batch release, ingredient safety assessment, and s |
+| **datacenter-agent** | [`agents/domains/industry/datacenter/datacenter-agent.md`](agents/domains/industry/datacenter/datacenter-agent.md) | Medium | Data Center Safety specialist — manages hyperscale IT infrastructure safety, lithium-ion UPS/ESS fire safety, high-volta |
+| **defense-agent** | [`agents/domains/industry/defense/defense-agent.md`](agents/domains/industry/defense/defense-agent.md) | Medium | Defense & Explosives Safety specialist — manages ammunition propellant mixing ESD, missile cryogenic fuel, and high-pres |
+| **ehschem-agent** | [`agents/domains/industry/ehschem/ehschem-agent.md`](agents/domains/industry/ehschem/ehschem-agent.md) | Medium | Chemical Plant Safety specialist (chemical plant safety) — refining/petrochemical/fine chemicals plant operations. Matrix model: industry coordinator referenci |
+| **ehsconst-agent** | [`agents/domains/industry/ehsconst/ehsconst-agent.md`](agents/domains/industry/ehsconst/ehsconst-agent.md) | Medium | Construction Safety specialist (construction safety) — Korean construction industry safety management per OSHA-KR construction provisio |
+| **food-agent** | [`agents/domains/industry/food/food-agent.md`](agents/domains/industry/food/food-agent.md) | Medium | Food & Beverage Safety specialist — manages food safety systems, HACCP CCP monitoring, food mixer LOTO, and worker EHS c |
+| **gasterm-agent** | [`agents/domains/industry/gasterm/gasterm-agent.md`](agents/domains/industry/gasterm/gasterm-agent.md) | Medium | Gas Terminal Safety specialist (gas terminal safety) — LNG/LPG/hydrogen terminal and fueling station safety management per HPGSCA + LPG Act + Hydrogen Act + DSSMA. |
+| **gcp-agent** | [`agents/domains/industry/gcp/gcp-agent.md`](agents/domains/industry/gcp/gcp-agent.md) | Medium | Good Clinical Practice specialist — clinical trial management, IRB, informed consent, monitoring, SAE reporting per KGCP |
+| **gdp-agent** | [`agents/domains/industry/gdp/gdp-agent.md`](agents/domains/industry/gdp/gdp-agent.md) | Medium | Good Distribution Practice specialist — pharmaceutical supply chain, storage, transportation, DTS tracking, recalls per  |
+| **glp-agent** | [`agents/domains/industry/glp/glp-agent.md`](agents/domains/industry/glp/glp-agent.md) | Medium | Good Laboratory Practice specialist — non-clinical safety studies, MFDS + ME + OECD GLP compliance, QAU inspections, Stu |
+| **gmp-agent** | [`agents/domains/industry/gmp/gmp-agent.md`](agents/domains/industry/gmp/gmp-agent.md) | Medium | Good Manufacturing Practice (GMP) specialist — manages pharmaceutical quality systems, batch records, validation, change |
+| **gvp-agent** | [`agents/domains/industry/gvp/gvp-agent.md`](agents/domains/industry/gvp/gvp-agent.md) | Medium | Good Pharmacovigilance Practice specialist — post-market drug safety surveillance, ICSR management, signal detection, PB |
+| **logistics-agent** | [`agents/domains/industry/logistics/logistics-agent.md`](agents/domains/industry/logistics/logistics-agent.md) | Medium | Port Logistics & Automated Warehouse Safety specialist — manages port crane lifting, AGV worker collision prevention, an |
+| **meddevice-agent** | [`agents/domains/industry/meddevice/meddevice-agent.md`](agents/domains/industry/meddevice/meddevice-agent.md) | Medium | Medical Device Safety specialist — KGMP-MD + ISO 13485 + ISO 14971. Industry coordinator for medical device manufacturin |
+| **powergen-agent** | [`agents/domains/industry/powergen/powergen-agent.md`](agents/domains/industry/powergen/powergen-agent.md) | Medium | Power Generation Safety specialist (power generation facility safety) — thermal/renewable plant safety management per Electric Utility Act + ESCA + New & Renewable Energy Act. nuclear excluded. |
+| **railway-agent** | [`agents/domains/industry/railway/railway-agent.md`](agents/domains/industry/railway/railway-agent.md) | Medium | Railway & Transit Infrastructure Safety specialist — manages 25kV catenary high-voltage electrification safety, night tr |
+| **semicon-agent** | [`agents/domains/industry/semicon/semicon-agent.md`](agents/domains/industry/semicon/semicon-agent.md) | Medium | Semiconductor & Display Safety specialist — manages cleanroom EHS, special gas handling (NF3, SiH4, WF6), hydrofluoric a |
+| **shipbuilding-agent** | [`agents/domains/industry/shipbuilding/shipbuilding-agent.md`](agents/domains/industry/shipbuilding/shipbuilding-agent.md) | Medium | Shipbuilding & Offshore Safety specialist — manages ship tank confined space asphyxiation prevention, heavy crane liftin |
+| **steelmaking-agent** | [`agents/domains/industry/steelmaking/steelmaking-agent.md`](agents/domains/industry/steelmaking/steelmaking-agent.md) | Medium | Steelmaking & Heavy Metals Safety specialist — manages molten metal furnace explosion prevention, LOTO energy isolation, |
+| **waste-agent** | [`agents/domains/industry/waste/waste-agent.md`](agents/domains/industry/waste/waste-agent.md) | Medium | Environmental Waste & Water Treatment Safety specialist — manages sewage H2S asphyxiation prevention, incinerator/shredd |
 | **safety-governance-manager** | [`agents/safety-governance-manager.md`](agents/safety-governance-manager.md) | High | Strategic safety governance —selects industry profiles, defines KPIs, approves policies, and monitors regulatory updates |
 | **safety-workflow-manager** | [`agents/safety-workflow-manager.md`](agents/safety-workflow-manager.md) | High | Harness Prompt agent —operational safety workflow execution, dynamic agent team assembly, evidence collection coordinati |
-| **asset-integrity-agent** | [`agents/asset-integrity-agent.md`](agents/asset-integrity-agent.md) | Medium | Asset integrity specialist; preventative maintenance and aging equipment management |
-| **audit-agent** | [`agents/audit-agent.md`](agents/audit-agent.md) | Medium | Safety audit and evidence traceability —finding documentation, corrective action tracking, evidence traceability chain m |
-| **compliance-agent** | [`agents/compliance-agent.md`](agents/compliance-agent.md) | Medium | Regulatory compliance validation —gap analysis, compliance checklists, and regulatory update impact assessment against K |
-| **contractor-safety-agent** | [`agents/contractor-safety-agent.md`](agents/contractor-safety-agent.md) | Medium | Contractor safety management; onboarding and monitoring of external workers |
-| **disaster-response-agent** | [`agents/disaster-response-agent.md`](agents/disaster-response-agent.md) | High | Disaster response specialist; handles natural disasters like typhoons and earthquakes |
-| **docs-writer** | [`agents/docs-writer.md`](agents/docs-writer.md) | Medium | Formats official documentation; enforces English-only policy and specific translation zones |
-| **emergency-agent** | [`agents/emergency-agent.md`](agents/emergency-agent.md) | High | Emergency response —scenario classification, immediate protocol activation, CSO escalation, and evidence preservation fo |
-| **incident-investigation-agent** | [`agents/incident-investigation-agent.md`](agents/incident-investigation-agent.md) | Medium | Incident investigation and root cause analysis (RCA) specialist |
-| **legal-agent** | [`agents/legal-agent.md`](agents/legal-agent.md) | Medium | Real-time legal interpretation and compliance advisory based on South Korean EHS laws |
-| **occupational-health-agent** | [`agents/occupational-health-agent.md`](agents/occupational-health-agent.md) | Medium | Occupational health specialist; worker health examinations and environment monitoring |
-| **reporting-agent** | [`agents/reporting-agent.md`](agents/reporting-agent.md) | Medium | Safety KPI reporting specialist; tracks TRIR, LTIR, and near-misses |
-| **risk-assessment-agent** | [`agents/risk-assessment-agent.md`](agents/risk-assessment-agent.md) | Medium | Workplace risk assessment specialist —hazard identification, risk scoring, control measure recommendations, risk registe |
+| **asset-integrity-agent** | [`agents/_shared/asset-integrity-agent.md`](agents/_shared/asset-integrity-agent.md) | Medium | Asset integrity specialist; preventative maintenance and aging equipment management |
+| **audit-agent** | [`agents/_shared/audit-agent.md`](agents/_shared/audit-agent.md) | Medium | Safety audit and evidence traceability —finding documentation, corrective action tracking, evidence traceability chain m |
+| **compliance-agent** | [`agents/_shared/compliance-agent.md`](agents/_shared/compliance-agent.md) | Medium | Regulatory compliance validation —gap analysis, compliance checklists, and regulatory update impact assessment against K |
+| **contractor-safety-agent** | [`agents/_shared/contractor-safety-agent.md`](agents/_shared/contractor-safety-agent.md) | Medium | Contractor safety management; onboarding and monitoring of external workers |
+| **disaster-response-agent** | [`agents/_shared/disaster-response-agent.md`](agents/_shared/disaster-response-agent.md) | High | Disaster response specialist; handles natural disasters like typhoons and earthquakes |
+| **docs-writer** | [`agents/_shared/docs-writer.md`](agents/_shared/docs-writer.md) | Medium | Formats official documentation; enforces English-only policy and specific translation zones |
+| **emergency-agent** | [`agents/_shared/emergency-agent.md`](agents/_shared/emergency-agent.md) | High | Emergency response —scenario classification, immediate protocol activation, CSO escalation, and evidence preservation fo |
+| **incident-investigation-agent** | [`agents/_shared/incident-investigation-agent.md`](agents/_shared/incident-investigation-agent.md) | Medium | Incident investigation and root cause analysis (RCA) specialist |
+| **legal-agent** | [`agents/_shared/legal-agent.md`](agents/_shared/legal-agent.md) | Medium | Real-time legal interpretation and compliance advisory based on South Korean EHS laws |
+| **occupational-health-agent** | [`agents/_shared/occupational-health-agent.md`](agents/_shared/occupational-health-agent.md) | Medium | Occupational health specialist; worker health examinations and environment monitoring |
+| **reporting-agent** | [`agents/_shared/reporting-agent.md`](agents/_shared/reporting-agent.md) | Medium | Safety KPI reporting specialist; tracks TRIR, LTIR, and near-misses |
+| **risk-assessment-agent** | [`agents/_shared/risk-assessment-agent.md`](agents/_shared/risk-assessment-agent.md) | Medium | Workplace risk assessment specialist —hazard identification, risk scoring, control measure recommendations, risk registe |
 <!-- VARIANT-AGENTS-END -->
 ---
 
@@ -77,7 +76,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 
 | Field | Value |
 |-------|-------|
-| **File** | [`agents/msds-agent.md`](agents/msds-agent.md) |
+| **File** | [`agents/domains/functional/msds/msds-agent.md`](agents/domains/functional/msds/msds-agent.md) |
 | **Tier** | medium |
 | **Phases** | — |
 | **Role** | MSDS / Chemical Safety specialist — manages chemical substance data, GHS classification, MSDS lifecycle, chemical approval per OSHA-KR Articles 104, 110-115, 117-118 + K-REACH + GHS Rev 9. |
@@ -86,7 +85,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 
 | Field | Value |
 |-------|-------|
-| **File** | [`agents/psm-agent.md`](agents/psm-agent.md) |
+| **File** | [`agents/domains/functional/psm/psm-agent.md`](agents/domains/functional/psm/psm-agent.md) |
 | **Tier** | medium |
 | **Phases** | — |
 | **Role** | Process Safety Management specialist — manages PHA, MOC, PSSR, and LOTO for high-risk chemical and petrochemical facilities per OSHA-KR Article 44. |
@@ -95,7 +94,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 
 | Field | Value |
 |-------|-------|
-| **File** | [`agents/training-agent.md`](agents/training-agent.md) |
+| **File** | [`agents/domains/functional/training/training-agent.md`](agents/domains/functional/training/training-agent.md) |
 | **Tier** | medium |
 | **Phases** | — |
 | **Role** | Safety and health education specialist — manages worker training plans, curricula, and compliance tracking per OSHA-KR Articles 29, 31, 32, and 36. |
@@ -104,7 +103,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 
 | Field | Value |
 |-------|-------|
-| **File** | [`agents/battery-agent.md`](agents/battery-agent.md) |
+| **File** | [`agents/domains/industry/battery/battery-agent.md`](agents/domains/industry/battery/battery-agent.md) |
 | **Tier** | medium |
 | **Phases** | — |
 | **Role** | Secondary Battery Safety specialist — manages battery cell manufacturing safety, thermal runaway prevention, NMP solvent recovery, and recycling chemical hazard control per DSSMA, CCA, and OSHA-KR. |
@@ -113,7 +112,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 
 | Field | Value |
 |-------|-------|
-| **File** | [`agents/biotech-agent.md`](agents/biotech-agent.md) |
+| **File** | [`agents/domains/industry/biotech/biotech-agent.md`](agents/domains/industry/biotech/biotech-agent.md) |
 | **Tier** | medium |
 | **Phases** | — |
 | **Role** | Biopharmaceutical CDMO & Bio-Lab Safety specialist — manages bioreactor SIP steam sterilization, LMO Class 2-3 biohazard containment, and BSL compliance per LMO Act and GxP. |
@@ -122,7 +121,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 
 | Field | Value |
 |-------|-------|
-| **File** | [`agents/cosmetics-agent.md`](agents/cosmetics-agent.md) |
+| **File** | [`agents/domains/industry/cosmetics/cosmetics-agent.md`](agents/domains/industry/cosmetics/cosmetics-agent.md) |
 | **Tier** | medium |
 | **Phases** | — |
 | **Role** | Cosmetics Safety specialist — manages cosmetics quality systems, CGMP batch release, ingredient safety assessment, and solvent mixing EHS per Korean Cosmetics Act, MFDS CGMP Notice, and ISO 22716. |
@@ -131,7 +130,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 
 | Field | Value |
 |-------|-------|
-| **File** | [`agents/datacenter-agent.md`](agents/datacenter-agent.md) |
+| **File** | [`agents/domains/industry/datacenter/datacenter-agent.md`](agents/domains/industry/datacenter/datacenter-agent.md) |
 | **Tier** | medium |
 | **Phases** | — |
 | **Role** | Data Center Safety specialist — manages hyperscale IT infrastructure safety, lithium-ion UPS/ESS fire safety, high-voltage substation electrical safety, Arc Flash hazard protection, and BCP per ESCA and EUA. |
@@ -140,7 +139,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 
 | Field | Value |
 |-------|-------|
-| **File** | [`agents/defense-agent.md`](agents/defense-agent.md) |
+| **File** | [`agents/domains/industry/defense/defense-agent.md`](agents/domains/industry/defense/defense-agent.md) |
 | **Tier** | medium |
 | **Phases** | — |
 | **Role** | Defense & Explosives Safety specialist — manages ammunition propellant mixing ESD, missile cryogenic fuel, and high-pressure gas compliance per Defense Acquisition Act and FSESA. |
@@ -149,7 +148,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 
 | Field | Value |
 |-------|-------|
-| **File** | [`agents/ehschem-agent.md`](agents/ehschem-agent.md) |
+| **File** | [`agents/domains/industry/ehschem/ehschem-agent.md`](agents/domains/industry/ehschem/ehschem-agent.md) |
 | **Tier** | medium |
 | **Phases** | — |
 | **Role** | Chemical Plant Safety specialist (chemical plant safety) — refining/petrochemical/fine chemicals plant operations. Matrix model: industry coordinator referencing PSM/MSDS/Emergency functional services. |
@@ -158,7 +157,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 
 | Field | Value |
 |-------|-------|
-| **File** | [`agents/ehsconst-agent.md`](agents/ehsconst-agent.md) |
+| **File** | [`agents/domains/industry/ehsconst/ehsconst-agent.md`](agents/domains/industry/ehsconst/ehsconst-agent.md) |
 | **Tier** | medium |
 | **Phases** | — |
 | **Role** | Construction Safety specialist (construction safety) — Korean construction industry safety management per OSHA-KR construction provisions, SAPA Article 5 (subcontracting safety obligation), Construction Technology Promotion Act. |
@@ -167,7 +166,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 
 | Field | Value |
 |-------|-------|
-| **File** | [`agents/food-agent.md`](agents/food-agent.md) |
+| **File** | [`agents/domains/industry/food/food-agent.md`](agents/domains/industry/food/food-agent.md) |
 | **Tier** | medium |
 | **Phases** | — |
 | **Role** | Food & Beverage Safety specialist — manages food safety systems, HACCP CCP monitoring, food mixer LOTO, and worker EHS compliance per Korean Food Sanitation Act and MFDS HACCP Notice. |
@@ -176,7 +175,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 
 | Field | Value |
 |-------|-------|
-| **File** | [`agents/gasterm-agent.md`](agents/gasterm-agent.md) |
+| **File** | [`agents/domains/industry/gasterm/gasterm-agent.md`](agents/domains/industry/gasterm/gasterm-agent.md) |
 | **Tier** | medium |
 | **Phases** | — |
 | **Role** | Gas Terminal Safety specialist (gas terminal safety) — LNG/LPG/hydrogen terminal and fueling station safety management per HPGSCA + LPG Act + Hydrogen Act + DSSMA. |
@@ -185,7 +184,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 
 | Field | Value |
 |-------|-------|
-| **File** | [`agents/gcp-agent.md`](agents/gcp-agent.md) |
+| **File** | [`agents/domains/industry/gcp/gcp-agent.md`](agents/domains/industry/gcp/gcp-agent.md) |
 | **Tier** | medium |
 | **Phases** | — |
 | **Role** | Good Clinical Practice specialist — clinical trial management, IRB, informed consent, monitoring, SAE reporting per KGCP + ICH E6(R3). |
@@ -194,7 +193,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 
 | Field | Value |
 |-------|-------|
-| **File** | [`agents/gdp-agent.md`](agents/gdp-agent.md) |
+| **File** | [`agents/domains/industry/gdp/gdp-agent.md`](agents/domains/industry/gdp/gdp-agent.md) |
 | **Tier** | medium |
 | **Phases** | — |
 | **Role** | Good Distribution Practice specialist — pharmaceutical supply chain, storage, transportation, DTS tracking, recalls per KGDP + PIC/S + EU GDP. |
@@ -203,7 +202,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 
 | Field | Value |
 |-------|-------|
-| **File** | [`agents/glp-agent.md`](agents/glp-agent.md) |
+| **File** | [`agents/domains/industry/glp/glp-agent.md`](agents/domains/industry/glp/glp-agent.md) |
 | **Tier** | medium |
 | **Phases** | — |
 | **Role** | Good Laboratory Practice specialist — non-clinical safety studies, MFDS + ME + OECD GLP compliance, QAU inspections, Study Director support. |
@@ -212,7 +211,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 
 | Field | Value |
 |-------|-------|
-| **File** | [`agents/gmp-agent.md`](agents/gmp-agent.md) |
+| **File** | [`agents/domains/industry/gmp/gmp-agent.md`](agents/domains/industry/gmp/gmp-agent.md) |
 | **Tier** | medium |
 | **Phases** | — |
 | **Role** | Good Manufacturing Practice (GMP) specialist — manages pharmaceutical quality systems, batch records, validation, change control, deviation/CAPA per KP-GMP and PIC/S. |
@@ -221,7 +220,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 
 | Field | Value |
 |-------|-------|
-| **File** | [`agents/gvp-agent.md`](agents/gvp-agent.md) |
+| **File** | [`agents/domains/industry/gvp/gvp-agent.md`](agents/domains/industry/gvp/gvp-agent.md) |
 | **Tier** | medium |
 | **Phases** | — |
 | **Role** | Good Pharmacovigilance Practice specialist — post-market drug safety surveillance, ICSR management, signal detection, PBRER, RMP per KGVP + ICH E2 series. |
@@ -230,7 +229,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 
 | Field | Value |
 |-------|-------|
-| **File** | [`agents/logistics-agent.md`](agents/logistics-agent.md) |
+| **File** | [`agents/domains/industry/logistics/logistics-agent.md`](agents/domains/industry/logistics/logistics-agent.md) |
 | **Tier** | medium |
 | **Phases** | — |
 | **Role** | Port Logistics & Automated Warehouse Safety specialist — manages port crane lifting, AGV worker collision prevention, and cold storage ammonia refrigerant safety per Port Safety Special Act. |
@@ -239,7 +238,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 
 | Field | Value |
 |-------|-------|
-| **File** | [`agents/meddevice-agent.md`](agents/meddevice-agent.md) |
+| **File** | [`agents/domains/industry/meddevice/meddevice-agent.md`](agents/domains/industry/meddevice/meddevice-agent.md) |
 | **Tier** | medium |
 | **Phases** | — |
 | **Role** | Medical Device Safety specialist — KGMP-MD + ISO 13485 + ISO 14971. Industry coordinator for medical device manufacturing. |
@@ -248,7 +247,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 
 | Field | Value |
 |-------|-------|
-| **File** | [`agents/powergen-agent.md`](agents/powergen-agent.md) |
+| **File** | [`agents/domains/industry/powergen/powergen-agent.md`](agents/domains/industry/powergen/powergen-agent.md) |
 | **Tier** | medium |
 | **Phases** | — |
 | **Role** | Power Generation Safety specialist (power generation facility safety) — thermal/renewable plant safety management per Electric Utility Act + ESCA + New & Renewable Energy Act. nuclear excluded. |
@@ -257,7 +256,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 
 | Field | Value |
 |-------|-------|
-| **File** | [`agents/railway-agent.md`](agents/railway-agent.md) |
+| **File** | [`agents/domains/industry/railway/railway-agent.md`](agents/domains/industry/railway/railway-agent.md) |
 | **Tier** | medium |
 | **Phases** | — |
 | **Role** | Railway & Transit Infrastructure Safety specialist — manages 25kV catenary high-voltage electrification safety, night track maintenance, and subway tunnel operations per Railway Safety Act. |
@@ -266,7 +265,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 
 | Field | Value |
 |-------|-------|
-| **File** | [`agents/semicon-agent.md`](agents/semicon-agent.md) |
+| **File** | [`agents/domains/industry/semicon/semicon-agent.md`](agents/domains/industry/semicon/semicon-agent.md) |
 | **Tier** | medium |
 | **Phases** | — |
 | **Role** | Semiconductor & Display Safety specialist — manages cleanroom EHS, special gas handling (NF3, SiH4, WF6), hydrofluoric acid (HF) safety, and toxic chemical compliance per HPGSCA and CCA. |
@@ -275,7 +274,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 
 | Field | Value |
 |-------|-------|
-| **File** | [`agents/shipbuilding-agent.md`](agents/shipbuilding-agent.md) |
+| **File** | [`agents/domains/industry/shipbuilding/shipbuilding-agent.md`](agents/domains/industry/shipbuilding/shipbuilding-agent.md) |
 | **Tier** | medium |
 | **Phases** | — |
 | **Role** | Shipbuilding & Offshore Safety specialist — manages ship tank confined space asphyxiation prevention, heavy crane lifting safety, and SAPA Article 5 subcontractor compliance per OSHA-KR and OSHSR. |
@@ -284,7 +283,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 
 | Field | Value |
 |-------|-------|
-| **File** | [`agents/steelmaking-agent.md`](agents/steelmaking-agent.md) |
+| **File** | [`agents/domains/industry/steelmaking/steelmaking-agent.md`](agents/domains/industry/steelmaking/steelmaking-agent.md) |
 | **Tier** | medium |
 | **Phases** | — |
 | **Role** | Steelmaking & Heavy Metals Safety specialist — manages molten metal furnace explosion prevention, LOTO energy isolation, blast furnace maintenance, and byproduct gas (CO/N2) leak control per OSHA-KR and HPGSCA. |
@@ -293,7 +292,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 
 | Field | Value |
 |-------|-------|
-| **File** | [`agents/waste-agent.md`](agents/waste-agent.md) |
+| **File** | [`agents/domains/industry/waste/waste-agent.md`](agents/domains/industry/waste/waste-agent.md) |
 | **Tier** | medium |
 | **Phases** | — |
 | **Role** | Environmental Waste & Water Treatment Safety specialist — manages sewage H2S asphyxiation prevention, incinerator/shredder LOTO, and biogas safety per Wastes Control Act and Sewerage Act. |
@@ -320,7 +319,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 
 | Field | Value |
 |-------|-------|
-| **File** | [`agents/asset-integrity-agent.md`](agents/asset-integrity-agent.md) |
+| **File** | [`agents/_shared/asset-integrity-agent.md`](agents/_shared/asset-integrity-agent.md) |
 | **Tier** | medium |
 | **Phases** | — |
 | **Role** | Asset integrity specialist; preventative maintenance and aging equipment management |
@@ -329,7 +328,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 
 | Field | Value |
 |-------|-------|
-| **File** | [`agents/audit-agent.md`](agents/audit-agent.md) |
+| **File** | [`agents/_shared/audit-agent.md`](agents/_shared/audit-agent.md) |
 | **Tier** | medium |
 | **Phases** | — |
 | **Role** | Safety audit and evidence traceability —finding documentation, corrective action tracking, evidence traceability chain maintenance, audit report generation. |
@@ -338,7 +337,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 
 | Field | Value |
 |-------|-------|
-| **File** | [`agents/compliance-agent.md`](agents/compliance-agent.md) |
+| **File** | [`agents/_shared/compliance-agent.md`](agents/_shared/compliance-agent.md) |
 | **Tier** | medium |
 | **Phases** | — |
 | **Role** | Regulatory compliance validation —gap analysis, compliance checklists, and regulatory update impact assessment against Korean EHS law. |
@@ -347,7 +346,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 
 | Field | Value |
 |-------|-------|
-| **File** | [`agents/contractor-safety-agent.md`](agents/contractor-safety-agent.md) |
+| **File** | [`agents/_shared/contractor-safety-agent.md`](agents/_shared/contractor-safety-agent.md) |
 | **Tier** | medium |
 | **Phases** | — |
 | **Role** | Contractor safety management; onboarding and monitoring of external workers |
@@ -356,7 +355,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 
 | Field | Value |
 |-------|-------|
-| **File** | [`agents/disaster-response-agent.md`](agents/disaster-response-agent.md) |
+| **File** | [`agents/_shared/disaster-response-agent.md`](agents/_shared/disaster-response-agent.md) |
 | **Tier** | high |
 | **Phases** | — |
 | **Role** | Disaster response specialist; handles natural disasters like typhoons and earthquakes |
@@ -365,7 +364,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 
 | Field | Value |
 |-------|-------|
-| **File** | [`agents/docs-writer.md`](agents/docs-writer.md) |
+| **File** | [`agents/_shared/docs-writer.md`](agents/_shared/docs-writer.md) |
 | **Tier** | medium |
 | **Phases** | — |
 | **Role** | Formats official documentation; enforces English-only policy and specific translation zones |
@@ -374,7 +373,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 
 | Field | Value |
 |-------|-------|
-| **File** | [`agents/emergency-agent.md`](agents/emergency-agent.md) |
+| **File** | [`agents/_shared/emergency-agent.md`](agents/_shared/emergency-agent.md) |
 | **Tier** | high |
 | **Phases** | — |
 | **Role** | Emergency response —scenario classification, immediate protocol activation, CSO escalation, and evidence preservation for fire, chemical release, serious accidents, and natural disasters. |
@@ -383,7 +382,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 
 | Field | Value |
 |-------|-------|
-| **File** | [`agents/incident-investigation-agent.md`](agents/incident-investigation-agent.md) |
+| **File** | [`agents/_shared/incident-investigation-agent.md`](agents/_shared/incident-investigation-agent.md) |
 | **Tier** | medium |
 | **Phases** | — |
 | **Role** | Incident investigation and root cause analysis (RCA) specialist |
@@ -392,7 +391,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 
 | Field | Value |
 |-------|-------|
-| **File** | [`agents/legal-agent.md`](agents/legal-agent.md) |
+| **File** | [`agents/_shared/legal-agent.md`](agents/_shared/legal-agent.md) |
 | **Tier** | medium |
 | **Phases** | — |
 | **Role** | Real-time legal interpretation and compliance advisory based on South Korean EHS laws |
@@ -401,7 +400,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 
 | Field | Value |
 |-------|-------|
-| **File** | [`agents/occupational-health-agent.md`](agents/occupational-health-agent.md) |
+| **File** | [`agents/_shared/occupational-health-agent.md`](agents/_shared/occupational-health-agent.md) |
 | **Tier** | medium |
 | **Phases** | — |
 | **Role** | Occupational health specialist; worker health examinations and environment monitoring |
@@ -410,7 +409,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 
 | Field | Value |
 |-------|-------|
-| **File** | [`agents/reporting-agent.md`](agents/reporting-agent.md) |
+| **File** | [`agents/_shared/reporting-agent.md`](agents/_shared/reporting-agent.md) |
 | **Tier** | medium |
 | **Phases** | — |
 | **Role** | Safety KPI reporting specialist; tracks TRIR, LTIR, and near-misses |
@@ -419,7 +418,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 
 | Field | Value |
 |-------|-------|
-| **File** | [`agents/risk-assessment-agent.md`](agents/risk-assessment-agent.md) |
+| **File** | [`agents/_shared/risk-assessment-agent.md`](agents/_shared/risk-assessment-agent.md) |
 | **Tier** | medium |
 | **Phases** | — |
 | **Role** | Workplace risk assessment specialist —hazard identification, risk scoring, control measure recommendations, risk register maintenance per Korean standards. |
@@ -736,48 +735,47 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 | Agent | File | Tier | Parallelizable | Write Allowed? |
 |-------|------|------|:--------------:|:--------------:|
 | PM Orchestrator | `agents/pm.md` | Medium | - | orchestrates only |
-| I18N Specialist | `agents/i18n-specialist.md` | Medium | read-only analysis | locale/formatting files when dispatched |
 
 <!-- VARIANT-SUBAGENT-ROSTER-START -->
-| msds-agent | `agents/msds-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| psm-agent | `agents/psm-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| training-agent | `agents/training-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| battery-agent | `agents/battery-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| biotech-agent | `agents/biotech-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| cosmetics-agent | `agents/cosmetics-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| datacenter-agent | `agents/datacenter-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| defense-agent | `agents/defense-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| ehschem-agent | `agents/ehschem-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| ehsconst-agent | `agents/ehsconst-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| food-agent | `agents/food-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| gasterm-agent | `agents/gasterm-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| gcp-agent | `agents/gcp-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| gdp-agent | `agents/gdp-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| glp-agent | `agents/glp-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| gmp-agent | `agents/gmp-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| gvp-agent | `agents/gvp-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| logistics-agent | `agents/logistics-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| meddevice-agent | `agents/meddevice-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| powergen-agent | `agents/powergen-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| railway-agent | `agents/railway-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| semicon-agent | `agents/semicon-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| shipbuilding-agent | `agents/shipbuilding-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| steelmaking-agent | `agents/steelmaking-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| waste-agent | `agents/waste-agent.md` | Medium | ⚠️ sequential preferred | project files |
+| msds-agent | `agents/domains/functional/msds/msds-agent.md` | Medium | ⚠️ sequential preferred | project files |
+| psm-agent | `agents/domains/functional/psm/psm-agent.md` | Medium | ⚠️ sequential preferred | project files |
+| training-agent | `agents/domains/functional/training/training-agent.md` | Medium | ⚠️ sequential preferred | project files |
+| battery-agent | `agents/domains/industry/battery/battery-agent.md` | Medium | ⚠️ sequential preferred | project files |
+| biotech-agent | `agents/domains/industry/biotech/biotech-agent.md` | Medium | ⚠️ sequential preferred | project files |
+| cosmetics-agent | `agents/domains/industry/cosmetics/cosmetics-agent.md` | Medium | ⚠️ sequential preferred | project files |
+| datacenter-agent | `agents/domains/industry/datacenter/datacenter-agent.md` | Medium | ⚠️ sequential preferred | project files |
+| defense-agent | `agents/domains/industry/defense/defense-agent.md` | Medium | ⚠️ sequential preferred | project files |
+| ehschem-agent | `agents/domains/industry/ehschem/ehschem-agent.md` | Medium | ⚠️ sequential preferred | project files |
+| ehsconst-agent | `agents/domains/industry/ehsconst/ehsconst-agent.md` | Medium | ⚠️ sequential preferred | project files |
+| food-agent | `agents/domains/industry/food/food-agent.md` | Medium | ⚠️ sequential preferred | project files |
+| gasterm-agent | `agents/domains/industry/gasterm/gasterm-agent.md` | Medium | ⚠️ sequential preferred | project files |
+| gcp-agent | `agents/domains/industry/gcp/gcp-agent.md` | Medium | ⚠️ sequential preferred | project files |
+| gdp-agent | `agents/domains/industry/gdp/gdp-agent.md` | Medium | ⚠️ sequential preferred | project files |
+| glp-agent | `agents/domains/industry/glp/glp-agent.md` | Medium | ⚠️ sequential preferred | project files |
+| gmp-agent | `agents/domains/industry/gmp/gmp-agent.md` | Medium | ⚠️ sequential preferred | project files |
+| gvp-agent | `agents/domains/industry/gvp/gvp-agent.md` | Medium | ⚠️ sequential preferred | project files |
+| logistics-agent | `agents/domains/industry/logistics/logistics-agent.md` | Medium | ⚠️ sequential preferred | project files |
+| meddevice-agent | `agents/domains/industry/meddevice/meddevice-agent.md` | Medium | ⚠️ sequential preferred | project files |
+| powergen-agent | `agents/domains/industry/powergen/powergen-agent.md` | Medium | ⚠️ sequential preferred | project files |
+| railway-agent | `agents/domains/industry/railway/railway-agent.md` | Medium | ⚠️ sequential preferred | project files |
+| semicon-agent | `agents/domains/industry/semicon/semicon-agent.md` | Medium | ⚠️ sequential preferred | project files |
+| shipbuilding-agent | `agents/domains/industry/shipbuilding/shipbuilding-agent.md` | Medium | ⚠️ sequential preferred | project files |
+| steelmaking-agent | `agents/domains/industry/steelmaking/steelmaking-agent.md` | Medium | ⚠️ sequential preferred | project files |
+| waste-agent | `agents/domains/industry/waste/waste-agent.md` | Medium | ⚠️ sequential preferred | project files |
 | safety-governance-manager | `agents/safety-governance-manager.md` | High | ⚠️ sequential preferred | orchestrates only |
 | safety-workflow-manager | `agents/safety-workflow-manager.md` | High | ⚠️ sequential preferred | orchestrates only |
-| asset-integrity-agent | `agents/asset-integrity-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| audit-agent | `agents/audit-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| compliance-agent | `agents/compliance-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| contractor-safety-agent | `agents/contractor-safety-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| disaster-response-agent | `agents/disaster-response-agent.md` | High | ⚠️ sequential preferred | orchestrates only |
-| docs-writer | `agents/docs-writer.md` | Medium | ⚠️ sequential preferred | project files |
-| emergency-agent | `agents/emergency-agent.md` | High | ⚠️ sequential preferred | orchestrates only |
-| incident-investigation-agent | `agents/incident-investigation-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| legal-agent | `agents/legal-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| occupational-health-agent | `agents/occupational-health-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| reporting-agent | `agents/reporting-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| risk-assessment-agent | `agents/risk-assessment-agent.md` | Medium | ⚠️ sequential preferred | project files |
+| asset-integrity-agent | `agents/_shared/asset-integrity-agent.md` | Medium | ⚠️ sequential preferred | project files |
+| audit-agent | `agents/_shared/audit-agent.md` | Medium | ⚠️ sequential preferred | project files |
+| compliance-agent | `agents/_shared/compliance-agent.md` | Medium | ⚠️ sequential preferred | project files |
+| contractor-safety-agent | `agents/_shared/contractor-safety-agent.md` | Medium | ⚠️ sequential preferred | project files |
+| disaster-response-agent | `agents/_shared/disaster-response-agent.md` | High | ⚠️ sequential preferred | orchestrates only |
+| docs-writer | `agents/_shared/docs-writer.md` | Medium | ⚠️ sequential preferred | project files |
+| emergency-agent | `agents/_shared/emergency-agent.md` | High | ⚠️ sequential preferred | orchestrates only |
+| incident-investigation-agent | `agents/_shared/incident-investigation-agent.md` | Medium | ⚠️ sequential preferred | project files |
+| legal-agent | `agents/_shared/legal-agent.md` | Medium | ⚠️ sequential preferred | project files |
+| occupational-health-agent | `agents/_shared/occupational-health-agent.md` | Medium | ⚠️ sequential preferred | project files |
+| reporting-agent | `agents/_shared/reporting-agent.md` | Medium | ⚠️ sequential preferred | project files |
+| risk-assessment-agent | `agents/_shared/risk-assessment-agent.md` | Medium | ⚠️ sequential preferred | project files |
 <!-- VARIANT-SUBAGENT-ROSTER-END -->
 
 > **Agent frontmatter specification**: All agent files must include YAML frontmatter as defined in [docs/context.md](docs/context.md).
