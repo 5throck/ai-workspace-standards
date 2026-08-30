@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-30T12:07:47.360Z
+**Generated**: 2026-08-30T12:15:24.253Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -63,7 +63,7 @@
 | promote-variant | 1.3.0 | active | skills/promote-variant/SKILL.md | workspace | promote variant, Phase B, variant promotion, promote to template, create template from prototype | pm |
 | research-analysis | 1.0.0 | active | skills/research-analysis/SKILL.md | workspace | research, analyze, investigate, synthesize, evidence gathering, data analysis, literature review | pm |
 | script-lifecycle-manager | 1.2.0 | active | skills/script-lifecycle-manager/SKILL.md | workspace | create script, update script, deprecate script, script lifecycle, manage scripts | pm |
-| security-scan | 1.1.0 | active | skills/security-scan/SKILL.md | workspace | security scan, scan for vulnerabilities, security check, run security | pm |
+| security-scan | 1.2.0 | active | skills/security-scan/SKILL.md | workspace | security scan, scan for vulnerabilities, security check, run security | pm |
 | simulate-l3-to-variant-promotion | 1.0.0 | active | skills/simulate-l3-to-variant-promotion/SKILL.md | workspace | simulate l2 promotion, test l2 pipeline, dry run variant promotion, test create-l3-scaffold | automation-engineer |
 | simulate-project-creation | 1.0.1 | active | skills/simulate-project-creation/SKILL.md | workspace | simulate project, test scaffolding, dry run project creation | scaffolding-expert |
 | skill-lifecycle-manager | 1.2.1 | active | skills/skill-lifecycle-manager/SKILL.md | workspace | create skill, new skill, validate skills, skill lifecycle, manage skills | pm |
