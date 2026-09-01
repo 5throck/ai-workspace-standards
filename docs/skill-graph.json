@@ -1087,16 +1087,6 @@
       "layer": "variant:co-work"
     },
     {
-      "id": "output_type.commonization_decision",
-      "type": "output_type",
-      "layer": "L0"
-    },
-    {
-      "id": "output_type.commonization_review",
-      "type": "output_type",
-      "layer": "L0"
-    },
-    {
       "id": "output_type.communication_plan",
       "type": "output_type",
       "layer": "variant:co-consult"
@@ -1120,16 +1110,6 @@
       "id": "output_type.content_integration_notes",
       "type": "output_type",
       "layer": "variant:co-game"
-    },
-    {
-      "id": "output_type.conversion_plan",
-      "type": "output_type",
-      "layer": "L0"
-    },
-    {
-      "id": "output_type.conversion_result",
-      "type": "output_type",
-      "layer": "L0"
     },
     {
       "id": "output_type.cost_assurance_notes",
@@ -1522,16 +1502,6 @@
       "layer": "variant:co-price"
     },
     {
-      "id": "output_type.promotion_checklist_result",
-      "type": "output_type",
-      "layer": "L0"
-    },
-    {
-      "id": "output_type.promotion_record",
-      "type": "output_type",
-      "layer": "L0"
-    },
-    {
       "id": "output_type.prototype_build",
       "type": "output_type",
       "layer": "variant:co-design"
@@ -1802,11 +1772,6 @@
       "layer": "variant:co-develop"
     },
     {
-      "id": "output_type.upgrade_report",
-      "type": "output_type",
-      "layer": "L0"
-    },
-    {
       "id": "output_type.ux_flows",
       "type": "output_type",
       "layer": "variant:co-price"
@@ -1815,16 +1780,6 @@
       "id": "output_type.validated_findings",
       "type": "output_type",
       "layer": "variant:co-security"
-    },
-    {
-      "id": "output_type.variant_proposal",
-      "type": "output_type",
-      "layer": "L0"
-    },
-    {
-      "id": "output_type.variant_scaffold",
-      "type": "output_type",
-      "layer": "L0"
     },
     {
       "id": "output_type.verification_ledger",
@@ -2261,31 +2216,6 @@
       "id": "procedure.co-work.project-intake-analysis",
       "type": "procedure",
       "layer": "variant:co-work"
-    },
-    {
-      "id": "procedure.l0.create-variant",
-      "type": "procedure",
-      "layer": "L0"
-    },
-    {
-      "id": "procedure.l0.de-commonization-review",
-      "type": "procedure",
-      "layer": "L0"
-    },
-    {
-      "id": "procedure.l0.project-to-variant",
-      "type": "procedure",
-      "layer": "L0"
-    },
-    {
-      "id": "procedure.l0.promote-variant",
-      "type": "procedure",
-      "layer": "L0"
-    },
-    {
-      "id": "procedure.l0.upgrade-project",
-      "type": "procedure",
-      "layer": "L0"
     },
     {
       "id": "project-coordinator",
@@ -3596,18 +3526,6 @@
       }
     },
     {
-      "type": "produces",
-      "from": "audit-workspace",
-      "to": "output_type.promotion_checklist_result",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "produces",
-      "from": "audit-workspace",
-      "to": "output_type.promotion_checklist_result",
-      "source": "procedure_schema"
-    },
-    {
       "type": "composes_with",
       "from": "audit-workspace",
       "to": "project-to-variant",
@@ -4461,12 +4379,6 @@
         "field": "relates_to",
         "index": 1
       }
-    },
-    {
-      "type": "produces",
-      "from": "context-commonization-review",
-      "to": "output_type.commonization_review",
-      "source": "procedure_schema"
     },
     {
       "type": "follows",
@@ -11347,264 +11259,6 @@
       "source": "procedure_schema"
     },
     {
-      "type": "step_uses_skill",
-      "from": "procedure.l0.create-variant",
-      "to": "audit-workspace",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.l0.create-variant",
-      "to": "auditor",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_uses_skill",
-      "from": "procedure.l0.create-variant",
-      "to": "create-variant",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.l0.create-variant",
-      "to": "docs-writer",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_uses_skill",
-      "from": "procedure.l0.create-variant",
-      "to": "documentation-writing",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "produces",
-      "from": "procedure.l0.create-variant",
-      "to": "output_type.variant_scaffold",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.l0.create-variant",
-      "to": "pm",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "enables",
-      "from": "procedure.l0.create-variant",
-      "to": "procedure.l0.promote-variant",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.l0.create-variant",
-      "to": "scaffolding-expert",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_uses_skill",
-      "from": "procedure.l0.create-variant",
-      "to": "team-builder",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.l0.de-commonization-review",
-      "to": "automation-engineer",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_uses_skill",
-      "from": "procedure.l0.de-commonization-review",
-      "to": "context-commonization-review",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_uses_skill",
-      "from": "procedure.l0.de-commonization-review",
-      "to": "context-commonization-review",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.l0.de-commonization-review",
-      "to": "docs-writer",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_uses_skill",
-      "from": "procedure.l0.de-commonization-review",
-      "to": "meeting-facilitation",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "produces",
-      "from": "procedure.l0.de-commonization-review",
-      "to": "output_type.commonization_decision",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.l0.de-commonization-review",
-      "to": "pm",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "follows",
-      "from": "procedure.l0.de-commonization-review",
-      "to": "procedure.l0.promote-variant",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.l0.project-to-variant",
-      "to": "architect",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_uses_skill",
-      "from": "procedure.l0.project-to-variant",
-      "to": "audit-workspace",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.l0.project-to-variant",
-      "to": "auditor",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.l0.project-to-variant",
-      "to": "automation-engineer",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "produces",
-      "from": "procedure.l0.project-to-variant",
-      "to": "output_type.conversion_result",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "composes_with",
-      "from": "procedure.l0.project-to-variant",
-      "to": "procedure.l0.create-variant",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_uses_skill",
-      "from": "procedure.l0.project-to-variant",
-      "to": "project-to-variant",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_uses_skill",
-      "from": "procedure.l0.project-to-variant",
-      "to": "project-to-variant",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_uses_skill",
-      "from": "procedure.l0.promote-variant",
-      "to": "audit-workspace",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.l0.promote-variant",
-      "to": "auditor",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.l0.promote-variant",
-      "to": "automation-engineer",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.l0.promote-variant",
-      "to": "lifecycle-manager",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "produces",
-      "from": "procedure.l0.promote-variant",
-      "to": "output_type.promotion_record",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "follows",
-      "from": "procedure.l0.promote-variant",
-      "to": "procedure.l0.create-variant",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "enables",
-      "from": "procedure.l0.promote-variant",
-      "to": "procedure.l0.upgrade-project",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_uses_skill",
-      "from": "procedure.l0.promote-variant",
-      "to": "promote-variant",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_uses_skill",
-      "from": "procedure.l0.promote-variant",
-      "to": "sync",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_uses_skill",
-      "from": "procedure.l0.upgrade-project",
-      "to": "audit-workspace",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.l0.upgrade-project",
-      "to": "auditor",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.l0.upgrade-project",
-      "to": "automation-engineer",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "produces",
-      "from": "procedure.l0.upgrade-project",
-      "to": "output_type.upgrade_report",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.l0.upgrade-project",
-      "to": "pm",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "follows",
-      "from": "procedure.l0.upgrade-project",
-      "to": "procedure.l0.promote-variant",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_uses_skill",
-      "from": "procedure.l0.upgrade-project",
-      "to": "upgrade-project",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_uses_skill",
-      "from": "procedure.l0.upgrade-project",
-      "to": "upgrade-project",
-      "source": "procedure_schema"
-    },
-    {
       "type": "used_by",
       "from": "project-delivery",
       "to": "delivery-manager",
@@ -11712,12 +11366,6 @@
       "from": "project-to-variant",
       "to": "k-law",
       "source": "prose"
-    },
-    {
-      "type": "produces",
-      "from": "project-to-variant",
-      "to": "output_type.conversion_plan",
-      "source": "procedure_schema"
     },
     {
       "type": "composes_with",
@@ -13706,12 +13354,6 @@
       "from": "team-builder",
       "to": "org-readiness-assessment",
       "source": "prose"
-    },
-    {
-      "type": "produces",
-      "from": "team-builder",
-      "to": "output_type.variant_proposal",
-      "source": "procedure_schema"
     },
     {
       "type": "references",

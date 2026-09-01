@@ -5,7 +5,7 @@
  * Recursively scans L3 project directories and classifies files
  * for variant conversion pipeline.
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @phase 1: L3 Analysis
  *
  * Dependencies:
@@ -90,7 +90,15 @@ const SCAN_CATEGORIES = {
   // Procedure Schema YAML workflows (ADR-0063) — MUST survive L3→variant promotion
   // so promoted variants carry their (agent, phase) workflow corpus.
   procedures: ['procedures'],
-  root: ['CLAUDE.md', 'GEMINI.md', 'README.md', 'CHANGELOG.md', 'package.json'],
+  // Variant tests (cf. templates/co-game/tests/) — promoted variants must carry
+  // their own test suite, so the tests/ tree is scanned and copied verbatim.
+  tests: ['tests'],
+  // PROMOTION_CHECKLIST.md is required by the Variant Readiness Gate (blocking)
+  // and ignore.conf is part of the variant contract when the L3 source ships one.
+  root: [
+    'CLAUDE.md', 'GEMINI.md', 'README.md', 'CHANGELOG.md', 'package.json',
+    'PROMOTION_CHECKLIST.md', 'ignore.conf',
+  ],
 } as const;
 
 // ============================================================================
@@ -351,9 +359,15 @@ export async function scanL3Project(l3ProjectPath: string): Promise<L3ScanResult
 
       if (isDirectory) {
         // Scan directory recursively
-        const extensions = category === 'scripts' ? ['.ts', '.sh', '.ps1'] :
-                         category === 'agents' || category === 'skills' ? ['.md'] :
+        // 'scripts' carries .md too so scripts/<variant>/SCRIPTS.md survives promotion.
+        // 'skills' takes no extension filter: a skill directory owns its sub-files
+        // (assets/, references/, templates/) whatever their extension, and they must
+        // travel with SKILL.md for its relative references to resolve.
+        const extensions = category === 'scripts' ? ['.ts', '.sh', '.ps1', '.md'] :
+                         category === 'agents' ? ['.md'] :
+                         category === 'skills' ? [] :
                          category === 'procedures' ? ['.yaml', '.yml', '.ts'] :
+                         category === 'tests' ? ['.ts', '.md', '.json'] :
                          ['.md', '.json'];
         filesToScan = scanDirectoryRecursively(fullScanPath, l3ProjectPath, extensions);
       } else {

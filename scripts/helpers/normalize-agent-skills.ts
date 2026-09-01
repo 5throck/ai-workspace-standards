@@ -6,7 +6,7 @@
  * skill files, and normalizes skill frontmatter/body section names to match
  * the canonical variant specialist structure.
  *
- * @version 1.1.0
+ * @version 1.2.0
  * @phase 1.5: Agent/Skill Normalization
  *
  * See: docs/adr/0042-l2-variant-pipeline-wave15-golden-reference.md
@@ -18,7 +18,7 @@
  * - lib/error-handling.ts (Error management)
  */
 
-import { join, dirname, basename } from 'path';
+import { join, dirname, basename, resolve, sep } from 'path';
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import { L3ScanResult } from './scan-l3-project.ts';
 import { readUTF8File, writeUTF8File } from '../lib/encoding-utils.ts';
@@ -451,6 +451,13 @@ export function normalizeAgentSkills(
     warnings: [],
   };
 
+  // v1.2.0: every scanned path is relative to the L3 project root, so it MUST be
+  // resolved against `l3ProjectPath` before any fs call. Passing the bare relative
+  // path made existsSync()/readUTF8File()/writeUTF8File() resolve against
+  // process.cwd() — the L0 workspace root — so Phase 1.5 read and OVERWROTE the
+  // harness's own skills/<name>/SKILL.md instead of the L3 source's files.
+  const l3Root = resolve(l3ProjectPath);
+
   for (const file of scanResult.files) {
     const isAgentFile =
       file.relativePath.match(/^agents\//) &&
@@ -461,14 +468,28 @@ export function normalizeAgentSkills(
       file.relativePath.match(/^skills\//) &&
       basename(file.relativePath) === 'SKILL.md';
 
-    if (!existsSync(file.relativePath)) continue;
+    if (!isAgentFile && !isSkillFile) continue;
 
-    const content = readUTF8File(file.relativePath);
+    const absPath = resolve(l3Root, file.relativePath);
+
+    // Containment guard: normalization only ever writes inside the L3 project.
+    if (absPath !== l3Root && !absPath.startsWith(l3Root + sep)) {
+      result.warnings.push({
+        level: 'info',
+        filePath: file.relativePath,
+        message: `Skipped — resolved path escapes the L3 project root (${absPath})`,
+      });
+      continue;
+    }
+
+    if (!existsSync(absPath)) continue;
+
+    const content = readUTF8File(absPath);
 
     if (isAgentFile) {
       const agentName = basename(file.relativePath, '.md');
       const { normalized, extracted, pending, warnings } = normalizeAgentFile(
-        file.relativePath,
+        absPath,
         content,
         agentName,
         l3ProjectPath,
@@ -480,7 +501,7 @@ export function normalizeAgentSkills(
       result.warnings.push(...warnings);
 
     } else if (isSkillFile) {
-      const { normalized, warnings } = normalizeSkillFile(file.relativePath, content);
+      const { normalized, warnings } = normalizeSkillFile(absPath, content);
       result.normalizedSkills.push(normalized);
       result.warnings.push(...warnings);
     }

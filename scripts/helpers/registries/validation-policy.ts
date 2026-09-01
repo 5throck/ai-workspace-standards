@@ -1,5 +1,5 @@
 // scripts/helpers/registries/validation-policy.ts
-// @version 1.1.0
+// @version 1.2.0
 // SSOT for per-type validation policies
 
 import type { VariantType } from './variant-type-registry.ts';
@@ -101,6 +101,17 @@ export const VALIDATION_POLICIES = {
   'abap-development': {
     requiredCapabilities: [],
     optionalAgentSections: ['## Phase Handoff Protocol'],
+  },
+  safety: {
+    // No safety/EHS/GxP capability is registered in CAPABILITY_REGISTRY yet, and
+    // requiredCapabilities is ERROR-severity/blocking — so it stays empty until a
+    // real capability exists to require.
+    requiredCapabilities: [],
+    // WARNING severity. Matched by a shallow glob of the L3 project's agents/*.md,
+    // so only templates/co-safety's two top-level, domain-agnostic managers qualify
+    // (the _shared/ and domains/ rosters are nested and invisible to that check).
+    requiredAgents: ['safety-governance-manager', 'safety-workflow-manager'],
+    optionalAgentSections: [],
   },
 } satisfies Record<VariantType, ValidationPolicy>;
 

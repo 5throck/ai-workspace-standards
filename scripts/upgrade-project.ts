@@ -1,5 +1,9 @@
 #!/usr/bin/env bun
-// @version 1.17.2
+// @version 1.18.0
+// v1.18.0: VCS-neutral mode for git-less projects (Plastic SCM variants) — a project with no git
+//           repository is no longer rejected: the rev-parse gate becomes a mode switch. Snapshot,
+//           --rollback, local-modification conflict detection and the git-hook security checks are
+//           skipped (with explicit INFO/WARN/SKIP notices), and prunes fall back to fs removal.
 // v1.17.0: Identity-separated fork support — a project whose variant.json self-declares a variant
 //           with no templates/<variant>/ dir (e.g. co-architect from co-work) is accepted in
 //           "common-only" sync mode: templates/common + project-owned files only, no readiness
@@ -139,13 +143,12 @@ if (!existsSync(projectDir)) {
   }
 }
 
-// Validate git repo
+// Detect VCS mode. A git repository unlocks the snapshot/rollback/conflict-detection
+// machinery; a git-less project (e.g. a Plastic SCM variant) runs in VCS-neutral mode.
 const gitCheck = spawnSync('git', ['-C', projectDir, 'rev-parse', '--git-dir'], { encoding: 'utf8' });
-if (gitCheck.status !== 0) {
-  console.error(`ERROR: Not a git repository: ${projectDir}`);
-  if (import.meta.main) {
-    process.exit(1);
-  }
+const isGitRepo = gitCheck.status === 0;
+if (!isGitRepo) {
+  console.log('INFO: Not a git repository — VCS-neutral mode. No stash snapshot will be taken; pruned files are removed with fs; git-hook security checks are skipped. Back up the project first (e.g. a Plastic shelve or checkin).');
 }
 
 // ── Version resolution ─────────────────────────────────────────────────────────
@@ -323,6 +326,10 @@ console.log('========================================================\n');
 
 // G12: --rollback convenience flag
 if (rollback) {
+  if (!isGitRepo) {
+    console.error('ERROR: --rollback requires a git repository (it restores a git stash).');
+    if (import.meta.main) process.exit(1);
+  }
   console.log('--- Rolling back last upgrade ---');
   const stashList = spawnSync('git', ['-C', projectDir, 'stash', 'list'], { encoding: 'utf8' });
   const preUpgradeStash = stashList.stdout.split('\n').find(l => l.includes('pre-upgrade-snapshot'));
@@ -340,7 +347,10 @@ if (rollback) {
   if (import.meta.main) process.exit(0);
 }
 
-if (!dryRun) {
+if (!dryRun && !isGitRepo) {
+  console.log('INFO: snapshot skipped (no git repository).');
+  console.log('');
+} else if (!dryRun) {
   console.log('--- Creating pre-upgrade git stash snapshot ---');
   const snapDate = new Date().toISOString().slice(0, 10).replace(/-/g, '');
   const stash = spawnSync('git', ['-C', projectDir, 'stash', 'push', '-m', `pre-upgrade-snapshot-${snapDate}`], { encoding: 'utf8' });
@@ -593,7 +603,15 @@ function mergeWorkspaceManaged(projectFile: string, templateFile: string, rel: s
 }
 
 /** Check if a project file has local modifications (via git status). */
+let localModWarned = false;
 function isLocallyModified(filePath: string): boolean {
+  if (!isGitRepo) {
+    if (!localModWarned) {
+      localModWarned = true;
+      console.log('WARN: local-modification detection unavailable without git — SYNC-tier conflicts cannot be detected; review the diff after the upgrade.');
+    }
+    return false;
+  }
   const rel = relative(projectDir, filePath);
   const status = spawnSync('git', ['-C', projectDir, 'status', '--porcelain', '--', rel], { encoding: 'utf8' });
   return status.stdout.trim().length > 0;
@@ -1590,8 +1608,10 @@ console.log('--- VARIANT-SCOPE SKILL PRUNE ---');
         if (!existsSync(target)) continue;
         console.log(`  ${dryTag}PRUNE  ${dir}/${skill}/  (owning variant: ${owner})`);
         if (!dryRun) {
-          const gitRm = spawnSync('git', ['-C', projectDir, 'rm', '-rf', '--quiet', `${dir}/${skill}`], { encoding: 'utf8' });
-          if (gitRm.status !== 0) rmSync(target, { recursive: true, force: true });
+          const gitRm = isGitRepo
+            ? spawnSync('git', ['-C', projectDir, 'rm', '-rf', '--quiet', `${dir}/${skill}`], { encoding: 'utf8' })
+            : null;
+          if (!gitRm || gitRm.status !== 0) rmSync(target, { recursive: true, force: true });
         }
         foreignPruned++;
       }
@@ -1656,7 +1676,10 @@ if (pruneRemoved) {
         if (!tplBasenames.has(d) && existsSync(join(cat.projDir, d, 'SKILL.md'))) {
           console.log(`  PRUNE  ${cat.label}${d}/`);
           if (!dryRun) {
-            spawnSync('git', ['-C', projectDir, 'rm', '-rf', `${cat.label}${d}`], { encoding: 'utf8' });
+            const gitRm = isGitRepo
+              ? spawnSync('git', ['-C', projectDir, 'rm', '-rf', `${cat.label}${d}`], { encoding: 'utf8' })
+              : null;
+            if (!gitRm || gitRm.status !== 0) rmSync(join(cat.projDir, d), { recursive: true, force: true });
           }
           prunedCount++;
         }
@@ -1666,7 +1689,10 @@ if (pruneRemoved) {
         if (f.endsWith(cat.ext) && !tplBasenames.has(f) && !(cat.skipFiles || []).includes(f)) {
           console.log(`  PRUNE  ${cat.label}${f}`);
           if (!dryRun) {
-            spawnSync('git', ['-C', projectDir, 'rm', '-f', `${cat.label}${f}`], { encoding: 'utf8' });
+            const gitRm = isGitRepo
+              ? spawnSync('git', ['-C', projectDir, 'rm', '-f', `${cat.label}${f}`], { encoding: 'utf8' })
+              : null;
+            if (!gitRm || gitRm.status !== 0) rmSync(join(cat.projDir, f), { force: true });
           }
           prunedCount++;
         }
@@ -1702,22 +1728,32 @@ function secCheck(label: string, ok: boolean): void {
   if (!ok) securityPass = false;
 }
 
-secCheck('.gitleaks.toml exists', existsSync(join(projectDir, '.gitleaks.toml')));
-secCheck('.githooks/pre-commit exists', existsSync(join(projectDir, '.githooks', 'pre-commit')));
-const ga = existsSync(join(projectDir, '.gitattributes')) ? readFileSync(join(projectDir, '.gitattributes'), 'utf8') : '';
-secCheck('.gitattributes has eol=lf', ga.includes('eol=lf'));
-const gi = existsSync(join(projectDir, '.gitignore')) ? readFileSync(join(projectDir, '.gitignore'), 'utf8') : '';
-secCheck('.gitignore has .env pattern', gi.includes('.env'));
+function secSkip(label: string): void {
+  console.log(`  SKIP ${label} (no git repository)`);
+}
 
-const hooksPath = spawnSync('git', ['-C', projectDir, 'config', 'core.hooksPath'], { encoding: 'utf8' }).stdout.trim();
-if (hooksPath === '.githooks') {
-  console.log('  OK  git core.hooksPath = .githooks');
-} else {
-  console.log(`  WARN git core.hooksPath = '${hooksPath}' (expected .githooks)`);
-  if (!dryRun) {
-    spawnSync('git', ['-C', projectDir, 'config', 'core.hooksPath', '.githooks']);
-    console.log('       -> Auto-fixed: set core.hooksPath to .githooks');
+secCheck('.gitleaks.toml exists', existsSync(join(projectDir, '.gitleaks.toml')));
+if (isGitRepo) {
+  secCheck('.githooks/pre-commit exists', existsSync(join(projectDir, '.githooks', 'pre-commit')));
+  const ga = existsSync(join(projectDir, '.gitattributes')) ? readFileSync(join(projectDir, '.gitattributes'), 'utf8') : '';
+  secCheck('.gitattributes has eol=lf', ga.includes('eol=lf'));
+  const gi = existsSync(join(projectDir, '.gitignore')) ? readFileSync(join(projectDir, '.gitignore'), 'utf8') : '';
+  secCheck('.gitignore has .env pattern', gi.includes('.env'));
+
+  const hooksPath = spawnSync('git', ['-C', projectDir, 'config', 'core.hooksPath'], { encoding: 'utf8' }).stdout.trim();
+  if (hooksPath === '.githooks') {
+    console.log('  OK  git core.hooksPath = .githooks');
+  } else {
+    console.log(`  WARN git core.hooksPath = '${hooksPath}' (expected .githooks)`);
+    if (!dryRun) {
+      spawnSync('git', ['-C', projectDir, 'config', 'core.hooksPath', '.githooks']);
+      console.log('       -> Auto-fixed: set core.hooksPath to .githooks');
+    }
   }
+} else {
+  secSkip('.githooks/pre-commit exists');
+  secSkip('.gitattributes has eol=lf');
+  secSkip('.gitignore has .env pattern');
 }
 console.log('');
 

@@ -5,7 +5,7 @@
  * Generates variant project structure from reconciled manifest.
  * Creates variant.json, directory structure, agent overrides, and skill directories.
  *
- * @version 1.13.2
+ * @version 1.14.0
  * @phase 3: Variant Generation
  *
  * Dependencies:
@@ -106,6 +106,8 @@ export interface AgentDefinition {
 export interface SkillDefinition {
   /** Skill name */
   name: string;
+  /** Skill file path, relative to the variant root (default: skills/<name>/SKILL.md) */
+  file?: string;
   /** Skill description */
   description?: string;
   /** Skill triggers */
@@ -271,7 +273,7 @@ function substitutePlaceholders(content: string, metadata: VariantMetadata): str
  * Generate variant.json from metadata
  * @version 1.1.0
  */
-function generateVariantJson(metadata: VariantMetadata): string {
+function generateVariantJson(metadata: VariantMetadata, includePmAgent = false): string {
   const today = new Date().toISOString().split('T')[0];
   const canonicalKeys = new Set([
     'name', 'description', 'variantType', 'status', 'version', 'inherits_common',
@@ -296,12 +298,23 @@ function generateVariantJson(metadata: VariantMetadata): string {
       lastTransition: `initial → ${metadata.status} on ${today}`,
       stablePromotedOn: metadata.status === 'stable' ? today : null,
     },
-    agents: metadata.agentRoster.map(agent => ({
-      name: agent.name,
-      file: `agents/${agent.name}.md`,
-    })),
+    // pm is excluded from `agentRoster` (it is infrastructure, not a specialist),
+    // but every stable template declares it in agents[] — regenerate-agents-md.ts
+    // filters it out again, and upgrade-project.ts uses agents[] as the agent-file
+    // allowlist, so omitting it would gate pm.md out of upgrades.
+    agents: [
+      ...metadata.agentRoster.map(agent => ({
+        name: agent.name,
+        file: `agents/${agent.name}.md`,
+      })),
+      ...(includePmAgent ? [{ name: 'pm', file: 'agents/pm.md' }] : []),
+    ],
+    // `file` is REQUIRED by the Variant Readiness Gate (skill-file-missing is
+    // blocking) — mirror the agents[] shape and point at the canonical
+    // skills/<name>/SKILL.md materialized by generateSkillDirectories().
     skills: metadata.skills.map(skill => ({
       name: skill.name,
+      file: skill.file ?? `skills/${skill.name}/SKILL.md`,
     })),
     ...(metadata.agent_manifest && { agent_manifest: metadata.agent_manifest }),
     ...(metadata.theme_manifest && { theme_manifest: metadata.theme_manifest }),
@@ -402,7 +415,11 @@ function generateAgentOverrides(
  * only) and the copy-remaining loop (skips 'skills/' assuming this function
  * handled it).
  *
- * @version 1.2.0
+ * v1.3.0: picks the canonical SKILL.md by exact path (not the first skill-tree
+ * entry, which was often an asset) and copies every skill sub-file — any
+ * extension — into all three skill roots.
+ *
+ * @version 1.3.0
  */
 export function generateSkillDirectories(
   variantPath: string,
@@ -411,28 +428,40 @@ export function generateSkillDirectories(
 ): string[] {
   const skillDirectories: string[] = [];
 
+  /** skills/<name>/<rel>, optionally under a .claude/.gemini/.agents platform root. */
+  const SKILL_PATH_RE = /^(?:(\.claude|\.gemini|\.agents)\/)?skills\/([^/]+)\/(.+)$/;
+
+  interface SkillEntry {
+    /** Platform root ('' = canonical top-level skills/) */
+    root: '' | '.claude' | '.gemini' | '.agents';
+    /** Path relative to the skill directory, e.g. 'SKILL.md', 'assets/x.md' */
+    rel: string;
+    file: ReconciledFile;
+  }
+
   // Group skill files by skill name
-  const skillFiles = new Map<string, ReconciledFile[]>();
+  const skillFiles = new Map<string, SkillEntry[]>();
 
   for (const file of manifest.keepInVariant) {
     // Normalize to forward slashes so prefix checks match on Windows (same
     // normalization as the agent loop and the copy-remaining loop)
     const normalizedTarget = file.targetPath.replace(/\\/g, '/');
-    if (normalizedTarget.includes('skills/') && normalizedTarget.endsWith('.md')) {
-      // Extract skill name from path (e.g., 'skills/meeting-facilitation/SKILL.md')
-      const match = normalizedTarget.match(/skills\/([^/]+)\//);
-      if (match) {
-        const skillName = match[1];
-        if (!skillFiles.has(skillName)) {
-          skillFiles.set(skillName, []);
-        }
-        skillFiles.get(skillName)!.push(file);
-      }
+    const match = normalizedTarget.match(SKILL_PATH_RE);
+    if (!match) continue;
+
+    const skillName = match[2];
+    if (!skillFiles.has(skillName)) {
+      skillFiles.set(skillName, []);
     }
+    skillFiles.get(skillName)!.push({
+      root: (match[1] ?? '') as SkillEntry['root'],
+      rel: match[3],
+      file,
+    });
   }
 
   // Create skill directories
-  for (const [skillName, files] of skillFiles.entries()) {
+  for (const [skillName, entries] of skillFiles.entries()) {
     const claudeSkillDir = join(variantPath, '.claude', 'skills', skillName);
     const geminiSkillDir = join(variantPath, '.gemini', 'skills', skillName);
     const topLevelSkillDir = join(variantPath, 'skills', skillName);
@@ -442,35 +471,28 @@ export function generateSkillDirectories(
 
     skillDirectories.push(claudeSkillDir, geminiSkillDir);
 
-    // Copy skill files
-    for (const file of files) {
-      const normalizedTarget = file.targetPath.replace(/\\/g, '/');
-      const isClaude = normalizedTarget.includes('.claude/skills/');
-      const isGemini = normalizedTarget.includes('.gemini/skills/');
-
-      if (isClaude) {
-        const targetPath = join(variantPath, '.claude', 'skills', skillName, 'SKILL.md');
-        if (existsSync(file.sourcePath)) {
-          copyFileUTF8(file.sourcePath, targetPath);
-        }
-      }
-
-      if (isGemini) {
-        const targetPath = join(variantPath, '.gemini', 'skills', skillName, 'SKILL.md');
-        if (existsSync(file.sourcePath)) {
-          copyFileUTF8(file.sourcePath, targetPath);
-        }
+    // Platform SKILL.md files keep their own source (a platform copy may
+    // legitimately diverge from the canonical one).
+    for (const entry of entries) {
+      if (entry.rel !== 'SKILL.md' || !existsSync(entry.file.sourcePath)) continue;
+      if (entry.root === '.claude') {
+        copyFileUTF8(entry.file.sourcePath, join(claudeSkillDir, 'SKILL.md'));
+      } else if (entry.root === '.gemini') {
+        copyFileUTF8(entry.file.sourcePath, join(geminiSkillDir, 'SKILL.md'));
       }
     }
 
-    // Top-level skills/<name>/SKILL.md (canonical co-consult layout): build it
-    // from the source's top-level copy when present, else mirror a platform
-    // copy, and backfill platform roots whose source had no platform file so
-    // all three skill roots carry the skill.
+    // Top-level skills/<name>/SKILL.md (canonical co-consult layout): the
+    // canonical source is the file whose path is EXACTLY skills/<name>/SKILL.md.
+    // v1.3.0: the old `startsWith('skills/')` find() took the FIRST skill-tree
+    // entry, which for a skill owning sub-folders was often an asset — the
+    // co-unity rehearsal wrote assets/review-brief-template.md into
+    // skills/code-review/SKILL.md. Fall back to a platform SKILL.md only when
+    // the source ships no top-level one.
     const canonicalSource =
-      files.find((f) => f.targetPath.replace(/\\/g, '/').startsWith('skills/'))?.sourcePath ??
-      files.find((f) => existsSync(f.sourcePath))?.sourcePath;
-    if (canonicalSource && existsSync(canonicalSource)) {
+      entries.find(e => e.root === '' && e.rel === 'SKILL.md' && existsSync(e.file.sourcePath))?.file.sourcePath ??
+      entries.find(e => e.rel === 'SKILL.md' && existsSync(e.file.sourcePath))?.file.sourcePath;
+    if (canonicalSource) {
       createDirectory(topLevelSkillDir);
       copyFileUTF8(canonicalSource, join(topLevelSkillDir, 'SKILL.md'));
       skillDirectories.push(topLevelSkillDir);
@@ -480,6 +502,27 @@ export function generateSkillDirectories(
         if (!existsSync(platformDest)) {
           copyFileUTF8(canonicalSource, platformDest);
         }
+      }
+    }
+
+    // Skill sub-files (assets/, references/, templates/ — any extension) are part
+    // of the skill: SKILL.md references them relatively, so they must be mirrored
+    // into all three skill roots. v1.3.0: previously never copied at all.
+    const subFiles = new Map<string, string>();
+    for (const entry of entries) {
+      if (entry.rel === 'SKILL.md' || !existsSync(entry.file.sourcePath)) continue;
+      // Prefer the canonical top-level source when the same sub-file is mirrored
+      // under a platform root as well.
+      if (!subFiles.has(entry.rel) || entry.root === '') {
+        subFiles.set(entry.rel, entry.file.sourcePath);
+      }
+    }
+
+    for (const [rel, sourcePath] of subFiles.entries()) {
+      for (const skillDir of [topLevelSkillDir, claudeSkillDir, geminiSkillDir]) {
+        const dest = join(skillDir, ...rel.split('/'));
+        createDirectory(dirname(dest));
+        copyFileUTF8(sourcePath, dest);
       }
     }
   }
@@ -1518,7 +1561,15 @@ export async function generateVariant(
 
   // Generate variant.json
   console.log(`\n=== Generating variant.json ===`);
-  const variantJsonContent = generateVariantJson(metadata);
+  // agents/pm.md is materialized by generateAgentOverrides() below (from the L3
+  // source, else from templates/common) — declare it only when it will exist.
+  const pmManifestEntry = manifest.keepInVariant.find(
+    f => f.targetPath.replace(/\\/g, '/') === 'agents/pm.md',
+  );
+  const includePmAgent =
+    !!pmManifestEntry &&
+    (existsSync(pmManifestEntry.sourcePath) || existsSync(join(COMMON_TEMPLATE, 'agents', 'pm.md')));
+  const variantJsonContent = generateVariantJson(metadata, includePmAgent);
   writeUTF8File(variantJsonPath, variantJsonContent);
   console.log(`Created: ${variantJsonPath}`);
 
@@ -1590,6 +1641,16 @@ export async function generateVariant(
     'docs/_COMMON_VERSION.md',
   ]);
 
+  // Skill trees are materialized by generateSkillDirectories() — skip only those
+  // roots. v1.14.0: the old `includes('skills/')` test also swallowed
+  // docs/lifecycle/skills/*.md, so promoted variants shipped agent and template
+  // lifecycle records but no skill ones.
+  const SKILL_TREE_PREFIXES = ['skills/', '.claude/skills/', '.gemini/skills/', '.agents/skills/'];
+  // scripts/ holds core workspace scripts that a variant must never fork, EXCEPT
+  // the variant-named subdirectory (cf. templates/co-game/scripts/co-game/), which
+  // is the variant's own script surface.
+  const variantScriptsPrefix = `scripts/${metadata.name}/`;
+
   for (const file of manifest.keepInVariant) {
     // Normalize to forward slashes so SKIP_IN_COPY and prefix checks match on Windows,
     // where path.relative() yields backslashes (same normalization as the agent loop, L335).
@@ -1598,8 +1659,8 @@ export async function generateVariant(
     const normalizedTarget = file.targetPath.replace(/\\/g, '/');
     // Skip already handled files and migration artifacts
     if (normalizedTarget.startsWith('agents/') ||
-        normalizedTarget.startsWith('scripts/') ||
-        normalizedTarget.includes('skills/') ||
+        (normalizedTarget.startsWith('scripts/') && !normalizedTarget.startsWith(variantScriptsPrefix)) ||
+        SKILL_TREE_PREFIXES.some(prefix => normalizedTarget.startsWith(prefix)) ||
         SKIP_IN_COPY.has(normalizedTarget)) {
       continue;
     }

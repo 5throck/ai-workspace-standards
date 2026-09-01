@@ -89,7 +89,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `generate-scripts-readme.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
 | `generate-version-manifest.ts` | L0 | 1.3.0 | active | —| —| L0 | —|
 | `helpers/beta-lifecycle.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
-| `helpers/generate-variant.ts` | L0 | 1.13.2 | active | —| —| L0 | —|
+| `helpers/generate-variant.ts` | L0 | 1.14.0 | active | —| —| L0 | —|
 | `helpers/agent-promote.ts` | L0 | 0.1.1 | experimental | —| —| L0 | —|
 | `experiments/infer-graph-from-phases.ts` | L0 | 0.1.0 | experimental | —| —| L0 | —|
 | `helpers/agent-similarity-analyzer.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
@@ -108,8 +108,8 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `helpers/variant-governance-rules.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `helpers/registries/variant-type-registry.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `helpers/registries/capability-registry.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `helpers/registries/promotion-policy.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `helpers/registries/validation-policy.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
+| `helpers/registries/promotion-policy.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
+| `helpers/registries/validation-policy.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `helpers/registries/index.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/plugins/variant-plugin.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/plugins/game-plugin.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
@@ -122,9 +122,9 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `helpers/plugins/index.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/workspace-integration.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/reconcile-with-l0-l1.ts` | L0 | 1.3.1 | active | —| —| L0 | —|
-| `helpers/normalize-agent-skills.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
+| `helpers/normalize-agent-skills.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `helpers/prune-country-scoped-assets.ts` | L0 | 0.3.0 | active | —| —| L0 | —|
-| `helpers/scan-l3-project.ts` | L0 | 1.3.0 | active | —| —| L0 | —|
+| `helpers/scan-l3-project.ts` | L0 | 1.4.0 | active | —| —| L0 | —|
 | `helpers/substitute-placeholders.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `helpers/template-utils.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
 | `helpers/rollback-partial-project.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
@@ -199,7 +199,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `test-runner.ts` | L0 | 1.1.0 | active | `--parallel`, `--sequential`, `--concurrency <n>`, `--timeout <ms>` | —| L0+L1 | —|
 | `translate-readme.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `ticket.ts` | L0 | 1.1.0 | active | `create --not-before`, `list --kind`, `list --ready` | —| L0 | —|
-| `upgrade-project.ts` | L0 | 1.17.2 | active | `--variant`, `--platform`, `--dry-run`, `--prune-removed`, `--rollback`, `--yes` | —| L0 | —|
+| `upgrade-project.ts` | L0 | 1.18.0 | active | `--variant`, `--platform`, `--dry-run`, `--prune-removed`, `--rollback`, `--yes` | —| L0 | —|
 | `variant-feature.ts` | L0 | 1.0.0 | active | `--variant`, `--feature`, `--type` | —| L0 | —|
 | `validate-agents.ts` | L0 | 1.0.5 | active | —| —| L0+L1 | —|
 | `validate-doc-folder.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|

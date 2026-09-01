@@ -271,6 +271,29 @@ Was the workspace template updated?
 
 ---
 
+## §6.1: VCS-Neutral Projects (No Git Repository)
+
+Some variants deliberately use a different version control system — `co-unity`, for example, is a Plastic SCM variant, so its projects have no git repository at all. `upgrade-project.ts` (v1.18.0+) detects this automatically and runs in **VCS-neutral mode**; no flag is required. It prints an `INFO: Not a git repository — VCS-neutral mode.` banner and then proceeds normally.
+
+What changes in VCS-neutral mode:
+
+| Capability | Git mode | VCS-neutral mode |
+|-----------|----------|------------------|
+| Pre-upgrade snapshot | `pre-upgrade-snapshot-YYYYMMDD` git stash | Skipped (`INFO: snapshot skipped (no git repository).`) |
+| `--rollback` | Restores the pre-upgrade stash | **Unavailable** — exits 1 with an error |
+| SYNC-tier conflict detection | `git status --porcelain` per file | Unavailable — one `WARN` is printed and every file is treated as unmodified |
+| Prune (`--prune-removed`, variant-scope skill prune) | `git rm` | Direct filesystem removal (`rmSync`) |
+| `.githooks/pre-commit`, `.gitattributes eol=lf`, `.gitignore .env`, `core.hooksPath` checks | Verified (hooksPath auto-fixed) | Reported as `SKIP … (no git repository)`; they do not fail the security gate |
+| `.gitleaks.toml` check | Verified | Verified (unchanged) |
+
+**Back up before upgrading.** Because there is no stash and no `--rollback`, the safety net of §3.2 does not apply. Take a Plastic **shelve** or **checkin** of the workspace before running the upgrade, and always preview with `--dry-run` first.
+
+**Review the diff yourself.** Local-modification detection is what normally protects a deliberately forked SYNC-tier file. Without git, those forks are invisible to the tool, so inspect the post-upgrade changes in your Plastic client before checking them in.
+
+**Re-run the variant's post-scaffold script.** The common overlay always re-delivers git-shaped files (`.githooks/`, `.gitattributes`, `.gitignore`, and related governance assets) because they are LOCKED/OVERWRITE-tier and know nothing about the project's VCS. After every upgrade, re-run the variant's post-scaffold bootstrap — for `co-unity`, `bun scripts/co-unity/plastic-bootstrap.ts` — to re-apply the Plastic-specific arrangement.
+
+---
+
 ## §7: Troubleshooting
 
 ### "Template has no WORKSPACE-MANAGED markers — skipping"
