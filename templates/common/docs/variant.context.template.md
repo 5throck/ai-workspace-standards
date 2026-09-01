@@ -133,7 +133,7 @@ Edit code
      co-security → ## Security Guidelines
      co-design  → ## Design Guidelines
      co-work    → ## Writing Guidelines -->
-<!-- intentional-duplicate: workspace standards §8 — maintained locally for AI context proximity; source: docs/constitution/08-coding-guidelines.md; hash: d03bef2a -->
+<!-- intentional-duplicate: workspace standards §8 — maintained locally for AI context proximity; source: docs/constitution/08-coding-guidelines.md; hash: 3a0b3968 -->
 
 > Replace this placeholder with variant-specific guidelines.
 > This section is REQUIRED — audit.ts will flag its absence.

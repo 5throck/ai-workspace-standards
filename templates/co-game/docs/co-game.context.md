@@ -125,7 +125,7 @@ PM → Game Designer (universal: core loop + difficulty + reward)
 
 <!-- VARIANT-INJECT: guidelines [REQUIRED] -->
 ## Coding Guidelines
-<!-- intentional-duplicate: workspace standards §8 — maintained locally for AI context proximity; source: docs/constitution/08-coding-guidelines.md; hash: d03bef2a -->
+<!-- intentional-duplicate: workspace standards §8 — maintained locally for AI context proximity; source: docs/constitution/08-coding-guidelines.md; hash: 3a0b3968 -->
 
 ### Core Rules
 

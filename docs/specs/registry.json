@@ -613,6 +613,15 @@
       "source": "project-review",
       "created": "2026-08-30",
       "last_updated": "2026-08-30"
+    },
+    {
+      "id": "2026-09-01-accessibility-standard-design",
+      "title": "accessibility standard design",
+      "file": "docs/designs/2026-09-01-accessibility-standard-design.md",
+      "status": "draft",
+      "source": "manual",
+      "created": "2026-09-01",
+      "last_updated": "2026-09-01"
     }
   ]
 }

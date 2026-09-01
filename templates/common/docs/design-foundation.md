@@ -149,6 +149,11 @@ This contract is review-enforced today; automated linting is a tracked backlog i
 Accessibility verification should use the `accessibility-audit` skill (axe-core, WCAG 2.1 AA) rather than
 ad-hoc checks.
 
+This contract covers the **design system** layer. Feature-level accessibility is a separate, mandatory
+duty: design docs for user-facing features MUST include an Accessibility section (target level, affected
+interaction areas, verification method) per the workspace standard — see `docs/context.md` §
+Accessibility Standards and ADR-0065.
+
 ## 8. Relationship to Other Workspace Assets
 
 | Asset | Relationship |

@@ -235,6 +235,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `adr:0062` | adr | — | — | — |
 | `adr:0063` | adr | — | — | — |
 | `adr:0064` | adr | — | accessibility-audit, design-foundation, token-usage-lint, ui-ux-design-intelligence | — |
+| `adr:0065` | adr | — | accessibility-audit | — |
 | `dec:DEC-20260825-01` | decision | — | — | — |
 | `dec:DEC-20260825-02` | decision | `sync` | — | — |
 | `dec:DEC-20260829-01` | decision | `decision-record` | — | — |
