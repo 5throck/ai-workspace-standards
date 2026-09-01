@@ -41,6 +41,10 @@ When calling `multi_replace_file_content` with multiple `ReplacementChunks`, the
 When executing CLI commands via `run_command` on Windows (PowerShell/CMD), the default Windows code page (e.g., CP949) often causes Unicode decoding errors.
 - **Rule:** Before running commands that output non-ASCII text, explicitly set the code page to UTF-8 by prepending `$OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8;` (PowerShell) or `chcp 65001` (CMD).
 
+#### ⚠️ Windows Reserved Device Name (nul) Redirection Safeguard
+In Git Bash on Windows, writing to `> nul` or `2> nul` creates a physical file named `nul` in the working directory because Bash interprets `nul` as a relative path rather than the Win32 OS NUL device. Node.js / Bun `fs` APIs cannot delete physical `nul` files on Windows.
+- **Rule**: NEVER use `> nul` or `2> nul` in shell commands or scripts. Use `> /dev/null 2>&1` in Bash, or `$null` / `Out-Null` in PowerShell. All `.gitignore` templates MUST include `nul` and `NUL`.
+
 #### ⚠️ Grep Search 50-Match Cap Safeguard
 The `grep_search` tool silently truncates results at exactly **50 matches**.
 - **Rule**: If a codebase-wide search yields 50 results, do **NOT** assume you have all occurrences.
@@ -216,12 +220,13 @@ Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 
 ---
 
-### 6. Project Boundary Policy
+<!-- COMMON-GEMINI:START -->
+### 6. Workspace & Template Boundary Policy
 
-- **Strict Scope**: Work only within the current project directory.
-- **No Cross-Project Modification**: Modifying files outside the project root during a session is forbidden.
+- **Strict CWD Isolation**: When modifying templates (in `templates/`), you MUST strictly limit your working directory (CWD) to the specific template folder.
+- **No Cross-Modification**: Modifying workspace root files and template files in a single task or session is forbidden. Keep workspace root changes and template changes completely isolated.
 
-> For lifecycle management rules, see [docs/context.md — Lifecycle Management](docs/context.md#lifecycle-management).
+> For L1-L2 Fork Model and lifecycle management rules, see [docs/context.md](docs/context.md) and [docs/context.md](docs/context.md).
 <!-- COMMON-GEMINI:END -->
 
 ---
@@ -254,6 +259,27 @@ Before editing any file for the **FIRST time in a session**, the agent MUST:
 | Antigravity | ✅ Prompt (manual) | Hooks do not fire — agent self-enforces |
 
 If the hook is not active (Antigravity), agents must still follow the 4-step process before making first edits.
+<!-- COMMON-GEMINI:END -->
+
+<!-- COMMON-GEMINI:START -->
+### Custom Command Error Recovery
+If a custom slash command or background script returns a non-zero exit code:
+* **Don't bypass hooks**: Never attempt to run git commands with `--no-verify` to bypass the hook system unless under explicit, written user instruction.
+* **Code Page / UTF-8 Issues (Windows)**: If broken Korean characters or Unicode errors appear in CLI output, the Windows terminal code page (CP949) is likely the cause. Ensure `$OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8;` or `chcp 65001` is prepended to scripts.
+* **Diagnostic Audit**: Immediately read the failure stdout log. Common errors include:
+  * Missing staged `CHANGELOG.md` edits (caught by `pre-commit`). Fix by running `/changelog` and staging the file.
+  * Direct push attempt to `main` (caught by `pre-push`). Fix by executing the `/sync` pipeline script which handles target branch generation and PR staging automatically.
+<!-- COMMON-GEMINI:END -->
+
+<!-- COMMON-GEMINI:START -->
+### Windows Platform Requirement
+
+**Git Bash required on Windows**: This workspace uses Unix-style shell scripts (`.sh`) for `.githooks/` hook files. Windows users must have Git Bash installed and configured as the default shell for git hooks.
+
+- Git Bash ships with [Git for Windows](https://gitforwindows.org/) — install if not present.
+- Verify: `git config core.hooksPath` should point to `.githooks/`
+- All `scripts/` operational scripts are TypeScript (`.ts`) — run via `bun scripts/<name>.ts`. No `.sh/.ps1` counterparts (ADR-0036).
+- If a hook fails on Windows with "command not found", run it via Git Bash: `"C:\Program Files\Git\bin\bash.exe" .githooks/pre-commit`
 <!-- COMMON-GEMINI:END -->
 
 ## Agent Teams vs. Antigravity Agent Manager
@@ -309,7 +335,7 @@ Antigravity does not have `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` or `teammateMod
 
 ---
 
-*Last Updated: 2026-08-15 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
+*Last Updated: 2026-09-01 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
 
 
 

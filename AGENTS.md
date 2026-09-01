@@ -386,6 +386,7 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 
 **Key points**:
 - **Row 0 (Design Gate) is MANDATORY** for L0/L1 — design document must be created/updated before implementation
+- **Design docs for user-facing features MUST include an Accessibility section** (target level, affected interaction areas, verification method) per ADR-0065 — accessibility is a mandatory consideration for web/app/CLI/document feature development (WCAG 2.1 AA baseline); backend/non-UI work is exempt only with an explicit statement
 - Tier column is MANDATORY (High/Medium/Low)
 - `/sync` is always the final step — it covers lifecycle update, full audit, commit, push, and PR creation
 - No separate Lifecycle Update or Final QA Audit rows needed — `/sync` handles both

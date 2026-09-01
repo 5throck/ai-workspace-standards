@@ -101,6 +101,26 @@ The project's design system SSOT is `docs/design.md`, which must contain a `desi
 record; token architecture is Primitive → Semantic (`[data-theme]` mapping) → Component.
 The `design-foundation` skill walks through the derivation procedure.
 
+### Accessibility Standards
+
+**Accessibility is a mandatory consideration for any user-facing software feature** (web apps,
+mobile apps, interactive CLIs, generated documents/templates) — not an optional enhancement.
+Backend/non-UI work is exempt only when the design doc or ADR states the exemption explicitly.
+
+- **Baseline**: WCAG 2.1 AA — aligned with the Design Foundation contract and the
+  `accessibility-audit` skill (axe-core, WCAG 2.1 AA; co-design) where available.
+- **Design docs MUST include an Accessibility section** for user-facing features: target level
+  (WCAG 2.1 AA), affected interaction areas (keyboard, screen reader, contrast, motion, touch),
+  and the verification method. **ADRs MUST record accessibility impact** for features that affect
+  user-facing interaction.
+- **Baseline requirements**: keyboard operability with visible focus (no keyboard traps); WCAG AA
+  contrast (4.5:1 normal text, 3:1 large text/UI components); semantic structure & ARIA with
+  accessible names (`aria-label`/`aria-labelledby` for icon-only controls); screen-reader reading
+  order; status never conveyed by color alone (always paired with icon and/or text);
+  `prefers-reduced-motion` respected; adequate touch/target sizes.
+- **Verification**: use the `accessibility-audit` skill where available; otherwise a documented
+  manual checklist covering the baseline items above.
+
 ### Session Log Format (`memory/YYYY-MM-DD.md`)
 
 Every session log entry MUST include the following four sections:

@@ -17,8 +17,7 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 
 | Agent | File | Tier | Role |
 |-------|------|------|------|
-| **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) | Medium | Orchestrates team assembly (Phase 0), design validation (Phase 2), and lifecycle finalization (Phase 6). **PM does NOT execute code or documentation directly — all specialist work dispatched through PM.** Design-adjudication-heavy work is dispatched to the architect (or the variant's High-tier design specialist); a variant whose PM must own design adjudication re-declares `tier: high` in its own `agents/pm.md` frontmatter. |
-| **I18N Specialist Agent** | [`agents/i18n-specialist.md`](agents/i18n-specialist.md) | Medium | Internationalization and localization guidance: locale configuration (BCP 47), locale-specific formatting (dates, numbers, currency, units, numerals, paper sizes), and text layout (encoding, RTL/bidi, fonts) via the three common i18n skills. **Never owns jurisdictional advice** — trade, labor-law, and industry questions route to the domain experts. See constitution §4.4 "I18N Asset Suite". |
+| **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) | High | Orchestrates team assembly (Phase 0), design validation (Phase 2), and lifecycle finalization (Phase 6). **PM does NOT execute code or documentation directly — all specialist work dispatched through PM.** |
 
 <!-- VARIANT-AGENTS-START -->
 <!-- Define project-specific specialist agents here.
@@ -165,6 +164,15 @@ When `/meeting` is invoked, the PM orchestrates structured multi-agent discussio
 3. **Synthesize outcomes**: Cross-domain agent synthesizes agreements
 4. **Document results**: Write transcript to `memory/meeting-YYYY-MM-DD-[slug].md`
 
+### §3.7.5 Governance Backlog Dispatch
+
+**Workspace root only** — `scripts/ticket.ts` and `tickets/` do not exist in variant projects (`@l2-propagate: false`); this section intentionally lives in `AGENTS.md` (L0-only SSOT, never propagated) rather than `agents/pm.md`, which extends into every variant's PM.
+
+Deferred governance decisions (e.g. an ADR's soak-period gate) are tracked as `kind: manual` tickets with an optional `not_before` date — see [docs/designs/2026-08-16-governance-backlog-design.md](docs/designs/2026-08-16-governance-backlog-design.md). When `bun scripts/ticket.ts list --ready --kind manual` surfaces a ticket (at session start or during the Weekly Health Check, [docs/context.md](docs/context.md) and [§9.1](docs/context.md#91-weekly-agentskill-health-check)):
+
+- If it's a pure decision (approve/reject), PM reviews and moves it (`bun scripts/ticket.ts move <id> review`, then `done`) — no specialist dispatch needed.
+- If acting on it requires implementation work, PM dispatches through the normal PM Gateway path (§3.1–§3.5) like any other task — no new mechanism. If the item is independent of other in-flight work and Agent Teams is enabled for the session, PM may dispatch it as a parallel teammate instead of sequentially.
+
 ### §3.8 Permission Denial Protocol
 
 When a specialist agent's required tool is denied, PM must **not** substitute for the specialist. Instead:
@@ -275,8 +283,7 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 
 | Agent | File | Tier | Parallelizable | Write Allowed? |
 |-------|------|------|:--------------:|:--------------:|
-| PM Orchestrator | `agents/pm.md` | Medium | - | orchestrates only |
-| I18N Specialist | `agents/i18n-specialist.md` | Medium | read-only analysis | locale/formatting files when dispatched |
+| PM Orchestrator | `agents/pm.md` | High | - | orchestrates only |
 
 <!-- VARIANT-SUBAGENT-ROSTER-START -->
 <!-- Add project-specific specialist agents here. Format:
@@ -332,10 +339,13 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 
 | Scenario | Use | Do NOT use |
 |----------|-----|------------|
+| Design the implementation approach and folder structure | `architect` | `automation-engineer` |
+| Write or modify automation scripts (.ts, package.json) per ADR-0036 | `automation-engineer` | `architect` |
+| Update documentation files | `docs-writer` | `architect` |
+| Create new project from template | `scaffolding-expert` | `automation-engineer` |
+| Security review, Git hooks configuration | `security-expert` | `architect` |
+| Cross-validate documentation consistency | `auditor` | `docs-writer` |
 | Orchestrate multi-step task across agents | `pm` | any execution agent |
-
-<!-- VARIANT-ROLE-BOUNDARY-START -->
-<!-- VARIANT-ROLE-BOUNDARY-END -->
 
 ---
 
@@ -356,6 +366,7 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 
 **Key points**:
 - **Row 0 (Design Gate) is MANDATORY** for L0/L1 — design document must be created/updated before implementation
+- **Design docs for user-facing features MUST include an Accessibility section** (target level, affected interaction areas, verification method) per ADR-0065 — accessibility is a mandatory consideration for web/app/CLI/document feature development (WCAG 2.1 AA baseline); backend/non-UI work is exempt only with an explicit statement
 - Tier column is MANDATORY (High/Medium/Low)
 - `/sync` is always the final step — it covers lifecycle update, full audit, commit, push, and PR creation
 - No separate Lifecycle Update or Final QA Audit rows needed — `/sync` handles both
@@ -379,6 +390,7 @@ When a task falls into an exempt category, Row 0 is replaced with an exemption m
 - Exempt Row 0: Agent/Tier/Model columns left blank (`—`)
 - Only E1–E5 categories may be used — PM cannot invent ad-hoc exemptions
 - Abuse of exemptions is a governance violation
+- These codes are machine-consumed by `audit.ts --spec-exempt=E1..E5` / `SYNC_SPEC_EXEMPT` (ADR-0055 Stage 2 gating; invalid codes hard-Fail)
 
 ### §5.2 Platform Parity Considerations
 
@@ -391,7 +403,7 @@ When modifying files that affect both CLAUDE.md and GEMINI.md:
 
 **Platform Column**: `Claude` / `Antigravity` / `Both` / `L0-only`
 
-**Note**: See execution plan boilerplate in CLAUDE.md §5, GEMINI.md §5, and agents/pm.md for the Platform column definition.
+**Note**: See execution plan boilerplate in CLAUDE.md ("### 5. Agent Dispatch Rules" and "## Execution Plan Boilerplate"), GEMINI.md (identical headings), and agents/pm.md for the Platform column definition.
 
 ### §5.3 Example Execution Plans
 
@@ -460,7 +472,7 @@ When a user request matches a skill trigger, apply this priority order — **enf
 When ambiguous, prefer the higher-priority (workspace-level) skill and confirm intent with the user.
 Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 
-**Common workspace-level skills** (see `docs/VERSION_MANIFEST.md` for versions):
+**Common workspace-level skills** (curated subset — see `docs/VERSION_MANIFEST.md` for the complete registry):
 
 | Skill | Location | Purpose |
 |-------|----------|---------|
@@ -471,6 +483,10 @@ Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 | `security-scan` | `skills/security-scan/` | Security and secret detection |
 | `create-variant` | `skills/create-variant/` | New variant scaffolding |
 | `promote-variant` | `skills/promote-variant/` | Variant promotion to official |
+| `simulate-l3-to-variant-promotion` | `skills/simulate-l3-to-variant-promotion/` | E2E smoke test for L3 scaffold → variant promotion pipeline |
+| `explain-me` | `skills/explain-me/` | Single-file interactive HTML report generation (inspired by beret21/reportme) |
+
+> **Complete Skill Registry**: The table above is a curated subset. For the complete registry including all 31 workspace-level skills, versions, status, and lifecycle metadata, see [`docs/VERSION_MANIFEST.md`](docs/VERSION_MANIFEST.md).
 
 ### Platform Skills Distribution
 

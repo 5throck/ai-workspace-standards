@@ -136,3 +136,21 @@ When adding or recommending dependencies:
 **Numeric outputs in deliverables must come from executed code, never from the model doing arithmetic.**
 
 All numeric outputs in deliverables (aggregations, statistics, percentages, metric computations, counts and sums) must be computed by executed code (bun/TypeScript scripts or an equivalent validated tool) — never by the LLM performing arithmetic directly. AI-produced figures are estimates until script-verified, and must be labeled **approximate** where shown. For high-precision or safety-critical computation (aerospace, precision control, regulated finance), delegate to validated external tools per `docs/context.md` § Computational Integrity Standards.
+
+#### 8.14 Accessibility (ADR-0065)
+
+**Accessibility is a mandatory consideration for any user-facing software feature** (web apps, mobile apps, interactive CLIs, generated documents/templates) — not an optional enhancement. Backend/non-UI work is exempt only when the design doc or ADR states the exemption explicitly.
+
+- **Baseline**: WCAG 2.1 AA, aligned with the Design Foundation contract and the `accessibility-audit` skill (axe-core, WCAG 2.1 AA; co-design).
+- **Design docs MUST include an Accessibility section** (`docs/designs/<spec-id>-design.md` for user-facing features): target level (WCAG 2.1 AA), affected interaction areas (keyboard, screen reader, contrast, motion, touch), and the verification method.
+- **ADRs MUST record accessibility impact** for features that affect user-facing interaction.
+- **Baseline requirements**:
+  - Keyboard operability — every interactive element reachable/operable by keyboard, no keyboard traps, visible focus indicator
+  - Contrast — WCAG AA (4.5:1 normal text, 3:1 large text/UI components)
+  - Semantic structure & ARIA — correct semantic HTML, accessible names for all controls (`aria-label`/`aria-labelledby` for icon-only controls)
+  - Screen reader — meaningful reading order; names/roles/values exposed correctly
+  - Status encoding — never color alone; always paired with icon and/or text (multi-encoded signals)
+  - Motion — respect `prefers-reduced-motion`; no essential information lost when motion is disabled
+  - Target size — adequate touch/target sizes where the platform warrants it
+- **Verification**: use the `accessibility-audit` skill where available; otherwise a documented manual checklist covering the baseline items above.
+- See [ADR-0065](../../docs/adr/0065-accessibility-standard.md) and `docs/context.md` § Accessibility Standards.

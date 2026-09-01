@@ -67,6 +67,10 @@ To disable the PostToolUse hook, remove the following block from `.claude/settin
 - **CLI**: Automated workflows, pre-commit-enforced audits, multi-agent orchestration.
 - **Desktop App**: PR monitoring, visual diff reviews, parallel sessions.
 
+#### ⚠️ Windows Reserved Device Name (nul) Redirection Safeguard
+In Git Bash on Windows, writing to `> nul` or `2> nul` creates a physical file named `nul` in the working directory because Bash interprets `nul` as a relative path rather than the Win32 OS NUL device. Node.js / Bun `fs` APIs cannot delete physical `nul` files on Windows.
+- **Rule**: NEVER use `> nul` or `2> nul` in shell commands or scripts. Use `> /dev/null 2>&1` in Bash, or `$null` / `Out-Null` in PowerShell. All `.gitignore` templates MUST include `nul` and `NUL`.
+
 ### 2. Pre-Edit Quality Gate (All Platforms)
 
 Before editing any file for the **FIRST time in a session**, the agent MUST:
@@ -248,6 +252,8 @@ Agent(
 ```
 
 > **Registry name → `model` parameter mapping**: `docs/workspace-schema.json` and the tables above name models by full registry ID (e.g. `claude-opus-5-0`) for cross-platform documentation. The native `Agent` tool's `model` parameter only accepts the short aliases `sonnet | opus | haiku | fable`. <!-- Note: `fable` is a forward-looking alias not yet registered in workspace-schema.json --> When dispatching, translate the agent's tier to its registry model, then to the matching alias: High → `claude-opus-5-0` → `model = "opus"`; Medium → `claude-sonnet-5-0` → `model = "sonnet"`; Low → `claude-haiku-4-5` → `model = "haiku"`. Omitting `model` lets the subagent fall back to its frontmatter (`model: inherit`), which inherits the parent session's model instead of the tier-appropriate one — always set `model` explicitly to actually get the cost-tier benefit.
+>
+> **Automated enforcement (Claude Code CLI only)**: `scripts/hooks/agent-model-gate.ts` runs as a `PreToolUse` hook (matcher: `Agent`) and asks for confirmation whenever an `Agent()` call dispatches one of the 8 workspace-root agents (`pm`, `architect`, `auditor`, `lifecycle-manager`, `automation-engineer`, `docs-writer`, `scaffolding-expert`, `security-expert`) without a valid `model` alias — this is the check that catches the High/Low-tier (`opus`/`haiku`) silent-fallback bug described above before it happens. L0-only; not propagated to `templates/common/` since variant projects have their own agent rosters without a workspace-wide tier registry.
 
 Each implementation task follows the **Phase 4 execution loop** (see [AGENTS.md - Subagent Roster](AGENTS.md#subagent-roster)):
 1. **automation-engineer** implements the changes (or code-writer for project-specific agents).
@@ -324,7 +330,7 @@ All shared Git/PR rules are in [docs/context.md](docs/context.md). Claude Code-s
 
 - **PR Language**: Governed by [docs/context.md](docs/context.md). All PR titles, bodies, and review comments must be written in English - no exceptions.
 
-*Last Updated: 2026-08-15 — removed redundant N-1/N boilerplate rows; /sync already covers lifecycle + audit + commit + push + PR; previous: 2026-06-21 inlined N-1/N rows*
+*Last Updated: 2026-09-01 — removed redundant N-1/N boilerplate rows; /sync already covers lifecycle + audit + commit + push + PR; previous: 2026-06-21 inlined N-1/N rows*
 <!-- COMMON-CLAUDE:END -->
 
 
