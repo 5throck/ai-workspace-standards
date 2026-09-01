@@ -4,6 +4,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-09-01](2026-09-01.md) | docs(co-unity): register co-unity variant adaptation plan |
 | [2026-08-30](2026-08-30.md) | feat(skills): promote handbook and handbook-sync-audit skills from co-deck to common |
 | [2026-08-29](2026-08-29.md) | feat(skills+templates): co-safety glossary back-port, project README backlog, scripts/co-safety layout (F1-F3) |
 | [2026-08-28](2026-08-28.md) | fix(audit): skip untracked template variants in variant-scanning checks |

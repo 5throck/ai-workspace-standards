@@ -613,6 +613,15 @@
       "source": "project-review",
       "created": "2026-08-30",
       "last_updated": "2026-08-30"
+    },
+    {
+      "id": "co-unity-plan",
+      "title": "co unity plan",
+      "file": "memory/co-unity-plan.md",
+      "status": "approved",
+      "source": "manual",
+      "created": "2026-09-01",
+      "last_updated": "2026-09-01"
     }
   ]
 }
