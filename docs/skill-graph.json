@@ -257,6 +257,11 @@
       "layer": "L0"
     },
     {
+      "id": "adr:0066",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
       "id": "agent-lifecycle-manager",
       "type": "skill",
       "layer": "L0"
@@ -3386,6 +3391,12 @@
       "type": "references",
       "from": "adr:0065",
       "to": "accessibility-audit",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0066",
+      "to": "design-foundation",
       "source": "prose"
     },
     {

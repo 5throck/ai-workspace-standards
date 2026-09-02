@@ -1,5 +1,7 @@
 # Design Foundation Framework — Design Document
 
+> **Update 2026-09-01**: process pipeline & design-phase gate (§2b of the template doc) added by [ADR-0066](../adr/0066-design-process-pipeline.md) — style-neutral method adopted from co-newbiz ADR-0087 practice.
+
 - **Spec ID**: design-foundation-2026-08-30
 - **Date**: 2026-08-30
 - **Status**: Approved

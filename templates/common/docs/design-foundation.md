@@ -33,6 +33,41 @@ The `design-foundation` skill walks a project through these stages. Each stage c
 | 5. Components | Tokens | UI consuming component tokens only |
 | 6. Validation | Everything | §7 validation contract |
 
+## 2b. Process Pipeline & Design-Phase Gate (v1.1 — from variant practice, ADR-0066)
+
+Deriving a design system is not one task; it is a **fixed order of layers** where each layer
+consumes the previous one. The order is normative for any project with UI; the *content* of
+each layer is project-specific and style-neutral — this template never prescribes colors,
+fonts, icon sets, interaction patterns, or layout patterns.
+
+```
+① Principles  →  ② Tokens  →  ③ Style guide & color system  →  ④ Iconography
+→  ⑤ Components  →  ⑥ Screen patterns  →  ⑦ Screens
+```
+
+Rules:
+
+1. **A layer must not be built before its predecessor exists.** Components reference
+   component tokens only; screens compose from declared patterns; new patterns require a
+   design-document revision (and, where the project uses ADRs, an ADR).
+2. **Tokens are data.** Declare the single source (e.g. `design-tokens.json` per the
+   co-design reference implementation, or the token CSS scaffold) and treat compiled
+   CSS/output as derived. Semantic-only classes without a declared source are a defect.
+3. **Interaction standards are declared, not improvised** — create/add, edit, delete
+   (label, confirmation, placement) is written down once and linted; this document does
+   not dictate what the standard is.
+4. **Design-phase gate**: a design document for a new screen/feature SHALL state
+   (a) the screen pattern(s) used, (b) tokens and components consumed (new ones approved
+   here, not during implementation), (c) conformance to the project's declared interaction
+   standards, (d) icon-vocabulary registration if icons are involved. Review ownership
+   follows the project's own review chain.
+5. **Enforcement SHOULD be automated** (a design-lint script: banned hard-coded values,
+   bypassed layout primitives, non-registered icons/labels). See the checklist template:
+   `docs/_templates/design-review-checklist-template.md`.
+
+Stage-table mapping (see §2) is unaffected — this pipeline governs *systemization order*,
+the stages above govern *derivation content*.
+
 ## 3. Design Principles — how to derive them
 
 Principles are derived from the project's domain, not from trends. Proven pattern (drawn from co-price
