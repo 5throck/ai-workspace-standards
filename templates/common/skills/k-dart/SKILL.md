@@ -7,7 +7,7 @@ description: >
   event reports. Includes structured parsing rules, data normalization,
   and accounting line-item extraction for consulting intelligence.
   Requires DART_API_KEY environment variable.
-version: 2.0.0
+version: 2.1.0
 last_reviewed: 2026-08-09
 status: active
 owner: strategy-analyst
@@ -104,9 +104,13 @@ Structured JSON output for financial metrics:
 
 ### corp_code Resolution
 
-Most DART API endpoints require `corp_code` (8-digit unique identifier). When the user provides only a company name or stock code (6 digits):
+Most DART API endpoints require `corp_code` (8-digit unique identifier, DART corp code, 8-digit). When the user provides only a company name or stock code (6 digits), resolve it through the **fallback chain** (v2.1.0) — in order:
 
-1. **Download the full corp_code list (`corpCode.xml`)** and parse it to resolve `corp_code`:
+1. **Bulk list cache** — `db/data/dart-corpcode-cache.json` (24h TTL; integrity-checked row count). Variants carry a manual refresh CLI (co-newbiz: `bun app/web-next/scripts/dart-sync-corp-codes.ts`) and a `resolveCorpCode()` entry point that logs the resolution path (bulk/web) as data provenance.
+2. **Bulk download retry (`corpCode.xml`)** — only if the cache is absent/stale. NOTE: the download is frequently IP-blocked (returns an HTML page instead of a ZIP) — treat HTML responses as "blocked" and fall through, never parse them:
+3. **Web fallback** — search the web for the company's DART corp code (corpCode / naviCrpCik URL parameters on dart.fss.or.kr), then **cross-validate** every candidate against `company.json` (company overview API) — record the code only when the corp name matches. Uncorroborated candidates are discarded.
+
+Legacy manual download (works only when not blocked):
 
 **macOS / Linux (bash):**
 
@@ -413,3 +417,10 @@ export function parseDartFinancials(rawItems: any[]): Record<string, number | nu
 - This skill is read-only query only.
 - Usage monitoring: [OpenDART Usage Status](https://opendart.fss.or.kr/mng/apiUsageStatusView.do)
 - **v2.0.0 changelog**: Merged `dart-disclosure-parser` parsing rules into unified skill. Renamed env var `API_K_DART` → `DART_API_KEY`. Promoted from co-consult variant to L1 common skill.
+- **v2.1.0 changelog (2026-09-01, benchmark-driven — `docs/research/k-dart-benchmarking-2026-09-01.md`)**:
+  - **P1 corp_code resolution**: fallback chain (cache 24h TTL → bulk retry → web fallback with `company.json` cross-validation); manual cache refresh CLI (`scripts/dart-sync-corp-codes.ts`); resolution path recorded as provenance.
+  - **P2 financials**: account alias normalization (e.g. `revenue(sales)`→`sales`), expanded accounts (COGS, SG&A), per-year summation check (assets = liabilities + equity, ±1% tolerance → `integrity: warning` on mismatch), consolidated(CFS)→separate(BFS) fallback with `fsDivLabel`.
+  - **P3 disclosures & ownership**: `searchDisclosures(corpCode, preset)` — presets: recent / amendments / audit-related / capital changes (12-month window; `bgn_de`/`end_de` required when `corp_code` is set); `getShareholderSignal(corpCode)` — major-shareholder (5% rule) summary for S7 scorecard input.
+  - **P4 source documents**: `fetchDisclosureText(rcept_no)` — OpenDART source document API (document.xml ZIP, incl. streaming entries) → plain text (500k char cap). HWP binaries unsupported — use the OCR path.
+  - **P5 operations**: all calls go through a shared fetch gate — concurrency ≤5, exponential backoff on 429/HTML-block/`020`, daily budget 15,000 calls. ZIP parsing enforces size (50MB) and compression-ratio (100x) limits.
+  - Reference implementation: co-newbiz variant `app/web-next/lib/dart-client.ts` (+`corp-code-fallback.ts`) — fallback chain, shared fetch gate, disclosure presets, shareholder signal, source-document text. When executing this skill in agent sessions inside a variant that carries this library, prefer those functions over hand-rolled curl; otherwise implement the chain with the guards described above.
