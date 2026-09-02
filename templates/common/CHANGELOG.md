@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased] 2026-09-01
+
+- docs: design-foundation.md §2b — design process pipeline (principles→tokens→style guide→icons→components→patterns→screens) and design-phase gate; style-neutral (ADR-0066)
+- docs/_templates: design-review-checklist-template.md added
+- skills: k-dart 2.0.0 → 2.1.0 — corp_code fallback chain with company.json cross-validation, financial account normalization + summation integrity checks, CFS→BFS fallback, disclosure search presets, shareholder signal, source-document text extraction, shared fetch gate (concurrency/backoff/daily budget)
+
+
 ## [Unreleased]
 
 ### Added
