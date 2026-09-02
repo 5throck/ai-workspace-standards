@@ -69,6 +69,7 @@
 | `k-dart` | common | — | — | — | — | — |
 | `k-kosis` | common | — | — | — | — | — |
 | `k-law` | common | — | — | — | — | — |
+| `k-opendata` | common | — | — | hs-classification-workflow (composes_with), k-kosis, landed-cost-calculation (composes_with), market-entry-strategy (composes_with) | — | — |
 | `labor-compliance-audit` | variant:co-hr | labor-compliance-analyst, labor-compliance-analyst, labor-relations-specialist, labor-relations-specialist, safety-health-officer, safety-health-officer | phase1, phase2 | org-readiness-assessment (follows), stakeholder-alignment (composes_with) | — | — |
 | `landed-cost-calculation` | variant:co-export | hs-classification-specialist, hs-classification-specialist, logistics-coordinator, logistics-coordinator | phase1, phase2 | hs-classification-workflow (composes_with), logistics-coordination (composes_with) | — | — |
 | `learning-curriculum-design` | variant:co-hr | learning-development-specialist, learning-development-specialist | phase2 | org-design-framework (composes_with), org-readiness-assessment (composes_with), performance-system-design (follows), stakeholder-alignment (composes_with), talent-acquisition-strategy (composes_with) | — | — |
