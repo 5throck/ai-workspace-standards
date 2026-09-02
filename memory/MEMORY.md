@@ -4,6 +4,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-09-03](2026-09-03.md) | feat: propagate k-opendata skill and DATA_GO_KR_API_KEY to templates/common |
 | [2026-09-02](2026-09-02.md) | chore: update |
 | [2026-09-01](2026-09-01.md) | docs(governance): add ADR-0065 accessibility standard for software feature development |
 | [2026-08-30](2026-08-30.md) | feat(skills): promote handbook and handbook-sync-audit skills from co-deck to common |

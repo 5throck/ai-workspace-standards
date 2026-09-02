@@ -852,6 +852,11 @@
       "layer": "common"
     },
     {
+      "id": "k-opendata",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
       "id": "l10n-auditor",
       "type": "agent",
       "layer": "variant:co-price"
@@ -7176,6 +7181,71 @@
       "from": "k-kosis",
       "to": "k-law",
       "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "k-opendata",
+      "to": "hs-classification-workflow",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/common/skills/k-opendata/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-opendata",
+      "to": "k-dart",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "k-opendata",
+      "to": "k-kosis",
+      "source": "prose"
+    },
+    {
+      "type": "relates_to",
+      "from": "k-opendata",
+      "to": "k-kosis",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/common/skills/k-opendata/SKILL.md",
+        "field": "relates_to",
+        "index": 3
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-opendata",
+      "to": "k-law",
+      "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "k-opendata",
+      "to": "landed-cost-calculation",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/common/skills/k-opendata/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "k-opendata",
+      "to": "market-entry-strategy",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/common/skills/k-opendata/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
     },
     {
       "type": "references",

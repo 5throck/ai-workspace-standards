@@ -92,6 +92,11 @@
       "layer": "common"
     },
     {
+      "id": "k-opendata",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
       "id": "meeting-facilitation",
       "type": "skill",
       "layer": "common"
@@ -370,6 +375,35 @@
     {
       "type": "references",
       "from": "k-kosis",
+      "to": "k-law",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "k-opendata",
+      "to": "k-dart",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "k-opendata",
+      "to": "k-kosis",
+      "source": "prose"
+    },
+    {
+      "type": "relates_to",
+      "from": "k-opendata",
+      "to": "k-kosis",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/common/skills/k-opendata/SKILL.md",
+        "field": "relates_to",
+        "index": 3
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-opendata",
       "to": "k-law",
       "source": "prose"
     },
