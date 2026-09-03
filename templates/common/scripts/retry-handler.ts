@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Error Recovery Handler
- * @version 1.0.1
+ * @version 1.1.0
  * Implements retry logic with exponential backoff for subagent failures
  */
 
@@ -16,6 +16,8 @@ interface RetryConfig {
   backoffMultiplier: number;
   maxDelay: number; // milliseconds
   isSuccess?: (result: unknown) => boolean; // optional predicate; when omitted, throw = failure, return = success (unchanged behavior)
+  signal?: AbortSignal; // optional external cancellation (variant scripts); AbortError propagates without retrying
+  jitter?: boolean; // randomize backoff wait (0.5x-1x) to avoid thundering-herd retries in parallel dispatch
 }
 
 interface RetryResult {
@@ -45,6 +47,10 @@ async function withRetry<T>(
   let delay = config.initialDelay;
 
   for (let attempt = 1; attempt <= config.maxRetries; attempt++) {
+    if (config.signal?.aborted) {
+      throw (config.signal.reason ?? new DOMException("Aborted", "AbortError"));
+    }
+
     try {
       console.log(`${context ? `[${context}] ` : ''}Attempt ${attempt}/${config.maxRetries}`);
 
@@ -86,8 +92,9 @@ async function withRetry<T>(
       }
 
       if (attempt < config.maxRetries) {
-        const waitTime = Math.min(delay, config.maxDelay);
-        console.log(`${context ? `[${context}] ` : ''}Waiting ${waitTime}ms before retry...`);
+        const baseWait = Math.min(delay, config.maxDelay);
+        const waitTime = config.jitter ? baseWait * (0.5 + Math.random() * 0.5) : baseWait;
+        console.log(`${context ? `[${context}] ` : ''}Waiting ${Math.round(waitTime)}ms before retry...`);
         await new Promise(resolve => setTimeout(resolve, waitTime));
         delay = Math.floor(delay * config.backoffMultiplier);
       }
@@ -176,6 +183,7 @@ function getRecoverySuggestion(errorType: string): string {
 
 // Export functions for use by other scripts
 export { withRetry, escalateToHuman, classifyError, getRecoverySuggestion, DEFAULT_CONFIG };
+export type { RetryConfig, RetryResult };
 
 // CLI interface
 if (import.meta.main) {

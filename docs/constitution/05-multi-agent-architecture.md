@@ -61,12 +61,12 @@ The `description` field is how the AI tool selects the right agent - always writ
 | Analysis | Read-only investigation, codebase exploration, data gathering | Medium | `*-analyst.md`, `auditor.md` |
 | Design | Architecture decisions, implementation planning, technical spec | High | `architect.md` |
 | Design | UI/UX specifications, wireframes, component and interaction design | Medium | `designer.md` |
-| Execution | Code implementation and automated test verification | Medium | `automation-engineer.md`, `docs-writer.md`, `scaffolding-expert.md` |
+| Execution | Code implementation and automated test verification | Low | `automation-engineer.md`, `scaffolding-expert.md` (`docs-writer.md` remains Medium) |
 | Quality | Independent QA gate, security validation | Medium | `auditor.md`, `security-expert.md` |
 
 #### 5.3 PM Orchestrator Rules
 
-- When no specific orchestrator is assigned, **always create `agents/pm.md`** - PM orchestrates Phases 0, 2, and 6 only.
+- When no specific orchestrator is assigned, **always create `agents/pm.md`** - PM owns Phases 0, 1–2, and 5 (per `docs/workspace-schema.json` `pm_owned`).
 - PM dispatches independent tasks as **parallel agents in a single message** (never sequential).
 - **Autonomous Agent Handoffs**: Agents can dispatch each other directly via JSON contracts for routine workflows without PM intervention
 - **Independent QA Gate**: Auditor owns Phase 6 QA gate autonomously using `scripts/qa-gate.ts`
@@ -179,7 +179,7 @@ The workspace enforces a **3-tier model strategy** to optimize cost and quality:
 |------|--------|------|----------------|
 | **High** | claude-opus-5-0, gemini-3.1-pro | Complex reasoning, architecture, PM orchestration | PM, Architect |
 | **Medium** | claude-sonnet-5-0, gemini-3.7-flash | Review, QA, analysis, supervision | Auditor, Security Expert |
-| **Low** | claude-haiku-4-5, gemini-3.7-flash | Fast coding, boilerplate, scoped tasks | Automation Engineer |
+| **Low** | claude-haiku-4-5, gemini-3.7-flash | Fast coding, boilerplate, scoped tasks | Automation Engineer, Scaffolding Expert |
 
 > **Model Registry**: Current model assignments are maintained in `docs/workspace-schema.json` (`models` block). The table above reflects those values.
 

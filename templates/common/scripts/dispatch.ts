@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Agent Dispatcher CLI
- * @version 1.0.0
+ * @version 1.1.0
  * Main entry point for agent dispatch operations
  *
  * Usage:
@@ -49,9 +49,9 @@ interface CliOptions {
 }
 
 /**
- * Display help information
+ * Display help information (exported so variant dispatch routers can reuse it)
  */
-function showHelp(): void {
+export function showHelp(): void {
   console.log(`
 ╭─────────────────────────────────────────────────────────────╮
 │              Agent Dispatcher CLI v1.0.0                    │

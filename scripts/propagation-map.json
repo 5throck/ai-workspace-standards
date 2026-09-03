@@ -1,6 +1,6 @@
 {
   "_comment": "Propagation map: L0 (workspace root) → L1 (templates/common/) for scripts/skills/commands; L1 (templates/common/) → L2 (templates/co-*/) for governance docs via marker-inject mode. Agents are intentionally excluded from L0→L1 propagation — only pm.md uses an explicit extends chain (ADR-0039, ADR-0040). Specialist agents are variant-defined (ADR-0043). l2_drift_eligible (default true): controls whether this domain participates in L1→L2 drift detection via --check-drift. Set false for domains whose L2 content is managed through the Fork Model scaffolding pipeline (create-variant / promote-variant per ADR-0031) — L2 variants receive this content during scaffolding/promotion, not through ongoing L1→L2 sync.",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "domains": {
     "scripts": {
       "description": "TypeScript automation scripts",
@@ -38,6 +38,16 @@
       "recursive": false,
       "l2_drift_eligible": false,
       "note": "No L2 variant has scripts/lib/"
+    },
+    "propagation-map": {
+      "description": "propagation-map.json itself (self-propagation) — L0 SSOT → L1 mirror",
+      "source": "scripts",
+      "target": "templates/common/scripts",
+      "include_pattern": "propagation-map.json",
+      "recursive": false,
+      "l2_drift_eligible": false,
+      "exclude": [],
+      "note": "Self-propagation: without this domain the SSOT's own updates never reach L1 (found stuck at v1.4.0 vs L0 v1.7.0, 2026-09-04). templates/common/scripts/propagation-map.json is kept byte-identical per validate-templates.ts glob parity; no code reads the L1 copy (see docs/templates/known-issues.json). templates/common/propagation-map.json is an unreferenced legacy duplicate refreshed manually — no domain covers it."
     },
     "claude-skills": {
       "description": "Platform skills for Claude Code",

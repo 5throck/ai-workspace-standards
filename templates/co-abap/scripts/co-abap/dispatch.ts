@@ -1,232 +1,49 @@
 #!/usr/bin/env bun
 /**
  * Agent Dispatcher CLI — VSP variant
- * @version 1.0.1
- * Main entry point for agent dispatch operations
+ * @version 1.1.0
+ * Thin mode router over the common dispatch CLI.
+ *
+ * Help text and mode routing live in templates/common/scripts/dispatch.ts;
+ * argument parsing and execution live in the common dispatch-parallel /
+ * dispatch-serial modules. This file only wires the VSP default tasks and
+ * pipeline by delegating to the sibling VSP wrappers.
+ * (ADR-0050 Part 1: Variant scripts inherit from templates/common, never duplicate)
  *
  * Usage:
  *   bun scripts/dispatch.ts parallel [--task "Description:role:task:priority"]
  *   bun scripts/dispatch.ts serial [--pipeline file.ts] [--continue-on-error] [--verbose]
  *   bun scripts/dispatch.ts help
  *
- * Re-exports the common dispatch router. VSP-specific defaults are handled by
- * dispatch-parallel.ts and dispatch-serial.ts wrappers.
- * (ADR-0050: Variant scripts inherit from templates/common, never duplicate)
- *
  * @module dispatch
  */
 
-import path from "node:path";
-import type { SerialAgentTask } from "./dispatch-serial.ts";
+import { showHelp as printHelp } from '../dispatch.ts';
+import { runCli as runParallelMode } from './dispatch-parallel.ts';
+import { runCli as runSerialMode } from './dispatch-serial.ts';
 
-const scriptDir = path.dirname(import.meta.path);
-const projectRoot = path.resolve(scriptDir, "..");
-
-interface ParallelAgentTask {
-  description: string;
-  role: string;
-  task: string;
-  priority?: 'high' | 'medium' | 'low';
-}
-
-interface SerialOptions {
-  stopOnError: boolean;
-  verbose: boolean;
-  dryRun: boolean;
-}
-
-/**
- * Display help information
- *
- * TODO(Task 25): Consider migrating to a proper CLI parser library (e.g., commander, yargs)
- * to handle --task, --pipeline, --continue-on-error, --verbose, --dry-run more robustly.
- * Current manual parsing works but is fragile for new options.
- */
-function showHelp(): void {
-  console.log(`
-╭─────────────────────────────────────────────────────────────╮
-│              Agent Dispatcher CLI v1.0.0                    │
-╰─────────────────────────────────────────────────────────────╯
-
-USAGE:
-  bun scripts/dispatch.ts <mode> [options]
-
-MODES:
-  parallel    Dispatch multiple read-only agents simultaneously
-              Use for: codebase analysis, documentation, health checks
-
-  serial      Execute agents sequentially with dependency tracking
-              Use for: implementation pipelines, multi-phase workflows
-
-  help        Show this help message
-
-PARALLEL OPTIONS:
-  --task <desc:role:task[:priority]>
-              Add a custom task to the dispatch queue
-              Priority: high | medium | low (default: medium)
-
-              Example:
-                --task "Audit code:code-auditor:Check quality:high"
-
-SERIAL OPTIONS:
-  --pipeline <file.ts>
-              Load custom pipeline from TypeScript file
-
-  --continue-on-error
-              Continue pipeline execution even if a task fails
-
-  --verbose, -v
-              Show detailed output for each task
-
-  --dry-run
-              Simulate execution without actually running tasks
-
-              Example:
-                bun scripts/dispatch.ts serial --dry-run --verbose
-
-EXAMPLES:
-  # Run default parallel dispatch
-  bun scripts/dispatch.ts parallel
-
-  # Run custom parallel tasks
-  bun scripts/dispatch.ts parallel \\
-    --task "Analyze code:analyst:Review structure:high" \\
-    --task "Check docs:doc-checker:Verify MD files"
-
-  # Run default serial pipeline
-  bun scripts/dispatch.ts serial
-
-  # Run serial pipeline with verbose output
-  bun scripts/dispatch.ts serial --verbose
-
-  # Dry run serial pipeline
-  bun scripts/dispatch.ts serial --dry-run
-
-CONFIGURATION:
-  Default tasks are defined in:
-  - scripts/dispatch-parallel.ts (parallel mode)
-  - scripts/dispatch-serial.ts (serial mode)
-
-  Customize by editing the defaultTasks/pipeline arrays
-  or provide your own via command line options.
-
-╭─────────────────────────────────────────────────────────────╮
-│  For more information, see: docs/context.md                  │
-╰─────────────────────────────────────────────────────────────╯
-`);
-}
-
-/**
- * Execute parallel dispatch mode
- */
-async function runParallel(args: string[]): Promise<void> {
-  console.log('🚀 Parallel Dispatch Mode\n');
-
-  // Build task list from --task arguments
-  const tasks: ParallelAgentTask[] = [];
-
-  for (let i = 0; i < args.length; i++) {
-    if (args[i] === '--task' && args[i + 1]) {
-      const parts = args[i + 1].split(':');
-      if (parts.length >= 3) {
-        const priority = parts[3] === 'high' || parts[3] === 'low' ? parts[3] : 'medium';
-        tasks.push({
-          description: parts[0],
-          role: parts[1],
-          task: parts[2],
-          priority
-        });
-      }
-      i++;
-    }
-  }
-
-  // Import and run - pass tasks or undefined for defaults
-  const dispatchModule = await import('./dispatch-parallel.ts');
-
-  if (tasks.length > 0) {
-    await dispatchModule.dispatchParallel(tasks);
-  } else {
-    // Use the runDispatcher helper that handles empty arrays
-    await dispatchModule.runDispatcher(undefined);
-  }
-}
-
-/**
- * Execute serial dispatch mode
- */
-async function runSerial(args: string[]): Promise<void> {
-  console.log('🔄 Serial Dispatch Mode\n');
-
-  const options: SerialOptions = {
-    stopOnError: !args.includes('--continue-on-error'),
-    verbose: args.includes('--verbose') || args.includes('-v'),
-    dryRun: args.includes('--dry-run')
-  };
-
-  // Check for custom pipeline
-  const pipelineIndex = args.indexOf('--pipeline');
-  let pipeline: SerialAgentTask[] | undefined;
-
-  if (pipelineIndex >= 0 && args[pipelineIndex + 1]) {
-    const pipelinePath = path.resolve(projectRoot, args[pipelineIndex + 1]);
-    // Reject paths that escape the project boundary (e.g. ../.. outside projectRoot).
-    const rel = path.relative(projectRoot, pipelinePath);
-    if (rel.startsWith("..") || path.isAbsolute(rel)) {
-      throw new Error(`Pipeline path must stay inside the project: ${args[pipelineIndex + 1]}`);
-    }
-    try {
-      const pipelineModule = await import(pipelinePath);
-      pipeline = pipelineModule.default || pipelineModule.pipeline;
-    } catch (error) {
-      throw new Error(`Failed to load pipeline from ${args[pipelineIndex + 1]}: ${error instanceof Error ? error.message : error}`);
-    }
-  }
-
-  // Import dispatch module and run with pipeline or defaults
-  const dispatchModule = await import('./dispatch-serial.ts');
-
-  if (pipeline) {
-    await dispatchModule.dispatchSerial(pipeline, options);
-  } else {
-    // Use default pipeline from module
-    await dispatchModule.runDispatcher(options);
-  }
-}
+const MODE_HANDLERS: Record<string, (argv: string[]) => Promise<void>> = {
+  parallel: runParallelMode,
+  serial: runSerialMode
+};
 
 /**
  * Main CLI entry point
  */
-async function main(): Promise<void> {
-  const mode = process.argv[2] || "help";
-  const args = process.argv.slice(3);
+export async function main(): Promise<void> {
+  const mode = process.argv[2] ?? 'help';
+  const rest = process.argv.slice(3);
 
   try {
-    switch (mode) {
-      case "parallel":
-        await runParallel(args);
-        break;
-
-      case "serial":
-        await runSerial(args);
-        break;
-
-      case "help":
-      case "--help":
-      case "-h":
-      default:
-        showHelp();
-        break;
-    }
-  } catch (error) {
-    console.error('\n❌ Dispatch failed:', error instanceof Error ? error.message : error);
+    const handler = MODE_HANDLERS[mode] ?? (async () => printHelp());
+    await handler(rest);
+  } catch (err) {
+    console.error('\n❌ Dispatch failed:', err instanceof Error ? err.message : err);
     process.exit(1);
   }
 }
 
 // Run if executed directly
 if (import.meta.main) {
-  main();
+  void main();
 }
-
-export { main };

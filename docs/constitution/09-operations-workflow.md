@@ -87,10 +87,10 @@ bun scripts/ticket.ts list --ready --kind manual
 # 1. Run template validator
 bun scripts/validate-templates.ts
 
-# 2. Compare L0 (common) with variants
-git diff templates/common/ templates/co-develop/
-git diff templates/common/ templates/co-design/
-git diff templates/common/ templates/co-work/
+# 2. Compare L0 (common) with variants (all 13: co-abap, co-consult, co-deck,
+#    co-design, co-develop, co-export, co-game, co-hr, co-news, co-price,
+#    co-safety, co-security, co-work)
+for v in templates/co-*/; do git diff templates/common/ "$v"; done
 
 # 3. Sync changes
 # Manual review and propagation of:

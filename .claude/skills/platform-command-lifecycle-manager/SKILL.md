@@ -7,6 +7,7 @@ description: >
   in .claude/commands/ and .gemini/commands/ directories. Use when: adding new commands,
   ensuring parity between Claude and Gemini command directories, or propagating commands to templates/common/.
 owner: pm
+scope: common
 last_reviewed: 2026-05-31
 metadata:
   type: process

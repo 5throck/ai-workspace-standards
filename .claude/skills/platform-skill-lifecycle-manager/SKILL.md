@@ -7,6 +7,7 @@ description: >
   in .claude/skills/ and .gemini/skills/ directories. Use when: creating new platform skills,
   updating platform skill versions, or ensuring propagation to templates/common/.
 owner: pm
+scope: common
 last_reviewed: 2026-05-31
 metadata:
   type: process

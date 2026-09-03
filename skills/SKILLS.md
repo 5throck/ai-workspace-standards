@@ -20,11 +20,16 @@ Skills with a `skills/<name>/` directory in the workspace root. These are the pr
 | `agent-lifecycle-manager` | 1.0.0 | active | pm | 2026-05-30 | — | — |
 | `audit-workspace` | 1.0.0 | active | auditor | 2026-05-30 | — | — |
 | `create-variant` | 1.4.1 | active | pm | 2026-08-24 | — | Workspace operator only — not deployed to L2 |
+| `finishing-a-development-branch` | 1.0.0 | active | pm | 2026-06-13 | — | Workspace override — redirects branch completion to /sync (mirrored 2026-09-04 from .claude/skills) |
+| `meeting` | 1.4.0 | active | pm | 2026-07-05 | — | Mirrored 2026-09-04 from .claude/skills |
 | `meeting-facilitation` | 1.4.0 | active | pm | 2026-06-05 | — | — |
 | `project-review` | 1.1.0 | active | pm | 2026-07-10 | — | — |
 | `promote-variant` | 1.2.1 | active | pm | 2026-08-24 | — | Workspace operator only — not deployed to L2 |
+| `platform-command-lifecycle-manager` | 1.0.0 | active | pm | 2026-05-31 | — | Mirrored 2026-09-04 from .claude/skills |
+| `platform-skill-lifecycle-manager` | 1.0.0 | active | pm | 2026-05-31 | — | Mirrored 2026-09-04 from .claude/skills |
 | `script-lifecycle-manager` | 1.2.0 | active | pm | 2026-05-30 | — | — |
 | `security-scan` | 1.0.0 | active | pm | 2026-07-19 | — | Reassigned from security-expert — not defined in templates/common/agents/ or any variant, caused orphan on every propagated variant |
+| `source-command-commit-push-pr` | 1.0.1 | active | pm | 2026-09-04 | — | Redirects commit+push+PR requests to /sync (mirrored 2026-09-04 from .claude/skills) |
 | `simulate-project-creation` | 1.0.1 | active | scaffolding-expert | 2026-08-09 | — | Workspace scaffolding test only |
 | `skill-lifecycle-manager` | 1.2.1 | active | pm | 2026-08-29 | — | — |
 | `sync` | 1.2.2 | active | pm | 2026-08-25 | — | Full project sync pipeline — lifecycle, audit, publish, commit, push, PR. Reassigned from lifecycle-manager — same orphan cause as security-scan |

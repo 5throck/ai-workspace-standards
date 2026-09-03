@@ -1,8 +1,8 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-09-02T19:47:23.953Z
+**Generated**: 2026-09-03T19:48:29.120Z
 **Manifest Version**: 1.0
-**Location**: docs\VERSION_MANIFEST.md
+**Location**: docs/VERSION_MANIFEST.md
 
 ---
 
@@ -44,7 +44,7 @@
 | documentation-writing | 1.0.0 | active | skills/documentation-writing/SKILL.md | workspace | write documentation, create guide, draft communication, write manual, create tutorial, documentation, technical writing | pm |
 | evidence-ledger | 1.1.0 | active | templates/common/skills/evidence-ledger/SKILL.md | common | evidence ledger, citation ledger, claim verification, source verification, evidence tracking | pm |
 | explain-me | 1.0.0 | experimental | skills/explain-me/SKILL.md | workspace | /explain-me, /reportme, make a report, create report, explain this topic | pm |
-| finishing-a-development-branch | 1.0.0 | active | .claude/skills/finishing-a-development-branch/SKILL.md | both | finish branch, complete work, wrap up, finishing a development branch, merge branch, create PR, push and PR | N/A |
+| finishing-a-development-branch | 1.0.0 | active | skills/finishing-a-development-branch/SKILL.md | workspace | finish branch, complete work, wrap up, finishing a development branch, merge branch, create PR, push and PR | pm |
 | gateguard | 1.0.0 | active | skills/gateguard/SKILL.md | workspace | gateguard, /gateguard, investigate file, check before edit, pre-edit check | pm |
 | handbook | 0.4.0 | active | templates/common/skills/handbook/SKILL.md | common | N/A | pm |
 | handbook-sync-audit | 1.0.0 | active | templates/common/skills/handbook-sync-audit/SKILL.md | common | N/A | handbook-reviewer |
@@ -56,10 +56,10 @@
 | k-kosis | 1.0.0 | active | templates/common/skills/k-kosis/SKILL.md | common | k-kosis, /k-kosis, KOSIS, `통계청`, `국가통계포털`, `인구통계`, `물가지수`, `경제통계`, `국가통계`, Korean national statistics | financial-analyst |
 | k-law | 1.0.0 | active | templates/common/skills/k-law/SKILL.md | common | k-law, /k-law, `법령`, `법률`, `법령정보`, `법령검색`, `판례`, law, statute, legal search, Korea law | strategy-analyst |
 | k-opendata | 1.2.0 | active | templates/common/skills/k-opendata/SKILL.md | common | k-opendata, /k-opendata, 공공데이터포털, data.go.kr, `관세청`, `수출입무역통계`, `품목별 국가별 수출입실적`, Korea Customs Service trade statistics, HS code trade data | hs-classification-specialist |
-| meeting | 1.4.0 | active | .claude/skills/meeting/SKILL.md | both | meeting, agent discussion, collaborative decision, multi-agent coordination, facilitate meeting | pm |
+| meeting | 1.4.0 | active | skills/meeting/SKILL.md | workspace | meeting, agent discussion, collaborative decision, multi-agent coordination, facilitate meeting | pm |
 | meeting-facilitation | 1.4.0 | active | skills/meeting-facilitation/SKILL.md | workspace | meeting, agent discussion, collaborative decision, multi-agent coordination, facilitate meeting | pm |
-| platform-command-lifecycle-manager | 1.0.0 | active | .claude/skills/platform-command-lifecycle-manager/SKILL.md | both | create platform command, new .claude command, new .gemini command, platform command lifecycle, command parity, propagate command | pm |
-| platform-skill-lifecycle-manager | 1.0.0 | active | .claude/skills/platform-skill-lifecycle-manager/SKILL.md | both | create platform skill, new .claude skill, new .gemini skill, platform skill version, platform skill lifecycle, update platform skill | pm |
+| platform-command-lifecycle-manager | 1.0.0 | active | skills/platform-command-lifecycle-manager/SKILL.md | workspace | create platform command, new .claude command, new .gemini command, platform command lifecycle, command parity, propagate command | pm |
+| platform-skill-lifecycle-manager | 1.0.0 | active | skills/platform-skill-lifecycle-manager/SKILL.md | workspace | create platform skill, new .claude skill, new .gemini skill, platform skill version, platform skill lifecycle, update platform skill | pm |
 | project-review | 1.1.0 | active | skills/project-review/SKILL.md | workspace | project review, review project, audit project, quality review | pm |
 | project-to-variant | 1.3.0 | active | skills/project-to-variant/SKILL.md | workspace | convert project to variant, create variant from project, project to template, promote project to variant | scaffolding-expert |
 | promote-variant | 1.3.0 | active | skills/promote-variant/SKILL.md | workspace | promote variant, Phase B, variant promotion, promote to template, create template from prototype | pm |
@@ -69,7 +69,7 @@
 | simulate-l3-to-variant-promotion | 1.0.0 | active | skills/simulate-l3-to-variant-promotion/SKILL.md | workspace | simulate l2 promotion, test l2 pipeline, dry run variant promotion, test create-l3-scaffold | automation-engineer |
 | simulate-project-creation | 1.0.1 | active | skills/simulate-project-creation/SKILL.md | workspace | simulate project, test scaffolding, dry run project creation | scaffolding-expert |
 | skill-lifecycle-manager | 1.2.1 | active | skills/skill-lifecycle-manager/SKILL.md | workspace | create skill, new skill, validate skills, skill lifecycle, manage skills | pm |
-| source-command-commit-push-pr | 1.0.1 | active | .claude/skills/source-command-commit-push-pr/SKILL.md | both | commit-push-pr, commit and push, create PR | N/A |
+| source-command-commit-push-pr | 1.0.1 | active | skills/source-command-commit-push-pr/SKILL.md | workspace | commit-push-pr, commit and push, create PR | pm |
 | standup-synthesizer | 1.0.0 | active | skills/standup-synthesizer/SKILL.md | workspace | standup digest, daily standup, synthesize standup, work summary | pm |
 | sync | 1.2.2 | active | skills/sync/SKILL.md | workspace | sync, /sync, commit and push, create PR | pm |
 | team-builder | 1.1.0 | active | skills/team-builder/SKILL.md | workspace | build new agent team, create agent team, agent team setup, team builder | pm |
@@ -100,9 +100,9 @@
 | compile-tokens.ts | 1.1.0 | scripts/compile-tokens.ts | N/A |
 | create-l3-scaffold.ts | 1.12.5 | scripts/create-l3-scaffold.ts | N/A |
 | dev-sync.ts | 1.8.0 | scripts/dev-sync.ts | bun |
-| dispatch-parallel.ts | 1.0.1 | scripts/dispatch-parallel.ts | N/A |
-| dispatch-serial.ts | 1.0.1 | scripts/dispatch-serial.ts | N/A |
-| dispatch.ts | 1.0.0 | scripts/dispatch.ts | N/A |
+| dispatch-parallel.ts | 1.1.0 | scripts/dispatch-parallel.ts | N/A |
+| dispatch-serial.ts | 1.1.0 | scripts/dispatch-serial.ts | N/A |
+| dispatch.ts | 1.1.0 | scripts/dispatch.ts | N/A |
 | fix-script-versions.ts | 1.1.1 | scripts/fix-script-versions.ts | fs, path |
 | gen-pr-body.ts | 1.2.0 | scripts/gen-pr-body.ts | bun |
 | generate-ide-rules.ts | 1.0.0 | scripts/generate-ide-rules.ts | N/A |
@@ -128,7 +128,7 @@
 | remove-project.ts | 1.0.1 | scripts/remove-project.ts | N/A |
 | render-pdf-deck.ts | 1.0.0 | scripts/render-pdf-deck.ts | N/A |
 | resolve-variants.ts | 1.0.1 | scripts/resolve-variants.ts | fs, js-yaml, path |
-| retry-handler.ts | 1.0.1 | scripts/retry-handler.ts | N/A |
+| retry-handler.ts | 1.1.0 | scripts/retry-handler.ts | N/A |
 | setup-github-branch-protection.ts | 1.0.1 | scripts/setup-github-branch-protection.ts | bun |
 | skill-dependency-analysis.ts | 1.0.2 | scripts/skill-dependency-analysis.ts | N/A |
 | skill-lifecycle-audit.ts | 1.3.0 | scripts/skill-lifecycle-audit.ts | N/A |
@@ -197,7 +197,7 @@
 **Checked**: Claude (.claude/) vs Gemini (.gemini/)
 
 - **Commands with parity**: 8 / 8
-- **Skills with parity**: 5 / 34 (common-template skills are parity-exempt)
+- **Skills with parity**: 0 / 34 (common-template skills are parity-exempt)
 
 ---
 
