@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Serial Agent Dispatcher
- * @version 1.0.1
+ * @version 1.1.0
  * Automates dispatching subagents that must run sequentially
  *
  * This dispatcher is for tasks with dependencies:
@@ -244,10 +244,14 @@ export async function dispatchSerial(
 }
 
 /**
- * CLI entry point
+ * CLI entry point, also callable by variant wrappers (ADR-0050 Part 1).
+ * `args` defaults to process.argv; `defaults` lets a variant supply its own
+ * default pipeline while reusing the common option parsing and execution.
  */
-async function main() {
-  const args = process.argv.slice(2);
+export async function runCli(
+  args: string[] = process.argv.slice(2),
+  defaults: SerialAgentTask[] = defaultPipeline
+): Promise<void> {
   const options: SerialExecutionOptions = {
     stopOnError: !args.includes('--continue-on-error'),
     verbose: args.includes('--verbose') || args.includes('-v'),
@@ -256,7 +260,7 @@ async function main() {
 
   // Check for custom pipeline file
   const pipelineFileIndex = args.indexOf('--pipeline');
-  let pipeline = defaultPipeline;
+  let pipeline = defaults;
 
   if (pipelineFileIndex >= 0 && args[pipelineFileIndex + 1]) {
     try {
@@ -289,6 +293,13 @@ async function main() {
     console.error('❌ Pipeline execution failed:', error);
     process.exit(1);
   }
+}
+
+/**
+ * CLI entry point
+ */
+async function main() {
+  await runCli();
 }
 
 // Run if executed directly

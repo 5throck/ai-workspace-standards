@@ -369,7 +369,7 @@ Every new project starts with `/new-project` (Claude Code) or `bun scripts/new-p
 
 ### 7.5 Common Layer Governance (`templates/common/`)
 
-The `templates/common/` directory is the shared foundation for all variant templates (`co-design`, `co-develop`, `co-work`, `co-security`). When `/new-project` runs, common content is copied first; variant-specific overlays are applied on top.
+The `templates/common/` directory is the shared foundation for all variant templates (`co-abap`, `co-consult`, `co-deck`, `co-design`, `co-develop`, `co-export`, `co-game`, `co-hr`, `co-news`, `co-price`, `co-safety`, `co-security`, `co-work`). When `/new-project` runs, common content is copied first; variant-specific overlays are applied on top.
 
 #### Purpose
 - Agents and skills that are identical across all variants live in `templates/common/agents/` and `templates/common/skills/`.
@@ -483,7 +483,7 @@ Operational procedures for maintaining workspace health and lifecycle hygiene. *
 The following terms have precise meanings across all workspace tools, agents, and documentation. Use these exact terms — do not substitute synonyms.
 
 #### Template Variant
-One of seven project archetypes: `co-develop`, `co-design`, `co-work`, `co-security`, `co-consult`, `co-game` (all stable), `co-deck` (beta). Specifies which `templates/<variant>/` folder is used during project scaffolding. Recorded in `.claude/template-version.txt` as `variant=<value>`.
+One of thirteen project archetypes. Stable: `co-abap`, `co-consult`, `co-deck`, `co-design`, `co-develop`, `co-game`, `co-security`, `co-work`. Beta: `co-export`, `co-hr`, `co-news`, `co-price`, `co-safety`. Specifies which `templates/<variant>/` folder is used during project scaffolding. Recorded in `.claude/template-version.txt` as `variant=<value>`.
 
 #### Platform Profile
 Controls which AI-platform-specific configuration files are included in a project. Three values:
@@ -652,4 +652,4 @@ Agent, skill, and command frontmatter structures are validated against JSON Sche
 
 ---
 
-*Last Updated: 2026-09-01*
+*Last Updated: 2026-09-03*

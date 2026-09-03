@@ -1,17 +1,19 @@
 #!/usr/bin/env bun
 /**
  * Parallel Agent Dispatcher — VSP variant wrapper
- * @version 1.0.1
+ * @version 1.1.0
  * Automates dispatching multiple read-only subagents simultaneously
  *
- * Re-exports the common dispatcher with VSP-specific default tasks.
- * (ADR-0050: Variant scripts inherit from templates/common, never duplicate)
+ * Thin wrapper over the common dispatcher: this file only supplies the
+ * VSP-specific default task list and re-exports the common implementation.
+ * (ADR-0050 Part 1: Variant scripts inherit from templates/common, never duplicate)
  *
  * @module dispatch-parallel
  */
 
 import {
   dispatchParallel as commonDispatchParallel,
+  runCli as commonRunCli,
   type ParallelAgentTask,
   type DispatchResult
 } from '../dispatch-parallel.ts';
@@ -19,7 +21,7 @@ import {
 /**
  * VSP-specific default tasks for parallel dispatch
  */
-const vspDefaultTasks: ParallelAgentTask[] = [
+export const vspDefaultTasks: ParallelAgentTask[] = [
   {
     description: "Codebase analyzer",
     role: "code-analyst",
@@ -71,38 +73,11 @@ const vspDefaultTasks: ParallelAgentTask[] = [
 ];
 
 /**
- * CLI entry point
+ * CLI entry point — delegates argument parsing and dispatch to the common module
+ * with the VSP default task list.
  */
-async function main() {
-  const args = process.argv.slice(2);
-  const customTasks: ParallelAgentTask[] = [];
-
-  // Parse custom tasks from command line
-  for (let i = 0; i < args.length; i++) {
-    if (args[i] === '--task' && args[i + 1]) {
-      const parts = args[i + 1].split(':');
-      if (parts.length >= 3) {
-        const priority = ['high', 'medium', 'low'].includes(parts[3]) ? parts[3] as 'high' | 'medium' | 'low' : 'medium';
-        customTasks.push({
-          description: parts[0],
-          role: parts[1],
-          task: parts[2],
-          priority
-        });
-      }
-      i++;
-    }
-  }
-
-  const tasksToRun = customTasks.length > 0 ? customTasks : vspDefaultTasks;
-
-  try {
-    await commonDispatchParallel(tasksToRun);
-    process.exit(0);
-  } catch (error) {
-    console.error('❌ Dispatch failed:', error);
-    process.exit(1);
-  }
+export async function runCli(args: string[] = process.argv.slice(2)): Promise<void> {
+  await commonRunCli(args, vspDefaultTasks);
 }
 
 /**
@@ -117,5 +92,5 @@ export { commonDispatchParallel as dispatchParallel, type ParallelAgentTask, typ
 
 // Run if executed directly
 if (import.meta.main) {
-  main();
+  void runCli();
 }

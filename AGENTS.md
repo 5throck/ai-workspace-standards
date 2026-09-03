@@ -229,7 +229,7 @@ lang_reason: legal   # legal | source-material | proper-noun
 - `source-material`: Primary source quotations where English translation would compromise academic accuracy or meaning.
 - `proper-noun`: Files dominated by Korean proper nouns (institution/place/person names).
 
-*Note: Exception is NOT available for: agents/*.md, skills/*.md, CONSTITUTION.md, CLAUDE.md, GEMINI.md, AGENTS.md, or any variant context.md file.*
+*Note: Exception is NOT available for: CONSTITUTION.md, CLAUDE.md, GEMINI.md, AGENTS.md, or any variant context.md file. It IS available for `agents/*.md` and `skills/*.md` (with `lang_reason` declared).*
 
 ### Enforcement
 - Pre-commit audit checks for Korean content outside ko/ and locales/ko/
@@ -343,7 +343,7 @@ Phase 5 - Lifecycle Finalization (PM-owned)
   PM updates governance records for any changed artifacts
   PM logs decisions to memory/YYYY-MM-DD.md
 
-Phase 6 - Quality Assurance & Finalization (specialist-autonomous in workspace, PM in variants)
+Phase 6 - Quality Assurance & Finalization (autonomous per `docs/workspace-schema.json`; specialist-autonomous in workspace, PM-owned in variants)
   Auditor (workspace) executes bun scripts/qa-gate.ts autonomously
   PM (variants) executes qa scripts
   Validates: workspace audit, project tests, documentation consistency

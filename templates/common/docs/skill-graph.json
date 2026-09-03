@@ -37,6 +37,11 @@
       "layer": "common"
     },
     {
+      "id": "finishing-a-development-branch",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
       "id": "gateguard",
       "type": "skill",
       "layer": "common"
@@ -97,7 +102,22 @@
       "layer": "common"
     },
     {
+      "id": "meeting",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
       "id": "meeting-facilitation",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "platform-command-lifecycle-manager",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "platform-skill-lifecycle-manager",
       "type": "skill",
       "layer": "common"
     },
@@ -128,6 +148,11 @@
     },
     {
       "id": "skill-lifecycle-manager",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "source-command-commit-push-pr",
       "type": "skill",
       "layer": "common"
     },
@@ -405,6 +430,12 @@
       "type": "references",
       "from": "k-opendata",
       "to": "k-law",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "meeting",
+      "to": "meeting-facilitation",
       "source": "prose"
     },
     {

@@ -1,17 +1,19 @@
 #!/usr/bin/env bun
 /**
  * Serial Agent Dispatcher — VSP variant wrapper
- * @version 1.0.1
+ * @version 1.1.0
  * Automates dispatching subagents that must run sequentially
  *
- * Re-exports the common dispatcher with VSP-specific default pipeline.
- * (ADR-0050: Variant scripts inherit from templates/common, never duplicate)
+ * Thin wrapper over the common dispatcher: this file only supplies the
+ * VSP-specific default pipeline and re-exports the common implementation.
+ * (ADR-0050 Part 1: Variant scripts inherit from templates/common, never duplicate)
  *
  * @module dispatch-serial
  */
 
 import {
   dispatchSerial as commonDispatchSerial,
+  runCli as commonRunCli,
   type SerialAgentTask,
   type SerialPipelineResult,
   type SerialExecutionOptions
@@ -20,7 +22,7 @@ import {
 /**
  * VSP-specific default pipeline for serial dispatch
  */
-const vspDefaultPipeline: SerialAgentTask[] = [
+export const vspDefaultPipeline: SerialAgentTask[] = [
   {
     description: "Implement feature",
     role: "code-writer",
@@ -57,38 +59,11 @@ const vspDefaultPipeline: SerialAgentTask[] = [
 ];
 
 /**
- * CLI entry point
+ * CLI entry point — delegates option/pipeline parsing and execution to the
+ * common module with the VSP default pipeline.
  */
-async function main() {
-  const args = process.argv.slice(2);
-  const options: SerialExecutionOptions = {
-    stopOnError: !args.includes('--continue-on-error'),
-    verbose: args.includes('--verbose') || args.includes('-v'),
-    dryRun: args.includes('--dry-run')
-  };
-
-  // Check for custom pipeline file
-  const pipelineFileIndex = args.indexOf('--pipeline');
-  let pipeline = vspDefaultPipeline;
-
-  if (pipelineFileIndex >= 0 && args[pipelineFileIndex + 1]) {
-    try {
-      const pipelinePath = args[pipelineFileIndex + 1];
-      pipeline = await import(pipelinePath).then(m => m.default || m.pipeline);
-    } catch (error) {
-      console.error(`❌ Failed to load pipeline from ${args[pipelineFileIndex + 1]}:`, error);
-      process.exit(1);
-    }
-  }
-
-  try {
-    const results = await commonDispatchSerial(pipeline, options);
-    const hasFailures = results.some(r => r.status === 'failed');
-    process.exit(hasFailures ? 1 : 0);
-  } catch (error) {
-    console.error('❌ Pipeline execution failed:', error);
-    process.exit(1);
-  }
+export async function runCli(args: string[] = process.argv.slice(2)): Promise<void> {
+  await commonRunCli(args, vspDefaultPipeline);
 }
 
 /**
@@ -103,5 +78,5 @@ export { commonDispatchSerial as dispatchSerial, type SerialAgentTask, type Seri
 
 // Run if executed directly
 if (import.meta.main) {
-  main();
+  void runCli();
 }

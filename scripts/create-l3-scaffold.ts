@@ -220,7 +220,7 @@ function parseArgs(argv: string[]): Args {
 // here — that's exactly how docs/context.md (added 2026-05-27) and .claude/skills.json
 // + .gemini/skills.json went missing from every L3 scaffold for months.
 const COMMON_OVERLAY_EXCLUDE = new Set([
-  '.agents', '.gateguard-state', 'node_modules', 'bun.lock', 'propagation-map.json',
+  '.agents', '.gateguard-state', '.DS_Store', 'node_modules', 'bun.lock', 'propagation-map.json',
   'docs', 'agents', 'scripts', 'skills', 'memory', 'package.json',
   'README.md', 'README_ko.md', 'AGENTS.md', 'SECURITY.md',
 ]);

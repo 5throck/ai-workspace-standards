@@ -566,12 +566,23 @@ function mergeWorkspaceManaged(projectFile: string, templateFile: string, rel: s
     }
 
     if (projOccurrences.length !== tplBlocks.length) {
-      console.log(`    WARNING: ${pattern.label} block count mismatch in ${rel} (project has ${projOccurrences.length}, template has ${tplBlocks.length}) — merging positionally up to the shorter count`);
+      // Counts diverged (template gained/lost blocks since the project copy was
+      // made). Positional pairing would silently drop the surplus and shift the
+      // remaining content, so instead replace the project's whole run of blocks
+      // for this marker with the template's full block sequence, in order.
+      console.log(`    WARNING: ${pattern.label} block count mismatch in ${rel} (project has ${projOccurrences.length}, template has ${tplBlocks.length}) — replacing all project blocks with the template sequence`);
+      const first = projOccurrences[0];
+      const last = projOccurrences[projOccurrences.length - 1];
+      if (!dryRun) {
+        updated = updated.slice(0, first.start) + tplBlocks.map((b) => b.matched).join('\n\n') + updated.slice(last.end);
+      }
+      merged = true;
+      console.log(`    ${dryTag}RECONCILED ${pattern.label} blocks in: ${rel}`);
+      continue;
     }
 
-    // Replace positionally, back-to-front so earlier offsets stay valid.
-    const pairCount = Math.min(projOccurrences.length, tplBlocks.length);
-    for (let i = pairCount - 1; i >= 0; i--) {
+    // Counts match — replace positionally, back-to-front so earlier offsets stay valid.
+    for (let i = tplBlocks.length - 1; i >= 0; i--) {
       const { start, end } = projOccurrences[i];
       const tplBlock = tplBlocks[i];
       if (!dryRun) {

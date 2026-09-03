@@ -144,5 +144,8 @@ memory/archive/
 # Ignore test temp directories
 tests/.temp/
 
+# Scratch space for .claude/skills/simulate-project-creation (never tracked)
+scripts/temp/
+
 # --- Claude Code plan-mode artifacts (session-local, must not be committed) ---
 .claude/plans/

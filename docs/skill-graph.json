@@ -339,7 +339,7 @@
     {
       "id": "code-review",
       "type": "skill",
-      "layer": "variant:co-develop"
+      "layer": "variant:co-game"
     },
     {
       "id": "code-writer",
@@ -374,7 +374,7 @@
     {
       "id": "competitive-intelligence",
       "type": "skill",
-      "layer": "variant:co-consult"
+      "layer": "variant:co-price"
     },
     {
       "id": "consulting-report-writing",
@@ -506,7 +506,7 @@
     {
       "id": "designer",
       "type": "agent",
-      "layer": "variant:co-develop"
+      "layer": "variant:co-game"
     },
     {
       "id": "desktop-app-fallback",
@@ -516,7 +516,7 @@
     {
       "id": "devops-admin",
       "type": "agent",
-      "layer": "variant:co-abap"
+      "layer": "variant:co-price"
     },
     {
       "id": "diagram-specialist",
@@ -561,15 +561,7 @@
     {
       "id": "executive-presentation",
       "type": "skill",
-      "layer": "variant:co-consult",
-      "inputs": [
-        "complexity-grades",
-        "business-case",
-        "readiness-scores"
-      ],
-      "outputs": [
-        "executive-deck"
-      ]
+      "layer": "variant:co-price"
     },
     {
       "id": "explain-me",
@@ -650,6 +642,11 @@
       "id": "finding-reconciliation",
       "type": "skill",
       "layer": "variant:co-security"
+    },
+    {
+      "id": "finishing-a-development-branch",
+      "type": "skill",
+      "layer": "L0"
     },
     {
       "id": "fiori-developer",
@@ -824,7 +821,7 @@
     {
       "id": "insight-synthesis",
       "type": "skill",
-      "layer": "variant:co-consult"
+      "layer": "variant:co-price"
     },
     {
       "id": "interface-expert",
@@ -957,6 +954,11 @@
       "layer": "variant:co-consult"
     },
     {
+      "id": "meeting",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
       "id": "meeting-facilitation",
       "type": "skill",
       "layer": "L0"
@@ -1014,7 +1016,7 @@
     {
       "id": "output_type.approved_implementation_plan",
       "type": "output_type",
-      "layer": "variant:co-develop"
+      "layer": "variant:co-game"
     },
     {
       "id": "output_type.arcade_reference_notes",
@@ -1102,16 +1104,6 @@
       "layer": "variant:co-work"
     },
     {
-      "id": "output_type.commonization_decision",
-      "type": "output_type",
-      "layer": "L0"
-    },
-    {
-      "id": "output_type.commonization_review",
-      "type": "output_type",
-      "layer": "L0"
-    },
-    {
       "id": "output_type.communication_plan",
       "type": "output_type",
       "layer": "variant:co-consult"
@@ -1135,16 +1127,6 @@
       "id": "output_type.content_integration_notes",
       "type": "output_type",
       "layer": "variant:co-game"
-    },
-    {
-      "id": "output_type.conversion_plan",
-      "type": "output_type",
-      "layer": "L0"
-    },
-    {
-      "id": "output_type.conversion_result",
-      "type": "output_type",
-      "layer": "L0"
     },
     {
       "id": "output_type.cost_assurance_notes",
@@ -1274,7 +1256,7 @@
     {
       "id": "output_type.feasibility_findings",
       "type": "output_type",
-      "layer": "variant:co-abap"
+      "layer": "variant:co-game"
     },
     {
       "id": "output_type.feasibility_notes",
@@ -1384,7 +1366,7 @@
     {
       "id": "output_type.implementation_commit",
       "type": "output_type",
-      "layer": "variant:co-develop"
+      "layer": "variant:co-game"
     },
     {
       "id": "output_type.implementation_metrics",
@@ -1537,16 +1519,6 @@
       "layer": "variant:co-price"
     },
     {
-      "id": "output_type.promotion_checklist_result",
-      "type": "output_type",
-      "layer": "L0"
-    },
-    {
-      "id": "output_type.promotion_record",
-      "type": "output_type",
-      "layer": "L0"
-    },
-    {
       "id": "output_type.prototype_build",
       "type": "output_type",
       "layer": "variant:co-design"
@@ -1584,7 +1556,7 @@
     {
       "id": "output_type.regression_report",
       "type": "output_type",
-      "layer": "variant:co-develop"
+      "layer": "variant:co-game"
     },
     {
       "id": "output_type.regulatory_landscape",
@@ -1817,11 +1789,6 @@
       "layer": "variant:co-develop"
     },
     {
-      "id": "output_type.upgrade_report",
-      "type": "output_type",
-      "layer": "L0"
-    },
-    {
       "id": "output_type.ux_flows",
       "type": "output_type",
       "layer": "variant:co-price"
@@ -1830,16 +1797,6 @@
       "id": "output_type.validated_findings",
       "type": "output_type",
       "layer": "variant:co-security"
-    },
-    {
-      "id": "output_type.variant_proposal",
-      "type": "output_type",
-      "layer": "L0"
-    },
-    {
-      "id": "output_type.variant_scaffold",
-      "type": "output_type",
-      "layer": "L0"
     },
     {
       "id": "output_type.verification_ledger",
@@ -1911,6 +1868,16 @@
       "id": "performance-tuning",
       "type": "skill",
       "layer": "variant:co-abap"
+    },
+    {
+      "id": "platform-command-lifecycle-manager",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
+      "id": "platform-skill-lifecycle-manager",
+      "type": "skill",
+      "layer": "L0"
     },
     {
       "id": "pm",
@@ -2278,31 +2245,6 @@
       "layer": "variant:co-work"
     },
     {
-      "id": "procedure.l0.create-variant",
-      "type": "procedure",
-      "layer": "L0"
-    },
-    {
-      "id": "procedure.l0.de-commonization-review",
-      "type": "procedure",
-      "layer": "L0"
-    },
-    {
-      "id": "procedure.l0.project-to-variant",
-      "type": "procedure",
-      "layer": "L0"
-    },
-    {
-      "id": "procedure.l0.promote-variant",
-      "type": "procedure",
-      "layer": "L0"
-    },
-    {
-      "id": "procedure.l0.upgrade-project",
-      "type": "procedure",
-      "layer": "L0"
-    },
-    {
       "id": "project-coordinator",
       "type": "agent",
       "layer": "variant:co-work"
@@ -2350,12 +2292,12 @@
     {
       "id": "README",
       "type": "agent",
-      "layer": "variant:co-abap"
+      "layer": "variant:co-deck"
     },
     {
       "id": "README_ko",
       "type": "agent",
-      "layer": "variant:co-abap"
+      "layer": "variant:co-deck"
     },
     {
       "id": "red-team-lead",
@@ -2365,7 +2307,7 @@
     {
       "id": "refactoring",
       "type": "skill",
-      "layer": "variant:co-develop"
+      "layer": "variant:co-game"
     },
     {
       "id": "report-writer",
@@ -2505,7 +2447,7 @@
     {
       "id": "security-monitor",
       "type": "agent",
-      "layer": "variant:co-abap"
+      "layer": "variant:co-price"
     },
     {
       "id": "security-scan",
@@ -2584,6 +2526,11 @@
       "layer": "variant:co-abap"
     },
     {
+      "id": "source-command-commit-push-pr",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
       "id": "source-verification-ledger",
       "type": "skill",
       "layer": "variant:co-news"
@@ -2601,7 +2548,7 @@
     {
       "id": "stack-setup",
       "type": "agent",
-      "layer": "variant:co-develop"
+      "layer": "variant:co-game"
     },
     {
       "id": "stakeholder-alignment",
@@ -2703,12 +2650,12 @@
     {
       "id": "test-driven-development",
       "type": "skill",
-      "layer": "variant:co-develop"
+      "layer": "variant:co-game"
     },
     {
       "id": "test-runner",
       "type": "agent",
-      "layer": "variant:co-abap"
+      "layer": "variant:co-game"
     },
     {
       "id": "theme-authoring",
@@ -2919,17 +2866,6 @@
       "from": "abap-code-review",
       "to": "phase4",
       "source": "skill_manifest"
-    },
-    {
-      "type": "used_by",
-      "from": "abap-code-review",
-      "to": "test-runner",
-      "source": "required_skills",
-      "provenance": {
-        "file": "templates/co-abap/agents/test-runner.md",
-        "field": "required_skills",
-        "index": 0
-      }
     },
     {
       "type": "used_by",
@@ -3623,18 +3559,6 @@
       }
     },
     {
-      "type": "produces",
-      "from": "audit-workspace",
-      "to": "output_type.promotion_checklist_result",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "produces",
-      "from": "audit-workspace",
-      "to": "output_type.promotion_checklist_result",
-      "source": "procedure_schema"
-    },
-    {
       "type": "composes_with",
       "from": "audit-workspace",
       "to": "project-to-variant",
@@ -3911,6 +3835,17 @@
       }
     },
     {
+      "type": "follows",
+      "from": "code-review",
+      "to": "arcade-physics",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-game/skills/code-review/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "used_by",
       "from": "code-review",
       "to": "code-writer",
@@ -3971,15 +3906,14 @@
       "source": "skill_manifest"
     },
     {
-      "type": "composes_with",
+      "type": "follows",
       "from": "code-review",
-      "to": "refactoring",
+      "to": "test-driven-development",
       "source": "relates_to",
-      "symmetric": true,
       "provenance": {
-        "file": "templates/co-develop/skills/code-review/SKILL.md",
+        "file": "templates/co-game/skills/code-review/SKILL.md",
         "field": "relates_to",
-        "index": 0
+        "index": 1
       }
     },
     {
@@ -4312,26 +4246,20 @@
     {
       "type": "composes_with",
       "from": "competitive-intelligence",
-      "to": "company-intelligence",
+      "to": "gabor-granger",
       "source": "relates_to",
       "symmetric": true,
       "provenance": {
-        "file": "templates/co-consult/skills/competitive-intelligence/SKILL.md",
-        "field": "relates_to",
-        "index": 0
-      }
-    },
-    {
-      "type": "composes_with",
-      "from": "competitive-intelligence",
-      "to": "financial-modeling",
-      "source": "relates_to",
-      "symmetric": true,
-      "provenance": {
-        "file": "templates/co-consult/skills/competitive-intelligence/SKILL.md",
+        "file": "templates/co-price/skills/competitive-intelligence/SKILL.md",
         "field": "relates_to",
         "index": 1
       }
+    },
+    {
+      "type": "references",
+      "from": "competitive-intelligence",
+      "to": "gabor-granger",
+      "source": "prose"
     },
     {
       "type": "used_by",
@@ -4349,24 +4277,6 @@
       "from": "competitive-intelligence",
       "to": "industry-expert",
       "source": "skill_manifest"
-    },
-    {
-      "type": "composes_with",
-      "from": "competitive-intelligence",
-      "to": "insight-synthesis",
-      "source": "relates_to",
-      "symmetric": true,
-      "provenance": {
-        "file": "templates/co-consult/skills/competitive-intelligence/SKILL.md",
-        "field": "relates_to",
-        "index": 2
-      }
-    },
-    {
-      "type": "references",
-      "from": "competitive-intelligence",
-      "to": "insight-synthesis",
-      "source": "prose"
     },
     {
       "type": "produces",
@@ -4387,6 +4297,18 @@
       "source": "skill_manifest"
     },
     {
+      "type": "composes_with",
+      "from": "competitive-intelligence",
+      "to": "price-waterfall-analysis",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-price/skills/competitive-intelligence/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
       "type": "used_by",
       "from": "competitive-intelligence",
       "to": "strategy-analyst",
@@ -4402,6 +4324,23 @@
       "from": "competitive-intelligence",
       "to": "strategy-analyst",
       "source": "skill_manifest"
+    },
+    {
+      "type": "follows",
+      "from": "competitive-intelligence",
+      "to": "van-westendorp-psm",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-price/skills/competitive-intelligence/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "references",
+      "from": "competitive-intelligence",
+      "to": "van-westendorp-psm",
+      "source": "prose"
     },
     {
       "type": "used_by",
@@ -4488,12 +4427,6 @@
         "field": "relates_to",
         "index": 1
       }
-    },
-    {
-      "type": "produces",
-      "from": "context-commonization-review",
-      "to": "output_type.commonization_review",
-      "source": "procedure_schema"
     },
     {
       "type": "follows",
@@ -4914,30 +4847,6 @@
       "source": "prose"
     },
     {
-      "type": "references",
-      "from": "designer",
-      "to": "code-review",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "designer",
-      "to": "refactoring",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "designer",
-      "to": "swe-solve",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "designer",
-      "to": "test-driven-development",
-      "source": "prose"
-    },
-    {
       "type": "used_by",
       "from": "desktop-app-fallback",
       "to": "code-writer",
@@ -5239,71 +5148,14 @@
       "source": "skill_manifest"
     },
     {
-      "type": "composes_with",
+      "type": "follows",
       "from": "executive-presentation",
-      "to": "consulting-report-writing",
+      "to": "harness-verification",
       "source": "relates_to",
-      "symmetric": true,
       "provenance": {
-        "file": "templates/co-consult/skills/executive-presentation/SKILL.md",
+        "file": "templates/co-price/skills/executive-presentation/SKILL.md",
         "field": "relates_to",
-        "index": 4
-      }
-    },
-    {
-      "type": "composes_with",
-      "from": "executive-presentation",
-      "to": "financial-modeling",
-      "source": "relates_to",
-      "symmetric": true,
-      "provenance": {
-        "file": "templates/co-consult/skills/executive-presentation/SKILL.md",
-        "field": "relates_to",
-        "index": 2
-      }
-    },
-    {
-      "type": "requires",
-      "from": "executive-presentation",
-      "to": "financial-modeling",
-      "source": "prerequisites",
-      "provenance": {
-        "file": "templates/co-consult/skills/executive-presentation/SKILL.md",
-        "field": "prerequisites"
-      }
-    },
-    {
-      "type": "composes_with",
-      "from": "executive-presentation",
-      "to": "narrative-framework",
-      "source": "relates_to",
-      "symmetric": true,
-      "provenance": {
-        "file": "templates/co-consult/skills/executive-presentation/SKILL.md",
-        "field": "relates_to",
-        "index": 3
-      }
-    },
-    {
-      "type": "composes_with",
-      "from": "executive-presentation",
-      "to": "org-readiness-assessment",
-      "source": "relates_to",
-      "symmetric": true,
-      "provenance": {
-        "file": "templates/co-consult/skills/executive-presentation/SKILL.md",
-        "field": "relates_to",
-        "index": 1
-      }
-    },
-    {
-      "type": "requires",
-      "from": "executive-presentation",
-      "to": "org-readiness-assessment",
-      "source": "prerequisites",
-      "provenance": {
-        "file": "templates/co-consult/skills/executive-presentation/SKILL.md",
-        "field": "prerequisites"
+        "index": 0
       }
     },
     {
@@ -5311,28 +5163,6 @@
       "from": "executive-presentation",
       "to": "phase3",
       "source": "skill_manifest"
-    },
-    {
-      "type": "composes_with",
-      "from": "executive-presentation",
-      "to": "technical-feasibility",
-      "source": "relates_to",
-      "symmetric": true,
-      "provenance": {
-        "file": "templates/co-consult/skills/executive-presentation/SKILL.md",
-        "field": "relates_to",
-        "index": 0
-      }
-    },
-    {
-      "type": "requires",
-      "from": "executive-presentation",
-      "to": "technical-feasibility",
-      "source": "prerequisites",
-      "provenance": {
-        "file": "templates/co-consult/skills/executive-presentation/SKILL.md",
-        "field": "prerequisites"
-      }
     },
     {
       "type": "references",
@@ -7066,18 +6896,6 @@
       "source": "prose"
     },
     {
-      "type": "composes_with",
-      "from": "insight-synthesis",
-      "to": "competitive-intelligence",
-      "source": "relates_to",
-      "symmetric": true,
-      "provenance": {
-        "file": "templates/co-consult/skills/insight-synthesis/SKILL.md",
-        "field": "relates_to",
-        "index": 3
-      }
-    },
-    {
       "type": "used_by",
       "from": "insight-synthesis",
       "to": "data-analyst",
@@ -7093,29 +6911,6 @@
       "from": "insight-synthesis",
       "to": "data-analyst",
       "source": "skill_manifest"
-    },
-    {
-      "type": "composes_with",
-      "from": "insight-synthesis",
-      "to": "financial-statement-analysis",
-      "source": "relates_to",
-      "symmetric": true,
-      "provenance": {
-        "file": "templates/co-consult/skills/insight-synthesis/SKILL.md",
-        "field": "relates_to",
-        "index": 2
-      }
-    },
-    {
-      "type": "follows",
-      "from": "insight-synthesis",
-      "to": "org-readiness-assessment",
-      "source": "relates_to",
-      "provenance": {
-        "file": "templates/co-consult/skills/insight-synthesis/SKILL.md",
-        "field": "relates_to",
-        "index": 0
-      }
     },
     {
       "type": "produces",
@@ -7134,18 +6929,6 @@
       "from": "insight-synthesis",
       "to": "phase3",
       "source": "skill_manifest"
-    },
-    {
-      "type": "composes_with",
-      "from": "insight-synthesis",
-      "to": "solution-design",
-      "source": "relates_to",
-      "symmetric": true,
-      "provenance": {
-        "file": "templates/co-consult/skills/insight-synthesis/SKILL.md",
-        "field": "relates_to",
-        "index": 1
-      }
     },
     {
       "type": "used_by",
@@ -7606,6 +7389,18 @@
     {
       "type": "references",
       "from": "lifecycle-manager",
+      "to": "platform-command-lifecycle-manager",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "lifecycle-manager",
+      "to": "platform-skill-lifecycle-manager",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "lifecycle-manager",
       "to": "script-lifecycle-manager",
       "source": "prose"
     },
@@ -7784,6 +7579,12 @@
       "from": "mece-logic-auditor",
       "to": "strategy-analyst",
       "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "meeting",
+      "to": "meeting-facilitation",
+      "source": "prose"
     },
     {
       "type": "produces",
@@ -11439,264 +11240,6 @@
       "source": "procedure_schema"
     },
     {
-      "type": "step_uses_skill",
-      "from": "procedure.l0.create-variant",
-      "to": "audit-workspace",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.l0.create-variant",
-      "to": "auditor",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_uses_skill",
-      "from": "procedure.l0.create-variant",
-      "to": "create-variant",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.l0.create-variant",
-      "to": "docs-writer",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_uses_skill",
-      "from": "procedure.l0.create-variant",
-      "to": "documentation-writing",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "produces",
-      "from": "procedure.l0.create-variant",
-      "to": "output_type.variant_scaffold",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.l0.create-variant",
-      "to": "pm",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "enables",
-      "from": "procedure.l0.create-variant",
-      "to": "procedure.l0.promote-variant",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.l0.create-variant",
-      "to": "scaffolding-expert",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_uses_skill",
-      "from": "procedure.l0.create-variant",
-      "to": "team-builder",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.l0.de-commonization-review",
-      "to": "automation-engineer",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_uses_skill",
-      "from": "procedure.l0.de-commonization-review",
-      "to": "context-commonization-review",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_uses_skill",
-      "from": "procedure.l0.de-commonization-review",
-      "to": "context-commonization-review",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.l0.de-commonization-review",
-      "to": "docs-writer",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_uses_skill",
-      "from": "procedure.l0.de-commonization-review",
-      "to": "meeting-facilitation",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "produces",
-      "from": "procedure.l0.de-commonization-review",
-      "to": "output_type.commonization_decision",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.l0.de-commonization-review",
-      "to": "pm",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "follows",
-      "from": "procedure.l0.de-commonization-review",
-      "to": "procedure.l0.promote-variant",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.l0.project-to-variant",
-      "to": "architect",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_uses_skill",
-      "from": "procedure.l0.project-to-variant",
-      "to": "audit-workspace",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.l0.project-to-variant",
-      "to": "auditor",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.l0.project-to-variant",
-      "to": "automation-engineer",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "produces",
-      "from": "procedure.l0.project-to-variant",
-      "to": "output_type.conversion_result",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "composes_with",
-      "from": "procedure.l0.project-to-variant",
-      "to": "procedure.l0.create-variant",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_uses_skill",
-      "from": "procedure.l0.project-to-variant",
-      "to": "project-to-variant",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_uses_skill",
-      "from": "procedure.l0.project-to-variant",
-      "to": "project-to-variant",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_uses_skill",
-      "from": "procedure.l0.promote-variant",
-      "to": "audit-workspace",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.l0.promote-variant",
-      "to": "auditor",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.l0.promote-variant",
-      "to": "automation-engineer",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.l0.promote-variant",
-      "to": "lifecycle-manager",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "produces",
-      "from": "procedure.l0.promote-variant",
-      "to": "output_type.promotion_record",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "follows",
-      "from": "procedure.l0.promote-variant",
-      "to": "procedure.l0.create-variant",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "enables",
-      "from": "procedure.l0.promote-variant",
-      "to": "procedure.l0.upgrade-project",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_uses_skill",
-      "from": "procedure.l0.promote-variant",
-      "to": "promote-variant",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_uses_skill",
-      "from": "procedure.l0.promote-variant",
-      "to": "sync",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_uses_skill",
-      "from": "procedure.l0.upgrade-project",
-      "to": "audit-workspace",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.l0.upgrade-project",
-      "to": "auditor",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.l0.upgrade-project",
-      "to": "automation-engineer",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "produces",
-      "from": "procedure.l0.upgrade-project",
-      "to": "output_type.upgrade_report",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.l0.upgrade-project",
-      "to": "pm",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "follows",
-      "from": "procedure.l0.upgrade-project",
-      "to": "procedure.l0.promote-variant",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_uses_skill",
-      "from": "procedure.l0.upgrade-project",
-      "to": "upgrade-project",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_uses_skill",
-      "from": "procedure.l0.upgrade-project",
-      "to": "upgrade-project",
-      "source": "procedure_schema"
-    },
-    {
       "type": "used_by",
       "from": "project-delivery",
       "to": "delivery-manager",
@@ -11806,12 +11349,6 @@
       "source": "prose"
     },
     {
-      "type": "produces",
-      "from": "project-to-variant",
-      "to": "output_type.conversion_plan",
-      "source": "procedure_schema"
-    },
-    {
       "type": "composes_with",
       "from": "project-to-variant",
       "to": "promote-variant",
@@ -11850,18 +11387,6 @@
       "from": "red-team-lead",
       "to": "verify-authorization",
       "source": "prose"
-    },
-    {
-      "type": "composes_with",
-      "from": "refactoring",
-      "to": "code-review",
-      "source": "relates_to",
-      "symmetric": true,
-      "provenance": {
-        "file": "templates/co-develop/skills/refactoring/SKILL.md",
-        "field": "relates_to",
-        "index": 0
-      }
     },
     {
       "type": "used_by",
@@ -13800,12 +13325,6 @@
       "source": "prose"
     },
     {
-      "type": "produces",
-      "from": "team-builder",
-      "to": "output_type.variant_proposal",
-      "source": "procedure_schema"
-    },
-    {
       "type": "references",
       "from": "team-builder",
       "to": "skill-lifecycle-manager",
@@ -13949,7 +13468,7 @@
       "to": "code-review",
       "source": "relates_to",
       "provenance": {
-        "file": "templates/co-develop/skills/test-driven-development/SKILL.md",
+        "file": "templates/co-game/skills/test-driven-development/SKILL.md",
         "field": "relates_to",
         "index": 0
       }
@@ -14006,6 +13525,17 @@
       "from": "test-driven-development",
       "to": "phase5",
       "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "test-driven-development",
+      "to": "test-runner",
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-game/agents/test-runner.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",

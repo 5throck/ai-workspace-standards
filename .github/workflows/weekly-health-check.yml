@@ -53,7 +53,13 @@ jobs:
       - name: Security audit - dependency vulnerabilities
         shell: bash
         run: |
-          audit_output=$(bun audit 2>&1) || true
+          # No `|| true` here: a bun audit command-level failure (network/registry
+          # outage) must fail the step loudly, not silently pass the gate.
+          if ! audit_output=$(bun audit 2>&1); then
+            echo "$audit_output"
+            echo "ERROR: bun audit command failed (infrastructure/registry error)."
+            exit 1
+          fi
           echo "$audit_output"
           if echo "$audit_output" | grep -qE '[1-9][0-9]* (high|critical)'; then
             echo "WARNING: High or critical vulnerabilities found. See audit output above."

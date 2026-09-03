@@ -229,6 +229,9 @@ Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 > For L1-L2 Fork Model and lifecycle management rules, see [CONSTITUTION.md §9](docs/constitution/09-operations-workflow.md) and [CONSTITUTION.md §10](CONSTITUTION.md#10-terminology--canonical-definitions).
 <!-- COMMON-GEMINI:END -->
 
+### MCP Configurations & Absolute Resolving
+No `.mcp.json` is currently defined at the project root — MCP servers are configured at the user/global level instead. If a project-level `.mcp.json` is added later, keep command executable paths relative to the project directory for portable cross-platform runs; the platform resolves relative paths (e.g., `./server` or `python scripts/mcp.py`) against the individual project's root folder.
+
 ---
 
 <!-- COMMON-GEMINI:START -->
@@ -335,7 +338,7 @@ Antigravity does not have `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` or `teammateMod
 
 ---
 
-*Last Updated: 2026-08-15 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
+*Last Updated: 2026-09-03 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
 
 
 

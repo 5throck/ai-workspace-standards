@@ -133,13 +133,13 @@ cp -r templates/common/.gemini/skills/. templates/co-<variant-name>/.gemini/skil
 
 > **Reconcile boundary**: `l3-to-variant-pipeline.ts` strips files from L2 that are identical to L0. Skills (`.claude/skills/`, `.gemini/skills/`) are **excluded from reconcile** and must always be present in L2. If skills are missing after pipeline run, restore them manually from `templates/common/.claude/skills/` and `templates/common/.gemini/skills/`.
 
-### Step 6: Verify new-project.sh/ps1 picks up the new variant
+### Step 6: Verify new-project.ts picks up the new variant
 
-`new-project.sh` and `new-project.ps1` automatically detect valid variants from `templates/` at runtime — **no manual update required**.
+`bun scripts/new-project.ts` automatically detects valid variants from `templates/` at runtime — **no manual update required**.
 
 Verify detection works:
 ```bash
-bash ./scripts/new-project.sh --help
+bun scripts/new-project.ts --help
 # Should list co-<name> in the available variants output
 ```
 
@@ -220,7 +220,7 @@ bun run agent:verify
 - [ ] `templates/co-<name>/` created and passes validate-templates.ts
 - [ ] Bilingual user guide authored: `templates/co-<name>/docs/user-guide.md` + `docs/user-guide_ko.md` per the User-Guide Standard (enforced by validate-templates WS-11; reference: `templates/co-work/docs/`)
 - [ ] co-<name> added to all 6 index READMEs — root `README.md` / `README_ko.md` / `README_es.md` / `README_ja.md` (tree + variant table) and `templates/README.md` / `templates/README_ko.md` (enforced by WS-12)
-- [ ] `new-project.sh` and `new-project.ps1` correctly list co-<name> in `--help` output (auto-detected from `templates/`)
+- [ ] `bun scripts/new-project.ts` correctly lists co-<name> in `--help` output (auto-detected from `templates/`)
 - [ ] `templates/co-<name>/variant.json` status is `beta` with correct lifecycle dates
 - [ ] `Projects/<variant-name>/variant.json` has `phaseAComplete: true`
 - [ ] `tag-template.ts` run and tag published
@@ -236,11 +236,11 @@ bun run agent:verify
 
 ## Testing the New Variant
 
-After Phase B, verify new-project.sh creates a working instance:
+After Phase B, verify `bun scripts/new-project.ts` creates a working instance:
 
 ```bash
 # Dry run (if supported):
-bash ./scripts/new-project.sh "my-test-project" --variant co-<name>
+bun scripts/new-project.ts "my-test-project" --variant co-<name>
 
 # Verify created project structure:
 ls Projects/my-test-project/

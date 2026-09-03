@@ -358,6 +358,7 @@ if (existsSync(templateValidationHelper)) {
 function copyDir(src: string, dest: string): void {
   mkdirSync(dest, { recursive: true });
   for (const entry of readdirSync(src)) {
+    if (entry === '.DS_Store') continue; // OS cruft — never copy into a scaffolded project
     const srcPath = join(src, entry);
     const destPath = join(dest, entry);
     if (statSync(srcPath).isDirectory()) {

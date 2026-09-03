@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Parallel Agent Dispatcher
- * @version 1.0.1
+ * @version 1.1.0
  * Automates dispatching multiple read-only subagents simultaneously
  *
  * This dispatcher is optimized for tasks that can run independently:
@@ -183,10 +183,14 @@ export async function dispatchParallel(tasks: ParallelAgentTask[]): Promise<Disp
 }
 
 /**
- * CLI entry point
+ * CLI entry point, also callable by variant wrappers (ADR-0050 Part 1).
+ * `args` defaults to process.argv; `defaults` lets a variant supply its own
+ * default task list while reusing the common argument parsing and dispatch.
  */
-async function main() {
-  const args = process.argv.slice(2);
+export async function runCli(
+  args: string[] = process.argv.slice(2),
+  defaults: ParallelAgentTask[] = defaultTasks
+): Promise<void> {
   const customTasks: ParallelAgentTask[] = [];
 
   // Parse custom tasks from command line
@@ -205,7 +209,7 @@ async function main() {
     }
   }
 
-  const tasksToRun = customTasks.length > 0 ? customTasks : defaultTasks;
+  const tasksToRun = customTasks.length > 0 ? customTasks : defaults;
 
   try {
     await dispatchParallel(tasksToRun);
@@ -214,6 +218,13 @@ async function main() {
     console.error('❌ Dispatch failed:', error);
     process.exit(1);
   }
+}
+
+/**
+ * CLI entry point
+ */
+async function main() {
+  await runCli();
 }
 
 /**

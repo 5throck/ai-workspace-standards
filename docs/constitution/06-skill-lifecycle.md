@@ -333,7 +333,7 @@ If audit fails:
 
 #### 6.7 Non-English Reference Material
 
-`skills/*.md` is a protected path under the workspace Language Policy — the `lang: ko` frontmatter exception never applies there, regardless of `lang_reason` (see [CONSTITUTION.md — Non-English Reference Material in Skills](../../CONSTITUTION.md#non-english-reference-material-in-skills)).
+The `lang: ko` frontmatter exception IS available for `skills/*.md` (with a declared `lang_reason`), but it never applies to the protected paths (`CONSTITUTION.md`, `CLAUDE.md`, `GEMINI.md`, `AGENTS.md`, and variant `*.context.md` files) — see [CONSTITUTION.md — Non-English Reference Material in Skills](../../CONSTITUTION.md#non-english-reference-material-in-skills).
 
 When a skill needs source-language reference data (a terminology glossary, official field/status name mappings, source-language excerpts), place it in a **non-Markdown** file under `skills/<name>/references/` (e.g. `references/terms-ko.json`, `references/glossary-ko.csv`). `validate-md-language.ts` only scans `*.md`, so these reference assets are exempt from the English-only policy and may contain the source language directly. `SKILL.md` stays English-only and links to the reference file.
 

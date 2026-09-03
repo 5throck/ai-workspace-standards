@@ -7,6 +7,7 @@ description: >
   in .claude/commands/ and .gemini/commands/ directories. Use when: adding new commands,
   ensuring parity between Claude and Gemini command directories, or propagating commands to templates/common/.
 owner: pm
+scope: common
 last_reviewed: 2026-05-31
 metadata:
   type: process
@@ -41,6 +42,15 @@ Use this skill when:
 3. **Register in common-contract.json**: Add entry to `common_commands` section
 
 4. **Run verification**: `bun scripts/verify-platform-lifecycle.ts` must pass Check G
+
+## Propagation Rule
+
+```
+.claude/commands/<name>.md                    ← Claude Code source
+.gemini/commands/<name>.md                    ← Gemini/Antigravity (if not skip)
+templates/common/.claude/commands/<name>.md   ← Template propagation (Claude)
+templates/common/.gemini/commands/<name>.md   ← Template propagation (if not skip)
+```
 
 ## Verification
 
