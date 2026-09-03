@@ -24,7 +24,7 @@ metadata:
 
 ## Overview
 
-This skill provides a systematic approach to creating, validating, and maintaining skill files. It ensures all skills follow proper structure, have correct frontmatter, and are properly documented in AGENTS.md and docs/context.md.
+This skill provides a systematic approach to creating, validating, and maintaining skill files. It ensures all skills follow proper structure, have correct frontmatter, and are properly documented in AGENTS.md and docs/context.md. (`docs/context.md` — like the other `docs/...` paths this skill mentions — exists inside a generated variant project, not at workspace root.)
 
 ## When to Use This Skill
 

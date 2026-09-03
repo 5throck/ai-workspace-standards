@@ -422,7 +422,7 @@ if (import.meta.main) {
 }
 
 // Workspace-only files that must NOT be copied into new projects
-const WORKSPACE_ONLY_FILES = ['package.json', 'scripts/package.json', 'package-lock.json', 'bun.lock', 'bun.lockb', 'propagation-map.json', 'variant.json'];
+const WORKSPACE_ONLY_FILES = ['package.json', 'scripts/package.json', 'package-lock.json', 'bun.lock', 'bun.lockb', 'variant.json'];
 copyDir(commonDir, projectDir);
 // Ensure all copied files are user-writable (template storage may set read-only bits)
 makeWritable(projectDir);

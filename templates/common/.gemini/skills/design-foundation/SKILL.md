@@ -41,7 +41,7 @@ Derive a **project-specific design system** through a traceable procedure. This 
 
 | Layer | Artifact |
 |-------|----------|
-| Specification (what to define) | `docs/design-foundation.md` (in this template's `docs/`) |
+| Specification (what to define) | `docs/design-foundation.md` (shipped inside a generated variant project's `docs/`; does not exist at workspace root) |
 | Scaffold (how tokens are expressed) | `docs/design-tokens.template.css` |
 | **Procedure (this skill)** | How to derive and apply |
 | Project SSOT (what was chosen) | Project `docs/design.md` + token implementation |

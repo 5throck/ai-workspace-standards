@@ -35,6 +35,16 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 
 ---
 
+## Registry Scope
+
+The registry below intentionally covers top-level `scripts/*.ts` entry points only. The following are deliberately **outside** the registry (helper/internal scope, not standalone lifecycle-managed scripts):
+
+- `scripts/helpers/plugins/*` — plugin modules consumed by registered scripts
+- `scripts/helpers/registries/*` — registry data modules loaded by tooling
+- `scripts/hooks/_test-*.ts` — internal test fixtures for hook scripts
+
+Their absence from the table is policy-consistent, not an oversight.
+
 ## Registry
 
 <!-- verify-scripts.ts parses rows between the Registry header and the next ## header. -->
@@ -147,7 +157,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `hooks/_test-consumer.ts` | L0 | 1.0.0 | active | —| —| L0-only | —|
 | `hooks/_test-module.ts` | L0 | 1.0.0 | active | —| —| L0-only | —|
 | `hooks/agent-model-gate.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `hooks/gateguard-fact-force.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
+| `hooks/gateguard-fact-force.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
 | `hooks/post-write-lifecycle-check.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `hooks/pre-commit.ts` | L0 | 1.5.10 | active | —| —| L0+L1 | —|
 | `hooks/pre-push.ts` | L0 | 1.2.9 | active | —| —| L0+L1 | —|

@@ -2,6 +2,8 @@
 status: Accepted
 date: 2026-08-23
 author: PM + Automation Engineer + Docs Writer
+lang: ko
+lang_reason: source-material
 ---
 
 # ADR-0057: Country Profile Mechanism for Variant Templates

@@ -180,7 +180,8 @@
     "lastTransition": "2026-08-25",
     "phaseA_complete": false,
     "promotion_checklist_passed": false,
-    "notes": "Phase B conversion in progress (PR #1). Phase C template promotion deferred until v10.1 feature phases land."
+    "notes": "Phase B conversion in progress (PR #1). Phase C template promotion deferred until v10.1 feature phases land.",
+    "betaEngagements": []
   },
   "created_at": "2026-08-25",
   "promotionChecklist": "PROMOTION_CHECKLIST.md"

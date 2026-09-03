@@ -2,7 +2,7 @@
 /**
  * gateguard-fact-force.ts — Pre-edit fact-forcing quality gate.
  * Triggered by PreToolUse (Claude Code) or BeforeTool (Gemini CLI).
- * Blocks first edit per file per session until importers are investigated.
+ * Blocks first edit per file per process until importers are investigated.
  *
  * Platform coverage:
  *   Claude Code CLI  — automatic via PreToolUse hook (ask mode)
@@ -10,14 +10,14 @@
  *   Gemini CLI       — automatic via BeforeTool hook (deny mode)
  *   Antigravity      — hooks do not fire (prompt enforcement)
  *
- * State persistence: PID-keyed file in .gateguard-state/ directory.
- * Survives across hook process spawns within the same Claude/Gemini session.
+ * State semantics: the hook process is spawned fresh on every tool call, so
+ * first-edit tracking is per-invocation only (in-memory Map, no persistence).
  *
- * @version 1.2.0
+ * @version 1.3.0
  */
 
-import { readFileSync, writeFileSync, existsSync, mkdirSync, unlinkSync } from 'node:fs';
-import { basename, join } from 'node:path';
+import { readFileSync } from 'node:fs';
+import { basename } from 'node:path';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -40,74 +40,13 @@ const GIT_GREP_GLOBS = ['*.ts', '*.tsx', '*.js', '*.jsx'];
 // Timeout for git grep: 3 seconds
 const GREP_TIMEOUT_MS = 3000;
 
-// State directory for PID-keyed persistence
-const STATE_DIR = join(process.cwd(), '.gateguard-state');
-
 // ---------------------------------------------------------------------------
-// Module-level state — tracks first edit per file per process
+// Module-level state — tracks first edit per file per process.
+// The hook is spawned as a new process for every tool call, so this Map
+// effectively holds state only for the duration of a single invocation.
 // ---------------------------------------------------------------------------
 
 const _firstEditSeen = new Map<string, boolean>();
-
-/** PID-keyed state file path. null if state persistence is unavailable. */
-let _stateFile: string | null = null;
-
-// ---------------------------------------------------------------------------
-// State persistence helpers
-// ---------------------------------------------------------------------------
-
-/**
- * Initialize state persistence. Loads prior state if this PID was used before
- * (rare: PID reuse), otherwise starts fresh. Registers exit cleanup.
- */
-function initState(): void {
-  try {
-    if (!existsSync(STATE_DIR)) {
-      mkdirSync(STATE_DIR, { recursive: true });
-    }
-    _stateFile = join(STATE_DIR, `${process.pid}.json`);
-
-    // Load existing state if file exists (e.g., PID was reused)
-    if (existsSync(_stateFile)) {
-      try {
-        const content = readFileSync(_stateFile, 'utf-8');
-        const entries = JSON.parse(content) as Record<string, boolean>;
-        for (const [key, val] of Object.entries(entries)) {
-          _firstEditSeen.set(key, val);
-        }
-      } catch {
-        // Corrupt or unreadable state file — start fresh
-      }
-    }
-
-    // Cleanup on exit (normal or signal)
-    const cleanup = (): void => {
-      if (_stateFile) {
-        try { unlinkSync(_stateFile); } catch { /* already gone */ }
-      }
-    };
-    process.on('exit', cleanup);
-    process.on('SIGINT', cleanup);
-    process.on('SIGTERM', cleanup);
-  } catch {
-    // State directory creation failed — proceed without persistence
-    _stateFile = null;
-  }
-}
-
-/** Persist current _firstEditSeen state to PID-keyed file. */
-function persistState(): void {
-  if (!_stateFile) return;
-  try {
-    const obj: Record<string, boolean> = {};
-    for (const [key, val] of _firstEditSeen.entries()) {
-      obj[key] = val;
-    }
-    writeFileSync(_stateFile, JSON.stringify(obj), 'utf-8');
-  } catch {
-    // Write failed — non-critical, in-memory state still works
-  }
-}
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -229,9 +168,6 @@ function findConfigReferences(filePath: string): string[] {
 // ---------------------------------------------------------------------------
 
 function main(): void {
-  // 0. Initialize state persistence
-  initState();
-
   // 1. Determine platform and mode from CLI flags
   const args = process.argv.slice(2);
   const platformIdx = args.indexOf('--platform');
@@ -293,7 +229,6 @@ function main(): void {
 
   // Mark as seen
   _firstEditSeen.set(normalizedFile, true);
-  persistState();
 
   // 7. First edit — determine gating strategy
   const isConfig = isGovernedConfig(normalizedFile);

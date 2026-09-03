@@ -344,7 +344,7 @@ async function generateManifest() {
 
 **Generated**: ${new Date().toISOString()}
 **Manifest Version**: ${MANIFEST_VERSION}
-**Location**: ${MANIFEST_PATH}
+**Location**: ${normalizePath(MANIFEST_PATH)}
 
 ---
 
@@ -364,7 +364,7 @@ async function generateManifest() {
 `;
 
     for (const agent of agents) {
-        markdown += `| ${agent.name} | ${agent.file} | ${agent.tier} | ${agent.model} | ${agent.last_modified} |\n`;
+        markdown += `| ${agent.name} | ${normalizePath(agent.file)} | ${agent.tier} | ${agent.model} | ${agent.last_modified} |\n`;
     }
 
     markdown += `
@@ -377,7 +377,7 @@ async function generateManifest() {
 `;
 
     for (const skill of skills) {
-        markdown += `| ${skill.name} | ${skill.version} | ${skill.status || 'active'} | ${skill.location} | ${skill.platform} | ${skill.triggers.join(', ') || 'N/A'} | ${skill.owner} |\n`;
+        markdown += `| ${skill.name} | ${skill.version} | ${skill.status || 'active'} | ${normalizePath(skill.location)} | ${skill.platform} | ${skill.triggers.join(', ') || 'N/A'} | ${skill.owner} |\n`;
     }
 
     markdown += `
@@ -390,7 +390,7 @@ async function generateManifest() {
 `;
 
     for (const script of scripts) {
-        markdown += `| ${script.name} | ${script.version} | ${script.location} | ${script.dependencies.join(', ') || 'N/A'} |\n`;
+        markdown += `| ${script.name} | ${script.version} | ${normalizePath(script.location)} | ${script.dependencies.join(', ') || 'N/A'} |\n`;
     }
 
     markdown += `
@@ -403,7 +403,7 @@ async function generateManifest() {
 `;
 
     for (const cmd of commands) {
-        markdown += `| ${cmd.name} | ${cmd.file} | ${cmd.platform} | ${cmd.skill_integration} |\n`;
+        markdown += `| ${cmd.name} | ${normalizePath(cmd.file)} | ${cmd.platform} | ${cmd.skill_integration} |\n`;
     }
 
     markdown += `

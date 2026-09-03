@@ -96,7 +96,8 @@ This section clearly defines hierarchy and distribution-related terms used in th
 
 ---
 
-### 1. Standard Folder Structure → [Full details](docs/constitution/01-folder-structure.md)
+### 1. Standard Folder Structure
+Full details: [`docs/constitution/01-folder-structure.md`](docs/constitution/01-folder-structure.md)
 
 Every project follows a standard layout with `src/`, `docs/`, `scripts/`, `memory/`, `agents/`, `skills/`, `.github/`, `.claude/`, and `.gemini/` directories. Key rules: `docs/context.md` is mandatory for all projects, `scripts/` must be divided into Tier 1 (Shell) and Tier 2 (Bun/TS) according to their purpose, and ADRs use sequential 4-digit prefix naming (`0001-slug.md`) with mandatory Context/Decision/Consequences sections.
 
@@ -104,31 +105,36 @@ Every project follows a standard layout with `src/`, `docs/`, `scripts/`, `memor
 
 ---
 
-### 2. Memory System → [Full details](docs/constitution/02-memory-system.md)
+### 2. Memory System
+Full details: [`docs/constitution/02-memory-system.md`](docs/constitution/02-memory-system.md)
 
 Every session that produces changes must be logged in `memory/YYYY-MM-DD.md` using the mandatory four-section format (Session Summary, Changes, Decisions, Open Issues). `CHANGELOG.md` is for product-facing changes (what), while `memory/` is for developer-facing documentation (how/why). Both must be in English. Archive when `MEMORY.md` exceeds ~50 rows: move older content to `docs/history.md` and `memory/archive/`.
 
 ---
 
-### 3. GitHub PR Workflow → [Full details](docs/constitution/03-pr-workflow.md)
+### 3. GitHub PR Workflow
+Full details: [`docs/constitution/03-pr-workflow.md`](docs/constitution/03-pr-workflow.md)
 
 All changes reach `main` via Pull Request—never by direct push. The `/sync` pipeline enforces this: memlog → MEMORY.md → CHANGELOG → audit → branch → commit → push → PR. All Git artifacts (commits, PR titles/bodies, branch names, comments) must be in English. Follow Conventional Commits (`feat:`, `fix:`, `docs:`, etc.). Active branches follow pattern `pr/<YYYYMMDD-HHmmss>-<slug>`. Run `git config core.hooksPath .githooks` to bind pre-commit and pre-push hooks. **Sequential Branch Dependency Rule** (§3.3 in the full details doc): merge a prior open PR before branching for the next task, unless the new work is explicitly justified as safe to run in parallel — `dev-sync.ts` touches shared pipeline files (CHANGELOG.md, memory logs, VERSION_MANIFEST.md, generated READMEs) on every commit, so parallel unmerged branches conflict by default, not by exception.
 
 ---
 
-### 4. Internationalization (i18n) → [Full details](docs/constitution/04-i18n.md)
+### 4. Internationalization (i18n)
+Full details: [`docs/constitution/04-i18n.md`](docs/constitution/04-i18n.md)
 
 Apply only to projects with user-facing UI (web app, desktop app, CLI with messages). Pure API servers and libraries are exempt. Standard: 16 languages (`en` default, `ko`, `ja`, `zh-CN`, `zh-TW`, `de`, `es`, `fr`, `pt`, `vi`, `ms`, `id`, `th`, `ru`, `it`, `ar` RTL). Translation files use flat JSON (`locales/<lang-code>.json`). Language detection: `APP_LOCALE` env var → OS locale → `en` fallback. All keys must exist in `en.json` as source of truth. Country profiles (`country_config`, ADR-0057/0058) are an axis independent from i18n locale codes - they scope jurisdiction-specific assets and never redefine language settings (§4.3 in the full details doc).
 
 ---
 
-### 5. Multi-Agent Architecture → [Full details](docs/constitution/05-multi-agent-architecture.md)
+### 5. Multi-Agent Architecture
+Full details: [`docs/constitution/05-multi-agent-architecture.md`](docs/constitution/05-multi-agent-architecture.md)
 
 Every project uses role-based agents defined in `agents/*.md` with YAML frontmatter (tier, model, color, description, examples). Three-tier cost optimization: High-tier models (claude-opus-5-0, gemini-3.1-pro) for PM/Architect; Medium-tier (claude-sonnet-5-0, gemini-3.7-flash) for QA; Low-tier (claude-haiku-4-5, gemini-3.7-flash) for execution. PM orchestrator follows a 6-phase governance workflow (Phase 0: Project Initiation → Phase 1-2: Planning & Architecture → Phase 3: Design Handoff → Phase 4: Execution → Phase 5: Lifecycle Finalization → Phase 6: Quality Assurance & Finalization). See [`docs/workspace-schema.json`](docs/workspace-schema.json) for the canonical phase definitions. See [§5.6 Agent Lifecycle](docs/constitution/05.6-agent-lifecycle.md) for creation/modification procedures.
 
 ---
 
-### 5.5 PM Gateway Workflow → [Full details](AGENTS.md#5-execution-plan-templates) | [Platform dispatch: CLAUDE.md §5](CLAUDE.md#5-agent-dispatch-rules) / [GEMINI.md §5](GEMINI.md#5-agent-dispatch-rules)
+### 5.5 PM Gateway Workflow
+Full details: [`AGENTS.md#5-execution-plan-templates`](AGENTS.md#5-execution-plan-templates) | [Platform dispatch: CLAUDE.md §5](CLAUDE.md#5-agent-dispatch-rules) / [GEMINI.md §5](GEMINI.md#5-agent-dispatch-rules)
 
 All specialist agent dispatch MUST go through the PM orchestrator. The PM Gateway enforces governance consistency across multi-agent tasks through a mandatory execution plan display.
 
@@ -177,7 +183,8 @@ For detailed PM procedures, dispatch rules, and escalation templates, see [`CLAU
 
 ---
 
-### 5.6 Agent Lifecycle Management → [Full details](docs/constitution/05.6-agent-lifecycle.md)
+### 5.6 Agent Lifecycle Management
+Full details: [`docs/constitution/05.6-agent-lifecycle.md`](docs/constitution/05.6-agent-lifecycle.md)
 
 Agents have three states: **active** (production use), **deprecated** (being phased out—reassign skills within 30 days), **retired** (move to `agents/_archive/`, delete after 90 days). PM is the designated owner of all agents. If an agent's prompt contains a vulnerability, immediately set `status: deprecated` and open a PR. Manage lifecycle via `agent-create.ts`, `agent-delete.ts`, and `agent-verify.ts`. After any agent change, update both `AGENTS.md` (canonical roster) and `CONSTITUTION.md §5` (architecture references).
 
@@ -193,7 +200,8 @@ L2 variant `pm.md` files must use the strict additive format utilizing `<!-- VAR
 
 ---
 
-### 6. Skill Lifecycle Management → [Full details](docs/constitution/06-skill-lifecycle.md)
+### 6. Skill Lifecycle Management
+Full details: [`docs/constitution/06-skill-lifecycle.md`](docs/constitution/06-skill-lifecycle.md)
 
 Skills are reusable workflows defined as `skills/<name>/SKILL.md` or `.claude/skills/<name>/SKILL.md`. To enable automated skill discovery by Claude, Gemini, and Antigravity, the `skills/` directory must be registered in the customizations configuration file `.agents/skills.json` at the root of the workspace or project. When creating a new skill, use the `skill-creator` plugin and complete the registration checklist: add to `docs/context.md ## Skills` (individual projects) and `AGENTS.md ## Skills` (workspace root). Skills have four states: **draft**, **active**, **deprecated** (archive after 30 days), **archived** (delete after 90 days). Version bump rules: **patch** (1.0.x) for wording fixes, **minor** (1.x.0) for new steps, **major** (x.0.0) for rewrites. Shared skills (`owner: [agent1, agent2]`) require both owners' approval.
 
@@ -203,7 +211,8 @@ Skills are reusable workflows defined as `skills/<name>/SKILL.md` or `.claude/sk
 
 ---
 
-### 6.5 Script Lifecycle Management → [Full details](docs/constitution/06.5-script-lifecycle.md)
+### 6.5 Script Lifecycle Management
+Full details: [`docs/constitution/06.5-script-lifecycle.md`](docs/constitution/06.5-script-lifecycle.md)
 
 **Script deployment path**:
 - **Source**: workspace root/scripts/ (L0 source)
@@ -219,7 +228,8 @@ Scripts have three statuses: **active** (version bump required on change), **dep
 
 ---
 
-### 6.7 Procedure Lifecycle Management → [Full details](docs/constitution/06.7-procedure-lifecycle.md)
+### 6.7 Procedure Lifecycle Management
+Full details: [`docs/constitution/06.7-procedure-lifecycle.md`](docs/constitution/06.7-procedure-lifecycle.md)
 
 Procedures (`schema.yaml` per workflow) are the canonical source for
 workflow-shaped agent/skill/output orchestration across variants and the L0
@@ -228,7 +238,8 @@ derive procedure/output_type graph nodes; coverage gaps are human judgment
 targets tracked as governance tickets. See
 `docs/constitution/06.7-procedure-lifecycle.md`.
 
-### 6.6 VERSION_MANIFEST System → [Full details](docs/adr/0012-version-manifest-schema.md)
+### 6.6 VERSION_MANIFEST System
+Full details: [`docs/adr/0012-version-manifest-schema.md`](docs/adr/0012-version-manifest-schema.md)
 
 The **VERSION_MANIFEST** is the single source of truth (SSOT) for lifecycle artifact versions across the workspace. It provides centralized visibility into agents, skills, scripts, and commands, along with platform parity status and drift detection.
 
@@ -359,7 +370,8 @@ See [ADR 0012: VERSION_MANIFEST Schema Design](docs/adr/0012-version-manifest-sc
 
 ---
 
-### 7. New Project Initialization → [Full details](docs/constitution/07-new-project.md)
+### 7. New Project Initialization
+Full details: [`docs/constitution/07-new-project.md`](docs/constitution/07-new-project.md)
 
 Every new project starts with `/new-project` (Claude Code) or `bun scripts/new-project.ts` (cross-platform CLI). The script copies `templates/` into the new directory, substitutes `[Project Name]` placeholders, removes `_examples/`, and initializes git with hooks active. Generated files include `docs/context.md` (fill in 10 sections), `AGENTS.md` (ready), 5 agent files (`[Project Name]` already substituted), `CLAUDE.md`/`GEMINI.md` (add project-specific settings if needed), `scripts/` (audit, dev-sync, sync-md), `.githooks/`, `CHANGELOG.md`, `README.md`, `.env.sample`, `.gitignore`, and `memory/MEMORY.md`.
 
@@ -466,13 +478,15 @@ must **not** contain references to it.
 
 ---
 
-### 8. Coding Behavior Guidelines → [Full details](docs/constitution/08-coding-guidelines.md)
+### 8. Coding Behavior Guidelines
+Full details: [`docs/constitution/08-coding-guidelines.md`](docs/constitution/08-coding-guidelines.md)
 
 Behavior guidelines to reduce common LLM coding mistakes. **Think Before Coding**: state assumptions, surface tradeoffs, ask when uncertain. **Simplicity First**: minimum code, no speculative features, no premature abstractions. **Surgical Changes**: touch only what you must, match existing style, clean up only your own orphans. **Goal-Driven Execution**: define verifiable success criteria, loop until confirmed. **Secrets Management**: never hardcode credentials—use `.env.sample` template. **Open-Source Policy**: prefer OSI-approved licenses (MIT, Apache-2.0, BSD), audit after install. **Response Language**: English (all documentation, commit messages, PR artifacts per AGENTS.md §Language Policy). Bilingual READMEs (README.md + README_ko.md) are the designated Korean-language zone. **File Encoding**: all text files UTF-8 without BOM. **Cross-Platform Redirection**: use `> /dev/null 2>&1` in Bash and `$null` in PowerShell; ban `> nul` to prevent Windows device file creation. **Hybrid Scripting**: Tier 1 (Bootstrap) in Native Shell, Tier 2 (Ops/Automation) in Bun/TS + package.json. **Bilingual README**: `templates/*` and workspace root require `README.md` and `README_ko.md` synced via `sync_version: <int>` YAML frontmatter. Other folders like `scripts/` require only English `README.md`. **Error Handling Standard** (ADR-0054): use `scripts/lib/error-handling.ts` for error/exit paths — `die()` for fatal conditions, `fatalError()`+`logError()` for structured errors with remediation; incremental migration rides along with functional changes. **Variant Script Inheritance** (ADR-0050): variant scripts inherit from `templates/common/`, never duplicate it — a `templates/co-*/scripts/` file is only legitimate when genuinely variant-specific. **Computational Integrity**: all numeric outputs in deliverables (aggregations, statistics, percentages, metrics) must be computed by executed code (bun/TypeScript scripts) — never by the model performing arithmetic directly; high-precision or safety-critical computation requires validated external tools (see §8.13). **Accessibility** (ADR-0065): accessibility is a mandatory consideration for any user-facing software feature (web/app/CLI/documents) — WCAG 2.1 AA baseline (keyboard operability with visible focus, contrast, semantic structure & ARIA, multi-encoded status — never color alone, `prefers-reduced-motion`, target sizes); design docs MUST include an Accessibility section and ADRs MUST record accessibility impact; verification via the `accessibility-audit` skill where available (see §8.14).
 
 ---
 
-### 9. Operations Workflow → [Full details](docs/constitution/09-operations-workflow.md)
+### 9. Operations Workflow
+Full details: [`docs/constitution/09-operations-workflow.md`](docs/constitution/09-operations-workflow.md)
 
 Operational procedures for maintaining workspace health and lifecycle hygiene. **Post-Implementation QA (Mandatory)**: All tasks executed based on an `implementation_plan.md` or formal plan MUST undergo a QA validation step via testing or verification scripts before completion, regardless of the agentic tool used (Claude/Antigravity). **Weekly Health Check** (PM, every Friday): Run lifecycle audits (`agent-lifecycle-audit.ts`, `skill-lifecycle-audit.ts`) and review deprecated items. **Monthly Lifecycle Review** (PM + Architect, first Friday): Review deprecated items >30 days, perform archive cleanup (move to `*_archive/` after 30 days, delete after 90), plan template synchronization, create action items. **Quarterly Template Sync** (Architect + PM, start of each quarter): Validate templates, propagate L0 changes to variants, update `templates/VERSION`. **On-Demand Synchronization**: Run `bun scripts/sync-agent-status.ts` and `bun scripts/sync-skill-status.ts` after agent/skill changes. **Operational Metrics**: Track agent/skill health (100% target), deprecated backlog (<5 items), archive age (<90 days), template sync lag (<7 days).
 
@@ -590,7 +604,8 @@ See [docs/constitution/06-skill-lifecycle.md](docs/constitution/06-skill-lifecyc
 A mechanism that allows variant-specific validation checks to be executed during the synchronization and validation pipeline without modifying core script files (e.g., `dev-sync.ts`, `audit.ts`). Variant-specific audits are placed in `scripts/audit-variant.ts`. If this script is present, the core validation runner (`audit.ts`) dynamically detects and executes it. Any non-zero exit code from `audit-variant.ts` will fail the audit gate.
 <!-- COMMON-CONSTITUTION:END -->
 
-### 11. Governance Enforcement Layers → [Full details](docs/designs/ecc-phase1-governance-design.md)
+### 11. Governance Enforcement Layers
+Full details: [`docs/designs/ecc-phase1-governance-design.md`](docs/designs/ecc-phase1-governance-design.md)
 
 Governance rules are enforced at three layers, ensuring coverage across all 4 supported platforms (Claude Code CLI, Claude Desktop App, Gemini CLI, Antigravity).
 
@@ -623,7 +638,7 @@ Before the first edit of any file per session, agents MUST investigate importers
 - **Antigravity**: Hooks do not fire — agent self-enforces via prompt
 - **Manual**: `/gateguard` command or `gateguard` skill invocation
 
-**State persistence**: GateGuard maintains a PID-keyed state file (`.gateguard-state/<pid>.json`) so that first-edit tracking survives across hook process spawns within the same session. State file is cleaned up on process exit.
+**State semantics**: First-edit tracking is per hook invocation. The hook process is spawned fresh for every tool call, so there is no cross-invocation state; the gate re-evaluates each file on each hook run.
 
 **Non-code file scope**: High-value config files (`CLAUDE.md`, `GEMINI.md`, `AGENTS.md`, `CONSTITUTION.md`, `package.json`) are gated via reference-based search — `git grep` finds files that reference the target filename. If references exist, the edit is gated (ask/deny). If no references, the edit passes through.
 

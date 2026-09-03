@@ -67,6 +67,8 @@ The upgrade tool classifies files into categories:
 | **PRESERVE** | Never touched | `README.md`, `src/` |
 | **OVERWRITE** | Governance files | `docs/_common/security.md` |
 
+> **Path note**: the `docs/...` paths in the tables above (`docs/context.md`, `docs/phase-definitions.md`, `docs/engagement-orchestration.md`, `docs/team-configuration-guide.md`, `docs/_common/security.md`, etc.) live inside the generated variant project being upgraded, not at the workspace root.
+
 ### Supported Managed Block Markers
 
 The merge engine recognizes these marker patterns for section-based merge:
