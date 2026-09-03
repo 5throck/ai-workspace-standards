@@ -1,3 +1,8 @@
+---
+lang: ko
+lang_reason: source-material
+---
+
 # AGPL-3.0 License Rollout Across Variant Templates
 
 | Field | Value |

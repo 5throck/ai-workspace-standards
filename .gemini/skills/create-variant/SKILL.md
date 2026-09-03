@@ -66,7 +66,7 @@ bun scripts/create-l3-scaffold.ts labor-kr --domain hr --country KR
 
 This creates `Projects/<variant-name>/` with:
 - All common infrastructure (.claude/, .gemini/, scripts/, skills/) — every top-level file/dir under `templates/common/` is copied by default except a short, documented exclusion list (`COMMON_OVERLAY_EXCLUDE` in the script), so new common files show up automatically without needing a script change
-- `docs/context.md` (the immutable common project-context file, placeholders substituted) + `docs/_common/*`
+- `docs/context.md` (the immutable common project-context file, placeholders substituted) + `docs/_common/*` (all `docs/...` paths referenced by skills — `context.md`, `user-guide.md`, `phase-definitions.md`, `engagement-orchestration.md`, `team-configuration-guide.md`, `_common/security.md`, etc. — exist inside a generated variant project, not at workspace root)
 - `.gitattributes` with a `docs/context.md merge=ours` protection rule
 - Git initialized + .githooks configured
 - bun install complete

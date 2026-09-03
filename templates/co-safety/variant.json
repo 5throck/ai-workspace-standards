@@ -1,6 +1,6 @@
 {
   "name": "co-safety",
-  "description": "EHS (Environmental Health & Safety) AI Agent platform for South Korea regulatory compliance",
+  "description": "EHS (Environmental Health & Safety) AI Agent platform for jurisdiction-specific regulatory compliance (country profiles under docs/countries/)",
   "variant_type": "safety",
   "status": "beta",
   "version": "0.1.0",
@@ -9,7 +9,8 @@
   "lifecycle": {
     "statusSince": "2026-06-04",
     "lastTransition": "Phase A completed on 2026-08-06",
-    "stablePromotedOn": null
+    "stablePromotedOn": null,
+    "betaEngagements": []
   },
   "agents": [
     {
@@ -197,7 +198,7 @@
     "supported": [
       "KR"
     ],
-    "default": "KR",
+    "default": null,
     "locales": [
       "ko"
     ]

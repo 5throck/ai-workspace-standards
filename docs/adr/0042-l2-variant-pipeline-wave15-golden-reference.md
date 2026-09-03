@@ -1,3 +1,8 @@
+---
+lang: ko
+lang_reason: source-material
+---
+
 # ADR-0042: L2-to-Variant Pipeline — Wave 1.5 Normalization Stage and Golden Reference Comparison
 
 Date: 2026-06-19

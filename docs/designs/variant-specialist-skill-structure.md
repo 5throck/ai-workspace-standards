@@ -1,3 +1,8 @@
+---
+lang: ko
+lang_reason: source-material
+---
+
 # Variant Specialist Skill File Structure
 
 > **Architect**: Canonical format specification for specialist skill files inside template variants

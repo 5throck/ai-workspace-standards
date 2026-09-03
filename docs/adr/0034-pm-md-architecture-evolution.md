@@ -1,5 +1,7 @@
 ---
 status: "Accepted"
+lang: ko
+lang_reason: source-material
 ---
 
 # ADR-0034: PM.md Architecture Evolution (v1.0 → v2.0)

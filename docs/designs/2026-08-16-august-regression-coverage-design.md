@@ -1,3 +1,8 @@
+---
+lang: ko
+lang_reason: source-material
+---
+
 # Design: August 2026 Regression-Coverage Gaps (3 Problems)
 
 **Author**: architect

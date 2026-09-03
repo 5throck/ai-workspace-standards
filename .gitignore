@@ -16,9 +16,6 @@
 nul
 NUL
 
-# --- GateGuard PID-keyed state persistence (session-local) ---
-.gateguard-state/
-
 # --- Beta lifecycle raw tracking state (local operational data — must not be
 # committed: holds per-engagement client identifiers and bug descriptions).
 # Already caught by the /*/  rule above; documented explicitly here so this
@@ -123,7 +120,7 @@ NUL
 
 # --- Antigravity/ZCode session-local state (already caught by the /*/  rule
 # above; documented explicitly per this file's own convention for local-only
-# state directories, e.g. .gateguard-state/ and .pipeline-state/ above) ---
+# state directories, e.g. .pipeline-state/ above) ---
 .zcode/
 
 # --- Sandbox for testing ---

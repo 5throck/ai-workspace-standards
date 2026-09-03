@@ -1,3 +1,8 @@
+---
+lang: ko
+lang_reason: source-material
+---
+
 # 설계: co-newbiz — 신사업 검토 시스템 구축·운영 AI Team
 
 **Date**: 2026-08-19

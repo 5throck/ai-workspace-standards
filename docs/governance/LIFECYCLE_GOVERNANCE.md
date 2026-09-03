@@ -1,8 +1,13 @@
+---
+lang: ko
+lang_reason: source-material
+---
+
 # Lifecycle Governance
 
 > **Doc intent:** Human-readable governance specification for the 5-domain × 3-layer lifecycle model.
 > Machine-readable policy is in [`lifecycle-governance.json`](lifecycle-governance.json).
-> Last Updated: 2026-08-14
+> Last Updated: 2026-09-03
 
 ---
 

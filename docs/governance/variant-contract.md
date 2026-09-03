@@ -1,3 +1,8 @@
+---
+lang: ko
+lang_reason: source-material
+---
+
 # Variant Contract
 
 Every variant under `templates/` MUST contain all files listed in the **Required** column.

@@ -1,3 +1,8 @@
+---
+lang: ko
+lang_reason: source-material
+---
+
 > Part of [CONSTITUTION.md](../../CONSTITUTION.md) — §8 Coding Behavior Guidelines
 > **Do not edit in isolation** — changes must be reflected in the hub index.
 
