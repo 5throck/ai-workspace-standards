@@ -2,7 +2,9 @@
 code: KR
 name: Republic of Korea
 status: active
-last_verified: 2026-08-27
+last_verified: 2026-09-04
+lang: ko
+lang_reason: legal
 ---
 # Country Profile: KR - Republic of Korea
 
@@ -18,7 +20,7 @@ Core EHS statute families:
 
 | Statute | Domain |
 |---------|--------|
-| `산업안전보건법` (Occupational Safety and Health Act) | General EHS obligations; 위험성평가 (Art 36), 작업허가 (Art 38), PSM (Art 44), MSDS 비치 (Art 110) |
+| `산업안전보건법` (Occupational Safety and Health Act) | General EHS obligations; 위험성평가 (Art 36), 안전조치 (Art 38, the statutory basis for permit-to-work detailed in the 산업안전보건기준에 관한 규칙), PSM (Art 44), MSDS 비치 (Art 110) |
 | `중대재해처벌법` (Serious Accidents Punishment Act) | Executive/corporate criminal liability for serious accidents; safety-and-health duty of the responsible executive |
 | `화학물질관리법` (Chemical Control Act) | Chemical registration, risk assessment, MSDS/GHS classification |
 | `고압가스안전관리법` (High-Pressure Gas Safety Act) | High-pressure gas storage, handling, and facility permits |
@@ -35,15 +37,15 @@ Regulators and public bodies:
 
 Licensed professionals:
 
-- `안전보건관리자` (Safety and Health Manager) — mandatory appointment under OSHA-KR for workplace safety management
-- `비상계획관리자` (Emergency Plan Manager) — PSM emergency-plan oversight per OSHA-KR Art 44
+- `안전보건관리책임자` (OSH Management Controller, OSHA-KR Art 15) and `안전관리자`/`보건관리자` (Safety Manager / Health Manager, OSHA-KR Arts 16-17) — mandatory appointments for workplace safety management
+- `공정안전관리` 비상계획 (PSM emergency planning) — required of the business owner under OSHA-KR Art 44; there is no separately licensed "emergency plan manager" designation
 - `공인노무사` (Certified Labor Attorney) — labor-law compliance advisory
 - `변호사` (Attorney) — for matters requiring legal determination or litigation
 
 Key obligations for EHS operations:
 
 - `위험성평가` (Risk Assessment) — mandatory workplace risk evaluation per OSHA-KR Art 36
-- `작업허가` (Permit-to-Work) — high-risk or non-routine work authorization per OSHA-KR Art 38
+- `작업허가` (Permit-to-Work) — high-risk or non-routine work authorization per OSHA-KR Art 38 (안전조치) as operationalized by the 산업안전보건기준에 관한 규칙 (e.g., Art 237 confined-space permit)
 - `안전보건교육` (Safety Training) — worker safety training requirements per OSHA-KR Art 29
 - `MSDS 비치` (MSDS Availability) — hazardous chemical safety data sheet placement per OSHA-KR Art 110
 - `공정안전관리` (PSM) — Process Safety Management for high-hazard processes per OSHA-KR Art 44
