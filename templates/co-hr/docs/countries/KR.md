@@ -2,7 +2,9 @@
 code: KR
 name: Republic of Korea
 status: active
-last_verified: 2026-08-23
+last_verified: 2026-09-04
+lang: ko
+lang_reason: legal
 ---
 # Country Profile: KR - Republic of Korea
 

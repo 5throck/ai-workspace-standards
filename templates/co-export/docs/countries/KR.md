@@ -2,7 +2,9 @@
 code: KR
 name: Republic of Korea
 status: active
-last_verified: 2026-08-23
+last_verified: 2026-09-04
+lang: ko
+lang_reason: legal
 ---
 
 # Country Profile: KR — Republic of Korea
@@ -32,8 +34,8 @@ broad FTA network, and a drawback regime that is generous but deadline-driven.
 
 **KR FTA network (major agreements):** RCEP, Korea–US (KORUS), Korea–EU, Korea–China,
 Korea–ASEAN, Korea–India (CEPA), Korea–EFTA, Korea–UK, Korea–Peru, Korea–Turkey,
-Korea–Australia, Korea–Canada, Korea–Vietnam, Korea–Colombia, Korea–Israel, Korea–CEPA
-(Central America). Each carries its own rules-of-origin annex — never assume criterion
+Korea–Australia, Korea–Canada, Korea–Vietnam (VKFTA), Korea–Colombia, Korea–Israel,
+Korea–Central America. Each carries its own rules-of-origin annex — never assume criterion
 harmonization across agreements.
 
 **Licensed professionals:** customs brokers (`관세사`, licensed by KCS) file declarations through
