@@ -10,6 +10,9 @@ last_reviewed: 2026-08-08
 status: active
 owner: trade-documentation-specialist
 prerequisites: none
+relates_to:
+  - skill: logistics-coordination
+    type: follows
 ---
 
 ## Context
@@ -23,6 +26,12 @@ not re-derive classification, origin, or control status.
 - Shipment is ready to move and a full document set needs to be prepared
 - Client has received L/C terms and needs a discrepancy-risk review before accepting
 - A document inconsistency (HS code, value, quantity, origin claim) needs to be tracked down
+
+## Prerequisites
+
+- Confirmed HS code, origin determination, and export control status from compliance specialists
+- Commercial terms (Incoterms, payment method) from the sales contract
+- L/C terms (if letter of credit is the payment method)
 
 ## Execution Steps
 
@@ -52,6 +61,14 @@ not re-derive classification, origin, or control status.
 - Document checklist with per-document status (drafted / pending compliance input / final)
 - Draft document templates with compliance-sourced fields populated
 - L/C discrepancy risk review with specific clause citations
+
+## Quality Criteria
+
+- [ ] Document checklist covers all required documents for the shipment's compliance profile
+- [ ] Cross-document consistency verified (HS code, value, quantity, origin claim identical across all documents)
+- [ ] L/C terms reviewed against UCP 600 discrepancy risks (if L/C applies)
+- [ ] Certificate of origin format matches the certification method determined by fta-origin-analyst
+- [ ] Outstanding items clearly marked as pending compliance input
 
 ## Related Skills
 

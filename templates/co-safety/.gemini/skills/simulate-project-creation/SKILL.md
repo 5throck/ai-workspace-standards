@@ -1,4 +1,5 @@
 ---
+scope: co-safety
 name: simulate-project-creation
 description: Performs end-to-end (E2E) testing of the project scaffolding scripts to verify cross-platform functionality and encoding integrity.
 version: 1.0.0

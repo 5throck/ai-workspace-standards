@@ -10,6 +10,9 @@ last_reviewed: 2026-08-25
 status: active
 owner: fta-origin-analyst
 prerequisites: fta-origin-determination
+relates_to:
+  - skill: halal-certification-workflow
+    type: follows
 metadata:
   type: domain
   triggers:

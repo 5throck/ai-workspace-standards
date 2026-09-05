@@ -18,6 +18,13 @@ version: 1.3.1
 last_reviewed: 2026-07-19
 prerequisites:
   - k-dart
+relates_to:
+  - skill: company-intelligence
+    type: composes_with
+  - skill: financial-modeling
+    type: composes_with
+  - skill: insight-synthesis
+    type: composes_with
 metadata:
   type: analysis
   tier: medium

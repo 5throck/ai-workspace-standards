@@ -10,6 +10,11 @@ status: active
 owner: pm
 last_reviewed: 2026-07-19
 prerequisites: none
+relates_to:
+  - skill: arcade-physics
+    type: follows
+  - skill: test-driven-development
+    type: follows
 gemini-parity: skip
 metadata:
   type: process

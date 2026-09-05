@@ -12,6 +12,9 @@ last_reviewed: 2026-08-25
 status: active
 owner: data-analyst
 prerequisites: none
+relates_to:
+  - skill: consulting-report-writing
+    type: follows
 metadata:
   type: domain
   triggers:

@@ -8,6 +8,11 @@ status: active
 owner: security-expert
 last_reviewed: 2026-08-25
 prerequisites: Finding documents in docs/findings/ (FIND-NNNN) and/or scanner outputs covering the same code from two or more passes or tools
+relates_to:
+  - skill: spdx-sbom
+    type: follows
+  - skill: sarif-exporter
+    type: composes_with
 scope: co-security
 l2_propagate: true
 metadata:

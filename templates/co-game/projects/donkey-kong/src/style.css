@@ -1,0 +1,28 @@
+:root {
+  font-family: monospace;
+}
+
+body {
+  margin: 0;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.frame {
+  text-align: center;
+}
+
+canvas {
+  image-rendering: pixelated;
+  border: 4px solid #f80000;
+  border-radius: 4px;
+}
+
+.help {
+  color: #fcc838;
+  font-size: 12px;
+  letter-spacing: 1px;
+}

@@ -182,28 +182,41 @@ export const FRUIT_DISPLAY_DURATION = 10000; // how long fruit stays visible
 
 // === Power Pellet / Frightened Mode ===
 
+// Arcade-faithful fright durations in ms (level → duration; 0 from level 17).
 export const FRIGHTENED_DURATIONS: Record<number, number> = {
   1: 6000,
   2: 5000,
   3: 4000,
   4: 3000,
   5: 2000,
-  6: 2000,
+  6: 5000,
   7: 2000,
   8: 2000,
-  9: 2000,
-  10: 2000,
+  9: 1000,
+  10: 5000,
   11: 2000,
-  12: 2000,
-  13: 2000,
-  14: 2000,
-  15: 2000,
-  16: 2000,
-  17: 2000,
-  18: 2000,
-  19: 2000,
-  20: 2000,
+  12: 1000,
+  13: 1000,
+  14: 3000,
+  15: 1000,
+  16: 1000,
+  17: 0,
+  18: 1000,
+  19: 0,
+  20: 0,
 };
+
+// === Cruise Elroy (Blinky) dot thresholds by level (1–2, 3–4, 5+) ===
+export const ELROY_DOT_THRESHOLDS: Record<number, [number, number]> = {
+  1: [20, 10],
+  2: [30, 15],
+  3: [40, 20],
+  4: [40, 20],
+  5: [40, 20],
+};
+
+// READY! display duration at stage start.
+export const READY_DURATION = 2000;
 
 // === Game Loop ===
 
@@ -216,9 +229,14 @@ export const RESPAWN_PAUSE_DURATION = 2000; // 2s pause after death before respa
 
 // === Ghost House Release Timers (milliseconds) ===
 
-export const PINKY_RELEASE_TIME = 2000; // 2 seconds after game start
-export const INKY_RELEASE_DOTS = 30; // dots eaten before Inky is released
-export const CLYDE_RELEASE_DOTS = 60; // dots eaten before Clyde is released
+export const INKY_RELEASE_DOTS = 30; // personal counter: dots since Pinky left
+export const CLYDE_RELEASE_DOTS = 60; // personal counter: dots since Inky left
+// Global counter after a life is lost (arcade level-1 values).
+export const GLOBAL_RELEASE_DOTS: Record<string, number> = {
+  PINKY: 7,
+  INKY: 17,
+  CLYDE: 32,
+};
 export const GHOST_HOUSE_PAUSE_DURATION = 500; // 0.5s pause when eaten ghost returns
 
 // === Scatter/Chase Cycles (milliseconds) ===

@@ -98,6 +98,7 @@ export class CollisionSystem {
 
     // --- X axis resolution ---
     // Check left/right collisions against solid walls (tile = 1)
+    entity.touchingWall = 0;
     const checkHorizontal = (xVal: number) => {
       const col = Math.floor(xVal / ts);
       const startRow = Math.floor(entity.top / ts);
@@ -117,12 +118,14 @@ export class CollisionSystem {
       if (hit) {
         entity.x = hit.col * ts - entity.width;
         entity.vx = 0;
+        entity.touchingWall = 1;
       }
     } else if (entity.vx < 0) {
       const hit = checkHorizontal(entity.left);
       if (hit) {
         entity.x = (hit.col + 1) * ts;
         entity.vx = 0;
+        entity.touchingWall = -1;
       }
     }
   }

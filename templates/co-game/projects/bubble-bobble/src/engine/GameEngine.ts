@@ -2,7 +2,8 @@ import { Player } from '../entities/Player';
 import { Enemy } from '../entities/Enemy';
 import { Bubble, BubbleType } from '../entities/Bubble';
 import { Item, ItemType } from '../entities/Item';
-import { WaterWave, FireFlame, LightningBolt } from '../entities/SpecialProjectiles';
+import { WaterWave, FireFlame, LightningBolt, EnemyRock } from '../entities/SpecialProjectiles';
+import { SkelMonsta } from '../entities/SkelMonsta';
 import { TileMap, CollisionSystem } from '../systems/CollisionSystem';
 import { PhysicsSystem, SCREEN_WIDTH, SCREEN_HEIGHT } from '../systems/PhysicsSystem';
 import { InputHandler } from '../utils/InputHandler';
@@ -13,6 +14,7 @@ import { audio } from '../audio/AudioSystem';
 import { ProceduralSprites } from '../rendering/ProceduralSprites';
 import { TileRenderer, TILE_THEMES } from '../rendering/TileRenderer';
 import { ParticleSystem } from '../rendering/ParticleSystem';
+import { loadHighScore, saveHighScore } from '../systems/HighScore';
 
 export type GameState = 'START_SCREEN' | 'PLAYING' | 'STAGE_CLEAR' | 'GAME_OVER';
 
@@ -20,6 +22,7 @@ interface PopTask {
   bubble: Bubble;
   delay: number;
   comboCount: number;
+  owner: Player;
 }
 
 interface WindParticle {
@@ -40,19 +43,45 @@ const BUBBLE_POP_COLORS: { [key: string]: string } = {
 const LANDING_VY_THRESHOLD = 2.5;
 
 // Pool of enemy spawn points/types, sliced per-stage by STAGE_META.enemyCount.
+// INVADER (Blubbor) entries at the tail only appear in later stages (8+).
 const ENEMY_SPAWN_POOL: Array<{ x: number; y: number; type: EnemyType }> = [
   { x: 240, y: 100, type: 'ZEN_CHAN' },
   { x: 160, y: 200, type: 'MIGHTA' },
   { x: 360, y: 240, type: 'ZEN_CHAN' },
   { x: 120, y: 200, type: 'MIGHTA' },
   { x: 400, y: 160, type: 'ZEN_CHAN' },
-  { x: 280, y: 280, type: 'MIGHTA' },
-  { x: 440, y: 120, type: 'ZEN_CHAN' },
+  { x: 280, y: 280, type: 'INVADER' },
+  { x: 440, y: 120, type: 'INVADER' },
 ];
+
+// Arcade layout count: the 20 stage layouts repeat across the 100 rounds.
+const LAYOUT_COUNT = 20;
+// Rounds 1-100, like the original arcade. After round 100 the game loops back
+// to round 1 with retained difficulty (the arcade's "Super" loop).
+const MAX_ROUND = 100;
+
+// Difficulty escalation per completed 20-round cycle (capped).
+const CYCLE_SPEED_MULTIPLIER = 1.08; // enemy speed +8% per completed cycle
+const CYCLE_HURRY_UP_FACTOR = 0.9;   // hurry-up threshold 10% shorter per cycle
+const CYCLE_CAP = 5;                 // effective cycle index cap (speed x~1.47)
+const MIN_HURRY_UP_SECONDS = 10;
 
 // "Hurry Up" enrage mechanic: after this many seconds without clearing the
 // stage, remaining enemies turn angry (angry sprite variant + speed boost).
 const HURRY_UP_THRESHOLD_SECONDS = 30;
+
+// Skel-Monsta chase: spawns this many seconds after the hurry-up enrage if
+// the stage is still not cleared. Only one exists at a time.
+const SKEL_MONSTA_DELAY_SECONDS = 15;
+
+// Dead players with remaining lives respawn after this delay.
+const PLAYER_RESPAWN_SECONDS = 2;
+
+// Arcade chain-scoring for simultaneous multi-pops (1986 Taito values).
+const CHAIN_SCORES = [400, 800, 1600, 3200, 5000, 7000];
+
+// Original caps concurrent bubbles per player (approximately 7–8 on screen).
+const MAX_BUBBLES_ON_SCREEN = 8;
 
 export class GameEngine {
   private canvas: HTMLCanvasElement;
@@ -60,30 +89,33 @@ export class GameEngine {
   private input: InputHandler;
 
   public state: GameState = 'START_SCREEN';
-  public player: Player;
+  // Two-player co-op: players[0] is Bub (P1), players[1] is Bob (P2).
+  public players: Player[];
   public enemies: Enemy[] = [];
   public bubbles: Bubble[] = [];
   public items: Item[] = [];
-  
+
   // Special projectiles
   public waterWaves: WaterWave[] = [];
   public fireFlames: FireFlame[] = [];
   public lightningBolts: LightningBolt[] = [];
+  public enemyRocks: EnemyRock[] = [];
+  public skelMonsta: SkelMonsta | null = null;
 
   public currentStageMap: TileMap;
+  // Global stage counter (0-based). Layout = counter % 20, round = (counter % 100) + 1.
   public currentStageIndex: number = 0;
-  
+
   private lastTime: number = 0;
   private accumulator: number = 0;
   private readonly fixedDt: number = 1000 / 60; // 60fps fixed step (~16.67ms)
 
-  // Invincibility frame timer for player
-  private invincibilityTimer: number = 0;
   private stageClearTimer: number = 0;
 
   // Hurry Up enrage mechanic state
   private stageElapsedTime: number = 0;
   private hurryUpTriggered: boolean = false;
+  private skelMonstaTimer: number = 0;
 
   // Staggered pop cascade queue
   private popQueue: PopTask[] = [];
@@ -103,13 +135,13 @@ export class GameEngine {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d')!;
     this.input = new InputHandler();
-    this.player = new Player(64, 360);
+    this.players = [new Player(64, 360, 0), new Player(96, 360, 1)];
     this.currentStageMap = STAGE_FACTORIES[0]();
 
     // Initialize graphics sprites cache
     ProceduralSprites.init();
     TileRenderer.init(this.currentStageMap.tileSize);
-    
+
     if (typeof window !== 'undefined') {
       window.addEventListener('keydown', (e) => {
         if (this.state === 'START_SCREEN' && (e.code === 'Enter' || e.code === 'Space')) {
@@ -122,9 +154,32 @@ export class GameEngine {
     }
   }
 
+  // Backwards-compatible accessor: P1 (Bub).
+  public get player(): Player {
+    return this.players[0];
+  }
+
+  // Current round number, 1-100 (arcade progression).
+  public get currentRound(): number {
+    return (this.currentStageIndex % MAX_ROUND) + 1;
+  }
+
+  // Number of completed 20-round cycles (difficulty escalation), capped.
+  public get difficultyCycle(): number {
+    return Math.min(Math.floor(this.currentStageIndex / LAYOUT_COUNT), CYCLE_CAP);
+  }
+
+  // Hurry-up threshold shrinks 10% per completed cycle, with a floor.
+  public get hurryUpThreshold(): number {
+    return Math.max(
+      MIN_HURRY_UP_SECONDS,
+      HURRY_UP_THRESHOLD_SECONDS * Math.pow(CYCLE_HURRY_UP_FACTOR, this.difficultyCycle)
+    );
+  }
+
   private startGame(): void {
     this.state = 'PLAYING';
-    this.player = new Player(64, 360);
+    this.players = [new Player(64, 360, 0), new Player(96, 360, 1)];
     this.currentStageIndex = 0;
     this.loadStage(this.currentStageIndex);
     audio.playBGM(STAGE_META[this.currentStageIndex % STAGE_META.length].themeIndex);
@@ -136,33 +191,66 @@ export class GameEngine {
     this.waterWaves = [];
     this.fireFlames = [];
     this.lightningBolts = [];
+    this.enemyRocks = [];
+    this.skelMonsta = null;
     this.popQueue = [];
     this.windParticles = [];
     this.particles.clear();
 
-    const stageIndex = index % STAGE_FACTORIES.length;
-    const meta = STAGE_META[stageIndex];
+    const layoutIndex = index % LAYOUT_COUNT;
+    const meta = STAGE_META[layoutIndex];
 
-    this.currentStageMap = STAGE_FACTORIES[stageIndex]();
+    this.currentStageMap = STAGE_FACTORIES[layoutIndex]();
+
+    // Per-cycle difficulty: +8% enemy speed per completed 20-round cycle.
+    const cycleSpeed = Math.pow(CYCLE_SPEED_MULTIPLIER, this.difficultyCycle);
     this.enemies = ENEMY_SPAWN_POOL.slice(0, meta.enemyCount).map((spawn) => {
       const enemy = new Enemy(spawn.x, spawn.y, spawn.type);
-      enemy.speed *= meta.enemySpeedMultiplier;
+      enemy.speed *= meta.enemySpeedMultiplier * cycleSpeed;
       enemy.vx = enemy.direction * enemy.speed;
       return enemy;
     });
 
-    // Reset player position
-    this.player.x = 64;
-    this.player.y = 360;
-    this.player.vx = 0;
-    this.player.vy = 0;
-    this.player.isGrounded = false;
-    this.invincibilityTimer = 1.5; // 1.5s invincibility at start
+    // Reset player positions; dead players with remaining lives come back.
+    this.players.forEach((player, i) => {
+      player.x = i === 0 ? 64 : 96;
+      player.y = 360;
+      player.vx = 0;
+      player.vy = 0;
+      player.isGrounded = false;
+      player.invincibleTimer = 1.5; // 1.5s invincibility at start
+      if (!this.isOutOfLives(player)) {
+        player.dead = false;
+        player.respawnTimer = 0;
+      }
+    });
 
     // Reset Hurry Up enrage timer for the new stage
     this.stageElapsedTime = 0;
     this.hurryUpTriggered = false;
+    this.skelMonstaTimer = 0;
     audio.setHurryUp(false);
+  }
+
+  private isOutOfLives(player: Player): boolean {
+    return player.lives <= 0;
+  }
+
+  // Nearest living player to a point, or null when everyone is out.
+  private nearestLivingPlayer(x: number, y: number): Player | null {
+    let nearest: Player | null = null;
+    let bestDist = Infinity;
+    this.players.forEach((player) => {
+      if (player.dead || this.isOutOfLives(player)) return;
+      const dx = player.centerX - x;
+      const dy = player.centerY - y;
+      const dist = dx * dx + dy * dy;
+      if (dist < bestDist) {
+        bestDist = dist;
+        nearest = player;
+      }
+    });
+    return nearest;
   }
 
   private triggerHurryUp(): void {
@@ -199,7 +287,7 @@ export class GameEngine {
     requestAnimationFrame((t) => this.run(t));
   }
 
-  private triggerChainPop(startBubble: Bubble): void {
+  private triggerChainPop(startBubble: Bubble, owner: Player): void {
     const queue: Bubble[] = [startBubble];
     const visited = new Set<Bubble>([startBubble]);
     let index = 0;
@@ -212,7 +300,8 @@ export class GameEngine {
       this.popQueue.push({
         bubble: current,
         delay: depth * 2,
-        comboCount: index
+        comboCount: index,
+        owner
       });
 
       this.bubbles.forEach((other) => {
@@ -235,7 +324,7 @@ export class GameEngine {
     }
   }
 
-  private spawnPopLoot(bubble: Bubble): void {
+  private spawnPopLoot(bubble: Bubble, comboCount: number, owner: Player): void {
     const popColor = BUBBLE_POP_COLORS[bubble.type] ?? BUBBLE_POP_COLORS.STANDARD;
 
     if (bubble.trappedEnemy) {
@@ -246,12 +335,13 @@ export class GameEngine {
 
       // 8% chance each of spawning Sneakers or Candy if not already held
       const powerRoll = Math.random();
-      if (powerRoll < 0.08 && !this.player.hasSneakers) {
+      if (powerRoll < 0.08 && !owner.hasSneakers) {
         this.items.push(new Item(bubble.x + 24, bubble.y, 'SNEAKERS'));
-      } else if (powerRoll < 0.16 && !this.player.hasCandy) {
+      } else if (powerRoll < 0.16 && !owner.hasCandy) {
         this.items.push(new Item(bubble.x + 24, bubble.y, 'CANDY'));
       }
-      this.player.score += 1000;
+      // Arcade chain values: 400 → 800 → 1600 → 3200 → 5000 → 7000 (cap).
+      owner.score += CHAIN_SCORES[Math.min(comboCount, CHAIN_SCORES.length - 1)];
       bubble.trappedEnemy.active = false;
 
       // Trigger screen shake and hit-stop
@@ -270,7 +360,7 @@ export class GameEngine {
     // Trigger special bubble pop actions
     if (bubble.type === 'WATER') {
       // Release water wave moving along the bubble's direction (or default player direction)
-      const dir = this.player.direction;
+      const dir = owner.direction;
       this.waterWaves.push(new WaterWave(bubble.x, bubble.y, dir));
     } else if (bubble.type === 'FIRE') {
       // Drops fire flame straight down
@@ -282,12 +372,42 @@ export class GameEngine {
     }
   }
 
+  private killPlayer(player: Player): void {
+    player.lives--;
+    audio.playDeath();
+    // Reset power-up flags on death
+    player.hasSneakers = false;
+    player.hasCandy = false;
+    if (this.isOutOfLives(player)) {
+      // Out of the game for good.
+      player.dead = true;
+      player.respawnTimer = 0;
+    } else {
+      // Waits 2s, then respawns at the spawn point while the other keeps playing.
+      player.dead = true;
+      player.respawnTimer = PLAYER_RESPAWN_SECONDS;
+      player.vx = 0;
+      player.vy = 0;
+    }
+
+    // Game over only when both players are out of lives.
+    if (this.players.every((p) => this.isOutOfLives(p))) {
+      this.state = 'GAME_OVER';
+      saveHighScore(Math.max(...this.players.map((p) => p.score)));
+      audio.stopBGM();
+      audio.playGameOver();
+    }
+  }
+
   private update(dt: number): void {
     if (this.state !== 'PLAYING') {
       if (this.state === 'STAGE_CLEAR') {
         this.stageClearTimer -= (1 / 60) * dt;
         if (this.stageClearTimer <= 0) {
-          this.currentStageIndex = (this.currentStageIndex + 1) % STAGE_FACTORIES.length; // Loop ten stages
+          // Advance the global stage counter. Layout wraps every 20 layouts;
+          // rounds run 1-100, then loop back to 1 with retained difficulty
+          // (the arcade's Super-round behavior).
+          this.currentStageIndex++;
           this.loadStage(this.currentStageIndex);
           audio.playBGM(STAGE_META[this.currentStageIndex % STAGE_META.length].themeIndex);
           this.state = 'PLAYING';
@@ -309,22 +429,26 @@ export class GameEngine {
       if (this.hitStopTimer < 0) this.hitStopTimer = 0;
     }
 
-    if (this.invincibilityTimer > 0) {
-      this.invincibilityTimer -= frameTime;
-    }
-
-    // Hurry Up enrage mechanic: after HURRY_UP_THRESHOLD_SECONDS, enrage all
+    // Hurry Up enrage mechanic: after the (cycle-scaled) threshold, enrage all
     // remaining enemies (angry sprite + speed multiplier via Enemy.setAngry).
     this.stageElapsedTime += frameTime;
-    if (!this.hurryUpTriggered && this.stageElapsedTime >= HURRY_UP_THRESHOLD_SECONDS) {
+    if (!this.hurryUpTriggered && this.stageElapsedTime >= this.hurryUpThreshold) {
       this.triggerHurryUp();
+    }
+
+    // Skel-Monsta chase: 15s after hurry-up with the stage still uncleared.
+    if (this.hurryUpTriggered && !this.skelMonsta) {
+      this.skelMonstaTimer += frameTime;
+      if (this.skelMonstaTimer >= SKEL_MONSTA_DELAY_SECONDS) {
+        this.skelMonsta = new SkelMonsta(SCREEN_WIDTH / 2, -20);
+      }
     }
 
     // Update Staggered Pop Cascades
     this.popQueue.forEach((task) => {
       task.delay -= 1 * dt;
       if (task.delay <= 0 && task.bubble.active && task.bubble.state !== 'POPPING') {
-        this.spawnPopLoot(task.bubble);
+        this.spawnPopLoot(task.bubble, task.comboCount, task.owner);
         task.bubble.pop();
         audio.playPop(task.comboCount);
       }
@@ -336,25 +460,40 @@ export class GameEngine {
       return;
     }
 
-    // Update Player
-    this.player.handleInput(this.input, () => {
-      const bubbleX = this.player.direction === 1 ? this.player.right : this.player.left - 12;
-      const bubbleY = this.player.y + 2;
-      
-      // 5% chance of spawning water/fire/lightning instead of standard bubble
-      const roll = Math.random();
-      let type: BubbleType = 'STANDARD';
-      if (roll < 0.05) {
-        const types: BubbleType[] = ['WATER', 'FIRE', 'LIGHTNING'];
-        type = types[Math.floor(Math.random() * types.length)];
+    // Update Players (input, physics, respawn timers)
+    this.players.forEach((player, playerIdx) => {
+      if (this.isOutOfLives(player)) return;
+
+      if (player.dead) {
+        player.respawnTimer -= frameTime;
+        if (player.respawnTimer <= 0) {
+          player.dead = false;
+          player.x = playerIdx === 0 ? 64 : 96;
+          player.y = 360;
+          player.vx = 0;
+          player.vy = 0;
+          player.invincibleTimer = 2.0;
+        }
+        return;
       }
 
-      const bubbleSpeed = 9.0 * (this.player.hasCandy ? 1.3 : 1.0);
-      const bubble = new Bubble(bubbleX, bubbleY, this.player.direction, type);
-      bubble.bubbleSpeed = bubbleSpeed;
-      bubble.vx = this.player.direction * bubbleSpeed;
-      this.bubbles.push(bubble);
-      audio.playShoot();
+      player.handleInput(this.input, () => {
+        // Arcade bubble limit: no new bubble while 8 are already on screen.
+        if (this.bubbles.length >= MAX_BUBBLES_ON_SCREEN) return;
+        const bubbleX = player.direction === 1 ? player.right : player.left - 12;
+        const bubbleY = player.y + 2;
+
+        // The 1986 arcade had no randomly-spawned special bubbles; bubbles are
+        // always STANDARD (WATER/FIRE/LIGHTNING remain as pop/kill logic).
+        const type: BubbleType = 'STANDARD';
+
+        const bubbleSpeed = 9.0 * (player.hasCandy ? 1.3 : 1.0);
+        const bubble = new Bubble(bubbleX, bubbleY, player.direction, type);
+        bubble.bubbleSpeed = bubbleSpeed;
+        bubble.vx = player.direction * bubbleSpeed;
+        this.bubbles.push(bubble);
+        audio.playShoot();
+      });
     });
 
     const updateEntityPhysics = (entity: any) => {
@@ -365,26 +504,56 @@ export class GameEngine {
       PhysicsSystem.handleScreenWrap(entity);
     };
 
-    const playerWasGrounded = this.player.isGrounded;
-    const playerVyBeforeLanding = this.player.vy;
-    updateEntityPhysics(this.player);
-    this.player.update(dt);
+    this.players.forEach((player) => {
+      if (player.dead || this.isOutOfLives(player)) return;
+      const wasGrounded = player.isGrounded;
+      const vyBeforeLanding = player.vy;
+      updateEntityPhysics(player);
+      player.update(dt);
 
-    if (!playerWasGrounded && this.player.isGrounded && playerVyBeforeLanding > LANDING_VY_THRESHOLD) {
-      this.particles.spawnBurst(this.player.centerX, this.player.bottom, 5, '#c9b78a', {
-        size: 1.5,
-        life: 0.3,
-      });
-      audio.playLand();
-    }
+      if (!wasGrounded && player.isGrounded && vyBeforeLanding > LANDING_VY_THRESHOLD) {
+        this.particles.spawnBurst(player.centerX, player.bottom, 5, '#c9b78a', {
+          size: 1.5,
+          life: 0.3,
+        });
+        audio.playLand();
+      }
+    });
 
     // Update Enemies
     this.enemies.forEach((enemy) => {
       if (enemy.active) {
         updateEntityPhysics(enemy);
         enemy.update(dt);
+
+        // Mighta rock-throwing: when the throw cadence fires and a living
+        // player is roughly on the Mighta's level, hurl a rock at them.
+        if (enemy.active && enemy.wantsToThrow) {
+          const target = this.nearestLivingPlayer(enemy.centerX, enemy.centerY);
+          if (target && Math.abs(target.centerY - enemy.centerY) < 24) {
+            const dir = target.centerX >= enemy.centerX ? 1 : -1;
+            this.enemyRocks.push(new EnemyRock(enemy.centerX + dir * 12, enemy.y + 4, dir as 1 | -1));
+            enemy.wantsToThrow = false;
+          }
+        }
       }
     });
+
+    // Update Enemy Rocks (affected by gravity via map collisions)
+    this.enemyRocks.forEach((rock) => {
+      if (rock.active) {
+        updateEntityPhysics(rock);
+        rock.update(dt);
+      }
+    });
+
+    // Update Skel-Monsta (ignores walls, chases the nearest living player)
+    if (this.skelMonsta) {
+      const target = this.nearestLivingPlayer(this.skelMonsta.centerX, this.skelMonsta.centerY);
+      if (target) {
+        this.skelMonsta.update(dt, target.centerX, target.centerY);
+      }
+    }
 
     // Apply bubble-on-bubble horizontal repulsion to prevent overlap/merging at ceiling
     for (let i = 0; i < this.bubbles.length; i++) {
@@ -429,7 +598,7 @@ export class GameEngine {
 
         bubble.x += bubble.vx * dt;
         bubble.y += bubble.vy * dt;
-        
+
         if (bubble.state === 'FLOATING' || bubble.state === 'ENEMY_TRAPPED') {
           const row = Math.floor(bubble.y / this.currentStageMap.tileSize);
           const col = Math.floor(bubble.x / this.currentStageMap.tileSize);
@@ -471,14 +640,14 @@ export class GameEngine {
         const wasGrounded = item.isGrounded;
         const prevVy = item.vy;
         updateEntityPhysics(item);
-        
+
         // Bouncing logic:
         if (item.isGrounded && !wasGrounded && prevVy > 0.5 && item.bounces < 2) {
           item.vy = -prevVy * 0.4;
           item.isGrounded = false;
           item.bounces++;
         }
-        
+
         item.update(dt);
       }
     });
@@ -520,10 +689,13 @@ export class GameEngine {
     this.waterWaves = this.waterWaves.filter((w) => w.active);
     this.fireFlames = this.fireFlames.filter((f) => f.active);
     this.lightningBolts = this.lightningBolts.filter((l) => l.active);
+    this.enemyRocks = this.enemyRocks.filter((r) => r.active);
 
     const activeEnemiesLeft = this.enemies.filter((e) => e.active).length;
     const trappedEnemiesLeft = this.bubbles.filter((b) => b.state === 'ENEMY_TRAPPED').length;
     if (activeEnemiesLeft === 0 && trappedEnemiesLeft === 0) {
+      // Skel-Monsta despawns once the stage is cleared.
+      this.skelMonsta = null;
       this.state = 'STAGE_CLEAR';
       this.stageClearTimer = 2.0;
       audio.stopBGM();
@@ -544,23 +716,35 @@ export class GameEngine {
       }
     });
 
-    // B. Player vs Bubble (Popping / Staggered Cascade)
+    // B. Player vs Bubble (Bounce / Popping / Staggered Cascade)
     this.bubbles.forEach((bubble) => {
-      if (bubble.active && CollisionSystem.checkAABB(this.player, bubble)) {
+      if (!bubble.active) return;
+      this.players.forEach((player) => {
+        if (player.dead || this.isOutOfLives(player)) return;
+        if (!CollisionSystem.checkAABB(player, bubble)) return;
+
         if (bubble.state === 'ENEMY_TRAPPED' && bubble.trappedEnemy) {
           // Trigger chain pop cascade instead of popping immediately
-          this.triggerChainPop(bubble);
+          this.triggerChainPop(bubble, player);
         } else if (bubble.state === 'FLOATING') {
-          this.player.vy = -3.2;
-          this.player.isGrounded = false;
-          this.particles.spawnBurst(bubble.centerX, bubble.centerY, 8, BUBBLE_POP_COLORS[bubble.type] ?? BUBBLE_POP_COLORS.STANDARD, {
-            size: 1.5,
-            life: 0.35,
-          });
-          bubble.pop();
-          audio.playPop(0);
+          // Jump-on-bubble: falling onto the top of a bubble bounces off
+          // WITHOUT popping it (arcade jump-on-bubbles mechanic).
+          if (player.vy > 0 && player.bottom < bubble.centerY) {
+            player.vy = -6;
+            player.isGrounded = false;
+          } else {
+            // Side/bottom contact pops the bubble with a small hop.
+            player.vy = -3.2;
+            player.isGrounded = false;
+            this.particles.spawnBurst(bubble.centerX, bubble.centerY, 8, BUBBLE_POP_COLORS[bubble.type] ?? BUBBLE_POP_COLORS.STANDARD, {
+              size: 1.5,
+              life: 0.35,
+            });
+            bubble.pop();
+            audio.playPop(0);
+          }
         }
-      }
+      });
     });
 
     // C. Special Projectiles vs Enemies
@@ -571,7 +755,7 @@ export class GameEngine {
           if (enemy.active && CollisionSystem.checkAABB(wave, enemy)) {
             // Defeat enemy
             this.items.push(new Item(enemy.x, enemy.y, 'MELON'));
-            this.player.score += 800;
+            this.awardScore(800);
             enemy.active = false;
             audio.playPop(2);
           }
@@ -585,7 +769,7 @@ export class GameEngine {
         this.enemies.forEach((enemy) => {
           if (enemy.active && CollisionSystem.checkAABB(flame, enemy)) {
             this.items.push(new Item(enemy.x, enemy.y, 'BANANA'));
-            this.player.score += 600;
+            this.awardScore(600);
             enemy.active = false;
             audio.playPop(1);
           }
@@ -599,7 +783,7 @@ export class GameEngine {
         this.enemies.forEach((enemy) => {
           if (enemy.active && CollisionSystem.checkAABB(bolt, enemy)) {
             this.items.push(new Item(enemy.x, enemy.y, 'APPLE'));
-            this.player.score += 1000;
+            this.awardScore(1000);
             enemy.active = false;
             audio.playPop(3);
           }
@@ -609,47 +793,59 @@ export class GameEngine {
 
     // D. Player vs Item (Collecting score)
     this.items.forEach((item) => {
-      if (item.active && CollisionSystem.checkAABB(this.player, item)) {
-        this.player.score += item.scoreValue;
-        this.particles.spawnBurst(item.centerX, item.centerY, 10, '#fff2a8', { size: 1.5, life: 0.4 });
-        if (item.type === 'SNEAKERS') {
-          this.player.hasSneakers = true;
-          this.particles.spawnBurst(item.centerX, item.centerY, 12, '#ff33aa', { size: 2, life: 0.5 });
-          audio.playPickup(2);
-        } else if (item.type === 'CANDY') {
-          this.player.hasCandy = true;
-          this.particles.spawnBurst(item.centerX, item.centerY, 12, '#ff3366', { size: 2, life: 0.5 });
-          audio.playPickup(2);
-        } else {
-          audio.playPickup(item.scoreValue >= 1000 ? 1 : 0);
-        }
-        item.active = false;
-      }
-    });
-
-    // E. Player vs Enemy (Losing lives)
-    if (this.invincibilityTimer <= 0) {
-      this.enemies.forEach((enemy) => {
-        if (enemy.active && CollisionSystem.checkAABB(this.player, enemy)) {
-          this.player.lives--;
-          audio.playDeath();
-          // Reset power-up flags on death
-          this.player.hasSneakers = false;
-          this.player.hasCandy = false;
-          if (this.player.lives <= 0) {
-            this.state = 'GAME_OVER';
-            audio.stopBGM();
-            audio.playGameOver();
+      if (!item.active) return;
+      this.players.forEach((player) => {
+        if (player.dead || this.isOutOfLives(player) || !item.active) return;
+        if (CollisionSystem.checkAABB(player, item)) {
+          player.score += item.scoreValue;
+          this.particles.spawnBurst(item.centerX, item.centerY, 10, '#fff2a8', { size: 1.5, life: 0.4 });
+          if (item.type === 'SNEAKERS') {
+            player.hasSneakers = true;
+            this.particles.spawnBurst(item.centerX, item.centerY, 12, '#ff33aa', { size: 2, life: 0.5 });
+            audio.playPickup(2);
+          } else if (item.type === 'CANDY') {
+            player.hasCandy = true;
+            this.particles.spawnBurst(item.centerX, item.centerY, 12, '#ff3366', { size: 2, life: 0.5 });
+            audio.playPickup(2);
           } else {
-            this.player.x = 64;
-            this.player.y = 360;
-            this.player.vx = 0;
-            this.player.vy = 0;
-            this.invincibilityTimer = 2.0;
+            audio.playPickup(item.scoreValue >= 1000 ? 1 : 0);
           }
+          item.active = false;
         }
       });
-    }
+    });
+
+    // E. Player vs Enemy / Rock / Skel-Monsta (Losing lives)
+    this.players.forEach((player) => {
+      if (player.dead || this.isOutOfLives(player) || player.invincibleTimer > 0) return;
+
+      this.enemies.forEach((enemy) => {
+        if (enemy.active && CollisionSystem.checkAABB(player, enemy)) {
+          this.killPlayer(player);
+        }
+      });
+
+      if (player.dead) return;
+
+      this.enemyRocks.forEach((rock) => {
+        if (rock.active && CollisionSystem.checkAABB(player, rock)) {
+          rock.active = false;
+          this.killPlayer(player);
+        }
+      });
+
+      if (player.dead) return;
+
+      if (this.skelMonsta && this.skelMonsta.active && CollisionSystem.checkAABB(player, this.skelMonsta)) {
+        this.killPlayer(player);
+      }
+    });
+  }
+
+  // Award unattributed projectile-kill score to the nearest living player.
+  private awardScore(points: number): void {
+    const target = this.nearestLivingPlayer(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2) ?? this.players[0];
+    target.score += points;
   }
 
   private draw(): void {
@@ -692,8 +888,8 @@ export class GameEngine {
 
     this.ctx.fillStyle = '#aaaaaa';
     this.ctx.font = '11px monospace';
-    this.ctx.fillText('Move: WASD / Arrows  |  Jump: W / ArrowUp', SCREEN_WIDTH / 2, 280);
-    this.ctx.fillText('Shoot: Space / J', SCREEN_WIDTH / 2, 300);
+    this.ctx.fillText('P1 Move: WASD / Arrows  |  Jump: W / ArrowUp  |  Shoot: Space / J', SCREEN_WIDTH / 2, 280);
+    this.ctx.fillText('P2 Move: F / H  |  Jump: T  |  Shoot: G', SCREEN_WIDTH / 2, 300);
   }
 
   private drawGameOverScreen(): void {
@@ -707,7 +903,33 @@ export class GameEngine {
 
     this.ctx.fillStyle = '#ffffff';
     this.ctx.font = '14px monospace';
+    this.ctx.fillText(`P1 SCORE ${`${this.players[0].score}`.padStart(6, '0')}`, SCREEN_WIDTH / 2, 240);
     this.ctx.fillText('PRESS SPACE TO RESTART', SCREEN_WIDTH / 2, 270);
+  }
+
+  private drawPlayer(player: Player): void {
+    if (player.dead || this.isOutOfLives(player)) return;
+    if (player.invincibleTimer > 0) {
+      if (Math.floor(Date.now() / 100) % 2 === 0) {
+        player.draw(this.ctx);
+      }
+    } else {
+      player.draw(this.ctx);
+    }
+  }
+
+  private drawLives(player: Player, color: string, rightAligned: boolean): void {
+    this.ctx.fillStyle = color;
+    this.ctx.strokeStyle = '#ffffff';
+    this.ctx.lineWidth = 1;
+    for (let i = 0; i < player.lives; i++) {
+      const lx = rightAligned ? SCREEN_WIDTH - 20 - i * 12 : 20 + i * 12;
+      const ly = SCREEN_HEIGHT - 12;
+      this.ctx.beginPath();
+      this.ctx.arc(lx, ly, 4, 0, Math.PI * 2);
+      this.ctx.fill();
+      this.ctx.stroke();
+    }
   }
 
   private drawGameplay(): void {
@@ -755,6 +977,12 @@ export class GameEngine {
     this.waterWaves.forEach((w) => w.draw(this.ctx));
     this.fireFlames.forEach((f) => f.draw(this.ctx));
     this.lightningBolts.forEach((l) => l.draw(this.ctx));
+    this.enemyRocks.forEach((r) => r.draw(this.ctx));
+
+    // 3.5 Draw Skel-Monsta (behind bubbles, above tiles)
+    if (this.skelMonsta) {
+      this.skelMonsta.draw(this.ctx);
+    }
 
     // 4. Draw Bubbles
     this.bubbles.forEach((b) => b.draw(this.ctx));
@@ -765,27 +993,21 @@ export class GameEngine {
     // 6. Draw Enemies
     this.enemies.forEach((e) => e.draw(this.ctx));
 
-    // 7. Draw Player
-    if (this.invincibilityTimer > 0) {
-      if (Math.floor(Date.now() / 100) % 2 === 0) {
-        this.player.draw(this.ctx);
-      }
-    } else {
-      this.player.draw(this.ctx);
-    }
+    // 7. Draw Players (Bub P1 + Bob P2)
+    this.players.forEach((player) => this.drawPlayer(player));
 
     // 7.5 Draw Event Particles (bubble pops, enemy defeats, landings, pickups)
     this.particles.draw(this.ctx);
 
     // 8. Draw HUD - Classic Bubble Bobble arcade style
-    // Left: 1UP in green, score in white
+    // Left: 1UP (P1) in green, score in white
     this.ctx.fillStyle = '#00ff00';
     this.ctx.font = 'bold 12px monospace';
     this.ctx.textAlign = 'left';
     this.ctx.fillText('1UP', 16, 14);
     this.ctx.fillStyle = '#ffffff';
     this.ctx.font = '12px monospace';
-    this.ctx.fillText(`${this.player.score}`.padStart(6, '0'), 16, 26);
+    this.ctx.fillText(`${this.players[0].score}`.padStart(6, '0'), 16, 26);
 
     // Center: HIGH SCORE in red
     this.ctx.fillStyle = '#ff3333';
@@ -794,35 +1016,28 @@ export class GameEngine {
     this.ctx.fillText('HIGH SCORE', SCREEN_WIDTH / 2, 14);
     this.ctx.fillStyle = '#ffffff';
     this.ctx.font = '12px monospace';
-    this.ctx.fillText('50000', SCREEN_WIDTH / 2, 26);
+    const topScore = Math.max(loadHighScore(), ...this.players.map((p) => p.score));
+    this.ctx.fillText(`${topScore}`.padStart(6, '0'), SCREEN_WIDTH / 2, 26);
 
-    // Right: 2UP in blue/cyan
+    // Right: 2UP (P2) in blue/cyan
     this.ctx.fillStyle = '#00ccff';
     this.ctx.font = 'bold 12px monospace';
     this.ctx.textAlign = 'right';
     this.ctx.fillText('2UP', SCREEN_WIDTH - 16, 14);
     this.ctx.fillStyle = '#ffffff';
     this.ctx.font = '12px monospace';
-    this.ctx.fillText('31910', SCREEN_WIDTH - 16, 26);
+    this.ctx.fillText(`${this.players[1].score}`.padStart(6, '0'), SCREEN_WIDTH - 16, 26);
 
-    // 8.5 Draw In-Game Stage number (top-left, green number, matching reference image)
+    // 8.5 Draw In-Game Round number 1-100 (top-left, green number)
     this.ctx.fillStyle = '#00ff00';
     this.ctx.font = 'bold 16px monospace';
     this.ctx.textAlign = 'left';
-    this.ctx.fillText(`${this.currentStageIndex + 1}`, 24, 48);
+    this.ctx.fillText(`${this.currentRound}`, 24, 48);
 
-    // 8.6 Draw Player Lives as green bubble circles at the bottom-left corner
-    this.ctx.fillStyle = '#33ff55';
-    this.ctx.strokeStyle = '#ffffff';
-    this.ctx.lineWidth = 1;
-    for (let i = 0; i < this.player.lives; i++) {
-      const lx = 20 + i * 12;
-      const ly = SCREEN_HEIGHT - 12;
-      this.ctx.beginPath();
-      this.ctx.arc(lx, ly, 4, 0, Math.PI * 2);
-      this.ctx.fill();
-      this.ctx.stroke();
-    }
+    // 8.6 Draw Player Lives as bubble circles: P1 bottom-left (green),
+    // P2 bottom-right (cyan)
+    this.drawLives(this.players[0], '#33ff55', false);
+    this.drawLives(this.players[1], '#00ccff', true);
 
     if (this.state === 'STAGE_CLEAR') {
       this.ctx.fillStyle = '#00ffcc';

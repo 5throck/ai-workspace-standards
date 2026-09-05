@@ -11,6 +11,22 @@ last_reviewed: 2026-06-13
 status: active
 owner: delivery-manager
 prerequisites: solution-design
+relates_to:
+  - skill: technical-feasibility
+    type: follows
+  - skill: stakeholder-review-management
+    type: composes_with
+  - skill: stakeholder-alignment
+    type: composes_with
+metadata:
+  type: process
+  triggers:
+    - project delivery
+    - execution plan
+    - milestone planning
+    - delivery plan
+    - workstream planning
+    - delivery management
 ---
 
 ## Context

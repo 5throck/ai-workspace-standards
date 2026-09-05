@@ -14,6 +14,11 @@ last_reviewed: 2026-08-25
 status: active
 owner: labor-compliance-analyst
 prerequisites: none
+relates_to:
+  - skill: org-readiness-assessment
+    type: follows
+  - skill: stakeholder-alignment
+    type: composes_with
 metadata:
   type: domain
   triggers:

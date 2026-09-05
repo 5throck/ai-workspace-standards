@@ -10,6 +10,9 @@ last_reviewed: 2026-08-08
 status: active
 owner: trade-documentation-specialist
 prerequisites: none
+relates_to:
+  - skill: logistics-coordination
+    type: follows
 ---
 
 ## Context

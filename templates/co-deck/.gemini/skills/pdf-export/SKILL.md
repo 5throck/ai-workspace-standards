@@ -12,6 +12,13 @@ status: active
 owner: pdf-export
 last_reviewed: 2026-08-25
 prerequisites: prep-pdf
+relates_to:
+  - skill: research
+    type: composes_with
+  - skill: storyline
+    type: composes_with
+inputs: [slide-html]
+outputs: [final-pdf]
 ---
 
 ## Context

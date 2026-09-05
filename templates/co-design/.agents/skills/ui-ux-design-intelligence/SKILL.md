@@ -11,6 +11,11 @@ status: active
 owner: pm
 last_reviewed: 2026-07-19
 prerequisites: none
+relates_to:
+  - skill: documentation-writing
+    type: follows
+  - skill: service-design
+    type: follows
 gemini-parity: skip
 metadata:
   type: implementation

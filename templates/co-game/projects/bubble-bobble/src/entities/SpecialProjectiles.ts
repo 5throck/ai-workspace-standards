@@ -147,3 +147,40 @@ export class LightningBolt extends EntityBase {
     ctx.restore();
   }
 }
+
+// Rock projectile thrown by Mighta enemies. Affected by gravity, kills a
+// player on contact, and disappears when it hits the ground or a wall.
+// Enemies are never harmed by their own rocks (GameEngine only checks players).
+export class EnemyRock extends EntityBase {
+  constructor(x: number, y: number, dir: EntityDirection) {
+    super(x, y, 12, 12);
+    this.direction = dir;
+    this.vx = dir * 3.5;
+    this.vy = -2.0; // small upward hop out of the Mighta's hand
+  }
+
+  public update(_dt: number): void {
+    // Ground contact (isGrounded) or wall contact (vx zeroed by collision)
+    // makes the rock crumble.
+    if (this.isGrounded || Math.abs(this.vx) < 0.1) {
+      this.active = false;
+    }
+  }
+
+  public draw(ctx: CanvasRenderingContext2D): void {
+    if (!this.active) return;
+    ctx.save();
+
+    const cx = this.centerX;
+    const cy = this.centerY;
+    ctx.fillStyle = '#8a7a66';
+    ctx.beginPath();
+    ctx.arc(cx, cy, this.width / 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#5c5044';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    ctx.restore();
+  }
+}
