@@ -378,9 +378,13 @@ if (fs.existsSync('scripts/skill-session-review.ts')) {
     if (reviewRes.exitCode !== 0) {
         console.warn(`⚠️  Step 3.96c: skill-session-review.ts failed (non-blocking, exit ${reviewRes.exitCode})`);
     }
-    const depReport = await $`bun scripts/skill-dependency-analysis.ts --report`.nothrow();
-    if (depReport.exitCode !== 0) {
-        console.warn(`⚠️  Step 3.96c: skill-dependency-analysis reported issues (non-blocking, exit ${depReport.exitCode})`);
+    // Full health report pass — the analyzer is L0-only, so this sub-step only
+    // runs where the script exists (workspace root / L0 dev machines).
+    if (fs.existsSync('scripts/skill-dependency-analysis.ts')) {
+        const depReport = await $`bun scripts/skill-dependency-analysis.ts --report`.nothrow();
+        if (depReport.exitCode !== 0) {
+            console.warn(`⚠️  Step 3.96c: skill-dependency-analysis reported issues (non-blocking, exit ${depReport.exitCode})`);
+        }
     }
 }
 

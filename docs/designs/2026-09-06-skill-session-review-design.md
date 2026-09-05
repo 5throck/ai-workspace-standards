@@ -3,6 +3,7 @@ schemaVersion: 1.0.0
 spec-id: skill-session-review
 date: 2026-09-06
 status: accepted
+adr: "ADR-0067 (docs/adr/0067-session-evidence-skill-review-loop.md)"
 inspired-by: "SkillHone (Tencent) — continual agent skill evolution through persistent decision history (arXiv:2606.08671)"
 ---
 
@@ -156,6 +157,35 @@ CLI: `bun scripts/skill-session-review.ts [--date YYYY-MM-DD] [--json] [--dry-ru
 - **Dependency analysis report**: `skill-dependency-analysis.ts --report` is
   additionally executed as a non-fatal warning step (previously manual-only /
   quarterly). Promoting either to fatal is a separate decision after soak.
+
+### 5.1 Template & Project Propagation (L0+L1)
+
+The loop is **not workspace-root-only** — every project scaffolded from the
+templates inherits it:
+
+- `scripts/skill-session-review.ts` is registered as **L0+L1** in
+  `scripts/SCRIPTS.md`, so `propagate-to-templates.ts` publishes it to
+  `templates/common/scripts/`, and `new-project.ts` copies it into every
+  scaffolded project's `scripts/` (standard L0+L1 script path).
+- `scripts/dev-sync.ts` (already L0+L1, core-standardized and byte-identical
+  per ADR-0036 policy) carries step 3.96c into L1/L3 unchanged. Its
+  `existsSync('scripts/skill-session-review.ts')` guard passes in every
+  project; only the full health-report sub-step is additionally guarded on
+  the L0-only `skill-dependency-analysis.ts`, degrading to a skip in
+  generated projects.
+- Inside `skill-session-review.ts`, the per-skill dependency re-analysis is
+  guarded the same way — structural checks (version/manifest, governance
+  Changelog, description-vs-triggers) run everywhere; dependency
+  re-validation runs only where the L0-only analyzer exists.
+- Project-local data paths (`memory/YYYY-MM-DD.md`, `memory/skill-review/`,
+  `skills/*/SKILL.md`, `docs/VERSION_MANIFEST.md`, `docs/lifecycle/skills/`)
+  all exist in scaffolded projects, so no path rewrite is needed.
+- The `## Skills Used` recording duty is documented in the `sync` skill
+  (scope: common → propagates to templates and platform mirrors), and the
+  loop procedure text lives in the skill-lifecycle standards section §6.6.
+- ADR-0067 records this decision; `lifecycle-sync-audit.ts` Check X
+  allowlist intentionally lists only `dev-sync:skill-dependency-analysis`
+  (the review script itself is L1 after promotion).
 
 ## 6. Governance Documentation
 

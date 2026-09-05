@@ -335,8 +335,11 @@ If audit fails:
 Complementary to the structural audits above, this loop evaluates how skills
 actually performed in sessions and accumulates evidence for future revisions.
 Inspired by SkillHone (Tencent), reinterpreted for the PM Gateway: **evaluation
-is automatic, revision is human-approved.** Design doc:
-`docs/designs/2026-09-06-skill-session-review-design.md`.
+is automatic, revision is human-approved.** Normative decision:
+[ADR-0067](../../docs/adr/0067-session-evidence-skill-review-loop.md); design doc:
+`docs/designs/2026-09-06-skill-session-review-design.md`. Applies at **every
+layer** — the review script is L0+L1 and ships with scaffolded projects, so
+L3 projects run the identical loop through their own `/sync`.
 
 ```
 Session --uses--> Skill --produces--> Outcome --reveals--> Observed Symptom
