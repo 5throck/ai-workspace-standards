@@ -26,12 +26,15 @@ import type { MapData, TileCoord } from './config/types';
 import {
   HUD_OFFSET_Y,
   TILE_SIZE,
+  MAP_COLS,
   DOT_POINTS,
   POWER_PELLET_POINTS,
   INITIAL_LIVES,
   DEATH_ANIMATION_DURATION,
   MAZE_FLASH_DURATION,
   RESPAWN_PAUSE_DURATION,
+  READY_DURATION,
+  ELROY_DOT_THRESHOLDS,
   GHOST_HOUSE_PAUSE_DURATION,
   GHOST_HOUSE_EXIT_ROW,
   GHOST_HOUSE_ENTRY_COL,
@@ -121,6 +124,8 @@ class PacmanGame {
   private dotsEaten: number = 0;
   private gameTime: number = 0;
   private stateStartTime: number = 0;
+  /** READY! countdown (ms) at each stage start; entities are frozen while > 0. */
+  private readyTimer: number = 0;
   private fruitSpawned: boolean = false;
   private fruitThresholdTriggered: number = 0; // tracks which threshold was last triggered
   private ghostHousePauseTimer: number = 0;
@@ -241,6 +246,12 @@ class PacmanGame {
 
     // Apply speed settings
     this.pacman.setSpeed(stageConfig.pacmanSpeed);
+    // Wire the arcade per-level ghost speed table (was dead code before).
+    for (const ghost of this.ghosts) {
+      ghost.setSpeedProfile(stageConfig.ghostSpeed);
+    }
+    // Arcade READY! pause before entities move at every stage start.
+    this.readyTimer = READY_DURATION;
 
     // Reset all entity positions
     this.pacman.reset(this.map.pacmanStart);
@@ -301,7 +312,16 @@ class PacmanGame {
   }
 
   private updatePlaying(dt: number, _stateElapsed: number, now: number): void {
+    // READY! freeze at stage start (arcade behavior).
+    if (this.readyTimer > 0) {
+      this.readyTimer -= dt * 1000;
+      return;
+    }
     this.gameTime += dt;
+
+    // Cruise Elroy: Blinky speeds up as the maze empties (arcade thresholds).
+    const [elroy1, elroy2] = ELROY_DOT_THRESHOLDS[Math.min(this.stageManager.currentStage, 5)] ?? ELROY_DOT_THRESHOLDS[5];
+    this.ghosts[0].setElroyLevel(this.dotsRemaining <= elroy2 ? 2 : this.dotsRemaining <= elroy1 ? 1 : 0);
 
     // Check for pause toggle
     if (this.input.consumePauseToggle()) {
@@ -325,6 +345,7 @@ class PacmanGame {
     for (const ghost of this.ghosts) {
       if (ghost.getMode() === GhostMode.IN_HOUSE && this.ghostHouse.shouldRelease(ghost.name)) {
         ghost.setMode(GhostMode.LEAVING_HOUSE);
+        this.ghostHouse.markReleased(ghost.name);
       }
     }
 
@@ -438,7 +459,8 @@ class PacmanGame {
         this.sound.playGameOver();
         this.stateStartTime = performance.now();
       } else {
-        // Respawn
+        // Respawn — arcade: releases switch to the global counter after death
+        this.ghostHouse.notifyLifeLost();
         this.respawnEntities();
         this.stateMachine.transition(GameState.PLAYING);
         this.stateStartTime = performance.now();
@@ -712,6 +734,20 @@ class PacmanGame {
       this.stageManager.currentStage,
       this.lives,
     );
+
+    // 7. READY! banner at stage start (arcade: yellow text under the ghost house).
+    if (this.readyTimer > 0 && state !== GameState.DYING) {
+      ctx.save();
+      ctx.fillStyle = '#ffff00';
+      ctx.font = 'bold 14px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(
+        'READY!',
+        (MAP_COLS * TILE_SIZE) / 2,
+        GHOST_HOUSE_EXIT_ROW * TILE_SIZE + 6 * TILE_SIZE + HUD_OFFSET_Y,
+      );
+      ctx.restore();
+    }
   }
 
   private renderLevelComplete(ctx: CanvasRenderingContext2D, elapsed: number): void {

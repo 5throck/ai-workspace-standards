@@ -7,8 +7,8 @@ description: >
   decision-making and problem resolution. Use when: running agent meetings, coordinating
   multi-agent discussions, or facilitating collaborative problem-solving sessions.
 owner: pm
-version: 1.4.0
-last_reviewed: 2026-06-05
+version: 1.4.1
+last_reviewed: 2026-09-05
 prerequisites: []
 metadata:
   type: process
@@ -45,6 +45,13 @@ Meeting transcript written to `memory/meeting-YYYY-MM-DD-[slug].md` containing:
 - Per-agent contributions (round-by-round)
 - Synthesized outcomes and decisions
 - Action items with owner assignments
+
+## Governance Rules
+
+All meetings facilitated through this skill MUST uphold three invariants:
+1. **Dissent seat**: at least one participant is designated as a red-team / dissenting role whose duty is to challenge the emerging consensus.
+2. **PROPOSAL, never decision**: the synthesized outcome is a proposal for the user's approval — the meeting itself does not decide.
+3. **Dissent preserved verbatim**: recorded disagreements are transcribed as stated — never summarized away or averaged into consensus.
 
 ## Related Skills
 

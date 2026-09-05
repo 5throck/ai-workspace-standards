@@ -11,6 +11,22 @@ last_reviewed: 2026-06-13
 status: active
 owner: change-management-partner
 prerequisites: none
+relates_to:
+  - skill: financial-modeling
+    type: enables
+  - skill: stakeholder-alignment
+    type: composes_with
+  - skill: change-impact-assessment
+    type: composes_with
+outputs: [readiness-scores, capability-gap-analysis, change-mgmt-cost-estimates]
+metadata:
+  type: domain
+  triggers:
+    - organizational readiness
+    - change readiness
+    - change capacity
+    - readiness assessment
+    - transformation readiness
 ---
 
 ## Context

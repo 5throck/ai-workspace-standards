@@ -10,6 +10,15 @@ last_reviewed: 2026-08-08
 status: active
 owner: foreign-regulatory-intelligence-analyst
 prerequisites: none
+relates_to:
+  - skill: export-control-screening
+    type: follows
+  - skill: hs-classification-workflow
+    type: composes_with
+  - skill: fta-origin-determination
+    type: composes_with
+  - skill: halal-certification-workflow
+    type: composes_with
 ---
 
 ## Context

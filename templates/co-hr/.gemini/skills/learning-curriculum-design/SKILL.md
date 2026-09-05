@@ -12,6 +12,17 @@ last_reviewed: 2026-08-23
 status: active
 owner: learning-development-specialist
 prerequisites: none
+relates_to:
+  - skill: org-design-framework
+    type: composes_with
+  - skill: talent-acquisition-strategy
+    type: composes_with
+  - skill: performance-system-design
+    type: follows
+  - skill: stakeholder-alignment
+    type: composes_with
+  - skill: org-readiness-assessment
+    type: composes_with
 metadata:
   type: domain
   triggers:

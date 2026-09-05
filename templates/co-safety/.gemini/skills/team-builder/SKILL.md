@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: team-builder
 description: >
   Guides the Engagement Leader through building a new AI agent team for any consulting domain.
@@ -7,7 +9,7 @@ description: >
   Triggered by: "새 팀 구성", "에이전트팀 변경", "신규 도메인 팀 빌딩", "build new agent team".
 version: 1.1.0
 status: active
-scope: common
+scope: co-safety
 owner: pm
 prerequisites: none
 metadata:

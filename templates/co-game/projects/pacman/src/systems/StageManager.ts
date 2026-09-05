@@ -43,7 +43,7 @@ export class StageManager {
     const tunnelPct = GHOST_TUNNEL_SPEED_PERCENTAGE[stage] ?? GHOST_TUNNEL_SPEED_PERCENTAGE[20] ?? 0.55;
 
     // Get frightened duration (0 for stage 21+)
-    const frightDuration = stage >= 21 ? 0 : (FRIGHTENED_DURATIONS[stage] ?? FRIGHTENED_DURATIONS[20] ?? 2000);
+    const frightDuration = stage >= 21 ? 0 : (FRIGHTENED_DURATIONS[stage] ?? 0);
 
     // Get scatter/chase cycles based on stage range
     let scatterChaseCycles: ScatterChaseCycle[];
@@ -55,9 +55,11 @@ export class StageManager {
       scatterChaseCycles = SCATTER_CHASE_CYCLES_STAGE_5;
     }
 
-    // Get fruit type based on stage (index 0-7, clamped)
-    const fruitIndex = Math.min(stage - 1, FRUIT_PROGRESSION.length - 1);
-    const fruit = FRUIT_PROGRESSION[Math.max(fruitIndex, 0)];
+    // Arcade fruit progression bands: most fruits repeat across 2 levels.
+    const FRUIT_BANDS = [0, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7] as const;
+    const bandIndex = Math.min(stage, FRUIT_BANDS.length) - 1;
+    const fruitIndex = FRUIT_BANDS[Math.max(bandIndex, 0)];
+    const fruit = FRUIT_PROGRESSION[fruitIndex];
 
     return {
       pacmanSpeed: pacmanPct,

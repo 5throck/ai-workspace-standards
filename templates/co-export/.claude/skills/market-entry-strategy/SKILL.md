@@ -10,6 +10,9 @@ last_reviewed: 2026-08-08
 status: active
 owner: market-entry-strategist
 prerequisites: none
+relates_to:
+  - skill: foreign-regulation-monitoring
+    type: follows
 ---
 
 ## Context
@@ -26,6 +29,12 @@ prevent that failure mode.
 - Multiple entry channel options need trade-off comparison
 - Compliance findings (tariff cost, FTA rate, export control status) need to be folded into an
   economics-aware market recommendation
+
+## Prerequisites
+
+- Compliance findings from hs-classification-specialist, fta-origin-analyst, and export-control-compliance-specialist
+- Target destination country and product category
+- Client's export objectives and risk appetite
 
 ## Execution Steps
 
@@ -55,6 +64,15 @@ prevent that failure mode.
 - Market entry strategy document: demand summary, competitive landscape, entry channel comparison
   with trade-offs, buyer/distributor candidate list (if requested), integrated recommendation
 - Client-facing presentation summarizing the recommendation
+
+## Quality Criteria
+
+- [ ] Market demand assessment cites trade statistics with source and date
+- [ ] Competitive landscape includes home-country and local competitors with price positioning
+- [ ] Entry channel comparison documents at least 2 options with cost/control/speed trade-offs
+- [ ] Compliance findings (tariff cost, FTA rate, control status) integrated into economics
+- [ ] Buyer/distributor candidates clearly labeled as screened, not vetted
+- [ ] Recommendation reflects compliance clearance — not just market attractiveness
 
 ## Related Skills
 

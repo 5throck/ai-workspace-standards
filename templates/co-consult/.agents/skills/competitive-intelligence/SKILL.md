@@ -11,6 +11,23 @@ last_reviewed: 2026-06-13
 status: active
 owner: strategy-analyst
 prerequisites: none
+relates_to:
+  - skill: company-intelligence
+    type: composes_with
+  - skill: financial-modeling
+    type: composes_with
+  - skill: insight-synthesis
+    type: composes_with
+metadata:
+  type: domain
+  triggers:
+    - competitive analysis
+    - market analysis
+    - competitor profiling
+    - market entry analysis
+    - industry attractiveness
+    - competitive intelligence
+    - five forces
 ---
 
 ## Context

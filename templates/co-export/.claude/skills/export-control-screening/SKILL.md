@@ -10,6 +10,19 @@ last_reviewed: 2026-08-08
 status: active
 owner: export-control-compliance-specialist
 prerequisites: none
+relates_to:
+  - skill: hs-classification-workflow
+    type: composes_with
+  - skill: roo-qualification-worksheet
+    type: composes_with
+  - skill: market-entry-strategy
+    type: composes_with
+  - skill: hs-classification-workflow
+    type: follows
+  - skill: fta-origin-determination
+    type: composes_with
+  - skill: halal-certification-workflow
+    type: composes_with
 ---
 
 ## Context
@@ -25,6 +38,13 @@ optional even when the item doesn't obviously look like a "controlled" good.
   aerospace, nuclear-related)
 - Transaction involves US-origin technology/software or a high-risk destination
 - Counterparty identity or ownership structure is not already verified clean
+
+## Prerequisites
+
+- Confirmed HS code (national tariff line) and item technical specifications
+- Destination country and end-user information
+- Counterparty names and addresses for denied-party screening
+- US-origin technology/software involvement assessment
 
 ## Execution Steps
 
@@ -52,6 +72,14 @@ optional even when the item doesn't obviously look like a "controlled" good.
 
 - Screening report: item control status, applicable control regime/authority, license
   requirement, counterparty screening results with match confidence, overall risk rating
+
+## Quality Criteria
+
+- [ ] Control list entry or regime cited for every controlled-item determination
+- [ ] Catch-all end-use/end-user assessment completed (not just list-check)
+- [ ] Sanctions screening covers OFAC SDN, BIS Entity List, and the home-jurisdiction sanctions list
+- [ ] Overall risk rating stated explicitly (clear / requires license / requires legal review / do not proceed)
+- [ ] Ambiguous or borderline findings escalated as "requires legal review"
 
 ## Related Skills
 

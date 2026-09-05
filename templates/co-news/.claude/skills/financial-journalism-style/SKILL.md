@@ -15,6 +15,13 @@ last_reviewed: 2026-08-10
 status: active
 owner: style-editor
 prerequisites: none
+relates_to:
+  - skill: financial-narrative-brief
+    type: composes_with
+  - skill: source-verification-ledger
+    type: composes_with
+  - skill: ai-tell-reduction
+    type: composes_with
 ---
 
 ## Context
@@ -23,7 +30,7 @@ This is the house-style guide for Korean business/finance journalism, drawing on
 
 The default output language is Korean. The assignment (set by pm in Phase 0) may specify a different target language, in which case this skill's Korean-specific phrasing templates are replaced by general business-journalism conventions for that language — the 5W1H-first lead, numbers-first headline, and source-attribution discipline still apply universally; only the specific Korean phrase templates are language-gated.
 
-**Known limitation**: this skill was authored from general knowledge of Korean financial-journalism conventions — direct fetching of sedaily.com/thebell.co.kr failed during the design session. It should be recalibrated against real sample articles before Phase B promotion (see `references/style-examples/`).
+**Known limitation (resolved 2026-08-12)**: this skill was originally authored from general knowledge of Korean financial-journalism conventions — direct fetching of sedaily.com/thebell.co.kr failed during the design session. It has since been recalibrated against 3 real sample articles (2 Sedaily, 1 TheBell), each independently confirmed against a direct live-page fetch — see `references/style-examples/` for the samples and per-sample style notes. Recalibration findings folded into steps 1-5 below: Sedaily favors figure-first or record-superlative headlines with terse same-day disclosure attribution (a filing-date-anchored "the company disclosed provisional results today, stating that..." construction); TheBell favors comparative/peer-ranking framing built from a single filing and assumes market-shorthand fluency.
 
 ## When to Use
 

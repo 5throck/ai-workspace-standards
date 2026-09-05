@@ -11,6 +11,24 @@ last_reviewed: 2026-06-13
 status: active
 owner: strategy-analyst
 prerequisites: none
+relates_to:
+  - skill: org-readiness-assessment
+    type: follows
+  - skill: solution-design
+    type: composes_with
+  - skill: financial-statement-analysis
+    type: composes_with
+  - skill: competitive-intelligence
+    type: composes_with
+metadata:
+  type: process
+  triggers:
+    - synthesize insights
+    - insight synthesis
+    - integrate analysis
+    - strategic synthesis
+    - combine findings
+    - cross-analysis integration
 ---
 
 ## Context

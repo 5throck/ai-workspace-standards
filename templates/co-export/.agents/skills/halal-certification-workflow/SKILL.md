@@ -10,6 +10,13 @@ last_reviewed: 2026-08-16
 status: active
 owner: halal-certification-specialist
 prerequisites: hs-classification-workflow
+relates_to:
+  - skill: hs-classification-workflow
+    type: composes_with
+  - skill: export-control-screening
+    type: follows
+  - skill: market-entry-strategy
+    type: composes_with
 ---
 
 ## Context

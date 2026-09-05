@@ -46,6 +46,12 @@ export class Blinky extends GhostBase {
   /** Blinky starts outside the ghost house, already active in SCATTER. */
   reset(start: TileCoord): void {
     super.reset(start);
+    this.setElroyLevel(0);
     this.setDirection(Direction.LEFT, GHOST_BASE_SPEED);
+  }
+
+  /** Blinky is the only ghost affected by Cruise Elroy. */
+  protected isElroy(): boolean {
+    return true;
   }
 }

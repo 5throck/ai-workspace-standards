@@ -17,7 +17,7 @@ import type {
   GhostTargetStrategy,
 } from "../config/types";
 import {
-  GHOST_BASE_SPEED,
+  PACMAN_BASE_SPEED,
   GHOST_FRIGHTENED_SPEED,
   GHOST_EATEN_SPEED,
   GHOST_IN_HOUSE_SPEED,
@@ -49,6 +49,11 @@ export abstract class GhostBase extends EntityBase {
   // Pac-Man reference for target calculations
   protected pacmanTile: TileCoord = { col: 14, row: 23 };
   protected pacmanDirection: Direction = Direction.NONE;
+
+  // Stage speed profile (percentage of arcade full speed, e.g. 0.75 at level 1)
+  private speedPct: number = 0.75;
+  // Cruise Elroy level: 0 = off, 1/2 = Blinky speed-up tiers at low dot counts
+  private elroyLevel: 0 | 1 | 2 = 0;
 
   // References to other ghosts (needed for Inky)
   protected ghostPositions: Record<GhostName, TileCoord> = {
@@ -148,22 +153,48 @@ export abstract class GhostBase extends EntityBase {
 
   // -- Protected Helpers ----------------------------------------------------
 
+  /** Apply the stage's ghost speed percentage (from the arcade per-level table). */
+  setSpeedProfile(pct: number): void {
+    this.speedPct = pct;
+  }
+
+  /** Set Cruise Elroy tier for Blinky (ignored by the other ghosts via isElroy()). */
+  setElroyLevel(level: 0 | 1 | 2): void {
+    this.elroyLevel = level;
+  }
+
+  /** Whether this ghost responds to Cruise Elroy speed-up (Blinky only). */
+  protected isElroy(): boolean {
+    return false;
+  }
+
+  /** Normal-mode speed: stage percentage, boosted by Cruise Elroy tiers. */
+  private normalSpeed(): number {
+    let speed = PACMAN_BASE_SPEED * this.speedPct;
+    if (this.isElroy()) {
+      // Arcade level-1 values: Elroy 1 = 80%, Elroy 2 = 85% (of full speed).
+      if (this.elroyLevel === 1) speed = PACMAN_BASE_SPEED * 0.8;
+      if (this.elroyLevel === 2) speed = PACMAN_BASE_SPEED * 0.85;
+    }
+    return speed;
+  }
+
   /** Get speed based on current mode and tunnel position. */
   protected getCurrentSpeed(): number {
     if (this.map) {
       const tile = this.tileCoord();
       if (tile.row === this.map.tunnelRow &&
           (tile.col <= TUNNEL_SPEED_ZONE_LEFT || tile.col >= TUNNEL_SPEED_ZONE_RIGHT)) {
-        return GHOST_TUNNEL_SPEED;
+        return GHOST_TUNNEL_SPEED * (this.speedPct / 0.75);
       }
     }
 
     switch (this.mode) {
       case GhostMode.SCATTER:
       case GhostMode.CHASE:
-        return GHOST_BASE_SPEED;
+        return this.normalSpeed();
       case GhostMode.FRIGHTENED:
-        return GHOST_FRIGHTENED_SPEED;
+        return GHOST_FRIGHTENED_SPEED * (this.speedPct / 0.75);
       case GhostMode.EATEN:
         return GHOST_EATEN_SPEED;
       case GhostMode.IN_HOUSE:
@@ -171,7 +202,7 @@ export abstract class GhostBase extends EntityBase {
       case GhostMode.LEAVING_HOUSE:
         return GHOST_IN_HOUSE_SPEED;
       default:
-        return GHOST_BASE_SPEED;
+        return this.normalSpeed();
     }
   }
 

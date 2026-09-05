@@ -11,6 +11,9 @@ export abstract class EntityBase {
   public isGrounded: boolean = false;
   public gravityScale: number = 1.0;
   public active: boolean = true;
+  // Horizontal wall contact set by CollisionSystem: -1 = against wall on the
+  // left, 1 = against wall on the right, 0 = no wall contact this frame.
+  public touchingWall: -1 | 0 | 1 = 0;
 
   constructor(x: number, y: number, width: number, height: number) {
     this.x = x;

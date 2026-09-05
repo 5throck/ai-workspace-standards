@@ -12,6 +12,25 @@ last_reviewed: 2026-06-13
 status: active
 owner: solutions-architect
 prerequisites: none
+relates_to:
+  - skill: executive-presentation
+    type: enables
+  - skill: project-delivery
+    type: follows
+  - skill: change-impact-assessment
+    type: follows
+  - skill: company-intelligence
+    type: composes_with
+outputs: [complexity-grades, risk-cost-ranges, preconditions]
+metadata:
+  type: process
+  triggers:
+    - technical feasibility
+    - feasibility study
+    - technical viability
+    - complexity grade
+    - technology readiness
+    - build vs buy
 ---
 
 ## Context

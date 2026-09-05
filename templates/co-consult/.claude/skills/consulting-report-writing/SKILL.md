@@ -11,6 +11,20 @@ last_reviewed: 2026-06-13
 status: active
 owner: communications-lead
 prerequisites: narrative-framework
+relates_to:
+  - skill: narrative-framework
+    type: composes_with
+  - skill: executive-presentation
+    type: composes_with
+metadata:
+  type: process
+  triggers:
+    - consulting report
+    - strategy report
+    - recommendation memo
+    - report writing
+    - issue tree
+    - consulting deliverable
 ---
 
 ## Context

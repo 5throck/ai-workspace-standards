@@ -12,6 +12,17 @@ last_reviewed: 2026-08-23
 status: active
 owner: org-design-consultant
 prerequisites: none
+relates_to:
+  - skill: talent-acquisition-strategy
+    type: follows
+  - skill: performance-system-design
+    type: composes_with
+  - skill: stakeholder-alignment
+    type: composes_with
+  - skill: org-readiness-assessment
+    type: composes_with
+  - skill: hr-metrics-analysis
+    type: follows
 metadata:
   type: domain
   triggers:
