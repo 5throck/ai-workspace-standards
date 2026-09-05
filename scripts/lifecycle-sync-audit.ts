@@ -11,8 +11,13 @@
  *   bun scripts/lifecycle-sync-audit.ts --json
  *   bun scripts/lifecycle-sync-audit.ts --fix
  *
- * @version 1.5.0
- * @last_updated 2026-08-28
+ * @version 1.6.0
+ * @last_updated 2026-09-06
+ * v1.6.0: Added 'dev-sync:skill-session-review' and 'dev-sync:skill-dependency-analysis'
+ *          to INTENTIONAL_CROSS_REFS — dev-sync.ts step 3.96c (session-evidence skill
+ *          review, SkillHone-inspired loop) is existsSync-guarded and skips in scaffolded
+ *          projects; both scripts are L0-only (design doc:
+ *          docs/designs/2026-09-06-skill-session-review-design.md).
  * v1.5.0: Added 'audit:upgrade-project' to INTENTIONAL_CROSS_REFS — audit.ts's new
  *          checkProjectDocMarkerDrift() mentions upgrade-project.ts in a WARN hint, guarded by
  *          existsSync('Projects') (same shape as the other existsSync-guarded L0-only refs).
@@ -373,6 +378,8 @@ const INTENTIONAL_CROSS_REFS = new Set([
   'dev-sync:generate-skill-graph',                // dev-sync.ts step 4.65: guarded by existsSync — skipped when L0 generator absent (ADR-0060 skill graph gate; scaffolded projects ship no skill graph tooling)
   'dev-sync:verify-skill-graph',                  // dev-sync.ts step 4.65: guarded by existsSync — skipped when L0 verifier absent (ADR-0060 skill graph gate; scaffolded projects ship no skill graph tooling)
   'dev-sync:sync-template-deps',                  // dev-sync.ts step 4.52: called only inside isWorkspaceRoot guard (same shape as dev-sync:propagate-to-templates; template dep mirror is L0-only tooling)
+  'dev-sync:skill-session-review',                // dev-sync.ts step 3.96c: guarded by existsSync — session-evidence skill review (SkillHone-inspired loop); L0-only script
+  'dev-sync:skill-dependency-analysis',           // dev-sync.ts step 3.96c: full health report pass is non-fatal; L0-only script
   'audit:sync-template-deps',                     // audit.ts: string mention in FAIL fix hint only; checkTemplateDependencyMirror skips entirely when templates/common/package.json is absent (L1/L3)
 ]);
 

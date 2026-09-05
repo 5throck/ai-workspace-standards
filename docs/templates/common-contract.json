@@ -63,7 +63,7 @@
     },
     "skill-lifecycle-manager": {
       "source": "skills/skill-lifecycle-manager/SKILL.md",
-      "version": "1.2.1",
+      "version": "1.3.0",
       "overridable": false,
       "description": "Skill lifecycle management"
     },
@@ -87,7 +87,7 @@
     },
     "sync": {
       "source": "skills/sync/SKILL.md",
-      "version": "1.2.2",
+      "version": "1.3.0",
       "overridable": false,
       "description": "Runs the full project sync pipeline"
     },

@@ -4,6 +4,10 @@
 
 2026-05-29
 
+## Changelog
+
+- 2026-09-06: v1.3.0 — whole-skill revision principle section added (SKILL.md + scripts/ + references/ revised together in one approved change; SkillHone finding; design doc docs/designs/2026-09-06-skill-session-review-design.md)
+
 ## Phase History
 
 | Date | From | To | Reason | Approver |

@@ -4,6 +4,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-09-06](2026-09-06.md) | feat(skills): session-evidence skill review loop (SkillHone-inspired) |
 | [2026-09-04](2026-09-04.md) | fix: apply project-review findings (C1-C4, H1-H10) |
 | [2026-09-03](2026-09-03.md) | feat: propagate k-opendata skill and DATA_GO_KR_API_KEY to templates/common |
 | [2026-09-02](2026-09-02.md) | chore: update |
