@@ -146,3 +146,6 @@ scripts/temp/
 
 # --- Claude Code plan-mode artifacts (session-local, must not be committed) ---
 .claude/plans/
+
+# graft's local graph cache — regenerable, not committed (run `graft build`).
+/graft/

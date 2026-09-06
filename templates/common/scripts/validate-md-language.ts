@@ -1,13 +1,16 @@
 #!/usr/bin/env bun
-// @version 1.8.0
+// @version 1.9.0
 /**
- * Markdown Language Validation Script with I18N Support
+ * Markdown/YAML Language Validation Script with I18N Support
  *
  * Policy: Official documents and governance files must contain English sentences.
  * Validates only allowlisted paths: agents/, AGENTS.md, CLAUDE.md, GEMINI.md,
  * context.md, CHANGELOG.md, docs/constitution/, docs/governance/, skills/,
  * .claude/skills/, .gemini/skills/, .claude/commands/, .gemini/commands/,
- * templates/, and SECURITY.md.
+ * templates/, and SECURITY.md. Both `.md` and `.yaml`/`.yml` files under these
+ * paths are scanned; the `lang: ko` + `lang_reason` exception is declared in
+ * `---` frontmatter for Markdown, or as a top-level `lang:`/`lang_reason:` key
+ * for plain YAML files that have no frontmatter fence.
  *
  * Excludes: memory/ logs, docs/designs/, docs/adr/, locale-specific files
  * for all supported I18N languages, and node_modules/.git directories.
@@ -103,15 +106,19 @@ function isProtectedPath(filePath: string): boolean {
 }
 
 /**
- * Extract lang and lang_reason from YAML frontmatter.
+ * Extract lang and lang_reason from YAML frontmatter (`---`-fenced, as used in
+ * Markdown files). For plain YAML files with no fence (e.g. `schema.yaml`
+ * starting directly with `schema_version:`), fall back to a top-level
+ * (column-0) `lang:`/`lang_reason:` key when isPlainYaml is true.
  */
-function parseFrontmatterLang(content: string): { lang?: string; lang_reason?: string } {
-  const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
-  if (!match) return {};
-  const fm = match[1];
-  const lang = /^lang:\s*(\S+)/m.exec(fm)?.[1];
-  const lang_reason = /^lang_reason:\s*(\S+)/m.exec(fm)?.[1];
-  return { lang, lang_reason };
+function parseLangDeclaration(content: string, isPlainYaml: boolean): { lang?: string; lang_reason?: string } {
+  const fenced = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  const source = fenced ? fenced[1] : (isPlainYaml ? content : null);
+  if (source === null) return {};
+  return {
+    lang: source.match(/^lang:\s*(\S+)/m)?.[1],
+    lang_reason: source.match(/^lang_reason:\s*(\S+)/m)?.[1],
+  };
 }
 
 /**
@@ -126,27 +133,30 @@ function parseFrontmatterLang(content: string): { lang?: string; lang_reason?: s
  * - .claude/skills/, .claude/commands/ (subdirectories)
  * - .gemini/skills/, .gemini/commands/ (subdirectories)
  * - templates/ (subdirectories)
+ *
+ * Directory-prefixed patterns match both `.md` and `.yaml`/`.yml` files; the
+ * fixed root filenames (AGENTS.md, CLAUDE.md, ...) are Markdown-only by name.
  */
 function isOfficialDocument(filePath: string): boolean {
   const normalizedPath = filePath.replace(/\\/g, "/");
 
   // Allowlisted official paths
   const officialPatterns = [
-    /^agents\/.*\.md$/,
+    /^agents\/.*\.(md|ya?ml)$/,
     /^AGENTS\.md$/,
     /^CLAUDE\.md$/,
     /^GEMINI\.md$/,
     /^CONSTITUTION\.md$/,
     /^CHANGELOG\.md$/,
     /^SECURITY\.md$/,
-    /^docs\/constitution\/.*\.md$/,
-    /^docs\/governance\/.*\.md$/,
-    /^skills\/.*\.md$/,
-    /^\.claude\/skills\/.*\.md$/,
-    /^\.claude\/commands\/.*\.md$/,
-    /^\.gemini\/skills\/.*\.md$/,
-    /^\.gemini\/commands\/.*\.md$/,
-    /^templates\/.*\.md$/,
+    /^docs\/constitution\/.*\.(md|ya?ml)$/,
+    /^docs\/governance\/.*\.(md|ya?ml)$/,
+    /^skills\/.*\.(md|ya?ml)$/,
+    /^\.claude\/skills\/.*\.(md|ya?ml)$/,
+    /^\.claude\/commands\/.*\.(md|ya?ml)$/,
+    /^\.gemini\/skills\/.*\.(md|ya?ml)$/,
+    /^\.gemini\/commands\/.*\.(md|ya?ml)$/,
+    /^templates\/.*\.(md|ya?ml)$/,
   ];
 
   return officialPatterns.some(pattern => pattern.test(normalizedPath));
@@ -160,9 +170,7 @@ function isI18nLocalePath(filePath: string): boolean {
   const normalized = filePath.replace(/\\/g, "/");
   return SUPPORTED_LOCALES.some(locale => {
     return (
-      normalized.endsWith(`_${locale}.md`) ||        // README_ko.md
-      normalized.endsWith(`-${locale}.md`) ||        // README-ko.md
-      normalized.endsWith(`.${locale}.md`) ||        // README.ko.md
+      new RegExp(`[._-]${locale}\\.(md|ya?ml)$`).test(normalized) || // README-ko.md, foo-ko.yaml
       normalized.startsWith(`${locale}/`) ||         // ko/...
       normalized.includes(`/${locale}/`) ||          // .../ko/...
       normalized.startsWith(`locales/${locale}/`) || // locales/ko/...
@@ -219,8 +227,8 @@ function analyzeFile(filePath: string): Violation | null {
       };
     }
 
-    // Stage 3: Frontmatter lang declaration
-    const { lang, lang_reason } = parseFrontmatterLang(content);
+    // Stage 3: Frontmatter/top-level lang declaration
+    const { lang, lang_reason } = parseLangDeclaration(content, /\.ya?ml$/.test(filePath));
     if (lang === 'ko') {
       if (lang_reason && (ALLOWED_LANG_REASONS as readonly string[]).includes(lang_reason)) {
         console.log(`   ℹ️  [INFO] Korean exception granted: ${filePath} (lang_reason: ${lang_reason})`);
@@ -247,13 +255,16 @@ function analyzeFile(filePath: string): Violation | null {
  * Main validation function
  */
 async function validateMarkdownLanguage(): Promise<void> {
-  console.log("🔍 Scanning official markdown files for undeclared Korean content...\n");
+  console.log("🔍 Scanning official markdown/YAML files for undeclared Korean content...\n");
 
-  // Find all .md files using Bun's built-in Glob API
-  const globber = new Bun.Glob("**/*.md");
+  // Find all .md and .yaml/.yml files using Bun's built-in Glob API
+  const globPatterns = ["**/*.md", "**/*.{yaml,yml}"];
   let allFiles: string[] = [];
   try {
-    allFiles = await Array.fromAsync(globber.scan({ cwd: process.cwd(), onlyFiles: true }));
+    for (const pattern of globPatterns) {
+      const globber = new Bun.Glob(pattern);
+      allFiles.push(...await Array.fromAsync(globber.scan({ cwd: process.cwd(), onlyFiles: true })));
+    }
   } catch (err) {
     // On Windows, scaffold test directories may have EPERM; collect files that are accessible
     const code = (err as NodeJS.ErrnoException).code;
@@ -297,7 +308,7 @@ async function validateMarkdownLanguage(): Promise<void> {
     }
   } catch { /* ignore scan errors */ }
 
-  const mdFiles = allFiles.filter((f) => {
+  const candidateFiles = allFiles.filter((f) => {
     const normalized = f.replace(/\\/g, "/");
     if (normalized.includes("node_modules/") ||
         normalized.includes(".git/") ||
@@ -323,7 +334,7 @@ async function validateMarkdownLanguage(): Promise<void> {
   const violations: Violation[] = [];
   let officialCount = 0;
 
-  for (const file of mdFiles) {
+  for (const file of candidateFiles) {
     // Skip excluded paths (locales, planning docs)
     if (isExcludedPath(file)) {
       continue;
@@ -361,7 +372,7 @@ async function validateMarkdownLanguage(): Promise<void> {
   // Report results
   if (violations.length === 0) {
     console.log("✅ No language violations in official documents.\n");
-    console.log(`   Scanned ${officialCount} official markdown files (agents, governance, skills, templates)`);
+    console.log(`   Scanned ${officialCount} official markdown/YAML files (agents, governance, skills, templates)`);
     console.log(`   I18N locale files excluded: ${SUPPORTED_LOCALES.length} language codes (${SUPPORTED_LOCALES.join(", ")})`);
     process.exit(0);
   } else {
@@ -370,7 +381,7 @@ async function validateMarkdownLanguage(): Promise<void> {
       console.log(`   📄 ${v.file}`);
       console.log(`      Reason: ${v.reason}\n`);
     });
-    console.log("Policy: Official documents must be in English. Korean exception requires 'lang: ko' + 'lang_reason: legal|source-material|proper-noun' in frontmatter.");
+    console.log("Policy: Official documents must be in English. Korean exception requires 'lang: ko' + 'lang_reason: legal|source-material|proper-noun' in frontmatter (Markdown) or as a top-level key (plain YAML).");
     console.log("Exception NOT available for: CLAUDE.md, GEMINI.md, CONSTITUTION.md, AGENTS.md, *.context.md");
     console.log("See: CONSTITUTION.md — Language Policy Exception — Korean Legal/Regulatory Content\n");
     process.exit(1);
