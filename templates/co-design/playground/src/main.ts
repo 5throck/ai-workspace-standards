@@ -7,6 +7,7 @@
  *   src/generated/tokens.ts   (typed constants + CSS_VARS var() references)
  */
 import "./style.css";
+import { renderPatterns } from "./patterns";
 
 type TokenTree = Record<string, Record<string, string> | string>;
 
@@ -39,17 +40,18 @@ function renderColors(container: HTMLElement, color: Record<string, string>, css
 
 function renderTypography(container: HTMLElement, typography: Record<string, Record<string, string>>): void {
   const sec = section("Typography", "Font families sampled at base size; then the size ladder in the sans family.");
-  for (const [familyName, familyValue] of Object.entries(typography.fontFamily ?? {})) {
+  const families = typography["font-family"] ?? typography.fontFamily ?? {};
+  for (const [familyName, familyValue] of Object.entries(families)) {
     const sample = el("p", "pg-type-sample");
     sample.style.fontFamily = familyValue;
     sample.textContent = `${familyName} — The quick brown fox jumps over the lazy dog`;
-    sec.append(sample, el("code", "pg-caption", `typography.fontFamily.${familyName}: ${familyValue}`));
+    sec.append(sample, el("code", "pg-caption", `typography.font-family.${familyName}: ${familyValue}`));
   }
   const ladder = el("div", "pg-stack");
-  for (const [sizeName, sizeValue] of Object.entries(typography.fontSize ?? {})) {
+  for (const [sizeName, sizeValue] of Object.entries(typography["font-size"] ?? typography.fontSize ?? {})) {
     const sample = el("p", "pg-type-sample");
     sample.style.fontSize = sizeValue;
-    sample.style.fontFamily = typography.fontFamily?.sans ?? "sans-serif";
+    sample.style.fontFamily = families.sans ?? "sans-serif";
     sample.textContent = `${sizeName} (${sizeValue}) — Component playground preview`;
     ladder.append(sample);
   }
@@ -82,6 +84,21 @@ function renderRadii(container: HTMLElement, borderRadius: Record<string, string
   }
   sec.append(grid);
   container.append(sec);
+}
+
+function flattenLayers(tree: TokenTree): TokenTree {
+  // v1.2.0 layer tokens: prefer the semantic layer for demos; merge any
+  // unlayered groups (pre-3-layer token files keep working).
+  const merged: TokenTree = {};
+  for (const key of ["primitive", "semantic", "component"] as const) {
+    const layer = tree[key];
+    if (layer && typeof layer === "object") Object.assign(merged, layer);
+  }
+  for (const [key, val] of Object.entries(tree)) {
+    if (key === "primitive" || key === "semantic" || key === "component" || key === "themes") continue;
+    merged[key] = val;
+  }
+  return merged;
 }
 
 function renderShadows(container: HTMLElement, shadow: Record<string, string>): void {
@@ -117,18 +134,21 @@ async function boot(): Promise<void> {
   try {
     const mod = await import("./generated/tokens");
     await import("./generated/tokens.css");
-    tokens = mod.tokens as unknown as TokenTree;
-    cssVars = mod.CSS_VARS as unknown as TokenTree;
+    tokens = flattenLayers(mod.tokens as unknown as TokenTree);
+    cssVars = flattenLayers(mod.CSS_VARS as unknown as TokenTree);
   } catch {
     renderMissingOutput(app);
     return;
   }
 
-  if (tokens.color && cssVars.color) renderColors(app, tokens.color, cssVars.color);
-  if (tokens.typography) renderTypography(app, tokens.typography);
-  if (tokens.spacing) renderSpacing(app, tokens.spacing);
-  if (tokens.borderRadius) renderRadii(app, tokens.borderRadius);
-  if (tokens.shadow) renderShadows(app, tokens.shadow);
+  if (tokens.color && cssVars.color) renderColors(app, tokens.color as Record<string, string>, cssVars.color as Record<string, string>);
+  if (tokens.typography) renderTypography(app, tokens.typography as Record<string, Record<string, string>>);
+  if (tokens.spacing) renderSpacing(app, tokens.spacing as Record<string, string>);
+  if (tokens["border-radius"] ?? tokens.borderRadius)
+    renderRadii(app, (tokens["border-radius"] ?? tokens.borderRadius) as Record<string, string>);
+  if (tokens.shadow) renderShadows(app, tokens.shadow as Record<string, string>);
+
+  renderPatterns(app);
 }
 
 boot();

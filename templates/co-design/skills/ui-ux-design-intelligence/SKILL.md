@@ -5,7 +5,7 @@ description: >
   component design, visual hierarchy, and user-centered design principles. Use when:
   building design systems, creating visual designs, designing UI components, or establishing
   design specifications.
-version: 1.0.0
+version: 1.0.1
 scope: co-design
 status: active
 owner: pm
@@ -171,8 +171,9 @@ This skill provides end-to-end UI/UX design capabilities, from design system arc
    - Test with contrast checker tools
 
 2. **Touch Targets**:
-   - Minimum size: 44×44 CSS pixels (WCAG AAA)
-   - Recommended size: 48×48 CSS pixels
+   - Practical baseline: 44×44 CSS pixels (from WCAG 2.5.5 Target Size, Level AAA)
+   - AA conformance minimum: 24×24 CSS pixels (WCAG 2.5.8, Level AA) — the 44px baseline exceeds it
+   - Recommended size: 48×48 CSS pixels (tokenized as `--target-size` in tokens.json)
    - Spacing between touch targets: 8px minimum
 
 3. **Typography**:
