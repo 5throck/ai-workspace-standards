@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-09-06T00:03:52.922Z
+**Generated**: 2026-09-06T05:16:17.327Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -9,7 +9,7 @@
 ## Summary
 
 - **Agents**: 8
-- **Skills**: 46
+- **Skills**: 47
 - **Scripts**: 88
 - **Commands**: 8
 
@@ -46,6 +46,7 @@
 | explain-me | 1.0.0 | experimental | skills/explain-me/SKILL.md | workspace | /explain-me, /reportme, make a report, create report, explain this topic | pm |
 | finishing-a-development-branch | 1.0.0 | active | skills/finishing-a-development-branch/SKILL.md | workspace | finish branch, complete work, wrap up, finishing a development branch, merge branch, create PR, push and PR | pm |
 | gateguard | 1.0.0 | active | skills/gateguard/SKILL.md | workspace | gateguard, /gateguard, investigate file, check before edit, pre-edit check | pm |
+| graft | 1.0.0 | active | .claude/skills/graft/SKILL.md | claude | N/A | N/A |
 | handbook | 0.4.0 | active | templates/common/skills/handbook/SKILL.md | common | N/A | pm |
 | handbook-sync-audit | 1.0.0 | active | templates/common/skills/handbook-sync-audit/SKILL.md | common | N/A | handbook-reviewer |
 | i18n-audit | 1.0.0 | active | templates/common/skills/i18n-audit/SKILL.md | common | i18n audit, locale parity, translation parity, glossary audit, L10N parity | pm |
@@ -156,7 +157,7 @@
 | validate-decisions.ts | 1.0.0 | scripts/validate-decisions.ts | js-yaml |
 | validate-doc-folder.ts | 1.1.0 | scripts/validate-doc-folder.ts | fs, path |
 | validate-docs-links.ts | 1.0.0 | scripts/validate-docs-links.ts | fs, path |
-| validate-md-language.ts | 1.8.0 | scripts/validate-md-language.ts | fs |
+| validate-md-language.ts | 1.9.0 | scripts/validate-md-language.ts | fs |
 | validate-model-registry.ts | N/A | scripts/validate-model-registry.ts | N/A |
 | validate-pm-extends.ts | 0.3.1 | scripts/validate-pm-extends.ts | N/A |
 | validate-procedures.ts | 1.1.0 | scripts/validate-procedures.ts | js-yaml |
@@ -198,7 +199,7 @@
 **Checked**: Claude (.claude/) vs Gemini (.gemini/)
 
 - **Commands with parity**: 8 / 8
-- **Skills with parity**: 0 / 34 (common-template skills are parity-exempt)
+- **Skills with parity**: 0 / 35 (common-template skills are parity-exempt)
 
 ---
 
@@ -206,5 +207,6 @@
 
 ⚠️ **Drift detected**:
 
+- [WARNING] Skill graft has no triggers defined
 - [WARNING] Skill handbook has no triggers defined
 - [WARNING] Skill handbook-sync-audit has no triggers defined

@@ -589,11 +589,23 @@ skills/*.md MAY use the exception: a project whose real-world domain requires
 Korean (e.g. citing Korean statutes, bilingual client-facing skill docs) may
 declare `lang: ko` + a valid `lang_reason` in frontmatter.
 
+`bun scripts/validate-md-language.ts` also scans `*.yaml`/`*.yml` files under
+the same official paths (`agents/`, `skills/`, `templates/`,
+`docs/constitution/`, `docs/governance/`, `.claude/skills`, `.claude/commands`,
+`.gemini/skills`, `.gemini/commands`). Plain YAML files (e.g. `schema.yaml`)
+rarely have a `---` frontmatter fence, so the exception is declared as a
+top-level (unindented) key instead:
+
+```yaml
+lang: ko
+lang_reason: legal   # legal | source-material | proper-noun
+```
+
 #### Non-English Reference Material in Skills
 
 `skills/*.md` may declare the `lang: ko` + `lang_reason` exception directly (see above) when the skill's own content is genuinely Korean-language. For a large or purely-tabular non-English reference (a terminology glossary, a mapping of official source-language field/status names) that would otherwise bloat `SKILL.md`, prefer keeping it out of Markdown entirely:
 
-- Store the non-English content in a **non-Markdown reference file** (e.g. `references/terms-ko.json`, `references/glossary-ko.csv`) under `skills/<name>/references/`. `bun scripts/validate-md-language.ts` only scans `*.md` files, so non-Markdown reference assets fall outside the English-only policy and may contain the source language directly, without frontmatter.
+- Store the non-English content in a **non-Markdown, non-YAML reference file** (e.g. `references/terms-ko.json`, `references/glossary-ko.csv`) under `skills/<name>/references/`. `bun scripts/validate-md-language.ts` scans `*.md` and `*.yaml`/`*.yml` files, so use `.json`/`.csv` (or another format outside those two) if the goal is to keep the reference file outside the English-only policy entirely, without a `lang` declaration.
 - `SKILL.md` itself stays English-only and simply points to the reference file (e.g. "See `references/terms-ko.json` for the Korean-original DART terminology mapping").
 - This is the general mechanism for any skill needing source-language reference data — not specific to Korean.
 
@@ -667,4 +679,4 @@ Agent, skill, and command frontmatter structures are validated against JSON Sche
 
 ---
 
-*Last Updated: 2026-09-03*
+*Last Updated: 2026-09-06*
