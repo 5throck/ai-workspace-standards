@@ -1,4 +1,4 @@
-// @version 2.29.1
+// @version 2.29.2
 // v2.28.0: nul-redirect lint no longer scans .bat/.cmd — cmd.exe `>nul` targets the NUL device and
 //           is the idiomatic, safe Windows batch redirect; the literal-file hazard is POSIX-only.
 // v2.26.0: New checkProjectDocMarkerDrift() (WARN-only, local-only) — detects when a
@@ -1383,6 +1383,12 @@ function checkDesignLint() {
         try {
             config = JSON.parse(readUTF8File(schemaPath) || '{}')?.designLint ?? {};
         } catch { /* schema unreadable — treat as disabled below */ }
+    } else {
+        // L3 scaffolded projects have no workspace-schema.json — apply the
+        // conventional default so the gate functions there (playground/src is
+        // the template-delivered UI source location).
+        const defaults = ['./playground/src', './src'].filter((r) => fs.existsSync(r));
+        if (defaults.length > 0) config = { enabled: true, scanRoots: defaults };
     }
 
     if (config.enabled !== true) {

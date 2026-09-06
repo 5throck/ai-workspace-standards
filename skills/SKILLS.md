@@ -46,7 +46,7 @@ Skills with a `skills/<name>/` directory in the workspace root. These are the pr
 | `standup-synthesizer` | 1.0.0 | active | pm | 2026-08-06 | — | Daily standup digest synthesizer aggregating commits, issues, PRs, and blockers |
 | `api-documentation` | 1.0.0 | active | pm | 2026-08-28 | — | Promoted from co-work/co-safety duplicate copies — generic REST/GraphQL/SDK documentation generation, not domain-specific |
 | `documentation-writing` | 1.0.0 | active | pm | 2026-08-28 | — | Promoted from co-work/co-safety duplicate copies — generic guide/manual/tutorial writing, not domain-specific |
-| `project-resync` | 1.0.0 | active | pm | 2026-09-06 | — | Whole-fleet bidirectional cycle: provenance audit (resync-audit.ts) → project GitHub sync → selective backport → root sync → upgrades. Operator skill; distinct from `sync` |
+| `project-resync` | 1.1.0 | active | pm | 2026-09-06 | — | Whole-fleet bidirectional cycle: provenance audit (resync-audit.ts) → project GitHub sync → selective backport → root sync → upgrades. Operator skill; distinct from `sync` |
 | `accessibility-audit` | 1.1.0 | active | pm | 2026-09-06 | — | Promoted from co-design (L2-as-basis per ADR-0068 plan): automated WCAG 2.1 AA audits via axe-core |
 | `token-usage-lint` | 1.1.0 | active | pm | 2026-09-06 | — | Promoted from co-design: token SSOT compliance lint; delegates to scripts/design-lint.ts (L0+L1) |
 | `ui-ux-design-intelligence` | 1.0.1 | active | pm | 2026-09-06 | — | Promoted from co-design: component design, visual hierarchy, WCAG checklist; enabled by design-foundation |

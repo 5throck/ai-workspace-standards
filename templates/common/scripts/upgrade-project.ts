@@ -69,7 +69,7 @@
 //           generalized from a variant-dir-only join() to resolveTemplate() (variant, then common)
 //           to support docs/context.md's common-only SSOT.
 // v1.3.0: Added multi-pattern managed block support (WORKSPACE-MANAGED, COMMON-CLAUDE, COMMON-GEMINI);
-//           removed stale agent MERGE references and CONSTITUTION.md
+//           removed stale agent MERGE references and context.md
 // v1.6.0: Added --prune-removed, --rollback, conflict detection for SYNC files, auto-discovery for script subdirs
 // v1.7.0: Added DOCS_MERGE (variant/common docs), VARIANT_DOCS_SYNC, COMMANDS_SYNC;
 //           extended managed block markers (VARIANT-INJECT, COMMON-AGENTS, DYNAMIC_SKILLS);
