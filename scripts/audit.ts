@@ -1,4 +1,11 @@
-// @version 2.29.2
+// @version 2.30.0
+// v2.30.0: Auto-activating skill-graph drift gate (ADR-0060) — when
+//           scripts/verify-skill-graph.ts exists in the audited context, the audit
+//           spawns it and FAILs on drift between the committed docs/skill-graph.json
+//           projection and the agents/skills/procedures SSOTs. Any project that has
+//           the graph feature therefore gets the gate enforced on every audit without
+//           per-project wiring; contexts that also wire it into their variant audit
+//           simply run the check twice (harmless).
 // v2.28.0: nul-redirect lint no longer scans .bat/.cmd — cmd.exe `>nul` targets the NUL device and
 //           is the idiomatic, safe Windows batch redirect; the literal-file hazard is POSIX-only.
 // v2.26.0: New checkProjectDocMarkerDrift() (WARN-only, local-only) — detects when a
@@ -2497,6 +2504,28 @@ if (GOVERNANCE_CHECK) {
     }
     if (status !== 0) {
         Fail('ADR governance linkage check failed with operational error — script exited non-zero');
+    }
+}
+
+// ── Skill-graph drift gate (ADR-0060) — auto-activating ──────────────────────
+// Any context that ships a committed skill graph (L0 root or an L3 project with
+// docs/skill-graph.json) gets its drift gate enforced here automatically: when
+// scripts/verify-skill-graph.ts exists, it re-derives the graph from the
+// agents/skills/procedures SSOTs and exits non-zero on drift, so a project
+// cannot silently audit green while its committed projection is stale.
+// Contexts that additionally wire the gate into their variant audit run the
+// check twice — harmless. Remedy on failure: bun scripts/generate-skill-graph.ts
+// (review + commit the regenerated projection).
+if (fs.existsSync(path.join('scripts', 'verify-skill-graph.ts'))) {
+    const { status, stdout, stderr } = spawnSync('bun', ['scripts/verify-skill-graph.ts'], {
+        encoding: 'utf-8',
+    });
+    if (status !== 0) {
+        if (stdout) console.log(stdout);
+        if (stderr) console.error(stderr);
+        Fail('Skill-graph drift detected: docs/skill-graph.json is stale — run bun scripts/generate-skill-graph.ts, review, and commit');
+    } else {
+        Pass('Skill-graph drift gate: committed projection matches SSOTs');
     }
 }
 
