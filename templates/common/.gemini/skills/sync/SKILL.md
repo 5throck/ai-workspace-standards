@@ -1,8 +1,8 @@
 ---
 name: sync
 description: Runs the full project sync pipeline — lifecycle update, audit, L0→L1 publish, commit, push, and PR creation.
-version: 1.2.2
-last_reviewed: 2026-08-25
+version: 1.3.0
+last_reviewed: 2026-09-06
 status: active
 scope: common
 l2_propagate: true
@@ -85,6 +85,7 @@ Runs the full project sync pipeline (`scripts/dev-sync.ts`). This is the single 
 | 3.8 | Memory File Archival | non-fatal | Runs `archive-memory.ts` to archive old memory files |
 | 3.9 | Spec Registry Check | **FATAL** (L0) | Runs `audit.ts --spec-check --lifecycle-only` — blocks on the spec-relevance Fail (code diff with no spec activity; ADR-0055 Stage 2) and any always-on audit Fail; stale/missing-spec stay WARN; escape hatch `--spec-exempt=E1-E5` (AGENTS.md §5.1.1); skipped when `docs/specs/registry.json` is absent |
 | 3.95 | QA Pre-checks | non-fatal | Runs project tests (if `package.json` has `test` script) and warns if `README_ko.md` is missing |
+| 3.96c | Session-Evidence Skill Review | non-fatal | Runs `skill-session-review.ts` — accumulates Observed Symptom + Evidence from the day's `## Skills Used` section into `memory/skill-review/` (diagnosis/candidate left empty for human triage); plus a non-fatal full `skill-dependency-analysis.ts --report` pass (SkillHone-inspired loop; design doc `docs/designs/2026-09-06-skill-session-review-design.md`) |
 | 3.97 | Governance Reflection Gate | **FATAL** (L0) | Runs `verify-adr-governance.ts --strict` — blocks sync when post-cutoff Accepted ADRs lack governance-doc references (ADR-0059 Stages 2+2b: unlinked-ADR and marker-drift findings block); skipped in scaffolded projects (L0-only validator) |
 | 4.5 | L0 to L1 Publish | **FATAL** (L0) / non-fatal (L1) | Propagates scripts, skills, commands, docs via `propagate-to-templates.ts --apply`; fatal only in L0 context (context.md present) |
 | 4.52 | Template Dependency Sync | **FATAL** (L0) | Runs `sync-template-deps.ts --apply` — aligns shared dependency versions from root `package.json` into `templates/common/package.json` and regenerates `bun.lock` (shared keys only; root-only deps never added, template-only deps never removed); workspace-root gated |
@@ -97,6 +98,15 @@ Runs the full project sync pipeline (`scripts/dev-sync.ts`). This is the single 
 | 7 | PR Creation | **FATAL** | If `--body-file` was passed, validates it (English) and opens the PR via `gh pr create --body-file`; otherwise falls back to `gen-pr-body.ts` template, `.github/pull_request_template.md`, then `gh pr create --fill`; idempotent — updates existing PR if one already exists for the branch |
 
 4. If audit fails, fix the reported issue before re-running.
+
+## Session Evidence Duty (`## Skills Used`)
+
+While the session is still open — BEFORE invoking `/sync` — record the skills
+actually loaded this session into `memory/YYYY-MM-DD.md` under `## Skills Used`
+(one block per skill; schema in the skill-lifecycle standards, §6.6
+Session-Evidence Skill Review Loop, and `docs/designs/2026-09-06-skill-session-review-design.md`). If the section was not filled before
+sync, the dev-sync step 2 skeleton is appended as a comment for later editing.
+Step 3.96c consumes this evidence automatically; it never modifies skills.
 
 ## Related Skills
 

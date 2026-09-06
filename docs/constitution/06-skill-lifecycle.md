@@ -330,6 +330,64 @@ If audit fails:
 - Reassign orphaned skills to valid agents
 - Archive deprecated skills to `skills/_archive/`
 
+##### Session-Evidence Skill Review Loop (Observation-Based Revision)
+
+Complementary to the structural audits above, this loop evaluates how skills
+actually performed in sessions and accumulates evidence for future revisions.
+Inspired by SkillHone (Tencent), reinterpreted for the PM Gateway: **evaluation
+is automatic, revision is human-approved.** Normative decision:
+[ADR-0067](../../docs/adr/0067-session-evidence-skill-review-loop.md); design doc:
+`docs/designs/2026-09-06-skill-session-review-design.md`. Applies at **every
+layer** — the review script is L0+L1 and ships with scaffolded projects, so
+L3 projects run the identical loop through their own `/sync`.
+
+```
+Session --uses--> Skill --produces--> Outcome --reveals--> Observed Symptom
+       --suggests--> Improvement Candidate --approved_by--> Skill Revision
+```
+
+**1. Evidence recording** — while a session is still open, the agent records
+the skills it actually loaded into `memory/YYYY-MM-DD.md` under `## Skills Used`
+(dev-sync step 2 provides the skeleton):
+
+```markdown
+- skill: <skill-name>
+  usage: primary | supporting
+  outcome: completed | partial | failed | abandoned
+  observations:
+    - "<what worked / what required manual workarounds>"
+```
+
+**2. Automatic detection** — dev-sync step 3.96c runs
+`bun scripts/skill-session-review.ts` (non-fatal), which classifies evidence
+into Observed Symptoms (taxonomy: `description_trigger_mismatch`,
+`missing_procedure`, `repeated_manual_intervention`, `outcome_failure`) and
+appends records to `memory/skill-review/YYYY-MM-DD.md`. The script generates
+**only** `observed_symptom` + `evidence` — observation and judgment are
+structurally separated.
+
+**3. Human triage** — PM / lifecycle-manager fills `diagnosis.likely_cause`
+and the improvement `candidate` (priority, confidence, `suggested_action`,
+`status`) in the review record. Candidate status machine:
+
+```
+proposed → triaged → approved → applied
+                   ↘ rejected
+```
+
+**4. Approved revision** — executed via the normal PM Gateway path
+(docs-writer/skill-lifecycle-manager), following the version bump rules
+(§6.6) and the whole-skill revision principle below. The governance record
+Changelog entry must reference the observed symptom and its evidence
+(sessions/occurrences) so revisions stay traceable to observations.
+
+**5. Revalidation** — dependency analysis re-runs automatically at the next
+sync (step 3.96c); the static Skill Graph regenerates at step 4.65.
+
+**Whole-skill revision principle**: a revision may touch SKILL.md prose,
+`scripts/`, and `references/` together in one approved change. Prompt-only
+revisions cannot fix failures that live in helper scripts (SkillHone finding).
+
 
 #### 6.7 Non-English Reference Material
 

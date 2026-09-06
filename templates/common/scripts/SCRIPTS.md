@@ -68,7 +68,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `clear-pm-approval.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `compile-tokens.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `create-l3-scaffold.ts` | L0 | 1.12.2 | active | —| —| L0 | —|
-| `dev-sync.ts` | L0 | 1.8.0 | active | —| —| L0+L1 | —|
+| `dev-sync.ts` | L0 | 1.9.0 | active | —| —| L0+L1 | —|
 | `dispatch-parallel.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `dispatch-serial.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `dispatch.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
@@ -190,7 +190,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `lib/platform-context.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/propagation-map-schema.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `lib/ssrf.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
-| `lifecycle-sync-audit.ts` | L0 | 1.5.0 | active | —| —| L0+L1 | —|
+| `lifecycle-sync-audit.ts` | L0 | 1.6.0 | active | —| —| L0+L1 | —|
 | `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `md-to-ooxml.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `new-project.ts` | L0 | 1.9.0 | active | —| —| L0 | —|
@@ -208,6 +208,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `spec-backfill.ts` | L0 | 1.0.0 | active | `--dry-run`, `--check` | —| L0 | —|
 | `spec-register.ts` | L0 | 1.1.0 | active | `--file`, `--source`, `--update`, `--status`, `--list`, `--ref`, `--id` | —| L0 | —|
 | `skill-lifecycle-audit.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
+| `skill-session-review.ts` | L0 | 1.0.0 | active | `--date`, `--json`, `--dry-run` | —| L0+L1 | —|
 | `sync-agent-status.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `sync-md.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
 | `sync-skill-status.ts` | L0 | 1.0.1 | active | — | — | L0+L1 | — |

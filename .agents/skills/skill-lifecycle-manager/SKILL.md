@@ -7,8 +7,8 @@ description: >
   Use when: creating new skills, updating skill metadata, validating skill structure,
   or managing skill-agent mappings.
 owner: pm
-version: 1.2.1
-last_reviewed: 2026-08-29
+version: 1.3.0
+last_reviewed: 2026-09-06
 relates_to:
   - skill: script-lifecycle-manager
     type: composes_with
@@ -190,6 +190,22 @@ bun run verify-skills
 - Triggers match expected use cases
 
 ---
+
+## Whole-Skill Revision Principle
+
+When executing an approved revision from the session-evidence review loop
+(`memory/skill-review/`, see the skill-lifecycle standards §6.6
+Session-Evidence Skill Review Loop and
+`docs/designs/2026-09-06-skill-session-review-design.md`), treat the skill as a
+**whole folder** —
+one approved change may update SKILL.md prose, add/fix `scripts/`, and extend
+`references/` together. Prompt-only revisions cannot fix failures that live in
+helper scripts (SkillHone finding). Requirements per revision:
+
+- Reference the observed symptom and its evidence (sessions/occurrences) in
+  the governance record Changelog entry
+- Follow the skill version bump rules (lifecycle standards §6.6)
+- Dependency revalidation happens automatically at the next `/sync` (step 3.96c)
 
 ## Expected Outputs
 
