@@ -491,3 +491,33 @@ migrator project-aware:
 verify clean; co-newbiz's `graph-map --check` bidirectional contract holds.
 Two legacy bare-string `relates_to` entries surfaced by the backfill were
 normalized to typed form (`type: relates_to`).
+
+## Amendment 2026-09-06 — Enforcement: Auto-Activating Drift Gate (Amendment 9)
+
+A graph that is a *generated projection* is only trustworthy while it is
+regenerated — and until 2026-09-06 nothing enforced regeneration outside
+co-newbiz's bespoke `graph-map --check`. Amendment 9 moves enforcement into the
+shared audit:
+
+- **`audit.ts` v2.30.0** appends an auto-activating check: when
+  `scripts/verify-skill-graph.ts` exists in the audited context (L0 root or an
+  L3 project), the audit spawns it and FAILs on drift between the committed
+  `docs/skill-graph.json` and the re-derived graph. "Has graph" and "gate
+  active" can no longer diverge — the generator pair's presence *is* the
+  activation condition, so projects need no per-project wiring, and future
+  scaffolds inherit enforcement from day one (new-project generates the
+  initial graph at scaffold time; the L1 `audit.ts` mirror ships the check).
+- **Fleet wiring** (defense in depth): the nine Projects/co-* without a
+  variant-level gate got one via their project-owned `audit-variant.ts`, with
+  projections regenerated post-0.6.0 and the gate negative-tested.
+- **Supporting fix**: `upgrade-project.ts` v1.19.0 repairs
+  `reconcileScriptRegistry()` (common-registry fallback, `L0`/`L0-only` → `L3`
+  layer rewrite on append, duplicate-row removal, delivered-file version
+  preference, JSC-safe row splicing) and `upgrade-project.ts`'s root registry
+  layer was corrected to `L0+L1` so L0→L1 publish actually ships it — the
+  upgrade path that delivers the graph feature now keeps its own script
+  registries honest.
+
+Design record, per-project PR list, and operational lessons (clean-tree
+upgrades, Bun/JSC `$nn` substitution hazard):
+`docs/designs/2026-09-06-skill-graph-drift-gate-autoactivation-design.md`.
