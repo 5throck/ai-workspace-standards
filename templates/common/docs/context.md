@@ -108,7 +108,7 @@ mobile apps, interactive CLIs, generated documents/templates) — not an optiona
 Backend/non-UI work is exempt only when the design doc or ADR states the exemption explicitly.
 
 - **Baseline**: WCAG 2.1 AA — aligned with the Design Foundation contract and the
-  `accessibility-audit` skill (axe-core, WCAG 2.1 AA; co-design) where available.
+  `accessibility-audit` skill (axe-core, WCAG 2.1 AA) where available.
 - **Design docs MUST include an Accessibility section** for user-facing features: target level
   (WCAG 2.1 AA), affected interaction areas (keyboard, screen reader, contrast, motion, touch),
   and the verification method. **ADRs MUST record accessibility impact** for features that affect
@@ -118,8 +118,16 @@ Backend/non-UI work is exempt only when the design doc or ADR states the exempti
   accessible names (`aria-label`/`aria-labelledby` for icon-only controls); screen-reader reading
   order; status never conveyed by color alone (always paired with icon and/or text);
   `prefers-reduced-motion` respected; adequate touch/target sizes.
+- **Universal Design (ADR-0068)**: user-facing designs are additionally evaluated against the
+  7 Universal Design principles (equitable use, flexible use, simple & intuitive use, perceptible
+  information, tolerance for error, low physical effort, size & space) as a style-neutral review
+  lens above the WCAG floor. The Design Foundation principle-derivation criteria include
+  **cognitive load** and **error recovery**; service/journey designs MUST include a
+  diversity-profile review step (aging / cognitive / situational / motor). Screen-pattern
+  inventories and the design-review checklist carry the matching accessibility evidence duties.
 - **Verification**: use the `accessibility-audit` skill where available; otherwise a documented
-  manual checklist covering the baseline items above.
+  manual checklist covering the baseline items above. Design conformance is machine-checked by
+  the blocking design-lint gate and the L0/L1 style-neutrality check (ADR-0064/0066).
 
 ### Session Log Format (`memory/YYYY-MM-DD.md`)
 

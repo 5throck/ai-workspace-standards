@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.19.0
+ * @version 1.20.0
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -32,7 +32,7 @@ function isCoVariantTracked(name: string): boolean {
   if (!_TRACKED_CO_VARIANTS) return true;
   return _TRACKED_CO_VARIANTS.has(name);
 }
-import { join, dirname, resolve, basename } from 'node:path';
+import { join, dirname, resolve, basename, relative } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { load } from 'js-yaml';
@@ -1586,6 +1586,128 @@ function checkVariantScopedSkillLeak(): void {
   if (leaks === 0) pass('templates/common/skills/: no variant-scoped skill leaks');
 }
 
+// Check B-12: L0/L1 style neutrality — variant-owned design identity literals
+// (palette hex/rgb()/hsl() colors, typeface names harvested from variant
+// tokens.json files) must not appear in L0 governance text or L1 normative
+// docs. Encodes the ADR-0064 "Foundation ≠ Design System" doctrine and the
+// ADR-0066 prohibition on hard-coding project styles into L0/L1 as a
+// machine check. Inline escape hatch: `<!-- neutrality-exempt: <reason> -->`
+// on the offending line (e.g. quoting a variant value inside a NON-normative
+// reference note).
+function checkStyleNeutrality() {
+  if (!JSON_MODE) console.log(`\n=== Check B-12: L0/L1 style neutrality (variant identity literals) ===`);
+  const TEMPLATES_DIR = join(ROOT, 'templates');
+  const GENERIC_FONT_TOKENS = new Set([
+    'system-ui', 'sans-serif', 'serif', 'monospace', 'cursive', 'fantasy',
+    'ui-sans-serif', 'ui-serif', 'ui-monospace', 'ui-rounded',
+  ]);
+
+  // 1. Harvest variant-owned identity literals from every variant tokens.json.
+  const identity = new Map<string, string>(); // literal -> owning variant
+  const variantsDir = join(TEMPLATES_DIR);
+  if (existsSync(variantsDir)) {
+    for (const entry of readdirSync(variantsDir, { withFileTypes: true })) {
+      if (!entry.isDirectory() || !entry.name.startsWith('co-')) continue;
+      const tokensPath = join(variantsDir, entry.name, 'tokens.json');
+      if (!existsSync(tokensPath)) continue;
+      let tokens: unknown;
+      try {
+        tokens = JSON.parse(readFileSync(tokensPath, 'utf-8'));
+      } catch {
+        continue; // invalid JSON is another check's problem
+      }
+      const addLiteral = (raw: string) => {
+        const literal = raw.trim();
+        if (literal.length < 3) return;
+        if (!identity.has(literal)) identity.set(literal, entry.name);
+      };
+      const walk = (node: unknown) => {
+        if (typeof node === 'string') {
+          for (const m of node.matchAll(/#[0-9a-fA-F]{3,8}\b/g)) addLiteral(m[0].toLowerCase());
+          for (const m of node.matchAll(/\b(?:rgba?|hsla?)\([^)]*\)/g)) addLiteral(m[0].replace(/\s+/g, ' '));
+          // typeface identity: first family of a comma-separated font stack
+          // (single-word values like "monospace" are generic; require a stack or
+          // a Capitalized name to avoid harvesting arbitrary strings)
+          const first = node.split(',')[0].trim().replace(/^["']|["']$/g, '');
+          const isStack = node.includes(',');
+          const isCapitalizedName = /^[A-Z]/.test(first) && first.split(' ').length <= 3;
+          if (isStack || isCapitalizedName) {
+            if (!GENERIC_FONT_TOKENS.has(first.toLowerCase())) addLiteral(first);
+          }
+        } else if (Array.isArray(node)) {
+          node.forEach(walk);
+        } else if (typeof node === 'object' && node !== null) {
+          for (const val of Object.values(node as Record<string, unknown>)) walk(val);
+        }
+      };
+      walk(tokens);
+    }
+  }
+
+  if (identity.size === 0) {
+    pass('L0/L1 style neutrality: no variant tokens.json found — nothing to cross-check');
+    return;
+  }
+
+  // 2. Normative L0 governance text + L1 normative docs.
+  const normativeFiles: string[] = [
+    'CONSTITUTION.md', 'AGENTS.md', 'CLAUDE.md', 'GEMINI.md',
+  ];
+  for (const dir of [join(ROOT, 'docs', 'constitution'), join(ROOT, 'docs', 'governance')]) {
+    if (existsSync(dir)) {
+      for (const f of readdirSync(dir, { withFileTypes: true })) {
+        if (f.isFile() && f.name.endsWith('.md')) normativeFiles.push(join(dir, f.name));
+      }
+    }
+  }
+  const commonDocs = join(TEMPLATES_DIR, 'common', 'docs');
+  if (existsSync(commonDocs)) {
+    const walkDocs = (dir: string) => {
+      for (const f of readdirSync(dir, { withFileTypes: true })) {
+        if (f.isDirectory()) walkDocs(join(dir, f.name));
+        else if (f.name.endsWith('.md') || f.name.endsWith('.css')) normativeFiles.push(join(dir, f.name));
+      }
+    };
+    walkDocs(commonDocs);
+  }
+  for (const base of ['skills', join(TEMPLATES_DIR, 'common', 'skills')]) {
+    const dir = join(ROOT, base);
+    if (existsSync(dir)) {
+      for (const entry of readdirSync(dir, { withFileTypes: true })) {
+        if (entry.isDirectory()) {
+          const skillMd = join(dir, entry.name, 'SKILL.md');
+          if (existsSync(skillMd)) normativeFiles.push(skillMd);
+        }
+      }
+    }
+  }
+
+  // 3. Scan (line-scoped; hex compared case-insensitively).
+  let violations = 0;
+  for (const file of normativeFiles) {
+    let content = '';
+    try { content = readFileSync(file, 'utf-8'); } catch { continue; }
+    const rel = relative(ROOT, file) || file;
+    const lines = content.split(/\r?\n/);
+    lines.forEach((line, idx) => {
+      if (line.includes('neutrality-exempt:')) return;
+      for (const [literal, owner] of identity) {
+        const matched = literal.startsWith('#')
+          ? line.toLowerCase().includes(literal.toLowerCase())
+          : new RegExp(`(?<![\\w-])${literal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![\\w-])`).test(line);
+        if (matched) {
+          violations++;
+          fail('root', 'B-12', `variant identity literal "${literal}" (${owner}) in normative L0/L1 file ${rel}:${idx + 1}`,
+            `Remove the variant-specific value or annotate the line with <!-- neutrality-exempt: <reason> --> (L0/L1 must stay style/pattern-neutral per ADR-0064/0066)`);
+        }
+      }
+    });
+  }
+  if (violations === 0) {
+    pass(`L0/L1 style neutrality: no variant identity literals in ${normativeFiles.length} normative file(s) (${identity.size} harvested literals)`);
+  }
+}
+
 // Check 11: Variant Contract compliance
 function checkVariantContract(variant: string): void {
   if (!JSON_MODE) console.log(`\n=== Check 11: Variant Contract compliance in ${variant} ===`);
@@ -3071,6 +3193,7 @@ function main() {
   checkCommands('common');
   // Script parity check removed (dead code after ADR-0036 TypeScript migration)
   checkVariantScopedSkillLeak();  // B-11: variant_scoped_skills must not live in common
+  checkStyleNeutrality();         // B-12: L0/L1 style neutrality (ADR-0064/0066)
 
   let variantsChecked = 0;
   for (const [variant, manifest] of manifests) {

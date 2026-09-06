@@ -28,7 +28,7 @@ metadata:
 
 `tokens.json` is the single source of truth for the project's design language: colors, typography, spacing, radii, and shadows. `scripts/compile-tokens.ts` compiles it into the two consumed forms, `tokens.css` (CSS custom properties such as `--color-primary`) and `tokens.ts` (typed constants plus `CSS_VARS`). Every styled surface must consume one of those forms, never a literal value. Theme presets live in the reserved top-level `themes` key (`dark`, `high-contrast`); the compiler emits each as a `[data-theme="<name>"]` CSS block after `:root` plus a `themes` export in `tokens.ts` — consumers switch themes via the `data-theme` attribute, never by re-declaring values.
 
-A hardcoded `#0066cc` or `padding: 12px` in a demo or prototype file forks the design language silently: it renders correctly today, but the next palette change in `tokens.json` never reaches it. This skill is the detection half of that contract. Reference implementation: the co-design variant (`templates/co-design/tokens.json` + `scripts/design-lint.ts`), whose playground binds demo authoring to it ("hardcoded hex/px values defeat the SSOT").
+A hardcoded palette hex (e.g. a raw `#rrggbb` value) or `padding: 12px` in a demo or prototype file forks the design language silently: it renders correctly today, but the next palette change in `tokens.json` never reaches it. This skill is the detection half of that contract. Reference implementation: the co-design variant (`templates/co-design/tokens.json` + `scripts/design-lint.ts`), whose playground binds demo authoring to it ("hardcoded hex/px values defeat the SSOT").
 
 Decision record: closes the backlog Low row "No token-usage lint (detecting hardcoded colors/spacing that bypass the SSOT)" in `docs/variant-benchmark-backlog.md` §3, closed 2026-08-25.
 
@@ -111,7 +111,7 @@ Findings are reported as a classification table (one row per hit) followed by a 
 ```text
 | file:line                  | match              | classification      | action                          |
 |----------------------------|--------------------|---------------------|---------------------------------|
-| src/demos/hero.tsx:14      | #0066cc            | should-be-token     | -> color.primary via CSS_VARS   |
+| src/demos/hero.tsx:14      | (raw palette hex)  | should-be-token     | -> color.primary via CSS_VARS   |
 | src/demos/chart.ts:31      | #7b3fe4            | one-off (documented)| keep; rationale comment added   |
 | src/main.ts:8              | href="#dec"        | false positive      | none                            |
 
@@ -133,7 +133,7 @@ Classify every hit before acting on it.
 
 **Should-be-token (remediate):**
 - Any color, spacing, radius, or shadow that mirrors an existing token or will recur across components
-- Hex/px values inside a `var()` fallback, for example `var(--color-text, #1a1a1a)`: the fallback duplicates the SSOT value and drifts silently on the next recompile. In the playground `tokens.css` is always loaded, so drop the fallback; keep fallbacks only in stylesheets consumed outside the compiled-token bundle, and document each one
+- Hex/px values inside a `var()` fallback, for example `var(--color-text, <fallback>)`: the fallback duplicates the SSOT value and drifts silently on the next recompile. In the playground `tokens.css` is always loaded, so drop the fallback; keep fallbacks only in stylesheets consumed outside the compiled-token bundle, and document each one
 
 Remediation for should-be-token findings:
 
