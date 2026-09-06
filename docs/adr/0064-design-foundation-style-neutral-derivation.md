@@ -113,3 +113,8 @@ review-enforced today. Automated lint implementation and co-design's
 - Follow-up backlog: automated design-lint script implementing the validation
   contract; migration of co-design's flat `tokens.json` to the 3-layer model
   once its compiler/lint consumers are updated.
+  → Both items are now **planned** (2026-09-06) under the unified
+  design/a11y/UD improvement plan with ADR-0068
+  ([docs/designs/2026-09-06-universal-design-extension-design.md](../designs/2026-09-06-universal-design-extension-design.md)):
+  token migration + `design-lint.ts` in Phase 2, L1 promotion in Phase 3,
+  blocking audit wiring in Phase 4.
