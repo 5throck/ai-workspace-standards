@@ -537,5 +537,13 @@
         "notes": "Scaffolded on new-project creation. Agents load this file at stage start."
       }
     }
+  },
+  "designLint": {
+    "enabled": true,
+    "scanRoots": [
+      "templates/co-design/playground/src"
+    ],
+    "allowlist": [],
+    "description": "Design-lint gate config (audit.ts checkDesignLint): token SSOT compliance scan roots for UI source; allowlist entries exempt documented literals."
   }
 }

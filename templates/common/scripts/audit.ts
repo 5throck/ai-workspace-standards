@@ -1,4 +1,4 @@
-// @version 2.28.0
+// @version 2.29.0
 // v2.28.0: nul-redirect lint no longer scans .bat/.cmd — cmd.exe `>nul` targets the NUL device and
 //           is the idiomatic, safe Windows batch redirect; the literal-file hazard is POSIX-only.
 // v2.26.0: New checkProjectDocMarkerDrift() (WARN-only, local-only) — detects when a
@@ -1363,6 +1363,43 @@ function checkShellInjectionPatterns() {
     }
 }
 checkShellInjectionPatterns();
+
+// Design-lint gate (blocking): token SSOT compliance for UI source directories.
+// Scope/escape-hatch are schema-driven (docs/workspace-schema.json `designLint`:
+// { enabled, scanRoots, allowlist }) so variants/projects without UI sources or
+// with grandfathered literals are not false-failed. Runs the promoted L0+L1
+// scripts/design-lint.ts (token-usage-lint skill companion). Blocking per the
+// 2026-09-06 unified plan decision; see
+// docs/designs/2026-09-06-universal-design-extension-design.md §3.
+function checkDesignLint() {
+    const lintScript = path.join('scripts', 'design-lint.ts');
+    if (!fs.existsSync(lintScript)) {
+        Pass('Design-lint gate: scripts/design-lint.ts not present — skipped');
+        return;
+    }
+    const schemaRaw = readUTF8File(path.join('docs', 'workspace-schema.json'));
+    let config: { enabled?: boolean; scanRoots?: string[] } = {};
+    try {
+        config = JSON.parse(schemaRaw || '{}')?.designLint ?? {};
+    } catch { /* schema unreadable — treat as disabled below */ }
+
+    if (config.enabled !== true) {
+        Pass('Design-lint gate: disabled (workspace-schema.json designLint.enabled) — skipped');
+        return;
+    }
+    const roots = (config.scanRoots ?? []).filter((r) => fs.existsSync(r));
+    if (roots.length === 0) {
+        Pass('Design-lint gate: no configured scan roots present — skipped');
+        return;
+    }
+    const result = spawnSync('bun', [lintScript, '--dir', ...roots], { encoding: 'utf-8' });
+    if (result.status === 0) {
+        Pass(`Design-lint gate: token SSOT compliance CLEAN across ${roots.length} scan root(s)`);
+    } else {
+        Fail(`Design-lint gate: should-be-token finding(s) in UI source — run: bun scripts/design-lint.ts --dir ${roots.join(' --dir ')} (exempt literals with a "design-token-exempt: <reason>" comment or list them in workspace-schema.json designLint)`);
+    }
+}
+checkDesignLint();
 
 // Variant script drift detection (WARN-only, first-pass heuristic).
 // Flags templates/co-*/scripts files that duplicate templates/common/scripts files by >50% content overlap.
