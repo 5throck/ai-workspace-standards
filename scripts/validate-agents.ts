@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Agent Lifecycle Validation Script
- * @version 1.0.5
+ * @version 1.1.0
  *
  * Validates all agents/*.md files for required lifecycle frontmatter
  * and checks governance records in docs/lifecycle/agents/*.md
@@ -266,6 +266,31 @@ function validateGovernanceRecords(): void {
 }
 
 // Main
+// Security holds — an agent flagged with security_hold: true must be
+// quarantined immediately (constitution 05.6 Security Protocol): non-deprecated
+// status or a missing removal-date is a hard error, not a warning.
+function validateSecurityHolds(): void {
+  const agentsDir = AGENTS_DIR;
+  if (!existsSync(agentsDir)) return;
+  for (const entry of readdirSync(agentsDir)) {
+    if (!entry.endsWith('.md') || entry === 'README.md') continue;
+    const raw = readFileSync(join(agentsDir, entry), 'utf-8');
+    const fm = raw.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+    if (!fm) continue;
+    const body = fm[1];
+    if (!/^security_hold:\s*true\b/m.test(body)) continue;
+
+    const isDeprecated = /^status:\s*deprecated\b/m.test(body);
+    const hasRemovalDate = /^removal[-_]date:/m.test(body);
+    if (!isDeprecated) {
+      issues.push({ level: 'error', file: entry, check: 'security-hold-active', message: entry + ': security_hold: true but status is not deprecated — quarantine immediately (constitution 05.6 Security Protocol)' });
+    }
+    if (!hasRemovalDate) {
+      issues.push({ level: 'error', file: entry, check: 'security-hold-no-removal-date', message: entry + ': security_hold: true without a removal-date — held agents must be scheduled for removal (≤ 30 days)' });
+    }
+  }
+}
+
 function main() {
   if (!JSON_MODE) {
     console.log(`${colors.cyan}🔍 Validating agent lifecycle documentation...${colors.reset}`);
@@ -273,6 +298,7 @@ function main() {
   }
 
   validateRuntimeDefinitions();
+  validateSecurityHolds();
   validateGovernanceRecords();
 
   const errors = issues.filter(i => i.level === 'error');

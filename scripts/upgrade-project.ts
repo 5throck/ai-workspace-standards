@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.19.0
+// @version 1.19.1
 // v1.19.0: Registry-row reconciliation fixes in reconcileScriptRegistry() — (1) fall back to the
 //           templates/common/scripts/SCRIPTS.md registry when the L0 row misses (scripts shipped
 //           from common under variant-prefixed upstream names, e.g. the handbook/ suite, were
@@ -12,6 +12,8 @@
 //           co-export dispatch* rows); (4) the row version written is the delivered template
 //           file's own @version (L0's row can be newer than the L1 snapshot — writing L0's
 //           number tripped lifecycle-sync-audit Check A).
+// v1.19.1: VARIANT_DOCS_SYNC gains the co-develop privacy-design-checklist pair (EN+KO) —
+//           generalized template-grade residue of the harness-assessment privacy ADRs.
 // v1.17.0: Identity-separated fork support — a project whose variant.json self-declares a variant
 //           with no templates/<variant>/ dir (e.g. co-architect from co-work) is accepted in
 //           "common-only" sync mode: templates/common + project-owned files only, no readiness
@@ -851,6 +853,10 @@ const VARIANT_DOCS_SYNC: string[] = [
   'docs/context.md',
   'docs/engagement-orchestration.md',
   'docs/team-configuration-guide.md',
+  // v1.19.1: co-develop privacy design checklist (generalized from the
+  // harness-assessment privacy ADRs; EN + KO mirrors version-bump together)
+  'docs/privacy-design-checklist.md',
+  'docs/privacy-design-checklist_ko.md',
 ];
 for (const rel of VARIANT_DOCS_SYNC) {
   const src = resolveTemplate(rel);

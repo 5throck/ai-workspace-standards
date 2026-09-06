@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Skill Lifecycle Validation Script
- * @version 1.3.1
+ * @version 1.4.0
  */
 // Validates skills/*/SKILL.md files for required frontmatter
 // and checks governance records in docs/lifecycle/skills/*.md
@@ -406,6 +406,46 @@ function collectKnownSkillNames(): Set<string> {
 }
 
 // Main
+// Part 1c: Security holds — a skill flagged with security_hold: true must be
+// quarantined immediately (constitution 06 Security Protocol): non-deprecated
+// status or a missing removal-date is a hard error, not a warning.
+function validateSecurityHolds(): void {
+  if (!JSON_MODE) console.log(`\n${colors.cyan}🛡️  Part 1c: Security Hold Validation (security_hold: true requires quarantine)${colors.reset}`);
+
+  const skillDirs = readdirSync(SKILLS_DIR, { withFileTypes: true })
+    .filter(dirent => dirent.isDirectory())
+    .map(dirent => dirent.name);
+
+  for (const skillDir of skillDirs) {
+    const skillFile = join(SKILLS_DIR, skillDir, 'SKILL.md');
+    if (!existsSync(skillFile)) continue;
+    const raw = readFileSync(skillFile, 'utf-8');
+    const fm = raw.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+    if (!fm) continue;
+    const body = fm[1];
+    if (!/^security_hold:\s*true\b/m.test(body)) continue;
+
+    const isDeprecated = /^status:\s*deprecated\b/m.test(body);
+    const hasRemovalDate = /^removal[-_]date:/m.test(body);
+    if (!isDeprecated) {
+      fail(
+        skillDir,
+        'security-hold-active',
+        skillDir + ': security_hold: true but status is not deprecated — quarantine immediately',
+        'Set status: deprecated and open the remediation PR now (constitution 06 Security Protocol).'
+      );
+    }
+    if (!hasRemovalDate) {
+      fail(
+        skillDir,
+        'security-hold-no-removal-date',
+        skillDir + ': security_hold: true without a removal-date — held skills must be scheduled for removal (≤ 30 days)',
+        'Add removal-date: YYYY-MM-DD to the SKILL.md frontmatter.'
+      );
+    }
+  }
+}
+
 function main() {
   if (!JSON_MODE) {
     console.log(`${colors.cyan}🔍 Validating skill lifecycle documentation...${colors.reset}`);
@@ -414,6 +454,7 @@ function main() {
 
   validateRuntimeDefinitions();
   validateLayerPlacement();
+  validateSecurityHolds();
   validateRelationMetadata(collectKnownSkillNames());
   validateGovernanceRecords();
 
