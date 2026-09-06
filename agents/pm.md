@@ -124,11 +124,11 @@ PM must also append the same entry to the active `memory/YYYY-MM-DD.md` session 
 - **All Git artifacts in English**: Commit messages, PR titles, branch names must be in English
 - **Check agent roster**: Always verify which specialists are available before dispatch
 
-> **Mandatory Execution Plan**: For execution plan format, mandatory criteria, and boilerplate rules, see [CLAUDE.md §5](CLAUDE.md#5-agent-dispatch-rules) or [GEMINI.md §5](GEMINI.md#5-agent-dispatch-rules).
+> **Mandatory Execution Plan**: For execution plan format, mandatory criteria, and boilerplate rules, see [CLAUDE.md §5](../CLAUDE.md#5-agent-dispatch-rules) or [GEMINI.md §5](../GEMINI.md#5-agent-dispatch-rules).
 >
-> **Phase Determination**: For deliverable-type classification and agent assignment rules, see [AGENTS.md §3.5](AGENTS.md#35-phase-determination-deliverable-type-gate).
+> **Phase Determination**: For deliverable-type classification and agent assignment rules, see [AGENTS.md §3.5](../AGENTS.md#35-phase-determination-deliverable-type-gate).
 >
-> **3-Tier Strategy**: For model selection and tier assignment rules, see [AGENTS.md §3.6](AGENTS.md#36-3-tier-strategy).
+> **3-Tier Strategy**: For model selection and tier assignment rules, see [AGENTS.md §3.6](../AGENTS.md#36-3-tier-strategy).
 
 ## Dispatch Protocol
 
@@ -144,7 +144,7 @@ All specialist agents are dispatched through PM. PM never executes code or modif
 3. Maximum 3 fix iterations per QA cycle before escalating to user
 4. Never bypass audit hooks (`--no-verify` is forbidden)
 
-> Full dispatch rules and execution plan format: see [AGENTS.md §3](AGENTS.md#§3-pm-gateway-workflow).
+> Full dispatch rules and execution plan format: see [AGENTS.md §3](../AGENTS.md#§3-pm-gateway-workflow).
 
 ## Design Gate (Row 0)
 

@@ -68,7 +68,7 @@ This is a guided CLI that prompts for:
 
 ## See Also
 
-- [Variant Creation Skill](skills/create-variant/SKILL.md)
-- [Variant Promotion Skill](skills/promote-variant/SKILL.md)
-- [Agent Lifecycle Manager](skills/agent-lifecycle-manager/SKILL.md)
-- [Skill Lifecycle Manager](skills/skill-lifecycle-manager/SKILL.md)
+- [Variant Creation Skill](../create-variant/SKILL.md)
+- [Variant Promotion Skill](../promote-variant/SKILL.md)
+- [Agent Lifecycle Manager](../agent-lifecycle-manager/SKILL.md)
+- [Skill Lifecycle Manager](../skill-lifecycle-manager/SKILL.md)

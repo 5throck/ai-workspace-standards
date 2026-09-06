@@ -1503,7 +1503,7 @@ This variant will be promoted to stable when ALL criteria are met:
 - **2026-06-03**: Initial beta release (v0.1.0)
 - **2026-09-03**: Promoted to stable (v1.0.0)
   - All 8 promotion criteria met
-  - ADR approved: [docs/adr/202609-stable-promotion-<variant>.md](../../adr/202609-stable-promotion-<variant>.md)
+  - ADR approved: `docs/adr/202609-stable-promotion-<variant>.md` (per-variant promotion ADR)
 
 ### Production Support
 
