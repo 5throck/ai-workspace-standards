@@ -7,7 +7,7 @@ lang_reason: source-material
 
 > **Doc intent:** Human-readable governance specification for the 5-domain × 3-layer lifecycle model.
 > Machine-readable policy is in [`lifecycle-governance.json`](lifecycle-governance.json).
-> Last Updated: 2026-09-03
+> Last Updated: 2026-09-06
 
 ---
 
@@ -215,3 +215,13 @@ Use this checklist when creating a new `templates/co-<name>/` variant. Steps are
 | `../../scripts/readme-lifecycle-audit.ts` | README domain validator |
 | `../../CONSTITUTION.md` | Workspace design philosophy and shared standards |
 | `../../AGENTS.md` | Canonical agent roster for L0 |
+
+## Docs Propagation Policy (ADR-0069)
+
+The `docs` propagation domain is **disabled by decision** (ADR-0069, 2026-09-06):
+L1 `templates/common/docs/` is independently maintained — it is project-facing
+normative documentation, not a mirror of L0 governance docs. Normative content
+that must reach L1 travels via COMMON-CONSTITUTION marker zones, L1 spec
+documents, and propagated skills/scripts; when L0 changes such content, the L1
+hand-sync is a required step of the same change. Reopening mirror/whitelist
+propagation requires a new ADR superseding ADR-0069.

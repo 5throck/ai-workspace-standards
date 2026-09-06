@@ -29,7 +29,7 @@ const YELLOW = '[33m';
 const CYAN = '[36m';
 const RESET = '[0m';
 
-type SpecStatus = 'draft' | 'proposed' | 'approved' | 'implemented' | 'drifted';
+type SpecStatus = 'draft' | 'proposed' | 'approved' | 'implemented' | 'drifted' | 'archived';
 type SpecSource = 'brainstorming' | 'meeting' | 'manual';
 
 interface SpecEntry {

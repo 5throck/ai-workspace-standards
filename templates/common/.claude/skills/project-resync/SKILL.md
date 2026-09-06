@@ -1,6 +1,6 @@
 ---
 name: project-resync
-version: 1.0.0
+version: 1.1.0
 description: >
   Full bidirectional sync cycle for Projects/co-* instances: provenance-audit
   uncommitted content, sync each project to its GitHub remote, selectively
@@ -114,6 +114,20 @@ category plan → run → verify `.claude/template-version.txt` and project
 Per project: dev-sync `chore: upgrade template to <version>`, merge CLEAN,
 default + pull + delete branches. Final gate: all projects have clean trees,
 0 unpushed, 0 open PRs, passing audits; root audit + validate-templates pass.
+
+## Step 6 — Fleet branch cleanup + root final sync
+
+After Step 5's merges:
+
+1. **Remote PR branches**: for every project, delete merged `pr/*` branches —
+   `git -C <project> branch -r --merged origin | grep 'origin/pr/'` →
+   `git -C <project> push origin --delete <branch>`; then `git fetch --prune`.
+   (Repos with auto-delete-on-merge need only the prune.)
+2. **Local PR branches**: `git -C <project> branch --list 'pr/*'` → `-D` after
+   verifying each is merged. Return every repo to its default branch + pull.
+3. **Root final sync**: root must be on `main`, pulled, clean (`git status`).
+4. Emit the final state table — per project: dirty / unpushed / open PRs /
+   template version — all zeros before declaring the cycle complete.
 
 ## Output Format
 

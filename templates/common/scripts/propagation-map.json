@@ -90,7 +90,7 @@
       ],
       "disabled": true,
       "l2_drift_eligible": false,
-      "note": "Disabled until docs propagation policy is decided (ADR required). L1 docs/ is currently independently maintained, not a mirror of L0 docs/. Do not enable without resolving: full mirror vs. whitelist vs. stay independent. Inspect candidate output: --domain docs --include-disabled --dry-run.",
+      "note": "Disabled by decision — ADR-0069 ratified L1 docs/ as independently maintained (different audience from L0 governance docs; normative content travels via COMMON-CONSTITUTION zones, L1 spec docs, and propagated skills/scripts). Do not enable without a new ADR superseding ADR-0069. Inspect candidate output: --domain docs --include-disabled --dry-run.",
       "disabled_since": "2026-07-08",
       "history": "globFiles() never supported a wildcard within the filename component of a pattern — '**/*.md' reduced to the literal basename '*.md', which can never equal a real filename — so this domain silently matched zero files from the moment it was declared (confirmed 2026-07-08; templates/common/docs/ has 28 independently-authored files vs. 147 under root docs/). Fixed in propagate-to-templates.ts v2.1.0. Activating this domain as-is would copy ~143 previously-unmatched files on the next --apply, including L0-only content (e.g. docs/constitution/) that scripts/audit.ts's L0-leakage check forbids under templates/ — hence disabled rather than enabled by the fix."
     },

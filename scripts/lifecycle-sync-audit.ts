@@ -381,6 +381,7 @@ const INTENTIONAL_CROSS_REFS = new Set([
   'dev-sync:skill-dependency-analysis',           // dev-sync.ts step 3.96c: full health report pass is non-fatal + existsSync-guarded; skill-session-review.ts itself is L0+L1 (ADR-0067) so needs no entry
   'skill-session-review:skill-dependency-analysis', // skill-session-review.ts: per-skill re-analysis is existsSync-guarded (import.meta.dir sibling check) and skips in L1/L3 where the analyzer is absent (ADR-0067 §Decision 5)
   'audit:sync-template-deps',                     // audit.ts: string mention in FAIL fix hint only; checkTemplateDependencyMirror skips entirely when templates/common/package.json is absent (L1/L3)
+  'upgrade-project:validate-variant-readiness',   // upgrade-project.ts: Variant Readiness Gate is existsSync-guarded — the gate runs only at a workspace root where the L0 validator exists (surfaced when the L1 copy caught up to v1.18.0)
 ]);
 
 function runCheckX(): SyncIssue[] {
