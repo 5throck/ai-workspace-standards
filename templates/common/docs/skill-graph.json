@@ -7,6 +7,11 @@
       "layer": "common"
     },
     {
+      "id": "accessibility-audit",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
       "id": "agent-lifecycle-manager",
       "type": "skill",
       "layer": "common"
@@ -172,7 +177,17 @@
       "layer": "common"
     },
     {
+      "id": "token-usage-lint",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
       "id": "translate",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "ui-ux-design-intelligence",
       "type": "skill",
       "layer": "common"
     },
@@ -498,6 +513,17 @@
       "source": "prose"
     },
     {
+      "type": "follows",
+      "from": "token-usage-lint",
+      "to": "ui-ux-design-intelligence",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/common/skills/token-usage-lint/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "composes_with",
       "from": "translate",
       "to": "documentation-writing",
@@ -505,6 +531,17 @@
       "symmetric": true,
       "provenance": {
         "file": "templates/common/skills/translate/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "follows",
+      "from": "ui-ux-design-intelligence",
+      "to": "documentation-writing",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/common/skills/ui-ux-design-intelligence/SKILL.md",
         "field": "relates_to",
         "index": 0
       }

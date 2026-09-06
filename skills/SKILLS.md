@@ -46,6 +46,9 @@ Skills with a `skills/<name>/` directory in the workspace root. These are the pr
 | `standup-synthesizer` | 1.0.0 | active | pm | 2026-08-06 | — | Daily standup digest synthesizer aggregating commits, issues, PRs, and blockers |
 | `api-documentation` | 1.0.0 | active | pm | 2026-08-28 | — | Promoted from co-work/co-safety duplicate copies — generic REST/GraphQL/SDK documentation generation, not domain-specific |
 | `documentation-writing` | 1.0.0 | active | pm | 2026-08-28 | — | Promoted from co-work/co-safety duplicate copies — generic guide/manual/tutorial writing, not domain-specific |
+| `accessibility-audit` | 1.1.0 | active | pm | 2026-09-06 | — | Promoted from co-design (L2-as-basis per ADR-0068 plan): automated WCAG 2.1 AA audits via axe-core |
+| `token-usage-lint` | 1.1.0 | active | pm | 2026-09-06 | — | Promoted from co-design: token SSOT compliance lint; delegates to scripts/design-lint.ts (L0+L1) |
+| `ui-ux-design-intelligence` | 1.0.1 | active | pm | 2026-09-06 | — | Promoted from co-design: component design, visual hierarchy, WCAG checklist; enabled by design-foundation |
 | `research-analysis` | 1.0.0 | active | pm | 2026-08-28 | — | Promoted from co-work/co-safety duplicate copies — generic research synthesis and evidence gathering, not domain-specific |
 
 
@@ -86,6 +89,5 @@ Skills registered in the catalog but without a `skills/<name>/` directory in the
 | `sound-synth` | 1.0.0 | active | sound-designer | 2026-08-06 | — | co-game only |
 | `mece-logic-auditor` | 1.0.0 | active | strategy-analyst | 2026-08-06 | — | co-consult only |
 | `sarif-exporter` | 1.0.1 | active | security-expert | 2026-08-06 | — | co-security only |
-| `accessibility-audit` | 1.0.0 | active | pm | 2026-08-06 | — | co-design only |
 | `presenter-mode` | 1.0.1 | active | html-build | 2026-08-16 | — | co-deck only |
 | `stride-threat-matrix` | 1.0.0 | active | security-expert | 2026-08-06 | — | co-security only |

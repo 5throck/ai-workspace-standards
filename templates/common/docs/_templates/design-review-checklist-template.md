@@ -35,7 +35,25 @@
 - [ ] Any new icon is registered in the project icon-vocabulary table (one concept = one icon).
 - [ ] Icon sizes derive from the project's declared control sizes.
 
-## E. Enforcement
+## E. Accessibility (ADR-0065 / ADR-0068 — mandatory)
+
+- [ ] Contrast: every new text/background and UI-component pair meets the WCAG 2.1 AA
+      ratios the design foundation declares (4.5:1 body text, 3:1 large text & UI parts);
+      the design doc states the semantic token pairs involved.
+- [ ] Keyboard operability: all new interactive elements are reachable and operable by
+      keyboard with a visible `:focus-visible` state; no focus traps.
+- [ ] Accessible names: every icon-only control carries an `aria-label`; label/field
+      associations are explicit.
+- [ ] Multi-encoded status: state (error, success, warning, selection) is conveyed by at
+      least two of color / icon / text — never color alone.
+- [ ] Motion: animation respects `prefers-reduced-motion` per the declared motion policy.
+- [ ] Target size: interactive targets meet the project's declared minimum (e.g. a
+      `--target-size` token) with adequate spacing.
+- [ ] Universal Design lens (ADR-0068): the design was walked against the project's
+      diversity profiles (aging / cognitive / situational / motor) where user journeys are
+      in scope; friction found is logged as design requirements.
+
+## F. Enforcement
 
 - [ ] Project design-lint (if implemented) passes with 0 violations, or violations are
       approved as documented exceptions.
