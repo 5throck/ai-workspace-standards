@@ -145,7 +145,7 @@
 | `trade-promotion-roi` | variant:co-price | — | — | — | — | — |
 | `translate` | L0 | — | — | documentation-writing (composes_with) | — | — |
 | `ui-component-design` | variant:co-price | — | — | cost-shock-analysis (follows), financial-statement-prep (follows) | — | — |
-| `ui-ux-design-intelligence` | L0 | design-lead, design-lead, ux-researcher, visual-designer, visual-designer | phase1, phase2, phase3 | documentation-writing (follows), service-design (follows) | — | — |
+| `ui-ux-design-intelligence` | L0 | design-lead, design-lead, ux-researcher, visual-designer, visual-designer | phase1, phase2, phase3 | documentation-writing (follows) | — | — |
 | `update-bun-packages` | L0 | — | — | — | — | — |
 | `upgrade-project` | L0 | — | — | promote-variant (follows) | — | — |
 | `validate-docs-links` | L0 | — | — | — | — | — |

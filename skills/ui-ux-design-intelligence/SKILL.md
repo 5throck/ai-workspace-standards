@@ -14,8 +14,6 @@ prerequisites: none
 relates_to:
   - skill: documentation-writing
     type: follows
-  - skill: service-design
-    type: follows
 gemini-parity: skip
 metadata:
   type: implementation

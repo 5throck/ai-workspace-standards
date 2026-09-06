@@ -13831,17 +13831,6 @@
       "source": "skill_manifest"
     },
     {
-      "type": "follows",
-      "from": "ui-ux-design-intelligence",
-      "to": "service-design",
-      "source": "relates_to",
-      "provenance": {
-        "file": "skills/ui-ux-design-intelligence/SKILL.md",
-        "field": "relates_to",
-        "index": 1
-      }
-    },
-    {
       "type": "used_by",
       "from": "ui-ux-design-intelligence",
       "to": "ux-researcher",
