@@ -122,9 +122,17 @@
 
   /* Interaction states */
   --focus-ring:        <primitive>;   /* visible :focus-visible is REQUIRED (WCAG AA) */
+  --focus-ring-offset: <primitive>;   /* e.g. a spacing token; offset keeps the ring visible */
   --hover-bg:          <primitive>;
   --input-bg:          <primitive>;
   --placeholder-fg:    <primitive>;
+
+  /* Accessibility semantics (ADR-0065/0068) — THEME-INVARIANT by convention
+     ([DESIGN-R2]): do not redeclare these inside [data-theme] blocks. */
+  --target-size:       <primitive>;   /* minimum interactive target, e.g. 44px (WCAG 2.5.5-derived baseline) */
+  --motion-duration-fast:   <primitive>;  /* the compiler emits a prefers-reduced-motion */
+  --motion-duration-normal: <primitive>;  /* block zeroing these automatically */
+  --motion-duration-slow:   <primitive>;
 }
 
 /* --- Alternate theme(s) — remap semantics ONLY, never primitives ----------- */
@@ -151,7 +159,36 @@
 }
 
 /* Add further named themes (e.g. [data-theme="high-contrast"]) the same way:
-   remap the semantic layer only. */
+   remap the semantic layer only. High-contrast themes should restate the full
+   semantic color set (including focus-ring) — example skeleton:
+
+[data-theme="high-contrast"] {
+  --background:        var(--color-neutral-0);
+  --foreground:        var(--color-neutral-950);
+  --border:            var(--color-neutral-950);
+  --primary:           <primitive>;
+  --primary-fg:        <primitive>;
+  --success-bg: <primitive>;  --success-fg: <primitive>;  --success-border: <primitive>;
+  --warning-bg: <primitive>;  --warning-fg: <primitive>;  --warning-border: <primitive>;
+  --danger-bg:  <primitive>;  --danger-fg:  <primitive>;  --danger-border:  <primitive>;
+  --info-bg:    <primitive>;  --info-fg:    <primitive>;  --info-border:    <primitive>;
+  --focus-ring:        <primitive>;
+}
+
+   Note: --target-size and --motion-duration-* stay in :root (theme-invariant). */
+
+/* Reduced motion (ADR-0065): when the token compiler (compile-tokens.ts v1.2.0+)
+   is used, this block is emitted automatically for every --motion-duration-*;
+   include it manually when tokens are maintained by hand:
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-duration-fast: 0ms;
+    --motion-duration-normal: 0ms;
+    --motion-duration-slow: 0ms;
+  }
+}
+*/
 
 
 /* ---------------------------------------------------------------------------

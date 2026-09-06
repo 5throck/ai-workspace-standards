@@ -10,7 +10,7 @@
 |-------|-------|-------------------|--------|------------|--------|---------|
 | `abap-code-review` | variant:co-abap | code-writer, code-writer, test-runner | phase3, phase4 | abap-dev (composes_with), abap-dev (follows) | — | — |
 | `abap-dev` | variant:co-abap | architect, code-writer, sap-investigator, test-runner | phase1, phase2, phase3, phase4 | dump-monitor (composes_with), research-analysis (composes_with), sap-co (composes_with), sap-co (composes_with), sap-fi (composes_with), sap-fi (follows), sap-le (composes_with), sap-le (composes_with), sap-mm (composes_with), sap-mm (composes_with), sap-pp (composes_with), sap-pp (composes_with), sap-sd (composes_with), sap-sd (composes_with) | — | — |
-| `accessibility-audit` | variant:co-design | ux-researcher, visual-designer | phase2, phase4 | — | — | — |
+| `accessibility-audit` | L0 | ux-researcher, visual-designer | phase2, phase4 | — | — | — |
 | `agent-lifecycle-manager` | L0 | — | — | skill-lifecycle-manager (composes_with) | — | — |
 | `ai-tell-reduction` | variant:co-news | style-editor, style-editor | phase4 | financial-journalism-style (composes_with) | — | — |
 | `api-documentation` | L0 | technical-writer | — | — | — | — |
@@ -139,12 +139,12 @@
 | `test-driven-development` | variant:co-game | game-debugger, game-developer, test-runner, test-runner, test-runner | phase3, phase4, phase5 | code-review (follows) | — | — |
 | `theme-authoring` | variant:co-deck | pm | — | — | — | — |
 | `ticket-run` | L0 | — | — | — | — | — |
-| `token-usage-lint` | variant:co-design | prototype-engineer, prototype-engineer | phase4 | ui-ux-design-intelligence (follows) | — | — |
+| `token-usage-lint` | L0 | prototype-engineer, prototype-engineer | phase4 | ui-ux-design-intelligence (follows) | — | — |
 | `trade-documentation-checklist` | variant:co-export | trade-documentation-specialist, trade-documentation-specialist | phase3 | logistics-coordination (follows) | — | — |
 | `trade-promotion-roi` | variant:co-price | — | — | — | — | — |
 | `translate` | L0 | — | — | documentation-writing (composes_with) | — | — |
 | `ui-component-design` | variant:co-price | — | — | cost-shock-analysis (follows), financial-statement-prep (follows) | — | — |
-| `ui-ux-design-intelligence` | variant:co-design | design-lead, design-lead, ux-researcher, visual-designer, visual-designer | phase1, phase2, phase3 | documentation-writing (follows), service-design (follows) | — | — |
+| `ui-ux-design-intelligence` | L0 | design-lead, design-lead, ux-researcher, visual-designer, visual-designer | phase1, phase2, phase3 | documentation-writing (follows), service-design (follows) | — | — |
 | `update-bun-packages` | L0 | — | — | — | — | — |
 | `upgrade-project` | L0 | — | — | promote-variant (follows) | — | — |
 | `validate-docs-links` | L0 | — | — | — | — | — |

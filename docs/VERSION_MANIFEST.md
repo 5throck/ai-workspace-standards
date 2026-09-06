@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-09-06T06:16:43.266Z
+**Generated**: 2026-09-06T06:27:48.514Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -9,8 +9,8 @@
 ## Summary
 
 - **Agents**: 8
-- **Skills**: 47
-- **Scripts**: 88
+- **Skills**: 50
+- **Scripts**: 89
 - **Commands**: 8
 
 ---
@@ -34,6 +34,7 @@
 
 | Name | Version | Status | Location | Platform | Triggers | Owner |
 |------|---------|--------|----------|----------|----------|-------|
+| accessibility-audit | 1.1.0 | active | skills/accessibility-audit/SKILL.md | workspace | accessibility-audit, /accessibility-audit, axe-core audit, wcag accessibility check, wcag 2.1 aa | pm |
 | agent-lifecycle-manager | 1.0.0 | active | skills/agent-lifecycle-manager/SKILL.md | workspace | create agent, new agent, validate agents, agent lifecycle, manage agents | pm |
 | api-documentation | 1.0.0 | active | skills/api-documentation/SKILL.md | workspace | api documentation, document api, api reference, developer documentation, rest api docs, graphql docs, sdk documentation | pm |
 | audit-workspace | 1.0.0 | active | skills/audit-workspace/SKILL.md | workspace | audit workspace, run audit, check compliance, workspace check | auditor |
@@ -75,7 +76,9 @@
 | sync | 1.3.0 | active | skills/sync/SKILL.md | workspace | sync, /sync, commit and push, create PR | pm |
 | team-builder | 1.1.0 | active | skills/team-builder/SKILL.md | workspace | build new agent team, create agent team, agent team setup, team builder | pm |
 | ticket-run | 1.0.0 | active | skills/ticket-run/SKILL.md | workspace | ticket-run, process ticket queue, run next ticket | automation-engineer |
+| token-usage-lint | 1.1.0 | active | skills/token-usage-lint/SKILL.md | workspace | token lint, hardcoded color, design token compliance, raw hex values, hardcoded spacing | pm |
 | translate | 1.0.1 | active | skills/translate/SKILL.md | workspace | translate, translation, Korean translation | pm |
+| ui-ux-design-intelligence | 1.0.1 | active | skills/ui-ux-design-intelligence/SKILL.md | workspace | design system, ui design, ux design, component design, visual design, design tokens, interface design | pm |
 | update-bun-packages | 1.3.0 | active | skills/update-bun-packages/SKILL.md | workspace | update bun packages, upgrade bun packages, bun update, update dependencies, upgrade dependencies | pm |
 | upgrade-project | 1.2.1 | active | skills/upgrade-project/SKILL.md | workspace | upgrade project, upgrade template, sync project with template, refresh project, update project infrastructure | pm |
 | validate-docs-links | 1.0.0 | active | skills/validate-docs-links/SKILL.md | workspace | validate links, check links, broken links, docs validation | pm |
@@ -100,6 +103,7 @@
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | N/A |
 | compile-tokens.ts | 1.2.0 | scripts/compile-tokens.ts | N/A |
 | create-l3-scaffold.ts | 1.12.5 | scripts/create-l3-scaffold.ts | N/A |
+| design-lint.ts | 1.0.0 | scripts/design-lint.ts | N/A |
 | dev-sync.ts | 1.9.0 | scripts/dev-sync.ts | bun |
 | dispatch-parallel.ts | 1.1.0 | scripts/dispatch-parallel.ts | N/A |
 | dispatch-serial.ts | 1.1.0 | scripts/dispatch-serial.ts | N/A |
@@ -199,7 +203,7 @@
 **Checked**: Claude (.claude/) vs Gemini (.gemini/)
 
 - **Commands with parity**: 8 / 8
-- **Skills with parity**: 0 / 35 (common-template skills are parity-exempt)
+- **Skills with parity**: 0 / 38 (common-template skills are parity-exempt)
 
 ---
 

@@ -67,6 +67,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `cleanup-completed-md.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `clear-pm-approval.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `compile-tokens.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
+| `design-lint.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `create-l3-scaffold.ts` | L0 | 1.12.2 | active | —| —| L0 | —|
 | `dev-sync.ts` | L0 | 1.9.0 | active | —| —| L0+L1 | —|
 | `dispatch-parallel.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|

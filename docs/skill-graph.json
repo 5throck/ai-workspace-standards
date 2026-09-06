@@ -14,7 +14,7 @@
     {
       "id": "accessibility-audit",
       "type": "skill",
-      "layer": "variant:co-design"
+      "layer": "L0"
     },
     {
       "id": "adr:0001",
@@ -2685,7 +2685,7 @@
     {
       "id": "token-usage-lint",
       "type": "skill",
-      "layer": "variant:co-design"
+      "layer": "L0"
     },
     {
       "id": "trade-documentation-checklist",
@@ -2720,7 +2720,7 @@
     {
       "id": "ui-ux-design-intelligence",
       "type": "skill",
-      "layer": "variant:co-design"
+      "layer": "L0"
     },
     {
       "id": "update-bun-packages",
@@ -13636,7 +13636,7 @@
       "to": "ui-ux-design-intelligence",
       "source": "relates_to",
       "provenance": {
-        "file": "templates/co-design/skills/token-usage-lint/SKILL.md",
+        "file": "skills/token-usage-lint/SKILL.md",
         "field": "relates_to",
         "index": 0
       }
@@ -13750,7 +13750,7 @@
       "to": "documentation-writing",
       "source": "relates_to",
       "provenance": {
-        "file": "templates/co-design/skills/ui-ux-design-intelligence/SKILL.md",
+        "file": "skills/ui-ux-design-intelligence/SKILL.md",
         "field": "relates_to",
         "index": 0
       }
@@ -13791,7 +13791,7 @@
       "to": "service-design",
       "source": "relates_to",
       "provenance": {
-        "file": "templates/co-design/skills/ui-ux-design-intelligence/SKILL.md",
+        "file": "skills/ui-ux-design-intelligence/SKILL.md",
         "field": "relates_to",
         "index": 1
       }
