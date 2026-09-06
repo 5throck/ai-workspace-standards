@@ -1,6 +1,6 @@
 ---
 name: project-resync
-version: 1.1.0
+version: 1.2.0
 description: >
   Full bidirectional sync cycle for Projects/co-* instances: provenance-audit
   uncommitted content, sync each project to its GitHub remote, selectively
@@ -108,6 +108,14 @@ branch rule — upgrades must see merged templates).
 Per project: `bun scripts/upgrade-project.ts Projects/<p> --dry-run` → review
 category plan → run → verify `.claude/template-version.txt` and project
 `bun scripts/audit.ts`.
+
+Since `upgrade-project` v1.19.0 the delivered scripts` SCRIPTS.md
+registry rows reconcile automatically (common-registry fallback, layer
+rewrite, duplicate-row removal). Still proof-check the upgrade:
+`bun scripts/verify-scripts.ts --verify` per project must exit clean — an
+unregistered script there means the reconcile missed a case (report it,
+do not hand-patch silently). Upgrades must run on a clean tree: the
+pre-upgrade `git stash push` snapshot reverts uncommitted tracked changes.
 
 ## Step 5 — Upgrade PRs + final verification
 

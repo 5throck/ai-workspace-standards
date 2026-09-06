@@ -11886,6 +11886,12 @@
     },
     {
       "type": "references",
+      "from": "project-resync",
+      "to": "upgrade-project",
+      "source": "prose"
+    },
+    {
+      "type": "references",
       "from": "project-to-variant",
       "to": "k-dart",
       "source": "prose"
