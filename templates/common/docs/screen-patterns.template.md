@@ -6,7 +6,9 @@
 > which patterns a project declares or how they look — replace the placeholder rows
 > with the project's own inventory derived via `docs/design-foundation.md`.
 >
-> Reference implementation: `templates/co-design/docs/screen-patterns.md`
+> Reference implementation (NON-normative — it is one variant's own derived
+> inventory, not a recommended or canonical set; a project's inventory is its
+> own derivation): `templates/co-design/docs/screen-patterns.md`
 > (list, form, detail, dashboard, modal, table) with a11y-evidenced playground
 > source in `templates/co-design/playground/src/patterns.ts`.
 
