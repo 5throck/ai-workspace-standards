@@ -78,6 +78,11 @@ Principles are derived from the project's domain, not from trends. Proven patter
 - **Clarity**: Every screen answers "what am I looking at, what can I do, what happens next" at a glance.
 - **Guided workflow**: If the domain has stages/processes, the UI reflects where the user stands.
 - **Accessibility**: WCAG AA contrast, visible focus, status never conveyed by color alone.
+- **Cognitive load** (ADR-0068): Minimize working-memory and comprehension burden — progressive
+  disclosure, chunked input, recognition over recall. State which screens carry the highest
+  interaction complexity and how the design bounds it.
+- **Error recovery** (ADR-0068): Prevent, forgive, and explain errors — constrained inputs,
+  reversible destructive actions, explicit feedback on failure with a recovery path.
 
 Write 3–6 principles. Each must be falsifiable in review ("does this screen satisfy principle N?").
 Pair them with operating rules (like co-newbiz's P1–P6) when the project needs machine-checkable constraints.
