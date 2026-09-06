@@ -15,12 +15,6 @@ status: active
 owner: hs-classification-specialist
 prerequisites: DATA_GO_KR_API_KEY environment variable
 relates_to:
-  - skill: hs-classification-workflow
-    type: composes_with
-  - skill: market-entry-strategy
-    type: composes_with
-  - skill: landed-cost-calculation
-    type: composes_with
   - skill: k-kosis
     type: relates_to
 l2_propagate: true
@@ -43,6 +37,10 @@ metadata:
 lang: ko
 lang_reason: proper-noun
 ---
+
+> **Composition note**: the Korea-Customs analysis workflows that compose with this
+> skill (`hs-classification-workflow`, `market-entry-strategy`, `landed-cost-calculation`)
+> live in the co-export variant (`templates/co-export/skills/`) and are linked there.
 
 ## Context
 
