@@ -124,6 +124,12 @@ Skills in `skills/` are propagated to `templates/common/skills/` (L1) by `propag
 | `removal-date` | Scheduled removal (if deprecated) |
 | `notes` | Human-readable context |
 
+> **Security Protocol (mandatory — immediate security action)**: When a vulnerability or privacy issue is found in a skill (SKILL.md, scripts, or shipped references), the response is immediate and ordered:
+> 1. **Quarantine now** — set frontmatter `status: deprecated`, `security_hold: true`, and a `removal-date` (≤ 30 days). The skill must not be invoked while held.
+> 2. **Open a remediation PR the same session** — fix or remove the affected content; cite the finding.
+> 3. **Re-scan before release** — the security-scan skill must pass, and the hold is lifted only inside the remediation PR.
+> `validate-skills.ts` FAILs on any skill that is active while `security_hold: true`, or that is held without a `removal-date`. Silence is never approval.
+
 **Prohibited in SKILLS.md**: Columns that control propagation behavior (e.g., `layer`) are explicitly forbidden. Propagation is exclusively controlled via SKILL.md frontmatter (`l2_propagate`/`scope`). Adding a `layer` column to SKILLS.md would create a silent dead column that misleads future developers — `layer-filter.ts` no longer reads it.
 
 **Inter-skill relations are also out of scope**: SKILLS.md does not track skill-to-skill relationships (prerequisites, related skills). Relations live in the generated skill graph (`docs/skill-graph.json` / `docs/skill-graph.md`), derived from SKILL.md frontmatter and agent/variant manifests per ADR-0060 — never as a SKILLS.md column.
