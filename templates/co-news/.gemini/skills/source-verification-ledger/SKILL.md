@@ -8,8 +8,8 @@ description: >
   legal-researcher produce their briefs, before the reporter drafts the
   article; re-run after style-editor's rewrite pass to confirm no figures
   drifted.
-version: 1.0.0
-last_reviewed: 2026-08-10
+version: 1.0.1
+last_reviewed: 2026-08-24
 status: active
 owner: fact-checker
 prerequisites: none
@@ -18,6 +18,8 @@ prerequisites: none
 ## Context
 
 The newsroom's fact-checking discipline requires every material claim (a number, a date, a quote, an attribution) in an article to be traceable to at least two independently verifiable sources before the article can be handed off for publication. This skill defines the ledger-building process that enforces that discipline.
+
+**Base format**: this ledger follows the fixed-column discipline of the common `evidence-ledger` skill (claim | source | url/ref | verification | status). The columns below are co-news's overlay on that base — the two source columns and the receipt-number column exist to enforce the 2+ independent sources rule (`NEWS-R1`), which remains a co-news-specific requirement on top of the common format.
 
 ## When to Use
 

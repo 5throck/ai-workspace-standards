@@ -10,6 +10,24 @@ last_reviewed: 2026-06-13
 status: active
 owner: change-management-partner
 prerequisites: none
+relates_to:
+  - skill: insight-synthesis
+    type: follows
+  - skill: org-readiness-assessment
+    type: composes_with
+  - skill: change-impact-assessment
+    type: composes_with
+  - skill: project-delivery
+    type: composes_with
+metadata:
+  type: process
+  triggers:
+    - stakeholder mapping
+    - stakeholder analysis
+    - stakeholder alignment
+    - influence-interest
+    - stakeholder identification
+    - communication strategy
 ---
 
 ## Context

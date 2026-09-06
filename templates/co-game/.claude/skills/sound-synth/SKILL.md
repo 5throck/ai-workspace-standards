@@ -10,6 +10,9 @@ scope: co-game
 l2_propagate: true
 owner: sound-designer
 prerequisites: Web Audio API standard support (browser context or node/bun audio polyfill)
+relates_to:
+  - skill: documentation-writing
+    type: follows
 metadata:
   type: audio-synthesis
   triggers:

@@ -10,6 +10,15 @@ last_reviewed: 2026-08-08
 status: active
 owner: fta-origin-analyst
 prerequisites: hs-classification-workflow
+relates_to:
+  - skill: trade-documentation-checklist
+    type: follows
+  - skill: logistics-coordination
+    type: composes_with
+  - skill: market-entry-strategy
+    type: composes_with
+  - skill: halal-certification-workflow
+    type: follows
 ---
 
 ## Context
@@ -24,6 +33,13 @@ analysis without a confirmed HS code is not reliable.
 - Shipment includes non-originating (third-country) inputs and origin status is unclear
 - Origin certificate/declaration requirements need to be identified before shipment
 - A customs post-clearance audit questions a prior origin claim
+
+## Prerequisites
+
+- Confirmed HS code (from hs-classification-specialist)
+- Bill of materials and sourcing breakdown (originating vs. non-originating inputs)
+- Target FTA text with Rules of Origin annex
+- Cost data for RVC calculation (if applicable)
 
 ## Execution Steps
 
@@ -50,6 +66,15 @@ analysis without a confirmed HS code is not reliable.
 
 - Origin determination report: applicable FTA(s), origin criterion applied, tariff-shift/RVC
   calculation, non-originating material assessment, certification method, confidence rating
+
+## Quality Criteria
+
+- [ ] Specific FTA article/annex and product-specific rule cited
+- [ ] Origin criterion applied (WO / CTC / RVC / specific process) documented with reasoning
+- [ ] Non-originating material assessment completed (tariff-shift, de minimis, accumulation)
+- [ ] RVC calculation shown with intermediate cost breakdown (if RVC is the criterion)
+- [ ] Certification method identified (self-certification / authorized exporter / issuing authority)
+- [ ] Confidence level stated (qualifies / does not qualify / requires advance ruling)
 
 ## Related Skills
 

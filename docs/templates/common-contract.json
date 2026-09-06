@@ -51,7 +51,7 @@
     },
     "meeting-facilitation": {
       "source": "skills/meeting-facilitation/SKILL.md",
-      "version": "1.4.0",
+      "version": "1.4.1",
       "overridable": false,
       "description": "Structured multi-agent meeting facilitation"
     },

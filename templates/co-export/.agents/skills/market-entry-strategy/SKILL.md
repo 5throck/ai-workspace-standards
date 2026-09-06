@@ -10,6 +10,9 @@ last_reviewed: 2026-08-08
 status: active
 owner: market-entry-strategist
 prerequisites: none
+relates_to:
+  - skill: foreign-regulation-monitoring
+    type: follows
 ---
 
 ## Context

@@ -10,6 +10,15 @@ last_reviewed: 2026-08-08
 status: active
 owner: foreign-regulatory-intelligence-analyst
 prerequisites: none
+relates_to:
+  - skill: export-control-screening
+    type: follows
+  - skill: hs-classification-workflow
+    type: composes_with
+  - skill: fta-origin-determination
+    type: composes_with
+  - skill: halal-certification-workflow
+    type: composes_with
 ---
 
 ## Context
@@ -26,6 +35,12 @@ conclusions in their domains.
   etc.) in the destination market
 - Significant time has elapsed since the last regulatory check for an ongoing engagement
 - A compliance specialist requests destination-side context for their determination
+
+## Prerequisites
+
+- Target destination country and product HS chapter
+- Client's current shipment timeline (to assess regulatory-change impact urgency)
+- Access to Federal Register, GACC, and TARIC databases (or equivalent public sources)
 
 ## Execution Steps
 
@@ -51,6 +66,14 @@ conclusions in their domains.
 
 - Regulatory monitoring brief: jurisdiction, regulation/measure name, effective date, source
   citation with access date, impact summary, staleness warning if applicable
+
+## Quality Criteria
+
+- [ ] Every finding dated and attributed to a specific foreign-government source
+- [ ] Enacted regulation clearly distinguished from proposed/pending regulation
+- [ ] Source access date noted (staleness warning if >30 days)
+- [ ] Impact on client's product/shipment stated explicitly
+- [ ] Findings flagged to appropriate compliance specialist when relevant
 
 ## Related Skills
 

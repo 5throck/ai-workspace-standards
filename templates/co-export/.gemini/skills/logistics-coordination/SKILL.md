@@ -11,6 +11,11 @@ last_reviewed: 2026-08-16
 status: active
 owner: logistics-coordinator
 prerequisites: none
+relates_to:
+  - skill: market-entry-strategy
+    type: follows
+  - skill: landed-cost-calculation
+    type: composes_with
 ---
 
 ## Context

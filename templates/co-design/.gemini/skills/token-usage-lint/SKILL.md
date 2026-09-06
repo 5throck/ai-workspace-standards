@@ -11,6 +11,9 @@ status: active
 owner: pm
 last_reviewed: 2026-08-25
 prerequisites: none
+relates_to:
+  - skill: ui-ux-design-intelligence
+    type: follows
 metadata:
   type: review
   triggers:

@@ -5,10 +5,10 @@ description: >
   to a source, a reference, and a verification state. Use when: building or
   updating an evidence or citation ledger, verifying claims ahead of a gate
   ruling, or linking evidence into a decision record (ADR-0061).
-version: 1.0.0
+version: 1.1.0
 owner: pm
 status: active
-last_reviewed: 2026-08-24
+last_reviewed: 2026-08-25
 scope: common
 metadata:
   type: process
@@ -52,6 +52,10 @@ Rows are never rewritten to change history — see Append vs Supersede below.
 The five columns are the common base. Variants MAY add requirements on top — stricter sourcing, extra columns, jurisdiction-specific citation rules — in the variant's own assets, never by editing this skill.
 
 Canonical overlay example: co-news requires **2+ independent sources per material claim** (`NEWS-R1`, registered inline in its context file) and instantiates the base format with claim / source 1 / source 2 / receipt number / status columns in its `source-verification-ledger` skill. The two source columns and the receipt-number column are the overlay; the row-per-claim, fixed-column, status-tracked discipline is the base.
+
+### Registry-backed overlays (formal-var form)
+
+Some registry-backed variants carry their evidence plane as FORMAL VARIABLES instead of a prose ledger — machine-checked rows in a schema-governed registry (e.g. an evidence-variable registry with run-scoped snapshots), with calibration corpora or finding files attached as provenance. That is a legitimate overlay form of this skill: the row-per-claim discipline becomes row-per-VARIABLE, `verification` becomes the registry's verification metadata, and supersession happens through the registry's own reversal/amendment protocol. Whichever form a variant uses, decision records `evidence_refs[]` must resolve inside it — a registry key name for formal-var overlays, a ledger row ID for prose ledgers.
 
 ## Append vs Supersede
 

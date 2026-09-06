@@ -10,6 +10,11 @@ last_reviewed: 2026-08-23
 status: active
 owner: change-management-partner
 prerequisites: none
+relates_to:
+  - skill: talent-acquisition-strategy
+    type: composes_with
+  - skill: org-readiness-assessment
+    type: follows
 metadata:
   type: process
   triggers:

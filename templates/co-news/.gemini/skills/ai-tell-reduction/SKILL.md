@@ -14,6 +14,9 @@ last_reviewed: 2026-08-10
 status: active
 owner: style-editor
 prerequisites: none
+relates_to:
+  - skill: financial-journalism-style
+    type: composes_with
 ---
 
 ## Context

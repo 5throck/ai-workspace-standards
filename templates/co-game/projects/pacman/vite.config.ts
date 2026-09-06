@@ -1,6 +1,8 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+  // Relative base so the built bundle also runs under the portal at /games/pacman/.
+  base: './',
   build: {
     target: 'es2020',
   },

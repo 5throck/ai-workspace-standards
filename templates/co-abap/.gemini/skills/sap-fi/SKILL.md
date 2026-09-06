@@ -1,5 +1,5 @@
 ---
-name: SAP FI Module — Financial Accounting
+name: sap-fi
 description: Use when working on FI module tasks — journal entries, account determination, G/L, accounts payable/receivable, or financial reporting. Provides process flows, key table relationships, common query patterns, field notes, SAP quirks, and standard BAPIs for the FI module.
 version: 1.0.0
 last_reviewed: 2026-08-15
@@ -7,6 +7,17 @@ status: active
 scope: co-abap
 owner: fi-analyst
 prerequisites: vsp MCP server
+relates_to:
+  - skill: sap-co
+    type: follows
+  - skill: sap-sd
+    type: composes_with
+  - skill: sap-mm
+    type: composes_with
+  - skill: sap-le
+    type: composes_with
+  - skill: sap-pp
+    type: composes_with
 metadata:
   type: module
   triggers:

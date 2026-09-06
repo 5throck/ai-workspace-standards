@@ -12,6 +12,9 @@ last_reviewed: 2026-08-08
 status: active
 owner: customs-duty-drawback-specialist
 prerequisites: hs-classification-workflow
+relates_to:
+  - skill: landed-cost-calculation
+    type: follows
 ---
 
 ## Context

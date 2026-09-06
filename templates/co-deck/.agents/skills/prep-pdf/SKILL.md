@@ -12,6 +12,9 @@ status: active
 owner: pdf-export
 last_reviewed: 2026-06-23
 prerequisites: html-build
+relates_to:
+  - skill: version
+    type: follows
 ---
 
 ## Context

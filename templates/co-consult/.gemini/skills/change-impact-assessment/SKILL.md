@@ -11,6 +11,21 @@ last_reviewed: 2026-06-13
 status: active
 owner: change-management-partner
 prerequisites: org-readiness-assessment
+relates_to:
+  - skill: solution-design
+    type: composes_with
+  - skill: stakeholder-alignment
+    type: composes_with
+  - skill: org-readiness-assessment
+    type: composes_with
+metadata:
+  type: process
+  triggers:
+    - change impact
+    - impact assessment
+    - organizational impact
+    - change impact assessment
+    - affected groups
 ---
 
 ## Context

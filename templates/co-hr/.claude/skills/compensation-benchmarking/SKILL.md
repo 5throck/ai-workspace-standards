@@ -12,6 +12,21 @@ last_reviewed: 2026-08-23
 status: active
 owner: compensation-benefits-analyst
 prerequisites: none
+relates_to:
+  - skill: hr-metrics-analysis
+    type: follows
+  - skill: consulting-report-writing
+    type: composes_with
+  - skill: org-design-framework
+    type: composes_with
+  - skill: learning-curriculum-design
+    type: follows
+  - skill: performance-system-design
+    type: composes_with
+  - skill: stakeholder-alignment
+    type: composes_with
+  - skill: org-readiness-assessment
+    type: composes_with
 metadata:
   type: domain
   triggers:

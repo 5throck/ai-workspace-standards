@@ -1,0 +1,212 @@
+:root {
+  --color-bg: #0a0a12;
+  --color-surface: #14141f;
+  --color-surface-raised: #1d1d2e;
+  --color-text: #e8e8f0;
+  --color-text-dim: #8a8a9e;
+  --color-primary: #ff3ec8;
+  --color-primary-dim: #b32a8d;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 16px;
+  --space-4: 24px;
+  --space-5: 40px;
+  --radius: 6px;
+  --font-arcade: 'Courier New', 'Consolas', monospace;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-arcade);
+  min-height: 100vh;
+}
+
+#app {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: var(--space-5) var(--space-4);
+}
+
+/* ── Header ─────────────────────────────────────────── */
+.portal-header {
+  text-align: center;
+  margin-bottom: var(--space-5);
+}
+
+.portal-header__title {
+  font-size: 2.4rem;
+  letter-spacing: 6px;
+  color: var(--color-primary);
+  text-shadow: 3px 3px 0 var(--color-primary-dim), 0 0 24px rgba(255, 62, 200, 0.35);
+}
+
+.portal-header__tagline {
+  margin-top: var(--space-2);
+  color: var(--color-text-dim);
+  letter-spacing: 3px;
+  font-size: 0.8rem;
+}
+
+/* ── Game grid / cards ──────────────────────────────── */
+.game-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.game-card {
+  --accent: var(--color-primary);
+  background: var(--color-surface);
+  border: 2px solid var(--accent);
+  border-radius: var(--radius);
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  box-shadow: 0 0 0 1px #000, 0 0 18px color-mix(in srgb, var(--accent) 25%, transparent);
+}
+
+.game-card__logo {
+  background: #000;
+  border-radius: var(--radius);
+  padding: var(--space-4) var(--space-2);
+  text-align: center;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--accent);
+  text-shadow: 0 0 12px var(--accent);
+  image-rendering: pixelated;
+}
+
+.game-card__desc {
+  color: var(--color-text-dim);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  min-height: 3em;
+}
+
+.game-card__score {
+  color: var(--accent);
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+}
+
+.game-card__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.game-card__year {
+  color: var(--color-text-dim);
+  font-size: 0.7rem;
+}
+
+.game-card__play {
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #000;
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius);
+  padding: var(--space-2) var(--space-4);
+  cursor: pointer;
+}
+
+.game-card__play:hover {
+  filter: brightness(1.15);
+}
+
+.game-card__play:active {
+  transform: translateY(1px);
+}
+
+/* ── Score board ────────────────────────────────────── */
+.score-board__title {
+  font-size: 1rem;
+  letter-spacing: 4px;
+  color: var(--color-text-dim);
+  margin-bottom: var(--space-3);
+}
+
+.score-board__list {
+  list-style: none;
+}
+
+.score-board__item {
+  --accent: var(--color-primary);
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-3);
+  border-left: 4px solid var(--accent);
+  background: var(--color-surface);
+  margin-bottom: var(--space-2);
+  font-size: 0.9rem;
+}
+
+/* ── Game viewer ────────────────────────────────────── */
+.game-viewer[hidden] {
+  display: none;
+}
+
+body[data-view='game'] .portal-header,
+body[data-view='game'] .game-grid,
+body[data-view='game'] .score-board {
+  display: none;
+}
+
+.game-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  background: var(--color-bg);
+  display: flex;
+  flex-direction: column;
+}
+
+.game-viewer__bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-surface-raised);
+}
+
+.game-viewer__title {
+  letter-spacing: 3px;
+  font-weight: 700;
+}
+
+.game-viewer__back {
+  font-family: inherit;
+  letter-spacing: 1px;
+  background: none;
+  border: 1px solid var(--color-text-dim);
+  border-radius: var(--radius);
+  color: var(--color-text);
+  padding: var(--space-1) var(--space-3);
+  cursor: pointer;
+}
+
+.game-viewer__back:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.game-viewer__frame {
+  flex: 1;
+  width: 100%;
+  border: none;
+  background: #000;
+}

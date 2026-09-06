@@ -18,7 +18,6 @@ export class SoundManager {
   private sirenGain: GainNode | null = null;
   private sirenTimeout: ReturnType<typeof setTimeout> | null = null;
   private dotCounter: number = 0;
-  private initialized: boolean = false;
 
   /** Initialize the AudioContext (must be called after user interaction). */
   init(): void {
@@ -27,7 +26,6 @@ export class SoundManager {
       this.audioCtx = new AudioContext();
       this.masterGain = this.audioCtx.createGain();
       this.masterGain.connect(this.audioCtx.destination);
-      this.initialized = true;
     } catch {
       this.audioCtx = null;
     }
@@ -124,6 +122,7 @@ export class SoundManager {
   playLevelUp(): void {
     const ctx = this.ensureContext();
     if (!ctx || !this.masterGain) return;
+    const master = this.masterGain;
 
     this.stopSiren();
 
@@ -135,7 +134,7 @@ export class SoundManager {
       osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.2);
       const start = ctx.currentTime + i * 0.2;
       this.applyADSR(gain, start, 0.005, 0.02, 0.15, 0.05, 0.15);
-      osc.connect(gain).connect(this.masterGain);
+      osc.connect(gain).connect(master);
       osc.start(start);
       osc.stop(start + 0.2);
       osc.onended = () => gain.disconnect();
@@ -146,6 +145,7 @@ export class SoundManager {
   playGameOver(): void {
     const ctx = this.ensureContext();
     if (!ctx || !this.masterGain) return;
+    const master = this.masterGain;
 
     this.stopSiren();
 
@@ -157,7 +157,7 @@ export class SoundManager {
       const start = ctx.currentTime + i * 0.5;
       osc.frequency.setValueAtTime(freq, start);
       this.applyADSR(gain, start, 0.01, 0.03, 0.15, 0.05, 0.45);
-      osc.connect(gain).connect(this.masterGain);
+      osc.connect(gain).connect(master);
       osc.start(start);
       osc.stop(start + 0.5);
       osc.onended = () => gain.disconnect();
@@ -168,6 +168,7 @@ export class SoundManager {
   playIntro(): void {
     const ctx = this.ensureContext();
     if (!ctx || !this.masterGain) return;
+    const master = this.masterGain;
 
     const notes = [262, 330, 392, 494, 523]; // C4, E4, G4, B4, C5
     notes.forEach((freq, i) => {
@@ -177,7 +178,7 @@ export class SoundManager {
       const start = ctx.currentTime + i * 0.15;
       osc.frequency.setValueAtTime(freq, start);
       this.applyADSR(gain, start, 0.005, 0.02, 0.15, 0.05, 0.12);
-      osc.connect(gain).connect(this.masterGain);
+      osc.connect(gain).connect(master);
       osc.start(start);
       osc.stop(start + 0.15);
       osc.onended = () => gain.disconnect();
@@ -240,7 +241,6 @@ export class SoundManager {
       try { this.audioCtx.close(); } catch { /* already closed */ }
     }
     this.audioCtx = null;
-    this.initialized = false;
   }
 
   /** Reset dot counter (for waka alternation). */

@@ -188,6 +188,9 @@ All numeric outputs in deliverables (aggregations, statistics, percentages, metr
 | `projects/pacman/` | Game sub-project root |
 | `projects/pacman/src/` | Game source code |
 | `projects/pacman/tests/` | Game test files |
+| `projects/donkey-kong/` | Donkey Kong sub-project (4 arcade stages, pixel sprites) |
+| `projects/portal/` | Arcade portal: game list, high scores, game launcher |
+| `projects/portal/public/games/` | Built game bundles served by the portal (`bun run build:games`) |
 
 ---
 
@@ -219,3 +222,9 @@ Key rules:
 
 - **Template-Version**: 0.5.3
 - **Template-Variant**: co-develop → co-game (forked and specialized for game development)
+
+## Template Provenance
+
+- **Template-Version**: 0.6.0
+- **Template-Variant**: co-game
+- **Target-Jurisdiction**: region-neutral
