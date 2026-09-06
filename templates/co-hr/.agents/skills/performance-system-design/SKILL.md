@@ -13,6 +13,13 @@ last_reviewed: 2026-08-23
 status: active
 owner: performance-management-consultant
 prerequisites: none
+relates_to:
+  - skill: talent-acquisition-strategy
+    type: composes_with
+  - skill: career-path-succession-planning
+    type: follows
+  - skill: stakeholder-alignment
+    type: composes_with
 metadata:
   type: domain
   triggers:

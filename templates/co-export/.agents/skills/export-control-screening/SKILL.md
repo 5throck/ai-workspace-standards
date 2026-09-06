@@ -10,6 +10,19 @@ last_reviewed: 2026-08-08
 status: active
 owner: export-control-compliance-specialist
 prerequisites: none
+relates_to:
+  - skill: hs-classification-workflow
+    type: composes_with
+  - skill: roo-qualification-worksheet
+    type: composes_with
+  - skill: market-entry-strategy
+    type: composes_with
+  - skill: hs-classification-workflow
+    type: follows
+  - skill: fta-origin-determination
+    type: composes_with
+  - skill: halal-certification-workflow
+    type: composes_with
 ---
 
 ## Context

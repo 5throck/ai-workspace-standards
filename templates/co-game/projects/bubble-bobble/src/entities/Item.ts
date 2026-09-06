@@ -18,16 +18,16 @@ export class Item extends EntityBase {
     
     switch (type) {
       case 'APPLE':
-        this.scoreValue = 500;
+        this.scoreValue = 400;
         break;
       case 'BANANA':
-        this.scoreValue = 700;
+        this.scoreValue = 200;
         break;
       case 'CHERRY':
-        this.scoreValue = 300;
+        this.scoreValue = 100;
         break;
       case 'MELON':
-        this.scoreValue = 1000;
+        this.scoreValue = 700;
         break;
       case 'SNEAKERS':
         this.scoreValue = 100;

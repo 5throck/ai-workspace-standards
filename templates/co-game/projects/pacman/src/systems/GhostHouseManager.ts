@@ -6,6 +6,7 @@
  * follow the global mode managed by this system.
  */
 import { GhostMode, GhostName } from '../config/types';
+import { INKY_RELEASE_DOTS, CLYDE_RELEASE_DOTS, GLOBAL_RELEASE_DOTS } from '../config/constants';
 import type { ScatterChaseCycle } from '../config/types';
 
 export class GhostHouseManager {
@@ -16,8 +17,12 @@ export class GhostHouseManager {
   private frightenedDuration: number = 0;
   private frightenedTimer: number = 0;
   private scatterChaseCycles: ScatterChaseCycle[] = [];
-  private gameTime: number = 0;
   private dotsEaten: number = 0;
+  // Arcade ghost-house release: per-ghost personal dot counters, switching to
+  // a global counter after a life is lost.
+  private usingGlobalCounter = false;
+  private dotsSinceDeath = 0;
+  private releasedAt: Partial<Record<GhostName, number>> = {};
 
   /** Set the scatter/chase cycles for the current stage. */
   setScatterChaseCycles(cycles: ScatterChaseCycle[]): void {
@@ -25,9 +30,9 @@ export class GhostHouseManager {
   }
 
   /** Update the game time and dot count for release timing. */
-  updateGameInfo(gameTime: number, dotsEaten: number): void {
-    this.gameTime = gameTime;
+  updateGameInfo(_gameTime: number, dotsEaten: number): void {
     this.dotsEaten = dotsEaten;
+    if (this.usingGlobalCounter) this.dotsSinceDeath = dotsEaten;
   }
 
   /** Advance the cycle timer by dt milliseconds. Triggers mode changes. */
@@ -124,12 +129,42 @@ export class GhostHouseManager {
    * Check if a ghost should be released based on current game conditions.
    */
   shouldRelease(ghostName: GhostName): boolean {
-    const timing = this.getReleaseTiming(ghostName);
-    if (timing.type === 'time') {
-      return this.gameTime >= timing.value;
-    } else {
-      return this.dotsEaten >= timing.value;
+    // After a life is lost the arcade switches to a global dot counter.
+    if (this.usingGlobalCounter && ghostName !== GhostName.BLINKY) {
+      return this.dotsSinceDeath >= GLOBAL_RELEASE_DOTS[ghostName];
     }
+    // Personal counters: Pinky leaves immediately; Inky counts dots since
+    // Pinky's release; Clyde counts dots since Inky's release.
+    switch (ghostName) {
+      case GhostName.BLINKY:
+        return true;
+      case GhostName.PINKY:
+        return true;
+      case GhostName.INKY: {
+        const baseline = this.releasedAt[GhostName.PINKY] ?? 0;
+        return this.dotsEaten - baseline >= INKY_RELEASE_DOTS;
+      }
+      case GhostName.CLYDE: {
+        const baseline = this.releasedAt[GhostName.INKY] ?? this.releasedAt[GhostName.PINKY] ?? 0;
+        return this.dotsEaten - baseline >= CLYDE_RELEASE_DOTS;
+      }
+      default:
+        return true;
+    }
+  }
+
+  /** Record that a ghost just left the house (starts the next ghost's counter). */
+  markReleased(ghostName: GhostName): void {
+    if (this.releasedAt[ghostName] === undefined) {
+      this.releasedAt[ghostName] = this.dotsEaten;
+    }
+  }
+
+  /** Arcade rule: after losing a life, releases use the global counter. */
+  notifyLifeLost(): void {
+    this.usingGlobalCounter = true;
+    this.dotsSinceDeath = 0;
+    this.releasedAt = {};
   }
 
   /** Reset the manager for a new stage. */
@@ -140,8 +175,10 @@ export class GhostHouseManager {
     this.frightenedActive = false;
     this.frightenedTimer = 0;
     this.frightenedDuration = 0;
-    this.gameTime = 0;
     this.dotsEaten = 0;
+    this.usingGlobalCounter = false;
+    this.dotsSinceDeath = 0;
+    this.releasedAt = {};
   }
 
   /** Full reset for a new game. */

@@ -12,6 +12,11 @@ status: active
 owner: storyline
 last_reviewed: 2026-06-19
 prerequisites: research
+relates_to:
+  - skill: design
+    type: follows
+inputs: [research-notes]
+outputs: [storyline-outline, slide-deck-draft]
 ---
 
 ## Context

@@ -1,7 +1,7 @@
 ---
 name: skill-lifecycle-manager
 status: active
-scope: common
+scope: co-safety
 description: >
   Manages the creation, validation, and maintenance of skill files across the project.
   Use when: creating new skills, updating skill metadata, validating skill structure,

@@ -12,6 +12,11 @@ last_reviewed: 2026-08-25
 status: active
 owner: logistics-coordinator
 prerequisites: hs-classification-workflow
+relates_to:
+  - skill: hs-classification-workflow
+    type: composes_with
+  - skill: logistics-coordination
+    type: composes_with
 metadata:
   type: domain
   triggers:

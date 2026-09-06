@@ -12,6 +12,13 @@ status: active
 owner: pdf-export
 last_reviewed: 2026-08-26
 prerequisites: html-build
+relates_to:
+  - skill: pdf-export
+    type: composes_with
+  - skill: pdf-export
+    type: follows
+inputs: [slide-html]
+outputs: [layout-gate-status]
 ---
 
 ## Context

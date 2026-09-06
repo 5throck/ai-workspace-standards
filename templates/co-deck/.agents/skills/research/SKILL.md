@@ -14,6 +14,10 @@ status: active
 owner: research
 last_reviewed: 2026-08-23
 prerequisites: none
+relates_to:
+  - skill: storyline
+    type: follows
+outputs: [research-notes]
 ---
 
 ## Context

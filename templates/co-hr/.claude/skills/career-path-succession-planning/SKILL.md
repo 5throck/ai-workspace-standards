@@ -13,6 +13,19 @@ last_reviewed: 2026-08-23
 status: active
 owner: career-succession-consultant
 prerequisites: none
+relates_to:
+  - skill: org-design-framework
+    type: composes_with
+  - skill: talent-acquisition-strategy
+    type: composes_with
+  - skill: compensation-benchmarking
+    type: composes_with
+  - skill: learning-curriculum-design
+    type: composes_with
+  - skill: stakeholder-alignment
+    type: follows
+  - skill: org-readiness-assessment
+    type: composes_with
 metadata:
   type: domain
   triggers:

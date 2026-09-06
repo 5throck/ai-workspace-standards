@@ -12,6 +12,9 @@ last_reviewed: 2026-08-08
 status: active
 owner: customs-duty-drawback-specialist
 prerequisites: hs-classification-workflow
+relates_to:
+  - skill: landed-cost-calculation
+    type: follows
 ---
 
 ## Context
@@ -29,6 +32,13 @@ eligibility and method selection with the same rigor as classification.
 - Client wants to compare the individual refund method against the simplified fixed-rate refund
   method to decide which to file under
 - A prior drawback claim needs review before the statutory application deadline lapses
+
+## Prerequisites
+
+- Confirmed HS code (national tariff line) and tariff rate paid (from hs-classification-specialist)
+- Import declaration records for the raw materials in question
+- Bill of materials linking raw materials to exported finished goods
+- Export declaration records for the finished goods
 
 ## Execution Steps
 
@@ -67,6 +77,15 @@ eligibility and method selection with the same rigor as classification.
 - Drawback assessment report: eligibility determination, regime confirmation (Duty Drawback Act
   vs. Customs Act Art. 46), method comparison with recommendation, usage-rate statement basis,
   estimated refundable amount, application deadline, fraud-risk flags (if any), confidence level
+
+## Quality Criteria
+
+- [ ] Refund-eligible material determination cites specific Duty Drawback Act provisions
+- [ ] Refund method comparison (individual vs. simplified fixed-rate) documented with reasoning
+- [ ] Usage-rate calculation basis clearly stated
+- [ ] Application deadline and statutory window noted
+- [ ] Regime disambiguation stated (Duty Drawback Act vs. Customs Act Art. 46)
+- [ ] Fraud-risk patterns flagged (or confirmed absent)
 
 ## Related Skills
 

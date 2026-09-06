@@ -11,6 +11,17 @@ status: active
 owner: pm
 last_reviewed: 2026-08-25
 prerequisites: none
+relates_to:
+  - skill: research-analysis
+    type: composes_with
+  - skill: test-driven-development
+    type: composes_with
+  - skill: sound-synth
+    type: follows
+  - skill: documentation-writing
+    type: composes_with
+  - skill: code-review
+    type: composes_with
 metadata:
   type: implementation
   triggers:

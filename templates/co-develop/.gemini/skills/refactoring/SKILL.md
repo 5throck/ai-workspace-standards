@@ -10,6 +10,9 @@ status: active
 owner: pm
 last_reviewed: 2026-07-19
 prerequisites: none
+relates_to:
+  - skill: code-review
+    type: composes_with
 gemini-parity: skip
 metadata:
   type: process

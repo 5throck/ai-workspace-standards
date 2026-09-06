@@ -57,7 +57,7 @@ bun scripts/post-write.ts "<object_url>"
 ## After QA Pass
 
 1. Sync changes: `bun scripts/sync-mcp.ts`
-2. Commit: `bun scripts/dev-sync.ts "description"
+2. Commit: `bun scripts/dev-sync.ts "description"`
 
 ## Context
 

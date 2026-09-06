@@ -33,5 +33,5 @@ export const STAGE_META: StageMeta[] = [
   { name: 'Shadow Domain',   themeIndex: 4, enemyCount: 7, enemySpeedMultiplier: 1.7,  itemDropWeights: { APPLE: 0, BANANA: 1, CHERRY: 1, MELON: 8 } },
   { name: 'Chaos Spire',     themeIndex: 4, enemyCount: 7, enemySpeedMultiplier: 1.75, itemDropWeights: { APPLE: 0, BANANA: 0, CHERRY: 1, MELON: 9 } },
   { name: 'Abyss Crossing',  themeIndex: 4, enemyCount: 7, enemySpeedMultiplier: 1.8,  itemDropWeights: { APPLE: 0, BANANA: 0, CHERRY: 1, MELON: 9 } },
-  { name: 'The Final Boss',  themeIndex: 4, enemyCount: 7, enemySpeedMultiplier: 2.0,  itemDropWeights: { APPLE: 0, BANANA: 0, CHERRY: 0, MELON: 10 } },
+  { name: 'Round 20 Climax', themeIndex: 4, enemyCount: 7, enemySpeedMultiplier: 2.0,  itemDropWeights: { APPLE: 0, BANANA: 0, CHERRY: 0, MELON: 10 } },
 ];

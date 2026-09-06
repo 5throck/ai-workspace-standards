@@ -8,6 +8,9 @@ status: active
 owner: security-expert
 last_reviewed: 2026-08-06
 prerequisites: Architecture diagrams or data flow specifications (DFD), system component inventory
+relates_to:
+  - skill: finding-reconciliation
+    type: follows
 scope: co-security
 l2_propagate: true
 metadata:

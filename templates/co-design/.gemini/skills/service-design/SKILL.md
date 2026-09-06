@@ -10,6 +10,13 @@ status: active
 owner: pm
 last_reviewed: 2026-07-19
 prerequisites: none
+relates_to:
+  - skill: accessibility-audit
+    type: follows
+  - skill: ui-ux-design-intelligence
+    type: follows
+  - skill: token-usage-lint
+    type: follows
 gemini-parity: skip
 metadata:
   type: process

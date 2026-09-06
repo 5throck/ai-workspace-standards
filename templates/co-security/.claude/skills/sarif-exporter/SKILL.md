@@ -7,6 +7,11 @@ status: active
 owner: security-expert
 last_reviewed: 2026-08-25
 prerequisites: Security scan findings, threat matrix assessments, or raw vulnerability objects
+relates_to:
+  - skill: samm-maturity
+    type: follows
+  - skill: stride-threat-matrix
+    type: composes_with
 scope: co-security
 l2_propagate: true
 metadata:

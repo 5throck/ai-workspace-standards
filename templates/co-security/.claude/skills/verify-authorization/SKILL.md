@@ -10,6 +10,9 @@ last_reviewed: 2026-06-13
 status: active
 owner: pm
 prerequisites: engagement-scoping must have been run (docs/scope.md must exist)
+relates_to:
+  - skill: stride-threat-matrix
+    type: follows
 ---
 
 # 🔒 Skill: verify-authorization

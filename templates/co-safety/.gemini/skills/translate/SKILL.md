@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: legal
 name: translate
 description: Translation helper for README and documentation files with diff preview and guidance
 version: 1.0.0
@@ -12,7 +14,7 @@ lifecycle:
   created: 2026-05-30
   last_updated: 2026-05-30
 status: active
-scope: common
+scope: co-safety
 metadata:
   type: process
   triggers:

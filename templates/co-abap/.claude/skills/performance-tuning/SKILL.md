@@ -1,5 +1,5 @@
 ---
-name: Performance Tuning
+name: performance-tuning
 description: Use when investigating slow ABAP programs, expensive SQL statements, or reviewing performance risk on large tables (VBAK, BSEG, ACDOCA, etc.). Provides a standardized workflow using TraceExecution, ListSQLTraces, and GetCallGraph to diagnose and document performance issues before they reach production.
 version: 1.0.0
 last_reviewed: 2026-08-15

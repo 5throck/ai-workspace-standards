@@ -15,6 +15,13 @@ last_reviewed: 2026-08-10
 status: active
 owner: style-editor
 prerequisites: none
+relates_to:
+  - skill: financial-narrative-brief
+    type: composes_with
+  - skill: source-verification-ledger
+    type: composes_with
+  - skill: ai-tell-reduction
+    type: composes_with
 ---
 
 ## Context

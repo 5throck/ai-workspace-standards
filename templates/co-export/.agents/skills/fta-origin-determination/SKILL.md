@@ -10,6 +10,15 @@ last_reviewed: 2026-08-08
 status: active
 owner: fta-origin-analyst
 prerequisites: hs-classification-workflow
+relates_to:
+  - skill: trade-documentation-checklist
+    type: follows
+  - skill: logistics-coordination
+    type: composes_with
+  - skill: market-entry-strategy
+    type: composes_with
+  - skill: halal-certification-workflow
+    type: follows
 ---
 
 ## Context

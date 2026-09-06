@@ -13,6 +13,9 @@ last_reviewed: 2026-08-26
 status: active
 owner: financial-analyst
 prerequisites: k-dart
+relates_to:
+  - skill: source-verification-ledger
+    type: follows
 ---
 
 ## Context
