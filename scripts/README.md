@@ -7,6 +7,15 @@
 
 ### Everyday Development Scripts (Tier 2 —`bun run <script>`)
 
+#### `resync-audit.ts`
+**Purpose**: Provenance audit of uncommitted content in Projects/co-* (project-resync skill Step 0).
+Classifies dirty/untracked files as STALE-RESIDUE (older revision of current L0/L1/L2 source —
+discard, upgrade re-delivers), LOCAL-WORK (commit candidate; feeds backport review), or KEEP
+(default-safe). Emits markdown/JSON verdict tables; optional local snapshot tarball of discard
+candidates. Read-only — never modifies the tree, never pushes.
+**Usage**: `bun scripts/resync-audit.ts [--project <path>]... [--json] [--snapshot-dir <dir>]`
+**Runs automatically**: never automatic — operator-invoked via the `project-resync` skill
+
 #### `audit.ts`
 **Purpose**: Documentation audit gate. Checks CHANGELOG.md, workspace standards, AGENTS.md,
 agent frontmatter, skill health, template lifecycle validation, and variant context guidelines

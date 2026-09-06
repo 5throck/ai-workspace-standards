@@ -2265,6 +2265,11 @@
       "layer": "variant:co-consult"
     },
     {
+      "id": "project-resync",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
       "id": "project-review",
       "type": "skill",
       "layer": "L0"
@@ -11351,6 +11356,46 @@
       "from": "project-delivery",
       "to": "workstream-lead",
       "source": "skill_manifest"
+    },
+    {
+      "type": "relates_to",
+      "from": "project-resync",
+      "to": "project-to-variant",
+      "source": "relates_to",
+      "provenance": {
+        "file": "skills/project-resync/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "project-resync",
+      "to": "sync",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "skills/project-resync/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "references",
+      "from": "project-resync",
+      "to": "sync",
+      "source": "prose"
+    },
+    {
+      "type": "follows",
+      "from": "project-resync",
+      "to": "upgrade-project",
+      "source": "relates_to",
+      "provenance": {
+        "file": "skills/project-resync/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
     },
     {
       "type": "references",
