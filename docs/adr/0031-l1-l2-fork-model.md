@@ -233,4 +233,4 @@ The `governance-*` domains in `propagation-map.json` use an explicit `target_var
 **Related ADRs**:
 - [ADR-0026: Variant Creation Procedure](0026-variant-creation-procedure.md) — partially superseded; §5 manual allowlist replaced by dynamic directory resolution
 - [ADR-0039: L0→L1→L2 Hierarchy and Extends Pattern](0039-l0-l1-l2-hierarchy-and-extends.md) — defines extends chain and Layout Reconstruction
-- [ADR-0030: Auto-Mode for Antigravity Platform](0030-auto-mode-architecture.md) — parallel ADR for platform dispatcher pattern
+- [ADR-0030: Auto-Mode for Antigravity Platform](retired/0030-auto-mode-architecture.md) — parallel ADR for platform dispatcher pattern (retired)

@@ -1,6 +1,6 @@
 # AI Workspace Templates
 
-![Template Version](https://img.shields.io/badge/version-0.5.3-blue)
+![Template Version](https://img.shields.io/badge/version-0.6.0-blue)
 
 This directory contains template variants for scaffolding new AI-assisted projects.
 Select a variant when running `bun scripts/new-project.ts <name> --variant <variant>`.
@@ -20,7 +20,7 @@ templates/
 ├── co-security/         # Security engagement variant
 ├── co-consult/          # Strategy consulting variant
 ├── co-price/            # Pricing management & consulting variant (beta)
-├── co-deck/             # Lecture/presentation variant (beta)
+├── co-deck/             # Lecture/presentation variant (stable)
 ├── co-game/             # Game development variant
 ├── co-export/           # Import/export trade compliance variant (beta)
 ├── co-news/             # business/finance journalism variant (beta)
@@ -81,7 +81,7 @@ bun scripts/new-project.ts my-project
 bun scripts/new-project.ts my-project --variant co-design
 
 # Specify platform and version tag
-bun scripts/new-project.ts my-project --variant co-develop --platform both --version 0.5.3
+bun scripts/new-project.ts my-project --variant co-develop --platform both --version 0.6.0
 ```
 
 ### Automation & Testing Scripts (templates/common/scripts)
@@ -110,4 +110,4 @@ See [CHANGELOG.md](CHANGELOG.md) for full history.
 - **Minor** bump: new agents, new variants going stable, structural section changes
 - **Patch** bump: documentation and description updates
 
-*Last Updated: 2026-08-28*
+*Last Updated: 2026-09-06*

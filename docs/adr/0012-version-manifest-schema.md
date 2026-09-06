@@ -243,7 +243,7 @@ This design depends on:
 2. **A-03 (Automation-engineer)**: Implementation of `scripts/generate-version-manifest.ts`
 3. **A-04 (Lifecycle-manager)**: AGENTS.md Skills table update to reference VERSION_MANIFEST
 
-See [meeting-2026-06-01-lifecycle-version-improvements.md](../../memory/meeting-2026-06-01-lifecycle-version-improvements.md) for full action plan.
+See `memory/meeting-2026-06-01-lifecycle-version-improvements.md` (workspace session memory, not tracked in the repo tree) for full action plan.
 
 ---
 
