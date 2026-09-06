@@ -1,5 +1,17 @@
 #!/usr/bin/env bun
-// @version 1.18.0
+// @version 1.19.0
+// v1.19.0: Registry-row reconciliation fixes in reconcileScriptRegistry() — (1) fall back to the
+//           templates/common/scripts/SCRIPTS.md registry when the L0 row misses (scripts shipped
+//           from common under variant-prefixed upstream names, e.g. the handbook/ suite, were
+//           silently never registered — verify-scripts "Unregistered script" ×26 on
+//           co-abap-plugin/co-architect/co-price during the 2026-09-06 fleet resync); (2) rewrite
+//           an appended row's layer cell from L0/L0-only → L3, since layer-L0 rows are skipped by
+//           verify-scripts at project context while the file ships on disk (upgrade-project.ts
+//           itself hit this); (3) drop stale duplicate rows for the same script during version
+//           update instead of first-match-only replace (lifecycle-sync-audit Check A failures on
+//           co-export dispatch* rows); (4) the row version written is the delivered template
+//           file's own @version (L0's row can be newer than the L1 snapshot — writing L0's
+//           number tripped lifecycle-sync-audit Check A).
 // v1.17.0: Identity-separated fork support — a project whose variant.json self-declares a variant
 //           with no templates/<variant>/ dir (e.g. co-architect from co-work) is accepted in
 //           "common-only" sync mode: templates/common + project-owned files only, no readiness
@@ -395,31 +407,71 @@ function fileHash(filePath: string): string {
  */
 function reconcileScriptRegistry(scriptRelPath: string): void {
   const registryPath = join(projectDir, 'scripts', 'SCRIPTS.md');
-  if (!existsSync(registryPath) || !existsSync(scriptsMd)) return;
+  if (!existsSync(registryPath)) return;
   // Registry rows key scripts by path relative to scripts/ (no "scripts/" prefix).
   const name = scriptRelPath.replace(/^scripts\//, '');
   const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const rowLookupRe = new RegExp(`^\\| \`${escaped}\` \\| [^|]*\\| ([^|]+) \\|.*\\r?$`, 'm');
 
-  const l0Content = readFileSync(scriptsMd, 'utf8');
-  const l0RowMatch = l0Content.match(new RegExp(`^\\| \`${escaped}\` \\| [^|]*\\| ([^|]+) \\|.*$`, 'm'));
-  if (!l0RowMatch) return; // not in L0 registry (e.g. a variant-local script) — nothing to reconcile
-  const l0Version = l0RowMatch[1].trim();
-  const l0FullRow = l0RowMatch[0];
+  // Row source: L0 (workspace root) registry first, then the L1 common-template
+  // registry. Scripts delivered from templates/common but registered upstream
+  // under a variant-prefixed name (e.g. `co-deck/handbook/check-links.ts` at L0
+  // vs plain `handbook/check-links.ts` in the project) only match the common
+  // registry, so the fallback is what makes the handbook/ suite reconcile.
+  let sourceRow: string | null = null;
+  let sourceVersion = '';
+  for (const registryFile of [scriptsMd, join(commonDir, 'scripts', 'SCRIPTS.md')]) {
+    if (!existsSync(registryFile)) continue;
+    const match = readFileSync(registryFile, 'utf8').match(rowLookupRe);
+    if (match) {
+      sourceRow = match[0];
+      sourceVersion = match[1].trim();
+      break;
+    }
+  }
+  if (!sourceRow) return; // not in any upstream registry (e.g. a variant-local script) — nothing to reconcile
+
+  // Prefer the version of the file actually being delivered (the resolved
+  // template copy) over the registry-lookup version: L0's row can be newer
+  // than the L1 snapshot the project receives, and writing L0's number would
+  // trip lifecycle-sync-audit Check A (@version vs registry row).
+  const tplFile = resolveTemplate(scriptRelPath);
+  const fileVersion = (tplFile && existsSync(tplFile)) ? extractScriptVersion(tplFile) : '';
+  const targetVersion = fileVersion || sourceVersion;
 
   const content = readFileSync(registryPath, 'utf8');
-  const rowRe = new RegExp(`^(\\| \`${escaped}\` \\| [^|]*\\| )[^|]+( \\|.*)$`, 'm');
-  if (rowRe.test(content)) {
-    const updated = content.replace(rowRe, `$1${l0Version}$2`);
-    if (updated !== content) {
-      writeFileSync(registryPath, updated, 'utf8');
-      console.log(`    📝 scripts/SCRIPTS.md: ${name} → v${l0Version}`);
+  // Consume the trailing newline on removal matches so dropped duplicate rows
+  // don't leave blank lines inside the markdown table.
+  const rowRe = new RegExp(`^\\| \`${escaped}\` \\| [^|]*\\| ([^|]+) \\|.*\\r?(?:\\n|$)`, 'gm');
+  let seen = 0;
+  let removed = 0;
+  const deduped = content.replace(rowRe, (matched, ver) => {
+    seen++;
+    if (seen > 1) { removed++; return ''; }
+    // Replace the version cell textually. Deliberately NOT a `$1`-template
+    // replacement string: under Bun/JSC a `$<digit>` sequence in the
+    // replacement is resolved against capture groups (or emitted literally
+    // when out of range), so `$1` + `1.19.0` corrupted rows into `$11.19.0…`.
+    return matched.replace(`| ${ver.trim()} |`, `| ${targetVersion} |`);
+  });
+  if (seen > 0) {
+    if (deduped !== content) {
+      writeFileSync(registryPath, deduped, 'utf8');
+      console.log(`    📝 scripts/SCRIPTS.md: ${name} → v${targetVersion}${removed > 0 ? ` (removed ${removed} stale duplicate row(s))` : ''}`);
     }
     return;
   }
 
-  // No row at all — append the L0 row verbatim after the last `| \`*.ts\` |` row
+  // No row at all — append the upstream row after the last `| \`*.ts\` |` row
   // INSIDE the registry table (stop at the first `#### \`` detail-section header,
   // whose flag tables also contain `| \`*.ts\` |`-shaped rows).
+  // Rows marked layer `L0`/`L0-only` are invisible to verify-scripts at project
+  // context (L0_ONLY_LAYERS skip) while the file itself ships on disk, which
+  // reads as "Unregistered script" — rewrite the layer cell to `L3` on append.
+  const appendedRow = sourceRow.replace(
+    /^(\| `[^`]+` \| [^|]*\| [^|]*\| [^|]*\| [^|]*\| [^|]*\| )([^|]+)(\|)/,
+    (_m, head, layer, tail) => /^L0(-only)?$/.test(layer.trim()) ? `${head}L3${tail}` : _m,
+  );
   const lines = content.split('\n');
   let lastRowIdx = -1;
   for (let i = 0; i < lines.length; i++) {
@@ -427,9 +479,9 @@ function reconcileScriptRegistry(scriptRelPath: string): void {
     if (/^\|\s*`[^`]+\.ts`\s*\|/.test(lines[i])) lastRowIdx = i;
   }
   if (lastRowIdx >= 0) {
-    lines.splice(lastRowIdx + 1, 0, l0FullRow);
+    lines.splice(lastRowIdx + 1, 0, appendedRow);
     writeFileSync(registryPath, lines.join('\n'), 'utf8');
-    console.log(`    📝 scripts/SCRIPTS.md: registered ${name} (v${l0Version})`);
+    console.log(`    📝 scripts/SCRIPTS.md: registered ${name} (v${targetVersion})`);
   }
 }
 
@@ -1002,7 +1054,7 @@ for (const subDir of scriptSubDirs) {
       // template copy wins, unconditionally (the integrity rule "core scripts
       // must not be modified" already forbids the local fork).
       console.log(`  ⚠️  DRIFT  ${rel}  ${projVer} (content differs from L1 at same version) — restored to canonical`);
-      if (!dryRun) copyFileSync(tplFile, projFile);
+      if (!dryRun) { copyFileSync(tplFile, projFile); reconcileScriptRegistry(rel); }
       console.log(`  ${dryTag}COPIED: ${rel}`);
       syncChanged++;
     } else {
