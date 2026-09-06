@@ -96,6 +96,7 @@
 | `pricing-playbook` | variant:co-price | — | — | scenario-comparison (enables) | elasticity-reading, price-corridor | pricing-policy-set, scenario-snapshots |
 | `prisma-7` | variant:co-price | — | — | pricing-governance (follows), ui-component-design (composes_with) | — | — |
 | `project-delivery` | variant:co-consult | delivery-manager, delivery-manager, workstream-lead, workstream-lead | phase4 | stakeholder-alignment (composes_with), stakeholder-review-management (composes_with), technical-feasibility (follows) | — | — |
+| `project-resync` | L0 | — | — | project-to-variant, sync (composes_with), upgrade-project (follows) | — | — |
 | `project-review` | L0 | — | — | — | — | — |
 | `project-to-variant` | L0 | — | — | promote-variant (composes_with) | — | — |
 | `promote-variant` | L0 | — | — | create-variant (follows), sync (follows) | — | — |

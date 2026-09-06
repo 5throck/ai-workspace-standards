@@ -78,6 +78,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `clear-pm-approval.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `compile-tokens.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `design-lint.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
+| `resync-audit.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `create-l3-scaffold.ts` | L0 | 1.12.5 | active | —| —| L0 | —|
 | `dev-sync.ts` | L0 | 1.9.0 | active | —| —| L0+L1 | —|
 | `dispatch-parallel.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
@@ -289,6 +290,15 @@ Their absence from the table is policy-consistent, not an oversight.
 ## Guide
 
 ### Everyday Development Scripts (Tier 2 —`bun run <script>`)
+
+#### `resync-audit.ts`
+**Purpose**: Provenance audit of uncommitted content in Projects/co-* (project-resync skill Step 0).
+Classifies dirty/untracked files as STALE-RESIDUE (older revision of current L0/L1/L2 source —
+discard, upgrade re-delivers), LOCAL-WORK (commit candidate; feeds backport review), or KEEP
+(default-safe). Emits markdown/JSON verdict tables; optional local snapshot tarball of discard
+candidates. Read-only — never modifies the tree, never pushes.
+**Usage**: `bun scripts/resync-audit.ts [--project <path>]... [--json] [--snapshot-dir <dir>]`
+**Runs automatically**: never automatic — operator-invoked via the `project-resync` skill
 
 #### `audit.ts`
 **Purpose**: Documentation audit gate. Checks CHANGELOG.md, workspace standards, AGENTS.md,
