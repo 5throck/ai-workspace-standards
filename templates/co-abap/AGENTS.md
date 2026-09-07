@@ -17,7 +17,7 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 
 | Agent | File | Tier | Role |
 |-------|------|------|------|
-| **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) | High | Orchestrates team assembly (Phase 0), design validation (Phase 2), and lifecycle finalization (Phase 6). **PM does NOT execute code or documentation directly — all specialist work dispatched through PM.** |
+| **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) | High | Orchestrates team assembly (Phase 0), design validation (Phase 1-2), and lifecycle finalization (Phase 5). **PM does NOT execute code or documentation directly — all specialist work dispatched through PM.** |
 
 <!-- VARIANT-AGENTS-START -->
 | **sd-analyst** | [`agents/sd-analyst.md`](agents/sd-analyst.md) | Medium | Sales & Distribution module analysis — activates on SD trigger keywords |
@@ -439,7 +439,7 @@ When a new skill is created in `skills/` or `.claude/skills/`:
 
 ---
 
-*Last Updated: 2026-08-30 (co-abap v1.0.0)*
+*Last Updated: 2026-09-07 (co-abap v1.0.0)*
 
 <!-- COMMON-AGENTS:START -->
 ## Language Policy

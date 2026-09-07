@@ -6,7 +6,7 @@
 Every project uses a role-based agent structure. Agents are defined as markdown files in `agents/`.
 
 > **Workspace Root vs. Individual Projects**:
-> - **Workspace Root** (`ai-workspace-standards`): Specialized agents for template maintenance (pm, architect, automation-engineer, security-expert, docs-writer, auditor, scaffolding-expert). See [AGENTS.md](AGENTS.md) for the complete roster.
+> - **Workspace Root** (`ai-workspace-standards`): Specialized agents for template maintenance (pm, architect, automation-engineer, security-expert, docs-writer, auditor, scaffolding-expert). See [AGENTS.md](../../AGENTS.md) for the complete roster.
 > - **Individual Projects**: Generic agents for development workflows (pm, architect, designer, code-writer, test-runner). These are generated from `templates/agents/` at project init.
 
 #### 5.1 Agent File Format (Standard Frontmatter)

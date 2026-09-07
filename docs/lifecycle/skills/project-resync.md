@@ -3,9 +3,9 @@
 ## Metadata
 - **Skill**: project-resync
 - **Status**: active
-- **Version**: 1.1.0
+- **Version**: 1.2.0
 - **Created**: 2026-09-06
-- **Last Updated**: 2026-09-06
+- **Last Updated**: 2026-09-07
 
 ## Description
 Whole-fleet bidirectional sync cycle for Projects/co-*: provenance audit
@@ -17,6 +17,7 @@ upgrade-project per project, and upgrade PR landing. Operator-level skill
 (workspace root); `l2_propagate: false`.
 
 ## Changelog
+- 2026-09-07: 1.2.0 — added Step 4 proof-check (commit `9d187b5a`)
 - 2026-09-06: 1.1.0 — added Step 6 (fleet branch cleanup + root final sync + final state table) from first-cycle lessons
 - 2026-09-06: 1.0.0 — created from the first full cycle (audit-first design per
   user diligence requirement: stale sync-wave residue must never reach a remote)

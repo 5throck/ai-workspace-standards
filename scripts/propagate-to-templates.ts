@@ -5,7 +5,7 @@
  * Replaces publish-to-template.ts (deprecated v1.8.0). Single authoritative script
  * for all L0→L1 propagation. Config-driven via propagation-map.json (SSOT for exclusions).
  *
- * @version 2.6.0
+ * @version 2.7.0
  *
  * Usage:
  *   bun scripts/propagate-to-templates.ts [--dry-run|--apply] [--domain <name>] [flags]
@@ -49,13 +49,16 @@ import {
 } from './helpers/markers.ts';
 
 // ── ANSI colors ────────────────────────────────────────────────────────────────
+// Only emit escapes on a TTY: CI captures stdout into strings, where raw ESC
+// bytes break downstream grep-based drift filters (BSD sed cannot strip \x1b).
+const TTY = process.stdout.isTTY === true;
 const C = {
-  green:  '\x1b[32m',
-  yellow: '\x1b[33m',
-  red:    '\x1b[31m',
-  cyan:   '\x1b[36m',
-  dim:    '\x1b[2m',
-  reset:  '\x1b[0m',
+  green:  TTY ? '\x1b[32m' : '',
+  yellow: TTY ? '\x1b[33m' : '',
+  red:    TTY ? '\x1b[31m' : '',
+  cyan:   TTY ? '\x1b[36m' : '',
+  dim:    TTY ? '\x1b[2m' : '',
+  reset:  TTY ? '\x1b[0m' : '',
 };
 
 // ── CLI flags ──────────────────────────────────────────────────────────────────

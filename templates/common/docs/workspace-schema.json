@@ -25,11 +25,11 @@
       ],
       "definitions": {
         "0": "Project Initiation",
+        "1-2": "Planning & Architecture",
         "3": "Design Handoff",
         "4": "Execution",
         "5": "Lifecycle Finalization",
-        "6": "Quality Assurance & Finalization",
-        "1-2": "Planning & Architecture"
+        "6": "Quality Assurance & Finalization"
       }
     }
   },
@@ -108,27 +108,43 @@
     "note": "audit.ts and validate-md-language.ts must read locale_codes from this file — do NOT hardcode language codes in scripts."
   },
   "country_scoped_assets": {
-    "description": "Skills, scripts, and env keys whose function is specific to one country/region because they access that country's data systems (NOT language-based). Pruned from generated projects/L3 drafts at scaffold time unless the project's target country matches. Registry-only SSOT — do not mark skills in SKILL.md frontmatter. Never register language skills (translate etc.) here.",
+    "description": "Skills, scripts, env keys, and variant asset directories whose function is specific to one country/region because they access that country's data systems (NOT language-based). Pruned from generated projects/L3 drafts at scaffold time unless the project's target country matches. Registry-only SSOT — do not mark skills in SKILL.md frontmatter. Never register language skills (translate etc.) here.",
     "skills": {
       "k-law": "KR",
       "k-dart": "KR",
-      "k-kosis": "KR"
+      "k-kosis": "KR",
+      "k-opendata": "KR"
     },
     "scripts": {},
     "env": {
       "DART_API_KEY": "KR",
       "LAW_API_OC": "KR",
-      "KOSIS_API_KEY": "KR"
+      "KOSIS_API_KEY": "KR",
+      "DATA_GO_KR_API_KEY": "KR"
+    },
+    "dirs": {
+      "regulations/KR": "KR"
     }
   },
   "variant_scoped_skills": {
     "description": "Skills whose function is exclusive to ONE variant. Registry-only SSOT (owner-curated — heuristics cannot distinguish these from genuinely common skills). If such a skill is found in templates/common/skills/ it is a promotion mistake: validate-templates FAILs and upgrade-project prunes it from projects whose variant does not own it (skills/ + .claude/.gemini/.agents mirrors). sound-synth (co-game) leaked this way on 2026-08-06 into 10 of 11 projects.",
-    "co-game": ["sound-synth"],
-    "co-design": ["accessibility-audit"],
-    "co-consult": ["mece-logic-auditor"],
-    "co-deck": ["presenter-mode"],
-    "co-security": ["sarif-exporter", "stride-threat-matrix"],
-    "co-develop": ["swe-solve"]
+    "co-game": [
+      "sound-synth"
+    ],
+    "co-design": [],
+    "co-consult": [
+      "mece-logic-auditor"
+    ],
+    "co-deck": [
+      "presenter-mode"
+    ],
+    "co-security": [
+      "sarif-exporter",
+      "stride-threat-matrix"
+    ],
+    "co-develop": [
+      "swe-solve"
+    ]
   },
   "rootAllowlist": {
     "description": "Whitelist of files and directories permitted in the workspace root. Anything not in these lists triggers a stray-artifact audit failure.",
@@ -146,6 +162,8 @@
       ".gitleaks.toml",
       "README.md",
       "README_ko.md",
+      "README_es.md",
+      "README_ja.md",
       "CLAUDE.md",
       "GEMINI.md",
       "AGENTS.md",
@@ -153,11 +171,17 @@
       "CONSTITUTION.md",
       "SECURITY.md",
       "LICENSE",
+      "NOTICES",
       ".mcp.json",
       ".sync_context.tmp",
       "propagation-map.json",
+      "services.yaml",
       "fix.mjs",
-      ".DS_Store"
+      ".DS_Store",
+      ".cursorrules",
+      ".clauderules",
+      ".ignore",
+      "opencode.json"
     ],
     "dirs": [
       ".git",
@@ -168,6 +192,8 @@
       "docs",
       "memory",
       "templates",
+      "tickets",
+      "schemas",
       ".claude",
       ".gemini",
       ".githooks",
@@ -230,6 +256,36 @@
         "notes": "profiles_dir is 'docs/countries' in all current variants. Each supported code must have <profiles_dir>/<CODE>.md with frontmatter code/name/status/last_verified. Profiles are advisory jurisdiction knowledge (loaded at engagement start), never auto-executed. Country != language — language policy remains i18n.locale_codes."
       }
     },
+    "co-abap": {
+      "agent_manifest": {
+        "description": "SAP ABAP development pipeline with optional SAP module analysts and technical execution agents",
+        "required_fields": [
+          "variant_agents_dir",
+          "optional",
+          "notes"
+        ],
+        "optional_fields": [
+          "pipeline_order"
+        ],
+        "notes": "pipeline_order defines the 6-step harness lifecycle. optional[] lists agents dispatched by PM as needed. Module analysts (SD/MM/FI/CO/PP/LE) activate on matching trigger keywords."
+      },
+      "skill_manifest": {
+        "description": "Variant-specific skills manifest with ABAP and SAP module skills",
+        "required_fields": [
+          "variant_specific"
+        ],
+        "notes": "Each entry declares name, layer, used_by_agents, phases, and platform_parity."
+      },
+      "script_manifest": {
+        "description": "Variant-specific scripts for VSP (VS Code ABAP) task execution and ABAP project lifecycle",
+        "required_fields": [
+          "variant_scripts_dir",
+          "local",
+          "external"
+        ],
+        "notes": "local[] lists variant-only scripts. external[] reserved for future third-party integrations."
+      }
+    },
     "co-consult": {
       "agent_manifest": {
         "$ref": "_shared.agent_manifest"
@@ -245,6 +301,159 @@
         "$ref": "_shared.agent_manifest"
       }
     },
+    "co-export": {
+      "agent_manifest": {
+        "description": "Import/export trade consulting agent roster with flat dispatch and no strict sequential dependency",
+        "required_fields": [
+          "variant_agents_dir",
+          "optional",
+          "notes"
+        ],
+        "optional_fields": [
+          "pipeline_order"
+        ],
+        "notes": "Agents dispatched by PM based on trade-consulting engagement phase. pipeline_order is empty for free-form dispatch."
+      },
+      "displayName": {
+        "description": "Human-readable variant display name",
+        "required_fields": [],
+        "notes": "Used in UI and documentation rendering."
+      },
+      "agent_overrides": {
+        "description": "Per-agent additive or replacing overrides with reason, review tracking, and affected aspects",
+        "required_fields": [
+          "type",
+          "reason",
+          "since",
+          "reviewed_by",
+          "overrides"
+        ],
+        "notes": "type: additive | replacing. overrides[]: list of aspects this override affects (agent-roster, governance-workflow, dispatch-protocol, etc.)."
+      },
+      "engagement_methodology": {
+        "description": "Variant-specific engagement methodology description",
+        "required_fields": [],
+        "notes": "Free-text field describing the structured engagement phases and client sign-off gates."
+      },
+      "deliverable_template": {
+        "description": "Standard deliverable template descriptions per engagement phase",
+        "required_fields": [],
+        "notes": "Free-text field listing deliverable types and their phase mapping."
+      },
+      "betaLifecycleSummary": {
+        "description": "Beta variant lifecycle tracking fields",
+        "required_fields": [
+          "betaEngagements",
+          "betaBugs",
+          "betaAgeInMonths",
+          "promotionEligible",
+          "missingCriteria",
+          "lastSynced"
+        ]
+      }
+    },
+    "co-hr": {
+      "displayName": {
+        "description": "Human-readable variant display name",
+        "required_fields": [],
+        "notes": "Used in UI and documentation rendering."
+      },
+      "engagement_methodology": {
+        "description": "Variant-specific engagement methodology description",
+        "required_fields": [],
+        "notes": "Free-text field describing the structured engagement phases and client sign-off gates."
+      },
+      "agent_overrides": {
+        "description": "Per-agent additive or replacing overrides with reason, review tracking, and affected aspects",
+        "required_fields": [
+          "type",
+          "reason",
+          "since",
+          "reviewed_by",
+          "overrides"
+        ],
+        "notes": "type: additive | replacing. overrides[]: list of aspects this override affects (agent-roster, governance-workflow, dispatch-protocol, etc.)."
+      },
+      "skill_manifest": {
+        "description": "Variant-specific skills manifest (e.g., k-law for Korean labor law compliance)",
+        "required_fields": [
+          "variant_specific"
+        ],
+        "notes": "Each entry declares name, used_by_agents, and phases."
+      },
+      "phaseAComplete": {
+        "description": "Flag indicating Phase A (prototype) completion status",
+        "required_fields": [],
+        "notes": "Boolean. true when all PROMOTION_CHECKLIST criteria have been met."
+      },
+      "promotionChecklist": {
+        "description": "Path to the promotion checklist file",
+        "required_fields": [],
+        "notes": "Relative path from variant root to the PROMOTION_CHECKLIST.md file."
+      },
+      "betaLifecycleSummary": {
+        "description": "Beta variant lifecycle tracking fields",
+        "required_fields": [
+          "betaEngagements",
+          "betaBugs",
+          "betaAgeInMonths",
+          "promotionEligible",
+          "missingCriteria",
+          "lastSynced"
+        ]
+      }
+    },
+    "co-news": {
+      "agent_manifest": {
+        "description": "Business/finance newsroom agent roster with flat dispatch and fact-checker sign-off gate",
+        "required_fields": [
+          "variant_agents_dir",
+          "optional",
+          "notes"
+        ],
+        "optional_fields": [
+          "pipeline_order"
+        ],
+        "notes": "Agents dispatched by PM based on newsroom workflow phase. Fact-checker sign-off gate before publish."
+      },
+      "displayName": {
+        "description": "Human-readable variant display name",
+        "required_fields": [],
+        "notes": "Used in UI and documentation rendering."
+      },
+      "agent_overrides": {
+        "description": "Per-agent additive or replacing overrides with reason, review tracking, and affected aspects",
+        "required_fields": [
+          "type",
+          "reason",
+          "since",
+          "reviewed_by",
+          "overrides"
+        ],
+        "notes": "type: additive | replacing. overrides[]: list of aspects this override affects."
+      },
+      "betaLifecycleSummary": {
+        "description": "Beta variant lifecycle tracking fields",
+        "required_fields": [
+          "betaEngagements",
+          "betaBugs",
+          "betaAgeInMonths",
+          "promotionEligible",
+          "missingCriteria",
+          "lastSynced"
+        ]
+      },
+      "phaseAComplete": {
+        "description": "Flag indicating Phase A (prototype) completion status",
+        "required_fields": [],
+        "notes": "Boolean. true when all PROMOTION_CHECKLIST criteria have been met."
+      },
+      "promotionChecklist": {
+        "description": "Path to the promotion checklist file",
+        "required_fields": [],
+        "notes": "Relative path from variant root to the PROMOTION_CHECKLIST.md file."
+      }
+    },
     "co-work": {
       "agent_manifest": {
         "$ref": "_shared.agent_manifest"
@@ -253,6 +462,31 @@
     "co-security": {
       "agent_manifest": {
         "$ref": "_shared.agent_manifest"
+      }
+    },
+    "co-game": {
+      "agent_manifest": {
+        "description": "Game development pipeline order with optional and skippable agents",
+        "required_fields": [
+          "variant_agents_dir",
+          "optional",
+          "notes"
+        ],
+        "optional_fields": [
+          "pipeline_order"
+        ],
+        "notes": "pipeline_order defines the sequential game development workflow. optional[] lists agents that can be omitted depending on genre (arcade, puzzle, etc.)."
+      },
+      "betaLifecycleSummary": {
+        "description": "Beta variant lifecycle tracking fields",
+        "required_fields": [
+          "betaEngagements",
+          "betaBugs",
+          "betaAgeInMonths",
+          "promotionEligible",
+          "missingCriteria",
+          "lastSynced"
+        ]
       }
     },
     "co-deck": {
@@ -292,7 +526,7 @@
           "default",
           "overrides_dir"
         ],
-        "notes": "CSS variable override themes. DOM structure immutable across all themes."
+        "notes": "CSS variable override themes. DOM structure immutable across all themes. overrides_dir accepts either on-disk layout per theme: flat (<overrides_dir>/<theme>.css) or nested (<overrides_dir>/<theme>/style.css, e.g. co-deck's shared styles/ pool) — validate-templates.ts B-04 checks both before failing."
       },
       "lecture_profile": {
         "description": "Lecture profile template metadata",
@@ -303,5 +537,13 @@
         "notes": "Scaffolded on new-project creation. Agents load this file at stage start."
       }
     }
+  },
+  "designLint": {
+    "enabled": true,
+    "scanRoots": [
+      "templates/co-design/playground/src"
+    ],
+    "allowlist": [],
+    "description": "Design-lint gate config (audit.ts checkDesignLint): token SSOT compliance scan roots for UI source; allowlist entries exempt documented literals."
   }
 }

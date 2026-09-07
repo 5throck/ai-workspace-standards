@@ -12,13 +12,13 @@
 
 > **Note**: `new-project.ts` is an L0-only script — it exists only in `scripts/` at the workspace root and is not propagated to `templates/common/scripts/` (L1). This is intentional: project scaffolding must run from the workspace, not from inside a generated project.
 
-The script copies [`templates/`](templates/) directly into the new project directory,
+The script copies [`templates/`](../../templates/) directly into the new project directory,
 substitutes the `[Project Name]` placeholder in all text files, removes `_examples/`,
 and initializes git with hooks active.
 
 #### 7.2 What Gets Generated
 
-The [`templates/`](templates/) folder mirrors the exact structure of a new project -
+The [`templates/`](../../templates/) folder mirrors the exact structure of a new project -
 browse it directly to see what every file should look like. All scaffold templates
 live there as **real, editable files** (not embedded strings).
 
@@ -40,7 +40,8 @@ live there as **real, editable files** (not embedded strings).
 | `memory/MEMORY.md` | Session log index | Ready to use |
 
 > **Extension templates** - ADR, analyst agent, skill, and daily log formats are **not**
-> generated at project init. Find ready-to-copy examples in [`templates/_examples/`](templates/_examples/).
+> generated at project init; consult the workspace `templates/` and `docs/` for current
+> formats when you need them.
 > **Design Foundation (ADR-0064)**: UI-bearing projects derive their own design system — the
 > methodology ships from L1 (`templates/common/docs/design-foundation.md` spec,
 > `docs/design-tokens.template.css` scaffold, `design-foundation` skill, `l2_propagate: false`).
