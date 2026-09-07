@@ -15,7 +15,7 @@ To avoid noise and preserve agent context, maintain a strict separation of conce
 ```markdown
 | Date | Summary |
 |------|---------|
-| [2026-05-21](2026-05-21.md) | feat: add pricing formula |
+| 2026-05-21 | feat: add pricing formula |
 ```
 
 **`memory/YYYY-MM-DD.md`** - daily log, written by the developer (via `/memlog` in Claude Code · manually in Gemini CLI):

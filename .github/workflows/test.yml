@@ -119,15 +119,25 @@ jobs:
       - name: L0→L1 drift check (propagation-map integrity)
         shell: bash
         run: |
-          # --check-drift exits 1 when any drift is found. gemini-settings has
-          # known intentional L2 variant overrides (PostToolUse lifecycle hooks)
-          # that will always differ from L1. Allow exit 1 but fail if any domain
-          # OTHER than gemini-settings appears in the drift report — that would
-          # indicate a regression (e.g. l2_drift_eligible misconfiguration).
-          DRIFT_OUTPUT=$(bun scripts/propagate-to-templates.ts --check-drift 2>&1 || true)
+          # --check-drift exits 1 when drift is found, and can also exit
+          # non-zero on hard failures (e.g. malformed propagation-map.json).
+          # gemini-settings has known intentional L2 variant overrides
+          # (PostToolUse lifecycle hooks) that will always differ from L1.
+          # Tolerate exit 1 only; any other non-zero exit is a hard failure.
+          # Fail if any domain OTHER than gemini-settings appears in the drift
+          # report — that would indicate a regression (e.g.
+          # l2_drift_eligible misconfiguration).
+          set -o pipefail
+          DRIFT_EXIT=0
+          DRIFT_OUTPUT=$(bun scripts/propagate-to-templates.ts --check-drift 2>&1) || DRIFT_EXIT=$?
           echo "$DRIFT_OUTPUT"
-          # Strip ANSI escapes, remove gemini-settings lines, check for remaining drift
-          if echo "$DRIFT_OUTPUT" | sed 's/\x1b\[[0-9;]*m//g' | grep -v "^gemini-settings" | grep -qi "differ\|missing\|extra"; then
+          if [ "$DRIFT_EXIT" -ne 0 ] && [ "$DRIFT_EXIT" -ne 1 ]; then
+            echo "ERROR: propagate-to-templates --check-drift failed hard (exit $DRIFT_EXIT)"
+            exit "$DRIFT_EXIT"
+          fi
+          # Strip ANSI escapes (portable via perl; BSD sed lacks \x1b support),
+          # remove gemini-settings lines, check for remaining drift
+          if echo "$DRIFT_OUTPUT" | perl -pe 's/\e\[[0-9;]*m//g' | grep -v "^gemini-settings" | grep -qi "differ\|missing\|extra"; then
             echo "ERROR: Unexpected drift detected in non-gemini-settings domain"
             exit 1
           fi
