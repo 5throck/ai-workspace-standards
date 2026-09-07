@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * verify-scripts.ts — Script Lifecycle Registry Verifier
- * @version 1.4.2
+ * @version 1.5.0
  *
  * Validates that scripts/SCRIPTS.md Registry is in sync with actual script files,
  * enforces deprecation removal dates, and blocks on security advisories.
@@ -463,6 +463,33 @@ function verify(): boolean {
       warnings.push(
         `⚠️  PAIR STATUS DRIFT: \`${entry.script}\` (${entry.status}) ↔ \`${entry.pair}\` (${pairEntry.status}) — statuses should match`
       );
+    }
+  }
+
+  // Check 7: Template propagation sanity (L0 only)
+  // A script file shipped in templates/common/scripts/ must be registered in the
+  // template SCRIPTS.md with a propagation tag other than L0-only — otherwise every
+  // scaffolded L3 project fails its own audit with "Unregistered script" (the
+  // upgrade-project.ts regression of 2026-09-07).
+  const templateScriptsDir = join(workspaceRoot, "templates", "common", "scripts");
+  const templateScriptsMd = join(templateScriptsDir, SCRIPTS_MD_FILENAME);
+  if (contextLayer === "L0" && existsSync(templateScriptsMd)) {
+    const templateRegistry = parseRegistry(readFileSync(templateScriptsMd, "utf-8"));
+    const templateRegistered = new Map(templateRegistry.map(e => [e.script, e]));
+    const templateFiles = walkScripts(templateScriptsDir)
+      .map((absPath) => relative(templateScriptsDir, absPath).replace(/\\/g, "/"))
+      .sort();
+    for (const file of templateFiles) {
+      const entry = templateRegistered.get(file);
+      if (!entry) {
+        errors.push(
+          `Template registry gap: \`${file}\` ships in templates/common/scripts/ but has no row in its SCRIPTS.md Registry — add a row or remove the file`
+        );
+      } else if (L0_ONLY_LAYERS.has(entry.layer)) {
+        errors.push(
+          `Template propagation mismatch: \`${file}\` ships in templates/common/scripts/ but its template-registry row is tagged \`${entry.layer}\` — fix the propagation tag to L0+L1 or remove the file from the template`
+        );
+      }
     }
   }
 
