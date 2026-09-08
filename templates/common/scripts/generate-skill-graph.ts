@@ -1,8 +1,16 @@
 #!/usr/bin/env bun
 /**
  * Skill Relationship Graph Generator
- * @version 1.8.3
+ * @version 1.8.4
  *
+ * v1.8.4 (2026-09-08): fix — variant directory discovery (skill/agent/
+ * procedure-derived output_type dedup) now sorts `templates/co-*` names in
+ * deterministic ascending lexical order (locale-independent, not
+ * `localeCompare`) before the existing first-wins logic runs; previously
+ * `readdirSync`'s OS/filesystem-dependent order caused any id duplicated
+ * across two or more variants to resolve to a different "owning" variant
+ * on different machines (observed: alphabetical on Windows/NTFS, not on
+ * the environment that generated the previously-committed graph).
  * v1.8.3 (2026-08-29): upstreams the three co-newbiz fork adaptations so
  * scaffolded projects no longer need a local generator fork:
  * 1. L0/L3 detection keys on `templates/common` (projects may carry content
@@ -353,6 +361,36 @@ function parsePrerequisites(prerequisites: string | string[] | undefined, knownS
 }
 
 /**
+ * Locale-independent ascending lexical comparator (plain UTF-16 code-unit
+ * ordering via `<`/`>`), deliberately not `String.localeCompare` — that API's
+ * ordering can vary by ICU version/locale, which would reintroduce exactly
+ * the kind of cross-environment non-determinism this comparator exists to
+ * eliminate. Exported for direct unit testing.
+ */
+export function compareVariantNames(a: string, b: string): number {
+  return a < b ? -1 : a > b ? 1 : 0;
+}
+
+/**
+ * List variant template directories (`templates/co-*`) in deterministic
+ * ascending lexical order by directory name. The first-wins dedup logic in
+ * discoverNodes() and the procedure-derivation loop (Source 4.7) picks an
+ * alphabetically-first-variant-as-deterministic-canonical-representative for
+ * any skill/agent/output_type id that happens to exist in more than one
+ * variant, based on iteration order — `readdirSync`'s own order is
+ * unspecified and differs across OS/filesystem (observed: sorted on
+ * Windows/NTFS, unsorted on Linux/ext4), so callers must sort explicitly to
+ * get a stable, portable result. This is a deterministic tie-break, not a
+ * semantic ownership judgment.
+ */
+export function listVariantDirs(dir: string): string[] {
+  return readdirSync(dir, { withFileTypes: true })
+    .filter(e => e.isDirectory() && e.name.startsWith('co-'))
+    .map(e => e.name)
+    .sort(compareVariantNames);
+}
+
+/**
  * Discover all skills and agents in the workspace
  */
 function discoverNodes(): { skills: Map<string, GraphNode>, agents: Map<string, GraphNode> } {
@@ -389,18 +427,15 @@ function discoverNodes(): { skills: Map<string, GraphNode>, agents: Map<string, 
 
   // Variant skills
   if (existsSync(templatesDir)) {
-    const variants = readdirSync(templatesDir, { withFileTypes: true });
-    for (const variant of variants) {
-      if (!variant.isDirectory() || !variant.name.startsWith('co-')) continue;
-
-      const variantSkillsDir = join(templatesDir, variant.name, 'skills');
+    for (const variantName of listVariantDirs(templatesDir)) {
+      const variantSkillsDir = join(templatesDir, variantName, 'skills');
       if (existsSync(variantSkillsDir)) {
         const entries = readdirSync(variantSkillsDir, { withFileTypes: true });
         for (const entry of entries) {
           if (entry.isDirectory()) {
             const skillFile = join(variantSkillsDir, entry.name, 'SKILL.md');
             if (existsSync(skillFile) && !skills.has(entry.name)) {
-              skills.set(entry.name, { id: entry.name, type: 'skill', layer: `variant:${variant.name}` });
+              skills.set(entry.name, { id: entry.name, type: 'skill', layer: `variant:${variantName}` });
             }
           }
         }
@@ -441,18 +476,15 @@ function discoverNodes(): { skills: Map<string, GraphNode>, agents: Map<string, 
 
   // Variant agents
   if (existsSync(templatesDir)) {
-    const variants = readdirSync(templatesDir, { withFileTypes: true });
-    for (const variant of variants) {
-      if (!variant.isDirectory() || !variant.name.startsWith('co-')) continue;
-
-      const variantAgentsDir = join(templatesDir, variant.name, 'agents');
+    for (const variantName of listVariantDirs(templatesDir)) {
+      const variantAgentsDir = join(templatesDir, variantName, 'agents');
       if (existsSync(variantAgentsDir)) {
         const entries = readdirSync(variantAgentsDir);
         for (const entry of entries) {
           if (entry.endsWith('.md')) {
             const name = entry.replace('.md', '');
             if (!agents.has(name)) {
-              agents.set(name, { id: name, type: 'agent', layer: `variant:${variant.name}` });
+              agents.set(name, { id: name, type: 'agent', layer: `variant:${variantName}` });
             }
           }
         }
@@ -853,13 +885,11 @@ export function buildGraph(): SkillGraph {
   // MUST NOT be hand-maintained (INV-1,
   // docs/designs/2026-08-29-procedure-schema-design.md).
   if (existsSync(templatesDir)) {
-    const variants = readdirSync(templatesDir, { withFileTypes: true });
-    for (const variant of variants) {
-      if (!variant.isDirectory() || !variant.name.startsWith('co-')) continue;
+    for (const variantName of listVariantDirs(templatesDir)) {
       deriveProceduresFromDir(
-        join(templatesDir, variant.name, 'procedures'),
-        variant.name,
-        `variant:${variant.name}`,
+        join(templatesDir, variantName, 'procedures'),
+        variantName,
+        `variant:${variantName}`,
         allNodes,
         edges,
       );

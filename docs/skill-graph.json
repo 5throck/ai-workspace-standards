@@ -359,7 +359,7 @@
     {
       "id": "code-review",
       "type": "skill",
-      "layer": "variant:co-game"
+      "layer": "variant:co-develop"
     },
     {
       "id": "code-writer",
@@ -394,7 +394,7 @@
     {
       "id": "competitive-intelligence",
       "type": "skill",
-      "layer": "variant:co-price"
+      "layer": "variant:co-consult"
     },
     {
       "id": "consulting-report-writing",
@@ -526,7 +526,7 @@
     {
       "id": "designer",
       "type": "agent",
-      "layer": "variant:co-game"
+      "layer": "variant:co-develop"
     },
     {
       "id": "desktop-app-fallback",
@@ -536,7 +536,7 @@
     {
       "id": "devops-admin",
       "type": "agent",
-      "layer": "variant:co-price"
+      "layer": "variant:co-abap"
     },
     {
       "id": "diagram-specialist",
@@ -581,7 +581,15 @@
     {
       "id": "executive-presentation",
       "type": "skill",
-      "layer": "variant:co-price"
+      "layer": "variant:co-consult",
+      "inputs": [
+        "complexity-grades",
+        "business-case",
+        "readiness-scores"
+      ],
+      "outputs": [
+        "executive-deck"
+      ]
     },
     {
       "id": "explain-me",
@@ -841,7 +849,7 @@
     {
       "id": "insight-synthesis",
       "type": "skill",
-      "layer": "variant:co-price"
+      "layer": "variant:co-consult"
     },
     {
       "id": "interface-expert",
@@ -1036,7 +1044,7 @@
     {
       "id": "output_type.approved_implementation_plan",
       "type": "output_type",
-      "layer": "variant:co-game"
+      "layer": "variant:co-develop"
     },
     {
       "id": "output_type.arcade_reference_notes",
@@ -1276,7 +1284,7 @@
     {
       "id": "output_type.feasibility_findings",
       "type": "output_type",
-      "layer": "variant:co-game"
+      "layer": "variant:co-abap"
     },
     {
       "id": "output_type.feasibility_notes",
@@ -1386,7 +1394,7 @@
     {
       "id": "output_type.implementation_commit",
       "type": "output_type",
-      "layer": "variant:co-game"
+      "layer": "variant:co-develop"
     },
     {
       "id": "output_type.implementation_metrics",
@@ -1576,7 +1584,7 @@
     {
       "id": "output_type.regression_report",
       "type": "output_type",
-      "layer": "variant:co-game"
+      "layer": "variant:co-develop"
     },
     {
       "id": "output_type.regulatory_landscape",
@@ -2317,12 +2325,12 @@
     {
       "id": "README",
       "type": "agent",
-      "layer": "variant:co-deck"
+      "layer": "variant:co-abap"
     },
     {
       "id": "README_ko",
       "type": "agent",
-      "layer": "variant:co-deck"
+      "layer": "variant:co-abap"
     },
     {
       "id": "red-team-lead",
@@ -2332,7 +2340,7 @@
     {
       "id": "refactoring",
       "type": "skill",
-      "layer": "variant:co-game"
+      "layer": "variant:co-develop"
     },
     {
       "id": "report-writer",
@@ -2472,7 +2480,7 @@
     {
       "id": "security-monitor",
       "type": "agent",
-      "layer": "variant:co-price"
+      "layer": "variant:co-abap"
     },
     {
       "id": "security-scan",
@@ -2573,7 +2581,7 @@
     {
       "id": "stack-setup",
       "type": "agent",
-      "layer": "variant:co-game"
+      "layer": "variant:co-develop"
     },
     {
       "id": "stakeholder-alignment",
@@ -2675,12 +2683,12 @@
     {
       "id": "test-driven-development",
       "type": "skill",
-      "layer": "variant:co-game"
+      "layer": "variant:co-develop"
     },
     {
       "id": "test-runner",
       "type": "agent",
-      "layer": "variant:co-game"
+      "layer": "variant:co-abap"
     },
     {
       "id": "theme-authoring",
@@ -2891,6 +2899,17 @@
       "from": "abap-code-review",
       "to": "phase4",
       "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "abap-code-review",
+      "to": "test-runner",
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-abap/agents/test-runner.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -3878,17 +3897,6 @@
       "source": "prose"
     },
     {
-      "type": "follows",
-      "from": "code-review",
-      "to": "arcade-physics",
-      "source": "relates_to",
-      "provenance": {
-        "file": "templates/co-game/skills/code-review/SKILL.md",
-        "field": "relates_to",
-        "index": 0
-      }
-    },
-    {
       "type": "used_by",
       "from": "code-review",
       "to": "code-writer",
@@ -3949,14 +3957,15 @@
       "source": "skill_manifest"
     },
     {
-      "type": "follows",
+      "type": "composes_with",
       "from": "code-review",
-      "to": "test-driven-development",
+      "to": "refactoring",
       "source": "relates_to",
+      "symmetric": true,
       "provenance": {
-        "file": "templates/co-game/skills/code-review/SKILL.md",
+        "file": "templates/co-develop/skills/code-review/SKILL.md",
         "field": "relates_to",
-        "index": 1
+        "index": 0
       }
     },
     {
@@ -4289,20 +4298,26 @@
     {
       "type": "composes_with",
       "from": "competitive-intelligence",
-      "to": "gabor-granger",
+      "to": "company-intelligence",
       "source": "relates_to",
       "symmetric": true,
       "provenance": {
-        "file": "templates/co-price/skills/competitive-intelligence/SKILL.md",
+        "file": "templates/co-consult/skills/competitive-intelligence/SKILL.md",
         "field": "relates_to",
-        "index": 1
+        "index": 0
       }
     },
     {
-      "type": "references",
+      "type": "composes_with",
       "from": "competitive-intelligence",
-      "to": "gabor-granger",
-      "source": "prose"
+      "to": "financial-modeling",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/competitive-intelligence/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
     },
     {
       "type": "used_by",
@@ -4320,6 +4335,24 @@
       "from": "competitive-intelligence",
       "to": "industry-expert",
       "source": "skill_manifest"
+    },
+    {
+      "type": "composes_with",
+      "from": "competitive-intelligence",
+      "to": "insight-synthesis",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/competitive-intelligence/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
+      "type": "references",
+      "from": "competitive-intelligence",
+      "to": "insight-synthesis",
+      "source": "prose"
     },
     {
       "type": "produces",
@@ -4340,18 +4373,6 @@
       "source": "skill_manifest"
     },
     {
-      "type": "composes_with",
-      "from": "competitive-intelligence",
-      "to": "price-waterfall-analysis",
-      "source": "relates_to",
-      "symmetric": true,
-      "provenance": {
-        "file": "templates/co-price/skills/competitive-intelligence/SKILL.md",
-        "field": "relates_to",
-        "index": 2
-      }
-    },
-    {
       "type": "used_by",
       "from": "competitive-intelligence",
       "to": "strategy-analyst",
@@ -4367,23 +4388,6 @@
       "from": "competitive-intelligence",
       "to": "strategy-analyst",
       "source": "skill_manifest"
-    },
-    {
-      "type": "follows",
-      "from": "competitive-intelligence",
-      "to": "van-westendorp-psm",
-      "source": "relates_to",
-      "provenance": {
-        "file": "templates/co-price/skills/competitive-intelligence/SKILL.md",
-        "field": "relates_to",
-        "index": 0
-      }
-    },
-    {
-      "type": "references",
-      "from": "competitive-intelligence",
-      "to": "van-westendorp-psm",
-      "source": "prose"
     },
     {
       "type": "used_by",
@@ -4890,6 +4894,30 @@
       "source": "prose"
     },
     {
+      "type": "references",
+      "from": "designer",
+      "to": "code-review",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "designer",
+      "to": "refactoring",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "designer",
+      "to": "swe-solve",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "designer",
+      "to": "test-driven-development",
+      "source": "prose"
+    },
+    {
       "type": "used_by",
       "from": "desktop-app-fallback",
       "to": "code-writer",
@@ -5191,14 +5219,71 @@
       "source": "skill_manifest"
     },
     {
-      "type": "follows",
+      "type": "composes_with",
       "from": "executive-presentation",
-      "to": "harness-verification",
+      "to": "consulting-report-writing",
       "source": "relates_to",
+      "symmetric": true,
       "provenance": {
-        "file": "templates/co-price/skills/executive-presentation/SKILL.md",
+        "file": "templates/co-consult/skills/executive-presentation/SKILL.md",
         "field": "relates_to",
-        "index": 0
+        "index": 4
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "executive-presentation",
+      "to": "financial-modeling",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/executive-presentation/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
+      "type": "requires",
+      "from": "executive-presentation",
+      "to": "financial-modeling",
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-consult/skills/executive-presentation/SKILL.md",
+        "field": "prerequisites"
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "executive-presentation",
+      "to": "narrative-framework",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/executive-presentation/SKILL.md",
+        "field": "relates_to",
+        "index": 3
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "executive-presentation",
+      "to": "org-readiness-assessment",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/executive-presentation/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "requires",
+      "from": "executive-presentation",
+      "to": "org-readiness-assessment",
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-consult/skills/executive-presentation/SKILL.md",
+        "field": "prerequisites"
       }
     },
     {
@@ -5206,6 +5291,28 @@
       "from": "executive-presentation",
       "to": "phase3",
       "source": "skill_manifest"
+    },
+    {
+      "type": "composes_with",
+      "from": "executive-presentation",
+      "to": "technical-feasibility",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/executive-presentation/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "requires",
+      "from": "executive-presentation",
+      "to": "technical-feasibility",
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-consult/skills/executive-presentation/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "references",
@@ -6939,6 +7046,18 @@
       "source": "prose"
     },
     {
+      "type": "composes_with",
+      "from": "insight-synthesis",
+      "to": "competitive-intelligence",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/insight-synthesis/SKILL.md",
+        "field": "relates_to",
+        "index": 3
+      }
+    },
+    {
       "type": "used_by",
       "from": "insight-synthesis",
       "to": "data-analyst",
@@ -6954,6 +7073,29 @@
       "from": "insight-synthesis",
       "to": "data-analyst",
       "source": "skill_manifest"
+    },
+    {
+      "type": "composes_with",
+      "from": "insight-synthesis",
+      "to": "financial-statement-analysis",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/insight-synthesis/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
+      "type": "follows",
+      "from": "insight-synthesis",
+      "to": "org-readiness-assessment",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-consult/skills/insight-synthesis/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     },
     {
       "type": "produces",
@@ -6972,6 +7114,18 @@
       "from": "insight-synthesis",
       "to": "phase3",
       "source": "skill_manifest"
+    },
+    {
+      "type": "composes_with",
+      "from": "insight-synthesis",
+      "to": "solution-design",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/insight-synthesis/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
     },
     {
       "type": "used_by",
@@ -11460,6 +11614,18 @@
       "source": "prose"
     },
     {
+      "type": "composes_with",
+      "from": "refactoring",
+      "to": "code-review",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-develop/skills/refactoring/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "used_by",
       "from": "refactoring",
       "to": "code-writer",
@@ -13539,7 +13705,7 @@
       "to": "code-review",
       "source": "relates_to",
       "provenance": {
-        "file": "templates/co-game/skills/test-driven-development/SKILL.md",
+        "file": "templates/co-develop/skills/test-driven-development/SKILL.md",
         "field": "relates_to",
         "index": 0
       }
@@ -13596,17 +13762,6 @@
       "from": "test-driven-development",
       "to": "phase5",
       "source": "skill_manifest"
-    },
-    {
-      "type": "used_by",
-      "from": "test-driven-development",
-      "to": "test-runner",
-      "source": "required_skills",
-      "provenance": {
-        "file": "templates/co-game/agents/test-runner.md",
-        "field": "required_skills",
-        "index": 0
-      }
     },
     {
       "type": "used_by",
