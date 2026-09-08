@@ -1,18 +1,18 @@
-Run a comprehensive parallel project review using all available specialist agents.
+Run a comprehensive project review: machine validator baseline, then scope-triaged specialist agents.
 
-Arguments: $ARGUMENTS (optional focus area or scope description)
+Arguments: $ARGUMENTS (optional scope: `full` | `scoped:<domains>` | `baseline-only`, or a focus description)
 
 Read and follow `skills/project-review/SKILL.md` exactly. The skill contains the full procedure:
 
-1. **Detect Project Context** — scan `agents/` for available agents, determine project type
-2. **Generate Execution Plan** — map agents to 7 review domains, present plan table, wait for user approval
-3. **Dispatch Agents in Parallel** — use `Agent` tool with `run_in_background: true` for each domain
-4. **Synthesize Results** — collect all findings into prioritized tables (Critical/High/Moderate/Low)
-5. **Generate Action Items** — create prioritized action item table with owner, deliverable, priority, phase
-
-Pass `--tasks` flag to automatically convert action items into tracked tasks.
+1. **Machine Baseline** — run the validator battery (audit, validate-templates, verify-scripts, lifecycle audits, drift check) before any agent dispatch
+2. **Detect Project Context** — scan `agents/` for available agents, determine project type and scope mode
+3. **Generate Execution Plan** — map agents to the 4 paired review slots, present plan table, wait for user approval
+4. **Dispatch Agents (max 4, resilient parallel)** — `Agent` tool with `run_in_background: true`; sequential fallback if concurrency-blocked
+5. **Collect, Classify, Persist** — findings tables with mandatory Class column (`one-time` | `systemic` | `script-gap`); persist report to `docs/reports/YYYY-MM-DD-project-review-<scope>.md`
+6. **Wire Outcomes** — fix-now via PM Gateway; deferred items via `bun scripts/ticket.ts create --manual`; `script-gap` findings get a `validator-hardening:` ticket
+7. **Post-Fix Verification** — re-run touched validators, append verification section, log to the daily memory file
 
 ## Platform Notes
 
-- On Antigravity/Gemini CLI: delegates to `/meeting "project review" --agents [list] --rounds 2 --dialogue`
 - On Claude Code: use native `Agent` tool for parallel dispatch
+- On Antigravity/Gemini CLI: delegates to `/meeting "project review" --agents [list] --rounds 2 --dialogue`

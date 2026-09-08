@@ -3,17 +3,19 @@ name: project-review
 status: active
 scope: common
 description: >
-  Performs a comprehensive parallel review of the current project using all
-  available specialist agents. Auto-detects project type and agent roster,
-  generates an execution plan, dispatches agents in parallel, and produces
-  a prioritized improvement plan (Critical/High/Medium/Low).
+  Performs a comprehensive review of the current project: machine validator
+  baseline first, then parallel specialist agents (scope-triageable: full /
+  scoped / baseline-only). Auto-detects project type and agent roster,
+  produces a prioritized, class-tagged findings report persisted to
+  docs/reports/, and wires outcomes to the ticket backlog (deferred items,
+  validator-hardening loop).
   Use when: user requests a full project review ("/project-review" or
   "do a full project review"); PM detects structural changes (3+ agent files modified,
   phase schema changes, workspace-schema.json modified, new variant added);
   QA escalation from auditor (audit.ts ERROR >= 3 or security Critical finding).
 owner: pm
-version: 1.1.0
-last_reviewed: 2026-07-10
+version: 1.2.0
+last_reviewed: 2026-09-08
 prerequisites: []
 metadata:
   type: process
@@ -22,281 +24,221 @@ metadata:
     - review project
     - audit project
     - quality review
+  related_skills:
+    - audit-workspace
+    - project-resync
+    - meeting-facilitation
 ---
 
 # project-review
 
-Comprehensive parallel review of the current project by all available specialist agents.
+Comprehensive review of the current project: machine baseline → scope-triaged specialist
+review → persisted report → ticketed follow-ups. **Ratchet principle**: every finding
+classified `script-gap` must end as a validator-hardening ticket so the next review
+catches that class mechanically, not by agent effort.
 
 ## When to Use
 
 - User explicitly requests a full project review
-- PM detects structural changes requiring cross-domain validation
+- PM detects structural changes requiring cross-domain validation (T-02)
 - QA escalation: `audit.ts` exits with 3+ ERRORs, or security-expert finds a Critical issue
+- Post-incident localized review (use `scoped` mode — see Step 1.5)
+- Weekly health pulse (use `baseline-only` mode — doubles as the §9.1 check)
 
-## Step 0 — Detect Optional Enhancements
+## Step 0 — Machine Baseline (run BEFORE any agent dispatch)
 
-Before starting, check for **optional MCP tool availability**. These tools enhance the review but are **NOT required** — the skill works fully without them.
+Run the validator battery and record results — this is (a) the report's Baseline
+section and (b) the reference for classifying findings as `script-gap` later.
 
-### base-map MCP Availability Check
-
-Check if any `mcp__base-map__*` tools are available in the current session:
-- `mcp__base-map__ask_local_llm` — local model for analysis, summarization, cross-validation
-- `mcp__base-map__review_code` — automated code review
-- `mcp__base-map__generate_tests` — test generation
-- `mcp__base-map__implement_code` — code generation from requirements
-
-**Detection method**: Attempt to list or call any `mcp__base-map__*` tool. If the tool set exists, set a session flag `BASE_MAP_AVAILABLE = true`. If not (tool not found, timeout, or error), set `BASE_MAP_AVAILABLE = false` and proceed without MCP enhancement.
-
-```
-BASE_MAP_AVAILABLE = (mcp__base-map__models or mcp__base-map__ask_local_llm exists)
+```bash
+bun scripts/audit.ts                              # workspace standards
+bun scripts/validate-templates.ts                 # template/variant integrity + L1 parity
+bun scripts/verify-scripts.ts --verify            # SCRIPTS.md registry sync
+bun run agent-lifecycle-audit                     # agent health
+bun run skill-lifecycle-audit                     # skill health
+bun scripts/propagate-to-templates.ts --check-drift  # L1↔L2 drift (tolerate gemini-settings)
 ```
 
-> **Important**: Not all users have base-map MCP configured. The review MUST complete successfully regardless of availability. base-map is a performance enhancer, not a dependency.
+Record per script: PASS/FAIL/WARN counts. In variant projects, run the project's own
+`bun scripts/audit.ts` instead of the root battery.
 
-### When base-map MCP IS Available
+If the baseline already shows ≥3 ERRORs, triage those FIRST (T-03) — agents may still be
+dispatched for non-machine-detectable classes, but don't let agents re-discover what the
+scripts just printed.
 
-Use it for the following enhancements throughout the review:
-- **Large file summarization**: `ask_local_llm` to summarize files too large to read in full
-- **Cross-validation**: `ask_local_llm` to validate findings across domains (e.g., "Does this code issue also appear in the architecture?")
-- **Code review**: `review_code` on critical scripts during automation-engineer review
-- **Synthesis**: `ask_local_llm` to deduplicate and prioritize findings from all agents
+### base-map MCP (optional enhancement)
 
-### When base-map MCP is NOT Available
-
-Skip all `mcp__base-map__*` calls. The review proceeds using only the native Agent tool and direct file reads. Results are equivalent — base-map only adds secondary validation efficiency.
+Check whether `mcp__base-map__*` tools exist in the session. If yes, set
+`BASE_MAP_AVAILABLE = true` and use them for large-file summarization,
+cross-validation of findings, and `review_code` on critical scripts. If no,
+skip every `mcp__base-map__*` call — the review completes without them.
+base-map is an enhancer, never a dependency.
 
 ## Step 1 — Detect Project Context
 
-Before dispatching agents, determine the execution context:
-
-1. **List available agents**: scan `agents/` directory for `*.md` files (excluding README)
-2. **Determine project type**: check for `docs/context.md` (variant project — this and the other `docs/...` paths below exist inside a generated variant project, not at workspace root) or workspace root indicators
+1. **List available agents**: scan `agents/` for `*.md` (excluding README)
+2. **Determine project type**: `docs/context.md` present → variant project; workspace
+   root indicators otherwise
 3. **Announce context**:
    ```
-   Project type: [workspace-root | co-develop | co-design | co-work | co-security | custom]
+   Project type: [workspace-root | co-… ]
    Available agents: [list]
-   Review domains: [mapped domains]
+   Review domains: [mapped]
+   Scope: [full | scoped:<domains> | baseline-only]
    base-map MCP: [available | not available]
    ```
 
+## Step 1.5 — Scope Triage (choose review breadth)
+
+| Mode | Agents | When |
+|------|--------|------|
+| `full` | 7 domains, parallel (paired per Step 3) | Default for T-01 user request, T-02 structural change, T-03 QA escalation |
+| `scoped <domains>` | Only the named domains | Post-incident review where the blast radius is known (2026-09-07 lesson: a localized registry-tag mismatch did not need 7 agents) |
+| `baseline-only` | Zero — machine battery + PM lightweight check (§7 universal behaviors spot-check) | Weekly health pulse; quick pre-release sanity; when agent budget is constrained |
+
+Selection rule: the PM picks the *smallest* mode that covers the trigger's blast radius,
+and states the choice in the Step 1 announcement.
+
 ## Step 2 — Generate Execution Plan
 
-Map available agents to review domains. Present the plan table and wait for user approval before proceeding:
+Map available agents to review domains (workspace root shown; variant projects map to
+their own roster, PM covers gaps directly):
 
 | # | Domain | Agent | Tier | Focus |
 |---|--------|-------|------|-------|
-| 1 | Architecture | architect (if available, else PM) | High | Structure, phase consistency, variant contracts |
-| 2 | Standards compliance | auditor (if available, else PM) | Medium | audit.ts, validate-templates.ts, SCRIPTS.md |
-| 3 | Automation | automation-engineer (if available, else PM) | Medium | Hooks, scripts, package.json, CI |
-| 4 | Documentation | docs-writer (if available, else PM) | Medium | References, language policy, cross-links |
-| 5 | Security | security-expert or security-monitor | Medium | Secrets, CI permissions, injection risks |
-| 6 | Lifecycle | lifecycle-manager | Medium | Agent/skill/script health, sync parity |
-| 7 | Scaffolding | scaffolding-expert (workspace only) | Medium | Template structure, variant contract |
+| 1 | Architecture + Scaffolding | architect (else PM) | High | Structure, variant contracts, template sync, L0/L1/L2 inheritance |
+| 2 | Standards + Lifecycle | auditor (else PM) | Medium | Registry/manifest accuracy, lifecycle records, governance doc consistency |
+| 3 | Automation | automation-engineer (else PM) | Medium | Scripts, hooks, package.json, CI workflows, cross-platform |
+| 4 | Documentation + Security | docs-writer + security-expert (else PM) | Medium | Links, language policy, secrets, CI permissions |
 
-> If an agent is not available for a domain, PM covers that domain directly with a lightweight check.
+> If an agent is not available for a domain, PM covers that domain directly with a
+> lightweight check. For `scoped` mode, keep only the selected rows.
 
-## Step 3 — Dispatch Agents in Parallel
+## Step 3 — Dispatch Agents (resilient parallel)
 
-### Claude Code / ZCode (Platform: claude)
+**Cap: at most 4 background agents.** Domains are pre-paired to fit the cap — this is
+the combination proven in the 2026-09-08 run:
 
-Dispatch all agents simultaneously using the `Agent` tool with `run_in_background: true`:
+| Slot | Domains |
+|------|---------|
+| Agent A | Architecture + Scaffolding |
+| Agent B | Standards + Lifecycle |
+| Agent C | Automation |
+| Agent D | Documentation + Security |
 
-```
-For each agent in the execution plan:
-  Agent(
-    description = "[Domain] review",
-    prompt = "You are the [agent] for this project at [path].
-              Review your domain and report: Critical Issues, High Issues,
-              Moderate Issues, Strengths. Include file paths and line numbers.
-              Research only — do NOT modify any files.
-
-              [IF BASE_MAP_AVAILABLE]:
-              You have access to base-map MCP tools (mcp__base-map__ask_local_llm,
-              mcp__base-map__review_code). Use them to:
-              - Summarize large files before detailed analysis
-              - Cross-validate findings with a secondary model
-              - Review critical code files with mcp__base-map__review_code
-              - Ask mcp__base-map__ask_local_llm for pattern analysis across files
-
-              [ENDIF]",
-    run_in_background = true
-  )
-```
-
-Wait for all agents to complete, then proceed to Step 4.
-
-### Antigravity / Gemini CLI (Platform: antigravity)
-
-Use the `/meeting` skill with all available agents in dialogue mode:
+Dispatch all slots in ONE message via the `Agent` tool with `run_in_background: true`
+(`subagent_type: Explore` for read-only reviews). Prompt template:
 
 ```
-/meeting "Comprehensive project review" --agents [comma-separated agent list] --rounds 2 --dialogue
+You are the [domain(s)] reviewer for this project at [path].
+Review your domain and report: Critical, High, Moderate issues and Strengths.
+Every finding MUST include: file path (+line number where possible), evidence
+you actually verified (diff/read output, not assumption), and a suggested fix.
+Research only — do NOT modify any files.
+[If BASE_MAP_AVAILABLE: use mcp__base-map__ask_local_llm to summarize large
+files and cross-validate; mcp__base-map__review_code on critical scripts.]
 ```
 
-Each agent reviews their domain in the meeting. PM synthesizes findings after Round 2.
+**Fallbacks**:
+- Background dispatch blocked by concurrency limits → run slots sequentially
+  (foreground), or merge two slots into one prompt.
+- On Antigravity/Gemini CLI: `/meeting "project review" --agents [list] --rounds 2 --dialogue`.
+- No Agent tool at all: PM role-plays each slot sequentially using the same prompts.
 
-### Fallback (no Agent tool available)
+## Step 4 — Collect, Classify, Persist
 
-Role-play each agent sequentially using the inline meeting approach:
-```
-/meeting "Comprehensive project review" --agents [list] --rounds 2
-```
+### 4a — Collect raw findings
+Gather per-slot reports: 🔴 Critical / 🟡 High / 🟢 Moderate / ✅ Strengths.
 
-## Step 4 — Collect and Synthesize Results
+### 4b — Cross-domain dedup
+Merge duplicates (same root cause), credit all discoverers, keep the most specific
+file:line and the highest severity.
 
-After all agents complete, PM synthesizes findings into a prioritized improvement table.
+### 4c — base-map cross-validation (optional, only if `BASE_MAP_AVAILABLE`)
+`mcp__base-map__ask_local_llm` over the merged findings for false positives,
+missing issues, and root-cause chains.
 
-### 4a — Collect Raw Findings
-
-Gather all agent reports from Step 3. Each report should contain:
-- 🔴 Critical Issues (with file paths and line numbers)
-- 🟡 High Issues (with file paths and line numbers)
-- 🟢 Moderate Issues (with file paths and line numbers)
-- ✅ Strengths
-
-### 4b — Cross-Domain Deduplication
-
-Multiple agents may report the same issue from different perspectives (e.g., architecture finds a phase numbering error that documentation also flags). Deduplicate by merging:
-
-```
-For each issue found by multiple agents:
-  Merge into a single entry
-  Credit all discovering agents
-  Use the most specific file path / line number
-  Use the highest severity rating among duplicates
-```
-
-### 4c — base-map MCP Enhanced Validation (Optional)
-
-**Only if `BASE_MAP_AVAILABLE = true`:**
-
-Use `mcp__base-map__ask_local_llm` for additional cross-validation:
-
-```
-mcp__base-map__ask_local_llm(
-  prompt = "You are a cross-domain review validator. I have findings from 7 review
-            domains for this project. Analyze these findings for:
-            1. False positives — findings that may be incorrect
-            2. Missing issues — obvious problems not caught by any domain
-            3. Root cause chains — multiple findings that share a root cause
-            4. Priority conflicts — findings whose severity may be misrated
-
-            Here are the findings:
-            [concatenated findings from all agents]
-
-            Return: validated findings with adjustments, grouped by root cause."
-)
-```
-
-For critical code files, use `mcp__base-map__review_code`:
-```
-mcp__base-map__review_code(
-  code = "[content of critical script file]"
-)
-```
-
-> **If base-map MCP is NOT available**: Skip 4c entirely. The agent reports from Step 3 are authoritative.
-
-### 4d — Final Report Format
+### 4d — Findings table (Class column is MANDATORY)
 
 ```markdown
-## Review Results — [Project Name] — [Date]
+## Review Results — [Project] — [Date]
+
+**Baseline**: audit PASS · validate-templates 0/0 · verify-scripts N PASS · drift: gemini-settings only
 
 ### 🔴 Critical (fix immediately)
-| # | Issue | Agent | File | Fix |
-|---|-------|-------|------|-----|
+| # | Issue | Agent | File:Line | Class | Fix |
+|---|-------|-------|-----------|-------|-----|
 
-### 🟡 High (fix within 1 week)
-| # | Issue | Agent | File | Fix |
-|---|-------|-------|------|-----|
-
-### 🟢 Moderate (fix within 2 weeks)
-| # | Issue | Agent | File | Fix |
-|---|-------|-------|------|-----|
-
+### 🟡 High (fix within 1 week)   <!-- same columns -->
+### 🟢 Moderate (fix within 2 weeks) <!-- same columns -->
 ### ℹ️ Low / Improvements
-| # | Suggestion | Agent | Notes |
-|---|-----------|-------|-------|
-
 ### ✅ Strengths
-- [What is working well]
 ```
 
-### 4e — Domain Summary Table
+**Class values** (drives Step 5 wiring):
+- `one-time` — instance drift; fix and forget (e.g. a stale version field)
+- `systemic` — recurring by nature but needs judgment each time (e.g. boilerplate
+  replication across 13 variants)
+- `script-gap` — a *machine* could and should have caught this; nobody did
+  (e.g. the 2026-09-08 L1 workspace-schema drift → became the WS-01 parity check)
+
+### 4e — Persist the report
+
+Write to `docs/reports/YYYY-MM-DD-project-review-<scope>.md` following the directory's
+header convention:
 
 ```markdown
-| Domain | 🔴 Critical | 🟡 High | 🟢 Moderate | ✅ Strengths |
-|--------|:-----------:|:-------:|:------------:|:------------:|
-| Architecture | | | | |
-| Standards | | | | |
-| Automation | | | | |
-| Documentation | | | | |
-| Security | | | | |
-| Lifecycle | | | | |
-| Scaffolding | | | | |
-| **Total** | | | | |
+# Project Review — [Project] — [Date]
+**Date**: [YYYY-MM-DD]
+**Scope**: [workspace root | variant | domains list]
+**Method**: [4 parallel agents | scoped | baseline-only] + machine battery
+<!-- If no fixes were applied in-session: -->
+> Analysis only — no files modified in this report.
 ```
 
-## Step 5 — Generate Action Items
+Include: baseline, findings tables (4d), domain summary, action wiring results (Step 5),
+and — after fixes — the verification results (Step 6).
 
-Create a prioritized action item table:
+## Step 5 — Wire Outcomes to Action
 
-| # | Owner | Deliverable | Priority | Phase |
-|---|-------|-------------|----------|-------|
+Route findings by Class — do not default to "fix everything now".
 
-> Pass `--tasks` flag to automatically convert action items into tracked tasks via `TaskCreate`.
+| Route | Condition | Action |
+|-------|-----------|--------|
+| Fix now | Critical/High, fix is clear, session budget allows | Dispatch through the normal PM Gateway (specialists execute) |
+| Ticket | Deferred items (needs design gate, low priority, future cycle) | `bun scripts/ticket.ts create --manual "<title>" --priority <low\|normal\|high> [--not-before YYYY-MM-DD]` — auto-enrolls in the §3.7.5 governance-backlog triage |
+| Validator-hardening ticket | Any `script-gap` finding | Same `create --manual`, title prefixed `validator-hardening:` — tracks the ratchet loop until a standing check exists |
 
-## Platform Execution Notes
+Rules:
+- Ticket titles in English, one actionable sentence.
+- Record ticket IDs back into the persisted report's "Action wiring" section.
+- `bun scripts/ticket.ts` is workspace-root only (L0); in variant projects, record
+  deferred items in the report + memory log instead.
 
-| Platform | Agent Dispatch | Parallel? | base-map MCP | Notes |
-|----------|--------------|-----------|:------------:|-------|
-| Claude Code (CLI) | `Agent` tool | ✅ Yes | if configured | Use `run_in_background: true` for all agents |
-| Claude Code (Desktop) | `Agent` tool | ✅ Yes | if configured | Same as CLI |
-| ZCode | `Agent` tool | ✅ Yes | if configured | Same as CLI |
-| Antigravity / Gemini CLI | `/meeting --dialogue` | Inline seq. | ❌ No | Agents speak in turn; PM synthesizes |
-| Any platform (fallback) | Inline roleplay | Sequential | ❌ No | `/meeting "project review" --agents [list]` |
+## Step 6 — Post-Fix Verification
 
-## base-map MCP Integration Reference
+If fixes were applied this session:
 
-| Step | MCP Tool | Purpose | Required? |
-|------|----------|---------|:----------:|
-| 0 | `mcp__base-map__models` | Check MCP availability | Detection |
-| 3 | `mcp__base-map__review_code` | Review critical scripts during agent dispatch | Optional |
-| 3 | `mcp__base-map__ask_local_llm` | Summarize large files for agents | Optional |
-| 4c | `mcp__base-map__ask_local_llm` | Cross-domain deduplication & validation | Optional |
-| 4c | `mcp__base-map__review_code` | Second-opinion review on flagged files | Optional |
+1. Re-run every validator whose domain was touched (minimum: `bun scripts/audit.ts`).
+2. Append a `## Verification` section to the persisted report with the results.
+3. Log the run in `memory/YYYY-MM-DD.md` per the daily-log convention (summary, changes,
+   deferred/ticket list, validation line).
 
-### Recommended base-map Usage Patterns
-
-**Pattern 1 — Large File Summary (before agent reads)**
-```
-mcp__base-map__ask_local_llm(
-  prompt = "Summarize this file's structure, key functions, and potential issues:
-            [first 200 lines of large file]"
-)
-```
-
-**Pattern 2 — Cross-Validation (after agent reports)**
-```
-mcp__base-map__ask_local_llm(
-  prompt = "Review these findings for false positives and missing issues:
-            [all agent findings concatenated]"
-)
-```
-
-**Pattern 3 — Code Review (for critical scripts)**
-```
-mcp__base-map__review_code(
-  code = "[file content]",
-  model = "google/gemma-4-e4b"
-)
-```
+**Ratchet check (quarterly, §10)**: diff persisted `docs/reports/*project-review*` files —
+`script-gap` classes should move to the machine baseline over time (found-by-agent ↓,
+caught-by-script ↑). If the same class reappears as an agent finding, the hardening
+ticket was not landed.
 
 ## Trigger Reference
 
-| Trigger | Invoker | Condition |
-|---------|---------|-----------|
-| T-01: User request | User | `/project-review` or natural language equivalent |
-| T-02: PM autonomous | PM agent | 3+ agent files modified; phase schema changed; `workspace-schema.json` modified; new variant added |
-| T-03: QA escalation | auditor / security-monitor | `audit.ts` ERROR ≥ 3; or security-expert Critical finding |
+| Trigger | Invoker | Condition | Default scope |
+|---------|---------|-----------|---------------|
+| T-01: User request | User | `/project-review` or natural language equivalent | full (scoped on request) |
+| T-02: PM autonomous | PM | 3+ agent files modified; phase schema changed; workspace-schema.json modified; new variant added | full |
+| T-03: QA escalation | auditor / security | audit.ts ERROR ≥ 3; security Critical | scoped to the failing domain, then full if it spreads |
+
+## Related Skills
+
+- **audit-workspace**: machine battery wrapper — project-review Step 0 is its superset
+- **project-resync**: fleet-level close-out after fixes land (commit/PR pipeline)
+- **meeting-facilitation**: Antigravity/Gemini dispatch path for Step 3

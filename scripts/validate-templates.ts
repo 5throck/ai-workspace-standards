@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.20.0
+ * @version 1.21.0
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -1904,6 +1904,33 @@ function checkWorkspaceSchema(): void {
   }
 
   pass('workspace-schema.json: present and valid JSON');
+
+  // --- WS-01 Check 0: L0↔L1 parity (root vs templates/common/docs copy) ---
+  // The docs propagation domain is disabled (ADR-0069), so nothing else keeps the L1
+  // copy in sync. Scaffold reads the L1 copy at project creation; a stale copy ships
+  // wrong country/variant registries into new projects (found by the 2026-09-08
+  // project review — validator-hardening pilot).
+  const l1SchemaPath = join(ROOT, 'templates', 'common', 'docs', 'workspace-schema.json');
+  if (!existsSync(l1SchemaPath)) {
+    warn('root', 'ws-schema-l1-missing', 'templates/common/docs/workspace-schema.json not found — L1 parity check skipped');
+  } else {
+    try {
+      const l1Schema = JSON.parse(readFileSync(l1SchemaPath, 'utf-8')) as Record<string, unknown>;
+      const rootKeys = new Set(Object.keys(schema));
+      const l1Keys = new Set(Object.keys(l1Schema));
+      const diverged: string[] = [];
+      for (const k of new Set([...rootKeys, ...l1Keys])) {
+        if (JSON.stringify(schema[k]) !== JSON.stringify(l1Schema[k])) diverged.push(k);
+      }
+      if (diverged.length > 0) {
+        fail('root', 'ws-schema-l1-parity', `templates/common/docs/workspace-schema.json diverged from root on key(s): ${diverged.join(', ')} — re-sync: cp docs/workspace-schema.json templates/common/docs/workspace-schema.json`);
+      } else {
+        pass('workspace-schema.json L1 parity: templates/common copy matches root');
+      }
+    } catch {
+      fail('root', 'ws-schema-l1-invalid', 'templates/common/docs/workspace-schema.json is not valid JSON — re-sync from docs/workspace-schema.json');
+    }
+  }
 
   const workflow = schema.workflow as Record<string, unknown> | undefined;
   const phases = workflow?.phases as Record<string, unknown> | undefined;
