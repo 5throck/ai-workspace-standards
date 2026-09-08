@@ -1,0 +1,7 @@
+# Scope the built-in `bun test` discovery to the workspace's own tests.
+# Without this, bare `bun test` at the root also sweeps Projects/** test files,
+# whose suites assume the project root as CWD and fail with ENOENT on
+# CWD-relative reads. The official entry points remain `bun run test` /
+# `test:unit` / `test:e2e` (scripts/test-runner.ts).
+[test]
+root = "./tests"
