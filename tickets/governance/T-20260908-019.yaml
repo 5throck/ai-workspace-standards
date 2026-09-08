@@ -1,0 +1,18 @@
+schemaVersion: 1
+id: T-20260908-019
+kind: manual
+title: >-
+  BUG upgrade-project v1.19.0 SCRIPTS.md reconcile: newly-delivered helper file
+  (helpers/upgrade-versions.ts) ships to the project but its registry row is
+  dropped by the rewrite — row had to be added manually in co-architect
+  (workaround documented in its upgrade PR)
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-09-08T12:58:19.991Z'
+history:
+  - at: '2026-09-08T12:58:19.991Z'
+    from: null
+    to: backlog
+result: null
+error: null
