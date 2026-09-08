@@ -151,6 +151,7 @@
     "files": [
       ".git",
       "package.json",
+      "bunfig.toml",
       "package-lock.json",
       "bun.lockb",
       "bun.lock",
