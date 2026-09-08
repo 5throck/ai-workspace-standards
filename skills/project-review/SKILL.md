@@ -206,7 +206,7 @@ Route findings by Class — do not default to "fix everything now".
 | Route | Condition | Action |
 |-------|-----------|--------|
 | Fix now | Critical/High, fix is clear, session budget allows | Dispatch through the normal PM Gateway (specialists execute) |
-| Ticket | Deferred items (needs design gate, low priority, future cycle) | `bun scripts/ticket.ts create --manual "<title>" --priority <low\|normal\|high> [--not-before YYYY-MM-DD]` — auto-enrolls in the §3.7.5 governance-backlog triage |
+| Ticket | Deferred items (needs design gate, low priority, future cycle) | `bun scripts/ticket.ts create --manual "<title>" --priority <low\|normal\|high\|urgent> [--not-before YYYY-MM-DD]` — auto-enrolls in the §3.7.5 governance-backlog triage (AGENTS.md) |
 | Validator-hardening ticket | Any `script-gap` finding | Same `create --manual`, title prefixed `validator-hardening:` — tracks the ratchet loop until a standing check exists |
 
 Rules:
@@ -224,7 +224,7 @@ If fixes were applied this session:
 3. Log the run in `memory/YYYY-MM-DD.md` per the daily-log convention (summary, changes,
    deferred/ticket list, validation line).
 
-**Ratchet check (quarterly, §10)**: diff persisted `docs/reports/*project-review*` files —
+**Ratchet check (quarterly, AGENTS.md §10)**: diff persisted `docs/reports/*project-review*` files —
 `script-gap` classes should move to the machine baseline over time (found-by-agent ↓,
 caught-by-script ↑). If the same class reappears as an agent finding, the hardening
 ticket was not landed.

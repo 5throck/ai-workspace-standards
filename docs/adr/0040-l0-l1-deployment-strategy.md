@@ -237,7 +237,7 @@ bun scripts/deploy-to-l1.ts --verify-only
 ## References
 
 - [ADR-0029: L0-L2 Workspace Design](0029-l0-l2-workspace-design.md)
-- [ADR-0030: Agent Lifecycle Management](0030-agent-lifecycle-management.md)
+- [ADR-0030: Auto-Mode for Antigravity Platform](retired/0030-auto-mode-architecture.md) (retired)
 - [CONSTITUTION.md §9: Workspace & Template Boundary Policy](../../CONSTITUTION.md#9-workspace--template-boundary-policy)
 - [CONSTITUTION.md §10: Lifecycle Management Rules](../../CONSTITUTION.md#10-lifecycle-management-rules)
 

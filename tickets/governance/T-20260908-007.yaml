@@ -1,0 +1,16 @@
+schemaVersion: 1
+id: T-20260908-007
+kind: manual
+title: >-
+  workflow: postmortem template + persistence convention (currently 3 bullets in
+  branch-strategy.md)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-08T11:20:33.231Z'
+history:
+  - at: '2026-09-08T11:20:33.231Z'
+    from: null
+    to: backlog
+result: null
+error: null

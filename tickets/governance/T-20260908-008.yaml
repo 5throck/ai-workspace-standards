@@ -1,0 +1,16 @@
+schemaVersion: 1
+id: T-20260908-008
+kind: manual
+title: >-
+  workflow: assign ci-failure issue triage owner in weekly-health-check +
+  onboarding verification step (getting-started.md undriven)
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-09-08T11:20:33.245Z'
+history:
+  - at: '2026-09-08T11:20:33.245Z'
+    from: null
+    to: backlog
+result: null
+error: null

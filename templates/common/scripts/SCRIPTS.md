@@ -80,15 +80,6 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `generate-scripts-readme.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
 | `generate-skill-graph.ts` | L0 | 1.8.3 | active | —| —| L0+L1 | —|
 | `generate-version-manifest.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
-| `dispatch-parallel.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
-| `dispatch-serial.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
-| `dispatch.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
-| `fix-script-versions.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
-| `gen-pr-body.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
-| `generate-ide-rules.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `generate-l3-readme.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
-| `generate-scripts-readme.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
-| `generate-version-manifest.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `handbook/apply-handbook-theme.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `handbook/build-search-index.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `handbook/check-a11y.ts` | L0 | 1.0.0 | active | — | — | common | — |

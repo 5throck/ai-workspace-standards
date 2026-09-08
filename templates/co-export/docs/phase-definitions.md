@@ -14,8 +14,8 @@ This document defines the standard workflow phases used across all variants. Eac
 | 2 | Design Review & Approval | Gate Keeper | PM + senior specialist agents |
 | 3 | Execution / Creation | Coordinator | Specialist agents (variant-defined) |
 | 4 | Delivery / Integration | Coordinator | Specialist agents (variant-defined) |
-| 5 | Quality Assurance | Owner | PM (runs audit scripts) |
-| 6 | PR & Handoff | Owner | PM (runs /sync, creates PR) |
+| 5 | Lifecycle Finalization | Owner | PM (runs audit scripts) |
+| 6 | Quality Assurance & Finalization | Owner | PM (runs /sync, creates PR) |
 
 ---
 

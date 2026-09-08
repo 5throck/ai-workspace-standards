@@ -1,0 +1,17 @@
+schemaVersion: 1
+id: T-20260908-014
+kind: manual
+title: >-
+  co-safety three-way phase contradiction: safety-governance-manager frontmatter
+  [2,6] vs AGENTS.md roster '—' vs dispatch table 'Phase 4' — adjudicate and fix
+  all three surfaces
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-08T11:36:17.838Z'
+history:
+  - at: '2026-09-08T11:36:17.838Z'
+    from: null
+    to: backlog
+result: null
+error: null

@@ -1,0 +1,17 @@
+schemaVersion: 1
+id: T-20260908-016
+kind: manual
+title: >-
+  co-safety ships 21 scripts/co-safety/*.ts with no script_manifest in
+  variant.json (CONSTITUTION requires declaration; B-03 cannot see undeclared
+  scripts) — declare and validate
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-08T11:36:17.871Z'
+history:
+  - at: '2026-09-08T11:36:17.871Z'
+    from: null
+    to: backlog
+result: null
+error: null
