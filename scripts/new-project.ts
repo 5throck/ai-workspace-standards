@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.9.0
+// @version 1.10.0
 // new-project.ts — Scaffold a new project under the workspace root
 // Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z] [--country <CODE>]
 //
@@ -538,6 +538,29 @@ for (const srcFile of walkFiles(templatesDir)) {
 }
 // Ensure variant-overlaid files are also writable
 makeWritable(projectDir);
+
+// ── 2.3b. Resolve variant pm.md extends-stub against the L1 body ──────────────
+// Variant templates may ship agents/pm.md as an ADR-0033 extends-stub (frontmatter
+// with `extends:` and an empty body). The overlay above replaces the full L1 pm.md
+// copied from templates/common, which would leave the project with a near-empty PM
+// agent. If the overlaid file is an empty-bodied extends-stub, re-attach the L1 body
+// so the project's pm.md is self-contained.
+const projPmMd = join(projectDir, 'agents', 'pm.md');
+if (existsSync(projPmMd)) {
+  const pmContent = readFileSync(projPmMd, 'utf8');
+  const pmFmMatch = pmContent.match(/^---\n([\s\S]*?)\n---\n?/);
+  const pmBody = pmFmMatch ? pmContent.slice(pmFmMatch[0].length) : pmContent;
+  if (pmFmMatch && /extends:/.test(pmFmMatch[1]) && pmBody.trim() === '') {
+    const l1PmMd = join(workspaceRoot, 'templates', 'common', 'agents', 'pm.md');
+    if (existsSync(l1PmMd)) {
+      const l1Content = readFileSync(l1PmMd, 'utf8');
+      const l1FmMatch = l1Content.match(/^---\n([\s\S]*?)\n---\n?/);
+      const l1Body = l1FmMatch ? l1Content.slice(l1FmMatch[0].length) : l1Content;
+      writeFileSync(projPmMd, pmContent + (pmContent.endsWith('\n') ? '' : '\n') + l1Body, 'utf8');
+      console.log('  ✅ agents/pm.md: resolved empty extends-stub against templates/common body');
+    }
+  }
+}
 
 // ── 2.4. Prune country-scoped assets ───────────────────────────────────────────
 const pruneHelper = join(workspaceRoot, 'scripts', 'helpers', 'prune-country-scoped-assets.ts');
