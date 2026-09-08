@@ -1912,15 +1912,27 @@ function checkWorkspaceSchema(): void {
   // project review — validator-hardening pilot).
   const l1SchemaPath = join(ROOT, 'templates', 'common', 'docs', 'workspace-schema.json');
   if (!existsSync(l1SchemaPath)) {
-    warn('root', 'ws-schema-l1-missing', 'templates/common/docs/workspace-schema.json not found — L1 parity check skipped');
+    fail('root', 'ws-schema-l1-missing', 'templates/common/docs/workspace-schema.json not found — scaffold reads the L1 copy; re-sync: cp docs/workspace-schema.json templates/common/docs/workspace-schema.json');
   } else {
+    // Canonical stringify (sorted keys, recursively) so comparison is semantic, not
+    // key-order sensitive (review 2026-09-08, Slot C F2).
+    const canon = (v: unknown): unknown => {
+      if (Array.isArray(v)) return v.map(canon);
+      if (v && typeof v === 'object') {
+        return Object.keys(v as Record<string, unknown>).sort().reduce<Record<string, unknown>>((acc, k) => {
+          acc[k] = canon((v as Record<string, unknown>)[k]);
+          return acc;
+        }, {});
+      }
+      return v;
+    };
     try {
       const l1Schema = JSON.parse(readFileSync(l1SchemaPath, 'utf-8')) as Record<string, unknown>;
       const rootKeys = new Set(Object.keys(schema));
       const l1Keys = new Set(Object.keys(l1Schema));
       const diverged: string[] = [];
       for (const k of new Set([...rootKeys, ...l1Keys])) {
-        if (JSON.stringify(schema[k]) !== JSON.stringify(l1Schema[k])) diverged.push(k);
+        if (JSON.stringify(canon(schema[k])) !== JSON.stringify(canon(l1Schema[k]))) diverged.push(k);
       }
       if (diverged.length > 0) {
         fail('root', 'ws-schema-l1-parity', `templates/common/docs/workspace-schema.json diverged from root on key(s): ${diverged.join(', ')} — re-sync: cp docs/workspace-schema.json templates/common/docs/workspace-schema.json`);

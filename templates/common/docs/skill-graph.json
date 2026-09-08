@@ -22,6 +22,11 @@
       "layer": "common"
     },
     {
+      "id": "ci-triage",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
       "id": "decision-record",
       "type": "skill",
       "layer": "common"
@@ -219,6 +224,12 @@
         "field": "relates_to",
         "index": 0
       }
+    },
+    {
+      "type": "references",
+      "from": "ci-triage",
+      "to": "project-review",
+      "source": "prose"
     },
     {
       "type": "references",

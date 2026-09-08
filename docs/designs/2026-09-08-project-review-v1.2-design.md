@@ -21,7 +21,7 @@ actually operates:
 |---|-----|----------|
 | G1 | `--tasks` → `TaskCreate` wiring is vapor — no implementation exists | workspace-wide grep: the only pairing is the skill's own line |
 | G2 | Ticket system (`scripts/ticket.ts`, `create --manual`, git-tracked `tickets/governance/`) never referenced; deferred items lose tracking | `grep -n ticket skills/project-review/SKILL.md` → 0 hits |
-| G3 | Report not persisted; `docs/reports/` convention (Date/Scope/Method header) exists but unused by the skill | SKILL.md Step 4d defines format only; past reports survive only as side effects in `memory/*.md` |
+| G3 | Report not persisted; `docs/reports/` convention (Date/Scope header) exists but unused by the skill | SKILL.md Step 4d defines format only; past reports survive only as side effects in `memory/*.md` |
 | G4 | Dispatch plan diverges from reality: 7-domain parallel is the spec; 4 domains ran 2026-09-08 (pairing), 1 subagent + direct execution 2026-09-07 (background concurrency limits). No scope triage | `memory/2026-09-07.md` ("full 7-agent review was unnecessary…"), `memory/2026-09-08.md` |
 | G5 | No validator-hardening loop: the 2026-09-08 Critical (L1 `workspace-schema.json` stale vs root) was caught by an agent, not by any script; the docs propagation domain is disabled (ADR-0069), so nothing prevents recurrence | grep: no script compares root vs L1 schema; `memory/2026-09-08.md` defers a "rootAllowlist parity validator" |
 
@@ -96,4 +96,5 @@ standing machine gate.
 3. `audit.ts`, `validate-templates.ts`, `verify-scripts.ts`, drift check green; root
    suite (`bun test`, 250 tests) passes.
 4. Skill copies byte-identical across `skills/`, `.agents/`, `.claude/`, `.gemini/`,
-   `templates/common/skills/`, and variant copies after sync + propagate.
+   `templates/common/skills/` after sync + propagate. (Variant copies are fork-model —
+   they refresh at promote/upgrade, not via sync.)

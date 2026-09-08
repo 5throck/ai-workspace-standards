@@ -13,4 +13,4 @@
 - [x] Registered in `skills/SKILLS.md` Workspace Skills table
 - [x] Frontmatter follows standard format (`metadata.triggers:`)
 - [x] `last_reviewed` field present
-- [ ] Lifecycle doc created (`docs/lifecycle/skills/ticket-run.md`)
+- [x] Lifecycle doc created (`docs/lifecycle/skills/ticket-run.md`)

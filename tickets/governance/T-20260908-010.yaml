@@ -1,0 +1,18 @@
+schemaVersion: 1
+id: T-20260908-010
+kind: manual
+title: >-
+  fix dispatch trio no-op: dispatch-parallel/serial spawn 'bun run dispatch.ts
+  --task <json>' which lands in the mode slot, prints help, exits 0 —
+  colon-format contract mismatch and infinite-recursion risk on fix; also
+  SCRIPTS.md documents nonexistent flags
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-09-08T11:36:17.770Z'
+history:
+  - at: '2026-09-08T11:36:17.770Z'
+    from: null
+    to: backlog
+result: null
+error: null

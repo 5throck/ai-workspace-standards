@@ -347,6 +347,11 @@
       "layer": "variant:co-consult"
     },
     {
+      "id": "ci-triage",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
       "id": "co-analyst",
       "type": "agent",
       "layer": "variant:co-abap"
@@ -3865,6 +3870,12 @@
         "field": "relates_to",
         "index": 1
       }
+    },
+    {
+      "type": "references",
+      "from": "ci-triage",
+      "to": "project-review",
+      "source": "prose"
     },
     {
       "type": "follows",

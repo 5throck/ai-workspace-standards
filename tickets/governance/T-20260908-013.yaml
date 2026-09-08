@@ -1,0 +1,18 @@
+schemaVersion: 1
+id: T-20260908-013
+kind: manual
+title: >-
+  validator-hardening: add Version field to lifecycle record templates
+  (agent+skill) — 12/38 skill records and 8/8 agent records lack version
+  tracking, enabling silent drift like promote-variant 1.2.1-vs-1.3.0; also
+  script record coverage is 3/89
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-08T11:36:17.820Z'
+history:
+  - at: '2026-09-08T11:36:17.820Z'
+    from: null
+    to: backlog
+result: null
+error: null

@@ -26,7 +26,7 @@
 ## Dependencies
 
 - lifecycle-manager (owner agent)
-- doc/lifecycle/README.md (governance reference)
+- docs/lifecycle/README.md (governance reference)
 
 ## Usage Statistics
 

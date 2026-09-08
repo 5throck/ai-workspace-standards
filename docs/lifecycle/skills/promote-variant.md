@@ -37,7 +37,7 @@
 ## Metadata
 
 - **Current Phase**: production
-- **Version**: 1.2.1
+- **Version**: 1.3.0
 - **Owner**: pm
 - **Last Updated**: 2026-08-24
 - **Last Reviewer**: docs-writer

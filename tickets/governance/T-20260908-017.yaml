@@ -1,0 +1,17 @@
+schemaVersion: 1
+id: T-20260908-017
+kind: manual
+title: >-
+  scaffolded pm.md governance pointer dangles in 10/13 variants (writes
+  docs/lifecycle/agents/pm.md but only 3 variants ship the file) — either ship
+  the record in common or write it at scaffold
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-08T11:36:17.886Z'
+history:
+  - at: '2026-09-08T11:36:17.886Z'
+    from: null
+    to: backlog
+result: null
+error: null

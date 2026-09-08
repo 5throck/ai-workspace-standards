@@ -1,0 +1,16 @@
+schemaVersion: 1
+id: T-20260908-006
+kind: manual
+title: >-
+  workflow: Projects EOL policy (deprecated state, _archive convention,
+  remove-project criteria after variant promotion)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-08T11:20:33.216Z'
+history:
+  - at: '2026-09-08T11:20:33.216Z'
+    from: null
+    to: backlog
+result: null
+error: null

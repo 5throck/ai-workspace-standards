@@ -1,0 +1,17 @@
+schemaVersion: 1
+id: T-20260908-015
+kind: manual
+title: >-
+  co-deck phase-definitions.md is a byte-identical copy of common; co-deck uses
+  fractional phases (1.5/3.5) and handbook H-phases — write a real one (model:
+  co-news)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-08T11:36:17.855Z'
+history:
+  - at: '2026-09-08T11:36:17.855Z'
+    from: null
+    to: backlog
+result: null
+error: null

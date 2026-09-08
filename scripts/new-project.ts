@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.10.0
+// @version 1.11.0
 // new-project.ts — Scaffold a new project under the workspace root
 // Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z] [--country <CODE>]
 //
@@ -556,8 +556,20 @@ if (existsSync(projPmMd)) {
       const l1Content = readFileSync(l1PmMd, 'utf8');
       const l1FmMatch = l1Content.match(/^---\n([\s\S]*?)\n---\n?/);
       const l1Body = l1FmMatch ? l1Content.slice(l1FmMatch[0].length) : l1Content;
-      writeFileSync(projPmMd, pmContent + (pmContent.endsWith('\n') ? '' : '\n') + l1Body, 'utf8');
+      // Merge: stub frontmatter wins, missing L1 fields (tier/model/color/description/examples)
+      // are filled in; `extends:` is dropped — the body is inlined, so the pointer would
+      // dangle in the standalone project repo (found by the 2026-09-08 review, Slot A F2).
+      const stubFm: Record<string, unknown> = yaml.load(pmFmMatch[1], { schema: yaml.DEFAULT_SCHEMA }) || {};
+      const l1Fm: Record<string, unknown> = l1FmMatch ? (yaml.load(l1FmMatch[1], { schema: yaml.DEFAULT_SCHEMA }) || {}) : {};
+      delete (stubFm as { extends?: unknown }).extends;
+      for (const [k, v] of Object.entries(l1Fm)) {
+        if (stubFm[k] === undefined && k !== 'extends') stubFm[k] = v;
+      }
+      const mergedFm = '---\n' + (yaml.dump(stubFm) as string).trimEnd() + '\n---\n';
+      writeFileSync(projPmMd, mergedFm + pmBody + (pmBody.endsWith('\n') ? '' : '\n') + l1Body, 'utf8');
       console.log('  ✅ agents/pm.md: resolved empty extends-stub against templates/common body');
+    } else {
+      console.log('  ⚠️  agents/pm.md: empty extends-stub but templates/common/agents/pm.md is missing — project ships a stub PM agent');
     }
   }
 }
@@ -618,7 +630,7 @@ console.log('  ✅ Variant templates copied');
   purge(projectDir, 1);
 }
 
-// ── 2.3b. Create deliverables/ subdirectories (co-consult) ──────────────────────
+// ── 2.6a. Create deliverables/ subdirectories (co-consult) ──────────────────────
 if (variant === 'co-consult') {
   const delRoot = join(projectDir, 'deliverables');
   const delDirs = [
