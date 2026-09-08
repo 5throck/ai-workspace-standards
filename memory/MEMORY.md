@@ -4,6 +4,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-09-09](2026-09-09.md) | --help |
 | [2026-09-08](2026-09-08.md) | fix(governance): template/lifecycle drift fixes from project review + co-price backport |
 | [2026-09-07](2026-09-07.md) | docs: fix stale statuses, broken links, and governance gaps from project review |
 | [2026-09-06](2026-09-06.md) | feat(skills): session-evidence skill review loop (SkillHone-inspired) |

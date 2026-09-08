@@ -1,0 +1,14 @@
+schemaVersion: 1
+id: T-20260909-025
+kind: manual
+title: correct SCRIPTS.md package.json note and test-platform-parity.ts Guide entry
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-09-08T21:47:57.511Z'
+history:
+  - at: '2026-09-08T21:47:57.511Z'
+    from: null
+    to: backlog
+result: null
+error: null

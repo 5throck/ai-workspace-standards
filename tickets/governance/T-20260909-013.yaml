@@ -1,0 +1,16 @@
+schemaVersion: 1
+id: T-20260909-013
+kind: manual
+title: >-
+  add test coverage for audit.ts/verify-scripts.ts pure helpers; fix
+  test-runner.ts suite table self-match and nonexistent dirs
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-08T21:47:57.351Z'
+history:
+  - at: '2026-09-08T21:47:57.351Z'
+    from: null
+    to: backlog
+result: null
+error: null
