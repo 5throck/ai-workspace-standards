@@ -77,14 +77,17 @@ jobs:
           # also set as ANTHROPIC_API_KEY so the CLI preflight sees a credential).
           ANTHROPIC_API_KEY: ${{ steps.creds.outputs.provider == 'zai' && secrets.ZAI_API_KEY || secrets.ANTHROPIC_API_KEY }}
           ANTHROPIC_AUTH_TOKEN: ${{ steps.creds.outputs.provider == 'zai' && secrets.ZAI_API_KEY || '' }}
-          ANTHROPIC_BASE_URL: ${{ steps.creds.outputs.provider == 'zai' && 'https://api.z.ai/api/anthropic' || '' }}
+          ANTHROPIC_BASE_URL: ${{ vars.NIGHTLY_TICKETS_BASE_URL || 'https://api.z.ai/api/anthropic' }}
           ANTHROPIC_MODEL: ${{ vars.NIGHTLY_TICKETS_MODEL || '' }}
           API_TIMEOUT_MS: "3000000"
           CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1"
         with:
-          timeout_minutes: "180"
-          allowed_tools: "Bash(bun *),Bash(git *),Bash(gh pr *),Bash(ls *),Bash(cat *),Bash(diff *),Bash(grep *),Bash(sed -i *),Bash(cp *),Bash(mkdir *),Bash(rm /tmp/*),Read,Write,Edit,Glob,Grep"
-          direct_prompt: |
+          # claude-code-action v1 inputs: prompt (direct run), claude_args for
+          # CLI passthrough. timeout is bounded by the job-level timeout-minutes.
+          claude_args: >-
+            --model ${{ vars.NIGHTLY_TICKETS_MODEL }}
+            --allowed-tools "Bash(bun:*)" "Bash(git:*)" "Bash(gh pr:*)" "Bash(gh api:*)" "Bash(ls:*)" "Bash(cat:*)" "Bash(diff:*)" "Bash(grep:*)" "Bash(cp:*)" "Bash(mkdir:*)" "Read" "Edit" "Write" "Glob" "Grep"
+          prompt: |
             You are the nightly governance-ticket batch runner for this workspace
             (single-repo checkout of ai-workspace-standards on ubuntu-latest).
             Process up to 10 ready governance tickets this run. The ready list is in
