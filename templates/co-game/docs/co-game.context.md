@@ -219,11 +219,8 @@ Key rules:
 
 ## Template Provenance
 
-- **Template-Version**: 0.5.3
-- **Template-Variant**: co-develop → co-game (forked and specialized for game development)
-
-## Template Provenance
-
-- **Template-Version**: 0.6.0
-- **Template-Variant**: co-game
-- **Target-Jurisdiction**: region-neutral
+- **0.5.3**
+  - **Template-Variant**: co-develop → co-game (forked and specialized for game development)
+- **0.6.0**
+  - **Template-Variant**: co-game
+  - **Target-Jurisdiction**: region-neutral

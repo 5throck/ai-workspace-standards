@@ -5,7 +5,7 @@
  * Replaces publish-to-template.ts (deprecated v1.8.0). Single authoritative script
  * for all L0→L1 propagation. Config-driven via propagation-map.json (SSOT for exclusions).
  *
- * @version 2.8.0
+ * @version 2.9.0
  *
  * Usage:
  *   bun scripts/propagate-to-templates.ts [--dry-run|--apply] [--domain <name>] [flags]
@@ -44,6 +44,7 @@ import {
   computeSectionHash,
   extractSectionContent,
   resolveConstitutionSource,
+  applyIntentionalDuplicateRewrites,
   type MarkerZone,
   type IntentionalDuplicateMarker
 } from './helpers/markers.ts';
@@ -1395,88 +1396,118 @@ function runMarkerRewrite(mapPath: string, isDryRun: boolean): void {
   const markers = scanIntentionalDuplicateMarkers();
   console.log(`\n  ${C.cyan}Scanning ${markers.length} intentional-duplicate marker(s)...${C.reset}`);
 
+  // Group markers by file: all stale-marker rewrites for one file are applied
+  // in a single bottom-up splice pass (applyIntentionalDuplicateRewrites), so
+  // a rewrite that changes line counts can never shift a later marker's
+  // scan-time index. The previous per-marker flow re-read the file but spliced
+  // at the scan-time index, corrupting later markers in the same file.
+  const markersByFile = new Map<string, IntentionalDuplicateMarker[]>();
   for (const marker of markers) {
-    if (!marker.source || !marker.hash) {
-      console.log(`    ${C.yellow}⚠️  Marker at ${marker.file}:${marker.line} lacks source/hash, skipping${C.reset}`);
-      totalSkipped++;
-      continue;
+    const group = markersByFile.get(marker.file);
+    if (group) {
+      group.push(marker);
+    } else {
+      markersByFile.set(marker.file, [marker]);
     }
+  }
 
-    // Resolve source file
-    const resolvedSource = marker.source.startsWith('docs/')
-      ? join(workspaceRoot, marker.source)
-      : marker.source;
+  for (const [markerFile, fileMarkers] of markersByFile) {
+    // Pass 1 — per-marker source resolution, hash check, and accounting,
+    // identical to the previous flow. Stale markers accumulate as pre-computed
+    // rewrites; in-sync and skipped markers never produce one. Dry-run logs
+    // per marker and writes nothing.
+    const rewrites: Array<{
+      marker: IntentionalDuplicateMarker;
+      lineIndex: number;
+      newSectionLines: string[];
+      newHash: string;
+    }> = [];
 
-    if (!existsSync(resolvedSource)) {
-      console.log(`    ${C.yellow}⚠️  Marker at ${marker.file}:${marker.line}: source missing: ${marker.source}${C.reset}`);
-      totalSkipped++;
-      continue;
-    }
-
-    // Compute current hash
-    const currentHash = computeSectionHash(resolvedSource);
-    if (!currentHash) {
-      console.log(`    ${C.yellow}⚠️  Marker at ${marker.file}:${marker.line}: failed to compute hash for ${marker.source}${C.reset}`);
-      totalSkipped++;
-      continue;
-    }
-
-    // Check if marker is stale
-    if (currentHash === marker.hash) {
-      console.log(`    ${C.dim}✓  Marker at ${marker.file}:${marker.line} (§${marker.section}): in sync${C.reset}`);
-      totalInSync++;
-      continue;
-    }
-
-    // Extract current section content
-    const sectionContent = extractSectionContent(resolvedSource);
-    if (!sectionContent) {
-      console.log(`    ${C.yellow}⚠️  Marker at ${marker.file}:${marker.line}: failed to extract section from ${marker.source}${C.reset}`);
-      totalSkipped++;
-      continue;
-    }
-
-    // Rewrite file with new content and updated hash
-    if (!isDryRun) {
-      let content = readFileSync(marker.file, 'utf-8');
-      const lines = content.split('\n');
-      const lineIndex = marker.line - 1; // 0-indexed
-
-      // Find the start of the duplicated section (line after marker)
-      let sectionStart = lineIndex + 1;
-      let sectionEnd = sectionStart;
-
-      // Find the end of the section (next marker or EOF)
-      for (let i = sectionStart; i < lines.length; i++) {
-        if (lines[i].match(/<!--\s*intentional-duplicate:/)) {
-          break;
-        }
-        sectionEnd = i;
+    for (const marker of fileMarkers) {
+      if (!marker.source || !marker.hash) {
+        console.log(`    ${C.yellow}⚠️  Marker at ${marker.file}:${marker.line} lacks source/hash, skipping${C.reset}`);
+        totalSkipped++;
+        continue;
       }
 
-      // Replace section content
-      const newSectionLines = sectionContent.split('\n');
-      lines.splice(sectionStart, sectionEnd - sectionStart + 1, ...newSectionLines);
+      // Resolve source file
+      const resolvedSource = marker.source.startsWith('docs/')
+        ? join(workspaceRoot, marker.source)
+        : marker.source;
 
-      // Update marker hash
-      const line = lines[lineIndex];
-      const newMarker = line.replace(/hash:\s*[0-9a-f]{8}/, `hash: ${currentHash}`);
-      lines[lineIndex] = newMarker;
+      if (!existsSync(resolvedSource)) {
+        console.log(`    ${C.yellow}⚠️  Marker at ${marker.file}:${marker.line}: source missing: ${marker.source}${C.reset}`);
+        totalSkipped++;
+        continue;
+      }
+
+      // Compute current hash
+      const currentHash = computeSectionHash(resolvedSource);
+      if (!currentHash) {
+        console.log(`    ${C.yellow}⚠️  Marker at ${marker.file}:${marker.line}: failed to compute hash for ${marker.source}${C.reset}`);
+        totalSkipped++;
+        continue;
+      }
+
+      // Check if marker is stale
+      if (currentHash === marker.hash) {
+        console.log(`    ${C.dim}✓  Marker at ${marker.file}:${marker.line} (§${marker.section}): in sync${C.reset}`);
+        totalInSync++;
+        continue;
+      }
+
+      // Extract current section content
+      const sectionContent = extractSectionContent(resolvedSource);
+      if (!sectionContent) {
+        console.log(`    ${C.yellow}⚠️  Marker at ${marker.file}:${marker.line}: failed to extract section from ${marker.source}${C.reset}`);
+        totalSkipped++;
+        continue;
+      }
+
+      if (isDryRun) {
+        console.log(`    ${C.cyan}[dry-run] Would overwrite marker at ${marker.file}:${marker.line} (§${marker.section}): hash ${marker.hash} → ${currentHash}${C.reset}`);
+        totalOverwritten++;
+        continue;
+      }
+
+      rewrites.push({
+        marker,
+        lineIndex: marker.line - 1, // 0-indexed
+        newSectionLines: sectionContent.split('\n'),
+        newHash: currentHash,
+      });
+    }
+
+    // Pass 2 — apply this file's rewrites in one bottom-up splice, write once.
+    if (rewrites.length > 0) {
+      let content = readFileSync(markerFile, 'utf-8');
+      const originalLines = content.split('\n');
+      const newLines = applyIntentionalDuplicateRewrites(originalLines, rewrites);
 
       // Write back — normalize to LF first, then re-apply the detected ending
       // so CRLF files never end up with \r\r\n
-      content = lines.join('\n');
-      const lineEnding = detectLineEnding(marker.file);
+      content = newLines.join('\n');
+      const lineEnding = detectLineEnding(markerFile);
       const normalizedContent = lineEnding === 'crlf'
         ? content.replace(/\r\n/g, '\n').replace(/\n/g, '\r\n')
         : content.replace(/\r\n/g, '\n');
 
-      writeFileSync(marker.file, normalizedContent, 'utf-8');
-      console.log(`    ${C.green}✓  Overwrote marker at ${marker.file}:${marker.line} (§${marker.section}): ${newSectionLines.length - (sectionEnd - sectionStart + 1) > 0 ? '+' : ''}${newSectionLines.length - (sectionEnd - sectionStart + 1)} lines, hash ${marker.hash} → ${currentHash}${C.reset}`);
-      totalOverwritten++;
-    } else {
-      console.log(`    ${C.cyan}[dry-run] Would overwrite marker at ${marker.file}:${marker.line} (§${marker.section}): hash ${marker.hash} → ${currentHash}${C.reset}`);
-      totalOverwritten++;
+      writeFileSync(markerFile, normalizedContent, 'utf-8');
+
+      for (const r of rewrites) {
+        // Log against the ORIGINAL region extent (next marker line - 1 or EOF,
+        // in scan-time coordinates) so the ±N line delta matches the previous
+        // per-marker log exactly.
+        const sectionStart = r.lineIndex + 1;
+        let sectionEnd = sectionStart;
+        for (let i = sectionStart; i < originalLines.length; i++) {
+          if (originalLines[i].match(/<!--\s*intentional-duplicate:/)) break;
+          sectionEnd = i;
+        }
+        const delta = r.newSectionLines.length - (sectionEnd - sectionStart + 1);
+        console.log(`    ${C.green}✓  Overwrote marker at ${r.marker.file}:${r.marker.line} (§${r.marker.section}): ${delta > 0 ? '+' : ''}${delta} lines, hash ${r.marker.hash} → ${r.newHash}${C.reset}`);
+        totalOverwritten++;
+      }
     }
   }
 

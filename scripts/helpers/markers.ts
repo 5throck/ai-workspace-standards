@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Shared Marker Parser
- * @version 1.0.0
+ * @version 1.1.0
  *
  * Common marker parsing logic for:
  * - propagate-to-templates.ts (marker-rewrite engine)
@@ -320,4 +320,63 @@ export function extractSectionContent(filePath: string): string | null {
   } catch {
     return null;
   }
+}
+
+// ============================================================================
+// INTENTIONAL-DUPLICATE REWRITE APPLICATION
+// ============================================================================
+
+/**
+ * Apply pre-computed stale-marker rewrites to one file's lines in a single
+ * bottom-up splice pass.
+ *
+ * Contract:
+ * - Pure: returns a NEW array; the input `lines` is never mutated.
+ * - `rewrites` may be given in any order; they are internally applied in
+ *   DESCENDING `lineIndex` order (bottom-up splice). Marker regions are
+ *   disjoint and ordered by construction, so a rewrite that changes line
+ *   counts can never shift the index of a not-yet-applied rewrite — this is
+ *   the fix for the stale-index bug where per-marker ascending splices used
+ *   scan-time indices after an earlier rewrite had shifted lines below them.
+ * - Per rewrite, the replaced region starts at `lineIndex + 1` and extends to
+ *   the line BEFORE the next intentional-duplicate marker (a line matching
+ *   /<!--\s*intentional-duplicate:/ — same convention as
+ *   `scanIntentionalDuplicateMarkers` and the engine loop this helper was
+ *   extracted from) or to EOF, whichever comes first. The marker line itself
+ *   keeps its position; only its `hash: [0-9a-f]{8}` field is replaced with
+ *   `newHash` (same replacement as the engine).
+ * - Out-of-range `lineIndex` rewrites are skipped (defensive; the engine never
+ *   produces one — a rewrite landing on a shifted file would no-op instead of
+ *   corrupting).
+ */
+export function applyIntentionalDuplicateRewrites(
+  lines: string[],
+  rewrites: Array<{ lineIndex: number; newSectionLines: string[]; newHash: string }>
+): string[] {
+  const result = [...lines];
+  const ordered = [...rewrites].sort((a, b) => b.lineIndex - a.lineIndex);
+
+  for (const rewrite of ordered) {
+    const lineIndex = rewrite.lineIndex;
+    if (lineIndex < 0 || lineIndex >= result.length) continue;
+
+    // Section region: line after the marker down to (next marker - 1) or EOF —
+    // identical bound rule to the engine's runMarkerRewrite loop.
+    const regionStart = lineIndex + 1;
+    let regionEnd = regionStart;
+    for (let i = regionStart; i < result.length; i++) {
+      if (result[i].match(/<!--\s*intentional-duplicate:/)) break;
+      regionEnd = i;
+    }
+    result.splice(regionStart, regionEnd - regionStart + 1, ...rewrite.newSectionLines);
+
+    // Update the marker line's hash in place; its position is unaffected
+    // because the splice happens strictly below it (descending order).
+    result[lineIndex] = result[lineIndex].replace(
+      /hash:\s*[0-9a-f]{8}/,
+      `hash: ${rewrite.newHash}`
+    );
+  }
+
+  return result;
 }

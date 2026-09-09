@@ -184,5 +184,4 @@ Key rules:
 
 ---
 
-*co-work.context.md version: 1.3 — connector-schemas referenced (Domain Rule 5)*
-*co-work.context.md version: 1.4 — Automation Runbook section added + Domain Rule 6 [WORK-R3] (when to script vs when to hand off; backlog §8 Open row 14, closed 2026-08-26)*
+*co-work.context.md version: 1.4 — Automation Runbook section added + Domain Rule 6 [WORK-R3] (when to script vs when to hand off; backlog §8 Open row 14, closed 2026-08-26); connector-schemas referenced (Domain Rule 5)*

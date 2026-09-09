@@ -682,6 +682,15 @@
       "source": "manual",
       "created": "2026-09-10",
       "last_updated": "2026-09-10"
+    },
+    {
+      "id": "2026-09-10-marker-hardening-followup-design",
+      "title": "marker hardening followup design",
+      "file": "docs/designs/2026-09-10-marker-hardening-followup-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-10",
+      "last_updated": "2026-09-10"
     }
   ]
 }
