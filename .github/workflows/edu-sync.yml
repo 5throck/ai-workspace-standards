@@ -151,6 +151,39 @@ jobs:
             no AI-generated filler text; quote real commands/paths from the
             upstream diff; keep edits minimal and accurate.
 
+            MANDATORY REPORT (never skip): before finishing, write
+            /tmp/edu-sync-report.md containing, per repo: (a) your relevance
+            decision and reasoning, (b) files changed (or "none"), (c) branch
+            and PR URL if pushed (or exactly why no PR was opened). Any edits
+            you make MUST be committed AND pushed — edited-but-unpushed trees
+            are treated as failures.
+
+      - name: Upload sync forensics
+        if: always()
+        run: |
+          {
+            echo "=== intro-to-ai-harness: last commits ==="
+            git -C /tmp/intro-to-ai-harness log --oneline -5 2>/dev/null || echo "(no clone)"
+            echo "=== intro-to-ai-harness: status ==="
+            git -C /tmp/intro-to-ai-harness status --short 2>/dev/null || true
+            echo "=== multi-agent-harness-handbook: last commits ==="
+            git -C /tmp/multi-agent-harness-handbook log --oneline -5 2>/dev/null || echo "(no clone)"
+            echo "=== multi-agent-harness-handbook: status ==="
+            git -C /tmp/multi-agent-harness-handbook status --short 2>/dev/null || true
+            echo "=== report ==="
+            cat /tmp/edu-sync-report.md 2>/dev/null > edu-sync-report.md || echo "(agent did not write the mandatory report)" > edu-sync-report.md
+            cat edu-sync-report.md
+            echo "=== relevant.diff (first 200 lines) ==="
+            head -200 /tmp/relevant.diff 2>/dev/null
+          } > edu-forensics.txt
+          cat edu-forensics.txt
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: edu-sync-forensics
+          path: edu-forensics.txt
+
       - name: Update baseline
         # Advance the baseline only when the sync actually succeeded — a failed
         # agent run must re-process the same range next week.
