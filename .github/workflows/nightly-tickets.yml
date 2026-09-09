@@ -117,9 +117,12 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           # claude-code-action v1 inputs: prompt (direct run), claude_args for
           # CLI passthrough. timeout is bounded by the job-level timeout-minutes.
+          # Broad Bash grant: the runner is ephemeral and the real guardrails are
+          # the prompt's safety rules + the ticket scope + the sync gates. Narrow
+          # tool lists caused 55 permission denials in the first real batch.
           claude_args: >-
             --model ${{ vars.NIGHTLY_TICKETS_MODEL }}
-            --allowed-tools "Bash(bun:*)" "Bash(git:*)" "Bash(gh pr:*)" "Bash(gh api:*)" "Bash(ls:*)" "Bash(cat:*)" "Bash(diff:*)" "Bash(grep:*)" "Bash(cp:*)" "Bash(mkdir:*)" "Read" "Edit" "Write" "Glob" "Grep"
+            --allowed-tools "Bash,Read,Edit,Write,Glob,Grep"
           prompt: |
             You are the nightly governance-ticket batch runner for this workspace
             (single-repo checkout of ai-workspace-standards on ubuntu-latest).
