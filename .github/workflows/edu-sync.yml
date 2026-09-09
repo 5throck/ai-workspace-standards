@@ -1,0 +1,158 @@
+name: Edu Sync
+
+# Weekly: detect changes in this workspace since the last synced commit and
+# update the two public education repositories with relevant content via PRs.
+# Baseline (last synced SHA) lives in a rolling "Edu Sync — baseline" issue —
+# no commits to this repo are needed for state.
+#
+# Requires repository secret EDU_SYNC_PAT: a fine-grained PAT with
+# Contents: read/write on 5throck/intro-to-ai-harness and
+# 5throck/multi-agent-harness-handbook. Without it the agent step skips.
+
+on:
+  schedule:
+    - cron: "0 19 * * 0" # Monday 04:00 KST
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: edu-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.4.0
+
+      - name: Resolve baseline SHA
+        id: baseline
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          REPO="${{ github.repository }}"
+          gh label create "edu-sync-baseline" -R "$REPO" \
+            --description "Edu Sync last-synced SHA baseline" --color 0E8A16 2>/dev/null || true
+          ISSUE=$(gh issue list -R "$REPO" --label "edu-sync-baseline" \
+            --state all --limit 1 --json number --jq '.[0].number // ""')
+          if [ -z "$ISSUE" ]; then
+            SHA=$(git rev-parse HEAD)
+            gh issue create -R "$REPO" --label "edu-sync-baseline" \
+              --title "Edu Sync — baseline" \
+              --body "Last synced SHA: $SHA"
+            echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+          else
+            SHA=$(gh issue view "$ISSUE" -R "$REPO" --json body --jq '.body' \
+              | grep -oE '[0-9a-f]{40}' | head -1)
+            [ -z "$SHA" ] && SHA=$(git rev-parse HEAD)
+            echo "issue=$ISSUE" >> "$GITHUB_OUTPUT"
+            echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+          fi
+          echo "baseline=$SHA"
+
+      - name: Collect upstream changes
+        id: changes
+        run: |
+          BASE="${{ steps.baseline.outputs.sha }}"
+          git log --oneline "$BASE..HEAD" > /tmp/commits.txt || true
+          git diff --stat "$BASE..HEAD" > /tmp/diffstat.txt || true
+          git diff "$BASE..HEAD" -- docs/ skills/ AGENTS.md CONSTITUTION.md CHANGELOG.md scripts/SCRIPTS.md > /tmp/relevant.diff || true
+          wc -l /tmp/commits.txt /tmp/relevant.diff
+          lines=$(wc -l < /tmp/relevant.diff)
+          echo "lines=$lines" >> "$GITHUB_OUTPUT"
+
+      - name: Guard — nothing to do
+        if: steps.changes.outputs.lines == '0'
+        run: echo "No upstream changes since last sync."; exit 0
+
+      - name: Clone education repositories
+        if: steps.changes.outputs.lines != '0' && secrets.EDU_SYNC_PAT != ''
+        env:
+          EDU_SYNC_PAT: ${{ secrets.EDU_SYNC_PAT }}
+        run: |
+          git clone --depth 1 "https://x-access-token:$EDU_SYNC_PAT@github.com/5throck/intro-to-ai-harness.git" /tmp/intro-to-ai-harness
+          git clone --depth 1 "https://x-access-token:$EDU_SYNC_PAT@github.com/5throck/multi-agent-harness-handbook.git" /tmp/multi-agent-harness-handbook
+
+      - name: Update education content (PR-only)
+        id: edu
+        if: steps.changes.outputs.lines != '0' && secrets.EDU_SYNC_PAT != ''
+        uses: anthropics/claude-code-action@5ccc3a35a6367cdb8e6fbd0728287467540ecfe2 # v1.0.219
+        env:
+          GH_TOKEN: ${{ secrets.EDU_SYNC_PAT }}
+          EDU_SYNC_PAT: ${{ secrets.EDU_SYNC_PAT }}
+          ANTHROPIC_API_KEY: ${{ secrets.ZAI_API_KEY || secrets.ANTHROPIC_API_KEY }}
+          ANTHROPIC_AUTH_TOKEN: ${{ secrets.ZAI_API_KEY || '' }}
+          ANTHROPIC_BASE_URL: ${{ vars.NIGHTLY_TICKETS_BASE_URL || 'https://api.z.ai/api/anthropic' }}
+          ANTHROPIC_MODEL: ${{ vars.NIGHTLY_TICKETS_MODEL || '' }}
+          API_TIMEOUT_MS: "3000000"
+          CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1"
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          claude_args: >-
+            --model ${{ vars.NIGHTLY_TICKETS_MODEL }}
+            --allowed-tools "Bash,Read,Edit,Write,Glob,Grep"
+          prompt: |
+            You are the weekly education-content sync agent. This checkout is the
+            ai-workspace-standards workspace (upstream). The two education
+            repositories are cloned at /tmp/intro-to-ai-harness and
+            /tmp/multi-agent-harness-handbook. Upstream changes since the last
+            sync: /tmp/commits.txt (messages), /tmp/diffstat.txt (stats),
+            /tmp/relevant.diff (patch of docs/skills/governance changes).
+
+            TASK
+            1. Read the upstream change list and identify changes RELEVANT to the
+               educational narrative of each repo:
+               - intro-to-ai-harness: practical guide to AI agents, Claude Code,
+                 workspace standards (chapters under docs/ch01..ch12)
+               - multi-agent-harness-handbook: multi-agent harness concepts
+                 (docs/concepts, docs/guardrails, docs/enterprise, docs/faq,
+                 docs/glossary, docs/capstone, docs/lecture-guide)
+               Educationally relevant = concepts, workflows, validators,
+               governance rules, new skills/agents, breaking changes that the
+               books teach. NOT relevant: internal bookkeeping (memory logs,
+               ticket bookkeeping, CI plumbing, version bumps without behavior).
+            2. For each repo with relevant changes: make focused edits to the
+               affected chapters/sections — keep each repo's existing tone,
+               structure, and bilingual conventions (EN files primary; if a
+               chapter has a _ko sibling, update it in kind; do not create new
+               locales). Add a short "What's new (2026-09)" callout only where
+               it fits naturally.
+            3. In each repo: create a branch edu-sync/<YYYY-MM-DD>, commit with
+               a conventional message, push using the credential embedded in the
+               clone URL (already set up — just git push), then open a PR with
+               gh using: gh pr create -R 5throck/<repo> --head <branch> ...
+               Include a per-change mapping (upstream change → edu update) in
+               the PR body. NEVER merge the PR.
+            4. If a repo has no relevant changes, do not touch it.
+
+            CONSTRAINTS: preserve each repo's LICENSE, CI, and i18n structure;
+            no AI-generated filler text; quote real commands/paths from the
+            upstream diff; keep edits minimal and accurate.
+
+      - name: Update baseline
+        # Advance the baseline only when the sync actually succeeded — a failed
+        # agent run must re-process the same range next week.
+        if: steps.edu.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          REPO="${{ github.repository }}"
+          ISSUE="${{ steps.baseline.outputs.issue }}"
+          SHA=$(git rev-parse HEAD)
+          if [ -n "$ISSUE" ]; then
+            BODY=$(gh issue view "$ISSUE" -R "$REPO" --json body --jq '.body' | sed -E "s/[0-9a-f]{40}/$SHA/")
+            gh issue edit "$ISSUE" -R "$REPO" --body "$BODY"
+          else
+            gh issue create -R "$REPO" --label "edu-sync-baseline" \
+              --title "Edu Sync — baseline" --body "Last synced SHA: $SHA"
+          fi
