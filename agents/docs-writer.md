@@ -120,6 +120,7 @@ When creating or updating documentation:
 - Avoid redundancy - if information exists in one file, reference it rather than duplicating.
 - Always use `utf-8` encoding.
 - Adhere to the language policy defined in `CONSTITUTION.md` (e.g., conversational interactions in Korean, Git/PR artifacts in English).
+- Verify edits in gitignored paths (e.g. `Projects/**`) with Read/grep output pasted verbatim — git diff cannot see these files, so git-based verification proves nothing there.
 
 ## Meeting Participation
 

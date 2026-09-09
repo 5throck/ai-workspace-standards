@@ -159,3 +159,12 @@ All numeric outputs in deliverables (aggregations, statistics, percentages, metr
   - Target size — adequate touch/target sizes where the platform warrants it
 - **Verification**: use the `accessibility-audit` skill where available; otherwise a documented manual checklist covering the baseline items above.
 - See [ADR-0065](../../docs/adr/0065-accessibility-standard.md) and `docs/context.md` § Accessibility Standards.
+
+#### 8.15 Schema Governance
+
+**Any database schema change requires an ADR before merge.**
+
+- **Scope**: tables, columns, constraints, indexes, migrations, and any DDL/DML migration artifact that alters a persisted data contract.
+- **ADR content**: motivation, schema diff, migration and rollback plan, and consumer impact (breaking-change assessment).
+- **Relationship to project trigger lists**: projects MAY maintain a broader ADR trigger list (e.g., auth boundaries, MCP tool scope); the project list is authoritative within its project, and this baseline applies where no project list exists.
+- **Origin**: promoted from the Projects/co-newbiz lifecycle rule to a workspace-wide baseline; decision record in `docs/designs/2026-09-09-schema-governance-adr-design.md`.
