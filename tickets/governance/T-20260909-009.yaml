@@ -1,0 +1,16 @@
+schemaVersion: 1
+id: T-20260909-009
+kind: manual
+title: >-
+  validator-hardening: audit.ts scan walkers should count and warn on
+  unreadable/skipped files instead of passing silently
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-08T21:47:40.563Z'
+history:
+  - at: '2026-09-08T21:47:40.563Z'
+    from: null
+    to: backlog
+result: null
+error: null

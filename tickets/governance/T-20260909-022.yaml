@@ -1,0 +1,14 @@
+schemaVersion: 1
+id: T-20260909-022
+kind: manual
+title: fill co-architect docs/context.md [Project Name] placeholders
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-09-08T21:47:57.473Z'
+history:
+  - at: '2026-09-08T21:47:57.473Z'
+    from: null
+    to: backlog
+result: null
+error: null
