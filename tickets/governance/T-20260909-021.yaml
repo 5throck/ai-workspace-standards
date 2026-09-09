@@ -5,12 +5,18 @@ title: >-
   guard audit.ts schema reads against missing rootAllowlist (fail loud instead
   of empty-allowlist behavior)
 priority: normal
-status: backlog
+status: running
 attempts: 0
 created_at: '2026-09-08T21:47:57.460Z'
 history:
   - at: '2026-09-08T21:47:57.460Z'
     from: null
     to: backlog
+  - at: '2026-09-09T02:20:36.172Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-09T02:20:36.184Z'
+    from: waiting
+    to: running
 result: null
 error: null

@@ -9,14 +9,20 @@
  *   bun scripts/agent-lifecycle-audit.ts
  *   bun scripts/agent-lifecycle-audit.ts --json   # JSON output
  *
- * @version 1.1.5
+ * @version 1.2.0
  * @l2-propagate false
- * @last_updated 2026-06-02
+ * @last_updated 2026-09-09
  * @license MIT
+ *
+ * v1.2.0: New Check 11 (T-20260909-004) — WARN when an agent's frontmatter
+ *         last_updated is older than the file's last git commit date (archived
+ *         agents exempt). CLI dispatch is import-guarded so unit tests can
+ *         import the helper functions safely.
  */
 
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { join, relative, dirname, basename } from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { cwd } from 'node:process';
 
 interface AgentFrontmatter {
@@ -268,6 +274,47 @@ function parseSkillFrontmatter(filePath: string): { owner?: string } | null {
   }
 }
 
+// Normalize a frontmatter date value ("2026-08-24", "2026-08-24T00:00:00.000Z")
+// to YYYY-MM-DD; null when the value is not calendar-date shaped.
+export function parseFrontmatterDate(value: unknown): string | null {
+  if (typeof value !== 'string') return null;
+  const unquoted = value.replace(/^['"]|['"]$/g, '');
+  const m = unquoted.match(/^(\d{4}-\d{2}-\d{2})/);
+  return m ? m[1] : null;
+}
+
+// ISO YYYY-MM-DD dates compare correctly as plain strings.
+export function isFrontmatterStale(frontmatterDate: string, lastCommitDate: string): boolean {
+  return frontmatterDate < lastCommitDate;
+}
+
+// Read a date-ish frontmatter field directly from the raw frontmatter text. The
+// generic parser above only keeps top-level keys, but `last_updated` legitimately
+// nests under `lifecycle:` in agent files — a targeted regex catches both layouts.
+function extractFrontmatterDate(filePath: string, field: string): string | null {
+  try {
+    const content = readFileSync(filePath, 'utf-8');
+    const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
+    if (!frontmatterMatch) return null;
+    const m = frontmatterMatch[1].match(new RegExp(`^\\s*${field}:\\s*['"]?(\\S+)`, 'm'));
+    return m ? m[1] : null;
+  } catch {
+    return null;
+  }
+}
+
+// Last git commit date (YYYY-MM-DD) for a file; null when git is unavailable or the
+// file has no commits yet (freshly added, uncommitted).
+function lastCommitDate(filePath: string): string | null {
+  try {
+    const result = spawnSync('git', ['log', '-1', '--format=%cs', '--', filePath], { encoding: 'utf-8' });
+    const date = (result.stdout || '').trim();
+    return /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : null;
+  } catch {
+    return null;
+  }
+}
+
 // Main audit function
 function auditAgents(jsonMode = false): AuditResult {
   const registeredAgents = getRegisteredAgents();
@@ -367,6 +414,22 @@ function auditAgents(jsonMode = false): AuditResult {
         message: 'Agent in _archive/ but status not set to archived',
         fix: "Set 'status: archived' in frontmatter",
       });
+    }
+
+    // Check 11: Stale last_updated (T-20260909-004) — the file's git history moved
+    // past its declared last_updated without the lifecycle metadata being refreshed.
+    // Archived agents are exempt: stale metadata is expected there by definition.
+    if (frontmatter.status !== 'archived' && !relPath.includes('_archive')) {
+      const fmDate = parseFrontmatterDate(extractFrontmatterDate(agentFile, 'last_updated'));
+      const commitDate = lastCommitDate(agentFile);
+      if (fmDate && commitDate && isFrontmatterStale(fmDate, commitDate)) {
+        warnings.push({
+          level: 'warning',
+          file: relPath,
+          message: `frontmatter last_updated (${fmDate}) is older than the last git commit (${commitDate})`,
+          fix: "Update 'last_updated' in frontmatter to reflect the latest change",
+        });
+      }
     }
 
     // Check 8: Tier validation - missing tier field
@@ -481,9 +544,12 @@ const args = process.argv.slice(2);
 const jsonMode = args.includes('--json');
 const helpMode = args.includes('--help') || args.includes('-h');
 
-if (helpMode) {
-  console.log(`
-Agent Lifecycle Audit v1.0.0
+// Dispatch is import-guarded so unit tests can import the helper functions without
+// triggering a full audit run.
+if (import.meta.main) {
+  if (helpMode) {
+    console.log(`
+Agent Lifecycle Audit v1.2.0
 
 Usage:
   bun scripts/agent-lifecycle-audit.ts          # Run audit
@@ -497,23 +563,21 @@ Checks:
   ✓ Deprecated agents with active skill references
   ✓ Archive location vs status consistency
   ✓ Tier field validation (all platforms present, valid values)
+  ✓ Stale frontmatter last_updated vs last git commit date (warn)
 
 Platform: ${PLATFORM}
   `);
-  if (import.meta.main) {
     process.exit(0);
   }
-}
 
-const result = auditAgents(jsonMode);
+  const result = auditAgents(jsonMode);
 
-if (jsonMode) {
-  printJsonResults(result);
-} else {
-  printResults(result);
-}
+  if (jsonMode) {
+    printJsonResults(result);
+  } else {
+    printResults(result);
+  }
 
-if (import.meta.main) {
   process.exit(result.errors.length > 0 ? 1 : 0);
 }
 

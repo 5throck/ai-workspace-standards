@@ -1,7 +1,12 @@
 #!/usr/bin/env bun
 /**
  * verify-memory.ts — Memory Log Format Verifier
- * @version 1.1.0
+ * @version 1.2.0
+ *
+ * v1.2.0: Reverse dead-link check (T-20260909-002) — MEMORY.md Sessions rows whose
+ *         session log no longer exists are now ERRORS (the forward/orphan check
+ *         only caught files missing from the index, never dangling index rows).
+ *         CLI dispatch is import-guarded so unit tests can import the module safely.
  *
  * Validates that memory/*.md session logs follow the mandatory 4-section format
  * and that MEMORY.md index is in sync with actual files on disk.
@@ -68,6 +73,26 @@ function parseMemoryIndex(content: string): Set<string> {
     }
   }
   return registered;
+}
+
+// Extract .md links from the `## Sessions` section only — the index's canonical
+// session-log registry. Meetings/ADRs sections, archive links, and prose links
+// are out of scope for the session-log checks.
+export function parseSessionsSection(content: string): string[] {
+  const links: string[] = [];
+  let inSessions = false;
+  for (const line of content.split("\n")) {
+    if (line.startsWith("## ")) {
+      if (inSessions) break; // next section — Sessions block ended
+      inSessions = line.trim() === "## Sessions";
+      continue;
+    }
+    if (!inSessions) continue;
+    for (const m of line.matchAll(/\]\(([^)]+\.md)\)/g)) {
+      links.push(m[1]);
+    }
+  }
+  return links;
 }
 
 interface SessionEntry {
@@ -197,6 +222,18 @@ function verify(explicitFiles?: string[]): boolean {
         );
       }
     }
+
+    // Check 3b: Reverse dead-link (T-20260909-002) — Sessions rows whose session log
+    // no longer exists. The forward (orphan) check above only catches the opposite
+    // direction, so pruned session logs kept their dangling index rows forever.
+    for (const href of parseSessionsSection(indexContent)) {
+      if (href.includes("/")) continue; // relative refs outside the flat memory dir are out of scope
+      if (!existsSync(join(memDir, href))) {
+        errors.push(
+          `Dead MEMORY.md Sessions row: \`${href}\` — indexed session log no longer exists; prune the row or restore the file`
+        );
+      }
+    }
   } else {
     warnings.push("MEMORY.md not found — run `bash scripts/sync-md.sh` to initialize");
   }
@@ -271,17 +308,15 @@ const args = process.argv.slice(2);
 // Any non-flag arguments are treated as explicit file paths to check
 const fileArgs = args.filter((a) => !a.startsWith("--"));
 
-if (args.includes("--report")) {
-  report();
-} else if (args.includes("--verify") || args.length === 0 || fileArgs.length > 0) {
-  const ok = verify(fileArgs.length > 0 ? fileArgs : undefined);
-  if (import.meta.main) {
+// Dispatch is import-guarded so unit tests can import the parser helpers without
+// triggering a full verification run.
+if (import.meta.main) {
+  if (args.includes("--report")) {
+    report();
+  } else if (args.includes("--verify") || args.length === 0 || fileArgs.length > 0) {
+    const ok = verify(fileArgs.length > 0 ? fileArgs : undefined);
     process.exit(ok ? 0 : 1);
-  }
-} else {
-  if (import.meta.main) {
-    die(`Usage: bun scripts/verify-memory.ts [--verify | --report] [file...]`, 1);
   } else {
-    console.error(`Usage: bun scripts/verify-memory.ts [--verify | --report] [file...]`);
+    die(`Usage: bun scripts/verify-memory.ts [--verify | --report] [file...]`, 1);
   }
 }

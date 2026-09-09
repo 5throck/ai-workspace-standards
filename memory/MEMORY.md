@@ -12,27 +12,11 @@
 | [2026-09-04](2026-09-04.md) | fix: apply project-review findings (C1-C4, H1-H10) |
 | [2026-09-03](2026-09-03.md) | feat: propagate k-opendata skill and DATA_GO_KR_API_KEY to templates/common |
 | [2026-09-02](2026-09-02.md) | chore: update |
-| [2026-09-01](2026-09-01.md) | docs(governance): add ADR-0065 accessibility standard for software feature development |
-| [2026-08-30](2026-08-30.md) | feat(skills): promote handbook and handbook-sync-audit skills from co-deck to common |
-| [2026-08-29](2026-08-29.md) | feat(skills+templates): co-safety glossary back-port, project README backlog, scripts/co-safety layout (F1-F3) |
-| [2026-08-28](2026-08-28.md) | fix(audit): skip untracked template variants in variant-scanning checks |
-| [2026-08-27](2026-08-27.md) | feat(workspace): language validator 1.7.0 variant-aware exemption + co-safety variant regen |
-| [2026-08-26](2026-08-26.md) | feat(co-design): dark-mode and high-contrast theme presets with data-theme compiler scoping (backlog row 11) |
-| [2026-08-25](2026-08-25.md) | feat(co-game): single-file HTML game bundler script + tests + script_manifest registration (PR19 of backlog execution series) |
-| [2026-08-24](2026-08-24.md) | feat(co-deck): port CSP-safe copy buttons with localized labels and hardened link checker from handbook repos |
-| [2026-08-22](2026-08-22.md) | chore: update |
-| [2026-08-23](2026-08-23.md) | feat(skills): promote k-kosis to templates/common |
-| [2026-08-21](2026-08-21.md) | fix(scaffold): repair create-l3-scaffold.ts docs/context.md omission and related drift-prone gaps |
-| [2026-08-20](2026-08-20.md) | docs(design): fold co-newbiz Stage 1 outcomes into the design of record |
-| [2026-08-19](2026-08-19.md) | fix(co-deck): remove execSync shell invocation from deploy-handbook.ts |
-| [2026-08-18](2026-08-18.md) | docs(handbook): add month-only date granularity rule for index meta block |
-| [2026-08-17](2026-08-17.md) | chore: update |
-| [2026-08-16](2026-08-16.md) | docs(co-deck): update handbook skill check count for footer-structure check |
-| [2026-08-15](2026-08-15.md) | chore: update |
-| [2026-08-14](2026-08-14.md) | chore: update |
-| [2026-08-13](2026-08-13.md) | docs(designs): reflect week 08-10..08-13 execution in design docs |
-| [2026-08-12](2026-08-12.md) | chore: update |
-| [2026-08-11](2026-08-11.md) | feat(scripts): make README generation reusable for Phase A variant scaffolds
+| [2026-09-01](archive/2026-09-01.md) | docs(governance): add ADR-0065 accessibility standard for software feature development |
+| [2026-08-30](archive/2026-08-30.md) | feat(skills): promote handbook and handbook-sync-audit skills from co-deck to common |
+| [2026-08-29](archive/2026-08-29.md) | feat(skills+templates): co-safety glossary back-port, project README backlog, scripts/co-safety layout (F1-F3) |
+| [2026-08-28](archive/2026-08-28.md) | fix(audit): skip untracked template variants in variant-scanning checks |
+| [2026-08-27](archive/2026-08-27.md) | feat(workspace): language validator 1.7.0 variant-aware exemption + co-safety variant regen |
 
 Phase A L2 projects (Projects/<name>/) previously scaffolded a 2-section README stub and required hand-authoring to match the workspace README Standard. This makes the existing Phase B renderer reusable at scaffold time and as a self-service CLI, so Phase A and Phase B READMEs can never drift structurally.
 
@@ -42,57 +26,11 @@ Phase A L2 projects (Projects/<name>/) previously scaffolded a 2-section README 
 - l2-to-variant-pipeline.ts v1.10.2: import the three relocated functions instead of defining them locally (pure refactor; Phase B regression 8/8).
 - skills/create-variant v1.2.0: new Step 6.5 (Regenerate README), Common Pitfall row, Verification bullet; propagated to all 6 lockstepped platform mirrors.
 - Governance docs: clarify Phase A (self-service, no CI gate) vs Phase B (WS-08 hard-enforced on templates/co-*/ only). |
-| [2026-08-10](2026-08-10.md) | feat(skills): promote k-dart and create k-law as L1 common skills, remove co-consult duplicates |
-| [2026-08-09](2026-08-09.md) | fix(pipeline): resolve remaining l2-to-variant-pipeline issues for co-export promotion |
-| [2026-08-08](2026-08-08.md) | fix(scripts): resolve bare 'bun' spawnSync ENOENT in new-project.ts governance/orchestration calls |
-| [2026-08-07](2026-08-07.md) | fix(scripts): validate-templates B-04 supports nested theme CSS layout; inject-skills registers co-game |
-| [2026-08-06](2026-08-06.md) | fix(scripts): resolve audit and scaffolding test issues |
-| [2026-08-04](2026-08-04.md) | fix(sync): align sync command files with agent-written PR body flow |
-| [2026-08-03](2026-08-03.md) | feat(skills): add explain-me skill — single-file interactive HTML report generation |
-| [2026-08-01](2026-08-01.md) | feat(governance): ECC Phase 1 — GateGuard, Prompt Defense, JSON Schema, Platform Parity |
-| [2026-07-31](2026-07-31.md) | chore: update |
-| [2026-07-30](2026-07-30.md) | chore: update |
-| [2026-07-22](2026-07-22.md) | fix(templates/co-deck): fix broken lifecycle-doc reference in docs/context.md and add missing html-to-pdf.ts script copy |
-| [2026-07-21](2026-07-21.md) | fix(templates): sync pitch theme migration and preview fixes |
-| [2026-07-20](2026-07-20.md) | chore: update |
-| [2026-07-19](2026-07-19.md) | feat(co-consult): add deliverables folder, k-dart and company-intelligence skills, cross-platform skill availability principle |
-| [2026-07-18](2026-07-18.md) | fix(dark-mode): remove @media block — use 2-layer :root + .dark strategy in template/co-deck |
-| [2026-07-17](2026-07-17.md) | chore: update |
-| [2026-07-16](2026-07-16.md) | fix(new-project): add root package.json generation and bun install to new-project.ts |
-| [2026-07-15](2026-07-15.md) | fix(new-project): add root package.json generation and bun install to new-project.ts |
-| [2026-07-14](2026-07-14.md) | chore: update |
-| [2026-07-11](2026-07-11.md) | fix(scripts): fix --check-drift false-positive L2 drift by adding l2_drift_eligible field |
-| [2026-07-10](2026-07-10.md) | fix(project-review): two-round project review with 51+ findings, 18 actioned fixes; project-review skill v1.1.0 (conditional base-map MCP); sync skill v1.1.0 (16-step pipeline docs) |
-| [2026-07-09](2026-07-09.md) | feat(skills): add cross-platform skill distribution infrastructure for Claude, Gemini, and Antigravity |
-| [2026-07-08](2026-07-08.md) | feat(variant-registry): centralized registries, plugin system, validator framework, workspace-integration + co-game variant (Phase A+B) |
-| [2026-07-07](2026-07-07.md) | chore: update |
-| [2026-07-06](2026-07-06.md) | feat(commands): add /project-review command and track .agents/ for skill discovery |
-| [2026-07-05](2026-07-05.md) | feat: register workspace skills globally via .agents/skills.json and propagate to L1 |
-| [2026-07-04](2026-07-04.md) | feat(axis-001): add missing unit tests and update changelog for Phase C & D |
-| [2026-07-03](2026-07-03.md) | docs(co-deck): add theme system enhancement phase 2 implementation plan; project review improvement planning meeting |
-| [2026-07-02](2026-07-02.md) | fix(scripts): add isSuccess predicate and classifyError wiring to retry-handler.ts |
-| [2026-07-01](2026-07-01.md) | fix(deps): add js-yaml to templates/common/scripts/package.json for independent dependency resolution |
-| [2026-06-28](2026-06-28.md) | fix(l0-leak): remove CONSTITUTION.md references from templates and tighten audit |
-| [2026-06-27](2026-06-27.md) | feat(co-consult): add Output Destination Mapping for all deliverable-producing agents |
-| [2026-06-26](2026-06-26.md) | fix(co-deck): vertical sticky topbar + TOC drawer consistency across themes |
-| [2026-06-25](2026-06-25.md) | fix(co-deck): unify CSS variable names across styles, fix glass panel contrast, improve TOC visibility, add preview backgroundImage support |
-| [2026-06-24](2026-06-24.md) | chore: update |
-| [2026-06-23](2026-06-23.md) | feat(co-deck): background image rendering + TTS voice selection improvements |
-| [2026-06-22](2026-06-22.md) | chore: update |
-| [2026-06-21](2026-06-21.md) | feat(variant-sync): pluggable variant audit hooks and pipeline integrity validation |
-| [2026-06-20](2026-06-20.md) | feat(co-deck): Phase 2 — HTML themes, source-verifier, image source strategy, context docs update |
-| [2026-06-19](2026-06-19.md) | feat(co-deck): complete variant template — fix all structural gaps vs other variants and update l2-to-variant-pipeline |
-| [2026-06-18](2026-06-18.md) | merge: integrate main into pr branch + add co-deck variant template (Phase A-C complete) |
-| [2026-06-16](2026-06-16.md) | feat(mcp): implement 3 Korean EHS MCP servers - k_skill, legalize_kr, mcp_kr_legislation |
-| [2026-06-15](2026-06-15.md) | Meeting skill propagation fix |
-| [2026-06-13](2026-06-13.md) | fix: Wave 1 — co-develop CLAUDE.md ADR-0036 fix, L1 sh/ps1 removal, publish-to-template ghost refs, collectDiffs L0-only filter, path traversal guard, CONSTITUTION.md lang fix |
-| [2026-06-12](2026-06-12.md) | variant template section split strategy — Coding Guidelines migration, variant-specific area management |
-| [2026-06-11](2026-06-11.md) | GEMINI.md Claude-specific 콘텐츠 수정, L1 pm.md 중복 섹션 제거, generate-variant.ts Windows 경로 구분자 버그 수정, VARIANT-* 플레이스홀더 주입 정상화 |
-| [2026-06-10](2026-06-10.md) | chore: update |
-| [2026-06-09](2026-06-09.md) | fix: resolve Agent Roster table rendering bug in merge-frontmatter.ts |
-| [2026-06-08](2026-06-08.md) | Fix variant scaffolding validation failure |
-| [2026-06-07](2026-06-07.md) | bash 3.2 compatibility mapfile fix meeting |
-| [2026-06-06](2026-06-06.md) | chore: update |
+| [2026-06-25](archive/2026-06-25.md) | fix(co-deck): unify CSS variable names across styles, fix glass panel contrast, improve TOC visibility, add preview backgroundImage support |
+| [2026-06-11](archive/2026-06-11.md) | GEMINI.md Claude-specific 콘텐츠 수정, L1 pm.md 중복 섹션 제거, generate-variant.ts Windows 경로 구분자 버그 수정, VARIANT-* 플레이스홀더 주입 정상화 |
+| [2026-06-10](archive/2026-06-10.md) | chore: update |
+| [2026-06-09](archive/2026-06-09.md) | fix: resolve Agent Roster table rendering bug in merge-frontmatter.ts |
+| [2026-06-08](archive/2026-06-08.md) | Fix variant scaffolding validation failure |
 | [2026-06-05](archive/2026-06-05.md) | Tier governance violation analysis |
 | [2026-06-04](archive/2026-06-04.md) | feat: add tag-template.ts, template version mismatch warning, and audit tag check |
 | [2026-06-03](archive/2026-06-03.md) | chore: update |
