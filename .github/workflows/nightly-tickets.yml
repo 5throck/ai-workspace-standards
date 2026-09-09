@@ -79,6 +79,8 @@ jobs:
           ANTHROPIC_AUTH_TOKEN: ${{ steps.creds.outputs.provider == 'zai' && secrets.ZAI_API_KEY || '' }}
           ANTHROPIC_BASE_URL: ${{ steps.creds.outputs.provider == 'zai' && 'https://api.z.ai/api/anthropic' || '' }}
           ANTHROPIC_MODEL: ${{ vars.NIGHTLY_TICKETS_MODEL || '' }}
+          API_TIMEOUT_MS: "3000000"
+          CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1"
         with:
           timeout_minutes: "180"
           allowed_tools: "Bash(bun *),Bash(git *),Bash(gh pr *),Bash(ls *),Bash(cat *),Bash(diff *),Bash(grep *),Bash(sed -i *),Bash(cp *),Bash(mkdir *),Bash(rm /tmp/*),Read,Write,Edit,Glob,Grep"
