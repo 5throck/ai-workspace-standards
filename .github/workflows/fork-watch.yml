@@ -1,0 +1,94 @@
+name: Fork Watch
+
+# Detects new forks of this (private) repository and reports them on a single
+# rolling "Fork Watch" issue. Baseline = the "## Known forks" list embedded in
+# the latest fork-watch issue body, so no commits/branches are needed.
+
+on:
+  schedule:
+    - cron: "30 18 * * *" # 03:30 KST daily — staggered after the tickets runner
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: fork-watch
+  cancel-in-progress: false
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Diff forks against baseline issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          REPO="${{ github.repository }}"
+          LABEL="fork-watch"
+
+          # Current forks (owner list, sorted)
+          gh api "repos/$REPO/forks" --paginate \
+            --jq '.[].owner.login' | sort -u > /tmp/current.txt
+          echo "Current forks: $(wc -l < /tmp/current.txt)"
+          cat /tmp/current.txt
+
+          # Find the latest fork-watch issue (any state)
+          ISSUE=$(gh issue list -R "$REPO" --label "$LABEL" --state all \
+            --limit 1 --json number --jq '.[0].number // ""')
+
+          if [ -z "$ISSUE" ]; then
+            echo "No baseline issue — creating one with the current fork list."
+            {
+              echo "## Known forks"
+              echo
+              while read -r f; do echo "- $f"; done < /tmp/current.txt
+            } > /tmp/body.md
+            gh issue create -R "$REPO" --label "$LABEL" \
+              --title "Fork Watch — baseline" \
+              --body-file /tmp/body.md
+            echo "Baseline created. Future runs will diff against it."
+            exit 0
+          fi
+
+          # Extract "## Known forks" logins from the issue body
+          gh issue view "$ISSUE" -R "$REPO" --json body --jq .body \
+            | sed -n '/## Known forks/,$p' | grep '^- ' | sed 's/^- //' \
+            | sort -u > /tmp/known.txt || true
+          echo "Known forks: $(wc -l < /tmp/known.txt)"
+
+          NEW=$(comm -23 /tmp/current.txt /tmp/known.txt)
+          if [ -z "$NEW" ]; then
+            echo "No new forks."
+            exit 0
+          fi
+
+          echo "NEW FORKS DETECTED:"
+          while read -r f; do echo "- $f"; done <<< "$NEW"
+
+          # Report + update the baseline section in the same issue
+          {
+            echo "## New fork(s) detected $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo
+            while read -r f; do
+              echo "- [$f](https://github.com/$f) — forked from $REPO"
+              CREATED=$(gh api "repos/$f" --jq '.created_at' || echo unknown)
+              echo "  - created: $CREATED"
+            done <<< "$NEW"
+          } > /tmp/comment.md
+          gh issue comment "$ISSUE" -R "$REPO" --body-file /tmp/comment.md
+
+          # Merge new forks into the Known list and rewrite the issue body
+          cat /tmp/known.txt /tmp/current.txt | sort -u > /tmp/all.txt
+          gh issue view "$ISSUE" -R "$REPO" --json body --jq .body > /tmp/orig-body.md
+          {
+            sed -n '1,/## Known forks/p' /tmp/orig-body.md | sed '$d'
+            echo "## Known forks"
+            echo
+            while read -r f; do echo "- $f"; done < /tmp/all.txt
+          } > /tmp/new-body.md
+          gh issue edit "$ISSUE" -R "$REPO" --body-file /tmp/new-body.md
+          echo "Baseline updated."
