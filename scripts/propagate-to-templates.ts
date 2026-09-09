@@ -5,7 +5,7 @@
  * Replaces publish-to-template.ts (deprecated v1.8.0). Single authoritative script
  * for all L0→L1 propagation. Config-driven via propagation-map.json (SSOT for exclusions).
  *
- * @version 2.7.0
+ * @version 2.8.0
  *
  * Usage:
  *   bun scripts/propagate-to-templates.ts [--dry-run|--apply] [--domain <name>] [flags]
@@ -460,7 +460,7 @@ function collectDiffs(mapPath: string): FileDiff[] {
         let srcContent = readFileSync(sourcePath, 'utf-8');
         const isTemplateTarget = targetPath.includes('templates/') || targetPath.includes('templates\\') || targetPath.includes('templates' + sep);
         if (isTemplateTarget && srcContent.includes('CONSTITUTION.md')) {
-          srcContent = scrubConstitutionRefs(srcContent, sourcePath);
+          srcContent = scrubConstitutionRefs(srcContent, sourcePath, targetPath);
         }
         const tgtContent = readFileSync(targetPath, 'utf-8');
         status = sha256(srcContent) === sha256(tgtContent) ? 'in-sync' : 'differs';
@@ -617,7 +617,7 @@ function printTable(diffs: FileDiff[]): void {
  * For markdown/prose files (the default), the full blanket replace is safe since there
  * is no functional code to protect.
  */
-export function scrubConstitutionRefs(content: string, filePath?: string): string {
+export function scrubConstitutionRefs(content: string, filePath?: string, targetPath?: string): string {
   const isCode = filePath ? /\.(ts|tsx|js|jsx)$/.test(filePath) : false;
 
   if (isCode) {
@@ -671,6 +671,15 @@ export function scrubConstitutionRefs(content: string, filePath?: string): strin
     /\[[^\]]*docs\/constitution\/[^\]]*\]\([^)]*docs\/constitution\/[^)]*\)/g,
     '[docs/context.md](docs/context.md)'
   );
+  // A-6. Target-aware: a target that lives at docs/context.md itself must use a
+  // relative link — ](docs/context.md) inside docs/context.md would resolve to
+  // docs/docs/context.md (broken self-reference). No targetPath → no-op.
+  if (targetPath) {
+    const normalizedTarget = targetPath.replace(/\\/g, '/');
+    if (normalizedTarget.endsWith('docs/context.md')) {
+      content = content.replace(/\]\(docs\/context\.md\)/g, '](context.md)');
+    }
+  }
   return content;
 }
 
@@ -686,7 +695,7 @@ function applyDiffs(diffs: FileDiff[]): number {
     // Scrub CONSTITUTION.md references when copying to templates/ (L1+).
     const needsScrub = d.targetPath.includes('templates' + sep) && content.includes('CONSTITUTION.md');
     if (needsScrub) {
-      content = scrubConstitutionRefs(content, d.sourcePath);
+      content = scrubConstitutionRefs(content, d.sourcePath, d.targetPath);
     }
 
     // For in-sync files: still write if scrub changed the content.
@@ -830,9 +839,9 @@ const GOVERNANCE_L1_FILES = [
 ];
 
 // Reference transformation rules: CONSTITUTION.md → docs/context.md
-function applyGovernanceTransforms(content: string, filename: string): string {
+function applyGovernanceTransforms(content: string, filename: string, targetPath?: string): string {
   // ── Phase A: CONSTITUTION.md reference replacement ───────────────────────
-  content = scrubConstitutionRefs(content);
+  content = scrubConstitutionRefs(content, undefined, targetPath);
 
   // ── Phase B: workspace root-specific content removal / replacement ────────
   if (filename === 'CLAUDE.md' || filename === 'GEMINI.md') {
@@ -1109,7 +1118,7 @@ function publishGovernanceL1(isDryRun: boolean): void {
     }
 
     const original = readFileSync(srcPath, 'utf-8');
-    const transformed = applyGovernanceTransforms(original, src);
+    const transformed = applyGovernanceTransforms(original, src, dstPath);
 
     if (isDryRun) {
       const l0Refs = (original.match(/CONSTITUTION\.md/g) ?? []).length;
@@ -1280,14 +1289,7 @@ function runMarkerRewrite(mapPath: string, isDryRun: boolean): void {
     }
 
     const sourceContent = readFileSync(sourcePath, 'utf-8');
-    let sourceSections = extractMarkerZones(sourceContent, marker);
-    // Domain opt-in scrub: propagated zones must not leak docs/constitution/
-    // links into L1 — same transform the non-marker copy path applies
-    // (L0-leakage is audited by audit.ts)
-    if (scrub) {
-      sourceSections = sourceSections.map(s =>
-        ({ ...s, fullBlock: scrubConstitutionRefs(s.fullBlock, sourceFile) }));
-    }
+    const sourceSections = extractMarkerZones(sourceContent, marker);
 
     if (sourceSections.length === 0) {
       console.log(`  ${C.yellow}⚠️  No <!-- ${marker}:START/END --> markers found in ${sourceFile}, skipping${C.reset}`);
@@ -1307,6 +1309,16 @@ function runMarkerRewrite(mapPath: string, isDryRun: boolean): void {
         totalSkipped++;
         continue;
       }
+
+      // Domain opt-in scrub: propagated zones must not leak docs/constitution/
+      // links into L1 — same transform the non-marker copy path applies
+      // (L0-leakage is audited by audit.ts). Applied per-variant (not once per
+      // domain) so target-aware scrub rules see each variant's own target path;
+      // the transform is idempotent, so per-variant application is safe.
+      const variantSections = scrub
+        ? sourceSections.map(s =>
+            ({ ...s, fullBlock: scrubConstitutionRefs(s.fullBlock, sourceFile, variantPath) }))
+        : sourceSections;
 
       const lineEnding = detectLineEnding(variantPath);
       const variantLabel = `templates/${variant}/${targetFilename}`;
@@ -1334,7 +1346,7 @@ function runMarkerRewrite(mapPath: string, isDryRun: boolean): void {
       for (let zi = existingZones.length - 1; zi >= 0; zi--) {
         const zone = existingZones[zi];
         // Pair by document order: k-th zone of this marker ↔ k-th source zone
-        const matchingSection = sourceSections[zi] ?? null;
+        const matchingSection = variantSections[zi] ?? null;
 
         if (!matchingSection) {
           totalSkipped++;

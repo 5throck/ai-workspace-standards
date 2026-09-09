@@ -176,7 +176,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `resolve-variants.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
 | `project-to-variant.ts` | L0 | 1.3.0 | active | `--source`, `--target`, `--dry-run`, `--force`, `--design-doc`, `--threshold-files`, `--threshold-dirs` | —| L0 | —|
 | `promote-context-section.ts` | L0 | 1.0.0 | active | `--heading`, `--variants`, `--source`, `--after-heading`, `--dry-run` | —| L0 | —|
-| `propagate-to-templates.ts` | L0 | 2.7.0 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs`, `--include-disabled`, `--marker-rewrite` | —| L0 | —|
+| `propagate-to-templates.ts` | L0 | 2.8.0 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs`, `--include-disabled`, `--marker-rewrite` | —| L0 | —|
 | `qa-gate.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `readme-lifecycle-audit.ts` | L0 | 1.0.4 | active | —| —| L0+L1 | —|
 | `release-template.ts` | L0 | 1.0.0 | active | `--version`, `--bump`, `--dry-run`, `--no-tag`, `--push` | —| L0 | —|
@@ -215,7 +215,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `procedure-coverage.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `validate-procedures.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `validate-decisions.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `validate-templates.ts` | L0 | 1.21.2 | active | —| —| L0+L1 | —|
+| `validate-templates.ts` | L0 | 1.21.3 | active | —| —| L0+L1 | —|
 | `validate-variant-readiness.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `verify-country-prune.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `verify-adr-governance.ts` | L0 | 1.4.0 | active | —| —| L0 | —|

@@ -207,6 +207,16 @@ lang_reason: legal # legal | source-material | proper-noun
 All text files (Markdown, scripts) must be saved as **UTF-8 (without BOM)**.
 
 <!-- COMMON-CONSTITUTION:START -->
+#### Schema Governance
+
+**Any database schema change — tables, columns, constraints, indexes, or migrations — requires an ADR before merge.**
+
+This is the workspace-wide baseline. Projects may maintain a broader project-specific
+ADR trigger list (e.g., auth boundaries, MCP tool scope); the project list is
+authoritative within its project, and this baseline applies where no project list exists.
+<!-- COMMON-CONSTITUTION:END -->
+
+<!-- COMMON-CONSTITUTION:START -->
 #### Language Policy Exception — Korean Legal/Regulatory Content
 
 The English-only policy admits a narrow exception for files where Korean is legally
@@ -249,7 +259,7 @@ lang_reason: legal   # legal | source-material | proper-noun
 - `SKILL.md` itself stays English-only and simply points to the reference file (e.g. "See `references/terms-ko.json` for the Korean-original DART terminology mapping").
 - This is the general mechanism for any skill needing source-language reference data — not specific to Korean.
 
-See [docs/context.md](context.md) for the skill-lifecycle registration details.
+See docs/context.md for the skill-lifecycle registration details.
 
 #### Pluggable Variant Audit Hook
 
