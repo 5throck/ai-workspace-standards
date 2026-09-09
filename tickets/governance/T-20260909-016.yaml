@@ -3,12 +3,24 @@ id: T-20260909-016
 kind: manual
 title: prune 8 dead rows from co-architect memory/MEMORY.md sessions index
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-08T21:47:57.392Z'
 history:
   - at: '2026-09-08T21:47:57.392Z'
     from: null
     to: backlog
+  - at: '2026-09-09T07:36:55.310Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-09T07:36:55.355Z'
+    from: waiting
+    to: running
+  - at: '2026-09-09T07:36:55.399Z'
+    from: running
+    to: review
+  - at: '2026-09-09T07:36:55.446Z'
+    from: review
+    to: done
 result: null
 error: null

@@ -1,0 +1,33 @@
+schema_version: "1.0"
+procedure_id: co-develop-security-release-retrospective
+variant: co-develop
+version: "1.0.0"
+title: Security Release Retrospective
+phase: 5
+status: active
+owner_agent: security-monitor
+purpose: >
+  Review residual security findings and lessons after release verification.
+inputs:
+  - regression_report
+  - release_notes
+preconditions:
+  - "Release verification has completed and findings are triaged."
+steps:
+  - id: 1
+    agent_key: security-monitor
+    skill_key: code-review
+    output_type: review_findings
+    description: >
+      Confirm security-related regressions, accepted risks, and follow-up work
+      are captured before closure.
+outputs:
+  - type: review_findings
+relations:
+  - type: follows
+    target: procedure.co-develop.release-verification
+quality_gates:
+  - "No untriaged security finding remains after release verification."
+evidence: []
+failure_modes:
+  - "Residual risk is unclear; keep the release in review until adjudicated."

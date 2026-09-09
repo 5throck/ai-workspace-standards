@@ -39,6 +39,9 @@ jobs:
       - name: Skill dependency analysis (full health report)
         run: bun scripts/skill-dependency-analysis.ts --report
 
+      - name: CI failure triage owner
+        run: echo "Weekly health-check failures are triaged by PM within 1 business day; issues are labeled ci-failure when issue creation succeeds."
+
       - name: Verify scripts registry
         run: bun run verify-scripts
 
@@ -77,13 +80,13 @@ jobs:
         run: |
           created=$(gh issue create \
             --title "Weekly Health Check failed — $(date -u +%Y-%m-%d)" \
-            --body "The scheduled weekly health check run failed. See the full log: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            --body "Owner: PM. The scheduled weekly health check run failed and requires triage within 1 business day. See the full log: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
             --label "ci-failure" 2>&1) || created=""
           if [ -z "$created" ]; then
             echo "Issue creation returned nothing (label may not exist) — retrying without label"
             gh issue create \
               --title "Weekly Health Check failed — $(date -u +%Y-%m-%d)" \
-              --body "The scheduled weekly health check run failed. See the full log: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" || true
+              --body "Owner: PM. The scheduled weekly health check run failed and requires triage within 1 business day. See the full log: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" || true
           else
             echo "Issue created: $created"
           fi

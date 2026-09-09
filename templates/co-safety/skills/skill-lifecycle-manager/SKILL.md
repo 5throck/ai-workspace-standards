@@ -274,5 +274,5 @@ metadata:
 
 ## Related Skills
 
-- **validate-templates**: Validates template structure (related validation skill)
+- **workspace template validation**: Validates template structure (related validation skill)
 - **agent-lifecycle-manager**: Manages agent creation and validation (parallel workflow)

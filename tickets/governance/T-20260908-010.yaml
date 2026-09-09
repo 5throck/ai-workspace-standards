@@ -7,12 +7,24 @@ title: >-
   colon-format contract mismatch and infinite-recursion risk on fix; also
   SCRIPTS.md documents nonexistent flags
 priority: high
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-08T11:36:17.770Z'
 history:
   - at: '2026-09-08T11:36:17.770Z'
     from: null
     to: backlog
+  - at: '2026-09-09T06:12:05.787Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-09T06:12:05.833Z'
+    from: waiting
+    to: running
+  - at: '2026-09-09T06:12:05.877Z'
+    from: running
+    to: review
+  - at: '2026-09-09T06:12:05.922Z'
+    from: review
+    to: done
 result: null
 error: null

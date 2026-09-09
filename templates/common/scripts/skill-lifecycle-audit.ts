@@ -10,8 +10,8 @@
  *   bun scripts/skill-lifecycle-audit.ts --fix    # Auto-fix simple issues
  *   bun scripts/skill-lifecycle-audit.ts --json   # JSON output
  *
- * @version 1.3.0
- * @last_updated 2026-08-16
+ * @version 1.4.0
+ * @last_updated 2026-09-09
  * @license MIT
  */
 
@@ -50,6 +50,14 @@ interface AuditResult {
 interface AgentRegistry {
   agents: string[];
   skills: Array<{ name: string; file: string; owner: string }>;
+}
+
+interface SkillRegistryRow {
+  version: string;
+  status: string;
+  owner: string;
+  lastReviewed: string;
+  removalDate: string;
 }
 
 // ANSI colors for terminal output
@@ -96,6 +104,29 @@ function detectPlatform(): 'claude-code' | 'antigravity' | 'unknown' {
   if (existsSync(join(ROOT, 'GEMINI.md'))) return 'antigravity';
   if (existsSync(join(ROOT, 'CLAUDE.md')) || existsSync(join(ROOT, '.claude'))) return 'claude-code';
   return 'unknown';
+}
+
+
+function parseSkillRegistryRows(registryPath = join(ROOT, 'skills', 'SKILLS.md')): Map<string, SkillRegistryRow> {
+  const rows = new Map<string, SkillRegistryRow>();
+  if (!existsSync(registryPath)) return rows;
+  const content = readFileSync(registryPath, 'utf-8').replace(/\r\n/g, '\n');
+  const registrySection = (content.split(/\n###\s+Workspace Skills\b/i)[1]?.split(/\n###\s+Variant-Exclusive Skills\b/i)[0]) ?? (content.split(/\n##\s+Registry\b/i)[1]?.split(/\n##\s+/)[0] ?? content);
+  for (const line of registrySection.split('\n')) {
+    const cells = line.split('|').map(c => c.trim());
+    if (cells.length < 8) continue;
+    const nameMatch = cells[1].match(/`([^`]+)`/);
+    if (!nameMatch) continue;
+    if (cells[2].toLowerCase() === 'version') continue;
+    rows.set(nameMatch[1], {
+      version: cells[2],
+      status: cells[3],
+      owner: cells[4],
+      lastReviewed: cells[5],
+      removalDate: cells[6],
+    });
+  }
+  return rows;
 }
 
 // Parse AGENTS.md for valid agents
@@ -264,6 +295,8 @@ function auditSkills(jsonMode = false): AuditResult {
 
   const errors: SkillIssue[] = [];
   const warnings: SkillIssue[] = [];
+  const registryRows = parseSkillRegistryRows();
+  const runtimeSkillNames = new Set<string>();
 
   // Skip header in JSON mode
   if (!jsonMode) {
@@ -289,6 +322,9 @@ function auditSkills(jsonMode = false): AuditResult {
       continue;
     }
 
+    const isPlatformSkill = skillFile.includes('/.claude/skills/') || skillFile.includes('\\.claude\\skills\\');
+    if (frontmatter.name && !isPlatformSkill) runtimeSkillNames.add(frontmatter.name);
+
     if (!frontmatter.name) {
       errors.push({
         level: 'error',
@@ -307,8 +343,6 @@ function auditSkills(jsonMode = false): AuditResult {
         fix: "Add 'description: This skill should be used when...'",
       });
     }
-
-    const isPlatformSkill = skillFile.includes('/.claude/skills/') || skillFile.includes('\\.claude\\skills\\');
 
     if (!isPlatformSkill && !frontmatter.owner) {
       errors.push({
@@ -355,6 +389,50 @@ function auditSkills(jsonMode = false): AuditResult {
         fix: 'Archive to skills/_archive/ or remove from repository',
       });
     }
+    if (!isPlatformSkill && frontmatter.name && registryRows.size > 0) {
+      const row = registryRows.get(frontmatter.name);
+      if (!row) {
+        errors.push({
+          level: 'error',
+          file: relPath,
+          message: `Missing skills/SKILLS.md registry row for ${frontmatter.name}`,
+          fix: `Add a registry row for ${frontmatter.name} or remove the runtime skill`,
+        });
+      } else {
+        if (frontmatter.version && row.version !== String(frontmatter.version)) {
+          errors.push({
+            level: 'error',
+            file: relPath,
+            message: `Registry version drift for ${frontmatter.name}: SKILL.md=${frontmatter.version}, SKILLS.md=${row.version}`,
+            fix: 'Update skills/SKILLS.md version to match SKILL.md frontmatter',
+          });
+        }
+        if (frontmatter.status && row.status !== String(frontmatter.status)) {
+          errors.push({
+            level: 'error',
+            file: relPath,
+            message: `Registry status drift for ${frontmatter.name}: SKILL.md=${frontmatter.status}, SKILLS.md=${row.status}`,
+            fix: 'Update skills/SKILLS.md status to match SKILL.md frontmatter',
+          });
+        }
+        if (frontmatter.owner && row.owner !== String(frontmatter.owner)) {
+          errors.push({
+            level: 'error',
+            file: relPath,
+            message: `Registry owner drift for ${frontmatter.name}: SKILL.md=${frontmatter.owner}, SKILLS.md=${row.owner}`,
+            fix: 'Update skills/SKILLS.md owner to match SKILL.md frontmatter',
+          });
+        }
+        if (frontmatter.last_reviewed && row.lastReviewed !== String(frontmatter.last_reviewed)) {
+          errors.push({
+            level: 'error',
+            file: relPath,
+            message: `Registry last_reviewed drift for ${frontmatter.name}: SKILL.md=${frontmatter.last_reviewed}, SKILLS.md=${row.lastReviewed}`,
+            fix: 'Update skills/SKILLS.md last reviewed date to match SKILL.md frontmatter',
+          });
+        }
+      }
+    }
 
     // Check: scope field should be declared
     const skillContent = readFileSync(skillFile, 'utf-8');
@@ -394,6 +472,19 @@ function auditSkills(jsonMode = false): AuditResult {
           file: relPath,
           message: `Circular dependency: ${cycle.join(' → ')}`,
           fix: 'Break the cycle by removing one dependency',
+        });
+      }
+    }
+  }
+
+  if (registryRows.size > 0) {
+    for (const name of registryRows.keys()) {
+      if (!runtimeSkillNames.has(name)) {
+        errors.push({
+          level: 'error',
+          file: 'skills/SKILLS.md',
+          message: `Registry row has no matching runtime skill: ${name}`,
+          fix: `Remove the ${name} row from skills/SKILLS.md or restore skills/${name}/SKILL.md`,
         });
       }
     }

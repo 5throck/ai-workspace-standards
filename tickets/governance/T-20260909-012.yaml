@@ -5,12 +5,24 @@ title: >-
   co-architect CI: add bun test, verify-scripts --verify, lifecycle audits,
   scripts/** path filter; drop dead test-node job
 priority: high
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-08T21:47:57.337Z'
 history:
   - at: '2026-09-08T21:47:57.337Z'
     from: null
     to: backlog
+  - at: '2026-09-09T06:10:36.901Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-09T06:10:36.940Z'
+    from: waiting
+    to: running
+  - at: '2026-09-09T06:10:36.981Z'
+    from: running
+    to: review
+  - at: '2026-09-09T06:10:37.020Z'
+    from: review
+    to: done
 result: null
 error: null

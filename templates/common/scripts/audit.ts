@@ -1,4 +1,5 @@
-// @version 2.31.0
+// @version 2.32.0
+// v2.32.0: Adds skipped-file counting for scan walkers and warns on live context placeholders.
 // v2.31.0: Stray-artifact check fails loud (T-20260909-006/021) — a missing
 //           docs/workspace-schema.json or a schema without a valid rootAllowlist
 //           ({files: [], dirs: []}) now FAILs the audit instead of silently scanning
@@ -104,6 +105,12 @@ const CYAN = '\x1b[36m';
 const RESET = '\x1b[0m';
 
 let errors = 0;
+let skippedFileCount = 0;
+const skippedFileSamples: string[] = [];
+function recordSkippedFile(filePath: string, reason: string) {
+    skippedFileCount++;
+    if (skippedFileSamples.length < 10) skippedFileSamples.push(`${filePath} (${reason})`);
+}
 
 function Pass(msg: string) {
     console.log(`${GREEN}[PASS] ${msg}${RESET}`);
@@ -314,8 +321,8 @@ function walkDir(dir: string, callback: (fPath: string) => void) {
             } else {
                 callback(dirPath);
             }
-        } catch {
-            // Ignore transient files deleted during concurrent test runs
+        } catch (e: any) {
+            recordSkippedFile(dirPath, e?.code || e?.message || "stat/read error");
         }
     }
 }
@@ -516,6 +523,29 @@ if (!LIFECYCLE_ONLY) {
         Fail(`Non-standard .md files found at project root: ${rootMdFiles.join(', ')} — move to docs/ or memory/ per File Organization Policy`);
     } else {
         Pass('Project root: no non-standard .md files (File Organization Policy compliant)');
+    }
+
+    // Check: live context files should not retain scaffold placeholders
+    {
+        const files: string[] = [];
+        if (fs.existsSync(projectCtxPath)) files.push(projectCtxPath);
+        if (fs.existsSync('docs')) {
+            for (const f of fs.readdirSync('docs')) {
+                if (f.endsWith('.context.md')) files.push(path.join('docs', f));
+            }
+        }
+        const placeholderRe = /\[(Project Name|One-sentence description[^\]]*|TODO|TBD)\]|<variant-name>|<project-name>/i;
+        const hits: string[] = [];
+        for (const file of files) {
+            try {
+                const content = readUTF8File(file);
+                if (placeholderRe.test(content)) hits.push(file);
+            } catch (e: any) {
+                recordSkippedFile(file, e?.code || e?.message || 'read error');
+            }
+        }
+        if (hits.length > 0) Warn(`Live context placeholder check: ${hits.length} file(s) still contain scaffold placeholders: ${hits.join(', ')}`);
+        else Pass('Live context placeholder check: no unfilled scaffold placeholders found');
     }
 
     // Check: docs/research/*.md files should have a ## References section (Research Standards)
@@ -2550,6 +2580,10 @@ if (fs.existsSync(path.join('scripts', 'verify-skill-graph.ts'))) {
     } else {
         Pass('Skill-graph drift gate: committed projection matches SSOTs');
     }
+}
+
+if (skippedFileCount > 0) {
+    Warn(`Skipped/unreadable files during scan: ${skippedFileCount}${skippedFileSamples.length ? ` (samples: ${skippedFileSamples.join('; ')})` : ''}`);
 }
 
 console.log("");

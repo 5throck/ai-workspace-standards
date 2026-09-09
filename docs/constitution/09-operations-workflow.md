@@ -274,6 +274,28 @@ bun scripts/spec-register.ts --update <id> --status draft|approved|implemented|d
 bun scripts/spec-register.ts --list [--status approved]
 ```
 
+
+#### 9.8 Projects End-of-Life Policy
+
+Projects under `Projects/` have an explicit end-of-life path so promoted variants do not leave ambiguous live copies behind.
+
+**States**:
+- `active`: live project or seed used for current work.
+- `deprecated`: no new feature work; security/critical fixes only while downstream users migrate.
+- `archived`: moved under `Projects/_archive/<name>/` for historical reference; excluded from routine fleet validation unless explicitly requested.
+- `removed`: deleted after the archive retention window and PM approval.
+
+**After variant promotion**:
+1. Record whether the source project remains active, is deprecated, or is archived.
+2. If the project is only a seed for the new variant, move it to `Projects/_archive/<name>/` after promotion validation and PR merge.
+3. Keep the promoted `templates/<variant>/` as the reusable source of truth; do not continue parallel template work in the archived project.
+
+**Removal criteria**:
+- The promoted variant has passed at least one post-promotion validation cycle.
+- No open tickets, docs, or workflows reference the project as a live source.
+- Required evidence, designs, and lifecycle records have been copied to the variant or retained in `memory/`.
+- PM explicitly records the removal decision in a memory log or decision record.
+
 ---
 
 *operations-workflow.md version: 1.0 — created 2026-05-27*

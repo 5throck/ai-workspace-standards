@@ -36,3 +36,7 @@ Performs end-to-end (E2E) smoke testing of the L3 scaffold -> variant promotion 
 ## Notes
 - Workspace-root only skill (no L2 propagation)
 - Owner: automation-engineer
+
+## Retirement
+
+- **2026-09-09**: Retired 2026-09-09; superseded by `simulate-pipeline` as the active canonical skill.

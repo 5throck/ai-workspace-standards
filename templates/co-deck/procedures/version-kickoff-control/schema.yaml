@@ -1,0 +1,31 @@
+schema_version: "1.0"
+procedure_id: co-deck-version-kickoff-control
+variant: co-deck
+version: "1.0.0"
+title: Version Kickoff Control
+phase: 0
+status: active
+owner_agent: version
+purpose: >
+  Create the initial deck version record before research and production work begins.
+inputs: []
+preconditions:
+  - "Deck engagement scope and repository location are known."
+steps:
+  - id: 1
+    agent_key: version
+    skill_key: version
+    output_type: version_record
+    description: >
+      Initialize the version record, naming convention, and change-log location
+      for the deck effort.
+outputs:
+  - type: version_record
+relations:
+  - type: enables
+    target: procedure.co-deck.source-research
+quality_gates:
+  - "A version record exists before source collection starts."
+evidence: []
+failure_modes:
+  - "No version owner or record exists; pause deck work until initialized."

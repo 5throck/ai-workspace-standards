@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.21.0
+ * @version 1.21.2
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -2329,7 +2329,7 @@ function checkCommonContract(): void {
       }
 
       // Sub-check A: no <!-- VARIANT-SECTION: markers should remain in scaffolded file
-      if (agentName !== 'pm' && variantRaw.includes('<!-- VARIANT-SECTION:')) {
+      if (variantRaw.includes('<!-- VARIANT-SECTION:')) {
         fail(variant, 'C-SK-02',
           `C-SK-02: ${variant}/agents/${agentName}.md contains unresolved <!-- VARIANT-SECTION: --> markers — skeleton not fully scaffolded`,
           `Replace all <!-- VARIANT-SECTION: --> blocks with actual variant-specific content`
@@ -2790,6 +2790,57 @@ function checkL0L1ScriptsNotInVariants(variant: string, scriptLayerMap: Map<stri
       warn(variant, 'WS-05', `templates/${variant}/scripts/${entry} is L0+L1 — redundant copy (managed in templates/common/scripts/)`, `Remove templates/${variant}/scripts/${entry} — it is inherited from templates/common/scripts/`);
     }
   }
+}
+
+// Check WS-05a: variant command/skill markdown must not give actionable L0-only tool commands.
+function checkL0OnlyToolRefsInVariantCommandSkills(variant: string): void {
+  if (!JSON_MODE) console.log(`\n=== Check WS-05a: L0-only tool refs in ${variant} command/skill files ===`);
+
+  const scanRoots = [
+    join(TEMPLATES_DIR, variant, '.claude', 'commands'),
+    join(TEMPLATES_DIR, variant, '.gemini', 'commands'),
+    join(TEMPLATES_DIR, variant, '.agents', 'commands'),
+    join(TEMPLATES_DIR, variant, '.claude', 'skills'),
+    join(TEMPLATES_DIR, variant, '.gemini', 'skills'),
+    join(TEMPLATES_DIR, variant, '.agents', 'skills'),
+    join(TEMPLATES_DIR, variant, 'skills'),
+  ];
+  const forbidden = /\b(?:bun\s+scripts\/)?(?:validate-templates|propagate-to-templates|ticket)\.ts\b|\bbun\s+scripts\/(?:validate-templates|propagate-to-templates|ticket)\b/g;
+  let checked = 0;
+
+  function scanRecursive(dir: string): void {
+    for (const entry of readdirSync(dir)) {
+      const fullPath = join(dir, entry);
+      const stat = statSync(fullPath);
+      if (stat.isDirectory()) {
+        scanRecursive(fullPath);
+        continue;
+      }
+      if (!entry.endsWith('.md')) continue;
+
+      checked++;
+      const relFile = relative(ROOT, fullPath).replace(/\\/g, '/');
+      const content = readFileSync(fullPath, 'utf-8');
+      const lines = content.split(/\r?\n/);
+      for (let i = 0; i < lines.length; i++) {
+        forbidden.lastIndex = 0;
+        const matches = [...lines[i].matchAll(forbidden)].map(m => m[0]);
+        if (matches.length === 0) continue;
+        fail(
+          variant,
+          'WS-05a',
+          `${relFile}:${i + 1} references L0-only workspace tooling (${Array.from(new Set(matches)).join(', ')})`,
+          'Replace actionable references with project-local audit/verify commands, or describe the workspace-only gate without naming the L0-only script.'
+        );
+      }
+    }
+  }
+
+  for (const root of scanRoots) {
+    if (existsSync(root)) scanRecursive(root);
+  }
+
+  if (checked > 0) pass(`WS-05a: ${variant} command/skill markdown has no L0-only tool references (${checked} file(s) checked)`);
 }
 
 // Check WS-06: Skills in templates/co-*/skills/ must be variant-scoped (L0+L2)
@@ -3270,9 +3321,10 @@ function main() {
   // WS-04, WS-05, WS-06, WS-07, WS-08: Reverse-direction layer checks for co-* variants
   for (const [variant] of manifests) {
     if (!variant.startsWith('co-')) continue;
-    checkL0ScriptsNotInVariants(variant, scriptLayerMap);       // WS-04
-    checkL0L1ScriptsNotInVariants(variant, scriptLayerMap);     // WS-05
-    checkVariantSkillsLayer(variant, skillLayerMap);             // WS-06
+      checkL0ScriptsNotInVariants(variant, scriptLayerMap);       // WS-04
+      checkL0L1ScriptsNotInVariants(variant, scriptLayerMap);     // WS-05
+      checkL0OnlyToolRefsInVariantCommandSkills(variant);         // WS-05a
+      checkVariantSkillsLayer(variant, skillLayerMap);             // WS-06
     checkNoVariantLocalContextMd(variant);                       // WS-07
     checkReadmeStandard(variant);                                // WS-08
     checkContextMdStructure(variant);                            // WS-09
@@ -3318,4 +3370,3 @@ function main() {
 }
 
 main();
-

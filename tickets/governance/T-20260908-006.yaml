@@ -5,12 +5,24 @@ title: >-
   workflow: Projects EOL policy (deprecated state, _archive convention,
   remove-project criteria after variant promotion)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-08T11:20:33.216Z'
 history:
   - at: '2026-09-08T11:20:33.216Z'
     from: null
     to: backlog
+  - at: '2026-09-09T07:36:52.263Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-09T07:36:52.305Z'
+    from: waiting
+    to: running
+  - at: '2026-09-09T07:36:52.347Z'
+    from: running
+    to: review
+  - at: '2026-09-09T07:36:52.388Z'
+    from: review
+    to: done
 result: null
 error: null

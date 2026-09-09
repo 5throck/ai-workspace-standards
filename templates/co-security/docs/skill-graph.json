@@ -87,6 +87,11 @@
       "layer": "variant:co-security"
     },
     {
+      "id": "procedure.co-security.post-engagement-hardening",
+      "type": "procedure",
+      "layer": "variant:co-security"
+    },
+    {
       "id": "procedure.co-security.remediation-support",
       "type": "procedure",
       "layer": "variant:co-security"
@@ -173,6 +178,12 @@
       "type": "produces",
       "from": "finding-reconciliation",
       "to": "output_type.test_objectives",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "finding-reconciliation",
+      "to": "output_type.validated_findings",
       "source": "procedure_schema"
     },
     {
@@ -316,6 +327,60 @@
       "type": "step_uses_skill",
       "from": "procedure.co-security.engagement-planning",
       "to": "verify-authorization",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-security.post-engagement-hardening",
+      "to": "finding-reconciliation",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-security.post-engagement-hardening",
+      "to": "output_type.engagement_report",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-security.post-engagement-hardening",
+      "to": "output_type.sbom_update",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-security.post-engagement-hardening",
+      "to": "patch-engineer",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-security.post-engagement-hardening",
+      "to": "pentester",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-security.post-engagement-hardening",
+      "to": "procedure.co-security.security-reporting",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-security.post-engagement-hardening",
+      "to": "report-writer",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-security.post-engagement-hardening",
+      "to": "sarif-exporter",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-security.post-engagement-hardening",
+      "to": "spdx-sbom",
       "source": "procedure_schema"
     },
     {

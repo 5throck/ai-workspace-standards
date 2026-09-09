@@ -1,0 +1,46 @@
+schema_version: "1.0"
+procedure_id: co-security-post-engagement-hardening
+variant: co-security
+version: "1.0.0"
+title: Post-Engagement Hardening
+phase: 6
+status: active
+owner_agent: report-writer
+purpose: >
+  Convert final security engagement outputs into retained lessons, hardening
+  actions, and follow-up evidence.
+inputs:
+  - engagement_report
+  - remediation_plan
+preconditions:
+  - "Final report has been delivered and remediation ownership is known."
+steps:
+  - id: 1
+    agent_key: pentester
+    skill_key: finding-reconciliation
+    output_type: validated_findings
+    description: >
+      Confirm post-engagement lessons do not change the validated finding set.
+  - id: 2
+    agent_key: patch-engineer
+    skill_key: spdx-sbom
+    output_type: sbom_update
+    description: >
+      Update hardening and SBOM follow-up notes for remediation owners.
+  - id: 3
+    agent_key: report-writer
+    skill_key: sarif-exporter
+    output_type: engagement_report
+    description: >
+      Archive the final report package and machine-readable outputs with follow-up actions.
+outputs:
+  - type: engagement_report
+  - type: sbom_update
+relations:
+  - type: follows
+    target: procedure.co-security.security-reporting
+quality_gates:
+  - "Every post-engagement hardening action has an owner or an explicit no-action rationale."
+evidence: []
+failure_modes:
+  - "New findings appear after final reporting; reopen finding reconciliation before archiving."

@@ -5,12 +5,24 @@ title: >-
   fix scripts/package.json aliases — wrong relative resolution from scripts/ and
   PATH fall-through at root (bun run audit executes system binary)
 priority: high
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-08T21:47:57.309Z'
 history:
   - at: '2026-09-08T21:47:57.309Z'
     from: null
     to: backlog
+  - at: '2026-09-09T06:07:15.537Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-09T06:07:15.579Z'
+    from: waiting
+    to: running
+  - at: '2026-09-09T06:07:15.622Z'
+    from: running
+    to: review
+  - at: '2026-09-09T06:07:15.666Z'
+    from: review
+    to: done
 result: null
 error: null

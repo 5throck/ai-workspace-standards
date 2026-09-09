@@ -3,12 +3,24 @@ id: T-20260909-018
 kind: manual
 title: register or delete scripts/co-architect/setup/setup.bat
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-08T21:47:57.419Z'
 history:
   - at: '2026-09-08T21:47:57.419Z'
     from: null
     to: backlog
+  - at: '2026-09-09T07:36:55.678Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-09T07:36:55.729Z'
+    from: waiting
+    to: running
+  - at: '2026-09-09T07:36:55.773Z'
+    from: running
+    to: review
+  - at: '2026-09-09T07:36:55.820Z'
+    from: review
+    to: done
 result: null
 error: null

@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Agent Dispatcher CLI
- * @version 1.1.0
+ * @version 1.1.1
  * Main entry point for agent dispatch operations
  *
  * Usage:
@@ -48,6 +48,10 @@ interface CliOptions {
   args: string[];
 }
 
+interface ParallelDispatchResult {
+  status: 'dispatched' | 'completed' | 'failed';
+}
+
 /**
  * Display help information (exported so variant dispatch routers can reuse it)
  */
@@ -76,6 +80,9 @@ PARALLEL OPTIONS:
 
               Example:
                 --task "Audit code:code-auditor:Check quality:high"
+
+  --dry-run
+              Validate and print the dispatch plan without invoking agents
 
 SERIAL OPTIONS:
   --pipeline <file.ts>
@@ -133,6 +140,7 @@ async function runParallel(args: string[]): Promise<void> {
 
   // Build task list from --task arguments
   const tasks: ParallelAgentTask[] = [];
+  const dryRun = args.includes('--dry-run');
 
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--task' && args[i + 1]) {
@@ -153,10 +161,12 @@ async function runParallel(args: string[]): Promise<void> {
   const dispatchModule = await import('./dispatch-parallel.ts');
 
   if (tasks.length > 0) {
-    await dispatchModule.dispatchParallel(tasks);
+    const results: ParallelDispatchResult[] = await dispatchModule.dispatchParallel(tasks, { dryRun });
+    if (results.some(result => result.status === 'failed')) process.exit(1);
   } else {
     // Use the runDispatcher helper that handles empty arrays
-    await dispatchModule.runDispatcher(undefined);
+    const results: ParallelDispatchResult[] = await dispatchModule.runDispatcher(undefined, { dryRun });
+    if (results.some(result => result.status === 'failed')) process.exit(1);
   }
 }
 
@@ -195,10 +205,12 @@ async function runSerial(args: string[]): Promise<void> {
   const dispatchModule = await import('./dispatch-serial.ts');
 
   if (pipeline) {
-    await dispatchModule.dispatchSerial(pipeline, options);
+    const results = await dispatchModule.dispatchSerial(pipeline, options);
+    if (results.some((result: { status: string }) => result.status === 'failed')) process.exit(1);
   } else {
     // Use default pipeline from module
-    await dispatchModule.runDispatcher(options);
+    const results = await dispatchModule.runDispatcher(options);
+    if (results.some((result: { status: string }) => result.status === 'failed')) process.exit(1);
   }
 }
 
@@ -238,3 +250,4 @@ if (import.meta.main) {
 }
 
 export { main };
+

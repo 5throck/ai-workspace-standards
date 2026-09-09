@@ -160,10 +160,10 @@ function _walkSkillDirs(dir: string, skillsDir: string, result: Map<string, Laye
     }
 
     // Read YAML frontmatter block
-    const fmMatch = content.match(/^---\n([\s\S]*?)\n---/);
+    const fmMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
     let layer: LayerValue = "L0+L1"; // default
     if (fmMatch) {
-      const fmLines = fmMatch[1].split("\n");
+      const fmLines = fmMatch[1].split(/\r?\n/);
       for (const fmLine of fmLines) {
         const scopeMatch = fmLine.match(/^\s*scope\s*:\s*(.+)$/);
         if (scopeMatch) {

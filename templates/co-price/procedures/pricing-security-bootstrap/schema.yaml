@@ -1,0 +1,32 @@
+schema_version: "1.0"
+procedure_id: co-price-pricing-security-bootstrap
+variant: co-price
+version: "1.0.0"
+title: Pricing Security Bootstrap
+phase: 0
+status: active
+owner_agent: security-monitor
+purpose: >
+  Establish baseline handling for sensitive pricing, cost, and customer data
+  before pricing analysis begins.
+inputs: []
+preconditions:
+  - "Pricing engagement scope and data sources are identified."
+steps:
+  - id: 1
+    agent_key: security-monitor
+    skill_key: harness-verification
+    output_type: security_review_notes
+    description: >
+      Define access, data minimization, and audit expectations for pricing models
+      and supporting evidence.
+outputs:
+  - type: security_review_notes
+relations:
+  - type: enables
+    target: procedure.co-price.pricing-analysis
+quality_gates:
+  - "Sensitive pricing-data handling controls are documented before analysis starts."
+evidence: []
+failure_modes:
+  - "Data controls are unclear; do not ingest sensitive pricing data."

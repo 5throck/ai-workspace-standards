@@ -26,10 +26,6 @@
       "file": "agents/legal-researcher.md"
     },
     {
-      "name": "pm",
-      "file": "agents/pm.md"
-    },
-    {
       "name": "reporter",
       "file": "agents/reporter.md"
     },

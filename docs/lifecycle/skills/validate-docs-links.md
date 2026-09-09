@@ -6,6 +6,8 @@
 
 ## Phase History
 
+- **2026-09-09**: Deprecated — documentation link-check ownership moved into `project-review` baseline-only mode; removal date set to 2026-12-09.
+
 | Date | From | To | Reason | Approver |
 |------|------|-----|---------|----------|
 | 2026-05-29 | - | production | Initial skill established for documentation link validation | lifecycle-manager |

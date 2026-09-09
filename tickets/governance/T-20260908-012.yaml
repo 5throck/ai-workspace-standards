@@ -6,12 +6,24 @@ title: >-
   templates/co-safety (vapor --tasks claim lives on); refresh at next
   promote/upgrade cycle and consider L2 skill-staleness validator
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-08T11:36:17.804Z'
 history:
   - at: '2026-09-08T11:36:17.804Z'
     from: null
     to: backlog
+  - at: '2026-09-09T07:36:52.939Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-09T07:36:52.982Z'
+    from: waiting
+    to: running
+  - at: '2026-09-09T07:36:53.026Z'
+    from: running
+    to: review
+  - at: '2026-09-09T07:36:53.072Z'
+    from: review
+    to: done
 result: null
 error: null

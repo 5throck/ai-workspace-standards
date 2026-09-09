@@ -162,6 +162,16 @@
       "layer": "variant:co-game"
     },
     {
+      "id": "procedure.co-game.game-security-bootstrap",
+      "type": "procedure",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "procedure.co-game.game-security-retrospective",
+      "type": "procedure",
+      "layer": "variant:co-game"
+    },
+    {
       "id": "procedure.co-game.gameplay-feature-loop",
       "type": "procedure",
       "layer": "variant:co-game"
@@ -661,6 +671,72 @@
       "type": "step_by_agent",
       "from": "procedure.co-game.game-release-verification",
       "to": "test-runner",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-game.game-security-bootstrap",
+      "to": "code-review",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-game.game-security-bootstrap",
+      "to": "output_type.feasibility_findings",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-game.game-security-bootstrap",
+      "to": "output_type.prototyping_environment",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "enables",
+      "from": "procedure.co-game.game-security-bootstrap",
+      "to": "procedure.co-game.game-concept-design",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-game.game-security-bootstrap",
+      "to": "security-monitor",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-game.game-security-bootstrap",
+      "to": "stack-setup",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-game.game-security-bootstrap",
+      "to": "test-driven-development",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-game.game-security-retrospective",
+      "to": "code-review",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-game.game-security-retrospective",
+      "to": "output_type.defect_sweep_report",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-game.game-security-retrospective",
+      "to": "procedure.co-game.game-release-verification",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-game.game-security-retrospective",
+      "to": "security-monitor",
       "source": "procedure_schema"
     },
     {

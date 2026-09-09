@@ -15,7 +15,10 @@
       "source": "agents/pm.md",
       "version": "1.1.0",
       "overridable": true,
-      "override_type_allowed": ["additive", "replacement"],
+      "override_type_allowed": [
+        "additive",
+        "replacement"
+      ],
       "expected_override_all_variants": true,
       "description": "Project Manager — orchestrates phases 0, 1-2, 5; universal across all variants",
       "skeleton_sections": [
@@ -37,12 +40,14 @@
       "source": "agents/i18n-specialist.md",
       "version": "1.0.0",
       "overridable": true,
-      "override_type_allowed": ["additive", "replacement"],
+      "override_type_allowed": [
+        "additive",
+        "replacement"
+      ],
       "description": "I18N Specialist — locale configuration, locale-specific formatting, and text layout routing (constitution §4.4 i18n asset suite); jurisdictional workflows stay with domain experts"
     }
   },
   "common_skills": {
-
     "project-review": {
       "source": "skills/project-review/SKILL.md",
       "version": "1.2.0",
@@ -171,7 +176,7 @@
     },
     "update-bun-packages": {
       "source": "skills/update-bun-packages/SKILL.md",
-      "version": "1.3.0",
+      "version": "1.3.1",
       "overridable": false,
       "description": "Scans, updates, and upgrades Bun dependencies with lockfile and security compliance"
     },
@@ -248,17 +253,10 @@
       "description": "Platform command lifecycle management for .claude/commands/ and .gemini/commands/",
       "propagated_to_common": true
     },
-    "simulate-project-creation": {
-      "claude_source": ".claude/skills/simulate-project-creation/SKILL.md",
-      "gemini_source": ".gemini/skills/simulate-project-creation/SKILL.md",
-      "version": "1.0.0",
-      "description": "Tests new-project scaffolding logic in a temporary directory",
-      "propagated_to_common": true
-    },
     "meeting-facilitation": {
       "claude_source": ".claude/skills/meeting-facilitation/SKILL.md",
       "gemini_source": ".gemini/skills/meeting-facilitation/SKILL.md",
-      "version": "1.4.0",
+      "version": "1.4.1",
       "description": "Structured multi-agent meeting facilitation — delegates to .claude/commands/meeting.md",
       "propagated_to_common": true
     }

@@ -8,12 +8,24 @@ title: >-
   resolve-variants.ts, and remove the pm.md exemption in the unresolved-marker
   check
 priority: high
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-08T11:36:17.751Z'
 history:
   - at: '2026-09-08T11:36:17.751Z'
     from: null
     to: backlog
+  - at: '2026-09-09T06:18:12.315Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-09T06:18:12.356Z'
+    from: waiting
+    to: running
+  - at: '2026-09-09T06:18:12.399Z'
+    from: running
+    to: review
+  - at: '2026-09-09T06:18:12.438Z'
+    from: review
+    to: done
 result: null
 error: null

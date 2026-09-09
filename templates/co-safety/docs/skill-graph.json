@@ -117,11 +117,6 @@
       "layer": "variant:co-safety"
     },
     {
-      "id": "simulate-project-creation",
-      "type": "skill",
-      "layer": "variant:co-safety"
-    },
-    {
       "id": "skill-lifecycle-manager",
       "type": "skill",
       "layer": "variant:co-safety"
@@ -140,6 +135,11 @@
       "id": "translate",
       "type": "skill",
       "layer": "variant:co-safety"
+    },
+    {
+      "id": "validate-docs-links",
+      "type": "skill",
+      "layer": "L0"
     }
   ],
   "edges": [
@@ -262,6 +262,12 @@
       "from": "procedure.co-safety.safety-plan-review",
       "to": "safety-governance-manager",
       "source": "procedure_schema"
+    },
+    {
+      "type": "references",
+      "from": "project-review",
+      "to": "validate-docs-links",
+      "source": "prose"
     },
     {
       "type": "references",

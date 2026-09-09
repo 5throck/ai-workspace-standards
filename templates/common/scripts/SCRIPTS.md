@@ -63,16 +63,16 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `agent-verify.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
 | `analyze-git-history.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
 | `archive-memory.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `audit.ts` | L0 | 2.31.0 | active | —| —| L0+L1 | —|
+| `audit.ts` | L0 | 2.32.0 | active | —| —| L0+L1 | —|
 | `cleanup-completed-md.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `clear-pm-approval.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `compile-tokens.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `design-lint.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `create-l3-scaffold.ts` | L0 | 1.12.2 | active | —| —| L0 | —|
 | `dev-sync.ts` | L0 | 1.9.0 | active | —| —| L0+L1 | —|
-| `dispatch-parallel.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
-| `dispatch-serial.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
-| `dispatch.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
+| `dispatch-parallel.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
+| `dispatch-serial.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
+| `dispatch.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
 | `fix-script-versions.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `gen-pr-body.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `generate-ide-rules.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
@@ -155,7 +155,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `validators/variant-json-validator.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `validators/extends-validator-wrapper.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `validators/capability-validator.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `validators/schema-validator.ts` | L0 | 1.3.0 | active | —| —| L0 | —|
+| `validators/schema-validator.ts` | L0 | 1.3.1 | active | —| —| L0 | —|
 | `validators/orphan-reference-validator.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `validators/duplicate-validator.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `validators/platform-parity-validator.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
@@ -187,7 +187,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `md-to-ooxml.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `new-project.ts` | L0 | 1.9.0 | active | —| —| L0 | —|
 | `remove-project.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
-| `resolve-variants.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
+| `resolve-variants.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
 | `project-to-variant.ts` | L0 | 1.2.0 | active | `--source`, `--target`, `--dry-run`, `--force`, `--design-doc`, `--threshold-files`, `--threshold-dirs` | —| L0 | —|
 | `promote-context-section.ts` | L0 | 1.0.0 | active | `--heading`, `--variants`, `--source`, `--after-heading`, `--dry-run` | —| L0 | —|
 | `propagate-to-templates.ts` | L0 | 2.5.1 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs`, `--include-disabled`, `--marker-rewrite` | —| L0 | —|
@@ -199,7 +199,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `skill-dependency-analysis.ts` | L0 | 1.0.2 | active | —| —| L0 | —|
 | `spec-backfill.ts` | L0 | 1.0.0 | active | `--dry-run`, `--check` | —| L0 | —|
 | `spec-register.ts` | L0 | 1.1.0 | active | `--file`, `--source`, `--update`, `--status`, `--list`, `--ref`, `--id` | —| L0 | —|
-| `skill-lifecycle-audit.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
+| `skill-lifecycle-audit.ts` | L0 | 1.4.0 | active | —| —| L0+L1 | —|
 | `skill-session-review.ts` | L0 | 1.0.0 | active | `--date`, `--json`, `--dry-run` | —| L0+L1 | —|
 | `sync-agent-status.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `sync-md.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
@@ -213,10 +213,10 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `test-new-project.ts` | L0 | 1.0.4 | active | —| —| L0 | —|
 | `test-extends-validator.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `test-l3-to-variant-promotion.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `test-runner.ts` | L0 | 1.1.0 | active | `--parallel`, `--sequential`, `--concurrency <n>`, `--timeout <ms>` | —| L0+L1 | —|
+| `test-runner.ts` | L0 | 1.1.1 | active | `--parallel`, `--sequential`, `--concurrency <n>`, `--timeout <ms>` | —| L0+L1 | —|
 | `translate-readme.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `ticket.ts` | L0 | 1.1.0 | active | `create --not-before`, `list --kind`, `list --ready` | —| L0 | —|
-| `upgrade-project.ts` | L0 | 1.19.1 | active | `--variant`, `--platform`, `--dry-run`, `--prune-removed`, `--rollback`, `--yes` | —| L0+L1 | —|
+| `upgrade-project.ts` | L0 | 1.19.2 | active | `--variant`, `--platform`, `--dry-run`, `--prune-removed`, `--rollback`, `--yes` | —| L0+L1 | —|
 | `variant-feature.ts` | L0 | 1.0.0 | active | `--variant`, `--feature`, `--type` | —| L0 | —|
 | `validate-agents.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `validate-doc-folder.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
@@ -226,7 +226,8 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `validate-procedures.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `validate-skills.ts` | L0 | 1.4.0 | active | —| —| L0+L1 | —|
 | `validate-decisions.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `validate-templates.ts` | L0 | 1.16.0 | active | —| —| L0 | —|
+| `validate-templates.ts` | L0 | 1.21.2 | active | —| —| L0+L1 | —|
+| `validate-variant-readiness.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `verify-country-prune.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `verify-adr-governance.ts` | L0 | 1.4.0 | active | —| —| L0 | —|
 | `verify-agent-deliverables.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|

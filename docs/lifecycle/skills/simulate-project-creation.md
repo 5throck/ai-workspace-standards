@@ -36,3 +36,7 @@
 - **Owner**: scaffolding-expert
 - **Last Updated**: 2026-05-29
 - **Last Reviewer**: lifecycle-manager
+
+## Retirement
+
+- **2026-09-09**: Retired 2026-09-09; superseded by `simulate-pipeline` as the active canonical skill.

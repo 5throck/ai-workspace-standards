@@ -6,12 +6,24 @@ title: >-
   docs/lifecycle/agents/pm.md but only 3 variants ship the file) — either ship
   the record in common or write it at scaffold
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-08T11:36:17.886Z'
 history:
   - at: '2026-09-08T11:36:17.886Z'
     from: null
     to: backlog
+  - at: '2026-09-09T07:36:53.828Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-09T07:36:53.877Z'
+    from: waiting
+    to: running
+  - at: '2026-09-09T07:36:53.922Z'
+    from: running
+    to: review
+  - at: '2026-09-09T07:36:53.968Z'
+    from: review
+    to: done
 result: null
 error: null

@@ -6,12 +6,24 @@ title: >-
   variant.json (CONSTITUTION requires declaration; B-03 cannot see undeclared
   scripts) — declare and validate
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-08T11:36:17.871Z'
 history:
   - at: '2026-09-08T11:36:17.871Z'
     from: null
     to: backlog
+  - at: '2026-09-09T07:36:53.647Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-09T07:36:53.691Z'
+    from: waiting
+    to: running
+  - at: '2026-09-09T07:36:53.736Z'
+    from: running
+    to: review
+  - at: '2026-09-09T07:36:53.778Z'
+    from: review
+    to: done
 result: null
 error: null

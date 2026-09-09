@@ -1,0 +1,34 @@
+schema_version: "1.0"
+procedure_id: co-deck-version-export-control
+variant: co-deck
+version: "1.0.0"
+title: Version Export Control
+phase: 4
+status: active
+owner_agent: version
+purpose: >
+  Bind generated HTML/PDF artifacts to the source revision that produced them.
+inputs:
+  - html_deck
+  - pdf_deck
+preconditions:
+  - "Build and export artifacts are available for review."
+steps:
+  - id: 1
+    agent_key: version
+    skill_key: version
+    output_type: version_record
+    description: >
+      Record artifact hashes, export settings, and source revision for released candidates.
+outputs:
+  - type: version_record
+relations:
+  - type: follows
+    target: procedure.co-deck.deck-build-and-export
+  - type: enables
+    target: procedure.co-deck.deck-publish-and-version
+quality_gates:
+  - "Every exported artifact maps to an auditable source revision."
+evidence: []
+failure_modes:
+  - "Generated artifact cannot be traced to source; rebuild from a known revision."

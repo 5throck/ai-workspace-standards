@@ -121,6 +121,13 @@ skills still being modified, dependency graph, circular dependencies, `scope` fi
 **Purpose**: Validates README.md / README_ko.md pairing in `templates/` directories.
 **Usage**: `bun scripts/readme-lifecycle-audit.ts`
 
+#### `release-template.ts`
+**Purpose**: Atomic template release helper. Bumps `templates/VERSION`, cuts `templates/CHANGELOG.md` `[Unreleased]` into a versioned section, then delegates tag creation to `tag-template.ts`.
+**Usage**: `bun scripts/release-template.ts --version X.Y.Z --no-tag` or `bun scripts/release-template.ts --bump patch --push`
+
+#### `tag-template.ts`
+**Purpose**: Creates the `template-v{templates/VERSION}` git tag and optionally pushes it.
+**Usage**: `bun scripts/tag-template.ts [--dry-run] [--no-push] [--fail-on-push-error]`
 #### `verify-skills.ts`
 **Purpose**: Cross-validates skills referenced in `docs/context.md` against actual
 skill files on disk. Detects missing or orphaned skill references.
@@ -200,17 +207,17 @@ orphaned files not registered in `MEMORY.md` index.
 #### `dispatch.ts`
 **Purpose**: Single-agent dispatch wrapper. Spawns one agent with a given prompt and
 waits for completion.
-**Usage**: `bun scripts/dispatch.ts --agent <name> --prompt "task"`
+**Usage**: `bun scripts/dispatch.ts parallel --dry-run [--task "desc:role:task[:priority]"]` or `bun scripts/dispatch.ts serial --dry-run [--pipeline file.ts]`
 
 #### `dispatch-parallel.ts`
 **Purpose**: Parallel multi-agent dispatch. Spawns multiple agents simultaneously and
 collects results when all complete.
-**Usage**: `bun scripts/dispatch-parallel.ts --agents agent1,agent2 --prompt "task"`
+**Usage**: `bun scripts/dispatch-parallel.ts --dry-run [--task "desc:role:task[:priority]"]`
 
 #### `dispatch-serial.ts`
 **Purpose**: Serial multi-agent dispatch. Chains agents sequentially, passing each
 agent's output as input to the next.
-**Usage**: `bun scripts/dispatch-serial.ts --agents agent1,agent2 --prompt "task"`
+**Usage**: `bun scripts/dispatch-serial.ts --dry-run [--pipeline file.ts]`
 
 #### `retry-handler.ts`
 **Purpose**: Wraps any dispatch call with retry logic (configurable attempts, backoff).

@@ -1,0 +1,34 @@
+schema_version: "1.0"
+procedure_id: co-price-pricing-security-closeout
+variant: co-price
+version: "1.0.0"
+title: Pricing Security Closeout
+phase: 5
+status: active
+owner_agent: security-monitor
+purpose: >
+  Confirm residual security, data-handling, and governance risks before pricing
+  engagement closure.
+inputs:
+  - release_decision
+  - security_attestation
+preconditions:
+  - "Release assurance and engagement-review evidence are available."
+steps:
+  - id: 1
+    agent_key: security-monitor
+    skill_key: harness-verification
+    output_type: security_attestation
+    description: >
+      Reconcile security attestations, retained data, and follow-up risks for the
+      pricing engagement.
+outputs:
+  - type: security_attestation
+relations:
+  - type: follows
+    target: procedure.co-price.engagement-review
+quality_gates:
+  - "Security attestation is complete or closure remains blocked."
+evidence: []
+failure_modes:
+  - "Residual security risk is unowned; keep closeout open."

@@ -50,7 +50,7 @@ Converts an existing standalone project into an official `co-*` variant template
 3. Skips `.git/`, `node_modules/`, `memory/`
 4. **Complexity routing check**: if the project diverges significantly from `templates/common/` (more than `--threshold-files` variant-unique files, or more than `--threshold-dirs` domain directories with >15 files each that don't exist in `templates/common/`), it prints a recommendation to use the Full L2 Pipeline instead and aborts unless `--force` is passed — this automates the judgment call that used to live only in this doc's prose (see Alternative below)
 5. Generates `variant.json` if not present
-6. Runs `validate-templates.ts` for verification
+6. Runs the workspace-template validation gate for verification
 7. Regenerates `templates/<target>/AGENTS.md` via `regenerate-agents-md.ts` (mechanical — always run, not gated on judgment)
 8. Registers the spec via `spec-register.ts` if `--design-doc` was passed
 9. Outputs a manual review checklist for the remaining judgment-based items only (`pm.md` override review, `CLAUDE.md`/`GEMINI.md` narrative context, country-profile review items)
@@ -71,7 +71,7 @@ When reviewing the output, confirm `country_config.supported` matches exactly th
 1. **Evaluate suitability**: ≥3 domain agents, ≥2 skills, ≥3 expected future projects
 2. **Prepare**: Remove `node_modules/`, `.env`, `memory/`, `CHANGELOG.md`
 3. **Run conversion**: `bun scripts/project-to-variant.ts --source <project-path> --target <variant-name> --design-doc <path-to-design-doc>`
-4. **Verify**: `bun scripts/validate-templates.ts`
+4. **Verify**: `bun scripts/audit.ts`
 5. **Review variant.json**: Check agents, skills, script_manifest, and `country_config` (if country profiles were carried)
 6. **Complete the printed manual checklist**: `pm.md` overrides and `CLAUDE.md`/`GEMINI.md` narrative context — everything else is now automated
 

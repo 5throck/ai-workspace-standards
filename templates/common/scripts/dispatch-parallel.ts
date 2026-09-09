@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Parallel Agent Dispatcher
- * @version 1.1.0
+ * @version 1.1.1
  * Automates dispatching multiple read-only subagents simultaneously
  *
  * This dispatcher is optimized for tasks that can run independently:
@@ -28,6 +28,10 @@ interface DispatchResult {
   output?: string;
   error?: string;
   timestamp: Date;
+}
+
+interface DispatchOptions {
+  dryRun?: boolean;
 }
 
 /**
@@ -89,7 +93,7 @@ const defaultTasks: ParallelAgentTask[] = [
  * Dispatch a single agent task
  * In production, this would invoke the Agent tool or call the appropriate API
  */
-async function dispatchAgent(task: ParallelAgentTask): Promise<DispatchResult> {
+async function dispatchAgent(task: ParallelAgentTask, options: DispatchOptions = {}): Promise<DispatchResult> {
   const startTime = Date.now();
 
   try {
@@ -97,47 +101,26 @@ async function dispatchAgent(task: ParallelAgentTask): Promise<DispatchResult> {
     console.log(`   Role: ${task.role}`);
     console.log(`   Task: ${task.task.substring(0, 60)}${task.task.length > 60 ? '...' : ''}`);
 
-    // TODO: Replace with Agent tool invocation when running inside Claude Code.
-    // The Agent tool cannot be called from a subprocess; this script is intended
-    // to be driven by PM/orchestrator code that substitutes real agent calls.
-    // For CLI use, we invoke dispatch.ts as a subprocess per task.
-    const { $ } = await import('bun');
-    const { withRetry, DEFAULT_CONFIG } = await import('./retry-handler.ts');
-    const dispatchRetry = await withRetry(
-      () => $`bun run scripts/dispatch.ts --task ${JSON.stringify(task)}`.nothrow(),
-      { ...DEFAULT_CONFIG, maxRetries: 3, initialDelay: 1000, isSuccess: (r: any) => r.exitCode === 0 },
-      `dispatch:${task.role}`
-    );
-    const proc = dispatchRetry.result ?? { stdout: Buffer.from(''), stderr: Buffer.from(''), exitCode: 1 };
-
-    const stdout = proc.stdout.toString().trim();
-    const stderr = proc.stderr.toString().trim();
-    const exitCode = proc.exitCode ?? 1;
-
     const elapsed = Date.now() - startTime;
 
-    if (!dispatchRetry.success) {
-      // On the failure path, withRetry's return has no `result` field (proc is the
-      // fallback stub above), so prefer lastError.message — synthesized by withRetry
-      // from the real stderr/exit code — over the now-empty stderr/generic exitCode.
-      const errMsg = dispatchRetry.lastError?.message || stderr || `exit code ${exitCode}`;
-      console.log(`   ❌ Failed: ${errMsg} (${elapsed}ms)\n`);
+    if (options.dryRun) {
+      console.log(`   ✅ Dry run accepted (${elapsed}ms)\n`);
+      return {
+        task,
+        status: 'completed',
+        output: 'dry-run',
+        timestamp: new Date()
+      };
+    }
+
+    const errMsg = 'CLI dispatch cannot invoke the host Agent tool. Run with --dry-run, or dispatch this task from the PM/orchestrator session.';
+    console.log(`   ❌ Failed: ${errMsg} (${elapsed}ms)\n`);
       return {
         task,
         status: 'failed',
         error: errMsg,
         timestamp: new Date()
       };
-    }
-
-    console.log(`   ✅ Complete (${elapsed}ms)\n`);
-
-    return {
-      task,
-      status: 'completed',
-      output: stdout,
-      timestamp: new Date()
-    };
   } catch (error) {
     return {
       task,
@@ -151,7 +134,7 @@ async function dispatchAgent(task: ParallelAgentTask): Promise<DispatchResult> {
 /**
  * Dispatch multiple agents in parallel and await all results
  */
-export async function dispatchParallel(tasks: ParallelAgentTask[]): Promise<DispatchResult[]> {
+export async function dispatchParallel(tasks: ParallelAgentTask[], options: DispatchOptions = {}): Promise<DispatchResult[]> {
   console.log(`\n🚀 Parallel Agent Dispatcher`);
   console.log(`📊 Dispatching ${tasks.length} agents simultaneously\n`);
   console.log(`━${'━'.repeat(60)}`);
@@ -165,7 +148,7 @@ export async function dispatchParallel(tasks: ParallelAgentTask[]): Promise<Disp
   });
 
   const results = await Promise.all(
-    prioritizedTasks.map(task => dispatchAgent(task))
+    prioritizedTasks.map(task => dispatchAgent(task, options))
   );
 
   const elapsed = Date.now() - startTime;
@@ -193,6 +176,8 @@ export async function runCli(
 ): Promise<void> {
   const customTasks: ParallelAgentTask[] = [];
 
+  const dryRun = args.includes('--dry-run');
+
   // Parse custom tasks from command line
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--task' && args[i + 1]) {
@@ -212,8 +197,8 @@ export async function runCli(
   const tasksToRun = customTasks.length > 0 ? customTasks : defaults;
 
   try {
-    await dispatchParallel(tasksToRun);
-    process.exit(0);
+    const results = await dispatchParallel(tasksToRun, { dryRun });
+    process.exit(results.some(result => result.status === 'failed') ? 1 : 0);
   } catch (error) {
     console.error('❌ Dispatch failed:', error);
     process.exit(1);
@@ -230,8 +215,8 @@ async function main() {
 /**
  * Export for direct module use - handles empty task array by using defaults
  */
-export async function runDispatcher(tasks?: ParallelAgentTask[]): Promise<DispatchResult[]> {
-  return dispatchParallel(tasks && tasks.length > 0 ? tasks : defaultTasks);
+export async function runDispatcher(tasks?: ParallelAgentTask[], options: DispatchOptions = {}): Promise<DispatchResult[]> {
+  return dispatchParallel(tasks && tasks.length > 0 ? tasks : defaultTasks, options);
 }
 
 // Run if executed directly
@@ -239,4 +224,5 @@ if (import.meta.main) {
   main();
 }
 
-export { dispatchParallel as default, ParallelAgentTask, DispatchResult };
+export { dispatchParallel as default, ParallelAgentTask, DispatchResult, DispatchOptions };
+

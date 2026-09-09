@@ -107,6 +107,11 @@
       "layer": "variant:co-develop"
     },
     {
+      "id": "procedure.co-develop.security-release-retrospective",
+      "type": "procedure",
+      "layer": "variant:co-develop"
+    },
+    {
       "id": "procedure.co-develop.technical-planning",
       "type": "procedure",
       "layer": "variant:co-develop"
@@ -396,6 +401,30 @@
       "type": "step_by_agent",
       "from": "procedure.co-develop.release-verification",
       "to": "test-runner",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-develop.security-release-retrospective",
+      "to": "code-review",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-develop.security-release-retrospective",
+      "to": "output_type.review_findings",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-develop.security-release-retrospective",
+      "to": "procedure.co-develop.release-verification",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-develop.security-release-retrospective",
+      "to": "security-monitor",
       "source": "procedure_schema"
     },
     {

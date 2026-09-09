@@ -1,0 +1,37 @@
+schema_version: "1.0"
+procedure_id: co-game-game-security-bootstrap
+variant: co-game
+version: "1.0.0"
+title: Game Security Bootstrap
+phase: 0
+status: active
+owner_agent: stack-setup
+purpose: >
+  Prepare the game project toolchain and security baseline before concept work.
+inputs: []
+preconditions:
+  - "Game target platform and repository are known."
+steps:
+  - id: 1
+    agent_key: stack-setup
+    skill_key: test-driven-development
+    output_type: prototyping_environment
+    description: >
+      Provision the initial game prototyping and test environment.
+  - id: 2
+    agent_key: security-monitor
+    skill_key: code-review
+    output_type: feasibility_findings
+    description: >
+      Define dependency, asset, and secret-handling security checks for the game project.
+outputs:
+  - type: prototyping_environment
+  - type: feasibility_findings
+relations:
+  - type: enables
+    target: procedure.co-game.game-concept-design
+quality_gates:
+  - "Prototype environment and security baseline exist before concept elaboration."
+evidence: []
+failure_modes:
+  - "Toolchain or security baseline is undefined; halt until bootstrap is complete."

@@ -7,12 +7,24 @@ title: >-
   dropped by the rewrite — row had to be added manually in co-architect
   (workaround documented in its upgrade PR)
 priority: high
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-08T12:58:19.991Z'
 history:
   - at: '2026-09-08T12:58:19.991Z'
     from: null
     to: backlog
+  - at: '2026-09-09T06:14:44.075Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-09T06:14:44.116Z'
+    from: waiting
+    to: running
+  - at: '2026-09-09T06:14:44.157Z'
+    from: running
+    to: review
+  - at: '2026-09-09T06:14:44.202Z'
+    from: review
+    to: done
 result: null
 error: null

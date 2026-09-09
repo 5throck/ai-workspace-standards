@@ -112,11 +112,6 @@
       "layer": "common"
     },
     {
-      "id": "meeting",
-      "type": "skill",
-      "layer": "common"
-    },
-    {
       "id": "meeting-facilitation",
       "type": "skill",
       "layer": "common"
@@ -460,12 +455,6 @@
     },
     {
       "type": "references",
-      "from": "meeting",
-      "to": "meeting-facilitation",
-      "source": "prose"
-    },
-    {
-      "type": "references",
       "from": "meeting-facilitation",
       "to": "project-review",
       "source": "prose"
@@ -480,6 +469,12 @@
       "type": "references",
       "from": "pm",
       "to": "decision-record",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "project-review",
+      "to": "validate-docs-links",
       "source": "prose"
     },
     {
@@ -556,6 +551,12 @@
         "field": "relates_to",
         "index": 0
       }
+    },
+    {
+      "type": "references",
+      "from": "validate-docs-links",
+      "to": "project-review",
+      "source": "prose"
     }
   ]
 }
