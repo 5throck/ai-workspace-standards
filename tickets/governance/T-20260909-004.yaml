@@ -5,7 +5,7 @@ title: >-
   validator-hardening: warn when agent frontmatter last_updated is older than
   the file's last git commit date
 priority: normal
-status: running
+status: done
 attempts: 0
 created_at: '2026-09-08T21:47:40.501Z'
 history:
@@ -18,5 +18,11 @@ history:
   - at: '2026-09-09T02:20:36.257Z'
     from: waiting
     to: running
+  - at: '2026-09-09T03:06:49.168Z'
+    from: running
+    to: review
+  - at: '2026-09-09T03:06:49.181Z'
+    from: review
+    to: done
 result: null
 error: null

@@ -5,7 +5,7 @@ title: >-
   validator-hardening: verify-memory.ts should flag MEMORY.md index rows whose
   session log file no longer exists (reverse dead-link check)
 priority: normal
-status: running
+status: done
 attempts: 0
 created_at: '2026-09-08T21:47:40.476Z'
 history:
@@ -18,5 +18,11 @@ history:
   - at: '2026-09-09T02:20:36.233Z'
     from: waiting
     to: running
+  - at: '2026-09-09T03:06:49.117Z'
+    from: running
+    to: review
+  - at: '2026-09-09T03:06:49.129Z'
+    from: review
+    to: done
 result: null
 error: null

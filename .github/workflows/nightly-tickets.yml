@@ -24,6 +24,38 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # Diagnostic: probe the z.ai Anthropic-compatible endpoint directly (no agent
+  # layer) to isolate auth/model/endpoint issues from claude-code-action hangs.
+  # Runs only on manual dispatch.
+  api-probe:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Probe z.ai endpoint with candidate models
+        env:
+          ZAI_API_KEY: ${{ secrets.ZAI_API_KEY }}
+        run: |
+          BASE="${{ vars.NIGHTLY_TICKETS_BASE_URL || 'https://api.z.ai/api/anthropic' }}"
+          for model in glm-5.3 glm-5.3-flash glm-4.7 "$NIGHTLY_TICKETS_MODEL"; do
+            [ -z "$model" ] && continue
+            code=$(curl -s --max-time 60 -o /tmp/resp.json -w "%{http_code}" \
+              "$BASE/v1/messages" \
+              -H "x-api-key: $ZAI_API_KEY" \
+              -H "anthropic-version: 2023-06-01" \
+              -H "content-type: application/json" \
+              -d "{\"model\":\"$model\",\"max_tokens\":8,\"messages\":[{\"role\":\"user\",\"content\":\"hi\"}]}")
+            echo "model=$model http=$code body=$(head -c 200 /tmp/resp.json)"
+          done
+          # Also test Bearer auth style (ANTHROPIC_AUTH_TOKEN equivalent)
+          code=$(curl -s --max-time 60 -o /tmp/resp2.json -w "%{http_code}" \
+            "$BASE/v1/messages" \
+            -H "Authorization: Bearer $ZAI_API_KEY" \
+            -H "anthropic-version: 2023-06-01" \
+            -H "content-type: application/json" \
+            -d '{"model":"glm-5.3","max_tokens":8,"messages":[{"role":"user","content":"hi"}]}')
+          echo "bearer-auth glm-5.3 http=$code body=$(head -c 200 /tmp/resp2.json)"
+
   tickets:
     runs-on: ubuntu-latest
     timeout-minutes: 210
