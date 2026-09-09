@@ -5,7 +5,7 @@ title: >-
   validator-hardening: add .bat to verify-scripts.ts SCRIPT_EXTENSIONS (or
   delete unregistered scripts/co-architect/setup/setup.bat)
 priority: normal
-status: running
+status: done
 attempts: 0
 created_at: '2026-09-08T21:47:40.489Z'
 history:
@@ -18,5 +18,11 @@ history:
   - at: '2026-09-09T02:20:36.208Z'
     from: waiting
     to: running
+  - at: '2026-09-09T03:06:49.142Z'
+    from: running
+    to: review
+  - at: '2026-09-09T03:06:49.155Z'
+    from: review
+    to: done
 result: null
 error: null
