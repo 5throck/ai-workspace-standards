@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-09-09T22:09:59.253Z
+**Generated**: 2026-09-09T22:33:39.877Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -22,7 +22,7 @@
 | architect | agents/architect.md | high        # claude-opus-5-0 | inherit | 2026-08-15 |
 | auditor | agents/auditor.md | medium        # claude-sonnet-5-0 | inherit | 2026-08-15 |
 | automation-engineer | agents/automation-engineer.md | low        # claude-haiku-4-5 | inherit | 2026-08-15 |
-| docs-writer | agents/docs-writer.md | medium        # claude-sonnet-5-0 | inherit | 2026-08-15 |
+| docs-writer | agents/docs-writer.md | medium        # claude-sonnet-5-0 | inherit | 2026-09-09 |
 | lifecycle-manager | agents/lifecycle-manager.md | medium        # claude-sonnet-5-0 | inherit | 2026-08-15 |
 | pm | agents/pm.md | high        # claude-opus-5-0 | inherit | 2026-09-06 |
 | scaffolding-expert | agents/scaffolding-expert.md | low        # claude-haiku-4-5 | inherit | 2026-08-15 |
@@ -127,7 +127,7 @@
 | procedure-coverage.ts | 1.0.0 | scripts/procedure-coverage.ts | js-yaml |
 | project-to-variant.ts | 1.3.0 | scripts/project-to-variant.ts | N/A |
 | promote-context-section.ts | 1.0.0 | scripts/promote-context-section.ts | N/A |
-| propagate-to-templates.ts | 2.8.0 | scripts/propagate-to-templates.ts | js-yaml |
+| propagate-to-templates.ts | 2.9.0 | scripts/propagate-to-templates.ts | js-yaml |
 | qa-gate.ts | N/A | scripts/qa-gate.ts | bun |
 | readme-lifecycle-audit.ts | 1.0.4 | scripts/readme-lifecycle-audit.ts | N/A |
 | regenerate-agents-md.ts | 1.1.0 | scripts/regenerate-agents-md.ts | fs, path |
