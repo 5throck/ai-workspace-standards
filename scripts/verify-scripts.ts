@@ -1,8 +1,12 @@
 #!/usr/bin/env bun
 /**
  * verify-scripts.ts — Script Lifecycle Registry Verifier
- * @version 1.5.0
+ * @version 1.6.0
  *
+ * v1.6.0: SCRIPT_EXTENSIONS now includes .bat (T-20260909-003) — Windows batch
+ *         helpers under scripts/ are registry-governed like .sh/.ps1/.ts and can
+ *         no longer escape the unregistered-script check. CLI dispatch is
+ *         import-guarded so unit tests can import the module safely.
  * Validates that scripts/SCRIPTS.md Registry is in sync with actual script files,
  * enforces deprecation removal dates, and blocks on security advisories.
  *
@@ -27,7 +31,10 @@ import { join, dirname, relative } from "path";
 
 // ── Configuration ────────────────────────────────────────────────────────────
 
-const SCRIPT_EXTENSIONS = [".sh", ".ps1", ".ts"];
+// .bat is governed too: Windows setup/batch helpers shipped under scripts/ must be
+// registered like any other script (T-20260909-003 — unregistered setup.bat escaped
+// every registry check because the scanner ignored the extension).
+export const SCRIPT_EXTENSIONS = [".sh", ".ps1", ".ts", ".bat"];
 const SCRIPTS_MD_FILENAME = "SCRIPTS.md";
 
 // Resolve workspace root (this script lives in scripts/ or templates/common/scripts/,
@@ -653,20 +660,20 @@ function report(): void {
 
 const args = process.argv.slice(2);
 
-if (args.includes("--generate")) {
-  generate();
-} else if (args.includes("--report")) {
-  report();
-} else if (args.includes("--check-drift")) {
-  checkDriftReport();
-} else if (args.includes("--verify") || args.length === 0) {
-  const ok = verify();
-  if (import.meta.main) {
+// Dispatch is import-guarded so unit tests can import the scanner helpers without
+// triggering a full verification run.
+if (import.meta.main) {
+  if (args.includes("--generate")) {
+    generate();
+  } else if (args.includes("--report")) {
+    report();
+  } else if (args.includes("--check-drift")) {
+    checkDriftReport();
+  } else if (args.includes("--verify") || args.length === 0) {
+    const ok = verify();
     process.exit(ok ? 0 : 1);
-  }
-} else {
-  console.error(`Usage: bun scripts/verify-scripts.ts [--verify | --generate | --report | --check-drift]`);
-  if (import.meta.main) {
+  } else {
+    console.error(`Usage: bun scripts/verify-scripts.ts [--verify | --generate | --report | --check-drift]`);
     process.exit(1);
   }
 }

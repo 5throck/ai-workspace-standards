@@ -5,12 +5,18 @@ title: >-
   validator-hardening: audit.ts root-allowlist check must fail loudly when
   docs/workspace-schema.json does not define rootAllowlist
 priority: normal
-status: backlog
+status: running
 attempts: 0
 created_at: '2026-09-08T21:47:40.527Z'
 history:
   - at: '2026-09-08T21:47:40.527Z'
     from: null
     to: backlog
+  - at: '2026-09-09T02:20:36.147Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-09T02:20:36.159Z'
+    from: waiting
+    to: running
 result: null
 error: null
