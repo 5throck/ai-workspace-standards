@@ -71,6 +71,7 @@ Detailed technical design documents, system improvement proposals, and machine-r
   - [Variant Templates Sync Design](designs/variant-templates-sync-design.md) — Architecture for variant template synchronization
   - [Workspace Q3 Improvements Design](designs/workspace-q3-improvements-design.md) — Comprehensive Q3 workspace improvement roadmap and design
   - [Variant Registry Architecture Design](designs/variant-registry-architecture-design.md) — Architecture for variant metadata registration and tracking
+  - [ci-triage Skill Design](designs/2026-09-08-ci-triage-skill-design.md) — CI failure triage skill pilot from the 2026-09-08 project-review ecosystem gap analysis
   - Additional design proposals: [L2 to Variant Conversion Pipeline](designs/l2-to-variant-conversion-pipeline.md), [Workspace Hardening Design](designs/workspace-hardening-design.md), [Governance Docs Consolidation Design](designs/governance-docs-consolidation-design.md)
 - [**Workspace Specifications**](specs/) — Structural specifications and JSON schema definitions:
   - [Specification Registry](specs/registry.json) — Schema registry index for workspace specifications
@@ -110,7 +111,7 @@ Lifecycle registries for workspace components, audit reports, historical reviews
   - [Lifecycle Architecture Overview](lifecycle/README.md) — Design and usage of component lifecycle registries
   - [Agent Lifecycle Registries](lifecycle/agents/) — Registration and status for workspace agents (e.g., `pm.md`, `architect.md`, `auditor.md`, `docs-writer.md`)
   - [Skill Lifecycle Registries](lifecycle/skills/) — Catalog of registered skills and lifecycle metadata
-  - [Script Lifecycle Registries](lifecycle/scripts/) — Index of workspace operational scripts and lifecycle state
+  - [Script Lifecycle Registries](lifecycle/scripts/) — Best-effort per-script records (currently 3); `scripts/SCRIPTS.md` is the SSOT for full script lifecycle state
   - [Template Lifecycle Registries](lifecycle/templates/) — Variant template lifecycle specifications (e.g., `co-develop.md`, `co-work.md`)
 - [**Workspace Audit Reports**](reports/) — Workspace evaluation, governance diet, and audit reports:
   - [Governance Docs Diet Analysis](reports/governance-docs-diet-analysis.md) — Optimization and consolidation audit of governance docs
