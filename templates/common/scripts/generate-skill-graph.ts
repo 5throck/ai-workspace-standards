@@ -1,8 +1,12 @@
 #!/usr/bin/env bun
 /**
  * Skill Relationship Graph Generator
- * @version 1.8.4
+ * @version 1.8.5
  *
+ * v1.8.5 (2026-09-09): ignore untracked/ignored workspace-root procedures/
+ * directories when deriving the L0 graph. Local disposable procedure fixtures
+ * must not make `bun scripts/audit.ts` fail on one checkout while CI stays green;
+ * tracked root procedure schemas are still included.
  * v1.8.4 (2026-09-08): fix — variant directory discovery (skill/agent/
  * procedure-derived output_type dedup) now sorts `templates/co-*` names in
  * deterministic ascending lexical order (locale-independent, not
@@ -58,6 +62,7 @@
  * - 1: Operational failure (missing files, parse errors, schema-validation errors)
  */
 
+import { execFileSync } from 'node:child_process';
 import { readFileSync, existsSync, readdirSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join, resolve, dirname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -73,6 +78,22 @@ const templatesDir = join(ROOT, 'templates');
 // being the L0 root — key on templates/common so local assets there are tagged
 // L3, not L0.
 const localLayer: 'L0' | 'L3' = existsSync(join(templatesDir, 'common')) ? 'L0' : 'L3';
+
+function hasTrackedFilesUnder(absDir: string): boolean {
+  if (!existsSync(absDir)) return false;
+  try {
+    const rel = relative(ROOT, absDir).replace(/\\/g, '/');
+    const out = execFileSync('git', ['ls-files', '--', rel], {
+      cwd: ROOT,
+      encoding: 'utf-8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    });
+    return out.trim().length > 0;
+  } catch {
+    // Non-git or restricted environments should keep the historical behavior.
+    return true;
+  }
+}
 
 // Interfaces for the graph structure
 interface GraphNode {
@@ -895,8 +916,13 @@ export function buildGraph(): SkillGraph {
       );
     }
   }
-  // Workspace-root lifecycle procedures (l0 namespace).
-  deriveProceduresFromDir(join(ROOT, 'procedures'), 'l0', localLayer, allNodes, edges);
+  // Workspace-root lifecycle procedures (l0 namespace). At the L0 workspace
+  // root, only tracked procedure schemas are canonical; ignored local fixture
+  // directories must not influence the committed graph projection.
+  const rootProceduresDir = join(ROOT, 'procedures');
+  if (localLayer !== 'L0' || hasTrackedFilesUnder(rootProceduresDir)) {
+    deriveProceduresFromDir(rootProceduresDir, 'l0', localLayer, allNodes, edges);
+  }
 
   // Source 5: Overrides (L0) — loaded and applied via shared helper
   const { overrides } = loadOverridesFile(join(ROOT, 'docs'));

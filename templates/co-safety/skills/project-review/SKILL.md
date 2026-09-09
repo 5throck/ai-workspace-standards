@@ -1,7 +1,7 @@
 ---
 name: project-review
 status: active
-scope: common
+scope: co-safety
 description: >
   Performs a comprehensive review of the current project: machine validator
   baseline first, then parallel specialist agents (scope-triageable: full /
