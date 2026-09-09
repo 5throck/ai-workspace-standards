@@ -82,6 +82,7 @@ jobs:
           API_TIMEOUT_MS: "3000000"
           CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1"
         with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           # claude-code-action v1 inputs: prompt (direct run), claude_args for
           # CLI passthrough. timeout is bounded by the job-level timeout-minutes.
           claude_args: >-
