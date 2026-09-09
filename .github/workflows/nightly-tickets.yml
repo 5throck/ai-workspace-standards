@@ -2,8 +2,14 @@ name: Nightly Governance Tickets
 
 # Ticket-driven nightly batch runner (project-resync / §3.7.5 companion).
 # Picks ready `kind: manual` governance tickets, implements the mechanically
-# actionable ones, and opens PRs — never merges. Requires repository secret
-# ANTHROPIC_API_KEY. Human review happens on the opened PRs the next morning.
+# actionable ones, and opens PRs — never merges. Human review happens on the
+# opened PRs the next morning.
+#
+# Credential auto-detection (step "Resolve credentials"):
+#   1. ANTHROPIC_API_KEY  — direct Anthropic API
+#   2. ZAI_API_KEY        — z.ai GLM via the Anthropic-compatible endpoint
+#                           (ANTHROPIC_BASE_URL=https://api.z.ai/api/anthropic)
+# If neither secret is set, the Claude step is skipped cleanly.
 
 on:
   schedule:
@@ -44,13 +50,36 @@ jobs:
           count=$(grep -c 'T-' ready-tickets.txt || true)
           echo "count=$count" >> "$GITHUB_OUTPUT"
 
+      - name: Resolve credentials (Anthropic direct or z.ai GLM)
+        id: creds
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ZAI_API_KEY: ${{ secrets.ZAI_API_KEY }}
+        run: |
+          if [ -n "$ANTHROPIC_API_KEY" ]; then
+            echo "provider=anthropic" >> "$GITHUB_OUTPUT"
+            echo "using provider: anthropic (direct)"
+          elif [ -n "$ZAI_API_KEY" ]; then
+            echo "provider=zai" >> "$GITHUB_OUTPUT"
+            echo "using provider: z.ai GLM (Anthropic-compatible endpoint)"
+          else
+            echo "provider=none" >> "$GITHUB_OUTPUT"
+            echo "no ANTHROPIC_API_KEY / ZAI_API_KEY secret set — skipping ticket processing"
+          fi
+
       - name: Process tickets (PR-only batch)
-        if: steps.ready.outputs.count != '0' && secrets.ANTHROPIC_API_KEY != ''
+        if: steps.ready.outputs.count != '0' && steps.creds.outputs.provider != 'none'
         uses: anthropics/claude-code-action@5ccc3a35a6367cdb8e6fbd0728287467540ecfe2 # v1.0.219
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Anthropic-direct mode: x-api-key auth. z.ai mode: Bearer auth via
+          # ANTHROPIC_AUTH_TOKEN + the Anthropic-compatible base URL (the key is
+          # also set as ANTHROPIC_API_KEY so the CLI preflight sees a credential).
+          ANTHROPIC_API_KEY: ${{ steps.creds.outputs.provider == 'zai' && secrets.ZAI_API_KEY || secrets.ANTHROPIC_API_KEY }}
+          ANTHROPIC_AUTH_TOKEN: ${{ steps.creds.outputs.provider == 'zai' && secrets.ZAI_API_KEY || '' }}
+          ANTHROPIC_BASE_URL: ${{ steps.creds.outputs.provider == 'zai' && 'https://api.z.ai/api/anthropic' || '' }}
+          ANTHROPIC_MODEL: ${{ vars.NIGHTLY_TICKETS_MODEL || '' }}
         with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           timeout_minutes: "180"
           allowed_tools: "Bash(bun *),Bash(git *),Bash(gh pr *),Bash(ls *),Bash(cat *),Bash(diff *),Bash(grep *),Bash(sed -i *),Bash(cp *),Bash(mkdir *),Bash(rm /tmp/*),Read,Write,Edit,Glob,Grep"
           direct_prompt: |
