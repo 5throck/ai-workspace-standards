@@ -75,8 +75,20 @@ jobs:
         if: steps.changes.outputs.lines == '0'
         run: echo "No upstream changes since last sync."; exit 0
 
+      - name: Check EDU_SYNC_PAT
+        id: pat
+        env:
+          EDU_SYNC_PAT: ${{ secrets.EDU_SYNC_PAT }}
+        run: |
+          if [ -n "$EDU_SYNC_PAT" ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "EDU_SYNC_PAT secret not set — skipping education updates"
+          fi
+
       - name: Clone education repositories
-        if: steps.changes.outputs.lines != '0' && secrets.EDU_SYNC_PAT != ''
+        if: steps.changes.outputs.lines != '0' && steps.pat.outputs.present == 'true'
         env:
           EDU_SYNC_PAT: ${{ secrets.EDU_SYNC_PAT }}
         run: |
@@ -85,7 +97,7 @@ jobs:
 
       - name: Update education content (PR-only)
         id: edu
-        if: steps.changes.outputs.lines != '0' && secrets.EDU_SYNC_PAT != ''
+        if: steps.changes.outputs.lines != '0' && steps.pat.outputs.present == 'true'
         uses: anthropics/claude-code-action@5ccc3a35a6367cdb8e6fbd0728287467540ecfe2 # v1.0.219
         env:
           GH_TOKEN: ${{ secrets.EDU_SYNC_PAT }}
