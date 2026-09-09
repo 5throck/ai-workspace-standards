@@ -4,6 +4,8 @@
 
 Records and governs the lifecycle of agents, skills, and scripts.
 
+> **Coverage**: per-component records are maintained for every agent and skill. Per-script records under `scripts/` are optional and best-effort — currently 3 records (`error-handling.md`, `new-project.md`, `validate-pm-extends.md`). `scripts/SCRIPTS.md` is the Single Source of Truth for script lifecycle state (see [§6.5 Script Lifecycle](../constitution/06.5-script-lifecycle.md)).
+
 ## File Structure
 
 ```
@@ -27,6 +29,7 @@ docs/lifecycle/
 │   ├── agent-lifecycle-manager.md
 │   ├── api-documentation.md
 │   ├── audit-workspace.md
+│   ├── ci-triage.md
 │   ├── context-commonization-review.md
 │   ├── create-variant.md
 │   ├── design-foundation.md
@@ -42,10 +45,12 @@ docs/lifecycle/
 │   ├── project-review.md
 │   ├── project-to-variant.md
 │   ├── promote-variant.md
+│   ├── release-template.md
 │   ├── research-analysis.md
 │   ├── script-lifecycle-manager.md
 │   ├── security-scan.md
 │   ├── simulate-l3-to-variant-promotion.md
+│   ├── simulate-pipeline.md
 │   ├── simulate-project-creation.md
 │   ├── skill-lifecycle-manager.md
 │   ├── source-command-commit-push-pr.md
