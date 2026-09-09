@@ -1,0 +1,33 @@
+schema_version: "1.0"
+procedure_id: co-game-game-security-retrospective
+variant: co-game
+version: "1.0.0"
+title: Game Security Retrospective
+phase: 5
+status: active
+owner_agent: security-monitor
+purpose: >
+  Capture post-release security and integrity lessons for game builds and assets.
+inputs:
+  - regression_report
+  - go_nogo_record
+preconditions:
+  - "Release verification has produced a go/no-go record."
+steps:
+  - id: 1
+    agent_key: security-monitor
+    skill_key: code-review
+    output_type: defect_sweep_report
+    description: >
+      Review dependency, asset-integrity, and runtime-risk findings that should
+      inform the next build cycle.
+outputs:
+  - type: defect_sweep_report
+relations:
+  - type: follows
+    target: procedure.co-game.game-release-verification
+quality_gates:
+  - "Post-release security follow-ups are recorded or explicitly waived."
+evidence: []
+failure_modes:
+  - "Security follow-ups are not captured; keep release closure open."

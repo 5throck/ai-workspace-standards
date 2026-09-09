@@ -21,4 +21,4 @@ To add a co-game-specific skill:
 1. Create a subdirectory: `templates/co-game/skills/<skill-name>/`
 2. Add a `SKILL.md` with required frontmatter (`name`, `version`, `last_reviewed`)
 3. Register the skill in this SKILLS.md and in `templates/co-game/variant.json skills[]`
-4. Run `bun scripts/validate-templates.ts` to verify compliance
+4. Run `bun scripts/audit.ts` to verify compliance

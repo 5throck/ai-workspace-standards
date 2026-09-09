@@ -10,44 +10,152 @@
   "specId": null,
   "origin_scenario": "B — existing project converted to variant-based governance (2026-08-25)",
   "agents": [
-    { "name": "pm", "file": "agents/pm.md" },
-    { "name": "lead-architect", "file": "agents/lead-architect.md" },
-    { "name": "core-engine-dev", "file": "agents/core-engine-dev.md" },
-    { "name": "cpa-auditor", "file": "agents/cpa-auditor.md" },
-    { "name": "security-auditor", "file": "agents/security-auditor.md" },
-    { "name": "finance-strategy-lead", "file": "agents/finance-strategy-lead.md" },
-    { "name": "cost-asset-mgmt", "file": "agents/cost-asset-mgmt.md" },
-    { "name": "ux-specialist", "file": "agents/ux-specialist.md" },
-    { "name": "l10n-auditor", "file": "agents/l10n-auditor.md" },
-    { "name": "qa-tester", "file": "agents/qa-tester.md" },
-    { "name": "devops-admin", "file": "agents/devops-admin.md" },
-    { "name": "security-monitor", "file": "agents/security-monitor.md" },
-    { "name": "pricing-strategist", "file": "agents/pricing-strategist.md" },
-    { "name": "market-intelligence-analyst", "file": "agents/market-intelligence-analyst.md" },
-    { "name": "engagement-director", "file": "agents/engagement-director.md" }
+    {
+      "name": "core-engine-dev",
+      "file": "agents/core-engine-dev.md"
+    },
+    {
+      "name": "cost-asset-mgmt",
+      "file": "agents/cost-asset-mgmt.md"
+    },
+    {
+      "name": "cpa-auditor",
+      "file": "agents/cpa-auditor.md"
+    },
+    {
+      "name": "devops-admin",
+      "file": "agents/devops-admin.md"
+    },
+    {
+      "name": "engagement-director",
+      "file": "agents/engagement-director.md"
+    },
+    {
+      "name": "finance-strategy-lead",
+      "file": "agents/finance-strategy-lead.md"
+    },
+    {
+      "name": "l10n-auditor",
+      "file": "agents/l10n-auditor.md"
+    },
+    {
+      "name": "lead-architect",
+      "file": "agents/lead-architect.md"
+    },
+    {
+      "name": "market-intelligence-analyst",
+      "file": "agents/market-intelligence-analyst.md"
+    },
+    {
+      "name": "pricing-strategist",
+      "file": "agents/pricing-strategist.md"
+    },
+    {
+      "name": "qa-tester",
+      "file": "agents/qa-tester.md"
+    },
+    {
+      "name": "security-auditor",
+      "file": "agents/security-auditor.md"
+    },
+    {
+      "name": "security-monitor",
+      "file": "agents/security-monitor.md"
+    },
+    {
+      "name": "ux-specialist",
+      "file": "agents/ux-specialist.md"
+    }
   ],
   "skills": [
-    { "name": "harness-verification", "file": "skills/harness-verification/SKILL.md" },
-    { "name": "double-entry-reconciliation", "file": "skills/double-entry-reconciliation/SKILL.md" },
-    { "name": "i18n-audit", "file": "skills/i18n-audit/SKILL.md" },
-    { "name": "excel-export", "file": "skills/excel-export/SKILL.md" },
-    { "name": "pdf-export", "file": "skills/pdf-export/SKILL.md" },
-    { "name": "financial-statement-prep", "file": "skills/financial-statement-prep/SKILL.md" },
-    { "name": "math-function-plotter", "file": "skills/math-function-plotter/SKILL.md" },
-    { "name": "sheet-model", "file": "skills/sheet-model/SKILL.md" },
-    { "name": "prisma-7", "file": "skills/prisma-7/SKILL.md" },
-    { "name": "ui-component-design", "file": "skills/ui-component-design/SKILL.md" },
-    { "name": "van-westendorp-psm", "file": "skills/van-westendorp-psm/SKILL.md" },
-    { "name": "gabor-granger", "file": "skills/gabor-granger/SKILL.md" },
-    { "name": "competitive-intelligence", "file": "skills/competitive-intelligence/SKILL.md" },
-    { "name": "scenario-comparison", "file": "skills/scenario-comparison/SKILL.md" },
-    { "name": "insight-synthesis", "file": "skills/insight-synthesis/SKILL.md" },
-    { "name": "executive-presentation", "file": "skills/executive-presentation/SKILL.md" },
-    { "name": "trade-promotion-roi", "file": "skills/trade-promotion-roi/SKILL.md" },
-    { "name": "pricing-playbook", "file": "skills/pricing-playbook/SKILL.md" },
-    { "name": "price-waterfall-analysis", "file": "skills/price-waterfall-analysis/SKILL.md" },
-    { "name": "pricing-governance", "file": "skills/pricing-governance/SKILL.md" },
-    { "name": "map-channel-enforcement", "file": "skills/map-channel-enforcement/SKILL.md" }
+    {
+      "name": "competitive-intelligence",
+      "file": "skills/competitive-intelligence/SKILL.md"
+    },
+    {
+      "name": "cost-shock-analysis",
+      "file": "skills/cost-shock-analysis/SKILL.md"
+    },
+    {
+      "name": "double-entry-reconciliation",
+      "file": "skills/double-entry-reconciliation/SKILL.md"
+    },
+    {
+      "name": "excel-export",
+      "file": "skills/excel-export/SKILL.md"
+    },
+    {
+      "name": "executive-presentation",
+      "file": "skills/executive-presentation/SKILL.md"
+    },
+    {
+      "name": "financial-statement-prep",
+      "file": "skills/financial-statement-prep/SKILL.md"
+    },
+    {
+      "name": "gabor-granger",
+      "file": "skills/gabor-granger/SKILL.md"
+    },
+    {
+      "name": "harness-verification",
+      "file": "skills/harness-verification/SKILL.md"
+    },
+    {
+      "name": "i18n-audit",
+      "file": "skills/i18n-audit/SKILL.md"
+    },
+    {
+      "name": "insight-synthesis",
+      "file": "skills/insight-synthesis/SKILL.md"
+    },
+    {
+      "name": "map-channel-enforcement",
+      "file": "skills/map-channel-enforcement/SKILL.md"
+    },
+    {
+      "name": "math-function-plotter",
+      "file": "skills/math-function-plotter/SKILL.md"
+    },
+    {
+      "name": "pdf-export",
+      "file": "skills/pdf-export/SKILL.md"
+    },
+    {
+      "name": "price-waterfall-analysis",
+      "file": "skills/price-waterfall-analysis/SKILL.md"
+    },
+    {
+      "name": "pricing-governance",
+      "file": "skills/pricing-governance/SKILL.md"
+    },
+    {
+      "name": "pricing-playbook",
+      "file": "skills/pricing-playbook/SKILL.md"
+    },
+    {
+      "name": "prisma-7",
+      "file": "skills/prisma-7/SKILL.md"
+    },
+    {
+      "name": "scenario-comparison",
+      "file": "skills/scenario-comparison/SKILL.md"
+    },
+    {
+      "name": "sheet-model",
+      "file": "skills/sheet-model/SKILL.md"
+    },
+    {
+      "name": "trade-promotion-roi",
+      "file": "skills/trade-promotion-roi/SKILL.md"
+    },
+    {
+      "name": "ui-component-design",
+      "file": "skills/ui-component-design/SKILL.md"
+    },
+    {
+      "name": "van-westendorp-psm",
+      "file": "skills/van-westendorp-psm/SKILL.md"
+    }
   ],
   "agent_overrides": {
     "pm": {

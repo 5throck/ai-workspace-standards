@@ -1,6 +1,6 @@
 /**
  * test-runner.ts — Test Runner for TypeScript Test Suites
- * @version 1.1.0
+ * @version 1.1.1
  */
 import { readdirSync, existsSync, rmSync, mkdirSync } from 'fs';
 import { join } from 'path';
@@ -41,11 +41,12 @@ const suites: TestSuite[] = [
 function getTestFiles(suite: TestSuite): string[] {
   const files: string[] = [];
   try {
+    if (!existsSync(suite.dir)) return files;
     const entries = readdirSync(suite.dir, { withFileTypes: true });
     for (const entry of entries) {
       if (!entry.isFile()) continue;
       const matchesExt = suite.ext === '' || entry.name.endsWith(suite.ext);
-      const matchesPattern = suite.name !== 'scripts' || entry.name.startsWith('test-');
+      const matchesPattern = suite.name !== 'scripts' || (entry.name.startsWith('test-') && entry.name !== 'test-runner.ts');
       if (matchesExt && matchesPattern) {
         files.push(join(suite.dir, entry.name));
       }

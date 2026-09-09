@@ -162,7 +162,7 @@
       "recursive": true,
       "l2_drift_eligible": false,
       "exclude": [
-        "simulate-project-creation"
+        "simulate-pipeline"
       ],
       "note": "No L2 variant has .agents/skills/ — workspace-root-only platform skills"
     },

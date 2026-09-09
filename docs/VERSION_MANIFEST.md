@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-09-09T03:26:26.579Z
+**Generated**: 2026-09-09T07:57:51.668Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -9,8 +9,8 @@
 ## Summary
 
 - **Agents**: 8
-- **Skills**: 52
-- **Scripts**: 90
+- **Skills**: 51
+- **Scripts**: 91
 - **Commands**: 8
 
 ---
@@ -59,7 +59,6 @@
 | k-kosis | 1.0.0 | active | templates/common/skills/k-kosis/SKILL.md | common | k-kosis, /k-kosis, KOSIS, `통계청`, `국가통계포털`, `인구통계`, `물가지수`, `경제통계`, `국가통계`, Korean national statistics | financial-analyst |
 | k-law | 1.0.0 | active | templates/common/skills/k-law/SKILL.md | common | k-law, /k-law, `법령`, `법률`, `법령정보`, `법령검색`, `판례`, law, statute, legal search, Korea law | strategy-analyst |
 | k-opendata | 1.2.0 | active | templates/common/skills/k-opendata/SKILL.md | common | k-opendata, /k-opendata, 공공데이터포털, data.go.kr, `관세청`, `수출입무역통계`, `품목별 국가별 수출입실적`, Korea Customs Service trade statistics, HS code trade data | hs-classification-specialist |
-| meeting | 1.4.1 | active | skills/meeting/SKILL.md | workspace | meeting, agent discussion, collaborative decision, multi-agent coordination, facilitate meeting | pm |
 | meeting-facilitation | 1.4.1 | active | skills/meeting-facilitation/SKILL.md | workspace | meeting, agent discussion, collaborative decision, multi-agent coordination, facilitate meeting | pm |
 | platform-command-lifecycle-manager | 1.0.0 | active | skills/platform-command-lifecycle-manager/SKILL.md | workspace | create platform command, new .claude command, new .gemini command, platform command lifecycle, command parity, propagate command | pm |
 | platform-skill-lifecycle-manager | 1.0.0 | active | skills/platform-skill-lifecycle-manager/SKILL.md | workspace | create platform skill, new .claude skill, new .gemini skill, platform skill version, platform skill lifecycle, update platform skill | pm |
@@ -67,11 +66,11 @@
 | project-review | 1.2.0 | active | skills/project-review/SKILL.md | workspace | project review, review project, audit project, quality review | pm |
 | project-to-variant | 1.3.0 | active | skills/project-to-variant/SKILL.md | workspace | convert project to variant, create variant from project, project to template, promote project to variant | scaffolding-expert |
 | promote-variant | 1.3.0 | active | skills/promote-variant/SKILL.md | workspace | promote variant, Phase B, variant promotion, promote to template, create template from prototype | pm |
+| release-template | 1.0.0 | active | skills/release-template/SKILL.md | workspace | release template, template release, bump templates version, tag template, publish template version | pm |
 | research-analysis | 1.0.0 | active | skills/research-analysis/SKILL.md | workspace | research, analyze, investigate, synthesize, evidence gathering, data analysis, literature review | pm |
 | script-lifecycle-manager | 1.2.0 | active | skills/script-lifecycle-manager/SKILL.md | workspace | create script, update script, deprecate script, script lifecycle, manage scripts | pm |
 | security-scan | 1.2.0 | active | skills/security-scan/SKILL.md | workspace | security scan, scan for vulnerabilities, security check, run security | pm |
-| simulate-l3-to-variant-promotion | 1.0.0 | active | skills/simulate-l3-to-variant-promotion/SKILL.md | workspace | simulate l2 promotion, test l2 pipeline, dry run variant promotion, test create-l3-scaffold | automation-engineer |
-| simulate-project-creation | 1.0.1 | active | skills/simulate-project-creation/SKILL.md | workspace | simulate project, test scaffolding, dry run project creation | scaffolding-expert |
+| simulate-pipeline | 1.0.0 | active | skills/simulate-pipeline/SKILL.md | workspace | simulate pipeline, simulate project, test scaffolding, dry run project creation, simulate l3 promotion, test l3 pipeline, dry run variant promotion | automation-engineer |
 | skill-lifecycle-manager | 1.3.0 | active | skills/skill-lifecycle-manager/SKILL.md | workspace | create skill, new skill, validate skills, skill lifecycle, manage skills | pm |
 | source-command-commit-push-pr | 1.0.1 | active | skills/source-command-commit-push-pr/SKILL.md | workspace | commit-push-pr, commit and push, create PR | pm |
 | standup-synthesizer | 1.0.0 | active | skills/standup-synthesizer/SKILL.md | workspace | standup digest, daily standup, synthesize standup, work summary | pm |
@@ -81,9 +80,9 @@
 | token-usage-lint | 1.1.0 | active | skills/token-usage-lint/SKILL.md | workspace | token lint, hardcoded color, design token compliance, raw hex values, hardcoded spacing | pm |
 | translate | 1.0.1 | active | skills/translate/SKILL.md | workspace | translate, translation, Korean translation | pm |
 | ui-ux-design-intelligence | 1.0.1 | active | skills/ui-ux-design-intelligence/SKILL.md | workspace | design system, ui design, ux design, component design, visual design, design tokens, interface design | pm |
-| update-bun-packages | 1.3.0 | active | skills/update-bun-packages/SKILL.md | workspace | update bun packages, upgrade bun packages, bun update, update dependencies, upgrade dependencies | pm |
+| update-bun-packages | 1.3.1 | active | skills/update-bun-packages/SKILL.md | workspace | update bun packages, upgrade bun packages, bun update, update dependencies, upgrade dependencies | pm |
 | upgrade-project | 1.2.1 | active | skills/upgrade-project/SKILL.md | workspace | upgrade project, upgrade template, sync project with template, refresh project, update project infrastructure | pm |
-| validate-docs-links | 1.0.0 | active | skills/validate-docs-links/SKILL.md | workspace | validate links, check links, broken links, docs validation | pm |
+| validate-docs-links | 1.0.0 | deprecated | skills/validate-docs-links/SKILL.md | workspace | validate links, check links, broken links, docs validation | pm |
 | variant-feature | 1.0.0 | active | skills/variant-feature/SKILL.md | workspace | add feature to variant, extend variant, variant feature, add agent to variant, add skill to variant | scaffolding-expert |
 | zod-contract-gate | 1.0.0 | active | skills/zod-contract-gate/SKILL.md | workspace | zod-contract-gate, /zod-contract-gate, zod contract validation, schema contract gate, runtime schema validation | architect |
 
@@ -100,16 +99,16 @@
 | agent-verify.ts | 1.0.2 | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.2 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.0.0 | scripts/archive-memory.ts | N/A |
-| audit.ts | 2.31.0 | scripts/audit.ts | bun |
+| audit.ts | 2.32.0 | scripts/audit.ts | bun |
 | cleanup-completed-md.ts | 1.1.0 | scripts/cleanup-completed-md.ts | N/A |
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | N/A |
 | compile-tokens.ts | 1.2.0 | scripts/compile-tokens.ts | N/A |
 | create-l3-scaffold.ts | 1.12.5 | scripts/create-l3-scaffold.ts | N/A |
 | design-lint.ts | 1.0.0 | scripts/design-lint.ts | N/A |
 | dev-sync.ts | 1.9.0 | scripts/dev-sync.ts | bun |
-| dispatch-parallel.ts | 1.1.0 | scripts/dispatch-parallel.ts | N/A |
-| dispatch-serial.ts | 1.1.0 | scripts/dispatch-serial.ts | N/A |
-| dispatch.ts | 1.1.0 | scripts/dispatch.ts | N/A |
+| dispatch-parallel.ts | 1.1.1 | scripts/dispatch-parallel.ts | N/A |
+| dispatch-serial.ts | 1.1.1 | scripts/dispatch-serial.ts | N/A |
+| dispatch.ts | 1.1.1 | scripts/dispatch.ts | N/A |
 | fix-script-versions.ts | 1.1.1 | scripts/fix-script-versions.ts | fs, path |
 | gen-pr-body.ts | 1.2.0 | scripts/gen-pr-body.ts | bun |
 | generate-ide-rules.ts | 1.0.0 | scripts/generate-ide-rules.ts | N/A |
@@ -132,14 +131,15 @@
 | qa-gate.ts | N/A | scripts/qa-gate.ts | bun |
 | readme-lifecycle-audit.ts | 1.0.4 | scripts/readme-lifecycle-audit.ts | N/A |
 | regenerate-agents-md.ts | 1.1.0 | scripts/regenerate-agents-md.ts | fs, path |
+| release-template.ts | 1.0.0 | scripts/release-template.ts | N/A |
 | remove-project.ts | 1.0.1 | scripts/remove-project.ts | N/A |
 | render-pdf-deck.ts | 1.0.0 | scripts/render-pdf-deck.ts | N/A |
-| resolve-variants.ts | 1.0.1 | scripts/resolve-variants.ts | fs, js-yaml, path |
+| resolve-variants.ts | 1.0.3 | scripts/resolve-variants.ts | fs, js-yaml, path |
 | resync-audit.ts | 1.0.0 | scripts/resync-audit.ts | N/A |
 | retry-handler.ts | 1.1.0 | scripts/retry-handler.ts | N/A |
 | setup-github-branch-protection.ts | 1.0.1 | scripts/setup-github-branch-protection.ts | bun |
 | skill-dependency-analysis.ts | 1.0.2 | scripts/skill-dependency-analysis.ts | N/A |
-| skill-lifecycle-audit.ts | 1.3.0 | scripts/skill-lifecycle-audit.ts | N/A |
+| skill-lifecycle-audit.ts | 1.4.0 | scripts/skill-lifecycle-audit.ts | N/A |
 | skill-session-review.ts | 1.0.0 | scripts/skill-session-review.ts | bun |
 | spec-backfill.ts | 1.0.0 | scripts/spec-backfill.ts | N/A |
 | spec-register.ts | 1.1.0 | scripts/spec-register.ts | N/A |
@@ -149,17 +149,17 @@
 | sync-skills-to-l2.ts | 1.0.1 | scripts/sync-skills-to-l2.ts | N/A |
 | sync-skills.ts | 1.4.1 | scripts/sync-skills.ts | N/A |
 | sync-template-deps.ts | 1.0.0 | scripts/sync-template-deps.ts | N/A |
-| tag-template.ts | 1.0.1 | scripts/tag-template.ts | bun |
+| tag-template.ts | 1.1.0 | scripts/tag-template.ts | bun |
 | team-builder.ts | 1.2.1 | scripts/team-builder.ts | N/A |
 | test-extends-validator.ts | 1.0.1 | scripts/test-extends-validator.ts | fs, path |
 | test-l3-to-variant-promotion.ts | 1.1.0 | scripts/test-l3-to-variant-promotion.ts | bun |
 | test-new-project.ts | 1.0.4 | scripts/test-new-project.ts | bun |
 | test-platform-parity.ts | 0.2.4 | scripts/test-platform-parity.ts | fs, path |
-| test-runner.ts | 1.1.0 | scripts/test-runner.ts | fs, os, path |
+| test-runner.ts | 1.1.1 | scripts/test-runner.ts | fs, os, path |
 | test-variant-readiness.ts | 1.0.0 | scripts/test-variant-readiness.ts | N/A |
 | ticket.ts | 1.1.0 | scripts/ticket.ts | N/A |
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, fs, path |
-| upgrade-project.ts | 1.19.1 | scripts/upgrade-project.ts | N/A |
+| upgrade-project.ts | 1.19.2 | scripts/upgrade-project.ts | N/A |
 | validate-agents.ts | 1.1.0 | scripts/validate-agents.ts | N/A |
 | validate-decisions.ts | 1.0.0 | scripts/validate-decisions.ts | js-yaml |
 | validate-doc-folder.ts | 1.1.0 | scripts/validate-doc-folder.ts | fs, path |
@@ -169,7 +169,7 @@
 | validate-pm-extends.ts | 0.3.1 | scripts/validate-pm-extends.ts | N/A |
 | validate-procedures.ts | 1.1.0 | scripts/validate-procedures.ts | js-yaml |
 | validate-skills.ts | 1.4.0 | scripts/validate-skills.ts | N/A |
-| validate-templates.ts | 1.21.0 | scripts/validate-templates.ts | js-yaml |
+| validate-templates.ts | 1.21.2 | scripts/validate-templates.ts | js-yaml |
 | validate-variant-readiness.ts | 1.1.0 | scripts/validate-variant-readiness.ts | N/A |
 | variant-feature.ts | 1.0.0 | scripts/variant-feature.ts | N/A |
 | verify-adr-governance.ts | 1.4.0 | scripts/verify-adr-governance.ts | N/A |
@@ -206,7 +206,7 @@
 **Checked**: Claude (.claude/) vs Gemini (.gemini/)
 
 - **Commands with parity**: 8 / 8
-- **Skills with parity**: 0 / 40 (common-template skills are parity-exempt)
+- **Skills with parity**: 0 / 39 (common-template skills are parity-exempt)
 
 ---
 
@@ -217,3 +217,4 @@
 - [WARNING] Skill graft has no triggers defined
 - [WARNING] Skill handbook has no triggers defined
 - [WARNING] Skill handbook-sync-audit has no triggers defined
+- [WARNING] Command meeting has no matching skill of the same name

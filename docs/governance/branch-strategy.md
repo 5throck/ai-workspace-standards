@@ -212,6 +212,50 @@ If a bad merge reaches `main`:
    - Update procedures to prevent recurrence
    - Add tests to catch regression
 
+### Postmortem Persistence Convention
+
+When a rollback, hotfix, failed sync, CI outage, or escaped regression requires a postmortem, persist it as a dated Markdown file instead of leaving only bullets in a PR thread.
+
+**Location**: `docs/governance/postmortems/YYYY-MM-DD-<incident-slug>.md`
+
+**Template**:
+```markdown
+# Postmortem — <incident title>
+
+- **Date detected**: YYYY-MM-DD
+- **Owner**: <agent/person>
+- **Severity**: low | medium | high | critical
+- **Status**: draft | final
+
+## Summary
+
+What happened and who/what was affected.
+
+## Timeline
+
+- YYYY-MM-DD HH:MM — event
+
+## Root Cause
+
+Primary technical/process cause.
+
+## Impact
+
+User, data, security, release, or workflow impact.
+
+## Corrective Actions
+
+| Action | Owner | Due | Status |
+|--------|-------|-----|--------|
+| ... | ... | YYYY-MM-DD | open |
+
+## Prevention / Follow-up Tickets
+
+Links to tickets, tests, validators, or procedure changes.
+```
+
+Keep the memory log as the session index, but keep the durable postmortem body under `docs/governance/postmortems/`.
+
 ## Branch Cleanup
 
 **Automated cleanup**:

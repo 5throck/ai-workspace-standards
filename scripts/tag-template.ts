@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.0.1
+// @version 1.1.0
 // tag-template.ts - Publish a new template version git tag
 
 import { $ } from 'bun';
@@ -16,6 +16,8 @@ const RESET    = '\x1b[0m';
 const scriptDir     = import.meta.dir;
 const workspaceRoot = path.resolve(scriptDir, '..');
 const isDryRun      = process.argv.includes('--dry-run');
+const noPush        = process.argv.includes('--no-push');
+const failOnPushError = process.argv.includes('--fail-on-push-error');
 
 // 1. Read templates/VERSION
 const versionFile = path.join(workspaceRoot, 'templates', 'VERSION');
@@ -74,13 +76,20 @@ if (isDryRun) {
   }
 }
 
-// 7. Create and push the tag
+// 7. Create and optionally push the tag
 const createResult = await $`git -C ${workspaceRoot} tag ${tagName}`.quiet().nothrow();
 if (createResult.exitCode !== 0) {
   const stderr = createResult.stderr.toString().trim();
   console.error(`${RED}✗ Failed to create tag ${tagName}: ${stderr}${RESET}`);
   if (import.meta.main) {
     process.exit(1);
+  }
+}
+
+if (noPush) {
+  console.log(`${GREEN}✅ Created local tag ${tagName} (push skipped by --no-push)${RESET}`);
+  if (import.meta.main) {
+    process.exit(0);
   }
 }
 
@@ -91,6 +100,9 @@ if (pushResult.exitCode === 0) {
   const stderr = pushResult.stderr.toString().trim();
   console.log(`${YELLOW}⚠ Tag created locally but push failed: ${stderr}${RESET}`);
   console.log(`${YELLOW}  Run: git push origin ${tagName}${RESET}`);
+  if (failOnPushError && import.meta.main) {
+    process.exit(1);
+  }
 }
 
 // 8. Remind user to bump version for the next release

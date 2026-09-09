@@ -80,7 +80,6 @@
 | `market-entry-strategy` | variant:co-export | market-entry-strategist, market-entry-strategist | phase1, phase3, phase4 | foreign-regulation-monitoring (follows) | — | — |
 | `math-function-plotter` | variant:co-price | — | — | — | — | — |
 | `mece-logic-auditor` | variant:co-consult | strategy-analyst | phase1 | — | — | — |
-| `meeting` | L0 | — | — | — | — | — |
 | `meeting-facilitation` | L0 | — | — | — | — | — |
 | `narrative-framework` | variant:co-consult | communications-lead, communications-lead | phase3 | consulting-report-writing (composes_with), executive-presentation (composes_with) | — | — |
 | `org-design-framework` | variant:co-hr | org-design-consultant, org-design-consultant | phase2, phase3 | hr-metrics-analysis (follows), org-readiness-assessment (composes_with), performance-system-design (composes_with), stakeholder-alignment (composes_with), talent-acquisition-strategy (follows) | — | — |
@@ -102,6 +101,7 @@
 | `project-to-variant` | L0 | — | — | promote-variant (composes_with) | — | — |
 | `promote-variant` | L0 | — | — | create-variant (follows), sync (follows) | — | — |
 | `refactoring` | variant:co-develop | code-writer, game-debugger, game-developer | phase3, phase4, phase5 | code-review (composes_with) | — | — |
+| `release-template` | L0 | — | — | — | — | — |
 | `research-analysis` | L0 | analyst | — | documentation-writing (enables) | — | — |
 | `roo-qualification-worksheet` | variant:co-export | fta-origin-analyst | phase1, phase2 | halal-certification-workflow (follows) | — | — |
 | `samm-maturity` | variant:co-security | threat-modeler | phase1, phase2 | — | — | — |
@@ -118,8 +118,7 @@
 | `security-scan` | L0 | — | — | — | — | — |
 | `service-design` | variant:co-design | design-lead, design-lead, service-designer, service-designer | phase1, phase2, phase3 | accessibility-audit (follows), token-usage-lint (follows), ui-ux-design-intelligence (follows) | — | — |
 | `sheet-model` | variant:co-price | — | — | — | — | — |
-| `simulate-l3-to-variant-promotion` | L0 | — | — | project-to-variant (follows) | — | — |
-| `simulate-project-creation` | L0 | — | — | — | — | — |
+| `simulate-pipeline` | L0 | — | — | — | — | — |
 | `skill-lifecycle-manager` | L0 | — | — | script-lifecycle-manager (composes_with) | — | — |
 | `slide-layout-gate` | variant:co-deck | pdf-export | phase4 | pdf-export (composes_with), pdf-export (follows) | slide-html | layout-gate-status |
 | `solution-design` | variant:co-consult | solutions-architect, solutions-architect, technology-specialist, technology-specialist | phase3, phase4 | financial-modeling (follows), stakeholder-alignment (composes_with), technical-feasibility (follows) | — | — |
@@ -203,7 +202,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `adr:0021` | adr | — | — | — |
 | `adr:0022` | adr | — | — | — |
 | `adr:0023` | adr | — | — | — |
-| `adr:0024` | adr | — | simulate-project-creation | — |
+| `adr:0024` | adr | — | — | — |
 | `adr:0025` | adr | — | — | — |
 | `adr:0026` | adr | — | — | — |
 | `adr:0027` | adr | — | design | — |

@@ -45,6 +45,10 @@ catches that class mechanically, not by agent effort.
 - Post-incident localized review (use `scoped` mode — see Step 1.5)
 - Weekly health pulse (use `baseline-only` mode — doubles as the §9.1 check)
 
+## Documentation/link ownership
+
+`project-review` owns routine documentation link-check evidence. Use `baseline-only` mode for weekly or pre-closeout docs/link validation instead of invoking the deprecated `validate-docs-links` skill.
+
 ## Step 0 — Machine Baseline (run BEFORE any agent dispatch)
 
 Run the validator battery and record results — this is (a) the report's Baseline

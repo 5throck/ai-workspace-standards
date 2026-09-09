@@ -1,0 +1,32 @@
+schema_version: "1.0"
+procedure_id: co-deck-version-retrospective-control
+variant: co-deck
+version: "1.0.0"
+title: Version Retrospective Control
+phase: 6
+status: active
+owner_agent: version
+purpose: >
+  Archive release notes and lessons after deck publication.
+inputs:
+  - publish_package
+preconditions:
+  - "Published deck package and release decision are available."
+steps:
+  - id: 1
+    agent_key: version
+    skill_key: version
+    output_type: version_record
+    description: >
+      Append post-release findings, accepted changes, and archive pointers to
+      the version record.
+outputs:
+  - type: version_record
+relations:
+  - type: follows
+    target: procedure.co-deck.deck-publish-and-version
+quality_gates:
+  - "Post-release archive identifies the final package and any follow-up actions."
+evidence: []
+failure_modes:
+  - "Published package has no archive pointer; recover before starting the next release."

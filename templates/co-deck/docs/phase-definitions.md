@@ -1,107 +1,33 @@
-# Phase Definitions
+# Phase Definitions — co-deck
 
-This document defines the standard workflow phases used across all variants. Each variant customizes the specialist agents for phases 1–5 while the overall structure remains consistent.
+co-deck uses presentation-delivery phases with fractional checkpoints for storyline lock and export readiness. PM owns phase 0 and final governance/QA; specialists own research, narrative, production, visual polish, and export tasks.
 
----
+| Phase | Name | Owning Agent(s) | Description |
+|-------|------|-----------------|-------------|
+| 0 | Deck Intake / Brief Lock | pm | Confirm audience, objective, format, constraints, timeline, source materials, and success criteria. |
+| 1 | Research & Evidence | analyst, business-consultant | Gather facts, claims, examples, and supporting material; identify citation and evidence gaps before narrative work. |
+| 1.5 | Storyline Gate | pm, strategist | Lock thesis, section flow, key messages, and decision asks before slide production begins. |
+| 2 | Information Architecture | deck-architect, content-strategist | Convert the storyline into slide-level structure, hierarchy, and speaker-note intent. |
+| 3 | Slide Production | slide-designer, visual-designer | Build slides, layouts, diagrams, tables, and visual treatments against the approved structure. |
+| 3.5 | Visual QA / Export Readiness | qa-reviewer, pm | Check brand consistency, overflow, accessibility, image manifests, and export constraints before final output. |
+| 4 | Export & Packaging | export-specialist | Generate deliverables (PDF/PPTX/HTML or requested package) and verify all assets are included. |
+| 5 | Delivery Retrospective | pm | Record lifecycle notes, unresolved follow-ups, reusable patterns, and post-delivery lessons. |
+| 6 | Final Audit / Publish Gate | pm | Run validation scripts and confirm no unresolved blockers remain before marking the deck publish-ready. |
 
-## Phase Overview
+## Handbook Phase Mapping
 
-| Phase | Name | PM Role | Who Acts |
-|-------|------|---------|----------|
-| 0 | Project Initiation | Orchestrator | PM + variant setup agents |
-| 1 | Research / Analysis | Observer | Specialist agents (variant-defined) |
-| 1-2 | Research & Architecture | Observer / Gate Keeper | Specialist agents (variant-defined) |
-| 2 | Design Review & Approval | Gate Keeper | PM + senior specialist agents |
-| 3 | Execution / Creation | Coordinator | Specialist agents (variant-defined) |
-| 4 | Delivery / Integration | Coordinator | Specialist agents (variant-defined) |
-| 5 | Lifecycle Finalization | Owner | PM (updates governance records, logs decisions) |
-| 6 | Quality Assurance & Finalization | Owner | PM (runs audit scripts, /sync, creates PR) |
+| Handbook Phase | co-deck Phase | Notes |
+|----------------|---------------|-------|
+| H0 — Setup | 0 | Brief, target audience, and output format are fixed here. |
+| H1 — Research | 1 | Evidence collection and claim validation. |
+| H2 — Narrative | 1.5–2 | Storyline gate plus slide-level information architecture. |
+| H3 — Production | 3 | Visual slide creation. |
+| H4 — Review | 3.5 | Visual QA, overflow checks, image manifest validation. |
+| H5 — Export | 4 | Package/export workflow. |
+| H6 — Closeout | 5–6 | Retrospective plus final audit/publish gate. |
 
----
+## Required Gates
 
-## Phase Details
-
-### Phase 0 — Project Initiation
-**PM opens the phase**: clarify objective, confirm scope, assemble the team.
-- PM reviews the request and classifies it
-- PM identifies which specialist agents are needed
-- Setup agents (if any) prepare the environment
-- **Output**: confirmed scope, team assignment
-
-### Phase 1 — Research / Analysis
-**PM observes**: specialists work autonomously.
-- Research agents gather data, evidence, and context
-- Analysis agents synthesize findings
-- PM intervenes only if quality standards are not met
-- **Output**: research findings, analysis report
-- **Gate**: none — phase ends when agents signal completion
-
-### Phase 1-2 — Combined Research & Architecture
-Some variants combine phases 1 and 2 when research and architecture planning are tightly coupled. In this case, specialist agents perform both research and architectural design before PM's approval gate. The approval gate still applies at the end of phase 1-2.
-
-### Phase 2 — Design Review & Approval
-**PM enforces the gate**: no execution without explicit user approval.
-- Senior specialist agents present the proposed approach
-- PM synthesizes findings into a decision recommendation
-- **USER APPROVAL REQUIRED** before proceeding to Phase 3
-- **Output**: approved implementation plan
-
-### Phase 3 — Execution / Creation
-**PM coordinates**: specialists implement per the approved plan.
-- Content, design, or code agents execute their domain work
-- Agents may hand off directly to each other without PM intervention
-- PM reviews output quality at phase end
-- **Output**: primary deliverables (documents, designs, code, etc.)
-
-### Phase 4 — Delivery / Integration
-**PM coordinates**: delivery agents finalize output.
-- Platform integration, publication, or deployment agents act
-- Project coordinators manage stakeholder communication
-- **Output**: delivered and integrated work product
-
-### Phase 5 — Lifecycle Finalization
-**PM owns**: updates governance records for any changed artifacts.
-- PM updates governance documents for agent/skill/script changes
-- PM logs decisions to `memory/YYYY-MM-DD.md`
-- Lifecycle state synced for any modified lifecycle-tracked artifacts
-- **Output**: governance records updated, drift report or "no drift" confirmation
-
-### Phase 6 — Quality Assurance & Finalization
-**PM owns**: finalizes the session.
-- PM runs `audit-workspace` skill
-- PM runs `validate-docs-links` skill
-- Maximum 2 fix iterations before escalating to user
-- PM runs `/sync` pipeline
-- PR opened with English title and description
-- Memory log updated
-- **Output**: passing audit report, merged PR or open PR link
-
----
-
-## Variant Customization Points
-
-Each variant declares its specialist agents per phase in `AGENTS.md § Phase Summary` and each agent's `agents/<name>.md` frontmatter:
-
-```yaml
-# Example agent frontmatter
-phases: [1, 2]
-handoff_to: [next-agent]
-handoff_from: [pm]
-required_skills: [skill-name]
-```
-
-The PM role and Phase 0/5/6 structure are identical across all variants. Variants differ in phases 1–4.
-
----
-
-## PM Facilitation per Phase
-
-| Phase | PM Opening | PM Monitoring | PM Synthesis |
-|-------|-----------|---------------|--------------|
-| 0 | Set objective, nominate team | Confirm setup complete | Scope document |
-| 1 | Brief analysts on research goal | Check quality of findings | Key findings summary |
-| 2 | Present findings for approval | — | Decision + approved plan |
-| 3 | Hand off approved plan | Intervene if off-plan | Quality review |
-| 4 | Confirm delivery targets | Track completion | Delivery confirmation |
-| 5 | Update governance records | Verify lifecycle drift | Drift report or "no drift" confirmation |
-| 6 | Run audit + /sync | Fix issues (max 2 iterations) | Audit pass report + PR link |
+- **Phase 1.5 Storyline Gate**: no production until the PM confirms the narrative path and section sequence.
+- **Phase 3.5 Export Readiness Gate**: no export until layout overflow, image manifest, and theme/style checks pass.
+- **Phase 6 Publish Gate**: final output is publish-ready only after validation and PM closeout.

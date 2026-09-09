@@ -197,6 +197,16 @@
       "layer": "variant:co-abap"
     },
     {
+      "id": "procedure.co-abap.security-closeout-review",
+      "type": "procedure",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "procedure.co-abap.security-readiness-baseline",
+      "type": "procedure",
+      "layer": "variant:co-abap"
+    },
+    {
       "id": "procedure.co-abap.solution-blueprint",
       "type": "procedure",
       "layer": "variant:co-abap"
@@ -1063,6 +1073,54 @@
       "type": "step_by_agent",
       "from": "procedure.co-abap.requirements-analysis",
       "to": "sd-analyst",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-abap.security-closeout-review",
+      "to": "abap-code-review",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-abap.security-closeout-review",
+      "to": "output_type.review_findings",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-abap.security-closeout-review",
+      "to": "procedure.co-abap.transport-release",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-abap.security-closeout-review",
+      "to": "security-monitor",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-abap.security-readiness-baseline",
+      "to": "abap-code-review",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-abap.security-readiness-baseline",
+      "to": "output_type.review_findings",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "enables",
+      "from": "procedure.co-abap.security-readiness-baseline",
+      "to": "procedure.co-abap.requirements-analysis",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-abap.security-readiness-baseline",
+      "to": "security-monitor",
       "source": "procedure_schema"
     },
     {

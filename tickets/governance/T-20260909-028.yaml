@@ -5,12 +5,24 @@ title: >-
   co-architect scripts: pre-commit which/where parity; audit.ts nul-cleanup
   branch dedupe; verify-scripts hint fix; skipped-file counting
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-08T21:47:57.548Z'
 history:
   - at: '2026-09-08T21:47:57.548Z'
     from: null
     to: backlog
+  - at: '2026-09-09T07:36:57.260Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-09T07:36:57.303Z'
+    from: waiting
+    to: running
+  - at: '2026-09-09T07:36:57.347Z'
+    from: running
+    to: review
+  - at: '2026-09-09T07:36:57.388Z'
+    from: review
+    to: done
 result: null
 error: null

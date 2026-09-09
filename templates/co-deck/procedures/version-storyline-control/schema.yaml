@@ -1,0 +1,33 @@
+schema_version: "1.0"
+procedure_id: co-deck-version-storyline-control
+variant: co-deck
+version: "1.0.0"
+title: Version Storyline Control
+phase: 2
+status: active
+owner_agent: version
+purpose: >
+  Preserve narrative-outline revisions before design and production begin.
+inputs:
+  - storyline_outline
+preconditions:
+  - "A candidate storyline outline exists."
+steps:
+  - id: 1
+    agent_key: version
+    skill_key: version
+    output_type: version_record
+    description: >
+      Record storyline revision, approved narrative structure, and open change requests.
+outputs:
+  - type: version_record
+relations:
+  - type: follows
+    target: procedure.co-deck.storyline-development
+  - type: enables
+    target: procedure.co-deck.lecture-deck-production
+quality_gates:
+  - "Production starts from a named and approved storyline revision."
+evidence: []
+failure_modes:
+  - "Storyline changes are untracked; stop production and re-establish the baseline."

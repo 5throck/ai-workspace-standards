@@ -303,7 +303,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 |-------|-------|
 | **File** | [`agents/safety-governance-manager.md`](agents/safety-governance-manager.md) |
 | **Tier** | high |
-| **Phases** | — |
+| **Phases** | 2, 6 |
 | **Role** | Strategic safety governance —selects industry profiles, defines KPIs, approves policies, and monitors regulatory updates. |
 
 ### safety-workflow-manager
@@ -525,7 +525,7 @@ All specialist agents below are dispatched ONLY through PM:
 | `shipbuilding-agent` | — | "shipbuilding-agent task needed", "shipbuilding-agent work required" |
 | `steelmaking-agent` | — | "steelmaking-agent task needed", "steelmaking-agent work required" |
 | `waste-agent` | — | "waste-agent task needed", "waste-agent work required" |
-| `safety-governance-manager` | — | "safety-governance-manager task needed", "safety-governance-manager work required" |
+| `safety-governance-manager` | 2, 6 | "safety-governance-manager task needed", "safety-governance-manager work required" |
 | `safety-workflow-manager` | — | "safety-workflow-manager task needed", "safety-workflow-manager work required" |
 | `asset-integrity-agent` | — | "asset-integrity-agent task needed", "asset-integrity-agent work required" |
 | `audit-agent` | — | "audit-agent task needed", "audit-agent work required" |
@@ -585,7 +585,7 @@ Before assigning an agent to any task, PM MUST classify the deliverable type:
 | Shipbuilding & Offshore Safety specialist — manages ship tank confined space asp | Phase 4 | `shipbuilding-agent` | medium | |
 | Steelmaking & Heavy Metals Safety specialist — manages molten metal furnace expl | Phase 4 | `steelmaking-agent` | medium | |
 | Environmental Waste & Water Treatment Safety specialist — manages sewage H2S asp | Phase 4 | `waste-agent` | medium | |
-| Strategic safety governance —selects industry profiles, defines KPIs, approves p | Phase 4 | `safety-governance-manager` | high | |
+| Strategic safety governance —selects industry profiles, defines KPIs, approves p | Phase 2, Phase 6 | `safety-governance-manager` | high | Strategic governance and QA gate ownership |
 | Harness Prompt agent —operational safety workflow execution, dynamic agent team  | Phase 4 | `safety-workflow-manager` | high | |
 | Asset integrity specialist; preventative maintenance and aging equipment managem | Phase 4 | `asset-integrity-agent` | medium | |
 | Safety audit and evidence traceability —finding documentation, corrective action | Phase 4 | `audit-agent` | medium | |

@@ -50,13 +50,13 @@ This is a guided CLI that prompts for:
 3. **Follow guided prompts**: Select variant, feature type, name, description
 4. **Customize generated stubs**: Fill in agent responsibilities, skill triggers, script logic
 5. **Update variant.json**: Add new agent/skill/script to manifest
-6. **Validate**: `bun scripts/validate-templates.ts`
+6. **Validate**: `bun scripts/audit.ts`
 7. **Update platform parity**: If adding a skill, ensure `.gemini/skills/` mirrors `.claude/skills/`
 
 ## After Adding Features
 
 - Update `variant.json` `agents[]`, `skills[]`, or `script_manifest.local[]`
-- Run validation: `bun scripts/validate-templates.ts`
+- Run validation: `bun scripts/audit.ts`
 - For skills: verify `.claude/skills/` and `.gemini/skills/` parity
 - For agents: update `AGENTS.md` roster table if the variant has one
 

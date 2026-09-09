@@ -3,7 +3,7 @@
 ## Metadata
 - **Skill**: update-bun-packages
 - **Status**: active
-- **Version**: 1.3.0
+- **Version**: 1.3.1
 - **Created**: 2026-08-16
 - **Last Updated**: 2026-08-16
 
@@ -17,6 +17,8 @@ Scans, updates, and upgrades Bun dependencies and packages across the AI workspa
 - Bun runtime
 
 ## Phase History
+
+- **2026-09-09**: Version 1.3.1 — documented `sync-template-deps.ts --apply` as the required root/common/variant package alignment path.
 
 | Date | From | To | Reason | Approver |
 |------|------|-----|---------|----------|

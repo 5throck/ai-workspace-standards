@@ -157,6 +157,36 @@
       "layer": "variant:co-deck"
     },
     {
+      "id": "procedure.co-deck.version-export-control",
+      "type": "procedure",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "procedure.co-deck.version-kickoff-control",
+      "type": "procedure",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "procedure.co-deck.version-production-control",
+      "type": "procedure",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "procedure.co-deck.version-research-control",
+      "type": "procedure",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "procedure.co-deck.version-retrospective-control",
+      "type": "procedure",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "procedure.co-deck.version-storyline-control",
+      "type": "procedure",
+      "layer": "variant:co-deck"
+    },
+    {
       "id": "README",
       "type": "agent",
       "layer": "variant:co-deck"
@@ -793,6 +823,174 @@
       "type": "step_uses_skill",
       "from": "procedure.co-deck.storyline-development",
       "to": "storyline",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-deck.version-export-control",
+      "to": "output_type.version_record",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-deck.version-export-control",
+      "to": "procedure.co-deck.deck-build-and-export",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "enables",
+      "from": "procedure.co-deck.version-export-control",
+      "to": "procedure.co-deck.deck-publish-and-version",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-deck.version-export-control",
+      "to": "version",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-deck.version-export-control",
+      "to": "version",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-deck.version-kickoff-control",
+      "to": "output_type.version_record",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "enables",
+      "from": "procedure.co-deck.version-kickoff-control",
+      "to": "procedure.co-deck.source-research",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-deck.version-kickoff-control",
+      "to": "version",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-deck.version-kickoff-control",
+      "to": "version",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-deck.version-production-control",
+      "to": "output_type.version_record",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "enables",
+      "from": "procedure.co-deck.version-production-control",
+      "to": "procedure.co-deck.deck-build-and-export",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-deck.version-production-control",
+      "to": "procedure.co-deck.lecture-deck-production",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-deck.version-production-control",
+      "to": "version",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-deck.version-production-control",
+      "to": "version",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-deck.version-research-control",
+      "to": "output_type.version_record",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-deck.version-research-control",
+      "to": "procedure.co-deck.source-research",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "enables",
+      "from": "procedure.co-deck.version-research-control",
+      "to": "procedure.co-deck.storyline-development",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-deck.version-research-control",
+      "to": "version",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-deck.version-research-control",
+      "to": "version",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-deck.version-retrospective-control",
+      "to": "output_type.version_record",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-deck.version-retrospective-control",
+      "to": "procedure.co-deck.deck-publish-and-version",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-deck.version-retrospective-control",
+      "to": "version",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-deck.version-retrospective-control",
+      "to": "version",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-deck.version-storyline-control",
+      "to": "output_type.version_record",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "enables",
+      "from": "procedure.co-deck.version-storyline-control",
+      "to": "procedure.co-deck.lecture-deck-production",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-deck.version-storyline-control",
+      "to": "procedure.co-deck.storyline-development",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-deck.version-storyline-control",
+      "to": "version",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-deck.version-storyline-control",
+      "to": "version",
       "source": "procedure_schema"
     },
     {

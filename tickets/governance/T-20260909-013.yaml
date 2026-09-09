@@ -5,12 +5,24 @@ title: >-
   add test coverage for audit.ts/verify-scripts.ts pure helpers; fix
   test-runner.ts suite table self-match and nonexistent dirs
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-08T21:47:57.351Z'
 history:
   - at: '2026-09-08T21:47:57.351Z'
     from: null
     to: backlog
+  - at: '2026-09-09T07:36:54.764Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-09T07:36:54.809Z'
+    from: waiting
+    to: running
+  - at: '2026-09-09T07:36:54.854Z'
+    from: running
+    to: review
+  - at: '2026-09-09T07:36:54.904Z'
+    from: review
+    to: done
 result: null
 error: null

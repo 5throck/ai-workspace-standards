@@ -14,174 +14,34 @@
   },
   "agents": [
     {
-      "name": "asset-integrity-agent",
-      "file": "agents/_shared/asset-integrity-agent.md"
-    },
-    {
-      "name": "audit-agent",
-      "file": "agents/_shared/audit-agent.md"
-    },
-    {
-      "name": "battery-agent",
-      "file": "agents/domains/industry/battery/battery-agent.md"
-    },
-    {
-      "name": "biotech-agent",
-      "file": "agents/domains/industry/biotech/biotech-agent.md"
-    },
-    {
-      "name": "compliance-agent",
-      "file": "agents/_shared/compliance-agent.md"
-    },
-    {
-      "name": "contractor-safety-agent",
-      "file": "agents/_shared/contractor-safety-agent.md"
-    },
-    {
-      "name": "cosmetics-agent",
-      "file": "agents/domains/industry/cosmetics/cosmetics-agent.md"
-    },
-    {
-      "name": "datacenter-agent",
-      "file": "agents/domains/industry/datacenter/datacenter-agent.md"
-    },
-    {
-      "name": "defense-agent",
-      "file": "agents/domains/industry/defense/defense-agent.md"
-    },
-    {
-      "name": "disaster-response-agent",
-      "file": "agents/_shared/disaster-response-agent.md"
-    },
-    {
-      "name": "docs-writer",
-      "file": "agents/_shared/docs-writer.md"
-    },
-    {
-      "name": "ehschem-agent",
-      "file": "agents/domains/industry/ehschem/ehschem-agent.md"
-    },
-    {
-      "name": "ehsconst-agent",
-      "file": "agents/domains/industry/ehsconst/ehsconst-agent.md"
-    },
-    {
-      "name": "emergency-agent",
-      "file": "agents/_shared/emergency-agent.md"
-    },
-    {
-      "name": "food-agent",
-      "file": "agents/domains/industry/food/food-agent.md"
-    },
-    {
-      "name": "gasterm-agent",
-      "file": "agents/domains/industry/gasterm/gasterm-agent.md"
-    },
-    {
-      "name": "gcp-agent",
-      "file": "agents/domains/industry/gcp/gcp-agent.md"
-    },
-    {
-      "name": "gdp-agent",
-      "file": "agents/domains/industry/gdp/gdp-agent.md"
-    },
-    {
-      "name": "glp-agent",
-      "file": "agents/domains/industry/glp/glp-agent.md"
-    },
-    {
-      "name": "gmp-agent",
-      "file": "agents/domains/industry/gmp/gmp-agent.md"
-    },
-    {
-      "name": "gvp-agent",
-      "file": "agents/domains/industry/gvp/gvp-agent.md"
-    },
-    {
-      "name": "incident-investigation-agent",
-      "file": "agents/_shared/incident-investigation-agent.md"
-    },
-    {
-      "name": "legal-agent",
-      "file": "agents/_shared/legal-agent.md"
-    },
-    {
-      "name": "logistics-agent",
-      "file": "agents/domains/industry/logistics/logistics-agent.md"
-    },
-    {
-      "name": "meddevice-agent",
-      "file": "agents/domains/industry/meddevice/meddevice-agent.md"
-    },
-    {
-      "name": "msds-agent",
-      "file": "agents/domains/functional/msds/msds-agent.md"
-    },
-    {
-      "name": "occupational-health-agent",
-      "file": "agents/_shared/occupational-health-agent.md"
-    },
-    {
-      "name": "pm",
-      "file": "agents/pm.md"
-    },
-    {
-      "name": "powergen-agent",
-      "file": "agents/domains/industry/powergen/powergen-agent.md"
-    },
-    {
-      "name": "psm-agent",
-      "file": "agents/domains/functional/psm/psm-agent.md"
-    },
-    {
-      "name": "railway-agent",
-      "file": "agents/domains/industry/railway/railway-agent.md"
-    },
-    {
-      "name": "reporting-agent",
-      "file": "agents/_shared/reporting-agent.md"
-    },
-    {
-      "name": "risk-assessment-agent",
-      "file": "agents/_shared/risk-assessment-agent.md"
-    },
-    {
       "name": "safety-governance-manager",
       "file": "agents/safety-governance-manager.md"
     },
     {
       "name": "safety-workflow-manager",
       "file": "agents/safety-workflow-manager.md"
-    },
-    {
-      "name": "semicon-agent",
-      "file": "agents/domains/industry/semicon/semicon-agent.md"
-    },
-    {
-      "name": "shipbuilding-agent",
-      "file": "agents/domains/industry/shipbuilding/shipbuilding-agent.md"
-    },
-    {
-      "name": "steelmaking-agent",
-      "file": "agents/domains/industry/steelmaking/steelmaking-agent.md"
-    },
-    {
-      "name": "training-agent",
-      "file": "agents/domains/functional/training/training-agent.md"
-    },
-    {
-      "name": "waste-agent",
-      "file": "agents/domains/industry/waste/waste-agent.md"
     }
   ],
   "skills": [
+    {
+      "name": "agent-lifecycle-manager",
+      "file": "skills/agent-lifecycle-manager/SKILL.md"
+    },
+    {
+      "name": "asset-integrity-check",
+      "file": "skills/daily/asset-integrity-check/SKILL.md"
+    },
+    {
+      "name": "audit-preparation",
+      "file": "skills/daily/audit-preparation/SKILL.md"
+    },
     {
       "name": "compliance-gap",
       "file": "skills/daily/compliance-gap/SKILL.md"
     },
     {
-      "name": "emergency-response",
-      "file": "skills/emergency/emergency-response/SKILL.md"
+      "name": "contractor-onboarding",
+      "file": "skills/daily/contractor-onboarding/SKILL.md"
     },
     {
       "name": "permit-to-work",
@@ -190,6 +50,218 @@
     {
       "name": "risk-assessment",
       "file": "skills/daily/risk-assessment/SKILL.md"
+    },
+    {
+      "name": "tool-box-meeting",
+      "file": "skills/daily/tool-box-meeting/SKILL.md"
+    },
+    {
+      "name": "chemical-risk-assessment",
+      "file": "skills/domains/functional/msds/chemical-risk-assessment/SKILL.md"
+    },
+    {
+      "name": "ghs-classifier",
+      "file": "skills/domains/functional/msds/ghs-classifier/SKILL.md"
+    },
+    {
+      "name": "msds-parser",
+      "file": "skills/domains/functional/msds/msds-parser/SKILL.md"
+    },
+    {
+      "name": "psm-loto",
+      "file": "skills/domains/functional/psm/loto/SKILL.md"
+    },
+    {
+      "name": "psm-moc",
+      "file": "skills/domains/functional/psm/moc/SKILL.md"
+    },
+    {
+      "name": "hv-cell-formation-electrical-safety-planner",
+      "file": "skills/domains/industry/battery/hv-cell-formation-electrical-safety-planner/SKILL.md"
+    },
+    {
+      "name": "bsl-lab-aerosol-control-planner",
+      "file": "skills/domains/industry/biotech/bsl-lab-aerosol-control-planner/SKILL.md"
+    },
+    {
+      "name": "cosmetics-solvent-exposure-monitor",
+      "file": "skills/domains/industry/cosmetics/cosmetics-solvent-exposure-monitor/SKILL.md"
+    },
+    {
+      "name": "rack-fall-protection-planner",
+      "file": "skills/domains/industry/datacenter/rack-fall-protection-planner/SKILL.md"
+    },
+    {
+      "name": "munitions-magazine-storage-safety-planner",
+      "file": "skills/domains/industry/defense/munitions-magazine-storage-safety-planner/SKILL.md"
+    },
+    {
+      "name": "environmental-compliance-checker",
+      "file": "skills/domains/industry/ehschem/environmental-compliance-checker/SKILL.md"
+    },
+    {
+      "name": "process-hazard-screening",
+      "file": "skills/domains/industry/ehschem/process-hazard-screening/SKILL.md"
+    },
+    {
+      "name": "tar-planning",
+      "file": "skills/domains/industry/ehschem/tar-planning/SKILL.md"
+    },
+    {
+      "name": "fall-hazard-assessor",
+      "file": "skills/domains/industry/ehsconst/fall-hazard-assessor/SKILL.md"
+    },
+    {
+      "name": "safety-inspection-validator",
+      "file": "skills/domains/industry/ehsconst/safety-inspection-validator/SKILL.md"
+    },
+    {
+      "name": "thermal-burn-prevention-planner",
+      "file": "skills/domains/industry/food/thermal-burn-prevention-planner/SKILL.md"
+    },
+    {
+      "name": "completion-inspection",
+      "file": "skills/domains/industry/gasterm/completion-inspection/SKILL.md"
+    },
+    {
+      "name": "construction-permit-overview",
+      "file": "skills/domains/industry/gasterm/construction-permit-overview/SKILL.md"
+    },
+    {
+      "name": "gas-dispersion-analyzer",
+      "file": "skills/domains/industry/gasterm/gas-dispersion-analyzer/SKILL.md"
+    },
+    {
+      "name": "mid-construction-inspection",
+      "file": "skills/domains/industry/gasterm/mid-construction-inspection/SKILL.md"
+    },
+    {
+      "name": "pre-construction-technical-review",
+      "file": "skills/domains/industry/gasterm/pre-construction-technical-review/SKILL.md"
+    },
+    {
+      "name": "tank-integrity-validator",
+      "file": "skills/domains/industry/gasterm/tank-integrity-validator/SKILL.md"
+    },
+    {
+      "name": "protocol-deviation-analyzer",
+      "file": "skills/domains/industry/gcp/protocol-deviation-analyzer/SKILL.md"
+    },
+    {
+      "name": "sae-causality-assessor",
+      "file": "skills/domains/industry/gcp/sae-causality-assessor/SKILL.md"
+    },
+    {
+      "name": "dts-verification",
+      "file": "skills/domains/industry/gdp/dts-verification/SKILL.md"
+    },
+    {
+      "name": "temperature-excursion-analyzer",
+      "file": "skills/domains/industry/gdp/temperature-excursion-analyzer/SKILL.md"
+    },
+    {
+      "name": "glp-data-integrity-checker",
+      "file": "skills/domains/industry/glp/glp-data-integrity-checker/SKILL.md"
+    },
+    {
+      "name": "glp-study-protocol-validator",
+      "file": "skills/domains/industry/glp/glp-study-protocol-validator/SKILL.md"
+    },
+    {
+      "name": "gmp-change-control",
+      "file": "skills/domains/industry/gmp/change-control/SKILL.md"
+    },
+    {
+      "name": "gmp-deviation-capa",
+      "file": "skills/domains/industry/gmp/deviation-capa/SKILL.md"
+    },
+    {
+      "name": "gmp-qrm",
+      "file": "skills/domains/industry/gmp/qrm/SKILL.md"
+    },
+    {
+      "name": "benefit-risk-assessor",
+      "file": "skills/domains/industry/gvp/benefit-risk-assessor/SKILL.md"
+    },
+    {
+      "name": "signal-detector",
+      "file": "skills/domains/industry/gvp/signal-detector/SKILL.md"
+    },
+    {
+      "name": "dangerous-cargo-handling-planner",
+      "file": "skills/domains/industry/logistics/dangerous-cargo-handling-planner/SKILL.md"
+    },
+    {
+      "name": "iso14971-risk-scorer",
+      "file": "skills/domains/industry/meddevice/iso14971-risk-scorer/SKILL.md"
+    },
+    {
+      "name": "arc-flash-analyzer",
+      "file": "skills/domains/industry/powergen/arc-flash-analyzer/SKILL.md"
+    },
+    {
+      "name": "ess-fire-risk-assessor",
+      "file": "skills/domains/industry/powergen/ess-fire-risk-assessor/SKILL.md"
+    },
+    {
+      "name": "rolling-stock-maintenance-loto-planner",
+      "file": "skills/domains/industry/railway/rolling-stock-maintenance-loto-planner/SKILL.md"
+    },
+    {
+      "name": "pyrophoric-gas-emergency-responder",
+      "file": "skills/domains/industry/semicon/pyrophoric-gas-emergency-responder/SKILL.md"
+    },
+    {
+      "name": "painting-coating-fire-toxic-planner",
+      "file": "skills/domains/industry/shipbuilding/painting-coating-fire-toxic-planner/SKILL.md"
+    },
+    {
+      "name": "coke-oven-pah-heat-stress-planner",
+      "file": "skills/domains/industry/steelmaking/coke-oven-pah-heat-stress-planner/SKILL.md"
+    },
+    {
+      "name": "landfill-methane-anaerobic-explosion-planner",
+      "file": "skills/domains/industry/waste/landfill-methane-anaerobic-explosion-planner/SKILL.md"
+    },
+    {
+      "name": "emergency-response",
+      "file": "skills/emergency/emergency-response/SKILL.md"
+    },
+    {
+      "name": "hazop-analysis",
+      "file": "skills/investigation/hazop-analysis/SKILL.md"
+    },
+    {
+      "name": "root-cause-analysis",
+      "file": "skills/investigation/root-cause-analysis/SKILL.md"
+    },
+    {
+      "name": "meeting-facilitation",
+      "file": "skills/meeting-facilitation/SKILL.md"
+    },
+    {
+      "name": "project-review",
+      "file": "skills/project-review/SKILL.md"
+    },
+    {
+      "name": "script-lifecycle-manager",
+      "file": "skills/script-lifecycle-manager/SKILL.md"
+    },
+    {
+      "name": "skill-lifecycle-manager",
+      "file": "skills/skill-lifecycle-manager/SKILL.md"
+    },
+    {
+      "name": "sync",
+      "file": "skills/sync/SKILL.md"
+    },
+    {
+      "name": "team-builder",
+      "file": "skills/team-builder/SKILL.md"
+    },
+    {
+      "name": "translate",
+      "file": "skills/translate/SKILL.md"
     }
   ],
   "displayName": "Safety OS",
@@ -284,5 +356,70 @@
     "promotionEligible": false,
     "missingCriteria": [],
     "lastSynced": "2026-08-26T23:18:00.672Z"
+  },
+  "script_manifest": {
+    "variant_scripts_dir": "scripts/co-safety",
+    "local": [
+      {
+        "name": "audit-variant",
+        "path": "scripts/co-safety/audit-variant.ts"
+      },
+      {
+        "name": "check-pm-approval",
+        "path": "scripts/co-safety/check-pm-approval.ts"
+      },
+      {
+        "name": "domain-config",
+        "path": "scripts/co-safety/domain-config.ts"
+      },
+      {
+        "name": "migrate-registry-to-coordinates",
+        "path": "scripts/co-safety/migrate-registry-to-coordinates.ts"
+      },
+      {
+        "name": "new-domain",
+        "path": "scripts/co-safety/new-domain.ts"
+      },
+      {
+        "name": "risk-register-rollup",
+        "path": "scripts/co-safety/risk-register-rollup.ts"
+      },
+      {
+        "name": "safety-audit",
+        "path": "scripts/co-safety/safety-audit.ts"
+      },
+      {
+        "name": "scaffold-industry",
+        "path": "scripts/co-safety/scaffold-industry.ts"
+      },
+      {
+        "name": "start-mcp",
+        "path": "scripts/co-safety/start-mcp.ts"
+      },
+      {
+        "name": "test-chemical-handling-profile",
+        "path": "scripts/co-safety/test-chemical-handling-profile.ts"
+      },
+      {
+        "name": "test-cross-domain-integration",
+        "path": "scripts/co-safety/test-cross-domain-integration.ts"
+      },
+      {
+        "name": "test-domain-scenarios",
+        "path": "scripts/co-safety/test-domain-scenarios.ts"
+      },
+      {
+        "name": "test-pharma-general-profile",
+        "path": "scripts/co-safety/test-pharma-general-profile.ts"
+      },
+      {
+        "name": "test-runtime-tools",
+        "path": "scripts/co-safety/test-runtime-tools.ts"
+      },
+      {
+        "name": "training-ingest",
+        "path": "scripts/co-safety/training-ingest.ts"
+      }
+    ]
   }
 }

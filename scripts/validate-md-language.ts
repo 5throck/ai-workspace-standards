@@ -5,14 +5,14 @@
  *
  * Policy: Official documents and governance files must contain English sentences.
  * Validates only allowlisted paths: agents/, AGENTS.md, CLAUDE.md, GEMINI.md,
- * CONSTITUTION.md, CHANGELOG.md, docs/constitution/, docs/governance/, skills/,
+ * CONSTITUTION.md, CHANGELOG.md, docs/constitution/, docs/governance/, docs/designs/, skills/,
  * .claude/skills/, .gemini/skills/, .claude/commands/, .gemini/commands/,
  * templates/, and SECURITY.md. Both `.md` and `.yaml`/`.yml` files under these
  * paths are scanned; the `lang: ko` + `lang_reason` exception is declared in
  * `---` frontmatter for Markdown, or as a top-level `lang:`/`lang_reason:` key
  * for plain YAML files that have no frontmatter fence.
  *
- * Excludes: memory/ logs, docs/designs/, docs/adr/, locale-specific files
+ * Excludes: memory/ logs, docs/adr/, locale-specific files
  * for all supported I18N languages, and node_modules/.git directories.
  *
  * Locale-only content in excluded paths is acceptable. Mixed-language content
@@ -129,6 +129,7 @@ function parseLangDeclaration(content: string, isPlainYaml: boolean): { lang?: s
  * - AGENTS.md, CLAUDE.md, GEMINI.md, CONSTITUTION.md, CHANGELOG.md, SECURITY.md
  * - docs/constitution/ (subdirectories)
  * - docs/governance/ (subdirectories)
+ * - docs/designs/ (design docs may use lang frontmatter exceptions)
  * - skills/ (subdirectories)
  * - .claude/skills/, .claude/commands/ (subdirectories)
  * - .gemini/skills/, .gemini/commands/ (subdirectories)
@@ -151,6 +152,7 @@ function isOfficialDocument(filePath: string): boolean {
     /^SECURITY\.md$/,
     /^docs\/constitution\/.*\.(md|ya?ml)$/,
     /^docs\/governance\/.*\.(md|ya?ml)$/,
+    /^docs\/designs\/.*\.(md|ya?ml)$/,
     /^skills\/.*\.(md|ya?ml)$/,
     /^\.claude\/skills\/.*\.(md|ya?ml)$/,
     /^\.claude\/commands\/.*\.(md|ya?ml)$/,
@@ -191,8 +193,7 @@ function isExcludedPath(filePath: string): boolean {
   }
 
   // Exclude planning/draft docs (locale-only content is acceptable here)
-  if (normalizedPath.startsWith("docs/designs/") ||
-      normalizedPath.startsWith("docs/adr/")) {
+  if (normalizedPath.startsWith("docs/adr/")) {
     return true;
   }
 

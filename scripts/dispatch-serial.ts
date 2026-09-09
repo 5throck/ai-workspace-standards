@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Serial Agent Dispatcher
- * @version 1.1.0
+ * @version 1.1.1
  * Automates dispatching subagents that must run sequentially
  *
  * This dispatcher is for tasks with dependencies:
@@ -104,43 +104,13 @@ async function executeSerialTask(
       console.log(`   Depends on: ${task.dependsOn}`);
     }
 
-    // TODO: Replace with Agent tool invocation when running inside Claude Code.
-    // The Agent tool cannot be called from a subprocess; this script is intended
-    // to be driven by PM/orchestrator code that substitutes real agent calls.
-    // For CLI use, we invoke dispatch.ts as a subprocess per task.
-    const { $ } = await import('bun');
-    const proc = await $`bun run scripts/dispatch.ts --task ${JSON.stringify(task)}`.nothrow();
-
-    const stdout = proc.stdout.toString().trim();
-    const stderr = proc.stderr.toString().trim();
-    const exitCode = proc.exitCode ?? 1;
-
-    if (options.verbose && stdout) {
-      console.log(`   Output: ${stdout}`);
-    }
-    if (stderr) {
-      console.log(`   Stderr: ${stderr}`);
-    }
-
     const duration = Date.now() - startTime;
-
-    if (exitCode !== 0) {
-      console.log(`   ❌ Failed with exit code ${exitCode} (${duration}ms)\n`);
-      return {
-        task,
-        status: 'failed',
-        error: stderr || `exit code ${exitCode}`,
-        timestamp: new Date(),
-        duration
-      };
-    }
-
-    console.log(`   ✅ Complete (${duration}ms)\n`);
-
+    const errMsg = 'CLI dispatch cannot invoke the host Agent tool. Run with --dry-run, or dispatch this task from the PM/orchestrator session.';
+    console.log(`   ❌ Failed: ${errMsg} (${duration}ms)\n`);
     return {
       task,
-      status: 'completed',
-      output: stdout,
+      status: 'failed',
+      error: errMsg,
       timestamp: new Date(),
       duration
     };
@@ -315,3 +285,4 @@ export async function runDispatcher(options?: SerialExecutionOptions): Promise<S
 }
 
 export { dispatchSerial as default, SerialAgentTask, SerialPipelineResult };
+

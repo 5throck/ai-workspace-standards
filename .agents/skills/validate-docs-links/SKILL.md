@@ -2,8 +2,9 @@
 name: validate-docs-links
 description: Scans Markdown documentation for dead links and file reference errors.
 version: 1.0.0
-last_reviewed: 2026-05-30
-status: active
+last_reviewed: 2026-09-09
+status: deprecated
+removal-date: 2026-12-09
 scope: common
 owner: pm
 prerequisites: Python or grep
@@ -19,6 +20,9 @@ metadata:
 # 🛠️ Skill: validate-docs-links
 
 ## Context
+
+> Deprecated 2026-09-09: `project-review` now owns the documentation/link-check baseline. Use project-review baseline-only mode for routine link-check evidence; keep this stub only as a transition alias until removal.
+
 Used by the `auditor` or `docs-writer` to ensure all cross-references in the workspace are valid.
 
 ## Execution Steps

@@ -1,5 +1,8 @@
 #!/usr/bin/env bun
-// @version 1.19.1
+// @version 1.19.2
+// v1.19.2: --prune-removed preserves project-declared variant-owned agents/skills
+//           from variant.json in common-only sync mode (identity-separated forks
+//           such as co-architect have no templates/<variant>/ source directory).
 // v1.19.0: Registry-row reconciliation fixes in reconcileScriptRegistry() — (1) fall back to the
 //           templates/common/scripts/SCRIPTS.md registry when the L0 row misses (scripts shipped
 //           from common under variant-prefixed upstream names, e.g. the handbook/ suite, were
@@ -1178,10 +1181,17 @@ function loadProjectAssetGate(): { skills: Set<string>; agents: Set<string> } | 
   try {
     const v = JSON.parse(readFileSync(gatePath, 'utf8'));
     const allow = Array.isArray(v?.skill_manifest?.allowlist) ? v.skill_manifest.allowlist as string[] : [];
+    const skills = Array.isArray(v?.skills) ? (v.skills as Array<{ name?: string; file?: string }>) : [];
     const agents = Array.isArray(v?.agents) ? (v.agents as Array<{ file?: string }>) : [];
-    if (allow.length === 0 && agents.length === 0) return null;
+    if (allow.length === 0 && skills.length === 0 && agents.length === 0) return null;
+    const skillNames = new Set(allow);
+    for (const skill of skills) {
+      if (skill.name) skillNames.add(skill.name);
+      const fileName = (skill.file ?? '').replace(/^skills\//, '').replace(/\/SKILL\.md$/, '');
+      if (fileName) skillNames.add(fileName);
+    }
     return {
-      skills: new Set(allow),
+      skills: skillNames,
       agents: new Set(agents.map((a) => (a.file ?? '').replace(/^agents\//, '')).filter(Boolean)),
     };
   } catch {
@@ -1708,7 +1718,10 @@ if (pruneRemoved) {
   ];
   for (const cat of pruneCategories) {
     if (!existsSync(cat.projDir)) continue;
-    // Collect all template file basenames
+    // Collect all template file basenames. For identity-separated/common-only
+    // projects, templates/<variant>/ may not exist; in that case the project's
+    // own variant.json is the authority for variant-owned agents/skills that
+    // must survive --prune-removed.
     const tplBasenames = new Set<string>();
     for (const td of cat.tplDirs) {
       if (!existsSync(td)) continue;
@@ -1721,6 +1734,15 @@ if (pruneRemoved) {
           if (f.endsWith(cat.ext)) tplBasenames.add(f);
         }
       }
+    }
+    if (cat.label === 'agents/' && assetGate) {
+      for (const agentFile of assetGate.agents) tplBasenames.add(agentFile);
+    }
+    if (cat.label === 'skills/') {
+      if (assetGate) {
+        for (const skill of assetGate.skills) tplBasenames.add(skill);
+      }
+      for (const skill of projectManifestSkills) tplBasenames.add(skill);
     }
     // Walk project dir recursively (for scripts/) or shallowly
     if (cat.isSkill) {

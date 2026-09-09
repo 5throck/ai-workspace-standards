@@ -46,5 +46,5 @@ Use this skill when:
 
 ```bash
 bun scripts/verify-platform-lifecycle.ts
-bun scripts/validate-templates.ts
+bun scripts/audit.ts
 ```

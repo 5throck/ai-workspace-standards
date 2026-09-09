@@ -300,6 +300,16 @@
       "layer": "variant:co-price"
     },
     {
+      "id": "procedure.co-price.pricing-security-bootstrap",
+      "type": "procedure",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "procedure.co-price.pricing-security-closeout",
+      "type": "procedure",
+      "layer": "variant:co-price"
+    },
+    {
       "id": "procedure.co-price.release-assurance",
       "type": "procedure",
       "layer": "variant:co-price"
@@ -1198,6 +1208,54 @@
       "type": "step_uses_skill",
       "from": "procedure.co-price.pricing-analysis",
       "to": "van-westendorp-psm",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-price.pricing-security-bootstrap",
+      "to": "harness-verification",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-price.pricing-security-bootstrap",
+      "to": "output_type.security_review_notes",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "enables",
+      "from": "procedure.co-price.pricing-security-bootstrap",
+      "to": "procedure.co-price.pricing-analysis",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-price.pricing-security-bootstrap",
+      "to": "security-monitor",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-price.pricing-security-closeout",
+      "to": "harness-verification",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-price.pricing-security-closeout",
+      "to": "output_type.security_attestation",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-price.pricing-security-closeout",
+      "to": "procedure.co-price.engagement-review",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-price.pricing-security-closeout",
+      "to": "security-monitor",
       "source": "procedure_schema"
     },
     {

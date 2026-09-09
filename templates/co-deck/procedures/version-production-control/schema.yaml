@@ -1,0 +1,33 @@
+schema_version: "1.0"
+procedure_id: co-deck-version-production-control
+variant: co-deck
+version: "1.0.0"
+title: Version Production Control
+phase: 3
+status: active
+owner_agent: version
+purpose: >
+  Track design and content revisions during deck production.
+inputs:
+  - design_spec
+preconditions:
+  - "Deck production is underway from an approved storyline baseline."
+steps:
+  - id: 1
+    agent_key: version
+    skill_key: version
+    output_type: version_record
+    description: >
+      Record design-spec and slide-content revision checkpoints before build/export.
+outputs:
+  - type: version_record
+relations:
+  - type: follows
+    target: procedure.co-deck.lecture-deck-production
+  - type: enables
+    target: procedure.co-deck.deck-build-and-export
+quality_gates:
+  - "Build/export uses a named production revision."
+evidence: []
+failure_modes:
+  - "Slide content and design revisions diverge; reconcile before export."

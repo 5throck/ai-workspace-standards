@@ -8,8 +8,8 @@ description: >
   and security compliance.
   Use when: updating bun dependencies, upgrading packages to @latest, checking outdated packages in workspace or templates.
 owner: pm
-version: 1.3.0
-last_reviewed: 2026-08-15
+version: 1.3.1
+last_reviewed: 2026-09-09
 metadata:
   type: process
   triggers:
@@ -115,8 +115,12 @@ fi
    $OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8; bun add <package-name>@latest
    $OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8; bun add -d <dev-package-name>@latest
    ```
-3. **Align Common Template**:
-   Sync shared dependency version strings in `./templates/common/package.json`.
+3. **Align Root/Common/Variant Template Dependencies**:
+   Use the dedicated alignment helper so root-template dependency strings are not patched by hand:
+   ```bash
+   bun scripts/sync-template-deps.ts --apply
+   ```
+   Review the diff for `package.json`, `templates/common/package.json`, and any `templates/co-*/package.json` overlays before continuing.
 4. **Propagate to Templates**:
    ```bash
    $OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8; bun run propagate:apply

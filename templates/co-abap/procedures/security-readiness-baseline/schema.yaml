@@ -1,0 +1,32 @@
+schema_version: "1.0"
+procedure_id: co-abap-security-readiness-baseline
+variant: co-abap
+version: "1.0.0"
+title: Security Readiness Baseline
+phase: 0
+status: active
+owner_agent: security-monitor
+purpose: >
+  Establish SAP security monitoring expectations before ABAP discovery or
+  implementation begins.
+inputs: []
+preconditions:
+  - "Target SAP landscape and access boundaries are known."
+steps:
+  - id: 1
+    agent_key: security-monitor
+    skill_key: abap-code-review
+    output_type: review_findings
+    description: >
+      Record baseline authorization, transport, and code-review controls that
+      must remain in force throughout the engagement.
+outputs:
+  - type: review_findings
+relations:
+  - type: enables
+    target: procedure.co-abap.requirements-analysis
+quality_gates:
+  - "Security baseline is documented before any system access or development work proceeds."
+evidence: []
+failure_modes:
+  - "Access or transport controls are undefined; pause until the baseline is agreed."

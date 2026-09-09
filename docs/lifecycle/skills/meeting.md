@@ -31,3 +31,7 @@ the platform skills distribution policy.
 - [x] SKILL.md exists at `skills/meeting/SKILL.md`
 - [x] Registered in docs/VERSION_MANIFEST.md and platform command tables
 - [x] Version parity with meeting-facilitation maintained
+
+## Retirement
+
+- **2026-09-09**: Retired 2026-09-09; superseded by `meeting-facilitation` as the active canonical skill.

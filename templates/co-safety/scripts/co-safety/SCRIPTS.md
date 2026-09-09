@@ -10,18 +10,18 @@
 
 | Script | Version | Purpose |
 |--------|---------|---------|
-| `audit-variant.ts` | 1.0.0 | co-safety variant-specific audit hook (pluggable per workspace policy) |
-| `check-pm-approval.ts` | 1.0.0 | PM approval gate check |
-| `domain-config.ts` | 1.0.0 | Domain registry + DEFAULT_MIN_LEGAL_BASIS config |
-| `migrate-registry-to-coordinates.ts` | 1.0.0 | Coordinate-registry migration utility |
-| `new-domain.ts` | 1.0.0 | Scaffold a new industry/functional domain |
+| `audit-variant.ts` | 1.1.0 | co-safety variant-specific audit hook (pluggable per workspace policy) |
+| `check-pm-approval.ts` | 1.0.1 | PM approval gate check |
+| `domain-config.ts` | 1.5.0 | Domain registry + DEFAULT_MIN_LEGAL_BASIS config |
+| `migrate-registry-to-coordinates.ts` | 1.0.2 | Coordinate-registry migration utility |
+| `new-domain.ts` | 1.0.1 | Scaffold a new industry/functional domain |
 | `risk-register-rollup.ts` | 1.0.0 | Roll up RA instances into facility risk registers |
-| `safety-audit.ts` | 1.0.0 | co-safety full compliance audit (legal_basis, schemas, evidence) |
-| `scaffold-industry.ts` | 1.0.0 | Scaffold an industry workflow/skill/evidence set |
+| `safety-audit.ts` | 4.10.1 | co-safety full compliance audit (legal_basis, schemas, evidence) |
+| `scaffold-industry.ts` | 0.1.1 | Scaffold an industry workflow/skill/evidence set |
 | `start-mcp.ts` | 1.0.0 | Start the co-safety MCP servers |
 | `test-chemical-handling-profile.ts` | 1.0.0 | Chemical handling profile test suite |
 | `test-cross-domain-integration.ts` | 1.0.0 | Cross-domain integration test suite |
-| `test-domain-scenarios.ts` | 1.0.0 | Domain scenario test suite |
+| `test-domain-scenarios.ts` | 1.1.0 | Domain scenario test suite |
 | `test-pharma-general-profile.ts` | 1.0.0 | Pharma general profile test suite |
 | `test-runtime-tools.ts` | 1.0.0 | Runtime tools test suite |
 | `training-ingest.ts` | 1.0.0 | Training record CSV ingestion → TRAIN-* JSON |

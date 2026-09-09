@@ -5,12 +5,24 @@ title: >-
   workflow: assign ci-failure issue triage owner in weekly-health-check +
   onboarding verification step (getting-started.md undriven)
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-08T11:20:33.245Z'
 history:
   - at: '2026-09-08T11:20:33.245Z'
     from: null
     to: backlog
+  - at: '2026-09-09T07:36:52.602Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-09T07:36:52.644Z'
+    from: waiting
+    to: running
+  - at: '2026-09-09T07:36:52.687Z'
+    from: running
+    to: review
+  - at: '2026-09-09T07:36:52.728Z'
+    from: review
+    to: done
 result: null
 error: null

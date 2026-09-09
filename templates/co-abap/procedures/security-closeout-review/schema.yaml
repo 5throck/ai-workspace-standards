@@ -1,0 +1,33 @@
+schema_version: "1.0"
+procedure_id: co-abap-security-closeout-review
+variant: co-abap
+version: "1.0.0"
+title: Security Closeout Review
+phase: 5
+status: active
+owner_agent: security-monitor
+purpose: >
+  Confirm that ABAP changes, transports, and residual risks are security-reviewed
+  before operational handoff.
+inputs:
+  - acceptance_report
+preconditions:
+  - "Functional acceptance and transport evidence are available."
+steps:
+  - id: 1
+    agent_key: security-monitor
+    skill_key: abap-code-review
+    output_type: review_findings
+    description: >
+      Review final ABAP artifacts, authorization impact, and transport history
+      for unresolved security risks.
+outputs:
+  - type: review_findings
+relations:
+  - type: follows
+    target: procedure.co-abap.transport-release
+quality_gates:
+  - "No high-severity security finding remains open at closeout."
+evidence: []
+failure_modes:
+  - "Residual risk is not accepted by the owner; hold release closure."

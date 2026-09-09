@@ -119,7 +119,7 @@ bash ./scripts/new-project.sh --help
 
 ### Step 6.5: Verify Antigravity coverage
 
-Before running validate-templates.ts, confirm Antigravity parity is complete:
+Before running the workspace-template validation gate, confirm Antigravity parity is complete:
 
 ```bash
 # Verify .gemini/ mirrors .claude/
@@ -135,13 +135,13 @@ Check that:
 - [ ] `GEMINI.md` variant context section identical to `CLAUDE.md` variant context section
 - [ ] Each `agents/*.md` file has Section C (Antigravity Integration)
 
-If any gap found: fix before running validate-templates.ts.
+If any gap found: fix before running the workspace-template validation gate.
 
-### Step 7: Run validate-templates.ts
+### Step 7: Run the workspace-template validation gate
 
 ```bash
 # From workspace root C:\git\
-bun scripts/validate-templates.ts
+bun scripts/audit.ts
 ```
 
 Fix any P-01 parity failures before proceeding.
@@ -191,7 +191,7 @@ bun run agent:verify
 
 ## Post-Promotion Checklist
 
-- [ ] `templates/co-<name>/` created and passes validate-templates.ts
+- [ ] `templates/co-<name>/` created and passes the workspace-template validation gate
 - [ ] `new-project.sh` and `new-project.ps1` correctly list co-<name> in `--help` output (auto-detected from `templates/`)
 - [ ] `templates/co-<name>/variant.json` status is `beta` with correct lifecycle dates
 - [ ] `Projects/<variant-name>/variant.json` has `phaseAComplete: true`

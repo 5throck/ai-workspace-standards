@@ -87,7 +87,7 @@ Map available agents to review domains. Present the plan table and wait for user
 | # | Domain | Agent | Tier | Focus |
 |---|--------|-------|------|-------|
 | 1 | Architecture | architect (if available, else PM) | High | Structure, phase consistency, variant contracts |
-| 2 | Standards compliance | auditor (if available, else PM) | Medium | audit.ts, validate-templates.ts, SCRIPTS.md |
+| 2 | Standards compliance | auditor (if available, else PM) | Medium | audit.ts, the workspace-template validation gate, SCRIPTS.md |
 | 3 | Automation | automation-engineer (if available, else PM) | Medium | Hooks, scripts, package.json, CI |
 | 4 | Documentation | docs-writer (if available, else PM) | Medium | References, language policy, cross-links |
 | 5 | Security | security-expert or security-monitor | Medium | Secrets, CI permissions, injection risks |

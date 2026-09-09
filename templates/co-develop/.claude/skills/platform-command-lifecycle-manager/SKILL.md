@@ -55,5 +55,5 @@ templates/common/.gemini/commands/<name>.md   ← Template propagation (if not s
 
 ```bash
 bun scripts/verify-platform-lifecycle.ts
-bun scripts/validate-templates.ts
+bun scripts/audit.ts
 ```

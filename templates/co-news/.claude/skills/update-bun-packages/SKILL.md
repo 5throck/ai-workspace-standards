@@ -145,7 +145,7 @@ fi
    ```
 2. Validate template integrity:
    ```bash
-   $OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8; bun scripts/validate-templates.ts
+   $OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8; bun scripts/audit.ts
    ```
 3. Run integration test suite:
    ```bash

@@ -86,7 +86,7 @@ Runs the full project sync pipeline (`scripts/dev-sync.ts`). This is the single 
 | 3.9 | Spec Registry Check | non-fatal | Runs `audit.ts --spec-check --lifecycle-only` to warn about stale specs |
 | 4 | AUDIT GATE | **FATAL** | Runs `audit.ts` — must exit 0 before proceeding |
 | 4.5 | VERSION_MANIFEST.md Generation | **FATAL** | Generates `VERSION_MANIFEST.md` via `generate-version-manifest.ts` |
-| 4.7 | L0 to L1 Publish | **FATAL** (L0) / non-fatal (L1) | Propagates scripts, skills, commands, docs via `propagate-to-templates.ts --apply`; fatal only in L0 context (context.md present) |
+| 4.7 | L0 to L1 Publish | **FATAL** (L0) / non-fatal (L1) | Propagates scripts, skills, commands, docs via workspace-root propagation tooling; fatal only in L0 context (context.md present) |
 | 4.8 | Skill Sync to Platforms | non-fatal | Runs `sync-skills.ts` to distribute skills to `.claude/skills/`, `.gemini/skills/`, `.agents/skills/`; warnings only |
 | 5 | Branch Creation | **FATAL** | Creates `pr/<timestamp>-<slug>` branch if on main/master; reuses existing branch otherwise |
 | 6 | Sensitive File Guard + Git Add/Commit/Push | **FATAL** | Guards against `.pem`, `.key`, `.env`, `credentials.json`, etc.; runs `git add -A`, `git commit`, `git push` |

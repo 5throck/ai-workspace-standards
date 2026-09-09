@@ -300,6 +300,18 @@ bash scripts/new-project.sh "my-project-name" --variant co-design
 .\scripts\new-project.ps1 "my-project-name"
 ```
 
+### 4.5 Verify Workspace Health
+
+Before starting project work, run the same core checks used by onboarding and scheduled health reviews:
+
+```bash
+bun run verify-scripts
+bun run validate-templates
+bun scripts/ticket.ts list --ready --kind manual
+```
+
+If any command fails, open or update a `ci-failure` issue and assign PM as triage owner.
+
 ### 5. Move to Project and Start AI Session
 
 ```bash

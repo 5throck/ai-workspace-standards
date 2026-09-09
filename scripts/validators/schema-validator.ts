@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Schema Validator — Validates agent, skill, and command frontmatter against JSON Schemas
- * @version 1.3.0
+ * @version 1.3.1
  *
  * Reads each agent, skill, and command file, parses YAML frontmatter, and manually
  * validates the declared fields against schema requirements.
@@ -30,7 +30,8 @@ import type { ValidatorContext, ValidatorDefinition, ValidatorResult, Validation
  * Returns the parsed frontmatter object, or empty object if no frontmatter found.
  */
 function parseFrontmatter(content: string): Record<string, any> {
-  const match = content.match(/^---\n([\s\S]+?)\n---\n?/);
+  const normalized = content.replace(/^\uFEFF/, '').replace(/\r\n/g, '\n');
+  const match = normalized.match(/^---\n([\s\S]+?)\n---\n?/);
   if (!match) return {};
 
   try {

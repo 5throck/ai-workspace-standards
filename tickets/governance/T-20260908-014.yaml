@@ -6,12 +6,24 @@ title: >-
   [2,6] vs AGENTS.md roster '—' vs dispatch table 'Phase 4' — adjudicate and fix
   all three surfaces
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-08T11:36:17.838Z'
 history:
   - at: '2026-09-08T11:36:17.838Z'
     from: null
     to: backlog
+  - at: '2026-09-09T07:36:53.288Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-09T07:36:53.333Z'
+    from: waiting
+    to: running
+  - at: '2026-09-09T07:36:53.377Z'
+    from: running
+    to: review
+  - at: '2026-09-09T07:36:53.421Z'
+    from: review
+    to: done
 result: null
 error: null

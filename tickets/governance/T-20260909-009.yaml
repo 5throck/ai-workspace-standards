@@ -5,12 +5,24 @@ title: >-
   validator-hardening: audit.ts scan walkers should count and warn on
   unreadable/skipped files instead of passing silently
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-08T21:47:40.563Z'
 history:
   - at: '2026-09-08T21:47:40.563Z'
     from: null
     to: backlog
+  - at: '2026-09-09T07:36:54.582Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-09T07:36:54.627Z'
+    from: waiting
+    to: running
+  - at: '2026-09-09T07:36:54.671Z'
+    from: running
+    to: review
+  - at: '2026-09-09T07:36:54.718Z'
+    from: review
+    to: done
 result: null
 error: null
