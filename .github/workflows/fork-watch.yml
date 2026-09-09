@@ -30,6 +30,10 @@ jobs:
           REPO="${{ github.repository }}"
           LABEL="fork-watch"
 
+          # Idempotent label bootstrap (fresh repos may not have it)
+          gh label create "$LABEL" -R "$REPO" \
+            --description "New repository fork detected" --color 1D76DB 2>/dev/null || true
+
           # Current forks (owner list, sorted)
           gh api "repos/$REPO/forks" --paginate \
             --jq '.[].owner.login' | sort -u > /tmp/current.txt
