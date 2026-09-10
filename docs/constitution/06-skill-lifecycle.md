@@ -213,6 +213,8 @@ Skills have a lifecycle managed by the PM agent. When agent configurations chang
 | **minor** (1.x.0) | New step added, trigger criteria expanded | Add validation step, expand when-to-use |
 | **major** (x.0.0) | Complete rewrite or incompatible change | Restructure workflow, remove steps |
 
+> **Scope of the bump rules**: any change that lands in `SKILL.md` requires at least a **patch** bump — including frontmatter metadata beyond date bookkeeping (description, `related_skills`/`relates_to`, triggers), CLI usage examples, expected-output lines, and checklist items; a new checklist condition or expected-output contract qualifies for **minor**. Only pure date bookkeeping (`last_updated`, `last_reviewed`) is exempt. (Clarified 2026-09-10, T-20260910-008: promote-variant's PR #854 checklist/CLI-drift edits landed without a bump — retroactively bumped 1.3.0 → 1.4.0.)
+
 > **Shared Skill Governance**: Skills with multiple owners (`owner: [agent1, agent2]`) require both owners' approval (PM decision) before modification.
 
 ##### Skill Frontmatter Template

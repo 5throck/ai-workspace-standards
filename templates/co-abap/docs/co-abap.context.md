@@ -489,12 +489,6 @@ For a full comparison of tool capabilities (Claude Code CLI vs Desktop App vs An
 
 ---
 
-## Computational Integrity
-
-All numeric outputs in deliverables (aggregations, statistics, percentages, metrics) must be computed by executed code (bun/TypeScript scripts) — never by the AI performing arithmetic directly. High-precision or safety-critical domains (Class A: aerospace, precision control, regulated finance) require validated external tools. See `docs/context.md` § Computational Integrity Standards for the full policy; label AI estimates **approximate**.
-
----
-
 ## Auto-Updating & Context Maintenance
 
 - **Trigger**: Agents MUST automatically append a summary to the `memory/MEMORY.md` or update architecture sections in `docs/co-abap.context.md` whenever a significant architectural decision or multi-file feature is completed.
@@ -510,10 +504,6 @@ All numeric outputs in deliverables (aggregations, statistics, percentages, metr
 ## File Encoding Rule (Markdown & Scripts)
 - All text files, including Markdown (.md) and scripts (.ps1, .sh, .py, .js, etc.), must be saved as **UTF-8 (without BOM)**.
 - Script outputs (Add-Content, Set-Content) must explicitly specify -Encoding UTF8.
-
-## Scripting Model
-- **All scripts are TypeScript (Bun)**: Both orchestration scripts (e.g., `dispatch.ts`, `retry-handler.ts`, `verify-skills.ts`) and development utilities (e.g., `dev-sync.ts`, `audit.ts`, `sync-md.ts`) are implemented as `.ts` files running on the Bun runtime.
-- **No cross-platform pairing needed**: Since all scripts are TypeScript, there is no need for separate `.sh`/`.ps1` pairs.
 
 ---
 <!-- COMMON-CONTEXT:START -->

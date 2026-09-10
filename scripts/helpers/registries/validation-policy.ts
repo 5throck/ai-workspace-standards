@@ -1,5 +1,7 @@
 // scripts/helpers/registries/validation-policy.ts
-// @version 1.2.0
+// @version 1.2.1
+// v1.2.1: architect-review flag resolved (T-20260910-007) — empty requiredCapabilities
+//         approved, rationale recorded in the entry comment; comment-only, no behavior change.
 // v1.2.0: safety entry added (empty requiredCapabilities — cannot false-block a
 //         future safety-type promotion) — d0ddc17f registered the safety variant
 //         type without a policy, tripping the registry-integrity exact-key-parity
@@ -109,7 +111,9 @@ export const VALIDATION_POLICIES = {
   // safety: registered by d0ddc17f (co-safety variant regen) without a policy entry,
   // which tripped the registry-integrity exact-key-parity check (fatal) on every
   // pipeline run. Deliberately empty requiredCapabilities so a safety-type promotion
-  // cannot false-block; flagged for architect review when the first safety-type
+  // cannot false-block. Architect-reviewed 2026-09-10 (T-20260910-007): approved —
+  // CAPABILITY_REGISTRY has no safety capabilities yet, so requiring any would
+  // false-block every run; register safety capabilities when the first safety-type
   // promotion is planned.
   safety: {
     requiredCapabilities: [],
