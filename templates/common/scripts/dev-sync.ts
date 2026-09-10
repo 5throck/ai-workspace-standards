@@ -1,4 +1,4 @@
-// @version 1.9.0
+// @version 1.9.1
 // v1.9.0: feat(skill-review): step 3.96c session-evidence skill review (SkillHone-inspired) —
 //           runs skill-session-review.ts (non-fatal) after 3.96a/3.96b to accumulate
 //           Observed Symptom + Evidence records into memory/skill-review/, plus a
@@ -507,8 +507,20 @@ if (isWorkspaceRoot && isL0Context) {
 console.log('📋 Step 4.6: Syncing skills to platform directories...');
 const syncSkillsResult = await $`bun scripts/sync-skills.ts`.nothrow();
 if (syncSkillsResult.exitCode !== 0) {
-    console.warn(`⚠️  Skill sync had warnings (exit ${syncSkillsResult.exitCode}), continuing...`);
-    if (syncSkillsResult.stderr) console.warn(String(syncSkillsResult.stderr).trim());
+    const syncSkillsErr = syncSkillsResult.stderr ? String(syncSkillsResult.stderr).trim() : '';
+    // A non-zero exit here can leave platform skill trees partially synced —
+    // committing that state would propagate the inconsistency. Mirrors the
+    // step 4.5 publish gate: fatal in L0 context, warn + continue elsewhere.
+    if (isL0Context) {
+        console.error(`${RED}❌ Skill sync failed (exit ${syncSkillsResult.exitCode}) — fatal in L0 context.${RESET}`);
+        if (syncSkillsErr) console.error(syncSkillsErr);
+        if (import.meta.main) {
+            process.exit(1);
+        }
+    } else {
+        console.warn(`${YELLOW}⚠️  Skill sync failed (exit ${syncSkillsResult.exitCode}) — continuing sync${RESET}`);
+        if (syncSkillsErr) console.warn(syncSkillsErr);
+    }
 }
 
 // 4.62 Cascade re-publish — unconditional second L0→L1 pass after skill sync.
@@ -688,7 +700,7 @@ try {
     const untracked = untrackedRes.stdout.toString().trim().split('\n').filter(Boolean);
     const modified = modifiedRes.stdout.toString().trim().split('\n').filter(Boolean);
     const candidates = [...new Set([...untracked, ...modified])];
-    const sensitivePattern = /\.(pem|key|p12|pfx|jks|keystore)$|^\.env(\.[^sa]|$)|credentials\.json|service.?account\.json|secrets\.ya?ml/;
+    const sensitivePattern = /\.(pem|key|p12|pfx|jks|keystore)$|^\.env(?!\.(example|sample)$)(\.[^sa]|$)|credentials\.json|service.?account\.json|secrets\.ya?ml/;
     const sensitive = candidates.filter(f => sensitivePattern.test(f));
 
     if (sensitive.length > 0) {
@@ -700,7 +712,12 @@ try {
         }
     }
 } catch (err) {
-  console.error(`[dev-sync] Error: ${err}`);
+  // Fail-closed: an error while collecting guard data must abort BEFORE
+  // `git add -A` runs — same contract as the other gates in this pipeline.
+  console.error(`${RED}❌ Sensitive-file guard errored — refusing git add -A: ${err}${RESET}`);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 try {

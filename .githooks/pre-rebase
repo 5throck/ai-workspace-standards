@@ -22,7 +22,7 @@ if [ $# -ge 2 ]; then
     # Scan each commit in the rebase range
     SECRETS_FOUND=0
     while IFS= read -r commit; do
-        if git show "$commit" 2>/dev/null | gitleaks detect --no-git --verbose --exit-code 2>/dev/null; then
+        if git show "$commit" 2>/dev/null | gitleaks detect --no-git --verbose --no-banner 2>/dev/null; then
             echo "✅ Commit $commit: clean"
         else
             echo "❌ SECRET DETECTED in commit $commit"
@@ -40,7 +40,7 @@ else
     echo "⚠️  No rebase parameters - scanning last 10 commits"
     SECRETS_FOUND=0
     while IFS= read -r commit; do
-        if git show "$commit" 2>/dev/null | gitleaks detect --no-git --verbose --exit-code 2>/dev/null; then
+        if git show "$commit" 2>/dev/null | gitleaks detect --no-git --verbose --no-banner 2>/dev/null; then
             echo "✅ Commit $commit: clean"
         else
             echo "❌ SECRET DETECTED in commit $commit"

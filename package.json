@@ -45,8 +45,7 @@
   },
   "devDependencies": {
     "@types/node": "^26.5.0",
-    "typescript": "^7.0.2",
-    "@types/js-yaml": "^4.0.9"
+    "typescript": "^7.0.2"
   },
   "engines": {
     "bun": ">=1.0.0"

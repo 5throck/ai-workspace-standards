@@ -31,7 +31,7 @@
 |---|---|---|---|
 | `CLAUDE.md` / `GEMINI.md` | Workspace Root | `templates/*/CLAUDE.md` | Manual propagation + `validate-templates.ts` |
 | `scripts/*.ts` | Workspace Root `scripts/` | `templates/common/scripts/` | Manual copy + version bump |
-| `agents/*.md` | Workspace Root `agents/` | `templates/co-*/agents/` | `bun run agent:verify` |
+| `agents/*.md` | Workspace Root `agents/` | Variant-defined per ADR-0043 (L1 Agent Layer and Hybrid Override Mechanism) — only `pm.md` (via the ADR-0039 extends chain, `templates/common/agents/` → `templates/co-*/agents/`) and `i18n-specialist.md` reach the template layers; L0-only agents (e.g. `lifecycle-manager.md`, `auditor.md`) and other L0 specialists never propagate | `bun run agent:verify` + `validate-pm-extends.ts` |
 | `AGENTS.md` | Workspace Root | `templates/co-*/AGENTS.md` | `bun run agent:verify` |
 | `.claude/commands/*.md` | Workspace Root | `templates/common/.claude/commands/` + `.gemini/commands/` | Manual propagation |
 | `variant.json` | `templates/co-*/` | (None) | Variant itself is the source |

@@ -1,0 +1,17 @@
+schemaVersion: 1
+id: T-20260910-029
+kind: manual
+title: >-
+  create lifecycle records for the 6 variants missing template records (co-abap,
+  co-game, co-hr, co-news, co-price, co-safety) or document the template-record
+  policy
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-09-10T14:01:23.346Z'
+history:
+  - at: '2026-09-10T14:01:23.346Z'
+    from: null
+    to: backlog
+result: null
+error: null

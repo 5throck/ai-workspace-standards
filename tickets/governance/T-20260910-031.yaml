@@ -1,0 +1,16 @@
+schemaVersion: 1
+id: T-20260910-031
+kind: manual
+title: >-
+  add a Windows fallback (fs.rmSync with extended-length prefix) for the
+  device-name purge in new-project.ts when bash is unavailable
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-09-10T14:01:23.373Z'
+history:
+  - at: '2026-09-10T14:01:23.373Z'
+    from: null
+    to: backlog
+result: null
+error: null

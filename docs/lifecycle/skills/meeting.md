@@ -2,10 +2,11 @@
 
 ## Metadata
 - **Skill**: meeting
-- **Status**: active
+- **Status**: retired
 - **Version**: 1.4.0
 - **Created**: 2026-09-04
-- **Last Updated**: 2026-09-04
+- **Last Updated**: 2026-09-10
+- **Successor**: `meeting-facilitation` (canonical meeting skill; `meeting` remains a trigger alias, not a skill directory)
 
 ## Description
 Shortcut skill for `/meeting` — multi-agent meeting orchestration entry point
@@ -24,6 +25,7 @@ the platform skills distribution policy.
 | Date | From | To | Reason | Approver |
 |------|------|-----|---------|----------|
 | 2026-09-04 | - | production | Record created retrospectively; skill long active and registered | pm |
+| 2026-09-09 | production | retired | Shortcut skill directory removed; `/meeting` delegates to `meeting-facilitation` | pm |
 
 ## Acceptance Criteria
 

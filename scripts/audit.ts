@@ -1,4 +1,4 @@
-// @version 2.32.0
+// @version 2.32.1
 // v2.32.0: Adds skipped-file counting for scan walkers and warns on live context placeholders.
 // v2.31.0: Stray-artifact check fails loud (T-20260909-006/021) — a missing
 //           docs/workspace-schema.json or a schema without a valid rootAllowlist
@@ -55,6 +55,7 @@ import { parsePmMd, extractVariantOverrides } from './helpers/pm-md-parser.ts';
 import { sourceShellInjectionPatterns } from './helpers/security-validator.ts';
 import { splitIntoSections, getContentLines } from './helpers/context-sections.ts';
 import * as url from 'node:url';
+import { safeFetch } from './lib/ssrf.ts';
 import { detectEncoding, detectHomoglyphs, detectZeroWidthChars, readUTF8File } from './lib/encoding-utils.ts';
 
 const _TRACKED_CO_VARIANTS: Set<string> | null = (() => {
@@ -205,7 +206,10 @@ if (!LIFECYCLE_ONLY) {
             while ((match = urlRegex.exec(content)) !== null) {
                 const url = match[0];
                 try {
-                    const response = await fetch(url, { method: 'HEAD', signal: AbortSignal.timeout(5000) });
+                    // Route through the repo's SSRF guard (safeFetch) — a bare
+                    // fetch() here bypassed the validateUrl/pinned-DNS protection
+                    // used by every other outbound fetch in the workspace.
+                    const response = await safeFetch(url, { signal: AbortSignal.timeout(5000) });
                     if (!response.ok) throw new Error('Bad status');
                 } catch {
                     linkErrors++;
@@ -1900,12 +1904,7 @@ if (IS_WORKSPACE_ROOT) {
             // Check and auto-delete Windows device name artifacts regardless of tracking status
             if (WINDOWS_DEVICE_NAMES.has(item)) {
                 try {
-                    let rmResult;
-                    if (process.platform === 'win32') {
-                        rmResult = spawnSync('bash', ['-c', 'rm -f -- "$1"', 'rm', item], { encoding: 'utf-8' });
-                    } else {
-                        rmResult = spawnSync('bash', ['-c', 'rm -f -- "$1"', 'rm', item], { encoding: 'utf-8' });
-                    }
+                    let rmResult = spawnSync('bash', ['-c', 'rm -f -- "$1"', 'rm', item], { encoding: 'utf-8' });
                     // Shell-free fallback — never interpolate filenames into a command line
                     if (rmResult.status !== 0) {
                         try {
@@ -2437,8 +2436,50 @@ if (!LIFECYCLE_ONLY && IS_WORKSPACE_ROOT) {
 }
 
 // 27. Variant-specific audit checks
-const variantAuditPath = path.join('scripts', 'audit-variant.ts');
-if (fs.existsSync(variantAuditPath)) {
+// Hook path resolution: the pluggable audit hook may live at the scripts root
+// (scripts/audit-variant.ts — the original convention) or nested under the
+// variant's own scripts directory (e.g. co-safety declares
+// scripts/co-safety/audit-variant.ts via variant.json's script_manifest /
+// variant_scripts_dir). Probe candidates in order — declared path first, then
+// the conventional locations — so the hook actually executes instead of
+// silently no-op'ing. A declared-but-missing hook WARNs rather than passes
+// silently.
+let variantAuditPath: string | null = null;
+let variantDeclaresAuditHook = false;
+{
+    const auditHookCandidates: string[] = [];
+    let variantName: string | null = null;
+    if (fs.existsSync(path.join('variant.json'))) {
+        try {
+            const variantManifest = JSON.parse(readUTF8File(path.join('variant.json')));
+            const scriptManifest = variantManifest?.script_manifest;
+            if (scriptManifest) {
+                if (typeof scriptManifest.variant_scripts_dir === 'string' && scriptManifest.variant_scripts_dir) {
+                    auditHookCandidates.push(path.join(scriptManifest.variant_scripts_dir, 'audit-variant.ts'));
+                }
+                if (Array.isArray(scriptManifest.local)) {
+                    for (const entry of scriptManifest.local) {
+                        if (entry?.name === 'audit-variant' && typeof entry.path === 'string' && entry.path) {
+                            auditHookCandidates.push(entry.path);
+                            variantDeclaresAuditHook = true;
+                        }
+                    }
+                }
+            }
+            if (typeof variantManifest?.name === 'string' && variantManifest.name) {
+                variantName = variantManifest.name;
+            }
+        } catch {
+            // Malformed variant.json — fall through to conventional path probing.
+        }
+    }
+    auditHookCandidates.push(path.join('scripts', 'audit-variant.ts'));
+    if (variantName) {
+        auditHookCandidates.push(path.join('scripts', variantName, 'audit-variant.ts'));
+    }
+    variantAuditPath = auditHookCandidates.find(p => fs.existsSync(p)) ?? null;
+}
+if (variantAuditPath) {
     console.log(`\n${CYAN}🔄 Running variant-specific audit checks via ${variantAuditPath}...${RESET}`);
     try {
         execFileSync('bun', [variantAuditPath], { stdio: 'inherit' });
@@ -2446,6 +2487,8 @@ if (fs.existsSync(variantAuditPath)) {
     } catch (e) {
         Fail('Variant-specific audit checks failed');
     }
+} else if (variantDeclaresAuditHook) {
+    Warn('variant.json declares an audit-variant hook but no candidate file exists (checked variant.json-declared path, scripts/audit-variant.ts, scripts/<variant>/audit-variant.ts) — variant-specific audit checks skipped');
 }
 
 // ── Spec Registry Checks (--spec-check mode) ─────────────────────

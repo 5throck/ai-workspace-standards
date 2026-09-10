@@ -9,7 +9,7 @@
       "include_pattern": "*.ts",
       "recursive": false,
       "l2_drift_eligible": false,
-      "note": "Fork Model — 5 of 7 L2 variants have no scripts/; L2 scripts are injected during scaffolding"
+      "note": "Fork Model — 5 of 13 L2 variants have scripts/; L2 scripts are injected during scaffolding"
     },
     "scripts-hooks": {
       "description": "Git hook scripts",
@@ -47,7 +47,7 @@
       "recursive": false,
       "l2_drift_eligible": false,
       "exclude": [],
-      "note": "Self-propagation: without this domain the SSOT's own updates never reach L1 (found stuck at v1.4.0 vs L0 v1.7.0, 2026-09-04). templates/common/scripts/propagation-map.json is kept byte-identical per validate-templates.ts glob parity; no code reads the L1 copy (see docs/templates/known-issues.json). templates/common/propagation-map.json is an unreferenced legacy duplicate refreshed manually — no domain covers it."
+      "note": "Self-propagation: without this domain the SSOT's own updates never reach L1 (found stuck at v1.4.0 vs L0 v1.7.0, 2026-09-04). templates/common/scripts/propagation-map.json is kept byte-identical per validate-templates.ts glob parity; no code reads the L1 copy (see docs/templates/known-issues.json ISSUE-008 — the unreferenced bare templates/common/propagation-map.json duplicate was deleted 2026-09-04)."
     },
     "claude-skills": {
       "description": "Platform skills for Claude Code",
@@ -57,7 +57,7 @@
       "recursive": true,
       "l2_drift_eligible": false,
       "exclude": [],
-      "note": "Fork Model — reconcile strips 16/19 L1 skills during promotion; L2 has 3-5 variant-specific skills only"
+      "note": "Fork Model — reconcile strips non-variant skills from the 38 L1 skills during promotion; L2 keeps only variant-specific skills"
     },
     "gemini-skills": {
       "description": "Platform skills for Gemini CLI",
@@ -132,7 +132,7 @@
       "recursive": false,
       "l2_drift_eligible": false,
       "exclude": [],
-      "note": "Fork Model — L1 has 7 commands, only 3/7 L2 variants have 1 variant-specific command each"
+      "note": "Fork Model — L1 has 8 commands; 5 of 13 L2 variants ship their own .claude/commands/ overlays"
     },
     "gemini-commands": {
       "description": "L0 .gemini/commands/ → L1 templates/common/.gemini/commands/",

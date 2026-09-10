@@ -26,7 +26,7 @@ live there as **real, editable files** (not embedded strings).
 |----------------|---------|---------------|
 | `docs/context.md` | Single source of truth - 10 required sections | Fill in `[...]` placeholders |
 | `AGENTS.md` | Canonical agent index | Ready to use |
-| `agents/pm.md` + 4 others | Role definitions (pm, architect, designer, code-writer, test-runner) | `[Project Name]` already substituted |
+| `agents/pm.md` + `agents/i18n-specialist.md` + variant domain agents | Role definitions (common: pm, i18n-specialist; variant overlay: domain agents, e.g. co-design's design-lead, ux-researcher, visual-designer) | `[Project Name]` already substituted |
 | `CLAUDE.md` / `GEMINI.md` | Platform-specific overrides | Add project-specific settings if needed |
 | `.claude/settings.json` | Hooks config (disabled by default - `{}`) | Enable PostToolUse if needed |
 | `.gemini/settings.json` | Gemini project settings | Ready to use (add settings as needed) |
@@ -103,9 +103,11 @@ See [ADR-0057](../adr/0057-country-profile-mechanism.md) and the convention doc
         macOS/Linux : grep "^## " docs/context.md
         Windows     : Select-String -Path docs/context.md -Pattern "^## "
 
-□ agents/ - [Project Name] substituted in all 5 ## Role sections
-    □ agents/pm.md          □ agents/architect.md   □ agents/designer.md
-    □ agents/code-writer.md □ agents/test-runner.md
+□ agents/ - [Project Name] substituted in all ## Role sections
+    □ agents/pm.md                □ agents/i18n-specialist.md
+    □ variant domain agents (per selected template — e.g. co-design:
+      design-lead.md, prototype-engineer.md, service-designer.md,
+      storyteller.md, typography-expert.md, ux-researcher.md, visual-designer.md)
 
 □ README.md - project description filled in
 

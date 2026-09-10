@@ -2,10 +2,11 @@
 
 ## Metadata
 - **Skill**: simulate-l3-to-variant-promotion
-- **Status**: active
+- **Status**: retired
 - **Version**: 1.0.0
 - **Created**: 2026-08-16
-- **Last Updated**: 2026-08-16
+- **Last Updated**: 2026-09-10
+- **Successor**: `simulate-pipeline` (merged smoke-test skill for project creation and L3→variant promotion modes)
 
 ## Description
 Performs end-to-end (E2E) smoke testing of the L3 scaffold -> variant promotion pipeline (create-l3-scaffold.ts + l3-to-variant-pipeline.ts) to catch classification/parsing regressions before promotion.
@@ -23,6 +24,7 @@ Performs end-to-end (E2E) smoke testing of the L3 scaffold -> variant promotion 
 | Date | From | To | Reason | Approver |
 |------|------|-----|---------|----------|
 | 2026-08-16 | - | production | Backfilled lifecycle document from existing SKILL.md | lifecycle-manager |
+| 2026-09-09 | production | retired | Skill directory removed; merged into `simulate-pipeline` | automation-engineer |
 
 ## Acceptance Criteria
 

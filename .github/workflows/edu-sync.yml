@@ -92,8 +92,22 @@ jobs:
         env:
           EDU_SYNC_PAT: ${{ secrets.EDU_SYNC_PAT }}
         run: |
-          git clone --depth 1 "https://x-access-token:$EDU_SYNC_PAT@github.com/5throck/intro-to-ai-harness.git" /tmp/intro-to-ai-harness
-          git clone --depth 1 "https://x-access-token:$EDU_SYNC_PAT@github.com/5throck/multi-agent-harness-handbook.git" /tmp/multi-agent-harness-handbook
+          # Clone with CLEAN URLs — the PAT must never appear in a clone URL,
+          # because `git clone https://x-access-token:<PAT>@...` persists the
+          # token in the cloned repo's .git/config, where the sync agent (which
+          # has Bash) could read it. Authentication instead goes through a
+          # global credential helper that resolves the token from the
+          # EDU_SYNC_PAT environment variable at each git invocation, so no
+          # secret is written to any config file or to disk.
+          git config --global credential.helper \
+            '!f() { printf "username=x-access-token\npassword=%s\n" "$EDU_SYNC_PAT"; }; f'
+          git clone --depth 1 https://github.com/5throck/intro-to-ai-harness.git /tmp/intro-to-ai-harness
+          git clone --depth 1 https://github.com/5throck/multi-agent-harness-handbook.git /tmp/multi-agent-harness-handbook
+          # Fail loudly if a token ever leaks into a cloned repo's config.
+          if grep -r "x-access-token" /tmp/intro-to-ai-harness/.git/config /tmp/multi-agent-harness-handbook/.git/config; then
+            echo "ERROR: credential material found in cloned repo config"
+            exit 1
+          fi
 
       - name: Update education content (PR-only)
         id: edu
@@ -140,8 +154,10 @@ jobs:
                locales). Add a short "What's new (2026-09)" callout only where
                it fits naturally.
             3. In each repo: create a branch edu-sync/<YYYY-MM-DD>, commit with
-               a conventional message, push using the credential embedded in the
-               clone URL (already set up — just git push), then open a PR with
+               a conventional message, then push with plain `git push` —
+               authentication is handled by a pre-configured credential helper.
+               NEVER append a token or credential to a remote URL (do not use
+               https://<token>@github.com/... style URLs); then open a PR with
                gh using: gh pr create -R 5throck/<repo> --head <branch> ...
                Include a per-change mapping (upstream change → edu update) in
                the PR body. NEVER merge the PR.

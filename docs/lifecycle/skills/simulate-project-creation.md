@@ -9,6 +9,7 @@
 | Date | From | To | Reason | Approver |
 |------|------|-----|---------|----------|
 | 2026-05-29 | - | production | Initial skill established for project creation simulation | lifecycle-manager |
+| 2026-09-09 | production | retired | Skill directory removed; project-creation simulation merged into `simulate-pipeline` | automation-engineer |
 
 ## Acceptance Criteria
 
@@ -32,10 +33,11 @@
 
 ## Metadata
 
-- **Current Phase**: production
+- **Current Phase**: retired
 - **Owner**: scaffolding-expert
-- **Last Updated**: 2026-05-29
+- **Last Updated**: 2026-09-10
 - **Last Reviewer**: lifecycle-manager
+- **Successor**: `simulate-pipeline` (merged smoke-test skill for project creation and L3→variant promotion modes)
 
 ## Retirement
 

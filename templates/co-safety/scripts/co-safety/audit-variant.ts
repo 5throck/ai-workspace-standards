@@ -1,6 +1,6 @@
 // @version 1.1.0
 // Variant-specific audit hook for Safety OS (co-safety).
-// Invoked by core scripts/audit.ts (pluggable variant audit hook, ADR-0038) so the
+// Invoked by core scripts/audit.ts (pluggable variant audit hook, ADR-0044) so the
 // CSO legal_basis gate and domain test suite run on every /sync, not only at the
 // next workspace audit. Replaces the variant-specific logic formerly embedded in
 // scripts/audit.ts v2.6.5 and scripts/dev-sync.ts v1.5.0 (removed 2026-08-26 when

@@ -29,7 +29,7 @@ if [ $# -ge 2 ]; then
 
     # Scan each commit in the rebase range
     git rev-list --no-merges "$UPSTREAM..$REBASE_BRANCH" | while read -r commit; do
-        if git show "$commit" 2>/dev/null | gitleaks detect --no-git --verbose --exit-code 2>/dev/null; then
+        if git show "$commit" 2>/dev/null | gitleaks detect --no-git --verbose --no-banner 2>/dev/null; then
             echo "✅ Commit $commit: clean"
         else
             echo "❌ SECRET DETECTED in commit $commit"
@@ -44,7 +44,7 @@ else
     # Fallback: scan recent commits if no parameters provided
     echo "⚠️  No rebase parameters - scanning last 10 commits"
     git log -n 10 --format="%H" | while read -r commit; do
-        if git show "$commit" 2>/dev/null | gitleaks detect --no-git --verbose --exit-code 2>/dev/null; then
+        if git show "$commit" 2>/dev/null | gitleaks detect --no-git --verbose --no-banner 2>/dev/null; then
             echo "✅ Commit $commit: clean"
         else
             echo "❌ SECRET DETECTED in commit $commit"

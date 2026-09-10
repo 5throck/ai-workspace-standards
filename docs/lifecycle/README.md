@@ -304,6 +304,7 @@ bun scripts/validate-doc-folder.ts
 ## Metadata
 
 - **Current Phase**: [design/review/production/deprecated]
+- **Version**: [X.Y.Z]
 - **Owner**: [agent-name]
 - **Last Updated**: [YYYY-MM-DD]
 - **Last Reviewer**: [reviewer-name]
@@ -361,6 +362,7 @@ bun scripts/validate-doc-folder.ts
 ## Metadata
 
 - **Current Phase**: [design/review/production/deprecated]
+- **Version**: [X.Y.Z]
 - **Owner**: [agent-name]
 - **Last Updated**: [YYYY-MM-DD]
 - **Last Reviewer**: [reviewer-name]

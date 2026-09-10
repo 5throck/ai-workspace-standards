@@ -4,7 +4,7 @@
  * Rollback capability and intermediate state persistence.
  * Addresses Risk #5: Rollback Capability.
  *
- * @version 1.1.1
+ * @version 1.1.2
  * @Risk #5: Rollback Capability (P1 - High)
  */
 
@@ -221,18 +221,18 @@ export async function executeRollback(): Promise<boolean> {
     const action = state.rollbackActions[i];
 
     if (action.executed) {
-      console.log(`??Skipping already executed: ${action.action} (${action.target})`);
+      console.log(`⊘ Skipping already executed: ${action.action} (${action.target})`);
       continue;
     }
 
-    console.log(`??Rolling back: ${action.action} (${action.target})`);
+    console.log(`↶ Rolling back: ${action.action} (${action.target})`);
 
     try {
       await executeRollbackAction(action);
       action.executed = true;
-      console.log(`??Rolled back: ${action.action}`);
+      console.log(`✅ Rolled back: ${action.action}`);
     } catch (error) {
-      console.error(`??Rollback failed: ${action.action}`);
+      console.error(`❌ Rollback failed: ${action.action}`);
       console.error(`   Error: ${error instanceof Error ? error.message : String(error)}`);
       success = false;
     }
@@ -242,7 +242,7 @@ export async function executeRollback(): Promise<boolean> {
 
   if (success) {
     rollbackPipeline();
-    console.log('\n??Rollback complete');
+    console.log('\n✅ Rollback complete');
   } else {
     console.log('\n⚠️  Rollback completed with errors');
   }
@@ -259,18 +259,18 @@ async function executeRollbackAction(action: RollbackAction): Promise<void> {
 
   switch (actionType) {
     case 'create_file':
-      // Delete created file
-      await $`rm -f ${target}`.quiet();
+      // Delete created file (force: missing-ok, same semantics as `rm -f`)
+      fs.rmSync(target, { force: true });
       break;
 
     case 'create_directory':
-      // Delete created directory
-      await $`rm -rf ${target}`.quiet();
+      // Delete created directory (recursive+force, same semantics as `rm -rf`)
+      fs.rmSync(target, { recursive: true, force: true });
       break;
 
     case 'copy_file':
-      // Delete copied file
-      await $`rm -f ${target}`.quiet();
+      // Delete copied file (force: missing-ok, same semantics as `rm -f`)
+      fs.rmSync(target, { force: true });
       break;
 
     case 'modify_file':
@@ -297,9 +297,7 @@ async function executeRollbackAction(action: RollbackAction): Promise<void> {
  * @version 1.1.0
  */
 export async function clearState(): Promise<void> {
-  if (existsSync(STATE_FILE)) {
-    await $`rm ${STATE_FILE}`.quiet();
-  }
+  fs.rmSync(STATE_FILE, { force: true });
 }
 
 /**

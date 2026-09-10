@@ -19,7 +19,7 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 
 | Agent | File | Tier | Role |
 |-------|------|------|------|
-| **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) (L0) → [`templates/common/agents/pm.md`](templates/common/agents/pm.md) (L1) → [`templates/<variant>/agents/pm.md`](templates/co-design/agents/pm.md) (L2) | High | Three-level inheritance architecture: L0 (workspace root base) → L1 (common template pure-extends) → L2 (variant YAML overrides). Orchestrates team assembly (Phase 0), design validation (Phase 1-2), and lifecycle finalization (Phase 5). **PM does NOT execute code or documentation directly — all specialist work dispatched through PM.** See [L0→L1→L2 PM Agent Architecture](#l0→l1→l2-pm-agent-architecture) for details. |
+| **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) (L0) → [`templates/common/agents/pm.md`](templates/common/agents/pm.md) (L1) → [`templates/<variant>/agents/pm.md`](templates/co-design/agents/pm.md) (L2) | High | Three-level inheritance architecture: L0 (workspace root base) → L1 (common template pure-extends) → L2 (variant YAML overrides). Orchestrates team assembly (Phase 0), design validation (Phase 1-2), and lifecycle finalization (Phase 5). **PM does NOT execute code or documentation directly — all specialist work dispatched through PM.** See [L0→L1→L2 PM Agent Architecture](#l0l1l2-pm-agent-architecture) for details. |
 | Consistency Auditor | [`agents/auditor.md`](agents/auditor.md) | Medium | Workspace-root-only cross-domain consistency auditor; detects structural inconsistencies scripts miss; NOT dispatched in variant projects |
 | **Lifecycle Manager** | [`agents/lifecycle-manager.md`](agents/lifecycle-manager.md) | Medium | **Workspace root only — L0-only agent**. Lifecycle state monitor and governance record keeper for the workspace root (8 domains × 3 layers); core duties include L0->L1 template publishing and L1->L2 explicitly requested skill/script synchronization; syncs governance docs after changes. Lifecycle finalization is handled automatically by `/sync` — PM does NOT need a separate N-1 dispatch step. **NOT available in variant templates** — this agent operates exclusively at workspace root level. |
 
@@ -62,7 +62,7 @@ All specialist agents require PM dispatch - enforced at 4 levels.
 
 #### §3.1.1 PM Direct Execution Scope
 
-PM is an escalation gateway, not an executor. **⚠️ CRITICAL**: PM MUST NOT perform Write/Edit on any file except `memory/*.md` and `CHANGELOG.md`. All file modifications MUST be dispatched to specialists (docs-writer, architect, automation-engineer, auditor). See [PM Direct Execution Constraints](agents/pm.md#⚠️-critical-pm-direct-execution-constraints) in `agents/pm.md`.
+PM is an escalation gateway, not an executor. **⚠️ CRITICAL**: PM MUST NOT perform Write/Edit on any file except `memory/*.md` and `CHANGELOG.md`. All file modifications MUST be dispatched to specialists (docs-writer, architect, automation-engineer, auditor). See [PM Direct Execution Constraints](agents/pm.md#pm-direct-execution-scope) in `agents/pm.md`.
 
 | Category | Tools | Scope |
 |----------|-------|-------|
@@ -72,9 +72,9 @@ PM is an escalation gateway, not an executor. **⚠️ CRITICAL**: PM MUST NOT p
 | Forbidden | Write, Edit (all other paths) | Must delegate to specialist (docs-writer, architect, automation-engineer, auditor) |
 | Forbidden | Bash (write/execute patterns) | Must delegate to specialist |
 
-**Rationale**: PM is orchestrator, not executor. Direct execution violates governance separation of concerns. See [Role Clarification](agents/pm.md#⚠️-role-clarification) and [Task Tracking vs Execution](agents/pm.md#task-tracking-vs-execution) in `agents/pm.md`.
+**Rationale**: PM is orchestrator, not executor. Direct execution violates governance separation of concerns. See [Role Clarification](agents/pm.md#-role-clarification) in `agents/pm.md` and the Task Owner vs Executor Distinction below.
 
-When a specialist agent's required tool is denied, PM applies the [Permission Denial Protocol](#§3.8-permission-denial-protocol) — never substitutes for the specialist.
+When a specialist agent's required tool is denied, PM applies the [Permission Denial Protocol](#38-permission-denial-protocol) — never substitutes for the specialist.
 
 #### §3.1.2 PM Role Boundaries
 
@@ -141,7 +141,7 @@ The PM Agent follows a three-level inheritance model: **L0 (workspace root base)
 
 **⚠️ IMPORTANT**: Do NOT invoke any specialist agent directly. All requests must go through PM.
 
-> **Execution Plan Format**: For mandatory criteria, boilerplate table, and rules, see [§5 Execution Plan Templates](#§5-execution-plan-templates). For platform-specific dispatch instructions, see [CLAUDE.md §5](CLAUDE.md#5-agent-dispatch-rules) or [GEMINI.md §5](GEMINI.md#5-agent-dispatch-rules).
+> **Execution Plan Format**: For mandatory criteria, boilerplate table, and rules, see [§5 Execution Plan Templates](#5-execution-plan-templates). For platform-specific dispatch instructions, see [CLAUDE.md §5](CLAUDE.md#5-agent-dispatch-rules) or [GEMINI.md §5](GEMINI.md#5-agent-dispatch-rules).
 
 ### §3.5 Phase Determination (Deliverable-Type Gate)
 
@@ -291,7 +291,7 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 #### Dispatch Rules
 
 1. **Autonomous Agent Handoffs** - Agents can dispatch each other directly via JSON contracts without PM intervention for routine workflows
-2. **PM Orchestration Phases** - PM only orchestrates Phases 0 (Team Assembly), 2 (Design Validation), and 5 (Lifecycle Finalization)
+2. **PM Orchestration Phases** - PM only orchestrates Phases 0 (Project Initiation/Team Assembly), 1-2 (Planning & Architecture), and 5 (Lifecycle Finalization), per `docs/workspace-schema.json`
 3. **Independent QA Gate** - Auditor owns Phase 6 QA gate autonomously using bun scripts/qa-gate.ts
 4. **Parallel Agent Dispatch** - all parallel agents must be dispatched in one turn for research/analysis phases
 5. **Error handling** - if any parallel agent fails, responsible agent resolves failure before proceeding. Do not skip.
@@ -324,7 +324,7 @@ Phase 0 - Project Initiation (PM-owned)
   PM dynamically creates new agents/skills and resolves R&R overlap
   PM updates AGENTS.md and maintains skill registry
 
-Phase 1-2 - Planning & Architecture (specialist-autonomous)
+Phase 1-2 - Planning & Architecture (PM-owned design validation; specialist-autonomous planning work)
   PM classifies the request; Architect produces implementation plan + ADR
   Dispatch read-only agents in parallel (analysis, research)
   PM synthesizes findings → acceptance criteria
@@ -459,9 +459,9 @@ When modifying files that affect both CLAUDE.md and GEMINI.md:
 > All skill versions, status, and lifecycle metadata are maintained in [`docs/VERSION_MANIFEST.md`](docs/VERSION_MANIFEST.md).
 > The table below provides skill names and locations only. For current versions, status, and detailed metadata, always reference VERSION_MANIFEST.
 >
-> **Skill structure specification**: See [CONSTITUTION.md §6 - Skills](CONSTITUTION.md#6-skills) for frontmatter format and session skill registration.
+> **Skill structure specification**: See [docs/constitution/06-skill-lifecycle.md §6 - Skills](docs/constitution/06-skill-lifecycle.md#6-skills) for frontmatter format and session skill registration.
 >
-> **Skill discovery & registration**: To make workspace-level skills discoverable and loadable by Claude, Gemini, and Antigravity, the `skills/` folder is registered via `skills.json` files in each platform directory: `.claude/skills.json`, `.gemini/skills.json`, and `.agents/skills.json`. The script `scripts/sync-skills.ts` distributes SSOT skills from `skills/` to `.claude/skills/`, `.gemini/skills/`, and `.agents/skills/`, and back-syncs shortcut skills (sync, meeting) from `.agents/skills/` to `.claude/skills/` and `.gemini/skills/`.
+> **Skill discovery & registration**: To make workspace-level skills discoverable and loadable by Claude, Gemini, and Antigravity, the `skills/` folder is registered via `skills.json` files in each platform directory: `.claude/skills.json`, `.gemini/skills.json`, and `.agents/skills.json`. The script `scripts/sync-skills.ts` distributes SSOT skills from `skills/` to `.claude/skills/`, `.gemini/skills/`, and `.agents/skills/`, and back-syncs shortcut skills (`sync`, `source-command-commit-push-pr`) from `.agents/skills/` to `.claude/skills/` and `.gemini/skills/`.
 
 > **`owner` field definition**: The `owner` field in `SKILL.md` frontmatter identifies the **maintainer responsibility** for that skill — the agent or role accountable for keeping the skill current. It does NOT require that agent to exist in the current project, and does NOT mean that agent is the only one who can invoke the skill.
 
@@ -498,15 +498,15 @@ Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 |-------|----------|---------|
 | `sync` | `skills/sync/` | Sync pipeline — lifecycle, audit, publish, commit, push, PR |
 | `project-review` | `skills/project-review/` | Multi-agent parallel project review |
-| `audit-workspace` | `skills/audit-workspace/` | Workspace standards audit |
+| `audit-workspace` | `skills/audit-workspace/` | Workspace standards audit (deprecated; removal 2026-10-10) |
 | `meeting-facilitation` | `skills/meeting-facilitation/` | Multi-agent meeting orchestration |
 | `security-scan` | `skills/security-scan/` | Security and secret detection |
 | `create-variant` | `skills/create-variant/` | New variant scaffolding |
 | `promote-variant` | `skills/promote-variant/` | Variant promotion to official |
-| `simulate-l3-to-variant-promotion` | `skills/simulate-l3-to-variant-promotion/` | E2E smoke test for L3 scaffold → variant promotion pipeline |
+| `simulate-pipeline` | `skills/simulate-pipeline/` | E2E smoke test for project creation and the L3 scaffold → variant promotion pipeline (merged skill) |
 | `explain-me` | `skills/explain-me/` | Single-file interactive HTML report generation (inspired by beret21/reportme) |
 
-> **Complete Skill Registry**: The table above is a curated subset. For the complete registry including all 31 workspace-level skills, versions, status, and lifecycle metadata, see [`docs/VERSION_MANIFEST.md`](docs/VERSION_MANIFEST.md).
+> **Complete Skill Registry**: The table above is a curated subset — see `docs/VERSION_MANIFEST.md` for the complete registry of all workspace-level skills with versions, status, and lifecycle metadata.
 
 ### Platform Skills Distribution
 
@@ -514,9 +514,9 @@ Skills are distributed to all three platform directories via `scripts/sync-skill
 
 | Platform | Directory | Registration | Shortcut Skills |
 |----------|-----------|--------------|-----------------|
-| Claude Code | `.claude/skills/` | `.claude/skills.json` | `sync`, `meeting` |
-| Gemini CLI | `.gemini/skills/` | `.gemini/skills.json` | `sync`, `meeting` |
-| Antigravity | `.agents/skills/` | `.agents/skills.json` | `sync`, `meeting`, `source-command-commit-push-pr` |
+| Claude Code | `.claude/skills/` | `.claude/skills.json` | `sync` |
+| Gemini CLI | `.gemini/skills/` | `.gemini/skills.json` | `sync` |
+| Antigravity | `.agents/skills/` | `.agents/skills.json` | `sync`, `source-command-commit-push-pr` |
 
 - **Phase 1**: Every `skills/*/SKILL.md` directory is copied to all three platform directories.
 - **Phase 2**: Shortcut skills that only exist in `.agents/skills/` are back-synced to `.claude/skills/` and `.gemini/skills/`.
