@@ -13,7 +13,7 @@ name: Nightly Governance Tickets
 
 on:
   schedule:
-    - cron: "30 17 * * *" # 02:30 KST — staggered after the local ZCode runner (02:00 KST); --ready excludes tickets it already moved out of backlog/waiting
+    - cron: "30 17 * * *" # 02:30 KST — a local ZCode runner (05:30 KST) picks up leftovers/anomalies after this window; --ready excludes tickets already moved out of backlog/waiting
   workflow_dispatch: {}
 
 permissions:
@@ -58,7 +58,7 @@ jobs:
 
   tickets:
     runs-on: ubuntu-latest
-    timeout-minutes: 210
+    timeout-minutes: 350
     permissions:
       contents: write # push the pr/* branch (dev-sync)
       pull-requests: write # open the PR
@@ -126,7 +126,7 @@ jobs:
           prompt: |
             You are the nightly governance-ticket batch runner for this workspace
             (single-repo checkout of ai-workspace-standards on ubuntu-latest).
-            Process up to 10 ready governance tickets this run. The ready list is in
+            Process up to 50 ready governance tickets this run. The ready list is in
             ready-tickets.txt (from: bun scripts/ticket.ts list --ready --kind manual).
 
             SELECT (priority high first), only mechanically actionable tickets WITHOUT
@@ -157,7 +157,7 @@ jobs:
             On failure: bun scripts/ticket.ts move <id> failed --error "<short error>"
             then bun scripts/ticket.ts move <id> waiting; retry once at most, then move on.
 
-            STOP after: 2 unexpected gate failures, 10 tickets, or ~2.5 hours.
+            STOP after: 2 unexpected gate failures, 50 tickets, or ~5 hours.
             FINISH by writing a run summary to memory/<today>.md (tickets attempted,
             PR URLs, validation results, skipped-and-why) — English.
 
