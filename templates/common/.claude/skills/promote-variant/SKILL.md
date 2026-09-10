@@ -59,6 +59,8 @@ bun scripts/audit.ts          # Conditions 3, 4
 # Conditions 6, 7 require human review
 ```
 
+- [ ] `docs/context.md` contains no project-only sections (purification diff empty or already mirrored into `docs/<variant>.context.md`)
+
 All conditions must show Done before proceeding.
 
 ### Step 1.5: Verify country-profile readiness
@@ -88,9 +90,10 @@ Before running the pipeline, update these fields in `Projects/<variant-name>/`:
 ```bash
 # From workspace root C:\git\
 bun scripts/l3-to-variant-pipeline.ts \
-  --source Projects/<variant-name> \
-  --variant co-<variant-name> \
-  --variantType <security|development|design|consulting|collaboration> \
+  --l3-path=Projects/<variant-name> \
+  --name=co-<variant-name> \
+  --type=<security|development|design|consulting|collaboration|lecture|game|abap-development|safety> \
+  --description="<variant-description>" \
   --auto-fix-agents-md \
   --auto-fix-pm-md
 ```
@@ -102,6 +105,7 @@ Expected output:
 - Domain skills materialized into all three skill roots (`skills/`, `.claude/skills/`, `.gemini/skills/`) — no manual copying (generate-variant.ts ≥ 1.12.0)
 - Agent `lifecycle` frontmatter preserved on the variant copy — no post-run backfills (generate-variant.ts ≥ 1.12.0)
 - VARIANT-INJECT markers ensured in `docs/co-<variant-name>.context.md` even when the L3 source overwrites the marker-rich skeleton
+- Context purification: N project-only section(s) merged into docs/<variant>.context.md, M superseded stub(s) dropped (Phase 4.7 gate: PASS)
 - `AGENTS.md` regenerated with the full roster (`--auto-fix-agents-md`, via `regenerate-agents-md.ts --source`)
 
 ### Step 4: Manual copy — pipeline-excluded directories

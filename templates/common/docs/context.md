@@ -512,4 +512,4 @@ See the workspace governance documentation (Governance Enforcement Layers) and A
 
 ---
 
-*context.md version: 2.5 — promoted "Scripts" section from 7 variants (co-consult, co-design, co-develop, co-export, co-game, co-security, co-work)*
+*context.md version: 2.6 — Schema Governance zone added (DB schema changes require an ADR before merge; CONSTITUTION.md §8.15)*

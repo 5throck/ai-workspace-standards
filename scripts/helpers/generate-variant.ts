@@ -5,13 +5,20 @@
  * Generates variant project structure from reconciled manifest.
  * Creates variant.json, directory structure, agent overrides, and skill directories.
  *
- * @version 1.13.2
+ * @version 1.14.0
  * @phase 3: Variant Generation
+ *
+ * v1.14.0: W1 context purification at the docs/<variant>.context.md copy seam —
+ * project-only sections from the L3 source's docs/context.md are appended to the
+ * final docs/<variant>.context.md before its version footer (--- separated), and
+ * superseded boilerplate sections are dropped with a log line
+ * (docs/designs/2026-09-10-context-purification-design.md D1).
  *
  * Dependencies:
  * - helpers/scan-l3-project.ts (File classification types)
  * - helpers/reconcile-with-l0-l1.ts (Reconciled manifest types)
  * - helpers/variant-governance-rules.ts (Variant type definitions)
+ * - helpers/context-sections.ts (W1 purification: extractProjectOnlySections)
  * - lib/encoding-utils.ts (UTF-8 handling)
  * - lib/error-handling.ts (Error management)
  * - lib/platform-context.ts (Platform detection)
@@ -28,6 +35,11 @@ import { getVariantTypeDefinition } from './registries/variant-type-registry.ts'
 import { getPromotionPolicy } from './registries/promotion-policy.ts';
 import { SKIP_AGENT_FILES } from './golden-reference-loader.ts';
 import type { L3ScanResult } from './scan-l3-project.ts';
+import {
+  extractProjectOnlySections,
+  splitOffVersionFooter,
+  type ContextSection,
+} from './context-sections.ts';
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -139,6 +151,14 @@ export interface GeneratedVariant {
     totalDirectoriesCreated: number;
     agentsInRoster: number;
     skillsCreated: number;
+    /**
+     * W1 context purification ledger (v1.14.0): normalized headings of the
+     * project-only sections merged into docs/<variant>.context.md and of the
+     * superseded boilerplate sections dropped. Absent when the L3 source had
+     * no docs/context.md (ledger is empty arrays in that case — set only at
+     * the docs/<variant>.context.md copy seam).
+     */
+    contextPurification: { merged: string[]; dropped: string[] };
   };
 }
 
@@ -1472,6 +1492,96 @@ function generateGeminiSettings(variantPath: string): string {
 // ============================================================================
 
 /**
+ * W1 context purification ledger shape (v1.14.0).
+ */
+export interface ContextPurificationLedger {
+  /** Normalized headings of project-only sections merged into docs/<variant>.context.md. */
+  merged: string[];
+  /** Normalized headings of superseded boilerplate sections dropped (already covered by the common template). */
+  dropped: string[];
+}
+
+/**
+ * W1 context purification (v1.14.0) — docs/designs/2026-09-10-context-purification-design.md D1.
+ *
+ * Called at the copy seam where the L3 source's docs/<variant>.context.md has just
+ * overwritten the generated skeleton and had its VARIANT-INJECT slots re-wrapped.
+ * The L3 source's docs/context.md is convention excluded from the promoted template
+ * (SKIP_IN_COPY) — but any PROJECT-ONLY content inside it would be silently lost.
+ * This reads that file (found next to the <variant>.context.md source), extracts
+ * project-only sections vs templates/common/docs/context.md, and appends them to the
+ * final docs/<variant>.context.md BEFORE its version footer (--- separated). Sections
+ * classified as superseded boilerplate (already covered by the common template, e.g.
+ * the fleet's legacy `## Procedures` stubs vs the common `### Procedure Graph`) are
+ * dropped with a log line instead.
+ *
+ * Ordering note (architect concern from the design): l3-to-variant-pipeline.ts Phase
+ * 4.6's writeContextMd() appends the PM section at raw EOF — after the version footer
+ * line. That is pre-existing writeContextMd behavior (it does not re-position the
+ * footer); this hook keeps the merged sections attached to the document body before
+ * the footer, and the pipeline's Phase 4.7 gate verifies merged headings by presence,
+ * not position, so the final file stays coherent.
+ *
+ * @param l3VariantContextSourcePath - L3 source path of docs/<variant>.context.md (its directory holds the L3 docs/context.md)
+ * @param targetContextPath - Promoted output path of docs/<variant>.context.md (already marker-rewrapped)
+ * @param variantName - Variant name, for logging
+ * @returns Ledger of merged/dropped normalized headings (empty when there is no L3 docs/context.md)
+ */
+export function purifyPromotedContextMd(
+  l3VariantContextSourcePath: string,
+  targetContextPath: string,
+  variantName: string,
+): ContextPurificationLedger {
+  const ledger: ContextPurificationLedger = { merged: [], dropped: [] };
+  try {
+    const l3ProjectContextPath = join(dirname(l3VariantContextSourcePath), 'context.md');
+    if (!existsSync(l3ProjectContextPath)) {
+      return ledger; // no L3 docs/context.md — nothing to purify
+    }
+    const commonContextPath = join(COMMON_TEMPLATE, 'docs', 'context.md');
+    if (!existsSync(commonContextPath)) {
+      console.warn(`⚠️  Context purification skipped: common template context not found at ${commonContextPath}`);
+      return ledger;
+    }
+
+    const { projectOnly, superseded } = extractProjectOnlySections(
+      readUTF8File(l3ProjectContextPath),
+      readUTF8File(commonContextPath),
+    );
+
+    for (const section of superseded) {
+      ledger.dropped.push(section.heading);
+      console.log(`  Context purification: DROPPED '${section.headingLine}' (superseded by templates/common/docs/context.md '${section.heading}')`);
+    }
+    if (projectOnly.length === 0) {
+      if (ledger.dropped.length > 0) console.log(`  Context purification: 0 project-only section(s) to merge`);
+      return ledger;
+    }
+
+    // Append project-only sections before the version footer, `---`-separated.
+    const targetContent = readUTF8File(targetContextPath);
+    const { body, footer } = splitOffVersionFooter(targetContent);
+    const rendered = projectOnly
+      .map((section: ContextSection) => `${section.headingLine}\n\n${section.body}`)
+      .join('\n\n---\n\n');
+    const mergedContent = `${body.trimEnd()}\n\n---\n\n${rendered}${footer}`;
+    // Re-run marker safety over the merged document. Appended sections are NOT
+    // VARIANT-INJECT slots, so the re-wrap must leave them untouched.
+    writeUTF8File(targetContextPath, ensureVariantInjectMarkers(mergedContent));
+
+    for (const section of projectOnly) {
+      ledger.merged.push(section.heading);
+      console.log(`  Context purification: MERGED '${section.headingLine}' into ${variantName}.context.md (project-only content rescued from docs/context.md)`);
+    }
+  } catch (error) {
+    // Non-fatal: purification must never break variant generation. The pipeline's
+    // Phase 4.7 gate re-verifies whatever ledger was produced against the output.
+    console.warn(`⚠️  Context purification warning: ${error instanceof Error ? error.message : String(error)}`);
+  }
+  return ledger;
+}
+
+/**
  * Generate variant from reconciled manifest and metadata
  * @version 1.1.0
  */
@@ -1572,6 +1682,9 @@ export async function generateVariant(
   // Copy remaining files from manifest
   console.log(`\n=== Copying Remaining Files ===`);
   let filesCopied = 0;
+  // W1 context purification ledger — populated at the first docs/*.context.md copy
+  let contextPurificationLedger: ContextPurificationLedger = { merged: [], dropped: [] };
+  let contextPurificationRan = false;
 
   // Files generated separately or that don't belong in a variant template
   const SKIP_IN_COPY = new Set([
@@ -1620,6 +1733,29 @@ export async function generateVariant(
       if (normalizedTarget === `docs/${metadata.name}.context.md`) {
         writeUTF8File(targetPath, ensureVariantInjectMarkers(readUTF8File(targetPath)));
       }
+      // v1.14.0 W1 context purification: the convention-excluded L3 docs/context.md
+      // dies here — rescue its project-only sections into the final
+      // <variant>.context.md before they are silently lost (design D1). Trigger on
+      // ANY copied docs/*.context.md entry: a real promotion's L3 file is named
+      // <variant>.context.md, but a disposable-scaffold promotion (the E2E harness)
+      // carries the scaffold-time name instead — the ledger target is always the
+      // canonical docs/<variant>.context.md. Runs once per generation.
+      if (
+        !contextPurificationRan &&
+        normalizedTarget.startsWith('docs/') &&
+        normalizedTarget.endsWith('.context.md')
+      ) {
+        contextPurificationRan = true;
+        const targetContextPath = join(variantPath, 'docs', `${metadata.name}.context.md`);
+        if (existsSync(targetContextPath)) {
+          // re-apply marker safety before merging (idempotent for the name-match
+          // case above; wraps the untouched skeleton in the name-mismatch case)
+          writeUTF8File(targetContextPath, ensureVariantInjectMarkers(readUTF8File(targetContextPath)));
+          contextPurificationLedger = purifyPromotedContextMd(file.sourcePath, targetContextPath, metadata.name);
+        } else {
+          console.warn(`⚠️  Context purification skipped: ${targetContextPath} not found`);
+        }
+      }
       filesCopied++;
     }
   }
@@ -1632,6 +1768,7 @@ export async function generateVariant(
     totalDirectoriesCreated: directories.length,
     agentsInRoster: metadata.agentRoster.length,
     skillsCreated: metadata.skills.length,
+    contextPurification: contextPurificationLedger,
   };
 
   console.log(`\n=== Variant Generation Complete ===`);
@@ -1640,6 +1777,7 @@ export async function generateVariant(
   console.log(`Directories created: ${summary.totalDirectoriesCreated}`);
   console.log(`Agents in roster: ${summary.agentsInRoster}`);
   console.log(`Skills created: ${summary.skillsCreated}`);
+  console.log(`Context purification: ${summary.contextPurification.merged.length} merged, ${summary.contextPurification.dropped.length} dropped`);
 
   return {
     variantPath,

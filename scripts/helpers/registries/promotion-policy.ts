@@ -1,5 +1,8 @@
 // scripts/helpers/registries/promotion-policy.ts
-// @version 1.1.0
+// @version 1.2.0
+// v1.2.0: safety entry added (mirrors abap-development) — d0ddc17f registered the
+//         safety variant type without a policy, tripping the registry-integrity
+//         exact-key-parity check (fatal) on every pipeline run.
 // SSOT for beta-to-stable promotion policies
 
 import type { VariantType } from './variant-type-registry.ts';
@@ -53,6 +56,14 @@ export const PROMOTION_POLICIES = {
     minBetaMonths: 3,
   },
   'abap-development': {
+    minEngagements: 3,
+    minBetaMonths: 2,
+  },
+  // safety: registered by d0ddc17f (co-safety variant regen) without a policy entry,
+  // which tripped the registry-integrity exact-key-parity check (fatal) on every
+  // pipeline run. Values mirror 'abap-development' (domain-specialist type); they only
+  // bind when a safety-type promotion actually runs — flagged for architect review.
+  safety: {
     minEngagements: 3,
     minBetaMonths: 2,
   },
