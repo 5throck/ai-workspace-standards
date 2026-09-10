@@ -185,6 +185,54 @@
       "version": "1.0.0",
       "overridable": false,
       "description": "Zod runtime schema validation patterns and contract safety rules"
+    },
+    "accessibility-audit": {
+      "source": "skills/accessibility-audit/SKILL.md",
+      "version": "1.1.0",
+      "overridable": false,
+      "description": "Automated WCAG 2.1 Level AA accessibility evaluation rules and axe-core DOM audit patterns"
+    },
+    "ci-triage": {
+      "source": "skills/ci-triage/SKILL.md",
+      "version": "0.1.0",
+      "overridable": false,
+      "description": "Triages CI / audit / scaffold failures: deterministic reproduction, provenance tracing, root-cause fix, re-verification"
+    },
+    "handbook": {
+      "source": "skills/handbook/SKILL.md",
+      "version": "0.4.0",
+      "overridable": false,
+      "description": "Document Production Workflow — generates searchable, themed handbook static sites (GitHub Pages)"
+    },
+    "handbook-sync-audit": {
+      "source": "skills/handbook-sync-audit/SKILL.md",
+      "version": "1.0.0",
+      "overridable": false,
+      "description": "Handbook Sync Audit — verifies generated handbooks stay aligned with their sources across content, structure, and anchor axes"
+    },
+    "i18n-audit": {
+      "source": "skills/i18n-audit/SKILL.md",
+      "version": "1.0.0",
+      "overridable": false,
+      "description": "Locale parity and glossary audit: translation-key parity across locale files, glossary adherence, drift reporting"
+    },
+    "source-command-commit-push-pr": {
+      "source": "skills/source-command-commit-push-pr/SKILL.md",
+      "version": "1.0.1",
+      "overridable": false,
+      "description": "Redirects commit+push+PR requests to the /sync pipeline (workspace enforcement)"
+    },
+    "token-usage-lint": {
+      "source": "skills/token-usage-lint/SKILL.md",
+      "version": "1.1.0",
+      "overridable": false,
+      "description": "Lint procedure scanning UI code for hardcoded design values (raw hex, rgb()/hsl(), raw px) that bypass the token layer"
+    },
+    "ui-ux-design-intelligence": {
+      "source": "skills/ui-ux-design-intelligence/SKILL.md",
+      "version": "1.0.1",
+      "overridable": false,
+      "description": "UI/UX design capabilities: design system creation, component design, visual hierarchy, user-centered design principles"
     }
   },
   "common_commands": {

@@ -2698,6 +2698,122 @@ if (variantAuditPath) {
     Warn('variant.json declares an audit-variant hook but no candidate file exists (checked variant.json-declared path, scripts/audit-variant.ts, scripts/<variant>/audit-variant.ts) — variant-specific audit checks skipped');
 }
 
+// 28. Standing variant audit-hook regression check (T-20260910-013)
+// Section 27 only runs when the audit itself executes inside a variant (variant.json in
+// CWD). At the L0 workspace scope nothing executed the hooks a variant declares via
+// script_manifest.local, so a hook that stopped resolving or started crashing went
+// unnoticed until someone ran an in-variant audit. This standing check sweeps every
+// templates/*/variant.json: each declared audit-variant hook must resolve to a file AND
+// execute cleanly (spawned the same way section 27 runs it, from the workspace root).
+{
+    const templatesDir = path.join('templates');
+    if (fs.existsSync(templatesDir)) {
+        let hookCount = 0;
+        for (const entry of fs.readdirSync(templatesDir, { withFileTypes: true })) {
+            if (!entry.isDirectory() || !entry.name.startsWith('co-')) continue;
+            const variantJsonPath = path.join(templatesDir, entry.name, 'variant.json');
+            if (!fs.existsSync(variantJsonPath)) continue;
+            let manifest: any;
+            try {
+                manifest = JSON.parse(readUTF8File(variantJsonPath));
+            } catch {
+                continue; // malformed variant.json is reported by the schema checks
+            }
+            const local = manifest?.script_manifest?.local;
+            if (!Array.isArray(local)) continue;
+            for (const hook of local) {
+                if (hook?.name !== 'audit-variant' || typeof hook.path !== 'string' || !hook.path) continue;
+                hookCount++;
+                const hookPath = path.join(templatesDir, entry.name, hook.path);
+                if (!fs.existsSync(hookPath)) {
+                    Fail(`Variant audit hook regression: ${entry.name}/variant.json declares audit-variant hook at '${hook.path}' but templates/${entry.name}/${hook.path} does not exist`);
+                    continue;
+                }
+                const { status, stdout, stderr } = spawnSync('bun', [hookPath], { encoding: 'utf-8', timeout: 120_000 });
+                if (status !== 0) {
+                    if (stdout) console.log(stdout);
+                    if (stderr) console.error(stderr);
+                    Fail(`Variant audit hook regression: ${entry.name} hook (${hook.path}) exited with status ${status} — the hook must execute cleanly`);
+                } else {
+                    Pass(`Variant audit hook: ${entry.name} (${hook.path}) resolves and executes`);
+                }
+            }
+        }
+        if (hookCount === 0) {
+            Warn('No variant declares an audit-variant hook in script_manifest.local — nothing to regression-check');
+        }
+    }
+}
+
+// 29. AGENTS.md §6 skill-table integrity (T-20260910-016)
+// §6 embeds a curated skill table whose Location column names backtick paths
+// (`skills/<name>/`), and declares docs/VERSION_MANIFEST.md the complete registry of all
+// workspace-level skills. Neither claim was machine-checked: a renamed/removed skill left a
+// dead row in AGENTS.md, and a new skills/ directory could exist without any registry row.
+{
+    const agentsMdPath = path.join('AGENTS.md');
+    if (fs.existsSync(agentsMdPath)) {
+        const agentsMd = readUTF8File(agentsMdPath);
+        const sectionMatch = agentsMd.match(/^## §6: Skills[\s\S]*?(?=^## §7:)/m);
+        if (!sectionMatch) {
+            Warn('AGENTS.md §6: Skills section not found — skill-table integrity check skipped');
+        } else {
+            // 29a. Every backtick `skills/...` path referenced in §6 must resolve on disk.
+            // Placeholder patterns like `skills/<name>/SKILL.md` are documentation, not paths.
+            const section = sectionMatch[0];
+            const backtickPaths = [...section.matchAll(/`(skills\/[^`]+)`/g)].map(m => m[1]);
+            const uniquePaths = [...new Set(backtickPaths)].filter(p => !p.includes('<') && !p.includes('$') && !p.includes('*'));
+            let badPaths = 0;
+            for (const p of uniquePaths) {
+                const skillName = p.split('/')[1];
+                const ok = p.endsWith('/SKILL.md')
+                    ? fs.existsSync(p)
+                    : fs.existsSync(path.join(p, 'SKILL.md'));
+                if (!ok) {
+                    Fail(`AGENTS.md §6 references '${p}' but skills/${skillName}/SKILL.md does not exist on disk`);
+                    badPaths++;
+                }
+            }
+            if (badPaths === 0 && uniquePaths.length > 0) {
+                Pass(`AGENTS.md §6 skill paths: all ${uniquePaths.length} referenced skill path(s) resolve`);
+            }
+
+            // 29b. Registry ↔ directory parity: VERSION_MANIFEST.md is declared the complete
+            // registry, so every skills/ directory must have a row there, and every
+            // VERSION_MANIFEST row pointing into skills/ must exist on disk.
+            const manifestPath = path.join('docs', 'VERSION_MANIFEST.md');
+            if (fs.existsSync(manifestPath)) {
+                const manifestMd = readUTF8File(manifestPath);
+                const manifestSkills = new Set<string>();
+                for (const line of manifestMd.split('\n')) {
+                    if (!line.startsWith('|')) continue; // Skills table rows only
+                    // Workspace rows only — the Location cell must be exactly skills/<name>/SKILL.md
+                    // (common-template rows point at templates/common/skills/... and platform rows
+                    // at .claude|.gemini|.agents/skills/..., which are different inventories).
+                    const cell = line.match(/\|\s*skills\/([A-Za-z0-9][A-Za-z0-9._-]*)\/SKILL\.md\s*\|/);
+                    if (cell) manifestSkills.add(cell[1]);
+                }
+                const diskSkills = fs.readdirSync('skills', { withFileTypes: true })
+                    .filter(e => e.isDirectory() && fs.existsSync(path.join('skills', e.name, 'SKILL.md')))
+                    .map(e => e.name);
+                const notInManifest = diskSkills.filter(s => !manifestSkills.has(s));
+                const notOnDisk = [...manifestSkills].filter(s => !fs.existsSync(path.join('skills', s, 'SKILL.md')));
+                for (const s of notOnDisk) {
+                    Fail(`VERSION_MANIFEST.md lists skill '${s}' but skills/${s}/SKILL.md does not exist — regenerate the manifest`);
+                }
+                if (notInManifest.length > 0) {
+                    Fail(`skills/ has ${notInManifest.length} skill(s) missing from docs/VERSION_MANIFEST.md (declared complete registry): ${notInManifest.join(', ')} — regenerate the manifest from the live skills/ tree`);
+                }
+                if (notInManifest.length === 0 && notOnDisk.length === 0) {
+                    Pass(`VERSION_MANIFEST.md ↔ skills/ parity: ${diskSkills.length} workspace skill(s) match the registry`);
+                }
+            } else {
+                Warn('docs/VERSION_MANIFEST.md not found — registry parity check skipped');
+            }
+        }
+    }
+}
+
 // ── Spec Registry Checks (--spec-check mode) ─────────────────────
 // ADR-0055 Stage 2 (2026-08-23): relevance check is FAIL; stale/missing-spec stay WARN.
 // NOTE: guarded by SPEC_CHECK alone (not !LIFECYCLE_ONLY) because dev-sync.ts's

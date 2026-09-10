@@ -28,8 +28,10 @@ import type { ValidatorContext, ValidatorDefinition, ValidatorResult, Validation
 /**
  * Parse YAML frontmatter from a markdown string.
  * Returns the parsed frontmatter object, or empty object if no frontmatter found.
+ * Exported for L0-facing validators so frontmatter parsing stays consistent
+ * between the variant sweep and the workspace-root sweep (T-20260910-017).
  */
-function parseFrontmatter(content: string): Record<string, any> {
+export function parseFrontmatter(content: string): Record<string, any> {
   const normalized = content.replace(/^\uFEFF/, '').replace(/\r\n/g, '\n');
   const match = normalized.match(/^---\n([\s\S]+?)\n---\n?/);
   if (!match) return {};
@@ -113,8 +115,11 @@ const AGENT_REQUIRED_FIELDS = [
 
 /**
  * Validate a single agent's parsed frontmatter.
+ * Exported so L0-facing validators (validate-agents.ts) can reuse the exact
+ * schema rule set for workspace-root agents/ (T-20260910-017: CONSTITUTION 11.4
+ * previously only covered variant templates/co-* through runAllValidators()).
  */
-function validateAgentFrontmatter(
+export function validateAgentFrontmatter(
   fm: Record<string, any>,
   agentFile: string,
 ): ValidationIssue[] {
@@ -260,8 +265,9 @@ const SKILL_REQUIRED_FIELDS = ['name', 'status', 'description', 'owner', 'versio
 
 /**
  * Validate a single skill's parsed frontmatter.
+ * Exported for L0-facing validators (validate-skills.ts) — see validateAgentFrontmatter.
  */
-function validateSkillFrontmatter(
+export function validateSkillFrontmatter(
   fm: Record<string, any>,
   skillFile: string,
 ): ValidationIssue[] {

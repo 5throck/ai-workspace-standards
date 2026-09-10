@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Agent Lifecycle Validation Script
- * @version 1.1.0
+ * @version 1.2.0
  *
  * Validates all agents/*.md files for required lifecycle frontmatter
  * and checks governance records in docs/lifecycle/agents/*.md
@@ -17,6 +17,7 @@
 
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
+import { parseFrontmatter as parseFrontmatterYaml, validateAgentFrontmatter } from './validators/schema-validator.ts';
 import { cwd } from 'node:process';
 
 interface ValidationIssue {
@@ -291,6 +292,28 @@ function validateSecurityHolds(): void {
   }
 }
 
+// T-20260910-017: run the schema-validator rule set over workspace-root agents/ frontmatter.
+// CONSTITUTION 11.4 previously only exercised these rules per-variant (templates/co-*) via
+// runAllValidators(); root agents/*.md now get the identical required-field / status-enum /
+// tier / semver / lifecycle checks through the same exported rule functions.
+function validateAgentSchema(): void {
+  if (!existsSync(AGENTS_DIR)) return;
+  for (const entry of readdirSync(AGENTS_DIR)) {
+    if (!isAgentFile(entry)) continue;
+    const filePath = join(AGENTS_DIR, entry);
+    const content = readFileSync(filePath, 'utf-8');
+    const fm = parseFrontmatterYaml(content);
+    if (Object.keys(fm).length === 0) continue; // no frontmatter — existing checks cover that
+    // extends-pattern stubs (L1/L2 pm.md) intentionally omit the full roster schema.
+    if (fm.extends) continue;
+    for (const issue of validateAgentFrontmatter(fm, entry)) {
+      const msg = `schema-validator: ${issue.message}`;
+      if (issue.severity === 'error') fail(entry, 'schema-agent', msg);
+      else warn(entry, 'schema-agent', msg);
+    }
+  }
+}
+
 function main() {
   if (!JSON_MODE) {
     console.log(`${colors.cyan}🔍 Validating agent lifecycle documentation...${colors.reset}`);
@@ -300,6 +323,7 @@ function main() {
   validateRuntimeDefinitions();
   validateSecurityHolds();
   validateGovernanceRecords();
+  validateAgentSchema();
 
   const errors = issues.filter(i => i.level === 'error');
   const warnings = issues.filter(i => i.level === 'warning');
