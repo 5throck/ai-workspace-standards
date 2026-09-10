@@ -5,7 +5,7 @@ title: >-
   validator-hardening: extend validate-docs-links.ts to verify anchor fragments
   against target headings instead of stripping them
 priority: high
-status: running
+status: review
 attempts: 0
 created_at: '2026-09-10T14:01:23.149Z'
 history:
@@ -18,5 +18,8 @@ history:
   - at: '2026-09-10T20:17:14.380Z'
     from: waiting
     to: running
+  - at: '2026-09-10T20:22:39.842Z'
+    from: running
+    to: review
 result: null
 error: null
