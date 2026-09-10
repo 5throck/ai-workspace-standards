@@ -168,3 +168,15 @@ All numeric outputs in deliverables (aggregations, statistics, percentages, metr
 - **ADR content**: motivation, schema diff, migration and rollback plan, and consumer impact (breaking-change assessment).
 - **Relationship to project trigger lists**: projects MAY maintain a broader ADR trigger list (e.g., auth boundaries, MCP tool scope); the project list is authoritative within its project, and this baseline applies where no project list exists.
 - **Origin**: promoted from the Projects/co-newbiz lifecycle rule to a workspace-wide baseline; decision record in `docs/designs/2026-09-09-schema-governance-adr-design.md`.
+
+#### 8.16 UI Preview Verification (ADR-0070)
+
+**User-facing web/app UI work is not complete until the UI was verified in a rendered preview.** Agents author UI without rendering it; layout and breakpoint defects (e.g. the 2026-09-10/11 co-newbiz fixed-width overlap and clipping bugs) are invisible in code review.
+
+- **Minimum verification**: a rendered check at ≥ 2 breakpoints (at minimum the project's declared mobile and desktop baselines) and ≥ 1 key interaction exercised (the screen's primary state change, navigation, or form flow).
+- **Evidence**: screenshots or automated visual-smoke output, attached to the design document or PR.
+- **Style/tool neutrality** (ADR-0064/0066): the workspace prescribes no preview tooling and no visual expectations — tooling and the "key interaction" choice are declared by the project in its design SSOT.
+- **Placement**: expressed as a process rule in `docs/design-foundation.md` (§2b rule 6, §7 validation contract) and as mandatory section G of the design-review checklist; design docs for user-facing web/app UI MUST include a Preview Verification note beside the ADR-0065 Accessibility section.
+- **Exemption**: pure backend/non-UI deliverables are exempt only with an explicit statement (ADR-0065 convention).
+- **Enforcement tier**: review-enforced today; a blocking evidence-presence gate is the expected Phase 2 (per-project opt-in, `designLint` schema pattern).
+- See [ADR-0070](../../docs/adr/0070-ui-preview-verification.md) and `docs/designs/2026-09-11-ui-preview-verification-design.md`.
