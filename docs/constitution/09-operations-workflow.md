@@ -296,6 +296,21 @@ Projects under `Projects/` have an explicit end-of-life path so promoted variant
 - Required evidence, designs, and lifecycle records have been copied to the variant or retained in `memory/`.
 - PM explicitly records the removal decision in a memory log or decision record.
 
+#### 9.8 Nightly Governance-Ticket Batch (CI + Local Runner)
+
+Daily cadence that mechanically processes ready `kind: manual` governance tickets (AGENTS.md §3.7.5). Normative decision: [ADR-0071](../../docs/adr/0071-nightly-governance-ticket-automation.md); as-deployed record: `docs/designs/2026-09-11-nightly-ticket-batch-automation-design.md`.
+
+| Time (KST) | Runner | Batch |
+|---|---|---|
+| 02:30 | GitHub scheduled batch (`nightly-tickets.yml`) | up to 50 tickets / ~5 h |
+| 05:30 | Local ZCode runner (workspace automation) | leftovers/anomalies: up to 25 tickets / ~3 h |
+
+**Contract** (both runners): PR-only via `bun scripts/dev-sync.ts` — never merge, never force-push, never bypass a gate; the four validation gates (`audit.ts`, `validate-templates.ts`, `verify-scripts.ts --verify`, `bun test`) must pass before landing; per-ticket status re-check immediately before claiming (`backlog`/`waiting` only); success moves the ticket to `review`, failure to `failed` → `waiting` (one retry). `review → done` remains human-only.
+
+**Missed-run rule**: GitHub schedules are best-effort — a nightly run created any time after 17:00 UTC counts as fired for that day regardless of start delay (observed: +2.5 h). A genuinely skipped schedule is caught by the 05:30 local runner, which performs the batch directly; while a CI run is in progress the local runner reports only and stops.
+
+**Evidence**: both runners append summaries to `memory/YYYY-MM-DD.md` (tickets attempted, PR URLs, validation results, skipped-and-why).
+
 ---
 
 *operations-workflow.md version: 1.0 — created 2026-05-27*
