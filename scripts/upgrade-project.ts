@@ -1,5 +1,15 @@
 #!/usr/bin/env bun
-// @version 1.19.2
+// @version 1.20.0
+// v1.20.0: New CONTEXT_COMMONIZATION pass (after VARIANT_DOCS_SYNC) — near-duplicate
+//           sections of docs/<variant>.context.md are pruned once the refreshed
+//           docs/context.md supersedes them: token-overlap >= 0.65 → REMOVE (logged),
+//           >= 0.30 → REVIEW (manual Context Commonization Review, ADR-0050 Part 3 —
+//           never auto-removed), below → silent. COMMON-*/VARIANT-INJECT zones and the
+//           version footer are excluded; sections containing managed-zone content are
+//           never auto-removed. Honors --dry-run; opt-out via
+//           --skip-context-commonization. Comparison reads the template source so
+//           dry-run verdicts match apply. Thresholds tuned on the real fleet
+//           (docs/designs/2026-09-10-context-purification-design.md D2).
 // v1.19.2: --prune-removed preserves project-declared variant-owned agents/skills
 //           from variant.json in common-only sync mode (identity-separated forks
 //           such as co-architect have no templates/<variant>/ source directory).
@@ -111,6 +121,15 @@ import { resolve, join, dirname, basename, isAbsolute, relative } from 'node:pat
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { extractScriptVersion, preserveLifecycleFrontmatter } from './helpers/upgrade-versions.ts';
+import {
+  splitIntoSections,
+  splitContextFileSections,
+  splitOffVersionFooter,
+  stripVersionFooter,
+  classifyCommonizationSection,
+  W2_REMOVE_THRESHOLD,
+  W2_REVIEW_FLOOR,
+} from './helpers/context-sections.ts';
 
 // ── Argument parsing ───────────────────────────────────────────────────────────
 let projectPath = '';
@@ -120,6 +139,7 @@ let dryRun = false;
 let pruneRemoved = false;
 let rollback = false;
 let yesFlag = false;
+let skipContextCommonization = false;
 
 const args = process.argv.slice(2);
 for (let i = 0; i < args.length; i++) {
@@ -129,11 +149,12 @@ for (let i = 0; i < args.length; i++) {
   if (args[i] === '--prune-removed') { pruneRemoved = true; continue; }
   if (args[i] === '--rollback') { rollback = true; continue; }
   if (args[i] === '--yes' || args[i] === '-y') { yesFlag = true; continue; }
+  if (args[i] === '--skip-context-commonization') { skipContextCommonization = true; continue; }
   if (!projectPath && !args[i].startsWith('--')) { projectPath = args[i]; continue; }
 }
 
 if (!projectPath) {
-  console.error('Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform claude|antigravity|both] [--dry-run] [--prune-removed] [--rollback] [--yes]');
+  console.error('Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform claude|antigravity|both] [--dry-run] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization]');
   if (import.meta.main) {
     process.exit(1);
   }
@@ -906,6 +927,80 @@ for (const rel of VARIANT_DOCS_SYNC) {
       syncChanged++;
     } else {
       console.log(`  OK     ${rel}  (hash match)`);
+    }
+  }
+}
+console.log('');
+
+// ── CONTEXT_COMMONIZATION: variant-context boilerplate prune (v1.20.0) ─────────
+// docs/designs/2026-09-10-context-purification-design.md D2. After VARIANT_DOCS_SYNC
+// refreshes docs/context.md, near-duplicate sections in docs/<variant>.context.md
+// become redundant. For each top-level section (COMMON-* zones, VARIANT-INJECT
+// blocks, and the version footer excluded), token-overlap similarity vs the common
+// template decides: >= W2_REMOVE_THRESHOLD → REMOVE; >= W2_REVIEW_FLOOR → REVIEW
+// (manual Context Commonization Review per ADR-0050 Part 3 — NEVER auto-removed);
+// below → untouched, silent. Comparison reads the TEMPLATE source so --dry-run
+// sees the same verdicts the apply run would produce.
+console.log('--- CONTEXT_COMMONIZATION: variant context commonization (boilerplate prune) ---');
+if (skipContextCommonization) {
+  console.log('  SKIP   (--skip-context-commonization)');
+} else {
+  const variantContextPath = join(projectDir, 'docs', `${variant}.context.md`);
+  const commonContextSrc = resolveTemplate('docs/context.md');
+  if (!existsSync(variantContextPath)) {
+    console.log(`  SKIP   (no variant context file): docs/${variant}.context.md`);
+  } else if (!commonContextSrc) {
+    console.log('  SKIP   (no common docs/context.md template)');
+  } else {
+    const commonSections = splitIntoSections(stripVersionFooter(readFileSync(commonContextSrc, 'utf8')));
+    const originalContent = readFileSync(variantContextPath, 'utf8');
+    const { body: originalBody, footer: originalFooter } = splitOffVersionFooter(originalContent);
+    const originalLines = originalBody.split('\n');
+    const sections = splitContextFileSections(originalBody, { includeVariantInject: true });
+
+    // Collect removal ranges (original line coordinates). Sections whose body
+    // contains managed-zone content are never auto-removed — deleting them would
+    // eat engine-managed blocks; they downgrade to REVIEW.
+    const removalRanges: Array<{ start: number; end: number; heading: string; similarity: number; matched: string | null }> = [];
+    for (const { section, headingInManagedZone, bodyContainedManagedZone, startLine, endLineExclusive } of sections) {
+      if (headingInManagedZone) continue;
+      const verdict = classifyCommonizationSection(section, commonSections, {
+        removeThreshold: W2_REMOVE_THRESHOLD,
+        reviewFloor: W2_REVIEW_FLOOR,
+      });
+      if (verdict.verdict === 'remove') {
+        if (bodyContainedManagedZone) {
+          console.log(`  REVIEW (manual commonization): ${section.heading} (overlap ${verdict.maxSimilarity.toFixed(2)} — kept: section contains managed COMMON-*/VARIANT-INJECT content)`);
+        } else {
+          removalRanges.push({ start: startLine, end: endLineExclusive, heading: section.heading, similarity: verdict.maxSimilarity, matched: verdict.matchedCommonHeading });
+        }
+      } else if (verdict.verdict === 'review') {
+        console.log(`  REVIEW (manual commonization): ${section.heading} (overlap ${verdict.maxSimilarity.toFixed(2)})`);
+      }
+      // verdict 'keep': below report floor — untouched, silent
+    }
+
+    if (removalRanges.length === 0) {
+      console.log('  OK     no near-duplicate sections to remove');
+    } else {
+      // Splice removal ranges out, then restore blank-line hygiene (collapse any
+      // 2+ consecutive blank lines left behind down to one).
+      const removed = new Set<number>();
+      for (const range of removalRanges) {
+        for (let i = range.start; i < range.end; i++) removed.add(i);
+        console.log(`  ${dryTag}REMOVE docs/${variant}.context.md ## ${range.heading} (overlap ${range.similarity.toFixed(2)} vs common ## ${range.matched})`);
+      }
+      const keptLines = originalLines.filter((_, i) => !removed.has(i))
+        .join('\n')
+        .replace(/\n{3,}/g, '\n\n')
+        .split('\n');
+      const cleaned = keptLines.join('\n').replace(/^\n+|\n+$/g, '');
+      let mergedContent = cleaned + originalFooter;
+      // preserve EOF newline hygiene so the write doesn't churn the final line
+      if (originalContent.endsWith('\n') && !mergedContent.endsWith('\n')) mergedContent += '\n';
+      if (!dryRun) writeFileSync(variantContextPath, mergedContent);
+      console.log(`  ${dryTag}WROTE: docs/${variant}.context.md (commonization)`);
+      syncChanged++;
     }
   }
 }

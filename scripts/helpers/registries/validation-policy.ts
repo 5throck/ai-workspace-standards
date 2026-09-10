@@ -1,5 +1,9 @@
 // scripts/helpers/registries/validation-policy.ts
-// @version 1.1.0
+// @version 1.2.0
+// v1.2.0: safety entry added (empty requiredCapabilities — cannot false-block a
+//         future safety-type promotion) — d0ddc17f registered the safety variant
+//         type without a policy, tripping the registry-integrity exact-key-parity
+//         check (fatal) on every pipeline run.
 // SSOT for per-type validation policies
 
 import type { VariantType } from './variant-type-registry.ts';
@@ -99,6 +103,15 @@ export const VALIDATION_POLICIES = {
     optionalAgentSections: ['## Game Mechanics', '## Performance Budget'],
   },
   'abap-development': {
+    requiredCapabilities: [],
+    optionalAgentSections: ['## Phase Handoff Protocol'],
+  },
+  // safety: registered by d0ddc17f (co-safety variant regen) without a policy entry,
+  // which tripped the registry-integrity exact-key-parity check (fatal) on every
+  // pipeline run. Deliberately empty requiredCapabilities so a safety-type promotion
+  // cannot false-block; flagged for architect review when the first safety-type
+  // promotion is planned.
+  safety: {
     requiredCapabilities: [],
     optionalAgentSections: ['## Phase Handoff Protocol'],
   },

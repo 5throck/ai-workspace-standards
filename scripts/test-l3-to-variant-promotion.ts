@@ -2,8 +2,14 @@
 /**
  * test-l3-to-variant-promotion.ts — E2E smoke test for the L3 scaffold → variant promotion path
  *
- * @version 1.1.0
- * @last_updated 2026-08-21
+ * @version 1.2.0
+ * @last_updated 2026-09-10
+ *
+ * v1.2.0: Tests 2.7 / 5d / 5e — context purification regression bait
+ *         (docs/designs/2026-09-10-context-purification-design.md D6): a project-only
+ *         section injected into the fixture's docs/context.md must be merged into the
+ *         promoted docs/co-e2etest.context.md, and a fleet-legacy `## Procedures` stub
+ *         must be dropped as superseded boilerplate.
  *
  * Backs the `simulate-l3-to-variant-promotion` skill (skills/simulate-l3-to-variant-promotion/SKILL.md).
  * Exercises `scripts/create-l3-scaffold.ts` + `scripts/l3-to-variant-pipeline.ts`
@@ -189,6 +195,43 @@ try {
       pass('Test 2.6 PASSED: capability-coverage fixture agent injected');
     } catch (e) { fail('Test 2.6', String(e)); }
 
+    // ── Test 2.7: Inject context-purification bait (W1) ─────────────────────
+    // docs/designs/2026-09-10-context-purification-design.md D1/D6. The promoted
+    // variant must NOT silently lose project-only content from the L3 source's
+    // docs/context.md (SKIP_IN_COPY drops that file). Inject (a) a clearly
+    // project-only section that MUST be merged into the promoted
+    // docs/co-e2etest.context.md, and (b) a `## Procedures` stub copied verbatim
+    // from the real fleet (Projects/co-abap/docs/context.md:301-303) that MUST be
+    // dropped as superseded boilerplate — its content is already carried by the
+    // common template's `### Procedure Graph` and the stub shares no exact line
+    // with it (token-overlap 0.600 >= W1_SUPERSEDED_THRESHOLD 0.55).
+    console.log('\nTest 2.7: Inject purification-bait sections into fixture docs/context.md');
+    try {
+      const fixtureContextPath = join(L3_FIXTURE_PATH, 'docs', 'context.md');
+      if (!existsSync(fixtureContextPath)) {
+        fail('Test 2.7', `docs/context.md not found at ${fixtureContextPath}`);
+      } else {
+        const original = readFileSync(fixtureContextPath, 'utf8');
+        const bait = [
+          '## Domain Configuration Notes',
+          '',
+          'Fixture-unique project-only content: the co-e2etest domain enables the `e2e-fixture-mode` runtime flag (declared in `docs/e2e-config.json`) and ships a bespoke `fixtures/seeds/*.json` corpus that exists nowhere in the common template.',
+          '',
+          '## Procedures',
+          '',
+          'Structured workflows live in `procedures/<name>/schema.yaml` (ADR-0063, canonical workflow source). Validate with `bun scripts/validate-procedures.ts`; the skill graph derives procedure/output_type nodes and step edges from them.',
+          '',
+        ].join('\n');
+        // Insert before the trailing version footer when present, else append.
+        const footerMatch = original.match(/\n---\n\n\*[^*\n]+version:[^*\n]*\*\s*$/);
+        const updated = footerMatch && footerMatch.index !== undefined
+          ? original.slice(0, footerMatch.index).trimEnd() + '\n\n' + bait + original.slice(footerMatch.index)
+          : original.trimEnd() + '\n\n' + bait;
+        writeFileSync(fixtureContextPath, updated, 'utf8');
+        pass('Test 2.7 PASSED: project-only section + Procedures stub injected into fixture docs/context.md');
+      }
+    } catch (e) { fail('Test 2.7', String(e)); }
+
     // ── Test 3: Run the pipeline programmatically (A.3 regression check) ────
     // Importing executeL3ToVariantPipeline() directly (rather than shelling out)
     // is the point: before the A.3 fix, a BLOCKING Phase 3.5/4.5 failure called
@@ -293,6 +336,38 @@ try {
       } else {
         pass('Test 5c PASSED: docs/co-e2etest.context.md generated in promoted variant output');
       }
+
+      // Test 5d (W1 purification, D6): the project-only section injected in Test 2.7
+      // must have been rescued from the convention-excluded docs/context.md into the
+      // promoted <variant>.context.md (generate-variant seam + Phase 4.7 gate).
+      try {
+        const promotedVariantContext = existsSync(promotedVariantContextMd)
+          ? readFileSync(promotedVariantContextMd, 'utf8')
+          : '';
+        if (
+          !promotedVariantContext.includes('## Domain Configuration Notes') ||
+          !promotedVariantContext.includes('e2e-fixture-mode')
+        ) {
+          fail('Test 5d', 'project-only section did not survive promotion into docs/co-e2etest.context.md — W1 purification lost content');
+        } else {
+          pass('Test 5d PASSED: project-only section merged into promoted co-e2etest.context.md (W1 purification)');
+        }
+      } catch (e) { fail('Test 5d', String(e)); }
+
+      // Test 5e (W1 purification, D6): the fleet-legacy Procedures stub injected in
+      // Test 2.7 is superseded boilerplate (covered by the common template's
+      // Procedure Graph) and must be DROPPED, not migrated.
+      try {
+        const promotedVariantContext = existsSync(promotedVariantContextMd)
+          ? readFileSync(promotedVariantContextMd, 'utf8')
+          : '';
+        const stubMarker = 'the skill graph derives procedure/output_type nodes and step edges from them';
+        if (promotedVariantContext.includes(stubMarker)) {
+          fail('Test 5e', 'superseded Procedures stub leaked into promoted co-e2etest.context.md — expected dropped as superseded');
+        } else {
+          pass('Test 5e PASSED: Procedures stub correctly dropped as superseded boilerplate');
+        }
+      } catch (e) { fail('Test 5e', String(e)); }
     } catch (e) { fail('Test 5', String(e)); }
   }
 

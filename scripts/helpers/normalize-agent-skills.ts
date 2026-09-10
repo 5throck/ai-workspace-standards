@@ -6,8 +6,16 @@
  * skill files, and normalizes skill frontmatter/body section names to match
  * the canonical variant specialist structure.
  *
- * @version 1.1.0
+ * @version 1.2.0
  * @phase 1.5: Agent/Skill Normalization
+ *
+ * v1.2.0: FIX — normalizeAgentSkills() resolved scan entries' relativePath against
+ *         process.cwd() instead of l3ProjectPath, so every pipeline run started from
+ *         the workspace root silently read/normalized/rewrote same-named WORKSPACE
+ *         skill and agent files (manifested as spurious last_reviewed=<today> +
+ *         prerequisites churn on skills/<name>/SKILL.md after every
+ *         test-l3-to-variant-promotion.ts run). All paths now resolve against the
+ *         L3 project root (docs/designs/2026-09-10-context-purification-design.md follow-up).
  *
  * See: docs/adr/0042-l2-variant-pipeline-wave15-golden-reference.md
  * See: docs/designs/variant-specialist-skill-structure.md
@@ -461,14 +469,22 @@ export function normalizeAgentSkills(
       file.relativePath.match(/^skills\//) &&
       basename(file.relativePath) === 'SKILL.md';
 
-    if (!existsSync(file.relativePath)) continue;
+    // v1.2.0: resolve scan entries against the L3 PROJECT ROOT, not process.cwd().
+    // relativePath is fixture-relative; resolving it against cwd made every pipeline
+    // run from the workspace root silently normalize (and rewrite) same-named
+    // WORKSPACE skill/agent files whenever the fixture contained a common-named
+    // skill — e.g. every test-l3-to-variant-promotion.ts run re-stamped
+    // skills/*/SKILL.md with last_reviewed=<today> + prerequisites (2026-09-10 debris).
+    const absoluteFilePath = join(l3ProjectPath, file.relativePath);
 
-    const content = readUTF8File(file.relativePath);
+    if (!existsSync(absoluteFilePath)) continue;
+
+    const content = readUTF8File(absoluteFilePath);
 
     if (isAgentFile) {
       const agentName = basename(file.relativePath, '.md');
       const { normalized, extracted, pending, warnings } = normalizeAgentFile(
-        file.relativePath,
+        absoluteFilePath,
         content,
         agentName,
         l3ProjectPath,
@@ -480,7 +496,7 @@ export function normalizeAgentSkills(
       result.warnings.push(...warnings);
 
     } else if (isSkillFile) {
-      const { normalized, warnings } = normalizeSkillFile(file.relativePath, content);
+      const { normalized, warnings } = normalizeSkillFile(absoluteFilePath, content);
       result.normalizedSkills.push(normalized);
       result.warnings.push(...warnings);
     }

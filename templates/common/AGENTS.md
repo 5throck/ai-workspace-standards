@@ -347,6 +347,9 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 | Cross-validate documentation consistency | `auditor` | `docs-writer` |
 | Orchestrate multi-step task across agents | `pm` | any execution agent |
 
+<!-- VARIANT-ROLE-BOUNDARY-START -->
+<!-- VARIANT-ROLE-BOUNDARY-END -->
+
 ---
 
 ## §5: Execution Plan Templates

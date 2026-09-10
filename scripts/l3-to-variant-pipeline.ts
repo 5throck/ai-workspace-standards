@@ -11,8 +11,15 @@
  * - Wave 3: Platform parity validation (validate-platform-parity.ts)
  * - Wave 3: Workspace integration (integration-helpers.ts)
  *
- * @version 1.15.0
+ * @version 1.16.0
  * @phase: Complete pipeline orchestration
+ *
+ * v1.16.0 (2026-09-10): PHASE 4.7 (new) — W1 context purification gate. After Phase
+ *          4.6, fail-closed verification that every project-only section extracted
+ *          during generation (generate-variant v1.14.0 ledger, summary.contextPurification)
+ *          is present by normalized heading in the final docs/<variant>.context.md;
+ *          outcome recorded into _pipeline_report.json
+ *          (docs/designs/2026-09-10-context-purification-design.md D1).
  *
  * v1.14.0 (2026-08-29): Phase 0.5 pre-flight PROMOTION HOLD — reads the SOURCE project's
  *          variant.json promotionHold before any write and aborts; no --force bypass (the owner
@@ -61,6 +68,12 @@
  *   PHASE 4.6 — Generated variant pm.md completion + context.md generation
  *               · Operates on GENERATED variant output (not L3 source)
  *               · Distinct from Phase 1.6 (source diagnosis)
+ *   PHASE 4.7 — Context purification gate — NEW in v1.16.0
+ *               · Fail-closed: every project-only section merged from the L3 source's
+ *                 docs/context.md (generate-variant v1.14.0 seam ledger) must be
+ *                 present by normalized heading in the final docs/<variant>.context.md
+ *               · BLOCKING on mismatch; reports section names
+ *               · Records merged/dropped outcome into _pipeline_report.json
  *   PHASE 5   — Beta lifecycle initialization
  *   PHASE 6   — Platform parity validation
  *   PHASE 7   — Workspace integration (DEPRECATED in v1.9.0 — defaults OFF)
@@ -113,6 +126,7 @@ import { integrateVariantToWorkspace, IntegrationResult } from './helpers/integr
 import { validateDependencies } from './helpers/variant-governance-rules.ts';
 import { ErrorPhase, fatalError, logError, logErrors } from './lib/error-handling.ts';
 import { parsePmMd, extractVariantOverrides, resolveExtendsChain, writeContextMd } from './helpers/pm-md-parser.ts';
+import { splitIntoTopLevelSections, normalizeHeading } from './helpers/context-sections.ts';
 import type { VariantType } from './helpers/registries/variant-type-registry.ts';
 import { listVariantTypes, isVariantType, getVariantTypeDefinition } from './helpers/registries/variant-type-registry.ts';
 
@@ -168,6 +182,20 @@ export interface PipelineResult {
   executionTime: number;
   /** Pipeline errors */
   errors: Array<{ phase: string; error: string }>;
+}
+
+/**
+ * Phase 4.7 gate core (v1.16.0, W1 context purification): which merged sections from
+ * the purification ledger are MISSING (by normalized heading) from the final
+ * docs/<variant>.context.md? Exported pure function so the fail-closed gate logic is
+ * unit-testable independently of the pipeline's heavier phases. Any non-empty result
+ * is a Phase 4.7 BLOCKING error.
+ */
+export function findMissingPurifiedSections(finalContent: string, mergedHeadings: string[]): string[] {
+  const presentHeadings = new Set(splitIntoTopLevelSections(finalContent).map(s => s.heading));
+  return mergedHeadings
+    .map(heading => normalizeHeading(heading))
+    .filter(heading => !presentHeadings.has(heading));
 }
 
 // ============================================================================
@@ -1076,6 +1104,82 @@ export async function executeL3ToVariantPipeline(config: PipelineConfig): Promis
     const errorMsg = error instanceof Error ? error.message : String(error);
     // Don't fail the pipeline for context.md generation errors
     console.warn(`⚠️  PHASE 4.6 WARNING: ${errorMsg}`);
+  }
+
+  // ============================================================================
+  // PHASE 4.7: CONTEXT PURIFICATION GATE (W1 fail-closed verification) — v1.16.0
+  // ============================================================================
+  // docs/designs/2026-09-10-context-purification-design.md D1. Phase 4's copy seam
+  // rescued project-only sections from the convention-excluded L3 docs/context.md
+  // into docs/<variant>.context.md (generate-variant.ts purifyPromotedContextMd).
+  // This gate re-verifies the ledger against the FINAL file — after Phase 4.6's
+  // writeContextMd() append — so any ordering interaction or lost section surfaces
+  // here instead of silently. BLOCKING: a merged section missing from the output is
+  // exactly the silent-loss failure class W1 exists to prevent.
+  // ============================================================================
+
+  try {
+    console.log(`\n${'─'.repeat(60)}`);
+    console.log(`PHASE 4.7: Context Purification Gate`);
+    console.log(`${'─'.repeat(60)}`);
+
+    const purification = generatedVariant!.summary.contextPurification;
+    const { merged, dropped } = purification;
+
+    if (merged.length === 0 && dropped.length === 0) {
+      console.log(`ℹ️  No project-only sections extracted from L3 docs/context.md — nothing to verify`);
+    } else {
+      if (merged.length > 0) {
+        const variantContextPath = join(generatedVariant!.variantPath, 'docs', `${config.variantName}.context.md`);
+        if (!existsSync(variantContextPath)) {
+          throw new Error(
+            `docs/${config.variantName}.context.md not found at ${variantContextPath} but the ` +
+            `purification ledger records ${merged.length} merged section(s): ${merged.join(', ')}`
+          );
+        }
+        const { readUTF8File: ru47 } = await import('./lib/encoding-utils.js');
+        const finalContent = ru47(variantContextPath);
+        const missing = findMissingPurifiedSections(finalContent, merged);
+        if (missing.length > 0) {
+          throw new Error(
+            `project-only section(s) missing from final docs/${config.variantName}.context.md: ` +
+            `[${missing.join(', ')}] — W1 purification ledger expected them merged`
+          );
+        }
+        console.log(`✅ ${merged.length} merged section(s) verified in docs/${config.variantName}.context.md: ${merged.join(', ')}`);
+      }
+      if (dropped.length > 0) {
+        console.log(`ℹ️  ${dropped.length} superseded section(s) dropped (covered by templates/common/docs/context.md): ${dropped.join(', ')}`);
+      }
+    }
+
+    // Record the purification outcome in the Phase 4.5 report (read-modify-write).
+    try {
+      const reportJsonPath = join(generatedVariant!.variantPath, '_pipeline_report.json');
+      if (existsSync(reportJsonPath)) {
+        const { readUTF8File: ru47r, writeUTF8File: wu47 } = await import('./lib/encoding-utils.js');
+        const reportJson = JSON.parse(ru47r(reportJsonPath)) as Record<string, unknown>;
+        reportJson.contextPurification = {
+          merged,
+          dropped,
+          verified: true,
+        };
+        wu47(reportJsonPath, JSON.stringify(reportJson, null, 2));
+        console.log(`  📄 Purification outcome recorded in _pipeline_report.json`);
+      }
+    } catch (reportError) {
+      // Report augmentation is best-effort; the gate verdict above is unaffected.
+      console.warn(`⚠️  PHASE 4.7: could not update _pipeline_report.json: ${reportError instanceof Error ? reportError.message : String(reportError)}`);
+    }
+
+    console.log(`✅ PHASE 4.7 COMPLETE`);
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    console.error(`\n❌ PHASE 4.7 BLOCKING: Context purification verification failed.`);
+    console.error(`   ${errorMsg}`);
+    console.error(`   Inspect docs/${config.variantName}.context.md and the generate-phase purification log, then re-run the pipeline.\n`);
+    errors.push({ phase: '4.7', error: errorMsg });
+    return buildFailureResult(phases, errors, startTime);
   }
 
   // ============================================================================

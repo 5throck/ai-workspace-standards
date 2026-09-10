@@ -28,6 +28,7 @@ Use this checklist to verify your variant is ready for promotion from Phase A (P
 - [ ] Country profiles (if shipped): `country_config` declared in `variant.json` with a `supported` list and `default: null` (region-neutral default), and every `supported` code has a `docs/countries/<CODE>.md` profile whose frontmatter `code` matches
 - [ ] Country-specific assets (skills, env keys) registered in `country_scoped_assets` in both schema copies (`docs/workspace-schema.json` and `templates/common/docs/workspace-schema.json`) - never shipped unregistered; no variant-local forks of registry-governed scoped skills
 - [ ] Docs and agents anchor to a jurisdiction only via the active country profile or explicit `(CC: ...)` markers - no hardcoded target-jurisdiction assumptions in region-neutral default paths
+- [ ] **Context purified**: project-specific sections removed from the project's `docs/context.md` and moved into `docs/<variant>.context.md`; no `templates/<variant>/docs/context.md` exists (WS-07); the pipeline's Phase 4.7 purification gate passed
 - [ ] `_ORIGIN.md` lists files copied from workspace root
 - [ ] `_COMMON_VERSION.md` contains workspace common version snapshot
 
@@ -121,6 +122,7 @@ Use this checklist to verify your variant is ready for promotion from Phase A (P
 **Checklist**:
 - [ ] Platform config (`CLAUDE.md` / `GEMINI.md`) inherited from `templates/common/` (no variant-local copies — removed by design in commit `2d860f05`)
 - [ ] `AGENTS.md` includes variant agent roster
+- [ ] `docs/<variant>.context.md` carries the variant-specific sections extracted at promotion (purification ledger in `_pipeline_report.json`)
 - [ ] `CHANGELOG.md` exists with [Unreleased] section
 - [ ] `memory/[variant-name]-plan.md` (design document) complete
 - [ ] `PROMOTION_CHECKLIST.md` (this file) complete
@@ -182,4 +184,4 @@ Use this checklist to verify your variant is ready for promotion from Phase A (P
 ---
 
 *Template Owner: pm*
-*Last Updated: 2026-08-30*
+*Last Updated: 2026-09-10*
