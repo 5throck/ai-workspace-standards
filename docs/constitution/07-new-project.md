@@ -56,7 +56,7 @@ Workspace-management artifacts are excluded **at the L0→L1 propagation stage**
 
 | Artifact type | Exclusion mechanism | How to add new exclusions |
 |---------------|---------------------|--------------------------|
-| **Skills** | `l2_propagate: false` in `SKILL.md` frontmatter | Add `l2_propagate: false` to the skill's SKILL.md in `skills/` (root only — `propagate-to-templates.ts` will exclude it from `templates/common/` automatically) |
+| **Skills** | `l2_propagate: false` in `SKILL.md` frontmatter | Add `l2_propagate: false` to the skill's SKILL.md in `skills/` (root only — `propagate-to-templates.ts` will exclude it from `templates/common/` automatically). The safety-net sweep runs over all three skill locations (`skills/`, `.claude/skills/`, `.gemini/skills/`), so a leak into the L1 platform dirs is also caught (T-20260910-023) |
 | **Scripts** | Scope `L0` in SCRIPTS.md | Set scope to `L0` in SCRIPTS.md (`propagate-to-templates.ts` will exclude it from `templates/common/` automatically) |
 
 The filtering is automatic — `propagate-to-templates.ts` enforces it at publish time, and `new-project.ts` re-checks as a safety net. No hardcoded exclusion lists are maintained.

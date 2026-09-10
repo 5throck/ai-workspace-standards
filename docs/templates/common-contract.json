@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "Declares the common layer contract: which agents and skills are provided by templates/common/, their versions, and override governance rules. Variants inherit these via new-project.ts and may declare overrides in their variant.json. Country-scoped skills (k-law/k-dart/k-kosis, tracked in workspace-schema.json country_scoped_assets) and variant-scoped skills (tracked in variant_scoped_skills, living in templates/co-*/skills/) are deliberately out of this contract.",
   "governance": {
     "anti_swelling_threshold": 0.5,
@@ -185,6 +185,54 @@
       "version": "1.0.0",
       "overridable": false,
       "description": "Zod runtime schema validation patterns and contract safety rules"
+    },
+    "accessibility-audit": {
+      "source": "skills/accessibility-audit/SKILL.md",
+      "version": "1.1.0",
+      "overridable": false,
+      "description": "Automated WCAG 2.1 Level AA accessibility evaluation rules and axe-core DOM audit patterns"
+    },
+    "ci-triage": {
+      "source": "skills/ci-triage/SKILL.md",
+      "version": "0.1.0",
+      "overridable": false,
+      "description": "Triages CI / audit / scaffold failures: deterministic reproduction, provenance tracing, root-cause fix, re-verification"
+    },
+    "handbook": {
+      "source": "skills/handbook/SKILL.md",
+      "version": "0.4.0",
+      "overridable": false,
+      "description": "Document Production Workflow — generates searchable, themed handbook static sites (GitHub Pages)"
+    },
+    "handbook-sync-audit": {
+      "source": "skills/handbook-sync-audit/SKILL.md",
+      "version": "1.0.0",
+      "overridable": false,
+      "description": "Handbook Sync Audit — verifies generated handbooks stay aligned with their sources across content, structure, and anchor axes"
+    },
+    "i18n-audit": {
+      "source": "skills/i18n-audit/SKILL.md",
+      "version": "1.0.0",
+      "overridable": false,
+      "description": "Locale parity and glossary audit: translation-key parity across locale files, glossary adherence, drift reporting"
+    },
+    "source-command-commit-push-pr": {
+      "source": "skills/source-command-commit-push-pr/SKILL.md",
+      "version": "1.0.1",
+      "overridable": false,
+      "description": "Redirects commit+push+PR requests to the /sync pipeline (workspace enforcement)"
+    },
+    "token-usage-lint": {
+      "source": "skills/token-usage-lint/SKILL.md",
+      "version": "1.1.0",
+      "overridable": false,
+      "description": "Lint procedure scanning UI code for hardcoded design values (raw hex, rgb()/hsl(), raw px) that bypass the token layer"
+    },
+    "ui-ux-design-intelligence": {
+      "source": "skills/ui-ux-design-intelligence/SKILL.md",
+      "version": "1.0.1",
+      "overridable": false,
+      "description": "UI/UX design capabilities: design system creation, component design, visual hierarchy, user-centered design principles"
     }
   },
   "common_commands": {
@@ -229,6 +277,20 @@
       "gemini-parity": "full",
       "description": "Creates a new task definition file with standardized template",
       "propagated_to_common": true
+    },
+    "gateguard": {
+      "source": ".claude/commands/gateguard.md",
+      "gemini_source": ".gemini/commands/gateguard.md",
+      "gemini-parity": "full",
+      "description": "Investigate a file before editing — pre-edit quality gate (companion to the PreToolUse GateGuard hook)",
+      "propagated_to_common": true
+    },
+    "sync": {
+      "source": ".claude/commands/sync.md",
+      "gemini_source": ".gemini/commands/sync.md",
+      "gemini-parity": "full",
+      "description": "Full pipeline — memlog, sync-md, changelog, audit, commit, push, PR via scripts/dev-sync.ts",
+      "propagated_to_common": true
     }
   },
   "common_platform_skills": {
@@ -258,6 +320,62 @@
       "gemini_source": ".gemini/skills/meeting-facilitation/SKILL.md",
       "version": "1.4.1",
       "description": "Structured multi-agent meeting facilitation — delegates to .claude/commands/meeting.md",
+      "propagated_to_common": true
+    },
+    "decision-record": {
+      "claude_source": ".claude/skills/decision-record/SKILL.md",
+      "gemini_source": ".gemini/skills/decision-record/SKILL.md",
+      "version": "1.1.0",
+      "description": "Decision record format for gate-moment rulings — Design Gate Row 0 determinations, escalations, and go/no-go calls as durable docs/decisions/DEC-YYYYMMDD-NN.md files (ADR-0061)",
+      "propagated_to_common": true
+    },
+    "evidence-ledger": {
+      "claude_source": ".claude/skills/evidence-ledger/SKILL.md",
+      "gemini_source": ".gemini/skills/evidence-ledger/SKILL.md",
+      "version": "1.1.0",
+      "description": "Fixed-column evidence ledger tracing every claim a decision depends on to a source, a reference, and a verification state",
+      "propagated_to_common": true
+    },
+    "handbook": {
+      "claude_source": ".claude/skills/handbook/SKILL.md",
+      "gemini_source": ".gemini/skills/handbook/SKILL.md",
+      "version": "0.4.0",
+      "description": "Document Production Workflow — generates searchable, themed handbook static sites (GitHub Pages); standalone, lecture-companion, and sync modes",
+      "propagated_to_common": true
+    },
+    "handbook-sync-audit": {
+      "claude_source": ".claude/skills/handbook-sync-audit/SKILL.md",
+      "gemini_source": ".gemini/skills/handbook-sync-audit/SKILL.md",
+      "version": "1.0.0",
+      "description": "Handbook Sync Audit — verifies generated handbooks stay aligned with their sources across content reflection, structural linkage, and freshness",
+      "propagated_to_common": true
+    },
+    "i18n-audit": {
+      "claude_source": ".claude/skills/i18n-audit/SKILL.md",
+      "gemini_source": ".gemini/skills/i18n-audit/SKILL.md",
+      "version": "1.0.0",
+      "description": "Locale parity and glossary audit — master-locale translation-key parity, glossary adherence, drift reporting, parity certificate on success",
+      "propagated_to_common": true
+    },
+    "i18n-formatting": {
+      "claude_source": ".claude/skills/i18n-formatting/SKILL.md",
+      "gemini_source": ".gemini/skills/i18n-formatting/SKILL.md",
+      "version": "1.0.0",
+      "description": "Locale-specific formatting rules — date/time, number and currency, units, Korean-scale numerals, print paper sizes",
+      "propagated_to_common": true
+    },
+    "i18n-layout": {
+      "claude_source": ".claude/skills/i18n-layout/SKILL.md",
+      "gemini_source": ".gemini/skills/i18n-layout/SKILL.md",
+      "version": "1.0.0",
+      "description": "Text layout and encoding guidance — UTF-8/legacy code pages, BOM hazards, line endings, RTL/bidi, script-specific font selection (Hangul focus)",
+      "propagated_to_common": true
+    },
+    "i18n-locale-config": {
+      "claude_source": ".claude/skills/i18n-locale-config/SKILL.md",
+      "gemini_source": ".gemini/skills/i18n-locale-config/SKILL.md",
+      "version": "1.0.0",
+      "description": "Locale identification and configuration — BCP 47 structure, language-vs-country doctrine, collation order, timezone handling, region/language matrix",
       "propagated_to_common": true
     }
   },

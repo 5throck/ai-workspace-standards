@@ -27,8 +27,8 @@
     },
     "status": {
       "type": "string",
-      "enum": ["draft", "active", "deprecated", "archived"],
-      "description": "Current lifecycle status of the skill"
+      "enum": ["draft", "active", "deprecated", "archived", "experimental"],
+      "description": "Current lifecycle status of the skill. 'experimental' is skill-only (T-20260910-021): a shipped, registered skill awaiting lifecycle adjudication — agents and commands do not use it."
     },
     "scope": {
       "type": "string",

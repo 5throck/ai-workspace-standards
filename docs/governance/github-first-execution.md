@@ -184,5 +184,5 @@ workspace/                          # L0 - Root
 ## References
 
 - [Meeting Transcript](../../memory/meeting-2026-05-30-github-first-execution.md)
-- [CONSTITUTION.md §5.6 - Agent Lifecycle](../../CONSTITUTION.md#56-lifecycle-governance)
-- [CONSTITUTION.md §6.5 - Script Lifecycle](../../CONSTITUTION.md#65-script-lifecycle)
+- [CONSTITUTION.md §5.6 - Agent Lifecycle](../../CONSTITUTION.md#56-agent-lifecycle-management)
+- [CONSTITUTION.md §6.5 - Script Lifecycle](../../CONSTITUTION.md#65-script-lifecycle-management)

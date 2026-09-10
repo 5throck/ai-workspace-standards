@@ -220,7 +220,7 @@ The `governance-*` domains in `propagation-map.json` use an explicit `target_var
 **Related Documentation**:
 - [CONSTITUTION.md §5 - Multi-Agent Architecture](../../constitution/05-multi-agent-architecture.md)
 - [ADR-0039: L0→L1→L2 Hierarchy and Extends Pattern](0039-l0-l1-l2-hierarchy-and-extends.md)
-- [CLAUDE.md §10 - Lifecycle Management Rules](../../CLAUDE.md#10-lifecycle-management-rules)
+- [CONSTITUTION.md §9 - Operations Workflow](../../CONSTITUTION.md#9-operations-workflow) (successor of the former "CLAUDE.md §10 Lifecycle Management Rules")
 - [PM.md Variant-Specific Content Injection Design](../designs/pm-md-variant-specific-content-injection-design.md)
 
 **Implementation Files**:

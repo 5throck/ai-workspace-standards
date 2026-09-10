@@ -64,6 +64,13 @@ Rules:
 5. **Enforcement SHOULD be automated** (a design-lint script: banned hard-coded values,
    bypassed layout primitives, non-registered icons/labels). See the checklist template:
    `docs/_templates/design-review-checklist-template.md`.
+6. **Rendered-preview verification (ADR-0070)**: user-facing web/app UI work is not
+   complete until the UI was verified in a rendered preview — at minimum a rendered
+   check at the project's declared mobile and desktop baselines (≥ 2 breakpoints) and
+   one key interaction exercised, with evidence (screenshots or an automated
+   visual-smoke output) attached to the design document or PR. Tooling is
+   project-chosen; pure backend/non-UI deliverables are exempt with an explicit
+   statement.
 
 Stage-table mapping (see §2) is unaffected — this pipeline governs *systemization order*,
 the stages above govern *derivation content*.
@@ -179,6 +186,8 @@ This contract is review-enforced today; automated linting is a tracked backlog i
 - ✓ WCAG AA target declared
 - ✓ Focus state defined
 - ✓ Non-color state encoding defined
+- ✓ Feature-level UI verified in a rendered preview per ADR-0070 (≥ 2 breakpoints,
+  ≥ 1 key interaction, evidence attached) — web/app UI only; exemption stated otherwise
 
 ### [Consistency]
 - ✓ Component tokens do not bypass semantic tokens
@@ -192,7 +201,8 @@ ad-hoc checks.
 This contract covers the **design system** layer. Feature-level accessibility is a separate, mandatory
 duty: design docs for user-facing features MUST include an Accessibility section (target level, affected
 interaction areas, verification method) per the workspace standard — see `docs/context.md` §
-Accessibility Standards and ADR-0065.
+Accessibility Standards and ADR-0065. Feature-level UI additionally carries the rendered-preview
+duty of §2b rule 6 / ADR-0070.
 
 ## 8. Relationship to Other Workspace Assets
 

@@ -247,6 +247,8 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `adr:0067` | adr | — | — | — |
 | `adr:0068` | adr | — | design-foundation, service-design | — |
 | `adr:0069` | adr | — | — | — |
+| `adr:0070` | adr | — | — | — |
+| `adr:0071` | adr | — | — | — |
 | `dec:DEC-20260825-01` | decision | — | — | — |
 | `dec:DEC-20260825-02` | decision | `sync` | — | — |
 | `dec:DEC-20260829-01` | decision | `decision-record` | — | — |

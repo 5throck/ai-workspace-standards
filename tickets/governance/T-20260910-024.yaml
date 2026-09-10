@@ -5,12 +5,21 @@ title: >-
   fix post-checkout lock lifetime (lock dies with the hook so concurrent
   checkouts both spawn AI sessions) and default AI_AUTOSTART off
 priority: normal
-status: backlog
+status: review
 attempts: 0
 created_at: '2026-09-10T14:01:23.280Z'
 history:
   - at: '2026-09-10T14:01:23.280Z'
     from: null
     to: backlog
+  - at: '2026-09-10T20:22:57.314Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-10T20:22:57.360Z'
+    from: waiting
+    to: running
+  - at: '2026-09-10T20:30:17.069Z'
+    from: running
+    to: review
 result: null
 error: null

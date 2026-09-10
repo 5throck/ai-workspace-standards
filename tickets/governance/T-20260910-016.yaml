@@ -12,8 +12,14 @@ history:
   - at: '2026-09-10T14:01:23.176Z'
     from: null
     to: backlog
-  - at: '2026-09-10T21:06:38.172Z'
+  - at: '2026-09-10T19:33:10.564Z'
     from: backlog
+    to: waiting
+  - at: '2026-09-10T19:33:10.605Z'
+    from: waiting
+    to: running
+  - at: '2026-09-10T20:22:39.886Z'
+    from: running
     to: review
 result: null
 error: null

@@ -86,3 +86,31 @@ Allow changes to core scripts in L2 and ignore them during reconciliation.
 
 - Meeting transcript: `memory/meeting-2026-06-21-variant-dev-sync-verification.md`
 - Execution plan: `implementation_plan.md`
+
+---
+
+## Amendment 1 (2026-09-11): Variant-JSON-Aware Hook Resolution
+
+The §Decision-1 contract as originally written (hard-coded
+`path.join('scripts', 'audit-variant.ts')` existence check) collided with ADR-0050's
+`scripts/<variant>/` script-layout rule: a variant declaring its hook under its variant
+scripts directory (e.g. `templates/co-safety` shipping
+`scripts/co-safety/audit-variant.ts`, declared in `variant.json`
+`script_manifest`) was silently never audited — `fs.existsSync` failed and the block
+was a no-op (found in the 2026-09-10 project review; fixed in PR #859).
+
+**Superseding resolution order** (implemented in `scripts/audit.ts` §27 and its L1
+mirror, parity-mandated):
+
+1. The variant-declared path from `variant.json` (`script_manifest` /
+   `variant_scripts_dir` entry naming an `audit-variant` script), if present;
+2. the root convention `scripts/audit-variant.ts` (this ADR's original contract);
+3. `scripts/<variant-name>/audit-variant.ts` (ADR-0050 layout convention).
+
+If `variant.json` **declares** an audit hook but no candidate file exists, the audit
+emits a WARN (declared-but-missing is a defect, not a silent skip). Variants without a
+declaration and without any candidate remain a clean skip, unchanged.
+
+ADR-0050's directory rule and this ADR's hook mechanism are thereby reconciled: both
+layouts are legitimate, the declaration wins, and the resolution is discoverable from
+the variant manifest.
