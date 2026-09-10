@@ -1,4 +1,4 @@
-// @version 1.3.0
+// @version 1.3.1
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { $ } from 'bun';
@@ -57,12 +57,23 @@ function normalizePath(p: string): string {
     return p.replace(/\\/g, '/');
 }
 
+/**
+ * Trim a YAML scalar and drop a trailing `# comment` (T-20260910-028): the
+ * manifest previously leaked inline comments straight into the Tier/Model
+ * columns. A `#` only opens a comment when preceded by whitespace (YAML rule),
+ * so `a#b`-style values are left intact.
+ */
+function scalarValue(raw: string): string {
+    const hash = raw.indexOf(' #');
+    return (hash === -1 ? raw : raw.slice(0, hash)).trim().replace(/\s+/g, ' ');
+}
+
 function parseAgentFrontmatter(content: string): { tier?: string; model?: string } {
     const tierMatch = /^tier:[ \t]*\n[ \t]+claude:[ \t]+(.+)$/m.exec(content);
     const modelMatch = /^model:[ \t]+(.+)$/m.exec(content);
     return {
-        tier: tierMatch ? tierMatch[1].trim() : 'N/A',
-        model: modelMatch ? modelMatch[1].trim() : 'N/A',
+        tier: tierMatch ? scalarValue(tierMatch[1]) : 'N/A',
+        model: modelMatch ? scalarValue(modelMatch[1]) : 'N/A',
     };
 }
 

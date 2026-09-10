@@ -30,6 +30,7 @@ import {
   W2_REMOVE_THRESHOLD,
   W2_REVIEW_FLOOR,
   type ContextSection,
+  MIN_MATCH_CANDIDATE_TOKENS,
 } from '../../scripts/helpers/context-sections.ts';
 import { ensureVariantInjectMarkers, purifyPromotedContextMd } from '../../scripts/helpers/generate-variant.ts';
 import { findMissingPurifiedSections } from '../../scripts/l3-to-variant-pipeline.ts';
@@ -427,6 +428,38 @@ describe('classifyCommonizationSection (W2, tuning pins)', () => {
     expect(classification.verdict).toBe('review');
     expect(classification.maxSimilarity).toBeGreaterThanOrEqual(W2_REVIEW_FLOOR);
     expect(classification.maxSimilarity).toBeLessThan(W2_REMOVE_THRESHOLD);
+  });
+
+  it('ignores tiny common sections as match candidates (T-20260910-011)', () => {
+    // A pointer-sized common section (<= MIN_MATCH_CANDIDATE_TOKENS content tokens):
+    // token-overlap against it inflated REVIEW flags to 0.50+ during the 2026-09-10
+    // fleet triage (the min() denominator makes a 1-2 token intersection score 0.50+).
+    // It must not be a match candidate.
+    const tiny = splitIntoSections('## Standard Root Files\n\n`README.md`, `CHANGELOG.md`, `AGENTS.md` are the standard root files.')[0];
+    const project = sectionOf([
+      '## Standard Root Files',
+      '',
+      'This project adds docs/reports/ to the standard root layout.',
+    ].join('\n'));
+    const classification = classifyCommonizationSection(project, [tiny]);
+    expect(classification.verdict).toBe('keep');
+    expect(classification.maxSimilarity).toBe(0);
+    expect(classification.matchedCommonHeading).toBeNull();
+  });
+
+  it('still matches substantive single-paragraph common sections (token floor is not a line count)', () => {
+    // The W2 REMOVE target on the real fleet is itself a single paragraph — the
+    // guard must key on token count, not content-line count (T-20260910-011).
+    const standards = splitIntoSections(
+      '## Computational Integrity Standards\n\nFor domains requiring high-precision or safety-critical numerical computation, **AI must NOT perform calculations directly**. Delegate to validated external tools instead. This applies to ALL reported numbers: aggregations, statistics, percentages, and metrics in any deliverable must be computed by executed code (bun/TypeScript scripts), never by the AI performing arithmetic directly.',
+    );
+    const classification = classifyCommonizationSection(sectionOf(CO_DEVELOP_COMPUTATIONAL_INTEGRITY), standards);
+    expect(classification.verdict).toBe('remove');
+    expect(classification.matchedCommonHeading).toBe('computational integrity standards');
+  });
+
+  it('exports the token floor between the measured pointer and substantive classes', () => {
+    expect(MIN_MATCH_CANDIDATE_TOKENS).toBe(15);
   });
 
   it('honors custom thresholds', () => {

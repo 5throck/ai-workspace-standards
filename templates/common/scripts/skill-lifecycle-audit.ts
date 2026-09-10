@@ -10,7 +10,7 @@
  *   bun scripts/skill-lifecycle-audit.ts --fix    # Auto-fix simple issues
  *   bun scripts/skill-lifecycle-audit.ts --json   # JSON output
  *
- * @version 1.4.0
+ * @version 1.4.1
  * @last_updated 2026-09-09
  * @license MIT
  */
@@ -185,14 +185,16 @@ function parseFrontmatter(filePath: string): SkillFrontmatter | null {
 }
 
 // Recursively find all SKILL.md files
-function findSkillFiles(dir: string, baseDir: string = ROOT): string[] {
+function findSkillFiles(dir: string, baseDir: string = ROOT, depth = 0): string[] {
   const skills: string[] = [];
 
   if (!existsSync(dir)) return skills;
+  if (depth > 8) return skills; // symlink-cycle / runaway-recursion bound (T-20260910-026)
 
   const entries = readdirSync(dir, { withFileTypes: true });
 
   for (const entry of entries) {
+    if (entry.isSymbolicLink()) continue; // never follow links: cycle-safe, no duplicate visits (T-20260910-026)
     const fullPath = join(dir, entry.name);
 
     if (entry.isDirectory()) {
@@ -209,7 +211,7 @@ function findSkillFiles(dir: string, baseDir: string = ROOT): string[] {
         if (entry.name !== 'skills' && entry.name !== '.claude') continue;
       }
 
-      skills.push(...findSkillFiles(fullPath, baseDir));
+      skills.push(...findSkillFiles(fullPath, baseDir, depth + 1));
     } else if (entry.name === 'SKILL.md') {
       skills.push(fullPath);
     }

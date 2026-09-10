@@ -2,12 +2,13 @@
 /**
  * pre-commit.ts — TS-based pre-commit hook.
  * Replaces the legacy bash/ps1 hooks.
- * @version 1.5.11
+ * @version 1.6.0
  */
 
 import { $ } from "bun";
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { hasNonEnglish } from "../lib/language-guard.ts";
+import { localDateISO } from "../lib/local-date.ts";
 
 async function main() {
   const stagedOutput = await $`git diff --cached --name-only`.text();
@@ -38,7 +39,8 @@ async function main() {
   // 1. Auto-update Markdown "Last Updated" dates
   const mdStaged = staged.filter(f => f.toLowerCase().endsWith('.md'));
   if (mdStaged.length > 0) {
-    const today = new Date().toISOString().slice(0, 10);
+    // Local calendar day, not toISOString() (UTC) — see lib/local-date.ts (T-20260910-030).
+    const today = localDateISO();
     for (const file of mdStaged) {
       try {
         let content = readFileSync(file, 'utf-8');
@@ -53,7 +55,8 @@ async function main() {
 
   // 1-A. Auto-date CHANGELOG.md [Unreleased]
   if (staged.includes('CHANGELOG.md')) {
-    const today = new Date().toISOString().slice(0, 10);
+    // Local calendar day, not toISOString() (UTC) — see lib/local-date.ts (T-20260910-030).
+    const today = localDateISO();
     let content = readFileSync('CHANGELOG.md', 'utf-8');
     let lines = content.split('\n');
     let inUnreleased = false;

@@ -694,4 +694,4 @@ Agent, skill, and command frontmatter structures are validated against JSON Sche
 
 ---
 
-*Last Updated: 2026-09-10*
+*Last Updated: 2026-09-11*
