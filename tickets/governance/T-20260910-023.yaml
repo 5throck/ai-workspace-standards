@@ -6,7 +6,7 @@ title: >-
   skills so workspace-only skills stop leaking into L3 projects; update
   07-new-project 7.3
 priority: high
-status: running
+status: review
 attempts: 0
 created_at: '2026-09-10T14:01:23.266Z'
 history:
@@ -19,5 +19,8 @@ history:
   - at: '2026-09-10T20:22:57.268Z'
     from: waiting
     to: running
+  - at: '2026-09-10T20:30:17.026Z'
+    from: running
+    to: review
 result: null
 error: null
