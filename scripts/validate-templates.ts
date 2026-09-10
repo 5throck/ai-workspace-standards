@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.21.3
+ * @version 1.22.0
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -2411,6 +2411,167 @@ function checkCommonContract(): void {
   pass('WS-02: common-contract.json compliance check complete');
 }
 
+// Check C-CM-04 (T-20260910-019): reverse exists→listed coverage for common-contract.json.
+// C-CM-01/C-CM-02 only prove that LISTED entries exist on disk; nothing proved that on-disk
+// common content is LISTED, so the contract inventories could silently rot in both directions.
+// Universe per section: templates/common/agents/*.md → common_agents,
+// templates/common/skills/*/ → common_skills, templates/common/.claude|.gemini/commands/*.md →
+// common_commands. Documented exemptions (contract description): country-scoped skills
+// (workspace-schema.json country_scoped_assets.skills) and variant-scoped skills
+// (variant_scoped_skills keys). The .claude/skills platform tree is checked at WARN only:
+// common_platform_skills records L0 workspace overrides (propagated_to_common), not a full
+// platform inventory — promoting it to a hard inventory is an open scope decision.
+function checkCommonContractReverseCoverage(): void {
+  if (!JSON_MODE) console.log('\n=== Check C-CM-04: common-contract.json reverse coverage (exists→listed) ===');
+
+  const contractPath = join(ROOT, 'docs', 'templates', 'common-contract.json');
+  if (!existsSync(contractPath)) return; // prerequisite missing — already reported by WS-02
+  let contract: Record<string, unknown>;
+  try {
+    contract = JSON.parse(readFileSync(contractPath, 'utf-8')) as Record<string, unknown>;
+  } catch {
+    return; // already reported by WS-02
+  }
+
+  // Exemptions declared by docs/workspace-schema.json
+  let exemptSkills = new Set<string>();
+  const schemaPath = join(ROOT, 'docs', 'workspace-schema.json');
+  if (existsSync(schemaPath)) {
+    try {
+      const schema = JSON.parse(readFileSync(schemaPath, 'utf-8')) as Record<string, any>;
+      exemptSkills = new Set([
+        ...Object.keys(schema.country_scoped_assets?.skills ?? {}),
+        ...Object.keys(schema.variant_scoped_skills ?? {}).filter(k => k !== 'description'),
+      ]);
+    } catch { /* fall through with no exemptions */ }
+  }
+
+  const commonAgents = new Set(Object.keys((contract.common_agents as Record<string, unknown>) ?? {}));
+  const commonSkills = new Set(Object.keys((contract.common_skills as Record<string, unknown>) ?? {}));
+  const commonCommands = new Set(Object.keys((contract.common_commands as Record<string, unknown>) ?? {}));
+  const commonPlatformSkills = new Set(Object.keys((contract.common_platform_skills as Record<string, unknown>) ?? {}));
+
+  // ── agents: templates/common/agents/*.md must be listed in common_agents ──
+  // _COMMON.md is a shared frontmatter fragment injected into agent files, not a roster agent.
+  const agentsDir = join(TEMPLATES_DIR, 'common', 'agents');
+  if (existsSync(agentsDir)) {
+    const unlistedAgents = readdirSync(agentsDir)
+      .filter(f => f.endsWith('.md') && f !== '_COMMON.md')
+      .map(f => f.replace(/\.md$/, ''))
+      .filter(name => !commonAgents.has(name));
+    if (unlistedAgents.length > 0) {
+      fail('common', 'C-CM-04', `templates/common/agents/ has agent(s) not listed in common-contract.json common_agents: ${unlistedAgents.join(', ')}`, `Add the agent(s) to common-contract.json common_agents or remove them from templates/common/agents/`);
+    } else {
+      pass('C-CM-04: all templates/common/agents/*.md files are listed in common_agents');
+    }
+  }
+
+  // ── skills: templates/common/skills/*/ must be listed in common_skills (or platform/country/variant exemptions) ──
+  const skillsDir = join(TEMPLATES_DIR, 'common', 'skills');
+  if (existsSync(skillsDir)) {
+    const unlistedSkills = readdirSync(skillsDir).filter(e => {
+      if (!existsSync(join(skillsDir, e, 'SKILL.md'))) return false; // non-skill entries (README etc.)
+      return !commonSkills.has(e) && !commonPlatformSkills.has(e) && !exemptSkills.has(e);
+    });
+    if (unlistedSkills.length > 0) {
+      fail('common', 'C-CM-04', `templates/common/skills/ has skill(s) not listed in common-contract.json common_skills: ${unlistedSkills.join(', ')}`, `Add the skill(s) to common_skills (or document them as country-scoped/variant-scoped in workspace-schema.json)`);
+    } else {
+      pass('C-CM-04: all templates/common/skills/ directories are listed in common_skills');
+    }
+  }
+
+  // ── commands: templates/common/.claude|.gemini/commands/*.md must be listed in common_commands ──
+  const unlistedCommands = new Set<string>();
+  for (const platformDir of ['.claude', '.gemini']) {
+    const cmdDir = join(TEMPLATES_DIR, 'common', platformDir, 'commands');
+    if (!existsSync(cmdDir)) continue;
+    for (const f of readdirSync(cmdDir)) {
+      if (!f.endsWith('.md')) continue;
+      const name = f.replace(/\.md$/, '');
+      if (!commonCommands.has(name)) unlistedCommands.add(name);
+    }
+  }
+  if (unlistedCommands.size > 0) {
+    fail('common', 'C-CM-04', `templates/common/.claude|.gemini/commands/ has command(s) not listed in common-contract.json common_commands: ${[...unlistedCommands].join(', ')}`, `Add the command(s) to common_commands with their source/gemini_source paths`);
+  } else {
+    pass('C-CM-04: all common command files are listed in common_commands');
+  }
+
+  // ── platform skills: templates/common/.claude/skills/*/ — WARN (aggregated), see doc comment ──
+  const platformDir = join(TEMPLATES_DIR, 'common', '.claude', 'skills');
+  if (existsSync(platformDir)) {
+    const unlistedPlatform = readdirSync(platformDir).filter(e => {
+      if (!existsSync(join(platformDir, e, 'SKILL.md'))) return false;
+      return !commonPlatformSkills.has(e) && !commonSkills.has(e) && !exemptSkills.has(e);
+    });
+    if (unlistedPlatform.length > 0) {
+      warn('common', 'C-CM-04', `${unlistedPlatform.length} platform skill dir(s) under templates/common/.claude/skills/ are not in common_platform_skills or common_skills: ${unlistedPlatform.slice(0, 12).join(', ')}${unlistedPlatform.length > 12 ? `, +${unlistedPlatform.length - 12} more` : ''}`, `Decide the common_platform_skills inventory scope (full platform inventory vs override record) and list or exempt accordingly`);
+    } else {
+      pass('C-CM-04: all platform skill dirs are covered by common_platform_skills/common_skills');
+    }
+  }
+}
+
+// Check PM-02 (T-20260910-018): marker-inject zone parity between propagation-map.json
+// target_variants and the zones that actually exist in templates/co-*/.
+//   listed→exists (ERROR): a variant listed in target_variants must carry the marker zone in
+//   its target file, otherwise the marker-inject domain would silently skip it.
+//   exists→listed (WARN, aggregated): a variant carrying the zone but absent from
+//   target_variants is an unmanaged zone — adjudication tracked by T-20260910-022.
+function checkMarkerZoneParity(): void {
+  if (!JSON_MODE) console.log('\n=== Check PM-02: marker-inject zone parity (propagation-map.json ↔ templates/co-*) ===');
+
+  const mapPath = join(ROOT, 'scripts', 'propagation-map.json');
+  if (!existsSync(mapPath)) return; // already reported by PM-01
+  let map: Record<string, any>;
+  try {
+    map = JSON.parse(readFileSync(mapPath, 'utf-8')) as Record<string, any>;
+  } catch {
+    return; // already reported by PM-01
+  }
+  const domains = (map.domains ?? {}) as Record<string, any>;
+
+  const variantDirs = readdirSync(TEMPLATES_DIR).filter(e => {
+    try { return e.startsWith('co-') && statSync(join(TEMPLATES_DIR, e)).isDirectory(); } catch { return false; }
+  });
+
+  for (const [domainName, domain] of Object.entries(domains)) {
+    if ((domain as any)?.mode !== 'marker-inject') continue;
+    const marker = String((domain as any).marker ?? '');
+    if (!marker) continue;
+    const targets: string[] = Array.isArray((domain as any).target_variants) ? (domain as any).target_variants : [];
+    const targetFileTpl = (domain as any).target_file
+      ?? basename(String((domain as any).source_file ?? 'AGENTS.md'));
+
+    for (const variant of targets) {
+      const targetPath = join(TEMPLATES_DIR, variant, targetFileTpl.replace('{variant}', variant));
+      if (!existsSync(targetPath)) {
+        fail('common', 'PM-02', `propagation-map.json '${domainName}' lists '${variant}' but target file templates/${variant}/${targetFileTpl.replace('{variant}', variant)} is missing`, `Create the target file with the ${marker} zone, or remove '${variant}' from target_variants`);
+        continue;
+      }
+      const content = readFileSync(targetPath, 'utf-8');
+      if (!content.includes(`<!-- ${marker}:START -->`)) {
+        fail('common', 'PM-02', `propagation-map.json '${domainName}' lists '${variant}' but templates/${variant}/${targetFileTpl.replace('{variant}', variant)} has no <!-- ${marker}:START --> zone`, `Add the ${marker} zone (run propagate-to-templates.ts --marker-rewrite --domain ${domainName}) or remove '${variant}' from target_variants`);
+      }
+    }
+
+    // Reverse direction: zones on disk that the map does not manage.
+    const unmanaged = variantDirs.filter(variant => {
+      if (targets.includes(variant)) return false;
+      const targetPath = join(TEMPLATES_DIR, variant, targetFileTpl.replace('{variant}', variant));
+      if (!existsSync(targetPath)) return false;
+      try {
+        return readFileSync(targetPath, 'utf-8').includes(`<!-- ${marker}:START -->`);
+      } catch { return false; }
+    });
+    if (unmanaged.length > 0) {
+      warn('common', 'PM-02', `propagation-map.json '${domainName}' (${marker}) has unmanaged zone(s) in: ${unmanaged.join(', ')} — zones exist but the variants are absent from target_variants`, `Add the variant(s) to '${domainName}'.target_variants or document the intentional divergence (T-20260910-022)`);
+    } else {
+      pass(`PM-02: '${domainName}' (${marker}) zone coverage matches target_variants`);
+    }
+  }
+}
+
 // Check VA-01: Phase Summary x Actual Agents Cross-Validation
 function checkPhaseSummaryAgents(variant: string): void {
   if (!JSON_MODE) console.log(`\n=== Check VA-01: Phase Summary agents cross-validation (${variant}) ===`);
@@ -3314,6 +3475,7 @@ function main() {
 
   checkWorkspaceSchema();
   checkCommonContract();
+  checkCommonContractReverseCoverage(); // C-CM-04: exists→listed contract coverage (T-20260910-019)
   for (const [variant, manifest] of manifests) {
     if (manifest.status === 'stable') checkCommonContractVariantSkills(variant);
   }
@@ -3341,6 +3503,7 @@ function main() {
   checkPlatformDocumentationParity();
   checkRootCommonCommandsParity();
   checkPropagationMapSchema();
+  checkMarkerZoneParity();       // PM-02: marker-inject zone parity (T-20260910-018)
   checkVariantReadinessGate();   // VRG-01: continuous Variant Readiness Gate enforcement
 
   // B-07: Sync validated variant info back to VERSION_REGISTRY.json

@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-09-10T19:01:25.907Z
+**Generated**: 2026-09-10T21:05:18.365Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -19,14 +19,14 @@
 
 | Name | File | Tier | Model | Last Modified |
 |------|------|------|-------|---------------|
-| architect | agents/architect.md | high        # claude-opus-5-0 | inherit | 2026-08-15 |
-| auditor | agents/auditor.md | medium        # claude-sonnet-5-0 | inherit | 2026-08-15 |
-| automation-engineer | agents/automation-engineer.md | low        # claude-haiku-4-5 | inherit | 2026-08-15 |
-| docs-writer | agents/docs-writer.md | medium        # claude-sonnet-5-0 | inherit | 2026-09-09 |
-| lifecycle-manager | agents/lifecycle-manager.md | medium        # claude-sonnet-5-0 | inherit | 2026-08-15 |
-| pm | agents/pm.md | high        # claude-opus-5-0 | inherit | 2026-09-06 |
-| scaffolding-expert | agents/scaffolding-expert.md | low        # claude-haiku-4-5 | inherit | 2026-08-15 |
-| security-expert | agents/security-expert.md | medium        # claude-sonnet-5-0 | inherit | 2026-08-15 |
+| architect | agents/architect.md | high        # claude-opus-5-0 | inherit | 2026-09-10 |
+| auditor | agents/auditor.md | medium        # claude-sonnet-5-0 | inherit | 2026-09-10 |
+| automation-engineer | agents/automation-engineer.md | low        # claude-haiku-4-5 | inherit | 2026-09-10 |
+| docs-writer | agents/docs-writer.md | medium        # claude-sonnet-5-0 | inherit | 2026-09-10 |
+| lifecycle-manager | agents/lifecycle-manager.md | medium        # claude-sonnet-5-0 | inherit | 2026-09-10 |
+| pm | agents/pm.md | high        # claude-opus-5-0 | inherit | 2026-09-10 |
+| scaffolding-expert | agents/scaffolding-expert.md | low        # claude-haiku-4-5 | inherit | 2026-09-10 |
+| security-expert | agents/security-expert.md | medium        # claude-sonnet-5-0 | inherit | 2026-09-10 |
 
 ---
 
@@ -99,7 +99,7 @@
 | agent-verify.ts | 1.0.2 | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.2 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.0.0 | scripts/archive-memory.ts | N/A |
-| audit.ts | 2.32.1 | scripts/audit.ts | bun |
+| audit.ts | 2.33.0 | scripts/audit.ts | bun |
 | cleanup-completed-md.ts | 1.1.0 | scripts/cleanup-completed-md.ts | N/A |
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | N/A |
 | compile-tokens.ts | 1.2.0 | scripts/compile-tokens.ts | N/A |
@@ -160,7 +160,7 @@
 | ticket.ts | 1.1.0 | scripts/ticket.ts | N/A |
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, fs, path |
 | upgrade-project.ts | 1.20.0 | scripts/upgrade-project.ts | N/A |
-| validate-agents.ts | 1.1.0 | scripts/validate-agents.ts | N/A |
+| validate-agents.ts | 1.2.0 | scripts/validate-agents.ts | N/A |
 | validate-decisions.ts | 1.0.0 | scripts/validate-decisions.ts | js-yaml |
 | validate-doc-folder.ts | 1.1.0 | scripts/validate-doc-folder.ts | fs, path |
 | validate-docs-links.ts | 1.0.0 | scripts/validate-docs-links.ts | fs, path |
@@ -168,8 +168,8 @@
 | validate-model-registry.ts | N/A | scripts/validate-model-registry.ts | N/A |
 | validate-pm-extends.ts | 0.3.1 | scripts/validate-pm-extends.ts | N/A |
 | validate-procedures.ts | 1.1.0 | scripts/validate-procedures.ts | js-yaml |
-| validate-skills.ts | 1.4.0 | scripts/validate-skills.ts | N/A |
-| validate-templates.ts | 1.21.3 | scripts/validate-templates.ts | js-yaml |
+| validate-skills.ts | 1.5.0 | scripts/validate-skills.ts | N/A |
+| validate-templates.ts | 1.22.0 | scripts/validate-templates.ts | js-yaml |
 | validate-variant-readiness.ts | 1.1.0 | scripts/validate-variant-readiness.ts | N/A |
 | variant-feature.ts | 1.0.0 | scripts/variant-feature.ts | N/A |
 | verify-adr-governance.ts | 1.4.0 | scripts/verify-adr-governance.ts | N/A |

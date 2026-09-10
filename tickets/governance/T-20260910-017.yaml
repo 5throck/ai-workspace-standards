@@ -5,12 +5,18 @@ title: >-
   validator-hardening: run schema-validator over L0 agents/ and skills/
   frontmatter (CONSTITUTION 11.4 currently only covers templates/co-*)
 priority: normal
-status: backlog
+status: running
 attempts: 0
 created_at: '2026-09-10T14:01:23.188Z'
 history:
   - at: '2026-09-10T14:01:23.188Z'
     from: null
     to: backlog
+  - at: '2026-09-10T20:36:08.214Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-10T20:36:08.257Z'
+    from: waiting
+    to: running
 result: null
 error: null

@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Skill Lifecycle Validation Script
- * @version 1.4.0
+ * @version 1.5.0
  */
 // Validates skills/*/SKILL.md files for required frontmatter
 // and checks governance records in docs/lifecycle/skills/*.md
@@ -10,8 +10,9 @@
 //   bun scripts/validate-skills.ts
 //   bun scripts/validate-skills.ts --json
 
-import { readFileSync, existsSync, readdirSync } from 'node:fs';
+import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
+import { parseFrontmatter as parseFrontmatterYaml, validateSkillFrontmatter } from './validators/schema-validator.ts';
 import { cwd } from 'node:process';
 
 interface ValidationIssue {
@@ -446,6 +447,31 @@ function validateSecurityHolds(): void {
   }
 }
 
+// T-20260910-017: run the schema-validator rule set over workspace-root skills/ frontmatter.
+// CONSTITUTION 11.4 previously only exercised these rules per-variant (templates/co-*) via
+// runAllValidators(); root skills/*/SKILL.md now get the identical required-field /
+// status-enum / semver / metadata checks through the same exported rule functions.
+function validateSkillSchema(): void {
+  if (!existsSync(SKILLS_DIR)) return;
+  for (const entry of readdirSync(SKILLS_DIR)) {
+    const skillPath = join(SKILLS_DIR, entry, 'SKILL.md');
+    try {
+      if (!statSync(join(SKILLS_DIR, entry)).isDirectory() || !existsSync(skillPath)) continue;
+    } catch { continue; }
+    const fm = parseFrontmatterYaml(readFileSync(skillPath, 'utf-8'));
+    if (Object.keys(fm).length === 0) continue; // no frontmatter — existing checks cover that
+    for (const issue of validateSkillFrontmatter(fm, entry)) {
+      // Downgrade status-enum violations to WARN at the L0 sweep only: the single known
+      // offender (skills/explain-me, `status: experimental`) is awaiting adjudication by
+      // T-20260910-021 (reclassify vs extend the enum). Revisit once that ticket lands.
+      const downgraded = issue.severity === 'error' && issue.category === 'invalid-enum';
+      const msg = `schema-validator: ${issue.message}${downgraded ? ' (adjudication pending: T-20260910-021)' : ''}`;
+      if (issue.severity === 'error' && !downgraded) fail(entry, 'schema-skill', msg);
+      else warn(entry, 'schema-skill', msg);
+    }
+  }
+}
+
 function main() {
   if (!JSON_MODE) {
     console.log(`${colors.cyan}🔍 Validating skill lifecycle documentation...${colors.reset}`);
@@ -457,6 +483,7 @@ function main() {
   validateSecurityHolds();
   validateRelationMetadata(collectKnownSkillNames());
   validateGovernanceRecords();
+  validateSkillSchema();
 
   const errors = issues.filter(i => i.level === 'error');
   const warnings = issues.filter(i => i.level === 'warning');

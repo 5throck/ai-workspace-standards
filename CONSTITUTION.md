@@ -684,7 +684,7 @@ All agents must enforce two universal security behaviors (see AGENTS.md §7):
 
 #### 11.4 JSON Schema Validation
 
-Agent, skill, and command frontmatter structures are validated against JSON Schemas in `schemas/` directory. Enforcement: `audit.ts` → `scripts/validators/schema-validator.ts`.
+Agent, skill, and command frontmatter structures are validated against JSON Schemas in `schemas/` directory. Enforcement: `audit.ts` → `scripts/validators/schema-validator.ts`. Coverage is **both** per-variant (`templates/co-*/agents|skills` via `runAllValidators()`, `extends:` stubs skipped) and workspace-root (`agents/*.md` via `validate-agents.ts`, `skills/*/SKILL.md` via `validate-skills.ts` — both call the exported `schema-validator.ts` rule functions so the rule set cannot drift between the two scopes; T-20260910-017). The one known exception: a non-enum skill `status` at the L0 sweep is a WARN until T-20260910-021 adjudicates `skills/explain-me`'s `status: experimental`.
 
 | Schema | File | Required Fields |
 |--------|------|----------------|
