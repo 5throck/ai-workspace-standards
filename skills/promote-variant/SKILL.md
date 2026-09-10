@@ -6,7 +6,7 @@ description: >
 status: active
 scope: common
 l2_propagate: false
-version: 1.3.0
+version: 1.4.0
 owner: pm
 last_reviewed: 2026-08-24
 relates_to:

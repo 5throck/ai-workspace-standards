@@ -5,12 +5,21 @@ title: >-
   Projects/co-deck: deduplicate doubled '## Architecture Principles' headings in
   docs/co-deck.context.md
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-10T02:01:30.284Z'
 history:
   - at: '2026-09-10T02:01:30.284Z'
     from: null
     to: backlog
+  - at: '2026-09-10T10:12:32.953Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-10T10:12:32.964Z'
+    from: waiting
+    to: review
+  - at: '2026-09-10T10:12:32.975Z'
+    from: review
+    to: done
 result: null
 error: null

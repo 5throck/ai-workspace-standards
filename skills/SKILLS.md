@@ -23,7 +23,7 @@ Skills with a `skills/<name>/` directory in the workspace root. These are the pr
 | `finishing-a-development-branch` | 1.0.0 | active | pm | 2026-06-13 | — | Workspace override — redirects branch completion to /sync (mirrored 2026-09-04 from .claude/skills) |
 | `meeting-facilitation` | 1.4.1 | active | pm | 2026-09-05 | — | Canonical meeting skill; `meeting` is a trigger alias, not a separate skill directory |
 | `project-review` | 1.2.0 | active | pm | 2026-09-08 | — | — |
-| `promote-variant` | 1.3.0 | active | pm | 2026-08-24 | — | Workspace operator only — not deployed to L2 |
+| `promote-variant` | 1.4.0 | active | pm | 2026-08-24 | — | Workspace operator only — not deployed to L2 |
 | `platform-command-lifecycle-manager` | 1.0.0 | active | pm | 2026-05-31 | — | Mirrored 2026-09-04 from .claude/skills |
 | `platform-skill-lifecycle-manager` | 1.0.0 | active | pm | 2026-05-31 | — | Mirrored 2026-09-04 from .claude/skills |
 | `script-lifecycle-manager` | 1.2.0 | active | pm | 2026-05-30 | — | — |

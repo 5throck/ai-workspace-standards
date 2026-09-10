@@ -6,7 +6,7 @@ title: >-
   (upgrade-project overlap 0.30-0.65) across the fleet per ADR-0050 Part 3
   (blocked by T-20260910-004 — co-abap dedup first)
 priority: low
-status: waiting
+status: done
 attempts: 0
 created_at: '2026-09-10T02:01:30.250Z'
 history:
@@ -16,5 +16,11 @@ history:
   - at: '2026-09-10T02:21:59.690Z'
     from: backlog
     to: waiting
+  - at: '2026-09-10T10:16:49.042Z'
+    from: waiting
+    to: review
+  - at: '2026-09-10T10:16:49.054Z'
+    from: review
+    to: done
 result: null
 error: null

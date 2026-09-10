@@ -1,5 +1,7 @@
 // scripts/helpers/registries/promotion-policy.ts
-// @version 1.2.0
+// @version 1.2.1
+// v1.2.1: architect-review flag resolved (T-20260910-007) — safety values approved
+//         as-is, rationale recorded in the entry comment; comment-only, no behavior change.
 // v1.2.0: safety entry added (mirrors abap-development) — d0ddc17f registered the
 //         safety variant type without a policy, tripping the registry-integrity
 //         exact-key-parity check (fatal) on every pipeline run.
@@ -61,8 +63,11 @@ export const PROMOTION_POLICIES = {
   },
   // safety: registered by d0ddc17f (co-safety variant regen) without a policy entry,
   // which tripped the registry-integrity exact-key-parity check (fatal) on every
-  // pipeline run. Values mirror 'abap-development' (domain-specialist type); they only
-  // bind when a safety-type promotion actually runs — flagged for architect review.
+  // pipeline run. Values mirror 'abap-development' (domain-specialist type).
+  // Architect-reviewed 2026-09-10 (T-20260910-007): approved as-is — co-safety's
+  // compliance risk is governed inside the variant (mandatory legal_basis gate,
+  // safety-audit.ts validation), so the promotion gate measures maturity only;
+  // revisit with real engagement data at the first safety-type promotion.
   safety: {
     minEngagements: 3,
     minBetaMonths: 2,
