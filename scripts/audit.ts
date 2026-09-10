@@ -1,4 +1,4 @@
-// @version 2.32.1
+// @version 2.32.2
 // v2.32.0: Adds skipped-file counting for scan walkers and warns on live context placeholders.
 // v2.31.0: Stray-artifact check fails loud (T-20260909-006/021) — a missing
 //           docs/workspace-schema.json or a schema without a valid rootAllowlist
@@ -311,17 +311,21 @@ if (!LIFECYCLE_ONLY) {
     }
 }
 
-function walkDir(dir: string, callback: (fPath: string) => void) {
+function walkDir(dir: string, callback: (fPath: string) => void, depth = 0) {
     if (!fs.existsSync(dir)) return;
+    if (depth > 8) return; // symlink-cycle / runaway-recursion bound (T-20260910-026)
     const SKIP_DIRS = new Set(['node_modules', '.git', '.bun', '.temp']);
     for (const f of fs.readdirSync(dir)) {
         if (SKIP_DIRS.has(f)) continue;
         const dirPath = path.join(dir, f);
         if (!fs.existsSync(dirPath)) continue;
         try {
+            // Never follow symlinks (lstat, not stat): link cycles would recurse
+            // forever and linked duplicates double-report (T-20260910-026).
+            if (fs.lstatSync(dirPath).isSymbolicLink()) continue;
             const isDirectory = fs.statSync(dirPath).isDirectory();
             if (isDirectory) {
-                walkDir(dirPath, callback);
+                walkDir(dirPath, callback, depth + 1);
             } else {
                 callback(dirPath);
             }

@@ -5,12 +5,15 @@ title: >-
   validator-hardening: validate AGENTS.md section-6 skill-table backtick paths
   and workspace skill count against the skills/ directory
 priority: normal
-status: backlog
+status: review
 attempts: 0
 created_at: '2026-09-10T14:01:23.176Z'
 history:
   - at: '2026-09-10T14:01:23.176Z'
     from: null
     to: backlog
+  - at: '2026-09-10T21:06:38.172Z'
+    from: backlog
+    to: review
 result: null
 error: null

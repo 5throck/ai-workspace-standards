@@ -68,12 +68,12 @@ Their absence from the table is policy-consistent, not an oversight.
 |--------|--------|---------|--------|--------------|-------------------|-------|------|
 | `agent-create.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `agent-delete.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
-| `agent-lifecycle-audit.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
+| `agent-lifecycle-audit.ts` | L0 | 1.2.1 | active | —| —| L0+L1 | —|
 | `agent-list.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `agent-verify.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
 | `analyze-git-history.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
 | `archive-memory.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `audit.ts` | L0 | 2.32.1 | active | —| —| L0+L1 | —|
+| `audit.ts` | L0 | 2.32.2 | active | —| —| L0+L1 | —|
 | `cleanup-completed-md.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `clear-pm-approval.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `compile-tokens.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
@@ -90,7 +90,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `generate-l3-readme.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
 | `generate-scripts-readme.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
 | `generate-skill-graph.ts` | L0 | 1.8.5 | active | —| —| L0+L1 | —|
-| `generate-version-manifest.ts` | L0 | 1.3.0 | active | —| —| L0 | —|
+| `generate-version-manifest.ts` | L0 | 1.3.1 | active | —| —| L0 | —|
 | `helpers/beta-lifecycle.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `helpers/generate-variant.ts` | L0 | 1.14.0 | active | —| —| L0 | —|
 | `helpers/agent-promote.ts` | L0 | 0.1.1 | experimental | —| —| L0 | —|
@@ -105,7 +105,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `helpers/upgrade-versions.ts` | L0+L1 | 1.0.1 | active | —| —| L0+L1 | —|
 | `helpers/merge-frontmatter.ts` | L0 | 1.8.6 | active | —| —| L0+L1 | —|
 | `helpers/security-validator.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
-| `helpers/context-sections.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
+| `helpers/context-sections.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `helpers/markers.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `helpers/pm-md-parser.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `helpers/variant-governance-rules.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
@@ -152,7 +152,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `hooks/agent-model-gate.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `hooks/gateguard-fact-force.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
 | `hooks/post-write-lifecycle-check.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
-| `hooks/pre-commit.ts` | L0 | 1.5.11 | active | —| —| L0+L1 | —|
+| `hooks/pre-commit.ts` | L0 | 1.6.0 | active | —| —| L0+L1 | —|
 | `hooks/pre-push.ts` | L0 | 1.2.10 | active | —| —| L0+L1 | —|
 | `ingest-external-skills.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `ingest-security-frameworks.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
@@ -164,14 +164,15 @@ Their absence from the table is policy-consistent, not an oversight.
 | `lib/encoding-utils.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `lib/error-handling.ts` | L0 | 1.3.1 | active | —| —| L0+L1 | —|
 | `lib/language-guard.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
+| `lib/local-date.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/pipeline-state.ts` | L0 | 1.1.2 | active | —| —| L0+L1 | —|
 | `lib/platform-context.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/propagation-map-schema.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `lib/ssrf.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
-| `lifecycle-sync-audit.ts` | L0 | 1.6.0 | active | —| —| L0+L1 | —|
+| `lifecycle-sync-audit.ts` | L0 | 1.6.1 | active | —| —| L0+L1 | —|
 | `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `md-to-ooxml.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
-| `new-project.ts` | L0 | 1.11.1 | active | —| —| L0 | —|
+| `new-project.ts` | L0 | 1.12.0 | active | —| —| L0 | —|
 | `remove-project.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `resolve-variants.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
 | `project-to-variant.ts` | L0 | 1.3.0 | active | `--source`, `--target`, `--dry-run`, `--force`, `--design-doc`, `--threshold-files`, `--threshold-dirs` | —| L0 | —|
@@ -186,14 +187,14 @@ Their absence from the table is policy-consistent, not an oversight.
 | `skill-dependency-analysis.ts` | L0 | 1.0.2 | active | —| —| L0 | —|
 | `spec-backfill.ts` | L0 | 1.0.0 | active | `--dry-run`, `--check` | —| L0 | —|
 | `spec-register.ts` | L0 | 1.1.0 | active | `--file`, `--source`, `--update`, `--status`, `--list`, `--ref`, `--id` | —| L0 | —|
-| `skill-lifecycle-audit.ts` | L0 | 1.4.0 | active | —| —| L0+L1 | —|
+| `skill-lifecycle-audit.ts` | L0 | 1.4.1 | active | —| —| L0+L1 | —|
 | `skill-session-review.ts` | L0 | 1.0.0 | active | `--date`, `--json`, `--dry-run` | —| L0+L1 | —|
 | `sync-agent-status.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `sync-md.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
 | `sync-skill-status.ts` | L0 | 1.0.1 | active | — | — | L0+L1 | — |
 | `sync-skills-to-l2.ts` | L0 | 1.0.1 | active | — | — | L0 | — |
 | `sync-template-deps.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `sync-skills.ts` | L0 | 1.4.1 | active | `--dir <path>`, `--all-variants` | — | L0+L1 | — |
+| `sync-skills.ts` | L0 | 1.5.0 | active | `--dir <path>`, `--all-variants` | — | L0+L1 | — |
 | `tag-template.ts` | L0 | 1.1.0 | active | `--dry-run`, `--no-push`, `--fail-on-push-error` | —| L0 | —|
 | `team-builder.ts` | L0 | 1.2.1 | active | —| —| L0+L1 | —|
 | `test-platform-parity.ts` | L0 | 0.2.4 | active | —| —| L0 | —|

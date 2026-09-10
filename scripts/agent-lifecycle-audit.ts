@@ -9,7 +9,7 @@
  *   bun scripts/agent-lifecycle-audit.ts
  *   bun scripts/agent-lifecycle-audit.ts --json   # JSON output
  *
- * @version 1.2.0
+ * @version 1.2.1
  * @l2-propagate false
  * @last_updated 2026-09-09
  * @license MIT
@@ -167,10 +167,11 @@ function parseAgentFrontmatter(filePath: string): AgentFrontmatter | null {
 }
 
 // Recursively find all agent files
-function findAgentFiles(dir: string): string[] {
+function findAgentFiles(dir: string, depth = 0): string[] {
   const agents: string[] = [];
 
   if (!existsSync(dir)) return agents;
+  if (depth > 8) return agents; // symlink-cycle / runaway-recursion bound (T-20260910-026)
 
   // If project root has an agents/ directory, only scan that (avoids false positives in docs/, etc.)
   if (dir === ROOT) {
@@ -185,12 +186,13 @@ function findAgentFiles(dir: string): string[] {
   const entries = readdirSync(dir, { withFileTypes: true });
 
   for (const entry of entries) {
+    if (entry.isSymbolicLink()) continue; // never follow links: cycle-safe, no duplicate visits (T-20260910-026)
     const fullPath = join(dir, entry.name);
 
     if (entry.isDirectory()) {
       if (entry.name === 'node_modules' || entry.name === '_archive' ||
           entry.name === 'skills' || entry.name === 'commands') continue;
-      agents.push(...findAgentFiles(fullPath));
+      agents.push(...findAgentFiles(fullPath, depth + 1));
     } else if (entry.name.endsWith('.md') &&
                entry.name !== 'AGENTS.md' &&
                entry.name !== 'README.md' &&
@@ -229,11 +231,12 @@ function getSkillOwnerReferences(): Map<string, string[]> {
 }
 
 // Find all skill files
-function findSkillFiles(dir: string): string[] {
+function findSkillFiles(dir: string, depth = 0): string[] {
   const skills: string[] = [];
 
   if (!existsSync(dir)) return skills;
 
+  if (depth > 8) return skills; // symlink-cycle / runaway-recursion bound (T-20260910-026)
   let entries;
   try {
     entries = readdirSync(dir, { withFileTypes: true });
@@ -244,11 +247,12 @@ function findSkillFiles(dir: string): string[] {
   }
 
   for (const entry of entries) {
+    if (entry.isSymbolicLink()) continue; // never follow links: cycle-safe, no duplicate visits (T-20260910-026)
     const fullPath = join(dir, entry.name);
 
     if (entry.isDirectory()) {
       if (entry.name === 'node_modules' || entry.name.startsWith('.')) continue;
-      skills.push(...findSkillFiles(fullPath));
+      skills.push(...findSkillFiles(fullPath, depth + 1));
     } else if (entry.name === 'SKILL.md') {
       skills.push(fullPath);
     }

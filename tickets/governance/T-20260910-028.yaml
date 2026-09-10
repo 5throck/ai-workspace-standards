@@ -5,12 +5,18 @@ title: >-
   fix generate-version-manifest.ts to parse tier scalars instead of leaking YAML
   comments into the Tier column and reconcile its summary figures
 priority: low
-status: backlog
+status: running
 attempts: 0
 created_at: '2026-09-10T14:01:23.333Z'
 history:
   - at: '2026-09-10T14:01:23.333Z'
     from: null
     to: backlog
+  - at: '2026-09-10T21:05:56.427Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-10T21:07:55.705Z'
+    from: waiting
+    to: running
 result: null
 error: null

@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.4.1
+// @version 1.5.0
 /**
  * sync-skills.ts
  * Distributes skills from the SSOT (skills/) to .claude/skills/, .gemini/skills/, and .agents/skills/.
@@ -68,13 +68,34 @@ export interface SyncSkillsOptions {
     copyDir?: (src: string, dest: string) => void;
 }
 
+/** Defensive recursion bound — deeper trees report "unequal" so the caller re-copies. */
+const MAX_COMPARE_DEPTH = 16;
+
 /**
  * Recursively compares two directories (or files) for identical content.
  * Returns false if either path is missing, if the entry sets differ, or if
  * any file's content differs. Used to skip no-op copies (M3 idempotency).
+ *
+ * Symlinks are compared via lstat and never followed (T-20260910-026): a link
+ * only equals another link with the same target, so a real file never silently
+ * matches a symlinked one (which would wrongly skip a needed re-copy), and a
+ * link cycle cannot recurse forever. Beyond MAX_COMPARE_DEPTH the result is
+ * `false` (conservative: re-copy).
  */
-export function dirsEqual(a: string, b: string): boolean {
+export function dirsEqual(a: string, b: string, depth = 0): boolean {
     if (!fs.existsSync(a) || !fs.existsSync(b)) return false;
+    if (depth > MAX_COMPARE_DEPTH) return false;
+
+    const lstatA = fs.lstatSync(a);
+    const lstatB = fs.lstatSync(b);
+    if (lstatA.isSymbolicLink() || lstatB.isSymbolicLink()) {
+        if (lstatA.isSymbolicLink() !== lstatB.isSymbolicLink()) return false;
+        try {
+            return fs.readlinkSync(a) === fs.readlinkSync(b);
+        } catch {
+            return false;
+        }
+    }
 
     const statA = fs.statSync(a);
     const statB = fs.statSync(b);
@@ -86,7 +107,7 @@ export function dirsEqual(a: string, b: string): boolean {
         if (entriesA.length !== entriesB.length) return false;
         for (let i = 0; i < entriesA.length; i++) {
             if (entriesA[i] !== entriesB[i]) return false;
-            if (!dirsEqual(path.join(a, entriesA[i]), path.join(b, entriesB[i]))) return false;
+            if (!dirsEqual(path.join(a, entriesA[i]), path.join(b, entriesB[i]), depth + 1)) return false;
         }
         return true;
     }

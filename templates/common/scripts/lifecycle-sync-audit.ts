@@ -11,7 +11,7 @@
  *   bun scripts/lifecycle-sync-audit.ts --json
  *   bun scripts/lifecycle-sync-audit.ts --fix
  *
- * @version 1.6.0
+ * @version 1.6.1
  * @last_updated 2026-09-06
  * v1.6.0: Added 'dev-sync:skill-dependency-analysis' to INTENTIONAL_CROSS_REFS —
  *          dev-sync.ts step 3.96c (session-evidence skill review, SkillHone-inspired
@@ -406,8 +406,9 @@ function runCheckX(): SyncIssue[] {
   if (!existsSync(templateScriptsDir)) return issues;
 
   // Recursively collect all .ts files under templateScriptsDir (including helpers/, hooks/, lib/, etc.)
-  function collectTsFiles(dir: string): string[] {
+  function collectTsFiles(dir: string, depth = 0): string[] {
     const result: string[] = [];
+    if (depth > 8) return result; // symlink-cycle / runaway-recursion bound (T-20260910-026)
     let entries: ReturnType<typeof readdirSync>;
     try {
       entries = readdirSync(dir, { withFileTypes: true });
@@ -415,8 +416,10 @@ function runCheckX(): SyncIssue[] {
       return result;
     }
     for (const entry of entries) {
+      if (entry.isSymbolicLink()) continue; // never follow links: cycle-safe, no duplicate visits (T-20260910-026)
       const fullPath = join(dir, entry.name);
       if (entry.isDirectory()) {
+        result.push(...collectTsFiles(fullPath, depth + 1));
         result.push(...collectTsFiles(fullPath));
       } else if (entry.isFile() && entry.name.endsWith('.ts')) {
         result.push(fullPath);
@@ -472,7 +475,8 @@ function runCheckD(): DuplicateEntry[] {
   const EXCLUDED = ['node_modules', '.git', '_archive', 'memory'];
   // Skip context.md itself (contains the annotation definition/example, not a real duplicate)
 
-  function walkDir(dir: string): void {
+  function walkDir(dir: string, depth = 0): void {
+    if (depth > 8) return; // symlink-cycle / runaway-recursion bound (T-20260910-026)
     let items: ReturnType<typeof readdirSync>;
     try {
       items = readdirSync(dir, { withFileTypes: true });
@@ -482,6 +486,7 @@ function runCheckD(): DuplicateEntry[] {
 
     for (const item of items) {
       if (item.name.startsWith('.') || EXCLUDED.includes(item.name)) continue;
+      if (item.isSymbolicLink()) continue; // never follow links: cycle-safe, no duplicate visits (T-20260910-026)
 
       const fullPath = join(dir, item.name);
 
@@ -490,7 +495,7 @@ function runCheckD(): DuplicateEntry[] {
         if (existsSync(join(fullPath, 'AGENTS.md')) || existsSync(join(fullPath, 'variant.json'))) {
           continue;
         }
-        walkDir(fullPath);
+        walkDir(fullPath, depth + 1);
       } else if (item.isFile() && item.name.endsWith('.md')) {
         // Skip context.md (contains definition example, not a real duplicate)
         if (item.name === 'CONSTITUTION.md') continue;

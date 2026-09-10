@@ -2,17 +2,23 @@ schemaVersion: 1
 id: T-20260910-011
 kind: manual
 title: >-
-  context-sections.ts classifyCommonizationSection: ignore matches against
-  tiny common sections (< ~3 content lines) — token-overlap against 1-line
-  sections (e.g. 'standard root files') inflates REVIEW flags to 0.50+; most
-  of the 2026-09-10 fleet triage (39 REVIEW) was this noise class
+  context-sections.ts classifyCommonizationSection: ignore matches against tiny
+  common sections (< ~3 content lines) — token-overlap against 1-line sections
+  (e.g. 'standard root files') inflates REVIEW flags to 0.50+; most of the
+  2026-09-10 fleet triage (39 REVIEW) was this noise class
 priority: low
-status: backlog
+status: running
 attempts: 0
 created_at: '2026-09-10T00:00:00.000Z'
 history:
   - at: '2026-09-10T00:00:00.000Z'
     from: null
     to: backlog
+  - at: '2026-09-10T21:05:56.571Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-10T21:07:55.841Z'
+    from: waiting
+    to: running
 result: null
 error: null

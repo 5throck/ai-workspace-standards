@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.11.1
+// @version 1.12.0
 // new-project.ts — Scaffold a new project under the workspace root
 // Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z] [--country <CODE>]
 //
@@ -630,9 +630,22 @@ console.log('  ✅ Variant templates copied');
       // Forward-slash path: Git Bash's rm mis-handles backslash forms. Shell-free argument
       // passing; trust the exit status (fs.existsSync is unreliable for device-name paths).
       const rm = spawnSync('bash', ['-c', 'rm -f -- "$1"', 'rm', p.split('\\').join('/')], { encoding: 'utf-8' });
-      if (rm.status === 0) {
+      let purged = rm.status === 0;
+      if (!purged && process.platform === 'win32') {
+        // Windows fallback (T-20260910-031): bash (Git Bash) is unavailable or failed.
+        // The extended-length prefix (\\?\C:\...) bypasses Win32 reserved-device-name
+        // resolution, letting fs unlink `nul`/`con`/`aux` artifacts that Node otherwise
+        // cannot address (CLAUDE.md §1 Windows safeguard).
+        try {
+          rmSync('\\\\?\\' + resolve(p), { force: true });
+          purged = true;
+        } catch { /* reported below */ }
+      }
+      if (purged) {
         console.log(`  🗑️  Purged device-name artifact from scaffold: ${p}`);
         removed++;
+      } else {
+        console.warn(`  ⚠️  Could not purge device-name artifact: ${p}`);
       }
     }
     return removed;

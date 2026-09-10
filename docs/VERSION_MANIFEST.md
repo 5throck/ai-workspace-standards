@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-09-10T19:01:25.907Z
+**Generated**: 2026-09-10T21:20:54.042Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -19,14 +19,14 @@
 
 | Name | File | Tier | Model | Last Modified |
 |------|------|------|-------|---------------|
-| architect | agents/architect.md | high        # claude-opus-5-0 | inherit | 2026-08-15 |
-| auditor | agents/auditor.md | medium        # claude-sonnet-5-0 | inherit | 2026-08-15 |
-| automation-engineer | agents/automation-engineer.md | low        # claude-haiku-4-5 | inherit | 2026-08-15 |
-| docs-writer | agents/docs-writer.md | medium        # claude-sonnet-5-0 | inherit | 2026-09-09 |
-| lifecycle-manager | agents/lifecycle-manager.md | medium        # claude-sonnet-5-0 | inherit | 2026-08-15 |
-| pm | agents/pm.md | high        # claude-opus-5-0 | inherit | 2026-09-06 |
-| scaffolding-expert | agents/scaffolding-expert.md | low        # claude-haiku-4-5 | inherit | 2026-08-15 |
-| security-expert | agents/security-expert.md | medium        # claude-sonnet-5-0 | inherit | 2026-08-15 |
+| architect | agents/architect.md | high | inherit | 2026-09-10 |
+| auditor | agents/auditor.md | medium | inherit | 2026-09-10 |
+| automation-engineer | agents/automation-engineer.md | low | inherit | 2026-09-10 |
+| docs-writer | agents/docs-writer.md | medium | inherit | 2026-09-10 |
+| lifecycle-manager | agents/lifecycle-manager.md | medium | inherit | 2026-09-10 |
+| pm | agents/pm.md | high | inherit | 2026-09-10 |
+| scaffolding-expert | agents/scaffolding-expert.md | low | inherit | 2026-09-10 |
+| security-expert | agents/security-expert.md | medium | inherit | 2026-09-10 |
 
 ---
 
@@ -94,12 +94,12 @@
 |------|---------|----------|--------------|
 | agent-create.ts | 1.0.1 | scripts/agent-create.ts | N/A |
 | agent-delete.ts | 1.0.1 | scripts/agent-delete.ts | N/A |
-| agent-lifecycle-audit.ts | 1.2.0 | scripts/agent-lifecycle-audit.ts | N/A |
+| agent-lifecycle-audit.ts | 1.2.1 | scripts/agent-lifecycle-audit.ts | N/A |
 | agent-list.ts | 1.1.0 | scripts/agent-list.ts | N/A |
 | agent-verify.ts | 1.0.2 | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.2 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.0.0 | scripts/archive-memory.ts | N/A |
-| audit.ts | 2.32.1 | scripts/audit.ts | bun |
+| audit.ts | 2.32.2 | scripts/audit.ts | bun |
 | cleanup-completed-md.ts | 1.1.0 | scripts/cleanup-completed-md.ts | N/A |
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | N/A |
 | compile-tokens.ts | 1.2.0 | scripts/compile-tokens.ts | N/A |
@@ -115,15 +115,15 @@
 | generate-l3-readme.ts | 1.0.3 | scripts/generate-l3-readme.ts | fs, path |
 | generate-scripts-readme.ts | 1.0.3 | scripts/generate-scripts-readme.ts | N/A |
 | generate-skill-graph.ts | 1.8.5 | scripts/generate-skill-graph.ts | js-yaml |
-| generate-version-manifest.ts | 1.3.0 | scripts/generate-version-manifest.ts | bun, js-yaml |
+| generate-version-manifest.ts | 1.3.1 | scripts/generate-version-manifest.ts | bun, js-yaml |
 | infer-graph-from-phases.ts | 0.1.0 | scripts/experiments/infer-graph-from-phases.ts | N/A |
 | ingest-external-skills.ts | 1.1.0 | scripts/ingest-external-skills.ts | N/A |
 | ingest-security-frameworks.ts | 1.1.0 | scripts/ingest-security-frameworks.ts | N/A |
 | l3-to-variant-pipeline.ts | 1.16.0 | scripts/l3-to-variant-pipeline.ts | child_process, fs, path, process |
-| lifecycle-sync-audit.ts | 1.6.0 | scripts/lifecycle-sync-audit.ts | N/A |
+| lifecycle-sync-audit.ts | 1.6.1 | scripts/lifecycle-sync-audit.ts | N/A |
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
 | md-to-ooxml.ts | 1.2.0 | scripts/md-to-ooxml.ts | fs, path |
-| new-project.ts | 1.11.1 | scripts/new-project.ts | js-yaml |
+| new-project.ts | 1.12.0 | scripts/new-project.ts | js-yaml |
 | procedure-coverage.ts | 1.0.0 | scripts/procedure-coverage.ts | js-yaml |
 | project-to-variant.ts | 1.3.0 | scripts/project-to-variant.ts | N/A |
 | promote-context-section.ts | 1.0.0 | scripts/promote-context-section.ts | N/A |
@@ -139,7 +139,7 @@
 | retry-handler.ts | 1.1.0 | scripts/retry-handler.ts | N/A |
 | setup-github-branch-protection.ts | 1.0.1 | scripts/setup-github-branch-protection.ts | bun |
 | skill-dependency-analysis.ts | 1.0.2 | scripts/skill-dependency-analysis.ts | N/A |
-| skill-lifecycle-audit.ts | 1.4.0 | scripts/skill-lifecycle-audit.ts | N/A |
+| skill-lifecycle-audit.ts | 1.4.1 | scripts/skill-lifecycle-audit.ts | N/A |
 | skill-session-review.ts | 1.0.0 | scripts/skill-session-review.ts | bun |
 | spec-backfill.ts | 1.0.0 | scripts/spec-backfill.ts | N/A |
 | spec-register.ts | 1.1.0 | scripts/spec-register.ts | N/A |
@@ -147,7 +147,7 @@
 | sync-md.ts | 1.3.0 | scripts/sync-md.ts | N/A |
 | sync-skill-status.ts | 1.0.1 | scripts/sync-skill-status.ts | N/A |
 | sync-skills-to-l2.ts | 1.0.1 | scripts/sync-skills-to-l2.ts | N/A |
-| sync-skills.ts | 1.4.1 | scripts/sync-skills.ts | N/A |
+| sync-skills.ts | 1.5.0 | scripts/sync-skills.ts | N/A |
 | sync-template-deps.ts | 1.0.0 | scripts/sync-template-deps.ts | N/A |
 | tag-template.ts | 1.1.0 | scripts/tag-template.ts | bun |
 | team-builder.ts | 1.2.1 | scripts/team-builder.ts | N/A |

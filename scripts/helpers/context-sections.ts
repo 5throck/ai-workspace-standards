@@ -1,4 +1,4 @@
-// @version 1.1.0
+// @version 1.2.0
 // context-sections.ts — shared markdown section-splitting used by audit.ts's
 // cross-variant context commonization detector, promote-context-section.ts's
 // promotion executor, l3-to-variant-pipeline/generate-variant's W1 context
@@ -171,6 +171,19 @@ export function computeLineOverlapSimilarity(bodyA: string, bodyB: string): numb
  *   Policy` (co-develop's project-specific folder table) scores 0.273 and must NOT be
  *   auto-removed. 0.65 keeps REMOVE clear of the 0.455 runner-up.
  */
+/**
+ * Match candidates below this content-token count are ignored by the W2 classifier
+ * (T-20260910-011). The ticket's "< ~3 content lines" heuristic is a line-count
+ * proxy, but the real fleet's common sections are single PARAGRAPHS: both the noise
+ * class and the legitimate W2 REMOVE target ('computational integrity standards',
+ * the 0.667 tuning pin) are 1 content line, so line count cannot separate them —
+ * token count can. 15 sits in the measured gap of templates/common/docs/context.md:
+ * pointer sections measure <=13 tokens ('standard root files (allowed at root)' = 8),
+ * substantive ones >=15 ('4. research output location' = 15, 'computational
+ * integrity standards' = 30).
+ */
+export const MIN_MATCH_CANDIDATE_TOKENS = 15;
+
 export const W1_SUPERSEDED_THRESHOLD = 0.55;
 export const W2_REMOVE_THRESHOLD = 0.65;
 export const W2_REVIEW_FLOOR = 0.3;
@@ -489,6 +502,11 @@ export function classifyCommonizationSection(
   let maxSimilarity = 0;
   let matchedCommonHeading: string | null = null;
   for (const common of commonSections) {
+    // Tiny candidates inflate the ratio: the min() denominator makes a 1-2 token
+    // intersection score 0.50+ (T-20260910-011 — most of the 2026-09-10 fleet triage's
+    // 39 REVIEW flags were this noise class). Skip them; they cannot meaningfully
+    // supersede variant content.
+    if (contentTokens(common.body).size < MIN_MATCH_CANDIDATE_TOKENS) continue;
     const similarity = computeTokenOverlapSimilarity(section.body, common.body);
     if (similarity > maxSimilarity) {
       maxSimilarity = similarity;
