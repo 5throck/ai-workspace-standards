@@ -25,7 +25,6 @@ metadata:
     - audit project
     - quality review
   related_skills:
-    - audit-workspace
     - project-resync
     - meeting-facilitation
 ---
@@ -243,6 +242,5 @@ ticket was not landed.
 
 ## Related Skills
 
-- **audit-workspace**: machine battery wrapper — project-review Step 0 is its superset
 - **project-resync**: fleet-level close-out after fixes land (commit/PR pipeline)
 - **meeting-facilitation**: Antigravity/Gemini dispatch path for Step 3

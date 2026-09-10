@@ -1,0 +1,17 @@
+schemaVersion: 1
+id: T-20260910-007
+kind: manual
+title: >-
+  Architect review: safety promotion/validation policy values (mirror of
+  abap-development, added in PR #854 to unblock registry integrity; flagged in
+  code)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-10T02:01:30.295Z'
+history:
+  - at: '2026-09-10T02:01:30.295Z'
+    from: null
+    to: backlog
+result: null
+error: null

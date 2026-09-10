@@ -1,0 +1,16 @@
+schemaVersion: 1
+id: T-20260910-008
+kind: manual
+title: >-
+  Decide promote-variant SKILL.md version-bump convention (metadata-only edits
+  landed in PR #854 without a bump)
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-09-10T02:01:30.307Z'
+history:
+  - at: '2026-09-10T02:01:30.307Z'
+    from: null
+    to: backlog
+result: null
+error: null
