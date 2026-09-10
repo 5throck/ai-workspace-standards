@@ -1,11 +1,18 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.1.0
 // @description Scans workspace Markdown files for broken relative file links.
 //              Invoked by dev-sync.ts as a pre-flight link validation gate.
 //              By default scans docs/ root level files only (no subdirectories).
 //              The docs/ subdirectories have many historical cross-references that
 //              are managed by the validate-doc-folder.ts validator separately.
 //              Use --dir to scan a specific directory, --all to scan all of docs/.
+//
+//              v1.1.0 (T-20260910-014): anchor fragments are now verified against
+//              the target file's headings instead of being stripped. A fragment is
+//              accepted when it matches either (a) the GitHub-style auto-slug of a
+//              heading, or (b) an explicit `{#custom-anchor}` declaration on a
+//              heading — the workspace uses both conventions (docs/constitution/).
+//              Headings inside ```/~~~ fences are ignored.
 // @usage bun scripts/validate-docs-links.ts [--dir <path>] [--all] [--verbose]
 
 import { existsSync, readdirSync, statSync, readFileSync } from "fs";
@@ -41,13 +48,61 @@ const EXAMPLE_PATH_PATTERNS = [
   /^\[.+\]+$/, // Regex patterns accidentally matched as links
 ];
 
-// Link pattern: [text](path) — captures relative paths (not http/https/mailto/# anchors)
-const RELATIVE_LINK_RE = /\[([^\]]*)\]\(([^)#]+?)(?:#[^)]*)?\)/g;
+// Link pattern: [text](path#fragment) — captures relative paths plus their
+// optional anchor fragment (v1.1.0 verifies fragments; not http/https/mailto/#-only anchors)
+const RELATIVE_LINK_RE = /\[([^\]]*)\]\(([^)#\s]+)(#[^)\s]+)?\)/g;
 
 let totalFiles = 0;
 let totalLinks = 0;
 let brokenLinks = 0;
 const errors: string[] = [];
+
+/**
+ * GitHub-style heading slug: lowercase, strip combining marks, drop characters
+ * that are not letters/numbers/spaces/hyphens/underscores, then map each
+ * whitespace character to a hyphen WITHOUT collapsing runs (so "A & B" →
+ * "a--b"). Matches the anchors GitHub renders for the workspace's headings —
+ * e.g. "### 10. Terminology → Canonical Definitions" →
+ * "10-terminology--canonical-definitions".
+ */
+function headingSlug(headingText: string): string {
+  return headingText
+    .trim()
+    .toLowerCase()
+    // eslint-disable-next-line no-irregular-whitespace
+    .replace(/[̀-ͯ]/g, "") // combining diacritics
+    .replace(/[^\p{L}\p{N}\p{M}\s\-_]/gu, "")
+    .replace(/\s/g, "-");
+}
+
+/**
+ * Collect the anchor fragments a target markdown file exposes: the auto-slug of
+ * every non-fenced ATX heading plus any explicit `{#custom-anchor}` declaration.
+ */
+function collectAnchorFragments(mdPath: string): Set<string> {
+  const fragments = new Set<string>();
+  let content: string;
+  try {
+    content = readFileSync(mdPath, "utf8");
+  } catch {
+    return fragments;
+  }
+  let inFence = false;
+  for (const line of content.split("\n")) {
+    if (/^\s*(```|~~~)/.test(line)) {
+      inFence = !inFence;
+      continue;
+    }
+    if (inFence) continue;
+    const heading = line.match(/^(#{1,6})\s+(.*?)\s*$/);
+    if (!heading) continue;
+    const explicit = heading[2].match(/\{#([A-Za-z0-9_-]+)\}/);
+    if (explicit) fragments.add(explicit[1].toLowerCase());
+    const text = heading[2].replace(/\s*#+\s*$/, "").replace(/\{#[A-Za-z0-9_-]+\}/g, "").trim();
+    fragments.add(headingSlug(text));
+  }
+  return fragments;
+}
 
 /**
  * Collect .md files from a directory.
@@ -110,6 +165,7 @@ function checkFile(mdPath: string): void {
 
   for (const match of content.matchAll(RELATIVE_LINK_RE)) {
     const href = match[2].trim();
+    const fragment = match[3] ? match[3].slice(1) : null;
     // Skip remote URLs, empty hrefs, anchor-only refs, and example placeholders
     if (!href || isRemote(href) || href.startsWith("#") || isExamplePath(href)) continue;
 
@@ -126,6 +182,19 @@ function checkFile(mdPath: string): void {
       const msg = `  ${rel}: broken link → ${href}`;
       errors.push(msg);
       if (verbose) console.error(msg);
+      continue;
+    }
+
+    // v1.1.0: verify the anchor fragment resolves against the target's headings
+    if (fragment && extname(target) === ".md") {
+      const fragments = collectAnchorFragments(target);
+      if (fragments.size > 0 && !fragments.has(fragment.toLowerCase())) {
+        brokenLinks++;
+        const rel = mdPath.replace(WORKSPACE_ROOT + "\\", "").replace(WORKSPACE_ROOT + "/", "");
+        const msg = `  ${rel}: broken anchor → ${hrefClean}#${fragment} (no matching heading in target)`;
+        errors.push(msg);
+        if (verbose) console.error(msg);
+      }
     }
   }
 }

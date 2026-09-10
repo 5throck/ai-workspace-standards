@@ -228,7 +228,7 @@ description: This skill should be used when...
 version: 1.2.3
 
 # Lifecycle metadata
-status: active           # draft | active | deprecated | archived
+status: active           # draft | active | deprecated | archived | experimental (skill-only, T-20260910-021)
 owner: agent-name        # Primary owning agent (or [agent1, agent2] for shared)
 requires: []             # Skills this depends on
 supersedes: old-skill    # This replaces old skill
@@ -264,6 +264,10 @@ last_reviewed_by: pm-agent
 | `scaffolding` | Project, variant, or upgrade scaffolding workflows | `project-to-variant`, `upgrade-project` |
 | `presentation-sync` | Presenter/display synchronization | `presenter-mode` |
 | `audio-synthesis` | Procedural audio generation | `sound-synth` |
+| `orchestration` | Coordinating a multi-agent or multi-session workflow (a `process` subkind where the skill's product IS the coordination itself) | `project-resync` |
+| `review` | Reviewing or auditing an artifact against a rubric to produce findings (a `process` subkind whose output is a verdict, not an artifact) | `token-usage-lint` |
+| `release` | Publishing, versioning, or distribution workflows (a `process` subkind for shipping steps) | `release-template` |
+| `quality` | Domain verification of deliverable quality against acceptance criteria (co-price subkind) | co-price's `harness-verification` |
 | `task` | *Discouraged* — a procedure skill; prefer `process` (kept only because `desktop-app-fallback` uses it) | `desktop-app-fallback` |
 | `utility` | *Example files only* — not for real skills | `docs/_examples/` samples |
 

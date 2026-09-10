@@ -5,12 +5,18 @@ title: >-
   decide skills/explain-me status: reclassify experimental to a documented
   lifecycle enum value or extend the enum in schema, validator, and constitution
 priority: normal
-status: backlog
+status: running
 attempts: 0
 created_at: '2026-09-10T14:01:23.241Z'
 history:
   - at: '2026-09-10T14:01:23.241Z'
     from: null
     to: backlog
+  - at: '2026-09-10T20:17:14.422Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-10T20:17:14.465Z'
+    from: waiting
+    to: running
 result: null
 error: null

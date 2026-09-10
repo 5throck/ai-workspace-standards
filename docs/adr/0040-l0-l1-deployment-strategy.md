@@ -240,8 +240,8 @@ bun scripts/deploy-to-l1.ts --verify-only
 
 - [ADR-0029: L0-L2 Workspace Design](0029-l0-l2-workspace-design.md)
 - [ADR-0030: Auto-Mode for Antigravity Platform](retired/0030-auto-mode-architecture.md) (retired)
-- [CONSTITUTION.md §9: Workspace & Template Boundary Policy](../../CONSTITUTION.md#9-workspace--template-boundary-policy)
-- [CONSTITUTION.md §10: Lifecycle Management Rules](../../CONSTITUTION.md#10-lifecycle-management-rules)
+- [CONSTITUTION.md §9: Operations Workflow](../../CONSTITUTION.md#9-operations-workflow) (successor of the former "Workspace & Template Boundary Policy" section)
+- [CONSTITUTION.md §10: Terminology → Canonical Definitions](../../CONSTITUTION.md#10-terminology--canonical-definitions) (successor of the former "Lifecycle Management Rules" section)
 
 ## Changelog
 

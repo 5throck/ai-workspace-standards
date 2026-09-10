@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Schema Validator — Validates agent, skill, and command frontmatter against JSON Schemas
- * @version 1.3.1
+ * @version 1.4.0
  *
  * Reads each agent, skill, and command file, parses YAML frontmatter, and manually
  * validates the declared fields against schema requirements.
@@ -41,8 +41,18 @@ function parseFrontmatter(content: string): Record<string, any> {
   }
 }
 
-/** Valid status values shared by agents and skills. */
+/** Valid status values shared by agents and commands. */
 const VALID_STATUSES = ['draft', 'active', 'deprecated', 'archived'] as const;
+
+/**
+ * Skills additionally accept 'experimental' (T-20260910-021). The value has been in
+ * active, tooling-surfaced use (VERSION_MANIFEST.md's generated status column, the
+ * AGENTS.md §6 skill table) since before this validator existed — the enum was
+ * stale, not the data. Same resolution as lifecycle.phase 'beta' below (2026-08-21):
+ * document the observed vocabulary instead of failing every audit on it. Agents and
+ * commands keep the four-value enum — no observed use of 'experimental' there.
+ */
+const VALID_SKILL_STATUSES = ['draft', 'active', 'deprecated', 'archived', 'experimental'] as const;
 
 /** Valid tier values for each platform key. */
 const VALID_TIER_VALUES = ['high', 'medium', 'low'] as const;
@@ -73,6 +83,7 @@ const DOCUMENTED_METADATA_TYPES = [
   'analysis', 'research', 'strategic-reasoning', 'financial-analysis', 'legal-research',
   'testing', 'accessibility-testing', 'security-reporting', 'threat-modeling', 'contract-safety',
   'scaffolding', 'presentation-sync', 'audio-synthesis',
+  'orchestration', 'review', 'release', 'quality',
   'task', 'utility',
 ] as const;
 
@@ -270,11 +281,11 @@ function validateSkillFrontmatter(
   }
 
   // ── status enum ────────────────────────────────────────────────────────
-  if (fm.status !== undefined && !VALID_STATUSES.includes(fm.status)) {
+  if (fm.status !== undefined && !VALID_SKILL_STATUSES.includes(fm.status)) {
     issues.push({
       severity: 'error',
       category: 'invalid-enum',
-      message: `Skill "${skillName}" has invalid status "${fm.status}" — must be one of: ${VALID_STATUSES.join(', ')}`,
+      message: `Skill "${skillName}" has invalid status "${fm.status}" — must be one of: ${VALID_SKILL_STATUSES.join(', ')}`,
       file: skillFile,
     });
   }

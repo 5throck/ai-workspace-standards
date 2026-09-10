@@ -5,12 +5,18 @@ title: >-
   validator-hardening: standing regression check that variant.json-declared
   audit hooks resolve and execute in audit.ts
 priority: high
-status: backlog
+status: running
 attempts: 0
 created_at: '2026-09-10T14:01:23.132Z'
 history:
   - at: '2026-09-10T14:01:23.132Z'
     from: null
     to: backlog
+  - at: '2026-09-10T19:33:10.479Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-10T19:33:10.521Z'
+    from: waiting
+    to: running
 result: null
 error: null
