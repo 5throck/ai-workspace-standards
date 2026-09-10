@@ -25,7 +25,6 @@ metadata:
   related_skills:
     - project-review
     - sync
-    - audit-workspace
 ---
 
 # ci-triage
@@ -102,4 +101,3 @@ execute). Never `--no-verify`, never gate bypasses.
 
 - **project-review**: broad multi-domain review — ci-triage is the single-failure counterpart
 - **sync**: landing pipeline for the fix
-- **audit-workspace**: machine battery reference

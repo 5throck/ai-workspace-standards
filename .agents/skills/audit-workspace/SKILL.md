@@ -2,8 +2,9 @@
 name: audit-workspace
 description: Runs the root workspace audit scripts to enforce workspace standards compliance.
 version: 1.0.0
-last_reviewed: 2026-05-30
-status: active
+last_reviewed: 2026-09-10
+status: deprecated
+removal-date: 2026-10-10
 scope: common
 l2_propagate: false
 owner: auditor
@@ -35,6 +36,9 @@ metadata:
 # 🛠️ Skill: audit-workspace
 
 ## Context
+
+> Deprecated 2026-09-10: `project-review` Step 0 (machine baseline battery) is a documented superset of this skill. Use `project-review` for workspace audit evidence; keep this stub only as a transition alias until removal.
+
 Used by the `auditor` or `pm` agents to run automated sanity checks against the project structure.
 
 ## Execution Steps

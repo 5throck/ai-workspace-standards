@@ -1,0 +1,16 @@
+schemaVersion: 1
+id: T-20260910-005
+kind: manual
+title: >-
+  Projects/co-safety: deduplicate doubled '## Domain Guidelines' headings in
+  docs/co-safety.context.md
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-09-10T02:01:30.273Z'
+history:
+  - at: '2026-09-10T02:01:30.273Z'
+    from: null
+    to: backlog
+result: null
+error: null

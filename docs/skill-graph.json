@@ -3674,6 +3674,12 @@
       }
     },
     {
+      "type": "references",
+      "from": "audit-workspace",
+      "to": "project-review",
+      "source": "prose"
+    },
+    {
       "type": "composes_with",
       "from": "audit-workspace",
       "to": "project-to-variant",

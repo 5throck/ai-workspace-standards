@@ -1,0 +1,19 @@
+schemaVersion: 1
+id: T-20260910-010
+kind: manual
+title: >-
+  Archive/delete audit-workspace skill files (SSOT skills/audit-workspace/ + 3
+  platform mirrors + skills/SKILLS.md row + VERSION_MANIFEST row + skill-graph
+  node) — deprecated 2026-09-10 in PR for context purification retirement;
+  removal-date 2026-10-10
+priority: low
+not_before: '2026-10-10'
+status: backlog
+attempts: 0
+created_at: '2026-09-10T04:35:32.463Z'
+history:
+  - at: '2026-09-10T04:35:32.463Z'
+    from: null
+    to: backlog
+result: null
+error: null
