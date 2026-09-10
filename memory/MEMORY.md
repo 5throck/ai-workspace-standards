@@ -12,6 +12,7 @@
 | [2026-09-06](2026-09-06.md) | feat(skills): session-evidence skill review loop (SkillHone-inspired) |
 | [2026-09-05](2026-09-05.md) | feat(skills): meeting-facilitation v1.4.1 governance rules + template skill drift sync |
 | [2026-09-04](2026-09-04.md) | fix: apply project-review findings (C1-C4, H1-H10) |
+| [2026-09-03](archive/2026-09-03.md) | feat: propagate k-opendata skill and DATA_GO_KR_API_KEY to templates/common |
 | [2026-09-01](archive/2026-09-01.md) | docs(governance): add ADR-0065 accessibility standard for software feature development |
 | [2026-08-30](archive/2026-08-30.md) | feat(skills): promote handbook and handbook-sync-audit skills from co-deck to common |
 | [2026-08-29](archive/2026-08-29.md) | feat(skills+templates): co-safety glossary back-port, project README backlog, scripts/co-safety layout (F1-F3) |
@@ -49,10 +50,6 @@ Phase A L2 projects (Projects/<name>/) previously scaffolded a 2-section README 
 
 | Date | Topic | File |
 |------|-------|------|
-| 2026-08-06 | Variant Templates GitHub Benchmarking & Advancement Plan | [meeting-2026-08-06-variant-benchmarking-advancement-plan.md](meeting-2026-08-06-variant-benchmarking-advancement-plan.md) |
-| 2026-08-06 | Templates (<variant>) Status Assessment & Improvement Plan | [meeting-2026-08-06-variant-templates-review.md](meeting-2026-08-06-variant-templates-review.md) |
-| 2026-08-06 | Workspace Status Review & Improvement Plan | [meeting-2026-08-06-workspace-improvement-plan.md](meeting-2026-08-06-workspace-improvement-plan.md) |
-| 2026-07-02 | withRetry + .nothrow() masks gh pr create failures in dev-sync.ts | [meeting-2026-07-02-withretry-nothrow-masks-gh-pr-create-fai.md](meeting-2026-07-02-withretry-nothrow-masks-gh-pr-create-fai.md) |
 | 2026-05-31 | Model name SSOT dispersion problem resolution — agents/*.md as SSOT, workspace-schema.json models block planned | [meeting-2026-05-31-model-name-ssot.md](archive/meeting-2026-05-31-model-name-ssot.md) |
 | 2026-05-30 | Command Documentation Inconsistency | [meeting-2026-05-30-command-doc-inconsistency.md](archive/meeting-2026-05-30-command-doc-inconsistency.md) |
 | 2026-05-30 | C-SK-02 Resolution Plan — Variant PM Migration | [meeting-2026-05-30-csk02-resolution-plan.md](archive/meeting-2026-05-30-csk02-resolution-plan.md) |
@@ -89,7 +86,7 @@ Phase A L2 projects (Projects/<name>/) previously scaffolded a 2-section README 
 | 2026-05-28 | Unified lifecycle governance structure across workspace root and templates | [meeting-2026-05-28-lifecycle-governance-structure.md](archive/meeting-2026-05-28-lifecycle-governance-structure.md) |
 | 2026-05-28 | Template lifecycle ↔ Script lifecycle integration review | [meeting-2026-05-28-lifecycle-integration-review.md](archive/meeting-2026-05-28-lifecycle-integration-review.md) |
 | 2026-05-28 | Variant structural gaps improvement plan meeting | [meeting-2026-05-28-variant-structural-gaps.md](archive/meeting-2026-05-28-variant-structural-gaps.md) |
-| 2026-05-28 | Kanban process and system design for current and new projects — **SUPERSEDED 2026-07-16** by the Service Ticket + Kanban design, see [meeting-2026-07-16-ticket-kanban-design-review.md](meeting-2026-07-16-ticket-kanban-design-review.md) | [meeting-2026-05-28-kanban-process-design.md](archive/meeting-2026-05-28-kanban-process-design.md) |
+| 2026-05-28 | Kanban process and system design for current and new projects — **SUPERSEDED 2026-07-16** by the Service Ticket + Kanban design (meeting notes removed in the 7c8a2f8d memory cleanup) | [meeting-2026-05-28-kanban-process-design.md](archive/meeting-2026-05-28-kanban-process-design.md) |
 | 2026-05-28 | Encoding and README sync review | [meeting-2026-05-28-encoding-readme-sync.md](archive/meeting-2026-05-28-encoding-readme-sync.md) |
 | 2026-05-28 | Implementation direction for platform parity, upgrade-project, and team role changes | [meeting-2026-05-28-implementation-direction.md](archive/meeting-2026-05-28-implementation-direction.md) |
 | 2026-05-28 | Team composition review and project improvement roadmap meeting | [meeting-2026-05-28-team-composition-improvement.md](archive/meeting-2026-05-28-team-composition-improvement.md) |
@@ -113,8 +110,8 @@ Phase A L2 projects (Projects/<name>/) previously scaffolded a 2-section README 
 | 2026-06-05 | Tier governance L0→L1→L2 propagation strategy — principles vs specialist-list separation | [meeting-2026-06-05-tier-governance-l0-l1-l2-propagation.md](archive/meeting-2026-06-05-tier-governance-l0-l1-l2-propagation.md) |
 | 2026-06-05 | Antigravity parity gap root cause — PM execution plan table missing Platform column | [meeting-2026-06-05-antigravity-parity-gap-root-cause.md](archive/meeting-2026-06-05-antigravity-parity-gap-root-cause.md) |
 | 2026-06-05 | Action item completeness review — C-01 L0→L1→L2 scope, A-00 and D-01 added | [meeting-2026-06-05-action-item-completeness-review.md](archive/meeting-2026-06-05-action-item-completeness-review.md) |
-| 2026-06-21 | Pluggable variant audit hooks and pipeline integrity validation | [meeting-2026-06-21-variant-dev-sync-verification.md](meeting-2026-06-21-variant-dev-sync-verification.md) |
-| 2026-06-21 | html-themes per-theme style restructure design — artifact ownership, target structure, 3-layer PDF merge | [meeting-2026-06-21-html-themes-per-theme-style-design.md](meeting-2026-06-21-html-themes-per-theme-style-design.md) |
+| 2026-06-21 | Pluggable variant audit hooks and pipeline integrity validation | meeting notes removed in the 7c8a2f8d memory cleanup |
+| 2026-06-21 | html-themes per-theme style restructure design — artifact ownership, target structure, 3-layer PDF merge | meeting notes removed in the 7c8a2f8d memory cleanup |
 | 2026-05-24 | Multi-agent analysis: 96 improvement opportunities identified | *(archived — file not preserved)* |
 
 ## ADRs

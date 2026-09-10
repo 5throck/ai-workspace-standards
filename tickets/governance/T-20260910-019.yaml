@@ -6,18 +6,21 @@ title: >-
   common-contract.json command and platform-skill inventories and refresh the
   stale lists
 priority: normal
-status: running
+status: review
 attempts: 0
 created_at: '2026-09-10T14:01:23.215Z'
 history:
   - at: '2026-09-10T14:01:23.215Z'
     from: null
     to: backlog
-  - at: '2026-09-10T20:36:08.397Z'
+  - at: '2026-09-10T19:33:10.826Z'
     from: backlog
     to: waiting
-  - at: '2026-09-10T20:36:08.439Z'
+  - at: '2026-09-10T19:33:10.870Z'
     from: waiting
     to: running
+  - at: '2026-09-10T20:22:40.020Z'
+    from: running
+    to: review
 result: null
 error: null

@@ -282,14 +282,14 @@
       "source": ".claude/commands/gateguard.md",
       "gemini_source": ".gemini/commands/gateguard.md",
       "gemini-parity": "full",
-      "description": "Investigate a file before editing — pre-edit quality gate (importers, schemas, scope constraints)",
+      "description": "Investigate a file before editing — pre-edit quality gate (companion to the PreToolUse GateGuard hook)",
       "propagated_to_common": true
     },
     "sync": {
       "source": ".claude/commands/sync.md",
       "gemini_source": ".gemini/commands/sync.md",
       "gemini-parity": "full",
-      "description": "Full pipeline — memlog → sync-md → changelog → audit → commit → PR",
+      "description": "Full pipeline — memlog, sync-md, changelog, audit, commit, push, PR via scripts/dev-sync.ts",
       "propagated_to_common": true
     }
   },
@@ -320,6 +320,62 @@
       "gemini_source": ".gemini/skills/meeting-facilitation/SKILL.md",
       "version": "1.4.1",
       "description": "Structured multi-agent meeting facilitation — delegates to .claude/commands/meeting.md",
+      "propagated_to_common": true
+    },
+    "decision-record": {
+      "claude_source": ".claude/skills/decision-record/SKILL.md",
+      "gemini_source": ".gemini/skills/decision-record/SKILL.md",
+      "version": "1.1.0",
+      "description": "Decision record format for gate-moment rulings — Design Gate Row 0 determinations, escalations, and go/no-go calls as durable docs/decisions/DEC-YYYYMMDD-NN.md files (ADR-0061)",
+      "propagated_to_common": true
+    },
+    "evidence-ledger": {
+      "claude_source": ".claude/skills/evidence-ledger/SKILL.md",
+      "gemini_source": ".gemini/skills/evidence-ledger/SKILL.md",
+      "version": "1.1.0",
+      "description": "Fixed-column evidence ledger tracing every claim a decision depends on to a source, a reference, and a verification state",
+      "propagated_to_common": true
+    },
+    "handbook": {
+      "claude_source": ".claude/skills/handbook/SKILL.md",
+      "gemini_source": ".gemini/skills/handbook/SKILL.md",
+      "version": "0.4.0",
+      "description": "Document Production Workflow — generates searchable, themed handbook static sites (GitHub Pages); standalone, lecture-companion, and sync modes",
+      "propagated_to_common": true
+    },
+    "handbook-sync-audit": {
+      "claude_source": ".claude/skills/handbook-sync-audit/SKILL.md",
+      "gemini_source": ".gemini/skills/handbook-sync-audit/SKILL.md",
+      "version": "1.0.0",
+      "description": "Handbook Sync Audit — verifies generated handbooks stay aligned with their sources across content reflection, structural linkage, and freshness",
+      "propagated_to_common": true
+    },
+    "i18n-audit": {
+      "claude_source": ".claude/skills/i18n-audit/SKILL.md",
+      "gemini_source": ".gemini/skills/i18n-audit/SKILL.md",
+      "version": "1.0.0",
+      "description": "Locale parity and glossary audit — master-locale translation-key parity, glossary adherence, drift reporting, parity certificate on success",
+      "propagated_to_common": true
+    },
+    "i18n-formatting": {
+      "claude_source": ".claude/skills/i18n-formatting/SKILL.md",
+      "gemini_source": ".gemini/skills/i18n-formatting/SKILL.md",
+      "version": "1.0.0",
+      "description": "Locale-specific formatting rules — date/time, number and currency, units, Korean-scale numerals, print paper sizes",
+      "propagated_to_common": true
+    },
+    "i18n-layout": {
+      "claude_source": ".claude/skills/i18n-layout/SKILL.md",
+      "gemini_source": ".gemini/skills/i18n-layout/SKILL.md",
+      "version": "1.0.0",
+      "description": "Text layout and encoding guidance — UTF-8/legacy code pages, BOM hazards, line endings, RTL/bidi, script-specific font selection (Hangul focus)",
+      "propagated_to_common": true
+    },
+    "i18n-locale-config": {
+      "claude_source": ".claude/skills/i18n-locale-config/SKILL.md",
+      "gemini_source": ".gemini/skills/i18n-locale-config/SKILL.md",
+      "version": "1.0.0",
+      "description": "Locale identification and configuration — BCP 47 structure, language-vs-country doctrine, collation order, timezone handling, region/language matrix",
       "propagated_to_common": true
     }
   },

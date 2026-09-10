@@ -1,4 +1,18 @@
 // @version 2.33.0
+// v2.33.0: Validator-hardening batch (T-20260910-013/016/017/026). New standing
+//           regression check checkVariantAuditHookRegression() — every variant.json
+//           that declares an audit-variant hook (script_manifest) must resolve to a
+//           real file in its template mirror, must be the path audit.ts §27's
+//           candidate simulation would select, and must load (bun build module-graph
+//           smoke, no side effects) — the co-safety "dead variant audit hook" class
+//           can no longer silently no-op. New checkAgentsMdSkillTable() — every
+//           `skills/<name>/` backtick path in AGENTS.md resolves, and the
+//           VERSION_MANIFEST.md Skills registry (AGENTS.md §6's declared complete
+//           registry) covers exactly the skills/ directory. Schema validation now
+//           also covers the workspace's own agents/ and skills/ frontmatter
+//           (CONSTITUTION §11.4 previously only exercised templates/co-*), skipping
+//           `_`-prefixed agent partials. hasSkillMdRecursive() skips symlinks so a
+//           cyclic link cannot send the walker into unbounded recursion.
 // v2.32.0: Adds skipped-file counting for scan walkers and warns on live context placeholders.
 // v2.31.0: Stray-artifact check fails loud (T-20260909-006/021) — a missing
 //           docs/workspace-schema.json or a schema without a valid rootAllowlist
@@ -49,6 +63,7 @@
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import * as os from 'node:os';
 import * as crypto from 'node:crypto';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { parsePmMd, extractVariantOverrides } from './helpers/pm-md-parser.ts';
@@ -311,7 +326,12 @@ if (!LIFECYCLE_ONLY) {
     }
 }
 
-function walkDir(dir: string, callback: (fPath: string) => void) {
+function walkDir(dir: string, callback: (fPath: string) => void, depth = 0) {
+    // Symlink + depth guards (T-20260910-026): statSync FOLLOWS symlinks, so a
+    // cyclic directory link (dir → ancestor) recursed without bound. lstatSync
+    // reports the link itself — symlinks are never followed; depth is capped as
+    // defense-in-depth against deep generated trees.
+    if (depth > 64) return;
     if (!fs.existsSync(dir)) return;
     const SKIP_DIRS = new Set(['node_modules', '.git', '.bun', '.temp']);
     for (const f of fs.readdirSync(dir)) {
@@ -319,9 +339,10 @@ function walkDir(dir: string, callback: (fPath: string) => void) {
         const dirPath = path.join(dir, f);
         if (!fs.existsSync(dirPath)) continue;
         try {
-            const isDirectory = fs.statSync(dirPath).isDirectory();
-            if (isDirectory) {
-                walkDir(dirPath, callback);
+            const st = fs.lstatSync(dirPath);
+            if (st.isSymbolicLink()) continue;
+            if (st.isDirectory()) {
+                walkDir(dirPath, callback, depth + 1);
             } else {
                 callback(dirPath);
             }
@@ -675,7 +696,7 @@ if (hasBun) {
         // though this existsSync guard makes the import unreachable there. Resolved to a
         // file URL so runtime ESM resolution is cwd/module-independent.
         const validatorsUrl = new URL('./validators/index.ts', import.meta.url).href;
-        const { runAllValidators } = await import(validatorsUrl);
+        const { runAllValidators, schemaValidator } = await import(validatorsUrl);
         let validatorErrors = 0;
         let validatorWarnings = 0;
         for (const variant of fs.readdirSync('templates').filter(d => d.startsWith('co-') && isCoVariantTracked(d))) {
@@ -712,6 +733,46 @@ if (hasBun) {
         }
         if (validatorErrors === 0) {
             Pass(`Variant registry validation: all variants clean (${validatorWarnings} warning(s) surfaced)`);
+        }
+
+        // L0 workspace frontmatter schema validation (T-20260910-017). CONSTITUTION
+        // §11.4 routes agent/skill/command frontmatter through schema-validator, but
+        // the per-variant loop above only ever exercised templates/co-* — the
+        // workspace's own agents/ and skills/ frontmatter (the 8 root agents, 38
+        // workspace skills) went unvalidated. `_`-prefixed agent files are skeleton
+        // partials (templates/common/agents/_COMMON.md), not agents — skip them the
+        // same way README* files are skipped.
+        if (fs.existsSync('agents') || fs.existsSync('skills')) {
+            const l0AgentFiles = fs.existsSync('agents')
+                ? fs.readdirSync('agents').filter(f => f.endsWith('.md') && !f.startsWith('README') && !f.startsWith('_'))
+                : [];
+            const l0SkillFiles = fs.existsSync('skills')
+                ? fs.readdirSync('skills').filter(d => {
+                    const p = path.join('skills', d);
+                    try { return fs.statSync(p).isDirectory() && fs.existsSync(path.join(p, 'SKILL.md')); }
+                    catch { return false; }
+                  })
+                : [];
+            const l0Result = await schemaValidator.validate({
+                variantDir: process.cwd(),
+                variantType: 'workspace-root',
+                variantJson: {},
+                agentFiles: l0AgentFiles,
+                skillFiles: l0SkillFiles,
+                policy: null,
+            });
+            let l0Errors = 0;
+            for (const issue of l0Result.issues ?? []) {
+                if (issue.severity === 'error') {
+                    Fail(`Workspace frontmatter schema [L0] ${issue.category}: ${issue.message}`);
+                    l0Errors++;
+                } else if (issue.severity === 'warning') {
+                    validatorWarnings++;
+                }
+            }
+            if (l0Errors === 0) {
+                Pass(`Workspace frontmatter schema: L0 agents/ + skills/ clean (${l0Result.checks} field check(s))`);
+            }
         }
     }
     if (fs.existsSync(path.join('scripts', 'verify-scripts.ts'))) {
@@ -1341,7 +1402,9 @@ function checkShellInjectionPatterns() {
     // Self-contained recursive directory walk (the module-level `walkDir` is
     // block-scoped to an earlier `if (!LIFECYCLE_ONLY)` block and is not
     // visible here).
-    function walkScanDir(dir: string, callback: (fPath: string) => void) {
+    function walkScanDir(dir: string, callback: (fPath: string) => void, depth = 0) {
+        // Symlink + depth guards (T-20260910-026) — see module-level walkDir().
+        if (depth > 64) return;
         if (!fs.existsSync(dir)) return;
         const SKIP_DIRS = new Set(['node_modules', '.git', '.bun', '.temp']);
         for (const f of fs.readdirSync(dir)) {
@@ -1349,9 +1412,10 @@ function checkShellInjectionPatterns() {
             const dirPath = path.join(dir, f);
             if (!fs.existsSync(dirPath)) continue;
             try {
-                const isDirectory = fs.statSync(dirPath).isDirectory();
-                if (isDirectory) {
-                    walkScanDir(dirPath, callback);
+                const st = fs.lstatSync(dirPath);
+                if (st.isSymbolicLink()) continue;
+                if (st.isDirectory()) {
+                    walkScanDir(dirPath, callback, depth + 1);
                 } else {
                     callback(dirPath);
                 }
@@ -1466,13 +1530,16 @@ function checkVariantScriptDrift() {
         const commonDir = path.join('templates', 'common', 'scripts');
         if (!fs.existsSync(commonDir)) return;
 
-        function walkDir(dir: string) {
+        function walkDir(dir: string, depth = 0) {
+            // Symlink + depth guards (T-20260910-026) — see module-level walkDir().
+            if (depth > 64) return;
             for (const entry of fs.readdirSync(dir)) {
                 const fullPath = path.join(dir, entry);
                 try {
-                    const stat = fs.statSync(fullPath);
-                    if (stat.isDirectory()) {
-                        walkDir(fullPath);
+                    const st = fs.lstatSync(fullPath);
+                    if (st.isSymbolicLink()) continue;
+                    if (st.isDirectory()) {
+                        walkDir(fullPath, depth + 1);
                     } else if (entry.endsWith('.ts') && !entry.endsWith('.test.ts') && !entry.endsWith('.d.ts')) {
                         const basename = path.basename(fullPath);
                         // Store the first occurrence; later ones are ignored (unlikely in practice)
@@ -1575,6 +1642,146 @@ function checkVariantScriptDrift() {
     }
 }
 checkVariantScriptDrift();
+
+// ── 28. Variant audit-hook resolution regression (T-20260910-013) ────────────
+// Standing regression guard for §27's pluggable audit hook. The 2026-09-10
+// project review (finding C1) caught co-safety's declared hook silently
+// no-op'ing because audit.ts hardcoded scripts/audit-variant.ts while the
+// declaration lived elsewhere. §27 is runtime resolution in a *scaffolded
+// project*; this check is its workspace-side twin: for every tracked variant
+// whose variant.json declares an audit-variant hook, verify that
+//   (a) the declared path exists in the variant's template mirror (a scaffolded
+//       project root projects templates/<variant>/ 1:1), and
+//   (b) §27's candidate order (declared → scripts/audit-variant.ts →
+//       scripts/<variant>/audit-variant.ts) still selects the DECLARED path —
+//       a regression that demotes the declared path below the conventional
+//       fallbacks, or a shadowed/duplicate declaration, fails here, and
+//   (c) the hook still LOADS — `bun build` resolves the module graph without
+//       executing top-level side effects (the full run needs a scaffolded
+//       project sandbox, which the workspace root does not provide).
+function checkVariantAuditHookRegression(): void {
+    if (!fs.existsSync('templates')) return;
+    let declaredHooks = 0;
+    for (const variant of fs.readdirSync('templates').filter(d => d.startsWith('co-') && isCoVariantTracked(d))) {
+        const variantDir = path.join('templates', variant);
+        const vjPath = path.join(variantDir, 'variant.json');
+        if (!fs.existsSync(vjPath)) continue;
+        let manifest: { script_manifest?: { variant_scripts_dir?: string; local?: Array<{ name?: string; path?: string }> }; name?: string };
+        try {
+            manifest = JSON.parse(readUTF8File(vjPath));
+        } catch { continue; } // malformed variant.json is variant-json-validator's finding
+
+        const sm = manifest.script_manifest;
+        // Declaration signal mirrors §27 exactly: only a script_manifest.local
+        // entry named 'audit-variant' DECLARES a hook (that is the sole branch
+        // that sets §27's variantDeclaresAuditHook). variant_scripts_dir only
+        // contributes a probe candidate — treating its existence as a
+        // declaration would fail every scripted variant that never had an
+        // audit-variant.ts (co-abap/co-consult/co-game/co-deck false positives,
+        // fixed same-day as introduced).
+        const declared: string[] = [];
+        if (Array.isArray(sm?.local)) {
+            for (const entry of sm.local) {
+                if (entry?.name === 'audit-variant' && typeof entry.path === 'string' && entry.path) {
+                    if (!declared.includes(entry.path)) declared.push(entry.path);
+                }
+            }
+        }
+        if (declared.length === 0) continue;
+
+        declaredHooks += declared.length;
+        const mirrorPath = path.join(variantDir, declared[0]);
+        if (!fs.existsSync(mirrorPath)) {
+            Fail(`Variant audit-hook regression [${variant}]: variant.json declares audit hook '${declared[0]}' but templates/${variant}/${declared[0]} does not exist — the hook would silently no-op in scaffolded projects (§27)`);
+            continue;
+        }
+
+        // (b) §27 candidate simulation, in §27's exact order: the
+        // variant_scripts_dir probe first, then the declared path, then the
+        // conventional fallbacks. A candidate that outranks and shadows the
+        // declaration is the regression class this check exists for.
+        const candidates: string[] = [];
+        if (typeof sm?.variant_scripts_dir === 'string' && sm.variant_scripts_dir) {
+            candidates.push(path.join(sm.variant_scripts_dir, 'audit-variant.ts'));
+        }
+        candidates.push(declared[0], path.join('scripts', 'audit-variant.ts'), path.join('scripts', (manifest.name ?? variant), 'audit-variant.ts'));
+        const selected = candidates.find(c => fs.existsSync(path.join(variantDir, c)));
+        if (selected !== declared[0]) {
+            Fail(`Variant audit-hook regression [${variant}]: §27 candidate simulation selects '${selected}' instead of declared '${declared[0]}' — declared hooks must keep candidate priority`);
+            continue;
+        }
+
+        // (c) Load smoke — module graph resolves, zero side effects executed.
+        //     Output lands in the OS temp dir, never the repo (stray-artifact check).
+        try {
+            const outfile = path.join(os.tmpdir(), `audit-hook-smoke-${variant}-${process.pid}.js`);
+            execFileSync('bun', ['build', mirrorPath, '--target=bun', '--outfile', outfile], { stdio: 'pipe' });
+            try { fs.rmSync(outfile, { force: true }); } catch { /* best effort */ }
+            Pass(`Variant audit-hook regression [${variant}]: declared hook ${declared[0]} resolves, keeps §27 priority, and loads`);
+        } catch (e: any) {
+            Fail(`Variant audit-hook regression [${variant}]: declared hook ${declared[0]} does not load (bun build failed: ${String(e?.stderr ?? e?.message).slice(0, 200)})`);
+        }
+    }
+    if (declaredHooks === 0) {
+        Pass('Variant audit-hook regression: no variant.json declares an audit-variant hook (conventional fallback applies)');
+    }
+}
+checkVariantAuditHookRegression();
+
+// ── 29. AGENTS.md §6 skill-table + VERSION_MANIFEST registry coverage (T-20260910-016) ──
+// AGENTS.md §6 presents skill locations as `skills/<name>/` backtick paths and
+// points at docs/VERSION_MANIFEST.md as "the complete registry". Both claims
+// were unenforced: backtick paths rotted after renames/removals, and the
+// manifest's Skills table drifted from the skills/ directory it claims to
+// enumerate (the manifest summary-count drift is T-20260910-028's scope; this
+// check enforces set coverage, which is the §6 contract).
+function checkAgentsMdSkillTable(): void {
+    if (!fs.existsSync('AGENTS.md')) return;
+
+    // (a) Every `skills/<name>/` backtick path in AGENTS.md must resolve.
+    const agentsMd = readUTF8File('AGENTS.md');
+    const backtickRefs = new Set<string>();
+    for (const m of agentsMd.matchAll(/`skills\/([A-Za-z0-9_-]+)\/`/g)) {
+        backtickRefs.add(m[1]);
+    }
+    let brokenRefs = 0;
+    for (const name of [...backtickRefs].sort()) {
+        if (!fs.existsSync(path.join('skills', name, 'SKILL.md'))) {
+            Fail(`AGENTS.md references \`skills/${name}/\` but skills/${name}/SKILL.md does not exist — stale §6 skill-table path`);
+            brokenRefs++;
+        }
+    }
+    if (backtickRefs.size > 0 && brokenRefs === 0) {
+        Pass(`AGENTS.md skill-table: all ${backtickRefs.size} \`skills/<name>/\` reference(s) resolve`);
+    }
+
+    // (b) VERSION_MANIFEST.md Skills rows must cover exactly the skills/ directory.
+    //     L1 context has no docs/VERSION_MANIFEST.md — the claim is an L0 §6 contract.
+    const manifestPath = path.join('docs', 'VERSION_MANIFEST.md');
+    if (!fs.existsSync(manifestPath) || !fs.existsSync('skills')) return;
+    const manifest = readUTF8File(manifestPath);
+    const manifestWorkspaceSkills = new Set<string>();
+    for (const m of manifest.matchAll(/^\| `?([A-Za-z0-9_-]+)`? \|[^|]*\|[^|]*\| skills\/[A-Za-z0-9_-]+\/SKILL\.md/gm)) {
+        manifestWorkspaceSkills.add(m[1]);
+    }
+    const dirSkills = new Set<string>();
+    for (const entry of fs.readdirSync('skills')) {
+        if (fs.existsSync(path.join('skills', entry, 'SKILL.md'))) dirSkills.add(entry);
+    }
+    const unregistered = [...dirSkills].filter(s => !manifestWorkspaceSkills.has(s)).sort();
+    const stale = [...manifestWorkspaceSkills].filter(s => !dirSkills.has(s)).sort();
+    for (const s of unregistered) {
+        Fail(`VERSION_MANIFEST.md Skills registry (AGENTS.md §6 "complete registry") is missing skills/${s}/ — regenerate the manifest or fix the registry row`);
+    }
+    for (const s of stale) {
+        Fail(`VERSION_MANIFEST.md Skills registry lists skills/${s}/ which does not exist in skills/ — stale registry row`);
+    }
+    if (unregistered.length === 0 && stale.length === 0) {
+        Pass(`VERSION_MANIFEST.md Skills registry covers skills/ exactly (${dirSkills.size} skill(s))`);
+    }
+}
+checkAgentsMdSkillTable();
+
 
 // Project CLAUDE.md / GEMINI.md managed-block drift detection (WARN-only, local-only).
 // upgrade-project.ts syncs the COMMON-CLAUDE:START/END and COMMON-GEMINI:START/END managed

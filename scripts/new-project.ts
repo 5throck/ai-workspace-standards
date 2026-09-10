@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.11.1
+// @version 1.12.0
 // new-project.ts — Scaffold a new project under the workspace root
 // Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z] [--country <CODE>]
 //
@@ -885,15 +885,21 @@ for (const skill of LEGACY_L0_SKILLS) {
     if (existsSync(dp)) rmSync(dp, { recursive: true });
   }
 }
-const projectSkillsDir = join(projectDir, 'skills');
-if (existsSync(projectSkillsDir)) {
-  for (const skillName of readdirSync(projectSkillsDir)) {
-    const skillMd = join(projectSkillsDir, skillName, 'SKILL.md');
+// T-20260910-023: the sweep runs over all three skill locations, not just the
+// SSOT mirror — a workspace-only skill that leaked into the L1 platform dirs
+// (`.claude/skills/`, `.gemini/skills/`) would otherwise survive into the
+// scaffolded project and register with the platform harness.
+const projectSkillBases = ['skills', '.claude/skills', '.gemini/skills'];
+for (const base of projectSkillBases) {
+  const baseDir = join(projectDir, base);
+  if (!existsSync(baseDir)) continue;
+  for (const skillName of readdirSync(baseDir)) {
+    const skillMd = join(baseDir, skillName, 'SKILL.md');
     if (existsSync(skillMd)) {
       const content = readFileSync(skillMd, 'utf-8');
       if (/^l2_propagate:\s*false\b/m.test(content)) {
-        rmSync(join(projectSkillsDir, skillName), { recursive: true });
-        console.log(`  🗑️  Excluded L1-only skill: ${skillName}`);
+        rmSync(join(baseDir, skillName), { recursive: true });
+        console.log(`  🗑️  Excluded L1-only skill (${base}): ${skillName}`);
       }
     }
   }

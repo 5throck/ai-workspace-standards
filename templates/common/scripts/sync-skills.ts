@@ -1,5 +1,8 @@
 #!/usr/bin/env bun
-// @version 1.4.1
+// @version 1.5.0
+// v1.5.0 (2026-09-10, T-20260910-026): dirsEqual() now lstats instead of statting
+//   (symlinks compared by target string, never dereferenced) and carries a depth
+//   cap of 64 so a symlinked directory cycle cannot recurse infinitely.
 /**
  * sync-skills.ts
  * Distributes skills from the SSOT (skills/) to .claude/skills/, .gemini/skills/, and .agents/skills/.
@@ -22,7 +25,7 @@
  * `security-gate: true` skills (validate-templates.ts Check B-03) are excluded from
  * Phase 1 distribution entirely — they must remain platform-neutral (`skills/` only).
  *
- * @version 1.4.1
+ * @version 1.5.0
  */
 
 import * as fs from 'node:fs';
@@ -69,15 +72,38 @@ export interface SyncSkillsOptions {
 }
 
 /**
+ * Recursion guard for dirsEqual (T-20260910-026): a symlinked directory cycle
+ * (e.g. skills/a -> . -> skills/a) would otherwise recurse until the process
+ * exhausts the stack. Skill trees are shallow; 64 levels is far beyond any
+ * real layout and matches the cap used by the audit.ts tree walkers.
+ */
+const DIRS_EQUAL_MAX_DEPTH = 64;
+
+/**
  * Recursively compares two directories (or files) for identical content.
  * Returns false if either path is missing, if the entry sets differ, or if
  * any file's content differs. Used to skip no-op copies (M3 idempotency).
+ *
+ * Symlinks are compared as symlinks (lstat, never followed): two links are
+ * equal iff both sides link to the same target string. This keeps a cyclic
+ * or dangling link from being dereferenced into infinite recursion or a
+ * spurious content mismatch.
  */
-export function dirsEqual(a: string, b: string): boolean {
+export function dirsEqual(a: string, b: string, depth: number = 0): boolean {
+    if (depth > DIRS_EQUAL_MAX_DEPTH) return false;
     if (!fs.existsSync(a) || !fs.existsSync(b)) return false;
 
-    const statA = fs.statSync(a);
-    const statB = fs.statSync(b);
+    const statA = fs.lstatSync(a);
+    const statB = fs.lstatSync(b);
+
+    // Symlink vs symlink: equal iff identical target strings; symlink vs
+    // anything else: not equal (copyDir will replace the target with real
+    // content, so treating it as "already equal" would leak the link).
+    if (statA.isSymbolicLink() || statB.isSymbolicLink()) {
+        return statA.isSymbolicLink() && statB.isSymbolicLink()
+            && fs.readlinkSync(a) === fs.readlinkSync(b);
+    }
+
     if (statA.isDirectory() !== statB.isDirectory()) return false;
 
     if (statA.isDirectory()) {
@@ -86,7 +112,7 @@ export function dirsEqual(a: string, b: string): boolean {
         if (entriesA.length !== entriesB.length) return false;
         for (let i = 0; i < entriesA.length; i++) {
             if (entriesA[i] !== entriesB[i]) return false;
-            if (!dirsEqual(path.join(a, entriesA[i]), path.join(b, entriesB[i]))) return false;
+            if (!dirsEqual(path.join(a, entriesA[i]), path.join(b, entriesB[i]), depth + 1)) return false;
         }
         return true;
     }
