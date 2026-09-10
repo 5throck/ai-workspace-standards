@@ -709,6 +709,15 @@
       "source": "manual",
       "created": "2026-09-10",
       "last_updated": "2026-09-10"
+    },
+    {
+      "id": "2026-09-11-nightly-ticket-batch-automation-design",
+      "title": "nightly ticket batch automation design",
+      "file": "docs/designs/2026-09-11-nightly-ticket-batch-automation-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-10",
+      "last_updated": "2026-09-10"
     }
   ]
 }
