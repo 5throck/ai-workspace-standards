@@ -18,7 +18,7 @@ last_reviewed: 2026-08-24
 lifecycle:
   phase: production
   created: 2026-05-29T00:00:00.000Z
-  last_updated: 2026-08-24T00:00:00.000Z
+  last_updated: 2026-09-07T00:00:00.000Z
   governance: docs/lifecycle/agents/pm.md
 ---
 

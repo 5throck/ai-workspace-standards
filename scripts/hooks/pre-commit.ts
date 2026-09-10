@@ -2,7 +2,7 @@
 /**
  * pre-commit.ts — TS-based pre-commit hook.
  * Replaces the legacy bash/ps1 hooks.
- * @version 1.5.10
+ * @version 1.5.11
  */
 
 import { $ } from "bun";
@@ -69,8 +69,8 @@ async function main() {
     await $`git add CHANGELOG.md`;
   }
 
-  // 2. Block .env files
-  const envStaged = staged.filter(f => /^\.env$|^\.env\.[^s]|(\/|\\)\.env$|(\/|\\)\.env\.[^s]/.test(f));
+  // 2. Block .env files (".env.example" / ".env.sample" templates are allowed)
+  const envStaged = staged.filter(f => /^\.env$|^\.env\.(?!example$|sample$)[^s]|(\/|\\)\.env$|(\/|\\)\.env\.(?!example$|sample$)[^s]/.test(f));
   if (envStaged.length > 0) {
     console.error("\x1b[31m[FAIL]\x1b[0m Attempt to commit .env file detected.");
     process.exit(1);

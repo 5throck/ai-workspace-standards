@@ -12,6 +12,8 @@ status: "Accepted"
 - **Deciders**: architect, docs-writer, lifecycle-manager
 - **Related**: ADR-0029 (L0-L2 Workspace Design), ADR-0030 (Agent Lifecycle Management)
 
+> **Status update (2026-09-10)**: the `deploy-to-l1.ts` implementation described below was never built (tracked as ISSUE-004 in `docs/templates/known-issues.json`). L0→L1 governance deployment is handled in practice by `propagate-to-templates.ts --governance-l1`.
+
 ## Context
 
 The workspace uses an L0-L2 deployment model where:

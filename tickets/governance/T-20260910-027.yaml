@@ -1,0 +1,17 @@
+schemaVersion: 1
+id: T-20260910-027
+kind: manual
+title: >-
+  document the language policy actual enforcement channels (fenced-content
+  exemption for variant templates, _ko-suffix files) and standardize one ko
+  declaration key
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-10T14:01:23.320Z'
+history:
+  - at: '2026-09-10T14:01:23.320Z'
+    from: null
+    to: backlog
+result: null
+error: null

@@ -1,0 +1,17 @@
+schemaVersion: 1
+id: T-20260910-023
+kind: manual
+title: >-
+  extend new-project.ts l2_propagate:false sweep to .claude and .gemini platform
+  skills so workspace-only skills stop leaking into L3 projects; update
+  07-new-project 7.3
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-09-10T14:01:23.266Z'
+history:
+  - at: '2026-09-10T14:01:23.266Z'
+    from: null
+    to: backlog
+result: null
+error: null

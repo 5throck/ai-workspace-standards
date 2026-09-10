@@ -1,0 +1,17 @@
+schemaVersion: 1
+id: T-20260910-019
+kind: manual
+title: >-
+  validator-hardening: add reverse exists-to-listed coverage check for
+  common-contract.json command and platform-skill inventories and refresh the
+  stale lists
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-10T14:01:23.215Z'
+history:
+  - at: '2026-09-10T14:01:23.215Z'
+    from: null
+    to: backlog
+result: null
+error: null

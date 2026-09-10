@@ -140,14 +140,14 @@ All specialist agent dispatch MUST go through the PM orchestrator. The PM Gatewa
 
 #### Enforcement Model
 
-The PM Gateway operates at **4 enforcement levels** (see [§5 Multi-Agent Architecture](docs/constitution/05-multi-agent-architecture.md) for full model):
+The PM Gateway operates at **4 enforcement levels**:
 
 | Level | Trigger | PM Action | Specialist Involved |
 |-------|---------|-----------|-------------------|
-| **Level 1** | Single-step, single-file tasks | PM executes directly | None |
+| **Level 1** | Single-step, single-file tasks | Minimal dispatch to the matching specialist (`docs-writer` for docs, `automation-engineer` for scripts) — PM never edits files directly | Yes (matching specialist) |
 | **Level 2** | Multi-step (2+ files) or multi-agent tasks | PM displays execution plan, then dispatches | Yes |
 | **Level 3** | Direct user invokes specialist | PM refuses, redirects through PM | Blocked |
-| **Level 4** | Emergency fix (production down) | PM executes directly, logs post-incident | Optional |
+| **Level 4** | Emergency fix (production down) | PM dispatches the responsible specialist immediately; incident note logged to `memory/YYYY-MM-DD.md` post-incident | Yes (responsible specialist) |
 
 #### Mandatory Execution Plan Display
 
@@ -170,6 +170,8 @@ The following agents require PM dispatch (no direct invocation):
 - **docs-writer** (Phase 4) - Documentation standardization and updates
 - **scaffolding-expert** (Phase 0) - Project scaffolding and template instantiation
 - **security-expert** (Phase 6) - Security audits and vulnerability assessments
+- **lifecycle-manager** (Phase 5, workspace root only) - Lifecycle state monitoring and governance record sync
+- **auditor** (Phase 6, workspace root only) - Quality verification and cross-domain consistency checks
 
 #### Permission Denial Protocol
 
@@ -192,11 +194,14 @@ Agents have three states: **active** (production use), **deprecated** (being pha
 
 ### 5.7 Additive Template Architecture
 
-L2 variant `pm.md` files must use the strict additive format utilizing `<!-- VARIANT-SECTION: [id] -->` markers.
+Variant `pm.md` files extend the L1 common PM via the ADR-0039 `extends` frontmatter chain — they never restate the common body.
 
-- `templates/common/agents/pm.md` acts as the single source of truth containing the base skeleton with injection anchors.
-- Variant `pm.md` files must ONLY contain the YAML frontmatter and the additive sections (`governance-workflow`, `agent-roster`, `dispatch-protocol`).
-- Variant `pm.md` files must NEVER duplicate the core PM text or exceed 200 lines.
+- `templates/common/agents/pm.md` acts as the single source of truth containing the base PM body; variant files supply only YAML frontmatter.
+- Two accepted variant forms:
+  - **Frontmatter-only extends stub** — a minimal YAML frontmatter with `extends: ../../common/agents/pm.md` and a `variant:` field as the sole differentiator (ADR-0047: *Variant PM Extends Redundant Body Cleanup*).
+  - **Stub plus `variant_overrides:` frontmatter keys** — the same stub with a `variant_overrides:` block holding `governance_workflow` / `agent_roster` / `dispatch_protocol` deltas as the only additions (ADR-0048: *Variant PM Architecture — AGENTS.md as Workflow SSOT*).
+- Variant `pm.md` files must NEVER duplicate the core PM body; domain workflow orchestration belongs in the variant's `AGENTS.md`, not in `pm.md` (ADR-0048).
+- `bun scripts/validate-pm-extends.ts` verifies extends-chain integrity after any change.
 
 ---
 
@@ -227,16 +232,6 @@ Full details: [`docs/constitution/06.5-script-lifecycle.md`](docs/constitution/0
 Scripts have three statuses: **active** (version bump required on change), **deprecated** (90-day minimum notice with `removal-date`), **experimental** (not propagated). Dependency tracking: scripts that call other scripts must declare `depends_on` in `SCRIPTS.md` Registry; `verify-scripts.ts` checks for circular and missing dependencies. Security advisories trigger immediate hard blocks.
 
 ---
-
-### 6.7 Procedure Lifecycle Management
-Full details: [`docs/constitution/06.7-procedure-lifecycle.md`](docs/constitution/06.7-procedure-lifecycle.md)
-
-Procedures (`schema.yaml` per workflow) are the canonical source for
-workflow-shaped agent/skill/output orchestration across variants and the L0
-lifecycle. They validate via `scripts/validate-procedures.ts` (L1–L8) and
-derive procedure/output_type graph nodes; coverage gaps are human judgment
-targets tracked as governance tickets. See
-`docs/constitution/06.7-procedure-lifecycle.md`.
 
 ### 6.6 VERSION_MANIFEST System
 Full details: [`docs/adr/0012-version-manifest-schema.md`](docs/adr/0012-version-manifest-schema.md)
@@ -368,12 +363,22 @@ The VERSION_MANIFEST schema is governed by ADR process (see [ADR 0012](docs/adr/
 
 See [ADR 0012: VERSION_MANIFEST Schema Design](docs/adr/0012-version-manifest-schema.md) for complete schema definition, generation algorithm, and open questions.
 
+### 6.7 Procedure Lifecycle Management
+Full details: [`docs/constitution/06.7-procedure-lifecycle.md`](docs/constitution/06.7-procedure-lifecycle.md)
+
+Procedures (`schema.yaml` per workflow) are the canonical source for
+workflow-shaped agent/skill/output orchestration across variants and the L0
+lifecycle. They validate via `scripts/validate-procedures.ts` (L1–L8) and
+derive procedure/output_type graph nodes; coverage gaps are human judgment
+targets tracked as governance tickets. See
+`docs/constitution/06.7-procedure-lifecycle.md`.
+
 ---
 
 ### 7. New Project Initialization
 Full details: [`docs/constitution/07-new-project.md`](docs/constitution/07-new-project.md)
 
-Every new project starts with `/new-project` (Claude Code) or `bun scripts/new-project.ts` (cross-platform CLI). The script copies `templates/` into the new directory, substitutes `[Project Name]` placeholders, removes `_examples/`, and initializes git with hooks active. Generated files include `docs/context.md` (fill in 10 sections), `AGENTS.md` (ready), 5 agent files (`[Project Name]` already substituted), `CLAUDE.md`/`GEMINI.md` (add project-specific settings if needed), `scripts/` (audit, dev-sync, sync-md), `.githooks/`, `CHANGELOG.md`, `README.md`, `.env.sample`, `.gitignore`, and `memory/MEMORY.md`.
+Every new project starts with `/new-project` (Claude Code) or `bun scripts/new-project.ts` (cross-platform CLI). The script copies `templates/` into the new directory, substitutes `[Project Name]` placeholders, removes `_examples/`, and initializes git with hooks active. Generated files include `docs/context.md` (fill in 10 sections), `AGENTS.md` (ready), agent files (`pm.md`, `i18n-specialist.md`, plus the selected variant's domain agents — `[Project Name]` already substituted), `CLAUDE.md`/`GEMINI.md` (add project-specific settings if needed), `scripts/` (audit, dev-sync, sync-md), `.githooks/`, `CHANGELOG.md`, `README.md`, `.env.sample`, `.gitignore`, and `memory/MEMORY.md`.
 
 > **Layer × Stage model**: workspace lifecycle spans four layers (L0 workspace root / L1 common templates / L2 variant templates / L3 generated projects) and three phases (Phase A Scaffold / Phase B Refinement / Phase C Promotion). See [§7.5 Layer × Stage Reference Matrix](docs/constitution/07-new-project.md) for the full cross-reference.
 
@@ -430,7 +435,7 @@ This is intentional — see ADR-0039 (L0→L1→L2 Hierarchy) and ADR-0040
   Override). This is a separate, intentional workflow distinct from L0→L1
   propagation.
 
-**Current L1 agent**: Only `pm.md` (uses `extends: ../../../agents/pm.md`).
+**Current L1 agents**: `pm.md` (uses `extends: ../../../agents/pm.md`) and `i18n-specialist.md`. `_COMMON.md` is directory documentation for `templates/common/agents/` — not a dispatched agent — and is excluded from generated projects.
 
 #### CONSTITUTION.md Non-Propagation
 
@@ -689,4 +694,4 @@ Agent, skill, and command frontmatter structures are validated against JSON Sche
 
 ---
 
-*Last Updated: 2026-09-09*
+*Last Updated: 2026-09-10*

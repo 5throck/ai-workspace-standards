@@ -11,6 +11,7 @@
 | Date | From | To | Reason | Approver |
 |------|------|-----|---------|----------|
 | 2026-05-29 | - | production | Initial skill established for documentation link validation | lifecycle-manager |
+| 2026-09-09 | production | deprecated | Documentation link-check ownership moved into `project-review` baseline-only mode; removal 2026-12-09 | pm |
 
 ## Acceptance Criteria
 
@@ -34,7 +35,8 @@
 
 ## Metadata
 
-- **Current Phase**: production
+- **Current Phase**: deprecated
 - **Owner**: docs-writer
-- **Last Updated**: 2026-05-29
+- **Last Updated**: 2026-09-10
 - **Last Reviewer**: lifecycle-manager
+- **Removal Date**: 2026-12-09

@@ -1,6 +1,6 @@
 # SKILLS.md — Skill Lifecycle Registry
 
-> Single Source of Truth for all project skills in `skills/`.  
+> Human-readable registry view of the skills in `skills/`. The SSOT for skill versions, status, and lifecycle metadata is `docs/VERSION_MANIFEST.md`.  
 > Propagation control is via SKILL.md frontmatter (`l2_propagate`/`scope`) — not this file.  
 > Platform skills (`.claude/skills/`, `.gemini/skills/`) are tracked by `verify-platform-lifecycle.ts` — not here.  
 > Machine parsing: `layer-filter.ts` reads each skill's `SKILL.md` frontmatter directly.  

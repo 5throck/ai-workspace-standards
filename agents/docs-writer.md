@@ -18,7 +18,7 @@ examples:
 lifecycle:
   phase: production
   created: 2026-05-29
-  last_updated: 2026-05-31
+  last_updated: 2026-09-10
   governance: docs/lifecycle/agents/docs-writer.md
 ---
 

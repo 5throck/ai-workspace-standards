@@ -5,7 +5,7 @@
  * Originally built for the L3-to-variant pipeline (Risk #4), now expanded
  * for general-purpose script error handling.
  *
- * @version 1.3.0
+ * @version 1.3.1
  * @Risk #4: Error Handling (P1 - High)
  */
 
@@ -204,7 +204,7 @@ export async function executeRecoveryAction(
 ): Promise<boolean> {
   switch (action.action) {
     case 'abort':
-      console.error(`??Pipeline aborted: ${action.reason}`);
+      console.error(`❌ Pipeline aborted: ${action.reason}`);
       console.error('\nRecovery steps:');
       for (const step of action.steps) {
         console.error(`  ${step}`);
@@ -225,7 +225,7 @@ export async function executeRecoveryAction(
       return true;
 
     case 'rollback':
-      console.error(`??Rollback required: ${action.reason}`);
+      console.error(`❌ Rollback required: ${action.reason}`);
       console.error('\nRollback steps:');
       for (const step of action.steps) {
         console.error(`  ${step}`);
@@ -233,7 +233,7 @@ export async function executeRecoveryAction(
       return false;
 
     default:
-      console.error(`??Unknown recovery action: ${action.action}`);
+      console.error(`❌ Unknown recovery action: ${action.action}`);
       return false;
   }
 }
@@ -306,7 +306,7 @@ export function logErrors(errors: PipelineError[]): void {
   };
 
   if (grouped.fatal.length > 0) {
-    console.error(`\n??Fatal Errors (${grouped.fatal.length}):`);
+    console.error(`\n❌ Fatal Errors (${grouped.fatal.length}):`);
     for (const error of grouped.fatal) {
       logError(error);
     }

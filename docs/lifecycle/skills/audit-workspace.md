@@ -9,6 +9,7 @@
 | Date | From | To | Reason | Approver |
 |------|------|-----|---------|----------|
 | 2026-05-29 | - | production | Initial skill established for workspace auditing | lifecycle-manager |
+| 2026-09-10 | production | deprecated | Superseded by standing `audit.ts` checks and the weekly health check (`project-review`); removal 2026-10-10 (PR #855) | pm |
 
 ## Acceptance Criteria
 
@@ -32,7 +33,8 @@
 
 ## Metadata
 
-- **Current Phase**: production
+- **Current Phase**: deprecated
 - **Owner**: auditor
-- **Last Updated**: 2026-05-29
+- **Last Updated**: 2026-09-10
 - **Last Reviewer**: lifecycle-manager
+- **Removal Date**: 2026-10-10

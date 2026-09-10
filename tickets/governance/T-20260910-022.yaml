@@ -1,0 +1,17 @@
+schemaVersion: 1
+id: T-20260910-022
+kind: manual
+title: >-
+  reconcile propagation-map.json marker-inject target_variants with actual
+  zones: add missing variants to governance-agents and variant-context and
+  document co-safety intentional divergence
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-10T14:01:23.253Z'
+history:
+  - at: '2026-09-10T14:01:23.253Z'
+    from: null
+    to: backlog
+result: null
+error: null

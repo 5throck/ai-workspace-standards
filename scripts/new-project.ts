@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.11.0
+// @version 1.11.1
 // new-project.ts — Scaffold a new project under the workspace root
 // Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z] [--country <CODE>]
 //
@@ -355,10 +355,17 @@ if (existsSync(templateValidationHelper)) {
 }
 
 // ── Helper: copy directory recursively ────────────────────────────────────────
+// Entries that must never be copied into a scaffolded project (mirrors
+// create-l3-scaffold.ts's COMMON_OVERLAY_EXCLUDE): dependency trees
+// (templates/common/node_modules alone is ~35MB — projects run their own
+// `bun install`) and Gateguard's local state file.
+const COPY_SKIP_ENTRIES = new Set(['node_modules', '.gateguard-state']);
+
 function copyDir(src: string, dest: string): void {
   mkdirSync(dest, { recursive: true });
   for (const entry of readdirSync(src)) {
     if (entry === '.DS_Store') continue; // OS cruft — never copy into a scaffolded project
+    if (COPY_SKIP_ENTRIES.has(entry)) continue;
     const srcPath = join(src, entry);
     const destPath = join(dest, entry);
     if (statSync(srcPath).isDirectory()) {
@@ -559,8 +566,11 @@ if (existsSync(projPmMd)) {
       // Merge: stub frontmatter wins, missing L1 fields (tier/model/color/description/examples)
       // are filled in; `extends:` is dropped — the body is inlined, so the pointer would
       // dangle in the standalone project repo (found by the 2026-09-08 review, Slot A F2).
-      const stubFm: Record<string, unknown> = yaml.load(pmFmMatch[1], { schema: yaml.DEFAULT_SCHEMA }) || {};
-      const l1Fm: Record<string, unknown> = l1FmMatch ? (yaml.load(l1FmMatch[1], { schema: yaml.DEFAULT_SCHEMA }) || {}) : {};
+    // Note: no `schema` option — js-yaml v5 dropped its DEFAULT_SCHEMA export, and
+    // omitting `schema` already selects the default schema (the previous
+    // `{ schema: yaml.DEFAULT_SCHEMA }` was passing `undefined` at runtime).
+    const stubFm: Record<string, unknown> = yaml.load(pmFmMatch[1]) || {};
+    const l1Fm: Record<string, unknown> = l1FmMatch ? (yaml.load(l1FmMatch[1]) || {}) : {};
       delete (stubFm as { extends?: unknown }).extends;
       for (const [k, v] of Object.entries(l1Fm)) {
         if (stubFm[k] === undefined && k !== 'extends') stubFm[k] = v;
@@ -664,7 +674,7 @@ if (existsSync(pmMd)) {
   content = content.replace(/^# @resolved-from:.*\n/m, '');
   const match = content.match(/^---\n([\s\S]*?)\n---\n?/);
   if (match) {
-    const fm: Record<string, unknown> = yaml.load(match[1], { schema: yaml.DEFAULT_SCHEMA }) || {};
+    const fm: Record<string, unknown> = yaml.load(match[1]) || {};
     // lifecycle is REGENERATED, not deleted. The resolved pm.md inherits L0's block verbatim —
     // including created/last_updated dates describing the workspace's own history, which are
     // meaningless in a freshly scaffolded project. But deleting it outright left the project

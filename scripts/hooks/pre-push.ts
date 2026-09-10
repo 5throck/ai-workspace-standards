@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * pre-push.ts — TS-based pre-push hook.
- * @version 1.2.9
+ * @version 1.2.10
  */
 
 import { $ } from "bun";
@@ -33,6 +33,27 @@ async function readPushRefUpdates(): Promise<PushRefUpdate[]> {
   } catch {
     return [];
   }
+}
+
+// Prepare the computed rev-list arguments for the gitleaks shell template.
+// Every token must be a git object name by construction — a 40-hex SHA, a
+// `^sha` exclusion, a `sha..sha` range, or HEAD — so allowlist-validate each
+// one and return them joined for the single `--log-opts` value. Throws on any
+// foreign token; the caller's catch block then blocks the push.
+//
+// Bun Shell note: interpolations reach the command verbatim as a single argv
+// element (no word-splitting, no re-parsing), so — unlike POSIX shells —
+// escaping here means validating the value, not adding quote characters
+// (literal quotes would become part of the flag value and corrupt it). This
+// wrapper also satisfies the audit's bun-shell-compound-interpolation
+// allowlist (shellEscape*/shellQuote*/escapeShellArg*).
+function shellEscapeRevListArgs(args: string[]): string {
+  for (const arg of args) {
+    if (!/^(?:[0-9a-f]{40}(?:\.\.[0-9a-f]{40})?|\^[0-9a-f]{40}|HEAD)$/.test(arg)) {
+      throw new Error(`unexpected rev-list argument: ${arg}`);
+    }
+  }
+  return args.join(" ");
 }
 
 async function main() {
@@ -79,8 +100,11 @@ async function main() {
         // Deduplicate and run gitleaks against the commit list
         const commitShas = (await $`git rev-list ${revListArgs}`.text()).trim();
         if (commitShas) {
-          const uniqueShas = [...new Set(commitShas.split('\n'))].join(' ');
-          await $`gitleaks detect --redact --log-opts -- ${uniqueShas}`;
+          // gitleaks forwards --log-opts verbatim to `git log`, so pass the exact
+          // rev-list arguments (ranges + `^sha` exclusions) as ONE flag value.
+          // The previous form (`--log-opts -- ${uniqueShas}`) made the literal `--`
+          // the flag value, so the computed SHAs never reached gitleaks.
+          await $`gitleaks detect --redact --log-opts=${shellEscapeRevListArgs(revListArgs)}`;
         }
       }
       // Tag-only or deletion pushes: nothing to scan, pass through

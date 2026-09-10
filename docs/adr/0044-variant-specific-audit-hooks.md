@@ -19,7 +19,7 @@ Allowing variant projects to directly modify their local copies of `dev-sync.ts`
 We need a design that:
 1. Standardizes core scripts across all templates and variants.
 2. Allows variant projects to execute custom validation checks during local audits.
-3. Automatically detects and prevents unauthorized local modifications to core scripts during template reconciliation (`l2-to-variant-pipeline.ts`).
+3. Automatically detects and prevents unauthorized local modifications to core scripts during template reconciliation (`l3-to-variant-pipeline.ts`).
 
 ---
 
@@ -46,7 +46,7 @@ This keeps the core pipeline clean and locked while allowing complete extensibil
 
 ### 2. Core Script Integrity Check during Reconciliation
 
-To prevent developers from directly editing core scripts in L2 projects, the template reconciliation process (`l2-to-variant-pipeline.ts` via `scripts/helpers/reconcile-with-l0-l1.ts`) will perform an integrity hash check on core synchronization scripts (specifically `scripts/dev-sync.ts` and `scripts/audit.ts`).
+To prevent developers from directly editing core scripts in L2 projects, the template reconciliation process (`l3-to-variant-pipeline.ts` via `scripts/helpers/reconcile-with-l0-l1.ts`) will perform an integrity hash check on core synchronization scripts (specifically `scripts/dev-sync.ts` and `scripts/audit.ts`).
 
 If the reconciliation process detects that `scripts/dev-sync.ts` or `scripts/audit.ts` has been classified as `modified` in the L2 project compared to the L1/L0 base templates, it will throw a fatal reconciliation error and halt pipeline compilation. Developers will be directed to migrate their custom checks to `scripts/audit-variant.ts` instead.
 

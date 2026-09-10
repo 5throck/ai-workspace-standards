@@ -18,7 +18,7 @@ last_reviewed: 2026-07-31
 lifecycle:
   phase: production
   created: 2026-05-29
-  last_updated: 2026-06-13
+  last_updated: 2026-08-15
   governance: docs/lifecycle/agents/scaffolding-expert.md
 ---
 

@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-content_hash: 3db57d2587631ae6c1a1a1951282f0bbed50936f572b541348003df905909dbc
+content_hash: c1c0ed9e031b698873c90cdc7c81a46f9ec193c886e9e194cb6d745f22e05d57
 ---
 
 **Languages**: [English](README.md) · [한국어](README_ko.md) · [Español](README_es.md) · [日本語](README_ja.md)
@@ -227,10 +227,10 @@ Every AI session begins by running this checklist (defined in `CONSTITUTION.md`)
 
 0. `git config core.hooksPath .githooks`
 1. Read `CONSTITUTION.md` (this workspace standard)
-2. Read the project's `docs/context.md`
+2. Read the project's `docs/context.md` (Skip at workspace root — `CONSTITUTION.md` covers it.)
 3. Read `AGENTS.md` (canonical agent roster)
 4. Check `memory/MEMORY.md` for recent changes
-5. Load skills from `docs/context.md ## Session Start Skills`
+5. Load skills from `docs/context.md ## Session Start Skills` (Skip at workspace root — `CONSTITUTION.md` covers it.)
 
 ---
 
@@ -357,4 +357,4 @@ AGPL-3.0 - see [LICENSE](LICENSE)
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-09-06*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-09-10*
