@@ -58,3 +58,15 @@
 - [ ] Project design-lint (if implemented) passes with 0 violations, or violations are
       approved as documented exceptions.
 - [ ] Baseline evidence attached (lint output / review notes).
+
+## G. UI Preview Verification (ADR-0070 — mandatory for web/app UI)
+
+- [ ] The UI was verified in a rendered preview (dev server, static build preview, or
+      headless capture — tooling is project-chosen) before the work was called done.
+- [ ] Rendered check covers ≥ 2 breakpoints — at minimum the project's declared mobile
+      and desktop viewport baselines: <list them>.
+- [ ] ≥ 1 key interaction exercised in the preview (the screen's primary state change,
+      navigation, or form flow): <name it>.
+- [ ] Evidence attached to this document or the PR (screenshots or automated
+      visual-smoke output): <link>.
+- [ ] Exemption (non-UI deliverable only): stated explicitly — <reason>.
