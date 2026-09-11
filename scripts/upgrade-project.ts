@@ -1,5 +1,11 @@
 #!/usr/bin/env bun
-// @version 1.22.0
+// @version 1.22.1
+// v1.22.1: Data-loss fix in --prune-removed — the skills prune category consulted only
+//           templates/common/skills, so variant-owned skills delivered by the VARIANT SKILLS
+//           pass (e.g. co-abap's sap-*) were marked prunable for projects without a
+//           variant.json manifest. The category now also accepts the variant template's
+//           skills/ directory as a template source (identity-separated projects unaffected —
+//           the missing dir is filtered out).
 // v1.22.0: Folded VARIANT_DOCS_SYNC into the TEMPLATE TREE SYNC pass (Phase C of
 //           2026-09-11-upgrade-policy-coverage-design.md) — the 5 hardcoded files are claimed
 //           by the default SYNC policy with identical inline-version/hash/conflict semantics,
@@ -1871,7 +1877,11 @@ if (pruneRemoved) {
   const pruneCategories = [
     { projDir: join(projectDir, 'scripts'), tplDirs: [join(commonDir, 'scripts')], ext: '.ts', label: 'scripts/' },
     { projDir: join(projectDir, 'agents'), tplDirs: [join(templatesDir, 'agents'), join(commonDir, 'agents')], ext: '.md', label: 'agents/', skipFiles: ['README.md', 'README_ko.md', '_COMMON.md'] },
-    { projDir: join(projectDir, 'skills'), tplDirs: [join(commonDir, 'skills')], ext: '/SKILL.md', label: 'skills/', isSkill: true },
+    // v1.22.1: the skills category MUST consult the variant template's skills/ too —
+    // variant-owned skills (e.g. co-abap's sap-*) are delivered by the VARIANT SKILLS
+    // pass and are template-owned; consulting only templates/common/skills marked them
+    // prunable for projects without variant.json (fleet dry-run catch, 2026-09-12).
+    { projDir: join(projectDir, 'skills'), tplDirs: [join(templatesDir, 'skills'), join(commonDir, 'skills')].filter(existsSync), ext: '/SKILL.md', label: 'skills/', isSkill: true },
   ];
   for (const cat of pruneCategories) {
     if (!existsSync(cat.projDir)) continue;
