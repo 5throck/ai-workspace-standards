@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.9.0
+// @version 1.10.0
 /**
  * Markdown/YAML Language Validation Script with I18N Support
  *
@@ -10,7 +10,9 @@
  * templates/, and SECURITY.md. Both `.md` and `.yaml`/`.yml` files under these
  * paths are scanned; the `lang: ko` + `lang_reason` exception is declared in
  * `---` frontmatter for Markdown, or as a top-level `lang:`/`lang_reason:` key
- * for plain YAML files that have no frontmatter fence.
+ * for plain YAML files that have no frontmatter fence. `language: ko` is
+ * accepted as a legacy alias for `lang: ko` (a WARN recommends migrating to
+ * `lang:` so the declaration vocabulary converges) — T-20260910-027.
  *
  * Excludes: memory/ logs, docs/adr/, locale-specific files
  * for all supported I18N languages, and node_modules/.git directories.
@@ -110,14 +112,21 @@ function isProtectedPath(filePath: string): boolean {
  * Markdown files). For plain YAML files with no fence (e.g. `schema.yaml`
  * starting directly with `schema_version:`), fall back to a top-level
  * (column-0) `lang:`/`lang_reason:` key when isPlainYaml is true.
+ *
+ * `language:` is accepted as a legacy alias for `lang:` (T-20260910-027):
+ * treated identically for the exception check, with `langKey` reporting which
+ * key was used so the caller can WARN in favor of the canonical `lang:`.
  */
-function parseLangDeclaration(content: string, isPlainYaml: boolean): { lang?: string; lang_reason?: string } {
+function parseLangDeclaration(content: string, isPlainYaml: boolean): { lang?: string; lang_reason?: string; langKey?: "lang" | "language" } {
   const fenced = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   const source = fenced ? fenced[1] : (isPlainYaml ? content : null);
   if (source === null) return {};
+  const lang = source.match(/^lang:\s*(\S+)/m)?.[1];
+  const languageAlias = lang ? undefined : source.match(/^language:\s*(\S+)/m)?.[1];
   return {
-    lang: source.match(/^lang:\s*(\S+)/m)?.[1],
+    lang: lang ?? languageAlias,
     lang_reason: source.match(/^lang_reason:\s*(\S+)/m)?.[1],
+    langKey: lang ? "lang" : (languageAlias ? "language" : undefined),
   };
 }
 
@@ -229,8 +238,13 @@ function analyzeFile(filePath: string): Violation | null {
     }
 
     // Stage 3: Frontmatter/top-level lang declaration
-    const { lang, lang_reason } = parseLangDeclaration(content, /\.ya?ml$/.test(filePath));
+    const { lang, lang_reason, langKey } = parseLangDeclaration(content, /\.ya?ml$/.test(filePath));
     if (lang === 'ko') {
+      // Legacy `language: ko` alias (T-20260910-027): accepted, but nudge
+      // toward the canonical `lang:` key so the vocabulary converges.
+      if (langKey === 'language') {
+        console.log(`   ⚠️  [WARN] Legacy declaration: ${filePath} uses 'language: ko' — migrate to 'lang: ko' (the policy key)`);
+      }
       if (lang_reason && (ALLOWED_LANG_REASONS as readonly string[]).includes(lang_reason)) {
         console.log(`   ℹ️  [INFO] Korean exception granted: ${filePath} (lang_reason: ${lang_reason})`);
         return null;
@@ -382,7 +396,7 @@ async function validateMarkdownLanguage(): Promise<void> {
       console.log(`   📄 ${v.file}`);
       console.log(`      Reason: ${v.reason}\n`);
     });
-    console.log("Policy: Official documents must be in English. Korean exception requires 'lang: ko' + 'lang_reason: legal|source-material|proper-noun' in frontmatter (Markdown) or as a top-level key (plain YAML).");
+    console.log("Policy: Official documents must be in English. Korean exception requires 'lang: ko' + 'lang_reason: legal|source-material|proper-noun' in frontmatter (Markdown) or as a top-level key (plain YAML). Legacy 'language: ko' declarations are accepted with a migration warning — prefer 'lang: ko'.");
     console.log("Exception NOT available for: CLAUDE.md, GEMINI.md, CONSTITUTION.md, AGENTS.md, *.context.md");
     console.log("See: CONSTITUTION.md — Language Policy Exception — Korean Legal/Regulatory Content\n");
     process.exit(1);

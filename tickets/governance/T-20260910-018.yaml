@@ -7,7 +7,7 @@ title: >-
   co-abap/co-hr/co-price/co-safety agents zones and co-price/co-safety context
   zones)
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-09-10T14:01:23.201Z'
 history:
@@ -23,5 +23,8 @@ history:
   - at: '2026-09-10T20:22:39.972Z'
     from: running
     to: review
+  - at: '2026-09-10T23:34:30.116Z'
+    from: review
+    to: done
 result: null
 error: null

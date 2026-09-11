@@ -67,11 +67,17 @@ docs/lifecycle/
 │   ├── variant-feature.md
 │   └── zod-contract-gate.md
 └── templates/
+    ├── co-abap.md
     ├── co-consult.md
     ├── co-deck.md
     ├── co-design.md
     ├── co-develop.md
     ├── co-export.md
+    ├── co-game.md
+    ├── co-hr.md
+    ├── co-news.md
+    ├── co-price.md
+    ├── co-safety.md
     ├── co-security.md
     ├── co-work.md
     └── common.md

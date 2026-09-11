@@ -77,6 +77,19 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Guard tracked .env
+        # gitleaks' git-mode scans honor the .gitleaks.toml path allowlist,
+        # which excludes \.env$ — a committed .env would be invisible to
+        # secret scanning (T-20260910-015). Fail if any tracked file is a
+        # bare .env; .env.sample / .env.example templates are allowed.
+        shell: bash
+        run: |
+          if git ls-files -- '*.env' '**/.env' | grep -E '(^|/)\.env$'; then
+            echo "ERROR: tracked .env file(s) found above. Untrack: git rm --cached <file>"
+            exit 1
+          fi
+          echo "No tracked .env files."
+
       - name: Validate templates
         run: bun run validate-templates
 
@@ -84,7 +97,16 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: bun scripts/audit.ts
 
+      - name: TypeScript typecheck (regression gate vs baseline)
+        # T-20260910-012 (infrastructure only): ~2137 pre-existing errors are
+        # absorbed by scripts/helpers/typecheck-baseline.json; this step fails
+        # only on regression. Not yet in the dev-sync battery (post-triage).
+        if: matrix.os == 'ubuntu-latest'
+        run: bun scripts/typecheck.ts
+
       - name: Run integration tests
+        # Full-suite gate lives here since T-20260910-025 scoped the local
+        # pre-push hook down to changed-path tests only.
         run: bun run test
 
       - name: Hook reliability tests
@@ -153,3 +175,134 @@ jobs:
           path: |
             test-results/
             tests/*.log
+
+  # T-20260910-020: the local secret gates (.githooks/pre-push,
+  # .githooks/pre-rebase) silently degrade when gitleaks is not installed —
+  # regex fallback / skip — so a broken gate ships unnoticed (the pre-push
+  # --log-opts bug did). This job installs a pinned gitleaks binary and
+  # exercises both hooks end-to-end in throwaway repos: a clean commit must
+  # pass, a commit with a fake AWS key must be blocked. Hermetic (temp dir,
+  # no network beyond the gitleaks download).
+  hook-secret-gates:
+    name: Hook secret gates (gitleaks smoke test)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          # Keep in sync with the test job above.
+          bun-version: 1.4.0
+
+      - name: Install gitleaks (pinned)
+        run: |
+          GITLEAKS_VERSION=8.24.3
+          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" -o /tmp/gitleaks.tgz
+          sudo tar -xzf /tmp/gitleaks.tgz -C /usr/local/bin gitleaks
+          gitleaks version
+
+      - name: Smoke test pre-push hook
+        shell: bash
+        run: |
+          set -euo pipefail
+          SMOKE=$(mktemp -d)
+          git init -q --bare "$SMOKE/origin.git"
+          git clone -q "$SMOKE/origin.git" "$SMOKE/work"
+          cd "$SMOKE/work"
+          git config user.email ci@example.com
+          git config user.name "CI Hook Smoke Test"
+          # SYNC_ACTIVE=1 is the only sanctioned push path (the /sync
+          # pipeline): pre-push.ts then skips the dev-sync audit/tests and
+          # this smoke test isolates the gitleaks gate.
+          export SYNC_ACTIVE=1
+
+          # Make both commits BEFORE wiring core.hooksPath — the workspace
+          # pre-commit gate is exercised elsewhere; this job tests only the
+          # push gate.
+          git checkout -q -b feature/clean
+          echo "clean" > clean.txt
+          git add clean.txt
+          git commit -qm "clean commit"
+          git checkout -q -b feature/leak
+          # Dummy AWS key in the AKIA + [0-9A-Z]{16} format. Deliberately NOT
+          # the canonical AWS docs example key — scanner allowlists commonly
+          # exclude that exact string. The literal is split
+          # across two shell words and concatenated at runtime so this workflow
+          # file itself carries no key-shaped string (workspace regex scanner
+          # has no inline-allowlist mechanism).
+          FAKE_KEY_PARTS='AKIA UY8J3KM2Q9XZLT4R'
+          echo "aws_access_key_id = $(echo "$FAKE_KEY_PARTS" | tr -d ' ')" > leak.txt
+          git add leak.txt
+          git commit -qm "add credentials"
+
+          # .githooks/pre-push runs `bun run scripts/hooks/pre-push.ts`
+          # relative to the pushed repo, so expose the checkout's scripts/
+          # at that path (symlink keeps the throwaway repo hermetic).
+          ln -s "$GITHUB_WORKSPACE/scripts" scripts
+          git config core.hooksPath "$GITHUB_WORKSPACE/.githooks"
+
+          git checkout -q feature/clean
+          git push -q origin feature/clean
+          echo "pre-push: clean commit passed (gitleaks installed)"
+
+          git checkout -q feature/leak
+          if git push origin feature/leak >"$SMOKE/push.log" 2>&1; then
+            echo "ERROR: pre-push hook did not block a commit containing a fake AWS key"
+            exit 1
+          fi
+          grep -q "Secret scan failed" "$SMOKE/push.log"
+          echo "pre-push: fake-secret commit blocked"
+
+      - name: Smoke test pre-rebase hook
+        shell: bash
+        run: |
+          set -euo pipefail
+          SMOKE=$(mktemp -d)
+          git init -q -b main "$SMOKE/repo"
+          cd "$SMOKE/repo"
+          git config user.email ci@example.com
+          git config user.name "CI Hook Smoke Test"
+          echo "base" > base.txt
+          git add base.txt
+          git commit -qm "base commit"
+
+          # Make both commits BEFORE wiring core.hooksPath — the workspace
+          # pre-commit gate is exercised elsewhere; this job tests only the
+          # rebase gate.
+          git checkout -q -b feature/clean
+          echo "clean" > clean.txt
+          git add clean.txt
+          git commit -qm "clean commit"
+          git checkout -q main
+          git checkout -q -b feature/leak
+          FAKE_KEY_PARTS='AKIA UY8J3KM2Q9XZLT4R'
+          echo "aws_access_key_id = $(echo "$FAKE_KEY_PARTS" | tr -d ' ')" > leak.txt
+          git add leak.txt
+          git commit -qm "add credentials"
+          # Advance main so a rebase actually has commits to replay — when the
+          # branch is strictly ahead of upstream, `git rebase` is a no-op
+          # ("Current branch is up to date") and the pre-rebase hook never
+          # fires.
+          git checkout -q main
+          git commit -q --allow-empty -m "advance main"
+
+          git config core.hooksPath "$GITHUB_WORKSPACE/.githooks"
+
+          # Clean branch: rebase must pass (hook exits 0)
+          git checkout -q feature/clean
+          git rebase main
+          echo "pre-rebase: clean rebase passed (gitleaks installed)"
+
+          # Fake-secret branch: rebase must be blocked (hook exits non-zero)
+          git checkout -q feature/leak
+          if git rebase main >"$SMOKE/rebase.log" 2>&1; then
+            echo "ERROR: pre-rebase hook did not block a commit containing a fake AWS key"
+            exit 1
+          fi
+          grep -qi "secret" "$SMOKE/rebase.log"
+          echo "pre-rebase: fake-secret rebase blocked"

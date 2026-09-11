@@ -180,3 +180,13 @@ All numeric outputs in deliverables (aggregations, statistics, percentages, metr
 - **Exemption**: pure backend/non-UI deliverables are exempt only with an explicit statement (ADR-0065 convention).
 - **Enforcement tier**: review-enforced today; a blocking evidence-presence gate is the expected Phase 2 (per-project opt-in, `designLint` schema pattern).
 - See [ADR-0070](../../docs/adr/0070-ui-preview-verification.md) and `docs/designs/2026-09-11-ui-preview-verification-design.md`.
+
+#### 8.17 Language Policy Enforcement Channels (cross-reference)
+
+**The normative language policy is AGENTS.md § Language Policy; this section only documents how `scripts/validate-md-language.ts` enforces it.** A green validator result is a scanner-scope statement, not a guarantee that every byte of Korean in the tree was reviewed.
+
+- **Official-path allowlist**: only allowlisted paths are scanned (agents/, skills/, templates/, docs/constitution/, docs/governance/, docs/designs/, platform `.claude/`/`.gemini/` skills and commands, and the root governance files); content outside these paths is out of scanner scope.
+- **Fenced-content exemption (variant templates)**: fenced code blocks, inline code, and link targets are stripped before scanning, so substantive Korean inside fences (e.g. KO routing tables in variant templates) passes silently — authors still own its reviewability and translation-zone placement.
+- **Locale-suffix exemption**: files matching `[._-]<locale>.(md|ya?ml)` (the `README_ko.md` pattern) and locale directories (`ko/`, `locales/ko/`) are excluded without any frontmatter declaration.
+- **Declaration key**: `lang:` + `lang_reason: legal|source-material|proper-noun` in frontmatter is THE canonical exception declaration; `language: ko` (seen in some `templates/co-deck` agent files) is a legacy variant accepted only as an alias with a migration WARN — validator-side alias support tracked as ticket T-20260910-027. Protected paths (CLAUDE.md, GEMINI.md, CONSTITUTION.md, AGENTS.md, `*.context.md`) never permit the exception.
+- See AGENTS.md § Language Policy (normative), `scripts/validate-md-language.ts`, and the explicit-exemption convention of [ADR-0065](../../docs/adr/0065-accessibility-standard.md).
