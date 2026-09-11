@@ -71,6 +71,7 @@
 | `k-dart` | common | — | — | k-ecos (composes_with), k-kosis (composes_with), k-law | — | — |
 | `k-ecos` | common | — | — | k-dart (composes_with), k-kosis (composes_with), k-opendata (composes_with) | — | — |
 | `k-kosis` | common | — | — | k-dart (composes_with), k-ecos (composes_with), k-law | — | — |
+| `k-krx` | common | — | — | k-dart (composes_with), k-ecos (composes_with), k-kosis (composes_with), k-opendata (composes_with) | — | — |
 | `k-law` | common | — | — | k-dart, k-kosis | — | — |
 | `k-opendata` | common | — | — | k-ecos (composes_with), k-kosis | — | — |
 | `labor-compliance-audit` | variant:co-hr | labor-compliance-analyst, labor-compliance-analyst, labor-relations-specialist, labor-relations-specialist, safety-health-officer, safety-health-officer | phase1, phase2 | org-readiness-assessment (follows), stakeholder-alignment (composes_with) | — | — |
@@ -266,12 +267,21 @@ Catalog table above — not skill references and not yet resolved as graph edges
 |------|-------|--------------------|
 | `100대 통계지표` | common | `k-ecos` |
 | `balPayments` | common | `k-opendata` |
+| `ELW 일별매매정보` | common | `k-krx` |
+| `ESG` | common | `k-krx` |
+| `ESG 증권상품` | common | `k-krx` |
+| `ESG 지수` | common | `k-krx` |
+| `ETF 일별매매정보` | common | `k-krx` |
+| `ETN 일별매매정보` | common | `k-krx` |
 | `expDlr` | common | `k-opendata` |
 | `expWgt` | common | `k-opendata` |
 | `hsCd` | common | `k-opendata` |
 | `hsCode` | common | `k-opendata` |
 | `impDlr` | common | `k-opendata` |
 | `impWgt` | common | `k-opendata` |
+| `KOSDAQ 시리즈 일별시세정보` | common | `k-krx` |
+| `KOSPI 시리즈 일별시세정보` | common | `k-krx` |
+| `KRX 시리즈 일별시세정보` | common | `k-krx` |
 | `SERVICE_KEY_IS_NOT_REGISTERED_ERROR` | common | `k-opendata` |
 | `SERVICE_KEY_IS_NULL` | common | `k-opendata` |
 | `statCd` | common | `k-opendata` |
@@ -288,6 +298,8 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `공포일자` | common | `k-law` |
 | `국가별 수출입실적(GW)` | common | `k-opendata` |
 | `국내총생산(명목, 원화표시)` | common | `k-ecos` |
+| `국채전문유통시장 일별매매정보` | common | `k-krx` |
+| `금시장 일별매매정보` | common | `k-krx` |
 | `금융감독원` | variant:co-consult | `company-intelligence` |
 | `나이스신용평가` | variant:co-consult | `company-intelligence` |
 | `년간` | common | `k-kosis` |
@@ -301,6 +313,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `반기보고서` | common | `k-dart` |
 | `반년` | common | `k-ecos` |
 | `반월` | common | `k-ecos` |
+| `배출권 시장 일별매매정보` | common | `k-krx` |
 | `법령ID` | common | `k-law` |
 | `법령명한글` | common | `k-law` |
 | `법령용어` | common | `k-law` |
@@ -323,26 +336,35 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `사업보고서` | common | `company-intelligence`, `k-dart` |
 | `사외이사` | variant:co-consult | `company-intelligence` |
 | `사용할수없는키` | common | `k-dart` |
+| `사회책임투자채권 정보` | common | `k-krx` |
 | `서비스 통계 목록` | common | `k-ecos` |
+| `석유시장 일별매매정보` | common | `k-krx` |
 | `선고일자` | common | `k-law` |
+| `선물 일별매매정보` | common | `k-krx` |
 | `소관부처` | common | `k-law` |
 | `소비자동향지수` | common | `k-ecos` |
 | `소송` | common | `k-dart` |
+| `소액채권시장 일별매매정보` | common | `k-krx` |
 | `수출입총괄(GW)` | common | `k-opendata` |
 | `시가총액` | variant:co-consult | `company-intelligence` |
 | `시도별 수출입실적(GW)` | common | `k-opendata` |
 | `시행일 법령` | common | `k-law` |
 | `시행일자` | common | `k-law` |
+| `신주인수권증권 일별매매정보` | common | `k-krx` |
+| `신주인수권증서 일별매매정보` | common | `k-krx` |
 | `실제지급준비액` | common | `k-ecos` |
 | `연` | common | `k-ecos` |
 | `영업이익` | common | `company-intelligence`, `k-dart` |
 | `예금규모별 계좌수 및 금액` | common | `k-ecos` |
 | `예금은행 지급준비액(구기준, 평잔)` | common | `k-ecos` |
+| `옵션 일별매매정보` | common | `k-krx` |
 | `요구불예금(실세)` | common | `k-ecos` |
 | `운영계정` | common | `k-opendata` |
 | `원/달러 환율(종가)` | common | `k-ecos` |
 | `월` | common | `k-ecos` |
 | `월간` | common | `k-kosis` |
+| `유가증권 일별매매정보` | common | `k-krx` |
+| `유가증권 종목기본정보` | common | `k-krx` |
 | `유가증권시장` | common | `company-intelligence`, `k-dart` |
 | `유상증자` | common | `k-dart` |
 | `의견거절` | common | `k-dart` |
@@ -350,6 +372,8 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `인구총조사 인구총표` | common | `k-kosis` |
 | `일` | common | `k-ecos` |
 | `일간` | common | `k-kosis` |
+| `일반상품` | common | `k-krx` |
+| `일반채권시장 일별매매정보` | common | `k-krx` |
 | `자기주식처분` | common | `k-dart` |
 | `자기주식취득` | common | `k-dart` |
 | `자본총계` | common | `k-dart` |
@@ -364,14 +388,27 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `조문` | common | `k-law` |
 | `조약` | common | `k-law` |
 | `조회된데이터가없음` | common | `k-dart` |
+| `주식` | common | `k-krx` |
+| `주식선물(유가) 일별매매정보` | common | `k-krx` |
+| `주식선물(코스닥) 일별매매정보` | common | `k-krx` |
+| `주식옵션(유가) 일별매매정보` | common | `k-krx` |
+| `주식옵션(코스닥) 일별매매정보` | common | `k-krx` |
 | `주요사항보고서` | common | `k-dart` |
 | `주요지표(연간지표)` | common | `k-ecos` |
+| `증권상품` | common | `k-krx` |
 | `지분율` | variant:co-consult | `company-intelligence` |
+| `지수` | common | `k-krx` |
 | `지주회사` | variant:co-consult | `company-intelligence` |
+| `채권` | common | `k-krx` |
+| `채권지수 시세정보` | common | `k-krx` |
 | `총계` | common | `k-opendata` |
 | `최대주주` | variant:co-consult | `company-intelligence` |
+| `코넥스 일별매매정보` | common | `k-krx` |
+| `코넥스 종목기본정보` | common | `k-krx` |
 | `코넥스시장` | common | `k-dart` |
 | `코스닥` | variant:co-consult | `company-intelligence` |
+| `코스닥 일별매매정보` | common | `k-krx` |
+| `코스닥 종목기본정보` | common | `k-krx` |
 | `코스닥시장` | common | `k-dart` |
 | `통계 세부항목 목록` | common | `k-ecos` |
 | `통계 조회 조건 설정` | common | `k-ecos` |
@@ -382,6 +419,8 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `통계자료조회` | common | `k-kosis` |
 | `통합검색` | common | `k-kosis` |
 | `특수관계인` | variant:co-consult | `company-intelligence` |
+| `파생상품` | common | `k-krx` |
+| `파생상품지수 시세정보` | common | `k-krx` |
 | `판결요지` | common | `k-law` |
 | `판례` | common | `k-law` |
 | `품목별 국가별 수출입실적(GW)` | common | `k-opendata` |

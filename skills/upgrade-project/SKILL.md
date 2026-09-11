@@ -1,11 +1,11 @@
 ---
 name: upgrade-project
 description: "Upgrade an existing L2/L3 project to the current template version. Use when: upgrading a variant-based project, syncing template improvements, refreshing scripts/agents/skills/docs/commands."
-version: "1.2.1"
+version: "1.3.0"
 status: active
 scope: workspace
 owner: pm
-last_reviewed: 2026-08-21
+last_reviewed: 2026-09-11
 relates_to:
   - skill: promote-variant
     type: follows
@@ -62,12 +62,15 @@ The upgrade tool classifies files into categories:
 | **DOCS_MERGE** | Section-based merge (managed blocks) | `AGENTS.md`, `docs/<variant>.context.md` |
 | **DOCS_OVERWRITE** | Plain overwrite (no blocks) | `docs/phase-definitions.md` |
 | **VARIANT_DOCS_SYNC** | Version/hash-based sync | `docs/context.md`, `docs/engagement-orchestration.md`, `docs/team-configuration-guide.md` |
+| **TEMPLATE TREE SYNC** | Default-policy delivery for template files no dedicated pass claims: add-if-missing, then inline-version/hash update with conflict warning. `JSON_MERGE` deep-merges platform settings (project-only array entries preserved); `WORKSPACE` seeds (`docs/designs/`, `docs/lifecycle/`, …) are add-if-missing only | Rest of the `docs/` tree (`user-guide`, variant domain docs, `countries/KR.md`, `skill-graph.overrides.json`), `.github/`, `.claude`/`.gemini/settings.json`, `.editorconfig`, platform `skills.json` |
 | **COMMANDS_SYNC** | Hash-based sync | `.claude/commands/*.md`, `.gemini/commands/*.md` |
 | **SYNC_IF_NEWER** | Version-based update | Scripts (`.ts`), agents (`.md`), skills (`SKILL.md`) |
 | **PRESERVE** | Never touched | `README.md`, `src/` |
 | **OVERWRITE** | Governance files | `docs/_common/security.md` |
 
 > **Path note**: the `docs/...` paths in the tables above (`docs/context.md`, `docs/phase-definitions.md`, `docs/engagement-orchestration.md`, `docs/team-configuration-guide.md`, `docs/_common/security.md`, etc.) live inside the generated variant project being upgraded, not at the workspace root.
+
+**Coverage is deny-list by design** ([2026-09-11-upgrade-policy-coverage-design.md](../../docs/designs/2026-09-11-upgrade-policy-coverage-design.md)): the classification for every template path lives in `scripts/lib/upgrade-policy.ts`, and the fallback policy *delivers by default* — a file added to the template without a dedicated upgrade pass still reaches existing projects instead of silently falling through. `bun scripts/check-upgrade-coverage.ts [--variant <name>] [--strict] [--json]` reports (and with `--strict` gates) the classification matrix over the whole effective template tree: placeholder tokens in delivered files, WS-07 contamination (`docs/context.md` inside a variant template), and JSON health of `JSON_MERGE` targets.
 
 ### Supported Managed Block Markers
 

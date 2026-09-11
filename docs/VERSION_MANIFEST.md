@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-09-11T12:13:56.551Z
+**Generated**: 2026-09-11T14:00:07.422Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -9,8 +9,8 @@
 ## Summary
 
 - **Agents**: 8
-- **Skills**: 52
-- **Scripts**: 92
+- **Skills**: 53
+- **Scripts**: 93
 - **Commands**: 8
 
 ---
@@ -58,6 +58,7 @@
 | k-dart | 2.1.0 | active | templates/common/skills/k-dart/SKILL.md | common | k-dart, /k-dart, DART, DART OpenAPI, `DART 공시`, `공시검색`, `기업개황`, `재무제표`, `재무정보`, `재무제표 조회`, financial statement, corporate disclosure | strategy-analyst |
 | k-ecos | 1.0.0 | active | templates/common/skills/k-ecos/SKILL.md | common | k-ecos, /k-ecos, ECOS, `한국은행`, `한국은행 Open API`, `경제통계시스템`, `기준금리`, `환율`, `본원통화`, `100대 통계지표`, Bank of Korea statistics, Korean monetary statistics | financial-analyst |
 | k-kosis | 1.0.0 | active | templates/common/skills/k-kosis/SKILL.md | common | k-kosis, /k-kosis, KOSIS, `통계청`, `국가통계포털`, `인구통계`, `물가지수`, `경제통계`, `국가통계`, Korean national statistics | financial-analyst |
+| k-krx | 1.0.0 | active | templates/common/skills/k-krx/SKILL.md | common | k-krx, /k-krx, KRX, `한국거래소`, `KRX Open API`, `정보데이터시스템`, `주식 시세`, `코스피`, `코스닥`, `코넥스`, `일별매매정보`, `종목기본정보`, Korean stock market data, KOSPI market data, KOSDAQ market data | financial-analyst |
 | k-law | 1.0.0 | active | templates/common/skills/k-law/SKILL.md | common | k-law, /k-law, `법령`, `법률`, `법령정보`, `법령검색`, `판례`, law, statute, legal search, Korea law | strategy-analyst |
 | k-opendata | 1.2.0 | active | templates/common/skills/k-opendata/SKILL.md | common | k-opendata, /k-opendata, 공공데이터포털, data.go.kr, `관세청`, `수출입무역통계`, `품목별 국가별 수출입실적`, Korea Customs Service trade statistics, HS code trade data | hs-classification-specialist |
 | meeting-facilitation | 1.4.1 | active | skills/meeting-facilitation/SKILL.md | workspace | meeting, agent discussion, collaborative decision, multi-agent coordination, facilitate meeting | pm |
@@ -82,7 +83,7 @@
 | translate | 1.0.1 | active | skills/translate/SKILL.md | workspace | translate, translation, Korean translation | pm |
 | ui-ux-design-intelligence | 1.0.1 | active | skills/ui-ux-design-intelligence/SKILL.md | workspace | design system, ui design, ux design, component design, visual design, design tokens, interface design | pm |
 | update-bun-packages | 1.3.1 | active | skills/update-bun-packages/SKILL.md | workspace | update bun packages, upgrade bun packages, bun update, update dependencies, upgrade dependencies | pm |
-| upgrade-project | 1.2.1 | active | skills/upgrade-project/SKILL.md | workspace | upgrade project, upgrade template, sync project with template, refresh project, update project infrastructure | pm |
+| upgrade-project | 1.3.0 | active | skills/upgrade-project/SKILL.md | workspace | upgrade project, upgrade template, sync project with template, refresh project, update project infrastructure | pm |
 | validate-docs-links | 1.0.0 | deprecated | skills/validate-docs-links/SKILL.md | workspace | validate links, check links, broken links, docs validation | pm |
 | variant-feature | 1.0.0 | active | skills/variant-feature/SKILL.md | workspace | add feature to variant, extend variant, variant feature, add agent to variant, add skill to variant | scaffolding-expert |
 | zod-contract-gate | 1.0.0 | active | skills/zod-contract-gate/SKILL.md | workspace | zod-contract-gate, /zod-contract-gate, zod contract validation, schema contract gate, runtime schema validation | architect |
@@ -101,6 +102,7 @@
 | analyze-git-history.ts | 1.0.2 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.0.0 | scripts/archive-memory.ts | N/A |
 | audit.ts | 2.33.0 | scripts/audit.ts | bun |
+| check-upgrade-coverage.ts | 1.0.0 | scripts/check-upgrade-coverage.ts | N/A |
 | cleanup-completed-md.ts | 1.1.0 | scripts/cleanup-completed-md.ts | N/A |
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | N/A |
 | compile-tokens.ts | 1.2.0 | scripts/compile-tokens.ts | N/A |
@@ -161,7 +163,7 @@
 | ticket.ts | 1.1.0 | scripts/ticket.ts | N/A |
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, fs, path |
 | typecheck.ts | 1.1.1 | scripts/typecheck.ts | N/A |
-| upgrade-project.ts | 1.20.0 | scripts/upgrade-project.ts | N/A |
+| upgrade-project.ts | 1.21.0 | scripts/upgrade-project.ts | N/A |
 | validate-agents.ts | 1.2.0 | scripts/validate-agents.ts | N/A |
 | validate-decisions.ts | 1.0.0 | scripts/validate-decisions.ts | js-yaml |
 | validate-doc-folder.ts | 1.1.0 | scripts/validate-doc-folder.ts | fs, path |
