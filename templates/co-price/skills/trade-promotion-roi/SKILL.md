@@ -2,7 +2,7 @@
 name: trade-promotion-roi
 scope: co-price
 description: Trade promotion ROI evaluation with netROI gate
-version: "1.0.0"
+version: 1.0.0
 last_reviewed: 2026-08-25
 status: active
 owner: market-intelligence-analyst

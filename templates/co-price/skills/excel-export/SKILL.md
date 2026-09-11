@@ -2,7 +2,7 @@
 name: excel-export
 scope: co-price
 description: Structured Excel workbook generation from engine data
-version: "2.0.0"
+version: 2.0.0
 last_reviewed: 2026-08-25
 status: active
 owner: core-engine-dev

@@ -2,7 +2,7 @@
 name: price-waterfall-analysis
 scope: co-price
 description: Pocket margin analysis and price waterfall diagnostics
-version: "1.0.0"
+version: 1.0.0
 last_reviewed: 2026-08-25
 status: active
 owner: finance-strategy-lead

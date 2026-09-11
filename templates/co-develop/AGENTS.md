@@ -294,6 +294,7 @@ lang_reason: legal   # legal | source-material | proper-noun
 The PM agent follows a three-level inheritance model: **L0 (workspace root)** → **L1 (common template)** → **L2 (variant templates)**.
 
 > **For PM Agent Architecture**: See [docs/context.md](docs/context.md) for complete governance workflow, L0→L1→L2 extends chain resolution, and variant-specific configuration.
+> ℹ️ In-template navigation: `docs/context.md` materializes at scaffold time. The variant-authored context in this template is `docs/co-develop.context.md`.
 
 #### Dispatch Decision
 
