@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-09-11T15:32:25.763Z
+**Generated**: 2026-09-11T16:10:56.404Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -164,7 +164,7 @@
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, fs, path |
 | typecheck.ts | 1.1.1 | scripts/typecheck.ts | N/A |
 | upgrade-project.ts | 1.22.1 | scripts/upgrade-project.ts | N/A |
-| validate-agents.ts | 1.2.0 | scripts/validate-agents.ts | N/A |
+| validate-agents.ts | 1.2.1 | scripts/validate-agents.ts | N/A |
 | validate-decisions.ts | 1.0.0 | scripts/validate-decisions.ts | js-yaml |
 | validate-doc-folder.ts | 1.1.0 | scripts/validate-doc-folder.ts | fs, path |
 | validate-docs-links.ts | 1.1.0 | scripts/validate-docs-links.ts | fs, path |
@@ -172,7 +172,7 @@
 | validate-model-registry.ts | N/A | scripts/validate-model-registry.ts | N/A |
 | validate-pm-extends.ts | 0.3.1 | scripts/validate-pm-extends.ts | N/A |
 | validate-procedures.ts | 1.1.0 | scripts/validate-procedures.ts | js-yaml |
-| validate-skills.ts | 1.5.0 | scripts/validate-skills.ts | N/A |
+| validate-skills.ts | 1.5.1 | scripts/validate-skills.ts | N/A |
 | validate-templates.ts | 1.22.0 | scripts/validate-templates.ts | js-yaml |
 | validate-variant-readiness.ts | 1.1.0 | scripts/validate-variant-readiness.ts | N/A |
 | variant-feature.ts | 1.0.0 | scripts/variant-feature.ts | N/A |

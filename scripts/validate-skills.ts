@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Skill Lifecycle Validation Script
- * @version 1.5.0
+ * @version 1.5.1
  */
 // Validates skills/*/SKILL.md files for required frontmatter
 // and checks governance records in docs/lifecycle/skills/*.md
@@ -12,7 +12,13 @@
 
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
-import { parseFrontmatter as parseFrontmatterYaml, validateSkillFrontmatter } from './validators/schema-validator.ts';
+// v1.5.1: ./validators/ is L0-only; the L1/L3 project copies of this script must not crash
+// at import time — the schema sweep degrades to a skip when the validators are absent
+// (the workspace-side sweep covers those checks).
+const schemaValidatorAvailable = existsSync(join(import.meta.dir, 'validators', 'schema-validator.ts'));
+const schemaValidator = schemaValidatorAvailable ? await import('./validators/schema-validator.ts') : null;
+const parseFrontmatterYaml = schemaValidator?.parseFrontmatter;
+const validateSkillFrontmatter = schemaValidator?.validateSkillFrontmatter;
 import { cwd } from 'node:process';
 
 interface ValidationIssue {
@@ -458,6 +464,7 @@ function validateSkillSchema(): void {
     try {
       if (!statSync(join(SKILLS_DIR, entry)).isDirectory() || !existsSync(skillPath)) continue;
     } catch { continue; }
+    if (!parseFrontmatterYaml || !validateSkillFrontmatter) continue; // validators absent in L1/L3 — workspace sweep covers schema checks
     const fm = parseFrontmatterYaml(readFileSync(skillPath, 'utf-8'));
     if (Object.keys(fm).length === 0) continue; // no frontmatter — existing checks cover that
     for (const issue of validateSkillFrontmatter(fm, entry)) {
