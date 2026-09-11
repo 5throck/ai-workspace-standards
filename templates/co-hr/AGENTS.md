@@ -602,7 +602,6 @@ Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 |-------|----------|---------|
 | `sync` | `skills/sync/` | Sync pipeline — lifecycle, audit, publish, commit, push, PR |
 | `project-review` | `skills/project-review/` | Multi-agent parallel project review |
-| `audit-workspace` | `skills/audit-workspace/` | Workspace standards audit |
 | `meeting-facilitation` | `skills/meeting-facilitation/` | Multi-agent meeting orchestration |
 | `security-scan` | `skills/security-scan/` | Security and secret detection |
 | `create-variant` | `skills/create-variant/` | New variant scaffolding |

@@ -17,4 +17,4 @@
 - [x] Uses the `extends` pattern (ADR-0033) rather than duplicating the workspace PM
 - [x] Carries `lifecycle` frontmatter with `phase` and `governance`
 - [x] Validated by `scripts/validate-agents.ts`
-- [ ] TODO: variant_overrides filled in (governance workflow, agent roster, dispatch protocol)
+- [x] variant_overrides filled in (governance workflow, agent roster, dispatch protocol)

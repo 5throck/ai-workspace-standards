@@ -8,7 +8,7 @@
  * Addresses Gap #2: Variant-weighted criteria for promotion
  * Addresses Gap #3: Dependency graph for reconciliation order
  *
- * @version 1.1.1
+ * @version 1.2.0
  * @phase 2-3: Governance & Integration
  *
  * Dependencies:
@@ -54,16 +54,13 @@ export interface PromotionEligibility {
   criteria: PromotionPolicy;
   currentEngagements: number;
   currentBetaMonths: number;
+  /** Engagement threshold met (currentEngagements >= criteria.minEngagements) */
+  engagementsMet: boolean;
+  /** Beta duration requirement met (betaMonths >= criteria.minBetaMonths) */
+  betaDurationMet: boolean;
   additionalChecksPassed: string[];
   additionalChecksFailed: string[];
   reasons: string[];
-  // T-012-BUG: consumers (scripts/helpers/beta-lifecycle.ts) read `engagementsMet` and
-  // `betaDurationMet` from this object, but checkPromotionEligibility() never sets them —
-  // they are always `undefined` at runtime. Declared optional to describe current reality
-  // without changing behavior; the internal flags (`engagementsMet`, `betaMonthsMet`) are
-  // computed but dropped from the return value.
-  engagementsMet?: boolean;
-  betaDurationMet?: boolean;
 }
 
 /**
@@ -92,11 +89,8 @@ export interface L1MajorReconciliationPlan {
     variant: string;
     action: 'reconcile' | 'skip' | 'manual_review';
     reason: string;
-    // T-012-BUG: generateL1MajorReconciliationPlan() never sets `canParallel` on its
-    // steps, so the console log there always renders "sequential" regardless of the
-    // variant's allowsParallelReconciliation flag. Declared optional to describe
-    // current reality without changing behavior.
-    canParallel?: boolean;
+    /** Mirrors the variant's allowsParallelReconciliation flag from the dependency graph */
+    canParallel: boolean;
   }>;
   estimatedDuration: string;
   requiresRollback: boolean;
@@ -192,6 +186,8 @@ export function checkPromotionEligibility(
     criteria,
     currentEngagements,
     currentBetaMonths: betaMonths,
+    engagementsMet,
+    betaDurationMet: betaMonthsMet,
     additionalChecksPassed,
     additionalChecksFailed,
     reasons,
@@ -407,10 +403,14 @@ export function planL1MajorUpdate(newL1Version: string): L1MajorReconciliationPl
     .filter(d => d.variant !== 'templates/common')
     .sort((a, b) => a.reconciliationOrder - b.reconciliationOrder);
 
-  const reconciliationSteps: L1MajorReconciliationPlan['reconciliationSteps'] = variants.map((variant, index) => ({
+  // Every affected variant is reconciled on an L1 MAJOR update; whether a step
+  // can run in parallel with same-order steps comes from the dependency graph's
+  // allowsParallelReconciliation flag (same mapping as getReconciliationOrder()).
+  const reconciliationSteps: L1MajorReconciliationPlan['reconciliationSteps'] = variants.map((variant) => ({
     order: variant.reconciliationOrder,
     variant: variant.variant,
-    action: (variant.allowsParallelReconciliation ? 'reconcile' : 'reconcile') as 'reconcile' | 'skip' | 'manual_review',
+    action: 'reconcile',
+    canParallel: variant.allowsParallelReconciliation,
     reason: variant.rationale,
   }));
 

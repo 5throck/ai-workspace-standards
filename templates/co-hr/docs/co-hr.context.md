@@ -135,10 +135,6 @@ Key rules:
 
 ---
 
-*co-hr.context.md version: 1.1 — restructured to the WS-09 standard slot order (Tech Stack / Agents / Skills / Environment Setup / Development Workflow / Guidelines / File Organization Policy / Domain Rules); v1.0 content preserved*
-
----
-
 ## Variant-Specific PM Configuration
 
 ### Governance Workflow
@@ -200,3 +196,7 @@ specialist agent is PM-only invocation (see each agent's "⚠️ PM-ONLY INVOCAT
 section) — PM never allows a user to bypass PM and address a specialist directly.
 This section replaces the workspace PM's dispatch protocol with variant-specific logic.
 <!-- END VARIANT-SECTION -->
+
+---
+
+*co-hr.context.md version: 1.1 — restructured to the WS-09 standard slot order (Tech Stack / Agents / Skills / Environment Setup / Development Workflow / Guidelines / File Organization Policy / Domain Rules); v1.0 content preserved*

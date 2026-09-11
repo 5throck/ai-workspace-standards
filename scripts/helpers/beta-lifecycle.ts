@@ -5,7 +5,7 @@
  * Tracks beta variant lifecycle including engagements, bugs, and promotion eligibility.
  * Implements variant-weighted promotion criteria from governance rules.
  *
- * @version 1.2.0
+ * @version 1.2.1
  * @phase 3: Beta Lifecycle Management
  *
  * Dependencies:
@@ -82,11 +82,8 @@ export interface PromotionEligibilityResult {
   currentState: BetaLifecycleState;
   /** Detailed eligibility check */
   eligibilityCheck: {
-    // T-012-BUG: sourced from PromotionEligibility.engagementsMet/betaDurationMet, which
-    // checkPromotionEligibility() never populates — these are `undefined` at runtime.
-    // Optional here to describe current reality without changing behavior.
-    engagementsMet?: boolean;
-    betaDurationMet?: boolean;
+    engagementsMet: boolean;
+    betaDurationMet: boolean;
     additionalChecksPassed: boolean;
     reasons: string[];
   };

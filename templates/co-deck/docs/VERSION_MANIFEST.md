@@ -6,4 +6,4 @@
 | Component | Version | Source |
 |-----------|---------|--------|
 | common overlay | `1.0.0` | templates/common/ |
-| variant (co-hr) | `0.1.0` | this project |
+| variant (co-deck) | `0.2.3` | this project |

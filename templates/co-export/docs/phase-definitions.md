@@ -61,8 +61,7 @@ Some variants combine phases 1 and 2 when research and architecture planning are
 
 ### Phase 5 — Quality Assurance
 **PM owns**: runs audit scripts directly.
-- PM runs `audit-workspace` skill
-- PM runs `validate-docs-links` skill
+- PM runs `project-review` skill (use `baseline-only` mode for docs/link validation instead of invoking the deprecated `validate-docs-links` skill)
 - Maximum 2 fix iterations before escalating to user
 - **Output**: passing audit report
 

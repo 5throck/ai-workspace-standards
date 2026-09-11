@@ -219,3 +219,7 @@ Co-News follows a **newsroom pipeline** dispatch model: Tip -> Research -> Draft
 | 5 | Visualization | visual-editor | Sequential (after Phase 4) |
 | 6 | Final QA / publish gate | pm | — |
 <!-- END VARIANT-SECTION -->
+
+---
+
+*co-news.context.md version: 1.0 — version footer added (T-012-adjacent hygiene pass) (2026-09-11)*

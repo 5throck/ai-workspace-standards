@@ -11,8 +11,12 @@
  *   bun scripts/lifecycle-sync-audit.ts --json
  *   bun scripts/lifecycle-sync-audit.ts --fix
  *
- * @version 1.6.1
- * @last_updated 2026-09-06
+ * @version 1.7.0
+ * @last_updated 2026-09-10
+ * v1.7.0: Fixed Check X's collectTsFiles() recursing into each subdirectory twice
+ *          (one depth+1 call plus one depth-0 call), producing duplicate file scans
+ *          and duplicate Check X issues; now a single correct recursion.
+ * v1.6.1: Symlink-safe, depth-bounded directory walkers (T-20260910-026).
  * v1.6.0: Added 'dev-sync:skill-dependency-analysis' to INTENTIONAL_CROSS_REFS —
  *          dev-sync.ts step 3.96c (session-evidence skill review, SkillHone-inspired
  *          loop) runs skill-session-review.ts, promoted to L0+L1 (ADR-0067), and the
@@ -420,7 +424,6 @@ function runCheckX(): SyncIssue[] {
       const fullPath = join(dir, entry.name);
       if (entry.isDirectory()) {
         result.push(...collectTsFiles(fullPath, depth + 1));
-        result.push(...collectTsFiles(fullPath));
       } else if (entry.isFile() && entry.name.endsWith('.ts')) {
         result.push(fullPath);
       }

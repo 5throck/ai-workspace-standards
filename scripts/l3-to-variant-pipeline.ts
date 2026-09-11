@@ -11,8 +11,14 @@
  * - Wave 3: Platform parity validation (validate-platform-parity.ts)
  * - Wave 3: Workspace integration (integration-helpers.ts)
  *
- * @version 1.16.0
+ * @version 1.17.0
  * @phase: Complete pipeline orchestration
+ *
+ * v1.17.0 (2026-09-10): PHASE 4 post-generation cleanup now resolves the ACTIVE.md
+ *          path from generatedVariant.variantPath (the root generateVariant actually
+ *          wrote to) instead of config.outputPath, which is optional — omitting
+ *          --output previously threw in cleanup and reported PHASE 4 FAILED after a
+ *          successful generation.
  *
  * v1.16.0 (2026-09-10): PHASE 4.7 (new) — W1 context purification gate. After Phase
  *          4.6, fail-closed verification that every project-only section extracted
@@ -933,11 +939,11 @@ export async function executeL3ToVariantPipeline(config: PipelineConfig): Promis
     phases.generate = { success: true, result: generatedVariant };
 
     // Post-generation cleanup: remove ACTIVE.md if copied (project-specific artifact)
-    // T-012-BUG: config.outputPath is optional (undefined when --output is omitted),
-    // so join(undefined, ...) throws here at runtime — the cleanup phase then reports
-    // "PHASE 4 FAILED" even though generation succeeded into the default templates/<name>
-    // path. The cast keeps that exact runtime behavior instead of masking it.
-    const activeMdPath = join(config.outputPath as string, 'docs', 'countries', 'ACTIVE.md');
+    // Clean up against the actual generation output root (generateVariant() resolves
+    // outputPath ?? templates/<name> and returns it as variantPath) — reading
+    // config.outputPath directly threw when --output was omitted and failed Phase 4
+    // after a successful generation.
+    const activeMdPath = join(generatedVariant!.variantPath, 'docs', 'countries', 'ACTIVE.md');
     const { existsSync: esync, rmSync: rmsync } = await import('node:fs');
     if (esync(activeMdPath)) {
       rmsync(activeMdPath);
