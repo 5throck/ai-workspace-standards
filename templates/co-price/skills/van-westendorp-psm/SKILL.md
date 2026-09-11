@@ -2,7 +2,7 @@
 name: van-westendorp-psm
 scope: co-price
 description: Van Westendorp Price Sensitivity Meter survey analysis
-version: "1.0.0"
+version: 1.0.0
 last_reviewed: 2026-08-25
 status: active
 owner: market-intelligence-analyst
