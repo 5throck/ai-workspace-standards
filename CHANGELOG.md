@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+- **[2026-09-12]**: chore(deps): **Per-project Dependabot retired fleet-wide; dependency update detection consolidated at the workspace root.** All 12 `co-*` repos on GitHub (11 template-derived + co-abap-plugin, which never had one) had `.github/dependabot.yml` removed — per-project bot PRs (a) ignored `bun.lock`, (b) bypassed the root-package.json version SSOT, and (c) ran with no CI. `templates/common/.github/dependabot.yml` deleted so future scaffolds ship without it. The root repo's existing `dependabot.yml` (already `package-ecosystem: "bun"` + `github-actions`, weekly) remains the single detection point: update PRs land at the root where `update-bun-packages` + typecheck/test gates govern adoption, then propagate via `sync-template-deps` / `upgrade-project`. The 6 open Dependabot PRs (co-abap ×2, co-consult ×4 — typescript 7 major, @types/node 26 major, docx 9 major, js-yaml 5 major; js-yaml is a runtime dep of 5 co-consult scripts) were closed with rationale. Gates: API-verified dependabot.yml absent on all 12 repos; fleet local state clean.
+
 ### Fixed
 - **[2026-09-12]**: fix(upgrade): **upgrade-project v1.22.1 — data-loss fix in `--prune-removed`: skills prune now consults the variant template.** The skills prune category checked only `templates/common/skills/`, so variant-owned skills delivered by the VARIANT SKILLS pass (e.g. co-abap's `sap-*`, `abap-*` domain skills — 14 directories) were marked prunable for projects without a `variant.json` manifest. Caught in the project-resync Step 4 dry-run review (co-abap would have lost its entire SAP domain skill set); the category now also accepts `templates/<variant>/skills/` (identity-separated projects unaffected — the absent dir is filtered). Registry rows bumped; fleet dry-runs re-verified (0 conflicts, security PASSED ×10).
 
