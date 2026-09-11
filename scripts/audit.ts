@@ -1,4 +1,4 @@
-// @version 2.33.0
+// @version 2.34.0
 // v2.33.0: Validator-hardening batch (T-20260910-013/016/017/026). New standing
 //           regression check checkVariantAuditHookRegression() — every variant.json
 //           that declares an audit-variant hook (script_manifest) must resolve to a
@@ -2945,6 +2945,25 @@ if (fs.existsSync(path.join('scripts', 'verify-skill-graph.ts'))) {
         Fail('Skill-graph drift detected: docs/skill-graph.json is stale — run bun scripts/generate-skill-graph.ts, review, and commit');
     } else {
         Pass('Skill-graph drift gate: committed projection matches SSOTs');
+    }
+}
+
+// ── Upgrade coverage gate (2026-09-11-upgrade-policy-coverage-design.md D6) ───
+// When scripts/check-upgrade-coverage.ts exists, every file in the effective template
+// tree must keep a delivery claim — --strict fails on {{placeholder}} tokens in delivered
+// files, WS-07 contamination (docs/context.md inside a variant template), and broken
+// JSON_MERGE targets. At project (L2) context the checker self-skips (no templates/
+// tree), so both L0 and L1 copies of the pair can run this gate unconditionally.
+if (fs.existsSync(path.join('scripts', 'check-upgrade-coverage.ts'))) {
+    const { status, stdout, stderr } = spawnSync('bun', ['scripts/check-upgrade-coverage.ts', '--strict'], {
+        encoding: 'utf-8',
+    });
+    if (status !== 0) {
+        if (stdout) console.log(stdout);
+        if (stderr) console.error(stderr);
+        Fail('Upgrade coverage gate failed — bun scripts/check-upgrade-coverage.ts (without --strict) lists the violations');
+    } else {
+        Pass('Upgrade coverage gate: every effective template file keeps a delivery claim (strict checks clean)');
     }
 }
 

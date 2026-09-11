@@ -12,7 +12,6 @@ import { tmpdir } from 'node:os';
 import { describe, test, expect } from 'bun:test';
 import {
   TEMPLATE_TREE_SYNC_PASS,
-  VARIANT_DOCS_SYNC_FILES,
   GOVERNANCE_FILES,
   PLACEHOLDER_ALLOWLIST,
   mergeSettingsData,
@@ -47,9 +46,15 @@ describe('upgrade-policy resolveClaim — dedicated passes keep their paths', ()
     expect(resolveClaim('docs/security.md', VARIANT).policy).toBe('OVERWRITE');
   });
 
-  test('VERSIONED_SYNC matches the VARIANT_DOCS_SYNC inventory', () => {
-    for (const rel of VARIANT_DOCS_SYNC_FILES) {
-      expect(resolveClaim(rel, VARIANT)).toEqual({ policy: 'VERSIONED_SYNC', pass: 'VARIANT_DOCS_SYNC' });
+  test('former VARIANT_DOCS_SYNC inventory falls through to the default SYNC policy (folded v1.22.0)', () => {
+    for (const rel of [
+      'docs/context.md',
+      'docs/engagement-orchestration.md',
+      'docs/team-configuration-guide.md',
+      'docs/privacy-design-checklist.md',
+      'docs/privacy-design-checklist_ko.md',
+    ]) {
+      expect(resolveClaim(rel, VARIANT)).toEqual({ policy: 'SYNC', pass: TEMPLATE_TREE_SYNC_PASS });
     }
   });
 
@@ -165,11 +170,9 @@ describe('upgrade-policy resolveClaim — default-policy inversion (the gap fix)
 describe('upgrade-policy drift guard vs scripts/upgrade-project.ts literals', () => {
   const src = require('node:fs').readFileSync(join(workspaceRoot, 'scripts', 'upgrade-project.ts'), 'utf8');
 
-  test('VARIANT_DOCS_SYNC literal matches the lib inventory', () => {
-    const m = src.match(/const VARIANT_DOCS_SYNC: string\[\] = \[([\s\S]*?)\];/);
-    expect(m).not.toBeNull();
-    const literal = [...m![1].matchAll(/'([^']+)'/g)].map(x => x[1]);
-    expect(literal).toEqual([...VARIANT_DOCS_SYNC_FILES]);
+  test('VARIANT_DOCS_SYNC literal stays folded out of the script (no re-duplication)', () => {
+    expect(src).not.toMatch(/const VARIANT_DOCS_SYNC\s*:\s*string\[\]/);
+    expect(src).not.toContain("docs/privacy-design-checklist.md',");
   });
 
   test('GOVERNANCE_FILES literal matches the lib inventory', () => {

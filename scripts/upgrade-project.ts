@@ -1,5 +1,10 @@
 #!/usr/bin/env bun
-// @version 1.21.0
+// @version 1.22.0
+// v1.22.0: Folded VARIANT_DOCS_SYNC into the TEMPLATE TREE SYNC pass (Phase C of
+//           2026-09-11-upgrade-policy-coverage-design.md) — the 5 hardcoded files are claimed
+//           by the default SYNC policy with identical inline-version/hash/conflict semantics,
+//           removing the last duplicated hardcoded docs list. No behavior change; the files
+//           now report under "TEMPLATE TREE SYNC" and treeChanged instead of syncChanged.
 // v1.21.0: New TEMPLATE TREE SYNC pass (2026-09-11-upgrade-policy-coverage-design.md) — upgrade
 //           coverage used to be enumeration, so template files with no claiming pass were
 //           silently never delivered to existing projects (most of the variant docs tree —
@@ -887,72 +892,18 @@ for (const rel of DOCS_OVERWRITE_FILES) {
 }
 console.log('');
 
-// ── VARIANT_DOCS_SYNC: variant-specific docs (version/hash based) ──────────────
-console.log('--- VARIANT_DOCS_SYNC: variant documentation (version/hash based) ---');
-// docs/context.md's SSOT is templates/common/, not the variant dir — WS-07 forbids
-// variants from carrying their own copy — so it needs the variant-then-common
-// fallback resolveTemplate() already provides, not a variant-dir-only join().
-const VARIANT_DOCS_SYNC: string[] = [
-  'docs/context.md',
-  'docs/engagement-orchestration.md',
-  'docs/team-configuration-guide.md',
-  // v1.19.1: co-develop privacy design checklist (generalized from the
-  // harness-assessment privacy ADRs; EN + KO mirrors version-bump together)
-  'docs/privacy-design-checklist.md',
-  'docs/privacy-design-checklist_ko.md',
-];
-for (const rel of VARIANT_DOCS_SYNC) {
-  const src = resolveTemplate(rel);
-  const dest = join(projectDir, rel);
-  if (!src) { console.log(`  SKIP (no template): ${rel}`); continue; }
-
-  const tplInlineVer = extractInlineVersion(src);
-  if (!existsSync(dest)) {
-    console.log(`  NEW    ${rel}  ${tplInlineVer ? `(v${tplInlineVer})` : '(hash-based)'}`);
-    if (!dryRun) { mkdirSync(dirname(dest), { recursive: true }); copyFileSync(src, dest); }
-    console.log(`  ${dryTag}COPIED: ${rel}`);
-    syncChanged++;
-  } else if (tplInlineVer) {
-    const projInlineVer = extractInlineVersion(dest);
-    if (!projInlineVer) {
-      console.log(`  UPDATE ${rel}  (no version) → v${tplInlineVer}`);
-      if (!dryRun) copyFileSync(src, dest);
-      console.log(`  ${dryTag}COPIED: ${rel}`);
-      syncChanged++;
-    } else if (inlineVersionGt(tplInlineVer, projInlineVer)) {
-      if (isLocallyModified(dest)) {
-        console.log(`  ⚠️  CONFLICT ${rel}  v${projInlineVer} → v${tplInlineVer}  (local modifications exist)`);
-      } else {
-        console.log(`  UPDATE ${rel}  v${projInlineVer} → v${tplInlineVer}`);
-      }
-      if (!dryRun) copyFileSync(src, dest);
-      console.log(`  ${dryTag}COPIED: ${rel}`);
-      syncChanged++;
-    } else {
-      console.log(`  OK     ${rel}  v${projInlineVer}`);
-    }
-  } else {
-    // No inline version — hash-based
-    const tplHash = fileHash(src);
-    const projHash = fileHash(dest);
-    if (tplHash !== projHash) {
-      if (isLocallyModified(dest)) {
-        console.log(`  ⚠️  CONFLICT ${rel}  (content changed, local modifications exist)`);
-      } else {
-        console.log(`  UPDATE ${rel}  (content changed)`);
-      }
-      if (!dryRun) copyFileSync(src, dest);
-      console.log(`  ${dryTag}COPIED: ${rel}`);
-      syncChanged++;
-    } else {
-      console.log(`  OK     ${rel}  (hash match)`);
-    }
-  }
-}
+// ── (v1.22.0) VARIANT_DOCS_SYNC folded into TEMPLATE TREE SYNC ────────────────
+// The former dedicated pass (docs/context.md, engagement-orchestration.md,
+// team-configuration-guide.md, privacy-design-checklist(+_ko)) is fully reproduced by the
+// TEMPLATE TREE SYNC pass's default SYNC policy — same inline-version/hash semantics, same
+// conflict warning, same variant-over-common resolution (docs/context.md's SSOT stays
+// templates/common per WS-07; the walk already takes it from common since variants never
+// carry it). Classification lives in scripts/lib/upgrade-policy.ts; re-adding a dedicated
+// pass for these paths would reopen the drift-duplication class the policy engine removed.
 console.log('');
 
 // ── CONTEXT_COMMONIZATION: variant-context boilerplate prune (v1.20.0) ─────────
-// docs/designs/2026-09-10-context-purification-design.md D2. After VARIANT_DOCS_SYNC
+// docs/designs/2026-09-10-context-purification-design.md D2. After the TEMPLATE TREE SYNC pass
 // refreshes docs/context.md, near-duplicate sections in docs/<variant>.context.md
 // become redundant. For each top-level section (COMMON-* zones, VARIANT-INJECT
 // blocks, and the version footer excluded), token-overlap similarity vs the common
@@ -1600,7 +1551,7 @@ if (variantAssetDirs.length > 0) {
 
 // ── GOVERNANCE FILES SYNC: top-level add-if-missing files (LICENSE, …) ────────
 // Templates ship top-level governance files (LICENSE) that no other pass covers:
-// LOCKED/MERGE/DOCS_*/VARIANT_DOCS_SYNC/SYNC_IF_NEWER all operate on hardcoded or
+// LOCKED/MERGE/DOCS_*/TEMPLATE TREE SYNC/SYNC_IF_NEWER all operate on hardcoded or
 // directory paths, and VARIANT ASSET DIRS SYNC only discovers directories — a
 // top-level file fell through every pass and never reached legacy projects. The
 // source is the variant template first, then templates/common (scaffold parity).
@@ -1691,7 +1642,7 @@ console.log('');
 // scripts/lib/upgrade-policy.ts with the fallback policy SYNC (deliver by default); this pass
 // delivers exactly the files whose claim names THIS pass:
 //   SYNC       — add-if-missing, then inline-version/hash update with the standard conflict
-//                warning on locally-modified files (same contract as VARIANT_DOCS_SYNC).
+//                warning on locally-modified files (the contract of the former VARIANT_DOCS_SYNC pass).
 //   WORKSPACE  — docs/ project workspaces (designs/, drafts/, lifecycle/, …): seed
 //                add-if-missing only, never overwrite, never prune.
 //   JSON_MERGE — platform settings: deep merge, template wins conflicts, arrays unioned so
