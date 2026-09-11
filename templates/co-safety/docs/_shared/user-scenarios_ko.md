@@ -44,16 +44,16 @@ ls workflows/domains/industry/     # 산업 운영 (건설, 가스, 발전 등)
    → 확인: 취급금지물질(산안법 제117조), 화학물질관리법, K-REACH
    ```
 
-4. **PSM 영향 평가** — covered process인 경우 PSI 업데이트
+4. **PSM 영향 평가** — covered process인 경우 PSI 갱신
    ```
    → ehschem-agent(화학공장)가 조정
-   → psm-agent가 공정안전정보(PSI) 업데이트
+   → psm-agent가 공정안전정보(PSI) 갱신
    ```
 
 5. **근로자 교육** — 직업보건 통보
    ```
    → msds-agent가 occupational-health-agent 통보
-   → 특수건강진단 대상 업데이트 (Section 11 독성 정보)
+   → 특수건강진단 대상 갱신 (Section 11 독성 정보)
    ```
 
 ### 생성 증거
@@ -135,7 +135,7 @@ ls workflows/domains/industry/     # 산업 운영 (건설, 가스, 발전 등)
 5. **일일 마감**
    ```
    → 모든 허가서 마감, 발견사항 문서화
-   → 안전관리비 집적 업데이트
+   → 안전관리비 집적 갱신
    ```
 
 ---

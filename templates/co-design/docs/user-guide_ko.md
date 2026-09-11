@@ -50,7 +50,7 @@ translated_from_hash: 93b93e4566a8202fff5c3b00f1fa3d7fd6c34645a34d9b175923c3f8ef
 | "팀 간 디자인 의사결정을 조율해달라" | PM (via `/meeting`) | — | 모든 단계 |
 
 **참고:**
-- `typography-expert`는 선택적입니다 — 브랜드 가이드라인에 의해 폰트 결정이 이미 고정되어 있다면 생략하세요.
+- `typography-expert`는 선택적입니다 — 브랜드 지침에 의해 폰트 결정이 이미 고정되어 있다면 생략하세요.
 - `storyteller`는 내러티브 요소가 없는 순수 기능적/기술적 디자인 작업에서는 선택적입니다.
 - 요청이 여러 행에 걸쳐 있는 경우(예: "온보딩 플로우를 조사한 후 디자인해달라"), PM이 여러 에이전트를 순서대로 배치하고 전체 실행 계획을 보여줍니다.
 
@@ -89,7 +89,7 @@ Phase 5 — 시스템 정제 및 핸드오프       (visual-designer, prototype-
 /sync "feat: description"
   1. bun scripts/audit.ts      — 실패 시 중단
   2. memory/YYYY-MM-DD.md      — 세션 로그 작성
-  3. MEMORY.md 인덱스 업데이트
+  3. MEMORY.md 인덱스 갱신
   4. CHANGELOG.md [Unreleased] 항목 추가
   5. git commit (pr/<date>-<slug> 브랜치에서)
   6. git push + gh pr create
@@ -124,7 +124,7 @@ Phase 5 — 시스템 정제 및 핸드오프       (visual-designer, prototype-
 | `docs/designs/` | 디자인 결정과 근거 (디자인 방향성 작성, ADR 스타일 노트) |
 | `docs/specs/` | UI/UX 사양 (컴포넌트 스펙, 디자인 토큰 문서, 접근성 보고서) |
 | `docs/prototypes/` | 프로토타입 문서 및 핸드오프 노트 |
-| `memory/YYYY-MM-DD.md` | 세션 로그, 디자인 리뷰 트랜스크립트, 미팅 결과 |
+| `memory/YYYY-MM-DD.md` | 세션 로그, 디자인 검토 트랜스크립트, 미팅 결과 |
 | `CHANGELOG.md` | 출시된 디자인 변경 사항의 사용자 대상 요약. 릴리스 전까지 `[Unreleased]`에 위치 |
 
 새 컴포넌트를 만들기 전에 기존 컴포넌트와 토큰을 재사용하세요 — 새 컴포넌트는 `docs/specs/`에 문서화하고 디자인 시스템 검토를 위해 `design-lead`에 등록하세요.

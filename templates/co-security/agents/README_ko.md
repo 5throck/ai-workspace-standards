@@ -24,6 +24,6 @@ PM은 Phase 1+ 작업 전 `verify-authorization` 스킬을 자동으로 실행�
 bun run agent:create <name> --role "Display Name" --group Security
 ```
 
-에이전트 생성 후 `AGENTS.md`와 `docs/co-security.context.md § Agents`를 업데이트하세요.
+에이전트 생성 후 `AGENTS.md`와 `docs/co-security.context.md § Agents`를 갱신하세요.
 
 전체 인게이지먼트 워크플로우(Phase 0–6)는 `AGENTS.md`를 참고하세요.

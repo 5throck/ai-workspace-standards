@@ -59,10 +59,10 @@ bun run agent:delete <name> --force  # 확인 건너뛰기
 
 ## 에이전트 생성/후 작업
 
-`AGENTS.md`를 업데이트하여:
+`AGENTS.md`를 갱신하여:
 1. 에이전트 로스터 테이블에 에이전트 추가/제거
 2. 서브에이전트 로스터 테이블에 에이전트 추가/제거
-3. `docs/context.md § Agents`를 일치하도록 업데이트
+3. `docs/context.md § Agents`를 일치하도록 갱신
 
 ## 에이전트 그룹
 

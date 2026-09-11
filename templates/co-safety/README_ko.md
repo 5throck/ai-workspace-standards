@@ -125,4 +125,4 @@ EHS (Environmental Health & Safety) AI Agent platform for South Korea regulatory
 
 ---
 
-*최근 업데이트: 2026-08-26*
+*최근 갱신: 2026-08-26*

@@ -25,7 +25,7 @@ bun run agent:create motion-designer --role "Motion Designer" --group Design
 bun run agent:create accessibility-expert --role "Accessibility Expert" --group Design
 ```
 
-에이전트 생성 후 `AGENTS.md`와 `docs/co-design.context.md § Agents`를 업데이트하세요.
+에이전트 생성 후 `AGENTS.md`와 `docs/co-design.context.md § Agents`를 갱신하세요.
 
 ## 에이전트 목록 조회
 

@@ -86,4 +86,4 @@ Software development workflow — full agent team with PM, Architect, Designer, 
 
 ---
 
-*최근 업데이트: 2026-08-09*
+*최근 갱신: 2026-08-09*

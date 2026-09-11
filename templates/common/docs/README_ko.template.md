@@ -73,4 +73,4 @@ lang_reason: source-material
 
 ---
 
-*최근 업데이트: {{LAST_UPDATED}}*
+*최근 갱신: {{LAST_UPDATED}}*

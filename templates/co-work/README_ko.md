@@ -67,7 +67,7 @@ lang_reason: source-material
 1. **기획 및 조율:** PM과 **Project Coordinator**가 작업 일정을 구성합니다.
 2. **리서치 및 분석:** **Analyst**가 데이터를 수집하고 정보를 종합합니다.
 3. **문서 작성:** **Content Writer**와 **Technical Writer**가 문서를 작성합니다.
-4. **리뷰 및 동기화:** `/sync "커밋 메시지"`를 사용하여 안전하게 커밋하고 PR을 엽니다.
+4. **검토 및 동기화:** `/sync "커밋 메시지"`를 사용하여 안전하게 커밋하고 PR을 엽니다.
 
 ### C. 사용 가능한 명령어
 
@@ -86,4 +86,4 @@ lang_reason: source-material
 
 ---
 
-*최근 업데이트: 2026-08-09*
+*최근 갱신: 2026-08-09*

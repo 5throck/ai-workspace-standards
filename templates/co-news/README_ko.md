@@ -94,4 +94,4 @@ Business/finance journalism variant for economics reporters covering listed comp
 
 ---
 
-*최근 업데이트: 2026-08-11*
+*최근 갱신: 2026-08-11*

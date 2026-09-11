@@ -64,7 +64,7 @@ lang_reason: source-material
 - **project-delivery**: 참여 딜리버리 계획 및 관리 — 마일스톤, 이슈 로그, 리스크 등록부, 상태 보고.
 - **solution-design**: 비즈니스 요구사항을 의존성 맵이 포함된 완전한 기술 솔루션 설계로 변환.
 - **stakeholder-alignment**: 체계적인 이해관계자 매핑, 저항 분석, 영향력-관심 우선순위화.
-- **stakeholder-review-management**: 이해관계자 리뷰 주기 관리 — 리뷰어 선정, 피드백, 충돌 해결, 변경 추적.
+- **stakeholder-review-management**: 이해관계자 검토 주기 관리 — 검토자 선정, 피드백, 충돌 해결, 변경 추적.
 - **technical-feasibility**: 제안된 솔루션의 기술적 구현 가능성 평가; 복잡도 등급 및 리스크 산출.
 - **company-intelligence**: 종합적인 기업/기업집단 인텔리전스; 5개 병렬 리서치 에이전트를 하나의 보고서로 통합.
 - **financial-statement-analysis**: 활성 국가 프로필 공시 시스템(KR: DART) 기반 재무제표 분석 전체 파이프라인 — 수집 → 검증 → 정규화 → KPI → ROIC 트리 → 보고서.
@@ -86,7 +86,7 @@ lang_reason: source-material
 2. **리서치 및 아키텍처:** **Strategy Analyst**와 **Solutions Architect**가 접근 방식을 설계합니다.
 3. **실행:** 분야별 전문가(**SME**, **Industry Expert**)가 심층적인 인사이트를 제공합니다.
 4. **전달:** **Communications Lead**와 **Delivery Manager**가 클라이언트 프레젠테이션을 완성합니다.
-5. **리뷰 및 동기화:** `/sync "커밋 메시지"`를 사용하여 안전하게 커밋하고 PR을 엽니다.
+5. **검토 및 동기화:** `/sync "커밋 메시지"`를 사용하여 안전하게 커밋하고 PR을 엽니다.
 
 ### C. 사용 가능한 명령어
 
@@ -105,4 +105,4 @@ lang_reason: source-material
 
 ---
 
-*최근 업데이트: 2026-08-09*
+*최근 갱신: 2026-08-09*
