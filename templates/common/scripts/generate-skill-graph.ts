@@ -99,7 +99,7 @@ function hasTrackedFilesUnder(absDir: string): boolean {
 interface GraphNode {
   id: string;
   type: 'skill' | 'agent' | 'decision' | 'adr' | 'procedure' | 'output_type';
-  layer: 'L0' | 'L3' | 'common' | 'variant:string';
+  layer: 'L0' | 'L3' | 'common' | `variant:${string}`;
   /** Opaque input/output labels from SKILL.md frontmatter (skill nodes only). */
   inputs?: string[];
   outputs?: string[];
@@ -529,7 +529,7 @@ function discoverNodes(): { skills: Map<string, GraphNode>, agents: Map<string, 
 function deriveProceduresFromDir(
   procDir: string,
   namespace: string,
-  layer: string,
+  layer: GraphNode['layer'],
   allNodes: Map<string, GraphNode>,
   edges: GraphEdge[],
 ): void {

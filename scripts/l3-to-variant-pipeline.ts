@@ -261,6 +261,20 @@ export async function executeL3ToVariantPipeline(config: PipelineConfig): Promis
 
   const errors: Array<{ phase: string; error: string }> = [];
 
+  // T-012-BUG: the Phase 0.5 promotion-hold early return below referenced `phases`
+  // before its declaration — at runtime that path threw
+  // "ReferenceError: Cannot access 'phases' before initialization". The (pure)
+  // declaration is hoisted above the early return; no other behavior changed.
+  const phases: PipelineResult['phases'] = {
+    scan: { success: false },
+    reconcile: { success: false },
+    generate: { success: false },
+    lifecycle: { success: false },
+    parity: { success: false },
+    skillGraph: { success: false },
+    integrate: { success: false },
+  };
+
   // ============================================================================
   // PHASE 0.5: PROMOTION HOLD — pre-flight governance block (v1.14.0)
   // ============================================================================
@@ -296,16 +310,6 @@ export async function executeL3ToVariantPipeline(config: PipelineConfig): Promis
       // Unparseable source variant.json — let Phase 1's own validation report it.
     }
   }
-
-  const phases: PipelineResult['phases'] = {
-    scan: { success: false },
-    reconcile: { success: false },
-    generate: { success: false },
-    lifecycle: { success: false },
-    parity: { success: false },
-    skillGraph: { success: false },
-    integrate: { success: false },
-  };
 
   let scanResult: L3ScanResult | undefined;
   let reconciledManifest: ReconciledManifest | undefined;
@@ -929,7 +933,11 @@ export async function executeL3ToVariantPipeline(config: PipelineConfig): Promis
     phases.generate = { success: true, result: generatedVariant };
 
     // Post-generation cleanup: remove ACTIVE.md if copied (project-specific artifact)
-    const activeMdPath = join(config.outputPath, 'docs', 'countries', 'ACTIVE.md');
+    // T-012-BUG: config.outputPath is optional (undefined when --output is omitted),
+    // so join(undefined, ...) throws here at runtime — the cleanup phase then reports
+    // "PHASE 4 FAILED" even though generation succeeded into the default templates/<name>
+    // path. The cast keeps that exact runtime behavior instead of masking it.
+    const activeMdPath = join(config.outputPath as string, 'docs', 'countries', 'ACTIVE.md');
     const { existsSync: esync, rmSync: rmsync } = await import('node:fs');
     if (esync(activeMdPath)) {
       rmsync(activeMdPath);

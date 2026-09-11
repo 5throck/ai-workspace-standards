@@ -219,7 +219,7 @@ function readGovernanceCorpus(): string[] {
   if (existsSync(CONSTITUTION_DIR)) {
     const constitutionFiles = readdirSync(CONSTITUTION_DIR, { recursive: true, withFileTypes: true })
       .filter(dirent => dirent.isFile() && dirent.name.endsWith('.md'))
-      .map(dirent => join(dirent.path, dirent.name));
+      .map(dirent => join(dirent.parentPath, dirent.name));
     files.push(...constitutionFiles);
   }
 
@@ -227,7 +227,7 @@ function readGovernanceCorpus(): string[] {
   if (existsSync(GOVERNANCE_DIR)) {
     const governanceFiles = readdirSync(GOVERNANCE_DIR, { recursive: true, withFileTypes: true })
       .filter(dirent => dirent.isFile() && dirent.name.endsWith('.md'))
-      .map(dirent => join(dirent.path, dirent.name));
+      .map(dirent => join(dirent.parentPath, dirent.name));
     files.push(...governanceFiles);
   }
 

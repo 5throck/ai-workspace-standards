@@ -1,4 +1,4 @@
-// @version 1.9.1
+// @version 1.10.0
 // v1.9.0: feat(skill-review): step 3.96c session-evidence skill review (SkillHone-inspired) —
 //           runs skill-session-review.ts (non-fatal) after 3.96a/3.96b to accumulate
 //           Observed Symptom + Evidence records into memory/skill-review/, plus a
@@ -335,6 +335,21 @@ if (fs.existsSync('package.json')) {
 // Check 2: README_ko pair
 if (fs.existsSync('README.md') && !fs.existsSync('README_ko.md')) {
     console.warn('⚠️  README_ko.md missing (non-blocking)');
+}
+
+// 3.95b Typecheck gate (T-20260910-012; blocking, root context only). Runs
+// `scripts/typecheck.ts`: `tsc --noEmit` over scripts/ vs the recorded baseline
+// (0 since the 2026-09-11 Phase 2 triage) — fails on ANY type error. The
+// baseline file is a root-context asset; scaffolded projects (no baseline)
+// skip cleanly inside typecheck.ts itself. Inline context.md check (the
+// shared isL0Context const is declared further below).
+if (fs.existsSync('CONSTITUTION.md') && fs.existsSync('scripts/typecheck.ts')) {
+    console.log('📋 Step 3.95b: Typecheck gate (tsc --noEmit over scripts/)...');
+    const typecheckResult = await $`bun scripts/typecheck.ts`.nothrow();
+    if (typecheckResult.exitCode !== 0) {
+        console.error(`${RED}❌ Typecheck gate failed — fix the type errors (never raise the baseline to absorb new debt).${RESET}`);
+        process.exit(1);
+    }
 }
 
 // 3.96 Skill & decision-chain validators (fail-closed gates, ADR-0055/0061; reledgev

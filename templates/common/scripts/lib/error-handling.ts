@@ -363,7 +363,12 @@ export async function withErrorHandling<T>(
     return await fn();
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    const error = fatalError(phase, 'UNCAUGHT', message, undefined, undefined, context);
+    // T-012-BUG: this call originally passed `context` as a 6th argument, but
+    // fatalError() only accepts 3-5 params and silently drops it — the context
+    // never reached the PipelineError. Trimmed to the supported arity; runtime
+    // behavior is unchanged. To actually plumb context through, fatalError
+    // needs a `context?: Record<string, unknown>` parameter forwarded to createError.
+    const error = fatalError(phase, 'UNCAUGHT', message);
     logError(error);
     const recovery = determineRecoveryAction(error);
     await executeRecoveryAction(recovery);
@@ -383,7 +388,10 @@ export function withSyncErrorHandling<T>(
     return fn();
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    const error = fatalError(phase, 'UNCAUGHT', message, undefined, undefined, context);
+    // T-012-BUG: see withErrorHandling above — the original 6th `context` argument
+    // was silently dropped by fatalError(); trimmed to the supported arity with
+    // runtime behavior unchanged.
+    const error = fatalError(phase, 'UNCAUGHT', message);
     logError(error);
     const recovery = determineRecoveryAction(error);
     void executeRecoveryAction(recovery);

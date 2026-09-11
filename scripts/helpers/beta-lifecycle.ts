@@ -82,8 +82,11 @@ export interface PromotionEligibilityResult {
   currentState: BetaLifecycleState;
   /** Detailed eligibility check */
   eligibilityCheck: {
-    engagementsMet: boolean;
-    betaDurationMet: boolean;
+    // T-012-BUG: sourced from PromotionEligibility.engagementsMet/betaDurationMet, which
+    // checkPromotionEligibility() never populates — these are `undefined` at runtime.
+    // Optional here to describe current reality without changing behavior.
+    engagementsMet?: boolean;
+    betaDurationMet?: boolean;
     additionalChecksPassed: boolean;
     reasons: string[];
   };

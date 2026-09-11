@@ -569,8 +569,8 @@ if (existsSync(projPmMd)) {
     // Note: no `schema` option — js-yaml v5 dropped its DEFAULT_SCHEMA export, and
     // omitting `schema` already selects the default schema (the previous
     // `{ schema: yaml.DEFAULT_SCHEMA }` was passing `undefined` at runtime).
-    const stubFm: Record<string, unknown> = yaml.load(pmFmMatch[1]) || {};
-    const l1Fm: Record<string, unknown> = l1FmMatch ? (yaml.load(l1FmMatch[1]) || {}) : {};
+    const stubFm: Record<string, unknown> = (yaml.load(pmFmMatch[1]) as Record<string, unknown>) || {};
+    const l1Fm: Record<string, unknown> = l1FmMatch ? ((yaml.load(l1FmMatch[1]) as Record<string, unknown>) || {}) : {};
       delete (stubFm as { extends?: unknown }).extends;
       for (const [k, v] of Object.entries(l1Fm)) {
         if (stubFm[k] === undefined && k !== 'extends') stubFm[k] = v;
@@ -591,7 +591,11 @@ if (existsSync(pruneHelper)) {
   const pruneResult = spawnSync(process.execPath, [pruneHelper, projectDir, selectedCountry || 'none'], { stdio: 'inherit' });
   if (pruneResult.status !== 0) {
     console.error('❌ Prune helper failed');
-    rollbackPartialProject(projectDir);
+    // T-012-BUG: called with only (projectDir); the required workspaceRoot argument was
+    // missing, so at runtime resolve(undefined) threw inside the helper and the partial-
+    // project rollback never ran (the script crashed instead of exiting cleanly).
+    // Passing workspaceRoot (same as the existing call above) restores the intended behavior.
+    rollbackPartialProject(projectDir, workspaceRoot);
     if (import.meta.main) {
       process.exit(1);
     }
@@ -687,7 +691,7 @@ if (existsSync(pmMd)) {
   content = content.replace(/^# @resolved-from:.*\n/m, '');
   const match = content.match(/^---\n([\s\S]*?)\n---\n?/);
   if (match) {
-    const fm: Record<string, unknown> = yaml.load(match[1]) || {};
+    const fm: Record<string, unknown> = (yaml.load(match[1]) as Record<string, unknown>) || {};
     // lifecycle is REGENERATED, not deleted. The resolved pm.md inherits L0's block verbatim —
     // including created/last_updated dates describing the workspace's own history, which are
     // meaningless in a freshly scaffolded project. But deleting it outright left the project

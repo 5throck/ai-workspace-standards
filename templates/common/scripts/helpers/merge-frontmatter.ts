@@ -85,7 +85,7 @@ const ALLOWED_PATHS = new Set(["agents/", "templates/", "vendors/", "scripts/", 
 const MAX_EXTENDS_DEPTH = 10;
 
 interface Frontmatter {
-  extends?: string;
+  extends?: string | null;
   [key: string]: any;
 }
 
@@ -1477,7 +1477,7 @@ const FALLBACK_HIERARCHY: Record<string, string[]> = {
  * @returns Object mapping agent types to agent names
  */
 function extractAgentTypes(agentRoster: any[], variant: string): Record<string, string> {
-  const types: Record<string, string> = {
+  const types: Record<string, string | null> = {
     design: null,
     execution: null,
     qa: null,
@@ -1565,7 +1565,9 @@ function extractAgentTypes(agentRoster: any[], variant: string): Record<string, 
     }
   }
 
-  return types;
+  // The fallback loop above populates every key (final L0 fallback covers all 8 types),
+  // so the returned map only ever holds string values at this point.
+  return types as Record<string, string>;
 }
 
 /**

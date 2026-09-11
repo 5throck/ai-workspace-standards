@@ -15,6 +15,10 @@
  * - lib/pipeline-state.ts (State persistence)
  */
 
+// T-012-NOTE: `semver` ships no type declarations; adding @types/semver would change
+// package.json, which is out of scope for this type-annotation-only pass. The import
+// is `any` here; only valid/gt/lt are used (version comparison, see compareVersions).
+// @ts-expect-error — semver has no bundled or installed type declarations
 import * as semver from 'semver';
 import { join, basename } from 'path';
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';

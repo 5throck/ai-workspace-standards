@@ -5,12 +5,18 @@ title: >-
   validator-hardening: add TypeScript typecheck (tsc --noEmit) over scripts/ to
   the validator battery or CI — 2137 pre-existing errors need triage first
 priority: high
-status: backlog
+status: review
 attempts: 0
 created_at: '2026-09-10T14:01:23.118Z'
 history:
   - at: '2026-09-10T14:01:23.118Z'
     from: null
     to: backlog
+  - at: '2026-09-11T00:17:40.512Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-11T00:17:40.524Z'
+    from: waiting
+    to: review
 result: null
 error: null

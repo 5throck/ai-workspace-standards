@@ -8,7 +8,7 @@
  * @Risk #5: Rollback Capability (P1 - High)
  */
 
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync, rmSync } from 'fs';
 import { join } from 'path';
 import { ErrorPhase } from './error-handling';
 
@@ -260,17 +260,17 @@ async function executeRollbackAction(action: RollbackAction): Promise<void> {
   switch (actionType) {
     case 'create_file':
       // Delete created file (force: missing-ok, same semantics as `rm -f`)
-      fs.rmSync(target, { force: true });
+      rmSync(target, { force: true });
       break;
 
     case 'create_directory':
       // Delete created directory (recursive+force, same semantics as `rm -rf`)
-      fs.rmSync(target, { recursive: true, force: true });
+      rmSync(target, { recursive: true, force: true });
       break;
 
     case 'copy_file':
       // Delete copied file (force: missing-ok, same semantics as `rm -f`)
-      fs.rmSync(target, { force: true });
+      rmSync(target, { force: true });
       break;
 
     case 'modify_file':
@@ -297,7 +297,7 @@ async function executeRollbackAction(action: RollbackAction): Promise<void> {
  * @version 1.1.0
  */
 export async function clearState(): Promise<void> {
-  fs.rmSync(STATE_FILE, { force: true });
+  rmSync(STATE_FILE, { force: true });
 }
 
 /**

@@ -7,7 +7,7 @@
  * @usage bun scripts/team-builder.ts <proposal-json-path> [--dry-run]
  */
 
-import { existsSync, mkdirSync, unlinkSync } from "node:fs";
+import { existsSync, mkdirSync, unlinkSync, readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 
 // ─── ANSI Colors ────────────────────────────────────────────────────────────
@@ -157,7 +157,11 @@ function initCheckpoints(): Checkpoint[] {
 function loadCheckpoints(): Checkpoint[] {
   if (existsSync(CHECKPOINT_FILE)) {
     try {
-      const raw = Bun.file(CHECKPOINT_FILE).textSync();
+      // T-012-BUG: this used Bun.file(CHECKPOINT_FILE).textSync(), but BunFile has no
+      // textSync() (types or runtime) — the call threw TypeError on every run, the catch
+      // swallowed it, and saved checkpoints were silently replaced with fresh ones.
+      // Sync node:fs read keeps the function synchronous and restores the intended load.
+      const raw = readFileSync(CHECKPOINT_FILE, "utf-8");
       return JSON.parse(raw) as Checkpoint[];
     } catch (err) {
       console.error(`[team-builder] Error: ${err}`);

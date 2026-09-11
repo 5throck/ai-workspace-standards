@@ -89,8 +89,14 @@ export class ConsultingPlugin implements VariantPlugin {
     // --- Check 2: Engagement methodology field ---
     // Consulting variants should declare an engagement methodology in variant.json.
     // A structured methodology ensures consistent and repeatable client delivery.
+    // Conservative shim: ValidationContext.variantJson is `unknown` (structure varies
+    // by variant type); the cast keeps the raw property-access semantics unchanged.
+    const variantJson = ctx.variantJson as {
+      engagement_methodology?: unknown;
+      deliverable_template?: unknown;
+    };
     if (
-      !ctx.variantJson.engagement_methodology
+      !variantJson.engagement_methodology
     ) {
       issues.push({
         severity: 'warning',
@@ -104,7 +110,7 @@ export class ConsultingPlugin implements VariantPlugin {
     // Standard deliverable template documentation for consulting contexts.
     // This is informational; not all consulting contexts require explicit deliverable template docs.
     if (
-      !ctx.variantJson.deliverable_template
+      !variantJson.deliverable_template
     ) {
       issues.push({
         severity: 'info',

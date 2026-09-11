@@ -6,12 +6,21 @@ title: >-
   exemption for variant templates, _ko-suffix files) and standardize one ko
   declaration key
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-10T14:01:23.320Z'
 history:
   - at: '2026-09-10T14:01:23.320Z'
     from: null
     to: backlog
+  - at: '2026-09-11T00:17:40.440Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-11T00:17:40.454Z'
+    from: waiting
+    to: review
+  - at: '2026-09-11T00:17:40.466Z'
+    from: review
+    to: done
 result: null
 error: null

@@ -182,7 +182,7 @@ export function validateRegistryIntegrity(): RegistryIntegrityReport {
     }
   }
   // Verify every referenced capability exists in the registry
-  const registeredCapabilityValues = new Set(Object.values(CAPABILITY_REGISTRY));
+  const registeredCapabilityValues = new Set<string>(Object.values(CAPABILITY_REGISTRY));
   for (const ref of allReferencedCapabilities) {
     if (!registeredCapabilityValues.has(ref)) {
       // This would also be caught by check 5, but we report it with a distinct registry label

@@ -247,7 +247,10 @@ async function runStructuralChecks(skills: string[]): Promise<string[]> {
 }
 
 // ── 4. Report rendering ──────────────────────────────────────────────────────
-function renderMarkdown(records: ReviewRecord[], evidence: SkillEvidence[], findings: string[]): string {
+// `records` is keyed by skill name (Map API is used throughout this function and
+// the only caller passes deriveSymptoms()'s Map) — the old `ReviewRecord[]`
+// annotation did not match the implementation.
+function renderMarkdown(records: Map<string, ReviewRecord>, evidence: SkillEvidence[], findings: string[]): string {
     const typeCounts = new Map<string, number>();
     for (const r of records.values()) {
         typeCounts.set(r.observed_symptom.type, (typeCounts.get(r.observed_symptom.type) ?? 0) + 1);

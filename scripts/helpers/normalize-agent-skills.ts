@@ -83,7 +83,7 @@ export interface NormalizationResult {
   /** New skill files extracted from agent bodies */
   extractedSkills: ExtractedSkill[];
   /** MEDIUM confidence detections awaiting user approval */
-  pendingApprovals: DetectedSkillPattern & { agentPath: string }[];
+  pendingApprovals: (DetectedSkillPattern & { agentPath: string })[];
   /** Warnings and info messages */
   warnings: NormalizationWarning[];
 }

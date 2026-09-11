@@ -154,13 +154,13 @@ function parseAgentFrontmatter(filePath: string): AgentFrontmatter | null {
         }
         // Strip comments and clean the value
         const cleanValue = value.split('#')[0].trim().replace(/^['"]|['"]$/g, '');
-        frontmatter['tier'][key] = cleanValue;
+        (frontmatter['tier'] as Record<string, string>)[key] = cleanValue;
       } else {
         frontmatter[key] = value.replace(/^['"]|['"]$/g, '');
       }
     }
 
-    return frontmatter as AgentFrontmatter;
+    return frontmatter as unknown as AgentFrontmatter;
   } catch {
     return null;
   }
@@ -446,7 +446,7 @@ function auditAgents(jsonMode = false): AuditResult {
       });
     } else {
       // Check 9: Tier validation - missing platforms
-      const requiredPlatforms = ['claude', 'antigravity', 'gemini-cli'];
+      const requiredPlatforms = ['claude', 'antigravity', 'gemini-cli'] as const;
       for (const platform of requiredPlatforms) {
         if (!frontmatter.tier[platform]) {
           errors.push({

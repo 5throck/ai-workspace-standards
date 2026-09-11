@@ -1828,15 +1828,10 @@ async function main() {
       }
 
       const readmePath = join(variantPath, 'README.md');
-      const readmeTemplatePath = resolve(process.cwd(), 'templates', regenerateArg, 'README.template.md');
 
-      if (!existsSync(readmeTemplatePath)) {
-        console.error(`❌ README.template.md not found for variant ${regenerateArg}`);
-        process.exit(1);
-      }
-
-      // Re-render README
-      const readmeContent = await renderREADME(metadata, readmeTemplatePath);
+      // Re-render README from the canonical common template (structural SSOT —
+      // a per-variant README.template.md is not required for regeneration).
+      const readmeContent = generateReadme(variantPath, metadata);
       writeFileSync(readmePath, readmeContent, 'utf-8');
 
       console.log(`\n✅ README regenerated for templates/${regenerateArg}`);

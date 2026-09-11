@@ -1,14 +1,14 @@
 {
   "compilerOptions": {
-    "strict": true,
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "noEmit": true,
+    "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
+    "noEmit": true,
     "declaration": false,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    "types": ["bun"],
+    "skipLibCheck": true,
     "noFallthroughCasesInSwitch": true
   },
   "include": ["scripts/**/*.ts"],

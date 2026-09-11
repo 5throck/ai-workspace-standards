@@ -342,7 +342,7 @@ function updateVersionRegistry(metadata: VariantMetadata): boolean {
       // Update existing entry
       existing.variant_type = metadata.variantType;
       existing.version = metadata.version;
-      existing.status = metadata.status;
+      existing.status = metadata.status as VersionRegistryEntry['status'];
       existing.inherits = metadata.inherits_common;
     } else {
       // Add new entry
@@ -350,7 +350,7 @@ function updateVersionRegistry(metadata: VariantMetadata): boolean {
         name: metadata.name,
         variant_type: metadata.variantType,
         version: metadata.version,
-        status: metadata.status,
+        status: metadata.status as VersionRegistryEntry['status'],
         inherits: metadata.inherits_common,
         created_at: new Date().toISOString(),
       };

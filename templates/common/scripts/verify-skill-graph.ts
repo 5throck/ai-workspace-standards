@@ -41,7 +41,10 @@ const ROOT = resolve(__dirname, '..');
 
 interface GraphNode {
   id: string;
-  type: 'skill' | 'agent';
+  // Mirrors GraphNode.type in generate-skill-graph.ts — scope/derived graphs carry
+  // decision/adr/procedure/output_type nodes too, so the narrow old union made
+  // compareGraphs(derived, committed) unassignable.
+  type: 'skill' | 'agent' | 'decision' | 'adr' | 'procedure' | 'output_type';
   layer: string;
 }
 
@@ -138,7 +141,9 @@ function hasCountryMark(text: string, countryCodes: string[]): boolean {
  * Check if an override entry is stale (> 12 months since last_reviewed)
  */
 function isStaleOverride(override: OverrideEdge): boolean {
-  const lastReviewed = new Date(override.last_reviewed);
+  // `last_reviewed` is optional; new Date(undefined) yields Invalid Date and the
+  // comparison below is false — the cast preserves that exact behavior.
+  const lastReviewed = new Date(override.last_reviewed as string);
   const now = new Date();
   const monthsDiff = (now.getFullYear() - lastReviewed.getFullYear()) * 12 +
                      (now.getMonth() - lastReviewed.getMonth());

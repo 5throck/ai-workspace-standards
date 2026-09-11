@@ -57,6 +57,13 @@ export interface PromotionEligibility {
   additionalChecksPassed: string[];
   additionalChecksFailed: string[];
   reasons: string[];
+  // T-012-BUG: consumers (scripts/helpers/beta-lifecycle.ts) read `engagementsMet` and
+  // `betaDurationMet` from this object, but checkPromotionEligibility() never sets them —
+  // they are always `undefined` at runtime. Declared optional to describe current reality
+  // without changing behavior; the internal flags (`engagementsMet`, `betaMonthsMet`) are
+  // computed but dropped from the return value.
+  engagementsMet?: boolean;
+  betaDurationMet?: boolean;
 }
 
 /**
@@ -85,6 +92,11 @@ export interface L1MajorReconciliationPlan {
     variant: string;
     action: 'reconcile' | 'skip' | 'manual_review';
     reason: string;
+    // T-012-BUG: generateL1MajorReconciliationPlan() never sets `canParallel` on its
+    // steps, so the console log there always renders "sequential" regardless of the
+    // variant's allowsParallelReconciliation flag. Declared optional to describe
+    // current reality without changing behavior.
+    canParallel?: boolean;
   }>;
   estimatedDuration: string;
   requiresRollback: boolean;
@@ -395,7 +407,7 @@ export function planL1MajorUpdate(newL1Version: string): L1MajorReconciliationPl
     .filter(d => d.variant !== 'templates/common')
     .sort((a, b) => a.reconciliationOrder - b.reconciliationOrder);
 
-  const reconciliationSteps = variants.map((variant, index) => ({
+  const reconciliationSteps: L1MajorReconciliationPlan['reconciliationSteps'] = variants.map((variant, index) => ({
     order: variant.reconciliationOrder,
     variant: variant.variant,
     action: (variant.allowsParallelReconciliation ? 'reconcile' : 'reconcile') as 'reconcile' | 'skip' | 'manual_review',

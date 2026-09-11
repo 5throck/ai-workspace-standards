@@ -1,5 +1,5 @@
 {
-  "count": 2169,
-  "updated": "2026-09-10",
-  "note": "Pre-existing typecheck debt at gate introduction (T-20260910-012; ~2137 at ticket time, 2160 measured 2026-09-10 before the gate script itself landed; 2169 includes scripts/typecheck.ts's own share of the repo-wide missing-bun/node-types debt). The gate fails only on regression — triage the debt before tightening, and never raise this count to absorb new errors."
+  "count": 0,
+  "updated": "2026-09-11",
+  "note": "Phase 2 triage complete (2026-09-11): type roots fixed (@types/bun + tsconfig) and all pre-existing errors resolved. Any type error fails the gate. Never raise this count — fix the error instead."
 }

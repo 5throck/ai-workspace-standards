@@ -81,7 +81,9 @@ function parseFrontmatter(content: string): FrontmatterResult {
 
 function stringifyFrontmatter(fm: Record<string, unknown>, body: string): string {
   // Use js-yaml dump for clean YAML output
-  const yamlStr = yamlDump(fm, { lineWidth: 120, quotingType: '"', forceQuotes: false }).trimEnd();
+  // Note: `quotingType` was dropped in js-yaml v5 (ignored at runtime) — removed here;
+  // output is unchanged.
+  const yamlStr = yamlDump(fm, { lineWidth: 120, forceQuotes: false }).trimEnd();
   return `---\n${yamlStr}\n---\n${body}`;
 }
 
