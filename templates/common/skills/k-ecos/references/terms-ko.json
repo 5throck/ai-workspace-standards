@@ -12,10 +12,10 @@
   },
   "cycle_codes": {
     "연": { "en": "annual", "mapsTo": { "cycle": "A", "dateFormat": "YYYY" } },
-    "반년": { "en": "semi-annual", "mapsTo": { "cycle": "S", "dateFormat": "unverified" }, "verified": false },
+    "반년": { "en": "semi-annual", "mapsTo": { "cycle": "S", "dateFormat": "YYYYS<n> (e.g. 2024S1)" }, "note": "live-verified 2026-09-11 (table 105Y001)" },
     "분기": { "en": "quarterly", "mapsTo": { "cycle": "Q", "dateFormat": "YYYYQn" } },
     "월": { "en": "monthly", "mapsTo": { "cycle": "M", "dateFormat": "YYYYMM" } },
-    "반월": { "en": "semi-monthly", "mapsTo": { "cycle": "SM", "dateFormat": "unverified" }, "verified": false },
+    "반월": { "en": "semi-monthly", "mapsTo": { "cycle": "SM", "dateFormat": "YYYYMMS<n> (e.g. 202401S1 = Jan, 1st half)" }, "note": "live-verified 2026-09-11 (table 814Y002)" },
     "일": { "en": "daily", "mapsTo": { "cycle": "D", "dateFormat": "YYYYMMDD" } }
   },
   "tables": {
@@ -42,6 +42,20 @@
     "본원통화 구성내역(평잔, 원계열)": {
       "en": "Components of the Monetary Base (daily average, original series)",
       "mapsTo": { "tableCode": "102Y004", "source": "live StatisticItemList 2026-09-11 via verify-terms.ts (originally from official-guide sample)" }
+    },
+    "예금규모별 계좌수 및 금액": {
+      "en": "Number of accounts and amounts by deposit size (semi-annual)",
+      "mapsTo": { "tableCode": "105Y001", "source": "live StatisticItemList + StatisticSearch 2026-09-11", "cycle": "S" },
+      "items": {
+        "요구불예금(실세)": { "en": "demand deposits (rates)", "mapsTo": { "itemCode": "1010000", "cycles": ["S"] } }
+      }
+    },
+    "예금은행 지급준비액(구기준, 평잔)": {
+      "en": "Required reserves of deposit money banks (old basis, daily average; semi-monthly, data ends 2008)",
+      "mapsTo": { "tableCode": "814Y002", "source": "live StatisticItemList + StatisticSearch 2026-09-11", "cycle": "SM" },
+      "items": {
+        "실제지급준비액": { "en": "actual reserves", "mapsTo": { "itemCode": "1020000", "cycles": ["SM"] } }
+      }
     }
   },
   "keystat_names": {

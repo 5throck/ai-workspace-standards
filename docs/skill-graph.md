@@ -176,7 +176,7 @@ Skills used in specific lifecycle phases (from `variant.json` `skill_manifest`):
 | `used_by` | Agent ↔ skill relation (from `required_skills` or `used_by_agents`) |
 | `phase` | Skill used in a lifecycle phase (from `variant.json` `skill_manifest.phases`) |
 | `supersedes` | Supersession — overrides (manual) or decision-record prose labels |
-| `references` | Backtick reference in SKILL.md/agent/ADR body prose, or DEC `knowledge_refs[]` naming an ADR |
+| `references` | Backtick reference in SKILL.md/agent/ADR body prose, DEC `knowledge_refs[]` naming an ADR, or skill → `term:` node from references/terms-ko.json (ADR-0072) |
 | `cites_skill` | Decision record `skills_used[]` validated against the skill set (ADR-0061 amendment 2026-08-25) |
 | `composes_with` | Typed `relates_to` entry — symmetric, used together in the same phase/workflow (ADR-0060 Amendment 3) |
 | `follows` | Typed `relates_to` entry — sequential/ordering relation, no dependency implication (ADR-0060 Amendment 3) |
@@ -255,3 +255,146 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `dec:DEC-20260825-02` | decision | `sync` | — | — |
 | `dec:DEC-20260829-01` | decision | `decision-record` | — | — |
 | `dec:DEC-20260829-02` | decision | `decision-record` | — | — |
+
+## Korean Term Vocabulary (terms-ko.json)
+
+> Source-language vocabulary quoted from `references/terms-ko.json` data files
+> (CONSTITUTION §6.7 non-Markdown reference assets). Term ids are namespaced
+> `term:<용어>` in `docs/skill-graph.json`.
+
+| Term | Layer | Referencing skills |
+|------|-------|--------------------|
+| `100대 통계지표` | common | `k-ecos` |
+| `balPayments` | common | `k-opendata` |
+| `expDlr` | common | `k-opendata` |
+| `expWgt` | common | `k-opendata` |
+| `hsCd` | common | `k-opendata` |
+| `hsCode` | common | `k-opendata` |
+| `impDlr` | common | `k-opendata` |
+| `impWgt` | common | `k-opendata` |
+| `SERVICE_KEY_IS_NOT_REGISTERED_ERROR` | common | `k-opendata` |
+| `SERVICE_KEY_IS_NULL` | common | `k-opendata` |
+| `statCd` | common | `k-opendata` |
+| `statKor` | common | `k-opendata` |
+| `가구당월평균소득` | common | `k-ecos` |
+| `감사` | variant:co-consult | `company-intelligence` |
+| `감사보고서` | variant:co-consult | `company-intelligence` |
+| `감사의견` | common | `k-dart` |
+| `감자` | common | `k-dart` |
+| `개발계정` | common | `k-opendata` |
+| `경제성장률(전기대비)` | common | `k-ecos` |
+| `경제심리지수` | common | `k-ecos` |
+| `계열사` | variant:co-consult | `company-intelligence` |
+| `공포일자` | common | `k-law` |
+| `국가별 수출입실적(GW)` | common | `k-opendata` |
+| `국내총생산(명목, 원화표시)` | common | `k-ecos` |
+| `금융감독원` | variant:co-consult | `company-intelligence` |
+| `나이스신용평가` | variant:co-consult | `company-intelligence` |
+| `년간` | common | `k-kosis` |
+| `당기순이익` | common | `company-intelligence`, `k-dart` |
+| `대표이사` | variant:co-consult | `company-intelligence` |
+| `데이터가 존재하지 않습니다.` | common | `k-kosis` |
+| `매출액` | common | `company-intelligence`, `k-dart` |
+| `모회사` | variant:co-consult | `company-intelligence` |
+| `무상증자` | common | `k-dart` |
+| `미등록키` | common | `k-dart` |
+| `반기보고서` | common | `k-dart` |
+| `반년` | common | `k-ecos` |
+| `반월` | common | `k-ecos` |
+| `법령ID` | common | `k-law` |
+| `법령명한글` | common | `k-law` |
+| `법령용어` | common | `k-law` |
+| `법령일련번호` | common | `k-law` |
+| `법령해석례` | common | `k-law` |
+| `법원명` | common | `k-law` |
+| `별표` | common | `k-law` |
+| `별표서식` | common | `k-law` |
+| `본원통화 구성내역(평잔, 원계열)` | common | `k-ecos` |
+| `부적정` | common | `k-dart` |
+| `부채비율` | variant:co-consult | `company-intelligence` |
+| `부채총계` | common | `k-dart` |
+| `부칙` | common | `k-law` |
+| `부회장` | variant:co-consult | `company-intelligence` |
+| `분기` | common | `k-ecos`, `k-kosis` |
+| `분기보고서` | common | `k-dart` |
+| `분할` | common | `k-dart` |
+| `사건명` | common | `k-law` |
+| `사건번호` | common | `k-law` |
+| `사업보고서` | common | `company-intelligence`, `k-dart` |
+| `사외이사` | variant:co-consult | `company-intelligence` |
+| `사용할수없는키` | common | `k-dart` |
+| `서비스 통계 목록` | common | `k-ecos` |
+| `선고일자` | common | `k-law` |
+| `소관부처` | common | `k-law` |
+| `소비자동향지수` | common | `k-ecos` |
+| `소송` | common | `k-dart` |
+| `수출입총괄(GW)` | common | `k-opendata` |
+| `시가총액` | variant:co-consult | `company-intelligence` |
+| `시도별 수출입실적(GW)` | common | `k-opendata` |
+| `시행일 법령` | common | `k-law` |
+| `시행일자` | common | `k-law` |
+| `실제지급준비액` | common | `k-ecos` |
+| `연` | common | `k-ecos` |
+| `영업이익` | common | `company-intelligence`, `k-dart` |
+| `예금규모별 계좌수 및 금액` | common | `k-ecos` |
+| `예금은행 지급준비액(구기준, 평잔)` | common | `k-ecos` |
+| `요구불예금(실세)` | common | `k-ecos` |
+| `운영계정` | common | `k-opendata` |
+| `원/달러 환율(종가)` | common | `k-ecos` |
+| `월` | common | `k-ecos` |
+| `월간` | common | `k-kosis` |
+| `유가증권시장` | common | `company-intelligence`, `k-dart` |
+| `유상증자` | common | `k-dart` |
+| `의견거절` | common | `k-dart` |
+| `이사회` | variant:co-consult | `company-intelligence` |
+| `인구총조사 인구총표` | common | `k-kosis` |
+| `일` | common | `k-ecos` |
+| `일간` | common | `k-kosis` |
+| `자기주식처분` | common | `k-dart` |
+| `자기주식취득` | common | `k-dart` |
+| `자본총계` | common | `k-dart` |
+| `자산총계` | common | `k-dart` |
+| `자치법규` | common | `k-law` |
+| `자회사` | variant:co-consult | `company-intelligence` |
+| `잘못된 요청 변수를 호출 하였습니다.` | common | `k-kosis` |
+| `적정` | common | `k-dart` |
+| `전자공시시스템` | variant:co-consult | `company-intelligence` |
+| `접근할수없는IP` | common | `k-dart` |
+| `정상` | common | `k-dart` |
+| `조문` | common | `k-law` |
+| `조약` | common | `k-law` |
+| `조회된데이터가없음` | common | `k-dart` |
+| `주요사항보고서` | common | `k-dart` |
+| `주요지표(연간지표)` | common | `k-ecos` |
+| `지분율` | variant:co-consult | `company-intelligence` |
+| `지주회사` | variant:co-consult | `company-intelligence` |
+| `총계` | common | `k-opendata` |
+| `최대주주` | variant:co-consult | `company-intelligence` |
+| `코넥스시장` | common | `k-dart` |
+| `코스닥` | variant:co-consult | `company-intelligence` |
+| `코스닥시장` | common | `k-dart` |
+| `통계 세부항목 목록` | common | `k-ecos` |
+| `통계 조회 조건 설정` | common | `k-ecos` |
+| `통계메타DB` | common | `k-ecos` |
+| `통계목록조회` | common | `k-kosis` |
+| `통계설명` | common | `k-kosis` |
+| `통계용어사전` | common | `k-ecos` |
+| `통계자료조회` | common | `k-kosis` |
+| `통합검색` | common | `k-kosis` |
+| `특수관계인` | variant:co-consult | `company-intelligence` |
+| `판결요지` | common | `k-law` |
+| `판례` | common | `k-law` |
+| `품목별 국가별 수출입실적(GW)` | common | `k-opendata` |
+| `품목별 수출입실적(GW)` | common | `k-opendata` |
+| `한국거래소` | variant:co-consult | `company-intelligence` |
+| `한국기업평가` | variant:co-consult | `company-intelligence` |
+| `한국신용평가` | variant:co-consult | `company-intelligence` |
+| `한국은행 기준금리` | common | `k-ecos` |
+| `한국은행 기준금리 및 여수신금리` | common | `k-ecos` |
+| `한정` | common | `k-dart` |
+| `합병` | common | `k-dart` |
+| `행정규칙` | common | `k-law` |
+| `헌재결정례` | common | `k-law` |
+| `현행법령` | common | `k-law` |
+| `활용신청` | common | `k-opendata` |
+| `회장` | variant:co-consult | `company-intelligence` |

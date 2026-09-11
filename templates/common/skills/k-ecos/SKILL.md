@@ -125,13 +125,13 @@ Common leading segments:
 | Cycle | Meaning | Date format (`검색시작일자` / `검색종료일자`) |
 |---|---|---|
 | `A` | `연` (annual) | `2024` |
-| `S` | `반년` (semi-annual) | e.g. `2024S1` ⚠️ Unverified |
+| `S` | `반년` (semi-annual) | `2024S1` / `2024S2` (live-verified 2026-09-11) |
 | `Q` | `분기` (quarterly) | `2024Q1` |
 | `M` | `월` (monthly) | `202401` |
-| `SM` | `반월` (semi-monthly) | ⚠️ Unverified — confirm format from `StatisticItemList` `START_TIME`/`END_TIME` |
+| `SM` | `반월` (semi-monthly) | `202401S1` / `202401S2` — month + half index (live-verified 2026-09-11) |
 | `D` | `일` (daily) | `20240101` |
 
-The date format must match the cycle exactly, otherwise `ERROR-101` (`주기와 다른 형식의 날짜 형식입니다`). When unsure of a table's cycles and coverage, read `CYCLE`/`START_TIME`/`END_TIME` from `StatisticItemList` first.
+Verified-format examples: `S` → table `105Y001` (`예금규모별 계좌수 및 금액`), `SM` → table `814Y002` (`예금은행 지급준비액(구기준, 평잔)`, data ends 2008). When unsure of a table's cycles and coverage, read `CYCLE`/`START_TIME`/`END_TIME` from `StatisticItemList` first — the `START_TIME`/`END_TIME` values themselves show the exact date format for that cycle. The date format must match the cycle exactly, otherwise `ERROR-101` (`주기와 다른 형식의 날짜 형식입니다`).
 
 ### 1. StatisticSearch (`통계 조회 조건 설정`) — main data endpoint
 

@@ -1,8 +1,13 @@
 #!/usr/bin/env bun
 /**
  * Skill Relationship Graph Generator
- * @version 1.9.0
+ * @version 1.10.0
  *
+ * v1.10.0 (2026-09-11): render the term vocabulary in docs/skill-graph.md —
+ * a "## Korean Term Vocabulary (terms-ko.json)" table (term | layer |
+ * referencing skills) after Decisions & ADRs; Edge Types table's `references`
+ * row now mentions term nodes. Resolves the ADR-0072 open question; the JSON
+ * remains the machine SSOT.
  * v1.9.0 (2026-09-11): Source 1b — term-node extraction per ADR-0072. Each
  * skill's references/terms-ko.json (non-Markdown asset, CONSTITUTION §6.7)
  * contributes `term:<용어>` nodes plus skill→term `references` edges, making
@@ -1409,7 +1414,7 @@ function generateMarkdown(graph: SkillGraph): string {
   lines.push('| `used_by` | Agent ↔ skill relation (from `required_skills` or `used_by_agents`) |');
   lines.push('| `phase` | Skill used in a lifecycle phase (from `variant.json` `skill_manifest.phases`) |');
   lines.push('| `supersedes` | Supersession — overrides (manual) or decision-record prose labels |');
-  lines.push('| `references` | Backtick reference in SKILL.md/agent/ADR body prose, or DEC `knowledge_refs[]` naming an ADR |');
+  lines.push('| `references` | Backtick reference in SKILL.md/agent/ADR body prose, DEC `knowledge_refs[]` naming an ADR, or skill → `term:` node from references/terms-ko.json (ADR-0072) |');
   lines.push('| `cites_skill` | Decision record `skills_used[]` validated against the skill set (ADR-0061 amendment 2026-08-25) |');
   lines.push('| `composes_with` | Typed `relates_to` entry — symmetric, used together in the same phase/workflow (ADR-0060 Amendment 3) |');
   lines.push('| `follows` | Typed `relates_to` entry — sequential/ordering relation, no dependency implication (ADR-0060 Amendment 3) |');
@@ -1447,6 +1452,29 @@ function generateMarkdown(graph: SkillGraph): string {
         .map(e => e.to)
         .join(', ');
       lines.push(`| \`${n.id}\` | ${n.type} | ${cites || '—'} | ${refs || '—'} | ${sup || '—'} |`);
+    }
+    lines.push('');
+  }
+
+  // Term vocabulary section (ADR-0072): term nodes extracted from skill
+  // references/terms-ko.json files, with the skills that reference them.
+  // Term keys are quoted source-language vocabulary (data, per §6.7), not prose.
+  const termNodes = graph.nodes.filter(n => n.type === 'term');
+  if (termNodes.length > 0) {
+    lines.push('## Korean Term Vocabulary (terms-ko.json)');
+    lines.push('');
+    lines.push('> Source-language vocabulary quoted from `references/terms-ko.json` data files');
+    lines.push('> (CONSTITUTION §6.7 non-Markdown reference assets). Term ids are namespaced');
+    lines.push('> `term:<용어>` in `docs/skill-graph.json`.');
+    lines.push('');
+    lines.push('| Term | Layer | Referencing skills |');
+    lines.push('|------|-------|--------------------|');
+    for (const n of termNodes.sort((a, b) => a.id.localeCompare(b.id))) {
+      const skills = graph.edges
+        .filter(e => e.type === 'references' && e.source === 'terms-ko.json' && e.to === n.id)
+        .map(e => `\`${e.from}\``)
+        .join(', ');
+      lines.push(`| \`${n.id.replace(/^term:/, '')}\` | ${n.layer} | ${skills || '—'} |`);
     }
     lines.push('');
   }

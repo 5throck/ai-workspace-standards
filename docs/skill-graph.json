@@ -3111,12 +3111,32 @@
       "layer": "common"
     },
     {
+      "id": "term:실제지급준비액",
+      "type": "term",
+      "layer": "common"
+    },
+    {
       "id": "term:연",
       "type": "term",
       "layer": "common"
     },
     {
       "id": "term:영업이익",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:예금규모별 계좌수 및 금액",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:예금은행 지급준비액(구기준, 평잔)",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:요구불예금(실세)",
       "type": "term",
       "layer": "common"
     },
@@ -8713,7 +8733,47 @@
     {
       "type": "references",
       "from": "k-ecos",
+      "to": "term:실제지급준비액",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-ecos/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-ecos",
       "to": "term:연",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-ecos/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-ecos",
+      "to": "term:예금규모별 계좌수 및 금액",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-ecos/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-ecos",
+      "to": "term:예금은행 지급준비액(구기준, 평잔)",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-ecos/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-ecos",
+      "to": "term:요구불예금(실세)",
       "source": "terms-ko.json",
       "provenance": {
         "file": "templates/common/skills/k-ecos/references/terms-ko.json",
