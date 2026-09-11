@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * inject-skills.ts
- * @version 1.0.2
+ * @version 1.1.0
  * inject-skills.ts — Inject AGENTS.md Skills table into context.md
  *
  * Usage:
@@ -14,88 +14,81 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-const args = process.argv.slice(2);
-const projectDir = args[0];
+function main(): number {
+  const args = process.argv.slice(2);
+  const projectDir = args[0];
 
-if (!projectDir) {
-  console.error('Usage: bun inject-skills.ts <project-dir>');
-  if (import.meta.main) {
-    process.exit(1);
+  if (!projectDir) {
+    console.error('Usage: bun inject-skills.ts <project-dir>');
+    return 1;
   }
-}
 
-// Try to find variant context file
-// Keep in sync with templates/co-*/docs/<variant>.context.md files that use the
-// <!-- DYNAMIC_SKILLS_START --> / <!-- DYNAMIC_SKILLS_END --> marker pattern.
-// co-deck is intentionally excluded: it maintains a static skills table, not the marker.
-const variants = ['co-develop', 'co-design', 'co-work', 'co-security', 'co-consult', 'co-game'];
-let contextMdPath: string | null = null;
+  // Try to find variant context file
+  // Keep in sync with templates/co-*/docs/<variant>.context.md files that use the
+  // <!-- DYNAMIC_SKILLS_START --> / <!-- DYNAMIC_SKILLS_END --> marker pattern.
+  // co-deck is intentionally excluded: it maintains a static skills table, not the marker.
+  const variants = ['co-develop', 'co-design', 'co-work', 'co-security', 'co-consult', 'co-game'];
+  let contextMdPath: string | null = null;
 
-for (const variant of variants) {
-  const path = join(projectDir, 'docs', `${variant}.context.md`);
-  if (existsSync(path)) {
-    contextMdPath = path;
-    break;
-  }
-}
-
-// Fallback to generic context.md
-if (!contextMdPath) {
-  const genericPath = join(projectDir, 'docs', 'context.md');
-  if (existsSync(genericPath)) {
-    contextMdPath = genericPath;
-  }
-}
-
-if (!contextMdPath) {
-  if (import.meta.main) {
-    process.exit(0); // No context file found, not an error
-  }
-}
-
-const agentsMdPath = join(projectDir, 'AGENTS.md');
-
-if (!existsSync(agentsMdPath)) {
-  if (import.meta.main) {
-    process.exit(0); // AGENTS.md not found, not an error
-  }
-}
-
-try {
-  const agentsContent = readFileSync(agentsMdPath, 'utf-8');
-  // T-012-BUG: in module (non-main) mode `contextMdPath` may still be null past the guard
-  // above (the guard only exits when import.meta.main), contradicting the "not an error"
-  // intent — readFileSync(null) throws and is swallowed by the catch below. The cast keeps
-  // that exact runtime behavior.
-  const contextContent = readFileSync(contextMdPath as string, 'utf-8');
-
-  // Extract Skills table from AGENTS.md
-  const skillsMatch = agentsContent.match(/^## Skills\s*(\| Skill .*?)(?=\n---|\Z)/ms);
-  if (!skillsMatch) {
-    if (import.meta.main) {
-      process.exit(0); // No skills table found, not an error
+  for (const variant of variants) {
+    const path = join(projectDir, 'docs', `${variant}.context.md`);
+    if (existsSync(path)) {
+      contextMdPath = path;
+      break;
     }
   }
 
-  const skillsTable = skillsMatch![1].trim();
-
-  // Replace content between markers
-  const newContextContent = contextContent.replace(
-    /(<!-- DYNAMIC_SKILLS_START -->).*?(<!-- DYNAMIC_SKILLS_END -->)/s,
-    `$1\n${skillsTable}\n$2`
-  );
-
-  if (newContextContent !== contextContent) {
-    writeFileSync(contextMdPath as string, newContextContent, 'utf-8');
-    console.log('  ✅ Injected dynamic skills from AGENTS.md into docs/context.md');
+  // Fallback to generic context.md
+  if (!contextMdPath) {
+    const genericPath = join(projectDir, 'docs', 'context.md');
+    if (existsSync(genericPath)) {
+      contextMdPath = genericPath;
+    }
   }
 
-  if (import.meta.main) {
-    process.exit(0);
+  if (!contextMdPath) {
+    return 0; // No context file found, not an error
   }
-} catch (error) {
-  console.error(`Error: ${error}`);
-  if (import.meta.main) {
-    process.exit(1);
+
+  const agentsMdPath = join(projectDir, 'AGENTS.md');
+
+  if (!existsSync(agentsMdPath)) {
+    return 0; // AGENTS.md not found, not an error
   }
+
+  try {
+    const agentsContent = readFileSync(agentsMdPath, 'utf-8');
+    const contextContent = readFileSync(contextMdPath, 'utf-8');
+
+    // Extract Skills table from AGENTS.md
+    const skillsMatch = agentsContent.match(/^## Skills\s*(\| Skill .*?)(?=\n---|\Z)/ms);
+    if (!skillsMatch) {
+      return 0; // No skills table found, not an error
+    }
+
+    const skillsTable = skillsMatch[1].trim();
+
+    // Replace content between markers
+    const newContextContent = contextContent.replace(
+      /(<!-- DYNAMIC_SKILLS_START -->).*?(<!-- DYNAMIC_SKILLS_END -->)/s,
+      `$1\n${skillsTable}\n$2`
+    );
+
+    if (newContextContent !== contextContent) {
+      writeFileSync(contextMdPath, newContextContent, 'utf-8');
+      console.log('  ✅ Injected dynamic skills from AGENTS.md into docs/context.md');
+    }
+
+    return 0;
+  } catch (error) {
+    console.error(`Error: ${error}`);
+    return 1;
+  }
+}
+
+// Run only when executed directly; imported as a module this file is a no-op
+// (all logic lives in main() with early returns, so no partially-initialized
+// state executes or leaks in module mode).
+if (import.meta.main) {
+  process.exit(main());
 }

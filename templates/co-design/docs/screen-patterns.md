@@ -2,7 +2,8 @@
 
 > The declared pattern inventory required by the Design Foundation 7-phase
 > pipeline (ADR-0066, layer ⑥) and reviewed via the design-review checklist
-> (section A). New patterns require a revision of this document **before**
+> (sections A–G; §G is the ADR-0070 rendered-preview gate). New patterns require
+> a revision of this document **before**
 > implementation (design-phase gate). Reference implementation:
 > `playground/src/patterns.ts` (live in the playground under each pattern
 > heading).

@@ -1,6 +1,6 @@
 ---
 # co-deck — Variant Configuration
-# Last Updated: 2026-08-30
+# Last Updated: 2026-09-11
 ---
 
 > Extends docs/context.md. This file IS the customization layer for this project.
@@ -687,9 +687,7 @@ Key rules:
 
 ---
 
-*co-deck.context.md version: 4.3 — updated 2026-07-19: merged Architecture Principles (Why Multi-Agent, Harness Pattern, Layer Separation, AI Neutrality) from root ARCHITECTURE.md.*
-*co-deck.context.md version: 4.4 — updated 2026-08-17: handbook search index is manifest-driven (`search-manifest.json` → `build-search-index.ts` → `search-data.js`); validation layered and aggregated via `validate-handbook.ts` (8 check groups).*
-*co-deck.context.md version: 4.5 — updated 2026-08-26: layout gate (Domain Rule 18, [DECK-R2]) — estimate-layout.ts v1.2.0 `--lint` checks slidedata.json against the merged content_constraints; FAIL blocks PDF export; `slide-layout-gate` skill owns the gate procedure.*
+*co-deck.context.md version: 4.5 — layout gate (Domain Rule 18, [DECK-R2]) — estimate-layout.ts v1.2.0 `--lint` checks slidedata.json against the merged content_constraints; FAIL blocks PDF export; `slide-layout-gate` skill owns the gate procedure (2026-08-26); previous: 4.4 handbook search index is manifest-driven (`search-manifest.json` → `build-search-index.ts` → `search-data.js`), validation layered and aggregated via `validate-handbook.ts` (8 check groups); 4.3 merged Architecture Principles (Why Multi-Agent, Harness Pattern, Layer Separation, AI Neutrality) from root ARCHITECTURE.md*
 
 ## Template Provenance
 

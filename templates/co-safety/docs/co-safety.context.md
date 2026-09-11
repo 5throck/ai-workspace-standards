@@ -254,3 +254,7 @@ dispatch triggers: `AGENTS.md` Specialist Agent Roster.
 
   Omitting `model` causes the subagent to silently inherit the parent session's model regardless of the tier written in the plan table. Verify the `model` argument (e.g. `model = "haiku"`) is present on every `Agent()` call before dispatching — do not rely on `subagent_type` alone.
 - *Phase Gate for New File Design*: Any new workflow file, evidence schema, or regulation metadata requires SGM review (equivalent to architect Phase 1-2) before SWM executes.
+
+---
+
+*co-safety.context.md version: 1.0 — version footer added (T-012-adjacent hygiene pass) (2026-09-11)*

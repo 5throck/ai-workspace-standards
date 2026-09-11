@@ -165,6 +165,8 @@ See [agents/pm.md](agents/pm.md) for complete role definition and delegation pro
 3. **Agent File-Level**: All specialists have "PM-ONLY INVOCATION" section
 4. **QA Gate-Level**: Auditor detects bypass in Phase 6 QA
 
+> **Design QA gate**: UI work is not complete until verified in a rendered preview per ADR-0070 / design-foundation §2b rule 6 (≥ 2 declared breakpoints, ≥ 1 key interaction, evidence attached).
+
 #### §3.1.4 Specialist Agent Dispatch Flow
 ```
 User Request → PM Triage → Design Approval → Specialist Dispatch → QA Gate → Finalization

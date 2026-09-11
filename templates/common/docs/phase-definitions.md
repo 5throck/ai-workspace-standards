@@ -68,8 +68,7 @@ Some variants combine phases 1 and 2 when research and architecture planning are
 
 ### Phase 6 — Quality Assurance & Finalization
 **PM owns**: finalizes the session.
-- PM runs `audit-workspace` skill
-- PM runs `validate-docs-links` skill
+- PM runs the workspace-level audit (`project-review` where available)
 - Maximum 2 fix iterations before escalating to user
 - PM runs `/sync` pipeline
 - PR opened with English title and description

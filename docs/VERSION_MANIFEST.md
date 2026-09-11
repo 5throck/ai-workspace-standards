@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-09-11T01:31:27.200Z
+**Generated**: 2026-09-11T02:04:37.903Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -119,8 +119,8 @@
 | infer-graph-from-phases.ts | 0.1.0 | scripts/experiments/infer-graph-from-phases.ts | N/A |
 | ingest-external-skills.ts | 1.1.0 | scripts/ingest-external-skills.ts | N/A |
 | ingest-security-frameworks.ts | 1.1.0 | scripts/ingest-security-frameworks.ts | N/A |
-| l3-to-variant-pipeline.ts | 1.16.0 | scripts/l3-to-variant-pipeline.ts | child_process, fs, path, process |
-| lifecycle-sync-audit.ts | 1.6.1 | scripts/lifecycle-sync-audit.ts | N/A |
+| l3-to-variant-pipeline.ts | 1.17.0 | scripts/l3-to-variant-pipeline.ts | child_process, fs, path, process |
+| lifecycle-sync-audit.ts | 1.7.0 | scripts/lifecycle-sync-audit.ts | N/A |
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
 | md-to-ooxml.ts | 1.2.0 | scripts/md-to-ooxml.ts | fs, path |
 | new-project.ts | 1.12.0 | scripts/new-project.ts | js-yaml |
@@ -150,7 +150,7 @@
 | sync-skills.ts | 1.5.0 | scripts/sync-skills.ts | N/A |
 | sync-template-deps.ts | 1.0.0 | scripts/sync-template-deps.ts | N/A |
 | tag-template.ts | 1.1.0 | scripts/tag-template.ts | bun |
-| team-builder.ts | 1.2.1 | scripts/team-builder.ts | N/A |
+| team-builder.ts | 1.3.0 | scripts/team-builder.ts | N/A |
 | test-extends-validator.ts | 1.0.1 | scripts/test-extends-validator.ts | fs, path |
 | test-l3-to-variant-promotion.ts | 1.2.0 | scripts/test-l3-to-variant-promotion.ts | bun |
 | test-new-project.ts | 1.0.4 | scripts/test-new-project.ts | bun |

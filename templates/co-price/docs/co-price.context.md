@@ -177,3 +177,7 @@ Use `bun scripts/dev-sync.ts "feat: …"` (or the `/sync` slash command) to comm
 - Channel strategy & Deal Desk process owned by `engagement-director` + `cpa-auditor` (exception log).
 - The LLM copilot cites engine-computed figures only; it never computes its own numbers.
 - Educational simulator only — no real customer/financial data; all samples are synthetic.
+
+---
+
+*co-price.context.md version: 1.0 — version footer added (T-012-adjacent hygiene pass) (2026-09-11)*

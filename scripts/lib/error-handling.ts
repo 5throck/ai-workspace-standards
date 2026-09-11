@@ -5,7 +5,7 @@
  * Originally built for the L3-to-variant pipeline (Risk #4), now expanded
  * for general-purpose script error handling.
  *
- * @version 1.3.1
+ * @version 1.4.0
  * @Risk #4: Error Handling (P1 - High)
  */
 
@@ -85,14 +85,15 @@ export function createError(
 
 /**
  * Create fatal error
- * @version 1.1.0
+ * @version 1.4.0 — optional trailing `context` forwarded to createError()
  */
 export function fatalError(
   phase: ErrorPhase,
   code: string,
   message: string,
   details?: string,
-  suggestedRemediation?: string
+  suggestedRemediation?: string,
+  context?: Record<string, unknown>
 ): PipelineError {
   return createError(
     ErrorSeverity.FATAL,
@@ -100,7 +101,8 @@ export function fatalError(
     code,
     message,
     details,
-    suggestedRemediation
+    suggestedRemediation,
+    context
   );
 }
 
@@ -363,12 +365,7 @@ export async function withErrorHandling<T>(
     return await fn();
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    // T-012-BUG: this call originally passed `context` as a 6th argument, but
-    // fatalError() only accepts 3-5 params and silently drops it — the context
-    // never reached the PipelineError. Trimmed to the supported arity; runtime
-    // behavior is unchanged. To actually plumb context through, fatalError
-    // needs a `context?: Record<string, unknown>` parameter forwarded to createError.
-    const error = fatalError(phase, 'UNCAUGHT', message);
+    const error = fatalError(phase, 'UNCAUGHT', message, undefined, undefined, context);
     logError(error);
     const recovery = determineRecoveryAction(error);
     await executeRecoveryAction(recovery);
@@ -388,10 +385,7 @@ export function withSyncErrorHandling<T>(
     return fn();
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    // T-012-BUG: see withErrorHandling above — the original 6th `context` argument
-    // was silently dropped by fatalError(); trimmed to the supported arity with
-    // runtime behavior unchanged.
-    const error = fatalError(phase, 'UNCAUGHT', message);
+    const error = fatalError(phase, 'UNCAUGHT', message, undefined, undefined, context);
     logError(error);
     const recovery = determineRecoveryAction(error);
     void executeRecoveryAction(recovery);

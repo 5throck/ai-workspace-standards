@@ -7,5 +7,3 @@
 |-----------|---------|--------|
 | common overlay | `1.0.0` | templates/common/ |
 | variant (co-export) | `0.1.0` | this project |
-
-> TODO: regenerate with `bun scripts/generate-version-manifest.ts` once agents/skills are defined.
