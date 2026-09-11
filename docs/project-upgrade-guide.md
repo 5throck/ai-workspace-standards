@@ -211,7 +211,8 @@ bun scripts/upgrade-project.ts <project-path> --dry-run
 
 Review the output carefully:
 - Files that will be LOCKED (overwritten)
-- Files that will be MERGED (skipped currently — no markers)
+- Files that will be MERGED (managed sections resynced)
+- Docs that will be synced via TEMPLATE TREE SYNC (`NEW` / `UPDATE` / `⚠️ CONFLICT`), plus settings JSON merges
 - Scripts/agents/skills that will be SYNC'd (version comparison results)
 - Files that will be PRESERVED
 
@@ -234,10 +235,11 @@ bun scripts/upgrade-project.ts <project-path>
 The tool will:
 1. Create a pre-upgrade stash
 2. Process LOCKED files (unconditional overwrite)
-3. Process MERGE files (currently skipped)
-4. SYNC scripts, agents, skills (version-based)
+3. Process MERGE files (managed sections resynced)
+4. Sync scripts, agents, skills (version-based) and the uncovered template tree (TEMPLATE TREE SYNC)
 5. Update template-version.txt
-6. Verify security bootstrap
+6. Regenerate the skill graph and distribute platform skills
+7. Verify security bootstrap
 
 ### Step 5: Verify Results
 

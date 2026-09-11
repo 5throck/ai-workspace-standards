@@ -528,7 +528,7 @@ Two template files serve distinct roles in the documentation layer:
 
 | File | Layer | Role |
 |------|-------|------|
-| `templates/common/docs/context.md` | L1 | **Project identity document** — immutable project architecture, standards, and invariants. Copied verbatim to `docs/context.md` in every new L3 project. Variant templates MUST NOT carry their own `docs/context.md` (enforced by `validate-templates.ts` WS-07); variant-specific content goes in `docs/<variant>.context.md`. Do NOT modify after project creation. |
+| `templates/common/docs/context.md` | L1 | **Project identity document** — immutable project architecture, standards, and invariants. Copied verbatim to `docs/context.md` in every new L3 project. Variant templates MUST NOT carry their own `docs/context.md` (enforced by `validate-templates.ts` WS-07); variant-specific content goes in `docs/<variant>.context.md`. Do not hand-edit after project creation — it receives sanctioned, conflict-aware non-breaking updates through the upgrade version-footer sync (TEMPLATE TREE SYNC). |
 | `templates/common/docs/variant.context.template.md` | L1 | **Variant overlay template** — customization layer rendered into `docs/<variant>.context.md`. Contains VARIANT-INJECT markers for variant-specific sections. |
 
 **Read order for AI tools in any L3 project:**
@@ -547,18 +547,25 @@ A pair of HTML comment markers used in MERGE-tier files to delimit sections mana
 Rules:
 - Content between these markers is automatically replaced by `upgrade-project.ts` during upgrades.
 - Content outside the markers is user-owned and is never modified by upgrade scripts.
-- `upgrade-project.ts` supports three marker patterns: `<!-- WORKSPACE-MANAGED -->`, `<!-- COMMON-CLAUDE:START -->`, and `<!-- COMMON-GEMINI:START -->`.
+- The merge engine supports six marker patterns: `<!-- WORKSPACE-MANAGED -->`, `<!-- COMMON-CLAUDE:START -->`, `<!-- COMMON-GEMINI:START -->`, `<!-- VARIANT-INJECT:label -->`, `<!-- COMMON-AGENTS:START -->`, and `<!-- DYNAMIC_SKILLS_START -->` (full table: `skills/upgrade-project/SKILL.md`).
 - Do **not** remove or reorder these markers manually.
 
-#### File Upgrade Tiers (LOCKED / MERGE / PRESERVE)
+#### File Upgrade Classification (Policy-Driven)
 
-Used by `upgrade-project.ts` to classify every project file during a template upgrade:
+Used by `upgrade-project.ts` (v1.22.0+) to classify every template file during an upgrade. The classification SSOT is `scripts/lib/upgrade-policy.ts` (`resolveClaim()`), and the **fallback policy is delivery**: a template file with no explicit claim is synced to projects by default (ADR-0073). Main tiers:
 
 | Tier | Behavior | Examples |
 |------|----------|---------|
 | **LOCKED** | Always overwritten; diff shown before overwrite | `.githooks/*`, `.gitattributes`, `.gitleaks.toml` |
-| **MERGE** | Only managed sections replaced; rest preserved | `CLAUDE.md`, `GEMINI.md`, `.gitignore`, `agents/pm.md` |
-| **PRESERVE** | Never touched; listed in upgrade report only | `README.md`, `src/`, `docs/context.md`, project-specific files |
+| **MERGE** | Only managed sections replaced; rest preserved | `CLAUDE.md`, `GEMINI.md`, `.gitignore`, `agents/pm.md`, `docs/<variant>.context.md` |
+| **SYNC (default)** | Add if missing; update on inline version or hash change (⚠️ conflict warning on local modifications) | Rest of the `docs/` tree, `.github/`, `.editorconfig` |
+| **JSON_MERGE** | Platform settings deep-merged; project-only array entries preserved | `.claude/settings.json`, `.gemini/settings.json` |
+| **WORKSPACE** | Seeds add-if-missing; never overwritten or pruned | `docs/{designs,drafts,reports,research,findings,threat-models,lifecycle}/` |
+| **ADD_IF_MISSING** | Copied only when absent | `LICENSE`, `SECURITY.md`, `procedures/` |
+| **PRESERVE / PROJECT_STATE** | Never touched | `README.md`, `CHANGELOG.md`, `docs/README(+_ko)`, `memory/`, `package.json`, `src/` |
+| **TEMPLATE_ONLY** | Staging zones the scaffold deletes — never upgrade-delivered | `docs/{adr,specs,variants,_templates,_examples}`, `docs/_common` |
+
+`docs/skill-graph.json` is REGENERATED in place; the upgrader itself is workspace-side (`L0`-only, ADR-0073 Amendment 1 — run `bun scripts/upgrade-project.ts Projects/<name>` from the workspace root). Report and gate: `bun scripts/check-upgrade-coverage.ts [--strict]`.
 
 #### Platform Documentation Parity
 The requirement that `CLAUDE.md` and `GEMINI.md` in every project template maintain equivalent section coverage. If a security configuration, behavioral rule, or workflow is documented in `CLAUDE.md`, an equivalent entry must exist in `GEMINI.md`, and vice versa. Verified during template validation (`bun scripts/validate-templates.ts`).
@@ -710,4 +717,4 @@ Agent, skill, and command frontmatter structures are validated against JSON Sche
 
 ---
 
-*Last Updated: 2026-09-11*
+*Last Updated: 2026-09-12*
