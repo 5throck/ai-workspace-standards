@@ -39,15 +39,6 @@ export const TEMPLATE_TREE_SYNC_PASS = 'TEMPLATE TREE SYNC';
 
 // ── Legacy pass inventories (mirrored from scripts/upgrade-project.ts; drift-guarded by tests) ──
 
-/** VARIANT_DOCS_SYNC list (upgrade-project.ts). Keep in lockstep — enforced by tests/unit/upgrade-policy.test.ts. */
-export const VARIANT_DOCS_SYNC_FILES = [
-  'docs/context.md',
-  'docs/engagement-orchestration.md',
-  'docs/team-configuration-guide.md',
-  'docs/privacy-design-checklist.md',
-  'docs/privacy-design-checklist_ko.md',
-] as const;
-
 /** GOVERNANCE FILES SYNC list (upgrade-project.ts). SECURITY.md added per design D5. */
 export const GOVERNANCE_FILES = ['LICENSE', 'SECURITY.md'] as const;
 
@@ -151,9 +142,10 @@ export function resolveClaim(relPath: string, variant = ''): UpgradeClaim {
     return { policy: 'MERGE_MANAGED', pass: 'DOCS_MERGE' };
   }
   if (OVERWRITE_FILES.has(rel)) return { policy: 'OVERWRITE', pass: 'DOCS_OVERWRITE' };
-  if ((VARIANT_DOCS_SYNC_FILES as readonly string[]).includes(rel)) {
-    return { policy: 'VERSIONED_SYNC', pass: 'VARIANT_DOCS_SYNC' };
-  }
+  // The former VARIANT_DOCS_SYNC pass (docs/context.md and friends) was folded into the
+  // TEMPLATE TREE SYNC pass in v1.22.0 — these files carry inline `*<file> version: X.Y`
+  // footers (or hash fallback) and the default SYNC policy reproduces the old semantics
+  // exactly, so no explicit claim is needed (deny-list inversion).
 
   if (underDir(rel, '.claude/commands') || underDir(rel, '.gemini/commands')) {
     return { policy: 'HASH_SYNC', pass: 'COMMANDS_SYNC' };

@@ -73,7 +73,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `agent-verify.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
 | `analyze-git-history.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
 | `archive-memory.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `audit.ts` | L0 | 2.33.0 | active | —| —| L0+L1 | —|
+| `audit.ts` | L0 | 2.34.0 | active | —| —| L0+L1 | —|
 | `check-upgrade-coverage.ts` | L0 | 1.0.0 | active | `--variant`, `--strict`, `--json` | —| L0+L1 | —|
 | `cleanup-completed-md.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `clear-pm-approval.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
@@ -208,7 +208,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `translate-readme.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `ticket.ts` | L0 | 1.1.0 | active | `create --not-before`, `list --kind`, `list --ready` | —| L0 | —|
 | `typecheck.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
-| `upgrade-project.ts` | L0 | 1.21.0 | active | `--variant`, `--platform`, `--dry-run`, `--prune-removed`, `--rollback`, `--yes`, `--skip-context-commonization` | —| L0+L1 | —|
+| `upgrade-project.ts` | L0 | 1.22.0 | active | `--variant`, `--platform`, `--dry-run`, `--prune-removed`, `--rollback`, `--yes`, `--skip-context-commonization` | —| L0+L1 | —|
 | `variant-feature.ts` | L0 | 1.0.0 | active | `--variant`, `--feature`, `--type` | —| L0 | —|
 | `validate-agents.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `validate-doc-folder.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|

@@ -1,7 +1,7 @@
 ---
 name: upgrade-project
 description: "Upgrade an existing L2/L3 project to the current template version. Use when: upgrading a variant-based project, syncing template improvements, refreshing scripts/agents/skills/docs/commands."
-version: "1.3.0"
+version: "1.3.1"
 status: active
 scope: workspace
 owner: pm
@@ -61,7 +61,7 @@ The upgrade tool classifies files into categories:
 | **MERGE** | Section-based merge via markers | `CLAUDE.md`, `GEMINI.md`, `.gitignore`, `agents/pm.md` |
 | **DOCS_MERGE** | Section-based merge (managed blocks) | `AGENTS.md`, `docs/<variant>.context.md` |
 | **DOCS_OVERWRITE** | Plain overwrite (no blocks) | `docs/phase-definitions.md` |
-| **VARIANT_DOCS_SYNC** | Version/hash-based sync | `docs/context.md`, `docs/engagement-orchestration.md`, `docs/team-configuration-guide.md` |
+| **VARIANT_DOCS_SYNC** *(folded v1.22.0)* | No longer a separate pass — its files (`docs/context.md` and the shared docs pair set) are delivered by **TEMPLATE TREE SYNC**'s default SYNC policy with identical inline-version/hash/conflict semantics | — |
 | **TEMPLATE TREE SYNC** | Default-policy delivery for template files no dedicated pass claims: add-if-missing, then inline-version/hash update with conflict warning. `JSON_MERGE` deep-merges platform settings (project-only array entries preserved); `WORKSPACE` seeds (`docs/designs/`, `docs/lifecycle/`, …) are add-if-missing only | Rest of the `docs/` tree (`user-guide`, variant domain docs, `countries/KR.md`, `skill-graph.overrides.json`), `.github/`, `.claude`/`.gemini/settings.json`, `.editorconfig`, platform `skills.json` |
 | **COMMANDS_SYNC** | Hash-based sync | `.claude/commands/*.md`, `.gemini/commands/*.md` |
 | **SYNC_IF_NEWER** | Version-based update | Scripts (`.ts`), agents (`.md`), skills (`SKILL.md`) |
@@ -96,7 +96,7 @@ The merge engine recognizes these marker patterns for section-based merge:
 ### `docs/context.md` Version Sync
 
 `docs/context.md` (the immutable common project-context file) carries an inline `*context.md
-version: X.Y*` footer that `VARIANT_DOCS_SYNC` compares against `templates/common/docs/context.md`'s
+version: X.Y*` footer that the TEMPLATE TREE SYNC pass compares against `templates/common/docs/context.md`'s
 footer on every upgrade run — if the project's copy is unmodified (`git status` clean for that file)
 and behind, it's updated automatically; if it has local modifications, the upgrade reports a
 CONFLICT instead of overwriting it. "Immutable" means don't hand-edit it for project-specific

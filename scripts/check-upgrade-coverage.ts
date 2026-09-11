@@ -67,6 +67,12 @@ const violations: Array<{ variant: string; rel: string; check: string; detail: s
 const rows: Array<{ variant: string; rel: string; source: string; policy: string; pass: string }> = [];
 
 const variants = variantFilter ? [variantFilter] : listVariants();
+if (!existsSync(templatesRoot)) {
+  // Project (L2) context: this validator classifies the workspace template tree and both
+  // scripts ship as L0+L1 — outside the workspace there is nothing to validate (skip, N/A).
+  console.log('check-upgrade-coverage: no templates/ directory — not a workspace root, skipping.');
+  process.exit(0);
+}
 if (variants.length === 0) {
   console.error(`No variant templates found under ${templatesRoot}`);
   process.exit(1);
