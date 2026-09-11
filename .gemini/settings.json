@@ -49,9 +49,8 @@
   ],
   "mcpServers": {
     "graft": {
-      "command": "npx",
+      "command": "bunx",
       "args": [
-        "-y",
         "@nanonets/graft",
         "mcp"
       ]
