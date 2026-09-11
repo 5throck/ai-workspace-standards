@@ -270,7 +270,7 @@ curl -fsS 'https://ecos.bok.or.kr/api/StatisticWord/'"$ECOS_API_KEY"'/json/kr/1/
 - Success: a single JSON object keyed by the service name, e.g. `{"StatisticSearch":{"list_total_count":12,"row":[{...}, ...]}}` (`KeyStatisticList` additionally carries `row_count`). Iterate `row`; use `list_total_count` for pagination.
 - Error: a bare object `{"RESULT":{"CODE":"...","MESSAGE":"..."}}` with no `row` key — surface `CODE`+`MESSAGE` verbatim. Note the guide lists codes as `정보-100`/`에러-301` etc., but the JSON payload spells them `INFO-100`/`ERROR-301`.
 - **Cycle-code alphabet gotcha**: the widely-copied tutorials use `YY`/`QQ`/`MM`/`DD`; the live API returns `ERROR-100` for those. Only `A`/`S`/`Q`/`M`/`SM`/`D` are accepted (official guide + verified live).
-- Row-range segments are 1-based in the official sample (`1`/`10`); a leading `0` was also observed to work live (treated as start-of-list). Prefer the documented `1`.
+- Row-range segments are 1-based (official sample `1`/`10`). The `sample`-key cap applies to the window span: `요청종료건수 − 요청시작건수 < 10`, i.e. at most 10 rows per window starting at ≥1 — verified live (`1/10` and `11/20` pass; `0/10` fails `ERROR-301` even though `0/5` passes, so a leading `0` is only safe for tiny windows). With a personal key the span cap is much larger; page in comfortable windows via `list_total_count`.
 - Omitting all item codes returns every item in the table for the date range — convenient but can be large; filter client-side or narrow the item path.
 - Korean path segments (`용어`, `데이터명`) must be percent-encoded; a literal UTF-8 Korean path segment was observed to 404 at the CDN level.
 - `DATA_VALUE` is returned as a string; keep the original string in deliverables and format for display only.
