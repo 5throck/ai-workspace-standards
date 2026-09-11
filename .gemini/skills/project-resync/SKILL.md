@@ -1,6 +1,6 @@
 ---
 name: project-resync
-version: 1.2.0
+version: 1.3.0
 description: >
   Full bidirectional sync cycle for Projects/co-* instances: provenance-audit
   uncommitted content, sync each project to its GitHub remote, selectively
@@ -14,7 +14,7 @@ status: active
 scope: common
 l2_propagate: false
 owner: pm
-last_reviewed: 2026-09-06
+last_reviewed: 2026-09-12
 prerequisites: gh CLI authenticated; workspace-root CWD
 relates_to:
   - skill: sync
@@ -105,9 +105,17 @@ branch rule — upgrades must see merged templates).
 
 ## Step 4 — Upgrade projects
 
-Per project: `bun scripts/upgrade-project.ts Projects/<p> --dry-run` → review
-category plan → run → verify `.claude/template-version.txt` and project
-`bun scripts/audit.ts`.
+Per project: `bun scripts/upgrade-project.ts Projects/<p> --dry-run --prune-removed` →
+review category plan → run with the same flags → verify
+`.claude/template-version.txt` and project `bun scripts/audit.ts`.
+
+`--prune-removed` is mandatory in this cycle: since ADR-0073 Amendment 1 the
+upgrade trio (`upgrade-project.ts`, `lib/upgrade-policy.ts`,
+`check-upgrade-coverage.ts`) is `L0`-only, so every project still holds an
+inert pre-v1.21 copy of `upgrade-project.ts` — this flag is what retires it
+(and `reconcileScriptRegistry` drops its SCRIPTS.md row). If a ghost row for
+`upgrade-project.ts` survives the prune, remove it per CONSTITUTION §6.5
+Tier 3 filtering and note it in the cycle report.
 
 Since `upgrade-project` v1.19.0 the delivered scripts` SCRIPTS.md
 registry rows reconcile automatically (common-registry fallback, layer
@@ -116,6 +124,9 @@ rewrite, duplicate-row removal). Still proof-check the upgrade:
 unregistered script there means the reconcile missed a case (report it,
 do not hand-patch silently). Upgrades must run on a clean tree: the
 pre-upgrade `git stash push` snapshot reverts uncommitted tracked changes.
+Note the upgrader is workspace-side only (`L0`, ADR-0073 Amendment 1) —
+invoke `bun scripts/upgrade-project.ts …` from the workspace root; from
+inside a project use `bun ../../scripts/upgrade-project.ts .`.
 
 ## Step 5 — Upgrade PRs + final verification
 
