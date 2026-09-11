@@ -7,12 +7,18 @@ title: >-
   lang:ko files
 priority: low
 not_before: '2026-10-01'
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-11T10:57:29.033Z'
 history:
   - at: '2026-09-11T10:57:29.033Z'
     from: null
     to: backlog
+  - at: '2026-09-11T12:06:12.217Z'
+    from: backlog
+    to: review
+  - at: '2026-09-11T12:06:12.231Z'
+    from: review
+    to: done
 result: null
 error: null
