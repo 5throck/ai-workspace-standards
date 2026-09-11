@@ -1,0 +1,62 @@
+{
+  "_note": "Korean-original ECOS terminology mapping. Non-Markdown reference asset — exempt from the workspace English-only doc policy (CONSTITUTION §6.7). SKILL.md stays English-only and links here. Schema: category values are either a plain string (glossary only) or an object with `en` plus optional code mapping fields. All entries live-verified 2026-09-11 unless marked otherwise.",
+  "version": "1.0.0",
+  "verified": "2026-09-11",
+  "service_names": {
+    "통계 조회 조건 설정": { "en": "statistic search (main data endpoint)", "mapsTo": { "service": "StatisticSearch" } },
+    "서비스 통계 목록": { "en": "statistics table list (category tree)", "mapsTo": { "service": "StatisticTableList" } },
+    "통계 세부항목 목록": { "en": "statistics item list", "mapsTo": { "service": "StatisticItemList" } },
+    "통계용어사전": { "en": "statistical glossary", "mapsTo": { "service": "StatisticWord" } },
+    "100대 통계지표": { "en": "100 key indicators (latest values)", "mapsTo": { "service": "KeyStatisticList" } },
+    "통계메타DB": { "en": "statistics metadata DB", "mapsTo": { "service": "StatisticMeta" } }
+  },
+  "cycle_codes": {
+    "연": { "en": "annual", "mapsTo": { "cycle": "A", "dateFormat": "YYYY" } },
+    "반년": { "en": "semi-annual", "mapsTo": { "cycle": "S", "dateFormat": "unverified" }, "verified": false },
+    "분기": { "en": "quarterly", "mapsTo": { "cycle": "Q", "dateFormat": "YYYYQn" } },
+    "월": { "en": "monthly", "mapsTo": { "cycle": "M", "dateFormat": "YYYYMM" } },
+    "반월": { "en": "semi-monthly", "mapsTo": { "cycle": "SM", "dateFormat": "unverified" }, "verified": false },
+    "일": { "en": "daily", "mapsTo": { "cycle": "D", "dateFormat": "YYYYMMDD" } }
+  },
+  "tables": {
+    "한국은행 기준금리 및 여수신금리": {
+      "en": "BOK Base Rate & Interest Rates on Loans and Discounts of the Bank of Korea",
+      "mapsTo": { "tableCode": "722Y001", "source": "live StatisticItemList + StatisticSearch 2026-09-11" },
+      "items": {
+        "한국은행 기준금리": {
+          "en": "BOK Base Rate",
+          "mapsTo": { "itemCode": "0101000", "cycles": ["A", "D", "M"], "unit": "연%" }
+        }
+      }
+    },
+    "주요지표(연간지표)": {
+      "en": "Key Indicators (annual; national income family)",
+      "mapsTo": { "tableCode": "200Y101", "source": "official guide sample + live StatisticSearch 2026-09-11" },
+      "items": {
+        "국내총생산(명목, 원화표시)": {
+          "en": "GDP (nominal, KRW)",
+          "mapsTo": { "itemCode": "10101", "cycles": ["A"], "unit": "십억원" }
+        }
+      }
+    },
+    "본원통화 구성내역(평잔, 원계열)": {
+      "en": "Components of the Monetary Base (daily average, original series)",
+      "mapsTo": { "tableCode": "102Y004", "source": "live StatisticItemList 2026-09-11 via verify-terms.ts (originally from official-guide sample)" }
+    }
+  },
+  "keystat_names": {
+    "원/달러 환율(종가)": { "en": "USD/KRW exchange rate (close)", "mapsTo": { "service": "KeyStatisticList", "class": "환율" } },
+    "경제성장률(전기대비)": { "en": "GDP growth rate (qoq)", "mapsTo": { "service": "KeyStatisticList" } },
+    "가구당월평균소득": { "en": "average monthly household income", "mapsTo": { "service": "KeyStatisticList", "class": "가계" } }
+  },
+  "glossary": {
+    "소비자동향지수": {
+      "en": "Consumer Sentiment Index (CSI)",
+      "note": "BOK monthly survey of consumer sentiment on the economy, spending plans, and living conditions; first compiled by the University of Michigan (1964). Source: live StatisticWord 2026-09-11."
+    },
+    "경제심리지수": {
+      "en": "Economic Sentiment Index (ESI)",
+      "note": "BOK composite sentiment series; per StatisticMeta, first composed 2012.6 (past series back to 2003.1). Source: live StatisticMeta 2026-09-11."
+    }
+  }
+}

@@ -79,7 +79,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `generate-ide-rules.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `generate-l3-readme.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
 | `generate-scripts-readme.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
-| `generate-skill-graph.ts` | L0 | 1.8.5 | active | —| —| L0+L1 | —|
+| `generate-skill-graph.ts` | L0 | 1.9.0 | active | —| —| L0+L1 | —|
 | `generate-version-manifest.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `handbook/apply-handbook-theme.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `handbook/build-search-index.ts` | L0 | 1.0.0 | active | — | — | common | — |
@@ -233,7 +233,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `verify-country-prune.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `verify-adr-governance.ts` | L0 | 1.4.0 | active | —| —| L0 | —|
 | `verify-agent-deliverables.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
-| `verify-skill-graph.ts` | L0 | 1.5.0 | active | —| —| L0+L1 | —|
+| `verify-skill-graph.ts` | L0 | 1.6.0 | active | —| —| L0+L1 | —|
 | `verify-memory.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `verify-new-project-tests.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
 | `verify-platform-lifecycle.ts` | L0 | 1.1.2 | active | —| —| L0+L1 | —|

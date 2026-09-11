@@ -1,7 +1,12 @@
 #!/usr/bin/env bun
 /**
  * Skill Relationship Graph Verification Script
- * @version 1.5.0
+ * @version 1.6.0
+ *
+ * v1.6.0 (2026-09-11): term-node invariants per ADR-0072 — `term:` id
+ * namespacing, uniqueness, and every term node must carry at least one
+ * skill→term `references` edge (source terms-ko.json). GraphNode.type union
+ * mirrors the generator's new 'term' member.
  *
  * Verifies that the committed skill graph files match the current state.
  * Re-derives the graph and compares against docs/skill-graph.json.
@@ -42,9 +47,10 @@ const ROOT = resolve(__dirname, '..');
 interface GraphNode {
   id: string;
   // Mirrors GraphNode.type in generate-skill-graph.ts — scope/derived graphs carry
-  // decision/adr/procedure/output_type nodes too, so the narrow old union made
-  // compareGraphs(derived, committed) unassignable.
-  type: 'skill' | 'agent' | 'decision' | 'adr' | 'procedure' | 'output_type';
+  // decision/adr/procedure/output_type/term nodes too, so the narrow old union made
+  // compareGraphs(derived, committed) unassignable. 'term' = Korean vocabulary
+  // node from references/terms-ko.json (ADR-0072).
+  type: 'skill' | 'agent' | 'decision' | 'adr' | 'procedure' | 'output_type' | 'term';
   layer: string;
 }
 
@@ -587,6 +593,44 @@ async function main(): Promise<void> {
   }
   if (derived.nodes.some(n => n.type === 'procedure')) {
     console.log(`  Procedure invariants: ${derived.nodes.filter(n => n.type === 'procedure').length} procedures checked (orphans/endpoints OK)`);
+  }
+
+  // Term-node invariants (ADR-0072): unique `term:<용어>` ids, every term node
+  // referenced by at least one skill edge, and term ids namespaced correctly.
+  const termNodes = derived.nodes.filter(n => n.type === 'term');
+  const termErrors: string[] = [];
+  {
+    const seen = new Set<string>();
+    for (const node of termNodes) {
+      if (!node.id.startsWith('term:')) {
+        termErrors.push(`term node id not namespaced: "${node.id}"`);
+      }
+      if (seen.has(node.id)) {
+        termErrors.push(`duplicate term node: "${node.id}"`);
+      }
+      seen.add(node.id);
+    }
+    const skillTermEdges = new Set(
+      derived.edges.filter(e => e.type === 'references' && e.source === 'terms-ko.json').map(e => e.to),
+    );
+    for (const node of termNodes) {
+      if (!skillTermEdges.has(node.id)) {
+        termErrors.push(`orphan term node "${node.id}" — no skill references edge`);
+      }
+    }
+  }
+  if (termErrors.length > 0) {
+    console.log('');
+    console.log('❌ Term-node invariant violations:');
+    for (const err of termErrors.slice(0, 20)) {
+      console.log(`   ${err}`);
+    }
+    console.log('');
+    console.log('   Term nodes come from references/terms-ko.json (ADR-0072); fix the data files, never skill-graph.json (INV-1).');
+    process.exit(1);
+  }
+  if (termNodes.length > 0) {
+    console.log(`  Term invariants: ${termNodes.length} term nodes checked (unique, all skill-referenced)`);
   }
 
   // Compare graphs

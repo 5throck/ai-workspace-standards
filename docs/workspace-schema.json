@@ -113,14 +113,16 @@
       "k-law": "KR",
       "k-dart": "KR",
       "k-kosis": "KR",
-      "k-opendata": "KR"
+      "k-opendata": "KR",
+      "k-ecos": "KR"
     },
     "scripts": {},
     "env": {
       "DART_API_KEY": "KR",
       "LAW_API_OC": "KR",
       "KOSIS_API_KEY": "KR",
-      "DATA_GO_KR_API_KEY": "KR"
+      "DATA_GO_KR_API_KEY": "KR",
+      "ECOS_API_KEY": "KR"
     },
     "dirs": {
       "regulations/KR": "KR"
