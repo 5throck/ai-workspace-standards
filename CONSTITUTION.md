@@ -616,6 +616,22 @@ lang: ko
 lang_reason: legal   # legal | source-material | proper-noun
 ```
 
+#### Korean Plain-Language Preference (`순우리말`-First)
+
+When writing Korean documentation or Korean translation output, prefer native Korean
+words (`순우리말`) over loanwords (`외래어`) whenever a natural, widely-understood native
+equivalent exists — e.g. prefer `만들기` over `크리에이션`, `알림` over `노티피케이션`,
+`모음` over `컬렉션` in general prose. Loanwords that are effectively settled in Korean
+(`컴퓨터`, `데이터`, `소프트웨어`, `파일`) and established international technical terms
+remain permitted — clarity and standard terminology always take precedence over forced
+nativization.
+
+- Applies immediately to all **new** Korean-language content (including `ko/`,
+  `locales/ko/`, `*_ko.md` files, and `lang: ko` exception files).
+- **Existing** Korean documents are nativized incrementally: whenever a document is
+  edited for other reasons, apply the plain-language preference to the touched sections.
+  No bulk rewrites.
+
 #### Non-English Reference Material in Skills
 
 `skills/*.md` may declare the `lang: ko` + `lang_reason` exception directly (see above) when the skill's own content is genuinely Korean-language. For a large or purely-tabular non-English reference (a terminology glossary, a mapping of official source-language field/status names) that would otherwise bloat `SKILL.md`, prefer keeping it out of Markdown entirely:

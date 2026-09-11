@@ -250,6 +250,7 @@ Run `/translate --dry-run` regularly to catch changes early.
 - Review diff carefully before updating
 - Maintain consistent terminology
 - Keep technical meaning accurate
+- Apply the Korean Plain-Language Preference (`순우리말`-first, per `CONSTITUTION.md` Language Policy): in Korean output, prefer native Korean words over loanwords where a natural, widely-understood equivalent exists (e.g. `만들기` over `크리에이션`, `알림` over `노티피케이션`). Settled loanwords (`컴퓨터`, `데이터`, `소프트웨어`, `파일`) and established technical terms remain permitted — never sacrifice clarity or standard terminology for nativization.
 
 ### Collaboration Workflow
 

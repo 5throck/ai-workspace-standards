@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+- **[2026-09-11]**: docs(policy): **Korean Plain-Language Preference (`순우리말`-first) policy added across L0/L1/L2 governance docs.** When writing Korean content, native Korean words are preferred over loanwords where a natural, widely-understood equivalent exists (e.g. `만들기` over `크리에이션`, `알림` over `노티피케이션`); loanwords settled in Korean (`컴퓨터`, `데이터`, `소프트웨어`, `파일`) and established technical terms remain permitted. New Korean content applies immediately; existing Korean documents are nativized incrementally (touched sections only — tracked as manual ticket `T-20260911-001`, not before 2026-10-01). Placement: CONSTITUTION.md COMMON-CONSTITUTION zone, COMMON-AGENTS block (root + L1 + 12 variants via `--docs` injection; co-safety hand-edited per its deliberate propagation-map exclusion), CLAUDE.md/GEMINI.md §4 mirrors (L0+L1), `templates/common/docs/context.md`, `agents/docs-writer.md` (terminology-consistency responsibility), `skills/translate` + `skills/documentation-writing` (L0→L1 skill copy). Design: `docs/designs/2026-09-11-korean-plain-language-policy-design.md`. Gates: md-language 0 violations; audit all pass.
+
 ### Fixed
 - **[2026-09-11]**: docs(skills): **k-ecos row-range policy bullet corrected.** The `sample`-key cap applies to the window span — `요청종료건수 − 요청시작건수 < 10` (≤10 rows per window starting at ≥1; live-verified `1/10` and `11/20` pass, `0/10` fails `ERROR-301` while `0/5` passes). Replaces the earlier "a leading `0` was also observed to work" observation, which predates the boundary probe. Follow-up to the k-* advancement pass (PR #870); boundary formula also recorded in `k-ecos/scripts/ecos-fetch.ts`.
 

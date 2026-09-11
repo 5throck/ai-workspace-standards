@@ -81,6 +81,8 @@ This skill provides comprehensive documentation writing capabilities, from techn
    - Format preferences (visual, text, interactive)
    - Disability accommodations
 
+**Korean Plain-Language Preference (`순우리말`-first)**: when the deliverable is Korean, prefer native Korean words over loanwords where a natural, widely-understood equivalent exists (e.g. `만들기` over `크리에이션`, `알림` over `노티피케이션`). Settled loanwords (`컴퓨터`, `데이터`, `소프트웨어`, `파일`) and established technical terms remain permitted — clarity and standard terminology take precedence. When editing existing Korean documents for other reasons, nativize the touched sections incrementally; no bulk rewrites.
+
 **Output**: Audience profile with characteristics and needs
 
 ---

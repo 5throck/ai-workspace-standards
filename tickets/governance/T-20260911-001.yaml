@@ -1,0 +1,18 @@
+schemaVersion: 1
+id: T-20260911-001
+kind: manual
+title: >-
+  Incremental Korean plain-language (순우리말-first) nativization of existing Korean
+  docs — apply to touched sections when editing ko/, locales/ko/, *_ko.md,
+  lang:ko files
+priority: low
+not_before: '2026-10-01'
+status: backlog
+attempts: 0
+created_at: '2026-09-11T10:57:29.033Z'
+history:
+  - at: '2026-09-11T10:57:29.033Z'
+    from: null
+    to: backlog
+result: null
+error: null
