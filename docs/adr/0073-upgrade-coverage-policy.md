@@ -36,7 +36,16 @@ Invert the default. Classification for every project-relative path lives in one 
 ## References
 
 - Design: `docs/designs/2026-09-11-upgrade-policy-coverage-design.md` (D1–D8, §10 Phase C addendum)
-- CONSTITUTION §6.5 Script Lifecycle (layer model — `upgrade-project.ts` is `L0+L1`; the coverage gate rides the shared `audit.ts`)
+- CONSTITUTION §6.5 Script Lifecycle (layer model — the upgrade trio is `L0`-only; see Amendment 1)
 - ADR-0060 (auto-activating audit gate precedent), ADR-0031 (L1/L2 fork model — upgrade philosophy), WS-07 (variant `docs/context.md` prohibition)
 - SSOT: `scripts/lib/upgrade-policy.ts`; gate: `scripts/check-upgrade-coverage.ts`; delivery: `scripts/upgrade-project.ts` v1.22.0
-- PRs #876 (Phases A+B), #877 (Phase C)
+- PRs #876 (Phases A+B), #877 (Phase C), #878 (ADR + docs)
+
+## Amendment 1 (2026-09-11): the upgrade trio is `L0`-only
+
+Adoption shipped `upgrade-project.ts`, `scripts/lib/upgrade-policy.ts`, and `scripts/check-upgrade-coverage.ts` as `L0+L1` so projects could "re-run upgrades from their own copy." That rationale was void: the script resolves the template tree **relative to its own location** (`workspaceRoot = resolve(import.meta.dir, '..')`), so an in-project run looks for `<project>/templates/common`, which never exists — every per-project copy was an inert fossil (already two minor versions stale across the fleet within a day of adoption).
+
+- `upgrade-project.ts`, `lib/upgrade-policy.ts`, `check-upgrade-coverage.ts` are **`L0`-only**; rows stay in the L1 `SCRIPTS.md` registry under the `L0` convention (cf. `new-project.ts`), physical mirrors are removed.
+- Upgrades run **from the workspace root** (`bun scripts/upgrade-project.ts Projects/<name>`); from inside a project, invoke the workspace script — `bun ../../scripts/upgrade-project.ts .` — so the upgrader is always the current version (a stale upgrader mutating the project is the worst version-skew possible for the convergence tool).
+- `helpers/upgrade-versions.ts` / `helpers/context-sections.ts` remain `L0+L1` (other project-shipped scripts, e.g. `audit.ts`, import them).
+- Inert per-project copies retire via `upgrade-project --prune-removed` (scripts absent from the template are pruned; `reconcileScriptRegistry` drops the stale registry row).

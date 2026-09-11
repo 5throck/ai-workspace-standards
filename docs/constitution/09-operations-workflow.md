@@ -169,6 +169,8 @@ bun scripts/validate-templates.ts
 > `docs/governance/`) using the canonical `ADR-00NN` form; unlinked ADRs → WARN. Earlier ADRs are grandfathered.
 > Since ADR-0059 Stage 2 (2026-08-23), `dev-sync.ts` step 3.97 runs `verify-adr-governance.ts --strict` as a blocking gate — an unlinked post-cutoff Accepted ADR aborts the sync before branch/commit; since ADR-0059 Stage 2b (2026-08-23), intentional-duplicate marker-hash drift also blocks under the same strict gate. Marker hashes are section-scoped (sha256-8 of the source section slice); the remedy is to review the flagged duplicate section, update it if stale, re-seed via `verify-adr-governance.ts --update-marker-hashes`, and re-run the sync. The `audit.ts --governance-check` flag itself remains a non-blocking diagnostic. New ADRs from the cutoff on require frontmatter `status:` + `date:`.
 
+> **Typecheck gate** (added 2026-09-10, T-20260910-012): `dev-sync.ts` step 3.95b runs `scripts/typecheck.ts` — `tsc --noEmit` over `scripts/` against the zero-error baseline (`scripts/helpers/typecheck-baseline.json`) — as a **blocking gate** in the root context; L1+ contexts skip cleanly via the missing-baseline guard. Baseline policy: never raise the error count — fix the error instead.
+
 **Responsibility**:
 - **Agent/Skill changes**: Creator runs sync scripts immediately
 - **L0 template changes**: Architect propagates to all variants within 1 week

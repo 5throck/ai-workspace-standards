@@ -11,8 +11,11 @@
  *   bun scripts/lifecycle-sync-audit.ts --json
  *   bun scripts/lifecycle-sync-audit.ts --fix
  *
- * @version 1.7.0
+ * @version 1.7.1
  * @last_updated 2026-09-10
+ * v1.7.1: Added 'audit:check-upgrade-coverage' to INTENTIONAL_CROSS_REFS — the upgrade coverage
+ *          gate (ADR-0073) is existsSync-guarded; the checker is L0-only (ADR-0073 Amendment 1
+ *          retired the inert per-project copies of the upgrade trio).
  * v1.7.0: Fixed Check X's collectTsFiles() recursing into each subdirectory twice
  *          (one depth+1 call plus one depth-0 call), producing duplicate file scans
  *          and duplicate Check X issues; now a single correct recursion.
@@ -386,6 +389,7 @@ const INTENTIONAL_CROSS_REFS = new Set([
   'skill-session-review:skill-dependency-analysis', // skill-session-review.ts: per-skill re-analysis is existsSync-guarded (import.meta.dir sibling check) and skips in L1/L3 where the analyzer is absent (ADR-0067 §Decision 5)
   'audit:sync-template-deps',                     // audit.ts: string mention in FAIL fix hint only; checkTemplateDependencyMirror skips entirely when templates/common/package.json is absent (L1/L3)
   'upgrade-project:validate-variant-readiness',   // upgrade-project.ts: Variant Readiness Gate is existsSync-guarded — the gate runs only at a workspace root where the L0 validator exists (surfaced when the L1 copy caught up to v1.18.0)
+  'audit:check-upgrade-coverage',                 // audit.ts: upgrade coverage gate (ADR-0073) is existsSync-guarded — the checker is L0-only and the gate self-skips when scripts/check-upgrade-coverage.ts is absent (L1/L3 projects)
 ]);
 
 function runCheckX(): SyncIssue[] {
