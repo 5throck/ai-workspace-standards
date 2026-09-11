@@ -2,9 +2,9 @@
 
 - **Spec ID**: 2026-09-11-upgrade-policy-coverage
 - **Date**: 2026-09-11
-- **Status**: approved (plan review 2026-09-11)
+- **Status**: implemented (PRs #876, #877; formalized as ADR-0073)
 - **Owners**: architect (design), automation-engineer (implementation)
-- **Affected artifacts**: `scripts/upgrade-project.ts`, new `scripts/lib/upgrade-policy.ts`, new `scripts/check-upgrade-coverage.ts`, `skills/upgrade-project/SKILL.md`, governance registries
+- **Affected artifacts**: `scripts/upgrade-project.ts`, new `scripts/lib/upgrade-policy.ts`, new `scripts/check-upgrade-coverage.ts`, `scripts/audit.ts` (coverage gate), `skills/upgrade-project/SKILL.md`, governance registries
 
 ## 1. Problem
 
@@ -122,6 +122,7 @@ Single PR (sequential; dev-sync touches shared pipeline files): design doc → `
 
 ## 9. References
 
+- ADR: `docs/adr/0073-upgrade-coverage-policy.md` (formalized decision record)
 - Investigation session log: `memory/2026-09-11.md` (fleet gap inventory)
 - `scripts/new-project.ts` (scaffold parity facts: lines 362, 432, 470, 477, 514–520, 535, 718, 728)
 - `scripts/upgrade-project.ts` (pass inventory, header changelog)

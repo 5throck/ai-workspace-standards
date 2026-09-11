@@ -1,7 +1,7 @@
 # Project Upgrade Guide
 
-**Version**: 1.0.0
-**Last Updated**: 2026-07-14
+**Version**: 1.1.0
+**Last Updated**: 2026-09-11
 **Scope**: Upgrading existing L2/L3 projects created from variant templates when templates are updated
 
 ---
@@ -27,17 +27,15 @@ This guide documents the `upgrade-project.ts` tool that automates this process.
 
 ## §2: Upgrade Tool
 
-**Script**: `scripts/upgrade-project.ts` (v1.2.2)
-**Location**: Workspace root (`C:\git\ai_workspace\`)
+**Script**: `scripts/upgrade-project.ts` (v1.22.0)
+**Location**: Workspace root; the script is `L0+L1`, so each project also carries its own copy under `scripts/`
 
 ### Usage
 
 ```bash
-# From the workspace root
-bun scripts/upgrade-project.ts <project-path> [--variant <name>] [--platform <claude|antigravity|both>] [--dry-run]
+# From the workspace root (recommended — uses the newest workspace-side copy)
+bun scripts/upgrade-project.ts <project-path> [--variant <name>] [--platform <claude|antigravity|both>] [--dry-run] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization]
 ```
-
-### Arguments
 
 | Argument | Required | Description |
 |----------|----------|-------------|
@@ -45,6 +43,10 @@ bun scripts/upgrade-project.ts <project-path> [--variant <name>] [--platform <cl
 | `--variant <name>` | No | Template variant to upgrade from (e.g., `co-design`). Auto-detected from `.claude/template-version.txt` if omitted |
 | `--platform <val>` | No | `claude`, `antigravity`, or `both` (default). Controls which platform config files are merged |
 | `--dry-run` | No | Analyze without making changes. All actions logged with `[DRY RUN]` prefix |
+| `--prune-removed` | No | Also remove project files that no longer exist in the template (scripts/, agents/, skills/) |
+| `--rollback` | No | Restore the pre-upgrade git stash snapshot |
+| `--yes` / `-y` | No | Non-interactive confirmation |
+| `--skip-context-commonization` | No | Opt out of the CONTEXT_COMMONIZATION boilerplate-prune pass |
 
 ---
 
@@ -52,7 +54,10 @@ bun scripts/upgrade-project.ts <project-path> [--variant <name>] [--platform <cl
 
 ### 3.1 File Categories
 
-The upgrade tool classifies files into 5 categories:
+Since v1.21.0 the tool is **policy-driven** (ADR-0073): every template path is classified by
+`scripts/lib/upgrade-policy.ts` (`resolveClaim()`), and the fallback policy is *deliver by
+default* — a template file with no dedicated pass still reaches existing projects. The
+categories below are the ones project owners interact with:
 
 #### 🔒 LOCKED Files (Unconditional Overwrite)
 
@@ -133,17 +138,43 @@ readiness gate) no-op. This keeps the project from silently re-inheriting the
 origin template's variant-specific assets after the identities diverged.
 Record the split with a `derivedFrom` field in the project's `variant.json`.
 
+#### 🌳 TEMPLATE TREE SYNC (Default-Policy Delivery, since v1.21.0)
+
+Every template file not claimed by a dedicated pass is delivered by this pass — this is what
+closed the historical silent-gap class (the variant `docs/` tree such as `user-guide`,
+`handoff-spec`, domain docs, `countries/KR.md`, plus `.github/`, `.editorconfig`,
+platform `skills.json`, `SECURITY.md`). Three sub-policies:
+
+| Sub-policy | Applies to | Behavior |
+|-----------|-----------|----------|
+| `SYNC` (default) | Reference docs, `.github/`, root dotfiles, `skills.json` | Add if missing; update on inline `*<file> version: X.Y` bump or content hash change; **⚠️ CONFLICT warning** when the project copy has uncommitted local modifications (template still wins — commit or stash first) |
+| `WORKSPACE` | `docs/{designs,drafts,reports,research,findings,threat-models,lifecycle}/` | Seed add-if-missing only — project artifacts there are never overwritten and never pruned |
+| `JSON_MERGE` | `.claude/settings.json`, `.gemini/settings.json` | Deep merge: template wins conflicts, **arrays are unioned** so project-only entries (e.g. `permissions.allow` grants) survive |
+
+Formerly-separate passes folded here: `VARIANT_DOCS_SYNC` (v1.22.0 — `docs/context.md` and the
+shared docs pairs keep their inline-version semantics under the default `SYNC` policy;
+`docs/context.md`'s SSOT stays `templates/common` per WS-07) and the former GOVERNANCE-era docs
+gaps. The former `docs/_common/security.md` overwrite and the add-if-missing governance pair
+(`LICENSE`, `SECURITY.md`) remain dedicated passes.
+
 #### 🛡️ PRESERVE Files (Never Touched)
 
 These files are always preserved — local modifications are safe:
 
 | File/Directory | Reason |
 |---------------|--------|
-| `README.md` | Project-specific documentation |
-| `README_ko.md` | Korean translation |
-| `docs/context.md` | Project context |
+| `README.md`, `README_ko.md` | Project-specific root documentation |
+| `CHANGELOG.md` | The project's own history |
+| `docs/README.md`, `docs/README_ko.md` | Project-owned docs index (delivered at scaffold only) |
+| `.env.sample` | Scaffold-time country pruning removes country-scoped env blocks; a wholesale re-sync would re-inject them |
+| `memory/` | Project session logs |
+| `package.json`, `bun.lock`, `variant.json` | Project runtime/generated state (dependency drift is handled by `sync-template-deps.ts` / the `update-bun-packages` skill, not the upgrade) |
 | `src/` | Project source code |
-| Project-only agents/skills | Not in template |
+| Project-only agents/skills | Not in template (prune manifests protect intentional forks) |
+
+> Note: `docs/context.md` is **not** preserve-classified — it is version-synced through
+> TEMPLATE TREE SYNC (see the variant context section in
+> [skills/upgrade-project/SKILL.md](../skills/upgrade-project/SKILL.md)).
 
 #### 📋 OVERWRITE Files (Governance)
 
@@ -262,12 +293,11 @@ Was the workspace template updated?
 
 | Limitation | Impact | Workaround |
 |-----------|--------|-----------|
-| No 3-way merge for SYNC files | Local modifications to scripts/agents are silently overwritten | Commit local changes before upgrade; manually merge after |
+| No 3-way merge for SYNC files | Local modifications to scripts/agents/reference docs are overwritten (⚠️ CONFLICT is warned, template still wins) | Commit local changes before upgrade; manually merge after; pre-upgrade stash is the safety net |
 | `.gitignore` MERGE mechanism non-functional | `.gitignore` updates don't propagate | Manual copy of needed sections |
 | CLAUDE.md/GEMINI.md MERGE requires markers | If a project's file was ever hand-rewritten without preserving `COMMON-CLAUDE`/`COMMON-GEMINI` markers, the merge point is silently lost and the file drifts permanently (2026-08 co-price/co-abap incident) | `bun scripts/audit.ts` at the workspace root WARNs on marker-count drift for any `Projects/co-*` checked out locally; re-add the missing marker pairs manually (compare against `templates/common/CLAUDE.md`/`GEMINI.md`) |
-| No deleted file handling | Stale files from old templates accumulate | Periodic manual cleanup |
-| No `--rollback` flag | Must know to use `git stash pop` | Keep this guide handy |
-| Script subdirectories hardcoded | New script directories in future templates may be missed | Report missing dirs after upgrade |
+| WORKSPACE seeds are delivered once | Template updates to seed files under `docs/designs/` etc. never propagate after first delivery (intentional — the directories are project-owned) | Hand-pick wanted changes from the template |
+| Settings JSON merge can duplicate hook entries | When the template rewrites a hook that a project had also modified, the union merge keeps both copies | Visible and safe; delete the stale entry manually |
 
 ---
 
@@ -300,6 +330,10 @@ The tool will prompt for confirmation before proceeding. This is expected for pr
 
 ## §8: Related Documentation
 
+- [Upgrade Coverage Policy (ADR-0073)](adr/0073-upgrade-coverage-policy.md) — the deliver-by-default coverage model and its audit gate
+- [Upgrade Policy Coverage Design](designs/2026-09-11-upgrade-policy-coverage-design.md) — gap inventory, decisions D1–D8, Phase C addendum
+- [Upgrade Project Skill](../skills/upgrade-project/SKILL.md) — pass table, managed-block markers, post-upgrade verification
+- [Coverage Validator](../scripts/check-upgrade-coverage.ts) — `bun scripts/check-upgrade-coverage.ts [--variant <name>] [--strict] [--json]`
 - [Variant Creation Guide](../.agents/skills/create-variant/SKILL.md) — Phase A: Creating new variants
 - [Variant Promotion Guide](../.agents/skills/promote-variant/SKILL.md) — Phase B: Promoting variants
 - [New Project Scaffolding](constitution/07-new-project.md) — Creating new L3 projects
