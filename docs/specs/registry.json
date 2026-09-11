@@ -718,6 +718,15 @@
       "source": "manual",
       "created": "2026-09-10",
       "last_updated": "2026-09-10"
+    },
+    {
+      "id": "2026-09-11-k-skills-advancement-design",
+      "title": "k skills advancement design",
+      "file": "docs/designs/2026-09-11-k-skills-advancement-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-11",
+      "last_updated": "2026-09-11"
     }
   ]
 }

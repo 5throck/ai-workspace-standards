@@ -68,10 +68,11 @@
 | `i18n-locale-config` | common | i18n-specialist | — | — | — | — |
 | `insight-synthesis` | variant:co-consult | data-analyst, data-analyst, strategy-analyst, strategy-analyst | phase1, phase3 | competitive-intelligence (composes_with), financial-statement-analysis (composes_with), org-readiness-assessment (follows), solution-design (composes_with) | — | — |
 | `investigation/hazop-analysis` | variant:co-safety | — | — | — | — | — |
-| `k-dart` | common | — | — | — | — | — |
-| `k-kosis` | common | — | — | — | — | — |
-| `k-law` | common | — | — | — | — | — |
-| `k-opendata` | common | — | — | k-kosis | — | — |
+| `k-dart` | common | — | — | k-ecos (composes_with), k-kosis (composes_with), k-law | — | — |
+| `k-ecos` | common | — | — | k-dart (composes_with), k-kosis (composes_with), k-opendata (composes_with) | — | — |
+| `k-kosis` | common | — | — | k-dart (composes_with), k-ecos (composes_with), k-law | — | — |
+| `k-law` | common | — | — | k-dart, k-kosis | — | — |
+| `k-opendata` | common | — | — | k-ecos (composes_with), k-kosis | — | — |
 | `labor-compliance-audit` | variant:co-hr | labor-compliance-analyst, labor-compliance-analyst, labor-relations-specialist, labor-relations-specialist, safety-health-officer, safety-health-officer | phase1, phase2 | org-readiness-assessment (follows), stakeholder-alignment (composes_with) | — | — |
 | `landed-cost-calculation` | variant:co-export | hs-classification-specialist, hs-classification-specialist, logistics-coordinator, logistics-coordinator | phase1, phase2 | hs-classification-workflow (composes_with), logistics-coordination (composes_with) | — | — |
 | `learning-curriculum-design` | variant:co-hr | learning-development-specialist, learning-development-specialist | phase2 | org-design-framework (composes_with), org-readiness-assessment (composes_with), performance-system-design (follows), stakeholder-alignment (composes_with), talent-acquisition-strategy (composes_with) | — | — |
@@ -249,6 +250,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `adr:0069` | adr | — | — | — |
 | `adr:0070` | adr | — | — | — |
 | `adr:0071` | adr | — | — | — |
+| `adr:0072` | adr | — | k-dart, k-ecos, k-kosis, k-law, k-opendata | — |
 | `dec:DEC-20260825-01` | decision | — | — | — |
 | `dec:DEC-20260825-02` | decision | `sync` | — | — |
 | `dec:DEC-20260829-01` | decision | `decision-record` | — | — |

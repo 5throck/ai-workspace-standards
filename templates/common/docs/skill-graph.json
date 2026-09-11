@@ -97,6 +97,11 @@
       "layer": "common"
     },
     {
+      "id": "k-ecos",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
       "id": "k-kosis",
       "type": "skill",
       "layer": "common"
@@ -413,10 +418,123 @@
       "source": "prose"
     },
     {
+      "type": "composes_with",
+      "from": "k-dart",
+      "to": "k-ecos",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/common/skills/k-dart/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "k-dart",
+      "to": "k-kosis",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/common/skills/k-dart/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "relates_to",
+      "from": "k-dart",
+      "to": "k-law",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/common/skills/k-dart/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "k-ecos",
+      "to": "k-dart",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/common/skills/k-ecos/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-ecos",
+      "to": "k-dart",
+      "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "k-ecos",
+      "to": "k-kosis",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/common/skills/k-ecos/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-ecos",
+      "to": "k-kosis",
+      "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "k-ecos",
+      "to": "k-opendata",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/common/skills/k-ecos/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-ecos",
+      "to": "k-opendata",
+      "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "k-kosis",
+      "to": "k-dart",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/common/skills/k-kosis/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "references",
       "from": "k-kosis",
       "to": "k-dart",
       "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "k-kosis",
+      "to": "k-ecos",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/common/skills/k-kosis/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
     },
     {
       "type": "references",
@@ -425,10 +543,55 @@
       "source": "prose"
     },
     {
+      "type": "relates_to",
+      "from": "k-kosis",
+      "to": "k-law",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/common/skills/k-kosis/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
+      "type": "relates_to",
+      "from": "k-law",
+      "to": "k-dart",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/common/skills/k-law/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "relates_to",
+      "from": "k-law",
+      "to": "k-kosis",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/common/skills/k-law/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
       "type": "references",
       "from": "k-opendata",
       "to": "k-dart",
       "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "k-opendata",
+      "to": "k-ecos",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/common/skills/k-opendata/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     },
     {
       "type": "references",
@@ -444,7 +607,7 @@
       "provenance": {
         "file": "templates/common/skills/k-opendata/SKILL.md",
         "field": "relates_to",
-        "index": 0
+        "index": 1
       }
     },
     {

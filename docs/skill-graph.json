@@ -287,6 +287,11 @@
       "layer": "L0"
     },
     {
+      "id": "adr:0072",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
       "id": "agent-lifecycle-manager",
       "type": "skill",
       "layer": "L0"
@@ -873,6 +878,11 @@
     },
     {
       "id": "k-dart",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "k-ecos",
       "type": "skill",
       "layer": "common"
     },
@@ -2756,6 +2766,656 @@
       "layer": "variant:co-consult"
     },
     {
+      "id": "term:100대 통계지표",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:balPayments",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:expDlr",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:expWgt",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:hsCd",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:hsCode",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:impDlr",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:impWgt",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:SERVICE_KEY_IS_NOT_REGISTERED_ERROR",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:SERVICE_KEY_IS_NULL",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:statCd",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:statKor",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:가구당월평균소득",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:감사",
+      "type": "term",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "term:감사보고서",
+      "type": "term",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "term:감사의견",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:감자",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:개발계정",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:경제성장률(전기대비)",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:경제심리지수",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:계열사",
+      "type": "term",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "term:공포일자",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:국가별 수출입실적(GW)",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:국내총생산(명목, 원화표시)",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:금융감독원",
+      "type": "term",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "term:나이스신용평가",
+      "type": "term",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "term:년간",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:당기순이익",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:대표이사",
+      "type": "term",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "term:데이터가 존재하지 않습니다.",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:매출액",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:모회사",
+      "type": "term",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "term:무상증자",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:미등록키",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:반기보고서",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:반년",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:반월",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:법령ID",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:법령명한글",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:법령용어",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:법령일련번호",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:법령해석례",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:법원명",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:별표",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:별표서식",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:본원통화 구성내역(평잔, 원계열)",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:부적정",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:부채비율",
+      "type": "term",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "term:부채총계",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:부칙",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:부회장",
+      "type": "term",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "term:분기",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:분기보고서",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:분할",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:사건명",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:사건번호",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:사업보고서",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:사외이사",
+      "type": "term",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "term:사용할수없는키",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:서비스 통계 목록",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:선고일자",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:소관부처",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:소비자동향지수",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:소송",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:수출입총괄(GW)",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:시가총액",
+      "type": "term",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "term:시도별 수출입실적(GW)",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:시행일 법령",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:시행일자",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:연",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:영업이익",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:운영계정",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:원/달러 환율(종가)",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:월",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:월간",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:유가증권시장",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:유상증자",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:의견거절",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:이사회",
+      "type": "term",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "term:인구총조사 인구총표",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:일",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:일간",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:자기주식처분",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:자기주식취득",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:자본총계",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:자산총계",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:자치법규",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:자회사",
+      "type": "term",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "term:잘못된 요청 변수를 호출 하였습니다.",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:적정",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:전자공시시스템",
+      "type": "term",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "term:접근할수없는IP",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:정상",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:조문",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:조약",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:조회된데이터가없음",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:주요사항보고서",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:주요지표(연간지표)",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:지분율",
+      "type": "term",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "term:지주회사",
+      "type": "term",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "term:총계",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:최대주주",
+      "type": "term",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "term:코넥스시장",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:코스닥",
+      "type": "term",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "term:코스닥시장",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:통계 세부항목 목록",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:통계 조회 조건 설정",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:통계메타DB",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:통계목록조회",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:통계설명",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:통계용어사전",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:통계자료조회",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:통합검색",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:특수관계인",
+      "type": "term",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "term:판결요지",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:판례",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:품목별 국가별 수출입실적(GW)",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:품목별 수출입실적(GW)",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:한국거래소",
+      "type": "term",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "term:한국기업평가",
+      "type": "term",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "term:한국신용평가",
+      "type": "term",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "term:한국은행 기준금리",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:한국은행 기준금리 및 여수신금리",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:한정",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:합병",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:행정규칙",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:헌재결정례",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:현행법령",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:활용신청",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:회장",
+      "type": "term",
+      "layer": "variant:co-consult"
+    },
+    {
       "id": "test-driven-development",
       "type": "skill",
       "layer": "variant:co-develop"
@@ -3463,6 +4123,36 @@
       "type": "references",
       "from": "adr:0068",
       "to": "service-design",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0072",
+      "to": "k-dart",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0072",
+      "to": "k-ecos",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0072",
+      "to": "k-kosis",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0072",
+      "to": "k-law",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0072",
+      "to": "k-opendata",
       "source": "prose"
     },
     {
@@ -4179,6 +4869,286 @@
         "file": "templates/co-consult/skills/company-intelligence/SKILL.md",
         "field": "relates_to",
         "index": 5
+      }
+    },
+    {
+      "type": "references",
+      "from": "company-intelligence",
+      "to": "term:감사",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/co-consult/skills/company-intelligence/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "company-intelligence",
+      "to": "term:감사보고서",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/co-consult/skills/company-intelligence/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "company-intelligence",
+      "to": "term:계열사",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/co-consult/skills/company-intelligence/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "company-intelligence",
+      "to": "term:금융감독원",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/co-consult/skills/company-intelligence/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "company-intelligence",
+      "to": "term:나이스신용평가",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/co-consult/skills/company-intelligence/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "company-intelligence",
+      "to": "term:당기순이익",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/co-consult/skills/company-intelligence/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "company-intelligence",
+      "to": "term:대표이사",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/co-consult/skills/company-intelligence/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "company-intelligence",
+      "to": "term:매출액",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/co-consult/skills/company-intelligence/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "company-intelligence",
+      "to": "term:모회사",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/co-consult/skills/company-intelligence/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "company-intelligence",
+      "to": "term:부채비율",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/co-consult/skills/company-intelligence/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "company-intelligence",
+      "to": "term:부회장",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/co-consult/skills/company-intelligence/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "company-intelligence",
+      "to": "term:사업보고서",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/co-consult/skills/company-intelligence/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "company-intelligence",
+      "to": "term:사외이사",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/co-consult/skills/company-intelligence/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "company-intelligence",
+      "to": "term:시가총액",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/co-consult/skills/company-intelligence/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "company-intelligence",
+      "to": "term:영업이익",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/co-consult/skills/company-intelligence/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "company-intelligence",
+      "to": "term:유가증권시장",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/co-consult/skills/company-intelligence/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "company-intelligence",
+      "to": "term:이사회",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/co-consult/skills/company-intelligence/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "company-intelligence",
+      "to": "term:자회사",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/co-consult/skills/company-intelligence/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "company-intelligence",
+      "to": "term:전자공시시스템",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/co-consult/skills/company-intelligence/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "company-intelligence",
+      "to": "term:지분율",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/co-consult/skills/company-intelligence/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "company-intelligence",
+      "to": "term:지주회사",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/co-consult/skills/company-intelligence/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "company-intelligence",
+      "to": "term:최대주주",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/co-consult/skills/company-intelligence/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "company-intelligence",
+      "to": "term:코스닥",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/co-consult/skills/company-intelligence/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "company-intelligence",
+      "to": "term:특수관계인",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/co-consult/skills/company-intelligence/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "company-intelligence",
+      "to": "term:한국거래소",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/co-consult/skills/company-intelligence/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "company-intelligence",
+      "to": "term:한국기업평가",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/co-consult/skills/company-intelligence/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "company-intelligence",
+      "to": "term:한국신용평가",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/co-consult/skills/company-intelligence/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "company-intelligence",
+      "to": "term:회장",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/co-consult/skills/company-intelligence/references/terms-ko.json",
+        "field": "terms-ko.json"
       }
     },
     {
@@ -7232,16 +8202,1042 @@
       "source": "procedure_schema"
     },
     {
+      "type": "composes_with",
+      "from": "k-dart",
+      "to": "k-ecos",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/common/skills/k-dart/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "k-dart",
+      "to": "k-kosis",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/common/skills/k-dart/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "relates_to",
+      "from": "k-dart",
+      "to": "k-law",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/common/skills/k-dart/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-dart",
+      "to": "term:감사의견",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-dart/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-dart",
+      "to": "term:감자",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-dart/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-dart",
+      "to": "term:당기순이익",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-dart/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-dart",
+      "to": "term:매출액",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-dart/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-dart",
+      "to": "term:무상증자",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-dart/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-dart",
+      "to": "term:미등록키",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-dart/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-dart",
+      "to": "term:반기보고서",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-dart/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-dart",
+      "to": "term:부적정",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-dart/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-dart",
+      "to": "term:부채총계",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-dart/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-dart",
+      "to": "term:분기보고서",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-dart/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-dart",
+      "to": "term:분할",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-dart/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-dart",
+      "to": "term:사업보고서",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-dart/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-dart",
+      "to": "term:사용할수없는키",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-dart/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-dart",
+      "to": "term:소송",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-dart/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-dart",
+      "to": "term:영업이익",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-dart/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-dart",
+      "to": "term:유가증권시장",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-dart/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-dart",
+      "to": "term:유상증자",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-dart/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-dart",
+      "to": "term:의견거절",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-dart/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-dart",
+      "to": "term:자기주식처분",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-dart/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-dart",
+      "to": "term:자기주식취득",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-dart/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-dart",
+      "to": "term:자본총계",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-dart/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-dart",
+      "to": "term:자산총계",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-dart/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-dart",
+      "to": "term:적정",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-dart/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-dart",
+      "to": "term:접근할수없는IP",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-dart/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-dart",
+      "to": "term:정상",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-dart/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-dart",
+      "to": "term:조회된데이터가없음",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-dart/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-dart",
+      "to": "term:주요사항보고서",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-dart/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-dart",
+      "to": "term:코넥스시장",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-dart/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-dart",
+      "to": "term:코스닥시장",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-dart/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-dart",
+      "to": "term:한정",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-dart/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-dart",
+      "to": "term:합병",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-dart/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "k-ecos",
+      "to": "k-dart",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/common/skills/k-ecos/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-ecos",
+      "to": "k-dart",
+      "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "k-ecos",
+      "to": "k-kosis",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/common/skills/k-ecos/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-ecos",
+      "to": "k-kosis",
+      "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "k-ecos",
+      "to": "k-opendata",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/common/skills/k-ecos/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-ecos",
+      "to": "k-opendata",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "k-ecos",
+      "to": "term:100대 통계지표",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-ecos/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-ecos",
+      "to": "term:가구당월평균소득",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-ecos/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-ecos",
+      "to": "term:경제성장률(전기대비)",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-ecos/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-ecos",
+      "to": "term:경제심리지수",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-ecos/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-ecos",
+      "to": "term:국내총생산(명목, 원화표시)",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-ecos/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-ecos",
+      "to": "term:반년",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-ecos/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-ecos",
+      "to": "term:반월",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-ecos/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-ecos",
+      "to": "term:본원통화 구성내역(평잔, 원계열)",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-ecos/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-ecos",
+      "to": "term:분기",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-ecos/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-ecos",
+      "to": "term:서비스 통계 목록",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-ecos/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-ecos",
+      "to": "term:소비자동향지수",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-ecos/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-ecos",
+      "to": "term:연",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-ecos/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-ecos",
+      "to": "term:원/달러 환율(종가)",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-ecos/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-ecos",
+      "to": "term:월",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-ecos/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-ecos",
+      "to": "term:일",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-ecos/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-ecos",
+      "to": "term:주요지표(연간지표)",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-ecos/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-ecos",
+      "to": "term:통계 세부항목 목록",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-ecos/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-ecos",
+      "to": "term:통계 조회 조건 설정",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-ecos/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-ecos",
+      "to": "term:통계메타DB",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-ecos/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-ecos",
+      "to": "term:통계용어사전",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-ecos/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-ecos",
+      "to": "term:한국은행 기준금리",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-ecos/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-ecos",
+      "to": "term:한국은행 기준금리 및 여수신금리",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-ecos/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "k-kosis",
+      "to": "k-dart",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/common/skills/k-kosis/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "references",
       "from": "k-kosis",
       "to": "k-dart",
       "source": "prose"
     },
     {
+      "type": "composes_with",
+      "from": "k-kosis",
+      "to": "k-ecos",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/common/skills/k-kosis/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
       "type": "references",
       "from": "k-kosis",
       "to": "k-law",
       "source": "prose"
+    },
+    {
+      "type": "relates_to",
+      "from": "k-kosis",
+      "to": "k-law",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/common/skills/k-kosis/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-kosis",
+      "to": "term:년간",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-kosis/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-kosis",
+      "to": "term:데이터가 존재하지 않습니다.",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-kosis/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-kosis",
+      "to": "term:분기",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-kosis/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-kosis",
+      "to": "term:월간",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-kosis/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-kosis",
+      "to": "term:인구총조사 인구총표",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-kosis/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-kosis",
+      "to": "term:일간",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-kosis/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-kosis",
+      "to": "term:잘못된 요청 변수를 호출 하였습니다.",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-kosis/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-kosis",
+      "to": "term:통계목록조회",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-kosis/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-kosis",
+      "to": "term:통계설명",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-kosis/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-kosis",
+      "to": "term:통계자료조회",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-kosis/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-kosis",
+      "to": "term:통합검색",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-kosis/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "relates_to",
+      "from": "k-law",
+      "to": "k-dart",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/common/skills/k-law/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "relates_to",
+      "from": "k-law",
+      "to": "k-kosis",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/common/skills/k-law/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-law",
+      "to": "term:공포일자",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-law/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-law",
+      "to": "term:법령ID",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-law/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-law",
+      "to": "term:법령명한글",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-law/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-law",
+      "to": "term:법령용어",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-law/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-law",
+      "to": "term:법령일련번호",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-law/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-law",
+      "to": "term:법령해석례",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-law/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-law",
+      "to": "term:법원명",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-law/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-law",
+      "to": "term:별표",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-law/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-law",
+      "to": "term:별표서식",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-law/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-law",
+      "to": "term:부칙",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-law/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-law",
+      "to": "term:사건명",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-law/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-law",
+      "to": "term:사건번호",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-law/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-law",
+      "to": "term:선고일자",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-law/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-law",
+      "to": "term:소관부처",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-law/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-law",
+      "to": "term:시행일 법령",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-law/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-law",
+      "to": "term:시행일자",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-law/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-law",
+      "to": "term:자치법규",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-law/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-law",
+      "to": "term:조문",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-law/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-law",
+      "to": "term:조약",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-law/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-law",
+      "to": "term:판결요지",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-law/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-law",
+      "to": "term:판례",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-law/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-law",
+      "to": "term:행정규칙",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-law/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-law",
+      "to": "term:헌재결정례",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-law/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-law",
+      "to": "term:현행법령",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-law/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
     },
     {
       "type": "references",
@@ -7254,6 +9250,18 @@
       "from": "k-opendata",
       "to": "k-dart",
       "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "k-opendata",
+      "to": "k-ecos",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/common/skills/k-opendata/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     },
     {
       "type": "references",
@@ -7269,7 +9277,7 @@
       "provenance": {
         "file": "templates/common/skills/k-opendata/SKILL.md",
         "field": "relates_to",
-        "index": 0
+        "index": 1
       }
     },
     {
@@ -7289,6 +9297,206 @@
       "from": "k-opendata",
       "to": "market-entry-strategy",
       "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "k-opendata",
+      "to": "term:balPayments",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-opendata/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-opendata",
+      "to": "term:expDlr",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-opendata/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-opendata",
+      "to": "term:expWgt",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-opendata/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-opendata",
+      "to": "term:hsCd",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-opendata/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-opendata",
+      "to": "term:hsCode",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-opendata/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-opendata",
+      "to": "term:impDlr",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-opendata/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-opendata",
+      "to": "term:impWgt",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-opendata/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-opendata",
+      "to": "term:SERVICE_KEY_IS_NOT_REGISTERED_ERROR",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-opendata/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-opendata",
+      "to": "term:SERVICE_KEY_IS_NULL",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-opendata/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-opendata",
+      "to": "term:statCd",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-opendata/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-opendata",
+      "to": "term:statKor",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-opendata/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-opendata",
+      "to": "term:개발계정",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-opendata/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-opendata",
+      "to": "term:국가별 수출입실적(GW)",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-opendata/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-opendata",
+      "to": "term:수출입총괄(GW)",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-opendata/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-opendata",
+      "to": "term:시도별 수출입실적(GW)",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-opendata/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-opendata",
+      "to": "term:운영계정",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-opendata/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-opendata",
+      "to": "term:총계",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-opendata/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-opendata",
+      "to": "term:품목별 국가별 수출입실적(GW)",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-opendata/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-opendata",
+      "to": "term:품목별 수출입실적(GW)",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-opendata/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-opendata",
+      "to": "term:활용신청",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-opendata/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
     },
     {
       "type": "references",

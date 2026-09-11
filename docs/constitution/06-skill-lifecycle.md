@@ -150,6 +150,8 @@ Per ADR-0060 (Amendments 3–6) and the `reledgev` design (`docs/designs/2026-08
 
 **Derivation sources (ADR-0060 Amendments 6 & 8)**: typed relations are derived, in order of precedence, from (1) procedure step adjacency — consecutive steps → `follows`, co-use within one procedure → `composes_with` (declared once, alphabetically-first skill), and (2) **agent co-use** (Amendment 8) — skills co-declared in one agent's `required_skills` → `composes_with`, declared on **both** sides. `tests/add-variant-relations.ts` is the idempotent migrator for both template and project (`--project <path>`) surfaces; already-declared relations are never overwritten.
 
+**Term nodes (ADR-0072)**: each skill's `references/terms-ko.json` (§6.7) also feeds the projection — the generator derives `term:<용어>` nodes plus skill→term `references` edges from them, making Korean domain vocabulary (the `k-*` country-scoped family) queryable in the graph. `verify-skill-graph.ts` enforces `term:` id namespacing, uniqueness, and at least one referencing skill per term node.
+
 **Pipeline integration**: the relation graph is regenerated at every lifecycle boundary — L0 `/sync` step 4.65 (all scopes), L3 scaffold (`new-project.ts` step 7.6), L3→variant promotion (`l3-to-variant-pipeline.ts` Phase 6.5), and project upgrade (`upgrade-project.ts` post-upgrade step). `validate-skills.ts` and `validate-decisions.ts` (ADR-0061 chain) run as fail-closed gates in `/sync` step 3.96.
 
 #### 6.3 Skill Body Structure

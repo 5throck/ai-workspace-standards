@@ -11,6 +11,11 @@ last_reviewed: 2026-08-09
 status: active
 owner: strategy-analyst
 prerequisites: LAW_API_OC environment variable
+relates_to:
+  - skill: k-dart
+    type: relates_to
+  - skill: k-kosis
+    type: relates_to
 l2_propagate: true
 metadata:
   type: legal-research
@@ -65,11 +70,12 @@ Use when an engagement requires Korean statutory or regulatory research from the
 
 ## Reference Material
 
-- None yet; if recurring lookups reveal stable target-specific parameter sets not covered below, capture them as `references/target-params-ko.json`.
+- `references/terms-ko.json`: Korean-original Korea Law Open API terminology mapping (target category codes, response field names). Non-Markdown reference asset, exempt from the workspace English-only doc policy. New target-specific parameter sets discovered in recurring lookups go there.
 
 ## Related Skills
 
 - k-dart
+- k-kosis
 - competitive-intelligence
 - technical-feasibility
 - change-impact-assessment

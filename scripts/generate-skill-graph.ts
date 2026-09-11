@@ -1,8 +1,16 @@
 #!/usr/bin/env bun
 /**
  * Skill Relationship Graph Generator
- * @version 1.8.5
+ * @version 1.9.0
  *
+ * v1.9.0 (2026-09-11): Source 1b — term-node extraction per ADR-0072. Each
+ * skill's references/terms-ko.json (non-Markdown asset, CONSTITUTION §6.7)
+ * contributes `term:<용어>` nodes plus skill→term `references` edges, making
+ * the k-* family's Korean domain vocabulary a first-class graph query. Dual-
+ * form entry values (plain glossary string, or object with `en`/`mapsTo` and
+ * an optional nested `items` map) are both parsed; malformed JSON files are
+ * skipped so the build stays deterministic. GraphNode.type union extended
+ * with 'term' (additive; existing consumers unaffected).
  * v1.8.5 (2026-09-09): ignore untracked/ignored workspace-root procedures/
  * directories when deriving the L0 graph. Local disposable procedure fixtures
  * must not make `bun scripts/audit.ts` fail on one checkout while CI stays green;
@@ -98,7 +106,9 @@ function hasTrackedFilesUnder(absDir: string): boolean {
 // Interfaces for the graph structure
 interface GraphNode {
   id: string;
-  type: 'skill' | 'agent' | 'decision' | 'adr' | 'procedure' | 'output_type';
+  // 'term' = Korean vocabulary node extracted from a skill's
+  // references/terms-ko.json (ADR-0072); id is namespaced `term:<용어>`.
+  type: 'skill' | 'agent' | 'decision' | 'adr' | 'procedure' | 'output_type' | 'term';
   layer: 'L0' | 'L3' | 'common' | `variant:${string}`;
   /** Opaque input/output labels from SKILL.md frontmatter (skill nodes only). */
   inputs?: string[];
@@ -633,6 +643,85 @@ function deriveProceduresFromDir(
 }
 
 /**
+ * Extract Korean term keys from one category map of a terms-ko.json file
+ * (ADR-0072). Category values are either a plain string (glossary-only) or a
+ * term object carrying `en`/`mapsTo`; a term object may nest an `items` map
+ * (table → item vocabulary) whose keys are terms in their own right.
+ * Keys starting with `_` are metadata, never terms.
+ */
+function extractTermsFromCategory(entries: [string, unknown][], out: Set<string>): void {
+  for (const [key, val] of entries) {
+    if (key.startsWith('_')) continue;
+    if (typeof val === 'string') {
+      out.add(key);
+      continue;
+    }
+    if (val === null || typeof val !== 'object') continue;
+    const entry = val as Record<string, unknown>;
+    if (typeof entry.en === 'string' || entry.mapsTo !== undefined) out.add(key);
+    const items = entry.items;
+    if (items === null || typeof items !== 'object') continue;
+    for (const [itemKey, itemVal] of Object.entries(items as Record<string, unknown>)) {
+      if (itemKey.startsWith('_')) continue;
+      if (typeof itemVal === 'string') {
+        out.add(itemKey);
+      } else if (itemVal !== null && typeof itemVal === 'object') {
+        const itemEntry = itemVal as Record<string, unknown>;
+        if (typeof itemEntry.en === 'string' || itemEntry.mapsTo !== undefined) out.add(itemKey);
+      }
+    }
+  }
+}
+
+/**
+ * Source 1b (ADR-0072): read each skill's references/terms-ko.json and emit a
+ * `term:<용어>` node plus a skill → term `references` edge. JSON-only source —
+ * a malformed file is skipped (never fails the build); data freshness is the
+ * per-skill drift-check script's job, not the generator's.
+ */
+function deriveTermNodesAndEdges(
+  skills: Map<string, GraphNode>,
+  allNodes: Map<string, GraphNode>,
+  edges: GraphEdge[],
+): void {
+  for (const [skillName, node] of skills) {
+    const skillDir = node.layer === 'common' ? join(ROOT, 'templates', 'common', 'skills', skillName)
+      : node.layer.startsWith('variant:') ? join(templatesDir, node.layer.replace('variant:', ''), 'skills', skillName)
+      : join(ROOT, 'skills', skillName);
+    const termsPath = join(skillDir, 'references', 'terms-ko.json');
+    if (!existsSync(termsPath)) continue;
+
+    try {
+      const termsJson = JSON.parse(readFileSync(termsPath, 'utf-8')) as Record<string, unknown>;
+      // Root level: skip metadata keys (`_note`, `version`, `verified`), walk
+      // each category map.
+      const terms = new Set<string>();
+      for (const [key, val] of Object.entries(termsJson)) {
+        if (key.startsWith('_') || key === 'version' || key === 'verified') continue;
+        if (val !== null && typeof val === 'object' && !Array.isArray(val)) {
+          extractTermsFromCategory(Object.entries(val as Record<string, unknown>), terms);
+        }
+      }
+      for (const term of terms) {
+        const termId = `term:${term}`;
+        if (!allNodes.has(termId)) {
+          allNodes.set(termId, { id: termId, type: 'term', layer: node.layer });
+        }
+        edges.push({
+          type: 'references',
+          from: skillName,
+          to: termId,
+          source: 'terms-ko.json',
+          provenance: prov(termsPath, 'terms-ko.json')
+        });
+      }
+    } catch {
+      // Malformed terms-ko.json — skip; drift-check scripts own data quality.
+    }
+  }
+}
+
+/**
  * Build the skill graph from all sources
  * Exported for use by verify-skill-graph.ts
  */
@@ -696,6 +785,9 @@ export function buildGraph(): SkillGraph {
       }
     }
   }
+
+  // Source 1b: Korean term vocabulary from references/terms-ko.json (ADR-0072)
+  deriveTermNodesAndEdges(skills, allNodes, edges);
 
   // Source 2: Agent required_skills
   for (const [agentName, node] of agents) {
