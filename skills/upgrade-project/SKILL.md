@@ -1,11 +1,11 @@
 ---
 name: upgrade-project
 description: "Upgrade an existing L2/L3 project to the current template version. Use when: upgrading a variant-based project, syncing template improvements, refreshing scripts/agents/skills/docs/commands."
-version: "1.3.1"
+version: "1.3.2"
 status: active
 scope: workspace
 owner: pm
-last_reviewed: 2026-09-11
+last_reviewed: 2026-09-12
 relates_to:
   - skill: promote-variant
     type: follows
@@ -37,8 +37,9 @@ Upgrades an existing project created from a variant template to match the curren
 
 ## Script
 
-**Script**: `scripts/upgrade-project.ts`
-**Usage**: `bun scripts/upgrade-project.ts <project-path> [--variant <name>] [--platform claude|antigravity|both] [--dry-run] [--prune-removed] [--rollback]`
+**Script**: `scripts/upgrade-project.ts` (v1.22.0)
+**Location**: Workspace root only (`L0` per ADR-0073 Amendment 1 — projects do not carry a copy; from inside a project use `bun ../../scripts/upgrade-project.ts .`)
+**Usage**: `bun scripts/upgrade-project.ts <project-path> [--variant <name>] [--platform claude|antigravity|both] [--dry-run] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization]`
 
 ### Arguments
 
