@@ -35,6 +35,8 @@ Root cause: upgrade coverage is a hand-maintained allowlist while the template s
 
 ## 3. Non-goals
 
+> **Status note (2026-09-11)**: the first two non-goals below were subsequently resolved — the VARIANT_DOCS_SYNC fold landed as Phase C (§10 D9, PR #877), and the coverage validator is wired into `audit.ts` as an auto-activating gate (§10 D10). GOVERNANCE FILES and the `docs/_common` overwrite remain dedicated by design. The list is kept as the original scope record.
+
 - Folding existing passes (VARIANT_DOCS_SYNC, docs/_common, GOVERNANCE FILES, …) into the new engine — deferred follow-up; this design only *classifies* them and adds one new pass for the previously-unclaimed remainder.
 - Wiring the coverage validator into `audit.ts`/CI — the validator ships standalone; integration is a follow-up.
 - Dependency updates for root `package.json`/`bun.lock` — remains the `sync-template-deps.ts` / `update-bun-packages` workflow (PROJECT_STATE classification only records that decision).

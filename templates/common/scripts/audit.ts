@@ -1,4 +1,4 @@
-// @version 2.34.0
+// @version 2.34.1
 // v2.33.0: Validator-hardening batch (T-20260910-013/016/017/026). New standing
 //           regression check checkVariantAuditHookRegression() — every variant.json
 //           that declares an audit-variant hook (script_manifest) must resolve to a
@@ -2953,7 +2953,7 @@ if (fs.existsSync(path.join('scripts', 'verify-skill-graph.ts'))) {
 // tree must keep a delivery claim — --strict fails on {{placeholder}} tokens in delivered
 // files, WS-07 contamination (docs/context.md inside a variant template), and broken
 // JSON_MERGE targets. At project (L2) context the checker self-skips (no templates/
-// tree), so both L0 and L1 copies of the pair can run this gate unconditionally.
+// tree) or when the L0-only checker is absent (ADR-0073 Amendment 1 — projects carry no copy).
 if (fs.existsSync(path.join('scripts', 'check-upgrade-coverage.ts'))) {
     const { status, stdout, stderr } = spawnSync('bun', ['scripts/check-upgrade-coverage.ts', '--strict'], {
         encoding: 'utf-8',

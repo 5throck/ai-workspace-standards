@@ -83,7 +83,7 @@ outside marker pairs (e.g. a project's own `## <Variant> Context` tail section) 
 |------|--------|--------|
 | CLAUDE.md | `<!-- COMMON-CLAUDE:START --> ... <!-- COMMON-CLAUDE:END -->` | ✅ Active (since v1.3.0) |
 | GEMINI.md | `<!-- COMMON-GEMINI:START --> ... <!-- COMMON-GEMINI:END -->` | ✅ Active (since v1.3.0) |
-| .gitignore | `<!-- WORKSPACE-MANAGED -->` | ⏳ Pending marker implementation |
+| .gitignore | `<!-- WORKSPACE-MANAGED -->` | ✅ Active (markers shipped in `templates/common/.gitignore`) |
 | agents/pm.md | Extends pattern (`extends:` frontmatter, not markers) | ✅ Active (ADR-0033) |
 
 > ⚠️ **Failure mode**: if a project's CLAUDE.md or GEMINI.md is ever hand-rewritten and the
@@ -294,7 +294,6 @@ Was the workspace template updated?
 | Limitation | Impact | Workaround |
 |-----------|--------|-----------|
 | No 3-way merge for SYNC files | Local modifications to scripts/agents/reference docs are overwritten (⚠️ CONFLICT is warned, template still wins) | Commit local changes before upgrade; manually merge after; pre-upgrade stash is the safety net |
-| `.gitignore` MERGE mechanism non-functional | `.gitignore` updates don't propagate | Manual copy of needed sections |
 | CLAUDE.md/GEMINI.md MERGE requires markers | If a project's file was ever hand-rewritten without preserving `COMMON-CLAUDE`/`COMMON-GEMINI` markers, the merge point is silently lost and the file drifts permanently (2026-08 co-price/co-abap incident) | `bun scripts/audit.ts` at the workspace root WARNs on marker-count drift for any `Projects/co-*` checked out locally; re-add the missing marker pairs manually (compare against `templates/common/CLAUDE.md`/`GEMINI.md`) |
 | WORKSPACE seeds are delivered once | Template updates to seed files under `docs/designs/` etc. never propagate after first delivery (intentional — the directories are project-owned) | Hand-pick wanted changes from the template |
 | Settings JSON merge can duplicate hook entries | When the template rewrites a hook that a project had also modified, the union merge keeps both copies | Visible and safe; delete the stale entry manually |
@@ -302,10 +301,6 @@ Was the workspace template updated?
 ---
 
 ## §7: Troubleshooting
-
-### "Template has no WORKSPACE-MANAGED markers — skipping"
-
-This is expected for `.gitignore` (the one remaining MERGE file without markers). This file won't be updated during upgrade — manually copy the relevant sections if needed.
 
 ### CLAUDE.md/GEMINI.md not picking up template changes after upgrade
 
