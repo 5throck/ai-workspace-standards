@@ -2,7 +2,7 @@
 /**
  * pre-commit.ts — TS-based pre-commit hook.
  * Replaces the legacy bash/ps1 hooks.
- * @version 1.6.0
+ * @version 1.7.0
  */
 
 import { $ } from "bun";
@@ -76,6 +76,21 @@ async function main() {
   const envStaged = staged.filter(f => /^\.env$|^\.env\.(?!example$|sample$)[^s]|(\/|\\)\.env$|(\/|\\)\.env\.(?!example$|sample$)[^s]/.test(f));
   if (envStaged.length > 0) {
     console.error("\x1b[31m[FAIL]\x1b[0m Attempt to commit .env file detected.");
+    process.exit(1);
+  }
+
+  // Tracked .env cleanup gate (T-20260910-015): staging a new .env is blocked
+  // above, but a .env committed before this hook existed stays tracked — and
+  // gitleaks' git-mode scans skip it via the .gitleaks.toml path allowlist, so
+  // nothing else would ever flag it. Block every commit until it is untracked.
+  const trackedEnv = (await $`git ls-files -- '*.env' '**/.env'`.nothrow().text())
+    .split('\n')
+    .map((l: string) => l.trim())
+    .filter((l: string) => /(^|\/)\.env$/.test(l));
+  if (trackedEnv.length > 0) {
+    console.error("\x1b[31m[FAIL]\x1b[0m Tracked .env file detected — commit blocked:");
+    for (const f of trackedEnv) console.error(`  - ${f}`);
+    console.error("\x1b[33m[INFO]\x1b[0m Untrack it with 'git rm --cached <file>' (keep the file on disk), then commit the removal.");
     process.exit(1);
   }
 
