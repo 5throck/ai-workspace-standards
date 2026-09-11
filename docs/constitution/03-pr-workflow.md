@@ -27,6 +27,7 @@ Edit code
 
 #### 3.2 Rules
 - Each project must have `scripts/dev-sync.ts` runnable via `bun scripts/dev-sync.ts` (ADR-0036 — TypeScript-only scripts policy).
+- **Universal Design Gate (ADR-0074)**: every code change at any tier (L0–L3) must carry spec activity — a design doc under `docs/designs/` registered via `scripts/spec-register.ts` — enforced FATAL by `audit.ts --spec-check` in the `/sync` pipeline (step 3.9); trivial changes use the `--spec-exempt=E1..E5` escape hatch (AGENTS.md §5.1.1). Project registries (`docs/specs/registry.json`) are add-if-missing upgrade seeds (ADR-0073 Amendment 2).
 - **Mandatory English Git & PR Artifacts**: All Git and GitHub-related artifacts (including commit messages, pull request titles, pull request descriptions/bodies, branch names, and code review comments) **MUST** be written entirely in **English**, regardless of the developer's native or session conversation language. Always double-check before pushing.
 - **Conventional Commits Standard**: All commits in this workspace must adhere to the Conventional Commits specification:
 
