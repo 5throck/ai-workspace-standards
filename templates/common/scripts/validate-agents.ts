@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Agent Lifecycle Validation Script
- * @version 1.2.0
+ * @version 1.2.1
  *
  * Validates all agents/*.md files for required lifecycle frontmatter
  * and checks governance records in docs/lifecycle/agents/*.md
@@ -17,7 +17,12 @@
 
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { parseFrontmatter as parseFrontmatterYaml, validateAgentFrontmatter } from './validators/schema-validator.ts';
+// v1.2.1: ./validators/ is L0-only; L1/L3 project copies must not crash at import time —
+// the frontmatter schema sweep degrades to a skip when the validators are absent.
+const schemaValidatorAvailable = existsSync(join(import.meta.dir, 'validators', 'schema-validator.ts'));
+const schemaValidator = schemaValidatorAvailable ? await import('./validators/schema-validator.ts') : null;
+const parseFrontmatterYaml = schemaValidator?.parseFrontmatter;
+const validateAgentFrontmatter = schemaValidator?.validateAgentFrontmatter;
 import { cwd } from 'node:process';
 
 interface ValidationIssue {
@@ -302,6 +307,7 @@ function validateAgentSchema(): void {
     if (!isAgentFile(entry)) continue;
     const filePath = join(AGENTS_DIR, entry);
     const content = readFileSync(filePath, 'utf-8');
+    if (!parseFrontmatterYaml || !validateAgentFrontmatter) continue; // validators absent in L1/L3 — workspace sweep covers schema checks
     const fm = parseFrontmatterYaml(content);
     if (Object.keys(fm).length === 0) continue; // no frontmatter — existing checks cover that
     // extends-pattern stubs (L1/L2 pm.md) intentionally omit the full roster schema.

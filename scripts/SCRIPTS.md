@@ -210,12 +210,12 @@ Their absence from the table is policy-consistent, not an oversight.
 | `typecheck.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
 | `upgrade-project.ts` | L0 | 1.22.1 | active | `--variant`, `--platform`, `--dry-run`, `--prune-removed`, `--rollback`, `--yes`, `--skip-context-commonization` | —| L0 | —|
 | `variant-feature.ts` | L0 | 1.0.0 | active | `--variant`, `--feature`, `--type` | —| L0 | —|
-| `validate-agents.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
+| `validate-agents.ts` | L0 | 1.2.1 | active | —| —| L0+L1 | —|
 | `validate-doc-folder.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `validate-docs-links.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `validate-md-language.ts` | L0 | 1.10.0 | active | —| —| L0+L1 | —|
 | `validate-model-registry.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
-| `validate-skills.ts` | L0 | 1.5.0 | active | —| —| L0+L1 | —|
+| `validate-skills.ts` | L0 | 1.5.1 | active | —| —| L0+L1 | —|
 | `procedure-coverage.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `validate-procedures.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `validate-decisions.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
