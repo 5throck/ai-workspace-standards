@@ -14,35 +14,53 @@
 | `agent-lifecycle-manager` | L0 | — | — | skill-lifecycle-manager (composes_with) | — | — |
 | `ai-tell-reduction` | variant:co-news | style-editor, style-editor | phase4 | financial-journalism-style (composes_with) | — | — |
 | `api-documentation` | L0 | technical-writer | — | — | — | — |
+| `arc-flash-analyzer` | variant:co-safety | — | — | — | — | — |
 | `arcade-physics` | variant:co-game | game-debugger, game-developer, game-developer | phase4 | code-review (composes_with), documentation-writing (composes_with), research-analysis (composes_with), sound-synth (follows), test-driven-development (composes_with) | — | — |
+| `asset-integrity-check` | variant:co-safety | — | — | — | — | — |
+| `audit-preparation` | variant:co-safety | — | — | hazop-analysis (composes_with) | — | — |
 | `audit-workspace` | L0 | — | — | create-variant (composes_with), project-to-variant (composes_with), promote-variant (follows), security-scan (composes_with), sync (composes_with), team-builder (composes_with), upgrade-project (composes_with) | — | — |
+| `benefit-risk-assessor` | variant:co-safety | — | — | — | — | — |
+| `bsl-lab-aerosol-control-planner` | variant:co-safety | — | — | — | — | — |
 | `career-path-succession-planning` | variant:co-hr | career-succession-consultant, career-succession-consultant | phase2 | compensation-benchmarking (composes_with), learning-curriculum-design (composes_with), org-design-framework (composes_with), org-readiness-assessment (composes_with), stakeholder-alignment (follows), talent-acquisition-strategy (composes_with) | — | — |
 | `change-impact-assessment` | variant:co-consult | change-management-partner, change-management-partner | phase1, phase2 | org-readiness-assessment (composes_with), solution-design (composes_with), stakeholder-alignment (composes_with) | — | — |
+| `chemical-risk-assessment` | variant:co-safety | — | — | — | — | — |
 | `ci-triage` | L0 | — | — | — | — | — |
 | `code-review` | variant:co-develop | code-writer, game-debugger, game-developer | phase3, phase4, phase5 | refactoring (composes_with) | — | — |
+| `coke-oven-pah-heat-stress-planner` | variant:co-safety | — | — | — | — | — |
 | `company-intelligence` | variant:co-consult | data-analyst, industry-expert, pm, sme, strategy-analyst, strategy-analyst | phase1 | competitive-intelligence (composes_with), financial-modeling (follows), financial-statement-analysis (composes_with), insight-synthesis (follows), org-readiness-assessment (composes_with), technical-feasibility (composes_with) | — | — |
 | `compensation-benchmarking` | variant:co-hr | compensation-benefits-analyst, compensation-benefits-analyst | phase2 | consulting-report-writing (composes_with), hr-metrics-analysis (follows), learning-curriculum-design (follows), org-design-framework (composes_with), org-readiness-assessment (composes_with), performance-system-design (composes_with), stakeholder-alignment (composes_with) | — | — |
 | `competency-modeling` | variant:co-hr | career-succession-consultant, learning-development-specialist, performance-management-consultant | phase2 | — | — | — |
 | `competitive-intelligence` | variant:co-consult | industry-expert, industry-expert, strategy-analyst, strategy-analyst | phase1, phase2 | company-intelligence (composes_with), financial-modeling (composes_with), insight-synthesis (composes_with) | — | — |
+| `completion-inspection` | variant:co-safety | — | — | — | — | — |
+| `compliance-gap` | variant:co-safety | — | — | meeting-facilitation (follows) | — | — |
+| `construction-permit-overview` | variant:co-safety | — | — | — | — | — |
 | `consulting-report-writing` | variant:co-consult | communications-lead, communications-lead, pm | phase3, phase3 | executive-presentation (composes_with), narrative-framework (composes_with) | — | — |
 | `context-commonization-review` | L0 | — | — | meeting-facilitation (follows), promote-variant (follows) | — | — |
+| `contractor-onboarding` | variant:co-safety | — | — | — | — | — |
+| `cosmetics-solvent-exposure-monitor` | variant:co-safety | — | — | — | — | — |
 | `cost-shock-analysis` | variant:co-price | — | — | double-entry-reconciliation (composes_with), financial-statement-prep (composes_with), harness-verification (composes_with), harness-verification (follows), price-waterfall-analysis (composes_with), pricing-governance (composes_with), pricing-playbook (composes_with), prisma-7 (composes_with) | — | — |
 | `create-variant` | L0 | — | — | documentation-writing (follows), promote-variant (enables) | — | — |
 | `customs-duty-drawback-workflow` | variant:co-export | customs-duty-drawback-specialist, customs-duty-drawback-specialist | phase3, phase4 | landed-cost-calculation (follows) | — | — |
 | `daily/audit-preparation` | variant:co-safety | — | — | — | — | — |
 | `daily/compliance-gap` | variant:co-safety | — | — | — | — | — |
 | `daily/risk-assessment` | variant:co-safety | — | — | — | — | — |
+| `dangerous-cargo-handling-planner` | variant:co-safety | — | — | — | — | — |
 | `decision-record` | common | — | — | — | — | — |
 | `design-foundation` | L0 | — | — | accessibility-audit (composes_with), token-usage-lint (composes_with), ui-ux-design-intelligence (enables) | — | — |
 | `desktop-app-fallback` | variant:co-abap | code-writer, test-runner | phase3, phase4 | — | — | — |
 | `documentation-writing` | L0 | content-writer, technical-writer | — | team-builder (composes_with) | — | — |
 | `double-entry-reconciliation` | variant:co-price | — | — | financial-statement-prep (composes_with), harness-verification (composes_with), i18n-audit (follows), pricing-playbook (composes_with) | — | — |
+| `dts-verification` | variant:co-safety | — | — | — | — | — |
 | `dump-monitor` | variant:co-abap | devops-admin, pm | phase1, phase6 | abap-dev (follows), research-analysis (composes_with), sap-co (composes_with), sap-fi (composes_with), sap-le (composes_with), sap-mm (composes_with), sap-sd (composes_with) | — | — |
+| `emergency-response` | variant:co-safety | — | — | — | — | — |
+| `environmental-compliance-checker` | variant:co-safety | — | — | — | — | — |
+| `ess-fire-risk-assessor` | variant:co-safety | — | — | — | — | — |
 | `evidence-ledger` | common | — | — | — | — | — |
 | `excel-export` | variant:co-price | — | — | — | — | — |
 | `executive-presentation` | variant:co-consult | communications-lead, communications-lead | phase3 | consulting-report-writing (composes_with), financial-modeling (composes_with), narrative-framework (composes_with), org-readiness-assessment (composes_with), technical-feasibility (composes_with) | complexity-grades, business-case, readiness-scores | executive-deck |
 | `explain-me` | L0 | — | — | — | — | — |
 | `export-control-screening` | variant:co-export | export-control-compliance-specialist, export-control-compliance-specialist | phase1, phase2 | fta-origin-determination (composes_with), halal-certification-workflow (composes_with), hs-classification-workflow (composes_with), hs-classification-workflow (follows), market-entry-strategy (composes_with), roo-qualification-worksheet (composes_with) | — | — |
+| `fall-hazard-assessor` | variant:co-safety | — | — | — | — | — |
 | `financial-infographic-svg` | variant:co-news | visual-editor, visual-editor | phase5 | — | — | — |
 | `financial-journalism-style` | variant:co-news | reporter, reporter, style-editor, style-editor | phase3, phase4 | ai-tell-reduction (composes_with), financial-narrative-brief (composes_with), source-verification-ledger (composes_with) | — | — |
 | `financial-modeling` | variant:co-consult | data-analyst, data-analyst, strategy-analyst, strategy-analyst | phase1, phase3 | competitive-intelligence (composes_with), executive-presentation (enables), financial-statement-analysis (composes_with), insight-synthesis (follows), stakeholder-alignment (follows), technical-feasibility (composes_with) | complexity-grades, readiness-scores, change-mgmt-cost-estimates | roi-analysis, npv-irr-payback, business-case |
@@ -54,13 +72,22 @@
 | `foreign-regulation-monitoring` | variant:co-export | foreign-regulatory-intelligence-analyst, foreign-regulatory-intelligence-analyst | phase1 | export-control-screening (follows), fta-origin-determination (composes_with), halal-certification-workflow (composes_with), hs-classification-workflow (composes_with) | — | — |
 | `fta-origin-determination` | variant:co-export | fta-origin-analyst, fta-origin-analyst | phase1, phase2 | halal-certification-workflow (follows), logistics-coordination (composes_with), market-entry-strategy (composes_with), trade-documentation-checklist (follows) | — | — |
 | `gabor-granger` | variant:co-price | — | — | price-waterfall-analysis (follows), pricing-playbook (enables), van-westendorp-psm (composes_with) | survey-responses-gg | demand-curve, optimal-price, elasticity-reading |
+| `gas-dispersion-analyzer` | variant:co-safety | — | — | — | — | — |
 | `gateguard` | L0 | — | — | — | — | — |
+| `ghs-classifier` | variant:co-safety | — | — | — | — | — |
+| `glp-data-integrity-checker` | variant:co-safety | — | — | — | — | — |
+| `glp-study-protocol-validator` | variant:co-safety | — | — | — | — | — |
+| `gmp-change-control` | variant:co-safety | — | — | — | — | — |
+| `gmp-deviation-capa` | variant:co-safety | — | — | — | — | — |
+| `gmp-qrm` | variant:co-safety | — | — | — | — | — |
 | `halal-certification-workflow` | variant:co-export | halal-certification-specialist, halal-certification-specialist | phase1, phase2 | export-control-screening (follows), hs-classification-workflow (composes_with), market-entry-strategy (composes_with) | — | — |
 | `handbook` | common | handbook-reviewer, handbook-writer | — | — | — | — |
 | `handbook-sync-audit` | common | — | — | — | — | — |
 | `harness-verification` | variant:co-price | — | — | double-entry-reconciliation (follows), i18n-audit (composes_with), i18n-audit (composes_with), pricing-playbook (composes_with), prisma-7 (composes_with), scenario-comparison (composes_with), ui-component-design (composes_with) | — | — |
+| `hazop-analysis` | variant:co-safety | — | — | risk-assessment (follows) | — | — |
 | `hr-metrics-analysis` | variant:co-hr | data-analyst | phase1, phase3 | consulting-report-writing (follows) | — | — |
 | `hs-classification-workflow` | variant:co-export | hs-classification-specialist, hs-classification-specialist | phase1, phase2 | fta-origin-determination (follows), landed-cost-calculation (composes_with), logistics-coordination (composes_with), market-entry-strategy (composes_with), roo-qualification-worksheet (follows), trade-documentation-checklist (composes_with) | — | — |
+| `hv-cell-formation-electrical-safety-planner` | variant:co-safety | — | — | — | — | — |
 | `hwp-document-processing` | variant:co-consult | communications-lead | phase3, phase4 | — | — | — |
 | `i18n-audit` | common | i18n-specialist | — | — | — | — |
 | `i18n-formatting` | common | i18n-specialist | — | — | — | — |
@@ -68,6 +95,7 @@
 | `i18n-locale-config` | common | i18n-specialist | — | — | — | — |
 | `insight-synthesis` | variant:co-consult | data-analyst, data-analyst, strategy-analyst, strategy-analyst | phase1, phase3 | competitive-intelligence (composes_with), financial-statement-analysis (composes_with), org-readiness-assessment (follows), solution-design (composes_with) | — | — |
 | `investigation/hazop-analysis` | variant:co-safety | — | — | — | — | — |
+| `iso14971-risk-scorer` | variant:co-safety | — | — | — | — | — |
 | `k-dart` | common | — | — | k-ecos (composes_with), k-kosis (composes_with), k-law | — | — |
 | `k-ecos` | common | — | — | k-dart (composes_with), k-kosis (composes_with), k-opendata (composes_with) | — | — |
 | `k-kosis` | common | — | — | k-dart (composes_with), k-ecos (composes_with), k-law | — | — |
@@ -76,6 +104,7 @@
 | `k-opendata` | common | — | — | k-ecos (composes_with), k-kosis | — | — |
 | `labor-compliance-audit` | variant:co-hr | labor-compliance-analyst, labor-compliance-analyst, labor-relations-specialist, labor-relations-specialist, safety-health-officer, safety-health-officer | phase1, phase2 | org-readiness-assessment (follows), stakeholder-alignment (composes_with) | — | — |
 | `landed-cost-calculation` | variant:co-export | hs-classification-specialist, hs-classification-specialist, logistics-coordinator, logistics-coordinator | phase1, phase2 | hs-classification-workflow (composes_with), logistics-coordination (composes_with) | — | — |
+| `landfill-methane-anaerobic-explosion-planner` | variant:co-safety | — | — | — | — | — |
 | `learning-curriculum-design` | variant:co-hr | learning-development-specialist, learning-development-specialist | phase2 | org-design-framework (composes_with), org-readiness-assessment (composes_with), performance-system-design (follows), stakeholder-alignment (composes_with), talent-acquisition-strategy (composes_with) | — | — |
 | `logistics-coordination` | variant:co-export | logistics-coordinator, logistics-coordinator | phase3, phase4 | landed-cost-calculation (composes_with), market-entry-strategy (follows) | — | — |
 | `map-channel-enforcement` | variant:co-price | — | — | — | — | — |
@@ -83,29 +112,46 @@
 | `math-function-plotter` | variant:co-price | — | — | — | — | — |
 | `mece-logic-auditor` | variant:co-consult | strategy-analyst | phase1 | — | — | — |
 | `meeting-facilitation` | L0 | — | — | — | — | — |
+| `mid-construction-inspection` | variant:co-safety | — | — | — | — | — |
+| `msds-parser` | variant:co-safety | — | — | — | — | — |
+| `munitions-magazine-storage-safety-planner` | variant:co-safety | — | — | — | — | — |
 | `narrative-framework` | variant:co-consult | communications-lead, communications-lead | phase3 | consulting-report-writing (composes_with), executive-presentation (composes_with) | — | — |
 | `org-design-framework` | variant:co-hr | org-design-consultant, org-design-consultant | phase2, phase3 | hr-metrics-analysis (follows), org-readiness-assessment (composes_with), performance-system-design (composes_with), stakeholder-alignment (composes_with), talent-acquisition-strategy (follows) | — | — |
 | `org-readiness-assessment` | variant:co-consult | change-management-partner, change-management-partner, change-management-partner | phase1, phase1, phase2, phase2 | change-impact-assessment (composes_with), financial-modeling (enables), stakeholder-alignment (composes_with) | — | readiness-scores, capability-gap-analysis, change-mgmt-cost-estimates |
+| `painting-coating-fire-toxic-planner` | variant:co-safety | — | — | — | — | — |
 | `performance-system-design` | variant:co-hr | performance-management-consultant, performance-management-consultant | phase2 | career-path-succession-planning (follows), stakeholder-alignment (composes_with), talent-acquisition-strategy (composes_with) | — | — |
 | `performance-tuning` | variant:co-abap | architect, dba, sap-investigator | phase1, phase2, phase4 | — | — | — |
+| `permit-to-work` | variant:co-safety | safety-workflow-manager | — | — | — | — |
 | `platform-command-lifecycle-manager` | L0 | — | — | — | — | — |
 | `platform-skill-lifecycle-manager` | L0 | — | — | — | — | — |
 | `post-write-chain` | variant:co-abap | code-writer, pm, test-runner | phase3, phase4 | — | — | — |
+| `pre-construction-technical-review` | variant:co-safety | — | — | — | — | — |
 | `prep-pdf` | variant:co-deck | measure, measure, pdf-export | phase4 | version (follows) | — | — |
 | `presenter-mode` | variant:co-deck | html-build | phase4 | — | — | — |
 | `price-waterfall-analysis` | variant:co-price | — | — | prisma-7 (composes_with), ui-component-design (follows), van-westendorp-psm (composes_with) | — | — |
 | `pricing-governance` | variant:co-price | — | — | price-waterfall-analysis (follows), ui-component-design (composes_with) | approval-record | exception-log, guardrail-status |
 | `pricing-playbook` | variant:co-price | — | — | scenario-comparison (enables) | elasticity-reading, price-corridor | pricing-policy-set, scenario-snapshots |
 | `prisma-7` | variant:co-price | — | — | pricing-governance (follows), ui-component-design (composes_with) | — | — |
+| `process-hazard-screening` | variant:co-safety | — | — | — | — | — |
 | `project-delivery` | variant:co-consult | delivery-manager, delivery-manager, workstream-lead, workstream-lead | phase4 | stakeholder-alignment (composes_with), stakeholder-review-management (composes_with), technical-feasibility (follows) | — | — |
 | `project-resync` | L0 | — | — | project-to-variant, sync (composes_with), upgrade-project (follows) | — | — |
 | `project-review` | L0 | — | — | — | — | — |
 | `project-to-variant` | L0 | — | — | promote-variant (composes_with) | — | — |
 | `promote-variant` | L0 | — | — | create-variant (follows), sync (follows) | — | — |
+| `protocol-deviation-analyzer` | variant:co-safety | — | — | — | — | — |
+| `psm-loto` | variant:co-safety | — | — | — | — | — |
+| `psm-moc` | variant:co-safety | — | — | — | — | — |
+| `pyrophoric-gas-emergency-responder` | variant:co-safety | — | — | — | — | — |
+| `rack-fall-protection-planner` | variant:co-safety | — | — | — | — | — |
 | `refactoring` | variant:co-develop | code-writer, game-debugger, game-developer | phase3, phase4, phase5 | code-review (composes_with) | — | — |
 | `release-template` | L0 | — | — | — | — | — |
 | `research-analysis` | L0 | analyst | — | documentation-writing (enables) | — | — |
+| `risk-assessment` | variant:co-safety | safety-workflow-manager | — | audit-preparation (follows) | — | — |
+| `rolling-stock-maintenance-loto-planner` | variant:co-safety | — | — | — | — | — |
 | `roo-qualification-worksheet` | variant:co-export | fta-origin-analyst | phase1, phase2 | halal-certification-workflow (follows) | — | — |
+| `root-cause-analysis` | variant:co-safety | — | — | — | — | — |
+| `sae-causality-assessor` | variant:co-safety | — | — | — | — | — |
+| `safety-inspection-validator` | variant:co-safety | — | — | — | — | — |
 | `samm-maturity` | variant:co-security | threat-modeler | phase1, phase2 | — | — | — |
 | `sample-driven-report-writing` | variant:co-consult | communications-lead | phase3, phase4 | — | — | — |
 | `sap-co` | variant:co-abap | architect, co-analyst, dba | phase1, phase2 | sap-le (composes_with), sap-mm (composes_with), sap-pp (composes_with), sap-sd (follows) | — | — |
@@ -120,6 +166,7 @@
 | `security-scan` | L0 | — | — | — | — | — |
 | `service-design` | variant:co-design | design-lead, design-lead, service-designer, service-designer | phase1, phase2, phase3 | accessibility-audit (follows), token-usage-lint (follows), ui-ux-design-intelligence (follows) | — | — |
 | `sheet-model` | variant:co-price | — | — | — | — | — |
+| `signal-detector` | variant:co-safety | — | — | — | — | — |
 | `simulate-pipeline` | L0 | — | — | — | — | — |
 | `skill-lifecycle-manager` | L0 | — | — | script-lifecycle-manager (composes_with) | — | — |
 | `slide-layout-gate` | variant:co-deck | pdf-export | phase4 | pdf-export (composes_with), pdf-export (follows) | slide-html | layout-gate-status |
@@ -137,12 +184,17 @@
 | `swe-solve` | variant:co-develop | pm | phase4 | — | — | — |
 | `sync` | L0 | — | — | — | — | — |
 | `talent-acquisition-strategy` | variant:co-hr | talent-acquisition-specialist, talent-acquisition-specialist | phase2 | compensation-benchmarking (follows) | — | — |
+| `tank-integrity-validator` | variant:co-safety | — | — | — | — | — |
+| `tar-planning` | variant:co-safety | — | — | — | — | — |
 | `team-builder` | L0 | — | — | — | — | — |
 | `technical-feasibility` | variant:co-consult | sme, sme, solutions-architect, solutions-architect, technology-specialist, technology-specialist | phase1, phase2, phase3, phase4 | change-impact-assessment (follows), company-intelligence (composes_with), executive-presentation (enables), project-delivery (follows) | — | complexity-grades, risk-cost-ranges, preconditions |
+| `temperature-excursion-analyzer` | variant:co-safety | — | — | — | — | — |
 | `test-driven-development` | variant:co-develop | game-debugger, game-developer, test-runner, test-runner | phase3, phase4, phase5 | code-review (follows) | — | — |
 | `theme-authoring` | variant:co-deck | pm | — | — | — | — |
+| `thermal-burn-prevention-planner` | variant:co-safety | — | — | — | — | — |
 | `ticket-run` | L0 | — | — | — | — | — |
 | `token-usage-lint` | L0 | prototype-engineer, prototype-engineer | phase4 | ui-ux-design-intelligence (follows) | — | — |
+| `tool-box-meeting` | variant:co-safety | — | — | — | — | — |
 | `trade-documentation-checklist` | variant:co-export | trade-documentation-specialist, trade-documentation-specialist | phase3 | logistics-coordination (follows) | — | — |
 | `trade-promotion-roi` | variant:co-price | — | — | — | — | — |
 | `translate` | L0 | — | — | documentation-writing (composes_with) | — | — |
@@ -253,6 +305,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `adr:0071` | adr | — | — | — |
 | `adr:0072` | adr | — | k-dart, k-ecos, k-kosis, k-law, k-opendata | — |
 | `adr:0073` | adr | — | — | — |
+| `adr:0074` | adr | — | gmp-change-control, gmp-deviation-capa, gmp-qrm, psm-loto, psm-moc | — |
 | `dec:DEC-20260825-01` | decision | — | — | — |
 | `dec:DEC-20260825-02` | decision | `sync` | — | — |
 | `dec:DEC-20260829-01` | decision | `decision-record` | — | — |
