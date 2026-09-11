@@ -13,7 +13,7 @@ translated_from_hash: 08780f074f99e9f05df795e2117ef856ae13fc508903bef2907ecc8774
 
 co-develop은 전적으로 **PM 게이트웨이 패턴**으로 운영됩니다. 사용자는 PM과 대화하고, PM이 계획을 수립하고, PM이 전문 에이전트를 디스패치하며, PM이 `/sync`로 마무리합니다.
 
-1. **작업을 평이한 언어로 설명합니다** — "로그인 엔드포인트를 추가해줘", "결제 흐름의 불안정한 테스트를 고쳐줘", "이 PR을 리뷰해줘". 전문 에이전트를 직접 호출하려고 하지 마세요. 전문 에이전트는 사용자의 직접 요청을 거부하고 PM으로 리다이렉트합니다.
+1. **작업을 평이한 언어로 설명합니다** — "로그인 엔드포인트를 추가해줘", "결제 흐름의 불안정한 테스트를 고쳐줘", "이 PR을 검토해줘". 전문 에이전트를 직접 호출하려고 하지 마세요. 전문 에이전트는 사용자의 직접 요청을 거부하고 PM으로 리다이렉트합니다.
 2. **PM이 작업을 분류**(Phase Determination)하고, 다단계 작업(2개 이상 파일 또는 2단계 이상 순차 작업)에 대해서는 다른 어떤 작업보다 먼저 **실행 계획 표**를 출력합니다.
 
    | # | Task | Agent | Tier | Model |
@@ -38,7 +38,7 @@ co-develop은 전적으로 **PM 게이트웨이 패턴**으로 운영됩니다. 
 |-----------|--------------|--------------|-------|
 | 신규 기능 / 신규 엔드포인트 | `architect` → `code-writer` → `test-runner` | `test-driven-development` | Architect가 먼저 계획/ADR을 작성하며, 계획이 승인된 후에만 code-writer가 구현 |
 | 버그 수정 | `code-writer` → `test-runner` | `test-driven-development` | 수정 전에 실패하는 테스트를 작성/확인 (red-green-refactor) |
-| 코드 리뷰 / PR 피드백 | `security-monitor` 또는 PM 지정 리뷰어 | `code-review` | 정확성, 유지보수성, 보안, 모범 사례에 초점 |
+| 코드 검토 / PR 피드백 | `security-monitor` 또는 PM 지정 검토자 | `code-review` | 정확성, 유지보수성, 보안, 모범 사례에 초점 |
 | 리팩토링 / 기술 부채 정리 | `code-writer` | `refactoring` | 동작을 보존하며, 회귀가 없는지 `test-runner`와 함께 확인 |
 | 신규 UI/UX 또는 컴포넌트 설계 | `designer` | — | 구현 전에 와이어프레임, 컴포넌트 스펙, 디자인 토큰을 산출 |
 | 미확인 기술 스택 / 환경 설정 | `stack-setup` | — | 조사 및 보안 검토 워크플로우를 실행하며, 설정 명령을 실행하기 전 사용자의 명시적 승인이 필요 |
@@ -48,7 +48,7 @@ co-develop은 전적으로 **PM 게이트웨이 패턴**으로 운영됩니다. 
 | 커밋, 푸시, PR 오픈 | PM | `sync` | 항상 `/sync "type(scope): message"`를 통해 — 절대 직접 `git commit`/`git push` 금지 |
 | 세션 중간에 changelog 항목 추가 | PM | `changelog` | 최종 `/sync` 이전에 `/changelog "..."` |
 | 전체 sync 없이 세션 메모 기록 | PM | `memlog` | `/memlog "summary"` |
-| 전체 멀티 에이전트 프로젝트 리뷰 | PM | `project-review` | 구성원을 자동 감지하여 모든 전문 에이전트를 병렬 디스패치하고 Critical/High/Medium/Low 우선순위 계획을 산출 |
+| 전체 멀티 에이전트 프로젝트 검토 | PM | `project-review` | 구성원을 자동 감지하여 모든 전문 에이전트를 병렬 디스패치하고 Critical/High/Medium/Low 우선순위 계획을 산출 |
 
 ---
 
@@ -76,7 +76,7 @@ bun scripts/audit.ts              # QA / 문서화 게이트 (반드시 exit 0)
 /sync "feat: description"         # 전체 파이프라인: memlog -> sync-md -> changelog -> audit -> commit -> PR
 ```
 
-`/sync`는 내부적으로 다음을 순서대로 수행합니다: audit.ts(실패 시 중단) → 메모리 로그 항목(4개 섹션 형식) → MEMORY.md 인덱스 업데이트 → `git add -A` + 커밋 → 브랜치 생성(`main`인 경우 `pr/<date>-<slug>`) → 푸시 → `gh pr create`. 이 파이프라인 외부에서의 직접적인 `git commit`/`git push` 호출 및 `--no-verify`는 pre-commit 훅에 의해 차단됩니다.
+`/sync`는 내부적으로 다음을 순서대로 수행합니다: audit.ts(실패 시 중단) → 메모리 로그 항목(4개 섹션 형식) → MEMORY.md 인덱스 갱신 → `git add -A` + 커밋 → 브랜치 생성(`main`인 경우 `pr/<date>-<slug>`) → 푸시 → `gh pr create`. 이 파이프라인 외부에서의 직접적인 `git commit`/`git push` 호출 및 `--no-verify`는 pre-commit 훅에 의해 차단됩니다.
 
 ---
 
@@ -88,10 +88,10 @@ co-develop은 선형적이고 게이트가 있는 단계 모델을 사용합니�
 |-------|------|---------------|---------------|
 | 0 | 팀 구성 / 착수 | PM이 요구사항을 평가하고 필요시 에이전트/스킬을 생성; 프로젝트 스캐폴딩 및 개발 환경 검증 | 프로젝트 스캐폴딩 완료, 개발 환경 검증 완료, CI 파이프라인 구성 완료 |
 | 1 | 분류(Triage) | PM이 요청을 분류하고 리서치/분석을 위해 읽기 전용 에이전트를 병렬로 디스패치 | — |
-| 2 | 분석 / 계획 | PM이 조사 결과를 요구사항과 인수 기준으로 종합; 아키텍처 및 기술 스택 확정 | 아키텍처 리뷰 승인, 기술 스택 확정, 스프린트 계획 정의 |
+| 2 | 분석 / 계획 | PM이 조사 결과를 요구사항과 인수 기준으로 종합; 아키텍처 및 기술 스택 확정 | 아키텍처 검토 승인, 기술 스택 확정, 스프린트 계획 정의 |
 | 3 | 설계 | Architect가 구현 계획과 ADR을 산출; 범위에 있으면 Designer가 UI/UX 스펙 산출 | — |
-| 4 | 구현 / 실행 | Code Writer가 구현; Test Runner가 검증; 실패 시 최대 3회 반복 | 코드 리뷰 통과, 테스트 그린, 심각한 린트 오류 없음 |
-| 5 | 마무리 | PM이 결정 사항을 기록하고 `/sync`를 실행하여 PR을 오픈; 배포 검증; 문서 업데이트 | 배포 검증 완료, 문서 업데이트 완료, 회고 완료 |
+| 4 | 구현 / 실행 | Code Writer가 구현; Test Runner가 검증; 실패 시 최대 3회 반복 | 코드 검토 통과, 테스트 그린, 심각한 린트 오류 없음 |
+| 5 | 마무리 | PM이 결정 사항을 기록하고 `/sync`를 실행하여 PR을 오픈; 배포 검증; 문서 갱신 | 배포 검증 완료, 문서 갱신 완료, 회고 완료 |
 
 **티어 상한 규칙**: 에이전트의 티어는 간단한 작업에 대해 낮출 수 있지만, 정의된 기준선보다 절대 높일 수 없습니다 (architect: High, designer/security-monitor/test-runner: Medium, code-writer/stack-setup: Low).
 

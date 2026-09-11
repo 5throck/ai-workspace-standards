@@ -131,7 +131,7 @@ psm-agent에 MOC 워크플로를 파견합니다.
 
 안전 조치:
   - 이중 씰 펌프 사양 지정 필수
-  - 설치 전 PSI (공정안전 정보) 업데이트
+  - 설치 전 PSI (공정안전 정보) 갱신
   - PSSR (사전 안전 검토) 실시 후 가동 승인
   - 관련 SOP 개정 및 근로자 교육
 
@@ -176,7 +176,7 @@ psm-agent에 MOC 워크플로를 파견합니다.
     "completion_date": "2026-06-25T00:00:00+09:00"
   },
   "approval_chain": [
-    { "role": "공정 엔지니어", "approver_id": "eng-042", "approval_date": "2026-06-26T00:00:00+09:00", "decision": "approved", "comments": "PSI 업데이트 완료; PSSR로 진행." },
+    { "role": "공정 엔지니어", "approver_id": "eng-042", "approval_date": "2026-06-26T00:00:00+09:00", "decision": "approved", "comments": "PSI 갱신 완료; PSSR로 진행." },
     { "role": "안전관리자", "approver_id": "safety-mgr-01", "approval_date": "2026-06-27T00:00:00+09:00", "decision": "pending", "comments": "PSSR 완료 후 서명 예정." }
   ]
 }
@@ -359,4 +359,4 @@ PM에게: "저희 시설이 PSM 의무 대상인지 확인해 주세요.
 
 ---
 
-*Last Updated: 2026-08-27*
+*Last Updated: 2026-09-11*

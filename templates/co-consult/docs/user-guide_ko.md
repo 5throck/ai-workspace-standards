@@ -115,7 +115,7 @@ bun scripts/co-consult/financial-report.ts   # financial-pipeline.ts가 프로�
 | 2 | 설계 검증 | industry-expert, sme, change-management-partner — PM이 검증 및 게이트 |
 | 3 | 솔루션 및 내러티브 설계 | communications-lead, solutions-architect, sme |
 | 4 | 실행 및 딜리버리 | delivery-manager, workstream-lead, technology-specialist |
-| 5 | 라이프사이클 마무리 | PM (거버넌스 기록 업데이트, memory/에 로그) |
+| 5 | 라이프사이클 마무리 | PM (거버넌스 기록 갱신, memory/에 로그) |
 | 6 | QA 및 마무리 | PM (`bun scripts/audit.ts` 실행 후 `/sync`) |
 
 **반복 루프**: `financial-modeling` ↔ `technical-feasibility`는 Phase 4로 이동하기 전에 비용/ROI 가정과 기술적 리스크를 조율하기 위해 최대 2회 반복될 수 있습니다.

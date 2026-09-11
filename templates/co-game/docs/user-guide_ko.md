@@ -51,13 +51,13 @@ co-game은 워크스페이스 전체의 **PM 게이트웨이** 패턴을 따릅�
 | "캔버스 엔진, 게임 루프, 충돌, 엔티티 시스템 구현" | `game-developer` | `test-driven-development` | 4 |
 | "게임플레이/충돌/AI 버그가 있음" | `game-debugger` | — | 4 |
 | "PR 전 테스트 실행 / 수락 기준 검증" | `test-runner` | `test-driven-development` | 4 |
-| "이 PR 리뷰 / 코드 품질 확인" | (코드를 작성한 전문 에이전트) | `code-review` | 4 |
+| "이 PR 검토 / 코드 품질 확인" | (코드를 작성한 전문 에이전트) | `code-review` | 4 |
 | "동작 변경 없이 중복 제거 / 구조 개선" | (파일 담당 전문 에이전트) | `refactoring` | 4 |
 | "병합 전 취약점 / 시크릿 스캔" | `security-monitor` | `security-scan` | 0, 5 |
 | "개발 환경 설정 / 인식되지 않는 기술 스택" | `stack-setup` | — | 0-1 |
 | "다중 에이전트 설계 토론 진행" | (PM이 진행) | `meeting-facilitation` (`/meeting`) | 모든 단계 |
 | "에이전트나 스킬 추가/수정" | PM + 대상 전문 에이전트 | `agent-lifecycle-manager` / `skill-lifecycle-manager` | 0 |
-| "모든 에이전트를 활용한 전체 프로젝트 리뷰" | 전 전문 에이전트 (병렬, 읽기 전용) | `project-review` | 모든 단계 |
+| "모든 에이전트를 활용한 전체 프로젝트 검토" | 전 전문 에이전트 (병렬, 읽기 전용) | `project-review` | 모든 단계 |
 
 **장르 라우팅 규칙**: 반응/타이밍 기반(미로, 슈팅, 벽돌깨기, 스네이크)이면 → `arcade-designer`. 턴제 또는 그리드 기반(매치-3, 로직 퍼즐, 보드/카드)이면 → `puzzle-designer`. 하이브리드 장르(타워 디펜스, 로그라이크, 방치형)는 두 에이전트에 `game-designer`의 범용 레이어까지 함께 사용합니다.
 

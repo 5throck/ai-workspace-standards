@@ -48,7 +48,7 @@ metadata:
 1. `_examples/skills/example-skill/` 예제 복사
 2. `skills/<skill-name>/SKILL.md` 생성
 3. 이름, 설명, 유형이 포함된 프론트매터 추가
-4. `AGENTS.md § Skills`와 `docs/context.md § Skills` 업데이트
+4. `AGENTS.md § Skills`와 `docs/context.md § Skills` 갱신
 5. `bun run verify-skills` 실행하여 검증
 
 ## 스킬 활성화

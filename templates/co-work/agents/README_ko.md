@@ -24,7 +24,7 @@ bun run agent:create data-analyst --role "Data Analyst" --group Research
 bun run agent:create ux-writer --role "UX Writer" --group Content
 ```
 
-에이전트 생성 후 `AGENTS.md`와 `docs/co-work.context.md § Agents`를 업데이트하세요.
+에이전트 생성 후 `AGENTS.md`와 `docs/co-work.context.md § Agents`를 갱신하세요.
 
 ## 에이전트 목록 조회
 

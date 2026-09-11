@@ -13,7 +13,7 @@
 | `setup.sh` / `setup.ps1` | 초기 프로젝트 설정 (env, 의존성, 첫 커밋) |
 | `audit.sh` / `audit.ps1` | 문서 및 파일 무결성 감사 |
 | `dev-sync.sh` / `dev-sync.ps1` | 전체 동기화 파이프라인 (memlog → changelog → audit → commit → PR) |
-| `sync-md.sh` / `sync-md.ps1` | memory/MEMORY.md 인덱스 업데이트 |
+| `sync-md.sh` / `sync-md.ps1` | memory/MEMORY.md 인덱스 갱신 |
 | `gen-pr-body.sh` / `gen-pr-body.ps1` | 변경 사항에서 PR 바디 생성 |
 
 ### TypeScript (Bun) 스크립트

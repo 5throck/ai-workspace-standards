@@ -34,7 +34,7 @@ lang_reason: source-material
 bun scripts/agent-create.ts <name> --role "표시 이름" --group <group>
 ```
 
-생성 후: `AGENTS.md` 및 `docs/co-export.context.md § Agent Roster & Phase Mapping`을 업데이트하세요.
+생성 후: `AGENTS.md` 및 `docs/co-export.context.md § Agent Roster & Phase Mapping`을 갱신하세요.
 
 ## 에이전트 목록 조회 / 검증
 

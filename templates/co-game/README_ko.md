@@ -53,7 +53,7 @@ Vanilla TypeScript 기반 HTML5 Canvas 게임 개발을 위한 variant입니다.
 
 ## 스킬
 
-- **code-review**: 정확성, 유지보수성, 보안, 모범 사례에 중점을 둔 철저한 코드 리뷰를 수행합니다.
+- **code-review**: 정확성, 유지보수성, 보안, 모범 사례에 중점을 둔 철저한 코드 검토를 수행합니다.
 - **refactoring**: 동작을 보존하면서 체계적인 리팩토링 기법으로 코드 구조와 설계를 개선합니다.
 - **test-driven-development**: red-green-refactor 주기를 통한 TDD 방법론으로 소프트웨어를 구현합니다.
 - **sound-synth**: Web Audio API 및 jsfxr 파라미터 명세를 사용한 절차적 8비트 레트로 사운드 이펙트 및 오디오 합성 규칙.
@@ -96,4 +96,4 @@ Vanilla TypeScript 기반 HTML5 Canvas 게임 개발을 위한 variant입니다.
 
 ---
 
-*최근 업데이트: 2026-08-12*
+*최근 갱신: 2026-08-12*

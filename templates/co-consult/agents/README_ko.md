@@ -24,6 +24,6 @@
 bun run agent:create <name> --role "표시 이름" --group <그룹>
 ```
 
-에이전트 생성 후 `AGENTS.md`와 `docs/co-consult.context.md § Agents`를 업데이트하세요.
+에이전트 생성 후 `AGENTS.md`와 `docs/co-consult.context.md § Agents`를 갱신하세요.
 
 전체 워크플로우는 `AGENTS.md`를 참고하세요.

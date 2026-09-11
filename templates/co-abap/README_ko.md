@@ -96,7 +96,7 @@ lang_reason: source-material
 3. **거버넌스 & 승인:** PM이 PRD/AC를 검토하고 범위를 확정합니다. 고위험 변경 시 사용자 승인이 필요합니다.
 4. **기술 설계 & 구현:** 아키텍트가 패턴을 선택하고 실행 계획을 생성한 후, code-writer가 ABAP 코드를 구현합니다.
 5. **검증:** test-runner가 필수 QA 체인(SyntaxCheck → RunUnitTests → GetCodeCoverage → RunATCCheck)을 실행합니다.
-6. **리뷰 & 동기화:** `/sync "커밋 메시지"`를 사용하여 안전하게 커밋하고 PR을 엽니다.
+6. **검토 & 동기화:** `/sync "커밋 메시지"`를 사용하여 안전하게 커밋하고 PR을 엽니다.
 
 ### C. 사용 가능한 명령어
 
@@ -116,4 +116,4 @@ lang_reason: source-material
 
 ---
 
-*최근 업데이트: 2026-08-15*
+*최근 갱신: 2026-08-15*

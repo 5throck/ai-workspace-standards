@@ -34,7 +34,7 @@ translated_from_hash: 6cdfd685645a36981691450db11c3b2684b152fbc62878aca579ea9845
 |------------------|----------------|-----------|
 | "주제를 조사하고 결과를 종합해야 합니다" | **analyst** | research-analysis |
 | "이 리서치를 다듬어진 문서/보고서로 만들어주세요" | **content-writer** | documentation-writing |
-| "기술 문서, 사용법 가이드, 레퍼런스 자료를 작성해주세요" | **technical-writer** | documentation-writing, api-documentation |
+| "기술 문서, 사용법 가이드, 참조 자료를 작성해주세요" | **technical-writer** | documentation-writing, api-documentation |
 | "REST/GraphQL API, SDK, 개발자용 스펙을 문서화해주세요" | **technical-writer** | api-documentation |
 | "산출물 추적, 일정 조율, 상태 보고를 해주세요" | **project-coordinator** | — |
 | "여러 전문가 간 토론을 진행해주세요" | **project-coordinator** (`/meeting` 경유) | — |
@@ -83,12 +83,12 @@ Co-Work 작업은 `AGENTS.md`(§3.5, §4.2)에 정의된 동일한 단계 모델
 
 | 단계 | 담당 | 진행 내용 |
 |------|------|-----------|
-| **Phase 0 — 프로젝트 개시** | PM | PM이 요구사항을 평가하고 필요 시 에이전트/스킬을 생성·조정, `AGENTS.md` 업데이트 |
+| **Phase 0 — 프로젝트 개시** | PM | PM이 요구사항을 평가하고 필요 시 에이전트/스킬을 생성·조정, `AGENTS.md` 갱신 |
 | **Phase 1 — 리서치 및 분석** | analyst, storyteller | 읽기 전용 조사, 데이터 종합, 내러티브 프레이밍 — 독립적인 경우 병렬 dispatch |
 | **Phase 2 — 설계 검증** | PM + storyteller | 새로운 구조, 스키마, 컨벤션은 구현 전에 명시적 승인 게이트를 거침 |
 | **Phase 3 — 설계 인계 / 초안 작성** | content-writer, technical-writer | 승인된 계획을 실제 문서/가이드로 전환 |
 | **Phase 4 — 실행** | project-coordinator, ms365-expert | 배송 로지스틱스, 일정 조율, MS365 관련 작업; 전문가들은 일상적인 단계는 서로 직접 인계 가능 |
-| **Phase 5 — 라이프사이클 마무리** | PM | 거버넌스 기록 업데이트, 의사결정을 `memory/YYYY-MM-DD.md`에 기록 |
+| **Phase 5 — 라이프사이클 마무리** | PM | 거버넌스 기록 갱신, 의사결정을 `memory/YYYY-MM-DD.md`에 기록 |
 | **Phase 6 — QA 및 마무리** | PM | `bun scripts/audit.ts` 실행 (에스컬레이션 전 최대 2회 반복), 이후 `/sync`로 PR 오픈 |
 
 쓰기 작업은 항상 **순차적**으로 진행됩니다 (파일 잠금 충돌 방지를 위해 한 번에 하나의 전문가만); 읽기 전용 리서치/분석은 **병렬**로 dispatch할 수 있습니다.
