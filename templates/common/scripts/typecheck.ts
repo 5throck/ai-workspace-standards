@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.1.0
+// @version 1.1.1
 /**
  * typecheck.ts — TypeScript typecheck gate over scripts/ (T-20260910-012).
  *
@@ -71,6 +71,9 @@ function main() {
   }
 
   console.error(`❌ Typecheck regression: ${baseline.count} → ${errorCount} (+${errorCount - baseline.count} above baseline).`);
+  const errorLines = output.split("\n").filter((line) => /error TS\d+:/.test(line));
+  for (const line of errorLines.slice(0, 10)) console.error("   " + line.trim());
+  if (errorLines.length > 10) console.error(`   … and ${errorLines.length - 10} more`);
   console.error("   Fix the new type errors. Only lower the baseline after triage per T-20260910-012 — never raise it to absorb new debt.");
   process.exit(1);
 }
