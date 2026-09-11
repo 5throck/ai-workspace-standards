@@ -1,7 +1,7 @@
 ---
 name: upgrade-project
 description: "Upgrade an existing L2/L3 project to the current template version. Use when: upgrading a variant-based project, syncing template improvements, refreshing scripts/agents/skills/docs/commands."
-version: "1.3.2"
+version: "1.4.0"
 status: active
 scope: workspace
 owner: pm
@@ -37,7 +37,7 @@ Upgrades an existing project created from a variant template to match the curren
 
 ## Script
 
-**Script**: `scripts/upgrade-project.ts` (v1.22.0)
+**Script**: `scripts/upgrade-project.ts` (v1.23.0)
 **Location**: Workspace root only (`L0` per ADR-0073 Amendment 1 — projects do not carry a copy; from inside a project use `bun ../../scripts/upgrade-project.ts .`)
 **Usage**: `bun scripts/upgrade-project.ts <project-path> [--variant <name>] [--platform claude|antigravity|both] [--dry-run] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization]`
 
@@ -64,6 +64,7 @@ The upgrade tool classifies files into categories:
 | **DOCS_OVERWRITE** | Plain overwrite (no blocks) | `docs/phase-definitions.md` |
 | **VARIANT_DOCS_SYNC** *(folded v1.22.0)* | No longer a separate pass — its files (`docs/context.md` and the shared docs pair set) are delivered by **TEMPLATE TREE SYNC**'s default SYNC policy with identical inline-version/hash/conflict semantics | — |
 | **TEMPLATE TREE SYNC** | Default-policy delivery for template files no dedicated pass claims: add-if-missing, then inline-version/hash update with conflict warning. `JSON_MERGE` deep-merges platform settings (project-only array entries preserved); `WORKSPACE` seeds (`docs/designs/`, `docs/lifecycle/`, …) are add-if-missing only | Rest of the `docs/` tree (`user-guide`, variant domain docs, `countries/KR.md`, `skill-graph.overrides.json`), `.github/`, `.claude`/`.gemini/settings.json`, `.editorconfig`, platform `skills.json` |
+| **ENV_SAMPLE SYNC** *(since v1.23.0)* | Country-aware MERGE delivery of `.env.sample`: template content with `# >>> country-scoped:<CC>` blocks pruned to the project's detected country (region-neutral = all blocks stripped, matching scaffold posture); same-NAME keys superseded by the template line, project-only keys preserved under a marker section (idempotent); standard conflict warning on locally-modified copies | `.env.sample` |
 | **COMMANDS_SYNC** | Hash-based sync | `.claude/commands/*.md`, `.gemini/commands/*.md` |
 | **SYNC_IF_NEWER** | Version-based update | Scripts (`.ts`), agents (`.md`), skills (`SKILL.md`) |
 | **PRESERVE** | Never touched | `README.md`, `src/` |

@@ -1,3 +1,9 @@
+// @version 1.1.0
+// v1.1.0: .env.sample reclassified PRESERVE → SYNC/ENV_SAMPLE SYNC (upgrade-project v1.23.0):
+//         the upgrade path now re-delivers template env-key changes with scaffold-parity
+//         country pruning applied (shared scripts/lib/env-sample-blocks.ts), so template
+//         .env.sample additions reach existing projects without re-injecting pruned
+//         country blocks.
 // upgrade-policy.ts — Upgrade classification SSOT (2026-09-11-upgrade-policy-coverage-design.md)
 // Classifies EVERY project-relative path a template can deliver. The fallback claim is
 // TEMPLATE TREE SYNC (deliver by default): coverage is deny-list, not an enumeration, so a
@@ -82,10 +88,6 @@ const PROJECT_STATE_FILES = new Set([
 
 const PRESERVE_FILES = new Set([
   'README.md', 'README_ko.md', 'CHANGELOG.md', 'docs/README.md', 'docs/README_ko.md',
-  // Scaffold-time country pruning (prune-country-scoped-assets.ts) removes country-scoped env
-  // blocks from .env.sample; a wholesale upgrade re-sync would re-inject them (the upgrade-path
-  // country prune deliberately does not handle env blocks — see COUNTRY-SCOPED SKILL PRUNE).
-  '.env.sample',
 ]);
 
 const REGENERATED_FILES = new Set(['docs/skill-graph.json', '.claude/template-version.txt']);
@@ -131,6 +133,12 @@ export function resolveClaim(relPath: string, variant = ''): UpgradeClaim {
   }
 
   if (REGENERATED_FILES.has(rel)) return { policy: 'REGENERATED', pass: '(regenerated in place)' };
+  // .env.sample delivery is country-aware (ENV_SAMPLE SYNC pass): scaffold-time pruning
+  // (prune-country-scoped-assets.ts, shared lib/env-sample.ts) strips country-scoped env
+  // blocks from the project copy, so upgrades must re-deliver with the same pruning
+  // applied — never a wholesale copy (that would re-inject pruned country profiles). The
+  // pass MERGES (lib/env-sample.ts): template keys updated, project-only keys preserved.
+  if (rel === '.env.sample') return { policy: 'SYNC', pass: 'ENV_SAMPLE SYNC' };
   if (PRESERVE_FILES.has(rel)) return { policy: 'PRESERVE', pass: '(project-owned)' };
   if ((GOVERNANCE_FILES as readonly string[]).includes(rel)) {
     return { policy: 'ADD_IF_MISSING', pass: 'GOVERNANCE FILES' };
@@ -185,7 +193,7 @@ export function resolveClaim(relPath: string, variant = ''): UpgradeClaim {
     return { policy: 'SYNC', pass: 'VARIANT ASSET DIRS' };
   }
 
-  // Root-level files with no dedicated pass (.editorconfig, .env.sample, …): the inversion —
+  // Root-level files with no dedicated pass (.editorconfig, …): the inversion —
   // deliver by default instead of silently dropping.
   return { policy: 'SYNC', pass: TEMPLATE_TREE_SYNC_PASS };
 }

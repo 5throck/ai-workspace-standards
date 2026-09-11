@@ -732,7 +732,7 @@
       "id": "2026-09-11-upgrade-policy-coverage-design",
       "title": "upgrade policy coverage design",
       "file": "docs/designs/2026-09-11-upgrade-policy-coverage-design.md",
-      "status": "draft",
+      "status": "implemented",
       "source": "manual",
       "created": "2026-09-11",
       "last_updated": "2026-09-11"
