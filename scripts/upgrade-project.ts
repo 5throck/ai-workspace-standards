@@ -1,5 +1,17 @@
 #!/usr/bin/env bun
-// @version 1.20.0
+// @version 1.21.0
+// v1.21.0: New TEMPLATE TREE SYNC pass (2026-09-11-upgrade-policy-coverage-design.md) — upgrade
+//           coverage used to be enumeration, so template files with no claiming pass were
+//           silently never delivered to existing projects (most of the variant docs tree —
+//           user-guide, handoff-spec, VERSION_MANIFEST, skill-graph.overrides.json, variant
+//           domain docs, countries/KR.md — plus .github/, .claude|gemini/settings.json,
+//           .editorconfig, skills.json). Classification moved to scripts/lib/upgrade-policy.ts
+//           with the fallback policy SYNC (deliver by default): this pass delivers every file
+//           whose claim names it — add-if-missing, then inline-version/hash update with the
+//           standard conflict warning; WORKSPACE seeds (docs/designs, docs/lifecycle, …) are
+//           add-if-missing only; platform settings.json are deep-merged with project-only
+//           array entries preserved. GOVERNANCE_FILES gains SECURITY.md. New companion
+//           scripts/check-upgrade-coverage.ts reports (and can gate) the classification matrix.
 // v1.20.0: New CONTEXT_COMMONIZATION pass (after VARIANT_DOCS_SYNC) — near-duplicate
 //           sections of docs/<variant>.context.md are pruned once the refreshed
 //           docs/context.md supersedes them: token-overlap >= 0.65 → REMOVE (logged),
@@ -130,6 +142,12 @@ import {
   W2_REMOVE_THRESHOLD,
   W2_REVIEW_FLOOR,
 } from './helpers/context-sections.ts';
+import {
+  TEMPLATE_TREE_SYNC_PASS,
+  iterEffectiveTemplateFiles,
+  mergeSettingsJson,
+  resolveClaim,
+} from './lib/upgrade-policy.ts';
 
 // ── Argument parsing ───────────────────────────────────────────────────────────
 let projectPath = '';
@@ -692,6 +710,7 @@ function isLocallyModified(filePath: string): boolean {
 }
 
 let lockedChanged = 0, mergeChanged = 0, preserveListed = 0, syncChanged = 0;
+let treeChanged = 0;
 
 /**
  * Extract every `'''...'''` (or `'...'`) string literal from a named TOML array
@@ -1590,7 +1609,10 @@ if (variantAssetDirs.length > 0) {
 // appendix, co-safety a filled-in copyright line), so an existing file is never
 // overwritten, never conflict-checked, and never updated to the template version.
 console.log('--- GOVERNANCE FILES SYNC (add-if-missing) ---');
-const GOVERNANCE_FILES = ['LICENSE'];
+// SECURITY.md added per 2026-09-11-upgrade-policy-coverage-design.md D5 — template-shipped
+// policy text, forkable like LICENSE. Mirrored in scripts/lib/upgrade-policy.ts (drift-guarded
+// by tests/unit/upgrade-policy.test.ts).
+const GOVERNANCE_FILES = ['LICENSE', 'SECURITY.md'];
 let govFilesCopied = 0;
 for (const fileName of GOVERNANCE_FILES) {
   const src = existsSync(join(templatesDir, fileName))
@@ -1661,6 +1683,95 @@ let proceduresCopied = 0;
   if (proceduresCopied === 0) console.log('  OK     procedures/ already in sync');
 }
 console.log('');
+
+// ── TEMPLATE TREE SYNC: template files no dedicated pass claims (default policy) ──────────────
+// 2026-09-11-upgrade-policy-coverage-design.md: upgrade coverage used to be enumeration, so
+// files with no claiming pass were silently never delivered (most of the variant docs tree,
+// .github/, platform settings.json, .editorconfig, skills.json, …). Classification lives in
+// scripts/lib/upgrade-policy.ts with the fallback policy SYNC (deliver by default); this pass
+// delivers exactly the files whose claim names THIS pass:
+//   SYNC       — add-if-missing, then inline-version/hash update with the standard conflict
+//                warning on locally-modified files (same contract as VARIANT_DOCS_SYNC).
+//   WORKSPACE  — docs/ project workspaces (designs/, drafts/, lifecycle/, …): seed
+//                add-if-missing only, never overwrite, never prune.
+//   JSON_MERGE — platform settings: deep merge, template wins conflicts, arrays unioned so
+//                project-only entries (e.g. permissions.allow grants) survive.
+console.log('--- TEMPLATE TREE SYNC: uncovered template files (default policy) ---');
+{
+  const variantTplDir = existsSync(templatesDir) ? templatesDir : null;
+  for (const { rel, abs } of iterEffectiveTemplateFiles(commonDir, variantTplDir)) {
+    const claim = resolveClaim(rel, variant);
+    if (!claim || claim.pass !== TEMPLATE_TREE_SYNC_PASS) continue;
+
+    // Country-profile parity with scaffold-time pruning (ADR-0057/0058): don't re-inject a
+    // country profile that doesn't match the project's detected country. Region-neutral
+    // projects receive all profiles (they were never pruned).
+    const countryMatch = rel.match(/^docs\/countries\/([A-Z]{2})\.md$/);
+    if (countryMatch && detectedCountry !== 'none' && detectedCountry !== countryMatch[1]) continue;
+
+    const dest = join(projectDir, rel);
+
+    if (claim.policy === 'JSON_MERGE') {
+      if (!existsSync(dest)) {
+        console.log(`  NEW    ${rel}`);
+        if (!dryRun) { mkdirSync(dirname(dest), { recursive: true }); copyFileSync(abs, dest); }
+        console.log(`  ${dryTag}COPIED: ${rel}`);
+      } else {
+        try {
+          const result = mergeSettingsJson(dest, abs);
+          if (!result.changed) { console.log(`  OK     ${rel}  (json merge — in sync)`); continue; }
+          console.log(`  MERGE  ${rel}${result.preserved.length > 0 ? `  (preserved project-only: ${result.preserved.join(', ')})` : ''}`);
+          if (!dryRun) writeFileSync(dest, result.merged, 'utf8');
+          console.log(`  ${dryTag}WROTE: ${rel}`);
+        } catch (err) {
+          console.log(`  ⚠️  SKIP   ${rel}  (json merge failed: ${(err as Error).message})`);
+          continue;
+        }
+      }
+      treeChanged++;
+      continue;
+    }
+
+    if (claim.policy === 'WORKSPACE') {
+      if (existsSync(dest)) continue; // project-owned — seed only, silent like PROCEDURES
+      console.log(`  NEW    ${rel}  (workspace seed)`);
+      if (!dryRun) { mkdirSync(dirname(dest), { recursive: true }); copyFileSync(abs, dest); }
+      console.log(`  ${dryTag}COPIED: ${rel}`);
+      treeChanged++;
+      continue;
+    }
+
+    // claim.policy === 'SYNC'
+    if (!existsSync(dest)) {
+      console.log(`  NEW    ${rel}`);
+      if (!dryRun) { mkdirSync(dirname(dest), { recursive: true }); copyFileSync(abs, dest); }
+      console.log(`  ${dryTag}COPIED: ${rel}`);
+      treeChanged++;
+      continue;
+    }
+    const tplInlineVer = extractInlineVersion(abs);
+    let reason = '';
+    if (tplInlineVer) {
+      const projVer = extractInlineVersion(dest);
+      if (!projVer) reason = `(no version) → v${tplInlineVer}`;
+      else if (inlineVersionGt(tplInlineVer, projVer)) reason = `v${projVer} → v${tplInlineVer}`;
+    } else if (fileHash(abs) !== fileHash(dest)) {
+      reason = '(content changed)';
+    }
+    if (reason !== '') {
+      if (isLocallyModified(dest)) {
+        console.log(`  ⚠️  CONFLICT ${rel}  ${reason}  (local modifications exist)`);
+      } else {
+        console.log(`  UPDATE ${rel}  ${reason}`);
+      }
+      if (!dryRun) copyFileSync(abs, dest);
+      console.log(`  ${dryTag}COPIED: ${rel}`);
+      treeChanged++;
+    }
+  }
+  if (treeChanged === 0) console.log('  (no uncovered template files — project already at parity)');
+  console.log('');
+}
 
 // ── COUNTRY-SCOPED SKILL PRUNE (ADR-0057/0058) ────────────────────────────────
 // The skill-copy passes above sync from templates/common/skills/ and, for variant
@@ -1955,6 +2066,7 @@ console.log('  Upgrade Complete');
 console.log(`  Locked files updated : ${lockedChanged}`);
 console.log(`  Merge files processed: ${mergeChanged}`);
 console.log(`  Sync files updated   : ${syncChanged}`);
+console.log(`  Tree-sync delivered  : ${treeChanged}`);
 console.log(`  Preserve files listed: ${preserveListed}`);
 console.log(`  Country skills pruned: ${countryPrunedSkills}${dryRun ? ' (dry-run count)' : ''}`);
 if (pruneRemoved) console.log(`  Files pruned         : ${prunedCount}`);

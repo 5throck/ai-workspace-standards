@@ -892,6 +892,11 @@
       "layer": "common"
     },
     {
+      "id": "k-krx",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
       "id": "k-law",
       "type": "skill",
       "layer": "common"
@@ -2776,6 +2781,36 @@
       "layer": "common"
     },
     {
+      "id": "term:ELW 일별매매정보",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:ESG",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:ESG 증권상품",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:ESG 지수",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:ETF 일별매매정보",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:ETN 일별매매정보",
+      "type": "term",
+      "layer": "common"
+    },
+    {
       "id": "term:expDlr",
       "type": "term",
       "layer": "common"
@@ -2802,6 +2837,21 @@
     },
     {
       "id": "term:impWgt",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:KOSDAQ 시리즈 일별시세정보",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:KOSPI 시리즈 일별시세정보",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:KRX 시리즈 일별시세정보",
       "type": "term",
       "layer": "common"
     },
@@ -2886,6 +2936,16 @@
       "layer": "common"
     },
     {
+      "id": "term:국채전문유통시장 일별매매정보",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:금시장 일별매매정보",
+      "type": "term",
+      "layer": "common"
+    },
+    {
       "id": "term:금융감독원",
       "type": "term",
       "layer": "variant:co-consult"
@@ -2947,6 +3007,11 @@
     },
     {
       "id": "term:반월",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:배출권 시장 일별매매정보",
       "type": "term",
       "layer": "common"
     },
@@ -3061,12 +3126,27 @@
       "layer": "common"
     },
     {
+      "id": "term:사회책임투자채권 정보",
+      "type": "term",
+      "layer": "common"
+    },
+    {
       "id": "term:서비스 통계 목록",
       "type": "term",
       "layer": "common"
     },
     {
+      "id": "term:석유시장 일별매매정보",
+      "type": "term",
+      "layer": "common"
+    },
+    {
       "id": "term:선고일자",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:선물 일별매매정보",
       "type": "term",
       "layer": "common"
     },
@@ -3082,6 +3162,11 @@
     },
     {
       "id": "term:소송",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:소액채권시장 일별매매정보",
       "type": "term",
       "layer": "common"
     },
@@ -3111,6 +3196,16 @@
       "layer": "common"
     },
     {
+      "id": "term:신주인수권증권 일별매매정보",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:신주인수권증서 일별매매정보",
+      "type": "term",
+      "layer": "common"
+    },
+    {
       "id": "term:실제지급준비액",
       "type": "term",
       "layer": "common"
@@ -3136,6 +3231,11 @@
       "layer": "common"
     },
     {
+      "id": "term:옵션 일별매매정보",
+      "type": "term",
+      "layer": "common"
+    },
+    {
       "id": "term:요구불예금(실세)",
       "type": "term",
       "layer": "common"
@@ -3157,6 +3257,16 @@
     },
     {
       "id": "term:월간",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:유가증권 일별매매정보",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:유가증권 종목기본정보",
       "type": "term",
       "layer": "common"
     },
@@ -3192,6 +3302,16 @@
     },
     {
       "id": "term:일간",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:일반상품",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:일반채권시장 일별매매정보",
       "type": "term",
       "layer": "common"
     },
@@ -3266,6 +3386,31 @@
       "layer": "common"
     },
     {
+      "id": "term:주식",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:주식선물(유가) 일별매매정보",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:주식선물(코스닥) 일별매매정보",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:주식옵션(유가) 일별매매정보",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:주식옵션(코스닥) 일별매매정보",
+      "type": "term",
+      "layer": "common"
+    },
+    {
       "id": "term:주요사항보고서",
       "type": "term",
       "layer": "common"
@@ -3276,14 +3421,34 @@
       "layer": "common"
     },
     {
+      "id": "term:증권상품",
+      "type": "term",
+      "layer": "common"
+    },
+    {
       "id": "term:지분율",
       "type": "term",
       "layer": "variant:co-consult"
     },
     {
+      "id": "term:지수",
+      "type": "term",
+      "layer": "common"
+    },
+    {
       "id": "term:지주회사",
       "type": "term",
       "layer": "variant:co-consult"
+    },
+    {
+      "id": "term:채권",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:채권지수 시세정보",
+      "type": "term",
+      "layer": "common"
     },
     {
       "id": "term:총계",
@@ -3296,6 +3461,16 @@
       "layer": "variant:co-consult"
     },
     {
+      "id": "term:코넥스 일별매매정보",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:코넥스 종목기본정보",
+      "type": "term",
+      "layer": "common"
+    },
+    {
       "id": "term:코넥스시장",
       "type": "term",
       "layer": "common"
@@ -3304,6 +3479,16 @@
       "id": "term:코스닥",
       "type": "term",
       "layer": "variant:co-consult"
+    },
+    {
+      "id": "term:코스닥 일별매매정보",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:코스닥 종목기본정보",
+      "type": "term",
+      "layer": "common"
     },
     {
       "id": "term:코스닥시장",
@@ -3354,6 +3539,16 @@
       "id": "term:특수관계인",
       "type": "term",
       "layer": "variant:co-consult"
+    },
+    {
+      "id": "term:파생상품",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:파생상품지수 시세정보",
+      "type": "term",
+      "layer": "common"
     },
     {
       "id": "term:판결요지",
@@ -9034,6 +9229,458 @@
       "source": "terms-ko.json",
       "provenance": {
         "file": "templates/common/skills/k-kosis/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "k-krx",
+      "to": "k-dart",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/common/skills/k-krx/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-krx",
+      "to": "k-dart",
+      "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "k-krx",
+      "to": "k-ecos",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/common/skills/k-krx/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-krx",
+      "to": "k-ecos",
+      "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "k-krx",
+      "to": "k-kosis",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/common/skills/k-krx/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-krx",
+      "to": "k-kosis",
+      "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "k-krx",
+      "to": "k-opendata",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/common/skills/k-krx/SKILL.md",
+        "field": "relates_to",
+        "index": 3
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-krx",
+      "to": "k-opendata",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "k-krx",
+      "to": "term:ELW 일별매매정보",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-krx",
+      "to": "term:ESG",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-krx",
+      "to": "term:ESG 증권상품",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-krx",
+      "to": "term:ESG 지수",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-krx",
+      "to": "term:ETF 일별매매정보",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-krx",
+      "to": "term:ETN 일별매매정보",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-krx",
+      "to": "term:KOSDAQ 시리즈 일별시세정보",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-krx",
+      "to": "term:KOSPI 시리즈 일별시세정보",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-krx",
+      "to": "term:KRX 시리즈 일별시세정보",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-krx",
+      "to": "term:국채전문유통시장 일별매매정보",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-krx",
+      "to": "term:금시장 일별매매정보",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-krx",
+      "to": "term:배출권 시장 일별매매정보",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-krx",
+      "to": "term:사회책임투자채권 정보",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-krx",
+      "to": "term:석유시장 일별매매정보",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-krx",
+      "to": "term:선물 일별매매정보",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-krx",
+      "to": "term:소액채권시장 일별매매정보",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-krx",
+      "to": "term:신주인수권증권 일별매매정보",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-krx",
+      "to": "term:신주인수권증서 일별매매정보",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-krx",
+      "to": "term:옵션 일별매매정보",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-krx",
+      "to": "term:유가증권 일별매매정보",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-krx",
+      "to": "term:유가증권 종목기본정보",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-krx",
+      "to": "term:일반상품",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-krx",
+      "to": "term:일반채권시장 일별매매정보",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-krx",
+      "to": "term:주식",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-krx",
+      "to": "term:주식선물(유가) 일별매매정보",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-krx",
+      "to": "term:주식선물(코스닥) 일별매매정보",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-krx",
+      "to": "term:주식옵션(유가) 일별매매정보",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-krx",
+      "to": "term:주식옵션(코스닥) 일별매매정보",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-krx",
+      "to": "term:증권상품",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-krx",
+      "to": "term:지수",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-krx",
+      "to": "term:채권",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-krx",
+      "to": "term:채권지수 시세정보",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-krx",
+      "to": "term:코넥스 일별매매정보",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-krx",
+      "to": "term:코넥스 종목기본정보",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-krx",
+      "to": "term:코스닥 일별매매정보",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-krx",
+      "to": "term:코스닥 종목기본정보",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-krx",
+      "to": "term:파생상품",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-krx",
+      "to": "term:파생상품지수 시세정보",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
         "field": "terms-ko.json"
       }
     },

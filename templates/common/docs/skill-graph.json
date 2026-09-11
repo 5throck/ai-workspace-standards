@@ -107,6 +107,11 @@
       "layer": "common"
     },
     {
+      "id": "k-krx",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
       "id": "k-law",
       "type": "skill",
       "layer": "common"
@@ -552,6 +557,78 @@
         "field": "relates_to",
         "index": 2
       }
+    },
+    {
+      "type": "composes_with",
+      "from": "k-krx",
+      "to": "k-dart",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/common/skills/k-krx/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-krx",
+      "to": "k-dart",
+      "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "k-krx",
+      "to": "k-ecos",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/common/skills/k-krx/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-krx",
+      "to": "k-ecos",
+      "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "k-krx",
+      "to": "k-kosis",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/common/skills/k-krx/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-krx",
+      "to": "k-kosis",
+      "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "k-krx",
+      "to": "k-opendata",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/common/skills/k-krx/SKILL.md",
+        "field": "relates_to",
+        "index": 3
+      }
+    },
+    {
+      "type": "references",
+      "from": "k-krx",
+      "to": "k-opendata",
+      "source": "prose"
     },
     {
       "type": "relates_to",
