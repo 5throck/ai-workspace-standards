@@ -99,7 +99,10 @@ function parseTierBlock(frontmatter: string): Map<string, { tier: string; modelC
 
 // Step 1: Load and validate workspace-schema.json
 const schemaPath = join(WORKSPACE_ROOT, "docs", "workspace-schema.json");
-let schema: WorkspaceSchema;
+// Definite-assignment assertions: `die()` exits in main mode; in module mode the
+// else-branch only logs and falls through exactly as before (a later property
+// access throws, unchanged from the prior runtime behavior).
+let schema!: WorkspaceSchema;
 try {
   schema = JSON.parse(readFileSync(schemaPath, "utf-8"));
 } catch (err) {
@@ -131,7 +134,7 @@ const models = schema.models as ModelsBlock;
 
 // Step 2: Read all agents/*.md files
 const agentsDir = join(WORKSPACE_ROOT, "agents");
-let agentFiles: string[];
+let agentFiles!: string[]; // see note above on definite-assignment assertions
 try {
   agentFiles = readdirSync(agentsDir)
     .filter((f) => f.endsWith(".md"))

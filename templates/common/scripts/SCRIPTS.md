@@ -70,7 +70,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `compile-tokens.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `design-lint.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `create-l3-scaffold.ts` | L0 | 1.12.2 | active | —| —| L0 | —|
-| `dev-sync.ts` | L0 | 1.9.1 | active | —| —| L0+L1 | —|
+| `dev-sync.ts` | L0 | 1.10.0 | active | —| —| L0+L1 | —|
 | `dispatch-parallel.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
 | `dispatch-serial.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
 | `dispatch.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
@@ -194,7 +194,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `propagate-to-templates.ts` | L0 | 2.9.0 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs`, `--include-disabled`, `--marker-rewrite` | —| L0 | —|
 | `qa-gate.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `readme-lifecycle-audit.ts` | L0 | 1.0.4 | active | —| —| L0+L1 | —|
-| `render-pdf-deck.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
+| `render-pdf-deck.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `retry-handler.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `setup-github-branch-protection.ts` | L0 | 1.0.1 | active | `--repo`, `--branch`, `--check` (repeatable), `--dry-run` | —| L0+L1 | —|
 | `skill-dependency-analysis.ts` | L0 | 1.0.2 | active | —| —| L0 | —|
@@ -217,7 +217,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `test-runner.ts` | L0 | 1.1.1 | active | `--parallel`, `--sequential`, `--concurrency <n>`, `--timeout <ms>` | —| L0+L1 | —|
 | `translate-readme.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `ticket.ts` | L0 | 1.1.0 | active | `create --not-before`, `list --kind`, `list --ready` | —| L0 | —|
-| `typecheck.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
+| `typecheck.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
 | `upgrade-project.ts` | L0 | 1.20.0 | active | `--variant`, `--platform`, `--dry-run`, `--prune-removed`, `--rollback`, `--yes`, `--skip-context-commonization` | —| L0+L1 | —|
 | `variant-feature.ts` | L0 | 1.0.0 | active | `--variant`, `--feature`, `--type` | —| L0 | —|
 | `validate-agents.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|

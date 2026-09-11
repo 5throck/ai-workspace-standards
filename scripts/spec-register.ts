@@ -144,9 +144,12 @@ if (getArg('--update')) {
   if (import.meta.main) {
     if (!entry) { console.error(`${RED}Spec not found: ${id}${RESET}`); process.exit(1); }
   }
-  const prev = entry.status;
-  entry.status = newStatus;
-  entry.last_updated = today();
+  // Non-null assertions: in module (non-main) mode the entry-guard above does not run,
+  // and entry would be undefined here exactly as before (TypeError on access) — the
+  // assertions preserve that behavior while letting main-mode pass typecheck.
+  const prev = entry!.status;
+  entry!.status = newStatus!;
+  entry!.last_updated = today();
   saveRegistry(registry);
   console.log(`${GREEN}Updated ${id}: ${prev} -> ${newStatus}${RESET}`);
   if (import.meta.main) {

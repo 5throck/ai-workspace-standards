@@ -63,7 +63,11 @@ if (!existsSync(agentsMdPath)) {
 
 try {
   const agentsContent = readFileSync(agentsMdPath, 'utf-8');
-  const contextContent = readFileSync(contextMdPath, 'utf-8');
+  // T-012-BUG: in module (non-main) mode `contextMdPath` may still be null past the guard
+  // above (the guard only exits when import.meta.main), contradicting the "not an error"
+  // intent — readFileSync(null) throws and is swallowed by the catch below. The cast keeps
+  // that exact runtime behavior.
+  const contextContent = readFileSync(contextMdPath as string, 'utf-8');
 
   // Extract Skills table from AGENTS.md
   const skillsMatch = agentsContent.match(/^## Skills\s*(\| Skill .*?)(?=\n---|\Z)/ms);
@@ -73,7 +77,7 @@ try {
     }
   }
 
-  const skillsTable = skillsMatch[1].trim();
+  const skillsTable = skillsMatch![1].trim();
 
   // Replace content between markers
   const newContextContent = contextContent.replace(
@@ -82,7 +86,7 @@ try {
   );
 
   if (newContextContent !== contextContent) {
-    writeFileSync(contextMdPath, newContextContent, 'utf-8');
+    writeFileSync(contextMdPath as string, newContextContent, 'utf-8');
     console.log('  ✅ Injected dynamic skills from AGENTS.md into docs/context.md');
   }
 

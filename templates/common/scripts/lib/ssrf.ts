@@ -181,10 +181,8 @@ export async function fetchPinned(
       family: net.isIPv6(address) ? 6 : 4,
     }));
     if ((options as dns.LookupOneOptions)?.all) {
-      // @ts-expect-error — Node's LookupFunction overload for all:true
       callback(null, results);
     } else {
-      // @ts-expect-error — Node's LookupFunction overload for all:false (default)
       callback(null, results[0].address, results[0].family);
     }
   };

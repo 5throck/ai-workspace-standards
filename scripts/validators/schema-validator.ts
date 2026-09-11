@@ -402,7 +402,7 @@ function validateCommandFrontmatter(
   }
 
   // ── status enum (if present) ─────────────────────────────────────────────
-  if (typeof fm.status === 'string' && !VALID_STATUSES.includes(fm.status)) {
+  if (typeof fm.status === 'string' && !VALID_STATUSES.includes(fm.status as any)) {
     issues.push({
       severity: 'error',
       category: 'invalid-enum',

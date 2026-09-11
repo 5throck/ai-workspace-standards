@@ -31,8 +31,13 @@ export interface PlatformContext {
 /**
  * Detect current platform context
  * @version 1.0.0
+ *
+ * T-012-BUG: this function used `await` (Bun shell probing) without being declared
+ * `async` — in an ES module that is a parse-time SyntaxError, so the module could
+ * never have been imported. Declared async now; the file currently has no importers,
+ * so no caller behavior changes.
  */
-export function detectPlatform(): PlatformContext {
+export async function detectPlatform(): Promise<PlatformContext> {
   const platform = os.platform();
   const detectedOS: PlatformContext['os'] =
     platform === 'win32' ? 'windows' :

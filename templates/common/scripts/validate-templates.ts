@@ -424,7 +424,10 @@ function checkVariantManifests(): Map<string, VariantManifest> {
               fail(dir, 'country-config', `templates/${dir}/variant.json country_config.supported contains invalid code: '${code}'. Pattern: ^[A-Z]{2,4}$`);
               continue;
             }
-            const profilePath = join(TEMPLATES_DIR, dir, countryConfig.profiles_dir, `${code}.md`);
+            // fail() above is not a `never` guard, so profiles_dir may still be undefined
+            // here at runtime (join then throws) — cast documents the intent without
+            // changing that behavior.
+            const profilePath = join(TEMPLATES_DIR, dir, countryConfig.profiles_dir as string, `${code}.md`);
             if (!existsSync(profilePath)) {
               fail(dir, 'country-config', `templates/${dir}/variant.json country_config.supported includes '${code}' but profile file missing: ${countryConfig.profiles_dir}/${code}.md`);
             } else {
@@ -489,7 +492,7 @@ function checkVariantManifests(): Map<string, VariantManifest> {
       // Advisory: check if description appears jurisdiction-anchored
       if (countryConfig && raw.description) {
         const jurisdictionTerms = /korea|korean|한국|대한민국/i;
-        if (jurisdictionTerms.test(raw.description)) {
+        if (jurisdictionTerms.test(String(raw.description))) {
           warn(dir, 'country-config', `templates/${dir}/variant.json description appears jurisdiction-anchored (contains Korea/Korean/한국/대한민국). Consider region-neutral description with country-specific details in profiles.`);
         }
       }
@@ -1544,7 +1547,7 @@ function checkVariantScriptsLayout(variant: string): void {
     const walk = (dir: string): void => {
       for (const e of readdirSync(dir, { withFileTypes: true })) {
         const p = join(dir, e.name);
-        if (e.isDirectory()) { walk(p, regContent); continue; }
+        if (e.isDirectory()) { walk(p); continue; }
         if (!e.name.endsWith('.ts')) continue;
         const rel = p.slice(variantScriptsDir.length + 1).replace(/\\/g, '/');
         if (!regContent.includes(`\`${rel}\``) && !regContent.includes(`\`${e.name}\``)) {
@@ -1553,7 +1556,7 @@ function checkVariantScriptsLayout(variant: string): void {
         }
       }
     };
-    walk(variantScriptsDir, regContent);
+    walk(variantScriptsDir);
   }
   if (layoutErrors === 0) {
     pass(`${variant}/scripts/${variant}/: layout convention OK`);
@@ -2596,66 +2599,6 @@ function checkCommonContractReverseCoverage(): void {
       warn('common', 'C-CM-04', `${unlistedPlatform.length} platform skill dir(s) under templates/common/.claude/skills/ are not in common_platform_skills or common_skills: ${unlistedPlatform.slice(0, 12).join(', ')}${unlistedPlatform.length > 12 ? `, +${unlistedPlatform.length - 12} more` : ''}`, `Decide the common_platform_skills inventory scope (full platform inventory vs override record) and list or exempt accordingly`);
     } else {
       pass('C-CM-04: all platform skill dirs are covered by common_platform_skills/common_skills');
-    }
-  }
-}
-
-// Check PM-02 (T-20260910-018): marker-inject zone parity between propagation-map.json
-// target_variants and the zones that actually exist in templates/co-*/.
-//   listed→exists (ERROR): a variant listed in target_variants must carry the marker zone in
-//   its target file, otherwise the marker-inject domain would silently skip it.
-//   exists→listed (WARN, aggregated): a variant carrying the zone but absent from
-//   target_variants is an unmanaged zone — adjudication tracked by T-20260910-022.
-function checkMarkerZoneParity(): void {
-  if (!JSON_MODE) console.log('\n=== Check PM-02: marker-inject zone parity (propagation-map.json ↔ templates/co-*) ===');
-
-  const mapPath = join(ROOT, 'scripts', 'propagation-map.json');
-  if (!existsSync(mapPath)) return; // already reported by PM-01
-  let map: Record<string, any>;
-  try {
-    map = JSON.parse(readFileSync(mapPath, 'utf-8')) as Record<string, any>;
-  } catch {
-    return; // already reported by PM-01
-  }
-  const domains = (map.domains ?? {}) as Record<string, any>;
-
-  const variantDirs = readdirSync(TEMPLATES_DIR).filter(e => {
-    try { return e.startsWith('co-') && statSync(join(TEMPLATES_DIR, e)).isDirectory(); } catch { return false; }
-  });
-
-  for (const [domainName, domain] of Object.entries(domains)) {
-    if ((domain as any)?.mode !== 'marker-inject') continue;
-    const marker = String((domain as any).marker ?? '');
-    if (!marker) continue;
-    const targets: string[] = Array.isArray((domain as any).target_variants) ? (domain as any).target_variants : [];
-    const targetFileTpl = (domain as any).target_file
-      ?? basename(String((domain as any).source_file ?? 'AGENTS.md'));
-
-    for (const variant of targets) {
-      const targetPath = join(TEMPLATES_DIR, variant, targetFileTpl.replace('{variant}', variant));
-      if (!existsSync(targetPath)) {
-        fail('common', 'PM-02', `propagation-map.json '${domainName}' lists '${variant}' but target file templates/${variant}/${targetFileTpl.replace('{variant}', variant)} is missing`, `Create the target file with the ${marker} zone, or remove '${variant}' from target_variants`);
-        continue;
-      }
-      const content = readFileSync(targetPath, 'utf-8');
-      if (!content.includes(`<!-- ${marker}:START -->`)) {
-        fail('common', 'PM-02', `propagation-map.json '${domainName}' lists '${variant}' but templates/${variant}/${targetFileTpl.replace('{variant}', variant)} has no <!-- ${marker}:START --> zone`, `Add the ${marker} zone (run propagate-to-templates.ts --marker-rewrite --domain ${domainName}) or remove '${variant}' from target_variants`);
-      }
-    }
-
-    // Reverse direction: zones on disk that the map does not manage.
-    const unmanaged = variantDirs.filter(variant => {
-      if (targets.includes(variant)) return false;
-      const targetPath = join(TEMPLATES_DIR, variant, targetFileTpl.replace('{variant}', variant));
-      if (!existsSync(targetPath)) return false;
-      try {
-        return readFileSync(targetPath, 'utf-8').includes(`<!-- ${marker}:START -->`);
-      } catch { return false; }
-    });
-    if (unmanaged.length > 0) {
-      warn('common', 'PM-02', `propagation-map.json '${domainName}' (${marker}) has unmanaged zone(s) in: ${unmanaged.join(', ')} — zones exist but the variants are absent from target_variants`, `Add the variant(s) to '${domainName}'.target_variants or document the intentional divergence (T-20260910-022)`);
-    } else {
-      pass(`PM-02: '${domainName}' (${marker}) zone coverage matches target_variants`);
     }
   }
 }

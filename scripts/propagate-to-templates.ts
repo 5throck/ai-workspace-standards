@@ -760,7 +760,7 @@ function publishDocs(isDryRun: boolean, mapPath: string): void {
 
   // Read governance-* domains from propagation-map.json
   const mapRaw = readFileSync(mapPath, 'utf-8');
-  const map = JSON.parse(mapRaw);
+  const map = JSON.parse(mapRaw) as PropagationMap;
 
   const govDomains = Object.entries(map.domains)
     .filter(([_, d]: [string, Domain]) => d.mode === 'marker-inject')

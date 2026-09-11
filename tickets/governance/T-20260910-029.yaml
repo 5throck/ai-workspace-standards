@@ -6,12 +6,21 @@ title: >-
   co-game, co-hr, co-news, co-price, co-safety) or document the template-record
   policy
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-10T14:01:23.346Z'
 history:
   - at: '2026-09-10T14:01:23.346Z'
     from: null
     to: backlog
+  - at: '2026-09-11T00:17:40.477Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-11T00:17:40.489Z'
+    from: waiting
+    to: review
+  - at: '2026-09-11T00:17:40.500Z'
+    from: review
+    to: done
 result: null
 error: null

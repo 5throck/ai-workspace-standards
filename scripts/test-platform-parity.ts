@@ -352,7 +352,7 @@ function usesExtends(filePath: string): { usesExtends: boolean; extendsPath?: st
       removeSections = removeSectionsMatch[1]
         .split('\n')
         .map(line => line.match(/\s*-\s*"([^"]+)"/)?.[1])
-        .filter(Boolean);
+        .filter((s): s is string => Boolean(s));
     }
 
     return {
@@ -749,7 +749,7 @@ async function main() {
     }
 
     // Check each L2 (if L2s array exists)
-    if (mappings.L2s) {
+    if ('L2s' in mappings && mappings.L2s) {
       for (const l2Path of mappings.L2s) {
         const fullL2Path = join(process.cwd(), l2Path);
 

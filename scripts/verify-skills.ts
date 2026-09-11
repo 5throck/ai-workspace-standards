@@ -160,7 +160,8 @@ async function scanSkills(): Promise<SkillCheck[]> {
     if (!existsSync(skillsPath)) return [];
 
     // Bun.glob is unavailable in some Bun versions — plain recursive readdir (fixed 2026-08-29)
-    const entries = readdirSync(skillsPath, { recursive: true });
+    // (no encoding option given, so entries are strings — the cast only pins the overload)
+    const entries = readdirSync(skillsPath, { recursive: true }) as string[];
     return entries
       .filter((entry) => entry.endsWith("SKILL.md"))
       .map((entry) => path.join(skillsPath, entry));

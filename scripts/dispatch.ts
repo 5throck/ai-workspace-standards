@@ -150,7 +150,7 @@ async function runParallel(args: string[]): Promise<void> {
           description: parts[0],
           role: parts[1],
           task: parts[2],
-          priority: parts[3] || 'medium'
+          priority: (parts[3] || 'medium') as ParallelAgentTask['priority']
         });
       }
       i++;

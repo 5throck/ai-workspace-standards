@@ -138,3 +138,6 @@ if (type === 'meeting') {
     await Bun.write(MEMORY_FILE, content);
   }
 }
+
+// Makes this file a module: top-level await below requires it (TS1375).
+export {};

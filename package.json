@@ -44,6 +44,7 @@
     "clean:sandbox": "bun -e \"import {rmSync, mkdirSync} from 'node:fs'; rmSync('.sandbox', {recursive:true, force:true}); mkdirSync('.sandbox');\""
   },
   "devDependencies": {
+    "@types/bun": "^1.4.2",
     "@types/node": "^26.5.0",
     "typescript": "^7.0.2"
   },

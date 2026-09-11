@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * HTML Presentation Deck PDF Renderer
- * @version 1.0.0
+ * @version 1.0.1
  *
  * Converts HTML presentation decks into paginated PDF files respecting @page print rules
  * using Playwright headless Chromium.
@@ -140,7 +140,11 @@ async function runCheck(options: CliOptions): Promise<void> {
 
   let playwrightAvailable = false;
   try {
-    const { chromium } = await import("playwright");
+    // Optional peer dependency, deliberately undeclared in package.json. The
+    // specifier goes through a variable so tsc never resolves it statically
+    // (installed locally / absent in CI — both must typecheck; T-012 triage).
+    const playwrightSpecifier = "playwright";
+    const { chromium } = await import(playwrightSpecifier);
     if (chromium) playwrightAvailable = true;
   } catch {
     playwrightAvailable = false;
@@ -209,7 +213,9 @@ async function main(): Promise<void> {
 
   let playwrightModule;
   try {
-    playwrightModule = await import("playwright");
+    // Same dynamic-specifier pattern as the availability probe above.
+    const playwrightSpecifier = "playwright";
+    playwrightModule = await import(playwrightSpecifier);
   } catch {
     console.error(`[ERROR] Playwright is required to render presentation PDFs.`);
     console.error(`  Please install it using: bun add playwright && bunx playwright install chromium`);

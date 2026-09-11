@@ -218,7 +218,7 @@ try {
     const expectedName = basename(testDir);
     if (hasOldPlaceholder) {
       fail('Test 3', 'Placeholder not replaced in README.md');
-    } else if (!readme.includes(projectName) && !readme.includes(expectedName) && !readme.includes(variantArg)) {
+    } else if (!readme.includes(String(projectName)) && !readme.includes(expectedName) && !readme.includes(String(variantArg))) {
       fail('Test 3', `Project name "${expectedName}" / variant "${variantArg}" not found in README.md`);
     } else {
       pass('Test 3 PASSED: Placeholders substituted correctly');

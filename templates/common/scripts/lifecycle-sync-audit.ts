@@ -24,7 +24,7 @@
  * @license MIT
  */
 
-import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, readdirSync, statSync, type Dirent } from 'node:fs';
 import { join, basename } from 'node:path';
 import { cwd } from 'node:process';
 import { createHash } from 'node:crypto';
@@ -409,7 +409,7 @@ function runCheckX(): SyncIssue[] {
   function collectTsFiles(dir: string, depth = 0): string[] {
     const result: string[] = [];
     if (depth > 8) return result; // symlink-cycle / runaway-recursion bound (T-20260910-026)
-    let entries: ReturnType<typeof readdirSync>;
+    let entries: Dirent<string>[];
     try {
       entries = readdirSync(dir, { withFileTypes: true });
     } catch {
@@ -477,7 +477,7 @@ function runCheckD(): DuplicateEntry[] {
 
   function walkDir(dir: string, depth = 0): void {
     if (depth > 8) return; // symlink-cycle / runaway-recursion bound (T-20260910-026)
-    let items: ReturnType<typeof readdirSync>;
+    let items: Dirent<string>[];
     try {
       items = readdirSync(dir, { withFileTypes: true });
     } catch {
