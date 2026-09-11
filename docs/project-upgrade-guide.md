@@ -28,7 +28,7 @@ This guide documents the `upgrade-project.ts` tool that automates this process.
 ## §2: Upgrade Tool
 
 **Script**: `scripts/upgrade-project.ts` (v1.22.0)
-**Location**: Workspace root; the script is `L0+L1`, so each project also carries its own copy under `scripts/`
+**Location**: Workspace root only (`L0` per ADR-0073 Amendment 1). Projects do **not** carry a copy — the script resolves the template tree relative to its own location, so a project-local copy could never source templates; inert legacy copies are pruned by `--prune-removed`. From inside a project, invoke the workspace script: `bun ../../scripts/upgrade-project.ts .`
 
 ### Usage
 

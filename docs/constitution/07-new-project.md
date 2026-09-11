@@ -63,7 +63,7 @@ The filtering is automatic — `propagate-to-templates.ts` enforces it at publis
 
 **Excluded skills** (workspace-management): `audit-workspace`, `create-variant`, `promote-variant`
 
-**Excluded scripts** (workspace-management): `upgrade-project.ts`
+**Excluded scripts** (workspace-management): `upgrade-project.ts` (layer `L0` per ADR-0073 Amendment 1 — the upgrade runs from the workspace root against the workspace-side template SSOT; a project-local copy could never source templates, and stale per-project copies are pruned by `upgrade-project --prune-removed`).
 
 #### 7.3.5 Target Country Selection (Country Profiles)
 
