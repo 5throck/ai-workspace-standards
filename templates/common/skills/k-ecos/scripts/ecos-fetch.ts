@@ -283,4 +283,9 @@ async function main(): Promise<number> {
   return 0;
 }
 
-if (import.meta.main) process.exit(await main());
+if (import.meta.main) {
+  // Natural exit (process.exitCode, not process.exit) so Bun flushes large
+  // pending stdout writes — process.exit truncated multi-hundred-KB JSON.
+  const code = await main();
+  if (code !== 0) process.exitCode = code;
+}
