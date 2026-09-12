@@ -23,7 +23,7 @@
 | co-architect | No local resync work; fast-forwarded to origin/main. | — |
 | co-consult | Synced and merged after regenerating skill graph and reconciling with latest main. | https://github.com/5throck/co-consult/pull/39 |
 | co-deck | Synced and merged after regenerating skill graph and reconciling with latest main. | https://github.com/5throck/co-deck/pull/77 |
-| co-develop | No local resync work; fast-forwarded to origin/master. | — |
+| co-develop | No local resync work; fast-forwarded; default branch is now `main`. | — |
 | co-safety | Synced and merged after regenerating skill graph, fixing stale VERSION_MANIFEST entry, and making CI tolerate repos without package.json. | https://github.com/5throck/co-safety/pull/142 |
 
 ## Validation notes
