@@ -1,5 +1,7 @@
 #!/usr/bin/env bun
-// @version 1.5.0
+// @version 1.6.0
+// v1.6.0 (2026-09-12): Phase 1 honors `mirror: false` frontmatter — agent-dispatched
+//   fleet skills (PM-gateway model) stay in skills/ without platform mirroring.
 // v1.5.0 (2026-09-10, T-20260910-026): dirsEqual() now lstats instead of statting
 //   (symlinks compared by target string, never dereferenced) and carries a depth
 //   cap of 64 so a symlinked directory cycle cannot recurse infinitely.
@@ -25,7 +27,7 @@
  * `security-gate: true` skills (validate-templates.ts Check B-03) are excluded from
  * Phase 1 distribution entirely — they must remain platform-neutral (`skills/` only).
  *
- * @version 1.5.0
+ * @version 1.6.0
  */
 
 import * as fs from 'node:fs';
@@ -160,6 +162,13 @@ export async function syncSkills(dirs: SkillSyncDirs, opts: SyncSkillsOptions = 
             // (validate-templates.ts Check B-03) — they must never be mirrored into
             // .claude/skills/, .gemini/skills/, or .agents/skills/, only skills/.
             if (/^security-gate:\s*true\b/m.test(fs.readFileSync(skillMdSrc, 'utf-8'))) {
+                continue;
+            }
+
+            // `mirror: false` skills are agent-dispatched only (PM-gateway fleet
+            // skills such as the domain planners) — they live in skills/ but are
+            // never mirrored into the platform directories.
+            if (/^mirror:\s*false\b/m.test(fs.readFileSync(skillMdSrc, 'utf-8'))) {
                 continue;
             }
 
