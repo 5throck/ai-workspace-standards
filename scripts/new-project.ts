@@ -474,7 +474,7 @@ for (const a of L1_ONLY_AGENTS) {
 }
 
 // L1-only directories
-const L1_ONLY_DIRS = ['docs/_templates', 'docs/_examples', 'docs/adr', 'docs/specs', 'docs/variants'];
+const L1_ONLY_DIRS = ['docs/_templates', 'docs/_examples', 'docs/adr', 'docs/variants']; // docs/specs left in ADR-0074 Amendment 2 (registry seed activates the Design Gate)
 for (const d of L1_ONLY_DIRS) {
   const dp = join(projectDir, d);
   if (existsSync(dp)) { rmSync(dp, { recursive: true }); console.log(`  🗑️  Excluded L1-only directory: ${d}`); }
@@ -715,7 +715,7 @@ if (existsSync(pmMd)) {
 }
 
 // ── 2.6b. Remove template-only docs/ subdirs (variant overlay may re-add; removed here after overlay)
-for (const d of ['docs/adr', 'docs/specs', 'docs/variants', 'docs/_templates', 'docs/_examples']) {
+for (const d of ['docs/adr', 'docs/variants', 'docs/_templates', 'docs/_examples']) { // docs/specs stays (ADR-0074)
   const dp = join(projectDir, d);
   if (existsSync(dp)) { rmSync(dp, { recursive: true }); console.log(`  🗑️  Removed template-only dir: ${d}`); }
 }

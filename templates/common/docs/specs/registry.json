@@ -1,0 +1,5 @@
+{
+  "_comment": "Universal Design Gate seed (ADR-0074) — delivered to projects add-if-missing (upgrade claim: DESIGN GATE SEED). Register design docs: bun scripts/spec-register.ts --file docs/designs/<spec-id>-design.md --source manual. The sync-time spec-check (audit.ts --spec-check, dev-sync step 3.9) blocks code changes without spec activity. Project entries are never overwritten or pruned by upgrades.",
+  "version": "1.0.0",
+  "specs": []
+}

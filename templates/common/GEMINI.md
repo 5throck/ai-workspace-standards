@@ -232,6 +232,9 @@ Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 > For L1-L2 Fork Model and lifecycle management rules, see [docs/context.md](docs/context.md) and [docs/context.md](docs/context.md).
 <!-- COMMON-GEMINI:END -->
 
+### MCP Configurations & Absolute Resolving
+No `.mcp.json` is currently defined at the project root — MCP servers are configured at the user/global level instead. If a project-level `.mcp.json` is added later, keep command executable paths relative to the project directory for portable cross-platform runs; the platform resolves relative paths (e.g., `./server` or `python scripts/mcp.py`) against the individual project's root folder.
+
 ---
 
 <!-- COMMON-GEMINI:START -->

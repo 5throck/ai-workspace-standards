@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-content_hash: c1c0ed9e031b698873c90cdc7c81a46f9ec193c886e9e194cb6d745f22e05d57
+content_hash: 3382c23c4676d6600916819cf63109133b9029f049d7f13397c79041dc25523d
 ---
 
 **Languages**: [English](README.md) · [한국어](README_ko.md) · [Español](README_es.md) · [日本語](README_ja.md)
@@ -31,6 +31,16 @@ Modern AI-assisted development requires more than prompts - it requires **consis
 **Vibe Coding** - AI takes the wheel. The developer describes intent; the AI agents (PM → Architect → Designer → Code Writer → Test Runner) execute the full workflow autonomously. These standards define the guardrails that keep autonomous execution safe and auditable.
 
 **Harness Engineering** - Developer stays in the loop. AI tools are precision instruments: surgical edits, explicit plans, mandatory review gates. These standards define the harness that keeps AI output predictable and reviewable.
+
+---
+
+### Built-in Country Profiles
+
+Korean jurisdiction support ships with the workspace: a **KR country profile** ([`docs/countries/KR.md`](docs/countries/KR.md)), six **KR-scoped `k-*` data skills** (statute lookup `k-law`, disclosures `k-dart`, statistics `k-kosis`, market data `k-krx`, macro-financial `k-ecos`, public data `k-opendata`), and per-project country configuration (`variant.json` `country_config`). A project declares its target country; KR projects automatically receive the k-* skills, Korean regulatory anchors, and the country API-key block in `.env.sample` — see `docs/country-profiles.md`.
+
+---
+
+## Prerequisites
 
 ---
 
@@ -357,4 +367,4 @@ AGPL-3.0 - see [LICENSE](LICENSE)
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-09-10*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-09-12*

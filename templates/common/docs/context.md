@@ -400,7 +400,7 @@ Use an external computation tool when the task involves ANY of the following:
 
 ## Git / PR Workflow
 
-<!-- intentional-duplicate: workspace standards §3 — maintained locally for AI context proximity; source: docs/constitution/03-pr-workflow.md; hash: e43638d6 -->
+<!-- intentional-duplicate: workspace standards §3 — maintained locally for AI context proximity; source: docs/constitution/03-pr-workflow.md; hash: 18ad2842 -->
 
 ```
 /sync "feat: description"
@@ -414,6 +414,8 @@ Use an external computation tool when the task involves ANY of the following:
 ```
 
 > All PR titles, bodies, and review comments must be in **English**.
+
+> Universal Design Gate (ADR-0074): every code change at any tier must carry spec activity — a design doc under docs/designs/ registered via scripts/spec-register.ts — enforced by the /sync spec-check (audit.ts --spec-check, FATAL). Trivial changes: --spec-exempt=E1..E5.
 
 ---
 
@@ -444,7 +446,7 @@ This workspace follows explicit lifecycle management practices for Agents, Skill
 
 ### Procedure Graph
 
-Each template layer owns structured procedures in `procedures/<name>/schema.yaml` (authoring skeleton: `templates/common/procedures/_template/`). Procedures are the canonical source for the workflow graph — validate with `bun scripts/validate-procedures.ts --all`, check coverage with `bun scripts/procedure-coverage.ts` (gaps become governance tickets via `--tickets`). Never hand-edit procedure-derived graph nodes. See `docs/procedure-schema-spec.md` and constitution §6.7.
+Each template layer owns structured procedures in `procedures/<name>/schema.yaml` (authoring skeleton: `templates/common/procedures/_template/`). Procedures are the canonical source for the workflow graph — validate with `bun scripts/validate-procedures.ts --all`, check coverage with `bun scripts/procedure-coverage.ts` (workspace root — L1 tool, not synced to projects) (gaps become governance tickets via `--tickets`). Never hand-edit procedure-derived graph nodes. See `docs/procedure-schema-spec.md` and constitution §6.7.
 
 ### Common Principles
 
