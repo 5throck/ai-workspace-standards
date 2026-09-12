@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-09-12T03:36:59.912Z
+**Generated**: 2026-09-12T03:59:59.639Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -19,14 +19,14 @@
 
 | Name | File | Tier | Model | Last Modified |
 |------|------|------|-------|---------------|
-| architect | agents/architect.md | high | inherit | 2026-09-10 |
-| auditor | agents/auditor.md | medium | inherit | 2026-09-10 |
-| automation-engineer | agents/automation-engineer.md | low | inherit | 2026-09-10 |
-| docs-writer | agents/docs-writer.md | medium | inherit | 2026-09-11 |
-| lifecycle-manager | agents/lifecycle-manager.md | medium | inherit | 2026-09-10 |
-| pm | agents/pm.md | high | inherit | 2026-09-10 |
-| scaffolding-expert | agents/scaffolding-expert.md | low | inherit | 2026-09-10 |
-| security-expert | agents/security-expert.md | medium | inherit | 2026-09-10 |
+| architect | agents/architect.md | high | inherit | 2026-09-12 |
+| auditor | agents/auditor.md | medium | inherit | 2026-09-12 |
+| automation-engineer | agents/automation-engineer.md | low | inherit | 2026-09-12 |
+| docs-writer | agents/docs-writer.md | medium | inherit | 2026-09-12 |
+| lifecycle-manager | agents/lifecycle-manager.md | medium | inherit | 2026-09-12 |
+| pm | agents/pm.md | high | inherit | 2026-09-12 |
+| scaffolding-expert | agents/scaffolding-expert.md | low | inherit | 2026-09-12 |
+| security-expert | agents/security-expert.md | medium | inherit | 2026-09-12 |
 
 ---
 
@@ -101,7 +101,7 @@
 | agent-verify.ts | 1.0.2 | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.2 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.0.0 | scripts/archive-memory.ts | N/A |
-| audit.ts | 2.34.1 | scripts/audit.ts | bun |
+| audit.ts | 2.35.0 | scripts/audit.ts | bun |
 | check-upgrade-coverage.ts | 1.0.0 | scripts/check-upgrade-coverage.ts | N/A |
 | cleanup-completed-md.ts | 1.1.0 | scripts/cleanup-completed-md.ts | N/A |
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | N/A |
@@ -173,7 +173,7 @@
 | validate-pm-extends.ts | 0.3.1 | scripts/validate-pm-extends.ts | N/A |
 | validate-procedures.ts | 1.1.0 | scripts/validate-procedures.ts | js-yaml |
 | validate-skills.ts | 1.5.1 | scripts/validate-skills.ts | N/A |
-| validate-templates.ts | 1.23.0 | scripts/validate-templates.ts | js-yaml |
+| validate-templates.ts | 1.24.0 | scripts/validate-templates.ts | js-yaml |
 | validate-variant-readiness.ts | 1.1.0 | scripts/validate-variant-readiness.ts | N/A |
 | variant-feature.ts | 1.0.0 | scripts/variant-feature.ts | N/A |
 | verify-adr-governance.ts | 1.4.0 | scripts/verify-adr-governance.ts | N/A |
