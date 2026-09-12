@@ -63,7 +63,7 @@ This document defines the workflow phases used by the `co-work` variant. It foll
 
 ### Phase 6 — Quality Assurance & Finalization
 **PM owns**: finalizes the session.
-- PM runs `project-review` skill (use `baseline-only` mode for docs/link validation instead of invoking the deprecated `validate-docs-links` skill)
+- PM runs `project-review` skill (use `baseline-only` mode for docs/link validation)
 - Maximum 2 fix iterations before escalating to user
 - PM runs `/sync` pipeline
 - PR opened with English title and description

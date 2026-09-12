@@ -18,8 +18,7 @@
       "security-scan": {},
       "skill-lifecycle-manager": {},
       "agent-lifecycle-manager": {},
-      "script-lifecycle-manager": {},
-      "validate-docs-links": {}
+      "script-lifecycle-manager": {}
     },
     "note": "After B-01 sync, all variants should have all 8 skills. Update this section if a variant intentionally excludes a skill."
   },

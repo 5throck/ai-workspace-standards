@@ -107,3 +107,135 @@ describe('upgrade-project.ts TEMPLATE TREE SYNC', () => {
     }
   }, 120000);
 });
+
+// ============================================================================
+// docs/context.md project-only preservation (T-20260912-001, upgrade-project v1.25.0)
+// ============================================================================
+describe('upgrade-project.ts docs/context.md CONTEXT PRESERVE gate', () => {
+  const contextTemplatePath = join(workspaceRoot, 'templates', 'common', 'docs', 'context.md');
+  const FOOTER_RE = /\n---\n\n\*context\.md version:[^*\n]*\*\s*$/;
+
+  function seedProjectContext(tmp: string, content: string): void {
+    mkdirSync(join(tmp, 'docs'), { recursive: true });
+    writeFileSync(join(tmp, 'docs', 'context.md'), content);
+    spawnSync('git', ['-C', tmp, 'add', '-A'], { cwd: tmp });
+    spawnSync('git', ['-C', tmp, 'commit', '-q', '-m', 'chore: seed context'], { cwd: tmp });
+  }
+
+  function templateWithOlderFooter(): string {
+    // Project scaffolded at footer 2.5 — one version behind the template's 2.6,
+    // which is what drives the SYNC branch's inline-version comparison.
+    return readFileSync(contextTemplatePath, 'utf8').replace(
+      /\*context\.md version: 2\.6/,
+      '*context.md version: 2.5',
+    );
+  }
+
+  test('a. project-only section → PRESERVE (dry-run and apply), template NOT applied', () => {
+    const tmp = makeTempProject();
+    try {
+      const tpl = templateWithOlderFooter();
+      const footerMatch = tpl.match(FOOTER_RE);
+      expect(footerMatch).not.toBeNull();
+      const body = tpl.slice(0, footerMatch!.index);
+      const footer = tpl.slice(footerMatch!.index);
+      const seededContent = body + '\n\n## Project Only Section\nproject-specific content that must survive the upgrade\n' + footer;
+      mkdirSync(join(tmp, 'docs'), { recursive: true });
+      writeFileSync(join(tmp, 'docs', 'context.md'), seededContent);
+      spawnSync('git', ['-C', tmp, 'add', '-A'], { cwd: tmp });
+      spawnSync('git', ['-C', tmp, 'commit', '-q', '-m', 'chore: seed context'], { cwd: tmp });
+
+      // Dry-run must produce the identical PRESERVE verdict.
+      const dry = spawnSync('bun', [upgradeScript, tmp, '--variant', VARIANT, '--dry-run', '--yes'],
+        { encoding: 'utf-8', timeout: 300000 });
+      expect(dry.status).toBe(0);
+      expect(dry.stdout).toContain('CONTEXT PRESERVE docs/context.md');
+      expect(dry.stdout).toContain('project-only: project only section');
+      expect(dry.stdout).toContain('preserved — re-run with --force-context-sync');
+      expect(readFileSync(join(tmp, 'docs', 'context.md'), 'utf8')).toBe(seededContent);
+
+      // Apply run: file preserved byte-for-byte, template content NOT applied.
+      const result = spawnSync('bun', [upgradeScript, tmp, '--variant', VARIANT, '--yes'],
+        { encoding: 'utf-8', timeout: 300000 });
+      expect(result.status).toBe(0);
+      expect(result.stdout).toContain('CONTEXT PRESERVE docs/context.md');
+      expect(result.stdout).toContain('project-only: project only section');
+      expect(readFileSync(join(tmp, 'docs', 'context.md'), 'utf8')).toBe(seededContent);
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  }, 400000);
+
+  test('b. --force-context-sync applies the template and logs the discarded sections', () => {
+    const tmp = makeTempProject();
+    try {
+      const tpl = templateWithOlderFooter();
+      const footerMatch = tpl.match(FOOTER_RE)!;
+      const seededContent = tpl.slice(0, footerMatch.index)
+        + '\n\n## Project Only Section\nproject-specific content that must survive the upgrade\n'
+        + tpl.slice(footerMatch.index);
+      seedProjectContext(tmp, seededContent);
+
+      const result = spawnSync(
+        'bun',
+        [upgradeScript, tmp, '--variant', VARIANT, '--yes', '--force-context-sync'],
+        { encoding: 'utf-8', timeout: 300000 });
+      expect(result.status).toBe(0);
+      expect(result.stdout).toContain('FORCED OVERWRITE docs/context.md');
+      expect(result.stdout).toContain('1 project-only section(s) discarded');
+
+      // Template version applied: project-only section gone, footer back at template text.
+      const applied = readFileSync(join(tmp, 'docs', 'context.md'), 'utf8');
+      expect(applied).not.toContain('## Project Only Section');
+      expect(applied).toContain('*context.md version: 2.6');
+      expect(applied).toBe(readFileSync(contextTemplatePath, 'utf8'));
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  }, 400000);
+
+  test('c. no project-only content (drift inside shared sections) → UPDATE fires unchanged', () => {
+    const tmp = makeTempProject();
+    try {
+      // Same shared headings as the template; only inline wording inside a shared
+      // section drifted + footer is one version behind.
+      const seededContent = templateWithOlderFooter().replace(
+        '#### Schema Governance',
+        '#### Schema Governance (local note)',
+      );
+      expect(seededContent).not.toBe(readFileSync(contextTemplatePath, 'utf8'));
+      seedProjectContext(tmp, seededContent);
+
+      const result = spawnSync('bun', [upgradeScript, tmp, '--variant', VARIANT, '--yes'],
+        { encoding: 'utf-8', timeout: 300000 });
+      expect(result.status).toBe(0);
+      expect(result.stdout).not.toContain('CONTEXT PRESERVE');
+      expect(result.stdout).toMatch(/UPDATE docs\/context\.md/);
+
+      // The template version was applied (current pre-preservation behavior preserved).
+      expect(readFileSync(join(tmp, 'docs', 'context.md'), 'utf8'))
+        .toBe(readFileSync(contextTemplatePath, 'utf8'));
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  }, 400000);
+
+  test('d. project copy with no version footer → PRESERVE (wholeFileOwned)', () => {
+    const tmp = makeTempProject();
+    try {
+      const tpl = readFileSync(contextTemplatePath, 'utf8');
+      const footerMatch = tpl.match(FOOTER_RE)!;
+      const noFooter = tpl.slice(0, footerMatch.index).trimEnd() + '\n';
+      seedProjectContext(tmp, noFooter);
+
+      const result = spawnSync('bun', [upgradeScript, tmp, '--variant', VARIANT, '--yes'],
+        { encoding: 'utf-8', timeout: 300000 });
+      expect(result.status).toBe(0);
+      expect(result.stdout).toContain('CONTEXT PRESERVE docs/context.md');
+      expect(result.stdout).toContain('(entire file — no version footer; treated as project-owned)');
+      expect(readFileSync(join(tmp, 'docs', 'context.md'), 'utf8')).toBe(noFooter);
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  }, 400000);
+});

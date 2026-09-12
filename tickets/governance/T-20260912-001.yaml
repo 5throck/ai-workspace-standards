@@ -6,12 +6,18 @@ title: >-
   ADR-0108-restructured docs/context.md on the next upgrade — add a
   project-owned preservation path or documented opt-out first
 priority: high
-status: backlog
+status: running
 attempts: 0
 created_at: '2026-09-11T23:09:51.579Z'
 history:
   - at: '2026-09-11T23:09:51.579Z'
     from: null
     to: backlog
+  - at: '2026-09-12T10:13:42.332Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-12T10:13:42.346Z'
+    from: waiting
+    to: running
 result: null
 error: null

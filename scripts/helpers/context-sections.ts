@@ -1,4 +1,4 @@
-// @version 1.2.0
+// @version 1.3.0
 // context-sections.ts — shared markdown section-splitting used by audit.ts's
 // cross-variant context commonization detector, promote-context-section.ts's
 // promotion executor, l3-to-variant-pipeline/generate-variant's W1 context
@@ -7,6 +7,11 @@
 // heading-parsing/similarity logic and drift apart — the same "one SSOT, never
 // duplicate" principle this tooling exists to enforce on docs/<variant>.context.md.
 //
+// v1.3.0 (T-20260912-001): findProjectOnlySections() — upgrade-time ownership detection for
+// docs/context.md's TEMPLATE TREE SYNC SYNC branch: which of the project's top-level sections
+// would a template overwrite destroy? Heading-presence comparison (not similarity — an
+// overwrite destroys a section wholesale regardless of paraphrase), managed-zone-aware via
+// splitContextFileSections, wholeFileOwned when the project copy carries no version footer.
 // v1.1.0 (2026-09-10-context-purification-design): fence-aware splitting (## lines
 // inside ```/~~~ code fences no longer count as section boundaries — closes the
 // KNOWN GAP where Session Log Format / CHANGELOG Entry Format examples inside
@@ -516,4 +521,65 @@ export function classifyCommonizationSection(
   if (maxSimilarity >= removeThreshold) return { verdict: 'remove', maxSimilarity, matchedCommonHeading };
   if (maxSimilarity >= reviewFloor) return { verdict: 'review', maxSimilarity, matchedCommonHeading };
   return { verdict: 'keep', maxSimilarity, matchedCommonHeading };
+}
+
+// ============================================================================
+// UPGRADE-TIME OWNERSHIP DETECTION — docs/context.md preservation (v1.3.0)
+// ============================================================================
+
+export interface ProjectOnlyDetection {
+  /**
+   * Project top-level sections whose heading does not exist in the template
+   * (normalized comparison) and that carry content the engine does not own
+   * (outside COMMON-* / VARIANT-INJECT managed zones, non-empty body).
+   */
+  sections: ContextSection[];
+  /**
+   * True when the project copy has NO version footer matching VERSION_FOOTER_RE —
+   * a fully restructured/foreign file the template engine cannot reason about,
+   * so the whole file is treated as project-owned.
+   */
+  wholeFileOwned: boolean;
+}
+
+/**
+ * Upgrade-time ownership detection for the docs/context.md SYNC gate (T-20260912-001):
+ * what PROJECT-ONLY content would a template overwrite destroy?
+ *
+ * - Both bodies are compared after the version footer is split off (footer version
+ *   differences are the SYNC trigger, not ownership signal).
+ * - wholeFileOwned: a project copy without a `*...version:...*` footer is treated as
+ *   fully project-owned (the ADR-0108-style fully-restructured file) — the overwrite
+ *   must never silently take it.
+ * - Sections: top-level (`##`) project sections whose normalized heading is absent
+ *   from the template body, EXCLUDING sections the engine owns — headings inside a
+ *   COMMON-* / VARIANT-INJECT managed zone, or bodies that contain managed-zone content
+ *   (same headingInManagedZone/bodyContainedManagedZone precedent as the W2
+ *   commonization pass), and empty-body headings (nothing to preserve).
+ * - Heading comparison is normalized (strip leading #s, trim, lowercase) via
+ *   normalizeHeading, so case and whitespace drift never manufacture project-only
+ *   sections.
+ *
+ * Deliberately NOT similarity-based (unlike W1/W2): an overwrite destroys a section
+ * wholesale, so paraphrased-but-same-purpose content still counts — only heading
+ * presence in the template proves the template carries the content.
+ */
+export function findProjectOnlySections(
+  projectContent: string,
+  templateContent: string,
+): ProjectOnlyDetection {
+  const { body: projectBody, footer: projectFooter } = splitOffVersionFooter(projectContent);
+  const wholeFileOwned = projectFooter === '';
+  const templateBody = stripVersionFooter(templateContent);
+  const templateHeadings = new Set(splitIntoSections(templateBody).map(s => s.heading));
+  const projectSections = splitContextFileSections(projectBody, { includeVariantInject: true });
+
+  const sections: ContextSection[] = [];
+  for (const { section, headingInManagedZone, bodyContainedManagedZone } of projectSections) {
+    if (headingInManagedZone || bodyContainedManagedZone) continue; // engine-owned content
+    if (templateHeadings.has(section.heading)) continue; // shared section — template carries it
+    if (!section.body.trim()) continue; // heading with no content — nothing to preserve
+    sections.push(section);
+  }
+  return { sections, wholeFileOwned };
 }

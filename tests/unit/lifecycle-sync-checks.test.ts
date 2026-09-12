@@ -80,11 +80,10 @@ describe('lifecycle-sync-audit Check E (lifecycle record metadata gate)', () => 
     expect(parseSkillFrontmatter('no frontmatter')).toEqual({});
   });
 
-  test('the four refreshed records agree with their SKILL.md frontmatter', () => {
+  test('the refreshed records agree with their SKILL.md frontmatter', () => {
     const cases: Array<[string, string, string]> = [
       ['sync', '1.5.0', 'pm'],
       ['security-scan', '1.2.0', 'pm'],
-      ['validate-docs-links', '1.0.0', 'pm'],
       ['upgrade-project', '1.4.1', 'pm'],
     ];
     for (const [skill, version, owner] of cases) {

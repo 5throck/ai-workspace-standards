@@ -18,7 +18,6 @@ Skills with a `skills/<name>/` directory in the workspace root. These are the pr
 | skill | version | status | owner | last_reviewed | removal-date | notes |
 |-------|---------|--------|-------|---------------|--------------|-------|
 | `agent-lifecycle-manager` | 1.0.0 | active | pm | 2026-05-30 | — | — |
-| `audit-workspace` | 1.0.0 | deprecated | auditor | 2026-09-10 | 2026-10-10 | Deprecated: project-review Step 0 is its documented superset |
 | `create-variant` | 1.4.1 | active | pm | 2026-08-24 | — | Workspace operator only — not deployed to L2 |
 | `finishing-a-development-branch` | 1.0.0 | active | pm | 2026-06-13 | — | Workspace override — redirects branch completion to /sync (mirrored 2026-09-04 from .claude/skills) |
 | `meeting-facilitation` | 1.4.1 | active | pm | 2026-09-05 | — | Canonical meeting skill; `meeting` is a trigger alias, not a separate skill directory |
@@ -34,7 +33,6 @@ Skills with a `skills/<name>/` directory in the workspace root. These are the pr
 | `sync` | 1.5.0 | active | pm | 2026-09-12 | — | Full project sync pipeline — lifecycle, audit, publish, commit, push, PR. Reassigned from lifecycle-manager — same orphan cause as security-scan |
 | `team-builder` | 1.1.0 | active | pm | 2026-06-13 | — | — |
 | `translate` | 1.0.1 | active | pm | 2026-08-24 | — | — |
-| `validate-docs-links` | 1.0.0 | deprecated | pm | 2026-09-09 | 2026-12-09 | Deprecated: project-review baseline owns documentation/link checking |
 | `project-to-variant` | 1.3.0 | active | scaffolding-expert | 2026-08-23 | — | Convert existing standalone project into official variant template |
 | `upgrade-project` | 1.4.1 | active | pm | 2026-09-12 | — | Upgrade existing L2/L3 project to current template version |
 | `variant-feature` | 1.0.0 | active | scaffolding-expert | 2026-07-31 | — | Add features (agents, skills, scripts, docs) to existing variant |

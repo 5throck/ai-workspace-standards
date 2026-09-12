@@ -157,6 +157,26 @@ shared docs pairs keep their inline-version semantics under the default `SYNC` p
 gaps. The former `docs/_common/security.md` overwrite and the add-if-missing governance pair
 (`LICENSE`, `SECURITY.md`) remain dedicated passes.
 
+##### docs/context.md Project-Only Preservation (since v1.25.0)
+
+A plain overwrite is wrong for `docs/context.md` when the project copy carries content the
+template does not: before overwriting, the pass compares the project copy against the
+incoming template (top-level `##` sections, managed COMMON-* / VARIANT-INJECT zones excluded)
+and:
+
+- **Project-only sections detected** (headings absent from the template, or the copy has no
+  version footer at all — a fully restructured file): the copy is **PRESERVED** — the update
+  is skipped with a `⚠️ CONTEXT PRESERVE` log listing each preserved section, and a hint to
+  re-run with `--force-context-sync` or merge manually. Dry-run shows the identical verdict.
+- **No project-only content** (all project headings exist in the template): the ordinary
+  `UPDATE` / `⚠️ CONFLICT` behavior above applies unchanged.
+- **`--force-context-sync`**: takes the template version regardless, logging how many
+  project-only sections were discarded — use it after merging the project content back into
+  the template (or when the sections are genuinely obsolete).
+
+The gate is scoped to exactly `docs/context.md`; `docs/<variant>.context.md` keeps its
+managed-block merge semantics.
+
 #### 🔑 ENV_SAMPLE SYNC (Country-Aware, since v1.23.0)
 
 `.env.sample` has its own pass rather than the default tree-sync policy, because

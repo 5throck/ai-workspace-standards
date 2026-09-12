@@ -82,12 +82,6 @@
       "overridable": false,
       "description": "Script lifecycle management — tracks script health and deprecation"
     },
-    "validate-docs-links": {
-      "source": "skills/validate-docs-links/SKILL.md",
-      "version": "1.0.0",
-      "overridable": false,
-      "description": "Validates documentation cross-references and link integrity"
-    },
     "sync": {
       "source": "skills/sync/SKILL.md",
       "version": "1.5.0",

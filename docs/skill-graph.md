@@ -18,7 +18,6 @@
 | `arcade-physics` | variant:co-game | game-debugger, game-developer, game-developer | phase4 | code-review (composes_with), documentation-writing (composes_with), research-analysis (composes_with), sound-synth (follows), test-driven-development (composes_with) | — | — |
 | `asset-integrity-check` | variant:co-safety | — | — | — | — | — |
 | `audit-preparation` | variant:co-safety | — | — | hazop-analysis (composes_with) | — | — |
-| `audit-workspace` | L0 | — | — | create-variant (composes_with), project-to-variant (composes_with), promote-variant (follows), security-scan (composes_with), sync (composes_with), team-builder (composes_with), upgrade-project (composes_with) | — | — |
 | `benefit-risk-assessor` | variant:co-safety | — | — | — | — | — |
 | `bsl-lab-aerosol-control-planner` | variant:co-safety | — | — | — | — | — |
 | `career-path-succession-planning` | variant:co-hr | career-succession-consultant, career-succession-consultant | phase2 | compensation-benchmarking (composes_with), learning-curriculum-design (composes_with), org-design-framework (composes_with), org-readiness-assessment (composes_with), stakeholder-alignment (follows), talent-acquisition-strategy (composes_with) | — | — |
@@ -202,7 +201,6 @@
 | `ui-ux-design-intelligence` | L0 | design-lead, design-lead, ux-researcher, visual-designer, visual-designer | phase1, phase2, phase3 | documentation-writing (follows) | — | — |
 | `update-bun-packages` | L0 | — | — | — | — | — |
 | `upgrade-project` | L0 | — | — | promote-variant (follows) | — | — |
-| `validate-docs-links` | L0 | — | — | — | — | — |
 | `van-westendorp-psm` | variant:co-price | — | — | gabor-granger (follows), pricing-playbook (enables) | survey-responses-vw | price-corridor, opp-price-point |
 | `variant-feature` | L0 | — | — | upgrade-project (composes_with) | — | — |
 | `verify-authorization` | variant:co-security | pentester, red-team-lead | phase1, phase3 | stride-threat-matrix (follows) | — | — |

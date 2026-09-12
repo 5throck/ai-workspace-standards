@@ -8,12 +8,26 @@ title: >-
   removal-date 2026-10-10
 priority: low
 not_before: '2026-10-10'
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-10T04:35:32.463Z'
 history:
   - at: '2026-09-10T04:35:32.463Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-12T10:01:16.316Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-12T10:01:16.330Z'
+    from: waiting
+    to: running
+  - at: '2026-09-12T10:13:33.643Z'
+    from: running
+    to: done
+result: >-
+  Owner-approved early removal (2026-09-12) superseding the scheduled 2026-10-10
+  date: audit-workspace SSOT + 4 platform mirrors + 4 L1 template copies
+  deleted; SKILLS.md/AGENTS.md rows removed; VERSION_MANIFEST + skill-graph
+  regenerated; lifecycle record set to retired final state. Implemented in PR
+  #905
 error: null

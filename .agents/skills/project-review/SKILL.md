@@ -46,7 +46,7 @@ catches that class mechanically, not by agent effort.
 
 ## Documentation/link ownership
 
-`project-review` owns routine documentation link-check evidence. Use `baseline-only` mode for weekly or pre-closeout docs/link validation instead of invoking the deprecated `validate-docs-links` skill.
+`project-review` owns routine documentation link-check evidence. Use `baseline-only` mode for weekly or pre-closeout docs/link validation.
 
 ## Step 0 — Machine Baseline (run BEFORE any agent dispatch)
 

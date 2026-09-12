@@ -48,3 +48,38 @@ The T-021 periodic `Projects/` scan surfaced 100 findings. Full triage verified 
 ## Addendum — ticket ID namespace fix (T-20260912-025, 2026-09-12)
 
 `ticket-store`'s `createTicket` allocated IDs by scanning only the target directory, while `move`/`list` resolve an ID with `tickets/governance/` precedence — so a service create (root dir) on a day that already had governance tickets could mint a same-day ID that shadow-matched a governance ticket (observed live during the T-20260912-023 verification: a scratch create produced `T-20260912-001` and a subsequent move closed the real governance ticket of that ID; restored from git). Fix: `nextSeqGuess` now scans both the target directory and its governance sibling (one namespace, whichever side allocates), keeping the exclusive-create retry as the last line of defense. Regression test added (fails on the old code, passes on the new); live-verified: a service create after governance `T-20260912-025` allocates `T-20260912-026`. `helpers/ticket-store.ts` 1.2.0 → 1.2.1; both SCRIPTS.md registry rows updated.
+
+## Addendum — docs/context.md upgrade preservation (T-20260912-001, 2026-09-12)
+
+**Corrected premise.** The original review item assumed co-newbiz's `docs/context.md` had
+been fully restructured (ADR-0108-style) and that ADR-0108's commit had clobbered it.
+Exploration disproved both: the ADR-0108 commit did not touch `docs/context.md`, and
+co-newbiz's copy is structurally in sync with the template (its hand-added sections exist
+in the template too). The real exposure is fleet-wide, not single-project: the TEMPLATE
+TREE SYNC `SYNC` branch (upgrade-project.ts) overwrites `docs/context.md` on any template
+footer bump with at most a warning-only `CONFLICT` — and no warning at all when the
+project copy is git-clean, which all 11 `Projects/co-*` are. The next template footer
+bump would therefore silently discard any project-only section across the whole fleet.
+
+**Design: preserve by default, overwrite only on explicit force.** When the SYNC branch
+would overwrite `docs/context.md`, it now runs `findProjectOnlySections()`
+(`helpers/context-sections.ts` v1.3.0) on the project copy vs the incoming template:
+
+- **Project-only sections** — top-level (`##`) sections whose normalized heading is
+  absent from the template body, excluding engine-owned content (headings inside a
+  COMMON-* / VARIANT-INJECT managed zone, or bodies containing managed-zone content —
+  the same `headingInManagedZone` / `bodyContainedManagedZone` precedent as the W2
+  commonization pass) and empty-body headings. Comparison is heading-presence, not
+  similarity: an overwrite destroys a section wholesale, so only heading presence in
+  the template proves the content is carried.
+- **wholeFileOwned** — a project copy with no version footer matching
+  `VERSION_FOOTER_RE` (a fully restructured/foreign file) is treated as entirely
+  project-owned.
+
+When project-only content exists, the copy is SKIPPED with a loud `CONTEXT PRESERVE`
+log (one line per preserved section) and a `--force-context-sync` hint; the skip is not
+counted in `treeChanged`. `--force-context-sync` takes the template version anyway and
+logs the discarded section count so the action stays visible. Files without project-only
+content keep the exact UPDATE/CONFLICT behavior; the special case is scoped to exactly
+`docs/context.md` (`docs/<variant>.context.md` stays MERGE_MANAGED), and dry-run
+produces the identical verdict.

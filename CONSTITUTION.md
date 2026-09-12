@@ -398,7 +398,7 @@ The `templates/common/` directory is the shared foundation for all variant templ
 | Category | Condition | Examples |
 |----------|-----------|---------|
 | **Common agent** | Exists identically across all variants | `pm.md` |
-| **Common skill** | Used in all variants without modification | `project-review`, `meeting-facilitation`, `audit-workspace`, `security-scan`, `skill-lifecycle-manager`, `agent-lifecycle-manager` |
+| **Common skill** | Used in all variants without modification | `project-review`, `meeting-facilitation`, `security-scan`, `skill-lifecycle-manager`, `agent-lifecycle-manager` |
 | **Variant-specific** | Unique to one variant; not applicable elsewhere | Domain-expert agents, variant-only skills |
 
 #### Override Types

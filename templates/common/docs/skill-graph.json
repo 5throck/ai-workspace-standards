@@ -207,11 +207,6 @@
       "layer": "common"
     },
     {
-      "id": "validate-docs-links",
-      "type": "skill",
-      "layer": "common"
-    },
-    {
       "id": "zod-contract-gate",
       "type": "skill",
       "layer": "common"
@@ -270,12 +265,6 @@
       "type": "references",
       "from": "handbook-sync-audit",
       "to": "project-review",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "handbook-sync-audit",
-      "to": "validate-docs-links",
       "source": "prose"
     },
     {
@@ -712,12 +701,6 @@
       "source": "prose"
     },
     {
-      "type": "references",
-      "from": "project-review",
-      "to": "validate-docs-links",
-      "source": "prose"
-    },
-    {
       "type": "enables",
       "from": "research-analysis",
       "to": "documentation-writing",
@@ -791,12 +774,6 @@
         "field": "relates_to",
         "index": 0
       }
-    },
-    {
-      "type": "references",
-      "from": "validate-docs-links",
-      "to": "project-review",
-      "source": "prose"
     }
   ]
 }
