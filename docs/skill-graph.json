@@ -297,6 +297,11 @@
       "layer": "L0"
     },
     {
+      "id": "adr:0074",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
       "id": "adr:0075",
       "type": "adr",
       "layer": "L0"
@@ -4638,6 +4643,12 @@
       "type": "references",
       "from": "adr:0072",
       "to": "k-opendata",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0074",
+      "to": "upgrade-project",
       "source": "prose"
     },
     {
