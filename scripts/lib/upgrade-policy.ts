@@ -1,4 +1,4 @@
-// @version 1.2.0
+// @version 1.3.0
 // v1.1.0: .env.sample reclassified PRESERVE → SYNC/ENV_SAMPLE SYNC (upgrade-project v1.23.0):
 //         the upgrade path now re-delivers template env-key changes with scaffold-parity
 //         country pruning applied (shared scripts/lib/env-sample-blocks.ts), so template
@@ -49,9 +49,12 @@ export const TEMPLATE_TREE_SYNC_PASS = 'TEMPLATE TREE SYNC';
 export const GOVERNANCE_FILES = ['LICENSE', 'SECURITY.md'] as const;
 
 /** docs/ subdirectories that are PROJECT WORKSPACES: template seeds are add-if-missing only;
- *  project artifacts there are never overwritten and never pruned. */
+ *  project artifacts there are never overwritten and never pruned. `specs` (ADR-0074): the
+ *  registry seed is what activates the Universal Design Gate in a project — it MUST ride the
+ *  TEMPLATE TREE SYNC pass (a named pass with no delivery code is silently never delivered:
+ *  the 2026-09-12 DESIGN GATE SEED incident). */
 export const WORKSPACE_DOC_DIRS = [
-  'designs', 'drafts', 'reports', 'research', 'findings', 'threat-models', 'lifecycle',
+  'designs', 'drafts', 'reports', 'research', 'findings', 'threat-models', 'lifecycle', 'specs',
 ] as const;
 
 /** Platform settings files merged (not overwritten) by the TEMPLATE TREE SYNC pass. */
@@ -70,7 +73,7 @@ export const PLACEHOLDER_ALLOWLIST = new Set([
  *  L1_ONLY_DIRS + the template-only docs removal loop) — template-side only; upgrading them
  *  into a project would resurrect files the scaffold deliberately removed. docs/specs left
  *  this list in ADR-0074 Amendment 2: its registry seed activates the Universal Design Gate
- *  in projects and is delivered add-if-missing (see the DESIGN GATE SEED claim below). */
+ *  in projects and rides the WORKSPACE seed semantics above. */
 const TEMPLATE_ONLY_DIRS = [
   'docs/_common', 'docs/_templates', 'docs/_examples', 'docs/variants', 'docs/adr',
 ];
@@ -130,10 +133,8 @@ export function resolveClaim(relPath: string, variant = ''): UpgradeClaim {
   if (underDir(rel, 'memory')) return { policy: 'PROJECT_STATE', pass: '(project memory)' };
   if (rel === 'docs/countries/ACTIVE.md') return { policy: 'PROJECT_STATE', pass: '(country runtime state)' };
 
-  // Universal Design Gate seed (ADR-0074): every project gets a spec registry so the
-  // sync-time spec-check is active. Add-if-missing — existing project entries are never
-  // overwritten or pruned by upgrades.
-  if (rel === 'docs/specs/registry.json') return { policy: 'ADD_IF_MISSING', pass: 'DESIGN GATE SEED' };
+  // Universal Design Gate seed (ADR-0074): docs/specs/* claims fall through to the
+  // WORKSPACE branch below (add-if-missing seed, never overwrite/prune project entries).
 
   if (TEMPLATE_ONLY_FILES.has(rel)) return { policy: 'TEMPLATE_ONLY', pass: '(scaffold-removed)' };
   for (const dir of TEMPLATE_ONLY_DIRS) {

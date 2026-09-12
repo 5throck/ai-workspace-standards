@@ -120,16 +120,19 @@ describe('upgrade-policy resolveClaim — PRESERVE / PROJECT_STATE / TEMPLATE_ON
     }
   });
 
-  test('docs/specs left the scaffold-removed zones — registry seed is the Design Gate claim (ADR-0074)', () => {
+  test('docs/specs left the scaffold-removed zones — registry seed rides WORKSPACE semantics (ADR-0074)', () => {
     // ADR-0073 Amendment 2 (via ADR-0074): docs/specs is no longer a scaffold-deleted zone;
-    // its registry seed is delivered add-if-missing so the spec-check activates in projects.
-    // Anything else under docs/specs falls through to the default SYNC policy on purpose.
-    expect(resolveClaim('docs/specs/registry.json', VARIANT).policy).not.toBe('TEMPLATE_ONLY');
+    // it is a WORKSPACE doc dir (add-if-missing seed, never overwrite/prune project entries).
+    // The seed MUST ride TEMPLATE TREE SYNC — a named pass with no delivery code is silently
+    // never delivered (the 2026-09-12 DESIGN GATE SEED incident).
     expect(resolveClaim('docs/specs/registry.json', VARIANT)).toEqual({
-      policy: 'ADD_IF_MISSING',
-      pass: 'DESIGN GATE SEED',
+      policy: 'WORKSPACE',
+      pass: 'TEMPLATE TREE SYNC',
     });
-    expect(resolveClaim('docs/specs/y.md', VARIANT).policy).toBe('SYNC');
+    expect(resolveClaim('docs/specs/y.md', VARIANT)).toEqual({
+      policy: 'WORKSPACE',
+      pass: 'TEMPLATE TREE SYNC',
+    });
   });
 });
 
