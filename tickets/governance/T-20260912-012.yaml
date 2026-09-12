@@ -5,12 +5,19 @@ title: >-
   Repair the LIFECYCLE_GOVERNANCE.md References table (5 dead links) and
   reconcile the three inconsistent VERSION_REGISTRY.json location claims
 priority: high
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-12T05:23:39.913Z'
 history:
   - at: '2026-09-12T05:23:39.913Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-12T09:21:35.006Z'
+    from: backlog
+    to: done
+result: >-
+  LIFECYCLE_GOVERNANCE.md References repaired (lifecycle-governance.json and
+  VERSION_REGISTRY.json repointed to docs/templates, variant-lifecycle.md and
+  version-registry-schema.md repointed, stale VARIANT_LIFECYCLE_INTEGRATION.md
+  entry resolved, registry location claims reconciled); implemented in PR #905
 error: null
