@@ -2,7 +2,7 @@
 name: pricing-playbook
 scope: co-price
 description: Standardized pricing methodology and process guide
-version: "1.0.0"
+version: 1.0.0
 last_reviewed: 2026-08-25
 status: active
 owner: pricing-strategist

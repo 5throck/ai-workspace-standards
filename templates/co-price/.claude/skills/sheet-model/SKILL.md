@@ -2,7 +2,7 @@
 name: sheet-model
 scope: co-price
 description: Spreadsheet-style data modeling and scenario analysis
-version: "2.0.0"
+version: 2.0.0
 last_reviewed: 2026-08-25
 status: active
 owner: cpa-auditor

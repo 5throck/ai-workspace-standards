@@ -89,6 +89,7 @@ __pycache__/
 !.claude/
 !.gemini/
 !.agents/
+!.codex/
 !scripts/
 !templates/
 !.editorconfig

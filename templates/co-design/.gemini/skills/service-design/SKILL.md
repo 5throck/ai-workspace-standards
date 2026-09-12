@@ -4,7 +4,7 @@ description: >
   Designs end-to-end service experiences including customer journeys, service blueprints,
   and operational processes. Use when: mapping customer experiences, optimizing touchpoints,
   aligning frontstage and backstage operations, or improving service delivery.
-version: 1.0.0
+version: 1.1.0
 scope: co-design
 status: active
 owner: pm
@@ -115,6 +115,17 @@ This skill provides comprehensive service design capabilities, focusing on the e
    - Pain points and frustrations
    - Needs and expectations
 
+5. **Diversity-Profile Review** (ADR-0068 — mandatory):
+   - Walk the mapped journey once for each diversity profile: **aging** (reduced
+     vision/dexterity, smaller working memory for new UI conventions), **cognitive**
+     (attention load, language complexity, multi-step comprehension), **situational**
+     (one-handed, noisy/bright environments, interruptions), and **motor-constrained**
+     (precision, reach, timing pressure).
+   - Log every friction point found in those walks as design requirements in the
+     journey map's Opportunities row — they are design inputs, not acceptable losses.
+   - WCAG conformance alone does not satisfy this step; it evaluates design-stage
+     coverage of user diversity (Universal Design), not technical compliance.
+
 **Journey Map Structure**:
 ```
 Stage: [Stage Name]
@@ -122,6 +133,7 @@ Touchpoints: [List all touchpoints]
 Customer Actions: [What customer does]
 Emotional Arc: [😊 → 😐 → 😞 → 😊]
 Pain Points: [Specific frustrations]
+Diversity-Profile Friction: [Aging/Cognitive/Situational/Motor findings]
 Opportunities: [Improvement areas]
 ```
 

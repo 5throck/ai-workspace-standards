@@ -170,6 +170,36 @@
       ],
       "note": "No L2 variant has .agents/skills/ — workspace-root-only platform skills"
     },
+    "codex-skills": {
+      "description": "L0 .codex/skills/ → L1 templates/common/.codex/skills/ — Codex CLI/Desktop App platform skills (ADR-0075)",
+      "source": ".codex/skills",
+      "target": "templates/common/.codex/skills",
+      "include_pattern": "*/SKILL.md",
+      "recursive": true,
+      "l2_drift_eligible": false,
+      "exclude": [],
+      "note": "Same B-03/mirror:false exclusions as the other platform mirrors (enforced in sync-skills.ts); L2 variant mirrors come from sync-skills --all-variants over each variant's own skills/ SSOT"
+    },
+    "codex-prompts": {
+      "description": "L0 .codex/prompts/ → L1 templates/common/.codex/prompts/ — Codex custom prompts mirrored from the .claude/commands SSOT (ADR-0075 D4)",
+      "source": ".codex/prompts",
+      "target": "templates/common/.codex/prompts",
+      "include_pattern": "*.md",
+      "recursive": false,
+      "l2_drift_eligible": false,
+      "exclude": [],
+      "note": "Project-level prompts support on Codex is verified live in W5; an unsupported result demotes this mirror to documented no-op"
+    },
+    "codex-config": {
+      "description": "L0 .codex/config.toml → L1 templates/common/.codex/config.toml — Codex TOML config (graft MCP seed, ADR-0074)",
+      "source": ".codex",
+      "target": "templates/common/.codex",
+      "include_pattern": "config.toml",
+      "recursive": false,
+      "l2_drift_eligible": false,
+      "exclude": [],
+      "note": "TOML is seed-only downstream (upgrade-policy ADD_IF_MISSING, ADR-0074); co-abap/co-safety own their project Codex configs"
+    },
     "claude-skills-json": {
       "description": "L0 .claude/skills.json → L1 templates/common/.claude/skills.json — Claude skill path registration",
       "source": ".claude",

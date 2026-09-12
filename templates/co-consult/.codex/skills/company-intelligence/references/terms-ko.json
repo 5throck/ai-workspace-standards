@@ -1,0 +1,41 @@
+{
+  "_note": "Korean-original company-research terminology and common source names. Non-Markdown reference asset — exempt from the workspace English-only doc policy (CONSTITUTION.md — Non-English Reference Material in Skills). SKILL.md stays English-only and links here.",
+  "corporate_structure": {
+    "지주회사": "holding company",
+    "계열사": "affiliate / group company",
+    "자회사": "subsidiary",
+    "모회사": "parent company",
+    "특수관계인": "related party",
+    "최대주주": "largest shareholder",
+    "지분율": "equity stake / ownership ratio"
+  },
+  "filings_and_sources": {
+    "전자공시시스템": "DART (Electronic Disclosure System, dart.fss.or.kr)",
+    "사업보고서": "annual report",
+    "감사보고서": "audit report",
+    "한국거래소": "KRX (Korea Exchange)",
+    "유가증권시장": "KOSPI",
+    "코스닥": "KOSDAQ",
+    "금융감독원": "FSS (Financial Supervisory Service)"
+  },
+  "credit_rating_agencies": {
+    "한국기업평가": "Korea Ratings (a NICE-affiliated agency; distinct from NICE신용평가)",
+    "나이스신용평가": "NICE Investors Service",
+    "한국신용평가": "Korea Investors Service"
+  },
+  "leadership_and_governance": {
+    "대표이사": "CEO / representative director",
+    "이사회": "board of directors",
+    "사외이사": "outside/independent director",
+    "감사": "auditor (statutory)",
+    "회장": "chairman",
+    "부회장": "vice chairman"
+  },
+  "financial_terms": {
+    "매출액": "revenue",
+    "영업이익": "operating profit",
+    "당기순이익": "net income",
+    "시가총액": "market capitalization",
+    "부채비율": "debt-to-equity ratio"
+  }
+}

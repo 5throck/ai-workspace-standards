@@ -2,7 +2,7 @@
 name: cost-shock-analysis
 scope: co-price
 description: Raw-material cost shock sensitivity analysis
-version: "1.0.0"
+version: 1.0.0
 last_reviewed: 2026-08-25
 status: active
 owner: cost-asset-mgmt

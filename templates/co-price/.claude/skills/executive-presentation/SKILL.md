@@ -2,7 +2,7 @@
 name: executive-presentation
 scope: co-price
 description: C-level presentation and decision deck design
-version: "1.0.0"
+version: 1.0.0
 last_reviewed: 2026-08-25
 status: active
 owner: ux-specialist

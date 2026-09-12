@@ -2,7 +2,7 @@
 name: gabor-granger
 scope: co-price
 description: Gabor-Granger direct pricing research methodology
-version: "1.0.0"
+version: 1.0.0
 last_reviewed: 2026-08-25
 status: active
 owner: market-intelligence-analyst

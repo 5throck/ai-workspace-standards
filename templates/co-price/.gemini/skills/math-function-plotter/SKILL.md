@@ -2,7 +2,7 @@
 name: math-function-plotter
 scope: co-price
 description: Mathematical function visualization for pricing curves
-version: "2.0.0"
+version: 2.0.0
 last_reviewed: 2026-08-25
 status: active
 owner: core-engine-dev

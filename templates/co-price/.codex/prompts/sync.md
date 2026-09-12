@@ -1,0 +1,33 @@
+Run the full project sync pipeline.
+
+Arguments: $ARGUMENTS
+
+Execute the following bash command exactly as written:
+
+```bash
+bun scripts/dev-sync.ts "$ARGUMENTS"
+```
+
+The pipeline will:
+1. Append a session entry to `memory/YYYY-MM-DD.md`
+2. Update `memory/MEMORY.md` index via `sync-md.ts`
+3. Auto-add `$ARGUMENTS` to `CHANGELOG.md [Unreleased]` if the section has no entries yet
+4. Run `audit.ts` — must exit 0 before proceeding
+5. Create a new PR branch, commit all staged changes, push, and open a GitHub PR
+
+If audit fails, fix the reported issue before re-running `/sync`.
+
+## Pre-PR Security Gate (public repos only)
+
+Before pushing/creating PR, check if the repo is public:
+
+```bash
+gh repo view --json isPrivate -q '.isPrivate' 2>/dev/null
+```
+
+If the result is `false` (public repo): run `/security-check --pr` (read-only advisory check).
+
+- If CRITICAL advisories are found: show the warning and **pause** — let the user decide whether to proceed or stop.
+- If no CRITICAL advisories: continue with push and PR.
+
+For private repos: skip this gate entirely.

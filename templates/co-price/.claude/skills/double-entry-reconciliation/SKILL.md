@@ -2,7 +2,7 @@
 name: double-entry-reconciliation
 scope: co-price
 description: Double-entry bookkeeping integrity verification
-version: "2.0.0"
+version: 2.0.0
 last_reviewed: 2026-08-25
 status: active
 owner: cpa-auditor

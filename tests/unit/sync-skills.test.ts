@@ -23,10 +23,11 @@ function freshDirs() {
     const claudeSkills = path.join(scratchRoot, '.claude', 'skills');
     const geminiSkills = path.join(scratchRoot, '.gemini', 'skills');
     const agentsSkills = path.join(scratchRoot, '.agents', 'skills');
-    for (const d of [ssotSkills, claudeSkills, geminiSkills, agentsSkills]) {
+    const codexSkills = path.join(scratchRoot, '.codex', 'skills');
+    for (const d of [ssotSkills, claudeSkills, geminiSkills, agentsSkills, codexSkills]) {
         fs.mkdirSync(d, { recursive: true });
     }
-    return { ssotSkills, claudeSkills, geminiSkills, agentsSkills };
+    return { ssotSkills, claudeSkills, geminiSkills, agentsSkills, codexSkills };
 }
 
 describe('dirsEqual', () => {
@@ -117,5 +118,44 @@ describe('syncSkills per-item error collection (M2 regression guard)', () => {
         expect(result.errors.some(e => e.includes('good-skill-a'))).toBe(true);
         // good-skill-b must still have synced successfully despite good-skill-a failing.
         expect(fs.existsSync(path.join(dirs.claudeSkills, 'good-skill-b', 'SKILL.md'))).toBe(true);
+    });
+});
+
+describe('codex platform target (ADR-0075 W1)', () => {
+    beforeEach(() => fs.rmSync(scratchRoot, { recursive: true, force: true }));
+    afterEach(() => fs.rmSync(scratchRoot, { recursive: true, force: true }));
+
+    test('skills mirror into .codex/skills alongside the other platform targets', async () => {
+        const dirs = freshDirs();
+        makeSkill(dirs.ssotSkills, 'demo-skill', '---\nname: demo\n---\n');
+
+        await syncSkills(dirs);
+
+        expect(fs.existsSync(path.join(dirs.codexSkills, 'demo-skill', 'SKILL.md'))).toBe(true);
+    });
+
+    test('security-gate skills stay out of .codex/skills (B-03 parity)', async () => {
+        const dirs = freshDirs();
+        makeSkill(dirs.ssotSkills, 'gated-skill', '---\nname: gated\nsecurity-gate: true\n---\n');
+        makeSkill(dirs.ssotSkills, 'open-skill', '---\nname: open\n---\n');
+
+        await syncSkills(dirs);
+
+        expect(fs.existsSync(path.join(dirs.codexSkills, 'gated-skill'))).toBe(false);
+        expect(fs.existsSync(path.join(dirs.codexSkills, 'open-skill', 'SKILL.md'))).toBe(true);
+    });
+
+    test('.claude/commands are mirrored to .codex/prompts (Phase 1b)', async () => {
+        const dirs = freshDirs();
+        makeSkill(dirs.ssotSkills, 'plain-skill', '---\nname: plain\n---\n');
+        const cmdDir = path.join(scratchRoot, '.claude', 'commands');
+        fs.mkdirSync(cmdDir, { recursive: true });
+        fs.writeFileSync(path.join(cmdDir, 'sync.md'), '# sync workflow\n', 'utf-8');
+
+        await syncSkills(dirs);
+
+        const mirrored = path.join(scratchRoot, '.codex', 'prompts', 'sync.md');
+        expect(fs.existsSync(mirrored)).toBe(true);
+        expect(fs.readFileSync(mirrored, 'utf-8')).toContain('sync workflow');
     });
 });

@@ -4,7 +4,7 @@ description: >-
   Authoritative Harness Engineering Protocol: machine-readable spec requirements,
   documentation-to-test mapping, baseline-seed verification, runtime guardrails,
   handover certification, and drift management — issuing a Harness Pass Certificate.
-version: "2.1.0"
+version: 2.1.0
 last_reviewed: "2026-08-25"
 status: active
 scope: co-price

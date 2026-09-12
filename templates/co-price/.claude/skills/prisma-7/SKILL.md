@@ -2,7 +2,7 @@
 name: prisma-7
 scope: co-price
 description: Prisma 7 ORM schema management and migration
-version: "2.0.0"
+version: 2.0.0
 last_reviewed: 2026-08-25
 status: active
 owner: lead-architect

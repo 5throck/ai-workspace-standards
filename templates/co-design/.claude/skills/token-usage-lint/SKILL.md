@@ -5,7 +5,7 @@ description: >
   rgb()/hsl() literals, raw px spacing) that bypass the tokens.json SSOT. Use when:
   reviewing generated UI code, auditing for hardcoded design values, or checking design
   token compliance in playground demos and handoff artifacts.
-version: 1.0.1
+version: 1.1.0
 scope: co-design
 status: active
 owner: pm
@@ -53,7 +53,20 @@ The scan must exclude paths that legitimately contain raw values:
 
 ## Execution Steps
 
-Run from the project root (the template playground or a scaffolded co-design project). Both shells report `file:line:match`.
+**Preferred (v1.1.0)**: run the runnable companion script, which implements the
+same detection rules, exempt paths, and classification scheme and exits non-zero
+on should-be-token findings (audit-integrable):
+
+```bash
+bun scripts/design-lint.ts                # default roots: ./playground/src ./src
+bun scripts/design-lint.ts --dir <path>   # explicit scan root (repeatable)
+```
+
+Inline suppression for documented one-offs: append `design-token-exempt: <reason>`
+on the same line as the literal.
+
+The manual grep procedure below remains valid as the fallback when the script is
+unavailable. Run from the project root (the template playground or a scaffolded co-design project). Both shells report `file:line:match`.
 
 ### Step 1: Scan for raw hex colors
 

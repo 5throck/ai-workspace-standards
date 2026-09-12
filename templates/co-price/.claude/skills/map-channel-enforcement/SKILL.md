@@ -2,7 +2,7 @@
 name: map-channel-enforcement
 scope: co-price
 description: MAP policy enforcement and channel conflict resolution
-version: "1.0.0"
+version: 1.0.0
 last_reviewed: 2026-08-25
 status: active
 owner: pricing-strategist

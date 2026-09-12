@@ -2,7 +2,7 @@
 name: competitive-intelligence
 scope: co-price
 description: Systematic market and competitive analysis
-version: "1.0.0"
+version: 1.0.0
 last_reviewed: 2026-08-25
 status: active
 owner: market-intelligence-analyst
