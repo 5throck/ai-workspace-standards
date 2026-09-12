@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 0.3.1
+// @version 0.3.2
 // v0.3.1: Env block pruning delegated to the shared lib/env-sample.ts parser (same
 //         marker grammar, same keep/drop and unbalanced-marker-leave-unchanged semantics).
 //         Behavior-preserving refactor — the upgrade path (upgrade-project.ts ENV_SAMPLE
@@ -129,7 +129,8 @@ function pruneSkill(skillName: string, scopedCountry: string): void {
     'skills',
     '.claude/skills',
     '.gemini/skills',
-    '.agents/skills'
+    '.agents/skills',
+    '.codex/skills'
   ];
 
   let removed = false;
