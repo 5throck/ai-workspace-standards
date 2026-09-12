@@ -1,8 +1,8 @@
 ---
 name: sync
 description: Runs the full project sync pipeline — lifecycle update, audit, L0→L1 publish, commit, push, and PR creation.
-version: 1.3.0
-last_reviewed: 2026-09-06
+version: 1.4.0
+last_reviewed: 2026-09-12
 status: active
 scope: common
 l2_propagate: true
@@ -33,11 +33,13 @@ Runs the full project sync pipeline (`scripts/dev-sync.ts`). This is the single 
 ## Output Format
 
 - A git branch `pr/<timestamp>-<slug>` created (or reused) from `main`
-- A commit with all staged changes and a conventional commit message
+- A commit with the task-staged files plus pipeline-generated files and a conventional commit message
 - An open GitHub PR with the agent-written body (Why / What Changed / Test Plan / Security Checklist / Notes)
 - Console output listing each pipeline step and its result
 
 ## Execution Steps
+
+0. **Stage the task files** (BEFORE invoking the pipeline): `git add <task files>`. Only explicitly task-staged files plus files the pipeline itself generates (memory log, VERSION_MANIFEST, propagation output, ...) are committable — dev-sync snapshots the working tree at start and at commit time, and any working-tree change that is neither task-staged nor pipeline-generated is reported as a WARN (swept in during the current soak; promotion will EXCLUDE it — preview with `SYNC_SCOPED_STAGING=1` or `--scoped-staging`; design: `docs/designs/2026-09-12-dev-sync-scoped-staging-design.md`). Never rely on `git add -A` to pick up your edits, and never leave unrelated dirt in the tree when syncing.
 
 1. **Write the PR body** (the agent writes it — never shell out to an LLM CLI):
    - Inspect the change: `git diff HEAD~1 --stat` and `git diff HEAD~1 --name-only` (first 30 files).
@@ -95,7 +97,7 @@ Runs the full project sync pipeline (`scripts/dev-sync.ts`). This is the single 
 | 4.7 | VERSION_MANIFEST.md Generation | **FATAL** | Generates `VERSION_MANIFEST.md` via `generate-version-manifest.ts` |
 | 4.9 | AUDIT GATE | **FATAL** | Runs `audit.ts` — must exit 0 before proceeding. Includes the auto-activating gates: skill-graph drift (ADR-0060) and upgrade coverage (`check-upgrade-coverage.ts --strict`, ADR-0073) |
 | 5 | Branch Creation | **FATAL** | Creates `pr/<timestamp>-<slug>` branch if on main/master; reuses existing branch otherwise |
-| 6 | Sensitive File Guard + Git Add/Commit/Push | **FATAL** | Guards against `.pem`, `.key`, `.env`, `credentials.json`, etc.; runs `git add -A`, `git commit`, `git push` |
+| 6 | Sensitive File Guard + Scoped Staging + Commit/Push | **FATAL** | Guards against `.pem`, `.key`, `.env`, `credentials.json`, etc.; scoped-staging check (S0/S1 tree snapshots — WARN-lists files that are neither task-staged nor pipeline-generated; `SYNC_SCOPED_STAGING=1` excludes them), then `git add`, `git commit`, `git push` |
 | 7 | PR Creation | **FATAL** | If `--body-file` was passed, validates it (English) and opens the PR via `gh pr create --body-file`; otherwise falls back to `gen-pr-body.ts` template, `.github/pull_request_template.md`, then `gh pr create --fill`; idempotent — updates existing PR if one already exists for the branch |
 
 4. If audit fails, fix the reported issue before re-running.
