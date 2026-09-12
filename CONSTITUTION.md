@@ -661,6 +661,8 @@ Full details: [`docs/designs/ecc-phase1-governance-design.md`](docs/designs/ecc-
 
 Governance rules are enforced at three layers, ensuring coverage across all 4 supported platforms (Claude Code CLI, Claude Desktop App, Gemini CLI, Antigravity).
 
+Platform extension to OpenAI Codex (CLI + Desktop App) is designed and Accepted per **ADR-0075** (`docs/adr/0075-codex-platform-support.md`): the `.codex/` platform directory, `CODEX.md` twin, and the enforcement-layer rows for the two new surfaces land through the implementation waves defined in `docs/designs/2026-09-12-codex-platform-support-design.md`.
+
 #### 11.1 Three-Layer Enforcement Model
 
 | Layer | Mechanism | Claude CLI | Claude Desktop App | Gemini CLI | Antigravity |
