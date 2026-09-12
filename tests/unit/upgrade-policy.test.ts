@@ -99,8 +99,8 @@ describe('upgrade-policy resolveClaim — PRESERVE / PROJECT_STATE / TEMPLATE_ON
     }
   });
 
-  test('.env.sample preserved (scaffold country-prunes its env blocks; wholesale re-sync would undo that)', () => {
-    expect(resolveClaim('.env.sample', VARIANT).policy).toBe('PRESERVE');
+  test('.env.sample has a dedicated country-aware pass (ENV_SAMPLE SYNC, v1.23.0)', () => {
+    expect(resolveClaim('.env.sample', VARIANT)).toEqual({ policy: 'SYNC', pass: 'ENV_SAMPLE SYNC' });
   });
 
   test('runtime / generated state never delivered', () => {

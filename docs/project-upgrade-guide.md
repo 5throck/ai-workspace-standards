@@ -157,6 +157,36 @@ shared docs pairs keep their inline-version semantics under the default `SYNC` p
 gaps. The former `docs/_common/security.md` overwrite and the add-if-missing governance pair
 (`LICENSE`, `SECURITY.md`) remain dedicated passes.
 
+#### 🔑 ENV_SAMPLE SYNC (Country-Aware, since v1.23.0)
+
+`.env.sample` has its own pass rather than the default tree-sync policy, because
+scaffold-time country pruning (`prune-country-scoped-assets.ts`) strips
+`# >>> country-scoped:<CC>` blocks from the project copy — a wholesale re-copy
+would re-inject them. The pass delivers the template content through the shared
+`lib/env-sample-blocks.ts` prune with the project's detected country applied:
+
+| Project country | Delivered `.env.sample` |
+|----------------|------------------------|
+| `KR` (or any detected code) | Template content with that country's block kept, all others pruned |
+| `none` (region-neutral) | Template content with ALL country blocks pruned — the scaffold posture |
+
+Behavior matches the tree-sync contract otherwise: add if missing, update on
+content change, **⚠️ CONFLICT warning** when the project copy has uncommitted
+local modifications (template still wins — commit or stash first; the
+pre-upgrade git stash is the rollback path).
+
+**Delivery is a merge, not an overwrite** (the `mergeGitleaksToml` lesson,
+v1.10.0): the template body is delivered, keys the template also defines are
+superseded by the template line (placeholder normalization — template wins
+conflicts), and **project-only keys survive** verbatim — including their
+section dividers, inline notes, and commented-out documentation keys — under a
+`# --- Project-specific variables (preserved by upgrade; not overwritten by
+template sync) ---` section appended at the end. A fully customized
+`.env.sample` (e.g. co-price's 16 `PRICE_*`/`NEXTAUTH_*` keys) therefore needs
+no pre-upgrade choreography: the merge is idempotent, and the pass logs
+`Preserved project-only keys: …` and `Template-superseded keys: …` so both
+directions of the merge are visible in the output.
+
 #### 🛡️ PRESERVE Files (Never Touched)
 
 These files are always preserved — local modifications are safe:
@@ -166,7 +196,6 @@ These files are always preserved — local modifications are safe:
 | `README.md`, `README_ko.md` | Project-specific root documentation |
 | `CHANGELOG.md` | The project's own history |
 | `docs/README.md`, `docs/README_ko.md` | Project-owned docs index (delivered at scaffold only) |
-| `.env.sample` | Scaffold-time country pruning removes country-scoped env blocks; a wholesale re-sync would re-inject them |
 | `memory/` | Project session logs |
 | `package.json`, `bun.lock`, `variant.json` | Project runtime/generated state (dependency drift is handled by `sync-template-deps.ts` / the `update-bun-packages` skill, not the upgrade) |
 | `src/` | Project source code |

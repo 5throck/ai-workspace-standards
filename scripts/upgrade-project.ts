@@ -1,5 +1,18 @@
 #!/usr/bin/env bun
-// @version 1.22.1
+// @version 1.23.0
+// v1.23.0: New ENV_SAMPLE SYNC pass — .env.sample is no longer PRESERVE. Scaffold-time
+//           country pruning (prune-country-scoped-assets.ts) strips country-scoped env
+//           blocks from the project copy, so a wholesale template re-copy would re-inject
+//           them; the pass instead delivers the template content through the shared
+//           lib/env-sample.ts with the project's detected country applied (region-neutral
+//           = all blocks stripped), so template env-key additions reach existing projects
+//           without resurrecting pruned country profiles. Delivery is a MERGE, not an
+//           overwrite (the mergeGitleaksToml lesson, v1.10.0 — Projects/co-price carries 16
+//           project-only keys): template re-delivered lines drop the project's byte-equal
+//           boilerplate and supersede same-NAME keys (placeholder normalization), while
+//           project-only keys, their section dividers, inline notes, and commented-out
+//           documentation keys are preserved verbatim under a marker section. Idempotent;
+//           standard conflict warning on locally-modified copies; --dry-run parity.
 // v1.22.1: Data-loss fix in --prune-removed — the skills prune category consulted only
 //           templates/common/skills, so variant-owned skills delivered by the VARIANT SKILLS
 //           pass (e.g. co-abap's sap-*) were marked prunable for projects without a
@@ -159,6 +172,7 @@ import {
   mergeSettingsJson,
   resolveClaim,
 } from './lib/upgrade-policy.ts';
+import { mergeEnvSample, pruneCountryScopedEnvBlocks } from './lib/env-sample.ts';
 
 // ── Argument parsing ───────────────────────────────────────────────────────────
 let projectPath = '';
@@ -1730,6 +1744,65 @@ console.log('--- TEMPLATE TREE SYNC: uncovered template files (default policy) -
   console.log('');
 }
 
+// ── ENV_SAMPLE SYNC: .env.sample (country-aware template delivery, merge-based) ───────────
+// Formerly a PRESERVE file (removed from upgrade-policy.ts PRESERVE_FILES in v1.23.0):
+// scaffold-time country pruning (prune-country-scoped-assets.ts) strips country-scoped
+// env blocks from the project copy, so a wholesale template re-copy would re-inject them
+// (same failure shape as the skill re-injection prune below). Deliver the template content
+// through the shared lib with the project's detected country applied — new template env
+// keys reach existing projects without resurrecting pruned country profiles. Region-neutral
+// projects (country 'none') receive the all-blocks-stripped form, exactly as the scaffold
+// left them. Delivery is a MERGE (lib/env-sample.ts mergeEnvSample): the template body is
+// delivered, same-NAME keys are superseded by the template line, and project-only keys,
+// their section dividers, inline notes, and commented-out documentation keys are preserved
+// verbatim under a marker section — a customized .env.sample like co-price's 16 project
+// keys survives an upgrade (the mergeGitleaksToml lesson).
+console.log('--- ENV_SAMPLE SYNC: .env.sample (country-aware) ---');
+{
+  const envTplPath = resolveTemplate('.env.sample');
+  const envDestPath = join(projectDir, '.env.sample');
+  if (!envTplPath) {
+    console.log('  (no template .env.sample — nothing to sync)');
+  } else {
+    const envPrune = pruneCountryScopedEnvBlocks(readFileSync(envTplPath, 'utf8'), detectedCountry);
+    for (const warn of envPrune.warnings) console.log(`  ⚠️  template .env.sample: ${warn}`);
+    if (envPrune.unbalanced) {
+      console.log('  ⚠️  SKIP   .env.sample  (unbalanced country-scoped markers in template — not delivered)');
+    } else if (!existsSync(envDestPath)) {
+      console.log('  NEW    .env.sample');
+      if (!dryRun) writeFileSync(envDestPath, envPrune.output, 'utf8');
+      console.log(`  ${dryTag}WROTE: .env.sample  (country profile: ${detectedCountry === 'none' ? 'region-neutral' : detectedCountry})`);
+      treeChanged++;
+    } else {
+      const currentEnv = readFileSync(envDestPath, 'utf8');
+      const envMerge = mergeEnvSample(envPrune.output, currentEnv);
+      if (envMerge.output === currentEnv) {
+        console.log('  OK     .env.sample  (in sync)');
+      } else {
+        if (isLocallyModified(envDestPath)) {
+          console.log('  ⚠️  CONFLICT .env.sample  (content changed — local modifications exist; the pre-upgrade stash covers rollback)');
+        } else {
+          console.log('  UPDATE .env.sample');
+        }
+        const { added, removed } = lineDiffCounts(currentEnv.split('\n'), envMerge.output.split('\n'));
+        console.log(`    Lines: ${currentEnv.split('\n').length} -> ${envMerge.output.split('\n').length}  (+${added}/-${removed})`);
+        if (envMerge.overriddenKeys.length > 0) {
+          console.log(`    Template-superseded keys: ${envMerge.overriddenKeys.join(', ')}`);
+        }
+        if (envMerge.preservedKeys.length > 0) {
+          const shown = envMerge.preservedKeys.slice(0, 8).join(', ');
+          const rest = envMerge.preservedKeys.length - Math.min(8, envMerge.preservedKeys.length);
+          console.log(`    Preserved project-only keys: ${shown}${rest > 0 ? ` +${rest} more` : ''}`);
+        }
+        if (!dryRun) writeFileSync(envDestPath, envMerge.output, 'utf8');
+        console.log(`  ${dryTag}WROTE: .env.sample  (country profile: ${detectedCountry === 'none' ? 'region-neutral' : detectedCountry})`);
+        treeChanged++;
+      }
+    }
+  }
+}
+console.log('');
+
 // ── COUNTRY-SCOPED SKILL PRUNE (ADR-0057/0058) ────────────────────────────────
 // The skill-copy passes above sync from templates/common/skills/ and, for variant
 // skills, templates/<variant>/skills/ with no country awareness — they re-inject
@@ -1737,9 +1810,10 @@ console.log('--- TEMPLATE TREE SYNC: uncovered template files (default policy) -
 // target country doesn't match, silently undoing scaffold-time pruning. Mirror the
 // registry logic of scripts/helpers/prune-country-scoped-assets.ts here instead of
 // spawning it: the upgrade path needs --dry-run parity and a conflict guard the
-// scaffold-time helper lacks. Registry scripts/ (currently empty) and .env.sample
-// env blocks are NOT pruned here — the upgrade path syncs scripts only from the
-// (unscoped) registry and never touches .env.sample.
+// scaffold-time helper lacks. Registry scripts/ (currently empty) are NOT pruned here —
+// the upgrade path syncs scripts only from the (unscoped) registry. Country-scoped
+// .env.sample blocks are handled upstream by the ENV_SAMPLE SYNC pass (shared
+// lib/env-sample-blocks.ts), so they arrive already pruned.
 // MUST run before the post-upgrade sync-skills.ts invoke so platform mirrors are
 // regenerated from the already-pruned skills/ root.
 console.log('--- COUNTRY-SCOPED SKILL PRUNE ---');

@@ -1,5 +1,9 @@
 #!/usr/bin/env bun
-// @version 0.3.0
+// @version 0.3.1
+// v0.3.1: Env block pruning delegated to the shared lib/env-sample.ts parser (same
+//         marker grammar, same keep/drop and unbalanced-marker-leave-unchanged semantics).
+//         Behavior-preserving refactor — the upgrade path (upgrade-project.ts ENV_SAMPLE
+//         SYNC) uses the same lib so scaffold pruning and upgrade re-delivery cannot drift.
 // v0.3.0: New "dirs" registry category — prunes whole variant asset directories (e.g.
 //         co-safety's regulations/KR/) whose content is country-specific, the same way
 //         "skills"/"scripts"/"env" already do. Needed because new-project.ts's region-neutral
@@ -32,6 +36,7 @@
 import { readFileSync, existsSync, rmSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { resolve, join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { pruneCountryScopedEnvBlocks } from '../lib/env-sample.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -190,80 +195,25 @@ function pruneDir(relPath: string, scopedCountry: string): void {
 }
 
 /**
- * Prune env key marker blocks from .env.sample
+ * Prune env key marker blocks from .env.sample — delegated to the shared
+ * lib/env-sample-blocks.ts parser so scaffold-time and upgrade-time pruning
+ * share one grammar and one keep/drop decision.
  */
 function pruneEnvBlocks(): void {
   const envSamplePath = join(targetDir, '.env.sample');
   if (!existsSync(envSamplePath)) return;
 
   try {
-    const content = readFileSync(envSamplePath, 'utf-8');
-    const lines = content.split('\n');
-    const output: string[] = [];
-    let inBlock = false;
-    let currentBlockCode: string | null = null;
-    let blockStartLine = -1;
-    let blockLines: string[] = [];
-    let blocksDeleted = 0;
-
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      const openMatch = line.match(/^# >>>\s*country-scoped:([A-Z]{2,4})/);
-      const closeMatch = line.match(/^# <<<\s*country-scoped:([A-Z]{2,4})/);
-
-      if (openMatch) {
-        if (inBlock) {
-          // Nested/unbalanced opening marker - warn and skip
-          console.warn(`  ⚠️  Unbalanced marker at line ${i + 1}: nested opening marker without closing previous block. File left unchanged.`);
-          return;
-        }
-        inBlock = true;
-        currentBlockCode = openMatch[1];
-        blockStartLine = i;
-        blockLines = [line];
-      } else if (closeMatch) {
-        if (!inBlock) {
-          console.warn(`  ⚠️  Unbalanced marker at line ${i + 1}: closing marker without opening. File left unchanged.`);
-          return;
-        }
-        if (closeMatch[1] !== currentBlockCode) {
-          console.warn(`  ⚠️  Unbalanced marker at line ${i + 1}: closing code '${closeMatch[1]}' doesn't match opening code '${currentBlockCode}'. File left unchanged.`);
-          return;
-        }
-
-        // Complete block - decide whether to keep or delete
-        blockLines.push(line);
-
-        if (countryArg !== 'none' && countryArg !== '' && countryArg === currentBlockCode) {
-          // Keep the block - country matches
-          output.push(...blockLines);
-        } else {
-          // Delete the block - country doesn't match
-          blocksDeleted++;
-          console.log(`Pruned ${currentBlockCode}-scoped env block from .env.sample`);
-        }
-
-        inBlock = false;
-        currentBlockCode = null;
-        blockLines = [];
-      } else if (inBlock) {
-        blockLines.push(line);
-      } else {
-        output.push(line);
-      }
+    const result = pruneCountryScopedEnvBlocks(readFileSync(envSamplePath, 'utf-8'), countryArg);
+    for (const warning of result.warnings) {
+      console.warn(`  ⚠️  ${warning}`);
     }
-
-    // Check for unclosed block
-    if (inBlock) {
-      console.warn(`  ⚠️  Unbalanced marker: block starting at line ${blockStartLine + 1} has no closing marker. File left unchanged.`);
-      return;
+    if (result.unbalanced || result.pruned.length === 0) return;
+    for (const code of result.pruned) {
+      console.log(`Pruned ${code}-scoped env block from .env.sample`);
     }
-
-    // Only rewrite if something was deleted
-    if (blocksDeleted > 0) {
-      writeFileSync(envSamplePath, output.join('\n'), 'utf-8');
-      prunedCount += blocksDeleted;
-    }
+    writeFileSync(envSamplePath, result.output, 'utf-8');
+    prunedCount += result.pruned.length;
   } catch (error) {
     console.warn(`  ⚠️  Could not process .env.sample: ${error}`);
   }
