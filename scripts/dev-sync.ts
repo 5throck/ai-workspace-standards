@@ -1,4 +1,4 @@
-// @version 1.12.0
+// @version 1.13.0
 // v1.12.0: feat(design-gate): step 3.9 registry-absent skip becomes a loud WARN — a missing
 //           docs/specs/registry.json means the Universal Design Gate (ADR-0074) spec-check is
 //           INACTIVE, which must be visible instead of a buried one-line log. Pairs with the
@@ -499,6 +499,28 @@ if (isWorkspaceRoot) {
             }
         } else {
             console.log(`${YELLOW}⚠️  L0→L1 publish failed — continuing sync${RESET}`);
+        }
+    }
+}
+
+// ── Step 4.51: Governance L0→L1 file deployment (CLAUDE/GEMINI/AGENTS/CODEX.md) ──
+//     ADR-0075 D11: the four instruction twins ride governance-l1 so model/registry
+//     edits at L0 reach templates/common in the same sync instead of waiting for a
+//     manual `--governance-l1` run. Fatal in L0 context, same contract as 4.5.
+if (isWorkspaceRoot && isL0Context) {
+    console.log('\n📘 Publishing governance instruction files L0→L1 (CLAUDE/GEMINI/AGENTS/CODEX.md)...');
+    try {
+        const govRes = await $`bun scripts/propagate-to-templates.ts --governance-l1`.nothrow();
+        if (govRes.exitCode !== 0) {
+            console.log(`${RED}❌ governance-l1 publish failed — fatal in L0 context${RESET}`);
+            if (import.meta.main) {
+              process.exit(1);
+            }
+        }
+    } catch (e) {
+        console.log(`${RED}❌ governance-l1 publish errored — fatal in L0 context: ${e}${RESET}`);
+        if (import.meta.main) {
+          process.exit(1);
         }
     }
 }

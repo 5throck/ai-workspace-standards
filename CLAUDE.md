@@ -86,6 +86,8 @@ Before editing any file for the **FIRST time in a session**, the agent MUST:
 | Claude Desktop App | ✅* Hook + Prompt | Should fire via bundled CLI; fallback: self-enforcement |
 | Gemini CLI | ✅ Hook (automatic) | BeforeTool `deny` mode — agent must re-attempt after investigation |
 | Antigravity | ✅ Prompt (manual) | Hooks do not fire in Antigravity — agent self-enforces |
+| Codex CLI | ✅ Prompt (manual) | Hooks not wired in Phase 1 — agent self-enforces (ADR-0075) |
+| Codex Desktop App | ✅ Prompt (manual) | Hooks not wired in Phase 1 — agent self-enforces (ADR-0075) |
 
 *Claude Desktop App: Uses bundled CLI per Anthropic docs. Workspace testing (2026-05) observed intermittent hook behavior.
 
@@ -267,11 +269,13 @@ Each implementation task follows the **Phase 4 execution loop** (see [AGENTS.md 
 
 > Loop and correct if review errors are flagged - maximum **3 iterations** before escalating to the user.
 
+<!-- COMMON-CLAUDE:START -->
 #### Cost Optimization (3-Tier Model Strategy)
 The High/Medium/Low tier concept and its usage rules are the Single Source of Truth in [AGENTS.md §3.6 3-Tier Strategy](AGENTS.md#36-3-tier-strategy). Claude Code's model-ID mapping (overridden per agent invocation when appropriate):
 - **High-tier** → `claude-opus-5-0`
 - **Medium-tier** → `claude-sonnet-5-0`
 - **Low-tier** → `claude-haiku-4-5`
+<!-- COMMON-CLAUDE:END -->
 
 <!-- COMMON-CLAUDE:START -->
 ### 7. Native Plan Mode (`EnterPlanMode`)
@@ -335,7 +339,7 @@ All shared Git/PR rules are in [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr
 
 - **PR Language**: Governed by [CONSTITUTION.md §3 - Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
 
-*Last Updated: 2026-09-11 — removed redundant N-1/N boilerplate rows; /sync already covers lifecycle + audit + commit + push + PR; previous: 2026-06-21 inlined N-1/N rows*
+*Last Updated: 2026-09-12 — removed redundant N-1/N boilerplate rows; /sync already covers lifecycle + audit + commit + push + PR; previous: 2026-06-21 inlined N-1/N rows*
 <!-- COMMON-CLAUDE:END -->
 
 

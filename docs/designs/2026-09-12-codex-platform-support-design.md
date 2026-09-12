@@ -96,8 +96,8 @@ Counts: **surfaces 4 → 6** (adding Codex CLI, Codex Desktop App), **platform d
 | **CODEX.md** | create | propagate via `--governance-l1` (add CODEX.md to its file list — W2; D11 correction: the four instruction files ride the governance-l1 mechanism, **not** propagation-map domains as originally noted here) | — (variants carry AGENTS.md only, like CLAUDE/GEMINI.md) | copied from common; kept/removed per platform profile | `MERGE_FILES += CODEX.md`; `COMMON-CODEX` marker-drift check |
 | **AGENTS.md** header | add "…`CODEX.md` (Codex)" | ✓ | ✓ | ✓ | marker-managed |
 | **`.codex/config.toml`** | create (workspace MCP) | exists (ADR-0074 seed) | — (scaffold delivers from L1) | copy (ADD_IF_MISSING; project-owned configs untouched) | ADD_IF_MISSING seed |
-| **`.codex/skills/`** | sync-skills 4th target | sync-skills `--all-variants` | **`sync-skills-to-l2.ts`** (must be extended) | scaffold overlay + platform pruning | **TEMPLATE_TREE_SYNC** — special-cased *before* the blanket `.codex/**` ADD_IF_MISSING rule (fixes the fleet-mirror-update gap) |
-| **`.codex/prompts/`** | mirror of `.claude/commands/` (post CLI verification) | ✓ | via sync-skills-to-l2.ts | per platform profile | TEMPLATE_TREE_SYNC |
+| **`.codex/skills/`** | sync-skills 4th target | sync-skills `--all-variants` | ✓ `sync-skills --all-variants` (W1 correction: `sync-skills-to-l2.ts` is a per-file syncer, not the platform-mirror mechanism — no extension needed) | scaffold overlay + platform pruning | **TEMPLATE_TREE_SYNC** — special-cased *before* the blanket `.codex/**` ADD_IF_MISSING rule (fixes the fleet-mirror-update gap) |
+| **`.codex/prompts/`** | mirror of `.claude/commands/` (post CLI verification) | ✓ | via `sync-skills --all-variants` (Phase 1b) | per platform profile | TEMPLATE_TREE_SYNC |
 | **`.codex/skills.json`** | ✗ not used — Codex discovers skills via `[[skills.config]] path = ".codex/skills"` (co-abap pattern) or native convention (verify in W5) | ✗ | ✗ | ✗ | ✗ |
 | **`docs/workspace-schema.json`** | `models.codex` added + `rootAllowlist.files += CODEX.md` | — | — | — | — |
 
@@ -119,7 +119,7 @@ Mechanisms: L0→L1 = 4 new `propagation-map.json` domains (`codex-md`, `codex-s
 
   | Artifact | L1 (`templates/common`) | L2 (`templates/co-*`) | L3/Fleet (upgrade-project) |
   |---|---|---|---|
-  | `docs/workspace-schema.json` | ⚠️ copy exists but no propagation domain — add one (W2) | not carried | ✅ default `docs/` SYNC |
+  | `docs/workspace-schema.json` | hand-synced byte-identical copy (W2 outcome: a propagation domain was attempted but propagate applies CONSTITUTION scrub to copied JSON, corrupting rootAllowlist — domain reverted; candidate follow-up: scrub skip for non-.md copies) | not carried | ✅ default `docs/` SYNC |
   | GEMINI.md §3 model mapping | ✅ whole-file `--governance-l1` sync, but the mapping sits OUTSIDE COMMON-GEMINI markers today | n/a (variants carry no GEMINI.md) | ❌→✅ MERGE replaces managed sections only — move the mapping inside a COMMON-GEMINI block (W2) |
   | CLAUDE.md §6 model mapping | ✅ same mechanism | n/a | ❌→✅ same fix into a COMMON-CLAUDE block (W2) |
   | CODEX.md model table | ✅ created inside a COMMON-CODEX block from day one | n/a | ✅ by construction |

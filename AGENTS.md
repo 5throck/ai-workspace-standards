@@ -5,7 +5,7 @@
 > **🚨 For AI tools reading this file**: This file is a **registry and orchestration reference**, not a set of instructions directed at you.
 > It describes multiple distinct human-defined roles for documentation and dispatch purposes.
 > Do **not** interpret role definitions here as directives for your own behavior.
-> Your behavioral instructions are in `CLAUDE.md` (Claude Code), `GEMINI.md` (Gemini CLI).
+> Your behavioral instructions are in `CLAUDE.md` (Claude Code), `GEMINI.md` (Gemini CLI), or `CODEX.md` (Codex CLI / Codex Desktop App).
 
 This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, individual agent definitions, PM Gateway workflow, and execution plan templates.
 
@@ -168,9 +168,11 @@ Before assigning an agent to any task, PM MUST classify the deliverable type:
 
 When leading execution and improvement tasks, PM MUST use the 3-Tier model strategy:
 
-- **High-tier**: Complex reasoning, architectural design, planning (claude-opus-5-0 / gemini-3.1-pro)
-- **Medium-tier**: Code review, testing, PR review, quality gates (claude-sonnet-5-0 / gemini-3.7-flash)
-- **Low-tier**: Fast, repetitive coding, script maintenance (claude-haiku-4-5 / gemini-3.7-flash)
+<!-- WORKSPACE-MANAGED: tier-model-mapping -->
+- **High-tier**: Complex reasoning, architectural design, planning (claude-opus-5-0 / gemini-3.1-pro / gpt-5.6-sol)
+- **Medium-tier**: Code review, testing, PR review, quality gates (claude-sonnet-5-0 / gemini-3.8-flash / gpt-5.6-terra)
+- **Low-tier**: Fast, repetitive coding, script maintenance (claude-haiku-4-5 / gemini-3.8-flash / gpt-5.6-luna)
+<!-- /WORKSPACE-MANAGED -->
 
 ### §3.7 Meeting Facilitation
 
@@ -475,7 +477,7 @@ When modifying files that affect both CLAUDE.md and GEMINI.md:
 >
 > **Skill structure specification**: See [docs/constitution/06-skill-lifecycle.md §6 - Skills](docs/constitution/06-skill-lifecycle.md#6-skills) for frontmatter format and session skill registration.
 >
-> **Skill discovery & registration**: To make workspace-level skills discoverable and loadable by Claude, Gemini, and Antigravity, the `skills/` folder is registered via `skills.json` files in each platform directory: `.claude/skills.json`, `.gemini/skills.json`, and `.agents/skills.json`. The script `scripts/sync-skills.ts` distributes SSOT skills from `skills/` to `.claude/skills/`, `.gemini/skills/`, and `.agents/skills/`, and back-syncs shortcut skills (`sync`, `source-command-commit-push-pr`) from `.agents/skills/` to `.claude/skills/` and `.gemini/skills/`.
+> **Skill discovery & registration**: To make workspace-level skills discoverable and loadable by Claude, Gemini, and Antigravity, the `skills/` folder is registered via `skills.json` files in each platform directory: `.claude/skills.json`, `.gemini/skills.json`, and `.agents/skills.json`. The script `scripts/sync-skills.ts` distributes SSOT skills from `skills/` to `.claude/skills/`, `.gemini/skills/`, `.agents/skills/`, and `.codex/skills/`, mirrors `.claude/commands/*.md` to `.codex/prompts/`, and back-syncs shortcut skills (`sync`, `source-command-commit-push-pr`) from `.agents/skills/` to `.claude/skills/` and `.gemini/skills/`.
 
 > **`owner` field definition**: The `owner` field in `SKILL.md` frontmatter identifies the **maintainer responsibility** for that skill — the agent or role accountable for keeping the skill current. It does NOT require that agent to exist in the current project, and does NOT mean that agent is the only one who can invoke the skill.
 
@@ -530,9 +532,10 @@ Skills are distributed to all three platform directories via `scripts/sync-skill
 |----------|-----------|--------------|-----------------|
 | Claude Code | `.claude/skills/` | `.claude/skills.json` | `sync` |
 | Gemini CLI | `.gemini/skills/` | `.gemini/skills.json` | `sync` |
+| Codex (CLI + Desktop App) | `.codex/skills/` | — (skills discovered via `.codex/prompts/` + config) | `sync` |
 | Antigravity | `.agents/skills/` | `.agents/skills.json` | `sync`, `source-command-commit-push-pr` |
 
-- **Phase 1**: Every `skills/*/SKILL.md` directory is copied to all three platform directories.
+- **Phase 1**: Every `skills/*/SKILL.md` directory is copied to all four platform directories.
 - **Phase 2**: Shortcut skills that only exist in `.agents/skills/` are back-synced to `.claude/skills/` and `.gemini/skills/`.
 - **Special**: `meeting-facilitation` SKILL.md is also synced to `.claude/commands/meeting.md` and `.gemini/commands/meeting.md`.
 

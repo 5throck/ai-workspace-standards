@@ -3,7 +3,8 @@
  * @description Agent team builder script — execution layer for the team-builder skill.
  *   Receives an approved proposal JSON (from skills/team-builder/SKILL.md Step 5) and
  *   executes all agent/skill changes in a fixed, safe order with checkpoint logging.
- * @version 1.3.0
+ * @version 1.4.0
+ * v1.4.0 (2026-09-12, ADR-0075 W2): tier blocks gain the codex platform (falls back to claude tier when absent).
  * @usage bun scripts/team-builder.ts <proposal-json-path> [--dry-run]
  */
 
@@ -23,7 +24,7 @@ const Z = "\x1b[0m";  // reset
 interface AgentToCreate {
   name: string;
   formalName: string;
-  tier: { claude: string; gemini?: string; antigravity?: string; "gemini-cli"?: string };
+  tier: { claude: string; gemini?: string; antigravity?: string; "gemini-cli"?: string; codex?: string };
   color: string;
   description: string;
   phases: string[];
@@ -225,6 +226,7 @@ function generateAgentMd(a: AgentToCreate): string {
   const geminiTier      = a.tier.gemini        ?? a.tier.claude;
   const antigravityTier = a.tier.antigravity   ?? a.tier.claude;
   const geminiCliTier   = a.tier["gemini-cli"] ?? a.tier.claude;
+  const codexTier       = a.tier.codex         ?? a.tier.claude;
   const phasesYaml = a.phases.map((p) => `  - "${p}"`).join("\n");
   const handoffToYaml = a.handoffTo.length
     ? a.handoffTo.map((h) => `  - ${h}`).join("\n")
@@ -246,6 +248,7 @@ tier:
   gemini: ${geminiTier}
   antigravity: ${antigravityTier}
   gemini-cli: ${geminiCliTier}
+  codex: ${codexTier}
 model: inherit
 color: ${a.color}
 description: >

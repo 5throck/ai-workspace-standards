@@ -28,8 +28,8 @@ The mapping is immutable per generation:
 
 **Gemini Tier Mapping (3.x Generation):**
 - **High**: `gemini-3.1-pro` (Complex reasoning, planning, architecture)
-- **Medium**: `gemini-3.7-flash` (Orchestration, coordination, reviews, testing, QA)
-- **Low**: `gemini-3.7-flash` (Fast, repetitive execution)
+- **Medium**: `gemini-3.8-flash` (Orchestration, coordination, reviews, testing, QA)
+- **Low**: `gemini-3.8-flash` (Fast, repetitive execution)
 
 **Claude Tier Mapping:**
 - **High**: `claude-opus-5-0`

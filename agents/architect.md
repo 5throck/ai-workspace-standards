@@ -7,6 +7,7 @@ tier:
   gemini: high        # gemini-3.1-pro
   antigravity: high   # gemini-3.1-pro
   gemini-cli: high    # gemini-3.1-pro
+  codex: high      # gpt-5.6-sol
 model: inherit
 version: 1.0.0
 last_reviewed: 2026-07-31

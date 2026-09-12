@@ -146,11 +146,13 @@ See [AGENTS.md - Subagent Roster](AGENTS.md#subagent-roster) for the complete ag
 
 > Loop and correct if review errors are flagged - maximum **3 iterations** before escalating to the user.
 
+<!-- COMMON-GEMINI:START -->
 #### Cost Optimization (3-Tier Model Strategy)
 The High/Medium/Low tier concept and its usage rules are the Single Source of Truth in [AGENTS.md §3.6 3-Tier Strategy](AGENTS.md#36-3-tier-strategy). Gemini/Antigravity's model-ID mapping (overridden per subagent invocation when appropriate):
 - **High-tier** → `gemini-3.1-pro` (Parameter: `thinking_level="medium"`)
-- **Medium-tier** → `gemini-3.7-flash` (no thinking parameter)
-- **Low-tier** → `gemini-3.7-flash` (no thinking parameter)
+- **Medium-tier** → `gemini-3.8-flash` (no thinking parameter)
+- **Low-tier** → `gemini-3.8-flash` (no thinking parameter)
+<!-- COMMON-GEMINI:END -->
 
 ---
 
@@ -263,6 +265,8 @@ Before editing any file for the **FIRST time in a session**, the agent MUST:
 |----------|:-----------:|---------|
 | Gemini CLI | ✅ Hook (automatic) | BeforeTool `deny` mode — blocked until agent investigates |
 | Antigravity | ✅ Prompt (manual) | Hooks do not fire — agent self-enforces |
+| Codex CLI | ✅ Prompt (manual) | Hooks not wired in Phase 1 — agent self-enforces (ADR-0075) |
+| Codex Desktop App | ✅ Prompt (manual) | Hooks not wired in Phase 1 — agent self-enforces (ADR-0075) |
 
 If the hook is not active (Antigravity), agents must still follow the 4-step process before making first edits.
 <!-- COMMON-GEMINI:END -->
@@ -341,7 +345,7 @@ Antigravity does not have `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` or `teammateMod
 
 ---
 
-*Last Updated: 2026-09-11 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
+*Last Updated: 2026-09-12 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
 
 
 

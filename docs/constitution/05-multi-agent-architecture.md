@@ -30,9 +30,9 @@ role: <one-line role description>
 status: active
 tier:
   claude: high|medium|low       # claude-opus-5-0 | claude-sonnet-5-0 | claude-haiku-4-5
-  gemini: high|medium|low       # gemini-3.1-pro | gemini-3.7-flash
-  antigravity: high|medium|low  # gemini-3.1-pro | gemini-3.7-flash
-  gemini-cli: high|medium|low   # gemini-3.1-pro | gemini-3.7-flash
+  gemini: high|medium|low       # gemini-3.1-pro | gemini-3.8-flash
+  antigravity: high|medium|low  # gemini-3.1-pro | gemini-3.8-flash
+  gemini-cli: high|medium|low   # gemini-3.1-pro | gemini-3.8-flash
 model: inherit
 color: blue | green | purple | red | orange | yellow | cyan | gray
 description: >-
@@ -178,8 +178,8 @@ The workspace enforces a **3-tier model strategy** to optimize cost and quality:
 | Tier | Models | Role | Example Agents |
 |------|--------|------|----------------|
 | **High** | claude-opus-5-0, gemini-3.1-pro | Complex reasoning, architecture, PM orchestration | PM, Architect |
-| **Medium** | claude-sonnet-5-0, gemini-3.7-flash | Review, QA, analysis, supervision | Auditor, Security Expert |
-| **Low** | claude-haiku-4-5, gemini-3.7-flash | Fast coding, boilerplate, scoped tasks | Automation Engineer, Scaffolding Expert |
+| **Medium** | claude-sonnet-5-0, gemini-3.8-flash | Review, QA, analysis, supervision | Auditor, Security Expert |
+| **Low** | claude-haiku-4-5, gemini-3.8-flash | Fast coding, boilerplate, scoped tasks | Automation Engineer, Scaffolding Expert |
 
 > **Model Registry**: Current model assignments are maintained in `docs/workspace-schema.json` (`models` block). The table above reflects those values.
 

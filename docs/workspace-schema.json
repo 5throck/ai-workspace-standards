@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "Single Source of Truth for workspace-wide invariants. All dependent documents must match these values. Validated by scripts/validate-templates.ts at pre-commit.",
   "workflow": {
     "phases": {
@@ -51,18 +51,23 @@
     },
     "gemini": {
       "high": "gemini-3.1-pro",
-      "medium": "gemini-3.7-flash",
-      "low": "gemini-3.7-flash"
+      "medium": "gemini-3.8-flash",
+      "low": "gemini-3.8-flash"
     },
     "antigravity": {
       "high": "gemini-3.1-pro",
-      "medium": "gemini-3.7-flash",
-      "low": "gemini-3.7-flash"
+      "medium": "gemini-3.8-flash",
+      "low": "gemini-3.8-flash"
     },
     "gemini-cli": {
       "high": "gemini-3.1-pro",
-      "medium": "gemini-3.7-flash",
-      "low": "gemini-3.7-flash"
+      "medium": "gemini-3.8-flash",
+      "low": "gemini-3.8-flash"
+    },
+    "codex": {
+      "high": "gpt-5.6-sol",
+      "medium": "gpt-5.6-terra",
+      "low": "gpt-5.6-luna"
     }
   },
   "variant_lifecycle": {
@@ -171,6 +176,7 @@
       "README_ja.md",
       "CLAUDE.md",
       "GEMINI.md",
+      "CODEX.md",
       "AGENTS.md",
       "CHANGELOG.md",
       "CONSTITUTION.md",

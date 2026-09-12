@@ -129,7 +129,7 @@ Apply only to projects with user-facing UI (web app, desktop app, CLI with messa
 ### 5. Multi-Agent Architecture
 Full details: [`docs/constitution/05-multi-agent-architecture.md`](docs/constitution/05-multi-agent-architecture.md)
 
-Every project uses role-based agents defined in `agents/*.md` with YAML frontmatter (tier, model, color, description, examples). Three-tier cost optimization: High-tier models (claude-opus-5-0, gemini-3.1-pro) for PM/Architect; Medium-tier (claude-sonnet-5-0, gemini-3.7-flash) for QA; Low-tier (claude-haiku-4-5, gemini-3.7-flash) for execution. PM orchestrator follows a 6-phase governance workflow (Phase 0: Project Initiation → Phase 1-2: Planning & Architecture → Phase 3: Design Handoff → Phase 4: Execution → Phase 5: Lifecycle Finalization → Phase 6: Quality Assurance & Finalization). See [`docs/workspace-schema.json`](docs/workspace-schema.json) for the canonical phase definitions. See [§5.6 Agent Lifecycle](docs/constitution/05.6-agent-lifecycle.md) for creation/modification procedures.
+Every project uses role-based agents defined in `agents/*.md` with YAML frontmatter (tier, model, color, description, examples). Three-tier cost optimization: High-tier models (claude-opus-5-0, gemini-3.1-pro) for PM/Architect; Medium-tier (claude-sonnet-5-0, gemini-3.8-flash) for QA; Low-tier (claude-haiku-4-5, gemini-3.8-flash) for execution. PM orchestrator follows a 6-phase governance workflow (Phase 0: Project Initiation → Phase 1-2: Planning & Architecture → Phase 3: Design Handoff → Phase 4: Execution → Phase 5: Lifecycle Finalization → Phase 6: Quality Assurance & Finalization). See [`docs/workspace-schema.json`](docs/workspace-schema.json) for the canonical phase definitions. See [§5.6 Agent Lifecycle](docs/constitution/05.6-agent-lifecycle.md) for creation/modification procedures.
 
 ---
 
@@ -210,7 +210,7 @@ Full details: [`docs/constitution/06-skill-lifecycle.md`](docs/constitution/06-s
 
 Skills are reusable workflows defined as `skills/<name>/SKILL.md` or `.claude/skills/<name>/SKILL.md`. To enable automated skill discovery by Claude, Gemini, and Antigravity, the `skills/` directory must be registered in the customizations configuration file `.agents/skills.json` at the root of the workspace or project. When creating a new skill, use the `skill-creator` plugin and complete the registration checklist: add to `docs/context.md ## Skills` (individual projects) and `AGENTS.md ## Skills` (workspace root). Skills have four states: **draft**, **active**, **deprecated** (archive after 30 days), **archived** (delete after 90 days). Version bump rules: **patch** (1.0.x) for wording fixes, **minor** (1.x.0) for new steps, **major** (x.0.0) for rewrites. Shared skills (`owner: [agent1, agent2]`) require both owners' approval.
 
-**Cross-Platform Skill Availability**: The `skills/<name>/` directory is the Single Source of Truth (SSOT) for all skill definitions. Every skill defined in `skills/` MUST be available on all supported AI platforms (Claude Code, Claude Desktop App, Gemini CLI, Antigravity, Antigravity CLI). Platform-specific distribution directories (`.claude/skills/`, `.gemini/skills/`, `.agents/skills/`) serve as derived copies only — they MUST NOT be the sole location of any skill. Variant templates MUST maintain skill parity across all three platform directories. Platform-specific configuration files (`skills.json`) register these directories for discovery, but the canonical definition always resides in `skills/`.
+**Cross-Platform Skill Availability**: The `skills/<name>/` directory is the Single Source of Truth (SSOT) for all skill definitions. Every skill defined in `skills/` MUST be available on all supported AI platforms (Claude Code, Claude Desktop App, Gemini CLI, Antigravity, Antigravity CLI, Codex CLI, Codex Desktop App). Platform-specific distribution directories (`.claude/skills/`, `.gemini/skills/`, `.agents/skills/`, `.codex/skills/`) serve as derived copies only — they MUST NOT be the sole location of any skill. Variant templates MUST maintain skill parity across the platform directories their profile ships. Platform-specific configuration files (`skills.json`) register these directories for discovery, but the canonical definition always resides in `skills/`.
 
 **Skill Relationship Graph (ADR-0060, Amendments 1–9)**: Skill-to-skill relations are managed in three layers — typed `relates_to` frontmatter (permanent), per-scope `skill-graph.overrides.json` (experimental; `reason`/`since` required, 90-day review, `suppress` markers), and the always-regenerated `docs/skill-graph.json` projection. Relations flow variant skill → L1 or same-variant targets only; the graph is regenerated at every lifecycle boundary (scaffold, promotion, upgrade, `/sync` step 4.65) and `validate-skills.ts` / `validate-decisions.ts` run as fail-closed `/sync` gates (step 3.96), including the auto-activating drift gate (Amendment 9, 2026-09-06). Security findings on a skill follow the mandatory **security-hold protocol** (`security_hold: true` quarantine with a `removal-date` ≤ 30 days; see §6.2). → Details: [§6.2.1 Skill Relation System](docs/constitution/06-skill-lifecycle.md).
 
@@ -515,10 +515,13 @@ The following terms have precise meanings across all workspace tools, agents, an
 One of thirteen project archetypes. Stable: `co-abap`, `co-consult`, `co-deck`, `co-design`, `co-develop`, `co-game`, `co-security`, `co-work`. Beta: `co-export`, `co-hr`, `co-news`, `co-price`, `co-safety`. Specifies which `templates/<variant>/` folder is used during project scaffolding. Recorded in `.claude/template-version.txt` as `variant=<value>`.
 
 #### Platform Profile
-Controls which AI-platform-specific configuration files are included in a project. Three values:
+Controls which AI-platform-specific configuration files are included in a project. Values:
 - `claude` — includes `CLAUDE.md` only; `GEMINI.md` is excluded
 - `antigravity` — includes `GEMINI.md` only; `CLAUDE.md` is excluded
-- `both` — includes both (default for all new projects)
+- `both` — includes both, i.e. claude + antigravity (legacy value; default for all new projects)
+- `codex` — additionally includes `CODEX.md` and the `.codex/` platform directory (ADR-0075)
+
+`codex` composes with the legacy values: a project's effective Codex surface is opt-in via the `codex` profile value or the `.codex/` template overlay delivered by upgrade.
 
 Recorded in `.claude/template-version.txt` as `platform=<value>`.
 
@@ -659,7 +662,7 @@ A mechanism that allows variant-specific validation checks to be executed during
 ### 11. Governance Enforcement Layers
 Full details: [`docs/designs/ecc-phase1-governance-design.md`](docs/designs/ecc-phase1-governance-design.md)
 
-Governance rules are enforced at three layers, ensuring coverage across all 4 supported platforms (Claude Code CLI, Claude Desktop App, Gemini CLI, Antigravity).
+Governance rules are enforced at three layers, ensuring coverage across all 6 supported surfaces on 4 platform directories (Claude Code CLI + Claude Desktop App, Gemini CLI, Antigravity, Codex CLI + Codex Desktop App).
 
 Platform extension to OpenAI Codex (CLI + Desktop App) is designed and Accepted per **ADR-0075** (`docs/adr/0075-codex-platform-support.md`): the `.codex/` platform directory, `CODEX.md` twin, and the enforcement-layer rows for the two new surfaces land through the implementation waves defined in `docs/designs/2026-09-12-codex-platform-support-design.md`.
 

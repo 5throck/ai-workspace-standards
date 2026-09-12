@@ -5,7 +5,7 @@
  * Replaces publish-to-template.ts (deprecated v1.8.0). Single authoritative script
  * for all L0→L1 propagation. Config-driven via propagation-map.json (SSOT for exclusions).
  *
- * @version 2.10.0
+ * @version 2.11.0
  *
  * Usage:
  *   bun scripts/propagate-to-templates.ts [--dry-run|--apply] [--domain <name>] [flags]
@@ -844,6 +844,7 @@ const GOVERNANCE_L1_FILES = [
   { src: 'CLAUDE.md',  dst: 'templates/common/CLAUDE.md'  },
   { src: 'GEMINI.md',  dst: 'templates/common/GEMINI.md'  },
   { src: 'AGENTS.md',  dst: 'templates/common/AGENTS.md'  },
+  { src: 'CODEX.md',   dst: 'templates/common/CODEX.md'   },
 ];
 
 // Reference transformation rules: CONSTITUTION.md → docs/context.md

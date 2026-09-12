@@ -9,9 +9,9 @@ capabilities:
   - visual-design
 tier:
   claude: medium        # claude-sonnet-5-0
-  gemini: medium        # gemini-3.7-flash
-  antigravity: medium   # gemini-3.7-flash
-  gemini-cli: medium    # gemini-3.7-flash
+  gemini: medium        # gemini-3.8-flash
+  antigravity: medium   # gemini-3.8-flash
+  gemini-cli: medium    # gemini-3.8-flash
 model: inherit
 color: magenta
 description: >

@@ -82,7 +82,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `design-lint.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `resync-audit.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `create-l3-scaffold.ts` | L0 | 1.13.0 | active | —| —| L0 | —|
-| `dev-sync.ts` | L0 | 1.12.0 | active | —| —| L0+L1 | —|
+| `dev-sync.ts` | L0 | 1.13.0 | active | —| —| L0+L1 | —|
 | `dispatch-parallel.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
 | `dispatch-serial.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
 | `dispatch.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
@@ -181,7 +181,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `resolve-variants.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
 | `project-to-variant.ts` | L0 | 1.3.0 | active | `--source`, `--target`, `--dry-run`, `--force`, `--design-doc`, `--threshold-files`, `--threshold-dirs` | —| L0 | —|
 | `promote-context-section.ts` | L0 | 1.0.0 | active | `--heading`, `--variants`, `--source`, `--after-heading`, `--dry-run` | —| L0 | —|
-| `propagate-to-templates.ts` | L0 | 2.10.0 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs`, `--include-disabled`, `--marker-rewrite` | —| L0 | —|
+| `propagate-to-templates.ts` | L0 | 2.11.0 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs`, `--include-disabled`, `--marker-rewrite` | —| L0 | —|
 | `qa-gate.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `readme-lifecycle-audit.ts` | L0 | 1.0.4 | active | —| —| L0+L1 | —|
 | `release-template.ts` | L0 | 1.0.0 | active | `--version`, `--bump`, `--dry-run`, `--no-tag`, `--push` | —| L0 | —|
@@ -200,7 +200,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `sync-template-deps.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `sync-skills.ts` | L0 | 1.7.0 | active | `--dir <path>`, `--all-variants` | — | L0+L1 | — |
 | `tag-template.ts` | L0 | 1.1.0 | active | `--dry-run`, `--no-push`, `--fail-on-push-error` | —| L0 | —|
-| `team-builder.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
+| `team-builder.ts` | L0 | 1.4.0 | active | —| —| L0+L1 | —|
 | `test-platform-parity.ts` | L0 | 0.2.4 | active | —| —| L0 | —|
 | `test-new-project.ts` | L0 | 1.0.4 | active | —| —| L0 | —|
 | `test-extends-validator.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
@@ -216,7 +216,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `validate-doc-folder.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `validate-docs-links.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `validate-md-language.ts` | L0 | 1.10.0 | active | —| —| L0+L1 | —|
-| `validate-model-registry.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
+| `validate-model-registry.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `validate-skills.ts` | L0 | 1.5.1 | active | —| —| L0+L1 | —|
 | `procedure-coverage.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `validate-procedures.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|

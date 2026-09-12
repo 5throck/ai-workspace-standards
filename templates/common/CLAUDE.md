@@ -86,6 +86,8 @@ Before editing any file for the **FIRST time in a session**, the agent MUST:
 | Claude Desktop App | ✅* Hook + Prompt | Should fire via bundled CLI; fallback: self-enforcement |
 | Gemini CLI | ✅ Hook (automatic) | BeforeTool `deny` mode — agent must re-attempt after investigation |
 | Antigravity | ✅ Prompt (manual) | Hooks do not fire in Antigravity — agent self-enforces |
+| Codex CLI | ✅ Prompt (manual) | Hooks not wired in Phase 1 — agent self-enforces (ADR-0075) |
+| Codex Desktop App | ✅ Prompt (manual) | Hooks not wired in Phase 1 — agent self-enforces (ADR-0075) |
 
 *Claude Desktop App: Uses bundled CLI per Anthropic docs. Workspace testing (2026-05) observed intermittent hook behavior.
 
@@ -267,11 +269,13 @@ Each implementation task follows the **Phase 4 execution loop** (see [AGENTS.md 
 
 > Loop and correct if review errors are flagged - maximum **3 iterations** before escalating to the user.
 
+<!-- COMMON-CLAUDE:START -->
 #### Cost Optimization (3-Tier Model Strategy)
 The High/Medium/Low tier concept and its usage rules are the Single Source of Truth in [AGENTS.md §3.6 3-Tier Strategy](AGENTS.md#36-3-tier-strategy). Claude Code's model-ID mapping (overridden per agent invocation when appropriate):
 - **High-tier** → `claude-opus-5-0`
 - **Medium-tier** → `claude-sonnet-5-0`
 - **Low-tier** → `claude-haiku-4-5`
+<!-- COMMON-CLAUDE:END -->
 
 <!-- COMMON-CLAUDE:START -->
 ### 7. Native Plan Mode (`EnterPlanMode`)
@@ -339,8 +343,6 @@ All shared Git/PR rules are in [docs/context.md](docs/context.md). Claude Code-s
 <!-- COMMON-CLAUDE:END -->
 
 
-
-<!-- WORKSPACE-MANAGED: graft repo context graph -->
 <!-- graft:start -->
 ## Graft — repo context graph
 
@@ -382,4 +384,3 @@ re-read whole files.
 After big code changes, refresh the graph with `graft build` (deterministic,
 no API key, $0).
 <!-- graft:end -->
-<!-- /WORKSPACE-MANAGED -->
