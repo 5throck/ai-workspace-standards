@@ -120,25 +120,25 @@ The multi-agent meeting on 2026-06-01 concluded that a VERSION_MANIFEST could so
 
 #### Lifecycle Sync Drift
 
-```
+~~~
 ✓ All scripts in sync between workspace and templates/common/
 ✓ Script SCRIPTS.md versions match
 ✓ All common skills propagated to .claude/skills/
-```
+~~~
 
 #### Platform Parity Drift
 
-```
+~~~
 No platform parity drift detected
-```
+~~~
 
 #### Documentation Drift
 
-```
+~~~
 ⚠ WARNING: 2 constitution docs reference outdated skill versions
   - CONSTITUTION.md §6 references skill v1.0.0 (current: v1.3.1)
   - AGENTS.md references pm agent v2.0.0 (current: v2.1.0)
-```
+~~~
 
 ---
 
@@ -173,6 +173,8 @@ If you previously tracked versions manually in AGENTS.md or other docs:
 
 - **Issue-001**: Script dependency extraction is heuristic-based - may miss dynamic requires
 - **Issue-002**: Platform detection for commands assumes parity unless `gemini-parity: skip` present
+
+```
 
 ---
 
