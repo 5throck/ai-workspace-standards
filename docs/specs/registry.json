@@ -738,6 +738,15 @@
       "last_updated": "2026-09-11"
     },
     {
+      "id": "2026-09-12-codex-platform-support-design",
+      "title": "codex platform support design",
+      "file": "docs/designs/2026-09-12-codex-platform-support-design.md",
+      "status": "draft",
+      "source": "manual",
+      "created": "2026-09-12",
+      "last_updated": "2026-09-12"
+    },
+    {
       "id": "2026-09-12-dev-sync-scoped-staging-design",
       "title": "dev sync scoped staging design",
       "file": "docs/designs/2026-09-12-dev-sync-scoped-staging-design.md",
