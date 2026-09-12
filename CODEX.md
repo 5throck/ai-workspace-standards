@@ -73,7 +73,7 @@ Codex consumes slash-style workflows as **custom prompts** mirrored from the com
 
 ### 4. MCP Configurations
 
-Codex registers MCP servers in **TOML**: project scope at `.codex/config.toml`, machine-global fallback at `~/.codex/config.toml` (ADR-0074 per-host matrix). The workspace registers the graft context-graph server:
+Codex registers MCP servers in **TOML**: project scope at `.codex/config.toml`, machine-global fallback at `~/.codex/config.toml` (ADR-0076 per-host matrix). The workspace registers the graft context-graph server:
 
 ```toml
 [mcp_servers.graft]

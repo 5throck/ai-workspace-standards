@@ -5,14 +5,30 @@
  * Detects version drift between lifecycle management artifacts.
  * Check A: scripts/*.ts @version comment vs scripts/SCRIPTS.md registry version
  * Check B: scripts/SCRIPTS.md vs templates/common/scripts/SCRIPTS.md version entries
+ * Check C: skills/<name>/SKILL.md vs templates/common/skills/<name>/SKILL.md content
+ *          (normalized through the shared scrub so only REAL drift reports)
+ * Check E: docs/lifecycle/skills/<name>.md Version/Owner vs SKILL.md frontmatter
  *
  * Usage:
  *   bun scripts/lifecycle-sync-audit.ts
  *   bun scripts/lifecycle-sync-audit.ts --json
  *   bun scripts/lifecycle-sync-audit.ts --fix
  *
- * @version 1.7.1
- * @last_updated 2026-09-10
+ * @version 1.8.0
+ * @last_updated 2026-09-12
+ * v1.8.0: Check C now normalizes L0 skill content through the shared scrub
+ *          (scripts/lib/constitution-scrub.ts — the exact transform propagate
+ *          applies to templates/ targets) before comparing, so the intentional
+ *          context.md→context.md substitution (§7.5 Non-Propagation) no
+ *          longer reports as permanent drift for skills/sync, gateguard, and
+ *          translate — and the old fix hint ("run propagate:apply") can no longer
+ *          recommend clobbering that intentional state. Remaining real content
+ *          drift is upgraded from warning to FAILURE. New Check E: a lifecycle
+ *          record's Version/Owner (docs/lifecycle/skills/<name>.md) that
+ *          disagrees with its skill's SKILL.md frontmatter is a FAILURE, not a
+ *          warning (T-20260912-010). The Check C summary line is informational
+ *          output now, not a warning entry. CLI dispatch wrapped in
+ *          import.meta.main so the checks are importable for tests.
  * v1.7.1: Added 'audit:check-upgrade-coverage' to INTENTIONAL_CROSS_REFS — the upgrade coverage
  *          gate (ADR-0073) is existsSync-guarded; the checker is L0-only (ADR-0073 Amendment 1
  *          retired the inert per-project copies of the upgrade trio).
@@ -35,6 +51,8 @@ import { readFileSync, writeFileSync, existsSync, readdirSync, statSync, type Di
 import { join, basename } from 'node:path';
 import { cwd } from 'node:process';
 import { createHash } from 'node:crypto';
+import { load as loadYaml } from 'js-yaml';
+import { scrubConstitutionRefs } from './lib/constitution-scrub.ts';
 
 // ANSI colors for terminal output
 const colors = {
@@ -240,11 +258,52 @@ function runCheckA(): SyncIssue[] {
 }
 
 /**
+ * Extract {version, owner} from a SKILL.md YAML frontmatter block.
+ * Returns {} when there is no parseable frontmatter.
+ */
+export function parseSkillFrontmatter(content: string): { version?: string; owner?: string } {
+  const fmMatch = /^---\r?\n([\s\S]*?)\r?\n---/.exec(content);
+  if (!fmMatch) return {};
+  try {
+    const doc = loadYaml(fmMatch[1]) as Record<string, unknown> | null;
+    if (!doc || typeof doc !== 'object') return {};
+    return {
+      version: doc.version !== undefined ? String(doc.version).trim() : undefined,
+      owner: doc.owner !== undefined ? String(doc.owner).trim() : undefined,
+    };
+  } catch {
+    return {};
+  }
+}
+
+/**
+ * Extract a `- **Field**: value` metadata value from a lifecycle record.
+ * Returns undefined when the field is absent (a record predating the metadata
+ * convention is not a mismatch — there is nothing to compare).
+ */
+export function extractRecordField(recordContent: string, field: string): string | undefined {
+  const match = new RegExp(`^\\s*-?\\s*\\*\\*${field}\\*\\*\\s*:\\s*(.+)$`, 'm').exec(recordContent);
+  if (!match) return undefined;
+  const value = match[1].trim();
+  return value.length > 0 ? value : undefined;
+}
+
+/**
  * Check C: Detect content drift between skills/<name>/SKILL.md (workspace root)
  * and templates/common/skills/<name>/SKILL.md.
- * Severity: WARN — L0→L1 publish is explicit, so differences may be intentional.
+ *
+ * The L0 side is first normalized through scrubConstitutionRefs — the exact
+ * transform propagate-to-templates.ts applies when copying to templates/
+ * targets (§7.5 Non-Propagation: L1 copies carry context.md substitutions by
+ * design). Comparing normalized L0 vs L1 means only REAL drift reports; the
+ * intentional substitution no longer produces permanent warnings for
+ * skills/sync, gateguard, and translate, and the fix hint can never recommend
+ * clobbering that intentional state.
+ *
+ * Remaining drift (not explainable by the scrub) is a FAILURE — the L1 mirror
+ * is propagated, not hand-maintained.
  */
-function runCheckC(): SyncIssue[] {
+export function runCheckC(): SyncIssue[] {
   const issues: SyncIssue[] = [];
 
   if (!IS_WORKSPACE_ROOT) return issues;
@@ -256,6 +315,7 @@ function runCheckC(): SyncIssue[] {
   if (!existsSync(rootSkillsDir)) return issues;
 
   let checkedCount = 0;
+  let driftCount = 0;
 
   const skillEntries = readdirSync(rootSkillsDir, { withFileTypes: true });
   for (const entry of skillEntries) {
@@ -270,25 +330,90 @@ function runCheckC(): SyncIssue[] {
 
     checkedCount++;
 
-    const rootHash = createHash('sha256').update(readFileSync(rootSkillFile)).digest('hex');
-    const templateHash = createHash('sha256').update(readFileSync(templateSkillFile)).digest('hex');
+    const rootContent = readFileSync(rootSkillFile, 'utf-8');
+    const templateContent = readFileSync(templateSkillFile, 'utf-8');
+
+    // Normalize L0 through the same scrub the propagator applies for this
+    // source→target pair (idempotent; no-op when nothing matches).
+    const normalizedRoot = scrubConstitutionRefs(rootContent, rootSkillFile, templateSkillFile);
+
+    const rootHash = createHash('sha256').update(normalizedRoot).digest('hex');
+    const templateHash = createHash('sha256').update(templateContent).digest('hex');
 
     if (rootHash !== templateHash) {
+      driftCount++;
       issues.push({
-        level: 'warning',
+        level: 'error',
         file: `skills/${skillName}/SKILL.md`,
-        message: `Check C: skills/${skillName}/SKILL.md differs from templates/common/skills/${skillName}/SKILL.md (run propagate:apply to sync)`,
-        fix: `Run 'bun run propagate:apply' to sync skills/${skillName}/SKILL.md to templates/common/skills/`,
+        message: `Check C: skills/${skillName}/SKILL.md differs from templates/common/skills/${skillName}/SKILL.md beyond the intentional CONSTITUTION.md→context.md substitution`,
+        fix: `First verify whether the L1 copy diverged intentionally; if the L0 version is canonical, re-sync it with 'bun scripts/propagate-to-templates.ts --apply --domain skills' — do not hand-edit the L1 mirror`,
       });
     }
   }
 
-  if (checkedCount > 0) {
-    issues.push({
-      level: 'warning',
-      file: 'skills/',
-      message: `Check C: checked ${checkedCount} skill(s) for content drift`,
-    });
+  if (!jsonMode && checkedCount > 0) {
+    console.log(
+      `${colors.dim}Check C: checked ${checkedCount} skill(s) for content drift${driftCount > 0 ? ` — ${driftCount} real drift(s)` : ' (normalized; no drift)'}${colors.reset}`,
+    );
+  }
+
+  return issues;
+}
+
+/**
+ * Check E: Lifecycle record metadata vs SKILL.md frontmatter.
+ *
+ * For every docs/lifecycle/skills/<name>.md record whose subject
+ * skills/<name>/SKILL.md exists, a recorded Version or Owner that disagrees
+ * with the SKILL.md frontmatter is a FAILURE — these records feed lifecycle
+ * decisions and promotion gates, so stale metadata is not advisory.
+ * Records missing a Version/Owner field are skipped (many predate the metadata
+ * convention; absence is not a mismatch). Runs only at workspace root.
+ */
+export function runCheckE(): SyncIssue[] {
+  const issues: SyncIssue[] = [];
+
+  if (!IS_WORKSPACE_ROOT) return issues;
+
+  const lifecycleDir = join(ROOT, 'docs', 'lifecycle', 'skills');
+  if (!existsSync(lifecycleDir)) return issues;
+
+  const rootSkillsDir = join(ROOT, 'skills');
+  if (!existsSync(rootSkillsDir)) return issues;
+
+  for (const entry of readdirSync(lifecycleDir)) {
+    if (!entry.endsWith('.md')) continue;
+    const skillName = entry.replace(/\.md$/, '');
+    const skillMdPath = join(rootSkillsDir, skillName, 'SKILL.md');
+    if (!existsSync(skillMdPath)) continue; // record for a removed/renamed skill — not this check's concern
+
+    const recordPath = join(lifecycleDir, entry);
+    const recordContent = readFileSync(recordPath, 'utf-8');
+    const frontmatter = parseSkillFrontmatter(readFileSync(skillMdPath, 'utf-8'));
+
+    const recordVersion = extractRecordField(recordContent, 'Version');
+    if (recordVersion && frontmatter.version) {
+      const a = recordVersion.replace(/^v/i, '');
+      const b = frontmatter.version.replace(/^v/i, '');
+      if (a !== b) {
+        issues.push({
+          level: 'error',
+          file: `docs/lifecycle/skills/${entry}`,
+          message: `Check E: lifecycle record Version ${recordVersion} does not match skills/${skillName}/SKILL.md frontmatter version ${frontmatter.version}`,
+          fix: `Update docs/lifecycle/skills/${entry} Version to ${frontmatter.version} (or fix the SKILL.md frontmatter if the record is correct)`,
+        });
+      }
+    }
+
+    const recordOwner = extractRecordField(recordContent, 'Owner');
+    if (recordOwner && frontmatter.owner && recordOwner !== frontmatter.owner) {
+      issues.push({
+        level: 'error',
+        file: `docs/lifecycle/skills/${entry}`,
+        message: `Check E: lifecycle record Owner "${recordOwner}" does not match skills/${skillName}/SKILL.md frontmatter owner "${frontmatter.owner}"`,
+        fix: `Update docs/lifecycle/skills/${entry} Owner to ${frontmatter.owner} (or fix the SKILL.md frontmatter if the record is correct)`,
+      });
+    }
   }
 
   return issues;
@@ -372,6 +497,7 @@ const INTENTIONAL_CROSS_REFS = new Set([
   'audit:tag-template',                         // audit.ts: string mention in warning message only
   'dev-sync:propagate-to-templates',            // dev-sync.ts: called only inside isL0Context guard
   'audit:propagate-to-templates',               // audit.ts: comment reference only (replaced checkScriptSync)
+  'lifecycle-sync-audit:propagate-to-templates',  // lifecycle-sync-audit.ts: string mention in Check C fix hint only (re-sync advice; the hint never runs the L0 script)
   'create-l3-scaffold:generate-version-manifest', // L0-workflow coordination; reference only in L1 copy
   'list-template-versions:tag-template',        // L0-workflow coordination; reference only in L1 copy
   'new-project:list-template-versions',         // L0-workflow coordination; reference only in L1 copy
@@ -714,6 +840,9 @@ function runAudit(jsonMode = false): AuditResult {
     console.log(
       `${colors.dim}Check V: variant scripts @version vs variant SCRIPTS.md registry${colors.reset}`,
     );
+    console.log(
+      `${colors.dim}Check E: lifecycle records Version/Owner vs SKILL.md frontmatter${colors.reset}`,
+    );
     console.log('');
   }
 
@@ -722,6 +851,7 @@ function runAudit(jsonMode = false): AuditResult {
   const checkCIssues = runCheckC();
   const checkXIssues = runCheckX();
   const checkVIssues = runCheckV();
+  const checkEIssues = runCheckE();
   const registryEntries = runCheckD();
 
   if (!jsonMode) {
@@ -743,6 +873,7 @@ function runAudit(jsonMode = false): AuditResult {
     ...checkCIssues.filter((i) => i.level === 'error'),
     ...checkXIssues.filter((i) => i.level === 'error'),
     ...checkVIssues.filter((i) => i.level === 'error'),
+    ...checkEIssues.filter((i) => i.level === 'error'),
   ];
   const allWarnings = [
     ...checkAIssues.filter((i) => i.level === 'warning'),
@@ -750,10 +881,11 @@ function runAudit(jsonMode = false): AuditResult {
     ...checkCIssues.filter((i) => i.level === 'warning'),
     ...checkXIssues.filter((i) => i.level === 'warning'),
     ...checkVIssues.filter((i) => i.level === 'warning'),
+    ...checkEIssues.filter((i) => i.level === 'warning'),
   ];
 
   return {
-    checksRun: 6,
+    checksRun: 7,
     errors: allErrors,
     warnings: allWarnings,
     registry: registryEntries,
@@ -794,39 +926,37 @@ const args = process.argv.slice(2);
 const jsonMode = args.includes('--json');
 const fixMode = args.includes('--fix');
 
-if (fixMode) {
-  // In fix mode: run Check A, apply fixes, then re-run full audit to report final state
-  console.log(`${colors.cyan}🔧 Lifecycle Sync Audit — Fix Mode${colors.reset}`);
-  console.log(`${colors.cyan}====================================${colors.reset}`);
-  console.log('');
+if (import.meta.main) {
+  if (fixMode) {
+    // In fix mode: run Check A, apply fixes, then re-run full audit to report final state
+    console.log(`${colors.cyan}🔧 Lifecycle Sync Audit — Fix Mode${colors.reset}`);
+    console.log(`${colors.cyan}====================================${colors.reset}`);
+    console.log('');
 
-  const checkAIssues = runCheckA();
-  applyFix(checkAIssues.filter((i) => i.level === 'error'));
-  console.log('');
+    const checkAIssues = runCheckA();
+    applyFix(checkAIssues.filter((i) => i.level === 'error'));
+    console.log('');
 
-  // Report remaining issues after fix
-  const result = runAudit(false);
-  printResults(result);
-  if (import.meta.main) {
-    process.exit(result.errors.length > 0 ? 1 : 0);
-  }
-} else {
-  const result = runAudit(jsonMode);
-
-  if (jsonMode) {
-    // Strip fixData from JSON output (internal only)
-    const cleanResult = {
-      ...result,
-      errors: result.errors.map(({ fixData: _fd, ...rest }) => rest),
-      warnings: result.warnings.map(({ fixData: _fd, ...rest }) => rest),
-      registry: result.registry,
-    };
-    console.log(JSON.stringify(cleanResult, null, 2));
-  } else {
+    // Report remaining issues after fix
+    const result = runAudit(false);
     printResults(result);
-  }
+    process.exit(result.errors.length > 0 ? 1 : 0);
+  } else {
+    const result = runAudit(jsonMode);
 
-  if (import.meta.main) {
+    if (jsonMode) {
+      // Strip fixData from JSON output (internal only)
+      const cleanResult = {
+        ...result,
+        errors: result.errors.map(({ fixData: _fd, ...rest }) => rest),
+        warnings: result.warnings.map(({ fixData: _fd, ...rest }) => rest),
+        registry: result.registry,
+      };
+      console.log(JSON.stringify(cleanResult, null, 2));
+    } else {
+      printResults(result);
+    }
+
     process.exit(result.errors.length > 0 ? 1 : 0);
   }
 }

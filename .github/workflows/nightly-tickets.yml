@@ -121,7 +121,7 @@ jobs:
           # the prompt's safety rules + the ticket scope + the sync gates. Narrow
           # tool lists caused 55 permission denials in the first real batch.
           claude_args: >-
-            --model ${{ vars.NIGHTLY_TICKETS_MODEL }}
+            --model ${{ vars.NIGHTLY_TICKETS_MODEL || 'glm-5.3' }}
             --allowed-tools "Bash,Read,Edit,Write,Glob,Grep"
           prompt: |
             You are the nightly governance-ticket batch runner for this workspace
@@ -158,8 +158,23 @@ jobs:
             then bun scripts/ticket.ts move <id> waiting; retry once at most, then move on.
 
             STOP after: 2 unexpected gate failures, 50 tickets, or ~5 hours.
-            FINISH by writing a run summary to memory/<today>.md (tickets attempted,
-            PR URLs, validation results, skipped-and-why) — English.
+            FINISH by APPENDING a run-summary block to memory/<today>.md (create
+            the file only if it does not exist — earlier sessions may already
+            have written it; never overwrite or rewrite existing blocks) —
+            English. The block MUST use the standard four-section daily-log
+            format required by docs/constitution/02-memory-system.md and
+            enforced by scripts/verify-memory.ts, with EXACTLY these headings:
+              ## Session Summary
+                (one paragraph: tickets attempted, PR URLs, validation results)
+              ## Changes
+                (file-level list: `path` — created/modified/deleted: reason)
+              ## Decisions
+                (choices made with rationale, including skipped-and-why per ticket)
+              ## Open Issues
+                (unresolved problems, blockers, follow-ups; or "none")
+            Do NOT invent alternative headings (e.g. "## Checks",
+            "## Decision + Evidence") — verify-memory.ts fails any daily log
+            missing the four standard headings.
 
             Safety rules (non-negotiable): never bypass a sync/audit gate, never
             --no-verify, never touch .github/workflows or CI permissions, never push

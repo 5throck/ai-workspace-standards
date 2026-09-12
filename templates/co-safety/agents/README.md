@@ -28,3 +28,11 @@ Every specialist agent file follows the mandatory **3-Section structure**:
 All agents are dispatched **only through the PM/CSO gateway** — never invoked
 directly. Register new agents in `AGENTS.md` and verify with
 `bun scripts/agent-verify.ts`.
+
+> **Manifest scope**: `variant.json` `agents[]` intentionally lists **top-level
+> roster files only** (`pm.md`, `safety-governance-manager.md`,
+> `safety-workflow-manager.md`) — the flat roster that
+> `docs/templates/variant.schema.json` and `scripts/resolve-variants.ts` scan.
+> The nested `_shared/` and `domains/` trees are cross-cutting/indexed
+> specialists governed by `AGENTS.md`, not standalone roster entries, and are
+> deliberately not declared in `variant.json` (T-20260912-014).

@@ -1,4 +1,4 @@
-// @version 1.3.1
+// @version 1.4.0
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { $ } from 'bun';
@@ -363,7 +363,7 @@ async function generateManifest() {
 
 - **Agents**: ${agents.length}
 - **Skills**: ${skills.length}
-- **Scripts**: ${scripts.length}
+- **Scripts**: ${scripts.length} *(top-level CLI scripts; library/helper modules under \`scripts/lib/\`, \`scripts/helpers/\`, \`scripts/hooks/\`, and \`scripts/validators/\` are excluded here — \`scripts/SCRIPTS.md\` is the full registry)*
 - **Commands**: ${commands.length}
 
 ---
@@ -381,6 +381,7 @@ async function generateManifest() {
     markdown += `
 ---
 
+<!-- validate-md-language:allowlist-begin reason="Triggers column embeds verbatim Korean search keywords copied from k-* SKILL.md frontmatter (proper-noun data values, not prose). Generated region — a whole-file lang: ko exception would be dishonest and would un-validate the rest of the manifest, so scripts/validate-md-language.ts exempts only this marked section (T-20260912-015)." -->
 ## Skills
 
 | Name | Version | Status | Location | Platform | Triggers | Owner |
@@ -392,6 +393,8 @@ async function generateManifest() {
     }
 
     markdown += `
+<!-- validate-md-language:allowlist-end -->
+
 ---
 
 ## Scripts

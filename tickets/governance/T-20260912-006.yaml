@@ -1,0 +1,21 @@
+schemaVersion: 1
+id: T-20260912-006
+kind: manual
+title: >-
+  Remove the CONSTITUTION.md 8.15 reference from the L1 docs/context.md version
+  footer, make the audit L0-leak exemption occurrence-scoped, and make the
+  scaffold sanitizer blank matched text instead of deleting lines so upgrade
+  version-footer sync works
+priority: high
+status: done
+attempts: 0
+created_at: '2026-09-12T05:23:26.560Z'
+history:
+  - at: '2026-09-12T05:23:26.560Z'
+    from: null
+    to: backlog
+  - at: '2026-09-12T07:17:31.471Z'
+    from: backlog
+    to: done
+result: null
+error: null

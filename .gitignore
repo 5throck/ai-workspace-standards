@@ -145,6 +145,10 @@ tests/.temp/
 # Scratch space for .claude/skills/simulate-project-creation (never tracked)
 scripts/temp/
 
+# Advisory concurrency lockfile for scripts/sync-skills.ts (T-20260912-017):
+# PID + timestamp of the active run; session-local, never tracked.
+.sync-skills.lock
+
 # --- Claude Code plan-mode artifacts (session-local, must not be committed) ---
 .claude/plans/
 

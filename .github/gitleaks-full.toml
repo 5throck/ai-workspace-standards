@@ -1,0 +1,51 @@
+# gitleaks FULL-SCAN configuration — periodic deep audit only (weekly-health-check.yml)
+#
+# NOT the repo's default secret-scan config: `gitleaks detect` without --config
+# picks up the root .gitleaks.toml, whose path allowlists exclude CHANGELOG and
+# Projects/ (plus test-file patterns) for fast per-PR scanning. This config exists
+# to bypass those path allowlists for the scheduled full-history audit, so a secret
+# that crept into an allowlisted path is still caught periodically.
+#
+# Semantics:
+#   * Default gitleaks rules apply ([extend] useDefault) — same rule set as the
+#     root config, ONLY the path allowlists are dropped.
+#   * Explicit allowlist entries below are limited to verified false positives,
+#     each with a rationale. Do NOT add path-based blanket excludes here — that
+#     would silently recreate the blind spot this scan exists to close.
+#   * Used by: .github/workflows/weekly-health-check.yml ("Secret scanning -
+#     full history (deep audit)") via --config. Local equivalent:
+#     `gitleaks detect --config .github/gitleaks-full.toml --redact --verbose`
+
+title = "ai-workspace-standards gitleaks FULL-SCAN config (no path allowlists)"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Verified false positives only — rationale required for every entry"
+# 1. Historical security-validator unit-test fixture (commit 3845d1a6; file
+#    deleted from HEAD since): obvious dummy values ('sk-1234567890',
+#    'my-secret-value', truncated JWT header 'eyJhbGciOiJIUzI1NiIs...') used as
+#    negative-test inputs for the validator's own secret-detection tests, in
+#    both the L0 and the L1 mirror copy. Not real credentials. Commit-scoped
+#    (not path-scoped) so a FUTURE commit reintroducing secret-shaped strings
+#    in that path is still reported.
+commits = [
+  '3845d1a6393732fadac268c7f3a4b59a327c0dd8',
+]
+# Regex patterns on the matched secret value
+regexes = [
+  # Placeholder values used by .env.sample templates and documentation examples
+  # (same value patterns as the root .gitleaks.toml — these are value-shape
+  # exclusions, not path exclusions; kept here so full scans report real finds
+  # only)
+  '''your[_-]?(api[_-]?)?key[_-]?here''',
+  '''your[_-]?secret[_-]?here''',
+  '''replace[_-]?with[_-]?actual''',
+  '''example[_\-.]com''',
+  '''YOUR_API_KEY''',
+  '''YOUR_TOKEN''',
+  '''YOUR_SECRET''',
+  # gitleaks:allow inline suppression marker
+  '''gitleaks:allow''',
+]

@@ -1,4 +1,15 @@
-// @version 1.13.0
+// @version 1.14.0
+// v1.14.0: fix(pipeline): two fail-open gates become fail-closed (T-20260912-009 /
+//           T-20260912-007). (1) Step 3.7 discarded verify-scripts --check-drift's exit
+//           code behind .quiet().nothrow() — L0/L1 script drift neither failed the
+//           pipeline nor printed; the result is now checked, the drift table stays
+//           visible (.quiet() dropped), and non-zero exits abort before step 4 (step 3.9
+//           idiom). (2) Step 5 branch creation ran the show-ref probe and both checkout
+//           forms under .nothrow() without checking .exitCode, so a refused checkout
+//           (e.g. "local changes would be overwritten") fell through to
+//           staging + commit + push ON MAIN; probe and checkout results are now
+//           exit-code-checked and abort BEFORE any staging (same contract as the step 6
+//           sensitive-file guard).
 // v1.12.0: feat(design-gate): step 3.9 registry-absent skip becomes a loud WARN — a missing
 //           docs/specs/registry.json means the Universal Design Gate (ADR-0074) spec-check is
 //           INACTIVE, which must be visible instead of a buried one-line log. Pairs with the
@@ -311,12 +322,23 @@ if (fs.existsSync(path.join('scripts', 'SCRIPTS.md'))) {
     }
 }
 
-// 3.7 L0/L1 script drift check
+// 3.7 L0/L1 script drift check (BLOCKING — T-20260912-009): the verify-scripts exit
+// code used to be discarded behind .quiet().nothrow(), so template drift neither
+// failed the pipeline nor printed. Output is intentionally visible (no .quiet()) so
+// the drift table shows; same idiom as step 3.9 below.
 const hasBun = (await $`bun --version`.quiet().nothrow()).exitCode === 0;
 if (hasBun) {
     const verifyScripts = path.join('scripts', 'verify-scripts.ts');
     if (fs.existsSync(verifyScripts)) {
-        await $`bun ${verifyScripts} --check-drift`.quiet().nothrow();
+        const driftRes = await $`bun ${verifyScripts} --check-drift`.nothrow();
+        if (driftRes.exitCode !== 0) {
+            console.error(`${RED}✗ Step 3.7: L0/L1 script drift detected (exit ${driftRes.exitCode})${RESET}`);
+            console.error('  Fix: bun scripts/propagate-to-templates.ts --apply refreshes stale mirrors');
+            console.error('  (then --check-drift to confirm only tolerated gemini-settings drift remains).');
+            if (import.meta.main) process.exit(1);
+        } else {
+            console.log(`${GREEN}✓ L0/L1 script drift check passed${RESET}`);
+        }
     }
 }
 
@@ -504,7 +526,7 @@ if (isWorkspaceRoot) {
 }
 
 // ── Step 4.51: Governance L0→L1 file deployment (CLAUDE/GEMINI/AGENTS/CODEX.md) ──
-//     ADR-0075 D11: the four instruction twins ride governance-l1 so model/registry
+//     ADR-0077 D11: the four instruction twins ride governance-l1 so model/registry
 //     edits at L0 reach templates/common in the same sync instead of waiting for a
 //     manual `--governance-l1` run. Fatal in L0 context, same contract as 4.5.
 if (isWorkspaceRoot && isL0Context) {
@@ -759,15 +781,21 @@ if (currentBranch === "main" || currentBranch === "master") {
     const timestamp = `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
     
     branch = `pr/${timestamp}-${slug}`;
-    try {
-        const branchExists = (await $`git show-ref --verify refs/heads/${branch}`.quiet().nothrow()).exitCode === 0;
-        if (branchExists) {
-            await $`git checkout ${branch}`.nothrow();
-        } else {
-            await $`git checkout -b ${branch}`.nothrow();
-        }
-    } catch {
-        console.log(`${RED}❌ Failed to create branch '${branch}'${RESET}`);
+    // Fail-closed branch gate (T-20260912-007): every command here runs under
+    // .nothrow(), so failures surface ONLY via .exitCode — the old try/catch was
+    // dead code, and a refused checkout (e.g. "local changes would be overwritten")
+    // fell through silently to staging + commit + push ON MAIN. Any non-zero exit
+    // now aborts BEFORE git add runs — same contract as the step 6 sensitive-file
+    // guard below.
+    const branchProbe = await $`git show-ref --verify refs/heads/${branch}`.quiet().nothrow();
+    const checkoutRes = branchProbe.exitCode === 0
+        ? await $`git checkout ${branch}`.nothrow()
+        : await $`git checkout -b ${branch}`.nothrow();
+    if (checkoutRes.exitCode !== 0) {
+        console.error(`${RED}❌ Failed to ${branchProbe.exitCode === 0 ? 'switch to' : 'create'} branch '${branch}' (exit ${checkoutRes.exitCode}) — aborting before staging/commit.${RESET}`);
+        const detail = checkoutRes.stderr.toString().trim() || checkoutRes.stdout.toString().trim();
+        if (detail) console.error(`   ${detail.split('\n')[0]}`);
+        console.error(`${YELLOW}   Resolve the git error (e.g. commit or stash conflicting local changes), then re-run /sync.${RESET}`);
         if (import.meta.main) {
           process.exit(1);
         }

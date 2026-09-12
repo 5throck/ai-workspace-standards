@@ -1,0 +1,18 @@
+schemaVersion: 1
+id: T-20260912-013
+kind: manual
+title: >-
+  Remove the validate-docs-links skill directory, SKILLS.md and VERSION_MANIFEST
+  rows, lifecycle record final state, and skill-graph node on or after
+  2026-12-09
+priority: normal
+not_before: '2026-12-09'
+status: backlog
+attempts: 0
+created_at: '2026-09-12T05:23:39.925Z'
+history:
+  - at: '2026-09-12T05:23:39.925Z'
+    from: null
+    to: backlog
+result: null
+error: null

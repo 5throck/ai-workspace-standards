@@ -1,7 +1,7 @@
 > Part of [CONSTITUTION.md](../../CONSTITUTION.md) — §6 Skill Lifecycle Management
 > **Do not edit in isolation** — changes must be reflected in the hub index.
 
-### 6. Skills {#skills}
+### 6. Skills
 
 Reusable workflow knowledge is defined as skills.
 

@@ -53,6 +53,55 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Secret scanning - full history deep audit (no path allowlists)
+        # T-20260912-021: the gitleaks-action step above runs with the root
+        # .gitleaks.toml, whose path allowlists (CHANGELOG, test-file patterns,
+        # local-only paths) exist to keep per-PR scanning fast and quiet. That
+        # also means a secret landing in an allowlisted tracked path is invisible
+        # to every PR scan. This weekly deep audit applies the SAME default rule
+        # set WITHOUT the path allowlists (.github/gitleaks-full.toml — verified
+        # false positives only in ITS allowlist) across the FULL git history
+        # (fetch-depth: 0 in the checkout step). Pinned install mirrors the
+        # hook-secret-gates job in test.yml.
+        shell: bash
+        run: |
+          GITLEAKS_VERSION=8.24.3
+          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" -o /tmp/gitleaks.tgz
+          sudo tar -xzf /tmp/gitleaks.tgz -C /usr/local/bin gitleaks
+          gitleaks version
+          gitleaks detect --config .github/gitleaks-full.toml --redact --verbose
+
+      - name: Secret scanning - Projects/ working tree (local hygiene report)
+        # Projects/ is intentionally untracked (user engagement repos — outside
+        # this repo's audit scope per .gitleaks.toml), so hosted runners never
+        # have it and the full-history gate above cannot see it. When it IS
+        # present (local/self-hosted runs), surface its findings loudly but do
+        # NOT gate: engagement repos are out of audit scope by policy, and
+        # pre-existing engagement-local findings must neither silently flip this
+        # workflow red nor be blanket-allowlisted (verified false positives only
+        # — see .github/gitleaks-full.toml).
+        shell: bash
+        run: |
+          if [ ! -d "Projects" ]; then
+            echo "Projects/ not present (untracked local dir) — hygiene report skipped."
+            exit 0
+          fi
+          GITLEAKS_VERSION=8.24.3
+          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" -o /tmp/gitleaks.tgz
+          sudo tar -xzf /tmp/gitleaks.tgz -C /usr/local/bin gitleaks
+          set -o pipefail
+          LOG=$(mktemp)
+          if gitleaks detect --no-git --source Projects --config .github/gitleaks-full.toml --redact --verbose 2>&1 | tee "$LOG"; then
+            echo "Projects/ working tree: no secret-shaped findings."
+          else
+            echo "----------------------------------------------------------------"
+            echo "⚠️  Projects/ working tree carries secret-shaped findings (list above)."
+            echo "    Out of repo audit scope by policy (.gitleaks.toml): triage LOCALLY in the"
+            echo "    engagement repos. Do NOT blanket-allowlist them here —"
+            echo "    .github/gitleaks-full.toml admits verified false positives only."
+            echo "----------------------------------------------------------------"
+          fi
+
       - name: Security audit - dependency vulnerabilities
         shell: bash
         run: |

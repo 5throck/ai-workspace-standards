@@ -17,7 +17,7 @@ By integrating proven industry methodologies and open-source benchmark architect
 
 ### 1.2 Version Manifest & Infrastructure Baseline
 The execution of the 2026 Q3–Q4 roadmap is anchored directly in the core platform architecture and infrastructure toolsets:
-- **Template Inheritance Model**: Built firmly upon the `template-v0.5.3` L0 -> L1 -> L2 inheritance architecture. Base settings, core capabilities, and governance rules propagate seamlessly from L0 (core base) to L1 (domain layer) and down to L2 (variant templates).
+- **Template Inheritance Model**: Built firmly upon the `template-v0.6.0` L0 -> L1 -> L2 inheritance architecture. Base settings, core capabilities, and governance rules propagate seamlessly from L0 (core base) to L1 (domain layer) and down to L2 (variant templates).
 - **Core Infrastructure Tooling**:
   - `dev-sync.ts` (v1.5.0): Used as the primary link validation gate across all variant folder layouts, verifying symlinks, structural integrity, and cross-layer references.
   - `test-runner.ts` (v1.1.0): Operates a high-concurrency parallel worker pool for rapid execution of variant-specific unit tests, security checks, and Playwright PDF renders.
@@ -222,4 +222,4 @@ bun scripts/validate-templates.ts
 
 - **Language Requirement**: All documentation, code comments, and error messages in this roadmap and associated implementations MUST be written in **English** per [CONSTITUTION.md](../CONSTITUTION.md).
 - **Cross-Referencing & Specification Alignment**: All relative links within `docs/` must remain valid and fully aligned with [VERSION_MANIFEST.md](VERSION_MANIFEST.md), [Variant Contract](governance/variant-contract.md), [Variant Registry Architecture](designs/variant-registry-architecture-design.md), and [Variant Templates Advancement Design](designs/variant-templates-advancement-design.md).
-- **Template Inheritance Architecture (`template-v0.5.3`)**: All variant templates strictly inherit from the `template-v0.5.3` L0 -> L1 -> L2 model. Any core helper scripts or shared tools (`dev-sync.ts` v1.5.0, `test-runner.ts` v1.1.0, `validate-templates.ts`) introduced or modified in this roadmap must be tracked in `script_manifest` within `variant.json` and registered for synchronized downstream updates via `upgrade-project.ts`.
+- **Template Inheritance Architecture (`template-v0.6.0`)**: All variant templates strictly inherit from the `template-v0.6.0` L0 -> L1 -> L2 model. Any core helper scripts or shared tools (`dev-sync.ts` v1.5.0, `test-runner.ts` v1.1.0, `validate-templates.ts`) introduced or modified in this roadmap must be tracked in `script_manifest` within `variant.json` and registered for synchronized downstream updates via `upgrade-project.ts`.

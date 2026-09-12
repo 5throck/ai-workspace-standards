@@ -1,14 +1,15 @@
 /**
- * Tests for sync-skills.ts — idempotent copy (M3) and per-item error
+ * Tests for sync-skills.ts — idempotent copy (M3), per-item error
  * collection/continuation (M2, already present but verified here as a
- * regression guard).
+ * regression guard), atomic copy semantics and dynamic shortcut back-sync
+ * (T-20260912-017).
  *
- * @version 1.0.0
+ * @version 1.1.0
  */
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { syncSkills, dirsEqual } from '../../scripts/sync-skills.ts';
+import { syncSkills, dirsEqual, defaultCopyDir, resolveTargetRoots } from '../../scripts/sync-skills.ts';
 
 const scratchRoot = path.resolve(import.meta.dir, '..', '.temp', 'sync-skills-test');
 
@@ -121,7 +122,98 @@ describe('syncSkills per-item error collection (M2 regression guard)', () => {
     });
 });
 
-describe('codex platform target (ADR-0075 W1)', () => {
+describe('defaultCopyDir atomic staging (T-20260912-017)', () => {
+    beforeEach(() => fs.rmSync(scratchRoot, { recursive: true, force: true }));
+    afterEach(() => fs.rmSync(scratchRoot, { recursive: true, force: true }));
+
+    test('copies full tree and replaces an existing destination', () => {
+        const src = path.join(scratchRoot, 'src');
+        const dest = path.join(scratchRoot, 'dest');
+        makeSkill(src, 'inner', '---\nname: inner\n---\n');
+        fs.mkdirSync(dest, { recursive: true });
+        fs.writeFileSync(path.join(dest, 'STALE.md'), 'old', 'utf-8');
+
+        defaultCopyDir(src, dest);
+
+        expect(fs.readFileSync(path.join(dest, 'inner', 'SKILL.md'), 'utf-8')).toContain('name: inner');
+        expect(fs.existsSync(path.join(dest, 'STALE.md'))).toBe(false);
+    });
+
+    test('leaves no temp staging siblings behind on success', () => {
+        const src = path.join(scratchRoot, 'src');
+        const dest = path.join(scratchRoot, 'dest');
+        makeSkill(src, 'demo', '---\nname: demo\n---\n');
+
+        defaultCopyDir(src, dest);
+
+        const siblings = fs.readdirSync(scratchRoot).filter(f => f.includes('.tmp-'));
+        expect(siblings).toEqual([]);
+    });
+
+    test('leaves no temp staging siblings behind when the copy fails', () => {
+        const dest = path.join(scratchRoot, 'dest');
+        fs.mkdirSync(dest, { recursive: true });
+        // Nonexistent source — cpSync into the temp sibling fails immediately,
+        // exercising the cleanup path deterministically (no fragile fs race).
+        expect(() => defaultCopyDir(path.join(scratchRoot, 'does-not-exist'), dest)).toThrow();
+        const debris = fs.readdirSync(dest).filter(f => f.includes('.tmp-'));
+        expect(debris).toEqual([]);
+    });
+});
+
+describe('resolveTargetRoots argument validation (T-20260912-017)', () => {
+    test('--dir with a missing value is a hard error, not a silent workspace-root fallback', () => {
+        expect(() => resolveTargetRoots(['--dir'])).toThrow(/--dir requires a path argument/);
+    });
+
+    test('--dir followed by another flag is a hard error', () => {
+        expect(() => resolveTargetRoots(['--dir', '--all-variants'])).toThrow(/--dir requires a path argument/);
+    });
+
+    test('--dir with a value resolves to that single root', () => {
+        const roots = resolveTargetRoots(['--dir', 'templates/co-consult']);
+        expect(roots).toHaveLength(1);
+        expect(roots[0]).toBe(path.resolve(path.resolve(import.meta.dir, '..', '..'), 'templates', 'co-consult'));
+    });
+});
+
+describe('Phase 2 shortcut semantics (T-20260912-017 premise fix)', () => {
+    beforeEach(() => fs.rmSync(scratchRoot, { recursive: true, force: true }));
+    afterEach(() => fs.rmSync(scratchRoot, { recursive: true, force: true }));
+
+    test('an .agents dir diverging from its SSOT counterpart yields a WARN and SSOT wins', async () => {
+        const dirs = freshDirs();
+        // SSOT copy and a hand-edited .agents copy of the same skill.
+        makeSkill(dirs.ssotSkills, 'sync', '---\nname: sync\n---\nSSOT BODY');
+        makeSkill(dirs.agentsSkills, 'sync', '---\nname: sync\n---\nHAND-EDITED BODY');
+
+        const result = await syncSkills(dirs);
+
+        expect(result.errors).toEqual([]);
+        expect(result.warnings.some(w => w.includes('sync'))).toBe(true);
+        // SSOT wins: Phase 1 re-synced the SSOT content over the hand-edit...
+        const agentsCopy = fs.readFileSync(path.join(dirs.agentsSkills, 'sync', 'SKILL.md'), 'utf-8');
+        expect(agentsCopy).toContain('SSOT BODY');
+        // ...and the divergent hand-edit was NOT propagated to .claude/.gemini.
+        const claudeCopy = fs.readFileSync(path.join(dirs.claudeSkills, 'sync', 'SKILL.md'), 'utf-8');
+        expect(claudeCopy).toContain('SSOT BODY');
+    });
+
+    test('a genuinely .agents-only shortcut is back-synced to .claude and .gemini', async () => {
+        const dirs = freshDirs();
+        makeSkill(dirs.agentsSkills, 'agents-only-skill', '---\nname: agents-only\n---\n');
+
+        const result = await syncSkills(dirs);
+
+        expect(result.errors).toEqual([]);
+        expect(result.warnings).toEqual([]);
+        expect(fs.existsSync(path.join(dirs.claudeSkills, 'agents-only-skill', 'SKILL.md'))).toBe(true);
+        expect(fs.existsSync(path.join(dirs.geminiSkills, 'agents-only-skill', 'SKILL.md'))).toBe(true);
+        expect(fs.existsSync(path.join(dirs.codexSkills, 'agents-only-skill'))).toBe(false);
+    });
+});
+
+describe('codex platform target (ADR-0077 W1)', () => {
     beforeEach(() => fs.rmSync(scratchRoot, { recursive: true, force: true }));
     afterEach(() => fs.rmSync(scratchRoot, { recursive: true, force: true }));
 

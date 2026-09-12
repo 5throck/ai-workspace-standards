@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.1.0
+// @version 1.2.0
 // @l2-propagate: false
 // ticket-store.ts — Atomic file I/O for the Phase A ticket queue. Every function
 // takes an explicit directory/path so callers (CLI, skill, tests) never assume a
@@ -147,6 +147,9 @@ export function createTicket(dir: string, input: CreateTicketInput): Ticket {
 export interface MoveOptions {
   force?: boolean;
   error?: string;
+  /** Outcome summary written to the ticket's `result` field on a `done` transition.
+   * The CLI requires a non-empty value for `move <id> done` (T-20260912-023). */
+  result?: string;
 }
 
 export function moveTicket(dir: string, id: string, to: Status, opts: MoveOptions = {}): Ticket {
@@ -159,6 +162,7 @@ export function moveTicket(dir: string, id: string, to: Status, opts: MoveOption
   ticket.history.push({ at: nowIso(), from, to });
   if (from === 'failed' && to === 'waiting') ticket.attempts += 1;
   if (to === 'failed' && opts.error !== undefined) ticket.error = opts.error;
+  if (to === 'done' && opts.result !== undefined) ticket.result = opts.result;
   writeTicketAtomic(dir, ticket);
   return ticket;
 }

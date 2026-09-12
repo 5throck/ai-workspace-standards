@@ -61,7 +61,7 @@ describe('upgrade-policy resolveClaim — dedicated passes keep their paths', ()
   test('HASH_SYNC for platform commands', () => {
     expect(resolveClaim('.claude/commands/sync.md', VARIANT)).toEqual({ policy: 'HASH_SYNC', pass: 'COMMANDS_SYNC' });
 
-    // ADR-0075 W4: codex platform mirrors claim TEMPLATE TREE SYNC *before* the blanket
+    // ADR-0077 W4: codex platform mirrors claim TEMPLATE TREE SYNC *before* the blanket
     // .codex/** ADD_IF_MISSING rule — otherwise fleet mirrors never receive updates.
     expect(resolveClaim('.codex/skills/demo-skill/SKILL.md', VARIANT)).toEqual({ policy: 'SYNC', pass: TEMPLATE_TREE_SYNC_PASS });
     expect(resolveClaim('.codex/prompts/sync.md', VARIANT)).toEqual({ policy: 'SYNC', pass: TEMPLATE_TREE_SYNC_PASS });

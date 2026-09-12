@@ -1,0 +1,20 @@
+schemaVersion: 1
+id: T-20260912-003
+kind: manual
+title: >-
+  Renumber duplicate Accepted ADRs (two 0074s, two 0075s) to unique IDs, update
+  citations in AGENTS/CONSTITUTION/CLAUDE/GEMINI, and add an ADR ID-uniqueness
+  check to verify-adr-governance.ts
+priority: urgent
+status: done
+attempts: 0
+created_at: '2026-09-12T05:23:26.520Z'
+history:
+  - at: '2026-09-12T05:23:26.520Z'
+    from: null
+    to: backlog
+  - at: '2026-09-12T06:42:23.596Z'
+    from: backlog
+    to: done
+result: null
+error: null

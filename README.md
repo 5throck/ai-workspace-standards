@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-content_hash: 78e9c7118d675b1ce4d6c74f085a9c24e82259d9fa243a74a56b5cf64bb0e0cb
+content_hash: 765cf36e9b1b27e1f411c44b6b9d49222325ee2bace842b7bf74ad95e4b66d34
 ---
 
 **Languages**: [English](README.md) · [한국어](README_ko.md) · [Español](README_es.md) · [日本語](README_ja.md)
@@ -37,11 +37,7 @@ Modern AI-assisted development requires more than prompts - it requires **consis
 
 ### Built-in Country Profiles
 
-Korean jurisdiction support ships with the workspace: a **KR country profile** ([`docs/countries/KR.md`](docs/countries/KR.md)), six **KR-scoped `k-*` data skills** (statute lookup `k-law`, disclosures `k-dart`, statistics `k-kosis`, market data `k-krx`, macro-financial `k-ecos`, public data `k-opendata`), and per-project country configuration (`variant.json` `country_config`). A project declares its target country; KR projects automatically receive the k-* skills, Korean regulatory anchors, and the country API-key block in `.env.sample` — see `docs/country-profiles.md`.
-
----
-
-## Prerequisites
+Korean jurisdiction support ships with the workspace: a **KR country profile** (see the exemplar at [`templates/co-news/docs/countries/KR.md`](templates/co-news/docs/countries/KR.md)), six **KR-scoped `k-*` data skills** (statute lookup `k-law`, disclosures `k-dart`, statistics `k-kosis`, market data `k-krx`, macro-financial `k-ecos`, public data `k-opendata`), and per-project country configuration (`variant.json` `country_config`). A project declares its target country; KR projects automatically receive the k-* skills, Korean regulatory anchors, and the country API-key block in `.env.sample`. Country profiles ship per-variant/per-project rather than at the workspace root — see [`templates/common/docs/country-profiles.md`](templates/common/docs/country-profiles.md) for the shared reference.
 
 ---
 
@@ -123,7 +119,7 @@ bun scripts/new-project.ts "my-project-name"
 bun scripts/new-project.ts "my-project-name" --variant co-develop
 
 # Use a specific template version (see available: bun scripts/list-template-versions.ts)
-bun scripts/new-project.ts "my-project-name" --version 0.5.0
+bun scripts/new-project.ts "my-project-name" --version 0.6.0
 ```
 
 > **[Breaking Change — 2026-06-11]**: `bash scripts/new-project.sh` and `.\scripts\new-project.ps1` have been replaced by `bun scripts/new-project.ts` (ADR-0036). Update any aliases or CI pipelines accordingly.
@@ -301,7 +297,7 @@ bun scripts/list-template-versions.ts
 bun scripts/new-project.ts my-project
 
 # Use a specific version
-bun scripts/new-project.ts my-project --version 0.5.0
+bun scripts/new-project.ts my-project --version 0.6.0
 
 # Use a specific variant
 bun scripts/new-project.ts my-project --variant co-develop

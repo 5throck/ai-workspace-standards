@@ -642,7 +642,7 @@ ${variantMarkers}
     const block = commonAgentsMd.slice(blockStart, blockEnd) + "<!-- COMMON-AGENTS:END -->\n";
     fs.appendFileSync(path.join(projectDir, "AGENTS.md"), "\n" + block);
   }
-  // Append the graft repo-context-graph instruction block (ADR-0074) — same
+  // Append the graft repo-context-graph instruction block (ADR-0076) — same
   // marker-extraction pattern as COMMON-AGENTS above. The L1 copy wraps the block
   // in WORKSPACE-MANAGED markers so upgrade-project's MERGE pass keeps it in sync
   // for projects created before this landed.
@@ -1088,7 +1088,7 @@ function main(): void {
   writePackageJson(projectDir, args.variant);
   bunInstall(projectDir);
 
-  // Step 8.5: graft index build (ADR-0074) — the template ships the full graft
+  // Step 8.5: graft index build (ADR-0076) — the template ships the full graft
   // surface (MCP entries, skill, hooks); give the fresh project its graph right
   // away. Non-fatal: bunx/graft may be unavailable (offline), and every graft tool
   // self-refreshes the graph before answering, so a skipped build self-heals.

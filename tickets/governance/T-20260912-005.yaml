@@ -1,0 +1,21 @@
+schemaVersion: 1
+id: T-20260912-005
+kind: manual
+title: >-
+  Restrict scrubConstitutionRefs code guard to cover .json and policy
+  meta-comments, restore the corrupted L1 propagation-map.json source_file and
+  CLAUDE/GEMINI line 3, and reconcile lifecycle-sync-audit Check C with the
+  intentional CONSTITUTION-to-context scrub
+priority: high
+status: done
+attempts: 0
+created_at: '2026-09-12T05:23:26.549Z'
+history:
+  - at: '2026-09-12T05:23:26.549Z'
+    from: null
+    to: backlog
+  - at: '2026-09-12T07:49:17.437Z'
+    from: backlog
+    to: done
+result: null
+error: null

@@ -2,14 +2,20 @@
 /**
  * test-new-project.ts — E2E Test for new-project.ts
  *
- * @version 1.0.4
- * @last_updated 2026-05-31
+ * @version 1.1.0
+ * @last_updated 2026-09-12
+ *
+ * v1.1.0: T-20260912-004 — new Test 25 pins pm.md extends-stub resolution (no
+ *         `extends:`, no raw `variant_overrides:`, substantive PM body, template
+ *         variant_overrides.governance_workflow rendered into the body); Test 22 no
+ *         longer passes on a dangling `extends:` pointer; `--all-variants` loops the
+ *         single-variant harness across every templates/co-* variant.
  *
  * Cross-platform: detects OS and calls the appropriate script.
  * Tests the OUTPUT of new-project, not the mechanism inside it.
  *
  * Usage:
- *   bun scripts/test-new-project.ts <TestProjectName> [--variant co-develop] [--platform both|claude|antigravity]
+ *   bun scripts/test-new-project.ts <TestProjectName> [--variant co-develop] [--platform both|claude|antigravity] [--all-variants]
  *
  * Test coverage:
  *   0.  Script syntax validation (bash -n / powershell parser — runs before project creation)
@@ -34,12 +40,16 @@
  *   17. No .cmd files remain
  *   18. Script pair validation in project scripts/
  *   19. AGENTS.md Skills injected into context.md (if markers present)
+ *   20-22. pm.md marker/frontmatter/invariant-section checks
+ *   23-24. Smoke tests — dev-sync/sync-md/verify-readme-sync present
+ *   25. pm.md extends-stub fully resolved (no extends / no variant_overrides / substantive body)
  */
 
 import { existsSync, readFileSync, readdirSync, statSync, rmSync } from 'node:fs';
 import { join, basename } from 'node:path';
 import { platform } from 'node:process';
 import { $ } from 'bun';
+import { load as yamlLoad } from 'js-yaml';
 
 // ── Args ─────────────────────────────────────────────────────────────────────
 
@@ -47,9 +57,37 @@ const args = process.argv.slice(2);
 const projectName = args.find(a => !a.startsWith('--'));
 const variantArg  = (() => { const i = args.indexOf('--variant');  return i !== -1 ? args[i + 1] : 'co-develop'; })();
 const platformArg = (() => { const i = args.indexOf('--platform'); return i !== -1 ? args[i + 1] : 'both'; })();
+// --all-variants: loop the single-variant harness across every templates/co-* variant
+// (T-20260912-004 — the pm.md extends-stub resolution differs per variant stub shape:
+// 8 empty-body stubs, 5 prose-body stubs; every variant must scaffold a full PM agent).
+const allVariants = args.includes('--all-variants');
+
+if (allVariants && import.meta.main) {
+  const tplDir = join(process.cwd(), 'templates');
+  const variants = readdirSync(tplDir, { withFileTypes: true })
+    .filter(e => e.isDirectory() && e.name.startsWith('co-'))
+    .map(e => e.name)
+    .sort();
+  console.log(`\n🧪 All-variants mode: ${variants.length} variants (${variants.join(', ')})`);
+  const failedVariants: string[] = [];
+  for (const v of variants) {
+    console.log(`\n${'═'.repeat(60)}\n🧪 Variant run: ${v}\n${'═'.repeat(60)}`);
+    const proc = Bun.spawnSync(
+      ['bun', 'scripts/test-new-project.ts', `PmStub-${v}`, '--variant', v, '--platform', platformArg, '--yes'],
+      { stdout: 'inherit', stderr: 'inherit', cwd: process.cwd() },
+    );
+    if (proc.exitCode !== 0) failedVariants.push(v);
+  }
+  console.log(`\n${'═'.repeat(60)}`);
+  console.log(`📊 All-variants summary: ${variants.length - failedVariants.length}/${variants.length} variants passed`);
+  if (failedVariants.length > 0) {
+    console.log(`   FAILED: ${failedVariants.join(', ')}`);
+  }
+  process.exit(failedVariants.length > 0 ? 1 : 0);
+}
 
 if (!projectName) {
-  console.error('Usage: bun scripts/test-new-project.ts <TestProjectName> [--variant co-develop] [--platform both|claude|antigravity]');
+  console.error('Usage: bun scripts/test-new-project.ts <TestProjectName> [--variant co-develop] [--platform both|claude|antigravity] [--all-variants]');
   if (import.meta.main) {
     process.exit(1);
   }
@@ -171,7 +209,7 @@ try {
   // ── Test 1: Project Creation [maps to: step 1 + step 2] ─────────────────────
   console.log('Test 1: Project Creation');
   try {
-    const result = await $`bun scripts/new-project.ts ${testDir} --variant ${variantArg} --platform ${platformArg}`.nothrow();
+    const result = await $`bun scripts/new-project.ts ${testDir} --variant ${variantArg} --platform ${platformArg} --yes`.nothrow();
     if (result.exitCode !== 0 || !existsSync(testDir)) {
       fail('Test 1', `exit code ${result.exitCode} / directory not found`);
     } else {
@@ -535,6 +573,9 @@ try {
   } catch (e) { fail('Test 21', String(e)); }
 
   // ── Test 22: pm.md contains all 7 invariant sections [maps to: AC-05] ─────
+  // T-20260912-004: the previous `extends:` escape hatch (pass when the scaffolded
+  // pm.md still said `extends:`) masked unresolved stubs — the scaffold must inline
+  // the common body, so the invariants are required unconditionally.
   console.log('\nTest 22: pm.md contains all 7 invariant sections');
   try {
     const pmPath = join(testDir, 'agents', 'pm.md');
@@ -542,24 +583,20 @@ try {
       fail('Test 22', 'agents/pm.md not found');
     } else {
       const pmContent = readFileSync(pmPath, 'utf-8');
-      if (pmContent.includes('extends:')) {
-        pass('Test 22 PASSED: pm.md dynamically inherits from common agent definition (extends)');
+      const invariants = [
+        '## Role',
+        '## ⚠️ ROLE CLARIFICATION',
+        '## YOU ARE THE SINGLE ENTRY POINT',
+        '## Consensus-Driven Facilitation Model',
+        '## Governance Workflow',
+        '## Agent Ecosystem',
+        '## Permission Denial Protocol'
+      ];
+      const missing = invariants.filter(s => !pmContent.includes(s));
+      if (missing.length > 0) {
+        fail('Test 22', `Missing invariant sections: ${missing.join(', ')}`);
       } else {
-        const invariants = [
-          '## Role',
-          '## ⚠️ ROLE CLARIFICATION',
-          '## YOU ARE THE SINGLE ENTRY POINT',
-          '## Consensus-Driven Facilitation Model',
-          '## Governance Workflow',
-          '## Agent Ecosystem',
-          '## Permission Denial Protocol'
-        ];
-        const missing = invariants.filter(s => !pmContent.includes(s));
-        if (missing.length > 0) {
-          fail('Test 22', `Missing invariant sections: ${missing.join(', ')}`);
-        } else {
-          pass('Test 22 PASSED: pm.md contains all 7 invariant sections');
-        }
+        pass('Test 22 PASSED: pm.md contains all 7 invariant sections');
       }
     }
   } catch (e) { fail('Test 22', String(e)); }
@@ -591,6 +628,55 @@ try {
       pass('Smoke test: scripts/verify-readme-sync.ts present');
     }
   } catch (e) { fail('Test 24', String(e)); }
+
+  // ── Test 25: pm.md extends-stub fully resolved [T-20260912-004] ──────────
+  // The scaffolded agents/pm.md must be self-contained: no dangling `extends:`,
+  // no raw `variant_overrides:` YAML (rendered into the body instead), and a
+  // substantive body (the L1 PM body, not a stub).
+  console.log('\nTest 25: pm.md extends-stub resolution (no extends / no variant_overrides / substantive body)');
+  try {
+    const pmPath = join(testDir, 'agents', 'pm.md');
+    if (!existsSync(pmPath)) {
+      fail('Test 25', 'agents/pm.md not found');
+    } else {
+      const pmContent = readFileSync(pmPath, 'utf-8');
+      const problems: string[] = [];
+      if (pmContent.includes('extends:')) {
+        problems.push('scaffolded pm.md still contains a dangling `extends:` pointer (templates/ does not exist in the project)');
+      }
+      if (pmContent.includes('variant_overrides:')) {
+        problems.push('scaffolded pm.md still contains raw `variant_overrides:` YAML (must be rendered into body sections)');
+      }
+      const fmMatch = pmContent.match(/^---\n([\s\S]*?)\n---\n?/);
+      const body = fmMatch ? pmContent.slice(fmMatch[0].length) : pmContent;
+      if (!/Permission Denial|PM Gateway|Dispatch Protocol/i.test(body)) {
+        problems.push('body lacks substantive PM content (no Permission Denial / PM Gateway / Dispatch Protocol match)');
+      }
+      if (body.trim().length < 2000) {
+        problems.push(`body too short (${body.trim().length} chars) — the L1 PM body was not attached`);
+      }
+      // If the variant template ships variant_overrides, its governance text must be
+      // rendered into the scaffolded body (ADR-0039/ADR-0034 scaffold-time contract).
+      const tmplPmPath = join(process.cwd(), 'templates', variantArg, 'agents', 'pm.md');
+      if (existsSync(tmplPmPath)) {
+        const tmplMatch = readFileSync(tmplPmPath, 'utf-8').match(/^---\n([\s\S]*?)\n---\n?/);
+        if (tmplMatch) {
+          const fm = (yamlLoad(tmplMatch[1]) ?? {}) as Record<string, unknown>;
+          const overrides = (fm['variant_overrides'] ?? {}) as Record<string, unknown>;
+          const gw = typeof overrides['governance_workflow'] === 'string' ? (overrides['governance_workflow'] as string) : '';
+          const contentLine = gw.split('\n').map(l => l.trim()).find(l => l !== '' && !l.startsWith('#'));
+          if (contentLine && !pmContent.includes(contentLine)) {
+            problems.push(`variant_overrides.governance_workflow not rendered into body (missing line: "${contentLine.slice(0, 60)}…")`);
+          }
+        }
+      }
+      if (problems.length > 0) {
+        fail('Test 25', problems.join('; '));
+      } else {
+        pass(`Test 25 PASSED: pm.md fully resolved (body: ${body.trim().length} chars, no extends, no variant_overrides)`);
+      }
+    }
+  } catch (e) { fail('Test 25', String(e)); }
 
   // ── Summary ───────────────────────────────────────────────────────────────
   console.log('\n' + '─'.repeat(50));

@@ -337,7 +337,7 @@ Before editing any non-trivial file for the first time in this session, you MUST
 **Content**:
 
 ```markdown
-### 11. Governance Enforcement Layers → [Full details](docs/constitution/11-governance-enforcement.md)
+### 11. Governance Enforcement Layers → [Full details](../../CONSTITUTION.md#11-governance-enforcement-layers)
 
 The workspace uses a 3-layer governance enforcement model to ensure agent compliance
 with quality standards, security practices, and operational procedures.
@@ -359,14 +359,17 @@ override capability. The combination ensures defense-in-depth.
 by a temp file). State resets on session restart — acceptable because hooks are per-session
 by definition and re-investigation cost is low.
 
-See [docs/constitution/11-governance-enforcement.md](docs/constitution/11-governance-enforcement.md)
-for the full specification including GateGuard architecture, hook script behavior,
+The full specification is maintained in this document (below) and in
+[CONSTITUTION.md §11](../../CONSTITUTION.md#11-governance-enforcement-layers)
+(the planned part file `docs/constitution/11-governance-enforcement.md` was never created —
+its content was consolidated into CONSTITUTION.md §11 and this design document),
+including GateGuard architecture, hook script behavior,
 and platform coverage matrix.
 ```
 
 **File changes**:
 - `CONSTITUTION.md`: Add Section 11 after Section 10 (Terminology).
-- `docs/constitution/11-governance-enforcement.md` (new): Full specification document.
+- Full specification: consolidated into `CONSTITUTION.md` §11 and this design document — the planned part file `docs/constitution/11-governance-enforcement.md` was never created.
 
 ### 4.5 GateGuard Skill
 
@@ -470,7 +473,7 @@ and platform coverage matrix.
 | `docs/schemas/agent-frontmatter.schema.json` | JSON Schema | L0 | Agent frontmatter validation schema |
 | `docs/schemas/skill-frontmatter.schema.json` | JSON Schema | L0 | Skill frontmatter validation schema |
 | `scripts/validators/frontmatter-validator.ts` | Validator | L0 | Modular frontmatter validation module |
-| `docs/constitution/11-governance-enforcement.md` | Documentation | L0 | Full governance enforcement layers specification |
+| `CONSTITUTION.md` §11 (Governance Enforcement Layers) | Documentation | L0 | Full governance enforcement layers specification |
 | `docs/designs/ecc-phase1-governance-design.md` | Design doc | L0 | This document |
 
 ### Modified Files
@@ -648,5 +651,5 @@ genuine workflow issue that requires human judgment to resolve.
 
 ---
 
-*Last Updated: 2026-08-15*
+*Last Updated: 2026-09-12*
 *Design Owner: Template Architect*

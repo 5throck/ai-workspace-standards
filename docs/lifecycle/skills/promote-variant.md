@@ -37,7 +37,7 @@
 ## Metadata
 
 - **Current Phase**: production
-- **Version**: 1.3.0
+- **Version**: 1.4.0
 - **Owner**: pm
-- **Last Updated**: 2026-08-24
+- **Last Updated**: 2026-09-12 (Version 1.3.0 → 1.4.0 aligned to SKILL.md frontmatter, T-20260912-010)
 - **Last Reviewer**: docs-writer

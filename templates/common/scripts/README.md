@@ -160,7 +160,7 @@ to ensure Claude Code, Gemini CLI, Antigravity, Antigravity CLI, and Codex pick 
 - `bun run sync-skills` — workspace root only (default, unchanged from prior versions)
 - `bun scripts/sync-skills.ts --dir templates/co-consult` — a single project root (variant or `templates/common`)
 - `bun scripts/sync-skills.ts --all-variants` — every `templates/co-*/` variant plus `templates/common/`
-**v1.7.0**: fourth platform target `.codex/skills/` (Codex CLI + Desktop App, ADR-0075 W1) and Phase 1b — `.claude/commands/*.md` mirrored to `.codex/prompts/` as Codex custom prompts (live-support gate in W5).
+**v1.7.0**: fourth platform target `.codex/skills/` (Codex CLI + Desktop App, ADR-0077 W1) and Phase 1b — `.claude/commands/*.md` mirrored to `.codex/prompts/` as Codex custom prompts (live-support gate in W5).
 **v1.4.0**: added `--dir`/`--all-variants` — the workspace-root-only default was silently leaving `.agents/skills/` (Antigravity CLI) far behind `.claude/skills/`/`.gemini/skills/` in every variant (discovered during a full skill-lifecycle audit, 2026-07-19). Run `--all-variants` after any variant-level skill change.
 
 #### `sync-template-deps.ts`

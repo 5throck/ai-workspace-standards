@@ -93,6 +93,16 @@ jobs:
       - name: Validate templates
         run: bun run validate-templates
 
+      - name: Validate docs links
+        # T-20260912-018: dev-sync.ts runs validate-docs-links.ts as a blocking
+        # /sync pre-flight, but CI never did — a PR with broken links could pass
+        # required CI then block the next /sync. Mirror the exact invocation
+        # dev-sync uses (docs/ root-level scan; no network — http(s) links are
+        # skipped, only relative file links + anchors are verified). Ubuntu-only:
+        # a pure markdown scan gains nothing from 3 OSes.
+        if: matrix.os == 'ubuntu-latest'
+        run: bun scripts/validate-docs-links.ts
+
       - name: Workspace audit
         if: matrix.os == 'ubuntu-latest'
         run: bun scripts/audit.ts
@@ -121,60 +131,85 @@ jobs:
             echo "::notice::E2E scenario tests skipped — no tests/scenarios/ directory or directory is empty"
           fi
 
-      - name: Tier 3 Auditor - Lifecycle Compliance Check
-        shell: pwsh
-        run: |
-          Write-Host "=== Tier 3 Auditor: Lifecycle Compliance Audit ===" -ForegroundColor Cyan
+      # T-20260912-008: these four audits previously ran sequentially inside ONE
+      # pwsh step. PSNativeCommandUseErrorActionPreference defaults to false in
+      # pwsh 7.4, so the step's exit code was only the LAST command's — up to 3
+      # of 4 audits could fail while the step (and CI) went green. Split into
+      # independent steps (mirrors weekly-health-check.yml) so each audit's
+      # non-zero exit fails the job on its own. Default shell per OS: bash -e
+      # on linux/macos; pwsh on windows, where GitHub appends a
+      # `exit $LASTEXITCODE` epilogue — both propagate a single command's
+      # failure correctly.
+      - name: Tier 3 Auditor - Agent lifecycle audit
+        run: bun run agent-lifecycle-audit
 
-          # Run lifecycle audit tools
-          Write-Host "Running agent lifecycle audit..." -ForegroundColor Yellow
-          bun run agent-lifecycle-audit
+      - name: Tier 3 Auditor - Skill lifecycle audit
+        run: bun run skill-lifecycle-audit
 
-          Write-Host "Running skill lifecycle audit..." -ForegroundColor Yellow
-          bun run skill-lifecycle-audit
+      - name: Tier 3 Auditor - README lifecycle audit
+        run: bun run readme-lifecycle-audit
 
-          Write-Host "Running README lifecycle audit..." -ForegroundColor Yellow
-          bun run readme-lifecycle-audit
-
-          Write-Host "Running scripts verification..." -ForegroundColor Yellow
-          bun run verify-scripts
-
-          Write-Host "✅ Tier 3 Auditor: All lifecycle checks passed" -ForegroundColor Green
+      - name: Tier 3 Auditor - Verify scripts registry
+        run: bun run verify-scripts
 
       - name: L0→L1 drift check (propagation-map integrity)
         shell: bash
         run: |
-          # --check-drift exits 1 when drift is found, and can also exit
-          # non-zero on hard failures (e.g. malformed propagation-map.json).
+          # Machine drift contract (T-20260912-016 follow-on): --check-drift
+          # --json has stable exit codes — 0 = clean, 1 = only tolerated
+          # gemini-settings drift, 2 = unexpected drift. This replaces the old
+          # fragile prose matching ("differ|missing|extra") on human output.
           # gemini-settings has known intentional L2 variant overrides
-          # (PostToolUse lifecycle hooks) that will always differ from L1.
-          # Tolerate exit 1 only; any other non-zero exit is a hard failure.
-          # Fail if any domain OTHER than gemini-settings appears in the drift
-          # report — that would indicate a regression (e.g.
-          # l2_drift_eligible misconfiguration).
+          # (PostToolUse lifecycle hooks) that will always differ from L1;
+          # exactly that domain and nothing broader is tolerated.
           set -o pipefail
           DRIFT_EXIT=0
-          DRIFT_OUTPUT=$(bun scripts/propagate-to-templates.ts --check-drift 2>&1) || DRIFT_EXIT=$?
+          DRIFT_OUTPUT=$(bun scripts/propagate-to-templates.ts --check-drift --json 2>&1) || DRIFT_EXIT=$?
           echo "$DRIFT_OUTPUT"
-          if [ "$DRIFT_EXIT" -ne 0 ] && [ "$DRIFT_EXIT" -ne 1 ]; then
-            echo "ERROR: propagate-to-templates --check-drift failed hard (exit $DRIFT_EXIT)"
-            exit "$DRIFT_EXIT"
+
+          # Human-readable annotation parsed from the JSON summary (bun is
+          # guaranteed by setup-bun; jq is not preinstalled on all runners).
+          # Read from stdin — no temp-file paths, safe on the windows runner's
+          # Git Bash too. Exit code: 0 = valid contract with no unexpected
+          # drift, 1 = valid contract WITH unexpected drift, 2 = output is not
+          # the machine contract (e.g. a hard crash / error stack).
+          CONTRACT=0
+          printf '%s' "$DRIFT_OUTPUT" | bun -e '
+            const chunks = [];
+            process.stdin.on("data", (d) => chunks.push(d));
+            process.stdin.on("end", () => {
+              const raw = Buffer.concat(chunks).toString("utf8");
+              const start = raw.indexOf("{");
+              try {
+                const summary = JSON.parse(raw.slice(start)).summary;
+                if (!summary || typeof summary.unexpectedDrift !== "number") throw new Error("no summary");
+                console.log(`Drift summary: total=${summary.total} inSync=${summary.inSync} tolerated-gemini-settings=${summary.toleratedDrift} unexpected=${summary.unexpectedDrift}`);
+                process.exit(summary.unexpectedDrift === 0 ? 0 : 1);
+              } catch {
+                process.exit(2);
+              }
+            });
+          ' || CONTRACT=$?
+
+          if [ "$DRIFT_EXIT" -eq 0 ]; then
+            echo "L0→L1 propagation map is clean."
+            exit 0
           fi
-          # Strip ANSI escapes (portable via perl; BSD sed lacks \x1b support),
-          # remove gemini-settings lines, check for remaining drift
-          if echo "$DRIFT_OUTPUT" | perl -pe 's/\e\[[0-9;]*m//g' | grep -v "^gemini-settings" | grep -qi "differ\|missing\|extra"; then
-            echo "ERROR: Unexpected drift detected in non-gemini-settings domain"
+          if [ "$DRIFT_EXIT" -eq 1 ] && [ "$CONTRACT" -eq 0 ]; then
+            # Tolerated drift: the contract check verified unexpectedDrift == 0,
+            # i.e. gemini-settings only. A hard crash (e.g. malformed
+            # propagation-map.json) also surfaces as Bun-runtime exit 1, but
+            # then the output is a stack trace, fails the CONTRACT check
+            # (exit 2), and is handled by the error branches below instead.
+            echo "Only tolerated gemini-settings drift — passing per policy."
+            exit 0
+          fi
+          if [ "$DRIFT_EXIT" -eq 1 ]; then
+            echo "ERROR: --check-drift exited 1 without a verified tolerated-only (gemini-settings) JSON report — hard failure or unexpected drift masquerading as exit 1."
             exit 1
           fi
-
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: test-results-${{ matrix.os }}
-          path: |
-            test-results/
-            tests/*.log
+          echo "ERROR: unexpected L0→L1 drift in a non-gemini-settings domain, or hard failure (exit $DRIFT_EXIT)."
+          exit "$DRIFT_EXIT"
 
   # T-20260910-020: the local secret gates (.githooks/pre-push,
   # .githooks/pre-rebase) silently degrade when gitleaks is not installed —

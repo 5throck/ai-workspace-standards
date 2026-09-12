@@ -81,7 +81,7 @@ bun --version
 
 > **Install as needed**: These tools are not required for basic workspace functionality but enhance the experience.
 
-### 1. GitHub CLI (gh)
+### 1. Shell Environment (Script Execution)
 
 **Purpose**: Script execution
 
@@ -97,11 +97,7 @@ bun --version
 # Linux: https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-linux
 ```
 
----
-
-## 🎯 Optional Software (Recommended)
-
-### 5. GitHub CLI (gh)
+### 2. GitHub CLI (gh)
 
 **Purpose**: PR creation/management, GitHub workflow automation
 
@@ -126,16 +122,13 @@ gh --version
 gh auth login
 ```
 
----
-
-### 2. Python 3 (Project-Specific)
+### 3. Python 3 (Project-Specific)
 
 **Purpose**: Required **only** when creating Python projects
 
 **When You Need It**:
 - Creating Python projects
-- Running `scripts/setup.sh` for Python projects
-- Python project dependency management
+- Python project dependency management (`pip` or `uv`)
 
 **Installation** (if creating Python projects):
 ```bash
@@ -150,7 +143,7 @@ python3 --version
 # Expected output: Python 3.8 or higher
 ```
 
-### 3. uv (Python Package Manager - Optional)
+### 4. uv (Python Package Manager - Optional)
 
 **Purpose**: Faster Python dependency management (alternative to pip)
 
@@ -188,7 +181,7 @@ Depending on the type of project you create, additional tools may be required:
 | **Elixir** | Elixir + Mix | [elixir-lang.org](https://elixir-lang.org/) |
 | **C/C++** | CMake | [cmake.org](https://cmake.org/download/) |
 
-> **Note**: The `scripts/setup.sh/ps1` script will automatically detect and install dependencies for your project type.
+> **Note**: Workspace automation is Bun/TypeScript-based (ADR-0036). Project dependencies are installed by each project's own toolchain (e.g. `bun install` for Bun projects, `pip`/`uv` for Python projects) — there is no workspace-wide setup script.
 
 ---
 
@@ -376,9 +369,9 @@ claude    # or agy for Gemini
 After completing the installation:
 
 1. 📖 Read [README.md](../README.md) for project overview
-2. 🚀 Create your first project using `scripts/new-project.sh/ps1`
+2. 🚀 Create your first project using `bun scripts/new-project.ts`
 3. 🤖 Start an AI session in your new project directory
-4. 📋 Configure project-specific tools using `scripts/setup.sh/ps1`
+4. 📋 Install project-specific dependencies with your project's package manager (e.g. `bun install`, `pip install`)
 
 ---
 

@@ -241,7 +241,7 @@ declare `lang: ko` + a valid `lang_reason` in frontmatter.
 
 `bun scripts/validate-md-language.ts` also scans `*.yaml`/`*.yml` files under
 the same official paths (`agents/`, `skills/`, `templates/`,
-`docs/constitution/`, `docs/governance/`, `.claude/skills`, `.claude/commands`,
+`docs/governance/`, `.claude/skills`, `.claude/commands`,
 `.gemini/skills`, `.gemini/commands`). Plain YAML files (e.g. `schema.yaml`)
 rarely have a `---` frontmatter fence, so the exception is declared as a
 top-level (unindented) key instead:
@@ -530,4 +530,4 @@ See the workspace governance documentation (Governance Enforcement Layers) and A
 
 ---
 
-*context.md version: 2.6 — Schema Governance zone added (DB schema changes require an ADR before merge; CONSTITUTION.md §8.15)*
+*context.md version: 2.6 — Schema Governance zone added (DB schema changes require an ADR before merge; see the Schema Governance zone above)*

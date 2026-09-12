@@ -5,7 +5,26 @@
  * Replaces publish-to-template.ts (deprecated v1.8.0). Single authoritative script
  * for all L0→L1 propagation. Config-driven via propagation-map.json (SSOT for exclusions).
  *
- * @version 2.11.0
+ * @version 2.13.0
+ *
+ * v2.13.0: scrubConstitutionRefs() moved to the shared scripts/lib/constitution-scrub.ts
+ *          module (T-20260912-005/T-20260912-010) so checkers normalize with the exact
+ *          transform the propagator applies and the two can never disagree again; the
+ *          scrub now (a) never touches .json files (functional field values such as
+ *          propagation-map.json's constitution-context "source_file" were being
+ *          rewritten to "context.md", corrupting the L1 mirror) and (b) leaves policy
+ *          self-description HTML comments (those mentioning "Non-Propagation" or
+ *          "must NOT reference CONSTITUTION.md") untouched instead of rewriting them
+ *          into self-referentially false statements. Also adds `--check-drift --json`
+ *          machine-readable mode (T-20260912-016): prints {domain, file, status}[]
+ *          plus summary; stable exit codes 0 = clean, 1 = only tolerated drift
+ *          (gemini-settings domain), 2 = unexpected drift. Human output unchanged.
+ * v2.12.0: scrubConstitutionRefs() gains rule A-8 (T-20260912-006) — bare
+ *          `docs/constitution/` directory mentions (no part-file name, invisible to
+ *          A-7) are dropped from path lists or projected to `docs/`; found leaking
+ *          through the constitution-context marker zone into
+ *          templates/common/docs/context.md, masked by the L0-leakage check's old
+ *          whole-file intentional-duplicate exemption.
  *
  * Usage:
  *   bun scripts/propagate-to-templates.ts [--dry-run|--apply] [--domain <name>] [flags]
@@ -18,6 +37,11 @@
  *   --governance-l1        Deploy CLAUDE.md, GEMINI.md, AGENTS.md L0→L1 with ref transforms
  *   --docs                 Inject COMMON markers from L1 governance into templates/co-* variants
  *   --check-drift          L1 vs L2 drift report (read-only, uses propagation-map.json)
+ *   --json                 With --check-drift: machine-readable JSON output
+ *                          ({domain, file, status}[] + summary) and stable exit
+ *                          codes: 0 = clean, 1 = only tolerated drift
+ *                          (gemini-settings domain), 2 = unexpected drift.
+ *                          Without --check-drift this flag is ignored.
  *   --prune                Remove L0-only orphan scripts from templates/common/scripts/ tree
  *   --skip-encoding-check  Skip CP949 corruption pre-check (not recommended)
  *   --include-disabled     Include domains marked `disabled: true` in the DRY-RUN
@@ -36,6 +60,7 @@ import { join, dirname, basename, extname, resolve, sep } from 'node:path';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { parseScriptLayers, includeSkillInL1, includeScriptInL1 } from './helpers/layer-filter.ts';
+import { scrubConstitutionRefs } from './lib/constitution-scrub.ts';
 import * as yaml from 'js-yaml';
 import {
   findMarkerZones,
@@ -71,6 +96,7 @@ const SKIP_ENCODING    = args.includes('--skip-encoding-check');
 const GOVERNANCE_L1    = args.includes('--governance-l1');
 const DOCS             = args.includes('--docs');
 const CHECK_DRIFT      = args.includes('--check-drift');
+const JSON_OUTPUT      = args.includes('--json');
 const PRUNE            = args.includes('--prune');
 const MARKER_REWRITE   = args.includes('--marker-rewrite');
 const domainIdx        = args.indexOf('--domain');
@@ -607,89 +633,14 @@ function printTable(diffs: FileDiff[]): void {
 /**
  * Scrub CONSTITUTION.md references for L1+ targets (no longer L0 context).
  *
- * For code files (.ts/.js/.tsx/.jsx), only text inside line comments and block
- * comments is scrubbed — string literals used in functional file-existence checks (e.g.
- * `join(dir, "CONSTITUTION.md")`, used by several scripts' own L0-root detection) are
- * left untouched. Those checks must keep pointing at the real L0 marker file regardless
- * of which layer the script itself runs from; blanket-replacing them with "context.md"
- * silently breaks root detection in the propagated copy (found 2026-08-15 — several
- * already-propagated L1 scripts, e.g. agent-lifecycle-audit.ts, had this exact bug).
- *
- * For markdown/prose files (the default), the full blanket replace is safe since there
- * is no functional code to protect.
+ * Implementation lives in scripts/lib/constitution-scrub.ts and is shared with
+ * validate-templates.ts (L0/L1 parity normalization) and lifecycle-sync-audit.ts
+ * (Check C skill-mirror normalization) so the propagator and the checkers can
+ * never disagree about which substitutions are intentional (T-20260912-005 /
+ * T-20260912-010). Re-exported here for backward compatibility with existing
+ * importers (tests, validate-templates).
  */
-export function scrubConstitutionRefs(content: string, filePath?: string, targetPath?: string): string {
-  const isCode = filePath ? /\.(ts|tsx|js|jsx)$/.test(filePath) : false;
-
-  if (isCode) {
-    const lines = content.split('\n');
-    let inBlockComment = false;
-    const scrubbedLines = lines.map((line) => {
-      const trimmed = line.trim();
-      const wasInBlockComment = inBlockComment;
-      if (/\/\*/.test(line) && !/\*\//.test(line.slice(line.indexOf('/*') + 2))) {
-        inBlockComment = true;
-      } else if (wasInBlockComment && /\*\//.test(line)) {
-        inBlockComment = false;
-      }
-      const isFullLineComment = wasInBlockComment || inBlockComment || trimmed.startsWith('//') || trimmed.startsWith('*');
-
-      if (isFullLineComment) {
-        return line.replace(/CONSTITUTION\.md/g, 'context.md');
-      }
-
-      // Trailing line comment on an otherwise-functional line: scrub only the comment part.
-      const commentIdx = line.indexOf('//');
-      if (commentIdx !== -1 && line.slice(commentIdx).includes('CONSTITUTION.md')) {
-        return line.slice(0, commentIdx) + line.slice(commentIdx).replace(/CONSTITUTION\.md/g, 'context.md');
-      }
-
-      // Functional code (string literal in join()/existsSync()/array/etc.) — leave as-is.
-      return line;
-    });
-    return scrubbedLines.join('\n');
-  }
-
-  // A-1. Header line — handles both backtick and plain variants.
-  content = content.replace(
-    /> \*\*(?:Shared workspace setup.*?|Project context.*?)(?:CONSTITUTION\.md|context\.md)[^*]*?\.\*\*/s,
-    '> **Project context, architecture, coding guidelines, and design standards live in [`docs/context.md`](docs/context.md) - read it first.**'
-  );
-  // A-2. Full markdown links where link text mentions CONSTITUTION.md.
-  content = content.replace(
-    /\[`?CONSTITUTION\.md`?[^\]]*\]\([^)]*\)/g,
-    '[docs/context.md](docs/context.md)'
-  );
-  // A-3. Remaining markdown link targets that still point at CONSTITUTION.md.
-  content = content.replace(/\]\(CONSTITUTION\.md[^)]*\)/g, '](docs/context.md)');
-  // A-4. Plain-text mentions.
-  content = content.replace(/CONSTITUTION\.md/g, 'context.md');
-  // A-5. Part-file links into docs/constitution/ (e.g. 06-skill-lifecycle.md) whose
-  // link text does NOT mention CONSTITUTION.md (those are already covered by A-2).
-  // L1/L2 trees have no docs/constitution/ directory — the projected home is
-  // docs/context.md, so pointing the link there keeps it resolvable.
-  content = content.replace(
-    /\[[^\]]*docs\/constitution\/[^\]]*\]\([^)]*docs\/constitution\/[^)]*\)/g,
-    '[docs/context.md](docs/context.md)'
-  );
-  // A-5b. ANY remaining markdown link whose TARGET points into docs/constitution/ —
-  // link text like "[§9.1]" carries no recognizable hint, so A-5 misses it. Projected
-  // home is docs/context.md (anchors dropped; the visible text keeps the reference).
-  content = content.replace(/\]\([^)]*docs\/constitution\/[^)]*\)/g, '](docs/context.md)');
-  // A-7. Plain-text / inline-code mentions of a docs/constitution/ part file
-  // (e.g. `docs/constitution/06-skill-lifecycle.md §6.6`) — projected to docs/context.md.
-  content = content.replace(/docs\/constitution\/[a-z0-9.-]+\.md/gi, 'docs/context.md');
-  // A-6. Target-aware: a target that lives at docs/context.md itself must use a
-  // relative link — ](docs/context.md) inside docs/context.md would resolve to
-  // docs/docs/context.md (broken self-reference). No targetPath → no-op.
-  if (targetPath) {
-    const normalizedTarget = targetPath.replace(/\\/g, '/');
-    if (normalizedTarget.endsWith('docs/context.md')) {
-      content = content.replace(/\]\(docs\/context\.md\)/g, '](context.md)');
-    }
-  }
-  return content;
-}
+export { scrubConstitutionRefs };
 
 function applyDiffs(diffs: FileDiff[]): number {
   let copied = 0;
@@ -1568,16 +1519,33 @@ if (CHECK_DRIFT) {
 }
 
 // ── runCheckDrift: independent L1→L2 drift report ─────────────────────────────
-function runCheckDrift(mapPath: string): void {
-  console.log(`${C.cyan}=== --check-drift: L1 vs L2 drift report (read-only) ===${C.reset}`);
-  if (DOMAIN_FILTER) console.log(`${C.dim}Domain filter: ${DOMAIN_FILTER}${C.reset}`);
+/**
+ * Tolerated drift: the gemini-settings domain is the only ongoing L1→L2 mirror
+ * and is allowed to differ within a review window (domain entries are emitted as
+ * "gemini-settings (<variant>)"). Any other domain's drift is unexpected.
+ */
+function isToleratedDriftDomain(domain: string): boolean {
+  return domain.split(' ')[0] === 'gemini-settings';
+}
 
-  // Early UX: if user filtered to an ineligible domain, explain instead of
-  // returning silently with 0 results.
+function runCheckDrift(mapPath: string): void {
+  // Ineligible-domain early UX: if the user filtered to a non-drift-eligible
+  // domain, explain instead of returning silently with 0 results (human mode)
+  // or an empty result set (JSON mode).
   if (DOMAIN_FILTER) {
     const map: PropagationMap = JSON.parse(readFileSync(mapPath, 'utf-8'));
     const filteredDomain = map.domains[DOMAIN_FILTER];
     if (filteredDomain && !isL2DriftEligible(filteredDomain)) {
+      if (JSON_OUTPUT) {
+        console.log(JSON.stringify({
+          results: [],
+          summary: { total: 0, inSync: 0, toleratedDrift: 0, unexpectedDrift: 0 },
+          note: `Domain "${DOMAIN_FILTER}" is not eligible for L2 drift checking (Fork Model — ADR-0031); L2 variants receive this content through scaffolding/promotion, not ongoing sync.`,
+        }, null, 2));
+        process.exit(0);
+      }
+      console.log(`${C.cyan}=== --check-drift: L1 vs L2 drift report (read-only) ===${C.reset}`);
+      console.log(`${C.dim}Domain filter: ${DOMAIN_FILTER}${C.reset}`);
       console.log(`${C.dim}ℹ️  Domain "${DOMAIN_FILTER}" is not eligible for L2 drift checking (Fork Model — ADR-0031).${C.reset}`);
       console.log(`${C.dim}    L2 variants receive this content through scaffolding/promotion, not ongoing sync.${C.reset}`);
       console.log(`\nTotal checked: 0, Out of sync: 0`);
@@ -1586,10 +1554,30 @@ function runCheckDrift(mapPath: string): void {
   }
 
   const drifts = collectDiffsL1L2(mapPath);
+  const outOfSync = drifts.filter(d => d.status !== 'in-sync');
+  const tolerated = outOfSync.filter(d => isToleratedDriftDomain(d.domain));
+  const unexpected = outOfSync.filter(d => !isToleratedDriftDomain(d.domain));
+
+  if (JSON_OUTPUT) {
+    // Machine-readable mode (T-20260912-016): stable contract for CI.
+    //   exit 0 = clean, 1 = only tolerated drift (gemini-settings), 2 = unexpected drift.
+    console.log(JSON.stringify({
+      results: drifts.map(d => ({ domain: d.domain, file: d.relativePath, status: d.status })),
+      summary: {
+        total: drifts.length,
+        inSync: drifts.length - outOfSync.length,
+        toleratedDrift: tolerated.length,
+        unexpectedDrift: unexpected.length,
+      },
+    }, null, 2));
+    process.exit(unexpected.length > 0 ? 2 : tolerated.length > 0 ? 1 : 0);
+  }
+
+  console.log(`${C.cyan}=== --check-drift: L1 vs L2 drift report (read-only) ===${C.reset}`);
+  if (DOMAIN_FILTER) console.log(`${C.dim}Domain filter: ${DOMAIN_FILTER}${C.reset}`);
   printTable(drifts);
-  const outOfSyncDrift = drifts.filter(d => d.status !== 'in-sync');
-  console.log(`Total checked: ${drifts.length}, Out of sync: ${outOfSyncDrift.length}`);
-  if (outOfSyncDrift.length > 0) {
+  console.log(`Total checked: ${drifts.length}, Out of sync: ${outOfSync.length}`);
+  if (outOfSync.length > 0) {
     console.log(`\nℹ️  Detected drift in a domain configured for L2 drift checking. Review whether this change is intentional before synchronizing.`);
     process.exitCode = 1;
   }

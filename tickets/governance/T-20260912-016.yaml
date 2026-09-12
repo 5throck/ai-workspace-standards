@@ -1,0 +1,20 @@
+schemaVersion: 1
+id: T-20260912-016
+kind: manual
+title: >-
+  Add a machine-readable mode (JSON plus stable exit codes) to
+  propagate-to-templates --check-drift and key the test.yml drift gate off exit
+  codes instead of output greps
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-09-12T05:23:47.254Z'
+history:
+  - at: '2026-09-12T05:23:47.254Z'
+    from: null
+    to: backlog
+  - at: '2026-09-12T07:49:17.478Z'
+    from: backlog
+    to: done
+result: null
+error: null

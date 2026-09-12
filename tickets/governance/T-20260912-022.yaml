@@ -1,0 +1,21 @@
+schemaVersion: 1
+id: T-20260912-022
+kind: manual
+title: >-
+  Registry and doc hygiene: correct SCRIPTS.md scope prose, add a
+  VERSION_MANIFEST script-count scope note, refresh the ADR index range, drop
+  dead common-contract skeleton sections, fix the L0 pm.md frontmatter phase
+  list, and update new-project usage strings for codex
+priority: low
+status: done
+attempts: 0
+created_at: '2026-09-12T05:23:52.798Z'
+history:
+  - at: '2026-09-12T05:23:52.798Z'
+    from: null
+    to: backlog
+  - at: '2026-09-12T08:55:40.197Z'
+    from: backlog
+    to: done
+result: null
+error: null

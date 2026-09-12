@@ -4,20 +4,22 @@ date: 2026-09-12
 author: PM
 ---
 
-# ADR-0075: OpenAI Codex as a Fourth Platform Directory — CODEX.md Twin, `.codex/` Mirror Delivery, Dual-Surface Coverage
+> Renumbered from ADR-0075 on 2026-09-12 to resolve a same-day number collision (review T-20260912-003).
+
+# ADR-0077: OpenAI Codex as a Fourth Platform Directory — CODEX.md Twin, `.codex/` Mirror Delivery, Dual-Surface Coverage
 
 ## Context
 
-The workspace supports 4 AI surfaces across 3 platform directories: `.claude/` (Claude Code CLI + Claude Desktop App), `.gemini/` (Gemini CLI), and `.agents/` (Antigravity IDE/CLI). Platform behavior is split between instruction twins (`CLAUDE.md` ↔ `GEMINI.md`, marker-managed) and a neutral registry (`AGENTS.md`). Codex already appears only as fragments: ADR-0074 seeded `templates/common/.codex/config.toml` as `ADD_IF_MISSING` for MCP, `rootAllowlist` pre-approves `.codex`, and the co-abap project runs a live `~/.codex`-style config (`[features] codex_hooks`, `[mcp_servers.*]`, `[[skills.config]]`).
+The workspace supports 4 AI surfaces across 3 platform directories: `.claude/` (Claude Code CLI + Claude Desktop App), `.gemini/` (Gemini CLI), and `.agents/` (Antigravity IDE/CLI). Platform behavior is split between instruction twins (`CLAUDE.md` ↔ `GEMINI.md`, marker-managed) and a neutral registry (`AGENTS.md`). Codex already appears only as fragments: ADR-0076 seeded `templates/common/.codex/config.toml` as `ADD_IF_MISSING` for MCP, `rootAllowlist` pre-approves `.codex`, and the co-abap project runs a live `~/.codex`-style config (`[features] codex_hooks`, `[mcp_servers.*]`, `[[skills.config]]`).
 
 Requirement (user, 2026-09-12): extend the ecosystem to **OpenAI Codex CLI and Codex Desktop App** — raising surfaces 4 → 6 and platform directories 3 → 4 — with full pipeline coverage (templates, new projects, existing fleet), keeping the security-gate and pruning governance on a single code path.
 
 ## Decision
 
-1. **One directory, two surfaces** (mirroring how `.claude/` serves CLI + Desktop App): `.codex/` = `config.toml` + `skills/` + `prompts/`; machine-global `~/.codex/config.toml` stays the fallback for surfaces without project scope (ADR-0074 per-host matrix precedent).
+1. **One directory, two surfaces** (mirroring how `.claude/` serves CLI + Desktop App): `.codex/` = `config.toml` + `skills/` + `prompts/`; machine-global `~/.codex/config.toml` stays the fallback for surfaces without project scope (ADR-0076 per-host matrix precedent).
 2. **`CODEX.md` is the platform twin** (L0 + L1), built from the analyzed CLAUDE.md/GEMINI.md section skeleton with Codex substitutions — no native subagent tool (single-session PM execution), hook-free prompt self-enforcement (CONSTITUTION §11 Antigravity precedent), literal model IDs, `.codex/prompts/` command table, `COMMON-CODEX` marker domain joining the VA-05 marker-sync scheme. AGENTS.md gains the pointer line. **Pointer-follow is a live verification gate per surface; fallback promotes Codex-essential rules into an AGENTS.md annex.**
 3. **Skills mirror the SSOT; never point Codex at `skills/` directly** (rejecting the co-abap direct-pointer pattern for the platform): `sync-skills.ts` gains a 4th target so B-03 security-gate exclusion and country/variant-scoped pruning apply unchanged.
-4. **Fleet delivery fix**: `.codex/skills/**` and `.codex/prompts/**` resolve to TEMPLATE_TREE_SYNC *before* the blanket `.codex/**` ADD_IF_MISSING claim — otherwise fleet mirrors never receive updates (the same incident class ADR-0074 fixed for `.claude/skills/graft`).
+4. **Fleet delivery fix**: `.codex/skills/**` and `.codex/prompts/**` resolve to TEMPLATE_TREE_SYNC *before* the blanket `.codex/**` ADD_IF_MISSING claim — otherwise fleet mirrors never receive updates (the same incident class ADR-0076 fixed for `.claude/skills/graft`).
 5. **Model registry (user-confirmed)**: `models.codex = { high: gpt-5.6-sol, medium: gpt-5.6-terra, low: gpt-5.6-luna }`; companion update moves `gemini`/`antigravity`/`gemini-cli` medium/low to `gemini-3.8-flash` (the three keys stay in lockstep). Agent frontmatter gains `tier.codex` across all 8 root agents.
 6. **Commands**: `.claude/commands/` mirrors to `.codex/prompts/`, gated on CLI verification; if unsupported, codex is commands-parity-exempt (gateguard/.agents precedent). **Hooks**: deferred to optional Phase 2 (CLI-only `.codex/hooks.json`); Phase 1 documents prompt self-enforcement.
 7. **ADR-0021 amended**: codex classification added to `platform_settings`; TOML config is excluded from the VA-04 JSON parity loop in favor of a dedicated parse + required-blocks check.
@@ -32,6 +34,6 @@ Requirement (user, 2026-09-12): extend the ecosystem to **OpenAI Codex CLI and C
 ## References
 
 - Design: `docs/designs/2026-09-12-codex-platform-support-design.md` (§4 section-parity analysis, §5 layer distribution matrix, D1–D10, waves W1–W5, verification §8)
-- ADR-0074 (graft fleet — `.codex/config.toml` seed, ADD_IF_MISSING, per-host matrix), ADR-0021 (settings parity, amended), ADR-0035/ADR-0048 (AGENTS.md structure/SSOT)
+- ADR-0076 (graft fleet — `.codex/config.toml` seed, ADD_IF_MISSING, per-host matrix), ADR-0021 (settings parity, amended), ADR-0035/ADR-0048 (AGENTS.md structure/SSOT)
 - CONSTITUTION §6, §10, §11 — prose counts to update in W2 ("all three platform directories", "all 4 supported platforms")
 - Live precedent: `Projects/co-abap/.codex/config.toml`, `templates/co-abap/AGENTS.md`

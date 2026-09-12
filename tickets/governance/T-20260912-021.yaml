@@ -1,0 +1,20 @@
+schemaVersion: 1
+id: T-20260912-021
+kind: manual
+title: >-
+  Deepen qa-gate L0-L1 parity comparison to recursive bidirectional content
+  checks, add a pre-rebase regex secret-scan fallback for missing gitleaks, and
+  schedule a periodic gitleaks audit covering Projects/ and CHANGELOG
+priority: low
+status: done
+attempts: 0
+created_at: '2026-09-12T05:23:52.784Z'
+history:
+  - at: '2026-09-12T05:23:52.784Z'
+    from: null
+    to: backlog
+  - at: '2026-09-12T08:37:19.112Z'
+    from: backlog
+    to: done
+result: null
+error: null

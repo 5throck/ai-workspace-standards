@@ -1,0 +1,21 @@
+schemaVersion: 1
+id: T-20260912-024
+kind: manual
+title: >-
+  Fix explain-me BUILD_GUIDE BSD-only sed -i usage, the nightly-tickets
+  model-var argv default, and stale test.yml artifact globs
+priority: low
+status: done
+attempts: 0
+created_at: '2026-09-12T05:24:59.769Z'
+history:
+  - at: '2026-09-12T05:24:59.769Z'
+    from: null
+    to: backlog
+  - at: '2026-09-12T09:18:02.706Z'
+    from: backlog
+    to: done
+result: >-
+  explain-me BUILD_GUIDE sed made portable across all 6 copies; nightly-tickets
+  + edu-sync model-var defaults added; test.yml stale artifact globs removed
+error: null

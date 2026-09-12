@@ -24,7 +24,7 @@
 
 ## Dependencies
 
-- docs-writer (owner agent)
+- pm (owner agent)
 - auditor (validation)
 
 ## Usage Statistics
@@ -36,7 +36,8 @@
 ## Metadata
 
 - **Current Phase**: deprecated
-- **Owner**: docs-writer
-- **Last Updated**: 2026-09-10
+- **Version**: 1.0.0
+- **Owner**: pm
+- **Last Updated**: 2026-09-12 (record reconciliation per T-20260912-010: Owner corrected docs-writer → pm to match SKILL.md frontmatter; Version field added)
 - **Last Reviewer**: lifecycle-manager
 - **Removal Date**: 2026-12-09

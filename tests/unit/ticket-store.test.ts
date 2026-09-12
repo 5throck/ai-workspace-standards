@@ -127,6 +127,24 @@ describe('moveTicket', () => {
     const failed = moveTicket(dir, t.id, 'failed', { error: 'boom' });
     expect(failed.error).toBe('boom');
   });
+
+  test('writes the result field when moving to done with a result (T-20260912-023)', () => {
+    const t = createTicket(dir, { kind: 'manual', title: 'x', priority: 'normal' });
+    moveTicket(dir, t.id, 'waiting', { force: false });
+    moveTicket(dir, t.id, 'review', { force: false });
+    const done = moveTicket(dir, t.id, 'done', { force: false, result: 'implemented and verified' });
+    expect(done.status).toBe('done');
+    expect(done.result).toBe('implemented and verified');
+  });
+
+  test('store leaves result null when no result option is passed — the non-empty --result requirement is enforced at the CLI layer, not here', () => {
+    const t = createTicket(dir, { kind: 'manual', title: 'x', priority: 'normal' });
+    moveTicket(dir, t.id, 'waiting', { force: false });
+    moveTicket(dir, t.id, 'review', { force: false });
+    const done = moveTicket(dir, t.id, 'done', { force: false });
+    expect(done.status).toBe('done');
+    expect(done.result).toBeNull();
+  });
 });
 
 describe('nextServiceTicket', () => {

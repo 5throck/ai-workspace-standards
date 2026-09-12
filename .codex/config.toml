@@ -1,8 +1,8 @@
-# Codex CLI workspace config — see docs/adr/0074-graft-fleet-integration.md and
-# docs/adr/0075-codex-platform-support.md.
+# Codex CLI workspace config — see docs/adr/0076-graft-fleet-integration.md and
+# docs/adr/0077-codex-platform-support.md.
 # Graft MCP is registered project-side; `graft mcp` resolves the repo root from the
 # working directory (nearest ancestor with a graft/ index). Machine-global fallbacks
-# (~/.codex/config.toml) follow the ADR-0074 per-host matrix.
+# (~/.codex/config.toml) follow the ADR-0076 per-host matrix.
 
 [mcp_servers.graft]
 command = "bunx"

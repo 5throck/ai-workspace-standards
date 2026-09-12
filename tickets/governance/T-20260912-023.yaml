@@ -1,0 +1,24 @@
+schemaVersion: 1
+id: T-20260912-023
+kind: manual
+title: >-
+  Fix memory/MEMORY.md links to untracked memory/archive files (commit the
+  archive or use tombstone rows), append standard daily-log sections to the
+  nightly runner, and require a result string on ticket done transitions with
+  archive rotation
+priority: low
+status: done
+attempts: 0
+created_at: '2026-09-12T05:23:52.811Z'
+history:
+  - at: '2026-09-12T05:23:52.811Z'
+    from: null
+    to: backlog
+  - at: '2026-09-12T09:18:02.694Z'
+    from: backlog
+    to: done
+result: >-
+  MEMORY.md archive links replaced with tombstones (archive is gitignored by
+  policy); ticket.ts done transitions now require --result; nightly runner emits
+  standard sections; live-tested
+error: null

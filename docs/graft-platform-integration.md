@@ -4,7 +4,7 @@ How graft (repo context graph, `@nanonets/graft`) is wired into every AI host th
 workspace targets — per-repo (committed, delivered by scaffold + upgrade) and
 machine-global (one-time local setup, never committed).
 
-**Policy**: ADR-0074 · **Design**: `docs/designs/2026-09-12-graft-multiplatform-rollout-design.md`
+**Policy**: ADR-0076 · **Design**: `docs/designs/2026-09-12-graft-multiplatform-rollout-design.md`
 
 ## Surface matrix
 
@@ -94,7 +94,7 @@ recommended for a single global file.
 
 ```bash
 cd <repo>
-bunx @nanonets/graft check     # index freshness (manual — no CI gate by decision, ADR-0074 D8)
+bunx @nanonets/graft check     # index freshness (manual — no CI gate by decision, ADR-0076 D8)
 grep -c graft CLAUDE.md GEMINI.md AGENTS.md
 ```
 

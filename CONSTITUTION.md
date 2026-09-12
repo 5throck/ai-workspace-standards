@@ -519,7 +519,7 @@ Controls which AI-platform-specific configuration files are included in a projec
 - `claude` — includes `CLAUDE.md` only; `GEMINI.md` is excluded
 - `antigravity` — includes `GEMINI.md` only; `CLAUDE.md` is excluded
 - `both` — includes both, i.e. claude + antigravity (legacy value; default for all new projects)
-- `codex` — additionally includes `CODEX.md` and the `.codex/` platform directory (ADR-0075)
+- `codex` — additionally includes `CODEX.md` and the `.codex/` platform directory (ADR-0077)
 
 `codex` composes with the legacy values: a project's effective Codex surface is opt-in via the `codex` profile value or the `.codex/` template overlay delivered by upgrade.
 
@@ -562,15 +562,15 @@ Used by `upgrade-project.ts` (v1.22.0+) to classify every template file during a
 | **LOCKED** | Always overwritten; diff shown before overwrite | `.githooks/*`, `.gitattributes`, `.gitleaks.toml` |
 | **MERGE** | Only managed sections replaced; rest preserved | `CLAUDE.md`, `GEMINI.md`, `.gitignore`, `agents/pm.md`, `docs/<variant>.context.md` |
 | **SYNC (default)** | Add if missing; update on inline version or hash change (⚠️ conflict warning on local modifications) | Rest of the `docs/` tree, `.github/`, `.editorconfig` |
-| **JSON_MERGE** | Platform settings deep-merged; project-only array entries preserved | `.claude/settings.json`, `.gemini/settings.json`, `.mcp.json`, `opencode.json` (ADR-0074) |
+| **JSON_MERGE** | Platform settings deep-merged; project-only array entries preserved | `.claude/settings.json`, `.gemini/settings.json`, `.mcp.json`, `opencode.json` (ADR-0076) |
 | **WORKSPACE** | Seeds add-if-missing; never overwritten or pruned | `docs/{designs,drafts,reports,research,findings,threat-models,lifecycle}/` |
-| **ADD_IF_MISSING** | Copied only when absent | `LICENSE`, `SECURITY.md`, `procedures/`, `.codex/` (ADR-0074) |
+| **ADD_IF_MISSING** | Copied only when absent | `LICENSE`, `SECURITY.md`, `procedures/`, `.codex/` (ADR-0076) |
 | **PRESERVE / PROJECT_STATE** | Never touched | `README.md`, `CHANGELOG.md`, `docs/README(+_ko)`, `memory/`, `package.json`, `src/` |
 | **TEMPLATE_ONLY** | Staging zones the scaffold deletes — never upgrade-delivered | `docs/{adr,specs,variants,_templates,_examples}`, `docs/_common` |
 
 `docs/skill-graph.json` is REGENERATED in place; the upgrader itself is workspace-side (`L0`-only, ADR-0073 Amendment 1 — run `bun scripts/upgrade-project.ts Projects/<name>` from the workspace root). Report and gate: `bun scripts/check-upgrade-coverage.ts [--strict]`.
 
-The graft repo-context-graph fleet surface (MCP registrations, `.claude/skills/graft/`, instruction blocks) is delivered through the same engine per **ADR-0074**: hand-maintained outside the SSOT `skills/` (claude-only by design), so its tree-sync claim must precede the platform-mirror rule; per-host setup for machine-global hosts (Codex global, Antigravity registry, Claude Desktop) is documented in `docs/graft-platform-integration.md`.
+The graft repo-context-graph fleet surface (MCP registrations, `.claude/skills/graft/`, instruction blocks) is delivered through the same engine per **ADR-0076**: hand-maintained outside the SSOT `skills/` (claude-only by design), so its tree-sync claim must precede the platform-mirror rule; per-host setup for machine-global hosts (Codex global, Antigravity registry, Claude Desktop) is documented in `docs/graft-platform-integration.md`.
 
 #### Platform Documentation Parity
 The requirement that `CLAUDE.md` and `GEMINI.md` in every project template maintain equivalent section coverage. If a security configuration, behavioral rule, or workflow is documented in `CLAUDE.md`, an equivalent entry must exist in `GEMINI.md`, and vice versa. Verified during template validation (`bun scripts/validate-templates.ts`).
@@ -664,7 +664,7 @@ Full details: [`docs/designs/ecc-phase1-governance-design.md`](docs/designs/ecc-
 
 Governance rules are enforced at three layers, ensuring coverage across all 6 supported surfaces on 4 platform directories (Claude Code CLI + Claude Desktop App, Gemini CLI, Antigravity, Codex CLI + Codex Desktop App).
 
-Platform extension to OpenAI Codex (CLI + Desktop App) is designed and Accepted per **ADR-0075** (`docs/adr/0075-codex-platform-support.md`): the `.codex/` platform directory, `CODEX.md` twin, and the enforcement-layer rows for the two new surfaces land through the implementation waves defined in `docs/designs/2026-09-12-codex-platform-support-design.md`.
+Platform extension to OpenAI Codex (CLI + Desktop App) is designed and Accepted per **ADR-0077** (`docs/adr/0077-codex-platform-support.md`): the `.codex/` platform directory, `CODEX.md` twin, and the enforcement-layer rows for the two new surfaces land through the implementation waves defined in `docs/designs/2026-09-12-codex-platform-support-design.md`.
 
 #### 11.1 Three-Layer Enforcement Model
 

@@ -1,11 +1,15 @@
 #!/usr/bin/env bun
 /**
  * verify-adr-governance.ts
- * @version 1.4.0
- * @last_updated 2026-08-24
+ * @version 1.5.0
+ * @last_updated 2026-09-12
  *
- * Verifies the ADR→governance linkage mechanism (upward reflection gap detection)
- * and intentional-duplicate marker hash drift detection.
+ * Verifies the ADR→governance linkage mechanism (upward reflection gap detection),
+ * ADR ID uniqueness, and intentional-duplicate marker hash drift detection.
+ *
+ * Phase 0 (ID Uniqueness): Derives the 4-digit ADR number from each docs/adr/*.md
+ * filename (^NNNN-) and hard-fails when two files share the same number — a duplicate
+ * silently breaks every ADR-NNNN citation pointing at the pair. Fails in BOTH modes.
  *
  * Phase 1 (ADR Linkage): Detects Accepted ADRs that landed without any pointer from the governance docs.
  * Governance corpus: CONSTITUTION.md, docs/constitution/ (recursive), docs/governance/ (recursive)
@@ -31,7 +35,7 @@
  *
  * Exit codes:
  * - 0: Check completed (default: findings are WARN-only; strict: no ADR-linkage or marker-drift findings)
- * - 1: Operational failure (e.g., docs/adr missing) OR strict mode with ADR-linkage or marker-drift findings
+ * - 1: Operational failure (e.g., docs/adr missing), duplicate ADR numbers (any mode), OR strict mode with ADR-linkage or marker-drift findings
  */
 
 import { readFileSync, existsSync, readdirSync, writeFileSync } from 'node:fs';
@@ -366,6 +370,45 @@ function scanADRFiles(): ADR[] {
 }
 
 /**
+ * Check ADR ID uniqueness (Phase 0)
+ * Derives the 4-digit number from each docs/adr/*.md filename (^NNNN-) and reports
+ * every number claimed by more than one file. Returns the number of colliding IDs.
+ * Collisions are integrity errors: they fail in BOTH default and strict mode.
+ */
+function checkADRIdUniqueness(adrs: ADR[]): number {
+  console.log('🔍 Checking ADR ID uniqueness...\n');
+
+  const byNumber = new Map<string, ADR[]>();
+  for (const adr of adrs) {
+    const group = byNumber.get(adr.number) ?? [];
+    group.push(adr);
+    byNumber.set(adr.number, group);
+  }
+
+  let findings = 0;
+  for (const [number, group] of byNumber) {
+    if (group.length < 2) {
+      continue;
+    }
+    findings++;
+    console.log(`[ERROR] ADR number collision: ${group.length} files claim ADR-${number}:`);
+    for (const adr of group) {
+      console.log(`        - docs/adr/${adr.file} (status: ${adr.status ?? 'unknown'})`);
+    }
+  }
+
+  if (findings === 0) {
+    console.log(`✅ ADR IDs are unique across ${adrs.length} file(s).\n`);
+  } else {
+    console.log(
+      `\n⛔ ${findings} duplicate ADR number(s) found — renumber the later ADR of each pair and repoint all citations by meaning (blocking in every mode)`
+    );
+  }
+
+  return findings;
+}
+
+/**
  * Main check function
  */
 function main(): void {
@@ -385,6 +428,9 @@ function main(): void {
   // Scan ADR files
   const adrs = scanADRFiles();
   console.log(`📋 ADR files scanned: ${adrs.length}\n`);
+
+  // Phase 0: ID uniqueness — integrity error, hard fail in both modes
+  const duplicateFindings = checkADRIdUniqueness(adrs);
 
   // Filter: post-cutoff + Accepted/active
   const checked = adrs.filter(adr => {
@@ -458,8 +504,12 @@ function main(): void {
     console.log('ℹ️  Strict mode: no linkage or marker-drift findings — exit 0');
   }
 
-  // Default mode: always exit 0 on findings (WARN-only)
+  // ID-uniqueness collisions fail in EVERY mode (integrity error, not a linkage WARN).
+  // Default mode: otherwise always exit 0 on findings (WARN-only)
   // Strict mode: exit 1 if linkage or marker findings exist, otherwise 0
+  if (duplicateFindings > 0) {
+    process.exit(1);
+  }
   process.exit(STRICT && (linkageFindings + markerFindings) > 0 ? 1 : 0);
 }
 

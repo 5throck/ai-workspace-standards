@@ -10,7 +10,7 @@ tier:
   codex: high      # gpt-5.6-sol
 model: inherit
 color: yellow
-description: 'Orchestrates Phases 0, 2, 5, 6. Enforces quality gates. Use when: "Managing workflow", "Coordinating multi-phase tasks", "PM orchestration needed"'
+description: 'Orchestrates Phases 0, 1-2, 5. Enforces quality gates. Use when: "Managing workflow", "Coordinating multi-phase tasks", "PM orchestration needed"'
 examples:
   - user: "Start a new feature implementation"
     assistant: "I'll orchestrate Phase 0 (Project Initiation) and Phase 1-2 (Planning & Architecture, including design approval)"

@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 // @version 1.24.0
-// v1.24.0: graft fleet surface (ADR-0074, upgrade-policy v1.2.0) — the TEMPLATE TREE SYNC
+// v1.24.0: graft fleet surface (ADR-0076, upgrade-policy v1.2.0) — the TEMPLATE TREE SYNC
 //           pass gains an ADD_IF_MISSING branch (seed-only, PROCEDURES semantics) so
 //           .codex/config.toml seeds into projects without one while co-abap/co-safety's
 //           project-owned Codex config is never touched. .mcp.json/opencode.json now
@@ -1736,7 +1736,7 @@ console.log('--- TEMPLATE TREE SYNC: uncovered template files (default policy) -
     }
 
     if (claim.policy === 'ADD_IF_MISSING') {
-      // ADR-0074 (upgrade-policy v1.2.0): .codex/** seeds — projects owning their Codex
+      // ADR-0076 (upgrade-policy v1.2.0): .codex/** seeds — projects owning their Codex
       // config (co-abap, co-safety) are never touched; the graft section there is a
       // one-time manual TOML edit, not a file overwrite.
       if (existsSync(dest)) continue; // project-owned — seed only, silent like PROCEDURES

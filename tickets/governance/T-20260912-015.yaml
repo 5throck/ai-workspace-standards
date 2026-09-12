@@ -1,0 +1,22 @@
+schemaVersion: 1
+id: T-20260912-015
+kind: manual
+title: >-
+  Extend validate-md-language coverage to docs/adr, docs/decisions, and
+  generated VERSION_MANIFEST tables, or declare lang exceptions at the generator
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-09-12T05:23:47.241Z'
+history:
+  - at: '2026-09-12T05:23:47.241Z'
+    from: null
+    to: backlog
+  - at: '2026-09-12T09:18:02.682Z'
+    from: backlog
+    to: done
+result: >-
+  validate-md-language scope widened to docs/adr, docs/decisions,
+  VERSION_MANIFEST; generator emits allowlist markers; ADR-0072 declared
+  proper-noun; DEC-20260825-02 translated; 1755 files scanned, 0 violations
+error: null

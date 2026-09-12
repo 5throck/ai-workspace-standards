@@ -12,10 +12,23 @@ if [ "${REBASE_BYPASS_SECRET_SCAN:-0}" = "1" ]; then
     exit 0
 fi
 
-# Check if gitleaks is available
+# Gitleaks missing — regex fallback (T-20260912-021): silently skipping the scan
+# (old behavior: exit 0) was inconsistent with scripts/hooks/pre-push.ts, which
+# falls back to a blocking regex scan when gitleaks is not installed. Same
+# working-tree `git grep` pass and the same pattern list; the pattern SSOT lives
+# in scripts/hooks/pre-push.ts (regex fallback branch) — keep the list in sync
+# when editing either file. Limitation (same as pre-push's fallback): the
+# working tree is scanned, not the commits being rebased.
 if ! command -v gitleaks &> /dev/null; then
-    echo "⚠️  gitleaks not found - skipping secret scan during rebase"
+    echo "⚠️  gitleaks not found - running regex secret scan fallback (install gitleaks for full coverage)"
     echo "   Install gitleaks for protection: https://github.com/gitleaks/gitleaks"
+    SECRET_PATTERN='sk-ant-api03-[A-Za-z0-9_-]{93}|AKIA[0-9A-Z]{16}|ghp_[A-Za-z0-9]{36}|sk-proj-[A-Za-z0-9_-]+'
+    if MATCHES=$(git grep -n -E "$SECRET_PATTERN" -- "*.ts" "*.js" "*.mjs" "*.py" "*.sh" "*.json" "*.md" "*.env" "*.env.*" "*.yml" "*.yaml" "*.toml" "*.cfg" "*.ini" "*.html" 2>/dev/null); then
+        echo "❌ Potential secrets found - rebase blocked. Install gitleaks for full coverage."
+        echo "$MATCHES" | head -n 5
+        exit 1
+    fi
+    echo "✅ Regex secret scan passed (install gitleaks for full coverage)"
     exit 0
 fi
 

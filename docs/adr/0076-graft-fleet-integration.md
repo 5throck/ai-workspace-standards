@@ -4,7 +4,9 @@ date: 2026-09-12
 author: PM
 ---
 
-# ADR-0074: Graft as a Multi-Platform Fleet Surface — Committed Repo Config, Machine-Local Hosts
+> Renumbered from ADR-0074 on 2026-09-12 to resolve a same-day number collision (review T-20260912-003).
+
+# ADR-0076: Graft as a Multi-Platform Fleet Surface — Committed Repo Config, Machine-Local Hosts
 
 ## Context
 

@@ -763,6 +763,15 @@
       "source": "manual",
       "created": "2026-09-11",
       "last_updated": "2026-09-12"
+    },
+    {
+      "id": "2026-09-12-project-review-remediations-design",
+      "title": "project review remediations design",
+      "file": "docs/designs/2026-09-12-project-review-remediations-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-12",
+      "last_updated": "2026-09-12"
     }
   ]
 }
