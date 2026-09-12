@@ -1,8 +1,12 @@
 #!/usr/bin/env bun
 /**
  * verify-scripts.ts — Script Lifecycle Registry Verifier
- * @version 1.6.0
+ * @version 1.6.1
  *
+ * v1.6.1: walkScripts() now skips node_modules directories — a scripts/-local
+ *         `bun install` (fresh CI runners) materialized dependency files that
+ *         were flagged as unregistered scripts (207 false positives), failing
+ *         the audit gate on every CI run.
  * v1.6.0: SCRIPT_EXTENSIONS now includes .bat (T-20260909-003) — Windows batch
  *         helpers under scripts/ are registry-governed like .sh/.ps1/.ts and can
  *         no longer escape the unregistered-script check. CLI dispatch is
@@ -195,6 +199,9 @@ function parseRegistry(content: string): RegistryEntry[] {
 function walkScripts(dir: string): string[] {
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
     if (entry.isDirectory()) {
+      // Dependency installs (scripts/-local bun install on CI runners) are not
+      // workspace scripts — their files must not be flagged as unregistered.
+      if (entry.name === "node_modules") return [];
       // A variant directory with its OWN SCRIPTS.md sub-registry governs itself
       // (the main registry doesn't list its files). Without a sub-registry, the
       // variant's scripts belong to the main registry via their `co-*/…` relative
