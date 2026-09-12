@@ -6,6 +6,10 @@
 //           docs/context.md version footer leak). Scan moved to shared
 //           helpers/l0-ref-policy.ts (findL0LeakLines) alongside new-project.ts's
 //           sanitizer; Fail lines now carry :<lineNo>.
+// v2.36.1 (merged from PR #904): variant audit hook priority comparison
+//           normalizes path separators (path.join backslash vs JSON forward
+//           slash) — a same-path mismatch on Windows is a false positive, not
+//           a regression.
 // v2.33.0: Validator-hardening batch (T-20260910-013/016/017/026). New standing
 //           regression check checkVariantAuditHookRegression() — every variant.json
 //           that declares an audit-variant hook (script_manifest) must resolve to a
@@ -1714,7 +1718,12 @@ function checkVariantAuditHookRegression(): void {
         }
         candidates.push(declared[0], path.join('scripts', 'audit-variant.ts'), path.join('scripts', (manifest.name ?? variant), 'audit-variant.ts'));
         const selected = candidates.find(c => fs.existsSync(path.join(variantDir, c)));
-        if (selected !== declared[0]) {
+        // Compare with separators normalized: path.join emits the OS separator
+        // (backslash on Windows) while declared[0] comes verbatim from JSON
+        // (forward slashes) — a same-path mismatch here is a false positive,
+        // not a real priority regression.
+        const norm = (p: string | undefined) => p?.replace(/\\/g, '/');
+        if (norm(selected) !== norm(declared[0])) {
             Fail(`Variant audit-hook regression [${variant}]: §27 candidate simulation selects '${selected}' instead of declared '${declared[0]}' — declared hooks must keep candidate priority`);
             continue;
         }
