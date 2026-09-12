@@ -1,4 +1,4 @@
-// @version 1.3.0
+// @version 1.4.0
 // v1.2.0: graft fleet surface (ADR-0074): .mcp.json + opencode.json join JSON_MERGE_FILES
 //         (project-owned MCP servers survive the union); .claude/skills/graft/** claims
 //         TEMPLATE TREE SYNC before the platform-mirror rule (the skill is hand-maintained
@@ -121,7 +121,7 @@ const TRAVERSAL_SKIP_DIRS = new Set(['node_modules', '.git', '.gateguard-state']
  *  top level belongs to the generic VARIANT ASSET DIRS pass). */
 const KNOWN_TOP_DIRS = new Set([
   'agents', 'skills', 'scripts', 'docs', 'procedures',
-  '.claude', '.gemini', '.agents', '.githooks', '.github', '.git', 'memory', 'node_modules',
+  '.claude', '.gemini', '.agents', '.codex', '.githooks', '.github', '.git', 'memory', 'node_modules',
 ]);
 
 function underDir(rel: string, dir: string): boolean {
@@ -188,6 +188,13 @@ export function resolveClaim(relPath: string, variant = ''): UpgradeClaim {
   // by design, C-CM-05 exception), so the post-upgrade sync-skills.ts run can never deliver
   // it — the TEMPLATE TREE SYNC pass must claim it explicitly or the fleet never receives it.
   if (underDir(rel, '.claude/skills/graft')) return { policy: 'SYNC', pass: TEMPLATE_TREE_SYNC_PASS };
+  // Codex platform mirrors (ADR-0075 W1/W4): claimed BEFORE the blanket `.codex/**` rule
+  // below, which exists only for the per-project config.toml seed. Without this ordering
+  // the blanket ADD_IF_MISSING swallows the mirrors and fleet projects never receive
+  // skill/prompt updates (same incident class as the .claude/skills/graft fleet gap).
+  if (underDir(rel, '.codex/skills') || underDir(rel, '.codex/prompts')) {
+    return { policy: 'SYNC', pass: TEMPLATE_TREE_SYNC_PASS };
+  }
   // Codex project config is per-project by nature (project MCP servers + codex hooks, e.g.
   // co-abap/co-safety): seed add-if-missing only, never overwrite an existing file (ADR-0074 D4).
   if (underDir(rel, '.codex')) return { policy: 'ADD_IF_MISSING', pass: TEMPLATE_TREE_SYNC_PASS };

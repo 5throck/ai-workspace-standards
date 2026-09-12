@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.13.0
+// @version 1.14.0
 // new-project.ts — Scaffold a new project under the workspace root
 // Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z] [--country <CODE>]
 //
@@ -76,8 +76,8 @@ if (projectName.length > 64) {
 }
 
 // Validate platform
-if (!['claude', 'antigravity', 'both'].includes(platform)) {
-  console.error('❌ --platform must be: claude, antigravity, or both (default: both)');
+if (!['claude', 'antigravity', 'both', 'codex'].includes(platform)) {
+  console.error('❌ --platform must be: claude, antigravity, both, or codex (default: both)');
   if (import.meta.main) {
     process.exit(1);
   }
@@ -723,6 +723,14 @@ for (const d of ['docs/adr', 'docs/variants', 'docs/_templates', 'docs/_examples
 // ── 2.7. Apply platform profile ───────────────────────────────────────────────
 if (platform === 'claude') { const f = join(projectDir, 'GEMINI.md'); if (existsSync(f)) rmSync(f); }
 if (platform === 'antigravity') { const f = join(projectDir, 'CLAUDE.md'); if (existsSync(f)) rmSync(f); }
+// ADR-0075 §10: `codex` is a codex-primary profile — keeps CODEX.md + .codex/ and drops the
+// legacy twins. Legacy profiles (`claude`/`antigravity`/`both`) are codex-opt-out: the twin
+// and platform dir are template overlay, removed here unless explicitly opted in.
+if (platform !== 'codex') {
+  for (const f of [join(projectDir, 'CODEX.md'), join(projectDir, '.codex')]) {
+    if (existsSync(f)) rmSync(f, { recursive: true });
+  }
+}
 
 // Remove .cmd files
 for (const f of walkFiles(projectDir)) {
@@ -906,7 +914,7 @@ for (const skill of LEGACY_L0_SKILLS) {
 // SSOT mirror — a workspace-only skill that leaked into the L1 platform dirs
 // (`.claude/skills/`, `.gemini/skills/`) would otherwise survive into the
 // scaffolded project and register with the platform harness.
-const projectSkillBases = ['skills', '.claude/skills', '.gemini/skills'];
+const projectSkillBases = ['skills', '.claude/skills', '.gemini/skills', '.codex/skills'];
 for (const base of projectSkillBases) {
   const baseDir = join(projectDir, base);
   if (!existsSync(baseDir)) continue;
