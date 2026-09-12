@@ -451,13 +451,13 @@ Each template layer owns structured procedures in `procedures/<name>/schema.yaml
 ### Common Principles
 
 - **Agent / Skill / Script** each have explicit lifecycle states (active, deprecated, retired/archived)
-- Full lifecycle rules are defined in [AGENTS.md §8 Lifecycle Management](../AGENTS.md#8-lifecycle-management)
+- Full lifecycle rules are defined in [AGENTS.md §8 Lifecycle Management](../AGENTS.md)
 - Audit commands exist for each domain: `agent-lifecycle-audit.ts`, `skill-lifecycle-audit.ts`, `verify-scripts.ts`
 
 For full lifecycle procedures:
-- **Agent Lifecycle**: See [AGENTS.md §8 Lifecycle Management](../AGENTS.md#8-lifecycle-management)
-- **Skill Lifecycle**: See [AGENTS.md §8 Lifecycle Management](../AGENTS.md#8-lifecycle-management)
-- **Script Lifecycle**: See [AGENTS.md §8 Lifecycle Management](../AGENTS.md#8-lifecycle-management)
+- **Agent Lifecycle**: See [AGENTS.md §8 Lifecycle Management](../AGENTS.md)
+- **Skill Lifecycle**: See [AGENTS.md §8 Lifecycle Management](../AGENTS.md)
+- **Script Lifecycle**: See [AGENTS.md §8 Lifecycle Management](../AGENTS.md)
 
 ### Context Commonization Review
 
