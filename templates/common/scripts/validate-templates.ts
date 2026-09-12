@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.22.0
+ * @version 1.23.0
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -2249,7 +2249,17 @@ function checkCommonContract(): void {
         if (countryScoped.has(name)) continue; // country-scoped — contract description excludes
         if (variantScoped.has(name)) continue; // variant-scoped — contract description excludes
         if (SINGLE_PLATFORM_EXCEPTIONS[name]) {
-          pass(`C-CM-05: platform skill '${name}' unlisted by exception — ${SINGLE_PLATFORM_EXCEPTIONS[name]}`);
+          // Anti-drift (ADR-0074 D6): the skill is hand-maintained as exactly two
+          // byte-identical copies (root + template) — divergence means an edit
+          // landed on one side only, and the next upgrade would ship the stale one.
+          const rootCopy = join(ROOT, '.claude', 'skills', name, 'SKILL.md');
+          const templateCopy = join(skillDir, name, 'SKILL.md');
+          if (existsSync(rootCopy) && readFileSync(rootCopy, 'utf-8') !== readFileSync(templateCopy, 'utf-8')) {
+            fail('common', 'C-CM-05', `hand-maintained skill '${name}' copies diverge — root .claude/skills/${name}/SKILL.md and templates/common/.claude/skills/${name}/SKILL.md must stay byte-identical`, `Overwrite the stale copy with the fresher one (root and template must match)`);
+            unlistedErrors++;
+          } else {
+            pass(`C-CM-05: platform skill '${name}' unlisted by exception — ${SINGLE_PLATFORM_EXCEPTIONS[name]}`);
+          }
           continue;
         }
         fail('common', 'C-CM-05', `templates/common/.claude/skills/${name}/ exists but is not declared in common-contract.json common_platform_skills and matches no documented exclusion class`, `Add "${name}" to common_platform_skills, or register it in workspace-schema.json country_scoped_assets/variant_scoped_skills, or document an exclusion in the C-CM-05 exception list`);

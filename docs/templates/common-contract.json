@@ -443,6 +443,26 @@
         "hooks.WorktreeCreate": {
           "description": "Fires when a Claude Code git worktree is created",
           "reason_excluded": "WorktreeCreate event does not exist in Gemini CLI"
+        },
+        "hooks.UserPromptSubmit": {
+          "description": "Prompt-submission hook — graft upkeep at turn start (graft-hooks.cjs prompt, ADR-0074)",
+          "reason_excluded": "UserPromptSubmit event does not exist in Gemini CLI"
+        },
+        "hooks.Stop": {
+          "description": "Turn-end hook — graft graph projection rebuild (graft-hooks.cjs stop, ADR-0074)",
+          "reason_excluded": "Stop event does not exist in Gemini CLI"
+        },
+        "statusLine": {
+          "description": "Claude Code statusline command — graft-statusline.cjs (ADR-0074)",
+          "reason_excluded": "No statusline setting in Gemini CLI / Antigravity"
+        },
+        "subagentStatusLine": {
+          "description": "Claude Code subagent statusline command — graft-statusline.cjs (ADR-0074)",
+          "reason_excluded": "No subagent statusline setting in Gemini CLI / Antigravity"
+        },
+        "footerLinksRegexes": {
+          "description": "Claude Code footer link patterns — graft/ markdown cards clickable (ADR-0074)",
+          "reason_excluded": "No footer-links setting in Gemini CLI / Antigravity"
         }
       }
     },

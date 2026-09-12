@@ -3,16 +3,28 @@
   "mcpServers": {
     "kr_safety": {
       "command": "bun",
-      "args": ["run", "--env-file", ".env", "./mcp/kr-safety-regs/index.ts"]
+      "args": [
+        "run",
+        "--env-file",
+        ".env",
+        "./mcp/kr-safety-regs/index.ts"
+      ]
     }
   },
   "permissions": {
     "allow": [
       "Bash(bun scripts/audit.ts *)",
-      "Bash(bun scripts/co-safety/safety-audit.ts *)",
       "Bash(bun scripts/lifecycle-sync-audit.ts *)",
       "Bash(bun run agent:verify *)",
-      "Bash(bun scripts/validate-templates.ts *)"
+      "Bash(curl -sI *)",
+      "Bash(bun scripts/validate-templates.ts *)",
+      "WebSearch(*)",
+      "WebFetch(*)",
+      "Bash(graft:*)",
+      "Bash(npx graft:*)",
+      "Bash(graft-dev:*)",
+      "Bash(node dist/cli.js:*)",
+      "Bash(bun scripts/co-safety/safety-audit.ts *)"
     ],
     "deny": [
       "Bash(git push --force*)",
@@ -27,6 +39,39 @@
   "teammateMode": "auto",
   "hooks": {
     "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun scripts/hooks/post-write-lifecycle-check.ts",
+            "timeout": 60,
+            "async": true,
+            "asyncRewake": true,
+            "statusMessage": "Running post-edit lifecycle check..."
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/graft-hooks.cjs\" post-edit",
+            "timeout": 10000
+          }
+        ]
+      },
+      {
+        "matcher": "Bash|mcp__graft__|Read|Grep|Glob",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/graft-hooks.cjs\" tool-savings",
+            "timeout": 8000
+          }
+        ]
+      },
       {
         "matcher": "Write|Edit",
         "hooks": [
@@ -51,9 +96,30 @@
             "statusMessage": "Configuring git hooks..."
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/graft-hooks.cjs\" session-start",
+            "timeout": 8000
+          }
+        ]
       }
     ],
     "TaskCompleted": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun scripts/audit.ts",
+            "timeout": 120,
+            "async": true,
+            "statusMessage": "Running QA audit on task completion..."
+          }
+        ]
+      },
       {
         "matcher": "",
         "hooks": [
@@ -66,6 +132,83 @@
           }
         ]
       }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun scripts/hooks/gateguard-fact-force.ts --mode ask",
+            "timeout": 30,
+            "statusMessage": "GateGuard: checking first-edit importers..."
+          }
+        ]
+      }
+    ],
+    "TeammateIdle": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun scripts/hooks/post-write-lifecycle-check.ts",
+            "timeout": 60,
+            "async": true,
+            "asyncRewake": true,
+            "statusMessage": "Running teammate idle lifecycle check..."
+          }
+        ]
+      }
+    ],
+    "WorktreeCreate": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "git config core.hooksPath .githooks",
+            "async": true,
+            "statusMessage": "Configuring git hooks in new worktree..."
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/graft-hooks.cjs\" prompt",
+            "timeout": 15000
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/graft-hooks.cjs\" stop",
+            "timeout": 8000
+          }
+        ]
+      }
     ]
-  }
+  },
+  "worktree": {
+    "bgIsolation": "none"
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/graft-statusline.cjs\""
+  },
+  "subagentStatusLine": {
+    "type": "command",
+    "command": "node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/graft-statusline.cjs\""
+  },
+  "footerLinksRegexes": [
+    "graft/[\\w./-]+\\.md"
+  ]
 }

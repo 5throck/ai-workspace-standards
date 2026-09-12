@@ -19,6 +19,30 @@
           }
         ]
       }
+    ],
+    "BeforeTool": [
+      {
+        "matcher": "write_file|replace_file_content|multi_replace_file_content",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun scripts/hooks/gateguard-fact-force.ts --platform gemini",
+            "timeout": 5000
+          }
+        ]
+      }
+    ],
+    "AfterTool": [
+      {
+        "matcher": "write_file|replace_file_content|multi_replace_file_content",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun scripts/hooks/post-write-lifecycle-check.ts --platform gemini",
+            "timeout": 5000
+          }
+        ]
+      }
     ]
   },
   "terminal.executionPolicy": "Auto",
@@ -35,5 +59,14 @@
     "format",
     "fdisk",
     "mkfs"
-  ]
+  ],
+  "mcpServers": {
+    "graft": {
+      "command": "bunx",
+      "args": [
+        "@nanonets/graft",
+        "mcp"
+      ]
+    }
+  }
 }

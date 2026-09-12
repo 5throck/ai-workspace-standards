@@ -71,4 +71,7 @@ memory/archive/
 
 # Ignore test temp directories
 tests/.temp/
+
+# graft's local graph cache — regenerable, not committed (run `graft build`).
+/graft/
 <!-- /WORKSPACE-MANAGED -->

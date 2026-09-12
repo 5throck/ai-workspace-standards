@@ -1,0 +1,18 @@
+schemaVersion: 1
+id: T-20260912-002
+kind: manual
+title: >-
+  Fleet rollout: run upgrade-project (--dry-run then apply) for all 11
+  Projects/co-* after the graft multi-platform PR merges — pilot co-newbiz +
+  co-architect first, then the remaining 9; one upgrade PR per project repo;
+  graft section hand-merge into co-abap/co-safety .codex/config.toml
+priority: medium
+status: backlog
+attempts: 0
+created_at: '2026-09-12T02:30:00.000Z'
+history:
+  - at: '2026-09-12T02:30:00.000Z'
+    from: null
+    to: backlog
+result: null
+error: null
