@@ -1,4 +1,4 @@
-// @version 2.35.0
+// @version 2.36.0
 // v2.33.0: Validator-hardening batch (T-20260910-013/016/017/026). New standing
 //           regression check checkVariantAuditHookRegression() — every variant.json
 //           that declares an audit-variant hook (script_manifest) must resolve to a
@@ -539,7 +539,7 @@ if (!LIFECYCLE_ONLY) {
     // Check: no non-standard .md files at project root (file organization policy)
     const STANDARD_ROOT_MD = new Set([
         'README.md', 'README_ko.md', 'CHANGELOG.md', 'AGENTS.md',
-        'SECURITY.md', 'CONSTITUTION.md', 'CLAUDE.md', 'GEMINI.md',
+        'SECURITY.md', 'CONSTITUTION.md', 'CLAUDE.md', 'GEMINI.md', 'CODEX.md',
         'PROMOTION_CHECKLIST.md', '_ORIGIN.md', '_COMMON_VERSION.md'
     ]);
     const rootMdFiles = fs.readdirSync('.')
