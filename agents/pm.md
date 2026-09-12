@@ -7,6 +7,7 @@ tier:
   gemini: high        # gemini-3.1-pro
   antigravity: high   # gemini-3.1-pro
   gemini-cli: high    # gemini-3.1-pro
+  codex: high      # gpt-5.6-sol
 model: inherit
 color: yellow
 description: 'Orchestrates Phases 0, 2, 5, 6. Enforces quality gates. Use when: "Managing workflow", "Coordinating multi-phase tasks", "PM orchestration needed"'

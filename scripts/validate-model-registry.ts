@@ -2,7 +2,7 @@
 /**
  * validate-model-registry.ts
  * Validates that all agents/*.md frontmatter model comments match docs/workspace-schema.json models block.
- * Level: L0 | Status: active | @version 1.1.0
+ * Level: L0 | Status: active | @version 1.2.0
  */
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
@@ -30,7 +30,7 @@ interface Mismatch {
   expectedModel: string;
 }
 
-const PLATFORMS = ["claude", "gemini", "antigravity", "gemini-cli"] as const;
+const PLATFORMS = ["claude", "gemini", "antigravity", "gemini-cli", "codex"] as const;
 type Platform = typeof PLATFORMS[number];
 
 /**

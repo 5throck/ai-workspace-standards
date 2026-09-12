@@ -151,10 +151,10 @@ Spawn parallel instances to execute dedicated work concurrently. PM **must** exp
 | Tier | Model ID | Thinking Parameter | Typical Use |
 |------|----------|-------------------|-------------|
 | High | `gemini-3.1-pro` | `thinking_level="medium"` | Synthesis agent, complex reasoning |
-| Medium | `gemini-3.7-flash` | (none) | Persona reviewers (§6), proofreaders (§7), SVG designer (§7.5) |
-| Low | `gemini-3.7-flash` | (none) | Structural validation, simple checks |
+| Medium | `gemini-3.8-flash` | (none) | Persona reviewers (§6), proofreaders (§7), SVG designer (§7.5) |
+| Low | `gemini-3.8-flash` | (none) | Structural validation, simple checks |
 
-> **Note**: Medium and Low tiers share the same model (`gemini-3.7-flash`) on the Gemini platform. The distinction is operational — Low-tier tasks get shorter prompts and simpler instructions. When writing the `Model` column in execution plan tables, use the literal Gemini model ID (e.g. `gemini-3.1-pro`), not a Claude-style short alias.
+> **Note**: Medium and Low tiers share the same model (`gemini-3.8-flash`) on the Gemini platform. The distinction is operational — Low-tier tasks get shorter prompts and simpler instructions. When writing the `Model` column in execution plan tables, use the literal Gemini model ID (e.g. `gemini-3.1-pro`), not a Claude-style short alias.
 
 ### 2.3 send_message for Inter-Agent Communication
 
@@ -278,10 +278,10 @@ After all sequential passes, merge all findings, deduplicate, and apply fixes to
 
 | Role | Claude Model | Gemini Model |
 |------|-------------|--------------|
-| Domain Expert | `sonnet` | `gemini-3.7-flash` |
-| Devil's Advocate | `sonnet` | `gemini-3.7-flash` |
-| Clarity Editor | `sonnet` | `gemini-3.7-flash` |
-| Consistency Auditor | `sonnet` | `gemini-3.7-flash` |
+| Domain Expert | `sonnet` | `gemini-3.8-flash` |
+| Devil's Advocate | `sonnet` | `gemini-3.8-flash` |
+| Clarity Editor | `sonnet` | `gemini-3.8-flash` |
+| Consistency Auditor | `sonnet` | `gemini-3.8-flash` |
 | Synthesis + Apply | `opus` | `gemini-3.1-pro` |
 
 **Claude Code — Parallel Dispatch (single turn)**:
@@ -357,13 +357,13 @@ Agent(description = "§6 Synthesis — merge findings and apply fixes",
 
 | Role | Claude Model | Gemini Model |
 |------|-------------|--------------|
-| Grammar Checker | `sonnet` | `gemini-3.7-flash` |
-| Spelling + Terminology | `sonnet` | `gemini-3.7-flash` |
-| Loanword Refinement | `sonnet` | `gemini-3.7-flash` |
-| Style + Tone | `sonnet` | `gemini-3.7-flash` |
-| Merge + Apply | `sonnet` | `gemini-3.7-flash` |
+| Grammar Checker | `sonnet` | `gemini-3.8-flash` |
+| Spelling + Terminology | `sonnet` | `gemini-3.8-flash` |
+| Loanword Refinement | `sonnet` | `gemini-3.8-flash` |
+| Style + Tone | `sonnet` | `gemini-3.8-flash` |
+| Merge + Apply | `sonnet` | `gemini-3.8-flash` |
 
-> Language proofreading is less reasoning-intensive than content verification, so `sonnet`/`gemini-3.7-flash` is sufficient even for the merge step.
+> Language proofreading is less reasoning-intensive than content verification, so `sonnet`/`gemini-3.8-flash` is sufficient even for the merge step.
 
 **Claude Code — Parallel Dispatch (single turn)**:
 
@@ -438,7 +438,7 @@ Agent(description = "§7 Merge proofreading findings and apply",
 
 | Role | Claude Model | Gemini Model |
 |------|-------------|--------------|
-| SVG Designer | `sonnet` | `gemini-3.7-flash` |
+| SVG Designer | `sonnet` | `gemini-3.8-flash` |
 
 > SVG creation is a focused task that benefits from a single specialist rather than parallel dispatch. The designer receives the report section context and produces a self-contained inline SVG string.
 
@@ -491,5 +491,5 @@ Agent(
 | Tier | Claude Alias | Claude Registry ID | Gemini Model ID |
 |------|-------------|-------------------|-----------------|
 | **High** | `"opus"` | `claude-opus-5-0` | `gemini-3.1-pro` |
-| **Medium** | `"sonnet"` | `claude-sonnet-5-0` | `gemini-3.7-flash` |
-| **Low** | `"haiku"` | `claude-haiku-4-5` | `gemini-3.7-flash` |
+| **Medium** | `"sonnet"` | `claude-sonnet-5-0` | `gemini-3.8-flash` |
+| **Low** | `"haiku"` | `claude-haiku-4-5` | `gemini-3.8-flash` |
