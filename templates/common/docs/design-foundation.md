@@ -63,7 +63,7 @@ Rules:
    follows the project's own review chain.
 5. **Enforcement SHOULD be automated** (a design-lint script: banned hard-coded values,
    bypassed layout primitives, non-registered icons/labels). See the checklist template:
-   `docs/_templates/design-review-checklist-template.md`.
+   the workspace-level `docs/_templates/design-review-checklist-template.md` (template-side staging — not delivered to projects; see the workspace repository).
 6. **Rendered-preview verification (ADR-0070)**: user-facing web/app UI work is not
    complete until the UI was verified in a rendered preview — at minimum a rendered
    check at the project's declared mobile and desktop baselines (≥ 2 breakpoints) and
