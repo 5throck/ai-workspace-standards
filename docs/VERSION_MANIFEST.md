@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-09-11T23:05:40.564Z
+**Generated**: 2026-09-12T00:22:50.088Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -150,7 +150,7 @@
 | sync-md.ts | 1.3.0 | scripts/sync-md.ts | N/A |
 | sync-skill-status.ts | 1.0.1 | scripts/sync-skill-status.ts | N/A |
 | sync-skills-to-l2.ts | 1.0.1 | scripts/sync-skills-to-l2.ts | N/A |
-| sync-skills.ts | 1.5.0 | scripts/sync-skills.ts | N/A |
+| sync-skills.ts | 1.6.0 | scripts/sync-skills.ts | N/A |
 | sync-template-deps.ts | 1.0.0 | scripts/sync-template-deps.ts | N/A |
 | tag-template.ts | 1.1.0 | scripts/tag-template.ts | bun |
 | team-builder.ts | 1.3.0 | scripts/team-builder.ts | N/A |
@@ -183,7 +183,7 @@
 | verify-new-project-tests.ts | 1.0.3 | scripts/verify-new-project-tests.ts | N/A |
 | verify-platform-lifecycle.ts | 1.1.2 | scripts/verify-platform-lifecycle.ts | N/A |
 | verify-readme-sync.ts | 1.4.0 | scripts/verify-readme-sync.ts | bun, fs, path |
-| verify-scripts.ts | 1.6.0 | scripts/verify-scripts.ts | fs, path |
+| verify-scripts.ts | 1.6.1 | scripts/verify-scripts.ts | fs, path |
 | verify-skill-graph.ts | 1.6.0 | scripts/verify-skill-graph.ts | N/A |
 | verify-skills.ts | 1.3.0 | scripts/verify-skills.ts | N/A |
 | verify-template-integrity.ts | 1.0.0 | scripts/verify-template-integrity.ts | crypto, fs, path |
