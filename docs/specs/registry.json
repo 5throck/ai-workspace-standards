@@ -750,10 +750,10 @@
       "id": "2026-09-12-universal-design-gate-design",
       "title": "universal design gate design",
       "file": "docs/designs/2026-09-12-universal-design-gate-design.md",
-      "status": "approved",
+      "status": "implemented",
       "source": "manual",
       "created": "2026-09-11",
-      "last_updated": "2026-09-11"
+      "last_updated": "2026-09-12"
     }
   ]
 }

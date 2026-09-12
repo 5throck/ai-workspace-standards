@@ -1,7 +1,7 @@
 ---
 name: sync
 description: Runs the full project sync pipeline — lifecycle update, audit, L0→L1 publish, commit, push, and PR creation.
-version: 1.4.0
+version: 1.5.0
 last_reviewed: 2026-09-12
 status: active
 scope: common
@@ -85,7 +85,7 @@ Runs the full project sync pipeline (`scripts/dev-sync.ts`). This is the single 
 | 3.6 | Deprecated Script Warnings | non-fatal | Scans `SCRIPTS.md` for deprecated scripts and prints warnings |
 | 3.7 | L0/L1 Script Drift Check | non-fatal | Runs `verify-scripts.ts --check-drift` to detect drift between L0 and L1 script copies |
 | 3.8 | Memory File Archival | non-fatal | Runs `archive-memory.ts` to archive old memory files |
-| 3.9 | Spec Registry Check | **FATAL** (L0) | Runs `audit.ts --spec-check --lifecycle-only` — blocks on the spec-relevance Fail (code diff with no spec activity; ADR-0055 Stage 2) and any always-on audit Fail; stale/missing-spec stay WARN; escape hatch `--spec-exempt=E1-E5` (AGENTS.md §5.1.1); skipped when `docs/specs/registry.json` is absent |
+| 3.9 | Spec Registry Check | **FATAL** (L0) | Runs `audit.ts --spec-check --lifecycle-only` — blocks on the spec-relevance Fail (code diff with no spec activity; ADR-0055 Stage 2) and any always-on audit Fail; stale/missing-spec stay WARN; escape hatch `--spec-exempt=E1-E5` (AGENTS.md §5.1.1); a missing `docs/specs/registry.json` is a loud WARN (gate INACTIVE — Universal Design Gate, ADR-0074; activate via `spec-register.ts`; the registry seed ships to projects add-if-missing) |
 | 3.95 | QA Pre-checks | non-fatal | Runs project tests (if `package.json` has `test` script) and warns if `README_ko.md` is missing |
 | 3.95b | Typecheck Gate | **FATAL** (L0) | Runs `scripts/typecheck.ts` — `tsc --noEmit` over `scripts/` against the zero-error baseline (`scripts/helpers/typecheck-baseline.json`; T-20260910-012). Root context only; L1+ contexts skip cleanly via the missing-baseline guard. Never raise the error count — fix the error instead |
 | 3.96c | Session-Evidence Skill Review | non-fatal | Runs `skill-session-review.ts` — accumulates Observed Symptom + Evidence from the day's `## Skills Used` section into `memory/skill-review/` (diagnosis/candidate left empty for human triage); plus a non-fatal full `skill-dependency-analysis.ts --report` pass (SkillHone-inspired loop; design doc `docs/designs/2026-09-06-skill-session-review-design.md`) |

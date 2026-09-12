@@ -111,13 +111,25 @@ describe('upgrade-policy resolveClaim — PRESERVE / PROJECT_STATE / TEMPLATE_ON
 
   test('scaffold-removed staging zones are TEMPLATE_ONLY', () => {
     for (const rel of [
-      'docs/adr/0001-x.md', 'docs/specs/y.md', 'docs/variants/z.md',
+      'docs/adr/0001-x.md', 'docs/variants/z.md',
       'docs/_templates/t.md', 'docs/_examples/e.md', 'docs/_common/security.md',
       'docs/variant.context.template.md', 'agents/_COMMON.md', 'agents/lifecycle-manager.md',
       'scripts/propagation-map.json', 'run.cmd',
     ]) {
       expect(resolveClaim(rel, VARIANT).policy).toBe('TEMPLATE_ONLY');
     }
+  });
+
+  test('docs/specs left the scaffold-removed zones — registry seed is the Design Gate claim (ADR-0074)', () => {
+    // ADR-0073 Amendment 2 (via ADR-0074): docs/specs is no longer a scaffold-deleted zone;
+    // its registry seed is delivered add-if-missing so the spec-check activates in projects.
+    // Anything else under docs/specs falls through to the default SYNC policy on purpose.
+    expect(resolveClaim('docs/specs/registry.json', VARIANT).policy).not.toBe('TEMPLATE_ONLY');
+    expect(resolveClaim('docs/specs/registry.json', VARIANT)).toEqual({
+      policy: 'ADD_IF_MISSING',
+      pass: 'DESIGN GATE SEED',
+    });
+    expect(resolveClaim('docs/specs/y.md', VARIANT).policy).toBe('SYNC');
   });
 });
 

@@ -1,4 +1,4 @@
-// @version 1.1.0
+// @version 1.2.0
 // v1.1.0: .env.sample reclassified PRESERVE → SYNC/ENV_SAMPLE SYNC (upgrade-project v1.23.0):
 //         the upgrade path now re-delivers template env-key changes with scaffold-parity
 //         country pruning applied (shared scripts/lib/env-sample-blocks.ts), so template
@@ -66,10 +66,13 @@ export const PLACEHOLDER_ALLOWLIST = new Set([
 
 // ── Scaffold-parity facts (mirrored from scripts/new-project.ts) ─────────────────────────────
 
-/** Staging zones the scaffold DELETES after copying (new-project.ts:470,477,718) — template-side
- *  only; upgrading them into a project would resurrect files the scaffold deliberately removed. */
+/** Staging zones the scaffold DELETES after copying (mirrored from scripts/new-project.ts
+ *  L1_ONLY_DIRS + the template-only docs removal loop) — template-side only; upgrading them
+ *  into a project would resurrect files the scaffold deliberately removed. docs/specs left
+ *  this list in ADR-0074 Amendment 2: its registry seed activates the Universal Design Gate
+ *  in projects and is delivered add-if-missing (see the DESIGN GATE SEED claim below). */
 const TEMPLATE_ONLY_DIRS = [
-  'docs/_common', 'docs/_templates', 'docs/_examples', 'docs/variants', 'docs/adr', 'docs/specs',
+  'docs/_common', 'docs/_templates', 'docs/_examples', 'docs/variants', 'docs/adr',
 ];
 
 const TEMPLATE_ONLY_FILES = new Set([
@@ -126,6 +129,11 @@ export function resolveClaim(relPath: string, variant = ''): UpgradeClaim {
   if (PROJECT_STATE_FILES.has(rel)) return { policy: 'PROJECT_STATE', pass: '(project state)' };
   if (underDir(rel, 'memory')) return { policy: 'PROJECT_STATE', pass: '(project memory)' };
   if (rel === 'docs/countries/ACTIVE.md') return { policy: 'PROJECT_STATE', pass: '(country runtime state)' };
+
+  // Universal Design Gate seed (ADR-0074): every project gets a spec registry so the
+  // sync-time spec-check is active. Add-if-missing — existing project entries are never
+  // overwritten or pruned by upgrades.
+  if (rel === 'docs/specs/registry.json') return { policy: 'ADD_IF_MISSING', pass: 'DESIGN GATE SEED' };
 
   if (TEMPLATE_ONLY_FILES.has(rel)) return { policy: 'TEMPLATE_ONLY', pass: '(scaffold-removed)' };
   for (const dir of TEMPLATE_ONLY_DIRS) {

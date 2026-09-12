@@ -1,4 +1,9 @@
-// @version 1.11.0
+// @version 1.12.0
+// v1.12.0: feat(design-gate): step 3.9 registry-absent skip becomes a loud WARN — a missing
+//           docs/specs/registry.json means the Universal Design Gate (ADR-0074) spec-check is
+//           INACTIVE, which must be visible instead of a buried one-line log. Pairs with the
+//           registry seed now shipping via templates/common (add-if-missing, ADR-0073
+//           Amendment 2) and spec-register.ts mirrored L0+L1.
 // v1.11.0: feat(pipeline): scoped staging, WARN phase — step 6 no longer blindly trusts
 //           git add -A to carry only task files. The pipeline snapshots the working tree
 //           before any step mutates it (S0) and again at commit time (S1); S1\S0 is the
@@ -346,7 +351,10 @@ if (fs.existsSync(specRegPath)) {
         console.log(`${GREEN}✓ Spec registry check passed${RESET}`);
     }
 } else {
-    console.log('📋 Step 3.9: skipped — no docs/specs/registry.json');
+    // ADR-0074 Universal Design Gate: a missing registry means the gate is INACTIVE —
+    // make that loud instead of a silent skip (previously buried in one plain log line).
+    console.log(`${YELLOW}⚠️  Step 3.9: no docs/specs/registry.json — the Universal Design Gate spec-check is INACTIVE in this repository.${RESET}`);
+    console.log(`${YELLOW}   Activate it: create docs/designs/<spec-id>-design.md, then bun scripts/spec-register.ts --file <design-doc> --source manual${RESET}`);
 }
 
 // 3.95 QA Pre-checks (non-fatal — unique checks from qa-gate.ts)

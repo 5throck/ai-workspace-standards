@@ -17,7 +17,7 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 
 | Agent | File | Tier | Role |
 |-------|------|------|------|
-| **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) | High | Orchestrates team assembly (Phase 0), design validation (Phase 1-2), and lifecycle finalization (Phase 5). **PM does NOT execute code or documentation directly — all specialist work dispatched through PM.** |
+| **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) | High | Orchestrates team assembly (Phase 0), design validation (Phase 2), and lifecycle finalization (Phase 6). **PM does NOT execute code or documentation directly — all specialist work dispatched through PM.** |
 
 <!-- VARIANT-AGENTS-START -->
 <!-- Define project-specific specialist agents here.
@@ -47,7 +47,7 @@ All specialist agents require PM dispatch - enforced at 4 levels.
 
 #### §3.1.1 PM Direct Execution Scope
 
-PM is an escalation gateway, not an executor. **⚠️ CRITICAL**: PM MUST NOT perform Write/Edit on any file except `memory/*.md` and `CHANGELOG.md`. All file modifications MUST be dispatched to project specialists. See [PM Direct Execution Constraints](agents/pm.md#⚠️-critical-pm-direct-execution-constraints) in `agents/pm.md`.
+PM is an escalation gateway, not an executor. **⚠️ CRITICAL**: PM MUST NOT perform Write/Edit on any file except `memory/*.md` and `CHANGELOG.md`. All file modifications MUST be dispatched to project specialists. See [PM Direct Execution Constraints](agents/pm.md#pm-direct-execution-scope) in `agents/pm.md`.
 
 | Category | Tools | Scope |
 |----------|-------|-------|
@@ -57,9 +57,9 @@ PM is an escalation gateway, not an executor. **⚠️ CRITICAL**: PM MUST NOT p
 | Forbidden | Write, Edit (all other paths) | Must delegate to project specialist |
 | Forbidden | Bash (write/execute patterns) | Must delegate to specialist |
 
-**Rationale**: PM is orchestrator, not executor. Direct execution violates governance separation of concerns. See [Role Clarification](agents/pm.md#⚠️-role-clarification) and [Task Tracking vs Execution](agents/pm.md#task-tracking-vs-execution) in `agents/pm.md`.
+**Rationale**: PM is orchestrator, not executor. Direct execution violates governance separation of concerns. See [Role Clarification](agents/pm.md#-role-clarification) in `agents/pm.md` and the Task Owner vs Executor Distinction below.
 
-When a specialist agent's required tool is denied, PM applies the [Permission Denial Protocol](#§3.8-permission-denial-protocol) — never substitutes for the specialist.
+When a specialist agent's required tool is denied, PM applies the [Permission Denial Protocol](#38-permission-denial-protocol) — never substitutes for the specialist.
 
 #### §3.1.2 PM Role Boundaries
 
@@ -119,7 +119,7 @@ All specialist agents below are dispatched ONLY through PM:
 <!-- VARIANT-DISPATCH-TRIGGERS-END -->
 **⚠️ IMPORTANT**: Do NOT invoke any specialist agent directly. All requests must go through PM.
 
-> **Execution Plan Format**: For mandatory criteria, boilerplate table, and rules, see [§5 Execution Plan Templates](#§5-execution-plan-templates). For platform-specific dispatch instructions, see [CLAUDE.md §5](CLAUDE.md#5-agent-dispatch-rules) or [GEMINI.md §5](GEMINI.md#5-agent-dispatch-rules).
+> **Execution Plan Format**: For mandatory criteria, boilerplate table, and rules, see [§5 Execution Plan Templates](#5-execution-plan-templates). For platform-specific dispatch instructions, see [CLAUDE.md §5](CLAUDE.md#5-agent-dispatch-rules) or [GEMINI.md §5](GEMINI.md#5-agent-dispatch-rules).
 
 ### §3.5 Phase Determination (Deliverable-Type Gate)
 
@@ -168,7 +168,7 @@ When `/meeting` is invoked, the PM orchestrates structured multi-agent discussio
 
 **Workspace root only** — `scripts/ticket.ts` and `tickets/` do not exist in variant projects (`@l2-propagate: false`); this section intentionally lives in `AGENTS.md` (L0-only SSOT, never propagated) rather than `agents/pm.md`, which extends into every variant's PM.
 
-Deferred governance decisions (e.g. an ADR's soak-period gate) are tracked as `kind: manual` tickets with an optional `not_before` date — see [docs/designs/2026-08-16-governance-backlog-design.md](docs/designs/2026-08-16-governance-backlog-design.md). When `bun scripts/ticket.ts list --ready --kind manual` surfaces a ticket (at session start or during the Weekly Health Check, [docs/context.md](docs/context.md) and [§9.1](docs/context.md#91-weekly-agentskill-health-check)):
+Deferred governance decisions (e.g. an ADR's soak-period gate) are tracked as `kind: manual` tickets with an optional `not_before` date — see [docs/designs/2026-08-16-governance-backlog-design.md](docs/designs/2026-08-16-governance-backlog-design.md). When `bun scripts/ticket.ts list --ready --kind manual` surfaces a ticket (at session start or during the Weekly Health Check, [docs/context.md](docs/context.md) and [§9.1](docs/context.md)):
 
 - If it's a pure decision (approve/reject), PM reviews and moves it (`bun scripts/ticket.ts move <id> review`, then `done`) — no specialist dispatch needed.
 - If acting on it requires implementation work, PM dispatches through the normal PM Gateway path (§3.1–§3.5) like any other task — no new mechanism. If the item is independent of other in-flight work and Agent Teams is enabled for the session, PM may dispatch it as a parallel teammate instead of sequentially.
@@ -211,7 +211,7 @@ lang_reason: legal   # legal | source-material | proper-noun
 - `source-material`: Primary source quotations where English translation would compromise academic accuracy or meaning.
 - `proper-noun`: Files dominated by Korean proper nouns (institution/place/person names).
 
-*Note: Exception is NOT available for: agents/*.md, skills/*.md, context.md, CLAUDE.md, GEMINI.md, AGENTS.md, or any variant context.md file.*
+*Note: Exception is NOT available for: context.md, CLAUDE.md, GEMINI.md, AGENTS.md, or any variant context.md file. It IS available for `agents/*.md` and `skills/*.md` (with `lang_reason` declared).*
 
 ### Korean Plain-Language Preference (`순우리말`-First)
 When writing Korean documentation or Korean translation output, prefer native Korean words (`순우리말`) over loanwords (`외래어`) whenever a natural, widely-understood native equivalent exists — e.g. prefer `만들기` over `크리에이션`, `알림` over `노티피케이션`, `모음` over `컬렉션` in general prose.
@@ -235,6 +235,10 @@ When writing Korean documentation or Korean translation output, prefer native Ko
 - **Core Script Standardization**: The core synchronization and validation scripts (`scripts/dev-sync.ts` and `scripts/audit.ts`) must remain standardized and identical across all templates and variants. Direct modification of these core scripts in L2 projects is strictly forbidden.
 - **Variant-Specific Audit Hook**: Variant projects requiring custom verification checks must implement them in a pluggable hook script located at `scripts/audit-variant.ts`.
 - **Integrity Enforcement**: During template reconciliation (`l3-to-variant-pipeline.ts`), any modified core scripts will be automatically detected and will fail the reconciliation.
+
+### Universal Design Gate (ADR-0074)
+
+Every code change at any tier (L0–L3) must carry spec activity: create/update a design doc at `docs/designs/<spec-id>-design.md` and register it (`bun scripts/spec-register.ts --file <design-doc> --source manual --status implemented`) before `/sync`. The sync-time spec-check (`audit.ts --spec-check`, dev-sync step 3.9) blocks commits without it; trivial changes use `--spec-exempt=E1..E5` (AGENTS.md §5.1.1). Project registries (`docs/specs/registry.json`) are add-if-missing seeds — upgrades never overwrite or prune project entries.
 <!-- COMMON-AGENTS:END -->
 
 ---
@@ -279,7 +283,7 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 #### Dispatch Rules
 
 1. **Autonomous Agent Handoffs** - Agents can dispatch each other directly via JSON contracts without PM intervention for routine workflows
-2. **PM Orchestration Phases** - PM only orchestrates Phases 0 (Team Assembly), 2 (Design Validation), and 5 (Lifecycle Finalization)
+2. **PM Orchestration Phases** - PM only orchestrates Phases 0 (Project Initiation/Team Assembly), 1-2 (Planning & Architecture), and 5 (Lifecycle Finalization), per `docs/workspace-schema.json`
 3. **QA Gate** - PM executes qa scripts at Phase 6 (bun scripts/qa-gate.ts)
 4. **Parallel Agent Dispatch** - all parallel agents must be dispatched in one turn for research/analysis phases
 5. **Error handling** - if any parallel agent fails, responsible agent resolves failure before proceeding. Do not skip.
@@ -311,7 +315,7 @@ Phase 0 - Project Initiation (PM-owned)
   PM dynamically creates new agents/skills and resolves R&R overlap
   PM updates AGENTS.md and maintains skill registry
 
-Phase 1-2 - Planning & Architecture (specialist-autonomous)
+Phase 1-2 - Planning & Architecture (PM-owned design validation; specialist-autonomous planning work)
   PM classifies the request; Architect produces implementation plan + ADR
   Dispatch read-only agents in parallel (analysis, research)
   PM synthesizes findings → acceptance criteria
@@ -330,8 +334,9 @@ Phase 5 - Lifecycle Finalization (PM-owned)
   PM updates governance records for any changed artifacts
   PM logs decisions to memory/YYYY-MM-DD.md
 
-Phase 6 - Quality Assurance & Finalization (PM-owned)
-  PM executes bun scripts/qa-gate.ts
+Phase 6 - Quality Assurance & Finalization (autonomous per `docs/workspace-schema.json`; specialist-autonomous in workspace, PM-owned in variants)
+  Auditor (workspace) executes bun scripts/qa-gate.ts autonomously
+  PM (variants) executes qa scripts
   Validates: workspace audit, project tests, documentation consistency
   Maximum 2 iterations before PM escalation → GATE
   PM runs /sync "type: description" → PR opened
@@ -353,17 +358,17 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 | Cross-validate documentation consistency | `auditor` | `docs-writer` |
 | Orchestrate multi-step task across agents | `pm` | any execution agent |
 
-<!-- VARIANT-ROLE-BOUNDARY-START -->
-<!-- VARIANT-ROLE-BOUNDARY-END -->
-
 ---
 
 ## §5: Execution Plan Templates
 
 ### §5.1 Standard Execution Plan Template
 
-> **Design Gate (Row 0)**: Workspace root (L0) and common template (L1) only.
-> L2 variant projects are exempt — they manage their own design workflow.
+> **Design Gate (Row 0)**: Universal across tiers (L0–L3) per ADR-0074 — every code change must
+> carry spec activity (design doc + registry entry), enforced by the sync-time spec-check
+> (`audit.ts --spec-check`, dev-sync step 3.9, FATAL). Full Row 0 ceremony (execution-plan
+> boilerplate, architect ownership) applies at L0/L1; L2/L3 satisfy the gate with the
+> one-design-doc convention via `scripts/spec-register.ts`.
 
 | # | Task | Agent | Tier | Model | Spec |
 |---|------|-------|------|-------|------|
@@ -374,8 +379,9 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 **Execution Order**: [Parallel | Sequential]
 
 **Key points**:
-- **Row 0 (Design Gate) is MANDATORY** for L0/L1 — design document must be created/updated before implementation
+- **Row 0 (Design Gate) is MANDATORY at every tier (ADR-0074)** — a design document must be created/updated before implementation; L2/L3 satisfy it with a single design doc + `spec-register.ts` entry (full ceremony stays L0/L1)
 - **Design docs for user-facing features MUST include an Accessibility section** (target level, affected interaction areas, verification method) per ADR-0065 — accessibility is a mandatory consideration for web/app/CLI/document feature development (WCAG 2.1 AA baseline); backend/non-UI work is exempt only with an explicit statement
+- **Design docs for user-facing web/app UI MUST include a Preview Verification note** (rendered check at ≥ 2 declared breakpoints, ≥ 1 key interaction, evidence attached) per ADR-0070 — a UI change is not done until it was seen rendered; pure backend/non-UI work is exempt only with an explicit statement
 - Tier column is MANDATORY (High/Medium/Low)
 - `/sync` is always the final step — it covers lifecycle update, full audit, commit, push, and PR creation
 - No separate Lifecycle Update or Final QA Audit rows needed — `/sync` handles both
@@ -450,7 +456,7 @@ When modifying files that affect both CLAUDE.md and GEMINI.md:
 >
 > **Skill structure specification**: See [docs/context.md](docs/context.md) for frontmatter format and session skill registration.
 >
-> **Skill discovery & registration**: To make workspace-level skills discoverable and loadable by Claude, Gemini, and Antigravity, the `skills/` folder is registered via `skills.json` files in each platform directory: `.claude/skills.json`, `.gemini/skills.json`, and `.agents/skills.json`. The script `scripts/sync-skills.ts` distributes SSOT skills from `skills/` to `.claude/skills/`, `.gemini/skills/`, and `.agents/skills/`, and back-syncs shortcut skills (sync, meeting) from `.agents/skills/` to `.claude/skills/` and `.gemini/skills/`.
+> **Skill discovery & registration**: To make workspace-level skills discoverable and loadable by Claude, Gemini, and Antigravity, the `skills/` folder is registered via `skills.json` files in each platform directory: `.claude/skills.json`, `.gemini/skills.json`, and `.agents/skills.json`. The script `scripts/sync-skills.ts` distributes SSOT skills from `skills/` to `.claude/skills/`, `.gemini/skills/`, and `.agents/skills/`, and back-syncs shortcut skills (`sync`, `source-command-commit-push-pr`) from `.agents/skills/` to `.claude/skills/` and `.gemini/skills/`.
 
 > **`owner` field definition**: The `owner` field in `SKILL.md` frontmatter identifies the **maintainer responsibility** for that skill — the agent or role accountable for keeping the skill current. It does NOT require that agent to exist in the current project, and does NOT mean that agent is the only one who can invoke the skill.
 
@@ -487,15 +493,15 @@ Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 |-------|----------|---------|
 | `sync` | `skills/sync/` | Sync pipeline — lifecycle, audit, publish, commit, push, PR |
 | `project-review` | `skills/project-review/` | Multi-agent parallel project review |
-| `audit-workspace` | `skills/audit-workspace/` | Workspace standards audit |
+| `audit-workspace` | `skills/audit-workspace/` | Workspace standards audit (deprecated; removal 2026-10-10) |
 | `meeting-facilitation` | `skills/meeting-facilitation/` | Multi-agent meeting orchestration |
 | `security-scan` | `skills/security-scan/` | Security and secret detection |
 | `create-variant` | `skills/create-variant/` | New variant scaffolding |
 | `promote-variant` | `skills/promote-variant/` | Variant promotion to official |
-| `simulate-l3-to-variant-promotion` | `skills/simulate-l3-to-variant-promotion/` | E2E smoke test for L3 scaffold → variant promotion pipeline |
+| `simulate-pipeline` | `skills/simulate-pipeline/` | E2E smoke test for project creation and the L3 scaffold → variant promotion pipeline (merged skill) |
 | `explain-me` | `skills/explain-me/` | Single-file interactive HTML report generation (inspired by beret21/reportme) |
 
-> **Complete Skill Registry**: The table above is a curated subset. For the complete registry including all 31 workspace-level skills, versions, status, and lifecycle metadata, see [`docs/VERSION_MANIFEST.md`](docs/VERSION_MANIFEST.md).
+> **Complete Skill Registry**: The table above is a curated subset — see `docs/VERSION_MANIFEST.md` for the complete registry of all workspace-level skills with versions, status, and lifecycle metadata.
 
 ### Platform Skills Distribution
 
@@ -503,9 +509,9 @@ Skills are distributed to all three platform directories via `scripts/sync-skill
 
 | Platform | Directory | Registration | Shortcut Skills |
 |----------|-----------|--------------|-----------------|
-| Claude Code | `.claude/skills/` | `.claude/skills.json` | `sync`, `meeting` |
-| Gemini CLI | `.gemini/skills/` | `.gemini/skills.json` | `sync`, `meeting` |
-| Antigravity | `.agents/skills/` | `.agents/skills.json` | `sync`, `meeting`, `source-command-commit-push-pr` |
+| Claude Code | `.claude/skills/` | `.claude/skills.json` | `sync` |
+| Gemini CLI | `.gemini/skills/` | `.gemini/skills.json` | `sync` |
+| Antigravity | `.agents/skills/` | `.agents/skills.json` | `sync`, `source-command-commit-push-pr` |
 
 - **Phase 1**: Every `skills/*/SKILL.md` directory is copied to all three platform directories.
 - **Phase 2**: Shortcut skills that only exist in `.agents/skills/` are back-synced to `.claude/skills/` and `.gemini/skills/`.
@@ -604,6 +610,8 @@ When a new skill is created in `skills/` or `.claude/skills/`:
    bun scripts/validate-skills.ts
    ```
 
+1.5. **Triage accumulated session evidence** — review `memory/skill-review/*.md` records produced by the session-evidence loop (dev-sync step 3.96c; see `docs/context.md §6.6 Session-Evidence Skill Review Loop`). Fill `diagnosis`/`candidate` blocks at triage, then dispatch approved revisions through the normal PM Gateway path (§3).
+
 2. **Triage findings** by severity:
    - 🔴 Broken dependencies or circular references → fix before quarter ends
    - 🟡 Deprecated dependency usage → fix within 2 weeks
@@ -630,3 +638,45 @@ A skill health check should also be run outside the quarterly schedule when:
 
 - **v2.0.0 (2026-06-09)**: Restructured as SSOT - Integrated PM Gateway workflow (§3), execution plan templates (§5), and renumbered existing sections. Consolidated duplicate content from pm.md, CLAUDE.md §5, GEMINI.md §5 into single source of truth.
 - **v1.x**: Previous versions maintained agent roster and individual definitions without PM Gateway integration
+
+<!-- graft:start -->
+## Graft — repo context graph
+
+This repo is indexed in `graft/`: small linked markdown nodes that explain each
+system and carry exact file:line spans, kept in sync with the code through git.
+
+For ANY task here — understanding how something works, finding where code lives,
+or scoping a change — get context from the graph before grepping or opening
+source files. Re-ask freely (it's cheap) and reuse literal identifiers you
+already have (symbol, error string, file name) as the query. New to this repo?
+Run `graft map` first — a token-budgeted orientation (dir clusters, hubs,
+hotspots), no LLM, no key.
+
+- Run `graft ask "<your question>" --source` → ranked nodes with the relevant
+  code spans inlined (each hit's ≤8-line crux by default; `--full` for whole
+  definitions when the crux isn't enough). Match the tool to the task shape:
+  for understanding or editing, the top node IS the answer — cite its
+  `covers:` file:line spans and edit straight from `--source`. For
+  exhaustive tasks ("every occurrence / every caller of this pattern"), ranked
+  results are top-N, not complete — run `graft grep "<literal>"` instead
+  (exhaustive over indexed files, grouped by enclosing symbol), falling back
+  to raw `grep -rn` only for unindexed files.
+- `graft skeleton <file>` → every definition's signature + span, ~10× cheaper
+  than reading the file; use it to skim an API surface.
+- `graft callers <symbol>` gives precomputed, exact edges — who calls this.
+  Add `--direction out` for what it calls, or `--depth N` to walk
+  transitively for the full blast radius. For structural questions, skip
+  ranking and use this directly.
+- Or browse: `graft/INDEX.md` lists every node; follow the links.
+- Monorepos and folders of multiple repos rank fairly across sub-projects —
+  hits carry `[scope/]` labels naming which one they're from. Narrow with
+  `graft ask "<task>" --in <scope>/` once you know where you're working.
+
+If a returned span is truncated ("+N more lines"), open the file at that exact
+range before finalizing. Only open source files when a node genuinely lacks a
+needed detail, and then at the exact file:line the node points to — never
+re-read whole files.
+
+After big code changes, refresh the graph with `graft build` (deterministic,
+no API key, $0).
+<!-- graft:end -->
