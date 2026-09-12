@@ -1,6 +1,6 @@
 ---
 name: project-resync
-version: 1.3.0
+version: 1.3.1
 description: >
   Full bidirectional sync cycle for Projects/co-* instances: provenance-audit
   uncommitted content, sync each project to its GitHub remote, selectively
@@ -48,7 +48,7 @@ verdict** — stale sync-wave residue must never pollute a remote.
 4. **Remote bootstrap**: remote-less repos get `gh repo create 5throck/<name>
    --private` + `git remote add origin` — private strictly, no
    collaborators/topics unless asked.
-5. **PR base = project default branch** (co-develop uses `master`); verify
+5. **PR base = project default branch**; verify
    before merging.
 6. **Backport gate**: promote only template-grade, reusable content. Engagement
    output, domain stacks, and VARIANT-INJECT content stay in the project
