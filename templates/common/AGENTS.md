@@ -639,6 +639,7 @@ A skill health check should also be run outside the quarterly schedule when:
 - **v2.0.0 (2026-06-09)**: Restructured as SSOT - Integrated PM Gateway workflow (§3), execution plan templates (§5), and renumbered existing sections. Consolidated duplicate content from pm.md, CLAUDE.md §5, GEMINI.md §5 into single source of truth.
 - **v1.x**: Previous versions maintained agent roster and individual definitions without PM Gateway integration
 
+<!-- WORKSPACE-MANAGED: graft repo context graph -->
 <!-- graft:start -->
 ## Graft — repo context graph
 
@@ -680,3 +681,4 @@ re-read whole files.
 After big code changes, refresh the graph with `graft build` (deterministic,
 no API key, $0).
 <!-- graft:end -->
+<!-- /WORKSPACE-MANAGED -->

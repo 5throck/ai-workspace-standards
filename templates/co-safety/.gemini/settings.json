@@ -3,7 +3,19 @@
   "mcpServers": {
     "kr_safety": {
       "command": "bun",
-      "args": ["run", "--env-file", ".env", "./mcp/kr-safety-regs/index.ts"]
+      "args": [
+        "run",
+        "--env-file",
+        ".env",
+        "./mcp/kr-safety-regs/index.ts"
+      ]
+    },
+    "graft": {
+      "command": "bunx",
+      "args": [
+        "@nanonets/graft",
+        "mcp"
+      ]
     }
   },
   "hooks": {
@@ -13,10 +25,34 @@
         "command": "git config core.hooksPath .githooks",
         "statusMessage": "Configuring git hooks..."
       }
+    ],
+    "BeforeTool": [
+      {
+        "matcher": "write_file|replace_file_content|multi_replace_file_content",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun scripts/hooks/gateguard-fact-force.ts --platform gemini",
+            "timeout": 5000
+          }
+        ]
+      }
+    ],
+    "AfterTool": [
+      {
+        "matcher": "write_file|replace_file_content|multi_replace_file_content",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun scripts/hooks/post-write-lifecycle-check.ts --platform gemini",
+            "timeout": 5000
+          }
+        ]
+      }
     ]
   },
   "terminal.executionPolicy": "Auto",
-  "artifact.reviewPolicy": "Request Review",
+  "artifact.reviewPolicy": "Auto",
   "mcp.toolApproval": "Manual",
   "terminal.denyList": [
     "rm -rf",

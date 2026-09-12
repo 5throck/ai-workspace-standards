@@ -4,7 +4,15 @@ description: This repo is indexed by graft/. For ANY task here, whether
   understanding how something works, finding where code lives, tracing what
   calls a symbol or what a change breaks, or scoping an edit, get your context
   from graft before grepping or reading source files.
-version: 1.0.0
+version: 1.0.1
+metadata:
+  type: reference
+  triggers:
+    - graft
+    - repo context graph
+    - code map
+    - who calls
+    - where is this implemented
 ---
 
 # graft
@@ -109,9 +117,9 @@ the rest, and every hit carries a `[scope/]` label naming its sub-project; when
 you already know where you're working, narrow with `graft ask "<task>" --in <scope>/`.
 
 ## Spend the fewest calls
-- A node's `covers:` list already gives exact `file:line` for every symbol, so
-  cite straight from it. The spans are generated from source and authoritative;
-  don't re-open or re-grep files to "double-check".
+- A node's symbol bullets already give exact `name · kind · Lstart-Lend` spans
+  for every definition, so cite straight from them. The spans are generated
+  from source and authoritative; don't re-open or re-grep files to "double-check".
 - When the task already names the file or symbol to change, go straight there:
   `graft grep "<symbol>"` for the exact `file:line`, then edit. Reserve
   `graft ask` for when you don't yet know where the code lives — an `ask`

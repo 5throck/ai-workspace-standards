@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-09-12T01:33:32.539Z
+**Generated**: 2026-09-12T03:01:35.513Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -48,7 +48,7 @@
 | explain-me | 1.0.0 | experimental | skills/explain-me/SKILL.md | workspace | /explain-me, /reportme, make a report, create report, explain this topic | pm |
 | finishing-a-development-branch | 1.0.0 | active | skills/finishing-a-development-branch/SKILL.md | workspace | finish branch, complete work, wrap up, finishing a development branch, merge branch, create PR, push and PR | pm |
 | gateguard | 1.0.0 | active | skills/gateguard/SKILL.md | workspace | gateguard, /gateguard, investigate file, check before edit, pre-edit check | pm |
-| graft | 1.0.0 | active | .claude/skills/graft/SKILL.md | claude | N/A | N/A |
+| graft | 1.0.1 | active | .claude/skills/graft/SKILL.md | claude | graft, repo context graph, code map, who calls, where is this implemented | N/A |
 | handbook | 0.4.0 | active | templates/common/skills/handbook/SKILL.md | common | N/A | pm |
 | handbook-sync-audit | 1.0.0 | active | templates/common/skills/handbook-sync-audit/SKILL.md | common | N/A | handbook-reviewer |
 | i18n-audit | 1.0.0 | active | templates/common/skills/i18n-audit/SKILL.md | common | i18n audit, locale parity, translation parity, glossary audit, L10N parity | pm |
@@ -106,7 +106,7 @@
 | cleanup-completed-md.ts | 1.1.0 | scripts/cleanup-completed-md.ts | N/A |
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | N/A |
 | compile-tokens.ts | 1.2.0 | scripts/compile-tokens.ts | N/A |
-| create-l3-scaffold.ts | 1.12.5 | scripts/create-l3-scaffold.ts | N/A |
+| create-l3-scaffold.ts | 1.13.0 | scripts/create-l3-scaffold.ts | N/A |
 | design-lint.ts | 1.0.0 | scripts/design-lint.ts | N/A |
 | dev-sync.ts | 1.12.0 | scripts/dev-sync.ts | bun |
 | dispatch-parallel.ts | 1.1.1 | scripts/dispatch-parallel.ts | N/A |
@@ -163,7 +163,7 @@
 | ticket.ts | 1.1.0 | scripts/ticket.ts | N/A |
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, fs, path |
 | typecheck.ts | 1.1.1 | scripts/typecheck.ts | N/A |
-| upgrade-project.ts | 1.23.1 | scripts/upgrade-project.ts | N/A |
+| upgrade-project.ts | 1.24.0 | scripts/upgrade-project.ts | N/A |
 | validate-agents.ts | 1.2.1 | scripts/validate-agents.ts | N/A |
 | validate-decisions.ts | 1.0.0 | scripts/validate-decisions.ts | js-yaml |
 | validate-doc-folder.ts | 1.1.0 | scripts/validate-doc-folder.ts | fs, path |
@@ -173,7 +173,7 @@
 | validate-pm-extends.ts | 0.3.1 | scripts/validate-pm-extends.ts | N/A |
 | validate-procedures.ts | 1.1.0 | scripts/validate-procedures.ts | js-yaml |
 | validate-skills.ts | 1.5.1 | scripts/validate-skills.ts | N/A |
-| validate-templates.ts | 1.22.0 | scripts/validate-templates.ts | js-yaml |
+| validate-templates.ts | 1.23.0 | scripts/validate-templates.ts | js-yaml |
 | validate-variant-readiness.ts | 1.1.0 | scripts/validate-variant-readiness.ts | N/A |
 | variant-feature.ts | 1.0.0 | scripts/variant-feature.ts | N/A |
 | verify-adr-governance.ts | 1.4.0 | scripts/verify-adr-governance.ts | N/A |
@@ -218,7 +218,6 @@
 
 ⚠️ **Drift detected**:
 
-- [WARNING] Skill graft has no triggers defined
 - [WARNING] Skill handbook has no triggers defined
 - [WARNING] Skill handbook-sync-audit has no triggers defined
 - [WARNING] Command meeting has no matching skill of the same name

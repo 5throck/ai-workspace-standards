@@ -1,4 +1,10 @@
 // @version 1.3.0
+// v1.2.0: graft fleet surface (ADR-0074): .mcp.json + opencode.json join JSON_MERGE_FILES
+//         (project-owned MCP servers survive the union); .claude/skills/graft/** claims
+//         TEMPLATE TREE SYNC before the platform-mirror rule (the skill is hand-maintained
+//         outside the SSOT skills/, so sync-skills.ts can never deliver it — the verified
+//         fleet-gap root cause); .codex/** is ADD_IF_MISSING (co-abap/co-safety own their
+//         config.toml; the graft section is seeded only into projects lacking the file).
 // v1.1.0: .env.sample reclassified PRESERVE → SYNC/ENV_SAMPLE SYNC (upgrade-project v1.23.0):
 //         the upgrade path now re-delivers template env-key changes with scaffold-parity
 //         country pruning applied (shared scripts/lib/env-sample-blocks.ts), so template
@@ -57,8 +63,13 @@ export const WORKSPACE_DOC_DIRS = [
   'designs', 'drafts', 'reports', 'research', 'findings', 'threat-models', 'lifecycle', 'specs',
 ] as const;
 
-/** Platform settings files merged (not overwritten) by the TEMPLATE TREE SYNC pass. */
-export const JSON_MERGE_FILES = ['.claude/settings.json', '.gemini/settings.json'] as const;
+/** Platform settings files merged (not overwritten) by the TEMPLATE TREE SYNC pass.
+ *  graft (ADR-0074): .mcp.json and opencode.json carry MCP server registrations — projects
+ *  may hold project-only servers (co-newbiz, co-safety, co-abap), so they deep-merge like
+ *  the platform settings instead of syncing. */
+export const JSON_MERGE_FILES = [
+  '.claude/settings.json', '.gemini/settings.json', '.mcp.json', 'opencode.json',
+] as const;
 
 /** Files whose scaffold-delivered copy was intentionally left unsubstituted — `{{tokens}}` are
  *  expected content, so the coverage validator's placeholder check must not flag them. */
@@ -172,6 +183,14 @@ export function resolveClaim(relPath: string, variant = ''): UpgradeClaim {
   }
 
   if (underDir(rel, 'procedures')) return { policy: 'ADD_IF_MISSING', pass: 'PROCEDURES' };
+
+  // graft repo-index skill (ADR-0074): hand-maintained OUTSIDE the SSOT skills/ (claude-only
+  // by design, C-CM-05 exception), so the post-upgrade sync-skills.ts run can never deliver
+  // it — the TEMPLATE TREE SYNC pass must claim it explicitly or the fleet never receives it.
+  if (underDir(rel, '.claude/skills/graft')) return { policy: 'SYNC', pass: TEMPLATE_TREE_SYNC_PASS };
+  // Codex project config is per-project by nature (project MCP servers + codex hooks, e.g.
+  // co-abap/co-safety): seed add-if-missing only, never overwrite an existing file (ADR-0074 D4).
+  if (underDir(rel, '.codex')) return { policy: 'ADD_IF_MISSING', pass: TEMPLATE_TREE_SYNC_PASS };
 
   // Platform skill mirrors are distributed by the post-upgrade sync-skills.ts run, not file passes
   if (underDir(rel, '.claude/skills') || underDir(rel, '.gemini/skills') || underDir(rel, '.agents/skills')) {

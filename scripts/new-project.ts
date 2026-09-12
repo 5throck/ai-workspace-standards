@@ -1094,6 +1094,23 @@ try {
   console.log(`  ⚠️  Skill graph generation errored (non-fatal): ${(err as Error).message}`);
 }
 
+// ── 7.7. Graft index build (ADR-0074) ─────────────────────────────────────────
+// The template ships the full graft surface (MCP entries, skill, hooks); give the
+// fresh project its repo graph right away. Non-fatal: bunx/graft may be unavailable
+// (offline), and every graft tool self-refreshes the graph before answering, so a
+// skipped build self-heals on first use.
+console.log('\nBuilding graft repo index…');
+try {
+  const graftResult = spawnSync('bunx', ['@nanonets/graft', 'build'], { stdio: 'inherit', cwd: projectDir });
+  if (graftResult.status === 0) {
+    console.log('  ✅ graft/ index created');
+  } else {
+    console.log('  ⚠️  graft build failed (non-fatal) — run `bunx @nanonets/graft build` in the project later.');
+  }
+} catch (err) {
+  console.log(`  ⚠️  graft build skipped (non-fatal): ${(err as Error).message}`);
+}
+
 // ── 6.5. Security Bootstrap Verification ──────────────────────────────────────
 console.log('\nRunning security bootstrap verification…');
 let securityOk = true;

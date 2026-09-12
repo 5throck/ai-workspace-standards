@@ -346,6 +346,8 @@ Antigravity does not have `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` or `teammateMod
 
 
 
+
+<!-- WORKSPACE-MANAGED: graft repo context graph -->
 <!-- graft:start -->
 ## Graft — repo context graph
 
@@ -387,3 +389,4 @@ re-read whole files.
 After big code changes, refresh the graph with `graft build` (deterministic,
 no API key, $0).
 <!-- graft:end -->
+<!-- /WORKSPACE-MANAGED -->

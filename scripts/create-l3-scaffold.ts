@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.12.5
+// @version 1.13.0
 /**
  * create-l3-scaffold.ts
  *
@@ -642,6 +642,16 @@ ${variantMarkers}
     const block = commonAgentsMd.slice(blockStart, blockEnd) + "<!-- COMMON-AGENTS:END -->\n";
     fs.appendFileSync(path.join(projectDir, "AGENTS.md"), "\n" + block);
   }
+  // Append the graft repo-context-graph instruction block (ADR-0074) — same
+  // marker-extraction pattern as COMMON-AGENTS above. The L1 copy wraps the block
+  // in WORKSPACE-MANAGED markers so upgrade-project's MERGE pass keeps it in sync
+  // for projects created before this landed.
+  const graftStart = commonAgentsMd.indexOf("<!-- WORKSPACE-MANAGED: graft repo context graph -->");
+  const graftEnd = commonAgentsMd.indexOf("<!-- /WORKSPACE-MANAGED -->", graftStart);
+  if (graftStart !== -1 && graftEnd !== -1) {
+    const graftBlock = commonAgentsMd.slice(graftStart, graftEnd) + "<!-- /WORKSPACE-MANAGED -->\n";
+    fs.appendFileSync(path.join(projectDir, "AGENTS.md"), "\n" + graftBlock);
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1077,6 +1087,18 @@ function main(): void {
   // Step 8: package.json + bun install
   writePackageJson(projectDir, args.variant);
   bunInstall(projectDir);
+
+  // Step 8.5: graft index build (ADR-0074) — the template ships the full graft
+  // surface (MCP entries, skill, hooks); give the fresh project its graph right
+  // away. Non-fatal: bunx/graft may be unavailable (offline), and every graft tool
+  // self-refreshes the graph before answering, so a skipped build self-heals.
+  log("\nBuilding graft repo index…");
+  try {
+    runNoShell("bunx", ["@nanonets/graft", "build"], { cwd: projectDir });
+    log("✅ graft/ index created");
+  } catch {
+    log("⚠️  graft build skipped (bunx unavailable?) — run `bunx @nanonets/graft build` in the project later.");
+  }
 
   // Step 9: post-scaffold audit — new-project.ts self-verifies immediately after
   // scaffolding; this script previously didn't, so scaffold defects (like the missing

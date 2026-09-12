@@ -339,6 +339,8 @@ All shared Git/PR rules are in [docs/context.md](docs/context.md). Claude Code-s
 <!-- COMMON-CLAUDE:END -->
 
 
+
+<!-- WORKSPACE-MANAGED: graft repo context graph -->
 <!-- graft:start -->
 ## Graft — repo context graph
 
@@ -380,3 +382,4 @@ re-read whole files.
 After big code changes, refresh the graph with `graft build` (deterministic,
 no API key, $0).
 <!-- graft:end -->
+<!-- /WORKSPACE-MANAGED -->

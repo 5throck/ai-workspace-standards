@@ -1,5 +1,13 @@
 #!/usr/bin/env bun
-// @version 1.23.1
+// @version 1.24.0
+// v1.24.0: graft fleet surface (ADR-0074, upgrade-policy v1.2.0) — the TEMPLATE TREE SYNC
+//           pass gains an ADD_IF_MISSING branch (seed-only, PROCEDURES semantics) so
+//           .codex/config.toml seeds into projects without one while co-abap/co-safety's
+//           project-owned Codex config is never touched. .mcp.json/opencode.json now
+//           JSON_MERGE via the existing branch; .claude/skills/graft delivers via the
+//           pass's SYNC policy (hand-maintained skill, outside sync-skills' SSOT).
+// v1.23.1: mainline fixes (#894 design-gate seed delivery, #895 country provenance
+//           fallback) integrated in this merge.
 // v1.23.0: New ENV_SAMPLE SYNC pass — .env.sample is no longer PRESERVE. Scaffold-time
 //           country pruning (prune-country-scoped-assets.ts) strips country-scoped env
 //           blocks from the project copy, so a wholesale template re-copy would re-inject
@@ -1721,6 +1729,18 @@ console.log('--- TEMPLATE TREE SYNC: uncovered template files (default policy) -
     if (claim.policy === 'WORKSPACE') {
       if (existsSync(dest)) continue; // project-owned — seed only, silent like PROCEDURES
       console.log(`  NEW    ${rel}  (workspace seed)`);
+      if (!dryRun) { mkdirSync(dirname(dest), { recursive: true }); copyFileSync(abs, dest); }
+      console.log(`  ${dryTag}COPIED: ${rel}`);
+      treeChanged++;
+      continue;
+    }
+
+    if (claim.policy === 'ADD_IF_MISSING') {
+      // ADR-0074 (upgrade-policy v1.2.0): .codex/** seeds — projects owning their Codex
+      // config (co-abap, co-safety) are never touched; the graft section there is a
+      // one-time manual TOML edit, not a file overwrite.
+      if (existsSync(dest)) continue; // project-owned — seed only, silent like PROCEDURES
+      console.log(`  NEW    ${rel}  (add-if-missing seed)`);
       if (!dryRun) { mkdirSync(dirname(dest), { recursive: true }); copyFileSync(abs, dest); }
       console.log(`  ${dryTag}COPIED: ${rel}`);
       treeChanged++;

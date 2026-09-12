@@ -1,0 +1,9 @@
+# Codex CLI project config — see docs/adr/0074-graft-fleet-integration.md.
+# Seed file (ADD_IF_MISSING): projects with their own .codex/config.toml are never
+# overwritten — copy the [mcp_servers.graft] section below into yours instead.
+# `graft mcp` resolves the repo root from the working directory (nearest ancestor
+# with a graft/ index); run `bunx @nanonets/graft build` once to create it.
+
+[mcp_servers.graft]
+command = "bunx"
+args = ["@nanonets/graft", "mcp"]
