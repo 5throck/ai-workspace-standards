@@ -82,7 +82,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `design-lint.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `resync-audit.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `create-l3-scaffold.ts` | L0 | 1.12.5 | active | —| —| L0 | —|
-| `dev-sync.ts` | L0 | 1.10.0 | active | —| —| L0+L1 | —|
+| `dev-sync.ts` | L0 | 1.11.0 | active | —| —| L0+L1 | —|
 | `dispatch-parallel.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
 | `dispatch-serial.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
 | `dispatch.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
@@ -166,6 +166,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `lib/encoding-utils.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `lib/error-handling.ts` | L0 | 1.4.0 | active | —| —| L0+L1 | —|
 | `lib/language-guard.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
+| `lib/git-status.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/pipeline-state.ts` | L0 | 1.1.2 | active | —| —| L0+L1 | —|
 | `lib/platform-context.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/propagation-map-schema.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
@@ -196,7 +197,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `sync-skill-status.ts` | L0 | 1.0.1 | active | — | — | L0+L1 | — |
 | `sync-skills-to-l2.ts` | L0 | 1.0.1 | active | — | — | L0 | — |
 | `sync-template-deps.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `sync-skills.ts` | L0 | 1.5.0 | active | `--dir <path>`, `--all-variants` | — | L0+L1 | — |
+| `sync-skills.ts` | L0 | 1.6.0 | active | `--dir <path>`, `--all-variants` | — | L0+L1 | — |
 | `tag-template.ts` | L0 | 1.1.0 | active | `--dry-run`, `--no-push`, `--fail-on-push-error` | —| L0 | —|
 | `team-builder.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
 | `test-platform-parity.ts` | L0 | 0.2.4 | active | —| —| L0 | —|
@@ -229,7 +230,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `verify-new-project-tests.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
 | `verify-platform-lifecycle.ts` | L0 | 1.1.2 | active | —| —| L0+L1 | —|
 | `verify-readme-sync.ts` | L0 | 1.4.0 | active | —| —| L0+L1 | —|
-| `verify-scripts.ts` | L0 | 1.6.0 | active | —| —| L0+L1 | —|
+| `verify-scripts.ts` | L0 | 1.6.1 | active | —| —| L0+L1 | —|
 | `verify-skills.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
 | `verify-template-integrity.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `validate-pm-extends.ts` | L0 | 0.3.1 | active | —| —| L0+L1 | —|

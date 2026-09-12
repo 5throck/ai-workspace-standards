@@ -1,4 +1,18 @@
-// @version 1.10.0
+// @version 1.11.0
+// v1.11.0: feat(pipeline): scoped staging, WARN phase — step 6 no longer blindly trusts
+//           git add -A to carry only task files. The pipeline snapshots the working tree
+//           before any step mutates it (S0) and again at commit time (S1); S1\S0 is the
+//           pipeline's own output (memory log, MEMORY.md index, propagation output,
+//           VERSION_MANIFEST, skill platform copies), and everything else must have been
+//           explicitly `git add`-ed by the invoking agent. During the ADR-0055 WARN soak
+//           the commit still runs git add -A but names every swept file that was neither
+//           task-staged nor pipeline-generated; SYNC_SCOPED_STAGING=1 (or --scoped-staging)
+//           previews the promoted behavior — stage only committable paths, leave residual
+//           dirt uncommitted. Fixes the sweep class where unrelated working-tree changes
+//           landed under a sync message that did not describe them (e.g. 75f98784 pulled
+//           the co-price plan relocation into a memory-log commit).
+//           Parser: scripts/lib/git-status.ts (unit-tested in tests/unit/git-status.test.ts).
+//           Design doc: docs/designs/2026-09-12-dev-sync-scoped-staging-design.md
 // v1.9.0: feat(skill-review): step 3.96c session-evidence skill review (SkillHone-inspired) —
 //           runs skill-session-review.ts (non-fatal) after 3.96a/3.96b to accumulate
 //           Observed Symptom + Evidence records into memory/skill-review/, plus a
@@ -38,6 +52,7 @@ import * as path from 'node:path';
 import * as crypto from 'node:crypto';
 import { withRetry, DEFAULT_CONFIG } from './retry-handler.ts';
 import { hasNonEnglish } from './lib/language-guard.ts';
+import { parseStatusPorcelain } from './lib/git-status.ts';
 
 const GREEN = '\x1b[32m';
 const RED = '\x1b[31m';
@@ -67,6 +82,10 @@ if (path.resolve(actualCwd) !== expectedRoot) {
 const rawArgs = process.argv.slice(2);
 let bodyFilePath = '';
 let specExempt = '';
+// Scoped staging (design: docs/designs/2026-09-12-dev-sync-scoped-staging-design.md).
+// Default is the ADR-0055 WARN soak; SYNC_SCOPED_STAGING=1 / --scoped-staging
+// previews the promoted exclude-behavior.
+let scopedStaging = process.env.SYNC_SCOPED_STAGING === '1';
 const msgArgs: string[] = [];
 for (let i = 0; i < rawArgs.length; i++) {
   const arg = rawArgs[i];
@@ -76,6 +95,8 @@ for (let i = 0; i < rawArgs.length; i++) {
     bodyFilePath = arg.slice('--body-file='.length);
   } else if (arg.startsWith('--spec-exempt=')) {
     specExempt = arg.slice('--spec-exempt='.length);
+  } else if (arg === '--scoped-staging') {
+    scopedStaging = true;
   } else {
     msgArgs.push(arg);
   }
@@ -97,6 +118,25 @@ if (hasNonEnglish(msg)) {
     if (import.meta.main) {
       process.exit(1);
     }
+}
+
+// ── Pre-flight working-tree snapshot (S0) ─────────────────────────────────────
+// Captures the agent-made working-tree state BEFORE any pipeline step mutates
+// files (memory session entry, propagation, manifests, ...). Step 6 re-snapshots
+// (S1); S1∖S0 is then the pipeline's own output — the only generated files that
+// may join the commit without explicit task staging.
+// Design: docs/designs/2026-09-12-dev-sync-scoped-staging-design.md
+let s0Paths = new Set<string>();
+let snapshotFailed = false;
+try {
+    const s0Res = await $`git status --porcelain=v1 -z -uall`.quiet().nothrow();
+    if (s0Res.exitCode !== 0) throw new Error(s0Res.stderr.toString());
+    s0Paths = parseStatusPorcelain(s0Res.stdout.toString());
+} catch {
+    // WARN mode fails open (empty S0 ⇒ every S1 change classifies as pipeline
+    // output — today's behavior). Scoped mode must not misclassify agent files
+    // as generated, so it aborts at step 6 via snapshotFailed.
+    snapshotFailed = true;
 }
 
 // Pre-flight Link Validation Gate — ensures markdown documentation links resolve.
@@ -735,13 +775,81 @@ try {
   }
 }
 
+// 6.5 Scoped staging — decide what may join this commit. taskStaged is what the
+// invoking agent explicitly staged; pipelineOutputs (S1∖S0) is what this run's
+// pipeline steps wrote; residual is neither — the exact set that used to be
+// silently swept in by git add -A (e.g. 75f98784).
+// Design: docs/designs/2026-09-12-dev-sync-scoped-staging-design.md
+let s1Paths = new Set<string>();
 try {
-    const addRes = await $`git add -A`.nothrow();
-    if (addRes.exitCode !== 0) throw new Error(addRes.stderr.toString());
-} catch (e) {
-    console.log(`${RED}❌ git add failed: ${e}${RESET}`);
-    if (import.meta.main) {
-      process.exit(1);
+    const s1Res = await $`git status --porcelain=v1 -z -uall`.quiet().nothrow();
+    if (s1Res.exitCode !== 0) throw new Error(s1Res.stderr.toString());
+    s1Paths = parseStatusPorcelain(s1Res.stdout.toString());
+} catch {
+    snapshotFailed = true;
+}
+
+let taskStaged = new Set<string>();
+try {
+    const stagedRes = await $`git diff --cached --name-only -z`.quiet().nothrow();
+    if (stagedRes.exitCode !== 0) throw new Error(stagedRes.stderr.toString());
+    taskStaged = new Set(stagedRes.stdout.toString().split('\0').filter(Boolean));
+} catch (err) {
+    console.error(`[dev-sync] Error: ${err}`);
+    snapshotFailed = true;
+}
+
+const pipelineOutputs = new Set([...s1Paths].filter(p => !s0Paths.has(p)));
+const committable = new Set([...taskStaged, ...pipelineOutputs]);
+const residual = [...s1Paths].filter(p => !committable.has(p)).sort();
+
+if (residual.length > 0) {
+    const disposition = scopedStaging
+        ? 'left OUT of this commit by scoped staging'
+        : 'swept INTO this commit by git add -A';
+    console.log(`${YELLOW}⚠️  Scoped-staging check: ${residual.length} working-tree file(s) were neither staged for this task nor generated by the pipeline — ${disposition}:${RESET}`);
+    residual.forEach(f => console.log(`   ${f}`));
+    console.log(`${YELLOW}   Stage task files explicitly with 'git add <file>' before /sync, or gitignore scratch paths.${RESET}`);
+    if (!scopedStaging) {
+        console.log(`${YELLOW}   Promotion will exclude these; preview with SYNC_SCOPED_STAGING=1 (or --scoped-staging).${RESET}`);
+    }
+}
+
+if (scopedStaging) {
+    // Promotion preview: stage only declared + generated paths. A failed
+    // snapshot must abort here — an empty S0 would classify every agent file
+    // as pipeline output and silently commit it (fail-closed, same contract
+    // as the sensitive-file guard above).
+    if (snapshotFailed) {
+        console.log(`${RED}❌ Scoped staging could not snapshot the working tree — refusing to stage.${RESET}`);
+        console.log(`${YELLOW}   Re-run without --scoped-staging to fall back to the WARN-soak behavior.${RESET}`);
+        if (import.meta.main) {
+          process.exit(1);
+        }
+    }
+    try {
+        if (committable.size > 0) {
+            const addRes = await $`git add -- ${[...committable].sort()}`.nothrow();
+            if (addRes.exitCode !== 0) throw new Error(addRes.stderr.toString());
+        }
+    } catch (e) {
+        console.log(`${RED}❌ git add failed: ${e}${RESET}`);
+        if (import.meta.main) {
+          process.exit(1);
+        }
+    }
+} else {
+    // WARN soak (ADR-0055): keep git add -A so sync behavior is unchanged;
+    // the residual listing above is the audit trail of what promotion will
+    // start excluding.
+    try {
+        const addRes = await $`git add -A`.nothrow();
+        if (addRes.exitCode !== 0) throw new Error(addRes.stderr.toString());
+    } catch (e) {
+        console.log(`${RED}❌ git add failed: ${e}${RESET}`);
+        if (import.meta.main) {
+          process.exit(1);
+        }
     }
 }
 

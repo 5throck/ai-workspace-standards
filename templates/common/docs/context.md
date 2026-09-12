@@ -400,7 +400,7 @@ Use an external computation tool when the task involves ANY of the following:
 
 ## Git / PR Workflow
 
-<!-- intentional-duplicate: workspace standards §3 — maintained locally for AI context proximity; source: docs/constitution/03-pr-workflow.md; hash: e43638d6 -->
+<!-- intentional-duplicate: workspace standards §3 — maintained locally for AI context proximity; source: docs/constitution/03-pr-workflow.md; hash: 18ad2842 -->
 
 ```
 /sync "feat: description"
@@ -414,6 +414,8 @@ Use an external computation tool when the task involves ANY of the following:
 ```
 
 > All PR titles, bodies, and review comments must be in **English**.
+
+> Universal Design Gate (ADR-0074): every code change at any tier must carry spec activity — a design doc under docs/designs/ registered via scripts/spec-register.ts — enforced by the /sync spec-check (audit.ts --spec-check, FATAL). Trivial changes: --spec-exempt=E1..E5.
 
 ---
 
