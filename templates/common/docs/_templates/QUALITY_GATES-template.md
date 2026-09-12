@@ -162,7 +162,7 @@ Phase C: Template Creation & Validation
    - `GEMINI.md` updated (platform parity)
 
 **Verification Method**:
-- Run `bun run scripts/validate-templates.ts`
+- Run `bun scripts/validate-templates.ts`
 - Manual file listing: `ls templates/co-[variant-name]/`
 - Compare file lists: `diff <(ls Projects/[variant-name]/agents/) <(ls templates/co-[variant-name]/agents/)`
 
@@ -187,7 +187,7 @@ Phase C: Template Creation & Validation
    - No structural violations detected
 
 2. **New Project Generation**
-   - Test project can be created: `bun run scripts/new-project.sh test-[variant-name] --variant co-[variant-name]`
+   - Test project can be created: `bun scripts/new-project.ts test-[variant-name] --variant co-[variant-name]`
    - Test project directory exists: `Projects/test-[variant-name]/`
    - Test project has all expected files (agents/, skills/, config files)
 
@@ -202,8 +202,8 @@ Phase C: Template Creation & Validation
    - All audit checks pass
 
 **Verification Method**:
-- Run `bun run scripts/validate-templates.ts`
-- Generate test project: `bun run scripts/new-project.sh test-[variant-name] --variant co-[variant-name]`
+- Run `bun scripts/validate-templates.ts`
+- Generate test project: `bun scripts/new-project.ts test-[variant-name] --variant co-[variant-name]`
 - Manual test of agents and skills in test project
 - Run audit on test project: `cd Projects/test-[variant-name]/ && bun run ../../scripts/audit.ts`
 
@@ -281,4 +281,4 @@ Phase C: Template Creation & Validation
 ---
 
 *Template Owner: pm*
-*Last Updated: 2026-06-05*
+*Last Updated: 2026-09-12*

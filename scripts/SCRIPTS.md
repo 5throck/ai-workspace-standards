@@ -73,7 +73,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `agent-verify.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
 | `analyze-git-history.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
 | `archive-memory.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `audit.ts` | L0 | 2.37.0 | active | —| —| L0+L1 | —|
+| `audit.ts` | L0 | 2.37.1 | active | —| —| L0+L1 | —|
 | `check-upgrade-coverage.ts` | L0 | 1.0.0 | active | `--variant`, `--strict`, `--json` | —| L0 | —|
 | `cleanup-completed-md.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `clear-pm-approval.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
@@ -92,7 +92,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `generate-l3-readme.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
 | `generate-scripts-readme.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
 | `generate-skill-graph.ts` | L0 | 1.10.0 | active | —| —| L0+L1 | —|
-| `generate-version-manifest.ts` | L0 | 1.4.0 | active | emits `validate-md-language:allowlist` markers around the generated Skills table (T-20260912-015) | —| L0 | —|
+| `generate-version-manifest.ts` | L0 | 1.4.1 | active | emits `validate-md-language:allowlist` markers around the generated Skills table (T-20260912-015) | —| L0 | —|
 | `helpers/beta-lifecycle.ts` | L0 | 1.2.1 | active | —| —| L0 | —|
 | `helpers/generate-variant.ts` | L0 | 1.14.0 | active | —| —| L0 | —|
 | `helpers/agent-promote.ts` | L0 | 0.1.1 | experimental | —| —| L0 | —|
@@ -223,7 +223,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `procedure-coverage.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `validate-procedures.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `validate-decisions.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `validate-templates.ts` | L0 | 1.25.0 | active | —| —| L0+L1 | —|
+| `validate-templates.ts` | L0 | 1.25.1 | active | —| —| L0+L1 | —|
 | `validate-variant-readiness.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `verify-country-prune.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `verify-adr-governance.ts` | L0 | 1.5.0 | active | —| —| L0 | —|
@@ -231,7 +231,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `verify-skill-graph.ts` | L0 | 1.6.0 | active | —| —| L0+L1 | —|
 | `verify-memory.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `verify-new-project-tests.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
-| `verify-platform-lifecycle.ts` | L0 | 1.1.2 | active | —| —| L0+L1 | —|
+| `verify-platform-lifecycle.ts` | L0 | 1.1.3 | active | —| —| L0+L1 | —|
 | `verify-readme-sync.ts` | L0 | 1.4.0 | active | —| —| L0+L1 | —|
 | `verify-scripts.ts` | L0 | 1.6.1 | active | —| —| L0+L1 | —|
 | `verify-skills.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|

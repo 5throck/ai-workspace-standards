@@ -59,8 +59,8 @@ curl -fsSL https://bun.sh/install | bash
 powershell -c "irm bun.sh/install.ps1 | iex"
 
 # Or use the automated install script
-bash scripts/install-bun.sh      # Unix/Linux/macOS
-pwsh scripts/install-bun.ps1      # Windows
+curl -fsSL https://bun.sh/install | bash  # Unix/Linux/macOS
+powershell -c "irm bun.sh/install.ps1 | iex"      # Windows
 ```
 
 **Verification**:
@@ -70,7 +70,7 @@ bun --version
 ```
 
 **Why Required**: As of the latest update, all Python inline code and PowerShell native code have been replaced with TypeScript helper scripts. Bun is now required for:
-- Project creation (`new-project.sh/ps1`)
+- Project creation (`new-project.ts`)
 - Template validation
 - Placeholder substitution
 - All workspace automation scripts
@@ -210,7 +210,7 @@ if command -v bun &>/dev/null; then
 else
   echo "❌ Bun not installed"
   echo "   Run: curl -fsSL https://bun.sh/install | bash"
-  echo "   Or: bash scripts/install-bun.sh"
+  echo "   Or: curl -fsSL https://bun.sh/install | bash"
 fi
 
 echo ""
@@ -262,8 +262,8 @@ cd ~/git
 git config core.hooksPath .githooks
 
 # 3. Install Bun (REQUIRED)
-bash scripts/install-bun.sh
-# or Windows: pwsh scripts/install-bun.ps1
+curl -fsSL https://bun.sh/install | bash
+# or Windows: powershell -c "irm bun.sh/install.ps1 | iex"
 
 # 4. Verify installation
 git --version
@@ -284,13 +284,13 @@ gh auth login
 
 ```bash
 # Default (latest template, co-develop variant)
-bash scripts/new-project.sh "my-project-name"
+bun scripts/new-project.ts "my-project-name"
 
 # Or specify variant
-bash scripts/new-project.sh "my-project-name" --variant co-design
+bun scripts/new-project.ts "my-project-name" --variant co-design
 
 # Windows PowerShell
-.\scripts\new-project.ps1 "my-project-name"
+bun scripts/new-project.ts "my-project-name"
 ```
 
 ### 4.5 Verify Workspace Health
@@ -341,7 +341,7 @@ claude    # or agy for Gemini
   # Reinstall Bun
   curl -fsSL https://bun.sh/install | bash
   # Or use the automated script
-  bash scripts/install-bun.sh
+  curl -fsSL https://bun.sh/install | bash
   ```
 
 ### "python3: command not found"

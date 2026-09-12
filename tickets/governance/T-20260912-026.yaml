@@ -1,0 +1,16 @@
+schemaVersion: 1
+id: T-20260912-026
+kind: manual
+title: >-
+  Harden edu-sync by separating AI patch generation from privileged cross-repo
+  push credentials
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-09-12T13:13:47.598Z'
+history:
+  - at: '2026-09-12T13:13:47.598Z'
+    from: null
+    to: backlog
+result: null
+error: null

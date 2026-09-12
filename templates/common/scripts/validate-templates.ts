@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.25.0
+ * @version 1.25.1
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -227,7 +227,7 @@ function checkCommon(): void {
   pass('templates/common/ exists with required subdirectories');
 
   // Check forbidden files — files that must NOT exist in templates/common/
-  const forbiddenFiles = ['CONSTITUTION.md'];
+  const forbiddenFiles = ['CONSTITUTION.md', 'node_modules', '.venv', '.bun', 'dist', 'build'];
   const presentForbidden = forbiddenFiles.filter(f => existsSync(join(commonDir, f)));
   if (presentForbidden.length > 0) {
     for (const f of presentForbidden) {
@@ -1828,7 +1828,8 @@ function checkVariantContract(variant: string): void {
     const missingFiles: string[] = [];
 
     const commonDir = join(TEMPLATES_DIR, 'common');
-    for (const requiredFile of contract.required) {
+    for (const requiredPattern of contract.required) {
+      const requiredFile = requiredPattern.replaceAll('{variant}', variant);
       const filePath = join(variantDir, requiredFile);
       const commonFilePath = join(commonDir, requiredFile);
       // A required file is satisfied if it exists in the variant OR in templates/common/
@@ -3706,6 +3707,7 @@ function main(): number {
     checkVariantSkills(variant);               // B-09: presence-driven skill lifecycle
     checkVariantScriptsLayout(variant);        // B-10: scripts/<variant>/ layout convention
     checkDeprecatedVersionBump(variant, manifest); // B-08: deprecated → version bump warning
+    checkPlatformSettingsParity(variant);      // VA-04: run for stable and beta/draft so bad platform keys cannot hide
 
     if (manifest.status === 'stable') {
       checkAgents(variant);
@@ -3713,7 +3715,6 @@ function main(): number {
       checkPhaseSummaryAgents(variant);
       checkWorkspaceRootAgentIntrusion(variant);
       checkSkillPlatformParity(variant);
-      checkPlatformSettingsParity(variant);
       checkDocumentCommonSections(variant);
       checkCommands(variant);
       // Script parity check removed (dead code after ADR-0036 TypeScript migration)

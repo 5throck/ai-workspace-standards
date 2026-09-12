@@ -15,6 +15,12 @@ owner: handbook-reviewer
 last_reviewed: 2026-08-29
 prerequisites: handbook (audits the output of the H-Stage handbook pipeline)
 l2_propagate: true
+metadata:
+  triggers:
+    - audit handbook
+    - handbook parity check
+    - handbook sync audit
+    - textbook drift check
 ---
 
 ## Context

@@ -39,6 +39,12 @@ commits = [
 ]
 
 [[allowlists]]
+description = "Historical CHANGELOG false positive from gitleaks triage prose (commit 3aca7460; generic-api-key captured an obviously fake test fixture password mentioned as documentation, not a credential). Commit-scoped so future CHANGELOG secret-shaped text still reports."
+commits = [
+  '3aca7460e244705b0ce7d517951db8dae9ebd353',
+]
+
+[[allowlists]]
 description = "Placeholder value shapes used by .env.sample templates and documentation examples (same patterns as the root .gitleaks.toml — value-shape exclusions, not path exclusions)"
 regexes = [
   '''your[_-]?(api[_-]?)?key[_-]?here''',

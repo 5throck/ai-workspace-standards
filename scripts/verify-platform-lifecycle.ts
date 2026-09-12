@@ -10,7 +10,7 @@
  *
  * Tier 1 vs Tier 3 auto-detection: if variant.json exists in cwd, runs Tier 3 subset (E+F only).
  *
- * @version 1.1.2
+ * @version 1.1.3
  */
 
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
@@ -25,6 +25,12 @@ const IS_TIER3 = existsSync(join(ROOT, 'variant.json')) || !existsSync(join(ROOT
 const LEVEL = IS_TIER3 ? 'Tier 3' : 'Tier 1 SSOT';
 
 const issues: Array<{ level: 'error' | 'warning'; check: string; message: string; fix?: string }> = [];
+const VERSION_EXEMPT_PLATFORM_SKILLS = new Set([
+  // ADR-0076 and the 2026-09-12 graft wiring refresh define this as a
+  // Claude-only, tool-owned skill. graft rewrites the frontmatter on version
+  // bumps, so workspace lifecycle fields would create recurring churn.
+  '.claude/skills/graft',
+]);
 
 function pass(msg: string) {
   if (!JSON_MODE) console.log(`\x1b[32m[PASS]\x1b[0m ${msg}`);
@@ -51,6 +57,10 @@ function getSkillVersion(skillMdPath: string): string | null {
   return match ? match[1] : null;
 }
 
+function isVersionExempt(platform: string, skillName: string): boolean {
+  return VERSION_EXEMPT_PLATFORM_SKILLS.has(`${platform}/skills/${skillName}`);
+}
+
 function listSkillDirs(baseDir: string): string[] {
   if (!existsSync(baseDir)) return [];
   return readdirSync(baseDir).filter(d =>
@@ -67,6 +77,10 @@ function checkE(): void {
     for (const skillName of listSkillDirs(skillsDir)) {
       const skillMd = join(skillsDir, skillName, 'SKILL.md');
       if (!existsSync(skillMd)) continue;
+      if (isVersionExempt(platform, skillName)) {
+        pass(`${platform}/skills/${skillName}: version exempt (tool-owned)`);
+        continue;
+      }
       const ver = getSkillVersion(skillMd);
       if (!ver) {
         fail('platform-skill-version', `${platform}/skills/${skillName}/SKILL.md missing version: field`,

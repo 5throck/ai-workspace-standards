@@ -7,7 +7,7 @@ lang_reason: source-material
 
 > **Doc intent:** Human-readable governance specification for the 5-domain × 3-layer lifecycle model.
 > Machine-readable policy is in [`lifecycle-governance.json`](lifecycle-governance.json).
-> Last Updated: 2026-09-06
+> Last Updated: 2026-09-12
 
 ---
 
@@ -189,12 +189,12 @@ Use this checklist when creating a new `templates/co-<name>/` variant. Steps are
 - [ ] Create `docs/<variant>.context.md` with architecture overview
 - [ ] Create `README.md` (English) following the README Standard — 7 required sections: Overview, Quick Start, Team Mission, Meet the AI Team, Skills, How to Collaborate, Variant Type (see `docs/governance/variant-contract.md` "README Standard")
 - [ ] Create `README_ko.md` (Korean) mirroring the same 7 sections (`개요 · 빠른 시작 · 팀 미션 · AI 팀 소개 · 스킬 · 협업 방법 · 변형 유형`)
-- [ ] Add variant entry to workspace `templates/common/VERSION_REGISTRY.json` if applicable
+- [ ] Add variant entry to workspace `docs/templates/VERSION_REGISTRY.json` if applicable
 - [ ] Run `bun scripts/validate-templates.ts --variant co-<name>` — all mandatory checks must pass
 - [ ] Promote `variant.json` `status` from `"draft"` to `"beta"` once validation passes
 - [ ] Submit PR; `validate-templates.ts` runs in CI as a required check
 
-> See `lifecycle-governance.json` → `variantValidationPolicy` for which checks are mandatory vs. warning-only before `new-project.ts` allows project creation from this variant.
+> See `../templates/lifecycle-governance.json` → `variantValidationPolicy` for which checks are mandatory vs. warning-only before `new-project.ts` allows project creation from this variant.
 
 ---
 
@@ -202,11 +202,11 @@ Use this checklist when creating a new `templates/co-<name>/` variant. Steps are
 
 | Resource | Purpose |
 |---|---|
-| [`lifecycle-governance.json`](lifecycle-governance.json) | Machine-readable policy (layer/domain matrix, currentStatus, mandatoryBeforeProjectCreation) |
+| [`lifecycle-governance.json`](../templates/lifecycle-governance.json) | Machine-readable policy (layer/domain matrix, currentStatus, mandatoryBeforeProjectCreation) |
 | [`VARIANT_LIFECYCLE.md`](VARIANT_LIFECYCLE.md) | Variant promotion rules and state transition diagram |
 | [`VARIANT_LIFECYCLE_INTEGRATION.md`](VARIANT_LIFECYCLE_INTEGRATION.md) | Integration guide for embedding lifecycle checks in CI/CD |
-| [`VERSION_REGISTRY.json`](VERSION_REGISTRY.json) | Canonical version registry for all tracked variants |
-| [`VERSION_REGISTRY_SCHEMA.md`](VERSION_REGISTRY_SCHEMA.md) | Schema documentation for VERSION_REGISTRY.json |
+| [`VERSION_REGISTRY.json`](../templates/VERSION_REGISTRY.json) | Canonical version registry for all tracked variants |
+| [`version-registry-schema.md`](version-registry-schema.md) | Schema documentation for VERSION_REGISTRY.json |
 | `../../scripts/audit.ts` | L0 orchestrator — workspace-level audit pipeline |
 | `../../scripts/validate-templates.ts` | L1b orchestrator — template variant validation |
 | `../../scripts/agent-lifecycle-audit.ts` | Agent domain validator |

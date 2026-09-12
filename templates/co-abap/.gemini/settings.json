@@ -24,9 +24,8 @@
       "url": "https://mcp-sap-docs.marianzeis.de/mcp"
     },
     "graft": {
-      "command": "bunx",
+      "command": "graft",
       "args": [
-        "@nanonets/graft",
         "mcp"
       ]
     }

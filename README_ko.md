@@ -251,7 +251,7 @@ C:\git\
 - **co-news**: 상장사 보도를 담당하는 경제 기자를 위한 경제/금융 저널리즘 워크플로 — 금융 공시 리서치(DART, KR 국가 프로필의 k-dart), 상법 리서치(k-law, KR 프로필), 인용 레저 기반 팩트체크, AI투 느낌 감소, 금융 인포그래픽 생성. 국가별 데이터 소스·법령은 docs/countries/의 국가 프로필로 연결됩니다 (KR 프로필 기본 포함, 다른 국가는 프로필 추가)
 - **co-abap**: PM 주도 오케스트레이션, 6개 SAP 모듈 애널리스트(SD, MM, FI, CO, PP, LE), 기술 실행 에이전트, 자동화된 QA 체인(SyntaxCheck → RunUnitTests → GetCodeCoverage → RunATCCheck)을 갖춘 6단계 SAP ABAP 개발 워크플로
 - **co-hr**: 인게이지먼트 인테이크, 대상 관할권의 노동법 컴플라이언스 점검(docs/countries/ 하위 국가 프로필 — KR 프로필 기본 포함), HRM/HRD 설계, 조직 재설계/변화관리를 아우르는 4단계 노무/HR 컨설팅 워크플로 — k-law/k-kosis 규제 리서치 연동(KR 스코프 스킬, KR 국가 프로젝트에만 배포), 12개 에이전트 로스터(PM + 전문가 11인)
-- **co-safety**: A 6-phase EHS/GxP compliance workflow covering Korean occupational safety (OSHA-KR, SAPA), process safety management (PSM), GxP pharmaceutical quality (GMP/GLP/GDP/GCP/GVP), medical device safety (KGMP-MD, ISO 13485), and 15 industry-specific domains (chemical, construction, semiconductor, battery, shipbuilding, steelmaking, etc.) across a 40+ agent roster
+- **co-safety**: 한국 산업안전(OSHA-KR, SAPA), 공정안전관리(PSM), GxP 의약품 품질(GMP/GLP/GDP/GCP/GVP), 의료기기 안전(KGMP-MD, ISO 13485), 15개 산업 도메인(화학, 건설, 반도체, 배터리, 조선, 제철 등)을 40명 이상 전문 에이전트로 다루는 6단계 EHS/GxP 컴플라이언스 워크플로
 
 **💡 Workflow 상세 정보 확인 방법**
 구체적인 에이전트 명단(Roster)과 거버넌스 단계는 프로젝트 생성 후 해당 프로젝트 폴더 내의 다음 문서들에서 관리 및 확인할 수 있습니다:

@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-09-12T12:55:32.829Z
+**Generated**: 2026-09-12T13:34:15.520Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -49,8 +49,8 @@
 | finishing-a-development-branch | 1.0.0 | active | skills/finishing-a-development-branch/SKILL.md | workspace | finish branch, complete work, wrap up, finishing a development branch, merge branch, create PR, push and PR | pm |
 | gateguard | 1.0.0 | active | skills/gateguard/SKILL.md | workspace | gateguard, /gateguard, investigate file, check before edit, pre-edit check | pm |
 | graft | N/A | active | .claude/skills/graft/SKILL.md | claude | N/A | N/A |
-| handbook | 0.4.0 | active | templates/common/skills/handbook/SKILL.md | common | N/A | pm |
-| handbook-sync-audit | 1.0.0 | active | templates/common/skills/handbook-sync-audit/SKILL.md | common | N/A | handbook-reviewer |
+| handbook | 0.4.0 | active | templates/common/skills/handbook/SKILL.md | common | make handbook, create handbook, build course site, companion handbook | pm |
+| handbook-sync-audit | 1.0.0 | active | templates/common/skills/handbook-sync-audit/SKILL.md | common | audit handbook, handbook parity check, handbook sync audit, textbook drift check | handbook-reviewer |
 | i18n-audit | 1.0.0 | active | templates/common/skills/i18n-audit/SKILL.md | common | i18n audit, locale parity, translation parity, glossary audit, L10N parity | pm |
 | i18n-formatting | 1.0.0 | active | templates/common/skills/i18n-formatting/SKILL.md | common | date format, number format, currency format, unit conversion, paper size, korean numerals | pm |
 | i18n-layout | 1.0.0 | active | templates/common/skills/i18n-layout/SKILL.md | common | character encoding, RTL, bidi, font selection, CRLF, BOM | pm |
@@ -102,7 +102,7 @@
 | agent-verify.ts | 1.0.2 | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.2 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.0.0 | scripts/archive-memory.ts | N/A |
-| audit.ts | 2.37.0 | scripts/audit.ts | bun |
+| audit.ts | 2.37.1 | scripts/audit.ts | bun |
 | check-upgrade-coverage.ts | 1.0.0 | scripts/check-upgrade-coverage.ts | N/A |
 | cleanup-completed-md.ts | 1.1.0 | scripts/cleanup-completed-md.ts | N/A |
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | N/A |
@@ -119,7 +119,7 @@
 | generate-l3-readme.ts | 1.0.3 | scripts/generate-l3-readme.ts | fs, path |
 | generate-scripts-readme.ts | 1.0.3 | scripts/generate-scripts-readme.ts | N/A |
 | generate-skill-graph.ts | 1.10.0 | scripts/generate-skill-graph.ts | js-yaml |
-| generate-version-manifest.ts | 1.4.0 | scripts/generate-version-manifest.ts | bun, js-yaml |
+| generate-version-manifest.ts | 1.4.1 | scripts/generate-version-manifest.ts | bun, js-yaml |
 | infer-graph-from-phases.ts | 0.1.0 | scripts/experiments/infer-graph-from-phases.ts | N/A |
 | ingest-external-skills.ts | 1.1.0 | scripts/ingest-external-skills.ts | N/A |
 | ingest-security-frameworks.ts | 1.1.0 | scripts/ingest-security-frameworks.ts | N/A |
@@ -132,7 +132,7 @@
 | project-to-variant.ts | 1.3.0 | scripts/project-to-variant.ts | N/A |
 | promote-context-section.ts | 1.0.0 | scripts/promote-context-section.ts | N/A |
 | propagate-to-templates.ts | 2.13.0 | scripts/propagate-to-templates.ts | js-yaml |
-| qa-gate.ts | N/A | scripts/qa-gate.ts | bun |
+| qa-gate.ts | 1.3.0 | scripts/qa-gate.ts | bun |
 | readme-lifecycle-audit.ts | 1.0.4 | scripts/readme-lifecycle-audit.ts | N/A |
 | regenerate-agents-md.ts | 1.1.0 | scripts/regenerate-agents-md.ts | fs, path |
 | release-template.ts | 1.0.0 | scripts/release-template.ts | N/A |
@@ -170,11 +170,11 @@
 | validate-doc-folder.ts | 1.1.0 | scripts/validate-doc-folder.ts | fs, path |
 | validate-docs-links.ts | 1.1.0 | scripts/validate-docs-links.ts | fs, path |
 | validate-md-language.ts | 1.11.0 | scripts/validate-md-language.ts | fs |
-| validate-model-registry.ts | N/A | scripts/validate-model-registry.ts | N/A |
+| validate-model-registry.ts | 1.2.0 | scripts/validate-model-registry.ts | N/A |
 | validate-pm-extends.ts | 0.3.1 | scripts/validate-pm-extends.ts | N/A |
 | validate-procedures.ts | 1.1.0 | scripts/validate-procedures.ts | js-yaml |
 | validate-skills.ts | 1.5.1 | scripts/validate-skills.ts | N/A |
-| validate-templates.ts | 1.25.0 | scripts/validate-templates.ts | js-yaml |
+| validate-templates.ts | 1.25.1 | scripts/validate-templates.ts | js-yaml |
 | validate-variant-readiness.ts | 1.1.0 | scripts/validate-variant-readiness.ts | N/A |
 | variant-feature.ts | 1.0.0 | scripts/variant-feature.ts | N/A |
 | verify-adr-governance.ts | 1.5.0 | scripts/verify-adr-governance.ts | N/A |
@@ -182,7 +182,7 @@
 | verify-country-prune.ts | 1.0.0 | scripts/verify-country-prune.ts | N/A |
 | verify-memory.ts | 1.2.0 | scripts/verify-memory.ts | fs, path |
 | verify-new-project-tests.ts | 1.0.3 | scripts/verify-new-project-tests.ts | N/A |
-| verify-platform-lifecycle.ts | 1.1.2 | scripts/verify-platform-lifecycle.ts | N/A |
+| verify-platform-lifecycle.ts | 1.1.3 | scripts/verify-platform-lifecycle.ts | N/A |
 | verify-readme-sync.ts | 1.4.0 | scripts/verify-readme-sync.ts | bun, fs, path |
 | verify-scripts.ts | 1.6.1 | scripts/verify-scripts.ts | fs, path |
 | verify-skill-graph.ts | 1.6.0 | scripts/verify-skill-graph.ts | N/A |
@@ -217,10 +217,4 @@
 
 ## Drift Detection
 
-⚠️ **Drift detected**:
-
-- [WARNING] Skill graft missing version
-- [WARNING] Skill graft has no triggers defined
-- [WARNING] Skill handbook has no triggers defined
-- [WARNING] Skill handbook-sync-audit has no triggers defined
-- [WARNING] Command meeting has no matching skill of the same name
+✅ No drift detected. All components are properly versioned and integrated.
