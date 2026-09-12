@@ -1,4 +1,4 @@
-// @version 2.34.1
+// @version 2.35.0
 // v2.33.0: Validator-hardening batch (T-20260910-013/016/017/026). New standing
 //           regression check checkVariantAuditHookRegression() — every variant.json
 //           that declares an audit-variant hook (script_manifest) must resolve to a
@@ -1810,6 +1810,7 @@ function checkProjectDocMarkerDrift() {
 
     const expectedClaude = countMarkers(path.join('templates', 'common', 'CLAUDE.md'), 'COMMON-CLAUDE');
     const expectedGemini = countMarkers(path.join('templates', 'common', 'GEMINI.md'), 'COMMON-GEMINI');
+    const expectedCodex = countMarkers(path.join('templates', 'common', 'CODEX.md'), 'COMMON-CODEX');
 
     let warnCount = 0;
     for (const entry of fs.readdirSync(projectsDir)) {
@@ -1828,6 +1829,13 @@ function checkProjectDocMarkerDrift() {
             const actual = countMarkers(path.join(projectDir, 'GEMINI.md'), 'COMMON-GEMINI');
             if (actual >= 0 && actual < expectedGemini) {
                 Warn(`GEMINI.md drift: Projects/${entry}/GEMINI.md has ${actual}/${expectedGemini} COMMON-GEMINI managed blocks vs templates/common/GEMINI.md — run 'bun scripts/upgrade-project.ts Projects/${entry}' or verify markers were not stripped by a hand rewrite.`);
+                warnCount++;
+            }
+        }
+        if (expectedCodex > 0) {
+            const actual = countMarkers(path.join(projectDir, 'CODEX.md'), 'COMMON-CODEX');
+            if (actual >= 0 && actual < expectedCodex) {
+                Warn(`CODEX.md drift: Projects/${entry}/CODEX.md has ${actual}/${expectedCodex} COMMON-CODEX managed blocks vs templates/common/CODEX.md — run 'bun scripts/upgrade-project.ts Projects/${entry}' or verify markers were not stripped by a hand rewrite.`);
                 warnCount++;
             }
         }

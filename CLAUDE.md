@@ -242,6 +242,7 @@ The execution plan table format, the Design Gate (Row 0) rule, exemption categor
 <!-- COMMON-CLAUDE:END -->
 
 ### 6. Native Sub-agents (`Agent` Tool)
+<!-- COMMON-CLAUDE:START -->
 Use the native `Agent` tool to spawn sub-agents for parallel or isolated tasks. Sub-agents load their role-based configurations from `agents/<name>.md`.
 
 > **Agent Architecture**: See [CONSTITUTION.md §5 - Multi-Agent Architecture](CONSTITUTION.md#5-multi-agent-architecture) for governance rules.
@@ -268,6 +269,7 @@ Each implementation task follows the **Phase 4 execution loop** (see [AGENTS.md 
 3. **Quality gate (audit script)** validates compliance.
 
 > Loop and correct if review errors are flagged - maximum **3 iterations** before escalating to the user.
+<!-- COMMON-CLAUDE:END -->
 
 <!-- COMMON-CLAUDE:START -->
 #### Cost Optimization (3-Tier Model Strategy)

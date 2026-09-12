@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.23.0
+ * @version 1.24.0
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -2913,6 +2913,38 @@ function extractMarkedSections(content: string, markerName: string): Array<{head
   return sections;
 }
 
+// Check MM-01: Model-ID literal placement (ADR-0075 D11). Model IDs may appear ONLY inside
+// managed marker sections (COMMON-*:START/END, WORKSPACE-MANAGED) of the four instruction
+// twins at L0/L1 — those are the only regions MERGE/marker-inject passes deliver downstream.
+// A literal outside a managed section silently stalls at its layer on the next model refresh.
+function checkModelLiteralPlacement(): void {
+  if (!JSON_MODE) console.log(`\n=== Check MM-01: Model literal placement (instruction twins) ===`);
+  const LITERAL = /\b(?:gpt-5\.6-(?:sol|terra|luna)|claude-opus-5-0|claude-sonnet-5-0|claude-haiku-4-5|gemini-3\.\d+(?:\.\d+)?-(?:pro|flash))\b/i;
+  const STARTS = /<!--\s*(?:COMMON-(?:CLAUDE|GEMINI|CODEX|AGENTS):START|WORKSPACE-MANAGED:[^>]*?)\s*-->/;
+  const ENDS = /<!--\s*(?:\/WORKSPACE-MANAGED|COMMON-(?:CLAUDE|GEMINI|CODEX|AGENTS):END)\s*-->/;
+  const files = [
+    'CLAUDE.md', 'GEMINI.md', 'CODEX.md', 'AGENTS.md',
+    'templates/common/CLAUDE.md', 'templates/common/GEMINI.md',
+    'templates/common/CODEX.md', 'templates/common/AGENTS.md',
+  ];
+  let hits = 0;
+  for (const rel of files) {
+    const p = join(ROOT, rel);
+    if (!existsSync(p)) continue;
+    const lines = readFileSync(p, 'utf-8').split('\n');
+    let inside = false;
+    for (let i = 0; i < lines.length; i++) {
+      if (STARTS.test(lines[i])) inside = true;
+      if (ENDS.test(lines[i])) inside = false;
+      if (!inside && LITERAL.test(lines[i])) {
+        fail('common', 'model-literal-outside-managed-section', `${rel}:${i + 1} — model ID outside a managed marker section will not propagate (wrap it in COMMON-*/WORKSPACE-MANAGED markers or drop the literal)`);
+        hits++;
+      }
+    }
+  }
+  if (hits === 0) pass('Model literal placement: all instruction-twin literals inside managed sections');
+}
+
 // Check VA-05: CLAUDE.md and GEMINI.md common section sync between workspace root and variant files
 function checkDocumentCommonSections(variant: string): void {
   if (!JSON_MODE) console.log(`\n=== Check VA-05: Document common section sync (${variant}) ===`);
@@ -2920,6 +2952,7 @@ function checkDocumentCommonSections(variant: string): void {
   const docFiles: Array<{ file: string; markerName: string }> = [
     { file: 'CLAUDE.md', markerName: 'COMMON-CLAUDE' },
     { file: 'GEMINI.md', markerName: 'COMMON-GEMINI' },
+    { file: 'CODEX.md', markerName: 'COMMON-CODEX' },
   ];
 
   for (const { file: docFile, markerName } of docFiles) {
@@ -3566,6 +3599,7 @@ function main() {
 
   // Check common/ commands and parity
   checkCommands('common');
+  checkModelLiteralPlacement();
   // Script parity check removed (dead code after ADR-0036 TypeScript migration)
   checkVariantScopedSkillLeak();  // B-11: variant_scoped_skills must not live in common
   checkStyleNeutrality();         // B-12: L0/L1 style neutrality (ADR-0064/0066)
