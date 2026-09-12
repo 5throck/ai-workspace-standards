@@ -151,7 +151,7 @@ The PM Gateway operates at **4 enforcement levels**:
 
 #### Mandatory Execution Plan Display
 
-Before dispatching any specialist agents (Level 2 tasks), PM **must** output an execution plan table in the user's active language. The table format and its rules are the Single Source of Truth in [AGENTS.md §5.1 Standard Execution Plan Template](AGENTS.md#51-standard-execution-plan-template) — do not restate it here; that section owns the mandatory table shape, the Design Gate row, and the `/sync`-as-final-step rule.
+Before dispatching any specialist agents (Level 2 tasks), PM **must** output an execution plan table in the user's active language. The table format and its rules are the Single Source of Truth in [AGENTS.md §5.1 Standard Execution Plan Template](AGENTS.md#51-standard-execution-plan-template) — do not restate it here; that section owns the mandatory table shape, the Design Gate row, and the `/sync`-as-final-step rule. The Design Gate is universal across tiers (L0–L3, ADR-0074): the machine side is the sync-time spec-check (`audit.ts --spec-check`, dev-sync step 3.9 — FATAL), with the `docs/designs/` + `docs/specs/registry.json` convention delivered to projects per ADR-0073 Amendment 2; L0/L1 additionally carry the full Row 0 ceremony.
 
 **Rules specific to this enforcement level**:
 - The Agent tool MUST NOT be called until this table is visible to the user
