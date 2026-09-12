@@ -82,7 +82,7 @@ Counts: **surfaces 4 → 6** (adding Codex CLI, Codex Desktop App), **platform d
 | §4 MCP | `.mcp.json` relative-path resolution note | `config.toml [mcp_servers.*]` (graft = `bunx`), project vs. `~/.codex/config.toml` global scope, same relative-path principle |
 | §4.5 Skill Resolution Priority | 3-level priority table | priority-2 row re-pointed to `.codex/skills/`; rest identical |
 | §5 Agent Dispatch Rules + Execution Plan Boilerplate | short-alias mapping (`opus/sonnet/haiku`) / literal-ID note | **literal model IDs** (`gpt-5.6-sol` / `gpt-5.6-terra` / `gpt-5.6-luna`); no-subagent → sequential execution; PM Gateway 4-level enforcement by reference to AGENTS.md §3/§5, unchanged |
-| §6 Execution Mechanics | CLAUDE §6 sub-agents + §7 Plan Mode + §8 Task Tracking / GEMINI §2 planning artifacts + §3 subagents | consolidated section: Codex plan/approval mode ≙ Plan Mode, `update_plan` ≙ Task Tracking, explicit statement of the no-subagent limitation. 3-Tier: High → `gpt-5.6-sol`, Medium → `gpt-5.6-terra`, Low → `gpt-5.6-luna` |
+| §6 Execution Mechanics | CLAUDE §6 sub-agents + §7 Plan Mode + §8 Task Tracking / GEMINI §2 planning artifacts + §3 subagents | consolidated section: Codex plan/approval mode ≙ Plan Mode, `update_plan` ≙ Task Tracking, explicit statement of the no-subagent limitation. 3-Tier: High → `gpt-5.6-sol`, Medium → `gpt-5.6-terra`, Low → `gpt-5.6-luna`. The model table is created inside the COMMON-CODEX managed block from day one (D11) |
 | §7 Boundary Policy / §8 Error Recovery / §9 Windows | `COMMON-CLAUDE` / `COMMON-GEMINI` markers | **`COMMON-CODEX` marker (new)**, body byte-identical (incl. `nul` redirection, CP949 code page, Git Bash requirement) |
 | Git & PR Additions | `COMMON-CLAUDE` / `COMMON-GEMINI` (hook status included) | `COMMON-CODEX` + Codex hook-support status row |
 | Graft block | byte-identical across the three twins | 4th byte-identical copy |
@@ -93,7 +93,7 @@ Counts: **surfaces 4 → 6** (adding Codex CLI, Codex Desktop App), **platform d
 
 | Artifact | L0 repo (workspace root) | L1 `templates/common` | L2 `templates/co-*` (13 variants) | L3 new project (scaffold) | Fleet existing repos (upgrade-project) |
 |---|---|---|---|---|---|
-| **CODEX.md** | create | propagate via new `codex-md` domain (WORKSPACE-MANAGED markers) | — (variants carry AGENTS.md only, like CLAUDE/GEMINI.md) | copied from common; kept/removed per platform profile | `MERGE_FILES += CODEX.md`; `COMMON-CODEX` marker-drift check |
+| **CODEX.md** | create | propagate via `--governance-l1` (add CODEX.md to its file list — W2; D11 correction: the four instruction files ride the governance-l1 mechanism, **not** propagation-map domains as originally noted here) | — (variants carry AGENTS.md only, like CLAUDE/GEMINI.md) | copied from common; kept/removed per platform profile | `MERGE_FILES += CODEX.md`; `COMMON-CODEX` marker-drift check |
 | **AGENTS.md** header | add "…`CODEX.md` (Codex)" | ✓ | ✓ | ✓ | marker-managed |
 | **`.codex/config.toml`** | create (workspace MCP) | exists (ADR-0074 seed) | — (scaffold delivers from L1) | copy (ADD_IF_MISSING; project-owned configs untouched) | ADD_IF_MISSING seed |
 | **`.codex/skills/`** | sync-skills 4th target | sync-skills `--all-variants` | **`sync-skills-to-l2.ts`** (must be extended) | scaffold overlay + platform pruning | **TEMPLATE_TREE_SYNC** — special-cased *before* the blanket `.codex/**` ADD_IF_MISSING rule (fixes the fleet-mirror-update gap) |
@@ -115,16 +115,31 @@ Mechanisms: L0→L1 = 4 new `propagation-map.json` domains (`codex-md`, `codex-s
 - **D8 — Scaffolding/fleet policy**: per the matrix in §5. Core fix: `.codex/skills/**` and `.codex/prompts/**` must resolve to TEMPLATE_TREE_SYNC **before** the blanket `.codex/**` ADD_IF_MISSING claim, otherwise fleet mirrors never update (ADR-0074 §14 root-cause class).
 - **D9 — ADR-0021 amendment**: `platform_settings` gains a codex classification; `.codex/config.toml` is TOML and is excluded from the VA-04 JSON parity loop, replaced by a dedicated lightweight check (parses + contains required `[mcp_servers.*]` blocks).
 - **D10 — Documentation alignment** (W2): CONSTITUTION §6 ("all three platform directories"), §10 Platform Profile enum, §11 ("all 4 supported platforms" → 6 surfaces / 4 directories); AGENTS.md §6 Platform Skills Distribution table; CLAUDE.md/GEMINI.md "All Platforms" tables gain Codex rows; README platform-support table.
+- **D11 — Fleet & template distribution guarantee for model/registry changes** (amendment, 2026-09-12). Self-review of the propagation machinery established that a registry/model change only reaches every layer if the literals live inside managed marker sections. **Principle: model-ID literals exist only inside the managed marker sections of the four instruction files (CLAUDE.md / GEMINI.md / CODEX.md / AGENTS.md) and in `docs/workspace-schema.json` (SSOT).** Verified propagation matrix:
+
+  | Artifact | L1 (`templates/common`) | L2 (`templates/co-*`) | L3/Fleet (upgrade-project) |
+  |---|---|---|---|
+  | `docs/workspace-schema.json` | ⚠️ copy exists but no propagation domain — add one (W2) | not carried | ✅ default `docs/` SYNC |
+  | GEMINI.md §3 model mapping | ✅ whole-file `--governance-l1` sync, but the mapping sits OUTSIDE COMMON-GEMINI markers today | n/a (variants carry no GEMINI.md) | ❌→✅ MERGE replaces managed sections only — move the mapping inside a COMMON-GEMINI block (W2) |
+  | CLAUDE.md §6 model mapping | ✅ same mechanism | n/a | ❌→✅ same fix into a COMMON-CLAUDE block (W2) |
+  | CODEX.md model table | ✅ created inside a COMMON-CODEX block from day one | n/a | ✅ by construction |
+  | AGENTS.md §3.6 model lines | ✅ whole-file sync | ❌→✅ only the COMMON-AGENTS section is injected into variants — move the model lines into it (W2); **co-safety is deliberately excluded** from injection (T-20260910-022) → PM-02 adjudication + W5 post-check exception | ❌→✅ MERGE (post-move) |
+  | `agents/*.md` (L1 `i18n-specialist.md`, variant agents e.g. co-game) | Fork Model — agents are **intentionally excluded** from L0→L1 propagation (ADR-0043); refresh is a W2 manual sweep, not machinery | variant-owned | ✅ `SYNC_IF_NEWER: agents/` |
+  | skill references (e.g. explain-me `PLATFORM_HARNESS.md`) | ✅ sync-skills | ✅ | ✅ platform mirror |
+  | `.env.sample` model keys | n/a | n/a | ✅ template-owned keys: value updates delivered by ENV_SAMPLE SYNC (`lib/env-sample.ts` "template owns this key"); **project-added keys are never auto-updated** |
+  | project-owned configs (e.g. co-architect `config/zwcad_config.json`) | — | — | ❌ out of delivery scope by design; W5 post-check surfaces → project responsibility |
+
+  **Supporting code change (W2):** `propagate-to-templates.ts --governance-l1` covers CLAUDE/GEMINI/AGENTS.md only and is **not invoked by dev-sync** — wire it into the pipeline (or gate on it) and add CODEX.md to its file list. This corrects the original §5 assumption of a `codex-md` propagation-map domain: the four instruction files ride governance-l1, not propagation-map domains. **Regression guard (W3):** extend validate-templates P-01 to FAIL on any model-ID literal found outside a managed marker section in the four files (L0/L1, plus L2 AGENTS.md). **Model-ID reality check (W2):** confirm registered IDs resolve (live call or owner confirmation) before rollout. **Rollout (W5):** standard chain — `--governance-l1` propagate → L1→L2 COMMON-AGENTS injection → `upgrade-project` per project repo (one upgrade PR per project, T-20260912-002 pattern) — then the §8 grep post-check.
 
 ## 7. Implementation Waves (follow-up sessions)
 
 | Wave | Content |
 |---|---|
 | W1 | Distribution infra: sync-skills 4th target, sync-skills-to-l2, propagation-map codex domains, create L0/L1 `.codex/skills` + `.codex/prompts`, root `.codex/config.toml` |
-| W2 | Registry & docs: CODEX.md (per §4), model registry (codex + Gemini 3.8 companion), CONSTITUTION §6/§10/§11, AGENTS.md, twin-table Codex rows |
-| W3 | Validators (D7 list) |
-| W4 | Scaffolding/fleet policy (D8 list) |
-| W5 | Live verification (real Codex CLI + Desktop App: skill discovery, prompts, CODEX.md pointer-follow) + simulate-pipeline + fleet rollout via upgrade-project |
+| W2 | Registry & docs: CODEX.md (per §4, model table inside COMMON-CODEX), model registry (codex + Gemini 3.8 companion + ID reality check), CONSTITUTION §6/§10/§11, AGENTS.md, twin-table Codex rows. **D11 relocation sweep**: move model mappings into managed sections (GEMINI §3 → COMMON-GEMINI, CLAUDE §6 → COMMON-CLAUDE, AGENTS §3.6 → COMMON-AGENTS-injected section); wire `--governance-l1` into dev-sync and add CODEX.md to its list; add L1 `workspace-schema.json` propagation domain; manual sweep of Fork-Model files (L1 `agents/i18n-specialist.md`, variant agents, `docs/context.md`, `docs/variants/pm-yaml-schema.md`) |
+| W3 | Validators (D7 list) **+ P-01 regression check: model-ID literals outside managed marker sections FAIL (four files × L0/L1 + L2 AGENTS.md)** |
+| W4 | Scaffolding/fleet policy (D8 list): insert `.codex/skills|prompts` mirror claims before the blanket `.codex/**` ADD_IF_MISSING rule; add `.codex` to the platform-dir SYNC list; `KNOWN_TOP_DIRS` |
+| W5 | Live verification (real Codex CLI + Desktop App: skill discovery, prompts, CODEX.md pointer-follow) + simulate-pipeline + **full distribution chain: governance-l1 propagate → L1→L2 COMMON-AGENTS injection → `upgrade-project` per project repo (one upgrade PR per project, T-20260912-002 pattern)** + grep post-check (§8) |
 
 Each wave lands as its own PR per the Sequential Branch Dependency Rule (CONSTITUTION §3.3).
 
@@ -135,6 +150,7 @@ Each wave lands as its own PR per the Sequential Branch Dependency Rule (CONSTIT
 3. Dry-run upgrade against a fleet project with an owned `.codex/config.toml` (co-abap): config untouched (ADD_IF_MISSING), skills/prompts updated (TEMPLATE_TREE_SYNC).
 4. **Live Codex gates** (W5, per surface): CODEX.md pointer-follow; `.codex/skills/` discovery (or `[[skills.config]]` path); `.codex/prompts/` availability; MCP `[mcp_servers.graft]` reachable.
 5. `bun scripts/verify-platform-lifecycle.ts` + VERSION_MANIFEST parity section show 4 directories in sync.
+6. **Post-distribution grep gate (W5)**: after rollout, stale model IDs (`gemini-3.7-flash` etc.) may remain across `templates/**` and `Projects/**` only in history contexts (CHANGELOG entries, memory logs). Any other hit is either a missed managed-section placement (fix at source, re-propagate) or a project-owned file (route to the project owner).
 
 ## 9. Risks & Mitigations
 
@@ -145,6 +161,9 @@ Each wave lands as its own PR per the Sequential Branch Dependency Rule (CONSTIT
 | Blanket `.codex/**` ADD_IF_MISSING swallows mirror updates | D8 ordering fix — mirror sub-paths claim before the blanket rule; covered by dry-run test 3 |
 | Validator false-positives while only 3 of 4 dirs exist during W1–W3 | Wave ordering puts `.codex/` content (W1) before validator extension (W3) |
 | `.agents/` inconsistency (has commands but excluded from scaffold overlay) | Out of scope; noted for the follow-up N-platform ticket |
+| Relocating model mappings into managed sections overwrites project-local edits to those regions | MERGE semantics conflict-warn on local modifications; W5 rollout reviews projects with heavy twin edits before upgrading (accepted — section replacement is the intended distribution mechanism) |
+| Project-owned files keep stale model IDs (hand-added `.env.sample` keys, project configs) | Out of delivery scope by design; W5 post-check greps `Projects/**` and routes non-conforming findings to project owners |
+| `--governance-l1` not running in the pipeline leaves changes stuck at L0 | W2 wires it into dev-sync (or gates on it); W5 post-check fails loudly if L1 copies drift |
 
 ## 10. Accessibility & Preview Verification Statements
 
