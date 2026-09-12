@@ -198,7 +198,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `sync-skill-status.ts` | L0 | 1.0.1 | active | — | — | L0+L1 | — |
 | `sync-skills-to-l2.ts` | L0 | 1.0.1 | active | — | — | L0 | — |
 | `sync-template-deps.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `sync-skills.ts` | L0 | 1.6.0 | active | `--dir <path>`, `--all-variants` | — | L0+L1 | — |
+| `sync-skills.ts` | L0 | 1.7.0 | active | `--dir <path>`, `--all-variants` | — | L0+L1 | — |
 | `tag-template.ts` | L0 | 1.1.0 | active | `--dry-run`, `--no-push`, `--fail-on-push-error` | —| L0 | —|
 | `team-builder.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
 | `test-platform-parity.ts` | L0 | 0.2.4 | active | —| —| L0 | —|
@@ -436,12 +436,13 @@ Detects running Claude Code / Antigravity processes with user confirmation befor
 
 #### `sync-skills.ts`
 **Purpose**: Distributes skills from a project's SSOT (`skills/`) to its runtime locations
-(`.claude/skills/`, `.gemini/skills/`, `.agents/skills/`). Run after any change to `skills/`
-to ensure Claude Code, Antigravity, and Antigravity CLI pick up the update.
+(`.claude/skills/`, `.gemini/skills/`, `.agents/skills/`, `.codex/skills/`). Run after any change to `skills/`
+to ensure Claude Code, Gemini CLI, Antigravity, Antigravity CLI, and Codex pick up the update.
 **Usage**:
 - `bun run sync-skills` — workspace root only (default, unchanged from prior versions)
 - `bun scripts/sync-skills.ts --dir templates/co-consult` — a single project root (variant or `templates/common`)
 - `bun scripts/sync-skills.ts --all-variants` — every `templates/co-*/` variant plus `templates/common/`
+**v1.7.0**: fourth platform target `.codex/skills/` (Codex CLI + Desktop App, ADR-0075 W1) and Phase 1b — `.claude/commands/*.md` mirrored to `.codex/prompts/` as Codex custom prompts (live-support gate in W5).
 **v1.4.0**: added `--dir`/`--all-variants` — the workspace-root-only default was silently leaving `.agents/skills/` (Antigravity CLI) far behind `.claude/skills/`/`.gemini/skills/` in every variant (discovered during a full skill-lifecycle audit, 2026-07-19). Run `--all-variants` after any variant-level skill change.
 
 #### `sync-template-deps.ts`

@@ -2,7 +2,7 @@
 name: ui-component-design
 scope: co-price
 description: Onyx 2.0 component design patterns
-version: "2.0.0"
+version: 2.0.0
 last_reviewed: 2026-08-25
 status: active
 owner: ux-specialist

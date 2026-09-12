@@ -1,0 +1,33 @@
+{
+  "_note": "Korean-original Korea Law Open API terminology mapping. Non-Markdown reference asset — exempt from the workspace English-only doc policy (CONSTITUTION §6.7). SKILL.md stays English-only and links here. Category codes and response field names are from the official 법제처 Open API guide pages as recorded in SKILL.md (2026-08-09).",
+  "version": "0.1.0",
+  "verified": "2026-08-09",
+  "target_codes": {
+    "현행법령": { "en": "current statutes", "mapsTo": { "target": "law" } },
+    "시행일 법령": { "en": "statute as of an effective date", "mapsTo": { "target": "eflaw" } },
+    "행정규칙": { "en": "administrative rules", "mapsTo": { "target": "admrul" } },
+    "자치법규": { "en": "municipal/local ordinances", "mapsTo": { "target": "ordin" } },
+    "판례": { "en": "court precedents", "mapsTo": { "target": "prec" } },
+    "법령해석례": { "en": "official legal interpretation cases", "mapsTo": { "target": "expc" } },
+    "헌재결정례": { "en": "Constitutional Court decisions", "mapsTo": { "target": "detc" } },
+    "조약": { "en": "treaties", "mapsTo": { "target": "trty" } },
+    "별표서식": { "en": "attached forms/schedules (별표)", "mapsTo": { "target": "licbyl" } },
+    "법령용어": { "en": "legal terminology dictionary", "mapsTo": { "target": "lstrm" } }
+  },
+  "response_fields": {
+    "법령명한글": { "en": "statute name (Korean)" },
+    "법령ID": { "en": "statute ID" },
+    "법령일련번호": { "en": "MST — serial number used by lawService.do detail retrieval" },
+    "공포일자": { "en": "promulgation date" },
+    "시행일자": { "en": "enforcement date" },
+    "소관부처": { "en": "competent ministry" },
+    "사건명": { "en": "case name" },
+    "사건번호": { "en": "case number" },
+    "선고일자": { "en": "ruling date" },
+    "법원명": { "en": "court name" },
+    "판결요지": { "en": "holding summary" },
+    "조문": { "en": "article text" },
+    "부칙": { "en": "supplementary provisions" },
+    "별표": { "en": "attached tables/forms" }
+  }
+}

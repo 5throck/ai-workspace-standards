@@ -1,5 +1,10 @@
 #!/usr/bin/env bun
-// @version 1.6.0
+// @version 1.7.0
+// v1.7.0 (2026-09-12, ADR-0075 W1): fourth platform target `.codex/skills/` (Codex CLI +
+//   Desktop App mirror — same B-03/mirror:false exclusions as the other targets) and
+//   Phase 1b — `.claude/commands/*.md` (the commands SSOT) mirrored to `.codex/prompts/`
+//   as Codex custom prompts; live project-prompts support is verified in W5, and an
+//   unsupported result demotes this mirror to documented no-op output.
 // v1.6.0 (2026-09-12): Phase 1 honors `mirror: false` frontmatter — agent-dispatched
 //   fleet skills (PM-gateway model) stay in skills/ without platform mirroring.
 // v1.5.0 (2026-09-10, T-20260910-026): dirsEqual() now lstats instead of statting
@@ -7,10 +12,12 @@
 //   cap of 64 so a symlinked directory cycle cannot recurse infinitely.
 /**
  * sync-skills.ts
- * Distributes skills from the SSOT (skills/) to .claude/skills/, .gemini/skills/, and .agents/skills/.
+ * Distributes skills from the SSOT (skills/) to .claude/skills/, .gemini/skills/,
+ * .agents/skills/, and .codex/skills/.
  * Also syncs shortcut skills (sync, meeting) from .agents/skills/ back to .claude and .gemini.
  *
- * Phase 1: Copy every skill directory (containing SKILL.md) to all three platform skill directories.
+ * Phase 1: Copy every skill directory (containing SKILL.md) to all four platform skill directories.
+ * Phase 1b: Mirror .claude/commands/*.md (commands SSOT) to .codex/prompts/ as Codex prompts.
  * Phase 2: Back-sync shortcut skills that only exist in .agents/skills/ to .claude and .gemini.
  * Special: meeting-facilitation SKILL.md is also synced to .claude/commands/meeting.md and .gemini/commands/meeting.md.
  *
@@ -58,6 +65,7 @@ function dirsFor(root: string): SkillSyncDirs {
         claudeSkills: path.join(root, '.claude', 'skills'),
         geminiSkills: path.join(root, '.gemini', 'skills'),
         agentsSkills: path.join(root, '.agents', 'skills'),
+        codexSkills:  path.join(root, '.codex', 'skills'),
     };
 }
 
@@ -66,6 +74,7 @@ export interface SkillSyncDirs {
     claudeSkills: string;
     geminiSkills: string;
     agentsSkills: string;
+    codexSkills: string;
 }
 
 export interface SyncSkillsOptions {
@@ -135,12 +144,13 @@ function defaultCopyDir(src: string, dest: string): void {
  */
 export async function syncSkills(dirs: SkillSyncDirs, opts: SyncSkillsOptions = {}): Promise<{ errors: string[] }> {
     const copyDir = opts.copyDir ?? defaultCopyDir;
-    const { ssotSkills, claudeSkills, geminiSkills, agentsSkills } = dirs;
+    const { ssotSkills, claudeSkills, geminiSkills, agentsSkills, codexSkills } = dirs;
     const root = path.dirname(ssotSkills);
 
     fs.mkdirSync(claudeSkills, { recursive: true });
     fs.mkdirSync(geminiSkills, { recursive: true });
     fs.mkdirSync(agentsSkills, { recursive: true });
+    fs.mkdirSync(codexSkills, { recursive: true });
 
     const errors: string[] = [];
 
@@ -160,7 +170,8 @@ export async function syncSkills(dirs: SkillSyncDirs, opts: SyncSkillsOptions = 
 
             // `security-gate: true` skills are a platform-neutral-only hard gate
             // (validate-templates.ts Check B-03) — they must never be mirrored into
-            // .claude/skills/, .gemini/skills/, or .agents/skills/, only skills/.
+            // .claude/skills/, .gemini/skills/, .agents/skills/, or .codex/skills/,
+            // only skills/.
             if (/^security-gate:\s*true\b/m.test(fs.readFileSync(skillMdSrc, 'utf-8'))) {
                 continue;
             }
@@ -172,7 +183,7 @@ export async function syncSkills(dirs: SkillSyncDirs, opts: SyncSkillsOptions = 
                 continue;
             }
 
-            for (const targetDir of [claudeSkills, geminiSkills, agentsSkills]) {
+            for (const targetDir of [claudeSkills, geminiSkills, agentsSkills, codexSkills]) {
                 const target = path.join(targetDir, item);
                 if (dirsEqual(itemPath, target)) {
                     continue; // idempotent skip — content already matches
@@ -181,8 +192,13 @@ export async function syncSkills(dirs: SkillSyncDirs, opts: SyncSkillsOptions = 
                 console.log(`  -> Synced ${item} to ${path.relative(root, targetDir)}/`);
             }
 
-            // Special logic for commands derived from skills
-            if (item === 'meeting-facilitation') {
+            // Special logic for commands derived from skills — workspace root ONLY.
+            // Variant `.claude|gemini/commands/meeting.md` files are Fork-Model overlays
+            // (e.g. co-safety's adjudicated divergence, T-20260910-022); regenerating them
+            // from the variant's own meeting-facilitation SKILL.md would clobber the
+            // adapted frontmatter (scope/audit_exception) that the variant registry
+            // validates against.
+            if (item === 'meeting-facilitation' && path.resolve(root) === workspaceRoot) {
                 const claudeCmdDir = path.join(root, '.claude', 'commands');
                 const geminiCmdDir = path.join(root, '.gemini', 'commands');
                 fs.mkdirSync(claudeCmdDir, { recursive: true });
@@ -207,6 +223,32 @@ export async function syncSkills(dirs: SkillSyncDirs, opts: SyncSkillsOptions = 
             const msg = (err instanceof Error) ? err.message : String(err);
             errors.push(`Phase 1: ${item}: ${msg}`);
             console.error(`  ❌ Error syncing ${item}: ${msg}`);
+        }
+    }
+
+    // --- Phase 1b: Mirror .claude/commands/*.md to .codex/prompts/ (ADR-0075 D4) ---
+    // Codex consumes slash-style workflows as custom prompts. `.claude/commands/` is the
+    // commands SSOT; this mirror is per-file idempotent. Project-level prompt support on
+    // Codex is verified live in W5 — an unsupported result demotes this mirror to a
+    // documented no-op rather than a silent gap.
+    const claudeCmdSource = path.join(root, '.claude', 'commands');
+    const codexPromptsDir = path.join(root, '.codex', 'prompts');
+    if (fs.existsSync(claudeCmdSource)) {
+        fs.mkdirSync(codexPromptsDir, { recursive: true });
+        for (const cmdFile of fs.readdirSync(claudeCmdSource)) {
+            try {
+                if (!cmdFile.endsWith('.md')) continue;
+                const src = path.join(claudeCmdSource, cmdFile);
+                if (!fs.statSync(src).isFile()) continue;
+                const dst = path.join(codexPromptsDir, cmdFile);
+                if (dirsEqual(src, dst)) continue;
+                fs.copyFileSync(src, dst);
+                console.log(`  -> Mirrored command ${cmdFile} to .codex/prompts/`);
+            } catch (err) {
+                const msg = (err instanceof Error) ? err.message : String(err);
+                errors.push(`Phase 1b: ${cmdFile}: ${msg}`);
+                console.error(`  ❌ Error mirroring ${cmdFile}: ${msg}`);
+            }
         }
     }
 

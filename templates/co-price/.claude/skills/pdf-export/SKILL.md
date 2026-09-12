@@ -2,7 +2,7 @@
 name: pdf-export
 scope: co-price
 description: PDF report generation for client-facing deliverables
-version: "1.1.0"
+version: 1.1.0
 last_reviewed: 2026-08-25
 status: active
 owner: core-engine-dev

@@ -12,6 +12,13 @@ last_reviewed: 2026-08-09
 status: active
 owner: strategy-analyst
 prerequisites: DART_API_KEY environment variable
+relates_to:
+  - skill: k-ecos
+    type: composes_with
+  - skill: k-kosis
+    type: composes_with
+  - skill: k-law
+    type: relates_to
 l2_propagate: true
 metadata:
   type: financial-analysis
@@ -90,6 +97,8 @@ Structured JSON output for financial metrics:
 
 ## Related Skills
 
+- k-ecos
+- k-kosis
 - k-law
 - financial-modeling
 - competitive-intelligence

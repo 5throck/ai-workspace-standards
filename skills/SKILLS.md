@@ -36,7 +36,7 @@ Skills with a `skills/<name>/` directory in the workspace root. These are the pr
 | `translate` | 1.0.1 | active | pm | 2026-08-24 | — | — |
 | `validate-docs-links` | 1.0.0 | deprecated | pm | 2026-09-09 | 2026-12-09 | Deprecated: project-review baseline owns documentation/link checking |
 | `project-to-variant` | 1.3.0 | active | scaffolding-expert | 2026-08-23 | — | Convert existing standalone project into official variant template |
-| `upgrade-project` | 1.4.0 | active | pm | 2026-09-12 | — | Upgrade existing L2/L3 project to current template version |
+| `upgrade-project` | 1.4.1 | active | pm | 2026-09-12 | — | Upgrade existing L2/L3 project to current template version |
 | `variant-feature` | 1.0.0 | active | scaffolding-expert | 2026-07-31 | — | Add features (agents, skills, scripts, docs) to existing variant |
 | `ticket-run` | 1.0.0 | active | automation-engineer | 2026-07-16 | — | Pulls next waiting service ticket from Phase A queue |
 | `explain-me` | 1.0.0 | experimental | pm | 2026-08-03 | — | Single-file interactive HTML report generation. Inspired by beret21/reportme (MIT). Korean loanword data in references/loanword-refinements.json |

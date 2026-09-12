@@ -1,7 +1,7 @@
 ---
 name: upgrade-project
 description: "Upgrade an existing L2/L3 project to the current template version. Use when: upgrading a variant-based project, syncing template improvements, refreshing scripts/agents/skills/docs/commands."
-version: "1.4.0"
+version: "1.4.1"
 status: active
 scope: workspace
 owner: pm
@@ -145,4 +145,4 @@ cd <project-directory>
 bun scripts/verify-scripts.ts --verify
 ```
 
-Must exit 0 with 0 errors. If ghost entries appear, the project's `scripts/SCRIPTS.md` may need manual cleanup (see Constitution §6.5 [Tier 3 SCRIPTS.md Filtering](../../docs/constitution/06.5-script-lifecycle.md#tier-3-script-md-filtering)).
+Must exit 0 with 0 errors. If ghost entries appear, the project's `scripts/SCRIPTS.md` may need manual cleanup (see the Tier 3 SCRIPTS.md Filtering section of the script-lifecycle governance docs at the workspace root).

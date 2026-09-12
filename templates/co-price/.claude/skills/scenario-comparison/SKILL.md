@@ -2,7 +2,7 @@
 name: scenario-comparison
 scope: co-price
 description: Multi-scenario pricing comparison and evaluation
-version: "1.0.0"
+version: 1.0.0
 last_reviewed: 2026-08-25
 status: active
 owner: engagement-director

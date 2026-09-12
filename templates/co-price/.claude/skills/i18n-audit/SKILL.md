@@ -2,7 +2,7 @@
 name: i18n-audit
 scope: co-price
 description: co-price specialization of the common i18n-audit skill — 16-locale translation parity and glossary adherence
-version: "2.1.0"
+version: 2.1.0
 last_reviewed: 2026-08-29
 status: active
 owner: l10n-auditor

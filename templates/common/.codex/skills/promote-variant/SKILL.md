@@ -1,0 +1,266 @@
+---
+name: promote-variant
+description: >
+  Guides Phase B promotion of a completed Phase A prototype to an official workspace variant template.
+  Use when: PROMOTION_CHECKLIST conditions are all met, ready to create templates/co-<name>/.
+status: active
+scope: common
+l2_propagate: false
+version: 1.4.0
+owner: pm
+last_reviewed: 2026-08-24
+relates_to:
+  - skill: create-variant
+    type: follows
+  - skill: sync
+    type: follows
+metadata:
+  type: process
+  triggers:
+    - promote variant
+    - Phase B
+    - variant promotion
+    - promote to template
+    - create template from prototype
+---
+
+# Skill: promote-variant
+
+## When to Use
+
+Use this skill after all `PROMOTION_CHECKLIST.md` conditions are satisfied in `Projects/<variant-name>/`.
+
+**Prerequisites**:
+- All PROMOTION_CHECKLIST.md conditions show Done
+- `bun scripts/audit.ts` passes (0 errors)
+- `bun run agent:verify` passes (0 errors)
+- User has reviewed `_ORIGIN.md §Manual Phase B Steps`
+- **No promotion hold**: the source project's `variant.json` must NOT contain
+  `promotionHold: { hold: true }`. A hold blocks `l3-to-variant-pipeline.ts`
+  (Phase 0.5) and `project-to-variant.ts` mechanically and cannot be bypassed
+  with `--force` — the owner removes the hold only after the user approves the
+  promotion in plain language. Green readiness checks are not an approval.
+
+---
+
+## Phase B Process
+
+### Step 1: Final verification
+
+```bash
+cd Projects/<variant-name>
+
+# Verify all conditions
+bun run agent:verify          # Conditions 1, 5
+bun scripts/validate-skills.ts  # Condition 2
+bun scripts/audit.ts          # Conditions 3, 4
+
+# Review PROMOTION_CHECKLIST.md manually
+# Conditions 6, 7 require human review
+```
+
+- [ ] `docs/context.md` contains no project-only sections (purification diff empty or already mirrored into `docs/<variant>.context.md`)
+
+All conditions must show Done before proceeding.
+
+### Step 1.5: Verify country-profile readiness
+
+Run the country-profile criteria rows from `docs/templates/PROMOTION_CHECKLIST-template.md` (Criteria 1) — these gate promotion for both country-shipping and region-neutral variants:
+
+- [ ] `country_config` valid (if the prototype ships country profiles): `supported` list declared, `default: null` (region-neutral default), and every `supported` code has a `docs/countries/<CODE>.md` profile with matching frontmatter `code`
+- [ ] Country-specific assets (skills, env keys) registered in `country_scoped_assets` in both schema copies - nothing ships unregistered, and there are no variant-local forks of registry-governed scoped skills
+- [ ] Region-neutral default intact: docs and agents reference a jurisdiction only via the active country profile or explicit `(CC: ...)` markers - no hardcoded target-jurisdiction assumptions in default paths
+
+A region-neutral prototype passes by confirming the second and third checks only (no unregistered scoped assets leaked in).
+
+### Step 2: Update pre-promotion metadata
+
+Before running the pipeline, update these fields in `Projects/<variant-name>/`:
+
+**`variant.json`**:
+- Confirm `inherits_common` matches current workspace common version
+- `phaseAComplete`: leave as `false` (pipeline sets this)
+
+**`_ORIGIN.md`**:
+- Confirm §Manual Phase B Steps lists all domain-specific folders
+- Confirm §Reconcile Survival Notes is complete
+
+### Step 3: Run l3-to-variant-pipeline.ts
+
+```bash
+# From workspace root C:\git\
+bun scripts/l3-to-variant-pipeline.ts \
+  --l3-path=Projects/<variant-name> \
+  --name=co-<variant-name> \
+  --type=<security|development|design|consulting|collaboration|lecture|game|abap-development|safety> \
+  --description="<variant-description>" \
+  --auto-fix-agents-md \
+  --auto-fix-pm-md
+```
+
+Expected output:
+- `templates/co-<variant-name>/` created
+- Common files reconciled (duplicates removed)
+- Platform parity validated
+- Domain skills materialized into all three skill roots (`skills/`, `.claude/skills/`, `.gemini/skills/`) — no manual copying (generate-variant.ts ≥ 1.12.0)
+- Agent `lifecycle` frontmatter preserved on the variant copy — no post-run backfills (generate-variant.ts ≥ 1.12.0)
+- VARIANT-INJECT markers ensured in `docs/co-<variant-name>.context.md` even when the L3 source overwrites the marker-rich skeleton
+- Context purification: N project-only section(s) merged into docs/<variant>.context.md, M superseded stub(s) dropped (Phase 4.7 gate: PASS)
+- `AGENTS.md` regenerated with the full roster (`--auto-fix-agents-md`, via `regenerate-agents-md.ts --source`)
+
+### Step 4: Manual copy — pipeline-excluded directories
+
+Check `_ORIGIN.md §Manual Phase B Steps` for domain-specific folders NOT scanned by the pipeline.
+
+Common exclusions (must copy manually):
+```bash
+# Domain-specific directories (not auto-scanned by reconcile):
+cp -r Projects/<variant-name>/workflows  templates/co-<variant-name>/workflows
+cp -r Projects/<variant-name>/regulations  templates/co-<variant-name>/regulations
+cp -r Projects/<variant-name>/evidence-models  templates/co-<variant-name>/evidence-models
+cp -r Projects/<variant-name>/industry-profiles  templates/co-<variant-name>/industry-profiles
+# Add others per _ORIGIN.md
+```
+
+### Step 5: Verify common skills in generated template
+
+```bash
+ls templates/co-<variant-name>/.claude/skills/
+ls templates/co-<variant-name>/.gemini/skills/
+```
+
+If common skills were stripped by reconcile (identical to L0), manually restore:
+```bash
+cp -r templates/common/.claude/skills/. templates/co-<variant-name>/.claude/skills/
+cp -r templates/common/.gemini/skills/. templates/co-<variant-name>/.gemini/skills/
+```
+
+> **Reconcile boundary**: `l3-to-variant-pipeline.ts` strips files from L2 that are identical to L0. Skills (`.claude/skills/`, `.gemini/skills/`) are **excluded from reconcile** and must always be present in L2. If skills are missing after pipeline run, restore them manually from `templates/common/.claude/skills/` and `templates/common/.gemini/skills/`.
+
+### Step 6: Verify new-project.ts picks up the new variant
+
+`bun scripts/new-project.ts` automatically detects valid variants from `templates/` at runtime — **no manual update required**.
+
+Verify detection works:
+```bash
+bun scripts/new-project.ts --help
+# Should list co-<name> in the available variants output
+```
+
+### Step 6.5: Verify Antigravity coverage
+
+Before running validate-templates.ts, confirm Antigravity parity is complete:
+
+```bash
+# Verify .gemini/ mirrors .claude/
+diff <(ls templates/co-<variant-name>/.claude/commands/) \
+     <(ls templates/co-<variant-name>/.gemini/commands/)
+diff <(ls templates/co-<variant-name>/.claude/skills/) \
+     <(ls templates/co-<variant-name>/.gemini/skills/)
+```
+
+Check that:
+- [ ] All commands in `.claude/commands/` have a matching file in `.gemini/commands/` (or explicit `gemini-parity: skip` frontmatter)
+- [ ] All skills in `.claude/skills/` have a matching file in `.gemini/skills/` (or `gemini-parity: skip`)
+- [ ] `GEMINI.md` variant context section identical to `CLAUDE.md` variant context section
+- [ ] Each `agents/*.md` file has Section C (Antigravity Integration)
+
+If any gap found: fix before running validate-templates.ts.
+
+### Step 7: Run validate-templates.ts
+
+```bash
+# From workspace root C:\git\
+bun scripts/validate-templates.ts
+```
+
+Fix any P-01 parity failures before proceeding.
+
+### Step 8: Update lifecycle metadata
+
+**`templates/co-<variant-name>/variant.json`**:
+```json
+{
+  "status": "beta",
+  "lifecycle": {
+    "statusSince": "<today-date>",
+    "lastTransition": "beta -> promoted on <today-date>",
+    "stablePromotedOn": null
+  }
+}
+```
+
+**`Projects/<variant-name>/variant.json`**:
+```json
+{
+  "phaseAComplete": true
+}
+```
+
+### Step 9: Run tag-template.ts
+
+After all template changes are committed and verified:
+
+```bash
+# From workspace root C:\git\
+bun scripts/tag-template.ts
+```
+
+This publishes a `template-v{VERSION}` git tag.
+
+### Step 10: Update workspace AGENTS.md
+
+Add the new variant to the workspace root `AGENTS.md` if it has a unique agent roster that should be documented.
+
+Run:
+```bash
+bun run agent:verify
+```
+
+---
+
+## Post-Promotion Checklist
+
+- [ ] `templates/co-<name>/` created and passes validate-templates.ts
+- [ ] Bilingual user guide authored: `templates/co-<name>/docs/user-guide.md` + `docs/user-guide_ko.md` per the User-Guide Standard (enforced by validate-templates WS-11; reference: `templates/co-work/docs/`)
+- [ ] co-<name> added to all 6 index READMEs — root `README.md` / `README_ko.md` / `README_es.md` / `README_ja.md` (tree + variant table) and `templates/README.md` / `templates/README_ko.md` (enforced by WS-12)
+- [ ] `bun scripts/new-project.ts` correctly lists co-<name> in `--help` output (auto-detected from `templates/`)
+- [ ] `templates/co-<name>/variant.json` status is `beta` with correct lifecycle dates
+- [ ] `Projects/<variant-name>/variant.json` has `phaseAComplete: true`
+- [ ] `tag-template.ts` run and tag published
+- [ ] Workspace AGENTS.md updated (if needed)
+- [ ] `SECURITY.md` completed (not just stub)
+- [ ] `.gemini/commands/` mirrors `.claude/commands/` (or gemini-parity: skip declared)
+- [ ] `.gemini/skills/` mirrors `.claude/skills/` (or gemini-parity: skip declared)
+- [ ] All `agents/*.md` have Section C: Antigravity Integration
+- [ ] L3 project `scripts/SCRIPTS.md` passes `bun scripts/verify-scripts.ts --verify` (no ghost entries, no PAIR MISSING)
+- [ ] Variant `scripts/<variant>/SCRIPTS.md` sub-registry exists and lists all variant-specific scripts
+
+---
+
+## Testing the New Variant
+
+After Phase B, verify `bun scripts/new-project.ts` creates a working instance:
+
+```bash
+# Dry run (if supported):
+bun scripts/new-project.ts "my-test-project" --variant co-<name>
+
+# Verify created project structure:
+ls Projects/my-test-project/
+```
+
+---
+
+## Previous Skill
+
+<- `skills/create-variant/SKILL.md` — Phase A creation process
+
+## Skill Graph Note
+
+Since `l3-to-variant-pipeline.ts` v1.13.0, Phase 6.5 regenerates and verifies the
+promoted variant's scope skill graph automatically. If it reports non-zero (e.g. older
+generator in the promoted output), run manually:
+`bun scripts/generate-skill-graph.ts --scope co-<name> && bun scripts/verify-skill-graph.ts --scope co-<name>`
+(ADR-0060 Amendment 6; `tests/add-variant-relations.ts` can backfill typed relations
+from the variant's new procedure corpus — idempotent).
