@@ -45,6 +45,23 @@ describe('createTicket', () => {
     }
     expect(ids.size).toBe(10);
   });
+
+  test('allocates an id that does not collide with the governance directory (T-20260912-025)', () => {
+    // move/list resolve ids with governance/ precedence, so a same-day id
+    // allocated in tickets/ root must not shadow-match one already handed
+    // out in tickets/governance/ (the scratch-create incident of 2026-09-12).
+    const governance = join(dir, 'governance');
+    const gov = createTicket(governance, { kind: 'manual', title: 'governance ticket', priority: 'high' });
+    const svc = createTicket(dir, { kind: 'service', service: 'audit', priority: 'normal' });
+    expect(svc.id).not.toBe(gov.id);
+    // and the reverse order must hold too
+    const gov2 = createTicket(governance, { kind: 'manual', title: 'governance ticket 2', priority: 'normal' });
+    const svc2 = createTicket(dir, { kind: 'service', service: 'audit', priority: 'normal' });
+    expect(gov2.id).not.toBe(svc.id);
+    expect(svc2.id).not.toBe(gov.id);
+    expect(svc2.id).not.toBe(svc.id);
+    expect(gov2.id).not.toBe(gov.id);
+  });
 });
 
 describe('listTickets ready filter (not_before boundary cases)', () => {
