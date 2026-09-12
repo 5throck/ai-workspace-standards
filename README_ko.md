@@ -23,6 +23,7 @@ sync_version: 1
 | 공유 워크스페이스 표준 | [`CONSTITUTION.md`](CONSTITUTION.md) | 모든 AI 도구 |
 | Claude Code 행동 지침 | [`CLAUDE.md`](CLAUDE.md) | Claude Code (CLI + Desktop) |
 | Gemini / Antigravity 행동 지침 | [`GEMINI.md`](GEMINI.md) | Gemini CLI + Antigravity 엔진 |
+| Codex 행동 지침 | [`CODEX.md`](CODEX.md) | Codex (CLI + Desktop App) |
 | 변경 이력 | [`CHANGELOG.md`](CHANGELOG.md) | 전체 |
 
 ### 두 가지 철학, 하나의 표준
@@ -171,6 +172,7 @@ C:\git\ (워크스페이스 루트 - 현재 저장소)
 ├── CONSTITUTION.md          # 마스터 표준 - 모든 세션에서 가장 먼저 읽어야 함
 ├── CLAUDE.md                # Claude Code 워크스페이스 동작 설정
 ├── GEMINI.md                # Gemini CLI / Antigravity 워크스페이스 동작 설정
+├── CODEX.md                 # Codex CLI / Desktop App 워크스페이스 동작 설정
 ├── SECURITY.md              # 표준 GitHub 취약점 보고 정책
 ├── CHANGELOG.md             # 워크스페이스 레벨 변경 이력
 ├── README.md                # 영문 README
