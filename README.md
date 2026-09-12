@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-content_hash: 3382c23c4676d6600916819cf63109133b9029f049d7f13397c79041dc25523d
+content_hash: 78e9c7118d675b1ce4d6c74f085a9c24e82259d9fa243a74a56b5cf64bb0e0cb
 ---
 
 **Languages**: [English](README.md) · [한국어](README_ko.md) · [Español](README_es.md) · [日本語](README_ja.md)
@@ -24,6 +24,7 @@ Modern AI-assisted development requires more than prompts - it requires **consis
 | Shared workspace standards | [`CONSTITUTION.md`](CONSTITUTION.md) | All AI tools |
 | Claude Code behaviors | [`CLAUDE.md`](CLAUDE.md) | Claude Code (CLI + Desktop) |
 | Gemini / Antigravity behaviors | [`GEMINI.md`](GEMINI.md) | Gemini CLI + Antigravity engine |
+| Codex behaviors | [`CODEX.md`](CODEX.md) | Codex (CLI + Desktop App) |
 | Change history | [`CHANGELOG.md`](CHANGELOG.md) | All |
 
 ### Two Philosophies, One Standard
@@ -179,6 +180,7 @@ C:\git\ (workspace root - this repo)
 ├── CONSTITUTION.md          # Master standard - read first in every session
 ├── CLAUDE.md                # Claude Code workspace behaviors
 ├── GEMINI.md                # Gemini CLI / Antigravity workspace behaviors
+├── CODEX.md                 # Codex CLI / Desktop App workspace behaviors
 ├── SECURITY.md              # Standard GitHub vulnerability reporting policy
 ├── CHANGELOG.md             # Workspace-level change history
 ├── README.md                # This file
