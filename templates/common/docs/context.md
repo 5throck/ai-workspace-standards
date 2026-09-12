@@ -446,7 +446,7 @@ This workspace follows explicit lifecycle management practices for Agents, Skill
 
 ### Procedure Graph
 
-Each template layer owns structured procedures in `procedures/<name>/schema.yaml` (authoring skeleton: `templates/common/procedures/_template/`). Procedures are the canonical source for the workflow graph — validate with `bun scripts/validate-procedures.ts --all`, check coverage with `bun scripts/procedure-coverage.ts` (gaps become governance tickets via `--tickets`). Never hand-edit procedure-derived graph nodes. See `docs/procedure-schema-spec.md` and constitution §6.7.
+Each template layer owns structured procedures in `procedures/<name>/schema.yaml` (authoring skeleton: `templates/common/procedures/_template/`). Procedures are the canonical source for the workflow graph — validate with `bun scripts/validate-procedures.ts --all`, check coverage with `bun scripts/procedure-coverage.ts` (workspace root — L1 tool, not synced to projects) (gaps become governance tickets via `--tickets`). Never hand-edit procedure-derived graph nodes. See `docs/procedure-schema-spec.md` and constitution §6.7.
 
 ### Common Principles
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.23.0
+// @version 1.23.1
 // v1.23.0: New ENV_SAMPLE SYNC pass — .env.sample is no longer PRESERVE. Scaffold-time
 //           country pruning (prune-country-scoped-assets.ts) strips country-scoped env
 //           blocks from the project copy, so a wholesale template re-copy would re-inject
@@ -277,6 +277,9 @@ if (!variant) {
 //      'none' for region-neutral projects — an explicit value is authoritative)
 //   2. docs/countries/ACTIVE.md "Active jurisdiction: <CODE>" pointer (legacy
 //      projects scaffolded with a country before the country= line existed)
+//   2.5 variant.json country_config (single supported country or explicit default) —
+//      v1.23.1: a scaffold-era country=none must not mute a project that declares
+//      its jurisdiction in variant.json (co-safety class, found 2026-09-12)
 //   3. 'none' (region-neutral default posture)
 let detectedCountry = 'none';
 if (countryFromVersionFile && (countryFromVersionFile === 'none' || /^[A-Z]{2,4}$/.test(countryFromVersionFile))) {
@@ -289,6 +292,18 @@ if (countryFromVersionFile && (countryFromVersionFile === 'none' || /^[A-Z]{2,4}
     const activeMatch = activeContent.match(/^Active jurisdiction:\s*([A-Z]{2,4})\b/m);
     if (activeMatch) detectedCountry = activeMatch[1];
   }
+}
+if (detectedCountry === 'none') {
+  // v1.23.1 fallback: infer from the project's own country_config declaration.
+  try {
+    const vJson = JSON.parse(readFileSync(join(projectDir, 'variant.json'), 'utf8')) as Record<string, any>;
+    const cc = (vJson?.country_config ?? {}) as { supported?: unknown[]; default?: unknown };
+    const supported = Array.isArray(cc.supported)
+      ? (cc.supported as unknown[]).filter((x): x is string => typeof x === 'string' && /^[A-Z]{2,4}$/.test(x))
+      : [];
+    if (supported.length === 1) detectedCountry = supported[0];
+    else if (typeof cc.default === 'string' && /^[A-Z]{2,4}$/.test(cc.default)) detectedCountry = cc.default;
+  } catch { /* variant.json absent or invalid — stay region-neutral */ }
 }
 console.log(`Country profile: ${detectedCountry === 'none' ? 'region-neutral' : detectedCountry}`);
 
