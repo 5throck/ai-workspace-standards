@@ -1,4 +1,4 @@
-// @version 1.2.0
+// @version 1.3.0
 // v1.2.0: graft fleet surface (ADR-0074): .mcp.json + opencode.json join JSON_MERGE_FILES
 //         (project-owned MCP servers survive the union); .claude/skills/graft/** claims
 //         TEMPLATE TREE SYNC before the platform-mirror rule (the skill is hand-maintained
@@ -55,9 +55,12 @@ export const TEMPLATE_TREE_SYNC_PASS = 'TEMPLATE TREE SYNC';
 export const GOVERNANCE_FILES = ['LICENSE', 'SECURITY.md'] as const;
 
 /** docs/ subdirectories that are PROJECT WORKSPACES: template seeds are add-if-missing only;
- *  project artifacts there are never overwritten and never pruned. */
+ *  project artifacts there are never overwritten and never pruned. `specs` (ADR-0074): the
+ *  registry seed is what activates the Universal Design Gate in a project — it MUST ride the
+ *  TEMPLATE TREE SYNC pass (a named pass with no delivery code is silently never delivered:
+ *  the 2026-09-12 DESIGN GATE SEED incident). */
 export const WORKSPACE_DOC_DIRS = [
-  'designs', 'drafts', 'reports', 'research', 'findings', 'threat-models', 'lifecycle',
+  'designs', 'drafts', 'reports', 'research', 'findings', 'threat-models', 'lifecycle', 'specs',
 ] as const;
 
 /** Platform settings files merged (not overwritten) by the TEMPLATE TREE SYNC pass.
@@ -77,10 +80,13 @@ export const PLACEHOLDER_ALLOWLIST = new Set([
 
 // ── Scaffold-parity facts (mirrored from scripts/new-project.ts) ─────────────────────────────
 
-/** Staging zones the scaffold DELETES after copying (new-project.ts:470,477,718) — template-side
- *  only; upgrading them into a project would resurrect files the scaffold deliberately removed. */
+/** Staging zones the scaffold DELETES after copying (mirrored from scripts/new-project.ts
+ *  L1_ONLY_DIRS + the template-only docs removal loop) — template-side only; upgrading them
+ *  into a project would resurrect files the scaffold deliberately removed. docs/specs left
+ *  this list in ADR-0074 Amendment 2: its registry seed activates the Universal Design Gate
+ *  in projects and rides the WORKSPACE seed semantics above. */
 const TEMPLATE_ONLY_DIRS = [
-  'docs/_common', 'docs/_templates', 'docs/_examples', 'docs/variants', 'docs/adr', 'docs/specs',
+  'docs/_common', 'docs/_templates', 'docs/_examples', 'docs/variants', 'docs/adr',
 ];
 
 const TEMPLATE_ONLY_FILES = new Set([
@@ -137,6 +143,9 @@ export function resolveClaim(relPath: string, variant = ''): UpgradeClaim {
   if (PROJECT_STATE_FILES.has(rel)) return { policy: 'PROJECT_STATE', pass: '(project state)' };
   if (underDir(rel, 'memory')) return { policy: 'PROJECT_STATE', pass: '(project memory)' };
   if (rel === 'docs/countries/ACTIVE.md') return { policy: 'PROJECT_STATE', pass: '(country runtime state)' };
+
+  // Universal Design Gate seed (ADR-0074): docs/specs/* claims fall through to the
+  // WORKSPACE branch below (add-if-missing seed, never overwrite/prune project entries).
 
   if (TEMPLATE_ONLY_FILES.has(rel)) return { policy: 'TEMPLATE_ONLY', pass: '(scaffold-removed)' };
   for (const dir of TEMPLATE_ONLY_DIRS) {

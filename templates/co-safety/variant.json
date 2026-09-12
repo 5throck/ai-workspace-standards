@@ -29,211 +29,211 @@
     },
     {
       "name": "asset-integrity-check",
-      "file": "skills/daily/asset-integrity-check/SKILL.md"
+      "file": "skills/asset-integrity-check/SKILL.md"
     },
     {
       "name": "audit-preparation",
-      "file": "skills/daily/audit-preparation/SKILL.md"
+      "file": "skills/audit-preparation/SKILL.md"
     },
     {
       "name": "compliance-gap",
-      "file": "skills/daily/compliance-gap/SKILL.md"
+      "file": "skills/compliance-gap/SKILL.md"
     },
     {
       "name": "contractor-onboarding",
-      "file": "skills/daily/contractor-onboarding/SKILL.md"
+      "file": "skills/contractor-onboarding/SKILL.md"
     },
     {
       "name": "permit-to-work",
-      "file": "skills/daily/permit-to-work/SKILL.md"
+      "file": "skills/permit-to-work/SKILL.md"
     },
     {
       "name": "risk-assessment",
-      "file": "skills/daily/risk-assessment/SKILL.md"
+      "file": "skills/risk-assessment/SKILL.md"
     },
     {
       "name": "tool-box-meeting",
-      "file": "skills/daily/tool-box-meeting/SKILL.md"
+      "file": "skills/tool-box-meeting/SKILL.md"
     },
     {
       "name": "chemical-risk-assessment",
-      "file": "skills/domains/functional/msds/chemical-risk-assessment/SKILL.md"
+      "file": "skills/chemical-risk-assessment/SKILL.md"
     },
     {
       "name": "ghs-classifier",
-      "file": "skills/domains/functional/msds/ghs-classifier/SKILL.md"
+      "file": "skills/ghs-classifier/SKILL.md"
     },
     {
       "name": "msds-parser",
-      "file": "skills/domains/functional/msds/msds-parser/SKILL.md"
+      "file": "skills/msds-parser/SKILL.md"
     },
     {
       "name": "psm-loto",
-      "file": "skills/domains/functional/psm/loto/SKILL.md"
+      "file": "skills/psm-loto/SKILL.md"
     },
     {
       "name": "psm-moc",
-      "file": "skills/domains/functional/psm/moc/SKILL.md"
+      "file": "skills/psm-moc/SKILL.md"
     },
     {
       "name": "hv-cell-formation-electrical-safety-planner",
-      "file": "skills/domains/industry/battery/hv-cell-formation-electrical-safety-planner/SKILL.md"
+      "file": "skills/hv-cell-formation-electrical-safety-planner/SKILL.md"
     },
     {
       "name": "bsl-lab-aerosol-control-planner",
-      "file": "skills/domains/industry/biotech/bsl-lab-aerosol-control-planner/SKILL.md"
+      "file": "skills/bsl-lab-aerosol-control-planner/SKILL.md"
     },
     {
       "name": "cosmetics-solvent-exposure-monitor",
-      "file": "skills/domains/industry/cosmetics/cosmetics-solvent-exposure-monitor/SKILL.md"
+      "file": "skills/cosmetics-solvent-exposure-monitor/SKILL.md"
     },
     {
       "name": "rack-fall-protection-planner",
-      "file": "skills/domains/industry/datacenter/rack-fall-protection-planner/SKILL.md"
+      "file": "skills/rack-fall-protection-planner/SKILL.md"
     },
     {
       "name": "munitions-magazine-storage-safety-planner",
-      "file": "skills/domains/industry/defense/munitions-magazine-storage-safety-planner/SKILL.md"
+      "file": "skills/munitions-magazine-storage-safety-planner/SKILL.md"
     },
     {
       "name": "environmental-compliance-checker",
-      "file": "skills/domains/industry/ehschem/environmental-compliance-checker/SKILL.md"
+      "file": "skills/environmental-compliance-checker/SKILL.md"
     },
     {
       "name": "process-hazard-screening",
-      "file": "skills/domains/industry/ehschem/process-hazard-screening/SKILL.md"
+      "file": "skills/process-hazard-screening/SKILL.md"
     },
     {
       "name": "tar-planning",
-      "file": "skills/domains/industry/ehschem/tar-planning/SKILL.md"
+      "file": "skills/tar-planning/SKILL.md"
     },
     {
       "name": "fall-hazard-assessor",
-      "file": "skills/domains/industry/ehsconst/fall-hazard-assessor/SKILL.md"
+      "file": "skills/fall-hazard-assessor/SKILL.md"
     },
     {
       "name": "safety-inspection-validator",
-      "file": "skills/domains/industry/ehsconst/safety-inspection-validator/SKILL.md"
+      "file": "skills/safety-inspection-validator/SKILL.md"
     },
     {
       "name": "thermal-burn-prevention-planner",
-      "file": "skills/domains/industry/food/thermal-burn-prevention-planner/SKILL.md"
+      "file": "skills/thermal-burn-prevention-planner/SKILL.md"
     },
     {
       "name": "completion-inspection",
-      "file": "skills/domains/industry/gasterm/completion-inspection/SKILL.md"
+      "file": "skills/completion-inspection/SKILL.md"
     },
     {
       "name": "construction-permit-overview",
-      "file": "skills/domains/industry/gasterm/construction-permit-overview/SKILL.md"
+      "file": "skills/construction-permit-overview/SKILL.md"
     },
     {
       "name": "gas-dispersion-analyzer",
-      "file": "skills/domains/industry/gasterm/gas-dispersion-analyzer/SKILL.md"
+      "file": "skills/gas-dispersion-analyzer/SKILL.md"
     },
     {
       "name": "mid-construction-inspection",
-      "file": "skills/domains/industry/gasterm/mid-construction-inspection/SKILL.md"
+      "file": "skills/mid-construction-inspection/SKILL.md"
     },
     {
       "name": "pre-construction-technical-review",
-      "file": "skills/domains/industry/gasterm/pre-construction-technical-review/SKILL.md"
+      "file": "skills/pre-construction-technical-review/SKILL.md"
     },
     {
       "name": "tank-integrity-validator",
-      "file": "skills/domains/industry/gasterm/tank-integrity-validator/SKILL.md"
+      "file": "skills/tank-integrity-validator/SKILL.md"
     },
     {
       "name": "protocol-deviation-analyzer",
-      "file": "skills/domains/industry/gcp/protocol-deviation-analyzer/SKILL.md"
+      "file": "skills/protocol-deviation-analyzer/SKILL.md"
     },
     {
       "name": "sae-causality-assessor",
-      "file": "skills/domains/industry/gcp/sae-causality-assessor/SKILL.md"
+      "file": "skills/sae-causality-assessor/SKILL.md"
     },
     {
       "name": "dts-verification",
-      "file": "skills/domains/industry/gdp/dts-verification/SKILL.md"
+      "file": "skills/dts-verification/SKILL.md"
     },
     {
       "name": "temperature-excursion-analyzer",
-      "file": "skills/domains/industry/gdp/temperature-excursion-analyzer/SKILL.md"
+      "file": "skills/temperature-excursion-analyzer/SKILL.md"
     },
     {
       "name": "glp-data-integrity-checker",
-      "file": "skills/domains/industry/glp/glp-data-integrity-checker/SKILL.md"
+      "file": "skills/glp-data-integrity-checker/SKILL.md"
     },
     {
       "name": "glp-study-protocol-validator",
-      "file": "skills/domains/industry/glp/glp-study-protocol-validator/SKILL.md"
+      "file": "skills/glp-study-protocol-validator/SKILL.md"
     },
     {
       "name": "gmp-change-control",
-      "file": "skills/domains/industry/gmp/change-control/SKILL.md"
+      "file": "skills/gmp-change-control/SKILL.md"
     },
     {
       "name": "gmp-deviation-capa",
-      "file": "skills/domains/industry/gmp/deviation-capa/SKILL.md"
+      "file": "skills/gmp-deviation-capa/SKILL.md"
     },
     {
       "name": "gmp-qrm",
-      "file": "skills/domains/industry/gmp/qrm/SKILL.md"
+      "file": "skills/gmp-qrm/SKILL.md"
     },
     {
       "name": "benefit-risk-assessor",
-      "file": "skills/domains/industry/gvp/benefit-risk-assessor/SKILL.md"
+      "file": "skills/benefit-risk-assessor/SKILL.md"
     },
     {
       "name": "signal-detector",
-      "file": "skills/domains/industry/gvp/signal-detector/SKILL.md"
+      "file": "skills/signal-detector/SKILL.md"
     },
     {
       "name": "dangerous-cargo-handling-planner",
-      "file": "skills/domains/industry/logistics/dangerous-cargo-handling-planner/SKILL.md"
+      "file": "skills/dangerous-cargo-handling-planner/SKILL.md"
     },
     {
       "name": "iso14971-risk-scorer",
-      "file": "skills/domains/industry/meddevice/iso14971-risk-scorer/SKILL.md"
+      "file": "skills/iso14971-risk-scorer/SKILL.md"
     },
     {
       "name": "arc-flash-analyzer",
-      "file": "skills/domains/industry/powergen/arc-flash-analyzer/SKILL.md"
+      "file": "skills/arc-flash-analyzer/SKILL.md"
     },
     {
       "name": "ess-fire-risk-assessor",
-      "file": "skills/domains/industry/powergen/ess-fire-risk-assessor/SKILL.md"
+      "file": "skills/ess-fire-risk-assessor/SKILL.md"
     },
     {
       "name": "rolling-stock-maintenance-loto-planner",
-      "file": "skills/domains/industry/railway/rolling-stock-maintenance-loto-planner/SKILL.md"
+      "file": "skills/rolling-stock-maintenance-loto-planner/SKILL.md"
     },
     {
       "name": "pyrophoric-gas-emergency-responder",
-      "file": "skills/domains/industry/semicon/pyrophoric-gas-emergency-responder/SKILL.md"
+      "file": "skills/pyrophoric-gas-emergency-responder/SKILL.md"
     },
     {
       "name": "painting-coating-fire-toxic-planner",
-      "file": "skills/domains/industry/shipbuilding/painting-coating-fire-toxic-planner/SKILL.md"
+      "file": "skills/painting-coating-fire-toxic-planner/SKILL.md"
     },
     {
       "name": "coke-oven-pah-heat-stress-planner",
-      "file": "skills/domains/industry/steelmaking/coke-oven-pah-heat-stress-planner/SKILL.md"
+      "file": "skills/coke-oven-pah-heat-stress-planner/SKILL.md"
     },
     {
       "name": "landfill-methane-anaerobic-explosion-planner",
-      "file": "skills/domains/industry/waste/landfill-methane-anaerobic-explosion-planner/SKILL.md"
+      "file": "skills/landfill-methane-anaerobic-explosion-planner/SKILL.md"
     },
     {
       "name": "emergency-response",
-      "file": "skills/emergency/emergency-response/SKILL.md"
+      "file": "skills/emergency-response/SKILL.md"
     },
     {
       "name": "hazop-analysis",
-      "file": "skills/investigation/hazop-analysis/SKILL.md"
+      "file": "skills/hazop-analysis/SKILL.md"
     },
     {
       "name": "root-cause-analysis",
-      "file": "skills/investigation/root-cause-analysis/SKILL.md"
+      "file": "skills/root-cause-analysis/SKILL.md"
     },
     {
       "name": "meeting-facilitation",

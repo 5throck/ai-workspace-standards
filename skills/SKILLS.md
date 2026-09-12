@@ -31,7 +31,7 @@ Skills with a `skills/<name>/` directory in the workspace root. These are the pr
 | `source-command-commit-push-pr` | 1.0.1 | active | pm | — | — | Redirects commit+push+PR requests to /sync (mirrored 2026-09-04 from .claude/skills) |
 | `simulate-pipeline` | 1.0.0 | active | automation-engineer | 2026-09-09 | — | Merged smoke-test skill for project creation and L3→variant promotion modes |
 | `skill-lifecycle-manager` | 1.3.0 | active | pm | 2026-09-06 | — | — |
-| `sync` | 1.3.0 | active | pm | 2026-09-06 | — | Full project sync pipeline — lifecycle, audit, publish, commit, push, PR. Reassigned from lifecycle-manager — same orphan cause as security-scan |
+| `sync` | 1.5.0 | active | pm | 2026-09-12 | — | Full project sync pipeline — lifecycle, audit, publish, commit, push, PR. Reassigned from lifecycle-manager — same orphan cause as security-scan |
 | `team-builder` | 1.1.0 | active | pm | 2026-06-13 | — | — |
 | `translate` | 1.0.1 | active | pm | 2026-08-24 | — | — |
 | `validate-docs-links` | 1.0.0 | deprecated | pm | 2026-09-09 | 2026-12-09 | Deprecated: project-review baseline owns documentation/link checking |

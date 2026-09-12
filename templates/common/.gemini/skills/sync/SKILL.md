@@ -1,8 +1,8 @@
 ---
 name: sync
 description: Runs the full project sync pipeline — lifecycle update, audit, L0→L1 publish, commit, push, and PR creation.
-version: 1.3.0
-last_reviewed: 2026-09-06
+version: 1.5.0
+last_reviewed: 2026-09-12
 status: active
 scope: common
 l2_propagate: true
@@ -33,11 +33,13 @@ Runs the full project sync pipeline (`scripts/dev-sync.ts`). This is the single 
 ## Output Format
 
 - A git branch `pr/<timestamp>-<slug>` created (or reused) from `main`
-- A commit with all staged changes and a conventional commit message
+- A commit with the task-staged files plus pipeline-generated files and a conventional commit message
 - An open GitHub PR with the agent-written body (Why / What Changed / Test Plan / Security Checklist / Notes)
 - Console output listing each pipeline step and its result
 
 ## Execution Steps
+
+0. **Stage the task files** (BEFORE invoking the pipeline): `git add <task files>`. Only explicitly task-staged files plus files the pipeline itself generates (memory log, VERSION_MANIFEST, propagation output, ...) are committable — dev-sync snapshots the working tree at start and at commit time, and any working-tree change that is neither task-staged nor pipeline-generated is reported as a WARN (swept in during the current soak; promotion will EXCLUDE it — preview with `SYNC_SCOPED_STAGING=1` or `--scoped-staging`; design: `docs/designs/2026-09-12-dev-sync-scoped-staging-design.md`). Never rely on `git add -A` to pick up your edits, and never leave unrelated dirt in the tree when syncing.
 
 1. **Write the PR body** (the agent writes it — never shell out to an LLM CLI):
    - Inspect the change: `git diff HEAD~1 --stat` and `git diff HEAD~1 --name-only` (first 30 files).
@@ -83,7 +85,7 @@ Runs the full project sync pipeline (`scripts/dev-sync.ts`). This is the single 
 | 3.6 | Deprecated Script Warnings | non-fatal | Scans `SCRIPTS.md` for deprecated scripts and prints warnings |
 | 3.7 | L0/L1 Script Drift Check | non-fatal | Runs `verify-scripts.ts --check-drift` to detect drift between L0 and L1 script copies |
 | 3.8 | Memory File Archival | non-fatal | Runs `archive-memory.ts` to archive old memory files |
-| 3.9 | Spec Registry Check | **FATAL** (L0) | Runs `audit.ts --spec-check --lifecycle-only` — blocks on the spec-relevance Fail (code diff with no spec activity; ADR-0055 Stage 2) and any always-on audit Fail; stale/missing-spec stay WARN; escape hatch `--spec-exempt=E1-E5` (AGENTS.md §5.1.1); skipped when `docs/specs/registry.json` is absent |
+| 3.9 | Spec Registry Check | **FATAL** (L0) | Runs `audit.ts --spec-check --lifecycle-only` — blocks on the spec-relevance Fail (code diff with no spec activity; ADR-0055 Stage 2) and any always-on audit Fail; stale/missing-spec stay WARN; escape hatch `--spec-exempt=E1-E5` (AGENTS.md §5.1.1); a missing `docs/specs/registry.json` is a loud WARN (gate INACTIVE — Universal Design Gate, ADR-0074; activate via `spec-register.ts`; the registry seed ships to projects add-if-missing) |
 | 3.95 | QA Pre-checks | non-fatal | Runs project tests (if `package.json` has `test` script) and warns if `README_ko.md` is missing |
 | 3.95b | Typecheck Gate | **FATAL** (L0) | Runs `scripts/typecheck.ts` — `tsc --noEmit` over `scripts/` against the zero-error baseline (`scripts/helpers/typecheck-baseline.json`; T-20260910-012). Root context only; L1+ contexts skip cleanly via the missing-baseline guard. Never raise the error count — fix the error instead |
 | 3.96c | Session-Evidence Skill Review | non-fatal | Runs `skill-session-review.ts` — accumulates Observed Symptom + Evidence from the day's `## Skills Used` section into `memory/skill-review/` (diagnosis/candidate left empty for human triage); plus a non-fatal full `skill-dependency-analysis.ts --report` pass (SkillHone-inspired loop; design doc `docs/designs/2026-09-06-skill-session-review-design.md`) |
@@ -95,7 +97,7 @@ Runs the full project sync pipeline (`scripts/dev-sync.ts`). This is the single 
 | 4.7 | VERSION_MANIFEST.md Generation | **FATAL** | Generates `VERSION_MANIFEST.md` via `generate-version-manifest.ts` |
 | 4.9 | AUDIT GATE | **FATAL** | Runs `audit.ts` — must exit 0 before proceeding. Includes the auto-activating gates: skill-graph drift (ADR-0060) and upgrade coverage (`check-upgrade-coverage.ts --strict`, ADR-0073) |
 | 5 | Branch Creation | **FATAL** | Creates `pr/<timestamp>-<slug>` branch if on main/master; reuses existing branch otherwise |
-| 6 | Sensitive File Guard + Git Add/Commit/Push | **FATAL** | Guards against `.pem`, `.key`, `.env`, `credentials.json`, etc.; runs `git add -A`, `git commit`, `git push` |
+| 6 | Sensitive File Guard + Scoped Staging + Commit/Push | **FATAL** | Guards against `.pem`, `.key`, `.env`, `credentials.json`, etc.; scoped-staging check (S0/S1 tree snapshots — WARN-lists files that are neither task-staged nor pipeline-generated; `SYNC_SCOPED_STAGING=1` excludes them), then `git add`, `git commit`, `git push` |
 | 7 | PR Creation | **FATAL** | If `--body-file` was passed, validates it (English) and opens the PR via `gh pr create --body-file`; otherwise falls back to `gen-pr-body.ts` template, `.github/pull_request_template.md`, then `gh pr create --fill`; idempotent — updates existing PR if one already exists for the branch |
 
 4. If audit fails, fix the reported issue before re-running.
