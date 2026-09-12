@@ -29,7 +29,7 @@ All mathematical formulas, calculation rules, and simulation constraints are syn
 - **[DONE] Multi-Regional Tax v4.5**: Engine supporting 20+ regional tax logic sets.
 - **[DONE] Variant Conversion P1 (2026-08-25)**: Workspace governance markers; bun as single package manager (ADR-0001, ADR-0002).
 
-### **Planned — v10.1 Consulting Evolution** ([execution plan](../memory/co-price-plan.md))
+### **Planned — v10.1 Consulting Evolution** ([execution plan](co-price-plan.md))
 - **[PLANNED] Governance P2**: Agent roster normalization (15 agents) + schema-compliant skills registry.
 - **[PLANNED] Diagnostics Engine**: Benchmark gap scoring, price waterfall, G/B/B validation, Floor/Target/Stretch guidance.
 - **[PLANNED] On-Rails AI Copilot**: Multi-provider advisory chat that cites engine-computed figures only (ADR-0003).

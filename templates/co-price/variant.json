@@ -6,7 +6,6 @@
   "status": "beta",
   "version": "4.1.0",
   "inherits_common": "templates/common",
-  "designDoc": "memory/co-price-plan.md",
   "specId": null,
   "origin_scenario": "B — existing project converted to variant-based governance (2026-08-25)",
   "agents": [

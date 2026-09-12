@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-09-12T00:24:55.885Z
+**Generated**: 2026-09-12T00:26:28.369Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -83,7 +83,7 @@
 | translate | 1.0.1 | active | skills/translate/SKILL.md | workspace | translate, translation, Korean translation | pm |
 | ui-ux-design-intelligence | 1.0.1 | active | skills/ui-ux-design-intelligence/SKILL.md | workspace | design system, ui design, ux design, component design, visual design, design tokens, interface design | pm |
 | update-bun-packages | 1.3.1 | active | skills/update-bun-packages/SKILL.md | workspace | update bun packages, upgrade bun packages, bun update, update dependencies, upgrade dependencies | pm |
-| upgrade-project | 1.3.2 | active | skills/upgrade-project/SKILL.md | workspace | upgrade project, upgrade template, sync project with template, refresh project, update project infrastructure | pm |
+| upgrade-project | 1.4.0 | active | skills/upgrade-project/SKILL.md | workspace | upgrade project, upgrade template, sync project with template, refresh project, update project infrastructure | pm |
 | validate-docs-links | 1.0.0 | deprecated | skills/validate-docs-links/SKILL.md | workspace | validate links, check links, broken links, docs validation | pm |
 | variant-feature | 1.0.0 | active | skills/variant-feature/SKILL.md | workspace | add feature to variant, extend variant, variant feature, add agent to variant, add skill to variant | scaffolding-expert |
 | zod-contract-gate | 1.0.0 | active | skills/zod-contract-gate/SKILL.md | workspace | zod-contract-gate, /zod-contract-gate, zod contract validation, schema contract gate, runtime schema validation | architect |
@@ -163,7 +163,7 @@
 | ticket.ts | 1.1.0 | scripts/ticket.ts | N/A |
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, fs, path |
 | typecheck.ts | 1.1.1 | scripts/typecheck.ts | N/A |
-| upgrade-project.ts | 1.22.1 | scripts/upgrade-project.ts | N/A |
+| upgrade-project.ts | 1.23.0 | scripts/upgrade-project.ts | N/A |
 | validate-agents.ts | 1.2.1 | scripts/validate-agents.ts | N/A |
 | validate-decisions.ts | 1.0.0 | scripts/validate-decisions.ts | js-yaml |
 | validate-doc-folder.ts | 1.1.0 | scripts/validate-doc-folder.ts | fs, path |
