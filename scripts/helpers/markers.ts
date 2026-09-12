@@ -1,18 +1,28 @@
 #!/usr/bin/env bun
 /**
  * Shared Marker Parser
- * @version 1.1.0
+ * @version 1.2.0
  *
  * Common marker parsing logic for:
  * - propagate-to-templates.ts (marker-rewrite engine)
  * - verify-adr-governance.ts (governance linkage gap detection)
+ * - lifecycle-sync-audit.ts (Check D intentional-duplicate registry)
  *
  * Parses two marker types:
  * 1. Marker zones: <!-- COMMON-<DOMAIN>:START --> ... <!-- COMMON-<DOMAIN>:END -->
- * 2. Intentional-duplicate markers: <!-- intentional-duplicate: <name>; source: <path>; hash: <sha256-8> -->
+ * 2. Intentional-duplicate markers:
+ *    <!-- intentional-duplicate: <name> — <reason>; source: <path>; hash: <sha256-8> -->
  *
  * Maintains ADR-0062 requirement: shared parser ensures rewrite engine and strict gate
  * agree on marker syntax and hash computation.
+ *
+ * v1.2.0: grammar-complete parseIntentionalDuplicateLine() (T-20260912-029) —
+ *          a line parses only when it contains a COMPLETE one-line comment
+ *          (<!-- ... -->) whose name carries the workspace standards §<digits>
+ *          grammar; the name/reason split keys on the em-dash separator.
+ *          scanIntentionalDuplicateMarkers() refactored onto it with no
+ *          behavior change (complete-form + section-number were already its
+ *          exact acceptance conditions).
  */
 
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
@@ -196,6 +206,64 @@ export function parseMarkerFields(markerText: string): {
 }
 
 /**
+ * A grammar-complete parse of one intentional-duplicate marker line
+ * (T-20260912-029). Returned only for lines carrying a COMPLETE one-line
+ * comment whose name satisfies the workspace standards §<digits> grammar.
+ */
+export interface IntentionalDuplicateLine {
+  /** Text before the " — " separator (or the whole pre-';' segment when no em-dash) */
+  name: string | null;
+  /** Text after " — " up to the first ';' (null when no em-dash separator) */
+  reason: string | null;
+  /** Constitution section digits — non-null whenever the object is returned */
+  section: string;
+  /** parseMarkerFields().source */
+  source: string | null;
+  /** parseMarkerFields().hash */
+  hash: string | null;
+}
+
+/**
+ * Parse one line as a grammar-complete intentional-duplicate marker.
+ *
+ * Acceptance conditions (both required, per ADR-0059/ADR-0062):
+ * 1. Complete-comment anchor: the line must contain
+ *    `<!-- intentional-duplicate: <body> -->` closing on the same line —
+ *    prose that merely opens a comment or mentions a partial marker returns
+ *    null. The body cannot contain '>' (capture stops at the first '>'), so
+ *    placeholder text such as `<name>` also fails the anchor.
+ * 2. Field grammar: parseSectionNumber() must return non-null
+ *    (workspace standards §<digits>) or the result is null — this kills
+ *    prose carrying the literal `§N` placeholder or no section at all.
+ *
+ * Name/reason split: the body up to the first ';' is split on the em-dash
+ * separator " — " (U+2014 with single surrounding spaces). No em-dash →
+ * name is the whole segment and reason is null. This leniency is deliberate
+ * so the refactored scanner's behavior is unchanged (it previously accepted
+ * section-bearing markers without an em-dash).
+ *
+ * CRLF-tolerant (a trailing \r after --> does not affect the match).
+ * First match only (line.match, non-global).
+ */
+export function parseIntentionalDuplicateLine(line: string): IntentionalDuplicateLine | null {
+  const anchorMatch = line.match(/<!--\s*intentional-duplicate:\s*([^>]+?)-->/);
+  if (!anchorMatch) return null;
+
+  const body = anchorMatch[1];
+  const section = parseSectionNumber(body);
+  if (!section) return null;
+
+  const { source, hash } = parseMarkerFields(body);
+
+  const head = body.split(';')[0];
+  const dashIdx = head.indexOf(' — ');
+  const name = dashIdx === -1 ? head.trim() : head.slice(0, dashIdx).trim();
+  const reason = dashIdx === -1 ? null : head.slice(dashIdx + ' — '.length).trim();
+
+  return { name, reason, section, source, hash };
+}
+
+/**
  * Resolve constitution source file for a section number
  * Maps §3 -> docs/constitution/03-pr-workflow.md, §8 -> docs/constitution/08-coding-guidelines.md
  */
@@ -277,23 +345,24 @@ export function scanIntentionalDuplicateMarkers(): IntentionalDuplicateMarker[] 
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
-      const markerMatch = line.match(/<!--\s*intentional-duplicate:\s*([^>]+)-->/);
+      // Grammar-complete acceptance (complete one-line comment + §<digits>)
+      // lives in the shared parser — same conditions this loop previously
+      // enforced inline (T-20260912-029). The retained body match only
+      // reproduces the existing `text` field (capture up to the closing -->).
+      const parsed = parseIntentionalDuplicateLine(line);
 
-      if (markerMatch) {
-        const markerText = markerMatch[1];
-        const section = parseSectionNumber(markerText);
+      if (parsed) {
+        const markerMatch = line.match(/<!--\s*intentional-duplicate:\s*([^>]+)-->/);
+        const markerText = markerMatch ? markerMatch[1] : '';
 
-        if (section) {
-          const { source, hash } = parseMarkerFields(markerText);
-          markers.push({
-            file: filePath,
-            line: i + 1, // 1-indexed
-            section,
-            text: markerText,
-            source,
-            hash,
-          });
-        }
+        markers.push({
+          file: filePath,
+          line: i + 1, // 1-indexed
+          section: parsed.section,
+          text: markerText,
+          source: parsed.source,
+          hash: parsed.hash,
+        });
       }
     }
   }

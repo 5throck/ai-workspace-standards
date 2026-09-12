@@ -109,7 +109,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `helpers/security-validator.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
 | `helpers/l0-ref-policy.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `helpers/context-sections.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
-| `helpers/markers.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
+| `helpers/markers.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `helpers/pm-md-parser.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `helpers/variant-governance-rules.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `helpers/registries/variant-type-registry.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
@@ -175,7 +175,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `lib/ssrf.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `lib/upgrade-policy.ts` | L0 | 1.5.0 | active | —| —| L0 | —|
 | `lib/env-sample.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `lifecycle-sync-audit.ts` | L0 | 1.8.0 | active | —| —| L0+L1 | —|
+| `lifecycle-sync-audit.ts` | L0 | 1.9.0 | active | —| —| L0+L1 | —|
 | `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `md-to-ooxml.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `new-project.ts` | L0 | 1.15.1 | active | —| —| L0 | —|
@@ -183,7 +183,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `resolve-variants.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
 | `project-to-variant.ts` | L0 | 1.3.0 | active | `--source`, `--target`, `--dry-run`, `--force`, `--design-doc`, `--threshold-files`, `--threshold-dirs` | —| L0 | —|
 | `promote-context-section.ts` | L0 | 1.0.0 | active | `--heading`, `--variants`, `--source`, `--after-heading`, `--dry-run` | —| L0 | —|
-| `propagate-to-templates.ts` | L0 | 2.13.0 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--json`, `--governance-l1`, `--docs`, `--include-disabled`, `--marker-rewrite` | —| L0 | —|
+| `propagate-to-templates.ts` | L0 | 2.14.0 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--json`, `--governance-l1`, `--docs`, `--include-disabled`, `--marker-rewrite` | —| L0 | —|
 | `qa-gate.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
 | `readme-lifecycle-audit.ts` | L0 | 1.0.4 | active | —| —| L0+L1 | —|
 | `release-template.ts` | L0 | 1.0.0 | active | `--version`, `--bump`, `--dry-run`, `--no-tag`, `--push` | —| L0 | —|

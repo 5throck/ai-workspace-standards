@@ -5,8 +5,23 @@
  * Replaces publish-to-template.ts (deprecated v1.8.0). Single authoritative script
  * for all L0→L1 propagation. Config-driven via propagation-map.json (SSOT for exclusions).
  *
- * @version 2.13.0
+ * @version 2.14.0
  *
+ * v2.14.0: --check-drift gemini-settings tolerance is now SEMANTIC, not
+ *          whole-domain (T-20260912-028): each drifted L1/L2 pair runs through
+ *          the new pure classifySettingsDrift() against the platform_settings
+ *          contract in docs/templates/common-contract.json — a byte difference
+ *          is a tolerated intentional overlay only when every shared key
+ *          (hooks.SessionStart) is present and deep-equal on both sides and no
+ *          claude_only key leaked into either .gemini file. Parse failures, an
+ *          empty/missing shared-key contract, and any non-gemini-settings
+ *          domain drift are unexpected (fail-closed); the whole-domain
+ *          isToleratedDriftDomain() is deleted. Exit semantics are UNIFIED
+ *          across output modes — 0 = clean, 1 = tolerated-only, 2 = unexpected
+ *          in both human and --json (human mode previously conflated every
+ *          drift as exit 1). JSON shape is backward-compatible: drifted
+ *          entries gain additive classification/detail fields; in-sync entries
+ *          and the summary key set are unchanged.
  * v2.13.0: scrubConstitutionRefs() moved to the shared scripts/lib/constitution-scrub.ts
  *          module (T-20260912-005/T-20260912-010) so checkers normalize with the exact
  *          transform the propagator applies and the two can never disagree again; the
@@ -38,10 +53,18 @@
  *   --docs                 Inject COMMON markers from L1 governance into templates/co-* variants
  *   --check-drift          L1 vs L2 drift report (read-only, uses propagation-map.json)
  *   --json                 With --check-drift: machine-readable JSON output
- *                          ({domain, file, status}[] + summary) and stable exit
- *                          codes: 0 = clean, 1 = only tolerated drift
- *                          (gemini-settings domain), 2 = unexpected drift.
- *                          Without --check-drift this flag is ignored.
+ *                          ({domain, file, status}[] + summary; drifted entries
+ *                          gain additive classification/detail fields) with
+ *                          stable exit codes IDENTICAL in both output modes
+ *                          (T-20260912-028): 0 = clean, 1 = only tolerated
+ *                          (intentional-overlay) drift, 2 = unexpected
+ *                          (semantic) drift. gemini-settings drift is classified
+ *                          against the shared-key contract in
+ *                          docs/templates/common-contract.json — tolerated only
+ *                          when the contract's shared keys are present and
+ *                          deep-equal on both sides and no claude-only key
+ *                          leaked into a .gemini file. Without --check-drift
+ *                          this flag is ignored.
  *   --prune                Remove L0-only orphan scripts from templates/common/scripts/ tree
  *   --skip-encoding-check  Skip CP949 corruption pre-check (not recommended)
  *   --include-disabled     Include domains marked `disabled: true` in the DRY-RUN
@@ -595,6 +618,174 @@ export function collectDiffsL1L2(mapPath: string): FileDiff[] {
   }
 
   return diffs;
+}
+
+// ── gemini-settings semantic drift classification (T-20260912-028) ─────────────
+/**
+ * Slice of docs/templates/common-contract.json consumed by classifySettingsDrift().
+ * The contract is parsed and passed in by the caller (runCheckDrift reads it from
+ * docs/templates/common-contract.json — the same SSOT validate-templates.ts VA-04
+ * checkPlatformSettingsParity reads), keeping the classifier pure and unit-testable.
+ */
+export interface PlatformSettingsContract {
+  platform_settings?: {
+    shared?: { keys?: Record<string, unknown> };
+    claude_only?: { keys?: Record<string, unknown> };
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+}
+
+export interface SettingsDriftDetail {
+  /** Shared keys missing on either side or not deep-equal */
+  mismatchedSharedKeys: string[];
+  /** claude_only keys present in either .gemini file */
+  leakedClaudeOnlyKeys: string[];
+  /** Which side failed JSON.parse */
+  parseError: 'L1' | 'L2' | null;
+  /** Informational: top-level keys present on one side only */
+  variantOwnedKeys: string[];
+  /** One human-readable finding per problem */
+  reasons: string[];
+}
+
+export interface SettingsDriftClassification extends SettingsDriftDetail {
+  classification: 'tolerated' | 'unexpected';
+}
+
+/** One FileDiff annotated with its semantic classification (in-sync diffs carry
+ *  neither field). One classification pass produces these; the human and JSON
+ *  renderers are two views over the same array (unified exit semantics). */
+export type ClassifiedDiff = FileDiff & {
+  classification?: 'tolerated' | 'unexpected';
+  detail?: SettingsDriftDetail;
+};
+
+/**
+ * Dotted-path getter — same semantics as validate-templates.ts VA-04's local
+ * helper. Replicated locally, NOT imported across: a checker importing from
+ * another heavyweight checker entry module would invert the dependency direction.
+ */
+function getNestedKey(obj: Record<string, unknown>, dotKey: string): unknown {
+  const parts = dotKey.split('.');
+  let current: unknown = obj;
+  for (const part of parts) {
+    if (current === null || typeof current !== 'object') return undefined;
+    current = (current as Record<string, unknown>)[part];
+  }
+  return current;
+}
+
+/**
+ * Canonical-JSON deep equality: recursively key-sorted serialization of both
+ * values. Arrays are ORDER-SENSITIVE — hook array order is execution order, so
+ * [A, B] vs [B, A] is a mismatch.
+ */
+function canonicalJson(value: unknown): string {
+  if (value === null || typeof value !== 'object') return JSON.stringify(value) ?? 'null';
+  if (Array.isArray(value)) return '[' + value.map(canonicalJson).join(',') + ']';
+  const record = value as Record<string, unknown>;
+  const entries = Object.keys(record)
+    .sort()
+    .map((k) => JSON.stringify(k) + ':' + canonicalJson(record[k]));
+  return '{' + entries.join(',') + '}';
+}
+
+/**
+ * Classify one drifted L1→L2 .gemini/settings.json pair (T-20260912-028).
+ *
+ * Tolerated = intentional overlay: both sides parse, every contract shared key
+ * is present and deep-equal on both sides, and no claude_only key appears in
+ * either .gemini file. Everything else is unexpected — fail-closed:
+ *   - JSON.parse failure on either side → unexpected (parseError names the side)
+ *   - contract null / platform_settings absent / shared.keys empty → unexpected
+ *     (an empty contract cannot prove a byte difference is an intentional overlay)
+ *   - shared key missing on either side, or not deep-equal → unexpected
+ *   - claude_only key present in either file → unexpected
+ *
+ * Pure: reads nothing, writes nothing — raw file text and the contract come in
+ * from the caller.
+ */
+export function classifySettingsDrift(
+  l1Raw: string,
+  l2Raw: string,
+  contract: PlatformSettingsContract | null
+): SettingsDriftClassification {
+  const detail: SettingsDriftDetail = {
+    mismatchedSharedKeys: [],
+    leakedClaudeOnlyKeys: [],
+    parseError: null,
+    variantOwnedKeys: [],
+    reasons: [],
+  };
+
+  // 1. Parse both sides — fail-closed on parse errors.
+  let l1: Record<string, unknown>;
+  let l2: Record<string, unknown>;
+  try {
+    l1 = JSON.parse(l1Raw) as Record<string, unknown>;
+  } catch {
+    detail.parseError = 'L1';
+    detail.reasons.push('L1 settings file is not valid JSON');
+    return { ...detail, classification: 'unexpected' };
+  }
+  try {
+    l2 = JSON.parse(l2Raw) as Record<string, unknown>;
+  } catch {
+    detail.parseError = 'L2';
+    detail.reasons.push('L2 settings file is not valid JSON');
+    return { ...detail, classification: 'unexpected' };
+  }
+
+  // 2. Shared-key contract — fail-closed when absent or empty.
+  const sharedKeys = Object.keys(contract?.platform_settings?.shared?.keys ?? {});
+  if (sharedKeys.length === 0) {
+    detail.reasons.push(
+      'No shared keys declared in platform_settings.shared.keys — an empty contract cannot prove a byte difference is an intentional overlay (fail-closed)'
+    );
+    return { ...detail, classification: 'unexpected' };
+  }
+  const claudeOnlyKeys = Object.keys(contract?.platform_settings?.claude_only?.keys ?? {});
+
+  // 3. Shared keys: present and deep-equal on both sides.
+  for (const key of sharedKeys) {
+    const v1 = getNestedKey(l1, key);
+    const v2 = getNestedKey(l2, key);
+    if (v1 === undefined || v2 === undefined) {
+      detail.mismatchedSharedKeys.push(key);
+      const side = v1 === undefined ? 'L1' : 'L2';
+      detail.reasons.push(`Shared key '${key}' is missing from ${side} settings`);
+    } else if (canonicalJson(v1) !== canonicalJson(v2)) {
+      detail.mismatchedSharedKeys.push(key);
+      detail.reasons.push(`Shared key '${key}' differs between L1 and L2`);
+    }
+  }
+
+  // 4. claude_only keys must not appear in a .gemini settings file.
+  for (const key of claudeOnlyKeys) {
+    const inL1 = getNestedKey(l1, key);
+    const inL2 = getNestedKey(l2, key);
+    if (inL1 !== undefined || inL2 !== undefined) {
+      detail.leakedClaudeOnlyKeys.push(key);
+      const sides = [inL1 !== undefined ? 'L1' : null, inL2 !== undefined ? 'L2' : null]
+        .filter(Boolean)
+        .join(' and ');
+      detail.reasons.push(`claude-only key '${key}' must not appear in a .gemini settings file (present in ${sides})`);
+    }
+  }
+
+  // 5. Informational: top-level key names present on one side only
+  //    (best-effort — empty for nested-only drift such as mcpServers.* additions).
+  const l1Keys = new Set(Object.keys(l1));
+  const l2Keys = new Set(Object.keys(l2));
+  detail.variantOwnedKeys = Object.keys({ ...l1, ...l2 })
+    .filter((k) => !l1Keys.has(k) || !l2Keys.has(k))
+    .sort();
+
+  if (detail.mismatchedSharedKeys.length > 0 || detail.leakedClaudeOnlyKeys.length > 0) {
+    return { ...detail, classification: 'unexpected' };
+  }
+  return { ...detail, classification: 'tolerated' };
 }
 
 function printTable(diffs: FileDiff[]): void {
@@ -1520,14 +1711,17 @@ if (CHECK_DRIFT) {
 
 // ── runCheckDrift: independent L1→L2 drift report ─────────────────────────────
 /**
- * Tolerated drift: the gemini-settings domain is the only ongoing L1→L2 mirror
- * and is allowed to differ within a review window (domain entries are emitted as
- * "gemini-settings (<variant>)"). Any other domain's drift is unexpected.
+ * T-20260912-028: drift classification is semantic, not whole-domain.
+ * gemini-settings pairs run through classifySettingsDrift() against the
+ * platform-settings contract (docs/templates/common-contract.json): a byte
+ * difference is a tolerated intentional overlay only when the contract's
+ * shared keys are present and deep-equal on both sides and no claude-only key
+ * leaked into a .gemini file. Parse failures, a missing/empty shared-key
+ * contract, and any non-gemini-settings domain drift are unexpected
+ * (fail-closed). One classification pass feeds BOTH the human and JSON
+ * renderers; exit codes are identical in both modes:
+ * 0 = clean, 1 = tolerated-only, 2 = unexpected.
  */
-function isToleratedDriftDomain(domain: string): boolean {
-  return domain.split(' ')[0] === 'gemini-settings';
-}
-
 function runCheckDrift(mapPath: string): void {
   // Ineligible-domain early UX: if the user filtered to a non-drift-eligible
   // domain, explain instead of returning silently with 0 results (human mode)
@@ -1555,30 +1749,109 @@ function runCheckDrift(mapPath: string): void {
 
   const drifts = collectDiffsL1L2(mapPath);
   const outOfSync = drifts.filter(d => d.status !== 'in-sync');
-  const tolerated = outOfSync.filter(d => isToleratedDriftDomain(d.domain));
-  const unexpected = outOfSync.filter(d => !isToleratedDriftDomain(d.domain));
+
+  // One classification pass (T-20260912-028): human and JSON are two views over
+  // this array. The contract SSOT is read by the caller, not the classifier.
+  let contract: PlatformSettingsContract | null = null;
+  const contractPath = join(workspaceRoot, 'docs', 'templates', 'common-contract.json');
+  if (existsSync(contractPath)) {
+    try {
+      contract = JSON.parse(readFileSync(contractPath, 'utf-8')) as PlatformSettingsContract;
+    } catch {
+      contract = null; // fail-closed: the classifier treats null as unexpected
+    }
+  }
+  const readRaw = (p: string): string => {
+    try {
+      return readFileSync(p, 'utf-8');
+    } catch {
+      return ''; // unreadable/missing side → JSON.parse fails → parseError (fail-closed)
+    }
+  };
+
+  const classified: ClassifiedDiff[] = drifts.map((d): ClassifiedDiff => {
+    if (d.status === 'in-sync') return d;
+    if (d.domain.split(' ')[0] !== 'gemini-settings') {
+      // No classifier for this domain — identical to the old non-gemini
+      // fallback: fail-closed unexpected.
+      return {
+        ...d,
+        classification: 'unexpected',
+        detail: {
+          mismatchedSharedKeys: [],
+          leakedClaudeOnlyKeys: [],
+          parseError: null,
+          variantOwnedKeys: [],
+          reasons: [`Drift in domain '${d.domain.split(' ')[0]}' has no semantic classifier (fail-closed)`],
+        },
+      };
+    }
+    const result = classifySettingsDrift(readRaw(d.sourcePath), readRaw(d.targetPath), contract);
+    return { ...d, classification: result.classification, detail: result };
+  });
+
+  const toleratedCount = classified.filter(c => c.classification === 'tolerated').length;
+  const unexpectedCount = classified.filter(c => c.classification === 'unexpected').length;
 
   if (JSON_OUTPUT) {
-    // Machine-readable mode (T-20260912-016): stable contract for CI.
-    //   exit 0 = clean, 1 = only tolerated drift (gemini-settings), 2 = unexpected drift.
+    // Machine-readable mode (T-20260912-016, extended additively by
+    // T-20260912-028): stable contract for CI. exit 0 = clean,
+    // 1 = only tolerated drift, 2 = unexpected drift. Drifted entries gain
+    // classification/detail; in-sync entries and the summary keys are unchanged.
     console.log(JSON.stringify({
-      results: drifts.map(d => ({ domain: d.domain, file: d.relativePath, status: d.status })),
+      results: classified.map(d => {
+        if (d.status === 'in-sync' || !d.classification || !d.detail) {
+          return { domain: d.domain, file: d.relativePath, status: d.status };
+        }
+        return {
+          domain: d.domain,
+          file: d.relativePath,
+          status: d.status,
+          classification: d.classification,
+          detail: {
+            mismatchedSharedKeys: d.detail.mismatchedSharedKeys,
+            leakedClaudeOnlyKeys: d.detail.leakedClaudeOnlyKeys,
+            parseError: d.detail.parseError,
+            variantOwnedKeys: d.detail.variantOwnedKeys,
+            reasons: d.detail.reasons,
+          },
+        };
+      }),
       summary: {
         total: drifts.length,
         inSync: drifts.length - outOfSync.length,
-        toleratedDrift: tolerated.length,
-        unexpectedDrift: unexpected.length,
+        toleratedDrift: toleratedCount,
+        unexpectedDrift: unexpectedCount,
       },
     }, null, 2));
-    process.exit(unexpected.length > 0 ? 2 : tolerated.length > 0 ? 1 : 0);
+    process.exit(unexpectedCount > 0 ? 2 : toleratedCount > 0 ? 1 : 0);
   }
 
   console.log(`${C.cyan}=== --check-drift: L1 vs L2 drift report (read-only) ===${C.reset}`);
   if (DOMAIN_FILTER) console.log(`${C.dim}Domain filter: ${DOMAIN_FILTER}${C.reset}`);
   printTable(drifts);
-  console.log(`Total checked: ${drifts.length}, Out of sync: ${outOfSync.length}`);
-  if (outOfSync.length > 0) {
-    console.log(`\nℹ️  Detected drift in a domain configured for L2 drift checking. Review whether this change is intentional before synchronizing.`);
+
+  // Per drifted pair: distinguish intentional overlays from semantic drift
+  // (parity with the JSON mode's classification field).
+  for (const d of classified) {
+    if (d.status === 'in-sync' || !d.classification || !d.detail) continue;
+    if (d.classification === 'tolerated') {
+      const owned = d.detail.variantOwnedKeys.length > 0
+        ? `variant-owned keys differ: ${d.detail.variantOwnedKeys.join(', ')}`
+        : 'variant-owned/nested keys differ';
+      console.log(`${C.yellow}⚠️  ${d.domain}: intentional overlay — shared keys verified; ${owned}${C.reset}`);
+    } else {
+      const problems = d.detail.reasons.length > 0 ? d.detail.reasons.join('; ') : 'semantic drift detected';
+      console.log(`${C.red}✖  ${d.domain}: semantic drift — ${problems}${C.reset}`);
+    }
+  }
+
+  console.log(`\nTotal checked: ${drifts.length}, In sync: ${drifts.length - outOfSync.length}, Tolerated overlay: ${toleratedCount}, Unexpected: ${unexpectedCount}`);
+  if (unexpectedCount > 0) {
+    console.log(`\nℹ️  Unexpected drift: a shared key or the platform-settings contract is violated. Align L1/L2 before synchronizing.`);
+    process.exitCode = 2;
+  } else if (toleratedCount > 0) {
+    console.log(`\nℹ️  Tolerated drift only: every drifted pair verified as an intentional overlay (shared keys intact). Review whether this change is intentional before synchronizing.`);
     process.exitCode = 1;
   }
 }
