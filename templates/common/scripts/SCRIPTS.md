@@ -210,7 +210,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `sync-skill-status.ts` | L0 | 1.0.1 | active | — | — | L0+L1 | — |
 | `sync-skills-to-l2.ts` | L0 | 1.0.1 | active | — | — | L0 | — |
 | `sync-template-deps.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `sync-skills.ts` | L0 | 1.5.0 | active | `--dir <path>`, `--all-variants` | — | L0+L1 | — |
+| `sync-skills.ts` | L0 | 1.6.0 | active | `--dir <path>`, `--all-variants` | — | L0+L1 | — |
 | `tag-template.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `team-builder.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
 | `test-platform-parity.ts` | L0 | 0.2.4 | active | —| —| L0 | —|
@@ -241,7 +241,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `verify-new-project-tests.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
 | `verify-platform-lifecycle.ts` | L0 | 1.1.2 | active | —| —| L0+L1 | —|
 | `verify-readme-sync.ts` | L0 | 1.4.0 | active | —| —| L0+L1 | —|
-| `verify-scripts.ts` | L0 | 1.6.0 | active | —| —| L0+L1 | —|
+| `verify-scripts.ts` | L0 | 1.6.1 | active | —| —| L0+L1 | —|
 | `verify-skills.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
 | `verify-template-integrity.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `validate-pm-extends.ts` | L0 | 0.3.1 | active | —| —| L0+L1 | —|
