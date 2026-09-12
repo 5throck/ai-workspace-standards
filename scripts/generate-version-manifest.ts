@@ -1,4 +1,4 @@
-// @version 1.4.0
+// @version 1.4.1
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { $ } from 'bun';
@@ -119,6 +119,9 @@ function extractScriptVersion(content: string): string {
     // Match JSDoc style:  * @version X.Y.Z
     const jsdocMatch = /^\s*\*\s*@version\s+([\d.]+)/m.exec(content);
     if (jsdocMatch) return jsdocMatch[1].trim();
+    // Match inline block comments and same-line metadata containing @version.
+    const inlineMatch = /@version\s+([\d.]+)/m.exec(content);
+    if (inlineMatch) return inlineMatch[1].trim();
     return 'N/A';
 }
 
@@ -144,7 +147,13 @@ function extractScriptDependencies(content: string): string[] {
 
 // Simple, single-action commands with no orchestration logic — intentionally
 // have no dedicated SKILL.md. See detectDrift() for rationale.
-const COMMAND_SKILL_EXEMPT = new Set(['changelog', 'memlog', 'new-task']);
+const COMMAND_SKILL_EXEMPT = new Set(['changelog', 'meeting', 'memlog', 'new-task']);
+const SKILL_METADATA_EXEMPT = new Set([
+    // ADR-0076 / 2026-09-12 graft wiring refresh: tool-owned Claude-only skill
+    // with canonical graft frontmatter; workspace lifecycle fields are not
+    // reattached because graft rewrites this file on version bumps.
+    'graft',
+]);
 
 function hasGeminiParitySkip(content: string): boolean {
     return /^gemini-parity:\s*skip/m.test(content);
@@ -301,6 +310,7 @@ export function detectDrift(agents: AgentInfo[], skills: SkillInfo[], commands: 
 
     // Check for skills with unparseable frontmatter or incomplete metadata
     for (const skill of skills) {
+        if (SKILL_METADATA_EXEMPT.has(skill.name)) continue;
         if (skill.parseError) {
             issues.add(`[ERROR] Skill ${skill.name} frontmatter YAML parse error: ${skill.parseError}`);
             continue; // version/triggers are unreliable if frontmatter didn't parse

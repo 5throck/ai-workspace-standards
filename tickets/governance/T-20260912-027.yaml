@@ -1,0 +1,16 @@
+schemaVersion: 1
+id: T-20260912-027
+kind: manual
+title: >-
+  Harden nightly ticket automation with deterministic path allowlists before
+  privileged push and PR creation
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-12T13:13:47.644Z'
+history:
+  - at: '2026-09-12T13:13:47.644Z'
+    from: null
+    to: backlog
+result: null
+error: null

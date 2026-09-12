@@ -51,7 +51,7 @@ Develop variant-specific functionality in isolation without affecting workspace 
 
 **A-2. New Project Creation**
 - **Location**: `Projects/[variant-name]/`
-- **Method**: `bun run scripts/new-project.sh [variant-name]` (or `.\scripts\new-project.ps1` for Windows)
+- **Method**: `bun scripts/new-project.ts [variant-name]`
 - **Variant Selection**: Select appropriate base variant (co-consult, co-design, etc.) or start from scratch
 - **Note**: Project is created with common/ dependencies from workspace root
 
@@ -165,11 +165,11 @@ Create variant template and propagate to workspace root, enabling future project
 **C-3. Validation**
 - **Tool**: `validate-templates.ts`
 - **Check**: Template structure compliance
-- **Method**: `bun run scripts/validate-templates.ts`
+- **Method**: `bun scripts/validate-templates.ts`
 
 **C-4. New Project Test**
 - **Activity**: Generate new project from template to verify end-to-end workflow
-- **Method**: `bun run scripts/new-project.sh test-[variant-name] --variant co-[variant-name]`
+- **Method**: `bun scripts/new-project.ts test-[variant-name] --variant co-[variant-name]`
 - **Verification**: Generated project works correctly
 
 ### Quality Gates
@@ -179,7 +179,7 @@ Create variant template and propagate to workspace root, enabling future project
   - `validate-templates.ts` passes all checks
   - Template folder structure matches workspace standards
   - All variant-specific files included
-- **Verification**: `bun run scripts/validate-templates.ts` output
+- **Verification**: `bun scripts/validate-templates.ts` output
 
 **Quality Gate C-2**: Integration Test
 - **Criteria**:
@@ -269,7 +269,7 @@ Create variant template and propagate to workspace root, enabling future project
 
 | Script | Purpose | Status |
 |--------|---------|--------|
-| `new-project.sh/ps1` | Create new project | ✅ Available |
+| `new-project.ts` | Create new project | ✅ Available |
 | `l3-to-variant-pipeline.ts` | Automate Projects/ → templates/ conversion | ✅ Available |
 | `validate-templates.ts` | Template structure validation | ✅ Available |
 | `audit.ts` | Workspace standards compliance | ✅ Available |

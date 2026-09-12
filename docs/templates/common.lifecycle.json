@@ -1,26 +1,58 @@
 {
   "version": "1.3.0",
   "status": "stable",
-  "lastUpdated": "2026-08-24",
+  "lastUpdated": "2026-09-12",
   "description": "Lifecycle state for templates/common — the L1 base layer propagated to all co-* variants",
   "propagatedTo": [
-    "co-develop",
-    "co-work",
+    "co-abap",
+    "co-consult",
+    "co-deck",
     "co-design",
+    "co-develop",
+    "co-export",
+    "co-game",
+    "co-hr",
+    "co-news",
+    "co-price",
+    "co-safety",
     "co-security",
-    "co-consult"
+    "co-work"
   ],
   "propagated_skills": {
-    "description": "Tracks which common_skills from common-contract.json are physically present in each L2 variant's skills/ directory",
+    "description": "Tracks current common_skills from common-contract.json that every co-* variant inherits through templates/common.",
     "skills": {
-      "project-review": {},
+      "accessibility-audit": {},
+      "agent-lifecycle-manager": {},
+      "api-documentation": {},
+      "ci-triage": {},
+      "decision-record": {},
+      "documentation-writing": {},
+      "evidence-ledger": {},
+      "explain-me": {},
+      "gateguard": {},
+      "handbook": {},
+      "handbook-sync-audit": {},
+      "i18n-audit": {},
+      "i18n-formatting": {},
+      "i18n-layout": {},
+      "i18n-locale-config": {},
       "meeting-facilitation": {},
+      "project-review": {},
+      "research-analysis": {},
+      "script-lifecycle-manager": {},
       "security-scan": {},
       "skill-lifecycle-manager": {},
-      "agent-lifecycle-manager": {},
-      "script-lifecycle-manager": {}
+      "source-command-commit-push-pr": {},
+      "standup-synthesizer": {},
+      "sync": {},
+      "team-builder": {},
+      "token-usage-lint": {},
+      "translate": {},
+      "ui-ux-design-intelligence": {},
+      "update-bun-packages": {},
+      "zod-contract-gate": {}
     },
-    "note": "After B-01 sync, all variants should have all 8 skills. Update this section if a variant intentionally excludes a skill."
+    "note": "All 30 common_skills are inherited by all 13 co-* variants through the common layer unless a variant explicitly documents an exclusion."
   },
   "history": [
     {
@@ -47,6 +79,11 @@
       "date": "2026-08-24",
       "event": "common-contract-expansion",
       "note": "common-contract.json updated: 3 skills added (i18n-locale-config, i18n-formatting, i18n-layout) and i18n-specialist agent added per constitution §4.4 i18n asset suite (5-part design PR5)"
+    },
+    {
+      "date": "2026-09-12",
+      "event": "project-review-reconciliation",
+      "note": "Aligned propagatedTo with all inheriting co-* variants and refreshed propagated_skills from common-contract.json."
     }
   ]
 }

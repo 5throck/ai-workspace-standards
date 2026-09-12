@@ -1,13 +1,18 @@
 {
-  "version": "1.1.0",
+  "version": "1.2.0",
   "required": [
     "variant.json",
     "README.md",
     "README_ko.md",
     "AGENTS.md",
+    "CLAUDE.md",
+    "GEMINI.md",
     "agents/pm.md",
     "agents/README.md",
     "agents/README_ko.md",
+    "docs/{variant}.context.md",
+    "docs/user-guide.md",
+    "docs/user-guide_ko.md",
     ".claude/settings.json",
     ".gemini/settings.json"
   ],

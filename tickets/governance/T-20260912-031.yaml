@@ -1,0 +1,16 @@
+schemaVersion: 1
+id: T-20260912-031
+kind: manual
+title: >-
+  Adjudicate co-safety COMMON-AGENTS marker divergence as either common-owned
+  sync or explicit variant-owned fork
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-12T13:13:47.812Z'
+history:
+  - at: '2026-09-12T13:13:47.812Z'
+    from: null
+    to: backlog
+result: null
+error: null

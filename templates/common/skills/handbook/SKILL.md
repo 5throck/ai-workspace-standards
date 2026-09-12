@@ -14,6 +14,12 @@ status: active
 owner: pm
 last_reviewed: 2026-08-17
 prerequisites: research (optional — standalone mode has no prerequisites)
+metadata:
+  triggers:
+    - make handbook
+    - create handbook
+    - build course site
+    - companion handbook
 attribution:
   source: https://github.com/beret21/teachme
   license: MIT

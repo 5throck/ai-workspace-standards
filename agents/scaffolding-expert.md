@@ -1,4 +1,5 @@
 ---
+last_updated: 2026-09-12
 name: Scaffolding Expert
 role: specialist
 status: active

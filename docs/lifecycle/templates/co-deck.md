@@ -10,6 +10,7 @@
 |------|------|-----|---------|----------|
 | 2026-06-17 | - | review | Initial creation — lecture/presentation variant | pm |
 | 2026-07-03 | review | review | Lifecycle record created (retroactive) | lifecycle-manager |
+| 2026-08-30 | review | stable | Stable transition recorded in `templates/co-deck/variant.json` | pm |
 
 ## Acceptance Criteria
 
@@ -22,14 +23,14 @@
 - [x] Theme manifest with 5 themes + PPT-transformed themes documented
 - [x] Script manifest with local scripts documented
 - [x] Trust score thresholds configured
-- [ ] Stable promotion pending — currently beta
+- [x] Stable promotion completed
 
 ### Production Phase
 
-- [ ] All review phase criteria met
-- [ ] Successfully tested in real scenario
-- [ ] Documentation complete
-- [ ] No known critical bugs
+- [x] All review phase criteria met
+- [x] Successfully tested in real scenario
+- [x] Documentation complete
+- [x] No known critical bugs
 
 ## Dependencies
 
@@ -38,7 +39,8 @@
 ## Metadata
 
 - **Type**: Template (L2 Variant — lecture)
-- **Current Phase**: review
+- **Version**: 0.2.3
+- **Current Phase**: stable
 - **Owner**: pm
-- **Last Updated**: 2026-07-03
+- **Last Updated**: 2026-09-12
 - **Last Reviewer**: lifecycle-manager

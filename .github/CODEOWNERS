@@ -1,26 +1,24 @@
 # Workspace CODEOWNERS
-# Single-maintainer workspace — CODEOWNERS enforcement disabled.
-# Enable when multiple contributors are added:
-# 1. Replace @your-team with actual GitHub team or username
-# 2. Uncomment the ownership rules below
+# Security-sensitive workspace paths require explicit owner review.
 # See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
 
 # Default owner for all files
-# * @your-team
+* @5throck
 
 # Critical governance files — require explicit review
-# /CLAUDE.md @your-team
-# /AGENTS.md @your-team
-# /CONSTITUTION.md @your-team
-# /GEMINI.md @your-team
+/CLAUDE.md @5throck
+/AGENTS.md @5throck
+/CONSTITUTION.md @5throck
+/GEMINI.md @5throck
+/CODEX.md @5throck
 
 # Agent definitions
-# /agents/ @your-team
+/agents/ @5throck
 
 # Hook and automation scripts
-# /scripts/ @your-team
-# /.githooks/ @your-team
-# /.github/workflows/ @your-team
+/scripts/ @5throck
+/.githooks/ @5throck
+/.github/workflows/ @5throck
 
 # Template system
-# /templates/ @your-team
+/templates/ @5throck

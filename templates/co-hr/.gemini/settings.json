@@ -8,18 +8,6 @@
         "statusMessage": "Configuring git hooks..."
       }
     ],
-    "PostToolUse": [
-      {
-        "matcher": "Write|Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bun scripts/hooks/post-write-lifecycle-check.ts",
-            "statusMessage": "Running post-edit lifecycle check..."
-          }
-        ]
-      }
-    ],
     "BeforeTool": [
       {
         "matcher": "write_file|replace_file_content|multi_replace_file_content",
@@ -62,9 +50,8 @@
   ],
   "mcpServers": {
     "graft": {
-      "command": "bunx",
+      "command": "graft",
       "args": [
-        "@nanonets/graft",
         "mcp"
       ]
     }

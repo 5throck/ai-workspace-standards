@@ -1,4 +1,4 @@
-// @version 2.37.0
+// @version 2.37.1
 // v2.37.0: L0 Leakage check exemption is now occurrence-scoped (T-20260912-006) — an
 //           intentional-duplicate marker exempts only the line carrying it, not the
 //           whole file, so a real CONSTITUTION reference can no longer hide in a file
@@ -841,9 +841,9 @@ if (hasBun) {
     }
     // Platform lifecycle verification (Check E/F/G/H)
     if (fs.existsSync(path.join('scripts', 'verify-platform-lifecycle.ts'))) {
-        try {
-            await $`bun ${path.join('scripts', 'verify-platform-lifecycle.ts')}`.nothrow();
-        } catch { /* non-blocking */ }
+        const out = await $`bun ${path.join('scripts', 'verify-platform-lifecycle.ts')}`.nothrow();
+        if (out.exitCode !== 0)
+            Fail("Platform lifecycle verification failed (run 'bun scripts/verify-platform-lifecycle.ts' to see details)");
     }
 
     // Script lifecycle verification: version headers

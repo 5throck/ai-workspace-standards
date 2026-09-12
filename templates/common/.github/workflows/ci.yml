@@ -22,6 +22,7 @@ jobs:
 
       # package.json lives at the repository root, not under scripts/.
       - name: Install dependencies
+        if: ${{ hashFiles('package.json') != '' }}
         run: bun install --frozen-lockfile
 
       - name: Run audit
