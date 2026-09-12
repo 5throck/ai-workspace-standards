@@ -772,6 +772,15 @@
       "source": "manual",
       "created": "2026-09-12",
       "last_updated": "2026-09-12"
+    },
+    {
+      "id": "2026-09-12-graft-wiring-refresh-design",
+      "title": "graft wiring refresh design",
+      "file": "docs/designs/2026-09-12-graft-wiring-refresh-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-12",
+      "last_updated": "2026-09-12"
     }
   ]
 }
