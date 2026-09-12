@@ -5,7 +5,7 @@
  * Replaces publish-to-template.ts (deprecated v1.8.0). Single authoritative script
  * for all L0→L1 propagation. Config-driven via propagation-map.json (SSOT for exclusions).
  *
- * @version 2.9.0
+ * @version 2.10.0
  *
  * Usage:
  *   bun scripts/propagate-to-templates.ts [--dry-run|--apply] [--domain <name>] [flags]
@@ -672,6 +672,13 @@ export function scrubConstitutionRefs(content: string, filePath?: string, target
     /\[[^\]]*docs\/constitution\/[^\]]*\]\([^)]*docs\/constitution\/[^)]*\)/g,
     '[docs/context.md](docs/context.md)'
   );
+  // A-5b. ANY remaining markdown link whose TARGET points into docs/constitution/ —
+  // link text like "[§9.1]" carries no recognizable hint, so A-5 misses it. Projected
+  // home is docs/context.md (anchors dropped; the visible text keeps the reference).
+  content = content.replace(/\]\([^)]*docs\/constitution\/[^)]*\)/g, '](docs/context.md)');
+  // A-7. Plain-text / inline-code mentions of a docs/constitution/ part file
+  // (e.g. `docs/constitution/06-skill-lifecycle.md §6.6`) — projected to docs/context.md.
+  content = content.replace(/docs\/constitution\/[a-z0-9.-]+\.md/gi, 'docs/context.md');
   // A-6. Target-aware: a target that lives at docs/context.md itself must use a
   // relative link — ](docs/context.md) inside docs/context.md would resolve to
   // docs/docs/context.md (broken self-reference). No targetPath → no-op.

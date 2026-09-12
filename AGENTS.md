@@ -253,6 +253,10 @@ When writing Korean documentation or Korean translation output, prefer native Ko
 - **Core Script Standardization**: The core synchronization and validation scripts (`scripts/dev-sync.ts` and `scripts/audit.ts`) must remain standardized and identical across all templates and variants. Direct modification of these core scripts in L2 projects is strictly forbidden.
 - **Variant-Specific Audit Hook**: Variant projects requiring custom verification checks must implement them in a pluggable hook script located at `scripts/audit-variant.ts`.
 - **Integrity Enforcement**: During template reconciliation (`l3-to-variant-pipeline.ts`), any modified core scripts will be automatically detected and will fail the reconciliation.
+
+### Universal Design Gate (ADR-0074)
+
+Every code change at any tier (L0–L3) must carry spec activity: create/update a design doc at `docs/designs/<spec-id>-design.md` and register it (`bun scripts/spec-register.ts --file <design-doc> --source manual --status implemented`) before `/sync`. The sync-time spec-check (`audit.ts --spec-check`, dev-sync step 3.9) blocks commits without it; trivial changes use `--spec-exempt=E1..E5` (AGENTS.md §5.1.1). Project registries (`docs/specs/registry.json`) are add-if-missing seeds — upgrades never overwrite or prune project entries.
 <!-- COMMON-AGENTS:END -->
 
 ---
@@ -379,8 +383,11 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 
 ### §5.1 Standard Execution Plan Template
 
-> **Design Gate (Row 0)**: Workspace root (L0) and common template (L1) only.
-> L2 variant projects are exempt — they manage their own design workflow.
+> **Design Gate (Row 0)**: Universal across tiers (L0–L3) per ADR-0074 — every code change must
+> carry spec activity (design doc + registry entry), enforced by the sync-time spec-check
+> (`audit.ts --spec-check`, dev-sync step 3.9, FATAL). Full Row 0 ceremony (execution-plan
+> boilerplate, architect ownership) applies at L0/L1; L2/L3 satisfy the gate with the
+> one-design-doc convention via `scripts/spec-register.ts`.
 
 | # | Task | Agent | Tier | Model | Spec |
 |---|------|-------|------|-------|------|
@@ -391,7 +398,7 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 **Execution Order**: [Parallel | Sequential]
 
 **Key points**:
-- **Row 0 (Design Gate) is MANDATORY** for L0/L1 — design document must be created/updated before implementation
+- **Row 0 (Design Gate) is MANDATORY at every tier (ADR-0074)** — a design document must be created/updated before implementation; L2/L3 satisfy it with a single design doc + `spec-register.ts` entry (full ceremony stays L0/L1)
 - **Design docs for user-facing features MUST include an Accessibility section** (target level, affected interaction areas, verification method) per ADR-0065 — accessibility is a mandatory consideration for web/app/CLI/document feature development (WCAG 2.1 AA baseline); backend/non-UI work is exempt only with an explicit statement
 - **Design docs for user-facing web/app UI MUST include a Preview Verification note** (rendered check at ≥ 2 declared breakpoints, ≥ 1 key interaction, evidence attached) per ADR-0070 — a UI change is not done until it was seen rendered; pure backend/non-UI work is exempt only with an explicit statement
 - Tier column is MANDATORY (High/Medium/Low)

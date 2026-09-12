@@ -92,7 +92,7 @@
     },
     "sync": {
       "source": "skills/sync/SKILL.md",
-      "version": "1.4.0",
+      "version": "1.5.0",
       "overridable": false,
       "description": "Runs the full project sync pipeline"
     },

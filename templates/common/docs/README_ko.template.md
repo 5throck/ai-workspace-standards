@@ -18,6 +18,8 @@ lang_reason: source-material
 
 {{QUICK_START_BODY}}
 
+> **설계 게이트 (ADR-0074)**: 코드 변경에는 스펙이 동반되어야 합니다 — `docs/designs/<spec-id>-design.md`를 만들고 등록한(`bun scripts/spec-register.ts --file <설계문서> --source manual`) 뒤 `/sync`하세요. 동기화 시 스펙 검사가 문서 없는 코드 변경을 차단합니다; 사소한 변경은 `--spec-exempt=E1..E5`를 쓸 수 있습니다.
+
 ### Claude Code 사용자:
 
 자세한 지침은 `CLAUDE.md`를 참고하세요.

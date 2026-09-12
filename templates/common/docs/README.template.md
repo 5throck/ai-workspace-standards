@@ -16,6 +16,8 @@ sync_version: 1
 
 {{QUICK_START_BODY}}
 
+> **Design Gate (ADR-0074)**: code changes must ship with a spec — create `docs/designs/<spec-id>-design.md`, register it (`bun scripts/spec-register.ts --file <design-doc> --source manual`), then `/sync`. The sync-time spec-check blocks undocumented code changes; trivial changes can use `--spec-exempt=E1..E5`.
+
 ### For Claude Code users:
 
 See `CLAUDE.md` for detailed instructions.
