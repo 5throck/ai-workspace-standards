@@ -1,7 +1,7 @@
 # CODEX.md
 
 > **Project context, architecture, coding guidelines, and design standards live in [`docs/context.md`](docs/context.md) - read it first.**
-<!-- L0-ONLY: This instruction targets the workspace root (L0). L1/L2 projects must NOT reference context.md — see context.md §7.5 context.md Non-Propagation. merge-frontmatter.ts strips context.md lines from L2 output. -->
+<!-- L0-ONLY: This instruction targets the workspace root (L0). L1/L2 projects must NOT reference CONSTITUTION.md — see CONSTITUTION.md §7.5 CONSTITUTION.md Non-Propagation. merge-frontmatter.ts strips CONSTITUTION.md lines from L2 output. -->
 
 ---
 
@@ -73,7 +73,7 @@ Codex consumes slash-style workflows as **custom prompts** mirrored from the com
 
 ### 4. MCP Configurations
 
-Codex registers MCP servers in **TOML**: project scope at `.codex/config.toml`, machine-global fallback at `~/.codex/config.toml` (ADR-0074 per-host matrix). The workspace registers the graft context-graph server:
+Codex registers MCP servers in **TOML**: project scope at `.codex/config.toml`, machine-global fallback at `~/.codex/config.toml` (ADR-0076 per-host matrix). The workspace registers the graft context-graph server:
 
 ```toml
 [mcp_servers.graft]

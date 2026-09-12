@@ -1,7 +1,7 @@
 # CLAUDE.md
 
 > **Project context, architecture, coding guidelines, and design standards live in [`docs/context.md`](docs/context.md) - read it first.**
-<!-- L0-ONLY: This instruction targets the workspace root (L0). L1/L2 projects must NOT reference context.md — see context.md §7.5 context.md Non-Propagation. merge-frontmatter.ts strips context.md lines from L2 output. -->
+<!-- L0-ONLY: This instruction targets the workspace root (L0). L1/L2 projects must NOT reference CONSTITUTION.md — see CONSTITUTION.md §7.5 CONSTITUTION.md Non-Propagation. merge-frontmatter.ts strips CONSTITUTION.md lines from L2 output. -->
 
 ---
 
@@ -71,7 +71,7 @@ To disable the PostToolUse hook, remove the following block from `.claude/settin
 In Git Bash on Windows, writing to `> nul` or `2> nul` creates a physical file named `nul` in the working directory because Bash interprets `nul` as a relative path rather than the Win32 OS NUL device. Node.js / Bun `fs` APIs cannot delete physical `nul` files on Windows.
 - **Rule**: NEVER use `> nul` or `2> nul` in shell commands or scripts. Use `> /dev/null 2>&1` in Bash, or `$null` / `Out-Null` in PowerShell. All `.gitignore` templates MUST include `nul` and `NUL`.
 
-### 2. Pre-Edit Quality Gate (All Platforms)
+### Pre-Edit Quality Gate (All Platforms)
 
 Before editing any file for the **FIRST time in a session**, the agent MUST:
 
@@ -86,8 +86,8 @@ Before editing any file for the **FIRST time in a session**, the agent MUST:
 | Claude Desktop App | ✅* Hook + Prompt | Should fire via bundled CLI; fallback: self-enforcement |
 | Gemini CLI | ✅ Hook (automatic) | BeforeTool `deny` mode — agent must re-attempt after investigation |
 | Antigravity | ✅ Prompt (manual) | Hooks do not fire in Antigravity — agent self-enforces |
-| Codex CLI | ✅ Prompt (manual) | Hooks not wired in Phase 1 — agent self-enforces (ADR-0075) |
-| Codex Desktop App | ✅ Prompt (manual) | Hooks not wired in Phase 1 — agent self-enforces (ADR-0075) |
+| Codex CLI | ✅ Prompt (manual) | Hooks not wired in Phase 1 — agent self-enforces (ADR-0077) |
+| Codex Desktop App | ✅ Prompt (manual) | Hooks not wired in Phase 1 — agent self-enforces (ADR-0077) |
 
 *Claude Desktop App: Uses bundled CLI per Anthropic docs. Workspace testing (2026-05) observed intermittent hook behavior.
 

@@ -376,7 +376,7 @@ Inline `<style>` (no external CSS) + **light/dark 2-theme.** Same token names, d
   ```bash
   # Claude Code (Bash tool) / Antigravity/Gemini (run_command tool):
   TODAY=$(date +"%Y-%m-%d")
-  sed -i '' "s#Written <strong>[^<]*</strong>#Written <strong>$TODAY</strong>#" "$PROJECT_DIR/<slug>.html"
+  sed -i.bak "s#Written <strong>[^<]*</strong>#Written <strong>$TODAY</strong>#" "$PROJECT_DIR/<slug>.html" && rm "$PROJECT_DIR/<slug>.html.bak"
   ```
 
 ---

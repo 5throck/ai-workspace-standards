@@ -70,7 +70,7 @@ This creates `Projects/<variant-name>/` with:
 - `.gitattributes` with a `docs/context.md merge=ours` protection rule
 - Git initialized + .githooks configured
 - bun install complete
-- graft repo index built (`bunx @nanonets/graft build`, Step 8.5 in the script — the common overlay ships the full graft surface: `.mcp.json`, `opencode.json`, `.codex/config.toml`, `.claude` hooks/helpers/skill, `.gemini` MCP; ADR-0074). Non-fatal if bunx is unavailable
+- graft repo index built (`bunx @nanonets/graft build`, Step 8.5 in the script — the common overlay ships the full graft surface: `.mcp.json`, `opencode.json`, `.codex/config.toml`, `.claude` hooks/helpers/skill, `.gemini` MCP; ADR-0076). Non-fatal if bunx is unavailable
 - stub files (_ORIGIN.md, variant.json, PROMOTION_CHECKLIST.md, etc.)
 - A post-scaffold `bun scripts/audit.ts` run — non-fatal, but surfaces problems immediately instead of waiting for the first `/sync`
 
@@ -123,7 +123,7 @@ Copy the exact same `## <VariantName> Context` section to `GEMINI.md`.
 
 - Remove all workspace agent table entries
 - Keep the header and §PM Gateway Policy
-- Keep the `<!-- WORKSPACE-MANAGED: graft repo context graph -->` block (scaffold-appended from the L1 baseline; the upgrade MERGE pass keeps it in sync — ADR-0074)
+- Keep the `<!-- WORKSPACE-MANAGED: graft repo context graph -->` block (scaffold-appended from the L1 baseline; the upgrade MERGE pass keeps it in sync — ADR-0076)
 - Add `## <VariantName> Agents` section with variant agent stubs
 
 Verify:
@@ -238,7 +238,7 @@ grep "^## " GEMINI.md
 > **Note**: `new-project.ts` auto-detects variants dynamically from `templates/` at runtime — no manual update to that script is required when adding a new variant.
 
 - [ ] Run `bun scripts/verify-scripts.ts --verify` in the `Projects/<name>/` draft (L3) — must exit 0 with 0 errors (confirms SCRIPTS.md has no ghost entries or PAIR MISSING warnings)
-- [ ] Graft surface present (ADR-0074): `.mcp.json` + `opencode.json` + `.codex/config.toml` at project root, `.claude/helpers/graft-hooks.cjs`, `.claude/skills/graft/`, graft blocks in `CLAUDE.md`/`GEMINI.md`/`AGENTS.md`, `/graft/` in `.gitignore`, and a built `graft/` index (`bunx @nanonets/graft check` passes or is skipped)
+- [ ] Graft surface present (ADR-0076): `.mcp.json` + `opencode.json` + `.codex/config.toml` at project root, `.claude/helpers/graft-hooks.cjs`, `.claude/skills/graft/`, graft blocks in `CLAUDE.md`/`GEMINI.md`/`AGENTS.md`, `/graft/` in `.gitignore`, and a built `graft/` index (`bunx @nanonets/graft check` passes or is skipped)
 - [ ] Regenerate the README via `bun scripts/generate-l3-readme.ts --l3-path Projects/<variant-name>` and confirm **zero `TODO:` markers** remain in `README.md`/`README_ko.md` (the `variant.json → description` must be filled first, in Step 7, or the tagline still reads `TODO: describe…`)
 
 ---

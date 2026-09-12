@@ -46,6 +46,10 @@
       "file": "agents/market-entry-strategist.md"
     },
     {
+      "name": "pm",
+      "file": "agents/pm.md"
+    },
+    {
       "name": "trade-documentation-specialist",
       "file": "agents/trade-documentation-specialist.md"
     }

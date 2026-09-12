@@ -61,7 +61,7 @@ Workspace-management artifacts are excluded **at the L0→L1 propagation stage**
 
 The filtering is automatic — `propagate-to-templates.ts` enforces it at publish time, and `new-project.ts` re-checks as a safety net. No hardcoded exclusion lists are maintained.
 
-**Excluded skills** (workspace-management): `audit-workspace`, `create-variant`, `promote-variant`
+**Excluded skills** (workspace-management): `create-variant`, `promote-variant`
 
 **Excluded scripts** (workspace-management): `upgrade-project.ts` (layer `L0` per ADR-0073 Amendment 1 — the upgrade runs from the workspace root against the workspace-side template SSOT; a project-local copy could never source templates, and stale per-project copies are pruned by `upgrade-project --prune-removed`).
 

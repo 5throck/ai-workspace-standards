@@ -1,0 +1,20 @@
+schemaVersion: 1
+id: T-20260912-019
+kind: manual
+title: >-
+  Import-guard spec-register.ts and validate-templates.ts module dispatch,
+  root-resolve the spec registry path, and exit 1 on l3-to-variant-pipeline
+  rejection backstop
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-09-12T05:23:47.297Z'
+history:
+  - at: '2026-09-12T05:23:47.297Z'
+    from: null
+    to: backlog
+  - at: '2026-09-12T07:49:17.491Z'
+    from: backlog
+    to: done
+result: null
+error: null

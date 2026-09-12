@@ -3,9 +3,9 @@
 ## Metadata
 - **Skill**: project-resync
 - **Status**: active
-- **Version**: 1.2.0
+- **Version**: 1.3.0
 - **Created**: 2026-09-06
-- **Last Updated**: 2026-09-07
+- **Last Updated**: 2026-09-12 (Version 1.2.0 → 1.3.0 aligned to SKILL.md frontmatter, T-20260912-010)
 
 ## Description
 Whole-fleet bidirectional sync cycle for Projects/co-*: provenance audit

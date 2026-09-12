@@ -349,6 +349,10 @@
         "path": "scripts/co-deck/verify-new-theme.ts"
       },
       {
+        "name": "watch-deck",
+        "path": "scripts/co-deck/watch-deck.ts"
+      },
+      {
         "name": "html-to-pdf",
         "path": "scripts/co-deck/html-to-pdf.ts"
       }

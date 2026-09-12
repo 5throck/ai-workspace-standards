@@ -1,0 +1,19 @@
+schemaVersion: 1
+id: T-20260912-007
+kind: manual
+title: >-
+  Check git checkout exit codes in dev-sync step 5 branch creation so a failed
+  branch switch cannot fall through to add/commit/push on main
+priority: high
+status: done
+attempts: 0
+created_at: '2026-09-12T05:23:39.847Z'
+history:
+  - at: '2026-09-12T05:23:39.847Z'
+    from: null
+    to: backlog
+  - at: '2026-09-12T08:37:19.076Z'
+    from: backlog
+    to: done
+result: null
+error: null

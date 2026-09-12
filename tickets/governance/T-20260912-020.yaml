@@ -1,0 +1,21 @@
+schemaVersion: 1
+id: T-20260912-020
+kind: manual
+title: >-
+  Repair live-doc defects: broken relative paths in l0-l1-differences and
+  platform-parity-rules and variant-lifecycle and ecc-phase1-design, AGENTS.md
+  6-skills anchor, duplicate README/getting-started/CLAUDE.md sections, stale
+  setup.sh and template-v0.5.3 references
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-09-12T05:23:47.310Z'
+history:
+  - at: '2026-09-12T05:23:47.310Z'
+    from: null
+    to: backlog
+  - at: '2026-09-12T08:55:40.184Z'
+    from: backlog
+    to: done
+result: null
+error: null

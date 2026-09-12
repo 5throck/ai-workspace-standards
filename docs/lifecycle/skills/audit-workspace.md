@@ -10,6 +10,7 @@
 |------|------|-----|---------|----------|
 | 2026-05-29 | - | production | Initial skill established for workspace auditing | lifecycle-manager |
 | 2026-09-10 | production | deprecated | Superseded by standing `audit.ts` checks and the weekly health check (`project-review`); removal 2026-10-10 (PR #855) | pm |
+| 2026-09-12 | deprecated | retired | Skill directory removed (SSOT + all platform mirrors + L1 template copies); owner-approved early removal superseding the scheduled 2026-10-10 date (T-20260910-010) | pm |
 
 ## Acceptance Criteria
 
@@ -33,8 +34,8 @@
 
 ## Metadata
 
-- **Current Phase**: deprecated
+- **Current Phase**: retired
 - **Owner**: auditor
-- **Last Updated**: 2026-09-10
+- **Last Updated**: 2026-09-12
 - **Last Reviewer**: lifecycle-manager
-- **Removal Date**: 2026-10-10
+- **Removal Date**: 2026-09-12 (owner-approved early removal superseding the scheduled 2026-10-10 date, T-20260910-010)

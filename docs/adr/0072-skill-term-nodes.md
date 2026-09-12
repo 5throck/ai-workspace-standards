@@ -2,6 +2,8 @@
 status: Accepted
 date: 2026-09-11
 author: PM
+lang: ko
+lang_reason: proper-noun
 ---
 
 # ADR-0072: Skill Term Nodes — Korean Reference Data Becomes First-Class Skill-Graph Vocabulary

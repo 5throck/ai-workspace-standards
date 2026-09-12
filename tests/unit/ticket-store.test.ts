@@ -45,6 +45,23 @@ describe('createTicket', () => {
     }
     expect(ids.size).toBe(10);
   });
+
+  test('allocates an id that does not collide with the governance directory (T-20260912-025)', () => {
+    // move/list resolve ids with governance/ precedence, so a same-day id
+    // allocated in tickets/ root must not shadow-match one already handed
+    // out in tickets/governance/ (the scratch-create incident of 2026-09-12).
+    const governance = join(dir, 'governance');
+    const gov = createTicket(governance, { kind: 'manual', title: 'governance ticket', priority: 'high' });
+    const svc = createTicket(dir, { kind: 'service', service: 'audit', priority: 'normal' });
+    expect(svc.id).not.toBe(gov.id);
+    // and the reverse order must hold too
+    const gov2 = createTicket(governance, { kind: 'manual', title: 'governance ticket 2', priority: 'normal' });
+    const svc2 = createTicket(dir, { kind: 'service', service: 'audit', priority: 'normal' });
+    expect(gov2.id).not.toBe(svc.id);
+    expect(svc2.id).not.toBe(gov.id);
+    expect(svc2.id).not.toBe(svc.id);
+    expect(gov2.id).not.toBe(gov.id);
+  });
 });
 
 describe('listTickets ready filter (not_before boundary cases)', () => {
@@ -126,6 +143,24 @@ describe('moveTicket', () => {
     moveTicket(dir, t.id, 'running', { force: false });
     const failed = moveTicket(dir, t.id, 'failed', { error: 'boom' });
     expect(failed.error).toBe('boom');
+  });
+
+  test('writes the result field when moving to done with a result (T-20260912-023)', () => {
+    const t = createTicket(dir, { kind: 'manual', title: 'x', priority: 'normal' });
+    moveTicket(dir, t.id, 'waiting', { force: false });
+    moveTicket(dir, t.id, 'review', { force: false });
+    const done = moveTicket(dir, t.id, 'done', { force: false, result: 'implemented and verified' });
+    expect(done.status).toBe('done');
+    expect(done.result).toBe('implemented and verified');
+  });
+
+  test('store leaves result null when no result option is passed — the non-empty --result requirement is enforced at the CLI layer, not here', () => {
+    const t = createTicket(dir, { kind: 'manual', title: 'x', priority: 'normal' });
+    moveTicket(dir, t.id, 'waiting', { force: false });
+    moveTicket(dir, t.id, 'review', { force: false });
+    const done = moveTicket(dir, t.id, 'done', { force: false });
+    expect(done.status).toBe('done');
+    expect(done.result).toBeNull();
   });
 });
 

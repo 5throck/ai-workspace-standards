@@ -1,7 +1,18 @@
 #!/usr/bin/env bun
-// @version 1.14.0
+// @version 1.15.1
+// v1.15.1: T-20260912-022 — usage strings now list `codex` in the --platform
+//           choices (argument validation already accepted it; docs-only fix).
+// v1.15.0: T-20260912-004 — pm.md extends-stub resolution is now frontmatter-based
+//           (`extends:` present) instead of requiring an empty body, so the five
+//           prose-stub variants (co-export, co-hr, co-news, co-price, co-safety)
+//           scaffold a full PM agent instead of a body-less one; variant_overrides /
+//           remove_sections are rendered into body sections and stripped from the
+//           merged frontmatter (ADR-0039/0034 scaffold-time contract). T-20260912-006
+//           — §2.5b sanitizer blanks the L0-reference text instead of dropping the
+//           line (docs/context.md version footer survives for upgrade version-sync);
+//           shared pattern moved to helpers/l0-ref-policy.ts.
 // new-project.ts — Scaffold a new project under the workspace root
-// Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z] [--country <CODE>]
+// Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|codex|both] [--version X.Y.Z] [--country <CODE>]
 //
 // Migrated from new-project.sh/ps1 per ADR-0036. No file permission manipulation.
 
@@ -14,6 +25,7 @@ import { resolve, join, dirname, basename, relative } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { applyContextTemplate, DEFAULT_PM_ROLE_DESCRIPTIONS } from './helpers/template-utils.ts';
 import { rollbackPartialProject } from './helpers/rollback-partial-project.ts';
+import { blankL0Refs } from './helpers/l0-ref-policy.ts';
 import * as yaml from 'js-yaml';
 
 // ── Argument parsing ───────────────────────────────────────────────────────────
@@ -54,7 +66,7 @@ for (let i = 0; i < args.length; i++) {
 }
 
 if (!projectName) {
-  console.error('Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z] [--country <CODE>]');
+  console.error('Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|codex|both] [--version X.Y.Z] [--country <CODE>]');
   if (import.meta.main) {
     process.exit(1);
   }
@@ -480,26 +492,25 @@ for (const d of L1_ONLY_DIRS) {
   if (existsSync(dp)) { rmSync(dp, { recursive: true }); console.log(`  🗑️  Excluded L1-only directory: ${d}`); }
 }
 
-// ── 2.5b. Sanitize: remove L0 CONSTITUTION.md references from all .md files ────
-// Defense-in-depth: strip lines referencing CONSTITUTION.md or docs/constitution/ paths
-// that should not exist in generated L2 variant projects.
-const L0_REF_PATTERN = /CONSTITUTION\.md|docs[\/\\]constitution[\/\\]/i;
+// ── 2.5b. Sanitize: blank L0 CONSTITUTION.md references in all .md files ────
+// Defense-in-depth: blank the L0-reference text (CONSTITUTION.md / docs/constitution/)
+// inside affected lines of files that should not reference L0 in generated L2 variant
+// projects. T-20260912-006: the previous implementation DROPPED the whole line, which
+// deleted a docs/context.md version footer that merely cited an L0 rule — permanently
+// silencing upgrade-project's version-sync (VERSION_FOOTER_RE needs the footer line).
+// blankL0Refs() preserves line structure and removes only the matched text.
 let sanitizedCount = 0;
 for (const f of walkFiles(projectDir)) {
   if (!f.endsWith('.md')) continue;
   const original = readFileSync(f, 'utf-8');
-  const cleaned = original
-    .split('\n')
-    .filter(line => !L0_REF_PATTERN.test(line))
-    .join('\n')
-    .replace(/\n{3,}/g, '\n\n');
+  const cleaned = blankL0Refs(original);
   if (cleaned !== original) {
     writeFileSync(f, cleaned);
     sanitizedCount++;
   }
 }
 if (sanitizedCount > 0) {
-  console.log(`  🧹 Sanitized ${sanitizedCount} file(s): removed L0 CONSTITUTION references`);
+  console.log(`  🧹 Sanitized ${sanitizedCount} file(s): blanked L0 CONSTITUTION references`);
 }
 
 // Clear memory log files (new projects start with empty memory/)
@@ -547,17 +558,40 @@ for (const srcFile of walkFiles(templatesDir)) {
 makeWritable(projectDir);
 
 // ── 2.3b. Resolve variant pm.md extends-stub against the L1 body ──────────────
+// variant_overrides rendering helpers — mirror resolve-variants.ts (resolvePmBody
+// support): resolve-variants.ts executes main() unconditionally on import, so the
+// two tiny transforms are duplicated here instead of imported.
+function stripVariantSectionMarkers(value: unknown): string {
+  if (value === undefined || value === null) return '';
+  const text = typeof value === 'string' ? value : JSON.stringify(value, null, 2);
+  return text
+    .replace(/^\s*<!--\s*VARIANT-SECTION:\s*[\w-]+\s*-->\s*/gm, '')
+    .replace(/^\s*<!--\s*END VARIANT-SECTION\s*-->\s*/gm, '')
+    .trim();
+}
+
+function removeMarkdownSection(content: string, heading: string): string {
+  const escaped = heading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const level = heading.match(/^#+/)?.[0].length ?? 2;
+  const nextSameOrHigher = `\\n#{1,${level}}\\s+`;
+  return content.replace(new RegExp(`(^|\\n)${escaped}[\\s\\S]*?(?=${nextSameOrHigher}|$)`, 'm'), '\n');
+}
+
 // Variant templates may ship agents/pm.md as an ADR-0033 extends-stub (frontmatter
-// with `extends:` and an empty body). The overlay above replaces the full L1 pm.md
-// copied from templates/common, which would leave the project with a near-empty PM
-// agent. If the overlaid file is an empty-bodied extends-stub, re-attach the L1 body
-// so the project's pm.md is self-contained.
+// with `extends:` and an empty or prose-only body). The overlay above replaces the
+// full L1 pm.md copied from templates/common, which would leave the project with a
+// near-empty PM agent. If the overlaid file is an extends-stub — detected by
+// `extends:` in the frontmatter REGARDLESS of body emptiness (T-20260912-004: five
+// variants ship prose one-liner stubs that previously skipped resolution and
+// scaffolded a body-less PM agent) — re-attach the L1 body so the project's pm.md
+// is self-contained.
 const projPmMd = join(projectDir, 'agents', 'pm.md');
 if (existsSync(projPmMd)) {
   const pmContent = readFileSync(projPmMd, 'utf8');
   const pmFmMatch = pmContent.match(/^---\n([\s\S]*?)\n---\n?/);
   const pmBody = pmFmMatch ? pmContent.slice(pmFmMatch[0].length) : pmContent;
-  if (pmFmMatch && /extends:/.test(pmFmMatch[1]) && pmBody.trim() === '') {
+  if (pmFmMatch && /extends:/.test(pmFmMatch[1])) {
+    const isProseStub = pmBody.trim() !== '';
     const l1PmMd = join(workspaceRoot, 'templates', 'common', 'agents', 'pm.md');
     if (existsSync(l1PmMd)) {
       const l1Content = readFileSync(l1PmMd, 'utf8');
@@ -575,11 +609,43 @@ if (existsSync(projPmMd)) {
       for (const [k, v] of Object.entries(l1Fm)) {
         if (stubFm[k] === undefined && k !== 'extends') stubFm[k] = v;
       }
+      // ADR-0039/ADR-0034: `variant_overrides` (and `remove_sections`) are scaffold-time
+      // override data — render them into real markdown sections appended to the L1 body
+      // (same contract as resolve-variants.ts resolvePmBody), then strip the raw YAML
+      // keys so the scaffolded frontmatter carries neither `extends:` nor
+      // `variant_overrides:`. Empty-body stubs carry neither key today, so their output
+      // is byte-identical to the previous implementation.
+      const overrides = (stubFm.variant_overrides ?? {}) as Record<string, unknown>;
+      const removeSections = Array.isArray(stubFm.remove_sections) ? stubFm.remove_sections as string[] : [];
+      delete (stubFm as { variant_overrides?: unknown }).variant_overrides;
+      delete (stubFm as { remove_sections?: unknown }).remove_sections;
+      let resolvedBody = l1Body;
+      for (const section of removeSections) {
+        resolvedBody = removeMarkdownSection(resolvedBody, section);
+      }
+      const injectedSections = [
+        stripVariantSectionMarkers(overrides['updated_role']),
+        stripVariantSectionMarkers(overrides['governance_workflow']),
+        stripVariantSectionMarkers(overrides['agent_roster']),
+        stripVariantSectionMarkers(overrides['dispatch_protocol']),
+      ].filter(Boolean);
+      if (injectedSections.length > 0) {
+        resolvedBody = `${resolvedBody.trimEnd()}\n\n${injectedSections.join('\n\n')}\n`;
+      }
       const mergedFm = '---\n' + (yaml.dump(stubFm) as string).trimEnd() + '\n---\n';
-      writeFileSync(projPmMd, mergedFm + pmBody + (pmBody.endsWith('\n') ? '' : '\n') + l1Body, 'utf8');
-      console.log('  ✅ agents/pm.md: resolved empty extends-stub against templates/common body');
+      if (isProseStub) {
+        // Prose stub: the one-liner body ("This co-X PM override inherits the common PM
+        // body…") is stub metadata, not project content — drop it. The project gets the
+        // full L1 body plus any rendered variant_overrides sections.
+        writeFileSync(projPmMd, mergedFm + '\n' + resolvedBody, 'utf8');
+        console.log('  ✅ agents/pm.md: resolved prose extends-stub against templates/common body');
+      } else {
+        // Empty stub — output shape unchanged from the previous implementation.
+        writeFileSync(projPmMd, mergedFm + pmBody + (pmBody.endsWith('\n') ? '' : '\n') + resolvedBody, 'utf8');
+        console.log('  ✅ agents/pm.md: resolved empty extends-stub against templates/common body');
+      }
     } else {
-      console.log('  ⚠️  agents/pm.md: empty extends-stub but templates/common/agents/pm.md is missing — project ships a stub PM agent');
+      console.log('  ⚠️  agents/pm.md: extends-stub but templates/common/agents/pm.md is missing — project ships a stub PM agent');
     }
   }
 }
@@ -723,7 +789,7 @@ for (const d of ['docs/adr', 'docs/variants', 'docs/_templates', 'docs/_examples
 // ── 2.7. Apply platform profile ───────────────────────────────────────────────
 if (platform === 'claude') { const f = join(projectDir, 'GEMINI.md'); if (existsSync(f)) rmSync(f); }
 if (platform === 'antigravity') { const f = join(projectDir, 'CLAUDE.md'); if (existsSync(f)) rmSync(f); }
-// ADR-0075 §10: `codex` is a codex-primary profile — keeps CODEX.md + .codex/ and drops the
+// ADR-0077 §10: `codex` is a codex-primary profile — keeps CODEX.md + .codex/ and drops the
 // legacy twins. Legacy profiles (`claude`/`antigravity`/`both`) are codex-opt-out: the twin
 // and platform dir are template overlay, removed here unless explicitly opted in.
 if (platform !== 'codex') {
@@ -1102,7 +1168,7 @@ try {
   console.log(`  ⚠️  Skill graph generation errored (non-fatal): ${(err as Error).message}`);
 }
 
-// ── 7.7. Graft index build (ADR-0074) ─────────────────────────────────────────
+// ── 7.7. Graft index build (ADR-0076) ─────────────────────────────────────────
 // The template ships the full graft surface (MCP entries, skill, hooks); give the
 // fresh project its repo graph right away. Non-fatal: bunx/graft may be unavailable
 // (offline), and every graft tool self-refreshes the graph before answering, so a

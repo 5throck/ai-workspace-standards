@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.24.0
+ * @version 1.25.0
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -10,6 +10,21 @@
  *   bun scripts/validate-templates.ts
  *   bun scripts/validate-templates.ts --variant co-develop
  *   bun scripts/validate-templates.ts --json
+ *
+ * v1.25.0 (T-20260912-014 / T-20260912-019): manifest reverse reconciliation —
+ *          exists→declared direction added for script_manifest.local (files under
+ *          the variant's scripts/<variant>/ top level not declared → WARN, grace
+ *          window before a later FAIL decision) and for agents[] (top-level
+ *          agents/*.md not declared → WARN; agents/domains/ and agents/_shared/
+ *          trees are out of scope — they are indexed via the variant's AGENTS.md,
+ *          matching resolve-variants.ts's top-level scan semantics). L0/L1 script
+ *          parity now also covers .json files (propagation-map.json's L1 copy was
+ *          skipped by the old .ts/.md-only filter while the scrub bug of
+ *          T-20260912-005 silently corrupted it). scrubConstitutionRefs now
+ *          imported from the shared scripts/lib/constitution-scrub.ts (also fixes
+ *          the L1 mirror's dangling import of the L0-only propagate-to-templates).
+ *          main() returns the exit code; process.exit only at the import.meta.main
+ *          call site, so the module is import-safe.
  */
 
 import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from 'node:fs';
@@ -38,7 +53,7 @@ import { fileURLToPath } from 'node:url';
 import { load } from 'js-yaml';
 import { getScriptLayer, getSkillLayer, includeScriptInL1, parseScriptLayers, parseSkillLayers } from './helpers/layer-filter.ts';
 import { validatePropagationMap } from './lib/propagation-map-schema.ts';
-import { scrubConstitutionRefs } from './propagate-to-templates.ts';
+import { scrubConstitutionRefs } from './lib/constitution-scrub.ts';
 
 interface VariantManifest {
   name: string;
@@ -292,6 +307,62 @@ function checkCountryProfileDivergence(): void {
   }
 }
 
+// ── B-03r / B-03a: exists→declared reverse reconciliation helpers (T-20260912-014) ──
+
+/** File extensions treated as invokable scripts for manifest reconciliation. */
+const SCRIPT_FILE_RE = /\.(ts|mjs|cjs|js|sh|ps1)$/;
+
+/**
+ * Find script files present at the TOP LEVEL of the variant's own scripts/
+ * namespace (scripts/<variant>/) that are not declared in variant.json
+ * script_manifest.local.
+ *
+ * Scope decision: top level only. Nested lib/ and tests/ support trees are
+ * registered in the variant's own scripts/<variant>/SCRIPTS.md registry, not in
+ * script_manifest.local — that manifest lists directly-invokable CLI scripts
+ * (that is what Check V version-tracks), and co-deck's lib/tests trees predate
+ * this check with exactly that split. SCRIPTS.md itself is excluded.
+ */
+export function findUndeclaredScripts(variantDir: string, declaredPaths: string[]): string[] {
+  const variantName = basename(variantDir);
+  const nsDir = join(variantDir, 'scripts', variantName);
+  if (!existsSync(nsDir)) return [];
+  const declared = new Set(declaredPaths.map(p => p.replace(/\\/g, '/')));
+  const undeclared: string[] = [];
+  for (const f of readdirSync(nsDir)) {
+    const full = join(nsDir, f);
+    if (!statSync(full).isFile()) continue;
+    if (f === 'SCRIPTS.md' || !SCRIPT_FILE_RE.test(f)) continue;
+    const rel = `scripts/${variantName}/${f}`;
+    if (!declared.has(rel)) undeclared.push(rel);
+  }
+  return undeclared.sort();
+}
+
+/**
+ * Find top-level agents/*.md files that are not declared in variant.json
+ * agents[]. README files are excluded; nested agents/domains/ and
+ * agents/_shared/ trees are out of scope (indexed via the variant's AGENTS.md —
+ * the schema's agents[] entries use flat "agents/<name>.md" paths and
+ * resolve-variants.ts scans the same top level).
+ */
+export function findUndeclaredAgents(variantDir: string, declared: Array<{ name?: string; file?: string }>): string[] {
+  const agentsDir = join(variantDir, 'agents');
+  if (!existsSync(agentsDir)) return [];
+  const declaredNames = new Set(declared.map(a => (a.name ?? '').replace(/\\/g, '/').toLowerCase()));
+  const declaredFiles = new Set(declared.map(a => (a.file ?? '').replace(/\\/g, '/').toLowerCase()));
+  const undeclared: string[] = [];
+  for (const f of readdirSync(agentsDir)) {
+    const full = join(agentsDir, f);
+    if (!statSync(full).isFile() || !f.endsWith('.md')) continue;
+    if (f.startsWith('README')) continue;
+    const name = f.replace(/\.md$/, '');
+    if (declaredNames.has(name.toLowerCase()) || declaredFiles.has(`agents/${f}`.toLowerCase())) continue;
+    undeclared.push(`agents/${f}`);
+  }
+  return undeclared.sort();
+}
+
 // Check 2: variant.json in each variant dir
 function checkVariantManifests(): Map<string, VariantManifest> {
   if (!JSON_MODE) console.log('\n=== Check 2: variant.json manifests ===');
@@ -366,6 +437,27 @@ function checkVariantManifests(): Map<string, VariantManifest> {
             pass(`templates/${dir}/variant.json script_manifest.local["${entry.name}"] → ${entry.path} ✓`);
           }
         }
+      }
+
+      // B-03r: exists→declared reverse reconciliation (T-20260912-014).
+      // A script dropped into the variant's own scripts/<variant>/ namespace must
+      // be declared in script_manifest.local, or downstream consumers (Check V
+      // version tracking, scaffolding injection) silently miss it.
+      const undeclaredScripts = findUndeclaredScripts(join(TEMPLATES_DIR, dir), (scriptManifest?.local ?? []).map(e => e.path));
+      for (const rel of undeclaredScripts) {
+        warn(dir, 'script-manifest-reverse', `templates/${dir}/${rel} exists but is not declared in variant.json script_manifest.local`, `Add {"name": "${basename(rel).replace(/\.[^.]+$/, '')}", "path": "${rel}"} to script_manifest.local — grace window: WARN now, promotion to FAIL is a pending follow-up decision`);
+      }
+
+      // B-03a: agents exists→declared reverse reconciliation (T-20260912-014).
+      // Top-level agents/*.md files must appear in variant.json agents[] — that
+      // array is the machine-readable roster (schema docs/templates/variant.schema.json;
+      // resolve-variants.ts scans the same top level). Nested agents/domains/ and
+      // agents/_shared/ trees are intentionally out of scope: they are indexed via
+      // the variant's AGENTS.md, not the flat agents[] roster.
+      const declaredAgents = (raw.agents as Array<{ name?: string; file?: string }> | undefined) ?? [];
+      const undeclaredAgents = findUndeclaredAgents(join(TEMPLATES_DIR, dir), declaredAgents);
+      for (const rel of undeclaredAgents) {
+        warn(dir, 'agent-manifest-reverse', `templates/${dir}/${rel} exists but is not declared in variant.json agents[]`, `Add {"name": "${basename(rel).replace(/\.md$/, '')}", "file": "${rel}"} to agents — top-level roster only (domains/_shared trees are indexed via AGENTS.md); grace window: WARN now, promotion to FAIL is a pending follow-up decision`);
       }
 
       // B-04: theme_manifest CSS file existence check
@@ -1151,8 +1243,8 @@ function checkL0L1ScriptParity() {
   for (const script of commonScripts) {
     // Skip helper sub-paths and non-file entries that may appear in the registry
     if (script.includes('/')) continue;
-    // Skip non-script config files (JSON, etc.) — they are data, not executable scripts
-    if (!script.endsWith('.ts') && !script.endsWith('.md')) continue;
+    // Scripts, docs, and data files are parity-checked; other extensions are not propagated
+    if (!script.endsWith('.ts') && !script.endsWith('.md') && !script.endsWith('.json')) continue;
 
     const l1Path = join(L1_SCRIPTS, script);
     const l0Path = join(L0_SCRIPTS, script);
@@ -2249,7 +2341,7 @@ function checkCommonContract(): void {
         if (countryScoped.has(name)) continue; // country-scoped — contract description excludes
         if (variantScoped.has(name)) continue; // variant-scoped — contract description excludes
         if (SINGLE_PLATFORM_EXCEPTIONS[name]) {
-          // Anti-drift (ADR-0074 D6): the skill is hand-maintained as exactly two
+          // Anti-drift (ADR-0076 D6): the skill is hand-maintained as exactly two
           // byte-identical copies (root + template) — divergence means an edit
           // landed on one side only, and the next upgrade would ship the stale one.
           const rootCopy = join(ROOT, '.claude', 'skills', name, 'SKILL.md');
@@ -2913,7 +3005,7 @@ function extractMarkedSections(content: string, markerName: string): Array<{head
   return sections;
 }
 
-// Check MM-01: Model-ID literal placement (ADR-0075 D11). Model IDs may appear ONLY inside
+// Check MM-01: Model-ID literal placement (ADR-0077 D11). Model IDs may appear ONLY inside
 // managed marker sections (COMMON-*:START/END, WORKSPACE-MANAGED) of the four instruction
 // twins at L0/L1 — those are the only regions MERGE/marker-inject passes deliver downstream.
 // A literal outside a managed section silently stalls at its layer on the next model refresh.
@@ -3580,7 +3672,7 @@ function checkMarkerZoneParity(): void {
   }
 }
 
-function main() {
+function main(): number {
   if (!JSON_MODE) {
     console.log(`${colors.cyan}Template Lifecycle Validator${colors.reset}`);
     console.log(`${colors.dim}Root: ${ROOT}${colors.reset}`);
@@ -3687,7 +3779,11 @@ function main() {
     }
   }
 
-  process.exit(errors.length > 0 ? 1 : 0);
+  // T-20260912-019: main() returns the exit code instead of exiting directly,
+  // so importing this module never terminates the importer's process.
+  return errors.length > 0 ? 1 : 0;
 }
 
-main();
+if (import.meta.main) {
+  process.exit(main());
+}

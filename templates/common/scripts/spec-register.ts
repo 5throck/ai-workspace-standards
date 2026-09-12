@@ -1,4 +1,4 @@
-// @version 1.1.0
+// @version 1.2.0
 /**
  * spec-register.ts
  *
@@ -16,18 +16,32 @@
  * --id <value> overrides the default slugFromPath(filePath) id. Needed for files without a
  * YYYY-MM-DD- filename prefix, so callers (e.g. spec-backfill.ts) can supply a dated id that
  * matches the convention used by hand-registered entries.
+ *
+ * v1.2.0 (T-20260912-019): import safety — all CLI dispatch is wrapped in
+ *          `if (import.meta.main)`, so importing this module for its helpers
+ *          (loadRegistry, saveRegistry, slugFromPath, titleFromPath) no longer
+ *          runs CRUD against the registry or prints usage errors. REGISTRY_PATH
+ *          resolves from this script's own location (import.meta.dir/..) instead
+ *          of process.cwd(), so spawned callers (variant-feature.ts,
+ *          project-to-variant.ts, spec-backfill.ts) resolve the workspace
+ *          registry regardless of their working directory; CLI behavior is
+ *          unchanged for the standard workspace-root invocation.
  */
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
-const REGISTRY_PATH = path.join('docs', 'specs', 'registry.json');
+// Resolved from the script's own location (scripts/spec-register.ts → workspace
+// root), not cwd — spawned callers may run from a different working directory.
+export const REGISTRY_PATH = path.resolve(import.meta.dir, '..', 'docs', 'specs', 'registry.json');
 
-const GREEN = '[32m';
-const RED = '[31m';
-const YELLOW = '[33m';
-const CYAN = '[36m';
-const RESET = '[0m';
+// ANSI colors — explicit \x1b escapes produce the exact same output bytes as the
+// previous raw-escape-character literals.
+const GREEN = '\x1b[32m';
+const RED = '\x1b[31m';
+const YELLOW = '\x1b[33m';
+const CYAN = '\x1b[36m';
+const RESET = '\x1b[0m';
 
 type SpecStatus = 'draft' | 'proposed' | 'approved' | 'implemented' | 'drifted' | 'archived';
 type SpecSource = 'brainstorming' | 'meeting' | 'manual';
@@ -48,7 +62,7 @@ interface Registry {
   specs: SpecEntry[];
 }
 
-function loadRegistry(): Registry {
+export function loadRegistry(): Registry {
   if (!fs.existsSync(REGISTRY_PATH)) {
     fs.mkdirSync(path.dirname(REGISTRY_PATH), { recursive: true });
     return { version: '1.0.0', specs: [] };
@@ -56,12 +70,12 @@ function loadRegistry(): Registry {
   return JSON.parse(fs.readFileSync(REGISTRY_PATH, 'utf-8'));
 }
 
-function saveRegistry(registry: Registry): void {
+export function saveRegistry(registry: Registry): void {
   fs.mkdirSync(path.dirname(REGISTRY_PATH), { recursive: true });
   fs.writeFileSync(REGISTRY_PATH, JSON.stringify(registry, null, 2) + '\n', 'utf-8');
 }
 
-function slugFromPath(filePath: string): string {
+export function slugFromPath(filePath: string): string {
   return path.basename(filePath, '.md')
     .toLowerCase()
     .replace(/[^a-z0-9-]/g, '-')
@@ -69,117 +83,126 @@ function slugFromPath(filePath: string): string {
     .replace(/^-|-$/g, '');
 }
 
-function titleFromPath(filePath: string): string {
+export function titleFromPath(filePath: string): string {
   const base = path.basename(filePath, '.md');
   return base.replace(/^\d{4}-\d{2}-\d{2}-/, '').replace(/-/g, ' ');
 }
 
-function today(): string {
+export function today(): string {
   return new Date().toISOString().split('T')[0];
 }
 
-const args = process.argv.slice(2);
+/** Register (or refresh) a spec entry — the `--file` code path, callable without process.argv. */
+export function registerSpec(options: {
+  filePath: string;
+  source?: SpecSource;
+  meetingRef?: string;
+  status?: SpecStatus;
+  id?: string;
+}): { id: string; updated: boolean } {
+  const source = (options.source ?? 'manual') as SpecSource;
+  const status = (options.status ?? (source === 'brainstorming' ? 'approved' : 'draft')) as SpecStatus;
 
-function getArg(flag: string): string | undefined {
-  const idx = args.indexOf(flag);
-  return idx !== -1 && idx + 1 < args.length ? args[idx + 1] : undefined;
-}
-
-function hasFlag(flag: string): boolean {
-  return args.includes(flag);
-}
-
-if (getArg('--file')) {
-  const filePath = getArg('--file')!;
-  const source = (getArg('--source') ?? 'manual') as SpecSource;
-  const meetingRef = getArg('--ref');
-  const statusArg = (getArg('--status') ?? (source === 'brainstorming' ? 'approved' : 'draft')) as SpecStatus;
-
-  if (!fs.existsSync(filePath)) {
-    console.error(`${RED}File not found: ${filePath}${RESET}`);
+  if (!fs.existsSync(options.filePath)) {
+    console.error(`${RED}File not found: ${options.filePath}${RESET}`);
     if (import.meta.main) {
       process.exit(1);
     }
+    throw new Error(`File not found: ${options.filePath}`);
   }
 
   const registry = loadRegistry();
-  const id = getArg('--id') ?? slugFromPath(filePath);
+  const id = options.id ?? slugFromPath(options.filePath);
   const existing = registry.specs.find(s => s.id === id);
   if (existing) {
     existing.last_updated = today();
-    if (meetingRef) existing.meeting_ref = meetingRef;
+    if (options.meetingRef) existing.meeting_ref = options.meetingRef;
     saveRegistry(registry);
     console.log(`${GREEN}Updated: ${id}${RESET}`);
-    if (import.meta.main) {
-      process.exit(0);
-    }
+    return { id, updated: true };
   }
 
   const entry: SpecEntry = {
     id,
-    title: titleFromPath(filePath),
-    file: filePath.split('\\').join('/'),
-    status: statusArg,
+    title: titleFromPath(options.filePath),
+    file: options.filePath.split('\\').join('/'),
+    status,
     source,
     created: today(),
     last_updated: today(),
   };
-  if (meetingRef) entry.meeting_ref = meetingRef.split('\\').join('/');
+  if (options.meetingRef) entry.meeting_ref = options.meetingRef.split('\\').join('/');
   registry.specs.push(entry);
   saveRegistry(registry);
   console.log(`${GREEN}Registered spec: ${id}${RESET}`);
-  if (import.meta.main) {
-    process.exit(0);
-  }
+  return { id, updated: false };
 }
 
-if (getArg('--update')) {
-  const id = getArg('--update')!;
-  const newStatus = getArg('--status') as SpecStatus | undefined;
-  if (import.meta.main) {
+/**
+ * CLI dispatch. Runs only when executed directly (`bun scripts/spec-register.ts …`).
+ * Output and exit codes are byte-identical to the pre-1.2.0 CLI behavior.
+ */
+function dispatch(): void {
+  const args = process.argv.slice(2);
+
+  function getArg(flag: string): string | undefined {
+    const idx = args.indexOf(flag);
+    return idx !== -1 && idx + 1 < args.length ? args[idx + 1] : undefined;
+  }
+
+  function hasFlag(flag: string): boolean {
+    return args.includes(flag);
+  }
+
+  if (getArg('--file')) {
+    registerSpec({
+      filePath: getArg('--file')!,
+      source: (getArg('--source') ?? 'manual') as SpecSource,
+      meetingRef: getArg('--ref'),
+      status: (getArg('--status') ?? undefined) as SpecStatus | undefined,
+      id: getArg('--id'),
+    });
+    // The old CLI exited immediately after register/update; preserve that contract.
+    process.exit(0);
+  }
+
+  if (getArg('--update')) {
+    const id = getArg('--update')!;
+    const newStatus = getArg('--status') as SpecStatus | undefined;
     if (!newStatus) { console.error(`${RED}--update requires --status${RESET}`); process.exit(1); }
-  }
-  const registry = loadRegistry();
-  const entry = registry.specs.find(s => s.id === id);
-  if (import.meta.main) {
+    const registry = loadRegistry();
+    const entry = registry.specs.find(s => s.id === id);
     if (!entry) { console.error(`${RED}Spec not found: ${id}${RESET}`); process.exit(1); }
-  }
-  // Non-null assertions: in module (non-main) mode the entry-guard above does not run,
-  // and entry would be undefined here exactly as before (TypeError on access) — the
-  // assertions preserve that behavior while letting main-mode pass typecheck.
-  const prev = entry!.status;
-  entry!.status = newStatus!;
-  entry!.last_updated = today();
-  saveRegistry(registry);
-  console.log(`${GREEN}Updated ${id}: ${prev} -> ${newStatus}${RESET}`);
-  if (import.meta.main) {
+    const prev = entry.status;
+    entry.status = newStatus;
+    entry.last_updated = today();
+    saveRegistry(registry);
+    console.log(`${GREEN}Updated ${id}: ${prev} -> ${newStatus}${RESET}`);
     process.exit(0);
   }
-}
 
-if (hasFlag('--list') || args.length === 0) {
-  const registry = loadRegistry();
-  const filterStatus = getArg('--status') as SpecStatus | undefined;
-  const specs = filterStatus ? registry.specs.filter(s => s.status === filterStatus) : registry.specs;
-  if (specs.length === 0) {
-    console.log(`${CYAN}No specs found${filterStatus ? ` with status: ${filterStatus}` : ''}.${RESET}`);
-    if (import.meta.main) {
+  if (hasFlag('--list') || args.length === 0) {
+    const registry = loadRegistry();
+    const filterStatus = getArg('--status') as SpecStatus | undefined;
+    const specs = filterStatus ? registry.specs.filter(s => s.status === filterStatus) : registry.specs;
+    if (specs.length === 0) {
+      console.log(`${CYAN}No specs found${filterStatus ? ` with status: ${filterStatus}` : ''}.${RESET}`);
       process.exit(0);
     }
-  }
-  console.log(`${CYAN}Spec Registry (${specs.length} entries)${RESET}
+    console.log(`${CYAN}Spec Registry (${specs.length} entries)${RESET}
 `);
-  for (const s of specs) {
-    const c = s.status === 'implemented' ? GREEN : s.status === 'approved' ? CYAN : s.status === 'drifted' ? RED : YELLOW;
-    console.log(`  ${c}[${s.status.padEnd(11)}]${RESET} ${s.id}
+    for (const s of specs) {
+      const c = s.status === 'implemented' ? GREEN : s.status === 'approved' ? CYAN : s.status === 'drifted' ? RED : YELLOW;
+      console.log(`  ${c}[${s.status.padEnd(11)}]${RESET} ${s.id}
              ${s.file}`);
-  }
-  if (import.meta.main) {
+    }
     process.exit(0);
   }
+
+  console.error('Usage: --file <path> --source <brainstorming|meeting|manual> | --update <id> --status <status> | --list');
+  process.exit(1);
 }
 
-console.error('Usage: --file <path> --source <brainstorming|meeting|manual> | --update <id> --status <status> | --list');
 if (import.meta.main) {
-  process.exit(1);
+  dispatch();
 }

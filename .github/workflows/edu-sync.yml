@@ -125,7 +125,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           claude_args: >-
-            --model ${{ vars.NIGHTLY_TICKETS_MODEL }}
+            --model ${{ vars.NIGHTLY_TICKETS_MODEL || 'glm-5.3' }}
             --allowed-tools "Bash,Read,Edit,Write,Glob,Grep"
           prompt: |
             You are the weekly education-content sync agent. This checkout is the

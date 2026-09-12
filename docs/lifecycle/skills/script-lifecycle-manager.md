@@ -33,6 +33,6 @@
 ## Metadata
 
 - **Current Phase**: production
-- **Owner**: automation-engineer
-- **Last Updated**: 2026-05-29
+- **Owner**: pm
+- **Last Updated**: 2026-09-12 (Owner corrected automation-engineer → pm to match SKILL.md frontmatter, T-20260912-010)
 - **Last Reviewer**: lifecycle-manager

@@ -172,6 +172,10 @@
       {
         "name": "bundle-html",
         "path": "scripts/co-game/bundle-html.ts"
+      },
+      {
+        "name": "validate-asset-manifest",
+        "path": "scripts/co-game/validate-asset-manifest.ts"
       }
     ],
     "external": []

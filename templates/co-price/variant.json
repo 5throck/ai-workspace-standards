@@ -46,6 +46,10 @@
       "file": "agents/market-intelligence-analyst.md"
     },
     {
+      "name": "pm",
+      "file": "agents/pm.md"
+    },
+    {
       "name": "pricing-strategist",
       "file": "agents/pricing-strategist.md"
     },

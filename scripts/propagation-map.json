@@ -1,6 +1,6 @@
 {
   "_comment": "Propagation map: L0 (workspace root) → L1 (templates/common/) for scripts/skills/commands; L1 (templates/common/) → L2 (templates/co-*/) for governance docs via marker-inject mode. Agents are intentionally excluded from L0→L1 propagation — only pm.md uses an explicit extends chain (ADR-0039, ADR-0040). Specialist agents are variant-defined (ADR-0043). l2_drift_eligible (default true): controls whether this domain participates in L1→L2 drift detection via --check-drift. Set false for domains whose L2 content is managed through the Fork Model scaffolding pipeline (create-variant / promote-variant per ADR-0031) — L2 variants receive this content during scaffolding/promotion, not through ongoing L1→L2 sync.",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "domains": {
     "scripts": {
       "description": "TypeScript automation scripts",
@@ -47,7 +47,7 @@
       "recursive": false,
       "l2_drift_eligible": false,
       "exclude": [],
-      "note": "Self-propagation: without this domain the SSOT's own updates never reach L1 (found stuck at v1.4.0 vs L0 v1.7.0, 2026-09-04). templates/common/scripts/propagation-map.json is kept byte-identical per validate-templates.ts glob parity; no code reads the L1 copy (see docs/templates/known-issues.json ISSUE-008 — the unreferenced bare templates/common/propagation-map.json duplicate was deleted 2026-09-04)."
+      "note": "Self-propagation: without this domain the SSOT's own updates never reach L1 (found stuck at v1.4.0 vs L0 v1.7.0, 2026-09-04). The L1 copy is propagated verbatim and IS byte-identical to this file (modulo line endings): JSON is functional data and scrubConstitutionRefs never touches .json (T-20260912-005 — the scrub had rewritten the constitution-context source_file to \"context.md\" until fixed). Byte-parity is enforced by validate-templates.ts checkL0L1ScriptParity, whose glob fallback covers .json files since v1.25.0. No code reads the L1 copy (see docs/templates/known-issues.json ISSUE-008 — the unreferenced bare templates/common/propagation-map.json duplicate was deleted 2026-09-04)."
     },
     "claude-skills": {
       "description": "Platform skills for Claude Code",
@@ -171,7 +171,7 @@
       "note": "No L2 variant has .agents/skills/ — workspace-root-only platform skills"
     },
     "codex-skills": {
-      "description": "L0 .codex/skills/ → L1 templates/common/.codex/skills/ — Codex CLI/Desktop App platform skills (ADR-0075)",
+      "description": "L0 .codex/skills/ → L1 templates/common/.codex/skills/ — Codex CLI/Desktop App platform skills (ADR-0077)",
       "source": ".codex/skills",
       "target": "templates/common/.codex/skills",
       "include_pattern": "*/SKILL.md",
@@ -181,7 +181,7 @@
       "note": "Same B-03/mirror:false exclusions as the other platform mirrors (enforced in sync-skills.ts); L2 variant mirrors come from sync-skills --all-variants over each variant's own skills/ SSOT"
     },
     "codex-prompts": {
-      "description": "L0 .codex/prompts/ → L1 templates/common/.codex/prompts/ — Codex custom prompts mirrored from the .claude/commands SSOT (ADR-0075 D4)",
+      "description": "L0 .codex/prompts/ → L1 templates/common/.codex/prompts/ — Codex custom prompts mirrored from the .claude/commands SSOT (ADR-0077 D4)",
       "source": ".codex/prompts",
       "target": "templates/common/.codex/prompts",
       "include_pattern": "*.md",
@@ -191,14 +191,14 @@
       "note": "Project-level prompts support on Codex is verified live in W5; an unsupported result demotes this mirror to documented no-op"
     },
     "codex-config": {
-      "description": "L0 .codex/config.toml → L1 templates/common/.codex/config.toml — Codex TOML config (graft MCP seed, ADR-0074)",
+      "description": "L0 .codex/config.toml → L1 templates/common/.codex/config.toml — Codex TOML config (graft MCP seed, ADR-0076)",
       "source": ".codex",
       "target": "templates/common/.codex",
       "include_pattern": "config.toml",
       "recursive": false,
       "l2_drift_eligible": false,
       "exclude": [],
-      "note": "TOML is seed-only downstream (upgrade-policy ADD_IF_MISSING, ADR-0074); co-abap/co-safety own their project Codex configs"
+      "note": "TOML is seed-only downstream (upgrade-policy ADD_IF_MISSING, ADR-0076); co-abap/co-safety own their project Codex configs"
     },
     "claude-skills-json": {
       "description": "L0 .claude/skills.json → L1 templates/common/.claude/skills.json — Claude skill path registration",

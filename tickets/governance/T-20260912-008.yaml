@@ -1,0 +1,20 @@
+schemaVersion: 1
+id: T-20260912-008
+kind: manual
+title: >-
+  Split the test.yml Tier 3 Auditor pwsh step into per-audit steps so
+  PSNativeCommandUseErrorActionPreference cannot mask three of four lifecycle
+  audit failures
+priority: high
+status: done
+attempts: 0
+created_at: '2026-09-12T05:23:39.863Z'
+history:
+  - at: '2026-09-12T05:23:39.863Z'
+    from: null
+    to: backlog
+  - at: '2026-09-12T07:56:06.412Z'
+    from: backlog
+    to: done
+result: null
+error: null

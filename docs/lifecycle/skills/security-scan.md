@@ -21,7 +21,9 @@
 
 ## Dependencies
 
-- security-expert (owner agent)
+- pm (owner agent)
+- gitleaks (prerequisite tooling)
+- security-expert (domain expertise for triage)
 
 ## Usage Statistics
 
@@ -32,6 +34,7 @@
 ## Metadata
 
 - **Current Phase**: production
-- **Owner**: security-expert
-- **Last Updated**: 2026-08-30 (SKILL.md 1.1.0 → 1.2.0: added on-demand dependency vulnerability step — `bun audit` failing on high/critical, mirroring the CI gate threshold; reconciles the pre-existing "Advisory scan, CVE checking" acceptance criterion that had no corresponding SKILL.md step. Previous: 1.0.0 → 1.1.0 mandated explicit `--config .gitleaks.toml` on all gitleaks invocations — subdirectory scans without it silently fall back to the default ruleset and lose workspace allowlists)
+- **Version**: 1.2.0
+- **Owner**: pm
+- **Last Updated**: 2026-09-12 (record reconciliation per T-20260912-010: Owner corrected security-expert → pm to match SKILL.md frontmatter; Version field added. Previous content update: 2026-08-30 — SKILL.md 1.1.0 → 1.2.0: added on-demand dependency vulnerability step — `bun audit` failing on high/critical, mirroring the CI gate threshold; reconciles the pre-existing "Advisory scan, CVE checking" acceptance criterion that had no corresponding SKILL.md step. Previous: 1.0.0 → 1.1.0 mandated explicit `--config .gitleaks.toml` on all gitleaks invocations — subdirectory scans without it silently fall back to the default ruleset and lose workspace allowlists)
 - **Last Reviewer**: lifecycle-manager

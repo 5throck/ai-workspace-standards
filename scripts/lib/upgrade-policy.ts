@@ -1,5 +1,11 @@
-// @version 1.4.0
-// v1.2.0: graft fleet surface (ADR-0074): .mcp.json + opencode.json join JSON_MERGE_FILES
+// @version 1.5.0
+// v1.5.0 (2026-09-12, T-20260912-021): PLACEHOLDER_ALLOWLIST gains
+//         skills/explain-me/templates/report.html and skills/explain-me/references/BUILD_GUIDE.md
+//         — the skill's own report template + authoring guide substitute their {{tokens}} at
+//         project RUNTIME (not scaffold time), so they ship verbatim by design. Context: the
+//         files reached templates/common when the explain-me L0↔L1 mirror drift was fixed
+//         (only SKILL.md propagated before, leaving a broken half-skill in projects).
+// v1.2.0: graft fleet surface (ADR-0076): .mcp.json + opencode.json join JSON_MERGE_FILES
 //         (project-owned MCP servers survive the union); .claude/skills/graft/** claims
 //         TEMPLATE TREE SYNC before the platform-mirror rule (the skill is hand-maintained
 //         outside the SSOT skills/, so sync-skills.ts can never deliver it — the verified
@@ -64,7 +70,7 @@ export const WORKSPACE_DOC_DIRS = [
 ] as const;
 
 /** Platform settings files merged (not overwritten) by the TEMPLATE TREE SYNC pass.
- *  graft (ADR-0074): .mcp.json and opencode.json carry MCP server registrations — projects
+ *  graft (ADR-0076): .mcp.json and opencode.json carry MCP server registrations — projects
  *  may hold project-only servers (co-newbiz, co-safety, co-abap), so they deep-merge like
  *  the platform settings instead of syncing. */
 export const JSON_MERGE_FILES = [
@@ -76,6 +82,14 @@ export const JSON_MERGE_FILES = [
 export const PLACEHOLDER_ALLOWLIST = new Set([
   'docs/README.template.md',
   'docs/README_ko.template.md',
+  // explain-me ships its own report TEMPLATE + authoring guide; the {{tokens}} are
+  // substituted by the skill itself at project runtime (report generation), never by
+  // scaffolding — exactly the "ships verbatim unrendered by design" contract above.
+  // (T-20260912-021: the files reached templates/common when the skill's L0↔L1
+  // mirror drift was fixed; before that only SKILL.md propagated and projects got a
+  // broken half-skill.)
+  'skills/explain-me/templates/report.html',
+  'skills/explain-me/references/BUILD_GUIDE.md',
 ]);
 
 // ── Scaffold-parity facts (mirrored from scripts/new-project.ts) ─────────────────────────────
@@ -184,11 +198,11 @@ export function resolveClaim(relPath: string, variant = ''): UpgradeClaim {
 
   if (underDir(rel, 'procedures')) return { policy: 'ADD_IF_MISSING', pass: 'PROCEDURES' };
 
-  // graft repo-index skill (ADR-0074): hand-maintained OUTSIDE the SSOT skills/ (claude-only
+  // graft repo-index skill (ADR-0076): hand-maintained OUTSIDE the SSOT skills/ (claude-only
   // by design, C-CM-05 exception), so the post-upgrade sync-skills.ts run can never deliver
   // it — the TEMPLATE TREE SYNC pass must claim it explicitly or the fleet never receives it.
   if (underDir(rel, '.claude/skills/graft')) return { policy: 'SYNC', pass: TEMPLATE_TREE_SYNC_PASS };
-  // Codex platform mirrors (ADR-0075 W1/W4): claimed BEFORE the blanket `.codex/**` rule
+  // Codex platform mirrors (ADR-0077 W1/W4): claimed BEFORE the blanket `.codex/**` rule
   // below, which exists only for the per-project config.toml seed. Without this ordering
   // the blanket ADD_IF_MISSING swallows the mirrors and fleet projects never receive
   // skill/prompt updates (same incident class as the .claude/skills/graft fleet gap).
@@ -196,7 +210,7 @@ export function resolveClaim(relPath: string, variant = ''): UpgradeClaim {
     return { policy: 'SYNC', pass: TEMPLATE_TREE_SYNC_PASS };
   }
   // Codex project config is per-project by nature (project MCP servers + codex hooks, e.g.
-  // co-abap/co-safety): seed add-if-missing only, never overwrite an existing file (ADR-0074 D4).
+  // co-abap/co-safety): seed add-if-missing only, never overwrite an existing file (ADR-0076 D4).
   if (underDir(rel, '.codex')) return { policy: 'ADD_IF_MISSING', pass: TEMPLATE_TREE_SYNC_PASS };
 
   // Platform skill mirrors are distributed by the post-upgrade sync-skills.ts run, not file passes

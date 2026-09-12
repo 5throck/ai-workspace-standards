@@ -14,6 +14,10 @@
   },
   "agents": [
     {
+      "name": "pm",
+      "file": "agents/pm.md"
+    },
+    {
       "name": "safety-governance-manager",
       "file": "agents/safety-governance-manager.md"
     },

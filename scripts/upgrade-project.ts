@@ -1,6 +1,18 @@
 #!/usr/bin/env bun
-// @version 1.24.0
-// v1.24.0: graft fleet surface (ADR-0074, upgrade-policy v1.2.0) — the TEMPLATE TREE SYNC
+// @version 1.25.0
+// v1.25.0: docs/context.md project-only preservation in the TEMPLATE TREE SYNC SYNC branch —
+//           a footer-bump overwrite used to clobber PROJECT-ONLY content with at most a
+//           warning-only CONFLICT (and no warning at all when the copy was git-clean, which
+//           every fleet project is). The SYNC branch now runs findProjectOnlySections()
+//           (helpers/context-sections.ts v1.3.0) on the destination vs the incoming template:
+//           project-only top-level sections (headings absent from the template, outside
+//           COMMON-*/VARIANT-INJECT managed zones) or a missing version footer
+//           (wholeFileOwned — fully restructured file) trigger CONTEXT PRESERVE — the copy
+//           is SKIPPED with a loud per-section log — unless --force-context-sync is given,
+//           in which case the overwrite proceeds and logs the discarded section count.
+//           Files without project-only content keep the exact UPDATE/CONFLICT behavior;
+//           dry-run produces the identical PRESERVE verdict.
+// v1.24.0: graft fleet surface (ADR-0076, upgrade-policy v1.2.0) — the TEMPLATE TREE SYNC
 //           pass gains an ADD_IF_MISSING branch (seed-only, PROCEDURES semantics) so
 //           .codex/config.toml seeds into projects without one while co-abap/co-safety's
 //           project-owned Codex config is never touched. .mcp.json/opencode.json now
@@ -132,7 +144,7 @@
 //         numbers on existing rows, "Unregistered script" for newly-added files) and
 //         required manual reconciliation every time.
 // upgrade-project.ts — Upgrade an existing project to the current template version
-// Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform claude|antigravity|both] [--dry-run] [--prune-removed] [--rollback]
+// Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform claude|antigravity|both] [--dry-run] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization] [--force-context-sync]
 // v1.9.0: Moved docs/context.md from DOCS_MERGE (managed-block merge) to VARIANT_DOCS_SYNC
 //           (version-footer sync) — the common template carries no managed-block markers,
 //           so the merge path was a silent no-op despite the file's *context.md version: X.Y*
@@ -170,6 +182,7 @@ import {
   splitContextFileSections,
   splitOffVersionFooter,
   stripVersionFooter,
+  findProjectOnlySections,
   classifyCommonizationSection,
   W2_REMOVE_THRESHOLD,
   W2_REVIEW_FLOOR,
@@ -191,6 +204,7 @@ let pruneRemoved = false;
 let rollback = false;
 let yesFlag = false;
 let skipContextCommonization = false;
+let forceContextSync = false;
 
 const args = process.argv.slice(2);
 for (let i = 0; i < args.length; i++) {
@@ -201,11 +215,12 @@ for (let i = 0; i < args.length; i++) {
   if (args[i] === '--rollback') { rollback = true; continue; }
   if (args[i] === '--yes' || args[i] === '-y') { yesFlag = true; continue; }
   if (args[i] === '--skip-context-commonization') { skipContextCommonization = true; continue; }
+  if (args[i] === '--force-context-sync') { forceContextSync = true; continue; }
   if (!projectPath && !args[i].startsWith('--')) { projectPath = args[i]; continue; }
 }
 
 if (!projectPath) {
-  console.error('Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform claude|antigravity|both] [--dry-run] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization]');
+  console.error('Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform claude|antigravity|both] [--dry-run] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization] [--force-context-sync]');
   if (import.meta.main) {
     process.exit(1);
   }
@@ -1736,7 +1751,7 @@ console.log('--- TEMPLATE TREE SYNC: uncovered template files (default policy) -
     }
 
     if (claim.policy === 'ADD_IF_MISSING') {
-      // ADR-0074 (upgrade-policy v1.2.0): .codex/** seeds — projects owning their Codex
+      // ADR-0076 (upgrade-policy v1.2.0): .codex/** seeds — projects owning their Codex
       // config (co-abap, co-safety) are never touched; the graft section there is a
       // one-time manual TOML edit, not a file overwrite.
       if (existsSync(dest)) continue; // project-owned — seed only, silent like PROCEDURES
@@ -1765,6 +1780,33 @@ console.log('--- TEMPLATE TREE SYNC: uncovered template files (default policy) -
       reason = '(content changed)';
     }
     if (reason !== '') {
+      // v1.25.0 docs/context.md project-only preservation (T-20260912-001): before
+      // overwriting, detect content the overwrite would destroy. Project-only top-level
+      // sections (headings absent from the template, outside managed zones) or a missing
+      // version footer (wholeFileOwned — fully restructured file) → SKIP the copy with a
+      // loud CONTEXT PRESERVE log, unless --force-context-sync takes the template version
+      // anyway (the forced overwrite logs the discarded section count so the action stays
+      // visible). Scoped to exactly docs/context.md — docs/<variant>.context.md
+      // (MERGE_MANAGED) and every other file keep their existing semantics. Dry-run parity
+      // is inherent: both sides are read from disk and nothing is written on the preserve
+      // path, so dry-run and apply produce the identical verdict.
+      if (rel === 'docs/context.md') {
+        const ownership = findProjectOnlySections(readFileSync(dest, 'utf8'), readFileSync(abs, 'utf8'));
+        if ((ownership.wholeFileOwned || ownership.sections.length > 0) && !forceContextSync) {
+          console.log(`  ⚠️  CONTEXT PRESERVE ${rel}  ${reason}`);
+          if (ownership.wholeFileOwned) {
+            console.log('      project-only: (entire file — no version footer; treated as project-owned)');
+          }
+          for (const section of ownership.sections) {
+            console.log(`      project-only: ${section.heading}`);
+          }
+          console.log('      preserved — re-run with --force-context-sync to take the template version, or merge manually');
+          continue; // skip the copy; intentionally NOT counted in treeChanged
+        }
+        if (ownership.wholeFileOwned || ownership.sections.length > 0) {
+          console.log(`  FORCED OVERWRITE ${rel}  ${reason}  (--force-context-sync — ${ownership.sections.length} project-only section(s) discarded)`);
+        }
+      }
       if (isLocallyModified(dest)) {
         console.log(`  ⚠️  CONFLICT ${rel}  ${reason}  (local modifications exist)`);
       } else {

@@ -1,0 +1,19 @@
+schemaVersion: 1
+id: T-20260912-009
+kind: manual
+title: >-
+  Make dev-sync step 3.7 fail on verify-scripts --check-drift non-zero exit and
+  drop the .quiet() suppression so drift is visible
+priority: high
+status: done
+attempts: 0
+created_at: '2026-09-12T05:23:39.876Z'
+history:
+  - at: '2026-09-12T05:23:39.876Z'
+    from: null
+    to: backlog
+  - at: '2026-09-12T08:37:19.089Z'
+    from: backlog
+    to: done
+result: null
+error: null

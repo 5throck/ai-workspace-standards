@@ -1,0 +1,21 @@
+schemaVersion: 1
+id: T-20260912-011
+kind: manual
+title: >-
+  Fix README.md country-profile links to point at real template paths
+  (templates/co-news/docs/countries/KR.md,
+  templates/common/docs/country-profiles.md) instead of nonexistent L0 docs
+  paths
+priority: high
+status: done
+attempts: 0
+created_at: '2026-09-12T05:23:39.901Z'
+history:
+  - at: '2026-09-12T05:23:39.901Z'
+    from: null
+    to: backlog
+  - at: '2026-09-12T08:55:40.171Z'
+    from: backlog
+    to: done
+result: null
+error: null

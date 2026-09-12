@@ -25,8 +25,6 @@
         "Role",
         "YOU ARE THE SINGLE ENTRY POINT",
         "Consensus-Driven Facilitation Model",
-        "Proactive Review Triggers (T-02)",
-        "QA Self-Check Trigger (T-03)",
         "Meeting Facilitation",
         "Constraints"
       ],
@@ -83,12 +81,6 @@
       "version": "1.2.0",
       "overridable": false,
       "description": "Script lifecycle management — tracks script health and deprecation"
-    },
-    "validate-docs-links": {
-      "source": "skills/validate-docs-links/SKILL.md",
-      "version": "1.0.0",
-      "overridable": false,
-      "description": "Validates documentation cross-references and link integrity"
     },
     "sync": {
       "source": "skills/sync/SKILL.md",
@@ -445,23 +437,23 @@
           "reason_excluded": "WorktreeCreate event does not exist in Gemini CLI"
         },
         "hooks.UserPromptSubmit": {
-          "description": "Prompt-submission hook — graft upkeep at turn start (graft-hooks.cjs prompt, ADR-0074)",
+          "description": "Prompt-submission hook — graft upkeep at turn start (graft-hooks.cjs prompt, ADR-0076)",
           "reason_excluded": "UserPromptSubmit event does not exist in Gemini CLI"
         },
         "hooks.Stop": {
-          "description": "Turn-end hook — graft graph projection rebuild (graft-hooks.cjs stop, ADR-0074)",
+          "description": "Turn-end hook — graft graph projection rebuild (graft-hooks.cjs stop, ADR-0076)",
           "reason_excluded": "Stop event does not exist in Gemini CLI"
         },
         "statusLine": {
-          "description": "Claude Code statusline command — graft-statusline.cjs (ADR-0074)",
+          "description": "Claude Code statusline command — graft-statusline.cjs (ADR-0076)",
           "reason_excluded": "No statusline setting in Gemini CLI / Antigravity"
         },
         "subagentStatusLine": {
-          "description": "Claude Code subagent statusline command — graft-statusline.cjs (ADR-0074)",
+          "description": "Claude Code subagent statusline command — graft-statusline.cjs (ADR-0076)",
           "reason_excluded": "No subagent statusline setting in Gemini CLI / Antigravity"
         },
         "footerLinksRegexes": {
-          "description": "Claude Code footer link patterns — graft/ markdown cards clickable (ADR-0074)",
+          "description": "Claude Code footer link patterns — graft/ markdown cards clickable (ADR-0076)",
           "reason_excluded": "No footer-links setting in Gemini CLI / Antigravity"
         }
       }

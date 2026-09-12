@@ -397,9 +397,9 @@ fi
 
 ## References
 
-- [Phase 4: Template Validation System](../governance/TEMPLATE_VALIDATION.md) (to be created)
-- [Variant JSON Schema](../governance/variant.schema.json) (to be created)
-- [New Project Script](../../scripts/new-project.sh)
+- [Variant JSON Schema](../templates/variant.schema.json) — canonical variant frontmatter/schema definition
+- [Template Validation](../../scripts/validate-templates.ts) — enforcement script (`bun scripts/validate-templates.ts`); template-quality gates live in [docs/templates/QUALITY_GATES-template.md](../templates/QUALITY_GATES-template.md)
+- [New Project Script](../../scripts/new-project.ts) — TypeScript CLI per ADR-0036 (replaces the retired `new-project.sh`)
 - [CHANGELOG.md](../../CHANGELOG.md)
 
 ---

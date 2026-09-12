@@ -4,7 +4,7 @@
  *   Receives an approved proposal JSON (from skills/team-builder/SKILL.md Step 5) and
  *   executes all agent/skill changes in a fixed, safe order with checkpoint logging.
  * @version 1.4.0
- * v1.4.0 (2026-09-12, ADR-0075 W2): tier blocks gain the codex platform (falls back to claude tier when absent).
+ * v1.4.0 (2026-09-12, ADR-0077 W2): tier blocks gain the codex platform (falls back to claude tier when absent).
  * @usage bun scripts/team-builder.ts <proposal-json-path> [--dry-run]
  */
 

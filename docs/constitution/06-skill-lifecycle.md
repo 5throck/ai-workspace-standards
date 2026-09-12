@@ -1,7 +1,7 @@
 > Part of [CONSTITUTION.md](../../CONSTITUTION.md) — §6 Skill Lifecycle Management
 > **Do not edit in isolation** — changes must be reflected in the hub index.
 
-### 6. Skills {#skills}
+### 6. Skills
 
 Reusable workflow knowledge is defined as skills.
 
@@ -21,7 +21,7 @@ Skills follow the same L0/L1/L2/L3 model as scripts:
 > **Field-name note**: The `l2_propagate` frontmatter field is a literal code identifier that predates this document's L3 layer — its `L2` denotes "propagates all the way to a scaffolded project," which this document now calls L3. Skill layer values come from `scripts/helpers/layer-filter.ts`'s `LayerValue` type: skills resolve to `L0`, `L0+L1`, or (since DEC-20260829-02 / layer-filter 1.5.0) **`L0+L2`** for variant-exclusive skills. `L0+L1+L2` remains a valid LayerValue for **scripts only** (SCRIPTS.md byte-identical sync model) and is no longer produced by skill scope parsing. Do not rename these identifiers from this doc alone; that would require a coordinated code change to `layer-filter.ts` and every `SKILL.md` using the field.
 
 > **Workspace Root vs. Individual Projects**:
-> - **Workspace Root** (`ai-workspace-standards`): Skills focus on template maintenance and scaffolding validation (e.g., `simulate-project-creation`, `security-scan`, `audit-workspace`).
+> - **Workspace Root** (`ai-workspace-standards`): Skills focus on template maintenance and scaffolding validation (e.g., `simulate-project-creation`, `security-scan`).
 > - **Individual Projects**: Skills are project-specific workflows defined by the development team.
 
 #### 6.1 Folder Structure
@@ -106,7 +106,7 @@ Skills in `skills/` are propagated to `templates/common/skills/` (L1) by `propag
 
 > ⚠️ **Never set `l2_propagate: false` on a skill living inside a variant template** (`templates/co-*/skills/`). The field is an L0→L1 propagation control and is self-contradictory in a variant: a variant skill exists precisely to be copied into projects scaffolded from that variant, yet `new-project.ts`'s safety-net honors the flag and **silently deletes the skill from every scaffold**. This exact combination (`scope: co-abap` + `l2_propagate: false` on 12 skills, plus one in co-consult) shipped co-abap projects without any of their SAP skills until it was found on 2026-08-21. A variant skill needs only `scope: <variant-name>` — nothing else.
 
-**Current excluded skills**: `audit-workspace`, `create-variant`, `promote-variant`
+**Current excluded skills**: `create-variant`, `promote-variant`
 
 > `propagate-to-templates.ts` calls `includeSkillInL1()` from `helpers/layer-filter.ts`, which reads SKILL.md frontmatter directly — `l2_propagate: false` or `scope: workspace` returns `false` (excluded). `new-project.ts` also checks this as a safety net. SKILLS.md is not consulted for propagation decisions.
 

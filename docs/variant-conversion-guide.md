@@ -159,7 +159,7 @@ Create `.claude/template-version.txt` in your project:
 
 ```
 variant: co-<name>
-version: 0.5.3
+version: 0.6.0
 platform: both
 date: 2026-07-14
 ```

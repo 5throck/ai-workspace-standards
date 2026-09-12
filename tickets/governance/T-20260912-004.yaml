@@ -1,0 +1,20 @@
+schemaVersion: 1
+id: T-20260912-004
+kind: manual
+title: >-
+  Fix new-project.ts PM extends-stub resolution to treat prose-only stub bodies
+  as stubs across all 13 variants and add a pm.md body-content assertion to
+  test-new-project.ts (defect persists after T-20260908-009 was closed)
+priority: urgent
+status: done
+attempts: 0
+created_at: '2026-09-12T05:23:26.537Z'
+history:
+  - at: '2026-09-12T05:23:26.537Z'
+    from: null
+    to: backlog
+  - at: '2026-09-12T07:17:31.457Z'
+    from: backlog
+    to: done
+result: null
+error: null

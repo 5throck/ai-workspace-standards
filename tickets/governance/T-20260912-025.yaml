@@ -1,0 +1,30 @@
+schemaVersion: 1
+id: T-20260912-025
+kind: manual
+title: >-
+  Fix ticket.ts ID allocation collision: create scans tickets/ root while move
+  resolves tickets/governance/ first, so same-day create can mint an id that
+  collides with an existing governance ticket
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-09-12T09:17:32.681Z'
+history:
+  - at: '2026-09-12T09:17:32.681Z'
+    from: null
+    to: backlog
+  - at: '2026-09-12T09:52:50.017Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-12T09:52:50.032Z'
+    from: waiting
+    to: running
+  - at: '2026-09-12T09:56:26.764Z'
+    from: running
+    to: done
+result: >-
+  ticket-store v1.2.1: nextSeqGuess scans both tickets/ and tickets/governance/
+  (ids are one namespace; move/list resolve governance first). Regression test
+  added (failed before fix, passes after); live-verified service create
+  allocates past governance max. Closed via /sync PR #905
+error: null

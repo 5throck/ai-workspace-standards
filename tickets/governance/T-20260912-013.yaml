@@ -1,0 +1,31 @@
+schemaVersion: 1
+id: T-20260912-013
+kind: manual
+title: >-
+  Remove the validate-docs-links skill directory, SKILLS.md and VERSION_MANIFEST
+  rows, lifecycle record final state, and skill-graph node on or after
+  2026-12-09
+priority: normal
+not_before: '2026-12-09'
+status: done
+attempts: 0
+created_at: '2026-09-12T05:23:39.925Z'
+history:
+  - at: '2026-09-12T05:23:39.925Z'
+    from: null
+    to: backlog
+  - at: '2026-09-12T10:01:16.343Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-12T10:01:16.358Z'
+    from: waiting
+    to: running
+  - at: '2026-09-12T10:13:33.656Z'
+    from: running
+    to: done
+result: >-
+  Owner-approved early removal (2026-09-12) superseding the scheduled 2026-12-09
+  date: validate-docs-links SKILL removed from all surfaces; the companion
+  SCRIPT scripts/validate-docs-links.ts stays (dev-sync + CI link gate);
+  lifecycle record retired. Implemented in PR #905
+error: null

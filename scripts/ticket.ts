@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.1.0
+// @version 1.2.0
 // @l2-propagate: false
 // ticket.ts — CLI for the Phase A Service Ticket + Kanban system (workspace root only).
 // Usage: bun scripts/ticket.ts <command> [args]
@@ -105,8 +105,17 @@ try {
     case 'move': {
       const { positional, flags } = parseFlags(rest);
       const [id, status] = positional;
-      if (!id || !status) fail('usage: ticket.ts move <id> <status> [--force]');
-      const moved = moveTicket(resolveTicketDir(id), id, status as Status, { force: Boolean(flags.force), error: flags.error as string | undefined });
+      if (!id || !status) fail('usage: ticket.ts move <id> <status> [--force] [--error "<text>"] [--result "<text>"]');
+      // T-20260912-023: closing a ticket requires a non-empty outcome summary.
+      // Deliberately NOT bypassable by --force — a forced done without a result
+      // would defeat the audit trail the requirement exists to guarantee.
+      if (status === 'done') {
+        const result = flags.result;
+        if (typeof result !== 'string' || result.trim() === '') {
+          fail('usage: ticket.ts move <id> done --result "<text>" — moving to done requires a non-empty --result outcome summary (--force does not bypass this)');
+        }
+      }
+      const moved = moveTicket(resolveTicketDir(id), id, status as Status, { force: Boolean(flags.force), error: flags.error as string | undefined, result: flags.result as string | undefined });
       console.log(`✅ ${id} -> ${moved.status}`);
       break;
     }

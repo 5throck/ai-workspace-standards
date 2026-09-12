@@ -307,6 +307,16 @@
       "layer": "L0"
     },
     {
+      "id": "adr:0076",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
+      "id": "adr:0077",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
       "id": "agent-lifecycle-manager",
       "type": "skill",
       "layer": "L0"
@@ -355,11 +365,6 @@
       "id": "audit-preparation",
       "type": "skill",
       "layer": "variant:co-safety"
-    },
-    {
-      "id": "audit-workspace",
-      "type": "skill",
-      "layer": "L0"
     },
     {
       "id": "auditor",
@@ -3991,11 +3996,6 @@
       "layer": "variant:co-price"
     },
     {
-      "id": "validate-docs-links",
-      "type": "skill",
-      "layer": "L0"
-    },
-    {
       "id": "van-westendorp-psm",
       "type": "skill",
       "layer": "variant:co-price",
@@ -4897,95 +4897,6 @@
         "file": "templates/co-safety/skills/audit-preparation/SKILL.md",
         "field": "relates_to",
         "index": 0
-      }
-    },
-    {
-      "type": "composes_with",
-      "from": "audit-workspace",
-      "to": "create-variant",
-      "source": "relates_to",
-      "symmetric": true,
-      "provenance": {
-        "file": "skills/audit-workspace/SKILL.md",
-        "field": "relates_to",
-        "index": 2
-      }
-    },
-    {
-      "type": "references",
-      "from": "audit-workspace",
-      "to": "project-review",
-      "source": "prose"
-    },
-    {
-      "type": "composes_with",
-      "from": "audit-workspace",
-      "to": "project-to-variant",
-      "source": "relates_to",
-      "symmetric": true,
-      "provenance": {
-        "file": "skills/audit-workspace/SKILL.md",
-        "field": "relates_to",
-        "index": 3
-      }
-    },
-    {
-      "type": "follows",
-      "from": "audit-workspace",
-      "to": "promote-variant",
-      "source": "relates_to",
-      "provenance": {
-        "file": "skills/audit-workspace/SKILL.md",
-        "field": "relates_to",
-        "index": 4
-      }
-    },
-    {
-      "type": "composes_with",
-      "from": "audit-workspace",
-      "to": "security-scan",
-      "source": "relates_to",
-      "symmetric": true,
-      "provenance": {
-        "file": "skills/audit-workspace/SKILL.md",
-        "field": "relates_to",
-        "index": 0
-      }
-    },
-    {
-      "type": "composes_with",
-      "from": "audit-workspace",
-      "to": "sync",
-      "source": "relates_to",
-      "symmetric": true,
-      "provenance": {
-        "file": "skills/audit-workspace/SKILL.md",
-        "field": "relates_to",
-        "index": 5
-      }
-    },
-    {
-      "type": "composes_with",
-      "from": "audit-workspace",
-      "to": "team-builder",
-      "source": "relates_to",
-      "symmetric": true,
-      "provenance": {
-        "file": "skills/audit-workspace/SKILL.md",
-        "field": "relates_to",
-        "index": 1
-      }
-    },
-    {
-      "type": "composes_with",
-      "from": "audit-workspace",
-      "to": "upgrade-project",
-      "source": "relates_to",
-      "symmetric": true,
-      "provenance": {
-        "file": "skills/audit-workspace/SKILL.md",
-        "field": "relates_to",
-        "index": 6
       }
     },
     {
@@ -8147,12 +8058,6 @@
       "type": "references",
       "from": "handbook-sync-audit",
       "to": "project-review",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "handbook-sync-audit",
-      "to": "validate-docs-links",
       "source": "prose"
     },
     {
@@ -15552,12 +15457,6 @@
     },
     {
       "type": "references",
-      "from": "project-review",
-      "to": "validate-docs-links",
-      "source": "prose"
-    },
-    {
-      "type": "references",
       "from": "project-to-variant",
       "to": "k-dart",
       "source": "prose"
@@ -18143,12 +18042,6 @@
         "field": "relates_to",
         "index": 0
       }
-    },
-    {
-      "type": "references",
-      "from": "validate-docs-links",
-      "to": "project-review",
-      "source": "prose"
     },
     {
       "type": "follows",

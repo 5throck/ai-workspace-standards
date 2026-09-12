@@ -1,7 +1,7 @@
 # GEMINI.md
 
 > **Project context, architecture, coding guidelines, and design standards live in [`docs/context.md`](docs/context.md) - read it first.**
-<!-- L0-ONLY: This instruction targets the workspace root (L0). L1/L2 projects must NOT reference context.md — see context.md §7.5 context.md Non-Propagation. merge-frontmatter.ts strips context.md lines from L2 output. -->
+<!-- L0-ONLY: This instruction targets the workspace root (L0). L1/L2 projects must NOT reference CONSTITUTION.md — see CONSTITUTION.md §7.5 CONSTITUTION.md Non-Propagation. merge-frontmatter.ts strips CONSTITUTION.md lines from L2 output. -->
 
 ---
 
@@ -265,8 +265,8 @@ Before editing any file for the **FIRST time in a session**, the agent MUST:
 |----------|:-----------:|---------|
 | Gemini CLI | ✅ Hook (automatic) | BeforeTool `deny` mode — blocked until agent investigates |
 | Antigravity | ✅ Prompt (manual) | Hooks do not fire — agent self-enforces |
-| Codex CLI | ✅ Prompt (manual) | Hooks not wired in Phase 1 — agent self-enforces (ADR-0075) |
-| Codex Desktop App | ✅ Prompt (manual) | Hooks not wired in Phase 1 — agent self-enforces (ADR-0075) |
+| Codex CLI | ✅ Prompt (manual) | Hooks not wired in Phase 1 — agent self-enforces (ADR-0077) |
+| Codex Desktop App | ✅ Prompt (manual) | Hooks not wired in Phase 1 — agent self-enforces (ADR-0077) |
 
 If the hook is not active (Antigravity), agents must still follow the 4-step process before making first edits.
 <!-- COMMON-GEMINI:END -->

@@ -25,7 +25,6 @@ metadata:
     - audit project
     - quality review
   related_skills:
-    - audit-workspace
     - project-resync
     - meeting-facilitation
 ---
@@ -51,7 +50,7 @@ catches that class mechanically, not by agent effort.
 
 ## Documentation/link ownership
 
-`project-review` owns routine documentation link-check evidence. Use `baseline-only` mode for weekly or pre-closeout docs/link validation instead of invoking the deprecated `validate-docs-links` skill.
+`project-review` owns routine documentation link-check evidence. Use `baseline-only` mode for weekly or pre-closeout docs/link validation 
 
 ## Step 0 — Machine Baseline (run BEFORE any agent dispatch)
 
@@ -247,7 +246,6 @@ ticket was not landed.
 
 ## Related Skills
 
-- **audit-workspace**: machine battery wrapper — project-review Step 0 is its superset
 - **project-resync**: fleet-level close-out after fixes land (commit/PR pipeline)
 - **meeting-facilitation**: Antigravity/Gemini dispatch path for Step 3
 

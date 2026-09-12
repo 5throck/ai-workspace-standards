@@ -2,7 +2,7 @@
 
 - **Date**: 2026-09-12
 - **Status**: Approved (Row 0 design; implementation in follow-up waves)
-- **Related**: ADR-0075 (decision record), ADR-0074 (graft multi-platform fleet — establishes `.codex/config.toml` seed precedent), ADR-0021 (platform settings parity), ADR-0035/ADR-0048 (AGENTS.md structure & variant SSOT)
+- **Related**: ADR-0077 (decision record), ADR-0076 (graft multi-platform fleet — establishes `.codex/config.toml` seed precedent), ADR-0021 (platform settings parity), ADR-0035/ADR-0048 (AGENTS.md structure & variant SSOT)
 - **Scope**: Design only. No schema, script, or template files are modified in this phase; every change below is recorded as the confirmed design for the implementation waves.
 
 ---
@@ -27,7 +27,7 @@ Distribution machinery (all of it must learn the 4th platform):
 - **Fleet**: `scripts/lib/upgrade-policy.ts` classifications (JSON_MERGE / ADD_IF_MISSING / TEMPLATE_TREE_SYNC / MERGE).
 - **Validators**: `validate-templates.ts` (~10 hardcoded `['.claude', '.gemini']` loops), `audit.ts` command parity, `helpers/validate-platform-parity.ts`, `verify-platform-lifecycle.ts`, `test-platform-parity.ts`.
 
-**Codex already exists in the repo as fragments** (from ADR-0074 graft work, currently uncommitted on branch `codex_support`):
+**Codex already exists in the repo as fragments** (from ADR-0076 graft work, currently uncommitted on branch `codex_support`):
 
 - `templates/common/.codex/config.toml` — MCP seed (`[mcp_servers.graft]` via `bunx`), classified `ADD_IF_MISSING`.
 - `scripts/lib/upgrade-policy.ts` — blanket `if (underDir(rel, '.codex')) return ADD_IF_MISSING`.
@@ -40,7 +40,7 @@ Distribution machinery (all of it must learn the 4th platform):
 1. No `CODEX.md` platform twin; `AGENTS.md` styles itself a registry and points behavioral instructions only to CLAUDE.md/GEMINI.md.
 2. No `.codex/skills/` or `.codex/prompts/` distribution; `sync-skills.ts` knows 3 targets.
 3. `models` registry has no `codex` entry; agent frontmatter `tier:` blocks carry only `claude/gemini/antigravity/gemini-cli`.
-4. Blanket `.codex/**` ADD_IF_MISSING means fleet projects would **never receive skill/prompt mirror updates** (same incident class ADR-0074 fixed for `.claude/skills/graft`).
+4. Blanket `.codex/**` ADD_IF_MISSING means fleet projects would **never receive skill/prompt mirror updates** (same incident class ADR-0076 fixed for `.claude/skills/graft`).
 5. Validators, parity checks, VERSION_MANIFEST parity section, and constitution prose all assume 3 platform dirs / 4 surfaces.
 
 ## 2. Goals / Non-Goals
@@ -95,7 +95,7 @@ Counts: **surfaces 4 → 6** (adding Codex CLI, Codex Desktop App), **platform d
 |---|---|---|---|---|---|
 | **CODEX.md** | create | propagate via `--governance-l1` (add CODEX.md to its file list — W2; D11 correction: the four instruction files ride the governance-l1 mechanism, **not** propagation-map domains as originally noted here) | — (variants carry AGENTS.md only, like CLAUDE/GEMINI.md) | copied from common; kept/removed per platform profile | `MERGE_FILES += CODEX.md`; `COMMON-CODEX` marker-drift check |
 | **AGENTS.md** header | add "…`CODEX.md` (Codex)" | ✓ | ✓ | ✓ | marker-managed |
-| **`.codex/config.toml`** | create (workspace MCP) | exists (ADR-0074 seed) | — (scaffold delivers from L1) | copy (ADD_IF_MISSING; project-owned configs untouched) | ADD_IF_MISSING seed |
+| **`.codex/config.toml`** | create (workspace MCP) | exists (ADR-0076 seed) | — (scaffold delivers from L1) | copy (ADD_IF_MISSING; project-owned configs untouched) | ADD_IF_MISSING seed |
 | **`.codex/skills/`** | sync-skills 4th target | sync-skills `--all-variants` | ✓ `sync-skills --all-variants` (W1 correction: `sync-skills-to-l2.ts` is a per-file syncer, not the platform-mirror mechanism — no extension needed) | scaffold overlay + platform pruning | **TEMPLATE_TREE_SYNC** — special-cased *before* the blanket `.codex/**` ADD_IF_MISSING rule (fixes the fleet-mirror-update gap) |
 | **`.codex/prompts/`** | mirror of `.claude/commands/` (post CLI verification) | ✓ | via `sync-skills --all-variants` (Phase 1b) | per platform profile | TEMPLATE_TREE_SYNC |
 | **`.codex/skills.json`** | ✗ not used — Codex discovers skills via `[[skills.config]] path = ".codex/skills"` (co-abap pattern) or native convention (verify in W5) | ✗ | ✗ | ✗ | ✗ |
@@ -106,13 +106,13 @@ Mechanisms: L0→L1 = 4 new `propagation-map.json` domains (`codex-md`, `codex-s
 ## 6. Design Decisions
 
 - **D1 — Entry point: CODEX.md twin.** New platform-twin file at L0 and L1 (section design in §4). AGENTS.md stays the neutral registry and gains the pointer line. Pointer-follow is verified on both surfaces; fallback is an AGENTS.md Codex annex.
-- **D2 — Directory: `.codex/`** = `config.toml` (TOML; ADR-0074 seed retained) + `skills/` + `prompts/`. Machine-global `~/.codex/config.toml` remains the fallback for surfaces without project scope (ADR-0074 per-host matrix precedent).
+- **D2 — Directory: `.codex/`** = `config.toml` (TOML; ADR-0076 seed retained) + `skills/` + `prompts/`. Machine-global `~/.codex/config.toml` remains the fallback for surfaces without project scope (ADR-0076 per-host matrix precedent).
 - **D3 — Skills: mirror, not SSOT pointing.** `sync-skills.ts` gains a 4th target. The co-abap `[[skills.config]] path = "skills"` direct-SSOT pattern is rejected for the platform because it bypasses B-03 security-gate exclusion, country-scoped pruning, and variant-scoped pruning; the mirror keeps one governance code path.
 - **D4 — Commands: `.codex/prompts/` mirror** of `.claude/commands/` (the SSOT), gated on CLI verification; if project-level prompts are unsupported, codex is commands-parity-exempt (precedent: `gateguard.md` absent from `.agents/commands/`).
 - **D5 — Hooks: deferred.** Phase 1 documents self-enforcement; Phase 2 (optional, CLI-only) adds `.codex/hooks.json` + `--platform codex` in hook scripts. Desktop App stays on self-enforcement.
 - **D6 — Model registry (confirmed values)**: `models.codex = { high: "gpt-5.6-sol", medium: "gpt-5.6-terra", low: "gpt-5.6-luna" }` (three-distinct structure, mirroring the Claude pattern). **Companion update**: `gemini`, `antigravity`, and `gemini-cli` keys move `medium`/`low` from `gemini-3.7-flash` → `gemini-3.8-flash` (high stays `gemini-3.1-pro`; the three keys are kept in lockstep by existing invariant). Agent frontmatter gains `tier.codex` across `agents/*.md` (8 files), synced with `docs/designs/l1-agent-format-spec.md`, `scripts/validate-model-registry.ts` (`PLATFORMS`), `scripts/team-builder.ts`, `scripts/regenerate-agents-md.ts`.
 - **D7 — Validators: incremental.** W3 extends: WS-05a scanRoots, `verify-platform-lifecycle.ts` codex loop, `audit.ts` normative files += CODEX.md, P-01 three-way section parity, VA-05 `COMMON-CODEX`, VERSION_MANIFEST parity section. The large N-platform constant refactor of `validate-templates.ts` pair-loops is a **follow-up governance ticket**, not part of this effort.
-- **D8 — Scaffolding/fleet policy**: per the matrix in §5. Core fix: `.codex/skills/**` and `.codex/prompts/**` must resolve to TEMPLATE_TREE_SYNC **before** the blanket `.codex/**` ADD_IF_MISSING claim, otherwise fleet mirrors never update (ADR-0074 §14 root-cause class).
+- **D8 — Scaffolding/fleet policy**: per the matrix in §5. Core fix: `.codex/skills/**` and `.codex/prompts/**` must resolve to TEMPLATE_TREE_SYNC **before** the blanket `.codex/**` ADD_IF_MISSING claim, otherwise fleet mirrors never update (ADR-0076 §14 root-cause class).
 - **D9 — ADR-0021 amendment**: `platform_settings` gains a codex classification; `.codex/config.toml` is TOML and is excluded from the VA-04 JSON parity loop, replaced by a dedicated lightweight check (parses + contains required `[mcp_servers.*]` blocks).
 - **D10 — Documentation alignment** (W2): CONSTITUTION §6 ("all three platform directories"), §10 Platform Profile enum, §11 ("all 4 supported platforms" → 6 surfaces / 4 directories); AGENTS.md §6 Platform Skills Distribution table; CLAUDE.md/GEMINI.md "All Platforms" tables gain Codex rows; README platform-support table.
 - **D11 — Fleet & template distribution guarantee for model/registry changes** (amendment, 2026-09-12). Self-review of the propagation machinery established that a registry/model change only reaches every layer if the literals live inside managed marker sections. **Principle: model-ID literals exist only inside the managed marker sections of the four instruction files (CLAUDE.md / GEMINI.md / CODEX.md / AGENTS.md) and in `docs/workspace-schema.json` (SSOT).** Verified propagation matrix:
@@ -172,7 +172,7 @@ Each wave lands as its own PR per the Sequential Branch Dependency Rule (CONSTIT
 
 ## 11. References
 
-- ADR-0074 — graft multi-platform fleet (`.codex/config.toml` seed, ADD_IF_MISSING, per-host matrix)
+- ADR-0076 — graft multi-platform fleet (`.codex/config.toml` seed, ADD_IF_MISSING, per-host matrix)
 - ADR-0021 — platform settings parity (3-tier classification; amended by D9)
 - ADR-0035 / ADR-0048 — AGENTS.md structure, variant workflow SSOT
 - CONSTITUTION §5 (multi-agent architecture), §6 (skill lifecycle), §10 (platform profile), §11 (governance enforcement layers)

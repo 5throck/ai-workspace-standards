@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.1.0
+// @version 1.2.1
 // @l2-propagate: false
 // ticket-store.ts — Atomic file I/O for the Phase A ticket queue. Every function
 // takes an explicit directory/path so callers (CLI, skill, tests) never assume a
@@ -7,7 +7,7 @@
 // Design: docs/superpowers/specs/2026-07-16-service-ticket-kanban-design.md
 
 import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, writeFileSync, openSync, closeSync, statSync } from 'node:fs';
-import { join, relative, resolve, isAbsolute } from 'node:path';
+import { join, dirname, basename, relative, resolve, isAbsolute } from 'node:path';
 import { load, dump, JSON_SCHEMA } from 'js-yaml';
 import {
   CURRENT_SCHEMA_VERSION,
@@ -86,12 +86,23 @@ function todayPrefix(): string {
 }
 
 function nextSeqGuess(dir: string, prefix: string): number {
-  if (!existsSync(dir)) return 1;
-  const existing = readdirSync(dir)
-    .filter(f => f.startsWith(prefix) && f.endsWith('.yaml'))
-    .map(f => parseInt(f.slice(prefix.length + 1, prefix.length + 4), 10))
-    .filter(n => !Number.isNaN(n));
-  return (existing.length ? Math.max(...existing) : 0) + 1;
+  // T-20260912-025: ids live in ONE namespace across both ticket directories —
+  // move/list resolve an id with governance/ precedence, so a seq guessed from
+  // the target directory alone can mint an id that shadows (or is shadowed by)
+  // a same-day ticket in the other directory. Always scan both.
+  const dirs = basename(dir) === 'governance'
+    ? [dir, dirname(dir)]
+    : [dir, join(dir, 'governance')];
+  let max = 0;
+  for (const d of dirs) {
+    if (!existsSync(d)) continue;
+    for (const f of readdirSync(d)) {
+      if (!f.startsWith(prefix) || !f.endsWith('.yaml')) continue;
+      const n = parseInt(f.slice(prefix.length + 1, prefix.length + 4), 10);
+      if (!Number.isNaN(n) && n > max) max = n;
+    }
+  }
+  return max + 1;
 }
 
 export interface CreateTicketInput {
@@ -147,6 +158,9 @@ export function createTicket(dir: string, input: CreateTicketInput): Ticket {
 export interface MoveOptions {
   force?: boolean;
   error?: string;
+  /** Outcome summary written to the ticket's `result` field on a `done` transition.
+   * The CLI requires a non-empty value for `move <id> done` (T-20260912-023). */
+  result?: string;
 }
 
 export function moveTicket(dir: string, id: string, to: Status, opts: MoveOptions = {}): Ticket {
@@ -159,6 +173,7 @@ export function moveTicket(dir: string, id: string, to: Status, opts: MoveOption
   ticket.history.push({ at: nowIso(), from, to });
   if (from === 'failed' && to === 'waiting') ticket.attempts += 1;
   if (to === 'failed' && opts.error !== undefined) ticket.error = opts.error;
+  if (to === 'done' && opts.result !== undefined) ticket.result = opts.result;
   writeTicketAtomic(dir, ticket);
   return ticket;
 }

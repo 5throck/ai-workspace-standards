@@ -8,7 +8,7 @@
 The `variant-templates-advancement` specification defines the architectural design for seven workspace variant templates. These enhancements aim to provide specialized, domain-specific capabilities within the AI workspace, standardizing workflows and integrations across development, design, consulting, presentations, gaming, security, and general productivity.
 
 ### 1.1 Version & Infrastructure Baseline
-- **Template Inheritance Model:** Built firmly upon the `template-v0.5.3` L0 -> L1 -> L2 inheritance model, ensuring consistent core capabilities propagate down to all specific variants.
+- **Template Inheritance Model:** Built firmly upon the `template-v0.6.0` L0 -> L1 -> L2 inheritance model, ensuring consistent core capabilities propagate down to all specific variants.
 - **Infrastructure Tools:**
   - `dev-sync.ts` (v1.5.0): Used as the primary link validation gate across all variant folder layouts.
   - `test-runner.ts` (v1.1.0): Utilizes a parallel worker pool for executing variant-specific testing rapidly.
@@ -78,4 +78,4 @@ Each variant defines a concrete set of specialized agents that utilize the estab
 
 *   **Schema & Validation:** The `validate-templates.ts` script guarantees all configurations are structured correctly according to the schema.
 *   **Architecture & Concurrency:** Implementations rely on `dev-sync.ts` (v1.5.0) for valid inter-folder links, while `test-runner.ts` (v1.1.0) executes heavy tests (like the playwright compiler) utilizing a robust parallel worker pool.
-*   **Inheritance:** Adherence to the `template-v0.5.3` L0->L1->L2 model is strictly enforced. Any changes to foundational configuration (L0/L1) requires an architecture review before adoption by the L2 variants.
+*   **Inheritance:** Adherence to the `template-v0.6.0` L0->L1->L2 model is strictly enforced. Any changes to foundational configuration (L0/L1) requires an architecture review before adoption by the L2 variants.

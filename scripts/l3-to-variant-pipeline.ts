@@ -11,9 +11,12 @@
  * - Wave 3: Platform parity validation (validate-platform-parity.ts)
  * - Wave 3: Workspace integration (integration-helpers.ts)
  *
- * @version 1.17.0
+ * @version 1.17.1
  * @phase: Complete pipeline orchestration
  *
+ * v1.17.1 (2026-09-12): T-20260912-019 — the import.meta.main entry point now
+ *          logs unhandled rejections and exits 1 instead of `.catch(console.error)`
+ *          letting the process exit 0 (a failed pipeline could read as success).
  * v1.17.0 (2026-09-10): PHASE 4 post-generation cleanup now resolves the ACTIVE.md
  *          path from generatedVariant.variantPath (the root generateVariant actually
  *          wrote to) instead of config.outputPath, which is optional — omitting
@@ -1501,5 +1504,12 @@ async function main() {
 
 // Run main only when executed directly (not when imported as a module)
 if (import.meta.main) {
-  main().catch(console.error);
+  // T-20260912-019: a rejection escaping main()'s internal try/catch must not
+  // exit 0 — log it and fail loudly (the previous `.catch(console.error)` let
+  // the process exit 0 on an unhandled rejection, signalling success to CI).
+  main().catch((error) => {
+    console.error('\n❌ Unhandled pipeline rejection:');
+    console.error(error);
+    process.exit(1);
+  });
 }
