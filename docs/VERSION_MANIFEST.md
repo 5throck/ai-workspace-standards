@@ -1,7 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-09-12T10:58:58.316Z
-**Generated**: 2026-09-12T07:28:12.305Z
+**Generated**: 2026-09-12T12:55:32.829Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -49,7 +48,7 @@
 | explain-me | 1.0.0 | experimental | skills/explain-me/SKILL.md | workspace | /explain-me, /reportme, make a report, create report, explain this topic | pm |
 | finishing-a-development-branch | 1.0.0 | active | skills/finishing-a-development-branch/SKILL.md | workspace | finish branch, complete work, wrap up, finishing a development branch, merge branch, create PR, push and PR | pm |
 | gateguard | 1.0.0 | active | skills/gateguard/SKILL.md | workspace | gateguard, /gateguard, investigate file, check before edit, pre-edit check | pm |
-| graft | 1.0.1 | active | .claude/skills/graft/SKILL.md | claude | graft, repo context graph, code map, who calls, where is this implemented | N/A |
+| graft | N/A | active | .claude/skills/graft/SKILL.md | claude | N/A | N/A |
 | handbook | 0.4.0 | active | templates/common/skills/handbook/SKILL.md | common | N/A | pm |
 | handbook-sync-audit | 1.0.0 | active | templates/common/skills/handbook-sync-audit/SKILL.md | common | N/A | handbook-reviewer |
 | i18n-audit | 1.0.0 | active | templates/common/skills/i18n-audit/SKILL.md | common | i18n audit, locale parity, translation parity, glossary audit, L10N parity | pm |
@@ -104,7 +103,6 @@
 | analyze-git-history.ts | 1.0.2 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.0.0 | scripts/archive-memory.ts | N/A |
 | audit.ts | 2.37.0 | scripts/audit.ts | bun |
-| audit.ts | 2.36.1 | scripts/audit.ts | bun |
 | check-upgrade-coverage.ts | 1.0.0 | scripts/check-upgrade-coverage.ts | N/A |
 | cleanup-completed-md.ts | 1.1.0 | scripts/cleanup-completed-md.ts | N/A |
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | N/A |
@@ -221,6 +219,8 @@
 
 ⚠️ **Drift detected**:
 
+- [WARNING] Skill graft missing version
+- [WARNING] Skill graft has no triggers defined
 - [WARNING] Skill handbook has no triggers defined
 - [WARNING] Skill handbook-sync-audit has no triggers defined
 - [WARNING] Command meeting has no matching skill of the same name
