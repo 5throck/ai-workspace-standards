@@ -781,6 +781,15 @@
       "source": "manual",
       "created": "2026-09-12",
       "last_updated": "2026-09-12"
+    },
+    {
+      "id": "2026-09-12-validator-hardening-drift-marker-design",
+      "title": "validator hardening drift marker design",
+      "file": "docs/designs/2026-09-12-validator-hardening-drift-marker-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-12",
+      "last_updated": "2026-09-12"
     }
   ]
 }

@@ -14,8 +14,17 @@
  *   bun scripts/lifecycle-sync-audit.ts --json
  *   bun scripts/lifecycle-sync-audit.ts --fix
  *
- * @version 1.8.0
+ * @version 1.9.0
  * @last_updated 2026-09-12
+ * v1.9.0: Check D now parses intentional-duplicate markers through the shared
+ *          parser (helpers/markers.ts parseIntentionalDuplicateLine — complete
+ *          one-line comment + workspace standards §<digits> grammar,
+ *          T-20260912-029) instead of a looser inline regex, so prose that
+ *          merely MENTIONS the marker syntax no longer pollutes the
+ *          informational registry (4 phantom entries → the 2 real markers).
+ *          Registry mapping: source = parsed source (fallback: parsed name),
+ *          reason = parsed reason (fallback: parsed name). Workspace-wide
+ *          walk, all exclusions, and the informational severity are unchanged.
  * v1.8.0: Check C now normalizes L0 skill content through the shared scrub
  *          (scripts/lib/constitution-scrub.ts — the exact transform propagate
  *          applies to templates/ targets) before comparing, so the intentional
@@ -53,6 +62,7 @@ import { cwd } from 'node:process';
 import { createHash } from 'node:crypto';
 import { load as loadYaml } from 'js-yaml';
 import { scrubConstitutionRefs } from './lib/constitution-scrub.ts';
+import { parseIntentionalDuplicateLine } from './helpers/markers.ts';
 
 // ANSI colors for terminal output
 const colors = {
@@ -601,10 +611,18 @@ function runCheckX(): SyncIssue[] {
 /**
  * Check D: Scan all .md files for intentional-duplicate annotations.
  * Informational only — never produces errors or warnings.
+ *
+ * Markers are parsed per line through the shared parser
+ * (helpers/markers.ts parseIntentionalDuplicateLine, T-20260912-029): a line
+ * registers only when it contains a COMPLETE one-line
+ * `<!-- intentional-duplicate: ... -->` comment whose name carries the
+ * workspace standards §<digits> grammar — prose that merely mentions the
+ * marker syntax stays out of the registry. Registry mapping:
+ * source = parsed `source` field (fallback: parsed `name`),
+ * reason = parsed `reason` field (fallback: parsed `name`).
  */
 function runCheckD(): DuplicateEntry[] {
   const entries: DuplicateEntry[] = [];
-  const PATTERN = /<!--\s*intentional-duplicate:\s*([^—\n]+)\s*—\s*([^;>\n]+)/g;
   const EXCLUDED = ['node_modules', '.git', '_archive', 'memory'];
   // Skip context.md itself (contains the annotation definition/example, not a real duplicate)
 
@@ -639,13 +657,15 @@ function runCheckD(): DuplicateEntry[] {
           continue;
         }
 
-        let match: RegExpExecArray | null;
-        PATTERN.lastIndex = 0;
-        while ((match = PATTERN.exec(content)) !== null) {
+        // Per-line shared-parser scan (lines scanned in order, so `file`
+        // remains a whole-file registry of marker lines).
+        for (const line of content.split('\n')) {
+          const parsed = parseIntentionalDuplicateLine(line);
+          if (!parsed) continue;
           entries.push({
             file: fullPath.replace(ROOT + '\\', '').replace(ROOT + '/', ''),
-            source: match[1].trim(),
-            reason: match[2].trim(),
+            source: parsed.source ?? parsed.name ?? '',
+            reason: parsed.reason ?? parsed.name ?? '',
           });
         }
       }
