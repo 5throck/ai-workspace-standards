@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-09-13T12:57:31.977Z
+**Generated**: 2026-09-13T20:41:21.044Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 8
 - **Skills**: 51
-- **Scripts**: 93 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
+- **Scripts**: 94 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
 - **Commands**: 8
 
 ---
@@ -65,7 +65,7 @@
 | platform-command-lifecycle-manager | 1.0.0 | active | skills/platform-command-lifecycle-manager/SKILL.md | workspace | create platform command, new .claude command, new .gemini command, platform command lifecycle, command parity, propagate command | pm |
 | platform-skill-lifecycle-manager | 1.0.0 | active | skills/platform-skill-lifecycle-manager/SKILL.md | workspace | create platform skill, new .claude skill, new .gemini skill, platform skill version, platform skill lifecycle, update platform skill | pm |
 | project-resync | 1.3.1 | active | skills/project-resync/SKILL.md | workspace | project-resync, resync projects, sync project cycle | pm |
-| project-review | 1.2.0 | active | skills/project-review/SKILL.md | workspace | project review, review project, audit project, quality review | pm |
+| project-review | 1.3.0 | active | skills/project-review/SKILL.md | workspace | project review, review project, audit project, quality review | pm |
 | project-to-variant | 1.3.0 | active | skills/project-to-variant/SKILL.md | workspace | convert project to variant, create variant from project, project to template, promote project to variant | scaffolding-expert |
 | promote-variant | 1.4.0 | active | skills/promote-variant/SKILL.md | workspace | promote variant, Phase B, variant promotion, promote to template, create template from prototype | pm |
 | release-template | 1.0.0 | active | skills/release-template/SKILL.md | workspace | release template, template release, bump templates version, tag template, publish template version | pm |
@@ -141,6 +141,7 @@
 | resolve-variants.ts | 1.0.3 | scripts/resolve-variants.ts | fs, js-yaml, path |
 | resync-audit.ts | 1.0.0 | scripts/resync-audit.ts | N/A |
 | retry-handler.ts | 1.1.0 | scripts/retry-handler.ts | N/A |
+| review-baseline.ts | 1.0.0 | scripts/review-baseline.ts | N/A |
 | setup-github-branch-protection.ts | 1.0.1 | scripts/setup-github-branch-protection.ts | bun |
 | skill-dependency-analysis.ts | 1.0.2 | scripts/skill-dependency-analysis.ts | N/A |
 | skill-lifecycle-audit.ts | 1.4.1 | scripts/skill-lifecycle-audit.ts | N/A |
