@@ -307,6 +307,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `adr:0075` | adr | — | gmp-change-control, gmp-deviation-capa, gmp-qrm, psm-loto, psm-moc | — |
 | `adr:0076` | adr | — | — | — |
 | `adr:0077` | adr | — | — | — |
+| `adr:0078` | adr | — | — | — |
 | `dec:DEC-20260825-01` | decision | — | — | — |
 | `dec:DEC-20260825-02` | decision | `sync` | — | — |
 | `dec:DEC-20260829-01` | decision | `decision-record` | — | — |
