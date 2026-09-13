@@ -116,7 +116,7 @@ describe('scanIntentionalDuplicateMarkers — parser parity (T-20260912-029 refa
     expect(normalized).toEqual([
       {
         file: expect.stringContaining('templates/common/docs/context.md'),
-        line: 411,
+        line: 421,
         section: '3',
       },
       {

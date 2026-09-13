@@ -5,12 +5,21 @@ title: >-
   Adjudicate co-safety COMMON-AGENTS marker divergence as either common-owned
   sync or explicit variant-owned fork
 priority: normal
-status: backlog
+status: review
 attempts: 0
 created_at: '2026-09-12T13:13:47.812Z'
 history:
   - at: '2026-09-12T13:13:47.812Z'
     from: null
     to: backlog
+  - at: '2026-09-13T19:47:46.461Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-13T19:47:46.514Z'
+    from: waiting
+    to: running
+  - at: '2026-09-13T19:48:27.142Z'
+    from: running
+    to: review
 result: null
 error: null
