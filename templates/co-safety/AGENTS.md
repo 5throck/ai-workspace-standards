@@ -694,6 +694,10 @@ Every code change at any tier (L0–L3) must carry spec activity: create/update 
 ### LLM Work Routing Policy (ADR-0078)
 
 Substantive LLM-assisted development work — generation or modification of code, documents, designs, tests, or scripts — MUST be routed through this project's agent team: `user → PM triage → Design Gate (unless exempt) → specialist dispatch → QA gate → /sync PR`. Querying an external LLM directly (e.g. a web chat) and landing its output in this repository is a policy violation. IDE inline completions and one-off Q&A that never land in the repository are exempt; repository-landing work uses the E1–E5 exemption codes only. An application calling LLM APIs at runtime is an architecture concern covered by the Design Gate (ADR-0074). Enforcement is structural via the existing hard gates — see ADR-0078 (workspace root, `docs/adr/0078-agent-mediated-llm-work-routing.md`) for the full decision.
+
+### Instruction Writing Standard (ASD-STE100, ADR-0079)
+
+Development-facing instruction text — requirement statements, task briefs, execution-plan task descriptions, agent dispatch prompts, design-doc requirement sections, API endpoint documentation, and how-to steps — follows ASD-STE100 (Simplified Technical English) structural rules, in every development domain (web, app, API, scripts, documents). Rules: one instruction per sentence (≤ 20 words procedural / ≤ 25 descriptive); active voice with imperative steps; present tense; one term = one meaning (use glossary/registry terms exactly); no idioms; positive phrasing preferred; minimal pronouns; lists for parallel items and tables for structured data. The STE dictionary is not adopted. Enforcement is advisory: PM conforms task briefs at triage; architect checks requirement sections at Design Gate review. Full policy: §3.10 (workspace root AGENTS.md) and ADR-0079 (`docs/adr/0079-simplified-english-development-instructions.md`).
 <!-- COMMON-AGENTS:END -->
 
 ---
