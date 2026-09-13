@@ -538,4 +538,4 @@ See the workspace governance documentation (Governance Enforcement Layers) and A
 
 ---
 
-*context.md version: 2.6 — Schema Governance zone added (DB schema changes require an ADR before merge; see the Schema Governance zone above)*
+*context.md version: 2.7 — LLM Work Routing Policy (ADR-0078) section added under Architecture*

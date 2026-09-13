@@ -1,0 +1,332 @@
+#!/usr/bin/env bun
+/**
+ * layer-filter.ts — Single Layer Filter Engine
+ * @version 1.5.0
+ * @status active
+ *
+ * Reads SCRIPTS.md layer column (for scripts) and SKILL.md frontmatter (for skills)
+ * and provides filtering functions for publish-to-template, create-l3-scaffold,
+ * validate-templates, and new-project.sh.
+ *
+ * Layer values (L0/L1/L2 here follow context.md's Terminology Definition:
+ * L1 = templates/common, L2 = templates/co-*):
+ *   L0        = workspace root only
+ *   L0+L1     = templates/common + all L3 (scaffolded) projects, identically
+ *   L0+L2     = variant-specific; lives in the owning variant's template skills
+ *               dir only (no templates/common base) — reaches its own variant's
+ *               L3 projects via the variant overlay, never other variants'
+ *   L0+L1+L2  = scripts only (byte-identical L0→L1→L2 sync); no longer produced
+ *               by skill scope parsing
+ */
+
+import * as fs from "fs";
+import * as path from "path";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Types
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type LayerValue = "L0" | "L0+L1" | "L0+L2" | "L0+L1+L2";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Backward-compat mapping
+// ─────────────────────────────────────────────────────────────────────────────
+
+function normalizeLayer(raw: string): LayerValue {
+  const v = raw.trim();
+  if (v === "L0-only" || v === "L0") return "L0";
+  if (v === "common" || v === "L0+L1") return "L0+L1";
+  if (v === "L0+L1+L2") return "L0+L1+L2";
+  if (v === "L0+L2") return "L0+L2";
+  // L0+L1-ws was retired — any stale value falls through to L0+L1 (treated as common)
+  // Default unrecognized values to L0+L1 (safe — keeps script in template)
+  return "L0+L1";
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// parseScriptLayers
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Parse SCRIPTS.md Registry section and return a Map<scriptName, LayerValue>.
+ *
+ * Column order (0-based from split on '|', first element is empty):
+ *   script | source | version | status | removal-date | security-advisory | layer | pair
+ * Dynamically resolves column index from the header row for robustness.
+ */
+export function parseScriptLayers(
+  scriptsMdPath?: string,
+): Map<string, LayerValue> {
+  const mdPath =
+    scriptsMdPath ?? path.join(process.cwd(), "scripts", "SCRIPTS.md");
+  const result = new Map<string, LayerValue>();
+
+  let content: string;
+  try {
+    content = fs.readFileSync(mdPath, "utf8");
+  } catch {
+    console.warn(`[layer-filter] Could not read SCRIPTS.md at ${mdPath}`);
+    return result;
+  }
+
+  let inRegistry = false;
+  let headerParsed = false;
+  let scriptColIndex = -1;
+  let layerColIndex = -1;
+
+  for (const rawLine of content.split("\n")) {
+    const line = rawLine.trim();
+
+    if (/^## Registry/.test(line)) {
+      inRegistry = true;
+      continue;
+    }
+    if (inRegistry && /^## /.test(line)) break;
+    if (!inRegistry) continue;
+    if (!line.startsWith("|")) continue;
+
+    if (!headerParsed) {
+      const cols = line.split("|").map((c) => c.trim().toLowerCase());
+      scriptColIndex = cols.findIndex((c) => c === "script");
+      layerColIndex = cols.findIndex((c) => c === "layer");
+      if (scriptColIndex >= 0 && layerColIndex >= 0) headerParsed = true;
+      continue;
+    }
+
+    // Skip separator rows
+    if (/^\|[-\s|]+\|$/.test(line)) continue;
+
+    const cols = line.split("|").map((c) => c.trim());
+    const scriptCell = cols[scriptColIndex] ?? "";
+    const layerCell = cols[layerColIndex] ?? "";
+
+    if (!scriptCell) continue;
+
+    const scriptName = scriptCell.replace(/`/g, "").trim();
+    const layer = normalizeLayer(layerCell);
+    result.set(scriptName, layer);
+  }
+
+  return result;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// parseSkillLayers
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Read SKILL.md frontmatter from each skill directory and return Map<skillName, LayerValue>.
+ * Reads `l2_propagate: false` and `scope: workspace` frontmatter fields — both map to 'L0'
+ * (excluded from L1 propagation).
+ */
+export function parseSkillLayers(
+  skillsDirPath?: string,
+): Map<string, LayerValue> {
+  const skillsDir = skillsDirPath ?? path.join(process.cwd(), "skills");
+  return _parseSkillLayersFromFrontmatter(skillsDir);
+}
+
+// Recursively walks skillsDir. A directory is treated as a skill the moment it
+// contains a direct SKILL.md; directories without one (category dirs like
+// daily/, domains/industry/gmp/, etc. — the co-safety-style nested layout) are
+// walked into instead of skipped, so nesting depth doesn't matter. Each found
+// skill is registered under both its full relative path (e.g.
+// "domains/industry/gmp/change-control", matching validate-templates.ts's
+// collectSkillDirs) and its bare basename (e.g. "change-control", preserving
+// the original flat-layout lookup key for existing callers).
+function _walkSkillDirs(dir: string, skillsDir: string, result: Map<string, LayerValue>): void {
+  let entries: fs.Dirent[];
+  try {
+    entries = fs.readdirSync(dir, { withFileTypes: true });
+  } catch {
+    return;
+  }
+
+  for (const entry of entries) {
+    if (!entry.isDirectory()) continue;
+    if (entry.name === "_archive" || entry.name === "local" || entry.name === "external" || entry.name.startsWith("_")) continue;
+    const fullPath = path.join(dir, entry.name);
+    const skillMdPath = path.join(fullPath, "SKILL.md");
+    if (!fs.existsSync(skillMdPath)) {
+      _walkSkillDirs(fullPath, skillsDir, result);
+      continue;
+    }
+
+    let content: string;
+    try {
+      content = fs.readFileSync(skillMdPath, "utf8");
+    } catch {
+      continue;
+    }
+
+    // Read YAML frontmatter block
+    const fmMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+    let layer: LayerValue = "L0+L1"; // default
+    if (fmMatch) {
+      const fmLines = fmMatch[1].split(/\r?\n/);
+      for (const fmLine of fmLines) {
+        const scopeMatch = fmLine.match(/^\s*scope\s*:\s*(.+)$/);
+        if (scopeMatch) {
+          const scope = scopeMatch[1].trim().toLowerCase();
+          if (scope === "workspace") layer = "L0";
+          else if (scope === "common") layer = "L0+L1";
+          // Any other explicit scope value names the variant the skill belongs to
+          // (e.g. `scope: co-consult`) — a variant-specific skill with no
+          // templates/common/ base. It lives in templates/co-*/skills/ and reaches
+          // L3 projects via the variant overlay, never other variants' projects.
+          // See ADR-0032 §7 and skills/SKILLS.md.
+          else layer = "L0+L2";
+        }
+        // l2_propagate: false overrides scope — skill stays in L0 only
+        if (/^\s*l2_propagate\s*:\s*false\b/.test(fmLine)) {
+          layer = "L0";
+        }
+      }
+    }
+
+    const relPath = fullPath.slice(skillsDir.length + 1).replace(/\\/g, "/");
+    result.set(relPath, layer);
+    if (!result.has(entry.name)) result.set(entry.name, layer);
+  }
+}
+
+function _parseSkillLayersFromFrontmatter(skillsDir: string): Map<string, LayerValue> {
+  const result = new Map<string, LayerValue>();
+  if (!fs.existsSync(skillsDir)) return result;
+  _walkSkillDirs(skillsDir, skillsDir, result);
+  return result;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Script inclusion helpers
+// ─────────────────────────────────────────────────────────────────────────────
+
+let _cachedScriptLayers: Map<string, LayerValue> | null = null;
+
+function _getScriptLayers(layers?: Map<string, LayerValue>): Map<string, LayerValue> {
+  if (layers) return layers;
+  if (!_cachedScriptLayers) _cachedScriptLayers = parseScriptLayers();
+  return _cachedScriptLayers;
+}
+
+/** Should this script be included in templates/common (L1)? */
+export function includeScriptInL1(
+  scriptName: string,
+  layers?: Map<string, LayerValue>,
+): boolean {
+  const layer = getScriptLayer(scriptName, layers);
+  return layer === "L0+L1" || layer === "L0+L1+L2";
+}
+
+/** Should this script be included when scaffolding an L3 project? (Named `InL2` historically — see CONSTITUTION.md §Terminology Definition; L3 = Projects/*.) */
+export function includeScriptInL3(
+  scriptName: string,
+  layers?: Map<string, LayerValue>,
+): boolean {
+  const layer = getScriptLayer(scriptName, layers);
+  return layer === "L0+L1" || layer === "L0+L1+L2";
+}
+
+/** Get the layer value for a specific script. Defaults to L0+L1 if unknown. */
+export function getScriptLayer(
+  scriptName: string,
+  layers?: Map<string, LayerValue>,
+): LayerValue {
+  const map = _getScriptLayers(layers);
+
+  // Try exact match first
+  if (map.has(scriptName)) return map.get(scriptName)!;
+
+  // Try base name match (e.g. "audit.ts" matches "helpers/audit.ts")
+  const baseName = path.basename(scriptName);
+  for (const [key, val] of map) {
+    if (path.basename(key) === baseName) return val;
+  }
+
+  return "L0+L1"; // safe default
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Skill inclusion helpers
+// ─────────────────────────────────────────────────────────────────────────────
+
+let _cachedSkillLayers: Map<string, LayerValue> | null = null;
+
+function _getSkillLayers(layers?: Map<string, LayerValue>): Map<string, LayerValue> {
+  if (layers) return layers;
+  if (!_cachedSkillLayers) _cachedSkillLayers = parseSkillLayers();
+  return _cachedSkillLayers;
+}
+
+/** Should this skill be included in templates/common (L1)? */
+export function includeSkillInL1(
+  skillName: string,
+  layers?: Map<string, LayerValue>,
+): boolean {
+  const layer = getSkillLayer(skillName, layers);
+  // Variant-specific skills (L0+L2) skip L1 — they ship via the co-* overlay.
+  return layer === "L0+L1" || layer === "L0+L1+L2";
+}
+
+/** Should this skill be included when scaffolding an L3 project? (Named `InL2` historically — see CONSTITUTION.md §Terminology Definition; L3 = Projects/*.) */
+export function includeSkillInL3(
+  skillName: string,
+  layers?: Map<string, LayerValue>,
+): boolean {
+  const layer = getSkillLayer(skillName, layers);
+  return layer === "L0+L1" || layer === "L0+L1+L2";
+}
+
+/** Get the layer value for a specific skill. Defaults to L0+L1 if unknown. */
+export function getSkillLayer(
+  skillName: string,
+  layers?: Map<string, LayerValue>,
+): LayerValue {
+  const map = _getSkillLayers(layers);
+  return map.get(skillName) ?? "L0+L1";
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CLI mode
+// ─────────────────────────────────────────────────────────────────────────────
+
+if (import.meta.main) {
+  const args = process.argv.slice(2);
+  const format = args.find((a) => a.startsWith("--format="))?.split("=")[1] ?? "list";
+
+  const showScriptsL0Only = args.includes("--scripts-l0-only");
+  const showScriptsL0PlusL1 = args.includes("--scripts-l0-plus-l1");
+  const showSkillsL0Only = args.includes("--skills-l0-only");
+
+  let names: string[] = [];
+
+  if (showScriptsL0Only) {
+    const layers = parseScriptLayers();
+    names = [...layers.entries()]
+      .filter(([, v]) => v === "L0")
+      .map(([k]) => k);
+  } else if (showScriptsL0PlusL1) {
+    const layers = parseScriptLayers();
+    names = [...layers.entries()]
+      .filter(([, v]) => v === "L0+L1")
+      .map(([k]) => k);
+  } else if (showSkillsL0Only) {
+    const layers = parseSkillLayers();
+    names = [...layers.entries()]
+      .filter(([, v]) => v === "L0")
+      .map(([k]) => k);
+  } else {
+    console.error(
+      "Usage: bun scripts/helpers/layer-filter.ts [--scripts-l0-only | --scripts-l0-plus-l1 | --skills-l0-only] [--format=list|json]",
+    );
+    process.exit(1);
+  }
+
+  if (format === "json") {
+    console.log(JSON.stringify(names, null, 2));
+  } else {
+    for (const name of names) {
+      console.log(name);
+    }
+  }
+}
