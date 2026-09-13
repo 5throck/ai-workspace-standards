@@ -5,8 +5,13 @@
  * Replaces publish-to-template.ts (deprecated v1.8.0). Single authoritative script
  * for all L0→L1 propagation. Config-driven via propagation-map.json (SSOT for exclusions).
  *
- * @version 2.15.0
+ * @version 2.15.1
  *
+ * v2.15.1: the bare-zone fallback in replaceCommonSection() is gated on the
+ *          source declaring exactly ONE section for the marker — with multiple
+ *          sections, replacing the first bare zone could clobber a different
+ *          section's content (guard added before the COMMON-CONTEXT domain
+ *          grows a second section).
  * v2.15.0: publishDocs (--docs) now honors a marker-inject domain's
  *          `target_file` template with {variant} substitution — without it the
  *          variant-context domain (docs/{variant}.context.md) probed
@@ -895,7 +900,8 @@ function extractCommonSections(content: string, marker: string): Array<{heading:
 function replaceCommonSection(
   variantContent: string,
   marker: string,
-  section: { heading: string; fullBlock: string }
+  section: { heading: string; fullBlock: string },
+  allowBareFallback = true
 ): { content: string; changed: boolean; handled: boolean } {
   // Escape the heading for use in a regex
   const headingEscaped = section.heading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -917,13 +923,30 @@ function replaceCommonSection(
   // v2.15.0: headingless section (no `#` line inside the source block → synthetic
   // `section-N` heading). The heading-anchored pattern can never match those, so
   // fall back to replacing the file's existing bare zone of this marker — the
-  // previous behavior appended a duplicate zone on every run.
-  const barePattern = new RegExp(
-    `<!--\\s*${marker}:START\\s*-->[\\s\\S]*?<!--\\s*${marker}:END\\s*-->`
+  // previous behavior appended a duplicate zone on every run. The fallback is
+  // only SAFE when the source declares exactly one section for the marker: with
+  // multiple sections, replacing the first bare zone could clobber a different
+  // section's content (v2.15.1 guard).
+  if (allowBareFallback) {
+    const barePattern = new RegExp(
+      `<!--\\s*${marker}:START\\s*-->[\\s\\S]*?<!--\\s*${marker}:END\\s*-->`
+    );
+    if (barePattern.test(variantContent)) {
+      const newContent = variantContent.replace(barePattern, section.fullBlock);
+      return { content: newContent, changed: newContent !== variantContent, handled: true };
+    }
+  }
+
+  // v2.15.1: verbatim-present check — with multiple source sections the bare
+  // fallback above is disabled, so a headingless section that ALREADY exists
+  // verbatim in the variant (e.g. the seeded COMMON-CONTEXT coding-guidelines
+  // zone) must count as in-sync instead of being appended a second time.
+  const normalize = (s: string) => s.replace(/\r\n/g, '\n').trim();
+  const allZones = variantContent.match(
+    new RegExp(`<!--\\s*${marker}:START\\s*-->[\\s\\S]*?<!--\\s*${marker}:END\\s*-->`, 'g')
   );
-  if (barePattern.test(variantContent)) {
-    const newContent = variantContent.replace(barePattern, section.fullBlock);
-    return { content: newContent, changed: newContent !== variantContent, handled: true };
+  if (allZones && allZones.some((z) => normalize(z) === normalize(section.fullBlock))) {
+    return { content: variantContent, changed: false, handled: true };
   }
 
   // No zone in the variant at all — caller decides whether to append
@@ -995,14 +1018,23 @@ function publishDocs(isDryRun: boolean, mapPath: string): void {
         const effectiveSection = scrub
           ? { ...section, fullBlock: scrubConstitutionRefs(section.fullBlock, sourcePath, variantPath) }
           : section;
-        const result = replaceCommonSection(variantContent, marker, effectiveSection);
+        // v2.15.1: the bare-zone fallback is only safe for single-section domains.
+        const result = replaceCommonSection(variantContent, marker, effectiveSection, sections.length === 1);
         if (result.changed) {
           variantContent = result.content;
           fileUpdated = true;
         } else if (!result.handled) {
-          // Section not present in variant yet — append on first propagation
-          const separator = variantContent.endsWith('\n') ? '\n' : '\n\n';
-          variantContent = variantContent.trimEnd() + separator + effectiveSection.fullBlock + '\n';
+          // Section not present in variant yet — insert on first propagation.
+          // v2.15.1: insert BEFORE a trailing version footer (variant context
+          // files keep their `*<variant>.context.md version:*` footer last)
+          // instead of blindly appending after it.
+          const footerMatch = variantContent.match(/\n---\n\n\*[^*\n]+version:[^*\n]+\*\s*$/);
+          if (footerMatch && footerMatch.index !== undefined) {
+            variantContent = variantContent.slice(0, footerMatch.index) + '\n' + effectiveSection.fullBlock + '\n' + variantContent.slice(footerMatch.index);
+          } else {
+            const separator = variantContent.endsWith('\n') ? '\n' : '\n\n';
+            variantContent = variantContent.trimEnd() + separator + effectiveSection.fullBlock + '\n';
+          }
           fileUpdated = true;
         }
       }

@@ -55,8 +55,8 @@ Standard operating procedures, developer guides, variant creation workflows, and
 
 Formal records documenting architectural decisions, design rationale, and evolution history.
 
-- [**ADR Index**](adr/) — Master index of Architecture Decision Records (ADRs 0001 through 0078; see docs/adr/)
-  - Key ADRs include [ADR-0039 (L0/L1/L2 Hierarchy & Extends)](adr/0039-l0-l1-l2-hierarchy-and-extends.md), [ADR-0040 (L0/L1 Deployment Strategy)](adr/0040-l0-l1-deployment-strategy.md), [ADR-0042 (L2 Variant Pipeline Golden Reference)](adr/0042-l2-variant-pipeline-wave15-golden-reference.md), [ADR-0048 (Variant PM AGENTS.md Workflow SSOT)](adr/0048-variant-pm-agents-md-workflow-ssot.md), and [ADR-0078 (Agent-Mediated LLM Work Routing)](adr/0078-agent-mediated-llm-work-routing.md).
+- [**ADR Index**](adr/) — Master index of Architecture Decision Records (ADRs 0001 through 0079; see docs/adr/)
+  - Key ADRs include [ADR-0039 (L0/L1/L2 Hierarchy & Extends)](adr/0039-l0-l1-l2-hierarchy-and-extends.md), [ADR-0040 (L0/L1 Deployment Strategy)](adr/0040-l0-l1-deployment-strategy.md), [ADR-0042 (L2 Variant Pipeline Golden Reference)](adr/0042-l2-variant-pipeline-wave15-golden-reference.md), [ADR-0048 (Variant PM AGENTS.md Workflow SSOT)](adr/0048-variant-pm-agents-md-workflow-ssot.md), [ADR-0078 (Agent-Mediated LLM Work Routing)](adr/0078-agent-mediated-llm-work-routing.md), and [ADR-0079 (Simplified English for Development Instructions)](adr/0079-simplified-english-development-instructions.md).
 - [**Retired ADRs**](adr/retired/) — Historical ADRs that have been retired or superseded by newer specifications (e.g., [ADR-0030 (Auto Mode Architecture)](adr/retired/0030-auto-mode-architecture.md))
 - [**ADR Templates**](adr/templates/) — Standardized templates for authoring new Architecture Decision Records (e.g., [Variant Creation Template](adr/templates/variant-creation-template.md))
 

@@ -197,6 +197,16 @@ section) — PM never allows a user to bypass PM and address a specialist direct
 This section replaces the workspace PM's dispatch protocol with variant-specific logic.
 <!-- END VARIANT-SECTION -->
 
+<!-- COMMON-CONTEXT:START -->
+### Instruction Writing Standard (ASD-STE100, ADR-0079)
+
+Development-facing instruction text follows ASD-STE100 (Simplified Technical English) structural rules — in every development domain (web, app, API, scripts, documents).
+
+- **Applies to**: requirement statements, task briefs, execution-plan task descriptions, agent dispatch prompts, design-doc requirement sections, API endpoint documentation, and how-to steps.
+- **Rules**: one instruction per sentence (≤ 20 words procedural / ≤ 25 descriptive); active voice with imperative steps; present tense; one term = one meaning (use glossary/registry terms exactly); no idioms; positive phrasing preferred; minimal pronouns; lists for parallel items and tables for structured data.
+- **Enforcement**: advisory — PM conforms task briefs at triage; architect checks requirement sections at Design Gate review. Full decision: ADR-0079 in the workspace root `docs/adr/`.
+<!-- COMMON-CONTEXT:END -->
+
 ---
 
 *co-hr.context.md version: 1.1 — restructured to the WS-09 standard slot order (Tech Stack / Agents / Skills / Environment Setup / Development Workflow / Guidelines / File Organization Policy / Domain Rules); v1.0 content preserved*

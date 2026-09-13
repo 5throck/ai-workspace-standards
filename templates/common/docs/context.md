@@ -46,6 +46,16 @@ Substantive LLM-assisted development work — generation or modification of code
 - **Runtime LLM integration**: an application calling LLM APIs at runtime is an architecture concern covered by the Design Gate.
 - **Enforcement**: structural, via the existing hard gates (Design Gate spec-check, pre-commit audit, QA gate). Full decision: ADR-0078 in the workspace root `docs/adr/`.
 
+<!-- COMMON-CONTEXT:START -->
+### Instruction Writing Standard (ASD-STE100, ADR-0079)
+
+Development-facing instruction text follows ASD-STE100 (Simplified Technical English) structural rules — in every development domain (web, app, API, scripts, documents).
+
+- **Applies to**: requirement statements, task briefs, execution-plan task descriptions, agent dispatch prompts, design-doc requirement sections, API endpoint documentation, and how-to steps.
+- **Rules**: one instruction per sentence (≤ 20 words procedural / ≤ 25 descriptive); active voice with imperative steps; present tense; one term = one meaning (use glossary/registry terms exactly); no idioms; positive phrasing preferred; minimal pronouns; lists for parallel items and tables for structured data.
+- **Enforcement**: advisory — PM conforms task briefs at triage; architect checks requirement sections at Design Gate review. Full decision: ADR-0079 in the workspace root `docs/adr/`.
+<!-- COMMON-CONTEXT:END -->
+
 Standard directory layout for all projects in this workspace:
 
 ```
@@ -538,4 +548,4 @@ See the workspace governance documentation (Governance Enforcement Layers) and A
 
 ---
 
-*context.md version: 2.7 — LLM Work Routing Policy (ADR-0078) section added under Architecture*
+*context.md version: 2.8 — Instruction Writing Standard (ASD-STE100, ADR-0079) section added under Architecture*

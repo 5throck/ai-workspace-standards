@@ -248,8 +248,8 @@ dispatch triggers: `AGENTS.md` Specialist Agent Roster.
 
   | Tier | Registry Model ID | `Agent(model: ...)` value (Short Alias) |
   |------|-------------------|------------------------------------------|
-  | High | `claude-opus-4-7` | `opus` |
-  | Medium | `claude-sonnet-4-6` | `sonnet` |
+  | High | `claude-opus-5-0` | `opus` |
+  | Medium | `claude-sonnet-5-0` | `sonnet` |
   | Low | `claude-haiku-4-5` | `haiku` |
 
   Omitting `model` causes the subagent to silently inherit the parent session's model regardless of the tier written in the plan table. Verify the `model` argument (e.g. `model = "haiku"`) is present on every `Agent()` call before dispatching — do not rely on `subagent_type` alone.
@@ -268,4 +268,13 @@ Key rules:
 <!-- COMMON-CONTEXT:END -->
 
 ---
-*co-safety.context.md version: 1.1 — COMMON-CONTEXT zone added, variant-context fleet inclusion (T-20260913-002) (2026-09-13); previous: version footer added (2026-09-11)*
+*co-safety.context.md version: 1.2 — PM model-ID table refreshed to current registry (claude-opus-5-0 / claude-sonnet-5-0) (2026-09-13); previous: 1.1 COMMON-CONTEXT zone added (T-20260913-002); 1.0 version footer added (2026-09-11)*
+<!-- COMMON-CONTEXT:START -->
+### Instruction Writing Standard (ASD-STE100, ADR-0079)
+
+Development-facing instruction text follows ASD-STE100 (Simplified Technical English) structural rules — in every development domain (web, app, API, scripts, documents).
+
+- **Applies to**: requirement statements, task briefs, execution-plan task descriptions, agent dispatch prompts, design-doc requirement sections, API endpoint documentation, and how-to steps.
+- **Rules**: one instruction per sentence (≤ 20 words procedural / ≤ 25 descriptive); active voice with imperative steps; present tense; one term = one meaning (use glossary/registry terms exactly); no idioms; positive phrasing preferred; minimal pronouns; lists for parallel items and tables for structured data.
+- **Enforcement**: advisory — PM conforms task briefs at triage; architect checks requirement sections at Design Gate review. Full decision: ADR-0079 in the workspace root `docs/adr/`.
+<!-- COMMON-CONTEXT:END -->

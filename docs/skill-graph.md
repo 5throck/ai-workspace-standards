@@ -308,6 +308,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `adr:0076` | adr | — | — | — |
 | `adr:0077` | adr | — | — | — |
 | `adr:0078` | adr | — | — | — |
+| `adr:0079` | adr | — | — | — |
 | `dec:DEC-20260825-01` | decision | — | — | — |
 | `dec:DEC-20260825-02` | decision | `sync` | — | — |
 | `dec:DEC-20260829-01` | decision | `decision-record` | — | — |

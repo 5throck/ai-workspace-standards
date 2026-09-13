@@ -220,6 +220,16 @@ Co-News follows a **newsroom pipeline** dispatch model: Tip -> Research -> Draft
 | 6 | Final QA / publish gate | pm | — |
 <!-- END VARIANT-SECTION -->
 
+<!-- COMMON-CONTEXT:START -->
+### Instruction Writing Standard (ASD-STE100, ADR-0079)
+
+Development-facing instruction text follows ASD-STE100 (Simplified Technical English) structural rules — in every development domain (web, app, API, scripts, documents).
+
+- **Applies to**: requirement statements, task briefs, execution-plan task descriptions, agent dispatch prompts, design-doc requirement sections, API endpoint documentation, and how-to steps.
+- **Rules**: one instruction per sentence (≤ 20 words procedural / ≤ 25 descriptive); active voice with imperative steps; present tense; one term = one meaning (use glossary/registry terms exactly); no idioms; positive phrasing preferred; minimal pronouns; lists for parallel items and tables for structured data.
+- **Enforcement**: advisory — PM conforms task briefs at triage; architect checks requirement sections at Design Gate review. Full decision: ADR-0079 in the workspace root `docs/adr/`.
+<!-- COMMON-CONTEXT:END -->
+
 ---
 
 *co-news.context.md version: 1.0 — version footer added (T-012-adjacent hygiene pass) (2026-09-11)*
