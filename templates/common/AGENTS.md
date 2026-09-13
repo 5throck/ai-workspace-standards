@@ -184,6 +184,15 @@ When a specialist agent's required tool is denied, PM must **not** substitute fo
 3. Log the denial to `memory/YYYY-MM-DD.md`
 4. Halt the blocked task — do not proceed without the required tool
 
+### §3.9 LLM Work Routing Policy (ADR-0078)
+
+Substantive LLM-assisted development work — generation or modification of code, documents, designs, tests, or scripts — MUST be routed through the project's agent team: `user → PM triage → Design Gate (unless exempt) → specialist dispatch → QA gate → /sync PR`. Querying an external LLM directly (e.g. a web chat) and landing its output in the repository is a policy violation.
+
+- **Exemptions**: trivial assistance not landing in the repository (IDE inline completions, one-off Q&A) is exempt; repository-landing work uses the existing E1–E5 exemption codes (§5.1.1) only.
+- **PM single entry point**: all specialist dispatch goes through PM (§3.1); Phases 3/4/6 remain specialist-autonomous per the existing workflow.
+- **Runtime LLM integration**: an application calling LLM APIs at runtime is an architecture concern covered by the Design Gate (ADR-0074) — no additional ceremony.
+- **Enforcement**: structural, via the existing hard gates (spec-check, pre-commit audit, QA gate). See ADR-0078 (workspace root, `docs/adr/0078-agent-mediated-llm-work-routing.md`).
+
 ---
 
 <!-- COMMON-AGENTS:START -->
@@ -241,6 +250,10 @@ When writing Korean documentation or Korean translation output, prefer native Ko
 ### Universal Design Gate (ADR-0074)
 
 Every code change at any tier (L0–L3) must carry spec activity: create/update a design doc at `docs/designs/<spec-id>-design.md` and register it (`bun scripts/spec-register.ts --file <design-doc> --source manual --status implemented`) before `/sync`. The sync-time spec-check (`audit.ts --spec-check`, dev-sync step 3.9) blocks commits without it; trivial changes use `--spec-exempt=E1..E5` (AGENTS.md §5.1.1). Project registries (`docs/specs/registry.json`) are add-if-missing seeds — upgrades never overwrite or prune project entries.
+
+### LLM Work Routing Policy (ADR-0078)
+
+Substantive LLM-assisted development work — generation or modification of code, documents, designs, tests, or scripts — MUST be routed through this project's agent team: `user → PM triage → Design Gate (unless exempt) → specialist dispatch → QA gate → /sync PR`. Querying an external LLM directly (e.g. a web chat) and landing its output in this repository is a policy violation. IDE inline completions and one-off Q&A that never land in the repository are exempt; repository-landing work uses the E1–E5 exemption codes only. An application calling LLM APIs at runtime is an architecture concern covered by the Design Gate (ADR-0074). Enforcement is structural via the existing hard gates — see ADR-0078 (workspace root, `docs/adr/0078-agent-mediated-llm-work-routing.md`) for the full decision.
 <!-- COMMON-AGENTS:END -->
 
 ---
@@ -478,6 +491,7 @@ When a user request matches a skill trigger, apply this priority order — **enf
 - **Single location requirement**: Workspace-level skills should exist **only** in `skills/` folder (priority 1). Do not duplicate these in `.claude/skills/` or `.gemini/skills/`.
 - **Platform-specific skills**: `.claude/skills/` and `.gemini/skills/` are reserved for platform-specific hooks, commands, and lifecycle management tools that differ between Claude Code and Gemini CLI.
 - **No cross-duplication**: Avoid duplicating the same skill across multiple locations. Choose the single most appropriate location based on the skill's purpose.
+- **Common (L1) skills are NOT missing from root**: Skills present in `templates/common/skills/` but absent from the root `skills/` folder (e.g. `decision-record`, `evidence-ledger`, `handbook`, `handbook-sync-audit`, `i18n-audit`, `i18n-formatting`, `i18n-layout`, `i18n-locale-config`) are **deliberate L1-only common assets** (`scope: common`), delivered to scaffolded projects via `docs/templates/common-contract.json` — not an SSOT gap to "fix" by promoting them to root. Root is L0; never deliver L1 content to the workspace root (see the 2026-09-12 root-upgrade incident, `memory/2026-09-12.md`).
 
 **Resolution Rule**: If a higher-priority skill's `metadata.triggers` matches the user request, use it — do **not** fall through to lower-priority skills with overlapping intent.
 

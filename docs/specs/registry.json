@@ -790,6 +790,15 @@
       "source": "manual",
       "created": "2026-09-12",
       "last_updated": "2026-09-12"
+    },
+    {
+      "id": "2026-09-13-llm-work-routing-design",
+      "title": "llm work routing design",
+      "file": "docs/designs/2026-09-13-llm-work-routing-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-13",
+      "last_updated": "2026-09-13"
     }
   ]
 }

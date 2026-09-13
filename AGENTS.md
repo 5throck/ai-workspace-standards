@@ -202,6 +202,15 @@ When a specialist agent's required tool is denied, PM must **not** substitute fo
 3. Log the denial to `memory/YYYY-MM-DD.md`
 4. Halt the blocked task — do not proceed without the required tool
 
+### §3.9 LLM Work Routing Policy (ADR-0078)
+
+Substantive LLM-assisted development work — generation or modification of code, documents, designs, tests, or scripts — MUST be routed through the project's agent team: `user → PM triage → Design Gate (unless exempt) → specialist dispatch → QA gate → /sync PR`. Querying an external LLM directly (e.g. a web chat) and landing its output in the repository is a policy violation.
+
+- **Exemptions**: trivial assistance not landing in the repository (IDE inline completions, one-off Q&A) is exempt; repository-landing work uses the existing E1–E5 exemption codes (§5.1.1) only.
+- **PM single entry point**: all specialist dispatch goes through PM (§3.1); Phases 3/4/6 remain specialist-autonomous per the existing workflow.
+- **Runtime LLM integration**: an application calling LLM APIs at runtime is an architecture concern covered by the Design Gate (ADR-0074) — no additional ceremony.
+- **Enforcement**: structural, via the existing hard gates (spec-check, pre-commit audit, QA gate). See ADR-0078 (workspace root, `docs/adr/0078-agent-mediated-llm-work-routing.md`).
+
 ---
 
 <!-- COMMON-AGENTS:START -->
@@ -259,6 +268,10 @@ When writing Korean documentation or Korean translation output, prefer native Ko
 ### Universal Design Gate (ADR-0074)
 
 Every code change at any tier (L0–L3) must carry spec activity: create/update a design doc at `docs/designs/<spec-id>-design.md` and register it (`bun scripts/spec-register.ts --file <design-doc> --source manual --status implemented`) before `/sync`. The sync-time spec-check (`audit.ts --spec-check`, dev-sync step 3.9) blocks commits without it; trivial changes use `--spec-exempt=E1..E5` (AGENTS.md §5.1.1). Project registries (`docs/specs/registry.json`) are add-if-missing seeds — upgrades never overwrite or prune project entries.
+
+### LLM Work Routing Policy (ADR-0078)
+
+Substantive LLM-assisted development work — generation or modification of code, documents, designs, tests, or scripts — MUST be routed through this project's agent team: `user → PM triage → Design Gate (unless exempt) → specialist dispatch → QA gate → /sync PR`. Querying an external LLM directly (e.g. a web chat) and landing its output in this repository is a policy violation. IDE inline completions and one-off Q&A that never land in the repository are exempt; repository-landing work uses the E1–E5 exemption codes only. An application calling LLM APIs at runtime is an architecture concern covered by the Design Gate (ADR-0074). Enforcement is structural via the existing hard gates — see ADR-0078 (workspace root, `docs/adr/0078-agent-mediated-llm-work-routing.md`) for the full decision.
 <!-- COMMON-AGENTS:END -->
 
 ---

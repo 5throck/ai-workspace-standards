@@ -38,6 +38,14 @@ The mapping is immutable per generation:
 
 Tier layering: the workspace-root PM stays High (workspace governance and design adjudication); template PMs are Medium (project orchestration). A variant whose PM must own design adjudication re-declares `tier: high` in its own `agents/pm.md` frontmatter.
 
+### LLM Work Routing Policy (ADR-0078)
+
+Substantive LLM-assisted development work — generation or modification of code, documents, designs, tests, or scripts — MUST be routed through this project's agent team, orchestrated by the PM agent as the single entry point: `user → PM triage → Design Gate (unless exempt) → specialist dispatch → QA gate → /sync PR`. Querying an external LLM directly (e.g. a web chat) and landing its output in this repository is a policy violation.
+
+- **Exempt**: IDE inline completions and one-off Q&A that never land in the repository. Repository-landing work uses the E1–E5 exemption codes only.
+- **Runtime LLM integration**: an application calling LLM APIs at runtime is an architecture concern covered by the Design Gate.
+- **Enforcement**: structural, via the existing hard gates (Design Gate spec-check, pre-commit audit, QA gate). Full decision: ADR-0078 in the workspace root `docs/adr/`.
+
 Standard directory layout for all projects in this workspace:
 
 ```

@@ -59,6 +59,16 @@ The PM operates as a facilitator and coordinator for multi-agent collaboration, 
 - **Collaborative decision-making**: Use `/meeting` skill to enable real-time multi-agent dialogue
 - **Consensus-driven execution**: Action items reflect agreed-upon plans from all participants
 
+## LLM Work Routing Duty (ADR-0078)
+
+Substantive LLM-assisted development work MUST flow through this agent team — never through direct queries to an external LLM with results pasted into the repository. As triage owner, PM is the routing enforcement point:
+
+- On receiving substantive work (code, documents, designs, tests, scripts), route it: triage → Design Gate (unless exempt, E1–E5) → specialist dispatch → QA gate → `/sync` PR.
+- If a user pastes externally generated output and asks to land it, treat it as input material: it still goes through the full gateway (design review, QA gates) before landing.
+- IDE completions and one-off Q&A that never land in the repository are exempt. Runtime LLM integration in the product is an architecture concern handled by the Design Gate.
+
+See AGENTS.md §3.9 — LLM Work Routing Policy (ADR-0078).
+
 ## Governance Workflow
 
 PM owns phases **0, 1-2, and 5** per the canonical phase schema in `docs/workspace-schema.json`:
