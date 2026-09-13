@@ -439,7 +439,7 @@ When a new skill is created in `skills/` or `.claude/skills/`:
 
 ---
 
-*Last Updated: 2026-09-12 (co-abap v1.0.0)*
+*Last Updated: 2026-09-13 (co-abap v1.0.0)*
 
 <!-- COMMON-AGENTS:START -->
 ## Language Policy
@@ -496,6 +496,10 @@ When writing Korean documentation or Korean translation output, prefer native Ko
 ### Universal Design Gate (ADR-0074)
 
 Every code change at any tier (L0–L3) must carry spec activity: create/update a design doc at `docs/designs/<spec-id>-design.md` and register it (`bun scripts/spec-register.ts --file <design-doc> --source manual --status implemented`) before `/sync`. The sync-time spec-check (`audit.ts --spec-check`, dev-sync step 3.9) blocks commits without it; trivial changes use `--spec-exempt=E1..E5` (AGENTS.md §5.1.1). Project registries (`docs/specs/registry.json`) are add-if-missing seeds — upgrades never overwrite or prune project entries.
+
+### LLM Work Routing Policy (ADR-0078)
+
+Substantive LLM-assisted development work — generation or modification of code, documents, designs, tests, or scripts — MUST be routed through this project's agent team: `user → PM triage → Design Gate (unless exempt) → specialist dispatch → QA gate → /sync PR`. Querying an external LLM directly (e.g. a web chat) and landing its output in this repository is a policy violation. IDE inline completions and one-off Q&A that never land in the repository are exempt; repository-landing work uses the E1–E5 exemption codes only. An application calling LLM APIs at runtime is an architecture concern covered by the Design Gate (ADR-0074). Enforcement is structural via the existing hard gates — see ADR-0078 (workspace root, `docs/adr/0078-agent-mediated-llm-work-routing.md`) for the full decision.
 <!-- COMMON-AGENTS:END -->
 
 <!-- WORKSPACE-MANAGED: graft repo context graph -->
