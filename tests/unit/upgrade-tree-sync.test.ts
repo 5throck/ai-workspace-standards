@@ -191,7 +191,11 @@ describe('upgrade-project.ts docs/context.md CONTEXT PRESERVE gate', () => {
       // Template version applied: project-only section gone, footer back at template text.
       const applied = readFileSync(join(tmp, 'docs', 'context.md'), 'utf8');
       expect(applied).not.toContain('## Project Only Section');
-      expect(applied).toContain('*context.md version: 2.6');
+      // Footer version asserted against the LIVE template (not a hardcoded
+      // literal — the 2.6 pin broke on the 2026-09-13 footer 2.7 bump).
+      const liveVersion = readFileSync(contextTemplatePath, 'utf8').match(/\*context\.md version: [^*\n]+\*/);
+      expect(liveVersion).not.toBeNull();
+      expect(applied).toContain(liveVersion![0]);
       expect(applied).toBe(readFileSync(contextTemplatePath, 'utf8'));
     } finally {
       rmSync(tmp, { recursive: true, force: true });
