@@ -80,6 +80,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `lib/local-date.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `compile-tokens.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `design-lint.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
+| `review-baseline.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `resync-audit.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `create-l3-scaffold.ts` | L0 | 1.13.0 | active | —| —| L0 | —|
 | `dev-sync.ts` | L0 | 1.14.0 | active | —| —| L0+L1 | —|
