@@ -799,6 +799,15 @@
       "source": "manual",
       "created": "2026-09-13",
       "last_updated": "2026-09-13"
+    },
+    {
+      "id": "2026-09-13-cosafety-zone-reconciliation-design",
+      "title": "cosafety zone reconciliation design",
+      "file": "docs/designs/2026-09-13-cosafety-zone-reconciliation-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-13",
+      "last_updated": "2026-09-13"
     }
   ]
 }

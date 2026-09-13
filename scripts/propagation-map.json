@@ -110,10 +110,11 @@
         "co-hr",
         "co-news",
         "co-price",
+        "co-safety",
         "co-security",
         "co-work"
       ],
-      "note": "co-abap/co-hr/co-price added 2026-09-10 (T-20260910-018/T-20260910-022): their AGENTS.md COMMON-AGENTS zones were byte-identical to the L1 source but unlisted — validate-templates PM-02 now FAILs that drift class. co-safety is deliberately excluded: its zone intentionally diverges (Safety OS governance section); adjudication tracked in T-20260910-022, surfaced as PM-02 WARN until resolved."
+      "note": "co-abap/co-hr/co-price added 2026-09-10 (T-20260910-018/T-20260910-022): their AGENTS.md COMMON-AGENTS zones were byte-identical to the L1 source but unlisted — validate-templates PM-02 now FAILs that drift class. co-safety added 2026-09-13 (T-20260913-001, superseding the T-20260910-022 divergence ruling): the ruling's stated basis (a Safety OS governance section) does not exist in the zone's git history — the only actual divergence was the audit-hook path bullet, now resolved by making the L1 bullet variant-neutral (path declared in variant.json → script_manifest). Zone re-synced to L1 via --docs; PM-02 WARN cleared."
     },
     "skills": {
       "description": "L0 skills/ → L1 templates/common/skills/",

@@ -1,0 +1,32 @@
+schemaVersion: 1
+id: T-20260913-001
+kind: manual
+title: >-
+  re-adjudicate co-safety COMMON-AGENTS divergence: reconcile zone to L1, list
+  in governance-agents, supersede T-20260910-022
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-09-13T11:52:53.384Z'
+history:
+  - at: '2026-09-13T11:52:53.384Z'
+    from: null
+    to: backlog
+  - at: '2026-09-13T11:53:36.244Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-13T11:53:36.258Z'
+    from: waiting
+    to: review
+  - at: '2026-09-13T11:53:36.272Z'
+    from: review
+    to: done
+result: >-
+  Adjudicated 2026-09-13 per
+  docs/designs/2026-09-13-cosafety-zone-reconciliation-design.md: the
+  T-20260910-022 basis (Safety OS governance section) does not exist in zone
+  history; sole divergence was the audit-hook path bullet, resolved via
+  variant-neutral L1 wording (variant.json script_manifest). co-safety listed in
+  governance-agents, zone re-synced via --docs, PM-02 WARN cleared
+  (validate-templates 2->1, remainder is unrelated C-CM-04).
+error: null
