@@ -5,12 +5,23 @@ title: >-
   Harden edu-sync by separating AI patch generation from privileged cross-repo
   push credentials
 priority: high
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-12T13:13:47.598Z'
 history:
   - at: '2026-09-12T13:13:47.598Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-13T23:30:05.852Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-13T23:30:05.865Z'
+    from: waiting
+    to: review
+  - at: '2026-09-13T23:30:05.927Z'
+    from: review
+    to: done
+result: >-
+  Implemented in the governance hardening batch (edu-sync two-phase credential
+  separation; merged to main via the T-026/027/031 batch PR)
 error: null
