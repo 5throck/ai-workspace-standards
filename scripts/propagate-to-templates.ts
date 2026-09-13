@@ -5,8 +5,18 @@
  * Replaces publish-to-template.ts (deprecated v1.8.0). Single authoritative script
  * for all L0→L1 propagation. Config-driven via propagation-map.json (SSOT for exclusions).
  *
- * @version 2.14.0
+ * @version 2.15.0
  *
+ * v2.15.0: publishDocs (--docs) now honors a marker-inject domain's
+ *          `target_file` template with {variant} substitution — without it the
+ *          variant-context domain (docs/{variant}.context.md) probed
+ *          templates/<variant>/context.md and was silently inert, so the 11
+ *          seeded COMMON-CONTEXT zones could never be refreshed from L1.
+ *          replaceCommonSection() gains a bare-zone fallback: headingless
+ *          source sections (synthetic `section-N` heading — the COMMON-CONTEXT
+ *          coding-guidelines block) previously matched nothing, so every run
+ *          appended a DUPLICATE zone; the fallback replaces the file's existing
+ *          zone of that marker and appends only when none exists (idempotent).
  * v2.14.0: --check-drift gemini-settings tolerance is now SEMANTIC, not
  *          whole-domain (T-20260912-028): each drifted L1/L2 pair runs through
  *          the new pure classifySettingsDrift() against the platform_settings
@@ -886,7 +896,7 @@ function replaceCommonSection(
   variantContent: string,
   marker: string,
   section: { heading: string; fullBlock: string }
-): { content: string; changed: boolean } {
+): { content: string; changed: boolean; handled: boolean } {
   // Escape the heading for use in a regex
   const headingEscaped = section.heading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const pattern = new RegExp(
@@ -896,11 +906,28 @@ function replaceCommonSection(
 
   if (pattern.test(variantContent)) {
     const newContent = variantContent.replace(pattern, section.fullBlock);
-    return { content: newContent, changed: newContent !== variantContent };
+    return { content: newContent, changed: newContent !== variantContent, handled: true };
   }
 
   // Section heading exists but has no markers yet — skip to avoid unintended overwrites
-  return { content: variantContent, changed: false };
+  if (variantContent.includes(section.heading)) {
+    return { content: variantContent, changed: false, handled: true };
+  }
+
+  // v2.15.0: headingless section (no `#` line inside the source block → synthetic
+  // `section-N` heading). The heading-anchored pattern can never match those, so
+  // fall back to replacing the file's existing bare zone of this marker — the
+  // previous behavior appended a duplicate zone on every run.
+  const barePattern = new RegExp(
+    `<!--\\s*${marker}:START\\s*-->[\\s\\S]*?<!--\\s*${marker}:END\\s*-->`
+  );
+  if (barePattern.test(variantContent)) {
+    const newContent = variantContent.replace(barePattern, section.fullBlock);
+    return { content: newContent, changed: newContent !== variantContent, handled: true };
+  }
+
+  // No zone in the variant at all — caller decides whether to append
+  return { content: variantContent, changed: false, handled: false };
 }
 
 function publishDocs(isDryRun: boolean, mapPath: string): void {
@@ -917,12 +944,21 @@ function publishDocs(isDryRun: boolean, mapPath: string): void {
       sourceFile: d.source_file as string,   // relative to workspaceRoot (L1 path)
       marker: d.marker as string,
       variants: d.target_variants as string[],
+      // target_file template (e.g. "docs/{variant}.context.md") overrides the
+      // basename-of-source default — v2.15.0: without this the variant-context
+      // domain probed templates/<variant>/context.md and was silently inert.
+      targetFile: (d as any).target_file as string | undefined,
+      // v2.15.0: honor the per-domain scrub flag (same contract as --check-drift):
+      // constitution-context injects CONSTITUTION.md slices into the L1
+      // docs/context.md and MUST apply the CONSTITUTION→context transform before
+      // writing, or L0 references leak into templates/ (audit.ts FAILs).
+      scrub: (d as any).scrub_constitution_refs === true,
     }));
 
   let totalUpdated = 0;
   let totalSkipped = 0;
 
-  for (const { sourceFile, marker, variants } of govDomains) {
+  for (const { sourceFile, marker, variants, targetFile, scrub } of govDomains) {
     const sourcePath = join(workspaceRoot, sourceFile);
     if (!existsSync(sourcePath)) {
       console.log(`  ${C.yellow}⚠️  ${sourceFile} not found, skipping${C.reset}`);
@@ -937,11 +973,13 @@ function publishDocs(isDryRun: boolean, mapPath: string): void {
       continue;
     }
 
-    // Derive the target filename (basename of source_file, e.g. "AGENTS.md")
-    const targetFilename = basename(sourceFile);
+    // Per-variant target filename: target_file template with {variant} substitution
+    // when declared (e.g. "docs/{variant}.context.md"), otherwise basename of source_file
     console.log(`\n  ${C.cyan}${sourceFile}${C.reset} — ${sections.length} common section(s) found`);
-
     for (const variant of variants) {
+      const targetFilename = targetFile
+        ? targetFile.replace('{variant}', variant)
+        : basename(sourceFile);
       const variantPath = join(workspaceRoot, 'templates', variant, targetFilename);
       if (!existsSync(variantPath)) {
         console.log(`    ${C.yellow}⚠️  templates/${variant}/${targetFilename} not found, skipping${C.reset}`);
@@ -952,14 +990,19 @@ function publishDocs(isDryRun: boolean, mapPath: string): void {
       let fileUpdated = false;
 
       for (const section of sections) {
-        const result = replaceCommonSection(variantContent, marker, section);
+        // Per-domain scrub (drift-checker contract): transform the section BEFORE
+        // injection so CONSTITUTION-derived slices land scrubbed (see v2.15.0 note).
+        const effectiveSection = scrub
+          ? { ...section, fullBlock: scrubConstitutionRefs(section.fullBlock, sourcePath, variantPath) }
+          : section;
+        const result = replaceCommonSection(variantContent, marker, effectiveSection);
         if (result.changed) {
           variantContent = result.content;
           fileUpdated = true;
-        } else if (!variantContent.includes(section.heading)) {
+        } else if (!result.handled) {
           // Section not present in variant yet — append on first propagation
           const separator = variantContent.endsWith('\n') ? '\n' : '\n\n';
-          variantContent = variantContent.trimEnd() + separator + section.fullBlock + '\n';
+          variantContent = variantContent.trimEnd() + separator + effectiveSection.fullBlock + '\n';
           fileUpdated = true;
         }
       }

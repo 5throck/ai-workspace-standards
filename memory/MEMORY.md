@@ -13,7 +13,7 @@
 | [2026-09-08](2026-09-08.md) | fix(governance): template/lifecycle drift fixes from project review + co-price backport |
 | [2026-09-07](2026-09-07.md) | docs: fix stale statuses, broken links, and governance gaps from project review |
 | [2026-09-06](2026-09-06.md) | feat(skills): session-evidence skill review loop (SkillHone-inspired) |
-| [2026-09-05](2026-09-05.md) | feat(skills): meeting-facilitation v1.4.1 governance rules + template skill drift sync |
+| 2026-09-05 | feat(skills): meeting-facilitation v1.4.1 governance rules + template skill drift sync |
 | 2026-09-03 | feat: propagate k-opendata skill and DATA_GO_KR_API_KEY to templates/common |
 | 2026-09-01 | docs(governance): add ADR-0065 accessibility standard for software feature development |
 | 2026-08-30 | feat(skills): promote handbook and handbook-sync-audit skills from co-deck to common |

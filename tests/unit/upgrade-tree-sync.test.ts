@@ -123,12 +123,16 @@ describe('upgrade-project.ts docs/context.md CONTEXT PRESERVE gate', () => {
   }
 
   function templateWithOlderFooter(): string {
-    // Project scaffolded at footer 2.5 — one version behind the template's 2.6,
-    // which is what drives the SYNC branch's inline-version comparison.
-    return readFileSync(contextTemplatePath, 'utf8').replace(
-      /\*context\.md version: 2\.6/,
-      '*context.md version: 2.5',
-    );
+    // Project scaffolded one MINOR version behind the live template footer —
+    // the version delta is what drives the SYNC branch's inline-version
+    // comparison. Derived dynamically so template footer bumps (2.6 → 2.7 → …)
+    // don't silently break the fixture (they did: the hardcoded 2.6→2.5 pair
+    // stopped matching after the 2026-09-13 footer 2.7 bump).
+    const tpl = readFileSync(contextTemplatePath, 'utf8');
+    const m = tpl.match(/\*context\.md version: (\d+)\.(\d+)/);
+    if (!m) throw new Error('cannot parse templates/common/docs/context.md version footer');
+    const behind = `${m[1]}.${Number(m[2]) - 1}`;
+    return tpl.replace(/\*context\.md version: \d+\.\d+/, `*context.md version: ${behind}`);
   }
 
   test('a. project-only section → PRESERVE (dry-run and apply), template NOT applied', () => {
@@ -187,7 +191,11 @@ describe('upgrade-project.ts docs/context.md CONTEXT PRESERVE gate', () => {
       // Template version applied: project-only section gone, footer back at template text.
       const applied = readFileSync(join(tmp, 'docs', 'context.md'), 'utf8');
       expect(applied).not.toContain('## Project Only Section');
-      expect(applied).toContain('*context.md version: 2.6');
+      // Footer version asserted against the LIVE template (not a hardcoded
+      // literal — the 2.6 pin broke on the 2026-09-13 footer 2.7 bump).
+      const liveVersion = readFileSync(contextTemplatePath, 'utf8').match(/\*context\.md version: [^*\n]+\*/);
+      expect(liveVersion).not.toBeNull();
+      expect(applied).toContain(liveVersion![0]);
       expect(applied).toBe(readFileSync(contextTemplatePath, 'utf8'));
     } finally {
       rmSync(tmp, { recursive: true, force: true });

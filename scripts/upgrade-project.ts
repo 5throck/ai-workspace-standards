@@ -1,5 +1,9 @@
 #!/usr/bin/env bun
-// @version 1.25.0
+// @version 1.26.0
+// v1.26.0: MANAGED_PATTERNS gains COMMON-CONTEXT (START/END) so the DOCS_MERGE
+//           pass merges the common coding-guidelines zone in docs/<variant>.context.md
+//           into project copies — previously projects had no delivery channel for
+//           that zone (only scaffold-time copies carried it, and inconsistently).
 // v1.25.0: docs/context.md project-only preservation in the TEMPLATE TREE SYNC SYNC branch —
 //           a footer-bump overwrite used to clobber PROJECT-ONLY content with at most a
 //           warning-only CONFLICT (and no warning at all when the copy was git-clean, which
@@ -628,7 +632,7 @@ function lineDiffCounts(a: string[], b: string[]): { added: number; removed: num
  *  Each entry supports raw regex in `open`/`close` fields — NOT literal strings.
  *  WORKSPACE-MANAGED open pattern accepts an optional `: description` suffix.
  *  VARIANT-INJECT uses asymmetric open/close naming (open: VARIANT-INJECT, close: END VARIANT-INJECT).
- *  COMMON-AGENTS and DYNAMIC_SKILLS use asymmetric START/END naming.
+ *  COMMON-AGENTS, COMMON-CONTEXT and DYNAMIC_SKILLS use asymmetric START/END naming.
  */
 const MANAGED_PATTERNS: Array<{ open: RegExp; close: string; label: string }> = [
   { open: /<!-- WORKSPACE-MANAGED(?::[^\-]*?)? -->/, close: '<!-- /WORKSPACE-MANAGED -->', label: 'WORKSPACE-MANAGED' },
@@ -636,6 +640,7 @@ const MANAGED_PATTERNS: Array<{ open: RegExp; close: string; label: string }> = 
   { open: /<!-- COMMON-GEMINI:START -->/, close: '<!-- COMMON-GEMINI:END -->', label: 'COMMON-GEMINI' },
   { open: /<!-- VARIANT-INJECT(?::[^\-]*?)? -->/, close: '<!-- END VARIANT-INJECT -->', label: 'VARIANT-INJECT' },
   { open: /<!-- COMMON-AGENTS:START -->/, close: '<!-- COMMON-AGENTS:END -->', label: 'COMMON-AGENTS' },
+  { open: /<!-- COMMON-CONTEXT:START -->/, close: '<!-- COMMON-CONTEXT:END -->', label: 'COMMON-CONTEXT' },
   { open: /<!-- DYNAMIC_SKILLS_START -->/, close: '<!-- DYNAMIC_SKILLS_END -->', label: 'DYNAMIC_SKILLS' },
 ];
 
