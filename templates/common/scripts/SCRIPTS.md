@@ -196,7 +196,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `resolve-variants.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
 | `project-to-variant.ts` | L0 | 1.2.0 | active | `--source`, `--target`, `--dry-run`, `--force`, `--design-doc`, `--threshold-files`, `--threshold-dirs` | —| L0 | —|
 | `promote-context-section.ts` | L0 | 1.0.0 | active | `--heading`, `--variants`, `--source`, `--after-heading`, `--dry-run` | —| L0 | —|
-| `propagate-to-templates.ts` | L0 | 2.12.0 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs`, `--include-disabled`, `--marker-rewrite` | —| L0 | —|
+| `propagate-to-templates.ts` | L0 | 2.15.0 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs`, `--include-disabled`, `--marker-rewrite` | —| L0 | —|
 | `qa-gate.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
 | `readme-lifecycle-audit.ts` | L0 | 1.0.4 | active | —| —| L0+L1 | —|
 | `render-pdf-deck.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
@@ -223,7 +223,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `translate-readme.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `ticket.ts` | L0 | 1.2.0 | active | `create --not-before`, `list --kind`, `list --ready`, `move done --result` (required, not bypassable by --force) | —| L0 | —|
 | `typecheck.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
-| `upgrade-project.ts` | L0 | 1.25.0 | active | `--variant`, `--platform`, `--dry-run`, `--prune-removed`, `--rollback`, `--yes`, `--skip-context-commonization`, `--force-context-sync` | —| L0 | —|
+| `upgrade-project.ts` | L0 | 1.26.0 | active | `--variant`, `--platform`, `--dry-run`, `--prune-removed`, `--rollback`, `--yes`, `--skip-context-commonization`, `--force-context-sync` | —| L0 | —|
 | `variant-feature.ts` | L0 | 1.0.0 | active | `--variant`, `--feature`, `--type` | —| L0 | —|
 | `validate-agents.ts` | L0 | 1.2.1 | active | —| —| L0+L1 | —|
 | `validate-doc-folder.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|

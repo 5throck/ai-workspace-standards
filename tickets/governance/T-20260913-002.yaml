@@ -1,0 +1,32 @@
+schemaVersion: 1
+id: T-20260913-002
+kind: manual
+title: >-
+  variant-context fleet inclusion: co-safety/co-price COMMON-CONTEXT zones +
+  publishDocs target_file/scrub fix + upgrade-project delivery channel
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-09-13T12:32:22.786Z'
+history:
+  - at: '2026-09-13T12:32:22.786Z'
+    from: null
+    to: backlog
+  - at: '2026-09-13T12:32:30.856Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-13T12:32:30.872Z'
+    from: waiting
+    to: review
+  - at: '2026-09-13T12:32:30.885Z'
+    from: review
+    to: done
+result: >-
+  Implemented per
+  docs/designs/2026-09-13-variant-context-fleet-inclusion-design.md:
+  propagate-to-templates 2.15.0 (publishDocs honors target_file + per-domain
+  scrub + bare-zone idempotent replace), upgrade-project 1.26.0 (COMMON-CONTEXT
+  in MANAGED_PATTERNS), co-safety/co-price zones seeded + listed (13/13). Gates:
+  validate-templates 0 err/1 pre-existing WARN, audit all-pass, verify-scripts
+  171/171, bun test 489/489.
+error: null

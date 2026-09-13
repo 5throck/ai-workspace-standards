@@ -123,12 +123,16 @@ describe('upgrade-project.ts docs/context.md CONTEXT PRESERVE gate', () => {
   }
 
   function templateWithOlderFooter(): string {
-    // Project scaffolded at footer 2.5 — one version behind the template's 2.6,
-    // which is what drives the SYNC branch's inline-version comparison.
-    return readFileSync(contextTemplatePath, 'utf8').replace(
-      /\*context\.md version: 2\.6/,
-      '*context.md version: 2.5',
-    );
+    // Project scaffolded one MINOR version behind the live template footer —
+    // the version delta is what drives the SYNC branch's inline-version
+    // comparison. Derived dynamically so template footer bumps (2.6 → 2.7 → …)
+    // don't silently break the fixture (they did: the hardcoded 2.6→2.5 pair
+    // stopped matching after the 2026-09-13 footer 2.7 bump).
+    const tpl = readFileSync(contextTemplatePath, 'utf8');
+    const m = tpl.match(/\*context\.md version: (\d+)\.(\d+)/);
+    if (!m) throw new Error('cannot parse templates/common/docs/context.md version footer');
+    const behind = `${m[1]}.${Number(m[2]) - 1}`;
+    return tpl.replace(/\*context\.md version: \d+\.\d+/, `*context.md version: ${behind}`);
   }
 
   test('a. project-only section → PRESERVE (dry-run and apply), template NOT applied', () => {

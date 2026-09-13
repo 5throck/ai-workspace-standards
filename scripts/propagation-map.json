@@ -249,10 +249,12 @@
         "co-game",
         "co-hr",
         "co-news",
+        "co-price",
+        "co-safety",
         "co-security",
         "co-work"
       ],
-      "note": "All 11 variants converted (2026-08-24). Pilot phase complete. ADR-0062. co-price/co-safety have no COMMON-CONTEXT zone and are deliberately unlisted (their docs/<variant>.context.md is variant-authored, not common-derived) — enforced by validate-templates PM-02 (T-20260910-018/T-20260910-022)."
+      "note": "All 11 variants converted (2026-08-24). Pilot phase complete. ADR-0062. co-price/co-safety added 2026-09-13 (T-20260913-002): their docs/<variant>.context.md files were variant-authored without a COMMON-CONTEXT zone — the Coding Guidelines key-rules zone inserted and both listed, completing 13/13 variant coverage. Note: before 2026-09-13 propagate-to-templates publishDocs() ignored target_file and could never refresh these zones (v2.15.0 fix)."
     }
   }
 }
