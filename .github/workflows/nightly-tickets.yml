@@ -181,6 +181,41 @@ jobs:
             engagement/Projects/ content, never modify tickets/governance/*.yaml by hand
             outside ticket.ts, never merge PRs, never force-push.
 
+      - name: Enforce changed-path allowlist (deterministic — T-20260912-027)
+        # The agent holds contents:write (dev-sync pushes its PR branches), so
+        # this gate cannot run before the push. It enforces the allowlist
+        # deterministically right after: every PR opened by this run must
+        # touch ONLY allowlisted paths. Any violation closes the PR (the
+        # branch becomes inert — nothing lands on main outside the allowlist)
+        # and fails the job so the violation is visible in the run result.
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ALLOWED='^(scripts/|docs/|templates/|skills/|agents/|tickets/|memory/|tests/|schemas/|\.claude/|\.gemini/|\.agents/|\.codex/|CHANGELOG\.md$|AGENTS\.md$|README\.md$|README_ko\.md$|CLAUDE\.md$|GEMINI\.md$|CODEX\.md$|package\.json$|bun\.lock$)'
+          prs=$(gh pr list --state open --limit 30 \
+            --author "app/github-actions" \
+            --json number --jq '.[].number')
+          violations=0
+          for pr in $prs; do
+            files=$(gh pr diff "$pr" --name-only || true)
+            [ -z "$files" ] && continue
+            bad=$(echo "$files" | grep -vE "$ALLOWED" || true)
+            if [ -n "$bad" ]; then
+              echo "❌ PR #$pr touches non-allowlisted path(s):"
+              echo "$bad"
+              gh pr close "$pr" --comment "Auto-closed by the T-20260912-027 deterministic allowlist gate: changes touch paths outside the nightly allowlist. See run ${{ github.run_id }}."
+              violations=$((violations + 1))
+            else
+              echo "✅ PR #$pr: all paths allowlisted"
+            fi
+          done
+          if [ "$violations" -gt 0 ]; then
+            echo "❌ $violations PR(s) violated the path allowlist — closed."
+            exit 1
+          fi
+          echo "✅ Path allowlist: no violations."
+
       - name: Run summary
         if: always()
         run: |

@@ -109,13 +109,24 @@ jobs:
             exit 1
           fi
 
-      - name: Update education content (PR-only)
+      - name: Revoke credentials for agent phase
+        if: steps.changes.outputs.lines != '0' && steps.pat.outputs.present == 'true'
+        run: |
+          # T-20260912-026: strip the global credential helper the clone step
+          # installed, so the AI agent phase provably has no route to the
+          # education repos. The publisher step re-installs it.
+          git config --global --unset credential.helper 2>/dev/null || true
+          echo "credential.helper: $(git config --global credential.helper || echo '(none)')"
+
+      - name: Update education content (patch generation only — unprivileged)
         id: edu
         if: steps.changes.outputs.lines != '0' && steps.pat.outputs.present == 'true'
-        uses: anthropics/claude-code-action@19dda84776b3518d98b8798e591daee763049ed3 # v1.0.220
         env:
-          GH_TOKEN: ${{ secrets.EDU_SYNC_PAT }}
-          EDU_SYNC_PAT: ${{ secrets.EDU_SYNC_PAT }}
+          # T-20260912-026: the agent is deliberately run WITHOUT the PAT and
+          # WITHOUT any GitHub write token. It edits local clones, commits to
+          # local branches, and exports format-patch bundles — it cannot push
+          # or open PRs. A separate deterministic step does the privileged
+          # publish (see "Publish patches").
           ANTHROPIC_API_KEY: ${{ secrets.ZAI_API_KEY || secrets.ANTHROPIC_API_KEY }}
           ANTHROPIC_AUTH_TOKEN: ${{ secrets.ZAI_API_KEY || '' }}
           ANTHROPIC_BASE_URL: ${{ vars.NIGHTLY_TICKETS_BASE_URL || 'https://api.z.ai/api/anthropic' }}
@@ -153,26 +164,90 @@ jobs:
                chapter has a _ko sibling, update it in kind; do not create new
                locales). Add a short "What's new (2026-09)" callout only where
                it fits naturally.
-            3. In each repo: create a branch edu-sync/<YYYY-MM-DD>, commit with
-               a conventional message, then push with plain `git push` —
-               authentication is handled by a pre-configured credential helper.
-               NEVER append a token or credential to a remote URL (do not use
-               https://<token>@github.com/... style URLs); then open a PR with
-               gh using: gh pr create -R 5throck/<repo> --head <branch> ...
-               Include a per-change mapping (upstream change → edu update) in
-               the PR body. NEVER merge the PR.
+            3. For each repo you edited: create a branch
+               edu-sync/<YYYY-MM-DD>, commit with a conventional message, then
+               EXPORT your work as patch bundles — this run has NO push or PR
+               credentials by design:
+                 mkdir -p /tmp/edu-patches/<repo-name>
+                 git format-patch <default-branch>..HEAD -o /tmp/edu-patches/<repo-name>/
+               (e.g. <repo-name> is intro-to-ai-harness or
+               multi-agent-harness-handbook). Do NOT push. Do NOT run gh. Do
+               NOT attempt authentication — this environment has none for the
+               education repos, and attempts are treated as violations.
             4. If a repo has no relevant changes, do not touch it.
 
-            CONSTRAINTS: preserve each repo's LICENSE, CI, and i18n structure;
+            CONSTRAINTS: only files under docs/ may be modified (anything
+            outside docs/ will cause the patch bundle to be REJECTED
+            downstream); preserve each repo's LICENSE, CI, and i18n structure;
             no AI-generated filler text; quote real commands/paths from the
             upstream diff; keep edits minimal and accurate.
 
             MANDATORY REPORT (never skip): before finishing, write
             /tmp/edu-sync-report.md containing, per repo: (a) your relevance
-            decision and reasoning, (b) files changed (or "none"), (c) branch
-            and PR URL if pushed (or exactly why no PR was opened). Any edits
-            you make MUST be committed AND pushed — edited-but-unpushed trees
-            are treated as failures.
+            decision and reasoning, (b) files changed (or "none"), (c) patch
+            bundle path and commit count (or exactly why no patches were
+            exported). Any edits you make MUST be committed AND exported as
+            patches — edited-but-unexported trees are treated as failures.
+
+      - name: Publish patches (trusted, deterministic — no AI)
+        id: publish
+        if: steps.edu.outcome == 'success'
+        env:
+          EDU_SYNC_PAT: ${{ secrets.EDU_SYNC_PAT }}
+          GH_TOKEN: ${{ secrets.EDU_SYNC_PAT }}
+        run: |
+          # T-20260912-026: the only step holding the PAT is this deterministic
+          # shell (no AI agent runs here). It validates the agent's patch
+          # bundles (docs/ paths only), applies them with `git am`, pushes the
+          # branch, and opens the PR.
+          set -e
+          git config --global credential.helper \
+            '!f() { printf "username=x-access-token\npassword=%s\n" "$EDU_SYNC_PAT"; }; f'
+          shopt -s nullglob
+          declare -A REPOS=(
+            [intro-to-ai-harness]="/tmp/intro-to-ai-harness"
+            [multi-agent-harness-handbook]="/tmp/multi-agent-harness-handbook"
+          )
+          DATE=$(date +%Y-%m-%d)
+          any_published=0
+          for name in intro-to-ai-harness multi-agent-harness-handbook; do
+            dir="${REPOS[$name]}"
+            patches=(/tmp/edu-patches/${name}/*.patch)
+            if [ ${#patches[@]} -eq 0 ]; then
+              echo "[$name] no patch bundle — nothing to publish"
+              continue
+            fi
+            echo "[$name] ${#patches[@]} patch(es) to publish"
+            cd "$dir"
+            base=$(git rev-parse HEAD)
+            branch="edu-sync/$DATE"
+            git checkout -B "$branch"
+            for p in "${patches[@]}"; do
+              # Deterministic path allowlist: only docs/** may be touched.
+              bad=$(git apply --numstat "$p" | awk '{print $3}' | grep -vE '^docs/' || true)
+              if [ -n "$bad" ]; then
+                echo "[$name] REJECTED: $p touches non-docs path(s): $bad"
+                exit 1
+              fi
+              git am --keep-non-patch "$p"
+            done
+            # Belt-and-suspenders: re-verify the whole branch diff post-apply.
+            bad=$(git diff --name-only "$base..HEAD" | grep -vE '^docs/' || true)
+            if [ -n "$bad" ]; then
+              echo "[$name] REJECTED post-apply: non-docs path(s): $bad"
+              exit 1
+            fi
+            git push origin "$branch"
+            subject=$(git log --format=%s -1)
+            gh pr create -R "5throck/$name" --head "$branch" \
+              --title "Edu sync $DATE: $subject" \
+              --body "Automated education-content sync from ai-workspace-standards. Patch bundle: /tmp/edu-patches/$name (${#patches[@]} commit(s)). Applied deterministically by the trusted publisher step — the AI agent ran without credentials. Per-change mapping in /tmp/edu-sync-report.md (attached as run artifact)."
+            echo "[$name] published branch $branch + PR"
+            any_published=1
+            cd "$RUNNER_WORKSPACE_DIRECTORY" 2>/dev/null || cd -
+          done
+          [ "$any_published" = "0" ] && echo "No patches published (agent reported no relevant changes)."
+          exit 0
 
       - name: Upload sync forensics
         if: always()
@@ -202,8 +277,10 @@ jobs:
 
       - name: Update baseline
         # Advance the baseline only when the sync actually succeeded — a failed
-        # agent run must re-process the same range next week.
-        if: steps.edu.outcome == 'success'
+        # agent run must re-process the same range next week. The publisher
+        # step must also succeed: if patch application/publish fails, the same
+        # range is re-processed (and re-generated) next week.
+        if: steps.edu.outcome == 'success' && steps.publish.outcome == 'success'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
