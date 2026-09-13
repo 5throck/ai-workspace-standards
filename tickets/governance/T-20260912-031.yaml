@@ -5,12 +5,24 @@ title: >-
   Adjudicate co-safety COMMON-AGENTS marker divergence as either common-owned
   sync or explicit variant-owned fork
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-12T13:13:47.812Z'
 history:
   - at: '2026-09-12T13:13:47.812Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-13T23:30:05.903Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-13T23:30:05.915Z'
+    from: waiting
+    to: review
+  - at: '2026-09-13T23:30:05.952Z'
+    from: review
+    to: done
+result: >-
+  Adjudicated: co-safety COMMON-AGENTS divergence is an explicit variant-owned
+  fork — enforced via propagation-map excluded_variants + PM-02 skip
+  (validate-templates 1.26.0); co-safety divergence WARN retired
 error: null
