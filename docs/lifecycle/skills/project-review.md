@@ -44,7 +44,7 @@
 ## Metadata
 
 - **Current Phase**: production
-- **Version**: 1.2.0
+- **Version**: 1.3.0
 - **Owner**: pm
-- **Last Updated**: 2026-09-08
+- **Last Updated**: 2026-09-14
 - **Last Reviewer**: pm

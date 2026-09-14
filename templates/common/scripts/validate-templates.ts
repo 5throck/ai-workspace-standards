@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.25.1
+ * @version 1.26.0
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -3609,7 +3609,7 @@ function checkMarkerZoneParity(): void {
   const mapPath = join(ROOT, 'scripts', 'propagation-map.json');
   if (!existsSync(mapPath)) return; // PM-01 already reported the missing map
 
-  let map: { domains?: Record<string, { mode?: string; source_file?: string; target_file?: string; marker?: string; target_variants?: string[] }> };
+  let map: { domains?: Record<string, { mode?: string; source_file?: string; target_file?: string; marker?: string; target_variants?: string[]; excluded_variants?: Array<string | { variant: string; reason?: string }> }> };
   try {
     map = JSON.parse(readFileSync(mapPath, 'utf-8'));
   } catch {
@@ -3633,6 +3633,14 @@ function checkMarkerZoneParity(): void {
       continue;
     }
     const listed = new Set(domain.target_variants ?? []);
+    // T-20260912-031: explicitly excluded variants carry a documented,
+    // adjudicated fork of the zone (e.g. co-safety COMMON-AGENTS). They are
+    // skipped by parity checks instead of emitting FAIL/WARN.
+    const excluded = new Map<string, string>();
+    for (const e of domain.excluded_variants ?? []) {
+      if (typeof e === 'string') excluded.set(e, '');
+      else if (e && typeof e.variant === 'string') excluded.set(e.variant, e.reason ?? '');
+    }
 
     for (const entry of readdirSync(TEMPLATES_DIR, { withFileTypes: true })) {
       if (!entry.isDirectory() || !entry.name.startsWith('co-')) continue;
@@ -3646,6 +3654,10 @@ function checkMarkerZoneParity(): void {
 
       checkedZones++;
       if (listed.has(variant)) continue; // managed — publishDocs() drift checks own content sync
+      if (excluded.has(variant)) {
+        if (!JSON_MODE) console.log(`  ℹ️  marker-zone-parity: ${variant}/${targetFile} is an adjudicated variant-owned fork (documented exclusion)`);
+        continue;
+      }
 
       if (variantZone === sourceZone) {
         fail('root', 'marker-zone-parity', `marker-inject domain [${domainName}]: ${variant}/${targetFile} carries a ${domain.marker} zone identical to the source but is not in target_variants — unmanaged coverage, the zone silently stops propagating on the next source change`, `Add "${variant}" to propagation-map.json domain [${domainName}].target_variants`);

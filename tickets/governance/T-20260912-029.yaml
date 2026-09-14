@@ -5,7 +5,7 @@ title: >-
   validator-hardening: replace lifecycle-sync intentional-duplicate regex scan
   with the shared marker parser
 priority: normal
-status: running
+status: done
 attempts: 0
 created_at: '2026-09-12T13:13:47.728Z'
 history:
@@ -18,5 +18,13 @@ history:
   - at: '2026-09-12T19:45:18.269Z'
     from: waiting
     to: running
-result: null
+  - at: '2026-09-13T20:34:50.509Z'
+    from: running
+    to: review
+  - at: '2026-09-13T23:19:53.021Z'
+    from: review
+    to: done
+result: >-
+  Landed via #912: lifecycle-sync intentional-duplicate regex scan replaced by
+  the shared marker parser; verified in main
 error: null

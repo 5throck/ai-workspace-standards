@@ -14,8 +14,8 @@ description: >
   phase schema changes, workspace-schema.json modified, new variant added);
   QA escalation from auditor (audit.ts ERROR >= 3 or security Critical finding).
 owner: pm
-version: 1.2.0
-last_reviewed: 2026-09-08
+version: 1.3.0
+last_reviewed: 2026-09-14
 prerequisites: []
 metadata:
   type: process
@@ -52,6 +52,10 @@ catches that class mechanically, not by agent effort.
 
 Run the validator battery and record results — this is (a) the report's Baseline
 section and (b) the reference for classifying findings as `script-gap` later.
+
+One-shot consolidated runner (T-20260912-030): `bun scripts/review-baseline.ts` —
+runs the six validators below in read-only mode with a PASS/FAIL summary
+(`--quiet` for summary only). Individual commands:
 
 ```bash
 bun scripts/audit.ts                              # workspace standards
