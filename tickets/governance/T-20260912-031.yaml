@@ -22,7 +22,10 @@ history:
     from: review
     to: done
 result: >-
-  Adjudicated: co-safety COMMON-AGENTS divergence is an explicit variant-owned
-  fork — enforced via propagation-map excluded_variants + PM-02 skip
-  (validate-templates 1.26.0); co-safety divergence WARN retired
+  Superseded by T-20260913-001: the divergence was re-adjudicated as
+  common-owned sync — co-safety's COMMON-AGENTS zone reconciled to the L1
+  source and co-safety listed in governance-agents target_variants (the
+  interim variant-owned-fork landing in the T-026/027/031 batch was removed
+  by that reconcile; the PM-02 excluded_variants mechanism from the same
+  batch remains available for any future documented exemption).
 error: null
