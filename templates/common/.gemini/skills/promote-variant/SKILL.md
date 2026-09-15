@@ -243,7 +243,7 @@ bun run agent:verify
 After Phase B, verify `bun scripts/new-project.ts` creates a working instance:
 
 ```bash
-# Dry run (if supported):
+# Bare names scaffold under Projects/:
 bun scripts/new-project.ts "my-test-project" --variant co-<name>
 
 # Verify created project structure:

@@ -5,7 +5,7 @@
  * Usage: bun tests/reflect-skill-graph-to-project.ts <projectPath> <variantName>
  */
 import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, cpSync } from 'node:fs';
-import { join, basename } from 'node:path';
+import { join, basename, resolve } from 'node:path';
 import { cwd } from 'node:process';
 import { spawnSync } from 'node:child_process';
 
@@ -13,6 +13,12 @@ const ROOT = cwd();
 const [projectPath, variant] = process.argv.slice(2);
 if (!projectPath || !variant) {
   console.error('Usage: bun tests/reflect-skill-graph-to-project.ts <projectPath> <variant>');
+  process.exit(1);
+}
+// Root-target guard (incident 2026-09-12): reflecting into the workspace root would
+// scatter template content across the repo root. Root is L0, not a project.
+if (resolve(projectPath) === ROOT) {
+  console.error('ERROR: Refusing to target the workspace ROOT — pass a Projects/<name> path.');
   process.exit(1);
 }
 const proj = basename(projectPath);

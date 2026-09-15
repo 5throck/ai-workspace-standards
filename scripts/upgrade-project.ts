@@ -1,5 +1,10 @@
 #!/usr/bin/env bun
-// @version 1.26.0
+// @version 1.27.0
+// v1.27.0: Root-target guard — a <project-path> that resolves to the workspace ROOT is
+//           rejected with an error, and targets outside Projects/ print a warning. The
+//           root passes both pre-flight guards (existsSync, git-repo check), and the
+//           2026-09-12 root-upgrade incident (memory/2026-09-12.md) delivered the whole
+//           template/L1 tree into the repo root through exactly this hole.
 // v1.26.0: MANAGED_PATTERNS gains COMMON-CONTEXT (START/END) so the DOCS_MERGE
 //           pass merges the common coding-guidelines zone in docs/<variant>.context.md
 //           into project copies — previously projects had no delivery channel for
@@ -239,6 +244,21 @@ if (!['claude', 'antigravity', 'both'].includes(platform)) {
 // ── Resolve paths ──────────────────────────────────────────────────────────────
 const workspaceRoot = resolve(import.meta.dir, '..');
 const projectDir = isAbsolute(projectPath) ? projectPath : resolve(projectPath);
+
+// Root-target guard (incident 2026-09-12): the workspace root is L0, not a project.
+// It passes the existsSync and git-repo checks below, so reject it before any
+// delivery step runs; a run against the root copies the whole template/L1 tree
+// into the repo root.
+if (resolve(projectDir) === workspaceRoot) {
+  console.error('ERROR: Refusing to target the workspace ROOT — root is L0, not a project (incident 2026-09-12). Pass a project directory under Projects/ instead.');
+  if (import.meta.main) {
+    process.exit(1);
+  }
+}
+const projectsRoot = join(workspaceRoot, 'Projects');
+if (relative(projectsRoot, projectDir).startsWith('..')) {
+  console.warn(`WARN: Target is outside ${projectsRoot} — the canonical project layout is Projects/<name>.`);
+}
 
 if (!existsSync(projectDir)) {
   console.error(`ERROR: Project directory not found: ${projectDir}`);

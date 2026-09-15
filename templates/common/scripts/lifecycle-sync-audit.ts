@@ -8,14 +8,25 @@
  * Check C: skills/<name>/SKILL.md vs templates/common/skills/<name>/SKILL.md content
  *          (normalized through the shared scrub so only REAL drift reports)
  * Check E: docs/lifecycle/skills/<name>.md Version/Owner vs SKILL.md frontmatter
+ * Check F: agent tier surfaces (frontmatter, L1 templates, AGENTS.md rosters,
+ *          lifecycle records) vs docs/workspace-schema.json agent_tiers SSOT
  *
  * Usage:
  *   bun scripts/lifecycle-sync-audit.ts
  *   bun scripts/lifecycle-sync-audit.ts --json
  *   bun scripts/lifecycle-sync-audit.ts --fix
  *
- * @version 1.9.0
- * @last_updated 2026-09-12
+ * @version 1.10.0
+ * @last_updated 2026-09-15
+ * v1.10.0: New Check F — agent tier drift detection. agent_tiers in
+ *          docs/workspace-schema.json is the SSOT (the agent-model-gate hook
+ *          consumes it at runtime); Check F compares L0 frontmatter tier
+ *          blocks (5 platforms, uniform), L1 common-template agent tier
+ *          blocks (SSOT match when the agent is registered; completeness and
+ *          uniformity otherwise — the L1 stub wins new-project.ts's stub
+ *          merge), AGENTS.md roster Tier cells (§1 and §4.1), and lifecycle
+ *          record **Tier** fields against it. Detection-only, error-level
+ *          (spec: docs/designs/2026-09-15-agent-tier-drift-check-design.md).
  * v1.9.0: Check D now parses intentional-duplicate markers through the shared
  *          parser (helpers/markers.ts parseIntentionalDuplicateLine — complete
  *          one-line comment + workspace standards §<digits> grammar,
@@ -424,6 +435,239 @@ export function runCheckE(): SyncIssue[] {
         fix: `Update docs/lifecycle/skills/${entry} Owner to ${frontmatter.owner} (or fix the SKILL.md frontmatter if the record is correct)`,
       });
     }
+  }
+
+  return issues;
+}
+
+/**
+ * Check F: Agent tier drift — docs/workspace-schema.json `agent_tiers` vs
+ * every other tier declaration surface.
+ *
+ * `agent_tiers` is the SSOT (the only machine-consumed copy: the
+ * agent-model-gate hook reads it at runtime). All other surfaces must
+ * agree:
+ *   (a) agents/<name>.md frontmatter — 5 platforms, uniform, == SSOT
+ *   (b) templates/common/agents/<name>.md — uniform, == SSOT when the
+ *       agent is in agent_tiers (the L1 stub frontmatter wins
+ *       new-project.ts's stub merge, so an L0/L1 split silently changes
+ *       resolved projects); L1-only agents get completeness/uniformity
+ *       checks only
+ *   (c) AGENTS.md roster rows referencing agents/<name>.md — Tier cell
+ *       (bold markers stripped) == SSOT
+ *   (d) docs/lifecycle/agents/<name>.md `**Tier**:` field == SSOT
+ *       (absent field is skipped — records predating the convention are
+ *       not mismatches)
+ * Detection-only (no fixData): remediation routes through the
+ * lifecycle-manager / docs-writer workflows. Runs only at workspace root.
+ * (spec: docs/designs/2026-09-15-agent-tier-drift-check-design.md)
+ */
+export function runCheckF(): SyncIssue[] {
+  const issues: SyncIssue[] = [];
+
+  if (!IS_WORKSPACE_ROOT) return issues;
+
+  const schemaPath = join(ROOT, 'docs', 'workspace-schema.json');
+  if (!existsSync(schemaPath)) return issues;
+
+  let agentTiers: Record<string, string>;
+  try {
+    const schema = JSON.parse(readFileSync(schemaPath, 'utf-8')) as {
+      agent_tiers?: Record<string, string>;
+    };
+    agentTiers = schema.agent_tiers ?? {};
+  } catch {
+    issues.push({
+      level: 'error',
+      file: 'docs/workspace-schema.json',
+      message: 'Check F: workspace-schema.json is not parseable JSON — agent tier SSOT unreadable',
+      fix: 'Repair the docs/workspace-schema.json JSON syntax',
+    });
+    return issues;
+  }
+  if (Object.keys(agentTiers).length === 0) return issues;
+
+  const VALID_TIERS = new Set(['high', 'medium', 'low']);
+  const PLATFORMS = ['claude', 'gemini', 'antigravity', 'gemini-cli', 'codex'];
+
+  const parseTierBlock = (content: string, relFile: string): Record<string, string> | undefined => {
+    const fm = /^---\r?\n([\s\S]*?)\r?\n---/.exec(content);
+    if (!fm) return undefined;
+    let doc: Record<string, unknown> | null;
+    try {
+      doc = loadYaml(fm[1]) as Record<string, unknown> | null;
+    } catch {
+      issues.push({
+        level: 'error',
+        file: relFile,
+        message: `Check F: ${relFile} frontmatter is not parseable YAML — tier unverifiable`,
+        fix: 'Repair the YAML frontmatter',
+      });
+      return undefined;
+    }
+    const tier = doc?.tier;
+    if (!tier || typeof tier !== 'object') return undefined;
+    const out: Record<string, string> = {};
+    for (const [platform, value] of Object.entries(tier as Record<string, unknown>)) {
+      out[platform] = String(value).trim().toLowerCase();
+    }
+    return out;
+  };
+
+  const checkTierBlock = (
+    tierBlock: Record<string, string> | undefined,
+    relFile: string,
+    expected?: string,
+  ): void => {
+    if (!tierBlock) return; // no tier block (extends-only skeleton) — shape validators own that
+    const missing = PLATFORMS.filter((p) => tierBlock[p] === undefined);
+    if (missing.length > 0) {
+      issues.push({
+        level: 'error',
+        file: relFile,
+        message: `Check F: ${relFile} tier block is missing platform key(s): ${missing.join(', ')}`,
+        fix: 'Declare all 5 platforms (claude, gemini, antigravity, gemini-cli, codex) in the tier block',
+      });
+      return;
+    }
+    const values = PLATFORMS.map((p) => tierBlock[p]);
+    const distinct = new Set(values);
+    if (distinct.size > 1) {
+      issues.push({
+        level: 'error',
+        file: relFile,
+        message: `Check F: ${relFile} tier block is not uniform across platforms (${[...distinct].join(' / ')})`,
+        fix: 'Set all platforms to the same tier value — one tier per agent (AGENTS.md §3.6)',
+      });
+      return;
+    }
+    const actual = values[0];
+    if (!VALID_TIERS.has(actual)) {
+      issues.push({
+        level: 'error',
+        file: relFile,
+        message: `Check F: ${relFile} tier value '${actual}' is not one of high/medium/low`,
+        fix: "Use 'high', 'medium', or 'low'",
+      });
+      return;
+    }
+    if (expected && actual !== expected) {
+      issues.push({
+        level: 'error',
+        file: relFile,
+        message: `Check F: ${relFile} tier '${actual}' does not match docs/workspace-schema.json agent_tiers '${expected}'`,
+        fix: `Update ${relFile} tier to '${expected}' (or fix agent_tiers if the frontmatter is correct)`,
+      });
+    }
+  };
+
+  // (a) L0 frontmatter ↔ SSOT
+  for (const [agent, expectedTier] of Object.entries(agentTiers)) {
+    const agentPath = join(ROOT, 'agents', `${agent}.md`);
+    if (!existsSync(agentPath)) {
+      issues.push({
+        level: 'error',
+        file: `agents/${agent}.md`,
+        message: `Check F: agent_tiers declares '${agent}' but agents/${agent}.md does not exist`,
+        fix: 'Remove the agent_tiers entry or restore the agent file',
+      });
+      continue;
+    }
+    const relFile = `agents/${agent}.md`;
+    checkTierBlock(parseTierBlock(readFileSync(agentPath, 'utf-8'), relFile), relFile, expectedTier);
+  }
+
+  // (b) L1 common-template agents ↔ SSOT (or completeness-only for L1-only agents)
+  const l1AgentsDir = join(ROOT, 'templates', 'common', 'agents');
+  if (existsSync(l1AgentsDir)) {
+    for (const entry of readdirSync(l1AgentsDir)) {
+      if (!entry.endsWith('.md') || entry === '_COMMON.md') continue;
+      const relFile = `templates/common/agents/${entry}`;
+      const content = readFileSync(join(l1AgentsDir, entry), 'utf-8');
+      const frontmatterName = (() => {
+        const fm = /^---\r?\n([\s\S]*?)\r?\n---/.exec(content);
+        if (!fm) return undefined;
+        try {
+          const doc = loadYaml(fm[1]) as { name?: string } | null;
+          return typeof doc?.name === 'string' ? doc.name : undefined;
+        } catch {
+          return undefined;
+        }
+      })();
+      checkTierBlock(
+        parseTierBlock(content, relFile),
+        relFile,
+        frontmatterName ? agentTiers[frontmatterName] : undefined,
+      );
+    }
+  }
+
+  // (c) AGENTS.md roster rows ↔ SSOT — scoped to the two roster tables
+  // (headers `| Agent | File | Tier |…`), so execution-plan example rows that
+  // merely mention agents/<name>.md in a Task cell cannot false-positive.
+  const agentsMdPath = join(ROOT, 'AGENTS.md');
+  if (existsSync(agentsMdPath)) {
+    const lines = readFileSync(agentsMdPath, 'utf-8').split('\n');
+    const rosterRows: string[] = [];
+    let inRosterTable = false;
+    for (const line of lines) {
+      if (!line.trimStart().startsWith('|')) {
+        inRosterTable = false;
+        continue;
+      }
+      const cells = line.split('|').map((c) => c.trim().toLowerCase());
+      if (cells.includes('agent') && cells.includes('file') && cells.includes('tier')) {
+        inRosterTable = true; // header row of a roster table
+        continue;
+      }
+      if (inRosterTable && cells.some((c) => c.includes('---'))) continue; // separator row
+      if (inRosterTable) rosterRows.push(line);
+    }
+    for (const [agent, expectedTier] of Object.entries(agentTiers)) {
+      const needle = `agents/${agent}.md`;
+      const matchingRows = rosterRows.filter((row) => row.includes(needle));
+      if (matchingRows.length === 0) {
+        issues.push({
+          level: 'error',
+          file: 'AGENTS.md',
+          message: `Check F: no AGENTS.md roster row references ${needle}`,
+          fix: `Add '${agent}' to the §1 Agent Roster and §4.1 Subagent Roster tables`,
+        });
+        continue;
+      }
+      for (const row of matchingRows) {
+        const tierCell = (row.split('|')[3] ?? '').replace(/\*\*/g, '').trim();
+        if (tierCell.toLowerCase() !== expectedTier) {
+          issues.push({
+            level: 'error',
+            file: 'AGENTS.md',
+            message: `Check F: AGENTS.md roster row for '${agent}' shows tier '${tierCell || '(empty)'}' but agent_tiers says '${expectedTier}'`,
+            fix: `Update the row's Tier cell to ${expectedTier.charAt(0).toUpperCase() + expectedTier.slice(1)} (or fix agent_tiers if the roster is correct)`,
+          });
+        }
+      }
+    }
+  }
+
+  // (d) Lifecycle record `**Tier**:` field ↔ SSOT
+  for (const [agent, expectedTier] of Object.entries(agentTiers)) {
+    const recordPath = join(ROOT, 'docs', 'lifecycle', 'agents', `${agent}.md`);
+    if (!existsSync(recordPath)) continue; // record existence is agent-lifecycle-audit's concern
+    const recordTier = extractRecordField(readFileSync(recordPath, 'utf-8'), 'Tier');
+    if (recordTier && recordTier.trim().replace(/\.$/, '').toLowerCase() !== expectedTier) {
+      issues.push({
+        level: 'error',
+        file: `docs/lifecycle/agents/${agent}.md`,
+        message: `Check F: lifecycle record Tier '${recordTier.trim()}' does not match agent_tiers '${expectedTier}'`,
+        fix: `Update the docs/lifecycle/agents/${agent}.md **Tier** field to ${expectedTier} (or fix agent_tiers if the record is correct)`,
+      });
+    }
+  }
+
+  if (!jsonMode) {
+    console.log(
+      `${colors.dim}Check F: agent tiers vs schema agent_tiers SSOT — ${Object.keys(agentTiers).length} agent(s)${issues.length > 0 ? `, ${issues.length} drift finding(s)` : ', all surfaces agree'}${colors.reset}`,
+    );
   }
 
   return issues;
@@ -863,6 +1107,9 @@ function runAudit(jsonMode = false): AuditResult {
     console.log(
       `${colors.dim}Check E: lifecycle records Version/Owner vs SKILL.md frontmatter${colors.reset}`,
     );
+    console.log(
+      `${colors.dim}Check F: agent tiers vs workspace-schema.json agent_tiers SSOT${colors.reset}`,
+    );
     console.log('');
   }
 
@@ -872,6 +1119,7 @@ function runAudit(jsonMode = false): AuditResult {
   const checkXIssues = runCheckX();
   const checkVIssues = runCheckV();
   const checkEIssues = runCheckE();
+  const checkFIssues = runCheckF();
   const registryEntries = runCheckD();
 
   if (!jsonMode) {
@@ -894,6 +1142,7 @@ function runAudit(jsonMode = false): AuditResult {
     ...checkXIssues.filter((i) => i.level === 'error'),
     ...checkVIssues.filter((i) => i.level === 'error'),
     ...checkEIssues.filter((i) => i.level === 'error'),
+    ...checkFIssues.filter((i) => i.level === 'error'),
   ];
   const allWarnings = [
     ...checkAIssues.filter((i) => i.level === 'warning'),
@@ -902,10 +1151,11 @@ function runAudit(jsonMode = false): AuditResult {
     ...checkXIssues.filter((i) => i.level === 'warning'),
     ...checkVIssues.filter((i) => i.level === 'warning'),
     ...checkEIssues.filter((i) => i.level === 'warning'),
+    ...checkFIssues.filter((i) => i.level === 'warning'),
   ];
 
   return {
-    checksRun: 7,
+    checksRun: 8,
     errors: allErrors,
     warnings: allWarnings,
     registry: registryEntries,

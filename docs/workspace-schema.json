@@ -34,7 +34,7 @@
     }
   },
   "agent_tiers": {
-    "pm": "high",
+    "pm": "medium",
     "architect": "high",
     "auditor": "medium",
     "docs-writer": "medium",
@@ -84,7 +84,7 @@
   },
   "_notes": {
     "variant_specific": "Variant-specific phase names (e.g., co-security Phase 3 = Threat Modeling) are declared in each variant's variant.json under phases.phase3_name",
-    "variant_agents": "Variant-specific agent tiers are declared in each variant's variant.json under agent_tiers"
+    "variant_agents": "Variant-specific agent tiers are declared in each variant agent's frontmatter tier block (templates/<variant>/agents/*.md); variant.json carries only the agent roster (name/file pairs), not tiers"
   },
   "i18n": {
     "description": "Internationalization policy. locale_codes defines all language codes recognized as valid translation zones. Files inside <lang-code>/ or locales/<lang-code>/ directories are exempt from the English-only documentation rule.",

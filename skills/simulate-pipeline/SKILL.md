@@ -33,8 +33,8 @@ Use this skill to run disposable end-to-end smoke checks for workspace creation 
 
 Validates the project scaffolding path driven by `new-project.ts`.
 
-1. Create a disposable scratch folder such as `scripts/temp/e2e-test-scaffold`.
-2. Run `bun scripts/new-project.ts "e2e-test-scaffold"`.
+1. Run `bun scripts/new-project.ts "e2e-test-scaffold"`.
+2. Verify the scaffold landed at `Projects/e2e-test-scaffold` (bare names scaffold under `Projects/`).
 3. Verify the generated files exist and match the expected template layout.
 4. Verify UTF-8 without BOM for generated Markdown and TypeScript files.
 5. Run `bun scripts/verify-scripts.ts --verify` in the scaffolded project; it must exit 0 with 0 errors.

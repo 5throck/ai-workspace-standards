@@ -153,7 +153,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `helpers/write-scripts-snapshot.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `hooks/_test-consumer.ts` | L0 | 1.0.0 | active | —| —| L0-only | —|
 | `hooks/_test-module.ts` | L0 | 1.0.0 | active | —| —| L0-only | —|
-| `hooks/agent-model-gate.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `hooks/agent-model-gate.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `hooks/gateguard-fact-force.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
 | `hooks/post-write-lifecycle-check.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `hooks/pre-commit.ts` | L0 | 1.7.0 | active | —| —| L0+L1 | —|
@@ -176,10 +176,10 @@ Their absence from the table is policy-consistent, not an oversight.
 | `lib/ssrf.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `lib/upgrade-policy.ts` | L0 | 1.5.0 | active | —| —| L0 | —|
 | `lib/env-sample.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `lifecycle-sync-audit.ts` | L0 | 1.9.0 | active | —| —| L0+L1 | —|
+| `lifecycle-sync-audit.ts` | L0 | 1.10.0 | active | —| —| L0+L1 | —|
 | `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `md-to-ooxml.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
-| `new-project.ts` | L0 | 1.15.1 | active | —| —| L0 | —|
+| `new-project.ts` | L0 | 1.16.0 | active | Bare names scaffold to `Projects/<name>` (v1.16.0); path-like names stay workspace-relative; workspace-root escape rejected | —| L0 | —|
 | `remove-project.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `resolve-variants.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
 | `project-to-variant.ts` | L0 | 1.3.0 | active | `--source`, `--target`, `--dry-run`, `--force`, `--design-doc`, `--threshold-files`, `--threshold-dirs` | —| L0 | —|
@@ -213,7 +213,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `translate-readme.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `ticket.ts` | L0 | 1.2.0 | active | `create --not-before`, `list --kind`, `list --ready`, `move done --result` (required, not bypassable by --force) | —| L0 | —|
 | `typecheck.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
-| `upgrade-project.ts` | L0 | 1.26.0 | active | `--variant`, `--platform`, `--dry-run`, `--prune-removed`, `--rollback`, `--yes`, `--skip-context-commonization`, `--force-context-sync` | —| L0 | —|
+| `upgrade-project.ts` | L0 | 1.27.0 | active | `--variant`, `--platform`, `--dry-run`, `--prune-removed`, `--rollback`, `--yes`, `--skip-context-commonization`, `--force-context-sync` | —| L0 | —|
 | `variant-feature.ts` | L0 | 1.0.0 | active | `--variant`, `--feature`, `--type` | —| L0 | —|
 | `validate-agents.ts` | L0 | 1.2.1 | active | —| —| L0+L1 | —|
 | `validate-doc-folder.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
@@ -423,9 +423,11 @@ skill files on disk. Detects missing or orphaned skill references.
 **Usage**: `bun scripts/sync-skill-status.ts`
 
 #### `new-project.ts`
-**Purpose**: Scaffolds a new project under the workspace root. Copies `templates/common/`
-and an optional variant, substitutes `[Project Name]` placeholders, strips L1-B metadata
-from `agents/pm.md`, flattens `docs/_common/`, and runs the post-scaffold audit.
+**Purpose**: Scaffolds a new project under `Projects/<name>` (bare names; path-like names
+are explicit workspace-relative destinations, used by `test-new-project.ts`). Copies
+`templates/common/` and an optional variant, substitutes `[Project Name]` placeholders,
+strips L1-B metadata from `agents/pm.md`, flattens `docs/_common/`, and runs the
+post-scaffold audit.
 **Usage**: `bun scripts/new-project.ts <name> <variant>`
 **Breaking change from**: `bash scripts/new-project.sh` / `.\scripts\new-project.ps1` (removed 2026-06-11, ADR-0036)
 **Note**: L0 script (workspace infrastructure only). Changes must be versioned in SCRIPTS.md.
