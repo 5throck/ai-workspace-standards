@@ -187,6 +187,16 @@ function checkFile(mdPath: string): void {
 
     // v1.1.0: verify the anchor fragment resolves against the target's headings
     if (fragment && extname(target) === ".md") {
+      // D4: Check for § character in the fragment — GitHub strips it from headings
+      if (fragment.includes("§")) {
+        brokenLinks++;
+        const rel = mdPath.replace(WORKSPACE_ROOT + "\\", "").replace(WORKSPACE_ROOT + "/", "");
+        const correctedFragment = fragment.replace(/§/g, "");
+        const msg = `  ${rel}: anchor contains '§', which GitHub strips from slugs; use #${correctedFragment} instead → ${hrefClean}#${correctedFragment}`;
+        errors.push(msg);
+        if (verbose) console.error(msg);
+        continue;
+      }
       const fragments = collectAnchorFragments(target);
       if (fragments.size > 0 && !fragments.has(fragment.toLowerCase())) {
         brokenLinks++;

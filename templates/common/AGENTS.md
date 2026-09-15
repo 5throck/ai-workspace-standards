@@ -143,7 +143,7 @@ Before assigning an agent to any task, PM MUST classify the deliverable type:
 
 **Tier Ceiling Rule**: An agent's tier may NOT be elevated beyond its defined tier.
 
-> **Execution Plan Boilerplate Policy**: For mandatory and discretionary boilerplate cases, see [§3 (PM Gateway Workflow)](AGENTS.md#§3-pm-gateway-workflow) above.
+> **Execution Plan Boilerplate Policy**: For mandatory and discretionary boilerplate cases, see [§3 (PM Gateway Workflow)](AGENTS.md#3-pm-gateway-workflow) above.
 
 
 ### §3.6 3-Tier Strategy

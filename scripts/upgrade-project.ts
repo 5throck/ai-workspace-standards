@@ -515,6 +515,77 @@ function extractFrontmatterVersion(filePath: string): string {
   return content.match(/^version:\s*["']?(\d+\.\d+\.\d+)/m)?.[1] ?? '';
 }
 
+/**
+ * Parse SKILL.md frontmatter to extract version and last_reviewed.
+ */
+function extractFrontmatterVersionAndReviewed(filePath: string): { version: string; last_reviewed: string } {
+  if (!existsSync(filePath)) return { version: '', last_reviewed: '' };
+  const content = readFileSync(filePath, 'utf8');
+  const versionMatch = content.match(/^version:\s*["']?(\d+\.\d+\.\d+)/m);
+  const reviewedMatch = content.match(/^last_reviewed:\s*["']?(\d{4}-\d{2}-\d{2})/m);
+  return {
+    version: versionMatch?.[1] ?? '',
+    last_reviewed: reviewedMatch?.[1] ?? '',
+  };
+}
+
+/**
+ * Parse SKILLS.md registry rows identically to skill-lifecycle-audit.ts.
+ * Returns a Map of skill name -> { version, status, owner, lastReviewed, removalDate, lineIdx, cells }.
+ */
+interface SkillRegistryRow {
+  version: string;
+  status: string;
+  owner: string;
+  lastReviewed: string;
+  removalDate: string;
+  lineIdx: number;
+  cells: string[];
+}
+function parseSkillRegistryRows(skillsMdPath: string): Map<string, SkillRegistryRow> {
+  const rows = new Map<string, SkillRegistryRow>();
+  if (!existsSync(skillsMdPath)) return rows;
+  const content = readFileSync(skillsMdPath, 'utf8').replace(/\r\n/g, '\n');
+  const lines = content.split('\n');
+
+  // Find ## Registry section
+  const registryLineIdx = lines.findIndex(l => l.trim() === '## Registry');
+  if (registryLineIdx === -1) return rows;
+
+  // Find header row
+  let headerIdx = -1;
+  for (let i = registryLineIdx + 1; i < lines.length; i++) {
+    if (lines[i].trimStart().startsWith('|')) { headerIdx = i; break; }
+  }
+  if (headerIdx === -1) return rows;
+
+  // Parse rows
+  for (let i = headerIdx + 1; i < lines.length; i++) {
+    if (lines[i].trim().startsWith('##')) break; // next section
+    if (!lines[i].trimStart().startsWith('|')) continue;
+
+    const cells = lines[i].split('|').map(c => c.trim());
+    if (cells.length < 8) continue;
+    const nameMatch = cells[1].match(/`([^`]+)`/);
+    if (!nameMatch) continue;
+    const name = nameMatch[1];
+
+    // Skip header row
+    if (cells[2].toLowerCase() === 'version') continue;
+
+    rows.set(name, {
+      version: cells[2],
+      status: cells[3],
+      owner: cells[4],
+      lastReviewed: cells[5],
+      removalDate: cells[6],
+      lineIdx: i,
+      cells,
+    });
+  }
+  return rows;
+}
+
 function fileHash(filePath: string): string {
   if (!existsSync(filePath)) return '';
   return createHash('md5').update(readFileSync(filePath)).digest('hex');
@@ -665,19 +736,39 @@ const MANAGED_PATTERNS: Array<{ open: RegExp; close: string; label: string }> = 
 ];
 
 /**
- * Find all managed blocks in the given content.
- * Returns an array of { pattern, blocks: [{start, end, matched}] }.
+ * ManagedBlock with extracted key from `: description` suffix.
  */
-function findManagedBlocks(content: string): Array<{ pattern: typeof MANAGED_PATTERNS[number]; blocks: Array<{ start: number; end: number; matched: string }> }> {
-  const results: Array<{ pattern: typeof MANAGED_PATTERNS[number]; blocks: Array<{ start: number; end: number; matched: string }> }> = [];
+interface ManagedBlock {
+  start: number;
+  end: number;
+  matched: string;
+  key: string;  // extracted `: description` suffix, or '' for unlabeled blocks
+}
+
+/**
+ * Find all managed blocks in the given content.
+ * Returns an array of { pattern, blocks: [ManagedBlock] }.
+ * The key is extracted from the optional `: description` suffix for WORKSPACE-MANAGED and VARIANT-INJECT;
+ * unlabeled blocks have an empty key and match by position.
+ */
+function findManagedBlocks(content: string): Array<{ pattern: typeof MANAGED_PATTERNS[number]; blocks: ManagedBlock[] }> {
+  const results: Array<{ pattern: typeof MANAGED_PATTERNS[number]; blocks: ManagedBlock[] }> = [];
   for (const p of MANAGED_PATTERNS) {
     // p.open is already a RegExp; p.close is a literal string that needs escaping.
     const closeEscaped = p.close.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const regex = new RegExp(p.open.source + '[\\s\\S]*?' + closeEscaped, 'g');
-    const blocks: Array<{ start: number; end: number; matched: string }> = [];
+    const blocks: ManagedBlock[] = [];
     let match: RegExpExecArray | null;
     while ((match = regex.exec(content)) !== null) {
-      blocks.push({ start: match.index, end: match.index + match[0].length, matched: match[0] });
+      const matched = match[0];
+      let key = '';
+      // Extract block key from `: description` suffix in the opening marker
+      // Pattern matches `: ` followed by any chars up to ` -->` (for symmetrical markers)
+      if (p.label === 'WORKSPACE-MANAGED' || p.label === 'VARIANT-INJECT') {
+        const keyMatch = matched.match(/:\s*([^\s].*?)\s*-->/);
+        if (keyMatch) key = keyMatch[1].trim();
+      }
+      blocks.push({ start: match.index, end: match.index + matched.length, matched, key });
     }
     if (blocks.length > 0) results.push({ pattern: p, blocks });
   }
@@ -687,23 +778,44 @@ function findManagedBlocks(content: string): Array<{ pattern: typeof MANAGED_PAT
 function mergeWorkspaceManaged(projectFile: string, templateFile: string, rel: string): void {
   let tplContent = readFileSync(templateFile, 'utf8');
   let tplManaged = findManagedBlocks(tplContent);
+  let commonContent: string | null = null;
+  let commonManaged: typeof tplManaged | null = null;
 
-  // If variant template has no managed markers, fall back to common template
+  // For per-key union: load common blocks if variant is being used, so we can merge them.
   // (variant may be an extends-only file that shadows the marker-rich common version).
-  if (tplManaged.length === 0 && templateFile.startsWith(templatesDir)) {
+  if (templateFile.startsWith(templatesDir)) {
     const commonFile = join(commonDir, rel);
     if (existsSync(commonFile)) {
-      const commonContent = readFileSync(commonFile, 'utf8');
-      const commonManaged = findManagedBlocks(commonContent);
-      if (commonManaged.length > 0) {
-        console.log(`    INFO: Variant template has no markers for ${rel}, using common template`);
-        tplContent = commonContent;
-        tplManaged = commonManaged;
+      commonContent = readFileSync(commonFile, 'utf8');
+      commonManaged = findManagedBlocks(commonContent);
+    }
+  }
+
+  // Per-key union: build a union of template blocks (variant ∪ common, variant wins on key collision)
+  const tplBlocksByKey = buildBlockKeyMap(tplManaged);
+  if (commonManaged) {
+    const commonBlocksByKey = buildBlockKeyMap(commonManaged);
+    for (const { pattern, blocks: commonBlocks } of commonManaged) {
+      if (!tplBlocksByKey.has(pattern.label)) {
+        tplBlocksByKey.set(pattern.label, { pattern, blocksByKey: new Map(), blocksByIndex: [] });
+      }
+      const entry = tplBlocksByKey.get(pattern.label)!;
+      for (const block of commonBlocks) {
+        if (!entry.blocksByKey.has(block.key)) {
+          entry.blocksByKey.set(block.key, block);
+          entry.blocksByIndex.push(block);
+        }
       }
     }
   }
 
-  if (tplManaged.length === 0) {
+  // Flatten the per-key map back into a managed array for processing
+  const mergedManaged: Array<{ pattern: typeof MANAGED_PATTERNS[number]; blocks: ManagedBlock[] }> = [];
+  for (const entry of tplBlocksByKey.values()) {
+    mergedManaged.push({ pattern: entry.pattern, blocks: entry.blocksByIndex });
+  }
+
+  if (mergedManaged.length === 0) {
     console.log(`    INFO: Template has no managed markers — skipping ${rel}`);
     return;
   }
@@ -721,62 +833,89 @@ function mergeWorkspaceManaged(projectFile: string, templateFile: string, rel: s
   const projContent = readFileSync(projectFile, 'utf8');
   const projManaged = findManagedBlocks(projContent);
 
-  // Strategy: merge each managed block from template into project, matched
-  // POSITIONALLY (template's Nth block of a given marker type -> project's Nth
-  // occurrence of that same marker type). A marker type like COMMON-CLAUDE can
-  // wrap several distinct blocks with different content in one file (e.g. one
-  // per numbered CLAUDE.md section) — the marker itself carries no per-block
-  // label, so a blind "replace every match with this one block" would clobber
-  // every occurrence with whichever block was processed last.
+  // Strategy: for keyed blocks (WORKSPACE-MANAGED, VARIANT-INJECT), match by key.
+  // For unlabeled blocks, match positionally (backward-compatible with existing behavior).
+  // Keyed blocks with no project counterpart are inserted.
   let updated = projContent;
   let merged = false;
 
-  for (const { pattern, blocks: tplBlocks } of tplManaged) {
+  for (const { pattern, blocks: tplBlocks } of mergedManaged) {
     const closeEscaped = pattern.close.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const regex = new RegExp(pattern.open.source + '[\\s\\S]*?' + closeEscaped, 'g');
 
+    // Build map of project blocks by key/index
+    const projBlocksByKey = new Map<string, ManagedBlock>();
+    const projBlocksByIndex: ManagedBlock[] = [];
     const projOccurrences: Array<{ start: number; end: number }> = [];
     for (const occ of updated.matchAll(regex)) {
-      projOccurrences.push({ start: occ.index!, end: occ.index! + occ[0].length });
+      const matched = occ[0]!;
+      let key = '';
+      if (pattern.label === 'WORKSPACE-MANAGED' || pattern.label === 'VARIANT-INJECT') {
+        const keyMatch = matched.match(/:\s*([^\s].*?)\s*-->/);
+        if (keyMatch) key = keyMatch[1].trim();
+      }
+      const block: ManagedBlock = { start: occ.index!, end: occ.index! + matched.length, matched, key };
+      projBlocksByKey.set(key, block);
+      projBlocksByIndex.push(block);
+      projOccurrences.push({ start: occ.index!, end: occ.index! + matched.length });
     }
 
+    // Separate keyed from unlabeled blocks
+    const keyedTplBlocks = tplBlocks.filter(b => b.key);
+    const unlabeledTplBlocks = tplBlocks.filter(b => !b.key);
+
+    // Process keyed blocks: match by key, insert if not found
+    for (const tplBlock of keyedTplBlocks) {
+      const projBlock = projBlocksByKey.get(tplBlock.key);
+      if (projBlock) {
+        // Found by key — replace it
+        if (!dryRun) {
+          updated = updated.slice(0, projBlock.start) + tplBlock.matched + updated.slice(projBlock.end);
+        }
+        merged = true;
+        console.log(`    ${dryTag}MERGED ${pattern.label}:${tplBlock.key} in: ${rel}`);
+      } else {
+        // Not found by key — insert with insertion anchor logic
+        const insertionPos = findInsertionPosition(updated, rel, tplBlock.key, pattern);
+        if (!dryRun) {
+          updated = updated.slice(0, insertionPos) + '\n\n' + tplBlock.matched + '\n' + updated.slice(insertionPos);
+        }
+        merged = true;
+        console.log(`    ${dryTag}INSERTED ${pattern.label}:${tplBlock.key} in: ${rel}`);
+      }
+    }
+
+    // Process unlabeled blocks: use positional matching for backward compatibility
     if (projOccurrences.length === 0) {
-      // No matching block in project — append all template blocks
-      for (const tplBlock of tplBlocks) {
+      // No matching block in project — append all unlabeled template blocks
+      for (const tplBlock of unlabeledTplBlocks) {
         if (!dryRun) {
           updated = updated + '\n\n' + tplBlock.matched + '\n';
         }
         merged = true;
         console.log(`    ${dryTag}APPENDED ${pattern.label} block to: ${rel}`);
       }
-      continue;
-    }
-
-    if (projOccurrences.length !== tplBlocks.length) {
-      // Counts diverged (template gained/lost blocks since the project copy was
-      // made). Positional pairing would silently drop the surplus and shift the
-      // remaining content, so instead replace the project's whole run of blocks
-      // for this marker with the template's full block sequence, in order.
-      console.log(`    WARNING: ${pattern.label} block count mismatch in ${rel} (project has ${projOccurrences.length}, template has ${tplBlocks.length}) — replacing all project blocks with the template sequence`);
+    } else if (projOccurrences.length !== unlabeledTplBlocks.length) {
+      // Counts diverged for unlabeled blocks — warn and replace all
+      console.log(`    WARNING: ${pattern.label} unlabeled block count mismatch in ${rel} (project has ${projOccurrences.length}, template has ${unlabeledTplBlocks.length}) — replacing all project blocks with the template sequence (this may cause prose loss if prose exists between project blocks)`);
       const first = projOccurrences[0];
       const last = projOccurrences[projOccurrences.length - 1];
       if (!dryRun) {
-        updated = updated.slice(0, first.start) + tplBlocks.map((b) => b.matched).join('\n\n') + updated.slice(last.end);
+        updated = updated.slice(0, first.start) + unlabeledTplBlocks.map((b) => b.matched).join('\n\n') + updated.slice(last.end);
       }
       merged = true;
       console.log(`    ${dryTag}RECONCILED ${pattern.label} blocks in: ${rel}`);
-      continue;
-    }
-
-    // Counts match — replace positionally, back-to-front so earlier offsets stay valid.
-    for (let i = tplBlocks.length - 1; i >= 0; i--) {
-      const { start, end } = projOccurrences[i];
-      const tplBlock = tplBlocks[i];
-      if (!dryRun) {
-        updated = updated.slice(0, start) + tplBlock.matched + updated.slice(end);
+    } else {
+      // Counts match — replace positionally, back-to-front so earlier offsets stay valid.
+      for (let i = unlabeledTplBlocks.length - 1; i >= 0; i--) {
+        const { start, end } = projOccurrences[i];
+        const tplBlock = unlabeledTplBlocks[i];
+        if (!dryRun) {
+          updated = updated.slice(0, start) + tplBlock.matched + updated.slice(end);
+        }
+        merged = true;
+        console.log(`    ${dryTag}MERGED ${pattern.label} block in: ${rel}`);
       }
-      merged = true;
-      console.log(`    ${dryTag}MERGED ${pattern.label} block in: ${rel}`);
     }
   }
 
@@ -788,6 +927,53 @@ function mergeWorkspaceManaged(projectFile: string, templateFile: string, rel: s
   } else if (!dryRun && merged) {
     writeFileSync(projectFile, updated, 'utf8');
   }
+}
+
+/**
+ * Build a map-of-maps for efficient key-based block lookup.
+ */
+function buildBlockKeyMap(managed: Array<{ pattern: typeof MANAGED_PATTERNS[number]; blocks: ManagedBlock[] }>) {
+  const map = new Map<string, { pattern: typeof MANAGED_PATTERNS[number]; blocksByKey: Map<string, ManagedBlock>; blocksByIndex: ManagedBlock[] }>();
+  for (const { pattern, blocks } of managed) {
+    const blocksByKey = new Map<string, ManagedBlock>();
+    const blocksByIndex: ManagedBlock[] = [];
+    for (const block of blocks) {
+      blocksByKey.set(block.key, block);
+      blocksByIndex.push(block);
+    }
+    map.set(pattern.label, { pattern, blocksByKey, blocksByIndex });
+  }
+  return map;
+}
+
+/**
+ * Find insertion position for a keyed block that has no project counterpart.
+ * Preference order: (a) immediately after the heading whose text names the key,
+ * (b) after the project's last block of the same label, (c) end of file.
+ */
+function findInsertionPosition(content: string, rel: string, key: string, pattern: typeof MANAGED_PATTERNS[number]): number {
+  // Try to find a heading with the key text and insert after it
+  const headingRegex = new RegExp(`^#+\\s+.*${key}.*$`, 'm');
+  const headingMatch = content.match(headingRegex);
+  if (headingMatch) {
+    const headingEnd = headingMatch.index! + headingMatch[0].length;
+    return headingEnd;
+  }
+
+  // Fallback: find the last block of the same label and insert after it
+  const closeEscaped = pattern.close.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(pattern.open.source + '[\\s\\S]*?' + closeEscaped, 'g');
+  let lastMatch: RegExpExecArray | null = null;
+  let match: RegExpExecArray | null;
+  while ((match = regex.exec(content)) !== null) {
+    lastMatch = match;
+  }
+  if (lastMatch) {
+    return lastMatch.index! + lastMatch[0].length;
+  }
+
+  // Ultimate fallback: end of file
+  return content.length;
 }
 
 /** Check if a project file has local modifications (via git status). */
@@ -1157,6 +1343,58 @@ if (existsSync(skillsMdPath)) {
   }
 } else {
   console.log("  INFO: skills/SKILLS.md not found — skipping migration");
+}
+console.log('');
+
+// ── SKILLS_REGISTRY_RECONCILE: version and last_reviewed columns ──────────────
+console.log('--- SKILLS_REGISTRY_RECONCILE: version and last_reviewed ---');
+const projSkillsPath = join(projectDir, 'skills');
+const registryPath = join(projectDir, 'skills', 'SKILLS.md');
+if (existsSync(registryPath) && existsSync(projSkillsPath)) {
+  const registryRows = parseSkillRegistryRows(registryPath);
+  const registryLines = readFileSync(registryPath, 'utf8').split('\n');
+  let registryChanged = false;
+
+  // For each SKILL.md in the project, reconcile its version/last_reviewed in the registry
+  for (const skillName of readdirSync(projSkillsPath)) {
+    const skillMdPath = join(projSkillsPath, skillName, 'SKILL.md');
+    if (!existsSync(skillMdPath)) continue;
+
+    const skillFrontmatter = extractFrontmatterVersionAndReviewed(skillMdPath);
+    if (!skillFrontmatter.version) continue;
+
+    const row = registryRows.get(skillName);
+    if (!row) {
+      // Row doesn't exist — skip (don't synthesize, per design doc)
+      continue;
+    }
+
+    // Update version and last_reviewed columns if they differ
+    const newVersion = skillFrontmatter.version;
+    const newReviewed = skillFrontmatter.last_reviewed || row.lastReviewed;
+
+    if (row.version !== newVersion || row.lastReviewed !== newReviewed) {
+      // Replace version and last_reviewed in the registry row
+      const updatedCells = [...row.cells];
+      updatedCells[2] = newVersion;
+      updatedCells[5] = newReviewed;
+      const updatedLine = updatedCells.join('|');
+
+      registryLines[row.lineIdx] = updatedLine;
+      registryChanged = true;
+      console.log(`  ${dryTag}RECONCILED: ${skillName} → v${newVersion}, last_reviewed: ${newReviewed}`);
+    }
+  }
+
+  if (registryChanged && !dryRun) {
+    writeFileSync(registryPath, registryLines.join('\n'), 'utf8');
+  }
+} else {
+  if (!existsSync(registryPath)) {
+    console.log("  INFO: skills/SKILLS.md not found — skipping reconciliation");
+  } else {
+    console.log("  INFO: skills/ directory not found — skipping reconciliation");
+  }
 }
 console.log('');
 

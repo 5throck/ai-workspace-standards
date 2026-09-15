@@ -156,7 +156,7 @@ All specialist agents are dispatched through PM. PM never executes code or modif
 3. Maximum 3 fix iterations per QA cycle before escalating to user
 4. Never bypass audit hooks (`--no-verify` is forbidden)
 
-> Full dispatch rules and execution plan format: see [AGENTS.md §3](../AGENTS.md#§3-pm-gateway-workflow).
+> Full dispatch rules and execution plan format: see [AGENTS.md §3](../AGENTS.md#3-pm-gateway-workflow).
 
 ## Design Gate (Row 0)
 

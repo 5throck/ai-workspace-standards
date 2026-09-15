@@ -123,7 +123,7 @@ PM is an escalation gateway, not an executor. **⚠️ CRITICAL**: PM MUST NOT p
 
 **Rationale**: PM is orchestrator, not executor. Direct execution violates governance separation of concerns. See [Role Clarification](agents/pm.md#⚠️-role-clarification) and [Task Tracking vs Execution](agents/pm.md#task-tracking-vs-execution) in `agents/pm.md`.
 
-When a specialist agent's required tool is denied, PM applies the [Permission Denial Protocol](#§3.8-permission-denial-protocol) — never substitutes for the specialist.
+When a specialist agent's required tool is denied, PM applies the [Permission Denial Protocol](#3.8-permission-denial-protocol) — never substitutes for the specialist.
 
 #### §3.1.2 PM Role Boundaries
 
@@ -189,7 +189,7 @@ All specialist agents below are dispatched ONLY through PM:
 <!-- VARIANT-DISPATCH-TRIGGERS-END -->
 **⚠️ IMPORTANT**: Do NOT invoke any specialist agent directly. All requests must go through PM.
 
-> **Execution Plan Format**: For mandatory criteria, boilerplate table, and rules, see [AGENTS.md §5](AGENTS.md#§5-execution-plan-templates). For platform-specific dispatch instructions, see `CLAUDE.md §5` or `GEMINI.md §5`.
+> **Execution Plan Format**: For mandatory criteria, boilerplate table, and rules, see [AGENTS.md §5](AGENTS.md#5-execution-plan-templates). For platform-specific dispatch instructions, see `CLAUDE.md §5` or `GEMINI.md §5`.
 
 ### §3.5 Phase Determination (Deliverable-Type Gate)
 
@@ -218,7 +218,7 @@ Before assigning an agent to any task, PM MUST classify the deliverable type:
 
 **Tier Ceiling Rule**: An agent's tier may NOT be elevated beyond its defined tier.
 
-> **Execution Plan Boilerplate Policy**: For mandatory and discretionary boilerplate cases, see [§3 (PM Gateway Workflow)](AGENTS.md#§3-pm-gateway-workflow) above.
+> **Execution Plan Boilerplate Policy**: For mandatory and discretionary boilerplate cases, see [§3 (PM Gateway Workflow)](AGENTS.md#3-pm-gateway-workflow) above.
 
 
 ### §3.6 3-Tier Strategy

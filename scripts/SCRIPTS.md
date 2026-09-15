@@ -93,7 +93,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `generate-l3-readme.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
 | `generate-scripts-readme.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
 | `generate-skill-graph.ts` | L0 | 1.10.0 | active | —| —| L0+L1 | —|
-| `generate-version-manifest.ts` | L0 | 1.4.1 | active | emits `validate-md-language:allowlist` markers around the generated Skills table (T-20260912-015) | —| L0 | —|
+| `generate-version-manifest.ts` | L0 | 1.4.1 | active | emits `validate-md-language:allowlist` markers around the generated Skills table (T-20260912-015) | —| L0+L1 | —|
 | `helpers/beta-lifecycle.ts` | L0 | 1.2.1 | active | —| —| L0 | —|
 | `helpers/generate-variant.ts` | L0 | 1.14.0 | active | —| —| L0 | —|
 | `helpers/agent-promote.ts` | L0 | 0.1.1 | experimental | —| —| L0 | —|
