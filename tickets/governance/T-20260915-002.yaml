@@ -5,12 +5,29 @@ title: >-
   validator-hardening: validate scaffolder marker references exist in source
   templates (graft/COMMON-AGENTS silent no-op class)
 priority: high
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-15T10:32:33.512Z'
 history:
   - at: '2026-09-15T10:32:33.512Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-15T23:05:02.571Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-15T23:05:02.584Z'
+    from: waiting
+    to: review
+  - at: '2026-09-15T23:52:14.389Z'
+    from: review
+    to: done
+result: >-
+  Landed in wave 2: shared marker contract scripts/helpers/scaffold-markers.ts
+  1.0.0 (marker constants + declarative marker-to-source mapping, consumed by
+  both scaffolders); create-l3-scaffold.ts 1.15.0 now warns loudly naming
+  marker+file when an extraction site finds nothing; validate-templates.ts
+  1.30.0 adds scaffold-marker-source check (Error) verifying all 10 marker
+  references against their source templates. C3 silent no-op class now caught by
+  script. Design docs/designs/2026-09-16-scaffold-delivery-validation-design.md
+  (spec 2026-09-16-scaffold-delivery-validation-design).
 error: null

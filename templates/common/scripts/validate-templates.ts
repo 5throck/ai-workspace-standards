@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.29.0
+ * @version 1.30.0
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -10,6 +10,21 @@
  *   bun scripts/validate-templates.ts
  *   bun scripts/validate-templates.ts --variant co-develop
  *   bun scripts/validate-templates.ts --json
+ *
+ * v1.30.0 (2026-09-16-scaffold-delivery-validation-design.md): Wave 2
+ *          scaffolder-validation batch T-20260915-002 (C3) + T-20260915-010
+ *          (H12). New `scaffold-marker-source` — every (marker, source
+ *          template) pair declared in helpers/scaffold-markers.ts
+ *          SCAFFOLD_MARKER_SOURCES must exist in its source file; a marker
+ *          referenced by the scaffolders but absent from its source template
+ *          is the C3 silent-no-op class (the graft-block injection once
+ *          searched a renamed marker and silently appended nothing). New
+ *          `pm-extends-stub-body` — every variant templates/co-<slug>
+ *          agents/pm.md declaring `extends:` must carry the canonical stub
+ *          body (empty or the canonicalPmStubBody sentence); a non-canonical
+ *          body is real variant content that scaffold-time resolution
+ *          silently discards (H12; the matching scaffold-time WARN lives in
+ *          new-project.ts §2.3b).
  *
  * v1.29.0 (2026-09-16-registry-version-parity-hardening-design.md): validator-
  *          hardening batch T-20260915-013 (H10) + T-20260915-001 (H8). New
@@ -76,6 +91,10 @@ import { load } from 'js-yaml';
 import { getScriptLayer, getSkillLayer, includeScriptInL1, parseScriptLayers, parseSkillLayers } from './helpers/layer-filter.ts';
 import { validatePropagationMap } from './lib/propagation-map-schema.ts';
 import { scrubConstitutionRefs } from './lib/constitution-scrub.ts';
+import {
+  SCAFFOLD_MARKER_SOURCES,
+  isCanonicalPmStubBody,
+} from './helpers/scaffold-markers.ts';
 
 interface VariantManifest {
   name: string;
@@ -3885,6 +3904,66 @@ function checkMarkerZoneParity(): void {
   }
 }
 
+// ── scaffold-marker-source (T-20260915-002 / C3) ─────────────────────────────
+// Every (marker, source template) pair the scaffolders depend on — declared in
+// helpers/scaffold-markers.ts SCAFFOLD_MARKER_SOURCES — must hold: the source
+// file exists and carries the marker. A marker referenced by scaffold code but
+// absent from its source template is the C3 silent-no-op class (indexOf miss →
+// block never appended, no warning). The scaffolders also warn at extraction
+// time; this standing check fails the battery BEFORE anything scaffolds.
+function checkScaffoldMarkerSources(): void {
+  if (!JSON_MODE) console.log('\n=== Check scaffold-marker-source: scaffolder markers vs source templates ===');
+  let verified = 0;
+  for (const entry of SCAFFOLD_MARKER_SOURCES) {
+    for (const relSource of entry.sources) {
+      const absSource = join(ROOT, relSource);
+      if (!existsSync(absSource)) {
+        fail('common', 'scaffold-marker-source',
+          `${relSource} not found — cannot verify scaffolder marker reference: ${entry.marker} (${entry.purpose})`,
+          `Restore the source template file, or update SCAFFOLD_MARKER_SOURCES in scripts/helpers/scaffold-markers.ts`);
+        continue;
+      }
+      if (!readFileSync(absSource, 'utf-8').includes(entry.marker)) {
+        fail('common', 'scaffold-marker-source',
+          `marker missing from ${relSource}: "${entry.marker}" (${entry.purpose}) — scaffolders referencing it silently no-op (C3 class)`,
+          `Re-wrap the block in the declared marker in ${relSource}, or update SCAFFOLD_MARKER_SOURCES in scripts/helpers/scaffold-markers.ts`);
+        continue;
+      }
+      verified++;
+    }
+  }
+  pass(`scaffold-marker-source: ${verified}/${SCAFFOLD_MARKER_SOURCES.length} declared marker reference(s) verified in their source templates`);
+}
+
+// ── pm-extends-stub-body (T-20260915-010 / H12) ──────────────────────────────
+// Every variant pm.md that declares `extends:` must carry the canonical stub
+// body (empty, or exactly the canonicalPmStubBody sentence for the variant).
+// new-project.ts §2.3b discards any prose stub body when it attaches the L1
+// body — a non-canonical body means real variant content is lost silently at
+// scaffold time (the matching scaffold-time WARN lives in new-project.ts).
+function checkPmExtendsStubBodies(): void {
+  if (!JSON_MODE) console.log('\n=== Check pm-extends-stub-body: variant pm.md extends-stub bodies are canonical ===');
+  let checked = 0;
+  for (const entry of readdirSync(TEMPLATES_DIR, { withFileTypes: true })) {
+    if (!entry.isDirectory() || !entry.name.startsWith('co-')) continue;
+    if (variantArg !== 'all' && variantArg !== entry.name) continue;
+    const pmPath = join(TEMPLATES_DIR, entry.name, 'agents', 'pm.md');
+    if (!existsSync(pmPath)) continue; // presence is checkAgents/checkReadmePresence's domain
+    const content = readFileSync(pmPath, 'utf-8');
+    const fmMatch = content.match(/^---\n([\s\S]*?)\n---\n?/);
+    if (!fmMatch || !/(^|\n)\s*extends:/.test(fmMatch[1])) continue;
+    checked++;
+    const body = content.slice(fmMatch[0].length);
+    if (isCanonicalPmStubBody(body, entry.name)) continue;
+    fail(entry.name, 'pm-extends-stub-body',
+      `agents/pm.md declares extends: but its body is not the canonical stub — scaffold-time resolution would silently discard ${body.trim().length} char(s) of variant content`,
+      `Inline the real content in agents/pm.md and drop extends:, or restore the canonical stub prose (canonicalPmStubBody in scripts/helpers/scaffold-markers.ts)`);
+  }
+  if (checked > 0) {
+    pass(`pm-extends-stub-body: ${checked} extends-stub variant pm.md file(s) carry canonical stub bodies`);
+  }
+}
+
 function main(): number {
   if (!JSON_MODE) {
     console.log(`${colors.cyan}Template Lifecycle Validator${colors.reset}`);
@@ -3967,6 +4046,8 @@ function main(): number {
   checkRootCommonCommandsParity();
   checkPropagationMapSchema();
   checkMarkerZoneParity();                                       // PM-02: marker-inject zones vs target_variants
+  checkScaffoldMarkerSources();                                  // T-20260915-002: scaffolder markers vs source templates
+  checkPmExtendsStubBodies();                                    // T-20260915-010: variant pm.md extends-stub bodies
   checkVariantReadinessGate();   // VRG-01: continuous Variant Readiness Gate enforcement
 
   // B-07: Sync validated variant info back to VERSION_REGISTRY.json

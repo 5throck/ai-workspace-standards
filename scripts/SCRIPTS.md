@@ -82,7 +82,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `design-lint.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `review-baseline.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `resync-audit.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `create-l3-scaffold.ts` | L0 | 1.14.0 | active | —| —| L0 | —|
+| `create-l3-scaffold.ts` | L0 | 1.15.0 | active | —| —| L0 | —|
 | `dev-sync.ts` | L0 | 1.14.0 | active | —| —| L0+L1 | —|
 | `dispatch-parallel.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
 | `dispatch-serial.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
@@ -111,6 +111,8 @@ Their absence from the table is policy-consistent, not an oversight.
 | `helpers/l0-ref-policy.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `helpers/context-sections.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
 | `helpers/markers.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
+| `helpers/scaffold-markers.ts` | L0 | 1.0.0 | active | Shared scaffold marker constants + (marker→source) mapping + delivery-tree derivations for the C3/H12/H13 validator batch | —| L0+L1 | —|
+| `helpers/template-version.ts` | L0 | 1.0.0 | active | templates/VERSION SSOT reader for scaffold provenance — fails loud on missing/unparseable (T-20260915-011) | —| L0 | —|
 | `helpers/pm-md-parser.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `helpers/variant-governance-rules.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `helpers/registries/variant-type-registry.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
@@ -179,7 +181,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `lifecycle-sync-audit.ts` | L0 | 1.13.0 | active | —| —| L0+L1 | —|
 | `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `md-to-ooxml.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
-| `new-project.ts` | L0 | 1.17.0 | active | Bare names scaffold to `Projects/<name>` (v1.16.0); path-like names stay workspace-relative; workspace-root escape rejected | —| L0 | —|
+| `new-project.ts` | L0 | 1.18.0 | active | Bare names scaffold to `Projects/<name>` (v1.16.0); path-like names stay workspace-relative; workspace-root escape rejected | —| L0 | —|
 | `remove-project.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `resolve-variants.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
 | `project-to-variant.ts` | L0 | 1.3.0 | active | `--source`, `--target`, `--dry-run`, `--force`, `--design-doc`, `--threshold-files`, `--threshold-dirs` | —| L0 | —|
@@ -204,9 +206,10 @@ Their absence from the table is policy-consistent, not an oversight.
 | `tag-template.ts` | L0 | 1.1.0 | active | `--dry-run`, `--no-push`, `--fail-on-push-error` | —| L0 | —|
 | `team-builder.ts` | L0 | 1.4.0 | active | —| —| L0+L1 | —|
 | `test-platform-parity.ts` | L0 | 0.2.4 | active | —| —| L0 | —|
-| `test-new-project.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
+| `test-new-project.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `test-extends-validator.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
-| `test-l3-to-variant-promotion.ts` | L0 | 1.2.1 | active | —| —| L0 | —|
+| `test-l3-to-variant-promotion.ts` | L0 | 1.3.0 | active | —| —| L0 | —|
+| `test-scaffold-delivery-parity.ts` | L0 | 1.0.0 | active | Fast static parity harness: new-project vs create-l3-scaffold delivery trees vs REVIEWED_DELIVERY_EXCLUSIONS (T-20260915-003) | —| L0 | —|
 | `test-variant-readiness.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `test-runner.ts` | L0 | 1.2.0 | active | `--parallel`, `--sequential`, `--concurrency <n>`, `--timeout <ms>` | —| L0+L1 | —|
 | `translate-readme.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
@@ -223,7 +226,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `procedure-coverage.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `validate-procedures.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `validate-decisions.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `validate-templates.ts` | L0 | 1.29.0 | active | —| —| L0+L1 | —|
+| `validate-templates.ts` | L0 | 1.30.0 | active | —| —| L0+L1 | —|
 | `validate-variant-readiness.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `verify-country-prune.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `verify-adr-governance.ts` | L0 | 1.5.0 | active | —| —| L0 | —|

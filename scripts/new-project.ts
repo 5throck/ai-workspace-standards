@@ -1,5 +1,16 @@
 #!/usr/bin/env bun
-// @version 1.17.0
+// @version 1.18.0
+// v1.18.0: Wave 2 scaffold-delivery validation batch
+//           (docs/designs/2026-09-16-scaffold-delivery-validation-design.md).
+//           H12/T-20260915-010: when a resolved variant pm.md extends-stub
+//           body is NOT the canonical stub prose (canonicalPmStubBody in
+//           helpers/scaffold-markers.ts), print a loud warning naming the
+//           variant and file before continuing — the body would be silently
+//           discarded by the L1-body attach. H13/T-20260915-003: the
+//           delivery-skip data (COPY_SKIP_ENTRIES, WORKSPACE_ONLY_FILES,
+//           L1_ONLY_AGENTS, L1_ONLY_DIRS, cleanup files, legacy L0 skills)
+//           now imports from helpers/scaffold-markers.ts so the delivery-tree
+//           parity derivation cannot drift from this script's behavior.
 // v1.16.0: Bare project names scaffold under Projects/<name> (canonical layout) instead
 //           of the workspace root — root-level scaffolds are how the 2026-09-12
 //           root-upgrade incident litter accumulated (memory/2026-09-12.md). Path-like
@@ -32,6 +43,15 @@ import { spawnSync } from 'node:child_process';
 import { applyContextTemplate, DEFAULT_PM_ROLE_DESCRIPTIONS } from './helpers/template-utils.ts';
 import { rollbackPartialProject } from './helpers/rollback-partial-project.ts';
 import { blankL0Refs } from './helpers/l0-ref-policy.ts';
+import {
+  NEW_PROJECT_COPY_SKIP_ENTRIES,
+  NEW_PROJECT_WORKSPACE_ONLY_FILES,
+  NEW_PROJECT_L1_ONLY_AGENTS,
+  NEW_PROJECT_L1_ONLY_DIRS,
+  NEW_PROJECT_CLEANUP_FILES,
+  NEW_PROJECT_LEGACY_L0_SKILLS,
+  isCanonicalPmStubBody,
+} from './helpers/scaffold-markers.ts';
 import * as yaml from 'js-yaml';
 
 // ── Argument parsing ───────────────────────────────────────────────────────────
@@ -405,10 +425,12 @@ if (existsSync(templateValidationHelper)) {
 
 // ── Helper: copy directory recursively ────────────────────────────────────────
 // Entries that must never be copied into a scaffolded project (mirrors
-// create-l3-scaffold.ts's COMMON_OVERLAY_EXCLUDE): dependency trees
+// create-l3-scaffold.ts's overlay exclude): dependency trees
 // (templates/common/node_modules alone is ~35MB — projects run their own
-// `bun install`) and Gateguard's local state file.
-const COPY_SKIP_ENTRIES = new Set(['node_modules', '.gateguard-state']);
+// `bun install`) and Gateguard's local state file. T-20260915-003 (H13): the
+// list lives in the shared scaffold-markers contract module so the
+// delivery-tree parity derivation stays faithful to this script.
+const COPY_SKIP_ENTRIES = new Set(NEW_PROJECT_COPY_SKIP_ENTRIES);
 
 function copyDir(src: string, dest: string): void {
   mkdirSync(dest, { recursive: true });
@@ -478,7 +500,8 @@ if (import.meta.main) {
 }
 
 // Workspace-only files that must NOT be copied into new projects
-const WORKSPACE_ONLY_FILES = ['package.json', 'scripts/package.json', 'package-lock.json', 'bun.lock', 'bun.lockb', 'variant.json'];
+// (single source: helpers/scaffold-markers.ts — T-20260915-003)
+const WORKSPACE_ONLY_FILES = [...NEW_PROJECT_WORKSPACE_ONLY_FILES];
 copyDir(commonDir, projectDir);
 // Ensure all copied files are user-writable (template storage may set read-only bits)
 makeWritable(projectDir);
@@ -516,14 +539,16 @@ writeFileSync(join(projectDir, 'package.json'), JSON.stringify(pkg, null, 2) + '
 console.log(`  ✅ Root package.json generated (name: ${pkg.name})`);
 
 // ── L1-only agent files ──────────────────────────────────────────────────
-const L1_ONLY_AGENTS = ['agents/lifecycle-manager.md', 'agents/_COMMON.md', 'agents/pm.md.backup'];
+// (single source: helpers/scaffold-markers.ts — T-20260915-003)
+const L1_ONLY_AGENTS = [...NEW_PROJECT_L1_ONLY_AGENTS];
 for (const a of L1_ONLY_AGENTS) {
   const fp = join(projectDir, a);
   if (existsSync(fp)) { rmSync(fp); console.log(`  🗑️  Excluded L1-only agent: ${a}`); }
 }
 
-// L1-only directories
-const L1_ONLY_DIRS = ['docs/_templates', 'docs/_examples', 'docs/adr', 'docs/variants']; // docs/specs left in ADR-0074 Amendment 2 (registry seed activates the Design Gate)
+// L1-only directories (single source: helpers/scaffold-markers.ts — T-20260915-003;
+// the same list is re-applied after the variant overlay in §2.6b)
+const L1_ONLY_DIRS = [...NEW_PROJECT_L1_ONLY_DIRS];
 for (const d of L1_ONLY_DIRS) {
   const dp = join(projectDir, d);
   if (existsSync(dp)) { rmSync(dp, { recursive: true }); console.log(`  🗑️  Excluded L1-only directory: ${d}`); }
@@ -678,6 +703,18 @@ if (existsSync(projPmMd)) {
         // Prose stub: the one-liner body ("This co-X PM override inherits the common PM
         // body…") is stub metadata, not project content — drop it. The project gets the
         // full L1 body plus any rendered variant_overrides sections.
+        // H12 (T-20260915-010): a NON-canonical prose body is real variant content
+        // about to be discarded — warn loud, naming the variant and file, before
+        // continuing (behavior unchanged; visibility added).
+        if (!isCanonicalPmStubBody(pmBody, variant)) {
+          console.warn(
+            `  ⚠️  agents/pm.md: variant '${variant}' ships a NON-canonical extends-stub body ` +
+              `(${pmBody.trim().length} chars) in templates/${variant}/agents/pm.md — it is not the ` +
+              `canonical stub prose and will be DISCARDED when the templates/common body is attached. ` +
+              `If this body holds real variant content, inline it and remove \`extends:\`; ` +
+              `otherwise restore the canonical stub.`
+          );
+        }
         writeFileSync(projPmMd, mergedFm + '\n' + resolvedBody, 'utf8');
         console.log('  ✅ agents/pm.md: resolved prose extends-stub against templates/common body');
       } else {
@@ -822,7 +859,7 @@ if (existsSync(pmMd)) {
 }
 
 // ── 2.6b. Remove template-only docs/ subdirs (variant overlay may re-add; removed here after overlay)
-for (const d of ['docs/adr', 'docs/variants', 'docs/_templates', 'docs/_examples']) { // docs/specs stays (ADR-0074)
+for (const d of L1_ONLY_DIRS) { // docs/specs stays (ADR-0074) — not in L1_ONLY_DIRS
   const dp = join(projectDir, d);
   if (existsSync(dp)) { rmSync(dp, { recursive: true }); console.log(`  🗑️  Removed template-only dir: ${d}`); }
 }
@@ -1018,13 +1055,8 @@ for (const s of l0Scripts) {
   if (existsSync(fp)) rmSync(fp, { recursive: true, force: true });
 }
 
-// Remove workspace-only artifacts
-const cleanupFiles = [
-  'scripts/propagation-map.json',
-  'variant.json',
-  'agents/pm.md.backup',
-  'docs/variant.context.template.md',  // scaffolding-only template — generates <variant>.context.md via applyContextTemplate()
-];
+// Remove workspace-only artifacts (single source: helpers/scaffold-markers.ts — T-20260915-003)
+const cleanupFiles = [...NEW_PROJECT_CLEANUP_FILES];
 for (const f of cleanupFiles) {
   const fp = join(projectDir, f);
   if (existsSync(fp)) rmSync(fp);
@@ -1034,7 +1066,8 @@ for (const f of cleanupFiles) {
 // (l2_propagate: false). Primary enforcement is in propagate-to-templates.ts via
 // layer-filter.ts — this block catches manual additions to templates/common/skills/.
 // Also removes legacy hardcoded L0-only skills (scope: workspace).
-const LEGACY_L0_SKILLS = ['simulate-project-creation'];
+// (single source: helpers/scaffold-markers.ts — T-20260915-003)
+const LEGACY_L0_SKILLS = NEW_PROJECT_LEGACY_L0_SKILLS;
 for (const skill of LEGACY_L0_SKILLS) {
   for (const base of ['skills', '.claude/skills', '.gemini/skills']) {
     const dp = join(projectDir, base, skill);

@@ -1,0 +1,18 @@
+schemaVersion: 1
+id: T-20260916-001
+kind: manual
+title: >-
+  test-infra: l3-to-variant-promotion staging dir under templates/ is scannable
+  by concurrently-running validate-templates whose B-07 sync pollutes
+  docs/templates/VERSION_REGISTRY.json (race found during T-20260915-003 E2E
+  pinning) — stage outside templates/ or exclude from B-07
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-15T23:51:08.119Z'
+history:
+  - at: '2026-09-15T23:51:08.119Z'
+    from: null
+    to: backlog
+result: null
+error: null

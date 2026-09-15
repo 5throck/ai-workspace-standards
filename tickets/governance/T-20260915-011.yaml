@@ -5,12 +5,28 @@ title: >-
   chore: create-l3-scaffold provenance version should read templates/VERSION not
   SCRIPTS.md with silent 1.0.0 fallback
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-15T10:32:47.090Z'
 history:
   - at: '2026-09-15T10:32:47.090Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-15T23:05:02.645Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-15T23:05:02.656Z'
+    from: waiting
+    to: review
+  - at: '2026-09-15T23:52:14.425Z'
+    from: review
+    to: done
+result: >-
+  Landed in wave 2: create-l3-scaffold.ts 1.15.0 provenance now reads
+  templates/VERSION via new scripts/helpers/template-version.ts 1.0.0
+  (parseTemplateVersion pure + readTemplateVersion) and fails loud on
+  missing/unparseable content; SCRIPTS.md parsing path and both silent fallbacks
+  (1.0.0, unknown) removed; downstream provenance formats (_ORIGIN.md,
+  _COMMON_VERSION.md, template-version.txt) unchanged. Residual new-project
+  fallback ticketed as T-20260916-002.
 error: null

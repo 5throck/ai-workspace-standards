@@ -5,12 +5,27 @@ title: >-
   new-project: warn before discarding non-canonical extends-stub bodies and
   validate stub prose in validate-templates
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-15T10:32:47.076Z'
 history:
   - at: '2026-09-15T10:32:47.076Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-15T23:05:02.621Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-15T23:05:02.633Z'
+    from: waiting
+    to: review
+  - at: '2026-09-15T23:52:14.414Z'
+    from: review
+    to: done
+result: >-
+  Landed in wave 2: new-project.ts 1.18.0 emits a scaffold-time WARN naming
+  variant+file when a resolved extends-stub body is non-canonical (content would
+  be discarded); validate-templates.ts 1.30.0 adds pm-extends-stub-body check
+  (Error) with canonical stub text single-sourced from the shared helper — 13/13
+  variants canonical. Design
+  docs/designs/2026-09-16-scaffold-delivery-validation-design.md.
 error: null
