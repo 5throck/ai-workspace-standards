@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.28.0
+ * @version 1.29.0
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -10,6 +10,22 @@
  *   bun scripts/validate-templates.ts
  *   bun scripts/validate-templates.ts --variant co-develop
  *   bun scripts/validate-templates.ts --json
+ *
+ * v1.29.0 (2026-09-16-registry-version-parity-hardening-design.md): validator-
+ *          hardening batch T-20260915-013 (H10) + T-20260915-001 (H8). New
+ *          C-CM-03b — contract common_platform_skills version parity: each
+ *          entry's contract version must equal the SKILL.md frontmatter version
+ *          of the propagated copy under templates/common/<platform>/skills/ for
+ *          every declared platform tree (Check H in verify-platform-lifecycle.ts
+ *          is exists-only), and a skill double-registered in common_skills AND
+ *          common_platform_skills must carry the same version in both sections
+ *          (9 skills are double-registered). The C-CM-04 reverse coverage sweep
+ *          now also covers the templates/common/.gemini/skills/ tree (previously
+ *          .claude-only). checkL0L1ScriptParity gains l0-l1-scripts-registry-
+ *          version — for every script name registered in BOTH SCRIPTS.md
+ *          registries the Version cells must be identical (the L1 registry is
+ *          hand-maintained and excluded from content parity, so its Version
+ *          cells went stale across three bump rounds; reconciled in PR #929).
  *
  * v1.27.0 (2026-09-15-agent-metadata-drift-check-design.md): new C-CM-03a —
  *          contract common_agents versions must match templates/common/agents/
@@ -1276,6 +1292,40 @@ function checkL0L1ScriptParity() {
     }
   }
 
+  // T-20260915-001 (finding H8): SCRIPTS.md registry version parity. The L1
+  // registry is hand-maintained and intentionally excluded from the content
+  // parity above (registryFiles), so its Version cells could go stale vs L0
+  // across bump rounds — five feature scripts drifted over three consecutive
+  // rounds before the manual PR #929 reconciliation, invisible to every gate.
+  // For every script name registered in BOTH registries the Version cells must
+  // be identical; a mismatch is an Error. Row presence differences (a name in
+  // only one registry) are verify-scripts.ts's ghost/unregistered scope, not
+  // parity's.
+  const l1RegistryPath = join(L1_SCRIPTS, 'SCRIPTS.md');
+  if (existsSync(scriptsRegistryPath) && existsSync(l1RegistryPath)) {
+    let l0Rows: Map<string, ScriptsRegistryRow> | null = null;
+    let l1Rows: Map<string, ScriptsRegistryRow> | null = null;
+    try {
+      l0Rows = parseScriptsMdRegistry(readFileSync(scriptsRegistryPath, 'utf-8'));
+      l1Rows = parseScriptsMdRegistry(readFileSync(l1RegistryPath, 'utf-8'));
+    } catch (err) {
+      warn('common', 'l0-l1-scripts-registry-version', `Failed to read a SCRIPTS.md registry: ${err}`, `Check file permissions or OS file locks.`);
+    }
+    if (l0Rows && l1Rows) {
+      for (const [name, l0Row] of l0Rows) {
+        const l1Row = l1Rows.get(name);
+        if (!l1Row) continue; // name present in only one registry — out of parity scope
+        if (!l0Row.version || !l1Row.version) {
+          fail('common', 'l0-l1-scripts-registry-version', `SCRIPTS.md registry row '${name}' has an empty Version cell (L0=${l0Row.version || '<empty>'}, L1=${l1Row.version || '<empty>'})`, `Set the Version cell in both SCRIPTS.md registries (the frontmatter/@version of the script is the source)`);
+        } else if (l0Row.version !== l1Row.version) {
+          fail('common', 'l0-l1-scripts-registry-version', `SCRIPTS.md registry version mismatch for '${name}': L0=${l0Row.version}, L1=${l1Row.version}`, `Update the templates/common/scripts/SCRIPTS.md row to ${l0Row.version} (the L1 registry is hand-maintained)`);
+        } else {
+          pass(`SCRIPTS.md registry version parity OK for '${name}' (${l0Row.version})`);
+        }
+      }
+    }
+  }
+
   // Recursively check subdirectories: helpers/, hooks/ (WARN on diff/missing), lib/ (ERROR on diff/missing)
   const subdirs = [
     { name: 'helpers', level: 'warn' as const },
@@ -2218,6 +2268,74 @@ function checkWorkspaceSchema(): void {
 }
 
 // Check WS-02: common-contract.json compliance (C-CM-01, C-CM-02, C-SK-01, C-AG-01, C-AG-02, WS-02)
+// ── Pure helpers exported for unit tests (C-CM-03b / l0-l1-scripts-registry-version) ──
+// Kept side-effect-free so tests/unit can import them without triggering the
+// variant-scan battery (validate-templates.ts only runs checks under import.meta.main).
+
+// Platform-tree source keys declared on common_platform_skills entries → the
+// platform directory the propagated copy lives under under templates/common/.
+const PLATFORM_SOURCE_KEYS: Readonly<Record<string, string>> = {
+  claude_source: '.claude',
+  gemini_source: '.gemini',
+  agents_source: '.agents',
+};
+
+/** Map a common_platform_skills entry's declared *_source keys to platform tree dirs. */
+export function declaredPlatformTrees(entry: Record<string, unknown>): string[] {
+  return Object.keys(PLATFORM_SOURCE_KEYS)
+    .filter(k => typeof entry[k] === 'string' && (entry[k] as string).length > 0)
+    .map(k => PLATFORM_SOURCE_KEYS[k]);
+}
+
+/** SKILL.md frontmatter `version:` extraction — same pattern as C-CM-03/03a. */
+export function extractFrontmatterVersion(content: string): string | undefined {
+  return content.match(/^version:\s*"?([0-9][0-9.]*)"?/m)?.[1];
+}
+
+export type VersionParityIssueKind = 'missing-contract-version' | 'missing-artifact-version' | 'mismatch';
+
+/**
+ * Three-branch parity comparison shared by C-CM-03/03a/03b semantics: a
+ * missing version on either side is a failure (never a silent skip — the M5
+ * direction), and unequal versions are a mismatch.
+ */
+export function versionParityIssue(contractVersion: string | undefined, artifactVersion: string | undefined): VersionParityIssueKind | null {
+  if (!contractVersion) return 'missing-contract-version';
+  if (!artifactVersion) return 'missing-artifact-version';
+  return contractVersion !== artifactVersion ? 'mismatch' : null;
+}
+
+export interface ScriptsRegistryRow {
+  name: string;
+  version: string;
+}
+
+/**
+ * Parse a SCRIPTS.md `## Registry` table into name → row (name + Version cell).
+ * Column order: script | source | version | status | removal-date |
+ * security-advisory | layer | pair. Only the section whose heading is exactly
+ * "Registry" is parsed — L0 SCRIPTS.md also carries a "Registry Scope" prose
+ * section that must not match (its content has no table rows, but an
+ * startsWith-based finder would stop there and silently return an empty set).
+ */
+export function parseScriptsMdRegistry(content: string): Map<string, ScriptsRegistryRow> {
+  const rows = new Map<string, ScriptsRegistryRow>();
+  const registrySection = content
+    .split(/^## /m)
+    .find(s => s.split('\n')[0].trim() === 'Registry');
+  if (!registrySection) return rows;
+  for (const line of registrySection.split('\n')) {
+    // Data rows start with a backticked name cell; header/separator rows never do.
+    const match = line.match(/^\|\s*`([^`]+)`\s*\|/);
+    if (!match) continue;
+    const cells = line.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map(c => c.trim());
+    const name = match[1].trim();
+    const version = cells.length >= 3 ? cells[2].replace(/`/g, '').trim() : '';
+    rows.set(name, { name, version });
+  }
+  return rows;
+}
+
 function checkCommonContract(): void {
   if (!JSON_MODE) console.log('\n=== Check WS-02: common-contract.json compliance ===');
 
@@ -2258,7 +2376,7 @@ function checkCommonContract(): void {
   for (const [skillName, entry] of Object.entries(contract.common_skills as Record<string, { version?: string; source?: string }>)) {
     const skillPath = join(TEMPLATES_DIR, 'common', 'skills', skillName, 'SKILL.md');
     if (!existsSync(skillPath)) continue; // C-CM-01 already flagged this
-    const fmVersion = readFileSync(skillPath, 'utf-8').match(/^version:\s*"?([0-9][0-9.]*)"?/m)?.[1];
+    const fmVersion = extractFrontmatterVersion(readFileSync(skillPath, 'utf-8'));
     const contractVersion = entry.version;
     if (!contractVersion) {
       fail('common', 'C-CM-03', `common-contract.json entry '${skillName}' has no version`, `Set "version" to the SKILL.md frontmatter version (${fmVersion ?? 'X.Y.Z'})`);
@@ -2289,7 +2407,7 @@ function checkCommonContract(): void {
   for (const [agentName, entry] of Object.entries(contract.common_agents as Record<string, { version?: string; source?: string }>)) {
     const agentPath = join(TEMPLATES_DIR, 'common', 'agents', `${agentName}.md`);
     if (!existsSync(agentPath)) continue; // C-CM-02 already flagged this
-    const fmVersion = readFileSync(agentPath, 'utf-8').match(/^version:\s*"?([0-9][0-9.]*)"?/m)?.[1];
+    const fmVersion = extractFrontmatterVersion(readFileSync(agentPath, 'utf-8'));
     const contractVersion = entry.version;
     if (!contractVersion) {
       fail('common', 'C-CM-03a', `common-contract.json entry '${agentName}' has no version`, `Set "version" to the agent frontmatter version (${fmVersion ?? 'X.Y.Z'})`);
@@ -2297,6 +2415,49 @@ function checkCommonContract(): void {
       fail('common', 'C-CM-03a', `common-contract.json declares version ${contractVersion} for '${agentName}' but the agent frontmatter has no version field`, `Restore "version: ${contractVersion}" to the agent frontmatter`);
     } else if (contractVersion !== fmVersion) {
       fail('common', 'C-CM-03a', `common-contract.json version mismatch for '${agentName}': contract=${contractVersion}, agent frontmatter=${fmVersion}`, `Update common-contract.json "version" to ${fmVersion}`);
+    }
+  }
+
+  // C-CM-03b (ERROR): contract common_platform_skills version parity
+  // (T-20260915-013, finding H10). Check H (verify-platform-lifecycle.ts) only
+  // proves the propagated platform-tree copies EXIST; a version bump on either
+  // side of the propagation edge was invisible. Two arms:
+  //   (a) each entry's contract version must equal the SKILL.md frontmatter
+  //       version of the propagated copy under templates/common/<platform>/skills/
+  //       for every declared platform tree (claude_source → .claude,
+  //       gemini_source → .gemini, agents_source → .agents). A missing copy or a
+  //       missing version on either side is a failure, not a silent skip (same
+  //       direction as the 1.28.0 M5 fix: unverifiable parity must fail loud).
+  //   (b) a skill listed in BOTH common_skills and common_platform_skills must
+  //       carry the SAME version in both sections (9 skills are double-registered).
+  const platformSkillEntries = Object.entries((contract.common_platform_skills ?? {}) as Record<string, { version?: string }>);
+  const commonSkillEntries = (contract.common_skills ?? {}) as Record<string, { version?: string }>;
+  for (const [skillName, entry] of platformSkillEntries) {
+    const platforms = declaredPlatformTrees(entry as Record<string, unknown>);
+    if (platforms.length === 0) {
+      fail('common', 'C-CM-03b', `common-contract.json platform skill '${skillName}' declares no platform source key (claude_source/gemini_source/agents_source)`, `Add the *_source key(s) for the platform tree(s) that carry '${skillName}'`);
+    }
+    for (const platform of platforms) {
+      const copyPath = join(TEMPLATES_DIR, 'common', platform, 'skills', skillName, 'SKILL.md');
+      if (!existsSync(copyPath)) {
+        fail('common', 'C-CM-03b', `common-contract.json platform skill '${skillName}' has no propagated copy at templates/common/${platform}/skills/ — version parity unverifiable`, `Propagate the skill to templates/common/${platform}/skills/ (platform-skill-lifecycle-manager skill)`);
+        continue;
+      }
+      const fmVersion = extractFrontmatterVersion(readFileSync(copyPath, 'utf-8'));
+      const issue = versionParityIssue(entry.version, fmVersion);
+      if (issue === 'missing-contract-version') {
+        fail('common', 'C-CM-03b', `common-contract.json platform skill '${skillName}' has no version`, `Set "version" to the templates/common/${platform}/skills/ SKILL.md frontmatter version (${fmVersion ?? 'X.Y.Z'})`);
+      } else if (issue === 'missing-artifact-version') {
+        fail('common', 'C-CM-03b', `common-contract.json declares version ${entry.version} for platform skill '${skillName}' but templates/common/${platform}/skills/ SKILL.md has no version field`, `Restore "version: ${entry.version}" to the SKILL.md frontmatter`);
+      } else if (issue === 'mismatch') {
+        fail('common', 'C-CM-03b', `common-contract.json version mismatch for platform skill '${skillName}' (${platform}): contract=${entry.version}, SKILL.md=${fmVersion}`, `Update common-contract.json "version" to ${fmVersion}`);
+      } else {
+        pass(`C-CM-03b: platform skill '${skillName}' (${platform}) version ${entry.version} matches the propagated copy`);
+      }
+    }
+    const commonEntry = commonSkillEntries[skillName];
+    if (commonEntry?.version && entry.version && commonEntry.version !== entry.version) {
+      fail('common', 'C-CM-03b', `platform skill '${skillName}' is double-registered with divergent versions: common_skills=${commonEntry.version}, common_platform_skills=${entry.version}`, `Align the two common-contract.json entries for '${skillName}' to the SKILL.md frontmatter version`);
     }
   }
 
@@ -2641,7 +2802,9 @@ function checkCommonContract(): void {
 // templates/common/skills/*/ → common_skills, templates/common/.claude|.gemini/commands/*.md →
 // common_commands. Documented exemptions (contract description): country-scoped skills
 // (workspace-schema.json country_scoped_assets.skills) and variant-scoped skills
-// (variant_scoped_skills keys). The .claude/skills platform tree is checked at WARN only:
+// (variant_scoped_skills keys). The platform skill trees (.claude + .gemini, T-20260915-013 —
+// the .gemini tree previously had no reverse arm, so a skill dir could appear there without
+// any contract listing while .claude stayed covered) are checked at WARN only:
 // common_platform_skills records L0 workspace overrides (propagated_to_common), not a full
 // platform inventory — promoting it to a hard inventory is an open scope decision.
 function checkCommonContractReverseCoverage(): void {
@@ -2720,18 +2883,26 @@ function checkCommonContractReverseCoverage(): void {
     pass('C-CM-04: all common command files are listed in common_commands');
   }
 
-  // ── platform skills: templates/common/.claude/skills/*/ — WARN (aggregated), see doc comment ──
-  const platformDir = join(TEMPLATES_DIR, 'common', '.claude', 'skills');
-  if (existsSync(platformDir)) {
+  // ── platform skills: templates/common/.claude|.gemini/skills/*/ — WARN (aggregated), see doc comment ──
+  // T-20260915-013: the sweep now mirrors over both platform trees.
+  let platformTreesCovered = 0;
+  let platformTreeCount = 0;
+  for (const platform of ['.claude', '.gemini']) {
+    const platformDir = join(TEMPLATES_DIR, 'common', platform, 'skills');
+    if (!existsSync(platformDir)) continue;
+    platformTreeCount++;
     const unlistedPlatform = readdirSync(platformDir).filter(e => {
       if (!existsSync(join(platformDir, e, 'SKILL.md'))) return false;
       return !commonPlatformSkills.has(e) && !commonSkills.has(e) && !exemptSkills.has(e);
     });
     if (unlistedPlatform.length > 0) {
-      warn('common', 'C-CM-04', `${unlistedPlatform.length} platform skill dir(s) under templates/common/.claude/skills/ are not in common_platform_skills or common_skills: ${unlistedPlatform.slice(0, 12).join(', ')}${unlistedPlatform.length > 12 ? `, +${unlistedPlatform.length - 12} more` : ''}`, `Decide the common_platform_skills inventory scope (full platform inventory vs override record) and list or exempt accordingly`);
+      warn('common', 'C-CM-04', `${unlistedPlatform.length} platform skill dir(s) under templates/common/${platform}/skills/ are not in common_platform_skills or common_skills: ${unlistedPlatform.slice(0, 12).join(', ')}${unlistedPlatform.length > 12 ? `, +${unlistedPlatform.length - 12} more` : ''}`, `Decide the common_platform_skills inventory scope (full platform inventory vs override record) and list or exempt accordingly`);
     } else {
-      pass('C-CM-04: all platform skill dirs are covered by common_platform_skills/common_skills');
+      platformTreesCovered++;
     }
+  }
+  if (platformTreeCount > 0 && platformTreesCovered === platformTreeCount) {
+    pass(`C-CM-04: all platform skill dirs are covered by common_platform_skills/common_skills (${platformTreesCovered}/${platformTreeCount} tree(s))`);
   }
 }
 

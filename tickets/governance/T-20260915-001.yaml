@@ -5,12 +5,30 @@ title: >-
   validator-hardening: add cross-registry SCRIPTS.md version parity check (L0 vs
   L1 rows for same-named scripts)
 priority: high
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-15T10:32:33.489Z'
 history:
   - at: '2026-09-15T10:32:33.489Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-15T22:29:01.644Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-15T22:29:01.663Z'
+    from: waiting
+    to: review
+  - at: '2026-09-15T23:01:41.025Z'
+    from: review
+    to: done
+result: >-
+  Landed in wave 1: new l0-l1-scripts-registry-version arm in
+  checkL0L1ScriptParity() (validate-templates.ts 1.28.0 -> 1.29.0, Error
+  severity) — version cells must be identical for every script registered in
+  both scripts/SCRIPTS.md and templates/common/scripts/SCRIPTS.md. Sweep found
+  and corrected 11 additional stale L1 version cells beyond the PR #929
+  top-level reconciliation. Design
+  docs/designs/2026-09-16-registry-version-parity-hardening-design.md (spec
+  2026-09-16-registry-version-parity-hardening-design); 22 unit tests; battery
+  7/7.
 error: null

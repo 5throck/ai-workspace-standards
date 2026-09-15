@@ -1,4 +1,15 @@
-// @version 1.4.1
+// @version 1.5.0
+// v1.5.0 (T-20260915-004, finding M7): (a) scripts/experiments/** is excluded
+//           from the CLI script collection (count AND table) — experiment files
+//           without a CLI surface previously inflated the Scripts count (93 vs
+//           real 92). (b) New `--check` mode: regenerates the manifest in memory
+//           and compares it against docs/VERSION_MANIFEST.md on disk (exit 0 on
+//           match, exit 1 with a concise line diff on drift). The generation
+//           timestamp line (`**Generated**: ...`) is normalized on both sides so
+//           the comparison is deterministic. Contexts without a committed
+//           manifest self-skip (exit 0), mirroring the ADR-0073 Amendment 1
+//           self-skip pattern.
+// v1.4.1 (previous)
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { $ } from 'bun';
@@ -9,6 +20,7 @@ const MANIFEST_VERSION = '1.0';
 
 const GREEN = '\x1b[32m';
 const CYAN = '\x1b[36m';
+const RED = '\x1b[31m';
 const RESET = '\x1b[0m';
 
 export interface AgentInfo {
@@ -233,16 +245,20 @@ async function collectScripts(): Promise<ScriptInfo[]> {
     const scriptsDir = 'scripts';
     if (!fs.existsSync(scriptsDir)) return scripts;
 
-    // Subdirectories containing library/helper modules, not standalone executable scripts.
-    // These files intentionally lack @version headers and should not appear in VERSION_MANIFEST.
-    const LIBRARY_SUBDIRS = new Set(['helpers', 'lib', 'validators', 'hooks']);
+    // Subdirectories excluded from the CLI script collection. Library/helper
+    // modules (helpers, lib, validators, hooks) are not standalone executable
+    // scripts. scripts/experiments/** holds CLI-less experiment files (T-20260915-004,
+    // finding M7) that previously inflated the Scripts count (93 vs real 92).
+    // None of these appear in the manifest count or table — scripts/SCRIPTS.md is
+    // the full registry.
+    const EXCLUDED_SUBDIRS = new Set(['helpers', 'lib', 'validators', 'hooks', 'experiments']);
 
     function walkDir(dir: string, callback: (filePath: string) => void) {
         for (const item of fs.readdirSync(dir)) {
             const itemPath = path.join(dir, item);
             if (fs.statSync(itemPath).isDirectory()) {
-                // Skip library subdirectories — their modules are not standalone scripts
-                if (LIBRARY_SUBDIRS.has(item)) continue;
+                // Skip excluded subdirectories — their modules are not standalone CLI scripts
+                if (EXCLUDED_SUBDIRS.has(item)) continue;
                 walkDir(itemPath, callback);
             } else if (item.endsWith('.ts')) {
                 callback(itemPath);
@@ -349,17 +365,64 @@ export function detectDrift(agents: AgentInfo[], skills: SkillInfo[], commands: 
     return Array.from(issues);
 }
 
-async function generateManifest() {
-    console.log(`${CYAN}Collecting workspace data...${RESET}`);
+interface ManifestData {
+    agents: AgentInfo[];
+    skills: SkillInfo[];
+    scripts: ScriptInfo[];
+    commands: CommandInfo[];
+    driftIssues: string[];
+}
 
+async function collectManifestData(): Promise<ManifestData> {
     const [agents, skills, scripts, commands] = await Promise.all([
         collectAgents(),
         collectSkills(),
         collectScripts(),
         collectCommands(),
     ]);
+    return { agents, skills, scripts, commands, driftIssues: detectDrift(agents, skills, commands) };
+}
 
-    const driftIssues = detectDrift(agents, skills, commands);
+// The only nondeterministic content in the rendered manifest is the generation
+// timestamp. `--check` normalizes that one line on BOTH sides so the comparison
+// is deterministic (T-20260915-004).
+const GENERATED_LINE_RE = /^\*\*Generated\*\*: .*$/;
+
+export function normalizeManifestForCompare(content: string): string {
+    return content
+        .split('\n')
+        .map(line => (GENERATED_LINE_RE.test(line) ? '**Generated**: <timestamp>' : line))
+        .join('\n');
+}
+
+export interface ManifestLineDiff {
+    line: number;
+    onDisk: string;
+    regenerated: string;
+}
+
+/**
+ * Line-wise comparison of the on-disk manifest against a fresh regeneration
+ * (both timestamp-normalized). Line-wise — not LCS — is deliberate: manifest
+ * drift is overwhelmingly in-place cell changes (version bumps, counts), and a
+ * shifted insertion shows up as the shifted region, which is still actionable.
+ * Output is capped at `limit` diffs to keep gate output concise.
+ */
+export function diffManifests(onDisk: string, regenerated: string, limit = 20): ManifestLineDiff[] {
+    const diskLines = normalizeManifestForCompare(onDisk).split('\n');
+    const regenLines = normalizeManifestForCompare(regenerated).split('\n');
+    const diffs: ManifestLineDiff[] = [];
+    const max = Math.max(diskLines.length, regenLines.length);
+    for (let i = 0; i < max && diffs.length < limit; i++) {
+        if (diskLines[i] !== regenLines[i]) {
+            diffs.push({ line: i + 1, onDisk: diskLines[i] ?? '<missing>', regenerated: regenLines[i] ?? '<missing>' });
+        }
+    }
+    return diffs;
+}
+
+function renderManifest(data: ManifestData): string {
+    const { agents, skills, scripts, commands, driftIssues } = data;
 
     let markdown = `# VERSION_MANIFEST.md
 
@@ -373,7 +436,7 @@ async function generateManifest() {
 
 - **Agents**: ${agents.length}
 - **Skills**: ${skills.length}
-- **Scripts**: ${scripts.length} *(top-level CLI scripts; library/helper modules under \`scripts/lib/\`, \`scripts/helpers/\`, \`scripts/hooks/\`, and \`scripts/validators/\` are excluded here — \`scripts/SCRIPTS.md\` is the full registry)*
+- **Scripts**: ${scripts.length} *(top-level CLI scripts; library/helper modules under \`scripts/lib/\`, \`scripts/helpers/\`, \`scripts/hooks/\`, and \`scripts/validators/\` plus experiment files under \`scripts/experiments/\` are excluded here — \`scripts/SCRIPTS.md\` is the full registry)*
 - **Commands**: ${commands.length}
 
 ---
@@ -459,6 +522,13 @@ async function generateManifest() {
         }
     }
 
+    return markdown;
+}
+
+async function generateManifest() {
+    console.log(`${CYAN}Collecting workspace data...${RESET}`);
+    const data = await collectManifestData();
+
     // Ensure docs directory exists
     const docsDir = path.dirname(MANIFEST_PATH);
     if (!fs.existsSync(docsDir)) {
@@ -466,14 +536,50 @@ async function generateManifest() {
     }
 
     // Write manifest
-    fs.writeFileSync(MANIFEST_PATH, markdown, 'utf-8');
+    fs.writeFileSync(MANIFEST_PATH, renderManifest(data), 'utf-8');
     console.log(`${GREEN}✓ Manifest generated: ${MANIFEST_PATH}${RESET}`);
-    console.log(`${GREEN}✓ ${agents.length} agents, ${skills.length} skills, ${scripts.length} scripts, ${commands.length} commands${RESET}`);
-    if (driftIssues.length > 0) {
-        console.log(`${CYAN}⚠ ${driftIssues.length} drift issues detected${RESET}`);
+    console.log(`${GREEN}✓ ${data.agents.length} agents, ${data.skills.length} skills, ${data.scripts.length} scripts, ${data.commands.length} commands${RESET}`);
+    if (data.driftIssues.length > 0) {
+        console.log(`${CYAN}⚠ ${data.driftIssues.length} drift issues detected${RESET}`);
     }
 }
 
+// --check reconciliation gate (T-20260915-004): regenerate the manifest in
+// memory and compare against the committed docs/VERSION_MANIFEST.md. Exit 0 on
+// match (or self-skip when this context carries no committed manifest —
+// mirroring the ADR-0073 Amendment 1 self-skip pattern), exit 1 with a concise
+// diff list on drift. audit.ts auto-activates this gate in the same style as
+// the skill-graph drift gate (ADR-0060).
+async function checkManifest(): Promise<void> {
+    if (!fs.existsSync(MANIFEST_PATH)) {
+        console.log(`${CYAN}VERSION_MANIFEST check: ${MANIFEST_PATH} not present in this context — skipping (exit 0)${RESET}`);
+        return;
+    }
+    const data = await collectManifestData();
+    const regenerated = renderManifest(data);
+    const onDisk = fs.readFileSync(MANIFEST_PATH, 'utf-8');
+    const diffs = diffManifests(onDisk, regenerated);
+    if (diffs.length === 0) {
+        console.log(`${GREEN}✓ VERSION_MANIFEST check: ${MANIFEST_PATH} matches the regenerated output${RESET}`);
+        return;
+    }
+    const truncated = diffs.length >= 20;
+    console.error(`${RED}✗ VERSION_MANIFEST drift: ${MANIFEST_PATH} is stale (${truncated ? '20+' : diffs.length} differing line(s)) — run bun scripts/generate-version-manifest.ts, review, and commit${RESET}`);
+    for (const d of diffs.slice(0, 10)) {
+        console.error(`  line ${d.line}:`);
+        console.error(`    disk: ${d.onDisk.slice(0, 160)}`);
+        console.error(`    regen: ${d.regenerated.slice(0, 160)}`);
+    }
+    process.exit(1);
+}
+
 if (import.meta.main) {
-    generateManifest().catch(console.error);
+    if (process.argv.slice(2).includes('--check')) {
+        checkManifest().catch(err => {
+            console.error(err);
+            process.exit(1);
+        });
+    } else {
+        generateManifest().catch(console.error);
+    }
 }

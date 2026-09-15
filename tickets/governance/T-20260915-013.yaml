@@ -6,12 +6,31 @@ title: >-
   .claude/.gemini trees and enforce cross-section equality with common_skills
   (C-CM-03b)
 priority: high
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-15T10:33:07.369Z'
 history:
   - at: '2026-09-15T10:33:07.369Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-15T22:29:01.706Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-15T22:29:01.718Z'
+    from: waiting
+    to: review
+  - at: '2026-09-15T23:01:41.051Z'
+    from: review
+    to: done
+result: >-
+  Landed in wave 1: C-CM-03b added to checkCommonContract()
+  (validate-templates.ts 1.29.0, Error severity) — common_platform_skills
+  contract version must equal declared platform-tree SKILL.md frontmatter
+  version, and skills double-registered in common_skills +
+  common_platform_skills must carry equal versions; C-CM-04 reverse
+  exists-to-listed coverage extended to the .gemini tree (WARN, mirrors .claude
+  arm). Current data clean (12 entries x 2 platforms equal). Single-home
+  decision: parity logic lives in validate-templates only;
+  verify-platform-lifecycle Check H intentionally left exists-only. Design +
+  spec 2026-09-16-registry-version-parity-hardening-design.
 error: null
