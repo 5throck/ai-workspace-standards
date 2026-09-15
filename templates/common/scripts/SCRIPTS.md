@@ -70,7 +70,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `lib/local-date.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `compile-tokens.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `design-lint.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `create-l3-scaffold.ts` | L0 | 1.14.0 | active | —| —| L0 | —|
+| `create-l3-scaffold.ts` | L0 | 1.15.0 | active | —| —| L0 | —|
 | `dev-sync.ts` | L0 | 1.14.0 | active | —| —| L0+L1 | —|
 | `dispatch-parallel.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
 | `dispatch-serial.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
@@ -121,6 +121,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `helpers/l0-ref-policy.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `helpers/context-sections.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
 | `helpers/markers.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
+| `helpers/scaffold-markers.ts` | L0 | 1.0.0 | active | Shared scaffold marker constants + (marker→source) mapping + delivery-tree derivations for the C3/H12/H13 validator batch | —| L0+L1 | —|
 | `helpers/pm-md-parser.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `helpers/variant-governance-rules.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `helpers/registries/variant-type-registry.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
@@ -191,7 +192,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `lifecycle-sync-audit.ts` | L0 | 1.13.0 | active | —| —| L0+L1 | —|
 | `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `md-to-ooxml.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
-| `new-project.ts` | L0 | 1.17.0 | active | —| —| L0 | —|
+| `new-project.ts` | L0 | 1.18.0 | active | —| —| L0 | —|
 | `remove-project.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `resolve-variants.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
 | `project-to-variant.ts` | L0 | 1.3.0 | active | `--source`, `--target`, `--dry-run`, `--force`, `--design-doc`, `--threshold-files`, `--threshold-dirs` | —| L0 | —|
@@ -215,9 +216,9 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `tag-template.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `team-builder.ts` | L0 | 1.4.0 | active | —| —| L0+L1 | —|
 | `test-platform-parity.ts` | L0 | 0.2.4 | active | —| —| L0 | —|
-| `test-new-project.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
+| `test-new-project.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `test-extends-validator.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
-| `test-l3-to-variant-promotion.ts` | L0 | 1.2.1 | active | —| —| L0 | —|
+| `test-l3-to-variant-promotion.ts` | L0 | 1.3.0 | active | —| —| L0 | —|
 | `test-runner.ts` | L0 | 1.2.0 | active | `--parallel`, `--sequential`, `--concurrency <n>`, `--timeout <ms>` | —| L0+L1 | —|
 | `translate-readme.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `ticket.ts` | L0 | 1.2.0 | active | `create --not-before`, `list --kind`, `list --ready`, `move done --result` (required, not bypassable by --force) | —| L0 | —|
@@ -232,7 +233,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `validate-procedures.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `validate-skills.ts` | L0 | 1.5.1 | active | —| —| L0+L1 | —|
 | `validate-decisions.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `validate-templates.ts` | L0 | 1.29.0 | active | —| —| L0+L1 | —|
+| `validate-templates.ts` | L0 | 1.30.0 | active | —| —| L0+L1 | —|
 | `validate-variant-readiness.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `verify-country-prune.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `verify-adr-governance.ts` | L0 | 1.5.0 | active | —| —| L0 | —|

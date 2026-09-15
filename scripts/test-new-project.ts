@@ -2,8 +2,15 @@
 /**
  * test-new-project.ts — E2E Test for new-project.ts
  *
- * @version 1.1.1
- * @last_updated 2026-09-12
+ * @version 1.2.0
+ * @last_updated 2026-09-16
+ *
+ * v1.2.0: T-20260915-003 — new Test 26 pins the static new-project delivery
+ *         derivation (helpers/scaffold-markers.ts deriveNewProjectDelivery)
+ *         against the REAL scaffolded tree: the parity harness
+ *         (scripts/test-scaffold-delivery-parity.ts) compares the two scaffold
+ *         paths using these derivations, so a drift between derivation and
+ *         actual scaffold behavior must fail here first.
  *
  * v1.1.0: T-20260912-004 — new Test 25 pins pm.md extends-stub resolution (no
  *         `extends:`, no raw `variant_overrides:`, substantive PM body, template
@@ -50,6 +57,7 @@ import { join, basename } from 'node:path';
 import { platform } from 'node:process';
 import { $ } from 'bun';
 import { load as yamlLoad } from 'js-yaml';
+import { verifyActualTreeMatchesDerivation } from './helpers/scaffold-markers.ts';
 
 // ── Args ─────────────────────────────────────────────────────────────────────
 
@@ -680,6 +688,34 @@ try {
       }
     }
   } catch (e) { fail('Test 25', String(e)); }
+
+  // ── Test 26: common-template delivery parity (derived vs actual) [T-20260915-003] ──
+  // The static derivation of what new-project delivers FROM templates/common/
+  // (helpers/scaffold-markers.ts deriveNewProjectDelivery) must match the REAL
+  // scaffolded tree. This pins the derivation that the fast delivery-tree
+  // parity harness (scripts/test-scaffold-delivery-parity.ts) compares against
+  // create-l3-scaffold's delivery — a drift between the derivation and this
+  // script's actual behavior fails here first. Post-delivery artifacts
+  // (bun install lockfiles, node_modules, .git, graft/) are excluded by the
+  // helper; comparison is restricted to the common-template universe.
+  console.log('\nTest 26: common-template delivery parity (derived vs actual)');
+  try {
+    const verdict = verifyActualTreeMatchesDerivation({
+      which: 'new-project',
+      actualRoot: testDir,
+      commonDir: join(process.cwd(), 'templates', 'common'),
+      platform: platformArg as 'claude' | 'antigravity' | 'both' | 'codex',
+    });
+    if (!verdict.ok) {
+      const detail = [
+        ...verdict.missing.map((p) => `derived but absent from scaffold: ${p}`),
+        ...verdict.extra.map((p) => `scaffolded but not derived: ${p}`),
+      ];
+      fail('Test 26', `delivery derivation drifted from actual scaffold (${detail.length} path(s)): ${detail.slice(0, 10).join('; ')}${detail.length > 10 ? '…' : ''}`);
+    } else {
+      pass('Test 26 PASSED: actual scaffold matches deriveNewProjectDelivery exactly');
+    }
+  } catch (e) { fail('Test 26', String(e)); }
 
   // ── Summary ───────────────────────────────────────────────────────────────
   console.log('\n' + '─'.repeat(50));

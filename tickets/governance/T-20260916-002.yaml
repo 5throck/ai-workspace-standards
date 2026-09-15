@@ -1,0 +1,17 @@
+schemaVersion: 1
+id: T-20260916-002
+kind: manual
+title: >-
+  new-project: --version <tag> provenance falls back to templates/VERSION then
+  silent 'unknown' — align with create-l3-scaffold fail-loud provenance policy
+  (residual of M11/T-20260915-011)
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-09-15T23:51:08.133Z'
+history:
+  - at: '2026-09-15T23:51:08.133Z'
+    from: null
+    to: backlog
+result: null
+error: null

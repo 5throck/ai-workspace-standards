@@ -1,5 +1,17 @@
 #!/usr/bin/env bun
-// @version 1.14.0
+// @version 1.15.0
+// v1.15.0: Wave 2 scaffold-delivery validation batch
+//         (docs/designs/2026-09-16-scaffold-delivery-validation-design.md).
+//         C3/T-20260915-002: marker strings + the delivery-exclusion list now
+//         imported from the shared scripts/helpers/scaffold-markers.ts
+//         contract module; a missing marker at an extraction site prints a
+//         loud warning naming marker + source file (the C3 "no warning"
+//         shape) instead of silently skipping the append.
+//         M11/T-20260915-011: scaffold provenance version now reads
+//         templates/VERSION via helpers/template-version.ts — missing or
+//         unparseable content fails loud (rollback hook cleans up); the
+//         SCRIPTS.md parsing path and both silent fallbacks ("1.0.0",
+//         "unknown") are removed.
 // v1.14.0: Three fixes from the 2026-09-15 project review
 //         (docs/reports/2026-09-15-project-review-template-fleet.md). C5: the
 //         COMMON-AGENTS block read templates/common/AGENTS.md relative to the
@@ -41,6 +53,15 @@ import { includeScriptInL3, parseScriptLayers } from './helpers/layer-filter.ts'
 import { parsePmMd, extractVariantOverrides } from './helpers/pm-md-parser.ts';
 import { generateReadme, generateReadmeKo, type VariantMetadata } from './helpers/generate-variant.ts';
 import { isVariantType } from './helpers/registries/variant-type-registry.ts';
+import {
+  COMMON_AGENTS_START,
+  COMMON_AGENTS_END,
+  GRAFT_BLOCK_OPEN,
+  WORKSPACE_MANAGED_CLOSE,
+  L3_COMMON_OVERLAY_EXCLUDE,
+  VARIANT_SCAFFOLD_MARKER_NAMES,
+} from './helpers/scaffold-markers.ts';
+import { readTemplateVersion } from './helpers/template-version.ts';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Constants
@@ -127,19 +148,18 @@ function toVariantSlug(name: string): string {
   return name.startsWith("co-") ? name : `co-${name}`;
 }
 
-/** Read the common version from SCRIPTS.md header, fall back to "1.0.0". */
-function readCommonVersion(): string {
+/**
+ * Read the scaffold provenance version from the SSOT (templates/VERSION).
+ * M11 (T-20260915-011): a missing or unparseable VERSION file fails loud —
+ * the scaffold must never record a fabricated ("1.0.0"/"unknown") version.
+ * The previous SCRIPTS.md `inherits_common` parsing path is removed.
+ */
+function readProvenanceVersion(): string {
   try {
-    const scriptsMd = fs.readFileSync(
-      path.join(COMMON_SCRIPTS_DIR, "SCRIPTS.md"),
-      "utf8",
-    );
-    const m = scriptsMd.match(/inherits[_-]?common["']?\s*[:=]\s*["']?(\d+\.\d+\.\d+)/i);
-    if (m) return m[1];
-  } catch {
-    /* ignore */
+    return readTemplateVersion(WORKSPACE_ROOT);
+  } catch (err) {
+    fail((err as Error).message);
   }
-  return "1.0.0";
 }
 
 /** Run an external command without a shell (injection-safe). */
@@ -232,11 +252,11 @@ function parseArgs(argv: string[]): Args {
 // drops any new file added to templates/common/ until someone remembers to list it
 // here — that's exactly how docs/context.md (added 2026-05-27) and .claude/skills.json
 // + .gemini/skills.json went missing from every L3 scaffold for months.
-const COMMON_OVERLAY_EXCLUDE = new Set([
-  '.agents', '.gateguard-state', '.DS_Store', 'node_modules', 'bun.lock', 'propagation-map.json',
-  'docs', 'agents', 'scripts', 'skills', 'memory', 'package.json',
-  'README.md', 'README_ko.md', 'AGENTS.md', 'SECURITY.md',
-]);
+// T-20260915-003 (H13): the delivery-exclusion list is the ONE exported
+// shared constant in scripts/helpers/scaffold-markers.ts — imported (not
+// duplicated) so the delivery-tree parity derivation cannot drift from this
+// script's actual behavior.
+const COMMON_OVERLAY_EXCLUDE = new Set(L3_COMMON_OVERLAY_EXCLUDE);
 
 function copyCommonOverlay(projectDir: string): void {
   log("📦 Copying templates/common/ overlay…");
@@ -339,10 +359,10 @@ function generateStubs(
   projectDir: string,
   variant: string,
   domain: string | null,
+  commonVersion: string,
 ): void {
   log("📝 Generating stub files…");
   const displayName = toDisplayName(variant);
-  const commonVersion = readCommonVersion();
 
   // variant.json
   const variantJson = {
@@ -605,18 +625,14 @@ TODO: document how secrets/credentials are handled (see \`.env.sample\`).
   FILE_COUNT += 2; // generateReadme/generateReadmeKo write via applyTemplate, bypassing the local writeFile counter
 
   // AGENTS.md — header only, workspace roster removed, TODO section added.
-  // Emits the §-numbered scaffold plus empty VARIANT-* injection markers and the
-  // COMMON-AGENTS Language Policy block so l3-to-variant-pipeline.ts Phase 3.5
-  // passes without auto-regeneration on a fresh scaffold.
-  const variantMarkers = [
-    "VARIANT-AGENTS-START",
-    "VARIANT-AGENT-DETAILS-START",
-    "VARIANT-DISPATCH-TRIGGERS-START",
-    "VARIANT-PHASE-GATE-START",
-    "VARIANT-SUBAGENT-ROSTER-START",
-    "VARIANT-ROLE-BOUNDARY-START",
-  ]
-    .map((m) => `<!-- ${m} -->\n<!-- ${m.replace("-START", "-END")} -->`)
+  // Emits the §-numbered scaffold plus empty VARIANT-* injection markers and
+  // the COMMON-AGENTS Language Policy block so l3-to-variant-pipeline.ts
+  // Phase 3.5 passes without auto-regeneration on a fresh scaffold. The
+  // marker names come from the shared scaffold-markers contract module
+  // (T-20260915-002) — same constants validate-templates pins against the
+  // L1 baseline.
+  const variantMarkers = VARIANT_SCAFFOLD_MARKER_NAMES
+    .map((m) => `<!-- ${m}-START -->\n<!-- ${m}-END -->`)
     .join("\n");
   const agentsMd = `# AGENTS.md
 
@@ -649,21 +665,28 @@ ${variantMarkers}
   writeFile(path.join(projectDir, "AGENTS.md"), agentsMd);
   // Append the COMMON-AGENTS Language Policy block verbatim from the L1 baseline.
   const commonAgentsMd = fs.readFileSync(path.join(COMMON_DIR, "AGENTS.md"), "utf-8");
-  const blockStart = commonAgentsMd.indexOf("<!-- COMMON-AGENTS:START -->");
-  const blockEnd = commonAgentsMd.indexOf("<!-- COMMON-AGENTS:END -->");
+  const blockStart = commonAgentsMd.indexOf(COMMON_AGENTS_START);
+  const blockEnd = commonAgentsMd.indexOf(COMMON_AGENTS_END);
   if (blockStart !== -1 && blockEnd !== -1) {
-    const block = commonAgentsMd.slice(blockStart, blockEnd) + "<!-- COMMON-AGENTS:END -->\n";
+    const block = commonAgentsMd.slice(blockStart, blockEnd) + COMMON_AGENTS_END + "\n";
     fs.appendFileSync(path.join(projectDir, "AGENTS.md"), "\n" + block);
+  } else {
+    // C3 (T-20260915-002): the original defect shape — a marker the source
+    // file no longer carries made this append a silent no-op. Warn loud
+    // (validate-templates' scaffold-marker-source check also fails on this).
+    log(`  ⚠️  COMMON-AGENTS markers not found in templates/common/AGENTS.md — Language Policy block NOT appended to AGENTS.md (marker: ${COMMON_AGENTS_START})`);
   }
   // Append the graft repo-context-graph instruction block (ADR-0076) — same
   // marker-extraction pattern as COMMON-AGENTS above. The L1 copy wraps the block
   // in WORKSPACE-MANAGED markers so upgrade-project's MERGE pass keeps it in sync
   // for projects created before this landed.
-  const graftStart = commonAgentsMd.indexOf("<!-- WORKSPACE-MANAGED: graft repo context graph -->");
-  const graftEnd = commonAgentsMd.indexOf("<!-- /WORKSPACE-MANAGED -->", graftStart);
+  const graftStart = commonAgentsMd.indexOf(GRAFT_BLOCK_OPEN);
+  const graftEnd = commonAgentsMd.indexOf(WORKSPACE_MANAGED_CLOSE, graftStart);
   if (graftStart !== -1 && graftEnd !== -1) {
-    const graftBlock = commonAgentsMd.slice(graftStart, graftEnd) + "<!-- /WORKSPACE-MANAGED -->\n";
+    const graftBlock = commonAgentsMd.slice(graftStart, graftEnd) + WORKSPACE_MANAGED_CLOSE + "\n";
     fs.appendFileSync(path.join(projectDir, "AGENTS.md"), "\n" + graftBlock);
+  } else {
+    log(`  ⚠️  graft block markers not found in templates/common/AGENTS.md — graft instruction block NOT appended to AGENTS.md (marker: ${GRAFT_BLOCK_OPEN})`);
   }
 }
 
@@ -1082,7 +1105,8 @@ function main(): void {
   }
 
   // Step 5: stub files
-  generateStubs(projectDir, args.variant, args.domain);
+  const commonVersion = readProvenanceVersion();
+  generateStubs(projectDir, args.variant, args.domain, commonVersion);
 
   // Step 6: domain docs + agents/
   createDomainDocs(projectDir, args.domain, args.variant);
@@ -1093,11 +1117,12 @@ function main(): void {
   }
 
   // Step 6.6: write .claude/template-version.txt — provenance for upgrade-project.ts
-  // (mirrors new-project.ts §5.6 field order: variant/version/platform/country/created)
+  // (mirrors new-project.ts §5.6 field order: variant/version/platform/country/created).
+  // M11: the version comes from the already-read templates/VERSION SSOT
+  // (commonVersion) — the previous silent "unknown" fallback is removed.
   const claudeDir = path.join(projectDir, ".claude");
   fs.mkdirSync(claudeDir, { recursive: true });
-  const versionFile = path.join(WORKSPACE_ROOT, "templates", "VERSION");
-  const templateVersion = fs.existsSync(versionFile) ? fs.readFileSync(versionFile, "utf8").trim() : "unknown";
+  const templateVersion = commonVersion;
   const scaffoldCountry = args.country || "none";
   fs.writeFileSync(
     path.join(claudeDir, "template-version.txt"),

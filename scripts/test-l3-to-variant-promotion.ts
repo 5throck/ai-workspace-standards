@@ -2,8 +2,13 @@
 /**
  * test-l3-to-variant-promotion.ts — E2E smoke test for the L3 scaffold → variant promotion path
  *
- * @version 1.2.1
- * @last_updated 2026-09-10
+ * @version 1.3.0
+ * @last_updated 2026-09-16
+ *
+ * v1.3.0: T-20260915-003 — new Test 1b pins the static L3 delivery derivation
+ *         (helpers/scaffold-markers.ts deriveL3ScaffoldDelivery) against the
+ *         real scaffolded fixture tree, mirroring test-new-project.ts Test 26
+ *         for the other scaffold path (delivery-tree parity harness input).
  *
  * v1.2.0: Tests 2.7 / 5d / 5e — context purification regression bait
  *         (docs/designs/2026-09-10-context-purification-design.md D6): a project-only
@@ -39,6 +44,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as path from 'node:path';
 import { $ } from 'bun';
+import { verifyActualTreeMatchesDerivation } from './helpers/scaffold-markers.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -102,6 +108,34 @@ try {
   if (!existsSync(L3_FIXTURE_PATH)) {
     console.error('\n❌ L3 fixture not found — remaining tests skipped.');
   } else {
+    // ── Test 1b: L3 delivery derivation pinning [T-20260915-003] ────────────
+    // The static derivation of what create-l3-scaffold delivers FROM
+    // templates/common/ (helpers/scaffold-markers.ts deriveL3ScaffoldDelivery)
+    // must match the REAL scaffolded fixture tree — the mirror of
+    // test-new-project.ts Test 26. The fast delivery-tree parity harness
+    // (scripts/test-scaffold-delivery-parity.ts) compares the two scaffold
+    // paths using these derivations, so a drift between derivation and actual
+    // scaffold behavior fails here first. Post-delivery artifacts (bun install
+    // lockfiles, node_modules, .git, graft/) are excluded by the helper.
+    console.log('\nTest 1b: L3 delivery derivation vs actual fixture');
+    try {
+      const verdict = verifyActualTreeMatchesDerivation({
+        which: 'l3-scaffold',
+        actualRoot: L3_FIXTURE_PATH,
+        commonDir: join(WORKSPACE_ROOT, 'templates', 'common'),
+        workspaceRoot: WORKSPACE_ROOT,
+      });
+      if (!verdict.ok) {
+        const detail = [
+          ...verdict.missing.map((p) => `derived but absent from fixture: ${p}`),
+          ...verdict.extra.map((p) => `in fixture but not derived: ${p}`),
+        ];
+        fail('Test 1b', `delivery derivation drifted from actual scaffold (${detail.length} path(s)): ${detail.slice(0, 10).join('; ')}${detail.length > 10 ? '…' : ''}`);
+      } else {
+        pass('Test 1b PASSED: actual L3 fixture matches deriveL3ScaffoldDelivery exactly');
+      }
+    } catch (e) { fail('Test 1b', String(e)); }
+
     // ── Test 2: Inject regression bait (A.1 / A.2 triggers) ─────────────────
     console.log('\nTest 2: Inject regression-bait fixture files');
     const agentsDir = join(L3_FIXTURE_PATH, 'agents');
