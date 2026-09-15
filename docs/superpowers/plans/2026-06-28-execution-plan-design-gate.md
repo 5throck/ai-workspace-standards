@@ -217,7 +217,7 @@ Read `GEMINI.md:182-205` and confirm:
 
 - [ ] **Step 1: Insert Design Gate section**
 
-After line 150 (`> Full dispatch rules and execution plan format: see [AGENTS.md §3](AGENTS.md#§3-pm-gateway-workflow).`), before line 152 (`## Required Tools`), insert:
+After line 150 (`> Full dispatch rules and execution plan format: see [AGENTS.md §3](AGENTS.md#3-pm-gateway-workflow).`), before line 152 (`## Required Tools`), insert:
 
 ```markdown
 

@@ -1,5 +1,5 @@
 ---
-translated_from_hash: 2a98794143a4a2bad50b4903cdc6e5227d11aebf0e4746e0661769fa736ec5ab
+translated_from_hash: d95f04053627951bb9cdb1dc841b75365f54a7aba3f834936196481554a8af0b
 ---
 # co-game 사용자 가이드
 
@@ -110,7 +110,7 @@ PM → game-designer         (범용: 핵심 루프 + 난이도 + 보상)
 
 ## 4. 참여(Engagement) / 프로젝트 단계 구조
 
-co-game은 워크스페이스의 6단계 모델을 재사용하며 ([AGENTS.md §4.2](../AGENTS.md#§42-harness-engineering-workflow) 참고), `docs/co-game.context.md`에서 게임 개발에 특화되어 있습니다.
+co-game은 워크스페이스의 6단계 모델을 재사용하며 ([AGENTS.md §4.2](../AGENTS.md#42-harness-engineering-workflow) 참고), `docs/co-game.context.md`에서 게임 개발에 특화되어 있습니다.
 
 | 단계 | 이름 | 진행 내용 |
 |---|---|---|

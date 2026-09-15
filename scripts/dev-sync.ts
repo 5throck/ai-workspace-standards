@@ -749,6 +749,8 @@ if (fs.existsSync(genManifestTs)) {
         }
     }
     console.log(`${GREEN}✓ VERSION_MANIFEST.md generated${RESET}`);
+} else {
+    console.log('📋 Step 4.7: skipped — VERSION_MANIFEST generator not present in this context');
 }
 
 // 4.9 Audit gate — call audit.ts directly (platform-independent, no shell intermediary)

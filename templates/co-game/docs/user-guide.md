@@ -107,7 +107,7 @@ Loop and correct — **maximum 3 iterations** before escalating to the user.
 
 ## 4. Engagement / Project Phase Structure
 
-co-game reuses the workspace's 6-phase model (see [AGENTS.md §4.2](../AGENTS.md#§42-harness-engineering-workflow)), specialized for game development in `docs/co-game.context.md`:
+co-game reuses the workspace's 6-phase model (see [AGENTS.md §4.2](../AGENTS.md#42-harness-engineering-workflow)), specialized for game development in `docs/co-game.context.md`:
 
 | Phase | Name | What happens |
 |---|---|---|

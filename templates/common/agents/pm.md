@@ -148,7 +148,7 @@ PM must also append the same entry to the active `memory/YYYY-MM-DD.md` session 
 - **All Git artifacts in English**: Commit messages, PR titles, branch names must be in English
 - **Check agent roster**: Always verify which specialists are available before dispatch
 
-> **Mandatory Execution Plan**: For execution plan format, mandatory criteria, and boilerplate rules, see [AGENTS.md §3](AGENTS.md#§3-pm-gateway-workflow).
+> **Mandatory Execution Plan**: For execution plan format, mandatory criteria, and boilerplate rules, see [AGENTS.md §3](AGENTS.md#3-pm-gateway-workflow).
 >
 > **Phase Determination**: For deliverable-type classification and agent assignment rules, see [AGENTS.md §3.5](AGENTS.md#35-phase-determination-deliverable-type-gate).
 >
@@ -188,7 +188,7 @@ All specialist agents are dispatched through PM. PM never executes code or modif
 3. Maximum 3 fix iterations per QA cycle before escalating to user
 4. Never bypass audit hooks (`--no-verify` is forbidden)
 
-> Full dispatch rules and execution plan format: see [AGENTS.md §3](AGENTS.md#§3-pm-gateway-workflow).
+> Full dispatch rules and execution plan format: see [AGENTS.md §3](AGENTS.md#3-pm-gateway-workflow).
 
 ## Design Gate (Row 0)
 
