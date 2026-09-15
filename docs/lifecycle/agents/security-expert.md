@@ -65,5 +65,5 @@
 
 - **Current Phase**: production
 - **Owner**: security-expert
-- **Last Updated**: 2026-05-29
+- **Last Updated**: 2026-09-15 (record refreshed to match agents/security-expert.md 2026-09-12 changes — Check F rollout)
 - **Last Reviewer**: lifecycle-manager

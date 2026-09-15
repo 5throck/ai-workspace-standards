@@ -16,8 +16,15 @@
  *   bun scripts/lifecycle-sync-audit.ts --json
  *   bun scripts/lifecycle-sync-audit.ts --fix
  *
- * @version 1.10.0
+ * @version 1.11.0
  * @last_updated 2026-09-15
+ * v1.11.0: Check F extended beyond tier to agent metadata dimensions found
+ *          unvalidated by the 2026-09-15 sweep: (e) frontmatter status vs
+ *          lifecycle record Current Phase (production→active strict, other
+ *          phase vocabularies warn), and (f) record Last Updated must not
+ *          lag frontmatter last_updated — the "record never refreshed after
+ *          the agent changed" class that hid the PM tier drift.
+ *          (spec: docs/designs/2026-09-15-agent-metadata-drift-check-design.md)
  * v1.10.0: New Check F — agent tier drift detection. agent_tiers in
  *          docs/workspace-schema.json is the SSOT (the agent-model-gate hook
  *          consumes it at runtime); Check F compares L0 frontmatter tier
@@ -456,11 +463,15 @@ export function runCheckE(): SyncIssue[] {
  *   (c) AGENTS.md roster rows referencing agents/<name>.md — Tier cell
  *       (bold markers stripped) == SSOT
  *   (d) docs/lifecycle/agents/<name>.md `**Tier**:` field == SSOT
- *       (absent field is skipped — records predating the convention are
- *       not mismatches)
+ *   (e) frontmatter status ↔ record Current Phase (production→active is
+ *       an error on mismatch; contested vocabularies report as warnings)
+ *   (f) record Last Updated must not lag frontmatter last_updated — an
+ *       agent change without a refreshed record is exactly the drift class
+ *       that hid the 2026-09 tier change (spec: docs/designs/
+ *       2026-09-15-agent-tier-drift-check-design.md and
+ *       docs/designs/2026-09-15-agent-metadata-drift-check-design.md)
  * Detection-only (no fixData): remediation routes through the
  * lifecycle-manager / docs-writer workflows. Runs only at workspace root.
- * (spec: docs/designs/2026-09-15-agent-tier-drift-check-design.md)
  */
 export function runCheckF(): SyncIssue[] {
   const issues: SyncIssue[] = [];
@@ -660,6 +671,66 @@ export function runCheckF(): SyncIssue[] {
         file: `docs/lifecycle/agents/${agent}.md`,
         message: `Check F: lifecycle record Tier '${recordTier.trim()}' does not match agent_tiers '${expectedTier}'`,
         fix: `Update the docs/lifecycle/agents/${agent}.md **Tier** field to ${expectedTier} (or fix agent_tiers if the record is correct)`,
+      });
+    }
+  }
+
+  // (e) frontmatter status ↔ record Current Phase
+  // (f) record Last Updated must not lag frontmatter last_updated
+  // Records missing a field are skipped (predating the convention is not a
+  // mismatch); both use extractRecordField like (d).
+  const PHASE_TO_STATUS: Record<string, string> = {
+    production: 'active',
+    beta: 'active',
+    draft: 'experimental',
+    deprecated: 'deprecated',
+    archived: 'archived',
+  };
+  const PHASE_STRICT = new Set(['production', 'deprecated', 'archived']);
+  for (const agent of Object.keys(agentTiers)) {
+    const agentPath = join(ROOT, 'agents', `${agent}.md`);
+    const recordPath = join(ROOT, 'docs', 'lifecycle', 'agents', `${agent}.md`);
+    if (!existsSync(agentPath) || !existsSync(recordPath)) continue; // absence handled by (a)/(d)
+
+    const fmMatch = /^---\r?\n([\s\S]*?)\r?\n---/.exec(readFileSync(agentPath, 'utf-8'));
+    let status: string | undefined;
+    let fmUpdated: string | undefined;
+    if (fmMatch) {
+      try {
+        const doc = loadYaml(fmMatch[1]) as { status?: string; last_updated?: string | Date } | null;
+        status = typeof doc?.status === 'string' ? doc.status.trim().toLowerCase() : undefined;
+        const lu = doc?.last_updated;
+        if (lu instanceof Date) fmUpdated = lu.toISOString().slice(0, 10);
+        else if (typeof lu === 'string') fmUpdated = lu.trim().slice(0, 10);
+      } catch {
+        // unparseable frontmatter already reported by (a)'s parseTierBlock
+      }
+    }
+
+    const recordContent = readFileSync(recordPath, 'utf-8');
+
+    const phase = extractRecordField(recordContent, 'Current Phase');
+    if (status && phase) {
+      const phaseNorm = phase.trim().toLowerCase();
+      const expected = PHASE_TO_STATUS[phaseNorm];
+      if (expected && expected !== status) {
+        issues.push({
+          level: PHASE_STRICT.has(phaseNorm) ? 'error' : 'warning',
+          file: `docs/lifecycle/agents/${agent}.md`,
+          message: `Check F: ${agent} lifecycle record Current Phase '${phase.trim()}' does not match agents/${agent}.md frontmatter status '${status}'`,
+          fix: `Reconcile the docs/lifecycle/agents/${agent}.md Current Phase field with agents/${agent}.md status`,
+        });
+      }
+    }
+
+    const recordUpdated = extractRecordField(recordContent, 'Last Updated');
+    const recordDate = recordUpdated ? /^(\d{4}-\d{2}-\d{2})/.exec(recordUpdated.trim())?.[1] : undefined;
+    if (fmUpdated && recordDate && recordDate < fmUpdated) {
+      issues.push({
+        level: 'error',
+        file: `docs/lifecycle/agents/${agent}.md`,
+        message: `Check F: lifecycle record Last Updated (${recordDate}) lags agents/${agent}.md frontmatter last_updated (${fmUpdated}) — the record was not refreshed after the agent changed`,
+        fix: `Update the docs/lifecycle/agents/${agent}.md **Last Updated** field to ${fmUpdated} (with a short reason note)`,
       });
     }
   }
