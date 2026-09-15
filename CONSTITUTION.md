@@ -507,7 +507,7 @@ authoritative within its project, and this baseline applies where no project lis
 ### 9. Operations Workflow
 Full details: [`docs/constitution/09-operations-workflow.md`](docs/constitution/09-operations-workflow.md)
 
-Operational procedures for maintaining workspace health and lifecycle hygiene. **Post-Implementation QA (Mandatory)**: All tasks executed based on an `implementation_plan.md` or formal plan MUST undergo a QA validation step via testing or verification scripts before completion, regardless of the agentic tool used (Claude/Antigravity). **Weekly Health Check** (PM, every Friday): Run lifecycle audits (`agent-lifecycle-audit.ts`, `skill-lifecycle-audit.ts`) and review deprecated items. **Monthly Lifecycle Review** (PM + Architect, first Friday): Review deprecated items >30 days, perform archive cleanup (move to `*_archive/` after 30 days, delete after 90), plan template synchronization, create action items. **Quarterly Template Sync** (Architect + PM, start of each quarter): Validate templates, propagate L0 changes to variants, update `templates/VERSION`. **On-Demand Synchronization**: Run `bun scripts/sync-agent-status.ts` and `bun scripts/sync-skill-status.ts` after agent/skill changes. **Operational Metrics**: Track agent/skill health (100% target), deprecated backlog (<5 items), archive age (<90 days), template sync lag (<7 days).
+Operational procedures for maintaining workspace health and lifecycle hygiene. **Post-Implementation QA (Mandatory)**: All tasks executed based on an `implementation_plan.md` or formal plan MUST undergo a QA validation step via testing or verification scripts before completion, regardless of the agentic tool used (Claude/Antigravity). **Weekly Health Check** (PM, every Friday): Run lifecycle audits (`agent-lifecycle-audit.ts`, `skill-lifecycle-audit.ts`) and review deprecated items. **Monthly Lifecycle Review** (PM + Architect, first Friday): Review deprecated items >30 days, perform archive cleanup (move to `*_archive/` after 30 days, delete after 90), plan template synchronization, create action items. **Quarterly Template Sync** (Architect + PM, start of each quarter): Validate templates, propagate L0 changes to variants, update `templates/VERSION`. **On-Demand Synchronization**: Run `bun scripts/sync-skill-status.ts` after skill changes (agent status is enforced by `agent-lifecycle-audit.ts` and the lifecycle-sync-audit Check F metadata gates — no roster sync tool exists; the roster carries no status column). **Operational Metrics**: Track agent/skill health (100% target), deprecated backlog (<5 items), archive age (<90 days), template sync lag (<7 days).
 
 ---
 
@@ -728,4 +728,4 @@ Agent, skill, and command frontmatter structures are validated against JSON Sche
 
 ---
 
-*Last Updated: 2026-09-13*
+*Last Updated: 2026-09-15*

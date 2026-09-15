@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-09-15T01:55:15.069Z
+**Generated**: 2026-09-15T02:29:51.405Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 8
 - **Skills**: 51
-- **Scripts**: 94 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
+- **Scripts**: 93 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
 - **Commands**: 8
 
 ---
@@ -23,8 +23,8 @@
 | auditor | agents/auditor.md | medium | inherit | 2026-09-12 |
 | automation-engineer | agents/automation-engineer.md | low | inherit | 2026-09-12 |
 | docs-writer | agents/docs-writer.md | medium | inherit | 2026-09-12 |
-| lifecycle-manager | agents/lifecycle-manager.md | medium | inherit | 2026-09-12 |
-| pm | agents/pm.md | medium | inherit | 2026-09-13 |
+| lifecycle-manager | agents/lifecycle-manager.md | medium | inherit | 2026-09-15 |
+| pm | agents/pm.md | medium | inherit | 2026-09-15 |
 | scaffolding-expert | agents/scaffolding-expert.md | low | inherit | 2026-09-12 |
 | security-expert | agents/security-expert.md | medium | inherit | 2026-09-12 |
 
@@ -102,7 +102,7 @@
 | agent-verify.ts | 1.0.2 | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.2 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.0.0 | scripts/archive-memory.ts | N/A |
-| audit.ts | 2.37.1 | scripts/audit.ts | bun |
+| audit.ts | 2.38.1 | scripts/audit.ts | bun |
 | check-upgrade-coverage.ts | 1.0.0 | scripts/check-upgrade-coverage.ts | N/A |
 | cleanup-completed-md.ts | 1.1.0 | scripts/cleanup-completed-md.ts | N/A |
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | N/A |
@@ -124,7 +124,7 @@
 | ingest-external-skills.ts | 1.1.0 | scripts/ingest-external-skills.ts | N/A |
 | ingest-security-frameworks.ts | 1.1.0 | scripts/ingest-security-frameworks.ts | N/A |
 | l3-to-variant-pipeline.ts | 1.17.1 | scripts/l3-to-variant-pipeline.ts | child_process, fs, path, process |
-| lifecycle-sync-audit.ts | 1.10.0 | scripts/lifecycle-sync-audit.ts | js-yaml |
+| lifecycle-sync-audit.ts | 1.12.0 | scripts/lifecycle-sync-audit.ts | js-yaml |
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
 | md-to-ooxml.ts | 1.2.0 | scripts/md-to-ooxml.ts | fs, path |
 | new-project.ts | 1.16.0 | scripts/new-project.ts | js-yaml |
@@ -148,7 +148,6 @@
 | skill-session-review.ts | 1.0.0 | scripts/skill-session-review.ts | bun |
 | spec-backfill.ts | 1.0.0 | scripts/spec-backfill.ts | N/A |
 | spec-register.ts | 1.2.0 | scripts/spec-register.ts | N/A |
-| sync-agent-status.ts | 1.0.1 | scripts/sync-agent-status.ts | N/A |
 | sync-md.ts | 1.3.0 | scripts/sync-md.ts | N/A |
 | sync-skill-status.ts | 1.0.1 | scripts/sync-skill-status.ts | N/A |
 | sync-skills-to-l2.ts | 1.0.1 | scripts/sync-skills-to-l2.ts | N/A |
@@ -171,11 +170,11 @@
 | validate-doc-folder.ts | 1.1.0 | scripts/validate-doc-folder.ts | fs, path |
 | validate-docs-links.ts | 1.1.0 | scripts/validate-docs-links.ts | fs, path |
 | validate-md-language.ts | 1.11.0 | scripts/validate-md-language.ts | fs |
-| validate-model-registry.ts | 1.2.0 | scripts/validate-model-registry.ts | N/A |
+| validate-model-registry.ts | 1.3.0 | scripts/validate-model-registry.ts | N/A |
 | validate-pm-extends.ts | 0.3.1 | scripts/validate-pm-extends.ts | N/A |
 | validate-procedures.ts | 1.1.0 | scripts/validate-procedures.ts | js-yaml |
 | validate-skills.ts | 1.5.1 | scripts/validate-skills.ts | N/A |
-| validate-templates.ts | 1.26.0 | scripts/validate-templates.ts | js-yaml |
+| validate-templates.ts | 1.27.0 | scripts/validate-templates.ts | js-yaml |
 | validate-variant-readiness.ts | 1.1.0 | scripts/validate-variant-readiness.ts | N/A |
 | variant-feature.ts | 1.0.0 | scripts/variant-feature.ts | N/A |
 | verify-adr-governance.ts | 1.5.0 | scripts/verify-adr-governance.ts | N/A |

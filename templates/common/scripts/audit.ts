@@ -1,4 +1,16 @@
-// @version 2.37.1
+// @version 2.38.1
+// v2.38.1: S-03 (.githooks parity) suppression note updated — the gap is now
+//          covered by lifecycle-sync-audit Check G (v1.12.0: .githooks vs
+//          templates/common/.githooks, CRLF-normalized byte parity), which
+//          runs in every full audit. No behavior change in audit.ts itself.
+// v2.38.0: Model registry gate (spec: docs/designs/2026-09-15-agent-metadata-drift-check-design.md) —
+//           when scripts/validate-model-registry.ts exists, spawn it: agents/*.md
+//           frontmatter model comments AND the tier→model mapping prose
+//           (AGENTS.md §3.6 / CLAUDE.md / GEMINI.md / CODEX.md) must match
+//           docs/workspace-schema.json `models`. validate-model-registry was
+//           previously manual-only, so a tier/model rename could leave comments
+//           and prose behind undetected (the non-atomic-update class that hid
+//           the 2026-09 PM tier drift).
 // v2.37.0: L0 Leakage check exemption is now occurrence-scoped (T-20260912-006) — an
 //           intentional-duplicate marker exempts only the line carrying it, not the
 //           whole file, so a real CONSTITUTION reference can no longer hide in a file
@@ -544,8 +556,9 @@ if (!LIFECYCLE_ONLY) {
 
     // S-02: .sh/.ps1 parity check removed (dead code after ADR-0036 TypeScript migration)
 
-    // S-03: .githooks parity check - Suppressed (Git Bash assumed on Windows)
-    // if (fs.existsSync('.githooks')) { ... }
+    // S-03: .githooks parity check — superseded by lifecycle-sync-audit Check G
+    // (.githooks vs templates/common/.githooks, CRLF-normalized byte parity),
+    // running in every full audit since lifecycle-sync-audit v1.12.0 (2026-09-15).
 
 
     // Check: no non-standard .md files at project root (file organization policy)
@@ -2995,6 +3008,23 @@ if (fs.existsSync(path.join('scripts', 'check-upgrade-coverage.ts'))) {
         Fail('Upgrade coverage gate failed — bun scripts/check-upgrade-coverage.ts (without --strict) lists the violations');
     } else {
         Pass('Upgrade coverage gate: every effective template file keeps a delivery claim (strict checks clean)');
+    }
+}
+
+// ── Model registry gate (2026-09-15-agent-metadata-drift-check-design.md) ─────
+// When scripts/validate-model-registry.ts exists, agents/*.md frontmatter model
+// comments AND the tier→model mapping prose (AGENTS.md §3.6 / CLAUDE.md /
+// GEMINI.md / CODEX.md) must match docs/workspace-schema.json `models`.
+if (fs.existsSync(path.join('scripts', 'validate-model-registry.ts'))) {
+    const { status, stdout, stderr } = spawnSync('bun', ['scripts/validate-model-registry.ts'], {
+        encoding: 'utf-8',
+    });
+    if (status !== 0) {
+        if (stdout) console.log(stdout);
+        if (stderr) console.error(stderr);
+        Fail('Model registry gate failed — model comments / tier→model prose disagree with docs/workspace-schema.json models (bun scripts/validate-model-registry.ts lists them)');
+    } else {
+        Pass('Model registry gate: model comments + tier→model mapping prose match the models registry');
     }
 }
 

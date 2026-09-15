@@ -23,14 +23,14 @@ if command -v bun >/dev/null 2>&1; then
     process.exit(hasNonEnglish(text) ? 1 : 0);
   " "$COMMIT_MSG_FILE"; then
     echo -e "\033[31m[FAIL]\033[0m Non-English characters detected in commit message."
-    echo "       CONSTITUTION.md mandates all commit messages must be in English."
+    echo "       Workspace policy requires all commit messages must be in English."
     exit 1
   fi
 elif command -v python3 >/dev/null 2>&1; then
   # Fallback: Korean-only regex (narrower than language-guard.ts)
   if ! python3 -c "import sys,re; data=open(sys.argv[1],encoding='utf-8').read(); sys.exit(1) if re.search(r'[가-힣ᄀ-ᇿ㄰-㆏]',data) else sys.exit(0)" "$COMMIT_MSG_FILE"; then
     echo -e "\033[31m[FAIL]\033[0m Non-English characters detected in commit message."
-    echo "       CONSTITUTION.md mandates all commit messages must be in English."
+    echo "       Workspace policy requires all commit messages must be in English."
     exit 1
   fi
 else

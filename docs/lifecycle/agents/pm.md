@@ -62,6 +62,6 @@
 
 - **Current Phase**: production
 - **Owner**: pm
-- **Last Updated**: 2026-08-24
+- **Last Updated**: 2026-09-15 (record refreshed after PM tier alignment to medium — Check F rollout)
 - **Last Reviewer**: lifecycle-manager
 

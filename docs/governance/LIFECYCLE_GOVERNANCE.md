@@ -7,7 +7,7 @@ lang_reason: source-material
 
 > **Doc intent:** Human-readable governance specification for the 5-domain × 3-layer lifecycle model.
 > Machine-readable policy is in [`lifecycle-governance.json`](lifecycle-governance.json).
-> Last Updated: 2026-09-12
+> Last Updated: 2026-09-15
 
 ---
 
@@ -74,7 +74,7 @@ This workspace enforces lifecycle governance across **5 domains** and **3 layers
 
 ### 2. Agent Domain
 
-**What it tracks:** Each agent file (`agents/<name>.md`) must declare a `status:` field in its YAML frontmatter. The audit checks that all agents have a valid status, that deprecated agents are not referenced in `AGENTS.md` as active, and that `sync-agent-status.ts` can reconcile the roster.
+**What it tracks:** Each agent file (`agents/<name>.md`) must declare a `status:` field in its YAML frontmatter. The audit checks that all agents have a valid status, that deprecated agents are not referenced as active, and — since lifecycle-sync-audit Check F — that frontmatter status matches the lifecycle record's Current Phase and the record's Last Updated does not lag the agent file. The AGENTS.md roster carries no status column, so no roster reconciliation tool exists (`sync-agent-status.ts` was removed 2026-09-15 as a no-op against the current roster format).
 
 **Lifecycle states:**
 - `draft` — role defined but not yet deployed
@@ -83,9 +83,9 @@ This workspace enforces lifecycle governance across **5 domains** and **3 layers
 - `archived` — removed from active roster
 
 **Validating tool:** `scripts/agent-lifecycle-audit.ts`
-**Sync tool:** `scripts/sync-agent-status.ts`
+**Metadata gates:** `scripts/lifecycle-sync-audit.ts` Check F (status ↔ phase, record freshness, tier)
 
-**Applicable layers:** L0 (workspace root agents), L1b (variant-scoped agents), L2 (project agents). `templates/common/` does not host agents directly.
+**Applicable layers:** L0 (workspace root agents), L1b (variant-scoped agents), L2 (project agents). `templates/common/agents/` hosts the two L1-common agents (`pm`, `i18n-specialist`), registered in `common-contract.json` `common_agents`.
 
 **Current gaps:**
 - L1b variants are not audited by `agent-lifecycle-audit.ts` during `validate-templates.ts` runs.
