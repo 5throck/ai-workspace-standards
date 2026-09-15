@@ -86,7 +86,7 @@ The script itself recommends this automatically when the complexity routing chec
 cp -r <project-path> Projects/<variant-name>/
 cd Projects/<variant-name>/ && git init && git add -A && git commit -m "initial"
 cd <workspace-root>
-bun scripts/l3-to-variant-pipeline.ts --auto-fix-agents-md --auto-fix-pm-md
+bun scripts/l3-to-variant-pipeline.ts --l3-path Projects/<variant-name>/ --name <variant-name> --type <collaboration|consulting|lecture> --description "<one-line description>" --auto-fix-agents-md --auto-fix-pm-md
 ```
 
 Since `l3-to-variant-pipeline.ts` 1.11.0, `--auto-fix-agents-md` / `--auto-fix-pm-md` let the pipeline regenerate the variant `AGENTS.md` from the L3 roster, and `generate-variant.ts` ≥ 1.12.0 materializes domain skills into all three skill roots, preserves agent `lifecycle` frontmatter, and re-applies VARIANT-INJECT markers — the manual post-run fixes this path used to require are automated.

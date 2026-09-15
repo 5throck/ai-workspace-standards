@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.27.0
+ * @version 1.28.0
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -2262,7 +2262,12 @@ function checkCommonContract(): void {
     const contractVersion = entry.version;
     if (!contractVersion) {
       fail('common', 'C-CM-03', `common-contract.json entry '${skillName}' has no version`, `Set "version" to the SKILL.md frontmatter version (${fmVersion ?? 'X.Y.Z'})`);
-    } else if (fmVersion && contractVersion !== fmVersion) {
+    } else if (!fmVersion) {
+      // M5 (2026-09-15 project review): a contract version with no comparable
+      // frontmatter version skipped the check silently — one deleted frontmatter
+      // line would reintroduce the exact drift this check exists to catch.
+      fail('common', 'C-CM-03', `common-contract.json declares version ${contractVersion} for '${skillName}' but SKILL.md frontmatter has no version field`, `Restore "version: ${contractVersion}" to the SKILL.md frontmatter`);
+    } else if (contractVersion !== fmVersion) {
       fail('common', 'C-CM-03', `common-contract.json version mismatch for '${skillName}': contract=${contractVersion}, SKILL.md=${fmVersion}`, `Update common-contract.json "version" to ${fmVersion}`);
     }
   }
@@ -2288,7 +2293,9 @@ function checkCommonContract(): void {
     const contractVersion = entry.version;
     if (!contractVersion) {
       fail('common', 'C-CM-03a', `common-contract.json entry '${agentName}' has no version`, `Set "version" to the agent frontmatter version (${fmVersion ?? 'X.Y.Z'})`);
-    } else if (fmVersion && contractVersion !== fmVersion) {
+    } else if (!fmVersion) {
+      fail('common', 'C-CM-03a', `common-contract.json declares version ${contractVersion} for '${agentName}' but the agent frontmatter has no version field`, `Restore "version: ${contractVersion}" to the agent frontmatter`);
+    } else if (contractVersion !== fmVersion) {
       fail('common', 'C-CM-03a', `common-contract.json version mismatch for '${agentName}': contract=${contractVersion}, agent frontmatter=${fmVersion}`, `Update common-contract.json "version" to ${fmVersion}`);
     }
   }

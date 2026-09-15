@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.16.0
+// @version 1.17.0
 // v1.16.0: Bare project names scaffold under Projects/<name> (canonical layout) instead
 //           of the workspace root — root-level scaffolds are how the 2026-09-12
 //           root-upgrade incident litter accumulated (memory/2026-09-12.md). Path-like
@@ -113,6 +113,24 @@ const projectDir = projectName.includes('/')
 // workspace root itself.
 if (resolve(projectDir) === workspaceRoot || relative(workspaceRoot, resolve(projectDir)).startsWith('..')) {
   console.error(`❌ Project directory escapes the workspace: ${projectDir}`);
+  if (import.meta.main) {
+    process.exit(1);
+  }
+}
+
+// H7 (2026-09-15 project review): a path-like name landing inside a managed
+// top-level directory scaffolds a full project tree exactly where the fleet
+// auto-detects variants (templates/co-*) or ships undeclared content
+// (scripts/, docs/, agents/) — the litter class behind the 2026-09-12
+// root-upgrade incident. 'tests' stays allowed: the E2E harness scaffolds
+// into tests/.temp/ by design.
+const MANAGED_TOP_LEVEL_DIRS = new Set([
+  'templates', 'scripts', 'docs', 'agents', 'skills', 'memory', 'graft',
+  '.github', '.claude', '.gemini', '.agents', '.codex',
+]);
+if (projectName.includes('/') && MANAGED_TOP_LEVEL_DIRS.has(projectName.split('/')[0])) {
+  console.error(`❌ Project target '${projectName}' resolves inside the managed '${projectName.split('/')[0]}/' directory.`);
+  console.error('   Scaffold into Projects/ (bare name) or tests/.temp/ instead.');
   if (import.meta.main) {
     process.exit(1);
   }
@@ -611,7 +629,11 @@ if (existsSync(projPmMd)) {
   const pmBody = pmFmMatch ? pmContent.slice(pmFmMatch[0].length) : pmContent;
   if (pmFmMatch && /extends:/.test(pmFmMatch[1])) {
     const isProseStub = pmBody.trim() !== '';
-    const l1PmMd = join(workspaceRoot, 'templates', 'common', 'agents', 'pm.md');
+    // H6 (2026-09-15 project review): resolve the L1 body from commonDir — the
+    // tag's extracted copy when --version <tag> is used — not the working tree;
+    // mixing tag content with HEAD content broke the provenance recorded in
+    // template-version.txt.
+    const l1PmMd = join(commonDir, 'agents', 'pm.md');
     if (existsSync(l1PmMd)) {
       const l1Content = readFileSync(l1PmMd, 'utf8');
       const l1FmMatch = l1Content.match(/^---\n([\s\S]*?)\n---\n?/);
@@ -825,10 +847,16 @@ for (const f of walkFiles(projectDir)) {
 // ── 3.6. Agent Override Merge (VARIANT-SECTION substitution) ──────────────────
 if (existsSync(variantJsonPath)) {
   const agentOverrideMerge = join(workspaceRoot, 'scripts', 'lib', 'agent-override-merge.ts');
-  spawnSync(process.execPath, [agentOverrideMerge, commonDir, templatesDir, projectDir], {
+  const mergeResult = spawnSync(process.execPath, [agentOverrideMerge, commonDir, templatesDir, projectDir], {
     encoding: 'utf8',
     stdio: 'inherit',
   });
+  // M9 (2026-09-15 project review): unchecked helper spawns shipped broken
+  // scaffolds with a success banner. Every helper below fails loud now.
+  if (mergeResult.status !== 0) {
+    console.error(`❌ Helper failed: agent-override-merge (exit ${mergeResult.status})`);
+    if (import.meta.main) process.exit(1);
+  }
 }
 
 // ── 4. Create ACTIVE.md if country was selected ──────────────────────────────────
@@ -882,7 +910,11 @@ if (existsSync(substitutePlaceholders)) {
     }
   }
 
-  spawnSync(process.execPath, [substitutePlaceholders, projectDir, basename(projectName), 'A new project', '', variant, countryDisplayName], { stdio: 'inherit' });
+  const substituteResult = spawnSync(process.execPath, [substitutePlaceholders, projectDir, basename(projectName), 'A new project', '', variant, countryDisplayName], { stdio: 'inherit' });
+  if (substituteResult.status !== 0) {
+    console.error(`❌ Helper failed: substitute-placeholders (exit ${substituteResult.status}) — live {{markers}} would ship in the project`);
+    if (import.meta.main) process.exit(1);
+  }
 } else {
   console.log('⚠️  Placeholder substitution skipped (helper missing)');
 }
@@ -893,7 +925,11 @@ const projVariantJson = join(projectDir, 'variant.json');
 if (existsSync(projVariantJson)) {
   const helper = join(workspaceRoot, 'scripts', 'helpers', 'update-variant-lifecycle.ts');
   if (existsSync(helper)) {
-    spawnSync(process.execPath, [helper, projectDir, projectDate, variant], { stdio: 'inherit' });
+    const r = spawnSync(process.execPath, [helper, projectDir, projectDate, variant], { stdio: 'inherit' });
+    if (r.status !== 0) {
+      console.error(`❌ Helper failed: update-variant-lifecycle (exit ${r.status})`);
+      if (import.meta.main) process.exit(1);
+    }
   }
 }
 
@@ -902,7 +938,11 @@ const scriptsMd = join(workspaceRoot, 'scripts', 'SCRIPTS.md');
 if (existsSync(scriptsMd)) {
   const helper = join(workspaceRoot, 'scripts', 'helpers', 'write-scripts-snapshot.ts');
   if (existsSync(helper)) {
-    spawnSync(process.execPath, [helper, projectDir, projectDate, variant, 'templates/common/scripts'], { stdio: 'inherit' });
+    const r = spawnSync(process.execPath, [helper, projectDir, projectDate, variant, 'templates/common/scripts'], { stdio: 'inherit' });
+    if (r.status !== 0) {
+      console.error(`❌ Helper failed: write-scripts-snapshot (exit ${r.status})`);
+      if (import.meta.main) process.exit(1);
+    }
   }
 }
 
@@ -912,7 +952,9 @@ const templateVersion = templateVer || (existsSync(versionFile) ? readFileSync(v
 const variantContextMd = join(projectDir, 'docs', `${variant}.context.md`);
 
 // Regenerate context.md from canonical template (SSOT: templates/common/docs/variant.context.template.md)
-const contextTemplatePath = join(workspaceRoot, 'templates', 'common', 'docs', 'variant.context.template.md');
+// H6 (2026-09-15 project review): read the canonical template from commonDir —
+// the tag's extracted copy when --version <tag> is used.
+const contextTemplatePath = join(commonDir, 'docs', 'variant.context.template.md');
 if (existsSync(contextTemplatePath) && !existsSync(variantContextMd)) {
   applyContextTemplate(contextTemplatePath, variantContextMd, {
     variantName: variant,
@@ -942,7 +984,11 @@ writeFileSync(
 // ── 5.6b. Inject AGENTS.md Skills into docs/context.md ───────────────────────
 const injectSkills = join(workspaceRoot, 'scripts', 'helpers', 'inject-skills.ts');
 if (existsSync(injectSkills)) {
-  spawnSync(process.execPath, [injectSkills, projectDir], { stdio: 'inherit' });
+  const r = spawnSync(process.execPath, [injectSkills, projectDir], { stdio: 'inherit' });
+  if (r.status !== 0) {
+    console.error(`❌ Helper failed: inject-skills (exit ${r.status})`);
+    if (import.meta.main) process.exit(1);
+  }
 }
 
 // ── 5.7. Protect context.md from accidental overwrites ────────────────────────

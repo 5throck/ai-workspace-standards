@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-09-15T03:05:17.659Z
+**Generated**: 2026-09-15T15:36:05.839Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -107,7 +107,7 @@
 | cleanup-completed-md.ts | 1.1.0 | scripts/cleanup-completed-md.ts | N/A |
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | N/A |
 | compile-tokens.ts | 1.2.0 | scripts/compile-tokens.ts | N/A |
-| create-l3-scaffold.ts | 1.13.0 | scripts/create-l3-scaffold.ts | N/A |
+| create-l3-scaffold.ts | 1.14.0 | scripts/create-l3-scaffold.ts | N/A |
 | design-lint.ts | 1.0.0 | scripts/design-lint.ts | N/A |
 | dev-sync.ts | 1.14.0 | scripts/dev-sync.ts | bun |
 | dispatch-parallel.ts | 1.1.1 | scripts/dispatch-parallel.ts | N/A |
@@ -123,11 +123,11 @@
 | infer-graph-from-phases.ts | 0.1.0 | scripts/experiments/infer-graph-from-phases.ts | N/A |
 | ingest-external-skills.ts | 1.1.0 | scripts/ingest-external-skills.ts | N/A |
 | ingest-security-frameworks.ts | 1.1.0 | scripts/ingest-security-frameworks.ts | N/A |
-| l3-to-variant-pipeline.ts | 1.17.1 | scripts/l3-to-variant-pipeline.ts | child_process, fs, path, process |
-| lifecycle-sync-audit.ts | 1.12.0 | scripts/lifecycle-sync-audit.ts | js-yaml |
+| l3-to-variant-pipeline.ts | 1.18.0 | scripts/l3-to-variant-pipeline.ts | child_process, fs, path, process |
+| lifecycle-sync-audit.ts | 1.13.0 | scripts/lifecycle-sync-audit.ts | js-yaml |
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
 | md-to-ooxml.ts | 1.2.0 | scripts/md-to-ooxml.ts | fs, path |
-| new-project.ts | 1.16.0 | scripts/new-project.ts | js-yaml |
+| new-project.ts | 1.17.0 | scripts/new-project.ts | js-yaml |
 | procedure-coverage.ts | 1.0.0 | scripts/procedure-coverage.ts | js-yaml |
 | project-to-variant.ts | 1.3.0 | scripts/project-to-variant.ts | N/A |
 | promote-context-section.ts | 1.0.0 | scripts/promote-context-section.ts | N/A |
@@ -156,15 +156,15 @@
 | tag-template.ts | 1.1.0 | scripts/tag-template.ts | bun |
 | team-builder.ts | 1.4.0 | scripts/team-builder.ts | N/A |
 | test-extends-validator.ts | 1.0.1 | scripts/test-extends-validator.ts | fs, path |
-| test-l3-to-variant-promotion.ts | 1.2.0 | scripts/test-l3-to-variant-promotion.ts | bun |
-| test-new-project.ts | 1.1.0 | scripts/test-new-project.ts | bun, js-yaml |
+| test-l3-to-variant-promotion.ts | 1.2.1 | scripts/test-l3-to-variant-promotion.ts | bun |
+| test-new-project.ts | 1.1.1 | scripts/test-new-project.ts | bun, js-yaml |
 | test-platform-parity.ts | 0.2.4 | scripts/test-platform-parity.ts | fs, path |
-| test-runner.ts | 1.1.1 | scripts/test-runner.ts | fs, os, path |
+| test-runner.ts | 1.2.0 | scripts/test-runner.ts | fs, os, path |
 | test-variant-readiness.ts | 1.0.0 | scripts/test-variant-readiness.ts | N/A |
 | ticket.ts | 1.2.0 | scripts/ticket.ts | N/A |
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, fs, path |
 | typecheck.ts | 1.1.1 | scripts/typecheck.ts | N/A |
-| upgrade-project.ts | 1.27.0 | scripts/upgrade-project.ts | N/A |
+| upgrade-project.ts | 1.28.0 | scripts/upgrade-project.ts | N/A |
 | validate-agents.ts | 1.2.1 | scripts/validate-agents.ts | N/A |
 | validate-decisions.ts | 1.0.0 | scripts/validate-decisions.ts | js-yaml |
 | validate-doc-folder.ts | 1.1.0 | scripts/validate-doc-folder.ts | fs, path |
@@ -174,7 +174,7 @@
 | validate-pm-extends.ts | 0.3.1 | scripts/validate-pm-extends.ts | N/A |
 | validate-procedures.ts | 1.1.0 | scripts/validate-procedures.ts | js-yaml |
 | validate-skills.ts | 1.5.1 | scripts/validate-skills.ts | N/A |
-| validate-templates.ts | 1.27.0 | scripts/validate-templates.ts | js-yaml |
+| validate-templates.ts | 1.28.0 | scripts/validate-templates.ts | js-yaml |
 | validate-variant-readiness.ts | 1.1.0 | scripts/validate-variant-readiness.ts | N/A |
 | variant-feature.ts | 1.0.0 | scripts/variant-feature.ts | N/A |
 | verify-adr-governance.ts | 1.5.0 | scripts/verify-adr-governance.ts | N/A |

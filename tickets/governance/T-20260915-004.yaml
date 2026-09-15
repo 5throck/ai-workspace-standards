@@ -1,0 +1,16 @@
+schemaVersion: 1
+id: T-20260915-004
+kind: manual
+title: >-
+  validator-hardening: add VERSION_MANIFEST --check reconciliation gate and
+  exclude scripts/experiments from the CLI script count
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-15T10:32:33.574Z'
+history:
+  - at: '2026-09-15T10:32:33.574Z'
+    from: null
+    to: backlog
+result: null
+error: null

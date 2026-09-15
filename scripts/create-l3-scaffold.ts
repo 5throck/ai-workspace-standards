@@ -1,5 +1,17 @@
 #!/usr/bin/env bun
-// @version 1.13.0
+// @version 1.14.0
+// v1.14.0: Three fixes from the 2026-09-15 project review
+//         (docs/reports/2026-09-15-project-review-template-fleet.md). C5: the
+//         COMMON-AGENTS block read templates/common/AGENTS.md relative to the
+//        CALLER's cwd (the only unanchored path in the file) — crashed
+//         mid-scaffold from any other directory, after Steps 3–4 had already
+//         copied content. C3: graft-block injection searched for
+//         WORKSPACE-MANAGED markers that templates/common/AGENTS.md lost in the
+//         graft rollout — indexOf missed, no warning, block silently never
+//         appended (the L1 file is re-wrapped in the same batch). H11: added
+//         new-project's rollbackPartialProject exit hook so a partial scaffold
+//         no longer lingers in Projects/. M10: layout guard compares skill
+//         scope against toVariantSlug(args.variant) instead of the raw arg.
 /**
  * create-l3-scaffold.ts
  *
@@ -18,6 +30,7 @@
  */
 
 import * as fs from "node:fs";
+import { rollbackPartialProject } from "./helpers/rollback-partial-project.ts";
 import * as path from "node:path";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from 'node:url';
@@ -635,7 +648,7 @@ ${variantMarkers}
 `;
   writeFile(path.join(projectDir, "AGENTS.md"), agentsMd);
   // Append the COMMON-AGENTS Language Policy block verbatim from the L1 baseline.
-  const commonAgentsMd = fs.readFileSync(path.join("templates", "common", "AGENTS.md"), "utf-8");
+  const commonAgentsMd = fs.readFileSync(path.join(COMMON_DIR, "AGENTS.md"), "utf-8");
   const blockStart = commonAgentsMd.indexOf("<!-- COMMON-AGENTS:START -->");
   const blockEnd = commonAgentsMd.indexOf("<!-- COMMON-AGENTS:END -->");
   if (blockStart !== -1 && blockEnd !== -1) {
@@ -997,6 +1010,17 @@ function main(): void {
   const projectDir = path.join(WORKSPACE_ROOT, "Projects", args.variant);
   const templateVariantDir = path.join(WORKSPACE_ROOT, "templates", toVariantSlug(args.variant));
 
+  // H11 (2026-09-15 project review): mirror new-project's M13 rollback — a
+  // crash or fail() after the project dir starts filling must not leave a
+  // broken draft in Projects/.
+  process.on("exit", (code) => {
+    if (code === 0) return;
+    const result = rollbackPartialProject(projectDir, WORKSPACE_ROOT);
+    if (result.rolledBack) {
+      console.error(`🧹 Rolled back partially-created project directory: ${projectDir}`);
+    }
+  });
+
   // Step 1: duplicate / existence checks
   if (fs.existsSync(projectDir)) {
     fail(`Projects/${args.variant}/ already exists. Choose a different name or remove it first.`);
@@ -1134,7 +1158,7 @@ function main(): void {
       for (const sm of walkSkills(skillsDir)) {
         const content = fs.readFileSync(sm, "utf8");
         const scope = (/^scope:\s*(\S+)/m.exec(content) || [])[1];
-        if (scope && /^co-/.test(scope) && scope !== args.variant) {
+        if (scope && /^co-/.test(scope) && scope !== toVariantSlug(args.variant)) {
           issues.push(`foreign-variant skill (scope: ${scope}): ${path.relative(projectDir, sm)}`);
         }
       }

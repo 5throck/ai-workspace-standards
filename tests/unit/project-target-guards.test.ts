@@ -13,11 +13,26 @@
  */
 import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { describe, test, expect } from 'bun:test';
+import { existsSync, mkdirSync } from 'node:fs';
+import { describe, test, expect, beforeAll } from 'bun:test';
 
 const workspaceRoot = resolve(import.meta.dir, '..', '..');
 
 describe('root-target guards (incident 2026-09-12)', () => {
+  beforeAll(() => {
+    // `Projects/` is gitignored (.gitignore: `/*/  Projects`), so it does not
+    // exist on a fresh checkout (CI, new clones). The next test's pre-flight
+    // path assumes it already exists to fail fast on the "already exists"
+    // check; without it, new-project.ts falls through and runs a REAL scaffold
+    // (bun install, graft index build with a tree-sitter-cli download) that
+    // takes well over the 30s test/file timeout — the CI TIMEOUT this guards
+    // against. Creating an empty Projects/ here restores the documented
+    // fast-fail pre-flight path deterministically, on any machine.
+    if (!existsSync(join(workspaceRoot, 'Projects'))) {
+      mkdirSync(join(workspaceRoot, 'Projects'), { recursive: true });
+    }
+  });
+
   test('upgrade-project.ts rejects the workspace ROOT as <project-path>', () => {
     const result = spawnSync(
       'bun',
@@ -31,9 +46,11 @@ describe('root-target guards (incident 2026-09-12)', () => {
   }, 30000);
 
   test('new-project.ts resolves bare names under Projects/ (existence pre-flight path)', () => {
-    // The name `.` resolves to <root>/Projects, which exists — so the pre-flight
-    // fails fast with the resolved path BEFORE any scaffold side effects run.
-    // Under pre-1.16.0 behavior the message would have named the workspace root.
+    // The name `.` resolves to <root>/Projects. beforeAll() above guarantees
+    // it exists (it's gitignored, so a fresh checkout won't have it) — so the
+    // pre-flight fails fast with the resolved path BEFORE any scaffold side
+    // effects run. Under pre-1.16.0 behavior the message would have named the
+    // workspace root.
     const result = spawnSync(
       'bun',
       ['scripts/new-project.ts', '.', '--variant', 'co-develop'],

@@ -119,6 +119,27 @@ jobs:
         # pre-push hook down to changed-path tests only.
         run: bun run test
 
+      - name: Run unit tests
+        # 2026-09-15 project review (C1): tests/unit/ — including the
+        # project-target-guards pinning test for the 2026-09-12 root-upgrade
+        # incident — was executed by no CI step or hook. Regression tests that
+        # never run are decoration.
+        run: bun run test:unit
+
+      - name: Run scripts E2E suite
+        # 2026-09-15 project review (C1): the scripts/test-*.ts harnesses
+        # (new-project creation, L3→variant promotion, platform parity,
+        # extends-validator, variant readiness) were manual-only. Heavy
+        # scaffolding work → ubuntu-only.
+        if: matrix.os == 'ubuntu-latest'
+        run: bun scripts/test-runner.ts scripts
+
+      - name: Upgrade coverage gate
+        # ADR-0073: every file in the effective template tree must keep a
+        # delivery claim. The checker existed but was wired to nothing.
+        if: matrix.os == 'ubuntu-latest'
+        run: bun scripts/check-upgrade-coverage.ts --strict
+
       - name: Hook reliability tests
         run: bun test tests/unit/hook-gateguard.test.ts tests/unit/hook-post-write-lifecycle.test.ts
 

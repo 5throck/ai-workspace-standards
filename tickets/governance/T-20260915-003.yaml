@@ -1,0 +1,16 @@
+schemaVersion: 1
+id: T-20260915-003
+kind: manual
+title: >-
+  validator-hardening: parity test between new-project and create-l3-scaffold
+  delivery trees with one shared exemption constant
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-15T10:32:33.549Z'
+history:
+  - at: '2026-09-15T10:32:33.549Z'
+    from: null
+    to: backlog
+result: null
+error: null
