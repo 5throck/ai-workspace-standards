@@ -1,6 +1,6 @@
 /**
  * test-runner.ts — Test Runner for TypeScript Test Suites
- * @version 1.1.1
+ * @version 1.2.0
  */
 import { readdirSync, existsSync, rmSync, mkdirSync } from 'fs';
 import { join } from 'path';
@@ -62,7 +62,8 @@ function getTestFiles(suite: TestSuite): string[] {
 async function executeTestFile(
   file: string,
   timeoutMs: number,
-  workerId: number
+  workerId: number,
+  execMode: 'bun-test' | 'bun-script' = 'bun-test'
 ): Promise<TestFileResult> {
   const startTime = Date.now();
   const workerTempDir = join('tests', '.temp', `worker-${workerId}`);
@@ -81,7 +82,12 @@ async function executeTestFile(
   let timer: ReturnType<typeof setTimeout> | null = null;
 
   try {
-    proc = Bun.spawn([process.execPath, 'test', file], {
+    // The `scripts` suite members are standalone assertion scripts (they exit
+    // non-zero on failure) — running them under `bun test` fails with
+    // "filters did not match any test files" because their names lack a bun
+    // test naming pattern. Everything else is a bun test file.
+    const argv = execMode === 'bun-script' ? [process.execPath, file] : [process.execPath, 'test', file];
+    proc = Bun.spawn(argv, {
       env,
       stdout: 'pipe',
       stderr: 'pipe',
@@ -212,16 +218,17 @@ export async function runTests(
   let results: TestFileResult[] = [];
 
   try {
+    const execMode = suiteName === 'scripts' ? 'bun-script' as const : 'bun-test' as const;
     if (isParallel && concurrency > 1) {
       try {
         results = await runInParallel(files, concurrency, (file, _, workerId) =>
-          executeTestFile(file, timeoutMs, workerId)
+          executeTestFile(file, timeoutMs, workerId, execMode)
         );
       } catch (err: any) {
         console.warn(`[test-runner] Warning: Parallel execution failed (${err.message}). Falling back to sequential execution...`);
         results = [];
         for (let i = 0; i < files.length; i++) {
-          const res = await executeTestFile(files[i], timeoutMs, 1);
+          const res = await executeTestFile(files[i], timeoutMs, 1, execMode);
           results.push(res);
         }
       }
@@ -229,7 +236,7 @@ export async function runTests(
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         console.log(`  Running: ${file}`);
-        const res = await executeTestFile(file, timeoutMs, 1);
+        const res = await executeTestFile(file, timeoutMs, 1, execMode);
         results.push(res);
       }
     }

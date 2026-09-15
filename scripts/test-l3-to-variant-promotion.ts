@@ -2,7 +2,7 @@
 /**
  * test-l3-to-variant-promotion.ts — E2E smoke test for the L3 scaffold → variant promotion path
  *
- * @version 1.2.0
+ * @version 1.2.1
  * @last_updated 2026-09-10
  *
  * v1.2.0: Tests 2.7 / 5d / 5e — context purification regression bait
@@ -378,6 +378,7 @@ try {
   console.log(`   Tests passed: ${testsPassed}`);
   console.log(`   Result: ${allPassed ? '✅ ALL PASSED' : '❌ FAILED'}`);
 } finally {
+  if (!process.env.KEEP_FIXTURES) cleanup();
   cleanup();
 }
 

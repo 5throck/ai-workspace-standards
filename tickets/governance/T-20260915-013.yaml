@@ -1,0 +1,17 @@
+schemaVersion: 1
+id: T-20260915-013
+kind: manual
+title: >-
+  validator-hardening: extend version parity to common_platform_skills across
+  .claude/.gemini trees and enforce cross-section equality with common_skills
+  (C-CM-03b)
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-09-15T10:33:07.369Z'
+history:
+  - at: '2026-09-15T10:33:07.369Z'
+    from: null
+    to: backlog
+result: null
+error: null

@@ -14,3 +14,11 @@
 - [x] Frontmatter follows standard format (`metadata.triggers:`)
 - [x] `last_reviewed` field present
 - [ ] Lifecycle doc created (`docs/lifecycle/skills/variant-feature.md`)
+
+## Metadata
+
+- **Current Phase**: production
+- **Owner**: scaffolding-expert
+- **Version**: 1.0.0
+- **Last Updated**: 2026-09-15 (Version/Owner backfilled after Check E silent-skip finding — 2026-09-15 project review H9)
+- **Last Reviewer**: pm

@@ -547,6 +547,75 @@
         ],
         "notes": "Scaffolded on new-project creation. Agents load this file at stage start."
       }
+    },
+    "co-price": {
+      "agent_manifest": {
+        "$ref": "_shared.agent_manifest"
+      },
+      "agent_overrides": {
+        "description": "Per-agent additive or replacing overrides with reason, review tracking, and affected aspects",
+        "required_fields": [
+          "type",
+          "reason",
+          "since",
+          "reviewed_by",
+          "overrides"
+        ],
+        "notes": "type: additive | replacing. overrides[]: list of aspects this override affects (agent-roster, governance-workflow, dispatch-protocol, etc.)."
+      },
+      "skill_manifest": {
+        "description": "Optional variant skill manifest: named skill groups with descriptions and keepInVariant/prune hints consumed by the variant-ization and upgrade pipelines",
+        "required_fields": [
+          "name",
+          "skills"
+        ],
+        "notes": "skills entries carry {name, description}; keepInVariant lists template-shipped skill dirs preserved during promotion pruning"
+      },
+      "promotionChecklist": {
+        "description": "Phase B promotion checklist persisted on the variant: ordered promotion steps with completion state, consumed by promote-variant and project-to-variant gating",
+        "required_fields": [
+          "items"
+        ],
+        "notes": "items[] carry {step, description, completed}; absence is valid — checklist surfaces only after a Phase A/B promotion records progress"
+      }
+    },
+    "co-safety": {
+      "agent_overrides": {
+        "description": "Per-agent additive or replacing overrides with reason, review tracking, and affected aspects",
+        "required_fields": [
+          "type",
+          "reason",
+          "since",
+          "reviewed_by",
+          "overrides"
+        ],
+        "notes": "type: additive | replacing. overrides[]: list of aspects this override affects (agent-roster, governance-workflow, dispatch-protocol, etc.)."
+      },
+      "script_manifest": {
+        "description": "Variant-local script declarations (scripts/<variant>/ helpers plus local harness entry points) validated by validate-templates B-03",
+        "required_fields": [
+          "local"
+        ],
+        "optional_fields": [
+          "hooks"
+        ],
+        "notes": "local maps script names to script_manifest entries; every declared path must exist and carry an @version header"
+      },
+      "skill_manifest": {
+        "description": "Optional variant skill manifest: named skill groups with descriptions and keepInVariant/prune hints consumed by the variant-ization and upgrade pipelines",
+        "required_fields": [
+          "name",
+          "skills"
+        ],
+        "notes": "skills entries carry {name, description}; keepInVariant lists template-shipped skill dirs preserved during promotion pruning"
+      },
+      "promotionChecklist": {
+        "description": "Phase B promotion checklist persisted on the variant: ordered promotion steps with completion state, consumed by promote-variant and project-to-variant gating",
+        "required_fields": [
+          "items"
+        ],
+        "notes": "items[] carry {step, description, completed}; absence is valid — checklist surfaces only after a Phase A/B promotion records progress"
+      }
     }
   },
   "designLint": {

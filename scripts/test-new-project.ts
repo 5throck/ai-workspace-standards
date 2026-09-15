@@ -2,7 +2,7 @@
 /**
  * test-new-project.ts — E2E Test for new-project.ts
  *
- * @version 1.1.0
+ * @version 1.1.1
  * @last_updated 2026-09-12
  *
  * v1.1.0: T-20260912-004 — new Test 25 pins pm.md extends-stub resolution (no
@@ -54,7 +54,10 @@ import { load as yamlLoad } from 'js-yaml';
 // ── Args ─────────────────────────────────────────────────────────────────────
 
 const args = process.argv.slice(2);
-const projectName = args.find(a => !a.startsWith('--'));
+// Default name keeps the harness runnable bare (test-runner scripts suite runs
+// every scripts/test-*.ts with no arguments); path-like names land in
+// tests/.temp/ per the v1.16.0 canonicalization rules.
+const projectName = args.find(a => !a.startsWith('--')) ?? `auto-${Date.now()}`;
 const variantArg  = (() => { const i = args.indexOf('--variant');  return i !== -1 ? args[i + 1] : 'co-develop'; })();
 const platformArg = (() => { const i = args.indexOf('--platform'); return i !== -1 ? args[i + 1] : 'both'; })();
 // --all-variants: loop the single-variant harness across every templates/co-* variant

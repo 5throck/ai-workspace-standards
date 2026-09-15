@@ -27,3 +27,11 @@ The generator also:
 - emits `promotionChecklist: "PROMOTION_CHECKLIST.md"` and creates a starter `PROMOTION_CHECKLIST.md`.
 
 See [`docs/designs/variant-readiness-gate.md`](../../../docs/designs/variant-readiness-gate.md).
+
+## Metadata
+
+- **Current Phase**: production
+- **Owner**: scaffolding-expert
+- **Version**: 1.3.0
+- **Last Updated**: 2026-09-15 (Version/Owner backfilled after Check E silent-skip finding — 2026-09-15 project review H9)
+- **Last Reviewer**: pm

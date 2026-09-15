@@ -16,8 +16,15 @@
  *   bun scripts/lifecycle-sync-audit.ts --json
  *   bun scripts/lifecycle-sync-audit.ts --fix
  *
- * @version 1.12.0
+ * @version 1.13.0
  * @last_updated 2026-09-15
+ * v1.13.0: Check E no longer stays fully silent on records without a Version
+ *          field — when the SKILL.md frontmatter declares one, the missing
+ *          record field is a WARNING with a backfill hint (the two
+ *          variant-ization records sat stale in exactly this blind spot; both
+ *          backfilled in the same batch). Absence stays advisory for records
+ *          predating the convention.
+ *          (spec: docs/reports/2026-09-15-project-review-template-fleet.md H9)
  * v1.12.0: New Check G — .githooks ↔ templates/common/.githooks mirror parity
  *          (presence-on-both-sides + CRLF-normalized byte equality), replacing
  *          audit.ts's long-suppressed S-03 check. The suppressed gap had
@@ -438,6 +445,17 @@ export function runCheckE(): SyncIssue[] {
           fix: `Update docs/lifecycle/skills/${entry} Version to ${frontmatter.version} (or fix the SKILL.md frontmatter if the record is correct)`,
         });
       }
+    } else if (!recordVersion && frontmatter.version) {
+      // H9 (2026-09-15 project review): a record with no Version field was
+      // permanently exempt from drift detection — the variant-ization records
+      // sat stale in exactly this blind spot. Warn so the field gets backfilled
+      // (warning, not error: records predating the convention stay advisory).
+      issues.push({
+        level: 'warning',
+        file: `docs/lifecycle/skills/${entry}`,
+        message: `Check E: lifecycle record has no Version field but skills/${skillName}/SKILL.md frontmatter declares ${frontmatter.version}`,
+        fix: `Add "- **Version**: ${frontmatter.version}" to docs/lifecycle/skills/${entry}`,
+      });
     }
 
     const recordOwner = extractRecordField(recordContent, 'Owner');

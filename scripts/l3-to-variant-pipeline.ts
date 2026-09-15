@@ -11,9 +11,15 @@
  * - Wave 3: Platform parity validation (validate-platform-parity.ts)
  * - Wave 3: Workspace integration (integration-helpers.ts)
  *
- * @version 1.17.1
+ * @version 1.18.0
  * @phase: Complete pipeline orchestration
  *
+ * v1.18.0 (2026-09-15): H4 — Phase 3.5/4.5 failures now return buildFailureResult()
+ *          instead of warn-and-continue (both are BLOCKING structural gates; an
+ *          exception slipped past them into generation). M3 — main() refuses to
+ *          run outside the workspace root (Phases 1.6/2.5/4/3.5-fix resolve
+ *          cwd-relative paths and silently degrade elsewhere).
+ *          (spec: docs/reports/2026-09-15-project-review-template-fleet.md)
  * v1.17.1 (2026-09-12): T-20260912-019 — the import.meta.main entry point now
  *          logs unhandled rejections and exits 1 instead of `.catch(console.error)`
  *          letting the process exit 0 (a failed pipeline could read as success).
@@ -669,7 +675,13 @@ export async function executeL3ToVariantPipeline(config: PipelineConfig): Promis
     console.log(`✅ PHASE 3.5 COMPLETE`);
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
-    console.warn(`⚠️  PHASE 3.5 WARNING: ${errorMsg}`);
+    // H4 (2026-09-15 project review): this phase BLOCKS on missing injection
+    // anchors — an exception here (unreadable file, encoding error) must fail
+    // the pipeline instead of slipping through as a warning into generation,
+    // which is exactly the silent-wrong-output class the gate exists for.
+    errors.push({ phase: '3.5-agents-md-preflight', error: errorMsg });
+    console.error(`❌ PHASE 3.5 FAILED: ${errorMsg}`);
+    return buildFailureResult(phases, errors, startTime);
   }
 
   // ============================================================================
@@ -1074,8 +1086,11 @@ export async function executeL3ToVariantPipeline(config: PipelineConfig): Promis
     console.log(`✅ PHASE 4.5 COMPLETE`);
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
-    // Non-fatal: log and continue
-    console.warn(`⚠️  PHASE 4.5 WARNING: ${errorMsg}`);
+    // H4 (2026-09-15 project review): same fail-closed rule as Phase 3.5 —
+    // this is a blocking structural gate, not an advisory check.
+    errors.push({ phase: '4.5-golden-gap-check', error: errorMsg });
+    console.error(`❌ PHASE 4.5 FAILED: ${errorMsg}`);
+    return buildFailureResult(phases, errors, startTime);
   }
 
   // ============================================================================
@@ -1400,6 +1415,19 @@ function buildFailureResult(
 
 async function main() {
   const args = process.argv.slice(2);
+
+  // M3 (2026-09-15 project review): Phases 1.6, 2.5, 4 and the 3.5 auto-fix
+  // spawn resolve paths against process.cwd() — from any other directory they
+  // silently degrade or fail. Fail loudly until all paths are import.meta-anchored
+  // like upgrade-project/project-to-variant.
+  {
+    let scriptRoot = new URL('..', import.meta.url).pathname;
+    scriptRoot = scriptRoot.replace(/^\/([A-Z]:)/, '$1').replace(/\/$/, '');
+    if (process.cwd().replace(/[\\/]+$/, '') !== scriptRoot) {
+      console.error(`ERROR: l3-to-variant-pipeline.ts must run from the workspace root (expected cwd ${scriptRoot}, got ${process.cwd()}).`);
+      process.exit(1);
+    }
+  }
 
   // Parse arguments
   const l3PathArg = args.find(arg => arg.startsWith('--l3-path='));

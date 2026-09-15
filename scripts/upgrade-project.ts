@@ -1,5 +1,18 @@
 #!/usr/bin/env bun
-// @version 1.27.0
+// @version 1.28.0
+// v1.28.0: Conflict-semantics + snapshot-honesty set (2026-09-15 project review,
+//          docs/reports/2026-09-15-project-review-template-fleet.md). C2/H1: the
+//          pre-upgrade stash now includes untracked files (git stash push -u) and
+//          the locally-modified set is snapshotted BEFORE the stash runs, so
+//          --dry-run's CONFLICT verdicts match apply instead of being silently
+//          downgraded to UPDATE once the tree is stashed clean. M4: a failed
+//          stash is a hard error (exit 1) — it previously masqueraded as "working
+//          tree clean", leaving the upgrade without rollback coverage. H3:
+//          --rollback exits 1 when the restore fails and is a no-op plan under
+//          --dry-run. H2: --prune-removed falls back to a direct delete when
+//          `git rm` fails on untracked files (sibling VARIANT-SCOPE SKILL PRUNE
+//          pattern) and no longer counts failed prunes. M1: the script exits 1
+//          when the security summary is FAILED instead of always exiting 0.
 // v1.27.0: Root-target guard — a <project-path> that resolves to the workspace ROOT is
 //           rejected with an error, and targets outside Projects/ print a warning. The
 //           root passes both pre-flight guards (existsSync, git-repo check), and the
@@ -466,6 +479,10 @@ console.log('========================================================\n');
 
 // G12: --rollback convenience flag
 if (rollback) {
+  if (dryRun) {
+    console.log('--- [DRY RUN] --rollback would restore the latest pre-upgrade stash. No changes made.');
+    if (import.meta.main) process.exit(0);
+  }
   console.log('--- Rolling back last upgrade ---');
   const stashList = spawnSync('git', ['-C', projectDir, 'stash', 'list'], { encoding: 'utf8' });
   const preUpgradeStash = stashList.stdout.split('\n').find(l => l.includes('pre-upgrade-snapshot'));
@@ -476,6 +493,8 @@ if (rollback) {
       console.log('✅ Pre-upgrade stash restored successfully.');
     } else {
       console.error(`ERROR: Failed to restore stash: ${pop.stderr}`);
+      // A failed rollback must not read as success (2026-09-15 project review H3).
+      if (import.meta.main) process.exit(1);
     }
   } else {
     console.log('INFO: No pre-upgrade stash found. Nothing to rollback.');
@@ -483,14 +502,39 @@ if (rollback) {
   if (import.meta.main) process.exit(0);
 }
 
+// H1 (2026-09-15 project review): capture the locally-modified set BEFORE any
+// stash runs. Apply mode stashes the tree, so consulting live git status from
+// the CONFLICT branches afterwards made every dry-run CONFLICT verdict
+// silently become UPDATE on the run that matters. Both modes now judge
+// against the same pre-upgrade snapshot of the tree.
+const preUpgradeDirty = new Set<string>();
+{
+  const st = spawnSync('git', ['-C', projectDir, 'status', '--porcelain'], { encoding: 'utf8' });
+  for (const line of (st.stdout || '').split('\n')) {
+    const entry = line.trim();
+    if (!entry) continue;
+    const dirtyPath = entry.slice(3).trim().replace(/^"|"$/g, '');
+    if (dirtyPath) preUpgradeDirty.add(dirtyPath);
+  }
+}
+
 if (!dryRun) {
-  console.log('--- Creating pre-upgrade git stash snapshot ---');
+  console.log('--- Creating pre-upgrade git stash snapshot (tracked + untracked) ---');
   const snapDate = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-  const stash = spawnSync('git', ['-C', projectDir, 'stash', 'push', '-m', `pre-upgrade-snapshot-${snapDate}`], { encoding: 'utf8' });
-  if (stash.status === 0 && !stash.stdout.includes('No local changes')) {
-    console.log('Snapshot saved. To revert: git stash pop or --rollback');
-  } else {
+  // C2 (2026-09-15 project review): without -u, untracked files were absent
+  // from the snapshot while CONFLICT branches still told the operator "the
+  // pre-upgrade stash covers rollback" — an untracked CONFLICT file was
+  // overwritten with no copy anywhere.
+  const stash = spawnSync('git', ['-C', projectDir, 'stash', 'push', '-u', '-m', `pre-upgrade-snapshot-${snapDate}`], { encoding: 'utf8' });
+  if (stash.status !== 0) {
+    // M4: a failed stash is NOT a clean tree — rollback coverage would be
+    // silently absent. Fail loudly instead of proceeding unprotected.
+    console.error(`ERROR: pre-upgrade stash failed (exit ${stash.status}): ${stash.stderr || stash.stdout}`);
+    if (import.meta.main) process.exit(1);
+  } else if (stash.stdout.includes('No local changes')) {
     console.log('INFO: Nothing to stash (working tree clean) — snapshot skipped.');
+  } else {
+    console.log('Snapshot saved. To revert: git stash pop or --rollback');
   }
   console.log('');
 }
@@ -976,11 +1020,13 @@ function findInsertionPosition(content: string, rel: string, key: string, patter
   return content.length;
 }
 
-/** Check if a project file has local modifications (via git status). */
+/** Check if a project file had local modifications at upgrade start (H1: judged
+ *  against the pre-upgrade dirty snapshot, NOT live git status — apply mode
+ *  stashes the tree, which would otherwise erase the CONFLICT verdicts the
+ *  operator reviewed in --dry-run). */
 function isLocallyModified(filePath: string): boolean {
-  const rel = relative(projectDir, filePath);
-  const status = spawnSync('git', ['-C', projectDir, 'status', '--porcelain', '--', rel], { encoding: 'utf8' });
-  return status.stdout.trim().length > 0;
+  const rel = relative(projectDir, filePath).replace(/\\/g, '/');
+  return preUpgradeDirty.has(rel);
 }
 
 let lockedChanged = 0, mergeChanged = 0, preserveListed = 0, syncChanged = 0;
@@ -2331,7 +2377,19 @@ if (pruneRemoved) {
         if (!tplBasenames.has(d) && existsSync(join(cat.projDir, d, 'SKILL.md'))) {
           console.log(`  PRUNE  ${cat.label}${d}/`);
           if (!dryRun) {
-            spawnSync('git', ['-C', projectDir, 'rm', '-rf', `${cat.label}${d}`], { encoding: 'utf8' });
+            const rm = spawnSync('git', ['-C', projectDir, 'rm', '-rf', `${cat.label}${d}`], { encoding: 'utf8' });
+            if (rm.status !== 0) {
+              // H2 (2026-09-15 project review): git rm fails for untracked
+              // files — fall back to a direct delete so the PRUNE verdict in
+              // this log matches disk state (same pattern as the VARIANT-SCOPE
+              // SKILL PRUNE pass).
+              try {
+                rmSync(join(projectDir, `${cat.label}${d}`), { recursive: true, force: true });
+              } catch (e) {
+                console.error(`  ERROR: failed to prune ${cat.label}${d}: ${(e as Error).message}`);
+                continue; // not pruned — do not count it
+              }
+            }
           }
           prunedCount++;
         }
@@ -2341,7 +2399,15 @@ if (pruneRemoved) {
         if (f.endsWith(cat.ext) && !tplBasenames.has(f) && !(cat.skipFiles || []).includes(f)) {
           console.log(`  PRUNE  ${cat.label}${f}`);
           if (!dryRun) {
-            spawnSync('git', ['-C', projectDir, 'rm', '-f', `${cat.label}${f}`], { encoding: 'utf8' });
+            const rm = spawnSync('git', ['-C', projectDir, 'rm', '-f', `${cat.label}${f}`], { encoding: 'utf8' });
+            if (rm.status !== 0) {
+              try {
+                rmSync(join(projectDir, `${cat.label}${f}`), { force: true });
+              } catch (e) {
+                console.error(`  ERROR: failed to prune ${cat.label}${f}: ${(e as Error).message}`);
+                continue; // not pruned — do not count it
+              }
+            }
           }
           prunedCount++;
         }
@@ -2377,19 +2443,25 @@ function secCheck(label: string, ok: boolean): void {
   if (!ok) securityPass = false;
 }
 
-secCheck('.gitleaks.toml exists', existsSync(join(projectDir, '.gitleaks.toml')));
-secCheck('.githooks/pre-commit exists', existsSync(join(projectDir, '.githooks', 'pre-commit')));
-const ga = existsSync(join(projectDir, '.gitattributes')) ? readFileSync(join(projectDir, '.gitattributes'), 'utf8') : '';
-secCheck('.gitattributes has eol=lf', ga.includes('eol=lf'));
-const gi = existsSync(join(projectDir, '.gitignore')) ? readFileSync(join(projectDir, '.gitignore'), 'utf8') : '';
-secCheck('.gitignore has .env pattern', gi.includes('.env'));
-
-const hooksPath = spawnSync('git', ['-C', projectDir, 'config', 'core.hooksPath'], { encoding: 'utf8' }).stdout.trim();
-if (hooksPath === '.githooks') {
-  console.log('  OK  git core.hooksPath = .githooks');
+if (dryRun) {
+  // 2026-09-15 project review follow-up: bootstrap artifacts (.gitleaks.toml
+  // etc.) are only materialized on apply — verifying their existence during a
+  // dry run reported spurious FAILED verdicts (and, since the M1 exit-code fix
+  // in this same version, a spurious exit 1). Apply mode verifies for real.
+  console.log('  SKIP (dry-run): bootstrap artifacts are materialized on apply — verified there.');
 } else {
-  console.log(`  WARN git core.hooksPath = '${hooksPath}' (expected .githooks)`);
-  if (!dryRun) {
+  secCheck('.gitleaks.toml exists', existsSync(join(projectDir, '.gitleaks.toml')));
+  secCheck('.githooks/pre-commit exists', existsSync(join(projectDir, '.githooks', 'pre-commit')));
+  const ga = existsSync(join(projectDir, '.gitattributes')) ? readFileSync(join(projectDir, '.gitattributes'), 'utf8') : '';
+  secCheck('.gitattributes has eol=lf', ga.includes('eol=lf'));
+  const gi = existsSync(join(projectDir, '.gitignore')) ? readFileSync(join(projectDir, '.gitignore'), 'utf8') : '';
+  secCheck('.gitignore has .env pattern', gi.includes('.env'));
+
+  const hooksPath = spawnSync('git', ['-C', projectDir, 'config', 'core.hooksPath'], { encoding: 'utf8' }).stdout.trim();
+  if (hooksPath === '.githooks') {
+    console.log('  OK  git core.hooksPath = .githooks');
+  } else {
+    console.log(`  WARN git core.hooksPath = '${hooksPath}' (expected .githooks)`);
     spawnSync('git', ['-C', projectDir, 'config', 'core.hooksPath', '.githooks']);
     console.log('       -> Auto-fixed: set core.hooksPath to .githooks');
   }
@@ -2447,3 +2519,6 @@ console.log(`  Country skills pruned: ${countryPrunedSkills}${dryRun ? ' (dry-ru
 if (pruneRemoved) console.log(`  Files pruned         : ${prunedCount}`);
 console.log(`  Security checks      : ${securityPass ? 'PASSED' : 'FAILED (see above)'}`);
 if (dryRun) console.log('\n  [DRY RUN] No files were modified.');
+// M1 (2026-09-15 project review): a failed security check must not read as a
+// green exit for scripted consumers (fleet runners, CI).
+if (import.meta.main && !securityPass) process.exit(1);
