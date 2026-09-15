@@ -18,7 +18,6 @@ bun scripts/agent-lifecycle-audit.ts
 bun scripts/skill-lifecycle-audit.ts
 
 # Review deprecated items
-bun scripts/sync-agent-status.ts
 bun scripts/sync-skill-status.ts
 
 # Check for docs/designs/*.md files missing from the spec registry
@@ -139,9 +138,6 @@ Both commands auto-register a spec via `spec-register.ts`. Run `bun scripts/vali
 
 **Commands**:
 ```bash
-# Sync agent status
-bun scripts/sync-agent-status.ts
-
 # Sync skill status
 bun scripts/sync-skill-status.ts
 

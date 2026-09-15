@@ -30,7 +30,6 @@ const SCRIPTS_TO_FIX = [
   'dispatch-parallel.ts',
   'dispatch-serial.ts',
   'retry-handler.ts',
-  'sync-agent-status.ts',
   'sync-skill-status.ts',
   'translate-readme.ts',
   'verify-agent-deliverables.ts',

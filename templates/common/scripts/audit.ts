@@ -1,4 +1,8 @@
-// @version 2.38.0
+// @version 2.38.1
+// v2.38.1: S-03 (.githooks parity) suppression note updated — the gap is now
+//          covered by lifecycle-sync-audit Check G (v1.12.0: .githooks vs
+//          templates/common/.githooks, CRLF-normalized byte parity), which
+//          runs in every full audit. No behavior change in audit.ts itself.
 // v2.38.0: Model registry gate (spec: docs/designs/2026-09-15-agent-metadata-drift-check-design.md) —
 //           when scripts/validate-model-registry.ts exists, spawn it: agents/*.md
 //           frontmatter model comments AND the tier→model mapping prose
@@ -552,8 +556,9 @@ if (!LIFECYCLE_ONLY) {
 
     // S-02: .sh/.ps1 parity check removed (dead code after ADR-0036 TypeScript migration)
 
-    // S-03: .githooks parity check - Suppressed (Git Bash assumed on Windows)
-    // if (fs.existsSync('.githooks')) { ... }
+    // S-03: .githooks parity check — superseded by lifecycle-sync-audit Check G
+    // (.githooks vs templates/common/.githooks, CRLF-normalized byte parity),
+    // running in every full audit since lifecycle-sync-audit v1.12.0 (2026-09-15).
 
 
     // Check: no non-standard .md files at project root (file organization policy)

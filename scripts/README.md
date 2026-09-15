@@ -102,11 +102,6 @@ deprecated agent references, missing fields.
 **Usage**: `bun scripts/agent-lifecycle-audit.ts`
 **Runs automatically**: pre-commit hook when `agents/*.md` files are staged.
 
-#### `sync-agent-status.ts`
-**Purpose**: Synchronizes agent status between agent files and AGENTS.md.
-**Usage**: `bun scripts/sync-agent-status.ts`
-
----
 
 ### Skill Lifecycle Scripts (Bun / TypeScript)
 
