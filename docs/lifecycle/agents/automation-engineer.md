@@ -42,7 +42,7 @@
 
 **Can Lead Phases**: [4]
 **Can Support In**: [0, 2]
-**Tier**: low (for simple/coding tasks)
+**Tier**: low
 **Communication Style**: async (can work independently on implementation tasks)
 
 ## Script Types

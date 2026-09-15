@@ -42,7 +42,7 @@
 
 **Can Lead Phases**: [0, 4]
 **Can Support In**: [6]
-**Tier**: low (for scaffolding tasks)
+**Tier**: low
 **Communication Style**: async (can work independently on setup)
 
 ## Scaffolding Tasks

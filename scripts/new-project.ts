@@ -1,5 +1,11 @@
 #!/usr/bin/env bun
-// @version 1.15.1
+// @version 1.16.0
+// v1.16.0: Bare project names scaffold under Projects/<name> (canonical layout) instead
+//           of the workspace root — root-level scaffolds are how the 2026-09-12
+//           root-upgrade incident litter accumulated (memory/2026-09-12.md). Path-like
+//           names (containing '/') remain explicit workspace-relative destinations so
+//           scripts/test-new-project.ts keeps scaffolding into tests/.temp/. A resolved
+//           target that escapes the workspace root is rejected.
 // v1.15.1: T-20260912-022 — usage strings now list `codex` in the --platform
 //           choices (argument validation already accepted it; docs-only fix).
 // v1.15.0: T-20260912-004 — pm.md extends-stub resolution is now frontmatter-based
@@ -11,7 +17,7 @@
 //           — §2.5b sanitizer blanks the L0-reference text instead of dropping the
 //           line (docs/context.md version footer survives for upgrade version-sync);
 //           shared pattern moved to helpers/l0-ref-policy.ts.
-// new-project.ts — Scaffold a new project under the workspace root
+// new-project.ts — Scaffold a new project under Projects/ (or an explicit workspace-relative path)
 // Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|codex|both] [--version X.Y.Z] [--country <CODE>]
 //
 // Migrated from new-project.sh/ps1 per ADR-0036. No file permission manipulation.
@@ -97,7 +103,20 @@ if (!['claude', 'antigravity', 'both', 'codex'].includes(platform)) {
 
 // ── Workspace root resolution ──────────────────────────────────────────────────
 const workspaceRoot = resolve(import.meta.dir, '..');
-const projectDir = join(workspaceRoot, projectName);
+// Bare names scaffold under Projects/<name> (canonical layout). Path-like names
+// (containing '/') are explicit workspace-relative destinations — the E2E harness
+// (scripts/test-new-project.ts) scaffolds into tests/.temp/ this way.
+const projectDir = projectName.includes('/')
+  ? resolve(workspaceRoot, projectName)
+  : join(workspaceRoot, 'Projects', projectName);
+// Containment guard (incident 2026-09-12): never resolve to — or outside — the
+// workspace root itself.
+if (resolve(projectDir) === workspaceRoot || relative(workspaceRoot, resolve(projectDir)).startsWith('..')) {
+  console.error(`❌ Project directory escapes the workspace: ${projectDir}`);
+  if (import.meta.main) {
+    process.exit(1);
+  }
+}
 
 // ── Variant detection & validation ────────────────────────────────────────────
 function getValidVariants(fromTag?: string): string[] {

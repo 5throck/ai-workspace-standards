@@ -18,7 +18,7 @@
 ### Production Phase
 
 - [x] Agent role clearly defined: Orchestrates Phases 0, 2, 5, 6 only
-- [x] Tier assignment: High-tier (claude-opus-5-0, gemini-3.1-pro)
+- [x] Tier assignment: Medium-tier (claude-sonnet-5-0, gemini-3.8-flash, gpt-5.6-terra)
 - [x] Single entry point: All agent dispatch goes through PM
 - [x] 3-tier strategy enforcement documented
 - [x] Agent roster specified (architect, automation-engineer, etc.)
@@ -55,7 +55,7 @@
 **Can Lead Phases**: [0, 2, 5]
 **Can Support In**: []
 **Auto-Dispatch To**: architect, automation-engineer, auditor, docs-writer, security-expert, scaffolding-expert
-**Tier**: high
+**Tier**: medium
 **Communication Style**: sync (PM gates require user confirmation)
 
 ## Metadata

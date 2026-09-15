@@ -7,8 +7,8 @@ description: >
   Use when: creating new agents, updating agent metadata/frontmatter, validating agent structures,
   or managing agent roles and 3-tier configurations.
 owner: pm
-version: 1.0.0
-last_reviewed: 2026-05-30
+version: 1.1.0
+last_reviewed: 2026-09-15
 relates_to:
   - skill: skill-lifecycle-manager
     type: composes_with
@@ -66,8 +66,10 @@ status: active
 description: "Short sentence on what the agent does"
 tier:
   claude: high | medium | low
+  gemini: high | medium | low
   antigravity: high | medium | low
   gemini-cli: high | medium | low
+  codex: high | medium | low
 ---
 ```
 
@@ -101,6 +103,25 @@ tier:
 
 ---
 
+## Changing an Agent's Tier
+
+**Purpose**: Keep every tier declaration surface in sync when a tier changes.
+
+Tier is declared in multiple places, and `docs/workspace-schema.json` → `agent_tiers` is the single source of truth (the `agent-model-gate` hook reads it at runtime). **Update surfaces in this order**:
+
+1. `docs/workspace-schema.json` → `agent_tiers` (SSOT — change this first)
+2. `agents/<name>.md` frontmatter `tier:` block (all 5 platforms, same value)
+3. `AGENTS.md` §1 Agent Roster and §4.1 Subagent Roster Tier cells
+4. `docs/lifecycle/agents/<name>.md` `**Tier**:` field (and any stale tier prose)
+
+Then run the tier drift check — it must pass before the change lands:
+
+```bash
+bun scripts/lifecycle-sync-audit.ts   # Check F: agent tiers vs agent_tiers SSOT
+```
+
+---
+
 ## Step 5: Validate Agent Lifecycle
 
 **Purpose**: Ensure the agent passes all programmatic lifecycle audits.
@@ -116,10 +137,16 @@ To verify a specific agent:
 bun scripts/agent-verify.ts <agent-name>
 ```
 
+To verify tier consistency across all declaration surfaces (schema SSOT, frontmatter, AGENTS.md rosters, lifecycle records):
+```bash
+bun scripts/lifecycle-sync-audit.ts   # Check F
+```
+
 **Validation Checklist**:
 - [ ] No orphaned agents (every `.md` file in `agents/` is listed in `AGENTS.md`)
 - [ ] Frontmatter passes all audit checks
 - [ ] Tier mappings are correctly structured
+- [ ] Tier drift check passes (Check F: frontmatter, rosters, and lifecycle record all match `agent_tiers`)
 - [ ] **Recommended**: Consider declaring the skill's deployment scope — is it needed in all variant projects (common) or workspace-root-only? Workspace-only skills should not be placed in `templates/common/skills/`.
 - [ ] **If research/investigation role**: agent content includes source citation requirements and uncertainty disclosure (`⚠️ Unverified`)
 - [ ] **If numerical computation role** (aerospace, finance, precision control, scientific): agent content includes Computational Integrity Standards — states that calculations must be delegated to external tools (Fortran, Python+NumPy, etc.) and never performed by AI directly

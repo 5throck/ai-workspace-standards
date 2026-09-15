@@ -1,14 +1,14 @@
 ---
-last_updated: 2026-09-12
+last_updated: 2026-09-15
 name: pm
 role: orchestrator
 status: active
 tier:
-  claude: high        # claude-opus-5-0
-  gemini: high        # gemini-3.1-pro
-  antigravity: high   # gemini-3.1-pro
-  gemini-cli: high    # gemini-3.1-pro
-  codex: high      # gpt-5.6-sol
+  claude: medium        # claude-sonnet-5-0
+  gemini: medium        # gemini-3.8-flash
+  antigravity: medium   # gemini-3.8-flash
+  gemini-cli: medium    # gemini-3.8-flash
+  codex: medium         # gpt-5.6-terra
 model: inherit
 color: yellow
 description: 'Orchestrates Phases 0, 1-2, 5. Enforces quality gates. Use when: "Managing workflow", "Coordinating multi-phase tasks", "PM orchestration needed"'

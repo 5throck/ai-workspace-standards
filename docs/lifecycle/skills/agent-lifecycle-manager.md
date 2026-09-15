@@ -34,5 +34,6 @@
 
 - **Current Phase**: production
 - **Owner**: pm
-- **Last Updated**: 2026-09-12 (Owner corrected lifecycle-manager → pm to match SKILL.md frontmatter, T-20260912-010)
+- **Version**: 1.1.0
+- **Last Updated**: 2026-09-15 (v1.1.0 — frontmatter template corrected to 5 tier platforms; tier-change procedure + Check F drift check added, spec 2026-09-15-agent-tier-drift-check)
 - **Last Reviewer**: lifecycle-manager

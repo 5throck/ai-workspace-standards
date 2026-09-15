@@ -138,9 +138,11 @@ skill files on disk. Detects missing or orphaned skill references.
 **Usage**: `bun scripts/sync-skill-status.ts`
 
 #### `new-project.ts`
-**Purpose**: Scaffolds a new project under the workspace root. Copies `templates/common/`
-and an optional variant, substitutes `[Project Name]` placeholders, strips L1-B metadata
-from `agents/pm.md`, flattens `docs/_common/`, and runs the post-scaffold audit.
+**Purpose**: Scaffolds a new project under `Projects/<name>` (bare names; path-like names
+are explicit workspace-relative destinations, used by `test-new-project.ts`). Copies
+`templates/common/` and an optional variant, substitutes `[Project Name]` placeholders,
+strips L1-B metadata from `agents/pm.md`, flattens `docs/_common/`, and runs the
+post-scaffold audit.
 **Usage**: `bun scripts/new-project.ts <name> <variant>`
 **Breaking change from**: `bash scripts/new-project.sh` / `.\scripts\new-project.ps1` (removed 2026-06-11, ADR-0036)
 **Note**: L0 script (workspace infrastructure only). Changes must be versioned in SCRIPTS.md.
@@ -359,4 +361,4 @@ writeFileSync('file.txt', content, 'utf-8');
 ```
 
 ---
-*Last Updated: 2026-09-14*
+*Last Updated: 2026-09-15*

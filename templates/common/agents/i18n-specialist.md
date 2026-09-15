@@ -8,11 +8,12 @@ tier:
   gemini: medium        # gemini-3.8-flash
   antigravity: medium   # gemini-3.8-flash
   gemini-cli: medium    # gemini-3.8-flash
+  codex: medium         # gpt-5.6-terra
 model: inherit
 lifecycle:
   phase: production
   created: "2026-08-24"
-  last_updated: "2026-08-24"
+  last_updated: "2026-09-15"
   governance: docs/lifecycle/agents/i18n-specialist.md
 version: "1.0.0"
 last_reviewed: "2026-08-24"

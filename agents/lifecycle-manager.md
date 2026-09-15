@@ -105,7 +105,7 @@ If missing, `verify-platform-lifecycle.ts` (Check E) will FAIL and block the com
 1. **State Monitoring**: Run these tools to get current lifecycle state:
    - `bun run agent:verify` — agent domain
    - `bun scripts/skill-lifecycle-audit.ts` — skill domain
-   - `bun scripts/lifecycle-sync-audit.ts` — script domain (Check A/B/C/D)
+   - `bun scripts/lifecycle-sync-audit.ts` — script domain (Check A/B/C/D) + agent tier drift (Check F: frontmatter, L1 templates, AGENTS.md rosters, lifecycle records vs `agent_tiers` SSOT)
    - `bun scripts/verify-platform-lifecycle.ts` — platform command/skill domain (Check E/F/G/H)
    - `bun scripts/validate-templates.ts` — variant and template domains
 
@@ -119,7 +119,7 @@ If missing, `verify-platform-lifecycle.ts` (Check E) will FAIL and block the com
    - `docs/templates/common.lifecycle.json` — L1 base layer version and propagation state
    - `docs/templates/VERSION_REGISTRY.json` — variant version and status registry
 
-4. **Drift Reporting**: Produce structured drift reports for PM when policy ≠ reality.
+4. **Drift Reporting**: Produce structured drift reports for PM when policy ≠ reality. Agent tier changes MUST surface here: run Check F (`bun scripts/lifecycle-sync-audit.ts`) and report any agent_tiers/frontmatter/roster/record disagreement — `docs/workspace-schema.json agent_tiers` is the SSOT, so fix the SSOT first and propagate outward.
 
 ## Dispatch Trigger
 

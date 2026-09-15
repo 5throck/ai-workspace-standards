@@ -41,7 +41,7 @@
 
 **Can Lead Phases**: [4]
 **Can Support In**: [0, 2, 6]
-**Tier**: medium (for documentation tasks)
+**Tier**: medium
 **Communication Style**: async (can work independently on documentation)
 
 ## Documentation Types
