@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-09-16T02:59:02.319Z
+**Generated**: 2026-09-16T09:03:22.747Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -122,13 +122,13 @@
 | generate-version-manifest.ts | 1.5.0 | scripts/generate-version-manifest.ts | bun, js-yaml |
 | ingest-external-skills.ts | 1.1.0 | scripts/ingest-external-skills.ts | N/A |
 | ingest-security-frameworks.ts | 1.1.0 | scripts/ingest-security-frameworks.ts | N/A |
-| l3-to-variant-pipeline.ts | 1.18.0 | scripts/l3-to-variant-pipeline.ts | child_process, fs, path, process |
+| l3-to-variant-pipeline.ts | 1.19.0 | scripts/l3-to-variant-pipeline.ts | child_process, fs, path, process |
 | lifecycle-sync-audit.ts | 1.14.0 | scripts/lifecycle-sync-audit.ts | js-yaml |
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
 | md-to-ooxml.ts | 1.2.0 | scripts/md-to-ooxml.ts | fs, path |
 | new-project.ts | 1.19.0 | scripts/new-project.ts | js-yaml |
 | procedure-coverage.ts | 1.0.0 | scripts/procedure-coverage.ts | js-yaml |
-| project-to-variant.ts | 1.3.0 | scripts/project-to-variant.ts | N/A |
+| project-to-variant.ts | 1.4.0 | scripts/project-to-variant.ts | N/A |
 | promote-context-section.ts | 1.0.0 | scripts/promote-context-section.ts | N/A |
 | propagate-to-templates.ts | 2.15.1 | scripts/propagate-to-templates.ts | js-yaml |
 | qa-gate.ts | 1.3.0 | scripts/qa-gate.ts | bun |
@@ -155,7 +155,7 @@
 | tag-template.ts | 1.1.0 | scripts/tag-template.ts | bun |
 | team-builder.ts | 1.4.0 | scripts/team-builder.ts | N/A |
 | test-extends-validator.ts | 1.0.1 | scripts/test-extends-validator.ts | fs, path |
-| test-l3-to-variant-promotion.ts | 1.3.0 | scripts/test-l3-to-variant-promotion.ts | bun |
+| test-l3-to-variant-promotion.ts | 1.5.0 | scripts/test-l3-to-variant-promotion.ts | bun |
 | test-new-project.ts | 1.2.0 | scripts/test-new-project.ts | bun, js-yaml |
 | test-platform-parity.ts | 0.2.4 | scripts/test-platform-parity.ts | fs, path |
 | test-runner.ts | 1.2.0 | scripts/test-runner.ts | fs, os, path |

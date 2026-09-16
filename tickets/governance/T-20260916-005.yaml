@@ -6,12 +6,33 @@ title: >-
   subprocess tests and promotion E2E second-run assertion (H5 design
   2026-09-16-variant-ization-overlay-guard)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-16T00:40:32.936Z'
 history:
   - at: '2026-09-16T00:40:32.936Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-16T05:05:21.445Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-16T05:05:21.457Z'
+    from: waiting
+    to: review
+  - at: '2026-09-16T09:02:45.560Z'
+    from: review
+    to: done
+result: >-
+  Landed in wave A: promotion E2E Test 6 pins pipeline second-run refusals (beta
+  names --overlay-variant, stable refuses even with overlayVariant, no stray
+  .overlay-backup-* in templates/); Test 7 pins project-to-variant subprocess
+  enforcement (beta refusal naming the flag, stable no-bypass, corrupt
+  variant.json refusal, authorized dry-run proceeds non-destructively).
+  Originally the subprocess arm lived in
+  tests/unit/variant-overlay-guard.test.ts but staging real templates/co-*
+  fixtures inside the parallel unit suite tripped the variant-set invariants
+  (the T-20260916-001 interference class) — moved to the sequential E2E harness
+  with a trivial 2-file source below the complexity-routing gate. 24 unit tests
+  over the pure helpers (scratch roots only). Suite: unit parallel runner green,
+  E2E 23/23.
 error: null

@@ -1,4 +1,13 @@
-// @version 1.3.0
+// @version 1.4.0
+// v1.4.0: Overlay guard + rollback (design docs/designs/2026-09-16-variant-ization-overlay-guard-design.md,
+//          tickets T-20260916-003/-004). Fail-closed exists-guard on templates/<target>/ immediately
+//          after targetDir resolution (§3.2 point 2): absent → proceed; corrupt/foreign target → hard
+//          refuse; stable/deprecated target → hard refuse (NO bypass); beta/pre-release target → refuse
+//          unless --overlay-variant. Authorized overlays snapshot the previous tree via the
+//          rollback-partial-project.ts snapshot trio BEFORE the copy loop; an M13/H11-style
+//          process.on('exit') hook rolls back (fresh: rm via rollbackPartialProject, overlay: snapshot
+//          restore) on ANY nonzero exit — including copy failures and the Variant Readiness Gate — and
+//          discards the snapshot on success.
 // v1.2.1: Corrected the manual review checklist's CLAUDE.md/GEMINI.md line — most variants
 //          ship neither (scaffolded from templates/common instead); if one does, the checklist
 //          now points at verifying COMMON-CLAUDE/COMMON-GEMINI marker integrity instead of the
@@ -17,6 +26,7 @@
  *   bun scripts/project-to-variant.ts --source Projects/co-legal --target co-legal
  *   bun scripts/project-to-variant.ts --source Projects/co-legal --target co-legal --dry-run
  *   bun scripts/project-to-variant.ts --source Projects/co-legal --target co-legal --force
+ *   bun scripts/project-to-variant.ts --source Projects/co-legal --target co-legal --overlay-variant
  *   bun scripts/project-to-variant.ts --source Projects/co-legal --target co-legal --design-doc docs/designs/co-legal-design.md
  *   bun scripts/project-to-variant.ts --source Projects/co-legal --target co-legal --threshold-files 60 --threshold-dirs 5
  */
@@ -24,6 +34,13 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { execFileSync } from 'node:child_process';
+import { evaluateVariantOverlayTarget } from './lib/variant-overlay-guard.ts';
+import {
+  discardOverlaySnapshot,
+  restoreOverlaySnapshot,
+  rollbackPartialProject,
+  snapshotDirForOverlay,
+} from './helpers/rollback-partial-project.ts';
 
 const GREEN = '\x1b[32m';
 const RED = '\x1b[31m';
@@ -46,6 +63,12 @@ function getArg(flag: string): string | undefined {
 }
 const DRY_RUN = args.includes('--dry-run');
 const FORCE = args.includes('--force');
+// Overlay authorization (v1.4.0): permits overwriting an EXISTING pre-release
+// (beta) variant template. The flag documentation states the trade-off (design
+// §3.3): an authorized overlay destroys the previous beta tree as a unit —
+// per-file history lives in git, not on disk. stable/deprecated targets refuse
+// even WITH this flag; re-promoting one requires editing its variant.json.
+const OVERLAY_VARIANT = args.includes('--overlay-variant');
 const designDocArg = getArg('--design-doc');
 const THRESHOLD_FILES = Number(getArg('--threshold-files') ?? 40);
 const THRESHOLD_DIRS = Number(getArg('--threshold-dirs') ?? 3);
@@ -55,7 +78,7 @@ const sourceArg = getArg('--source');
 const targetArg = getArg('--target');
 
 if (!sourceArg || !targetArg) {
-  fail('Usage: bun scripts/project-to-variant.ts --source <path> --target <variant-name> [--dry-run] [--force] [--design-doc <path>] [--threshold-files <n>] [--threshold-dirs <n>]');
+  fail('Usage: bun scripts/project-to-variant.ts --source <path> --target <variant-name> [--dry-run] [--force] [--overlay-variant] [--design-doc <path>] [--threshold-files <n>] [--threshold-dirs <n>]');
 }
 
 if (!/^co-[a-z][a-z0-9-]{1,30}$/.test(targetArg)) {
@@ -88,6 +111,24 @@ if (fs.existsSync(srcVariantJson)) {
 }
 
 const targetDir = path.join(WORKSPACE_ROOT, 'templates', targetArg);
+
+// ============================================================================
+// OVERLAY GUARD (v1.4.0, design 2026-09-16-variant-ization-overlay-guard §3.2
+// point 2) — fail-closed classification of the target slot BEFORE any write,
+// immediately after targetDir resolution. Read-only: refusal exits here, a
+// proceeding verdict carries the classification into the rollback arming below.
+// ============================================================================
+const overlayVerdict = evaluateVariantOverlayTarget({
+  targetDir,
+  workspaceRoot: WORKSPACE_ROOT,
+  overlayAuthorized: OVERLAY_VARIANT,
+  explicitOutput: false, // this script derives the target from --target; no --output exists
+});
+if (overlayVerdict.action === 'refuse') {
+  fail(overlayVerdict.message);
+}
+const overlayMode = overlayVerdict.classification === 'overlay-authorized';
+const freshMode = overlayVerdict.classification === 'absent';
 
 console.log(`${CYAN}=== project-to-variant.ts ===${RESET}`);
 console.log(`Source : ${path.relative(WORKSPACE_ROOT, sourceDir)}`);
@@ -219,6 +260,64 @@ if (variantUnique.length > THRESHOLD_FILES || largeDomainDirs.length > THRESHOLD
 
 let copied = 0;
 let errored = 0;
+
+// ============================================================================
+// ROLLBACK ARMING (v1.4.0, design §4.1/§4.2/§4.3) — placed after every
+// pre-flight check that can refuse without writing (guard, routing check), so
+// the hook only exists once this run OWNS the target slot. Two modes:
+//   fresh  — this run created the target; failure removes the partial tree via
+//            rollbackPartialProject (design §4.1: whole-directory rm is exact).
+//   overlay — the target pre-existed and --overlay-variant authorized the
+//            overwrite; the previous tree was snapshotted (rename) below and
+//            is RESTORED on failure — rm-based rollback would delete the live
+//            variant, not this run's output (design §4.2).
+// The 'exit' hook fires synchronously on every exit path — explicit fail()
+// exits, the errored>0 exit, and natural success — so copy failures AND a
+// Variant Readiness Gate failure both roll back instead of straying a partial
+// tree (the pre-v1.4.0 behavior class H5 names).
+// ============================================================================
+let overlayBackupPath: string | undefined;
+let runSucceeded = false;
+
+if (!DRY_RUN && import.meta.main) {
+  if (overlayMode) {
+    const snap = snapshotDirForOverlay(targetDir, WORKSPACE_ROOT);
+    if (!snap.snapshotted || !snap.backupPath) {
+      fail(`OVERLAY GUARD: could not snapshot the existing variant tree before overlay — ${snap.reason ?? 'unknown error'}`);
+    }
+    overlayBackupPath = snap.backupPath;
+    console.log(`${YELLOW}Overlay authorized — previous tree snapshotted to ${path.relative(WORKSPACE_ROOT, snap.backupPath)}${RESET}`);
+  }
+
+  process.on('exit', () => {
+    try {
+      if (overlayMode && overlayBackupPath) {
+        if (runSucceeded) {
+          const discarded = discardOverlaySnapshot(overlayBackupPath, WORKSPACE_ROOT);
+          if (!discarded.discarded) {
+            console.error(`OVERLAY GUARD: run succeeded but the snapshot could not be discarded (${discarded.reason}) — remove ${overlayBackupPath} manually.`);
+          }
+        } else {
+          const restored = restoreOverlaySnapshot(overlayBackupPath, targetDir, WORKSPACE_ROOT);
+          if (restored.restored) {
+            console.error(`OVERLAY GUARD: run failed — previous variant tree restored from ${path.relative(WORKSPACE_ROOT, overlayBackupPath)}.`);
+          } else {
+            console.error(`OVERLAY GUARD: run failed AND restore failed (${restored.reason}). The original error above stands; snapshot kept at ${overlayBackupPath}.`);
+          }
+        }
+      } else if (freshMode && !runSucceeded) {
+        const rolledBack = rollbackPartialProject(targetDir, WORKSPACE_ROOT);
+        if (rolledBack.rolledBack) {
+          console.error(`ROLLBACK: removed the partially promoted tree at ${path.relative(WORKSPACE_ROOT, targetDir)}.`);
+        } else if (rolledBack.reason && rolledBack.reason !== 'nothing to roll back') {
+          console.error(`ROLLBACK: could not remove ${targetDir} — ${rolledBack.reason}. The original error above stands.`);
+        }
+      }
+    } catch (hookError) {
+      console.error(`ROLLBACK: exit-hook error (original error above stands): ${hookError instanceof Error ? hookError.message : String(hookError)}`);
+    }
+  });
+}
 
 for (const f of variantUnique) {
   const dest = path.join(targetDir, f.rel);
@@ -407,6 +506,11 @@ ${CYAN}=== Manual Review Checklist ===${RESET}
 
 Run bun scripts/audit.ts after completing the checklist.
 `);
+
+// Success marker for the rollback exit hook (v1.4.0): only a run that copied
+// every file AND passed/forced the readiness gate gets here. The errored>0
+// exit below keeps runSucceeded=false so the hook rolls the partial tree back.
+runSucceeded = errored === 0;
 
 if (import.meta.main) {
   if (errored > 0) { console.error(`${RED}${errored} file(s) failed to copy${RESET}`); process.exit(1); }

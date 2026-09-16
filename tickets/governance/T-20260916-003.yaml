@@ -6,12 +6,30 @@ title: >-
   project-to-variant and l3-to-variant-pipeline (H5 design
   2026-09-16-variant-ization-overlay-guard)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-16T00:40:32.911Z'
 history:
   - at: '2026-09-16T00:40:32.911Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-16T05:05:21.395Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-16T05:05:21.409Z'
+    from: waiting
+    to: review
+  - at: '2026-09-16T09:02:45.507Z'
+    from: review
+    to: done
+result: >-
+  Landed in wave A: shared guard scripts/lib/variant-overlay-guard.ts 1.0.0 —
+  fail-closed classification of templates/co-<name>/ from its own variant.json
+  (absent proceed; corrupt refuse; stable/deprecated refuse with no bypass; beta
+  refuse unless --overlay-variant; explicit output outside templates/ exempt).
+  Enforced at all three design points: l3-to-variant-pipeline.ts 1.19.0 Phase
+  0.6 (before the Phase 3.5 auto-fix), project-to-variant.ts 1.4.0 (before the
+  copy loop), helpers/generate-variant.ts (default-output resolution). Spec
+  2026-09-16-variant-ization-overlay-guard-design advanced approved ->
+  implemented.
 error: null

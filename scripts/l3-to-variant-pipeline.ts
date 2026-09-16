@@ -11,9 +11,26 @@
  * - Wave 3: Platform parity validation (validate-platform-parity.ts)
  * - Wave 3: Workspace integration (integration-helpers.ts)
  *
- * @version 1.18.0
+ * @version 1.19.0
  * @phase: Complete pipeline orchestration
  *
+ * v1.19.0 (2026-09-16): Overlay guard + module-level rollback (design
+ *          docs/designs/2026-09-16-variant-ization-overlay-guard-design.md,
+ *          tickets T-20260916-003/-004). PHASE 0.6 (new) — fail-closed
+ *          exists-guard on the promotion target BEFORE Phase 1 (must precede
+ *          the Phase 3.5 auto-fix, which can write into a live
+ *          templates/<variant> when the L3 source lives under templates/):
+ *          absent → proceed; corrupt/foreign target → hard refuse;
+ *          stable/deprecated → hard refuse (no bypass); beta/pre-release →
+ *          refuse unless --overlay-variant (config.overlayVariant); explicit
+ *          --output outside templates/ → exempt (E2E harness pattern).
+ *          Rollback (§4.3) is wired through the MODULE failure paths — NOT a
+ *          process-level hook, because the E2E harness imports the execute
+ *          function: fresh-create failures rm the partial tree via
+ *          rollbackPartialProject; authorized-overlay failures restore the
+ *          pre-run snapshot (rename trio in rollback-partial-project.ts);
+ *          green overlay runs discard the snapshot. Every rollback is
+ *          best-effort and never masks the original phase error.
  * v1.18.0 (2026-09-15): H4 — Phase 3.5/4.5 failures now return buildFailureResult()
  *          instead of warn-and-continue (both are BLOCKING structural gates; an
  *          exception slipped past them into generation). M3 — main() refuses to
@@ -110,11 +127,18 @@
  * - lib/error-handling.ts (Error management)
  */
 
-import { join, basename, dirname } from 'path';
+import { join, basename, dirname, resolve } from 'path';
 import { existsSync, mkdirSync, readFileSync } from 'fs';
 import { cwd } from 'process';
 import { execFileSync, spawnSync } from 'child_process';
 import { readUTF8File } from './lib/encoding-utils.ts';
+import { evaluateVariantOverlayTarget } from './lib/variant-overlay-guard.ts';
+import {
+  discardOverlaySnapshot,
+  restoreOverlaySnapshot,
+  rollbackPartialProject,
+  snapshotDirForOverlay,
+} from './helpers/rollback-partial-project.ts';
 import { scanL3Project, L3ScanResult } from './helpers/scan-l3-project.ts';
 import {
   normalizeAgentSkills,
@@ -172,6 +196,13 @@ export interface PipelineConfig {
   autoFixAgentsMd?: boolean;
   /** Output path for variant (optional) */
   outputPath?: string;
+  /**
+   * Authorize overwriting an EXISTING pre-release (beta) variant template
+   * (v1.19.0). The overlay destroys the previous tree as a unit — per-file
+   * history lives in git, not on disk. stable/deprecated targets refuse even
+   * with this flag (design 2026-09-16-variant-ization-overlay-guard §3.3).
+   */
+  overlayVariant?: boolean;
   /** Variant version (default: '0.1.0') */
   version?: string;
   /** Variant lifecycle status (default: 'beta') */
@@ -262,9 +293,13 @@ function matchCountryScopedSkill(targetPath: string, scopedSkills: Set<string>):
 
 /**
  * Execute complete L3-to-variant pipeline
- * @version 1.3.0 — Phase 3.5/4.5 failures now return buildFailureResult() instead of
- *                  calling process.exit(1) directly, so programmatic callers can handle
- *                  failure without their host process dying (Issue A.3).
+ * @version 1.5.0 — v1.19.0 adds the Phase 0.6 overlay guard (before Phase 1)
+ *                  and module-level rollback on every failure path
+ *                  (failWithRollback); green overlay runs discard the snapshot.
+ *                  v1.3.0 — Phase 3.5/4.5 failures returned buildFailureResult()
+ *                  instead of calling process.exit(1) directly, so programmatic
+ *                  callers can handle failure without their host process dying
+ *                  (Issue A.3).
  */
 export async function executeL3ToVariantPipeline(config: PipelineConfig): Promise<PipelineResult> {
   const startTime = Date.now();
@@ -326,6 +361,102 @@ export async function executeL3ToVariantPipeline(config: PipelineConfig): Promis
     }
   }
 
+  // ============================================================================
+  // PHASE 0.6: OVERLAY GUARD — fail-closed exists-guard on the promotion target
+  // (v1.19.0, design docs/designs/2026-09-16-variant-ization-overlay-guard-design.md §3.2 point 1)
+  // ============================================================================
+  // Runs BEFORE Phase 1 — and therefore before the Phase 3.5 auto-fix, which
+  // can already write into a live templates/<variant> when the L3 source lives
+  // under templates/. An explicit --output outside templates/ is exempt (the
+  // E2E harness pattern). The guard lives in the exported execute function, not
+  // main(), so programmatic callers (the E2E harness imports this function)
+  // get the same protection.
+  // ============================================================================
+  const resolvedOutputRoot = config.outputPath
+    ? resolve(config.outputPath)
+    : join(cwd(), 'templates', config.variantName);
+  const overlayVerdict = evaluateVariantOverlayTarget({
+    targetDir: resolvedOutputRoot,
+    workspaceRoot: cwd(),
+    overlayAuthorized: config.overlayVariant === true,
+    explicitOutput: Boolean(config.outputPath),
+  });
+
+  // ============================================================================
+  // ROLLBACK STATE (design §4.3) — module failure paths, NOT process-level
+  // hooks: this module is imported by scripts/test-l3-to-variant-promotion.ts,
+  // and a module-scope exit hook would roll back inside the harness process.
+  //   fresh   — this run created the target; failure rm's the partial tree.
+  //   overlay — the target pre-existed and overlay was authorized; the tree is
+  //             snapshotted right before Phase 4 and RESTORED on failure.
+  //   null    — exempt-output; the destination was named by the caller, so this
+  //             run owns no rollback for it.
+  // Every rollback is best-effort with loud reporting and never masks the
+  // original phase error (it runs BEFORE the failure result is returned, so
+  // the phase error is already on stderr; rollback failures add their own
+  // lines and keep any snapshot on disk for manual recovery).
+  // ============================================================================
+  let rollbackMode: 'fresh' | 'overlay' | null = null;
+  let overlayBackupPath: string | undefined;
+  let rollbackSettled = false;
+
+  const settleFailureRollback = (): void => {
+    if (rollbackSettled || rollbackMode === null) return;
+    rollbackSettled = true;
+    try {
+      if (rollbackMode === 'overlay') {
+        if (!overlayBackupPath) return; // failed before the snapshot — nothing pre-run to restore
+        const restored = restoreOverlaySnapshot(overlayBackupPath, resolvedOutputRoot, cwd());
+        if (restored.restored) {
+          console.error(`🛡️  Rollback: previous variant tree restored from ${overlayBackupPath}`);
+        } else {
+          console.error(`🛡️  Rollback FAILED — the original phase error above stands. Snapshot kept at ${overlayBackupPath} (${restored.reason ?? 'unknown reason'})`);
+        }
+      } else {
+        const rolledBack = rollbackPartialProject(resolvedOutputRoot, cwd());
+        if (rolledBack.rolledBack) {
+          console.error(`🛡️  Rollback: removed the partially generated tree at ${resolvedOutputRoot}`);
+        } else if (rolledBack.reason && rolledBack.reason !== 'nothing to roll back') {
+          console.error(`🛡️  Rollback could not remove ${resolvedOutputRoot} — ${rolledBack.reason}. The original phase error above stands.`);
+        }
+      }
+    } catch (rollbackError) {
+      console.error(`🛡️  Rollback error (original phase error above stands): ${rollbackError instanceof Error ? rollbackError.message : String(rollbackError)}`);
+    }
+  };
+
+  const settleSuccessDiscard = (): void => {
+    if (rollbackSettled || rollbackMode !== 'overlay' || !overlayBackupPath) return;
+    rollbackSettled = true;
+    try {
+      const discarded = discardOverlaySnapshot(overlayBackupPath, cwd());
+      if (!discarded.discarded) {
+        console.error(`⚠️  Overlay snapshot could not be discarded (${discarded.reason ?? 'unknown reason'}) — remove ${overlayBackupPath} manually.`);
+      }
+    } catch (discardError) {
+      console.error(`⚠️  Overlay snapshot discard error: ${discardError instanceof Error ? discardError.message : String(discardError)}`);
+    }
+  };
+
+  /** Failure-result seam: settles rollback ownership, then builds the result. */
+  const failWithRollback = (): PipelineResult => {
+    settleFailureRollback();
+    return buildFailureResult(phases, errors, startTime);
+  };
+
+  if (overlayVerdict.action === 'refuse') {
+    console.error(`\n❌ ${overlayVerdict.message}`);
+    errors.push({ phase: 'overlay-guard', error: overlayVerdict.message });
+    // Refusal happens before any write and before any snapshot — the target is
+    // untouched, so there is deliberately nothing to roll back.
+    return failWithRollback();
+  }
+  rollbackMode = overlayVerdict.classification === 'absent'
+    ? 'fresh'
+    : overlayVerdict.classification === 'overlay-authorized'
+      ? 'overlay'
+      : null; // exempt-output
+
   let scanResult: L3ScanResult | undefined;
   let reconciledManifest: ReconciledManifest | undefined;
   let generatedVariant: GeneratedVariant | undefined;
@@ -353,7 +484,7 @@ export async function executeL3ToVariantPipeline(config: PipelineConfig): Promis
   }
 
   if (!phases.scan.success) {
-    return buildFailureResult(phases, errors, startTime);
+    return failWithRollback();
   }
 
   // ============================================================================
@@ -489,7 +620,7 @@ export async function executeL3ToVariantPipeline(config: PipelineConfig): Promis
   }
 
   if (!phases.reconcile.success) {
-    return buildFailureResult(phases, errors, startTime);
+    return failWithRollback();
   }
 
   // ============================================================================
@@ -658,7 +789,7 @@ export async function executeL3ToVariantPipeline(config: PipelineConfig): Promis
             console.error(`   Fix manually: bun scripts/regenerate-agents-md.ts --variant ${config.variantName}`);
             console.error(`   Then re-run the pipeline.`);
             errors.push({ phase: '3.5', error: `AGENTS.md auto-regeneration failed: ${fixMsg}` });
-            return buildFailureResult(phases, errors, startTime);
+            return failWithRollback();
           }
         } else {
           // BLOCKING: Phase 4 injection will silently produce wrong output without markers
@@ -667,7 +798,7 @@ export async function executeL3ToVariantPipeline(config: PipelineConfig): Promis
           console.error(`   Fix: bun scripts/regenerate-agents-md.ts --variant ${config.variantName}`);
           console.error(`   Or re-run pipeline with autoFixAgentsMd:true\n`);
           errors.push({ phase: '3.5', error: `AGENTS.md structure check failed: ${issues.join('; ')}` });
-          return buildFailureResult(phases, errors, startTime);
+          return failWithRollback();
         }
       }
     }
@@ -681,7 +812,7 @@ export async function executeL3ToVariantPipeline(config: PipelineConfig): Promis
     // which is exactly the silent-wrong-output class the gate exists for.
     errors.push({ phase: '3.5-agents-md-preflight', error: errorMsg });
     console.error(`❌ PHASE 3.5 FAILED: ${errorMsg}`);
-    return buildFailureResult(phases, errors, startTime);
+    return failWithRollback();
   }
 
   // ============================================================================
@@ -860,7 +991,7 @@ export async function executeL3ToVariantPipeline(config: PipelineConfig): Promis
 
     if (hasCapabilityErrors || hasPluginErrors) {
       console.error(`\n❌ PHASE 3.7 BLOCKING: Capability or plugin validation errors found.`);
-      return buildFailureResult(phases, errors, startTime);
+      return failWithRollback();
     }
 
     console.log(`✅ PHASE 3.7 COMPLETE`);
@@ -876,6 +1007,23 @@ export async function executeL3ToVariantPipeline(config: PipelineConfig): Promis
   // ============================================================================
   // PHASE 4: GENERATE VARIANT
   // ============================================================================
+
+  // v1.19.0: authorized-overlay runs snapshot the pre-existing tree NOW —
+  // immediately before the first write into the target slot (generateVariant).
+  // Success path discards the snapshot (settleSuccessDiscard, before the final
+  // return); any failure path after this point restores it (failWithRollback).
+  // A failed snapshot aborts BEFORE any write — fail-closed (design §4.2).
+  if (rollbackMode === 'overlay') {
+    const snap = snapshotDirForOverlay(resolvedOutputRoot, cwd());
+    if (!snap.snapshotted || !snap.backupPath) {
+      const msg = `overlay snapshot failed before generation — ${snap.reason ?? 'unknown reason'}`;
+      console.error(`\n❌ ${msg}`);
+      errors.push({ phase: 'overlay-guard', error: msg });
+      return failWithRollback();
+    }
+    overlayBackupPath = snap.backupPath;
+    console.log(`  🛡️  Overlay authorized — previous tree snapshotted to ${snap.backupPath}`);
+  }
 
   try {
     console.log(`\n${'─'.repeat(60)}`);
@@ -974,7 +1122,7 @@ export async function executeL3ToVariantPipeline(config: PipelineConfig): Promis
   }
 
   if (!phases.generate.success) {
-    return buildFailureResult(phases, errors, startTime);
+    return failWithRollback();
   }
 
   // ============================================================================
@@ -1079,7 +1227,7 @@ export async function executeL3ToVariantPipeline(config: PipelineConfig): Promis
         console.error(`   Fix: bun scripts/regenerate-agents-md.ts --variant ${variantPath.split(/[\\/]/).pop()}`);
         console.error(`   Then re-run the pipeline.\n`);
         errors.push({ phase: '4.5', error: `AGENTS.md structure misaligned with L1 template: ${issues.join('; ')}` });
-        return buildFailureResult(phases, errors, startTime);
+        return failWithRollback();
       }
     }
 
@@ -1090,7 +1238,7 @@ export async function executeL3ToVariantPipeline(config: PipelineConfig): Promis
     // this is a blocking structural gate, not an advisory check.
     errors.push({ phase: '4.5-golden-gap-check', error: errorMsg });
     console.error(`❌ PHASE 4.5 FAILED: ${errorMsg}`);
-    return buildFailureResult(phases, errors, startTime);
+    return failWithRollback();
   }
 
   // ============================================================================
@@ -1211,7 +1359,7 @@ export async function executeL3ToVariantPipeline(config: PipelineConfig): Promis
     console.error(`   ${errorMsg}`);
     console.error(`   Inspect docs/${config.variantName}.context.md and the generate-phase purification log, then re-run the pipeline.\n`);
     errors.push({ phase: '4.7', error: errorMsg });
-    return buildFailureResult(phases, errors, startTime);
+    return failWithRollback();
   }
 
   // ============================================================================
@@ -1234,7 +1382,7 @@ export async function executeL3ToVariantPipeline(config: PipelineConfig): Promis
   }
 
   if (!phases.lifecycle.success) {
-    return buildFailureResult(phases, errors, startTime);
+    return failWithRollback();
   }
 
   // ============================================================================
@@ -1273,7 +1421,7 @@ export async function executeL3ToVariantPipeline(config: PipelineConfig): Promis
   }
 
   if (!phases.parity.success) {
-    return buildFailureResult(phases, errors, startTime);
+    return failWithRollback();
   }
 
   // ============================================================================
@@ -1378,6 +1526,10 @@ export async function executeL3ToVariantPipeline(config: PipelineConfig): Promis
   console.log(`\n🎉 Variant generated successfully!`);
   console.log(`Path: ${generatedVariant!.variantPath}`);
 
+  // v1.19.0: green run on an authorized overlay — discard the snapshot now
+  // that the new tree is fully in place (design §4.2 success path).
+  settleSuccessDiscard();
+
   // Country profile verification checklist
   console.log(`\n=== Manual Verification Checklist ===`);
   console.log(`  [ ] templates/${config.variantName}/docs/countries/ profiles contain jurisdiction knowledge (not project-specific data); ACTIVE.md excluded`);
@@ -1446,6 +1598,10 @@ async function main() {
   const autoFixAgentsMdArg = args.includes('--auto-fix-agents-md');
   const autoFixPmMdArg = args.includes('--auto-fix-pm-md');
   const forceArg = args.includes('--force');
+  // Overlay authorization (v1.19.0): permits overwriting an EXISTING pre-release
+  // (beta) variant template — destroys the previous tree as a unit; per-file
+  // history lives in git. stable/deprecated targets refuse even with the flag.
+  const overlayVariantArg = args.includes('--overlay-variant');
 
   if (!l3PathArg || !nameArg || !typeArg || !descArg) {
     console.error('Usage: bun scripts/l3-to-variant-pipeline.ts \\');
@@ -1460,6 +1616,7 @@ async function main() {
     console.error('  [--status=<beta|stable|deprecated>] (default: beta) \\');
     console.error('  [--auto-fix-agents-md] (phase 3.5: regenerate AGENTS.md on marker misalignment) \\');
     console.error('  [--auto-fix-pm-md] (phase 3.0: emit pm.md slimming guidance)');
+    console.error('  [--overlay-variant] (authorize overwriting an existing BETA variant template; stable/deprecated always refuse) \\');
     console.error('  [--force] (skip the Variant Readiness Gate — see PHASE 8)');
     process.exit(1);
   }
@@ -1490,6 +1647,7 @@ async function main() {
     status: statusArg?.split('=')[1],
     autoFixAgentsMd: autoFixAgentsMdArg,
     autoFixPmMd: autoFixPmMdArg,
+    overlayVariant: overlayVariantArg,
   };
 
   try {
