@@ -898,6 +898,15 @@
       "source": "manual",
       "created": "2026-09-15",
       "last_updated": "2026-09-15"
+    },
+    {
+      "id": "2026-09-16-propagation-target-derivation-design",
+      "title": "propagation target derivation design",
+      "file": "docs/designs/2026-09-16-propagation-target-derivation-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-16",
+      "last_updated": "2026-09-16"
     }
   ]
 }
