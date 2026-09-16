@@ -925,6 +925,15 @@
       "source": "manual",
       "created": "2026-09-16",
       "last_updated": "2026-09-16"
+    },
+    {
+      "id": "2026-09-16-lifecycle-gate-and-pm-role-completion-design",
+      "title": "lifecycle gate and pm role completion design",
+      "file": "docs/designs/2026-09-16-lifecycle-gate-and-pm-role-completion-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-16",
+      "last_updated": "2026-09-16"
     }
   ]
 }

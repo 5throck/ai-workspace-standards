@@ -9,7 +9,11 @@
  * warned permanently before). Remaining drift is a FAILURE, and the fix hint
  * must never recommend an action that clobbers the intentional state.
  *
- * @version 1.0.0
+ * @version 1.1.0
+ * v1.1.0 (T-20260915-009): Check H coverage — compareScriptRecordVersion
+ *          helper semantics (agreement null / mismatch ERROR / missing-field
+ *          WARNING) and live-state parity for the 3 script records.
+ *          (T-20260915-008): upgrade-project fixture 1.4.1 → 1.5.0.
  */
 import { describe, test, expect } from 'bun:test';
 import { readFileSync } from 'node:fs';
@@ -18,6 +22,8 @@ import { scrubConstitutionRefs } from '../../scripts/lib/constitution-scrub.ts';
 import {
   runCheckC,
   runCheckE,
+  runCheckH,
+  compareScriptRecordVersion,
   extractRecordField,
   parseSkillFrontmatter,
 } from '../../scripts/lifecycle-sync-audit.ts';
@@ -84,7 +90,7 @@ describe('lifecycle-sync-audit Check E (lifecycle record metadata gate)', () => 
     const cases: Array<[string, string, string]> = [
       ['sync', '1.5.0', 'pm'],
       ['security-scan', '1.2.0', 'pm'],
-      ['upgrade-project', '1.4.1', 'pm'],
+      ['upgrade-project', '1.5.0', 'pm'],
     ];
     for (const [skill, version, owner] of cases) {
       const fm = parseSkillFrontmatter(
@@ -98,6 +104,52 @@ describe('lifecycle-sync-audit Check E (lifecycle record metadata gate)', () => 
       expect(extractRecordField(record, 'Owner')).toBe(owner);
       expect(fm.version).toBe(version);
       expect(fm.owner).toBe(owner);
+    }
+  });
+});
+
+describe('lifecycle-sync-audit Check H (script record version gate, T-20260915-009)', () => {
+  test('compareScriptRecordVersion: agreement returns null', () => {
+    expect(compareScriptRecordVersion('1.4.0', '1.4.0', 'record.md')).toBeNull();
+    expect(compareScriptRecordVersion('v1.4.0', '1.4.0', 'record.md')).toBeNull();
+    expect(compareScriptRecordVersion('1.4.0', 'v1.4.0', 'record.md')).toBeNull();
+  });
+
+  test('compareScriptRecordVersion: mismatch is an ERROR with a backfill fix hint', () => {
+    const verdict = compareScriptRecordVersion('1.10.0', '1.18.0', 'docs/lifecycle/scripts/new-project.md');
+    expect(verdict).not.toBeNull();
+    expect(verdict!.level).toBe('error');
+    expect(verdict!.message).toContain('1.10.0');
+    expect(verdict!.message).toContain('1.18.0');
+    expect(verdict!.fix).toContain('1.18.0');
+  });
+
+  test('compareScriptRecordVersion: missing Version field is a WARNING (Check E semantics)', () => {
+    const verdict = compareScriptRecordVersion(undefined, '0.3.1', 'docs/lifecycle/scripts/validate-pm-extends.md');
+    expect(verdict).not.toBeNull();
+    expect(verdict!.level).toBe('warning');
+    expect(verdict!.fix).toContain('- **Version**: 0.3.1');
+    const blank = compareScriptRecordVersion('', '0.3.1', 'record.md');
+    expect(blank!.level).toBe('warning');
+  });
+
+  test('every current script lifecycle record is at parity (backfilled 2026-09-16)', () => {
+    const errors = runCheckH().filter(i => i.level === 'error');
+    expect(errors).toEqual([]);
+  });
+
+  test('the three known script records carry a Version field matching SCRIPTS.md', () => {
+    const cases: Array<[string, string]> = [
+      ['error-handling', '1.4.0'],
+      ['new-project', '1.18.0'],
+      ['validate-pm-extends', '0.3.1'],
+    ];
+    for (const [record, version] of cases) {
+      const content = readFileSync(
+        join(workspaceRoot, 'docs', 'lifecycle', 'scripts', `${record}.md`),
+        'utf-8',
+      );
+      expect(extractRecordField(content, 'Version')).toBe(version);
     }
   });
 });

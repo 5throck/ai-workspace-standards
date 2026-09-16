@@ -10,14 +10,32 @@
  * Check E: docs/lifecycle/skills/<name>.md Version/Owner vs SKILL.md frontmatter
  * Check F: agent tier surfaces (frontmatter, L1 templates, AGENTS.md rosters,
  *          lifecycle records) vs docs/workspace-schema.json agent_tiers SSOT
+ * Check H: docs/lifecycle/scripts/<name>.md Version vs the current version of
+ *          scripts/<name>.ts (same source Check A uses: the SCRIPTS.md row the
+ *          @version header is validated against)
  *
  * Usage:
  *   bun scripts/lifecycle-sync-audit.ts
  *   bun scripts/lifecycle-sync-audit.ts --json
  *   bun scripts/lifecycle-sync-audit.ts --fix
  *
- * @version 1.13.0
- * @last_updated 2026-09-15
+ * @version 1.14.0
+ * @last_updated 2026-09-16
+ * v1.14.0: New Check H — script lifecycle record version gate. For every
+ *          docs/lifecycle/scripts/<name>.md record whose subject script
+ *          resolves (exact scripts/<name>.ts, then an unambiguous SCRIPTS.md
+ *          basename match for sub-path rows like lib/error-handling.ts), the
+ *          declared Version must equal the script's current SCRIPTS.md
+ *          version (the same source Check A validates @version headers
+ *          against): mismatch = ERROR, missing Version field = WARNING
+ *          (Check E's missing-field semantics). Records are opt-in — a
+ *          script with no record is not reported (SCRIPTS.md remains the
+ *          script lifecycle SSOT), and a record with no resolvable script
+ *          version source is not this check's concern. Motivation: the 3
+ *          script records carry phase-history narrative SCRIPTS.md rows do
+ *          not, and their versions had silently lapsed
+ *          (2026-09-15 project review M6; PM adjudication: GATE, not retire).
+ *          (spec: docs/designs/2026-09-16-lifecycle-gate-and-pm-role-completion-design.md)
  * v1.13.0: Check E no longer stays fully silent on records without a Version
  *          field — when the SKILL.md frontmatter declares one, the missing
  *          record field is a WARNING with a backfill hint (the two
@@ -837,6 +855,106 @@ export function runCheckG(): SyncIssue[] {
 }
 
 /**
+ * Check H: script lifecycle record version gate (pure comparison helper).
+ *
+ * Compares a docs/lifecycle/scripts/<name>.md record's declared **Version**
+ * against the subject script's current version (the SCRIPTS.md registry row —
+ * the same source Check A validates the file's @version header against).
+ * Missing Version field = WARNING (mirrors Check E's missing-field semantics:
+ * records predating the convention stay advisory); a declared Version that
+ * disagrees = ERROR; agreement = null. Leading "v" is tolerated on both
+ * sides. `recordLabel` names the record in the emitted message/fix text.
+ */
+export function compareScriptRecordVersion(
+  recordVersion: string | undefined,
+  scriptVersion: string,
+  recordLabel: string,
+): { level: 'error' | 'warning'; message: string; fix: string } | null {
+  const normalize = (v: string): string => v.trim().replace(/^v/i, '');
+  if (recordVersion === undefined || recordVersion.trim() === '') {
+    return {
+      level: 'warning',
+      message: `${recordLabel} has no Version field but the script's SCRIPTS.md entry declares ${scriptVersion}`,
+      fix: `Add "- **Version**: ${scriptVersion}" to ${recordLabel}`,
+    };
+  }
+  if (normalize(recordVersion) !== normalize(scriptVersion)) {
+    return {
+      level: 'error',
+      message: `${recordLabel} Version ${recordVersion} does not match the script's SCRIPTS.md entry ${scriptVersion}`,
+      fix: `Update ${recordLabel} Version to ${scriptVersion} (with a Phase History catch-up row)`,
+    };
+  }
+  return null;
+}
+
+/**
+ * Check H: script lifecycle record version gate.
+ *
+ * For every docs/lifecycle/scripts/<name>.md record whose subject script
+ * resolves, the declared Version must equal the script's current version per
+ * Check A's source (the scripts/SCRIPTS.md row; the @version header is the
+ * same source Check A validates against it). Resolution: exact
+ * `scripts/<name>.ts` first, then an unambiguous SCRIPTS.md basename match
+ * (sub-path rows like `lib/error-handling.ts`). Records are opt-in: no
+ * record for a script = not reported (SCRIPTS.md remains the script
+ * lifecycle SSOT); a record with no resolvable version source (removed or
+ * unregistered script) is not this check's concern. Runs only at workspace
+ * root. (spec: docs/designs/2026-09-16-lifecycle-gate-and-pm-role-completion-design.md)
+ */
+export function runCheckH(): SyncIssue[] {
+  const issues: SyncIssue[] = [];
+
+  if (!IS_WORKSPACE_ROOT) return issues;
+  const lifecycleScriptsDir = join(ROOT, 'docs', 'lifecycle', 'scripts');
+  if (!existsSync(lifecycleScriptsDir)) return issues;
+  if (!existsSync(SCRIPTS_MD)) return issues;
+
+  const registry = parseScriptsMdRegistry(SCRIPTS_MD);
+  let checkedCount = 0;
+
+  for (const entry of readdirSync(lifecycleScriptsDir)) {
+    if (!entry.endsWith('.md')) continue;
+    const recordName = entry.replace(/\.md$/, '');
+
+    // Resolve the subject script's registry row (see docblock above).
+    let registryKey: string | undefined;
+    if (registry.has(`${recordName}.ts`)) {
+      registryKey = `${recordName}.ts`;
+    } else {
+      const matches = [...registry.keys()].filter((k) => basename(k) === `${recordName}.ts`);
+      if (matches.length === 1) registryKey = matches[0];
+    }
+    if (!registryKey) continue; // no version source — records are opt-in
+
+    const recordPath = join(lifecycleScriptsDir, entry);
+    const recordContent = readFileSync(recordPath, 'utf-8');
+    const recordLabel = `docs/lifecycle/scripts/${entry}`;
+    const verdict = compareScriptRecordVersion(
+      extractRecordField(recordContent, 'Version'),
+      registry.get(registryKey)!.version,
+      recordLabel,
+    );
+    if (!verdict) continue;
+    checkedCount++;
+    issues.push({
+      level: verdict.level,
+      file: recordLabel,
+      message: `Check H: ${verdict.message}`,
+      fix: verdict.fix,
+    });
+  }
+
+  if (!jsonMode) {
+    console.log(
+      `${colors.dim}Check H: script record versions vs SCRIPTS.md — ${checkedCount} finding(s)${issues.length > 0 ? '' : ', all records in sync'}${colors.reset}`,
+    );
+  }
+
+  return issues;
+}
+
+/**
  * Check B: Compare version entries between scripts/SCRIPTS.md and
  * templates/common/scripts/SCRIPTS.md. Uses the layer column to decide
  * whether each script should be present in templates/common/:
@@ -1276,6 +1394,9 @@ function runAudit(jsonMode = false): AuditResult {
     console.log(
       `${colors.dim}Check G: .githooks vs templates/common/.githooks mirror parity${colors.reset}`,
     );
+    console.log(
+      `${colors.dim}Check H: script lifecycle record versions vs SCRIPTS.md${colors.reset}`,
+    );
     console.log('');
   }
 
@@ -1287,6 +1408,7 @@ function runAudit(jsonMode = false): AuditResult {
   const checkEIssues = runCheckE();
   const checkFIssues = runCheckF();
   const checkGIssues = runCheckG();
+  const checkHIssues = runCheckH();
   const registryEntries = runCheckD();
 
   if (!jsonMode) {
@@ -1311,6 +1433,7 @@ function runAudit(jsonMode = false): AuditResult {
     ...checkEIssues.filter((i) => i.level === 'error'),
     ...checkFIssues.filter((i) => i.level === 'error'),
     ...checkGIssues.filter((i) => i.level === 'error'),
+    ...checkHIssues.filter((i) => i.level === 'error'),
   ];
   const allWarnings = [
     ...checkAIssues.filter((i) => i.level === 'warning'),
@@ -1321,10 +1444,11 @@ function runAudit(jsonMode = false): AuditResult {
     ...checkEIssues.filter((i) => i.level === 'warning'),
     ...checkFIssues.filter((i) => i.level === 'warning'),
     ...checkGIssues.filter((i) => i.level === 'warning'),
+    ...checkHIssues.filter((i) => i.level === 'warning'),
   ];
 
   return {
-    checksRun: 9,
+    checksRun: 10,
     errors: allErrors,
     warnings: allWarnings,
     registry: registryEntries,

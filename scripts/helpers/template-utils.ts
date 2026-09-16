@@ -8,7 +8,7 @@
  *   - new-project.ts (L1→L3 project deployment: context.md)
  *   - create-l3-scaffold.ts (L3 project README stub rendering)
  *
- * @version 1.1.1
+ * @version 1.2.0
  */
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
@@ -84,11 +84,30 @@ export function applyContextTemplate(
 /**
  * Default PM role descriptions per variant type.
  * Used when the caller does not supply a custom pmRoleDescription.
+ *
+ * T-20260915-012 (M13): the map must cover EVERY current variant — an absent
+ * key silently renders the generic fallback into a variant's context.md.
+ * Each description is derived from that variant template's actual PM role
+ * (templates/co-<x>/agents/pm.md variant_overrides; for pure extends stubs,
+ * the variant's AGENTS.md roster + docs/<variant>.context.md workflow).
+ * A unit test asserts the keys stay identical to the templates/co-* set.
+ *
+ * @version 1.2.0: completed from 5 to all 13 variants (co-abap, co-deck,
+ *          co-export, co-game, co-hr, co-news, co-price, co-safety added;
+ *          map alphabetized).
  */
 export const DEFAULT_PM_ROLE_DESCRIPTIONS: Record<string, string> = {
-  'co-develop':  'Workflow management, task dispatch, quality gates',
+  'co-abap':     'SAP ABAP delivery orchestration, module analysis dispatch, transport and QA gates',
   'co-consult':  'Engagement orchestration, client interface, final decisions',
-  'co-security': 'Security governance, threat modeling, compliance review',
+  'co-deck':     'Deck pipeline orchestration, stage gate approvals, export readiness',
   'co-design':   'Design process management, creative direction, quality review',
+  'co-develop':  'Workflow management, task dispatch, quality gates',
+  'co-export':   'Trade engagement coordination, compliance approval gates, final sign-off',
+  'co-game':     'Game pipeline orchestration, genre-based dispatch, test and debug gates',
+  'co-hr':       'HR engagement coordination, people-domain dispatch, client approval gates',
+  'co-news':     'Newsroom pipeline gating, editorial approval, publication readiness',
+  'co-price':    'Pricing engagement governance, method dispatch, executive synthesis',
+  'co-safety':   'Safety governance, regulatory evidence gates, deliverable closeout approval',
+  'co-security': 'Security governance, threat modeling, compliance review',
   'co-work':     'Content workflow management, editorial oversight, quality gates',
 };
