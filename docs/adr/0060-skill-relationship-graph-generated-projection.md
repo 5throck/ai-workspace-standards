@@ -101,7 +101,7 @@ One graph file for the whole workspace, with each node carrying a `layer` field 
 
 ---
 
-## Amendment 2026-08-25 — Document Layer
+## Amendment 2026-08-25 — Document Layer (Amendment 1)
 
 **Status**: Accepted (same-day amendment, implemented in the amending PR)
 **Design of record**: [2026-08-25-skill-graph-document-layer-design.md](../designs/2026-08-25-skill-graph-document-layer-design.md)

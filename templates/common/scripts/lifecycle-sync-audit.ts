@@ -13,14 +13,29 @@
  * Check H: docs/lifecycle/scripts/<name>.md Version vs the current version of
  *          scripts/<name>.ts (same source Check A uses: the SCRIPTS.md row the
  *          @version header is validated against)
+ * Check H2: the complement arm of Check H — a versioned shared module
+ *          (SCRIPTS.md registry row under scripts/lib|hooks|validators|helpers/
+ *          with a parseable version) with NO docs/lifecycle/scripts/<name>.md
+ *          record warns (Check H validates records once present; Check H2
+ *          flags the significant modules that never got one)
  *
  * Usage:
  *   bun scripts/lifecycle-sync-audit.ts
  *   bun scripts/lifecycle-sync-audit.ts --json
  *   bun scripts/lifecycle-sync-audit.ts --fix
  *
- * @version 1.14.0
+ * @version 1.15.0
  * @last_updated 2026-09-16
+ * v1.15.0: New Check H2 — the complement arm of Check H (2026-09-17 project
+ *          review finding #10: Check H only validates records that exist, so
+ *          it cannot flag "significant new lib without a record"). Warns when
+ *          a versioned shared module — a SCRIPTS.md registry row under
+ *          scripts/lib/, scripts/hooks/, scripts/validators/, or
+ *          scripts/helpers/ with a parseable version — has NO
+ *          docs/lifecycle/scripts/<basename>.md record. Top-level scripts/*.ts
+ *          stay out of scope (SCRIPTS.md remains their lifecycle SSOT).
+ *          Warning-level only — warnings never affect the exit code.
+ *          (ticket: T-20260917-004)
  * v1.14.0: New Check H — script lifecycle record version gate. For every
  *          docs/lifecycle/scripts/<name>.md record whose subject script
  *          resolves (exact scripts/<name>.ts, then an unambiguous SCRIPTS.md
@@ -955,6 +970,60 @@ export function runCheckH(): SyncIssue[] {
 }
 
 /**
+ * Check H2: versioned shared modules without a lifecycle record — the
+ * complement arm of Check H (2026-09-17 project review finding #10).
+ *
+ * Check H is opt-in by design: it only validates records that exist, so a
+ * significant new shared module can land with no lifecycle record at all and
+ * stay invisible. This arm closes that gap from the other side: every SCRIPTS.md
+ * registry row under a shared sub-directory (lib/, hooks/, validators/,
+ * helpers/) whose version parses must have a docs/lifecycle/scripts/<name>.md
+ * record, where <name> is the basename without extension
+ * (`lib/error-handling.ts` → `error-handling.md`). Top-level scripts/*.ts are
+ * OUT of scope — SCRIPTS.md remains their lifecycle SSOT. Missing record =
+ * one WARNING per module (warnings never affect the exit code). Reuses
+ * runCheckH's registry parser and guards. Runs only at workspace root.
+ * (ticket: T-20260917-004)
+ */
+export function runCheckH2(): SyncIssue[] {
+  const issues: SyncIssue[] = [];
+
+  if (!IS_WORKSPACE_ROOT) return issues;
+  const lifecycleScriptsDir = join(ROOT, 'docs', 'lifecycle', 'scripts');
+  if (!existsSync(lifecycleScriptsDir)) return issues;
+  if (!existsSync(SCRIPTS_MD)) return issues;
+
+  const registry = parseScriptsMdRegistry(SCRIPTS_MD);
+  let inScopeCount = 0;
+
+  for (const [registryKey, { version }] of registry) {
+    // Shared-module scope: registry rows under lib/, hooks/, validators/, helpers/.
+    if (!/^(lib|hooks|validators|helpers)\//.test(registryKey)) continue;
+    // "Significant" = versioned; unparseable version columns are not this check's concern.
+    if (!/^\d+\.\d+/.test(version.trim())) continue;
+    inScopeCount++;
+
+    const recordName = basename(registryKey).replace(/\.(ts|sh|ps1)$/, '');
+    if (existsSync(join(lifecycleScriptsDir, `${recordName}.md`))) continue; // present — Check H validates it
+
+    issues.push({
+      level: 'warning',
+      file: `docs/lifecycle/scripts/${recordName}.md`,
+      message: `Check H2: ${registryKey} (v${version}) has no docs/lifecycle/scripts/${recordName}.md lifecycle record`,
+      fix: `Create docs/lifecycle/scripts/${recordName}.md declaring "- **Version**: ${version}" with a Phase History section (Check H validates it once present)`,
+    });
+  }
+
+  if (!jsonMode) {
+    console.log(
+      `${colors.dim}Check H2: shared modules without lifecycle records — ${inScopeCount} in scope, ${issues.length} missing record(s)${colors.reset}`,
+    );
+  }
+
+  return issues;
+}
+
+/**
  * Check B: Compare version entries between scripts/SCRIPTS.md and
  * templates/common/scripts/SCRIPTS.md. Uses the layer column to decide
  * whether each script should be present in templates/common/:
@@ -1397,6 +1466,9 @@ function runAudit(jsonMode = false): AuditResult {
     console.log(
       `${colors.dim}Check H: script lifecycle record versions vs SCRIPTS.md${colors.reset}`,
     );
+    console.log(
+      `${colors.dim}Check H2: versioned shared modules without a lifecycle record${colors.reset}`,
+    );
     console.log('');
   }
 
@@ -1409,6 +1481,7 @@ function runAudit(jsonMode = false): AuditResult {
   const checkFIssues = runCheckF();
   const checkGIssues = runCheckG();
   const checkHIssues = runCheckH();
+  const checkH2Issues = runCheckH2();
   const registryEntries = runCheckD();
 
   if (!jsonMode) {
@@ -1434,6 +1507,7 @@ function runAudit(jsonMode = false): AuditResult {
     ...checkFIssues.filter((i) => i.level === 'error'),
     ...checkGIssues.filter((i) => i.level === 'error'),
     ...checkHIssues.filter((i) => i.level === 'error'),
+    ...checkH2Issues.filter((i) => i.level === 'error'),
   ];
   const allWarnings = [
     ...checkAIssues.filter((i) => i.level === 'warning'),
@@ -1445,10 +1519,11 @@ function runAudit(jsonMode = false): AuditResult {
     ...checkFIssues.filter((i) => i.level === 'warning'),
     ...checkGIssues.filter((i) => i.level === 'warning'),
     ...checkHIssues.filter((i) => i.level === 'warning'),
+    ...checkH2Issues.filter((i) => i.level === 'warning'),
   ];
 
   return {
-    checksRun: 10,
+    checksRun: 11,
     errors: allErrors,
     warnings: allWarnings,
     registry: registryEntries,

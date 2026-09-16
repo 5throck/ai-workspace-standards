@@ -1,8 +1,8 @@
 #!/usr/bin/env bun
 /**
  * verify-adr-governance.ts
- * @version 1.5.0
- * @last_updated 2026-09-12
+ * @version 1.6.0
+ * @last_updated 2026-09-16
  *
  * Verifies the ADR→governance linkage mechanism (upward reflection gap detection),
  * ADR ID uniqueness, and intentional-duplicate marker hash drift detection.
@@ -18,6 +18,13 @@
  * Phase 2 (Marker Hash Drift): Detects intentional-duplicate markers whose source files have changed.
  * Scans templates/ for markers and validates sha256 hashes against their constitution sources.
  *
+ * Phase 3 (Amendment References): Detects "ADR-NNNN Amendment N" citations that do not
+ * resolve to an actual amendment record. A reference resolves when an Amendment heading
+ * or bold lead-in naming the amendment number appears in the referenced ADR, in any
+ * other ADR cited alongside it on the same line (the "recorded in [ADR-XXXX]" pattern),
+ * or in the citing file itself. Amendments are often RECORDED in a different ADR than
+ * the one cited, so all three sites are searched.
+ *
  * Rules:
  * - Only ADRs ON OR AFTER CUTOFF_DATE (2026-08-23) are checked
  * - Earlier ADRs are grandfathered silently (avoids ~50-file backfill noise)
@@ -25,7 +32,7 @@
  * - Accepted/active ADRs must be referenced from governance docs
  * - Marker hashes must match their section source (section-sliced sha256-8; WARN on drift in default mode, blocking in strict)
  * - Default mode: WARN-only (always exits 0 on findings; exits 1 only on operational failure)
- * - Strict mode (--strict): exits 1 on ADR-linkage OR marker-drift findings
+ * - Strict mode (--strict): exits 1 on ADR-linkage, amendment-reference, OR marker-drift findings
  *
  * Usage: bun scripts/verify-adr-governance.ts [--update-marker-hashes] [--strict]
  *
@@ -34,9 +41,15 @@
  * - --strict: Exit 1 on ADR-linkage or marker-drift findings (blocking gate for dev-sync step 3.97; Stage 2b)
  *
  * Exit codes:
- * - 0: Check completed (default: findings are WARN-only; strict: no ADR-linkage or marker-drift findings)
- * - 1: Operational failure (e.g., docs/adr missing), duplicate ADR numbers (any mode), OR strict mode with ADR-linkage or marker-drift findings
+ * - 0: Check completed (default: findings are WARN-only; strict: no ADR-linkage, amendment-reference, or marker-drift findings)
+ * - 1: Operational failure (e.g., docs/adr missing), duplicate ADR numbers (any mode), OR strict mode with ADR-linkage, amendment-reference, or marker-drift findings
  */
+
+// v1.6.0 (T-20260917-002): amendment-reference resolution arm — every "ADR-NNNN Amendment N"
+// citation in the governance corpus must resolve to an Amendment heading or bold lead-in in
+// the referenced ADR, in any other ADR cited alongside it on the same line ("recorded in
+// [ADR-XXXX]"), or in the citing file itself; warn-level, blocking under --strict exactly
+// like ADR-linkage findings (2026-09-17 project review finding 8).
 
 import { readFileSync, existsSync, readdirSync, writeFileSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
@@ -59,9 +72,18 @@ const ROOT = resolve(__dirname, '..');
 const CUTOFF_DATE = '2026-08-23';
 const ADR_DIR = join(ROOT, 'docs', 'adr');
 const CONSTITUTION_MD = join(ROOT, 'CONSTITUTION.md');
+const AGENTS_MD = join(ROOT, 'AGENTS.md');
+const CLAUDE_MD = join(ROOT, 'CLAUDE.md');
+const GEMINI_MD = join(ROOT, 'GEMINI.md');
 const CONSTITUTION_DIR = join(ROOT, 'docs', 'constitution');
 const GOVERNANCE_DIR = join(ROOT, 'docs', 'governance');
 const TEMPLATES_DIR = join(ROOT, 'templates');
+
+// Phase 3: "ADR-NNNN Amendment N" citation pattern. Line-scoped (applied per line)
+// so a reference cannot bleed across sentences: the gap class excludes periods and
+// newlines, and the dash class covers en-dash/em-dash/ASCII-hyphen amendment ranges
+// ("Amendments 3–6") with `-` kept last so it stays a literal.
+const AMENDMENT_REF_PATTERN = /ADR-(\d{4})[^.\n]{0,200}?Amendments?\s+(\d+)(?:\s*[–—-]\s*(\d+))?/g;
 
 // CLI flags
 const UPDATE_MARKER_HASHES = process.argv.includes('--update-marker-hashes');
@@ -409,6 +431,155 @@ function checkADRIdUniqueness(adrs: ADR[]): number {
 }
 
 /**
+ * Read the Phase 3 amendment-reference corpus: the four root governance docs,
+ * every docs/constitution/*.md (recursive), and every docs/adr/NNNN-*.md (top
+ * level, same filename grammar as scanADRFiles). Each location is existsSync-
+ * guarded like readGovernanceCorpus().
+ */
+function readAmendmentCorpus(): string[] {
+  const files: string[] = [];
+
+  for (const rootDoc of [CONSTITUTION_MD, AGENTS_MD, CLAUDE_MD, GEMINI_MD]) {
+    if (existsSync(rootDoc)) {
+      files.push(rootDoc);
+    }
+  }
+
+  if (existsSync(CONSTITUTION_DIR)) {
+    const constitutionFiles = readdirSync(CONSTITUTION_DIR, { recursive: true, withFileTypes: true })
+      .filter(dirent => dirent.isFile() && dirent.name.endsWith('.md'))
+      .map(dirent => join(dirent.parentPath, dirent.name));
+    files.push(...constitutionFiles);
+  }
+
+  if (existsSync(ADR_DIR)) {
+    for (const entry of readdirSync(ADR_DIR)) {
+      if (entry.endsWith('.md') && parseADRNumber(entry)) {
+        files.push(join(ADR_DIR, entry));
+      }
+    }
+  }
+
+  return files;
+}
+
+/**
+ * Resolution test: does `text` record amendment number `n`?
+ * Either a Markdown heading LINE containing it ("## Amendment 2026-08-25 — ... (Amendment 1)")
+ * or a bold lead-in containing it ("**ADR-0073 Amendment 2 — ...**").
+ */
+function hasAmendmentMarker(text: string, n: number): boolean {
+  if (new RegExp(`^#{1,6}[^\\n]*Amendment\\s*${n}\\b`, 'm').test(text)) {
+    return true;
+  }
+  return new RegExp(`\\*\\*[^*\\n]*Amendment\\s*${n}\\b`).test(text);
+}
+
+/**
+ * Phase 3: ADR amendment-reference resolution.
+ *
+ * Every "ADR-NNNN Amendment N" citation in the governance corpus (ranges
+ * "Amendments lo–hi" expand to each N) must resolve: an Amendment heading or
+ * bold lead-in naming N must appear in (a) the referenced ADR file, or — the
+ * "recorded in [ADR-XXXX]" pattern, since an amendment is often RECORDED in a
+ * different ADR than the one cited — (b) any other ADR cited alongside the
+ * reference on the same line, or (c) the citing file itself (an ADR that
+ * records another ADR's amendment carries the bold-lead-in record directly).
+ * Findings deduplicate per (source file, referenced ADR, amendment number).
+ * Returns the number of findings — warn-level in default mode, counted as
+ * blocking under --strict exactly like ADR-linkage findings.
+ */
+function checkAmendmentReferences(adrs: ADR[]): number {
+  console.log('🔍 Checking ADR amendment references...\n');
+
+  const adrFileByNumber = new Map(adrs.map(adr => [adr.number, adr.file]));
+  const corpus = readAmendmentCorpus();
+
+  let checked = 0;
+  let findings = 0;
+  const reported = new Set<string>();
+  const contentCache = new Map<string, string>();
+  const readText = (file: string): string => {
+    let text = contentCache.get(file);
+    if (text === undefined) {
+      text = readFileSync(file, 'utf-8');
+      contentCache.set(file, text);
+    }
+    return text;
+  };
+
+  for (const file of corpus) {
+    const relFile = file.replace(ROOT, '').replace(/^[\/\\]+/, '');
+    const lines = readText(file).split('\n');
+
+    for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+      const line = lines[lineIndex];
+      AMENDMENT_REF_PATTERN.lastIndex = 0;
+      let match: RegExpExecArray | null;
+
+      while ((match = AMENDMENT_REF_PATTERN.exec(line)) !== null) {
+        const refNumber = match[1];
+        const lo = parseInt(match[2], 10);
+        const hi = match[3] !== undefined ? parseInt(match[3], 10) : lo;
+
+        // Other ADR-NNNN cited alongside on the same reference line — the
+        // "recorded in [ADR-XXXX]" companion sites.
+        const companions: string[] = [];
+        for (const cited of line.matchAll(/ADR-(\d{4})/g)) {
+          if (cited[1] !== refNumber && !companions.includes(cited[1])) {
+            companions.push(cited[1]);
+          }
+        }
+
+        for (let n = lo; n <= hi; n++) {
+          const dedupeKey = `${relFile}|${refNumber}|${n}`;
+          if (reported.has(dedupeKey)) {
+            continue;
+          }
+          reported.add(dedupeKey);
+          checked++;
+
+          const refFile = adrFileByNumber.get(refNumber);
+          if (!refFile) {
+            findings++;
+            console.log(`[WARN] ${relFile}:${lineIndex + 1} — "${match[0]}" cites ADR-${refNumber} Amendment ${n} but the referenced ADR file docs/adr/${refNumber}-*.md does not exist`);
+            continue;
+          }
+
+          // Resolution sites, in order: the referenced ADR; the companions cited
+          // alongside; the citing file itself (self-recording bold lead-ins).
+          const sites: string[] = [join(ADR_DIR, refFile)];
+          for (const companion of companions) {
+            const companionFile = adrFileByNumber.get(companion);
+            if (companionFile) {
+              const companionPath = join(ADR_DIR, companionFile);
+              if (!sites.includes(companionPath)) {
+                sites.push(companionPath);
+              }
+            }
+          }
+          sites.push(file);
+
+          const resolved = sites.some(site => hasAmendmentMarker(readText(site), n));
+          if (!resolved) {
+            findings++;
+            console.log(`[WARN] ${relFile}:${lineIndex + 1} — "${match[0]}" does not resolve to an Amendment heading or bold lead-in in docs/adr/${refFile} or any ADR cited alongside it`);
+          }
+        }
+      }
+    }
+  }
+
+  console.log(`\namendment references: ${checked - findings}/${checked} resolved\n`);
+
+  if (STRICT && findings > 0) {
+    console.log(`⛔ Strict mode: ${findings} amendment-reference finding(s) — blocking (dev-sync step 3.97; see docs/adr/0059)`);
+  }
+
+  return findings;
+}
+
+/**
  * Main check function
  */
 function main(): void {
@@ -491,6 +662,10 @@ function main(): void {
     }
   }
 
+  // Phase 3: ADR amendment-reference resolution (warn-only in default mode,
+  // blocking under --strict exactly like ADR-linkage findings)
+  const amendmentFindings = checkAmendmentReferences(adrs);
+
   // Phase 2: Check intentional-duplicate markers
   const markers = scanIntentionalDuplicateMarkers();
 
@@ -499,18 +674,18 @@ function main(): void {
   if (UPDATE_MARKER_HASHES) {
     updateMarkerHashes(markers);
   } else if (STRICT && markerFindings > 0) {
-    console.log(`⛔ Strict mode: ${linkageFindings} unlinked-ADR and/or ${markerFindings} marker-drift finding(s) — blocking (dev-sync step 3.97; see docs/adr/0059)`);
-  } else if (STRICT && linkageFindings === 0 && markerFindings === 0) {
-    console.log('ℹ️  Strict mode: no linkage or marker-drift findings — exit 0');
+    console.log(`⛔ Strict mode: ${linkageFindings} unlinked-ADR, ${amendmentFindings} amendment-reference, and/or ${markerFindings} marker-drift finding(s) — blocking (dev-sync step 3.97; see docs/adr/0059)`);
+  } else if (STRICT && linkageFindings === 0 && markerFindings === 0 && amendmentFindings === 0) {
+    console.log('ℹ️  Strict mode: no linkage, amendment-reference, or marker-drift findings — exit 0');
   }
 
   // ID-uniqueness collisions fail in EVERY mode (integrity error, not a linkage WARN).
   // Default mode: otherwise always exit 0 on findings (WARN-only)
-  // Strict mode: exit 1 if linkage or marker findings exist, otherwise 0
+  // Strict mode: exit 1 if linkage, amendment-reference, or marker findings exist, otherwise 0
   if (duplicateFindings > 0) {
     process.exit(1);
   }
-  process.exit(STRICT && (linkageFindings + markerFindings) > 0 ? 1 : 0);
+  process.exit(STRICT && (linkageFindings + amendmentFindings + markerFindings) > 0 ? 1 : 0);
 }
 
 // Run the check

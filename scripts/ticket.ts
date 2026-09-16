@@ -1,17 +1,20 @@
 #!/usr/bin/env bun
-// @version 1.2.0
+// @version 1.3.0
 // @l2-propagate: false
 // ticket.ts — CLI for the Phase A Service Ticket + Kanban system (workspace root only).
 // Usage: bun scripts/ticket.ts <command> [args]
 // Design: docs/superpowers/specs/2026-07-16-service-ticket-kanban-design.md,
 //         docs/designs/2026-08-16-governance-backlog-design.md (not_before / --ready / --kind)
+// v1.3.0 (T-20260917-003): doctor reports ticket attempts fields inconsistent with
+//         history transitions (finding 11 — attempts is unmaintained when it does not
+//         equal the count of failed→waiting history entries).
 
 import { resolve, join } from 'node:path';
-import { existsSync } from 'node:fs';
+import { existsSync, readdirSync } from 'node:fs';
 import {
-  createTicket, listTickets, moveTicket, nextServiceTicket, staleRunningTickets, loadCatalog,
+  createTicket, listTickets, moveTicket, nextServiceTicket, staleRunningTickets, loadCatalog, readTicket,
 } from './helpers/ticket-store.ts';
-import type { Priority, Status, Kind } from './helpers/ticket-schema.ts';
+import type { Priority, Status, Kind, Ticket } from './helpers/ticket-schema.ts';
 
 const workspaceRoot = resolve(import.meta.dir, '..');
 // Service tickets: ephemeral execution-queue instances (tickets/*.yaml is gitignored — Task 8).
@@ -129,8 +132,42 @@ try {
         thresholdMinutes = Number(flags.minutes);
       }
       const stale = staleRunningTickets(ticketsDir, thresholdMinutes);
-      if (stale.length === 0) { console.log('No stale running tickets.'); break; }
-      for (const t of stale) console.log(`⚠️  ${t.id} has been running > ${thresholdMinutes}m`);
+      if (stale.length === 0) console.log('No stale running tickets.');
+      else for (const t of stale) console.log(`⚠️  ${t.id} has been running > ${thresholdMinutes}m`);
+
+      // T-20260917-003: the store increments `attempts` exactly on a failed→waiting
+      // transition (helpers/ticket-store.ts moveTicket), so attempts must equal the
+      // number of failed→waiting history entries. Anything else means the field is
+      // unmaintained. Warn-only: doctor's exit code never changes for this.
+      const unloadable: string[] = [];
+      const inconsistent: string[] = [];
+      let scanned = 0;
+      for (const dir of [ticketsDir, governanceDir]) {
+        if (!existsSync(dir)) continue;
+        for (const f of readdirSync(dir)) {
+          if (!f.endsWith('.yaml') || f.includes('.tmp-')) continue;
+          const id = f.replace(/\.yaml$/, '');
+          let ticket: Ticket;
+          try {
+            ticket = readTicket(dir, id); // same loading path listTickets uses (load + validateTicket)
+          } catch {
+            unloadable.push(id);
+            continue;
+          }
+          scanned++;
+          const expected = ticket.history.filter(h => h.from === 'failed' && h.to === 'waiting').length;
+          if (ticket.attempts !== expected) {
+            inconsistent.push(`⚠️  ${ticket.id} attempts: ${ticket.attempts} but history shows ${expected} failed→waiting transition(s) — attempts is unmaintained (T-20260917-003)`);
+          }
+        }
+      }
+      if (scanned > 0) {
+        for (const line of inconsistent) console.log(line);
+        if (inconsistent.length === 0) console.log('✅ ticket attempts fields consistent with history');
+      }
+      if (unloadable.length > 0) {
+        console.log(`⚠️  skipped ${unloadable.length} ticket file(s) that failed to load: ${unloadable.join(', ')}`);
+      }
       break;
     }
     case 'board': {

@@ -5,12 +5,18 @@ title: >-
   validator-hardening: validate ADR amendment references resolve to a real
   heading
 priority: normal
-status: backlog
+status: running
 attempts: 0
 created_at: '2026-09-16T15:36:26.397Z'
 history:
   - at: '2026-09-16T15:36:26.397Z'
     from: null
     to: backlog
+  - at: '2026-09-16T20:40:15.468Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-16T20:40:15.514Z'
+    from: waiting
+    to: running
 result: null
 error: null
