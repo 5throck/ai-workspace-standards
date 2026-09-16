@@ -1,7 +1,16 @@
 #!/usr/bin/env bun
 /**
  * Shared Scaffold Delivery Contracts
- * @version 1.1.0
+ * @version 1.2.0
+ *
+ * v1.2.0 (T-20260916-010): variant templates stopped shipping a stub
+ * docs/VERSION_MANIFEST.md (validate-templates `variant-version-manifest`
+ * arm retires the stub class); the full generated manifest is scaffold-owned.
+ * This module carries the relpath constants and the pure invoke-decision
+ * helper the scaffold (new-project.ts §7.8) and the upgrade flow
+ * (upgrade-project.ts post-upgrade regeneration) share, so "which file is
+ * generated, and what does the generator need to exist" cannot drift between
+ * the two delivery paths.
  *
  * v1.1.0 (T-20260915-012 / M12): NEW_PROJECT_L1_ONLY_AGENTS dropped stale
  * entries (`agents/lifecycle-manager.md`, `agents/pm.md.backup` — neither
@@ -31,6 +40,7 @@
  * Consumers:
  * - create-l3-scaffold.ts  — marker constants, L3_COMMON_OVERLAY_EXCLUDE
  * - new-project.ts         — NEW_PROJECT_* delivery constants, isCanonicalPmStubBody
+ * - upgrade-project.ts     — VERSION_MANIFEST regeneration constants
  * - validate-templates.ts  — SCAFFOLD_MARKER_SOURCES (scaffold-marker-source
  *                            check), REVIEWED_DELIVERY_EXCLUSIONS helpers,
  *                            isCanonicalPmStubBody (pm-extends-stub-body check)
@@ -121,6 +131,46 @@ export const SCAFFOLD_MARKER_SOURCES: readonly ScaffoldMarkerSource[] = [
     }),
   ),
 ];
+
+// ============================================================================
+// 2.5 Version-manifest generation contract (T-20260916-010)
+// ============================================================================
+// A scaffolded project is a standalone repo whose steady-state
+// docs/VERSION_MANIFEST.md is the FULL generated manifest (the project's own
+// scripts/generate-version-manifest.ts output). Variant templates no longer
+// ship a stub — the file is generated post-delivery (new-project.ts §7.8) and
+// regenerated post-upgrade (upgrade-project.ts), never template-delivered
+// (lib/upgrade-policy.ts REGENERATED_FILES). These constants are the single
+// declaration of the generated relpaths and the generator dependency so both
+// delivery paths and the validators cannot drift.
+
+/** Project-relative path of the generated manifest. */
+export const VERSION_MANIFEST_RELPATH = 'docs/VERSION_MANIFEST.md';
+
+/** Project-relative path of the generator the project itself ships. */
+export const VERSION_MANIFEST_GENERATOR_RELPATH = 'scripts/generate-version-manifest.ts';
+
+/** The decision new-project §7.8 / upgrade-project regeneration implement. */
+export type ManifestGenerationDecision =
+  | { action: 'generate' }
+  | { action: 'skip-missing-generator' }
+  | { action: 'skip-no-bun' };
+
+/**
+ * Pure invoke semantics for the post-delivery manifest generation. The
+ * generator must exist in the PROJECT (it is shipped by templates/common —
+ * verified by a unit test) and bun must be available; everything else about
+ * the step is warn-and-continue, because the post-scaffold audit's
+ * VERSION_MANIFEST gates catch a missing/stale manifest either way.
+ */
+export function decideManifestGeneration(
+  generatorExists: boolean,
+  bunAvailable: boolean,
+): ManifestGenerationDecision {
+  if (!generatorExists) return { action: 'skip-missing-generator' };
+  if (!bunAvailable) return { action: 'skip-no-bun' };
+  return { action: 'generate' };
+}
 
 // ============================================================================
 // 3. PM extends-stub contract (T-20260915-010 / H12)

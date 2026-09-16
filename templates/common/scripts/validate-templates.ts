@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.31.0
+ * @version 1.32.0
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -10,6 +10,27 @@
  *   bun scripts/validate-templates.ts
  *   bun scripts/validate-templates.ts --variant co-develop
  *   bun scripts/validate-templates.ts --json
+ *
+ * v1.32.0 (2026-09-16-scaffold-fresh-audit-remediation-design.md): T-20260916-009
+ *          + T-20260916-010. New `managed-block-parity` — every
+ *          `<!-- WORKSPACE-MANAGED: <key> -->…<!-- /WORKSPACE-MANAGED -->`
+ *          block present in templates/common/AGENTS.md must exist, wrapped,
+ *          in EVERY templates/co-* variant AGENTS.md with content parity
+ *          (set-of-normalized-contents per key; duplicates are legitimate —
+ *          common itself carries two tier-model-mapping blocks). Missing key,
+ *          missing wrapped copy, or divergent content = Error with fix hint.
+ *          This closes the T-009 delivery-channel gap: §3.6 sits outside the
+ *          COMMON-AGENTS marker-inject zone, so a stale unwrapped variant
+ *          block silently scaffolded a 2-model §3.6 into every fresh project
+ *          (40 audit FAILs in the 2026-09-16 co-develop scaffold test). New
+ *          `variant-version-manifest` — variant templates must NOT ship
+ *          docs/VERSION_MANIFEST.md; the stub class is retired and the full
+ *          manifest is scaffold/upgrade-owned (new-project §7.8 generation,
+ *          upgrade-project post-upgrade regeneration, upgrade-policy
+ *          REGENERATED_FILES). T-010 root cause: the stub tripped both the
+ *          skills↔manifest parity check (37 FAILs) and the --check drift gate
+ *          in the fresh scaffold's own audit, while co-abap/co-price shipped
+ *          no stub at all — inconsistent either way.
  *
  * v1.31.0 (2026-09-16-propagation-target-derivation-design.md): T-20260915-005
  *          (M8). New `propagation-targets` (PM-03) — the hand-maintained
@@ -115,6 +136,7 @@ import {
   auditFixedTargets,
 } from './lib/propagation-map-schema.ts';
 import { scrubConstitutionRefs } from './lib/constitution-scrub.ts';
+import { extractKeyedBlocks, compareKeyedBlocks } from './lib/managed-block-parity.ts';
 import {
   SCAFFOLD_MARKER_SOURCES,
   isCanonicalPmStubBody,
@@ -3448,6 +3470,96 @@ function checkNoVariantLocalContextMd(variant: string): void {
   }
 }
 
+// T-20260916-010: variant templates must NOT ship docs/VERSION_MANIFEST.md.
+// The stub class is retired: a stub tripped both the project audit's
+// skills↔manifest parity check and the VERSION_MANIFEST --check drift gate in
+// the fresh-scaffold test (2026-09-16), while co-abap/co-price shipped no stub
+// at all — inconsistent either way. The project's steady-state manifest is the
+// FULL generated one, produced post-delivery (new-project.ts §7.8) and
+// regenerated post-upgrade (upgrade-project.ts); the path is classified
+// REGENERATED in lib/upgrade-policy.ts so it is never template-delivered.
+// Also arms the check against a future FULL manifest leaking into a template
+// (it would go stale in template CI — the reason generation is
+// scaffold/upgrade-owned), making the 11/13 divergence class impossible.
+function checkNoVariantVersionManifest(variant: string): void {
+  if (!JSON_MODE) console.log(`\n=== Check T-010: ${variant} must not ship docs/VERSION_MANIFEST.md ===`);
+
+  const manifestPath = join(TEMPLATES_DIR, variant, 'docs', 'VERSION_MANIFEST.md');
+  if (existsSync(manifestPath)) {
+    fail(variant, 'variant-version-manifest', `templates/${variant}/docs/VERSION_MANIFEST.md must not exist — the manifest is generated state, not template content: new-project.ts §7.8 runs the project's own scripts/generate-version-manifest.ts after delivery and upgrade-project.ts regenerates it on upgrade (lib/upgrade-policy.ts classifies it REGENERATED)`, `Delete templates/${variant}/docs/VERSION_MANIFEST.md (stub or otherwise) — scaffolds and upgrades generate the full manifest in-project`);
+  } else {
+    pass(`variant-version-manifest: ${variant} ships no docs/VERSION_MANIFEST.md (generated in-project)`);
+  }
+}
+
+// Check PM-04: managed-block parity (T-20260916-009).
+// Every `<!-- WORKSPACE-MANAGED: <key> -->…<!-- /WORKSPACE-MANAGED -->` block
+// present in templates/common/AGENTS.md must exist, marker-wrapped, in EVERY
+// templates/co-*/AGENTS.md with content parity. Comparison is per-key
+// set-of-normalized-contents (duplicates are legitimate — common itself
+// carries two tier-model-mapping blocks: the §3.6 tier list and the §5.3
+// Model-column note). This is the standing guard for the T-009 defect class:
+// §3.6 sits OUTSIDE the COMMON-AGENTS marker-inject zone, so a stale,
+// unwrapped variant copy has no other delivery channel — the 2026-09-16
+// fresh-scaffold test showed the stale 2-model block scaffolding straight
+// into a new project and failing its model-registry gate (3 ERRORs).
+// Severity: Error. Extraction/comparison primitives live in
+// scripts/lib/managed-block-parity.ts (unit-tested).
+function checkManagedBlockParity(): void {
+  if (!JSON_MODE) console.log('\n=== Check PM-04: managed-block parity (common AGENTS.md → every variant AGENTS.md) ===');
+
+  const commonPath = join(TEMPLATES_DIR, 'common', 'AGENTS.md');
+  if (!existsSync(commonPath)) {
+    fail('common', 'managed-block-parity', 'templates/common/AGENTS.md not found — cannot derive the managed-block parity baseline');
+    return;
+  }
+  const commonIssues: string[] = [];
+  const commonBlocks = extractKeyedBlocks(readFileSync(commonPath, 'utf-8'), commonIssues);
+  for (const issue of commonIssues) {
+    fail('common', 'managed-block-parity', `templates/common/AGENTS.md: ${issue}`, 'Close the WORKSPACE-MANAGED block with <!-- /WORKSPACE-MANAGED -->');
+  }
+  if (commonBlocks.size === 0) {
+    pass('managed-block-parity: common AGENTS.md carries no managed blocks (nothing to enforce)');
+    return;
+  }
+
+  const variants = readdirSync(TEMPLATES_DIR, { withFileTypes: true })
+    .filter(e => e.isDirectory() && e.name.startsWith('co-'))
+    .map(e => e.name)
+    .sort();
+
+  let checked = 0;
+  for (const variant of variants) {
+    const variantPath = join(TEMPLATES_DIR, variant, 'AGENTS.md');
+    if (!existsSync(variantPath)) {
+      fail(variant, 'managed-block-parity', `templates/${variant}/AGENTS.md not found — the common managed blocks have no delivery channel into this variant`, `Create templates/${variant}/AGENTS.md carrying every common WORKSPACE-MANAGED block (see templates/common/AGENTS.md)`);
+      continue;
+    }
+    const variantIssues: string[] = [];
+    const variantBlocks = extractKeyedBlocks(readFileSync(variantPath, 'utf-8'), variantIssues);
+    for (const issue of variantIssues) {
+      fail(variant, 'managed-block-parity', `templates/${variant}/AGENTS.md: ${issue}`, 'Close the WORKSPACE-MANAGED block with <!-- /WORKSPACE-MANAGED -->');
+    }
+
+    const violations = compareKeyedBlocks(commonBlocks, variantBlocks);
+    for (const v of violations) {
+      if (v.kind === 'missing-key') {
+        fail(variant, 'managed-block-parity', `templates/${variant}/AGENTS.md carries no "WORKSPACE-MANAGED: ${v.key}" block — the common AGENTS.md keyed block has no L1→L2 delivery channel (fresh scaffolds copy the variant template wholesale; the COMMON-AGENTS marker-inject zone does not cover it)`, `Copy the "<!-- WORKSPACE-MANAGED: ${v.key} -->" block(s) from templates/common/AGENTS.md into templates/${variant}/AGENTS.md at the matching section, markers included`);
+      } else if (v.kind === 'missing-content') {
+        fail(variant, 'managed-block-parity', `templates/${variant}/AGENTS.md "WORKSPACE-MANAGED: ${v.key}" content diverges from templates/common/AGENTS.md (missing the common block content)`, `Replace the variant's "<!-- WORKSPACE-MANAGED: ${v.key} -->" block content with the common copy (markers included), byte-identical after line normalization`);
+      } else {
+        fail(variant, 'managed-block-parity', `templates/${variant}/AGENTS.md "WORKSPACE-MANAGED: ${v.key}" carries content templates/common/AGENTS.md does not — a variant-only managed block would be unioned into projects by upgrade MERGE with no common source`, `Adjudicate: move the content out of WORKSPACE-MANAGED markers, or add the block to templates/common/AGENTS.md so parity holds`);
+      }
+    }
+    if (violations.length === 0 && variantIssues.length === 0) {
+      checked++;
+    }
+  }
+  if (checked > 0) {
+    pass(`managed-block-parity: ${checked}/${variants.length} variant AGENTS.md carry every common WORKSPACE-MANAGED block with content parity`);
+  }
+}
+
 // Check WS-11: bilingual user-guide pair (docs/user-guide.md + docs/user-guide_ko.md)
 // Standard defined in docs/governance/variant-contract.md "User-Guide Standard".
 // Unlike Variant Contract required files, templates/common/ does NOT satisfy this
@@ -4205,6 +4317,7 @@ function main(): number {
       checkL0OnlyToolRefsInVariantCommandSkills(variant);         // WS-05a
       checkVariantSkillsLayer(variant, skillLayerMap);             // WS-06
     checkNoVariantLocalContextMd(variant);                       // WS-07
+    checkNoVariantVersionManifest(variant);                      // T-20260916-010: no stub/full manifest in variant templates
     checkReadmeStandard(variant);                                // WS-08
     checkContextMdStructure(variant);                            // WS-09
     checkAgentLifecycleFrontmatter(variant);                     // WS-10
@@ -4221,6 +4334,7 @@ function main(): number {
   checkRootCommonCommandsParity();
   checkPropagationMapSchema();
   checkMarkerZoneParity();                                       // PM-02: marker-inject zones vs target_variants
+  checkManagedBlockParity();                                     // PM-04: WORKSPACE-MANAGED blocks, common → every variant (T-20260916-009)
   checkPropagationTargets();                                     // PM-03: target lists vs actual templates/co-* dir set (T-20260915-005)
   checkScaffoldMarkerSources();                                  // T-20260915-002: scaffolder markers vs source templates
   checkPmExtendsStubBodies();                                    // T-20260915-010: variant pm.md extends-stub bodies

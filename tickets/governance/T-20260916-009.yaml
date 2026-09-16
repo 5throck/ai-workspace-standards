@@ -1,0 +1,42 @@
+schemaVersion: 1
+id: T-20260916-009
+kind: manual
+title: >-
+  propagation: tier-model-mapping WORKSPACE-MANAGED block has no L1-to-L2
+  delivery channel — all 13 templates/co-*/AGENTS.md carry stale 2-model prose
+  with no marker wrapper (L0+L1 current at 3 models incl. gpt-5.6-*); fresh
+  scaffolds inherit the stale zone and fail the model-registry gate (found by
+  co-develop scaffold test 2026-09-16; existing projects escaped via upgrade
+  union fix). Fix: L2 keyed-block delivery or propagation domain + validator arm
+  (keyed WORKSPACE-MANAGED blocks in templates/common/AGENTS.md must exist
+  marker-wrapped in every variant template)
+priority: high
+status: done
+attempts: 0
+created_at: '2026-09-16T02:14:46.283Z'
+history:
+  - at: '2026-09-16T02:14:46.283Z'
+    from: null
+    to: backlog
+  - at: '2026-09-16T02:19:32.351Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-16T02:19:32.362Z'
+    from: waiting
+    to: review
+  - at: '2026-09-16T02:58:33.703Z'
+    from: review
+    to: done
+result: >-
+  Fixed and verified: all 13 templates/co-*/AGENTS.md now carry the
+  byte-identical L1 marker-wrapped blocks (tier-model-mapping section 3.6 +
+  section 5.3 model-column note) — 11 stale 2-model prose sites replaced,
+  co-abap/co-price given a full L1-shaped section 3.6 (they lacked the section
+  entirely). New PM-04 managed-block-parity arm in validate-templates.ts 1.32.0
+  (Error): every WORKSPACE-MANAGED block in templates/common/AGENTS.md must
+  exist marker-wrapped with content parity in every variant AGENTS.md; no
+  intentional divergence found, escape hatch unused. Shared logic in new
+  scripts/lib/managed-block-parity.ts 1.0.0. Verification scaffold: project
+  AGENTS.md lists 3 models per tier. Design
+  docs/designs/2026-09-16-scaffold-fresh-audit-remediation-design.md.
+error: null

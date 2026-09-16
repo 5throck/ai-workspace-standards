@@ -78,7 +78,7 @@ describe('upgrade-policy resolveClaim — dedicated passes keep their paths', ()
   });
 
   test('REGENERATED files are generated in-project', () => {
-    for (const rel of ['docs/skill-graph.json', '.claude/template-version.txt']) {
+    for (const rel of ['docs/skill-graph.json', '.claude/template-version.txt', 'docs/VERSION_MANIFEST.md']) {
       expect(resolveClaim(rel, VARIANT).policy).toBe('REGENERATED');
     }
   });
@@ -147,7 +147,7 @@ describe('upgrade-policy resolveClaim — default-policy inversion (the gap fix)
   test('variant docs gaps land on TEMPLATE TREE SYNC', () => {
     for (const rel of [
       'docs/user-guide.md', 'docs/user-guide_ko.md', 'docs/handoff-spec.md',
-      'docs/VERSION_MANIFEST.md', 'docs/skill-graph.overrides.json',
+      'docs/skill-graph.overrides.json',
       'docs/countries/KR.md', 'docs/wire-format.md', 'docs/benchmark-fixtures/ISSUE-001.md',
     ]) {
       const claim = resolveClaim(rel, VARIANT);

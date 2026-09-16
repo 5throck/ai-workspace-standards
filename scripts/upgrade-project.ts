@@ -1,5 +1,15 @@
 #!/usr/bin/env bun
-// @version 1.28.0
+// @version 1.29.0
+// v1.29.0: T-20260916-010 — post-upgrade docs/VERSION_MANIFEST.md regeneration
+//          (mirrors the skill-graph regeneration): the upgrade refreshed
+//          agents/skills/scripts, so the project manifest is stale until the
+//          next /sync — regenerate now via the project's own
+//          scripts/generate-version-manifest.ts (cwd = projectDir, non-fatal
+//          warn-and-continue). Also retires the stub-manifest class: variant
+//          templates no longer ship docs/VERSION_MANIFEST.md and the file
+//          joined lib/upgrade-policy.ts REGENERATED_FILES (never
+//          template-delivered), so a project still carrying an old stub gets
+//          a full generated manifest on its next upgrade instead.
 // v1.28.0: Conflict-semantics + snapshot-honesty set (2026-09-15 project review,
 //          docs/reports/2026-09-15-project-review-template-fleet.md). C2/H1: the
 //          pre-upgrade stash now includes untracked files (git stash push -u) and
@@ -2503,6 +2513,35 @@ if (existsSync(graphGenScript)) {
     }
   } else {
     console.log('  [DRY RUN] Would run: bun scripts/generate-skill-graph.ts');
+  }
+  console.log('');
+}
+
+// ── Post-upgrade: regenerate docs/VERSION_MANIFEST.md (T-20260916-010) ────────
+// The upgrade just refreshed agents/skills/scripts, so the project's manifest
+// (skills↔manifest parity + --check drift gates) is stale until the next
+// /sync — regenerate now. This also REPLACES any stub manifest a project
+// still carries from the retired template stub class: the generator writes
+// the full manifest unconditionally. Non-fatal: missing bun/generator warns
+// and continues (same contract as the skill-graph regeneration above).
+const manifestGenScript = join(projectDir, 'scripts', 'generate-version-manifest.ts');
+if (existsSync(manifestGenScript)) {
+  console.log('--- Post-upgrade: Regenerating docs/VERSION_MANIFEST.md ---');
+  if (!dryRun) {
+    const bunCheck = spawnSync('bun', ['--version'], { encoding: 'utf8', stdio: 'pipe' });
+    if (bunCheck.error || bunCheck.status !== 0) {
+      console.log('  ⚠️  bun not available — skipping manifest regeneration (the project\'s next /sync step 4.7 will regenerate it)');
+    } else {
+      const manifestGen = spawnSync('bun', ['scripts/generate-version-manifest.ts'], { cwd: projectDir, encoding: 'utf8', timeout: 60000 });
+      if (manifestGen.status === 0) {
+        console.log('  ✅ Project VERSION_MANIFEST regenerated (full manifest — replaces any retired stub)');
+      } else {
+        console.log(`  ⚠️  generate-version-manifest.ts exited with status ${manifestGen.status} — the project's next /sync (step 4.7) will regenerate it`);
+        if (manifestGen.stderr) console.log(`  STDERR: ${manifestGen.stderr.trim()}`);
+      }
+    }
+  } else {
+    console.log('  [DRY RUN] Would run: bun scripts/generate-version-manifest.ts');
   }
   console.log('');
 }

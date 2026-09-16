@@ -154,6 +154,20 @@ MAP enforcement, governance cadence):
 Skills backing these: `pricing-governance`, `price-waterfall-analysis`,
 `map-channel-enforcement` (registered in `variant.json → skill_manifest`).
 
+### §3.6 3-Tier Strategy
+
+When leading execution and improvement tasks, PM MUST use the 3-Tier model strategy:
+
+<!-- WORKSPACE-MANAGED: tier-model-mapping -->
+- **High-tier**: Complex reasoning, architectural design, planning (claude-opus-5-0 / gemini-3.1-pro / gpt-5.6-sol)
+- **Medium-tier**: Code review, testing, PR review, quality gates (claude-sonnet-5-0 / gemini-3.8-flash / gpt-5.6-terra)
+- **Low-tier**: Fast, repetitive coding, script maintenance (claude-haiku-4-5 / gemini-3.8-flash / gpt-5.6-luna)
+<!-- /WORKSPACE-MANAGED -->
+
+<!-- WORKSPACE-MANAGED: tier-model-mapping -->
+> **Note**: The `Model` column below shows the Claude Code short alias (`sonnet`/`opus`/`haiku`/`fable`) actually passed to the `Agent()` tool's `model` parameter — not the registry ID (e.g. `claude-sonnet-5-0`). See [CLAUDE.md §6](CLAUDE.md#6-native-sub-agents-agent-tool) for the registry-ID → alias translation table. On Gemini/Antigravity, use the literal model ID instead (see GEMINI.md's equivalent example).
+<!-- /WORKSPACE-MANAGED -->
+
 ## §4: PM Subagent Dispatch Protocol
 
 <!-- VARIANT-SUBAGENT-ROSTER-START -->

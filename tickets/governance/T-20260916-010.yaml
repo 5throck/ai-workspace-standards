@@ -1,0 +1,44 @@
+schemaVersion: 1
+id: T-20260916-010
+kind: manual
+title: >-
+  fresh-scaffold audit red class: project-context audit treats the stub
+  docs/VERSION_MANIFEST.md as a complete registry — skills-parity check fails
+  37x and the wave-1 VERSION_MANIFEST --check gate fails on the stub (40 FAILs
+  on a clean co-develop scaffold; existing projects pass because upgrade
+  regenerates a full manifest). Adjudicate: stub-aware audit checks, or
+  templates stop shipping stubs and scaffold/upgrade generates the manifest.
+  Also: only 11/13 variant templates ship the stub (co-abap, co-price missing)
+  and stub version cells are static 1.0.0 vs templates/VERSION 0.6.0
+priority: high
+status: done
+attempts: 0
+created_at: '2026-09-16T02:14:46.295Z'
+history:
+  - at: '2026-09-16T02:14:46.295Z'
+    from: null
+    to: backlog
+  - at: '2026-09-16T02:19:32.374Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-16T02:19:32.386Z'
+    from: waiting
+    to: review
+  - at: '2026-09-16T02:58:33.717Z'
+    from: review
+    to: done
+result: >-
+  Fixed and verified. Adjudication: templates stop shipping stubs — generation
+  is scaffold/upgrade-owned (project steady-state is the full generated
+  manifest; templates cannot carry generated manifests without stale-in-CI). 11
+  stub docs/VERSION_MANIFEST.md deleted from variant templates (the 11/13
+  inconsistency becomes moot, enforced by the new variant-version-manifest arm,
+  Error); new-project.ts 1.19.0 generates the full project manifest
+  post-delivery (new section 7.8); upgrade-project.ts 1.29.0 regenerates
+  post-upgrade; lib/upgrade-policy.ts 1.6.0 declares the manifest REGENERATED so
+  the deny-list default cannot deliver a stale copy; upgrade-path bookkeeping
+  verified via check-upgrade-coverage --strict (clean). Verification scaffold:
+  full 145-row generated manifest, no Stub line, skills-parity and --check gate
+  green. Design
+  docs/designs/2026-09-16-scaffold-fresh-audit-remediation-design.md.
+error: null
