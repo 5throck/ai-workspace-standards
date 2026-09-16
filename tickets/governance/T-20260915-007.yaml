@@ -5,12 +5,30 @@ title: >-
   design: harden upgrade-project target guard with realpath canonicalization and
   confirm targets outside Projects
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-15T10:32:47.032Z'
 history:
   - at: '2026-09-15T10:32:47.032Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-16T00:23:23.848Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-16T00:23:23.860Z'
+    from: waiting
+    to: review
+  - at: '2026-09-16T00:40:59.759Z'
+    from: review
+    to: done
+result: >-
+  Design delivered and registered approved:
+  docs/designs/2026-09-16-upgrade-target-realpath-guard-design.md (spec
+  2026-09-16-upgrade-target-realpath-guard-design, status approved).
+  fs.realpathSync canonicalization of the target (post-existsSync, ENOENT
+  messaging unchanged) with workspace root/Projects canonicalized once — closes
+  the symlink bypass of the lexical root guard at upgrade-project.ts:258-270;
+  outside-Projects targets move WARN to confirm-prompt default-N (reuses the
+  script's prompt('Proceed? [y/N]') + --yes precedent). Implementation ticketed:
+  T-20260916-006/007.
 error: null

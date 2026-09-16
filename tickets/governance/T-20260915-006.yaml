@@ -5,12 +5,32 @@ title: >-
   design: guard variant-ization against overlaying an existing live variant
   template and add post-Phase-4 state rollback
 priority: high
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-15T10:32:47.017Z'
 history:
   - at: '2026-09-15T10:32:47.017Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-16T00:23:23.823Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-16T00:23:23.836Z'
+    from: waiting
+    to: review
+  - at: '2026-09-16T00:40:59.746Z'
+    from: review
+    to: done
+result: >-
+  Design delivered and registered approved:
+  docs/designs/2026-09-16-variant-ization-overlay-guard-design.md (spec
+  2026-09-16-variant-ization-overlay-guard-design, status approved). Fail-closed
+  exists-guard classified by target variant.json status (stable/deprecated
+  hard-refuse no-flag, beta via --overlay-variant, --output outside templates/
+  exempt); rollback = rollbackPartialProject reuse for fresh-create + atomic
+  snapshot-rename trio for authorized overlays; enforcement at pipeline
+  pre-Phase-3.5 / project-to-variant pre-copy / generate-variant default
+  resolution. Corrected the review hypothesis: Phase 4 touches only the
+  templates/co-<x>/ tree; registry/propagation writes are the default-OFF Phase
+  7 helper. Implementation ticketed: T-20260916-003/004/005.
 error: null

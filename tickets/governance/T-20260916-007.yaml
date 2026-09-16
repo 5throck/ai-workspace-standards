@@ -1,0 +1,17 @@
+schemaVersion: 1
+id: T-20260916-007
+kind: manual
+title: >-
+  test: symlink-to-root and outside-Projects negative coverage for
+  upgrade-project target guard (H14 design
+  2026-09-16-upgrade-target-realpath-guard)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-16T00:40:32.959Z'
+history:
+  - at: '2026-09-16T00:40:32.959Z'
+    from: null
+    to: backlog
+result: null
+error: null
