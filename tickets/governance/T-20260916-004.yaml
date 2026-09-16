@@ -6,12 +6,30 @@ title: >-
   rollback-partial-project and wire module failure-path rollback (H5 design
   2026-09-16-variant-ization-overlay-guard)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-16T00:40:32.924Z'
 history:
   - at: '2026-09-16T00:40:32.924Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-16T05:05:21.422Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-16T05:05:21.434Z'
+    from: waiting
+    to: review
+  - at: '2026-09-16T09:02:45.526Z'
+    from: review
+    to: done
+result: >-
+  Landed in wave A: helpers/rollback-partial-project.ts 1.1.0 — fresh-create
+  failures reuse rollbackPartialProject; authorized overlays snapshot-rename the
+  live tree to a dot-prefixed sibling under templates/ and restore on failure
+  (rm-based rollback would delete the live variant). Wired through module
+  failure paths (failWithRollback seam / buildFailureResult), not process exit
+  hooks, so the E2E harness importing the module is covered. Integration review
+  fixed a fatal seam defect: failWithRollback() recursively called itself,
+  spinning 100% CPU on every refusal — now returns buildFailureResult(phases,
+  errors, startTime).
 error: null

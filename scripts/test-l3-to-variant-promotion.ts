@@ -2,8 +2,24 @@
 /**
  * test-l3-to-variant-promotion.ts — E2E smoke test for the L3 scaffold → variant promotion path
  *
- * @version 1.3.0
+ * @version 1.5.0
  * @last_updated 2026-09-16
+ *
+ * v1.5.0: T-20260916-005 — Test 7 absorbs the project-to-variant.ts
+ *         subprocess enforcement assertions that briefly lived in
+ *         tests/unit/variant-overlay-guard.test.ts: the parallel unit runner
+ *         must not stage templates/co-* fixtures while other files' invariants
+ *         scan the same tree; this sequential harness owns that staging.
+ * v1.4.0: T-20260916-005 — Test 6 pins the variant-ization overlay guard
+ *         (docs/designs/2026-09-16-variant-ization-overlay-guard-design.md):
+ *         a second promotion run against an already-promoted beta variant
+ *         template slot (templates/co-e2eguard-*) refuses with the documented
+ *         OVERLAY GUARD message naming --overlay-variant; a stable-status slot
+ *         refuses even WITH overlayVariant (no bypass); and no stray
+ *         .overlay-backup-* snapshot remains in templates/ after the green
+ *         Test 3 run. Tests 3–5 stay green on the explicit --output path —
+ *         they double as the design §6 guard-exemption assertion (the
+ *         destination is named, not derived, so the guard does not apply).
  *
  * v1.3.0: T-20260915-003 — new Test 1b pins the static L3 delivery derivation
  *         (helpers/scaffold-markers.ts deriveL3ScaffoldDelivery) against the
@@ -36,15 +52,19 @@
  *   bun scripts/test-l3-to-variant-promotion.ts
  *
  * All fixture output is written under Projects/ and tests/.temp/ and removed
- * on exit (success or failure) — nothing is written to templates/.
+ * on exit (success or failure) — nothing is written to templates/, except the
+ * Test 6 disposable guard fixtures (templates/co-e2eguard-*, variant.json
+ * only), which are staged and removed by the same cleanup path.
  */
 
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as path from 'node:path';
 import { $ } from 'bun';
+import { spawnSync } from 'node:child_process';
 import { verifyActualTreeMatchesDerivation } from './helpers/scaffold-markers.ts';
+import { OVERLAY_GUARD_PREFIX } from './lib/variant-overlay-guard.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -67,6 +87,20 @@ const PIPELINE_OUTPUT_PATH = join(WORKSPACE_ROOT, 'tests', '.temp', `l3-promotio
 // the regenerated AGENTS.md back onto the fixture (see Test 2.5 below).
 const AGENTS_MD_STAGING_NAME = `${SCAFFOLD_VARIANT_NAME}-agentsmd-stage`;
 const AGENTS_MD_STAGING_PATH = join(WORKSPACE_ROOT, 'templates', AGENTS_MD_STAGING_NAME);
+// Test 6 guard fixtures (T-20260916-005): disposable already-promoted variant
+// slots in templates/ — variant.json only, staged and removed by cleanup().
+const GUARD_FIXTURE_BETA = `co-e2eguard-beta-${RUN_ID}`;
+const GUARD_FIXTURE_STABLE = `co-e2eguard-stable-${RUN_ID}`;
+// Test 7 (v1.5.0): project-to-variant.ts subprocess enforcement fixtures —
+// same slot shape, staged/removed by the same sequential cleanup() path.
+const P2V_FIX_BETA = `co-e2p2b-${RUN_ID}`;
+const P2V_FIX_STABLE = `co-e2p2s-${RUN_ID}`;
+const P2V_FIX_CORRUPT = `co-e2p2c-${RUN_ID}`;
+const P2V_FIXTURES = [P2V_FIX_BETA, P2V_FIX_STABLE, P2V_FIX_CORRUPT];
+// Trivial L3 source (2 files, below the complexity-routing thresholds) — the
+// dry-run-proceed assertion must reach the copy pipeline, not the
+// full-pipeline recommendation abort a real scaffold triggers.
+const P2V_SRC = join(WORKSPACE_ROOT, 'tests', '.temp', `e2eguard-p2v-src-${RUN_ID}`);
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -77,7 +111,11 @@ function pass(label: string) { console.log(`  ✅ ${label}`); testsPassed++; tes
 function fail(label: string, reason: string) { console.error(`  ❌ ${label}: ${reason}`); allPassed = false; testsRun++; }
 
 function cleanup(): void {
-  for (const p of [L3_FIXTURE_PATH, PIPELINE_OUTPUT_PATH, AGENTS_MD_STAGING_PATH]) {
+  for (const p of [L3_FIXTURE_PATH, PIPELINE_OUTPUT_PATH, AGENTS_MD_STAGING_PATH,
+    join(WORKSPACE_ROOT, 'templates', GUARD_FIXTURE_BETA),
+    join(WORKSPACE_ROOT, 'templates', GUARD_FIXTURE_STABLE),
+    ...P2V_FIXTURES.map((name) => join(WORKSPACE_ROOT, 'templates', name)),
+    P2V_SRC]) {
     if (existsSync(p)) {
       try { rmSync(p, { recursive: true, force: true }); } catch { /* ignore */ }
     }
@@ -403,7 +441,157 @@ try {
         }
       } catch (e) { fail('Test 5e', String(e)); }
     } catch (e) { fail('Test 5', String(e)); }
+
+    // ── Test 6: Variant-ization overlay guard (T-20260916-005) ──────────────
+    // docs/designs/2026-09-16-variant-ization-overlay-guard-design.md §6: a
+    // second promotion run against an ALREADY-PROMOTED variant template slot
+    // must refuse instead of silently overwriting the live tree. The harness
+    // stages disposable templates/co-e2eguard-* slots (variant.json only) and
+    // removes them in cleanup(), so the assertion is non-destructive to the
+    // rest of the suite. The refusal happens in the pipeline's Phase 0.6 —
+    // before Phase 1 — so these runs are fast and write nothing.
+    console.log('\nTest 6: overlay guard — second promotion run against an occupied slot');
+    try {
+      const stageGuardFixture = (name: string, status: string): string => {
+        const dir = join(WORKSPACE_ROOT, 'templates', name);
+        mkdirSync(dir, { recursive: true });
+        const manifest = JSON.stringify({ name, extends: 'common', status, version: '0.1.0', agents: [], skills: [] }, null, 2) + '\n';
+        writeFileSync(join(dir, 'variant.json'), manifest, 'utf8');
+        return manifest;
+      };
+      const { executeL3ToVariantPipeline } = await import('./l3-to-variant-pipeline.ts');
+
+      // 6a: beta slot WITHOUT overlay authorization → refuse, naming the flag.
+      const betaManifest = stageGuardFixture(GUARD_FIXTURE_BETA, 'beta');
+      const betaRun = await executeL3ToVariantPipeline({
+        l3ProjectPath: L3_FIXTURE_PATH,
+        variantName: GUARD_FIXTURE_BETA,
+        variantType: 'collaboration',
+        variantDescription: 'Test 6 guard fixture — second-run refusal probe',
+        skipParityValidation: true,
+        skipIntegration: true,
+      });
+      const betaRefusal = betaRun.errors.find(e => e.phase === 'overlay-guard');
+      if (
+        betaRun.success !== false ||
+        !betaRefusal ||
+        !betaRefusal.error.includes(OVERLAY_GUARD_PREFIX) ||
+        !betaRefusal.error.includes('--overlay-variant')
+      ) {
+        fail('Test 6a', `expected an overlay-guard refusal naming --overlay-variant, got: success=${betaRun.success}, errors=${JSON.stringify(betaRun.errors)}`);
+      } else {
+        pass('Test 6a PASSED: second run against an already-promoted BETA slot refuses and names --overlay-variant');
+      }
+      if (readFileSync(join(WORKSPACE_ROOT, 'templates', GUARD_FIXTURE_BETA, 'variant.json'), 'utf8') !== betaManifest) {
+        fail('Test 6a', 'the guard refusal modified the pre-existing variant.json');
+      } else {
+        pass('Test 6a PASSED: refusal is non-destructive — pre-existing variant.json untouched');
+      }
+
+      // 6b: stable slot refuses EVEN WITH overlayVariant — no bypass flag exists.
+      stageGuardFixture(GUARD_FIXTURE_STABLE, 'stable');
+      const stableRun = await executeL3ToVariantPipeline({
+        l3ProjectPath: L3_FIXTURE_PATH,
+        variantName: GUARD_FIXTURE_STABLE,
+        variantType: 'collaboration',
+        variantDescription: 'Test 6 guard fixture — stable no-bypass probe',
+        skipParityValidation: true,
+        skipIntegration: true,
+        overlayVariant: true,
+      });
+      const stableRefusal = stableRun.errors.find(e => e.phase === 'overlay-guard');
+      if (
+        stableRun.success !== false ||
+        !stableRefusal ||
+        !stableRefusal.error.includes(OVERLAY_GUARD_PREFIX) ||
+        !stableRefusal.error.includes('"stable"') ||
+        !stableRefusal.error.includes('no bypass flag')
+      ) {
+        fail('Test 6b', `expected a stable no-bypass refusal, got: success=${stableRun.success}, errors=${JSON.stringify(stableRun.errors)}`);
+      } else {
+        pass('Test 6b PASSED: stable slot refuses even with overlayVariant authorized (no bypass)');
+      }
+
+      // 6c: no stray .overlay-backup-* snapshot may remain under templates/.
+      // The green Test 3 run uses the guard-exempt explicit --output path
+      // (design §6: existing harness flow stays green = exemption proof), so
+      // nothing on this suite's success path may ever snapshot into templates/.
+      // Snapshots live at the templates/ top level by construction, so a plain
+      // top-level readdir suffices (a recursive glob walk over the whole
+      // template tree would be needlessly slow).
+      const templatesDir = join(WORKSPACE_ROOT, 'templates');
+      const strays = existsSync(templatesDir)
+        ? readdirSync(templatesDir).filter((name) => name.startsWith('.overlay-backup-'))
+        : [];
+      if (strays.length > 0) {
+        fail('Test 6c', `stray overlay snapshot(s) in templates/: ${strays.join(', ')}`);
+      } else {
+        pass('Test 6c PASSED: no .overlay-backup-* snapshot strays in templates/');
+      }
+    } catch (e) { fail('Test 6', String(e)); }
   }
+
+  // ── Test 7: project-to-variant.ts overlay guard (subprocess) ─────────────
+  // T-20260916-005: prove the SECOND enforcement point end-to-end via the real
+  // CLI — flag parsing, exit codes, and the stable no-bypass rule. Sequential
+  // here so the templates/co-* staging never overlaps another process's scan.
+  console.log('\nTest 7: project-to-variant overlay guard (subprocess)');
+  try {
+    const stageP2vFixture = (name: string, variantJson: string): string => {
+      const dir = join(WORKSPACE_ROOT, 'templates', name);
+      mkdirSync(dir, { recursive: true });
+      writeFileSync(join(dir, 'variant.json'), variantJson);
+      return variantJson;
+    };
+    const p2vBetaManifest = stageP2vFixture(P2V_FIX_BETA, JSON.stringify({ name: P2V_FIX_BETA, extends: 'common', status: 'beta', version: '0.1.0', agents: [], skills: [] }));
+    stageP2vFixture(P2V_FIX_STABLE, JSON.stringify({ name: P2V_FIX_STABLE, extends: 'common', status: 'stable', version: '1.0.0', agents: [], skills: [] }));
+    stageP2vFixture(P2V_FIX_CORRUPT, '{ this is not json');
+    mkdirSync(join(P2V_SRC, 'docs'), { recursive: true });
+    writeFileSync(join(P2V_SRC, 'README.md'), `# e2eguard p2v fixture ${RUN_ID}\n`);
+    writeFileSync(join(P2V_SRC, 'docs', 'fixture-note.md'), 'disposable overlay-guard fixture\n');
+    const runP2v = (target: string, extraArgs: string[] = []): { status: number | null; out: string } => {
+      const res = spawnSync('bun', ['scripts/project-to-variant.ts', '--source', P2V_SRC, '--target', target, ...extraArgs],
+        { cwd: WORKSPACE_ROOT, encoding: 'utf-8', timeout: 60000 });
+      return { status: res.status, out: (res.stdout ?? '') + (res.stderr ?? '') };
+    };
+
+    // 7a: beta refuses WITHOUT --overlay-variant; names the flag; non-destructive.
+    const r7a = runP2v(P2V_FIX_BETA);
+    const betaJson = join(WORKSPACE_ROOT, 'templates', P2V_FIX_BETA, 'variant.json');
+    if (r7a.status === 1 && r7a.out.includes('OVERLAY GUARD') && r7a.out.includes('--overlay-variant')
+        && existsSync(betaJson) && readFileSync(betaJson, 'utf8') === p2vBetaManifest) {
+      pass('Test 7a PASSED: project-to-variant refuses an occupied BETA slot, names --overlay-variant, leaves the slot untouched');
+    } else {
+      fail('Test 7a', `expected exit 1 + OVERLAY GUARD + --overlay-variant + untouched fixture, got status=${r7a.status}, out=${r7a.out.slice(0, 400)}`);
+    }
+
+    // 7b: stable refuses EVEN WITH --overlay-variant (no bypass).
+    const r7b = runP2v(P2V_FIX_STABLE, ['--overlay-variant']);
+    if (r7b.status === 1 && r7b.out.includes('OVERLAY GUARD') && r7b.out.includes('"stable"') && r7b.out.includes('no bypass flag')) {
+      pass('Test 7b PASSED: stable slot refuses even with --overlay-variant (no bypass)');
+    } else {
+      fail('Test 7b', `expected stable no-bypass refusal, got status=${r7b.status}, out=${r7b.out.slice(0, 400)}`);
+    }
+
+    // 7c: corrupt (unparseable variant.json) target refuses.
+    const r7c = runP2v(P2V_FIX_CORRUPT, ['--overlay-variant']);
+    if (r7c.status === 1 && r7c.out.includes('OVERLAY GUARD') && r7c.out.includes('missing or unparseable')) {
+      pass('Test 7c PASSED: corrupt slot refuses (missing or unparseable variant.json)');
+    } else {
+      fail('Test 7c', `expected corrupt refusal, got status=${r7c.status}, out=${r7c.out.slice(0, 400)}`);
+    }
+
+    // 7d: beta + --overlay-variant + --dry-run proceeds — exit 0, no refusal,
+    // no writes (the pre-existing tree stays byte-identical).
+    const r7d = runP2v(P2V_FIX_BETA, ['--overlay-variant', '--dry-run']);
+    const readmeAfter = join(WORKSPACE_ROOT, 'templates', P2V_FIX_BETA, 'README.md');
+    if (r7d.status === 0 && !r7d.out.includes('OVERLAY GUARD') && r7d.out.includes('[DRY]')
+        && readFileSync(betaJson, 'utf8') === p2vBetaManifest && !existsSync(readmeAfter)) {
+      pass('Test 7d PASSED: authorized overlay dry-run proceeds without touching the pre-existing tree');
+    } else {
+      fail('Test 7d', `expected dry-run proceed (exit 0, [DRY], untouched fixture), got status=${r7d.status}, out=${r7d.out.slice(0, 400)}`);
+    }
+  } catch (e) { fail('Test 7', String(e)); }
 
   // ── Summary ───────────────────────────────────────────────────────────────
   console.log('\n' + '─'.repeat(50));
