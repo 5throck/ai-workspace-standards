@@ -3,12 +3,23 @@ id: T-20260917-004
 kind: manual
 title: 'validator-hardening: warn when a versioned script lacks a lifecycle record'
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-16T15:36:26.564Z'
 history:
   - at: '2026-09-16T15:36:26.564Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-16T22:09:31.894Z'
+    from: backlog
+    to: review
+  - at: '2026-09-16T22:09:53.741Z'
+    from: review
+    to: done
+result: >-
+  lifecycle-sync-audit 1.15.0 Check H coverage arm — versioned scripts without a
+  docs/lifecycle/scripts/ record reported as one aggregated WARNING (first dozen
+  named, count totalled); records stay opt-in per the SCRIPTS.md-SSOT stance. 55
+  scripts currently listed. Spec:
+  docs/designs/2026-09-17-governance-backlog-batch-design.md
 error: null

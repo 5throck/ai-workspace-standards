@@ -23,6 +23,7 @@ import {
   compareKeyedBlocks,
   normalizeBlockContent,
   parseManagedBlockOpen,
+  isExtendsStub,
 } from '../../scripts/lib/managed-block-parity.ts';
 
 const workspaceRoot = resolve(import.meta.dir, '..', '..');
@@ -167,5 +168,33 @@ describe('real-tree invariant: the T-009 data fix is at parity', () => {
       const violations = compareKeyedBlocks(commonBlocks, variantBlocks);
       expect(violations).toEqual([]);
     }
+  });
+});
+
+describe('isExtendsStub (T-20260917-001)', () => {
+  test('detects a variant pm.md extends-stub frontmatter', () => {
+    const stub = [
+      '---',
+      "extends: ../../common/agents/pm.md",
+      'name: pm',
+      'variant: co-abap',
+      '---',
+      '',
+    ].join('\n');
+    expect(isExtendsStub(stub)).toBe(true);
+  });
+
+  test('rejects a full body without frontmatter', () => {
+    expect(isExtendsStub('# PM\n\nBody prose.\n')).toBe(false);
+  });
+
+  test('ignores an extends key outside frontmatter', () => {
+    const body = ['# PM', '', 'extends: ../../common/agents/pm.md', ''].join('\n');
+    expect(isExtendsStub(body)).toBe(false);
+  });
+
+  test('rejects frontmatter without an extends field', () => {
+    const notStub = ['---', 'name: pm', '---', 'body'].join('\n');
+    expect(isExtendsStub(notStub)).toBe(false);
   });
 });

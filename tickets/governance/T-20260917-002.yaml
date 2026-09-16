@@ -5,12 +5,24 @@ title: >-
   validator-hardening: validate ADR amendment references resolve to a real
   heading
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-16T15:36:26.397Z'
 history:
   - at: '2026-09-16T15:36:26.397Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-16T22:09:31.868Z'
+    from: backlog
+    to: review
+  - at: '2026-09-16T22:09:53.707Z'
+    from: review
+    to: done
+result: >-
+  verify-adr-governance 1.6.0 Phase 3 — amendment-reference resolution over the
+  governance corpus (WARN default, strict-blocking); en-dash ranges resolve at
+  every number; multi-ADR lines skipped per the recorded-in convention. ADR-0060
+  Amendment 1 heading labeled so CONSTITUTION.md Amendments 1–9 resolves;
+  --strict exits 0. Spec:
+  docs/designs/2026-09-17-governance-backlog-batch-design.md
 error: null

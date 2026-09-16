@@ -1,4 +1,6 @@
-// @version 1.0.0
+// @version 1.1.0
+// v1.1.0 (T-20260917-001): isExtendsStub — variant pm.md extends-stub detection
+//           so the parity arm can honor the stub-resolution delivery channel.
 // v1.0.0 (T-20260916-009): keyed WORKSPACE-MANAGED block extraction and
 //           common↔variant parity comparison. The fresh-scaffold audit failure
 //           (2026-09-16 co-develop scaffold, 40 audit FAILs) traced to stale
@@ -138,4 +140,17 @@ export function compareKeyedBlocks(
   }
 
   return violations;
+}
+
+/**
+ * Detect a variant pm.md extends-stub: YAML frontmatter whose `extends:` field
+ * points at the common body. Stub files resolve against the L1 pm.md at scaffold
+ * time (new-project §2.3b), so the common keyed blocks reach the project through
+ * stub resolution rather than through the variant file itself — the parity arm
+ * must not demand marker-wrapped copies inside a stub. (T-20260917-001)
+ */
+export function isExtendsStub(content: string): boolean {
+  const frontmatter = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  if (!frontmatter) return false;
+  return /^extends:\s*\S+/m.test(frontmatter[1]);
 }

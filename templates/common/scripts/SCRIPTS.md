@@ -151,7 +151,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `helpers/update-variant-lifecycle.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `helpers/validate-output.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `helpers/validate-platform-parity.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
-| `helpers/ticket-schema.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
+| `helpers/ticket-schema.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `helpers/ticket-store.ts` | L0 | 1.2.1 | active | MoveOptions.result written to the ticket on done transitions (T-20260912-023); id allocation scans both tickets/ and tickets/governance/ so a create can never mint a same-day id that shadows or is shadowed across directories (T-20260912-025) | —| L0 | —|
 | `tests/apply-handbook-theme.test.ts` | L0 | 1.0.1 | active | — | — | common | — |
 | `tests/check-structure.test.ts` | L0 | 1.0.0 | active | — | — | common | — |
@@ -187,14 +187,14 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `lib/pipeline-state.ts` | L0 | 1.1.2 | active | —| —| L0+L1 | —|
 | `lib/platform-context.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/propagation-map-schema.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
-| `lib/managed-block-parity.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
+| `lib/managed-block-parity.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `lib/platform-delivery.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/ssrf.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `lib/constitution-scrub.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `lib/upgrade-policy.ts` | L0 | 1.6.0 | active | —| —| L0 | —|
+| `lib/upgrade-policy.ts` | L0 | 1.7.0 | active | —| —| L0 | —|
 | `lib/variant-overlay-guard.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/platform-mirror-freshness.ts` | L0 | 1.0.1 | active | Pure platform-skill-mirror vs skills/ SSOT version comparison for the platform-mirror-freshness check (T-20260916-008) | —| L0+L1 | —|
-| `lifecycle-sync-audit.ts` | L0 | 1.14.0 | active | —| —| L0+L1 | —|
+| `lifecycle-sync-audit.ts` | L0 | 1.15.0 | active | —| —| L0+L1 | —|
 | `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `md-to-ooxml.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `new-project.ts` | L0 | 1.20.0 | active | —| —| L0 | —|
@@ -238,10 +238,10 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `validate-procedures.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `validate-skills.ts` | L0 | 1.5.1 | active | —| —| L0+L1 | —|
 | `validate-decisions.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `validate-templates.ts` | L0 | 1.33.0 | active | —| —| L0+L1 | —|
+| `validate-templates.ts` | L0 | 1.34.0 | active | —| —| L0+L1 | —|
 | `validate-variant-readiness.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `verify-country-prune.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `verify-adr-governance.ts` | L0 | 1.5.0 | active | —| —| L0 | —|
+| `verify-adr-governance.ts` | L0 | 1.6.0 | active | —| —| L0 | —|
 | `verify-agent-deliverables.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `verify-skill-graph.ts` | L0 | 1.6.0 | active | —| —| L0+L1 | —|
 | `verify-memory.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|

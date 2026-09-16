@@ -3,12 +3,22 @@ id: T-20260917-006
 kind: manual
 title: 'design: snapshot replaced unlabeled managed-block spans before reconcile'
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-16T15:36:32.298Z'
 history:
   - at: '2026-09-16T15:36:32.298Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-16T22:09:31.919Z'
+    from: backlog
+    to: review
+  - at: '2026-09-16T22:09:53.765Z'
+    from: review
+    to: done
+result: >-
+  Design recorded: docs/designs/2026-09-17-governance-backlog-batch-design.md —
+  write <target>.pre-reconcile.bak beside the target before the unlabeled span
+  replace; write failure aborts fail-closed; dry-run skips; snapshot path named
+  in the merge log. Implementation follows as a separate code ticket.
 error: null
