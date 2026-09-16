@@ -1,6 +1,6 @@
 {
   "_comment": "Propagation map: L0 (workspace root) → L1 (templates/common/) for scripts/skills/commands; L1 (templates/common/) → L2 (templates/co-*/) for governance docs via marker-inject mode. Agents are intentionally excluded from L0→L1 propagation — only pm.md uses an explicit extends chain (ADR-0039, ADR-0040). Specialist agents are variant-defined (ADR-0043). l2_drift_eligible (default true): controls whether this domain participates in L1→L2 drift detection via --check-drift. Set false for domains whose L2 content is managed through the Fork Model scaffolding pipeline (create-variant / promote-variant per ADR-0031) — L2 variants receive this content during scaffolding/promotion, not through ongoing L1→L2 sync.",
-  "version": "1.9.0",
+  "version": "1.10.0",
   "domains": {
     "scripts": {
       "description": "TypeScript automation scripts",
@@ -114,7 +114,8 @@
         "co-security",
         "co-work"
       ],
-      "note": "co-abap/co-hr/co-price added 2026-09-10 (T-20260910-018/T-20260910-022): their AGENTS.md COMMON-AGENTS zones were byte-identical to the L1 source but unlisted — validate-templates PM-02 now FAILs that drift class. co-safety added 2026-09-13 (T-20260913-001, superseding the T-20260910-022 divergence ruling): the ruling's stated basis (a Safety OS governance section) does not exist in the zone's git history — the only actual divergence was the audit-hook path bullet, now resolved by making the L1 bullet variant-neutral (path declared in variant.json → script_manifest). Zone re-synced to L1 via --docs; PM-02 WARN cleared."
+      "exclude_variants": [],
+      "note": "co-abap/co-hr/co-price added 2026-09-10 (T-20260910-018/T-20260910-022): their AGENTS.md COMMON-AGENTS zones were byte-identical to the L1 source but unlisted — validate-templates PM-02 now FAILs that drift class. co-safety added 2026-09-13 (T-20260913-001, superseding the T-20260910-022 divergence ruling): the ruling's stated basis (a Safety OS governance section) does not exist in the zone's git history — the only actual divergence was the audit-hook path bullet, now resolved by making the L1 bullet variant-neutral (path declared in variant.json → script_manifest). Zone re-synced to L1 via --docs; PM-02 WARN cleared. target_variants must equal the templates/co-* dir set minus exclude_variants — enforced by validate-templates PM-03 (T-20260915-005), so a new variant cannot be silently missed."
     },
     "skills": {
       "description": "L0 skills/ → L1 templates/common/skills/",
@@ -254,7 +255,8 @@
         "co-security",
         "co-work"
       ],
-      "note": "All 11 variants converted (2026-08-24). Pilot phase complete. ADR-0062. co-price/co-safety added 2026-09-13 (T-20260913-002): their docs/<variant>.context.md files were variant-authored without a COMMON-CONTEXT zone — the Coding Guidelines key-rules zone inserted and both listed, completing 13/13 variant coverage. Note: before 2026-09-13 propagate-to-templates publishDocs() ignored target_file and could never refresh these zones (v2.15.0 fix)."
+      "exclude_variants": [],
+      "note": "All 11 variants converted (2026-08-24). Pilot phase complete. ADR-0062. co-price/co-safety added 2026-09-13 (T-20260913-002): their docs/<variant>.context.md files were variant-authored without a COMMON-CONTEXT zone — the Coding Guidelines key-rules zone inserted and both listed, completing 13/13 variant coverage. Note: before 2026-09-13 propagate-to-templates publishDocs() ignored target_file and could never refresh these zones (v2.15.0 fix). target_variants must equal the templates/co-* dir set minus exclude_variants — enforced by validate-templates PM-03 (T-20260915-005)."
     }
   }
 }

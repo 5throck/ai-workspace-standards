@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.30.0
+ * @version 1.31.0
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -10,6 +10,24 @@
  *   bun scripts/validate-templates.ts
  *   bun scripts/validate-templates.ts --variant co-develop
  *   bun scripts/validate-templates.ts --json
+ *
+ * v1.31.0 (2026-09-16-propagation-target-derivation-design.md): T-20260915-005
+ *          (M8). New `propagation-targets` (PM-03) — the hand-maintained
+ *          propagation target lists can no longer silently miss the next new
+ *          variant. For every marker-inject domain in propagation-map.json the
+ *          domain is classified structurally by its target-file shape:
+ *          variant-scoped (target_file absent → basename-of-source default, or
+ *          carries {variant}) must satisfy target_variants ⊎ exclude_variants
+ *          ≡ the actual templates/co-* directory set, disjoint (new optional
+ *          per-domain exclude_variants field declares deliberate non-targets;
+ *          distinct from PM-02's excluded_variants = adjudicated divergent
+ *          copies); fixed-target domains (fixed relative target_file, e.g.
+ *          constitution-context → docs/context.md) are validated against their
+ *          own declared shape — every listed target must be an existing
+ *          template directory carrying the resolved target file.
+ *          docs/templates/common.lifecycle.json propagatedTo must also equal
+ *          the derived co-* set in both directions. All violations are
+ *          Errors with fix hints naming the exact JSON pointer.
  *
  * v1.30.0 (2026-09-16-scaffold-delivery-validation-design.md): Wave 2
  *          scaffolder-validation batch T-20260915-002 (C3) + T-20260915-010
@@ -89,7 +107,13 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { load } from 'js-yaml';
 import { getScriptLayer, getSkillLayer, includeScriptInL1, parseScriptLayers, parseSkillLayers } from './helpers/layer-filter.ts';
-import { validatePropagationMap } from './lib/propagation-map-schema.ts';
+import {
+  validatePropagationMap,
+  deriveCoVariantDirs,
+  markerInjectTargetScope,
+  auditVariantScopedTargets,
+  auditFixedTargets,
+} from './lib/propagation-map-schema.ts';
 import { scrubConstitutionRefs } from './lib/constitution-scrub.ts';
 import {
   SCAFFOLD_MARKER_SOURCES,
@@ -3904,6 +3928,157 @@ function checkMarkerZoneParity(): void {
   }
 }
 
+// Check PM-03: propagation target derivation (T-20260915-005 / M8)
+// The hand-maintained target lists must equal the actual templates/co-*
+// directory set, so registering a new variant can no longer silently miss
+// them. Marker-inject domains are classified structurally by target-file
+// shape (never by name):
+//   variant-scoped (target_file absent → publishDocs basename-of-source
+//     default, or carries {variant}):
+//     target_variants ⊎ exclude_variants ≡ co-* dir set, disjoint.
+//     target_variants entry that is no real co-* dir  → ERROR (stale listing)
+//     co-* dir in neither array                       → ERROR (missed
+//       registration — publishDocs() would never inject this variant; the
+//       exact M8 silent-propagation-break class)
+//     exclude_variants entry that is no real co-* dir → ERROR (typo)
+//     dir in both arrays / duplicate entries          → ERROR
+//   fixed-target (fixed relative target_file, e.g. constitution-context →
+//     docs/context.md): validated against its own declared shape — every
+//     listed target must be an existing template directory carrying the
+//     resolved target file. No co-* equality is imposed.
+// docs/templates/common.lifecycle.json propagatedTo must also equal the
+// derived co-* set in both directions (the file is L0-only: no propagation
+// domain manages it and no L1 mirror exists).
+// Every Error's fix hint names the exact JSON pointer to edit. Pure helpers
+// live in lib/propagation-map-schema.ts (unit-tested against synthetic trees).
+function checkPropagationTargets(): void {
+  if (!JSON_MODE) console.log('\n=== Check PM-03: propagation targets ≡ templates/co-* dir set ===');
+  const coDirs = deriveCoVariantDirs(TEMPLATES_DIR);
+  if (coDirs.length === 0) {
+    warn('root', 'propagation-targets', 'no templates/co-* directories found — target derivation skipped');
+    return;
+  }
+
+  let auditedDomains = 0;
+  let violations = 0;
+  const mapPath = join(ROOT, 'scripts', 'propagation-map.json');
+  if (existsSync(mapPath)) {
+    let map: { domains?: Record<string, { mode?: string; target_file?: string; target_variants?: string[]; exclude_variants?: string[] }> };
+    try {
+      map = JSON.parse(readFileSync(mapPath, 'utf-8'));
+    } catch {
+      map = {}; // PM-01 already reported the invalid JSON
+    }
+
+    for (const [domainName, domain] of Object.entries(map.domains ?? {})) {
+      if (domain.mode !== 'marker-inject') continue;
+      auditedDomains++;
+      const listed = domain.target_variants ?? [];
+
+      if (markerInjectTargetScope(domain) === 'variant-scoped') {
+        const excluded = domain.exclude_variants ?? [];
+        const audit = auditVariantScopedTargets(listed, coDirs, excluded);
+        const targetDesc = (domain.target_file ?? 'AGENTS.md (basename-of-source default)').replace('{variant}', '<variant>');
+        for (const v of audit.staleEntries) {
+          violations++;
+          fail('root', `propagation-targets:${domainName}`,
+            `marker-inject domain [${domainName}] target_variants lists "${v}" but templates/${v}/ does not exist — stale listing`,
+            `Remove "${v}" from scripts/propagation-map.json domains.${domainName}.target_variants (or create the variant directory it references)`);
+        }
+        for (const v of audit.missingVariants) {
+          violations++;
+          fail('root', `propagation-targets:${domainName}`,
+            `variant "${v}" exists (templates/${v}/) but marker-inject domain [${domainName}] neither targets nor excludes it — its ${targetDesc} would silently stop propagating (M8 registration drift)`,
+            `Add "${v}" to scripts/propagation-map.json domains.${domainName}.target_variants, or declare the deliberate non-target in domains.${domainName}.exclude_variants`);
+        }
+        for (const v of audit.invalidExclusions) {
+          violations++;
+          fail('root', `propagation-targets:${domainName}`,
+            `marker-inject domain [${domainName}] exclude_variants lists "${v}" but templates/${v}/ does not exist — typo?`,
+            `Remove or correct "${v}" in scripts/propagation-map.json domains.${domainName}.exclude_variants`);
+        }
+        for (const v of audit.overlaps) {
+          violations++;
+          fail('root', `propagation-targets:${domainName}`,
+            `marker-inject domain [${domainName}] lists "${v}" in both target_variants and exclude_variants — contradictory declaration`,
+            `Remove "${v}" from scripts/propagation-map.json domains.${domainName}.exclude_variants (target_variants wins)`);
+        }
+        for (const v of audit.duplicates) {
+          violations++;
+          fail('root', `propagation-targets:${domainName}`,
+            `marker-inject domain [${domainName}] lists "${v}" more than once across target_variants/exclude_variants — duplicate entry`,
+            `Keep exactly one entry for "${v}" in scripts/propagation-map.json domains.${domainName}.target_variants or .exclude_variants`);
+        }
+      } else {
+        // fixed-target: validated against the domain's own declared shape
+        const seen = new Set<string>();
+        for (const t of listed) {
+          if (seen.has(t)) {
+            violations++;
+            fail('root', `propagation-targets:${domainName}`,
+              `marker-inject domain [${domainName}] target_variants lists "${t}" more than once — duplicate entry`,
+              `Keep exactly one entry for "${t}" in scripts/propagation-map.json domains.${domainName}.target_variants`);
+          }
+          seen.add(t);
+        }
+        const audit = auditFixedTargets(listed, domain.target_file!, TEMPLATES_DIR);
+        for (const t of audit.unknownDirs) {
+          violations++;
+          fail('root', `propagation-targets:${domainName}`,
+            `marker-inject domain [${domainName}] target_variants lists "${t}" but templates/${t}/ does not exist — stale listing`,
+            `Remove "${t}" from scripts/propagation-map.json domains.${domainName}.target_variants (or create the template directory it references)`);
+        }
+        for (const m of audit.missingTargetFiles) {
+          violations++;
+          fail('root', `propagation-targets:${domainName}`,
+            `marker-inject domain [${domainName}] targets ${m.file} (declared target_file: ${domain.target_file}) but the file does not exist — dead target`,
+            `Create ${m.file} with the ${domainName} marker zone, or remove "${m.target}" from scripts/propagation-map.json domains.${domainName}.target_variants`);
+        }
+        if ((domain.exclude_variants ?? []).length > 0) {
+          warn('root', `propagation-targets:${domainName}`,
+            `marker-inject domain [${domainName}] is fixed-target (no {variant} in target_file) — exclude_variants is never consulted for this shape`,
+            `Remove the dead exclude_variants from scripts/propagation-map.json domains.${domainName}, or drop the entries`);
+        }
+      }
+    }
+  }
+
+  // (c) common.lifecycle.json propagatedTo ≡ co-* dir set (both directions)
+  const lcPath = join(ROOT, 'docs', 'templates', 'common.lifecycle.json');
+  let lifecycleChecked = false;
+  if (existsSync(lcPath)) {
+    let lc: { propagatedTo?: unknown };
+    try {
+      lc = JSON.parse(readFileSync(lcPath, 'utf-8'));
+    } catch {
+      fail('common', 'common-lifecycle-propagatedto', 'docs/templates/common.lifecycle.json is not valid JSON — propagatedTo cannot be derived-checked');
+      return; // nothing else in this check can run meaningfully
+    }
+    if (!Array.isArray(lc.propagatedTo) || lc.propagatedTo.some((v) => typeof v !== 'string')) {
+      fail('common', 'common-lifecycle-propagatedto', 'docs/templates/common.lifecycle.json propagatedTo must be an array of variant names');
+    } else {
+      lifecycleChecked = true;
+      const listed = lc.propagatedTo as string[];
+      for (const v of listed.filter((v) => !coDirs.includes(v))) {
+        violations++;
+        fail('common', 'common-lifecycle-propagatedto',
+          `docs/templates/common.lifecycle.json propagatedTo lists "${v}" but templates/${v}/ does not exist — stale entry`,
+          `Remove "${v}" from docs/templates/common.lifecycle.json propagatedTo (or create the variant directory it references)`);
+      }
+      for (const v of coDirs.filter((v) => !listed.includes(v))) {
+        violations++;
+        fail('common', 'common-lifecycle-propagatedto',
+          `variant "${v}" exists (templates/${v}/) but docs/templates/common.lifecycle.json propagatedTo does not list it — the lifecycle record under-reports common-layer propagation`,
+          `Add "${v}" to docs/templates/common.lifecycle.json propagatedTo`);
+      }
+    }
+  }
+
+  if ((auditedDomains > 0 || lifecycleChecked) && violations === 0) {
+    pass(`propagation-targets: ${auditedDomains} marker-inject domain(s) + common.lifecycle.json propagatedTo consistent with the templates/co-* dir set (${coDirs.length} variants)`);
+  }
+}
+
 // ── scaffold-marker-source (T-20260915-002 / C3) ─────────────────────────────
 // Every (marker, source template) pair the scaffolders depend on — declared in
 // helpers/scaffold-markers.ts SCAFFOLD_MARKER_SOURCES — must hold: the source
@@ -4046,6 +4221,7 @@ function main(): number {
   checkRootCommonCommandsParity();
   checkPropagationMapSchema();
   checkMarkerZoneParity();                                       // PM-02: marker-inject zones vs target_variants
+  checkPropagationTargets();                                     // PM-03: target lists vs actual templates/co-* dir set (T-20260915-005)
   checkScaffoldMarkerSources();                                  // T-20260915-002: scaffolder markers vs source templates
   checkPmExtendsStubBodies();                                    // T-20260915-010: variant pm.md extends-stub bodies
   checkVariantReadinessGate();   // VRG-01: continuous Variant Readiness Gate enforcement

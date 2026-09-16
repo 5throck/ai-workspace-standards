@@ -5,12 +5,34 @@ title: >-
   validator-hardening: PM-01 derive propagation target_variants and propagatedTo
   from the actual variant directory set
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-15T10:32:33.596Z'
 history:
   - at: '2026-09-15T10:32:33.596Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-16T00:01:08.474Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-16T00:01:08.487Z'
+    from: waiting
+    to: review
+  - at: '2026-09-16T00:20:46.621Z'
+    from: review
+    to: done
+result: >-
+  Landed in wave 3: PM-03 propagation-targets check in validate-templates.ts
+  1.30.0 -> 1.31.0 (Error) — variant-scoped marker-inject domains must satisfy
+  target_variants + exclude_variants = actual templates/co-* directory set (both
+  directions, with fix hints naming the JSON pointer); fixed-target domains
+  (constitution-context) validated against their declared shape;
+  common-lifecycle-propagatedto arm enforces common.lifecycle.json propagatedTo
+  = co-* set. New optional exclude_variants field in schema SSOT
+  scripts/lib/propagation-map-schema.ts 1.3.0; propagation-map.json 1.10.0 with
+  explicit empty exclude_variants. Fleet data verified consistent (13/13), check
+  lands green. Design
+  docs/designs/2026-09-16-propagation-target-derivation-design.md (spec
+  2026-09-16-propagation-target-derivation-design); 22 unit tests; battery 7/7
+  post-propagation.
 error: null
