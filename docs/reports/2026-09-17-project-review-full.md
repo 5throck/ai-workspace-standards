@@ -53,6 +53,12 @@ Findings deduplicated across slots (A4≡C2 same root cause); discoverers credit
 | 20 | co-hr / co-safety ship no `.gitignore` (benign — common delivers); 11 redundant variant copies are drift fuel | A | instance | Ticket (chore) |
 | 21 | common `.gitignore` SSOT block carries duplicate `dist/` and `nul`/`NUL` entries — noise propagates to every scaffold | A | instance | Deduped this session |
 
+### 🔴 Critical (found during Step 6 verification — same session)
+
+| # | Issue | Agent | File:Line | Class | Fix |
+|---|-------|-------|-----------|-------|-----|
+| 22 | `archive-memory.ts` archives old session logs but leaves their `[date](date.md)` links in memory/MEMORY.md — every archival run guarantees a dead link, failing the verify-memory dead-link regression test on the next CI run (surfaced by PR #946's Windows job: 2026-09-09 archived by dev-sync step 3.96b, row left linked) | PM (post-fix verification) | scripts/archive-memory.ts:37-40 | script-gap | Archiver now rewrites the archived session's MEMORY.md row as a link-free tombstone (v1.1.0, fixed same session); 2026-09-09 row tombstoned |
+
 ### ✅ Strengths (verified across slots)
 
 - SCRIPTS.md ↔ disk (179 rows), VERSION_MANIFEST ↔ disk (93/8/51), specs registry ↔ designs (108) — all exact matches; governance §-references and constitution anchors resolve (except #8/#18).
@@ -94,6 +100,7 @@ Fixes applied 2026-09-17 (design: `docs/designs/2026-09-17-project-review-remedi
 - **#15 (SHA-256 guards)**: pre-push.ts hex allowlists widened to `{40,64}` (v1.4.0 → v1.4.1).
 - **#18 (§6.6 label)**: AGENTS.md §10 step 1.5 now cites the real heading title ("Session-Evidence Skill Review Loop (Observation-Based Revision)", 06-skill-lifecycle.md:347).
 - **#19 (fetch-depth note)**: covered by generate-version-manifest v1.6.1 header + the pre-existing T-20260916-013 shallow-tolerance docs; CI workflow already carries the inline rationale.
+- **#22 (archiver tombstone gap)**: `archive-memory.ts` v1.1.0 tombstones the archived session's MEMORY.md row (link → plain-text date, the documented convention); the 2026-09-09 row was tombstoned, unblocking the dead-link regression test.
 - L0→L1 mirrors re-propagated (`propagate:apply`, 46 files); SCRIPTS.md + L1 mirror versions bumped in lockstep (Check A clean).
 
-**Post-fix validation**: `bun scripts/review-baseline.ts` **6/6 green** · targeted unit tests **46 pass / 0 fail** (`generate-version-manifest`, `managed-block-merge`, `pre-push-deletion-detection`).
+**Post-fix validation**: `bun scripts/review-baseline.ts` **6/6 green** · targeted unit tests **46 pass / 0 fail** (`generate-version-manifest`, `managed-block-merge`, `pre-push-deletion-detection`) · dead-link regression suite **5 pass / 0 fail** · PR #946 CI: ubuntu/macos/windows unit suites + hook secret gates all passing.
