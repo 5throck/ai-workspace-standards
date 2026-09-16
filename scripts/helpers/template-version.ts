@@ -1,7 +1,13 @@
 #!/usr/bin/env bun
 /**
  * Template Version Reader (scaffold provenance SSOT)
- * @version 1.0.0
+ * @version 1.1.0
+ *
+ * v1.1.0: T-20260916-002 — new resolveProvenanceVersion() pins the shared
+ *         scaffold provenance resolution order (explicit --version value
+ *         wins as-is, otherwise the fail-loud templates/VERSION read) so
+ *         new-project.ts and its unit tests consume the same decision
+ *         create-l3-scaffold.ts already follows.
  *
  * `templates/VERSION` is the Single Source of Truth for the template version
  * recorded in scaffold provenance (`_ORIGIN.md`, `_COMMON_VERSION.md`,
@@ -67,4 +73,21 @@ export function readTemplateVersion(rootDir: string): string {
     );
   }
   return parseTemplateVersion(readFileSync(absPath, 'utf-8'));
+}
+
+/**
+ * Resolve the scaffold provenance version.
+ *
+ * Resolution order (T-20260916-002, shared by new-project.ts):
+ *   1. An explicit `--version` value — returned AS-IS. It is a git tag
+ *      lookup string (`template-v<value>`), already allowlisted by the
+ *      caller; semver validation is deliberately NOT applied to it.
+ *   2. Otherwise the templates/VERSION SSOT via readTemplateVersion —
+ *      which throws on a missing or unparseable file. The historical
+ *      silent "unknown" fallback is gone: a scaffold without a readable
+ *      SSOT version aborts instead of recording fabricated provenance.
+ */
+export function resolveProvenanceVersion(explicit: string, rootDir: string): string {
+  if (explicit !== '') return explicit;
+  return readTemplateVersion(rootDir);
 }

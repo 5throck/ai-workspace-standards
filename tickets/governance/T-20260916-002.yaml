@@ -6,12 +6,30 @@ title: >-
   silent 'unknown' — align with create-l3-scaffold fail-loud provenance policy
   (residual of M11/T-20260915-011)
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-15T23:51:08.133Z'
 history:
   - at: '2026-09-15T23:51:08.133Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-16T10:03:22.147Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-16T10:03:22.161Z'
+    from: waiting
+    to: review
+  - at: '2026-09-16T10:20:11.904Z'
+    from: review
+    to: done
+result: >-
+  Landed in wave D: new-project.ts 1.19.0 -> 1.20.0 resolves provenance via
+  shared resolveProvenanceVersion() (helpers/template-version.ts 1.1.0) —
+  explicit --version wins as-is (caller allowlist unchanged), otherwise
+  templates/VERSION read via readTemplateVersion with missing/unparseable
+  failing loud at PRE-FLIGHT (before variant detection, tag extraction, or any
+  copying — no rollback churn, unknown provenance unwritable). Downstream
+  formats unchanged. 5 unit tests; battery 6/6. Design
+  docs/designs/2026-09-16-new-project-provenance-alignment-design.md (spec
+  2026-09-16-new-project-provenance-alignment-design).
 error: null
