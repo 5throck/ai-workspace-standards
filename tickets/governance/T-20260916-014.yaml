@@ -1,0 +1,42 @@
+schemaVersion: 1
+id: T-20260916-014
+kind: manual
+title: >-
+  hooks: pre-push runs the full audit battery on ref-DELETION pushes and blocks
+  them (found deleting merged pr/* branches across Projects/co-* — every git
+  push origin --delete was rejected by the project pre-push hook; deletion
+  pushes carry no commits to audit). Fix: pre-push should no-op (or scan-only)
+  when all pushed refs are deletions (all-zero local SHAs on stdin), in both the
+  TS hook and the .githooks shell wrapper — keeping commit pushes fully gated.
+  Note .githooks/pre-push is a hand-maintained L0+L1 parity pair
+  (lifecycle-sync-audit Check G)
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-09-16T12:30:43.987Z'
+history:
+  - at: '2026-09-16T12:30:43.987Z'
+    from: null
+    to: backlog
+  - at: '2026-09-16T12:30:44.000Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-16T12:30:44.011Z'
+    from: waiting
+    to: review
+  - at: '2026-09-16T12:48:54.930Z'
+    from: review
+    to: done
+result: >-
+  Landed: scripts/hooks/pre-push.ts 1.4.0 — early exit with skip note when every
+  stdin ref update is a deletion (isZeroOid accepts SHA-1/SHA-256 all-zero OIDs,
+  replacing the hard-coded 40-zero constant at all deletion-classification
+  sites); mixed pushes keep the full gate for commit-bearing refs;
+  empty/malformed stdin fail-closed; commit pushes fully gated (scratch
+  verification: failing audit still blocks). Single seam in the TS hook covers
+  workspace + all delivered projects (.githooks wrappers delegate stdin
+  unchanged, Check G parity intact). 14 unit tests; battery 7/7. Design
+  docs/designs/2026-09-16-pre-push-deletion-skip-design.md (spec
+  pre-push-deletion-skip). Projects receive the fixed hook at their next
+  template sync/upgrade.
+error: null

@@ -1,18 +1,36 @@
 #!/usr/bin/env bun
 /**
  * pre-push.ts — TS-based pre-push hook.
- * @version 1.3.0
+ * @version 1.4.0
  */
 
 import { $ } from "bun";
 
-const ZERO_OID = "0000000000000000000000000000000000000000";
+// All-zero OID: git's "null" object id, sent as the local OID of a ref
+// deletion on both SHA-1 (40 zeros) and SHA-256 (64 zeros) repositories.
+const ZERO_OID_RE = /^(?:0{40}|0{64})$/;
 
-interface PushRefUpdate {
+export interface PushRefUpdate {
   localRef: string;
   localOid: string;
   remoteRef: string;
   remoteOid: string;
+}
+
+// A deletion line (e.g. `git push origin --delete <branch>`) carries an
+// all-zero local OID instead of a commit SHA.
+export function isZeroOid(oid: string | undefined): boolean {
+  return typeof oid === "string" && ZERO_OID_RE.test(oid);
+}
+
+// A pure ref-deletion push is one where EVERY stdin line deletes a remote
+// ref (all-zero local OID). Such a push transfers no commits, so there is
+// nothing content-bearing to secret-scan or audit (T-20260916-014).
+// Mixed pushes (commits + deletions) are not pure deletions and keep the
+// full gate. An empty stdin line set is NOT a pure deletion: the hook's
+// no-ref-updates fallback (branch protection) still applies.
+export function isPureDeletionPush(refUpdates: PushRefUpdate[]): boolean {
+  return refUpdates.length > 0 && refUpdates.every(r => isZeroOid(r.localOid));
 }
 
 // Read stdin ONCE to determine what refs are actually being pushed.
@@ -42,9 +60,9 @@ async function readPushRefUpdates(): Promise<PushRefUpdate[]> {
 async function collectPushedChangedFiles(refUpdates: PushRefUpdate[]): Promise<string[]> {
   const files = new Set<string>();
   for (const ref of refUpdates) {
-    if (ref.localOid === ZERO_OID) continue; // deletion pushes no commits
+    if (isZeroOid(ref.localOid)) continue; // deletion refs push no commits
     if (!/^[0-9a-f]{40}$/.test(ref.localOid)) continue; // validate before shell interpolation
-    if (ref.remoteOid !== ZERO_OID && /^[0-9a-f]{40}$/.test(ref.remoteOid)) {
+    if (!isZeroOid(ref.remoteOid) && /^[0-9a-f]{40}$/.test(ref.remoteOid)) {
       // Existing remote ref — net diff of the pushed range
       const range = `${ref.remoteOid}..${ref.localOid}`;
       const out = await $`git diff --name-only ${range}`.nothrow().text();
@@ -98,19 +116,28 @@ async function main() {
   // protection below, since stdin can only be consumed once.
   const refUpdates = await readPushRefUpdates();
 
+  // Pure ref-deletion push (T-20260916-014): every stdin line deletes a
+  // remote ref (all-zero local OID). No commits are transferred, so there is
+  // nothing content-bearing to secret-scan or audit — exit early instead of
+  // running the gate battery and blocking branch-cleanup pushes.
+  if (isPureDeletionPush(refUpdates)) {
+    console.log("ℹ️  pre-push: ref-deletion push — no commits to audit, skipping");
+    return;
+  }
+
   // Secret scan (gitleaks) — skip if not installed
   // Scoped to only the commits being pushed, not the entire working tree.
   try {
     await $`which gitleaks`;
     try {
-      const pushedUpdates = refUpdates.filter(r => r.localOid !== ZERO_OID);
+      const pushedUpdates = refUpdates.filter(r => !isZeroOid(r.localOid));
       if (pushedUpdates.length > 0) {
         // Use gitleaks in git-aware mode with --log-opts to restrict scanning
         // to only the commit ranges being pushed. Collect unique commit SHAs
         // across all pushed ref updates via git rev-list.
         const revListArgs: string[] = [];
         for (const ref of pushedUpdates) {
-          if (ref.remoteOid !== ZERO_OID) {
+          if (!isZeroOid(ref.remoteOid)) {
             // Existing remote ref — diff the range
             revListArgs.push(`${ref.remoteOid}..${ref.localOid}`);
           } else {
@@ -210,7 +237,7 @@ async function main() {
   // different local branch. Deletions (localOid all-zero) push no commits and are exempt.
   if (refUpdates.length > 0) {
     const blockedUpdate = refUpdates.find(r =>
-      r.localOid !== ZERO_OID &&
+      !isZeroOid(r.localOid) &&
       (r.remoteRef === "refs/heads/main" || r.remoteRef === "refs/heads/master")
     );
     if (blockedUpdate) {
@@ -230,9 +257,11 @@ async function main() {
   }
 }
 
-main().catch(err => {
-  console.error(err);
-  if (import.meta.main) {
+// Guarded so unit tests can import the exported helpers without executing
+// the hook (git invokes this file directly, where import.meta.main is true).
+if (import.meta.main) {
+  main().catch(err => {
+    console.error(err);
     process.exit(1);
-  }
-});
+  });
+}
