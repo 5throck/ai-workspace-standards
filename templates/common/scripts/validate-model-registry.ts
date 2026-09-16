@@ -4,11 +4,20 @@
  * Validates that all agents/*.md frontmatter model comments match docs/workspace-schema.json models block,
  * and that the tier→model mapping prose in AGENTS.md §3.6 / CLAUDE.md / GEMINI.md / CODEX.md
  * names exactly the models the registry declares for each tier.
- * Level: L0 | Status: active | @version 1.3.0
+ * Level: L0 | Status: active | @version 1.4.0
+ *
+ * v1.4.0 (T-20260916-011): the CODEX.md prose target is now platform-delivery
+ * aware. Projects scaffolded without the codex platform carry neither
+ * CODEX.md nor .codex/ (new-project.ts §2.7 strips both), and the
+ * unconditional read failed their audit with "could not read CODEX.md".
+ * The codex target self-skips with a visible note when the platform is not
+ * delivered (shared lib/platform-delivery.ts); L0/L1 contexts, where every
+ * target file exists, are behaviorally unchanged.
  */
-import { readFileSync, readdirSync } from "node:fs";
+import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { die } from "./lib/error-handling.ts";
+import { partitionProseTargetsByDelivery } from "./lib/platform-delivery.ts";
 
 const WORKSPACE_ROOT = new URL("..", import.meta.url).pathname
   .replace(/\/$/, "")
@@ -244,7 +253,16 @@ interface ProseMismatch {
 }
 const proseMismatches: ProseMismatch[] = [];
 
-for (const target of proseTargets) {
+// T-20260916-011: skip targets whose platform/file was not delivered into this
+// context (a codex-opt-out project has neither CODEX.md nor .codex/). Skipped
+// targets are surfaced, never silent.
+const { active: deliveredTargets, skipped: skippedTargets } =
+  partitionProseTargetsByDelivery(proseTargets, (rel) => existsSync(join(WORKSPACE_ROOT, rel)));
+for (const s of skippedTargets) {
+  console.log(`ℹ️  ${s.file} ${s.label}: skipped (${s.reason})`);
+}
+
+for (const target of deliveredTargets) {
   const filePath = join(WORKSPACE_ROOT, target.file);
   let content: string;
   try {

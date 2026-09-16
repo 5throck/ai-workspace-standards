@@ -7,7 +7,7 @@ title: >-
   docs/templates/VERSION_REGISTRY.json (race found during T-20260915-003 E2E
   pinning) — stage outside templates/ or exclude from B-07
 priority: normal
-status: waiting
+status: backlog
 attempts: 0
 created_at: '2026-09-15T23:51:08.119Z'
 history:
@@ -17,5 +17,8 @@ history:
   - at: '2026-09-16T00:01:08.499Z'
     from: backlog
     to: waiting
+  - at: '2026-09-16T01:15:58.963Z'
+    from: waiting
+    to: backlog
 result: null
 error: null

@@ -3,7 +3,7 @@
 ## Metadata
 
 - **Current Phase**: production
-- **Version**: 1.18.0
+- **Version**: 1.19.0
 - **Owner**: automation-engineer
 - **Last Updated**: 2026-09-16
 - **Last Reviewer**: pm
@@ -21,6 +21,7 @@
 | 2026-06-23 | production | production | v1.1.8: Fixed scaffolding leak — added `docs/variant.context.template.md` to cleanupFiles array. Template file was copied but never cleaned up after `applyContextTemplate()` consumed it. | lifecycle-manager |
 | 2026-09-08 | production | production | v1.10.0 catch-up (record backfilled at 2026-09-08 review; versions 1.2.0–1.9.0 landed without record updates): pm.md extends-stub resolution against L1 body (v1.10.0, PR #822), L1-B metadata stripping, lifecycle regeneration, overlay skip list, rollback safety. Registry SSOT: scripts/SCRIPTS.md | pm |
 | 2026-09-16 | production | production | Version sync gate landed (lifecycle-sync-audit Check H); record caught up to SCRIPTS.md SSOT v1.18.0 | pm |
+| 2026-09-16 | production | production | v1.19.0 (T-20260916-010): §7.8 generates the project's full docs/VERSION_MANIFEST.md post-delivery (variant stub class retired); record synced to SCRIPTS.md SSOT | automation-engineer |
 
 ## Acceptance Criteria
 

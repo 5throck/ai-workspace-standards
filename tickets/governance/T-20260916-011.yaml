@@ -1,0 +1,33 @@
+schemaVersion: 1
+id: T-20260916-011
+kind: manual
+title: >-
+  validate-model-registry: CODEX.md is read unconditionally — projects
+  scaffolded without the codex platform (--platform default) fail the gate with
+  'could not read CODEX.md'; the check needs platform-delivery awareness in
+  project contexts (found by co-develop scaffold test 2026-09-16)
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-09-16T02:14:46.307Z'
+history:
+  - at: '2026-09-16T02:14:46.307Z'
+    from: null
+    to: backlog
+  - at: '2026-09-16T02:19:32.397Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-16T02:19:32.409Z'
+    from: waiting
+    to: review
+  - at: '2026-09-16T02:58:33.729Z'
+    from: review
+    to: done
+result: >-
+  Fixed and verified: validate-model-registry.ts 1.4.0 partitions prose targets
+  by platform delivery (new scripts/lib/platform-delivery.ts 1.0.0) — codex
+  target self-skips with a visible 'skipped (codex platform not delivered)' note
+  when neither CODEX.md nor .codex/ exists; L0/L1 behavior unchanged.
+  Verification scaffold shows the skip line and zero CODEX.md errors. Design
+  docs/designs/2026-09-16-scaffold-fresh-audit-remediation-design.md.
+error: null

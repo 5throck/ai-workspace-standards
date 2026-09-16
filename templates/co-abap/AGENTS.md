@@ -380,6 +380,20 @@ If a user request contains trigger keywords matching **two or more modules**, ac
 
 ---
 
+### §3.6 3-Tier Strategy
+
+When leading execution and improvement tasks, PM MUST use the 3-Tier model strategy:
+
+<!-- WORKSPACE-MANAGED: tier-model-mapping -->
+- **High-tier**: Complex reasoning, architectural design, planning (claude-opus-5-0 / gemini-3.1-pro / gpt-5.6-sol)
+- **Medium-tier**: Code review, testing, PR review, quality gates (claude-sonnet-5-0 / gemini-3.8-flash / gpt-5.6-terra)
+- **Low-tier**: Fast, repetitive coding, script maintenance (claude-haiku-4-5 / gemini-3.8-flash / gpt-5.6-luna)
+<!-- /WORKSPACE-MANAGED -->
+
+<!-- WORKSPACE-MANAGED: tier-model-mapping -->
+> **Note**: The `Model` column below shows the Claude Code short alias (`sonnet`/`opus`/`haiku`/`fable`) actually passed to the `Agent()` tool's `model` parameter — not the registry ID (e.g. `claude-sonnet-5-0`). See [CLAUDE.md §6](CLAUDE.md#6-native-sub-agents-agent-tool) for the registry-ID → alias translation table. On Gemini/Antigravity, use the literal model ID instead (see GEMINI.md's equivalent example).
+<!-- /WORKSPACE-MANAGED -->
+
 ## Universal Baseline Behaviors
 
 All agents, regardless of their role, must adhere to the following:
@@ -439,7 +453,7 @@ When a new skill is created in `skills/` or `.claude/skills/`:
 
 ---
 
-*Last Updated: 2026-09-13 (co-abap v1.0.0)*
+*Last Updated: 2026-09-16 (co-abap v1.0.0)*
 
 <!-- COMMON-AGENTS:START -->
 ## Language Policy

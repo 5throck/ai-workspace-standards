@@ -934,6 +934,15 @@
       "source": "manual",
       "created": "2026-09-16",
       "last_updated": "2026-09-16"
+    },
+    {
+      "id": "2026-09-16-scaffold-fresh-audit-remediation-design",
+      "title": "scaffold fresh audit remediation design",
+      "file": "docs/designs/2026-09-16-scaffold-fresh-audit-remediation-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-16",
+      "last_updated": "2026-09-16"
     }
   ]
 }

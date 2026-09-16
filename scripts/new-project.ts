@@ -1,5 +1,14 @@
 #!/usr/bin/env bun
-// @version 1.18.0
+// @version 1.19.0
+// v1.19.0: T-20260916-010 — variant templates stopped shipping a stub
+//           docs/VERSION_MANIFEST.md (the stub class retired by the new
+//           validate-templates `variant-version-manifest` arm); the project's
+//           full manifest is now generated post-delivery by §7.8, which runs
+//           the project's own scripts/generate-version-manifest.ts
+//           (cwd = projectDir) BEFORE the post-scaffold audit. Loud non-fatal
+//           warn-and-continue on failure (mirror of the §7.7 graft build
+//           semantics) — the audit's VERSION_MANIFEST gates catch a missing
+//           or stale manifest either way.
 // v1.18.0: Wave 2 scaffold-delivery validation batch
 //           (docs/designs/2026-09-16-scaffold-delivery-validation-design.md).
 //           H12/T-20260915-010: when a resolved variant pm.md extends-stub
@@ -51,6 +60,9 @@ import {
   NEW_PROJECT_CLEANUP_FILES,
   NEW_PROJECT_LEGACY_L0_SKILLS,
   isCanonicalPmStubBody,
+  VERSION_MANIFEST_GENERATOR_RELPATH,
+  VERSION_MANIFEST_RELPATH,
+  decideManifestGeneration,
 } from './helpers/scaffold-markers.ts';
 import * as yaml from 'js-yaml';
 
@@ -1281,6 +1293,51 @@ try {
   }
 } catch (err) {
   console.log(`  ⚠️  graft build skipped (non-fatal): ${(err as Error).message}`);
+}
+
+// ── 7.8. Version manifest generation (T-20260916-010) ─────────────────────────
+// Variant templates no longer ship a stub docs/VERSION_MANIFEST.md (the stub
+// class is retired — validate-templates `variant-version-manifest` arm). The
+// project's steady-state manifest is the FULL generated one, so generate it
+// right after content delivery and BEFORE the post-scaffold audit, by running
+// the project's own generator (cwd = projectDir — the generator is
+// cwd-relative and must run under bun). Non-fatal warn-and-continue, mirroring
+// the §7.7 graft build semantics: a missing bun or a generation failure
+// degrades gracefully, and the audit immediately after enforces the
+// VERSION_MANIFEST gates (skills↔manifest parity + --check drift), so a
+// skipped generation can never ship silently.
+console.log('\nGenerating version manifest…');
+try {
+  const decision = decideManifestGeneration(
+    existsSync(join(projectDir, VERSION_MANIFEST_GENERATOR_RELPATH)),
+    (() => {
+      const bunCheck = spawnSync('bun', ['--version'], { encoding: 'utf8', stdio: 'pipe' });
+      return !bunCheck.error && bunCheck.status === 0;
+    })(),
+  );
+  switch (decision.action) {
+    case 'generate': {
+      const genResult = spawnSync(
+        'bun',
+        [join(projectDir, VERSION_MANIFEST_GENERATOR_RELPATH)],
+        { stdio: 'inherit', cwd: projectDir },
+      );
+      if (genResult.status === 0) {
+        console.log(`  ✅ ${VERSION_MANIFEST_RELPATH} generated (full project manifest)`);
+      } else {
+        console.log(`  ⚠️  Version manifest generation failed (non-fatal) — run \`bun ${VERSION_MANIFEST_GENERATOR_RELPATH}\` in the project later.`);
+      }
+      break;
+    }
+    case 'skip-missing-generator':
+      console.log(`  ⚠️  ${VERSION_MANIFEST_GENERATOR_RELPATH} not found in scaffolded project — skipping (audit will flag the missing manifest)`);
+      break;
+    case 'skip-no-bun':
+      console.log('  ⚠️  bun not available — skipping version manifest generation');
+      break;
+  }
+} catch (err) {
+  console.log(`  ⚠️  Version manifest generation errored (non-fatal): ${(err as Error).message}`);
 }
 
 // ── 6.5. Security Bootstrap Verification ──────────────────────────────────────

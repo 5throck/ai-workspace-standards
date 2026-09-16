@@ -1,4 +1,12 @@
-// @version 1.5.0
+// @version 1.6.0
+// v1.6.0 (2026-09-16, T-20260916-010): docs/VERSION_MANIFEST.md joins
+//         REGENERATED_FILES. Variant templates stopped shipping the stub
+//         manifest (validate-templates `variant-version-manifest` arm retires
+//         the stub class); the project manifest is generated state — produced
+//         post-delivery by new-project.ts §7.8 and regenerated post-upgrade by
+//         upgrade-project.ts. Without this reclassification the deny-list
+//         default (TEMPLATE TREE SYNC / SYNC) would deliver any future
+//         template copy over a project's generated manifest.
 // v1.5.0 (2026-09-12, T-20260912-021): PLACEHOLDER_ALLOWLIST gains
 //         skills/explain-me/templates/report.html and skills/explain-me/references/BUILD_GUIDE.md
 //         — the skill's own report template + authoring guide substitute their {{tokens}} at
@@ -117,11 +125,19 @@ const PROJECT_STATE_FILES = new Set([
   'variant.json', 'scripts-snapshot.json',
 ]);
 
+/** Project files the scaffold/upgrade flows REGENERATE in place
+ *  (T-20260916-010: docs/VERSION_MANIFEST.md joined — templates stopped
+ *  shipping the stub manifest; the full manifest is generated post-delivery
+ *  (new-project §7.8) and regenerated post-upgrade (upgrade-project),
+ *  never template-delivered). */
+const REGENERATED_FILES = new Set([
+  'docs/skill-graph.json', '.claude/template-version.txt',
+  'docs/VERSION_MANIFEST.md',
+]);
+
 const PRESERVE_FILES = new Set([
   'README.md', 'README_ko.md', 'CHANGELOG.md', 'docs/README.md', 'docs/README_ko.md',
 ]);
-
-const REGENERATED_FILES = new Set(['docs/skill-graph.json', '.claude/template-version.txt']);
 
 const LOCKED_FILES = new Set(['.gitattributes', '.gitleaks.toml']);
 
