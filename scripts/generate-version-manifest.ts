@@ -1,4 +1,20 @@
-// @version 1.5.0
+// @version 1.6.0
+// v1.6.0 (T-20260916-013): shallow-tolerant --check. In a shallow checkout
+//           (actions/checkout default depth=1) `git log` has no history, so the
+//           per-file "Last Modified" dates fall back to checkout-time values and
+//           the committed manifest (generated locally with full history) then
+//           PERMANENTLY drifts against CI regeneration, failing the gate no
+//           matter what is committed (real case: co-safety Documentation Audit
+//           job — its ci.yml was fixed with fetch-depth: 0 during the fleet
+//           resync, PR #149). The comparator now detects a shallow repository
+//           (`git rev-parse --is-shallow-repository`) and switches to
+//           ignoreDateColumns mode: the volatile "Last Modified" cell (column
+//           index derived from each table's header row, never a hard-coded
+//           position) is masked on BOTH sides, so structural drift (rows
+//           added/removed, name/version/path changes) is still caught while the
+//           git-depth-dependent dates are ignored. Full-history behavior is
+//           byte-identical to v1.5.0 (dates compared). The audit.ts gate spawns
+//           `--check` and inherits the fix with no changes of its own.
 // v1.5.0 (T-20260915-004, finding M7): (a) scripts/experiments/** is excluded
 //           from the CLI script collection (count AND table) — experiment files
 //           without a CLI surface previously inflated the Scripts count (93 vs
@@ -12,6 +28,7 @@
 // v1.4.1 (previous)
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { $ } from 'bun';
 import * as yaml from 'js-yaml';
 
@@ -63,6 +80,24 @@ async function getGitTimestamp(filePath: string): Promise<string> {
         const timestamp = parseInt(stdout.toString().trim(), 10);
         return new Date(timestamp * 1000).toISOString().split('T')[0];
     } catch { return 'N/A'; }
+}
+
+/**
+ * Shallow-repository detection (T-20260916-013): `git rev-parse
+ * --is-shallow-repository` prints "true" for a shallow clone (actions/checkout
+ * default depth=1) and "false" for a full one. Anything else — non-zero exit,
+ * empty/unexpected output, git missing (spawnSync throws → caught) — is treated
+ * as a FULL repository so behavior stays byte-identical to v1.5.0.
+ */
+export function isShallowRepository(): boolean {
+    try {
+        const { status, stdout } = spawnSync('git', ['rev-parse', '--is-shallow-repository'], {
+            encoding: 'utf-8',
+        });
+        return status === 0 && stdout.trim() === 'true';
+    } catch {
+        return false;
+    }
 }
 
 function normalizePath(p: string): string {
@@ -385,7 +420,8 @@ async function collectManifestData(): Promise<ManifestData> {
 
 // The only nondeterministic content in the rendered manifest is the generation
 // timestamp. `--check` normalizes that one line on BOTH sides so the comparison
-// is deterministic (T-20260915-004).
+// is deterministic (T-20260915-004). In shallow mode the volatile "Last
+// Modified" date cells are masked on BOTH sides too (T-20260916-013).
 const GENERATED_LINE_RE = /^\*\*Generated\*\*: .*$/;
 
 export function normalizeManifestForCompare(content: string): string {
@@ -395,22 +431,96 @@ export function normalizeManifestForCompare(content: string): string {
         .join('\n');
 }
 
+// ── Date-column masking (T-20260916-013) ─────────────────────────────────────
+// The per-row "Last Modified" value is derived from `git log`, which is
+// environment-dependent in a shallow clone (checkout-time fallback / N/A).
+// Masking is header-derived, never positional: for every markdown table, the
+// header row is scanned for a cell whose text is exactly "Last Modified"
+// (case-insensitive) and only that column's DATA cells are replaced. Tables
+// without such a header are returned untouched, so adding a date column to
+// another table later needs no comparator change.
+
+const DATE_COLUMN_HEADER_RE = /^last modified$/i;
+const MASKED_DATE_CELL = '<date>';
+
+/** Split a markdown table row into trimmed cells; null when not a table row. */
+function splitTableRow(line: string): string[] | null {
+    const trimmed = line.trim();
+    if (!trimmed.startsWith('|') || !trimmed.endsWith('|')) return null;
+    return trimmed.slice(1, -1).split('|').map(cell => cell.trim());
+}
+
+function isTableSeparatorRow(cells: string[]): boolean {
+    return cells.length > 0 && cells.every(cell => /^:?-+:?$/.test(cell));
+}
+
+/**
+ * Replace every "Last Modified" DATA cell with a constant placeholder. The
+ * column index comes from the current table's header row (first row of each
+ * contiguous table block); header and separator rows are never masked.
+ */
+export function maskDateColumns(content: string): string {
+    let dateColumnIndex = -1;
+    let sawHeader = false;
+    return content
+        .split('\n')
+        .map(line => {
+            const cells = splitTableRow(line);
+            if (!cells) {
+                // Blank line / heading / prose: the current table block ends.
+                dateColumnIndex = -1;
+                sawHeader = false;
+                return line;
+            }
+            if (!sawHeader) {
+                sawHeader = true;
+                dateColumnIndex = cells.findIndex(cell => DATE_COLUMN_HEADER_RE.test(cell));
+                return line;
+            }
+            if (isTableSeparatorRow(cells)) return line;
+            if (dateColumnIndex >= 0 && cells.length > dateColumnIndex) {
+                cells[dateColumnIndex] = MASKED_DATE_CELL;
+                return `| ${cells.join(' | ')} |`;
+            }
+            return line;
+        })
+        .join('\n');
+}
+
 export interface ManifestLineDiff {
     line: number;
     onDisk: string;
     regenerated: string;
 }
 
+export interface DiffManifestsOptions {
+    /**
+     * Shallow mode (T-20260916-013): mask the volatile "Last Modified" cells on
+     * BOTH sides before comparing, so git-depth-dependent dates are ignored
+     * while structural drift (rows added/removed, name/version/path changes)
+     * is still caught. Default false — full-history behavior compares dates.
+     */
+    ignoreDateColumns?: boolean;
+    /** Max reported diffs (default 20). */
+    limit?: number;
+}
+
 /**
  * Line-wise comparison of the on-disk manifest against a fresh regeneration
- * (both timestamp-normalized). Line-wise — not LCS — is deliberate: manifest
+ * (both timestamp-normalized; date columns additionally masked on both sides in
+ * ignoreDateColumns mode). Line-wise — not LCS — is deliberate: manifest
  * drift is overwhelmingly in-place cell changes (version bumps, counts), and a
  * shifted insertion shows up as the shifted region, which is still actionable.
  * Output is capped at `limit` diffs to keep gate output concise.
  */
-export function diffManifests(onDisk: string, regenerated: string, limit = 20): ManifestLineDiff[] {
-    const diskLines = normalizeManifestForCompare(onDisk).split('\n');
-    const regenLines = normalizeManifestForCompare(regenerated).split('\n');
+export function diffManifests(onDisk: string, regenerated: string, options: DiffManifestsOptions = {}): ManifestLineDiff[] {
+    const limit = options.limit ?? 20;
+    const prepare = (content: string): string[] => {
+        const normalized = normalizeManifestForCompare(content);
+        return (options.ignoreDateColumns ? maskDateColumns(normalized) : normalized).split('\n');
+    };
+    const diskLines = prepare(onDisk);
+    const regenLines = prepare(regenerated);
     const diffs: ManifestLineDiff[] = [];
     const max = Math.max(diskLines.length, regenLines.length);
     for (let i = 0; i < max && diffs.length < limit; i++) {
@@ -558,7 +668,17 @@ async function checkManifest(): Promise<void> {
     const data = await collectManifestData();
     const regenerated = renderManifest(data);
     const onDisk = fs.readFileSync(MANIFEST_PATH, 'utf-8');
-    const diffs = diffManifests(onDisk, regenerated);
+    // Shallow tolerance (T-20260916-013): a shallow checkout cannot reproduce
+    // git-log-derived "Last Modified" dates, so the comparison drops the date
+    // columns (masked on BOTH sides) and verifies structural content only.
+    // With full history nothing changes — dates are compared as before.
+    const shallow = isShallowRepository();
+    if (shallow) {
+        console.log(`ℹ️ shallow repository detected — Last Modified columns excluded from comparison (run with full history for date verification)`);
+    }
+    const diffs = shallow
+        ? diffManifests(onDisk, regenerated, { ignoreDateColumns: true })
+        : diffManifests(onDisk, regenerated);
     if (diffs.length === 0) {
         console.log(`${GREEN}✓ VERSION_MANIFEST check: ${MANIFEST_PATH} matches the regenerated output${RESET}`);
         return;

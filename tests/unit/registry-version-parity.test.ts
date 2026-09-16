@@ -2,11 +2,14 @@
  * Tests for the registry version parity helpers introduced by the
  * validator-hardening batch T-20260915-013 (H10, C-CM-03b) and
  * T-20260915-001 (H8, l0-l1-scripts-registry-version) plus the
- * VERSION_MANIFEST --check comparison helpers from T-20260915-004 (M7).
+ * VERSION_MANIFEST --check comparison helpers from T-20260915-004 (M7),
+ * extended with the shallow-repository ignoreDateColumns mode from
+ * T-20260916-013.
  *
  * Spec: docs/designs/2026-09-16-registry-version-parity-hardening-design.md
+ *       docs/designs/2026-09-16-manifest-gate-shallow-tolerance-design.md
  *
- * @version 1.0.0
+ * @version 1.1.0
  */
 import { describe, test, expect } from 'bun:test';
 import {
@@ -18,6 +21,8 @@ import {
 import {
     normalizeManifestForCompare,
     diffManifests,
+    maskDateColumns,
+    isShallowRepository,
 } from '../../scripts/generate-version-manifest.ts';
 
 describe('declaredPlatformTrees (C-CM-03b)', () => {
@@ -176,6 +181,112 @@ describe('diffManifests (--check, T-20260915-004)', () => {
         const a = Array.from({ length: 50 }, (_, i) => `line ${i}`).join('\n');
         const b = Array.from({ length: 50 }, (_, i) => `changed ${i}`).join('\n');
         expect(diffManifests(a, b).length).toBe(20);
-        expect(diffManifests(a, b, 5).length).toBe(5);
+        expect(diffManifests(a, b, { limit: 5 }).length).toBe(5);
+    });
+});
+
+// ── Shallow-mode comparison (ignoreDateColumns, T-20260916-013) ─────────────
+// In a shallow checkout (actions/checkout default depth=1) the per-row "Last
+// Modified" dates are git-depth-dependent (checkout-time fallback), so the
+// committed manifest would permanently drift against CI regeneration. The
+// ignoreDateColumns mode masks those cells on BOTH sides; structural drift
+// must still be caught. Fixtures use scratch strings only.
+
+const AGENTS_MANIFEST = (generated: string, architectDate: string, pmDate: string): string => `# VERSION_MANIFEST.md
+
+**Generated**: ${generated}
+**Manifest Version**: 1.0
+
+## Agents
+
+| Name | File | Tier | Model | Last Modified |
+|------|------|------|-------|---------------|
+| architect | agents/architect.md | High | opus | ${architectDate} |
+| pm | agents/pm.md | Medium | sonnet | ${pmDate} |
+`;
+
+describe('maskDateColumns (shallow --check, T-20260916-013)', () => {
+    test('masks only the Last Modified DATA cells; header and separator rows untouched', () => {
+        const masked = maskDateColumns(AGENTS_MANIFEST('X', '2026-09-01', '2026-09-02'));
+        expect(masked).toContain('| Name | File | Tier | Model | Last Modified |');
+        expect(masked).toContain('|------|------|------|-------|---------------|');
+        expect(masked).toContain('| architect | agents/architect.md | High | opus | <date> |');
+        expect(masked).toContain('| pm | agents/pm.md | Medium | sonnet | <date> |');
+        expect(masked).not.toContain('2026-09-01');
+        expect(masked).not.toContain('2026-09-02');
+    });
+
+    test('date column index is derived from the header, not a hard-coded position', () => {
+        const content = [
+            '| Last Modified | Name |',
+            '|----------------|------|',
+            '| 2026-01-01 | alpha |',
+            '',
+            '| Name | Version |',
+            '|------|---------|',
+            '| beta | 2026-12-31 |',
+        ].join('\n');
+        const masked = maskDateColumns(content);
+        expect(masked).toContain('| <date> | alpha |'); // first-column date masked
+        // The second table has no "Last Modified" header — its cells (even a
+        // date-shaped value) must stay untouched.
+        expect(masked).toContain('| beta | 2026-12-31 |');
+        expect(masked).toContain('| Name | Version |');
+    });
+});
+
+describe('diffManifests shallow mode (ignoreDateColumns, T-20260916-013)', () => {
+    const disk = AGENTS_MANIFEST('2026-09-16T01:00:00.000Z', '2026-09-01', '2026-09-02');
+    const shallowRegen = AGENTS_MANIFEST('2026-09-16T09:00:00.000Z', '2026-09-15', 'N/A');
+
+    test('date-only drift is ignored under ignoreDateColumns (Generated line still normalized)', () => {
+        expect(diffManifests(disk, shallowRegen, { ignoreDateColumns: true })).toEqual([]);
+    });
+
+    test('full-history mode is unchanged: the same date-only drift IS reported', () => {
+        const diffs = diffManifests(disk, shallowRegen);
+        expect(diffs.length).toBe(2); // both agent rows differ on the date cell
+        expect(diffs[0].onDisk).toContain('2026-09-01');
+        expect(diffs[0].regenerated).toContain('2026-09-15');
+    });
+
+    test('structural drift is still caught in shallow mode: removed row', () => {
+        const regen = AGENTS_MANIFEST('2026-09-16T09:00:00.000Z', '2026-09-15', '2026-09-15')
+            .replace('| pm | agents/pm.md | Medium | sonnet | 2026-09-15 |\n', '');
+        const diffs = diffManifests(disk, regen, { ignoreDateColumns: true });
+        expect(diffs.length).toBeGreaterThanOrEqual(1);
+        expect(diffs[0].onDisk).toContain('| pm |');
+        expect(diffs[0].regenerated).toBe('');
+    });
+
+    test('structural drift is still caught in shallow mode: name/path change', () => {
+        const regen = AGENTS_MANIFEST('2026-09-16T09:00:00.000Z', '2026-09-15', '2026-09-15')
+            .replace('| pm | agents/pm.md |', '| pm-renamed | agents/pm-renamed.md |');
+        const diffs = diffManifests(disk, regen, { ignoreDateColumns: true });
+        expect(diffs.length).toBe(1);
+        expect(diffs[0].onDisk).toContain('| pm | agents/pm.md |');
+        expect(diffs[0].regenerated).toContain('| pm-renamed | agents/pm-renamed.md |');
+    });
+
+    test('non-date columns of other tables still compare (header-derived masking is per table)', () => {
+        const tables = (skillVersion: string): string => [
+            '| Last Modified | Name |',
+            '|----------------|------|',
+            '| 2026-01-01 | alpha |',
+            '',
+            '| Name | Version |',
+            '|------|---------|',
+            '| sync | ' + skillVersion + ' |',
+        ].join('\n');
+        const diffs = diffManifests(tables('1.0.0'), tables('1.1.0'), { ignoreDateColumns: true });
+        expect(diffs.length).toBe(1); // only the Version cell drifts
+        expect(diffs[0].onDisk).toContain('| sync | 1.0.0 |');
+        expect(diffs[0].regenerated).toContain('| sync | 1.1.0 |');
+    });
+});
+
+describe('isShallowRepository (T-20260916-013)', () => {
+    test('returns a boolean without throwing (spawn failure counts as full)', () => {
+        expect(typeof isShallowRepository()).toBe('boolean');
     });
 });

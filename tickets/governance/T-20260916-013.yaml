@@ -10,12 +10,32 @@ title: >-
   workflows for the same class, and consider making the generator
   shallow-tolerant or the drift comparator date-source-aware)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-16T11:31:52.264Z'
 history:
   - at: '2026-09-16T11:31:52.264Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-16T11:38:06.157Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-16T11:38:06.172Z'
+    from: waiting
+    to: review
+  - at: '2026-09-16T11:55:12.774Z'
+    from: review
+    to: done
+result: >-
+  Landed: generate-version-manifest.ts 1.6.0 — --check detects shallow
+  repositories (isShallowRepository via git rev-parse --is-shallow-repository)
+  and masks header-derived Last Modified date columns on both comparison sides
+  (maskDateColumns) while catching all structural drift; full-history mode
+  byte-identical; audit.ts gate inherits unchanged. Live depth-1 clone
+  simulation reproduced the permanent 8-line date drift on v1.5.0 and exit-0
+  steady state on v1.6.0 (structural drift still fails). Root workflow survey
+  clean (gate-running checkouts already fetch-depth:0). Project side: co-safety
+  safety-audit.yml 4 checkouts fixed with fetch-depth:0 (delivered via co-safety
+  repo PR). 30 unit tests; battery 8/8. Design
+  docs/designs/2026-09-16-manifest-gate-shallow-tolerance-design.md.
 error: null
