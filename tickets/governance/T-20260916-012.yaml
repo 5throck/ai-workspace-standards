@@ -1,0 +1,42 @@
+schemaVersion: 1
+id: T-20260916-012
+kind: manual
+title: >-
+  upgrade-project mergeWorkspaceManaged destroys keyed WORKSPACE-MANAGED blocks:
+  unlabeled reconcile counts ALL project occurrences (keyed included) vs
+  template UNLABELED-only, then slices by stale pre-merge offsets — real
+  co-develop upgrade wiped the .gitignore secret-patterns block (security gate
+  caught it) and the AGENTS.md graft block (43 lines). Extract pure merge lib +
+  fix unlabeled-only accounting with post-keyed rescan + regression tests
+priority: urgent
+status: done
+attempts: 0
+created_at: '2026-09-16T10:42:08.761Z'
+history:
+  - at: '2026-09-16T10:42:08.761Z'
+    from: null
+    to: backlog
+  - at: '2026-09-16T10:42:08.773Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-16T10:42:08.786Z'
+    from: waiting
+    to: review
+  - at: '2026-09-16T11:09:49.580Z'
+    from: review
+    to: done
+result: >-
+  Landed: merge core extracted to pure lib scripts/lib/managed-block-merge.ts
+  1.0.0 (keyed/unlabeled occurrences tracked separately; unlabeled reconcile
+  compares and slices only unlabeled spans; occurrences re-scanned after the
+  keyed phase for fresh offsets); upgrade-project.ts 1.31.0 is a thin fs
+  wrapper. Real damage confirmed and explained: co-develop upgrade wiped the
+  .gitignore secrets block (security bootstrap gate caught it) and the 43-line
+  AGENTS.md graft block. 18 unit tests incl. the keyed-only regression +
+  fresh-offset sentinel scenario; COMMON-* behavior byte-identical. Live
+  dry-run: .gitignore and graft MERGE cleanly with zero mismatch warnings; pm.md
+  keyed body INSERTED (add-if-missing restored — the earlier bug had nuked it
+  too). Known pre-existing limitation documented (design section 4.3):
+  open-marker regex cannot match keys containing hyphens. Design
+  docs/designs/2026-09-16-managed-block-merge-fix-design.md.
+error: null

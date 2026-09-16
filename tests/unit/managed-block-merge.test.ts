@@ -1,0 +1,334 @@
+/**
+ * Tests for scripts/lib/managed-block-merge.ts (T-20260916-012): the pure
+ * managed-block merge core extracted from upgrade-project.ts
+ * mergeWorkspaceManaged(), plus the fix for the two compounding defects that
+ * destroyed keyed WORKSPACE-MANAGED blocks during the 2026-09-16 co-develop
+ * upgrade (the project .gitignore lost its secrets-patterns block — caught by
+ * the upgrade's own security gate — and AGENTS.md lost its 43-line graft
+ * block):
+ *
+ *   Defect 1: the project-side occurrence list counted ALL pattern matches
+ *   (keyed blocks included) against a template count of UNLABELED blocks
+ *   only, so keyed-only project files hit the count-mismatch reconcile and
+ *   were sliced first-to-last with an EMPTY replacement.
+ *   Defect 2: reconcile/positional offsets were captured BEFORE the keyed
+ *   replacements mutated the content (stale offsets).
+ *
+ * Pins:
+ * 1. Keyed merge by key; keyed insert when the project lacks the key.
+ * 2. THE BUG: keyed-only project + keyed-only template → keyed content
+ *    survives, no WARNING/RECONCILED.
+ * 3. Fresh offsets: a length-changing keyed merge must not shift the
+ *    unlabeled reconcile/positional spans (PROSE-MID/PROSE-TAIL sentinels).
+ * 4. Unlabeled append / count-mismatch reconcile (unlabeled-only span) /
+ *    equal-count positional replacement.
+ * 5. COMMON-AGENTS zone parity: START/END pair preserved, byte-identical
+ *    behavior for the always-unlabeled COMMON classes.
+ * 6. Per-key union variant ∪ common.
+ * 7. dryRun purity: content unchanged, logs still emitted.
+ *
+ * Scratch content strings only — no fs, no real templates/.
+ *
+ * @version 1.0.0
+ */
+import { describe, test, expect } from 'bun:test';
+import {
+  mergeManagedBlocks,
+  findManagedBlocks,
+  buildMergedTemplateBlocks,
+  MANAGED_PATTERNS,
+} from '../../scripts/lib/managed-block-merge.ts';
+
+const REL = '.gitignore';
+
+function keyed(key: string, inner: string): string {
+  return `<!-- WORKSPACE-MANAGED: ${key} -->\n${inner}\n<!-- /WORKSPACE-MANAGED -->`;
+}
+
+function unlabeled(inner: string): string {
+  return `<!-- WORKSPACE-MANAGED -->\n${inner}\n<!-- /WORKSPACE-MANAGED -->`;
+}
+
+describe('MANAGED_PATTERNS / findManagedBlocks', () => {
+  test('extracts keyed and unlabeled blocks with keys', () => {
+    const content = `HEAD\n\n${keyed('graft repo context graph', 'graft lines')}\n\n${unlabeled('stale')}\n`;
+    const found = findManagedBlocks(content);
+    expect(found).toHaveLength(1);
+    expect(found[0]!.pattern.label).toBe('WORKSPACE-MANAGED');
+    expect(found[0]!.blocks.map((b) => b.key)).toEqual(['graft repo context graph', '']);
+  });
+
+  test('COMMON-* zone blocks are always unlabeled (key \'\')', () => {
+    const content = '<!-- COMMON-AGENTS:START -->\nzone\n<!-- COMMON-AGENTS:END -->\n';
+    const found = findManagedBlocks(content);
+    expect(found[0]!.pattern.label).toBe('COMMON-AGENTS');
+    expect(found[0]!.blocks.every((b) => b.key === '')).toBe(true);
+  });
+
+  test('union of template ∪ common keeps variant blocks and adds common-only keys', () => {
+    const tpl = keyed('variant only', 'v') + '\n';
+    const common = keyed('common only', 'c') + '\n';
+    const merged = buildMergedTemplateBlocks(tpl, common);
+    expect(merged).toHaveLength(1);
+    expect(merged[0]!.blocks.map((b) => b.key)).toEqual(['variant only', 'common only']);
+  });
+
+  test('union dedupes shared keys (variant wins)', () => {
+    const tpl = keyed('shared', 'variant version') + '\n';
+    const common = keyed('shared', 'common version') + '\n';
+    const merged = buildMergedTemplateBlocks(tpl, common);
+    expect(merged[0]!.blocks).toHaveLength(1);
+    expect(merged[0]!.blocks[0]!.matched).toContain('variant version');
+  });
+
+  test('empty template and common → no managed blocks (INFO skip shape)', () => {
+    expect(buildMergedTemplateBlocks('no markers', null)).toHaveLength(0);
+  });
+});
+
+describe('keyed blocks (WORKSPACE-MANAGED / VARIANT-INJECT)', () => {
+  test('(a) merges by key: project block replaced by template content', () => {
+    const proj = `HEAD\n\n${keyed('k1', 'old-content')}\n\nTAIL\n`;
+    const tpl = keyed('k1', 'new-content') + '\n';
+    const r = mergeManagedBlocks(proj, tpl, null, REL, false);
+    expect(r.merged).toBe(true);
+    expect(r.content).toContain('new-content');
+    expect(r.content).not.toContain('old-content');
+    expect(r.content).toContain('HEAD');
+    expect(r.content).toContain('TAIL');
+    expect(r.log).toContain(`    MERGED WORKSPACE-MANAGED:k1 in: ${REL}`);
+    expect(r.log.join('\n')).not.toContain('RECONCILED');
+    expect(r.log.join('\n')).not.toContain('WARNING');
+  });
+
+  test('(h) project with zero managed blocks + template keyed block → INSERTED', () => {
+    const proj = 'just prose\n';
+    const tpl = keyed('fresh key', 'fresh content') + '\n';
+    const r = mergeManagedBlocks(proj, tpl, null, REL, false);
+    expect(r.content).toContain('fresh content');
+    expect(r.log).toContain(`    INSERTED WORKSPACE-MANAGED:fresh key in: ${REL}`);
+  });
+
+  test('(b) THE BUG: keyed-only project + keyed-only template keeps the keyed block', () => {
+    // Pre-fix behavior: projOccurrences counted the keyed block, template had
+    // 0 unlabeled → count mismatch → RECONCILED with an empty join deleted
+    // the whole block (real co-develop .gitignore/AGENTS.md corruption).
+    const proj = `HEAD\n\n${keyed('Git ignore patterns. Content outside this block is preserved during project upgrades.', '.env\n*.pem')}\n\nTAIL\n`;
+    const tpl = keyed('Git ignore patterns. Content outside this block is preserved during project upgrades.', '.env\n*.pem\nnode_modules/') + '\n';
+    const r = mergeManagedBlocks(proj, tpl, null, REL, false);
+    expect(r.content).toContain('.env');
+    expect(r.content).toContain('*.pem');
+    expect(r.content).toContain('node_modules/');
+    expect(r.content).toContain('HEAD');
+    expect(r.content).toContain('TAIL');
+    expect(r.log).toContain(`    MERGED WORKSPACE-MANAGED:Git ignore patterns. Content outside this block is preserved during project upgrades. in: ${REL}`);
+    expect(r.log.join('\n')).not.toContain('RECONCILED');
+    expect(r.log.join('\n')).not.toContain('count mismatch');
+  });
+
+  test('keyed VARIANT-INJECT block merges by key too', () => {
+    const proj = `<!-- VARIANT-INJECT: section a -->\nold\n<!-- END VARIANT-INJECT -->\n`;
+    const tpl = '<!-- VARIANT-INJECT: section a -->\nnew\n<!-- END VARIANT-INJECT -->\n';
+    const r = mergeManagedBlocks(proj, tpl, null, 'AGENTS.md', false);
+    expect(r.content).toContain('new');
+    expect(r.content).not.toContain('old');
+    expect(r.log).toContain('    MERGED VARIANT-INJECT:section a in: AGENTS.md');
+  });
+});
+
+describe('unlabeled blocks (T-20260916-012 fixes)', () => {
+  test('(c) mismatch reconcile operates on FRESH offsets after a length-changing keyed merge', () => {
+    const longKeyed = keyed('alpha', 'LONG OLD KEYED CONTENT THAT IS DELIBERATELY QUITE LENGTHY');
+    const proj = [
+      'PROSE-HEAD',
+      '',
+      longKeyed,
+      '',
+      'PROSE-MID',
+      '',
+      unlabeled('STALE UNLABELED'),
+      '',
+      'PROSE-TAIL',
+      '',
+    ].join('\n');
+    const tpl = [
+      keyed('alpha', 'SHORT'),
+      '',
+      unlabeled('FRESH-UNLABELED-1'),
+      '',
+      unlabeled('FRESH-UNLABELED-2'),
+      '',
+    ].join('\n');
+    const r = mergeManagedBlocks(proj, tpl, null, REL, false);
+    // keyed merge happened (shrink) and unlabeled reconcile fired
+    expect(r.log).toContain(`    MERGED WORKSPACE-MANAGED:alpha in: ${REL}`);
+    expect(r.log.join('\n')).toContain('count mismatch');
+    expect(r.log).toContain(`    RECONCILED WORKSPACE-MANAGED blocks in: ${REL}`);
+    // FRESH offsets: the surrounding prose and the shrunk keyed block survive intact
+    expect(r.content).toContain('PROSE-HEAD');
+    expect(r.content).toContain('PROSE-MID');
+    expect(r.content).toContain('PROSE-TAIL');
+    expect(r.content).toContain('SHORT');
+    expect(r.content).toContain('FRESH-UNLABELED-1');
+    expect(r.content).toContain('FRESH-UNLABELED-2');
+    expect(r.content).not.toContain('STALE UNLABELED');
+    expect(r.content).not.toContain('LONG OLD KEYED CONTENT');
+    // the replacement is exactly the two template blocks joined by a blank line
+    expect(r.content).toContain(`${unlabeled('FRESH-UNLABELED-1')}\n\n${unlabeled('FRESH-UNLABELED-2')}`);
+  });
+
+  test('(e) reconcile with zero template unlabeled blocks removes ONLY the unlabeled span', () => {
+    const proj = [
+      'PROSE-HEAD',
+      '',
+      keyed('keep me', 'keyed content'),
+      '',
+      'PROSE-MID',
+      '',
+      unlabeled('STALE UNLABELED'),
+      '',
+      'PROSE-TAIL',
+      '',
+    ].join('\n');
+    const tpl = keyed('keep me', 'keyed content NEW') + '\n';
+    const r = mergeManagedBlocks(proj, tpl, null, REL, false);
+    expect(r.log).toContain(`    RECONCILED WORKSPACE-MANAGED blocks in: ${REL}`);
+    expect(r.content).toContain(keyed('keep me', 'keyed content NEW'));
+    expect(r.content).not.toContain('STALE UNLABELED');
+    expect(r.content).toContain('PROSE-HEAD');
+    expect(r.content).toContain('PROSE-MID');
+    expect(r.content).toContain('PROSE-TAIL');
+  });
+
+  test('(d) appends unlabeled template blocks when the project has none', () => {
+    const proj = 'PROSE only, no markers\n';
+    const tpl = unlabeled('brand new block') + '\n';
+    const r = mergeManagedBlocks(proj, tpl, null, REL, false);
+    expect(r.log).toContain(`    APPENDED WORKSPACE-MANAGED block to: ${REL}`);
+    expect(r.content.endsWith(`${unlabeled('brand new block')}\n`)).toBe(true);
+  });
+
+  test('(f) equal counts replace positionally on fresh offsets', () => {
+    const proj = [
+      'PROSE-HEAD',
+      '',
+      keyed('alpha', 'A VERY LONG KEYED BODY INDEED YES QUITE LONG'),
+      '',
+      'PROSE-MID',
+      '',
+      unlabeled('old unlabeled body'),
+      '',
+      'PROSE-TAIL',
+      '',
+    ].join('\n');
+    const tpl = [
+      keyed('alpha', 'tiny'),
+      '',
+      unlabeled('new unlabeled body'),
+      '',
+    ].join('\n');
+    const r = mergeManagedBlocks(proj, tpl, null, REL, false);
+    expect(r.log).toContain(`    MERGED WORKSPACE-MANAGED:alpha in: ${REL}`);
+    expect(r.log).toContain(`    MERGED WORKSPACE-MANAGED block in: ${REL}`);
+    expect(r.log.join('\n')).not.toContain('RECONCILED');
+    expect(r.log.join('\n')).not.toContain('WARNING');
+    expect(r.content).toBe([
+      'PROSE-HEAD',
+      '',
+      keyed('alpha', 'tiny'),
+      '',
+      'PROSE-MID',
+      '',
+      unlabeled('new unlabeled body'),
+      '',
+      'PROSE-TAIL',
+      '',
+    ].join('\n'));
+  });
+});
+
+describe('COMMON-* zones (always unlabeled — byte-identical behavior)', () => {
+  test('(g) COMMON-AGENTS START/END pair preserved across positional merge', () => {
+    const proj = [
+      '# Header',
+      '',
+      '<!-- COMMON-AGENTS:START -->',
+      'old governance roster',
+      '<!-- COMMON-AGENTS:END -->',
+      '',
+      'footer prose',
+      '',
+    ].join('\n');
+    const tpl = [
+      '# Header',
+      '',
+      '<!-- COMMON-AGENTS:START -->',
+      'new governance roster',
+      '<!-- COMMON-AGENTS:END -->',
+      '',
+    ].join('\n');
+    const r = mergeManagedBlocks(proj, tpl, null, 'AGENTS.md', false);
+    expect(r.log).toContain('    MERGED COMMON-AGENTS block in: AGENTS.md');
+    expect(r.content).toContain('new governance roster');
+    expect(r.content).not.toContain('old governance roster');
+    expect(r.content).toContain('<!-- COMMON-AGENTS:START -->');
+    expect(r.content).toContain('<!-- COMMON-AGENTS:END -->');
+    expect(r.content.split('<!-- COMMON-AGENTS:START -->')).toHaveLength(2);
+    expect(r.content).toContain('footer prose');
+  });
+
+  test('COMMON-CLAUDE append when the project lacks the zone', () => {
+    const proj = 'prose\n';
+    const tpl = '<!-- COMMON-CLAUDE:START -->\nzone\n<!-- COMMON-CLAUDE:END -->\n';
+    const r = mergeManagedBlocks(proj, tpl, null, 'CLAUDE.md', false);
+    expect(r.log).toContain('    APPENDED COMMON-CLAUDE block to: CLAUDE.md');
+    expect(r.content).toContain('<!-- COMMON-CLAUDE:START -->');
+  });
+});
+
+describe('per-key union at merge time (variant ∪ common)', () => {
+  test('(i) common-only keyed block merges alongside the variant block', () => {
+    const proj = [
+      'HEAD',
+      '',
+      keyed('variant only', 'old v'),
+      '',
+      keyed('common only', 'old c'),
+      '',
+      'TAIL',
+      '',
+    ].join('\n');
+    const tpl = keyed('variant only', 'new v') + '\n';
+    const common = keyed('common only', 'new c') + '\n';
+    const r = mergeManagedBlocks(proj, tpl, common, REL, false);
+    expect(r.content).toContain('new v');
+    expect(r.content).toContain('new c');
+    expect(r.content).not.toContain('old v');
+    expect(r.content).not.toContain('old c');
+    expect(r.log).toContain(`    MERGED WORKSPACE-MANAGED:variant only in: ${REL}`);
+    expect(r.log).toContain(`    MERGED WORKSPACE-MANAGED:common only in: ${REL}`);
+  });
+});
+
+describe('dryRun purity and API shape', () => {
+  test('dryRun=true leaves the computation identical and only tags the logs', () => {
+    const proj = `HEAD\n\n${keyed('k1', 'old-content')}\n\n${unlabeled('old unlabeled')}\n`;
+    const tpl = [keyed('k1', 'new-content'), '', unlabeled('new unlabeled'), ''].join('\n');
+    const dry = mergeManagedBlocks(proj, tpl, null, REL, true);
+    const applied = mergeManagedBlocks(proj, tpl, null, REL, false);
+    // dryRun affects only the log tag, never the computed content
+    expect(dry.content).toBe(applied.content);
+    expect(dry.merged).toBe(true);
+    expect(dry.log).toContain(`    [DRY RUN] MERGED WORKSPACE-MANAGED:k1 in: ${REL}`);
+    expect(dry.log).toContain(`    [DRY RUN] MERGED WORKSPACE-MANAGED block in: ${REL}`);
+    expect(applied.log.join('\n')).not.toContain('[DRY RUN]');
+  });
+
+  test('template with no managed markers → INFO skip, untouched content', () => {
+    const proj = 'project content\n';
+    const r = mergeManagedBlocks(proj, 'no markers here', null, REL, false);
+    expect(r.content).toBe(proj);
+    expect(r.merged).toBe(false);
+    expect(r.log).toEqual([`    INFO: Template has no managed markers — skipping ${REL}`]);
+  });
+});
