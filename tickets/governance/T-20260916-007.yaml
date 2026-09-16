@@ -6,12 +6,28 @@ title: >-
   upgrade-project target guard (H14 design
   2026-09-16-upgrade-target-realpath-guard)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-16T00:40:32.959Z'
 history:
   - at: '2026-09-16T00:40:32.959Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-16T09:05:15.055Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-16T09:05:15.068Z'
+    from: waiting
+    to: review
+  - at: '2026-09-16T09:26:55.780Z'
+    from: review
+    to: done
+result: >-
+  Landed in wave B: 7 subprocess negative tests in
+  tests/unit/project-target-guards.test.ts 1.1.0 — symlink-to-root hard-fail
+  (platform-guarded graceful skip where symlinks unavailable), EOF and 'n'
+  refusal paths (exit 1, canonical path named, aborted pre-preflight), 'y' and
+  --yes consent paths (reach pre-flight, no delivery), inside-Projects never
+  prompts, missing-target lexical not-found message. Battery 8/8 incl. dry-run
+  happy-path unchanged.
 error: null

@@ -168,9 +168,16 @@ documented, greppable path.
 
 ### 5.2 Version bump expectation
 
-`scripts/upgrade-project.ts` 1.28.0 → **1.29.0** (new guard behavior +
-new user-visible prompt; minor). Test file 1.0.0 → 1.1.0. No data files,
+`scripts/upgrade-project.ts` 1.29.0 → **1.30.0** (new guard behavior + new
+user-visible prompt; minor). Test file 1.0.0 → 1.1.0. No data files,
 no templates content, no new flags — the L1 row changes version only.
+
+> **Reality note (2026-09-16, implementation)**: this section originally read
+> 1.28.0 → 1.29.0, but v1.29.0 was consumed by T-20260916-010 (post-upgrade
+> VERSION_MANIFEST regeneration), which landed on main first and also shifted
+> the guard region's line numbers (Section 2's lines 257-290 now sit at
+> 267-300). This batch therefore bumps 1.29.0 → 1.30.0; all other semantics
+> are unchanged.
 The `upgrade-project` SKILL.md refresh stays in T-20260915-008's scope;
 the implementation ticket notes the dependency so the skill doc picks up
 the confirmation behavior.
