@@ -5,12 +5,18 @@ version: "1.0.0"
 status: active
 scope: workspace
 owner: scaffolding-expert
-triggers:
-  - add feature to variant
-  - extend variant
-  - variant feature
-  - add agent to variant
-  - add skill to variant
+last_reviewed: 2026-07-31
+relates_to:
+  - skill: upgrade-project
+    type: composes_with
+metadata:
+  type: scaffolding
+  triggers:
+    - add feature to variant
+    - extend variant
+    - variant feature
+    - add agent to variant
+    - add skill to variant
 ---
 
 # Variant Feature
@@ -62,7 +68,7 @@ This is a guided CLI that prompts for:
 
 ## See Also
 
-- [Variant Creation Skill](skills/create-variant/SKILL.md)
-- [Variant Promotion Skill](skills/promote-variant/SKILL.md)
-- [Agent Lifecycle Manager](skills/agent-lifecycle-manager/SKILL.md)
-- [Skill Lifecycle Manager](skills/skill-lifecycle-manager/SKILL.md)
+- [Variant Creation Skill](../create-variant/SKILL.md)
+- [Variant Promotion Skill](../promote-variant/SKILL.md)
+- [Agent Lifecycle Manager](../agent-lifecycle-manager/SKILL.md)
+- [Skill Lifecycle Manager](../skill-lifecycle-manager/SKILL.md)

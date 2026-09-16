@@ -2,9 +2,16 @@
 /**
  * test-l3-to-variant-promotion.ts — E2E smoke test for the L3 scaffold → variant promotion path
  *
- * @version 1.5.0
+ * @version 1.6.0
  * @last_updated 2026-09-16
  *
+ * v1.6.0: T-20260916-001 — fixture dir names under templates/ are now built
+ *         from the shared TRANSIENT_TEST_FIXTURE_PREFIXES constants
+ *         (helpers/scaffold-markers.ts) so the validator skip predicate
+ *         isTransientTestFixture can never drift from the names actually
+ *         staged; the scripts suite also runs sequential now (test-runner
+ *         v1.3.0), which removes the cross-E2E staging race this file's
+ *         fixtures participated in.
  * v1.5.0: T-20260916-005 — Test 7 absorbs the project-to-variant.ts
  *         subprocess enforcement assertions that briefly lived in
  *         tests/unit/variant-overlay-guard.test.ts: the parallel unit runner
@@ -63,7 +70,7 @@ import { fileURLToPath } from 'node:url';
 import * as path from 'node:path';
 import { $ } from 'bun';
 import { spawnSync } from 'node:child_process';
-import { verifyActualTreeMatchesDerivation } from './helpers/scaffold-markers.ts';
+import { verifyActualTreeMatchesDerivation, TRANSIENT_TEST_FIXTURE_PREFIXES } from './helpers/scaffold-markers.ts';
 import { OVERLAY_GUARD_PREFIX } from './lib/variant-overlay-guard.ts';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -73,7 +80,12 @@ const WORKSPACE_ROOT = path.resolve(__dirname, '..');
 // ── Fixture paths (disposable, timestamp-scoped to avoid collisions) ──────────
 
 const RUN_ID = Date.now();
-const SCAFFOLD_VARIANT_NAME = `test-l3promo-${RUN_ID}`;
+// Fixture dir names are built from the SHARED prefix constants
+// (helpers/scaffold-markers.ts) so the validator skip predicate
+// (isTransientTestFixture) can never drift from the names actually staged
+// under templates/ — T-20260916-001.
+const [P_L3PROMO, P_E2EGUARD, P_P2B, P_P2S, P_P2C] = TRANSIENT_TEST_FIXTURE_PREFIXES;
+const SCAFFOLD_VARIANT_NAME = `${P_L3PROMO}${RUN_ID}`;
 // create-l3-scaffold.ts hardcodes its output to Projects/<variant-name> — not
 // overridable via CLI flag, so we let it do that and clean up afterward.
 const L3_FIXTURE_PATH = join(WORKSPACE_ROOT, 'Projects', SCAFFOLD_VARIANT_NAME);
@@ -89,13 +101,13 @@ const AGENTS_MD_STAGING_NAME = `${SCAFFOLD_VARIANT_NAME}-agentsmd-stage`;
 const AGENTS_MD_STAGING_PATH = join(WORKSPACE_ROOT, 'templates', AGENTS_MD_STAGING_NAME);
 // Test 6 guard fixtures (T-20260916-005): disposable already-promoted variant
 // slots in templates/ — variant.json only, staged and removed by cleanup().
-const GUARD_FIXTURE_BETA = `co-e2eguard-beta-${RUN_ID}`;
-const GUARD_FIXTURE_STABLE = `co-e2eguard-stable-${RUN_ID}`;
+const GUARD_FIXTURE_BETA = `${P_E2EGUARD}beta-${RUN_ID}`;
+const GUARD_FIXTURE_STABLE = `${P_E2EGUARD}stable-${RUN_ID}`;
 // Test 7 (v1.5.0): project-to-variant.ts subprocess enforcement fixtures —
 // same slot shape, staged/removed by the same sequential cleanup() path.
-const P2V_FIX_BETA = `co-e2p2b-${RUN_ID}`;
-const P2V_FIX_STABLE = `co-e2p2s-${RUN_ID}`;
-const P2V_FIX_CORRUPT = `co-e2p2c-${RUN_ID}`;
+const P2V_FIX_BETA = `${P_P2B}${RUN_ID}`;
+const P2V_FIX_STABLE = `${P_P2S}${RUN_ID}`;
+const P2V_FIX_CORRUPT = `${P_P2C}${RUN_ID}`;
 const P2V_FIXTURES = [P2V_FIX_BETA, P2V_FIX_STABLE, P2V_FIX_CORRUPT];
 // Trivial L3 source (2 files, below the complexity-routing thresholds) — the
 // dry-run-proceed assertion must reach the copy pipeline, not the

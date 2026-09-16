@@ -30,15 +30,16 @@ section presence (VARIANT-INJECT: guidelines [REQUIRED] marker enforcement).
 **v1.5.0**: Added pre-flight markdown link validation gate (`bun scripts/validate-docs-links.ts`) executed before git operations to ensure all documentation links resolve.
 
 #### `test-runner.ts`
-**Purpose**: Test suite execution framework supporting `unit`, `integration`, `scenarios`, and `scripts` suites. Features parallel test execution with worker pool concurrency, worker temp directory isolation (`TEST_TEMP_DIR`), automatic fallback to sequential execution on failure, and per-suite timeouts.
+**Purpose**: Test suite execution framework supporting `unit`, `integration`, `scenarios`, and `scripts` suites. Features parallel test execution with worker pool concurrency, worker temp directory isolation (`TEST_TEMP_DIR`), automatic fallback to sequential execution on failure, and per-suite timeouts. The `scripts` suite runs sequentially by default (v1.3.0): its E2E members stage transient fixture dirs under the real `templates/` tree and race concurrent validators when parallel; a post-suite hygiene assertion fails the suite if `docs/templates/` gained modifications or transient fixture dirs (`test-l3promo-*`, `co-e2eguard-*`, `co-e2p2*`) were left behind.
 **Usage**:
 - `bun scripts/test-runner.ts [suite] [flags]` (default suite: `integration`)
 - Via `package.json` aliases: `bun run test`, `bun run test:unit`, `bun run test:e2e`, `bun run test:full`
 **CLI Flags**:
-- `--parallel`: Enable parallel execution across test files (default when > 1 test file)
+- `--parallel`: Enable parallel execution across test files (default when > 1 test file; overrides the scripts suite's sequential default — you own the race)
 - `--sequential`: Force sequential test file execution
 - `--concurrency <n>`: Set worker pool concurrency level (default: CPU core count up to 4)
 - `--timeout <ms>`: Set per-test execution timeout in milliseconds
+**v1.3.0**: T-20260916-001 — per-suite `sequential` flag (scripts suite sequential by default) + post-suite hygiene assertion (no new `docs/templates/` modifications, no leftover transient fixture dirs).
 **v1.1.0**: Documented parallel execution capabilities, worker pool temp directory isolation (`tests/.temp/worker-<id>`), automatic sequential fallback, and CLI flags (`--parallel`, `--sequential`, `--concurrency <n>`, `--timeout <ms>`).
 
 #### `sync-md.ts`

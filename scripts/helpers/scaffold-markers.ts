@@ -1,7 +1,14 @@
 #!/usr/bin/env bun
 /**
  * Shared Scaffold Delivery Contracts
- * @version 1.2.0
+ * @version 1.3.0
+ *
+ * v1.3.0 (T-20260916-001): TRANSIENT_TEST_FIXTURE_PREFIXES +
+ * isTransientTestFixture — the shared name predicate that lets
+ * templates/-scanning validators skip E2E staging dirs
+ * (test-l3promo-*, co-e2eguard-*, co-e2p2*) while they exist. The E2E
+ * (test-l3-to-variant-promotion.ts) derives its fixture names from the
+ * same constants, so producer and skipper cannot drift.
  *
  * v1.2.0 (T-20260916-010): variant templates stopped shipping a stub
  * docs/VERSION_MANIFEST.md (validate-templates `variant-version-manifest`
@@ -666,7 +673,35 @@ export function verifyActualTreeMatchesDerivation(opts: {
 }
 
 // ============================================================================
-// 9. Internal helpers
+// 9. Transient test-fixture predicate (T-20260916-001)
+// ============================================================================
+// test-l3-to-variant-promotion.ts stages disposable fixture dirs under the
+// REAL templates/ tree for the duration of an E2E run. Any validator that
+// enumerates templates/ while such an E2E is in flight must skip these
+// names (defense in depth against VERSION_REGISTRY.json pollution and
+// fixture-shaped variant failures). ONE prefix list here is the contract
+// between the E2E producer (which builds its dir names from these exact
+// constants) and the validators (which filter with isTransientTestFixture).
+
+/** Directory-name prefixes owned by templates/-staging E2E fixtures. */
+export const TRANSIENT_TEST_FIXTURE_PREFIXES: readonly string[] = [
+  'test-l3promo-', // l3-to-variant-promotion E2E: scaffold variant + agentsmd stage
+  'co-e2eguard-', // l3-to-variant-promotion E2E: overlay-guard variant.json-only slots
+  'co-e2p2b-', // l3-to-variant-promotion E2E: p2v guard fixture (beta)
+  'co-e2p2s-', // l3-to-variant-promotion E2E: p2v guard fixture (stable)
+  'co-e2p2c-', // l3-to-variant-promotion E2E: p2v guard fixture (corrupt)
+];
+
+/**
+ * True when a templates/ entry name is a transient E2E test fixture
+ * (never a real variant). Pure — no I/O, safe to import anywhere.
+ */
+export function isTransientTestFixture(name: string): boolean {
+  return TRANSIENT_TEST_FIXTURE_PREFIXES.some((p) => name.startsWith(p));
+}
+
+// ============================================================================
+// 10. Internal helpers
 // ============================================================================
 
 function isUnderAny(rel: string, dirs: readonly string[]): boolean {

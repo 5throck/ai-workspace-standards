@@ -8,12 +8,36 @@ title: >-
   a staleness gate; codex-skills domain lacks the same scope filter (drift found
   during T-20260915-008)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-16T01:13:05.305Z'
 history:
   - at: '2026-09-16T01:13:05.305Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-16T09:29:17.259Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-16T09:29:17.273Z'
+    from: waiting
+    to: review
+  - at: '2026-09-16T10:00:48.254Z'
+    from: review
+    to: done
+result: >-
+  Landed in wave C. Investigation: mirrors ARE delivered — new-project.ts copies
+  the whole templates/common/ tree stripping only l2_propagate:false and
+  legacy-L0 skills, so every fresh project received upgrade-project@1.4.1 in
+  three platform mirrors while codex tracked 1.5.0 (real delivery defect, not
+  dead weight); the collectDiffs scope-skip had no recorded rationale beyond an
+  inline comment (bulk commit 7aa478c9). Adjudication: drop the skip —
+  propagate-to-templates.ts 2.16.0 treats all four platform-skill domains
+  uniformly, the three mirrors caught up (upgrade-project 1.5.0 + ticket-run,
+  release-template, context-commonization-review, simulate-pipeline — all
+  already shipped by the codex mirror), and a new standing
+  platform-mirror-freshness check (Error, validate-templates.ts 1.33.0, pure
+  helper scripts/lib/platform-mirror-freshness.ts 1.0.0) makes staleness
+  unregressable. Rejected alternative (add the skip to codex) would have frozen
+  upgrade-project stale in all four mirrors. Design
+  docs/designs/2026-09-16-template-tree-infra-consistency-design.md.
 error: null
