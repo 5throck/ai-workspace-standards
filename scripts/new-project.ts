@@ -1,5 +1,14 @@
 #!/usr/bin/env bun
-// @version 1.19.0
+// @version 1.20.0
+// v1.20.0: T-20260916-002 — scaffold provenance fallback aligned with the M11
+//           fail-loud policy (docs/designs/2026-09-16-new-project-provenance-
+//           alignment-design.md): the old resolution chain
+//           `--version <tag> || templates/VERSION || silent "unknown"` loses
+//           its silent tail. Without --version, templates/VERSION is read via
+//           helpers/template-version.ts resolveProvenanceVersion() — a missing
+//           or unparseable SSOT aborts pre-flight (before any scaffolding
+//           work), so no project can ever record an "unknown" provenance
+//           version. An explicit --version value is still accepted as-is.
 // v1.19.0: T-20260916-010 — variant templates stopped shipping a stub
 //           docs/VERSION_MANIFEST.md (the stub class retired by the new
 //           validate-templates `variant-version-manifest` arm); the project's
@@ -52,6 +61,7 @@ import { spawnSync } from 'node:child_process';
 import { applyContextTemplate, DEFAULT_PM_ROLE_DESCRIPTIONS } from './helpers/template-utils.ts';
 import { rollbackPartialProject } from './helpers/rollback-partial-project.ts';
 import { blankL0Refs } from './helpers/l0-ref-policy.ts';
+import { resolveProvenanceVersion } from './helpers/template-version.ts';
 import {
   NEW_PROJECT_COPY_SKIP_ENTRIES,
   NEW_PROJECT_WORKSPACE_ONLY_FILES,
@@ -166,6 +176,25 @@ if (projectName.includes('/') && MANAGED_TOP_LEVEL_DIRS.has(projectName.split('/
   if (import.meta.main) {
     process.exit(1);
   }
+}
+
+// ── Scaffold provenance version (fail-loud fallback) ──────────────────────────
+// T-20260916-002 (M11 residual): the old resolution chain was
+//   --version <tag> || templates/VERSION || silent "unknown".
+// The silent tail is gone (policy parity with create-l3-scaffold.ts):
+// without --version, templates/VERSION must be readable — a missing or
+// unparseable SSOT aborts here, BEFORE any scaffolding work (tag extraction,
+// readiness gate, copy), so no project can ever record an "unknown"
+// provenance version in docs/<variant>.context.md or .claude/template-version.txt.
+let templateVersion = '';
+try {
+  templateVersion = resolveProvenanceVersion(templateVer, workspaceRoot);
+} catch (err) {
+  console.error(`❌ ${(err as Error).message}`);
+  if (import.meta.main) {
+    process.exit(1);
+  }
+  throw err; // imported (non-main) context: never fall through with no version
 }
 
 // ── Variant detection & validation ────────────────────────────────────────────
@@ -996,8 +1025,11 @@ if (existsSync(scriptsMd)) {
 }
 
 // ── 5.5. Record template provenance ───────────────────────────────────────────
-const versionFile = join(workspaceRoot, 'templates', 'VERSION');
-const templateVersion = templateVer || (existsSync(versionFile) ? readFileSync(versionFile, 'utf8').trim() : 'unknown');
+// templateVersion was resolved pre-flight (T-20260916-002): an explicit
+// --version value wins as-is, otherwise the templates/VERSION SSOT read
+// fail-loud via helpers/template-version.ts resolveProvenanceVersion() (M11
+// parity with create-l3-scaffold.ts). The previous silent "unknown" fallback
+// is removed — the downstream output formats are unchanged.
 const variantContextMd = join(projectDir, 'docs', `${variant}.context.md`);
 
 // Regenerate context.md from canonical template (SSOT: templates/common/docs/variant.context.template.md)
