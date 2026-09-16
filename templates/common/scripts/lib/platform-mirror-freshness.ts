@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Platform Mirror Freshness — pure comparison helpers
- * @version 1.0.0
+ * @version 1.0.1
  *
  * T-20260916-008: the four L1 platform skill mirrors
  * (templates/common/.{claude,gemini,agents,codex}/skills) are propagated
@@ -41,7 +41,9 @@ export const PLATFORM_MIRROR_DIRS: readonly string[] = [
  * freshness arm rather than failed (frontmatter richness is B-09's domain).
  */
 export function extractSkillVersion(skillMdText: string): string | null {
-  const m = skillMdText.match(/^version:\s*"?([^"\n]+)"?\s*$/m);
+  // Strip a UTF-8 BOM first — `^` in the multiline regex would not match a
+  // `version:` line sitting behind a BOM, silently skipping the skill.
+  const m = skillMdText.replace(/^\uFEFF/, '').match(/^version:\s*"?([^"\n]+)"?\s*$/m);
   return m ? m[1].trim() : null;
 }
 

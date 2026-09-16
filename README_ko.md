@@ -36,7 +36,7 @@ sync_version: 1
 
 ### 내장 국가 프로필
 
-한국 관할권 지원이 워크스페이스에 기본 포함되어 있습니다: **KR 국가 프로필**([`docs/countries/KR.md`](docs/countries/KR.md)), **KR 스코프 `k-*` 데이터 스킬 6종**(법령 조회 `k-law`, 공시 `k-dart`, 통계 `k-kosis`, 시장 데이터 `k-krx`, 거시경제 `k-ecos`, 공공데이터 `k-opendata`), 프로젝트별 국가 구성(`variant.json` `country_config`). 프로젝트가 대상 국가를 선언하면, KR 프로젝트는 k-* 스킬과 한국 규제 앵커, `.env.sample`의 국가 API 키 블록을 자동으로 받습니다 — 자세한 것은 `docs/country-profiles.md`.
+한국 관할권 지원이 워크스페이스에 기본 포함되어 있습니다: **KR 국가 프로필**([`templates/co-news/docs/countries/KR.md`](templates/co-news/docs/countries/KR.md) 예시 참고), **KR 스코프 `k-*` 데이터 스킬 6종**(법령 조회 `k-law`, 공시 `k-dart`, 통계 `k-kosis`, 시장 데이터 `k-krx`, 거시경제 `k-ecos`, 공공데이터 `k-opendata`), 프로젝트별 국가 구성(`variant.json` `country_config`). 프로젝트가 대상 국가를 선언하면, KR 프로젝트는 k-* 스킬과 한국 규제 앵커, `.env.sample`의 국가 API 키 블록을 자동으로 받습니다 — 자세한 것은 [`templates/common/docs/country-profiles.md`](templates/common/docs/country-profiles.md)를 참고하세요.
 
 
 ## 사전 요구 사항 (Prerequisites)
@@ -357,4 +357,4 @@ AGPL-3.0 - [LICENSE](LICENSE) 파일 참조
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-09-12*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-09-17*

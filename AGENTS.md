@@ -668,7 +668,7 @@ When a new skill is created in `skills/` or `.claude/skills/`:
    bun scripts/validate-skills.ts
    ```
 
-1.5. **Triage accumulated session evidence** — review `memory/skill-review/*.md` records produced by the session-evidence loop (dev-sync step 3.96c; see `docs/constitution/06-skill-lifecycle.md §6.6 Session-Evidence Skill Review Loop`). Fill `diagnosis`/`candidate` blocks at triage, then dispatch approved revisions through the normal PM Gateway path (§3).
+1.5. **Triage accumulated session evidence** — review `memory/skill-review/*.md` records produced by the session-evidence loop (dev-sync step 3.96c; see `docs/constitution/06-skill-lifecycle.md` → "Session-Evidence Skill Review Loop (Observation-Based Revision)"). Fill `diagnosis`/`candidate` blocks at triage, then dispatch approved revisions through the normal PM Gateway path (§3).
 
 2. **Triage findings** by severity:
    - 🔴 Broken dependencies or circular references → fix before quarter ends

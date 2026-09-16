@@ -1,4 +1,4 @@
-// @version 1.0.0
+// @version 1.0.1
 // v1.0.0 (T-20260916-012): extracted the managed-block merge core from
 //           scripts/upgrade-project.ts mergeWorkspaceManaged() into this pure
 //           lib (L0-only — it serves only the L0-only upgrader), fixing two
@@ -175,8 +175,12 @@ export function buildMergedTemplateBlocks(
  * (b) after the project's last block of the same label, (c) end of file.
  */
 export function findInsertionPosition(content: string, rel: string, key: string, pattern: ManagedPattern): number {
-  // Try to find a heading with the key text and insert after it
-  const headingRegex = new RegExp(`^#+\\s+.*${key}.*$`, 'm');
+  // Try to find a heading with the key text and insert after it.
+  // Escape the key: block keys come from arbitrary `: description` suffixes and
+  // may contain RegExp metacharacters — unescaped interpolation would throw
+  // mid-upgrade or silently mis-anchor the insertion (T-20260917-review).
+  const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const headingRegex = new RegExp(`^#+\\s+.*${escapedKey}.*$`, 'm');
   const headingMatch = content.match(headingRegex);
   if (headingMatch) {
     const headingEnd = headingMatch.index! + headingMatch[0].length;

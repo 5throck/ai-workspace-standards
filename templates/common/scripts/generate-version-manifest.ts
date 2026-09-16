@@ -1,5 +1,6 @@
-// @version 1.6.0
+// @version 1.6.1
 // v1.6.0 (T-20260916-013): shallow-tolerant --check. In a shallow checkout
+// v1.6.1 (T-20260917-review): parseAgentFrontmatter normalizes CRLF before tier/model regexes; on Windows working trees the nested `tier:` block parsed as tier=N/A and regenerated a drifting manifest. parseAgentFrontmatter is now exported for CRLF unit coverage.
 //           (actions/checkout default depth=1) `git log` has no history, so the
 //           per-file "Last Modified" dates fall back to checkout-time values and
 //           the committed manifest (generated locally with full history) then
@@ -115,9 +116,13 @@ function scalarValue(raw: string): string {
     return (hash === -1 ? raw : raw.slice(0, hash)).trim().replace(/\s+/g, ' ');
 }
 
-function parseAgentFrontmatter(content: string): { tier?: string; model?: string } {
-    const tierMatch = /^tier:[ \t]*\n[ \t]+claude:[ \t]+(.+)$/m.exec(content);
-    const modelMatch = /^model:[ \t]+(.+)$/m.exec(content);
+export function parseAgentFrontmatter(content: string): { tier?: string; model?: string } {
+    // Normalize CRLF first (T-20260917-review): on Windows working trees the
+    // nested `tier:` block is `tier:\r\n  claude: ...` and a bare `\n` in the
+    // regex silently parsed tier as 'N/A', regenerating a drifting manifest.
+    const normalized = content.replace(/\r\n/g, '\n');
+    const tierMatch = /^tier:[ \t]*\n[ \t]+claude:[ \t]+(.+)$/m.exec(normalized);
+    const modelMatch = /^model:[ \t]+(.+)$/m.exec(normalized);
     return {
         tier: tierMatch ? scalarValue(tierMatch[1]) : 'N/A',
         model: modelMatch ? scalarValue(modelMatch[1]) : 'N/A',

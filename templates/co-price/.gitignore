@@ -1,6 +1,8 @@
-﻿<!-- WORKSPACE-MANAGED -->
-# Secrets ??never commit
+<!-- WORKSPACE-MANAGED: Git ignore patterns. Content outside this block is preserved during project upgrades. -->
+# Secrets — never commit
 .env
+.env.*
+!.env.sample
 
 # Python
 .venv/
@@ -13,24 +15,24 @@ dist/
 # Node.js
 node_modules/
 .next/
-dist/
 build/
 
 # OS artifacts
 .DS_Store
 Thumbs.db
+Desktop.ini
 
 # IDE
 .idea/
 .vscode/
 *.swp
 
-# Local AI settings (personal overrides ??never shared)
+# Local AI settings (personal overrides — never shared)
 .claude/settings.local.json
 .gemini/settings.local.json
 .mcp.local.json
 
-# Crypto / certificates ??never commit private key material
+# Crypto / certificates — never commit private key material
 *.pem
 *.key
 *.p12
@@ -51,14 +53,28 @@ Thumbs.db
 *.db
 
 
-.env.local
+# Antigravity/ZCode session-local state (plans, config — never shared)
+.zcode/
 
-# session artifacts (PR bodies, batch payloads)
+# Windows reserved device name artifacts (created by git hooks on cmd.exe)
+nul
+NUL
+
+# --- Sandbox for testing ---
+.sandbox/
+
+# Archive directory ignored to save space (local preservation only)
+memory/archive/
+
+# Ignore test temp directories
+tests/.temp/
+
+# graft's local graph cache — regenerable, not committed (run `graft build`).
+/graft/
+<!-- /WORKSPACE-MANAGED -->
+
+# --- co-price variant-specific entries (preserved outside the managed block) ---
 tmp/
-
-# Generated / scratch (template build artifacts)
 src/generated/
 scratch/
 tsconfig.tsbuildinfo
-
-<!-- END WORKSPACE-MANAGED -->
