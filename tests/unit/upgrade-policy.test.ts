@@ -14,10 +14,12 @@ import {
   TEMPLATE_TREE_SYNC_PASS,
   GOVERNANCE_FILES,
   PLACEHOLDER_ALLOWLIST,
+  SCAFFOLD_COMMON_OWNED_FILES,
   mergeSettingsData,
   mergeSettingsJson,
   resolveClaim,
 } from '../../scripts/lib/upgrade-policy.ts';
+import { readFileSync } from 'node:fs';
 
 const workspaceRoot = resolve(import.meta.dir, '..', '..');
 const VARIANT = 'co-develop';
@@ -270,5 +272,24 @@ describe('upgrade-policy placeholder allowlist (design D8)', () => {
     expect(PLACEHOLDER_ALLOWLIST.has('docs/README.template.md')).toBe(true);
     expect(PLACEHOLDER_ALLOWLIST.has('docs/README_ko.template.md')).toBe(true);
     expect(PLACEHOLDER_ALLOWLIST.has('docs/user-guide.md')).toBe(false);
+  });
+});
+
+describe('SCAFFOLD_COMMON_OWNED_FILES (T-20260917-009)', () => {
+  test('contains docs/context.md', () => {
+    expect(SCAFFOLD_COMMON_OWNED_FILES.size).toBeGreaterThan(0);
+    expect(SCAFFOLD_COMMON_OWNED_FILES.has('docs/context.md')).toBe(true);
+  });
+
+  test('new-project derives the variant overlay skip from the classification (no hand list)', () => {
+    const src = readFileSync(resolve(import.meta.dir, '..', '..', 'scripts', 'new-project.ts'), 'utf-8');
+    expect(src).toContain('SCAFFOLD_COMMON_OWNED_FILES');
+    expect(src).not.toMatch(/VARIANT_OVERLAY_SKIP\s*=\s*new Set/);
+  });
+
+  test('validate-templates WS-07 derives its forbidden list from the same classification', () => {
+    const src = readFileSync(resolve(import.meta.dir, '..', '..', 'scripts', 'validate-templates.ts'), 'utf-8');
+    expect(src).toMatch(/SCAFFOLD_COMMON_OWNED_FILES/);
+    expect(src).not.toMatch(/const variantContextMd = join\(TEMPLATES_DIR, variant, 'docs', 'context.md'\)/);
   });
 });

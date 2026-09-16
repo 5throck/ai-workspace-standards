@@ -1,0 +1,28 @@
+schemaVersion: 1
+id: T-20260917-009
+kind: manual
+title: >-
+  implement: derive VARIANT_OVERLAY_SKIP from upgrade-policy
+  SCAFFOLD_COMMON_OWNED_FILES (design 2026-09-17-governance-backlog-batch T-005)
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-09-16T22:27:45.629Z'
+history:
+  - at: '2026-09-16T22:27:45.629Z'
+    from: null
+    to: backlog
+  - at: '2026-09-16T22:37:37.836Z'
+    from: backlog
+    to: review
+  - at: '2026-09-16T22:37:37.863Z'
+    from: review
+    to: done
+result: >-
+  Implemented per the batch design: upgrade-policy 1.8.0 exports
+  SCAFFOLD_COMMON_OWNED_FILES; new-project 1.21.0 derives VARIANT_OVERLAY_SKIP
+  from it (hand list deleted); validate-templates 1.35.0 WS-07 derives its
+  forbidden list and cites the classification. Acceptance tests in
+  tests/unit/upgrade-policy.test.ts (set contents + both call sites + no literal
+  Set).
+error: null

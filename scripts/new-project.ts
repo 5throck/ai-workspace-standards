@@ -1,5 +1,8 @@
 #!/usr/bin/env bun
-// @version 1.20.0
+// @version 1.21.0
+// v1.21.0: T-20260917-009 — VARIANT_OVERLAY_SKIP derives from the upgrade-policy
+//           SCAFFOLD_COMMON_OWNED_FILES classification (same SSOT as
+//           validate-templates WS-07); the local hand list is gone.
 // v1.20.0: T-20260916-002 — scaffold provenance fallback aligned with the M11
 //           fail-loud policy (docs/designs/2026-09-16-new-project-provenance-
 //           alignment-design.md): the old resolution chain
@@ -74,6 +77,7 @@ import {
   VERSION_MANIFEST_RELPATH,
   decideManifestGeneration,
 } from './helpers/scaffold-markers.ts';
+import { SCAFFOLD_COMMON_OWNED_FILES } from './lib/upgrade-policy.ts';
 import * as yaml from 'js-yaml';
 
 // ── Argument parsing ───────────────────────────────────────────────────────────
@@ -642,14 +646,15 @@ if (!existsSync(templatesDir)) {
 }
 
 console.log('📝 Copying variant templates...');
-// Files a variant MUST NOT overlay — owned by templates/common/ (copied at L318) and
-// sacred to the project. A variant-level docs/context.md would clobber the canonical
-// immutable context that was just laid down (see CONSTITUTION.md §10; validate-templates.ts
-// WS-07 forbids the variant from carrying it in the first place — this is defense-in-depth).
-const VARIANT_OVERLAY_SKIP = new Set(['docs/context.md']);
+// Files a variant MUST NOT overlay — owned by templates/common/ (copied earlier in
+// this pass) and sacred to the project. A variant-level docs/context.md would clobber
+// the canonical immutable context that was just laid down (see CONSTITUTION.md §10).
+// The set derives from the upgrade-policy SCAFFOLD_COMMON_OWNED_FILES classification —
+// the same SSOT validate-templates WS-07 enforces (no variant copy may exist at all);
+// this skip is defense-in-depth at scaffold time. (T-20260917-009)
 for (const srcFile of walkFiles(templatesDir)) {
   const relPath = relative(templatesDir, srcFile).replace(/\\/g, '/');
-  if (VARIANT_OVERLAY_SKIP.has(relPath)) {
+  if (SCAFFOLD_COMMON_OWNED_FILES.has(relPath)) {
     console.log(`  ⏭️  Skipped variant overlay (owned by templates/common/): ${relPath}`);
     continue;
   }

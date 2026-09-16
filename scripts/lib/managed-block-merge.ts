@@ -1,4 +1,10 @@
-// @version 1.0.1
+// @version 1.1.0
+// v1.1.0 (T-20260917-010): the result carries `snapshots` — the exact project
+//           span(s) an unlabeled count-mismatch reconcile replaces — so the
+//           caller can persist `<target>.pre-reconcile.bak` before writing the
+//           merged content (fail-closed; design
+//           docs/designs/2026-09-17-governance-backlog-batch-design.md). The
+//           lib stays pure: it returns data, never touches the filesystem.
 // v1.0.0 (T-20260916-012): extracted the managed-block merge core from
 //           scripts/upgrade-project.ts mergeWorkspaceManaged() into this pure
 //           lib (L0-only — it serves only the L0-only upgrader), fixing two
@@ -210,6 +216,12 @@ export interface ManagedBlockMergeResult {
   merged: boolean;
   /** Verbatim log lines (4-space indented, `[DRY RUN] ` tagged when dryRun). */
   log: string[];
+  /** T-20260917-010: exact project span(s) replaced by an unlabeled-block
+   *  reconcile, in merge order. The caller must persist each to
+   *  `<target>.pre-reconcile.bak` BEFORE writing the merged content (and
+   *  abort fail-closed when the write fails); dry-run callers skip writing.
+   *  Empty unless a count-mismatch reconcile fired. */
+  snapshots: { rel: string; content: string }[];
 }
 
 /**
@@ -230,11 +242,12 @@ export function mergeManagedBlocks(
 ): ManagedBlockMergeResult {
   const dryTag = dryRun ? '[DRY RUN] ' : '';
   const log: string[] = [];
+  const snapshots: { rel: string; content: string }[] = [];
   const mergedManaged = buildMergedTemplateBlocks(templateContent, commonContent);
 
   if (mergedManaged.length === 0) {
     log.push(`    INFO: Template has no managed markers — skipping ${rel}`);
-    return { content: projectContent, merged: false, log };
+    return { content: projectContent, merged: false, log, snapshots };
   }
 
   let updated = projectContent;
@@ -296,6 +309,10 @@ export function mergeManagedBlocks(
         log.push(`    WARNING: ${pattern.label} unlabeled block count mismatch in ${rel} (project has ${projUnlabeledCount}, template has ${unlabeledTplBlocks.length}) — replacing all project blocks with the template sequence (this may cause prose loss if prose exists between project blocks)`);
         const first = fresh[0];
         const last = fresh[fresh.length - 1];
+        // T-20260917-010: capture the exact replaced span so the caller can
+        // persist a recovery snapshot before applying this destructive
+        // replace. Pure data here — the fs write lives in upgrade-project.
+        snapshots.push({ rel, content: updated.slice(first.start, last.end) });
         updated = updated.slice(0, first.start) + unlabeledTplBlocks.map((b) => b.matched).join('\n\n') + updated.slice(last.end);
         merged = true;
         log.push(`    ${dryTag}RECONCILED ${pattern.label} blocks in: ${rel}`);
@@ -322,5 +339,5 @@ export function mergeManagedBlocks(
     log.push(`    ${dryTag}APPENDED managed blocks to: ${rel}`);
   }
 
-  return { content: updated, merged, log };
+  return { content: updated, merged, log, snapshots };
 }

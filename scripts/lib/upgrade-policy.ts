@@ -1,4 +1,7 @@
-// @version 1.7.0
+// @version 1.8.0
+// v1.8.0 (2026-09-17, T-20260917-009): SCAFFOLD_COMMON_OWNED_FILES exported —
+//         new-project's variant-overlay skip and validate-templates WS-07 both
+//         derive from this one classification instead of parallel hand lists.
 // v1.7.0 (2026-09-17, T-20260917-001): MERGE_MANAGED_FILES exported so the
 //         validate-templates managed-block-parity arm (PM-04) enforces
 //         common→variant parity over the same file set upgrade MERGE unions.
@@ -149,6 +152,14 @@ const LOCKED_FILES = new Set(['.gitattributes', '.gitleaks.toml']);
  *  parity over exactly this set — one SSOT for "which files carry managed blocks"
  *  (T-20260917-001). */
 export const MERGE_MANAGED_FILES = new Set(['CLAUDE.md', 'GEMINI.md', '.gitignore', 'AGENTS.md', 'agents/pm.md']);
+
+/** Common-owned scaffold files: delivered by templates/common/ and sacred to the
+ *  project — a variant template must never carry them (WS-07) and new-project's
+ *  variant overlay must skip them (defense-in-depth against a variant copy
+ *  clobbering the canonical common file just laid down). One SSOT for both
+ *  consumers; extend here, never with a local hand list. (T-20260917-009,
+ *  design docs/designs/2026-09-17-governance-backlog-batch-design.md) */
+export const SCAFFOLD_COMMON_OWNED_FILES = new Set(['docs/context.md']);
 
 const OVERWRITE_FILES = new Set(['docs/phase-definitions.md', 'docs/security.md']);
 

@@ -1,7 +1,14 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.34.0
+ * @version 1.35.0
+ *
+ * v1.35.0 (2026-09-17-governance-backlog-batch-design.md): T-20260917-009.
+ *          WS-07 now derives its forbidden-file list from the upgrade-policy
+ *          SCAFFOLD_COMMON_OWNED_FILES classification instead of hard-coding
+ *          docs/context.md — the same SSOT new-project's variant overlay
+ *          skips, so a new common-owned file is enforced and skipped
+ *          atomically (design T-005 acceptance).
  *
  * v1.34.0 (2026-09-17-governance-backlog-batch-design.md): T-20260917-001.
  *          `managed-block-parity` (PM-04) now enforces common→variant parity
@@ -169,7 +176,7 @@ import {
 } from './lib/propagation-map-schema.ts';
 import { scrubConstitutionRefs } from './lib/constitution-scrub.ts';
 import { extractKeyedBlocks, compareKeyedBlocks, isExtendsStub } from './lib/managed-block-parity.ts';
-import { MERGE_MANAGED_FILES } from './lib/upgrade-policy.ts';
+import { MERGE_MANAGED_FILES, SCAFFOLD_COMMON_OWNED_FILES } from './lib/upgrade-policy.ts';
 import {
   SCAFFOLD_MARKER_SOURCES,
   isCanonicalPmStubBody,
@@ -3523,15 +3530,23 @@ function checkVariantSkillsLayer(variant: string, _skillLayerMap: Map<string, im
   }
 }
 
-// Check WS-07: Variants MUST NOT carry their own docs/context.md (owned solely by templates/common/)
+// Check WS-07: Variants MUST NOT carry common-owned scaffold files — the
+// SCAFFOLD_COMMON_OWNED_FILES classification in lib/upgrade-policy.ts (the
+// same SSOT new-project's variant overlay skips, T-20260917-009). Owned
+// solely by templates/common/ and copied into every project at scaffold time.
 function checkNoVariantLocalContextMd(variant: string): void {
-  if (!JSON_MODE) console.log(`\n=== Check WS-07: ${variant} must not carry its own docs/context.md ===`);
+  if (!JSON_MODE) console.log(`\n=== Check WS-07: ${variant} must not carry common-owned scaffold files (SCAFFOLD_COMMON_OWNED_FILES) ===`);
 
-  const variantContextMd = join(TEMPLATES_DIR, variant, 'docs', 'context.md');
-  if (existsSync(variantContextMd)) {
-    fail(variant, 'WS-07', `templates/${variant}/docs/context.md must not exist — the immutable project context is owned solely by templates/common/docs/context.md and copied into every project at scaffold time`, `Delete templates/${variant}/docs/context.md; move any variant-specific content into docs/${variant}.context.md`);
-  } else {
-    pass(`WS-07: ${variant} has no local docs/context.md (inherits common's)`);
+  for (const relFile of [...SCAFFOLD_COMMON_OWNED_FILES].sort()) {
+    const variantFile = join(TEMPLATES_DIR, variant, ...relFile.split('/'));
+    if (existsSync(variantFile)) {
+      const hint = relFile === 'docs/context.md'
+        ? `Delete templates/${variant}/${relFile}; move any variant-specific content into docs/${variant}.context.md`
+        : `Delete templates/${variant}/${relFile} — the common copy is the single source of record`;
+      fail(variant, 'WS-07', `templates/${variant}/${relFile} must not exist — it is classified SCAFFOLD_COMMON_OWNED_FILES in lib/upgrade-policy.ts (owned solely by templates/common, copied into every project at scaffold time, and skipped by the variant overlay)`, hint);
+    } else {
+      pass(`WS-07: ${variant} has no local ${relFile} (inherits common's)`);
+    }
   }
 }
 
