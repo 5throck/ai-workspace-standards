@@ -5,12 +5,23 @@ title: >-
   design: derive VARIANT_OVERLAY_SKIP from upgrade-policy classifications
   instead of a hand list
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-16T15:36:32.202Z'
 history:
   - at: '2026-09-16T15:36:32.202Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-16T22:09:31.906Z'
+    from: backlog
+    to: review
+  - at: '2026-09-16T22:09:53.753Z'
+    from: review
+    to: done
+result: >-
+  Design recorded: docs/designs/2026-09-17-governance-backlog-batch-design.md —
+  derive VARIANT_OVERLAY_SKIP from a new upgrade-policy
+  SCAFFOLD_COMMON_OWNED_FILES classification consumed by both new-project (skip)
+  and validate-templates WS-07 (forbidden-list), with acceptance criteria.
+  Implementation follows as a separate code ticket.
 error: null

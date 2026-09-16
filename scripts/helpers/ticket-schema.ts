@@ -1,5 +1,8 @@
 #!/usr/bin/env bun
-// @version 1.1.0
+// @version 1.2.0
+// v1.2.0 (T-20260917-003): attempts is validated against history — it must
+//           equal the count of failed → waiting transitions, so the field can
+//           no longer sit at an unmaintained value.
 // @l2-propagate: false
 // ticket-schema.ts — Pure schema types, state machine, and validation for the
 // Phase A Service Ticket + Kanban system. No file I/O here (see ticket-store.ts).
@@ -51,6 +54,9 @@ export interface Ticket {
   inputs?: Record<string, string>;
   priority: Priority;
   status: Status;
+  /** Failure-retry count — derivable from history: every failed → waiting
+   *  transition is one retry. validateTicket enforces the equality so the
+   *  field cannot drift into unmaintained state (T-20260917-003). */
   attempts: number;
   created_at: string;
   /** ISO YYYY-MM-DD. Governance Backlog eligibility gate, orthogonal to `status` —
@@ -139,6 +145,14 @@ export function validateTicket(obj: unknown): asserts obj is Ticket {
     fail(`ticket.not_before must be an ISO YYYY-MM-DD string: ${JSON.stringify(t.not_before)}`);
   }
   if (!Array.isArray(t.history)) fail('ticket.history must be an array');
+  // attempts must equal the number of failed → waiting transitions in history —
+  // the field is a derived retry count, not independent state (T-20260917-003).
+  const expectedAttempts = (t.history as unknown[]).filter(
+    (h) => (h as HistoryEntry).from === 'failed' && (h as HistoryEntry).to === 'waiting',
+  ).length;
+  if (t.attempts !== expectedAttempts) {
+    fail(`ticket.attempts (${t.attempts}) must equal the number of failed → waiting history transitions (${expectedAttempts})`);
+  }
   if (t.inputs !== undefined) {
     if (typeof t.inputs !== 'object' || t.inputs === null) fail('ticket.inputs must be an object');
     for (const key of Object.keys(t.inputs as Record<string, unknown>)) {

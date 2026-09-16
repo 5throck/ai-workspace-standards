@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-09-16T15:55:20.877Z
+**Generated**: 2026-09-16T22:16:48.752Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -123,7 +123,7 @@
 | ingest-external-skills.ts | 1.1.0 | scripts/ingest-external-skills.ts | N/A |
 | ingest-security-frameworks.ts | 1.1.0 | scripts/ingest-security-frameworks.ts | N/A |
 | l3-to-variant-pipeline.ts | 1.19.0 | scripts/l3-to-variant-pipeline.ts | child_process, fs, path, process |
-| lifecycle-sync-audit.ts | 1.14.0 | scripts/lifecycle-sync-audit.ts | js-yaml |
+| lifecycle-sync-audit.ts | 1.15.0 | scripts/lifecycle-sync-audit.ts | js-yaml |
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
 | md-to-ooxml.ts | 1.2.0 | scripts/md-to-ooxml.ts | fs, path |
 | new-project.ts | 1.20.0 | scripts/new-project.ts | js-yaml |
@@ -174,10 +174,10 @@
 | validate-pm-extends.ts | 0.3.1 | scripts/validate-pm-extends.ts | N/A |
 | validate-procedures.ts | 1.1.0 | scripts/validate-procedures.ts | js-yaml |
 | validate-skills.ts | 1.5.1 | scripts/validate-skills.ts | N/A |
-| validate-templates.ts | 1.33.0 | scripts/validate-templates.ts | js-yaml |
+| validate-templates.ts | 1.34.0 | scripts/validate-templates.ts | js-yaml |
 | validate-variant-readiness.ts | 1.1.0 | scripts/validate-variant-readiness.ts | N/A |
 | variant-feature.ts | 1.0.0 | scripts/variant-feature.ts | N/A |
-| verify-adr-governance.ts | 1.5.0 | scripts/verify-adr-governance.ts | N/A |
+| verify-adr-governance.ts | 1.6.0 | scripts/verify-adr-governance.ts | N/A |
 | verify-agent-deliverables.ts | 1.0.1 | scripts/verify-agent-deliverables.ts | fs |
 | verify-country-prune.ts | 1.0.0 | scripts/verify-country-prune.ts | N/A |
 | verify-memory.ts | 1.2.0 | scripts/verify-memory.ts | fs, path |

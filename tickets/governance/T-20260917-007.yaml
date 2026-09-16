@@ -3,12 +3,23 @@ id: T-20260917-007
 kind: manual
 title: 'chore: cut CHANGELOG release or split Unreleased per Keep-a-Changelog'
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-16T15:36:32.366Z'
 history:
   - at: '2026-09-16T15:36:32.366Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-16T22:09:31.938Z'
+    from: backlog
+    to: review
+  - at: '2026-09-16T22:09:53.776Z'
+    from: review
+    to: done
+result: >-
+  CHANGELOG [Unreleased] split per Keep-a-Changelog: scattered subsections and
+  unlabeled leading bullets consolidated into one
+  Added(29)/Changed(42)/Fixed(33); entries classified by leading
+  conventional-commit type; 104 blocks with multi-line bodies preserved. Release
+  cut deferred (no version policy decision in scope).
 error: null

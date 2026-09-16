@@ -1,4 +1,7 @@
-// @version 1.6.0
+// @version 1.7.0
+// v1.7.0 (2026-09-17, T-20260917-001): MERGE_MANAGED_FILES exported so the
+//         validate-templates managed-block-parity arm (PM-04) enforces
+//         common→variant parity over the same file set upgrade MERGE unions.
 // v1.6.0 (2026-09-16, T-20260916-010): docs/VERSION_MANIFEST.md joins
 //         REGENERATED_FILES. Variant templates stopped shipping the stub
 //         manifest (validate-templates `variant-version-manifest` arm retires
@@ -141,7 +144,11 @@ const PRESERVE_FILES = new Set([
 
 const LOCKED_FILES = new Set(['.gitattributes', '.gitleaks.toml']);
 
-const MERGE_MANAGED_FILES = new Set(['CLAUDE.md', 'GEMINI.md', '.gitignore', 'AGENTS.md', 'agents/pm.md']);
+/** Files whose WORKSPACE-MANAGED blocks upgrade MERGE unions into projects. Exported
+ *  so the validate-templates managed-block-parity arm (PM-04) enforces common→variant
+ *  parity over exactly this set — one SSOT for "which files carry managed blocks"
+ *  (T-20260917-001). */
+export const MERGE_MANAGED_FILES = new Set(['CLAUDE.md', 'GEMINI.md', '.gitignore', 'AGENTS.md', 'agents/pm.md']);
 
 const OVERWRITE_FILES = new Set(['docs/phase-definitions.md', 'docs/security.md']);
 

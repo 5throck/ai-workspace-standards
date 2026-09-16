@@ -1,7 +1,22 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.33.0
+ * @version 1.34.0
+ *
+ * v1.34.0 (2026-09-17-governance-backlog-batch-design.md): T-20260917-001.
+ *          `managed-block-parity` (PM-04) now enforces common→variant parity
+ *          over every MERGE_MANAGED file (lib/upgrade-policy.ts SSOT export)
+ *          whose common copy carries keyed WORKSPACE-MANAGED blocks — was
+ *          AGENTS.md only while upgrade MERGE unions CLAUDE.md, GEMINI.md,
+ *          .gitignore, and agents/pm.md too (project-review finding #3: same
+ *          silent-drift class everywhere else). Per-file absence policy: a
+ *          variant AGENTS.md must exist (unchanged); any other MERGE_MANAGED
+ *          file may be absent — the scaffold lays down the common copy and
+ *          the variant overlay never fires (co-hr/co-safety ship no
+ *          .gitignore by design). A variant agents/pm.md extends-stub
+ *          delivers the common body through stub resolution (new-project
+ *          §2.3b), so stubs are exempt from marker-wrapped parity
+ *          (isExtendsStub, lib/managed-block-parity.ts v1.1.0).
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -153,7 +168,8 @@ import {
   auditFixedTargets,
 } from './lib/propagation-map-schema.ts';
 import { scrubConstitutionRefs } from './lib/constitution-scrub.ts';
-import { extractKeyedBlocks, compareKeyedBlocks } from './lib/managed-block-parity.ts';
+import { extractKeyedBlocks, compareKeyedBlocks, isExtendsStub } from './lib/managed-block-parity.ts';
+import { MERGE_MANAGED_FILES } from './lib/upgrade-policy.ts';
 import {
   SCAFFOLD_MARKER_SOURCES,
   isCanonicalPmStubBody,
@@ -3541,71 +3557,93 @@ function checkNoVariantVersionManifest(variant: string): void {
   }
 }
 
-// Check PM-04: managed-block parity (T-20260916-009).
+// Check PM-04: managed-block parity (T-20260916-009; extended to all
+// MERGE_MANAGED files by T-20260917-001).
 // Every `<!-- WORKSPACE-MANAGED: <key> -->…<!-- /WORKSPACE-MANAGED -->` block
-// present in templates/common/AGENTS.md must exist, marker-wrapped, in EVERY
-// templates/co-*/AGENTS.md with content parity. Comparison is per-key
-// set-of-normalized-contents (duplicates are legitimate — common itself
-// carries two tier-model-mapping blocks: the §3.6 tier list and the §5.3
-// Model-column note). This is the standing guard for the T-009 defect class:
-// §3.6 sits OUTSIDE the COMMON-AGENTS marker-inject zone, so a stale,
-// unwrapped variant copy has no other delivery channel — the 2026-09-16
-// fresh-scaffold test showed the stale 2-model block scaffolding straight
-// into a new project and failing its model-registry gate (3 ERRORs).
-// Severity: Error. Extraction/comparison primitives live in
-// scripts/lib/managed-block-parity.ts (unit-tested).
+// present in a templates/common/ MERGE_MANAGED file (lib/upgrade-policy.ts —
+// the same set upgrade MERGE unions into projects) must exist, marker-wrapped,
+// in EVERY templates/co-* copy of that file with content parity. Comparison is
+// per-key set-of-normalized-contents (duplicates are legitimate — common
+// AGENTS.md itself carries two tier-model-mapping blocks: the §3.6 tier list
+// and the §5.3 Model-column note). This is the standing guard for the T-009
+// defect class: §3.6 sits OUTSIDE the COMMON-AGENTS marker-inject zone, so a
+// stale, unwrapped variant copy has no other delivery channel — the
+// 2026-09-16 fresh-scaffold test showed the stale 2-model block scaffolding
+// straight into a new project and failing its model-registry gate (3 ERRORs).
+// Per-file absence policy: a variant copy of AGENTS.md must exist (the roster
+// file is the variant's identity carrier); any other MERGE_MANAGED file may
+// be absent from a variant template — the scaffold lays down the common copy
+// first and the variant overlay never fires for it (co-hr / co-safety ship no
+// .gitignore by design). A variant agents/pm.md that is an extends-stub
+// (frontmatter `extends:`) delivers the common body — keyed blocks included —
+// through stub resolution (new-project §2.3b), so marker-wrapped parity does
+// not apply to stubs. Files whose common copy carries no managed blocks are
+// skipped (nothing to enforce). Severity: Error. Extraction/comparison
+// primitives live in scripts/lib/managed-block-parity.ts (unit-tested).
 function checkManagedBlockParity(): void {
-  if (!JSON_MODE) console.log('\n=== Check PM-04: managed-block parity (common AGENTS.md → every variant AGENTS.md) ===');
-
-  const commonPath = join(TEMPLATES_DIR, 'common', 'AGENTS.md');
-  if (!existsSync(commonPath)) {
-    fail('common', 'managed-block-parity', 'templates/common/AGENTS.md not found — cannot derive the managed-block parity baseline');
-    return;
-  }
-  const commonIssues: string[] = [];
-  const commonBlocks = extractKeyedBlocks(readFileSync(commonPath, 'utf-8'), commonIssues);
-  for (const issue of commonIssues) {
-    fail('common', 'managed-block-parity', `templates/common/AGENTS.md: ${issue}`, 'Close the WORKSPACE-MANAGED block with <!-- /WORKSPACE-MANAGED -->');
-  }
-  if (commonBlocks.size === 0) {
-    pass('managed-block-parity: common AGENTS.md carries no managed blocks (nothing to enforce)');
-    return;
-  }
+  if (!JSON_MODE) console.log('\n=== Check PM-04: managed-block parity (common → every variant, MERGE_MANAGED files) ===');
 
   const variants = readdirSync(TEMPLATES_DIR, { withFileTypes: true })
     .filter(e => e.isDirectory() && e.name.startsWith('co-') && !isTransientTestFixture(e.name))
     .map(e => e.name)
     .sort();
 
-  let checked = 0;
-  for (const variant of variants) {
-    const variantPath = join(TEMPLATES_DIR, variant, 'AGENTS.md');
-    if (!existsSync(variantPath)) {
-      fail(variant, 'managed-block-parity', `templates/${variant}/AGENTS.md not found — the common managed blocks have no delivery channel into this variant`, `Create templates/${variant}/AGENTS.md carrying every common WORKSPACE-MANAGED block (see templates/common/AGENTS.md)`);
-      continue;
+  let enforcedFiles = 0;
+  let checkedCopies = 0;
+  for (const relFile of [...MERGE_MANAGED_FILES].sort()) {
+    const commonPath = join(TEMPLATES_DIR, 'common', relFile);
+    if (!existsSync(commonPath)) continue;
+    const commonIssues: string[] = [];
+    const commonBlocks = extractKeyedBlocks(readFileSync(commonPath, 'utf-8'), commonIssues);
+    for (const issue of commonIssues) {
+      fail('common', 'managed-block-parity', `templates/common/${relFile}: ${issue}`, 'Close the WORKSPACE-MANAGED block with <!-- /WORKSPACE-MANAGED -->');
     }
-    const variantIssues: string[] = [];
-    const variantBlocks = extractKeyedBlocks(readFileSync(variantPath, 'utf-8'), variantIssues);
-    for (const issue of variantIssues) {
-      fail(variant, 'managed-block-parity', `templates/${variant}/AGENTS.md: ${issue}`, 'Close the WORKSPACE-MANAGED block with <!-- /WORKSPACE-MANAGED -->');
-    }
+    if (commonBlocks.size === 0) continue; // common defines no managed blocks here — nothing to enforce
 
-    const violations = compareKeyedBlocks(commonBlocks, variantBlocks);
-    for (const v of violations) {
-      if (v.kind === 'missing-key') {
-        fail(variant, 'managed-block-parity', `templates/${variant}/AGENTS.md carries no "WORKSPACE-MANAGED: ${v.key}" block — the common AGENTS.md keyed block has no L1→L2 delivery channel (fresh scaffolds copy the variant template wholesale; the COMMON-AGENTS marker-inject zone does not cover it)`, `Copy the "<!-- WORKSPACE-MANAGED: ${v.key} -->" block(s) from templates/common/AGENTS.md into templates/${variant}/AGENTS.md at the matching section, markers included`);
-      } else if (v.kind === 'missing-content') {
-        fail(variant, 'managed-block-parity', `templates/${variant}/AGENTS.md "WORKSPACE-MANAGED: ${v.key}" content diverges from templates/common/AGENTS.md (missing the common block content)`, `Replace the variant's "<!-- WORKSPACE-MANAGED: ${v.key} -->" block content with the common copy (markers included), byte-identical after line normalization`);
-      } else {
-        fail(variant, 'managed-block-parity', `templates/${variant}/AGENTS.md "WORKSPACE-MANAGED: ${v.key}" carries content templates/common/AGENTS.md does not — a variant-only managed block would be unioned into projects by upgrade MERGE with no common source`, `Adjudicate: move the content out of WORKSPACE-MANAGED markers, or add the block to templates/common/AGENTS.md so parity holds`);
+    enforcedFiles++;
+    for (const variant of variants) {
+      const variantRel = `templates/${variant}/${relFile}`;
+      const variantPath = join(TEMPLATES_DIR, variant, relFile);
+      if (!existsSync(variantPath)) {
+        if (relFile === 'AGENTS.md') {
+          fail(variant, 'managed-block-parity', `${variantRel} not found — the common managed blocks have no delivery channel into this variant`, `Create ${variantRel} carrying every common WORKSPACE-MANAGED block (see templates/common/AGENTS.md)`);
+        }
+        // Other MERGE_MANAGED files: absence is compliant — the scaffold copies
+        // the common file into the project and the variant overlay never fires.
+        continue;
+      }
+      const variantContent = readFileSync(variantPath, 'utf-8');
+      if (relFile === 'agents/pm.md' && isExtendsStub(variantContent)) {
+        // Stub resolution delivers the common body (keyed blocks included) at scaffold.
+        continue;
+      }
+      const variantIssues: string[] = [];
+      const variantBlocks = extractKeyedBlocks(variantContent, variantIssues);
+      for (const issue of variantIssues) {
+        fail(variant, 'managed-block-parity', `${variantRel}: ${issue}`, 'Close the WORKSPACE-MANAGED block with <!-- /WORKSPACE-MANAGED -->');
+      }
+
+      const violations = compareKeyedBlocks(commonBlocks, variantBlocks);
+      for (const v of violations) {
+        if (v.kind === 'missing-key') {
+          fail(variant, 'managed-block-parity', `${variantRel} carries no "WORKSPACE-MANAGED: ${v.key}" block — the common ${relFile} keyed block has no L1→L2 delivery channel (fresh scaffolds overlay the variant copy over the common one; the COMMON-AGENTS marker-inject zone does not cover it)`, `Copy the "<!-- WORKSPACE-MANAGED: ${v.key} -->" block(s) from templates/common/${relFile} into ${variantRel} at the matching section, markers included — or delete ${variantRel} so the common copy delivers`);
+        } else if (v.kind === 'missing-content') {
+          fail(variant, 'managed-block-parity', `${variantRel} "WORKSPACE-MANAGED: ${v.key}" content diverges from templates/common/${relFile} (missing the common block content)`, `Replace the variant's "<!-- WORKSPACE-MANAGED: ${v.key} -->" block content with the common copy (markers included), byte-identical after line normalization`);
+        } else {
+          fail(variant, 'managed-block-parity', `${variantRel} "WORKSPACE-MANAGED: ${v.key}" carries content templates/common/${relFile} does not — a variant-only managed block would be unioned into projects by upgrade MERGE with no common source`, `Adjudicate: move the content out of WORKSPACE-MANAGED markers, or add the block to templates/common/${relFile} so parity holds`);
+        }
+      }
+      if (violations.length === 0 && variantIssues.length === 0) {
+        checkedCopies++;
       }
     }
-    if (violations.length === 0 && variantIssues.length === 0) {
-      checked++;
-    }
   }
-  if (checked > 0) {
-    pass(`managed-block-parity: ${checked}/${variants.length} variant AGENTS.md carry every common WORKSPACE-MANAGED block with content parity`);
+  if (enforcedFiles === 0) {
+    pass('managed-block-parity: no common MERGE_MANAGED file carries managed blocks (nothing to enforce)');
+    return;
+  }
+  if (checkedCopies > 0) {
+    pass(`managed-block-parity: ${checkedCopies} variant file copies across ${enforcedFiles} MERGE_MANAGED file(s) carry every common WORKSPACE-MANAGED block with content parity`);
   }
 }
 
@@ -4387,7 +4425,7 @@ function main(): number {
   checkRootCommonCommandsParity();
   checkPropagationMapSchema();
   checkMarkerZoneParity();                                       // PM-02: marker-inject zones vs target_variants
-  checkManagedBlockParity();                                     // PM-04: WORKSPACE-MANAGED blocks, common → every variant (T-20260916-009)
+  checkManagedBlockParity();                                     // PM-04: WORKSPACE-MANAGED blocks, common → every variant MERGE_MANAGED copy (T-20260916-009, T-20260917-001)
   checkPropagationTargets();                                     // PM-03: target lists vs actual templates/co-* dir set (T-20260915-005)
   checkScaffoldMarkerSources();                                  // T-20260915-002: scaffolder markers vs source templates
   checkPmExtendsStubBodies();                                    // T-20260915-010: variant pm.md extends-stub bodies

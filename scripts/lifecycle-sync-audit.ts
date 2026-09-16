@@ -12,15 +12,24 @@
  *          lifecycle records) vs docs/workspace-schema.json agent_tiers SSOT
  * Check H: docs/lifecycle/scripts/<name>.md Version vs the current version of
  *          scripts/<name>.ts (same source Check A uses: the SCRIPTS.md row the
- *          @version header is validated against)
+ *          @version header is validated against); plus a coverage arm —
+ *          versioned scripts with no record are one aggregated WARNING (v1.15.0)
  *
  * Usage:
  *   bun scripts/lifecycle-sync-audit.ts
  *   bun scripts/lifecycle-sync-audit.ts --json
  *   bun scripts/lifecycle-sync-audit.ts --fix
  *
- * @version 1.14.0
- * @last_updated 2026-09-16
+ * @version 1.15.0
+ * @last_updated 2026-09-17
+ * v1.15.0 (T-20260917-004): Check H gains a coverage arm — versioned scripts
+ *          (carrying a `// @version` header) with no docs/lifecycle/scripts/
+ *          record are now reported as one aggregated WARNING (records stay
+ *          opt-in; SCRIPTS.md remains the lifecycle SSOT). Motivation:
+ *          project-review finding #10 — Check H could not flag a significant
+ *          new lib without a record, so record gaps were invisible by
+ *          construction.
+ *          (spec: docs/designs/2026-09-17-governance-backlog-batch-design.md)
  * v1.14.0: New Check H — script lifecycle record version gate. For every
  *          docs/lifecycle/scripts/<name>.md record whose subject script
  *          resolves (exact scripts/<name>.ts, then an unambiguous SCRIPTS.md
@@ -889,6 +898,31 @@ export function compareScriptRecordVersion(
 }
 
 /**
+ * Check H coverage arm (pure helper): every .ts file under `dir` (recursive,
+ * node_modules and .d.ts skipped) carrying a `// @version` header, as paths
+ * relative to `dir`, sorted. (T-20260917-004)
+ */
+export function listVersionedScripts(dir: string): string[] {
+  const found: string[] = [];
+  const walk = (current: string): void => {
+    for (const entry of readdirSync(current, { withFileTypes: true })) {
+      if (entry.name === 'node_modules') continue;
+      const path = join(current, entry.name);
+      if (entry.isDirectory()) {
+        walk(path);
+        continue;
+      }
+      if (!entry.name.endsWith('.ts') || entry.name.endsWith('.d.ts')) continue;
+      if (/^\/\/\s*@version\s+\S+/m.test(readFileSync(path, 'utf-8'))) {
+        found.push(path.slice(dir.length + 1).replace(/\\/g, '/'));
+      }
+    }
+  };
+  if (existsSync(dir)) walk(dir);
+  return found.sort();
+}
+
+/**
  * Check H: script lifecycle record version gate.
  *
  * For every docs/lifecycle/scripts/<name>.md record whose subject script
@@ -901,6 +935,12 @@ export function compareScriptRecordVersion(
  * lifecycle SSOT); a record with no resolvable version source (removed or
  * unregistered script) is not this check's concern. Runs only at workspace
  * root. (spec: docs/designs/2026-09-16-lifecycle-gate-and-pm-role-completion-design.md)
+ *
+ * Coverage arm (T-20260917-004, spec: docs/designs/2026-09-17-governance-backlog-batch-design.md):
+ * the opt-in stance stays, but the gap is no longer invisible — every
+ * versioned script (a `// @version` header) without a record is reported as
+ * ONE aggregated WARNING naming the first dozen scripts (project-review
+ * finding #10: "Check H cannot flag a significant new lib without a record").
  */
 export function runCheckH(): SyncIssue[] {
   const issues: SyncIssue[] = [];
@@ -912,10 +952,12 @@ export function runCheckH(): SyncIssue[] {
 
   const registry = parseScriptsMdRegistry(SCRIPTS_MD);
   let checkedCount = 0;
+  const recordedScripts = new Set<string>();
 
   for (const entry of readdirSync(lifecycleScriptsDir)) {
     if (!entry.endsWith('.md')) continue;
     const recordName = entry.replace(/\.md$/, '');
+    recordedScripts.add(`${recordName}.ts`);
 
     // Resolve the subject script's registry row (see docblock above).
     let registryKey: string | undefined;
@@ -942,6 +984,22 @@ export function runCheckH(): SyncIssue[] {
       file: recordLabel,
       message: `Check H: ${verdict.message}`,
       fix: verdict.fix,
+    });
+  }
+
+  // Coverage arm (T-20260917-004): versioned scripts with no record — one
+  // aggregated WARNING. Records stay opt-in; the point is visibility.
+  const unrecorded = listVersionedScripts(join(ROOT, 'scripts')).filter(
+    (rel) => !recordedScripts.has(basename(rel)),
+  );
+  if (unrecorded.length > 0) {
+    const display = unrecorded.slice(0, 12).map((rel) => `scripts/${rel}`).join(', ')
+      + (unrecorded.length > 12 ? `, … +${unrecorded.length - 12} more` : '');
+    issues.push({
+      level: 'warning',
+      file: 'docs/lifecycle/scripts/',
+      message: `Check H: ${unrecorded.length} versioned script(s) have no lifecycle record: ${display}`,
+      fix: 'Records are opt-in (SCRIPTS.md stays the lifecycle SSOT) — add docs/lifecycle/scripts/<name>.md for governance-critical scripts',
     });
   }
 

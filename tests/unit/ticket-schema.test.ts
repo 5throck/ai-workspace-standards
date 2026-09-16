@@ -104,3 +104,59 @@ describe('validateTicket', () => {
     expect(() => validateTicket(ticket)).toThrow(/schemaVersion/);
   });
 });
+
+describe('validateTicket attempts ↔ history (T-20260917-003)', () => {
+  const base = {
+    schemaVersion: 1,
+    id: 'T-20260917-100',
+    kind: 'service',
+    service: 'audit',
+    priority: 'normal',
+    status: 'waiting',
+    attempts: 0,
+    created_at: '2026-09-17T10:00:00+09:00',
+    history: [{ at: '2026-09-17T10:00:00+09:00', from: null, to: 'backlog' }],
+    result: null,
+    error: null,
+  };
+
+  test('accepts attempts 0 with no failed → waiting transitions', () => {
+    expect(() => validateTicket({ ...base })).not.toThrow();
+  });
+
+  test('accepts attempts equal to the failed → waiting transition count', () => {
+    const ticket = {
+      ...base,
+      status: 'running',
+      attempts: 1,
+      history: [
+        ...base.history,
+        { at: '2026-09-17T11:00:00+09:00', from: 'backlog', to: 'waiting' },
+        { at: '2026-09-17T12:00:00+09:00', from: 'waiting', to: 'running' },
+        { at: '2026-09-17T13:00:00+09:00', from: 'running', to: 'failed' },
+        { at: '2026-09-17T14:00:00+09:00', from: 'failed', to: 'waiting' },
+        { at: '2026-09-17T15:00:00+09:00', from: 'waiting', to: 'running' },
+      ],
+    };
+    expect(() => validateTicket(ticket)).not.toThrow();
+  });
+
+  test('rejects attempts drifting above the derived count', () => {
+    const ticket = { ...base, attempts: 1 };
+    expect(() => validateTicket(ticket)).toThrow(/attempts.*failed.*waiting|failed.*waiting.*attempts/i);
+  });
+
+  test('rejects attempts left at 0 when history records a retry', () => {
+    const ticket = {
+      ...base,
+      attempts: 0,
+      history: [
+        ...base.history,
+        { at: '2026-09-17T12:00:00+09:00', from: 'waiting', to: 'running' },
+        { at: '2026-09-17T13:00:00+09:00', from: 'running', to: 'failed' },
+        { at: '2026-09-17T14:00:00+09:00', from: 'failed', to: 'waiting' },
+      ],
+    };
+    expect(() => validateTicket(ticket)).toThrow(/attempts/);
+  });
+});
