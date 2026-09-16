@@ -216,7 +216,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `test-l3-to-variant-promotion.ts` | L0 | 1.6.0 | active | —| —| L0 | —|
 | `test-scaffold-delivery-parity.ts` | L0 | 1.0.0 | active | Fast static parity harness: new-project vs create-l3-scaffold delivery trees vs REVIEWED_DELIVERY_EXCLUSIONS (T-20260915-003) | —| L0 | —|
 | `test-variant-readiness.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `test-runner.ts` | L0 | 1.3.0 | active | `--parallel`, `--sequential`, `--concurrency <n>`, `--timeout <ms>` | —| L0+L1 | —|
+| `test-runner.ts` | L0 | 1.4.0 | active | `--parallel`, `--sequential`, `--concurrency <n>`, `--timeout <ms>` | —| L0+L1 | —|
 | `translate-readme.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `ticket.ts` | L0 | 1.2.0 | active | `create --not-before`, `list --kind`, `list --ready`, `move done --result` (required, not bypassable by --force) | —| L0 | —|
 | `typecheck.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|

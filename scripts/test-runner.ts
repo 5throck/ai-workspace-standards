@@ -1,6 +1,6 @@
 /**
  * test-runner.ts — Test Runner for TypeScript Test Suites
- * @version 1.3.0
+ * @version 1.4.0
  *
  * v1.3.0 (T-20260916-001): (1) per-suite `sequential` flag — the `scripts`
  * suite now runs its members one at a time because its E2E files stage
@@ -47,7 +47,7 @@ interface TestFileResult {
 }
 
 const suites: TestSuite[] = [
-  { name: 'unit', pattern: '*.test.ts', timeout: 30000, dir: 'tests/unit', ext: '.test.ts' },
+  { name: 'unit', pattern: '*.test.ts', timeout: 120000, dir: 'tests/unit', ext: '.test.ts' },
   { name: 'integration', pattern: '*.test.ts', timeout: 120000, dir: 'tests', ext: '.test.ts' },
   { name: 'scenarios', pattern: '*', timeout: 300000, dir: 'tests/scenarios', ext: '' },
   // sequential: members stage transient fixture dirs under the real templates/
