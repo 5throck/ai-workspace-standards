@@ -72,7 +72,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `agent-list.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `agent-verify.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
 | `analyze-git-history.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
-| `archive-memory.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
+| `archive-memory.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `audit.ts` | L0 | 2.39.0 | active | —| —| L0+L1 | —|
 | `check-upgrade-coverage.ts` | L0 | 1.0.0 | active | `--variant`, `--strict`, `--json` | —| L0 | —|
 | `cleanup-completed-md.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
@@ -83,7 +83,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `review-baseline.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `resync-audit.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `create-l3-scaffold.ts` | L0 | 1.15.0 | active | —| —| L0 | —|
-| `dev-sync.ts` | L0 | 1.14.0 | active | —| —| L0+L1 | —|
+| `dev-sync.ts` | L0 | 1.14.1 | active | —| —| L0+L1 | —|
 | `dispatch-parallel.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
 | `dispatch-serial.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
 | `dispatch.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
@@ -93,7 +93,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `generate-l3-readme.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
 | `generate-scripts-readme.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
 | `generate-skill-graph.ts` | L0 | 1.10.0 | active | —| —| L0+L1 | —|
-| `generate-version-manifest.ts` | L0 | 1.6.0 | active | shallow-tolerant `--check` (T-20260916-013); emits `validate-md-language:allowlist` markers around the generated Skills table (T-20260912-015) | —| L0+L1 | —|
+| `generate-version-manifest.ts` | L0 | 1.6.1 | active | shallow-tolerant `--check` (T-20260916-013); emits `validate-md-language:allowlist` markers around the generated Skills table (T-20260912-015) | —| L0+L1 | —|
 | `helpers/beta-lifecycle.ts` | L0 | 1.2.1 | active | —| —| L0 | —|
 | `helpers/generate-variant.ts` | L0 | 1.15.0 | active | —| —| L0+L1 | —|
 | `helpers/agent-promote.ts` | L0 | 0.1.1 | experimental | —| —| L0 | —|
@@ -158,8 +158,8 @@ Their absence from the table is policy-consistent, not an oversight.
 | `hooks/agent-model-gate.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `hooks/gateguard-fact-force.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
 | `hooks/post-write-lifecycle-check.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
-| `hooks/pre-commit.ts` | L0 | 1.7.0 | active | —| —| L0+L1 | —|
-| `hooks/pre-push.ts` | L0 | 1.4.0 | active | —| —| L0+L1 | —|
+| `hooks/pre-commit.ts` | L0 | 1.7.1 | active | —| —| L0+L1 | —|
+| `hooks/pre-push.ts` | L0 | 1.4.1 | active | —| —| L0+L1 | —|
 | `ingest-external-skills.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `ingest-security-frameworks.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `l3-to-variant-pipeline.ts` | L0 | 1.19.0 | active | `--overlay-variant` | —| L0 | —|
@@ -175,13 +175,13 @@ Their absence from the table is policy-consistent, not an oversight.
 | `lib/pipeline-state.ts` | L0 | 1.1.2 | active | —| —| L0+L1 | —|
 | `lib/platform-context.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/propagation-map-schema.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
-| `lib/managed-block-merge.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `lib/managed-block-merge.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `lib/managed-block-parity.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/platform-delivery.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/ssrf.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `lib/upgrade-policy.ts` | L0 | 1.6.0 | active | —| —| L0 | —|
 | `lib/variant-overlay-guard.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `lib/platform-mirror-freshness.ts` | L0 | 1.0.0 | active | Pure platform-skill-mirror vs skills/ SSOT version comparison for the platform-mirror-freshness check (T-20260916-008) | —| L0+L1 | —|
+| `lib/platform-mirror-freshness.ts` | L0 | 1.0.1 | active | Pure platform-skill-mirror vs skills/ SSOT version comparison for the platform-mirror-freshness check (T-20260916-008) | —| L0+L1 | —|
 | `lib/env-sample.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `lifecycle-sync-audit.ts` | L0 | 1.14.0 | active | —| —| L0+L1 | —|
 | `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|

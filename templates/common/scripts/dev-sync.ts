@@ -1,4 +1,4 @@
-// @version 1.14.0
+// @version 1.14.1
 // v1.14.0: fix(pipeline): two fail-open gates become fail-closed (T-20260912-009 /
 //           T-20260912-007). (1) Step 3.7 discarded verify-scripts --check-drift's exit
 //           code behind .quiet().nothrow() — L0/L1 script drift neither failed the
@@ -804,6 +804,17 @@ if (currentBranch === "main" || currentBranch === "master") {
     }
 } else {
     console.log(`${CYAN}ℹ️  Already on branch '${branch}' - committing here without creating a new branch.${RESET}`);
+}
+
+// 5.5 Merge-in-progress gate — a pending `.git/MERGE_HEAD` means a prior
+// merge/pull stopped on conflicts. Committing here would snapshot whatever is
+// currently staged (possibly unresolved resolutions) as a merge commit.
+if (fs.existsSync('.git/MERGE_HEAD')) {
+    console.error(`${RED}❌ A merge is already in progress (unresolved MERGE_HEAD).${RESET}`);
+    console.error(`${YELLOW}   Resolve the conflicts, then re-run /sync — or abort with 'git merge --abort' first.${RESET}`);
+    if (import.meta.main) {
+      process.exit(1);
+    }
 }
 
 // 6. Guard against sensitive files — checks both new (untracked) and modified

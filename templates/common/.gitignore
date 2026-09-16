@@ -15,15 +15,12 @@ dist/
 # Node.js
 node_modules/
 .next/
-dist/
 build/
 
 # OS artifacts
 .DS_Store
 Thumbs.db
 Desktop.ini
-nul
-NUL
 
 # IDE
 .idea/

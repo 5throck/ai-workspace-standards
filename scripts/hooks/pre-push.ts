@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * pre-push.ts — TS-based pre-push hook.
- * @version 1.4.0
+ * @version 1.4.1
  */
 
 import { $ } from "bun";
@@ -61,8 +61,8 @@ async function collectPushedChangedFiles(refUpdates: PushRefUpdate[]): Promise<s
   const files = new Set<string>();
   for (const ref of refUpdates) {
     if (isZeroOid(ref.localOid)) continue; // deletion refs push no commits
-    if (!/^[0-9a-f]{40}$/.test(ref.localOid)) continue; // validate before shell interpolation
-    if (!isZeroOid(ref.remoteOid) && /^[0-9a-f]{40}$/.test(ref.remoteOid)) {
+    if (!/^[0-9a-f]{40,64}$/.test(ref.localOid)) continue; // validate before shell interpolation
+    if (!isZeroOid(ref.remoteOid) && /^[0-9a-f]{40,64}$/.test(ref.remoteOid)) {
       // Existing remote ref — net diff of the pushed range
       const range = `${ref.remoteOid}..${ref.localOid}`;
       const out = await $`git diff --name-only ${range}`.nothrow().text();
@@ -76,7 +76,7 @@ async function collectPushedChangedFiles(refUpdates: PushRefUpdate[]): Promise<s
       const shas = (await $`git rev-list ${ref.localOid} --not --remotes`.nothrow().text())
         .split('\n').map((s: string) => s.trim()).filter(Boolean);
       for (const sha of shas) {
-        if (!/^[0-9a-f]{40}$/.test(sha)) continue;
+        if (!/^[0-9a-f]{40,64}$/.test(sha)) continue;
         const out = await $`git diff-tree --no-commit-id --name-only -r ${sha}`.nothrow().text();
         for (const line of out.split('\n')) {
           const f = line.trim();
@@ -102,7 +102,7 @@ async function collectPushedChangedFiles(refUpdates: PushRefUpdate[]): Promise<s
 // allowlist (shellEscape*/shellQuote*/escapeShellArg*).
 function shellEscapeRevListArgs(args: string[]): string {
   for (const arg of args) {
-    if (!/^(?:[0-9a-f]{40}(?:\.\.[0-9a-f]{40})?|\^[0-9a-f]{40}|HEAD)$/.test(arg)) {
+    if (!/^(?:[0-9a-f]{40,64}(?:\.\.[0-9a-f]{40,64})?|\^[0-9a-f]{40,64}|HEAD)$/.test(arg)) {
       throw new Error(`unexpected rev-list argument: ${arg}`);
     }
   }

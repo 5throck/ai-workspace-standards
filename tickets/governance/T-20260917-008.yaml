@@ -1,0 +1,14 @@
+schemaVersion: 1
+id: T-20260917-008
+kind: manual
+title: 'chore: delete variant .gitignore copies byte-identical to common'
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-09-16T15:36:32.448Z'
+history:
+  - at: '2026-09-16T15:36:32.448Z'
+    from: null
+    to: backlog
+result: null
+error: null

@@ -8,6 +8,7 @@
 import { describe, test, expect } from 'bun:test';
 import {
     parseSkillFrontmatter,
+    parseAgentFrontmatter,
     detectDrift,
     type SkillInfo,
     type AgentInfo,
@@ -123,5 +124,35 @@ describe('detectDrift', () => {
         ];
         const issues = detectDrift(noAgents, skills, commands);
         expect(issues.some(i => i.includes('commit-push-pr') && i.includes('no matching skill'))).toBe(false);
+    });
+});
+
+describe('parseAgentFrontmatter', () => {
+    const agentMd = (eol: string) =>
+        ['---',
+         'name: pm',
+         'tier:',
+         '  claude: medium        # claude-sonnet-5-0',
+         '  gemini: medium',
+         'model: inherit',
+         '---',
+         '',
+         '# Agent'].join(eol);
+
+    test('parses nested tier/model from LF content', () => {
+        const { tier, model } = parseAgentFrontmatter(agentMd('\n'));
+        expect(tier).toBe('medium');
+        expect(model).toBe('inherit');
+    });
+
+    test('parses nested tier/model from CRLF content (Windows working trees, T-20260917-review)', () => {
+        const { tier, model } = parseAgentFrontmatter(agentMd('\r\n'));
+        expect(tier).toBe('medium');
+        expect(model).toBe('inherit');
+    });
+
+    test('returns N/A when no tier block exists', () => {
+        const { tier } = parseAgentFrontmatter('---\nname: x\n---\n');
+        expect(tier).toBe('N/A');
     });
 });

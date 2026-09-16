@@ -9,7 +9,7 @@
 | [2026-09-12](2026-09-12.md) | docs(consistency): resolve stale claims across upgrade-policy doc fleet (audit comment, non-goals, gitignore merge) |
 | [2026-09-11](2026-09-11.md) | fix(review): project-review 2026-09-10 remediations — dead variant audit hook, rollback crash, PAT-in-URL, governance doc contradictions |
 | [2026-09-10](2026-09-10.md) | docs(governance): Schema Governance ADR baseline + marker engine remediation |
-| [2026-09-09](2026-09-09.md) | docs(governance): Schema Governance ADR baseline (design + implementation; pre-sync working tree) |
+| 2026-09-09 | docs(governance): Schema Governance ADR baseline (design + implementation; pre-sync working tree) |
 | 2026-09-08 | fix(governance): template/lifecycle drift fixes from project review + co-price backport |
 | 2026-09-07 | docs: fix stale statuses, broken links, and governance gaps from project review |
 | 2026-09-06 | feat(skills): session-evidence skill review loop (SkillHone-inspired) |

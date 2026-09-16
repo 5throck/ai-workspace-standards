@@ -2,7 +2,7 @@
 /**
  * pre-commit.ts — TS-based pre-commit hook.
  * Replaces the legacy bash/ps1 hooks.
- * @version 1.7.0
+ * @version 1.7.1
  */
 
 import { $ } from "bun";
@@ -68,8 +68,11 @@ async function main() {
         lines[i] = lines[i].replace(/^(\s*-\s+)/, `$1**[${today}]**: `);
       }
     }
-    writeFileSync('CHANGELOG.md', lines.join('\n'), 'utf-8');
-    await $`git add CHANGELOG.md`;
+    const rewritten = lines.join('\n');
+    if (rewritten !== content) {
+      writeFileSync('CHANGELOG.md', rewritten, 'utf-8');
+      await $`git add CHANGELOG.md`;
+    }
   }
 
   // 2. Block .env files (".env.example" / ".env.sample" templates are allowed)
@@ -100,11 +103,12 @@ async function main() {
     if (!existsSync(file)) continue;
     try {
       const content = readFileSync(file, 'utf-8');
-      if (/^<<<<<<<\s/m.test(content) || /^=======\r?\n/m.test(content) || /^>>>>>>>\s/m.test(content)) {
-        if (/^<<<<<<<\s/m.test(content) || /^>>>>>>>\s/m.test(content)) {
-          console.error(`\x1b[31m[FAIL]\x1b[0m Merge conflict marker detected in ${file}`);
-          process.exit(1);
-        }
+      // `=======` alone is a legal markdown setext underline — only the opening
+      // and closing markers block (the former bare-`=======` test here was dead
+      // code: the inner exit path never fired for it).
+      if (/^<<<<<<<\s/m.test(content) || /^>>>>>>>\s/m.test(content)) {
+        console.error(`\x1b[31m[FAIL]\x1b[0m Merge conflict marker detected in ${file}`);
+        process.exit(1);
       }
     } catch { /* ignore binary read errors */ }
   }
@@ -321,8 +325,13 @@ async function main() {
   const gitleaksCheck = await $`which gitleaks 2>/dev/null`.nothrow().quiet();
   if (gitleaksCheck.exitCode === 0) {
     try {
-      const configArg = existsSync('.gitleaks.toml') ? ['--config', '.gitleaks.toml'] : [];
-      const gitleaksResult = await $`gitleaks protect --staged --no-banner --log-level error ${configArg[0] ?? ''} ${configArg[1] ?? ''}`.nothrow().quiet();
+      // Build the argv array conditionally — interpolating empty-string
+      // fallback args into the Bun shell passed literal '' arguments to
+      // gitleaks when no .gitleaks.toml exists, weakening the gate.
+      const gitleaksArgs = existsSync('.gitleaks.toml')
+        ? ['protect', '--staged', '--no-banner', '--log-level', 'error', '--config', '.gitleaks.toml']
+        : ['protect', '--staged', '--no-banner', '--log-level', 'error'];
+      const gitleaksResult = await $`gitleaks ${gitleaksArgs}`.nothrow().quiet();
       if (gitleaksResult.exitCode !== 0) {
         console.error("\x1b[31m[FAIL]\x1b[0m Secrets detected by gitleaks! Commit blocked.");
         process.exit(1);
