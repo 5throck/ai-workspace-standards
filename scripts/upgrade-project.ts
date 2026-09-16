@@ -1,5 +1,27 @@
 #!/usr/bin/env bun
-// @version 1.30.0
+// @version 1.31.0
+// v1.31.0: T-20260916-012 — managed-block merge extraction + keyed-block
+//          destruction fix (design docs/designs/2026-09-16-managed-block-merge-fix-design.md):
+//          the merge core moved to the new pure lib/managed-block-merge.ts
+//          (mergeManagedBlocks; this file keeps only fs concerns) because
+//          mergeWorkspaceManaged's unlabeled-blocks reconciliation phase had
+//          two compounding defects: (1) projOccurrences counted ALL pattern
+//          matches — keyed WORKSPACE-MANAGED/VARIANT-INJECT blocks included —
+//          against a template count of UNLABELED blocks only, so a project
+//          file whose only managed blocks were keyed (real case: co-develop
+//          .gitignore / AGENTS.md, 2026-09-16) hit the count-mismatch branch
+//          and the reconcile replaced the first-to-last span with an EMPTY
+//          join — deleting the .gitignore secrets block (.env/*.pem; caught
+//          only because the upgrade's own security gate failed) and AGENTS.md's
+//          43-line graft block; (2) reconcile/positional offsets were captured
+//          BEFORE the keyed replacements mutated the content, so legitimate
+//          reconciles sliced stale positions. The lib tracks keyed and
+//          unlabeled project occurrences separately, slices unlabeled spans
+//          only, and re-scans unlabeled occurrences AFTER the keyed phase
+//          (fresh offsets); zero-unlabeled-template reconciles still remove
+//          stale unlabeled project blocks by design but can never touch keyed
+//          blocks. All log lines unchanged (verbatim from the lib); COMMON-*
+//          zones are key-less and byte-identical in behavior.
 // v1.30.0: T-20260916-006 — upgrade-target realpath guard (H14, design
 //          docs/designs/2026-09-16-upgrade-target-realpath-guard-design.md):
 //          the target is canonicalized with fs.realpathSync AFTER the existsSync
@@ -241,6 +263,10 @@ import {
   resolveClaim,
 } from './lib/upgrade-policy.ts';
 import { mergeEnvSample, pruneCountryScopedEnvBlocks } from './lib/env-sample.ts';
+import {
+  buildMergedTemplateBlocks,
+  mergeManagedBlocks,
+} from './lib/managed-block-merge.ts';
 
 // ── Argument parsing ───────────────────────────────────────────────────────────
 let projectPath = '';
@@ -835,67 +861,15 @@ function lineDiffCounts(a: string[], b: string[]): { added: number; removed: num
   return { removed: n - lcs, added: m - lcs };
 }
 
-/** Marker patterns supported by mergeWorkspaceManaged.
- *  Each entry supports raw regex in `open`/`close` fields — NOT literal strings.
- *  WORKSPACE-MANAGED open pattern accepts an optional `: description` suffix.
- *  VARIANT-INJECT uses asymmetric open/close naming (open: VARIANT-INJECT, close: END VARIANT-INJECT).
- *  COMMON-AGENTS, COMMON-CONTEXT and DYNAMIC_SKILLS use asymmetric START/END naming.
- */
-const MANAGED_PATTERNS: Array<{ open: RegExp; close: string; label: string }> = [
-  { open: /<!-- WORKSPACE-MANAGED(?::[^\-]*?)? -->/, close: '<!-- /WORKSPACE-MANAGED -->', label: 'WORKSPACE-MANAGED' },
-  { open: /<!-- COMMON-CLAUDE:START -->/, close: '<!-- COMMON-CLAUDE:END -->', label: 'COMMON-CLAUDE' },
-  { open: /<!-- COMMON-GEMINI:START -->/, close: '<!-- COMMON-GEMINI:END -->', label: 'COMMON-GEMINI' },
-  { open: /<!-- VARIANT-INJECT(?::[^\-]*?)? -->/, close: '<!-- END VARIANT-INJECT -->', label: 'VARIANT-INJECT' },
-  { open: /<!-- COMMON-AGENTS:START -->/, close: '<!-- COMMON-AGENTS:END -->', label: 'COMMON-AGENTS' },
-  { open: /<!-- COMMON-CONTEXT:START -->/, close: '<!-- COMMON-CONTEXT:END -->', label: 'COMMON-CONTEXT' },
-  { open: /<!-- DYNAMIC_SKILLS_START -->/, close: '<!-- DYNAMIC_SKILLS_END -->', label: 'DYNAMIC_SKILLS' },
-];
-
-/**
- * ManagedBlock with extracted key from `: description` suffix.
- */
-interface ManagedBlock {
-  start: number;
-  end: number;
-  matched: string;
-  key: string;  // extracted `: description` suffix, or '' for unlabeled blocks
-}
-
-/**
- * Find all managed blocks in the given content.
- * Returns an array of { pattern, blocks: [ManagedBlock] }.
- * The key is extracted from the optional `: description` suffix for WORKSPACE-MANAGED and VARIANT-INJECT;
- * unlabeled blocks have an empty key and match by position.
- */
-function findManagedBlocks(content: string): Array<{ pattern: typeof MANAGED_PATTERNS[number]; blocks: ManagedBlock[] }> {
-  const results: Array<{ pattern: typeof MANAGED_PATTERNS[number]; blocks: ManagedBlock[] }> = [];
-  for (const p of MANAGED_PATTERNS) {
-    // p.open is already a RegExp; p.close is a literal string that needs escaping.
-    const closeEscaped = p.close.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const regex = new RegExp(p.open.source + '[\\s\\S]*?' + closeEscaped, 'g');
-    const blocks: ManagedBlock[] = [];
-    let match: RegExpExecArray | null;
-    while ((match = regex.exec(content)) !== null) {
-      const matched = match[0];
-      let key = '';
-      // Extract block key from `: description` suffix in the opening marker
-      // Pattern matches `: ` followed by any chars up to ` -->` (for symmetrical markers)
-      if (p.label === 'WORKSPACE-MANAGED' || p.label === 'VARIANT-INJECT') {
-        const keyMatch = matched.match(/:\s*([^\s].*?)\s*-->/);
-        if (keyMatch) key = keyMatch[1].trim();
-      }
-      blocks.push({ start: match.index, end: match.index + matched.length, matched, key });
-    }
-    if (blocks.length > 0) results.push({ pattern: p, blocks });
-  }
-  return results;
-}
-
+/** Managed-block merge (WORKSPACE-MANAGED / COMMON-* / VARIANT-INJECT /
+ *  DYNAMIC_SKILLS zones): marker patterns, keyed+positional merge semantics,
+ *  and the merge core live in scripts/lib/managed-block-merge.ts (T-20260916-012
+ *  extraction). This wrapper keeps only the filesystem concerns: template and
+ *  common file loading, the not-yet-created project copy path, and writing the
+ *  merged content back in apply mode. All log lines come verbatim from the lib. */
 function mergeWorkspaceManaged(projectFile: string, templateFile: string, rel: string): void {
-  let tplContent = readFileSync(templateFile, 'utf8');
-  let tplManaged = findManagedBlocks(tplContent);
+  const tplContent = readFileSync(templateFile, 'utf8');
   let commonContent: string | null = null;
-  let commonManaged: typeof tplManaged | null = null;
 
   // For per-key union: load common blocks if variant is being used, so we can merge them.
   // (variant may be an extends-only file that shadows the marker-rich common version).
@@ -903,35 +877,11 @@ function mergeWorkspaceManaged(projectFile: string, templateFile: string, rel: s
     const commonFile = join(commonDir, rel);
     if (existsSync(commonFile)) {
       commonContent = readFileSync(commonFile, 'utf8');
-      commonManaged = findManagedBlocks(commonContent);
     }
   }
 
-  // Per-key union: build a union of template blocks (variant ∪ common, variant wins on key collision)
-  const tplBlocksByKey = buildBlockKeyMap(tplManaged);
-  if (commonManaged) {
-    const commonBlocksByKey = buildBlockKeyMap(commonManaged);
-    for (const { pattern, blocks: commonBlocks } of commonManaged) {
-      if (!tplBlocksByKey.has(pattern.label)) {
-        tplBlocksByKey.set(pattern.label, { pattern, blocksByKey: new Map(), blocksByIndex: [] });
-      }
-      const entry = tplBlocksByKey.get(pattern.label)!;
-      for (const block of commonBlocks) {
-        if (!entry.blocksByKey.has(block.key)) {
-          entry.blocksByKey.set(block.key, block);
-          entry.blocksByIndex.push(block);
-        }
-      }
-    }
-  }
-
-  // Flatten the per-key map back into a managed array for processing
-  const mergedManaged: Array<{ pattern: typeof MANAGED_PATTERNS[number]; blocks: ManagedBlock[] }> = [];
-  for (const entry of tplBlocksByKey.values()) {
-    mergedManaged.push({ pattern: entry.pattern, blocks: entry.blocksByIndex });
-  }
-
-  if (mergedManaged.length === 0) {
+  const mergedTplBlocks = buildMergedTemplateBlocks(tplContent, commonContent);
+  if (mergedTplBlocks.length === 0) {
     console.log(`    INFO: Template has no managed markers — skipping ${rel}`);
     return;
   }
@@ -947,149 +897,11 @@ function mergeWorkspaceManaged(projectFile: string, templateFile: string, rel: s
   }
 
   const projContent = readFileSync(projectFile, 'utf8');
-  const projManaged = findManagedBlocks(projContent);
-
-  // Strategy: for keyed blocks (WORKSPACE-MANAGED, VARIANT-INJECT), match by key.
-  // For unlabeled blocks, match positionally (backward-compatible with existing behavior).
-  // Keyed blocks with no project counterpart are inserted.
-  let updated = projContent;
-  let merged = false;
-
-  for (const { pattern, blocks: tplBlocks } of mergedManaged) {
-    const closeEscaped = pattern.close.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const regex = new RegExp(pattern.open.source + '[\\s\\S]*?' + closeEscaped, 'g');
-
-    // Build map of project blocks by key/index
-    const projBlocksByKey = new Map<string, ManagedBlock>();
-    const projBlocksByIndex: ManagedBlock[] = [];
-    const projOccurrences: Array<{ start: number; end: number }> = [];
-    for (const occ of updated.matchAll(regex)) {
-      const matched = occ[0]!;
-      let key = '';
-      if (pattern.label === 'WORKSPACE-MANAGED' || pattern.label === 'VARIANT-INJECT') {
-        const keyMatch = matched.match(/:\s*([^\s].*?)\s*-->/);
-        if (keyMatch) key = keyMatch[1].trim();
-      }
-      const block: ManagedBlock = { start: occ.index!, end: occ.index! + matched.length, matched, key };
-      projBlocksByKey.set(key, block);
-      projBlocksByIndex.push(block);
-      projOccurrences.push({ start: occ.index!, end: occ.index! + matched.length });
-    }
-
-    // Separate keyed from unlabeled blocks
-    const keyedTplBlocks = tplBlocks.filter(b => b.key);
-    const unlabeledTplBlocks = tplBlocks.filter(b => !b.key);
-
-    // Process keyed blocks: match by key, insert if not found
-    for (const tplBlock of keyedTplBlocks) {
-      const projBlock = projBlocksByKey.get(tplBlock.key);
-      if (projBlock) {
-        // Found by key — replace it
-        if (!dryRun) {
-          updated = updated.slice(0, projBlock.start) + tplBlock.matched + updated.slice(projBlock.end);
-        }
-        merged = true;
-        console.log(`    ${dryTag}MERGED ${pattern.label}:${tplBlock.key} in: ${rel}`);
-      } else {
-        // Not found by key — insert with insertion anchor logic
-        const insertionPos = findInsertionPosition(updated, rel, tplBlock.key, pattern);
-        if (!dryRun) {
-          updated = updated.slice(0, insertionPos) + '\n\n' + tplBlock.matched + '\n' + updated.slice(insertionPos);
-        }
-        merged = true;
-        console.log(`    ${dryTag}INSERTED ${pattern.label}:${tplBlock.key} in: ${rel}`);
-      }
-    }
-
-    // Process unlabeled blocks: use positional matching for backward compatibility
-    if (projOccurrences.length === 0) {
-      // No matching block in project — append all unlabeled template blocks
-      for (const tplBlock of unlabeledTplBlocks) {
-        if (!dryRun) {
-          updated = updated + '\n\n' + tplBlock.matched + '\n';
-        }
-        merged = true;
-        console.log(`    ${dryTag}APPENDED ${pattern.label} block to: ${rel}`);
-      }
-    } else if (projOccurrences.length !== unlabeledTplBlocks.length) {
-      // Counts diverged for unlabeled blocks — warn and replace all
-      console.log(`    WARNING: ${pattern.label} unlabeled block count mismatch in ${rel} (project has ${projOccurrences.length}, template has ${unlabeledTplBlocks.length}) — replacing all project blocks with the template sequence (this may cause prose loss if prose exists between project blocks)`);
-      const first = projOccurrences[0];
-      const last = projOccurrences[projOccurrences.length - 1];
-      if (!dryRun) {
-        updated = updated.slice(0, first.start) + unlabeledTplBlocks.map((b) => b.matched).join('\n\n') + updated.slice(last.end);
-      }
-      merged = true;
-      console.log(`    ${dryTag}RECONCILED ${pattern.label} blocks in: ${rel}`);
-    } else {
-      // Counts match — replace positionally, back-to-front so earlier offsets stay valid.
-      for (let i = unlabeledTplBlocks.length - 1; i >= 0; i--) {
-        const { start, end } = projOccurrences[i];
-        const tplBlock = unlabeledTplBlocks[i];
-        if (!dryRun) {
-          updated = updated.slice(0, start) + tplBlock.matched + updated.slice(end);
-        }
-        merged = true;
-        console.log(`    ${dryTag}MERGED ${pattern.label} block in: ${rel}`);
-      }
-    }
+  const result = mergeManagedBlocks(projContent, tplContent, commonContent, rel, dryRun);
+  for (const line of result.log) console.log(line);
+  if (!dryRun && result.merged) {
+    writeFileSync(projectFile, result.content, 'utf8');
   }
-
-  if (projManaged.length === 0 && !merged) {
-    console.log(`    WARNING: ${rel} has no managed markers in project.`);
-    console.log('             Appending template managed blocks at end of file.');
-    if (!dryRun) writeFileSync(projectFile, updated, 'utf8');
-    console.log(`    ${dryTag}APPENDED managed blocks to: ${rel}`);
-  } else if (!dryRun && merged) {
-    writeFileSync(projectFile, updated, 'utf8');
-  }
-}
-
-/**
- * Build a map-of-maps for efficient key-based block lookup.
- */
-function buildBlockKeyMap(managed: Array<{ pattern: typeof MANAGED_PATTERNS[number]; blocks: ManagedBlock[] }>) {
-  const map = new Map<string, { pattern: typeof MANAGED_PATTERNS[number]; blocksByKey: Map<string, ManagedBlock>; blocksByIndex: ManagedBlock[] }>();
-  for (const { pattern, blocks } of managed) {
-    const blocksByKey = new Map<string, ManagedBlock>();
-    const blocksByIndex: ManagedBlock[] = [];
-    for (const block of blocks) {
-      blocksByKey.set(block.key, block);
-      blocksByIndex.push(block);
-    }
-    map.set(pattern.label, { pattern, blocksByKey, blocksByIndex });
-  }
-  return map;
-}
-
-/**
- * Find insertion position for a keyed block that has no project counterpart.
- * Preference order: (a) immediately after the heading whose text names the key,
- * (b) after the project's last block of the same label, (c) end of file.
- */
-function findInsertionPosition(content: string, rel: string, key: string, pattern: typeof MANAGED_PATTERNS[number]): number {
-  // Try to find a heading with the key text and insert after it
-  const headingRegex = new RegExp(`^#+\\s+.*${key}.*$`, 'm');
-  const headingMatch = content.match(headingRegex);
-  if (headingMatch) {
-    const headingEnd = headingMatch.index! + headingMatch[0].length;
-    return headingEnd;
-  }
-
-  // Fallback: find the last block of the same label and insert after it
-  const closeEscaped = pattern.close.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const regex = new RegExp(pattern.open.source + '[\\s\\S]*?' + closeEscaped, 'g');
-  let lastMatch: RegExpExecArray | null = null;
-  let match: RegExpExecArray | null;
-  while ((match = regex.exec(content)) !== null) {
-    lastMatch = match;
-  }
-  if (lastMatch) {
-    return lastMatch.index! + lastMatch[0].length;
-  }
-
-  // Ultimate fallback: end of file
-  return content.length;
 }
 
 /** Check if a project file had local modifications at upgrade start (H1: judged
