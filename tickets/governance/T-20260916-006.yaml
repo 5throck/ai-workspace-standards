@@ -5,12 +5,31 @@ title: >-
   upgrade-project: canonicalize target with fs.realpathSync and confirm
   outside-Projects targets (H14 design 2026-09-16-upgrade-target-realpath-guard)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-16T00:40:32.948Z'
 history:
   - at: '2026-09-16T00:40:32.948Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-16T09:05:15.028Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-16T09:05:15.041Z'
+    from: waiting
+    to: review
+  - at: '2026-09-16T09:26:55.766Z'
+    from: review
+    to: done
+result: >-
+  Landed in wave B: upgrade-project.ts 1.29.0 -> 1.30.0 — workspace root and
+  target fs.realpathSync-canonicalized once (root guard compares canonical
+  forms; symlink-to-root now hits the unchanged hard-fail), existsSync pre-check
+  before canonicalization keeps ENOENT messaging, outside-Projects targets move
+  WARN to fail-closed confirm-prompt (default N, canonical path named, dry-run
+  included, EOF aborts, refusal exits 1, --yes the only consent token),
+  Projects/ root canonical with ENOENT fallback. Spec
+  2026-09-16-upgrade-target-realpath-guard-design advanced approved ->
+  implemented (design section 5.2 reality note: v1.29.0 was consumed by
+  T-20260916-010, actual bump 1.30.0).
 error: null

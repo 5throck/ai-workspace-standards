@@ -1,5 +1,20 @@
 #!/usr/bin/env bun
-// @version 1.29.0
+// @version 1.30.0
+// v1.30.0: T-20260916-006 — upgrade-target realpath guard (H14, design
+//          docs/designs/2026-09-16-upgrade-target-realpath-guard-design.md):
+//          the target is canonicalized with fs.realpathSync AFTER the existsSync
+//          pre-check (so the not-found error keeps firing first, unchanged, on
+//          the lexical form), workspaceRoot and Projects/ are canonicalized once
+//          at resolution time, and the root guard + containment check compare
+//          canonical forms only — a symlink resolving to the workspace root now
+//          hits the unchanged hard-fail root guard instead of slipping past
+//          lexical comparison into the symlink-following existsSync/git checks.
+//          The outside-Projects WARN gains a fail-closed confirm-prompt
+//          (default N, precedent-style 'Proceed? [y/N]' from the
+//          template-version.txt flow): it names the canonical target, fires for
+//          dry-run too, and EOF/non-y answers abort with exit 1 (policy refusal,
+//          not the optional-prompt exit 0); --yes stays the single scripted
+//          consent token. No new flags.
 // v1.29.0: T-20260916-010 — post-upgrade docs/VERSION_MANIFEST.md regeneration
 //          (mirrors the skill-graph regeneration): the upgrade refreshed
 //          agents/skills/scripts, so the project manifest is stale until the
@@ -203,7 +218,7 @@
 
 import {
   existsSync, mkdirSync, copyFileSync, cpSync, readFileSync, writeFileSync,
-  readdirSync, statSync, rmSync,
+  readdirSync, statSync, rmSync, realpathSync,
 } from 'node:fs';
 import { resolve, join, dirname, basename, isAbsolute, relative } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -265,28 +280,75 @@ if (!['claude', 'antigravity', 'both'].includes(platform)) {
 }
 
 // ── Resolve paths ──────────────────────────────────────────────────────────────
-const workspaceRoot = resolve(import.meta.dir, '..');
-const projectDir = isAbsolute(projectPath) ? projectPath : resolve(projectPath);
+// Canonical root (H14, design 2026-09-16-upgrade-target-realpath-guard):
+// canonicalized ONCE here so every guard and every downstream join compares or
+// operates on the real path, not a lexical form that a symlinked checkout could
+// diverge from.
+const workspaceRoot = realpathSync(resolve(import.meta.dir, '..'));
+const projectDirLexical = isAbsolute(projectPath) ? projectPath : resolve(projectPath);
+
+// Existence pre-check BEFORE canonicalization: fs.realpathSync throws ENOENT on
+// missing paths, and the not-found error must keep firing first, unchanged,
+// naming the path the user typed (lexical form — kept only for this message).
+if (!existsSync(projectDirLexical)) {
+  console.error(`ERROR: Project directory not found: ${projectDirLexical}`);
+  if (import.meta.main) {
+    process.exit(1);
+  }
+}
+
+// Canonicalize the target: path.resolve is purely lexical — it does not follow
+// symlinks, so a symlink named Projects/link pointing at the workspace root used
+// to compare unequal under the root guard and slip through to the
+// symlink-following existsSync/git checks. All guards below compare canonical
+// forms only.
+let projectDir = projectDirLexical;
+try {
+  projectDir = realpathSync(projectDirLexical);
+} catch (err) {
+  // existsSync just passed, so this is extraordinary (race, permissions) —
+  // fail closed rather than guard on a half-resolved path.
+  console.error(`ERROR: Could not resolve the real path of the target: ${projectDirLexical} (${(err as Error).message})`);
+  if (import.meta.main) {
+    process.exit(1);
+  }
+}
 
 // Root-target guard (incident 2026-09-12): the workspace root is L0, not a project.
 // It passes the existsSync and git-repo checks below, so reject it before any
 // delivery step runs; a run against the root copies the whole template/L1 tree
-// into the repo root.
-if (resolve(projectDir) === workspaceRoot) {
+// into the repo root. Canonical equality: a symlink resolving to the root hits
+// this guard too. Hard-fail, no bypass flag.
+if (projectDir === workspaceRoot) {
   console.error('ERROR: Refusing to target the workspace ROOT — root is L0, not a project (incident 2026-09-12). Pass a project directory under Projects/ instead.');
   if (import.meta.main) {
     process.exit(1);
   }
 }
-const projectsRoot = join(workspaceRoot, 'Projects');
+const projectsRoot = (() => {
+  const lexical = join(workspaceRoot, 'Projects');
+  try {
+    return realpathSync(lexical);
+  } catch {
+    // Projects/ is gitignored and absent on a fresh checkout — nothing to
+    // canonicalize; any existing target then correctly classifies as outside.
+    return lexical;
+  }
+})();
 if (relative(projectsRoot, projectDir).startsWith('..')) {
   console.warn(`WARN: Target is outside ${projectsRoot} — the canonical project layout is Projects/<name>.`);
-}
-
-if (!existsSync(projectDir)) {
-  console.error(`ERROR: Project directory not found: ${projectDir}`);
-  if (import.meta.main) {
-    process.exit(1);
+  // H14: a warning the run continues past is invisible in scripts — that was the
+  // 2026-09-12 incident class. Fail-closed confirm (design §4.2), reusing the
+  // template-version.txt prompt precedent: EOF/closed stdin yields null → abort;
+  // any non-y answer aborts; --yes is the single scripted consent token; the
+  // prompt names the CANONICAL target and fires for dry-run too. Exit 1 on
+  // refusal (policy refusal, deliberately not the precedent's exit 0).
+  if (import.meta.main && !yesFlag) {
+    const answer = prompt(`    Proceed with upgrade into ${projectDir}? [y/N] `);
+    if (answer === null || !['y', 'Y'].includes(answer)) {
+      console.error('ERROR: Outside-Projects target refused — explicit confirmation required (re-run with --yes for scripted consent).');
+      process.exit(1);
+    }
   }
 }
 
