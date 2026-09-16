@@ -1,0 +1,21 @@
+schemaVersion: 1
+id: T-20260916-013
+kind: manual
+title: >-
+  generator/CI determinism: generate-version-manifest agent last_modified
+  derives from git log, so a shallow-checkout CI regenerates with checkout-date
+  fallback and permanently drifts against locally regenerated manifests (found
+  in co-safety: Documentation Audit job lacked fetch-depth:0 — fixed there in
+  fleet resync; audit safety-audit.yml checkouts and other Projects/co-* CI
+  workflows for the same class, and consider making the generator
+  shallow-tolerant or the drift comparator date-source-aware)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-16T11:31:52.264Z'
+history:
+  - at: '2026-09-16T11:31:52.264Z'
+    from: null
+    to: backlog
+result: null
+error: null
