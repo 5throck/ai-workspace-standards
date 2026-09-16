@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.32.0
+ * @version 1.33.0
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -10,6 +10,21 @@
  *   bun scripts/validate-templates.ts
  *   bun scripts/validate-templates.ts --variant co-develop
  *   bun scripts/validate-templates.ts --json
+ *
+ * v1.33.0 (2026-09-16-template-tree-infra-consistency-design.md):
+ *          T-20260916-001 + T-20260916-008. (1) Every templates/ enumeration
+ *          site now skips transient E2E fixture dirs via the shared
+ *          isTransientTestFixture predicate (helpers/scaffold-markers.ts) —
+ *          defense in depth so a validator running while
+ *          test-l3-to-variant-promotion stages fixtures under templates/
+ *          can neither pollute docs/templates/VERSION_REGISTRY.json via
+ *          B-07 nor fail on fixture-shaped variants. (2) New standing
+ *          check `platform-mirror-freshness` — every skill present in BOTH
+ *          a templates/common/.{claude,gemini,agents,codex}/skills mirror
+ *          and the skills/ SSOT must carry the same version (pure logic in
+ *          lib/platform-mirror-freshness.ts); T-008 found upgrade-project
+ *          stale at 1.4.1 in three mirrors because the propagator's
+ *          claude/gemini/agents scope-skip did not apply to codex.
  *
  * v1.32.0 (2026-09-16-scaffold-fresh-audit-remediation-design.md): T-20260916-009
  *          + T-20260916-010. New `managed-block-parity` — every
@@ -128,6 +143,8 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { load } from 'js-yaml';
 import { getScriptLayer, getSkillLayer, includeScriptInL1, parseScriptLayers, parseSkillLayers } from './helpers/layer-filter.ts';
+import { isTransientTestFixture } from './helpers/scaffold-markers.ts';
+import { collectMirrorFreshnessDrift, PLATFORM_MIRROR_DIRS } from './lib/platform-mirror-freshness.ts';
 import {
   validatePropagationMap,
   deriveCoVariantDirs,
@@ -462,6 +479,7 @@ function checkVariantManifests(): Map<string, VariantManifest> {
 
   const entries = readdirSync(TEMPLATES_DIR);
   const variantDirs = entries.filter(e => {
+    if (isTransientTestFixture(e)) return false; // E2E staging dirs under templates/ (T-20260916-001)
     const fullPath = join(TEMPLATES_DIR, e);
     return statSync(fullPath).isDirectory() && !e.startsWith('.') && e !== 'common'
       && (e.startsWith('co-') ? isCoVariantTracked(e) : true);
@@ -1541,6 +1559,7 @@ function checkPlatformDocumentationParity(): void {
   const templatesDir = readdirSync(TEMPLATES_DIR);
   for (const tpl of templatesDir) {
     if (tpl === 'common' || tpl.startsWith('.')) continue;
+    if (isTransientTestFixture(tpl)) continue; // E2E staging dirs (T-20260916-001)
     if (tpl.startsWith('co-') && !isCoVariantTracked(tpl)) continue;
     const tplPath = join(TEMPLATES_DIR, tpl);
     if (!statSync(tplPath).isDirectory()) continue;
@@ -1800,6 +1819,35 @@ function checkVariantScopedSkillLeak(): void {
     }
   }
   if (leaks === 0) pass('templates/common/skills/: no variant-scoped skill leaks');
+}
+
+// Check: platform-mirror-freshness — L1 platform skill mirrors must carry the
+// SSOT version (T-20260916-008). upgrade-project sat at 1.4.1 in the
+// claude/gemini/agents mirrors while skills/ moved to 1.5.0 because the
+// propagator skipped workspace-scoped skills for exactly three of the four
+// platform domains. With all four domains propagating uniformly (the T-008
+// fix) this arm fails if any mirror copy of an SSOT skill ever diverges again.
+function checkPlatformMirrorFreshness(): void {
+  if (!JSON_MODE) console.log('\n=== Check platform-mirror-freshness: L1 platform skill mirrors carry SSOT versions ===');
+  const ssotSkillsDir = join(ROOT, 'skills');
+  const commonDir = join(TEMPLATES_DIR, 'common');
+  if (!existsSync(ssotSkillsDir) || !existsSync(commonDir)) {
+    if (!JSON_MODE) pass('platform-mirror-freshness: skills/ or templates/common/ missing — nothing to compare');
+    return;
+  }
+  const drift = collectMirrorFreshnessDrift({ ssotSkillsDir, commonDir, mirrorDirs: PLATFORM_MIRROR_DIRS });
+  if (drift.length === 0) {
+    pass('platform-mirror-freshness: all four platform skill mirrors carry SSOT versions');
+    return;
+  }
+  for (const d of drift) {
+    fail(
+      'common',
+      'platform-mirror-freshness',
+      `templates/common/${d.mirror}/${d.skill}/SKILL.md version ${d.mirrorVersion} != skills/${d.skill} SSOT version ${d.ssotVersion}`,
+      `Re-run propagate-to-templates.ts --apply (domain mirror for ${d.mirror}); if it stays stale, check the propagator's platform-skills domain handling`
+    );
+  }
 }
 
 // Check B-12: L0/L1 style neutrality — variant-owned design identity literals
@@ -2422,6 +2470,7 @@ function checkCommonContract(): void {
   const commonAgents = Object.keys((contract.common_agents as Record<string, unknown>) ?? {});
 
   const variantDirs = readdirSync(TEMPLATES_DIR).filter(e => {
+    if (isTransientTestFixture(e)) return false; // E2E staging dirs (T-20260916-001)
     const fullPath = join(TEMPLATES_DIR, e);
     try { return statSync(fullPath).isDirectory() && !e.startsWith('.') && e !== 'common'; } catch { return false; }
   });
@@ -3524,7 +3573,7 @@ function checkManagedBlockParity(): void {
   }
 
   const variants = readdirSync(TEMPLATES_DIR, { withFileTypes: true })
-    .filter(e => e.isDirectory() && e.name.startsWith('co-'))
+    .filter(e => e.isDirectory() && e.name.startsWith('co-') && !isTransientTestFixture(e.name))
     .map(e => e.name)
     .sort();
 
@@ -3894,6 +3943,7 @@ function checkVariantReadinessGate(): void {
     dirs = readdirSync(TEMPLATES_DIR, { withFileTypes: true })
       .filter((e) => e.isDirectory())
       .map((e) => e.name)
+      .filter((name) => !isTransientTestFixture(name)) // E2E staging dirs (T-20260916-001)
       .filter((name) => name.startsWith('co-') ? isCoVariantTracked(name) : true)
       .filter((name) => existsSync(join(TEMPLATES_DIR, name, 'variant.json')));
   } catch {
@@ -3999,6 +4049,7 @@ function checkMarkerZoneParity(): void {
 
     for (const entry of readdirSync(TEMPLATES_DIR, { withFileTypes: true })) {
       if (!entry.isDirectory() || !entry.name.startsWith('co-')) continue;
+      if (isTransientTestFixture(entry.name)) continue; // E2E staging dirs (T-20260916-001)
       const variant = entry.name;
       const targetFile = (domain.target_file ?? 'AGENTS.md').replace('{variant}', variant);
       const variantPath = join(TEMPLATES_DIR, variant, targetFile);
@@ -4233,6 +4284,7 @@ function checkPmExtendsStubBodies(): void {
   let checked = 0;
   for (const entry of readdirSync(TEMPLATES_DIR, { withFileTypes: true })) {
     if (!entry.isDirectory() || !entry.name.startsWith('co-')) continue;
+    if (isTransientTestFixture(entry.name)) continue; // E2E staging dirs (T-20260916-001)
     if (variantArg !== 'all' && variantArg !== entry.name) continue;
     const pmPath = join(TEMPLATES_DIR, entry.name, 'agents', 'pm.md');
     if (!existsSync(pmPath)) continue; // presence is checkAgents/checkReadmePresence's domain
@@ -4273,6 +4325,7 @@ function main(): number {
   checkModelLiteralPlacement();
   // Script parity check removed (dead code after ADR-0036 TypeScript migration)
   checkVariantScopedSkillLeak();  // B-11: variant_scoped_skills must not live in common
+  checkPlatformMirrorFreshness(); // T-20260916-008: platform skill mirrors carry SSOT versions
   checkStyleNeutrality();         // B-12: L0/L1 style neutrality (ADR-0064/0066)
 
   let variantsChecked = 0;

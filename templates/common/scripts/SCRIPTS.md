@@ -121,7 +121,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `helpers/l0-ref-policy.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `helpers/context-sections.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
 | `helpers/markers.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
-| `helpers/scaffold-markers.ts` | L0 | 1.2.0 | active | Shared scaffold marker constants + (marker→source) mapping + delivery-tree derivations for the C3/H12/H13 validator batch | —| L0+L1 | —|
+| `helpers/scaffold-markers.ts` | L0 | 1.3.0 | active | Shared scaffold marker constants + (marker→source) mapping + delivery-tree derivations + transient test-fixture predicate (T-20260916-001) | —| L0+L1 | —|
 | `helpers/pm-md-parser.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `helpers/variant-governance-rules.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `helpers/registries/variant-type-registry.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
@@ -192,6 +192,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `lib/constitution-scrub.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/upgrade-policy.ts` | L0 | 1.6.0 | active | —| —| L0 | —|
 | `lib/variant-overlay-guard.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
+| `lib/platform-mirror-freshness.ts` | L0 | 1.0.0 | active | Pure platform-skill-mirror vs skills/ SSOT version comparison for the platform-mirror-freshness check (T-20260916-008) | —| L0+L1 | —|
 | `lifecycle-sync-audit.ts` | L0 | 1.14.0 | active | —| —| L0+L1 | —|
 | `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `md-to-ooxml.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
@@ -200,7 +201,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `resolve-variants.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
 | `project-to-variant.ts` | L0 | 1.4.0 | active | `--source`, `--target`, `--dry-run`, `--force`, `--overlay-variant`, `--design-doc`, `--threshold-files`, `--threshold-dirs` | —| L0 | —|
 | `promote-context-section.ts` | L0 | 1.0.0 | active | `--heading`, `--variants`, `--source`, `--after-heading`, `--dry-run` | —| L0 | —|
-| `propagate-to-templates.ts` | L0 | 2.15.1 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs`, `--include-disabled`, `--marker-rewrite` | —| L0 | —|
+| `propagate-to-templates.ts` | L0 | 2.16.0 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs`, `--include-disabled`, `--marker-rewrite` | —| L0 | —|
 | `qa-gate.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
 | `readme-lifecycle-audit.ts` | L0 | 1.0.4 | active | —| —| L0+L1 | —|
 | `render-pdf-deck.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
@@ -221,8 +222,8 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `test-platform-parity.ts` | L0 | 0.2.4 | active | —| —| L0 | —|
 | `test-new-project.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `test-extends-validator.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
-| `test-l3-to-variant-promotion.ts` | L0 | 1.5.0 | active | —| —| L0 | —|
-| `test-runner.ts` | L0 | 1.2.0 | active | `--parallel`, `--sequential`, `--concurrency <n>`, `--timeout <ms>` | —| L0+L1 | —|
+| `test-l3-to-variant-promotion.ts` | L0 | 1.6.0 | active | —| —| L0 | —|
+| `test-runner.ts` | L0 | 1.3.0 | active | `--parallel`, `--sequential`, `--concurrency <n>`, `--timeout <ms>` | —| L0+L1 | —|
 | `translate-readme.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `ticket.ts` | L0 | 1.2.0 | active | `create --not-before`, `list --kind`, `list --ready`, `move done --result` (required, not bypassable by --force) | —| L0 | —|
 | `typecheck.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
@@ -236,7 +237,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `validate-procedures.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `validate-skills.ts` | L0 | 1.5.1 | active | —| —| L0+L1 | —|
 | `validate-decisions.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `validate-templates.ts` | L0 | 1.32.0 | active | —| —| L0+L1 | —|
+| `validate-templates.ts` | L0 | 1.33.0 | active | —| —| L0+L1 | —|
 | `validate-variant-readiness.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `verify-country-prune.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `verify-adr-governance.ts` | L0 | 1.5.0 | active | —| —| L0 | —|

@@ -5,8 +5,19 @@
  * Replaces publish-to-template.ts (deprecated v1.8.0). Single authoritative script
  * for all L0→L1 propagation. Config-driven via propagation-map.json (SSOT for exclusions).
  *
- * @version 2.15.1
+ * @version 2.16.0
  *
+ * v2.16.0 (2026-09-16-template-tree-infra-consistency-design.md):
+ *          T-20260916-008. Removed the claude-skills/gemini-skills/
+ *          agents-skills scope-skip in collectDiffs — it filtered
+ *          workspace-scoped platform skills out of three of the four L1
+ *          platform mirrors while codex-skills had no such arm, leaving
+ *          templates/common/.{claude,gemini,agents}/skills/upgrade-project
+ *          stale at 1.4.1 (new-project delivers the mirrors to every fresh
+ *          project) while the codex mirror tracked 1.5.0. All four platform
+ *          domains now propagate uniformly (domain `exclude` lists remain);
+ *          validate-templates' new `platform-mirror-freshness` check keeps
+ *          the mirrors unregressable.
  * v2.15.1: the bare-zone fallback in replaceCommonSection() is gated on the
  *          source declaring exactly ONE section for the marker — with multiple
  *          sections, replacing the first bare zone could clobber a different
@@ -503,17 +514,15 @@ function collectDiffs(mapPath: string): FileDiff[] {
         if (!includeScriptInL1(scriptKey, scriptLayers)) continue;
       }
 
-      // Skip workspace-scoped AND variant-scoped platform skills — only
-      // common-layer skills (scope: common or unspecified) reach L1 mirrors
-      if (domainName === 'claude-skills' || domainName === 'gemini-skills' || domainName === 'agents-skills') {
-        const skillName = relPath.split('/')[0].split('\\')[0];
-        const skillMdPath = join(domain.source, skillName, 'SKILL.md');
-        if (existsSync(skillMdPath)) {
-          const content = readFileSync(skillMdPath, 'utf-8');
-          const mirrorScope = extractSkillFrontmatterScope(content);
-          if (mirrorScope === 'workspace' || (mirrorScope !== undefined && mirrorScope !== 'common')) continue;
-        }
-      }
+      // T-20260916-008: the former claude-skills/gemini-skills/agents-skills
+      // scope-skip is REMOVED. It filtered workspace-scoped platform skills out
+      // of three of the four platform mirrors while codex-skills had no such
+      // arm — the asymmetry left templates/common/.{claude,gemini,agents}/
+      // skills/upgrade-project stale at 1.4.1 (delivered to every fresh
+      // project by new-project) while the codex mirror tracked 1.5.0. All
+      // four platform domains now propagate uniformly; each domain's
+      // `exclude` list remains the only carve-out. Mirror freshness is
+      // enforced by validate-templates' `platform-mirror-freshness` check.
 
       const sourcePath = join(domain.source, relPath);
       const targetPath = join(domain.target, relPath);

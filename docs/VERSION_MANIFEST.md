@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-09-16T09:27:18.107Z
+**Generated**: 2026-09-16T10:01:13.517Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -130,7 +130,7 @@
 | procedure-coverage.ts | 1.0.0 | scripts/procedure-coverage.ts | js-yaml |
 | project-to-variant.ts | 1.4.0 | scripts/project-to-variant.ts | N/A |
 | promote-context-section.ts | 1.0.0 | scripts/promote-context-section.ts | N/A |
-| propagate-to-templates.ts | 2.15.1 | scripts/propagate-to-templates.ts | js-yaml |
+| propagate-to-templates.ts | 2.16.0 | scripts/propagate-to-templates.ts | js-yaml |
 | qa-gate.ts | 1.3.0 | scripts/qa-gate.ts | bun |
 | readme-lifecycle-audit.ts | 1.0.4 | scripts/readme-lifecycle-audit.ts | N/A |
 | regenerate-agents-md.ts | 1.1.0 | scripts/regenerate-agents-md.ts | fs, path |
@@ -155,10 +155,10 @@
 | tag-template.ts | 1.1.0 | scripts/tag-template.ts | bun |
 | team-builder.ts | 1.4.0 | scripts/team-builder.ts | N/A |
 | test-extends-validator.ts | 1.0.1 | scripts/test-extends-validator.ts | fs, path |
-| test-l3-to-variant-promotion.ts | 1.5.0 | scripts/test-l3-to-variant-promotion.ts | bun |
+| test-l3-to-variant-promotion.ts | 1.6.0 | scripts/test-l3-to-variant-promotion.ts | bun |
 | test-new-project.ts | 1.2.0 | scripts/test-new-project.ts | bun, js-yaml |
 | test-platform-parity.ts | 0.2.4 | scripts/test-platform-parity.ts | fs, path |
-| test-runner.ts | 1.2.0 | scripts/test-runner.ts | fs, os, path |
+| test-runner.ts | 1.3.0 | scripts/test-runner.ts | fs, os, path |
 | test-scaffold-delivery-parity.ts | 1.0.0 | scripts/test-scaffold-delivery-parity.ts | N/A |
 | test-variant-readiness.ts | 1.0.0 | scripts/test-variant-readiness.ts | N/A |
 | ticket.ts | 1.2.0 | scripts/ticket.ts | N/A |
@@ -174,7 +174,7 @@
 | validate-pm-extends.ts | 0.3.1 | scripts/validate-pm-extends.ts | N/A |
 | validate-procedures.ts | 1.1.0 | scripts/validate-procedures.ts | js-yaml |
 | validate-skills.ts | 1.5.1 | scripts/validate-skills.ts | N/A |
-| validate-templates.ts | 1.32.0 | scripts/validate-templates.ts | js-yaml |
+| validate-templates.ts | 1.33.0 | scripts/validate-templates.ts | js-yaml |
 | validate-variant-readiness.ts | 1.1.0 | scripts/validate-variant-readiness.ts | N/A |
 | variant-feature.ts | 1.0.0 | scripts/variant-feature.ts | N/A |
 | verify-adr-governance.ts | 1.5.0 | scripts/verify-adr-governance.ts | N/A |
