@@ -1,5 +1,14 @@
 # error-handling.ts Script Lifecycle
 
+## Metadata
+
+- **Current Phase**: production
+- **Version**: 1.4.0
+- **Owner**: automation-engineer
+- **Last Updated**: 2026-09-16
+- **Last Reviewer**: pm
+- **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort.
+
 ## Created
 
 2026-07-02 (initial v1.0.0, L3-to-variant pipeline scope)
@@ -10,6 +19,7 @@
 |------|------|-----|---------|----------|
 | 2026-07-02 | - | production | Initial structured error handling library for the L3-to-variant pipeline (Risk #4: Error Handling) | automation-engineer |
 | 2026-08-16 | production | production | v1.3.0: Expanded to general-purpose standard per ADR-0054 — added 6 generic ErrorPhase values (SCRIPT_EXECUTION, FILE_IO, CLI_PARSING, AUDIT, LIFECYCLE, SECURITY) and convenience functions (die, warnAndExit, withErrorHandling, withSyncErrorHandling); L0→L1 sync | pm, architect |
+| 2026-09-16 | production | production | Version sync gate landed (lifecycle-sync-audit Check H); record caught up to SCRIPTS.md SSOT v1.4.0 | pm |
 
 ## Acceptance Criteria
 
@@ -37,10 +47,3 @@
 - Carry remediation hints for agent-driven recovery
 - Classify errors by phase for audit reporting
 - Provide simple `die()`/`warnAndExit()` for lightweight scripts
-
-## Metadata
-
-- **Current Phase**: production
-- **Owner**: automation-engineer
-- **Last Updated**: 2026-08-16
-- **Last Reviewer**: pm

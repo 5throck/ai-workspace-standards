@@ -5,12 +5,33 @@ title: >-
   governance: gate or retire docs/lifecycle/scripts records so new-project
   version history cannot silently lapse
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-15T10:32:47.061Z'
 history:
   - at: '2026-09-15T10:32:47.061Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-16T00:44:43.850Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-16T00:44:43.861Z'
+    from: waiting
+    to: review
+  - at: '2026-09-16T01:13:46.865Z'
+    from: review
+    to: done
+result: >-
+  Landed in wave 5. PM adjudication: GATE, not retire — the 3
+  docs/lifecycle/scripts/ records carry phase-history narrative SCRIPTS.md rows
+  do not, so records stay and the lapse class gets a gate.
+  lifecycle-sync-audit.ts 1.14.0 Check H: every docs/lifecycle/scripts/<name>.md
+  record must declare - **Version** equal to the subject script's SCRIPTS.md row
+  version (mismatch = Error, missing field = Warning, records opt-in, SCRIPTS.md
+  stays SSOT). All 3 records backfilled (new-project v1.18.0, error-handling
+  v1.4.0, validate-pm-extends v0.3.1) with 2026-09-16 catch-up history rows and
+  skill-record-style Metadata layout. Negative probe: corrupted version -> exit
+  1 with named fix; reverted. Design
+  docs/designs/2026-09-16-lifecycle-gate-and-pm-role-completion-design.md (spec
+  2026-09-16-lifecycle-gate-and-pm-role-completion-design).
 error: null

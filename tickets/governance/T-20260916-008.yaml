@@ -1,0 +1,19 @@
+schemaVersion: 1
+id: T-20260916-008
+kind: manual
+title: >-
+  propagation: templates/common/.claude|.gemini|.agents skills mirrors
+  deliberately skipped by the propagator sit stale (upgrade-project 1.4.1 vs
+  SSOT 1.5.0) — either remove the mirror dirs from the propagation scope or add
+  a staleness gate; codex-skills domain lacks the same scope filter (drift found
+  during T-20260915-008)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-16T01:13:05.305Z'
+history:
+  - at: '2026-09-16T01:13:05.305Z'
+    from: null
+    to: backlog
+result: null
+error: null

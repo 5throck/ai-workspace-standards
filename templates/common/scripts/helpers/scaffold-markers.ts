@@ -1,7 +1,13 @@
 #!/usr/bin/env bun
 /**
  * Shared Scaffold Delivery Contracts
- * @version 1.0.0
+ * @version 1.1.0
+ *
+ * v1.1.0 (T-20260915-012 / M12): NEW_PROJECT_L1_ONLY_AGENTS dropped stale
+ * entries (`agents/lifecycle-manager.md`, `agents/pm.md.backup` — neither
+ * exists under templates/common/, so the exclusions were dead and masked
+ * future drift); only the resolving entry `agents/_COMMON.md` remains, and
+ * a unit test now asserts every entry resolves.
  *
  * Single source for the string markers, delivery-exclusion data, PM
  * extends-stub contract, and delivery-tree derivations shared by the two
@@ -175,9 +181,15 @@ export const NEW_PROJECT_WORKSPACE_ONLY_FILES: readonly string[] = [
   'package.json', 'scripts/package.json', 'package-lock.json', 'bun.lock', 'bun.lockb', 'variant.json',
 ];
 
-/** L1-only agent files new-project removes (workspace governance machinery). */
+/** L1-only agent files new-project removes (workspace governance machinery).
+ *  T-20260915-012 (M12): every entry must resolve to a real templates/common/
+ *  path — stale entries silently mask future drift, so a unit test asserts
+ *  resolution. `agents/lifecycle-manager.md` (L0-only agent, never shipped in
+ *  templates) and `agents/pm.md.backup` (never present in templates/common)
+ *  were dropped; only `agents/_COMMON.md` — the shared-sections include file
+ *  that copies but must not ship — remains. */
 export const NEW_PROJECT_L1_ONLY_AGENTS: readonly string[] = [
-  'agents/lifecycle-manager.md', 'agents/_COMMON.md', 'agents/pm.md.backup',
+  'agents/_COMMON.md',
 ];
 
 /**

@@ -1,5 +1,14 @@
 # validate-pm-extends.ts Script Lifecycle
 
+## Metadata
+
+- **Current Phase**: production
+- **Version**: 0.3.1
+- **Owner**: automation-engineer
+- **Last Updated**: 2026-09-16
+- **Last Reviewer**: pm
+- **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort.
+
 ## Created
 
 2026-05-29
@@ -10,6 +19,7 @@
 |------|------|-----|---------|----------|
 | 2026-05-29 | - | production | Initial PM extends validation tool per ADR-0033 | automation-engineer |
 | 2026-06-23 | production | production | v0.3.0: Switched file discovery from full filesystem scan to `git ls-files` (git-tracked only). Untracked test projects auto-excluded. Fallback scoped to `agents/` + `templates/`. | lifecycle-manager |
+| 2026-09-16 | production | production | Version sync gate landed (lifecycle-sync-audit Check H); record caught up to SCRIPTS.md SSOT v0.3.1 | pm |
 
 ## Acceptance Criteria
 
@@ -38,10 +48,3 @@
 - Enforce depth limits
 - Verify file existence and platform parity
 - Scan only git-tracked pm.md files (untracked excluded)
-
-## Metadata
-
-- **Current Phase**: production
-- **Owner**: automation-engineer
-- **Last Updated**: 2026-06-23
-- **Last Reviewer**: lifecycle-manager
