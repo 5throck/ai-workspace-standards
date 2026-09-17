@@ -56,5 +56,5 @@
 
 - **Current Phase**: production
 - **Owner**: architect
-- **Last Updated**: 2026-09-15 (record refreshed to match agents/architect.md 2026-09-12 changes — Check F rollout)
+- **Last Updated**: 2026-09-17 (Design Gate STE constraint added per ADR-0079 — instruction-policy wiring spec)
 - **Last Reviewer**: lifecycle-manager

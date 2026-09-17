@@ -418,7 +418,7 @@ Use an external computation tool when the task involves ANY of the following:
 
 ## Git / PR Workflow
 
-<!-- intentional-duplicate: workspace standards §3 — maintained locally for AI context proximity; source: docs/constitution/03-pr-workflow.md; hash: 18ad2842 -->
+<!-- intentional-duplicate: workspace standards §3 — maintained locally for AI context proximity; source: docs/constitution/03-pr-workflow.md; hash: 8d70ef81 -->
 
 ```
 /sync "feat: description"
@@ -434,6 +434,8 @@ Use an external computation tool when the task involves ANY of the following:
 > All PR titles, bodies, and review comments must be in **English**.
 
 > Universal Design Gate (ADR-0074): every code change at any tier must carry spec activity — a design doc under docs/designs/ registered via scripts/spec-register.ts — enforced by the /sync spec-check (audit.ts --spec-check, FATAL). Trivial changes: --spec-exempt=E1..E5.
+
+> LLM Work Routing (ADR-0078): substantive LLM-assisted work must reach /sync through the agent-team path — PM triage → Design Gate → specialist dispatch. Output pasted from an external LLM chat is input material, not a deliverable.
 
 ---
 

@@ -62,6 +62,6 @@
 
 - **Current Phase**: production
 - **Owner**: pm
-- **Last Updated**: 2026-09-15 (record refreshed after PM tier alignment to medium — Check F rollout)
+- **Last Updated**: 2026-09-17 (Instruction Writing Duty (ADR-0079) section added — instruction-policy wiring spec)
 - **Last Reviewer**: lifecycle-manager
 

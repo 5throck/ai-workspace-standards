@@ -3,15 +3,16 @@
 ## Metadata
 - **Skill**: sync
 - **Status**: active
-- **Version**: 1.5.0
+- **Version**: 1.6.0
 - **Owner**: pm
 - **Created**: 2026-07-08
-- **Last Updated**: 2026-09-12
+- **Last Updated**: 2026-09-17
 
 ## Description
 Full project sync pipeline covering lifecycle update, audit, L0→L1 publish, commit, push, and PR creation.
 
 ## Changelog
+- 2026-09-17: v1.6.0 — instruction-policy wiring: step 3.9 now cites the PM routing path (ADR-0078); step 0 sentence split into single-instruction sentences per ADR-0079 (design doc docs/designs/2026-09-17-instruction-policy-wiring-design.md)
 - 2026-09-12: v1.5.0 — Universal Design Gate (ADR-0074) phase B: pipeline step 3.9 Spec Registry Check (`audit.ts --spec-check --lifecycle-only`) documented as FATAL at L0 — blocks on a code diff with no spec activity; escape hatch `--spec-exempt=E1-E5`; missing `docs/specs/registry.json` is a loud WARN (gate INACTIVE) (commit 7170c3d8)
 - 2026-09-12: v1.4.0 — scoped staging: step 0 documents task-staged-file discipline, `SYNC_SCOPED_STAGING=1` / `--scoped-staging` preview, and dev-sync v1.11.0 WARN-phase residual reporting for `git add -A` sweeps (commit 20b534a9)
 - 2026-09-06: v1.3.0 — session-evidence skill review loop (SkillHone-inspired): step 3.96c row added to pipeline table; `## Skills Used` session evidence recording duty documented (design doc docs/designs/2026-09-06-skill-session-review-design.md)
@@ -34,6 +35,7 @@ Full project sync pipeline covering lifecycle update, audit, L0→L1 publish, co
 | 2026-07-08 | - | production | Skill extracted from inline /sync command to standalone SKILL.md | pm |
 | 2026-07-19 | production | production | Reassigned owner to pm and updated pipeline sync steps | pm |
 | 2026-09-12 | production | production | v1.4.x → v1.5.0 design-gate work: Universal Design Gate (ADR-0074) phase B — spec-check step 3.9 documented in the pipeline table; scoped-staging discipline documented in step 0; lifecycle record refreshed to match SKILL.md v1.5.0 (T-20260912-010) | pm |
+| 2026-09-17 | production | production | v1.5.0 → v1.6.0 instruction-policy wiring: ADR-0078 routing reference in step 3.9; step 0 STE sentence split (docs/designs/2026-09-17-instruction-policy-wiring-design.md) | pm |
 
 ## Acceptance Criteria
 

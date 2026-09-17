@@ -90,7 +90,7 @@ describe('lifecycle-sync-audit Check E (lifecycle record metadata gate)', () => 
 
   test('the refreshed records agree with their SKILL.md frontmatter', () => {
     const cases: Array<[string, string, string]> = [
-      ['sync', '1.5.0', 'pm'],
+      ['sync', '1.6.0', 'pm'],
       ['security-scan', '1.2.0', 'pm'],
       ['upgrade-project', '1.5.0', 'pm'],
     ];

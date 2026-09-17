@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-09-16T22:39:45.470Z
+**Generated**: 2026-09-17T05:23:21.464Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -19,12 +19,12 @@
 
 | Name | File | Tier | Model | Last Modified |
 |------|------|------|-------|---------------|
-| architect | agents/architect.md | high | inherit | 2026-09-12 |
+| architect | agents/architect.md | high | inherit | 2026-09-17 |
 | auditor | agents/auditor.md | medium | inherit | 2026-09-12 |
 | automation-engineer | agents/automation-engineer.md | low | inherit | 2026-09-12 |
-| docs-writer | agents/docs-writer.md | medium | inherit | 2026-09-12 |
+| docs-writer | agents/docs-writer.md | medium | inherit | 2026-09-17 |
 | lifecycle-manager | agents/lifecycle-manager.md | medium | inherit | 2026-09-15 |
-| pm | agents/pm.md | medium | inherit | 2026-09-15 |
+| pm | agents/pm.md | medium | inherit | 2026-09-17 |
 | scaffolding-expert | agents/scaffolding-expert.md | low | inherit | 2026-09-12 |
 | security-expert | agents/security-expert.md | medium | inherit | 2026-09-12 |
 
@@ -76,7 +76,7 @@
 | skill-lifecycle-manager | 1.3.0 | active | skills/skill-lifecycle-manager/SKILL.md | workspace | create skill, new skill, validate skills, skill lifecycle, manage skills | pm |
 | source-command-commit-push-pr | 1.0.1 | active | skills/source-command-commit-push-pr/SKILL.md | workspace | commit-push-pr, commit and push, create PR | pm |
 | standup-synthesizer | 1.0.0 | active | skills/standup-synthesizer/SKILL.md | workspace | standup digest, daily standup, synthesize standup, work summary | pm |
-| sync | 1.5.0 | active | skills/sync/SKILL.md | workspace | sync, /sync, commit and push, create PR | pm |
+| sync | 1.6.0 | active | skills/sync/SKILL.md | workspace | sync, /sync, commit and push, create PR | pm |
 | team-builder | 1.1.0 | active | skills/team-builder/SKILL.md | workspace | build new agent team, create agent team, agent team setup, team builder | pm |
 | ticket-run | 1.0.0 | active | skills/ticket-run/SKILL.md | workspace | ticket-run, process ticket queue, run next ticket | automation-engineer |
 | token-usage-lint | 1.1.0 | active | skills/token-usage-lint/SKILL.md | workspace | token lint, hardcoded color, design token compliance, raw hex values, hardcoded spacing | pm |

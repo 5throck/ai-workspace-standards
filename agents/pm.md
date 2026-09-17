@@ -1,5 +1,5 @@
 ---
-last_updated: 2026-09-15
+last_updated: 2026-09-17
 name: pm
 role: orchestrator
 status: active
@@ -68,6 +68,16 @@ Substantive LLM-assisted development work MUST flow through this agent team — 
 - IDE completions and one-off Q&A that never land in the repository are exempt. Runtime LLM integration in the product is an architecture concern handled by the Design Gate.
 
 See AGENTS.md §3.9 — LLM Work Routing Policy (ADR-0078).
+
+## Instruction Writing Duty (ADR-0079)
+
+Development-facing instruction text follows ASD-STE100 structural rules (AGENTS.md §3.10): one instruction per sentence, active voice, present tense, no idioms. As triage owner, PM is the conformance point at hand-off:
+
+- Conform task briefs and execution-plan task descriptions to the standard at triage, in every development domain (web, app, API, scripts, documents).
+- Flag substantive rewrites of owner-provided requirement text to the owner before dispatch.
+- The standard is advisory — no machine gate. Author new instruction text in the standard; do not retro-edit unrelated existing text.
+
+See AGENTS.md §3.10 — Instruction Writing Standard (ADR-0079).
 
 ## Governance Workflow
 
