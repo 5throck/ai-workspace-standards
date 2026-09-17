@@ -5,12 +5,32 @@ title: >-
   ADR-0079 probe: sentence-length lint prototype (advisory WARN) for design-doc
   requirement sections
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-17T05:26:06.926Z'
 history:
   - at: '2026-09-17T05:26:06.926Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-17T10:47:56.275Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-17T10:57:55.208Z'
+    from: waiting
+    to: review
+  - at: '2026-09-17T10:57:55.230Z'
+    from: review
+    to: done
+result: >-
+  Implemented per docs/designs/2026-09-17-instruction-lint-probe-design.md:
+  scripts/lint-instructions.ts 1.0.0 - advisory sentence-length probe for
+  ADR-0079 instruction text. Scans requirement/acceptance sections (headings
+  matching requirement/acceptance, levels 2-4) in docs/designs/*.md by default;
+  flags sentences over the 25-word descriptive limit as WARN lines; skips fenced
+  code blocks and table rows; --dir rescopes the root, --strict flips exit to 1;
+  exit 0 otherwise (no gate wiring - ADR-0079 Decision 4 keeps enforcement
+  advisory). First live run: 137 files scanned, 20 over-limit sentences, worst =
+  58 words (2026-09-17-governance-backlog-batch-design.md R1 - the exact
+  sentence the 2026-09-17 audit flagged). Tests: 10 new unit tests (672/672
+  total), typecheck delta 0, audit all-pass; L0+L1 SCRIPTS.md rows.
 error: null

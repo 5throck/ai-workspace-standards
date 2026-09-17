@@ -5,12 +5,36 @@ title: >-
   ADR-0078 observation: E2-E5 exempt paths land without design activity — survey
   landing pattern via exemption codes in audit logs
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-17T05:26:06.941Z'
 history:
   - at: '2026-09-17T05:26:06.941Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-17T10:47:56.261Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-17T10:49:45.504Z'
+    from: waiting
+    to: review
+  - at: '2026-09-17T10:49:45.518Z'
+    from: review
+    to: done
+result: >-
+  Survey window 2026-08-23 (ADR-0055 Stage 2) to 2026-09-17. (1) Recorded
+  exemption usage = E5 only: the 2026-09-12/13 fleet deliveries ran per-project
+  /sync --spec-exempt=E5 for sync-only delivery commits
+  (memory/2026-09-12.md:1693; CHANGELOG 2026-09-13 propagation entry). (2) Zero
+  recorded E1-E4 usage in memory/ or CHANGELOG; the 10 'EXEMPT:' grep hits are
+  boilerplate category definitions in design docs, not usage markers. (3)
+  Contrast: 111 design-gated specs registered in docs/specs/registry.json. (4)
+  History note: the hatch was silently inert 2026-08-23 to 24 (argv
+  interpolation bug; fixed via SYNC_SPEC_EXEMPT env delivery, dev-sync 1.7.2) -
+  fail-closed direction. Conclusion: no observed abuse of E2-E5 for substantive
+  landings in the self-reported record; the structural gap (E2-E5 need no design
+  doc by design) stands as a declared ADR-0078/0055 limit. Caveat: memory logs
+  are self-reported - a violating landing would not necessarily self-record;
+  mechanical commit-vs-registry correlation would be the deeper probe if abuse
+  is ever suspected.
 error: null
