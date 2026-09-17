@@ -13,7 +13,7 @@
  *    templates/ tree finds exactly the 2 known real markers (pins the
  *    no-behavior-change refactor of the scanner onto the parser).
  *
- * @version 1.0.0
+ * @version 1.1.0
  */
 import { describe, test, expect } from 'bun:test';
 import { join } from 'node:path';
@@ -23,7 +23,7 @@ import {
 } from '../../scripts/helpers/markers.ts';
 
 const REAL_MARKER_LINE =
-  '<!-- intentional-duplicate: workspace standards §3 — maintained locally for AI context proximity; source: docs/constitution/03-pr-workflow.md; hash: 18ad2842 -->';
+  '<!-- intentional-duplicate: workspace standards §3 — maintained locally for AI context proximity; source: docs/constitution/03-pr-workflow.md; hash: 8d70ef81 -->';
 
 // Verbatim contiguous slices of the four real prose lines that fed Check D's
 // phantom registry before T-20260912-029 (sources cited per fixture).
@@ -43,7 +43,7 @@ describe('parseIntentionalDuplicateLine', () => {
       reason: 'maintained locally for AI context proximity',
       section: '3',
       source: 'docs/constitution/03-pr-workflow.md',
-      hash: '18ad2842',
+      hash: '8d70ef81',
     });
   });
 
@@ -82,7 +82,7 @@ describe('parseIntentionalDuplicateLine', () => {
       reason: 'maintained locally for AI context proximity',
       section: '3',
       source: 'docs/constitution/03-pr-workflow.md',
-      hash: '18ad2842',
+      hash: '8d70ef81',
     });
   });
 
@@ -127,9 +127,11 @@ describe('scanIntentionalDuplicateMarkers — parser parity (T-20260912-029 refa
     ]);
 
     // Field fidelity through the refactor: source/hash still parsed identically.
+    // Hash re-seeded 18ad2842 → 8d70ef81 when the ADR-0078 routing line was
+    // added to the duplicated §3 source (instruction-policy wiring, 2026-09-17).
     for (const m of markers) {
       expect(m.source).toBe('docs/constitution/03-pr-workflow.md');
-      expect(m.hash).toBe('18ad2842');
+      expect(m.hash).toBe('8d70ef81');
       expect(m.text).toContain('workspace standards §3');
     }
   });
