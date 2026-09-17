@@ -1,0 +1,27 @@
+schemaVersion: 1
+id: T-20260917-010
+kind: manual
+title: >-
+  implement: snapshot replaced unlabeled managed-block spans before reconcile
+  (design 2026-09-17-governance-backlog-batch T-006)
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-09-16T22:27:45.643Z'
+history:
+  - at: '2026-09-16T22:27:45.643Z'
+    from: null
+    to: backlog
+  - at: '2026-09-16T22:37:37.850Z'
+    from: backlog
+    to: review
+  - at: '2026-09-16T22:37:37.876Z'
+    from: review
+    to: done
+result: >-
+  Implemented per the batch design: managed-block-merge 1.1.0 returns snapshots
+  ({rel, content} of the exact replaced span) — lib stays pure; upgrade-project
+  1.32.0 persists <target>.pre-reconcile.bak BEFORE the merged content write
+  (gitignored via *.bak), throws fail-closed on write failure, dry-run never
+  writes, SNAPSHOT line logged. 4 unit tests in managed-block-merge.test.ts.
+error: null

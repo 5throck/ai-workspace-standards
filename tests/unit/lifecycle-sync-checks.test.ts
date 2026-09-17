@@ -143,7 +143,7 @@ describe('lifecycle-sync-audit Check H (script record version gate, T-20260915-0
   test('the three known script records carry a Version field matching SCRIPTS.md', () => {
     const cases: Array<[string, string]> = [
       ['error-handling', '1.4.0'],
-      ['new-project', '1.20.0'],
+      ['new-project', '1.21.0'],
       ['validate-pm-extends', '0.3.1'],
     ];
     for (const [record, version] of cases) {

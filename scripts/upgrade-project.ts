@@ -1,5 +1,12 @@
 #!/usr/bin/env bun
-// @version 1.31.0
+// @version 1.32.0
+// v1.32.0: T-20260917-010 — pre-reconcile recovery snapshots. When the merge
+//          lib reports replaced unlabeled span(s) (result.snapshots), the
+//          wrapper writes them to `<target>.pre-reconcile.bak` BEFORE the
+//          merged content lands and logs the SNAPSHOT line; a snapshot write
+//          failure aborts fail-closed before that file's destructive
+//          reconcile. Dry-run never writes. Design:
+//          docs/designs/2026-09-17-governance-backlog-batch-design.md.
 // v1.31.0: T-20260916-012 — managed-block merge extraction + keyed-block
 //          destruction fix (design docs/designs/2026-09-16-managed-block-merge-fix-design.md):
 //          the merge core moved to the new pure lib/managed-block-merge.ts
@@ -900,6 +907,20 @@ function mergeWorkspaceManaged(projectFile: string, templateFile: string, rel: s
   const result = mergeManagedBlocks(projContent, tplContent, commonContent, rel, dryRun);
   for (const line of result.log) console.log(line);
   if (!dryRun && result.merged) {
+    // T-20260917-010: persist the replaced span(s) BEFORE the merged content
+    // lands — a recovery copy that cannot be written means the destructive
+    // unlabeled reconcile must not proceed (fail-closed abort; files merged
+    // earlier in this run stay merged, matching error-time behavior elsewhere
+    // in the run — the rollback pass remains the recovery path).
+    for (const snap of result.snapshots) {
+      const bakPath = `${projectFile}.pre-reconcile.bak`;
+      try {
+        writeFileSync(bakPath, snap.content, 'utf8');
+      } catch (err) {
+        throw new Error(`[upgrade-project] cannot write the recovery snapshot ${bakPath} — aborting before the destructive unlabeled reconcile of ${rel} (${(err as Error).message})`);
+      }
+      console.log(`    SNAPSHOT: replaced unlabeled span(s) of ${rel} saved to ${rel}.pre-reconcile.bak (overwritten per run; gitignored via *.bak)`);
+    }
     writeFileSync(projectFile, result.content, 'utf8');
   }
 }

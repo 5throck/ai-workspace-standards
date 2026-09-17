@@ -332,3 +332,49 @@ describe('dryRun purity and API shape', () => {
     expect(r.log).toEqual([`    INFO: Template has no managed markers — skipping ${REL}`]);
   });
 });
+
+describe('reconcile snapshots (T-20260917-010)', () => {
+  test('count-mismatch reconcile captures the exact replaced span', () => {
+    const proj = [
+      'PROSE-HEAD',
+      '',
+      unlabeled('STALE UNLABELED'),
+      '',
+      'PROSE-TAIL',
+      '',
+    ].join('\n');
+    const tpl = [unlabeled('FRESH-1'), '', unlabeled('FRESH-2'), ''].join('\n');
+    const r = mergeManagedBlocks(proj, tpl, null, REL, false);
+    expect(r.log.join('\n')).toContain('count mismatch');
+    expect(r.snapshots).toHaveLength(1);
+    expect(r.snapshots[0]!.rel).toBe(REL);
+    // the span is exactly the stale block (markers included), no surrounding prose
+    expect(r.snapshots[0]!.content).toBe(unlabeled('STALE UNLABELED'));
+    // the merged content moved on, but the snapshot preserves what was replaced
+    expect(r.content).not.toContain('STALE UNLABELED');
+  });
+
+  test('equal-count positional path captures no snapshot', () => {
+    const proj = ['HEAD', '', unlabeled('OLD'), '', 'TAIL', ''].join('\n');
+    const tpl = [unlabeled('NEW'), ''].join('\n');
+    const r = mergeManagedBlocks(proj, tpl, null, REL, false);
+    expect(r.merged).toBe(true);
+    expect(r.snapshots).toEqual([]);
+  });
+
+  test('dry-run still returns snapshot data (purity: the write decision is the caller\u2019s)', () => {
+    const proj = ['HEAD', '', unlabeled('STALE'), '', 'TAIL', ''].join('\n');
+    const tpl = [unlabeled('A'), '', unlabeled('B'), ''].join('\n');
+    const r = mergeManagedBlocks(proj, tpl, null, REL, true);
+    expect(r.snapshots).toHaveLength(1);
+    expect(r.snapshots[0]!.content).toBe(unlabeled('STALE'));
+  });
+
+  test('template with no managed blocks hits the early return with an empty snapshot list', () => {
+    const proj = ['HEAD', '', keyed('k', 'v'), '', 'TAIL', ''].join('\n');
+    const r = mergeManagedBlocks(proj, 'PLAIN TEMPLATE\n', null, REL, false);
+    expect(r.merged).toBe(false);
+    expect(r.snapshots).toEqual([]);
+    expect(r.content).toBe(proj);
+  });
+});
