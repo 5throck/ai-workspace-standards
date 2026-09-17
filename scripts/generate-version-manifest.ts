@@ -1,4 +1,4 @@
-// @version 1.6.1
+// @version 1.6.2
 // v1.6.0 (T-20260916-013): shallow-tolerant --check. In a shallow checkout
 // v1.6.1 (T-20260917-review): parseAgentFrontmatter normalizes CRLF before tier/model regexes; on Windows working trees the nested `tier:` block parsed as tier=N/A and regenerated a drifting manifest. parseAgentFrontmatter is now exported for CRLF unit coverage.
 //           (actions/checkout default depth=1) `git log` has no history, so the
@@ -199,7 +199,10 @@ function extractScriptDependencies(content: string): string[] {
 
 // Simple, single-action commands with no orchestration logic — intentionally
 // have no dedicated SKILL.md. See detectDrift() for rationale.
-const COMMAND_SKILL_EXEMPT = new Set(['changelog', 'meeting', 'memlog', 'new-task']);
+// commit-push-pr: pure redirect stub to /sync (workspace enforcement banner);
+// flagged as drift in variants that lack the source-command-<name> alias skill
+// (fixed at L0 because core scripts are immutable at L2/L3).
+const COMMAND_SKILL_EXEMPT = new Set(['changelog', 'meeting', 'memlog', 'new-task', 'commit-push-pr']);
 const SKILL_METADATA_EXEMPT = new Set([
     // ADR-0076 / 2026-09-12 graft wiring refresh: tool-owned Claude-only skill
     // with canonical graft frontmatter; workspace lifecycle fields are not
