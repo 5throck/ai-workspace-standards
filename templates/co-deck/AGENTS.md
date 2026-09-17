@@ -191,7 +191,7 @@ When a specialist agent's required tool is denied, PM applies the [Permission De
 - Perform design work (delegate to `[design specialist]`)
 
 **Task Owner vs Executor Distinction**:
-- **Task owner (PM)**: "Buck stops here" responsible person for tracking progress
+- **Task owner (PM)**: PM is accountable for task progress and final delivery
 - **Task executor (specialist)**: Agent who performs the actual work
 - PM creates tasks (owner: pm), dispatches project specialists (executor: `[specialist agent]`), and updates task status upon completion
 

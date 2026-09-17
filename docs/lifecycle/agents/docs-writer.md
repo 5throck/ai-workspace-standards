@@ -55,5 +55,5 @@
 
 - **Current Phase**: production
 - **Owner**: docs-writer
-- **Last Updated**: 2026-09-15 (record refreshed to match agents/docs-writer.md 2026-09-12 changes — Check F rollout)
+- **Last Updated**: 2026-09-17 (STE authoring constraint added per ADR-0079 — instruction-policy wiring spec)
 - **Last Reviewer**: lifecycle-manager
