@@ -1,0 +1,16 @@
+schemaVersion: 1
+id: T-20260917-011
+kind: manual
+title: >-
+  ADR-0079 probe: sentence-length lint prototype (advisory WARN) for design-doc
+  requirement sections
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-09-17T05:26:06.926Z'
+history:
+  - at: '2026-09-17T05:26:06.926Z'
+    from: null
+    to: backlog
+result: null
+error: null
