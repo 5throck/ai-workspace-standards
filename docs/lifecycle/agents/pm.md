@@ -12,6 +12,7 @@
 | 2026-05-30 | production | production | Updated Meeting Facilitation section to reflect dual execution modes | antigravity |
 | 2026-06-23 | production | production | ADR-0047: Migrated co-work/co-design pm.md to frontmatter-only extends (redundant body cleanup) | lifecycle-manager |
 | 2026-06-23 | production | production | ADR-0048: Migrated co-deck pm.md domain orchestration to AGENTS.md §4.2, converted pm.md to frontmatter-only. All 6 variants now follow identical 7-line minimal frontmatter pattern. | lifecycle-manager |
+| 2026-09-18 | production | production | v1.2.0: Added Agent Hiring & Firing authority (PM-decided timing, deprecate-default exit, ADR-0061 decision records) and Skill Request Approval (agent-initiated, PM-approved) | pm |
 
 ## Acceptance Criteria
 
@@ -36,6 +37,7 @@
 - docs-writer (for documentation)
 - security-expert (for security review)
 - scaffolding-expert (for project setup)
+- lifecycle-manager (for governance records and L0→L1 publishing)
 
 ## Domain
 
@@ -49,6 +51,8 @@
 - Safely scaffolding new projects
 - Orchestrating multi-agent workflows
 - Enforcing quality gates
+- Deciding agent hiring/firing (agent-lifecycle-manager)
+- Approving agent skill requests (skill-lifecycle-manager)
 
 ## Dispatch Protocol
 
@@ -62,6 +66,6 @@
 
 - **Current Phase**: production
 - **Owner**: pm
-- **Last Updated**: 2026-09-17 (Instruction Writing Duty (ADR-0079) section added — instruction-policy wiring spec)
+- **Last Updated**: 2026-09-18 (record refreshed after v1.2.0 hiring/firing + skill request approval rollout; Instruction Writing Duty section landed 2026-09-17)
 - **Last Reviewer**: lifecycle-manager
 

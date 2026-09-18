@@ -10,6 +10,7 @@ All notable changes to the template variants are documented here.
 
 ## [Unreleased]
 ### Changed
+- **[2026-09-18]**: `templates/common/agents/pm.md` 1.2.0 — WORKSPACE-MANAGED block gains "Agent Hiring & Firing" (PM-decided timing, deprecate-default exit, hard delete on explicit user request) and "Skill Request Approval" (agent-initiated, PM-approved skill create/attach/remove). Variants inherit via the pm.md extends chain; `templates/common/skills/agent-lifecycle-manager` 1.2.0 and `skill-lifecycle-manager` 1.4.0 published from L0 via `propagate:apply`.
 - **[2026-06-01]**: `co-security` variant: Redesigned workflow by merging Phase 1 and 2 into "Recon & Threat Modeling"
 - **[2026-06-01]**: `co-security` variant: Fixed PM-ONLY Agent Roster in `AGENTS.md` and `docs/co-security.context.md`
 

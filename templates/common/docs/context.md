@@ -36,7 +36,7 @@ The mapping is immutable per generation:
 - **Medium**: `claude-sonnet-5-0`
 - **Low**: `claude-haiku-4-5`
 
-Tier layering: the workspace-root PM stays High (workspace governance and design adjudication); template PMs are Medium (project orchestration). A variant whose PM must own design adjudication re-declares `tier: high` in its own `agents/pm.md` frontmatter.
+Tier layering: the workspace-root PM and template PMs are all Medium (orchestration and coordination; workspace-root aligned to Medium 2026-09-15). Design-adjudication-heavy work dispatches to the architect or the High-tier design specialists. A variant whose PM must own design adjudication re-declares `tier: high` in its own `agents/pm.md` frontmatter.
 
 ### LLM Work Routing Policy (ADR-0078)
 
