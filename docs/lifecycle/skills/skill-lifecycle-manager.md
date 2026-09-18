@@ -7,6 +7,7 @@
 ## Changelog
 
 - 2026-09-06: v1.3.0 — whole-skill revision principle section added (SKILL.md + scripts/ + references/ revised together in one approved change; SkillHone finding; design doc docs/designs/2026-09-06-skill-session-review-design.md)
+- 2026-09-18: v1.4.0 — Skill Request Workflow (agent-initiated, PM-approved; Steps R1–R3) and Skill Deprecation & Removal sections added (removal procedure was previously missing entirely)
 
 ## Phase History
 
@@ -38,5 +39,6 @@
 
 - **Current Phase**: production
 - **Owner**: pm
-- **Last Updated**: 2026-09-12 (Owner corrected lifecycle-manager → pm to match SKILL.md frontmatter, T-20260912-010)
+- **Version**: 1.4.0
+- **Last Updated**: 2026-09-18 (v1.4.0 — Skill Request Workflow + Deprecation & Removal sections added)
 - **Last Reviewer**: lifecycle-manager

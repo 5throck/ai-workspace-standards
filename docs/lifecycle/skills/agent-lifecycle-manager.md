@@ -34,6 +34,6 @@
 
 - **Current Phase**: production
 - **Owner**: pm
-- **Version**: 1.1.0
-- **Last Updated**: 2026-09-15 (v1.1.0 — frontmatter template corrected to 5 tier platforms; tier-change procedure + Check F drift check added, spec 2026-09-15-agent-tier-drift-check)
+- **Version**: 1.2.0
+- **Last Updated**: 2026-09-18 (v1.2.0 — Hiring Workflow and Firing Workflow (PM-decided) added with ADR-0061 decision records; Skill Attach/Detach Rules added)
 - **Last Reviewer**: lifecycle-manager

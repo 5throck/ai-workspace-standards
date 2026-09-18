@@ -155,6 +155,8 @@ Before dispatching any specialist agents (Level 2 tasks), PM **must** output an 
 
 **LLM Work Routing (ADR-0078)**: substantive LLM-assisted development work — generation or modification of code, documents, designs, tests, or scripts — MUST route through the project's agent team via the PM Gateway path above; querying an external LLM directly and landing its output in the repository is a policy violation. Exemptions and runtime LLM integration scoping: [AGENTS.md §3.9](AGENTS.md#39-llm-work-routing-policy-adr-0078) and [ADR-0078](docs/adr/0078-agent-mediated-llm-work-routing.md).
 
+**Team Management (ADR-0080)**: PM owns agent-team composition and skill-change rulings — hiring/firing is PM-decided from workflow signals (decision record per ADR-0061 before dispatch; default exit `status: deprecated`, hard delete only on explicit user request), and skill add/remove requests are agent-initiated but proceed only on PM approval. Authority summary: [AGENTS.md §3.11](AGENTS.md#311-pm-team-management-authority-adr-0080) and [ADR-0080](docs/adr/0080-pm-team-management-authority.md).
+
 **Rules specific to this enforcement level**:
 - The Agent tool MUST NOT be called until this table is visible to the user
 - At workspace root, dispatch `lifecycle-manager` and `auditor`; in variant projects, PM handles both directly
@@ -728,4 +730,4 @@ Agent, skill, and command frontmatter structures are validated against JSON Sche
 
 ---
 
-*Last Updated: 2026-09-17*
+*Last Updated: 2026-09-18*

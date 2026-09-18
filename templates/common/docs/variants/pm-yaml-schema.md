@@ -278,7 +278,7 @@ dispatch_protocol:
 - `medium`: Standard orchestration (claude-sonnet-5-0, gemini-3.8-flash)
 - `low`: Simple coordination (claude-haiku-4-5)
 
-> Template PMs default to `medium` (project orchestration); the workspace-root PM is `high`. A variant whose PM must own design adjudication re-declares `tier: high` in its own `agents/pm.md` frontmatter.
+> Template PMs and the workspace-root PM are all `medium` (orchestration and coordination; workspace-root aligned 2026-09-15). A variant whose PM must own design adjudication re-declares `tier: high` in its own `agents/pm.md` frontmatter.
 
 **Communication Style Values**:
 - `sync`: Synchronous - requires user confirmation at each gate

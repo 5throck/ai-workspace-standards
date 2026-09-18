@@ -228,6 +228,15 @@ Development-facing instruction text follows ASD-STE100 (Simplified Technical Eng
 
 **Enforcement**: advisory — PM conforms task briefs and execution-plan rows at triage (flagging substantive rewrites); architect checks requirement sections at Design Gate review; specialists author new docs in the standard. See ADR-0079 (workspace root, `docs/adr/0079-simplified-english-development-instructions.md`).
 
+### §3.11 PM Team-Management Authority (ADR-0080)
+
+PM owns the composition of the agent team and rules on skill changes:
+
+- **Hiring/firing (top-down, PM-decided)**: PM judges timing and target from workflow signals — recurring unmatched work types, role overload, absorbed roles, the quarterly roster review (§10 cadence) — without a blocking user approval. Every decision emits a gate-moment decision record (ADR-0061) before dispatch. Default exit is `status: deprecated`; hard delete requires an explicit user request. Procedure: `agent-lifecycle-manager` skill (Hiring H1–H6, Firing F1–F5).
+- **Skill requests (bottom-up, agent-initiated, PM-approved)**: agents file structured request blocks (`create|attach|remove` + evidence) in their task reports and memory logs; PM triages and only approved requests are dispatched for execution. Agents never create, attach, or remove skills unilaterally. Procedure: `skill-lifecycle-manager` skill (Requests R1–R3, Deprecation & Removal).
+
+**Enforcement**: governance, not code — the audits (`agent-lifecycle-audit.ts`, `lifecycle-sync-audit.ts`) catch structural drift, and decision records capture the judgment trail. See ADR-0080 (workspace root, `docs/adr/0080-pm-team-management-authority.md`).
+
 ---
 
 <!-- COMMON-AGENTS:START -->
