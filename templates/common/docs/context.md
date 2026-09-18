@@ -426,7 +426,7 @@ Use an external computation tool when the task involves ANY of the following:
 
 ## Git / PR Workflow
 
-<!-- intentional-duplicate: workspace standards §3 — maintained locally for AI context proximity; source: docs/constitution/03-pr-workflow.md; hash: 8d70ef81 -->
+<!-- intentional-duplicate: workspace standards §3 — maintained locally for AI context proximity; source: docs/constitution/03-pr-workflow.md; hash: a1be51db -->
 
 ```
 /sync "feat: description"
@@ -444,6 +444,8 @@ Use an external computation tool when the task involves ANY of the following:
 > Universal Design Gate (ADR-0074): every code change at any tier must carry spec activity — a design doc under docs/designs/ registered via scripts/spec-register.ts — enforced by the /sync spec-check (audit.ts --spec-check, FATAL). Trivial changes: --spec-exempt=E1..E5.
 
 > LLM Work Routing (ADR-0078): substantive LLM-assisted work must reach /sync through the agent-team path — PM triage → Design Gate → specialist dispatch. Output pasted from an external LLM chat is input material, not a deliverable.
+
+> Conflicted-PR recovery (ADR-0081): when origin/main advances past your branch, merge it in early — dev-sync warns at pre-flight naming the diverged shared pipeline files. If a merge conflict lands despite §3.3, resolve it and conclude through the gates with /sync --conclude-merge (bare git commit stays blocked).
 
 ---
 

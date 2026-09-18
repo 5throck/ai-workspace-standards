@@ -83,7 +83,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `review-baseline.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `resync-audit.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `create-l3-scaffold.ts` | L0 | 1.15.0 | active | —| —| L0 | —|
-| `dev-sync.ts` | L0 | 1.14.1 | active | —| —| L0+L1 | —|
+| `dev-sync.ts` | L0 | 1.15.0 | active | main-drift pre-flight warning (`--require-current-main` abort) + sanctioned `--conclude-merge` conflicted-merge path (ADR-0081/T-20260918-002) | —| L0+L1 | —|
 | `dispatch-parallel.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
 | `dispatch-serial.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
 | `dispatch.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
@@ -111,6 +111,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `helpers/l0-ref-policy.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `helpers/context-sections.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
 | `helpers/markers.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
+| `helpers/merge-state.ts` | L0 | 1.0.0 | active | §3.3 shared-file taxonomy + unresolved-conflict parsing for dev-sync main-drift/--conclude-merge (ADR-0081/T-20260918-002) | —| L0+L1 | —|
 | `helpers/scaffold-markers.ts` | L0 | 1.3.0 | active | Shared scaffold marker constants + (marker→source) mapping + delivery-tree derivations + transient test-fixture predicate (T-20260916-001) | —| L0+L1 | —|
 | `helpers/template-version.ts` | L0 | 1.1.0 | active | templates/VERSION SSOT reader for scaffold provenance — fails loud on missing/unparseable; resolveProvenanceVersion() pins the shared --version-wins resolution order (T-20260915-011, T-20260916-002) | —| L0 | —|
 | `helpers/pm-md-parser.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
