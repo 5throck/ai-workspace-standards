@@ -1,0 +1,25 @@
+schemaVersion: 1
+id: T-20260918-004
+kind: manual
+title: >-
+  Delivery hardening P4: fleet backport of ADR-0080 policy content across
+  Projects/co-* (first application of the standing backport policy)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-18T02:33:00.000Z'
+history:
+  - at: '2026-09-18T02:33:00.000Z'
+    from: null
+    to: backlog
+notes: >-
+  ADR-0080 authority content (hiring/firing + skill request sections) shipped
+  to L0 and L1 managed blocks (pm.md WORKSPACE-MANAGED, COMMON-AGENTS,
+  COMMON-CONTEXT) but the 11 Projects/co-* fleet inherits managed-block content
+  only via scaffold or the manual project-resync runbook (last: 2026-09-16, 12
+  hand-written upgrade PRs). Per ADR-0081 Decision 4 / design §3.4: run the
+  project-resync / upgrade-project sweep to deliver the policy content to the
+  fleet within one release cycle, and record the standing rule that
+  policy-class L1 changes open a fleet backport ticket in the same PR's Notes.
+  Longer term (separate design): evaluate widening upgrade-project's
+  managed-zone sync to cover COMMON-CONTEXT content directly.

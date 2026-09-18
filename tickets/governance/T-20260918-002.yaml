@@ -1,0 +1,27 @@
+schemaVersion: 1
+id: T-20260918-002
+kind: manual
+title: >-
+  Delivery hardening P2: dev-sync pre-flight main-drift warning + sanctioned
+  --conclude-merge path for conflicted PR branches
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-18T02:31:00.000Z'
+history:
+  - at: '2026-09-18T02:31:00.000Z'
+    from: null
+    to: backlog
+notes: >-
+  Evidence: PR #954 — origin/main advanced (#951-#953) while the branch was
+  open; five shared pipeline files conflicted and the merge could not be
+  concluded locally (pre-commit SYNC_ACTIVE gate + dev-sync MERGE_HEAD
+  fail-closed gate), forcing a full branch rebuild (reset --hard origin/main,
+  resolved-tree replay, second dev-sync, push --force-with-lease). Fix per
+  ADR-0081 Decision 2 / design §3.2: (a) pre-flight step fetches origin/main
+  and loudly warns (naming the diverged §3.3 shared files) when main advanced
+  past the merge-base, with opt-in --require-current-main abort; (b)
+  --conclude-merge mode running the identical gate battery over a resolved
+  in-progress merge and creating the merge commit through the SYNC_ACTIVE
+  context contract. MERGE_HEAD gate stays fail-closed for the default path;
+  CONSTITUTION §3.3 stays the primary rule. Acceptance criteria in design §3.2.

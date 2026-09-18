@@ -1,0 +1,26 @@
+schemaVersion: 1
+id: T-20260918-001
+kind: manual
+title: >-
+  Delivery hardening P1: manifest --check masks "Last Modified" date columns
+  unconditionally (off-by-one-commit lag breaks full-history CI)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-18T02:30:00.000Z'
+history:
+  - at: '2026-09-18T02:30:00.000Z'
+    from: null
+    to: backlog
+notes: >-
+  Evidence: PR #954 first CI run failed on "VERSION_MANIFEST drift: 1 differing
+  line(s)" and recovery required the convergence commit eb6901ab. Root:
+  getGitTimestamp() derives Last Modified from committed git log while dev-sync
+  generates the manifest (step 4.7) before the commit (step 6) — the committed
+  manifest records the pre-PR date and CI merge previews see the PR commit,
+  drifting across day boundaries. Fix per ADR-0081 Decision 1 /
+  docs/designs/2026-09-18-delivery-pipeline-hardening-design.md §3.1: drop the
+  shallow-only branch in generate-version-manifest.ts --check and mask
+  header-derived Last Modified columns on both sides unconditionally; keep
+  structural columns literal; add a comparator fixture test with a date-only
+  diff. Rejected alternative: post-commit regen + amend.

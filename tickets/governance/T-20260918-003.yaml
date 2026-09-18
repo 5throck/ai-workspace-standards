@@ -1,0 +1,27 @@
+schemaVersion: 1
+id: T-20260918-003
+kind: manual
+title: >-
+  Delivery hardening P3: de-position the intentional-duplicate parity pin
+  (assert marker identity, not absolute line)
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-09-18T02:32:00.000Z'
+history:
+  - at: '2026-09-18T02:32:00.000Z'
+    from: null
+    to: backlog
+notes: >-
+  Evidence: PR #955 (docs-only) failed CI on all three OSes — inserting ten
+  lines into the COMMON-CONTEXT block shifted the §3 marker in
+  templates/common/docs/context.md from line 421 to 429 and
+  tests/unit/intentional-duplicate-parser.test.ts pins the absolute line (the
+  pin was re-pointed 421 to 429 in the same PR as interim maintenance). Fix per
+  ADR-0081 Decision 3 / design §3.3: keep the exactly-2-markers, per-file
+  uniqueness and section/source/hash/text fidelity assertions; drop the
+  absolute line expectations for both files (context.md and
+  variant.context.template.md:151), keeping only a sanity bound (marker after
+  the file's first heading). Acceptance: documentation insertions above a
+  marker keep the suite green; deleting a marker or mutating source/hash still
+  fails.
