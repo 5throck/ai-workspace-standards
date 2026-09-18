@@ -285,6 +285,39 @@ describe('diffManifests shallow mode (ignoreDateColumns, T-20260916-013)', () =>
     });
 });
 
+describe('date-masked --check default (ADR-0081 / T-20260918-001)', () => {
+    // checkManifest() now passes ignoreDateColumns: true unconditionally (the
+    // shallow-only gating is gone): the Last Modified cells always lag the
+    // generating PR's own commit by one commit (generation precedes the
+    // commit), so they are informational, not gate-bearing. These fixtures pin
+    // that contract at the comparator level.
+
+    test('date-only drift across a day boundary is not a gate failure', () => {
+        const disk = AGENTS_MANIFEST('2026-09-17T10:00:00.000Z', '2026-09-17', '2026-09-17');
+        const regen = AGENTS_MANIFEST('2026-09-18T09:00:00.000Z', '2026-09-18', '2026-09-18');
+        expect(diffManifests(disk, regen, { ignoreDateColumns: true })).toEqual([]);
+    });
+
+    test('tier drift is still a failure under the date-masked default', () => {
+        const disk = AGENTS_MANIFEST('2026-09-18T10:00:00.000Z', '2026-09-18', '2026-09-18');
+        const regen = AGENTS_MANIFEST('2026-09-18T10:00:00.000Z', '2026-09-18', '2026-09-18').replace('| High |', '| Low |');
+        const diffs = diffManifests(disk, regen, { ignoreDateColumns: true });
+        expect(diffs.length).toBe(1);
+        expect(diffs[0].onDisk).toContain('| High |');
+        expect(diffs[0].regenerated).toContain('| Low |');
+    });
+
+    test('path drift is still a failure under the date-masked default', () => {
+        const disk = AGENTS_MANIFEST('2026-09-18T10:00:00.000Z', '2026-09-18', '2026-09-18');
+        const regen = AGENTS_MANIFEST('2026-09-18T10:00:00.000Z', '2026-09-18', '2026-09-18')
+            .replace('agents/architect.md', 'agents/architect-renamed.md');
+        const diffs = diffManifests(disk, regen, { ignoreDateColumns: true });
+        expect(diffs.length).toBe(1);
+        expect(diffs[0].onDisk).toContain('agents/architect.md');
+        expect(diffs[0].regenerated).toContain('agents/architect-renamed.md');
+    });
+});
+
 describe('isShallowRepository (T-20260916-013)', () => {
     test('returns a boolean without throwing (spawn failure counts as full)', () => {
         expect(typeof isShallowRepository()).toBe('boolean');
