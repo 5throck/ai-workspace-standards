@@ -1033,6 +1033,15 @@
       "source": "manual",
       "created": "2026-09-18",
       "last_updated": "2026-09-18"
+    },
+    {
+      "id": "2026-09-18-delivery-pipeline-hardening-design",
+      "title": "delivery pipeline hardening design",
+      "file": "docs/designs/2026-09-18-delivery-pipeline-hardening-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-18",
+      "last_updated": "2026-09-18"
     }
   ]
 }

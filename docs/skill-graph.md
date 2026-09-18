@@ -310,6 +310,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `adr:0078` | adr | — | — | — |
 | `adr:0079` | adr | — | — | — |
 | `adr:0080` | adr | — | agent-lifecycle-manager, skill-lifecycle-manager, team-builder | — |
+| `adr:0081` | adr | — | project-resync, upgrade-project | — |
 | `dec:DEC-20260825-01` | decision | — | — | — |
 | `dec:DEC-20260825-02` | decision | `sync` | — | — |
 | `dec:DEC-20260829-01` | decision | `decision-record` | — | — |
