@@ -5,22 +5,31 @@ title: >-
   Delivery hardening P1: manifest --check masks "Last Modified" date columns
   unconditionally (off-by-one-commit lag breaks full-history CI)
 priority: normal
-status: backlog
-attempts: 0
+status: done
+attempts: 1
 created_at: '2026-09-18T02:30:00.000Z'
 history:
   - at: '2026-09-18T02:30:00.000Z'
     from: null
     to: backlog
-notes: >-
-  Evidence: PR #954 first CI run failed on "VERSION_MANIFEST drift: 1 differing
-  line(s)" and recovery required the convergence commit eb6901ab. Root:
-  getGitTimestamp() derives Last Modified from committed git log while dev-sync
-  generates the manifest (step 4.7) before the commit (step 6) — the committed
-  manifest records the pre-PR date and CI merge previews see the PR commit,
-  drifting across day boundaries. Fix per ADR-0081 Decision 1 /
-  docs/designs/2026-09-18-delivery-pipeline-hardening-design.md §3.1: drop the
-  shallow-only branch in generate-version-manifest.ts --check and mask
-  header-derived Last Modified columns on both sides unconditionally; keep
-  structural columns literal; add a comparator fixture test with a date-only
-  diff. Rejected alternative: post-commit regen + amend.
+  - at: '2026-09-18T03:05:00.000Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-18T03:10:00.000Z'
+    from: waiting
+    to: review
+  - at: '2026-09-18T03:15:00.000Z'
+    from: review
+    to: done
+result: >-
+  Implemented per ADR-0081 Decision 1 /
+  docs/designs/2026-09-18-delivery-pipeline-hardening-design.md §3.1.
+  generate-version-manifest.ts 1.6.2 → 1.7.0: checkManifest() passes
+  ignoreDateColumns: true unconditionally (the shallow-only gating of
+  T-20260916-013 is gone; isShallowRepository() retained exported for
+  date-source work but no longer consulted). Structural columns
+  (name/file/tier/model/version/location/triggers) still compare literally;
+  published dates remain informational. Comparator fixtures added in
+  tests/unit/registry-version-parity.test.ts ("date-masked --check default"):
+  date-only drift across a day boundary passes; tier and path drift still
+  fail. SCRIPTS.md row + footer updated.

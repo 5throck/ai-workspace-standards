@@ -73,7 +73,7 @@
       "severity": "Major",
       "location": "scripts/generate-version-manifest.ts (getGitTimestamp), scripts/dev-sync.ts (step 4.7 vs step 6 ordering)",
       "description": "The manifest's Last Modified cells derive from committed git log, but dev-sync generates the manifest (step 4.7) before committing (step 6), so the committed manifest records the pre-PR date for every file the PR touches. CI merge previews regenerate with the PR commit as last toucher, so date cells drift by one commit whenever the previous toucher predates the PR's day. PR #954's first CI run failed on this (2026-09-18); recovery required the convergence commit eb6901ab. Date masking currently applies to shallow checkouts only (T-20260916-013). Remediation: ADR-0081 Decision 1 / T-20260918-001 — mask Last Modified columns in full-history mode too.",
-      "expected_status": "Accepted"
+      "expected_status": "Resolved"
     },
     {
       "id": "ISSUE-010",
