@@ -5,23 +5,36 @@ title: >-
   Delivery hardening P2: dev-sync pre-flight main-drift warning + sanctioned
   --conclude-merge path for conflicted PR branches
 priority: normal
-status: backlog
-attempts: 0
+status: done
+attempts: 1
 created_at: '2026-09-18T02:31:00.000Z'
 history:
   - at: '2026-09-18T02:31:00.000Z'
     from: null
     to: backlog
-notes: >-
-  Evidence: PR #954 — origin/main advanced (#951-#953) while the branch was
-  open; five shared pipeline files conflicted and the merge could not be
-  concluded locally (pre-commit SYNC_ACTIVE gate + dev-sync MERGE_HEAD
-  fail-closed gate), forcing a full branch rebuild (reset --hard origin/main,
-  resolved-tree replay, second dev-sync, push --force-with-lease). Fix per
-  ADR-0081 Decision 2 / design §3.2: (a) pre-flight step fetches origin/main
-  and loudly warns (naming the diverged §3.3 shared files) when main advanced
-  past the merge-base, with opt-in --require-current-main abort; (b)
-  --conclude-merge mode running the identical gate battery over a resolved
-  in-progress merge and creating the merge commit through the SYNC_ACTIVE
-  context contract. MERGE_HEAD gate stays fail-closed for the default path;
-  CONSTITUTION §3.3 stays the primary rule. Acceptance criteria in design §3.2.
+  - at: '2026-09-18T03:30:00.000Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-18T03:35:00.000Z'
+    from: waiting
+    to: review
+  - at: '2026-09-18T03:40:00.000Z'
+    from: review
+    to: done
+result: >-
+  Implemented per ADR-0081 Decision 2 /
+  docs/designs/2026-09-18-delivery-pipeline-hardening-design.md §3.2.
+  dev-sync.ts 1.14.1 → 1.15.0: (1) pre-flight main-drift detection after the
+  language gate — best-effort fetch of origin/main, merge-base compare, loud
+  warning naming the diverged CONSTITUTION §3.3 shared pipeline files when
+  origin/main advanced past the branch's merge-base; --require-current-main
+  escalates to abort; offline/no-remote skips silently. (2) --conclude-merge:
+  the MERGE_HEAD fail-closed gate is satisfied only with the flag AND a fully
+  resolved tree (zero --diff-filter=U entries via the new
+  parseUnresolvedConflicts); the standard gate battery then runs and
+  git commit -m produces the two-parent merge commit. Without the flag the
+  gate is byte-identical to v1.14.1. Shared-file taxonomy + parsing live in
+  the new import-safe scripts/helpers/merge-state.ts 1.0.0 (6 unit tests in
+  tests/unit/merge-state.test.ts — pipeline itself is not import-safe).
+  Workflow recovery note added to docs/constitution/03-pr-workflow.md §3.3.
+  SCRIPTS.md L0/L1 rows + footers updated.

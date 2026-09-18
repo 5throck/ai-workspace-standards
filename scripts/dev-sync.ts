@@ -1,4 +1,22 @@
-// @version 1.14.1
+// @version 1.15.0
+// v1.15.0 (ADR-0081 / T-20260918-002): main-integration hardening — two
+//           additions, CONSTITUTION §3.3 unchanged as the primary rule.
+//           (1) Pre-flight main-drift detection: after the language gate, a
+//           best-effort `git fetch origin main` + merge-base check warns loudly
+//           — naming the diverged §3.3 shared pipeline files — when origin/main
+//           has advanced past HEAD's merge-base; `--require-current-main`
+//           escalates the warning to an abort. Offline/no-remote contexts skip
+//           silently. Closes the "stale branch discovered at PR-merge-time"
+//           class (PR #954: five shared files conflicted after #951-#953
+//           landed mid-flight).
+//           (2) `--conclude-merge`: the sanctioned exit for an in-progress
+//           conflicted merge. The MERGE_HEAD fail-closed gate is satisfied
+//           only with the flag AND a fully resolved tree (zero
+//           --diff-filter=U entries); the standard gate battery then runs and
+//           `git commit -m` produces the two-parent merge commit (git attaches
+//           MERGE_HEAD as the second parent). Without the flag the gate is
+//           byte-identical to v1.14.1. Shared-file taxonomy + conflict parsing
+//           live in the new import-safe scripts/helpers/merge-state.ts 1.0.0.
 // v1.14.0: fix(pipeline): two fail-open gates become fail-closed (T-20260912-009 /
 //           T-20260912-007). (1) Step 3.7 discarded verify-scripts --check-drift's exit
 //           code behind .quiet().nothrow() — L0/L1 script drift neither failed the
@@ -69,6 +87,7 @@ import * as crypto from 'node:crypto';
 import { withRetry, DEFAULT_CONFIG } from './retry-handler.ts';
 import { hasNonEnglish } from './lib/language-guard.ts';
 import { parseStatusPorcelain } from './lib/git-status.ts';
+import { sharedPipelineFilesChanged, parseUnresolvedConflicts } from './helpers/merge-state.ts';
 
 const GREEN = '\x1b[32m';
 const RED = '\x1b[31m';
@@ -102,6 +121,17 @@ let specExempt = '';
 // Default is the ADR-0055 WARN soak; SYNC_SCOPED_STAGING=1 / --scoped-staging
 // previews the promoted exclude-behavior.
 let scopedStaging = process.env.SYNC_SCOPED_STAGING === '1';
+// Main-integration hardening (ADR-0081 / T-20260918-002):
+//   --require-current-main — escalate the pre-flight main-drift warning to an
+//   abort (default: warn only).
+//   --conclude-merge — sanctioned path to conclude an in-progress conflicted
+//   merge: the MERGE_HEAD fail-closed gate is satisfied after verifying the
+//   tree has zero unresolved conflicts, and the standard gate battery +
+//   `git commit -m` then produce the two-parent merge commit (git creates the
+//   second parent from MERGE_HEAD automatically). Without this flag the gate
+//   stays fail-closed exactly as before.
+let requireCurrentMain = false;
+let concludeMerge = false;
 const msgArgs: string[] = [];
 for (let i = 0; i < rawArgs.length; i++) {
   const arg = rawArgs[i];
@@ -113,6 +143,10 @@ for (let i = 0; i < rawArgs.length; i++) {
     specExempt = arg.slice('--spec-exempt='.length);
   } else if (arg === '--scoped-staging') {
     scopedStaging = true;
+  } else if (arg === '--require-current-main') {
+    requireCurrentMain = true;
+  } else if (arg === '--conclude-merge') {
+    concludeMerge = true;
   } else {
     msgArgs.push(arg);
   }
@@ -133,6 +167,46 @@ if (hasNonEnglish(msg)) {
     console.log(`${YELLOW}   Translate the message and re-run: /sync "<english message>"${RESET}`);
     if (import.meta.main) {
       process.exit(1);
+    }
+}
+
+// ── Pre-flight main-drift detection (ADR-0081 / T-20260918-002) ──────────────
+// CONSTITUTION §3.3: dev-sync touches shared pipeline files on every commit, so
+// a branch opened against a stale main conflicts by default. Detect the drift
+// BEFORE an hour of pipeline work: fetch origin/main and, when it has advanced
+// past HEAD's merge-base, warn loudly — naming which of the shared pipeline
+// files changed on the main side. --require-current-main escalates to an abort.
+// Offline / no-remote contexts skip the check silently (best-effort fetch).
+// Shared-file taxonomy + filtering live in scripts/helpers/merge-state.ts
+// (import-safe, unit-tested); this block is the git I/O + reporting only.
+if (import.meta.main) {
+    const fetchRes = await $`git fetch origin main`.quiet().nothrow();
+    if (fetchRes.exitCode !== 0) {
+        console.log(`${CYAN}ℹ️  main-drift check skipped (could not fetch origin/main)${RESET}`);
+    } else {
+        const baseRes = await $`git merge-base HEAD origin/main`.quiet().nothrow();
+        if (baseRes.exitCode === 0) {
+            const mergeBase = baseRes.stdout.toString().trim();
+            const countRes = await $`git rev-list --count ${mergeBase}..origin/main`.quiet().nothrow();
+            const ahead = parseInt(countRes.stdout.toString().trim() || '0', 10);
+            if (ahead > 0) {
+                const changedRes = await $`git diff --name-only ${mergeBase} origin/main`.quiet().nothrow();
+                const changedOnMain = changedRes.stdout.toString().split('\n').map((l) => l.trim()).filter(Boolean);
+                const shared = sharedPipelineFilesChanged(changedOnMain);
+                const sharedNote = shared.length > 0
+                    ? `Shared pipeline files changed on main: ${shared.join(', ')}`
+                    : 'No shared pipeline files changed on main (conflict risk lower)';
+                console.log(`${YELLOW}⚠️  main-drift: origin/main is ${ahead} commit(s) ahead of this branch's merge-base.${RESET}`);
+                console.log(`${YELLOW}   ${sharedNote}${RESET}`);
+                console.log(`${YELLOW}   Merging main into this branch NOW (while conflicts are small) is cheaper than at PR merge time. See CONSTITUTION §3.3 and ADR-0081.${RESET}`);
+                if (requireCurrentMain) {
+                    console.log(`${RED}❌ --require-current-main: integrate origin/main (git merge origin/main) and re-run /sync.${RESET}`);
+                    if (import.meta.main) {
+                      process.exit(1);
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -809,12 +883,30 @@ if (currentBranch === "main" || currentBranch === "master") {
 // 5.5 Merge-in-progress gate — a pending `.git/MERGE_HEAD` means a prior
 // merge/pull stopped on conflicts. Committing here would snapshot whatever is
 // currently staged (possibly unresolved resolutions) as a merge commit.
+// ADR-0081 / T-20260918-002: --conclude-merge is the sanctioned exit. After the
+// operator resolves every conflict, this verifies the tree is fully resolved
+// and lets the standard gate battery + `git commit -m` produce the two-parent
+// merge commit (git attaches MERGE_HEAD as the second parent automatically).
+// Without the flag the gate stays fail-closed exactly as before.
 if (fs.existsSync('.git/MERGE_HEAD')) {
-    console.error(`${RED}❌ A merge is already in progress (unresolved MERGE_HEAD).${RESET}`);
-    console.error(`${YELLOW}   Resolve the conflicts, then re-run /sync — or abort with 'git merge --abort' first.${RESET}`);
-    if (import.meta.main) {
-      process.exit(1);
+    if (!concludeMerge) {
+        console.error(`${RED}❌ A merge is already in progress (unresolved MERGE_HEAD).${RESET}`);
+        console.error(`${YELLOW}   Resolve the conflicts, then re-run /sync --conclude-merge to finish it through the gates — or abort with 'git merge --abort' first.${RESET}`);
+        if (import.meta.main) {
+          process.exit(1);
+        }
     }
+    const unresolvedRes = await $`git diff --name-only --diff-filter=U`.quiet().nothrow();
+    const unresolved = parseUnresolvedConflicts(unresolvedRes.stdout.toString());
+    if (unresolved.length > 0) {
+        console.error(`${RED}❌ --conclude-merge: ${unresolved.length} unresolved conflict file(s):${RESET}`);
+        for (const f of unresolved) console.error(`   ${f}`);
+        console.error(`${YELLOW}   Resolve every conflict (git add <file>), then re-run /sync --conclude-merge.${RESET}`);
+        if (import.meta.main) {
+          process.exit(1);
+        }
+    }
+    console.log(`${GREEN}✓ --conclude-merge: tree fully resolved — the merge commit follows the gate battery${RESET}`);
 }
 
 // 6. Guard against sensitive files — checks both new (untracked) and modified

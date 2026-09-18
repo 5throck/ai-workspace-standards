@@ -72,7 +72,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `compile-tokens.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `design-lint.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `create-l3-scaffold.ts` | L0 | 1.15.0 | active | —| —| L0 | —|
-| `dev-sync.ts` | L0 | 1.14.1 | active | —| —| L0+L1 | —|
+| `dev-sync.ts` | L0 | 1.15.0 | active | —| —| L0+L1 | —|
 | `dispatch-parallel.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
 | `dispatch-serial.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
 | `dispatch.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
@@ -122,6 +122,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `helpers/l0-ref-policy.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `helpers/context-sections.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
 | `helpers/markers.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
+| `helpers/merge-state.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `helpers/scaffold-markers.ts` | L0 | 1.3.0 | active | Shared scaffold marker constants + (marker→source) mapping + delivery-tree derivations + transient test-fixture predicate (T-20260916-001) | —| L0+L1 | —|
 | `helpers/pm-md-parser.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `helpers/variant-governance-rules.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
