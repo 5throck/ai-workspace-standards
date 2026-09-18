@@ -68,7 +68,9 @@ flow, and keep both inside the existing governance machinery.
    `templates/common/agents/pm.md` (WORKSPACE-MANAGED block; variants
    inherit via the `extends:` chain), in AGENTS.md §3.11 (L0 and
    `templates/common/AGENTS.md`, condensed copy inside the COMMON-AGENTS
-   marker block), and in the procedures of `skills/agent-lifecycle-manager`
+   marker block), in `templates/common/docs/context.md` (COMMON-CONTEXT
+   marker block, following the ADR-0078/ADR-0079 policy-distribution
+   pattern), and in the procedures of `skills/agent-lifecycle-manager`
    (1.2.0: Hiring/Firing Workflows, Skill Attach/Detach Rules) and
    `skills/skill-lifecycle-manager` (1.4.0: Skill Request Workflow R1–R3,
    Deprecation & Removal).

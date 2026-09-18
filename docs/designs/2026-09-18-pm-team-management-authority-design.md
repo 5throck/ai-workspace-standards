@@ -82,7 +82,8 @@ complete.
 | L2 variants | `extends:` chain — no per-variant edits |
 | Skills L0 → L1 | `bun run propagate:apply` |
 | AGENTS.md §3.11 | Direct edit L0; condensed copy in L1 COMMON-AGENTS block |
-| New projects | COMMON-AGENTS block + pm.md WORKSPACE-MANAGED block at scaffold time |
+| `templates/common/docs/context.md` | "PM Team-Management Authority" section inside the COMMON-CONTEXT block (upgrade-sync managed zone — reaches new projects at scaffold and existing projects via the sanctioned version-footer sync) |
+| New projects | COMMON-AGENTS block + pm.md WORKSPACE-MANAGED block + COMMON-CONTEXT block at scaffold time |
 
 Existing L2/L3 projects do not retro-inherit pm.md body changes
 (Fork Model, ADR-0031) — same deferred-backport cost class as ADR-0078.
