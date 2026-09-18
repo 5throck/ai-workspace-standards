@@ -23,7 +23,7 @@ import {
 } from '../../scripts/helpers/markers.ts';
 
 const REAL_MARKER_LINE =
-  '<!-- intentional-duplicate: workspace standards §3 — maintained locally for AI context proximity; source: docs/constitution/03-pr-workflow.md; hash: 8d70ef81 -->';
+  '<!-- intentional-duplicate: workspace standards §3 — maintained locally for AI context proximity; source: docs/constitution/03-pr-workflow.md; hash: a1be51db -->';
 
 // Verbatim contiguous slices of the four real prose lines that fed Check D's
 // phantom registry before T-20260912-029 (sources cited per fixture).
@@ -128,13 +128,15 @@ describe('scanIntentionalDuplicateMarkers — parser parity (T-20260912-029 refa
 
     // Field fidelity through the refactor: source/hash still parsed identically.
     // Hash re-seeded 18ad2842 → 8d70ef81 when the ADR-0078 routing line was
-    // added to the duplicated §3 source (instruction-policy wiring, 2026-09-17).
+    // added to the duplicated §3 source (instruction-policy wiring, 2026-09-17),
+    // and 8d70ef81 → a1be51db when §3.3 gained the conflicted-PR recovery note
+    // (ADR-0081 delivery-pipeline hardening, 2026-09-18).
     // Line re-pinned 421 → 429 when the COMMON-CONTEXT block gained the
     // "PM Team-Management Authority (ADR-0080)" section (2026-09-18).
     for (const m of markers) {
-      expect(m.source).toBe('docs/constitution/03-pr-workflow.md');
-      expect(m.hash).toBe('8d70ef81');
-      expect(m.text).toContain('workspace standards §3');
+        expect(m.source).toBe('docs/constitution/03-pr-workflow.md');
+        expect(m.hash).toBe('a1be51db');
+        expect(m.text).toContain('workspace standards §3');
     }
   });
 
