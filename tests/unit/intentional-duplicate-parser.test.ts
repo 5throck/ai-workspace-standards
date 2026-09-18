@@ -43,7 +43,7 @@ describe('parseIntentionalDuplicateLine', () => {
       reason: 'maintained locally for AI context proximity',
       section: '3',
       source: 'docs/constitution/03-pr-workflow.md',
-      hash: '8d70ef81',
+      hash: 'a1be51db',
     });
   });
 
@@ -82,7 +82,7 @@ describe('parseIntentionalDuplicateLine', () => {
       reason: 'maintained locally for AI context proximity',
       section: '3',
       source: 'docs/constitution/03-pr-workflow.md',
-      hash: '8d70ef81',
+      hash: 'a1be51db',
     });
   });
 
