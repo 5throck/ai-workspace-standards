@@ -116,7 +116,7 @@ describe('scanIntentionalDuplicateMarkers — parser parity (T-20260912-029 refa
     expect(normalized).toEqual([
       {
         file: expect.stringContaining('templates/common/docs/context.md'),
-        line: 421,
+        line: 429,
         section: '3',
       },
       {
@@ -129,6 +129,8 @@ describe('scanIntentionalDuplicateMarkers — parser parity (T-20260912-029 refa
     // Field fidelity through the refactor: source/hash still parsed identically.
     // Hash re-seeded 18ad2842 → 8d70ef81 when the ADR-0078 routing line was
     // added to the duplicated §3 source (instruction-policy wiring, 2026-09-17).
+    // Line re-pinned 421 → 429 when the COMMON-CONTEXT block gained the
+    // "PM Team-Management Authority (ADR-0080)" section (2026-09-18).
     for (const m of markers) {
       expect(m.source).toBe('docs/constitution/03-pr-workflow.md');
       expect(m.hash).toBe('8d70ef81');
