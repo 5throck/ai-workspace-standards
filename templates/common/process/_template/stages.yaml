@@ -1,0 +1,23 @@
+# Process Schema v1.0 — authoring skeleton
+# Copy this file to templates/<variant>/process/stages.yaml
+# and replace every placeholder. See ADR-0082 and
+# docs/designs/2026-09-19-template-domain-operating-system-design.md
+# for the normative design and authoring rules.
+schema_version: "1.0"
+variant: <variant>                     # e.g. co-design
+stages:
+  - id: S1                             # pattern ^S[0-9]+$
+    title: "<Stage title>"             # e.g. "Current State Diagnosis"
+    order: 1                           # unique integer, contiguous from 1
+    purpose: >
+      One paragraph: what this stage accomplishes and when it is used.
+    entry_criteria:
+      - "<Condition that must hold before stage entry.>"
+    exit_criteria:
+      - "<Condition that must hold for stage completion.>"
+    decision_point: DG-<VARIANT>-01    # optional; resolves in decisions/gates.yaml
+    owner_agent: <agent-key>           # must exist: agents/<agent-key>.md
+  # Additional stages follow the same structure
+  # - id: S2
+  #   title: "..."
+  #   ...

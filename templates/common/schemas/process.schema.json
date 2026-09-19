@@ -1,0 +1,75 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "process.schema.json",
+  "title": "Process Layer — Stage Definition Schema",
+  "description": "Validates templates/<variant>/process/stages.yaml. Defines domain stages as part of the Domain Execution Graph (DEG). See design §4.1 and ADR-0083.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "variant", "stages"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "Schema version. Currently fixed at 1.0."
+    },
+    "variant": {
+      "type": "string",
+      "pattern": "^co-[a-z]+$",
+      "description": "Variant identifier matching the template directory name (e.g. co-consult, co-deck). Must match the parent directory name."
+    },
+    "stages": {
+      "type": "array",
+      "minItems": 1,
+      "description": "List of process stages in domain order.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "title", "order", "purpose", "entry_criteria", "exit_criteria", "owner_agent"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^S[0-9]+$",
+            "description": "Stage identifier. Pattern: S (stage prefix) followed by one or more digits. Example: S1, S2, S10."
+          },
+          "title": {
+            "type": "string",
+            "description": "Human-readable stage title."
+          },
+          "order": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Unique integer order value, contiguous from 1 with no gaps. Must be unique within the stages array."
+          },
+          "purpose": {
+            "type": "string",
+            "description": "One or more sentences describing what this stage accomplishes and when it is used."
+          },
+          "entry_criteria": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Conditions that must hold before this stage begins. Each entry is a single criterion statement."
+          },
+          "exit_criteria": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Conditions that must hold for this stage to be considered complete. Each entry is a single criterion statement."
+          },
+          "decision_point": {
+            "type": "string",
+            "pattern": "^DG-[A-Z0-9]+-[0-9]{2}$",
+            "description": "Optional decision gate ID that gates entry to or completion of this stage. Resolves in decisions/gates.yaml. Pattern: DG- (gate prefix), variant letters/numbers, hyphen, two-digit number."
+          },
+          "owner_agent": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$",
+            "description": "Kebab-case agent identifier that is accountable for this stage. Must resolve to a real agent file."
+          }
+        }
+      }
+    }
+  }
+}
