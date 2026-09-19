@@ -32,7 +32,7 @@ outputs:
 relations:
   - type: follows
     target: procedure.co-design.visual-implementation
-quality_gates:
+
   - "Accessibility report shows zero critical findings."
 evidence: []
 failure_modes:

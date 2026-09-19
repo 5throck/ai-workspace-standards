@@ -1,0 +1,63 @@
+schema_version: "1.0"
+variant: co-deck
+gates:
+  - id: DG-DECK-01
+    title: "Layout gate passes with zero violations before export."
+    stage: S2
+    decider_agent: version
+    inputs:
+      - pdf_deck
+    criteria:
+      - "Layout gate passes with zero violations before export."
+    outcomes:
+      - proceed
+      - rework
+    record_kind: DEC
+  - id: DG-DECK-02
+    title: "Slide layout gate passes on every slide before export."
+    stage: S2
+    decider_agent: version
+    inputs:
+      - pdf_deck
+    criteria:
+      - "Slide layout gate passes on every slide before export."
+    outcomes:
+      - proceed
+      - rework
+    record_kind: DEC
+  - id: DG-DECK-03
+    title: "Measure check confirms readability at target projector resol"
+    stage: S2
+    decider_agent: version
+    inputs:
+      - pdf_deck
+    criteria:
+      - "Measure check confirms readability at target projector resolution."
+    outcomes:
+      - proceed
+      - rework
+    record_kind: DEC
+  - id: DG-DECK-04
+    title: "Narrative arc review passed - each slide advances exactly on"
+    stage: S2
+    decider_agent: version
+    inputs:
+      - storyline_outline
+    criteria:
+      - "Narrative arc review passed - each slide advances exactly one idea."
+    outcomes:
+      - proceed
+      - rework
+    record_kind: DEC
+  - id: DG-DECK-05
+    title: "Production starts from a named and approved storyline revisi"
+    stage: S2
+    decider_agent: version
+    inputs:
+      - version_record
+    criteria:
+      - "Production starts from a named and approved storyline revision."
+    outcomes:
+      - proceed
+      - rework
+    record_kind: DEC

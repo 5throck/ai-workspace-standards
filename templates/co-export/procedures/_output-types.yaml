@@ -1,37 +1,160 @@
-schema_version: "1.0"
+schema_version: '1.1'
 variant: co-export
 output_types:
   commercial_invoice_data:
-    description: "Registered procedure output type"
+    description: >
+      Commercial invoice data for the shipment - consumed as an input by the
+      export-shipment-compliance procedure but not produced by any procedure
+      in this variant; it originates externally (client ERP/order system).
+    owner_agent: external
+    format: json
+    evidence_model: null
+    retention: engagement
   hs_classification:
-    description: "Registered procedure output type"
+    description: >-
+      Hs classification - an intermediate artifact from step 1 of the Compliance Determination
+      procedure (co-export-compliance-determination), produced by hs-classification-specialist:
+      Finalize HS classification for the concrete shipment items.
+    owner_agent: hs-classification-specialist
+    format: markdown
+    evidence_model: null
+    retention: engagement
   origin_determination:
-    description: "Registered procedure output type"
+    description: >-
+      Origin determination - the final output of the Compliance Determination procedure
+      (co-export-compliance-determination): Produce the binding compliance determinations for a
+      shipment: origin, certification, and control screening.
+    owner_agent: fta-origin-analyst
+    format: markdown
+    evidence_model: null
+    retention: engagement
   document_set:
-    description: "Registered procedure output type"
+    description: >-
+      Document set - the final output of the Export Shipment Compliance procedure
+      (co-export-export-shipment-compliance): Take an export shipment from HS classification through
+      origin determination and documentation to logistics coordination.
+    owner_agent: pm
+    format: markdown
+    evidence_model: null
+    retention: engagement
   shipment_plan:
-    description: "Registered procedure output type"
+    description: >-
+      Shipment plan - an intermediate artifact from step 4 of the Export Shipment Compliance
+      procedure (co-export-export-shipment-compliance), produced by logistics-coordinator:
+      Coordinate booking and shipment plan based on cleared documentation.
+    owner_agent: logistics-coordinator
+    format: markdown
+    evidence_model: null
+    retention: engagement
   market_entry_assessment:
-    description: "Registered procedure output type"
+    description: >-
+      Market entry assessment - the final output of the Market Entry Assessment procedure
+      (co-export-market-entry-assessment): Assess a destination market end to end: regulatory
+      posture, certification needs, and classification groundwork before any shipment is planned.
+    owner_agent: market-entry-strategist
+    format: markdown
+    evidence_model: null
+    retention: engagement
   regulatory_landscape:
-    description: "Registered procedure output type"
+    description: >-
+      Regulatory landscape - an intermediate artifact from step 2 of the Market Entry Assessment
+      procedure (co-export-market-entry-assessment), produced by
+      foreign-regulatory-intelligence-analyst: Map the destination regulatory landscape and
+      monitoring obligations.
+    owner_agent: foreign-regulatory-intelligence-analyst
+    format: markdown
+    evidence_model: null
+    retention: engagement
   export_control_precheck:
-    description: "Registered procedure output type"
+    description: >-
+      Export control precheck - an intermediate artifact from step 3 of the Market Entry Assessment
+      procedure (co-export-market-entry-assessment), produced by
+      export-control-compliance-specialist: Pre-screen the product category against export control
+      regimes.
+    owner_agent: export-control-compliance-specialist
+    format: markdown
+    evidence_model: null
+    retention: engagement
   export_control_clearance:
-    description: "Registered procedure output type"
+    description: >-
+      Export control clearance - an intermediate artifact from step 4 of the Compliance
+      Determination procedure (co-export-compliance-determination), produced by
+      export-control-compliance-specialist: Complete export control screening for the shipment.
+    owner_agent: export-control-compliance-specialist
+    format: markdown
+    evidence_model: null
+    retention: engagement
   classification_groundwork:
-    description: "Registered procedure output type"
+    description: >-
+      Classification groundwork - an intermediate artifact from step 4 of the Market Entry
+      Assessment procedure (co-export-market-entry-assessment), produced by
+      hs-classification-specialist: Prepare HS classification groundwork for the product category.
+    owner_agent: hs-classification-specialist
+    format: markdown
+    evidence_model: null
+    retention: engagement
   certification_requirements:
-    description: "Registered procedure output type"
+    description: >-
+      Certification requirements - an intermediate artifact from step 3 of the Compliance
+      Determination procedure (co-export-compliance-determination), produced by
+      halal-certification-specialist: Determine certification requirements where the destination
+      market demands them.
+    owner_agent: halal-certification-specialist
+    format: markdown
+    evidence_model: null
+    retention: engagement
   landed_cost_model:
-    description: "Registered procedure output type"
+    description: >-
+      Landed cost model - an intermediate artifact from step 2 of the Shipment Execution procedure
+      (co-export-shipment-execution), produced by market-entry-strategist: Model landed cost against
+      the market entry plan.
+    owner_agent: market-entry-strategist
+    format: yaml
+    evidence_model: null
+    retention: engagement
   drawback_positioning:
-    description: "Registered procedure output type"
+    description: >-
+      Drawback positioning - the final output of the Shipment Execution procedure
+      (co-export-shipment-execution): Execute shipment operations once compliance determinations are
+      complete: drawback positioning and coordinated logistics.
+    owner_agent: logistics-coordinator
+    format: markdown
+    evidence_model: null
+    retention: engagement
   lane_optimization_plan:
-    description: "Registered procedure output type"
+    description: >-
+      Lane optimization plan - the final output of the Post-Delivery Optimization procedure
+      (co-export-post-delivery-optimization): Optimize the ongoing trade lane after first delivery:
+      logistics tuning and market entry follow-through.
+    owner_agent: logistics-coordinator
+    format: markdown
+    evidence_model: null
+    retention: engagement
   market_expansion_plan:
-    description: "Registered procedure output type"
+    description: >-
+      Market expansion plan - an intermediate artifact from step 2 of the Post-Delivery Optimization
+      procedure (co-export-post-delivery-optimization), produced by market-entry-strategist: Update
+      the market expansion plan from realized performance.
+    owner_agent: market-entry-strategist
+    format: markdown
+    evidence_model: null
+    retention: engagement
   fta_opportunity_scan:
-    description: "Registered procedure output type"
+    description: >-
+      Fta opportunity scan - an intermediate artifact from step 5 of the Market Entry Assessment
+      procedure (co-export-market-entry-assessment), produced by fta-origin-analyst: Scan applicable
+      FTAs and origin opportunities for the market.
+    owner_agent: fta-origin-analyst
+    format: markdown
+    evidence_model: null
+    retention: engagement
   halal_market_requirements:
-    description: "Registered procedure output type"
+    description: >-
+      Halal market requirements - an intermediate artifact from step 6 of the Market Entry
+      Assessment procedure (co-export-market-entry-assessment), produced by
+      halal-certification-specialist: Scan halal certification demand where the destination market
+      requires it.
+    owner_agent: halal-certification-specialist
+    format: markdown
+    evidence_model: null
+    retention: engagement

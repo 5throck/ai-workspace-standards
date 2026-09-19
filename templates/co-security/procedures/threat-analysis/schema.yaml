@@ -32,7 +32,7 @@ outputs:
 relations:
   - type: follows
     target: procedure.co-security.engagement-planning
-quality_gates:
+
   - "Every test objective traces to a modeled threat."
 evidence: []
 failure_modes:

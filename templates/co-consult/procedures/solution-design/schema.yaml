@@ -38,7 +38,7 @@ outputs:
 relations:
   - type: follows
     target: procedure.co-consult.current-state-diagnosis
-quality_gates:
+
   - "Every option has feasibility notes and a change impact map before selection."
 evidence: []
 failure_modes:

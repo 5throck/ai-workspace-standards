@@ -37,8 +37,6 @@ steps:
 outputs:
   - type: research_findings
 relations: []
-quality_gates:
-  - "Design-lead review recorded before any visual design work starts."
 evidence:
   - "docs/co-design.context.md"
 failure_modes:

@@ -43,8 +43,6 @@ outputs:
 relations:
   - type: enables
     target: procedure.co-hr.hr-solution-design
-quality_gates:
-  - "Diagnosis covers compliance, relations, safety, and readiness dimensions."
 evidence: []
 failure_modes:
   - "Compliance violations found requiring immediate action - escalate before continuing the diagnosis."

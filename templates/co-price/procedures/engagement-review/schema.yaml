@@ -32,7 +32,7 @@ outputs:
 relations:
   - type: follows
     target: procedure.co-price.release-assurance
-quality_gates:
+
   - "Client acceptance recorded and security attestation filed."
 evidence: []
 failure_modes:

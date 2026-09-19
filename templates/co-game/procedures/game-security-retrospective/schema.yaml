@@ -27,7 +27,7 @@ outputs:
 relations:
   - type: follows
     target: procedure.co-game.game-release-verification
-quality_gates:
+
   - "Post-release security follow-ups are recorded or explicitly waived."
 evidence: []
 failure_modes:

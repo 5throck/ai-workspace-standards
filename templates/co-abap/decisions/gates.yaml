@@ -1,0 +1,15 @@
+schema_version: "1.0"
+variant: co-abap
+gates:
+  - id: DG-ABAP-01
+    title: "Clean ABAP checklist review completed with no open critical "
+    stage: S2
+    decider_agent: code-writer
+    inputs:
+      - implementation_package
+    criteria:
+      - "Clean ABAP checklist review completed with no open critical findings."
+    outcomes:
+      - proceed
+      - rework
+    record_kind: DEC

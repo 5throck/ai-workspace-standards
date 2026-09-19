@@ -1,41 +1,174 @@
-schema_version: "1.0"
+schema_version: '1.1'
 variant: co-game
 output_types:
   feature_spec:
-    description: "Registered procedure output type"
+    description: >
+      Feature specification for a gameplay feature - consumed as an input by
+      the gameplay-feature-loop procedure but not produced by any procedure in
+      this variant; it originates externally (design brief/product backlog).
+    owner_agent: external
+    format: yaml
+    evidence_model: null
+    retention: engagement
   tuning_parameters:
-    description: "Registered procedure output type"
+    description: >-
+      Tuning parameters - an intermediate artifact from step 1 of the Gameplay Feature Loop
+      procedure (co-game-gameplay-feature-loop), produced by game-designer: Specify gameplay tuning
+      parameters, including physics behavior targets.
+    owner_agent: game-designer
+    format: markdown
+    evidence_model: null
+    retention: engagement
   implementation_commit:
-    description: "Registered procedure output type"
+    description: >-
+      Implementation commit - the final output of the Gameplay Feature Loop procedure
+      (co-game-gameplay-feature-loop): Implement one gameplay feature through design, test-first
+      development, debugging, and physics verification.
+    owner_agent: game-developer
+    format: markdown
+    evidence_model: null
+    retention: engagement
   defect_report:
-    description: "Registered procedure output type"
+    description: >-
+      Defect report - an intermediate artifact from step 3 of the Gameplay Feature Loop procedure
+      (co-game-gameplay-feature-loop), produced by game-debugger: Reproduce, isolate, and report
+      defects found in the new feature.
+    owner_agent: game-debugger
+    format: markdown
+    evidence_model: null
+    retention: engagement
   concept_document:
-    description: "Registered procedure output type"
+    description: >-
+      Concept document - the final output of the Game Concept Design procedure
+      (co-game-game-concept-design): Research and shape the game concept: core loop, level
+      archetypes, and technical feasibility.
+    owner_agent: game-designer
+    format: markdown
+    evidence_model: null
+    retention: engagement
   level_archetypes:
-    description: "Registered procedure output type"
+    description: >-
+      Level archetypes - an intermediate artifact from step 2 of the Game Concept Design procedure
+      (co-game-game-concept-design), produced by puzzle-designer: Sketch level and puzzle archetypes
+      that exercise the core loop.
+    owner_agent: puzzle-designer
+    format: markdown
+    evidence_model: null
+    retention: engagement
   feasibility_findings:
-    description: "Registered procedure output type"
+    description: >-
+      Feasibility findings - the final output of the Game Security Bootstrap procedure
+      (co-game-game-security-bootstrap): Prepare the game project toolchain and security baseline
+      before concept work.
+    owner_agent: stack-setup
+    format: markdown
+    evidence_model: null
+    retention: engagement
   tuning_plan:
-    description: "Registered procedure output type"
+    description: >-
+      Tuning plan - an intermediate artifact from step 2 of the Game Architecture Design procedure
+      (co-game-game-architecture-design), produced by game-designer: Plan tuning parameters and
+      difficulty curves per milestone.
+    owner_agent: game-designer
+    format: markdown
+    evidence_model: null
+    retention: engagement
   level_plan:
-    description: "Registered procedure output type"
+    description: >-
+      Level plan - an intermediate artifact from step 3 of the Game Architecture Design procedure
+      (co-game-game-architecture-design), produced by puzzle-designer: Plan the level sequence and
+      progression gates.
+    owner_agent: puzzle-designer
+    format: markdown
+    evidence_model: null
+    retention: engagement
   sprite_asset_set:
-    description: "Registered procedure output type"
+    description: >-
+      Sprite asset set - the final output of the Game Content Production procedure
+      (co-game-game-content-production): Produce the audiovisual content layer that the gameplay
+      code consumes.
+    owner_agent: designer
+    format: markdown
+    evidence_model: null
+    retention: engagement
   audio_asset_set:
-    description: "Registered procedure output type"
+    description: >-
+      Audio asset set - an intermediate artifact from step 2 of the Game Content Production
+      procedure (co-game-game-content-production), produced by sound-designer: Synthesize music and
+      SFX within the audio budget.
+    owner_agent: sound-designer
+    format: markdown
+    evidence_model: null
+    retention: engagement
   content_integration_notes:
-    description: "Registered procedure output type"
+    description: >-
+      Content integration notes - an intermediate artifact from step 3 of the Game Content
+      Production procedure (co-game-game-content-production), produced by designer: Document asset
+      integration requirements for the development team.
+    owner_agent: designer
+    format: markdown
+    evidence_model: null
+    retention: engagement
   defect_sweep_report:
-    description: "Registered procedure output type"
+    description: >-
+      Defect sweep report - the final output of the Game Security Retrospective procedure
+      (co-game-game-security-retrospective): Capture post-release security and integrity lessons for
+      game builds and assets.
+    owner_agent: security-monitor
+    format: markdown
+    evidence_model: null
+    retention: engagement
   regression_report:
-    description: "Registered procedure output type"
+    description: >-
+      Regression report - an intermediate artifact from step 2 of the Game Release Verification
+      procedure (co-game-game-release-verification), produced by test-runner: Run the automated
+      regression suite on the milestone build.
+    owner_agent: test-runner
+    format: markdown
+    evidence_model: null
+    retention: engagement
   go_nogo_record:
-    description: "Registered procedure output type"
+    description: >-
+      Go nogo record - the final output of the Game Release Verification procedure
+      (co-game-game-release-verification): Verify the milestone build: defect sweep, full test pass,
+      and go/no-go.
+    owner_agent: game-debugger
+    format: json
+    evidence_model: null
+    retention: engagement
   approved_implementation_plan:
-    description: "Registered procedure output type"
+    description: >-
+      Approved implementation plan - the final output of the Game Architecture Design procedure
+      (co-game-game-architecture-design): Design the technical architecture and detailed content
+      plans for the approved concept.
+    owner_agent: architect
+    format: markdown
+    evidence_model: null
+    retention: engagement
   arcade_reference_notes:
-    description: "Registered procedure output type"
+    description: >-
+      Arcade reference notes - an intermediate artifact from step 4 of the Game Concept Design
+      procedure (co-game-game-concept-design), produced by arcade-designer: Supply arcade-feel
+      references that anchor the concept playtests.
+    owner_agent: arcade-designer
+    format: markdown
+    evidence_model: null
+    retention: engagement
   feel_requirements:
-    description: "Registered procedure output type"
+    description: >-
+      Feel requirements - an intermediate artifact from step 4 of the Game Architecture Design
+      procedure (co-game-game-architecture-design), produced by arcade-designer: Translate
+      arcade-feel references into architecture-level requirements.
+    owner_agent: arcade-designer
+    format: markdown
+    evidence_model: null
+    retention: engagement
   prototyping_environment:
-    description: "Registered procedure output type"
+    description: >-
+      Prototyping environment - the final output of the Game Security Bootstrap procedure
+      (co-game-game-security-bootstrap): Prepare the game project toolchain and security baseline
+      before concept work.
+    owner_agent: stack-setup
+    format: markdown
+    evidence_model: null
+    retention: engagement

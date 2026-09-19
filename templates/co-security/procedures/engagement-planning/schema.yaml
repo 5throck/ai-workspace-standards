@@ -32,7 +32,7 @@ outputs:
 relations:
   - type: enables
     target: procedure.co-security.threat-model-and-report
-quality_gates:
+
   - "No planning output is produced before authorization is verified."
 evidence: []
 failure_modes:

@@ -28,7 +28,7 @@ relations:
     target: procedure.co-deck.source-research
   - type: enables
     target: procedure.co-deck.storyline-development
-quality_gates:
+
   - "Storyline work references a named research revision."
 evidence: []
 failure_modes:

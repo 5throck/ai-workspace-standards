@@ -1,51 +1,219 @@
-schema_version: "1.0"
+schema_version: '1.1'
 variant: co-price
 output_types:
   market_baseline:
-    description: "Registered procedure output type"
+    description: >-
+      Market baseline - an intermediate artifact from step 1 of the Pricing Analysis procedure
+      (co-price-pricing-analysis), produced by market-intelligence-analyst: Establish the
+      competitive and market baseline the pricing methods will anchor against.
+    owner_agent: market-intelligence-analyst
+    format: json
+    evidence_model: null
+    retention: engagement
   wtp_findings:
-    description: "Registered procedure output type"
+    description: >-
+      Wtp findings - an intermediate artifact from step 2 of the Pricing Analysis procedure
+      (co-price-pricing-analysis), produced by pricing-strategist: Run Van Westendorp price
+      sensitivity measurement to bound acceptable price ranges.
+    owner_agent: pricing-strategist
+    format: markdown
+    evidence_model: null
+    retention: engagement
   demand_curve:
-    description: "Registered procedure output type"
+    description: >-
+      Demand curve - an intermediate artifact from step 3 of the Pricing Analysis procedure
+      (co-price-pricing-analysis), produced by pricing-strategist: Quantify demand at candidate
+      price points with Gabor-Granger.
+    owner_agent: pricing-strategist
+    format: markdown
+    evidence_model: null
+    retention: engagement
   waterfall_model:
-    description: "Registered procedure output type"
+    description: >-
+      Waterfall model - an intermediate artifact from step 4 of the Pricing Analysis procedure
+      (co-price-pricing-analysis), produced by pricing-strategist: Model list-to-net waterfall
+      economics to reconcile headline price with realized margin.
+    owner_agent: pricing-strategist
+    format: yaml
+    evidence_model: null
+    retention: engagement
   price_recommendation:
-    description: "Registered procedure output type"
+    description: >-
+      Price recommendation - the final output of the Pricing Analysis procedure
+      (co-price-pricing-analysis): Produce a quantified price recommendation from willingness-to-pay
+      methods and waterfall economics, governed by the pricing governance rules.
+    owner_agent: pricing-strategist
+    format: markdown
+    evidence_model: null
+    retention: engagement
   scenario_set:
-    description: "Registered procedure output type"
+    description: >-
+      Scenario set - the final output of the Pricing Scenario Modeling procedure
+      (co-price-scenario-modeling): Design and stress the pricing solution scenarios that
+      implementation will build.
+    owner_agent: lead-architect
+    format: markdown
+    evidence_model: null
+    retention: engagement
   solution_architecture:
-    description: "Registered procedure output type"
+    description: >-
+      Solution architecture - an intermediate artifact from step 2 of the Pricing Scenario Modeling
+      procedure (co-price-scenario-modeling), produced by lead-architect: Design the data and
+      service architecture that realizes the scenarios.
+    owner_agent: lead-architect
+    format: markdown
+    evidence_model: null
+    retention: engagement
   ux_flows:
-    description: "Registered procedure output type"
+    description: >-
+      Ux flows - an intermediate artifact from step 3 of the Pricing Scenario Modeling procedure
+      (co-price-scenario-modeling), produced by ux-specialist: Design the price-setting and approval
+      user flows.
+    owner_agent: ux-specialist
+    format: markdown
+    evidence_model: null
+    retention: engagement
   finance_impact_model:
-    description: "Registered procedure output type"
+    description: >-
+      Finance impact model - an intermediate artifact from step 4 of the Pricing Scenario Modeling
+      procedure (co-price-scenario-modeling), produced by finance-strategy-lead: Model the P&L and
+      balance-sheet impact of each scenario.
+    owner_agent: finance-strategy-lead
+    format: yaml
+    evidence_model: null
+    retention: engagement
   security_review_notes:
-    description: "Registered procedure output type"
+    description: >-
+      Security review notes - the final output of the Pricing Security Bootstrap procedure
+      (co-price-pricing-security-bootstrap): Establish baseline handling for sensitive pricing,
+      cost, and customer data before pricing analysis begins.
+    owner_agent: security-monitor
+    format: markdown
+    evidence_model: null
+    retention: engagement
   engine_build:
-    description: "Registered procedure output type"
+    description: >-
+      Engine build - the final output of the Pricing Engine Implementation procedure
+      (co-price-engine-implementation): Build the pricing engine that realizes the selected
+      scenarios end to end.
+    owner_agent: lead-architect
+    format: markdown
+    evidence_model: null
+    retention: engagement
   governance_rules_build:
-    description: "Registered procedure output type"
+    description: >-
+      Governance rules build - an intermediate artifact from step 2 of the Pricing Engine
+      Implementation procedure (co-price-engine-implementation), produced by lead-architect: Encode
+      the pricing governance rules into the engine.
+    owner_agent: lead-architect
+    format: markdown
+    evidence_model: null
+    retention: engagement
   waterfall_checks:
-    description: "Registered procedure output type"
+    description: >-
+      Waterfall checks - an intermediate artifact from step 3 of the Pricing Engine Implementation
+      procedure (co-price-engine-implementation), produced by pricing-strategist: Verify engine
+      outputs reconcile with waterfall economics.
+    owner_agent: pricing-strategist
+    format: markdown
+    evidence_model: null
+    retention: engagement
   ui_build:
-    description: "Registered procedure output type"
+    description: >-
+      Ui build - an intermediate artifact from step 4 of the Pricing Engine Implementation procedure
+      (co-price-engine-implementation), produced by ux-specialist: Implement the price-setting and
+      approval interfaces.
+    owner_agent: ux-specialist
+    format: markdown
+    evidence_model: null
+    retention: engagement
   cost_stress_results:
-    description: "Registered procedure output type"
+    description: >-
+      Cost stress results - an intermediate artifact from step 5 of the Pricing Engine
+      Implementation procedure (co-price-engine-implementation), produced by cost-asset-mgmt: Stress
+      the engine against cost shock scenarios.
+    owner_agent: cost-asset-mgmt
+    format: markdown
+    evidence_model: null
+    retention: engagement
   test_summary:
-    description: "Registered procedure output type"
+    description: >-
+      Test summary - an intermediate artifact from step 1 of the Release Assurance procedure
+      (co-price-release-assurance), produced by qa-tester: Run the verification harness across
+      pricing scenarios.
+    owner_agent: qa-tester
+    format: markdown
+    evidence_model: null
+    retention: engagement
   audit_reconciliation:
-    description: "Registered procedure output type"
+    description: >-
+      Audit reconciliation - an intermediate artifact from step 2 of the Release Assurance procedure
+      (co-price-release-assurance), produced by cpa-auditor: Reconcile engine outputs against
+      accounting entries.
+    owner_agent: cpa-auditor
+    format: markdown
+    evidence_model: null
+    retention: engagement
   localization_report:
-    description: "Registered procedure output type"
+    description: >-
+      Localization report - an intermediate artifact from step 3 of the Release Assurance procedure
+      (co-price-release-assurance), produced by l10n-auditor: Audit localization coverage for target
+      markets.
+    owner_agent: l10n-auditor
+    format: markdown
+    evidence_model: null
+    retention: engagement
   cost_assurance_notes:
-    description: "Registered procedure output type"
+    description: >-
+      Cost assurance notes - an intermediate artifact from step 4 of the Release Assurance procedure
+      (co-price-release-assurance), produced by cost-asset-mgmt: Confirm cost data integrity in the
+      release candidate.
+    owner_agent: cost-asset-mgmt
+    format: markdown
+    evidence_model: null
+    retention: engagement
   deployment_readiness:
-    description: "Registered procedure output type"
+    description: >-
+      Deployment readiness - an intermediate artifact from step 5 of the Release Assurance procedure
+      (co-price-release-assurance), produced by devops-admin: Verify deployment pipeline and
+      rollback readiness.
+    owner_agent: devops-admin
+    format: markdown
+    evidence_model: null
+    retention: engagement
   finance_signoff:
-    description: "Registered procedure output type"
+    description: >-
+      Finance signoff - an intermediate artifact from step 6 of the Release Assurance procedure
+      (co-price-release-assurance), produced by finance-strategy-lead: Grant finance sign-off on the
+      release candidate.
+    owner_agent: finance-strategy-lead
+    format: markdown
+    evidence_model: null
+    retention: engagement
   release_decision:
-    description: "Registered procedure output type"
+    description: >-
+      Release decision - the final output of the Release Assurance procedure
+      (co-price-release-assurance): Assure the built pricing engine across finance, audit,
+      localization, and operations before client release.
+    owner_agent: qa-tester
+    format: markdown
+    evidence_model: null
+    retention: engagement
   client_review_deck:
-    description: "Registered procedure output type"
+    description: >-
+      Client review deck - the final output of the Engagement Review procedure
+      (co-price-engagement-review): Review the released pricing solution with the client and record
+      security posture for operations handover.
+    owner_agent: engagement-director
+    format: pptx
+    evidence_model: null
+    retention: engagement
   security_attestation:
-    description: "Registered procedure output type"
+    description: >-
+      Security attestation - the final output of the Pricing Security Closeout procedure
+      (co-price-pricing-security-closeout): Confirm residual security, data-handling, and governance
+      risks before pricing engagement closure.
+    owner_agent: security-monitor
+    format: markdown
+    evidence_model: null
+    retention: engagement

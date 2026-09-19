@@ -49,7 +49,7 @@ outputs:
 relations:
   - type: enables
     target: procedure.co-game.game-architecture-design
-quality_gates:
+
   - "Core loop playtested on paper prototypes and feasibility findings documented."
 evidence: []
 failure_modes:

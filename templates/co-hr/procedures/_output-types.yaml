@@ -1,39 +1,166 @@
-schema_version: "1.0"
+schema_version: '1.1'
 variant: co-hr
 output_types:
   market_dataset:
-    description: "Registered procedure output type"
+    description: >-
+      Market dataset - an intermediate artifact from step 1 of the Compensation Benchmarking
+      procedure (co-hr-compensation-benchmarking), produced by data-analyst: Assemble and normalize
+      market pay data for the agreed benchmark roles.
+    owner_agent: data-analyst
+    format: json
+    evidence_model: null
+    retention: engagement
   gap_analysis:
-    description: "Registered procedure output type"
+    description: >-
+      Gap analysis - an intermediate artifact from step 2 of the Compensation Benchmarking procedure
+      (co-hr-compensation-benchmarking), produced by compensation-benefits-analyst: Compare client
+      positions to the market dataset and quantify gaps by role and level.
+    owner_agent: compensation-benefits-analyst
+    format: markdown
+    evidence_model: null
+    retention: engagement
   benchmark_report:
-    description: "Registered procedure output type"
+    description: >-
+      Benchmark report - the final output of the Compensation Benchmarking procedure
+      (co-hr-compensation-benchmarking): Produce a defensible compensation benchmark comparing
+      client pay positions against market data.
+    owner_agent: compensation-benefits-analyst
+    format: markdown
+    evidence_model: null
+    retention: engagement
   readiness_baseline:
-    description: "Registered procedure output type"
+    description: >
+      Orphaned registry entry - no procedure in co-hr declares this as a
+      procedure-level output or a step output_type, and it is not referenced
+      as an input anywhere in the variant. Left unresolved rather than
+      fabricating an owner; flag for removal or linkage in a future pass.
+    owner_agent: unassigned
+    format: json
+    evidence_model: null
+    retention: engagement
   relations_landscape:
-    description: "Registered procedure output type"
+    description: >-
+      Relations landscape - an intermediate artifact from step 2 of the HR Diagnosis procedure
+      (co-hr-hr-diagnosis), produced by labor-relations-specialist: Map labor relations: unions,
+      agreements, and dispute history.
+    owner_agent: labor-relations-specialist
+    format: markdown
+    evidence_model: null
+    retention: engagement
   safety_baseline:
-    description: "Registered procedure output type"
+    description: >-
+      Safety baseline - an intermediate artifact from step 3 of the HR Diagnosis procedure
+      (co-hr-hr-diagnosis), produced by safety-health-officer: Baseline safety and health
+      obligations for the workforce.
+    owner_agent: safety-health-officer
+    format: json
+    evidence_model: null
+    retention: engagement
   change_readiness_map:
-    description: "Registered procedure output type"
+    description: >-
+      Change readiness map - an intermediate artifact from step 4 of the HR Diagnosis procedure
+      (co-hr-hr-diagnosis), produced by change-management-partner: Gauge stakeholder alignment and
+      readiness for HR change.
+    owner_agent: change-management-partner
+    format: markdown
+    evidence_model: null
+    retention: engagement
   org_design_options:
-    description: "Registered procedure output type"
+    description: >-
+      Org design options - the final output of the HR Solution Design procedure
+      (co-hr-hr-solution-design): Design the integrated HR solution across the diagnosed dimensions:
+      organization, talent, compensation, learning, and performance.
+    owner_agent: org-design-consultant
+    format: markdown
+    evidence_model: null
+    retention: engagement
   talent_plan:
-    description: "Registered procedure output type"
+    description: >-
+      Talent plan - an intermediate artifact from step 2 of the HR Solution Design procedure
+      (co-hr-hr-solution-design), produced by talent-acquisition-specialist: Plan acquisition and
+      sourcing against the target organization.
+    owner_agent: talent-acquisition-specialist
+    format: markdown
+    evidence_model: null
+    retention: engagement
   compensation_framework:
-    description: "Registered procedure output type"
+    description: >-
+      Compensation framework - an intermediate artifact from step 3 of the HR Solution Design
+      procedure (co-hr-hr-solution-design), produced by compensation-benefits-analyst: Design the
+      compensation and benefits framework on the benchmark data.
+    owner_agent: compensation-benefits-analyst
+    format: markdown
+    evidence_model: null
+    retention: engagement
   learning_roadmap:
-    description: "Registered procedure output type"
+    description: >-
+      Learning roadmap - an intermediate artifact from step 4 of the HR Solution Design procedure
+      (co-hr-hr-solution-design), produced by learning-development-specialist: Design the learning
+      and development roadmap for capability gaps.
+    owner_agent: learning-development-specialist
+    format: markdown
+    evidence_model: null
+    retention: engagement
   performance_system_design:
-    description: "Registered procedure output type"
+    description: >-
+      Performance system design - an intermediate artifact from step 5 of the HR Solution Design
+      procedure (co-hr-hr-solution-design), produced by performance-management-consultant: Design
+      the performance management system and cadence.
+    owner_agent: performance-management-consultant
+    format: markdown
+    evidence_model: null
+    retention: engagement
   succession_framework:
-    description: "Registered procedure output type"
+    description: >-
+      Succession framework - an intermediate artifact from step 6 of the HR Solution Design
+      procedure (co-hr-hr-solution-design), produced by career-succession-consultant: Design career
+      paths and succession coverage for critical roles.
+    owner_agent: career-succession-consultant
+    format: markdown
+    evidence_model: null
+    retention: engagement
   change_roadmap:
-    description: "Registered procedure output type"
+    description: >-
+      Change roadmap - an intermediate artifact from step 7 of the HR Solution Design procedure
+      (co-hr-hr-solution-design), produced by change-management-partner: Package the solution with a
+      change adoption roadmap.
+    owner_agent: change-management-partner
+    format: markdown
+    evidence_model: null
+    retention: engagement
   implementation_milestones:
-    description: "Registered procedure output type"
+    description: >-
+      Implementation milestones - the final output of the Organization Implementation procedure
+      (co-hr-org-implementation): Implement the approved HR solution and quantify its effects with
+      data.
+    owner_agent: org-design-consultant
+    format: markdown
+    evidence_model: null
+    retention: engagement
   implementation_metrics:
-    description: "Registered procedure output type"
+    description: >-
+      Implementation metrics - an intermediate artifact from step 2 of the Organization
+      Implementation procedure (co-hr-org-implementation), produced by data-analyst: Stand up the
+      metrics that will verify implementation effects.
+    owner_agent: data-analyst
+    format: json
+    evidence_model: null
+    retention: engagement
   compliance_findings:
-    description: "Registered procedure output type"
+    description: >-
+      Compliance findings - the final output of the HR Diagnosis procedure (co-hr-hr-diagnosis):
+      Diagnose the client organization across labor relations, compliance, and workforce risk before
+      any HR solution is designed.
+    owner_agent: org-design-consultant
+    format: markdown
+    evidence_model: null
+    retention: engagement
   relations_impact_notes:
-    description: "Registered procedure output type"
+    description: >-
+      Relations impact notes - an intermediate artifact from step 8 of the HR Solution Design
+      procedure (co-hr-hr-solution-design), produced by labor-relations-specialist: Review the
+      solution for labor relations consequences before packaging.
+    owner_agent: labor-relations-specialist
+    format: markdown
+    evidence_model: null
+    retention: engagement

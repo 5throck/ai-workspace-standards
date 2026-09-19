@@ -25,7 +25,7 @@ outputs:
 relations:
   - type: enables
     target: procedure.co-deck.source-research
-quality_gates:
+
   - "A version record exists before source collection starts."
 evidence: []
 failure_modes:

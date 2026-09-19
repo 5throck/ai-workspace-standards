@@ -1,25 +1,101 @@
-schema_version: "1.0"
+schema_version: '1.1'
 variant: co-design
 output_types:
   research_findings:
-    description: "Registered procedure output type"
+    description: >-
+      Research findings - the final output of the UX Discovery procedure (co-design-ux-discovery):
+      Establish evidence-based understanding of users and service context to feed design work.
+    owner_agent: ux-researcher
+    format: markdown
+    evidence_model: null
+    retention: engagement
   service_blueprint:
-    description: "Registered procedure output type"
+    description: >-
+      Service blueprint - an intermediate artifact from step 2 of the UX Discovery procedure
+      (co-design-ux-discovery), produced by service-designer: Map findings into a service blueprint
+      covering touchpoints and actors.
+    owner_agent: service-designer
+    format: markdown
+    evidence_model: null
+    retention: engagement
   discovery_review:
-    description: "Registered procedure output type"
+    description: >-
+      Discovery review - an intermediate artifact from step 3 of the UX Discovery procedure
+      (co-design-ux-discovery), produced by design-lead: Review research findings and blueprint;
+      approve entry into design definition.
+    owner_agent: design-lead
+    format: markdown
+    evidence_model: null
+    retention: engagement
   narrative_brief:
-    description: "Registered procedure output type"
+    description: >-
+      Narrative brief - the final output of the Narrative Discovery procedure
+      (co-design-narrative-discovery): Capture the story and brand voice constraints that design
+      work must express.
+    owner_agent: storyteller
+    format: markdown
+    evidence_model: null
+    retention: engagement
   design_direction:
-    description: "Registered procedure output type"
+    description: >-
+      Design direction - the final output of the Design Definition procedure
+      (co-design-design-definition): Turn discovery outputs into an agreed design direction:
+      information architecture, narrative structure, and success criteria.
+    owner_agent: design-lead
+    format: markdown
+    evidence_model: null
+    retention: engagement
   touchpoint_specs:
-    description: "Registered procedure output type"
+    description: >-
+      Touchpoint specs - an intermediate artifact from step 1 of the Visual and Service
+      Implementation procedure (co-design-visual-implementation), produced by service-designer:
+      Detail the service blueprint into concrete touchpoint specifications.
+    owner_agent: service-designer
+    format: yaml
+    evidence_model: null
+    retention: engagement
   type_system:
-    description: "Registered procedure output type"
+    description: >-
+      Type system - an intermediate artifact from step 2 of the Visual and Service Implementation
+      procedure (co-design-visual-implementation), produced by typography-expert: Establish the type
+      system and verify token usage compliance.
+    owner_agent: typography-expert
+    format: markdown
+    evidence_model: null
+    retention: engagement
   visual_design_set:
-    description: "Registered procedure output type"
+    description: >-
+      Visual design set - the final output of the Visual and Service Implementation procedure
+      (co-design-visual-implementation): Execute the approved direction across visual design,
+      typography, and service touchpoints.
+    owner_agent: visual-designer
+    format: markdown
+    evidence_model: null
+    retention: engagement
   prototype_build:
-    description: "Registered procedure output type"
+    description: >-
+      Prototype build - the final output of the Prototype Validation procedure
+      (co-design-prototype-validation): Validate the implemented design with a working prototype and
+      accessibility checks before delivery.
+    owner_agent: prototype-engineer
+    format: markdown
+    evidence_model: null
+    retention: engagement
   accessibility_report:
-    description: "Registered procedure output type"
+    description: >-
+      Accessibility report - an intermediate artifact from step 2 of the Prototype Validation
+      procedure (co-design-prototype-validation), produced by prototype-engineer: Audit the
+      prototype against accessibility standards and fix findings.
+    owner_agent: prototype-engineer
+    format: markdown
+    evidence_model: null
+    retention: engagement
   design_review_record:
-    description: "Registered procedure output type"
+    description: >-
+      Design review record - an intermediate artifact from step 4 of the Visual and Service
+      Implementation procedure (co-design-visual-implementation), produced by design-lead: Review
+      the full visual set against the approved direction.
+    owner_agent: design-lead
+    format: json
+    evidence_model: null
+    retention: engagement

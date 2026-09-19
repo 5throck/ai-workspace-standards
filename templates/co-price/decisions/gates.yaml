@@ -1,0 +1,27 @@
+schema_version: "1.0"
+variant: co-price
+gates:
+  - id: DG-PRICE-01
+    title: "Engine outputs reconcile with waterfall checks within tolera"
+    stage: S1
+    decider_agent: lead-architect
+    inputs:
+      - engine_build
+    criteria:
+      - "Engine outputs reconcile with waterfall checks within tolerance."
+    outcomes:
+      - proceed
+      - rework
+    record_kind: DEC
+  - id: DG-PRICE-02
+    title: "Recommendation reconciles with the waterfall model within to"
+    stage: S1
+    decider_agent: lead-architect
+    inputs:
+      - price_recommendation
+    criteria:
+      - "Recommendation reconciles with the waterfall model within tolerance."
+    outcomes:
+      - proceed
+      - rework
+    record_kind: DEC

@@ -38,7 +38,7 @@ outputs:
 relations:
   - type: follows
     target: procedure.co-consult.solution-delivery
-quality_gates:
+
   - "Client sign-off recorded on all acceptance criteria."
 evidence: []
 failure_modes:

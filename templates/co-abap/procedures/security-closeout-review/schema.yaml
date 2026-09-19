@@ -27,7 +27,7 @@ outputs:
 relations:
   - type: follows
     target: procedure.co-abap.transport-release
-quality_gates:
+
   - "No high-severity security finding remains open at closeout."
 evidence: []
 failure_modes:

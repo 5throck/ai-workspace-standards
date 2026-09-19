@@ -32,8 +32,10 @@ outputs:
 relations:
   - type: composes_with
     target: procedure.co-export.export-shipment-compliance
-quality_gates:
+
   - "Landed cost model reconciles with the commercial quote."
+decision_points:
+  - DG-EXPORT-02
 evidence: []
 failure_modes:
   - "Landed cost breaks the commercial case - return to market entry assessment with findings."

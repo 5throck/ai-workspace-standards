@@ -28,7 +28,7 @@ outputs:
 relations:
   - type: follows
     target: procedure.co-price.engagement-review
-quality_gates:
+
   - "Security attestation is complete or closure remains blocked."
 evidence: []
 failure_modes:

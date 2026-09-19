@@ -32,7 +32,7 @@ outputs:
 relations:
   - type: follows
     target: procedure.co-export.shipment-execution
-quality_gates:
+
   - "Optimization plan backed by delivery actuals, not estimates."
 evidence: []
 failure_modes:

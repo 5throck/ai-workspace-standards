@@ -43,6 +43,26 @@
       "layer": "variant:co-hr"
     },
     {
+      "id": "gate.co-hr.DG-HR-01",
+      "type": "decision_gate",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "gate.co-hr.DG-HR-02",
+      "type": "decision_gate",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "gate.co-hr.DG-HR-03",
+      "type": "decision_gate",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "gate.co-hr.DG-HR-04",
+      "type": "decision_gate",
+      "layer": "variant:co-hr"
+    },
+    {
       "id": "hr-metrics-analysis",
       "type": "skill",
       "layer": "variant:co-hr"
@@ -579,6 +599,30 @@
       "from": "consulting-report-writing",
       "to": "pm",
       "source": "skill_manifest"
+    },
+    {
+      "type": "decides_on",
+      "from": "gate.co-hr.DG-HR-01",
+      "to": "output_type.benchmark_report",
+      "source": "decision_model"
+    },
+    {
+      "type": "decides_on",
+      "from": "gate.co-hr.DG-HR-02",
+      "to": "output_type.compliance_findings",
+      "source": "decision_model"
+    },
+    {
+      "type": "decides_on",
+      "from": "gate.co-hr.DG-HR-03",
+      "to": "output_type.org_design_options",
+      "source": "decision_model"
+    },
+    {
+      "type": "decides_on",
+      "from": "gate.co-hr.DG-HR-04",
+      "to": "output_type.implementation_milestones",
+      "source": "decision_model"
     },
     {
       "type": "follows",
@@ -1366,16 +1410,40 @@
       "source": "process_schema"
     },
     {
+      "type": "gated_by",
+      "from": "stage.co-hr.S1",
+      "to": "gate.co-hr.DG-HR-01",
+      "source": "decision_model"
+    },
+    {
       "type": "stage_follows",
       "from": "stage.co-hr.S1",
       "to": "stage.co-hr.S2",
       "source": "process_schema"
     },
     {
+      "type": "gated_by",
+      "from": "stage.co-hr.S2",
+      "to": "gate.co-hr.DG-HR-02",
+      "source": "decision_model"
+    },
+    {
+      "type": "gated_by",
+      "from": "stage.co-hr.S2",
+      "to": "gate.co-hr.DG-HR-03",
+      "source": "decision_model"
+    },
+    {
       "type": "stage_follows",
       "from": "stage.co-hr.S2",
       "to": "stage.co-hr.S3",
       "source": "process_schema"
+    },
+    {
+      "type": "gated_by",
+      "from": "stage.co-hr.S3",
+      "to": "gate.co-hr.DG-HR-04",
+      "source": "decision_model"
     },
     {
       "type": "used_by",

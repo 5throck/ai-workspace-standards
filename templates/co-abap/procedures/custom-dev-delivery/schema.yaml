@@ -65,9 +65,11 @@ outputs:
 relations:
   - type: follows
     target: skill.abap-dev
-quality_gates:
+
   - "Clean ABAP checklist review completed with no open critical findings."
   - "All automated tests pass before handoff to transport release."
+decision_points:
+  - DG-ABAP-01
 evidence:
   - "docs/handoff-spec.md"
 failure_modes:

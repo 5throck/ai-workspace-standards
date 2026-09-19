@@ -26,7 +26,7 @@ outputs:
 relations:
   - type: enables
     target: procedure.co-price.pricing-analysis
-quality_gates:
+
   - "Sensitive pricing-data handling controls are documented before analysis starts."
 evidence: []
 failure_modes:

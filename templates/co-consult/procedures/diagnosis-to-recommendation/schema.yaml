@@ -40,9 +40,11 @@ outputs:
 relations:
   - type: enables
     target: skill.consulting-report-writing
-quality_gates:
+
   - "Every recommendation traces to at least one verified evidence item."
   - "Logic audit passes before executive presentation."
+decision_points:
+  - DG-CONSULT-01
 evidence:
   - "docs/engagement-orchestration.md"
 failure_modes:

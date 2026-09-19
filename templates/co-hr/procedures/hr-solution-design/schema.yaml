@@ -70,8 +70,6 @@ relations:
     target: procedure.co-hr.hr-diagnosis
   - type: enables
     target: procedure.co-hr.org-implementation
-quality_gates:
-  - "Solution components mutually consistent and cover all diagnosed gaps."
 evidence: []
 failure_modes:
   - "Solution components conflict (e.g. compensation vs structure) - reconcile before client presentation."

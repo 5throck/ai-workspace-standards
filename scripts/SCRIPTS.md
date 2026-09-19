@@ -94,7 +94,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `generate-l3-readme.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
 | `generate-scripts-readme.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
 | `generate-raci.ts` | L0 | 1.0.0 | active | RACI matrix generator per ADR-0083 P4; derives A/R from procedures and stages, accepts explicit C/I from schema | —| L0+L1 | —|
-| `generate-skill-graph.ts` | L0 | 1.11.0 | active | DEG v1 support per ADR-0083 — stage nodes and edges from process/stages.yaml | —| L0+L1 | —|
+| `generate-skill-graph.ts` | L0 | 1.11.1 | active | DEG v1 support per ADR-0083 — stage nodes and edges from process/stages.yaml | —| L0+L1 | —|
 | `generate-version-manifest.ts` | L0 | 1.7.0 | active | date-masked `--check` — Last Modified columns excluded from comparison unconditionally (ADR-0081/T-20260918-001); emits `validate-md-language:allowlist` markers around the generated Skills table (T-20260912-015) | —| L0+L1 | —|
 | `helpers/beta-lifecycle.ts` | L0 | 1.2.1 | active | —| —| L0 | —|
 | `helpers/generate-variant.ts` | L0 | 1.15.0 | active | —| —| L0+L1 | —|
@@ -190,6 +190,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `lint-instructions.ts` | L0 | 1.0.0 | active | `--dir`, `--strict` | —| L0+L1 | —|
 | `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `md-to-ooxml.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
+| `migrate-quality-gates.ts` | L0 | 1.1.0 | active | Convert quality_gates prose entries to decision gates; automate classification (GATE vs INVARIANT vs MANUAL), YAML output, procedure schema updates, and _output-types.yaml enrichment (ADR-0083 P5); decider_agent derived from stage owner_agent, not procedure owner_agent | —| L0+L1 | —|
 | `new-project.ts` | L0 | 1.21.0 | active | Provenance fallback is fail-loud via the templates/VERSION SSOT — silent "unknown" removed, --version still wins as-is (v1.20.0); bare names scaffold to `Projects/<name>`, path-like names stay workspace-relative | —| L0 | —|
 | `remove-project.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `resolve-variants.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|

@@ -45,7 +45,7 @@ outputs:
 relations:
   - type: follows
     target: skill.verify-authorization
-quality_gates:
+
   - "Authorization scope matches every tested component - no out-of-scope findings included."
 evidence:
   - "docs/co-security.context.md"

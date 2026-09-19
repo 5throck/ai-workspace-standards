@@ -1,0 +1,27 @@
+schema_version: "1.0"
+variant: co-game
+gates:
+  - id: DG-GAME-01
+    title: "Implementation plan approved at the design gate."
+    stage: S1
+    decider_agent: stack-setup
+    inputs:
+      - approved_implementation_plan
+    criteria:
+      - "Implementation plan approved at the design gate."
+    outcomes:
+      - proceed
+      - rework
+    record_kind: DEC
+  - id: DG-GAME-02
+    title: "Assets pass integration checks in the target engine format."
+    stage: S1
+    decider_agent: stack-setup
+    inputs:
+      - sprite_asset_set
+    criteria:
+      - "Assets pass integration checks in the target engine format."
+    outcomes:
+      - proceed
+      - rework
+    record_kind: DEC

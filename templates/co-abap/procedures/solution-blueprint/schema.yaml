@@ -40,7 +40,7 @@ relations:
     target: procedure.co-abap.requirements-analysis
   - type: enables
     target: procedure.co-abap.custom-dev-delivery
-quality_gates:
+
   - "Blueprint reviewed against every module impact note."
 evidence: []
 failure_modes:

@@ -32,7 +32,7 @@ outputs:
 relations:
   - type: follows
     target: procedure.co-deck.deck-build-and-export
-quality_gates:
+
   - "Published package hash matches the registered version record."
 evidence: []
 failure_modes:

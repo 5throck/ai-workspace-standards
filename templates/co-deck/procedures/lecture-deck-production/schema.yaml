@@ -47,9 +47,8 @@ steps:
 outputs:
   - type: pdf_deck
 relations: []
-quality_gates:
-  - "Slide layout gate passes on every slide before export."
-  - "Measure check confirms readability at target projector resolution."
+decision_points:
+  - DG-DECK-02
 evidence:
   - "docs/co-deck.context.md"
 failure_modes:

@@ -18,6 +18,16 @@
       "layer": "L0"
     },
     {
+      "id": "gate.co-design.DG-DESIGN-01",
+      "type": "decision_gate",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "gate.co-design.DG-DESIGN-02",
+      "type": "decision_gate",
+      "layer": "variant:co-design"
+    },
+    {
       "id": "output_type.accessibility_report",
       "type": "output_type",
       "layer": "variant:co-design"
@@ -225,6 +235,18 @@
       "from": "documentation-writing",
       "to": "output_type.narrative_brief",
       "source": "procedure_schema"
+    },
+    {
+      "type": "decides_on",
+      "from": "gate.co-design.DG-DESIGN-01",
+      "to": "output_type.design_direction",
+      "source": "decision_model"
+    },
+    {
+      "type": "decides_on",
+      "from": "gate.co-design.DG-DESIGN-02",
+      "to": "output_type.visual_design_set",
+      "source": "decision_model"
     },
     {
       "type": "step_by_agent",
@@ -560,10 +582,22 @@
       "source": "process_schema"
     },
     {
+      "type": "gated_by",
+      "from": "stage.co-design.S3",
+      "to": "gate.co-design.DG-DESIGN-01",
+      "source": "decision_model"
+    },
+    {
       "type": "stage_follows",
       "from": "stage.co-design.S3",
       "to": "stage.co-design.S4",
       "source": "process_schema"
+    },
+    {
+      "type": "gated_by",
+      "from": "stage.co-design.S4",
+      "to": "gate.co-design.DG-DESIGN-02",
+      "source": "decision_model"
     },
     {
       "type": "stage_follows",

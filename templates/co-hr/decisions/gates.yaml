@@ -1,0 +1,51 @@
+schema_version: "1.0"
+variant: co-hr
+gates:
+  - id: DG-HR-01
+    title: "Data sources disclosed and every figure traceable to the market dataset."
+    stage: S1
+    decider_agent: compensation-benefits-analyst
+    inputs:
+      - benchmark_report
+    criteria:
+      - "Data sources disclosed and every figure traceable to the market dataset."
+    outcomes:
+      - proceed
+      - rework
+    record_kind: DEC
+  - id: DG-HR-02
+    title: "Diagnosis covers compliance, relations, safety, and readiness dimensions."
+    stage: S2
+    decider_agent: org-design-consultant
+    inputs:
+      - compliance_findings
+    criteria:
+      - "Diagnosis covers compliance, relations, safety, and readiness dimensions."
+    outcomes:
+      - proceed
+      - rework
+    record_kind: DEC
+  - id: DG-HR-03
+    title: "Solution components mutually consistent and cover all diagnosed gaps."
+    stage: S2
+    decider_agent: org-design-consultant
+    inputs:
+      - org_design_options
+    criteria:
+      - "Solution components mutually consistent and cover all diagnosed gaps."
+    outcomes:
+      - proceed
+      - rework
+    record_kind: DEC
+  - id: DG-HR-04
+    title: "Every milestone has an owner, a date, and a verifying metric."
+    stage: S3
+    decider_agent: org-design-consultant
+    inputs:
+      - implementation_milestones
+    criteria:
+      - "Every milestone has an owner, a date, and a verifying metric."
+    outcomes:
+      - proceed
+      - rework
+    record_kind: DEC
