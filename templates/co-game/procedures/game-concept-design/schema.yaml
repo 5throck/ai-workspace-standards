@@ -4,6 +4,7 @@ variant: co-game
 version: "1.0.0"
 title: Game Concept Design
 phase: 1
+stage: S1
 status: active
 owner_agent: game-designer
 purpose: >

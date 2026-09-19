@@ -71,5 +71,12 @@
       }
     ]
   },
-  "promotionChecklist": "PROMOTION_CHECKLIST.md"
+  "promotionChecklist": "PROMOTION_CHECKLIST.md",
+  "deg_conformance": "core",
+  "process_manifest": {
+    "stages_file": null,
+    "raci_file": "governance/raci.yaml",
+    "gates_file": "decisions/gates.yaml",
+    "evidence_models_dir": "evidence-models/"
+  }
 }

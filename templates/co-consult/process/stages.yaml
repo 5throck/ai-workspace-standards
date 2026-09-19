@@ -1,0 +1,39 @@
+schema_version: '1.0'
+variant: co-consult
+stages:
+  - id: S1
+    title: Current State Diagnosis
+    order: 1
+    purpose: PENDING_REVIEW
+    entry_criteria:
+      - PENDING_REVIEW
+    exit_criteria:
+      - PENDING_REVIEW
+    owner_agent: strategy-analyst
+  - id: S2
+    title: Diagnosis to Recommendation
+    order: 2
+    purpose: PENDING_REVIEW
+    entry_criteria:
+      - PENDING_REVIEW
+    exit_criteria:
+      - PENDING_REVIEW
+    owner_agent: strategy-analyst
+  - id: S3
+    title: Solution Delivery
+    order: 3
+    purpose: PENDING_REVIEW
+    entry_criteria:
+      - PENDING_REVIEW
+    exit_criteria:
+      - PENDING_REVIEW
+    owner_agent: strategy-analyst
+  - id: S4
+    title: Engagement Closeout
+    order: 4
+    purpose: PENDING_REVIEW
+    entry_criteria:
+      - PENDING_REVIEW
+    exit_criteria:
+      - PENDING_REVIEW
+    owner_agent: delivery-manager

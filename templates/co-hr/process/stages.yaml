@@ -1,0 +1,30 @@
+schema_version: '1.0'
+variant: co-hr
+stages:
+  - id: S1
+    title: Compensation Benchmarking
+    order: 1
+    purpose: PENDING_REVIEW
+    entry_criteria:
+      - PENDING_REVIEW
+    exit_criteria:
+      - PENDING_REVIEW
+    owner_agent: compensation-benefits-analyst
+  - id: S2
+    title: HR Solution Design
+    order: 2
+    purpose: PENDING_REVIEW
+    entry_criteria:
+      - PENDING_REVIEW
+    exit_criteria:
+      - PENDING_REVIEW
+    owner_agent: org-design-consultant
+  - id: S3
+    title: Organization Implementation
+    order: 3
+    purpose: PENDING_REVIEW
+    entry_criteria:
+      - PENDING_REVIEW
+    exit_criteria:
+      - PENDING_REVIEW
+    owner_agent: org-design-consultant

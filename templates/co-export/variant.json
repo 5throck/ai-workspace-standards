@@ -252,5 +252,12 @@
     "missingCriteria": [],
     "lastSynced": "2026-08-09T03:13:04.029Z"
   },
-  "promotionChecklist": "PROMOTION_CHECKLIST.md"
+  "promotionChecklist": "PROMOTION_CHECKLIST.md",
+  "deg_conformance": "governed",
+  "process_manifest": {
+    "stages_file": "process/stages.yaml",
+    "raci_file": "governance/raci.yaml",
+    "gates_file": "decisions/gates.yaml",
+    "evidence_models_dir": "evidence-models/"
+  }
 }

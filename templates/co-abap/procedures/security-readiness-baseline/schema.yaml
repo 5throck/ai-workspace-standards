@@ -4,6 +4,7 @@ variant: co-abap
 version: "1.0.0"
 title: Security Readiness Baseline
 phase: 0
+stage: S1
 status: active
 owner_agent: security-monitor
 purpose: >

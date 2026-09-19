@@ -1,0 +1,21 @@
+schema_version: '1.0'
+variant: co-game
+stages:
+  - id: S1
+    title: Game Security Retrospective
+    order: 1
+    purpose: PENDING_REVIEW
+    entry_criteria:
+      - PENDING_REVIEW
+    exit_criteria:
+      - PENDING_REVIEW
+    owner_agent: stack-setup
+  - id: S2
+    title: Gameplay Feature Loop
+    order: 2
+    purpose: PENDING_REVIEW
+    entry_criteria:
+      - PENDING_REVIEW
+    exit_criteria:
+      - PENDING_REVIEW
+    owner_agent: game-developer

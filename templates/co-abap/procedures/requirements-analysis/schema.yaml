@@ -4,6 +4,7 @@ variant: co-abap
 version: "1.0.0"
 title: SAP Requirements Analysis
 phase: 1
+stage: S1
 status: active
 owner_agent: co-analyst
 purpose: >

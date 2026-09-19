@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-09-19T05:10:08.590Z
+**Generated**: 2026-09-19T05:36:02.391Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 8
 - **Skills**: 51
-- **Scripts**: 94 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` plus experiment files under `scripts/experiments/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
+- **Scripts**: 95 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` plus experiment files under `scripts/experiments/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
 - **Commands**: 8
 
 ---
@@ -103,6 +103,7 @@
 | analyze-git-history.ts | 1.0.2 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.1.0 | scripts/archive-memory.ts | N/A |
 | audit.ts | 2.39.0 | scripts/audit.ts | bun |
+| bootstrap-stages.ts | 1.0.0 | scripts/bootstrap-stages.ts | fs, js-yaml, path |
 | check-upgrade-coverage.ts | 1.0.0 | scripts/check-upgrade-coverage.ts | N/A |
 | cleanup-completed-md.ts | 1.1.0 | scripts/cleanup-completed-md.ts | N/A |
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | N/A |

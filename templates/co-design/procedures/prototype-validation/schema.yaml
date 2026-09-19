@@ -4,6 +4,7 @@ variant: co-design
 version: "1.0.0"
 title: Prototype Validation
 phase: 4
+stage: S5
 status: active
 owner_agent: prototype-engineer
 purpose: >

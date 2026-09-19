@@ -4,6 +4,7 @@ variant: co-abap
 version: "1.0.0"
 title: SAP Solution Blueprint
 phase: 2
+stage: S1
 status: active
 owner_agent: architect
 purpose: >

@@ -4,6 +4,7 @@ variant: co-export
 version: "1.0.0"
 title: Shipment Execution
 phase: 3
+stage: S4
 status: active
 owner_agent: logistics-coordinator
 purpose: >

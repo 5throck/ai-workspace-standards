@@ -4,6 +4,7 @@ variant: co-consult
 version: "1.0.0"
 title: Engagement Closeout
 phase: 4
+stage: S4
 status: active
 owner_agent: delivery-manager
 purpose: >

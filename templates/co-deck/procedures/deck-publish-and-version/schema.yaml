@@ -4,6 +4,7 @@ variant: co-deck
 version: "1.0.0"
 title: Deck Publish and Versioning
 phase: 5
+stage: S3
 status: active
 owner_agent: pdf-export
 purpose: >

@@ -4,6 +4,7 @@ variant: co-abap
 version: "1.0.0"
 title: Transport Release and Acceptance
 phase: 4
+stage: S2
 status: active
 owner_agent: devops-admin
 purpose: >

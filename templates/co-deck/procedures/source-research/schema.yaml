@@ -4,6 +4,7 @@ variant: co-deck
 version: "1.0.0"
 title: Deck Source Research
 phase: 1
+stage: S1
 status: active
 owner_agent: research
 purpose: >

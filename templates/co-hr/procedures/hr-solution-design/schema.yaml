@@ -4,6 +4,7 @@ variant: co-hr
 version: "1.0.0"
 title: HR Solution Design
 phase: 2
+stage: S2
 status: active
 owner_agent: org-design-consultant
 purpose: >

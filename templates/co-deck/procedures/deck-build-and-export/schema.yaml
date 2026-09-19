@@ -4,6 +4,7 @@ variant: co-deck
 version: "1.0.0"
 title: Deck Build and Export
 phase: 4
+stage: S2
 status: active
 owner_agent: html-build
 purpose: >

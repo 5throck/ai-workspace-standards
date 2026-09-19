@@ -4,6 +4,7 @@ variant: co-price
 version: "1.0.0"
 title: Release Assurance
 phase: 4
+stage: S1
 status: active
 owner_agent: qa-tester
 purpose: >

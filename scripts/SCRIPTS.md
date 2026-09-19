@@ -74,6 +74,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `analyze-git-history.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
 | `archive-memory.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `audit.ts` | L0 | 2.39.0 | active | —| —| L0+L1 | —|
+| `bootstrap-stages.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `check-upgrade-coverage.ts` | L0 | 1.0.0 | active | `--variant`, `--strict`, `--json` | —| L0 | —|
 | `cleanup-completed-md.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `clear-pm-approval.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|

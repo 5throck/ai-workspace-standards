@@ -4,6 +4,7 @@ variant: co-hr
 version: "1.0.0"
 title: Compensation Benchmarking
 phase: 1
+stage: S1
 status: active
 owner_agent: compensation-benefits-analyst
 purpose: >

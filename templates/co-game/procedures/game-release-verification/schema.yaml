@@ -4,6 +4,7 @@ variant: co-game
 version: "1.0.0"
 title: Game Release Verification
 phase: 4
+stage: S1
 status: active
 owner_agent: game-debugger
 purpose: >
