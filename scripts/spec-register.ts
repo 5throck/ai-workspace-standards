@@ -1,4 +1,4 @@
-// @version 1.2.0
+// @version 1.3.0
 /**
  * spec-register.ts
  *
@@ -44,7 +44,7 @@ const CYAN = '\x1b[36m';
 const RESET = '\x1b[0m';
 
 type SpecStatus = 'draft' | 'proposed' | 'approved' | 'implemented' | 'drifted' | 'archived';
-type SpecSource = 'brainstorming' | 'meeting' | 'manual';
+type SpecSource = 'brainstorming' | 'meeting' | 'manual' | 'architect' | 'pm';
 
 interface SpecEntry {
   id: string;
@@ -154,10 +154,20 @@ function dispatch(): void {
     return args.includes(flag);
   }
 
+  function isValidSource(source: string): source is SpecSource {
+    const validSources: SpecSource[] = ['brainstorming', 'meeting', 'manual', 'architect', 'pm'];
+    return validSources.includes(source as SpecSource);
+  }
+
   if (getArg('--file')) {
+    const sourceArg = getArg('--source') ?? 'manual';
+    if (!isValidSource(sourceArg)) {
+      console.error(`${RED}Invalid --source value: "${sourceArg}". Valid options: brainstorming, meeting, manual, architect, pm${RESET}`);
+      process.exit(1);
+    }
     registerSpec({
       filePath: getArg('--file')!,
-      source: (getArg('--source') ?? 'manual') as SpecSource,
+      source: sourceArg,
       meetingRef: getArg('--ref'),
       status: (getArg('--status') ?? undefined) as SpecStatus | undefined,
       id: getArg('--id'),
@@ -199,7 +209,7 @@ function dispatch(): void {
     process.exit(0);
   }
 
-  console.error('Usage: --file <path> --source <brainstorming|meeting|manual> | --update <id> --status <status> | --list');
+  console.error('Usage: --file <path> --source <brainstorming|meeting|manual|architect|pm> | --update <id> --status <status> | --list');
   process.exit(1);
 }
 

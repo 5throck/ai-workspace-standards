@@ -218,6 +218,8 @@ Skills are reusable workflows defined as `skills/<name>/SKILL.md` or `.claude/sk
 
 **Skill Relationship Graph (ADR-0060, Amendments 1–9)**: Skill-to-skill relations are managed in three layers — typed `relates_to` frontmatter (permanent), per-scope `skill-graph.overrides.json` (experimental; `reason`/`since` required, 90-day review, `suppress` markers), and the always-regenerated `docs/skill-graph.json` projection. Relations flow variant skill → L1 or same-variant targets only; the graph is regenerated at every lifecycle boundary (scaffold, promotion, upgrade, `/sync` step 4.65) and `validate-skills.ts` / `validate-decisions.ts` run as fail-closed `/sync` gates (step 3.96), including the auto-activating drift gate (Amendment 9, 2026-09-06). Security findings on a skill follow the mandatory **security-hold protocol** (`security_hold: true` quarantine with a `removal-date` ≤ 30 days; see §6.2). → Details: [§6.2.1 Skill Relation System](docs/constitution/06-skill-lifecycle.md).
 
+**Flat Skill Directory Layout and Frontmatter Categories (ADR-0075)**: Skills are organized in a flat directory structure (`skills/<name>/SKILL.md`) rather than nested subdirectories, with categorization via `metadata.type` frontmatter instead — eliminating coupling between skill discovery and layout paths, enabling the upgrade skill pass to synchronize nested skills, and supporting the `mirror: false` sync-exclusion mechanism for domain-specific agent-dispatched skills. This flattened layout also resolves skill-graph projection gaps where nested categories were not discovered. → Details: [ADR-0075](docs/adr/0075-flat-skill-layout-frontmatter-categories.md).
+
 ---
 
 ### 6.5 Script Lifecycle Management
@@ -734,4 +736,4 @@ Agent, skill, and command frontmatter structures are validated against JSON Sche
 
 ---
 
-*Last Updated: 2026-09-19*
+*Last Updated: 2026-09-20*

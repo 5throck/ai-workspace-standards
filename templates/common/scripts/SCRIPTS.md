@@ -217,10 +217,10 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `setup-github-branch-protection.ts` | L0 | 1.0.1 | active | `--repo`, `--branch`, `--check` (repeatable), `--dry-run` | —| L0+L1 | —|
 | `skill-dependency-analysis.ts` | L0 | 1.0.2 | active | —| —| L0 | —|
 | `spec-backfill.ts` | L0 | 1.0.0 | active | `--dry-run`, `--check` | —| L0 | —|
-| `spec-register.ts` | L0 | 1.2.0 | active | `--file`, `--source`, `--update`, `--status`, `--list`, `--ref`, `--id` | —| L0+L1 | —|
+| `spec-register.ts` | L0 | 1.3.0 | active | `--file`, `--source`, `--update`, `--status`, `--list`, `--ref`, `--id` | —| L0+L1 | —|
 | `skill-lifecycle-audit.ts` | L0 | 1.4.1 | active | —| —| L0+L1 | —|
 | `skill-session-review.ts` | L0 | 1.0.0 | active | `--date`, `--json`, `--dry-run` | —| L0+L1 | —|
-| `sync-md.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
+| `sync-md.ts` | L0 | 1.4.0 | active | —| —| L0+L1 | —|
 | `sync-skill-status.ts` | L0 | 1.0.1 | active | — | — | L0+L1 | — |
 | `sync-skills-to-l2.ts` | L0 | 1.0.1 | active | — | — | L0 | — |
 | `sync-template-deps.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
@@ -250,7 +250,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `validate-templates.ts` | L0 | 1.36.0 | active | —| —| L0+L1 | —|
 | `validate-variant-readiness.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `verify-country-prune.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `verify-adr-governance.ts` | L0 | 1.6.0 | active | —| —| L0 | —|
+| `verify-adr-governance.ts` | L0 | 1.7.0 | active | Added bold-line fallback for `**Date**: YYYY-MM-DD` metadata to mirror `extractADRStatus()` pattern (ADR-0084 safety net); WARN on unparseable dates for Accepted/Proposed ADRs | —| L0 | —|
 | `verify-agent-deliverables.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `verify-skill-graph.ts` | L0 | 1.6.0 | active | —| —| L0+L1 | —|
 | `verify-memory.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
