@@ -1143,13 +1143,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-hr.compensation-benchmarking",
       "to": "compensation-benefits-analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-hr.compensation-benchmarking",
       "to": "compensation-benefits-analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1161,7 +1163,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-hr.compensation-benchmarking",
       "to": "data-analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1185,13 +1188,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-hr.hr-diagnosis",
       "to": "change-management-partner",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-hr.hr-diagnosis",
       "to": "labor-compliance-analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1209,7 +1214,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-hr.hr-diagnosis",
       "to": "labor-relations-specialist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1233,7 +1239,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-hr.hr-diagnosis",
       "to": "safety-health-officer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "in_stage",
@@ -1257,13 +1264,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-hr.hr-solution-design",
       "to": "career-succession-consultant",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-hr.hr-solution-design",
       "to": "change-management-partner",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1275,13 +1284,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-hr.hr-solution-design",
       "to": "compensation-benefits-analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-hr.hr-solution-design",
       "to": "labor-relations-specialist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1293,13 +1304,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-hr.hr-solution-design",
       "to": "learning-development-specialist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-hr.hr-solution-design",
       "to": "org-design-consultant",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1323,7 +1336,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-hr.hr-solution-design",
       "to": "performance-management-consultant",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1359,7 +1373,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-hr.hr-solution-design",
       "to": "talent-acquisition-specialist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1371,7 +1386,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-hr.org-implementation",
       "to": "data-analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1383,7 +1399,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-hr.org-implementation",
       "to": "org-design-consultant",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",

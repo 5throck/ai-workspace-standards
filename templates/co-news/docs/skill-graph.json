@@ -401,7 +401,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-news.editorial-finalization",
       "to": "style-editor",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -413,7 +414,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-news.fact-checked-article",
       "to": "fact-checker",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -431,7 +433,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-news.fact-checked-article",
       "to": "legal-researcher",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -443,7 +446,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-news.fact-checked-article",
       "to": "reporter",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -461,19 +465,22 @@
       "type": "step_by_agent",
       "from": "procedure.co-news.fact-checked-article",
       "to": "style-editor",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-news.pre-publication-review",
       "to": "fact-checker",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-news.pre-publication-review",
       "to": "legal-researcher",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -503,7 +510,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-news.topic-discovery",
       "to": "financial-analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -515,7 +523,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-news.topic-discovery",
       "to": "legal-researcher",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -557,7 +566,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-news.visual-news-production",
       "to": "visual-editor",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "references",

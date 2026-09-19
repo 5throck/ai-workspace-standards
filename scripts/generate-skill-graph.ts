@@ -1,7 +1,13 @@
 #!/usr/bin/env bun
 /**
  * Skill Relationship Graph Generator
- * @version 1.11.1 (P5 defect fix, 2026-09-19): decides_on edge target now
+ * @version 1.12.0 (ADR-0084 Actor Model, 2026-09-19): emit human_role nodes
+ * from governance/_human-roles.yaml; add actor_type edge attribute to RACI
+ * edges (accountable_for, consulted_on, informed_of, step_by_agent); resolve
+ * actor type per derivation rule §3.1 (human-roles registry takes precedence
+ * over agent files).
+ *
+ * v1.11.1 (P5 defect fix, 2026-09-19): decides_on edge target now
  * uses the canonical `output_type.<name>` node ID prefix instead of the bare
  * gate.inputs[] string, fixing ghost/unknown-target edges caught by
  * dev-sync's per-scope graph verification (same bug class as the P4
@@ -126,7 +132,7 @@ export interface GraphNode {
   // 'stage' = domain execution stage node (DEG, ADR-0083); id form: `stage.<variant>.<id>`
   // 'decision_gate' = decision gate node (DEG, ADR-0083); id form: `gate.<variant>.<id>`
   // 'evidence_model' = evidence schema node (DEG, ADR-0083); id form: `evidence.<variant>.<name>`
-  type: 'skill' | 'agent' | 'decision' | 'adr' | 'procedure' | 'output_type' | 'term' | 'stage' | 'decision_gate' | 'evidence_model';
+  type: 'skill' | 'agent' | 'decision' | 'adr' | 'procedure' | 'output_type' | 'term' | 'stage' | 'decision_gate' | 'evidence_model' | 'human_role';
   layer: 'L0' | 'L3' | 'common' | `variant:${string}`;
   /** Opaque input/output labels from SKILL.md frontmatter (skill nodes only). */
   inputs?: string[];
@@ -167,6 +173,8 @@ export interface GraphEdge {
   extra?: Record<string, unknown>;
   /** Exactly which frontmatter field/entry produced this edge (JSON-only; not rendered in .md). */
   provenance?: EdgeProvenance;
+  /** Actor type ("human"|"agent") on RACI edges (accountable_for, consulted_on, informed_of, step_by_agent) per ADR-0084. */
+  actor_type?: "human" | "agent";
 }
 
 export interface SkillGraph {
@@ -549,6 +557,53 @@ function discoverNodes(): { skills: Map<string, GraphNode>, agents: Map<string, 
 }
 
 /**
+ * Load the human-roles registry for a variant/scope dir, if present
+ * (ADR-0084, §3.4). Shared by deriveProceduresFromDir and deriveRACIFromYaml.
+ */
+function loadHumanRoles(variantDir: string): Set<string> {
+  const humanRoles = new Set<string>();
+  const humanRolesPath = join(variantDir, 'governance', '_human-roles.yaml');
+  if (existsSync(humanRolesPath)) {
+    try {
+      const hrData = yamlLoad(readFileSync(humanRolesPath, 'utf-8')) as any;
+      if (hrData?.human_roles && typeof hrData.human_roles === 'object') {
+        for (const key of Object.keys(hrData.human_roles)) {
+          humanRoles.add(key);
+        }
+      }
+    } catch {
+      // Ignore parse errors for human-roles
+    }
+  }
+  return humanRoles;
+}
+
+/** Check if an agent file exists anywhere in the workspace (any variant, or workspace-root agents/). */
+function agentFileExists(agentKey: string): boolean {
+  const templatesDir = join(ROOT, 'templates');
+  if (existsSync(templatesDir)) {
+    for (const variant of readdirSync(templatesDir)) {
+      const agentPath = join(templatesDir, variant, 'agents', `${agentKey}.md`);
+      if (existsSync(agentPath)) return true;
+    }
+  }
+  const workspaceAgentPath = join(ROOT, 'agents', `${agentKey}.md`);
+  if (existsSync(workspaceAgentPath)) return true;
+  return false;
+}
+
+/**
+ * Resolve actor type for an agent key per derivation rule (ADR-0084, §3.1):
+ * human-roles registry membership takes precedence over agent-file existence;
+ * omit the attribute entirely (return undefined) if neither matches.
+ */
+function resolveActorType(agentKey: string, humanRoles: Set<string>): "human" | "agent" | undefined {
+  if (humanRoles.has(agentKey)) return "human";
+  if (agentFileExists(agentKey)) return "agent";
+  return undefined;
+}
+
+/**
  * Derive procedure/output_type nodes and procedure edges from a directory of
  * procedure schemas (<dir>/<name>/schema.yaml). Shared by buildGraph (variant
  * templates + the root l0 namespace) and buildScopeGraph (per-scope artifacts).
@@ -557,6 +612,10 @@ function discoverNodes(): { skills: Map<string, GraphNode>, agents: Map<string, 
  * output_type; a step output_type NOT in outputs[] → the step's skill →
  * output_type. Node ids: `procedure.<namespace>.<name>`,
  * `output_type.<type>`.
+ *
+ * `variantDir` (optional) is the variant/scope root used to resolve the
+ * human-roles registry for `step_by_agent` edge `actor_type` tagging
+ * (ADR-0084 §3.4). When omitted, `actor_type` is not attached.
  */
 function deriveProceduresFromDir(
   procDir: string,
@@ -564,8 +623,11 @@ function deriveProceduresFromDir(
   layer: GraphNode['layer'],
   allNodes: Map<string, GraphNode>,
   edges: GraphEdge[],
+  variantDir?: string,
 ): void {
   if (!existsSync(procDir)) return;
+
+  const humanRoles = variantDir ? loadHumanRoles(variantDir) : new Set<string>();
 
   for (const entry of readdirSync(procDir, { withFileTypes: true })) {
     if (!entry.isDirectory() || entry.name.startsWith('_')) continue;
@@ -633,7 +695,14 @@ function deriveProceduresFromDir(
           }
         }
         if (typeof step.agent_key === 'string' && step.agent_key && allNodes.has(step.agent_key)) {
-          edges.push({ type: 'step_by_agent', from: procId, to: step.agent_key, source: 'procedure_schema' });
+          const actorType = variantDir ? resolveActorType(step.agent_key, humanRoles) : undefined;
+          edges.push({
+            type: 'step_by_agent',
+            from: procId,
+            to: step.agent_key,
+            source: 'procedure_schema',
+            ...(actorType && { actor_type: actorType }),
+          });
         }
       }
     }
@@ -805,8 +874,9 @@ function deriveStagesFromYaml(
 }
 
 /**
- * Derive RACI edges from raci.yaml (ADR-0083 P4)
- * Creates accountable_for, consulted_on, and informed_of edges
+ * Derive RACI edges from raci.yaml (ADR-0083 P4, ADR-0084 §3.4)
+ * Creates accountable_for, consulted_on, informed_of, and step_by_agent edges
+ * Emits human_role nodes and actor_type edge attributes per ADR-0084
  */
 function deriveRACIFromYaml(
   raciPath: string,
@@ -814,6 +884,7 @@ function deriveRACIFromYaml(
   layer: GraphNode['layer'],
   allNodes: Map<string, GraphNode>,
   edges: GraphEdge[],
+  variantDir: string,
 ): void {
   if (!existsSync(raciPath)) return;
 
@@ -826,12 +897,16 @@ function deriveRACIFromYaml(
   }
   if (!data || typeof data !== 'object' || !Array.isArray(data.rows)) return;
 
+  // Load human-roles registry if present (ADR-0084, §3.4)
+  const humanRoles = loadHumanRoles(variantDir);
+
   const rows = data.rows as Array<{
     activity?: string;
     accountable?: string;
     responsible?: string[];
     consulted?: string[];
     informed?: string[];
+    actor_types?: Record<string, "human" | "agent">;
   }>;
 
   for (const row of rows) {
@@ -843,13 +918,27 @@ function deriveRACIFromYaml(
       allNodes.set(procId, { id: procId, type: 'procedure', layer });
     }
 
+    // Create human_role nodes for any human roles appearing in this row (ADR-0084)
+    if (row.actor_types && typeof row.actor_types === 'object') {
+      for (const [agentKey, actorType] of Object.entries(row.actor_types)) {
+        if (actorType === 'human') {
+          const humanRoleId = agentKey;
+          if (!allNodes.has(humanRoleId)) {
+            allNodes.set(humanRoleId, { id: humanRoleId, type: 'human_role', layer });
+          }
+        }
+      }
+    }
+
     // accountable_for edge: accountable agent → procedure (one per row)
     if (typeof row.accountable === 'string') {
+      const actorType = row.actor_types?.[row.accountable];
       edges.push({
         type: 'accountable_for',
         from: row.accountable,
         to: procId,
         source: 'raci_matrix',
+        ...(actorType && { actor_type: actorType }),
       });
     }
 
@@ -857,11 +946,13 @@ function deriveRACIFromYaml(
     if (Array.isArray(row.consulted)) {
       for (const agent of row.consulted) {
         if (typeof agent === 'string') {
+          const actorType = row.actor_types?.[agent];
           edges.push({
             type: 'consulted_on',
             from: agent,
             to: procId,
             source: 'raci_matrix',
+            ...(actorType && { actor_type: actorType }),
           });
         }
       }
@@ -871,11 +962,13 @@ function deriveRACIFromYaml(
     if (Array.isArray(row.informed)) {
       for (const agent of row.informed) {
         if (typeof agent === 'string') {
+          const actorType = row.actor_types?.[agent];
           edges.push({
             type: 'informed_of',
             from: agent,
             to: procId,
             source: 'raci_matrix',
+            ...(actorType && { actor_type: actorType }),
           });
         }
       }
@@ -1231,6 +1324,7 @@ export function buildGraph(): SkillGraph {
         `variant:${variantName}`,
         allNodes,
         edges,
+        join(templatesDir, variantName),
       );
     }
   }
@@ -1239,7 +1333,7 @@ export function buildGraph(): SkillGraph {
   // directories must not influence the committed graph projection.
   const rootProceduresDir = join(ROOT, 'procedures');
   if (localLayer !== 'L0' || hasTrackedFilesUnder(rootProceduresDir)) {
-    deriveProceduresFromDir(rootProceduresDir, 'l0', localLayer, allNodes, edges);
+    deriveProceduresFromDir(rootProceduresDir, 'l0', localLayer, allNodes, edges, ROOT);
   }
 
   // Source 5.8: Stages — domain execution stages derived from process/stages.yaml (ADR-0083)
@@ -1255,7 +1349,7 @@ export function buildGraph(): SkillGraph {
     }
   }
 
-  // Source 5.9: RACI matrix edges derived from governance/raci.yaml (ADR-0083 P4)
+  // Source 5.9: RACI matrix edges derived from governance/raci.yaml (ADR-0083 P4, ADR-0084 §3.4)
   if (existsSync(templatesDir)) {
     for (const variantName of listVariantDirs(templatesDir)) {
       deriveRACIFromYaml(
@@ -1264,6 +1358,7 @@ export function buildGraph(): SkillGraph {
         `variant:${variantName}`,
         allNodes,
         edges,
+        join(templatesDir, variantName),
       );
     }
   }
@@ -1553,13 +1648,13 @@ export function buildScopeGraph(scope: string): SkillGraph {
   }
 
   // Source 4.7 (scope): procedures owned by this scope.
-  deriveProceduresFromDir(join(scopeDir, 'procedures'), scope, layer, allNodes, edges);
+  deriveProceduresFromDir(join(scopeDir, 'procedures'), scope, layer, allNodes, edges, scopeDir);
 
   // Source 5.8 (scope): stages owned by this scope (ADR-0083)
   deriveStagesFromYaml(join(scopeDir, 'process', 'stages.yaml'), scope, layer, allNodes, edges);
 
-  // Source 5.9 (scope): RACI matrix edges owned by this scope (ADR-0083 P4)
-  deriveRACIFromYaml(join(scopeDir, 'governance', 'raci.yaml'), scope, layer, allNodes, edges);
+  // Source 5.9 (scope): RACI matrix edges owned by this scope (ADR-0083 P4, ADR-0084 §3.4)
+  deriveRACIFromYaml(join(scopeDir, 'governance', 'raci.yaml'), scope, layer, allNodes, edges, scopeDir);
 
   // Source 5.10 (scope): decision gates owned by this scope (ADR-0083 P5)
   deriveDecisionGatesFromYaml(join(scopeDir, 'decisions', 'gates.yaml'), scope, layer, allNodes, edges);

@@ -9,8 +9,8 @@
   "properties": {
     "schema_version": {
       "type": "string",
-      "const": "1.0",
-      "description": "Schema version. Currently fixed at 1.0."
+      "enum": ["1.0", "1.1"],
+      "description": "Schema version. 1.0: RACI basic. 1.1: adds optional actor_types field per row (ADR-0084)."
     },
     "variant": {
       "type": "string",
@@ -69,6 +69,12 @@
               "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$"
             },
             "description": "Optional array of agents kept in the loop. Each resolves to a real agent file. DEG-R-03 forbids an agent from being both Accountable and Informed on the same activity."
+          },
+          "actor_types": {
+            "type": "object",
+            "additionalProperties": { "enum": ["human", "agent"] },
+            "propertyNames": { "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$" },
+            "description": "Generated map from every agent key used in this row's R/A/C/I slots to its resolved actor type. Derived from governance/_human-roles.yaml; never hand-authored. Optional at schema_version 1.0. When present, key set must equal the union of accountable, responsible, consulted, and informed keys (DEG-R-07)."
           }
         }
       }

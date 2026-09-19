@@ -331,7 +331,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-security.engagement-planning",
       "to": "red-team-lead",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "in_stage",
@@ -349,7 +350,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-security.engagement-planning",
       "to": "threat-modeler",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -379,13 +381,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-security.post-engagement-hardening",
       "to": "patch-engineer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-security.post-engagement-hardening",
       "to": "pentester",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "follows",
@@ -397,7 +401,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-security.post-engagement-hardening",
       "to": "report-writer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -433,13 +438,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-security.remediation-support",
       "to": "patch-engineer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-security.remediation-support",
       "to": "patch-engineer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "follows",
@@ -475,13 +482,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-security.security-reporting",
       "to": "report-writer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-security.security-reporting",
       "to": "report-writer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -523,7 +532,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-security.threat-analysis",
       "to": "red-team-lead",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "in_stage",
@@ -541,7 +551,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-security.threat-analysis",
       "to": "threat-modeler",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -565,19 +576,22 @@
       "type": "step_by_agent",
       "from": "procedure.co-security.threat-model-and-report",
       "to": "pentester",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-security.threat-model-and-report",
       "to": "red-team-lead",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-security.threat-model-and-report",
       "to": "report-writer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -601,7 +615,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-security.threat-model-and-report",
       "to": "threat-modeler",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "follows",

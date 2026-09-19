@@ -713,7 +713,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-deck.deck-build-and-export",
       "to": "html-build",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -725,7 +726,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-deck.deck-build-and-export",
       "to": "measure",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -737,7 +739,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-deck.deck-build-and-export",
       "to": "pdf-export",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -773,7 +776,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-deck.deck-publish-and-version",
       "to": "pdf-export",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -797,7 +801,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-deck.deck-publish-and-version",
       "to": "version",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -809,7 +814,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-deck.lecture-deck-production",
       "to": "design",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -821,7 +827,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-deck.lecture-deck-production",
       "to": "html-build",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -839,7 +846,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-deck.lecture-deck-production",
       "to": "pdf-export",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -851,7 +859,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-deck.lecture-deck-production",
       "to": "research",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -869,7 +878,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-deck.lecture-deck-production",
       "to": "storyline",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -893,7 +903,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-deck.source-research",
       "to": "research",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -929,7 +940,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-deck.storyline-development",
       "to": "storyline",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -965,7 +977,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-deck.version-export-control",
       "to": "version",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -995,7 +1008,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-deck.version-kickoff-control",
       "to": "version",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1031,7 +1045,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-deck.version-production-control",
       "to": "version",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1067,7 +1082,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-deck.version-research-control",
       "to": "version",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1097,7 +1113,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-deck.version-retrospective-control",
       "to": "version",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1133,7 +1150,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-deck.version-storyline-control",
       "to": "version",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",

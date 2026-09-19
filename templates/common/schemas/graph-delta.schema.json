@@ -1,0 +1,148 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "Graph Delta Record",
+  "description": "Per-scope structural diff between committed and freshly built skill graph, computed at /sync time. This is a machine-written artifact recording changes to the Domain Execution Graph (ADR-0084). Not an evidence model; persisted to docs/graph-deltas/<YYYY>/<date>-<commit>-<scope>.json for consumption by evidence-backport-scan.ts (M2, M4, M6b maturity bar tests) and potential future SkillHone Evolution Loop use.",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "generated_at",
+    "commit",
+    "scope",
+    "totals",
+    "by_node_type",
+    "by_edge_type",
+    "ids"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "enum": ["1.0"],
+      "description": "Schema version; bumped on breaking changes to totals, type breakdown, or ID inclusion policy (ADR-0084 §8 open question 10)"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 instant when delta was computed"
+    },
+    "commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}$",
+      "description": "Short commit hash (8 hex digits) that triggered this delta"
+    },
+    "pr": {
+      "type": "integer",
+      "description": "Pull request number, if delta was computed during /sync inside a PR context (optional)"
+    },
+    "scope": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$",
+      "description": "Variant scope or 'common' (per-scope records per ADR-0084 §5.4)"
+    },
+    "totals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "nodes_added",
+        "nodes_removed",
+        "edges_added",
+        "edges_removed"
+      ],
+      "properties": {
+        "nodes_added": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "nodes_removed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "edges_added": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "edges_removed": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "by_node_type": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["added", "removed"],
+        "properties": {
+          "added": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "removed": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "description": "Breakdown of node additions/removals by node type (skill, agent, procedure, stage, etc.)"
+    },
+    "by_edge_type": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["added", "removed"],
+        "properties": {
+          "added": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "removed": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "description": "Breakdown of edge additions/removals by edge type (step_uses_skill, accountable_for, etc.)"
+    },
+    "ids": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["truncated"],
+      "properties": {
+        "nodes_added": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Explicit node IDs when total changed elements ≤ 50 (design §5.4)"
+        },
+        "nodes_removed": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "edges_added": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^.+\\|.+\\|.+$"
+          },
+          "description": "Edge tuples as 'from|to|type' when ≤ 50 total changed (design §5.4)"
+        },
+        "edges_removed": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^.+\\|.+\\|.+$"
+          }
+        },
+        "truncated": {
+          "type": "boolean",
+          "description": "True if total changed elements > 50 and ID arrays are omitted (design §5.4)"
+        }
+      }
+    }
+  }
+}

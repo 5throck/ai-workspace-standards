@@ -8,17 +8,19 @@
  * (DEG-R-02), no agent both accountable and informed (DEG-R-03), all agent keys
  * resolve to agent files or human-role entries (DEG-R-04).
  *
- * RACI invariants (§6.3, ADR-0083):
+ * RACI invariants (§6.3, ADR-0083; §3.3, ADR-0084):
  *   DEG-R-01: Each activity declares exactly one accountable agent.
  *   DEG-R-02: Each activity declares at least one responsible agent.
  *   DEG-R-03: No agent holds both accountable and informed on one activity.
  *   DEG-R-04: Every RACI agent key resolves to an agent file or human-role entry.
  *   DEG-R-05: The committed matrix matches a fresh regeneration.
+ *   DEG-R-06: Human-accountable activity must have a matching gate (ADR-0084, opt-in).
+ *   DEG-R-07: When actor_types present, key set must match R/A/C/I union (ADR-0084, opt-in).
  *
  * This script is a validator only — it never mutates files.
  *
  * @usage bun scripts/validate-raci.ts [--variant co-consult|all] [--all] [--root <dir>]
- * @version 1.1.0
+ * @version 1.2.0
  */
 
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
@@ -38,6 +40,7 @@ interface RACIRow {
   responsible?: string | string[];
   consulted?: string | string[];
   informed?: string | string[];
+  actor_types?: Record<string, "human" | "agent">;
 }
 
 interface RACIMatrix {
@@ -45,6 +48,12 @@ interface RACIMatrix {
   variant?: string;
   generated_from?: string;
   rows?: RACIRow[];
+}
+
+interface Gate {
+  id: string;
+  decider_agent: string;
+  [key: string]: any;
 }
 
 function parseYaml(text: string, file: string): any | null {
@@ -109,6 +118,31 @@ function agentFileExists(agentKey: string, root: string): boolean {
   if (existsSync(workspaceAgentPath)) return true;
 
   return false;
+}
+
+/** Load gates from decisions/gates.yaml for a variant */
+function loadGates(variantDir: string): Map<string, Gate> {
+  const gatesPath = join(variantDir, 'decisions', 'gates.yaml');
+  const gates = new Map<string, Gate>();
+
+  if (!existsSync(gatesPath)) {
+    return gates;
+  }
+
+  try {
+    const data = yamlLoad(readFileSync(gatesPath, 'utf-8')) as any;
+    if (data?.gates && Array.isArray(data.gates)) {
+      for (const gate of data.gates) {
+        if (gate?.id && gate?.decider_agent) {
+          gates.set(gate.id, gate);
+        }
+      }
+    }
+  } catch (err) {
+    // Ignore parse errors for gates (optional file)
+  }
+
+  return gates;
 }
 
 /**
@@ -227,6 +261,53 @@ function validateRACIFile(
           file: raciPath,
           message: `${activity}: agent "${agent}" not found in agent files or human-roles registry`,
         });
+      }
+    }
+
+    // DEG-R-06: An activity whose accountable key types as human MUST have a matching gate
+    // This check only applies to variants that ship _human-roles.yaml
+    if (humanRoles.size > 0 && typeof accountable === 'string' && humanRoles.has(accountable)) {
+      const gates = loadGates(variantDir);
+      const matchingGate = Array.from(gates.values()).find(g => g.decider_agent === accountable);
+      if (!matchingGate) {
+        issues.push({
+          layer: 'DEG-R-06',
+          file: raciPath,
+          message: `${activity}: human-accountable agent "${accountable}" has no matching gate in decisions/gates.yaml with decider_agent="${accountable}"`,
+        });
+      }
+    }
+
+    // DEG-R-07: When actor_types is present, its key set MUST equal the union of R/A/C/I keys
+    if (row.actor_types && typeof row.actor_types === 'object') {
+      const expectedKeys = new Set<string>();
+      if (typeof accountable === 'string') expectedKeys.add(accountable);
+      if (Array.isArray(responsible)) responsible.forEach((a: string) => expectedKeys.add(a));
+      if (Array.isArray(row.consulted)) (row.consulted as string[]).forEach(a => expectedKeys.add(a));
+      if (Array.isArray(row.informed)) (row.informed as string[]).forEach(a => expectedKeys.add(a));
+
+      const actualKeys = new Set<string>(Object.keys(row.actor_types));
+
+      // Check for missing keys
+      for (const key of expectedKeys) {
+        if (!actualKeys.has(key)) {
+          issues.push({
+            layer: 'DEG-R-07',
+            file: raciPath,
+            message: `${activity}: actor_types missing key "${key}" from R/A/C/I slots`,
+          });
+        }
+      }
+
+      // Check for extra keys
+      for (const key of actualKeys) {
+        if (!expectedKeys.has(key)) {
+          issues.push({
+            layer: 'DEG-R-07',
+            file: raciPath,
+            message: `${activity}: actor_types has extra key "${key}" not found in R/A/C/I slots`,
+          });
+        }
       }
     }
   }

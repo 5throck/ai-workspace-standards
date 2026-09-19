@@ -6,15 +6,21 @@
  * Derives Accountable (A) from stage owner_agent and Responsible (R) from step agent_keys.
  * Consulted (C) and Informed (I) are read from procedure raci.consulted/raci.informed if present.
  *
- * RACI invariants validated (§6.3):
+ * RACI invariants validated (§6.3, §3.4, ADR-0083, ADR-0084):
  *   DEG-R-01: Each activity declares exactly one accountable agent.
  *   DEG-R-02: Each activity declares at least one responsible agent.
  *   DEG-R-03: No agent holds both accountable and informed on one activity.
  *   DEG-R-04: Every RACI agent key resolves to an agent file or human-role entry.
  *   DEG-R-05: The committed matrix matches a fresh regeneration (validated by drift check).
  *
+ * Enhancements (ADR-0084):
+ *   - Loads governance/_human-roles.yaml if present
+ *   - Resolves actor_type per row (human|agent) per §3.1 derivation rule
+ *   - Emits actor_types map when registry exists
+ *   - Sets schema_version: "1.1" only for variants shipping _human-roles.yaml
+ *
  * @usage bun scripts/generate-raci.ts [--variant co-consult|all] [--root <dir>] [--write]
- * @version 1.0.0
+ * @version 1.1.0
  */
 
 import { existsSync, readdirSync, readFileSync, writeFileSync, mkdirSync, statSync } from 'node:fs';
@@ -56,6 +62,7 @@ interface RACIRow {
   responsible: string[];
   consulted?: string[];
   informed?: string[];
+  actor_types?: Record<string, "human" | "agent">;
 }
 
 interface RACIMatrix {
@@ -142,10 +149,71 @@ function loadProcedures(variantDir: string, variant: string): RACIProcedure[] {
   return procedures;
 }
 
+/** Load human-roles registry if it exists (ADR-0084) */
+function loadHumanRoles(variantDir: string): Set<string> {
+  const humanRolesPath = join(variantDir, 'governance', '_human-roles.yaml');
+  const roles = new Set<string>();
+
+  if (!existsSync(humanRolesPath)) {
+    return roles;
+  }
+
+  try {
+    const data = loadYaml(humanRolesPath) as any;
+    if (data?.human_roles && typeof data.human_roles === 'object') {
+      for (const key of Object.keys(data.human_roles)) {
+        roles.add(key);
+      }
+    }
+  } catch (err) {
+    // Ignore parse errors for human-roles (optional file)
+  }
+
+  return roles;
+}
+
+/** Check if an agent file exists */
+function agentFileExists(agentKey: string, root: string): boolean {
+  // Try all variant agent directories
+  const templatesDir = join(root, 'templates');
+  if (existsSync(templatesDir)) {
+    for (const variant of readdirSync(templatesDir)) {
+      const agentPath = join(templatesDir, variant, 'agents', `${agentKey}.md`);
+      if (existsSync(agentPath)) return true;
+    }
+  }
+
+  // Try workspace agents
+  const workspaceAgentPath = join(root, 'agents', `${agentKey}.md`);
+  if (existsSync(workspaceAgentPath)) return true;
+
+  return false;
+}
+
+/** Resolve actor type for an agent key per derivation rule (ADR-0084, §3.1) */
+function resolveActorType(
+  agentKey: string,
+  humanRoles: Set<string>,
+  root: string
+): "human" | "agent" | null {
+  // 1. Check human-roles registry first (takes precedence)
+  if (humanRoles.has(agentKey)) {
+    return "human";
+  }
+  // 2. Check if agent file exists
+  if (agentFileExists(agentKey, root)) {
+    return "agent";
+  }
+  // 3. Neither match
+  return null;
+}
+
 function generateMatrix(
   variant: string,
   stages: Stage[],
-  procedures: RACIProcedure[]
+  procedures: RACIProcedure[],
+  humanRoles: Set<string>,
+  root: string
 ): { matrix: RACIMatrix; issues: ValidationIssue[] } {
   const rows: RACIRow[] = [];
   const issues: ValidationIssue[] = [];
@@ -240,11 +308,32 @@ function generateMatrix(
       });
     }
 
+    // Compute actor_types if human-roles registry is present (ADR-0084, §3.4)
+    if (humanRoles.size > 0) {
+      const actorTypes: Record<string, "human" | "agent"> = {};
+      const allAgents = new Set<string>();
+      allAgents.add(accountable);
+      responsible.forEach(a => allAgents.add(a));
+      row.consulted?.forEach(a => allAgents.add(a));
+      row.informed?.forEach(a => allAgents.add(a));
+
+      for (const agent of allAgents) {
+        const type = resolveActorType(agent, humanRoles, root);
+        if (type) {
+          actorTypes[agent] = type;
+        }
+      }
+
+      if (Object.keys(actorTypes).length > 0) {
+        row.actor_types = actorTypes;
+      }
+    }
+
     rows.push(row);
   }
 
   const matrix: RACIMatrix = {
-    schema_version: '1.0',
+    schema_version: humanRoles.size > 0 ? '1.1' : '1.0',
     variant: variant,
     generated_from: 'procedures/',
     rows: rows.sort((a, b) => {
@@ -285,7 +374,8 @@ export function generateAllRACIMatrices(
 
     const stages = loadStages(variantDir);
     const procedures = loadProcedures(variantDir, variant);
-    const { matrix, issues } = generateMatrix(variant, stages, procedures);
+    const humanRoles = loadHumanRoles(variantDir);
+    const { matrix, issues } = generateMatrix(variant, stages, procedures, humanRoles, root);
 
     let written = false;
     if (writeFiles && issues.filter(i => i.rule.startsWith('DEG-R')).length === 0) {

@@ -482,7 +482,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-game.game-architecture-design",
       "to": "arcade-designer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -506,7 +507,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-game.game-architecture-design",
       "to": "architect",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -518,7 +520,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-game.game-architecture-design",
       "to": "game-designer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -542,7 +545,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-game.game-architecture-design",
       "to": "puzzle-designer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "in_stage",
@@ -554,7 +558,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-game.game-concept-design",
       "to": "arcade-designer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -578,13 +583,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-game.game-concept-design",
       "to": "architect",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-game.game-concept-design",
       "to": "game-designer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -602,7 +609,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-game.game-concept-design",
       "to": "puzzle-designer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -614,7 +622,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-game.game-concept-design",
       "to": "stack-setup",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "in_stage",
@@ -638,7 +647,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-game.game-content-production",
       "to": "designer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -662,7 +672,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-game.game-content-production",
       "to": "sound-designer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -680,7 +691,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-game.game-content-production",
       "to": "visual-artist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -698,13 +710,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-game.game-release-verification",
       "to": "game-debugger",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-game.game-release-verification",
       "to": "game-developer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -734,7 +748,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-game.game-release-verification",
       "to": "test-runner",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -764,13 +779,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-game.game-security-bootstrap",
       "to": "security-monitor",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-game.game-security-bootstrap",
       "to": "stack-setup",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "in_stage",
@@ -806,7 +823,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-game.game-security-retrospective",
       "to": "security-monitor",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "in_stage",
@@ -830,19 +848,22 @@
       "type": "step_by_agent",
       "from": "procedure.co-game.gameplay-feature-loop",
       "to": "game-debugger",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-game.gameplay-feature-loop",
       "to": "game-designer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-game.gameplay-feature-loop",
       "to": "game-developer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
