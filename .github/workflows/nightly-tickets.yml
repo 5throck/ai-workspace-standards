@@ -1,9 +1,14 @@
 name: Nightly Governance Tickets
 
-# Ticket-driven nightly batch runner (project-resync / §3.7.5 companion).
-# Picks ready `kind: manual` governance tickets, implements the mechanically
-# actionable ones, and opens PRs — never merges. Human review happens on the
-# opened PRs the next morning.
+# MANUAL-ONLY since 2026-09-19 (ADR-0082): the scheduled GitHub batch was retired;
+# the local ZCode workspace automation (daily 05:30 KST) is now the sole scheduled
+# governance-ticket runner. This workflow is retained for manual dispatch as an
+# emergency fallback batch — dispatch it only when the local runner cannot run.
+# The local runner defers (report-only) while a manual dispatch is in progress.
+#
+# Ticket batch runner (project-resync / §3.7.5 companion). Picks ready
+# `kind: manual` governance tickets, implements the mechanically actionable ones,
+# and opens PRs — never merges. Human review happens on the opened PRs.
 #
 # Credential auto-detection (step "Resolve credentials"):
 #   1. ANTHROPIC_API_KEY  — direct Anthropic API
@@ -12,8 +17,6 @@ name: Nightly Governance Tickets
 # If neither secret is set, the Claude step is skipped cleanly.
 
 on:
-  schedule:
-    - cron: "30 17 * * *" # 02:30 KST — a local ZCode runner (05:30 KST) picks up leftovers/anomalies after this window; --ready excludes tickets already moved out of backlog/waiting
   workflow_dispatch: {}
 
 permissions:

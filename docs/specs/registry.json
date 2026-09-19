@@ -1051,6 +1051,15 @@
       "source": "manual",
       "created": "2026-06-02",
       "last_updated": "2026-09-18"
+    },
+    {
+      "id": "2026-09-19-local-ticket-runner-migration-design",
+      "title": "local ticket runner migration design",
+      "file": "docs/designs/2026-09-19-local-ticket-runner-migration-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-19",
+      "last_updated": "2026-09-19"
     }
   ]
 }
