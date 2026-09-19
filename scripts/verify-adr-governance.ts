@@ -1,8 +1,8 @@
 #!/usr/bin/env bun
 /**
  * verify-adr-governance.ts
- * @version 1.6.0
- * @last_updated 2026-09-17
+ * @version 1.7.0
+ * @last_updated 2026-09-20
  *
  * Verifies the ADR→governance linkage mechanism (upward reflection gap detection),
  * ADR ID uniqueness, intentional-duplicate marker hash drift detection, and
@@ -280,7 +280,7 @@ function extractADRStatus(content: string): string | null {
 
 /**
  * Extract date from ADR file
- * Looks for YAML frontmatter date: YYYY-MM-DD
+ * Priority: YAML frontmatter > body line "**Date**:"
  */
 function extractADRDate(content: string): string | null {
   const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
@@ -291,6 +291,13 @@ function extractADRDate(content: string): string | null {
       return dateMatch[1];
     }
   }
+
+  // Fallback to body line
+  const bodyDateMatch = content.match(/^\*\*Date\*\*:\s*(\d{4}-\d{2}-\d{2})$/m);
+  if (bodyDateMatch) {
+    return bodyDateMatch[1];
+  }
+
   return null;
 }
 
@@ -513,9 +520,16 @@ function main(): void {
   const duplicateFindings = checkADRIdUniqueness(adrs);
 
   // Filter: post-cutoff + Accepted/active
+  // Also detect Accepted/Proposed ADRs with unparseable dates (safety gate)
+  const undatedWarnings: ADR[] = [];
   const checked = adrs.filter(adr => {
     if (!adr.date) {
-      // No date = pre-cutoff/grandfathered
+      // No date = cannot determine if post-cutoff
+      // But if it's Accepted/Proposed, warn about the unknown date
+      const status = classifyStatus(adr.status);
+      if (status === ADRStatus.Accepted || status === ADRStatus.Proposed) {
+        undatedWarnings.push(adr);
+      }
       return false;
     }
     if (adr.date < CUTOFF_DATE) {
@@ -525,6 +539,17 @@ function main(): void {
     const status = classifyStatus(adr.status);
     return status === ADRStatus.Accepted;
   });
+
+  // Report undated Accepted/Proposed ADRs
+  if (undatedWarnings.length > 0) {
+    console.log(`⚠️  [WARN] Found ${undatedWarnings.length} Accepted/Proposed ADR(s) with unparseable date:\n`);
+    for (const adr of undatedWarnings) {
+      console.log(
+        `[WARN] ADR-${adr.number} (${adr.slug}) has status ${adr.status} but no parseable date (neither YAML frontmatter 'date:' nor body-line '**Date**:') — add date metadata in YAML frontmatter to enable governance linkage checking`
+      );
+    }
+    console.log('');
+  }
 
   console.log(`✓ Post-cutoff Accepted ADRs to check: ${checked.length}\n`);
 

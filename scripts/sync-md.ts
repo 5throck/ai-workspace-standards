@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.3.0
+// @version 1.4.0
 // sync-md.ts - Update memory/MEMORY.md index
 // Usage:
 //   bun run scripts/sync-md.ts "YYYY-MM-DD" "summary"              # session entry
@@ -110,8 +110,13 @@ if (type === 'meeting') {
   // Only insert if not already present (dedup by date + summary)
   if (!content.includes(date) && !content.includes(summary)) {
     // Insert row after the separator line of the ## Meetings table
+    // Match the Meetings table header directly rather than requiring it to
+    // immediately follow the "## Meetings" heading — a note/blockquote line
+    // (e.g. archive-memory.ts's tombstone explanation) inserted between the
+    // heading and the table would otherwise make this regex silently fail to
+    // match, and the row would never be appended (no error, no insertion).
     content = content.replace(
-      /(## Meetings\r?\n\r?\n\| Date \|[^\n]+\r?\n\|[-| ]+\|)/,
+      /(\| Date \| Topic \| File \|\r?\n\|[-| ]+\|)/,
       `$1\n| ${date} | ${summary} | [${meetingFile}](${meetingFile}) |`
     );
     await Bun.write(MEMORY_FILE, content);
@@ -122,8 +127,10 @@ if (type === 'meeting') {
   const adrFile = `${id}-${slug}.md`;
   // Only insert if not already present
   if (!content.includes(id) && !content.includes(summary)) {
+    // Same fragility fix as Meetings/Sessions: match the ADRs table header
+    // directly, tolerant of any intervening note text after "## ADRs".
     content = content.replace(
-      /(## ADRs\r?\n\r?\n\| ID \|[^\n]+\r?\n\|[-| ]+\|)/,
+      /(\| ID \| Title \| Status \| File \|\r?\n\|[-| ]+\|)/,
       `$1\n| ${id} | ${summary} | Accepted | [${adrFile}](${adrFile}) |`
     );
     await Bun.write(MEMORY_FILE, content);
@@ -131,10 +138,23 @@ if (type === 'meeting') {
 } else {
   // Session: dedup by date
   if (!content.includes(`[${date}]`)) {
+    // Root cause of a missed-row bug (2026-09-20): this regex used to anchor
+    // to "## Sessions\r?\n\r?\n| Date |...", requiring the table to
+    // immediately follow the heading. archive-memory.ts's tombstone
+    // explanatory note (a blockquote line under "## Sessions") sits between
+    // the heading and the table, so the anchored regex silently failed to
+    // match — .replace() is a no-op when there's no match, so the row was
+    // never appended and no error surfaced. Match the Sessions table header
+    // itself instead, which is tolerant of any intervening note content.
+    const before = content;
     content = content.replace(
-      /(## Sessions\r?\n\r?\n\| Date \|[^\n]+\r?\n\|[-| ]+\|)/,
+      /(\| Date \| Summary \|\r?\n\|[-| ]+\|)/,
       `$1\n| [${date}](${date}.md) | ${summary} |`
     );
+    if (content === before) {
+      console.error(`❌ sync-md.ts: could not find the Sessions table header in ${MEMORY_FILE} — row for ${date} was NOT added.`);
+      process.exit(1);
+    }
     await Bun.write(MEMORY_FILE, content);
   }
 }
