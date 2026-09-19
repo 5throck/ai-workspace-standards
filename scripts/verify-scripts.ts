@@ -1,8 +1,18 @@
 #!/usr/bin/env bun
 /**
  * verify-scripts.ts — Script Lifecycle Registry Verifier
- * @version 1.6.1
+ * @version 1.7.0
  *
+ * v1.7.0 (ADR-0081 / T-20260919-002): new `--fix` mode — auto-registers the
+ *         scripts Check 1 flags as unregistered. A row per script (version
+ *         from its @version header, today's date, placeholder description) is
+ *         appended directly after the last Registry table row; descriptions
+ *         are left for the author. Removes the hand-written-row step that made
+ *         every new project-local script block its project's audit until
+ *         SCRIPTS.md was edited by hand (observed on co-newbiz/co-architect
+ *         during the 2026-09-19 fleet sweep). Primitives are exported for
+ *         unit tests (extractHeaderVersion, buildFixRow,
+ *         insertRowsIntoRegistry).
  * v1.6.1: walkScripts() now skips node_modules directories — a scripts/-local
  *         `bun install` (fresh CI runners) materialized dependency files that
  *         were flagged as unregistered scripts (207 false positives), failing
@@ -27,11 +37,52 @@
  * Exit codes:
  *   0 = all checks passed
  *   1 = drift, expired removal date, or active security advisory detected
+ *
+ * --fix (ADR-0081 / T-20260919-002): auto-registers unregistered scripts found
+ *   by Check 1 — appends a registry row per script (version read from the
+ *   script's @version header) directly after the last row of the Registry
+ *   table, so a project-local script no longer blocks the audit until someone
+ *   hand-writes the row. Descriptions are left as placeholders to fill in.
  */
 
 import * as fs from "fs";
 import { readFileSync, readdirSync, existsSync, writeFileSync } from "fs";
 import { join, dirname, relative } from "path";
+
+// ── --fix helpers (ADR-0081 / T-20260919-002; pure, unit-tested) ────────────
+
+/** Read a script file's `@version X.Y.Z` header. Returns '1.0.0' when absent. */
+export function extractHeaderVersion(scriptContent: string): string {
+  const m = scriptContent.match(/@version\s+(\d+\.\d+\.\d+)/);
+  return m ? m[1] : "1.0.0";
+}
+
+/** Build one Registry table row for an auto-registered script. */
+export function buildFixRow(script: string, version: string, source: string, layer: string, today: string): string {
+  return `| \`${script}\` | ${source} | ${version} | active | ${today} | — | ${layer} | — |`;
+}
+
+/**
+ * Insert rows after the LAST table row of the `## Registry` section.
+ * Returns null when the Registry table cannot be located (leave the file
+ * untouched and let the regular error message guide the operator).
+ */
+export function insertRowsIntoRegistry(content: string, rows: string[]): { content: string; insertedAt: number } | null {
+  const lines = content.split("\n");
+  let inRegistry = false;
+  let lastRowIndex = -1;
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (line.startsWith("## Registry")) { inRegistry = true; continue; }
+    if (inRegistry && line.startsWith("## ")) break;
+    if (!inRegistry) continue;
+    const t = line.trim();
+    if (t.startsWith("|") && !t.startsWith("|-")) lastRowIndex = i;
+  }
+  if (lastRowIndex < 0) return null;
+  const out = lines.slice(0, lastRowIndex + 1).concat(rows, lines.slice(lastRowIndex + 1));
+  return { content: out.join("\n"), insertedAt: lastRowIndex };
+}
 
 // ── Configuration ────────────────────────────────────────────────────────────
 
@@ -606,7 +657,54 @@ ${rows}
   writeFileSync(scriptsMdPath, draft, "utf-8");
   console.log(`✅ Generated SCRIPTS.md draft with ${actualScripts.length} scripts`);
   console.log(`   Path: ${scriptsMdPath}`);
+  writeFileSync(scriptsMdPath, draft, "utf-8");
+  console.log(`✅ Generated SCRIPTS.md draft with ${actualScripts.length} scripts`);
+  console.log(`   Path: ${scriptsMdPath}`);
   console.log(`   Next: fill in Guide section, then commit`);
+}
+
+// ── Fix Mode (ADR-0081 / T-20260919-002) ─────────────────────────────────────
+// Auto-registers the scripts Check 1 flags as unregistered. A registry row per
+// script is appended directly after the last Registry table row — version from
+// the script's @version header, description left as a placeholder to fill in.
+// This removes the manual row-hand-writing step that made every new
+// project-local script block its project's audit until someone edited
+// SCRIPTS.md by hand (observed on co-newbiz/co-architect during the
+// 2026-09-19 fleet sweep).
+function fixUnregistered(): void {
+  if (!existsSync(scriptsMdPath)) {
+    console.error(`❌ SCRIPTS.md not found. Run --generate first.`);
+    process.exit(1);
+  }
+  const content = readFileSync(scriptsMdPath, "utf-8");
+  const registry = parseRegistry(content);
+  const actualScripts = getActualScripts();
+  const relevantRegisteredNames = contextLayer === "L0"
+    ? new Set(registry.map((e) => e.script))
+    : new Set(registry.filter(isLayerRelevant).map((e) => e.script));
+  const unregistered = actualScripts.filter((s) => !relevantRegisteredNames.has(s));
+  if (unregistered.length === 0) {
+    console.log(`✅ --fix: no unregistered scripts — Registry is in sync with scripts/`);
+    return;
+  }
+  const today = new Date().toISOString().slice(0, 10);
+  const rows = unregistered.map((script) => {
+    let version = "1.0.0";
+    try {
+      version = extractHeaderVersion(readFileSync(join(scriptsDir, script), "utf-8"));
+    } catch { /* header unreadable — default 1.0.0 */ }
+    return buildFixRow(script, version, contextLayer, contextLayer, today);
+  });
+  const result = insertRowsIntoRegistry(content, rows);
+  if (!result) {
+    console.error(`❌ --fix: could not locate the ## Registry table in ${scriptsMdPath}`);
+    if (import.meta.main) process.exit(1);
+    return;
+  }
+  writeFileSync(scriptsMdPath, result.content, "utf-8");
+  console.log(`✅ --fix: registered ${rows.length} script(s) in ${scriptsMdPath}:`);
+  for (const script of unregistered) console.log(`   - ${script}`);
+  console.log(`   Re-run --verify to confirm, then fill in the description column.`);
 }
 
 // ── Report Mode ──────────────────────────────────────────────────────────────
@@ -672,6 +770,8 @@ const args = process.argv.slice(2);
 if (import.meta.main) {
   if (args.includes("--generate")) {
     generate();
+  } else if (args.includes("--fix")) {
+    fixUnregistered();
   } else if (args.includes("--report")) {
     report();
   } else if (args.includes("--check-drift")) {
@@ -680,7 +780,7 @@ if (import.meta.main) {
     const ok = verify();
     process.exit(ok ? 0 : 1);
   } else {
-    console.error(`Usage: bun scripts/verify-scripts.ts [--verify | --generate | --report | --check-drift]`);
+    console.error(`Usage: bun scripts/verify-scripts.ts [--verify | --fix | --generate | --report | --check-drift]`);
     process.exit(1);
   }
 }

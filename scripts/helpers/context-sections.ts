@@ -1,4 +1,10 @@
-// @version 1.4.0
+// @version 1.5.0
+// v1.5.0 (ADR-0081 fleet sweep / T-20260919-003): spliceCommonContextBlock() —
+//           replaces a project context copy's COMMON-CONTEXT managed block with
+//           the template's, so managed-zone policy content delivers even when
+//           the wholesale docs/context.md copy is skipped by CONTEXT PRESERVE
+//           (project-only top-level sections). Project content outside the
+//           managed block is untouched.
 // context-sections.ts — shared markdown section-splitting used by audit.ts's
 // cross-variant context commonization detector, promote-context-section.ts's
 // promotion executor, l3-to-variant-pipeline/generate-variant's W1 context
@@ -285,6 +291,40 @@ const VARIANT_INJECT_END_RE = /<!--\s*END VARIANT-INJECT\s*-->/;
 
 /** Trailing `---` separator + italic version footer, e.g. "*context.md version: 2.5 — ...*" or "*co-x.context.md version: 1.2 — ...*". CRLF-tolerant (v1.4.0): Windows working trees check out `\r\n`, and the bare-`\n` separator form silently unmatched there. */
 const VERSION_FOOTER_RE = /\r?\n---\r?\n\r?\n\*[^*\r\n]+version:[^*\r\n]*\*\s*$/;
+
+const COMMON_CONTEXT_BLOCK_RE = /<!--\s*COMMON-CONTEXT:START\s*-->[\s\S]*?<!--\s*\/?COMMON-CONTEXT:END\s*-->/;
+
+/**
+ * Splice the TEMPLATE's COMMON-CONTEXT managed block into a project context
+ * copy, replacing the copy's own first COMMON-CONTEXT block (v1.5.0, ADR-0081
+ * fleet sweep / T-20260919-003). Purpose: managed-zone policy content (e.g. the
+ * ADR-0080 authority section) must reach projects even when the wholesale
+ * docs/context.md copy is skipped by the CONTEXT PRESERVE gate (project-only
+ * top-level sections). Everything outside the managed block — including
+ * project-only sections — is untouched.
+ *
+ * Returns the (possibly untouched) content with a `changed` flag and a note
+ * describing what happened. The project copy is returned unchanged when it has
+ * no COMMON-CONTEXT block, or when the template carries none.
+ */
+export function spliceCommonContextBlock(
+  projectContent: string,
+  templateContent: string,
+): { content: string; changed: boolean; note: string } {
+  const tmplBlock = templateContent.match(COMMON_CONTEXT_BLOCK_RE);
+  if (!tmplBlock) {
+    return { content: projectContent, changed: false, note: "template carries no COMMON-CONTEXT block" };
+  }
+  if (!COMMON_CONTEXT_BLOCK_RE.test(projectContent)) {
+    return {
+      content: projectContent,
+      changed: false,
+      note: "project copy has no COMMON-CONTEXT block — the template section arrives with the next wholesale context sync",
+    };
+  }
+  const content = projectContent.replace(COMMON_CONTEXT_BLOCK_RE, () => tmplBlock[0]);
+  return { content, changed: content !== projectContent, note: "COMMON-CONTEXT block updated to template content" };
+}
 
 /**
  * Split off a trailing version footer (`---` separator + italic `*...version:...*`

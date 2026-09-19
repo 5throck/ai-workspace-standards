@@ -1,5 +1,14 @@
 #!/usr/bin/env bun
-// @version 1.32.0
+// @version 1.33.0
+// v1.33.0: ADR-0081 fleet sweep / T-20260919-003 — COMMON-CONTEXT block splice
+//          under CONTEXT PRESERVE. When the wholesale docs/context.md copy is
+//          skipped (project-only top-level sections) the template's
+//          COMMON-CONTEXT managed block is now spliced into the preserved copy
+//          (spliceCommonContextBlock, helpers/context-sections.ts v1.5.0), so
+//          managed-zone policy content (e.g. the ADR-0080 authority section)
+//          delivers without --force-context-sync. Project-only sections and
+//          everything outside the managed block stay untouched. Dry-run logs
+//          the splice without writing.
 // v1.32.0: T-20260917-010 — pre-reconcile recovery snapshots. When the merge
 //          lib reports replaced unlabeled span(s) (result.snapshots), the
 //          wrapper writes them to `<target>.pre-reconcile.bak` BEFORE the
@@ -259,6 +268,7 @@ import {
   splitOffVersionFooter,
   stripVersionFooter,
   findProjectOnlySections,
+  spliceCommonContextBlock,
   classifyCommonizationSection,
   W2_REMOVE_THRESHOLD,
   W2_REVIEW_FLOOR,
@@ -2015,7 +2025,17 @@ console.log('--- TEMPLATE TREE SYNC: uncovered template files (default policy) -
             console.log(`      project-only: ${section.heading}`);
           }
           console.log('      preserved — re-run with --force-context-sync to take the template version, or merge manually');
-          continue; // skip the copy; intentionally NOT counted in treeChanged
+          // ADR-0081 / T-20260919-003: managed-zone policy content still delivers
+          // under PRESERVE — splice the template's COMMON-CONTEXT block into the
+          // preserved copy so project-only sections are protected AND policy
+          // sections (e.g. PM Team-Management Authority) are never starved.
+          const spliced = spliceCommonContextBlock(readFileSync(dest, 'utf8'), readFileSync(abs, 'utf8'));
+          if (spliced.changed) {
+            if (!dryRun) writeFileSync(dest, spliced.content);
+            console.log(`      ${dryTag}MERGED COMMON-CONTEXT block in: ${rel} (managed-zone policy content delivers under PRESERVE)`);
+            treeChanged++;
+          }
+          continue; // skip the wholesale copy; intentionally NOT counted in treeChanged
         }
         if (ownership.wholeFileOwned || ownership.sections.length > 0) {
           console.log(`  FORCED OVERWRITE ${rel}  ${reason}  (--force-context-sync — ${ownership.sections.length} project-only section(s) discarded)`);
