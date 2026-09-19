@@ -96,8 +96,8 @@
       "title": "Fleet (Projects/co-*) receives policy-class L1 changes only via manual resync",
       "severity": "Major",
       "location": "templates/common/docs/context.md (COMMON-CONTEXT block), templates/common/AGENTS.md (COMMON-AGENTS block), templates/common/agents/pm.md (WORKSPACE-MANAGED block)",
-      "description": "Managed-block policy content ships to L0/L1 but the 11 Projects/co-* fleet inherits it only through scaffold or the manual project-resync runbook (last: 2026-09-16, 12 hand-created upgrade PRs). ADR-0080's authority text (2026-09-18) is the current unbackported instance. Remediation: ADR-0081 Decision 4 / T-20260918-004 — standing policy that policy-class L1 changes open a fleet backport ticket landing within one release cycle; ADR-0080 backport is the first instance.",
-      "expected_status": "Accepted"
+      "description": "Managed-block policy content ships to L0/L1 but the Projects/co-* fleet (8 git repos) inherits it only through scaffold or the manual project-resync runbook. ADR-0080's authority text (2026-09-18) was the first unbackported instance; the fleet sweep executed 2026-09-19 delivered it to all 8 projects (8/8 upgrade PRs merged; co-abap-plugin's context.md preserved via CONTEXT PRESERVE — project-only content — with the policy reaching its pm.md/AGENTS.md). Standing policy per ADR-0081 Decision 4: policy-class L1 changes open a fleet backport ticket landing within one release cycle.",
+      "expected_status": "Resolved"
     }
   ]
 }
