@@ -1,0 +1,39 @@
+schema_version: '1.0'
+variant: co-deck
+stages:
+  - id: S1
+    title: Deck Source Research
+    order: 1
+    purpose: PENDING_REVIEW
+    entry_criteria:
+      - PENDING_REVIEW
+    exit_criteria:
+      - PENDING_REVIEW
+    owner_agent: version
+  - id: S2
+    title: Version Export Control
+    order: 2
+    purpose: PENDING_REVIEW
+    entry_criteria:
+      - PENDING_REVIEW
+    exit_criteria:
+      - PENDING_REVIEW
+    owner_agent: version
+  - id: S3
+    title: Deck Publish and Versioning
+    order: 3
+    purpose: PENDING_REVIEW
+    entry_criteria:
+      - PENDING_REVIEW
+    exit_criteria:
+      - PENDING_REVIEW
+    owner_agent: pdf-export
+  - id: S4
+    title: Version Retrospective Control
+    order: 4
+    purpose: PENDING_REVIEW
+    entry_criteria:
+      - PENDING_REVIEW
+    exit_criteria:
+      - PENDING_REVIEW
+    owner_agent: version

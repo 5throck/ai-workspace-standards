@@ -4,6 +4,7 @@ variant: co-deck
 version: "1.0.0"
 title: Version Retrospective Control
 phase: 6
+stage: S4
 status: active
 owner_agent: version
 purpose: >

@@ -156,5 +156,12 @@
     ],
     "notes": "patch-engineer: skip for report-only engagements where remediation is out of scope."
   },
-  "promotionChecklist": "PROMOTION_CHECKLIST.md"
+  "promotionChecklist": "PROMOTION_CHECKLIST.md",
+  "deg_conformance": "governed",
+  "process_manifest": {
+    "stages_file": "process/stages.yaml",
+    "raci_file": "governance/raci.yaml",
+    "gates_file": "decisions/gates.yaml",
+    "evidence_models_dir": "evidence-models/"
+  }
 }

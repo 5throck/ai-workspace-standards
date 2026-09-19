@@ -4,6 +4,7 @@ variant: co-price
 version: "1.0.0"
 title: Pricing Scenario Modeling
 phase: 2
+stage: S1
 status: active
 owner_agent: lead-architect
 purpose: >

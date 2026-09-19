@@ -1,0 +1,48 @@
+schema_version: '1.0'
+variant: co-export
+stages:
+  - id: S1
+    title: Market Entry Assessment
+    order: 1
+    purpose: PENDING_REVIEW
+    entry_criteria:
+      - PENDING_REVIEW
+    exit_criteria:
+      - PENDING_REVIEW
+    owner_agent: market-entry-strategist
+  - id: S2
+    title: Compliance Determination
+    order: 2
+    purpose: PENDING_REVIEW
+    entry_criteria:
+      - PENDING_REVIEW
+    exit_criteria:
+      - PENDING_REVIEW
+    owner_agent: fta-origin-analyst
+  - id: S3
+    title: Export Shipment Compliance
+    order: 3
+    purpose: PENDING_REVIEW
+    entry_criteria:
+      - PENDING_REVIEW
+    exit_criteria:
+      - PENDING_REVIEW
+    owner_agent: pm
+  - id: S4
+    title: Shipment Execution
+    order: 4
+    purpose: PENDING_REVIEW
+    entry_criteria:
+      - PENDING_REVIEW
+    exit_criteria:
+      - PENDING_REVIEW
+    owner_agent: logistics-coordinator
+  - id: S5
+    title: Post-Delivery Optimization
+    order: 5
+    purpose: PENDING_REVIEW
+    entry_criteria:
+      - PENDING_REVIEW
+    exit_criteria:
+      - PENDING_REVIEW
+    owner_agent: logistics-coordinator

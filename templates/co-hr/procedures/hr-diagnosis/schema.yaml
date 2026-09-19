@@ -4,6 +4,7 @@ variant: co-hr
 version: "1.0.0"
 title: HR Diagnosis
 phase: 1
+stage: S2
 status: active
 owner_agent: org-design-consultant
 purpose: >

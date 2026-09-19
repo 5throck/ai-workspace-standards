@@ -4,6 +4,7 @@ variant: co-security
 version: "1.0.0"
 title: Threat Analysis
 phase: 2
+stage: S1
 status: active
 owner_agent: threat-modeler
 purpose: >

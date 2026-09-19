@@ -4,6 +4,7 @@ variant: co-deck
 version: "1.0.0"
 title: Version Export Control
 phase: 4
+stage: S2
 status: active
 owner_agent: version
 purpose: >

@@ -4,6 +4,7 @@ variant: co-consult
 version: "1.0.0"
 title: Diagnosis to Recommendation
 phase: 1
+stage: S2
 status: active
 owner_agent: strategy-analyst
 purpose: >

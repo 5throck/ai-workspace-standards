@@ -4,6 +4,7 @@ variant: co-export
 version: "1.0.0"
 title: Compliance Determination
 phase: 2
+stage: S2
 status: active
 owner_agent: fta-origin-analyst
 purpose: >

@@ -4,6 +4,7 @@ variant: co-export
 version: "1.0.0"
 title: Export Shipment Compliance
 phase: 3
+stage: S3
 status: active
 owner_agent: pm
 purpose: >

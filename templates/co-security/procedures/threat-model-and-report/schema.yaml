@@ -4,6 +4,7 @@ variant: co-security
 version: "1.0.0"
 title: Threat Model and Report
 phase: 3
+stage: S2
 status: active
 owner_agent: threat-modeler
 purpose: >

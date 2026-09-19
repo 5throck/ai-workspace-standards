@@ -4,6 +4,7 @@ variant: co-game
 version: "1.0.0"
 title: Game Security Bootstrap
 phase: 0
+stage: S1
 status: active
 owner_agent: stack-setup
 purpose: >

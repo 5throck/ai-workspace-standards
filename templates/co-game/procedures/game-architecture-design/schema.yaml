@@ -4,6 +4,7 @@ variant: co-game
 version: "1.0.0"
 title: Game Architecture Design
 phase: 2
+stage: S1
 status: active
 owner_agent: architect
 purpose: >

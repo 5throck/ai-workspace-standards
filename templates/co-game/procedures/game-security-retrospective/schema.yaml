@@ -4,6 +4,7 @@ variant: co-game
 version: "1.0.0"
 title: Game Security Retrospective
 phase: 5
+stage: S1
 status: active
 owner_agent: security-monitor
 purpose: >

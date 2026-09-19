@@ -1,0 +1,21 @@
+schema_version: '1.0'
+variant: co-security
+stages:
+  - id: S1
+    title: Threat Analysis and Reporting
+    order: 1
+    purpose: PENDING_REVIEW
+    entry_criteria:
+      - PENDING_REVIEW
+    exit_criteria:
+      - PENDING_REVIEW
+    owner_agent: security-architect
+  - id: S2
+    title: Remediation Support and Hardening
+    order: 2
+    purpose: PENDING_REVIEW
+    entry_criteria:
+      - PENDING_REVIEW
+    exit_criteria:
+      - PENDING_REVIEW
+    owner_agent: security-architect

@@ -4,6 +4,7 @@ variant: co-design
 version: "1.0.0"
 title: Design Definition
 phase: 2
+stage: S3
 status: active
 owner_agent: design-lead
 purpose: >

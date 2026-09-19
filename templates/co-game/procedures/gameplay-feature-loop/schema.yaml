@@ -4,6 +4,7 @@ variant: co-game
 version: "1.0.0"
 title: Gameplay Feature Loop
 phase: 3
+stage: S2
 status: active
 owner_agent: game-developer
 purpose: >

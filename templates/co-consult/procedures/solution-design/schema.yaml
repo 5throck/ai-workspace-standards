@@ -4,6 +4,7 @@ variant: co-consult
 version: "1.0.0"
 title: Solution Design
 phase: 2
+stage: S3
 status: active
 owner_agent: strategy-analyst
 purpose: >

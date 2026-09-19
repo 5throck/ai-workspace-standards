@@ -4,6 +4,7 @@ variant: co-price
 version: "1.0.0"
 title: Pricing Security Closeout
 phase: 5
+stage: S2
 status: active
 owner_agent: security-monitor
 purpose: >

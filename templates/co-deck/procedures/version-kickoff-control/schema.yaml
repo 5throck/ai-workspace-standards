@@ -4,6 +4,7 @@ variant: co-deck
 version: "1.0.0"
 title: Version Kickoff Control
 phase: 0
+stage: S1
 status: active
 owner_agent: version
 purpose: >

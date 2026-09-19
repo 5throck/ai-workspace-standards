@@ -4,6 +4,7 @@ variant: co-deck
 version: "1.0.0"
 title: Version Research Control
 phase: 1
+stage: S2
 status: active
 owner_agent: version
 purpose: >

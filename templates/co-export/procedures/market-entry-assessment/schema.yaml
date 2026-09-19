@@ -4,6 +4,7 @@ variant: co-export
 version: "1.0.0"
 title: Market Entry Assessment
 phase: 1
+stage: S1
 status: active
 owner_agent: market-entry-strategist
 purpose: >

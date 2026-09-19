@@ -4,6 +4,7 @@ variant: co-hr
 version: "1.0.0"
 title: Organization Implementation
 phase: 3
+stage: S3
 status: active
 owner_agent: org-design-consultant
 purpose: >

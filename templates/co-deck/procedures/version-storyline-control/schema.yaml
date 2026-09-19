@@ -4,6 +4,7 @@ variant: co-deck
 version: "1.0.0"
 title: Version Storyline Control
 phase: 2
+stage: S2
 status: active
 owner_agent: version
 purpose: >

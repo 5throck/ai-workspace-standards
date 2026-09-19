@@ -4,6 +4,7 @@ variant: co-security
 version: "1.0.0"
 title: Security Reporting
 phase: 5
+stage: S2
 status: active
 owner_agent: report-writer
 purpose: >

@@ -4,6 +4,7 @@ variant: co-design
 version: "1.0.0"
 title: Visual and Service Implementation
 phase: 3
+stage: S4
 status: active
 owner_agent: visual-designer
 purpose: >
