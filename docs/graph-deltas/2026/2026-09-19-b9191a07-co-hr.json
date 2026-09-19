@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-09-19T13:24:59.090Z",
+  "commit": "b9191a07",
+  "scope": "co-hr",
+  "totals": {
+    "nodes_added": 0,
+    "nodes_removed": 0,
+    "edges_added": 158,
+    "edges_removed": 0
+  },
+  "by_node_type": {},
+  "by_edge_type": {
+    "step_by_agent": {
+      "added": 158,
+      "removed": 0
+    }
+  },
+  "ids": {
+    "truncated": true
+  }
+}

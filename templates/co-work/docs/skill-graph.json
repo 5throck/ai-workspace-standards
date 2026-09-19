@@ -185,7 +185,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-work.distribution-integration",
       "to": "ms365-expert",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -203,7 +204,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-work.distribution-integration",
       "to": "project-coordinator",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -215,13 +217,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-work.document-production",
       "to": "analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-work.document-production",
       "to": "content-writer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -257,13 +261,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-work.document-production",
       "to": "storyteller",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-work.document-production",
       "to": "technical-writer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -287,13 +293,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-work.narrative-design",
       "to": "storyteller",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-work.project-intake-analysis",
       "to": "analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -323,7 +331,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-work.project-intake-analysis",
       "to": "storyteller",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "used_by",

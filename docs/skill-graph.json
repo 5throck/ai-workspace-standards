@@ -12633,31 +12633,36 @@
       "type": "step_by_agent",
       "from": "procedure.co-abap.custom-dev-delivery",
       "to": "code-writer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-abap.custom-dev-delivery",
       "to": "code-writer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-abap.custom-dev-delivery",
       "to": "fiori-developer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-abap.custom-dev-delivery",
       "to": "form-expert",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-abap.custom-dev-delivery",
       "to": "gui-scripter",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -12669,7 +12674,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-abap.custom-dev-delivery",
       "to": "sap-investigator",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "in_stage",
@@ -12681,7 +12687,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-abap.custom-dev-delivery",
       "to": "test-runner",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -12699,19 +12706,22 @@
       "type": "step_by_agent",
       "from": "procedure.co-abap.requirements-analysis",
       "to": "architect",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-abap.requirements-analysis",
       "to": "co-analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-abap.requirements-analysis",
       "to": "co-analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -12723,19 +12733,22 @@
       "type": "step_by_agent",
       "from": "procedure.co-abap.requirements-analysis",
       "to": "fi-analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-abap.requirements-analysis",
       "to": "le-analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-abap.requirements-analysis",
       "to": "mm-analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -12747,7 +12760,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-abap.requirements-analysis",
       "to": "pp-analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "enables",
@@ -12759,7 +12773,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-abap.requirements-analysis",
       "to": "read-only-analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -12807,13 +12822,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-abap.requirements-analysis",
       "to": "schema-inspector",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-abap.requirements-analysis",
       "to": "sd-analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "in_stage",
@@ -12843,7 +12860,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-abap.security-closeout-review",
       "to": "security-monitor",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "in_stage",
@@ -12873,7 +12891,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-abap.security-readiness-baseline",
       "to": "security-monitor",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "in_stage",
@@ -12903,19 +12922,22 @@
       "type": "step_by_agent",
       "from": "procedure.co-abap.solution-blueprint",
       "to": "architect",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-abap.solution-blueprint",
       "to": "dba",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-abap.solution-blueprint",
       "to": "interface-expert",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -12957,7 +12979,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-abap.transport-release",
       "to": "devops-admin",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -12981,13 +13004,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-abap.transport-release",
       "to": "test-runner",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-consult.current-state-diagnosis",
       "to": "change-management-partner",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -12999,7 +13024,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-consult.current-state-diagnosis",
       "to": "industry-expert",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -13029,7 +13055,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-consult.current-state-diagnosis",
       "to": "sme",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "in_stage",
@@ -13053,7 +13080,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-consult.diagnosis-to-recommendation",
       "to": "data-analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -13065,7 +13093,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-consult.diagnosis-to-recommendation",
       "to": "industry-expert",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -13089,13 +13118,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-consult.diagnosis-to-recommendation",
       "to": "strategy-analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-consult.engagement-closeout",
       "to": "delivery-manager",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -13137,25 +13168,29 @@
       "type": "step_by_agent",
       "from": "procedure.co-consult.engagement-closeout",
       "to": "technology-specialist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-consult.engagement-closeout",
       "to": "workstream-lead",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-consult.solution-delivery",
       "to": "communications-lead",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-consult.solution-delivery",
       "to": "data-analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -13185,7 +13220,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-consult.solution-delivery",
       "to": "sme",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -13197,7 +13233,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-consult.solution-delivery",
       "to": "solutions-architect",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "in_stage",
@@ -13221,13 +13258,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-consult.solution-design",
       "to": "change-management-partner",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-consult.solution-design",
       "to": "industry-expert",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -13245,7 +13284,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-consult.solution-design",
       "to": "sme",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -13269,7 +13309,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-deck.deck-build-and-export",
       "to": "html-build",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -13281,7 +13322,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-deck.deck-build-and-export",
       "to": "measure",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -13293,7 +13335,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-deck.deck-build-and-export",
       "to": "pdf-export",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -13329,7 +13372,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-deck.deck-publish-and-version",
       "to": "pdf-export",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -13353,7 +13397,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-deck.deck-publish-and-version",
       "to": "version",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -13365,7 +13410,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-deck.lecture-deck-production",
       "to": "design",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -13377,7 +13423,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-deck.lecture-deck-production",
       "to": "html-build",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -13395,7 +13442,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-deck.lecture-deck-production",
       "to": "pdf-export",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -13407,7 +13455,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-deck.lecture-deck-production",
       "to": "research",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -13425,7 +13474,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-deck.lecture-deck-production",
       "to": "storyline",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -13449,7 +13499,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-deck.source-research",
       "to": "research",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -13485,7 +13536,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-deck.storyline-development",
       "to": "storyline",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -13521,7 +13573,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-deck.version-export-control",
       "to": "version",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -13551,7 +13604,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-deck.version-kickoff-control",
       "to": "version",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -13587,7 +13641,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-deck.version-production-control",
       "to": "version",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -13623,7 +13678,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-deck.version-research-control",
       "to": "version",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -13653,7 +13709,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-deck.version-retrospective-control",
       "to": "version",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -13689,7 +13746,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-deck.version-storyline-control",
       "to": "version",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -13701,7 +13759,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-design.design-definition",
       "to": "design-lead",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -13731,7 +13790,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-design.design-definition",
       "to": "storyteller",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -13767,7 +13827,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-design.narrative-discovery",
       "to": "storyteller",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -13791,13 +13852,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-design.prototype-validation",
       "to": "prototype-engineer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-design.prototype-validation",
       "to": "prototype-engineer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -13815,7 +13878,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-design.ux-discovery",
       "to": "design-lead",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -13833,7 +13897,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-design.ux-discovery",
       "to": "service-designer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "in_stage",
@@ -13857,13 +13922,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-design.ux-discovery",
       "to": "ux-researcher",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-design.visual-implementation",
       "to": "design-lead",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -13887,7 +13954,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-design.visual-implementation",
       "to": "service-designer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "in_stage",
@@ -13905,7 +13973,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-design.visual-implementation",
       "to": "typography-expert",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -13923,13 +13992,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-design.visual-implementation",
       "to": "visual-designer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-develop.architecture-design",
       "to": "architect",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -13977,13 +14048,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-develop.environment-bootstrap",
       "to": "security-monitor",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-develop.environment-bootstrap",
       "to": "stack-setup",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -13995,7 +14068,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-develop.feature-implementation",
       "to": "architect",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -14007,13 +14081,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-develop.feature-implementation",
       "to": "code-writer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-develop.feature-implementation",
       "to": "designer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -14037,7 +14113,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-develop.feature-implementation",
       "to": "security-monitor",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -14055,7 +14132,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-develop.release-verification",
       "to": "code-writer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -14085,7 +14163,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-develop.release-verification",
       "to": "test-runner",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -14109,13 +14188,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-develop.security-release-retrospective",
       "to": "security-monitor",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-develop.technical-planning",
       "to": "architect",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -14145,13 +14226,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-develop.technical-planning",
       "to": "stack-setup",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-export.compliance-determination",
       "to": "export-control-compliance-specialist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -14163,13 +14246,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-export.compliance-determination",
       "to": "fta-origin-analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-export.compliance-determination",
       "to": "halal-certification-specialist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -14181,7 +14266,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-export.compliance-determination",
       "to": "hs-classification-specialist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -14223,7 +14309,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-export.export-shipment-compliance",
       "to": "fta-origin-analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -14235,7 +14322,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-export.export-shipment-compliance",
       "to": "hs-classification-specialist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -14253,7 +14341,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-export.export-shipment-compliance",
       "to": "logistics-coordinator",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -14277,13 +14366,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-export.export-shipment-compliance",
       "to": "trade-documentation-specialist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-export.market-entry-assessment",
       "to": "export-control-compliance-specialist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -14301,13 +14392,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-export.market-entry-assessment",
       "to": "foreign-regulatory-intelligence-analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-export.market-entry-assessment",
       "to": "fta-origin-analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -14319,7 +14412,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-export.market-entry-assessment",
       "to": "halal-certification-specialist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -14331,7 +14425,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-export.market-entry-assessment",
       "to": "hs-classification-specialist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -14343,7 +14438,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-export.market-entry-assessment",
       "to": "market-entry-strategist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -14379,13 +14475,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-export.post-delivery-optimization",
       "to": "logistics-coordinator",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-export.post-delivery-optimization",
       "to": "market-entry-strategist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -14415,7 +14513,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-export.shipment-execution",
       "to": "customs-duty-drawback-specialist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -14433,7 +14532,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-export.shipment-execution",
       "to": "market-entry-strategist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -14457,7 +14557,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-game.game-architecture-design",
       "to": "arcade-designer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -14481,7 +14582,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-game.game-architecture-design",
       "to": "architect",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -14493,7 +14595,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-game.game-architecture-design",
       "to": "game-designer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -14517,7 +14620,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-game.game-architecture-design",
       "to": "puzzle-designer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "in_stage",
@@ -14529,7 +14633,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-game.game-concept-design",
       "to": "arcade-designer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -14553,13 +14658,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-game.game-concept-design",
       "to": "architect",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-game.game-concept-design",
       "to": "game-designer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -14577,7 +14684,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-game.game-concept-design",
       "to": "puzzle-designer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -14589,7 +14697,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-game.game-concept-design",
       "to": "stack-setup",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "in_stage",
@@ -14613,7 +14722,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-game.game-content-production",
       "to": "designer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -14637,7 +14747,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-game.game-content-production",
       "to": "sound-designer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -14655,7 +14766,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-game.game-content-production",
       "to": "visual-artist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -14673,13 +14785,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-game.game-release-verification",
       "to": "game-debugger",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-game.game-release-verification",
       "to": "game-developer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -14709,7 +14823,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-game.game-release-verification",
       "to": "test-runner",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -14739,13 +14854,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-game.game-security-bootstrap",
       "to": "security-monitor",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-game.game-security-bootstrap",
       "to": "stack-setup",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "in_stage",
@@ -14781,7 +14898,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-game.game-security-retrospective",
       "to": "security-monitor",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "in_stage",
@@ -14805,19 +14923,22 @@
       "type": "step_by_agent",
       "from": "procedure.co-game.gameplay-feature-loop",
       "to": "game-debugger",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-game.gameplay-feature-loop",
       "to": "game-designer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-game.gameplay-feature-loop",
       "to": "game-developer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -14847,13 +14968,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-hr.compensation-benchmarking",
       "to": "compensation-benefits-analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-hr.compensation-benchmarking",
       "to": "compensation-benefits-analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -14865,7 +14988,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-hr.compensation-benchmarking",
       "to": "data-analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -14889,13 +15013,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-hr.hr-diagnosis",
       "to": "change-management-partner",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-hr.hr-diagnosis",
       "to": "labor-compliance-analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -14913,7 +15039,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-hr.hr-diagnosis",
       "to": "labor-relations-specialist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -14937,7 +15064,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-hr.hr-diagnosis",
       "to": "safety-health-officer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "in_stage",
@@ -14961,13 +15089,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-hr.hr-solution-design",
       "to": "career-succession-consultant",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-hr.hr-solution-design",
       "to": "change-management-partner",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -14979,13 +15109,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-hr.hr-solution-design",
       "to": "compensation-benefits-analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-hr.hr-solution-design",
       "to": "labor-relations-specialist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -14997,13 +15129,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-hr.hr-solution-design",
       "to": "learning-development-specialist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-hr.hr-solution-design",
       "to": "org-design-consultant",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -15027,7 +15161,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-hr.hr-solution-design",
       "to": "performance-management-consultant",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -15063,7 +15198,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-hr.hr-solution-design",
       "to": "talent-acquisition-specialist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -15075,7 +15211,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-hr.org-implementation",
       "to": "data-analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -15087,7 +15224,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-hr.org-implementation",
       "to": "org-design-consultant",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -15129,7 +15267,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-news.editorial-finalization",
       "to": "style-editor",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -15141,7 +15280,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-news.fact-checked-article",
       "to": "fact-checker",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -15159,7 +15299,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-news.fact-checked-article",
       "to": "legal-researcher",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -15171,7 +15312,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-news.fact-checked-article",
       "to": "reporter",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -15189,19 +15331,22 @@
       "type": "step_by_agent",
       "from": "procedure.co-news.fact-checked-article",
       "to": "style-editor",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-news.pre-publication-review",
       "to": "fact-checker",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-news.pre-publication-review",
       "to": "legal-researcher",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -15231,7 +15376,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-news.topic-discovery",
       "to": "financial-analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -15243,7 +15389,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-news.topic-discovery",
       "to": "legal-researcher",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -15285,13 +15432,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-news.visual-news-production",
       "to": "visual-editor",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-price.engagement-review",
       "to": "engagement-director",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -15321,7 +15470,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-price.engagement-review",
       "to": "security-auditor",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "in_stage",
@@ -15333,13 +15483,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-price.engine-implementation",
       "to": "core-engine-dev",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-price.engine-implementation",
       "to": "cost-asset-mgmt",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -15351,7 +15503,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-price.engine-implementation",
       "to": "lead-architect",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -15375,7 +15528,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-price.engine-implementation",
       "to": "pricing-strategist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -15411,7 +15565,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-price.engine-implementation",
       "to": "ux-specialist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -15429,7 +15584,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-price.pricing-analysis",
       "to": "market-intelligence-analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -15453,19 +15609,22 @@
       "type": "step_by_agent",
       "from": "procedure.co-price.pricing-analysis",
       "to": "pricing-strategist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-price.pricing-analysis",
       "to": "pricing-strategist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-price.pricing-analysis",
       "to": "pricing-strategist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "in_stage",
@@ -15501,7 +15660,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-price.pricing-security-bootstrap",
       "to": "security-monitor",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "in_stage",
@@ -15531,7 +15691,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-price.pricing-security-closeout",
       "to": "security-monitor",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "in_stage",
@@ -15543,7 +15704,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-price.release-assurance",
       "to": "cost-asset-mgmt",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -15555,13 +15717,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-price.release-assurance",
       "to": "cpa-auditor",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-price.release-assurance",
       "to": "devops-admin",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -15573,13 +15737,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-price.release-assurance",
       "to": "engagement-director",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-price.release-assurance",
       "to": "finance-strategy-lead",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -15609,7 +15775,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-price.release-assurance",
       "to": "l10n-auditor",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -15639,7 +15806,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-price.release-assurance",
       "to": "qa-tester",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "in_stage",
@@ -15651,7 +15819,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-price.scenario-modeling",
       "to": "finance-strategy-lead",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -15669,7 +15838,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-price.scenario-modeling",
       "to": "lead-architect",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -15681,7 +15851,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-price.scenario-modeling",
       "to": "pricing-strategist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -15711,7 +15882,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-price.scenario-modeling",
       "to": "security-auditor",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "in_stage",
@@ -15729,7 +15901,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-price.scenario-modeling",
       "to": "ux-specialist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -15759,19 +15932,22 @@
       "type": "step_by_agent",
       "from": "procedure.co-safety.daily-risk-assessment",
       "to": "safety-governance-manager",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-safety.daily-risk-assessment",
       "to": "safety-workflow-manager",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-safety.daily-risk-assessment",
       "to": "safety-workflow-manager",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -15795,7 +15971,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-safety.governance-audit",
       "to": "pm",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "follows",
@@ -15807,7 +15984,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-safety.governance-audit",
       "to": "safety-governance-manager",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -15831,7 +16009,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-safety.safety-plan-review",
       "to": "safety-governance-manager",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -15849,7 +16028,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-security.engagement-planning",
       "to": "red-team-lead",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "in_stage",
@@ -15867,7 +16047,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-security.engagement-planning",
       "to": "threat-modeler",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -15897,13 +16078,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-security.post-engagement-hardening",
       "to": "patch-engineer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-security.post-engagement-hardening",
       "to": "pentester",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "follows",
@@ -15915,7 +16098,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-security.post-engagement-hardening",
       "to": "report-writer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -15951,13 +16135,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-security.remediation-support",
       "to": "patch-engineer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-security.remediation-support",
       "to": "patch-engineer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "follows",
@@ -15993,13 +16179,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-security.security-reporting",
       "to": "report-writer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-security.security-reporting",
       "to": "report-writer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -16041,7 +16229,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-security.threat-analysis",
       "to": "red-team-lead",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "in_stage",
@@ -16059,7 +16248,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-security.threat-analysis",
       "to": "threat-modeler",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -16083,19 +16273,22 @@
       "type": "step_by_agent",
       "from": "procedure.co-security.threat-model-and-report",
       "to": "pentester",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-security.threat-model-and-report",
       "to": "red-team-lead",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-security.threat-model-and-report",
       "to": "report-writer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -16119,7 +16312,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-security.threat-model-and-report",
       "to": "threat-modeler",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "follows",
@@ -16137,7 +16331,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-work.distribution-integration",
       "to": "ms365-expert",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -16155,7 +16350,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-work.distribution-integration",
       "to": "project-coordinator",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -16167,13 +16363,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-work.document-production",
       "to": "analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-work.document-production",
       "to": "content-writer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -16209,13 +16407,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-work.document-production",
       "to": "storyteller",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-work.document-production",
       "to": "technical-writer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -16239,13 +16439,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-work.narrative-design",
       "to": "storyteller",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-work.project-intake-analysis",
       "to": "analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -16275,7 +16477,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-work.project-intake-analysis",
       "to": "storyteller",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "used_by",

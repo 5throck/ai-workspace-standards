@@ -731,19 +731,22 @@
       "type": "step_by_agent",
       "from": "procedure.co-safety.daily-risk-assessment",
       "to": "safety-governance-manager",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-safety.daily-risk-assessment",
       "to": "safety-workflow-manager",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-safety.daily-risk-assessment",
       "to": "safety-workflow-manager",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -767,7 +770,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-safety.governance-audit",
       "to": "pm",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "follows",
@@ -779,7 +783,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-safety.governance-audit",
       "to": "safety-governance-manager",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -803,7 +808,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-safety.safety-plan-review",
       "to": "safety-governance-manager",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "references",

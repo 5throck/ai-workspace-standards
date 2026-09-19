@@ -252,7 +252,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-design.design-definition",
       "to": "design-lead",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -282,7 +283,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-design.design-definition",
       "to": "storyteller",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -318,7 +320,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-design.narrative-discovery",
       "to": "storyteller",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -342,13 +345,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-design.prototype-validation",
       "to": "prototype-engineer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-design.prototype-validation",
       "to": "prototype-engineer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -366,7 +371,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-design.ux-discovery",
       "to": "design-lead",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -384,7 +390,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-design.ux-discovery",
       "to": "service-designer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "in_stage",
@@ -408,13 +415,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-design.ux-discovery",
       "to": "ux-researcher",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-design.visual-implementation",
       "to": "design-lead",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -438,7 +447,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-design.visual-implementation",
       "to": "service-designer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "in_stage",
@@ -456,7 +466,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-design.visual-implementation",
       "to": "typography-expert",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -474,7 +485,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-design.visual-implementation",
       "to": "visual-designer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "accountable_for",

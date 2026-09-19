@@ -246,7 +246,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-develop.architecture-design",
       "to": "architect",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -294,13 +295,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-develop.environment-bootstrap",
       "to": "security-monitor",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-develop.environment-bootstrap",
       "to": "stack-setup",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -312,7 +315,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-develop.feature-implementation",
       "to": "architect",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -324,13 +328,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-develop.feature-implementation",
       "to": "code-writer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-develop.feature-implementation",
       "to": "designer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -354,7 +360,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-develop.feature-implementation",
       "to": "security-monitor",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -372,7 +379,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-develop.release-verification",
       "to": "code-writer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -402,7 +410,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-develop.release-verification",
       "to": "test-runner",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -426,13 +435,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-develop.security-release-retrospective",
       "to": "security-monitor",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-develop.technical-planning",
       "to": "architect",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -462,7 +473,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-develop.technical-planning",
       "to": "stack-setup",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "composes_with",
