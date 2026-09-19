@@ -154,3 +154,6 @@ scripts/temp/
 
 # graft's local graph cache — regenerable, not committed (run `graft build`).
 /graft/
+
+# assessment-service PDF font asset (downloaded, never committed)
+services/assessment-service/assets/
