@@ -177,7 +177,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `lib/platform-context.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/propagation-map-schema.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
 | `lib/managed-block-merge.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `lib/managed-block-parity.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
+| `lib/managed-block-parity.ts` | L0 | 1.2.0 | active | COMMON-AGENTS zone extraction/parity (ADR-0081/T-20260919-001); keyed WORKSPACE-MANAGED blocks (T-20260916-009) | —| L0+L1 | —|
 | `lib/platform-delivery.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/ssrf.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `lib/upgrade-policy.ts` | L0 | 1.8.0 | active | —| —| L0 | —|
@@ -233,7 +233,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `procedure-coverage.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `validate-procedures.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `validate-decisions.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `validate-templates.ts` | L0 | 1.35.0 | active | —| —| L0+L1 | —|
+| `validate-templates.ts` | L0 | 1.36.0 | active | common-agents-parity (PM-04b, ADR-0081/T-20260919-001); managed-block-parity PM-04 (T-20260916-009) | —| L0+L1 | —|
 | `validate-variant-readiness.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `verify-country-prune.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `verify-adr-governance.ts` | L0 | 1.6.0 | active | —| —| L0 | —|
