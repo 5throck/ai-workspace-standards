@@ -16,6 +16,44 @@ Skill, Agent Team, RACI, Artifact Model, Evidence Model, Decision Model, and a g
 A 2026-09-19 verification pass against the repository found that **most of the proposal is already
 built**, and that the remaining gaps are narrower and more specific than the proposal assumed.
 
+### Terminology — Domain Operating Model
+
+The framework this ADR governs is officially named the **Domain Operating Model**. The name is
+registered retroactively; the design doc §1.5 holds the full reasoning.
+
+> **NAMING RULE — NEVER ABBREVIATE.** Always spell out "Domain Operating Model". Never write
+> **"DOM"** — it collides with Document Object Model, live terminology in the `co-deck`,
+> `co-design`, and `co-game` variants. Never write **"AOM"** — "Agent" already denotes PM-Gateway
+> specialist agents, and the framework must not be named after one of its own sub-components. No
+> acronym is permitted in any document, schema, script, or commit message.
+
+The Core has **four groups**, not a flat list of axes. Design §1.5.2 holds the structure diagram,
+the per-group precision notes, and the full edge-type table.
+
+| Core group | Contains | Status | Where |
+|---|---|---|---|
+| **Process** | Stage → Activity → Skill | **IMPLEMENTED** (P2); Skill is **pre-existing** (ADR-0060, ADR-0063), not built by this rollout | `process/stages.yaml`; procedure `stage:`; `skills/*/SKILL.md` |
+| **Governance** | RACI | **IMPLEMENTED** (P4) | `governance/raci.yaml` |
+| **Execution** | Artifact, Decision | **IMPLEMENTED** (P5) | enriched `procedures/_output-types.yaml`; `decisions/gates.yaml` (distinct from ADR-0061 `DEC-*.md`) |
+| **Graph** | Domain Execution Graph | **IMPLEMENTED** (P3) | vocabulary profile over `docs/skill-graph.json` |
+
+**Agent is not a peer group.** It is the actor reference inside RACI — each role slot holds a flat
+`agent-key` with no schema-level human-versus-AI-executor distinction. **Graph is not a peer
+domain concern either**; it is the relationship layer tying Process, Governance, and Execution
+into connected executable knowledge via the derived `in_stage`, `step_uses_skill`, `step_by_agent`,
+`produces`, `accountable_for`, `consulted_on`, `informed_of`, `gated_by`, and `decides_on` edges.
+
+**Future Extensions — named, not designed** (design §1.5.3): an **Actor Model** formalizing
+`actor_type: human|agent`; an **Evidence Model** (DEG-E-01..03 are specified and implemented but
+unclaimed, P6 deferred — the richer Evidence↔Decision provenance structure goes beyond that and is
+undesigned); and a **SkillHone Evolution Loop**, an external feedback mechanism that would evolve
+the model's Skills, with no wiring to Domain Operating Model outcomes today.
+
+**Layering** (design §1.5.4): AI Workspace → Domain Operating Model → Template → Project/Instance.
+A **Template** (`templates/co-*/`) packages exactly one domain's Domain Operating Model. The
+Workspace layer (`templates/common/`) owns the schemas and contracts; each Template supplies the
+domain content — the same boundary as CONSTITUTION.md §5.7, §6, and §7.5.
+
 ### What already exists
 
 - **Activity layer.** `procedures/<name>/schema.yaml` holds 80 procedures across 13 variant
