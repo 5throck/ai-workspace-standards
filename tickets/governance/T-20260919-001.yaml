@@ -6,7 +6,7 @@ title: >-
   blocks went stale while the validator stayed green
 priority: normal
 status: done
-attempts: 1
+attempts: 0
 created_at: '2026-09-19T12:00:00.000Z'
 history:
   - at: '2026-09-19T12:00:00.000Z'
