@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-09-19T22:27:37.345Z
+**Generated**: 2026-09-19T22:34:51.532Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -152,8 +152,8 @@
 | skill-lifecycle-audit.ts | 1.4.1 | scripts/skill-lifecycle-audit.ts | N/A |
 | skill-session-review.ts | 1.0.0 | scripts/skill-session-review.ts | bun |
 | spec-backfill.ts | 1.0.0 | scripts/spec-backfill.ts | N/A |
-| spec-register.ts | 1.2.0 | scripts/spec-register.ts | N/A |
-| sync-md.ts | 1.3.0 | scripts/sync-md.ts | N/A |
+| spec-register.ts | 1.3.0 | scripts/spec-register.ts | N/A |
+| sync-md.ts | 1.4.0 | scripts/sync-md.ts | N/A |
 | sync-skill-status.ts | 1.0.1 | scripts/sync-skill-status.ts | N/A |
 | sync-skills-to-l2.ts | 1.0.1 | scripts/sync-skills-to-l2.ts | N/A |
 | sync-skills.ts | 1.8.0 | scripts/sync-skills.ts | N/A |
@@ -185,7 +185,7 @@
 | validate-templates.ts | 1.36.0 | scripts/validate-templates.ts | js-yaml |
 | validate-variant-readiness.ts | 1.1.0 | scripts/validate-variant-readiness.ts | N/A |
 | variant-feature.ts | 1.0.0 | scripts/variant-feature.ts | N/A |
-| verify-adr-governance.ts | 1.6.0 | scripts/verify-adr-governance.ts | N/A |
+| verify-adr-governance.ts | 1.7.0 | scripts/verify-adr-governance.ts | N/A |
 | verify-agent-deliverables.ts | 1.0.1 | scripts/verify-agent-deliverables.ts | fs |
 | verify-country-prune.ts | 1.0.0 | scripts/verify-country-prune.ts | N/A |
 | verify-memory.ts | 1.2.0 | scripts/verify-memory.ts | fs, path |
