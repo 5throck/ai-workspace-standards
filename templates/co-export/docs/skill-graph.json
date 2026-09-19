@@ -1,5 +1,6 @@
 {
   "version": 1,
+  "graph_profile": "deg/v1",
   "nodes": [
     {
       "id": "customs-duty-drawback-specialist",
@@ -209,6 +210,31 @@
     {
       "id": "roo-qualification-worksheet",
       "type": "skill",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "stage.co-export.S1",
+      "type": "stage",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "stage.co-export.S2",
+      "type": "stage",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "stage.co-export.S3",
+      "type": "stage",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "stage.co-export.S4",
+      "type": "stage",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "stage.co-export.S5",
+      "type": "stage",
       "layer": "variant:co-export"
     },
     {
@@ -1004,6 +1030,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-export.compliance-determination",
+      "to": "stage.co-export.S2",
+      "source": "process_schema"
+    },
+    {
       "type": "step_by_agent",
       "from": "procedure.co-export.export-shipment-compliance",
       "to": "fta-origin-analyst",
@@ -1044,6 +1076,12 @@
       "from": "procedure.co-export.export-shipment-compliance",
       "to": "output_type.document_set",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-export.export-shipment-compliance",
+      "to": "stage.co-export.S3",
+      "source": "process_schema"
     },
     {
       "type": "step_uses_skill",
@@ -1142,6 +1180,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-export.market-entry-assessment",
+      "to": "stage.co-export.S1",
+      "source": "process_schema"
+    },
+    {
       "type": "step_uses_skill",
       "from": "procedure.co-export.post-delivery-optimization",
       "to": "logistics-coordination",
@@ -1178,6 +1222,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-export.post-delivery-optimization",
+      "to": "stage.co-export.S5",
+      "source": "process_schema"
+    },
+    {
       "type": "step_by_agent",
       "from": "procedure.co-export.shipment-execution",
       "to": "customs-duty-drawback-specialist",
@@ -1212,6 +1262,12 @@
       "from": "procedure.co-export.shipment-execution",
       "to": "procedure.co-export.export-shipment-compliance",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-export.shipment-execution",
+      "to": "stage.co-export.S4",
+      "source": "process_schema"
     },
     {
       "type": "used_by",
@@ -1269,6 +1325,30 @@
       "from": "roo-qualification-worksheet",
       "to": "trade-documentation-checklist",
       "source": "prose"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-export.S1",
+      "to": "stage.co-export.S2",
+      "source": "process_schema"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-export.S2",
+      "to": "stage.co-export.S3",
+      "source": "process_schema"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-export.S3",
+      "to": "stage.co-export.S4",
+      "source": "process_schema"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-export.S4",
+      "to": "stage.co-export.S5",
+      "source": "process_schema"
     },
     {
       "type": "follows",

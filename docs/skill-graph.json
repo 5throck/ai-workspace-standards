@@ -1,5 +1,6 @@
 {
   "version": 1,
+  "graph_profile": "deg/v1",
   "nodes": [
     {
       "id": "abap-code-review",
@@ -2957,6 +2958,151 @@
       "id": "stack-setup",
       "type": "agent",
       "layer": "variant:co-develop"
+    },
+    {
+      "id": "stage.co-abap.S1",
+      "type": "stage",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "stage.co-abap.S2",
+      "type": "stage",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "stage.co-consult.S1",
+      "type": "stage",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "stage.co-consult.S2",
+      "type": "stage",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "stage.co-consult.S3",
+      "type": "stage",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "stage.co-consult.S4",
+      "type": "stage",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "stage.co-deck.S1",
+      "type": "stage",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "stage.co-deck.S2",
+      "type": "stage",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "stage.co-deck.S3",
+      "type": "stage",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "stage.co-deck.S4",
+      "type": "stage",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "stage.co-design.S1",
+      "type": "stage",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "stage.co-design.S2",
+      "type": "stage",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "stage.co-design.S3",
+      "type": "stage",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "stage.co-design.S4",
+      "type": "stage",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "stage.co-design.S5",
+      "type": "stage",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "stage.co-export.S1",
+      "type": "stage",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "stage.co-export.S2",
+      "type": "stage",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "stage.co-export.S3",
+      "type": "stage",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "stage.co-export.S4",
+      "type": "stage",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "stage.co-export.S5",
+      "type": "stage",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "stage.co-game.S1",
+      "type": "stage",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "stage.co-game.S2",
+      "type": "stage",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "stage.co-hr.S1",
+      "type": "stage",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "stage.co-hr.S2",
+      "type": "stage",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "stage.co-hr.S3",
+      "type": "stage",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "stage.co-price.S1",
+      "type": "stage",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "stage.co-price.S2",
+      "type": "stage",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "stage.co-security.S1",
+      "type": "stage",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "stage.co-security.S2",
+      "type": "stage",
+      "layer": "variant:co-security"
     },
     {
       "id": "stakeholder-alignment",
@@ -12133,6 +12279,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-abap.custom-dev-delivery",
+      "to": "stage.co-abap.S2",
+      "source": "process_schema"
+    },
+    {
       "type": "step_by_agent",
       "from": "procedure.co-abap.custom-dev-delivery",
       "to": "test-runner",
@@ -12271,6 +12423,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-abap.requirements-analysis",
+      "to": "stage.co-abap.S1",
+      "source": "process_schema"
+    },
+    {
       "type": "step_uses_skill",
       "from": "procedure.co-abap.security-closeout-review",
       "to": "abap-code-review",
@@ -12295,6 +12453,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-abap.security-closeout-review",
+      "to": "stage.co-abap.S2",
+      "source": "process_schema"
+    },
+    {
       "type": "step_uses_skill",
       "from": "procedure.co-abap.security-readiness-baseline",
       "to": "abap-code-review",
@@ -12317,6 +12481,12 @@
       "from": "procedure.co-abap.security-readiness-baseline",
       "to": "security-monitor",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-abap.security-readiness-baseline",
+      "to": "stage.co-abap.S1",
+      "source": "process_schema"
     },
     {
       "type": "step_uses_skill",
@@ -12373,6 +12543,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-abap.solution-blueprint",
+      "to": "stage.co-abap.S1",
+      "source": "process_schema"
+    },
+    {
       "type": "step_uses_skill",
       "from": "procedure.co-abap.transport-release",
       "to": "abap-dev",
@@ -12401,6 +12577,12 @@
       "from": "procedure.co-abap.transport-release",
       "to": "procedure.co-abap.custom-dev-delivery",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-abap.transport-release",
+      "to": "stage.co-abap.S2",
+      "source": "process_schema"
     },
     {
       "type": "step_by_agent",
@@ -12457,6 +12639,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-consult.current-state-diagnosis",
+      "to": "stage.co-consult.S1",
+      "source": "process_schema"
+    },
+    {
       "type": "step_uses_skill",
       "from": "procedure.co-consult.diagnosis-to-recommendation",
       "to": "company-intelligence",
@@ -12499,6 +12687,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-consult.diagnosis-to-recommendation",
+      "to": "stage.co-consult.S2",
+      "source": "process_schema"
+    },
+    {
       "type": "step_by_agent",
       "from": "procedure.co-consult.diagnosis-to-recommendation",
       "to": "strategy-analyst",
@@ -12533,6 +12727,12 @@
       "from": "procedure.co-consult.engagement-closeout",
       "to": "project-delivery",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-consult.engagement-closeout",
+      "to": "stage.co-consult.S4",
+      "source": "process_schema"
     },
     {
       "type": "step_uses_skill",
@@ -12607,6 +12807,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-consult.solution-delivery",
+      "to": "stage.co-consult.S3",
+      "source": "process_schema"
+    },
+    {
       "type": "step_uses_skill",
       "from": "procedure.co-consult.solution-delivery",
       "to": "stakeholder-alignment",
@@ -12653,6 +12859,12 @@
       "from": "procedure.co-consult.solution-design",
       "to": "solution-design",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-consult.solution-design",
+      "to": "stage.co-consult.S3",
+      "source": "process_schema"
     },
     {
       "type": "step_uses_skill",
@@ -12709,6 +12921,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-deck.deck-build-and-export",
+      "to": "stage.co-deck.S2",
+      "source": "process_schema"
+    },
+    {
       "type": "produces",
       "from": "procedure.co-deck.deck-publish-and-version",
       "to": "output_type.publish_package",
@@ -12731,6 +12949,12 @@
       "from": "procedure.co-deck.deck-publish-and-version",
       "to": "procedure.co-deck.deck-build-and-export",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-deck.deck-publish-and-version",
+      "to": "stage.co-deck.S3",
+      "source": "process_schema"
     },
     {
       "type": "step_by_agent",
@@ -12799,6 +13023,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-deck.lecture-deck-production",
+      "to": "stage.co-deck.S2",
+      "source": "process_schema"
+    },
+    {
       "type": "step_by_agent",
       "from": "procedure.co-deck.lecture-deck-production",
       "to": "storyline",
@@ -12835,6 +13065,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-deck.source-research",
+      "to": "stage.co-deck.S1",
+      "source": "process_schema"
+    },
+    {
       "type": "produces",
       "from": "procedure.co-deck.storyline-development",
       "to": "output_type.storyline_outline",
@@ -12847,6 +13083,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-deck.storyline-development",
+      "to": "stage.co-deck.S2",
+      "source": "process_schema"
+    },
+    {
       "type": "step_by_agent",
       "from": "procedure.co-deck.storyline-development",
       "to": "storyline",
@@ -12877,6 +13119,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-deck.version-export-control",
+      "to": "stage.co-deck.S2",
+      "source": "process_schema"
+    },
+    {
       "type": "step_by_agent",
       "from": "procedure.co-deck.version-export-control",
       "to": "version",
@@ -12899,6 +13147,12 @@
       "from": "procedure.co-deck.version-kickoff-control",
       "to": "procedure.co-deck.source-research",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-deck.version-kickoff-control",
+      "to": "stage.co-deck.S1",
+      "source": "process_schema"
     },
     {
       "type": "step_by_agent",
@@ -12931,6 +13185,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-deck.version-production-control",
+      "to": "stage.co-deck.S2",
+      "source": "process_schema"
+    },
+    {
       "type": "step_by_agent",
       "from": "procedure.co-deck.version-production-control",
       "to": "version",
@@ -12961,6 +13221,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-deck.version-research-control",
+      "to": "stage.co-deck.S2",
+      "source": "process_schema"
+    },
+    {
       "type": "step_by_agent",
       "from": "procedure.co-deck.version-research-control",
       "to": "version",
@@ -12983,6 +13249,12 @@
       "from": "procedure.co-deck.version-retrospective-control",
       "to": "procedure.co-deck.deck-publish-and-version",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-deck.version-retrospective-control",
+      "to": "stage.co-deck.S4",
+      "source": "process_schema"
     },
     {
       "type": "step_by_agent",
@@ -13013,6 +13285,12 @@
       "from": "procedure.co-deck.version-storyline-control",
       "to": "procedure.co-deck.storyline-development",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-deck.version-storyline-control",
+      "to": "stage.co-deck.S2",
+      "source": "process_schema"
     },
     {
       "type": "step_by_agent",
@@ -13051,6 +13329,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-design.design-definition",
+      "to": "stage.co-design.S3",
+      "source": "process_schema"
+    },
+    {
       "type": "step_by_agent",
       "from": "procedure.co-design.design-definition",
       "to": "storyteller",
@@ -13079,6 +13363,12 @@
       "from": "procedure.co-design.narrative-discovery",
       "to": "procedure.co-design.ux-discovery",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-design.narrative-discovery",
+      "to": "stage.co-design.S1",
+      "source": "process_schema"
     },
     {
       "type": "step_by_agent",
@@ -13123,6 +13413,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-design.prototype-validation",
+      "to": "stage.co-design.S5",
+      "source": "process_schema"
+    },
+    {
       "type": "step_by_agent",
       "from": "procedure.co-design.ux-discovery",
       "to": "design-lead",
@@ -13145,6 +13441,12 @@
       "from": "procedure.co-design.ux-discovery",
       "to": "service-designer",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-design.ux-discovery",
+      "to": "stage.co-design.S2",
+      "source": "process_schema"
     },
     {
       "type": "step_uses_skill",
@@ -13193,6 +13495,12 @@
       "from": "procedure.co-design.visual-implementation",
       "to": "service-designer",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-design.visual-implementation",
+      "to": "stage.co-design.S4",
+      "source": "process_schema"
     },
     {
       "type": "step_uses_skill",
@@ -13513,6 +13821,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-export.compliance-determination",
+      "to": "stage.co-export.S2",
+      "source": "process_schema"
+    },
+    {
       "type": "step_by_agent",
       "from": "procedure.co-export.export-shipment-compliance",
       "to": "fta-origin-analyst",
@@ -13553,6 +13867,12 @@
       "from": "procedure.co-export.export-shipment-compliance",
       "to": "output_type.document_set",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-export.export-shipment-compliance",
+      "to": "stage.co-export.S3",
+      "source": "process_schema"
     },
     {
       "type": "step_uses_skill",
@@ -13651,6 +13971,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-export.market-entry-assessment",
+      "to": "stage.co-export.S1",
+      "source": "process_schema"
+    },
+    {
       "type": "step_uses_skill",
       "from": "procedure.co-export.post-delivery-optimization",
       "to": "logistics-coordination",
@@ -13687,6 +14013,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-export.post-delivery-optimization",
+      "to": "stage.co-export.S5",
+      "source": "process_schema"
+    },
+    {
       "type": "step_by_agent",
       "from": "procedure.co-export.shipment-execution",
       "to": "customs-duty-drawback-specialist",
@@ -13721,6 +14053,12 @@
       "from": "procedure.co-export.shipment-execution",
       "to": "procedure.co-export.export-shipment-compliance",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-export.shipment-execution",
+      "to": "stage.co-export.S4",
+      "source": "process_schema"
     },
     {
       "type": "step_by_agent",
@@ -13789,6 +14127,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-game.game-architecture-design",
+      "to": "stage.co-game.S1",
+      "source": "process_schema"
+    },
+    {
       "type": "step_by_agent",
       "from": "procedure.co-game.game-concept-design",
       "to": "arcade-designer",
@@ -13855,6 +14199,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-game.game-concept-design",
+      "to": "stage.co-game.S1",
+      "source": "process_schema"
+    },
+    {
       "type": "step_uses_skill",
       "from": "procedure.co-game.game-concept-design",
       "to": "test-driven-development",
@@ -13903,6 +14253,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-game.game-content-production",
+      "to": "stage.co-game.S1",
+      "source": "process_schema"
+    },
+    {
       "type": "step_by_agent",
       "from": "procedure.co-game.game-content-production",
       "to": "visual-artist",
@@ -13943,6 +14299,12 @@
       "from": "procedure.co-game.game-release-verification",
       "to": "procedure.co-game.gameplay-feature-loop",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-game.game-release-verification",
+      "to": "stage.co-game.S1",
+      "source": "process_schema"
     },
     {
       "type": "step_uses_skill",
@@ -13993,6 +14355,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-game.game-security-bootstrap",
+      "to": "stage.co-game.S1",
+      "source": "process_schema"
+    },
+    {
       "type": "step_uses_skill",
       "from": "procedure.co-game.game-security-bootstrap",
       "to": "test-driven-development",
@@ -14021,6 +14389,12 @@
       "from": "procedure.co-game.game-security-retrospective",
       "to": "security-monitor",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-game.game-security-retrospective",
+      "to": "stage.co-game.S1",
+      "source": "process_schema"
     },
     {
       "type": "step_uses_skill",
@@ -14057,6 +14431,12 @@
       "from": "procedure.co-game.gameplay-feature-loop",
       "to": "output_type.implementation_commit",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-game.gameplay-feature-loop",
+      "to": "stage.co-game.S2",
+      "source": "process_schema"
     },
     {
       "type": "step_uses_skill",
@@ -14105,6 +14485,12 @@
       "from": "procedure.co-hr.compensation-benchmarking",
       "to": "output_type.benchmark_report",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-hr.compensation-benchmarking",
+      "to": "stage.co-hr.S1",
+      "source": "process_schema"
     },
     {
       "type": "step_by_agent",
@@ -14159,6 +14545,12 @@
       "from": "procedure.co-hr.hr-diagnosis",
       "to": "safety-health-officer",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-hr.hr-diagnosis",
+      "to": "stage.co-hr.S2",
+      "source": "process_schema"
     },
     {
       "type": "step_uses_skill",
@@ -14263,6 +14655,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-hr.hr-solution-design",
+      "to": "stage.co-hr.S2",
+      "source": "process_schema"
+    },
+    {
       "type": "step_uses_skill",
       "from": "procedure.co-hr.hr-solution-design",
       "to": "stakeholder-alignment",
@@ -14315,6 +14713,12 @@
       "from": "procedure.co-hr.org-implementation",
       "to": "procedure.co-hr.hr-solution-design",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-hr.org-implementation",
+      "to": "stage.co-hr.S3",
+      "source": "process_schema"
     },
     {
       "type": "produces",
@@ -14527,6 +14931,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-price.engagement-review",
+      "to": "stage.co-price.S2",
+      "source": "process_schema"
+    },
+    {
       "type": "step_by_agent",
       "from": "procedure.co-price.engine-implementation",
       "to": "core-engine-dev",
@@ -14591,6 +15001,12 @@
       "from": "procedure.co-price.engine-implementation",
       "to": "procedure.co-price.scenario-modeling",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-price.engine-implementation",
+      "to": "stage.co-price.S1",
+      "source": "process_schema"
     },
     {
       "type": "step_uses_skill",
@@ -14659,6 +15075,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-price.pricing-analysis",
+      "to": "stage.co-price.S1",
+      "source": "process_schema"
+    },
+    {
       "type": "step_uses_skill",
       "from": "procedure.co-price.pricing-analysis",
       "to": "van-westendorp-psm",
@@ -14689,6 +15111,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-price.pricing-security-bootstrap",
+      "to": "stage.co-price.S1",
+      "source": "process_schema"
+    },
+    {
       "type": "step_uses_skill",
       "from": "procedure.co-price.pricing-security-closeout",
       "to": "harness-verification",
@@ -14711,6 +15139,12 @@
       "from": "procedure.co-price.pricing-security-closeout",
       "to": "security-monitor",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-price.pricing-security-closeout",
+      "to": "stage.co-price.S2",
+      "source": "process_schema"
     },
     {
       "type": "step_by_agent",
@@ -14815,6 +15249,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-price.release-assurance",
+      "to": "stage.co-price.S1",
+      "source": "process_schema"
+    },
+    {
       "type": "step_by_agent",
       "from": "procedure.co-price.scenario-modeling",
       "to": "finance-strategy-lead",
@@ -14879,6 +15319,12 @@
       "from": "procedure.co-price.scenario-modeling",
       "to": "security-auditor",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-price.scenario-modeling",
+      "to": "stage.co-price.S1",
+      "source": "process_schema"
     },
     {
       "type": "step_uses_skill",
@@ -15013,6 +15459,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-security.engagement-planning",
+      "to": "stage.co-security.S1",
+      "source": "process_schema"
+    },
+    {
       "type": "step_uses_skill",
       "from": "procedure.co-security.engagement-planning",
       "to": "stride-threat-matrix",
@@ -15085,6 +15537,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-security.post-engagement-hardening",
+      "to": "stage.co-security.S2",
+      "source": "process_schema"
+    },
+    {
       "type": "step_uses_skill",
       "from": "procedure.co-security.remediation-support",
       "to": "finding-reconciliation",
@@ -15119,6 +15577,12 @@
       "from": "procedure.co-security.remediation-support",
       "to": "spdx-sbom",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-security.remediation-support",
+      "to": "stage.co-security.S2",
+      "source": "process_schema"
     },
     {
       "type": "produces",
@@ -15157,6 +15621,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-security.security-reporting",
+      "to": "stage.co-security.S2",
+      "source": "process_schema"
+    },
+    {
       "type": "step_uses_skill",
       "from": "procedure.co-security.threat-analysis",
       "to": "finding-reconciliation",
@@ -15179,6 +15649,12 @@
       "from": "procedure.co-security.threat-analysis",
       "to": "red-team-lead",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-security.threat-analysis",
+      "to": "stage.co-security.S1",
+      "source": "process_schema"
     },
     {
       "type": "step_uses_skill",
@@ -15233,6 +15709,12 @@
       "from": "procedure.co-security.threat-model-and-report",
       "to": "sarif-exporter",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-security.threat-model-and-report",
+      "to": "stage.co-security.S2",
+      "source": "process_schema"
     },
     {
       "type": "step_uses_skill",
@@ -17171,6 +17653,126 @@
       "from": "spdx-sbom",
       "to": "security-scan",
       "source": "prose"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-abap.S1",
+      "to": "stage.co-abap.S2",
+      "source": "process_schema"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-consult.S1",
+      "to": "stage.co-consult.S2",
+      "source": "process_schema"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-consult.S2",
+      "to": "stage.co-consult.S3",
+      "source": "process_schema"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-consult.S3",
+      "to": "stage.co-consult.S4",
+      "source": "process_schema"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-deck.S1",
+      "to": "stage.co-deck.S2",
+      "source": "process_schema"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-deck.S2",
+      "to": "stage.co-deck.S3",
+      "source": "process_schema"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-deck.S3",
+      "to": "stage.co-deck.S4",
+      "source": "process_schema"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-design.S1",
+      "to": "stage.co-design.S2",
+      "source": "process_schema"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-design.S2",
+      "to": "stage.co-design.S3",
+      "source": "process_schema"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-design.S3",
+      "to": "stage.co-design.S4",
+      "source": "process_schema"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-design.S4",
+      "to": "stage.co-design.S5",
+      "source": "process_schema"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-export.S1",
+      "to": "stage.co-export.S2",
+      "source": "process_schema"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-export.S2",
+      "to": "stage.co-export.S3",
+      "source": "process_schema"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-export.S3",
+      "to": "stage.co-export.S4",
+      "source": "process_schema"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-export.S4",
+      "to": "stage.co-export.S5",
+      "source": "process_schema"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-game.S1",
+      "to": "stage.co-game.S2",
+      "source": "process_schema"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-hr.S1",
+      "to": "stage.co-hr.S2",
+      "source": "process_schema"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-hr.S2",
+      "to": "stage.co-hr.S3",
+      "source": "process_schema"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-price.S1",
+      "to": "stage.co-price.S2",
+      "source": "process_schema"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-security.S1",
+      "to": "stage.co-security.S2",
+      "source": "process_schema"
     },
     {
       "type": "composes_with",

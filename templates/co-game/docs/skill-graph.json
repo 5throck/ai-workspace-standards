@@ -1,5 +1,6 @@
 {
   "version": 1,
+  "graph_profile": "deg/v1",
   "nodes": [
     {
       "id": "arcade-designer",
@@ -219,6 +220,16 @@
     {
       "id": "stack-setup",
       "type": "agent",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "stage.co-game.S1",
+      "type": "stage",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "stage.co-game.S2",
+      "type": "stage",
       "layer": "variant:co-game"
     },
     {
@@ -506,6 +517,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-game.game-architecture-design",
+      "to": "stage.co-game.S1",
+      "source": "process_schema"
+    },
+    {
       "type": "step_by_agent",
       "from": "procedure.co-game.game-concept-design",
       "to": "arcade-designer",
@@ -572,6 +589,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-game.game-concept-design",
+      "to": "stage.co-game.S1",
+      "source": "process_schema"
+    },
+    {
       "type": "step_uses_skill",
       "from": "procedure.co-game.game-concept-design",
       "to": "test-driven-development",
@@ -620,6 +643,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-game.game-content-production",
+      "to": "stage.co-game.S1",
+      "source": "process_schema"
+    },
+    {
       "type": "step_by_agent",
       "from": "procedure.co-game.game-content-production",
       "to": "visual-artist",
@@ -660,6 +689,12 @@
       "from": "procedure.co-game.game-release-verification",
       "to": "procedure.co-game.gameplay-feature-loop",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-game.game-release-verification",
+      "to": "stage.co-game.S1",
+      "source": "process_schema"
     },
     {
       "type": "step_uses_skill",
@@ -710,6 +745,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-game.game-security-bootstrap",
+      "to": "stage.co-game.S1",
+      "source": "process_schema"
+    },
+    {
       "type": "step_uses_skill",
       "from": "procedure.co-game.game-security-bootstrap",
       "to": "test-driven-development",
@@ -738,6 +779,12 @@
       "from": "procedure.co-game.game-security-retrospective",
       "to": "security-monitor",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-game.game-security-retrospective",
+      "to": "stage.co-game.S1",
+      "source": "process_schema"
     },
     {
       "type": "step_uses_skill",
@@ -774,6 +821,12 @@
       "from": "procedure.co-game.gameplay-feature-loop",
       "to": "output_type.implementation_commit",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-game.gameplay-feature-loop",
+      "to": "stage.co-game.S2",
+      "source": "process_schema"
     },
     {
       "type": "step_uses_skill",
@@ -845,6 +898,12 @@
       "from": "sound-synth",
       "to": "sound-designer",
       "source": "skill_manifest"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-game.S1",
+      "to": "stage.co-game.S2",
+      "source": "process_schema"
     },
     {
       "type": "follows",

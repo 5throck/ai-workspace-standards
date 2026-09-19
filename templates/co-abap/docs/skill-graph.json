@@ -1,5 +1,6 @@
 {
   "version": 1,
+  "graph_profile": "deg/v1",
   "nodes": [
     {
       "id": "abap-code-review",
@@ -289,6 +290,16 @@
     {
       "id": "source-command-celebrate",
       "type": "skill",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "stage.co-abap.S1",
+      "type": "stage",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "stage.co-abap.S2",
+      "type": "stage",
       "layer": "variant:co-abap"
     },
     {
@@ -938,6 +949,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-abap.custom-dev-delivery",
+      "to": "stage.co-abap.S2",
+      "source": "process_schema"
+    },
+    {
       "type": "step_by_agent",
       "from": "procedure.co-abap.custom-dev-delivery",
       "to": "test-runner",
@@ -1076,6 +1093,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-abap.requirements-analysis",
+      "to": "stage.co-abap.S1",
+      "source": "process_schema"
+    },
+    {
       "type": "step_uses_skill",
       "from": "procedure.co-abap.security-closeout-review",
       "to": "abap-code-review",
@@ -1100,6 +1123,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-abap.security-closeout-review",
+      "to": "stage.co-abap.S2",
+      "source": "process_schema"
+    },
+    {
       "type": "step_uses_skill",
       "from": "procedure.co-abap.security-readiness-baseline",
       "to": "abap-code-review",
@@ -1122,6 +1151,12 @@
       "from": "procedure.co-abap.security-readiness-baseline",
       "to": "security-monitor",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-abap.security-readiness-baseline",
+      "to": "stage.co-abap.S1",
+      "source": "process_schema"
     },
     {
       "type": "step_uses_skill",
@@ -1178,6 +1213,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-abap.solution-blueprint",
+      "to": "stage.co-abap.S1",
+      "source": "process_schema"
+    },
+    {
       "type": "step_uses_skill",
       "from": "procedure.co-abap.transport-release",
       "to": "abap-dev",
@@ -1206,6 +1247,12 @@
       "from": "procedure.co-abap.transport-release",
       "to": "procedure.co-abap.custom-dev-delivery",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-abap.transport-release",
+      "to": "stage.co-abap.S2",
+      "source": "process_schema"
     },
     {
       "type": "step_by_agent",
@@ -1842,6 +1889,12 @@
       "from": "source-command-celebrate",
       "to": "pm",
       "source": "skill_manifest"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-abap.S1",
+      "to": "stage.co-abap.S2",
+      "source": "process_schema"
     }
   ]
 }

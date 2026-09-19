@@ -1,8 +1,14 @@
 #!/usr/bin/env bun
 /**
  * Skill Relationship Graph Generator
- * @version 1.10.0
+ * @version 1.11.0
  *
+ * v1.11.0 (2026-09-19): add DEG (Domain Execution Graph) support per ADR-0083 —
+ * emit stage nodes from process/stages.yaml, stage_follows edges between ordered
+ * stages, in_stage edges from procedure.stage field, and graph_profile: "deg/v1"
+ * marker. Defensively define (zero-instance) node/edge types for decision gates,
+ * evidence models, and RACI edges, ready for P4/P5. Exclude DEG sources from
+ * skill-graph.overrides.json eligibility per ADR-0060 Amendment 10 (forthcoming).
  * v1.10.0 (2026-09-11): render the term vocabulary in docs/skill-graph.md —
  * a "## Korean Term Vocabulary (terms-ko.json)" table (term | layer |
  * referencing skills) after Decisions & ADRs; Edge Types table's `references`
@@ -109,11 +115,14 @@ function hasTrackedFilesUnder(absDir: string): boolean {
 }
 
 // Interfaces for the graph structure
-interface GraphNode {
+export interface GraphNode {
   id: string;
   // 'term' = Korean vocabulary node extracted from a skill's
   // references/terms-ko.json (ADR-0072); id is namespaced `term:<용어>`.
-  type: 'skill' | 'agent' | 'decision' | 'adr' | 'procedure' | 'output_type' | 'term';
+  // 'stage' = domain execution stage node (DEG, ADR-0083); id form: `stage.<variant>.<id>`
+  // 'decision_gate' = decision gate node (DEG, ADR-0083); id form: `gate.<variant>.<id>`
+  // 'evidence_model' = evidence schema node (DEG, ADR-0083); id form: `evidence.<variant>.<name>`
+  type: 'skill' | 'agent' | 'decision' | 'adr' | 'procedure' | 'output_type' | 'term' | 'stage' | 'decision_gate' | 'evidence_model';
   layer: 'L0' | 'L3' | 'common' | `variant:${string}`;
   /** Opaque input/output labels from SKILL.md frontmatter (skill nodes only). */
   inputs?: string[];
@@ -127,7 +136,10 @@ type EdgeType =
   // Procedure Schema v1.0 (2026-08-29): procedure-derived edges (canonical
   // source = templates/<variant>/procedures/<name>/schema.yaml — INV-1, see
   // docs/designs/2026-08-29-procedure-schema-design.md)
-  | 'step_uses_skill' | 'step_by_agent' | 'produces';
+  | 'step_uses_skill' | 'step_by_agent' | 'produces'
+  // Domain Execution Graph (ADR-0083): stage-axis, RACI, decision, evidence edges
+  | 'in_stage' | 'stage_follows' | 'accountable_for' | 'consulted_on' | 'informed_of'
+  | 'gated_by' | 'decides_on' | 'evidenced_by';
 
 // Typed `relates_to` entry shape is a *forward-open* object: {skill, type} are
 // the only two fields Phase 1 interprets. Any additional key (e.g. a future
@@ -139,7 +151,7 @@ interface EdgeProvenance {
   index?: number;
 }
 
-interface GraphEdge {
+export interface GraphEdge {
   type: EdgeType;
   from: string;
   to: string;
@@ -153,8 +165,9 @@ interface GraphEdge {
   provenance?: EdgeProvenance;
 }
 
-interface SkillGraph {
+export interface SkillGraph {
   version: 1;
+  graph_profile?: 'deg/v1';
   nodes: GraphNode[];
   edges: GraphEdge[];
 }
@@ -644,6 +657,16 @@ function deriveProceduresFromDir(
         }
       }
     }
+
+    // in_stage edge (ADR-0083): procedure → stage, derived from procedure stage: field
+    if (typeof data.stage === 'string' && data.stage) {
+      const stageId = `stage.${ns}.${data.stage}`;
+      // Materialize stage node if it doesn't exist (deferred variants may not have stages.yaml)
+      if (!allNodes.has(stageId)) {
+        allNodes.set(stageId, { id: stageId, type: 'stage', layer });
+      }
+      edges.push({ type: 'in_stage', from: procId, to: stageId, source: 'process_schema' });
+    }
   }
 }
 
@@ -723,6 +746,57 @@ function deriveTermNodesAndEdges(
     } catch {
       // Malformed terms-ko.json — skip; drift-check scripts own data quality.
     }
+  }
+}
+
+/**
+ * Derive stage nodes and stage_follows edges from process/stages.yaml (ADR-0083).
+ * Stages are optional; the function gracefully skips if stages.yaml does not exist.
+ * Source: process_schema
+ */
+function deriveStagesFromYaml(
+  stagesPath: string,
+  variant: string,
+  layer: GraphNode['layer'],
+  allNodes: Map<string, GraphNode>,
+  edges: GraphEdge[],
+): void {
+  if (!existsSync(stagesPath)) return;
+
+  let data: any;
+  try {
+    data = yamlLoad(readFileSync(stagesPath, 'utf-8'));
+  } catch {
+    // Malformed stages.yaml — skip; the validator owns its quality
+    return;
+  }
+  if (!data || typeof data !== 'object' || !Array.isArray(data.stages)) return;
+
+  const stages = data.stages as Array<{ id: string; order?: number }>;
+  const stageMap = new Map<number, string>();
+
+  for (const stage of stages) {
+    if (typeof stage.id !== 'string') continue;
+    const stageId = `stage.${variant}.${stage.id}`;
+    if (!allNodes.has(stageId)) {
+      allNodes.set(stageId, { id: stageId, type: 'stage', layer });
+    }
+    if (typeof stage.order === 'number') {
+      stageMap.set(stage.order, stage.id);
+    }
+  }
+
+  // stage_follows edges: stage with order N → stage with order N+1
+  const sortedOrders = Array.from(stageMap.keys()).sort((a, b) => a - b);
+  for (let i = 0; i < sortedOrders.length - 1; i++) {
+    const fromId = stageMap.get(sortedOrders[i])!;
+    const toId = stageMap.get(sortedOrders[i + 1])!;
+    edges.push({
+      type: 'stage_follows',
+      from: `stage.${variant}.${fromId}`,
+      to: `stage.${variant}.${toId}`,
+      source: 'process_schema',
+    });
   }
 }
 
@@ -1021,6 +1095,19 @@ export function buildGraph(): SkillGraph {
     deriveProceduresFromDir(rootProceduresDir, 'l0', localLayer, allNodes, edges);
   }
 
+  // Source 5.8: Stages — domain execution stages derived from process/stages.yaml (ADR-0083)
+  if (existsSync(templatesDir)) {
+    for (const variantName of listVariantDirs(templatesDir)) {
+      deriveStagesFromYaml(
+        join(templatesDir, variantName, 'process', 'stages.yaml'),
+        variantName,
+        `variant:${variantName}`,
+        allNodes,
+        edges,
+      );
+    }
+  }
+
   // Source 5: Overrides (L0) — loaded and applied via shared helper
   const { overrides } = loadOverridesFile(join(ROOT, 'docs'));
   applyOverrides(overrides, allNodes, edges);
@@ -1037,6 +1124,7 @@ export function buildGraph(): SkillGraph {
 
   return {
     version: 1,
+    graph_profile: 'deg/v1',
     nodes: sortedNodes,
     edges: sortedEdges
   };
@@ -1294,6 +1382,9 @@ export function buildScopeGraph(scope: string): SkillGraph {
   // Source 4.7 (scope): procedures owned by this scope.
   deriveProceduresFromDir(join(scopeDir, 'procedures'), scope, layer, allNodes, edges);
 
+  // Source 5.8 (scope): stages owned by this scope (ADR-0083)
+  deriveStagesFromYaml(join(scopeDir, 'process', 'stages.yaml'), scope, layer, allNodes, edges);
+
   // Source 5 (scope): overrides from templates/<scope>/docs/skill-graph.overrides.json
   // (reledgev addendum — previously L0-only; each scope now owns its experimental layer)
   const { overrides: scopeOverrides } = loadOverridesFile(join(scopeDir, 'docs'));
@@ -1311,6 +1402,7 @@ export function buildScopeGraph(scope: string): SkillGraph {
 
   return {
     version: 1,
+    graph_profile: 'deg/v1',
     nodes: sortedNodes,
     edges: sortedEdges
   };

@@ -1,5 +1,6 @@
 {
   "version": 1,
+  "graph_profile": "deg/v1",
   "nodes": [
     {
       "id": "career-path-succession-planning",
@@ -224,6 +225,21 @@
     {
       "id": "safety-health-officer",
       "type": "agent",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "stage.co-hr.S1",
+      "type": "stage",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "stage.co-hr.S2",
+      "type": "stage",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "stage.co-hr.S3",
+      "type": "stage",
       "layer": "variant:co-hr"
     },
     {
@@ -1092,6 +1108,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-hr.compensation-benchmarking",
+      "to": "stage.co-hr.S1",
+      "source": "process_schema"
+    },
+    {
       "type": "step_by_agent",
       "from": "procedure.co-hr.hr-diagnosis",
       "to": "change-management-partner",
@@ -1144,6 +1166,12 @@
       "from": "procedure.co-hr.hr-diagnosis",
       "to": "safety-health-officer",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-hr.hr-diagnosis",
+      "to": "stage.co-hr.S2",
+      "source": "process_schema"
     },
     {
       "type": "step_uses_skill",
@@ -1248,6 +1276,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-hr.hr-solution-design",
+      "to": "stage.co-hr.S2",
+      "source": "process_schema"
+    },
+    {
       "type": "step_uses_skill",
       "from": "procedure.co-hr.hr-solution-design",
       "to": "stakeholder-alignment",
@@ -1300,6 +1334,24 @@
       "from": "procedure.co-hr.org-implementation",
       "to": "procedure.co-hr.hr-solution-design",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-hr.org-implementation",
+      "to": "stage.co-hr.S3",
+      "source": "process_schema"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-hr.S1",
+      "to": "stage.co-hr.S2",
+      "source": "process_schema"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-hr.S2",
+      "to": "stage.co-hr.S3",
+      "source": "process_schema"
     },
     {
       "type": "used_by",
