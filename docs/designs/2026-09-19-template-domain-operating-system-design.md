@@ -10,6 +10,7 @@
 ## Table of Contents
 
 1. [Problem Statement](#1-problem-statement)
+   - 1.5 [**Terminology** — Domain Operating Model (never abbreviated)](#15-terminology)
 2. [Decision Summary](#2-decision-summary)
 3. [Architecture Overview](#3-architecture-overview)
 4. [Process Layer — Stage and Activity](#4-process-layer--stage-and-activity)
@@ -83,6 +84,82 @@ v0.4.0 emits 9 node types and 12 edge types, including `decision`, `rule`, `arti
 co-newbiz is therefore **not a rollout target that must be raised to the standard**. It is the
 upstream donor. This design generalizes its `gate:` field into the L1 `stage:` field, following
 the precedent ADR-0060 Amendment 7 already set for upstreaming co-newbiz adaptations.
+
+### 1.5 Terminology
+
+This subsection registers the official name for the framework this design builds, together with
+the naming rules that govern it. It is normative.
+
+#### 1.5.1 Domain Operating Model — and the no-abbreviation rule
+
+> **NAMING RULE — NEVER ABBREVIATE.** The umbrella concept is called the **Domain Operating
+> Model**. Always spell it out in full. Never write **"DOM"**. Never write **"AOM"**. No acronym
+> for this term is permitted in any workspace document, schema, script, comment, or commit
+> message. When a short form is needed in casual prose, write "the Domain Operating Model" or
+> "the framework".
+
+Two abbreviations were considered and both are rejected:
+
+- **"DOM" is rejected.** It collides with Document Object Model, which is live, actively used
+  terminology in this workspace. The web-facing variants `co-deck`, `co-design`, and `co-game`
+  each manipulate the DOM in their own domains, so the acronym is already taken.
+- **"AOM" (Agent Operating Model) is rejected.** "Agent" is already a first-class, heavily loaded
+  term here, denoting the Claude Code specialist agents dispatched through the PM Gateway. Naming
+  the whole framework after one of its own sub-components creates the self-reference ambiguity
+  this design has avoided throughout. §10.1 applies the same discipline to the graph: the skill
+  graph is the file, the Domain Execution Graph is the vocabulary.
+
+A Domain Operating Model is the complete, domain-specific operating definition of how one domain
+executes work. It is composed of the axes in §1.5.2.
+
+#### 1.5.2 Axes and implementation status
+
+| Axis | Meaning | Status | Where |
+|---|---|---|---|
+| **Process** | Stage → Activity | **IMPLEMENTED** (P2) | `process/stages.yaml`; procedure schema `stage:` field |
+| **RACI** | Responsibility assignment | **IMPLEMENTED** (P4) | `governance/raci.yaml` |
+| **Skill** | Executable SOP | **PRE-EXISTING** — not part of this rollout | `skills/*/SKILL.md` (ADR-0060, ADR-0063) |
+| **Agent** | Execution actor within the model | **PRE-EXISTING**; `executor_type` distinction is **FUTURE SCOPE** | `variant.json` rosters; RACI `agent-key` |
+| **Artifact** | Typed output contract | **IMPLEMENTED** (P5) | enriched `procedures/_output-types.yaml` |
+| **Evidence** | Typed proof of execution | **SPECIFIED BUT UNCLAIMED** — P6 deferred | `evidence-models/` (co-safety only; see §15.1 R7) |
+| **Decision** | Gate definitions | **IMPLEMENTED** (P5) | `decisions/gates.yaml` |
+| **Graph** | Domain Execution Graph | **IMPLEMENTED** (P3) | vocabulary profile over `docs/skill-graph.json` (§10.1) |
+| **Learning** | SkillHone feedback loop | **FUTURE SCOPE — NOT DESIGNED** | — |
+
+Four rows need precision beyond the table.
+
+**Agent is a component, not the model.** The Agent axis names the actor that executes an Activity.
+It is not the framework itself — this is the reason "Agent Operating Model" was rejected above.
+The RACI schema currently tracks a single `agent-key` per role (accountable, responsible,
+consulted, informed). It draws no schema-level distinction between a human role-holder and an AI
+agent executor. A field such as `executor_type: human|agent` would formalize that distinction. It
+is **future scope**: not designed, not specified, not implemented.
+
+**Evidence is specified but unclaimed.** The `evidenced` conformance level and its DEG-E-* rules
+are specified and implemented. No variant claims the level in this programme. co-safety was the
+only real candidate and it sits in the `core`-deferred set. See §15.1 R7.
+
+**Decision gates are not decision records.** `decisions/gates.yaml` defines gates at template
+level. It is distinct from the pre-existing L0 `docs/decisions/DEC-*.md` instance records governed
+by ADR-0061. The two coexist.
+
+**Learning does not exist yet.** `SkillHone` is a separate, pre-existing skill-quality feedback
+mechanism in this workspace (`skill-session-review.ts` and related workspace-standards
+infrastructure). It operates on `skills/` generally. Wiring Domain Operating Model Decision and
+Evidence outcomes back into a SkillHone-style improvement loop specific to this framework has not
+been designed. It is an open future-scope item.
+
+#### 1.5.3 Template is the packaging mechanism
+
+A **Template** is how a Domain Operating Model is instantiated and made reusable. Each
+`templates/co-*/` template packages exactly one domain's Domain Operating Model — `co-newbiz`
+packages a New Business Domain Operating Model, `co-security` packages a Security Domain
+Operating Model.
+
+The split follows the existing Workspace/Template boundary. The Workspace layer
+(`templates/common/`) owns the schemas and contracts that define what a Domain Operating Model
+*can* contain. Each Template supplies the actual domain content. This is the same boundary already
+documented in CONSTITUTION.md §5.7, §6, and §7.5, and elaborated for this design in §11.
 
 ---
 

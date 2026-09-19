@@ -16,6 +16,38 @@ Skill, Agent Team, RACI, Artifact Model, Evidence Model, Decision Model, and a g
 A 2026-09-19 verification pass against the repository found that **most of the proposal is already
 built**, and that the remaining gaps are narrower and more specific than the proposal assumed.
 
+### Terminology — Domain Operating Model
+
+The framework this ADR governs is officially named the **Domain Operating Model**. The name is
+registered retroactively; the design doc §1.5 holds the full reasoning.
+
+> **NAMING RULE — NEVER ABBREVIATE.** Always spell out "Domain Operating Model". Never write
+> **"DOM"** — it collides with Document Object Model, live terminology in the `co-deck`,
+> `co-design`, and `co-game` variants. Never write **"AOM"** — "Agent" already denotes PM-Gateway
+> specialist agents, and the framework must not be named after one of its own sub-components. No
+> acronym is permitted in any document, schema, script, or commit message.
+
+A **Template** (`templates/co-*/`) is the packaging mechanism: it instantiates one domain's Domain
+Operating Model. The Workspace layer (`templates/common/`) owns the schemas and contracts; each
+Template supplies the domain content — the same boundary as CONSTITUTION.md §5.7, §6, and §7.5.
+
+| Axis | Status | Where |
+|---|---|---|
+| **Process** (Stage → Activity) | **IMPLEMENTED** (P2) | `process/stages.yaml`; procedure `stage:` |
+| **RACI** | **IMPLEMENTED** (P4) | `governance/raci.yaml` |
+| **Skill** (Executable SOP) | **PRE-EXISTING** — not this rollout | `skills/*/SKILL.md` (ADR-0060, ADR-0063) |
+| **Agent** (execution actor, not the model) | **PRE-EXISTING**; `executor_type` is **FUTURE SCOPE** | RACI `agent-key` |
+| **Artifact** | **IMPLEMENTED** (P5) | enriched `procedures/_output-types.yaml` |
+| **Evidence** | **SPECIFIED BUT UNCLAIMED** — P6 deferred | `evidence-models/` (co-safety only) |
+| **Decision** | **IMPLEMENTED** (P5) | `decisions/gates.yaml` (distinct from ADR-0061 `DEC-*.md`) |
+| **Graph** (Domain Execution Graph) | **IMPLEMENTED** (P3) | vocabulary over `docs/skill-graph.json` |
+| **Learning** (SkillHone loop) | **FUTURE SCOPE — NOT DESIGNED** | — |
+
+Two clarifications carry forward from the design. The RACI schema tracks one `agent-key` per role
+and draws no human-versus-AI-executor distinction; formalizing it is future scope. `SkillHone` is
+a pre-existing, separate skill-quality mechanism; wiring Decision and Evidence outcomes into a
+feedback loop for this framework has not been designed.
+
 ### What already exists
 
 - **Activity layer.** `procedures/<name>/schema.yaml` holds 80 procedures across 13 variant
