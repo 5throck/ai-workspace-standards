@@ -48,8 +48,9 @@ tickets can land independently.
    windows. The shift was pure documentation addition; marker identity
    (file/section/source/hash) never changed.
 4. **P4 — backport gap.** ADR-0080 content reached L0 and L1 managed blocks;
-   the 11 `Projects/co-*` fleet inherits managed-block content only via
-   scaffold or the manual `project-resync` runbook (last: 2026-09-16, 12
+   the `Projects/co-*` fleet (8 git repos as inventoried 2026-09-19; earlier
+   counts of 11 predate fleet reductions) inherits managed-block content only
+   via scaffold or the manual `project-resync` runbook (last: 2026-09-16, 12
    hand-written upgrade PRs). No standing obligation ties policy-class L1
    changes to a fleet sweep.
 
