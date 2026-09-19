@@ -1,6 +1,6 @@
 ---
 name: project-resync
-version: 1.3.1
+version: 1.4.0
 description: >
   Full bidirectional sync cycle for Projects/co-* instances: provenance-audit
   uncommitted content, sync each project to its GitHub remote, selectively
@@ -98,6 +98,40 @@ Diff each project's committed LOCAL-WORK against its variant surface
   discarded-stale) — it feeds Step 3's PR body and the root CHANGELOG.
 - Validate: `bun scripts/validate-templates.ts`, `bun test` (root).
 
+## Step 2b — Evidence plane review
+
+Run `bun scripts/evidence-backport-scan.ts`. Read-only: reports candidates, never
+writes into `templates/` or into any `Projects/co-*` instance (design
+docs/designs/2026-09-19-actor-model-and-evidence-backport-design.md §4, ADR-0084
+Decision 6).
+
+For each project, record the detected form (F1 prose ledger / F2 registry-backed /
+F3 schema-typed / F0 unrecognized / MIXED / none), the M1-M6 maturity results, and
+the verdict:
+
+| Verdict | Meaning | Action |
+|---|---|---|
+| PROMOTABLE | form real + all of M1-M6 pass | promote (see below) |
+| SCHEMA-ONLY | M6a passes (a procedure exists) but M6b fails (not repeatedly used) | human-triage row; do not promote |
+| NOT_YET | some other maturity test failed | human-triage row; do not promote |
+| NEEDS_TRIAGE | F0, MIXED, or no evidence-shaped content at all | human-triage row; do not promote |
+
+Promote only `PROMOTABLE` candidates, and only by authoring the **pair** — under
+`templates/co-<x>/`:
+
+- the F3 schema (`evidence-models/<record-type>.schema.json`, regardless of the
+  source form),
+- its companion `evidence-collection-<name>` skill (a generalization of the
+  source collection procedure — never a copy of engagement-specific content),
+- a provenance `README.md` recording the source project, source form, the skill
+  path that satisfied M6, the commit range the maturity bar was measured over,
+  and the M1-M6 results.
+
+A schema promoted without its companion procedure is an incomplete backport and
+MUST be rejected at review. Route `F0`, `MIXED`, `SCHEMA-ONLY`, and any
+`NOT_YET` verdict to the cycle report as human-triage rows. Never auto-write
+into `templates/`. Safety Rule 6 (backport gate) governs this step unchanged.
+
 ## Step 3 — Root PR
 
 Standard `/sync` with the Step-2 report; merge before Step 4 (sequential
@@ -153,6 +187,7 @@ After Step 5's merges:
 - Step 0: audit tables (script output) + applied-verdict summary per project.
 - Steps 1/5: per-project PR URLs + merge states.
 - Step 2: per-variant judgment report.
+- Step 2b: evidence-backport-scan verdict table per project + human-triage rows.
 - Cycle summary: one table — project → synced? / promoted? / upgraded? / final state.
 
 ## Related Skills

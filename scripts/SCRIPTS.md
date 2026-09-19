@@ -83,6 +83,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `design-lint.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `review-baseline.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `resync-audit.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `evidence-backport-scan.ts` | L0 | 1.0.0 | active | Evidence Backporting scanner — read-only form detection (F1/F2/F3/F0/MIXED) + M1-M6 maturity bar over Projects/co-* evidence planes (ADR-0084 Decision 6, design §4); consumes graph-delta-log.ts output for M2/M4/M6b with git-log fallback; project-resync Step 2b | —| L0+L1 | —|
 | `create-l3-scaffold.ts` | L0 | 1.15.0 | active | —| —| L0 | —|
 | `dev-sync.ts` | L0 | 1.15.0 | active | main-drift pre-flight warning (`--require-current-main` abort) + sanctioned `--conclude-merge` conflicted-merge path (ADR-0081/T-20260918-002) | —| L0+L1 | —|
 | `dispatch-parallel.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
