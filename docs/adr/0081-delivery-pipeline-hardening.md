@@ -46,10 +46,11 @@ not retro-actively").
    A marker's line position is incidental; pinning it turns any upstream
    insertion into a red cross-OS run.
 4. **Fleet policy backport gap.** ADR-0080's authority text shipped to L0 and
-   L1 managed blocks, but the 11 `Projects/co-*` fleet receives COMMON-CONTEXT
-   and pm.md body content only through scaffold or the manual `project-resync`
-   runbook (last run: 2026-09-16, 12 hand-created upgrade PRs). Until that
-   runs again, the fleet operates under the old doctrine.
+   L1 managed blocks, but the `Projects/co-*` fleet (8 git repos as inventoried
+   2026-09-19; earlier counts of 11 predate fleet reductions) receives
+   COMMON-CONTEXT and pm.md body content only through scaffold or the manual
+   `project-resync` runbook (last run: 2026-09-16, 12 hand-created upgrade
+   PRs). Until that runs again, the fleet operates under the old doctrine.
 
 ## Decision
 

@@ -5,21 +5,45 @@ title: >-
   Delivery hardening P4: fleet backport of ADR-0080 policy content across
   Projects/co-* (first application of the standing backport policy)
 priority: normal
-status: backlog
-attempts: 0
+status: done
+attempts: 1
 created_at: '2026-09-18T02:33:00.000Z'
 history:
   - at: '2026-09-18T02:33:00.000Z'
     from: null
     to: backlog
-notes: >-
-  ADR-0080 authority content (hiring/firing + skill request sections) shipped
-  to L0 and L1 managed blocks (pm.md WORKSPACE-MANAGED, COMMON-AGENTS,
-  COMMON-CONTEXT) but the 11 Projects/co-* fleet inherits managed-block content
-  only via scaffold or the manual project-resync runbook (last: 2026-09-16, 12
-  hand-written upgrade PRs). Per ADR-0081 Decision 4 / design §3.4: run the
-  project-resync / upgrade-project sweep to deliver the policy content to the
-  fleet within one release cycle, and record the standing rule that
-  policy-class L1 changes open a fleet backport ticket in the same PR's Notes.
-  Longer term (separate design): evaluate widening upgrade-project's
-  managed-zone sync to cover COMMON-CONTEXT content directly.
+  - at: '2026-09-19T11:00:00.000Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-19T11:30:00.000Z'
+    from: waiting
+    to: review
+  - at: '2026-09-19T12:30:00.000Z'
+    from: review
+    to: done
+result: >-
+  Fleet sweep completed 2026-09-19 (upgrade-only scope; reverse backport not
+  needed — the cycle's changes were template→project direction only). Fleet
+  inventory corrected: 8 git repos (co-abap, co-abap-plugin, co-architect,
+  co-consult, co-deck, co-develop, co-newbiz, co-safety) + non-repo test/
+  dir — not 11 as the ADR-0081 text assumed from the stale 2026-09-16
+  changelog. Enablers landed first: CRLF-tolerant context footer parsing
+  (T-20260918-005) and the COMMON-AGENTS block sync to all 13 variant
+  AGENTS.md (workspace PR #963) — project upgrades merge the COMMON-AGENTS
+  block from the variant template first, and all 13 variant blocks were
+  stale. Prerequisites merged at root: PR #961 (architecture cleanup),
+  #962 (CRLF fix + context.md footer 2.9), #963 (variant block sync).
+  Delivery per project (upgrade-project --dry-run → --prune-removed --yes →
+  verify → project dev-sync --spec-exempt=E5 → PR → merge): co-develop #88,
+  co-abap #133, co-abap-plugin #94, co-architect #305, co-consult #45,
+  co-deck #83, co-safety #157, co-newbiz #353 — 8/8 merged. Verified per
+  project: agents/pm.md "Agent Hiring & Firing", AGENTS.md +
+  docs/context.md "PM Team-Management Authority". Partial: co-abap-plugin
+  context.md preserved (CONTEXT PRESERVE — project-only top-level content
+  protected; the ADR-0080 section reaches it via pm.md/AGENTS.md; revisit
+  with --force-context-sync only after triaging those sections). co-newbiz
+  LOCAL-WORK (.mcp.json, opencode.json) intentionally left uncommitted per
+  sweep scope. Registry reconciliations surfaced by the stricter delivered
+  validators: co-architect SKILLS.md rows (ALM 1.2.0 / SLM 1.4.0 / sync
+  1.6.0), co-newbiz SCRIPTS.md rows (seed-s1-s12-demo 1.2.0,
+  generate-process-flow 1.3.3, job-worker 1.0.0 registered).
