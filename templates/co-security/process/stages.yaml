@@ -9,7 +9,7 @@ stages:
       - PENDING_REVIEW
     exit_criteria:
       - PENDING_REVIEW
-    owner_agent: security-architect
+    owner_agent: red-team-lead
   - id: S2
     title: Remediation Support and Hardening
     order: 2
@@ -18,4 +18,4 @@ stages:
       - PENDING_REVIEW
     exit_criteria:
       - PENDING_REVIEW
-    owner_agent: security-architect
+    owner_agent: report-writer

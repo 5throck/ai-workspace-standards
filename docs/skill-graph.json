@@ -5106,6 +5106,24 @@
       "source": "prose"
     },
     {
+      "type": "accountable_for",
+      "from": "architect",
+      "to": "procedure.co-abap.requirements-analysis",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "architect",
+      "to": "procedure.co-abap.security-readiness-baseline",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "architect",
+      "to": "procedure.co-abap.solution-blueprint",
+      "source": "raci_matrix"
+    },
+    {
       "type": "composes_with",
       "from": "audit-preparation",
       "to": "hazop-analysis",
@@ -5411,6 +5429,24 @@
         "field": "relates_to",
         "index": 0
       }
+    },
+    {
+      "type": "accountable_for",
+      "from": "code-writer",
+      "to": "procedure.co-abap.custom-dev-delivery",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "code-writer",
+      "to": "procedure.co-abap.security-closeout-review",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "code-writer",
+      "to": "procedure.co-abap.transport-release",
+      "source": "raci_matrix"
     },
     {
       "type": "references",
@@ -5988,6 +6024,12 @@
       "from": "compensation-benchmarking",
       "to": "talent-acquisition-strategy",
       "source": "prose"
+    },
+    {
+      "type": "accountable_for",
+      "from": "compensation-benefits-analyst",
+      "to": "procedure.co-hr.compensation-benchmarking",
+      "source": "raci_matrix"
     },
     {
       "type": "references",
@@ -6575,6 +6617,12 @@
       "source": "prose"
     },
     {
+      "type": "accountable_for",
+      "from": "delivery-manager",
+      "to": "procedure.co-consult.engagement-closeout",
+      "source": "raci_matrix"
+    },
+    {
       "type": "used_by",
       "from": "design",
       "to": "design",
@@ -6735,6 +6783,12 @@
       "from": "design-foundation",
       "to": "ui-ux-design-intelligence",
       "source": "prose"
+    },
+    {
+      "type": "accountable_for",
+      "from": "design-lead",
+      "to": "procedure.co-design.design-definition",
+      "source": "raci_matrix"
     },
     {
       "type": "references",
@@ -7025,6 +7079,18 @@
       "from": "engagement-director",
       "to": "pdf-export",
       "source": "prose"
+    },
+    {
+      "type": "accountable_for",
+      "from": "engagement-director",
+      "to": "procedure.co-price.engagement-review",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "engagement-director",
+      "to": "procedure.co-price.pricing-security-closeout",
+      "source": "raci_matrix"
     },
     {
       "type": "references",
@@ -8004,6 +8070,12 @@
       "source": "skill_manifest"
     },
     {
+      "type": "accountable_for",
+      "from": "fta-origin-analyst",
+      "to": "procedure.co-export.compliance-determination",
+      "source": "raci_matrix"
+    },
+    {
       "type": "used_by",
       "from": "fta-origin-determination",
       "to": "fta-origin-analyst",
@@ -8139,6 +8211,12 @@
         "field": "relates_to",
         "index": 0
       }
+    },
+    {
+      "type": "accountable_for",
+      "from": "game-developer",
+      "to": "procedure.co-game.gameplay-feature-loop",
+      "source": "raci_matrix"
     },
     {
       "type": "follows",
@@ -11080,6 +11158,36 @@
       "source": "prose"
     },
     {
+      "type": "accountable_for",
+      "from": "lead-architect",
+      "to": "procedure.co-price.engine-implementation",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "lead-architect",
+      "to": "procedure.co-price.pricing-analysis",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "lead-architect",
+      "to": "procedure.co-price.pricing-security-bootstrap",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "lead-architect",
+      "to": "procedure.co-price.release-assurance",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "lead-architect",
+      "to": "procedure.co-price.scenario-modeling",
+      "source": "raci_matrix"
+    },
+    {
       "type": "references",
       "from": "learning-curriculum-design",
       "to": "career-path-succession-planning",
@@ -11286,10 +11394,28 @@
       "source": "skill_manifest"
     },
     {
+      "type": "accountable_for",
+      "from": "logistics-coordinator",
+      "to": "procedure.co-export.post-delivery-optimization",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "logistics-coordinator",
+      "to": "procedure.co-export.shipment-execution",
+      "source": "raci_matrix"
+    },
+    {
       "type": "references",
       "from": "map-channel-enforcement",
       "to": "pricing-governance",
       "source": "prose"
+    },
+    {
+      "type": "accountable_for",
+      "from": "market-entry-strategist",
+      "to": "procedure.co-export.market-entry-assessment",
+      "source": "raci_matrix"
     },
     {
       "type": "follows",
@@ -11485,6 +11611,24 @@
       "from": "narrative-framework",
       "to": "phase3",
       "source": "skill_manifest"
+    },
+    {
+      "type": "accountable_for",
+      "from": "org-design-consultant",
+      "to": "procedure.co-hr.hr-diagnosis",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "org-design-consultant",
+      "to": "procedure.co-hr.hr-solution-design",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "org-design-consultant",
+      "to": "procedure.co-hr.org-implementation",
+      "source": "raci_matrix"
     },
     {
       "type": "follows",
@@ -11749,6 +11893,12 @@
       }
     },
     {
+      "type": "accountable_for",
+      "from": "pdf-export",
+      "to": "procedure.co-deck.deck-publish-and-version",
+      "source": "raci_matrix"
+    },
+    {
       "type": "composes_with",
       "from": "pdf-export",
       "to": "research",
@@ -11919,6 +12069,12 @@
       "from": "pm",
       "to": "decision-record",
       "source": "prose"
+    },
+    {
+      "type": "accountable_for",
+      "from": "pm",
+      "to": "procedure.co-export.export-shipment-compliance",
+      "source": "raci_matrix"
     },
     {
       "type": "references",
@@ -16074,6 +16230,12 @@
       }
     },
     {
+      "type": "accountable_for",
+      "from": "prototype-engineer",
+      "to": "procedure.co-design.prototype-validation",
+      "source": "raci_matrix"
+    },
+    {
       "type": "references",
       "from": "psm-loto",
       "to": "permit-to-work",
@@ -16120,6 +16282,18 @@
       "from": "rack-fall-protection-planner",
       "to": "tool-box-meeting",
       "source": "prose"
+    },
+    {
+      "type": "accountable_for",
+      "from": "red-team-lead",
+      "to": "procedure.co-security.engagement-planning",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "red-team-lead",
+      "to": "procedure.co-security.threat-analysis",
+      "source": "raci_matrix"
     },
     {
       "type": "references",
@@ -16180,6 +16354,30 @@
       "from": "refactoring",
       "to": "phase5",
       "source": "skill_manifest"
+    },
+    {
+      "type": "accountable_for",
+      "from": "report-writer",
+      "to": "procedure.co-security.post-engagement-hardening",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "report-writer",
+      "to": "procedure.co-security.remediation-support",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "report-writer",
+      "to": "procedure.co-security.security-reporting",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "report-writer",
+      "to": "procedure.co-security.threat-model-and-report",
+      "source": "raci_matrix"
     },
     {
       "type": "references",
@@ -17655,6 +17853,42 @@
       "source": "prose"
     },
     {
+      "type": "accountable_for",
+      "from": "stack-setup",
+      "to": "procedure.co-game.game-architecture-design",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "stack-setup",
+      "to": "procedure.co-game.game-concept-design",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "stack-setup",
+      "to": "procedure.co-game.game-content-production",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "stack-setup",
+      "to": "procedure.co-game.game-release-verification",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "stack-setup",
+      "to": "procedure.co-game.game-security-bootstrap",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "stack-setup",
+      "to": "procedure.co-game.game-security-retrospective",
+      "source": "raci_matrix"
+    },
+    {
       "type": "stage_follows",
       "from": "stage.co-abap.S1",
       "to": "stage.co-abap.S2",
@@ -18037,6 +18271,36 @@
       "from": "storyline",
       "to": "storyline",
       "source": "skill_manifest"
+    },
+    {
+      "type": "accountable_for",
+      "from": "storyteller",
+      "to": "procedure.co-design.narrative-discovery",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "strategy-analyst",
+      "to": "procedure.co-consult.current-state-diagnosis",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "strategy-analyst",
+      "to": "procedure.co-consult.diagnosis-to-recommendation",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "strategy-analyst",
+      "to": "procedure.co-consult.solution-delivery",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "strategy-analyst",
+      "to": "procedure.co-consult.solution-design",
+      "source": "raci_matrix"
     },
     {
       "type": "follows",
@@ -18736,6 +19000,12 @@
       }
     },
     {
+      "type": "accountable_for",
+      "from": "ux-researcher",
+      "to": "procedure.co-design.ux-discovery",
+      "source": "raci_matrix"
+    },
+    {
       "type": "follows",
       "from": "van-westendorp-psm",
       "to": "gabor-granger",
@@ -18919,6 +19189,66 @@
       "source": "skill_manifest"
     },
     {
+      "type": "accountable_for",
+      "from": "version",
+      "to": "procedure.co-deck.deck-build-and-export",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "version",
+      "to": "procedure.co-deck.lecture-deck-production",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "version",
+      "to": "procedure.co-deck.source-research",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "version",
+      "to": "procedure.co-deck.storyline-development",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "version",
+      "to": "procedure.co-deck.version-export-control",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "version",
+      "to": "procedure.co-deck.version-kickoff-control",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "version",
+      "to": "procedure.co-deck.version-production-control",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "version",
+      "to": "procedure.co-deck.version-research-control",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "version",
+      "to": "procedure.co-deck.version-retrospective-control",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "version",
+      "to": "procedure.co-deck.version-storyline-control",
+      "source": "raci_matrix"
+    },
+    {
       "type": "references",
       "from": "version",
       "to": "research",
@@ -18958,6 +19288,12 @@
         "field": "required_skills",
         "index": 0
       }
+    },
+    {
+      "type": "accountable_for",
+      "from": "visual-designer",
+      "to": "procedure.co-design.visual-implementation",
+      "source": "raci_matrix"
     },
     {
       "type": "references",

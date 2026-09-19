@@ -18,4 +18,4 @@ stages:
       - PENDING_REVIEW
     exit_criteria:
       - PENDING_REVIEW
-    owner_agent: project-manager
+    owner_agent: code-writer

@@ -215,6 +215,12 @@
       "source": "skill_manifest"
     },
     {
+      "type": "accountable_for",
+      "from": "design-lead",
+      "to": "procedure.co-design.design-definition",
+      "source": "raci_matrix"
+    },
+    {
       "type": "produces",
       "from": "documentation-writing",
       "to": "output_type.narrative_brief",
@@ -449,6 +455,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "accountable_for",
+      "from": "prototype-engineer",
+      "to": "procedure.co-design.prototype-validation",
+      "source": "raci_matrix"
+    },
+    {
       "type": "follows",
       "from": "service-design",
       "to": "accessibility-audit",
@@ -558,6 +570,12 @@
       "from": "stage.co-design.S4",
       "to": "stage.co-design.S5",
       "source": "process_schema"
+    },
+    {
+      "type": "accountable_for",
+      "from": "storyteller",
+      "to": "procedure.co-design.narrative-discovery",
+      "source": "raci_matrix"
     },
     {
       "type": "produces",
@@ -675,6 +693,18 @@
       "from": "ui-ux-design-intelligence",
       "to": "visual-designer",
       "source": "skill_manifest"
+    },
+    {
+      "type": "accountable_for",
+      "from": "ux-researcher",
+      "to": "procedure.co-design.ux-discovery",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "visual-designer",
+      "to": "procedure.co-design.visual-implementation",
+      "source": "raci_matrix"
     }
   ]
 }

@@ -642,6 +642,12 @@
       "source": "skill_manifest"
     },
     {
+      "type": "accountable_for",
+      "from": "delivery-manager",
+      "to": "procedure.co-consult.engagement-closeout",
+      "source": "raci_matrix"
+    },
+    {
       "type": "used_by",
       "from": "executive-presentation",
       "to": "communications-lead",
@@ -1919,6 +1925,30 @@
         "file": "templates/co-consult/skills/stakeholder-review-management/SKILL.md",
         "field": "prerequisites"
       }
+    },
+    {
+      "type": "accountable_for",
+      "from": "strategy-analyst",
+      "to": "procedure.co-consult.current-state-diagnosis",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "strategy-analyst",
+      "to": "procedure.co-consult.diagnosis-to-recommendation",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "strategy-analyst",
+      "to": "procedure.co-consult.solution-delivery",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "strategy-analyst",
+      "to": "procedure.co-consult.solution-design",
+      "source": "raci_matrix"
     },
     {
       "type": "follows",

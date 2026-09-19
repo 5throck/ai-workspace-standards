@@ -509,6 +509,12 @@
       "source": "prose"
     },
     {
+      "type": "accountable_for",
+      "from": "compensation-benefits-analyst",
+      "to": "procedure.co-hr.compensation-benchmarking",
+      "source": "raci_matrix"
+    },
+    {
       "type": "references",
       "from": "competency-modeling",
       "to": "career-path-succession-planning",
@@ -834,6 +840,24 @@
         "field": "relates_to",
         "index": 1
       }
+    },
+    {
+      "type": "accountable_for",
+      "from": "org-design-consultant",
+      "to": "procedure.co-hr.hr-diagnosis",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "org-design-consultant",
+      "to": "procedure.co-hr.hr-solution-design",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "org-design-consultant",
+      "to": "procedure.co-hr.org-implementation",
+      "source": "raci_matrix"
     },
     {
       "type": "follows",

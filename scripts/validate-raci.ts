@@ -3,9 +3,10 @@
  * validate-raci.ts — Repository consistency checker for RACI Matrix (ADR-0083).
  *
  * Validates templates/<variant>/governance/raci.yaml files and enforces RACI
- * invariants (DEG-R-01..05). Currently skips cleanly since no RACI matrices exist
- * in the repository yet; this validator is ready for P4 when raci.yaml files
- * are generated/committed.
+ * invariants (DEG-R-01..05). Validates generated RACI matrices against all
+ * five invariants: exactly one accountable (DEG-R-01), at least one responsible
+ * (DEG-R-02), no agent both accountable and informed (DEG-R-03), all agent keys
+ * resolve to agent files or human-role entries (DEG-R-04).
  *
  * RACI invariants (§6.3, ADR-0083):
  *   DEG-R-01: Each activity declares exactly one accountable agent.
@@ -16,8 +17,8 @@
  *
  * This script is a validator only — it never mutates files.
  *
- * @usage bun scripts/validate-raci.ts [--variant co-design|l0] [--all] [--root <dir>]
- * @version 1.0.0
+ * @usage bun scripts/validate-raci.ts [--variant co-consult|all] [--all] [--root <dir>]
+ * @version 1.1.0
  */
 
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
@@ -54,19 +55,60 @@ function parseYaml(text: string, file: string): any | null {
   }
 }
 
-/** Discover variant namespaces: co-* templates + l0 (if procedures/ exists) */
+/** Discover variant namespaces: co-* templates + common */
 function discoverVariants(root: string): string[] {
   const variants: string[] = [];
-  if (existsSync(join(root, 'procedures'))) variants.push('l0');
   const templatesDir = join(root, 'templates');
   if (existsSync(templatesDir)) {
+    // Add all co-* variants
     for (const name of readdirSync(templatesDir)) {
-      if (name.startsWith('co-') && statSync(join(templatesDir, name)).isDirectory()) {
+      if ((name.startsWith('co-') || name === 'common') && statSync(join(templatesDir, name)).isDirectory()) {
         variants.push(name);
       }
     }
   }
   return variants;
+}
+
+/** Load human-roles registry if it exists */
+function loadHumanRoles(variantDir: string): Set<string> {
+  const humanRolesPath = join(variantDir, 'governance', '_human-roles.yaml');
+  const roles = new Set<string>();
+
+  if (!existsSync(humanRolesPath)) {
+    return roles;
+  }
+
+  try {
+    const data = yamlLoad(readFileSync(humanRolesPath, 'utf-8')) as any;
+    if (data?.human_roles && typeof data.human_roles === 'object') {
+      for (const key of Object.keys(data.human_roles)) {
+        roles.add(key);
+      }
+    }
+  } catch (err) {
+    // Ignore parse errors for human-roles (optional file)
+  }
+
+  return roles;
+}
+
+/** Check if an agent file exists */
+function agentFileExists(agentKey: string, root: string): boolean {
+  // Try all variant agent directories
+  const templatesDir = join(root, 'templates');
+  if (existsSync(templatesDir)) {
+    for (const variant of readdirSync(templatesDir)) {
+      const agentPath = join(templatesDir, variant, 'agents', `${agentKey}.md`);
+      if (existsSync(agentPath)) return true;
+    }
+  }
+
+  // Try workspace agents
+  const workspaceAgentPath = join(root, 'agents', `${agentKey}.md`);
+  if (existsSync(workspaceAgentPath)) return true;
+
+  return false;
 }
 
 /**
@@ -78,8 +120,7 @@ function validateRACIFile(
   root: string,
   issues: Issue[],
 ): RACIMatrix | null {
-  const variantDir =
-    variant === 'l0' ? root : join(root, 'templates', variant);
+  const variantDir = join(root, 'templates', variant);
   const raciPath = join(variantDir, 'governance', 'raci.yaml');
 
   if (!existsSync(raciPath)) {
@@ -118,6 +159,8 @@ function validateRACIFile(
     return null;
   }
 
+  const humanRoles = loadHumanRoles(variantDir);
+
   for (let i = 0; i < data.rows.length; i++) {
     const row = data.rows[i];
     if (!row || typeof row !== 'object') {
@@ -129,20 +172,22 @@ function validateRACIFile(
       continue;
     }
 
+    const activity = (row as any).activity || `row[${i}]`;
+
     // DEG-R-01: exactly one accountable
     const accountable = row.accountable;
     if (!accountable || (typeof accountable === 'string' ? !accountable : !Array.isArray(accountable))) {
       issues.push({
         layer: 'DEG-R-01',
         file: raciPath,
-        message: `rows[${i}] must declare exactly one accountable agent`,
+        message: `${activity}: must declare exactly one accountable agent`,
       });
     } else if (Array.isArray(accountable)) {
       if (accountable.length !== 1) {
         issues.push({
           layer: 'DEG-R-01',
           file: raciPath,
-          message: `rows[${i}].accountable must be a single agent, not an array of ${accountable.length}`,
+          message: `${activity}: accountable must be a single agent, not an array of ${accountable.length}`,
         });
       }
     }
@@ -153,7 +198,7 @@ function validateRACIFile(
       issues.push({
         layer: 'DEG-R-02',
         file: raciPath,
-        message: `rows[${i}] must declare at least one responsible agent`,
+        message: `${activity}: must declare at least one responsible agent`,
       });
     }
 
@@ -163,7 +208,24 @@ function validateRACIFile(
         issues.push({
           layer: 'DEG-R-03',
           file: raciPath,
-          message: `rows[${i}]: agent "${accountable}" cannot be both accountable and informed`,
+          message: `${activity}: agent "${accountable}" cannot be both accountable and informed`,
+        });
+      }
+    }
+
+    // DEG-R-04: Every RACI agent key resolves to an agent file or human-role entry
+    const allAgents = new Set<string>();
+    if (typeof accountable === 'string') allAgents.add(accountable);
+    if (Array.isArray(responsible)) responsible.forEach((a: string) => allAgents.add(a));
+    if (Array.isArray(row.consulted)) (row.consulted as string[]).forEach(a => allAgents.add(a));
+    if (Array.isArray(row.informed)) (row.informed as string[]).forEach(a => allAgents.add(a));
+
+    for (const agent of allAgents) {
+      if (!agentFileExists(agent, root) && !humanRoles.has(agent)) {
+        issues.push({
+          layer: 'DEG-R-04',
+          file: raciPath,
+          message: `${activity}: agent "${agent}" not found in agent files or human-roles registry`,
         });
       }
     }
@@ -211,7 +273,7 @@ function main(): void {
 
   if (issues.length === 0) {
     const scope = variant ?? 'all variants';
-    console.log(`OK: RACI validation passed for ${scope} (no raci.yaml files to check yet).`);
+    console.log(`OK: RACI validation passed for ${scope}.`);
     process.exit(0);
   }
 

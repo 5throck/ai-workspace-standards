@@ -611,10 +611,46 @@
       "source": "prose"
     },
     {
+      "type": "accountable_for",
+      "from": "red-team-lead",
+      "to": "procedure.co-security.engagement-planning",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "red-team-lead",
+      "to": "procedure.co-security.threat-analysis",
+      "source": "raci_matrix"
+    },
+    {
       "type": "references",
       "from": "red-team-lead",
       "to": "verify-authorization",
       "source": "prose"
+    },
+    {
+      "type": "accountable_for",
+      "from": "report-writer",
+      "to": "procedure.co-security.post-engagement-hardening",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "report-writer",
+      "to": "procedure.co-security.remediation-support",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "report-writer",
+      "to": "procedure.co-security.security-reporting",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "report-writer",
+      "to": "procedure.co-security.threat-model-and-report",
+      "source": "raci_matrix"
     },
     {
       "type": "references",

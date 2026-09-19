@@ -656,6 +656,42 @@
       "source": "skill_manifest"
     },
     {
+      "type": "accountable_for",
+      "from": "architect",
+      "to": "procedure.co-abap.requirements-analysis",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "architect",
+      "to": "procedure.co-abap.security-readiness-baseline",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "architect",
+      "to": "procedure.co-abap.solution-blueprint",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "code-writer",
+      "to": "procedure.co-abap.custom-dev-delivery",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "code-writer",
+      "to": "procedure.co-abap.security-closeout-review",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "code-writer",
+      "to": "procedure.co-abap.transport-release",
+      "source": "raci_matrix"
+    },
+    {
       "type": "used_by",
       "from": "desktop-app-fallback",
       "to": "code-writer",

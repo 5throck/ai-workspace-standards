@@ -451,6 +451,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "accountable_for",
+      "from": "game-developer",
+      "to": "procedure.co-game.gameplay-feature-loop",
+      "source": "raci_matrix"
+    },
+    {
       "type": "step_by_agent",
       "from": "procedure.co-game.game-architecture-design",
       "to": "arcade-designer",
@@ -898,6 +904,42 @@
       "from": "sound-synth",
       "to": "sound-designer",
       "source": "skill_manifest"
+    },
+    {
+      "type": "accountable_for",
+      "from": "stack-setup",
+      "to": "procedure.co-game.game-architecture-design",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "stack-setup",
+      "to": "procedure.co-game.game-concept-design",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "stack-setup",
+      "to": "procedure.co-game.game-content-production",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "stack-setup",
+      "to": "procedure.co-game.game-release-verification",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "stack-setup",
+      "to": "procedure.co-game.game-security-bootstrap",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "stack-setup",
+      "to": "procedure.co-game.game-security-retrospective",
+      "source": "raci_matrix"
     },
     {
       "type": "stage_follows",

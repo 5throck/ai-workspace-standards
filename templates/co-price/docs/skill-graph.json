@@ -627,6 +627,18 @@
       "source": "prose"
     },
     {
+      "type": "accountable_for",
+      "from": "engagement-director",
+      "to": "procedure.co-price.engagement-review",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "engagement-director",
+      "to": "procedure.co-price.pricing-security-closeout",
+      "source": "raci_matrix"
+    },
+    {
       "type": "follows",
       "from": "executive-presentation",
       "to": "harness-verification",
@@ -900,6 +912,36 @@
         "field": "relates_to",
         "index": 1
       }
+    },
+    {
+      "type": "accountable_for",
+      "from": "lead-architect",
+      "to": "procedure.co-price.engine-implementation",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "lead-architect",
+      "to": "procedure.co-price.pricing-analysis",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "lead-architect",
+      "to": "procedure.co-price.pricing-security-bootstrap",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "lead-architect",
+      "to": "procedure.co-price.release-assurance",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "lead-architect",
+      "to": "procedure.co-price.scenario-modeling",
+      "source": "raci_matrix"
     },
     {
       "type": "references",
