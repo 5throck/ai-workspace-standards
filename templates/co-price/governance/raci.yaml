@@ -1,0 +1,55 @@
+schema_version: '1.0'
+variant: co-price
+generated_from: procedures/
+rows:
+  - stage: S1
+    activity: procedure.co-price.engine-implementation
+    accountable: lead-architect
+    responsible:
+      - core-engine-dev
+      - cost-asset-mgmt
+      - lead-architect
+      - pricing-strategist
+      - ux-specialist
+  - stage: S1
+    activity: procedure.co-price.pricing-analysis
+    accountable: lead-architect
+    responsible:
+      - market-intelligence-analyst
+      - pricing-strategist
+  - stage: S1
+    activity: procedure.co-price.pricing-security-bootstrap
+    accountable: lead-architect
+    responsible:
+      - security-monitor
+  - stage: S1
+    activity: procedure.co-price.release-assurance
+    accountable: lead-architect
+    responsible:
+      - cost-asset-mgmt
+      - cpa-auditor
+      - devops-admin
+      - engagement-director
+      - finance-strategy-lead
+      - l10n-auditor
+      - qa-tester
+  - stage: S1
+    activity: procedure.co-price.scenario-modeling
+    accountable: lead-architect
+    responsible:
+      - finance-strategy-lead
+      - lead-architect
+      - pricing-strategist
+      - security-auditor
+      - ux-specialist
+  - stage: S2
+    activity: procedure.co-price.engagement-review
+    accountable: engagement-director
+    responsible:
+      - engagement-director
+      - security-auditor
+  - stage: S2
+    activity: procedure.co-price.pricing-security-closeout
+    accountable: engagement-director
+    responsible:
+      - security-monitor

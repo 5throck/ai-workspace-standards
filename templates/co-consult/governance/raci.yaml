@@ -1,0 +1,40 @@
+schema_version: '1.0'
+variant: co-consult
+generated_from: procedures/
+rows:
+  - stage: S1
+    activity: procedure.co-consult.current-state-diagnosis
+    accountable: strategy-analyst
+    responsible:
+      - change-management-partner
+      - industry-expert
+      - sme
+  - stage: S2
+    activity: procedure.co-consult.diagnosis-to-recommendation
+    accountable: strategy-analyst
+    responsible:
+      - data-analyst
+      - industry-expert
+      - strategy-analyst
+  - stage: S3
+    activity: procedure.co-consult.solution-delivery
+    accountable: strategy-analyst
+    responsible:
+      - communications-lead
+      - data-analyst
+      - sme
+      - solutions-architect
+  - stage: S3
+    activity: procedure.co-consult.solution-design
+    accountable: strategy-analyst
+    responsible:
+      - change-management-partner
+      - industry-expert
+      - sme
+  - stage: S4
+    activity: procedure.co-consult.engagement-closeout
+    accountable: delivery-manager
+    responsible:
+      - delivery-manager
+      - technology-specialist
+      - workstream-lead

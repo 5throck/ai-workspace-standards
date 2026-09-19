@@ -1,0 +1,35 @@
+schema_version: '1.0'
+variant: co-design
+generated_from: procedures/
+rows:
+  - stage: S1
+    activity: procedure.co-design.narrative-discovery
+    accountable: storyteller
+    responsible:
+      - storyteller
+  - stage: S2
+    activity: procedure.co-design.ux-discovery
+    accountable: ux-researcher
+    responsible:
+      - design-lead
+      - service-designer
+      - ux-researcher
+  - stage: S3
+    activity: procedure.co-design.design-definition
+    accountable: design-lead
+    responsible:
+      - design-lead
+      - storyteller
+  - stage: S4
+    activity: procedure.co-design.visual-implementation
+    accountable: visual-designer
+    responsible:
+      - design-lead
+      - service-designer
+      - typography-expert
+      - visual-designer
+  - stage: S5
+    activity: procedure.co-design.prototype-validation
+    accountable: prototype-engineer
+    responsible:
+      - prototype-engineer

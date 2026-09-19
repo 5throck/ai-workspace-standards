@@ -1,0 +1,53 @@
+schema_version: '1.0'
+variant: co-game
+generated_from: procedures/
+rows:
+  - stage: S1
+    activity: procedure.co-game.game-architecture-design
+    accountable: stack-setup
+    responsible:
+      - arcade-designer
+      - architect
+      - game-designer
+      - puzzle-designer
+  - stage: S1
+    activity: procedure.co-game.game-concept-design
+    accountable: stack-setup
+    responsible:
+      - arcade-designer
+      - architect
+      - game-designer
+      - puzzle-designer
+      - stack-setup
+  - stage: S1
+    activity: procedure.co-game.game-content-production
+    accountable: stack-setup
+    responsible:
+      - designer
+      - sound-designer
+      - visual-artist
+  - stage: S1
+    activity: procedure.co-game.game-release-verification
+    accountable: stack-setup
+    responsible:
+      - game-debugger
+      - game-developer
+      - test-runner
+  - stage: S1
+    activity: procedure.co-game.game-security-bootstrap
+    accountable: stack-setup
+    responsible:
+      - security-monitor
+      - stack-setup
+  - stage: S1
+    activity: procedure.co-game.game-security-retrospective
+    accountable: stack-setup
+    responsible:
+      - security-monitor
+  - stage: S2
+    activity: procedure.co-game.gameplay-feature-loop
+    accountable: game-developer
+    responsible:
+      - game-debugger
+      - game-designer
+      - game-developer

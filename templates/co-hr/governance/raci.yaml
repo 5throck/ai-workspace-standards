@@ -1,0 +1,36 @@
+schema_version: '1.0'
+variant: co-hr
+generated_from: procedures/
+rows:
+  - stage: S1
+    activity: procedure.co-hr.compensation-benchmarking
+    accountable: compensation-benefits-analyst
+    responsible:
+      - compensation-benefits-analyst
+      - data-analyst
+  - stage: S2
+    activity: procedure.co-hr.hr-diagnosis
+    accountable: org-design-consultant
+    responsible:
+      - change-management-partner
+      - labor-compliance-analyst
+      - labor-relations-specialist
+      - safety-health-officer
+  - stage: S2
+    activity: procedure.co-hr.hr-solution-design
+    accountable: org-design-consultant
+    responsible:
+      - career-succession-consultant
+      - change-management-partner
+      - compensation-benefits-analyst
+      - labor-relations-specialist
+      - learning-development-specialist
+      - org-design-consultant
+      - performance-management-consultant
+      - talent-acquisition-specialist
+  - stage: S3
+    activity: procedure.co-hr.org-implementation
+    accountable: org-design-consultant
+    responsible:
+      - data-analyst
+      - org-design-consultant

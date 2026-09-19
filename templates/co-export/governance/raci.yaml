@@ -1,0 +1,42 @@
+schema_version: '1.0'
+variant: co-export
+generated_from: procedures/
+rows:
+  - stage: S1
+    activity: procedure.co-export.market-entry-assessment
+    accountable: market-entry-strategist
+    responsible:
+      - export-control-compliance-specialist
+      - foreign-regulatory-intelligence-analyst
+      - fta-origin-analyst
+      - halal-certification-specialist
+      - hs-classification-specialist
+      - market-entry-strategist
+  - stage: S2
+    activity: procedure.co-export.compliance-determination
+    accountable: fta-origin-analyst
+    responsible:
+      - export-control-compliance-specialist
+      - fta-origin-analyst
+      - halal-certification-specialist
+      - hs-classification-specialist
+  - stage: S3
+    activity: procedure.co-export.export-shipment-compliance
+    accountable: pm
+    responsible:
+      - fta-origin-analyst
+      - hs-classification-specialist
+      - logistics-coordinator
+      - trade-documentation-specialist
+  - stage: S4
+    activity: procedure.co-export.shipment-execution
+    accountable: logistics-coordinator
+    responsible:
+      - customs-duty-drawback-specialist
+      - market-entry-strategist
+  - stage: S5
+    activity: procedure.co-export.post-delivery-optimization
+    accountable: logistics-coordinator
+    responsible:
+      - logistics-coordinator
+      - market-entry-strategist

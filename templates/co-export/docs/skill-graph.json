@@ -473,6 +473,12 @@
       "source": "skill_manifest"
     },
     {
+      "type": "accountable_for",
+      "from": "fta-origin-analyst",
+      "to": "procedure.co-export.compliance-determination",
+      "source": "raci_matrix"
+    },
+    {
       "type": "used_by",
       "from": "fta-origin-determination",
       "to": "fta-origin-analyst",
@@ -917,6 +923,24 @@
       "source": "skill_manifest"
     },
     {
+      "type": "accountable_for",
+      "from": "logistics-coordinator",
+      "to": "procedure.co-export.post-delivery-optimization",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "logistics-coordinator",
+      "to": "procedure.co-export.shipment-execution",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "market-entry-strategist",
+      "to": "procedure.co-export.market-entry-assessment",
+      "source": "raci_matrix"
+    },
+    {
       "type": "follows",
       "from": "market-entry-strategy",
       "to": "foreign-regulation-monitoring",
@@ -962,6 +986,12 @@
       "from": "market-entry-strategy",
       "to": "phase4",
       "source": "skill_manifest"
+    },
+    {
+      "type": "accountable_for",
+      "from": "pm",
+      "to": "procedure.co-export.export-shipment-compliance",
+      "source": "raci_matrix"
     },
     {
       "type": "step_by_agent",

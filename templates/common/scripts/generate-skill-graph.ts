@@ -801,6 +801,85 @@ function deriveStagesFromYaml(
 }
 
 /**
+ * Derive RACI edges from raci.yaml (ADR-0083 P4)
+ * Creates accountable_for, consulted_on, and informed_of edges
+ */
+function deriveRACIFromYaml(
+  raciPath: string,
+  variant: string,
+  layer: GraphNode['layer'],
+  allNodes: Map<string, GraphNode>,
+  edges: GraphEdge[],
+): void {
+  if (!existsSync(raciPath)) return;
+
+  let data: any;
+  try {
+    data = yamlLoad(readFileSync(raciPath, 'utf-8'));
+  } catch {
+    // Malformed raci.yaml — skip; the validator owns its quality
+    return;
+  }
+  if (!data || typeof data !== 'object' || !Array.isArray(data.rows)) return;
+
+  const rows = data.rows as Array<{
+    activity?: string;
+    accountable?: string;
+    responsible?: string[];
+    consulted?: string[];
+    informed?: string[];
+  }>;
+
+  for (const row of rows) {
+    if (typeof row.activity !== 'string') continue;
+
+    // Ensure procedure node exists
+    const procId = row.activity;
+    if (!allNodes.has(procId)) {
+      allNodes.set(procId, { id: procId, type: 'procedure', layer });
+    }
+
+    // accountable_for edge: accountable agent → procedure (one per row)
+    if (typeof row.accountable === 'string') {
+      edges.push({
+        type: 'accountable_for',
+        from: row.accountable,
+        to: procId,
+        source: 'raci_matrix',
+      });
+    }
+
+    // consulted_on edges: each consulted agent → procedure
+    if (Array.isArray(row.consulted)) {
+      for (const agent of row.consulted) {
+        if (typeof agent === 'string') {
+          edges.push({
+            type: 'consulted_on',
+            from: agent,
+            to: procId,
+            source: 'raci_matrix',
+          });
+        }
+      }
+    }
+
+    // informed_of edges: each informed agent → procedure
+    if (Array.isArray(row.informed)) {
+      for (const agent of row.informed) {
+        if (typeof agent === 'string') {
+          edges.push({
+            type: 'informed_of',
+            from: agent,
+            to: procId,
+            source: 'raci_matrix',
+          });
+        }
+      }
+    }
+  }
+}
+
+/**
  * Build the skill graph from all sources
  * Exported for use by verify-skill-graph.ts
  */
@@ -1108,6 +1187,19 @@ export function buildGraph(): SkillGraph {
     }
   }
 
+  // Source 5.9: RACI matrix edges derived from governance/raci.yaml (ADR-0083 P4)
+  if (existsSync(templatesDir)) {
+    for (const variantName of listVariantDirs(templatesDir)) {
+      deriveRACIFromYaml(
+        join(templatesDir, variantName, 'governance', 'raci.yaml'),
+        variantName,
+        `variant:${variantName}`,
+        allNodes,
+        edges,
+      );
+    }
+  }
+
   // Source 5: Overrides (L0) — loaded and applied via shared helper
   const { overrides } = loadOverridesFile(join(ROOT, 'docs'));
   applyOverrides(overrides, allNodes, edges);
@@ -1384,6 +1476,9 @@ export function buildScopeGraph(scope: string): SkillGraph {
 
   // Source 5.8 (scope): stages owned by this scope (ADR-0083)
   deriveStagesFromYaml(join(scopeDir, 'process', 'stages.yaml'), scope, layer, allNodes, edges);
+
+  // Source 5.9 (scope): RACI matrix edges owned by this scope (ADR-0083 P4)
+  deriveRACIFromYaml(join(scopeDir, 'governance', 'raci.yaml'), scope, layer, allNodes, edges);
 
   // Source 5 (scope): overrides from templates/<scope>/docs/skill-graph.overrides.json
   // (reledgev addendum — previously L0-only; each scope now owns its experimental layer)

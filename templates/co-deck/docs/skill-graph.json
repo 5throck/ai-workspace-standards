@@ -538,6 +538,12 @@
       }
     },
     {
+      "type": "accountable_for",
+      "from": "pdf-export",
+      "to": "procedure.co-deck.deck-publish-and-version",
+      "source": "raci_matrix"
+    },
+    {
       "type": "composes_with",
       "from": "pdf-export",
       "to": "research",
@@ -1366,6 +1372,66 @@
       "from": "version",
       "to": "phase6",
       "source": "skill_manifest"
+    },
+    {
+      "type": "accountable_for",
+      "from": "version",
+      "to": "procedure.co-deck.deck-build-and-export",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "version",
+      "to": "procedure.co-deck.lecture-deck-production",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "version",
+      "to": "procedure.co-deck.source-research",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "version",
+      "to": "procedure.co-deck.storyline-development",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "version",
+      "to": "procedure.co-deck.version-export-control",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "version",
+      "to": "procedure.co-deck.version-kickoff-control",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "version",
+      "to": "procedure.co-deck.version-production-control",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "version",
+      "to": "procedure.co-deck.version-research-control",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "version",
+      "to": "procedure.co-deck.version-retrospective-control",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "version",
+      "to": "procedure.co-deck.version-storyline-control",
+      "source": "raci_matrix"
     },
     {
       "type": "references",
