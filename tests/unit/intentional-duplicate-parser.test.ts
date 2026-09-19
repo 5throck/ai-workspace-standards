@@ -10,10 +10,12 @@
  * 3. An unterminated comment returns null (complete-comment anchor).
  * 4. CRLF line endings parse identically.
  * 5. Scanner parity: scanIntentionalDuplicateMarkers() over the repo's
- *    templates/ tree finds exactly the 2 known real markers (pins the
- *    no-behavior-change refactor of the scanner onto the parser).
+ *    templates/ tree finds exactly the 2 known real markers — pinned by
+ *    IDENTITY (file + section + source/hash fidelity), never by absolute
+ *    line: positions are incidental and shifted twice on 2026-09-18 alone
+ *    (ADR-0081 / T-20260918-003, after PR #955 broke CI on a docs-only PR).
  *
- * @version 1.1.0
+ * @version 1.2.0
  */
 import { describe, test, expect } from 'bun:test';
 import { join } from 'node:path';
@@ -107,32 +109,39 @@ describe('parseIntentionalDuplicateLine', () => {
 });
 
 describe('scanIntentionalDuplicateMarkers — parser parity (T-20260912-029 refactor)', () => {
-  test('finds exactly the 2 real markers at the known file:line locations', () => {
+  test('finds exactly the 2 real markers, one per known file, by identity — not by position (ADR-0081 / T-20260918-003)', () => {
     const markers = scanIntentionalDuplicateMarkers();
     const normalized = markers
-      .map((m) => ({ file: m.file.replaceAll('\\', '/'), line: m.line, section: m.section }))
-      .sort((a, b) => (a.file + ':' + a.line).localeCompare(b.file + ':' + b.line));
+      .map((m) => ({ file: m.file.replaceAll('\\', '/'), section: m.section }))
+      .sort((a, b) => a.file.localeCompare(b.file));
 
+    // Identity pin: exactly one marker per known file, §3 both. Absolute line
+    // numbers are deliberately NOT asserted — a marker's position is
+    // incidental, and pinning it turned any upstream documentation insertion
+    // into a cross-OS CI failure (PR #955: a 10-line COMMON-CONTEXT addition
+    // shifted the marker 421 → 429 and broke the suite). Deleting a marker or
+    // mutating its section still fails below.
+    expect(markers).toHaveLength(2);
     expect(normalized).toEqual([
-      {
-        file: expect.stringContaining('templates/common/docs/context.md'),
-        line: 429,
-        section: '3',
-      },
-      {
-        file: expect.stringContaining('templates/common/docs/variant.context.template.md'),
-        line: 151,
-        section: '3',
-      },
+      { file: expect.stringContaining('templates/common/docs/context.md'), section: '3' },
+      { file: expect.stringContaining('templates/common/docs/variant.context.template.md'), section: '3' },
     ]);
+
+    // Position sanity only: each marker sits inside the document body, after
+    // its file's first '## ' heading (catches degenerate scans at line 1).
+    const { readFileSync } = require('node:fs') as typeof import('node:fs');
+    for (const m of markers) {
+      const firstHeading = readFileSync(m.file, 'utf-8')
+        .split('\n')
+        .findIndex((l) => l.startsWith('## ')) + 1;
+      expect(m.line).toBeGreaterThan(firstHeading);
+    }
 
     // Field fidelity through the refactor: source/hash still parsed identically.
     // Hash re-seeded 18ad2842 → 8d70ef81 when the ADR-0078 routing line was
     // added to the duplicated §3 source (instruction-policy wiring, 2026-09-17),
     // and 8d70ef81 → a1be51db when §3.3 gained the conflicted-PR recovery note
     // (ADR-0081 delivery-pipeline hardening, 2026-09-18).
-    // Line re-pinned 421 → 429 when the COMMON-CONTEXT block gained the
-    // "PM Team-Management Authority (ADR-0080)" section (2026-09-18).
     for (const m of markers) {
         expect(m.source).toBe('docs/constitution/03-pr-workflow.md');
         expect(m.hash).toBe('a1be51db');
