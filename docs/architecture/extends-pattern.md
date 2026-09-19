@@ -1,9 +1,19 @@
 # Extends Pattern Migration Guide
 
-**Status**: Active  
-**Version**: 1.0.0  
-**Last Updated**: 2026-06-07  
+**Status**: Completed (historical)  
+**Version**: 1.1.0  
+**Last Updated**: 2026-09-18  
 **Related ADR**: [ADR-0039](../adr/0039-l0-l1-l2-hierarchy-and-extends.md)
+
+> **✅ MIGRATION COMPLETE (2026-09-18)** — this guide is preserved as history.
+> The marker→extends migration landed through [ADR-0047](../adr/0047-variant-pm-extends-redundant-body-cleanup.md)
+> and [ADR-0048](../adr/0048-variant-pm-extends-redundant-body-cleanup.md)
+> (agentic cleanup wave): every variant `pm.md` is now a frontmatter-only
+> extends stub, enforced by `validate-pm-extends.ts` and the
+> managed-block-parity checks. Details below reflect the plan at authoring
+> time — target paths and file lists evolved during landing (e.g. variant
+> extends resolve via `../../common/agents/pm.md`, and the variant set has
+> since changed), so treat specifics as point-in-time.
 
 ## Executive Summary
 
