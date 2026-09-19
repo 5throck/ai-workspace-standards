@@ -79,7 +79,7 @@ outputs:
 relations:
   - type: enables
     target: procedure.co-abap.solution-blueprint
-quality_gates:
+
   - "All impacted modules have impact notes before the solution blueprint."
 evidence: []
 failure_modes:

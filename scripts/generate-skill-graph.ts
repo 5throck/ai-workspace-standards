@@ -1,7 +1,11 @@
 #!/usr/bin/env bun
 /**
  * Skill Relationship Graph Generator
- * @version 1.11.0
+ * @version 1.11.1 (P5 defect fix, 2026-09-19): decides_on edge target now
+ * uses the canonical `output_type.<name>` node ID prefix instead of the bare
+ * gate.inputs[] string, fixing ghost/unknown-target edges caught by
+ * dev-sync's per-scope graph verification (same bug class as the P4
+ * procedure-ID mismatch).
  *
  * v1.11.0 (2026-09-19): add DEG (Domain Execution Graph) support per ADR-0083 —
  * emit stage nodes from process/stages.yaml, stage_follows edges between ordered
@@ -880,6 +884,70 @@ function deriveRACIFromYaml(
 }
 
 /**
+ * Derive decision gates from decisions/gates.yaml (ADR-0083 P5)
+ * Creates decision_gate nodes, gated_by edges (stage → gate), and decides_on edges (gate → output_type)
+ */
+function deriveDecisionGatesFromYaml(
+  gatesPath: string,
+  variant: string,
+  layer: GraphNode['layer'],
+  allNodes: Map<string, GraphNode>,
+  edges: GraphEdge[],
+): void {
+  if (!existsSync(gatesPath)) return;
+
+  let data: any;
+  try {
+    data = yamlLoad(readFileSync(gatesPath, 'utf-8'));
+  } catch {
+    // Malformed gates.yaml — skip; the validator owns its quality
+    return;
+  }
+  if (!data || typeof data !== 'object' || !Array.isArray(data.gates)) return;
+
+  const gates = data.gates as Array<{
+    id?: string;
+    stage?: string;
+    inputs?: string[];
+  }>;
+
+  for (const gate of gates) {
+    if (typeof gate.id !== 'string') continue;
+
+    // Create decision_gate node
+    const gateId = `gate.${variant}.${gate.id}`;
+    if (!allNodes.has(gateId)) {
+      allNodes.set(gateId, { id: gateId, type: 'decision_gate', layer });
+    }
+
+    // gated_by edge: stage → decision_gate
+    if (typeof gate.stage === 'string') {
+      const stageId = `stage.${variant}.${gate.stage}`;
+      edges.push({
+        type: 'gated_by',
+        from: stageId,
+        to: gateId,
+        source: 'decision_model',
+      });
+    }
+
+    // decides_on edges: decision_gate → output_type (for each input)
+    if (Array.isArray(gate.inputs)) {
+      for (const outputType of gate.inputs) {
+        if (typeof outputType === 'string') {
+          edges.push({
+            type: 'decides_on',
+            from: gateId,
+            to: `output_type.${outputType}`,
+            source: 'decision_model',
+          });
+        }
+      }
+    }
+  }
+}
+
+/**
  * Build the skill graph from all sources
  * Exported for use by verify-skill-graph.ts
  */
@@ -1200,6 +1268,19 @@ export function buildGraph(): SkillGraph {
     }
   }
 
+  // Source 5.10: Decision gates derived from decisions/gates.yaml (ADR-0083 P5)
+  if (existsSync(templatesDir)) {
+    for (const variantName of listVariantDirs(templatesDir)) {
+      deriveDecisionGatesFromYaml(
+        join(templatesDir, variantName, 'decisions', 'gates.yaml'),
+        variantName,
+        `variant:${variantName}`,
+        allNodes,
+        edges,
+      );
+    }
+  }
+
   // Source 5: Overrides (L0) — loaded and applied via shared helper
   const { overrides } = loadOverridesFile(join(ROOT, 'docs'));
   applyOverrides(overrides, allNodes, edges);
@@ -1479,6 +1560,9 @@ export function buildScopeGraph(scope: string): SkillGraph {
 
   // Source 5.9 (scope): RACI matrix edges owned by this scope (ADR-0083 P4)
   deriveRACIFromYaml(join(scopeDir, 'governance', 'raci.yaml'), scope, layer, allNodes, edges);
+
+  // Source 5.10 (scope): decision gates owned by this scope (ADR-0083 P5)
+  deriveDecisionGatesFromYaml(join(scopeDir, 'decisions', 'gates.yaml'), scope, layer, allNodes, edges);
 
   // Source 5 (scope): overrides from templates/<scope>/docs/skill-graph.overrides.json
   // (reledgev addendum — previously L0-only; each scope now owns its experimental layer)

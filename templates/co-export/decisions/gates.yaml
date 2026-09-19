@@ -1,0 +1,27 @@
+schema_version: "1.0"
+variant: co-export
+gates:
+  - id: DG-EXPORT-01
+    title: "Document set passes checklist with zero missing mandatory fi"
+    stage: S3
+    decider_agent: pm
+    inputs:
+      - document_set
+    criteria:
+      - "Document set passes checklist with zero missing mandatory fields."
+    outcomes:
+      - proceed
+      - rework
+    record_kind: DEC
+  - id: DG-EXPORT-02
+    title: "Landed cost model reconciles with the commercial quote."
+    stage: S4
+    decider_agent: logistics-coordinator
+    inputs:
+      - drawback_positioning
+    criteria:
+      - "Landed cost model reconciles with the commercial quote."
+    outcomes:
+      - proceed
+      - rework
+    record_kind: DEC

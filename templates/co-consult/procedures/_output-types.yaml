@@ -1,31 +1,130 @@
-schema_version: "1.0"
+schema_version: '1.1'
 variant: co-consult
 output_types:
   diagnosis_findings:
-    description: "Registered procedure output type"
+    description: >-
+      Diagnosis findings - the final output of the Current State Diagnosis procedure
+      (co-consult-current-state-diagnosis): Establish a fact-based picture of the client
+      organization: market position, expert judgment, and change readiness.
+    owner_agent: strategy-analyst
+    format: markdown
+    evidence_model: null
+    retention: engagement
   quantitative_baseline:
-    description: "Registered procedure output type"
+    description: >-
+      Quantitative baseline - an intermediate artifact from step 2 of the Diagnosis to
+      Recommendation procedure (co-consult-diagnosis-to-recommendation), produced by data-analyst:
+      Build the quantitative baseline and scenario models that recommendations must reconcile
+      against.
+    owner_agent: data-analyst
+    format: json
+    evidence_model: null
+    retention: engagement
   recommendation_set:
-    description: "Registered procedure output type"
+    description: >-
+      Recommendation set - the final output of the Diagnosis to Recommendation procedure
+      (co-consult-diagnosis-to-recommendation): Move from company and market diagnosis to a
+      MECE-structured recommendation set validated by evidence and stakeholder review.
+    owner_agent: strategy-analyst
+    format: markdown
+    evidence_model: null
+    retention: engagement
   readiness_baseline:
-    description: "Registered procedure output type"
+    description: >-
+      Readiness baseline - an intermediate artifact from step 3 of the Current State Diagnosis
+      procedure (co-consult-current-state-diagnosis), produced by change-management-partner: Assess
+      organizational readiness for change so recommendations are implementable, not just correct.
+    owner_agent: change-management-partner
+    format: json
+    evidence_model: null
+    retention: engagement
   solution_options:
-    description: "Registered procedure output type"
+    description: >-
+      Solution options - the final output of the Solution Design procedure
+      (co-consult-solution-design): Convert the diagnosis into a solution architecture with expert
+      review and change impact assessment.
+    owner_agent: strategy-analyst
+    format: markdown
+    evidence_model: null
+    retention: engagement
   feasibility_notes:
-    description: "Registered procedure output type"
+    description: >-
+      Feasibility notes - an intermediate artifact from step 2 of the Solution Design procedure
+      (co-consult-solution-design), produced by sme: Stress-test each option for feasibility in the
+      client context.
+    owner_agent: sme
+    format: markdown
+    evidence_model: null
+    retention: engagement
   change_impact_map:
-    description: "Registered procedure output type"
+    description: >-
+      Change impact map - an intermediate artifact from step 3 of the Solution Design procedure
+      (co-consult-solution-design), produced by change-management-partner: Map the organizational
+      impact of each option to inform selection.
+    owner_agent: change-management-partner
+    format: markdown
+    evidence_model: null
+    retention: engagement
   implementation_blueprint:
-    description: "Registered procedure output type"
+    description: >-
+      Implementation blueprint - the final output of the Solution Delivery procedure
+      (co-consult-solution-delivery): Deliver the selected solution: workstream execution,
+      supporting analysis, and stakeholder communication.
+    owner_agent: delivery-manager
+    format: markdown
+    evidence_model: null
+    retention: engagement
   supporting_analysis:
-    description: "Registered procedure output type"
+    description: >-
+      Supporting analysis - an intermediate artifact from step 2 of the Solution Delivery procedure
+      (co-consult-solution-delivery), produced by data-analyst: Produce the quantitative analyses
+      that back the implementation.
+    owner_agent: data-analyst
+    format: markdown
+    evidence_model: null
+    retention: engagement
   communication_plan:
-    description: "Registered procedure output type"
+    description: >-
+      Communication plan - an intermediate artifact from step 3 of the Solution Delivery procedure
+      (co-consult-solution-delivery), produced by communications-lead: Plan and run stakeholder
+      communication for the delivery.
+    owner_agent: communications-lead
+    format: markdown
+    evidence_model: null
+    retention: engagement
   closeout_record:
-    description: "Registered procedure output type"
+    description: >-
+      Closeout record - the final output of the Engagement Closeout procedure
+      (co-consult-engagement-closeout): Close the engagement: final deliverable integration,
+      technology handover, and workstream wrap-up.
+    owner_agent: delivery-manager
+    format: json
+    evidence_model: null
+    retention: engagement
   handover_notes:
-    description: "Registered procedure output type"
+    description: >-
+      Handover notes - an intermediate artifact from step 2 of the Engagement Closeout procedure
+      (co-consult-engagement-closeout), produced by technology-specialist: Complete the technology
+      handover notes for client teams.
+    owner_agent: technology-specialist
+    format: markdown
+    evidence_model: null
+    retention: engagement
   delivery_review_notes:
-    description: "Registered procedure output type"
+    description: >-
+      Delivery review notes - an intermediate artifact from step 4 of the Solution Delivery
+      procedure (co-consult-solution-delivery), produced by sme: Provide subject-matter review of
+      delivered artifacts during execution.
+    owner_agent: sme
+    format: markdown
+    evidence_model: null
+    retention: engagement
   closeout_signoff:
-    description: "Registered procedure output type"
+    description: >-
+      Closeout signoff - an intermediate artifact from step 3 of the Engagement Closeout procedure
+      (co-consult-engagement-closeout), produced by delivery-manager: Give the final
+      delivery-manager sign-off on the closeout record.
+    owner_agent: delivery-manager
+    format: markdown
+    evidence_model: null
+    retention: engagement

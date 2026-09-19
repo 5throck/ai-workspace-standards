@@ -44,8 +44,10 @@ outputs:
 relations:
   - type: follows
     target: procedure.co-design.design-definition
-quality_gates:
+
   - "Token usage lint passes and design-lead reviews the full set."
+decision_points:
+  - DG-DESIGN-02
 evidence: []
 failure_modes:
   - "Accessibility constraints violated - halt and consult accessibility-audit before continuing."

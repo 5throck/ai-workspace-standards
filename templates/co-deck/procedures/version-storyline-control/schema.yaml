@@ -27,7 +27,7 @@ relations:
     target: procedure.co-deck.storyline-development
   - type: enables
     target: procedure.co-deck.lecture-deck-production
-quality_gates:
+
   - "Production starts from a named and approved storyline revision."
 evidence: []
 failure_modes:

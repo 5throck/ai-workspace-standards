@@ -83,7 +83,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `generate-l3-readme.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
 | `generate-scripts-readme.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
 | `generate-raci.ts` | L0 | 1.0.0 | active | RACI matrix generator per ADR-0083 P4; derives A/R from procedures and stages, accepts explicit C/I from schema | —| L0+L1 | —|
-| `generate-skill-graph.ts` | L0 | 1.11.0 | active | DEG v1 support per ADR-0083 — stage nodes and edges from process/stages.yaml | —| L0+L1 | —|
+| `generate-skill-graph.ts` | L0 | 1.11.1 | active | DEG v1 support per ADR-0083 — stage nodes and edges from process/stages.yaml | —| L0+L1 | —|
 | `generate-version-manifest.ts` | L0 | 1.7.0 | active | —| —| L0+L1 | —|
 | `handbook/apply-handbook-theme.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `handbook/build-search-index.ts` | L0 | 1.0.0 | active | — | — | common | — |
@@ -201,6 +201,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `lint-instructions.ts` | L0 | 1.0.0 | active | `--dir`, `--strict` | —| L0+L1 | —|
 | `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `md-to-ooxml.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
+| `migrate-quality-gates.ts` | L0 | 1.1.0 | active | Convert quality_gates prose entries to decision gates; automate classification (GATE vs INVARIANT vs MANUAL), YAML output, procedure schema updates, and _output-types.yaml enrichment (ADR-0083 P5); decider_agent derived from stage owner_agent, not procedure owner_agent | —| L0+L1 | —|
 | `new-project.ts` | L0 | 1.21.0 | active | —| —| L0 | —|
 | `remove-project.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `resolve-variants.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|

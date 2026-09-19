@@ -26,8 +26,10 @@ outputs:
 relations:
   - type: follows
     target: procedure.co-deck.source-research
-quality_gates:
+
   - "Narrative arc review passed - each slide advances exactly one idea."
+decision_points:
+  - DG-DECK-04
 evidence: []
 failure_modes:
   - "Research too thin for the target depth - return to source-research rather than padding the storyline."

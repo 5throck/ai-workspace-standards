@@ -64,7 +64,7 @@ relations:
     target: procedure.co-price.engine-implementation
   - type: enables
     target: procedure.co-price.engagement-review
-quality_gates:
+
   - "All assurance dimensions signed off before release."
 evidence: []
 failure_modes:

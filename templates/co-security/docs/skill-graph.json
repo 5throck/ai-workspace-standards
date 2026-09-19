@@ -8,6 +8,11 @@
       "layer": "variant:co-security"
     },
     {
+      "id": "gate.co-security.DG-SECURITY-01",
+      "type": "decision_gate",
+      "layer": "variant:co-security"
+    },
+    {
       "id": "output_type.attack_hypotheses",
       "type": "output_type",
       "layer": "variant:co-security"
@@ -291,6 +296,12 @@
       "from": "finding-reconciliation",
       "to": "verify-authorization",
       "source": "prose"
+    },
+    {
+      "type": "decides_on",
+      "from": "gate.co-security.DG-SECURITY-01",
+      "to": "output_type.sarif_export",
+      "source": "decision_model"
     },
     {
       "type": "references",
@@ -830,6 +841,12 @@
       "from": "stage.co-security.S1",
       "to": "stage.co-security.S2",
       "source": "process_schema"
+    },
+    {
+      "type": "gated_by",
+      "from": "stage.co-security.S2",
+      "to": "gate.co-security.DG-SECURITY-01",
+      "source": "decision_model"
     },
     {
       "type": "follows",

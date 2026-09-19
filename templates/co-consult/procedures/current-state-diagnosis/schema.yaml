@@ -38,7 +38,7 @@ outputs:
 relations:
   - type: composes_with
     target: procedure.co-consult.diagnosis-to-recommendation
-quality_gates:
+
   - "Diagnosis findings cite verifiable sources and are reviewed by strategy-analyst."
 evidence: []
 failure_modes:

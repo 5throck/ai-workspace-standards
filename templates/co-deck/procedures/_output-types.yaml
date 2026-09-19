@@ -1,19 +1,75 @@
-schema_version: "1.0"
+schema_version: '1.1'
 variant: co-deck
 output_types:
   research_pack:
-    description: "Registered procedure output type"
+    description: >-
+      Research pack - the final output of the Deck Source Research procedure
+      (co-deck-source-research): Collect and verify the lecture source material that every later
+      deck artifact depends on.
+    owner_agent: research
+    format: markdown
+    evidence_model: null
+    retention: engagement
   storyline_outline:
-    description: "Registered procedure output type"
+    description: >-
+      Storyline outline - the final output of the Storyline Development procedure
+      (co-deck-storyline-development): Shape the verified research into a per-slide narrative before
+      any visual design starts.
+    owner_agent: storyline
+    format: markdown
+    evidence_model: null
+    retention: engagement
   design_spec:
-    description: "Registered procedure output type"
+    description: >-
+      Design spec - an intermediate artifact from step 3 of the Lecture Deck Production procedure
+      (co-deck-lecture-deck-production), produced by design: Lock visual design style and produce
+      the design spec for the build.
+    owner_agent: design
+    format: yaml
+    evidence_model: null
+    retention: engagement
   html_deck:
-    description: "Registered procedure output type"
+    description: >-
+      Html deck - an intermediate artifact from step 1 of the Deck Build and Export procedure
+      (co-deck-deck-build-and-export), produced by html-build: Build the deck as HTML slides from
+      the design spec and outline.
+    owner_agent: html-build
+    format: pptx
+    evidence_model: null
+    retention: engagement
   pdf_deck:
-    description: "Registered procedure output type"
+    description: >-
+      Pdf deck - the final output of the Deck Build and Export procedure
+      (co-deck-deck-build-and-export): Build the approved design into HTML slides, measure
+      readability, and export the deliverable PDF.
+    owner_agent: html-build
+    format: pptx
+    evidence_model: null
+    retention: engagement
   layout_report:
-    description: "Registered procedure output type"
+    description: >-
+      Layout report - an intermediate artifact from step 2 of the Deck Build and Export procedure
+      (co-deck-deck-build-and-export), produced by measure: Run the layout gate and readability
+      measure on every slide.
+    owner_agent: measure
+    format: markdown
+    evidence_model: null
+    retention: engagement
   publish_package:
-    description: "Registered procedure output type"
+    description: >-
+      Publish package - the final output of the Deck Publish and Versioning procedure
+      (co-deck-deck-publish-and-version): Publish the exported deck for presentation and register
+      its version so revisions stay traceable.
+    owner_agent: pdf-export
+    format: markdown
+    evidence_model: null
+    retention: engagement
   version_record:
-    description: "Registered procedure output type"
+    description: >-
+      Version record - the final output of the Version Export Control procedure
+      (co-deck-version-export-control): Bind generated HTML/PDF artifacts to the source revision
+      that produced them.
+    owner_agent: version
+    format: json
+    evidence_model: null
+    retention: engagement

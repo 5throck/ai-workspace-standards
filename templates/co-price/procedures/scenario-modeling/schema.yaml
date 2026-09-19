@@ -52,7 +52,7 @@ relations:
     target: procedure.co-price.pricing-analysis
   - type: enables
     target: procedure.co-price.engine-implementation
-quality_gates:
+
   - "Each scenario carries finance impact and security review before build."
 evidence: []
 failure_modes:

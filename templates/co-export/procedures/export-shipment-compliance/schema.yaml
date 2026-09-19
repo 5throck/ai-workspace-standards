@@ -43,9 +43,8 @@ steps:
 outputs:
   - type: document_set
 relations: []
-quality_gates:
-  - "Export control screening cleared for all destination jurisdictions."
-  - "Document set passes checklist with zero missing mandatory fields."
+decision_points:
+  - DG-EXPORT-01
 evidence:
   - "docs/tariff-dataset-schema.md"
 failure_modes:

@@ -76,6 +76,16 @@
       ]
     },
     {
+      "id": "gate.co-price.DG-PRICE-01",
+      "type": "decision_gate",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "gate.co-price.DG-PRICE-02",
+      "type": "decision_gate",
+      "layer": "variant:co-price"
+    },
+    {
       "id": "harness-verification",
       "type": "skill",
       "layer": "variant:co-price"
@@ -776,6 +786,18 @@
         "field": "relates_to",
         "index": 0
       }
+    },
+    {
+      "type": "decides_on",
+      "from": "gate.co-price.DG-PRICE-01",
+      "to": "output_type.engine_build",
+      "source": "decision_model"
+    },
+    {
+      "type": "decides_on",
+      "from": "gate.co-price.DG-PRICE-02",
+      "to": "output_type.price_recommendation",
+      "source": "decision_model"
     },
     {
       "type": "follows",
@@ -1566,6 +1588,18 @@
         "field": "relates_to",
         "index": 2
       }
+    },
+    {
+      "type": "gated_by",
+      "from": "stage.co-price.S1",
+      "to": "gate.co-price.DG-PRICE-01",
+      "source": "decision_model"
+    },
+    {
+      "type": "gated_by",
+      "from": "stage.co-price.S1",
+      "to": "gate.co-price.DG-PRICE-02",
+      "source": "decision_model"
     },
     {
       "type": "stage_follows",

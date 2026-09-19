@@ -27,7 +27,7 @@ relations:
     target: procedure.co-deck.lecture-deck-production
   - type: enables
     target: procedure.co-deck.deck-build-and-export
-quality_gates:
+
   - "Build/export uses a named production revision."
 evidence: []
 failure_modes:

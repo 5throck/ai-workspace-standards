@@ -25,6 +25,31 @@
       "layer": "L0"
     },
     {
+      "id": "gate.co-deck.DG-DECK-01",
+      "type": "decision_gate",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "gate.co-deck.DG-DECK-02",
+      "type": "decision_gate",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "gate.co-deck.DG-DECK-03",
+      "type": "decision_gate",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "gate.co-deck.DG-DECK-04",
+      "type": "decision_gate",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "gate.co-deck.DG-DECK-05",
+      "type": "decision_gate",
+      "layer": "variant:co-deck"
+    },
+    {
       "id": "handbook",
       "type": "skill",
       "layer": "common"
@@ -368,6 +393,36 @@
         "file": "templates/co-deck/skills/design/SKILL.md",
         "field": "prerequisites"
       }
+    },
+    {
+      "type": "decides_on",
+      "from": "gate.co-deck.DG-DECK-01",
+      "to": "output_type.pdf_deck",
+      "source": "decision_model"
+    },
+    {
+      "type": "decides_on",
+      "from": "gate.co-deck.DG-DECK-02",
+      "to": "output_type.pdf_deck",
+      "source": "decision_model"
+    },
+    {
+      "type": "decides_on",
+      "from": "gate.co-deck.DG-DECK-03",
+      "to": "output_type.pdf_deck",
+      "source": "decision_model"
+    },
+    {
+      "type": "decides_on",
+      "from": "gate.co-deck.DG-DECK-04",
+      "to": "output_type.storyline_outline",
+      "source": "decision_model"
+    },
+    {
+      "type": "decides_on",
+      "from": "gate.co-deck.DG-DECK-05",
+      "to": "output_type.version_record",
+      "source": "decision_model"
     },
     {
       "type": "used_by",
@@ -1177,6 +1232,36 @@
       "from": "stage.co-deck.S1",
       "to": "stage.co-deck.S2",
       "source": "process_schema"
+    },
+    {
+      "type": "gated_by",
+      "from": "stage.co-deck.S2",
+      "to": "gate.co-deck.DG-DECK-01",
+      "source": "decision_model"
+    },
+    {
+      "type": "gated_by",
+      "from": "stage.co-deck.S2",
+      "to": "gate.co-deck.DG-DECK-02",
+      "source": "decision_model"
+    },
+    {
+      "type": "gated_by",
+      "from": "stage.co-deck.S2",
+      "to": "gate.co-deck.DG-DECK-03",
+      "source": "decision_model"
+    },
+    {
+      "type": "gated_by",
+      "from": "stage.co-deck.S2",
+      "to": "gate.co-deck.DG-DECK-04",
+      "source": "decision_model"
+    },
+    {
+      "type": "gated_by",
+      "from": "stage.co-deck.S2",
+      "to": "gate.co-deck.DG-DECK-05",
+      "source": "decision_model"
     },
     {
       "type": "stage_follows",

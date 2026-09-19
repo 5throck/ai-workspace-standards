@@ -33,8 +33,10 @@ outputs:
 relations:
   - type: follows
     target: procedure.co-design.ux-discovery
-quality_gates:
+
   - "Design direction approved at the phase 2 gate before implementation."
+decision_points:
+  - DG-DESIGN-01
 evidence: []
 failure_modes:
   - "Direction conflicts with research findings - resolve with ux-researcher before proceeding."

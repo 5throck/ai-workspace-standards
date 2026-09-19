@@ -24,7 +24,7 @@ outputs:
 relations:
   - type: composes_with
     target: procedure.co-design.ux-discovery
-quality_gates:
+
   - "Narrative brief reviewed by design-lead before design definition."
 evidence: []
 failure_modes:

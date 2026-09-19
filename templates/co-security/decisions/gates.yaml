@@ -1,0 +1,15 @@
+schema_version: "1.0"
+variant: co-security
+gates:
+  - id: DG-SECURITY-01
+    title: "Report findings match the reconciled finding set exactly."
+    stage: S2
+    decider_agent: report-writer
+    inputs:
+      - sarif_export
+    criteria:
+      - "Report findings match the reconciled finding set exactly."
+    outcomes:
+      - proceed
+      - rework
+    record_kind: DEC

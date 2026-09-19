@@ -44,7 +44,7 @@ outputs:
 relations:
   - type: follows
     target: procedure.co-consult.solution-design
-quality_gates:
+
   - "Workstream reviews confirm blueprint and analyses are consistent."
 evidence: []
 failure_modes:

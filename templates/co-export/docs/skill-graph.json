@@ -43,6 +43,16 @@
       "layer": "variant:co-export"
     },
     {
+      "id": "gate.co-export.DG-EXPORT-01",
+      "type": "decision_gate",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "gate.co-export.DG-EXPORT-02",
+      "type": "decision_gate",
+      "layer": "variant:co-export"
+    },
+    {
       "id": "halal-certification-specialist",
       "type": "agent",
       "layer": "variant:co-export"
@@ -569,6 +579,18 @@
         "field": "relates_to",
         "index": 0
       }
+    },
+    {
+      "type": "decides_on",
+      "from": "gate.co-export.DG-EXPORT-01",
+      "to": "output_type.document_set",
+      "source": "decision_model"
+    },
+    {
+      "type": "decides_on",
+      "from": "gate.co-export.DG-EXPORT-02",
+      "to": "output_type.drawback_positioning",
+      "source": "decision_model"
     },
     {
       "type": "follows",
@@ -1369,10 +1391,22 @@
       "source": "process_schema"
     },
     {
+      "type": "gated_by",
+      "from": "stage.co-export.S3",
+      "to": "gate.co-export.DG-EXPORT-01",
+      "source": "decision_model"
+    },
+    {
       "type": "stage_follows",
       "from": "stage.co-export.S3",
       "to": "stage.co-export.S4",
       "source": "process_schema"
+    },
+    {
+      "type": "gated_by",
+      "from": "stage.co-export.S4",
+      "to": "gate.co-export.DG-EXPORT-02",
+      "source": "decision_model"
     },
     {
       "type": "stage_follows",

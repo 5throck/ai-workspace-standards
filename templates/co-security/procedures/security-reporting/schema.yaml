@@ -33,7 +33,7 @@ outputs:
 relations:
   - type: follows
     target: procedure.co-security.remediation-support
-quality_gates:
+
   - "Report findings match the reconciled finding set exactly."
 evidence: []
 failure_modes:

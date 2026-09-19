@@ -37,8 +37,10 @@ outputs:
 relations:
   - type: follows
     target: procedure.co-game.game-architecture-design
-quality_gates:
+
   - "Assets pass integration checks in the target engine format."
+decision_points:
+  - DG-GAME-02
 evidence: []
 failure_modes:
   - "Assets exceed the performance budget - re-work assets instead of shipping frame drops."

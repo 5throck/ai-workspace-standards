@@ -37,7 +37,7 @@ outputs:
 relations:
   - type: follows
     target: procedure.co-game.gameplay-feature-loop
-quality_gates:
+
   - "No open P0/P1 defects at go/no-go."
 evidence: []
 failure_modes:

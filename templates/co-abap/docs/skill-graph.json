@@ -63,6 +63,11 @@
       "layer": "variant:co-abap"
     },
     {
+      "id": "gate.co-abap.DG-ABAP-01",
+      "type": "decision_gate",
+      "layer": "variant:co-abap"
+    },
+    {
       "id": "gui-scripter",
       "type": "agent",
       "layer": "variant:co-abap"
@@ -827,6 +832,12 @@
         "field": "relates_to",
         "index": 2
       }
+    },
+    {
+      "type": "decides_on",
+      "from": "gate.co-abap.DG-ABAP-01",
+      "to": "output_type.implementation_package",
+      "source": "decision_model"
     },
     {
       "type": "used_by",
@@ -1931,6 +1942,12 @@
       "from": "stage.co-abap.S1",
       "to": "stage.co-abap.S2",
       "source": "process_schema"
+    },
+    {
+      "type": "gated_by",
+      "from": "stage.co-abap.S2",
+      "to": "gate.co-abap.DG-ABAP-01",
+      "source": "decision_model"
     }
   ]
 }

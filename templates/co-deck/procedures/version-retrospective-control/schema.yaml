@@ -26,7 +26,7 @@ outputs:
 relations:
   - type: follows
     target: procedure.co-deck.deck-publish-and-version
-quality_gates:
+
   - "Post-release archive identifies the final package and any follow-up actions."
 evidence: []
 failure_modes:

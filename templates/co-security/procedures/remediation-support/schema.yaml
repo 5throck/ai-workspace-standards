@@ -31,7 +31,7 @@ outputs:
 relations:
   - type: follows
     target: procedure.co-security.threat-model-and-report
-quality_gates:
+
   - "Every remediated finding re-verified against the original evidence."
 evidence: []
 failure_modes:

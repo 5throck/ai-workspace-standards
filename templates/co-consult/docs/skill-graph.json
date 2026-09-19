@@ -76,6 +76,11 @@
       "layer": "variant:co-consult"
     },
     {
+      "id": "gate.co-consult.DG-CONSULT-01",
+      "type": "decision_gate",
+      "layer": "variant:co-consult"
+    },
+    {
       "id": "hwp-document-processing",
       "type": "skill",
       "layer": "variant:co-consult"
@@ -987,6 +992,12 @@
       "source": "skill_manifest"
     },
     {
+      "type": "decides_on",
+      "from": "gate.co-consult.DG-CONSULT-01",
+      "to": "output_type.recommendation_set",
+      "source": "decision_model"
+    },
+    {
       "type": "used_by",
       "from": "hwp-document-processing",
       "to": "communications-lead",
@@ -1768,6 +1779,12 @@
       "from": "stage.co-consult.S1",
       "to": "stage.co-consult.S2",
       "source": "process_schema"
+    },
+    {
+      "type": "gated_by",
+      "from": "stage.co-consult.S2",
+      "to": "gate.co-consult.DG-CONSULT-01",
+      "source": "decision_model"
     },
     {
       "type": "stage_follows",

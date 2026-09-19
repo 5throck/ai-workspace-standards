@@ -37,8 +37,6 @@ steps:
 outputs:
   - type: implementation_commit
 relations: []
-quality_gates:
-  - "All tests pass and no open P0/P1 defects remain in the feature."
 evidence:
   - "docs/scene-management.md"
 failure_modes:

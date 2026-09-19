@@ -31,8 +31,6 @@ outputs:
 relations:
   - type: follows
     target: procedure.co-hr.hr-solution-design
-quality_gates:
-  - "Every milestone has an owner, a date, and a verifying metric."
 evidence: []
 failure_modes:
   - "Adoption stalling - trigger the change roadmap instead of pushing the schedule."

@@ -40,8 +40,10 @@ outputs:
 relations:
   - type: follows
     target: procedure.co-security.security-reporting
-quality_gates:
+
   - "Every post-engagement hardening action has an owner or an explicit no-action rationale."
+decision_points:
+  - DG-SECURITY-01
 evidence: []
 failure_modes:
   - "New findings appear after final reporting; reopen finding reconciliation before archiving."

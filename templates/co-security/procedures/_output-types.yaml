@@ -1,29 +1,121 @@
-schema_version: "1.0"
+schema_version: '1.1'
 variant: co-security
 output_types:
   engagement_scope:
-    description: "Registered procedure output type"
+    description: >
+      Engagement scope document - consumed as an input by both the
+      engagement-planning and threat-model-and-report procedures but not
+      produced by any procedure in this variant; it originates externally
+      (signed statement of work / client scoping document).
+    owner_agent: external
+    format: markdown
+    evidence_model: null
+    retention: engagement
   threat_model:
-    description: "Registered procedure output type"
+    description: >-
+      Threat model - the final output of the Threat Model and Report procedure
+      (co-security-threat-model-and-report): Produce a STRIDE threat model for a target system and
+      consolidate findings into an authorized engagement report.
+    owner_agent: threat-modeler
+    format: yaml
+    evidence_model: null
+    retention: engagement
   validated_findings:
-    description: "Registered procedure output type"
+    description: >-
+      Validated findings - an intermediate artifact from step 1 of the Post-Engagement Hardening
+      procedure (co-security-post-engagement-hardening), produced by pentester: Confirm
+      post-engagement lessons do not change the validated finding set.
+    owner_agent: pentester
+    format: markdown
+    evidence_model: null
+    retention: engagement
   engagement_report:
-    description: "Registered procedure output type"
+    description: >-
+      Engagement report - the final output of the Post-Engagement Hardening procedure
+      (co-security-post-engagement-hardening): Convert final security engagement outputs into
+      retained lessons, hardening actions, and follow-up evidence.
+    owner_agent: report-writer
+    format: markdown
+    evidence_model: null
+    retention: engagement
   authorization_record:
-    description: "Registered procedure output type"
+    description: >-
+      Authorization record - the final output of the Engagement Planning procedure
+      (co-security-engagement-planning): Plan an authorized offensive engagement: scope, rules of
+      engagement, and threat landscape briefing.
+    owner_agent: red-team-lead
+    format: json
+    evidence_model: null
+    retention: engagement
   threat_landscape_brief:
-    description: "Registered procedure output type"
+    description: >-
+      Threat landscape brief - an intermediate artifact from step 2 of the Engagement Planning
+      procedure (co-security-engagement-planning), produced by threat-modeler: Brief the target
+      threat landscape to focus planning.
+    owner_agent: threat-modeler
+    format: markdown
+    evidence_model: null
+    retention: engagement
   attack_hypotheses:
-    description: "Registered procedure output type"
+    description: >-
+      Attack hypotheses - the final output of the Threat Analysis procedure
+      (co-security-threat-analysis): Deepen the threat model into attack hypotheses and prioritized
+      test objectives for the engagement.
+    owner_agent: threat-modeler
+    format: markdown
+    evidence_model: null
+    retention: engagement
   test_objectives:
-    description: "Registered procedure output type"
+    description: >-
+      Test objectives - an intermediate artifact from step 2 of the Threat Analysis procedure
+      (co-security-threat-analysis), produced by red-team-lead: Turn hypotheses into test objectives
+      and success criteria.
+    owner_agent: red-team-lead
+    format: markdown
+    evidence_model: null
+    retention: engagement
   exploitation_notes:
-    description: "Registered procedure output type"
+    description: >-
+      Exploitation notes - an intermediate artifact from step 2.5 of the Threat Model and Report
+      procedure (co-security-threat-model-and-report), produced by red-team-lead: Prioritize
+      exploitation paths that the validation steps must cover.
+    owner_agent: red-team-lead
+    format: markdown
+    evidence_model: null
+    retention: engagement
   remediation_plan:
-    description: "Registered procedure output type"
+    description: >-
+      Remediation plan - the final output of the Remediation Support procedure
+      (co-security-remediation-support): Support the client through patching and verification of
+      validated findings.
+    owner_agent: patch-engineer
+    format: markdown
+    evidence_model: null
+    retention: engagement
   sbom_update:
-    description: "Registered procedure output type"
+    description: >-
+      Sbom update - the final output of the Post-Engagement Hardening procedure
+      (co-security-post-engagement-hardening): Convert final security engagement outputs into
+      retained lessons, hardening actions, and follow-up evidence.
+    owner_agent: report-writer
+    format: markdown
+    evidence_model: null
+    retention: engagement
   sarif_export:
-    description: "Registered procedure output type"
+    description: >-
+      Sarif export - the final output of the Security Reporting procedure
+      (co-security-security-reporting): Produce the consolidated engagement report and
+      machine-readable exports for client systems.
+    owner_agent: report-writer
+    format: markdown
+    evidence_model: null
+    retention: engagement
   maturity_assessment:
-    description: "Registered procedure output type"
+    description: >-
+      Maturity assessment - an intermediate artifact from step 2 of the Security Reporting procedure
+      (co-security-security-reporting), produced by report-writer: Score the organization against
+      the SAMM maturity model for the report.
+    owner_agent: report-writer
+    format: markdown
+    evidence_model: null
+    retention: engagement

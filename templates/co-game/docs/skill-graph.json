@@ -48,6 +48,16 @@
       "layer": "variant:co-game"
     },
     {
+      "id": "gate.co-game.DG-GAME-01",
+      "type": "decision_gate",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "gate.co-game.DG-GAME-02",
+      "type": "decision_gate",
+      "layer": "variant:co-game"
+    },
+    {
       "id": "output_type.approved_implementation_plan",
       "type": "output_type",
       "layer": "variant:co-game"
@@ -455,6 +465,18 @@
       "from": "game-developer",
       "to": "procedure.co-game.gameplay-feature-loop",
       "source": "raci_matrix"
+    },
+    {
+      "type": "decides_on",
+      "from": "gate.co-game.DG-GAME-01",
+      "to": "output_type.approved_implementation_plan",
+      "source": "decision_model"
+    },
+    {
+      "type": "decides_on",
+      "from": "gate.co-game.DG-GAME-02",
+      "to": "output_type.sprite_asset_set",
+      "source": "decision_model"
     },
     {
       "type": "step_by_agent",
@@ -940,6 +962,18 @@
       "from": "stack-setup",
       "to": "procedure.co-game.game-security-retrospective",
       "source": "raci_matrix"
+    },
+    {
+      "type": "gated_by",
+      "from": "stage.co-game.S1",
+      "to": "gate.co-game.DG-GAME-01",
+      "source": "decision_model"
+    },
+    {
+      "type": "gated_by",
+      "from": "stage.co-game.S1",
+      "to": "gate.co-game.DG-GAME-02",
+      "source": "decision_model"
     },
     {
       "type": "stage_follows",
