@@ -1,5 +1,6 @@
 {
   "version": 1,
+  "graph_profile": "deg/v1",
   "nodes": [
     {
       "id": "competitive-intelligence",
@@ -359,6 +360,16 @@
     {
       "id": "sheet-model",
       "type": "skill",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "stage.co-price.S1",
+      "type": "stage",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "stage.co-price.S2",
+      "type": "stage",
       "layer": "variant:co-price"
     },
     {
@@ -1073,6 +1084,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-price.engagement-review",
+      "to": "stage.co-price.S2",
+      "source": "process_schema"
+    },
+    {
       "type": "step_by_agent",
       "from": "procedure.co-price.engine-implementation",
       "to": "core-engine-dev",
@@ -1137,6 +1154,12 @@
       "from": "procedure.co-price.engine-implementation",
       "to": "procedure.co-price.scenario-modeling",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-price.engine-implementation",
+      "to": "stage.co-price.S1",
+      "source": "process_schema"
     },
     {
       "type": "step_uses_skill",
@@ -1205,6 +1228,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-price.pricing-analysis",
+      "to": "stage.co-price.S1",
+      "source": "process_schema"
+    },
+    {
       "type": "step_uses_skill",
       "from": "procedure.co-price.pricing-analysis",
       "to": "van-westendorp-psm",
@@ -1235,6 +1264,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-price.pricing-security-bootstrap",
+      "to": "stage.co-price.S1",
+      "source": "process_schema"
+    },
+    {
       "type": "step_uses_skill",
       "from": "procedure.co-price.pricing-security-closeout",
       "to": "harness-verification",
@@ -1257,6 +1292,12 @@
       "from": "procedure.co-price.pricing-security-closeout",
       "to": "security-monitor",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-price.pricing-security-closeout",
+      "to": "stage.co-price.S2",
+      "source": "process_schema"
     },
     {
       "type": "step_by_agent",
@@ -1361,6 +1402,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-price.release-assurance",
+      "to": "stage.co-price.S1",
+      "source": "process_schema"
+    },
+    {
       "type": "step_by_agent",
       "from": "procedure.co-price.scenario-modeling",
       "to": "finance-strategy-lead",
@@ -1427,6 +1474,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-price.scenario-modeling",
+      "to": "stage.co-price.S1",
+      "source": "process_schema"
+    },
+    {
       "type": "step_uses_skill",
       "from": "procedure.co-price.scenario-modeling",
       "to": "ui-component-design",
@@ -1471,6 +1524,12 @@
         "field": "relates_to",
         "index": 2
       }
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-price.S1",
+      "to": "stage.co-price.S2",
+      "source": "process_schema"
     },
     {
       "type": "references",

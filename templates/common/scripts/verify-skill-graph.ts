@@ -38,35 +38,11 @@
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { buildGraph, buildScopeGraph, parseFrontmatter, parseRelatesTo } from './generate-skill-graph.ts';
+import { buildGraph, buildScopeGraph, parseFrontmatter, parseRelatesTo, SkillGraph, GraphNode, GraphEdge } from './generate-skill-graph.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const ROOT = resolve(__dirname, '..');
-
-interface GraphNode {
-  id: string;
-  // Mirrors GraphNode.type in generate-skill-graph.ts — scope/derived graphs carry
-  // decision/adr/procedure/output_type/term nodes too, so the narrow old union made
-  // compareGraphs(derived, committed) unassignable. 'term' = Korean vocabulary
-  // node from references/terms-ko.json (ADR-0072).
-  type: 'skill' | 'agent' | 'decision' | 'adr' | 'procedure' | 'output_type' | 'term';
-  layer: string;
-}
-
-interface GraphEdge {
-  type: string;
-  from: string;
-  to: string;
-  source: string;
-  reason?: string;
-}
-
-interface SkillGraph {
-  version: 1;
-  nodes: GraphNode[];
-  edges: GraphEdge[];
-}
 
 interface OverrideEdge {
   type: string;

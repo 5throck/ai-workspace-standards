@@ -1,5 +1,6 @@
 {
   "version": 1,
+  "graph_profile": "deg/v1",
   "nodes": [
     {
       "id": "finding-reconciliation",
@@ -149,6 +150,16 @@
     {
       "id": "spdx-sbom",
       "type": "skill",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "stage.co-security.S1",
+      "type": "stage",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "stage.co-security.S2",
+      "type": "stage",
       "layer": "variant:co-security"
     },
     {
@@ -312,6 +323,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-security.engagement-planning",
+      "to": "stage.co-security.S1",
+      "source": "process_schema"
+    },
+    {
       "type": "step_uses_skill",
       "from": "procedure.co-security.engagement-planning",
       "to": "stride-threat-matrix",
@@ -384,6 +401,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-security.post-engagement-hardening",
+      "to": "stage.co-security.S2",
+      "source": "process_schema"
+    },
+    {
       "type": "step_uses_skill",
       "from": "procedure.co-security.remediation-support",
       "to": "finding-reconciliation",
@@ -418,6 +441,12 @@
       "from": "procedure.co-security.remediation-support",
       "to": "spdx-sbom",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-security.remediation-support",
+      "to": "stage.co-security.S2",
+      "source": "process_schema"
     },
     {
       "type": "produces",
@@ -456,6 +485,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-security.security-reporting",
+      "to": "stage.co-security.S2",
+      "source": "process_schema"
+    },
+    {
       "type": "step_uses_skill",
       "from": "procedure.co-security.threat-analysis",
       "to": "finding-reconciliation",
@@ -478,6 +513,12 @@
       "from": "procedure.co-security.threat-analysis",
       "to": "red-team-lead",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-security.threat-analysis",
+      "to": "stage.co-security.S1",
+      "source": "process_schema"
     },
     {
       "type": "step_uses_skill",
@@ -532,6 +573,12 @@
       "from": "procedure.co-security.threat-model-and-report",
       "to": "sarif-exporter",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-security.threat-model-and-report",
+      "to": "stage.co-security.S2",
+      "source": "process_schema"
     },
     {
       "type": "step_uses_skill",
@@ -741,6 +788,12 @@
       "from": "spdx-sbom",
       "to": "security-scan",
       "source": "prose"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-security.S1",
+      "to": "stage.co-security.S2",
+      "source": "process_schema"
     },
     {
       "type": "follows",
