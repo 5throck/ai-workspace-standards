@@ -13,7 +13,11 @@
  * 4. Real-tree invariant: templates/common/AGENTS.md and ALL 13 variant
  *    AGENTS.md are at parity right now (pins the T-009 data fix).
  *
- * @version 1.0.0
+ * 5. COMMON-AGENTS:START/END zone (v1.2.0, ADR-0081 / T-20260919-001):
+ *    extraction, missing/mismatch comparison, and the real-tree invariant
+ *    that common + all 13 variant AGENTS.md are at parity.
+ *
+ * @version 1.1.0
  */
 import { describe, test, expect } from 'bun:test';
 import { readFileSync, readdirSync } from 'node:fs';
@@ -24,6 +28,8 @@ import {
   normalizeBlockContent,
   parseManagedBlockOpen,
   isExtendsStub,
+  extractCommonAgentsBlock,
+  compareCommonAgentsBlock,
 } from '../../scripts/lib/managed-block-parity.ts';
 
 const workspaceRoot = resolve(import.meta.dir, '..', '..');
@@ -198,3 +204,76 @@ describe('isExtendsStub (T-20260917-001)', () => {
     expect(isExtendsStub(notStub)).toBe(false);
   });
 });
+
+// ── COMMON-AGENTS zone (v1.2.0, ADR-0081 / T-20260919-001) ──────────────────
+
+const CA_OPEN = '<!-- COMMON-AGENTS:START -->';
+const CA_CLOSE = '<!-- COMMON-AGENTS:END -->';
+const CA_BODY = [
+  '## Language Policy',
+  'english-only rule',
+  '',
+  '### PM Team-Management Authority (ADR-0080)',
+  'authority text',
+];
+const CA_BLOCK = [CA_OPEN, ...CA_BODY, CA_CLOSE].join('\n');
+
+describe('extractCommonAgentsBlock', () => {
+  test('returns the normalized inner content', () => {
+    const content = ['before', CA_BLOCK, 'after'].join('\n');
+    expect(extractCommonAgentsBlock(content)).toBe(CA_BODY.join('\n'));
+  });
+
+  test('returns null when the block is absent', () => {
+    expect(extractCommonAgentsBlock('no block here')).toBeNull();
+  });
+
+  test('unterminated block is reported via issues and returns null', () => {
+    const issues: string[] = [];
+    const content = [CA_OPEN, 'orphan content'].join('\n');
+    expect(extractCommonAgentsBlock(content, issues)).toBeNull();
+    expect(issues.length).toBe(1);
+    expect(issues[0]).toContain('unterminated COMMON-AGENTS');
+  });
+
+  test('CRLF input extracts identically', () => {
+    const content = [CA_OPEN, ...CA_BODY, CA_CLOSE].join('\n').split('\n').join('\r\n');
+    expect(extractCommonAgentsBlock(content)).toBe(CA_BODY.join('\n'));
+  });
+});
+
+describe('compareCommonAgentsBlock', () => {
+  test('identical content → null (parity)', () => {
+    expect(compareCommonAgentsBlock(CA_BODY.join('\n'), CA_BODY.join('\n'))).toBeNull();
+  });
+
+  test('variant without the block → missing', () => {
+    expect(compareCommonAgentsBlock(CA_BODY.join('\n'), null)).toBe('missing');
+  });
+
+  test('divergent content → mismatch', () => {
+    expect(compareCommonAgentsBlock(CA_BODY.join('\n'), 'stale policy text')).toBe('mismatch');
+  });
+
+  test('line-ending and whitespace differences are normalized away', () => {
+    expect(compareCommonAgentsBlock(CA_BODY.join('\n'), CA_BODY.join('\r\n'))).toBeNull();
+  });
+});
+
+describe('real-tree invariant: COMMON-AGENTS parity (ADR-0081 / T-20260919-001)', () => {
+  test('common AGENTS.md and ALL variant AGENTS.md are at parity', () => {
+    const common = readFileSync(join(workspaceRoot, 'templates', 'common', 'AGENTS.md'), 'utf-8');
+    const commonBlock = extractCommonAgentsBlock(common);
+    expect(commonBlock).not.toBeNull();
+    const variants = readdirSync(join(workspaceRoot, 'templates'), { withFileTypes: true })
+      .filter((e) => e.isDirectory() && e.name.startsWith('co-'))
+      .map((e) => e.name)
+      .sort();
+    expect(variants.length).toBeGreaterThanOrEqual(13);
+    for (const v of variants) {
+      const content = readFileSync(join(workspaceRoot, 'templates', v, 'AGENTS.md'), 'utf-8');
+      expect(compareCommonAgentsBlock(commonBlock as string, extractCommonAgentsBlock(content))).toBeNull();
+    }
+  });
+});
+

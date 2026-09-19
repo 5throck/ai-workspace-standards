@@ -1,4 +1,12 @@
-// @version 1.1.0
+// @version 1.2.0
+// v1.2.0 (ADR-0081 fleet sweep / T-20260919-001): extractCommonAgentsBlock +
+//           compareSingleBlock — parity primitives for the COMMON-AGENTS:START/END
+//           marker-inject zone in AGENTS.md, which PM-04's keyed
+//           WORKSPACE-MANAGED extraction never covered (the 2026-09-19 fleet
+//           sweep found all 13 variant COMMON-AGENTS blocks stale while
+//           validate-templates stayed green). The zone is key-less and
+//           single-instance per file, so parity is whole-content equality of
+//           the normalized block.
 // v1.1.0 (T-20260917-001): isExtendsStub — variant pm.md extends-stub detection
 //           so the parity arm can honor the stub-resolution delivery channel.
 // v1.0.0 (T-20260916-009): keyed WORKSPACE-MANAGED block extraction and
@@ -153,4 +161,38 @@ export function isExtendsStub(content: string): boolean {
   const frontmatter = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   if (!frontmatter) return false;
   return /^extends:\s*\S+/m.test(frontmatter[1]);
+}
+
+// ── COMMON-AGENTS marker-inject zone (v1.2.0, ADR-0081 / T-20260919-001) ────
+// The COMMON-AGENTS:START/END zone is key-less and single-instance per file, so
+// its parity contract is whole-content equality of the normalized block — a
+// different shape from the multi-key WORKSPACE-MANAGED extraction above.
+
+/** Normalized inner content of the `<!-- COMMON-AGENTS:START -->` …
+ *  `<!-- COMMON-AGENTS:END -->` block, or null when the file carries no such
+ *  block. An unterminated block is reported via `issues` and returns null
+ *  (never silently treated as absent-and-fine). */
+export function extractCommonAgentsBlock(content: string, issues?: string[]): string | null {
+  const open = content.match(/<!--\s*COMMON-AGENTS:START\s*-->/);
+  if (!open || open.index === undefined) return null;
+  const closeMatch = content.slice(open.index).match(/<!--\s*\/?COMMON-AGENTS:END\s*-->/);
+  if (!closeMatch || closeMatch.index === undefined) {
+    if (issues) issues.push('unterminated COMMON-AGENTS block (START without END)');
+    return null;
+  }
+  const start = open.index + open[0].length;
+  const end = open.index + closeMatch.index;
+  return normalizeBlockContent(content.slice(start, end));
+}
+
+/** Compare the common COMMON-AGENTS block content against a variant's.
+ *  Returns the violation kind, or null when parity holds:
+ *  - 'missing'  — the variant file carries no COMMON-AGENTS block;
+ *  - 'mismatch' — the block exists but its normalized content differs. */
+export function compareCommonAgentsBlock(
+  common: string,
+  variant: string | null,
+): 'missing' | 'mismatch' | null {
+  if (variant === null) return 'missing';
+  return normalizeBlockContent(common) === normalizeBlockContent(variant) ? null : 'mismatch';
 }

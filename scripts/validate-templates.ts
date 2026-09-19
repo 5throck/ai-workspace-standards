@@ -1,7 +1,18 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.35.0
+ * @version 1.36.0
+ *
+ * v1.36.0 (ADR-0081 fleet sweep / T-20260919-001): new `common-agents-parity`
+ *           (PM-04b) — every variant templates/co-<v>/AGENTS.md must carry the
+ *           COMMON-AGENTS:START/END marker-inject zone with normalized content
+ *           identical to templates/common/AGENTS.md's. Closes the PM-04 gap:
+ *           the keyed WORKSPACE-MANAGED extraction never covered the key-less
+ *           COMMON-AGENTS zone, so all 13 variant blocks went stale (missing
+ *           the ADR-0080 authority section) while the validator stayed green —
+ *           discovered during the 2026-09-19 fleet sweep. Primitives:
+ *           lib/managed-block-parity.ts 1.2.0 (extractCommonAgentsBlock,
+ *           compareCommonAgentsBlock). Severity: Error.
  *
  * v1.35.0 (2026-09-17-governance-backlog-batch-design.md): T-20260917-009.
  *          WS-07 now derives its forbidden-file list from the upgrade-policy
@@ -175,7 +186,7 @@ import {
   auditFixedTargets,
 } from './lib/propagation-map-schema.ts';
 import { scrubConstitutionRefs } from './lib/constitution-scrub.ts';
-import { extractKeyedBlocks, compareKeyedBlocks, isExtendsStub } from './lib/managed-block-parity.ts';
+import { extractKeyedBlocks, compareKeyedBlocks, isExtendsStub, extractCommonAgentsBlock, compareCommonAgentsBlock } from './lib/managed-block-parity.ts';
 import { MERGE_MANAGED_FILES, SCAFFOLD_COMMON_OWNED_FILES } from './lib/upgrade-policy.ts';
 import {
   SCAFFOLD_MARKER_SOURCES,
@@ -3662,6 +3673,62 @@ function checkManagedBlockParity(): void {
   }
 }
 
+// Check PM-04b: COMMON-AGENTS block parity (ADR-0081 fleet sweep / T-20260919-001).
+// The COMMON-AGENTS:START/END marker-inject zone in AGENTS.md is delivered to
+// projects by upgrade MERGE from the VARIANT template copy (variant-first
+// overlay), so a stale variant block silently starves every project of policy
+// updates added to the common block — observed 2026-09-19: all 13 variant
+// COMMON-AGENTS blocks were stale (missing the ADR-0080
+// "PM Team-Management Authority" section) while this validator stayed green,
+// because PM-04's keyed WORKSPACE-MANAGED extraction does not cover the
+// key-less COMMON-AGENTS zone. Contract: every variant AGENTS.md carries the
+// block with normalized content identical to templates/common/AGENTS.md's.
+// Severity: Error. Primitives: lib/managed-block-parity.ts (unit-tested).
+function checkCommonAgentsBlockParity(): void {
+  if (!JSON_MODE) console.log('\n=== Check PM-04b: COMMON-AGENTS block parity (common → every variant AGENTS.md) ===');
+
+  const commonPath = join(TEMPLATES_DIR, 'common', 'AGENTS.md');
+  const commonIssues: string[] = [];
+  const commonBlock = extractCommonAgentsBlock(readFileSync(commonPath, 'utf-8'), commonIssues);
+  for (const issue of commonIssues) {
+    fail('common', 'common-agents-parity', `templates/common/AGENTS.md: ${issue}`, 'Close the block with <!-- /COMMON-AGENTS -->');
+  }
+  if (commonBlock === null) {
+    fail('common', 'common-agents-parity', 'templates/common/AGENTS.md carries no COMMON-AGENTS block', 'Add the <!-- COMMON-AGENTS:START/END --> marker-inject zone (it is the delivery channel for common policy sections into variant/project AGENTS.md)');
+    return;
+  }
+
+  const variants = readdirSync(TEMPLATES_DIR, { withFileTypes: true })
+    .filter(e => e.isDirectory() && e.name.startsWith('co-') && !isTransientTestFixture(e.name))
+    .map(e => e.name)
+    .sort();
+
+  let checked = 0;
+  for (const variant of variants) {
+    const variantPath = join(TEMPLATES_DIR, variant, 'AGENTS.md');
+    if (!existsSync(variantPath)) {
+      fail(variant, 'common-agents-parity', `${variant}/AGENTS.md not found — the COMMON-AGENTS zone has no delivery channel into this variant`, `Create ${variant}/AGENTS.md with the COMMON-AGENTS block copied from templates/common/AGENTS.md`);
+      continue;
+    }
+    const variantIssues: string[] = [];
+    const variantBlock = extractCommonAgentsBlock(readFileSync(variantPath, 'utf-8'), variantIssues);
+    for (const issue of variantIssues) {
+      fail(variant, 'common-agents-parity', `templates/${variant}/AGENTS.md: ${issue}`, 'Close the block with <!-- /COMMON-AGENTS -->');
+    }
+    const violation = compareCommonAgentsBlock(commonBlock, variantBlock);
+    if (violation === 'missing') {
+      fail(variant, 'common-agents-parity', `templates/${variant}/AGENTS.md carries no COMMON-AGENTS block — common policy sections (LLM routing, instruction standard, PM team-management authority) have no delivery channel into this variant`, `Copy the "<!-- COMMON-AGENTS:START/END -->" block from templates/common/AGENTS.md into ${variant}/AGENTS.md`);
+    } else if (violation === 'mismatch') {
+      fail(variant, 'common-agents-parity', `templates/${variant}/AGENTS.md COMMON-AGENTS block content diverges from templates/common/AGENTS.md`, `Replace the variant's COMMON-AGENTS block content with the common copy (markers included), byte-identical after line normalization`);
+    } else {
+      checked++;
+    }
+  }
+  if (checked > 0) {
+    pass(`common-agents-parity: ${checked}/${variants.length} variant AGENTS.md files carry the COMMON-AGENTS block with content parity`);
+  }
+}
+
 // Check WS-11: bilingual user-guide pair (docs/user-guide.md + docs/user-guide_ko.md)
 // Standard defined in docs/governance/variant-contract.md "User-Guide Standard".
 // Unlike Variant Contract required files, templates/common/ does NOT satisfy this
@@ -4441,6 +4508,7 @@ function main(): number {
   checkPropagationMapSchema();
   checkMarkerZoneParity();                                       // PM-02: marker-inject zones vs target_variants
   checkManagedBlockParity();                                     // PM-04: WORKSPACE-MANAGED blocks, common → every variant MERGE_MANAGED copy (T-20260916-009, T-20260917-001)
+  checkCommonAgentsBlockParity();                                // PM-04b: COMMON-AGENTS marker-inject zone, common → every variant AGENTS.md (ADR-0081, T-20260919-001)
   checkPropagationTargets();                                     // PM-03: target lists vs actual templates/co-* dir set (T-20260915-005)
   checkScaffoldMarkerSources();                                  // T-20260915-002: scaffolder markers vs source templates
   checkPmExtendsStubBodies();                                    // T-20260915-010: variant pm.md extends-stub bodies
