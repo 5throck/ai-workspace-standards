@@ -3,9 +3,9 @@
 ## Metadata
 - **Skill**: project-resync
 - **Status**: active
-- **Version**: 1.3.1
+- **Version**: 1.4.0
 - **Created**: 2026-09-06
-- **Last Updated**: 2026-09-12 (Version 1.3.0 → 1.3.1 removes stale co-develop master-branch exception after default branch rename)
+- **Last Updated**: 2026-09-19 (Version 1.3.1 → 1.4.0 adds Step 2b Evidence plane review, running `scripts/evidence-backport-scan.ts` per design §4.8 / ADR-0084 Decision 6; previous: 2026-09-12 removed stale co-develop master-branch exception after default branch rename)
 
 ## Description
 Whole-fleet bidirectional sync cycle for Projects/co-*: provenance audit
