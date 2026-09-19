@@ -313,6 +313,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `adr:0081` | adr | — | project-resync, upgrade-project | — |
 | `adr:0082` | adr | — | — | — |
 | `adr:0083` | adr | — | — | — |
+| `adr:0084` | adr | — | evidence-ledger, project-resync | — |
 | `dec:DEC-20260825-01` | decision | — | — | — |
 | `dec:DEC-20260825-02` | decision | `sync` | — | — |
 | `dec:DEC-20260829-01` | decision | `decision-record` | — | — |
