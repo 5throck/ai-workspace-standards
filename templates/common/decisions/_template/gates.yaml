@@ -1,0 +1,26 @@
+# Decision Model Schema v1.0 — authoring skeleton
+# Copy this file to templates/<variant>/decisions/gates.yaml
+# and replace every placeholder. See ADR-0082 and
+# docs/designs/2026-09-19-template-domain-operating-system-design.md
+# for the normative design and authoring rules.
+schema_version: "1.0"
+variant: <variant>                     # e.g. co-design
+gates:
+  - id: DG-<VARIANT>-01                # pattern ^DG-[A-Z0-9]+-[0-9]{2}$
+    title: "<Gate decision title>"     # e.g. "Diagnosis accepted"
+    stage: S1                          # resolves in process/stages.yaml
+    decider_agent: <agent-key>         # must equal the stage owner_agent
+    inputs:                            # output_type references
+      - <output-type>                  # must be registered in _output-types.yaml
+    criteria:
+      - "<Verifiable criterion statement.>"
+      - "<Another criterion.>"
+    outcomes:                          # closed enum, minimum two
+      - proceed
+      - rework
+      # - stop  # alternative outcome
+    record_kind: DEC                   # fixed value for linkage to ADR-0061 records
+  # Additional gates follow the same structure
+  # - id: DG-<VARIANT>-02
+  #   title: "..."
+  #   ...

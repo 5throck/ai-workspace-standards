@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "artifact-model.schema.json",
+  "title": "Artifact Model Schema",
+  "description": "Validates the value object for each entry in templates/<variant>/procedures/_output-types.yaml. Enriches artifact type definitions with contracts: owner, format, fields, evidence binding, and retention policy. See design §7.1 and ADR-0082.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["description", "owner_agent", "format", "retention"],
+  "properties": {
+    "description": {
+      "type": "string",
+      "description": "Human-readable description of the artifact type."
+    },
+    "owner_agent": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$",
+      "description": "Kebab-case agent identifier that owns/authors this artifact type. Must resolve to a real agent file or a human-role registry entry (templates/<variant>/governance/_human-roles.yaml). DEG-A-03 requires every owner_agent to be resolvable."
+    },
+    "format": {
+      "type": "string",
+      "enum": ["markdown", "json", "yaml", "xlsx", "pptx", "docx", "pdf", "mixed"],
+      "description": "Primary output format of this artifact type. 'mixed' indicates multiple formats within one artifact instance."
+    },
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "type", "required"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Field name (kebab-case or snake_case)."
+          },
+          "type": {
+            "type": "string",
+            "description": "Field type: string, number, boolean, array, object, or a domain-specific type name.",
+            "enum": ["string", "number", "boolean", "integer", "array", "object", "date", "datetime", "uri"]
+          },
+          "required": {
+            "type": "boolean",
+            "description": "Whether this field is mandatory in every artifact instance."
+          }
+        }
+      },
+      "description": "Optional array of field definitions. Specifies the structure of the artifact data."
+    },
+    "evidence_model": {
+      "type": ["string", "null"],
+      "description": "Optional path under evidence-models/ that defines the evidence schema for this artifact type (e.g. 'evidence-models/_shared/tbm-record.json'). Null if no evidence model is bound. DEG-A-04 requires a non-null evidence_model for retention: regulated."
+    },
+    "retention": {
+      "type": "string",
+      "enum": ["session", "engagement", "permanent", "regulated"],
+      "description": "Retention policy: session (transient), engagement (duration of engagement), permanent (archival), or regulated (subject to regulatory retention rules). If regulated, evidence_model must be non-null."
+    }
+  }
+}

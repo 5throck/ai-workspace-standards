@@ -1,0 +1,77 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "raci.schema.json",
+  "title": "RACI Layer Schema",
+  "description": "Validates templates/<variant>/governance/raci.yaml. A generated, committed, drift-checked verification artifact that records Accountable, Responsible, Consulted, and Informed roles. See design §6.2 and ADR-0082.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "variant", "generated_from", "rows"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "Schema version. Currently fixed at 1.0."
+    },
+    "variant": {
+      "type": "string",
+      "pattern": "^co-[a-z]+$",
+      "description": "Variant identifier matching the template directory name."
+    },
+    "generated_from": {
+      "type": "string",
+      "const": "procedures/",
+      "description": "Source location from which this matrix was generated. Currently always 'procedures/'."
+    },
+    "rows": {
+      "type": "array",
+      "minItems": 1,
+      "description": "RACI matrix rows, one per procedure activity.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["stage", "activity", "accountable", "responsible"],
+        "properties": {
+          "stage": {
+            "type": "string",
+            "pattern": "^S[0-9]+$",
+            "description": "Stage identifier where this activity occurs. Resolves in process/stages.yaml."
+          },
+          "activity": {
+            "type": "string",
+            "description": "Procedure identifier (kebab-case, e.g. co-consult-current-state-diagnosis)."
+          },
+          "accountable": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$",
+            "description": "Single agent (kebab-case) responsible for decisions and outcomes. Must equal the procedure's owner_agent. DEG-R-01 requires exactly one Accountable per activity."
+          },
+          "responsible": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$"
+            },
+            "description": "Array of agents performing the work. Each resolves to a real agent file. DEG-R-02 requires at least one Responsible per activity."
+          },
+          "consulted": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$"
+            },
+            "description": "Optional array of agents asked for input. Each resolves to a real agent file."
+          },
+          "informed": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$"
+            },
+            "description": "Optional array of agents kept in the loop. Each resolves to a real agent file. DEG-R-03 forbids an agent from being both Accountable and Informed on the same activity."
+          }
+        }
+      }
+    }
+  }
+}

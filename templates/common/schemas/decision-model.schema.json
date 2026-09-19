@@ -1,0 +1,80 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "decision-model.schema.json",
+  "title": "Decision Model Schema",
+  "description": "Validates templates/<variant>/decisions/gates.yaml. Defines decision gates as part of the Domain Execution Graph (DEG). Each gate is a reusable decision point with decider, inputs, criteria, and outcomes. See design §9.2 and ADR-0082.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "variant", "gates"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "Schema version. Currently fixed at 1.0."
+    },
+    "variant": {
+      "type": "string",
+      "pattern": "^co-[a-z]+$",
+      "description": "Variant identifier matching the template directory name."
+    },
+    "gates": {
+      "type": "array",
+      "minItems": 1,
+      "description": "List of decision gates in the variant's domain process.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "title", "stage", "decider_agent", "criteria", "outcomes", "record_kind"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^DG-[A-Z0-9]+-[0-9]{2}$",
+            "description": "Unique gate identifier. Pattern: DG- (gate prefix), variant letters/numbers, hyphen, two-digit number. Example: DG-CONSULT-01, DG-DECK-12."
+          },
+          "title": {
+            "type": "string",
+            "description": "Human-readable title of the gate (e.g. 'Diagnosis accepted')."
+          },
+          "stage": {
+            "type": "string",
+            "pattern": "^S[0-9]+$",
+            "description": "Stage identifier where this gate is applied. Resolves in process/stages.yaml. DEG-D-02 requires the stage to exist."
+          },
+          "decider_agent": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$",
+            "description": "Kebab-case agent identifier that makes the decision at this gate. DEG-D-04 requires this to equal the stage's owner_agent."
+          },
+          "inputs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of output_type references that are inputs to this gate (e.g. ['diagnosis_findings']). Each must exist in the variant's procedures/_output-types.yaml. DEG-D-06 enforces this."
+          },
+          "criteria": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            },
+            "description": "Verifiable decision criteria. Each entry is a criterion statement that can be evaluated as pass/fail."
+          },
+          "outcomes": {
+            "type": "array",
+            "minItems": 2,
+            "items": {
+              "type": "string"
+            },
+            "description": "Closed enumeration of possible outcomes (e.g. ['proceed', 'rework', 'stop']). DEG-D-03 requires at least two outcomes."
+          },
+          "record_kind": {
+            "type": "string",
+            "const": "DEC",
+            "description": "Fixed value 'DEC'. Links gate definitions to decision records (docs/decisions/DEC-*.md) via ADR-0061."
+          }
+        }
+      }
+    }
+  }
+}
