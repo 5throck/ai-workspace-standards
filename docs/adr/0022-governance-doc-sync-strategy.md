@@ -45,7 +45,7 @@ templates/common/
     gemini/          ← GEMINI.md.template + Gemini-specific sections
 ```
 
-`publish-to-template.ts --docs` assembles complete files from fragments using `[!include path]` directives. See `docs/architecture/governance-docs-architecture.md` for the full P2 design.
+`publish-to-template.ts --docs` assembles complete files from fragments using `[!include path]` directives. See `docs/designs/2026-06-02-governance-docs-architecture-design.md` for the full P2 design (rehomed from `docs/architecture/` on 2026-09-18).
 
 ### AGENTS.md — Excluded from propagation
 

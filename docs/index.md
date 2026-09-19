@@ -26,8 +26,8 @@ Core system rules, constitution modules, system architecture, security policies,
   - [08 - Coding Guidelines](constitution/08-coding-guidelines.md) — Code style, linting, and quality criteria
   - [09 - Operations Workflow](constitution/09-operations-workflow.md) — Operational execution workflows
 - [**Architecture Guides**](architecture/) — Workspace design patterns and architectural concepts:
-  - [Extends Pattern](architecture/extends-pattern.md) — Layer inheritance and configuration overriding
-  - [Governance Docs Architecture](architecture/governance-docs-architecture.md) — Structural design of governance documentation
+  - [Extends Pattern](architecture/extends-pattern.md) — Layer inheritance and configuration overriding (migration completed — historical)
+  - [Governance Docs Architecture](designs/2026-06-02-governance-docs-architecture-design.md) — Structural design of governance documentation (rehomed to designs/, pending implementation)
   - [L0/L1 Differences](architecture/l0-l1-differences.md) — Distinctions between Core (L0) and Common (L1) layers
 - [**Security Policies**](security/) — Workspace security standards and audit records:
   - [Extends Chain Security](security/extends-chain-security.md) — Validation rules for extends inheritance chains

@@ -1,9 +1,15 @@
+---
+schemaVersion: 1.0.0
+spec-id: 2026-06-02-governance-docs-architecture-design
+---
+
 # Governance Document Architecture: _shared/ + _platform/ Design
 
 **Status**: Design (P2 — pending implementation)
 **Supersedes**: Section marker approach (implemented in P1)
 **Created**: 2026-06-02
 **Owner**: architect
+**Provenance note**: rehomed from `docs/architecture/governance-docs-architecture.md` on 2026-09-18 (docs/architecture cleanup — pending designs follow the `docs/designs/` convention; referenced as the full P2 design by [ADR-0022](../adr/0022-governance-doc-sync-strategy.md))
 
 ---
 
