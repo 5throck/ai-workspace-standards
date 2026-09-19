@@ -141,3 +141,35 @@ describe('findProjectOnlySections', () => {
     expect(body).toBe(TEMPLATE_BODY);
   });
 });
+
+// ── CRLF tolerance (v1.4.0, ADR-0081 fleet sweep / T-20260918-005) ──────────
+// Windows working trees check out CRLF; the old bare-LF separator regex never
+// matched there, so every CRLF project was wholeFileOwned → CONTEXT PRESERVE
+// and template footer bumps never delivered. (No backslash escapes in this
+// block on purpose — line endings are built from char codes.)
+
+const LF = String.fromCharCode(10);
+const CRLF = String.fromCharCode(13) + LF;
+
+describe('CRLF tolerance (v1.4.0)', () => {
+  test('splitOffVersionFooter parses a CRLF footer and returns the LF body', () => {
+    const crlfContent = (TEMPLATE_BODY + FOOTER).split(LF).join(CRLF);
+    const { body, footer } = splitOffVersionFooter(crlfContent);
+    expect(footer).toContain('version: 2.6');
+    expect(body.split(CRLF).join(LF)).toBe(TEMPLATE_BODY);
+  });
+
+  test('CRLF project copy is not wholeFileOwned (footer recognized)', () => {
+    const project = projectWith(['## Project Specific Workflow', 'do the co-newbiz thing']).split(LF).join(CRLF);
+    const { sections, wholeFileOwned } = findProjectOnlySections(project, TEMPLATE);
+    expect(wholeFileOwned).toBe(false);
+    expect(sections).toHaveLength(1);
+  });
+
+  test('mixed line endings: CRLF project against LF template still evaluates', () => {
+    const project = (TEMPLATE_BODY + FOOTER).split(LF).join(CRLF);
+    const { sections, wholeFileOwned } = findProjectOnlySections(project, TEMPLATE);
+    expect(wholeFileOwned).toBe(false);
+    expect(sections).toHaveLength(0);
+  });
+});
