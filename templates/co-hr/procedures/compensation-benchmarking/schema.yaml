@@ -4,6 +4,7 @@ variant: co-hr
 version: "1.0.0"
 title: Compensation Benchmarking
 phase: 1
+stage: S1
 status: active
 owner_agent: compensation-benefits-analyst
 purpose: >
@@ -36,8 +37,6 @@ steps:
 outputs:
   - type: benchmark_report
 relations: []
-quality_gates:
-  - "Data sources disclosed and every figure traceable to the market dataset."
 evidence:
   - "docs/iso-30414-metrics-mapping.md"
 failure_modes:

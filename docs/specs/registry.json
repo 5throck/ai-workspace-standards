@@ -1060,6 +1060,24 @@
       "source": "manual",
       "created": "2026-09-19",
       "last_updated": "2026-09-19"
+    },
+    {
+      "id": "2026-09-19-template-domain-operating-system-design",
+      "title": "template domain operating system design",
+      "file": "docs/designs/2026-09-19-template-domain-operating-system-design.md",
+      "status": "approved",
+      "source": "architect",
+      "created": "2026-09-19",
+      "last_updated": "2026-09-19"
+    },
+    {
+      "id": "2026-09-19-actor-model-and-evidence-backport-design",
+      "title": "actor model and evidence backport design",
+      "file": "docs/designs/2026-09-19-actor-model-and-evidence-backport-design.md",
+      "status": "approved",
+      "source": "architect",
+      "created": "2026-09-19",
+      "last_updated": "2026-09-19"
     }
   ]
 }

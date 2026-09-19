@@ -1,0 +1,38 @@
+# governance/_human-roles.yaml — the closed registry of agent-key values that
+# name HUMAN ROLES, not AI agents. Used to distinguish human decision-makers
+# from AI agents in RACI matrices and Domain Execution Graph queries (ADR-0084).
+#
+# When present, this file:
+# - Takes precedence over same-named agent files (derivation rule §3.1)
+# - Triggers schema_version: "1.1" in raci.yaml (§3.2)
+# - Enables DEG-R-06 validation (human accountability must match a gate) (§3.3)
+# - Causes human_role nodes to appear in skill-graph.json (§3.4)
+#
+# A step whose agent_key appears here is EXEMPT from the agents/<key>.md
+# existence checks — the missing file is the POINT: the key names a person-role,
+# and no AI agent definition may exist for it. The registry is the anti-gaming
+# surface: a step cannot dodge the missing-agent-file check by marking itself
+# decision_authority: human with an arbitrary key — only keys listed here earn
+# the skip.
+#
+# Consistency rule (DEG-R-06): a human-role key used on a step whose activity
+# is accountable to that key MUST have a matching gate in decisions/gates.yaml
+# whose decider_agent is that same key. A human role appearing as an
+# accountable executor with no human-decided gate is a modeling defect.
+#
+# Adding a human role = a registry entry + a gate + a step marked
+# decision_authority: human in the same change (mirrors the baseline discipline:
+# never extended by accident).
+
+human_roles:
+  # Example human role (replace with domain-specific roles):
+  # key-name:
+  #   description: >-
+  #     Plain English description of the person role, their authority, and
+  #     what gate(s) represent their decisions. Keep it concrete and specific
+  #     so future readers know exactly which human makes the call.
+  #   reference: docs/designs/<design>.md §<section>
+  #       or: docs/adr/<number>.md
+  #       or: docs/manuals/<name>.md
+  #     Link to the governing design document or procedure manual that
+  #     defines the role's authority and decision scope.

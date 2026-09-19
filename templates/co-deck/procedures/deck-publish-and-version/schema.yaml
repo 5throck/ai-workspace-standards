@@ -4,6 +4,7 @@ variant: co-deck
 version: "1.0.0"
 title: Deck Publish and Versioning
 phase: 5
+stage: S3
 status: active
 owner_agent: pdf-export
 purpose: >
@@ -31,7 +32,7 @@ outputs:
 relations:
   - type: follows
     target: procedure.co-deck.deck-build-and-export
-quality_gates:
+
   - "Published package hash matches the registered version record."
 evidence: []
 failure_modes:

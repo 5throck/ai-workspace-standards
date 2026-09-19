@@ -4,6 +4,7 @@ variant: co-abap
 version: "1.0.0"
 title: Transport Release and Acceptance
 phase: 4
+stage: S2
 status: active
 owner_agent: devops-admin
 purpose: >
@@ -31,7 +32,7 @@ outputs:
 relations:
   - type: follows
     target: procedure.co-abap.custom-dev-delivery
-quality_gates:
+
   - "Post-transport smoke tests pass in the target system."
 evidence: []
 failure_modes:

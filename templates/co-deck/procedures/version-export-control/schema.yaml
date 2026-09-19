@@ -4,6 +4,7 @@ variant: co-deck
 version: "1.0.0"
 title: Version Export Control
 phase: 4
+stage: S2
 status: active
 owner_agent: version
 purpose: >
@@ -27,8 +28,10 @@ relations:
     target: procedure.co-deck.deck-build-and-export
   - type: enables
     target: procedure.co-deck.deck-publish-and-version
-quality_gates:
+
   - "Every exported artifact maps to an auditable source revision."
+decision_points:
+  - DG-DECK-05
 evidence: []
 failure_modes:
   - "Generated artifact cannot be traced to source; rebuild from a known revision."

@@ -4,6 +4,7 @@ variant: co-game
 version: "1.0.0"
 title: Game Security Retrospective
 phase: 5
+stage: S1
 status: active
 owner_agent: security-monitor
 purpose: >
@@ -26,7 +27,7 @@ outputs:
 relations:
   - type: follows
     target: procedure.co-game.game-release-verification
-quality_gates:
+
   - "Post-release security follow-ups are recorded or explicitly waived."
 evidence: []
 failure_modes:

@@ -4,6 +4,7 @@ variant: co-deck
 version: "1.0.0"
 title: Version Storyline Control
 phase: 2
+stage: S2
 status: active
 owner_agent: version
 purpose: >
@@ -26,7 +27,7 @@ relations:
     target: procedure.co-deck.storyline-development
   - type: enables
     target: procedure.co-deck.lecture-deck-production
-quality_gates:
+
   - "Production starts from a named and approved storyline revision."
 evidence: []
 failure_modes:

@@ -4,6 +4,7 @@ variant: co-deck
 version: "1.0.0"
 title: Version Production Control
 phase: 3
+stage: S2
 status: active
 owner_agent: version
 purpose: >
@@ -26,7 +27,7 @@ relations:
     target: procedure.co-deck.lecture-deck-production
   - type: enables
     target: procedure.co-deck.deck-build-and-export
-quality_gates:
+
   - "Build/export uses a named production revision."
 evidence: []
 failure_modes:

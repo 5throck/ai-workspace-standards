@@ -4,6 +4,7 @@ variant: co-price
 version: "1.0.0"
 title: Engagement Review
 phase: 5
+stage: S2
 status: active
 owner_agent: engagement-director
 purpose: >
@@ -31,7 +32,7 @@ outputs:
 relations:
   - type: follows
     target: procedure.co-price.release-assurance
-quality_gates:
+
   - "Client acceptance recorded and security attestation filed."
 evidence: []
 failure_modes:

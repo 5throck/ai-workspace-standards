@@ -4,6 +4,7 @@ variant: co-deck
 version: "1.0.0"
 title: Deck Build and Export
 phase: 4
+stage: S2
 status: active
 owner_agent: html-build
 purpose: >
@@ -37,8 +38,10 @@ outputs:
 relations:
   - type: follows
     target: procedure.co-deck.storyline-development
-quality_gates:
+
   - "Layout gate passes with zero violations before export."
+decision_points:
+  - DG-DECK-01
 evidence: []
 failure_modes:
   - "Layout gate failures persist - return to design rather than exporting degraded slides."

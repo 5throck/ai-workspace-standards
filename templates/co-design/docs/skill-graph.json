@@ -1,5 +1,6 @@
 {
   "version": 1,
+  "graph_profile": "deg/v1",
   "nodes": [
     {
       "id": "accessibility-audit",
@@ -15,6 +16,16 @@
       "id": "documentation-writing",
       "type": "skill",
       "layer": "L0"
+    },
+    {
+      "id": "gate.co-design.DG-DESIGN-01",
+      "type": "decision_gate",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "gate.co-design.DG-DESIGN-02",
+      "type": "decision_gate",
+      "layer": "variant:co-design"
     },
     {
       "id": "output_type.accessibility_report",
@@ -127,6 +138,31 @@
       "layer": "variant:co-design"
     },
     {
+      "id": "stage.co-design.S1",
+      "type": "stage",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "stage.co-design.S2",
+      "type": "stage",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "stage.co-design.S3",
+      "type": "stage",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "stage.co-design.S4",
+      "type": "stage",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "stage.co-design.S5",
+      "type": "stage",
+      "layer": "variant:co-design"
+    },
+    {
       "id": "storyteller",
       "type": "agent",
       "layer": "variant:co-design"
@@ -189,16 +225,35 @@
       "source": "skill_manifest"
     },
     {
+      "type": "accountable_for",
+      "from": "design-lead",
+      "to": "procedure.co-design.design-definition",
+      "source": "raci_matrix"
+    },
+    {
       "type": "produces",
       "from": "documentation-writing",
       "to": "output_type.narrative_brief",
       "source": "procedure_schema"
     },
     {
+      "type": "decides_on",
+      "from": "gate.co-design.DG-DESIGN-01",
+      "to": "output_type.design_direction",
+      "source": "decision_model"
+    },
+    {
+      "type": "decides_on",
+      "from": "gate.co-design.DG-DESIGN-02",
+      "to": "output_type.visual_design_set",
+      "source": "decision_model"
+    },
+    {
       "type": "step_by_agent",
       "from": "procedure.co-design.design-definition",
       "to": "design-lead",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -219,10 +274,17 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-design.design-definition",
+      "to": "stage.co-design.S3",
+      "source": "process_schema"
+    },
+    {
       "type": "step_by_agent",
       "from": "procedure.co-design.design-definition",
       "to": "storyteller",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -249,10 +311,17 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-design.narrative-discovery",
+      "to": "stage.co-design.S1",
+      "source": "process_schema"
+    },
+    {
       "type": "step_by_agent",
       "from": "procedure.co-design.narrative-discovery",
       "to": "storyteller",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -276,13 +345,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-design.prototype-validation",
       "to": "prototype-engineer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-design.prototype-validation",
       "to": "prototype-engineer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -291,10 +362,17 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-design.prototype-validation",
+      "to": "stage.co-design.S5",
+      "source": "process_schema"
+    },
+    {
       "type": "step_by_agent",
       "from": "procedure.co-design.ux-discovery",
       "to": "design-lead",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -312,7 +390,14 @@
       "type": "step_by_agent",
       "from": "procedure.co-design.ux-discovery",
       "to": "service-designer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-design.ux-discovery",
+      "to": "stage.co-design.S2",
+      "source": "process_schema"
     },
     {
       "type": "step_uses_skill",
@@ -330,13 +415,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-design.ux-discovery",
       "to": "ux-researcher",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-design.visual-implementation",
       "to": "design-lead",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -360,7 +447,14 @@
       "type": "step_by_agent",
       "from": "procedure.co-design.visual-implementation",
       "to": "service-designer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-design.visual-implementation",
+      "to": "stage.co-design.S4",
+      "source": "process_schema"
     },
     {
       "type": "step_uses_skill",
@@ -372,7 +466,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-design.visual-implementation",
       "to": "typography-expert",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -390,7 +485,14 @@
       "type": "step_by_agent",
       "from": "procedure.co-design.visual-implementation",
       "to": "visual-designer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "accountable_for",
+      "from": "prototype-engineer",
+      "to": "procedure.co-design.prototype-validation",
+      "source": "raci_matrix"
     },
     {
       "type": "follows",
@@ -478,6 +580,48 @@
         "field": "relates_to",
         "index": 1
       }
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-design.S1",
+      "to": "stage.co-design.S2",
+      "source": "process_schema"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-design.S2",
+      "to": "stage.co-design.S3",
+      "source": "process_schema"
+    },
+    {
+      "type": "gated_by",
+      "from": "stage.co-design.S3",
+      "to": "gate.co-design.DG-DESIGN-01",
+      "source": "decision_model"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-design.S3",
+      "to": "stage.co-design.S4",
+      "source": "process_schema"
+    },
+    {
+      "type": "gated_by",
+      "from": "stage.co-design.S4",
+      "to": "gate.co-design.DG-DESIGN-02",
+      "source": "decision_model"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-design.S4",
+      "to": "stage.co-design.S5",
+      "source": "process_schema"
+    },
+    {
+      "type": "accountable_for",
+      "from": "storyteller",
+      "to": "procedure.co-design.narrative-discovery",
+      "source": "raci_matrix"
     },
     {
       "type": "produces",
@@ -595,6 +739,18 @@
       "from": "ui-ux-design-intelligence",
       "to": "visual-designer",
       "source": "skill_manifest"
+    },
+    {
+      "type": "accountable_for",
+      "from": "ux-researcher",
+      "to": "procedure.co-design.ux-discovery",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "visual-designer",
+      "to": "procedure.co-design.visual-implementation",
+      "source": "raci_matrix"
     }
   ]
 }

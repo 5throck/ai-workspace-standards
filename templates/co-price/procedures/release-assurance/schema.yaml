@@ -4,6 +4,7 @@ variant: co-price
 version: "1.0.0"
 title: Release Assurance
 phase: 4
+stage: S1
 status: active
 owner_agent: qa-tester
 purpose: >
@@ -63,7 +64,7 @@ relations:
     target: procedure.co-price.engine-implementation
   - type: enables
     target: procedure.co-price.engagement-review
-quality_gates:
+
   - "All assurance dimensions signed off before release."
 evidence: []
 failure_modes:

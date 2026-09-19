@@ -4,6 +4,7 @@ variant: co-price
 version: "1.0.0"
 title: Pricing Engine Implementation
 phase: 3
+stage: S1
 status: active
 owner_agent: lead-architect
 purpose: >
@@ -50,8 +51,10 @@ relations:
     target: procedure.co-price.scenario-modeling
   - type: enables
     target: procedure.co-price.release-assurance
-quality_gates:
+
   - "Engine outputs reconcile with waterfall checks within tolerance."
+decision_points:
+  - DG-PRICE-01
 evidence: []
 failure_modes:
   - "Waterfall reconciliation fails - fix the engine rather than adjusting the analysis."

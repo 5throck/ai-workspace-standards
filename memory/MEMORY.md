@@ -6,6 +6,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-09-20](2026-09-20.md) | feat(governance): implement ADR-0084 actor model and graph delta log |
 | 2026-09-12 | docs(consistency): resolve stale claims across upgrade-policy doc fleet (audit comment, non-goals, gitignore merge) |
 | 2026-09-11 | fix(review): project-review 2026-09-10 remediations — dead variant audit hook, rollback crash, PAT-in-URL, governance doc contradictions |
 | 2026-09-10 | docs(governance): Schema Governance ADR baseline + marker engine remediation |

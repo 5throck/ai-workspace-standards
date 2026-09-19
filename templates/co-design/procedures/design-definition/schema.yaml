@@ -4,6 +4,7 @@ variant: co-design
 version: "1.0.0"
 title: Design Definition
 phase: 2
+stage: S3
 status: active
 owner_agent: design-lead
 purpose: >
@@ -32,8 +33,10 @@ outputs:
 relations:
   - type: follows
     target: procedure.co-design.ux-discovery
-quality_gates:
+
   - "Design direction approved at the phase 2 gate before implementation."
+decision_points:
+  - DG-DESIGN-01
 evidence: []
 failure_modes:
   - "Direction conflicts with research findings - resolve with ux-researcher before proceeding."

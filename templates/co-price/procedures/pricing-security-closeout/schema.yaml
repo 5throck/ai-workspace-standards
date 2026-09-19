@@ -4,6 +4,7 @@ variant: co-price
 version: "1.0.0"
 title: Pricing Security Closeout
 phase: 5
+stage: S2
 status: active
 owner_agent: security-monitor
 purpose: >
@@ -27,7 +28,7 @@ outputs:
 relations:
   - type: follows
     target: procedure.co-price.engagement-review
-quality_gates:
+
   - "Security attestation is complete or closure remains blocked."
 evidence: []
 failure_modes:

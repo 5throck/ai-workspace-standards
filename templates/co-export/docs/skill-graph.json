@@ -1,5 +1,6 @@
 {
   "version": 1,
+  "graph_profile": "deg/v1",
   "nodes": [
     {
       "id": "customs-duty-drawback-specialist",
@@ -39,6 +40,16 @@
     {
       "id": "fta-origin-determination",
       "type": "skill",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "gate.co-export.DG-EXPORT-01",
+      "type": "decision_gate",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "gate.co-export.DG-EXPORT-02",
+      "type": "decision_gate",
       "layer": "variant:co-export"
     },
     {
@@ -209,6 +220,31 @@
     {
       "id": "roo-qualification-worksheet",
       "type": "skill",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "stage.co-export.S1",
+      "type": "stage",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "stage.co-export.S2",
+      "type": "stage",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "stage.co-export.S3",
+      "type": "stage",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "stage.co-export.S4",
+      "type": "stage",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "stage.co-export.S5",
+      "type": "stage",
       "layer": "variant:co-export"
     },
     {
@@ -447,6 +483,12 @@
       "source": "skill_manifest"
     },
     {
+      "type": "accountable_for",
+      "from": "fta-origin-analyst",
+      "to": "procedure.co-export.compliance-determination",
+      "source": "raci_matrix"
+    },
+    {
       "type": "used_by",
       "from": "fta-origin-determination",
       "to": "fta-origin-analyst",
@@ -537,6 +579,18 @@
         "field": "relates_to",
         "index": 0
       }
+    },
+    {
+      "type": "decides_on",
+      "from": "gate.co-export.DG-EXPORT-01",
+      "to": "output_type.document_set",
+      "source": "decision_model"
+    },
+    {
+      "type": "decides_on",
+      "from": "gate.co-export.DG-EXPORT-02",
+      "to": "output_type.drawback_positioning",
+      "source": "decision_model"
     },
     {
       "type": "follows",
@@ -891,6 +945,24 @@
       "source": "skill_manifest"
     },
     {
+      "type": "accountable_for",
+      "from": "logistics-coordinator",
+      "to": "procedure.co-export.post-delivery-optimization",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "logistics-coordinator",
+      "to": "procedure.co-export.shipment-execution",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "market-entry-strategist",
+      "to": "procedure.co-export.market-entry-assessment",
+      "source": "raci_matrix"
+    },
+    {
       "type": "follows",
       "from": "market-entry-strategy",
       "to": "foreign-regulation-monitoring",
@@ -938,10 +1010,17 @@
       "source": "skill_manifest"
     },
     {
+      "type": "accountable_for",
+      "from": "pm",
+      "to": "procedure.co-export.export-shipment-compliance",
+      "source": "raci_matrix"
+    },
+    {
       "type": "step_by_agent",
       "from": "procedure.co-export.compliance-determination",
       "to": "export-control-compliance-specialist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -953,13 +1032,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-export.compliance-determination",
       "to": "fta-origin-analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-export.compliance-determination",
       "to": "halal-certification-specialist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -971,7 +1052,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-export.compliance-determination",
       "to": "hs-classification-specialist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1004,10 +1086,17 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-export.compliance-determination",
+      "to": "stage.co-export.S2",
+      "source": "process_schema"
+    },
+    {
       "type": "step_by_agent",
       "from": "procedure.co-export.export-shipment-compliance",
       "to": "fta-origin-analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1019,7 +1108,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-export.export-shipment-compliance",
       "to": "hs-classification-specialist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1037,13 +1127,20 @@
       "type": "step_by_agent",
       "from": "procedure.co-export.export-shipment-compliance",
       "to": "logistics-coordinator",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
       "from": "procedure.co-export.export-shipment-compliance",
       "to": "output_type.document_set",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-export.export-shipment-compliance",
+      "to": "stage.co-export.S3",
+      "source": "process_schema"
     },
     {
       "type": "step_uses_skill",
@@ -1055,13 +1152,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-export.export-shipment-compliance",
       "to": "trade-documentation-specialist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-export.market-entry-assessment",
       "to": "export-control-compliance-specialist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1079,13 +1178,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-export.market-entry-assessment",
       "to": "foreign-regulatory-intelligence-analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-export.market-entry-assessment",
       "to": "fta-origin-analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1097,7 +1198,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-export.market-entry-assessment",
       "to": "halal-certification-specialist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1109,7 +1211,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-export.market-entry-assessment",
       "to": "hs-classification-specialist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1121,7 +1224,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-export.market-entry-assessment",
       "to": "market-entry-strategist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1142,6 +1246,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-export.market-entry-assessment",
+      "to": "stage.co-export.S1",
+      "source": "process_schema"
+    },
+    {
       "type": "step_uses_skill",
       "from": "procedure.co-export.post-delivery-optimization",
       "to": "logistics-coordination",
@@ -1151,13 +1261,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-export.post-delivery-optimization",
       "to": "logistics-coordinator",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-export.post-delivery-optimization",
       "to": "market-entry-strategist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1178,10 +1290,17 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-export.post-delivery-optimization",
+      "to": "stage.co-export.S5",
+      "source": "process_schema"
+    },
+    {
       "type": "step_by_agent",
       "from": "procedure.co-export.shipment-execution",
       "to": "customs-duty-drawback-specialist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1199,7 +1318,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-export.shipment-execution",
       "to": "market-entry-strategist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -1212,6 +1332,12 @@
       "from": "procedure.co-export.shipment-execution",
       "to": "procedure.co-export.export-shipment-compliance",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-export.shipment-execution",
+      "to": "stage.co-export.S4",
+      "source": "process_schema"
     },
     {
       "type": "used_by",
@@ -1269,6 +1395,42 @@
       "from": "roo-qualification-worksheet",
       "to": "trade-documentation-checklist",
       "source": "prose"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-export.S1",
+      "to": "stage.co-export.S2",
+      "source": "process_schema"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-export.S2",
+      "to": "stage.co-export.S3",
+      "source": "process_schema"
+    },
+    {
+      "type": "gated_by",
+      "from": "stage.co-export.S3",
+      "to": "gate.co-export.DG-EXPORT-01",
+      "source": "decision_model"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-export.S3",
+      "to": "stage.co-export.S4",
+      "source": "process_schema"
+    },
+    {
+      "type": "gated_by",
+      "from": "stage.co-export.S4",
+      "to": "gate.co-export.DG-EXPORT-02",
+      "source": "decision_model"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-export.S4",
+      "to": "stage.co-export.S5",
+      "source": "process_schema"
     },
     {
       "type": "follows",

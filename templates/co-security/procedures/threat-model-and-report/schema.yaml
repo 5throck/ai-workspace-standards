@@ -4,6 +4,7 @@ variant: co-security
 version: "1.0.0"
 title: Threat Model and Report
 phase: 3
+stage: S2
 status: active
 owner_agent: threat-modeler
 purpose: >
@@ -44,7 +45,7 @@ outputs:
 relations:
   - type: follows
     target: skill.verify-authorization
-quality_gates:
+
   - "Authorization scope matches every tested component - no out-of-scope findings included."
 evidence:
   - "docs/co-security.context.md"

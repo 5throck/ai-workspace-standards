@@ -4,6 +4,7 @@ variant: co-deck
 version: "1.0.0"
 title: Lecture Deck Production
 phase: 3
+stage: S2
 status: active
 owner_agent: pm
 purpose: >
@@ -46,9 +47,8 @@ steps:
 outputs:
   - type: pdf_deck
 relations: []
-quality_gates:
-  - "Slide layout gate passes on every slide before export."
-  - "Measure check confirms readability at target projector resolution."
+decision_points:
+  - DG-DECK-02
 evidence:
   - "docs/co-deck.context.md"
 failure_modes:

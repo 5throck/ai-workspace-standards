@@ -264,5 +264,12 @@
     "promotionEligible": false,
     "missingCriteria": [],
     "lastSynced": "2026-08-22T17:41:54.183Z"
+  },
+  "deg_conformance": "governed",
+  "process_manifest": {
+    "stages_file": "process/stages.yaml",
+    "raci_file": "governance/raci.yaml",
+    "gates_file": "decisions/gates.yaml",
+    "evidence_models_dir": "evidence-models/"
   }
 }

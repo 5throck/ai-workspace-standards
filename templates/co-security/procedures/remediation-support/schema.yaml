@@ -4,6 +4,7 @@ variant: co-security
 version: "1.0.0"
 title: Remediation Support
 phase: 4
+stage: S2
 status: active
 owner_agent: patch-engineer
 purpose: >
@@ -30,7 +31,7 @@ outputs:
 relations:
   - type: follows
     target: procedure.co-security.threat-model-and-report
-quality_gates:
+
   - "Every remediated finding re-verified against the original evidence."
 evidence: []
 failure_modes:

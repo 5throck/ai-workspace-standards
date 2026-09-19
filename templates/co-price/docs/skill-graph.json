@@ -1,5 +1,6 @@
 {
   "version": 1,
+  "graph_profile": "deg/v1",
   "nodes": [
     {
       "id": "competitive-intelligence",
@@ -73,6 +74,16 @@
         "optimal-price",
         "elasticity-reading"
       ]
+    },
+    {
+      "id": "gate.co-price.DG-PRICE-01",
+      "type": "decision_gate",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "gate.co-price.DG-PRICE-02",
+      "type": "decision_gate",
+      "layer": "variant:co-price"
     },
     {
       "id": "harness-verification",
@@ -362,6 +373,16 @@
       "layer": "variant:co-price"
     },
     {
+      "id": "stage.co-price.S1",
+      "type": "stage",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "stage.co-price.S2",
+      "type": "stage",
+      "layer": "variant:co-price"
+    },
+    {
       "id": "trade-promotion-roi",
       "type": "skill",
       "layer": "variant:co-price"
@@ -616,6 +637,18 @@
       "source": "prose"
     },
     {
+      "type": "accountable_for",
+      "from": "engagement-director",
+      "to": "procedure.co-price.engagement-review",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "engagement-director",
+      "to": "procedure.co-price.pricing-security-closeout",
+      "source": "raci_matrix"
+    },
+    {
       "type": "follows",
       "from": "executive-presentation",
       "to": "harness-verification",
@@ -755,6 +788,18 @@
       }
     },
     {
+      "type": "decides_on",
+      "from": "gate.co-price.DG-PRICE-01",
+      "to": "output_type.engine_build",
+      "source": "decision_model"
+    },
+    {
+      "type": "decides_on",
+      "from": "gate.co-price.DG-PRICE-02",
+      "to": "output_type.price_recommendation",
+      "source": "decision_model"
+    },
+    {
       "type": "follows",
       "from": "harness-verification",
       "to": "double-entry-reconciliation",
@@ -889,6 +934,36 @@
         "field": "relates_to",
         "index": 1
       }
+    },
+    {
+      "type": "accountable_for",
+      "from": "lead-architect",
+      "to": "procedure.co-price.engine-implementation",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "lead-architect",
+      "to": "procedure.co-price.pricing-analysis",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "lead-architect",
+      "to": "procedure.co-price.pricing-security-bootstrap",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "lead-architect",
+      "to": "procedure.co-price.release-assurance",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "lead-architect",
+      "to": "procedure.co-price.scenario-modeling",
+      "source": "raci_matrix"
     },
     {
       "type": "references",
@@ -1040,7 +1115,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-price.engagement-review",
       "to": "engagement-director",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1070,19 +1146,28 @@
       "type": "step_by_agent",
       "from": "procedure.co-price.engagement-review",
       "to": "security-auditor",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-price.engagement-review",
+      "to": "stage.co-price.S2",
+      "source": "process_schema"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-price.engine-implementation",
       "to": "core-engine-dev",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-price.engine-implementation",
       "to": "cost-asset-mgmt",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1094,7 +1179,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-price.engine-implementation",
       "to": "lead-architect",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -1118,7 +1204,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-price.engine-implementation",
       "to": "pricing-strategist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1139,6 +1226,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-price.engine-implementation",
+      "to": "stage.co-price.S1",
+      "source": "process_schema"
+    },
+    {
       "type": "step_uses_skill",
       "from": "procedure.co-price.engine-implementation",
       "to": "ui-component-design",
@@ -1148,7 +1241,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-price.engine-implementation",
       "to": "ux-specialist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1166,7 +1260,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-price.pricing-analysis",
       "to": "market-intelligence-analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -1190,19 +1285,28 @@
       "type": "step_by_agent",
       "from": "procedure.co-price.pricing-analysis",
       "to": "pricing-strategist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-price.pricing-analysis",
       "to": "pricing-strategist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-price.pricing-analysis",
       "to": "pricing-strategist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-price.pricing-analysis",
+      "to": "stage.co-price.S1",
+      "source": "process_schema"
     },
     {
       "type": "step_uses_skill",
@@ -1232,7 +1336,14 @@
       "type": "step_by_agent",
       "from": "procedure.co-price.pricing-security-bootstrap",
       "to": "security-monitor",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-price.pricing-security-bootstrap",
+      "to": "stage.co-price.S1",
+      "source": "process_schema"
     },
     {
       "type": "step_uses_skill",
@@ -1256,13 +1367,21 @@
       "type": "step_by_agent",
       "from": "procedure.co-price.pricing-security-closeout",
       "to": "security-monitor",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-price.pricing-security-closeout",
+      "to": "stage.co-price.S2",
+      "source": "process_schema"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-price.release-assurance",
       "to": "cost-asset-mgmt",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1274,13 +1393,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-price.release-assurance",
       "to": "cpa-auditor",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-price.release-assurance",
       "to": "devops-admin",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1292,13 +1413,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-price.release-assurance",
       "to": "engagement-director",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-price.release-assurance",
       "to": "finance-strategy-lead",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1328,7 +1451,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-price.release-assurance",
       "to": "l10n-auditor",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -1358,13 +1482,21 @@
       "type": "step_by_agent",
       "from": "procedure.co-price.release-assurance",
       "to": "qa-tester",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-price.release-assurance",
+      "to": "stage.co-price.S1",
+      "source": "process_schema"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-price.scenario-modeling",
       "to": "finance-strategy-lead",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1382,7 +1514,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-price.scenario-modeling",
       "to": "lead-architect",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -1394,7 +1527,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-price.scenario-modeling",
       "to": "pricing-strategist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1424,7 +1558,14 @@
       "type": "step_by_agent",
       "from": "procedure.co-price.scenario-modeling",
       "to": "security-auditor",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-price.scenario-modeling",
+      "to": "stage.co-price.S1",
+      "source": "process_schema"
     },
     {
       "type": "step_uses_skill",
@@ -1436,7 +1577,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-price.scenario-modeling",
       "to": "ux-specialist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "enables",
@@ -1471,6 +1613,24 @@
         "field": "relates_to",
         "index": 2
       }
+    },
+    {
+      "type": "gated_by",
+      "from": "stage.co-price.S1",
+      "to": "gate.co-price.DG-PRICE-01",
+      "source": "decision_model"
+    },
+    {
+      "type": "gated_by",
+      "from": "stage.co-price.S1",
+      "to": "gate.co-price.DG-PRICE-02",
+      "source": "decision_model"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-price.S1",
+      "to": "stage.co-price.S2",
+      "source": "process_schema"
     },
     {
       "type": "references",

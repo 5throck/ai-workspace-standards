@@ -4,6 +4,7 @@ variant: co-deck
 version: "1.0.0"
 title: Deck Source Research
 phase: 1
+stage: S1
 status: active
 owner_agent: research
 purpose: >
@@ -25,7 +26,7 @@ outputs:
 relations:
   - type: enables
     target: procedure.co-deck.storyline-development
-quality_gates:
+
   - "Every key claim in the research pack carries a verified source."
 evidence: []
 failure_modes:

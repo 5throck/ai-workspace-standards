@@ -4,6 +4,7 @@ variant: co-export
 version: "1.0.0"
 title: Compliance Determination
 phase: 2
+stage: S2
 status: active
 owner_agent: fta-origin-analyst
 purpose: >
@@ -46,7 +47,7 @@ relations:
     target: procedure.co-export.market-entry-assessment
   - type: enables
     target: procedure.co-export.export-shipment-compliance
-quality_gates:
+
   - "All determinations documented with rationale before shipment planning."
 evidence: []
 failure_modes:

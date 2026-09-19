@@ -406,5 +406,12 @@
     ],
     "external": []
   },
-  "promotionChecklist": "PROMOTION_CHECKLIST.md"
+  "promotionChecklist": "PROMOTION_CHECKLIST.md",
+  "deg_conformance": "governed",
+  "process_manifest": {
+    "stages_file": "process/stages.yaml",
+    "raci_file": "governance/raci.yaml",
+    "gates_file": "decisions/gates.yaml",
+    "evidence_models_dir": "evidence-models/"
+  }
 }

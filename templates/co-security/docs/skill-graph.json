@@ -1,9 +1,15 @@
 {
   "version": 1,
+  "graph_profile": "deg/v1",
   "nodes": [
     {
       "id": "finding-reconciliation",
       "type": "skill",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "gate.co-security.DG-SECURITY-01",
+      "type": "decision_gate",
       "layer": "variant:co-security"
     },
     {
@@ -152,6 +158,16 @@
       "layer": "variant:co-security"
     },
     {
+      "id": "stage.co-security.S1",
+      "type": "stage",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "stage.co-security.S2",
+      "type": "stage",
+      "layer": "variant:co-security"
+    },
+    {
       "id": "stride-threat-matrix",
       "type": "skill",
       "layer": "variant:co-security"
@@ -282,6 +298,12 @@
       "source": "prose"
     },
     {
+      "type": "decides_on",
+      "from": "gate.co-security.DG-SECURITY-01",
+      "to": "output_type.sarif_export",
+      "source": "decision_model"
+    },
+    {
       "type": "references",
       "from": "patch-engineer",
       "to": "verify-authorization",
@@ -309,7 +331,14 @@
       "type": "step_by_agent",
       "from": "procedure.co-security.engagement-planning",
       "to": "red-team-lead",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-security.engagement-planning",
+      "to": "stage.co-security.S1",
+      "source": "process_schema"
     },
     {
       "type": "step_uses_skill",
@@ -321,7 +350,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-security.engagement-planning",
       "to": "threat-modeler",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -351,13 +381,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-security.post-engagement-hardening",
       "to": "patch-engineer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-security.post-engagement-hardening",
       "to": "pentester",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "follows",
@@ -369,7 +401,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-security.post-engagement-hardening",
       "to": "report-writer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -382,6 +415,12 @@
       "from": "procedure.co-security.post-engagement-hardening",
       "to": "spdx-sbom",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-security.post-engagement-hardening",
+      "to": "stage.co-security.S2",
+      "source": "process_schema"
     },
     {
       "type": "step_uses_skill",
@@ -399,13 +438,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-security.remediation-support",
       "to": "patch-engineer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-security.remediation-support",
       "to": "patch-engineer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "follows",
@@ -418,6 +459,12 @@
       "from": "procedure.co-security.remediation-support",
       "to": "spdx-sbom",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-security.remediation-support",
+      "to": "stage.co-security.S2",
+      "source": "process_schema"
     },
     {
       "type": "produces",
@@ -435,13 +482,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-security.security-reporting",
       "to": "report-writer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-security.security-reporting",
       "to": "report-writer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -454,6 +503,12 @@
       "from": "procedure.co-security.security-reporting",
       "to": "sarif-exporter",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-security.security-reporting",
+      "to": "stage.co-security.S2",
+      "source": "process_schema"
     },
     {
       "type": "step_uses_skill",
@@ -477,7 +532,14 @@
       "type": "step_by_agent",
       "from": "procedure.co-security.threat-analysis",
       "to": "red-team-lead",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-security.threat-analysis",
+      "to": "stage.co-security.S1",
+      "source": "process_schema"
     },
     {
       "type": "step_uses_skill",
@@ -489,7 +551,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-security.threat-analysis",
       "to": "threat-modeler",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -513,25 +576,34 @@
       "type": "step_by_agent",
       "from": "procedure.co-security.threat-model-and-report",
       "to": "pentester",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-security.threat-model-and-report",
       "to": "red-team-lead",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-security.threat-model-and-report",
       "to": "report-writer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
       "from": "procedure.co-security.threat-model-and-report",
       "to": "sarif-exporter",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-security.threat-model-and-report",
+      "to": "stage.co-security.S2",
+      "source": "process_schema"
     },
     {
       "type": "step_uses_skill",
@@ -543,7 +615,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-security.threat-model-and-report",
       "to": "threat-modeler",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "follows",
@@ -564,10 +637,46 @@
       "source": "prose"
     },
     {
+      "type": "accountable_for",
+      "from": "red-team-lead",
+      "to": "procedure.co-security.engagement-planning",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "red-team-lead",
+      "to": "procedure.co-security.threat-analysis",
+      "source": "raci_matrix"
+    },
+    {
       "type": "references",
       "from": "red-team-lead",
       "to": "verify-authorization",
       "source": "prose"
+    },
+    {
+      "type": "accountable_for",
+      "from": "report-writer",
+      "to": "procedure.co-security.post-engagement-hardening",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "report-writer",
+      "to": "procedure.co-security.remediation-support",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "report-writer",
+      "to": "procedure.co-security.security-reporting",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "report-writer",
+      "to": "procedure.co-security.threat-model-and-report",
+      "source": "raci_matrix"
     },
     {
       "type": "references",
@@ -741,6 +850,18 @@
       "from": "spdx-sbom",
       "to": "security-scan",
       "source": "prose"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-security.S1",
+      "to": "stage.co-security.S2",
+      "source": "process_schema"
+    },
+    {
+      "type": "gated_by",
+      "from": "stage.co-security.S2",
+      "to": "gate.co-security.DG-SECURITY-01",
+      "source": "decision_model"
     },
     {
       "type": "follows",

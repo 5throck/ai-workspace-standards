@@ -1,37 +1,157 @@
-schema_version: "1.0"
+schema_version: '1.1'
 variant: co-abap
 output_types:
   functional_requirement:
-    description: "Registered procedure output type"
+    description: >-
+      Functional requirement - the final output of the SAP Requirements Analysis procedure
+      (co-abap-requirements-analysis): Analyze functional requirements across SAP modules and system
+      state before any build decision.
+    owner_agent: co-analyst
+    format: markdown
+    evidence_model: null
+    retention: engagement
   technical_analysis:
-    description: "Registered procedure output type"
+    description: >-
+      Technical analysis - an intermediate artifact from step 1 of the Custom ABAP Development
+      Delivery procedure (co-abap-custom-dev-delivery), produced by sap-investigator: Investigate
+      standard SAP behavior, tables, and exits to decide build vs configure before any code is
+      written.
+    owner_agent: sap-investigator
+    format: markdown
+    evidence_model: null
+    retention: engagement
   implementation_package:
-    description: "Registered procedure output type"
+    description: >-
+      Implementation package - the final output of the Custom ABAP Development Delivery procedure
+      (co-abap-custom-dev-delivery): Deliver a custom ABAP development request from investigation
+      through tested, reviewed code following Clean ABAP standards.
+    owner_agent: code-writer
+    format: markdown
+    evidence_model: null
+    retention: engagement
   review_findings:
-    description: "Registered procedure output type"
+    description: >-
+      Review findings - the final output of the Security Closeout Review procedure
+      (co-abap-security-closeout-review): Confirm that ABAP changes, transports, and residual risks
+      are security-reviewed before operational handoff.
+    owner_agent: security-monitor
+    format: markdown
+    evidence_model: null
+    retention: engagement
   test_report:
-    description: "Registered procedure output type"
+    description: >-
+      Test report - an intermediate artifact from step 4 of the Custom ABAP Development Delivery
+      procedure (co-abap-custom-dev-delivery), produced by test-runner: Execute unit and integration
+      tests; record results in the test report.
+    owner_agent: test-runner
+    format: markdown
+    evidence_model: null
+    retention: engagement
   module_impact_notes:
-    description: "Registered procedure output type"
+    description: >-
+      Module impact notes - an intermediate artifact from step 2 of the SAP Requirements Analysis
+      procedure (co-abap-requirements-analysis), produced by fi-analyst: Assess FI impact of the
+      requirement.
+    owner_agent: fi-analyst
+    format: markdown
+    evidence_model: null
+    retention: engagement
   system_state_report:
-    description: "Registered procedure output type"
+    description: >-
+      System state report - an intermediate artifact from step 8 of the SAP Requirements Analysis
+      procedure (co-abap-requirements-analysis), produced by read-only-analyst: Inspect current
+      system behavior and configuration without changes.
+    owner_agent: read-only-analyst
+    format: markdown
+    evidence_model: null
+    retention: engagement
   data_model_report:
-    description: "Registered procedure output type"
+    description: >-
+      Data model report - an intermediate artifact from step 9 of the SAP Requirements Analysis
+      procedure (co-abap-requirements-analysis), produced by schema-inspector: Inspect tables and
+      data model touched by the requirement.
+    owner_agent: schema-inspector
+    format: markdown
+    evidence_model: null
+    retention: engagement
   feasibility_findings:
-    description: "Registered procedure output type"
+    description: >-
+      Feasibility findings - an intermediate artifact from step 10 of the SAP Requirements Analysis
+      procedure (co-abap-requirements-analysis), produced by architect: Judge build-vs-configure
+      feasibility at the analysis level.
+    owner_agent: architect
+    format: markdown
+    evidence_model: null
+    retention: engagement
   solution_blueprint:
-    description: "Registered procedure output type"
+    description: >-
+      Solution blueprint - the final output of the SAP Solution Blueprint procedure
+      (co-abap-solution-blueprint): Design the technical solution shape: data model, interfaces, and
+      platform constraints, feeding the build procedure.
+    owner_agent: architect
+    format: markdown
+    evidence_model: null
+    retention: engagement
   data_layer_design:
-    description: "Registered procedure output type"
+    description: >-
+      Data layer design - an intermediate artifact from step 2 of the SAP Solution Blueprint
+      procedure (co-abap-solution-blueprint), produced by dba: Design tables, indexes, and data
+      migration needs.
+    owner_agent: dba
+    format: json
+    evidence_model: null
+    retention: engagement
   interface_design:
-    description: "Registered procedure output type"
+    description: >-
+      Interface design - an intermediate artifact from step 3 of the SAP Solution Blueprint
+      procedure (co-abap-solution-blueprint), produced by interface-expert: Design inbound/outbound
+      interfaces and IDoc/API touchpoints.
+    owner_agent: interface-expert
+    format: markdown
+    evidence_model: null
+    retention: engagement
   ui_enhancement:
-    description: "Registered procedure output type"
+    description: >-
+      Ui enhancement - an intermediate artifact from step 3.5 of the Custom ABAP Development
+      Delivery procedure (co-abap-custom-dev-delivery), produced by fiori-developer: Implement the
+      Fiori/UI layer where the solution touches user interfaces.
+    owner_agent: fiori-developer
+    format: markdown
+    evidence_model: null
+    retention: engagement
   form_outputs:
-    description: "Registered procedure output type"
+    description: >-
+      Form outputs - an intermediate artifact from step 3.6 of the Custom ABAP Development Delivery
+      procedure (co-abap-custom-dev-delivery), produced by form-expert: Implement SAPscript/Adobe
+      form outputs required by the solution.
+    owner_agent: form-expert
+    format: markdown
+    evidence_model: null
+    retention: engagement
   automation_scripts:
-    description: "Registered procedure output type"
+    description: >-
+      Automation scripts - an intermediate artifact from step 3.7 of the Custom ABAP Development
+      Delivery procedure (co-abap-custom-dev-delivery), produced by gui-scripter: Add GUI automation
+      where legacy transactions need automation support.
+    owner_agent: gui-scripter
+    format: markdown
+    evidence_model: null
+    retention: engagement
   transport_plan:
-    description: "Registered procedure output type"
+    description: >-
+      Transport plan - the final output of the Transport Release and Acceptance procedure
+      (co-abap-transport-release): Release the tested development through transports and confirm
+      acceptance in the target system.
+    owner_agent: devops-admin
+    format: markdown
+    evidence_model: null
+    retention: engagement
   acceptance_report:
-    description: "Registered procedure output type"
+    description: >-
+      Acceptance report - an intermediate artifact from step 2 of the Transport Release and
+      Acceptance procedure (co-abap-transport-release), produced by test-runner: Run post-transport
+      smoke tests in the target system.
+    owner_agent: test-runner
+    format: markdown
+    evidence_model: null
+    retention: engagement

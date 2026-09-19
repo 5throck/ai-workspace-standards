@@ -1,0 +1,80 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "evidence-model.schema.json",
+  "title": "Evidence Model Meta-Schema",
+  "description": "Meta-schema that all variant evidence models must validate against. Every evidence model in templates/<variant>/evidence-models/** must declare a draft-07 JSON Schema and include all required top-level fields. Generalizes the co-safety evidence-models pattern. See design §8.2 and ADR-0083.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["$schema", "$id", "title", "version", "type", "required", "properties"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "const": "http://json-schema.org/draft-07/schema#",
+      "description": "JSON Schema dialect. Must be draft-07."
+    },
+    "$id": {
+      "type": "string",
+      "description": "Unique identifier for this evidence model schema (e.g. 'tbm-record.schema.json')."
+    },
+    "title": {
+      "type": "string",
+      "description": "Human-readable title of the evidence model."
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed description of what records this evidence model captures."
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "Semantic version (e.g. 1.2.0) of this evidence model."
+    },
+    "type": {
+      "type": "string",
+      "const": "object",
+      "description": "Evidence models are objects."
+    },
+    "required": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of required properties. Must include 'record_id' to satisfy the meta-schema requirement."
+    },
+    "properties": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Object describing all properties of the evidence record.",
+      "properties": {
+        "record_id": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "pattern"],
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "string",
+              "description": "Record ID type (string)."
+            },
+            "pattern": {
+              "type": "string",
+              "description": "Regex pattern that record_id values must match (e.g. '^REC-[0-9]{6}$')."
+            },
+            "description": {
+              "type": "string",
+              "description": "Description of the record_id field."
+            }
+          },
+          "description": "The record_id property, required in all evidence models. Provides a unique identifier for each evidence record."
+        }
+      }
+    },
+    "definitions": {
+      "type": "object",
+      "description": "Optional reusable schema definitions."
+    },
+    "additionalProperties": {
+      "description": "Additional properties are permitted to support domain-specific extensions."
+    }
+  }
+}

@@ -1,0 +1,41 @@
+schema_version: '1.0'
+variant: co-security
+generated_from: procedures/
+rows:
+  - stage: S1
+    activity: procedure.co-security.engagement-planning
+    accountable: red-team-lead
+    responsible:
+      - red-team-lead
+      - threat-modeler
+  - stage: S1
+    activity: procedure.co-security.threat-analysis
+    accountable: red-team-lead
+    responsible:
+      - red-team-lead
+      - threat-modeler
+  - stage: S2
+    activity: procedure.co-security.post-engagement-hardening
+    accountable: report-writer
+    responsible:
+      - patch-engineer
+      - pentester
+      - report-writer
+  - stage: S2
+    activity: procedure.co-security.remediation-support
+    accountable: report-writer
+    responsible:
+      - patch-engineer
+  - stage: S2
+    activity: procedure.co-security.security-reporting
+    accountable: report-writer
+    responsible:
+      - report-writer
+  - stage: S2
+    activity: procedure.co-security.threat-model-and-report
+    accountable: report-writer
+    responsible:
+      - pentester
+      - red-team-lead
+      - report-writer
+      - threat-modeler

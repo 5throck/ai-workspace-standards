@@ -4,6 +4,7 @@ variant: co-consult
 version: "1.0.0"
 title: Solution Delivery
 phase: 3
+stage: S3
 status: active
 owner_agent: delivery-manager
 purpose: >
@@ -43,7 +44,7 @@ outputs:
 relations:
   - type: follows
     target: procedure.co-consult.solution-design
-quality_gates:
+
   - "Workstream reviews confirm blueprint and analyses are consistent."
 evidence: []
 failure_modes:

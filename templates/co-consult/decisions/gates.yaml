@@ -1,0 +1,15 @@
+schema_version: "1.0"
+variant: co-consult
+gates:
+  - id: DG-CONSULT-01
+    title: "Logic audit passes before executive presentation."
+    stage: S2
+    decider_agent: strategy-analyst
+    inputs:
+      - recommendation_set
+    criteria:
+      - "Logic audit passes before executive presentation."
+    outcomes:
+      - proceed
+      - rework
+    record_kind: DEC

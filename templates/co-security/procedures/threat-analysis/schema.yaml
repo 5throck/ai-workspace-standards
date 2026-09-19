@@ -4,6 +4,7 @@ variant: co-security
 version: "1.0.0"
 title: Threat Analysis
 phase: 2
+stage: S1
 status: active
 owner_agent: threat-modeler
 purpose: >
@@ -31,7 +32,7 @@ outputs:
 relations:
   - type: follows
     target: procedure.co-security.engagement-planning
-quality_gates:
+
   - "Every test objective traces to a modeled threat."
 evidence: []
 failure_modes:

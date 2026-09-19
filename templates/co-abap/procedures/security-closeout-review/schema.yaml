@@ -4,6 +4,7 @@ variant: co-abap
 version: "1.0.0"
 title: Security Closeout Review
 phase: 5
+stage: S2
 status: active
 owner_agent: security-monitor
 purpose: >
@@ -26,7 +27,7 @@ outputs:
 relations:
   - type: follows
     target: procedure.co-abap.transport-release
-quality_gates:
+
   - "No high-severity security finding remains open at closeout."
 evidence: []
 failure_modes:

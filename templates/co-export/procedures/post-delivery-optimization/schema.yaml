@@ -4,6 +4,7 @@ variant: co-export
 version: "1.0.0"
 title: Post-Delivery Optimization
 phase: 4
+stage: S5
 status: active
 owner_agent: logistics-coordinator
 purpose: >
@@ -31,7 +32,7 @@ outputs:
 relations:
   - type: follows
     target: procedure.co-export.shipment-execution
-quality_gates:
+
   - "Optimization plan backed by delivery actuals, not estimates."
 evidence: []
 failure_modes:

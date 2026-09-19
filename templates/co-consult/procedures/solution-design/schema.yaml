@@ -4,6 +4,7 @@ variant: co-consult
 version: "1.0.0"
 title: Solution Design
 phase: 2
+stage: S3
 status: active
 owner_agent: strategy-analyst
 purpose: >
@@ -37,7 +38,7 @@ outputs:
 relations:
   - type: follows
     target: procedure.co-consult.current-state-diagnosis
-quality_gates:
+
   - "Every option has feasibility notes and a change impact map before selection."
 evidence: []
 failure_modes:

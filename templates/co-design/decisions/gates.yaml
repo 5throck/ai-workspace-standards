@@ -1,0 +1,27 @@
+schema_version: "1.0"
+variant: co-design
+gates:
+  - id: DG-DESIGN-01
+    title: "Design direction approved at the phase 2 gate before impleme"
+    stage: S3
+    decider_agent: design-lead
+    inputs:
+      - design_direction
+    criteria:
+      - "Design direction approved at the phase 2 gate before implementation."
+    outcomes:
+      - proceed
+      - rework
+    record_kind: DEC
+  - id: DG-DESIGN-02
+    title: "Token usage lint passes and design-lead reviews the full set"
+    stage: S4
+    decider_agent: visual-designer
+    inputs:
+      - visual_design_set
+    criteria:
+      - "Token usage lint passes and design-lead reviews the full set."
+    outcomes:
+      - proceed
+      - rework
+    record_kind: DEC

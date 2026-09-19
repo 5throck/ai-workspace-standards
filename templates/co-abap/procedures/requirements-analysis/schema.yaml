@@ -4,6 +4,7 @@ variant: co-abap
 version: "1.0.0"
 title: SAP Requirements Analysis
 phase: 1
+stage: S1
 status: active
 owner_agent: co-analyst
 purpose: >
@@ -78,7 +79,7 @@ outputs:
 relations:
   - type: enables
     target: procedure.co-abap.solution-blueprint
-quality_gates:
+
   - "All impacted modules have impact notes before the solution blueprint."
 evidence: []
 failure_modes:

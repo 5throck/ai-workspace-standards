@@ -4,6 +4,7 @@ variant: co-price
 version: "1.0.0"
 title: Pricing Analysis
 phase: 1
+stage: S1
 status: active
 owner_agent: pricing-strategist
 purpose: >
@@ -45,9 +46,11 @@ outputs:
 relations:
   - type: enables
     target: skill.pricing-governance
-quality_gates:
+
   - "Recommendation reconciles with the waterfall model within tolerance."
   - "Scenario comparison run across at least three price points."
+decision_points:
+  - DG-PRICE-02
 evidence:
   - "docs/pricing-governance-rules.md"
 failure_modes:

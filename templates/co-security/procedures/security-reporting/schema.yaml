@@ -4,6 +4,7 @@ variant: co-security
 version: "1.0.0"
 title: Security Reporting
 phase: 5
+stage: S2
 status: active
 owner_agent: report-writer
 purpose: >
@@ -32,7 +33,7 @@ outputs:
 relations:
   - type: follows
     target: procedure.co-security.remediation-support
-quality_gates:
+
   - "Report findings match the reconciled finding set exactly."
 evidence: []
 failure_modes:

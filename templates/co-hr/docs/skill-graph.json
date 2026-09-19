@@ -1,5 +1,6 @@
 {
   "version": 1,
+  "graph_profile": "deg/v1",
   "nodes": [
     {
       "id": "career-path-succession-planning",
@@ -39,6 +40,26 @@
     {
       "id": "data-analyst",
       "type": "agent",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "gate.co-hr.DG-HR-01",
+      "type": "decision_gate",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "gate.co-hr.DG-HR-02",
+      "type": "decision_gate",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "gate.co-hr.DG-HR-03",
+      "type": "decision_gate",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "gate.co-hr.DG-HR-04",
+      "type": "decision_gate",
       "layer": "variant:co-hr"
     },
     {
@@ -224,6 +245,21 @@
     {
       "id": "safety-health-officer",
       "type": "agent",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "stage.co-hr.S1",
+      "type": "stage",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "stage.co-hr.S2",
+      "type": "stage",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "stage.co-hr.S3",
+      "type": "stage",
       "layer": "variant:co-hr"
     },
     {
@@ -493,6 +529,12 @@
       "source": "prose"
     },
     {
+      "type": "accountable_for",
+      "from": "compensation-benefits-analyst",
+      "to": "procedure.co-hr.compensation-benchmarking",
+      "source": "raci_matrix"
+    },
+    {
       "type": "references",
       "from": "competency-modeling",
       "to": "career-path-succession-planning",
@@ -557,6 +599,30 @@
       "from": "consulting-report-writing",
       "to": "pm",
       "source": "skill_manifest"
+    },
+    {
+      "type": "decides_on",
+      "from": "gate.co-hr.DG-HR-01",
+      "to": "output_type.benchmark_report",
+      "source": "decision_model"
+    },
+    {
+      "type": "decides_on",
+      "from": "gate.co-hr.DG-HR-02",
+      "to": "output_type.compliance_findings",
+      "source": "decision_model"
+    },
+    {
+      "type": "decides_on",
+      "from": "gate.co-hr.DG-HR-03",
+      "to": "output_type.org_design_options",
+      "source": "decision_model"
+    },
+    {
+      "type": "decides_on",
+      "from": "gate.co-hr.DG-HR-04",
+      "to": "output_type.implementation_milestones",
+      "source": "decision_model"
     },
     {
       "type": "follows",
@@ -820,6 +886,24 @@
       }
     },
     {
+      "type": "accountable_for",
+      "from": "org-design-consultant",
+      "to": "procedure.co-hr.hr-diagnosis",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "org-design-consultant",
+      "to": "procedure.co-hr.hr-solution-design",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "org-design-consultant",
+      "to": "procedure.co-hr.org-implementation",
+      "source": "raci_matrix"
+    },
+    {
       "type": "follows",
       "from": "org-design-framework",
       "to": "hr-metrics-analysis",
@@ -1059,13 +1143,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-hr.compensation-benchmarking",
       "to": "compensation-benefits-analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-hr.compensation-benchmarking",
       "to": "compensation-benefits-analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1077,7 +1163,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-hr.compensation-benchmarking",
       "to": "data-analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1092,16 +1179,24 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-hr.compensation-benchmarking",
+      "to": "stage.co-hr.S1",
+      "source": "process_schema"
+    },
+    {
       "type": "step_by_agent",
       "from": "procedure.co-hr.hr-diagnosis",
       "to": "change-management-partner",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-hr.hr-diagnosis",
       "to": "labor-compliance-analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1119,7 +1214,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-hr.hr-diagnosis",
       "to": "labor-relations-specialist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1143,7 +1239,14 @@
       "type": "step_by_agent",
       "from": "procedure.co-hr.hr-diagnosis",
       "to": "safety-health-officer",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-hr.hr-diagnosis",
+      "to": "stage.co-hr.S2",
+      "source": "process_schema"
     },
     {
       "type": "step_uses_skill",
@@ -1161,13 +1264,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-hr.hr-solution-design",
       "to": "career-succession-consultant",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-hr.hr-solution-design",
       "to": "change-management-partner",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1179,13 +1284,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-hr.hr-solution-design",
       "to": "compensation-benefits-analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-hr.hr-solution-design",
       "to": "labor-relations-specialist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1197,13 +1304,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-hr.hr-solution-design",
       "to": "learning-development-specialist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-hr.hr-solution-design",
       "to": "org-design-consultant",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1227,7 +1336,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-hr.hr-solution-design",
       "to": "performance-management-consultant",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1248,6 +1358,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-hr.hr-solution-design",
+      "to": "stage.co-hr.S2",
+      "source": "process_schema"
+    },
+    {
       "type": "step_uses_skill",
       "from": "procedure.co-hr.hr-solution-design",
       "to": "stakeholder-alignment",
@@ -1257,7 +1373,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-hr.hr-solution-design",
       "to": "talent-acquisition-specialist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1269,7 +1386,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-hr.org-implementation",
       "to": "data-analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1281,7 +1399,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-hr.org-implementation",
       "to": "org-design-consultant",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1300,6 +1419,48 @@
       "from": "procedure.co-hr.org-implementation",
       "to": "procedure.co-hr.hr-solution-design",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-hr.org-implementation",
+      "to": "stage.co-hr.S3",
+      "source": "process_schema"
+    },
+    {
+      "type": "gated_by",
+      "from": "stage.co-hr.S1",
+      "to": "gate.co-hr.DG-HR-01",
+      "source": "decision_model"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-hr.S1",
+      "to": "stage.co-hr.S2",
+      "source": "process_schema"
+    },
+    {
+      "type": "gated_by",
+      "from": "stage.co-hr.S2",
+      "to": "gate.co-hr.DG-HR-02",
+      "source": "decision_model"
+    },
+    {
+      "type": "gated_by",
+      "from": "stage.co-hr.S2",
+      "to": "gate.co-hr.DG-HR-03",
+      "source": "decision_model"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-hr.S2",
+      "to": "stage.co-hr.S3",
+      "source": "process_schema"
+    },
+    {
+      "type": "gated_by",
+      "from": "stage.co-hr.S3",
+      "to": "gate.co-hr.DG-HR-04",
+      "source": "decision_model"
     },
     {
       "type": "used_by",

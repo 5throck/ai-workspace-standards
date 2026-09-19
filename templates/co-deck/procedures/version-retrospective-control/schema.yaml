@@ -4,6 +4,7 @@ variant: co-deck
 version: "1.0.0"
 title: Version Retrospective Control
 phase: 6
+stage: S4
 status: active
 owner_agent: version
 purpose: >
@@ -25,7 +26,7 @@ outputs:
 relations:
   - type: follows
     target: procedure.co-deck.deck-publish-and-version
-quality_gates:
+
   - "Post-release archive identifies the final package and any follow-up actions."
 evidence: []
 failure_modes:

@@ -4,6 +4,7 @@ variant: co-design
 version: "1.0.0"
 title: Narrative Discovery
 phase: 1
+stage: S1
 status: active
 owner_agent: storyteller
 purpose: >
@@ -23,7 +24,7 @@ outputs:
 relations:
   - type: composes_with
     target: procedure.co-design.ux-discovery
-quality_gates:
+
   - "Narrative brief reviewed by design-lead before design definition."
 evidence: []
 failure_modes:

@@ -4,6 +4,7 @@ variant: co-export
 version: "1.0.0"
 title: Market Entry Assessment
 phase: 1
+stage: S1
 status: active
 owner_agent: market-entry-strategist
 purpose: >
@@ -54,7 +55,7 @@ outputs:
 relations:
   - type: enables
     target: procedure.co-export.compliance-determination
-quality_gates:
+
   - "Assessment covers regulatory, certification, and classification dimensions before go-ahead."
 evidence: []
 failure_modes:

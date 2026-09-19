@@ -4,6 +4,7 @@ variant: co-export
 version: "1.0.0"
 title: Export Shipment Compliance
 phase: 3
+stage: S3
 status: active
 owner_agent: pm
 purpose: >
@@ -42,9 +43,8 @@ steps:
 outputs:
   - type: document_set
 relations: []
-quality_gates:
-  - "Export control screening cleared for all destination jurisdictions."
-  - "Document set passes checklist with zero missing mandatory fields."
+decision_points:
+  - DG-EXPORT-01
 evidence:
   - "docs/tariff-dataset-schema.md"
 failure_modes:

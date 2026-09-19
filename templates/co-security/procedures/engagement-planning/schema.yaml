@@ -4,6 +4,7 @@ variant: co-security
 version: "1.0.0"
 title: Engagement Planning
 phase: 1
+stage: S1
 status: active
 owner_agent: red-team-lead
 purpose: >
@@ -31,7 +32,7 @@ outputs:
 relations:
   - type: enables
     target: procedure.co-security.threat-model-and-report
-quality_gates:
+
   - "No planning output is produced before authorization is verified."
 evidence: []
 failure_modes:

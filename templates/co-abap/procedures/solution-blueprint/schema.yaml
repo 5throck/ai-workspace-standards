@@ -4,6 +4,7 @@ variant: co-abap
 version: "1.0.0"
 title: SAP Solution Blueprint
 phase: 2
+stage: S1
 status: active
 owner_agent: architect
 purpose: >
@@ -39,7 +40,7 @@ relations:
     target: procedure.co-abap.requirements-analysis
   - type: enables
     target: procedure.co-abap.custom-dev-delivery
-quality_gates:
+
   - "Blueprint reviewed against every module impact note."
 evidence: []
 failure_modes:

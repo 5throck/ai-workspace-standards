@@ -4,6 +4,7 @@ variant: co-design
 version: "1.0.0"
 title: Prototype Validation
 phase: 4
+stage: S5
 status: active
 owner_agent: prototype-engineer
 purpose: >
@@ -31,7 +32,7 @@ outputs:
 relations:
   - type: follows
     target: procedure.co-design.visual-implementation
-quality_gates:
+
   - "Accessibility report shows zero critical findings."
 evidence: []
 failure_modes:

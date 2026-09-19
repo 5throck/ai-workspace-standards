@@ -4,6 +4,7 @@ variant: co-consult
 version: "1.0.0"
 title: Engagement Closeout
 phase: 4
+stage: S4
 status: active
 owner_agent: delivery-manager
 purpose: >
@@ -37,7 +38,7 @@ outputs:
 relations:
   - type: follows
     target: procedure.co-consult.solution-delivery
-quality_gates:
+
   - "Client sign-off recorded on all acceptance criteria."
 evidence: []
 failure_modes:

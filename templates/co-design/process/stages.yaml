@@ -1,0 +1,48 @@
+schema_version: '1.0'
+variant: co-design
+stages:
+  - id: S1
+    title: Narrative Discovery
+    order: 1
+    purpose: PENDING_REVIEW
+    entry_criteria:
+      - PENDING_REVIEW
+    exit_criteria:
+      - PENDING_REVIEW
+    owner_agent: storyteller
+  - id: S2
+    title: UX Discovery
+    order: 2
+    purpose: PENDING_REVIEW
+    entry_criteria:
+      - PENDING_REVIEW
+    exit_criteria:
+      - PENDING_REVIEW
+    owner_agent: ux-researcher
+  - id: S3
+    title: Design Definition
+    order: 3
+    purpose: PENDING_REVIEW
+    entry_criteria:
+      - PENDING_REVIEW
+    exit_criteria:
+      - PENDING_REVIEW
+    owner_agent: design-lead
+  - id: S4
+    title: Visual and Service Implementation
+    order: 4
+    purpose: PENDING_REVIEW
+    entry_criteria:
+      - PENDING_REVIEW
+    exit_criteria:
+      - PENDING_REVIEW
+    owner_agent: visual-designer
+  - id: S5
+    title: Prototype Validation
+    order: 5
+    purpose: PENDING_REVIEW
+    entry_criteria:
+      - PENDING_REVIEW
+    exit_criteria:
+      - PENDING_REVIEW
+    owner_agent: prototype-engineer

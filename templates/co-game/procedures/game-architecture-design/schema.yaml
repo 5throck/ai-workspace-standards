@@ -4,6 +4,7 @@ variant: co-game
 version: "1.0.0"
 title: Game Architecture Design
 phase: 2
+stage: S1
 status: active
 owner_agent: architect
 purpose: >
@@ -45,8 +46,10 @@ relations:
     target: procedure.co-game.game-concept-design
   - type: enables
     target: procedure.co-game.gameplay-feature-loop
-quality_gates:
+
   - "Implementation plan approved at the design gate."
+decision_points:
+  - DG-GAME-01
 evidence: []
 failure_modes:
   - "Architecture cannot support the tuning plan - revise the plan instead of hacking the architecture later."

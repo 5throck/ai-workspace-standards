@@ -4,6 +4,7 @@ variant: co-price
 version: "1.0.0"
 title: Pricing Security Bootstrap
 phase: 0
+stage: S1
 status: active
 owner_agent: security-monitor
 purpose: >
@@ -25,7 +26,7 @@ outputs:
 relations:
   - type: enables
     target: procedure.co-price.pricing-analysis
-quality_gates:
+
   - "Sensitive pricing-data handling controls are documented before analysis starts."
 evidence: []
 failure_modes:

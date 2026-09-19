@@ -1,5 +1,6 @@
 {
   "version": 1,
+  "graph_profile": "deg/v1",
   "nodes": [
     {
       "id": "change-impact-assessment",
@@ -72,6 +73,11 @@
     {
       "id": "financial-statement-analysis",
       "type": "skill",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "gate.co-consult.DG-CONSULT-01",
+      "type": "decision_gate",
       "layer": "variant:co-consult"
     },
     {
@@ -257,6 +263,26 @@
     {
       "id": "solutions-architect",
       "type": "agent",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "stage.co-consult.S1",
+      "type": "stage",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "stage.co-consult.S2",
+      "type": "stage",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "stage.co-consult.S3",
+      "type": "stage",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "stage.co-consult.S4",
+      "type": "stage",
       "layer": "variant:co-consult"
     },
     {
@@ -621,6 +647,12 @@
       "source": "skill_manifest"
     },
     {
+      "type": "accountable_for",
+      "from": "delivery-manager",
+      "to": "procedure.co-consult.engagement-closeout",
+      "source": "raci_matrix"
+    },
+    {
       "type": "used_by",
       "from": "executive-presentation",
       "to": "communications-lead",
@@ -960,6 +992,12 @@
       "source": "skill_manifest"
     },
     {
+      "type": "decides_on",
+      "from": "gate.co-consult.DG-CONSULT-01",
+      "to": "output_type.recommendation_set",
+      "source": "decision_model"
+    },
+    {
       "type": "used_by",
       "from": "hwp-document-processing",
       "to": "communications-lead",
@@ -1231,7 +1269,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-consult.current-state-diagnosis",
       "to": "change-management-partner",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1243,7 +1282,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-consult.current-state-diagnosis",
       "to": "industry-expert",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1273,7 +1313,14 @@
       "type": "step_by_agent",
       "from": "procedure.co-consult.current-state-diagnosis",
       "to": "sme",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-consult.current-state-diagnosis",
+      "to": "stage.co-consult.S1",
+      "source": "process_schema"
     },
     {
       "type": "step_uses_skill",
@@ -1291,7 +1338,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-consult.diagnosis-to-recommendation",
       "to": "data-analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1303,7 +1351,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-consult.diagnosis-to-recommendation",
       "to": "industry-expert",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1318,16 +1367,24 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-consult.diagnosis-to-recommendation",
+      "to": "stage.co-consult.S2",
+      "source": "process_schema"
+    },
+    {
       "type": "step_by_agent",
       "from": "procedure.co-consult.diagnosis-to-recommendation",
       "to": "strategy-analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-consult.engagement-closeout",
       "to": "delivery-manager",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -1354,6 +1411,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "in_stage",
+      "from": "procedure.co-consult.engagement-closeout",
+      "to": "stage.co-consult.S4",
+      "source": "process_schema"
+    },
+    {
       "type": "step_uses_skill",
       "from": "procedure.co-consult.engagement-closeout",
       "to": "technical-feasibility",
@@ -1363,25 +1426,29 @@
       "type": "step_by_agent",
       "from": "procedure.co-consult.engagement-closeout",
       "to": "technology-specialist",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-consult.engagement-closeout",
       "to": "workstream-lead",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-consult.solution-delivery",
       "to": "communications-lead",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-consult.solution-delivery",
       "to": "data-analyst",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1411,7 +1478,8 @@
       "type": "step_by_agent",
       "from": "procedure.co-consult.solution-delivery",
       "to": "sme",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -1423,7 +1491,14 @@
       "type": "step_by_agent",
       "from": "procedure.co-consult.solution-delivery",
       "to": "solutions-architect",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-consult.solution-delivery",
+      "to": "stage.co-consult.S3",
+      "source": "process_schema"
     },
     {
       "type": "step_uses_skill",
@@ -1441,13 +1516,15 @@
       "type": "step_by_agent",
       "from": "procedure.co-consult.solution-design",
       "to": "change-management-partner",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-consult.solution-design",
       "to": "industry-expert",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -1465,13 +1542,20 @@
       "type": "step_by_agent",
       "from": "procedure.co-consult.solution-design",
       "to": "sme",
-      "source": "procedure_schema"
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
       "from": "procedure.co-consult.solution-design",
       "to": "solution-design",
       "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-consult.solution-design",
+      "to": "stage.co-consult.S3",
+      "source": "process_schema"
     },
     {
       "type": "step_uses_skill",
@@ -1707,6 +1791,30 @@
       "source": "skill_manifest"
     },
     {
+      "type": "stage_follows",
+      "from": "stage.co-consult.S1",
+      "to": "stage.co-consult.S2",
+      "source": "process_schema"
+    },
+    {
+      "type": "gated_by",
+      "from": "stage.co-consult.S2",
+      "to": "gate.co-consult.DG-CONSULT-01",
+      "source": "decision_model"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-consult.S2",
+      "to": "stage.co-consult.S3",
+      "source": "process_schema"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-consult.S3",
+      "to": "stage.co-consult.S4",
+      "source": "process_schema"
+    },
+    {
       "type": "composes_with",
       "from": "stakeholder-alignment",
       "to": "change-impact-assessment",
@@ -1850,6 +1958,30 @@
         "file": "templates/co-consult/skills/stakeholder-review-management/SKILL.md",
         "field": "prerequisites"
       }
+    },
+    {
+      "type": "accountable_for",
+      "from": "strategy-analyst",
+      "to": "procedure.co-consult.current-state-diagnosis",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "strategy-analyst",
+      "to": "procedure.co-consult.diagnosis-to-recommendation",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "strategy-analyst",
+      "to": "procedure.co-consult.solution-delivery",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "strategy-analyst",
+      "to": "procedure.co-consult.solution-design",
+      "source": "raci_matrix"
     },
     {
       "type": "follows",

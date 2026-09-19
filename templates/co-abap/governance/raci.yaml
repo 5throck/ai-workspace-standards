@@ -1,0 +1,50 @@
+schema_version: '1.0'
+variant: co-abap
+generated_from: procedures/
+rows:
+  - stage: S1
+    activity: procedure.co-abap.requirements-analysis
+    accountable: architect
+    responsible:
+      - architect
+      - co-analyst
+      - fi-analyst
+      - le-analyst
+      - mm-analyst
+      - pp-analyst
+      - read-only-analyst
+      - schema-inspector
+      - sd-analyst
+  - stage: S1
+    activity: procedure.co-abap.security-readiness-baseline
+    accountable: architect
+    responsible:
+      - security-monitor
+  - stage: S1
+    activity: procedure.co-abap.solution-blueprint
+    accountable: architect
+    responsible:
+      - architect
+      - dba
+      - interface-expert
+  - stage: S2
+    activity: procedure.co-abap.custom-dev-delivery
+    accountable: code-writer
+    responsible:
+      - code-writer
+      - fiori-developer
+      - form-expert
+      - gui-scripter
+      - sap-investigator
+      - test-runner
+  - stage: S2
+    activity: procedure.co-abap.security-closeout-review
+    accountable: code-writer
+    responsible:
+      - security-monitor
+  - stage: S2
+    activity: procedure.co-abap.transport-release
+    accountable: code-writer
+    responsible:
+      - devops-admin
+      - test-runner

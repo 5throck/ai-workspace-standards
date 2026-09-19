@@ -4,6 +4,7 @@ variant: co-abap
 version: "1.0.0"
 title: Security Readiness Baseline
 phase: 0
+stage: S1
 status: active
 owner_agent: security-monitor
 purpose: >
@@ -25,7 +26,7 @@ outputs:
 relations:
   - type: enables
     target: procedure.co-abap.requirements-analysis
-quality_gates:
+
   - "Security baseline is documented before any system access or development work proceeds."
 evidence: []
 failure_modes:

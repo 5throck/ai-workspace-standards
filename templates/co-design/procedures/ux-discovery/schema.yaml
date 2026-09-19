@@ -4,6 +4,7 @@ variant: co-design
 version: "1.0.0"
 title: UX Discovery
 phase: 1
+stage: S2
 status: active
 owner_agent: ux-researcher
 purpose: >
@@ -36,8 +37,6 @@ steps:
 outputs:
   - type: research_findings
 relations: []
-quality_gates:
-  - "Design-lead review recorded before any visual design work starts."
 evidence:
   - "docs/co-design.context.md"
 failure_modes:

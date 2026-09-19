@@ -4,6 +4,7 @@ variant: co-deck
 version: "1.0.0"
 title: Version Research Control
 phase: 1
+stage: S2
 status: active
 owner_agent: version
 purpose: >
@@ -27,7 +28,7 @@ relations:
     target: procedure.co-deck.source-research
   - type: enables
     target: procedure.co-deck.storyline-development
-quality_gates:
+
   - "Storyline work references a named research revision."
 evidence: []
 failure_modes:

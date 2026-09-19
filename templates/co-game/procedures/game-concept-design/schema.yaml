@@ -4,6 +4,7 @@ variant: co-game
 version: "1.0.0"
 title: Game Concept Design
 phase: 1
+stage: S1
 status: active
 owner_agent: game-designer
 purpose: >
@@ -48,7 +49,7 @@ outputs:
 relations:
   - type: enables
     target: procedure.co-game.game-architecture-design
-quality_gates:
+
   - "Core loop playtested on paper prototypes and feasibility findings documented."
 evidence: []
 failure_modes:

@@ -1,0 +1,21 @@
+schema_version: '1.0'
+variant: co-price
+stages:
+  - id: S1
+    title: Release Assurance
+    order: 1
+    purpose: PENDING_REVIEW
+    entry_criteria:
+      - PENDING_REVIEW
+    exit_criteria:
+      - PENDING_REVIEW
+    owner_agent: lead-architect
+  - id: S2
+    title: Pricing Security Closeout
+    order: 2
+    purpose: PENDING_REVIEW
+    entry_criteria:
+      - PENDING_REVIEW
+    exit_criteria:
+      - PENDING_REVIEW
+    owner_agent: engagement-director

@@ -1,8 +1,24 @@
 #!/usr/bin/env bun
 /**
  * Skill Relationship Graph Generator
- * @version 1.10.0
+ * @version 1.12.0 (ADR-0084 Actor Model, 2026-09-19): emit human_role nodes
+ * from governance/_human-roles.yaml; add actor_type edge attribute to RACI
+ * edges (accountable_for, consulted_on, informed_of, step_by_agent); resolve
+ * actor type per derivation rule §3.1 (human-roles registry takes precedence
+ * over agent files).
  *
+ * v1.11.1 (P5 defect fix, 2026-09-19): decides_on edge target now
+ * uses the canonical `output_type.<name>` node ID prefix instead of the bare
+ * gate.inputs[] string, fixing ghost/unknown-target edges caught by
+ * dev-sync's per-scope graph verification (same bug class as the P4
+ * procedure-ID mismatch).
+ *
+ * v1.11.0 (2026-09-19): add DEG (Domain Execution Graph) support per ADR-0083 —
+ * emit stage nodes from process/stages.yaml, stage_follows edges between ordered
+ * stages, in_stage edges from procedure.stage field, and graph_profile: "deg/v1"
+ * marker. Defensively define (zero-instance) node/edge types for decision gates,
+ * evidence models, and RACI edges, ready for P4/P5. Exclude DEG sources from
+ * skill-graph.overrides.json eligibility per ADR-0060 Amendment 10 (forthcoming).
  * v1.10.0 (2026-09-11): render the term vocabulary in docs/skill-graph.md —
  * a "## Korean Term Vocabulary (terms-ko.json)" table (term | layer |
  * referencing skills) after Decisions & ADRs; Edge Types table's `references`
@@ -109,11 +125,14 @@ function hasTrackedFilesUnder(absDir: string): boolean {
 }
 
 // Interfaces for the graph structure
-interface GraphNode {
+export interface GraphNode {
   id: string;
   // 'term' = Korean vocabulary node extracted from a skill's
   // references/terms-ko.json (ADR-0072); id is namespaced `term:<용어>`.
-  type: 'skill' | 'agent' | 'decision' | 'adr' | 'procedure' | 'output_type' | 'term';
+  // 'stage' = domain execution stage node (DEG, ADR-0083); id form: `stage.<variant>.<id>`
+  // 'decision_gate' = decision gate node (DEG, ADR-0083); id form: `gate.<variant>.<id>`
+  // 'evidence_model' = evidence schema node (DEG, ADR-0083); id form: `evidence.<variant>.<name>`
+  type: 'skill' | 'agent' | 'decision' | 'adr' | 'procedure' | 'output_type' | 'term' | 'stage' | 'decision_gate' | 'evidence_model' | 'human_role';
   layer: 'L0' | 'L3' | 'common' | `variant:${string}`;
   /** Opaque input/output labels from SKILL.md frontmatter (skill nodes only). */
   inputs?: string[];
@@ -127,7 +146,10 @@ type EdgeType =
   // Procedure Schema v1.0 (2026-08-29): procedure-derived edges (canonical
   // source = templates/<variant>/procedures/<name>/schema.yaml — INV-1, see
   // docs/designs/2026-08-29-procedure-schema-design.md)
-  | 'step_uses_skill' | 'step_by_agent' | 'produces';
+  | 'step_uses_skill' | 'step_by_agent' | 'produces'
+  // Domain Execution Graph (ADR-0083): stage-axis, RACI, decision, evidence edges
+  | 'in_stage' | 'stage_follows' | 'accountable_for' | 'consulted_on' | 'informed_of'
+  | 'gated_by' | 'decides_on' | 'evidenced_by';
 
 // Typed `relates_to` entry shape is a *forward-open* object: {skill, type} are
 // the only two fields Phase 1 interprets. Any additional key (e.g. a future
@@ -139,7 +161,7 @@ interface EdgeProvenance {
   index?: number;
 }
 
-interface GraphEdge {
+export interface GraphEdge {
   type: EdgeType;
   from: string;
   to: string;
@@ -151,10 +173,13 @@ interface GraphEdge {
   extra?: Record<string, unknown>;
   /** Exactly which frontmatter field/entry produced this edge (JSON-only; not rendered in .md). */
   provenance?: EdgeProvenance;
+  /** Actor type ("human"|"agent") on RACI edges (accountable_for, consulted_on, informed_of, step_by_agent) per ADR-0084. */
+  actor_type?: "human" | "agent";
 }
 
-interface SkillGraph {
+export interface SkillGraph {
   version: 1;
+  graph_profile?: 'deg/v1';
   nodes: GraphNode[];
   edges: GraphEdge[];
 }
@@ -532,6 +557,53 @@ function discoverNodes(): { skills: Map<string, GraphNode>, agents: Map<string, 
 }
 
 /**
+ * Load the human-roles registry for a variant/scope dir, if present
+ * (ADR-0084, §3.4). Shared by deriveProceduresFromDir and deriveRACIFromYaml.
+ */
+function loadHumanRoles(variantDir: string): Set<string> {
+  const humanRoles = new Set<string>();
+  const humanRolesPath = join(variantDir, 'governance', '_human-roles.yaml');
+  if (existsSync(humanRolesPath)) {
+    try {
+      const hrData = yamlLoad(readFileSync(humanRolesPath, 'utf-8')) as any;
+      if (hrData?.human_roles && typeof hrData.human_roles === 'object') {
+        for (const key of Object.keys(hrData.human_roles)) {
+          humanRoles.add(key);
+        }
+      }
+    } catch {
+      // Ignore parse errors for human-roles
+    }
+  }
+  return humanRoles;
+}
+
+/** Check if an agent file exists anywhere in the workspace (any variant, or workspace-root agents/). */
+function agentFileExists(agentKey: string): boolean {
+  const templatesDir = join(ROOT, 'templates');
+  if (existsSync(templatesDir)) {
+    for (const variant of readdirSync(templatesDir)) {
+      const agentPath = join(templatesDir, variant, 'agents', `${agentKey}.md`);
+      if (existsSync(agentPath)) return true;
+    }
+  }
+  const workspaceAgentPath = join(ROOT, 'agents', `${agentKey}.md`);
+  if (existsSync(workspaceAgentPath)) return true;
+  return false;
+}
+
+/**
+ * Resolve actor type for an agent key per derivation rule (ADR-0084, §3.1):
+ * human-roles registry membership takes precedence over agent-file existence;
+ * omit the attribute entirely (return undefined) if neither matches.
+ */
+function resolveActorType(agentKey: string, humanRoles: Set<string>): "human" | "agent" | undefined {
+  if (humanRoles.has(agentKey)) return "human";
+  if (agentFileExists(agentKey)) return "agent";
+  return undefined;
+}
+
+/**
  * Derive procedure/output_type nodes and procedure edges from a directory of
  * procedure schemas (<dir>/<name>/schema.yaml). Shared by buildGraph (variant
  * templates + the root l0 namespace) and buildScopeGraph (per-scope artifacts).
@@ -540,6 +612,10 @@ function discoverNodes(): { skills: Map<string, GraphNode>, agents: Map<string, 
  * output_type; a step output_type NOT in outputs[] → the step's skill →
  * output_type. Node ids: `procedure.<namespace>.<name>`,
  * `output_type.<type>`.
+ *
+ * `variantDir` (optional) is the variant/scope root used to resolve the
+ * human-roles registry for `step_by_agent` edge `actor_type` tagging
+ * (ADR-0084 §3.4). When omitted, `actor_type` is not attached.
  */
 function deriveProceduresFromDir(
   procDir: string,
@@ -547,8 +623,11 @@ function deriveProceduresFromDir(
   layer: GraphNode['layer'],
   allNodes: Map<string, GraphNode>,
   edges: GraphEdge[],
+  variantDir?: string,
 ): void {
   if (!existsSync(procDir)) return;
+
+  const humanRoles = variantDir ? loadHumanRoles(variantDir) : new Set<string>();
 
   for (const entry of readdirSync(procDir, { withFileTypes: true })) {
     if (!entry.isDirectory() || entry.name.startsWith('_')) continue;
@@ -616,7 +695,14 @@ function deriveProceduresFromDir(
           }
         }
         if (typeof step.agent_key === 'string' && step.agent_key && allNodes.has(step.agent_key)) {
-          edges.push({ type: 'step_by_agent', from: procId, to: step.agent_key, source: 'procedure_schema' });
+          const actorType = variantDir ? resolveActorType(step.agent_key, humanRoles) : undefined;
+          edges.push({
+            type: 'step_by_agent',
+            from: procId,
+            to: step.agent_key,
+            source: 'procedure_schema',
+            ...(actorType && { actor_type: actorType }),
+          });
         }
       }
     }
@@ -643,6 +729,16 @@ function deriveProceduresFromDir(
           edges.push({ type, from: procId, to: skillMatch[1], source: 'procedure_schema' });
         }
       }
+    }
+
+    // in_stage edge (ADR-0083): procedure → stage, derived from procedure stage: field
+    if (typeof data.stage === 'string' && data.stage) {
+      const stageId = `stage.${ns}.${data.stage}`;
+      // Materialize stage node if it doesn't exist (deferred variants may not have stages.yaml)
+      if (!allNodes.has(stageId)) {
+        allNodes.set(stageId, { id: stageId, type: 'stage', layer });
+      }
+      edges.push({ type: 'in_stage', from: procId, to: stageId, source: 'process_schema' });
     }
   }
 }
@@ -722,6 +818,224 @@ function deriveTermNodesAndEdges(
       }
     } catch {
       // Malformed terms-ko.json — skip; drift-check scripts own data quality.
+    }
+  }
+}
+
+/**
+ * Derive stage nodes and stage_follows edges from process/stages.yaml (ADR-0083).
+ * Stages are optional; the function gracefully skips if stages.yaml does not exist.
+ * Source: process_schema
+ */
+function deriveStagesFromYaml(
+  stagesPath: string,
+  variant: string,
+  layer: GraphNode['layer'],
+  allNodes: Map<string, GraphNode>,
+  edges: GraphEdge[],
+): void {
+  if (!existsSync(stagesPath)) return;
+
+  let data: any;
+  try {
+    data = yamlLoad(readFileSync(stagesPath, 'utf-8'));
+  } catch {
+    // Malformed stages.yaml — skip; the validator owns its quality
+    return;
+  }
+  if (!data || typeof data !== 'object' || !Array.isArray(data.stages)) return;
+
+  const stages = data.stages as Array<{ id: string; order?: number }>;
+  const stageMap = new Map<number, string>();
+
+  for (const stage of stages) {
+    if (typeof stage.id !== 'string') continue;
+    const stageId = `stage.${variant}.${stage.id}`;
+    if (!allNodes.has(stageId)) {
+      allNodes.set(stageId, { id: stageId, type: 'stage', layer });
+    }
+    if (typeof stage.order === 'number') {
+      stageMap.set(stage.order, stage.id);
+    }
+  }
+
+  // stage_follows edges: stage with order N → stage with order N+1
+  const sortedOrders = Array.from(stageMap.keys()).sort((a, b) => a - b);
+  for (let i = 0; i < sortedOrders.length - 1; i++) {
+    const fromId = stageMap.get(sortedOrders[i])!;
+    const toId = stageMap.get(sortedOrders[i + 1])!;
+    edges.push({
+      type: 'stage_follows',
+      from: `stage.${variant}.${fromId}`,
+      to: `stage.${variant}.${toId}`,
+      source: 'process_schema',
+    });
+  }
+}
+
+/**
+ * Derive RACI edges from raci.yaml (ADR-0083 P4, ADR-0084 §3.4)
+ * Creates accountable_for, consulted_on, informed_of, and step_by_agent edges
+ * Emits human_role nodes and actor_type edge attributes per ADR-0084
+ */
+function deriveRACIFromYaml(
+  raciPath: string,
+  variant: string,
+  layer: GraphNode['layer'],
+  allNodes: Map<string, GraphNode>,
+  edges: GraphEdge[],
+  variantDir: string,
+): void {
+  if (!existsSync(raciPath)) return;
+
+  let data: any;
+  try {
+    data = yamlLoad(readFileSync(raciPath, 'utf-8'));
+  } catch {
+    // Malformed raci.yaml — skip; the validator owns its quality
+    return;
+  }
+  if (!data || typeof data !== 'object' || !Array.isArray(data.rows)) return;
+
+  // Load human-roles registry if present (ADR-0084, §3.4)
+  const humanRoles = loadHumanRoles(variantDir);
+
+  const rows = data.rows as Array<{
+    activity?: string;
+    accountable?: string;
+    responsible?: string[];
+    consulted?: string[];
+    informed?: string[];
+    actor_types?: Record<string, "human" | "agent">;
+  }>;
+
+  for (const row of rows) {
+    if (typeof row.activity !== 'string') continue;
+
+    // Ensure procedure node exists
+    const procId = row.activity;
+    if (!allNodes.has(procId)) {
+      allNodes.set(procId, { id: procId, type: 'procedure', layer });
+    }
+
+    // Create human_role nodes for any human roles appearing in this row (ADR-0084)
+    if (row.actor_types && typeof row.actor_types === 'object') {
+      for (const [agentKey, actorType] of Object.entries(row.actor_types)) {
+        if (actorType === 'human') {
+          const humanRoleId = agentKey;
+          if (!allNodes.has(humanRoleId)) {
+            allNodes.set(humanRoleId, { id: humanRoleId, type: 'human_role', layer });
+          }
+        }
+      }
+    }
+
+    // accountable_for edge: accountable agent → procedure (one per row)
+    if (typeof row.accountable === 'string') {
+      const actorType = row.actor_types?.[row.accountable];
+      edges.push({
+        type: 'accountable_for',
+        from: row.accountable,
+        to: procId,
+        source: 'raci_matrix',
+        ...(actorType && { actor_type: actorType }),
+      });
+    }
+
+    // consulted_on edges: each consulted agent → procedure
+    if (Array.isArray(row.consulted)) {
+      for (const agent of row.consulted) {
+        if (typeof agent === 'string') {
+          const actorType = row.actor_types?.[agent];
+          edges.push({
+            type: 'consulted_on',
+            from: agent,
+            to: procId,
+            source: 'raci_matrix',
+            ...(actorType && { actor_type: actorType }),
+          });
+        }
+      }
+    }
+
+    // informed_of edges: each informed agent → procedure
+    if (Array.isArray(row.informed)) {
+      for (const agent of row.informed) {
+        if (typeof agent === 'string') {
+          const actorType = row.actor_types?.[agent];
+          edges.push({
+            type: 'informed_of',
+            from: agent,
+            to: procId,
+            source: 'raci_matrix',
+            ...(actorType && { actor_type: actorType }),
+          });
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Derive decision gates from decisions/gates.yaml (ADR-0083 P5)
+ * Creates decision_gate nodes, gated_by edges (stage → gate), and decides_on edges (gate → output_type)
+ */
+function deriveDecisionGatesFromYaml(
+  gatesPath: string,
+  variant: string,
+  layer: GraphNode['layer'],
+  allNodes: Map<string, GraphNode>,
+  edges: GraphEdge[],
+): void {
+  if (!existsSync(gatesPath)) return;
+
+  let data: any;
+  try {
+    data = yamlLoad(readFileSync(gatesPath, 'utf-8'));
+  } catch {
+    // Malformed gates.yaml — skip; the validator owns its quality
+    return;
+  }
+  if (!data || typeof data !== 'object' || !Array.isArray(data.gates)) return;
+
+  const gates = data.gates as Array<{
+    id?: string;
+    stage?: string;
+    inputs?: string[];
+  }>;
+
+  for (const gate of gates) {
+    if (typeof gate.id !== 'string') continue;
+
+    // Create decision_gate node
+    const gateId = `gate.${variant}.${gate.id}`;
+    if (!allNodes.has(gateId)) {
+      allNodes.set(gateId, { id: gateId, type: 'decision_gate', layer });
+    }
+
+    // gated_by edge: stage → decision_gate
+    if (typeof gate.stage === 'string') {
+      const stageId = `stage.${variant}.${gate.stage}`;
+      edges.push({
+        type: 'gated_by',
+        from: stageId,
+        to: gateId,
+        source: 'decision_model',
+      });
+    }
+
+    // decides_on edges: decision_gate → output_type (for each input)
+    if (Array.isArray(gate.inputs)) {
+      for (const outputType of gate.inputs) {
+        if (typeof outputType === 'string') {
+          edges.push({
+            type: 'decides_on',
+            from: gateId,
+            to: `output_type.${outputType}`,
+            source: 'decision_model',
+          });
+        }
+      }
     }
   }
 }
@@ -1010,6 +1324,7 @@ export function buildGraph(): SkillGraph {
         `variant:${variantName}`,
         allNodes,
         edges,
+        join(templatesDir, variantName),
       );
     }
   }
@@ -1018,7 +1333,47 @@ export function buildGraph(): SkillGraph {
   // directories must not influence the committed graph projection.
   const rootProceduresDir = join(ROOT, 'procedures');
   if (localLayer !== 'L0' || hasTrackedFilesUnder(rootProceduresDir)) {
-    deriveProceduresFromDir(rootProceduresDir, 'l0', localLayer, allNodes, edges);
+    deriveProceduresFromDir(rootProceduresDir, 'l0', localLayer, allNodes, edges, ROOT);
+  }
+
+  // Source 5.8: Stages — domain execution stages derived from process/stages.yaml (ADR-0083)
+  if (existsSync(templatesDir)) {
+    for (const variantName of listVariantDirs(templatesDir)) {
+      deriveStagesFromYaml(
+        join(templatesDir, variantName, 'process', 'stages.yaml'),
+        variantName,
+        `variant:${variantName}`,
+        allNodes,
+        edges,
+      );
+    }
+  }
+
+  // Source 5.9: RACI matrix edges derived from governance/raci.yaml (ADR-0083 P4, ADR-0084 §3.4)
+  if (existsSync(templatesDir)) {
+    for (const variantName of listVariantDirs(templatesDir)) {
+      deriveRACIFromYaml(
+        join(templatesDir, variantName, 'governance', 'raci.yaml'),
+        variantName,
+        `variant:${variantName}`,
+        allNodes,
+        edges,
+        join(templatesDir, variantName),
+      );
+    }
+  }
+
+  // Source 5.10: Decision gates derived from decisions/gates.yaml (ADR-0083 P5)
+  if (existsSync(templatesDir)) {
+    for (const variantName of listVariantDirs(templatesDir)) {
+      deriveDecisionGatesFromYaml(
+        join(templatesDir, variantName, 'decisions', 'gates.yaml'),
+        variantName,
+        `variant:${variantName}`,
+        allNodes,
+        edges,
+      );
+    }
   }
 
   // Source 5: Overrides (L0) — loaded and applied via shared helper
@@ -1037,6 +1392,7 @@ export function buildGraph(): SkillGraph {
 
   return {
     version: 1,
+    graph_profile: 'deg/v1',
     nodes: sortedNodes,
     edges: sortedEdges
   };
@@ -1292,7 +1648,16 @@ export function buildScopeGraph(scope: string): SkillGraph {
   }
 
   // Source 4.7 (scope): procedures owned by this scope.
-  deriveProceduresFromDir(join(scopeDir, 'procedures'), scope, layer, allNodes, edges);
+  deriveProceduresFromDir(join(scopeDir, 'procedures'), scope, layer, allNodes, edges, scopeDir);
+
+  // Source 5.8 (scope): stages owned by this scope (ADR-0083)
+  deriveStagesFromYaml(join(scopeDir, 'process', 'stages.yaml'), scope, layer, allNodes, edges);
+
+  // Source 5.9 (scope): RACI matrix edges owned by this scope (ADR-0083 P4, ADR-0084 §3.4)
+  deriveRACIFromYaml(join(scopeDir, 'governance', 'raci.yaml'), scope, layer, allNodes, edges, scopeDir);
+
+  // Source 5.10 (scope): decision gates owned by this scope (ADR-0083 P5)
+  deriveDecisionGatesFromYaml(join(scopeDir, 'decisions', 'gates.yaml'), scope, layer, allNodes, edges);
 
   // Source 5 (scope): overrides from templates/<scope>/docs/skill-graph.overrides.json
   // (reledgev addendum — previously L0-only; each scope now owns its experimental layer)
@@ -1311,6 +1676,7 @@ export function buildScopeGraph(scope: string): SkillGraph {
 
   return {
     version: 1,
+    graph_profile: 'deg/v1',
     nodes: sortedNodes,
     edges: sortedEdges
   };

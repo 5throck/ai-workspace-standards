@@ -1,0 +1,21 @@
+schema_version: '1.0'
+variant: co-abap
+stages:
+  - id: S1
+    title: SAP Solution Blueprint
+    order: 1
+    purpose: PENDING_REVIEW
+    entry_criteria:
+      - PENDING_REVIEW
+    exit_criteria:
+      - PENDING_REVIEW
+    owner_agent: architect
+  - id: S2
+    title: Transport Release and Acceptance
+    order: 2
+    purpose: PENDING_REVIEW
+    entry_criteria:
+      - PENDING_REVIEW
+    exit_criteria:
+      - PENDING_REVIEW
+    owner_agent: code-writer
