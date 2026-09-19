@@ -1,4 +1,23 @@
-// @version 1.3.0
+// @version 1.4.0
+// context-sections.ts — shared markdown section-splitting used by audit.ts's
+// cross-variant context commonization detector, promote-context-section.ts's
+// promotion executor, l3-to-variant-pipeline/generate-variant's W1 context
+// purification, and upgrade-project.ts's W2 CONTEXT_COMMONIZATION pass.
+// Extracted so the consumers never independently re-implement the same
+// heading-parsing/similarity logic and drift apart — the same "one SSOT, never
+// duplicate" principle this tooling exists to enforce on docs/<variant>.context.md.
+//
+// v1.4.0 (ADR-0081 fleet sweep / T-20260918-005): VERSION_FOOTER_RE is
+// CRLF-tolerant (`\r?\n` separators, `\r` excluded from the version-text
+// classes). Project working trees on Windows check out CRLF, and the old
+// `\n---\n\n` separator form never matched there — splitOffVersionFooter
+// returned footer:'' → findProjectOnlySections reported wholeFileOwned →
+// upgrade-project logged CONTEXT PRESERVE and skipped the context.md SYNC
+// branch on EVERY CRLF project, permanently blocking template footer bumps
+// (observed: ADR-0080 delivery to Projects/co-* blocked, 2026-09-19). Same
+// CRLF-fragility class as the manifest tier regex (T-20260916-013) and
+// parseAgentFrontmatter (v1.6.1).
+//
 // context-sections.ts — shared markdown section-splitting used by audit.ts's
 // cross-variant context commonization detector, promote-context-section.ts's
 // promotion executor, l3-to-variant-pipeline/generate-variant's W1 context
@@ -264,8 +283,8 @@ const COMMON_MARKER_END_RE = /<!--\s*(COMMON-[A-Za-z0-9-]+):\s*END\s*-->/;
 const VARIANT_INJECT_START_RE = /<!--\s*VARIANT-INJECT:[^>]*-->/;
 const VARIANT_INJECT_END_RE = /<!--\s*END VARIANT-INJECT\s*-->/;
 
-/** Trailing `---` separator + italic version footer, e.g. "*context.md version: 2.5 — ...*" or "*co-x.context.md version: 1.2 — ...*". */
-const VERSION_FOOTER_RE = /\n---\n\n\*[^*\n]+version:[^*\n]*\*\s*$/;
+/** Trailing `---` separator + italic version footer, e.g. "*context.md version: 2.5 — ...*" or "*co-x.context.md version: 1.2 — ...*". CRLF-tolerant (v1.4.0): Windows working trees check out `\r\n`, and the bare-`\n` separator form silently unmatched there. */
+const VERSION_FOOTER_RE = /\r?\n---\r?\n\r?\n\*[^*\r\n]+version:[^*\r\n]*\*\s*$/;
 
 /**
  * Split off a trailing version footer (`---` separator + italic `*...version:...*`

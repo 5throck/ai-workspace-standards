@@ -1,0 +1,40 @@
+schemaVersion: 1
+id: T-20260918-005
+kind: manual
+title: >-
+  Delivery hardening P5: CRLF-tolerant context.md version-footer parsing —
+  CRLF projects never received template footer bumps (blocked the ADR-0080
+  fleet sweep)
+priority: normal
+status: done
+attempts: 1
+created_at: '2026-09-19T10:00:00.000Z'
+history:
+  - at: '2026-09-19T10:00:00.000Z'
+    from: null
+    to: backlog
+  - at: '2026-09-19T10:05:00.000Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-19T10:10:00.000Z'
+    from: waiting
+    to: review
+  - at: '2026-09-19T10:15:00.000Z'
+    from: review
+    to: done
+result: >-
+  Discovered during the T-20260918-004 fleet sweep: co-develop's docs/context.md
+  checked out CRLF on Windows, and VERSION_FOOTER_RE's bare-\n separator form
+  (`\n---\n\n`) never matched CRLF content — splitOffVersionFooter returned
+  footer:'' → findProjectOnlySections reported wholeFileOwned → upgrade-project
+  logged "CONTEXT PRESERVE docs/context.md v2.8 → v2.9" and skipped the SYNC
+  branch on every CRLF project, permanently blocking template footer bumps
+  (the ADR-0080 delivery in this sweep was the first bump to expose it; the
+  same CRLF-fragility class as T-20260916-013 and parseAgentFrontmatter
+  v1.6.1). Fix: context-sections.ts 1.3.0 → 1.4.0 — VERSION_FOOTER_RE accepts
+  \r?\n separators and excludes \r from the version-text classes; behavior on
+  LF content is byte-identical. 3 regression tests added in
+  tests/unit/context-ownership.test.ts (CRLF footer split; CRLF project copy
+  not wholeFileOwned; CRLF-project-vs-LF-template evaluates). Verified live:
+  co-develop dry-run moved from "CONTEXT PRESERVE docs/context.md v2.8 → v2.9"
+  to delivering the template context content.

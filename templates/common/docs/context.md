@@ -560,4 +560,4 @@ See the workspace governance documentation (Governance Enforcement Layers) and A
 
 ---
 
-*context.md version: 2.8 — Instruction Writing Standard (ASD-STE100, ADR-0079) section added under Architecture*
+*context.md version: 2.9 — PM Team-Management Authority (ADR-0080) section added under Architecture*
