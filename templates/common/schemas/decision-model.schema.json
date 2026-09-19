@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "decision-model.schema.json",
   "title": "Decision Model Schema",
-  "description": "Validates templates/<variant>/decisions/gates.yaml. Defines decision gates as part of the Domain Execution Graph (DEG). Each gate is a reusable decision point with decider, inputs, criteria, and outcomes. See design §9.2 and ADR-0082.",
+  "description": "Validates templates/<variant>/decisions/gates.yaml. Defines decision gates as part of the Domain Execution Graph (DEG). Each gate is a reusable decision point with decider, inputs, criteria, and outcomes. See design §9.2 and ADR-0083.",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema_version", "variant", "gates"],

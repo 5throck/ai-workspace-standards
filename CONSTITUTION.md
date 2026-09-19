@@ -377,7 +377,7 @@ derive procedure/output_type graph nodes; coverage gaps are human judgment
 targets tracked as governance tickets. See
 `docs/constitution/06.7-procedure-lifecycle.md`.
 
-**Domain Execution Graph and Stage Axis (ADR-0082)**: the Procedure Schema gains a domain **Stage** axis (`stage:`) that describes where a procedure sits in a domain's own execution order, independent of the existing `phase:` axis, which continues to describe workspace lifecycle position — the two are separate axes and must not be conflated. The same ADR adds the RACI, Artifact, Evidence, and Decision Model schemas under `templates/common/schemas/`, plus a Domain Execution Graph (DEG) vocabulary profile layered over the generated `docs/skill-graph.json` projection. → [ADR-0082](docs/adr/0082-domain-execution-graph-and-stage-axis.md); full rationale in [the template domain operating system design](docs/designs/2026-09-19-template-domain-operating-system-design.md).
+**Domain Execution Graph and Stage Axis (ADR-0083)**: the Procedure Schema gains a domain **Stage** axis (`stage:`) that describes where a procedure sits in a domain's own execution order, independent of the existing `phase:` axis, which continues to describe workspace lifecycle position — the two are separate axes and must not be conflated. The same ADR adds the RACI, Artifact, Evidence, and Decision Model schemas under `templates/common/schemas/`, plus a Domain Execution Graph (DEG) vocabulary profile layered over the generated `docs/skill-graph.json` projection. → [ADR-0083](docs/adr/0083-domain-execution-graph-and-stage-axis.md); full rationale in [the template domain operating system design](docs/designs/2026-09-19-template-domain-operating-system-design.md).
 
 ---
 

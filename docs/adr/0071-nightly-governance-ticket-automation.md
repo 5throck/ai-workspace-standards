@@ -4,6 +4,12 @@ date: 2026-09-11
 author: PM
 ---
 
+> **SUPERSEDED** (2026-09-19): The dual-runner cadence (§1 CI batch + §2 local
+> anomaly pass) is superseded by [ADR-0082](0082-local-only-governance-ticket-processing.md) —
+> the GitHub scheduled batch was retired and the local ZCode runner is now the
+> sole scheduled processor. The safety rules, four-gate validation, PR-only
+> landing, and ticket state-machine contract below carry over unchanged.
+
 # ADR-0071: Nightly Governance-Ticket Batch Automation and the 05:30 Local Runner
 
 ## Context

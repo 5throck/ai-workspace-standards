@@ -3,7 +3,7 @@
 **Date**: 2026-09-19
 **Status**: Approved
 **Spec ID**: 2026-09-19-template-domain-operating-system
-**Scope**: `templates/common/schemas/`, `templates/common/process/`, `templates/co-*/process/`, `templates/co-*/governance/`, `templates/co-*/decisions/`, `templates/co-*/evidence-models/`, `templates/*/procedures/`, `procedures/`, `Projects/co-newbiz/procedures/`, `scripts/generate-skill-graph.ts`, `scripts/verify-skill-graph.ts`, `scripts/validate-procedures.ts`, `scripts/validate-templates.ts`, `docs/adr/0082-domain-execution-graph-and-stage-axis.md`
+**Scope**: `templates/common/schemas/`, `templates/common/process/`, `templates/co-*/process/`, `templates/co-*/governance/`, `templates/co-*/decisions/`, `templates/co-*/evidence-models/`, `templates/*/procedures/`, `procedures/`, `Projects/co-newbiz/procedures/`, `scripts/generate-skill-graph.ts`, `scripts/verify-skill-graph.ts`, `scripts/validate-procedures.ts`, `scripts/validate-templates.ts`, `docs/adr/0083-domain-execution-graph-and-stage-axis.md`
 
 ---
 
@@ -464,7 +464,7 @@ Two distinct artifacts. Never merge them.
 
 | Artifact | Layer | Meaning | Governance |
 |---|---|---|---|
-| `templates/<variant>/decisions/gates.yaml` | Template (L1) | The gate **definition** — a reusable decision point in the domain process | this design, ADR-0082 |
+| `templates/<variant>/decisions/gates.yaml` | Template (L1) | The gate **definition** — a reusable decision point in the domain process | this design, ADR-0083 |
 | `docs/decisions/DEC-*.md` | Workspace and project | The decision **record** — one ruling actually made | ADR-0061, `validate-decisions.ts` |
 
 A gate is a type. A record is an instance. `record_kind: DEC` links the two.
@@ -717,7 +717,7 @@ This design needs one new ADR and two amendments to existing ADRs.
 
 | Document | Content | Produced here |
 |---|---|---|
-| **ADR-0082** | Stage axis, DEG vocabulary, conformance levels, Structural Convergence Rule | **yes** |
+| **ADR-0083** | Stage axis, DEG vocabulary, conformance levels, Structural Convergence Rule | **yes** |
 | ADR-0060 Amendment 10 | DEG node and edge vocabulary inside `skill-graph.json` | no — belongs to the P3 pull request |
 | ADR-0063 amendment | `stage:` field, `evidence` widening, `quality_gates` removal | no — belongs to the P2 and P5 pull requests |
 
@@ -941,7 +941,7 @@ decision-gate axes only.
 
 ## 17. References
 
-- **ADR-0082** — [Domain Execution Graph and Stage Axis](../adr/0082-domain-execution-graph-and-stage-axis.md) (this design's decision record)
+- **ADR-0083** — [Domain Execution Graph and Stage Axis](../adr/0083-domain-execution-graph-and-stage-axis.md) (this design's decision record)
 - ADR-0060 — [Skill Relationship Graph as Generated Projection](../adr/0060-skill-relationship-graph-generated-projection.md), Amendments 1–9
 - ADR-0061 — Decision Record Chain
 - ADR-0063 — [Procedure Schema as Canonical Workflow Source](../adr/0063-procedure-schema-canonical-workflow-source.md)

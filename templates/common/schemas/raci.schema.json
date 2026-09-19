@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "raci.schema.json",
   "title": "RACI Layer Schema",
-  "description": "Validates templates/<variant>/governance/raci.yaml. A generated, committed, drift-checked verification artifact that records Accountable, Responsible, Consulted, and Informed roles. See design §6.2 and ADR-0082.",
+  "description": "Validates templates/<variant>/governance/raci.yaml. A generated, committed, drift-checked verification artifact that records Accountable, Responsible, Consulted, and Informed roles. See design §6.2 and ADR-0083.",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema_version", "variant", "generated_from", "rows"],

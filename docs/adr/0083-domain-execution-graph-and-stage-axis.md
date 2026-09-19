@@ -4,7 +4,7 @@ date: 2026-09-19
 author: Architect
 ---
 
-# ADR-0082: Domain Execution Graph and the Domain Stage Axis
+# ADR-0083: Domain Execution Graph and the Domain Stage Axis
 
 ## Context
 

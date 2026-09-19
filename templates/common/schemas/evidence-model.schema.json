@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "evidence-model.schema.json",
   "title": "Evidence Model Meta-Schema",
-  "description": "Meta-schema that all variant evidence models must validate against. Every evidence model in templates/<variant>/evidence-models/** must declare a draft-07 JSON Schema and include all required top-level fields. Generalizes the co-safety evidence-models pattern. See design §8.2 and ADR-0082.",
+  "description": "Meta-schema that all variant evidence models must validate against. Every evidence model in templates/<variant>/evidence-models/** must declare a draft-07 JSON Schema and include all required top-level fields. Generalizes the co-safety evidence-models pattern. See design §8.2 and ADR-0083.",
   "type": "object",
   "additionalProperties": true,
   "required": ["$schema", "$id", "title", "version", "type", "required", "properties"],

@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "process.schema.json",
   "title": "Process Layer — Stage Definition Schema",
-  "description": "Validates templates/<variant>/process/stages.yaml. Defines domain stages as part of the Domain Execution Graph (DEG). See design §4.1 and ADR-0082.",
+  "description": "Validates templates/<variant>/process/stages.yaml. Defines domain stages as part of the Domain Execution Graph (DEG). See design §4.1 and ADR-0083.",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema_version", "variant", "stages"],

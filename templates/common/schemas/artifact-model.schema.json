@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "artifact-model.schema.json",
   "title": "Artifact Model Schema",
-  "description": "Validates the value object for each entry in templates/<variant>/procedures/_output-types.yaml. Enriches artifact type definitions with contracts: owner, format, fields, evidence binding, and retention policy. See design §7.1 and ADR-0082.",
+  "description": "Validates the value object for each entry in templates/<variant>/procedures/_output-types.yaml. Enriches artifact type definitions with contracts: owner, format, fields, evidence binding, and retention policy. See design §7.1 and ADR-0083.",
   "type": "object",
   "additionalProperties": false,
   "required": ["description", "owner_agent", "format", "retention"],
