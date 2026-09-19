@@ -110,56 +110,149 @@ Two abbreviations were considered and both are rejected:
   graph is the file, the Domain Execution Graph is the vocabulary.
 
 A Domain Operating Model is the complete, domain-specific operating definition of how one domain
-executes work. It is composed of the axes in §1.5.2.
+executes work. Its Core is composed of the four groups in §1.5.2. Extensions that are named but
+not yet designed are listed separately in §1.5.3, and must not be treated as part of the Core.
 
-#### 1.5.2 Axes and implementation status
+#### 1.5.2 Domain Operating Model Core
 
-| Axis | Meaning | Status | Where |
-|---|---|---|---|
-| **Process** | Stage → Activity | **IMPLEMENTED** (P2) | `process/stages.yaml`; procedure schema `stage:` field |
-| **RACI** | Responsibility assignment | **IMPLEMENTED** (P4) | `governance/raci.yaml` |
-| **Skill** | Executable SOP | **PRE-EXISTING** — not part of this rollout | `skills/*/SKILL.md` (ADR-0060, ADR-0063) |
-| **Agent** | Execution actor within the model | **PRE-EXISTING**; `executor_type` distinction is **FUTURE SCOPE** | `variant.json` rosters; RACI `agent-key` |
-| **Artifact** | Typed output contract | **IMPLEMENTED** (P5) | enriched `procedures/_output-types.yaml` |
-| **Evidence** | Typed proof of execution | **SPECIFIED BUT UNCLAIMED** — P6 deferred | `evidence-models/` (co-safety only; see §15.1 R7) |
-| **Decision** | Gate definitions | **IMPLEMENTED** (P5) | `decisions/gates.yaml` |
-| **Graph** | Domain Execution Graph | **IMPLEMENTED** (P3) | vocabulary profile over `docs/skill-graph.json` (§10.1) |
-| **Learning** | SkillHone feedback loop | **FUTURE SCOPE — NOT DESIGNED** | — |
+The Core has four groups, not a flat list of axes. Grouping matters: it fixes which concepts are
+peers and which are contained.
 
-Four rows need precision beyond the table.
+```
+Domain Operating Model
+│
+├── Process
+│   └── Stage → Activity → Skill
+│
+├── Governance
+│   └── RACI
+│
+├── Execution
+│   ├── Artifact
+│   └── Decision
+│
+└── Graph
+    └── Domain Execution Graph
+```
 
-**Agent is a component, not the model.** The Agent axis names the actor that executes an Activity.
-It is not the framework itself — this is the reason "Agent Operating Model" was rejected above.
-The RACI schema currently tracks a single `agent-key` per role (accountable, responsible,
-consulted, informed). It draws no schema-level distinction between a human role-holder and an AI
-agent executor. A field such as `executor_type: human|agent` would formalize that distinction. It
-is **future scope**: not designed, not specified, not implemented.
+**Process — Stage → Activity → Skill. IMPLEMENTED (P2).** The Stage axis lands in
+`process/stages.yaml` and in the procedure schema's `stage:` field. Activity is the procedure
+itself (`procedures/<name>/schema.yaml`). Skill is the innermost rung: the executable SOP a
+procedure step invokes.
 
-**Evidence is specified but unclaimed.** The `evidenced` conformance level and its DEG-E-* rules
-are specified and implemented. No variant claims the level in this programme. co-safety was the
-only real candidate and it sits in the `core`-deferred set. See §15.1 R7.
+> Skill is **pre-existing infrastructure this rollout builds on**, not something P1–P5 created.
+> `skills/*/SKILL.md` is governed by ADR-0060 and ADR-0063 and was shipping long before this
+> design. Grouping Skill under Process describes containment, not authorship.
 
-**Decision gates are not decision records.** `decisions/gates.yaml` defines gates at template
-level. It is distinct from the pre-existing L0 `docs/decisions/DEC-*.md` instance records governed
-by ADR-0061. The two coexist.
+**Governance — RACI. IMPLEMENTED (P4).** `governance/raci.yaml` assigns Accountable, Responsible,
+Consulted, and Informed roles per activity, validated by `templates/common/schemas/raci.schema.json`.
 
-**Learning does not exist yet.** `SkillHone` is a separate, pre-existing skill-quality feedback
+> **Agent is not a peer axis of the Core.** Agent is the *actor reference inside RACI*. The schema
+> holds `accountable` as a single `agent-key` string and `responsible` as an array of `agent-key`
+> strings; `consulted` and `informed` are the same. There is **no schema-level distinction between
+> a human role-holder and an AI agent executor** — every role slot is one flat agent key. An
+> `actor_type: human|agent` plus `actor_key` split (equivalently, an `executor_type` field) would
+> formalize that distinction. It is future scope (§1.5.3), not designed and not implemented.
+>
+> Placing Agent inside Governance rather than beside it also settles the self-reference problem
+> §1.5.1 raised more cleanly than the earlier framing did: the framework is not named after, and
+> does not structurally elevate, one of its own sub-components.
+
+**Execution — Artifact and Decision. Both IMPLEMENTED (P5).** They are siblings because both are
+execution-time outputs. Artifact is the typed output contract in the enriched
+`procedures/_output-types.yaml`. Decision is the gate definition set in `decisions/gates.yaml`.
+
+> **Decision gates are not decision records.** `decisions/gates.yaml` defines gates at *template*
+> level. The pre-existing L0 `docs/decisions/DEC-*.md` files are *instance* records governed by
+> ADR-0061. The two coexist and neither replaces the other.
+
+**Graph — the Domain Execution Graph. IMPLEMENTED (P3).** The Graph is not a fifth peer domain
+concern sitting alongside Process, Governance, and Execution. It is **the relationship layer that
+ties the other three together into connected executable knowledge**. It is a vocabulary profile
+over the pre-existing `docs/skill-graph.json` (`graph_profile: "deg/v1"`, §10.1), not a second
+file.
+
+The relations it actually encodes, using the real edge type names emitted by
+`scripts/generate-skill-graph.ts`:
+
+| Relation | Edge type | Direction |
+|---|---|---|
+| Stage ordering within a Process | `stage_follows` | stage → stage |
+| An Activity sits in a Stage | `in_stage` | procedure → stage |
+| An Activity invokes a Skill | `step_uses_skill` | procedure → skill |
+| An Activity assigns a step to an Agent | `step_by_agent` | procedure → agent |
+| An Activity or Skill yields an Artifact | `produces` | procedure/skill → output_type |
+| Governance: who is Accountable | `accountable_for` | agent → procedure |
+| Governance: who is Consulted | `consulted_on` | agent → procedure |
+| Governance: who is Informed | `informed_of` | agent → procedure |
+| A Stage is gated by a Decision gate | `gated_by` | stage → decision_gate |
+| A Decision gate rules on an Artifact | `decides_on` | decision_gate → output_type |
+
+> Two precision notes. The RACI `responsible` array is validated by the schema but is **not**
+> currently projected as a graph edge — only `accountable_for`, `consulted_on`, and `informed_of`
+> are emitted. And the Decision-to-Skill link is indirect: a gate reaches Skills only through the
+> Artifacts it takes as inputs (`decides_on` → `output_type` ← `produces`), not by a direct edge.
+
+#### 1.5.3 Future Extensions — named, not designed
+
+The following are **not** part of the Domain Operating Model Core. They are recorded here so that
+later work has a name to attach to, and so that no reader mistakes them for shipped capability.
+
+**Actor Model.** Extends Governance/RACI's flat `agent-key` into a real `Human | Agent`
+distinction — for example an `actor_type` + `actor_key` pair replacing the bare key in each role
+slot. **Not designed.** No schema, no validator, no migration path exists.
+
+**Evidence Model.** Extends Execution with a typed Evidence concept sitting between Skill and
+Decision: conceptually a Skill produces an Artifact, a Skill requires Evidence, and Evidence
+supports a Decision. Two distinct states must be kept apart here:
+
+- At the validation-rule level, the `evidenced` conformance level and rules DEG-E-01..03 are
+  **specified and implemented but unclaimed**. P6 is deferred; co-safety was the only real
+  candidate and sits in the `core`-deferred set. See §15.1 R7.
+- The richer relational model above — Evidence as first-class provenance linking Skill execution
+  to Decision outcomes — goes **beyond what P6 specified**. It is a further, undesigned extension
+  layered on top of those rules, not a restatement of them.
+
+**SkillHone Evolution Loop.** `SkillHone` is a separate, pre-existing skill-quality feedback
 mechanism in this workspace (`skill-session-review.ts` and related workspace-standards
-infrastructure). It operates on `skills/` generally. Wiring Domain Operating Model Decision and
-Evidence outcomes back into a SkillHone-style improvement loop specific to this framework has not
-been designed. It is an open future-scope item.
+infrastructure) that operates on `skills/` generally. It is **not a component within the Domain
+Operating Model**. It is an external, superordinate feedback mechanism that evolves the model's
+Skills over time:
 
-#### 1.5.3 Template is the packaging mechanism
+```
+Domain Operating Model  --executes-->  Skills
+Skills                  --evaluated by-->  SkillHone
+SkillHone               --improves-->  Skills
+```
 
-A **Template** is how a Domain Operating Model is instantiated and made reusable. Each
-`templates/co-*/` template packages exactly one domain's Domain Operating Model — `co-newbiz`
-packages a New Business Domain Operating Model, `co-security` packages a Security Domain
-Operating Model.
+The loop closes back into Process (the group that contains Skill), rather than adding a new Core
+group. **No such wiring exists today** between Domain Operating Model outcomes — Decisions,
+Artifacts, Evidence — and SkillHone. Building it is future scope.
 
-The split follows the existing Workspace/Template boundary. The Workspace layer
-(`templates/common/`) owns the schemas and contracts that define what a Domain Operating Model
-*can* contain. Each Template supplies the actual domain content. This is the same boundary already
-documented in CONSTITUTION.md §5.7, §6, and §7.5, and elaborated for this design in §11.
+#### 1.5.4 Layering — Workspace, Model, Template, Instance
+
+A **Template** is how a Domain Operating Model is packaged, instantiated, and made reusable. The
+full layering, from the standards layer down to a running deployment:
+
+```
+AI Workspace
+    ↓ (standardizes schemas, contracts, governance)
+Domain Operating Model
+    ↓ (Process / Governance / Execution / Graph)
+Template
+    ↓ (packages a specific domain's Domain Operating Model — e.g. co-newbiz packages
+       the New Business Domain Operating Model)
+Project / Instance
+    ↓ (a deployed, running instantiation of a Template)
+```
+
+Each `templates/co-*/` template packages exactly one domain's Domain Operating Model — `co-newbiz`
+packages a New Business Domain Operating Model, `co-security` packages a Security Domain Operating
+Model. The Workspace layer (`templates/common/`) owns the schemas and contracts that define what a
+Domain Operating Model *can* contain; each Template supplies the actual domain content. This is
+the existing Workspace/Template boundary already documented in CONSTITUTION.md §5.7, §6, and §7.5,
+and elaborated for this design in §11. The Project/Instance layer is the L2/L3 deployment of a
+Template and holds no schema authority of its own.
 
 ---
 
