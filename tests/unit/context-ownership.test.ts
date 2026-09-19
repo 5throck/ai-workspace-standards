@@ -1,14 +1,17 @@
 /**
- * Unit tests for findProjectOnlySections() (helpers/context-sections.ts v1.3.0) —
- * the upgrade-time ownership detection behind docs/context.md's CONTEXT PRESERVE gate
- * (T-20260912-001): which top-level sections would a template overwrite destroy?
+ * Unit tests for findProjectOnlySections() and spliceCommonContextBlock()
+ * (helpers/context-sections.ts) — the upgrade-time ownership detection behind
+ * docs/context.md's CONTEXT PRESERVE gate (T-20260912-001) and the
+ * managed-zone splice that delivers policy content under PRESERVE
+ * (ADR-0081 / T-20260919-003).
  *
- * @version 1.0.0
+ * @version 1.1.0
  */
 import { describe, test, expect } from 'bun:test';
 import {
   findProjectOnlySections,
   splitOffVersionFooter,
+  spliceCommonContextBlock,
 } from '../../scripts/helpers/context-sections.ts';
 
 const FOOTER = '\n---\n\n*context.md version: 2.6 — test footer*';
@@ -171,5 +174,69 @@ describe('CRLF tolerance (v1.4.0)', () => {
     const { sections, wholeFileOwned } = findProjectOnlySections(project, TEMPLATE);
     expect(wholeFileOwned).toBe(false);
     expect(sections).toHaveLength(0);
+  });
+});
+
+// ── spliceCommonContextBlock (v1.5.0, ADR-0081 / T-20260919-003) ─────────────
+// Managed-zone policy content must deliver even when the wholesale
+// docs/context.md copy is skipped by CONTEXT PRESERVE (project-only sections).
+
+const TMPL_CONTEXT = [
+  '## Architecture',
+  '',
+  '<!-- COMMON-CONTEXT:START -->',
+  '### PM Team-Management Authority (ADR-0080)',
+  'authority text (new)',
+  '<!-- COMMON-CONTEXT:END -->',
+  '',
+  '## Key Files',
+].join('\n');
+
+const PROJ_CONTEXT = [
+  '## Architecture',
+  '',
+  '<!-- COMMON-CONTEXT:START -->',
+  '### PM Team-Management Authority (ADR-0080)',
+  'authority text (old)',
+  '<!-- COMMON-CONTEXT:END -->',
+  '',
+  '## Procedures',
+  'project-specific procedures',
+].join('\n');
+
+describe('spliceCommonContextBlock (v1.5.0)', () => {
+  test('replaces the project COMMON-CONTEXT block with the template block; project-only sections survive', () => {
+    const r = spliceCommonContextBlock(PROJ_CONTEXT, TMPL_CONTEXT);
+    expect(r.changed).toBe(true);
+    expect(r.content).toContain('authority text (new)');
+    expect(r.content).not.toContain('authority text (old)');
+    expect(r.content).toContain('## Procedures');
+    expect(r.content).toContain('project-specific procedures');
+  });
+
+  test('changed=false when the project block already matches the template', () => {
+    const r = spliceCommonContextBlock(TMPL_CONTEXT, TMPL_CONTEXT);
+    expect(r.changed).toBe(false);
+  });
+
+  test('no-op when the template carries no COMMON-CONTEXT block', () => {
+    const bare = '## Architecture\n\nplain content\n';
+    const r = spliceCommonContextBlock(PROJ_CONTEXT, bare);
+    expect(r.changed).toBe(false);
+    expect(r.note).toContain('no COMMON-CONTEXT block');
+  });
+
+  test('no-op with a hint when the project copy has no block to splice into', () => {
+    const r = spliceCommonContextBlock('## Architecture\n\nplain\n', TMPL_CONTEXT);
+    expect(r.changed).toBe(false);
+    expect(r.note).toContain('no COMMON-CONTEXT block');
+  });
+
+  test('CRLF project content splices correctly', () => {
+    const projCrlf = PROJ_CONTEXT.split('\n').join('\r\n');
+    const r = spliceCommonContextBlock(projCrlf, TMPL_CONTEXT);
+    expect(r.changed).toBe(true);
+    expect(r.content).toContain('authority text (new)');
+    expect(r.content).toContain('## Procedures');
   });
 });

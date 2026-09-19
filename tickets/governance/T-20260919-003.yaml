@@ -1,0 +1,37 @@
+schemaVersion: 1
+id: T-20260919-003
+kind: manual
+title: >-
+  Delivery hardening P6: splice the template COMMON-CONTEXT block into
+  docs/context.md under CONTEXT PRESERVE — policy content no longer starved
+priority: normal
+status: done
+attempts: 1
+created_at: '2026-09-19T13:20:00.000Z'
+history:
+  - at: '2026-09-19T13:20:00.000Z'
+    from: null
+    to: backlog
+  - at: '2026-09-19T13:25:00.000Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-19T13:30:00.000Z'
+    from: waiting
+    to: review
+  - at: '2026-09-19T13:35:00.000Z'
+    from: review
+    to: done
+result: >-
+  Structural resolution of the co-abap-plugin CONTEXT PRESERVE recurrence risk
+  (the manual relocation in PR #95 fixed that instance; this change fixes the
+  class). helpers/context-sections.ts 1.4.0 → 1.5.0:
+  spliceCommonContextBlock(projectContent, templateContent) — replaces the
+  project copy's COMMON-CONTEXT managed block with the template's, leaving
+  everything outside the block untouched. upgrade-project.ts 1.32.0 → 1.33.0:
+  on the CONTEXT PRESERVE path for docs/context.md, the splice runs after the
+  PRESERVE log (dry-run aware), so managed-zone policy content delivers even
+  when the wholesale copy is skipped for project-only sections. --force-context-sync
+  semantics unchanged (full wholesale realignment remains opt-in). 5 unit tests
+  in tests/unit/context-ownership.test.ts 1.1.0 (deliver + preserve, no-op
+  cases, CRLF). Verified live on Projects/co-abap-plugin (PR #95): splice
+  class delivery + Procedures relocation co-exist.
