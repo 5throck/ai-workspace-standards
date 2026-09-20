@@ -1,0 +1,21 @@
+schemaVersion: 1
+id: T-20260920-002
+kind: manual
+title: >-
+  agents/ SYNC_IF_NEWER missed delivering the 2026-09-15
+  templates/common/agents/i18n-specialist.md update (codex tier line added) to 6
+  projects (abap/consult/develop/export/game/security) — project copies remain
+  2026-08-24 even after the same-day 0.6.0 fleet upgrade; determine why
+  SYNC_IF_NEWER (lib/upgrade-policy.ts agents policy) judged them current
+  (likely no version header / last_updated not compared) and fix the comparison
+  or the delivery
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-20T08:29:53.766Z'
+history:
+  - at: '2026-09-20T08:29:53.766Z'
+    from: null
+    to: backlog
+result: null
+error: null
