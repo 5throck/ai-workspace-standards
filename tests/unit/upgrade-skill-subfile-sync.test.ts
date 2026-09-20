@@ -120,6 +120,53 @@ describe('upgrade-project.ts common-skills sub-file delivery', () => {
     }
   }, 300000);
 
+  test('registry reconcile runs AFTER delivery: stale row ends at the delivered version', () => {
+    const tmp = makeTempProject();
+    try {
+      // Seed a stale SKILL.md (0.5.9) while the registry row already claims the
+      // template version — the pre-fix reconcile ran before delivery, set the row
+      // BACK to 0.5.9, and the delivery then invalidated it (co-game/co-architect
+      // rollout failures, 2026-09-21).
+      mkdirSync(join(tmp, 'skills', 'handbook'), { recursive: true });
+      const tplSkill = readFileSync(join(tplHandbook, 'SKILL.md'), 'utf-8');
+      writeFileSync(join(tmp, 'skills', 'handbook', 'SKILL.md'), tplSkill.replace(/^version: 0\.6\.0$/m, 'version: 0.5.9'));
+      mkdirSync(join(tmp, 'skills'), { recursive: true });
+      writeFileSync(
+        join(tmp, 'skills', 'SKILLS.md'),
+        `# Skills\n\n### Workspace Skills\n\n| skill | version | status | owner | last_reviewed | removal-date | notes | layer |\n|---|---|---|---|---|---|---|---|\n| \`handbook\` | 0.6.0 | active | pm | 2026-09-20 | — | — |\n`
+      );
+      commitAll(tmp, 'chore: seed stale handbook with current row');
+
+      const { status } = runUpgrade(tmp, false);
+      expect(status).toBe(0);
+      const rowLine = readFileSync(join(tmp, 'skills', 'SKILLS.md'), 'utf-8')
+        .split('\n').find(l => l.includes('`handbook`'));
+      expect(rowLine).toContain('0.6.0');
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  }, 300000);
+
+  test('delivery manifest is written in apply mode (rollout hardening R3)', () => {
+    const tmp = makeTempProject();
+    try {
+      mkdirSync(join(tmp, 'skills', 'handbook'), { recursive: true });
+      const tplSkill = readFileSync(join(tplHandbook, 'SKILL.md'), 'utf-8');
+      writeFileSync(join(tmp, 'skills', 'handbook', 'SKILL.md'), tplSkill.replace(/^version: 0\.6\.0$/m, 'version: 0.5.9'));
+      commitAll(tmp, 'chore: seed stale handbook');
+
+      const { status } = runUpgrade(tmp, false);
+      expect(status).toBe(0);
+      const manifestPath = join(tmp, '.claude', 'last-upgrade-delivery.json');
+      expect(existsSync(manifestPath)).toBe(true);
+      const manifest = JSON.parse(readFileSync(manifestPath, 'utf-8'));
+      expect(Array.isArray(manifest.files)).toBe(true);
+      expect(manifest.files.some((f: string) => f.includes('skills/handbook/SKILL.md'))).toBe(true);
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  }, 300000);
+
   test('dry-run reports the whole-directory delivery but writes nothing', () => {
     const tmp = makeTempProject();
     try {

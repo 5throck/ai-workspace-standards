@@ -1,5 +1,14 @@
 #!/usr/bin/env bun
-// @version 1.37.1
+// @version 1.38.0
+// v1.38.0 (2026-09-21, rollout hardening — 2026-09-21-upgrade-project-rollout-
+//           hardening-design): (1) SKILLS_REGISTRY_RECONCILE moved after ALL
+//           skill-mutating passes — it previously ran before the skills delivery,
+//           reconciling pre-delivery state and guaranteeing registry drift on
+//           every version-changing delivery (co-game/co-architect rollout
+//           failures). (2) Variant-skills pass gains equal-version CATCH-UP/DRIFT
+//           via the shared catchUpDir helper (company-intelligence terms-ko.json
+//           incident). (3) Apply-mode writes .claude/last-upgrade-delivery.json
+//           recording the delivered diff so project /sync can auto-apply E5.
 // v1.37.1 (2026-09-21): CATCH-UP DRIFT paths are normalized to POSIX separators
 //           before printing, so Windows runs report `references/x.md` not
 //           `references\x.md` (cross-platform log parity + test assertions).
@@ -1346,57 +1355,7 @@ if (existsSync(skillsMdPath)) {
 }
 console.log('');
 
-// ── SKILLS_REGISTRY_RECONCILE: version and last_reviewed columns ──────────────
-console.log('--- SKILLS_REGISTRY_RECONCILE: version and last_reviewed ---');
-const projSkillsPath = join(projectDir, 'skills');
-const registryPath = join(projectDir, 'skills', 'SKILLS.md');
-if (existsSync(registryPath) && existsSync(projSkillsPath)) {
-  const registryRows = parseSkillRegistryRows(registryPath);
-  const registryLines = readFileSync(registryPath, 'utf8').split('\n');
-  let registryChanged = false;
 
-  // For each SKILL.md in the project, reconcile its version/last_reviewed in the registry
-  for (const skillName of readdirSync(projSkillsPath)) {
-    const skillMdPath = join(projSkillsPath, skillName, 'SKILL.md');
-    if (!existsSync(skillMdPath)) continue;
-
-    const skillFrontmatter = extractFrontmatterVersionAndReviewed(skillMdPath);
-    if (!skillFrontmatter.version) continue;
-
-    const row = registryRows.get(skillName);
-    if (!row) {
-      // Row doesn't exist — skip (don't synthesize, per design doc)
-      continue;
-    }
-
-    // Update version and last_reviewed columns if they differ
-    const newVersion = skillFrontmatter.version;
-    const newReviewed = skillFrontmatter.last_reviewed || row.lastReviewed;
-
-    if (row.version !== newVersion || row.lastReviewed !== newReviewed) {
-      // Replace version and last_reviewed in the registry row
-      const updatedCells = [...row.cells];
-      updatedCells[2] = newVersion;
-      updatedCells[5] = newReviewed;
-      const updatedLine = updatedCells.join('|');
-
-      registryLines[row.lineIdx] = updatedLine;
-      registryChanged = true;
-      console.log(`  ${dryTag}RECONCILED: ${skillName} → v${newVersion}, last_reviewed: ${newReviewed}`);
-    }
-  }
-
-  if (registryChanged && !dryRun) {
-    writeFileSync(registryPath, registryLines.join('\n'), 'utf8');
-  }
-} else {
-  if (!existsSync(registryPath)) {
-    console.log("  INFO: skills/SKILLS.md not found — skipping reconciliation");
-  } else {
-    console.log("  INFO: skills/ directory not found — skipping reconciliation");
-  }
-}
-console.log('');
 
 // ── SYNC_IF_NEWER: scripts/ ───────────────────────────────────────────────────
 console.log('--- SYNC_IF_NEWER: scripts/ ---');
@@ -1694,12 +1653,13 @@ const tplSkillsDir = join(commonDir, 'skills');
 const seenSkills = new Set<string>();
 // Recursively deliver template files missing from the project skill directory
 // without overwriting anything that already exists (dry-run counts only).
-const catchUpSkillDir = (skillName: string): { copied: number; drifted: string[] } => {
-  const tplSkillDir = join(tplSkillsDir, skillName);
-  const projSkillDir = join(projectDir, 'skills', skillName);
+// v1.38.0: generic recursive catch-up, shared by the common and variant skill passes
+const catchUpDir = (srcRoot: string, dstRoot: string): { copied: number; drifted: string[] } => {
   let copied = 0;
   const drifted: string[] = [];
   const walk = (srcDir: string, dstDir: string): void => {
+    const projSkillDir = dstRoot;
+    void projSkillDir;
     for (const entry of readdirSync(srcDir, { withFileTypes: true })) {
       const src = join(srcDir, entry.name);
       const dst = join(dstDir, entry.name);
@@ -1711,14 +1671,16 @@ const catchUpSkillDir = (skillName: string): { copied: number; drifted: string[]
           if (!dryRun) copyFileSync(src, dst);
           copied++;
         } else if (fileHash(src) !== fileHash(dst)) {
-          drifted.push(dst.slice(projSkillDir.length + 1).replace(/\\/g, '/'));
+          drifted.push(dst.slice(dstRoot.length + 1).replace(/\\/g, '/'));
         }
       }
     }
   };
-  walk(tplSkillDir, projSkillDir);
+  walk(srcRoot, dstRoot);
   return { copied, drifted };
 };
+const catchUpSkillDir = (skillName: string): { copied: number; drifted: string[] } =>
+  catchUpDir(join(tplSkillsDir, skillName), join(projectDir, 'skills', skillName));
 if (existsSync(tplSkillsDir)) {
   for (const skillName of readdirSync(tplSkillsDir)) {
     const tplSkillFile = join(tplSkillsDir, skillName, 'SKILL.md');
@@ -1846,7 +1808,17 @@ if (existsSync(variantSkillsSrc)) {
         console.log(`  ${dryTag}COPIED: skills/${skillName}/`);
         syncChanged++;
       } else {
-        console.log(`  OK     skills/${skillName}/SKILL.md  ${projVer}`);
+        // v1.38.0: equal-version catch-up, same policy as the common skills pass
+        const { copied, drifted } = catchUpDir(tplSkillDir, projSkillDir);
+        if (copied > 0) {
+          console.log(`  CATCH-UP skills/${skillName}/  ${copied} missing file(s) delivered (same version ${projVer})`);
+          syncChanged++;
+        } else if (drifted.length === 0) {
+          console.log(`  OK     skills/${skillName}/SKILL.md  ${projVer}`);
+        }
+        for (const d of drifted) {
+          console.log(`  ⚠️  DRIFT skills/${skillName}/${d}  (same-version content differs — left untouched)`);
+        }
       }
     } else {
       const tplHash = fileHash(tplSkillFile);
@@ -1862,7 +1834,16 @@ if (existsSync(variantSkillsSrc)) {
         console.log(`  ${dryTag}COPIED: skills/${skillName}/`);
         syncChanged++;
       } else {
-        console.log(`  OK     skills/${skillName}/SKILL.md  (hash match)`);
+        const { copied, drifted } = catchUpDir(tplSkillDir, projSkillDir);
+        if (copied > 0) {
+          console.log(`  CATCH-UP skills/${skillName}/  ${copied} missing file(s) delivered (hash match)`);
+          syncChanged++;
+        } else if (drifted.length === 0) {
+          console.log(`  OK     skills/${skillName}/SKILL.md  (hash match)`);
+        }
+        for (const d of drifted) {
+          console.log(`  ⚠️  DRIFT skills/${skillName}/${d}  (same-version content differs — left untouched)`);
+        }
       }
     }
   }
@@ -2327,6 +2308,58 @@ console.log('--- VARIANT-SCOPE SKILL PRUNE ---');
 }
 console.log('');
 
+// ── SKILLS_REGISTRY_RECONCILE: version and last_reviewed columns ──────────────
+console.log('--- SKILLS_REGISTRY_RECONCILE: version and last_reviewed ---');
+const projSkillsPath = join(projectDir, 'skills');
+const registryPath = join(projectDir, 'skills', 'SKILLS.md');
+if (existsSync(registryPath) && existsSync(projSkillsPath)) {
+  const registryRows = parseSkillRegistryRows(registryPath);
+  const registryLines = readFileSync(registryPath, 'utf8').split('\n');
+  let registryChanged = false;
+
+  // For each SKILL.md in the project, reconcile its version/last_reviewed in the registry
+  for (const skillName of readdirSync(projSkillsPath)) {
+    const skillMdPath = join(projSkillsPath, skillName, 'SKILL.md');
+    if (!existsSync(skillMdPath)) continue;
+
+    const skillFrontmatter = extractFrontmatterVersionAndReviewed(skillMdPath);
+    if (!skillFrontmatter.version) continue;
+
+    const row = registryRows.get(skillName);
+    if (!row) {
+      // Row doesn't exist — skip (don't synthesize, per design doc)
+      continue;
+    }
+
+    // Update version and last_reviewed columns if they differ
+    const newVersion = skillFrontmatter.version;
+    const newReviewed = skillFrontmatter.last_reviewed || row.lastReviewed;
+
+    if (row.version !== newVersion || row.lastReviewed !== newReviewed) {
+      // Replace version and last_reviewed in the registry row
+      const updatedCells = [...row.cells];
+      updatedCells[2] = newVersion;
+      updatedCells[5] = newReviewed;
+      const updatedLine = updatedCells.join('|');
+
+      registryLines[row.lineIdx] = updatedLine;
+      registryChanged = true;
+      console.log(`  ${dryTag}RECONCILED: ${skillName} → v${newVersion}, last_reviewed: ${newReviewed}`);
+    }
+  }
+
+  if (registryChanged && !dryRun) {
+    writeFileSync(registryPath, registryLines.join('\n'), 'utf8');
+  }
+} else {
+  if (!existsSync(registryPath)) {
+    console.log("  INFO: skills/SKILLS.md not found — skipping reconciliation");
+  } else {
+    console.log("  INFO: skills/ directory not found — skipping reconciliation");
+  }
+}
+console.log('');
+
 // ── OVERWRITE: docs/_common/ (allowlist) ──────────────────────────────────────
 console.log('--- OVERWRITE: docs/_common/ (governance files) ---');
 const DOCS_OVERWRITE = ['security.md'];
@@ -2640,6 +2673,27 @@ if (syncChanged > 0 && existsSync(syncSkillsScript)) {
     console.log('  [DRY RUN] Would run: bun scripts/sync-skills.ts');
   }
   console.log('');
+}
+
+// ── Delivery manifest (v1.38.0) ───────────────────────────────────────────────
+// Record the delivered diff so the project's /sync can recognize an
+// upgrade-explained change set (dev-sync step 3.9 auto-E5, R4 of the rollout
+// hardening design). Written in apply mode only, before sync-skills runs.
+if (!dryRun) {
+  try {
+    const por = spawnSync('git', ['-C', projectDir, 'status', '--porcelain'], { encoding: 'utf8' });
+    const files = (por.stdout || '').split('\n')
+      .map(l => l.replace(/^\S+\s+/, '').trim().replace(/^"|"$/g, ''))
+      .filter(Boolean);
+    mkdirSync(join(projectDir, '.claude'), { recursive: true });
+    writeFileSync(
+      join(projectDir, '.claude', 'last-upgrade-delivery.json'),
+      JSON.stringify({ timestamp: new Date().toISOString(), files }, null, 2) + '\n'
+    );
+    console.log(`  Delivery manifest written: .claude/last-upgrade-delivery.json (${files.length} path(s))`);
+  } catch (err) {
+    console.log(`  ⚠️  could not write delivery manifest (${String(err)}) — /sync auto-E5 unavailable for this wave`);
+  }
 }
 
 // ── Post-upgrade: regenerate the project skill graph ──────────────────────────

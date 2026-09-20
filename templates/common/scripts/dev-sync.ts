@@ -1,4 +1,4 @@
-// @version 1.15.0
+// @version 1.16.0
 // v1.15.0 (ADR-0081 / T-20260918-002): main-integration hardening — two
 //           additions, CONSTITUTION §3.3 unchanged as the primary rule.
 //           (1) Pre-flight main-drift detection: after the language gate, a
@@ -88,6 +88,7 @@ import { withRetry, DEFAULT_CONFIG } from './retry-handler.ts';
 import { hasNonEnglish } from './lib/language-guard.ts';
 import { parseStatusPorcelain } from './lib/git-status.ts';
 import { sharedPipelineFilesChanged, parseUnresolvedConflicts } from './helpers/merge-state.ts';
+import { isDeliveredDiff } from './lib/upgrade-policy.ts';
 
 const GREEN = '\x1b[32m';
 const RED = '\x1b[31m';
@@ -438,11 +439,39 @@ if (fs.existsSync(specRegPath)) {
         .env({ ...process.env, ...specEnv })
         .nothrow();
     if (specRes.exitCode !== 0) {
-        console.error(`${RED}✗ Step 3.9: spec-check FAILED (exit ${specRes.exitCode})${RESET}`);
-        console.error('  The diff touches code (scripts/templates/agents) with no relevant spec activity.');
-        console.error('  Fix: update docs/specs/ (or docs/designs/) alongside the change, or legitimize the');
-        console.error('  sync with --spec-exempt=E1..E5 (AGENTS.md §5.1.1 categories; e.g. --spec-exempt=E3 for a typo hotfix).');
-        if (import.meta.main) process.exit(1);
+        // v1.16.0: auto-E5 — a diff fully explained by the recorded upgrade delivery
+        // (.claude/last-upgrade-delivery.json) IS a sync execution; retry with E5.
+        // Any hand-edited file outside the delivered set keeps the block.
+        let handled = false;
+        const manifestPath = path.join('.claude', 'last-upgrade-delivery.json');
+        if (fs.existsSync(manifestPath)) {
+            try {
+                const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+                const st = await $`git status --porcelain`.quiet().nothrow();
+                const changedFiles = String(st.stdout ?? '').split('\n')
+                    .map(l => l.replace(/^\S+\s+/, '').trim().replace(/^"|"$/g, ''))
+                    .filter(Boolean);
+                if (isDeliveredDiff(changedFiles, manifest.files ?? [])) {
+                    console.log(`${YELLOW}ℹ️  Step 3.9: diff fully explained by upgrade delivery — auto-applying E5 (sync-only).${RESET}`);
+                    const retryRes = await $`bun scripts/audit.ts --spec-check --lifecycle-only`
+                        .env({ ...process.env, SYNC_SPEC_EXEMPT: 'E5' })
+                        .nothrow();
+                    if (retryRes.exitCode === 0) {
+                        console.log(`${GREEN}✓ Spec registry check passed (upgrade-delivered diff)${RESET}`);
+                        handled = true;
+                    }
+                }
+            } catch (err) {
+                console.log(`${YELLOW}⚠️  Step 3.9: auto-E5 inspection failed (${String(err)}) — treating as unattributed diff.${RESET}`);
+            }
+        }
+        if (!handled) {
+            console.error(`${RED}✗ Step 3.9: spec-check FAILED (exit ${specRes.exitCode})${RESET}`);
+            console.error('  The diff touches code (scripts/templates/agents) with no relevant spec activity.');
+            console.error('  Fix: update docs/specs/ (or docs/designs/) alongside the change, or legitimize the');
+            console.error('  sync with --spec-exempt=E1..E5 (AGENTS.md §5.1.1 categories; e.g. --spec-exempt=E3 for a typo hotfix).');
+            if (import.meta.main) process.exit(1);
+        }
     } else {
         console.log(`${GREEN}✓ Spec registry check passed${RESET}`);
     }
