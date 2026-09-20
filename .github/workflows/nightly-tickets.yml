@@ -104,7 +104,7 @@ jobs:
 
       - name: Process tickets (PR-only batch)
         if: steps.ready.outputs.count != '0' && steps.creds.outputs.provider != 'none'
-        uses: anthropics/claude-code-action@19dda84776b3518d98b8798e591daee763049ed3 # v1.0.220
+        uses: anthropics/claude-code-action@7b0b255830a1fab6e602658672acad11c12d841d # v1.0.226
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # Anthropic-direct mode: x-api-key auth. z.ai mode: Bearer auth via
