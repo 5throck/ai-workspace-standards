@@ -9,9 +9,9 @@
  *   bun scripts/agent-lifecycle-audit.ts
  *   bun scripts/agent-lifecycle-audit.ts --json   # JSON output
  *
- * @version 1.2.1
+ * @version 1.3.0
  * @l2-propagate false
- * @last_updated 2026-09-09
+ * @last_updated 2026-09-21
  * @license MIT
  *
  * v1.2.0: New Check 11 (T-20260909-004) — WARN when an agent's frontmatter
@@ -292,6 +292,60 @@ export function isFrontmatterStale(frontmatterDate: string, lastCommitDate: stri
   return frontmatterDate < lastCommitDate;
 }
 
+// ── v1.3.0 lifecycle-modernization checks (2026-09-21) ──────────────────────
+
+/** An agent name resolves if a roster entry, an agent file, or a variant agent file exists. */
+function agentNameExists(name: string, registeredAgents: Set<string>): boolean {
+  if (registeredAgents.has(name)) return true;
+  if (existsSync(join(ROOT, 'agents', `${name}.md`))) return true;
+  if (existsSync(join(ROOT, '.claude', 'agents', `${name}.md`))) return true;
+  const templatesDir = join(ROOT, 'templates');
+  if (existsSync(templatesDir)) {
+    for (const e of readdirSync(templatesDir, { withFileTypes: true })) {
+      if (e.isDirectory() && e.name.startsWith('co-') && existsSync(join(templatesDir, e.name, 'agents', `${name}.md`))) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+/** Extract list-valued frontmatter entries (handoff_to, handoff_from, …) as name tokens. */
+function extractFrontmatterNameList(filePath: string, field: string): string[] {
+  try {
+    const content = readFileSync(filePath, 'utf-8').replace(/\r\n/g, '\n');
+    const fm = content.match(/^---\n([\s\S]*?)\n---/);
+    if (!fm) return [];
+    const names: string[] = [];
+    const lines = fm[1].split('\n');
+    for (let i = 0; i < lines.length; i++) {
+      const inline = lines[i].match(new RegExp(`^${field}:\\s*(.+)$`));
+      if (inline) {
+        if (inline[1].startsWith('[')) {
+          names.push(...inline[1].slice(1, -1).split(',').map(s => s.trim().replace(/^['"]|['"]$/g, '')).filter(Boolean));
+        } else if (inline[1]) {
+          names.push(inline[1].trim().replace(/^['"]|['"]$/g, ''));
+        }
+        continue;
+      }
+      if (new RegExp(`^${field}:\\s*$`).test(lines[i])) {
+        for (let j = i + 1; j < lines.length && /^-\s/.test(lines[j]); j++) {
+          names.push(lines[j].replace(/^-\s*/, '').trim().replace(/^['"]|['"]$/g, ''));
+        }
+      }
+    }
+    return names.filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
+/** Removal-review deadline (ISO date) is in the past. */
+export function isRemovalReviewOverdue(removalReview: string | null): boolean {
+  if (!removalReview || !/^\d{4}-\d{2}-\d{2}$/.test(removalReview)) return false;
+  return new Date(removalReview + 'T23:59:59').getTime() <= Date.now();
+}
+
 // Read a date-ish frontmatter field directly from the raw frontmatter text. The
 // generic parser above only keeps top-level keys, but `last_updated` legitimately
 // nests under `lifecycle:` in agent files — a targeted regex catches both layouts.
@@ -317,6 +371,29 @@ function lastCommitDate(filePath: string): string | null {
   } catch {
     return null;
   }
+}
+
+/** True when the named agent exists but is deprecated/archived (non-live). */
+function isAgentNonLive(name: string): boolean {
+  for (const p of [join(ROOT, 'agents', `${name}.md`), join(ROOT, '.claude', 'agents', `${name}.md`)]) {
+    if (existsSync(p)) {
+      const fm = parseAgentFrontmatter(p);
+      return fm?.status === 'deprecated' || fm?.status === 'archived';
+    }
+  }
+  const templatesDir = join(ROOT, 'templates');
+  if (existsSync(templatesDir)) {
+    for (const e of readdirSync(templatesDir, { withFileTypes: true })) {
+      if (e.isDirectory() && e.name.startsWith('co-')) {
+        const p = join(templatesDir, e.name, 'agents', `${name}.md`);
+        if (existsSync(p)) {
+          const fm = parseAgentFrontmatter(p);
+          return fm?.status === 'deprecated' || fm?.status === 'archived';
+        }
+      }
+    }
+  }
+  return false;
 }
 
 // Main audit function
@@ -436,6 +513,68 @@ function auditAgents(jsonMode = false): AuditResult {
       }
     }
 
+    // Check 4b: status vocabulary (v1.3.0) — `retired` is a legacy alias of `archived`
+    const validAgentStatuses = ['draft', 'active', 'deprecated', 'archived'];
+    if (frontmatter.status && !validAgentStatuses.includes(String(frontmatter.status))) {
+      if (String(frontmatter.status) === 'retired') {
+        warnings.push({
+          level: 'warning',
+          file: relPath,
+          message: "status 'retired' is a legacy alias — use 'archived'",
+          fix: "Set 'status: archived' in frontmatter",
+        });
+      } else {
+        errors.push({
+          level: 'error',
+          file: relPath,
+          message: `Invalid status value '${frontmatter.status}' (allowed: ${validAgentStatuses.join(' | ')})`,
+          fix: `Set status to one of: ${validAgentStatuses.join(', ')}`,
+        });
+      }
+    }
+
+    // Check 13: handoff integrity (v1.3.0) — handoff targets must exist and be live
+    for (const field of ['handoff_to', 'handoff_from'] as const) {
+      for (const target of extractFrontmatterNameList(agentFile, field)) {
+        if (!agentNameExists(target, registeredAgents)) {
+          errors.push({
+            level: 'error',
+            file: relPath,
+            message: `Dangling ${field} reference: agent '${target}' does not exist`,
+            fix: `Update or remove the ${field} entry`,
+          });
+        } else if (isAgentNonLive(target)) {
+          errors.push({
+            level: 'error',
+            file: relPath,
+            message: `${field} references non-live agent '${target}'`,
+            fix: `Re-route the handoff to a live agent`,
+          });
+        }
+      }
+    }
+
+    // Check 14: removal-review deadline (v1.3.0) — deprecated agents must carry a
+    // future removal_review date, and an expired one blocks until the review runs.
+    if (frontmatter.status === 'deprecated') {
+      const removalReview = parseFrontmatterDate(extractFrontmatterDate(agentFile, 'removal_review'));
+      if (!removalReview) {
+        errors.push({
+          level: 'error',
+          file: relPath,
+          message: 'Deprecated agent has no removal_review date',
+          fix: "Add 'removal_review: YYYY-MM-DD' (default: deprecation + 90 days) to frontmatter",
+        });
+      } else if (isRemovalReviewOverdue(removalReview)) {
+        errors.push({
+          level: 'error',
+          file: relPath,
+          message: `Removal review overdue for deprecated agent (removal_review ${removalReview} has passed)`,
+          fix: 'Run the removal review now: delete (user-approved), archive, or push the date out with a recorded rationale',
+        });
+      }
+    }
+
     // Check 8: Tier validation - missing tier field
     if (!frontmatter.tier) {
       errors.push({
@@ -482,6 +621,30 @@ function auditAgents(jsonMode = false): AuditResult {
         message: 'Registered in AGENTS.md but file not found',
         fix: `Create agents/${agentName}.md or remove from AGENTS.md`,
       });
+    }
+  }
+
+  // Check 12 (v1.3.0): skill `owner:` values on the L0 AUTHORING surface
+  // (skills/) naming agents that exist nowhere. Variant-template skills are
+  // excluded — several variants declare virtual domain owners (e.g. co-safety's
+  // gmp-agent) as an intentional local model, and project copies heal through
+  // the upgrade path. The soft orphaned-owner WARN in skill-lifecycle-audit
+  // still covers those surfaces.
+  for (const [owner, skillPaths] of skillOwnerRefs) {
+    for (const token of owner.split(/[\s,]+/).filter(Boolean)) {
+      if (agentNameExists(token, registeredAgents)) continue;
+      const l0Path = skillPaths.find(p => {
+        const norm = p.replace(/\\/g, '/');
+        return norm.startsWith('skills/');
+      });
+      if (l0Path) {
+        errors.push({
+          level: 'error',
+          file: l0Path.replace(/\\/g, '/'),
+          message: `Skill owner references nonexistent agent: ${token}`,
+          fix: `Create agents/${token}.md, or reassign the skill's owner to a live agent`,
+        });
+      }
     }
   }
 

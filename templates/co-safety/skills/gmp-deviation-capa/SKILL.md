@@ -64,8 +64,8 @@ Common fields required:
 - `e_signature`, `qrm_assessment`, `nomenclature`, `audit_trail`
 
 ## Integration Points
-- **From**: `batch-mfg` workflow (IPC failures, OOS), `self-inspection` workflow (findings), `cleaning-validation` (failures)
-- **To**: `change-control` workflow (when CAPA requires permanent change), `equipment-qualification` (re-qualification triggers)
+- **From**: batch-mfg workflow (IPC failures, OOS), self-inspection workflow (findings), cleaning-validation (failures)
+- **To**: change-control workflow (when CAPA requires permanent change), equipment-qualification (re-qualification triggers)
 
 ## KPI Tracking
 - Deviation rate per 100 batches (target: <2%)

@@ -3,7 +3,7 @@
 ## Metadata
 - **Skill**: zod-contract-gate
 - **Status**: active
-- **Version**: 1.0.0
+- **Version**: 1.0.2
 - **Created**: 2026-08-16
 - **Last Updated**: 2026-08-16
 
@@ -11,6 +11,10 @@
 Defines Zod runtime schema validation patterns, interface boundaries, and contract safety rules for multi-agent architecture, IPC channels, and API endpoints.
 
 ## Changelog
+
+- **1.0.2** (2026-09-21): patch bump — deliver accumulated template content to the fleet (equal-version content drift measured 2026-09-21; upgrade-project 1.37 UPDATE delivery).
+
+- **1.0.1** (2026-09-21): patch bump — deliver accumulated template content that predated this version to the fleet (equal-version content drift measured 2026-09-21; upgrade-project 1.37 UPDATE delivery).
 - 2026-08-16: Lifecycle document created from SKILL.md frontmatter (backfill)
 
 ## Dependencies

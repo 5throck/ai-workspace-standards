@@ -3,7 +3,7 @@
 ## Metadata
 - **Skill**: source-command-commit-push-pr
 - **Status**: active
-- **Version**: 1.0.1
+- **Version**: 1.0.3
 - **Created**: 2026-09-04
 - **Last Updated**: 2026-09-04
 
@@ -14,6 +14,10 @@ changes, writes an English conventional commit message, pushes the branch, and
 opens a PR — the lightweight alternative to the full `sync` pipeline.
 
 ## Changelog
+
+- **1.0.3** (2026-09-21): patch bump — deliver accumulated template content to the fleet (equal-version content drift measured 2026-09-21; upgrade-project 1.37 UPDATE delivery).
+
+- **1.0.2** (2026-09-21): patch bump — deliver accumulated template content that predated this version to the fleet (equal-version content drift measured 2026-09-21; upgrade-project 1.37 UPDATE delivery).
 - 2026-09-04: 1.0.1 — patch adjustment at lifecycle-record creation
 - 2026-09-04: 1.0.0 — initial version
 

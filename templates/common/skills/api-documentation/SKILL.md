@@ -4,7 +4,7 @@ description: >
   Creates comprehensive API documentation including endpoints, parameters, authentication,
   request/response schemas, and code examples. Use when: documenting REST APIs, GraphQL
   interfaces, SDKs, or developer-facing technical specifications.
-version: 1.0.0
+version: 1.0.2
 scope: common
 status: active
 owner: pm

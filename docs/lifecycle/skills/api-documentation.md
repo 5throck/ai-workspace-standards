@@ -3,7 +3,7 @@
 ## Metadata
 - **Skill**: api-documentation
 - **Status**: active
-- **Version**: 1.0.0
+- **Version**: 1.0.2
 - **Created**: 2026-08-28
 - **Last Updated**: 2026-08-29
 
@@ -11,6 +11,10 @@
 Creates comprehensive API documentation: endpoints, parameters, authentication, request/response schemas, and code examples.
 
 ## Changelog
+
+- **1.0.2** (2026-09-21): patch bump — deliver accumulated template content to the fleet (equal-version content drift measured 2026-09-21; upgrade-project 1.37 UPDATE delivery).
+
+- **1.0.1** (2026-09-21): patch bump — deliver accumulated template content that predated this version to the fleet (equal-version content drift measured 2026-09-21; upgrade-project 1.37 UPDATE delivery).
 - 2026-08-28: Promoted from co-work/co-safety duplicate copies into the workspace-root common layer (identical body deduplicated; generic, not domain-specific).
 - 2026-08-29: Lifecycle document created (backfill — record was missing after the promotion).
 

@@ -7,11 +7,10 @@
  *
  * Usage:
  *   bun scripts/skill-lifecycle-audit.ts
- *   bun scripts/skill-lifecycle-audit.ts --fix    # Auto-fix simple issues
  *   bun scripts/skill-lifecycle-audit.ts --json   # JSON output
  *
- * @version 1.4.1
- * @last_updated 2026-09-09
+ * @version 1.5.0
+ * @last_updated 2026-09-21
  * @license MIT
  */
 
@@ -30,6 +29,12 @@ interface SkillFrontmatter {
   superseded_by?: string[];
   last_reviewed?: string;
   last_reviewed_by?: string;
+}
+
+interface ReferenceAllowlistEntry {
+  file_substring: string;
+  refs: string[];
+  reason?: string;
 }
 
 interface SkillIssue {
@@ -247,6 +252,123 @@ function wasModifiedRecently(filePath: string, days: number = 30): boolean {
   return daysSince < days;
 }
 
+// ── Reference integrity (v1.5.0, 2026-09-21 agent-skill-lifecycle modernization) ──
+
+/** Every skill name that exists in the workspace: root SSOT + every variant/common template. */
+function collectKnownSkillNames(): { names: Set<string>; statusByName: Map<string, string> } {
+  const names = new Set<string>();
+  const statusByName = new Map<string, string>();
+  const roots = [join(ROOT, 'skills')];
+  const templatesDir = join(ROOT, 'templates');
+  if (existsSync(templatesDir)) {
+    for (const e of readdirSync(templatesDir, { withFileTypes: true })) {
+      if (e.isDirectory() && (e.name.startsWith('co-') || e.name === 'common')) {
+        roots.push(join(templatesDir, e.name, 'skills'));
+      }
+    }
+  }
+  for (const base of roots) {
+    if (!existsSync(base)) continue;
+    for (const e of readdirSync(base, { withFileTypes: true })) {
+      if (!e.isDirectory()) continue;
+      const fm = parseFrontmatter(join(base, e.name, 'SKILL.md'));
+      if (fm?.name) {
+        names.add(fm.name);
+        if (fm.status) statusByName.set(fm.name, String(fm.status));
+      }
+    }
+  }
+  return { names, statusByName };
+}
+
+/** Allowlisted intentional historical references (docs/lifecycle/reference-allowlist.json). */
+function loadReferenceAllowlist(): ReferenceAllowlistEntry[] {
+  const p = join(ROOT, 'docs', 'lifecycle', 'reference-allowlist.json');
+  if (!existsSync(p)) return [];
+  try {
+    const parsed = JSON.parse(readFileSync(p, 'utf-8'));
+    return Array.isArray(parsed?.allow) ? parsed.allow as ReferenceAllowlistEntry[] : [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Scan a SKILL.md body for references that look like skill citations and
+ * classify each as resolvable / deprecated / unknown / agent-only.
+ *
+ * Precision rules (kebab-case backticks alone would flag HTML attributes and
+ * shell commands): a token counts as a skill reference only when it appears
+ *   (a) in a `## Related Skills` section, or
+ *   (b) adjacent to the word "skill" — `` `x` skill`` / ``skill `x` ``.
+ */
+export function scanSkillReferences(
+  skillFile: string,
+  known: { names: Set<string>; statusByName: Map<string, string> },
+  allowlist: ReferenceAllowlistEntry[],
+  agentNames: Set<string> = new Set(),
+): { unknown: string[]; deprecated: string[]; agentOnly: string[] } {
+  const content = readFileSync(skillFile, 'utf-8').replace(/\r\n/g, '\n');
+  const body = content.replace(/^---\n[\s\S]*?\n---/, ''); // frontmatter relations are covered by requires/relates_to checks
+  const self = parseFrontmatter(skillFile)?.name ?? '';
+  const allowForFile = allowlist
+    .filter(e => skillFile.replace(/\\/g, '/').includes(e.file_substring))
+    .flatMap(e => e.refs);
+
+  const candidates = new Set<string>();
+  // (a) Related Skills sections
+  const section = body.match(/## Related Skills\n([\s\S]*?)(?=\n## |$)/);
+  if (section) {
+    for (const m of section[1].matchAll(/`([a-z0-9]+(?:-[a-z0-9]+)+)`/g)) candidates.add(m[1]);
+  }
+  // (b) "skill"-adjacent inline mentions
+  for (const m of body.matchAll(/`([a-z0-9]+(?:-[a-z0-9]+)+)`\s+skills?\b/gi)) candidates.add(m[1]);
+  for (const m of body.matchAll(/skills?\s+`([a-z0-9]+(?:-[a-z0-9]+)+)`/gi)) candidates.add(m[1]);
+
+  const unknown = new Set<string>();
+  const deprecated = new Set<string>();
+  const agentOnly = new Set<string>();
+  for (const name of candidates) {
+    if (name === self) continue;
+    if (known.names.has(name)) {
+      if (known.statusByName.get(name) === 'deprecated') deprecated.add(name);
+      continue;
+    }
+    if (agentNames.has(name)) {
+      agentOnly.add(name);
+      continue;
+    }
+    if (allowForFile.includes(name)) continue;
+    unknown.add(name);
+  }
+  return { unknown: [...unknown], deprecated: [...deprecated], agentOnly: [...agentOnly] };
+}
+
+/** Every agent name declared in agents/ rosters at L0 and inside template variants. */
+function collectKnownAgentNames(): Set<string> {
+  const names = new Set<string>();
+  const dirs = [join(ROOT, 'agents'), join(ROOT, '.claude', 'agents')];
+  const templatesDir = join(ROOT, 'templates');
+  if (existsSync(templatesDir)) {
+    for (const e of readdirSync(templatesDir, { withFileTypes: true })) {
+      if (e.isDirectory() && e.name.startsWith('co-')) dirs.push(join(templatesDir, e.name, 'agents'));
+    }
+  }
+  for (const dir of dirs) {
+    if (!existsSync(dir)) continue;
+    for (const f of readdirSync(dir)) {
+      if (f.endsWith('.md')) names.add(f.replace(/\.md$/, ''));
+    }
+  }
+  return names;
+}
+
+/** Registry removal-date ≤ today on a skill that still exists (Check RD, ERROR). */
+function isRemovalDateExpired(removalDate: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(removalDate)) return false;
+  return new Date(removalDate + 'T23:59:59').getTime() <= Date.now();
+}
+
 // Check for circular dependencies
 function checkCircularDependencies(
   skillFile: string,
@@ -299,6 +421,10 @@ function auditSkills(jsonMode = false): AuditResult {
   const warnings: SkillIssue[] = [];
   const registryRows = parseSkillRegistryRows();
   const runtimeSkillNames = new Set<string>();
+  // v1.5.0 reference-integrity inputs (L0 only — mirrors/projects inherit L0 state)
+  const knownSkills = collectKnownSkillNames();
+  const refAllowlist = loadReferenceAllowlist();
+  const knownAgents = collectKnownAgentNames();
 
   // Skip header in JSON mode
   if (!jsonMode) {
@@ -477,6 +603,44 @@ function auditSkills(jsonMode = false): AuditResult {
         });
       }
     }
+
+    // Check RI/RI-d/RI-a (v1.5.0): body references must resolve to real skills
+    if (IS_WORKSPACE_ROOT && !isPlatformSkill && frontmatter.name) {
+      const { unknown, deprecated, agentOnly } = scanSkillReferences(skillFile, knownSkills, refAllowlist, knownAgents);
+      for (const name of unknown) {
+        errors.push({
+          level: 'error',
+          file: relPath,
+          message: `Reference integrity: backtick reference \`${name}\` resolves to no skill in skills/ or templates/*/skills/`,
+          fix: `Fix or remove the reference (add docs/lifecycle/reference-allowlist.json entry if it is an intentional historical note)`,
+        });
+      }
+      for (const name of deprecated) {
+        warnings.push({
+          level: 'warning',
+          file: relPath,
+          message: `Reference \`${name}\` points at a deprecated skill`,
+          fix: `Update the reference to the successor skill`,
+        });
+      }
+      for (const name of agentOnly) {
+        warnings.push({
+          level: 'warning',
+          file: relPath,
+          message: `Related-Skills entry \`${name}\` resolves to an agent, not a skill`,
+          fix: `Move the reference to the agent-relations section or cite the actual skill name`,
+        });
+      }
+      // Check LC (v1.5.0): active skills must carry a lifecycle record
+      if (frontmatter.status === 'active' && !existsSync(join(ROOT, 'docs', 'lifecycle', 'skills', `${frontmatter.name}.md`))) {
+        warnings.push({
+          level: 'warning',
+          file: relPath,
+          message: `No lifecycle record: docs/lifecycle/skills/${frontmatter.name}.md is missing for an active skill`,
+          fix: `Create the record (Created / Phase History / Acceptance Criteria / Metadata)`,
+        });
+      }
+    }
   }
 
   if (registryRows.size > 0) {
@@ -488,6 +652,43 @@ function auditSkills(jsonMode = false): AuditResult {
           message: `Registry row has no matching runtime skill: ${name}`,
           fix: `Remove the ${name} row from skills/SKILLS.md or restore skills/${name}/SKILL.md`,
         });
+      }
+      // Check RD (v1.5.0): expired removal-date on a still-present skill
+      const row = registryRows.get(name)!;
+      if (row.removalDate && isRemovalDateExpired(row.removalDate)) {
+        errors.push({
+          level: 'error',
+          file: 'skills/SKILLS.md',
+          message: `Removal date expired for ${name} (removal-date ${row.removalDate} has passed; the skill is still present)`,
+          fix: `Run the removal review now: remove the skill or push the removal-date out with a recorded rationale`,
+        });
+      }
+    }
+  }
+
+  // Check RI for template-resident skills (v1.5.0) — templates/*/skills are not
+  // part of the runtime scan above, but their SKILL.md bodies reference skills too.
+  if (IS_WORKSPACE_ROOT) {
+    const templatesDir = join(ROOT, 'templates');
+    if (existsSync(templatesDir)) {
+      for (const e of readdirSync(templatesDir, { withFileTypes: true })) {
+        if (!e.isDirectory() || !(e.name.startsWith('co-') || e.name === 'common')) continue;
+        const tplSkillsDir = join(templatesDir, e.name, 'skills');
+        if (!existsSync(tplSkillsDir)) continue;
+        for (const s of readdirSync(tplSkillsDir, { withFileTypes: true })) {
+          if (!s.isDirectory()) continue;
+          const f = join(tplSkillsDir, s.name, 'SKILL.md');
+          if (!existsSync(f)) continue;
+          const { unknown } = scanSkillReferences(f, knownSkills, refAllowlist, knownAgents);
+          for (const name of unknown) {
+            errors.push({
+              level: 'error',
+              file: `templates/${e.name}/skills/${s.name}/SKILL.md`,
+              message: `Reference integrity: backtick reference \`${name}\` resolves to no skill in skills/ or templates/*/skills/`,
+              fix: `Fix or remove the reference (add docs/lifecycle/reference-allowlist.json entry if it is an intentional historical note)`,
+            });
+          }
+        }
       }
     }
   }

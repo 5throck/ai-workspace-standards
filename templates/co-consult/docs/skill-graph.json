@@ -1028,6 +1028,12 @@
       "source": "skill_manifest"
     },
     {
+      "type": "references",
+      "from": "hwp-document-processing",
+      "to": "sample-driven-report-writing",
+      "source": "prose"
+    },
+    {
       "type": "composes_with",
       "from": "insight-synthesis",
       "to": "competitive-intelligence",

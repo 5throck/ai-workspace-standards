@@ -67,7 +67,7 @@ Execute Lockout/Tagout (LOTO) procedure verification for hazardous energy source
 
 ### Workflow
 
-1. **Identify Energy Sources** — Determine all hazardous energy types affecting the equipment (`energy_types_isolated`: electrical, mechanical, hydraulic, pneumatic, thermal, chemical). Reference `risk_assessment_ref` if a prior risk assessment already identified these sources; otherwise dispatch `risk-assessment-agent` first.
+1. **Identify Energy Sources** — Determine all hazardous energy types affecting the equipment (`energy_types_isolated`: electrical, mechanical, hydraulic, pneumatic, thermal, chemical). Reference `risk_assessment_ref` if a prior risk assessment already identified these sources; otherwise dispatch the risk-assessment agent first.
 2. **Determine Lock Classification** — Select `lock_type` per KOSHA GUIDE Z-40-2022 §3.2-3.4:
    - `personal_lock` — solo worker, solo lock at a single isolation point.
    - `individual_locking` — one isolation point, 2+ workers each applying their own lock.

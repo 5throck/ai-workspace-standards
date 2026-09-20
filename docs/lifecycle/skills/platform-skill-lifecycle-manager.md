@@ -3,7 +3,7 @@
 ## Metadata
 - **Skill**: platform-skill-lifecycle-manager
 - **Status**: active
-- **Version**: 1.0.0
+- **Version**: 1.0.2
 - **Created**: 2026-09-04
 - **Last Updated**: 2026-09-04
 
@@ -14,6 +14,10 @@ Guides creation and lifecycle management of platform skills
 back-sync rules, version pinning, and AGENTS.md §8 lifecycle triggers.
 
 ## Changelog
+
+- **1.0.2** (2026-09-21): patch bump — deliver accumulated template content to the fleet (equal-version content drift measured 2026-09-21; upgrade-project 1.37 UPDATE delivery).
+
+- **1.0.1** (2026-09-21): patch bump — deliver accumulated template content that predated this version to the fleet (equal-version content drift measured 2026-09-21; upgrade-project 1.37 UPDATE delivery).
 - 2026-09-04: 1.0.0 — initial version
 
 ## Dependencies

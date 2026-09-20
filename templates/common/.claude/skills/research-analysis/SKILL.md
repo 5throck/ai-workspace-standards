@@ -4,7 +4,7 @@ description: >
   Conducts systematic research, data synthesis, and evidence-based analysis to support
   decision-making and documentation. Use when: analyzing topics, synthesizing research,
   gathering evidence, or investigating questions for documentation or strategy.
-version: 1.0.0
+version: 1.0.2
 scope: common
 status: active
 owner: pm

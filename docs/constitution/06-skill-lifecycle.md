@@ -204,8 +204,10 @@ Skills have a lifecycle managed by the PM agent. When agent configurations chang
 |-------|-------------|-----------------|
 | **draft** | Skill under development | Move to active after review |
 | **active** | Skill in production use | Regular health checks |
-| **deprecated** | Superseded, pending removal | Add frontmatter warning, archive after 30 days |
+| **deprecated** | Superseded, pending removal | Add frontmatter warning + `superseded_by`, set a `removal-date`, bump the version (deprecation is a content change); archive after 30 days |
 | **archived** | No longer used, kept for reference | Move to `skills/_archive/`, can delete after 90 days |
+
+> **Reference integrity (2026-09-21)**: `skill-lifecycle-audit.ts` Check RI FAILs when a SKILL.md body cites a skill name that resolves to nothing in `skills/` or `templates/*/skills/` — renaming or retiring a skill is not done until its references are updated or allowlisted in `docs/lifecycle/reference-allowlist.json` (intentional historical notes only). References to deprecated skills WARN with a pointer to the successor; the successor itself must be declared via `superseded_by:` in the deprecated skill's frontmatter. An expired `removal-date` on a still-present skill also FAILS (Check RD).
 
 ##### Skill Version Bump Rules
 

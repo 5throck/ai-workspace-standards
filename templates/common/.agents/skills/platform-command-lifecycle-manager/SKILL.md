@@ -1,7 +1,7 @@
 ---
 name: platform-command-lifecycle-manager
 status: active
-version: 1.0.0
+version: 1.0.2
 description: >
   Manages the creation, registration, and propagation of platform commands
   in .claude/commands/ and .gemini/commands/ directories. Use when: adding new commands,
