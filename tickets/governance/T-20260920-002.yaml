@@ -10,7 +10,7 @@ title: >-
   (likely no version header / last_updated not compared) and fix the comparison
   or the delivery
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-09-20T08:29:53.766Z'
 history:
@@ -23,5 +23,12 @@ history:
   - at: '2026-09-20T13:00:33.516Z'
     from: waiting
     to: review
-result: null
+  - at: '2026-09-20T13:31:36.501Z'
+    from: review
+    to: done
+result: >-
+  agents/ SYNC_IF_NEWER gained equal-version content-drift reconciliation
+  (lifecycle-stripped comparison via upgrade-policy lifecyclelessText()); E2E
+  fleet upgrade delivered 76 accumulated agent drifts across 10 projects incl.
+  i18n-specialist codex-tier update to all six stale projects.
 error: null

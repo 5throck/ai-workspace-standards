@@ -15,7 +15,7 @@ title: >-
   dry-run/apply plan; also decide whether delivered dependency versions should
   pin to the root SSOT versions.
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-09-20T08:00:50.258Z'
 history:
@@ -28,5 +28,15 @@ history:
   - at: '2026-09-20T13:00:33.502Z'
     from: waiting
     to: review
-result: null
+  - at: '2026-09-20T13:31:36.486Z'
+    from: review
+    to: done
+result: >-
+  DEPENDENCY GUARD pass in upgrade-project 1.35.0 — lib/dependency-guard.ts
+  (L0+L1) scans delivered scripts' bare-package imports vs project package.json
+  and reports missing packages with importers + exact bun add line in the plan
+  (report-only). E2E caught real gaps: co-price js-yaml, co-deck @resvg/resvg-js
+  — both fixed in the delivery PRs. Smoke test hardened the scanner (comment
+  lines skipped, same-line matching, builtins/interpolation filtered); 10 unit
+  tests.
 error: null
