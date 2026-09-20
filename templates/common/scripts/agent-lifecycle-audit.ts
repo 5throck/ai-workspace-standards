@@ -9,9 +9,10 @@
  *   bun scripts/agent-lifecycle-audit.ts
  *   bun scripts/agent-lifecycle-audit.ts --json   # JSON output
  *
- * @version 1.3.0
+ * @version 1.3.1
  * @l2-propagate false
  * @last_updated 2026-09-21
+ * v1.3.1: Check 12 gated to IS_WORKSPACE_ROOT — project snapshots keep delivered owners as-is (co-safety virtual domain owners would otherwise fail project-side audits).
  * @license MIT
  *
  * v1.2.0: New Check 11 (T-20260909-004) — WARN when an agent's frontmatter
@@ -631,6 +632,7 @@ function auditAgents(jsonMode = false): AuditResult {
   // the upgrade path. The soft orphaned-owner WARN in skill-lifecycle-audit
   // still covers those surfaces.
   for (const [owner, skillPaths] of skillOwnerRefs) {
+    if (!IS_WORKSPACE_ROOT) break; // v1.3.1: authoring-surface check — project snapshots keep their owners as delivered
     for (const token of owner.split(/[\s,]+/).filter(Boolean)) {
       if (agentNameExists(token, registeredAgents)) continue;
       const l0Path = skillPaths.find(p => {
