@@ -1,4 +1,9 @@
-// @version 1.7.0
+// @version 1.7.1
+// v1.7.1: scripts-table sort gained a full-path tiebreaker — basename ties
+//           (e.g. scripts/x.ts vs scripts/<variant>/x.ts) previously fell back
+//           to readdir insertion order, which differs between macOS and Linux,
+//           so the committed manifest and CI's regeneration ordered the tied
+//           rows differently and the drift gate failed spuriously.
 // v1.7.0 (ADR-0081 / T-20260918-001): --check masks the "Last Modified" columns
 //           on BOTH comparison sides unconditionally — the shallow-only gating
 //           is gone. Rationale: the cells derive from committed `git log`, but
@@ -332,7 +337,7 @@ async function collectScripts(): Promise<ScriptInfo[]> {
             dependencies: extractScriptDependencies(content),
         });
     });
-    return scripts.sort((a, b) => a.name.localeCompare(b.name));
+    return scripts.sort((a, b) => a.name.localeCompare(b.name) || a.location.localeCompare(b.location));
 }
 
 async function collectCommands(): Promise<CommandInfo[]> {
