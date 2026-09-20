@@ -1132,6 +1132,15 @@
       "source": "manual",
       "created": "2026-09-20",
       "last_updated": "2026-09-20"
+    },
+    {
+      "id": "2026-09-21-upgrade-project-skill-subfile-sync-design",
+      "title": "upgrade project skill subfile sync design",
+      "file": "docs/designs/2026-09-21-upgrade-project-skill-subfile-sync-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-20",
+      "last_updated": "2026-09-20"
     }
   ]
 }

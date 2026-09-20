@@ -1,5 +1,17 @@
 #!/usr/bin/env bun
-// @version 1.36.0
+// @version 1.37.0
+// v1.37.0 (2026-09-21, skill sub-file sync): the common-skills SYNC_IF_NEWER
+//           pass delivered only skills/<name>/SKILL.md, so skill sub-files
+//           (references/, assets/, examples/) never reached existing projects —
+//           the 2026-09-20 handbook v0.6.0 fleet upgrade shipped SKILL.md while
+//           KOREAN_LANGUAGE.md and the localized copy-code.js stayed absent
+//           fleet-wide (8 emergency re-delivery PRs on 2026-09-21). NEW/UPDATE
+//           now copy the whole skill directory via cpSync (template files
+//           overwrite same-named files, project-only files are preserved), and
+//           equal-version skills get additive catch-up: missing files are
+//           delivered, same-version content differences are warned as DRIFT and
+//           left untouched. Variant-skills copySkillDir is now recursive so
+//           depth ≥ 3 files (references/validation/*) are delivered too.
 // v1.36.0 (2026-09-20, E2E refinements to T-20260920-003): retired-mirror sweep
 //           hardened — a project-authored skills/<name>/ SSOT (co-newbiz: 100+
 //           standalone-track skills) now preserves its mirrors, and only names
@@ -1668,9 +1680,42 @@ if (existsSync(projAgentsDir)) {
 console.log('');
 
 // ── SYNC_IF_NEWER: skills/ ────────────────────────────────────────────────────
+// v1.37.0: NEW/UPDATE copy the skill's WHOLE directory (template files overwrite
+// same-named project files; project-only files are preserved). Equal-version
+// skills get additive catch-up — missing files are delivered, same-version
+// content differences are warned as DRIFT and left untouched. Before v1.37.0
+// only skills/<name>/SKILL.md was delivered, so skill sub-files (references/,
+// assets/, examples/) never reached existing projects after scaffolding.
 console.log('--- SYNC_IF_NEWER: skills/ ---');
 const tplSkillsDir = join(commonDir, 'skills');
 const seenSkills = new Set<string>();
+// Recursively deliver template files missing from the project skill directory
+// without overwriting anything that already exists (dry-run counts only).
+const catchUpSkillDir = (skillName: string): { copied: number; drifted: string[] } => {
+  const tplSkillDir = join(tplSkillsDir, skillName);
+  const projSkillDir = join(projectDir, 'skills', skillName);
+  let copied = 0;
+  const drifted: string[] = [];
+  const walk = (srcDir: string, dstDir: string): void => {
+    for (const entry of readdirSync(srcDir, { withFileTypes: true })) {
+      const src = join(srcDir, entry.name);
+      const dst = join(dstDir, entry.name);
+      if (entry.isDirectory()) {
+        if (!dryRun) mkdirSync(dst, { recursive: true });
+        walk(src, dst);
+      } else if (entry.isFile()) {
+        if (!existsSync(dst)) {
+          if (!dryRun) copyFileSync(src, dst);
+          copied++;
+        } else if (fileHash(src) !== fileHash(dst)) {
+          drifted.push(dst.slice(projSkillDir.length + 1));
+        }
+      }
+    }
+  };
+  walk(tplSkillDir, projSkillDir);
+  return { copied, drifted };
+};
 if (existsSync(tplSkillsDir)) {
   for (const skillName of readdirSync(tplSkillsDir)) {
     const tplSkillFile = join(tplSkillsDir, skillName, 'SKILL.md');
@@ -1678,6 +1723,11 @@ if (existsSync(tplSkillsDir)) {
     seenSkills.add(skillName);
     const projSkillFile = join(projectDir, 'skills', skillName, 'SKILL.md');
     const tplVer = extractFrontmatterVersion(tplSkillFile);
+    const copyWholeSkillDir = (): void => {
+      if (dryRun) return;
+      mkdirSync(dirname(projSkillFile), { recursive: true });
+      cpSync(join(tplSkillsDir, skillName), join(projectDir, 'skills', skillName), { recursive: true });
+    };
     if (tplVer) {
       const projVer = extractFrontmatterVersion(projSkillFile);
       if (!existsSync(projSkillFile)) {
@@ -1686,8 +1736,8 @@ if (existsSync(tplSkillsDir)) {
           continue;
         }
         console.log(`  NEW   skills/${skillName}/SKILL.md  (none) → ${tplVer}`);
-        if (!dryRun) { mkdirSync(dirname(projSkillFile), { recursive: true }); copyFileSync(tplSkillFile, projSkillFile); }
-        console.log(`  ${dryTag}COPIED: skills/${skillName}/SKILL.md`);
+        copyWholeSkillDir();
+        console.log(`  ${dryTag}COPIED: skills/${skillName}/ (whole directory)`);
         syncChanged++;
       } else if (semverGt(tplVer, projVer)) {
         // G05: Warn if project file has local modifications.
@@ -1696,11 +1746,20 @@ if (existsSync(tplSkillsDir)) {
         } else {
           console.log(`  UPDATE skills/${skillName}/SKILL.md  ${projVer || '(none)'} → ${tplVer}`);
         }
-        if (!dryRun) copyFileSync(tplSkillFile, projSkillFile);
-        console.log(`  ${dryTag}COPIED: skills/${skillName}/SKILL.md`);
+        copyWholeSkillDir();
+        console.log(`  ${dryTag}COPIED: skills/${skillName}/ (whole directory)`);
         syncChanged++;
       } else {
-        console.log(`  OK     skills/${skillName}/SKILL.md  ${projVer}`);
+        const { copied, drifted } = catchUpSkillDir(skillName);
+        if (copied > 0) {
+          console.log(`  CATCH-UP skills/${skillName}/  ${copied} missing file(s) delivered (same version ${projVer})`);
+          syncChanged++;
+        } else if (drifted.length === 0) {
+          console.log(`  OK     skills/${skillName}/SKILL.md  ${projVer}`);
+        }
+        for (const d of drifted) {
+          console.log(`  ⚠️  DRIFT skills/${skillName}/${d}  (same-version content differs — left untouched)`);
+        }
       }
     } else {
       // No explicit version — compare by content hash
@@ -1712,16 +1771,25 @@ if (existsSync(tplSkillsDir)) {
           continue;
         }
         console.log(`  NEW   skills/${skillName}/SKILL.md  (hash-based)`);
-        if (!dryRun) { mkdirSync(dirname(projSkillFile), { recursive: true }); copyFileSync(tplSkillFile, projSkillFile); }
-        console.log(`  ${dryTag}COPIED: skills/${skillName}/SKILL.md`);
+        copyWholeSkillDir();
+        console.log(`  ${dryTag}COPIED: skills/${skillName}/ (whole directory)`);
         syncChanged++;
       } else if (tplHash !== projHash) {
         console.log(`  UPDATE skills/${skillName}/SKILL.md  (content changed)`);
-        if (!dryRun) copyFileSync(tplSkillFile, projSkillFile);
-        console.log(`  ${dryTag}COPIED: skills/${skillName}/SKILL.md`);
+        copyWholeSkillDir();
+        console.log(`  ${dryTag}COPIED: skills/${skillName}/ (whole directory)`);
         syncChanged++;
       } else {
-        console.log(`  OK     skills/${skillName}/SKILL.md  (hash match)`);
+        const { copied, drifted } = catchUpSkillDir(skillName);
+        if (copied > 0) {
+          console.log(`  CATCH-UP skills/${skillName}/  ${copied} missing file(s) delivered (hash match)`);
+          syncChanged++;
+        } else if (drifted.length === 0) {
+          console.log(`  OK     skills/${skillName}/SKILL.md  (hash match)`);
+        }
+        for (const d of drifted) {
+          console.log(`  ⚠️  DRIFT skills/${skillName}/${d}  (same-version content differs — left untouched)`);
+        }
       }
     }
   }
@@ -1755,20 +1823,9 @@ if (existsSync(variantSkillsSrc)) {
     const projVer = existsSync(projSkillFile) ? extractFrontmatterVersion(projSkillFile) : '';
     const copySkillDir = (): void => {
       mkdirSync(projSkillDir, { recursive: true });
-      for (const entry of readdirSync(tplSkillDir, { withFileTypes: true })) {
-        const src = join(tplSkillDir, entry.name);
-        const dst = join(projSkillDir, entry.name);
-        if (entry.isDirectory()) {
-          mkdirSync(dst, { recursive: true });
-          for (const sub of readdirSync(src, { withFileTypes: true })) {
-            const subSrc = join(src, sub.name);
-            const subDst = join(dst, sub.name);
-            if (sub.isFile()) copyFileSync(subSrc, subDst);
-          }
-        } else if (entry.isFile()) {
-          copyFileSync(src, dst);
-        }
-      }
+      // v1.37.0: recursive merge — the old two-level walk skipped files at
+      // depth ≥ 3 (e.g. references/validation/*).
+      cpSync(tplSkillDir, projSkillDir, { recursive: true });
     };
     if (tplVer) {
       if (!existsSync(projSkillFile)) {
