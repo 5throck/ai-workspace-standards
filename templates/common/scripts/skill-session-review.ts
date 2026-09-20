@@ -1,4 +1,12 @@
-// @version 1.0.0
+// @version 1.1.0
+// v1.1.0: fix(reporting) — Q3 2026 skill review findings: (1) renderMarkdown now
+//           distinguishes "no evidence" from "evidence parsed, zero symptoms
+//           classified" instead of always claiming the section is absent/empty;
+//           (2) parseSkillsUsed dedupes the tail section by prefix so the final
+//           `## Skills Used` body is parsed once, not twice (identity comparison
+//           never fired because the tail match extends past the `---` boundary).
+//           Evidence schema, classifier, and CLI surface unchanged.
+//           Design doc: docs/designs/2026-09-20-skill-session-review-reporting-fixes-design.md
 // feat(skills): session-evidence skill review loop (SkillHone-inspired).
 // Design doc: docs/designs/2026-09-06-skill-session-review-design.md
 //
@@ -26,7 +34,7 @@ import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
-const VERSION = '1.0.0';
+const VERSION = '1.1.0';
 const GREEN = '\x1b[32m';
 const YELLOW = '\x1b[33m';
 const CYAN = '\x1b[36m';
@@ -96,7 +104,10 @@ function parseSkillsUsed(memContent: string): SkillEvidence[] {
     const bodies: string[] = [];
     let m: RegExpExecArray | null;
     while ((m = sectionRe.exec(memContent)) !== null) bodies.push(m[1]);
-    if (tailMatch && !bodies.includes(tailMatch[1])) bodies.push(tailMatch[1]);
+    // v1.1.0: prefix dedupe — the tail body (last section to EOF) extends the final
+    // sectionRe body past its `\n---\n` boundary, so identity comparison never fired
+    // and the last section was parsed twice (Q3 2026 review finding #2).
+    if (tailMatch && !bodies.some((b) => tailMatch[1].startsWith(b))) bodies.push(tailMatch[1]);
     if (bodies.length === 0) return [];
 
     // Strip HTML comment blocks — the dev-sync skeleton keeps its fill-in
@@ -269,7 +280,14 @@ function renderMarkdown(records: Map<string, ReviewRecord>, evidence: SkillEvide
     lines.push(`- symptom_types: ${[...typeCounts.entries()].map(([t, c]) => `${t}=${c}`).join(', ') || 'none'}`, '');
 
     if (records.size === 0) {
-        lines.push(`No skill usage evidence found in memory/${date}.md (\`## Skills Used\` absent or empty).`, '');
+        // v1.1.0: distinguish "no evidence at all" from "evidence parsed, zero
+        // symptoms classified" — the old message blamed an absent/empty section
+        // even when entries existed (Q3 2026 review finding #1).
+        if (evidence.length === 0) {
+            lines.push(`No skill usage evidence found in memory/${date}.md (\`## Skills Used\` absent or empty).`, '');
+        } else {
+            lines.push(`${evidence.length} evidence entries found in memory/${date}.md; none classified as symptoms (no actionable observations matched classifier heuristics).`, '');
+        }
     }
     for (const r of records.values()) {
         lines.push(`## Skill Review Entry — ${r.skill}`, '', '```yaml');

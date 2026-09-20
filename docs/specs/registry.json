@@ -1096,6 +1096,15 @@
       "source": "manual",
       "created": "2026-09-20",
       "last_updated": "2026-09-20"
+    },
+    {
+      "id": "2026-09-20-skill-session-review-reporting-fixes-design",
+      "title": "skill session review reporting fixes design",
+      "file": "docs/designs/2026-09-20-skill-session-review-reporting-fixes-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-20",
+      "last_updated": "2026-09-20"
     }
   ]
 }
