@@ -95,6 +95,18 @@
 
 ---
 
+## 5a. No Date-Stamped "New" Framing
+
+**Principle**: Do not label content as new relative to a specific calendar date (e.g. "New as of September 2026," a dated badge like "(2026-09 New)", a dedicated "What's New" section keyed to a date). Write every section as if it has always been part of the material.
+
+- **Why**: A handbook is read long after it's written. Date-stamped "new" framing goes stale the moment the next update lands — readers a year later see "new" labels on content that's no longer new, and a "what's new" section becomes a second, decaying source of truth that has to be manually retired later. Content generalized once (§5) but timestamped for novelty (§5a) still locks the reader to a single point in time.
+- **How to apply**:
+  - Fold newly-added coverage directly into the normal chapter/section flow, in the same voice as everything else — no separate "what's new" heading, no `(YYYY-MM New)` badge or span next to a table row.
+  - If ordering by rollout is genuinely useful (e.g. a changelog page), that belongs in `CHANGELOG.md`, not in reader-facing handbook chapters.
+  - When revising a page to add a feature that happens to be new, remove any residual date-specific phrasing from the surrounding prose in the same edit (e.g. phrases meaning "as of this update" or "newly added") rather than leaving it for a later pass.
+
+---
+
 ## 6. Removal of Artificial Constraints
 
 **Principle**: Do not include unnecessary time/scope constraints that burden the learner.
@@ -1017,6 +1029,7 @@ After completing the draft, verify each item below one by one.
 - [ ] §3: Are role definitions written first as tool-neutral `AGENTS.md` specs?
 - [ ] §4: Do numbers/classifications/names match official sources? (research if necessary)
 - [ ] §5: Are there any expressions that lock descriptions to a single organizational scale?
+- [ ] §5a: Any date-stamped "new" labels, `(YYYY-MM New)` badges, or a "what's new" section to fold into normal flow?
 - [ ] §6: Are there any artificial time/scope constraints? Has the time allocation table been recalculated?
 - [ ] §7: Are all prerequisites (account creation, admin privileges, subscriptions) included without exception?
 - [ ] §8: Are learner materials in `.html` with navigation and search?
