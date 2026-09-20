@@ -1,5 +1,11 @@
 #!/usr/bin/env bun
-// @version 1.35.0
+// @version 1.36.0
+// v1.36.0 (2026-09-20, E2E refinements to T-20260920-003): retired-mirror sweep
+//           hardened — a project-authored skills/<name>/ SSOT (co-newbiz: 100+
+//           standalone-track skills) now preserves its mirrors, and only names
+//           with an explicit retirement marker (root lifecycle record retired/
+//           deprecated, or mirror SKILL.md status) are pruned; project-authored
+//           orphans without a retirement decision are kept for human review.
 // v1.35.0 (2026-09-20, T-20260920-001/-002/-003): three hardening changes —
 //           (1) DEPENDENCY GUARD pass: scan delivered scripts' bare-package
 //           imports against project package.json and report missing packages
@@ -2453,9 +2459,41 @@ if (pruneRemoved) {
   for (const mirrorRoot of ['.claude', '.gemini', '.agents', '.codex']) {
     const projMirror = join(projectDir, mirrorRoot, 'skills');
     if (!existsSync(projMirror)) continue;
+    // A project-authored skills/<name>/ SSOT (standalone-track projects like
+    // co-newbiz have 100+ skills that exist nowhere upstream) is a legitimate
+    // source for its own mirrors — only upstream-orphaned names are residue.
+    const projSsotSkills = join(projectDir, 'skills');
+    const projSsotNames = new Set<string>(
+      existsSync(projSsotSkills)
+        ? readdirSync(projSsotSkills).filter((d) => existsSync(join(projSsotSkills, d, 'SKILL.md')))
+        : []
+    );
+    // Retirement discriminator (E2E fleet catch, 2026-09-20): orphaned mirrors
+    // split into upstream-RETIRED skills (meeting, audit-workspace, … — safe to
+    // prune) and project-authored orphans whose SSOT vanished without a
+    // retirement decision (co-newbiz domain skills — content may exist ONLY in
+    // the mirror; KEEP-uncertain, needs human review). Prune only the former:
+    // a root lifecycle record marked retired/deprecated, or a mirror SKILL.md
+    // that self-declares retired/deprecated.
+    const isRetiredSkill = (name: string): boolean => {
+      const record = join(workspaceRoot, 'docs', 'lifecycle', 'skills', `${name}.md`);
+      if (existsSync(record) && / retired | deprecated /i.test(readFileSync(record, 'utf8').slice(0, 4000))) return true;
+      const mirrorSkill = join(projectDir, 'skills', name, 'SKILL.md');
+      if (existsSync(mirrorSkill)) return false;
+      let status = '';
+      for (const mirrorRoot of ['.claude', '.gemini', '.agents', '.codex']) {
+        const mf = join(projectDir, mirrorRoot, 'skills', name, 'SKILL.md');
+        if (existsSync(mf)) {
+          const m = readFileSync(mf, 'utf8').match(/^status:\s*(\S+)/m);
+          if (m) { status = m[1].toLowerCase(); break; }
+        }
+      }
+      return status === 'retired' || status === 'deprecated';
+    };
     for (const d of readdirSync(projMirror)) {
       if (!existsSync(join(projMirror, d, 'SKILL.md'))) continue;
-      if (upstreamSkillNames.has(d)) continue;
+      if (upstreamSkillNames.has(d) || projSsotNames.has(d)) continue;
+      if (!isRetiredSkill(d)) continue;
       console.log(`  PRUNE  ${mirrorRoot}/skills/${d}/  (no upstream source — retired skill)`);
       if (!dryRun) {
         const rm = spawnSync('git', ['-C', projectDir, 'rm', '-rf', `${mirrorRoot}/skills/${d}`], { encoding: 'utf8' });

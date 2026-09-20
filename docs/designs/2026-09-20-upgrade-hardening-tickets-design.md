@@ -140,6 +140,18 @@ Deliberate forks untouched: co-safety `meeting-facilitation` 1.5.0, co-price
 | Accessibility | n/a — backend/non-UI change (ADR-0065 exemption statement) |
 | Preview verification | n/a — non-UI (ADR-0070 exemption statement) |
 
+### D3 refinement (E2E, same day)
+
+The fleet E2E split the orphan-mirror class in two. Co-newbiz (standalone
+track, 100+ project-authored skills with no upstream) would have lost 177
+mirror files whose names simply never existed upstream — mirrors of
+project-authored skills whose `skills/` SSOT rows were removed earlier. The
+sweep now prunes a mirror only when the name has no upstream source, no
+project `skills/` SSOT, AND an explicit retirement marker (root lifecycle
+record retired/deprecated, or the mirror SKILL.md's own `status:`).
+Project-authored orphans without a retirement decision are kept for human
+review (KEEP-uncertain rule). Shipped as upgrade-project 1.36.0.
+
 ## Out of Scope
 
 - Auto-installing dependencies during upgrade (network + lockfile churn).
