@@ -81,3 +81,28 @@ interaction surface.
 2. SKILL.md frontmatter version = 0.5.0, `last_reviewed` = 2026-09-20; manifest row matches.
 3. M-Stage section present with M-1..M-5; MAINTENANCE_PLAYBOOK.md referenced from SKILL.md and present on disk.
 4. H-5/`verify` prescribe `bun run ci` and `check-i18n`.
+
+## 6. Addendum (same day): v0.6.0 — Korean language support + teachme parity
+
+Follow-up comparison of the fielded handbooks and the attribution source
+(`beret21/teachme` v0.3.1) surfaced two more gaps. Skill bumped 0.5.0 → 0.6.0:
+
+1. **Korean language characteristics first-class** — new
+   `references/KOREAN_LANGUAGE.md` (register, `순우리말`-first preference,
+   spacing/typography, SVG-label localization, automated-check interplay,
+   the strictest-standard Korean proofreading pass, ko→out translation
+   mappings). The file declares the Language Policy exception
+   (`lang: ko`, `lang_reason: source-material`) because Korean strings are
+   its subject matter. H-0 gains a Korean-canonical authoring note.
+2. **teachme feature comparison** — adopted: an `add` subcommand (extend an
+   existing handbook in place: chapter / quiz / appendix, routed through
+   M-2a), the add-only-edit safety ground rule (never delete
+   participant-facing content; supersede instead), and teachme's
+   strictest-Korean-proofreading standard. Already covered by the skill
+   (no change): quiz model-answers + rubric, per-language editions,
+   secret scan, themes. Rejected: `--no-verify` (contradicts mandatory
+   gates), theme `ink` (native covers it), separate Korean command set
+   (semantic trigger matching suffices).
+
+Validation: validate-skills 0 errors, validate-templates 0 errors,
+validate-md-language pass (code-span containment + declared exception).

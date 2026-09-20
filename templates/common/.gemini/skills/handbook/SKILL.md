@@ -1,7 +1,7 @@
 ---
 name: handbook
 scope: common
-version: 0.5.0
+version: 0.6.0
 description: >-
   Document Production Workflow — generates searchable, themed handbooks as
   static sites (GitHub Pages). Three modes: standalone handbook, lecture
@@ -12,7 +12,9 @@ description: >-
   (M-1 through M-5) upgrades existing handbooks: upstream sync, chapter
   add/rename/renumber, schedule consistency. Fielded references
   (intro-to-ai-harness, multi-agent-harness-handbook) ship four languages
-  (ko canonical + en/ja/es). Independent from slide pipelines.
+  (ko canonical + en/ja/es). Korean-language authoring characteristics
+  (register, spacing, proofreading pass, check interplay) are first-class —
+  see references/KOREAN_LANGUAGE.md. Independent from slide pipelines.
   Promoted from co-deck to common (2026-08-30) — usable by any variant.
 status: active
 owner: pm
@@ -30,7 +32,7 @@ metadata:
 attribution:
   source: https://github.com/beret21/teachme
   license: MIT
-  note: "Inspired by beret21/teachme. Built from scratch — no original code copied."
+  note: "Inspired by beret21/teachme. Built from scratch — no original code copied. 2026-09-20: `add` command, strictest-Korean-proofreading, and add-only-edit safety adopted from the teachme v0.3.1 feature comparison."
 ---
 
 ## Context
@@ -59,6 +61,7 @@ Dark mode is automatic (3-layer: `:root` light → `@media prefers-color-scheme:
 | Command | Description |
 |---------|-------------|
 | `new` | Create standalone handbook from topic |
+| `add` | Extend an existing handbook in place — new chapter / quiz / appendix (routes through M-2a checklist) |
 | `companion` | Create companion handbook from an existing co-deck (slide pipeline) project |
 | `course` | Create full course site with Course Overview + Instructor Guide |
 | `theme` | Apply a built-in theme to existing handbook |
@@ -76,6 +79,8 @@ PM confirms with the user:
 4. **Companion mode** — whether to reuse slide-pipeline caches (yes/no; co-deck only)
 
 > **Dark mode**: No preference needed — auto-detect + manual toggle. All themes include 3-layer dark mode by default.
+
+> **Korean canonical (default `ko`)**: apply references/KOREAN_LANGUAGE.md — plain declarative register (`평서체`), `순우리말`-first preference, Korean proofreading pass before ship (script checks are English-only), and the Korean structural labels that nav/search rely on.
 
 > **Companion mode cache reuse**: If companion, H-1 is skipped. The following cached outputs are reused:
 > - `research_notes.md` (Research Package)
@@ -126,7 +131,7 @@ PM runs secret scan, then deploys to GitHub Pages.
 
 For fielded handbooks (e.g. `Handbooks/intro-to-ai-harness`, `Handbooks/multi-agent-harness-handbook`).
 Triggered by "update handbook", "handbook sync", `교재 업데이트`, or an upstream standards change.
-Full checklists: `references/MAINTENANCE_PLAYBOOK.md`. Each M-stage ends in `bun run ci` +
+Full checklists: `references/MAINTENANCE_PLAYBOOK.md`. Ground rule (adopted from teachme): maintenance is **add-and-amend only** — never delete participant-facing content or user files; supersede instead. Each M-stage ends in `bun run ci` +
 `bun run check-i18n` (all 4 languages green), a CHANGELOG entry, and a PR — handbooks are
 independent git repositories and land PR-only, in English.
 
@@ -222,5 +227,6 @@ handbook/
 ## References
 
 - `references/MAINTENANCE_PLAYBOOK.md` — M-Stage checklists: upstream sync, add/renumber chapter sweep, schedule consistency, verification triage (2026-09-20 field incidents)
+- `references/KOREAN_LANGUAGE.md` — Korean-canonical authoring: register, `순우리말`-first, spacing/typography, SVG labels, check interplay, proofreading pass, ko→out translation mappings
 - `references/I18N_PARITY_PLAYBOOK.md` — canonical-first multilingual maintenance rules
 - `references/AUTHORING_GUIDELINES.md`, `references/SECTION_TYPES.md`, `references/QUALITY_CHECKLIST.md`, `references/BUILD_GUIDE.md`
