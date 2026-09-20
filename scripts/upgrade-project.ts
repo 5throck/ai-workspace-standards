@@ -1,5 +1,16 @@
 #!/usr/bin/env bun
-// @version 1.34.0
+// @version 1.35.0
+// v1.35.0 (2026-09-20, T-20260920-001/-002/-003): three hardening changes —
+//           (1) DEPENDENCY GUARD pass: scan delivered scripts' bare-package
+//           imports against project package.json and report missing packages
+//           (report-only, lib/dependency-guard.ts; pm-md-parser/js-yaml fleet
+//           incident). (2) agents/ SYNC_IF_NEWER gains equal-version content-
+//           drift reconciliation mirroring the scripts pass v1.17.2 rule
+//           (lifecycle-stripped comparison — T-20260920-002 i18n-specialist).
+//           (3) --prune-removed: skills/ category consults L0 root skills/ as
+//           upstream, and platform mirror dirs (.claude/.gemini/.agents/.codex
+//           skills) whose name has no upstream source are pruned as retired-
+//           skill residue (T-20260920-003 validate-docs-links class).
 // v1.34.0: --platform 'both' renamed to 'all' and expanded to cover all three
 //          platforms (claude+antigravity+codex, not just the first two) —
 //          added the missing `codex` value and a CODEX.md MERGE branch that
@@ -280,9 +291,11 @@ import {
 import {
   TEMPLATE_TREE_SYNC_PASS,
   iterEffectiveTemplateFiles,
+  lifecyclelessText,
   mergeSettingsJson,
   resolveClaim,
 } from './lib/upgrade-policy.ts';
+import { missingDependencies, scanDeliveredScripts } from './lib/dependency-guard.ts';
 import { mergeEnvSample, pruneCountryScopedEnvBlocks } from './lib/env-sample.ts';
 import {
   buildMergedTemplateBlocks,
@@ -1621,6 +1634,17 @@ for (const agentsDir of tplAgentsDirs) {
       if (!dryRun) writeAgentWithLifecycle(tplFile, projFile);
       console.log(`  ${dryTag}COPIED: ${rel}`);
       syncChanged++;
+    } else if (lifecyclelessText(readFileSync(tplFile, 'utf8')) !== lifecyclelessText(readFileSync(projFile, 'utf8'))) {
+      // v1.35.0 drift reconciliation (T-20260920-002): equal frontmatter version
+      // but lifecycle-stripped content differs — the same version-gated skip that
+      // v1.17.2 fixed for scripts/ (i18n-specialist's 2026-09-15 codex-tier update
+      // shipped without a version bump and never reached six projects). Agents are
+      // canonical like core scripts; the project lifecycle block stays preserved
+      // by writeAgentWithLifecycle, so the comparison strips it on both sides.
+      console.log(`  ⚠️  DRIFT ${rel}  ${projVer} (content differs from template at same version) — restored to canonical`);
+      if (!dryRun) writeAgentWithLifecycle(tplFile, projFile);
+      console.log(`  ${dryTag}COPIED: ${rel}`);
+      syncChanged++;
     } else {
       console.log(`  OK     ${rel}  ${projVer}`);
     }
@@ -2261,6 +2285,51 @@ console.log('');
 
 // ── G10: --prune-removed (files in project but absent from template) ─────────────
 let prunedCount = 0;
+// ── DEPENDENCY GUARD (v1.35.0, T-20260920-001) ────────────────────────────────
+// Delivered scripts may import bare packages (js-yaml, …) that live in the
+// project-owned package.json — PROJECT_STATE_FILES the upgrader never writes.
+// Report every missing package with its importers so the gap is loud in the
+// plan (dry-run and apply alike) instead of surfacing as CI `Cannot find
+// package` after merge. Report-only: no network, no lockfile churn.
+{
+  console.log('--- DEPENDENCY GUARD ---');
+  const pkgFile = join(projectDir, 'package.json');
+  const declared = new Set<string>();
+  if (existsSync(pkgFile)) {
+    try {
+      const pkg = JSON.parse(readFileSync(pkgFile, 'utf8'));
+      for (const k of Object.keys(pkg.dependencies ?? {})) declared.add(k);
+      for (const k of Object.keys(pkg.devDependencies ?? {})) declared.add(k);
+    } catch (e) {
+      console.error(`  ERROR: failed to parse package.json: ${(e as Error).message}`);
+    }
+  } else {
+    console.log('  (no package.json — nothing delivered scripts can depend on)');
+  }
+  if (existsSync(pkgFile)) {
+    const deliveredRoots = [
+      join(templatesDir, 'scripts'),
+      join(commonDir, 'scripts'),
+    ];
+    const imports = scanDeliveredScripts(deliveredRoots, workspaceRoot);
+    const allPkgs = new Set(imports.map((i) => i.pkg));
+    const missing = missingDependencies(declared, allPkgs);
+    for (const pkg of missing) {
+      const info = imports.find((i) => i.pkg === pkg)!;
+      const files = info.importedBy.slice(0, 3).join(', ');
+      const more = info.importedBy.length > 3 ? ` +${info.importedBy.length - 3} more` : '';
+      console.log(`  MISSING  ${pkg}  (imported by ${files}${more})`);
+    }
+    if (missing.length > 0) {
+      console.log(`  → run inside the project: bun add ${missing.join(' ')}`);
+      console.log(`  Dependency guard: ${missing.length} missing package(s)`);
+    } else {
+      console.log('  OK: all delivered-script dependencies declared');
+    }
+  }
+  console.log('');
+}
+
 if (pruneRemoved) {
   console.log('--- PRUNE REMOVED: files present in project but absent from template ---');
   // Check scripts/
@@ -2271,7 +2340,10 @@ if (pruneRemoved) {
     // variant-owned skills (e.g. co-abap's sap-*) are delivered by the VARIANT SKILLS
     // pass and are template-owned; consulting only templates/common/skills marked them
     // prunable for projects without variant.json (fleet dry-run catch, 2026-09-12).
-    { projDir: join(projectDir, 'skills'), tplDirs: [join(templatesDir, 'skills'), join(commonDir, 'skills')].filter(existsSync), ext: '/SKILL.md', label: 'skills/', isSkill: true },
+    // v1.35.0 (T-20260920-003): consult L0 root skills/ too — a project skill
+    // delivered from the workspace-root SSOT (not present in variant/L1 trees)
+    // must never count as prunable; upstream = any source that delivers.
+    { projDir: join(projectDir, 'skills'), tplDirs: [join(templatesDir, 'skills'), join(commonDir, 'skills'), join(workspaceRoot, 'skills')].filter(existsSync), ext: '/SKILL.md', label: 'skills/', isSkill: true },
   ];
   for (const cat of pruneCategories) {
     if (!existsSync(cat.projDir)) continue;
@@ -2345,6 +2417,62 @@ if (pruneRemoved) {
     }
   }
   if (prunedCount === 0) console.log('  (no stale files found)');
+
+  // ── Retired-skill mirror sweep (v1.35.0, T-20260920-003) ──
+  // Platform skill mirrors are distributed by sync-skills.ts, not by file
+  // passes, so the tree prunes above never own them — a skill retired at
+  // L0/L1 (validate-docs-links, 2026-09-12) left 46 orphan mirror dirs across
+  // the fleet. A mirror dir is pruned when its skill name resolves from NO
+  // upstream source: root SSOT skills/, root platform mirrors, variant
+  // skills/, variant platform mirrors, templates/common/skills/, and the L1
+  // platform mirrors. Variant-owned names resolve through the variant trees
+  // and the asset gate, so they are never touched.
+  const upstreamSkillNames = new Set<string>();
+  const upstreamNameSources = [
+    join(workspaceRoot, 'skills'),
+    join(workspaceRoot, '.claude', 'skills'),
+    join(workspaceRoot, '.gemini', 'skills'),
+    join(workspaceRoot, '.agents', 'skills'),
+    join(commonDir, 'skills'),
+    join(commonDir, '.claude', 'skills'),
+    join(commonDir, '.gemini', 'skills'),
+    join(commonDir, '.agents', 'skills'),
+    join(templatesDir, 'skills'),
+    join(templatesDir, '.claude', 'skills'),
+    join(templatesDir, '.gemini', 'skills'),
+    join(templatesDir, '.agents', 'skills'),
+    join(templatesDir, '.codex', 'skills'),
+  ];
+  for (const src of upstreamNameSources) {
+    if (!existsSync(src)) continue;
+    for (const d of readdirSync(src)) {
+      if (existsSync(join(src, d, 'SKILL.md'))) upstreamSkillNames.add(d);
+    }
+  }
+  const mirrorPruneCount = { n: 0 };
+  for (const mirrorRoot of ['.claude', '.gemini', '.agents', '.codex']) {
+    const projMirror = join(projectDir, mirrorRoot, 'skills');
+    if (!existsSync(projMirror)) continue;
+    for (const d of readdirSync(projMirror)) {
+      if (!existsSync(join(projMirror, d, 'SKILL.md'))) continue;
+      if (upstreamSkillNames.has(d)) continue;
+      console.log(`  PRUNE  ${mirrorRoot}/skills/${d}/  (no upstream source — retired skill)`);
+      if (!dryRun) {
+        const rm = spawnSync('git', ['-C', projectDir, 'rm', '-rf', `${mirrorRoot}/skills/${d}`], { encoding: 'utf8' });
+        if (rm.status !== 0) {
+          try {
+            rmSync(join(projMirror, d), { recursive: true, force: true });
+          } catch (e) {
+            console.error(`  ERROR: failed to prune ${mirrorRoot}/skills/${d}: ${(e as Error).message}`);
+            continue;
+          }
+        }
+      }
+      mirrorPruneCount.n++;
+    }
+  }
+  prunedCount += mirrorPruneCount.n;
+  if (prunedCount === 0) console.log('');
   console.log('');
 }
 

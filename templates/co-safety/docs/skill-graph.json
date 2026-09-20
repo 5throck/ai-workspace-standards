@@ -88,6 +88,11 @@
       "layer": "variant:co-safety"
     },
     {
+      "id": "documentation-writing",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
       "id": "dts-verification",
       "type": "skill",
       "layer": "variant:co-safety"
@@ -399,6 +404,24 @@
     }
   ],
   "edges": [
+    {
+      "type": "composes_with",
+      "from": "agent-lifecycle-manager",
+      "to": "skill-lifecycle-manager",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-safety/skills/agent-lifecycle-manager/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "references",
+      "from": "agent-lifecycle-manager",
+      "to": "skill-lifecycle-manager",
+      "source": "prose"
+    },
     {
       "type": "composes_with",
       "from": "audit-preparation",
@@ -908,6 +931,24 @@
     },
     {
       "type": "references",
+      "from": "skill-lifecycle-manager",
+      "to": "agent-lifecycle-manager",
+      "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "skill-lifecycle-manager",
+      "to": "script-lifecycle-manager",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-safety/skills/skill-lifecycle-manager/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "references",
       "from": "tar-planning",
       "to": "psm-loto",
       "source": "prose"
@@ -965,6 +1006,18 @@
       "from": "tool-box-meeting",
       "to": "risk-assessment",
       "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "translate",
+      "to": "documentation-writing",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-safety/skills/translate/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     }
   ]
 }

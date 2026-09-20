@@ -1,4 +1,4 @@
-// @version 1.8.0
+// @version 1.9.0
 // v1.8.0 (2026-09-17, T-20260917-009): SCAFFOLD_COMMON_OWNED_FILES exported —
 //         new-project's variant-overlay skip and validate-templates WS-07 both
 //         derive from this one classification instead of parallel hand lists.
@@ -391,4 +391,25 @@ export function mergeSettingsJson(projectFile: string, templateFile: string): Js
   const { merged, preserved } = mergeSettingsData(template, project);
   const out = `${JSON.stringify(merged, null, 2)}\n`;
   return { changed: out !== projectRaw, merged: out, preserved };
+}
+
+/** Remove an agent/markdown file's top-level `lifecycle:` frontmatter block
+ *  (a YAML mapping at column 0 inside the frontmatter, terminated by the next
+ *  key at column 0 or the closing `---`). Used for drift comparisons where the
+ *  project's lifecycle block is preserved by design and must not count. */
+export function lifecyclelessText(text: string): string {
+  const fm = text.match(/^---\n([\s\S]*?)\n---/);
+  if (!fm) return text;
+  const lines = fm[1].split("\n");
+  const kept: string[] = [];
+  let skipping = false;
+  for (const line of lines) {
+    if (/^lifecycle:\s*$/.test(line)) { skipping = true; continue; }
+    if (skipping) {
+      if (/^[^\s#]/.test(line)) { skipping = false; kept.push(line); }
+      continue;
+    }
+    kept.push(line);
+  }
+  return text.replace(fm[0], `---\n${kept.join("\n")}\n---`);
 }

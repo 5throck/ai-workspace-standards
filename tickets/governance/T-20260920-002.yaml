@@ -10,12 +10,18 @@ title: >-
   (likely no version header / last_updated not compared) and fix the comparison
   or the delivery
 priority: normal
-status: backlog
+status: review
 attempts: 0
 created_at: '2026-09-20T08:29:53.766Z'
 history:
   - at: '2026-09-20T08:29:53.766Z'
     from: null
     to: backlog
+  - at: '2026-09-20T12:49:19.666Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-20T13:00:33.516Z'
+    from: waiting
+    to: review
 result: null
 error: null
