@@ -1,9 +1,12 @@
 #!/usr/bin/env bun
-// @version 1.0.1
+// @version 1.0.2
 // v1.0.0 (2026-09-20, T-20260920-001): dependency guard for upgrade-project —
 //           scan delivered scripts' bare-package imports against the project
 //           package.json and report missing packages. Report-only (no network,
 //           no lockfile churn); design docs/designs/2026-09-20-upgrade-hardening-tickets-design.md D1.
+// v1.0.2 (2026-09-20): scanner skips //-comment lines — the header's own
+//           `from '…'` doc examples matched the regex (pkg "…"). Do not write
+//           import-looking examples in // comments of this file.
 // v1.0.1 (2026-09-20, smoke-test fixes): same-line specifier matching only
 //           (\s+ crossed newlines into prose), skip ${…}-interpolated specifiers,
 //           and filter runtime builtins (node builtins imported without the
@@ -90,7 +93,11 @@ export function scanDeliveredScripts(scriptsRoots: string[], baseDir: string): D
       } else if (entry.name.endsWith('.ts') && !seen.has(full)) {
         seen.add(full);
         const rel = relative(baseDir, full).split('\\').join('/');
-        for (const pkg of barePackageImports(readFileSync(full, 'utf8'))) {
+        // Skip comment lines: doc examples like from '…' must not match.
+        const code = readFileSync(full, 'utf8').split('\n')
+          .filter((l) => { const t = l.trim(); return !t.startsWith('//') && !t.startsWith('*') && !t.startsWith('/*'); })
+          .join('\n');
+        for (const pkg of barePackageImports(code)) {
           if (!byPkg.has(pkg)) byPkg.set(pkg, new Set());
           byPkg.get(pkg)!.add(rel);
         }
