@@ -17,7 +17,11 @@ const workspaceRoot = resolve(import.meta.dir, '..', '..');
 const auditScript = join(workspaceRoot, 'scripts', 'agent-lifecycle-audit.ts');
 
 function makeTempWorkspace(): string {
-  return mkdtempSync(join(tmpdir(), 'agent-audit-13-'));
+  const tmp = mkdtempSync(join(tmpdir(), 'agent-audit-13-'));
+  // Check 12 is workspace-root gated (IS_WORKSPACE_ROOT keys on CONSTITUTION.md);
+  // a stub marks the temp dir as an authoring surface.
+  writeFileSync(join(tmp, 'CONSTITUTION.md'), '# test stub\n');
+  return tmp;
 }
 
 function writeAgent(tmp: string, name: string, frontmatter: string): void {
