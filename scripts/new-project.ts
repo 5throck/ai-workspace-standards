@@ -1,5 +1,9 @@
 #!/usr/bin/env bun
-// @version 1.22.0
+// @version 1.23.0
+// v1.23.0: graft build (§7.7) tries the global `graft` binary before bunx —
+//          a bunx native postinstall failure (tree-sitter-kotlin on Windows)
+//          leaves a partial temp cache that breaks every later bunx call
+//          (spec 2026-09-20-graft-scaffold-resilience).
 // v1.22.0: --platform 'both' renamed to 'all' and its meaning expanded to cover
 //           all three platforms (claude+antigravity+codex, not just the first
 //           two) — 'all' now keeps CLAUDE.md, GEMINI.md, CODEX.md, and .codex/
@@ -1327,15 +1331,25 @@ try {
 // (offline), and every graft tool self-refreshes the graph before answering, so a
 // skipped build self-heals on first use.
 console.log('\nBuilding graft repo index…');
-try {
-  const graftResult = spawnSync('bunx', ['@nanonets/graft', 'build'], { stdio: 'inherit', cwd: projectDir });
-  if (graftResult.status === 0) {
-    console.log('  ✅ graft/ index created');
-  } else {
-    console.log('  ⚠️  graft build failed (non-fatal) — run `bunx @nanonets/graft build` in the project later.');
+// graft-first, bunx fallback (spec 2026-09-20-graft-scaffold-resilience): bunx
+// installs the package on first run, and a native postinstall failure (observed
+// with tree-sitter-kotlin on Windows) leaves a partial temp cache that breaks
+// every later bunx call. The global binary skips that install path entirely.
+const graftDirect = spawnSync('graft', ['build'], { stdio: 'inherit', cwd: projectDir });
+if (graftDirect.status === 0) {
+  console.log('  ✅ graft/ index created');
+} else {
+  console.log('  ⚠️  global graft unavailable or failed — falling back to bunx');
+  try {
+    const graftResult = spawnSync('bunx', ['@nanonets/graft', 'build'], { stdio: 'inherit', cwd: projectDir });
+    if (graftResult.status === 0) {
+      console.log('  ✅ graft/ index created (via bunx)');
+    } else {
+      console.log('  ⚠️  graft build failed (non-fatal) — run `graft build` or `bunx @nanonets/graft build` in the project later.');
+    }
+  } catch (err) {
+    console.log(`  ⚠️  graft build skipped (non-fatal): ${(err as Error).message}`);
   }
-} catch (err) {
-  console.log(`  ⚠️  graft build skipped (non-fatal): ${(err as Error).message}`);
 }
 
 // ── 7.8. Version manifest generation (T-20260916-010) ─────────────────────────

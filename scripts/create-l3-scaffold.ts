@@ -1,5 +1,8 @@
 #!/usr/bin/env bun
-// @version 1.15.0
+// @version 1.16.0
+// v1.16.0: Step 8.5 graft build tries the global `graft` binary before bunx
+//          (spec 2026-09-20-graft-scaffold-resilience) — same rationale as
+//          new-project.ts v1.23.0.
 // v1.15.0: Wave 2 scaffold-delivery validation batch
 //         (docs/designs/2026-09-16-scaffold-delivery-validation-design.md).
 //         C3/T-20260915-002: marker strings + the delivery-exclusion list now
@@ -1141,12 +1144,21 @@ function main(): void {
   // surface (MCP entries, skill, hooks); give the fresh project its graph right
   // away. Non-fatal: bunx/graft may be unavailable (offline), and every graft tool
   // self-refreshes the graph before answering, so a skipped build self-heals.
+  // graft-first, bunx fallback (spec 2026-09-20-graft-scaffold-resilience): a
+  // bunx native postinstall failure leaves a partial temp cache that breaks every
+  // later bunx call, so the global binary is tried first.
   log("\nBuilding graft repo index…");
   try {
-    runNoShell("bunx", ["@nanonets/graft", "build"], { cwd: projectDir });
+    runNoShell("graft", ["build"], { cwd: projectDir });
     log("✅ graft/ index created");
   } catch {
-    log("⚠️  graft build skipped (bunx unavailable?) — run `bunx @nanonets/graft build` in the project later.");
+    log("⚠️  global graft unavailable or failed — trying bunx fallback…");
+    try {
+      runNoShell("bunx", ["@nanonets/graft", "build"], { cwd: projectDir });
+      log("✅ graft/ index created (via bunx)");
+    } catch {
+      log("⚠️  graft build skipped — run `graft build` or `bunx @nanonets/graft build` in the project later.");
+    }
   }
 
   // Step 9: post-scaffold audit — new-project.ts self-verifies immediately after

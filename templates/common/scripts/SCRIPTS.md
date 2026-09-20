@@ -72,7 +72,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `lib/managed-block-merge.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `compile-tokens.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `design-lint.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `create-l3-scaffold.ts` | L0 | 1.15.0 | active | —| —| L0 | —|
+| `create-l3-scaffold.ts` | L0 | 1.16.0 | active | Step 8.5 graft build: global `graft` first, bunx fallback (spec 2026-09-20-graft-scaffold-resilience) | —| L0 | —|
 | `dev-sync.ts` | L0 | 1.15.0 | active | —| —| L0+L1 | —|
 | `dispatch-parallel.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
 | `dispatch-serial.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
@@ -204,7 +204,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `md-to-ooxml.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `migrate-quality-gates.ts` | L0 | 1.1.0 | active | Convert quality_gates prose entries to decision gates; automate classification (GATE vs INVARIANT vs MANUAL), YAML output, procedure schema updates, and _output-types.yaml enrichment (ADR-0083 P5); decider_agent derived from stage owner_agent, not procedure owner_agent | —| L0+L1 | —|
-| `new-project.ts` | L0 | 1.22.0 | active | `--platform both`→`all` rename, now covers claude+antigravity+codex | —| L0 | —|
+| `new-project.ts` | L0 | 1.23.0 | active | §7.7 graft build: global `graft` first, bunx fallback; `--platform both`→`all` rename, now covers claude+antigravity+codex | —| L0 | —|
 | `remove-project.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `resolve-variants.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
 | `project-to-variant.ts` | L0 | 1.4.0 | active | `--source`, `--target`, `--dry-run`, `--force`, `--overlay-variant`, `--design-doc`, `--threshold-files`, `--threshold-dirs` | —| L0 | —|
