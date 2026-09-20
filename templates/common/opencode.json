@@ -3,8 +3,7 @@
     "graft": {
       "type": "local",
       "command": [
-        "bunx",
-        "@nanonets/graft",
+        "graft",
         "mcp"
       ],
       "enabled": true
