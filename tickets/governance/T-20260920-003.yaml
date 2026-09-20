@@ -1,0 +1,21 @@
+schemaVersion: 1
+id: T-20260920-003
+kind: manual
+title: >-
+  retired-skill residue survives --prune-removed upgrades: the 2026-09-12
+  validate-docs-links retirement (T-20260912-013) removed root/L1 copies but
+  left 46 project-side dirs (4 platform mirrors x 11 projects + skills/ SSOT in
+  architect & deck); today's --prune-removed upgrade reported 'Files pruned: 0'
+  and could not see them — extend prune scope to platform mirror dirs and
+  skills/ SSOT dirs absent from all upstream sources, or add a retired-skill
+  sweep step to the upgrade
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-20T08:29:53.780Z'
+history:
+  - at: '2026-09-20T08:29:53.780Z'
+    from: null
+    to: backlog
+result: null
+error: null
