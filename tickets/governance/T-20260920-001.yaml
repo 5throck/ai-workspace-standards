@@ -1,0 +1,26 @@
+schemaVersion: 1
+id: T-20260920-001
+kind: manual
+title: >-
+  upgrade-policy gap: upgrade-project delivers template scripts whose runtime
+  dependencies live in project-owned package.json — new template-script deps
+  never reach projects, CI breaks with 'Cannot find package'. Found in
+  2026-09-20 fleet upgrade: delivered scripts/helpers/pm-md-parser.ts imports
+  js-yaml; co-abap/co-deck lacked it (CI Documentation Audit failed),
+  co-architect carried a stale older version. package.json/bun.lock are
+  PROJECT_STATE_FILES in lib/upgrade-policy.ts so they are never
+  template-delivered. Fix direction: upgrader scans imports of delivered scripts
+  vs project package.json deps and either auto-adds missing ones (merge
+  semantics like .env.sample) or surfaces a required-dependencies section in the
+  dry-run/apply plan; also decide whether delivered dependency versions should
+  pin to the root SSOT versions.
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-20T08:00:50.258Z'
+history:
+  - at: '2026-09-20T08:00:50.258Z'
+    from: null
+    to: backlog
+result: null
+error: null
