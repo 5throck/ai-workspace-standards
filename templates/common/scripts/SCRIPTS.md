@@ -31,7 +31,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 *   **Purpose**: All scripting tasks — project scaffolding, pipeline, code generation, linting, syncing, lifecycle audits.
 *   **Implementation**: Written in TypeScript (`.ts`), executed via the Bun runtime.
 *   **Execution**: `bun scripts/<name>.ts` or via `package.json` alias.
-*   **Examples**: `upgrade-project.ts`, `cleanup-completed-md.ts`, `audit.ts`, `dev-sync.ts`.
+*   **Examples**: `cleanup-completed-md.ts`, `audit.ts`, `dev-sync.ts`.
 
 ---
 
