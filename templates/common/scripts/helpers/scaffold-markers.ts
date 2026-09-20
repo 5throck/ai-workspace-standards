@@ -1,8 +1,14 @@
 #!/usr/bin/env bun
 /**
  * Shared Scaffold Delivery Contracts
- * @version 1.3.0
+ * @version 1.4.0
  *
+ * v1.4.0: PlatformProfile's 'both' renamed to 'all' and its delivery-derivation
+ * meaning expanded to include the codex platform (CODEX.md/.codex/), matching
+ * the same rename in new-project.ts/upgrade-project.ts/test-new-project.ts —
+ * this module's docstring says it mirrors new-project's delivery logic, so it
+ * must stay in lockstep or simulate-pipeline's dry-run predictions drift from
+ * real scaffold output.
  * v1.3.0 (T-20260916-001): TRANSIENT_TEST_FIXTURE_PREFIXES +
  * isTransientTestFixture — the shared name predicate that lets
  * templates/-scanning validators skip E2E staging dirs
@@ -364,7 +370,7 @@ export const REVIEWED_DELIVERY_EXCLUSIONS: readonly ReviewedDeliveryExclusion[] 
 // 6. Delivery-tree derivation (T-20260915-003 / H13)
 // ============================================================================
 
-export type PlatformProfile = 'claude' | 'antigravity' | 'both' | 'codex';
+export type PlatformProfile = 'claude' | 'antigravity' | 'all' | 'codex';
 
 /**
  * Relpaths (forward slashes) of files under templates/common/ that are NOT
@@ -463,7 +469,7 @@ export function restrictToUniverse(rels: Iterable<string>, universe: Set<string>
  * Derive the file set new-project.ts delivers FROM templates/common/
  * (forward-slash relpaths, docs/_common flattened). Mirrors new-project's
  * copyDir skips, workspace-only/L1-only removals, memory clear, .gitkeep
- * removal, platform profile (default "both"), L0-only script removal (same
+ * removal, platform profile (default "all"), L0-only script removal (same
  * layer-filter source the script shells out to), the l2_propagate:false
  * safety nets, and the region-neutral country-scoped prune.
  */
@@ -471,7 +477,7 @@ export function deriveNewProjectDelivery(
   commonDir: string,
   opts: { platform?: PlatformProfile; workspaceRoot?: string } = {},
 ): Set<string> {
-  const platform: PlatformProfile = opts.platform ?? 'both';
+  const platform: PlatformProfile = opts.platform ?? 'all';
   const workspaceRoot = opts.workspaceRoot ?? join(commonDir, '..', '..');
   const l0OnlyScripts = new Set(
     [...parseScriptLayers().entries()].filter(([, v]) => v === 'L0').map(([k]) => k),
@@ -490,7 +496,7 @@ export function deriveNewProjectDelivery(
     if (NEW_PROJECT_CLEANUP_FILES.includes(rel)) continue;
     if (top === 'memory' && rel.endsWith('.md')) continue; // §memory clear
     if (basename(rel) === '.gitkeep') continue;
-    if (platform !== 'codex' && (rel === 'CODEX.md' || rel.startsWith('.codex/'))) continue;
+    if (platform !== 'codex' && platform !== 'all' && (rel === 'CODEX.md' || rel.startsWith('.codex/'))) continue;
     if (platform === 'claude' && rel === 'GEMINI.md') continue;
     if (platform === 'antigravity' && rel === 'CLAUDE.md') continue;
     if (isL2PropagateFalseSkillRel(rel, l2PropagateFalseSkills)) continue;

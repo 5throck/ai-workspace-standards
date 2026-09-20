@@ -91,7 +91,7 @@ Standard directory layout for all projects in this workspace:
 | `docs/<variant>.context.md` | Variant config — tech stack, agents, skills, scripts, workflow |
 | `CLAUDE.md` | Claude Code session behavior and slash commands |
 | `GEMINI.md` | Gemini CLI / Antigravity session behavior |
-| `AGENTS.md` | Canonical agent index (auto-loaded by Claude Code) |
+| `AGENTS.md` | Canonical agent index (linked from CLAUDE.md/GEMINI.md/CODEX.md — not auto-loaded by any platform on its own) |
 | `.claude/skills.json` | Claude Code/App skill discovery config (registers `skills/` SSOT) |
 | `.gemini/skills.json` | Gemini CLI skill discovery config (registers `skills/` SSOT) |
 | `.agents/skills.json` | Antigravity/Antigravity CLI skill discovery config (registers `skills/` SSOT) |

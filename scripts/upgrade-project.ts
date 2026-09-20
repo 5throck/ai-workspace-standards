@@ -1,5 +1,9 @@
 #!/usr/bin/env bun
-// @version 1.33.0
+// @version 1.34.0
+// v1.34.0: --platform 'both' renamed to 'all' and expanded to cover all three
+//          platforms (claude+antigravity+codex, not just the first two) —
+//          added the missing `codex` value and a CODEX.md MERGE branch that
+//          new-project.ts already had but this script never picked up.
 // v1.33.0: ADR-0081 fleet sweep / T-20260919-003 — COMMON-CONTEXT block splice
 //          under CONTEXT PRESERVE. When the wholesale docs/context.md copy is
 //          skipped (project-only top-level sections) the template's
@@ -229,7 +233,7 @@
 //         numbers on existing rows, "Unregistered script" for newly-added files) and
 //         required manual reconciliation every time.
 // upgrade-project.ts — Upgrade an existing project to the current template version
-// Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform claude|antigravity|both] [--dry-run] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization] [--force-context-sync]
+// Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform claude|antigravity|codex|all] [--dry-run] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization] [--force-context-sync]
 // v1.9.0: Moved docs/context.md from DOCS_MERGE (managed-block merge) to VARIANT_DOCS_SYNC
 //           (version-footer sync) — the common template carries no managed-block markers,
 //           so the merge path was a silent no-op despite the file's *context.md version: X.Y*
@@ -288,7 +292,7 @@ import {
 // ── Argument parsing ───────────────────────────────────────────────────────────
 let projectPath = '';
 let variant = '';
-let platform = 'both';
+let platform = 'all';
 let dryRun = false;
 let pruneRemoved = false;
 let rollback = false;
@@ -310,13 +314,13 @@ for (let i = 0; i < args.length; i++) {
 }
 
 if (!projectPath) {
-  console.error('Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform claude|antigravity|both] [--dry-run] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization] [--force-context-sync]');
+  console.error('Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform claude|antigravity|codex|all] [--dry-run] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization] [--force-context-sync]');
   if (import.meta.main) {
     process.exit(1);
   }
 }
-if (!['claude', 'antigravity', 'both'].includes(platform)) {
-  console.error('ERROR: --platform must be one of: claude, antigravity, both');
+if (!['claude', 'antigravity', 'codex', 'all'].includes(platform)) {
+  console.error('ERROR: --platform must be one of: claude, antigravity, codex, all');
   if (import.meta.main) {
     process.exit(1);
   }
@@ -1050,8 +1054,9 @@ console.log('');
 // ── MERGE files ────────────────────────────────────────────────────────────────
 console.log('--- MERGE files (WORKSPACE-MANAGED sections) ---');
 const MERGE_FILES: string[] = [];
-if (platform === 'claude' || platform === 'both') MERGE_FILES.push('CLAUDE.md');
-if (platform === 'antigravity' || platform === 'both') MERGE_FILES.push('GEMINI.md');
+if (platform === 'claude' || platform === 'all') MERGE_FILES.push('CLAUDE.md');
+if (platform === 'antigravity' || platform === 'all') MERGE_FILES.push('GEMINI.md');
+if (platform === 'codex' || platform === 'all') MERGE_FILES.push('CODEX.md');
 MERGE_FILES.push(
   '.gitignore', 'agents/pm.md',
 );
@@ -1209,8 +1214,8 @@ console.log('');
 // ── COMMANDS_SYNC: platform command files (.claude/commands, .gemini/commands) ──
 console.log('--- COMMANDS_SYNC: platform commands (hash-based) ---');
 const COMMANDS_DIRS: string[] = [];
-if (platform === 'claude' || platform === 'both') COMMANDS_DIRS.push('.claude/commands');
-if (platform === 'antigravity' || platform === 'both') COMMANDS_DIRS.push('.gemini/commands');
+if (platform === 'claude' || platform === 'all') COMMANDS_DIRS.push('.claude/commands');
+if (platform === 'antigravity' || platform === 'all') COMMANDS_DIRS.push('.gemini/commands');
 
 for (const cmdDir of COMMANDS_DIRS) {
   // Check variant template first, then common
