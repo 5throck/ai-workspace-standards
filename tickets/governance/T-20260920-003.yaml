@@ -10,12 +10,18 @@ title: >-
   skills/ SSOT dirs absent from all upstream sources, or add a retired-skill
   sweep step to the upgrade
 priority: normal
-status: backlog
+status: review
 attempts: 0
 created_at: '2026-09-20T08:29:53.780Z'
 history:
   - at: '2026-09-20T08:29:53.780Z'
     from: null
     to: backlog
+  - at: '2026-09-20T12:49:19.678Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-20T13:00:33.530Z'
+    from: waiting
+    to: review
 result: null
 error: null

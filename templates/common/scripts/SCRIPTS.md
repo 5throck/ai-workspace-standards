@@ -196,7 +196,8 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `lib/platform-delivery.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/ssrf.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `lib/constitution-scrub.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `lib/upgrade-policy.ts` | L0 | 1.8.0 | active | —| —| L0 | —|
+| `lib/upgrade-policy.ts` | L0 | 1.9.0 | active | exports `lifecyclelessText()` for equal-version agent drift comparison (T-20260920-002) | —| L0 | —|
+| `lib/dependency-guard.ts` | L0 | 1.0.1 | active | DEPENDENCY GUARD — scans delivered scripts' bare-package imports vs project package.json, reports missing packages in the upgrade plan (T-20260920-001) | —| L0+L1 | —|
 | `lib/variant-overlay-guard.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/platform-mirror-freshness.ts` | L0 | 1.0.1 | active | Pure platform-skill-mirror vs skills/ SSOT version comparison for the platform-mirror-freshness check (T-20260916-008) | —| L0+L1 | —|
 | `lifecycle-sync-audit.ts` | L0 | 1.15.0 | active | —| —| L0+L1 | —|
@@ -235,7 +236,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `translate-readme.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `ticket.ts` | L0 | 1.2.0 | active | `create --not-before`, `list --kind`, `list --ready`, `move done --result` (required, not bypassable by --force) | —| L0 | —|
 | `typecheck.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
-| `upgrade-project.ts` | L0 | 1.34.0 | active | `--variant`, `--platform` (claude/antigravity/codex/all — `all` renamed from `both`, now merges CODEX.md too), `--dry-run`, `--prune-removed`, `--rollback`, `--yes`, `--skip-context-commonization`, `--force-context-sync` | —| L0 | —|
+| `upgrade-project.ts` | L0 | 1.35.0 | active | `--variant`, `--platform` (claude/antigravity/codex/all — `all` renamed from `both`, now merges CODEX.md too), `--dry-run`, `--prune-removed`, `--rollback`, `--yes`, `--skip-context-commonization`, `--force-context-sync` | —| L0 | —|
 | `variant-feature.ts` | L0 | 1.0.0 | active | `--variant`, `--feature`, `--type` | —| L0 | —|
 | `validate-agents.ts` | L0 | 1.2.1 | active | —| —| L0+L1 | —|
 | `validate-doc-folder.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
