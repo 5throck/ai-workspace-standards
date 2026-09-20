@@ -5,8 +5,8 @@ description: >
   (`--mode project-creation`) or L3 scaffold to L2 variant promotion
   (`--mode l3-to-variant-promotion`). Use when validating new-project scaffolding,
   testing disposable L3 promotion fixtures, or checking promotion/scaffold regressions.
-version: 1.0.0
-last_reviewed: 2026-09-09
+version: 1.0.1
+last_reviewed: 2026-09-21
 status: active
 scope: workspace
 owner: automation-engineer
@@ -33,7 +33,7 @@ Use this skill to run disposable end-to-end smoke checks for workspace creation 
 
 Validates the project scaffolding path driven by `new-project.ts`.
 
-1. Run `bun scripts/new-project.ts "e2e-test-scaffold"`.
+1. Run `bun scripts/new-project.ts "e2e-test-scaffold" --variant <variant>` (for example `--variant co-deck`). `--variant` is required — without it `new-project.ts` lists valid variants and exits 1.
 2. Verify the scaffold landed at `Projects/e2e-test-scaffold` (bare names scaffold under `Projects/`).
 3. Verify the generated files exist and match the expected template layout.
 4. Verify UTF-8 without BOM for generated Markdown and TypeScript files.
