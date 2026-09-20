@@ -1105,6 +1105,15 @@
       "source": "manual",
       "created": "2026-09-20",
       "last_updated": "2026-09-20"
+    },
+    {
+      "id": "2026-09-20-handbook-skill-maintenance-mode-design",
+      "title": "handbook skill maintenance mode design",
+      "file": "docs/designs/2026-09-20-handbook-skill-maintenance-mode-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-20",
+      "last_updated": "2026-09-20"
     }
   ]
 }

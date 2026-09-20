@@ -264,6 +264,12 @@
     },
     {
       "type": "references",
+      "from": "handbook",
+      "to": "handbook-sync-audit",
+      "source": "prose"
+    },
+    {
+      "type": "references",
       "from": "handbook-sync-audit",
       "to": "handbook",
       "source": "prose"

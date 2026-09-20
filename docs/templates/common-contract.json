@@ -192,7 +192,7 @@
     },
     "handbook": {
       "source": "skills/handbook/SKILL.md",
-      "version": "0.4.0",
+      "version": "0.6.0",
       "overridable": false,
       "description": "Document Production Workflow — generates searchable, themed handbook static sites (GitHub Pages)"
     },
@@ -331,7 +331,7 @@
     "handbook": {
       "claude_source": ".claude/skills/handbook/SKILL.md",
       "gemini_source": ".gemini/skills/handbook/SKILL.md",
-      "version": "0.4.0",
+      "version": "0.6.0",
       "description": "Document Production Workflow — generates searchable, themed handbook static sites (GitHub Pages); standalone, lecture-companion, and sync modes",
       "propagated_to_common": true
     },
