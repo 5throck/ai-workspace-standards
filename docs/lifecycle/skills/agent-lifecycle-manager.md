@@ -34,6 +34,10 @@
 
 - **Current Phase**: production
 - **Owner**: pm
-- **Version**: 1.2.0
+- **Version**: 1.3.0
 - **Last Updated**: 2026-09-18 (v1.2.0 — Hiring Workflow and Firing Workflow (PM-decided) added with ADR-0061 decision records; Skill Attach/Detach Rules added)
 - **Last Reviewer**: lifecycle-manager
+
+## Changelog
+
+- **1.3.0** (2026-09-21): lifecycle modernization per 2026-09-21-agent-skill-lifecycle-modernization-design — H5 creates the agent lifecycle record + regenerates derived artifacts, F4 schedules removal_review (deprecation + 90 days), F5 prose checks promoted to enforced audit checks (13/14), DEC validator invocation explicit.

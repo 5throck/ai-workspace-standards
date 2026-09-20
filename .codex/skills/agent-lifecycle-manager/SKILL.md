@@ -9,8 +9,8 @@ description: >
   metadata/frontmatter, validating agent structures, attaching or detaching skills to agents,
   or managing agent roles and 3-tier configurations.
 owner: pm
-version: 1.2.0
-last_reviewed: 2026-09-18
+version: 1.3.0
+last_reviewed: 2026-09-21
 relates_to:
   - skill: skill-lifecycle-manager
     type: composes_with
@@ -204,7 +204,7 @@ The initial skill package is part of the hiring decision (PM-decided). For each 
 ### Step H4: Record the Decision
 
 Before any dispatch:
-1. Emit a Gate-Moment Decision Record at `docs/decisions/DEC-YYYYMMDD-NN.md` (ADR-0061): signal, evidence, role definition, skill package, alternatives considered (re-scope/attach existing agent)
+1. Emit a Gate-Moment Decision Record at `docs/decisions/DEC-YYYYMMDD-NN.md` (ADR-0061). The record must carry the ADR-0061 required frontmatter fields (`id, date, agent, decision, alternatives, status`); validate with `bun scripts/validate-decisions.ts`. Content: signal, evidence, role definition, skill package, alternatives considered (re-scope/attach existing agent)
 2. Append a summary entry to the active `memory/YYYY-MM-DD.md`
 
 ### Step H5: Execute via Dispatch
@@ -213,7 +213,8 @@ PM dispatches **automation-engineer** (never edits files directly):
 1. Create `agents/<name>.md` — write it directly (recommended) or via `bun scripts/agent-create.ts <agent-name>`; the file must contain **all schema-required frontmatter fields** (`name`, `role`, `status`, `tier`, `version`, `last_reviewed`, `description`, `lifecycle` per `schemas/agent.schema.json`)
 2. Register the agent in the AGENTS.md §1 Agent Roster table (`| Agent Role | agents/agent-name.md | Tier | Role description |`)
 3. Apply the skill package owner updates (Step H3)
-4. lifecycle-manager then updates governance records and publishes via `bun run propagate:apply`
+4. Create the governance record `docs/lifecycle/agents/<name>.md` (Created date, empty Phase History, Metadata with Owner + Current Phase `production`)
+5. lifecycle-manager then updates governance records, regenerates the derived artifacts (`bun scripts/generate-version-manifest.ts`, `bun scripts/generate-skill-graph.ts`), and publishes via `bun run propagate:apply`
 
 ### Step H6: Validate
 
@@ -252,7 +253,7 @@ The disposition plan is part of the firing decision — the fired agent cannot r
 ### Step F3: Record the Decision
 
 Before any dispatch:
-1. Emit a Gate-Moment Decision Record at `docs/decisions/DEC-YYYYMMDD-NN.md` (ADR-0061): signal, dependency map, disposition plan, exit mode (deprecate vs delete)
+1. Emit a Gate-Moment Decision Record at `docs/decisions/DEC-YYYYMMDD-NN.md` (ADR-0061) with the required frontmatter fields; validate with `bun scripts/validate-decisions.ts`. Content: signal, dependency map, disposition plan, exit mode (deprecate vs delete)
 2. Append a summary entry to the active `memory/YYYY-MM-DD.md`
 
 ### Step F4: Execute via Dispatch
@@ -261,16 +262,17 @@ PM dispatches **automation-engineer**:
 
 **Default — deprecate:**
 1. Set `status: deprecated` in the agent frontmatter (keep the file and governance record in place)
-2. Apply the skill disposition plan (Step F2)
-3. Update AGENTS.md roster cells (mark deprecated; do not delete the row yet)
-4. lifecycle-manager updates governance records and publishes L0→L1
+2. Schedule the removal review: set `removal_review: YYYY-MM-DD` in the agent frontmatter (default: deprecation + 90 days) — the quarterly roster review consumes it, and `agent-lifecycle-audit.ts` FAILS once the date passes without a review decision
+3. Apply the skill disposition plan (Step F2)
+4. Update AGENTS.md roster cells (mark deprecated; do not delete the row yet)
+5. lifecycle-manager updates governance records, regenerates derived artifacts (`generate-version-manifest.ts`, `generate-skill-graph.ts`), and publishes L0→L1
 
 **Hard delete — explicit user request only:**
 1. Confirm the user explicitly asked for deletion (not just "fire" in passing)
 2. Run `bun scripts/agent-delete.ts <name> --force`
 3. Remove the AGENTS.md §1/§4.1 roster rows
 4. Complete the skill disposition plan — no orphaned skills may remain
-5. lifecycle-manager updates governance records and publishes L0→L1
+5. lifecycle-manager updates governance records, regenerates derived artifacts, and publishes L0→L1
 
 ### Step F5: Validate
 
@@ -279,7 +281,7 @@ bun scripts/agent-lifecycle-audit.ts
 bun scripts/lifecycle-sync-audit.ts
 ```
 
-Additional checks: no dangling `handoff_to`/`handoff_from` references to the fired agent; no skill left with the fired agent as sole `owner:`.
+The audit now enforces the reference sweep mechanically: Check 13 fails on dangling `handoff_to`/`handoff_from` references to the fired agent, and the skill-disposition checks fail on any skill left with the fired agent as sole (or now-nonexistent) `owner:`. Confirm both in the audit output — these are no longer prose-only checks.
 
 ---
 

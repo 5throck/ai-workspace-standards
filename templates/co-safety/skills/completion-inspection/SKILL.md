@@ -72,7 +72,7 @@ Execute Phase 3 of the KGS Code construction inspection: completion inspection a
 5. **Corrective Action / Re-inspection (if needed)** — Remediate and re-inspect critical/major deficiencies before proceeding to permit issuance.
 6. **Result Recording** — Set `inspection_result`: `pass` / `supplement_required` / `fail`.
 7. **Permit Issuance** — On `pass`, `local_government` issues the 변경허가 completion; record `permit_granted = true`, `permit_granted_date`, `permit_number`.
-8. **Operation Start** — Confirm `safety_manager_appointed` (안전관리자 선임), record `operation_start_date` and `next_periodic_inspection_date` (annual KGS periodic inspection cadence — hands off to routine `gasterm-inspection-record` tracking).
+8. **Operation Start** — Confirm `safety_manager_appointed` (안전관리자 선임), record `operation_start_date` and `next_periodic_inspection_date` (annual KGS periodic inspection cadence — hands off to routine gasterm inspection-record tracking).
 9. **Closure** — Return `record_id` to the orchestrating `construction-permit-overview` record's `phases.completion.result_id`; set that record's `overall_status = completed` when `permit_granted == true`.
 
 ### Inputs

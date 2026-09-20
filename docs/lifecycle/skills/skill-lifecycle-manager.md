@@ -6,6 +6,8 @@
 
 ## Changelog
 
+- **1.5.0** (2026-09-21): lifecycle modernization per 2026-09-21-agent-skill-lifecycle-modernization-design — R1-R3 evidence_refs mandatory + DEC frontmatter compliance, new Registry Lockstep Checklist section, Deprecate gains superseded_by/removal-date/version-bump requirements, Remove covers 4 mirrors + derived-artifact regeneration + record retirement.
+
 - 2026-09-06: v1.3.0 — whole-skill revision principle section added (SKILL.md + scripts/ + references/ revised together in one approved change; SkillHone finding; design doc docs/designs/2026-09-06-skill-session-review-design.md)
 - 2026-09-18: v1.4.0 — Skill Request Workflow (agent-initiated, PM-approved; Steps R1–R3) and Skill Deprecation & Removal sections added (removal procedure was previously missing entirely)
 
@@ -39,6 +41,6 @@
 
 - **Current Phase**: production
 - **Owner**: pm
-- **Version**: 1.4.0
+- **Version**: 1.5.0
 - **Last Updated**: 2026-09-18 (v1.4.0 — Skill Request Workflow + Deprecation & Removal sections added)
 - **Last Reviewer**: lifecycle-manager

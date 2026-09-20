@@ -42,3 +42,10 @@
 - **Owner**: pm
 - **Last Updated**: 2026-09-05
 - **Last Reviewer**: lifecycle-manager
+
+## Changelog
+
+- **1.4.3** (2026-09-21): patch bump — deliver accumulated template content to the fleet (equal-version content drift measured 2026-09-21; upgrade-project 1.37 UPDATE delivery).
+
+- **1.4.2** (2026-09-21): patch bump — deliver accumulated template content that predated this version to the fleet (equal-version content drift measured 2026-09-21; upgrade-project 1.37 UPDATE delivery).
+- **Version**: 1.4.3

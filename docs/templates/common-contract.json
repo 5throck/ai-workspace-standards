@@ -54,7 +54,7 @@
     },
     "meeting-facilitation": {
       "source": "skills/meeting-facilitation/SKILL.md",
-      "version": "1.4.1",
+      "version": "1.4.3",
       "overridable": false,
       "description": "Structured multi-agent meeting facilitation"
     },
@@ -66,19 +66,19 @@
     },
     "skill-lifecycle-manager": {
       "source": "skills/skill-lifecycle-manager/SKILL.md",
-      "version": "1.4.0",
+      "version": "1.5.0",
       "overridable": false,
       "description": "Skill lifecycle management"
     },
     "agent-lifecycle-manager": {
       "source": "skills/agent-lifecycle-manager/SKILL.md",
-      "version": "1.2.0",
+      "version": "1.3.0",
       "overridable": false,
       "description": "Agent lifecycle management"
     },
     "script-lifecycle-manager": {
       "source": "skills/script-lifecycle-manager/SKILL.md",
-      "version": "1.2.0",
+      "version": "1.2.2",
       "overridable": false,
       "description": "Script lifecycle management — tracks script health and deprecation"
     },
@@ -96,7 +96,7 @@
     },
     "translate": {
       "source": "skills/translate/SKILL.md",
-      "version": "1.0.1",
+      "version": "1.0.3",
       "overridable": false,
       "description": "Translation helper for README and documentation files"
     },
@@ -132,13 +132,13 @@
     },
     "api-documentation": {
       "source": "skills/api-documentation/SKILL.md",
-      "version": "1.0.0",
+      "version": "1.0.2",
       "overridable": false,
       "description": "Creates comprehensive API documentation: endpoints, parameters, auth, request/response schemas, code examples"
     },
     "documentation-writing": {
       "source": "skills/documentation-writing/SKILL.md",
-      "version": "1.0.0",
+      "version": "1.0.3",
       "overridable": false,
       "description": "Creates clear, accessible documentation and communications for diverse audiences"
     },
@@ -150,13 +150,13 @@
     },
     "gateguard": {
       "source": "skills/gateguard/SKILL.md",
-      "version": "1.0.0",
+      "version": "1.0.2",
       "overridable": false,
       "description": "Pre-edit fact-forcing quality gate - investigate importers, schemas, scope constraints before editing"
     },
     "research-analysis": {
       "source": "skills/research-analysis/SKILL.md",
-      "version": "1.0.0",
+      "version": "1.0.2",
       "overridable": false,
       "description": "Systematic research, data synthesis, and evidence-based analysis"
     },
@@ -174,7 +174,7 @@
     },
     "zod-contract-gate": {
       "source": "skills/zod-contract-gate/SKILL.md",
-      "version": "1.0.0",
+      "version": "1.0.2",
       "overridable": false,
       "description": "Zod runtime schema validation patterns and contract safety rules"
     },
@@ -186,7 +186,7 @@
     },
     "ci-triage": {
       "source": "skills/ci-triage/SKILL.md",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "overridable": false,
       "description": "Triages CI / audit / scaffold failures: deterministic reproduction, provenance tracing, root-cause fix, re-verification"
     },
@@ -198,7 +198,7 @@
     },
     "handbook-sync-audit": {
       "source": "skills/handbook-sync-audit/SKILL.md",
-      "version": "1.0.0",
+      "version": "1.0.4",
       "overridable": false,
       "description": "Handbook Sync Audit — verifies generated handbooks stay aligned with their sources across content, structure, and anchor axes"
     },
@@ -210,7 +210,7 @@
     },
     "source-command-commit-push-pr": {
       "source": "skills/source-command-commit-push-pr/SKILL.md",
-      "version": "1.0.1",
+      "version": "1.0.3",
       "overridable": false,
       "description": "Redirects commit+push+PR requests to the /sync pipeline (workspace enforcement)"
     },
@@ -289,28 +289,28 @@
     "finishing-a-development-branch": {
       "claude_source": ".claude/skills/finishing-a-development-branch/SKILL.md",
       "gemini_source": ".gemini/skills/finishing-a-development-branch/SKILL.md",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "description": "Workspace override — redirects branch completion to /sync pipeline",
       "propagated_to_common": true
     },
     "platform-skill-lifecycle-manager": {
       "claude_source": ".claude/skills/platform-skill-lifecycle-manager/SKILL.md",
       "gemini_source": ".gemini/skills/platform-skill-lifecycle-manager/SKILL.md",
-      "version": "1.0.0",
+      "version": "1.0.2",
       "description": "Platform skill lifecycle management for .claude/skills/ and .gemini/skills/",
       "propagated_to_common": true
     },
     "platform-command-lifecycle-manager": {
       "claude_source": ".claude/skills/platform-command-lifecycle-manager/SKILL.md",
       "gemini_source": ".gemini/skills/platform-command-lifecycle-manager/SKILL.md",
-      "version": "1.0.0",
+      "version": "1.0.2",
       "description": "Platform command lifecycle management for .claude/commands/ and .gemini/commands/",
       "propagated_to_common": true
     },
     "meeting-facilitation": {
       "claude_source": ".claude/skills/meeting-facilitation/SKILL.md",
       "gemini_source": ".gemini/skills/meeting-facilitation/SKILL.md",
-      "version": "1.4.1",
+      "version": "1.4.3",
       "description": "Structured multi-agent meeting facilitation — delegates to .claude/commands/meeting.md",
       "propagated_to_common": true
     },
@@ -338,7 +338,7 @@
     "handbook-sync-audit": {
       "claude_source": ".claude/skills/handbook-sync-audit/SKILL.md",
       "gemini_source": ".gemini/skills/handbook-sync-audit/SKILL.md",
-      "version": "1.0.0",
+      "version": "1.0.4",
       "description": "Handbook Sync Audit — verifies generated handbooks stay aligned with their sources across content reflection, structural linkage, and freshness",
       "propagated_to_common": true
     },

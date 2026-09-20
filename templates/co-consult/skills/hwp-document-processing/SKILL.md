@@ -32,14 +32,14 @@ Korean government and public-institution consulting deliverables (e.g. the KOSME
 
 1. **Environment constraint** (verified 2026-08-08 on this workspace's machine): `pywin32` is installed but the `HwpFrame.HwpObject` COM automation class is NOT registered — only Hancom Office Viewer (view-only) is present, not the full `한글` (Hangul) editor. Programmatic `.hwp` *writing* via COM automation is unavailable here. Re-verify with `reg query "HKEY_CLASSES_ROOT\HwpFrame.HwpObject"` before assuming this has changed.
 2. **Policy judgment** (holds independently of environment): even where COM automation is available, writing directly into a `.hwp` binary risks corrupting formatting. Reading is safe and well-supported by this workspace's own parser.
-3. **Tooling**: `python/extract_hwp.py` (OLE-compound-file + zlib BodyText stream parser), wrapped by `bun scripts/co-consult/hwp-extract.ts <path.hwp>`. Extracts the table of contents and body text — this is how the source template's chapter structure and `[작성 가이드라인]` slots were catalogued for `structural-innovation-report-writing`.
+3. **Tooling**: `python/extract_hwp.py` (OLE-compound-file + zlib BodyText stream parser), wrapped by `bun scripts/co-consult/hwp-extract.ts <path.hwp>`. Extracts the table of contents and body text — this is how the source template's chapter structure and `[작성 가이드라인]` slots were catalogued for `sample-driven-report-writing`.
 4. **No `.hwp`→`.hwpx` direct conversion**: `python-hwpx` (see below) cannot open `.hwp` v5 binaries. Do NOT attempt to convert the template file itself — instead extract its structure and generate a fresh `.hwpx` (see below).
 
 ### HWPX (.hwpx, open XML/ZIP) — full read, write, generate, validate
 
 1. **Verified capability** (tested 2026-08-08 in this workspace): the `python-hwpx` library (pure Python, Apache 2.0, no Hancom Office required, PyPI package `python-hwpx`, source https://github.com/airmang/python-hwpx) creates, edits, and validates real `.hwpx` files. Confirmed working: `HwpxDocument.new()`, `add_heading()`, `add_paragraph()`, `add_table()` + `set_cell_text()`, `save_to_path()`, `open()`, and round-trip text extraction. Output passed the official `hwpx-validate` CLI schema validator with "All schema validations passed."
 2. **Tooling**: `python/generate_hwpx.py` (Markdown → HWPX converter — headings, paragraphs, pipe-tables), wrapped by `bun scripts/co-consult/hwpx-generate.ts <input.md> <output.hwpx>`.
-3. **This is now the actual deliverable production path**: draft chapters in Markdown per `structural-innovation-report-writing`, then generate the final `.hwpx` directly — no human manual transcription step required for this format.
+3. **This is now the actual deliverable production path**: draft chapters in Markdown per `sample-driven-report-writing`, then generate the final `.hwpx` directly — no human manual transcription step required for this format.
 4. **Always run schema validation** (`hwpx-validate <file>.hwpx`) after generation, plus the structural/placeholder/page-count checks below, before handoff.
 
 ## When to Use
@@ -54,7 +54,7 @@ Korean government and public-institution consulting deliverables (e.g. the KOSME
 ## Execution Steps
 
 1. **Extract template structure** (once per engagement / template version): `bun scripts/co-consult/hwp-extract.ts <path-to.hwp>` → chapter/section checklist.
-2. **Draft in Markdown** per `structural-innovation-report-writing`'s chapter ownership model, replacing every guideline slot with real content.
+2. **Draft in Markdown** per `sample-driven-report-writing`'s chapter ownership model, replacing every guideline slot with real content.
 3. **Cross-check the draft**: confirm every checklist item from step 1 appears in the Markdown draft, in the same order.
 4. **Scan for leftover placeholders**: grep the draft for `[작성 가이드라인]`, `예시1)`, `예시2)` — zero matches required.
 5. **Generate the final `.hwpx`**: `bun scripts/co-consult/hwpx-generate.ts <draft.md> <output.hwpx>`.
@@ -71,6 +71,6 @@ Korean government and public-institution consulting deliverables (e.g. the KOSME
 
 ## Related Skills
 
-- `structural-innovation-report-writing` — defines the chapter structure, page targets, and Markdown draft this skill converts into the final `.hwpx`
+- `sample-driven-report-writing` — defines the chapter structure, page targets, and Markdown draft this skill converts into the final `.hwpx`
 - `consulting-report-writing` — general consulting report writing standards
 - `i18n-layout` (common skill, constitution §4.4 i18n asset suite) — owns general text encoding, RTL/bidi, and script-font layout rules; this skill owns the HWP/HWPX document procedures themselves

@@ -1141,6 +1141,15 @@
       "source": "manual",
       "created": "2026-09-20",
       "last_updated": "2026-09-20"
+    },
+    {
+      "id": "2026-09-21-agent-skill-lifecycle-modernization-design",
+      "title": "agent skill lifecycle modernization design",
+      "file": "docs/designs/2026-09-21-agent-skill-lifecycle-modernization-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-20",
+      "last_updated": "2026-09-20"
     }
   ]
 }

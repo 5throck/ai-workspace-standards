@@ -1,0 +1,20 @@
+{
+  "description": "Intentional historical skill-name references allowed by the skill-lifecycle-audit reference-integrity check (Check RI). Each entry exempts specific backtick references inside files whose path contains file_substring. Do not add entries for live references that should simply be fixed.",
+  "allow": [
+    {
+      "file_substring": "skills/simulate-pipeline",
+      "refs": [
+        "simulate-project-creation",
+        "simulate-l3-to-variant-promotion"
+      ],
+      "reason": "Overview documents that this skill replaces the two former skills (merge rationale, 2026-09-09)."
+    },
+    {
+      "file_substring": "skills/k-dart",
+      "refs": [
+        "dart-disclosure-parser"
+      ],
+      "reason": "v2.0.0 changelog note: dart-disclosure-parser parsing rules were merged into this unified skill; the mention is merge history."
+    }
+  ]
+}

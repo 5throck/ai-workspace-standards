@@ -7,7 +7,7 @@ description: >
   across the workspace and templates. Use when: creating new scripts, updating script versions,
   deprecating scripts, or managing script dependencies in SCRIPTS.md.
 owner: pm
-version: 1.2.0
+version: 1.2.2
 last_reviewed: 2026-05-30
 metadata:
   type: process

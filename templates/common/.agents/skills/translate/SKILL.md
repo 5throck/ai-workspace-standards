@@ -1,7 +1,7 @@
 ---
 name: translate
 description: Translation helper for README and documentation files with diff preview and guidance
-version: 1.0.1
+version: 1.0.3
 owner: pm
 status: active
 last_reviewed: 2026-08-24

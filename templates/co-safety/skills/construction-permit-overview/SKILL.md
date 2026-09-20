@@ -73,7 +73,7 @@ Orchestrate the complete construction/permit lifecycle for gas terminal faciliti
 5. **Gate Check** — Do not proceed to Phase 3 unless `phases.mid_inspection.status == passed`.
 6. **Phase 3 Dispatch** — Dispatch `completion-inspection`, passing `mid_construction_inspection_id`. Set `phases.completion.status`; record `result_id`.
 7. **Permit Tracking** — Track `permit_status` (not_applied/applied/granted/rejected) and `local_government` (관할 지자체) throughout; local government permit issuance is authoritative, KGS technical review/inspection results are the supporting basis.
-8. **Closure** — When all three phases are `passed` and `permit_status == granted`, set `overall_status = completed`. Hand off to routine gasterm operational monitoring (`gasterm-inspection-record`, periodic KGS inspection cadence).
+8. **Closure** — When all three phases are `passed` and `permit_status == granted`, set `overall_status = completed`. Hand off to routine gasterm operational monitoring (gasterm inspection-record, periodic KGS inspection cadence).
 9. **Non-conformance** — Any phase `failed` sets `overall_status = failed`; escalate to PM (CSO) per gasterm-agent Escalation Triggers (KGS 검사 불합격 → 시설 운영 중지).
 
 ### Inputs

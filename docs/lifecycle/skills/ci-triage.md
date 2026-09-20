@@ -3,7 +3,7 @@
 ## Metadata
 - **Skill**: ci-triage
 - **Status**: active
-- **Version**: 0.1.0
+- **Version**: 0.1.1
 - **Created**: 2026-09-08
 - **Last Updated**: 2026-09-08
 
@@ -14,6 +14,10 @@ validator-hardening ratchet. Pilot from the 2026-09-08 project-review ecosystem
 gap analysis (design: docs/designs/2026-09-08-ci-triage-skill-design.md).
 
 ## Changelog
+
+- **0.1.2** (2026-09-21): patch bump — deliver accumulated template content that predated this version to the fleet (equal-version content drift measured 2026-09-21; upgrade-project 1.37 UPDATE delivery).
+
+- **0.1.1** (2026-09-21): patch bump — deliver accumulated template content that predated this version to the fleet (equal-version content drift measured 2026-09-21; upgrade-project 1.37 UPDATE delivery).
 - 2026-09-08: 0.1.0 — initial pilot version
 
 ## Dependencies

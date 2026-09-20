@@ -4,7 +4,7 @@ description: >
   Defines Zod runtime schema validation patterns, interface boundaries,
   and contract safety rules for multi-agent architecture, IPC channels,
   and API endpoints.
-version: 1.0.0
+version: 1.0.2
 last_reviewed: 2026-08-06
 status: active
 scope: common

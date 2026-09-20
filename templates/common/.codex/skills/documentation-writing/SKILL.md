@@ -4,7 +4,7 @@ description: >
   Creates clear, accessible documentation and communications for diverse audiences.
   Use when: writing guides, creating documentation, drafting communications, or synthesizing
   complex information for technical and non-technical audiences.
-version: 1.0.0
+version: 1.0.3
 scope: common
 status: active
 owner: pm
