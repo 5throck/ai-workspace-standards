@@ -1,5 +1,8 @@
 #!/usr/bin/env bun
-// @version 1.37.0
+// @version 1.37.1
+// v1.37.1 (2026-09-21): CATCH-UP DRIFT paths are normalized to POSIX separators
+//           before printing, so Windows runs report `references/x.md` not
+//           `references\x.md` (cross-platform log parity + test assertions).
 // v1.37.0 (2026-09-21, skill sub-file sync): the common-skills SYNC_IF_NEWER
 //           pass delivered only skills/<name>/SKILL.md, so skill sub-files
 //           (references/, assets/, examples/) never reached existing projects —
@@ -1708,7 +1711,7 @@ const catchUpSkillDir = (skillName: string): { copied: number; drifted: string[]
           if (!dryRun) copyFileSync(src, dst);
           copied++;
         } else if (fileHash(src) !== fileHash(dst)) {
-          drifted.push(dst.slice(projSkillDir.length + 1));
+          drifted.push(dst.slice(projSkillDir.length + 1).replace(/\\/g, '/'));
         }
       }
     }

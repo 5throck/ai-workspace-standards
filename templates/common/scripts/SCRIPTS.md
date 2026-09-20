@@ -236,7 +236,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `translate-readme.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `ticket.ts` | L0 | 1.2.0 | active | `create --not-before`, `list --kind`, `list --ready`, `move done --result` (required, not bypassable by --force) | —| L0 | —|
 | `typecheck.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
-| `upgrade-project.ts` | L0 | 1.37.0 | active | `--variant`, `--platform` (claude/antigravity/codex/all — `all` renamed from `both`, now merges CODEX.md too), `--dry-run`, `--prune-removed`, `--rollback`, `--yes`, `--skip-context-commonization`, `--force-context-sync`; COMMON-CONTEXT splice under PRESERVE (T-20260919-003); skill sub-file sync — NEW/UPDATE deliver the whole skill dir, equal-version skills get additive CATCH-UP + DRIFT warnings (2026-09-21) | —| L0 | —|
+| `upgrade-project.ts` | L0 | 1.37.1 | active | `--variant`, `--platform` (claude/antigravity/codex/all — `all` renamed from `both`, now merges CODEX.md too), `--dry-run`, `--prune-removed`, `--rollback`, `--yes`, `--skip-context-commonization`, `--force-context-sync`; COMMON-CONTEXT splice under PRESERVE (T-20260919-003); skill sub-file sync — NEW/UPDATE deliver the whole skill dir, equal-version skills get additive CATCH-UP + DRIFT warnings (2026-09-21) | —| L0 | —|
 | `variant-feature.ts` | L0 | 1.0.0 | active | `--variant`, `--feature`, `--type` | —| L0 | —|
 | `validate-agents.ts` | L0 | 1.2.1 | active | —| —| L0+L1 | —|
 | `validate-doc-folder.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
