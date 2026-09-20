@@ -22,6 +22,15 @@
 # Declare files that will always have LF line endings on checkout.
 *.sh text eol=lf
 
+# Enforce LF line endings for all text-based web and doc files.
+# Prevents CRLF smudge on Windows checkouts, which breaks LF-expecting
+# pipeline gates (e.g. the VERSION_MANIFEST drift check).
+*.html text eol=lf
+*.css text eol=lf
+*.js text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+
 # Union merge for append-only pipeline files — auto-combines both sides on merge
 # instead of raising conflicts. dev-sync.ts touches these shared files on every commit
 # (CHANGELOG.md [Unreleased] entries, memory/*.md session logs, regenerated manifests),

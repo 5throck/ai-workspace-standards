@@ -1114,6 +1114,15 @@
       "source": "manual",
       "created": "2026-09-20",
       "last_updated": "2026-09-20"
+    },
+    {
+      "id": "2026-09-20-gitattributes-lf-enforcement-design",
+      "title": "gitattributes lf enforcement design",
+      "file": "docs/designs/2026-09-20-gitattributes-lf-enforcement-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-20",
+      "last_updated": "2026-09-20"
     }
   ]
 }
