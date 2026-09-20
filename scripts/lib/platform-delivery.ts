@@ -2,8 +2,8 @@
 // v1.0.0 (T-20260916-011): platform-delivery awareness for prose validators.
 //           validate-model-registry.ts read CODEX.md unconditionally, so any
 //           project scaffolded without the codex platform (--platform
-//           claude/antigravity/both strips CODEX.md and .codex/ in
-//           new-project.ts §2.7) failed its own audit with
+//           claude/antigravity strips CODEX.md and .codex/ in new-project.ts
+//           §2.7; --platform all keeps them) failed its own audit with
 //           "could not read CODEX.md". The codex prose target is deliverable
 //           only when the codex platform actually reached the audited context:
 //           a CODEX.md file OR a .codex/ directory.

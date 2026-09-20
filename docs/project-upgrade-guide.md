@@ -34,14 +34,14 @@ This guide documents the `upgrade-project.ts` tool that automates this process.
 
 ```bash
 # From the workspace root (recommended — uses the newest workspace-side copy)
-bun scripts/upgrade-project.ts <project-path> [--variant <name>] [--platform <claude|antigravity|both>] [--dry-run] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization]
+bun scripts/upgrade-project.ts <project-path> [--variant <name>] [--platform <claude|antigravity|codex|all>] [--dry-run] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization]
 ```
 
 | Argument | Required | Description |
 |----------|----------|-------------|
 | `<project-path>` | Yes | Path to the target project directory (can be relative or absolute) |
 | `--variant <name>` | No | Template variant to upgrade from (e.g., `co-design`). Auto-detected from `.claude/template-version.txt` if omitted |
-| `--platform <val>` | No | `claude`, `antigravity`, or `both` (default). Controls which platform config files are merged |
+| `--platform <val>` | No | `claude`, `antigravity`, `codex`, or `all` (default). Controls which platform config files are merged |
 | `--dry-run` | No | Analyze without making changes. All actions logged with `[DRY RUN]` prefix |
 | `--prune-removed` | No | Also remove project files that no longer exist in the template (scripts/, agents/, skills/) |
 | `--rollback` | No | Restore the pre-upgrade git stash snapshot |

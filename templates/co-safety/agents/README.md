@@ -1,7 +1,7 @@
 # agents/
 
 Safety OS agent definitions — the full roster and dispatch rules live in
-[`../AGENTS.md`](../AGENTS.md) (canonical agent index, auto-loaded by Claude Code).
+[`../AGENTS.md`](../AGENTS.md) (canonical agent index, linked from CLAUDE.md/GEMINI.md/CODEX.md — not auto-loaded on its own).
 
 This variant uses a **nested roster layout**:
 

@@ -1,5 +1,10 @@
 #!/usr/bin/env bun
-// @version 1.21.0
+// @version 1.22.0
+// v1.22.0: --platform 'both' renamed to 'all' and its meaning expanded to cover
+//           all three platforms (claude+antigravity+codex, not just the first
+//           two) — 'all' now keeps CLAUDE.md, GEMINI.md, CODEX.md, and .codex/
+//           together; single-platform values (claude/antigravity/codex) still
+//           drop the others as before.
 // v1.21.0: T-20260917-009 — VARIANT_OVERLAY_SKIP derives from the upgrade-policy
 //           SCAFFOLD_COMMON_OWNED_FILES classification (same SSOT as
 //           validate-templates WS-07); the local hand list is gone.
@@ -50,7 +55,7 @@
 //           line (docs/context.md version footer survives for upgrade version-sync);
 //           shared pattern moved to helpers/l0-ref-policy.ts.
 // new-project.ts — Scaffold a new project under Projects/ (or an explicit workspace-relative path)
-// Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|codex|both] [--version X.Y.Z] [--country <CODE>]
+// Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|codex|all] [--version X.Y.Z] [--country <CODE>]
 //
 // Migrated from new-project.sh/ps1 per ADR-0036. No file permission manipulation.
 
@@ -84,7 +89,7 @@ import * as yaml from 'js-yaml';
 let projectName = '';
 let variant = '';
 let templateVer = '';
-let platform = 'both';
+let platform = 'all';
 let country = '';
 
 const args = process.argv.slice(2);
@@ -118,7 +123,7 @@ for (let i = 0; i < args.length; i++) {
 }
 
 if (!projectName) {
-  console.error('Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|codex|both] [--version X.Y.Z] [--country <CODE>]');
+  console.error('Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|codex|all] [--version X.Y.Z] [--country <CODE>]');
   if (import.meta.main) {
     process.exit(1);
   }
@@ -140,8 +145,8 @@ if (projectName.length > 64) {
 }
 
 // Validate platform
-if (!['claude', 'antigravity', 'both', 'codex'].includes(platform)) {
-  console.error('❌ --platform must be: claude, antigravity, both, or codex (default: both)');
+if (!['claude', 'antigravity', 'all', 'codex'].includes(platform)) {
+  console.error('❌ --platform must be: claude, antigravity, codex, or all (default: all)');
   if (import.meta.main) {
     process.exit(1);
   }
@@ -914,9 +919,10 @@ for (const d of L1_ONLY_DIRS) { // docs/specs stays (ADR-0074) — not in L1_ONL
 if (platform === 'claude') { const f = join(projectDir, 'GEMINI.md'); if (existsSync(f)) rmSync(f); }
 if (platform === 'antigravity') { const f = join(projectDir, 'CLAUDE.md'); if (existsSync(f)) rmSync(f); }
 // ADR-0077 §10: `codex` is a codex-primary profile — keeps CODEX.md + .codex/ and drops the
-// legacy twins. Legacy profiles (`claude`/`antigravity`/`both`) are codex-opt-out: the twin
-// and platform dir are template overlay, removed here unless explicitly opted in.
-if (platform !== 'codex') {
+// legacy twins. `all` keeps every platform's files, including CODEX.md/.codex/. Single-platform
+// legacy profiles (`claude`/`antigravity`) are codex-opt-out: the twin and platform dir are
+// template overlay, removed here unless explicitly opted in.
+if (platform !== 'codex' && platform !== 'all') {
   for (const f of [join(projectDir, 'CODEX.md'), join(projectDir, '.codex')]) {
     if (existsSync(f)) rmSync(f, { recursive: true });
   }

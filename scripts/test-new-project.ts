@@ -2,9 +2,12 @@
 /**
  * test-new-project.ts — E2E Test for new-project.ts
  *
- * @version 1.2.0
- * @last_updated 2026-09-16
+ * @version 1.3.0
+ * @last_updated 2026-09-20
  *
+ * v1.3.0: --platform 'both' renamed to 'all' and Test 8 now also covers
+ *         --platform codex explicitly and asserts CODEX.md/.codex/ under
+ *         --platform all (all three platforms), matching new-project.ts.
  * v1.2.0: T-20260915-003 — new Test 26 pins the static new-project delivery
  *         derivation (helpers/scaffold-markers.ts deriveNewProjectDelivery)
  *         against the REAL scaffolded tree: the parity harness
@@ -22,7 +25,7 @@
  * Tests the OUTPUT of new-project, not the mechanism inside it.
  *
  * Usage:
- *   bun scripts/test-new-project.ts <TestProjectName> [--variant co-develop] [--platform both|claude|antigravity] [--all-variants]
+ *   bun scripts/test-new-project.ts <TestProjectName> [--variant co-develop] [--platform all|claude|antigravity|codex] [--all-variants]
  *
  * Test coverage:
  *   0.  Script syntax validation (bash -n / powershell parser — runs before project creation)
@@ -67,7 +70,7 @@ const args = process.argv.slice(2);
 // tests/.temp/ per the v1.16.0 canonicalization rules.
 const projectName = args.find(a => !a.startsWith('--')) ?? `auto-${Date.now()}`;
 const variantArg  = (() => { const i = args.indexOf('--variant');  return i !== -1 ? args[i + 1] : 'co-develop'; })();
-const platformArg = (() => { const i = args.indexOf('--platform'); return i !== -1 ? args[i + 1] : 'both'; })();
+const platformArg = (() => { const i = args.indexOf('--platform'); return i !== -1 ? args[i + 1] : 'all'; })();
 // --all-variants: loop the single-variant harness across every templates/co-* variant
 // (T-20260912-004 — the pm.md extends-stub resolution differs per variant stub shape:
 // 8 empty-body stubs, 5 prose-body stubs; every variant must scaffold a full PM agent).
@@ -98,7 +101,7 @@ if (allVariants && import.meta.main) {
 }
 
 if (!projectName) {
-  console.error('Usage: bun scripts/test-new-project.ts <TestProjectName> [--variant co-develop] [--platform both|claude|antigravity] [--all-variants]');
+  console.error('Usage: bun scripts/test-new-project.ts <TestProjectName> [--variant co-develop] [--platform all|claude|antigravity|codex] [--all-variants]');
   if (import.meta.main) {
     process.exit(1);
   }
@@ -342,11 +345,21 @@ try {
     } else if (platformArg === 'antigravity') {
       if (fileExists('CLAUDE.md'))  fail('Test 8', 'CLAUDE.md should be removed for --platform antigravity');
       else                          pass('Test 8 PASSED: CLAUDE.md removed for antigravity platform');
+    } else if (platformArg === 'codex') {
+      const hasCodexMd  = fileExists('CODEX.md');
+      const hasCodexDir = fileExists('.codex');
+      if (!hasCodexMd || !hasCodexDir) fail('Test 8', `codex files expected: CODEX.md=${hasCodexMd} .codex/=${hasCodexDir}`);
+      else                             pass('Test 8 PASSED: CODEX.md and .codex/ present for codex platform');
     } else {
-      const hasClaude = fileExists('CLAUDE.md');
-      const hasGemini = fileExists('GEMINI.md');
-      if (!hasClaude || !hasGemini) fail('Test 8', `Both files expected: CLAUDE.md=${hasClaude} GEMINI.md=${hasGemini}`);
-      else                          pass('Test 8 PASSED: Both CLAUDE.md and GEMINI.md present for platform=both');
+      const hasClaude   = fileExists('CLAUDE.md');
+      const hasGemini   = fileExists('GEMINI.md');
+      const hasCodexMd  = fileExists('CODEX.md');
+      const hasCodexDir = fileExists('.codex');
+      if (!hasClaude || !hasGemini || !hasCodexMd || !hasCodexDir) {
+        fail('Test 8', `All files expected: CLAUDE.md=${hasClaude} GEMINI.md=${hasGemini} CODEX.md=${hasCodexMd} .codex/=${hasCodexDir}`);
+      } else {
+        pass('Test 8 PASSED: CLAUDE.md, GEMINI.md, CODEX.md, and .codex/ all present for platform=all');
+      }
     }
   } catch (e) { fail('Test 8', String(e)); }
 
@@ -704,7 +717,7 @@ try {
       which: 'new-project',
       actualRoot: testDir,
       commonDir: join(process.cwd(), 'templates', 'common'),
-      platform: platformArg as 'claude' | 'antigravity' | 'both' | 'codex',
+      platform: platformArg as 'claude' | 'antigravity' | 'all' | 'codex',
     });
     if (!verdict.ok) {
       const detail = [

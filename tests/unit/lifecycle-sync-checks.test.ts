@@ -9,7 +9,8 @@
  * warned permanently before). Remaining drift is a FAILURE, and the fix hint
  * must never recommend an action that clobbers the intentional state.
  *
- * @version 1.2.0
+ * @version 1.3.0
+ * v1.3.0: new-project record pin 1.21.0 → 1.22.0 (--platform both → all rename).
  * v1.2.0 (T-20260916-002): new-project record pin 1.19.0 → 1.20.0
  *          (provenance fallback alignment version bump).
  * v1.1.0 (T-20260915-009): Check H coverage — compareScriptRecordVersion
@@ -143,7 +144,7 @@ describe('lifecycle-sync-audit Check H (script record version gate, T-20260915-0
   test('the three known script records carry a Version field matching SCRIPTS.md', () => {
     const cases: Array<[string, string]> = [
       ['error-handling', '1.4.0'],
-      ['new-project', '1.21.0'],
+      ['new-project', '1.22.0'],
       ['validate-pm-extends', '0.3.1'],
     ];
     for (const [record, version] of cases) {

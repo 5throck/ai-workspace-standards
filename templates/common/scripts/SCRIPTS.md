@@ -127,7 +127,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `helpers/context-sections.ts` | L0 | 1.5.0 | active | —| —| L0+L1 | —|
 | `helpers/markers.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `helpers/merge-state.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `helpers/scaffold-markers.ts` | L0 | 1.3.0 | active | Shared scaffold marker constants + (marker→source) mapping + delivery-tree derivations + transient test-fixture predicate (T-20260916-001) | —| L0+L1 | —|
+| `helpers/scaffold-markers.ts` | L0 | 1.4.0 | active | Shared scaffold marker constants + (marker→source) mapping + delivery-tree derivations + transient test-fixture predicate (T-20260916-001); PlatformProfile 'both'→'all' rename | —| L0+L1 | —|
 | `helpers/pm-md-parser.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `helpers/variant-governance-rules.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `helpers/registries/variant-type-registry.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
@@ -204,7 +204,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `md-to-ooxml.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `migrate-quality-gates.ts` | L0 | 1.1.0 | active | Convert quality_gates prose entries to decision gates; automate classification (GATE vs INVARIANT vs MANUAL), YAML output, procedure schema updates, and _output-types.yaml enrichment (ADR-0083 P5); decider_agent derived from stage owner_agent, not procedure owner_agent | —| L0+L1 | —|
-| `new-project.ts` | L0 | 1.21.0 | active | —| —| L0 | —|
+| `new-project.ts` | L0 | 1.22.0 | active | `--platform both`→`all` rename, now covers claude+antigravity+codex | —| L0 | —|
 | `remove-project.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `resolve-variants.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
 | `project-to-variant.ts` | L0 | 1.4.0 | active | `--source`, `--target`, `--dry-run`, `--force`, `--overlay-variant`, `--design-doc`, `--threshold-files`, `--threshold-dirs` | —| L0 | —|
@@ -228,14 +228,14 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `tag-template.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `team-builder.ts` | L0 | 1.4.0 | active | —| —| L0+L1 | —|
 | `test-platform-parity.ts` | L0 | 0.2.4 | active | —| —| L0 | —|
-| `test-new-project.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
+| `test-new-project.ts` | L0 | 1.3.0 | active | Test 8 now covers `--platform codex` and asserts CODEX.md/.codex/ under `all` | —| L0 | —|
 | `test-extends-validator.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `test-l3-to-variant-promotion.ts` | L0 | 1.6.0 | active | —| —| L0 | —|
 | `test-runner.ts` | L0 | 1.4.0 | active | `--parallel`, `--sequential`, `--concurrency <n>`, `--timeout <ms>` | —| L0+L1 | —|
 | `translate-readme.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `ticket.ts` | L0 | 1.2.0 | active | `create --not-before`, `list --kind`, `list --ready`, `move done --result` (required, not bypassable by --force) | —| L0 | —|
 | `typecheck.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
-| `upgrade-project.ts` | L0 | 1.33.0 | active | `--variant`, `--platform`, `--dry-run`, `--prune-removed`, `--rollback`, `--yes`, `--skip-context-commonization`, `--force-context-sync` | —| L0 | —|
+| `upgrade-project.ts` | L0 | 1.34.0 | active | `--variant`, `--platform` (claude/antigravity/codex/all — `all` renamed from `both`, now merges CODEX.md too), `--dry-run`, `--prune-removed`, `--rollback`, `--yes`, `--skip-context-commonization`, `--force-context-sync` | —| L0 | —|
 | `variant-feature.ts` | L0 | 1.0.0 | active | `--variant`, `--feature`, `--type` | —| L0 | —|
 | `validate-agents.ts` | L0 | 1.2.1 | active | —| —| L0+L1 | —|
 | `validate-doc-folder.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
