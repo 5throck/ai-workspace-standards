@@ -22,6 +22,7 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 | **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) (L0) → [`templates/common/agents/pm.md`](templates/common/agents/pm.md) (L1) → [`templates/<variant>/agents/pm.md`](templates/co-design/agents/pm.md) (L2) | Medium | Three-level inheritance architecture: L0 (workspace root base) → L1 (common template pure-extends) → L2 (variant YAML overrides). Orchestrates team assembly (Phase 0), design validation (Phase 1-2), and lifecycle finalization (Phase 5). **PM does NOT execute code or documentation directly — all specialist work dispatched through PM.** See [L0→L1→L2 PM Agent Architecture](#l0l1l2-pm-agent-architecture) for details. |
 | Consistency Auditor | [`agents/auditor.md`](agents/auditor.md) | Medium | Workspace-root-only cross-domain consistency auditor; detects structural inconsistencies scripts miss; NOT dispatched in variant projects |
 | **Lifecycle Manager** | [`agents/lifecycle-manager.md`](agents/lifecycle-manager.md) | Medium | **Workspace root only — L0-only agent**. Lifecycle state monitor and governance record keeper for the workspace root (8 domains × 3 layers); core duties include L0->L1 template publishing and L1->L2 explicitly requested skill/script synchronization; syncs governance docs after changes. Lifecycle finalization is handled automatically by `/sync` — PM does NOT need a separate N-1 dispatch step. **NOT available in variant templates** — this agent operates exclusively at workspace root level. |
+| **Skill-Graph Analyst** | [`agents/skill-graph-analyst.md`](agents/skill-graph-analyst.md) | Low | **Workspace root only — L0-only agent**. Fleet skill-graph analytics specialist: runs the weekly consolidation report over root + per-project skill-graph projections (`skill-graph-fleet-report.ts`), triages consolidation/promotion candidates (>= 3-project convergence) and delivery gaps (root skills missing from projects), files tickets. **Triage only — never modifies skills or executes promotions.** See the `skill-graph-analytics` skill for the cadence procedure. |
 
 ### 📐 Design
 
@@ -134,6 +135,7 @@ All specialist agents below are dispatched ONLY through PM:
 | **security-expert** | 6 | "Security review", "Hook configuration", "Secret detection" |
 | **lifecycle-manager** | 5 | "Lifecycle finalization", "Governance record sync", "L0->L1 template publishing", "L1->L2 explicit skill/script sync" — invoked on-demand for governance changes; lifecycle finalization runs automatically via `/sync` (**Workspace root only — L0-only agent, NOT available in variant templates**) |
 | **auditor** | 6 | "Quality verification", "Documentation consistency check", "QA gate required" (Workspace root only) |
+| **skill-graph-analyst** | 6 | "Fleet skill-graph analytics", "skill graph report", "skill convergence triage", "weekly analytics cadence" (Workspace root only — L0-only agent; triage only, tickets for promotion candidates) |
 
 ### L0→L1→L2 PM Agent Architecture
 
@@ -369,6 +371,7 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 | Documentation Writer | `agents/docs-writer.md` | Medium | After design | .md files only |
 | Scaffolding Expert | `agents/scaffolding-expert.md` | Low | Research phase | setup scripts only (after approval) |
 | Security & Git Expert | `agents/security-expert.md` | Medium | Review phase | Hook configs only |
+| Skill-Graph Analyst | `agents/skill-graph-analyst.md` | Low | Weekly analytics cadence | Ticket filing only — `bun scripts/ticket.ts create` (Workspace root only — L0-only agent) |
 
 > **Agent frontmatter specification**: All agent files must include YAML frontmatter as defined in [CONSTITUTION.md §5.1](docs/constitution/05-multi-agent-architecture.md#51-agent-file-format-standard-frontmatter).
 

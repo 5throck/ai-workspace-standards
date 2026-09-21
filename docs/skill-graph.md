@@ -167,6 +167,7 @@
 | `sheet-model` | variant:co-price | — | — | — | — | — |
 | `signal-detector` | variant:co-safety | — | — | — | — | — |
 | `simulate-pipeline` | L0 | — | — | — | — | — |
+| `skill-graph-analytics` | L0 | — | — | context-commonization-review, project-resync (composes_with) | — | — |
 | `skill-lifecycle-manager` | L0 | — | — | script-lifecycle-manager (composes_with) | — | — |
 | `slide-layout-gate` | variant:co-deck | pdf-export | phase4 | pdf-export (composes_with), pdf-export (follows) | slide-html | layout-gate-status |
 | `solution-design` | variant:co-consult | solutions-architect, solutions-architect, technology-specialist, technology-specialist | phase3, phase4 | financial-modeling (follows), stakeholder-alignment (composes_with), technical-feasibility (follows) | — | — |

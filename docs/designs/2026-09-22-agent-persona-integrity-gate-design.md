@@ -38,3 +38,4 @@ project's own sync flow, now enforced by this gate.
 - [x] L0 root `bun scripts/validate-agents.ts` → 0 errors, 0 warnings (8 base agents)
 - [x] co-newbiz `bun scripts/validate-agents.ts` → 0 errors, 0 warnings (41 agents)
 - [x] Negative fixture (dangling extends + body spill + no description) → `extends-dangling`, `body-frontmatter-spill`, `description-missing` all fire; resolving-stub case → warning only
+- [x] Delivery includes `skills/skill-graph-analytics/` (the fleet-sweep skill the registered `skill-graph-fleet-report.ts` references — materialized into the root `skills/` SSOT by the sync pass so the skill's Step-1 procedure is versioned with its script)

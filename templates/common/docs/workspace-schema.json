@@ -41,7 +41,8 @@
     "automation-engineer": "low",
     "scaffolding-expert": "low",
     "lifecycle-manager": "medium",
-    "security-expert": "medium"
+    "security-expert": "medium",
+    "skill-graph-analyst": "low"
   },
   "models": {
     "claude": {

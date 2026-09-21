@@ -3004,6 +3004,16 @@
       "layer": "L0"
     },
     {
+      "id": "skill-graph-analyst",
+      "type": "agent",
+      "layer": "L0"
+    },
+    {
+      "id": "skill-graph-analytics",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
       "id": "skill-lifecycle-manager",
       "type": "skill",
       "layer": "L0"
@@ -18028,6 +18038,29 @@
       "from": "simulate-pipeline",
       "to": "project-to-variant",
       "source": "prose"
+    },
+    {
+      "type": "relates_to",
+      "from": "skill-graph-analytics",
+      "to": "context-commonization-review",
+      "source": "relates_to",
+      "provenance": {
+        "file": "skills/skill-graph-analytics/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "skill-graph-analytics",
+      "to": "project-resync",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "skills/skill-graph-analytics/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     },
     {
       "type": "references",
