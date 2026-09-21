@@ -39,6 +39,10 @@
     {
       "name": "technical-writer",
       "file": "agents/technical-writer.md"
+    },
+    {
+      "name": "i18n-specialist",
+      "file": "agents/i18n-specialist.md"
     }
   ],
   "skills": [
