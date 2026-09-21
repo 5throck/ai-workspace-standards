@@ -2,23 +2,42 @@ schemaVersion: 1
 id: T-20260921-004
 kind: manual
 title: >-
-  handbook-sync-audit owner is a co-deck-only variant agent (handbook-reviewer) - orphan owner in
-  every non-co-deck delivery
+  handbook-sync-audit owner is a co-deck-only variant agent (handbook-reviewer)
+  - orphan owner in every non-co-deck delivery
 inputs:
   source: fleet-rollout-2026-09-21
   evidence: >-
-    templates/common/skills/handbook-sync-audit/SKILL.md frontmatter owner: handbook-reviewer exists
-    only in templates/co-deck/agents/; every other variant delivery warns Orphaned skill (owner:
-    handbook-reviewer not found). The sibling handbook skill already uses owner: pm
-  impact: misleading maintainer signal plus warning noise in 12 of 13 variant deliveries
-  resolution: reassign owner to pm (matching handbook), patch-bump, VERSION_MANIFEST + L1 lockstep
+    templates/common/skills/handbook-sync-audit/SKILL.md frontmatter owner:
+    handbook-reviewer exists only in templates/co-deck/agents/; every other
+    variant delivery warns Orphaned skill (owner: handbook-reviewer not found).
+    The sibling handbook skill already uses owner: pm
+  impact: >-
+    misleading maintainer signal plus warning noise in 12 of 13 variant
+    deliveries
+  resolution: >-
+    reassign owner to pm (matching handbook), patch-bump, VERSION_MANIFEST + L1
+    lockstep
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-21T09:30:00.000Z'
 history:
   - at: '2026-09-21T09:30:00.000Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-21T03:21:11.909Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-21T03:21:11.920Z'
+    from: waiting
+    to: running
+  - at: '2026-09-21T03:21:11.932Z'
+    from: running
+    to: review
+  - at: '2026-09-21T03:21:11.943Z'
+    from: review
+    to: done
+result: >-
+  Implemented and merged in 5throck/ai-workspace-standards#1007 (CHANGELOG
+  2026-09-21 ticket batch entry)
 error: null
