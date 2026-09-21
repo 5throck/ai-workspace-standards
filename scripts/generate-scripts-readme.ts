@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Auto-generates scripts/README.md from scripts/SCRIPTS.md (L0 SSOT)
- * @version 1.0.3
+ * @version 1.0.4
  */
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
@@ -86,7 +86,7 @@ writeFileSync('file.txt', content, 'utf-8');
 \`\`\`
 
 ---
-*Last Updated: ${new Date().toISOString().split('T')[0]}*
+*Last Updated: ${new Date().toLocaleDateString('sv-SE')}*
 `;
 
   const readmeContent = `# Workspace Scripts

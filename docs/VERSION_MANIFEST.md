@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-09-21T17:44:14.101Z
+**Generated**: 2026-09-21T22:55:55.018Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 8
 - **Skills**: 51
-- **Scripts**: 101 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` plus experiment files under `scripts/experiments/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
+- **Scripts**: 102 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` plus experiment files under `scripts/experiments/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
 - **Commands**: 8
 
 ---
@@ -64,7 +64,7 @@
 | meeting-facilitation | 1.4.3 | active | skills/meeting-facilitation/SKILL.md | workspace | meeting, agent discussion, collaborative decision, multi-agent coordination, facilitate meeting | pm |
 | platform-command-lifecycle-manager | 1.0.2 | active | skills/platform-command-lifecycle-manager/SKILL.md | workspace | create platform command, new .claude command, new .gemini command, platform command lifecycle, command parity, propagate command | pm |
 | platform-skill-lifecycle-manager | 1.0.2 | active | skills/platform-skill-lifecycle-manager/SKILL.md | workspace | create platform skill, new .claude skill, new .gemini skill, platform skill version, platform skill lifecycle, update platform skill | pm |
-| project-resync | 1.4.0 | active | skills/project-resync/SKILL.md | workspace | project-resync, resync projects, sync project cycle | pm |
+| project-resync | 1.5.0 | active | skills/project-resync/SKILL.md | workspace | project-resync, resync projects, sync project cycle | pm |
 | project-review | 1.3.0 | active | skills/project-review/SKILL.md | workspace | project review, review project, audit project, quality review | pm |
 | project-to-variant | 1.3.0 | active | skills/project-to-variant/SKILL.md | workspace | convert project to variant, create variant from project, project to template, promote project to variant | scaffolding-expert |
 | promote-variant | 1.4.0 | active | skills/promote-variant/SKILL.md | workspace | promote variant, Phase B, variant promotion, promote to template, create template from prototype | pm |
@@ -103,6 +103,7 @@
 | analyze-git-history.ts | 1.0.2 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.1.0 | scripts/archive-memory.ts | N/A |
 | audit.ts | 2.39.0 | scripts/audit.ts | bun |
+| backport-diff.ts | 1.0.0 | scripts/backport-diff.ts | N/A |
 | bootstrap-stages.ts | 1.0.0 | scripts/bootstrap-stages.ts | fs, js-yaml, path |
 | check-upgrade-coverage.ts | 1.0.0 | scripts/check-upgrade-coverage.ts | N/A |
 | cleanup-completed-md.ts | 1.1.0 | scripts/cleanup-completed-md.ts | N/A |
@@ -120,7 +121,7 @@
 | generate-ide-rules.ts | 1.0.0 | scripts/generate-ide-rules.ts | N/A |
 | generate-l3-readme.ts | 1.0.3 | scripts/generate-l3-readme.ts | fs, path |
 | generate-raci.ts | 1.1.0 | scripts/generate-raci.ts | js-yaml |
-| generate-scripts-readme.ts | 1.0.3 | scripts/generate-scripts-readme.ts | N/A |
+| generate-scripts-readme.ts | 1.0.4 | scripts/generate-scripts-readme.ts | N/A |
 | generate-skill-graph.ts | 1.12.0 | scripts/generate-skill-graph.ts | js-yaml |
 | generate-version-manifest.ts | 1.7.1 | scripts/generate-version-manifest.ts | bun, js-yaml |
 | graph-delta-log.ts | 1.0.0 | scripts/graph-delta-log.ts | N/A |
@@ -135,7 +136,7 @@
 | new-project.ts | 1.24.0 | scripts/new-project.ts | js-yaml |
 | procedure-coverage.ts | 1.0.0 | scripts/procedure-coverage.ts | js-yaml |
 | project-to-variant.ts | 1.4.0 | scripts/project-to-variant.ts | N/A |
-| promote-context-section.ts | 1.0.0 | scripts/promote-context-section.ts | N/A |
+| promote-context-section.ts | 1.1.0 | scripts/promote-context-section.ts | N/A |
 | propagate-to-templates.ts | 2.16.0 | scripts/propagate-to-templates.ts | js-yaml |
 | qa-gate.ts | 1.3.0 | scripts/qa-gate.ts | bun |
 | readme-lifecycle-audit.ts | 1.0.4 | scripts/readme-lifecycle-audit.ts | N/A |
@@ -144,7 +145,7 @@
 | remove-project.ts | 1.0.1 | scripts/remove-project.ts | N/A |
 | render-pdf-deck.ts | 1.0.1 | scripts/render-pdf-deck.ts | N/A |
 | resolve-variants.ts | 1.0.3 | scripts/resolve-variants.ts | fs, js-yaml, path |
-| resync-audit.ts | 1.0.0 | scripts/resync-audit.ts | N/A |
+| resync-audit.ts | 1.1.0 | scripts/resync-audit.ts | N/A |
 | retry-handler.ts | 1.1.0 | scripts/retry-handler.ts | N/A |
 | review-baseline.ts | 1.0.0 | scripts/review-baseline.ts | N/A |
 | setup-github-branch-protection.ts | 1.0.1 | scripts/setup-github-branch-protection.ts | bun |
@@ -170,7 +171,7 @@
 | ticket.ts | 1.2.0 | scripts/ticket.ts | N/A |
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, fs, path |
 | typecheck.ts | 1.1.1 | scripts/typecheck.ts | N/A |
-| upgrade-project.ts | 1.41.0 | scripts/upgrade-project.ts | N/A |
+| upgrade-project.ts | 1.42.0 | scripts/upgrade-project.ts | N/A |
 | validate-agents.ts | 1.2.1 | scripts/validate-agents.ts | N/A |
 | validate-decisions.ts | 1.0.0 | scripts/validate-decisions.ts | js-yaml |
 | validate-doc-folder.ts | 1.1.0 | scripts/validate-doc-folder.ts | fs, path |

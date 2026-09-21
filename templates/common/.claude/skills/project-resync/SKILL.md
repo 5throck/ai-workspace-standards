@@ -1,6 +1,6 @@
 ---
 name: project-resync
-version: 1.4.0
+version: 1.5.0
 description: >
   Full bidirectional sync cycle for Projects/co-* instances: provenance-audit
   uncommitted content, sync each project to its GitHub remote, selectively
@@ -14,7 +14,7 @@ status: active
 scope: common
 l2_propagate: false
 owner: pm
-last_reviewed: 2026-09-12
+last_reviewed: 2026-09-22
 prerequisites: gh CLI authenticated; workspace-root CWD
 relates_to:
   - skill: sync
@@ -65,7 +65,8 @@ Review the per-project verdict tables:
 
 | Verdict | Meaning | Action |
 |---|---|---|
-| STALE-RESIDUE | equals an older revision of the current L0/L1/L2 source | snapshot → discard (tracked: `git checkout --`, untracked: delete) |
+| STALE-RESIDUE | equals a current L0/L1/L2 source, or an older revision corroborated by project mtime older + line-order agreement | snapshot → discard (tracked: `git checkout --`, untracked: delete) |
+| PRESUME-STALE | subset of a source without mtime/order corroboration — possible deliberate reordering or legitimate deletion | human confirm before discard; routes to commit-side review like LOCAL-WORK |
 | LOCAL-WORK | diverges from HEAD and every source; or non-template file | commit candidate (Step 1); feeds backport review (Step 2) |
 | KEEP | unresolvable | human review; default to commit on a side branch if risky |
 
@@ -94,6 +95,9 @@ Diff each project's committed LOCAL-WORK against its variant surface
   for cross-variant assets) — after measuring that the project copy is
   genuinely newer/richer, not just divergent.
 - **Stays-project**: engagement output, domain content, VARIANT-INJECT blocks.
+- Optional aid: `bun scripts/backport-diff.ts --project <co-name> [--base <commit>]`
+  — read-only per-file candidate table (surface / divergence direction /
+  +added/-removed) over the committed range (L0-only).
 - Produce the per-variant judgment report (promoted / stays-project /
   discarded-stale) — it feeds Step 3's PR body and the root CHANGELOG.
 - Validate: `bun scripts/validate-templates.ts`, `bun test` (root).
@@ -131,6 +135,30 @@ A schema promoted without its companion procedure is an incomplete backport and
 MUST be rejected at review. Route `F0`, `MIXED`, `SCHEMA-ONLY`, and any
 `NOT_YET` verdict to the cycle report as human-triage rows. Never auto-write
 into `templates/`. Safety Rule 6 (backport gate) governs this step unchanged.
+
+## Step 2c — Fleet echo check
+
+For each backport-worthy LOCAL-WORK candidate from Step 2, check whether the
+same change (fix, improvement, or gap) echoes across the rest of the fleet:
+
+1. Derive a fixed query per candidate: its distinctive identifiers or strings
+   (symbol names, error messages, config keys — stable tokens that only match
+   the changed code).
+2. Run the query across ALL `Projects/co-*` repos, scoped to the surface the
+   candidate came from (e.g.
+   `grep -rn "<identifier>" Projects/*/skills/ Projects/*/scripts/`).
+3. Record a per-project verdict in the Step 2 judgment report:
+
+| Verdict | Meaning | Action |
+|---|---|---|
+| same-defect-present | the sibling carries the same pre-fix content | row in the cycle report — the fix lands in that project's own next resync |
+| absent | the sibling has no matching content (different lineage, or already resolved) | no action |
+| divergent-implementation | the sibling solves the same problem differently | human-triage row — possible cross-project learning, never merged mechanically |
+
+Report-only: this step never edits sibling projects. ADR-0031 Principle 5
+(`docs/adr/0031-l1-l2-fork-model.md`) forbids automated sibling sync — drift
+REPORTING is the sanctioned direction. Each project adopts its echo fixes
+through its own reviewed resync cycle.
 
 ## Step 3 — Root PR
 
@@ -188,6 +216,7 @@ After Step 5's merges:
 - Steps 1/5: per-project PR URLs + merge states.
 - Step 2: per-variant judgment report.
 - Step 2b: evidence-backport-scan verdict table per project + human-triage rows.
+- Step 2c: fleet echo-check verdict table per backport candidate.
 - Cycle summary: one table — project → synced? / promoted? / upgraded? / final state.
 
 ## Related Skills

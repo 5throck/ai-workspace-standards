@@ -4,6 +4,13 @@
 
 Defines the procedure for when a skill in the production phase requires modification.
 
+> **Project-origin promotions**: this procedure covers updates to skills that
+> already live in the workspace. When a skill originates in a project and is
+> promoted INTO the workspace, follow [ADR-0086](../adr/0086-project-asset-promotion-procedure.md)
+> (Project-Origin Asset Promotion Procedure) instead — its 8-step sequence
+> (select, generalize, harden, register, validate, propagate, deliver back,
+> record) covers the project-to-workflow direction this document does not.
+
 ## When to Use This Procedure
 
 **Trigger**: When a production phase skill needs to be modified

@@ -1,4 +1,14 @@
-// @version 1.5.0
+// @version 1.6.0
+// v1.6.0 (2026-09-22, ADR-0050 Part 3 nested-heading fix): findHeadingSpan() /
+//           removeHeadingSpan() — nesting-aware section extraction and removal for
+//           promote-context-section.ts. The promotion tool previously removed a
+//           promoted section with a regex that stopped at the NEXT `#{2,3}` heading,
+//           so a nested `###` subsection of a promoted `##` section was orphaned in
+//           every variant file and never reached the canonical copy (real incident:
+//           promoting "Scripts" orphaned `### Hybrid Scripting` in 7 variant files,
+//           losing content in co-consult/co-export). A span ends at the next heading
+//           whose level is <= the promoted heading's level (or EOF), and ```/~~~
+//           fences never terminate a span — the same fence awareness as the splitters.
 // v1.5.0 (ADR-0081 fleet sweep / T-20260919-003): spliceCommonContextBlock() —
 //           replaces a project context copy's COMMON-CONTEXT managed block with
 //           the template's, so managed-zone policy content delivers even when
@@ -641,4 +651,92 @@ export function findProjectOnlySections(
     sections.push(section);
   }
   return { sections, wholeFileOwned };
+}
+
+// ============================================================================
+// v1.6.0 — HEADING SPANS: NESTING-AWARE EXTRACTION / REMOVAL
+// (promote-context-section.ts; closes the ADR-0050 Part 3 nested-heading defect)
+// ============================================================================
+
+export interface HeadingSpan {
+  /** Raw heading line, e.g. "## Scripts". */
+  headingLine: string;
+  /** Normalized heading text, e.g. "scripts". */
+  heading: string;
+  /** Heading level: 2 for `##`, 3 for `###`. */
+  level: number;
+  /** Body between the heading and the span end (leading/trailing blanks trimmed). */
+  body: string;
+  /** 0-indexed line of the heading line. */
+  startLine: number;
+  /** 0-indexed line ONE PAST the span's last line (next <=level heading's startLine, or lines.length). */
+  endLineExclusive: number;
+}
+
+/**
+ * Locate a `##`/`###` heading (fence-aware) and return its NESTING-AWARE span:
+ * from the heading line to just before the NEXT heading whose level is <= the
+ * target's (or EOF). Nested deeper headings (e.g. a `###` under a promoted `##`)
+ * stay INSIDE the span — the fix for the ADR-0050 Part 3 defect where the old
+ * next-`#{2,3}` regex orphaned nested subsections in every variant file. Lines
+ * inside ``` / ~~~ fences never count as heading boundaries (v1.1.0 fence rule).
+ * Returns null when no non-fenced heading matches `targetHeading` (normalized).
+ */
+export function findHeadingSpan(content: string, targetHeading: string): HeadingSpan | null {
+  const lines = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+  const fenced = computeFencedLines(lines);
+  const target = normalizeHeading(targetHeading);
+
+  let startLine = -1;
+  let level = 0;
+  for (let i = 0; i < lines.length; i++) {
+    if (fenced[i]) continue;
+    const match = /^(#{2,3})\s+/.exec(lines[i]);
+    if (match && normalizeHeading(lines[i]) === target) {
+      startLine = i;
+      level = match[1].length;
+      break;
+    }
+  }
+  if (startLine === -1) return null;
+
+  let endLineExclusive = lines.length;
+  for (let i = startLine + 1; i < lines.length; i++) {
+    if (fenced[i]) continue;
+    const match = /^(#{2,3})\s+/.exec(lines[i]);
+    if (match && match[1].length <= level) {
+      endLineExclusive = i;
+      break;
+    }
+  }
+
+  return {
+    headingLine: lines[startLine],
+    heading: target,
+    level,
+    body: lines.slice(startLine + 1, endLineExclusive).join('\n').replace(/^\n+|\n+$/g, ''),
+    startLine,
+    endLineExclusive,
+  };
+}
+
+/**
+ * Remove the nesting-aware span of `targetHeading` from `content` (v1.6.0).
+ * Blank-line hygiene at the removal seam: at most one blank line survives between
+ * the content before and after the removed span. Returns the updated content, or
+ * null when the heading is not found (caller decides whether that is fatal).
+ */
+export function removeHeadingSpan(content: string, targetHeading: string): string | null {
+  const span = findHeadingSpan(content, targetHeading);
+  if (!span) return null;
+  const lines = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+  const before = lines.slice(0, span.startLine);
+  const after = lines.slice(span.endLineExclusive);
+  while (
+    before.length > 0 && after.length > 0 &&
+    before[before.length - 1].trim() === '' && after[0].trim() === ''
+  ) {
+    before.pop();
+  }
+  return [...before, ...after].join('\n');
 }

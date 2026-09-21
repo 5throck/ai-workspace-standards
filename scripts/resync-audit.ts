@@ -2,7 +2,7 @@
 /**
  * resync-audit.ts — Provenance audit of uncommitted content in Projects/co-*
  * (project-resync skill Step 0).
- * @version 1.0.0
+ * @version 1.1.0
  *
  * Before any project sync pushes local work to GitHub, this tool answers the
  * diligence question: is each dirty/untracked file CURRENT work worth
@@ -16,6 +16,11 @@
  *      against the workspace source of truth:
  *        - dirty content == L0/L1/L2 source  → STALE-RESIDUE
  *          (an older sync wave; DISCARD + let upgrade re-deliver)
+ *        - subset of a source (older-revision shape) → STALE-RESIDUE only
+ *          with corroboration (project mtime older than source AND
+ *          line-order agreement on the common lines); otherwise
+ *          PRESUME-STALE — human confirm before discard (routes to
+ *          commit-side review like LOCAL-WORK)
  *        - divergent from HEAD and not equal to any source → LOCAL-WORK
  *          (candidate COMMIT; feeds the backport review)
  *        - unresolvable → KEEP (default-safe; human review)
@@ -45,13 +50,13 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSy
 import { join, relative, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 
-const VERSION = "1.0.0";
+const VERSION = "1.1.0";
 
 interface FileRow {
   file: string;
   state: "modified" | "untracked";
   mtime: string;
-  verdict: "STALE-RESIDUE" | "LOCAL-WORK" | "KEEP";
+  verdict: "STALE-RESIDUE" | "PRESUME-STALE" | "LOCAL-WORK" | "KEEP";
   basis: string;
 }
 
@@ -161,6 +166,64 @@ function isOlderRevision(older: string, newer: string): boolean {
   return true;
 }
 
+/**
+ * True when the non-empty lines of `sub` appear in `superStr` in the same
+ * order (order-sensitive subsequence). Corroborates that a subset match is
+ * genuinely an earlier revision rather than a deliberate reordering.
+ */
+export function linesInOrder(sub: string, superStr: string): boolean {
+  const a = sub.split("\n").map((l) => l.trimEnd()).filter((l) => l.trim().length > 0);
+  const b = superStr.split("\n").map((l) => l.trimEnd()).filter((l) => l.trim().length > 0);
+  let i = 0;
+  for (const line of b) {
+    if (i < a.length && line === a[i]) i++;
+  }
+  return i === a.length;
+}
+
+/** True when `candidate`'s mtime is strictly older than `reference`'s. */
+function mtimeOlder(candidate: string, reference: string): boolean {
+  try {
+    return statSync(candidate).mtimeMs < statSync(reference).mtimeMs;
+  } catch {
+    return false; // vanished mid-audit → no corroboration
+  }
+}
+
+/**
+ * Subset-only stale classification (isOlderRevision true but not equal).
+ * Since v1.1.0, order-insensitive line containment alone no longer discards:
+ * it misclassifies deliberate reorderings and legitimate deletions as "older
+ * revision". STALE-RESIDUE requires corroborating evidence — project mtime
+ * older than the source mtime AND line-order agreement on the common lines.
+ * Without it → PRESUME-STALE: human confirm before discard; routes to the
+ * commit-side review like LOCAL-WORK (never auto-discarded, never snapshotted
+ * as a discard candidate).
+ */
+export function corroboratedStale(
+  dirtyPath: string,
+  src: string,
+  dirty: string,
+  srcContent: string,
+): { verdict: "STALE-RESIDUE" | "PRESUME-STALE"; basis: string } {
+  const orderOk = linesInOrder(dirty, srcContent);
+  const mtimeOk = mtimeOlder(dirtyPath, src);
+  if (orderOk && mtimeOk) {
+    const added = srcContent.split("\n").length - dirty.split("\n").length;
+    return {
+      verdict: "STALE-RESIDUE",
+      basis: `older revision of ${src} corroborated (mtime older, line order matches; source adds ${added} line(s))`,
+    };
+  }
+  const why = [orderOk ? null : "line order differs", mtimeOk ? null : "mtime newer"]
+    .filter(Boolean)
+    .join(" + ");
+  return {
+    verdict: "PRESUME-STALE",
+    basis: `subset of ${src} without corroboration (${why}) — human confirm before discard`,
+  };
+}
+
 function classify(projectPath: string, relFile: string, state: "modified" | "untracked"): FileRow {
   const abs = join(projectPath, relFile);
   let mtime = "";
@@ -192,8 +255,9 @@ function classify(projectPath: string, relFile: string, state: "modified" | "unt
           return row;
         }
         if (isOlderRevision(dirty, srcContent)) {
-          row.verdict = "STALE-RESIDUE";
-          row.basis = `older revision of ${src} (source adds ${srcContent.split("\n").length - dirty.split("\n").length} line(s))`;
+          const c = corroboratedStale(abs, src, dirty, srcContent);
+          row.verdict = c.verdict;
+          row.basis = c.basis;
           return row;
         }
       }
@@ -219,8 +283,9 @@ function classify(projectPath: string, relFile: string, state: "modified" | "unt
           return row;
         }
         if (isOlderRevision(dirty, srcContent)) {
-          row.verdict = "STALE-RESIDUE";
-          row.basis = `older revision of ${src} (untracked)`;
+          const c = corroboratedStale(abs, src, dirty, srcContent);
+          row.verdict = c.verdict;
+          row.basis = c.basis;
           return row;
         }
       }
@@ -280,7 +345,7 @@ function markdownReport(reports: ProjectReport[]): string {
   const lines: string[] = [
     `# resync-audit report — ${new Date().toISOString().slice(0, 10)}`,
     "",
-    `Verdicts: STALE-RESIDUE = discard (upgrade re-delivers) · LOCAL-WORK = commit candidate · KEEP = default-safe.`,
+    `Verdicts: STALE-RESIDUE = discard (upgrade re-delivers) · PRESUME-STALE = human confirm before discard (subset match without mtime/order corroboration) · LOCAL-WORK = commit candidate · KEEP = default-safe.`,
     "",
   ];
   for (const p of reports) {
