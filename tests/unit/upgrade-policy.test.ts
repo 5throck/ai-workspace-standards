@@ -63,10 +63,12 @@ describe('upgrade-policy resolveClaim — dedicated passes keep their paths', ()
   test('HASH_SYNC for platform commands', () => {
     expect(resolveClaim('.claude/commands/sync.md', VARIANT)).toEqual({ policy: 'HASH_SYNC', pass: 'COMMANDS_SYNC' });
 
-    // ADR-0077 W4: codex platform mirrors claim TEMPLATE TREE SYNC *before* the blanket
+    // ADR-0077 W4: codex platform mirrors must be claimed BEFORE the blanket
     // .codex/** ADD_IF_MISSING rule — otherwise fleet mirrors never receive updates.
-    expect(resolveClaim('.codex/skills/demo-skill/SKILL.md', VARIANT)).toEqual({ policy: 'SYNC', pass: TEMPLATE_TREE_SYNC_PASS });
-    expect(resolveClaim('.codex/prompts/sync.md', VARIANT)).toEqual({ policy: 'SYNC', pass: TEMPLATE_TREE_SYNC_PASS });
+    // Since T-20260921-009 (ADR-0085 D2) they ride the sync-skills mirror pass like
+    // .claude/.gemini/.agents so l2_propagate:false skills are not re-delivered.
+    expect(resolveClaim('.codex/skills/demo-skill/SKILL.md', VARIANT)).toEqual({ policy: 'SYNC', pass: 'sync-skills.ts (platform mirror)' });
+    expect(resolveClaim('.codex/prompts/sync.md', VARIANT)).toEqual({ policy: 'SYNC', pass: 'sync-skills.ts (platform mirror)' });
     // per-project Codex config stays seed-only
     expect(resolveClaim('.codex/config.toml', VARIANT)).toEqual({ policy: 'ADD_IF_MISSING', pass: TEMPLATE_TREE_SYNC_PASS });
     expect(resolveClaim('.gemini/commands/memlog.md', VARIANT)).toEqual({ policy: 'HASH_SYNC', pass: 'COMMANDS_SYNC' });

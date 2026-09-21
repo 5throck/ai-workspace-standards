@@ -50,6 +50,23 @@ equal-version drift) are resolved in ADR-0085 rather than deferred.
 - **T-019** drift data remediated earlier this session (38 PM rows); standing
   validator re-filed as T-20260921-020.
 
+## 2b. CI alignment + claim-order fix (unit-suite follow-up)
+
+The CI unit suite (`tests/unit/`) caught one real defect and pinned the new
+behaviors:
+
+- **Claim-order fix (`scripts/lib/upgrade-policy.ts` 1.10.0 → 1.11.0)**: the T-007
+  reorder accidentally placed the platform-mirror pass group AFTER the blanket
+  `.codex/**` ADD_IF_MISSING rule, so `.codex/skills|prompts` were swallowed
+  and fleet mirrors would never receive updates (the graft fleet-gap class the
+  pass comments warn about). The mirror group now sits back ABOVE the blanket
+  rule; `tests/unit/upgrade-policy.test.ts` pins the new claim for both paths.
+- Unit fixtures updated to pin the intended behaviors: `generate-variant`
+  creates all five skill roots (claude/gemini/agents/codex + top-level);
+  `memory/MEMORY.md` is seeded by new-project (derivation + fixture trees);
+  DRIFT output carries the `(preserved)` policy verb; upgrade-project
+  lifecycle fixture 1.5.0 → 1.5.1.
+
 ## 3. Acceptance criteria
 
 1. `review-baseline.ts` 6/6 green; `check-upgrade-coverage.ts --strict` clean.

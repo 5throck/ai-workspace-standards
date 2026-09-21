@@ -1,4 +1,4 @@
-// @version 1.10.0
+// @version 1.11.0
 // v1.10.0 (2026-09-21, rollout hardening): isDeliveredDiff() — a changed-file list
 //         is fully explained by a recorded upgrade delivery (delivered files ∪
 //         pipeline artifacts) so dev-sync step 3.9 can auto-apply E5 (sync-only)
@@ -240,20 +240,20 @@ export function resolveClaim(relPath: string, variant = ''): UpgradeClaim {
   // by design, C-CM-05 exception), so the post-upgrade sync-skills.ts run can never deliver
   // it — the TEMPLATE TREE SYNC pass must claim it explicitly or the fleet never receives it.
   if (underDir(rel, '.claude/skills/graft')) return { policy: 'SYNC', pass: TEMPLATE_TREE_SYNC_PASS };
-  // Codex project config is per-project by nature (project MCP servers + codex hooks, e.g.
-  // co-abap/co-safety): seed add-if-missing only, never overwrite an existing file (ADR-0076 D4).
-  if (underDir(rel, '.codex')) return { policy: 'ADD_IF_MISSING', pass: TEMPLATE_TREE_SYNC_PASS };
-
   // Platform skill mirrors are distributed by the post-upgrade sync-skills.ts run, not file
   // passes. Codex mirrors (ADR-0077 W1/W4) joined them in the 2026-09-21 review (C-1): the
   // former dedicated TEMPLATE TREE SYNC claim re-delivered l2_propagate:false skills from
-  // the L1 .codex mirror into projects. Ordering still matters — these must stay claimed
-  // BEFORE the blanket `.codex/**` rule above, or the blanket ADD_IF_MISSING swallows the
-  // mirrors and fleet projects never receive skill/prompt updates (graft fleet-gap class).
+  // the L1 .codex mirror into projects. This group MUST stay ABOVE the blanket `.codex/**`
+  // rule below, or the blanket ADD_IF_MISSING swallows the mirrors and fleet projects
+  // never receive skill/prompt updates (graft fleet-gap class).
   if (underDir(rel, '.claude/skills') || underDir(rel, '.gemini/skills') || underDir(rel, '.agents/skills')
     || underDir(rel, '.codex/skills') || underDir(rel, '.codex/prompts')) {
     return { policy: 'SYNC', pass: 'sync-skills.ts (platform mirror)' };
   }
+  // Codex project config is per-project by nature (project MCP servers + codex hooks, e.g.
+  // co-abap/co-safety): seed add-if-missing only, never overwrite an existing file (ADR-0076 D4).
+  if (underDir(rel, '.codex')) return { policy: 'ADD_IF_MISSING', pass: TEMPLATE_TREE_SYNC_PASS };
+
   // Registration pointers + platform settings extras: default sync (static today, format may evolve)
   if (underDir(rel, '.claude') || underDir(rel, '.gemini') || underDir(rel, '.agents')) {
     return { policy: 'SYNC', pass: TEMPLATE_TREE_SYNC_PASS };

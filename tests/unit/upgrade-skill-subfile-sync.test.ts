@@ -113,7 +113,7 @@ describe('upgrade-project.ts common-skills sub-file delivery', () => {
       expect(
         readFileSync(join(tmp, 'skills', 'handbook', 'references', 'QUALITY_CHECKLIST.md'), 'utf-8')
       ).toContain('Locally adapted checklist');
-      expect(out).toContain('DRIFT skills/handbook/references/QUALITY_CHECKLIST.md');
+      expect(out).toContain('DRIFT (preserved) skills/handbook/references/QUALITY_CHECKLIST.md');
       expect(out).toContain('left untouched');
     } finally {
       rmSync(tmp, { recursive: true, force: true });

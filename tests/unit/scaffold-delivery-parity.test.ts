@@ -292,7 +292,7 @@ describe('synthetic-tree derivations (H13)', () => {
             expect(set.has('docs/adr/0001-x.md')).toBe(false);  // L1-only dir
             expect(set.has('docs/_examples/x.md')).toBe(false);
             expect(set.has('docs/variant.context.template.md')).toBe(false); // cleanup
-            expect(set.has('memory/MEMORY.md')).toBe(false);    // memory cleared
+            expect(set.has('memory/MEMORY.md')).toBe(true);   // memory cleared, then the M-13 seed writes the canonical empty index
             expect(set.has('memory/2026-01-01.md')).toBe(false);
             expect(set.has('CODEX.md')).toBe(false);            // platform both removes
             expect(set.has('docs/skill-graph.json')).toBe(true); // delivered (regenerated later)
@@ -336,17 +336,20 @@ describe('verifyActualTreeMatchesDerivation (H13 E2E pinning helper)', () => {
         const workspaceRoot = mkdtempSync(join(tmpdir(), 'actual-tree-'));
         const commonDir = join(workspaceRoot, 'templates', 'common');
         const actualRoot = join(workspaceRoot, 'project');
-        for (const rel of ['AGENTS.md', 'CHANGELOG.md', 'docs/_common/playbook.md', 'skills/zzz-fake/SKILL.md']) {
+        for (const rel of ['AGENTS.md', 'CHANGELOG.md', 'docs/_common/playbook.md', 'skills/zzz-fake/SKILL.md', 'memory/MEMORY.md']) {
             const abs = join(commonDir, rel);
             mkdirSync(join(abs, '..'), { recursive: true });
             writeFileSync(abs, 'x\n');
         }
         // Actual scaffold: has AGENTS.md + CHANGELOG.md + flattened docs/playbook.md,
         // MISSING the skills tree. bun.lock is a post-delivery artifact — ignored.
+        // memory/MEMORY.md is present: the M-13 seed step always writes it (2026-09-21).
         mkdirSync(join(actualRoot, 'docs'), { recursive: true });
+        mkdirSync(join(actualRoot, 'memory'), { recursive: true });
         writeFileSync(join(actualRoot, 'AGENTS.md'), 'x\n');
         writeFileSync(join(actualRoot, 'CHANGELOG.md'), 'x\n');
         writeFileSync(join(actualRoot, 'docs', 'playbook.md'), 'x\n');
+        writeFileSync(join(actualRoot, 'memory', 'MEMORY.md'), 'x\n');
         writeFileSync(join(actualRoot, 'bun.lock'), '{}');
         try {
             const verdict = verifyActualTreeMatchesDerivation({
