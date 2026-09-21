@@ -147,3 +147,13 @@ Verification checklist (D6, in order):
 ## Open Questions
 
 - None blocking implementation. For the record: `co-architect`'s exact upgrade path (missing variant template → must self-declare `commonOnlySync` like co-newbiz or be flagged) is verified at batch run time per D4, not a design question.
+
+---
+
+## Addendum (2026-09-22) — W2 HARVEST: variant-only lines are reported, not silently deleted
+
+**NG1/NG2 revised (ticket T-20260922-001 follow-up; behavior-additive, `upgrade-project.ts` v1.42.0).** Removal is still automatic and unchanged — the W2 pass still removes exactly the near-duplicate sections this design already removed, and mixed/partial-overlap sections are still never auto-edited. What changes is visibility: for each REMOVE-range section, the pass now computes the **variant-only lines** (set difference on trimmed non-empty lines: present in the project section, absent from the matched common section) and reports them as **backport candidates** in a `W2 HARVEST — backport candidates` output block plus a run-summary count.
+
+Rationale: the original NG1 ("only removes near-duplicates; never migrates content anywhere") meant silent deletion was the only alternative to auto-migration. Between "delete silently" and "auto-migrate" there is a third option this addendum adopts — **harvest and report**, leaving the migration decision human-owned. The harvest is informational and non-blocking; no auto-surgery is introduced (NG2's substance stands).
+
+Known limitation (unchanged from the original design): W2 still has no automatic follow-up — acting on a backport candidate is a manual Context Commonization Review decision (ADR-0050 Part 3).

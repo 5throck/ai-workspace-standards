@@ -3,9 +3,9 @@
 ## Metadata
 - **Skill**: project-resync
 - **Status**: active
-- **Version**: 1.4.0
+- **Version**: 1.5.0
 - **Created**: 2026-09-06
-- **Last Updated**: 2026-09-19 (Version 1.3.1 → 1.4.0 adds Step 2b Evidence plane review, running `scripts/evidence-backport-scan.ts` per design §4.8 / ADR-0084 Decision 6; previous: 2026-09-12 removed stale co-develop master-branch exception after default branch rename)
+- **Last Updated**: 2026-09-22 (Version 1.4.0 → 1.5.0 adds Step 2c fleet echo check — report-only cross-project drift reporting per ADR-0031 Principle 5 — plus Step 0 PRESUME-STALE verdict from resync-audit.ts v1.1.0 and the `scripts/backport-diff.ts` v1.0.0 Step 2 support tool; previous: 2026-09-19 Version 1.3.1 → 1.4.0 adds Step 2b Evidence plane review, running `scripts/evidence-backport-scan.ts` per design §4.8 / ADR-0084 Decision 6)
 
 ## Description
 Whole-fleet bidirectional sync cycle for Projects/co-*: provenance audit
@@ -17,6 +17,7 @@ upgrade-project per project, and upgrade PR landing. Operator-level skill
 (workspace root); `l2_propagate: false`.
 
 ## Changelog
+- 2026-09-22: 1.5.0 — added Step 2c fleet echo check (grep-based sibling drift reporting, report-only per ADR-0031 Principle 5); Step 0 verdict table gains PRESUME-STALE (resync-audit.ts v1.1.0 mtime/order corroboration buffer); Step 2 documents the `scripts/backport-diff.ts` v1.0.0 support tool
 - 2026-09-12: 1.3.1 — removed stale co-develop master branch exception; PR base must always be the repository default branch
 - 2026-09-07: 1.2.0 — added Step 4 proof-check (commit `9d187b5a`)
 - 2026-09-06: 1.1.0 — added Step 6 (fleet branch cleanup + root final sync + final state table) from first-cycle lessons

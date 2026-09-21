@@ -87,18 +87,19 @@ before re-running without `--dry-run`. The script:
 - Removes the section from each listed variant's `templates/<variant>/docs/<variant>.context.md`
 - Does **not** decide anything and does **not** touch already-scaffolded projects (see step 4)
 
-**⚠️ Known defect — nested `###` subsections are silently dropped, not promoted.** The
-removal regex stops at the *next* `#{2,3}` heading, so if the promoted `##` section has a
-nested `###` subsection, that subsection is excluded from both the removal (left behind as an
-orphaned, parent-less duplicate in the variant file) *and* the canonical content copied into
-`docs/context.md` (never appears there either) — real content loss if no other copy of that
-subsection exists elsewhere in the file. Hit in practice promoting "Scripts" (`### Hybrid
-Scripting` nested underneath): 7 variant files were left with an orphaned duplicate, and
-`co-consult`/`co-export` genuinely lost the content since neither had a second copy elsewhere.
-**Before running without `--dry-run`, check whether the candidate section (per `audit.ts`'s
-output) has a nested `###` subsection** — if so, verify after promotion that the subsection
-landed in `docs/context.md` and manually add it if not, then manually remove any orphaned
-leftover from each variant file. The tool itself is not yet fixed for this case.
+**Fixed 2026-09-22 — nested `###` subsections are no longer dropped.** Earlier versions
+of the tool removed the promoted section with a regex that stopped at the *next* `#{2,3}`
+heading, so if the promoted `##` section had a nested `###` subsection, that subsection was
+excluded from both the removal (left behind as an orphaned, parent-less duplicate in the
+variant file) *and* the canonical content copied into `docs/context.md` (never appeared
+there either) — real content loss if no other copy of that subsection existed elsewhere in
+the file. Hit in practice promoting "Scripts" (`### Hybrid Scripting` nested underneath):
+7 variant files were left with an orphaned duplicate, and `co-consult`/`co-export`
+genuinely lost the content since neither had a second copy elsewhere. Fixed in
+`promote-context-section.ts` v1.1.0 (nesting-aware spans, `helpers/context-sections.ts`
+v1.6.0): a promoted `##` section now carries its `###` children into `docs/context.md` AND
+removes them from every variant file; fenced `#` lines never terminate a section. The
+dry-run preview notes when a candidate section includes nested subsections.
 
 ### 4. Handle already-scaffolded projects
 

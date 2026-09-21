@@ -7,12 +7,28 @@ title: >-
   contract-skill delivery exposed the gap; fleet resync needed a manual backfill
   across 11 projects) and must not emit quoted date cells
 priority: high
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-21T15:54:37.948Z'
 history:
   - at: '2026-09-21T15:54:37.948Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-21T17:44:59.066Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-21T17:44:59.086Z'
+    from: waiting
+    to: running
+  - at: '2026-09-21T17:44:59.098Z'
+    from: running
+    to: review
+  - at: '2026-09-21T20:21:53.803Z'
+    from: review
+    to: done
+result: >-
+  Landed via #1012: SKILLS_REGISTRY_RECONCILE adds rows for newly delivered
+  skills (helpers/skills-registry.ts shape-based parser;
+  Registry/duplicated-heading/category formats) and never emits quoted date
+  cells; upgrade-project 1.41.0; 13 unit tests
 error: null

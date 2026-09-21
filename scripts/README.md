@@ -9,11 +9,23 @@
 
 #### `resync-audit.ts`
 **Purpose**: Provenance audit of uncommitted content in Projects/co-* (project-resync skill Step 0).
-Classifies dirty/untracked files as STALE-RESIDUE (older revision of current L0/L1/L2 source —
-discard, upgrade re-delivers), LOCAL-WORK (commit candidate; feeds backport review), or KEEP
-(default-safe). Emits markdown/JSON verdict tables; optional local snapshot tarball of discard
-candidates. Read-only — never modifies the tree, never pushes.
+Classifies dirty/untracked files as STALE-RESIDUE (equals a current L0/L1/L2 source, or an older
+revision corroborated by project mtime older + line-order agreement — discard, upgrade re-delivers),
+PRESUME-STALE (subset match without corroboration — possible deliberate reordering or legitimate
+deletion; human confirm before discard, routes to commit-side review), LOCAL-WORK (commit candidate;
+feeds backport review), or KEEP (default-safe). Emits markdown/JSON verdict tables; optional local
+snapshot tarball of discard candidates. Read-only — never modifies the tree, never pushes.
 **Usage**: `bun scripts/resync-audit.ts [--project <path>]... [--json] [--snapshot-dir <dir>]`
+**Runs automatically**: never automatic — operator-invoked via the `project-resync` skill
+
+#### `backport-diff.ts`
+**Purpose**: Read-only 5-surface backport candidate differ for a project's committed LOCAL-WORK
+(project-resync skill Step 2 support). Diffs `--base..HEAD` over the project's files and maps each
+changed file to its best-matching template source (variant → common → L0) per the 5-surface method
+of docs/designs/2026-08-28-project-template-backport-design.md. Emits a candidate table: path |
+surface | divergence direction (project-ahead / template-ahead / both-changed / in-sync /
+project-only) | +added/-removed. L0-only — reads Projects/; no L1 mirror. Never writes anywhere.
+**Usage**: `bun scripts/backport-diff.ts --project <co-name> [--surfaces all|skills|scripts|helpers|context|agents] [--base <commit>] [--json]`
 **Runs automatically**: never automatic — operator-invoked via the `project-resync` skill
 
 #### `audit.ts`
@@ -357,4 +369,4 @@ writeFileSync('file.txt', content, 'utf-8');
 ```
 
 ---
-*Last Updated: 2026-09-21*
+*Last Updated: 2026-09-22*

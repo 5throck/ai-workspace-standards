@@ -1,5 +1,13 @@
 #!/usr/bin/env bun
-// @version 1.41.0
+// @version 1.42.0
+// v1.42.0 (2026-09-22, T-20260922-001 follow-up): W2 HARVEST in CONTEXT_COMMONIZATION —
+//           lines UNIQUE to the variant copy inside a removed near-duplicate section are
+//           now computed (trimmed non-empty line set difference vs the matched common
+//           section) and reported as backport candidates ("W2 HARVEST — backport
+//           candidates" block + summary count) instead of being silently deleted with
+//           the section. Informational only — the removal itself is unchanged
+//           (behavior-additive; design NG1/NG2 revised, see
+//           docs/designs/2026-09-10-context-purification-design.md addendum).
 // v1.41.0 (2026-09-21, T-20260922-001): SKILLS_REGISTRY_RECONCILE now ADDS rows for
 //           newly delivered skills (previously skipped — T-007 contract-skill delivery
 //           needed a manual backfill across 11 projects) via helpers/skills-registry.ts
@@ -332,6 +340,7 @@ import {
   findProjectOnlySections,
   spliceCommonContextBlock,
   classifyCommonizationSection,
+  getContentLines,
   W2_REMOVE_THRESHOLD,
   W2_REVIEW_FLOOR,
 } from './helpers/context-sections.ts';
@@ -970,6 +979,7 @@ function isLocallyModified(filePath: string): boolean {
 
 let lockedChanged = 0, mergeChanged = 0, preserveListed = 0, syncChanged = 0;
 let treeChanged = 0;
+let w2HarvestLines = 0; // v1.42.0 — variant-only lines found inside W2-removed sections
 
 /**
  * Extract every `'''...'''` (or `'...'`) string literal from a named TOML array
@@ -1187,6 +1197,11 @@ if (skipContextCommonization) {
     // contains managed-zone content are never auto-removed — deleting them would
     // eat engine-managed blocks; they downgrade to REVIEW.
     const removalRanges: Array<{ start: number; end: number; heading: string; similarity: number; matched: string | null }> = [];
+    // v1.42.0 (T-20260922-001 follow-up): W2 HARVEST — variant-only lines inside
+    // sections the pass removes. Set difference on trimmed non-empty lines vs the
+    // matched common section; reported as backport candidates instead of being
+    // silently deleted. Informational only — the removal still happens.
+    const harvest: Array<{ heading: string; matched: string | null; lines: string[] }> = [];
     for (const { section, headingInManagedZone, bodyContainedManagedZone, startLine, endLineExclusive } of sections) {
       if (headingInManagedZone) continue;
       const verdict = classifyCommonizationSection(section, commonSections, {
@@ -1198,6 +1213,10 @@ if (skipContextCommonization) {
           console.log(`  REVIEW (manual commonization): ${section.heading} (overlap ${verdict.maxSimilarity.toFixed(2)} — kept: section contains managed COMMON-*/VARIANT-INJECT content)`);
         } else {
           removalRanges.push({ start: startLine, end: endLineExclusive, heading: section.heading, similarity: verdict.maxSimilarity, matched: verdict.matchedCommonHeading });
+          const matchedCommon = commonSections.find(s => s.heading === verdict.matchedCommonHeading);
+          const commonLineSet = matchedCommon ? getContentLines(matchedCommon.body) : new Set<string>();
+          const variantOnly = [...getContentLines(section.body)].filter(l => !commonLineSet.has(l));
+          if (variantOnly.length > 0) harvest.push({ heading: section.heading, matched: verdict.matchedCommonHeading, lines: variantOnly });
         }
       } else if (verdict.verdict === 'review') {
         console.log(`  REVIEW (manual commonization): ${section.heading} (overlap ${verdict.maxSimilarity.toFixed(2)})`);
@@ -1226,6 +1245,19 @@ if (skipContextCommonization) {
       if (!dryRun) writeFileSync(variantContextPath, mergedContent);
       console.log(`  ${dryTag}WROTE: docs/${variant}.context.md (commonization)`);
       syncChanged++;
+    }
+
+    // v1.42.0 W2 HARVEST report — informational, never blocks the removal.
+    if (harvest.length > 0) {
+      console.log('');
+      console.log('  W2 HARVEST — backport candidates (variant-only lines inside removed sections):');
+      for (const h of harvest) {
+        console.log(`    HARVEST docs/${variant}.context.md ## ${h.heading} — ${h.lines.length} line(s) not in common ## ${h.matched}`);
+        for (const sample of h.lines.slice(0, 3)) console.log(`      - ${sample}`);
+        if (h.lines.length > 3) console.log(`      … and ${h.lines.length - 3} more`);
+        w2HarvestLines += h.lines.length;
+      }
+      console.log('    Genuinely unique lines belong back in the common template or a variant context file — review manually (no auto-migration, design NG1/NG2).');
     }
   }
 }
@@ -2886,6 +2918,7 @@ console.log(`  Merge files processed: ${mergeChanged}`);
 console.log(`  Sync files updated   : ${syncChanged}`);
 console.log(`  Tree-sync delivered  : ${treeChanged}`);
 console.log(`  Preserve files listed: ${preserveListed}`);
+console.log(`  W2 harvest candidates: ${w2HarvestLines} variant-only line(s) (informational — see W2 HARVEST above)`);
 console.log(`  Country skills pruned: ${countryPrunedSkills}${dryRun ? ' (dry-run count)' : ''}`);
 if (pruneRemoved) console.log(`  Files pruned         : ${prunedCount}`);
 console.log(`  Security checks      : ${securityPass ? 'PASSED' : 'FAILED (see above)'}`);

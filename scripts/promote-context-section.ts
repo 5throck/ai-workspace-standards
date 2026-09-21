@@ -1,5 +1,15 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.1.0
+// v1.1.0 (2026-09-22, ADR-0050 Part 3 nested-heading fix): section extraction and
+//           removal are now NESTING-AWARE via findHeadingSpan/removeHeadingSpan
+//           (helpers/context-sections.ts v1.6.0). The old removal regex stopped at
+//           the next `#{2,3}` heading, so a nested `###` subsection of a promoted
+//           `##` section was orphaned in every variant file and never reached the
+//           canonical copy (real incident: promoting "Scripts" orphaned
+//           `### Hybrid Scripting` in 7 variant files; co-consult/co-export lost
+//           the content). A promoted `##` section now carries its `###` children
+//           into docs/context.md AND removes them from the variant files; fenced
+//           `#` lines never terminate a section.
 // promote-context-section.ts — Promote a section duplicated across several variants'
 // docs/<variant>.context.md into the shared templates/common/docs/context.md (ADR-0050
 // Part 3). Executes the decision half of the Context Commonization Review process;
@@ -21,7 +31,7 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { splitIntoSections, normalizeHeading, computeLineOverlapSimilarity, getContentLines } from './helpers/context-sections.ts';
+import { splitIntoSections, normalizeHeading, computeLineOverlapSimilarity, getContentLines, findHeadingSpan, removeHeadingSpan } from './helpers/context-sections.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -83,9 +93,11 @@ for (const variant of args.variants) {
   const filePath = path.join(TEMPLATES_DIR, variant, 'docs', `${variant}.context.md`);
   if (!fs.existsSync(filePath)) fail(`No such file: ${path.relative(WORKSPACE_ROOT, filePath)} (is "${variant}" a valid templates/co-* variant?)`);
   const fullContent = fs.readFileSync(filePath, 'utf8');
-  const section = splitIntoSections(fullContent).find(s => s.heading === targetHeading);
-  if (!section) fail(`Heading "${args.heading}" not found in ${path.relative(WORKSPACE_ROOT, filePath)}. Run 'bun scripts/audit.ts' to see current candidate headings.`);
-  found.push({ variant, filePath, headingLine: section.headingLine, body: section.body, fullContent });
+  // v1.1.0: nesting-aware span — a promoted `##` section includes its nested
+  // `###` subsections in both the canonical copy and the removal.
+  const span = findHeadingSpan(fullContent, targetHeading);
+  if (!span) fail(`Heading "${args.heading}" not found in ${path.relative(WORKSPACE_ROOT, filePath)}. Run 'bun scripts/audit.ts' to see current candidate headings.`);
+  found.push({ variant, filePath, headingLine: span.headingLine, body: span.body, fullContent });
 }
 
 // ── Pick canonical content, show what will happen ───────────────────────────────
@@ -100,6 +112,7 @@ for (const f of found) {
   const sim = f === canonical ? 1 : computeLineOverlapSimilarity(canonical.body, f.body);
   const label = f === canonical ? '(canonical)' : `(${(sim * 100).toFixed(1)}% overlap with canonical)`;
   console.log(`--- ${f.variant} ${label} ---`);
+  if (/^###\s+/m.test(f.body)) console.log('   (includes nested ### subsection(s) — they are promoted and removed together)');
   console.log(f.body.split('\n').slice(0, 8).join('\n'));
   if (f.body.split('\n').length > 8) console.log('    …');
   console.log('');
@@ -164,10 +177,12 @@ if (!args.dryRun) fs.writeFileSync(COMMON_CONTEXT_MD, newCommonContent, 'utf8');
 console.log(`${dryTag}WROTE: templates/common/docs/context.md (inserted after "${args.afterHeading ?? 'Lifecycle Management'}")`);
 
 // ── Remove the section from each variant file ────────────────────────────────────
+// v1.1.0: nesting-aware removal (removeHeadingSpan) — the span ends at the next
+// heading whose level is <= the promoted heading's level, so nested `###`
+// subsections are removed WITH their parent (fenced `#` lines never terminate).
 for (const f of found) {
-  const escaped = f.headingLine.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const sectionRegex = new RegExp(`\\n?${escaped}\\n[\\s\\S]*?(?=\\n#{2,3}\\s|$)`);
-  const updated = f.fullContent.replace(sectionRegex, '\n');
+  const updated = removeHeadingSpan(f.fullContent, targetHeading);
+  if (updated === null) fail(`Could not locate "${args.heading}" for removal in ${path.relative(WORKSPACE_ROOT, f.filePath)} (matched earlier — file changed during the run?)`);
   if (!args.dryRun) fs.writeFileSync(f.filePath, updated, 'utf8');
   console.log(`${dryTag}REMOVED: "${args.heading}" section from ${path.relative(WORKSPACE_ROOT, f.filePath)}`);
 }
