@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-09-21T23:12:18.571Z
+**Generated**: 2026-09-21T23:55:38.606Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 8
 - **Skills**: 51
-- **Scripts**: 102 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` plus experiment files under `scripts/experiments/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
+- **Scripts**: 103 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` plus experiment files under `scripts/experiments/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
 - **Commands**: 8
 
 ---
@@ -150,6 +150,7 @@
 | review-baseline.ts | 1.0.0 | scripts/review-baseline.ts | N/A |
 | setup-github-branch-protection.ts | 1.0.1 | scripts/setup-github-branch-protection.ts | bun |
 | skill-dependency-analysis.ts | 1.0.2 | scripts/skill-dependency-analysis.ts | N/A |
+| skill-graph-fleet-report.ts | 1.0.0 | scripts/skill-graph-fleet-report.ts | N/A |
 | skill-lifecycle-audit.ts | 1.5.1 | scripts/skill-lifecycle-audit.ts | N/A |
 | skill-session-review.ts | 1.1.0 | scripts/skill-session-review.ts | bun |
 | spec-backfill.ts | 1.0.0 | scripts/spec-backfill.ts | N/A |
@@ -172,7 +173,7 @@
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, fs, path |
 | typecheck.ts | 1.1.1 | scripts/typecheck.ts | N/A |
 | upgrade-project.ts | 1.42.0 | scripts/upgrade-project.ts | N/A |
-| validate-agents.ts | 1.2.1 | scripts/validate-agents.ts | N/A |
+| validate-agents.ts | 1.3.0 | scripts/validate-agents.ts | N/A |
 | validate-decisions.ts | 1.0.0 | scripts/validate-decisions.ts | js-yaml |
 | validate-doc-folder.ts | 1.1.0 | scripts/validate-doc-folder.ts | fs, path |
 | validate-docs-links.ts | 1.1.0 | scripts/validate-docs-links.ts | fs, path |

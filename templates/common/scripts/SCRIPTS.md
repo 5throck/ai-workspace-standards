@@ -239,7 +239,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `typecheck.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
 | `upgrade-project.ts` | L0 | 1.42.0 | active | `--variant`, `--platform` (claude/antigravity/codex/all — `all` renamed from `both`, now merges CODEX.md too), `--dry-run`, `--prune-removed`, `--rollback`, `--yes`, `--skip-context-commonization`, `--force-context-sync`; COMMON-CONTEXT splice under PRESERVE (T-20260919-003); skill sub-file sync — NEW/UPDATE deliver the whole skill dir, equal-version skills get additive CATCH-UP + DRIFT warnings (2026-09-21); W2 HARVEST — variant-only lines inside removed near-duplicate sections reported as backport candidates (2026-09-22) | —| L0+L1 | —|
 | `variant-feature.ts` | L0 | 1.0.0 | active | `--variant`, `--feature`, `--type` | —| L0 | —|
-| `validate-agents.ts` | L0 | 1.2.1 | active | —| —| L0+L1 | —|
+| `validate-agents.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
 | `validate-doc-folder.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `validate-docs-links.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `validate-md-language.ts` | L0 | 1.11.0 | active | scan scope widened to docs/adr/, docs/decisions/, docs/VERSION_MANIFEST.md + generated-region allowlist markers (T-20260912-015) | —| L0+L1 | —|

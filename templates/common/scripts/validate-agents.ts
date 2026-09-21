@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Agent Lifecycle Validation Script
- * @version 1.2.1
+ * @version 1.3.0
  *
  * Validates all agents/*.md files for required lifecycle frontmatter
  * and checks governance records in docs/lifecycle/agents/*.md
@@ -16,7 +16,7 @@
  */
 
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, dirname, resolve } from 'node:path';
 // v1.2.1: ./validators/ is L0-only; L1/L3 project copies must not crash at import time —
 // the frontmatter schema sweep degrades to a skip when the validators are absent.
 const schemaValidatorAvailable = existsSync(join(import.meta.dir, 'validators', 'schema-validator.ts'));
@@ -320,6 +320,57 @@ function validateAgentSchema(): void {
   }
 }
 
+// T-20260922-001: persona integrity gate — regression checks for the
+// 2026-09-19 roster-generation artifact class (design
+// docs/designs/2026-09-22-agent-roster-generation-artifact-repair-design.md):
+//   (a) extends: whose base file does not exist (the chain must resolve from
+//       the file's own directory — a dangling field also disables the
+//       extends-stub schema skip above, hiding real schema errors);
+//   (b) frontmatter fragments spilled into the markdown body
+//       (sync-agent-personas inlines the body into .claude/agents, so every
+//       harness dispatch embeds the garbage);
+//   (c) missing frontmatter description: (the persona generator silently
+//       skips sources without one, freezing the generated persona).
+function validatePersonaIntegrity(): void {
+  if (!existsSync(AGENTS_DIR)) return;
+  for (const entry of readdirSync(AGENTS_DIR)) {
+    if (!isAgentFile(entry)) continue;
+    const filePath = join(AGENTS_DIR, entry);
+    const content = readFileSync(filePath, 'utf-8');
+    const fmEnd = content.indexOf('\n---', 3);
+    if (!content.startsWith('---') || fmEnd === -1) continue; // no frontmatter — schema sweep covers
+    const frontmatter = content.slice(3, fmEnd);
+    const body = content.slice(fmEnd + 4);
+
+    const extendsMatch = frontmatter.match(/^extends:\s*["']?([^"'\n]+?)["']?\s*$/m);
+    let extendsResolves = false;
+    if (extendsMatch) {
+      const baseAbs = resolve(dirname(filePath), extendsMatch[1].trim());
+      if (!existsSync(baseAbs)) {
+        fail(entry, 'extends-dangling', `${entry}: extends '${extendsMatch[1].trim()}' does not resolve to an existing base file — remove the field (self-contained definition) or fix the chain target`, "Delete the 'extends:' line, or point it at an existing base persona");
+      } else {
+        extendsResolves = true;
+      }
+    }
+
+    const spillLine = body.split('\n').find(l => /^ {2}governance: docs\/lifecycle\//.test(l) || /^examples: \[\]\s*$/.test(l));
+    if (spillLine !== undefined) {
+      fail(entry, 'body-frontmatter-spill', `${entry}: frontmatter fragment leaked into the body ("${spillLine.trim()}") — the generated persona inlines it into every dispatch`, 'Delete the leaked line(s) from the markdown body');
+    }
+
+    if (!/^description:/m.test(frontmatter)) {
+      // ADR-0033 extends-stubs may legitimately inherit the description from
+      // their base persona — warn there, fail on self-contained definitions
+      // (sync-agent-personas silently skips those, freezing the persona).
+      if (extendsResolves) {
+        warn(entry, 'description-missing', `${entry}: no frontmatter description: — the extends-stub is assumed to inherit it from its base persona`, "Inline the base persona's description once the stub is resolved");
+      } else {
+        fail(entry, 'description-missing', `${entry}: no frontmatter description: — sync-agent-personas silently skips the file, freezing the generated persona`, "Add a one-line 'description:' summarizing the agent's role");
+      }
+    }
+  }
+}
+
 function main() {
   if (!JSON_MODE) {
     console.log(`${colors.cyan}🔍 Validating agent lifecycle documentation...${colors.reset}`);
@@ -330,6 +381,7 @@ function main() {
   validateSecurityHolds();
   validateGovernanceRecords();
   validateAgentSchema();
+  validatePersonaIntegrity();
 
   const errors = issues.filter(i => i.level === 'error');
   const warnings = issues.filter(i => i.level === 'warning');

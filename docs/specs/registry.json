@@ -1177,6 +1177,24 @@
       "source": "manual",
       "created": "2026-09-21",
       "last_updated": "2026-09-21"
+    },
+    {
+      "id": "2026-09-22-agent-persona-integrity-gate-design",
+      "title": "agent persona integrity gate design",
+      "file": "docs/designs/2026-09-22-agent-persona-integrity-gate-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-21",
+      "last_updated": "2026-09-21"
+    },
+    {
+      "id": "2026-09-22-skill-graph-fleet-analytics-design",
+      "title": "skill graph fleet analytics design",
+      "file": "docs/designs/2026-09-22-skill-graph-fleet-analytics-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-21",
+      "last_updated": "2026-09-21"
     }
   ]
 }
