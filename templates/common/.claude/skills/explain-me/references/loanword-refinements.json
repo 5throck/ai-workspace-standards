@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "title": "Korean Loanword Refinement Guidelines",
+  "description": "Judgment criteria for Korean loanword refinement during §7 language proofreading. Based on National Institute of Korean Language 'Refined Words' (다듬은 말). NOT a fixed replacement dictionary — use these as judgment criteria with context.",
+  "source": "https://www.korean.go.kr/front/imprv/refineList.do",
+  "principles": [
+    "Evidence comes from the dictionary. Changes must be grounded in National Institute of Korean Language 'Refined Words'.",
+    "Do NOT apply mechanically. Many refined words are not established in practice and may sound awkward (e.g., internet→누리망, login→접속). Only change when the result is MORE natural and clear to the target reader.",
+    "Preserve established technical identifiers and code: API, HTML, CSS, URL, SVG, JSON, pipeline(), Workflow, git, etc.",
+    "Calques (direct translations of metaphors) are NOT dictionary entries. Replace with natural Korean equivalents (e.g., lens→관점, drift→어긋남, gate→검문). Judge via §7 'translationese' criteria."
+  ],
+  "always_change": [
+    { "loanword": "가이드라인", "refined": "지침" },
+    { "loanword": "다운로드", "refined": "내려받기" },
+    { "loanword": "업로드", "refined": "올리기" },
+    { "loanword": "업데이트", "refined": "갱신" },
+    { "loanword": "모니터링", "refined": "점검 / 감시" },
+    { "loanword": "게이트웨이", "refined": "관문" },
+    { "loanword": "게이트", "refined": "관문" },
+    { "loanword": "프로토콜", "refined": "통신 규약" },
+    { "loanword": "로그", "refined": "기록" },
+    { "loanword": "로깅", "refined": "기록" },
+    { "loanword": "트래픽", "refined": "소통량" },
+    { "loanword": "스토리지", "refined": "저장 장치" },
+    { "loanword": "솔루션", "refined": "해결책" }
+  ],
+  "context_dependent": [
+    { "loanword": "콘텐츠", "refined": "내용(물)", "criteria": "'콘텐츠' is widely established — change to '내용' only when it reads more naturally in context" },
+    { "loanword": "플랫폼", "refined": "기반", "criteria": "Use '기반' in general context; keep '플랫폼' in proper product/tech context" },
+    { "loanword": "인프라", "refined": "기반 시설", "criteria": "Original may be clearer when the refined form is too long" },
+    { "loanword": "프로세스", "refined": "절차 / 과정", "criteria": "Most contexts: '절차/과정' is natural" }
+  ],
+  "never_change": [
+    "인터넷 (not 누리망)",
+    "로그인/로그아웃 (not 접속/접속 해지)",
+    "웹서핑 (not 누리 검색)",
+    "와이파이 (not 근거리 무선망)",
+    "아이콘 (not 그림 단추)",
+    "메신저 (not 쪽지창)"
+  ],
+  "calques_to_replace": [
+    { "calque": "렌즈 (검토 렌즈)", "replacement": "관점" },
+    { "calque": "드리프트", "replacement": "어긋남" },
+    { "calque": "게이트 (비유적)", "replacement": "검문" }
+  ]
+}

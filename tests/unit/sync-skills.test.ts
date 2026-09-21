@@ -199,7 +199,7 @@ describe('Phase 2 shortcut semantics (T-20260912-017 premise fix)', () => {
         expect(claudeCopy).toContain('SSOT BODY');
     });
 
-    test('a genuinely .agents-only shortcut is back-synced to .claude and .gemini', async () => {
+    test('a genuinely .agents-only shortcut is back-synced to all four mirrors', async () => {
         const dirs = freshDirs();
         makeSkill(dirs.agentsSkills, 'agents-only-skill', '---\nname: agents-only\n---\n');
 
@@ -209,7 +209,9 @@ describe('Phase 2 shortcut semantics (T-20260912-017 premise fix)', () => {
         expect(result.warnings).toEqual([]);
         expect(fs.existsSync(path.join(dirs.claudeSkills, 'agents-only-skill', 'SKILL.md'))).toBe(true);
         expect(fs.existsSync(path.join(dirs.geminiSkills, 'agents-only-skill', 'SKILL.md'))).toBe(true);
-        expect(fs.existsSync(path.join(dirs.codexSkills, 'agents-only-skill'))).toBe(false);
+        // T-20260921-019/M-19 (ADR-0077 W1 four-mirror parity): .codex joined the
+        // Phase 2 back-sync target list — shortcut skills reach every mirror.
+        expect(fs.existsSync(path.join(dirs.codexSkills, 'agents-only-skill', 'SKILL.md'))).toBe(true);
     });
 });
 

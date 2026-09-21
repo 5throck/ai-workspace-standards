@@ -6,9 +6,9 @@ description: >
 status: active
 scope: common
 l2_propagate: false
-version: 1.4.1
+version: 1.4.2
 owner: pm
-last_reviewed: 2026-08-24
+last_reviewed: 2026-09-21
 relates_to:
   - skill: promote-variant
     type: enables
@@ -19,7 +19,6 @@ metadata:
   triggers:
     - create variant
     - new variant
-    - create variant
     - variant creation
     - scaffold new variant
     - new co- project
@@ -33,7 +32,7 @@ Use this skill when creating a new workspace variant (e.g., co-safety, co-legal,
 A variant is a domain-specific AI team configuration built on the workspace common infrastructure.
 
 **Prerequisites**:
-- Workspace root access (`C:\git\`)
+- Workspace root access (the cloned `ai_workspace` repository)
 - `bun` installed (`bun --version`)
 - `git` installed
 
@@ -45,24 +44,24 @@ A variant is a domain-specific AI team configuration built on the workspace comm
 
 - [ ] Variant name is unique: check `Projects/` and `templates/` — no existing `co-<name>`
 - [ ] Variant name format: lowercase, alphanumeric + hyphens only (e.g., `safety-os`, `legal-ai`)
-- [ ] Domain type decided: `security` | `development` | `design` | `consulting` | `collaboration` | `lecture` | `game` | (custom)
+- [ ] Domain type decided: `security` | `development` | `design` | `consulting` | `collaboration` | `lecture` | `game` | `abap-development` | `safety` (registry: `scripts/helpers/registries/variant-type-registry.ts`; an unregistered value silently falls back to `collaboration`)
 - [ ] Target country decided: a specific jurisdiction (`--country <CODE>`, e.g. `KR`) or region-neutral (default - omit the flag)
-- [ ] i18n locale set decided (which of the schema's `i18n.locale_codes` translation zones the variant supports, e.g. `ko`/`ja` docs): the language axis is independent of the country axis - a variant may be multi-language and region-neutral, single-language with country profiles, or any combination (see the Country vs. Language principle in `docs/country-profiles.md`)
+- [ ] i18n locale set decided (which of the schema's `i18n.locale_codes` translation zones the variant supports, e.g. `ko`/`ja` docs): the language axis is independent of the country axis - a variant may be multi-language and region-neutral, single-language with country profiles, or any combination (see the Country vs. Language principle in `templates/common/docs/country-profiles.md`, shipped into the project as `docs/country-profiles.md`)
 
 ### Step 1: Run scaffold script
 
 ```bash
-# From workspace root C:\git\
+# From the workspace root
 bun scripts/create-l3-scaffold.ts <variant-name> --domain <type> [--country <CODE>]
 
 # Example:
-bun scripts/create-l3-scaffold.ts safety-os --domain ehs
+bun scripts/create-l3-scaffold.ts safety-os --domain safety
 
 # Example (domain anchored to a specific jurisdiction):
 bun scripts/create-l3-scaffold.ts labor-kr --domain hr --country KR
 ```
 
-> **Target country**: pass `--country <CODE>` (ISO 3166-1 alpha-2 or a well-known region code such as `EU`) when the domain is anchored to a specific jurisdiction. This deploys that country's scoped skills into the draft (e.g. `KR` deploys `k-law`/`k-dart`/`k-kosis`) and records the selection. Omit the flag for a region-neutral variant - country-scoped skills are then pruned from the scaffold. See `templates/common/docs/country-profiles.md` (shipped into the project as `docs/country-profiles.md`).
+> **Target country**: pass `--country <CODE>` (ISO 3166-1 alpha-2 or a well-known region code such as `EU`) when the domain is anchored to a specific jurisdiction. This deploys that country's scoped skills into the draft (e.g. `KR` deploys all six `k-*` skills registered under `country_scoped_assets` in `docs/workspace-schema.json`: `k-law`, `k-dart`, `k-kosis`, `k-opendata`, `k-ecos`, `k-krx`) and records the selection. Omit the flag for a region-neutral variant - country-scoped skills are then pruned from the scaffold. See `templates/common/docs/country-profiles.md` (shipped into the project as `docs/country-profiles.md`).
 
 This creates `Projects/<variant-name>/` with:
 - All common infrastructure (.claude/, .gemini/, scripts/, skills/) — every top-level file/dir under `templates/common/` is copied by default except a short, documented exclusion list (`COMMON_OVERLAY_EXCLUDE` in the script), so new common files show up automatically without needing a script change
@@ -173,7 +172,7 @@ Re-run this command after **any** later agent, skill, or `variant.json` change �
 
 Edit `Projects/<variant-name>/variant.json`:
 - `description`: clear description of the variant's purpose
-- `variant_type`: `security` | `development` | `design` | `consulting` | `collaboration` | `lecture` | `game`
+- `variant_type`: `security` | `development` | `design` | `consulting` | `collaboration` | `lecture` | `game` | `abap-development` | `safety`
 - `agent_overrides.pm.reason`: describe the PM role override
 - `skill_manifest.variant_specific`: list domain skills with `used_by_agents` and `phases`
 - `country_config`: declare supported country profiles if the variant ships `docs/countries/<CODE>.md` (keep `default: null` - region-neutral is the required default state)

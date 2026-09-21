@@ -23,7 +23,7 @@ Detailed personas live in [`agents/*.md`](agents/); reusable workflows in [`skil
 | Agent | File | Tier | Subdomain | Role |
 |-------|------|------|-----------|------|
 | **I18N Specialist Agent** | [`agents/i18n-specialist.md`](agents/i18n-specialist.md) | Medium | i18n | Locale documentation — translation zones, language-policy enforcement, Korean plain-language output. |
-| **PM — Pricing Consulting Orchestrator** | [`agents/pm.md`](agents/pm.md) | High | orchestration | Runs the build lifecycle (5-phase) and consulting engagement lifecycle; sole dispatcher; enforces Harness order and PR-only sync |
+| **PM — Pricing Consulting Orchestrator** | [`agents/pm.md`](agents/pm.md) | Medium | orchestration | Runs the build lifecycle (5-phase) and consulting engagement lifecycle; sole dispatcher; enforces Harness order and PR-only sync |
 
 <!-- VARIANT-AGENTS-START -->
 | **Finance Strategy & Channel Lead** | [`agents/finance-strategy-lead.md`](agents/finance-strategy-lead.md) | High | strategy | Multi-industry pricing/P&L LaTeX spec authorship — revenue engine, waterfall, dual pricing, discount timing, scorecard weights — margin floors & price-waterfall governance |
@@ -272,16 +272,17 @@ registered here inside the `VARIANT-AGENTS` block.
 **English-Only Documentation Rule**: All workspace documentation files (.md) must be written in English, with explicit exceptions for recognized locale translation zones and declared Korean legal/regulatory content (see Exceptions below).
 
 ### English Documentation Requirement
-- All `.md` files outside `ko/` and `locales/ko/` directories MUST be in English
+- All `.md` files outside locale translation zones (`<lang-code>/`, `locales/<lang-code>/`, and `*_&lt;lang-code&gt;` suffix files) MUST be in English
 - Applies to: README.md, CLAUDE.md, GEMINI.md, AGENTS.md, context.md, CHANGELOG.md, all documentation in docs/, agents/, skills/
 - Rationale: English documentation ensures global accessibility and cross-team collaboration
 
 ### Translation Zones (Locale Exceptions)
 - `<lang-code>/` directories — language-specific documentation (e.g. `ko/`, `ja/`)
 - `locales/<lang-code>/` — locale translation files for internationalization (e.g. `locales/ko/`, `locales/zh-CN/`)
+- `*_&lt;lang-code&gt;.md` / `*_&lt;lang-code&gt;.yaml` suffix files — translation mirrors tracked by hash-sync (e.g. `README_ko.md`)
 - These are the ONLY locations where non-English `.md` files are permitted (except declared exceptions)
-- Recognized locale codes (from `docs/workspace-schema.json` `i18n.locale_codes`):
-  `ko`, `ja`, `zh-CN`, `zh-TW`, `de`, `es`, `fr`, `pt`, `vi`, `ms`, `id`, `th`, `ru`, `it`, `ar`
+- Recognized locale codes (from `docs/workspace-schema.json` `i18n.locale_codes` — 16 codes including `en`, the source language; `en` is not a translation-zone target):
+  `ko`, `ja`, `zh-CN`, `zh-TW`, `de`, `es`, `fr`, `pt`, `vi`, `ms`, `id`, `th`, `ru`, `it`, `ar` (+ `en`)
 
 ### Language Policy Exception — Korean Legal/Regulatory Content
 The English-only policy admits a narrow exception for files where Korean is legally or academically mandatory. To declare an exception, add to the file's frontmatter:

@@ -65,7 +65,7 @@ When the source project carries country assets, the conversion handles them as f
 - `docs/countries/ACTIVE.md` is **excluded** - it records this project's country selection (project state), not reusable template knowledge
 - `docs/countries/<CODE>.md` profiles **are carried** into the template - they are durable jurisdiction knowledge (statutes, regulators, formats)
 - The `country_config` key in `variant.json` is **preserved**, keeping `supported` in sync with the carried profiles
-- Country-scoped skills (`k-law`, `k-dart`, `k-kosis` - see the `country_scoped_assets` registry in `docs/workspace-schema.json`) are **never copied** into the variant: they already live in `templates/common/skills/` and deploy only to matching-country projects at scaffold time
+- Country-scoped skills (all six `k-*` skills - see the `country_scoped_assets` registry in `docs/workspace-schema.json`) are **never copied** into the variant: they already live in `templates/common/skills/` and deploy only to matching-country projects at scaffold time
 
 When reviewing the output, confirm `country_config.supported` matches exactly the profiles carried into `templates/<target>/docs/countries/`. The full L2 pipeline (`l3-to-variant-pipeline.ts`) applies the same rules. See ADR-0057 for the full mechanism.
 

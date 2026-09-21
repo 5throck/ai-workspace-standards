@@ -728,6 +728,15 @@ function createDomainDocs(projectDir: string, domain: string | null, variant: st
   copyItem(path.join(COMMON_DIR, 'docs', 'context.md'), path.join(projectDir, 'docs', 'context.md'));
   log('  ✅ docs/context.md copied (immutable common project context)');
 
+  // docs/workspace-schema.json — the locale/country registry SSOT the project-side
+  // validate-md-language.ts resolves at <project>/docs/workspace-schema.json. Without it
+  // the validator degrades to a ko-only locale list and mis-flags non-ko translation
+  // zones in fresh drafts (2026-09-21 review M-22 / H-2 minimum fix). Same delivery rule
+  // as context.md: top-level docs/ file copied explicitly because the loop above only
+  // walks docs/_common/.
+  copyItem(path.join(COMMON_DIR, 'docs', 'workspace-schema.json'), path.join(projectDir, 'docs', 'workspace-schema.json'));
+  log('  ✅ docs/workspace-schema.json copied (i18n locale_codes + country_scoped_assets registry)');
+
   // The copy above is still the raw common template — [Project Name] / <variant-name> / <variant>
   // placeholders unresolved. new-project.ts's substitute-placeholders.ts helper would do this,
   // but it sweeps every text file in the project — several copied skill docs (e.g.
@@ -1102,7 +1111,7 @@ function main(): void {
   if (fs.existsSync(pruneHelper)) {
     const country = args.country || "none";
     log(`🌐 Pruning country-scoped assets${args.country ? ` for ${args.country}` : " (region-neutral)"}…`);
-    runNoShell(process.execPath, [pruneHelper, projectDir, country], { cwd: WORKSPACE_ROOT, quiet: false });
+    runNoShell(process.execPath, [pruneHelper, projectDir, country, args.variant || 'none'], { cwd: WORKSPACE_ROOT, quiet: false });
   } else {
     log("⚠️  prune-country-scoped-assets.ts not found — skipping country-scoped asset pruning");
   }

@@ -1,0 +1,29 @@
+schemaVersion: 1
+id: T-20260921-015
+kind: manual
+title: >-
+  design: platform-profile delivery asymmetry — upgrade resolveClaim re-delivers
+  .claude/.gemini/.agents trees regardless of the project's recorded platform
+  opt-out while only codex removes both file and tree (2026-09-21 review M-17)
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-09-21T13:28:40.129Z'
+history:
+  - at: '2026-09-21T13:28:40.129Z'
+    from: null
+    to: backlog
+  - at: '2026-09-21T14:26:58.209Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-21T14:26:58.221Z'
+    from: waiting
+    to: review
+  - at: '2026-09-21T14:27:24.623Z'
+    from: review
+    to: done
+result: >-
+  ADR-0085 D2: platform mirrors are shared fleet surface; profiles govern
+  primary instruction files and per-project config seeds; codex .codex removal
+  documented as config-ownership exception
+error: null

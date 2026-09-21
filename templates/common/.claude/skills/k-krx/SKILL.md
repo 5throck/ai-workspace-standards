@@ -11,7 +11,7 @@ description: >
   the 7-category / 31-service catalog, authentication, request formatting,
   and error handling. Requires KRX_API_KEY environment variable (issued via
   openapi.krx.co.kr with administrator approval; no public demo key).
-version: 1.0.0
+version: 1.0.2
 last_reviewed: 2026-09-11
 status: active
 owner: financial-analyst

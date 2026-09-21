@@ -1,0 +1,31 @@
+schemaVersion: 1
+id: T-20260921-008
+kind: manual
+title: >-
+  design: locale (i18n) plumbing for project creation — decide --locale flag
+  (validate against i18n.locale_codes, seed locales/<code>.json, record in
+  template-version.txt) vs documenting locale setup as agent-driven via
+  i18n-specialist (2026-09-21 review H-2)
+priority: high
+status: done
+attempts: 0
+created_at: '2026-09-21T13:28:16.974Z'
+history:
+  - at: '2026-09-21T13:28:16.974Z'
+    from: null
+    to: backlog
+  - at: '2026-09-21T14:26:58.044Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-21T14:26:58.056Z'
+    from: waiting
+    to: review
+  - at: '2026-09-21T14:27:24.536Z'
+    from: review
+    to: done
+result: >-
+  ADR-0085 D1: locale setup is agent-driven (i18n-specialist); no --locale flag
+  — scaffolds deliver the locale SSOT (docs/workspace-schema.json on both
+  creation paths) and the language policy; country_config.locales retired as
+  dead code
+error: null

@@ -7,7 +7,7 @@ description: >
   event reports. Includes structured parsing rules, data normalization,
   and accounting line-item extraction for consulting intelligence.
   Requires DART_API_KEY environment variable.
-version: 2.1.0
+version: 2.1.2
 last_reviewed: 2026-08-09
 status: active
 owner: strategy-analyst

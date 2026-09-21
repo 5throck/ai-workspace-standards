@@ -161,10 +161,11 @@ Custom slash commands in `.claude/commands/` are natively recognized by Claude C
 | `/new-task "name"` | Create task block in today's memory log | In-session task tracking |
 | `/commit-push-pr` | Commit, push, and open a PR in one step | Standalone commit/PR helper (bypasses full `/sync` pipeline) |
 | `/gateguard` | Investigate importers before first edit per file (GateGuard) | Companion to the PreToolUse GateGuard hook |
+| `/meeting "topic"` | Structured multi-agent discussion | `skills/meeting-facilitation` (special-synced to `.claude/commands/meeting.md`) |
 | `/project-review` | Run a structured project review | Project review workflow command |
 
 > **How commands become Skills**: each `.claude/commands/<name>.md` file is automatically
-> registered as a `<name>` Skill. All commands above have corresponding files in `.claude/commands/`. There is no `/new-project` command file — scaffold new projects with `bun scripts/new-project.ts "<name>"` directly.
+> registered as a `<name>` Skill. All commands above have corresponding files in `.claude/commands/`. There is no `/new-project` command file — scaffold new projects with `bun scripts/new-project.ts "<name>" --variant <co-variant>` directly (`--variant` is required).
 
 > **Platform parity**: every command file in `.claude/commands/` must have a matching file in `.gemini/commands/`. Intentional Claude-only exceptions use `gemini-parity: skip` in frontmatter. See [docs/context.md](docs/context.md).
 
@@ -178,7 +179,7 @@ No `.mcp.json` is currently defined at the project root — MCP servers are conf
 <!-- COMMON-CLAUDE:START -->
 ### 4. Language Policy for Documentation
 
-All `.md` files you create or modify MUST be in English, except in `ko/` or `locales/ko/` directories (Korean translation zones) or when explicitly declared as a Korean legal/regulatory content exception.
+All `.md` files you create or modify MUST be in English, except in recognized locale translation zones (`<lang-code>/` or `locales/<lang-code>/` directories, plus `*_&lt;lang-code&gt;` suffix files such as `README_ko.md` — see the AGENTS.md Language Policy) or when explicitly declared as a Korean legal/regulatory content exception.
 
 - README.md, CLAUDE.md, GEMINI.md, AGENTS.md, context.md, CHANGELOG.md — English only
 - All documentation in docs/, agents/, skills/ — English only
@@ -341,7 +342,7 @@ All shared Git/PR rules are in [docs/context.md](docs/context.md). Claude Code-s
 
 - **PR Language**: Governed by [docs/context.md](docs/context.md). All PR titles, bodies, and review comments must be written in English - no exceptions.
 
-*Last Updated: 2026-09-12 — removed redundant N-1/N boilerplate rows; /sync already covers lifecycle + audit + commit + push + PR; previous: 2026-06-21 inlined N-1/N rows*
+*Last Updated: 2026-09-21 — removed redundant N-1/N boilerplate rows; /sync already covers lifecycle + audit + commit + push + PR; previous: 2026-06-21 inlined N-1/N rows*
 <!-- COMMON-CLAUDE:END -->
 
 

@@ -11,7 +11,7 @@
  * - Wave 3: Platform parity validation (validate-platform-parity.ts)
  * - Wave 3: Workspace integration (integration-helpers.ts)
  *
- * @version 1.19.0
+ * @version 1.20.0
  * @phase: Complete pipeline orchestration
  *
  * v1.19.0 (2026-09-16): Overlay guard + module-level rollback (design
@@ -279,7 +279,8 @@ function matchCountryScopedSkill(targetPath: string, scopedSkills: Set<string>):
       normalized.startsWith(`skills/${name}/`) ||
       normalized.startsWith(`.claude/skills/${name}/`) ||
       normalized.startsWith(`.gemini/skills/${name}/`) ||
-      normalized.startsWith(`.agents/skills/${name}/`)
+      normalized.startsWith(`.agents/skills/${name}/`) ||
+      normalized.startsWith(`.codex/skills/${name}/`)
     ) {
       return name;
     }

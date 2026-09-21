@@ -50,8 +50,8 @@ Develop variant-specific functionality in isolation without affecting workspace 
   ```
 
 **A-2. New Project Creation**
-- **Location**: `Projects/[variant-name]/`
-- **Method**: `bun scripts/new-project.ts [variant-name]`
+- **Location**: `Projects/[project-name]/`
+- **Method**: `bun scripts/new-project.ts "<project-name>" --variant <co-variant>` (`--variant` is required — the bare command lists valid variants and exits 1)
 - **Variant Selection**: Select appropriate base variant (co-consult, co-design, etc.) or start from scratch
 - **Note**: Project is created with common/ dependencies from workspace root
 

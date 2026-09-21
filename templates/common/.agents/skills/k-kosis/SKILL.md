@@ -7,7 +7,7 @@ description: >
   indicators, and other government-published statistical tables. Covers
   keyword search, table-list browsing, statistical data retrieval, and
   metadata lookup. Requires KOSIS_API_KEY environment variable.
-version: 1.0.0
+version: 1.0.2
 last_reviewed: 2026-08-23
 status: active
 owner: financial-analyst

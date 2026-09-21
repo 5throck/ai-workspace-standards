@@ -8,7 +8,7 @@
 **Every new project starts with a project scaffolding command:**
 
 - **Claude Code**: `/new-project` (slash command in `.claude/commands/`)
-- **CLI (cross-platform)**: `bun scripts/new-project.ts "<project-name>"`
+- **CLI (cross-platform)**: `bun scripts/new-project.ts "<project-name>" --variant <co-variant>` (`--variant` is required — without it the script lists valid variants and exits 1)
 
 > **Note**: `new-project.ts` is an L0-only script — it exists only in `scripts/` at the workspace root and is not propagated to `templates/common/scripts/` (L1). This is intentional: project scaffolding must run from the workspace, not from inside a generated project.
 
@@ -21,6 +21,11 @@ and initializes git with hooks active.
 The [`templates/`](../../templates/) folder mirrors the exact structure of a new project -
 browse it directly to see what every file should look like. All scaffold templates
 live there as **real, editable files** (not embedded strings).
+
+> **Locale (i18n) axis**: scaffolds deliver the locale SSOT (`docs/workspace-schema.json`,
+> `i18n.locale_codes`) and the language policy text only — locale content setup
+> (`locales/<code>/`, glossaries) is deliberately agent-driven via `i18n-specialist`
+> (ADR-0085). The `--country` jurisdiction axis is separate and automated end-to-end.
 
 | Generated file | Purpose | Action needed |
 |----------------|---------|---------------|
@@ -82,9 +87,10 @@ asks for the project's target country at scaffold time (or takes `--country <COD
 **Country-scoped skill pruning**: after the copy + overlay steps, the shared helper
 `scripts/helpers/prune-country-scoped-assets.ts` deletes every skill registered in the
 `country_scoped_assets` section of [`docs/workspace-schema.json`](../workspace-schema.json)
-(SSOT) from all four mirror directories (`skills/`, `.claude/skills/`, `.gemini/skills/`,
-`.agents/skills/`) unless the selected country matches the registered scope — e.g.
-`k-law` / `k-dart` / `k-kosis` (KR) deploy only to `--country KR` projects and are
+(SSOT) from all five mirror directories (`skills/`, `.claude/skills/`, `.gemini/skills/`,
+`.agents/skills/`, `.codex/skills/`) unless the selected country matches the registered
+scope — e.g. the six `k-*` registry skills (`k-law`, `k-dart`, `k-kosis`, `k-opendata`,
+`k-ecos`, `k-krx`; all KR) deploy only to `--country KR` projects and are
 absent from region-neutral ones. The same helper runs in `create-l3-scaffold.ts`
 (new-variant drafts take the same `--country` flag).
 

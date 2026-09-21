@@ -59,7 +59,7 @@ State updates are dispatched as JSON messages matching the `PresenterStateMessag
 
 ## Related Skills
 
-- `render-pdf-deck`: Renders HTML presentation decks into paginated PDF files using Playwright.
+The pdf-export agent renders HTML presentation decks into paginated PDF files using Playwright (scripts/co-deck/gen-slides-pdf.ts).
 - `explain-me`: Generates executive presentation summaries and documentation dashboards.
 
 ## Core Architecture & State Model

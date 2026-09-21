@@ -353,6 +353,11 @@
       "layer": "L0"
     },
     {
+      "id": "adr:0085",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
       "id": "agent-lifecycle-manager",
       "type": "skill",
       "layer": "L0"
@@ -5005,6 +5010,36 @@
       "source": "prose"
     },
     {
+      "type": "references",
+      "from": "adr:0085",
+      "to": "i18n-audit",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0085",
+      "to": "i18n-formatting",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0085",
+      "to": "i18n-layout",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0085",
+      "to": "i18n-locale-config",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0085",
+      "to": "upgrade-project",
+      "source": "prose"
+    },
+    {
       "type": "composes_with",
       "from": "agent-lifecycle-manager",
       "to": "skill-lifecycle-manager",
@@ -6603,13 +6638,31 @@
     {
       "type": "references",
       "from": "create-variant",
+      "to": "k-ecos",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "create-variant",
       "to": "k-kosis",
       "source": "prose"
     },
     {
       "type": "references",
       "from": "create-variant",
+      "to": "k-krx",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "create-variant",
       "to": "k-law",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "create-variant",
+      "to": "k-opendata",
       "source": "prose"
     },
     {
@@ -16627,24 +16680,6 @@
       "type": "references",
       "from": "project-resync",
       "to": "upgrade-project",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "project-to-variant",
-      "to": "k-dart",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "project-to-variant",
-      "to": "k-kosis",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "project-to-variant",
-      "to": "k-law",
       "source": "prose"
     },
     {

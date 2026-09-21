@@ -1,5 +1,10 @@
 #!/usr/bin/env bun
-// @version 0.3.2
+// @version 0.3.3
+// v0.3.3: Context-doc reference scrub accepts an optional <variant> argument and
+//         scrubs every existing candidate (docs/context.md for L3 drafts,
+//         docs/<variant>.context.md for projects, docs/<basename>.context.md).
+//         The old basename-only derivation was a silent no-op whenever the project
+//         directory name differed from the variant (2026-09-21 review H-7).
 // v0.3.1: Env block pruning delegated to the shared lib/env-sample.ts parser (same
 //         marker grammar, same keep/drop and unbalanced-marker-leave-unchanged semantics).
 //         Behavior-preserving refactor — the upgrade path (upgrade-project.ts ENV_SAMPLE
@@ -17,7 +22,7 @@
  * generated projects/L3 drafts based on the target country. Reads the country_scoped_assets
  * registry from workspace schema (SSOT) and removes assets whose registered country != target.
  *
- * Usage: bun scripts/helpers/prune-country-scoped-assets.ts <target-dir> <country|none>
+ * Usage: bun scripts/helpers/prune-country-scoped-assets.ts <target-dir> <country|none> [variant]
  *
  * @country: ISO 3166-1 alpha-2 code (KR, US, etc.) or region code (EU, ASEAN)
  *           or "none" for region-neutral projects (prunes ALL scoped assets)
@@ -50,6 +55,9 @@ if (process.argv.length < 4) {
 
 const targetDir = process.argv[2];
 const countryArg = process.argv[3];
+// Optional variant name: projects name their context doc docs/<variant>.context.md and
+// the project directory name may differ from the variant; L3 drafts use docs/context.md.
+const variantArg = process.argv[4] && process.argv[4] !== 'none' ? process.argv[4] : undefined;
 
 // Validate country pattern (ISO 3166-1 alpha-2 or well-known region codes)
 if (countryArg !== 'none' && countryArg !== '' && !/^[A-Z]{2,4}$/.test(countryArg)) {
@@ -263,8 +271,16 @@ function scrubPrunedSkillReferences(): void {
     }
   }
 
-  const ctxPath = join(targetDir, 'docs', `${basename(targetDir)}.context.md`);
-  if (existsSync(ctxPath)) {
+  // Context-doc naming differs by delivery path (2026-09-21 review H-7): L3 drafts use
+  // docs/context.md, scaffolded projects use docs/<variant>.context.md, and the project
+  // directory name may differ from the variant. Scrub every candidate that exists.
+  const ctxCandidates = [
+    join(targetDir, 'docs', 'context.md'),
+    join(targetDir, 'docs', `${basename(targetDir)}.context.md`),
+    ...(variantArg ? [join(targetDir, 'docs', `${variantArg}.context.md`)] : []),
+  ];
+  for (const ctxPath of ctxCandidates) {
+    if (!existsSync(ctxPath)) continue;
     const lines = readFileSync(ctxPath, 'utf-8').split('\n');
     const kept = lines.filter(line =>
       !prunedSkillNames.some(n => line.includes(`\`${n}\``)));

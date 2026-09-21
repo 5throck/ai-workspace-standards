@@ -214,7 +214,8 @@ synth.playBlip();      // Triggers UI select/blip sound
 
 ## Related Skills
 
-- `ecs-core`: Entity Component System engine core — connects game events to audio triggers.
-- `canvas-renderer`: HTML5 Canvas rendering pipeline — coordinates visual and audio feedback.
-- `game-loop`: Main game loop orchestration — integrates sound synthesis into the tick cycle.
-- `level-design`: Level and environment design — specifies sound event mappings per level.
+Pipeline components this skill integrates with (co-game pipeline layers, not skills):
+ecs-core (Entity Component System engine core — connects game events to audio triggers),
+canvas-renderer (HTML5 Canvas rendering pipeline — coordinates visual and audio feedback),
+game-loop (main loop orchestration — integrates sound synthesis into the tick cycle),
+and level-design (level and environment data — specifies sound event mappings per level).

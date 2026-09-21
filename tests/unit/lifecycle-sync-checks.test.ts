@@ -19,6 +19,8 @@
  *          helper semantics (agreement null / mismatch ERROR / missing-field
  *          WARNING) and live-state parity for the 3 script records.
  *          (T-20260915-008): upgrade-project fixture 1.4.1 → 1.5.0.
+ * v1.3.1 (T-20260921-007): upgrade-project fixture 1.5.0 → 1.5.1
+ *          (--platform doc fix; SKILL.md + lifecycle record bumped in lockstep).
  */
 import { describe, test, expect } from 'bun:test';
 import { readFileSync } from 'node:fs';
@@ -95,7 +97,7 @@ describe('lifecycle-sync-audit Check E (lifecycle record metadata gate)', () => 
     const cases: Array<[string, string, string]> = [
       ['sync', '1.6.0', 'pm'],
       ['security-scan', '1.2.0', 'pm'],
-      ['upgrade-project', '1.5.0', 'pm'],
+      ['upgrade-project', '1.5.1', 'pm'],
     ];
     for (const [skill, version, owner] of cases) {
       const fm = parseSkillFrontmatter(

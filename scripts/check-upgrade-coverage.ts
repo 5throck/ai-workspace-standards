@@ -98,9 +98,14 @@ for (const variant of variants) {
     }
     rows.push({ variant, rel, source, policy: claim.policy, pass: claim.pass });
 
-    // Check 2 — placeholder tokens in delivered files
+    // Check 2 — placeholder tokens in delivered files. The allowlist is keyed by
+    // top-level relpaths; platform-mirror copies (.claude/skills/…, .codex/…, …) are
+    // matched with the mirror prefix stripped so a skill-level exemption covers all
+    // four mirrors (T-20260921-009: the --all-variants mirror heal distributed
+    // explain-me's runtime-template files into every variant mirror).
     const ext = rel.slice(rel.lastIndexOf('.')).toLowerCase();
-    if (isDeliveryPolicy(claim.policy) && !PLACEHOLDER_ALLOWLIST.has(rel) && PLACEHOLDER_EXTENSIONS.has(ext)) {
+    const allowlistRel = rel.replace(/^\.[\w-]+\/skills\//, 'skills/');
+    if (isDeliveryPolicy(claim.policy) && !PLACEHOLDER_ALLOWLIST.has(rel) && !PLACEHOLDER_ALLOWLIST.has(allowlistRel) && PLACEHOLDER_EXTENSIONS.has(ext)) {
       try {
         if (statSync(abs).size < 2_000_000 && PLACEHOLDER_TOKEN.test(readFileSync(abs, 'utf8'))) {
           violations.push({ variant, rel, check: 'placeholder', detail: `delivery policy ${claim.policy} but file contains an {{UPPER_SNAKE}} placeholder token` });

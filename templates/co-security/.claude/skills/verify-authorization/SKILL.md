@@ -9,7 +9,7 @@ version: 1.0.0
 last_reviewed: 2026-06-13
 status: active
 owner: pm
-prerequisites: engagement-scoping must have been run (docs/scope.md must exist)
+prerequisites: engagement scoping complete — docs/scope.md must exist
 relates_to:
   - skill: stride-threat-matrix
     type: follows
@@ -87,7 +87,9 @@ No PoC, recon, or patch activity may begin until this skill returns PASS.
 
 ## Related Skills
 
-- `engagement-scoping` — creates the authorization document this skill validates
-- `recon-surface` — must pass verify-authorization before executing
-- `finding-tracker` — must pass verify-authorization before Phase 3
-- `patch-automation` — must pass verify-authorization before applying patches
+- `stride-threat-matrix` — threat model that defines what verify-authorization checks
+- `security-scan` — downstream verification after authorization passes
+
+The original engagement pipeline (scoping, recon surface, finding tracker, patch
+automation) never shipped as skills; this skill validates `docs/scope.md` and
+`docs/authorization.md` produced by the PM workflow instead.

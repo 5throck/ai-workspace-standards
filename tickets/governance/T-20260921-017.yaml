@@ -1,0 +1,29 @@
+schemaVersion: 1
+id: T-20260921-017
+kind: manual
+title: >-
+  design: unify the equal-version drift policy between the upgrade skills pass
+  (preserve) and agents pass (restore) with explicit DRIFT (preserved/restored)
+  output labels (2026-09-21 review M-20)
+priority: low
+status: done
+attempts: 0
+created_at: '2026-09-21T13:28:40.154Z'
+history:
+  - at: '2026-09-21T13:28:40.154Z'
+    from: null
+    to: backlog
+  - at: '2026-09-21T14:26:58.256Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-21T14:26:58.267Z'
+    from: waiting
+    to: review
+  - at: '2026-09-21T14:27:24.647Z'
+    from: review
+    to: done
+result: >-
+  ADR-0085 D3: skills=preserve / agents=restore asymmetry kept with rationale;
+  all six DRIFT outputs now carry policy verbs (DRIFT (preserved) / DRIFT
+  (restored to canonical))
+error: null

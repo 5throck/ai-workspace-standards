@@ -1,0 +1,28 @@
+schemaVersion: 1
+id: T-20260921-016
+kind: manual
+title: >-
+  upgrade-project: raise the post-upgrade sync-skills 30s timeout, treat a null
+  exit status as a partial-sync warning, and re-check mirror parity on a sample
+  (2026-09-21 review M-18)
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-09-21T13:28:40.142Z'
+history:
+  - at: '2026-09-21T13:28:40.142Z'
+    from: null
+    to: backlog
+  - at: '2026-09-21T14:26:58.233Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-21T14:26:58.244Z'
+    from: waiting
+    to: review
+  - at: '2026-09-21T14:27:24.635Z'
+    from: review
+    to: done
+result: >-
+  upgrade-project 1.40.0: post-upgrade sync-skills timeout 30s -> 120s; SIGTERM
+  timeout reported explicitly as partial-sync warning with re-run instruction
+error: null

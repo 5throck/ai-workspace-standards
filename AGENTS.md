@@ -245,16 +245,17 @@ PM owns the composition of the agent team and rules on skill changes:
 **English-Only Documentation Rule**: All workspace documentation files (.md) must be written in English, with explicit exceptions for recognized locale translation zones and declared Korean legal/regulatory content (see Exceptions below).
 
 ### English Documentation Requirement
-- All `.md` files outside `ko/` and `locales/ko/` directories MUST be in English
+- All `.md` files outside locale translation zones (`<lang-code>/`, `locales/<lang-code>/`, and `*_&lt;lang-code&gt;` suffix files) MUST be in English
 - Applies to: README.md, CLAUDE.md, GEMINI.md, AGENTS.md, CONSTITUTION.md, CHANGELOG.md, all documentation in docs/, agents/, skills/
 - Rationale: English documentation ensures global accessibility and cross-team collaboration
 
 ### Translation Zones (Locale Exceptions)
 - `<lang-code>/` directories — language-specific documentation (e.g. `ko/`, `ja/`)
 - `locales/<lang-code>/` — locale translation files for internationalization (e.g. `locales/ko/`, `locales/zh-CN/`)
+- `*_&lt;lang-code&gt;.md` / `*_&lt;lang-code&gt;.yaml` suffix files — translation mirrors tracked by hash-sync (e.g. `README_ko.md`)
 - These are the ONLY locations where non-English `.md` files are permitted (except declared exceptions)
-- Recognized locale codes (from `docs/workspace-schema.json` `i18n.locale_codes`):
-  `ko`, `ja`, `zh-CN`, `zh-TW`, `de`, `es`, `fr`, `pt`, `vi`, `ms`, `id`, `th`, `ru`, `it`, `ar`
+- Recognized locale codes (from `docs/workspace-schema.json` `i18n.locale_codes` — 16 codes including `en`, the source language; `en` is not a translation-zone target):
+  `ko`, `ja`, `zh-CN`, `zh-TW`, `de`, `es`, `fr`, `pt`, `vi`, `ms`, `id`, `th`, `ru`, `it`, `ar` (+ `en`)
 
 ### Language Policy Exception — Korean Legal/Regulatory Content
 The English-only policy admits a narrow exception for files where Korean is legally or academically mandatory. To declare an exception, add to the file's frontmatter:
@@ -302,6 +303,10 @@ Substantive LLM-assisted development work — generation or modification of code
 ### Instruction Writing Standard (ASD-STE100, ADR-0079)
 
 Development-facing instruction text — requirement statements, task briefs, execution-plan task descriptions, agent dispatch prompts, design-doc requirement sections, API endpoint documentation, and how-to steps — follows ASD-STE100 (Simplified Technical English) structural rules, in every development domain (web, app, API, scripts, documents). Rules: one instruction per sentence (≤ 20 words procedural / ≤ 25 descriptive); active voice with imperative steps; present tense; one term = one meaning (use glossary/registry terms exactly); no idioms; positive phrasing preferred; minimal pronouns; lists for parallel items and tables for structured data. The STE dictionary is not adopted. Enforcement is advisory: PM conforms task briefs at triage; architect checks requirement sections at Design Gate review. Full policy: §3.10 (workspace root AGENTS.md) and ADR-0079 (`docs/adr/0079-simplified-english-development-instructions.md`).
+
+### PM Team-Management Authority (ADR-0080)
+
+PM owns team composition and skill-change rulings. Hiring and firing: PM decides timing and target from workflow signals — recurring unmatched work types, role overload, absorbed roles, the quarterly roster review — and records every decision (ADR-0061 decision record + memory log) before dispatch; the default exit for a fired agent is `status: deprecated`, and hard delete requires an explicit user request. Skill requests: agents file structured `create|attach|remove` request blocks with evidence in their task reports and memory logs; PM triages them and only approved requests are executed — agents never create, attach, or remove skills unilaterally. Procedures: `agent-lifecycle-manager` and `skill-lifecycle-manager` skills. Full decision: ADR-0080 in the workspace root `docs/adr/`.
 <!-- COMMON-AGENTS:END -->
 
 ---
@@ -421,6 +426,9 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 | Security review, Git hooks configuration | `security-expert` | `architect` |
 | Cross-validate documentation consistency | `auditor` | `docs-writer` |
 | Orchestrate multi-step task across agents | `pm` | any execution agent |
+
+<!-- VARIANT-ROLE-BOUNDARY-START -->
+<!-- VARIANT-ROLE-BOUNDARY-END -->
 
 ---
 
@@ -562,9 +570,9 @@ Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 | `project-review` | `skills/project-review/` | Multi-agent parallel project review |
 | `meeting-facilitation` | `skills/meeting-facilitation/` | Multi-agent meeting orchestration |
 | `security-scan` | `skills/security-scan/` | Security and secret detection |
-| `create-variant` | `skills/create-variant/` | New variant scaffolding |
-| `promote-variant` | `skills/promote-variant/` | Variant promotion to official |
-| `simulate-pipeline` | `skills/simulate-pipeline/` | E2E smoke test for project creation and the L3 scaffold → variant promotion pipeline (merged skill) |
+| `create-variant` | `skills/create-variant/` | New variant scaffolding — workspace-root (L0) only, not shipped in scaffolds |
+| `promote-variant` | `skills/promote-variant/` | Variant promotion to official — workspace-root (L0) only, not shipped in scaffolds |
+| `simulate-pipeline` | `skills/simulate-pipeline/` | E2E smoke test for project creation and the L3 scaffold → variant promotion pipeline (merged skill) — workspace-root (L0) only, not shipped in scaffolds |
 | `explain-me` | `skills/explain-me/` | Single-file interactive HTML report generation (inspired by beret21/reportme) |
 
 > **Complete Skill Registry**: The table above is a curated subset — see `docs/VERSION_MANIFEST.md` for the complete registry of all workspace-level skills with versions, status, and lifecycle metadata.
@@ -573,12 +581,16 @@ Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 
 Skills are distributed to all three platform directories via `scripts/sync-skills.ts`:
 
-| Platform | Directory | Registration | Shortcut Skills |
-|----------|-----------|--------------|-----------------|
-| Claude Code | `.claude/skills/` | `.claude/skills.json` | `sync` |
-| Gemini CLI | `.gemini/skills/` | `.gemini/skills.json` | `sync` |
-| Codex (CLI + Desktop App) | `.codex/skills/` | — (skills discovered via `.codex/prompts/` + config) | `sync` |
-| Antigravity | `.agents/skills/` | `.agents/skills.json` | `sync`, `source-command-commit-push-pr` |
+| Platform | Directory | Registration |
+|----------|-----------|--------------|
+| Claude Code | `.claude/skills/` | `.claude/skills.json` |
+| Gemini CLI | `.gemini/skills/` | `.gemini/skills.json` |
+| Codex (CLI + Desktop App) | `.codex/skills/` | — (skills discovered via `.codex/prompts/` + config) |
+| Antigravity | `.agents/skills/` | `.agents/skills.json` |
+
+> Phase 1 distributes every SSOT skill to all four platform directories; the Phase 2
+> back-sync target list is dynamic and currently empty (all former `.agents`-only
+> shortcut candidates are SSOT skills today).
 
 - **Phase 1**: Every `skills/*/SKILL.md` directory is copied to all four platform directories.
 - **Phase 2**: Shortcut skills that only exist in `.agents/skills/` are back-synced to `.claude/skills/` and `.gemini/skills/`.
@@ -706,6 +718,7 @@ A skill health check should also be run outside the quarterly schedule when:
 - **v2.0.0 (2026-06-09)**: Restructured as SSOT - Integrated PM Gateway workflow (§3), execution plan templates (§5), and renumbered existing sections. Consolidated duplicate content from pm.md, CLAUDE.md §5, GEMINI.md §5 into single source of truth.
 - **v1.x**: Previous versions maintained agent roster and individual definitions without PM Gateway integration
 
+<!-- WORKSPACE-MANAGED: graft repo context graph -->
 <!-- graft:start -->
 ## Graft — repo context graph
 
@@ -747,3 +760,4 @@ re-read whole files.
 After big code changes, refresh the graph with `graft build` (deterministic,
 no API key, $0).
 <!-- graft:end -->
+<!-- /WORKSPACE-MANAGED -->

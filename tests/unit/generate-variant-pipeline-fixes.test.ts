@@ -138,8 +138,8 @@ describe('ensureVariantInjectMarkers (v1.0.0 — context.md wrapper injection)',
   });
 });
 
-describe('generateSkillDirectories (v1.2.0 — Windows backslash paths)', () => {
-  it('creates all three skill roots from backslashed targetPaths', () => {
+describe('generateSkillDirectories (v1.16.0 — Windows backslash paths + four mirrors)', () => {
+  it('creates all five skill roots from backslashed targetPaths', () => {
     const tmpRoot = join(tmpdir(), `gv-fixes-${process.pid}-${Date.now()}`);
     const variantPath = join(tmpRoot, 'variant');
     const sourceSkill = join(tmpRoot, 'src', 'skills', 'demo-skill', 'SKILL.md');
@@ -159,7 +159,10 @@ describe('generateSkillDirectories (v1.2.0 — Windows backslash paths)', () => 
       expect(existsSync(join(variantPath, 'skills', 'demo-skill', 'SKILL.md'))).toBe(true);
       expect(existsSync(join(variantPath, '.claude', 'skills', 'demo-skill', 'SKILL.md'))).toBe(true);
       expect(existsSync(join(variantPath, '.gemini', 'skills', 'demo-skill', 'SKILL.md'))).toBe(true);
-      expect(dirs.length).toBe(3);
+      // T-20260921-009 (review H-3): the .agents/.codex mirrors joined the set.
+      expect(existsSync(join(variantPath, '.agents', 'skills', 'demo-skill', 'SKILL.md'))).toBe(true);
+      expect(existsSync(join(variantPath, '.codex', 'skills', 'demo-skill', 'SKILL.md'))).toBe(true);
+      expect(dirs.length).toBe(5);
     } finally {
       rmSync(tmpRoot, { recursive: true, force: true });
     }

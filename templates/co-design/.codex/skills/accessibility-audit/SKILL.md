@@ -3,8 +3,8 @@ name: accessibility-audit
 description: >
   Defines automated WCAG 2.1 Level AA accessibility evaluation rules, DOM audit patterns,
   and remediation guidance using axe-core for UI components, templates, and web applications.
-version: 1.0.0
-last_reviewed: 2026-08-06
+version: 1.1.0
+last_reviewed: 2026-09-06
 status: active
 scope: co-design
 l2_propagate: true
@@ -19,7 +19,6 @@ metadata:
     - wcag accessibility check
     - wcag 2.1 aa
 ---
-
 # ♿ Skill: accessibility-audit
 
 ## Context
