@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.23.0
+// @version 1.24.0
 // v1.23.0: graft build (§7.7) tries the global `graft` binary before bunx —
 //          a bunx native postinstall failure (tree-sitter-kotlin on Windows)
 //          leaves a partial temp cache that breaks every later bunx call
@@ -68,6 +68,7 @@ import {
   readFileSync, writeFileSync, copyFileSync, appendFileSync, chmodSync, mkdtempSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
+import { createHash } from 'node:crypto';
 import { resolve, join, dirname, basename, relative } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { applyContextTemplate, DEFAULT_PM_ROLE_DESCRIPTIONS } from './helpers/template-utils.ts';
@@ -1098,6 +1099,34 @@ if (existsSync(gitattributes)) {
   writeFileSync(gitattributes, 'docs/context.md merge=ours\n');
 }
 
+// ── 5a. Refresh README hashes (v1.24.0, T-20260921-002) ──────────────────────
+// Placeholder substitution rewrites README.md after the template recorded its
+// content_hash, and README_ko.md's translated_from_hash goes stale with it —
+// the project's very first /sync then fails verify-readme-sync twice. Refresh
+// both hashes now, from the FINAL substituted bodies.
+{
+  const strip = (t: string): string => t.replace(/^---\r?\n[\s\S]*?\r?\n---/, '');
+  const bodyHash = (t: string): string => createHash('sha256').update(strip(t), 'utf-8').digest('hex');
+  const enPath = join(projectDir, 'README.md');
+  const koPath = join(projectDir, 'README_ko.md');
+  if (existsSync(enPath)) {
+    const en = readFileSync(enPath, 'utf-8');
+    const h = bodyHash(en);
+    const updated = /^content_hash:/m.test(en)
+      ? en.replace(/^content_hash:\s*.+$/m, `content_hash: ${h}`)
+      : en.replace(/^(---\r?\n[\s\S]*?)(---)/m, `$1content_hash: ${h}\n$2`);
+    writeFileSync(enPath, updated, 'utf-8');
+    if (existsSync(koPath)) {
+      const ko = readFileSync(koPath, 'utf-8');
+      const koUpdated = /^translated_from_hash:/m.test(ko)
+        ? ko.replace(/^translated_from_hash:\s*.+$/m, `translated_from_hash: ${h}`)
+        : ko.replace(/^(---\r?\n[\s\S]*?)(---)/m, `$1translated_from_hash: ${h}\n$2`);
+      writeFileSync(koPath, koUpdated, 'utf-8');
+    }
+    console.log('  ✅ README content hashes refreshed (EN + KO)');
+  }
+}
+
 // ── 6. Cleanup Strictly L0 Files ──────────────────────────────────────────────
 const layerFilter = join(workspaceRoot, 'scripts', 'helpers', 'layer-filter.ts');
 let l0Scripts: string[] = [];
@@ -1246,7 +1275,10 @@ if (l0Scripts.length > 0 && existsSync(projectScriptsMd)) {
 
 // ── 7. Initialize git ──────────────────────────────────────────────────────────
 process.chdir(projectDir);
-spawnSync('git', ['init'], { stdio: 'inherit' });
+// v1.24.0 (T-20260921-003): git init without cwd reinitialized the PARENT
+// workspace repo (git walks up to an existing work tree) — the scaffold
+// inherited the workspace origin and its first /sync opened PRs there.
+spawnSync('git', ['init'], { stdio: 'inherit', cwd: projectDir });
 spawnSync('git', ['config', 'core.hooksPath', '.githooks'], { stdio: 'inherit' });
 
 // Set git identity if missing

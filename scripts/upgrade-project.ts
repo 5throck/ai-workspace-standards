@@ -1,5 +1,10 @@
 #!/usr/bin/env bun
-// @version 1.38.0
+// @version 1.39.0
+// v1.39.0 (2026-09-21, ticket batch T-20260921-001/006): (1) pre-upgrade stash
+//           skips gracefully on repos with no initial commit (fresh scaffolds
+//           could not receive any upgrade); (2) country prune scrubs AGENTS.md
+//           skill-path lines and variant context mentions of pruned k-* skills
+//           — region-neutral scaffolds no longer fail their own audit.
 // v1.38.0 (2026-09-21, rollout hardening — 2026-09-21-upgrade-project-rollout-
 //           hardening-design): (1) SKILLS_REGISTRY_RECONCILE moved after ALL
 //           skill-mutating passes — it previously ran before the skills delivery,
@@ -682,12 +687,19 @@ const preUpgradeDirty = new Set<string>();
 
 if (!dryRun) {
   console.log('--- Creating pre-upgrade git stash snapshot (tracked + untracked) ---');
+  // v1.39.0 (T-20260921-001): fresh scaffolds have no initial commit — stash
+  // would fail and abort the whole upgrade. Skip the snapshot gracefully; the
+  // project tree is the scaffold state, rollback equals re-scaffolding.
+  const hasHead = spawnSync('git', ['-C', projectDir, 'rev-parse', '--verify', '-q', 'HEAD'], { encoding: 'utf8' }).status === 0;
+  if (!hasHead) {
+    console.log('  INFO: no commits yet (fresh scaffold) — pre-upgrade stash skipped.');
+  }
   const snapDate = new Date().toISOString().slice(0, 10).replace(/-/g, '');
   // C2 (2026-09-15 project review): without -u, untracked files were absent
   // from the snapshot while CONFLICT branches still told the operator "the
   // pre-upgrade stash covers rollback" — an untracked CONFLICT file was
   // overwritten with no copy anywhere.
-  const stash = spawnSync('git', ['-C', projectDir, 'stash', 'push', '-u', '-m', `pre-upgrade-snapshot-${snapDate}`], { encoding: 'utf8' });
+  const stash = hasHead ? spawnSync('git', ['-C', projectDir, 'stash', 'push', '-u', '-m', `pre-upgrade-snapshot-${snapDate}`], { encoding: 'utf8' }) : { status: 0, stdout: 'No local changes', stderr: '' };
   if (stash.status !== 0) {
     // M4: a failed stash is NOT a clean tree — rollback coverage would be
     // silently absent. Fail loudly instead of proceeding unprotected.
@@ -2218,6 +2230,7 @@ let countryPrunedSkills = 0;
     }
   }
 
+  const prunedCountrySkills: string[] = [];
   for (const [skillName, scopedCountry] of Object.entries(scopedSkills)) {
     if (detectedCountry !== 'none' && detectedCountry === scopedCountry) continue; // country matches — keep
     // SAFETY (v1.17.1): a skill the project's own variant.json deliberately
@@ -2249,6 +2262,7 @@ let countryPrunedSkills = 0;
         }
       }
       console.log(`  ${dryTag}PRUNE  ${skillBase}/${skillName}/  (${scopedCountry}-scoped, project country: ${detectedCountry})`);
+      prunedCountrySkills.push(skillName);
       if (!dryRun) rmSync(projSkillDir, { recursive: true, force: true });
       countryPrunedSkills++;
     }
@@ -2257,6 +2271,31 @@ let countryPrunedSkills = 0;
     console.log('  (no country-scoped skills registered — nothing to check)');
   } else if (countryPrunedSkills === 0) {
     console.log('  (no country-scoped skills needed pruning)');
+  }
+
+  // v1.39.0 (T-20260921-006): pruned skills must not survive as dangling
+  // references — scrub AGENTS.md skill-path lines and variant context mentions.
+  if (!dryRun && prunedCountrySkills.length > 0) {
+    const agentsPath = join(projectDir, 'AGENTS.md');
+    if (existsSync(agentsPath)) {
+      const lines = readFileSync(agentsPath, 'utf8').split('\n');
+      const kept = lines.filter(line =>
+        !prunedCountrySkills.some((n: string) => line.includes(`skills/${n}/SKILL.md`)));
+      if (kept.length !== lines.length) {
+        writeFileSync(agentsPath, kept.join('\n'), 'utf8');
+        console.log(`  SCRUB  AGENTS.md — removed ${lines.length - kept.length} pruned-skill reference line(s)`);
+      }
+    }
+    const ctxPath = join(projectDir, 'docs', `${variant}.context.md`);
+    if (existsSync(ctxPath)) {
+      const lines = readFileSync(ctxPath, 'utf8').split('\n');
+      const kept = lines.filter(line =>
+        !prunedCountrySkills.some((n: string) => line.includes(`\`${n}\``)));
+      if (kept.length !== lines.length) {
+        writeFileSync(ctxPath, kept.join('\n'), 'utf8');
+        console.log(`  SCRUB  docs/${variant}.context.md — removed ${lines.length - kept.length} pruned-skill line(s)`);
+      }
+    }
   }
 }
 console.log('');

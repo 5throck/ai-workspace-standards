@@ -1,0 +1,25 @@
+schemaVersion: 1
+id: T-20260921-003
+kind: manual
+title: >-
+  new-project inherits the workspace remote - first /sync opens an erroneous PR against the
+  standards repo
+inputs:
+  source: fleet-rollout-2026-09-21
+  evidence: >-
+    co-develop-demo inherited origin=ai-workspace-standards; its initial /sync pushed a branch and
+    opened PR #1006 against the standards repo (closed, branch deleted, remote removed)
+  impact: validation or local projects pollute the standards repo with PRs
+  resolution: >-
+    new-project should not inherit the workspace origin: leave origin unset, or prompt for an
+    explicit target repo before the first sync
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-21T09:30:00.000Z'
+history:
+  - at: '2026-09-21T09:30:00.000Z'
+    from: null
+    to: backlog
+result: null
+error: null

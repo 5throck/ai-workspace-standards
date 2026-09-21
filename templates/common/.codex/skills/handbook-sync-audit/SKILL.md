@@ -1,7 +1,7 @@
 ---
 name: handbook-sync-audit
 scope: common
-version: 1.0.4
+version: 1.0.5
 description: >-
   Handbook Sync Audit — verifies that generated handbooks stay aligned with
   their sources across three axes: (1) content reflection against the
@@ -11,7 +11,7 @@ description: >-
   missing. Responds to "audit handbook", "handbook parity check",
   "handbook sync audit", "textbook drift check".
 status: active
-owner: handbook-reviewer
+owner: pm
 last_reviewed: 2026-08-29
 prerequisites: handbook (audits the output of the H-Stage handbook pipeline)
 l2_propagate: true

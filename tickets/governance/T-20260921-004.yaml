@@ -1,0 +1,24 @@
+schemaVersion: 1
+id: T-20260921-004
+kind: manual
+title: >-
+  handbook-sync-audit owner is a co-deck-only variant agent (handbook-reviewer) - orphan owner in
+  every non-co-deck delivery
+inputs:
+  source: fleet-rollout-2026-09-21
+  evidence: >-
+    templates/common/skills/handbook-sync-audit/SKILL.md frontmatter owner: handbook-reviewer exists
+    only in templates/co-deck/agents/; every other variant delivery warns Orphaned skill (owner:
+    handbook-reviewer not found). The sibling handbook skill already uses owner: pm
+  impact: misleading maintainer signal plus warning noise in 12 of 13 variant deliveries
+  resolution: reassign owner to pm (matching handbook), patch-bump, VERSION_MANIFEST + L1 lockstep
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-21T09:30:00.000Z'
+history:
+  - at: '2026-09-21T09:30:00.000Z'
+    from: null
+    to: backlog
+result: null
+error: null

@@ -1,4 +1,5 @@
 ---
+translated_from_hash: 765cf36e9b1b27e1f411c44b6b9d49222325ee2bace842b7bf74ad95e4b66d34
 sync_version: 1
 ---
 
@@ -357,4 +358,4 @@ AGPL-3.0 - [LICENSE](LICENSE) 파일 참조
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-09-17*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-09-21*

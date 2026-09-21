@@ -1,0 +1,23 @@
+schemaVersion: 1
+id: T-20260921-001
+kind: manual
+title: 'Fresh scaffold: upgrade-project aborts until the first commit exists'
+inputs:
+  source: fleet-rollout-2026-09-21
+  evidence: >-
+    co-develop-demo apply run aborted: pre-upgrade stash failed (exit 1): You do not have the
+    initial commit yet
+  impact: new projects cannot receive any upgrade until a human makes the first commit via /sync
+  resolution: >-
+    pre-upgrade stash should skip gracefully (or use an index-only snapshot) when the repo has no
+    commits yet, and the scaffold banner should surface first-commit-pending
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-21T09:30:00.000Z'
+history:
+  - at: '2026-09-21T09:30:00.000Z'
+    from: null
+    to: backlog
+result: null
+error: null

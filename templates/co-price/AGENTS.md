@@ -22,6 +22,7 @@ Detailed personas live in [`agents/*.md`](agents/); reusable workflows in [`skil
 
 | Agent | File | Tier | Subdomain | Role |
 |-------|------|------|-----------|------|
+| **I18N Specialist Agent** | [`agents/i18n-specialist.md`](agents/i18n-specialist.md) | Medium | i18n | Locale documentation — translation zones, language-policy enforcement, Korean plain-language output. |
 | **PM — Pricing Consulting Orchestrator** | [`agents/pm.md`](agents/pm.md) | High | orchestration | Runs the build lifecycle (5-phase) and consulting engagement lifecycle; sole dispatcher; enforces Harness order and PR-only sync |
 
 <!-- VARIANT-AGENTS-START -->

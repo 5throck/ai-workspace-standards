@@ -3,7 +3,7 @@
 ## Metadata
 
 - **Current Phase**: production
-- **Version**: 1.23.0
+- **Version**: 1.24.0
 - **Owner**: automation-engineer
 - **Last Updated**: 2026-09-20
 - **Last Reviewer**: pm
@@ -14,6 +14,8 @@
 2026-06-01
 
 ## Phase History
+
+- **2026-09-21**: v1.24.0 — git init runs with cwd: projectDir (T-20260921-003: parent-repo reinit inherited the workspace origin); README content_hash + README_ko translated_from_hash refreshed post-substitution (T-20260921-002).
 
 | Date | From | To | Reason | Approver |
 |------|------|-----|---------|----------|

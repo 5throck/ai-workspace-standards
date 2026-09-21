@@ -35,6 +35,7 @@
 
 import { readFileSync, existsSync, rmSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { resolve, join, dirname } from 'node:path';
+import { basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { pruneCountryScopedEnvBlocks } from '../lib/env-sample.ts';
 
@@ -94,6 +95,7 @@ if (existsSync(schemaPath)) {
 // ── Pruning logic ───────────────────────────────────────────────────────────
 
 let prunedCount = 0;
+const prunedSkillNames: string[] = [];
 
 /**
  * Safely remove a directory or file if it exists
@@ -143,6 +145,7 @@ function pruneSkill(skillName: string, scopedCountry: string): void {
 
   if (removed) {
     console.log(`Pruned ${scopedCountry}-scoped skill: ${skillName}`);
+    prunedSkillNames.push(skillName);
     prunedCount++;
   }
 }
@@ -241,6 +244,42 @@ for (const [dirRelPath, scopedCountry] of Object.entries(registry.dirs)) {
 
 // Prune env marker blocks
 pruneEnvBlocks();
+
+// ── Reference scrub (T-20260921-006): pruned skills must not survive as
+// dangling references in AGENTS.md (skill-path table lines) or the variant
+// context doc — a region-neutral scaffold otherwise fails its own audit.
+function scrubPrunedSkillReferences(): void {
+  if (prunedSkillNames.length === 0) return;
+  let scrubbed = 0;
+
+  const agentsPath = join(targetDir, 'AGENTS.md');
+  if (existsSync(agentsPath)) {
+    const lines = readFileSync(agentsPath, 'utf-8').split('\n');
+    const kept = lines.filter(line =>
+      !prunedSkillNames.some(n => line.includes(`skills/${n}/SKILL.md`)));
+    if (kept.length !== lines.length) {
+      writeFileSync(agentsPath, kept.join('\n'), 'utf-8');
+      scrubbed += lines.length - kept.length;
+    }
+  }
+
+  const ctxPath = join(targetDir, 'docs', `${basename(targetDir)}.context.md`);
+  if (existsSync(ctxPath)) {
+    const lines = readFileSync(ctxPath, 'utf-8').split('\n');
+    const kept = lines.filter(line =>
+      !prunedSkillNames.some(n => line.includes(`\`${n}\``)));
+    if (kept.length !== lines.length) {
+      writeFileSync(ctxPath, kept.join('\n'), 'utf-8');
+      scrubbed += lines.length - kept.length;
+    }
+  }
+
+  if (scrubbed > 0) {
+    console.log(`Scrubbed ${scrubbed} dangling reference line(s) (AGENTS.md / context)`);
+    prunedCount += scrubbed;
+  }
+}
+scrubPrunedSkillReferences();
 
 if (prunedCount === 0) {
   console.log('No country-scoped assets needed pruning.');
