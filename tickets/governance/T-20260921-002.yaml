@@ -1,0 +1,26 @@
+schemaVersion: 1
+id: T-20260921-002
+kind: manual
+title: >-
+  Fresh scaffold: first /sync blocked by stale README content_hash and README_ko
+  translated_from_hash
+inputs:
+  source: fleet-rollout-2026-09-21
+  evidence: >-
+    co-develop-demo first dev-sync blocked by verify-readme-sync: placeholder substitution changed
+    the README.md body after the template hash was recorded; README_ko.md translated_from_hash also
+    stale and --update-hashes only covers user-guide pairs
+  impact: every new project's first /sync fails twice before landing
+  resolution: >-
+    new-project should refresh content_hash post-substitution and seed README_ko
+    translated_from_hash (or exclude generated READMEs from hash tracking until first edit)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-21T09:30:00.000Z'
+history:
+  - at: '2026-09-21T09:30:00.000Z'
+    from: null
+    to: backlog
+result: null
+error: null

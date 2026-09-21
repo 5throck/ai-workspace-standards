@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-09-20T23:29:23.548Z
+**Generated**: 2026-09-21T03:16:21.560Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -50,7 +50,7 @@
 | gateguard | 1.0.2 | active | skills/gateguard/SKILL.md | workspace | gateguard, /gateguard, investigate file, check before edit, pre-edit check | pm |
 | graft | N/A | active | .claude/skills/graft/SKILL.md | claude | N/A | N/A |
 | handbook | 0.6.0 | active | templates/common/skills/handbook/SKILL.md | common | make handbook, create handbook, build course site, companion handbook, update handbook, handbook sync, handbook maintenance | pm |
-| handbook-sync-audit | 1.0.4 | active | templates/common/skills/handbook-sync-audit/SKILL.md | common | audit handbook, handbook parity check, handbook sync audit, textbook drift check | handbook-reviewer |
+| handbook-sync-audit | 1.0.5 | active | templates/common/skills/handbook-sync-audit/SKILL.md | common | audit handbook, handbook parity check, handbook sync audit, textbook drift check | pm |
 | i18n-audit | 1.0.0 | active | templates/common/skills/i18n-audit/SKILL.md | common | i18n audit, locale parity, translation parity, glossary audit, L10N parity | pm |
 | i18n-formatting | 1.0.0 | active | templates/common/skills/i18n-formatting/SKILL.md | common | date format, number format, currency format, unit conversion, paper size, korean numerals | pm |
 | i18n-layout | 1.0.0 | active | templates/common/skills/i18n-layout/SKILL.md | common | character encoding, RTL, bidi, font selection, CRLF, BOM | pm |
@@ -132,7 +132,7 @@
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
 | md-to-ooxml.ts | 1.2.0 | scripts/md-to-ooxml.ts | fs, path |
 | migrate-quality-gates.ts | 1.1.0 | scripts/migrate-quality-gates.ts | fs, js-yaml, path |
-| new-project.ts | 1.23.0 | scripts/new-project.ts | js-yaml |
+| new-project.ts | 1.24.0 | scripts/new-project.ts | js-yaml |
 | procedure-coverage.ts | 1.0.0 | scripts/procedure-coverage.ts | js-yaml |
 | project-to-variant.ts | 1.4.0 | scripts/project-to-variant.ts | N/A |
 | promote-context-section.ts | 1.0.0 | scripts/promote-context-section.ts | N/A |
@@ -149,7 +149,7 @@
 | review-baseline.ts | 1.0.0 | scripts/review-baseline.ts | N/A |
 | setup-github-branch-protection.ts | 1.0.1 | scripts/setup-github-branch-protection.ts | bun |
 | skill-dependency-analysis.ts | 1.0.2 | scripts/skill-dependency-analysis.ts | N/A |
-| skill-lifecycle-audit.ts | 1.5.0 | scripts/skill-lifecycle-audit.ts | N/A |
+| skill-lifecycle-audit.ts | 1.5.1 | scripts/skill-lifecycle-audit.ts | N/A |
 | skill-session-review.ts | 1.1.0 | scripts/skill-session-review.ts | bun |
 | spec-backfill.ts | 1.0.0 | scripts/spec-backfill.ts | N/A |
 | spec-register.ts | 1.3.0 | scripts/spec-register.ts | N/A |
@@ -170,7 +170,7 @@
 | ticket.ts | 1.2.0 | scripts/ticket.ts | N/A |
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, fs, path |
 | typecheck.ts | 1.1.1 | scripts/typecheck.ts | N/A |
-| upgrade-project.ts | 1.38.0 | scripts/upgrade-project.ts | N/A |
+| upgrade-project.ts | 1.39.0 | scripts/upgrade-project.ts | N/A |
 | validate-agents.ts | 1.2.1 | scripts/validate-agents.ts | N/A |
 | validate-decisions.ts | 1.0.0 | scripts/validate-decisions.ts | js-yaml |
 | validate-doc-folder.ts | 1.1.0 | scripts/validate-doc-folder.ts | fs, path |

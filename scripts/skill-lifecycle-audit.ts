@@ -9,7 +9,10 @@
  *   bun scripts/skill-lifecycle-audit.ts
  *   bun scripts/skill-lifecycle-audit.ts --json   # JSON output
  *
- * @version 1.5.0
+ * @version 1.5.1
+ * v1.5.1: scope validation accepts the project's variant name from
+ *         .claude/template-version.txt (project dir name != variant name);
+ *         orphaned-owner WARN gated to the workspace-root authoring surface.
  * @last_updated 2026-09-21
  * @license MIT
  */
@@ -84,6 +87,15 @@ const CONSTITUTION_FILE = join(ROOT, 'CONSTITUTION.md');
 // see scripts/helpers/layer-filter.ts. `variant` itself is also accepted as a
 // generic placeholder for skills not yet tied to one specific variant name.
 const CURRENT_VARIANT_NAME = basename(ROOT);
+// In a scaffolded project the skills' variant scope is the VARIANT name recorded
+// in .claude/template-version.txt — not the project directory name (a project
+// named `co-develop-demo` still carries `scope: co-develop` skills).
+const PROJECT_VARIANT_NAME = (() => {
+  const tv = join(ROOT, '.claude', 'template-version.txt');
+  if (!existsSync(tv)) return '';
+  const m = readFileSync(tv, 'utf-8').match(/^variant=(\S+)/m);
+  return m ? m[1].trim() : '';
+})();
 // Root-level (L0) skills in skills/ may declare a specific variant's name as
 // their scope even though the audit always runs from workspace root (where
 // CURRENT_VARIANT_NAME resolves to the workspace folder name, never a co-*
@@ -96,7 +108,7 @@ const KNOWN_VARIANT_NAMES = (() => {
     .map(e => e.name);
 })();
 function isValidScope(scope: string): boolean {
-  return ['workspace', 'common', 'variant', CURRENT_VARIANT_NAME, ...KNOWN_VARIANT_NAMES].includes(scope);
+  return ['workspace', 'common', 'variant', CURRENT_VARIANT_NAME, PROJECT_VARIANT_NAME, ...KNOWN_VARIANT_NAMES].filter(Boolean).includes(scope);
 }
 
 // Detect if we're at workspace root or in a sub-project
@@ -482,7 +494,9 @@ function auditSkills(jsonMode = false): AuditResult {
       continue;
     }
 
-    if (!isPlatformSkill && frontmatter.owner && !agentExists(frontmatter.owner, registry)) {
+    // v1.5.1: orphaned-owner is an authoring-surface check — project snapshots
+    // keep their delivered owners as-is (same rationale as agent-audit Check 12).
+    if (IS_WORKSPACE_ROOT && !isPlatformSkill && frontmatter.owner && !agentExists(frontmatter.owner, registry)) {
       warnings.push({
         level: 'warning',
         file: relPath,

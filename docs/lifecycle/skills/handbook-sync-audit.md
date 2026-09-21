@@ -3,7 +3,7 @@
 ## Overview
 
 - **Skill Name**: handbook-sync-audit
-- **Version**: 1.0.4
+- **Version**: 1.0.5
 - **Status**: active
 - **Owner**: handbook-reviewer
 - **Phase**: production
@@ -30,6 +30,8 @@
 - **Last Updated**: 2026-09-21
 
 ## Changelog
+
+- **1.0.5** (2026-09-21): owner reassigned handbook-reviewer → pm — the reviewer agent exists only in co-deck; a common skill's maintainer must exist workspace-wide (T-20260921-004).
 
 - **1.0.4** (2026-09-21): patch bump — deliver accumulated template content to the fleet (equal-version content drift measured 2026-09-21; upgrade-project 1.37 UPDATE delivery).
 

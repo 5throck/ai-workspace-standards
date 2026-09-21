@@ -1,0 +1,27 @@
+schemaVersion: 1
+id: T-20260921-006
+kind: manual
+title: >-
+  Region-neutral scaffolds of country-profile variants retain pruned k-* references and fail their
+  own audit
+inputs:
+  source: fleet-rollout-2026-09-21
+  evidence: >-
+    co-consult scaffold without --country: country prune correctly removed 7 k-* assets and their
+    SKILLS.md rows, but AGENTS.md section 6 still references skills/k-dart/SKILL.md and
+    skills/k-law/SKILL.md and docs/co-consult.context.md retains k-* mentions - the fresh project
+    fails its own audit with 2 reference FAILs
+  impact: every region-neutral scaffold of a country-profile variant is born failing its audit gate
+  resolution: >-
+    country-prune pass must also scrub AGENTS.md skill-path references and context.md mentions of
+    pruned country-scoped skills
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-21T09:30:00.000Z'
+history:
+  - at: '2026-09-21T09:30:00.000Z'
+    from: null
+    to: backlog
+result: null
+error: null

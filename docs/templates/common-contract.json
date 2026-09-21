@@ -198,7 +198,7 @@
     },
     "handbook-sync-audit": {
       "source": "skills/handbook-sync-audit/SKILL.md",
-      "version": "1.0.4",
+      "version": "1.0.5",
       "overridable": false,
       "description": "Handbook Sync Audit — verifies generated handbooks stay aligned with their sources across content, structure, and anchor axes"
     },
@@ -338,7 +338,7 @@
     "handbook-sync-audit": {
       "claude_source": ".claude/skills/handbook-sync-audit/SKILL.md",
       "gemini_source": ".gemini/skills/handbook-sync-audit/SKILL.md",
-      "version": "1.0.4",
+      "version": "1.0.5",
       "description": "Handbook Sync Audit — verifies generated handbooks stay aligned with their sources across content reflection, structural linkage, and freshness",
       "propagated_to_common": true
     },

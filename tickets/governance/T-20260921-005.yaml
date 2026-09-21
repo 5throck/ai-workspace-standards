@@ -1,0 +1,25 @@
+schemaVersion: 1
+id: T-20260921-005
+kind: manual
+title: i18n-specialist common agent is delivered to every new project but never registered - orphan agent
+inputs:
+  source: fleet-rollout-2026-09-21
+  evidence: >-
+    templates/common/agents/i18n-specialist.md ships in every scaffold (confirmed in
+    co-develop-demo) but no variant AGENTS.md registers it (grep count 0); agent-lifecycle-audit
+    warns Agent not registered in AGENTS.md; frontmatter also lacks role
+  impact: i18n work has a delivered-but-invisible agent in every project; audit warning noise
+  resolution: >-
+    choose one: (A, recommended) register common agents in scaffolded AGENTS.md under a
+    Common-agents group during roster generation and add the missing role frontmatter, or (B) stop
+    delivering unregistered common agents
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-21T09:30:00.000Z'
+history:
+  - at: '2026-09-21T09:30:00.000Z'
+    from: null
+    to: backlog
+result: null
+error: null

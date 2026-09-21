@@ -18,6 +18,7 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 | Agent | File | Tier | Role |
 |-------|------|------|------|
 | **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) | High | Orchestrates team assembly (Phase 0), design validation (Phase 1-2), and lifecycle finalization (Phase 5). **PM does NOT execute code or documentation directly — all specialist work dispatched through PM.** |
+| **I18N Specialist Agent** | [`agents/i18n-specialist.md`](agents/i18n-specialist.md) | Medium | Locale documentation — translation zones, language-policy enforcement, Korean plain-language output. |
 
 <!-- VARIANT-AGENTS-START -->
 | **fact-checker** | [`agents/fact-checker.md`](agents/fact-checker.md) | Medium | Fact-checker - the newsroom's citation gatekeeper. Extracts every material claim from briefs and drafts, requires 2+ ind |
