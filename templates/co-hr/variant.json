@@ -60,6 +60,10 @@
     {
       "name": "talent-acquisition-specialist",
       "file": "agents/talent-acquisition-specialist.md"
+    },
+    {
+      "name": "i18n-specialist",
+      "file": "agents/i18n-specialist.md"
     }
   ],
   "skills": [

@@ -24,6 +24,10 @@
     {
       "name": "safety-workflow-manager",
       "file": "agents/safety-workflow-manager.md"
+    },
+    {
+      "name": "i18n-specialist",
+      "file": "agents/i18n-specialist.md"
     }
   ],
   "skills": [

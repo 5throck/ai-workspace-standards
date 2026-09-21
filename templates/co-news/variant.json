@@ -40,6 +40,10 @@
     {
       "name": "visual-editor",
       "file": "agents/visual-editor.md"
+    },
+    {
+      "name": "i18n-specialist",
+      "file": "agents/i18n-specialist.md"
     }
   ],
   "skills": [
