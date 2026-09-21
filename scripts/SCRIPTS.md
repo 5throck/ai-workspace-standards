@@ -82,6 +82,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `compile-tokens.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `design-lint.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `review-baseline.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `helpers/skills-registry.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `resync-audit.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `evidence-backport-scan.ts` | L0 | 1.0.0 | active | Evidence Backporting scanner — read-only form detection (F1/F2/F3/F0/MIXED) + M1-M6 maturity bar over Projects/co-* evidence planes (ADR-0084 Decision 6, design §4); consumes graph-delta-log.ts output for M2/M4/M6b with git-log fallback; project-resync Step 2b | —| L0+L1 | —|
 | `create-l3-scaffold.ts` | L0 | 1.16.0 | active | Step 8.5 graft build: global `graft` first, bunx fallback (spec 2026-09-20-graft-scaffold-resilience) | —| L0 | —|
@@ -228,7 +229,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `translate-readme.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `ticket.ts` | L0 | 1.2.0 | active | `create --not-before`, `list --kind`, `list --ready`, `move done --result` (required, not bypassable by --force) | —| L0 | —|
 | `typecheck.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
-| `upgrade-project.ts` | L0 | 1.40.0 | active | `--variant`, `--platform` (claude/antigravity/codex/all — `all` renamed from `both`, now merges CODEX.md too), `--dry-run`, `--prune-removed`, `--rollback`, `--yes`, `--skip-context-commonization`, `--force-context-sync`; COMMON-CONTEXT splice under PRESERVE (T-20260919-003); skill sub-file sync — NEW/UPDATE deliver the whole skill dir, equal-version skills get additive CATCH-UP + DRIFT warnings (2026-09-21) | —| L0 | —|
+| `upgrade-project.ts` | L0 | 1.41.0 | active | `--variant`, `--platform` (claude/antigravity/codex/all — `all` renamed from `both`, now merges CODEX.md too), `--dry-run`, `--prune-removed`, `--rollback`, `--yes`, `--skip-context-commonization`, `--force-context-sync`; COMMON-CONTEXT splice under PRESERVE (T-20260919-003); skill sub-file sync — NEW/UPDATE deliver the whole skill dir, equal-version skills get additive CATCH-UP + DRIFT warnings (2026-09-21) | —| L0+L1 | —|
 | `variant-feature.ts` | L0 | 1.0.0 | active | `--variant`, `--feature`, `--type` | —| L0 | —|
 | `validate-agents.ts` | L0 | 1.2.1 | active | —| —| L0+L1 | —|
 | `validate-doc-folder.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
