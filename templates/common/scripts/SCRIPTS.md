@@ -248,7 +248,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `validate-procedures.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `validate-skills.ts` | L0 | 1.5.1 | active | —| —| L0+L1 | —|
 | `validate-decisions.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `validate-templates.ts` | L0 | 1.36.0 | active | —| —| L0+L1 | —|
+| `validate-templates.ts` | L0 | 1.37.0 | active | roster-tier-consistency (T-20260921-020: roster tier vs extends-resolved frontmatter tier + L0 Tier Ceiling enforcement) —| —| L0+L1 | —|
 | `validate-variant-readiness.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `verify-country-prune.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `verify-adr-governance.ts` | L0 | 1.7.0 | active | Added bold-line fallback for `**Date**: YYYY-MM-DD` metadata to mirror `extractADRStatus()` pattern (ADR-0084 safety net); WARN on unparseable dates for Accepted/Proposed ADRs | —| L0 | —|

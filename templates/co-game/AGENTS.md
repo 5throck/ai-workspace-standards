@@ -21,16 +21,16 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 | **I18N Specialist Agent** | [`agents/i18n-specialist.md`](agents/i18n-specialist.md) | Medium | Locale documentation — translation zones, language-policy enforcement, Korean plain-language output. |
 
 <!-- VARIANT-AGENTS-START -->
-| **arcade-designer** | [`agents/arcade-designer.md`](agents/arcade-designer.md) | Medium | Arcade game design specialist. Produces entity AI patterns, wave/stage systems, item/power-up mechanics, scoring systems |
-| **architect** | [`agents/architect.md`](agents/architect.md) | Medium | Design agent - produces implementation plans and technical specs. Use when: planning a new feature, evaluating architect |
+| **arcade-designer** | [`agents/arcade-designer.md`](agents/arcade-designer.md) | High | Arcade game design specialist. Produces entity AI patterns, wave/stage systems, item/power-up mechanics, scoring systems |
+| **architect** | [`agents/architect.md`](agents/architect.md) | High | Design agent - produces implementation plans and technical specs. Use when: planning a new feature, evaluating architect |
 | **designer** | [`agents/designer.md`](agents/designer.md) | Medium | UI/UX design agent - produces wireframes, component specs, and design tokens. Use when: designing new screens or flows,  |
 | **game-debugger** | [`agents/game-debugger.md`](agents/game-debugger.md) | Medium | Game debugger agent - analyzes bug reports, identifies root causes in game engine code, proposes targeted fixes, writes  |
-| **game-designer** | [`agents/game-designer.md`](agents/game-designer.md) | Medium | Universal game design agent - produces core game loop specifications, difficulty curves, reward systems, tutorial/onboar |
-| **game-developer** | [`agents/game-developer.md`](agents/game-developer.md) | Medium | Game implementation agent - implements Canvas rendering engine, game loop, collision detection, entity systems, sprite r |
-| **puzzle-designer** | [`agents/puzzle-designer.md`](agents/puzzle-designer.md) | Medium | Puzzle and board game design specialist. Produces matching/link logic, turn-based systems, difficulty generation algorit |
+| **game-designer** | [`agents/game-designer.md`](agents/game-designer.md) | High | Universal game design agent - produces core game loop specifications, difficulty curves, reward systems, tutorial/onboar |
+| **game-developer** | [`agents/game-developer.md`](agents/game-developer.md) | Low | Game implementation agent - implements Canvas rendering engine, game loop, collision detection, entity systems, sprite r |
+| **puzzle-designer** | [`agents/puzzle-designer.md`](agents/puzzle-designer.md) | High | Puzzle and board game design specialist. Produces matching/link logic, turn-based systems, difficulty generation algorit |
 | **security-monitor** | [`agents/security-monitor.md`](agents/security-monitor.md) | Medium | Security monitor - scans for vulnerabilities, advisories, and secret leaks. Use for: daily security scans, pre-PR adviso |
 | **sound-designer** | [`agents/sound-designer.md`](agents/sound-designer.md) | Medium | Procedural audio design specialist. Produces sound effect specifications, BGM loop structures, audio effect chains, and  |
-| **stack-setup** | [`agents/stack-setup.md`](agents/stack-setup.md) | Medium | Stack Setup Specialist. Use when: "Unrecognized tech stack", "Environment setup needed", "Project initialization" |
+| **stack-setup** | [`agents/stack-setup.md`](agents/stack-setup.md) | Low | Stack Setup Specialist. Use when: "Unrecognized tech stack", "Environment setup needed", "Project initialization" |
 | **test-runner** | [`agents/test-runner.md`](agents/test-runner.md) | Medium | QA and verification agent - runs tests and validates acceptance criteria. Use when: code has been written and needs to b |
 | **visual-artist** | [`agents/visual-artist.md`](agents/visual-artist.md) | Medium | Visual asset specification agent - produces sprite sheet layouts, animation frame specs, procedural rendering instructio |
 <!-- VARIANT-AGENTS-END -->
@@ -439,16 +439,16 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 | PM Orchestrator | `agents/pm.md` | Medium | - | orchestrates only |
 
 <!-- VARIANT-SUBAGENT-ROSTER-START -->
-| arcade-designer | `agents/arcade-designer.md` | Medium | ⚠️ sequential preferred | project files |
-| architect | `agents/architect.md` | Medium | ⚠️ sequential preferred | project files |
+| arcade-designer | `agents/arcade-designer.md` | High | ⚠️ sequential preferred | project files |
+| architect | `agents/architect.md` | High | ⚠️ sequential preferred | project files |
 | designer | `agents/designer.md` | Medium | ⚠️ sequential preferred | project files |
 | game-debugger | `agents/game-debugger.md` | Medium | ⚠️ sequential preferred | project files |
-| game-designer | `agents/game-designer.md` | Medium | ⚠️ sequential preferred | project files |
-| game-developer | `agents/game-developer.md` | Medium | ⚠️ sequential preferred | project files |
-| puzzle-designer | `agents/puzzle-designer.md` | Medium | ⚠️ sequential preferred | project files |
+| game-designer | `agents/game-designer.md` | High | ⚠️ sequential preferred | project files |
+| game-developer | `agents/game-developer.md` | Low | ⚠️ sequential preferred | project files |
+| puzzle-designer | `agents/puzzle-designer.md` | High | ⚠️ sequential preferred | project files |
 | security-monitor | `agents/security-monitor.md` | Medium | ⚠️ sequential preferred | project files |
 | sound-designer | `agents/sound-designer.md` | Medium | ⚠️ sequential preferred | project files |
-| stack-setup | `agents/stack-setup.md` | Medium | ⚠️ sequential preferred | project files |
+| stack-setup | `agents/stack-setup.md` | Low | ⚠️ sequential preferred | project files |
 | test-runner | `agents/test-runner.md` | Medium | ⚠️ sequential preferred | project files |
 | visual-artist | `agents/visual-artist.md` | Medium | ⚠️ sequential preferred | project files |
 <!-- VARIANT-SUBAGENT-ROSTER-END -->

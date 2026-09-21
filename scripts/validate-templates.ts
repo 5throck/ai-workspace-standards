@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.36.0
+ * @version 1.37.0
  *
  * v1.36.0 (ADR-0081 fleet sweep / T-20260919-001): new `common-agents-parity`
  *           (PM-04b) — every variant templates/co-<v>/AGENTS.md must carry the
@@ -1949,6 +1949,118 @@ function checkVariantMirrorParity(): void {
     if (checked === 0) console.log('  (no variant templates with a skills/ tree found)');
     else if (warnings === 0) console.log(`  ✓ ${checked} variant template(s): platform mirrors carry exactly the mirrorable set`);
   }
+}
+
+// Check: roster-tier-consistency (T-20260921-020, validator-hardening) — an
+// AGENTS.md roster row's Tier cell must match the referenced agent's effective
+// frontmatter tier (resolving the extends chain: variant stub → common → root;
+// scalar `tier:` or per-platform map, `claude` value), and must not ELEVATE
+// above the L0 baseline tier for agents that exist at the root (AGENTS.md §3.5
+// Tier Ceiling Rule) unless the variant agent frontmatter declares
+// `tier_ceiling_exempt: <reason>`. Live instance: PM was downgraded to Medium
+// at the root on 2026-09-15 but all 13 variant rosters kept High until
+// 2026-09-21 — hand-maintained rosters drift silently, so the machine owns it now.
+const TIER_RANK: Record<string, number> = { low: 0, medium: 1, high: 2 };
+
+function readFrontmatterTier(fmPath: string): string | null {
+  if (!existsSync(fmPath)) return null;
+  let fm: string;
+  try {
+    const m = readFileSync(fmPath, 'utf-8').match(/^---\n([\s\S]*?)\n---/);
+    if (!m) return null;
+    fm = m[1];
+  } catch {
+    return null;
+  }
+  const scalar = fm.match(/^tier:\s*(\S+)\s*$/m);
+  if (scalar) return scalar[1].toLowerCase();
+  const map = fm.match(/^tier:\s*$[\s\S]*?^\s{2}claude:\s*(\S+)/m);
+  return map ? map[1].toLowerCase() : null;
+}
+
+function resolveTierViaExtends(fmPath: string, depth = 0): string | null {
+  if (depth > 3 || !existsSync(fmPath)) return null;
+  const direct = readFrontmatterTier(fmPath);
+  if (direct) return direct;
+  let content: string;
+  try {
+    content = readFileSync(fmPath, 'utf-8');
+  } catch {
+    return null;
+  }
+  const ext = content.match(/^extends:\s*(\S+)\s*$/m);
+  if (!ext) return null;
+  return resolveTierViaExtends(join(dirname(fmPath), ext[1]), depth + 1);
+}
+
+function rosterTierRows(agentsMd: string): Array<{ name: string; tier: string; line: number }> {
+  const out: Array<{ name: string; tier: string; line: number }> = [];
+  let lines: string[] = [];
+  try {
+    lines = readFileSync(agentsMd, 'utf-8').split('\n');
+  } catch {
+    return out;
+  }
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (!line.trim().startsWith('|') || !line.includes('agents/')) continue;
+    const cells = line.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map(c => c.trim());
+    for (let j = 0; j < cells.length; j++) {
+      const m = cells[j].match(/agents\/([A-Za-z0-9_-]+)\.md/);
+      if (!m) continue;
+      const next = (cells[j + 1] ?? '').replace(/\*\*/g, '').trim().toLowerCase();
+      if (/^(high|medium|low)$/.test(next)) out.push({ name: m[1], tier: next, line: i + 1 });
+      break; // the first agent-file cell in the row owns the tier cell
+    }
+  }
+  return out;
+}
+
+function checkRosterTierConsistency(): void {
+  if (!JSON_MODE) console.log('\n=== Check roster-tier-consistency: AGENTS.md roster tiers match resolved agent frontmatter tiers ===');
+  let checked = 0;
+
+  // 1. Workspace root self-check (AGENTS.md vs agents/*.md frontmatter)
+  for (const row of rosterTierRows(join(ROOT, 'AGENTS.md'))) {
+    const resolved = resolveTierViaExtends(join(ROOT, 'agents', `${row.name}.md`));
+    if (resolved && resolved !== row.tier) {
+      fail('common', 'roster-tier-consistency',
+        `AGENTS.md roster row for agents/${row.name}.md says ${row.tier} but agents/${row.name}.md frontmatter resolves to ${resolved}`,
+        'Update the roster row or the agent frontmatter — hand-maintained rosters drift silently (PM 2026-09-15 instance)');
+    }
+    checked++;
+  }
+
+  // 2. Variant templates: roster tier vs extends-chain resolution + L0 tier ceiling
+  if (!existsSync(TEMPLATES_DIR)) return;
+  for (const entry of readdirSync(TEMPLATES_DIR, { withFileTypes: true })) {
+    if (!entry.isDirectory() || !entry.name.startsWith('co-')) continue;
+    const vdir = join(TEMPLATES_DIR, entry.name);
+    const agentsMd = join(vdir, 'AGENTS.md');
+    if (!existsSync(agentsMd)) continue;
+    for (const row of rosterTierRows(agentsMd)) {
+      checked++;
+      let resolved = resolveTierViaExtends(join(vdir, 'agents', `${row.name}.md`))
+        ?? resolveTierViaExtends(join(TEMPLATES_DIR, 'common', 'agents', `${row.name}.md`))
+        ?? resolveTierViaExtends(join(ROOT, 'agents', `${row.name}.md`));
+      if (resolved && resolved !== row.tier) {
+        fail(entry.name, 'roster-tier-consistency',
+          `AGENTS.md:${row.line} roster row for agents/${row.name}.md says ${row.tier} but the agent resolves to ${resolved} via the extends chain`,
+          `Update the roster row (or the agent frontmatter) — every scaffold inherits this table`);
+      }
+      const baseline = resolveTierViaExtends(join(ROOT, 'agents', `${row.name}.md`));
+      if (baseline && resolved && TIER_RANK[resolved] > TIER_RANK[baseline]) {
+        const vAgent = join(vdir, 'agents', `${row.name}.md`);
+        const exempt = existsSync(vAgent) && /^tier_ceiling_exempt:\s*\S/m.test(readFileSync(vAgent, 'utf-8'));
+        if (!exempt) {
+          fail(entry.name, 'roster-tier-consistency',
+            `agents/${row.name}.md resolves to ${resolved}, above the L0 baseline ${baseline} (AGENTS.md §3.5 Tier Ceiling Rule)`,
+            `Lower the tier to the L0 baseline, or declare \`tier_ceiling_exempt: <reason>\` in the variant agent frontmatter`);
+        }
+      }
+    }
+  }
+  if (!JSON_MODE && checked > 0) console.log(`  ✓ ${checked} roster row(s) checked`);
 }
 
 // Check B-12: L0/L1 style neutrality — variant-owned design identity literals
@@ -4514,6 +4626,7 @@ function main(): number {
   checkVariantScopedSkillLeak();  // B-11: variant_scoped_skills must not live in common
   checkPlatformMirrorFreshness(); // T-20260916-008: platform skill mirrors carry SSOT versions
   checkVariantMirrorParity();     // T-20260921-009: variant mirrors carry the variant skill set
+  checkRosterTierConsistency();   // T-20260921-020: roster tiers match resolved agent frontmatter tiers
   checkStyleNeutrality();         // B-12: L0/L1 style neutrality (ADR-0064/0066)
 
   let variantsChecked = 0;
