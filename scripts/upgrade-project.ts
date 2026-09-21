@@ -2241,7 +2241,7 @@ let countryPrunedSkills = 0;
       console.log(`  ⚠️  KEEP ${skillName}/  (${scopedCountry}-scoped, project country ${detectedCountry})  — declared in the project variant.json skill_manifest`);
       continue;
     }
-    for (const skillBase of ['skills', '.claude/skills', '.gemini/skills', '.agents/skills']) {
+    for (const skillBase of ['skills', '.claude/skills', '.gemini/skills', '.agents/skills', '.codex/skills']) {
       const projSkillDir = join(projectDir, skillBase, skillName);
       if (!existsSync(projSkillDir)) continue;
       const skillMd = join(projSkillDir, 'SKILL.md');
@@ -2693,6 +2693,56 @@ if (dryRun) {
     spawnSync('git', ['-C', projectDir, 'config', 'core.hooksPath', '.githooks']);
     console.log('       -> Auto-fixed: set core.hooksPath to .githooks');
   }
+}
+console.log('');
+
+// ── WORKSPACE-ONLY SKILL SWEEP (2026-09-21 review C-1) ────────────────────────
+// l2_propagate:false skills (create-variant, promote-variant, release-template,
+// simulate-pipeline, …) are workspace/L0 lifecycle tooling and must never ship into
+// projects. Older scaffolds and the former .codex TEMPLATE TREE SYNC claim leaked
+// them into the platform mirrors; sweep every base so existing projects self-heal.
+// Stock copies (byte-equal to the L1 mirror or a variant overlay) are removed;
+// diverged + locally-modified copies surface a CONFLICT and are kept, mirroring the
+// country-prune safety model. `.claude/skills/graft` is exempt (C-CM-05 claude-only
+// exception, hand-maintained outside the SSOT and delivered by TEMPLATE TREE SYNC).
+// MUST run before the post-upgrade sync-skills.ts invoke so mirrors are regenerated
+// from the already-swept skill set.
+console.log('--- WORKSPACE-ONLY SKILL SWEEP (l2_propagate: false) ---');
+{
+  const sweepBases = ['skills', '.claude/skills', '.gemini/skills', '.agents/skills', '.codex/skills'];
+  // Keep in sync with NEW_PROJECT_LEGACY_L0_SKILLS in helpers/scaffold-markers.ts.
+  const LEGACY_L0_SKILLS = ['simulate-project-creation'];
+  let sweptSkills = 0;
+  for (const sweepBase of sweepBases) {
+    const sweepDir = join(projectDir, sweepBase);
+    if (!existsSync(sweepDir)) continue;
+    for (const skillName of readdirSync(sweepDir)) {
+      if (sweepBase === '.claude/skills' && skillName === 'graft') continue;
+      const sweepSkillMd = join(sweepDir, skillName, 'SKILL.md');
+      if (!existsSync(sweepSkillMd)) continue;
+      let flagged = false;
+      try {
+        flagged = LEGACY_L0_SKILLS.includes(skillName)
+          || /^l2_propagate:\s*false\b/m.test(readFileSync(sweepSkillMd, 'utf8'));
+      } catch {
+        continue; // unreadable — leave for the next run rather than guess
+      }
+      if (!flagged) continue;
+      const isStockCopy = [
+        join(commonDir, '.claude/skills', skillName, 'SKILL.md'),
+        join(commonDir, 'skills', skillName, 'SKILL.md'),
+        join(templatesDir, 'skills', skillName, 'SKILL.md'),
+      ].some(src => existsSync(src) && fileHash(src) === fileHash(sweepSkillMd));
+      if (!isStockCopy && isLocallyModified(sweepSkillMd)) {
+        console.log(`  ⚠️  CONFLICT ${sweepBase}/${skillName}/  workspace-only skill, locally modified — kept`);
+        continue;
+      }
+      console.log(`  ${dryTag}SWEEP  ${sweepBase}/${skillName}/  (l2_propagate: false — workspace-only)`);
+      if (!dryRun) rmSync(join(sweepDir, skillName), { recursive: true, force: true });
+      sweptSkills++;
+    }
+  }
+  if (sweptSkills === 0) console.log('  (no workspace-only skills found — nothing to sweep)');
 }
 console.log('');
 

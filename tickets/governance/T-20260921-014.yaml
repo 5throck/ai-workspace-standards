@@ -1,0 +1,17 @@
+schemaVersion: 1
+id: T-20260921-014
+kind: manual
+title: >-
+  new-project: reuse country_config.profiles_dir for {{COUNTRY}} display-name
+  resolution and warn when the profiles directory is missing instead of silently
+  skipping ACTIVE.md (2026-09-21 review M-16)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-21T13:28:40.117Z'
+history:
+  - at: '2026-09-21T13:28:40.117Z'
+    from: null
+    to: backlog
+result: null
+error: null

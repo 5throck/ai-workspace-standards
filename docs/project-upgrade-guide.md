@@ -27,7 +27,7 @@ This guide documents the `upgrade-project.ts` tool that automates this process.
 
 ## §2: Upgrade Tool
 
-**Script**: `scripts/upgrade-project.ts` (v1.22.0)
+**Script**: `scripts/upgrade-project.ts` (v1.39.0)
 **Location**: Workspace root only (`L0` per ADR-0073 Amendment 1). Projects do **not** carry a copy — the script resolves the template tree relative to its own location, so a project-local copy could never source templates; inert legacy copies are pruned by `--prune-removed`. From inside a project, invoke the workspace script: `bun ../../scripts/upgrade-project.ts .`
 
 ### Usage
@@ -380,8 +380,8 @@ The tool will prompt for confirmation before proceeding. This is expected for pr
 - [Upgrade Policy Coverage Design](designs/2026-09-11-upgrade-policy-coverage-design.md) — gap inventory, decisions D1–D8, Phase C addendum
 - [Upgrade Project Skill](../skills/upgrade-project/SKILL.md) — pass table, managed-block markers, post-upgrade verification
 - [Coverage Validator](../scripts/check-upgrade-coverage.ts) — `bun scripts/check-upgrade-coverage.ts [--variant <name>] [--strict] [--json]`
-- [Variant Creation Guide](../.agents/skills/create-variant/SKILL.md) — Phase A: Creating new variants
-- [Variant Promotion Guide](../.agents/skills/promote-variant/SKILL.md) — Phase B: Promoting variants
+- [Variant Creation Guide](../skills/create-variant/SKILL.md) — Phase A: Creating new variants
+- [Variant Promotion Guide](../skills/promote-variant/SKILL.md) — Phase B: Promoting variants
 - [New Project Scaffolding](constitution/07-new-project.md) — Creating new L3 projects
 - [Fork Model (ADR-0031)](adr/0031-l1-l2-fork-model.md) — L1/L2 propagation philosophy
 - [Variant Review Report (2026-07-14)](variant-review-report-2026-07-14.md) — Infrastructure audit results

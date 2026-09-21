@@ -1,0 +1,17 @@
+schemaVersion: 1
+id: T-20260921-012
+kind: manual
+title: >-
+  validator-hardening: add the *_<lang-code>.md filename-suffix translation zone
+  to the AGENTS.md policy text and workspace-schema translation_zone_patterns so
+  policy text matches validate-md-language enforcement (2026-09-21 review M-2)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-21T13:28:40.092Z'
+history:
+  - at: '2026-09-21T13:28:40.092Z'
+    from: null
+    to: backlog
+result: null
+error: null

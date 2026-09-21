@@ -3,16 +3,16 @@
 ## Metadata
 - **Skill**: upgrade-project
 - **Status**: active
-- **Version**: 1.5.0
+- **Version**: 1.5.1
 - **Owner**: pm
 - **Created**: 2026-07-31
-- **Last Updated**: 2026-09-16
+- **Last Updated**: 2026-09-21
 
 ## Description
 Upgrades an existing L2/L3 project to the current template version: syncs template improvements into a variant-based project's scripts, agents, skills, docs, and commands through the policy-driven TEMPLATE TREE SYNC engine (`scripts/upgrade-project.ts`, backed by `lib/upgrade-policy.ts`), with country-aware .env.sample delivery and conflict warnings for locally-modified files.
 
 ## Dependencies
-- `scripts/upgrade-project.ts` — main implementation (v1.28.0)
+- `scripts/upgrade-project.ts` — main implementation (v1.39.0)
 - `scripts/lib/upgrade-policy.ts` — delivery-policy engine (ADD_IF_MISSING / PROCEDURES / PRESERVE semantics)
 - `scripts/lib/env-sample.ts` — country-aware .env.sample merge engine
 - `scripts/resolve-variants.ts` — variant.json reconciliation support
@@ -24,6 +24,7 @@ Upgrades an existing L2/L3 project to the current template version: syncs templa
 | 2026-07-31 | - | production | Phase A accepted: registered in SKILLS.md; frontmatter standardized to metadata.triggers format | pm |
 | 2026-09-12 | production | production | Lifecycle record rewritten from a stale Phase-A stub to a full record matching the real skill (SKILL.md v1.4.1, owner pm, scope workspace); T-20260912-010 | pm |
 | 2026-09-16 | production | production | SKILL.md v1.5.0: behavior sections refreshed to the underlying script's v1.28.0 semantics (stash -u rollback, pre-scan conflict semantics, honest exit codes, CONTEXT_COMMONIZATION, GOVERNANCE FILES SYNC, COMMON-CONTEXT markers, root-target guard); T-20260915-008 | pm |
+| 2026-09-21 | production | production | SKILL.md v1.5.1: `--platform` values corrected to `claude\|antigravity\|codex\|all` (the documented `both` was renamed to `all` in script v1.34.0 and hard-errored), script pin refreshed v1.28.0 → v1.39.0 (2026-09-21 project review C-2/H-10) | pm |
 
 ## Acceptance Criteria
 

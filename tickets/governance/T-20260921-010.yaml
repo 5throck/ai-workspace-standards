@@ -1,0 +1,19 @@
+schemaVersion: 1
+id: T-20260921-010
+kind: manual
+title: >-
+  validator-hardening: detect core-script (dev-sync.ts, audit.ts) version forks
+  in upgrade-project SCRIPTS SYNC instead of silent OK, and make promotion
+  reconciliation provenance-aware so un-upgraded projects are told to upgrade
+  rather than failing with a forbidden-modification error (2026-09-21 review
+  H-4)
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-09-21T13:28:17.031Z'
+history:
+  - at: '2026-09-21T13:28:17.031Z'
+    from: null
+    to: backlog
+result: null
+error: null

@@ -1,0 +1,17 @@
+schemaVersion: 1
+id: T-20260921-015
+kind: manual
+title: >-
+  design: platform-profile delivery asymmetry — upgrade resolveClaim re-delivers
+  .claude/.gemini/.agents trees regardless of the project's recorded platform
+  opt-out while only codex removes both file and tree (2026-09-21 review M-17)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-21T13:28:40.129Z'
+history:
+  - at: '2026-09-21T13:28:40.129Z'
+    from: null
+    to: backlog
+result: null
+error: null

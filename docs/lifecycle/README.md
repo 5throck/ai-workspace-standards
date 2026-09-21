@@ -16,6 +16,7 @@ docs/lifecycle/
 │   ├── auditor.md
 │   ├── automation-engineer.md
 │   ├── docs-writer.md
+│   ├── i18n-specialist.md
 │   ├── lifecycle-manager.md
 │   ├── pm.md
 │   ├── scaffolding-expert.md
@@ -37,6 +38,13 @@ docs/lifecycle/
 │   ├── explain-me.md
 │   ├── finishing-a-development-branch.md
 │   ├── gateguard.md
+│   ├── handbook-sync-audit.md
+│   ├── k-dart.md
+│   ├── k-ecos.md
+│   ├── k-kosis.md
+│   ├── k-krx.md
+│   ├── k-law.md
+│   ├── k-opendata.md
 │   ├── meeting-facilitation.md
 │   ├── meeting.md
 │   ├── platform-command-lifecycle-manager.md
@@ -82,6 +90,12 @@ docs/lifecycle/
     ├── co-work.md
     └── common.md
 ```
+
+> **L1 records**: common-layer skill records live in `templates/common/docs/lifecycle/skills/`
+> (`decision-record`, `evidence-ledger`, `handbook`, `i18n-audit`, `i18n-formatting`,
+> `i18n-layout`, `i18n-locale-config`) and the common PM agent record in
+> `templates/common/docs/lifecycle/agents/pm.md` — they are delivered with the L1 tree
+> and are not duplicated here.
 
 ## Required Sections
 

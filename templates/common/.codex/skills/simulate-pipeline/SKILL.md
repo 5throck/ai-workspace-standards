@@ -5,10 +5,11 @@ description: >
   (`--mode project-creation`) or L3 scaffold to L2 variant promotion
   (`--mode l3-to-variant-promotion`). Use when validating new-project scaffolding,
   testing disposable L3 promotion fixtures, or checking promotion/scaffold regressions.
-version: 1.0.1
+version: 1.0.2
 last_reviewed: 2026-09-21
 status: active
 scope: workspace
+l2_propagate: false
 owner: automation-engineer
 prerequisites: Bun (`new-project.ts`, `test-l3-to-variant-promotion.ts`; ADR-0036 TypeScript-only scripts)
 metadata:

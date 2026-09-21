@@ -143,7 +143,7 @@ Before assigning an agent to any task, PM MUST classify the deliverable type:
 
 **Tier Ceiling Rule**: An agent's tier may NOT be elevated beyond its defined tier.
 
-> **Execution Plan Boilerplate Policy**: For mandatory and discretionary boilerplate cases, see [§3 (PM Gateway Workflow)](AGENTS.md#3-pm-gateway-workflow) above.
+> **Execution Plan Boilerplate Policy**: For mandatory and discretionary boilerplate cases, see [§3 (PM Gateway Workflow)](AGENTS.md#§3-pm-gateway-workflow) above.
 
 
 ### §3.6 3-Tier Strategy
@@ -217,7 +217,7 @@ PM owns the composition of the agent team and rules on skill changes:
 - **Hiring/firing (top-down, PM-decided)**: PM judges timing and target from workflow signals — recurring unmatched work types, role overload, absorbed roles, the quarterly roster review (§10 cadence) — without a blocking user approval. Every decision emits a gate-moment decision record (ADR-0061) before dispatch. Default exit is `status: deprecated`; hard delete requires an explicit user request. Procedure: `agent-lifecycle-manager` skill (Hiring H1–H6, Firing F1–F5).
 - **Skill requests (bottom-up, agent-initiated, PM-approved)**: agents file structured request blocks (`create|attach|remove` + evidence) in their task reports and memory logs; PM triages and only approved requests are dispatched for execution. Agents never create, attach, or remove skills unilaterally. Procedure: `skill-lifecycle-manager` skill (Requests R1–R3, Deprecation & Removal).
 
-**Enforcement**: governance, not code — decision records capture the judgment trail, and the change audits catch structural drift. See ADR-0080 (workspace root, `docs/adr/0080-pm-team-management-authority.md`).
+**Enforcement**: governance, not code — the audits (`agent-lifecycle-audit.ts`, `lifecycle-sync-audit.ts`) catch structural drift, and decision records capture the judgment trail. See ADR-0080 (workspace root, `docs/adr/0080-pm-team-management-authority.md`).
 
 ---
 
@@ -550,9 +550,9 @@ Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 | `project-review` | `skills/project-review/` | Multi-agent parallel project review |
 | `meeting-facilitation` | `skills/meeting-facilitation/` | Multi-agent meeting orchestration |
 | `security-scan` | `skills/security-scan/` | Security and secret detection |
-| `create-variant` | `skills/create-variant/` | New variant scaffolding |
-| `promote-variant` | `skills/promote-variant/` | Variant promotion to official |
-| `simulate-pipeline` | `skills/simulate-pipeline/` | E2E smoke test for project creation and the L3 scaffold → variant promotion pipeline (merged skill) |
+| `create-variant` | `skills/create-variant/` | New variant scaffolding — workspace-root (L0) only, not shipped in scaffolds |
+| `promote-variant` | `skills/promote-variant/` | Variant promotion to official — workspace-root (L0) only, not shipped in scaffolds |
+| `simulate-pipeline` | `skills/simulate-pipeline/` | E2E smoke test for project creation and the L3 scaffold → variant promotion pipeline (merged skill) — workspace-root (L0) only, not shipped in scaffolds |
 | `explain-me` | `skills/explain-me/` | Single-file interactive HTML report generation (inspired by beret21/reportme) |
 
 > **Complete Skill Registry**: The table above is a curated subset — see `docs/VERSION_MANIFEST.md` for the complete registry of all workspace-level skills with versions, status, and lifecycle metadata.
@@ -561,12 +561,16 @@ Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 
 Skills are distributed to all three platform directories via `scripts/sync-skills.ts`:
 
-| Platform | Directory | Registration | Shortcut Skills |
-|----------|-----------|--------------|-----------------|
-| Claude Code | `.claude/skills/` | `.claude/skills.json` | `sync` |
-| Gemini CLI | `.gemini/skills/` | `.gemini/skills.json` | `sync` |
-| Codex (CLI + Desktop App) | `.codex/skills/` | — (skills discovered via `.codex/prompts/` + config) | `sync` |
-| Antigravity | `.agents/skills/` | `.agents/skills.json` | `sync`, `source-command-commit-push-pr` |
+| Platform | Directory | Registration |
+|----------|-----------|--------------|
+| Claude Code | `.claude/skills/` | `.claude/skills.json` |
+| Gemini CLI | `.gemini/skills/` | `.gemini/skills.json` |
+| Codex (CLI + Desktop App) | `.codex/skills/` | — (skills discovered via `.codex/prompts/` + config) |
+| Antigravity | `.agents/skills/` | `.agents/skills.json` |
+
+> Phase 1 distributes every SSOT skill to all four platform directories; the Phase 2
+> back-sync target list is dynamic and currently empty (all former `.agents`-only
+> shortcut candidates are SSOT skills today).
 
 - **Phase 1**: Every `skills/*/SKILL.md` directory is copied to all four platform directories.
 - **Phase 2**: Shortcut skills that only exist in `.agents/skills/` are back-synced to `.claude/skills/` and `.gemini/skills/`.
@@ -665,7 +669,7 @@ When a new skill is created in `skills/` or `.claude/skills/`:
    bun scripts/validate-skills.ts
    ```
 
-1.5. **Triage accumulated session evidence** — review `memory/skill-review/*.md` records produced by the session-evidence loop (dev-sync step 3.96c; see `docs/context.md §6.6 Session-Evidence Skill Review Loop`). Fill `diagnosis`/`candidate` blocks at triage, then dispatch approved revisions through the normal PM Gateway path (§3).
+1.5. **Triage accumulated session evidence** — review `memory/skill-review/*.md` records produced by the session-evidence loop (dev-sync step 3.96c; see `docs/context.md` → "Session-Evidence Skill Review Loop (Observation-Based Revision)"). Fill `diagnosis`/`candidate` blocks at triage, then dispatch approved revisions through the normal PM Gateway path (§3).
 
 2. **Triage findings** by severity:
    - 🔴 Broken dependencies or circular references → fix before quarter ends

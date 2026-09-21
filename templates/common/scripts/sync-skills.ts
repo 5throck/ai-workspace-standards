@@ -356,10 +356,13 @@ export async function syncSkills(dirs: SkillSyncDirs, opts: SyncSkillsOptions = 
                 const ssotCounterpart = path.join(ssotSkills, item);
                 if (fs.existsSync(ssotCounterpart)) continue; // SSOT-derived — Phase 1 owns it
 
-                // Genuinely .agents-only: back-sync to .claude and .gemini.
+                // Genuinely .agents-only: back-sync to all four platform mirrors.
+                // .codex was added in the 2026-09-21 review (M-19) — without it the
+                // four-mirror parity principle (ADR-0077 W1) broke for exactly the
+                // skills that only exist via back-sync.
                 if (!fs.existsSync(path.join(source, 'SKILL.md'))) continue;
 
-                for (const targetDir of [claudeSkills, geminiSkills]) {
+                for (const targetDir of [claudeSkills, geminiSkills, agentsSkills, codexSkills]) {
                     const target = path.join(targetDir, item);
                     if (dirsEqual(source, target)) {
                         continue; // idempotent skip

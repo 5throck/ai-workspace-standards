@@ -1,0 +1,17 @@
+schemaVersion: 1
+id: T-20260921-013
+kind: manual
+title: >-
+  propagate-to-templates applyDiffs: add per-item failure isolation with
+  applied/failed counts and a non-zero exit code instead of aborting mid-write
+  (mirror sync-skills atomic pattern) (2026-09-21 review M-15)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-21T13:28:40.104Z'
+history:
+  - at: '2026-09-21T13:28:40.104Z'
+    from: null
+    to: backlog
+result: null
+error: null

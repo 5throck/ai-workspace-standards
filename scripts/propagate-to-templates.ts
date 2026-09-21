@@ -1757,9 +1757,11 @@ if (!existsSync(MAP_PATH)) {
   process.exit(1);
 }
 
-// Encoding gate — only on --apply (not dry-run or governance/docs modes)
+// Encoding gate — on every --apply mode except dry-run and --check-drift. Governance
+// and docs modes were exempt until the 2026-09-21 review (M-14) flagged the gap: those
+// modes write the Korean-heavy governance docs, exactly the CP949-corruption risk class.
 // Only scan git-tracked files — skip untracked local directories
-if (APPLY && !SKIP_ENCODING && !GOVERNANCE_L1 && !DOCS && !CHECK_DRIFT) {
+if (APPLY && !SKIP_ENCODING && !CHECK_DRIFT) {
   const gitLsResult = execFileSync('git', ['ls-files', '--cached'], { encoding: 'utf-8' });
   const trackedFiles = new Set(gitLsResult.trim().split('\n').filter(Boolean));
   const scanDirs = ['.', join('templates')];

@@ -1,0 +1,17 @@
+schemaVersion: 1
+id: T-20260921-011
+kind: manual
+title: >-
+  align the i18n.locale_codes rendering across AGENTS.md COMMON-AGENTS blocks
+  (15 vs schema 16 with en) and the COMMON-CLAUDE/COMMON-GEMINI ko-only
+  translation-zone wording (2026-09-21 review M-1)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-21T13:28:40.078Z'
+history:
+  - at: '2026-09-21T13:28:40.078Z'
+    from: null
+    to: backlog
+result: null
+error: null

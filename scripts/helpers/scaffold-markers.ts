@@ -282,6 +282,9 @@ export const NEW_PROJECT_LEGACY_L0_SKILLS: readonly string[] = ['simulate-projec
 export const L3_DEDICATED_STEP_DELIVERIES: readonly string[] = [
   'AGENTS.md', 'README.md', 'README_ko.md', 'SECURITY.md', 'package.json',
   'agents/pm.md', 'memory/MEMORY.md', 'docs/lifecycle/agents/pm.md', 'docs/context.md',
+  // Copied explicitly alongside docs/context.md (2026-09-21 review M-22): keeps the
+  // project-side language validator out of its degraded ko-only locale mode.
+  'docs/workspace-schema.json',
 ];
 
 // ============================================================================
@@ -345,10 +348,6 @@ export const REVIEWED_DELIVERY_EXCLUSIONS: readonly ReviewedDeliveryExclusion[] 
     reason: 'top-level docs/ beyond _common excluded by COMMON_OVERLAY_EXCLUDE (H13 reviewed gap)',
   },
   {
-    path: 'docs/workspace-schema.json',
-    reason: 'top-level docs/ beyond _common excluded by COMMON_OVERLAY_EXCLUDE (H13 reviewed gap)',
-  },
-  {
     path: 'docs/skill-graph.json',
     reason: 'regenerated on first /sync (dev-sync step 4.65); a stale common copy would be overwritten at first generation',
   },
@@ -358,6 +357,30 @@ export const REVIEWED_DELIVERY_EXCLUSIONS: readonly ReviewedDeliveryExclusion[] 
   },
   {
     path: 'docs/lifecycle/skills/i18n-audit.md',
+    reason: 'L3 delivers only its own docs/lifecycle/agents/pm.md governance record; the rest of docs/lifecycle/ is not copied (H13 reviewed gap)',
+  },
+  {
+    path: 'docs/lifecycle/skills/decision-record.md',
+    reason: 'L3 delivers only its own docs/lifecycle/agents/pm.md governance record; the rest of docs/lifecycle/ is not copied (H13 reviewed gap)',
+  },
+  {
+    path: 'docs/lifecycle/skills/evidence-ledger.md',
+    reason: 'L3 delivers only its own docs/lifecycle/agents/pm.md governance record; the rest of docs/lifecycle/ is not copied (H13 reviewed gap)',
+  },
+  {
+    path: 'docs/lifecycle/skills/handbook.md',
+    reason: 'L3 delivers only its own docs/lifecycle/agents/pm.md governance record; the rest of docs/lifecycle/ is not copied (H13 reviewed gap)',
+  },
+  {
+    path: 'docs/lifecycle/skills/i18n-formatting.md',
+    reason: 'L3 delivers only its own docs/lifecycle/agents/pm.md governance record; the rest of docs/lifecycle/ is not copied (H13 reviewed gap)',
+  },
+  {
+    path: 'docs/lifecycle/skills/i18n-layout.md',
+    reason: 'L3 delivers only its own docs/lifecycle/agents/pm.md governance record; the rest of docs/lifecycle/ is not copied (H13 reviewed gap)',
+  },
+  {
+    path: 'docs/lifecycle/skills/i18n-locale-config.md',
     reason: 'L3 delivers only its own docs/lifecycle/agents/pm.md governance record; the rest of docs/lifecycle/ is not copied (H13 reviewed gap)',
   },
   {
@@ -513,6 +536,11 @@ export function deriveNewProjectDelivery(
   // but §2.5c regenerates a root package.json at the SAME relpath — the file
   // exists in the final tree, so the delivery set models it as present.
   if (existsSync(join(commonDir, 'package.json'))) out.add('package.json');
+
+  // memory/MEMORY.md: the §memory clear removes every memory/*.md, then the
+  // M-13 seed step writes the canonical empty index at that relpath — model
+  // it as present (2026-09-21 review M-13, mirrors create-l3-scaffold).
+  out.add('memory/MEMORY.md');
 
   pruneRegionNeutral(out, workspaceRoot);
   return out;
@@ -717,7 +745,10 @@ function isUnderAny(rel: string, dirs: readonly string[]): boolean {
 /** skill dir name → l2_propagate:false, collected from the common tree. */
 function collectL2PropagateFalseSkills(commonDir: string): Map<string, Set<string>> {
   const result = new Map<string, Set<string>>();
-  const bases = ['skills', '.claude/skills', '.gemini/skills', '.codex/skills'];
+  // All five skill bases — the runtime sweep in new-project.ts must stay in sync.
+  // .agents/skills was missing here, so flagged skills leaked via that mirror
+  // while the derivation (and Test 26) stayed green (2026-09-21 review C-1).
+  const bases = ['skills', '.claude/skills', '.gemini/skills', '.agents/skills', '.codex/skills'];
   for (const base of bases) {
     const baseDir = join(commonDir, base);
     const names = new Set<string>();
@@ -754,7 +785,7 @@ function isL2PropagateFalseSkillRel(
 }
 
 function isLegacyL0SkillRel(rel: string): boolean {
-  const bases = ['skills', '.claude/skills', '.gemini/skills', '.codex/skills'];
+  const bases = ['skills', '.claude/skills', '.gemini/skills', '.agents/skills', '.codex/skills'];
   for (const base of bases) {
     if (rel.startsWith(`${base}/`)) {
       const skillName = rel.slice(base.length + 1).split('/')[0];

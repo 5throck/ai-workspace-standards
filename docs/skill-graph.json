@@ -6603,13 +6603,31 @@
     {
       "type": "references",
       "from": "create-variant",
+      "to": "k-ecos",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "create-variant",
       "to": "k-kosis",
       "source": "prose"
     },
     {
       "type": "references",
       "from": "create-variant",
+      "to": "k-krx",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "create-variant",
       "to": "k-law",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "create-variant",
+      "to": "k-opendata",
       "source": "prose"
     },
     {
@@ -16627,24 +16645,6 @@
       "type": "references",
       "from": "project-resync",
       "to": "upgrade-project",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "project-to-variant",
-      "to": "k-dart",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "project-to-variant",
-      "to": "k-kosis",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "project-to-variant",
-      "to": "k-law",
       "source": "prose"
     },
     {

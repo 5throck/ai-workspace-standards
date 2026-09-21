@@ -240,19 +240,18 @@ export function resolveClaim(relPath: string, variant = ''): UpgradeClaim {
   // by design, C-CM-05 exception), so the post-upgrade sync-skills.ts run can never deliver
   // it — the TEMPLATE TREE SYNC pass must claim it explicitly or the fleet never receives it.
   if (underDir(rel, '.claude/skills/graft')) return { policy: 'SYNC', pass: TEMPLATE_TREE_SYNC_PASS };
-  // Codex platform mirrors (ADR-0077 W1/W4): claimed BEFORE the blanket `.codex/**` rule
-  // below, which exists only for the per-project config.toml seed. Without this ordering
-  // the blanket ADD_IF_MISSING swallows the mirrors and fleet projects never receive
-  // skill/prompt updates (same incident class as the .claude/skills/graft fleet gap).
-  if (underDir(rel, '.codex/skills') || underDir(rel, '.codex/prompts')) {
-    return { policy: 'SYNC', pass: TEMPLATE_TREE_SYNC_PASS };
-  }
   // Codex project config is per-project by nature (project MCP servers + codex hooks, e.g.
   // co-abap/co-safety): seed add-if-missing only, never overwrite an existing file (ADR-0076 D4).
   if (underDir(rel, '.codex')) return { policy: 'ADD_IF_MISSING', pass: TEMPLATE_TREE_SYNC_PASS };
 
-  // Platform skill mirrors are distributed by the post-upgrade sync-skills.ts run, not file passes
-  if (underDir(rel, '.claude/skills') || underDir(rel, '.gemini/skills') || underDir(rel, '.agents/skills')) {
+  // Platform skill mirrors are distributed by the post-upgrade sync-skills.ts run, not file
+  // passes. Codex mirrors (ADR-0077 W1/W4) joined them in the 2026-09-21 review (C-1): the
+  // former dedicated TEMPLATE TREE SYNC claim re-delivered l2_propagate:false skills from
+  // the L1 .codex mirror into projects. Ordering still matters — these must stay claimed
+  // BEFORE the blanket `.codex/**` rule above, or the blanket ADD_IF_MISSING swallows the
+  // mirrors and fleet projects never receive skill/prompt updates (graft fleet-gap class).
+  if (underDir(rel, '.claude/skills') || underDir(rel, '.gemini/skills') || underDir(rel, '.agents/skills')
+    || underDir(rel, '.codex/skills') || underDir(rel, '.codex/prompts')) {
     return { policy: 'SYNC', pass: 'sync-skills.ts (platform mirror)' };
   }
   // Registration pointers + platform settings extras: default sync (static today, format may evolve)

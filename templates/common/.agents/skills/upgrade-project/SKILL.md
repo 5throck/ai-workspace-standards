@@ -1,11 +1,11 @@
 ---
 name: upgrade-project
 description: "Upgrade an existing L2/L3 project to the current template version. Use when: upgrading a variant-based project, syncing template improvements, refreshing scripts/agents/skills/docs/commands."
-version: "1.5.0"
+version: "1.5.1"
 status: active
 scope: workspace
 owner: pm
-last_reviewed: 2026-09-16
+last_reviewed: 2026-09-21
 relates_to:
   - skill: promote-variant
     type: follows
@@ -37,9 +37,9 @@ Upgrades an existing project created from a variant template to match the curren
 
 ## Script
 
-**Script**: `scripts/upgrade-project.ts` (v1.28.0)
+**Script**: `scripts/upgrade-project.ts` (v1.39.0)
 **Location**: Workspace root only (`L0` per ADR-0073 Amendment 1 — projects do not carry a copy; from inside a project use `bun ../../scripts/upgrade-project.ts .`)
-**Usage**: `bun scripts/upgrade-project.ts <project-path> [--variant <name>] [--platform claude|antigravity|both] [--dry-run] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization] [--force-context-sync]`
+**Usage**: `bun scripts/upgrade-project.ts <project-path> [--variant <name>] [--platform claude|antigravity|codex|all] [--dry-run] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization] [--force-context-sync]`
 
 ### Arguments
 
@@ -47,7 +47,7 @@ Upgrades an existing project created from a variant template to match the curren
 |----------|----------|-------------|
 | `<project-path>` | Yes | Path to the target project. A path that resolves to the workspace ROOT is rejected (root is L0, not a project); targets outside `Projects/` print a warning |
 | `--variant <name>` | No | Auto-detected from `.claude/template-version.txt` |
-| `--platform <val>` | No | `claude`, `antigravity`, or `both` (default: both) |
+| `--platform <val>` | No | `claude`, `antigravity`, `codex`, or `all` — all three platforms (default: `all`; `both` was renamed to `all` in v1.34.0) |
 | `--dry-run` | No | Analyze without making changes |
 | `--prune-removed` | No | Remove files present in project but absent from template (falls back to a direct delete when `git rm` fails on untracked files) |
 | `--rollback` | No | Restore pre-upgrade git stash snapshot; exits 1 when the restore fails. Under `--dry-run` it prints a no-op plan instead |

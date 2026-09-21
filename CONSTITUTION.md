@@ -562,7 +562,7 @@ A pair of HTML comment markers used in MERGE-tier files to delimit sections mana
 Rules:
 - Content between these markers is automatically replaced by `upgrade-project.ts` during upgrades.
 - Content outside the markers is user-owned and is never modified by upgrade scripts.
-- The merge engine supports six marker patterns: `<!-- WORKSPACE-MANAGED -->`, `<!-- COMMON-CLAUDE:START -->`, `<!-- COMMON-GEMINI:START -->`, `<!-- VARIANT-INJECT:label -->`, `<!-- COMMON-AGENTS:START -->`, and `<!-- DYNAMIC_SKILLS_START -->` (full table: `skills/upgrade-project/SKILL.md`).
+- The merge engine supports seven marker patterns: `<!-- WORKSPACE-MANAGED -->`, `<!-- COMMON-CLAUDE:START -->`, `<!-- COMMON-GEMINI:START -->`, `<!-- VARIANT-INJECT:label -->`, `<!-- COMMON-AGENTS:START -->`, `<!-- COMMON-CONTEXT:START -->`, and `<!-- DYNAMIC_SKILLS_START -->` (full table: `skills/upgrade-project/SKILL.md`).
 - Do **not** remove or reorder these markers manually.
 
 #### File Upgrade Classification (Policy-Driven)
@@ -736,4 +736,4 @@ Agent, skill, and command frontmatter structures are validated against JSON Sche
 
 ---
 
-*Last Updated: 2026-09-20*
+*Last Updated: 2026-09-21*

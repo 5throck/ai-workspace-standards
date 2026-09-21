@@ -637,6 +637,31 @@ if (existsSync(memoryDir)) {
     if (f.endsWith('.md')) rmSync(f);
   }
   console.log('  🗑️  Cleared memory/*.md (new projects start with empty memory/)');
+
+  // Seed memory/MEMORY.md — mirrors create-l3-scaffold.ts. sync-md.ts treats a missing
+  // "## Sessions" index as a legacy file needing migration on every run; a fresh project
+  // starts with the canonical structure instead (2026-09-21 review M-13).
+  writeFileSync(
+    join(memoryDir, 'MEMORY.md'),
+    `# Memory Index
+
+## Sessions
+
+| Date | Summary |
+|------|---------|
+
+## Meetings
+
+| Date | Topic | File |
+|------|-------|------|
+
+## ADRs
+
+| ID | Title | Status | File |
+|----|-------|--------|------|
+`,
+  );
+  console.log('  ✅ Seeded memory/MEMORY.md (empty index)');
 }
 
 // ── 2.6. Flatten docs/_common/ → docs/ ───────────────────────────────────────
@@ -788,7 +813,7 @@ if (existsSync(projPmMd)) {
 const pruneHelper = join(workspaceRoot, 'scripts', 'helpers', 'prune-country-scoped-assets.ts');
 if (existsSync(pruneHelper)) {
   console.log(`🌐 Pruning country-scoped assets${selectedCountry ? ` for ${selectedCountry}` : ' (region-neutral)'}…`);
-  const pruneResult = spawnSync(process.execPath, [pruneHelper, projectDir, selectedCountry || 'none'], { stdio: 'inherit' });
+  const pruneResult = spawnSync(process.execPath, [pruneHelper, projectDir, selectedCountry || 'none', variant || 'none'], { stdio: 'inherit' });
   if (pruneResult.status !== 0) {
     console.error('❌ Prune helper failed');
     // T-012-BUG: called with only (projectDir); the required workspaceRoot argument was
@@ -1157,16 +1182,17 @@ for (const f of cleanupFiles) {
 // (single source: helpers/scaffold-markers.ts — T-20260915-003)
 const LEGACY_L0_SKILLS = NEW_PROJECT_LEGACY_L0_SKILLS;
 for (const skill of LEGACY_L0_SKILLS) {
-  for (const base of ['skills', '.claude/skills', '.gemini/skills']) {
+  for (const base of ['skills', '.claude/skills', '.gemini/skills', '.agents/skills', '.codex/skills']) {
     const dp = join(projectDir, base, skill);
     if (existsSync(dp)) rmSync(dp, { recursive: true });
   }
 }
-// T-20260910-023: the sweep runs over all three skill locations, not just the
+// T-20260910-023: the sweep runs over all five skill locations, not just the
 // SSOT mirror — a workspace-only skill that leaked into the L1 platform dirs
-// (`.claude/skills/`, `.gemini/skills/`) would otherwise survive into the
-// scaffolded project and register with the platform harness.
-const projectSkillBases = ['skills', '.claude/skills', '.gemini/skills', '.codex/skills'];
+// (`.claude/skills/`, `.gemini/skills/`, `.agents/skills/`, `.codex/skills/`)
+// would otherwise survive into the scaffolded project and register with the
+// platform harness. (.agents/skills was missing until the 2026-09-21 review C-1.)
+const projectSkillBases = ['skills', '.claude/skills', '.gemini/skills', '.agents/skills', '.codex/skills'];
 for (const base of projectSkillBases) {
   const baseDir = join(projectDir, base);
   if (!existsSync(baseDir)) continue;
