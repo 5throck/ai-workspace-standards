@@ -1,0 +1,20 @@
+schemaVersion: 1
+id: T-20260921-019
+kind: manual
+title: >-
+  validator-hardening: add a roster-tier consistency check failing when an
+  AGENTS.md roster row's tier differs from the agent file's frontmatter tier
+  (resolving the pm.md L0->L1->L2 extends chain) or elevates above the L0
+  baseline tier per the AGENTS.md §3.5 Tier Ceiling Rule — PM was downgraded to
+  Medium on 2026-09-15 but all 13 variant rosters and 10 projects kept High
+  until 2026-09-21 (2026-09-21 PM tier drift finding)
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-09-21T13:47:55.933Z'
+history:
+  - at: '2026-09-21T13:47:55.933Z'
+    from: null
+    to: backlog
+result: null
+error: null

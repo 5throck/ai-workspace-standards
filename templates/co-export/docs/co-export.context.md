@@ -43,7 +43,7 @@ This variant follows the standard 7-phase workflow defined in [`phase-definition
 
 | Agent | File | Tier | Phases | Leads |
 |-------|------|------|--------|-------|
-| Trade Engagement Leader (PM) | `agents/pm.md` | High | 0, 1-2, 5, 6 | Orchestration & gates |
+| Trade Engagement Leader (PM) | `agents/pm.md` | Medium | 0, 1-2, 5, 6 | Orchestration & gates |
 | HS Classification Specialist | `agents/hs-classification-specialist.md` | High | 1, 2 | Phase 1 (classification) |
 | Customs Duty Drawback Specialist | `agents/customs-duty-drawback-specialist.md` | High | 3 | — |
 | FTA/Origin Analyst | `agents/fta-origin-analyst.md` | High | 1, 2 | — |
