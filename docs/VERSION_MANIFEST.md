@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-09-21T23:07:55.961Z
+**Generated**: 2026-09-21T23:12:18.571Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -103,7 +103,7 @@
 | analyze-git-history.ts | 1.0.2 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.1.0 | scripts/archive-memory.ts | N/A |
 | audit.ts | 2.39.0 | scripts/audit.ts | bun |
-| backport-diff.ts | 1.0.0 | scripts/backport-diff.ts | N/A |
+| backport-diff.ts | 1.0.1 | scripts/backport-diff.ts | N/A |
 | bootstrap-stages.ts | 1.0.0 | scripts/bootstrap-stages.ts | fs, js-yaml, path |
 | check-upgrade-coverage.ts | 1.0.0 | scripts/check-upgrade-coverage.ts | N/A |
 | cleanup-completed-md.ts | 1.1.0 | scripts/cleanup-completed-md.ts | N/A |

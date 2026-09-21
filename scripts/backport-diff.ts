@@ -2,7 +2,7 @@
 /**
  * backport-diff.ts — 5-surface backport candidate differ for committed
  * Projects/co-* LOCAL-WORK (project-resync skill Step 2 support).
- * @version 1.0.0
+ * @version 1.0.1
  *
  * Supports the Step 2 human backport review: after a project's LOCAL-WORK is
  * committed (Step 1), this tool diffs the committed range over the project's
@@ -198,11 +198,16 @@ export function counterpartCandidates(relFile: string, variant: string | null): 
   const candidates: string[] = [];
   const push = (rel: string) => {
     for (const root of roots) {
-      const candidate = root ? join(root, rel) : rel;
+      // Normalize to forward slashes: on Windows join() emits backslashes and
+      // the emitted candidates must match the POSIX-style paths used by git
+      // output and the report (T-20260922-001 follow-up, Windows CI failure).
+      const candidate = root ? join(root, rel).replace(/\\/g, "/") : rel;
       if (!candidates.includes(candidate)) candidates.push(candidate);
     }
   };
-  if (relFile === "docs/context.md" && variant) push(join("docs", `${variant}.context.md`));
+  if (relFile === "docs/context.md" && variant) {
+    push(["docs", `${variant}.context.md`].join("/"));
+  }
   push(relFile);
   return candidates;
 }
