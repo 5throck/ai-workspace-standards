@@ -1000,6 +1000,10 @@ Active jurisdiction: ${selectedCountry} — ${countryName}. See ${countryConfig.
 `;
     writeFileSync(activePath, activeContent);
     console.log(`  📄 Created ${countryConfig.profiles_dir}/ACTIVE.md (points to ${selectedCountry})`);
+  } else {
+    // T-20260921-014 (review M-16): the profiles directory was silently missing —
+    // the scaffold produced no jurisdiction artifact at all. Warn loud instead.
+    console.warn(`  ⚠️  Country profiles directory '${countryConfig.profiles_dir}/' not found in the scaffolded tree — ACTIVE.md was NOT created`);
   }
 }
 
@@ -1014,7 +1018,11 @@ if (existsSync(substitutePlaceholders)) {
   // Get country display name for {{COUNTRY}} placeholder
   let countryDisplayName = '';
   if (selectedCountry) {
-    const profilePath = join(projectDir, 'docs', 'countries', `${selectedCountry}.md`);
+    // T-20260921-014 (review M-16): honor the variant's profiles_dir instead of
+    // hardcoding docs/countries — a variant with a custom profiles_dir otherwise
+    // got a fallback-to-code display name in every {{COUNTRY}} marker.
+    const profilesDir = countryConfig?.profiles_dir ?? join('docs', 'countries');
+    const profilePath = join(projectDir, profilesDir, `${selectedCountry}.md`);
     if (existsSync(profilePath)) {
       try {
         const profileContent = readFileSync(profilePath, 'utf-8');

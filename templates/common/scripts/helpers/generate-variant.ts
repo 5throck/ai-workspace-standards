@@ -5,9 +5,13 @@
  * Generates variant project structure from reconciled manifest.
  * Creates variant.json, directory structure, agent overrides, and skill directories.
  *
- * @version 1.15.0
+ * @version 1.16.0
  * @phase 3: Variant Generation
  *
+ * v1.16.0: materialize .agents/skills/ and .codex/skills/ mirrors alongside
+ *          .claude/.gemini/skills (2026-09-21 review H-3) — a promoted variant
+ *          previously started with empty .agents/.codex mirrors and only
+ *          sync-skills --dir/--all-variants could heal them.
  * v1.15.0: fail-closed overlay guard at the output-path resolution (design
  *          docs/designs/2026-09-16-variant-ization-overlay-guard-design.md
  *          §3.2 point 3 — last line of defense for ANY generateVariant
@@ -466,18 +470,24 @@ export function generateSkillDirectories(
   for (const [skillName, files] of skillFiles.entries()) {
     const claudeSkillDir = join(variantPath, '.claude', 'skills', skillName);
     const geminiSkillDir = join(variantPath, '.gemini', 'skills', skillName);
+    const agentsSkillDir = join(variantPath, '.agents', 'skills', skillName);
+    const codexSkillDir = join(variantPath, '.codex', 'skills', skillName);
     const topLevelSkillDir = join(variantPath, 'skills', skillName);
 
     createDirectory(claudeSkillDir);
     createDirectory(geminiSkillDir);
+    createDirectory(agentsSkillDir);
+    createDirectory(codexSkillDir);
 
-    skillDirectories.push(claudeSkillDir, geminiSkillDir);
+    skillDirectories.push(claudeSkillDir, geminiSkillDir, agentsSkillDir, codexSkillDir);
 
     // Copy skill files
     for (const file of files) {
       const normalizedTarget = file.targetPath.replace(/\\/g, '/');
       const isClaude = normalizedTarget.includes('.claude/skills/');
       const isGemini = normalizedTarget.includes('.gemini/skills/');
+      const isAgents = normalizedTarget.includes('.agents/skills/');
+      const isCodex = normalizedTarget.includes('.codex/skills/');
 
       if (isClaude) {
         const targetPath = join(variantPath, '.claude', 'skills', skillName, 'SKILL.md');
@@ -488,6 +498,20 @@ export function generateSkillDirectories(
 
       if (isGemini) {
         const targetPath = join(variantPath, '.gemini', 'skills', skillName, 'SKILL.md');
+        if (existsSync(file.sourcePath)) {
+          copyFileUTF8(file.sourcePath, targetPath);
+        }
+      }
+
+      if (isAgents) {
+        const targetPath = join(variantPath, '.agents', 'skills', skillName, 'SKILL.md');
+        if (existsSync(file.sourcePath)) {
+          copyFileUTF8(file.sourcePath, targetPath);
+        }
+      }
+
+      if (isCodex) {
+        const targetPath = join(variantPath, '.codex', 'skills', skillName, 'SKILL.md');
         if (existsSync(file.sourcePath)) {
           copyFileUTF8(file.sourcePath, targetPath);
         }
@@ -506,7 +530,7 @@ export function generateSkillDirectories(
       copyFileUTF8(canonicalSource, join(topLevelSkillDir, 'SKILL.md'));
       skillDirectories.push(topLevelSkillDir);
 
-      for (const platformDir of [claudeSkillDir, geminiSkillDir]) {
+      for (const platformDir of [claudeSkillDir, geminiSkillDir, agentsSkillDir, codexSkillDir]) {
         const platformDest = join(platformDir, 'SKILL.md');
         if (!existsSync(platformDest)) {
           copyFileUTF8(canonicalSource, platformDest);

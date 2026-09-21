@@ -6,12 +6,23 @@ title: >-
   applied/failed counts and a non-zero exit code instead of aborting mid-write
   (mirror sync-skills atomic pattern) (2026-09-21 review M-15)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-21T13:28:40.104Z'
 history:
   - at: '2026-09-21T13:28:40.104Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-21T14:26:58.162Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-21T14:26:58.173Z'
+    from: waiting
+    to: review
+  - at: '2026-09-21T14:27:24.599Z'
+    from: review
+    to: done
+result: >-
+  propagate-to-templates applyDiffs: per-file try/catch, FAILED lines,
+  applied/failed summary, exit code 1 on failure
 error: null

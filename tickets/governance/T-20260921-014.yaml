@@ -6,12 +6,24 @@ title: >-
   resolution and warn when the profiles directory is missing instead of silently
   skipping ACTIVE.md (2026-09-21 review M-16)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-21T13:28:40.117Z'
 history:
   - at: '2026-09-21T13:28:40.117Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-21T14:26:58.185Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-21T14:26:58.197Z'
+    from: waiting
+    to: review
+  - at: '2026-09-21T14:27:24.611Z'
+    from: review
+    to: done
+result: >-
+  new-project honors country_config.profiles_dir for {{COUNTRY}} display
+  resolution and warns loud when the profiles directory is missing instead of
+  silently skipping ACTIVE.md
 error: null

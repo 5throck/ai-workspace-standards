@@ -1884,6 +1884,73 @@ function checkPlatformMirrorFreshness(): void {
   }
 }
 
+// Check: variant-mirror-parity — a variant template's four platform skill mirrors
+// should carry exactly (variant skills/ minus mirror:false|security-gate skills) ∪
+// (common skills/ minus flagged skills). T-20260921-009, review H-3. Two failure
+// classes, both WARN (heal = delete the stray directory; sync-skills never prunes):
+//   1. stale mirror entry — a mirrored skill that is absent from both trees, or
+//      whose owning tree flags it mirror:false / security-gate:true (it must never
+//      be mirrored; the pre-flag .claude/.gemini copies of co-safety's 52
+//      agent-dispatched skills are the live example)
+//   2. unmirrored variant skill — a variant skill WITHOUT the flags missing from a
+//      mirror (four-mirror parity, ADR-0077 W1)
+function checkVariantMirrorParity(): void {
+  if (!JSON_MODE) console.log('\n=== Check variant-mirror-parity: variant platform skill mirrors carry exactly the mirrorable set ===');
+  const variantsDir = TEMPLATES_DIR;
+  const neverMirror = (skillMd: string): boolean => {
+    try {
+      const content = readFileSync(skillMd, 'utf-8');
+      return /^mirror:\s*false\b/m.test(content) || /^security-gate:\s*true\b/m.test(content);
+    } catch {
+      return false; // unreadable — treat as mirrorable rather than guess
+    }
+  };
+  const listSkillDirs = (dir: string): Set<string> =>
+    new Set(
+      existsSync(dir)
+        ? readdirSync(dir, { withFileTypes: true }).filter(e => e.isDirectory() && existsSync(join(dir, e.name, 'SKILL.md'))).map(e => e.name)
+        : [],
+    );
+  let checked = 0;
+  let warnings = 0;
+  if (!existsSync(variantsDir)) return;
+  for (const entry of readdirSync(variantsDir, { withFileTypes: true })) {
+    if (!entry.isDirectory() || !entry.name.startsWith('co-')) continue;
+    const vdir = join(variantsDir, entry.name);
+    const vSkills = join(vdir, 'skills');
+    if (!existsSync(vSkills)) continue;
+    checked++;
+    const variantSkills = listSkillDirs(vSkills);
+    const commonSkills = listSkillDirs(join(TEMPLATES_DIR, 'common', 'skills'));
+    for (const mirror of PLATFORM_MIRROR_DIRS) {
+      const mirrorDir = join(vdir, mirror);
+      for (const name of listSkillDirs(mirrorDir)) {
+        const inVariant = variantSkills.has(name);
+        const inCommon = commonSkills.has(name);
+        const flagged = (inVariant && neverMirror(join(vSkills, name, 'SKILL.md')))
+          || (!inVariant && inCommon && neverMirror(join(TEMPLATES_DIR, 'common', 'skills', name, 'SKILL.md')));
+        if ((inVariant || inCommon) && !flagged) continue;
+        warn(entry.name, 'variant-mirror-parity',
+          `${mirror}/${name}/ must not be mirrored — ${flagged ? 'the owning skill is flagged mirror:false/security-gate:true' : 'absent from both the variant and the common skills/ tree'}`,
+          `Delete templates/${entry.name}/${mirror}/${name}/ (sync-skills never prunes; it will not be resurrected while the flag stands)`);
+        warnings++;
+      }
+      for (const name of variantSkills) {
+        if (variantSkills.has(name) && neverMirror(join(vSkills, name, 'SKILL.md'))) continue;
+        if (!existsSync(join(vdir, mirror, name, 'SKILL.md'))) {
+          warn(entry.name, 'variant-mirror-parity', `${mirror}/${name}/ missing — mirrorable variant skill not mirrored to ${mirror}`,
+            `Run bun scripts/sync-skills.ts --all-variants (or --dir templates/${entry.name}) to heal`);
+          warnings++;
+        }
+      }
+    }
+  }
+  if (!JSON_MODE) {
+    if (checked === 0) console.log('  (no variant templates with a skills/ tree found)');
+    else if (warnings === 0) console.log(`  ✓ ${checked} variant template(s): platform mirrors carry exactly the mirrorable set`);
+  }
+}
+
 // Check B-12: L0/L1 style neutrality — variant-owned design identity literals
 // (palette hex/rgb()/hsl() colors, typeface names harvested from variant
 // tokens.json files) must not appear in L0 governance text or L1 normative
@@ -4446,6 +4513,7 @@ function main(): number {
   // Script parity check removed (dead code after ADR-0036 TypeScript migration)
   checkVariantScopedSkillLeak();  // B-11: variant_scoped_skills must not live in common
   checkPlatformMirrorFreshness(); // T-20260916-008: platform skill mirrors carry SSOT versions
+  checkVariantMirrorParity();     // T-20260921-009: variant mirrors carry the variant skill set
   checkStyleNeutrality();         // B-12: L0/L1 style neutrality (ADR-0064/0066)
 
   let variantsChecked = 0;

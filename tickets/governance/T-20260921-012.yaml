@@ -6,12 +6,24 @@ title: >-
   to the AGENTS.md policy text and workspace-schema translation_zone_patterns so
   policy text matches validate-md-language enforcement (2026-09-21 review M-2)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-21T13:28:40.092Z'
 history:
   - at: '2026-09-21T13:28:40.092Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-21T14:26:58.139Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-21T14:26:58.150Z'
+    from: waiting
+    to: review
+  - at: '2026-09-21T14:27:24.586Z'
+    from: review
+    to: done
+result: >-
+  AGENTS.md Translation Zones gains the *_<lang-code> suffix-zone bullet;
+  workspace-schema i18n.translation_zone_patterns lists all three zone forms
+  matching validate-md-language enforcement
 error: null

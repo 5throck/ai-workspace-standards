@@ -87,7 +87,7 @@
     "variant_agents": "Variant-specific agent tiers are declared in each variant agent's frontmatter tier block (templates/<variant>/agents/*.md); variant.json carries only the agent roster (name/file pairs), not tiers"
   },
   "i18n": {
-    "description": "Internationalization policy. locale_codes defines all language codes recognized as valid translation zones. Files inside <lang-code>/ or locales/<lang-code>/ directories are exempt from the English-only documentation rule.",
+    "description": "Internationalization policy. locale_codes defines all language codes recognized as valid translation zones. Files inside <lang-code>/ or locales/<lang-code>/ directories, and *_<lang-code> suffix files (e.g. README_ko.md, tracked by hash-sync), are exempt from the English-only documentation rule. en is the source language, not a translation-zone target.",
     "locale_codes": [
       "ko",
       "ja",
@@ -108,7 +108,9 @@
     ],
     "translation_zone_patterns": [
       "<lang-code>/",
-      "locales/<lang-code>/"
+      "locales/<lang-code>/",
+      "*_<lang-code>.md",
+      "*_<lang-code>.yaml"
     ],
     "note": "audit.ts and validate-md-language.ts must read locale_codes from this file — do NOT hardcode language codes in scripts."
   },

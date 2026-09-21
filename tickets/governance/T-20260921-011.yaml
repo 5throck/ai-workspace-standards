@@ -6,12 +6,24 @@ title: >-
   (15 vs schema 16 with en) and the COMMON-CLAUDE/COMMON-GEMINI ko-only
   translation-zone wording (2026-09-21 review M-1)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-21T13:28:40.078Z'
 history:
   - at: '2026-09-21T13:28:40.078Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-21T14:26:58.116Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-21T14:26:58.127Z'
+    from: waiting
+    to: review
+  - at: '2026-09-21T14:27:24.574Z'
+    from: review
+    to: done
+result: >-
+  AGENTS.md COMMON-AGENTS locale list states 16 codes incl. en (source
+  language); COMMON-CLAUDE/GEMINI ko-only wording generalized to recognized
+  locale translation zones; propagated L0->L1->L2 (docs sync 26 files)
 error: null

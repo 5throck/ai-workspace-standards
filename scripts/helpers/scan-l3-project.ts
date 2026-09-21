@@ -5,7 +5,7 @@
  * Recursively scans L3 project directories and classifies files
  * for variant conversion pipeline.
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @phase 1: L3 Analysis
  *
  * Dependencies:
@@ -80,17 +80,21 @@ const L0_ROOT = process.cwd();
 const L1_COMMON = join(L0_ROOT, 'templates', 'common');
 
 // File categories to scan
+// v1.4.0 (2026-09-21 review H-3): .agents/.codex mirrors and the AGENTS.md/CODEX.md/
+// README_ko.md/SECURITY.md root files joined the scan — the promotion pipeline was
+// blind to the two newest platform surfaces (a codex-primary project lost its platform
+// files at promotion, and .codex skill copies were never classified).
 const SCAN_CATEGORIES = {
   agents: ['agents', '.claude/agents', '.gemini/agents'],
-  skills: ['skills', '.claude/skills', '.gemini/skills'],
+  skills: ['skills', '.claude/skills', '.gemini/skills', '.agents/skills', '.codex/skills'],
   commands: ['.claude/commands', '.gemini/commands'],
-  configs: ['.claude', '.gemini'],
+  configs: ['.claude', '.gemini', '.agents', '.codex'],
   scripts: ['scripts'],
   docs: ['docs'],
   // Procedure Schema YAML workflows (ADR-0063) — MUST survive L3→variant promotion
   // so promoted variants carry their (agent, phase) workflow corpus.
   procedures: ['procedures'],
-  root: ['CLAUDE.md', 'GEMINI.md', 'README.md', 'CHANGELOG.md', 'package.json'],
+  root: ['CLAUDE.md', 'GEMINI.md', 'AGENTS.md', 'CODEX.md', 'README.md', 'README_ko.md', 'SECURITY.md', 'CHANGELOG.md', 'package.json'],
 } as const;
 
 // ============================================================================

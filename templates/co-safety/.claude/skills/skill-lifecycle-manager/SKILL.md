@@ -5,10 +5,13 @@ scope: co-safety
 description: >
   Manages the creation, validation, and maintenance of skill files across the project.
   Use when: creating new skills, updating skill metadata, validating skill structure,
-  or managing skill-agent mappings.
+  managing skill-agent mappings, triaging agent skill requests, or deprecating/removing skills.
 owner: pm
-version: 1.2.0
-last_reviewed: 2026-05-30
+version: 1.4.0
+last_reviewed: 2026-09-18
+relates_to:
+  - skill: script-lifecycle-manager
+    type: composes_with
 metadata:
   type: process
   triggers:
@@ -17,13 +20,15 @@ metadata:
     - validate skills
     - skill lifecycle
     - manage skills
+    - skill request
+    - deprecate skill
+    - remove skill
 ---
 
 audit_exception: safety-os-skill-structure — Safety OS skills use the legal_basis-gated SSOT skill format (validated by scripts/skill-lifecycle-audit.ts and scripts/validate-skills.ts), not the generic template 5-section/7-frontmatter schema
-
 ## Overview
 
-This skill provides a systematic approach to creating, validating, and maintaining skill files. It ensures all skills follow proper structure, have correct frontmatter, and are properly documented in AGENTS.md and docs/context.md.
+This skill provides a systematic approach to creating, validating, and maintaining skill files. It ensures all skills follow proper structure, have correct frontmatter, and are properly documented in AGENTS.md and docs/context.md. (`docs/context.md` — like the other `docs/...` paths this skill mentions — exists inside a generated variant project, not at workspace root.)
 
 ## When to Use This Skill
 
@@ -39,6 +44,14 @@ This skill provides a systematic approach to creating, validating, and maintaini
 - Trigger: "Update skill triggers" or "Modify skill frontmatter"
 - Use Case: Improving skill discoverability or updating descriptions
 
+**Triage Agent Skill Requests (PM only):**
+- Trigger: Pending skill request blocks in `memory/YYYY-MM-DD.md` logs
+- Use Case: An agent requested a skill create/attach/remove; PM reviews and approves or rejects
+
+**Deprecate or Remove a Skill:**
+- Trigger: "Deprecate skill X" or "Remove skill Y", or an approved `remove` request
+- Use Case: A skill is obsolete, superseded, or its owner agent was fired
+
 ---
 
 ## Step 1: Create New Skill Structure
@@ -48,13 +61,13 @@ This skill provides a systematic approach to creating, validating, and maintaini
 **Steps**:
 1. Choose the correct ownership layer:
    - **L0** (`skills/`): Workspace SSOT — all skill development happens here.
-   - **L1** (`templates/common/skills/`): Template snapshot — published from L0 via `bun scripts/publish-to-template.ts`.
+   - **L1** (`templates/common/skills/`): Template snapshot — published from L0 via `bun run propagate:apply`.
    - **L3** (`<project>/skills/`): Project snapshot created from L1 at `new-project` time.
    - Never edit L1 directly; edit L0 and publish.
 2. Create skill directory: `mkdir -p skills/<skill-name>/`
 3. Create SKILL.md file: `touch skills/<skill-name>/SKILL.md`
 4. After editing, run `bun scripts/sync-skills.ts` to distribute to `.claude/skills/` and `.gemini/skills/`.
-5. Check if `templates/common/` exists to confirm you are in the L0 workspace. If it does not exist, you are in an L3 project and must skip this step. If it does exist, propagate to the L1 template by running `bun scripts/publish-to-template.ts`.
+5. Check if `templates/common/` exists to confirm you are in the L0 workspace. If it does not exist, you are in an L3 project and must skip this step. If it does exist, propagate to the L1 template by running `bun run propagate:apply`.
 
 **Validation**:
 - Directory name should use kebab-case (lowercase with hyphens)
@@ -139,8 +152,8 @@ metadata:
    - Add to Skills section
    - Include skill name, type, and brief description
 
-3. **skills/README.md**:
-   - Update available skills list
+3. **skills/SKILLS.md**:
+   - Update the skill registry row (version, status, owner, last_reviewed)
    - Ensure skill is discoverable
 
 **Validation**:
@@ -189,6 +202,101 @@ bun run verify-skills
 - Triggers match expected use cases
 
 ---
+
+## Skill Request Workflow (Agent-Initiated, PM-Approved)
+
+Skill additions and removals are **bottom-up**: each agent judges its own needs and requests changes through PM. PM approval is mandatory before any skill work proceeds — agents never create, attach, or remove skills unilaterally.
+
+### Step R1: Agent Submits Request
+
+An agent that identifies a skill need or an unnecessary skill records a structured request block in its task report **and** in the active `memory/YYYY-MM-DD.md` session log:
+
+```
+## Skill Request
+- requester: <agent-name>
+- type: create | attach | remove
+- target_skill: <skill-name> (or proposed name for `create`)
+- justification: <what keeps failing / what is unused, with concrete evidence>
+- impact: <which workflows, phases, or agents are affected>
+```
+
+Evidence expectations by type:
+- `create` — repeated task failures or accumulated manual work that no existing skill covers; name the occurrences
+- `attach` — the agent performs work owned by a skill whose `owner:` does not include it
+- `remove` — skill unused over an extended period, superseded by another skill, or detached from all workflows
+
+### Step R2: PM Triage
+
+PM reviews pending request blocks at the next orchestration cycle or at Phase 5 finalization:
+
+| Check | Question |
+|-------|----------|
+| Evidence | Is the justification concrete and verifiable from session logs? |
+| Duplication | Does an existing skill already cover the need (check `skills/*/SKILL.md` and `metadata.triggers`)? |
+| Roster impact | Does the change overlap another agent's role or break an existing `owner:` mapping? |
+| Layer | Is this an L0 workspace skill or should it live project-local (L3)? |
+
+### Step R3: Approval or Rejection
+
+**On approval** (PM):
+1. Emit a Gate-Moment Decision Record at `docs/decisions/DEC-YYYYMMDD-NN.md` (ADR-0061) before dispatch continues
+2. Dispatch automation-engineer to execute the change via Steps 1–6 above (`create`), the attach rules in `agent-lifecycle-manager` (`attach`), or the Deprecation & Removal section below (`remove`)
+3. Run validation (`bun run verify-skills`, relevant lifecycle audits)
+
+**On rejection** (PM):
+1. Record the rationale in the same `memory/YYYY-MM-DD.md` log next to the request
+2. Relay the rejection rationale to the requesting agent at its next dispatch
+
+---
+
+## Skill Deprecation & Removal
+
+Skills follow a two-stage exit: **deprecate** first, **remove** only when retirement is confirmed. Removal executes only through PM approval — either an approved `remove` request (Step R3) or the skill-transfer plan inside a Firing Workflow decision (`agent-lifecycle-manager`).
+
+### Deprecate (default)
+
+1. Set `status: deprecated` in the skill frontmatter (keep the directory in place)
+2. Reassign responsibility: update `owner:` to the surviving agent, or leave a comment pointing to the replacement skill
+3. Strip stale `metadata.triggers` so the skill stops auto-activating
+4. Update `skills/SKILLS.md` registry row (status, version, last_reviewed)
+5. Note the deprecation rationale in the governance record (`docs/lifecycle/skills/<name>.md`) and the session memory log
+
+Deprecation is reversible; keep the folder until the removal review confirms nothing references it.
+
+### Remove (explicit approval only)
+
+Run only after deprecation or with explicit user/PM approval:
+
+1. Verify no live references: grep the skill name across `agents/*.md`, `AGENTS.md`, `skills/SKILLS.md`, procedures, and other skills' `relates_to`
+2. Delete the skill directory `skills/<skill-name>/`
+3. Update registries: remove rows from `skills/SKILLS.md`, `AGENTS.md` (if listed), and `docs/context.md` in generated projects
+4. Sync platform mirrors: `bun scripts/sync-skills.ts` (removes stale copies from `.claude/skills/` and `.gemini/skills/`)
+5. Publish the deletion to the L1 template: `bun run propagate:apply` (L0 is the SSOT — never edit `templates/common/skills/` directly)
+6. Run `bun run verify-skills` and record the removal in the session memory log
+
+**Validation**:
+- [ ] No dangling references to the removed skill anywhere in the workspace
+- [ ] `.claude/skills/` and `.gemini/skills/` no longer contain the skill
+- [ ] `templates/common/skills/` reflects the removal after propagation
+- [ ] Deprecation path used `status: deprecated` and preserved the rationale
+
+---
+
+## Whole-Skill Revision Principle
+
+When executing an approved revision from the session-evidence review loop
+(`memory/skill-review/`, see the skill-lifecycle standards §6.6
+Session-Evidence Skill Review Loop and
+`docs/designs/2026-09-06-skill-session-review-design.md`), treat the skill as a
+**whole folder** —
+one approved change may update SKILL.md prose, add/fix `scripts/`, and extend
+`references/` together. Prompt-only revisions cannot fix failures that live in
+helper scripts (SkillHone finding). Requirements per revision:
+
+- Reference the observed symptom and its evidence (sessions/occurrences) in
+  the governance record Changelog entry
+- Follow the skill version bump rules (lifecycle standards §6.6)
+- Dependency revalidation happens automatically at the next `/sync` (step 3.96c)
 
 ## Expected Outputs
 
@@ -274,5 +382,6 @@ metadata:
 
 ## Related Skills
 
-- **workspace template validation**: Validates template structure (related validation skill)
-- **agent-lifecycle-manager**: Manages agent creation and validation (parallel workflow)
+- **validate-templates**: Validates template structure (related validation skill)
+- **agent-lifecycle-manager**: Manages agent creation, validation, and PM-led hiring/firing (parallel workflow; its Firing Workflow is a valid source of approved skill removals)
+- **team-builder**: Whole-team restructuring with bulk skill transfer plans (superset of this skill's per-skill operations)

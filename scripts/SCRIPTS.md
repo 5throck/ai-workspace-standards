@@ -99,7 +99,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `generate-version-manifest.ts` | L0 | 1.7.1 | active | scripts-table sort uses a full-path tiebreaker so basename ties (scripts/x.ts vs scripts/<variant>/x.ts) stop depending on readdir order (macOS vs Linux drift); date-masked `--check` — Last Modified columns excluded from comparison unconditionally (ADR-0081/T-20260918-001); emits `validate-md-language:allowlist` markers around the generated Skills table (T-20260912-015) | —| L0+L1 | —|
 | `graph-delta-log.ts` | L0 | 1.0.0 | active | Graph Delta Log — compute and persist per-scope structural diffs between committed and derived skill graphs (ADR-0084 §5); two-layer delivery (workspace root + projects); consumed by evidence-backport-scan.ts maturity bar (M2, M4, M6b tests) | —| L0+L1 | —|
 | `helpers/beta-lifecycle.ts` | L0 | 1.2.1 | active | —| —| L0 | —|
-| `helpers/generate-variant.ts` | L0 | 1.15.0 | active | —| —| L0+L1 | —|
+| `helpers/generate-variant.ts` | L0 | 1.16.0 | active | —| —| L0+L1 | —|
 | `helpers/agent-promote.ts` | L0 | 0.1.1 | experimental | —| —| L0 | —|
 | `experiments/infer-graph-from-phases.ts` | L0 | 0.1.0 | experimental | —| —| L0 | —|
 | `helpers/agent-similarity-analyzer.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
@@ -138,7 +138,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `helpers/reconcile-with-l0-l1.ts` | L0 | 1.3.1 | active | —| —| L0 | —|
 | `helpers/normalize-agent-skills.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `helpers/prune-country-scoped-assets.ts` | L0 | 0.3.3 | active | —| —| L0 | —|
-| `helpers/scan-l3-project.ts` | L0 | 1.3.0 | active | —| —| L0 | —|
+| `helpers/scan-l3-project.ts` | L0 | 1.4.0 | active | —| —| L0 | —|
 | `helpers/substitute-placeholders.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `helpers/template-utils.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `helpers/rollback-partial-project.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
@@ -167,7 +167,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `hooks/pre-push.ts` | L0 | 1.4.1 | active | —| —| L0+L1 | —|
 | `ingest-external-skills.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `ingest-security-frameworks.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `l3-to-variant-pipeline.ts` | L0 | 1.19.0 | active | `--overlay-variant` | —| L0 | —|
+| `l3-to-variant-pipeline.ts` | L0 | 1.20.0 | active | `--overlay-variant` | —| L0 | —|
 | `regenerate-agents-md.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `lib/agent-override-merge.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `lib/context-md-schema.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
@@ -228,7 +228,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `translate-readme.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `ticket.ts` | L0 | 1.2.0 | active | `create --not-before`, `list --kind`, `list --ready`, `move done --result` (required, not bypassable by --force) | —| L0 | —|
 | `typecheck.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
-| `upgrade-project.ts` | L0 | 1.39.0 | active | `--variant`, `--platform` (claude/antigravity/codex/all — `all` renamed from `both`, now merges CODEX.md too), `--dry-run`, `--prune-removed`, `--rollback`, `--yes`, `--skip-context-commonization`, `--force-context-sync`; COMMON-CONTEXT splice under PRESERVE (T-20260919-003); skill sub-file sync — NEW/UPDATE deliver the whole skill dir, equal-version skills get additive CATCH-UP + DRIFT warnings (2026-09-21) | —| L0 | —|
+| `upgrade-project.ts` | L0 | 1.40.0 | active | `--variant`, `--platform` (claude/antigravity/codex/all — `all` renamed from `both`, now merges CODEX.md too), `--dry-run`, `--prune-removed`, `--rollback`, `--yes`, `--skip-context-commonization`, `--force-context-sync`; COMMON-CONTEXT splice under PRESERVE (T-20260919-003); skill sub-file sync — NEW/UPDATE deliver the whole skill dir, equal-version skills get additive CATCH-UP + DRIFT warnings (2026-09-21) | —| L0 | —|
 | `variant-feature.ts` | L0 | 1.0.0 | active | `--variant`, `--feature`, `--type` | —| L0 | —|
 | `validate-agents.ts` | L0 | 1.2.1 | active | —| —| L0+L1 | —|
 | `validate-doc-folder.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|

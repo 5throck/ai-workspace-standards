@@ -1,5 +1,11 @@
 #!/usr/bin/env bun
-// @version 1.39.0
+// @version 1.40.0
+// v1.40.0 (2026-09-21, ticket batch T-20260921-007/010/016/019): (1) CONTRACT
+//           common_skills bypass the frozen variant.json allowlist gate + loud
+//           CONTRACT PARITY report (T-007); (2) CORE-SCRIPT FORK arm — a
+//           version-bumped fork of dev-sync.ts/audit.ts is restored to canonical
+//           instead of printing OK forever (T-010); (3) post-upgrade sync-skills
+//           timeout 30s → 120s with explicit partial-sync warning (T-016).
 // v1.39.0 (2026-09-21, ticket batch T-20260921-001/006): (1) pre-upgrade stash
 //           skips gracefully on repos with no initial commit (fresh scaffolds
 //           could not receive any upgrade); (2) country prune scrubs AGENTS.md
@@ -1372,6 +1378,10 @@ console.log('');
 // ── SYNC_IF_NEWER: scripts/ ───────────────────────────────────────────────────
 console.log('--- SYNC_IF_NEWER: scripts/ ---');
 
+// T-20260921-010: the two AGENTS.md-locked core scripts. A project-side fork with
+// a bumped @version used to fall through every restore branch into a silent OK.
+const CORE_LOCKED_SCRIPTS = ['scripts/dev-sync.ts', 'scripts/audit.ts'];
+
 // G11: Auto-discover script subdirectories from template instead of hardcoding.
 const tplScriptsRoot = join(commonDir, 'scripts');
 const scriptSubDirs = [''];  // root scripts/ always included
@@ -1419,7 +1429,18 @@ for (const subDir of scriptSubDirs) {
       // 11 drifted forks in a single project). Core scripts are canonical: the
       // template copy wins, unconditionally (the integrity rule "core scripts
       // must not be modified" already forbids the local fork).
-      console.log(`  ⚠️  DRIFT  ${rel}  ${projVer} (content differs from L1 at same version) — restored to canonical`);
+      console.log(`  ⚠️  DRIFT (restored to canonical) ${rel}  ${projVer} (content differs from L1 at same version — ADR-0085 D3)`);
+      if (!dryRun) { copyFileSync(tplFile, projFile); reconcileScriptRegistry(rel); }
+      console.log(`  ${dryTag}COPIED: ${rel}`);
+      syncChanged++;
+    } else if (CORE_LOCKED_SCRIPTS.includes(rel) && projVer !== tplVer) {
+      // T-20260921-010 (review H-4): a version-bumped fork of a locked core script
+      // (project @version != template @version in either direction) matched no
+      // restore branch above and printed OK forever — the fork survived every
+      // future upgrade. AGENTS.md "Pluggable Variant Audit Hooks" forbids
+      // modifying dev-sync.ts / audit.ts in L2 projects: the canonical template
+      // copy wins, loudly.
+      console.log(`  ⚠️  CORE-SCRIPT FORK ${rel}  project ${projVer} vs template ${tplVer} — locked core script must not be modified; restored to canonical`);
       if (!dryRun) { copyFileSync(tplFile, projFile); reconcileScriptRegistry(rel); }
       console.log(`  ${dryTag}COPIED: ${rel}`);
       syncChanged++;
@@ -1557,6 +1578,22 @@ function loadProjectAssetGate(): { skills: Set<string>; agents: Set<string> } | 
 }
 const assetGate = loadProjectAssetGate();
 
+// T-20260921-007 (review H-1): common_skills declared in docs/templates/common-contract.json
+// are the fleet-standard set — the frozen variant.json allowlist of projects scaffolded
+// before a common skill landed must not withhold it forever (handbook, handbook-sync-audit,
+// i18n-audit never reached projects whose allowlist predated them). Contract skills bypass
+// the gate below (add-if-missing only); the CONTRACT PARITY report tells the operator which
+// project skill_manifest entries to refresh.
+const contractCommonSkills: Set<string> = (() => {
+  try {
+    const contract = JSON.parse(readFileSync(join(workspaceRoot, 'docs', 'templates', 'common-contract.json'), 'utf8'));
+    const skills = contract?.common_skills;
+    return new Set(skills && typeof skills === 'object' ? Object.keys(skills) : []);
+  } catch {
+    return new Set(); // unreadable contract — keep the strict gate rather than guess
+  }
+})();
+
 // Skills the project's own variant.json deliberately registers in
 // skill_manifest.variant_specific (v1.17.1) — the country-prune pass must not
 // delete these even when the detected country doesn't match the skill's scope.
@@ -1633,7 +1670,7 @@ for (const agentsDir of tplAgentsDirs) {
       // shipped without a version bump and never reached six projects). Agents are
       // canonical like core scripts; the project lifecycle block stays preserved
       // by writeAgentWithLifecycle, so the comparison strips it on both sides.
-      console.log(`  ⚠️  DRIFT ${rel}  ${projVer} (content differs from template at same version) — restored to canonical`);
+      console.log(`  ⚠️  DRIFT (restored to canonical) ${rel}  ${projVer} (content differs from template at same version — ADR-0085 D3)`);
       if (!dryRun) writeAgentWithLifecycle(tplFile, projFile);
       console.log(`  ${dryTag}COPIED: ${rel}`);
       syncChanged++;
@@ -1708,9 +1745,13 @@ if (existsSync(tplSkillsDir)) {
     if (tplVer) {
       const projVer = extractFrontmatterVersion(projSkillFile);
       if (!existsSync(projSkillFile)) {
-        if (assetGate && !assetGate.skills.has(skillName)) {
+        const contractCommonDelivery = assetGate && !assetGate.skills.has(skillName) && contractCommonSkills.has(skillName);
+        if (assetGate && !assetGate.skills.has(skillName) && !contractCommonDelivery) {
           console.log(`  SKIP (not in variant.json skill allowlist): skills/${skillName}/SKILL.md`);
           continue;
+        }
+        if (contractCommonDelivery) {
+          console.log(`  ℹ️  contract common_skill delivered despite variant.json allowlist — refresh skill_manifest.allowlist to record it`);
         }
         console.log(`  NEW   skills/${skillName}/SKILL.md  (none) → ${tplVer}`);
         copyWholeSkillDir();
@@ -1735,7 +1776,7 @@ if (existsSync(tplSkillsDir)) {
           console.log(`  OK     skills/${skillName}/SKILL.md  ${projVer}`);
         }
         for (const d of drifted) {
-          console.log(`  ⚠️  DRIFT skills/${skillName}/${d}  (same-version content differs — left untouched)`);
+          console.log(`  ⚠️  DRIFT (preserved) skills/${skillName}/${d}  (same-version content differs — left untouched; ADR-0085 D3)`);
         }
       }
     } else {
@@ -1743,9 +1784,13 @@ if (existsSync(tplSkillsDir)) {
       const tplHash = fileHash(tplSkillFile);
       const projHash = fileHash(projSkillFile);
       if (!existsSync(projSkillFile)) {
-        if (assetGate && !assetGate.skills.has(skillName)) {
+        const contractCommonDelivery = assetGate && !assetGate.skills.has(skillName) && contractCommonSkills.has(skillName);
+        if (assetGate && !assetGate.skills.has(skillName) && !contractCommonDelivery) {
           console.log(`  SKIP (not in variant.json skill allowlist): skills/${skillName}/SKILL.md`);
           continue;
+        }
+        if (contractCommonDelivery) {
+          console.log(`  ℹ️  contract common_skill delivered despite variant.json allowlist — refresh skill_manifest.allowlist to record it`);
         }
         console.log(`  NEW   skills/${skillName}/SKILL.md  (hash-based)`);
         copyWholeSkillDir();
@@ -1765,7 +1810,7 @@ if (existsSync(tplSkillsDir)) {
           console.log(`  OK     skills/${skillName}/SKILL.md  (hash match)`);
         }
         for (const d of drifted) {
-          console.log(`  ⚠️  DRIFT skills/${skillName}/${d}  (same-version content differs — left untouched)`);
+          console.log(`  ⚠️  DRIFT (preserved) skills/${skillName}/${d}  (same-version content differs — left untouched; ADR-0085 D3)`);
         }
       }
     }
@@ -1829,7 +1874,7 @@ if (existsSync(variantSkillsSrc)) {
           console.log(`  OK     skills/${skillName}/SKILL.md  ${projVer}`);
         }
         for (const d of drifted) {
-          console.log(`  ⚠️  DRIFT skills/${skillName}/${d}  (same-version content differs — left untouched)`);
+          console.log(`  ⚠️  DRIFT (preserved) skills/${skillName}/${d}  (same-version content differs — left untouched; ADR-0085 D3)`);
         }
       }
     } else {
@@ -1854,7 +1899,7 @@ if (existsSync(variantSkillsSrc)) {
           console.log(`  OK     skills/${skillName}/SKILL.md  (hash match)`);
         }
         for (const d of drifted) {
-          console.log(`  ⚠️  DRIFT skills/${skillName}/${d}  (same-version content differs — left untouched)`);
+          console.log(`  ⚠️  DRIFT (preserved) skills/${skillName}/${d}  (same-version content differs — left untouched; ADR-0085 D3)`);
         }
       }
     }
@@ -1916,6 +1961,35 @@ if (variantAssetDirs.length > 0) {
     syncAssetDir(join(templatesDir, dirName), join(projectDir, dirName), dirName);
   }
   console.log('  (project-only files under these directories are preserved — not deleted; run with --prune-removed awareness manually if needed)');
+  console.log('');
+}
+
+// ── CONTRACT PARITY (T-20260921-007, review H-1) ─────────────────────────────
+// Loud post-pass report: docs/templates/common-contract.json common_skills are the
+// fleet-standard skill set. Report any still missing from the project (the
+// add-if-missing passes deliver them, so a miss means the gate withheld it or the
+// contract drifted) and count delivered ones the project's variant.json does not
+// declare (the project-side allowlist is operator-owned and should be refreshed).
+console.log('--- CONTRACT PARITY (common-contract.json common_skills) ---');
+{
+  let missing = 0;
+  let undeclared = 0;
+  for (const skillName of [...contractCommonSkills].sort()) {
+    const projSkillFile = join(projectDir, 'skills', skillName, 'SKILL.md');
+    if (!existsSync(projSkillFile)) {
+      console.log(`  ⚠️  MISSING skills/${skillName}/  (declared in common-contract.json, absent from the project)`);
+      missing++;
+      continue;
+    }
+    if (assetGate && !assetGate.skills.has(skillName)) undeclared++;
+  }
+  if (missing === 0 && undeclared === 0) {
+    console.log('  OK  project satisfies the contract common_skills set');
+  } else {
+    if (missing > 0) console.log(`  ${missing} contract skill(s) missing from the project`);
+    if (undeclared > 0) console.log(`  ℹ️  ${undeclared} contract skill(s) present but not declared in variant.json skill_manifest`);
+  }
+  if (dryRun) console.log('  (dry run — reflects pre-upgrade state; planned deliveries are not applied yet)');
   console.log('');
 }
 
@@ -2751,9 +2825,15 @@ const syncSkillsScript = join(projectDir, 'scripts', 'sync-skills.ts');
 if (syncChanged > 0 && existsSync(syncSkillsScript)) {
   console.log('--- Post-upgrade: Running sync-skills.ts for platform skill distribution ---');
   if (!dryRun) {
-    const syncResult = spawnSync('bun', ['scripts/sync-skills.ts'], { cwd: projectDir, encoding: 'utf8', timeout: 30000 });
+    // T-20260921-016 (review M-18): 30s was too tight for large skill deliveries —
+    // a timeout returns status === null, which the old check treated as any other
+    // failure. Treat it explicitly as a partial-sync warning and raise the budget.
+    const syncResult = spawnSync('bun', ['scripts/sync-skills.ts'], { cwd: projectDir, encoding: 'utf8', timeout: 120000 });
     if (syncResult.status === 0) {
       console.log('  ✅ sync-skills.ts completed successfully');
+    } else if (syncResult.status === null && syncResult.signal === 'SIGTERM') {
+      console.log('  ⚠️  sync-skills.ts TIMED OUT after 120s — platform mirrors may be PARTIALLY synced. Re-run: bun scripts/sync-skills.ts (inside the project)');
+      if (syncResult.stderr) console.log(`  STDERR: ${syncResult.stderr.trim()}`);
     } else {
       console.log(`  ⚠️  sync-skills.ts exited with status ${syncResult.status}`);
       if (syncResult.stderr) console.log(`  STDERR: ${syncResult.stderr.trim()}`);

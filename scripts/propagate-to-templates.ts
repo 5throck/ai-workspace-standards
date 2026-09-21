@@ -859,26 +859,40 @@ export { scrubConstitutionRefs };
 
 function applyDiffs(diffs: FileDiff[]): number {
   let copied = 0;
+  let failed = 0;
   for (const d of diffs) {
-    const targetDir = dirname(d.targetPath);
-    if (!existsSync(targetDir)) {
-      mkdirSync(targetDir, { recursive: true });
+    try {
+      const targetDir = dirname(d.targetPath);
+      if (!existsSync(targetDir)) {
+        mkdirSync(targetDir, { recursive: true });
+      }
+
+      let content = readFileSync(d.sourcePath, 'utf-8');
+      // Scrub CONSTITUTION.md references when copying to templates/ (L1+).
+      const needsScrub = d.targetPath.includes('templates' + sep) && content.includes('CONSTITUTION.md');
+      if (needsScrub) {
+        content = scrubConstitutionRefs(content, d.sourcePath, d.targetPath);
+      }
+
+      // For in-sync files: still write if scrub changed the content.
+      if (d.status === 'in-sync' && !FORCE && !needsScrub) continue;
+
+      writeFileSync(d.targetPath, content, 'utf-8');
+      const label = (d.status === 'in-sync' && needsScrub) ? 'scrubbed' : 'copied';
+      console.log(`${C.green}  ${label}${C.reset}  ${d.sourcePath} → ${d.targetPath}`);
+      copied++;
+    } catch (err) {
+      // T-20260921-013 (review M-15): one throwing file used to abort the run
+      // mid-loop, leaving L1 half-synced with no summary. Isolate per file, keep
+      // applying, report at the end, and fail the run via exit code. Targets are
+      // git-tracked, so the partial state stays visible and re-running converges.
+      failed++;
+      console.error(`${C.red}  FAILED  ${d.sourcePath} → ${d.targetPath}: ${err instanceof Error ? err.message : String(err)}${C.reset}`);
     }
-
-    let content = readFileSync(d.sourcePath, 'utf-8');
-    // Scrub CONSTITUTION.md references when copying to templates/ (L1+).
-    const needsScrub = d.targetPath.includes('templates' + sep) && content.includes('CONSTITUTION.md');
-    if (needsScrub) {
-      content = scrubConstitutionRefs(content, d.sourcePath, d.targetPath);
-    }
-
-    // For in-sync files: still write if scrub changed the content.
-    if (d.status === 'in-sync' && !FORCE && !needsScrub) continue;
-
-    writeFileSync(d.targetPath, content, 'utf-8');
-    const label = (d.status === 'in-sync' && needsScrub) ? 'scrubbed' : 'copied';
-    console.log(`${C.green}  ${label}${C.reset}  ${d.sourcePath} → ${d.targetPath}`);
-    copied++;
+  }
+  if (failed > 0) {
+    console.error(`${C.red}  ${failed} file(s) FAILED to apply (${copied} applied) — see FAILED lines above${C.reset}`);
+    process.exitCode = 1;
   }
   return copied;
 }

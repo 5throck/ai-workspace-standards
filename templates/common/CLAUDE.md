@@ -179,7 +179,7 @@ No `.mcp.json` is currently defined at the project root — MCP servers are conf
 <!-- COMMON-CLAUDE:START -->
 ### 4. Language Policy for Documentation
 
-All `.md` files you create or modify MUST be in English, except in `ko/` or `locales/ko/` directories (Korean translation zones) or when explicitly declared as a Korean legal/regulatory content exception.
+All `.md` files you create or modify MUST be in English, except in recognized locale translation zones (`<lang-code>/` or `locales/<lang-code>/` directories, plus `*_&lt;lang-code&gt;` suffix files such as `README_ko.md` — see the AGENTS.md Language Policy) or when explicitly declared as a Korean legal/regulatory content exception.
 
 - README.md, CLAUDE.md, GEMINI.md, AGENTS.md, context.md, CHANGELOG.md — English only
 - All documentation in docs/, agents/, skills/ — English only

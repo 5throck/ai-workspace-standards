@@ -396,8 +396,27 @@ function applyAntiSwellingProtection(
 // ============================================================================
 
 /**
+ * Read a locked core script's scaffold-time @version from the project's
+ * scripts-snapshot.json (written at scaffold time by
+ * scripts/helpers/write-scripts-snapshot.ts). Returns the recorded version or
+ * null when the snapshot is missing/unreadable/does not list the script.
+ * T-20260921-010 (review H-4).
+ */
+function readSnapshotScriptVersion(snapshotPath: string, scriptName: string): string | null {
+  if (!existsSync(snapshotPath)) return null;
+  try {
+    const snapshot = JSON.parse(readFileSync(snapshotPath, 'utf-8')) as {
+      scripts?: Record<string, { version?: string }>;
+    };
+    return snapshot?.scripts?.[scriptName]?.version ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Reconcile L3 scan results with L0 and L1
- * @version 1.1.0
+ * @version 1.2.0
  */
 export async function reconcileWithL0L1(
   scanResult: L3ScanResult,
@@ -417,9 +436,23 @@ export async function reconcileWithL0L1(
     const normalizedPath = file.relativePath.replace(/\\/g, '/');
     if (normalizedPath === 'scripts/dev-sync.ts' || normalizedPath === 'scripts/audit.ts') {
       const isIdenticalToL0 = file.existsInL0 && file.hashL3 === file.hashL0;
-      const isIdenticalToL1 = file.existsInL1 && file.hashL3 === file.hashL1;
+      const isIdenticalToL1 = file.existsInL1 && file.hashL1 !== undefined && file.hashL3 === file.hashL1;
       if (!isIdenticalToL0 && !isIdenticalToL1) {
-        throw new Error(`Integrity Violation: Core script '${normalizedPath}' has been modified. Direct modifications to core scripts are forbidden. Please migrate your variant-specific validations to 'scripts/audit-variant.ts' instead.`);
+        // T-20260921-010 (review H-4) — provenance-aware: an UN-upgraded project
+        // whose core scripts are untouched since scaffold time also differs from
+        // the CURRENT L0/L1 purely because upstream moved on. The scaffold-time
+        // scripts-snapshot.json records the @version each script shipped with; a
+        // project script still AT its scaffolded version is compliant (warn +
+        // instruct an upgrade), while any other divergence stays a hard violation.
+        const snapshotVersion = readSnapshotScriptVersion(
+          join(scanResult.scanMetadata.l3ProjectPath, 'scripts-snapshot.json'),
+          basename(normalizedPath),
+        );
+        if (snapshotVersion && file.l3Version && snapshotVersion === file.l3Version) {
+          console.log(`  ⚠️  CORE SCRIPT PROVENANCE OK: ${normalizedPath} @${file.l3Version} differs from current L0/L1 but matches the scaffold-time snapshot — run upgrade-project to receive the canonical current version before promoting`);
+        } else {
+          throw new Error(`Integrity Violation: Core script '${normalizedPath}' differs from current L0/L1 and does not match its scaffold-time version${file.l3Version ? ` (project @${file.l3Version} vs snapshot @${snapshotVersion ?? 'none'})` : ''}. Run upgrade-project first; direct modifications to core scripts are forbidden — migrate variant-specific validations to 'scripts/audit-variant.ts' instead.`);
+        }
       }
     }
 

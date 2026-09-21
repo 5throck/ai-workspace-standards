@@ -353,6 +353,11 @@
       "layer": "L0"
     },
     {
+      "id": "adr:0085",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
       "id": "agent-lifecycle-manager",
       "type": "skill",
       "layer": "L0"
@@ -5002,6 +5007,36 @@
       "type": "references",
       "from": "adr:0084",
       "to": "project-resync",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0085",
+      "to": "i18n-audit",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0085",
+      "to": "i18n-formatting",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0085",
+      "to": "i18n-layout",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0085",
+      "to": "i18n-locale-config",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0085",
+      "to": "upgrade-project",
       "source": "prose"
     },
     {

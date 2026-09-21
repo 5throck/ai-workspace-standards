@@ -17,7 +17,7 @@ metadata:
 
 # source-command-celebrate
 
-Use this skill when the user asks to run the migrated source command `celebrate`.
+Use this skill when the user asks to run the migrated source command celebrate (a workspace convention, not a skill).
 
 ## Command Template
 
