@@ -1,7 +1,14 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.37.0
+ * @version 1.38.0
+ *
+ * v1.38.0 (ADR-0077 twin parity): new VA-06 cross-twin common section parity — the
+ *           three instruction twins (CLAUDE/GEMINI/CODEX at root and templates/common)
+ *           must each carry the shared policy anchors (Language Policy, Execution Plan
+ *           Boilerplate, 3-Tier Cost Optimization, Error Recovery, Windows, Git & PR).
+ *           Catches a policy section landed on two twins but never ported to the third
+ *           (the 2026-09 CODEX.md Language Policy gap VA-05 cannot see).
  *
  * v1.36.0 (ADR-0081 fleet sweep / T-20260919-001): new `common-agents-parity`
  *           (PM-04b) — every variant templates/co-<v>/AGENTS.md must carry the
@@ -3603,6 +3610,47 @@ function checkDocumentCommonSections(variant: string): void {
   }
 }
 
+// Check VA-06: cross-twin common section parity (ADR-0077 twin doctrine).
+// VA-05 compares each twin root↔variant-template per file, so a policy section
+// added to two twins but never ported to the third was invisible (the 2026-09
+// CODEX.md Language Policy gap). The three instruction twins must each carry
+// the shared policy set — checked by anchor substring, not full content
+// equality, because platform-specific sections legitimately differ.
+const TWIN_FILES = ['CLAUDE.md', 'GEMINI.md', 'CODEX.md'];
+const TWIN_COMMON_ANCHORS = [
+  'Language Policy for Documentation',
+  'Execution Plan Boilerplate',
+  'Cost Optimization (3-Tier Model Strategy)',
+  'Custom Command Error Recovery',
+  'Windows Platform Requirement',
+  'Git & PR Additions',
+];
+
+function checkTwinCommonSectionParity(): void {
+  if (!JSON_MODE) console.log(`\n=== Check VA-06: Cross-twin common section parity ===`);
+  const layers = [
+    { label: 'root', dir: ROOT, variant: 'root' },
+    { label: 'templates/common', dir: join(TEMPLATES_DIR, 'common'), variant: 'common' },
+  ];
+  for (const layer of layers) {
+    for (const file of TWIN_FILES) {
+      const twinPath = join(layer.dir, file);
+      if (!existsSync(twinPath)) {
+        fail(layer.variant, 'VA-06', `${layer.label}/${file}: platform twin not found — ADR-0077 requires all three instruction twins`, 'Restore the twin from its sibling platforms or templates/common');
+        continue;
+      }
+      const content = readFileSync(twinPath, 'utf-8');
+      for (const anchor of TWIN_COMMON_ANCHORS) {
+        if (!content.includes(anchor)) {
+          fail(layer.variant, 'VA-06', `${layer.label}/${file}: common policy section "${anchor}" missing — the instruction twins must all carry the shared policy set`, `Port the section from a sibling twin (see ${layer.dir === ROOT ? 'CLAUDE.md' : 'templates/common/CLAUDE.md'}) — governance-l1 then deploys it (bun run propagate:governance)`);
+        } else {
+          pass(`VA-06: ${layer.label}/${file} carries "${anchor}"`);
+        }
+      }
+    }
+  }
+}
+
 // Check WS-04: L0 scripts must NOT exist in templates/co-*/scripts/
 function checkL0ScriptsNotInVariants(variant: string, scriptLayerMap: Map<string, import('./helpers/layer-filter.js').LayerValue>): void {
   if (!JSON_MODE) console.log(`\n=== Check WS-04: L0 scripts must not exist in ${variant}/scripts/ ===`);
@@ -4622,6 +4670,7 @@ function main(): number {
   // Check common/ commands and parity
   checkCommands('common');
   checkModelLiteralPlacement();
+  checkTwinCommonSectionParity(); // VA-06: CLAUDE/GEMINI/CODEX twins carry the shared policy set
   // Script parity check removed (dead code after ADR-0036 TypeScript migration)
   checkVariantScopedSkillLeak();  // B-11: variant_scoped_skills must not live in common
   checkPlatformMirrorFreshness(); // T-20260916-008: platform skill mirrors carry SSOT versions
