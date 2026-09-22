@@ -6,6 +6,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-09-22](2026-09-22.md) | chore(team-builder): add harness engineering proposal |
 | [2026-09-21](2026-09-21.md) | chore: update |
 | [2026-09-20](2026-09-20.md) | feat(governance): implement ADR-0084 actor model and graph delta log |
 | 2026-09-12 | docs(consistency): resolve stale claims across upgrade-policy doc fleet (audit comment, non-goals, gitignore merge) |

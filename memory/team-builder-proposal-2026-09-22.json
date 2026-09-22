@@ -1,0 +1,224 @@
+{
+  "version": "1.0.0",
+  "timestamp": "2026-09-22T00:00:00Z",
+  "teamName": "Harness Engineering Validation Team",
+  "benchmarkSources": [
+    "Gartner Fusion Teams model",
+    "Google Cloud DORA State of DevOps research",
+    "McKinsey Enterprise Architecture / technology modernization guidance",
+    "BCG digital due diligence / digital transformation guidance"
+  ],
+  "changes": {
+    "agentsToCreate": [
+      {
+        "name": "cloud-platform-engineer",
+        "formalName": "Cloud Platform Engineer",
+        "tier": {
+          "claude": "medium"
+        },
+        "color": "blue",
+        "description": "Validates cloud readiness, deployment architecture, operations risk, and platform constraints before project kickoff.",
+        "phases": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "handoffTo": [
+          "poc-automation-engineer",
+          "security-validation-engineer",
+          "validation-auditor"
+        ],
+        "handoffFrom": [
+          "harness-architect",
+          "pm"
+        ],
+        "requiredSkills": [
+          "cloud-readiness-assessment"
+        ],
+        "rationale": "Cloud expertise is mandatory for the target project types and is not represented by a dedicated current agent."
+      },
+      {
+        "name": "data-platform-engineer",
+        "formalName": "Data Platform Engineer",
+        "tier": {
+          "claude": "medium"
+        },
+        "color": "purple",
+        "description": "Validates data models, pipelines, storage choices, integration constraints, and analytics readiness before project kickoff.",
+        "phases": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "handoffTo": [
+          "poc-automation-engineer",
+          "security-validation-engineer",
+          "validation-auditor"
+        ],
+        "handoffFrom": [
+          "harness-architect",
+          "pm"
+        ],
+        "requiredSkills": [
+          "data-platform-assessment"
+        ],
+        "rationale": "Data expertise is mandatory because the team must validate data platforms, internal systems, and web-service data flows."
+      }
+    ],
+    "agentsToConvert": [
+      {
+        "currentFile": "architect.md",
+        "newFile": "harness-architect.md",
+        "newFormalName": "Harness Architect",
+        "roleChanges": "Focus the architect role on technical validation planning, architecture hypotheses, PoC scope, and Go/No-Go evidence design.",
+        "skillsRetained": [
+          "design-foundation",
+          "zod-contract-gate",
+          "context-commonization-review"
+        ],
+        "skillsReplaced": [
+          "general template architecture -> technical-validation-planning"
+        ]
+      },
+      {
+        "currentFile": "automation-engineer.md",
+        "newFile": "poc-automation-engineer.md",
+        "newFormalName": "PoC Automation Engineer",
+        "roleChanges": "Focus the automation role on PoC code, validation harnesses, repeatable checks, and evidence-producing scripts.",
+        "skillsRetained": [
+          "simulate-pipeline",
+          "ticket-run"
+        ],
+        "skillsReplaced": [
+          "general automation scripting -> poc-implementation"
+        ]
+      },
+      {
+        "currentFile": "security-expert.md",
+        "newFile": "security-validation-engineer.md",
+        "newFormalName": "Security Validation Engineer",
+        "roleChanges": "Focus the security role on mandatory security checklists, authentication review, authorization review, secret handling, and delivery risk.",
+        "skillsRetained": [
+          "security-scan"
+        ],
+        "skillsReplaced": [
+          "git hook security focus -> security-validation-checklist"
+        ]
+      }
+    ],
+    "agentsToDelete": [],
+    "skillsToCreate": [
+      {
+        "name": "technical-validation-planning",
+        "owner": "harness-architect",
+        "description": "Creates technical validation plans, hypotheses, acceptance criteria, evidence requirements, and architecture review scope.",
+        "prerequisites": []
+      },
+      {
+        "name": "poc-implementation",
+        "owner": "poc-automation-engineer",
+        "description": "Creates PoC code, validation harnesses, automation scripts, and reproducible test evidence.",
+        "prerequisites": [
+          "technical-validation-planning"
+        ]
+      },
+      {
+        "name": "cloud-readiness-assessment",
+        "owner": "cloud-platform-engineer",
+        "description": "Assesses cloud architecture, deployment topology, scalability, reliability, observability, and operational constraints.",
+        "prerequisites": [
+          "technical-validation-planning"
+        ]
+      },
+      {
+        "name": "data-platform-assessment",
+        "owner": "data-platform-engineer",
+        "description": "Assesses data models, pipelines, storage systems, integration paths, governance risks, and analytics readiness.",
+        "prerequisites": [
+          "technical-validation-planning"
+        ]
+      },
+      {
+        "name": "security-validation-checklist",
+        "owner": "security-validation-engineer",
+        "description": "Runs mandatory security validation across authentication, authorization, secrets, dependencies, data exposure, and deployment risk.",
+        "prerequisites": [
+          "technical-validation-planning"
+        ]
+      }
+    ],
+    "skillsToModify": [
+      {
+        "name": "project-review",
+        "changes": "Add technical-validation evidence checks for PoC code, security checklist, cloud readiness, and data-platform readiness."
+      },
+      {
+        "name": "documentation-writing",
+        "changes": "Add final validation report format with Go, No-Go, and Conditional Go recommendations."
+      }
+    ],
+    "skillsToReassign": [],
+    "workflowPhases": [
+      {
+        "phase": 0,
+        "name": "Intake and Scope",
+        "lead": "pm",
+        "supporting": [
+          "harness-architect"
+        ]
+      },
+      {
+        "phase": 1,
+        "name": "Technical Validation Design",
+        "lead": "harness-architect",
+        "supporting": [
+          "cloud-platform-engineer",
+          "data-platform-engineer",
+          "security-validation-engineer"
+        ]
+      },
+      {
+        "phase": 2,
+        "name": "PoC Planning",
+        "lead": "harness-architect",
+        "supporting": [
+          "poc-automation-engineer",
+          "cloud-platform-engineer",
+          "data-platform-engineer"
+        ]
+      },
+      {
+        "phase": 3,
+        "name": "PoC Implementation",
+        "lead": "poc-automation-engineer",
+        "supporting": [
+          "cloud-platform-engineer",
+          "data-platform-engineer"
+        ]
+      },
+      {
+        "phase": 4,
+        "name": "Security and Quality Review",
+        "lead": "security-validation-engineer",
+        "supporting": [
+          "validation-auditor"
+        ]
+      },
+      {
+        "phase": 5,
+        "name": "Final Report and Decision",
+        "lead": "documentation-writer",
+        "supporting": [
+          "pm",
+          "validation-auditor",
+          "harness-architect"
+        ]
+      }
+    ]
+  },
+  "changeHistoryEntry": "Approved proposal for an eight-agent Harness Engineering Validation Team focused on pre-kickoff technical validation, PoC delivery, and architecture review for web services, data platforms, and internal systems. The proposal creates Cloud Platform Engineer and Data Platform Engineer roles, converts Architect, Automation Engineer, and Security Expert into validation-focused roles, and adds five validation skills covering planning, PoC implementation, cloud readiness, data-platform assessment, and security checklist execution.",
+  "approvedBy": "user",
+  "approvedAt": "2026-09-22T00:00:00Z"
+}
