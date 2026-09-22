@@ -18,6 +18,22 @@ snapshot tarball of discard candidates. Read-only — never modifies the tree, n
 **Usage**: `bun scripts/resync-audit.ts [--project <path>]... [--json] [--snapshot-dir <dir>]`
 **Runs automatically**: never automatic — operator-invoked via the `project-resync` skill
 
+#### `skill-graph-fleet-report.ts`
+**Purpose**: Read-only fleet analytics over the per-project skill-graph projections
+(skill-graph-analytics skill Step 1). Loads the root `docs/skill-graph.json` plus every
+`Projects/co-*/docs/skill-graph.json` (missing graphs skipped with a note) and computes:
+per-project node/edge/skill-node counts; the skill x project presence matrix with fleet
+presence counts; root-graph skills missing from each project's graph (capped display, full
+list in the snapshot); project-vs-root node-set Jaccard distance; a NEW/VANISHED skill diff
+against the newest previous snapshot; top-10 skills by fleet presence. Emits a human-readable
+report on stdout and a machine snapshot at
+`memory/skill-graph-metrics/snapshot-<YYYY-MM-DD>.json` (one per local calendar date;
+same-date reruns overwrite). `--json` prints the snapshot JSON instead. Read-only over all
+inputs — the snapshot is the only write; exits 1 when zero graphs are found.
+**Usage**: `bun scripts/skill-graph-fleet-report.ts [--json] [--snapshot-dir <dir>]`
+**Runs automatically**: never automatic — weekly cadence via the `skill-graph-analytics`
+skill (the 02:30 ticket runner may invoke it); operator-invoked on demand
+
 #### `backport-diff.ts`
 **Purpose**: Read-only 5-surface backport candidate differ for a project's committed LOCAL-WORK
 (project-resync skill Step 2 support). Diffs `--base..HEAD` over the project's files and maps each
