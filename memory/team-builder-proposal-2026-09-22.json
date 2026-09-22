@@ -162,7 +162,7 @@
     "skillsToReassign": [],
     "workflowPhases": [
       {
-        "phase": 0,
+        "phase": "0",
         "name": "Intake and Scope",
         "lead": "pm",
         "supporting": [
@@ -170,7 +170,7 @@
         ]
       },
       {
-        "phase": 1,
+        "phase": "1",
         "name": "Technical Validation Design",
         "lead": "harness-architect",
         "supporting": [
@@ -180,7 +180,7 @@
         ]
       },
       {
-        "phase": 2,
+        "phase": "2",
         "name": "PoC Planning",
         "lead": "harness-architect",
         "supporting": [
@@ -190,7 +190,7 @@
         ]
       },
       {
-        "phase": 3,
+        "phase": "3",
         "name": "PoC Implementation",
         "lead": "poc-automation-engineer",
         "supporting": [
@@ -199,7 +199,7 @@
         ]
       },
       {
-        "phase": 4,
+        "phase": "4",
         "name": "Security and Quality Review",
         "lead": "security-validation-engineer",
         "supporting": [
@@ -207,7 +207,7 @@
         ]
       },
       {
-        "phase": 5,
+        "phase": "5",
         "name": "Final Report and Decision",
         "lead": "documentation-writer",
         "supporting": [
