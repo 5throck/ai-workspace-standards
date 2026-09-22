@@ -200,7 +200,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `new-project.ts` | L0 | 1.24.0 | active | §7.7 graft build: global `graft` first, bunx fallback (spec 2026-09-20-graft-scaffold-resilience); `--platform both`→`all` rename, now covers claude+antigravity+codex; Provenance fallback is fail-loud via the templates/VERSION SSOT — silent "unknown" removed, --version still wins as-is (v1.20.0); bare names scaffold to `Projects/<name>`, path-like names stay workspace-relative | —| L0 | —|
 | `remove-project.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `resolve-variants.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
-| `project-to-variant.ts` | L0 | 1.4.0 | active | `--source`, `--target`, `--dry-run`, `--force`, `--overlay-variant`, `--design-doc`, `--threshold-files`, `--threshold-dirs` | —| L0 | —|
+| `project-to-variant.ts` | L0 | 1.4.1 | active | `--source`, `--target`, `--dry-run`, `--force`, `--overlay-variant`, `--design-doc`, `--threshold-files`, `--threshold-dirs` | —| L0 | —|
 | `promote-context-section.ts` | L0 | 1.1.0 | active | `--heading`, `--variants`, `--source`, `--after-heading`, `--dry-run`; nesting-aware removal — promoted `##` sections remove their nested `###` subsections too (2026-09-22) | —| L0 | —|
 | `propagate-to-templates.ts` | L0 | 2.16.0 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--json`, `--governance-l1`, `--docs`, `--include-disabled`, `--marker-rewrite` | —| L0 | —|
 | `qa-gate.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
@@ -244,7 +244,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `procedure-coverage.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `validate-procedures.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `validate-decisions.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `validate-templates.ts` | L0 | 1.37.0 | active | roster-tier-consistency (T-20260921-020: roster tier vs extends-resolved frontmatter tier + L0 Tier Ceiling enforcement) common-agents-parity (PM-04b, ADR-0081/T-20260919-001); managed-block-parity PM-04 (T-20260916-009) | —| L0+L1 | —|
+| `validate-templates.ts` | L0 | 1.38.0 | active | roster-tier-consistency (T-20260921-020: roster tier vs extends-resolved frontmatter tier + L0 Tier Ceiling enforcement) common-agents-parity (PM-04b, ADR-0081/T-20260919-001); managed-block-parity PM-04 (T-20260916-009); cross-twin common section parity VA-06 (ADR-0077 — CLAUDE/GEMINI/CODEX twins carry the shared policy set) | —| L0+L1 | —|
 | `validate-variant-readiness.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `verify-country-prune.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `verify-adr-governance.ts` | L0 | 1.7.0 | active | Added bold-line fallback for `**Date**: YYYY-MM-DD` metadata to mirror `extractADRStatus()` pattern (ADR-0084 safety net); WARN on unparseable dates for Accepted/Proposed ADRs | —| L0 | —|

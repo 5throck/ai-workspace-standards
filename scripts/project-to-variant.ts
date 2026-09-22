@@ -1,4 +1,6 @@
-// @version 1.4.0
+// @version 1.4.1
+// v1.4.1: variantization checklist now names CODEX.md beside CLAUDE.md/GEMINI.md (ADR-0077
+//          twin set — COMMON-CODEX marker pairs, templates/common/{CLAUDE,GEMINI,CODEX}.md).
 // v1.4.0: Overlay guard + rollback (design docs/designs/2026-09-16-variant-ization-overlay-guard-design.md,
 //          tickets T-20260916-003/-004). Fail-closed exists-guard on templates/<target>/ immediately
 //          after targetDir resolution (§3.2 point 2): absent → proceed; corrupt/foreign target → hard
@@ -497,9 +499,9 @@ if (designDocArg && !DRY_RUN) {
 console.log(`
 ${CYAN}=== Manual Review Checklist ===${RESET}
   [ ] templates/${targetArg}/agents/pm.md -- verify PM overrides
-  [ ] templates/${targetArg}/CLAUDE.md and GEMINI.md -- most variants ship neither (scaffolded from
-      templates/common/{CLAUDE,GEMINI}.md instead); if this variant DOES ship one, verify its
-      COMMON-CLAUDE/COMMON-GEMINI marker pairs are intact (bun scripts/audit.ts warns on drift)${specRegistered ? '' : `
+  [ ] templates/${targetArg}/CLAUDE.md, GEMINI.md, and CODEX.md -- most variants ship neither (scaffolded from
+      templates/common/{CLAUDE,GEMINI,CODEX}.md instead); if this variant DOES ship one, verify its
+      COMMON-CLAUDE/COMMON-GEMINI/COMMON-CODEX marker pairs are intact (bun scripts/audit.ts warns on drift)${specRegistered ? '' : `
   [ ] Register spec: bun scripts/spec-register.ts --file <design-doc> --source manual (or re-run with --design-doc <path>)`}
   [ ] templates/${targetArg}/docs/countries/ profiles contain jurisdiction knowledge (not project-specific data); ACTIVE.md excluded
   [ ] variant.json country_config.supported matches shipped profiles (validate-templates country-config check)
