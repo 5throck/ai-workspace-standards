@@ -18,7 +18,7 @@ into the L1 project (the script-drift check compares the two copies).
 
 ## Requirements
 
-- REQ-G1: `validate-agents.ts` fails when an `extends:` chain does not resolve to an existing base file, resolved from the defining file's own directory.
+- REQ-G1: `validate-agents.ts` fails when an `extends:` chain does not resolve to an existing base file whose base directory exists (resolved from the defining file's own directory); a reference into a workspace level absent from the checkout (fresh clone / CI) downgrades to a warning — unverifiable there, strict inside the workspace.
 - REQ-G2: `validate-agents.ts` fails when the known spilled-frontmatter shapes appear in the markdown body (indented `governance: docs/lifecycle/…` lines and bare `examples: []` lines).
 - REQ-G3: `validate-agents.ts` fails when a self-contained definition (no `extends`, or dangling `extends`) lacks a frontmatter `description:`; a resolving extends-stub (ADR-0033) yields a warning instead — the stub inherits the description from its base.
 - REQ-G4: The gate runs in every validator invocation (L0 root and L1 project contexts) through the existing fail/warn channel, using raw-content checks only (no dependency on the L0-only schema-validator import).

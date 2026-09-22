@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Agent Lifecycle Validation Script
- * @version 1.3.0
+ * @version 1.3.1
  *
  * Validates all agents/*.md files for required lifecycle frontmatter
  * and checks governance records in docs/lifecycle/agents/*.md
@@ -345,11 +345,21 @@ function validatePersonaIntegrity(): void {
     const extendsMatch = frontmatter.match(/^extends:\s*["']?([^"'\n]+?)["']?\s*$/m);
     let extendsResolves = false;
     if (extendsMatch) {
-      const baseAbs = resolve(dirname(filePath), extendsMatch[1].trim());
-      if (!existsSync(baseAbs)) {
-        fail(entry, 'extends-dangling', `${entry}: extends '${extendsMatch[1].trim()}' does not resolve to an existing base file — remove the field (self-contained definition) or fix the chain target`, "Delete the 'extends:' line, or point it at an existing base persona");
-      } else {
+      const rawTarget = extendsMatch[1].trim();
+      const baseAbs = resolve(dirname(filePath), rawTarget);
+      const baseDir = dirname(baseAbs);
+      if (existsSync(baseAbs)) {
         extendsResolves = true;
+      } else if (existsSync(baseDir)) {
+        // The base DIRECTORY exists but the file does not — a genuinely
+        // dangling reference (the roster-artifact class this gate guards).
+        fail(entry, 'extends-dangling', `${entry}: extends '${rawTarget}' does not resolve to an existing base file — remove the field (self-contained definition) or fix the chain target`, "Delete the 'extends:' line, or point it at an existing base persona");
+      } else {
+        // The base directory itself is absent — the reference crosses into a
+        // workspace level this checkout cannot see (fresh clone / CI). Not
+        // verifiable here; surface as a warning, never a silent pass in a
+        // workspace-aware run.
+        warn(entry, 'extends-unverifiable', `${entry}: extends '${rawTarget}' points outside this checkout (base directory absent) — unverifiable here, re-validate inside the workspace`, 'Re-run validate-agents from the workspace root checkout');
       }
     }
 
