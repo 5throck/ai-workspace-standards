@@ -21,7 +21,7 @@
  * mirrors), the gate skips cleanly — the baseline is a root-context asset.
  */
 
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 
 const BASELINE_PATH = join(dirname(import.meta.path), "helpers", "typecheck-baseline.json");
@@ -47,6 +47,12 @@ function main() {
   console.log("=== TypeScript typecheck (tsc --noEmit over scripts/) ===");
   // Resolve from the repo root so the repo tsconfig governs regardless of cwd.
   const repoRoot = join(dirname(import.meta.path), "..");
+  // T-20260922-030: tsc exits 0 with help text when tsconfig is missing — a
+  // deleted config would disable the baseline-0 gate with a green checkmark.
+  if (!existsSync(join(repoRoot, "tsconfig.json"))) {
+    console.error("❌ tsconfig.json not found at repo root — the typecheck gate cannot run without it.");
+    process.exit(1);
+  }
   const proc = Bun.spawnSync(["bunx", "tsc", "--noEmit"], { cwd: repoRoot, stdout: "pipe", stderr: "pipe" });
   const output = new TextDecoder().decode(proc.stdout) + new TextDecoder().decode(proc.stderr);
   const errorCount = output.split("\n").filter((line) => /error TS\d+:/.test(line)).length;

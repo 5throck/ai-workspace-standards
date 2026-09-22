@@ -112,7 +112,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `handbook/validate-nav.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `helpers/beta-lifecycle.ts` | L0 | 1.2.1 | active | —| —| L0 | —|
 | `helpers/generate-variant.ts` | L0 | 1.16.0 | active | —| —| L0+L1 | —|
-| `helpers/agent-promote.ts` | L0 | 1.0.0 | active | `--json`, `--help` — ADR-0043 promotion-candidate ANALYSIS (read-only): ≥3-variant agent names, pairwise Role+Responsibilities Jaccard, ≥80% groups reported | —| L0 | —|
+| `helpers/agent-promote.ts` | L0 | 1.0.1 | active | `--json`, `--help` — ADR-0043 promotion-candidate ANALYSIS (read-only): ≥3-variant agent names, pairwise Role+Responsibilities Jaccard, ≥80% groups reported | —| L0 | —|
 | `helpers/agent-similarity-analyzer.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `helpers/golden-reference-loader.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `helpers/skills-registry.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|

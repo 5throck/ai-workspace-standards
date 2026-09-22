@@ -2,7 +2,7 @@
 /**
  * resync-audit.ts — Provenance audit of uncommitted content in Projects/co-*
  * (project-resync skill Step 0).
- * @version 1.1.0
+ * @version 1.1.1
  *
  * Before any project sync pushes local work to GitHub, this tool answers the
  * diligence question: is each dirty/untracked file CURRENT work worth
@@ -237,6 +237,14 @@ function classify(projectPath: string, relFile: string, state: "modified" | "unt
     const head = git(projectPath, ["show", `HEAD:${relFile}`]);
     if (!head) {
       row.basis = "modified with no HEAD version (added-then-modified) → KEEP";
+      return row;
+    }
+    // T-20260912-030: a ` D` porcelain row means the file is deleted in the
+    // working tree — readFileSync would throw ENOENT and zero out the whole
+    // audit. Report it as a KEEP row (nothing on disk to classify).
+    if (!existsSync(abs)) {
+      row.verdict = "KEEP";
+      row.basis = "deleted in working tree — no file content to audit; restore or commit the deletion";
       return row;
     }
     const dirty = readFileSync(abs, "utf-8").replace(/\r\n/g, "\n");

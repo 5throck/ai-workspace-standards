@@ -81,9 +81,9 @@ Their absence from the table is policy-consistent, not an oversight.
 | `lib/local-date.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `compile-tokens.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `design-lint.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `review-baseline.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `review-baseline.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `helpers/skills-registry.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `resync-audit.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
+| `resync-audit.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `skill-graph-fleet-report.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `backport-diff.ts` | L0 | 1.0.1 | active | Backport candidate differ — read-only 5-surface diff of a project's committed LOCAL-WORK (`git diff <base>..HEAD`) against its best-matching template source (variant → common → L0) per docs/designs/2026-08-28-project-template-backport-design.md §Method; emits per-file surface / divergence direction (project-ahead / template-ahead / both-changed / in-sync / project-only) / +added/-removed; project-resync Step 2 support | —| L0 | —|
 | `evidence-backport-scan.ts` | L0 | 1.0.0 | active | Evidence Backporting scanner — read-only form detection (F1/F2/F3/F0/MIXED) + M1-M6 maturity bar over Projects/co-* evidence planes (ADR-0084 Decision 6, design §4); consumes graph-delta-log.ts output for M2/M4/M6b with git-log fallback; project-resync Step 2b | —| L0+L1 | —|
@@ -103,7 +103,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `graph-delta-log.ts` | L0 | 1.0.0 | active | Graph Delta Log — compute and persist per-scope structural diffs between committed and derived skill graphs (ADR-0084 §5); two-layer delivery (workspace root + projects); consumed by evidence-backport-scan.ts maturity bar (M2, M4, M6b tests) | —| L0+L1 | —|
 | `helpers/beta-lifecycle.ts` | L0 | 1.2.1 | active | —| —| L0 | —|
 | `helpers/generate-variant.ts` | L0 | 1.16.0 | active | —| —| L0+L1 | —|
-| `helpers/agent-promote.ts` | L0 | 1.0.0 | active | `--json`, `--help` — ADR-0043 promotion-candidate ANALYSIS (read-only): ≥3-variant agent names, pairwise Role+Responsibilities Jaccard, ≥80% groups reported | —| L0 | —|
+| `helpers/agent-promote.ts` | L0 | 1.0.1 | active | `--json`, `--help` — ADR-0043 promotion-candidate ANALYSIS (read-only): ≥3-variant agent names, pairwise Role+Responsibilities Jaccard, ≥80% groups reported | —| L0 | —|
 | `experiments/infer-graph-from-phases.ts` | L0 | 0.1.0 | experimental | —| —| L0 | —|
 | `helpers/agent-similarity-analyzer.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `helpers/golden-reference-loader.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
