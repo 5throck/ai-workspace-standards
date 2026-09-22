@@ -225,6 +225,36 @@
       "version": "1.0.1",
       "overridable": false,
       "description": "UI/UX design capabilities: design system creation, component design, visual hierarchy, user-centered design principles"
+    },
+    "cloud-readiness-assessment": {
+      "source": "skills/cloud-readiness-assessment/SKILL.md",
+      "version": "1.0.0",
+      "overridable": false,
+      "description": "Cloud architecture, deployment topology, reliability, observability, and operations readiness assessment"
+    },
+    "data-platform-assessment": {
+      "source": "skills/data-platform-assessment/SKILL.md",
+      "version": "1.0.0",
+      "overridable": false,
+      "description": "Data model, pipeline, storage, integration, governance, and analytics readiness assessment"
+    },
+    "poc-implementation": {
+      "source": "skills/poc-implementation/SKILL.md",
+      "version": "1.0.0",
+      "overridable": false,
+      "description": "PoC code, validation harness, automation scripts, and reproducible evidence creation"
+    },
+    "security-validation-checklist": {
+      "source": "skills/security-validation-checklist/SKILL.md",
+      "version": "1.0.0",
+      "overridable": false,
+      "description": "Mandatory security checklist for authentication, authorization, secrets, dependencies, and deployment risk"
+    },
+    "technical-validation-planning": {
+      "source": "skills/technical-validation-planning/SKILL.md",
+      "version": "1.0.0",
+      "overridable": false,
+      "description": "Technical validation planning, hypotheses, acceptance criteria, evidence requirements, and architecture review scope"
     }
   },
   "common_commands": {

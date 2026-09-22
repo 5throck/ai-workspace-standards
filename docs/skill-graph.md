@@ -24,6 +24,7 @@
 | `change-impact-assessment` | variant:co-consult | change-management-partner, change-management-partner | phase1, phase2 | org-readiness-assessment (composes_with), solution-design (composes_with), stakeholder-alignment (composes_with) | — | — |
 | `chemical-risk-assessment` | variant:co-safety | — | — | — | — | — |
 | `ci-triage` | L0 | — | — | — | — | — |
+| `cloud-readiness-assessment` | L0 | cloud-platform-engineer | — | — | — | — |
 | `code-review` | variant:co-develop | code-writer, game-debugger, game-developer | phase3, phase4, phase5 | refactoring (composes_with) | — | — |
 | `coke-oven-pah-heat-stress-planner` | variant:co-safety | — | — | — | — | — |
 | `company-intelligence` | variant:co-consult | data-analyst, industry-expert, pm, sme, strategy-analyst, strategy-analyst | phase1 | competitive-intelligence (composes_with), financial-modeling (follows), financial-statement-analysis (composes_with), insight-synthesis (follows), org-readiness-assessment (composes_with), technical-feasibility (composes_with) | — | — |
@@ -44,6 +45,7 @@
 | `daily/compliance-gap` | variant:co-safety | — | — | — | — | — |
 | `daily/risk-assessment` | variant:co-safety | — | — | — | — | — |
 | `dangerous-cargo-handling-planner` | variant:co-safety | — | — | — | — | — |
+| `data-platform-assessment` | L0 | data-platform-engineer | — | — | — | — |
 | `decision-record` | common | — | — | — | — | — |
 | `design-foundation` | L0 | — | — | accessibility-audit (composes_with), token-usage-lint (composes_with), ui-ux-design-intelligence (enables) | — | — |
 | `desktop-app-fallback` | variant:co-abap | code-writer, test-runner | phase3, phase4 | — | — | — |
@@ -123,6 +125,7 @@
 | `permit-to-work` | variant:co-safety | safety-workflow-manager | — | — | — | — |
 | `platform-command-lifecycle-manager` | L0 | — | — | — | — | — |
 | `platform-skill-lifecycle-manager` | L0 | — | — | — | — | — |
+| `poc-implementation` | L0 | — | — | — | — | — |
 | `post-write-chain` | variant:co-abap | code-writer, pm, test-runner | phase3, phase4 | — | — | — |
 | `pre-construction-technical-review` | variant:co-safety | — | — | — | — | — |
 | `prep-pdf` | variant:co-deck | measure, measure, pdf-export | phase4 | version (follows) | — | — |
@@ -163,6 +166,7 @@
 | `scenario-comparison` | variant:co-price | — | — | pricing-governance (enables), prisma-7 (follows), ui-component-design (composes_with) | scenario-snapshots | tri-view-comparison, approval-record |
 | `script-lifecycle-manager` | L0 | — | — | — | — | — |
 | `security-scan` | L0 | — | — | — | — | — |
+| `security-validation-checklist` | L0 | — | — | — | — | — |
 | `service-design` | variant:co-design | design-lead, design-lead, service-designer, service-designer | phase1, phase2, phase3 | accessibility-audit (follows), token-usage-lint (follows), ui-ux-design-intelligence (follows) | — | — |
 | `sheet-model` | variant:co-price | — | — | — | — | — |
 | `signal-detector` | variant:co-safety | — | — | — | — | — |
@@ -187,6 +191,7 @@
 | `tar-planning` | variant:co-safety | — | — | — | — | — |
 | `team-builder` | L0 | — | — | — | — | — |
 | `technical-feasibility` | variant:co-consult | sme, sme, solutions-architect, solutions-architect, technology-specialist, technology-specialist | phase1, phase2, phase3, phase4 | change-impact-assessment (follows), company-intelligence (composes_with), executive-presentation (enables), project-delivery (follows) | — | complexity-grades, risk-cost-ranges, preconditions |
+| `technical-validation-planning` | L0 | — | — | — | — | — |
 | `temperature-excursion-analyzer` | variant:co-safety | — | — | — | — | — |
 | `test-driven-development` | variant:co-develop | game-debugger, game-developer, test-runner, test-runner | phase3, phase4, phase5 | code-review (follows) | — | — |
 | `theme-authoring` | variant:co-deck | pm | — | — | — | — |

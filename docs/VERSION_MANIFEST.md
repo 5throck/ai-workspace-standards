@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-09-22T01:08:07.582Z
+**Generated**: 2026-09-22T01:17:09.530Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -8,8 +8,8 @@
 
 ## Summary
 
-- **Agents**: 8
-- **Skills**: 51
+- **Agents**: 10
+- **Skills**: 56
 - **Scripts**: 101 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` plus experiment files under `scripts/experiments/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
 - **Commands**: 8
 
@@ -22,6 +22,8 @@
 | architect | agents/architect.md | high | inherit | 2026-09-20 |
 | auditor | agents/auditor.md | medium | inherit | 2026-09-20 |
 | automation-engineer | agents/automation-engineer.md | low | inherit | 2026-09-20 |
+| cloud-platform-engineer | agents/cloud-platform-engineer.md | medium | inherit | N/A |
+| data-platform-engineer | agents/data-platform-engineer.md | medium | inherit | N/A |
 | docs-writer | agents/docs-writer.md | medium | inherit | 2026-09-20 |
 | lifecycle-manager | agents/lifecycle-manager.md | medium | inherit | 2026-09-20 |
 | pm | agents/pm.md | medium | inherit | 2026-09-20 |
@@ -39,8 +41,10 @@
 | agent-lifecycle-manager | 1.3.0 | active | skills/agent-lifecycle-manager/SKILL.md | workspace | create agent, new agent, validate agents, agent lifecycle, manage agents, hire agent, fire agent, deprecate agent | pm |
 | api-documentation | 1.0.2 | active | skills/api-documentation/SKILL.md | workspace | api documentation, document api, api reference, developer documentation, rest api docs, graphql docs, sdk documentation | pm |
 | ci-triage | 0.1.1 | active | skills/ci-triage/SKILL.md | workspace | ci failure, triage failure, audit gate failed, scaffold failed, fix the pipeline | pm |
+| cloud-readiness-assessment | 1.0.0 | active | skills/cloud-readiness-assessment/SKILL.md | workspace | N/A | cloud-platform-engineer |
 | context-commonization-review | 1.1.0 | active | skills/context-commonization-review/SKILL.md | workspace | context commonization review, variant context duplication, commonization review, context.md duplication review, context.md commonization | architect |
 | create-variant | 1.4.1 | active | skills/create-variant/SKILL.md | workspace | create variant, new variant, create variant, variant creation, scaffold new variant, new co- project | pm |
+| data-platform-assessment | 1.0.0 | active | skills/data-platform-assessment/SKILL.md | workspace | N/A | data-platform-engineer |
 | decision-record | 1.1.0 | active | templates/common/skills/decision-record/SKILL.md | common | decision record, gate ruling, go/no-go decision, escalation decision, record a decision | pm |
 | design-foundation | 1.0.0 | active | skills/design-foundation/SKILL.md | workspace | design foundation, design principles, design guide, design tokens setup, design decision record | architect |
 | documentation-writing | 1.0.3 | active | skills/documentation-writing/SKILL.md | workspace | write documentation, create guide, draft communication, write manual, create tutorial, documentation, technical writing | pm |
@@ -64,6 +68,7 @@
 | meeting-facilitation | 1.4.3 | active | skills/meeting-facilitation/SKILL.md | workspace | meeting, agent discussion, collaborative decision, multi-agent coordination, facilitate meeting | pm |
 | platform-command-lifecycle-manager | 1.0.2 | active | skills/platform-command-lifecycle-manager/SKILL.md | workspace | create platform command, new .claude command, new .gemini command, platform command lifecycle, command parity, propagate command | pm |
 | platform-skill-lifecycle-manager | 1.0.2 | active | skills/platform-skill-lifecycle-manager/SKILL.md | workspace | create platform skill, new .claude skill, new .gemini skill, platform skill version, platform skill lifecycle, update platform skill | pm |
+| poc-implementation | 1.0.0 | active | skills/poc-implementation/SKILL.md | workspace | N/A | automation-engineer |
 | project-resync | 1.4.0 | active | skills/project-resync/SKILL.md | workspace | project-resync, resync projects, sync project cycle | pm |
 | project-review | 1.3.0 | active | skills/project-review/SKILL.md | workspace | project review, review project, audit project, quality review | pm |
 | project-to-variant | 1.3.0 | active | skills/project-to-variant/SKILL.md | workspace | convert project to variant, create variant from project, project to template, promote project to variant | scaffolding-expert |
@@ -72,12 +77,14 @@
 | research-analysis | 1.0.2 | active | skills/research-analysis/SKILL.md | workspace | research, analyze, investigate, synthesize, evidence gathering, data analysis, literature review | pm |
 | script-lifecycle-manager | 1.2.2 | active | skills/script-lifecycle-manager/SKILL.md | workspace | create script, update script, deprecate script, script lifecycle, manage scripts | pm |
 | security-scan | 1.2.0 | active | skills/security-scan/SKILL.md | workspace | security scan, scan for vulnerabilities, security check, run security | pm |
+| security-validation-checklist | 1.0.0 | active | skills/security-validation-checklist/SKILL.md | workspace | N/A | security-expert |
 | simulate-pipeline | 1.0.1 | active | skills/simulate-pipeline/SKILL.md | workspace | simulate pipeline, simulate project, test scaffolding, dry run project creation, simulate l3 promotion, test l3 pipeline, dry run variant promotion | automation-engineer |
 | skill-lifecycle-manager | 1.5.0 | active | skills/skill-lifecycle-manager/SKILL.md | workspace | create skill, new skill, validate skills, skill lifecycle, manage skills, skill request, deprecate skill, remove skill | pm |
 | source-command-commit-push-pr | 1.0.3 | active | skills/source-command-commit-push-pr/SKILL.md | workspace | commit-push-pr, commit and push, create PR | pm |
 | standup-synthesizer | 1.0.0 | active | skills/standup-synthesizer/SKILL.md | workspace | standup digest, daily standup, synthesize standup, work summary | pm |
 | sync | 1.6.0 | active | skills/sync/SKILL.md | workspace | sync, /sync, commit and push, create PR | pm |
 | team-builder | 1.1.0 | active | skills/team-builder/SKILL.md | workspace | build new agent team, create agent team, agent team setup, team builder | pm |
+| technical-validation-planning | 1.0.0 | active | skills/technical-validation-planning/SKILL.md | workspace | N/A | architect |
 | ticket-run | 1.0.0 | active | skills/ticket-run/SKILL.md | workspace | ticket-run, process ticket queue, run next ticket | automation-engineer |
 | token-usage-lint | 1.1.0 | active | skills/token-usage-lint/SKILL.md | workspace | token lint, hardcoded color, design token compliance, raw hex values, hardcoded spacing | pm |
 | translate | 1.0.3 | active | skills/translate/SKILL.md | workspace | translate, translation, Korean translation | pm |
@@ -219,10 +226,16 @@
 **Checked**: Claude (.claude/) vs Gemini (.gemini/)
 
 - **Commands with parity**: 8 / 8
-- **Skills with parity**: 0 / 37 (common-template skills are parity-exempt)
+- **Skills with parity**: 0 / 42 (common-template skills are parity-exempt)
 
 ---
 
 ## Drift Detection
 
-✅ No drift detected. All components are properly versioned and integrated.
+⚠️ **Drift detected**:
+
+- [WARNING] Skill cloud-readiness-assessment has no triggers defined
+- [WARNING] Skill data-platform-assessment has no triggers defined
+- [WARNING] Skill poc-implementation has no triggers defined
+- [WARNING] Skill security-validation-checklist has no triggers defined
+- [WARNING] Skill technical-validation-planning has no triggers defined

@@ -453,6 +453,16 @@
       "layer": "L0"
     },
     {
+      "id": "cloud-platform-engineer",
+      "type": "agent",
+      "layer": "L0"
+    },
+    {
+      "id": "cloud-readiness-assessment",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
       "id": "co-analyst",
       "type": "agent",
       "layer": "variant:co-abap"
@@ -601,6 +611,16 @@
       "id": "data-analyst",
       "type": "agent",
       "layer": "variant:co-consult"
+    },
+    {
+      "id": "data-platform-assessment",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
+      "id": "data-platform-engineer",
+      "type": "agent",
+      "layer": "L0"
     },
     {
       "id": "dba",
@@ -2259,6 +2279,11 @@
       "layer": "L0"
     },
     {
+      "id": "poc-implementation",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
       "id": "post-write-chain",
       "type": "skill",
       "layer": "variant:co-abap"
@@ -2969,6 +2994,11 @@
       "layer": "L0"
     },
     {
+      "id": "security-validation-checklist",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
       "id": "service-design",
       "type": "skill",
       "layer": "variant:co-design"
@@ -3305,6 +3335,11 @@
         "risk-cost-ranges",
         "preconditions"
       ]
+    },
+    {
+      "id": "technical-validation-planning",
+      "type": "skill",
+      "layer": "L0"
     },
     {
       "id": "technical-writer",
@@ -5477,6 +5512,27 @@
     },
     {
       "type": "used_by",
+      "from": "cloud-readiness-assessment",
+      "to": "cloud-platform-engineer",
+      "source": "required_skills",
+      "provenance": {
+        "file": "agents/cloud-platform-engineer.md",
+        "field": "required_skills",
+        "index": 0
+      }
+    },
+    {
+      "type": "requires",
+      "from": "cloud-readiness-assessment",
+      "to": "technical-validation-planning",
+      "source": "prerequisites",
+      "provenance": {
+        "file": "skills/cloud-readiness-assessment/SKILL.md",
+        "field": "prerequisites"
+      }
+    },
+    {
+      "type": "used_by",
       "from": "code-review",
       "to": "code-writer",
       "source": "skill_manifest"
@@ -6708,6 +6764,27 @@
       "from": "dangerous-cargo-handling-planner",
       "to": "tool-box-meeting",
       "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "data-platform-assessment",
+      "to": "data-platform-engineer",
+      "source": "required_skills",
+      "provenance": {
+        "file": "agents/data-platform-engineer.md",
+        "field": "required_skills",
+        "index": 0
+      }
+    },
+    {
+      "type": "requires",
+      "from": "data-platform-assessment",
+      "to": "technical-validation-planning",
+      "source": "prerequisites",
+      "provenance": {
+        "file": "skills/data-platform-assessment/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "cites_skill",
@@ -12332,6 +12409,16 @@
       "source": "prose"
     },
     {
+      "type": "requires",
+      "from": "poc-implementation",
+      "to": "technical-validation-planning",
+      "source": "prerequisites",
+      "provenance": {
+        "file": "skills/poc-implementation/SKILL.md",
+        "field": "prerequisites"
+      }
+    },
+    {
       "type": "used_by",
       "from": "post-write-chain",
       "to": "code-writer",
@@ -17879,6 +17966,16 @@
       "from": "security-scan",
       "to": "update-bun-packages",
       "source": "prose"
+    },
+    {
+      "type": "requires",
+      "from": "security-validation-checklist",
+      "to": "technical-validation-planning",
+      "source": "prerequisites",
+      "provenance": {
+        "file": "skills/security-validation-checklist/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "follows",

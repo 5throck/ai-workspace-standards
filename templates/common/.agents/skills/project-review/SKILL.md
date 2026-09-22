@@ -248,3 +248,5 @@ ticket was not landed.
 
 - **project-resync**: fleet-level close-out after fixes land (commit/PR pipeline)
 - **meeting-facilitation**: Antigravity/Gemini dispatch path for Step 3
+
+<!-- team-builder modification: Add technical-validation evidence checks for PoC code, security checklist, cloud readiness, and data-platform readiness. -->

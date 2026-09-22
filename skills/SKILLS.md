@@ -54,6 +54,12 @@ Skills with a `skills/<name>/` directory in the workspace root. These are the pr
 | `update-bun-packages` | 1.3.1 | active | pm | 2026-09-09 | — | Owns Bun dependency updates and root/common/variant alignment via sync-template-deps.ts --apply |
 | `ci-triage` | 0.1.1 | active | pm | 2026-09-08 | — | CI failure triage and owner routing for scheduled health-check issues |
 
+| `cloud-readiness-assessment` | 1.0.0 | active | cloud-platform-engineer | 2026-09-22 | — | Cloud architecture, deployment topology, reliability, observability, and operations readiness checks |
+| `data-platform-assessment` | 1.0.0 | active | data-platform-engineer | 2026-09-22 | — | Data model, pipeline, storage, integration, governance, and analytics readiness checks |
+| `poc-implementation` | 1.0.0 | active | automation-engineer | 2026-09-22 | — | PoC code, validation harness, automation scripts, and reproducible evidence |
+| `security-validation-checklist` | 1.0.0 | active | security-expert | 2026-09-22 | — | Mandatory security checklist for authentication, authorization, secrets, dependencies, and deployment risk |
+| `technical-validation-planning` | 1.0.0 | active | architect | 2026-09-22 | — | Technical validation plan, hypotheses, acceptance criteria, evidence requirements, and architecture review scope |
+
 ### Variant-Exclusive Skills
 
 Skills registered in the catalog but without a `skills/<name>/` directory in the workspace root. These live exclusively inside variant templates (`templates/co-*/skills/`) and are only available when that variant is active.

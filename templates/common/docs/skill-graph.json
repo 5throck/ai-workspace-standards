@@ -28,6 +28,16 @@
       "layer": "common"
     },
     {
+      "id": "cloud-readiness-assessment",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "data-platform-assessment",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
       "id": "decision-record",
       "type": "skill",
       "layer": "common"
@@ -143,6 +153,11 @@
       "layer": "common"
     },
     {
+      "id": "poc-implementation",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
       "id": "project-review",
       "type": "skill",
       "layer": "common"
@@ -159,6 +174,11 @@
     },
     {
       "id": "security-scan",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "security-validation-checklist",
       "type": "skill",
       "layer": "common"
     },
@@ -184,6 +204,11 @@
     },
     {
       "id": "team-builder",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "technical-validation-planning",
       "type": "skill",
       "layer": "common"
     },
@@ -237,6 +262,26 @@
       "from": "ci-triage",
       "to": "project-review",
       "source": "prose"
+    },
+    {
+      "type": "requires",
+      "from": "cloud-readiness-assessment",
+      "to": "technical-validation-planning",
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/common/skills/cloud-readiness-assessment/SKILL.md",
+        "field": "prerequisites"
+      }
+    },
+    {
+      "type": "requires",
+      "from": "data-platform-assessment",
+      "to": "technical-validation-planning",
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/common/skills/data-platform-assessment/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "references",
@@ -726,6 +771,16 @@
       "source": "prose"
     },
     {
+      "type": "requires",
+      "from": "poc-implementation",
+      "to": "technical-validation-planning",
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/common/skills/poc-implementation/SKILL.md",
+        "field": "prerequisites"
+      }
+    },
+    {
       "type": "enables",
       "from": "research-analysis",
       "to": "documentation-writing",
@@ -741,6 +796,16 @@
       "from": "security-scan",
       "to": "update-bun-packages",
       "source": "prose"
+    },
+    {
+      "type": "requires",
+      "from": "security-validation-checklist",
+      "to": "technical-validation-planning",
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/common/skills/security-validation-checklist/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "references",

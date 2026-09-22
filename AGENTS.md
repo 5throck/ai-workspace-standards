@@ -34,6 +34,8 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 | Agent | File | Tier | Role |
 |-------|------|------|------|
 | Automation Engineer | [`agents/automation-engineer.md`](agents/automation-engineer.md) | Low | Scripting and tools expert; maintains TypeScript (.ts) automation scripts per ADR-0036; ensures idempotency and robustness |
+| Cloud Platform Engineer | [`agents/cloud-platform-engineer.md`](agents/cloud-platform-engineer.md) | Medium | Validates cloud readiness, deployment architecture, operations risk, and platform constraints before project kickoff |
+| Data Platform Engineer | [`agents/data-platform-engineer.md`](agents/data-platform-engineer.md) | Medium | Validates data models, pipelines, storage choices, integration constraints, and analytics readiness before project kickoff |
 | Documentation Writer | [`agents/docs-writer.md`](agents/docs-writer.md) | Medium | Executes documentation changes per Architect decisions; writing, editing, terminology consistency; Architect owns document architecture design |
 | Scaffolding Expert | [`agents/scaffolding-expert.md`](agents/scaffolding-expert.md) | Low | New Project & Template Specialist; validates new-project logic; ensures template folder synchrony; prevents OS-level encoding corruption |
 
@@ -361,6 +363,8 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 | Lifecycle Manager | `agents/lifecycle-manager.md` | Medium | On-demand governance sync | Governance docs only (Workspace root only — L0-only agent) |
 | Template Architect | `agents/architect.md` | High | Design phase | No |
 | Automation Engineer | `agents/automation-engineer.md` | Low | Serial | TypeScript (.ts) automation scripts per ADR-0036 |
+| Cloud Platform Engineer | `agents/cloud-platform-engineer.md` | Medium | Validation phase | Cloud readiness notes only |
+| Data Platform Engineer | `agents/data-platform-engineer.md` | Medium | Validation phase | Data readiness notes only |
 | Documentation Writer | `agents/docs-writer.md` | Medium | After design | .md files only |
 | Scaffolding Expert | `agents/scaffolding-expert.md` | Low | Research phase | setup scripts only (after approval) |
 | Security & Git Expert | `agents/security-expert.md` | Medium | Review phase | Hook configs only |
