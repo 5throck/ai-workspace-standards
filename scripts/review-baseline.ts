@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.0.1
 /**
  * review-baseline.ts — consolidated read-only runner for the project-review
  * Step 0 baseline battery (T-20260912-030).
@@ -23,14 +23,22 @@
  * Usage: bun scripts/review-baseline.ts [--quiet]
  */
 
-const validators: Array<{ name: string; cmd: string[]; tolerateExit1?: boolean }> = [
+const validators: Array<{
+  name: string;
+  cmd: string[];
+  tolerateExit1?: boolean;
+  driftJsonContract?: boolean;
+}> = [
   { name: "audit.ts (workspace standards)", cmd: ["bun", "scripts/audit.ts"] },
   { name: "validate-templates.ts (template/variant integrity + L1 parity)", cmd: ["bun", "scripts/validate-templates.ts"] },
   { name: "verify-scripts.ts --verify (SCRIPTS.md registry sync)", cmd: ["bun", "scripts/verify-scripts.ts", "--verify"] },
   { name: "agent-lifecycle-audit (agent health)", cmd: ["bun", "run", "agent-lifecycle-audit"] },
   { name: "skill-lifecycle-audit (skill health)", cmd: ["bun", "run", "skill-lifecycle-audit"] },
-  // Documented exception: exits 1 on the tolerated gemini-settings drift class.
-  { name: "propagate-to-templates --check-drift (L1↔L2 drift)", cmd: ["bun", "scripts/propagate-to-templates.ts", "--check-drift"], tolerateExit1: true },
+  // T-20260922-030: the tolerated exit-1 class is verified via the machine
+  // contract (--json: toleratedDrift/unexpectedDrift) — a hard crash also
+  // exits 1, and mapping it to "tolerated" would green-light a drift check
+  // that never ran. Mirrors the test.yml drift step's contract.
+  { name: "propagate-to-templates --check-drift (L1↔L2 drift)", cmd: ["bun", "scripts/propagate-to-templates.ts", "--check-drift", "--json"], tolerateExit1: true, driftJsonContract: true },
 ];
 
 const quiet = process.argv.includes("--quiet");
@@ -39,13 +47,35 @@ const results: Array<{ name: string; ok: boolean; note: string }> = [];
 for (const v of validators) {
   const proc = Bun.spawnSync(v.cmd, { stdout: "pipe", stderr: "pipe" });
   const output = new TextDecoder().decode(proc.stdout) + new TextDecoder().decode(proc.stderr);
-  const failed = proc.exitCode !== 0 && !(v.tolerateExit1 && proc.exitCode === 1);
-  const note = failed
-    ? `exit ${proc.exitCode}`
-    : v.tolerateExit1 && proc.exitCode === 1
-      ? "exit 1 (documented tolerated drift class)"
-      : `exit 0`;
-  results.push({ name: v.name, ok: !failed, note });
+  // T-20260922-030: for the drift validator, a tolerated exit 1 counts as pass
+  // ONLY when the output proves the machine contract (parseable JSON with
+  // unexpectedDrift === 0). A hard crash also exits 1 — mapping it to
+  // "tolerated" would green-light a drift check that never ran.
+  let ok = proc.exitCode === 0;
+  let note = `exit ${proc.exitCode}`;
+  if (!ok && v.tolerateExit1 && proc.exitCode === 1 && v.driftJsonContract) {
+    try {
+      // The drift script prints human-readable lines before the machine JSON;
+      // parse from the first `{` and read the nested summary — same contract
+      // as test.yml's drift step.
+      const start = output.indexOf("{");
+      const summary = JSON.parse(output.slice(start)).summary;
+      if (summary && typeof summary.unexpectedDrift === "number") {
+        if (summary.unexpectedDrift === 0) {
+          ok = true;
+          note = `exit 1 (documented tolerated drift class, JSON contract verified: tolerated ${summary.toleratedDrift}, unexpected 0)`;
+        } else {
+          note = `exit 1 with unexpectedDrift=${summary.unexpectedDrift} — treated as failure`;
+        }
+      } else {
+        note = `exit 1 without a machine contract summary — treated as failure`;
+      }
+    } catch {
+      note = `exit 1 with unparseable output — treated as failure`;
+    }
+  }
+  const failed = !ok;
+  results.push({ name: v.name, ok, note });
   if (!quiet) {
     console.log(`${failed ? "❌" : "✅"} ${v.name} — ${note}`);
     if (failed) {

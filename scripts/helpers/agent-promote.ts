@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.0.1
 // agent-promote.ts — ADR-0043 L1 promotion-candidate ANALYSIS (read-only).
 // v1.0.0 (2026-09-22): replaces the Wave 2b exit-1 stub with a working ANALYSIS
 //           mode implementing the DETECTION half of ADR-0043's promotion gate
@@ -82,7 +82,14 @@ function stripFrontmatter(content: string): string {
 /** Body of the named `## <title>` section (until the next `## ` heading), or ''. */
 function extractH2Body(body: string, title: RegExp): string {
   const lines = body.split('\n');
-  const start = lines.findIndex(l => /^##\s+/.test(l) && title.test(l));
+  // T-20260922-030 fix: the heading line starts with "## ", so test the title
+  // against the text AFTER the prefix — the old two-condition form
+  // (/^##\s+/.test(l) && /^Role\s*$/.test(l)) was mutually exclusive and could
+  // never match, silently reducing similarity to first-section-only.
+  const start = lines.findIndex(l => {
+    const m = l.match(/^##\s+(.*)$/);
+    return m !== null && title.test(m[1]);
+  });
   if (start === -1) return '';
   const out: string[] = [];
   for (let i = start + 1; i < lines.length; i++) {
@@ -122,7 +129,9 @@ function tokenise(text: string): Set<string> {
 }
 
 function jaccard(a: Set<string>, b: Set<string>): number {
-  if (a.size === 0 && b.size === 0) return 1.0;
+  // Two empty extractions carry no similarity evidence — a perfect score here
+  // produced false promotion candidates (T-20260922-030).
+  if (a.size === 0 && b.size === 0) return 0.0;
   if (a.size === 0 || b.size === 0) return 0.0;
   let intersection = 0;
   for (const token of a) if (b.has(token)) intersection++;
