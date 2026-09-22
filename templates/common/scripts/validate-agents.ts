@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Agent Lifecycle Validation Script
- * @version 1.3.1
+ * @version 1.3.2
  *
  * Validates all agents/*.md files for required lifecycle frontmatter
  * and checks governance records in docs/lifecycle/agents/*.md
@@ -337,9 +337,14 @@ function validatePersonaIntegrity(): void {
     if (!isAgentFile(entry)) continue;
     const filePath = join(AGENTS_DIR, entry);
     const content = readFileSync(filePath, 'utf-8');
-    const fmEnd = content.indexOf('\n---', 3);
-    if (!content.startsWith('---') || fmEnd === -1) continue; // no frontmatter — schema sweep covers
-    const frontmatter = content.slice(3, fmEnd);
+    // Tolerant anchor — a leading `# @resolved-from:` annotation line is legal
+    // (parseFrontmatter in this same file supports it); byte-0 `---` alone
+    // would silently skip those files.
+    const fmStart = content.match(/^---/m)?.index;
+    if (fmStart === undefined) continue; // no frontmatter — schema sweep covers
+    const fmEnd = content.indexOf('\n---', fmStart + 3);
+    if (fmEnd === -1) continue; // unterminated frontmatter — schema sweep covers
+    const frontmatter = content.slice(fmStart + 3, fmEnd);
     const body = content.slice(fmEnd + 4);
 
     const extendsMatch = frontmatter.match(/^extends:\s*["']?([^"'\n]+?)["']?\s*$/m);
