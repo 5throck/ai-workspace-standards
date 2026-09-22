@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-09-21T23:59:18.936Z
+**Generated**: 2026-09-22T00:06:51.789Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -27,7 +27,7 @@
 | pm | agents/pm.md | medium | inherit | 2026-09-18 |
 | scaffolding-expert | agents/scaffolding-expert.md | low | inherit | 2026-09-12 |
 | security-expert | agents/security-expert.md | medium | inherit | 2026-09-12 |
-| skill-graph-analyst | agents/skill-graph-analyst.md | low | inherit | N/A |
+| skill-graph-analyst | agents/skill-graph-analyst.md | low | inherit | 2026-09-21 |
 
 ---
 

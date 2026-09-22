@@ -350,7 +350,10 @@ same-date). Read-only over all inputs.`);
   mkdirSync(snapshotDir, { recursive: true });
   const snapshotFile = join(snapshotDir, `snapshot-${today}.json`);
   writeFileSync(snapshotFile, JSON.stringify(snapshot, null, 2) + "\n");
-  console.log(`📦 snapshot → ${snapshotFile}${previous ? ` (diffed vs snapshot-${previous.date}.json)` : " (baseline — no previous snapshot)"}`);
+  // --json consumers parse stdout as pure JSON: the status line goes to stderr there.
+  const statusLine = `📦 snapshot → ${snapshotFile}${previous ? ` (diffed vs snapshot-${previous.date}.json)` : " (baseline — no previous snapshot)"}`;
+  if (json) console.error(statusLine);
+  else console.log(statusLine);
 
   if (json) {
     console.log(JSON.stringify(snapshot, null, 2));

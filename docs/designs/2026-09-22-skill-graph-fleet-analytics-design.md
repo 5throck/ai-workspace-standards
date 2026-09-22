@@ -85,11 +85,12 @@ Read-only consolidation report + dated machine snapshots. No graph is modified.
 
 ## Verification Results (2026-09-22)
 
-First snapshot (`memory/skill-graph-metrics/snapshot-2026-09-22.json`, baseline):
+Baseline snapshot (`memory/skill-graph-metrics/snapshot-2026-09-22.json`,
+regenerated after the new agent/skill joined the graph projection):
 
-- Root graph: 847 nodes / 2101 edges / 197 skill nodes; 11/11 project graphs loaded.
-- Fleet-wide skill set: 258 distinct skill ids (31 carried by all 11 projects;
-  42 present in >= 3 projects; 26 root-only, carried by zero projects).
+- Root graph: 849 nodes / 2103 edges / 198 skill nodes; 11/11 project graphs loaded.
+- Fleet-wide skill set: 259 distinct skill ids (30 carried by all 11 projects;
+  42 present in >= 3 projects; 27 root-only, carried by zero projects).
 - Top-3 by fleet presence (11/11 each): `accessibility-audit`,
   `agent-lifecycle-manager`, `api-documentation`.
 - Jaccard distance vs root: 0.687 (co-consult, closest) to 0.933 (co-architect,
