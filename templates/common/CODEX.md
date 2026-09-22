@@ -96,6 +96,27 @@ When a user request matches a skill trigger, apply this priority order — **enf
 
 **Rule**: If a local skill's `metadata.triggers` matches the user request, use it — do **not** fall through to a global plugin with overlapping intent. Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 
+### 4.6 Language Policy for Documentation
+
+All `.md` files you create or modify MUST be in English, except in recognized locale translation zones (`<lang-code>/` or `locales/<lang-code>/` directories, plus `*_&lt;lang-code&gt;` suffix files such as `README_ko.md` — see the AGENTS.md Language Policy) or when explicitly declared as a Korean legal/regulatory content exception.
+
+- README.md, CLAUDE.md, GEMINI.md, CODEX.md, AGENTS.md, context.md, CHANGELOG.md — English only
+- All documentation in docs/, agents/, skills/ — English only
+- Git commit messages, PR titles, PR descriptions — English only
+- Branch names — English only
+- Code comments — English (unless documenting locale-specific logic)
+
+#### Language Policy Exception
+For files where Korean is legally or academically mandatory, add to the frontmatter:
+```yaml
+lang: ko
+lang_reason: legal # legal | source-material | proper-noun
+```
+*(Not available for: context.md, CLAUDE.md, GEMINI.md, CODEX.md, AGENTS.md, or any variant context.md)*
+
+#### Korean Plain-Language Preference (`순우리말`-First)
+When writing Korean documentation or Korean translation output, prefer native Korean words (`순우리말`) over loanwords (`외래어`) whenever a natural, widely-understood native equivalent exists — e.g. prefer `만들기` over `크리에이션`, `알림` over `노티피케이션`. Loanwords effectively settled in Korean (`컴퓨터`, `데이터`, `소프트웨어`, `파일`) and established technical terms remain permitted; clarity takes precedence over forced nativization. New Korean content applies this immediately; existing Korean documents are nativized incrementally (touched sections only, no bulk rewrites).
+
 ### 5. Agent Dispatch Rules
 
 **MANDATORY PM GATEWAY**: All specialist agent dispatch MUST go through PM.
