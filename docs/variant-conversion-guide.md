@@ -125,23 +125,46 @@ This runs additional checks:
 
 ---
 
-## §3: Scenario B — Re-homing an Existing Project Under a Variant
+## §3: Scenario B — Adopting an Existing Project Into the Workspace Standard (automated)
 
 ### When to Use
 
 You have an existing project that was created independently (not from a variant template), and you want to:
-1. Align it with the variant template system for future upgrades
-2. Adopt variant governance (agents, skills, hooks)
-3. Enable `upgrade-project.ts` for ongoing maintenance
+1. Align it with the workspace standard in place — AGENTS.md, the platform twins (CLAUDE.md/GEMINI.md/CODEX.md), docs/context.md, githooks, scripts — as if it had been created by `new-project.ts`
+2. Keep the project's own content and git history (adoption never deletes or auto-commits)
+3. Enable `upgrade-project.ts` for ongoing maintenance (and `project-to-variant.ts` for later template promotion)
+
+### Script
+
+```bash
+# Preview the full plan without writing anything
+bun scripts/adopt-project.ts <project-path> --variant co-<name> --dry-run
+
+# Adopt for real (interactive confirmations; --yes accepts defaults)
+bun scripts/adopt-project.ts <project-path> --variant co-<name> [--platform all|claude|antigravity|codex] [--yes]
+```
+
+### What the tool guarantees
+
+| Concern | Behavior |
+|---------|----------|
+| Variant choice | Required; menu on omission; non-stable variants warn and confirm |
+| Foreign content | Nothing deleted: every foreign file at a delivered path is backed up outside the repo and archived under `scripts/_legacy/` (de-executed) after delivery |
+| Foreign skills | Protected from registry-driven prunes via a variant.json skill_manifest seed (removed post-delivery) |
+| Foreign scripts | Retained `scripts/*.ts` are registered in the project SCRIPTS.md (with a `@version 0.0.1` stamp when missing) so the project audit passes |
+| package.json | Created from the template when absent; merged (project keys win, workspace script surface + deps added) when present |
+| Platform twins | Delivered per `--platform`; existing foreign twin prose is preserved via managed-block merge |
+| Refusals (`--yes` cannot bypass) | Tracked secret-shaped files, hook-manager conflicts (husky/simple-git-hooks/lefthook), gitleaks findings in pre-existing content |
+| Failure | Guided recovery (recorded HEAD SHA + backup path); resumable state ledger |
 
 ### Prerequisites
 
-- Identify the closest matching variant (co-design, co-develop, etc.)
-- The project should be under active development
+- The project is a git repository with a fully committed working tree
+- `bun` is installed (workspace scripts and the pre-commit hook require it)
+- No competing hook managers (remove or migrate them first — the tool refuses and explains)
+- Identify the closest variant (table below)
 
-### Step-by-Step Procedure
-
-#### Step 1: Identify the Closest Variant
+### Variant Selection Guide
 
 | Project Type | Closest Variant |
 |-------------|----------------|
@@ -153,78 +176,46 @@ You have an existing project that was created independently (not from a variant 
 | General work/documentation | co-work |
 | Game development | co-game |
 
-#### Step 2: Create a Template Version Marker
-
-Create `.claude/template-version.txt` in your project:
-
-```
-variant: co-<name>
-version: 0.6.0
-platform: both
-date: 2026-07-14
-```
-
-This enables `upgrade-project.ts` to detect and upgrade the project.
-
-#### Step 3: Adopt Variant Infrastructure
-
-Copy the variant's infrastructure files into your project:
-
-```bash
-# From workspace root, run upgrade with dry-run first
-bun scripts/upgrade-project.ts <project-path> --variant co-<name> --dry-run
-
-# Review output, then run for real
-bun scripts/upgrade-project.ts <project-path> --variant co-<name>
-```
-
-This will:
-- Set up git hooks (LOCKED files)
-- Sync common scripts, agents, and skills
-- Configure security bootstrap
-
-#### Step 4: Adopt Variant Agents
-
-Review the variant's agent roster and adopt relevant agents:
-
-```bash
-# List variant agents
-ls templates/co-<name>/agents/
-
-# Copy relevant agent definitions
-cp templates/co-<name>/agents/<agent>.md <project>/agents/<agent>.md
-```
-
-Customize each agent definition for your project context.
-
-#### Step 5: Adopt Variant Skills
-
-```bash
-# List variant skills
-ls templates/co-<name>/.claude/skills/
-
-# Skills are synced automatically by upgrade-project.ts
-# For first-time setup, run upgrade or copy manually
-```
-
-#### Step 6: Verify Alignment
+### After Adoption
 
 ```bash
 cd <project-path>
-bun scripts/audit.ts           # Run workspace audit
-bun scripts/validate-skills.ts  # Verify skills
+git diff HEAD          # Review the delivered change set (adoption never commits)
+bun scripts/audit.ts --skip-memory   # Already run by the tool; rerun any time
 ```
+
+Future maintenance uses the standard upgrade path:
+
+```bash
+bun scripts/upgrade-project.ts <project-path> --variant co-<name>
+```
+
+### Migration Note (historical)
+
+Before `adopt-project.ts` (2026-09-23), this scenario was manual: hand-create `.claude/template-version.txt`, run `upgrade-project.ts --dry-run`, and copy agents/skills by hand. That manual procedure is retired — the marker format it documented (`variant: co-<name>`, colon form) was never parseable by the engine, which reads `^variant=(.*)$` (equals form). Do not hand-create markers; adopt-project mints correct provenance.
 
 ---
 
-## §4: Migration Decision Matrix
+## §4: Tool Disambiguation and Migration Decision Matrix
+
+### Which tool for which direction?
+
+| Intent | Tool |
+|--------|------|
+| External project → workspace-standard project, in place | **`adopt-project.ts`** (Scenario B) |
+| Keep an adopted/standard project current with its template | `upgrade-project.ts` |
+| Standard project → variant TEMPLATE for reuse | `project-to-variant.ts` / `l3-to-variant-pipeline.ts` (Scenario A) |
+| Promote a beta variant template to stable | `promote-variant` skill |
+| New project, starting fresh | `new-project.ts` (no conversion needed) |
+
+### Decision matrix
 
 | Current State | Recommended Path |
 |--------------|-----------------|
-| Mature project, ≥ 3 custom agents, want to reuse as template | Scenario A (→ variant template) |
-| Active project, want variant governance + upgrade capability | Scenario B (→ variant-based project) |
+| Mature project, ≥ 3 custom agents, want to reuse as template | Adopt first (`adopt-project.ts`), then Scenario A promotion once proven |
+| Active project, want workspace governance + upgrade capability | Scenario B (`adopt-project.ts`) |
 | New project, starting fresh | Use `new-project.ts` directly (no conversion needed) |
-| Experiment/prototype, uncertain about variant fit | Keep standalone; convert later if mature |
+| Experiment/prototype, uncertain about variant fit | Keep standalone; adopt later if mature |
 
 ---
 
@@ -232,9 +223,9 @@ bun scripts/validate-skills.ts  # Verify skills
 
 | Limitation | Impact | Workaround |
 |-----------|--------|-----------|
-| No automated detection of closest variant | User must identify the right variant | Use the mapping table in §3 Step 1 |
+| No automated detection of closest variant | User must identify the right variant | Use the mapping table in §3 |
 | Conversion is one-way | No automated "un-variant" process | Manual file cleanup |
-| Variant infrastructure adoption (Scenario B) is manual | Requires careful file-by-file adoption | Use upgrade-project.ts for automation where possible |
+| Adoption requires a fully committed working tree and bun | Dirty trees or bun-less environments abort pre-flight | Commit/stash first; install bun (`https://bun.sh`) |
 | Conversion copies files as-is — it never authors a user guide | `validate-templates` WS-11 fails until the pair exists | Author `docs/user-guide.md` + `docs/user-guide_ko.md` per the User-Guide Standard ([variant-contract.md](governance/variant-contract.md)); also add the variant to all 6 index READMEs (WS-12) |
 
 ---

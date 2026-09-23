@@ -123,6 +123,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `helpers/template-version.ts` | L0 | 1.1.0 | active | templates/VERSION SSOT reader for scaffold provenance — fails loud on missing/unparseable; resolveProvenanceVersion() pins the shared --version-wins resolution order (T-20260915-011, T-20260916-002) | —| L0 | —|
 | `helpers/pm-md-parser.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `helpers/resolve-pm-stub.ts` | L0 | 1.0.0 | active | Shared agents/pm.md normalization — ADR-0033 extends-stub resolution against the L1 body (H12 non-canonical prose flag) + L1-B metadata strip with project-local lifecycle regeneration; extracted verbatim from new-project §2.3b/§2.5, shared with the adopt-project settling pass | —| L0 | —|
+| `helpers/adopt-plan.ts` | L0 | 1.0.0 | active | Pure scan/plan logic for adopt-project: full delivered-path derivation (upgrade-policy SSOT), collision scan, retained foreign scripts, foreign skills, secret-shaped tracked files, hook-manager conflicts, workflow traces, versioned adoption plan | —| L0 | —|
 | `helpers/variant-governance-rules.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `helpers/registries/variant-type-registry.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `helpers/registries/capability-registry.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
@@ -143,7 +144,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `helpers/normalize-agent-skills.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `helpers/prune-country-scoped-assets.ts` | L0 | 0.3.3 | active | —| —| L0 | —|
 | `helpers/scan-l3-project.ts` | L0 | 1.4.0 | active | —| —| L0 | —|
-| `helpers/substitute-placeholders.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
+| `helpers/substitute-placeholders.ts` | L0 | 1.3.0 | active | v1.3.0: exported pure `applySubstitutions`/`substituteFiles` (strict-UTF-8 guard, explicit file list) for adopt's scoped substitution; CLI flow guarded by import.meta.main, behavior unchanged | —| L0 | —|
 | `helpers/template-utils.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `helpers/rollback-partial-project.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `helpers/template-validation.ts` | L0 | 1.0.2 | active | —| —| L0 | —|
@@ -199,6 +200,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `md-to-ooxml.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `migrate-quality-gates.ts` | L0 | 1.1.0 | active | Convert quality_gates prose entries to decision gates; automate classification (GATE vs INVARIANT vs MANUAL), YAML output, procedure schema updates, and _output-types.yaml enrichment (ADR-0083 P5); decider_agent derived from stage owner_agent, not procedure owner_agent | —| L0+L1 | —|
 | `new-project.ts` | L0 | 1.25.0 | active | §2.3b extends-stub resolution + §2.5 L1-B strip extracted verbatim to `helpers/resolve-pm-stub.ts` (behavior unchanged); §7.7 graft build: global `graft` first, bunx fallback (spec 2026-09-20-graft-scaffold-resilience); `--platform both`→`all` rename, now covers claude+antigravity+codex; Provenance fallback is fail-loud via the templates/VERSION SSOT — silent "unknown" removed, --version still wins as-is (v1.20.0); bare names scaffold to `Projects/<name>`, path-like names stay workspace-relative | —| L0 | —|
+| `adopt-project.ts` | L0 | 1.0.0 | active | `<project-path> --variant <v> [--platform] [--dry-run] [--yes]` — in-place conversion of an external project to the workspace standard; subprocess delivery via upgrade-project (files-only contract), full delivered-path collision scan with outside-repo backup + `scripts/_legacy/` archival, foreign-skill manifest seed, refusal-grade pre-flight (secrets/hook managers/gitleaks), settling pass (pm stub resolution, seeds, scoped substitution, package.json merge, bun install + hooksPath, graft, audit smoke); no auto-commit. Spec: docs/designs/2026-09-23-adopt-project-conversion-design.md | —| L0 | —|
 | `remove-project.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `resolve-variants.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
 | `project-to-variant.ts` | L0 | 1.4.1 | active | `--source`, `--target`, `--dry-run`, `--force`, `--overlay-variant`, `--design-doc`, `--threshold-files`, `--threshold-dirs` | —| L0 | —|
@@ -224,6 +226,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `team-builder.ts` | L0 | 1.4.0 | active | —| —| L0+L1 | —|
 | `test-platform-parity.ts` | L0 | 0.2.4 | active | —| —| L0 | —|
 | `test-new-project.ts` | L0 | 1.3.0 | active | Test 8 now covers `--platform codex` and asserts CODEX.md/.codex/ under `all` | —| L0 | —|
+| `test-adopt-project.ts` | L0 | 1.0.0 | active | Fast mode: dry-run plan + refusal-grade pre-flight (secrets, hook managers), zero writes; `ADOPT_E2E_FULL=1` runs the real conversion on a disposable fixture (delivery, preservation, _legacy archival, package.json merge, already-adopted guard) | —| L0 | —|
 | `test-extends-validator.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `test-l3-to-variant-promotion.ts` | L0 | 1.6.0 | active | —| —| L0 | —|
 | `test-scaffold-delivery-parity.ts` | L0 | 1.0.0 | active | Fast static parity harness: new-project vs create-l3-scaffold delivery trees vs REVIEWED_DELIVERY_EXCLUSIONS (T-20260915-003) | —| L0 | —|
