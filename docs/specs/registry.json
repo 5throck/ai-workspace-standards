@@ -1204,6 +1204,15 @@
       "source": "manual",
       "created": "2026-09-22",
       "last_updated": "2026-09-22"
+    },
+    {
+      "id": "2026-09-23-adopt-project-conversion-design",
+      "title": "adopt project conversion design",
+      "file": "docs/designs/2026-09-23-adopt-project-conversion-design.md",
+      "status": "draft",
+      "source": "manual",
+      "created": "2026-09-23",
+      "last_updated": "2026-09-23"
     }
   ]
 }
