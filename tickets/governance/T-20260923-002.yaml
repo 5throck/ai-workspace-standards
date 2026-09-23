@@ -1,0 +1,25 @@
+schemaVersion: 1
+id: T-20260923-002
+kind: manual
+title: >-
+  skill-graph: 17 variant skills remain graph-isolated after Source 4.8 +
+  overrides (T-20260923-001) — triage via skill-graph-analytics weekly cadence
+  4-way criteria; co-safety x13 (asset-integrity-check, benefit-risk-assessor,
+  contractor-onboarding, dts-verification, ess-fire-risk-assessor,
+  glp-data-integrity-checker, glp-study-protocol-validator,
+  iso14971-risk-scorer, process-hazard-screening, protocol-deviation-analyzer,
+  sae-causality-assessor, safety-inspection-validator, signal-detector,
+  temperature-excursion-analyzer), co-price x3 (excel-export,
+  math-function-plotter, sheet-model). Each carries variant-doc references (5-28
+  hits) so likely co-safety/co-price overrides entries or procedure-step
+  citations, not orphans
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-23T01:52:14.598Z'
+history:
+  - at: '2026-09-23T01:52:14.598Z'
+    from: null
+    to: backlog
+result: null
+error: null
