@@ -1,0 +1,24 @@
+schemaVersion: 1
+id: T-20260923-003
+kind: manual
+title: >-
+  upgrade-project PRUNE REMOVED: the scripts/ category prunes on template
+  basenames only and never consults the project SCRIPTS.md registry (unlike
+  skills/, which consults variant.json manifest + asset gate) — registered
+  project-local scripts get deleted on every --prune-removed run. Instance
+  (2026-09-23 fleet resync): co-newbiz scripts/deploy-web.ts (owner co-newbiz,
+  L3-only, active, design 2026-09-21-docker-prod-cicd) was git rm-ed by the
+  v1.43.0 upgrade prune; restored manually and the manifest regenerated. Fix:
+  prune scripts/ candidates must survive when registered in the project
+  SCRIPTS.md (and reconcileScriptRegistry should drop pruned rows only when the
+  prune was legitimate); add a regression test with a registered
+  project-local script + --prune-removed
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-23T09:05:09.000Z'
+history:
+  - at: '2026-09-23T09:05:09.000Z'
+    from: null
+    to: backlog
+error: null
