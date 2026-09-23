@@ -1,0 +1,27 @@
+schemaVersion: 1
+id: T-20260923-004
+kind: manual
+title: >-
+  Adjudicate ADR-0073 Amendment 1 vs delivery reality for the upgrade trio:
+  Amendment 1 (2026-09-11) and CONSTITUTION §6.5 say upgrade-project.ts /
+  lib/upgrade-policy.ts / check-upgrade-coverage.ts are L0-only with physical
+  L1 mirrors REMOVED, but templates/common/scripts/upgrade-project.ts +
+  templates/common/scripts/lib/upgrade-policy.ts exist, are actively maintained
+  in lockstep (upgrade-policy.test.ts guards the mirror), the L0/L1 registries
+  declare layer L0+L1 (since f9bfd006 2026-09-06 post-resync hardening), and
+  TEMPLATE TREE SYNC re-delivered fresh v1.43.0 copies into all 11 Projects/co-*
+  on 2026-09-23 (check-upgrade-coverage.ts is correctly absent from L1). The
+  project-resync skill's --prune-removed rationale ("retires the inert
+  pre-v1.21 copy") is stale under this state — the prune can never fire while
+  the mirror exists. Either complete Amendment 1 (remove both mirrors,
+  reclassify, prune fleet copies) or amend the ADR + CONSTITUTION §6.5 + skill
+  text to the mirror-delivery reality
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-23T09:05:09.000Z'
+history:
+  - at: '2026-09-23T09:05:09.000Z'
+    from: null
+    to: backlog
+error: null
