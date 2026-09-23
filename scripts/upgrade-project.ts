@@ -1,5 +1,8 @@
 #!/usr/bin/env bun
-// @version 1.45.2
+// @version 1.45.3
+// v1.45.3 (2026-09-23, root-debris incident hardening): templatesDir invariant —
+//          an empty variant collapsing templatesDir onto the templates ROOT now
+//          fails closed before any pass runs (see the invariant comment below).
 // v1.45.2 (2026-09-23, T-20260923-003 fleet hardening 2): the walk-based prune
 //          sets re-union the manifest protections the tplBasenames build used —
 //          agents declared in variant.json assetGate.agents survive even when
@@ -646,6 +649,16 @@ if (existsSync(gateScript) && import.meta.main && !commonOnlySync) {
 
 const templatesDir = join(workspaceRoot, 'templates', variant);
 const commonDir = join(workspaceRoot, 'templates', 'common');
+// v1.45.3 invariant: an empty/whitespace variant would collapse templatesDir
+// onto the templates ROOT itself — every variant template (and common/) then
+// reads as a "variant asset directory" of the project and gets materialized
+// into the target CWD (the 2026-09-23 root-debris incident: import probes with
+// no --variant materialized templates/common + all 13 templates/co-* into the
+// workspace root). Fail closed instead.
+if (templatesDir === join(workspaceRoot, 'templates') || !variant.trim()) {
+  console.error(`ERROR: Variant '${variant}' would resolve the template dir to the templates ROOT — refusing (incident 2026-09-23).`);
+  process.exit(1);
+}
 
 if (!commonOnlySync && !existsSync(templatesDir)) { console.error(`ERROR: Template variant not found: ${templatesDir}`); process.exit(1); }
 if (!existsSync(commonDir)) { console.error(`ERROR: Common templates directory not found: ${commonDir}`); process.exit(1); }
