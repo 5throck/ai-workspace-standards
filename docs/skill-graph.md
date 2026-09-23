@@ -305,7 +305,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `adr:0070` | adr | — | — | — |
 | `adr:0071` | adr | — | — | — |
 | `adr:0072` | adr | — | k-dart, k-ecos, k-kosis, k-law, k-opendata | — |
-| `adr:0073` | adr | — | — | — |
+| `adr:0073` | adr | — | upgrade-project | — |
 | `adr:0074` | adr | — | upgrade-project | — |
 | `adr:0075` | adr | — | gmp-change-control, gmp-deviation-capa, gmp-qrm, psm-loto, psm-moc | — |
 | `adr:0076` | adr | — | — | — |

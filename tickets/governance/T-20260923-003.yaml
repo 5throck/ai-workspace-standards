@@ -14,11 +14,22 @@ title: >-
   prune was legitimate); add a regression test with a registered
   project-local script + --prune-removed
 priority: normal
-status: backlog
+status: done
 attempts: 0
-created_at: '2026-09-23T09:05:09.000Z'
+created_at: '2026-09-23T09:38:01.000Z'
 history:
-  - at: '2026-09-23T09:05:09.000Z'
+  - at: '2026-09-23T09:38:01.000Z'
     from: null
     to: backlog
+  - at: '2026-09-23T09:38:01.000Z'
+    from: backlog
+    to: done
+result: >-
+  Fixed in upgrade-project 1.44.0 (spec
+  2026-09-23-upgrade-engine-l0-only-completion-design): the scripts/ prune
+  consults the project SCRIPTS.md source cell — a row sourced to the variant
+  name is project-local and survives with a KEEP verdict; a legitimately
+  pruned registered script has its row dropped (dropScriptRegistryRows).
+  Regression tests tests/unit/upgrade-prune-removed.test.ts 3/3; co-newbiz
+  deploy-web.ts preserved on the cycle's fleet re-run.
 error: null

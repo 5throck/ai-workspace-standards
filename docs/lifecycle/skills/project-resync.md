@@ -3,9 +3,9 @@
 ## Metadata
 - **Skill**: project-resync
 - **Status**: active
-- **Version**: 1.5.0
+- **Version**: 1.5.1
 - **Created**: 2026-09-06
-- **Last Updated**: 2026-09-22 (Version 1.4.0 → 1.5.0 adds Step 2c fleet echo check — report-only cross-project drift reporting per ADR-0031 Principle 5 — plus Step 0 PRESUME-STALE verdict from resync-audit.ts v1.1.0 and the `scripts/backport-diff.ts` v1.0.0 Step 2 support tool; previous: 2026-09-19 Version 1.3.1 → 1.4.0 adds Step 2b Evidence plane review, running `scripts/evidence-backport-scan.ts` per design §4.8 / ADR-0084 Decision 6)
+- **Last Updated**: 2026-09-23 (Version 1.5.0 → 1.5.1: Step 4 `--prune-removed` rationale rewritten for the registry-aware prune and engine-only L0-only scope — ADR-0073 Amendment 3, spec `2026-09-23-upgrade-engine-l0-only-completion-design`; previous: 2026-09-22 Version 1.4.0 → 1.5.0 adds Step 2c fleet echo check — report-only cross-project drift reporting per ADR-0031 Principle 5 — plus Step 0 PRESUME-STALE verdict from resync-audit.ts v1.1.0 and the `scripts/backport-diff.ts` v1.0.0 Step 2 support tool; previous: 2026-09-19 Version 1.3.1 → 1.4.0 adds Step 2b Evidence plane review, running `scripts/evidence-backport-scan.ts` per design §4.8 / ADR-0084 Decision 6))
 
 ## Description
 Whole-fleet bidirectional sync cycle for Projects/co-*: provenance audit

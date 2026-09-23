@@ -5790,6 +5790,12 @@
     },
     {
       "type": "references",
+      "from": "adr:0073",
+      "to": "upgrade-project",
+      "source": "prose"
+    },
+    {
+      "type": "references",
       "from": "adr:0074",
       "to": "upgrade-project",
       "source": "prose"

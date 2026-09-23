@@ -1,6 +1,6 @@
 ---
 name: project-resync
-version: 1.5.0
+version: 1.5.1
 description: >
   Full bidirectional sync cycle for Projects/co-* instances: provenance-audit
   uncommitted content, sync each project to its GitHub remote, selectively
@@ -14,7 +14,7 @@ status: active
 scope: common
 l2_propagate: false
 owner: pm
-last_reviewed: 2026-09-22
+last_reviewed: 2026-09-23
 prerequisites: gh CLI authenticated; workspace-root CWD
 relates_to:
   - skill: sync
@@ -171,13 +171,15 @@ Per project: `bun scripts/upgrade-project.ts Projects/<p> --dry-run --prune-remo
 review category plan → run with the same flags → verify
 `.claude/template-version.txt` and project `bun scripts/audit.ts`.
 
-`--prune-removed` is mandatory in this cycle: since ADR-0073 Amendment 1 the
-upgrade trio (`upgrade-project.ts`, `lib/upgrade-policy.ts`,
-`check-upgrade-coverage.ts`) is `L0`-only, so every project still holds an
-inert pre-v1.21 copy of `upgrade-project.ts` — this flag is what retires it
-(and `reconcileScriptRegistry` drops its SCRIPTS.md row). If a ghost row for
-`upgrade-project.ts` survives the prune, remove it per CONSTITUTION §6.5
-Tier 3 filtering and note it in the cycle report.
+`--prune-removed` is mandatory in this cycle: the upgrade engine is
+`L0`-only (ADR-0073 Amendments 1 and 3 — engine-only scope;
+`lib/upgrade-policy.ts` stays delivered as the shared data module project
+`dev-sync.ts`/`validate-templates.ts` import), so any project still holding
+an engine copy (`scripts/upgrade-project.ts`, `helpers/skills-registry.ts`)
+gets it retired by this flag — v1.44.0 also drops the pruned script's
+registry row itself. A registered project-local script (SCRIPTS.md source
+cell = the variant name) is never pruned; if one still disappears, that is a
+pruner defect — file a ticket, do not hand-restore silently.
 
 Since `upgrade-project` v1.19.0 the delivered scripts` SCRIPTS.md
 registry rows reconcile automatically (common-registry fallback, layer

@@ -1,7 +1,12 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.38.0
+ * @version 1.38.1
+ * v1.38.1 (2026-09-23, 2026-09-23-upgrade-engine-l0-only-completion-design):
+ *          C-SK-02 allowedWithExtends gains `description` — the persona-integrity
+ *          field (validate-agents 1.3.2) required on extends-stubs whose extends
+ *          cannot resolve in project layout; the 2026-09-23 fleet repair inlined
+ *          the base persona's description into all 13 variant pm.md stubs.
  *
  * v1.38.0 (ADR-0077 twin parity): new VA-06 cross-twin common section parity — the
  *           three instruction twins (CLAUDE/GEMINI/CODEX at root and templates/common)
@@ -3027,9 +3032,15 @@ function checkCommonContract(): void {
         // `lifecycle` is required L2 metadata for variants shipping their own
         // recursive validate-agents.ts (e.g. co-safety) that enforces
         // lifecycle.phase/lifecycle.governance per-file, independent of `extends`.
+        // `description` is the persona-integrity field (validate-agents 1.3.2):
+        // a stub whose extends cannot resolve in project layout would otherwise
+        // fail the gate with no description to inherit — stubs inline the base
+        // persona's description (2026-09-23 fleet repair,
+        // 2026-09-22-agent-persona-integrity-gate).
         const allowedWithExtends = new Set([
           'extends', 'name', 'variant', 'version', 'last_updated', 'status',
           'remove_sections', 'variant_overrides', 'owner', 'capabilities', 'lifecycle',
+          'description',
         ]);
         const fieldKeys = Object.keys(variantFields);
         const unexpectedKeys = fieldKeys.filter(k => !allowedWithExtends.has(k));
