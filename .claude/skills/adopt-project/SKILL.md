@@ -13,8 +13,8 @@ version: 1.1.0
 owner: scaffolding-expert
 last_reviewed: 2026-09-23
 relates_to:
-  - skill: ensure-github-repo
-    type: follows
+  - skill: migrate-project
+    type: composes_with
   - skill: upgrade-project
     type: composes_with
   - skill: project-to-variant
@@ -63,7 +63,7 @@ bun scripts/adopt-project.ts <project-path> --variant co-<x> [--platform all|cla
 
 ## Requirements
 
-- **A verified GitHub baseline** — run `ensure-github-repo` first (it checks, creates, pushes, and verifies); adopt-project warns when no GitHub remote exists.
+- **A verified GitHub baseline** — run `migrate-project` (which performs this step via `ensure-github-repo.ts`) or the script directly; adopt-project warns when no GitHub remote exists.
 - The project is a git repository with a fully committed working tree.
 - `bun` is installed (all workspace scripts and the pre-commit hook require it).
 - No competing hook managers (they must be removed/migrated first — the script refuses and explains).
