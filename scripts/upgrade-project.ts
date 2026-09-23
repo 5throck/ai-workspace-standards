@@ -1,5 +1,20 @@
 #!/usr/bin/env bun
-// @version 1.44.0
+// @version 1.45.0
+// v1.45.0 (2026-09-23, same spec 2026-09-23-upgrade-engine-l0-only-completion):
+//          (1) PRUNE REMOVED's scripts/ category walks the project and template
+//          trees RECURSIVELY — the pass docstring always said "recursively" but
+//          the implementation only read the top level, so subdir engine helpers
+//          delivered by the pre-Amendment-1 tree-sync (helpers/skills-registry.ts)
+//          could never be retired; the template side walks with the same
+//          recursion so delivered subdir scripts (lib/upgrade-policy.ts,
+//          helpers/upgrade-versions.ts) are never misread as prunable.
+//          (2) HARD-GUARD FIX: the pre-execution guards (missing project path,
+//          target-not-found, realpath failure, workspace-ROOT target) now exit
+//          UNCONDITIONALLY. They previously exited only under import.meta.main,
+//          so a module IMPORT with a missing/ROOT target logged the error and
+//          FELL THROUGH into a full upgrade against the CWD — discovered after
+//          import-probe runs executed real upgrades against the workspace root
+//          (stashes + workspace-skill sweep deletions, all reverted).
 // v1.44.0 (2026-09-23, upgrade-engine L0-only completion — spec
 //          2026-09-23-upgrade-engine-l0-only-completion-design, T-20260923-003):
 //          PRUNE REMOVED's scripts/ category becomes registry-aware. A
@@ -414,15 +429,11 @@ for (let i = 0; i < args.length; i++) {
 
 if (!projectPath) {
   console.error('Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform claude|antigravity|codex|all] [--dry-run] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization] [--force-context-sync]');
-  if (import.meta.main) {
-    process.exit(1);
-  }
+  process.exit(1);
 }
 if (!['claude', 'antigravity', 'codex', 'all'].includes(platform)) {
   console.error('ERROR: --platform must be one of: claude, antigravity, codex, all');
-  if (import.meta.main) {
-    process.exit(1);
-  }
+  process.exit(1);
 }
 
 // ── Resolve paths ──────────────────────────────────────────────────────────────
@@ -438,9 +449,7 @@ const projectDirLexical = isAbsolute(projectPath) ? projectPath : resolve(projec
 // naming the path the user typed (lexical form — kept only for this message).
 if (!existsSync(projectDirLexical)) {
   console.error(`ERROR: Project directory not found: ${projectDirLexical}`);
-  if (import.meta.main) {
-    process.exit(1);
-  }
+  process.exit(1);
 }
 
 // Canonicalize the target: path.resolve is purely lexical — it does not follow
@@ -455,9 +464,7 @@ try {
   // existsSync just passed, so this is extraordinary (race, permissions) —
   // fail closed rather than guard on a half-resolved path.
   console.error(`ERROR: Could not resolve the real path of the target: ${projectDirLexical} (${(err as Error).message})`);
-  if (import.meta.main) {
-    process.exit(1);
-  }
+  process.exit(1);
 }
 
 // Root-target guard (incident 2026-09-12): the workspace root is L0, not a project.
@@ -467,9 +474,7 @@ try {
 // this guard too. Hard-fail, no bypass flag.
 if (projectDir === workspaceRoot) {
   console.error('ERROR: Refusing to target the workspace ROOT — root is L0, not a project (incident 2026-09-12). Pass a project directory under Projects/ instead.');
-  if (import.meta.main) {
-    process.exit(1);
-  }
+  process.exit(1);
 }
 const projectsRoot = (() => {
   const lexical = join(workspaceRoot, 'Projects');
@@ -502,9 +507,7 @@ if (relative(projectsRoot, projectDir).startsWith('..')) {
 const gitCheck = spawnSync('git', ['-C', projectDir, 'rev-parse', '--git-dir'], { encoding: 'utf8' });
 if (gitCheck.status !== 0) {
   console.error(`ERROR: Not a git repository: ${projectDir}`);
-  if (import.meta.main) {
-    process.exit(1);
-  }
+  process.exit(1);
 }
 
 // ── Version resolution ─────────────────────────────────────────────────────────
@@ -542,9 +545,7 @@ if (!variant) {
     console.log(`Auto-detected variant: ${variant}`);
   } else {
     console.error('ERROR: Could not detect variant from template-version.txt. Specify --variant explicitly.');
-    if (import.meta.main) {
-      process.exit(1);
-    }
+    process.exit(1);
   }
 }
 
@@ -608,9 +609,7 @@ if (!validVariants.includes(variant)) {
   } else {
     console.error(`ERROR: Invalid variant: ${variant}`);
     console.error(`   Valid variants: ${validVariants.join(' ')}`);
-    if (import.meta.main) {
-      process.exit(1);
-    }
+    process.exit(1);
   }
 }
 
@@ -634,12 +633,8 @@ if (existsSync(gateScript) && import.meta.main && !commonOnlySync) {
 const templatesDir = join(workspaceRoot, 'templates', variant);
 const commonDir = join(workspaceRoot, 'templates', 'common');
 
-if (import.meta.main) {
-  if (!commonOnlySync && !existsSync(templatesDir)) { console.error(`ERROR: Template variant not found: ${templatesDir}`); process.exit(1); }
-}
-if (import.meta.main) {
-  if (!existsSync(commonDir)) { console.error(`ERROR: Common templates directory not found: ${commonDir}`); process.exit(1); }
-}
+if (!commonOnlySync && !existsSync(templatesDir)) { console.error(`ERROR: Template variant not found: ${templatesDir}`); process.exit(1); }
+if (!existsSync(commonDir)) { console.error(`ERROR: Common templates directory not found: ${commonDir}`); process.exit(1); }
 
 // ── Script version comparison ──────────────────────────────────────────────────
 const scriptsSnapshot = join(projectDir, 'scripts-snapshot.json');
@@ -2734,8 +2729,26 @@ if (pruneRemoved) {
         }
       }
     } else {
-      for (const f of readdirSync(cat.projDir)) {
-        if (f.endsWith(cat.ext) && !tplBasenames.has(f) && !(cat.skipFiles || []).includes(f)) {
+      // v1.45.0: recursive tree walk (see header note) — template side walks
+      // with the same recursion so delivered subdir scripts are never misread
+      // as prunable.
+      const walkTs = (root: string, prefix = ''): string[] => {
+        if (!existsSync(root)) return [];
+        const out: string[] = [];
+        for (const e of readdirSync(root, { withFileTypes: true })) {
+          const rel = prefix ? `${prefix}/${e.name}` : e.name;
+          if (e.isDirectory()) out.push(...walkTs(join(root, e.name), rel));
+          else if (e.name.endsWith(cat.ext)) out.push(rel);
+        }
+        return out;
+      };
+      const projRels = walkTs(cat.projDir);
+      const tplRels = new Set(cat.tplDirs.flatMap((td) => walkTs(td)));
+      for (const rel of projRels) {
+        if (tplRels.has(rel) || (cat.skipFiles || []).includes(rel)) {
+          continue;
+        }
+        const f = rel;
           // v1.44.0 (T-20260923-003): a registry row sourced to the variant
           // name marks a project-local script (ADR-0031 engagement output) —
           // absence from the template is its normal state, never a prune
@@ -2763,7 +2776,6 @@ if (pruneRemoved) {
           // error. Row-drop is legitimate-prune-only by construction (it
           // fires only inside the branch that actually deleted the file).
           if (cat.label === 'scripts/' && !dryRun) dropScriptRegistryRows(f);
-        }
       }
     }
   }
