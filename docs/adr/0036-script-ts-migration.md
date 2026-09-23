@@ -1,7 +1,7 @@
 # ADR-0036: Script Migration — sh/ps1 → TypeScript (Bun Runtime)
 
 ## Status
-Accepted
+Accepted — amended by [ADR-0087](0087-runtime-standard-exceptions.md) (2026-09-23): tool-owned graft node shims, documented co-deck Playwright exception, and browser/web assets are out of scope; see that ADR for the exception list.
 
 ## Type
 Operational

@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-09-23T01:52:35.018Z
+**Generated**: 2026-09-23T04:01:03.133Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -128,7 +128,7 @@
 | generate-l3-readme.ts | 1.0.3 | scripts/generate-l3-readme.ts | fs, path |
 | generate-raci.ts | 1.1.0 | scripts/generate-raci.ts | js-yaml |
 | generate-scripts-readme.ts | 1.0.4 | scripts/generate-scripts-readme.ts | N/A |
-| generate-skill-graph.ts | 1.13.0 | scripts/generate-skill-graph.ts | js-yaml |
+| generate-skill-graph.ts | 1.14.0 | scripts/generate-skill-graph.ts | js-yaml |
 | generate-version-manifest.ts | 1.7.1 | scripts/generate-version-manifest.ts | bun, js-yaml |
 | graph-delta-log.ts | 1.0.0 | scripts/graph-delta-log.ts | N/A |
 | ingest-external-skills.ts | 1.1.0 | scripts/ingest-external-skills.ts | N/A |

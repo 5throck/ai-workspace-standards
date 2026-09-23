@@ -99,6 +99,7 @@ When adding or recommending dependencies:
 - **Single implementation**: All operational scripts in `scripts/` are TypeScript (`.ts`) executed via Bun (`bun scripts/<name>.ts`). There are no `.sh` or `.ps1` operational script counterparts — ADR-0036 retired the dual-file model.
 - **No pairing required**: Creating, modifying, or deleting a script requires changes to exactly one `.ts` file. Script parity checks between `.sh` and `.ps1` no longer apply.
 - **Registry enforcement**: Every `.ts` script must have a matching entry in `scripts/SCRIPTS.md` with correct `@version`. Adding a new script without updating the registry is a governance violation caught by `bun scripts/audit.ts`.
+- **Runtime standard exceptions (ADR-0087)**: Tool-owned `node` shims (graft-generated `settings.json` hook blocks and `.cjs` helpers), CI bootstraps that install Bun itself, and documented per-variant exceptions are compliant — see ADR-0087 for the exception register before flagging `node` usage as drift.
 
 #### 8.9 Bilingual Documentation Rule
 - **README Pairing Requirement**: For any `README.md` file created in the `templates/` directory, a corresponding Korean version `README_ko.md` MUST also be created and maintained.
