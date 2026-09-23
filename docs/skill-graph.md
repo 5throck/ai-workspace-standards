@@ -11,7 +11,7 @@
 | `abap-code-review` | variant:co-abap | code-writer, code-writer, test-runner, test-runner | phase3, phase4 | abap-dev (composes_with), abap-dev (follows) | — | — |
 | `abap-dev` | variant:co-abap | architect, code-writer, sap-investigator, test-runner | phase1, phase2, phase3, phase4 | dump-monitor (composes_with), research-analysis (composes_with), sap-co (composes_with), sap-co (composes_with), sap-fi (composes_with), sap-fi (follows), sap-le (composes_with), sap-le (composes_with), sap-mm (composes_with), sap-mm (composes_with), sap-pp (composes_with), sap-pp (composes_with), sap-sd (composes_with), sap-sd (composes_with) | — | — |
 | `accessibility-audit` | L0 | ux-researcher, visual-designer | phase2, phase4 | — | — | — |
-| `adopt-project` | L0 | — | — | ensure-github-repo (follows), project-to-variant (follows), upgrade-project (composes_with) | — | — |
+| `adopt-project` | L0 | — | — | migrate-project (composes_with), project-to-variant (follows), upgrade-project (composes_with) | — | — |
 | `agent-lifecycle-manager` | L0 | — | — | skill-lifecycle-manager (composes_with) | — | — |
 | `ai-tell-reduction` | variant:co-news | style-editor, style-editor | phase4 | financial-journalism-style (composes_with) | — | — |
 | `api-documentation` | L0 | technical-writer | — | — | — | — |
@@ -53,7 +53,6 @@
 | `dts-verification` | variant:co-safety | — | — | — | — | — |
 | `dump-monitor` | variant:co-abap | devops-admin, pm | phase1, phase6 | abap-dev (follows), research-analysis (composes_with), sap-co (composes_with), sap-fi (composes_with), sap-le (composes_with), sap-mm (composes_with), sap-sd (composes_with) | — | — |
 | `emergency-response` | variant:co-safety | — | — | — | — | — |
-| `ensure-github-repo` | L0 | — | — | adopt-project (enables), upgrade-project (follows) | — | — |
 | `environmental-compliance-checker` | variant:co-safety | — | — | — | — | — |
 | `ess-fire-risk-assessor` | variant:co-safety | — | — | — | — | — |
 | `evidence-ledger` | common | — | — | — | — | — |
@@ -114,6 +113,7 @@
 | `mece-logic-auditor` | variant:co-consult | strategy-analyst | phase1 | — | — | — |
 | `meeting-facilitation` | L0 | — | — | — | — | — |
 | `mid-construction-inspection` | variant:co-safety | — | — | — | — | — |
+| `migrate-project` | L0 | — | — | adopt-project (composes_with), upgrade-project (follows) | — | — |
 | `msds-parser` | variant:co-safety | — | — | — | — | — |
 | `munitions-magazine-storage-safety-planner` | variant:co-safety | — | — | — | — | — |
 | `narrative-framework` | variant:co-consult | communications-lead, communications-lead | phase3 | consulting-report-writing (composes_with), executive-presentation (composes_with) | — | — |

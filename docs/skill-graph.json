@@ -830,11 +830,6 @@
       "layer": "variant:co-price"
     },
     {
-      "id": "ensure-github-repo",
-      "type": "skill",
-      "layer": "L0"
-    },
-    {
       "id": "environmental-compliance-checker",
       "type": "skill",
       "layer": "variant:co-safety"
@@ -1436,6 +1431,11 @@
       "id": "mid-construction-inspection",
       "type": "skill",
       "layer": "variant:co-safety"
+    },
+    {
+      "id": "migrate-project",
+      "type": "skill",
+      "layer": "L0"
     },
     {
       "id": "mm-analyst",
@@ -4843,10 +4843,11 @@
       "source": "skill_manifest"
     },
     {
-      "type": "follows",
+      "type": "composes_with",
       "from": "adopt-project",
-      "to": "ensure-github-repo",
+      "to": "migrate-project",
       "source": "relates_to",
+      "symmetric": true,
       "provenance": {
         "file": "skills/adopt-project/SKILL.md",
         "field": "relates_to",
@@ -4856,7 +4857,7 @@
     {
       "type": "references",
       "from": "adopt-project",
-      "to": "ensure-github-repo",
+      "to": "migrate-project",
       "source": "prose"
     },
     {
@@ -8166,34 +8167,6 @@
       "from": "engagement-director",
       "to": "procedure.co-price.pricing-security-closeout",
       "source": "raci_matrix"
-    },
-    {
-      "type": "enables",
-      "from": "ensure-github-repo",
-      "to": "adopt-project",
-      "source": "relates_to",
-      "provenance": {
-        "file": "skills/ensure-github-repo/SKILL.md",
-        "field": "relates_to",
-        "index": 0
-      }
-    },
-    {
-      "type": "references",
-      "from": "ensure-github-repo",
-      "to": "adopt-project",
-      "source": "prose"
-    },
-    {
-      "type": "follows",
-      "from": "ensure-github-repo",
-      "to": "upgrade-project",
-      "source": "relates_to",
-      "provenance": {
-        "file": "skills/ensure-github-repo/SKILL.md",
-        "field": "relates_to",
-        "index": 1
-      }
     },
     {
       "type": "references",
@@ -12794,6 +12767,35 @@
       "from": "mid-construction-inspection",
       "to": "pre-construction-technical-review",
       "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "migrate-project",
+      "to": "adopt-project",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "skills/migrate-project/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "references",
+      "from": "migrate-project",
+      "to": "adopt-project",
+      "source": "prose"
+    },
+    {
+      "type": "follows",
+      "from": "migrate-project",
+      "to": "upgrade-project",
+      "source": "relates_to",
+      "provenance": {
+        "file": "skills/migrate-project/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
     },
     {
       "type": "references",
