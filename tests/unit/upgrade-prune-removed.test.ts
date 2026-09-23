@@ -1,17 +1,16 @@
 /**
- * upgrade-project.ts PRUNE REMOVED — registry-aware scripts/ prune (v1.44.0).
+ * upgrade-project.ts PRUNE REMOVED — registry-aware scripts/ prune (v1.45.1).
  *
  * Spec: docs/designs/2026-09-23-upgrade-engine-l0-only-completion-design.md
  * Tickets: T-20260923-003 (the co-newbiz deploy-web.ts false prune).
  *
- * Contract under test:
- *   (a) a scripts/SCRIPTS.md row whose source cell names the project variant
- *       marks a project-local script — absence from the template is its normal
- *       state, so the prune keeps file and row (KEEP verdict);
- *   (b) a registered script whose source is `L0` and whose file is absent from
- *       the template is pruned AND its registry row is dropped (no ghost row
- *       for verify-scripts);
- *   (c) an unregistered foreign script is pruned (legacy behavior unchanged).
+ * Contract under test (v1.45.1 semantics):
+ *   A project script absent from the template tree is pruned ONLY when it has
+ *   an UPSTREAM (L0/L1) SCRIPTS.md registry row — i.e. it was template-delivered
+ *   and its absence means a retired delivery (the ADR-0073 Amendment 1 engine
+ *   copies). Everything else — unregistered strays and project-owned scripts
+ *   whatever their source cell claims — is KEEP-uncertain and survives
+ *   (ADR-0031); verify-scripts owns registration hygiene at audit time.
  */
 import { existsSync, mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -54,7 +53,7 @@ function registryContains(tmp: string, name: string): boolean {
   return content.includes(`| \`${name}\` |`);
 }
 
-describe('upgrade-project.ts PRUNE REMOVED (registry-aware, v1.44.0)', () => {
+describe('upgrade-project.ts PRUNE REMOVED (upstream-row semantics, v1.45.1)', () => {
   test('project-local registered script survives the prune with its row', () => {
     const tmp = makeTempProject();
     try {
@@ -85,14 +84,15 @@ describe('upgrade-project.ts PRUNE REMOVED (registry-aware, v1.44.0)', () => {
     }
   }, 300000);
 
-  test('registered L0-source script absent from template is pruned and its row dropped', () => {
+  test('retired delivery (upstream L0 row) is pruned with its row; delivered subdir scripts survive', () => {
     const tmp = makeTempProject();
     try {
       seedScriptRegistry(tmp, [
-        '| `sync-agent-status.ts` | L0 | 1.2.0 | active | —| —| L0 | —|',
+        '| `helpers/skills-registry.ts` | L0 | 1.0.0 | active | —| —| L0 | —|',
         '| `deploy-web.ts` | co-develop | 1.0.0 | active | —| —| L3 | —|',
       ]);
-      writeFileSync(join(tmp, 'scripts', 'sync-agent-status.ts'), 'export const RETIRED = 1;\n');
+      mkdirSync(join(tmp, 'scripts', 'helpers'), { recursive: true });
+      writeFileSync(join(tmp, 'scripts', 'helpers', 'skills-registry.ts'), 'export const HELPER = 1;\n');
       writeFileSync(join(tmp, 'scripts', 'deploy-web.ts'), 'export const LOCAL = 1;\n');
       spawnSync('git', ['-C', tmp, 'add', '-A'], { cwd: tmp });
       spawnSync('git', ['-C', tmp, 'commit', '-q', '-m', 'chore: pre-upgrade'], { cwd: tmp });
@@ -104,18 +104,25 @@ describe('upgrade-project.ts PRUNE REMOVED (registry-aware, v1.44.0)', () => {
       );
       expect(result.status).toBe(0);
       const out = result.stdout ?? '';
-      expect(out).toContain('PRUNE  scripts/sync-agent-status.ts');
-      expect(existsSync(join(tmp, 'scripts', 'sync-agent-status.ts'))).toBe(false);
-      // The L0 row is dropped with the file; the project-local row and file survive.
-      expect(registryContains(tmp, 'sync-agent-status.ts')).toBe(false);
+      // helpers/skills-registry.ts is rowed in the REAL L0 registry (retired
+      // Amendment-1 delivery): pruned recursively from the subdir, row dropped.
+      expect(out).toContain('PRUNE  scripts/helpers/skills-registry.ts');
+      expect(existsSync(join(tmp, 'scripts', 'helpers', 'skills-registry.ts'))).toBe(false);
+      expect(registryContains(tmp, 'helpers/skills-registry.ts')).toBe(false);
+      // Project-local content survives.
       expect(existsSync(join(tmp, 'scripts', 'deploy-web.ts'))).toBe(true);
       expect(registryContains(tmp, 'deploy-web.ts')).toBe(true);
+      // Critical negative: delivered subdir scripts (L0+L1 shared data module)
+      // must survive — a template walk that is not recursive would misread
+      // them as prunable and break project dev-sync/validate-templates.
+      expect(existsSync(join(tmp, 'scripts', 'lib', 'upgrade-policy.ts'))).toBe(true);
+      expect(existsSync(join(tmp, 'scripts', 'helpers', 'upgrade-versions.ts'))).toBe(true);
     } finally {
       rmSync(tmp, { recursive: true, force: true });
     }
   }, 300000);
 
-  test('unregistered foreign script is pruned (legacy behavior unchanged)', () => {
+  test('unregistered stray survives (KEEP-uncertain; verify-scripts owns registration)', () => {
     const tmp = makeTempProject();
     try {
       seedScriptRegistry(tmp, []);
@@ -130,8 +137,8 @@ describe('upgrade-project.ts PRUNE REMOVED (registry-aware, v1.44.0)', () => {
       );
       expect(result.status).toBe(0);
       const out = result.stdout ?? '';
-      expect(out).toContain('PRUNE  scripts/stray-foreign.ts');
-      expect(existsSync(join(tmp, 'scripts', 'stray-foreign.ts'))).toBe(false);
+      expect(out).toContain('KEEP   scripts/stray-foreign.ts');
+      expect(existsSync(join(tmp, 'scripts', 'stray-foreign.ts'))).toBe(true);
     } finally {
       rmSync(tmp, { recursive: true, force: true });
     }
