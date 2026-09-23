@@ -1,0 +1,20 @@
+schemaVersion: 1
+id: T-20260924-001
+kind: manual
+title: >-
+  Automate L1 SCRIPTS.md mirror projection — generate
+  templates/common/scripts/SCRIPTS.md registry view from root scripts/SCRIPTS.md
+  (layer-filtered), replacing error-prone manual same-commit alignment
+  (propagate-to-templates.ts only parses SCRIPTS.md for layer metadata and never
+  writes the mirror, which is how the 2026-09-24 13-row annotation-prose lag
+  accumulated); enforce via lifecycle-sync-audit Check B or a new drift check
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-23T23:34:18.642Z'
+history:
+  - at: '2026-09-23T23:34:18.642Z'
+    from: null
+    to: backlog
+result: null
+error: null

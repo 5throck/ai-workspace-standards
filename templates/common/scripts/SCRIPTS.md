@@ -73,7 +73,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `compile-tokens.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `design-lint.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `create-l3-scaffold.ts` | L0 | 1.16.0 | active | Step 8.5 graft build: global `graft` first, bunx fallback (spec 2026-09-20-graft-scaffold-resilience) | —| L0 | —|
-| `dev-sync.ts` | L0 | 1.16.0 | active | —| —| L0+L1 | —|
+| `dev-sync.ts` | L0 | 1.16.0 | active | main-drift pre-flight warning (`--require-current-main` abort) + sanctioned `--conclude-merge` conflicted-merge path (ADR-0081/T-20260918-002) | —| L0+L1 | —|
 | `dispatch-parallel.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
 | `dispatch-serial.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
 | `dispatch.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
@@ -83,8 +83,8 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `generate-l3-readme.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
 | `generate-scripts-readme.ts` | L0 | 1.0.4 | active | —| —| L0 | —|
 | `generate-raci.ts` | L0 | 1.1.0 | active | RACI matrix generator per ADR-0083 P4, ADR-0084 §3.4; derives A/R from procedures, accepts explicit C/I; loads governance/_human-roles.yaml when present; emits actor_types map when registry exists; sets schema_version: "1.1" for registries | —| L0+L1 | —|
-| `generate-skill-graph.ts` | L0 | 1.14.0 | active | DEG v1 per ADR-0083; ADR-0084 §3.4: human_role nodes from governance/_human-roles.yaml; actor_type edge attribute on RACI edges (accountable_for, consulted_on, informed_of, step_by_agent) | —| L0+L1 | —|
-| `generate-version-manifest.ts` | L0 | 1.7.1 | active | scripts-table sort uses a full-path tiebreaker so basename ties stop depending on readdir order (macOS vs Linux drift) | —| L0+L1 | —|
+| `generate-skill-graph.ts` | L0 | 1.14.0 | active | DEG v1 per ADR-0083; ADR-0084 §3.4: human_role nodes from governance/_human-roles.yaml; actor_type edge attribute on RACI edges (accountable_for, consulted_on, informed_of, step_by_agent); v1.13.0: variant agent discovery skips README*/_ files (co-abap README nodes, T-20260923-001) + Source 4.8 workflow-doc citations — bounded corpus mints `doc:` nodes and `cites_skill` edges so workflow-dispatched skills are no longer graph-isolated; v1.14.0: variant corpus widened (docs/*.md, README.md, agents/**, workflows/**) + path-fragment/README-plain matching — variant isolation 17 → 0 (T-20260923-002) | —| L0+L1 | —|
+| `generate-version-manifest.ts` | L0 | 1.7.1 | active | scripts-table sort uses a full-path tiebreaker so basename ties (scripts/x.ts vs scripts/<variant>/x.ts) stop depending on readdir order (macOS vs Linux drift); date-masked `--check` — Last Modified columns excluded from comparison unconditionally (ADR-0081/T-20260918-001); emits `validate-md-language:allowlist` markers around the generated Skills table (T-20260912-015) | —| L0+L1 | —|
 | `evidence-backport-scan.ts` | L0 | 1.0.0 | active | Evidence Backporting scanner — read-only form detection (F1/F2/F3/F0/MIXED) + M1-M6 maturity bar over Projects/co-* evidence planes (ADR-0084 Decision 6, design §4); consumes graph-delta-log.ts output for M2/M4/M6b with git-log fallback; project-resync Step 2b | —| L0+L1 | —|
 | `graph-delta-log.ts` | L0 | 1.0.0 | active | Graph Delta Log — compute and persist per-scope structural diffs between committed and derived skill graphs (ADR-0084 §5); two-layer delivery (workspace root + projects); consumed by evidence-backport-scan.ts maturity bar (M2, M4, M6b tests) | —| L0+L1 | —|
 | `handbook/apply-handbook-theme.ts` | L0 | 1.0.0 | active | — | — | common | — |
@@ -127,7 +127,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `helpers/l0-ref-policy.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `helpers/context-sections.ts` | L0 | 1.6.0 | active | CRLF-tolerant footer parsing (T-20260918-005); spliceCommonContextBlock delivers policy under PRESERVE (T-20260919-003); nesting-aware findHeadingSpan/removeHeadingSpan — promoted `##` sections carry their `###` children (2026-09-22) | —| L0+L1 | —|
 | `helpers/markers.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
-| `helpers/merge-state.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
+| `helpers/merge-state.ts` | L0 | 1.0.0 | active | §3.3 shared-file taxonomy + unresolved-conflict parsing for dev-sync main-drift/--conclude-merge (ADR-0081/T-20260918-002) | —| L0+L1 | —|
 | `helpers/scaffold-markers.ts` | L0 | 1.4.0 | active | Shared scaffold marker constants + (marker→source) mapping + delivery-tree derivations + transient test-fixture predicate (T-20260916-001); PlatformProfile 'both'→'all' rename | —| L0+L1 | —|
 | `helpers/pm-md-parser.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `helpers/variant-governance-rules.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
@@ -150,7 +150,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `helpers/normalize-agent-skills.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `helpers/prune-country-scoped-assets.ts` | L0 | 0.3.3 | active | —| —| L0 | —|
 | `helpers/scan-l3-project.ts` | L0 | 1.4.0 | active | —| —| L0 | —|
-| `helpers/substitute-placeholders.ts` | L0 | 1.3.0 | active | —| —| L0 | —|
+| `helpers/substitute-placeholders.ts` | L0 | 1.3.0 | active | v1.3.0: exported pure `applySubstitutions`/`substituteFiles` (strict-UTF-8 guard, explicit file list) for adopt's scoped substitution; CLI flow guarded by import.meta.main, behavior unchanged | —| L0 | —|
 | `helpers/template-utils.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `helpers/rollback-partial-project.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `helpers/template-validation.ts` | L0 | 1.0.2 | active | —| —| L0 | —|
@@ -190,10 +190,10 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `lib/error-handling.ts` | L0 | 1.4.0 | active | —| —| L0+L1 | —|
 | `lib/language-guard.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/git-status.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `lib/pipeline-state.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
+| `lib/pipeline-state.ts` | L0 | 1.2.0 | active | v1.2.0: injectable state file (`setStateFile`), string phase names, snapshot-backed undo (`addRollbackActionWithBackup`; modify/delete/move restore from captured content) for in-project adopt state | —| L0+L1 | —|
 | `lib/platform-context.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/propagation-map-schema.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
-| `lib/managed-block-parity.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
+| `lib/managed-block-parity.ts` | L0 | 1.2.0 | active | COMMON-AGENTS zone extraction/parity (ADR-0081/T-20260919-001); keyed WORKSPACE-MANAGED blocks (T-20260916-009) | —| L0+L1 | —|
 | `lib/platform-delivery.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/ssrf.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `lib/constitution-scrub.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
@@ -206,12 +206,12 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `md-to-ooxml.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `migrate-quality-gates.ts` | L0 | 1.1.0 | active | Convert quality_gates prose entries to decision gates; automate classification (GATE vs INVARIANT vs MANUAL), YAML output, procedure schema updates, and _output-types.yaml enrichment (ADR-0083 P5); decider_agent derived from stage owner_agent, not procedure owner_agent | —| L0+L1 | —|
-| `new-project.ts` | L0 | 1.25.0 | active | §7.7 graft build: global `graft` first, bunx fallback; `--platform both`→`all` rename, now covers claude+antigravity+codex | —| L0 | —|
+| `new-project.ts` | L0 | 1.25.0 | active | §2.3b extends-stub resolution + §2.5 L1-B strip extracted verbatim to `helpers/resolve-pm-stub.ts` (behavior unchanged); §7.7 graft build: global `graft` first, bunx fallback (spec 2026-09-20-graft-scaffold-resilience); `--platform both`→`all` rename, now covers claude+antigravity+codex; Provenance fallback is fail-loud via the templates/VERSION SSOT — silent "unknown" removed, --version still wins as-is (v1.20.0); bare names scaffold to `Projects/<name>`, path-like names stay workspace-relative | —| L0 | —|
 | `remove-project.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `resolve-variants.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
 | `project-to-variant.ts` | L0 | 1.4.1 | active | `--source`, `--target`, `--dry-run`, `--force`, `--overlay-variant`, `--design-doc`, `--threshold-files`, `--threshold-dirs` | —| L0 | —|
 | `promote-context-section.ts` | L0 | 1.1.0 | active | `--heading`, `--variants`, `--source`, `--after-heading`, `--dry-run`; nesting-aware removal — promoted `##` sections remove their nested `###` subsections too (2026-09-22) | —| L0 | —|
-| `propagate-to-templates.ts` | L0 | 2.16.0 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs`, `--include-disabled`, `--marker-rewrite` | —| L0 | —|
+| `propagate-to-templates.ts` | L0 | 2.16.0 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--json`, `--governance-l1`, `--docs`, `--include-disabled`, `--marker-rewrite` | —| L0 | —|
 | `qa-gate.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
 | `readme-lifecycle-audit.ts` | L0 | 1.0.4 | active | —| —| L0+L1 | —|
 | `render-pdf-deck.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
@@ -227,7 +227,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `sync-skills-to-l2.ts` | L0 | 1.0.1 | active | — | — | L0 | — |
 | `sync-template-deps.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `sync-skills.ts` | L0 | 1.8.0 | active | `--dir <path>`, `--all-variants` | — | L0+L1 | — |
-| `tag-template.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
+| `tag-template.ts` | L0 | 1.1.0 | active | `--dry-run`, `--no-push`, `--fail-on-push-error` | —| L0 | —|
 | `team-builder.ts` | L0 | 1.4.0 | active | —| —| L0+L1 | —|
 | `test-platform-parity.ts` | L0 | 0.2.4 | active | —| —| L0 | —|
 | `test-new-project.ts` | L0 | 1.3.0 | active | Test 8 now covers `--platform codex` and asserts CODEX.md/.codex/ under `all` | —| L0 | —|
@@ -237,7 +237,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `translate-readme.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `ticket.ts` | L0 | 1.2.0 | active | `create --not-before`, `list --kind`, `list --ready`, `move done --result` (required, not bypassable by --force) | —| L0 | —|
 | `typecheck.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
-| `upgrade-project.ts` | L0 | 1.45.3 | active | `--variant`, `--platform` (claude/antigravity/codex/all — `all` renamed from `both`, now merges CODEX.md too), `--dry-run`, `--prune-removed`, `--rollback`, `--yes`, `--skip-context-commonization`, `--force-context-sync`; COMMON-CONTEXT splice under PRESERVE (T-20260919-003); skill sub-file sync — NEW/UPDATE deliver the whole skill dir, equal-version skills get additive CATCH-UP + DRIFT warnings (2026-09-21); W2 HARVEST — variant-only lines inside removed near-duplicate sections reported as backport candidates (2026-09-22) | —| L0 | —|
+| `upgrade-project.ts` | L0 | 1.45.3 | active | v1.44.0 (T-20260923-003/-004): PRUNE REMOVED scripts/ category is registry-aware — a SCRIPTS.md row sourced to the variant name (project-local script) survives with a KEEP verdict; pruned registered scripts get their row dropped (ghost-row class). L1 engine mirror retired per ADR-0073 Amendment 1 completion + Amendment 3 scope note; the prune retires engine copies already delivered to projects. Prior: v1.43.0 (adopt-project prerequisites): variant-scope skill prune honors variant.json skill_manifest (v1.17.1 symmetry — adopted foreign skills no longer `git rm`-ed); `.gitattributes` merge-aware LOCKED delivery (`mergeGitattributes`, mergeGitleaksToml pattern). Prior: `--variant`, `--platform` (claude/antigravity/codex/all — `all` renamed from `both`, now merges CODEX.md too), `--dry-run`, `--prune-removed`, `--rollback`, `--yes`, `--skip-context-commonization`, `--force-context-sync`; COMMON-CONTEXT splice under PRESERVE (T-20260919-003); skill sub-file sync — NEW/UPDATE deliver the whole skill dir, equal-version skills get additive CATCH-UP + DRIFT warnings (2026-09-21); W2 HARVEST — variant-only lines inside removed near-duplicate sections reported as backport candidates (2026-09-22) | —| L0 | —|
 | `variant-feature.ts` | L0 | 1.0.0 | active | `--variant`, `--feature`, `--type` | —| L0 | —|
 | `validate-agents.ts` | L0 | 1.3.2 | active | —| —| L0+L1 | —|
 | `validate-doc-folder.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
@@ -249,7 +249,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `validate-procedures.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `validate-skills.ts` | L0 | 1.5.1 | active | —| —| L0+L1 | —|
 | `validate-decisions.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `validate-templates.ts` | L0 | 1.38.1 | active | roster-tier-consistency (T-20260921-020: roster tier vs extends-resolved frontmatter tier + L0 Tier Ceiling enforcement); cross-twin common section parity VA-06 (ADR-0077 — CLAUDE/GEMINI/CODEX twins carry the shared policy set) —| —| L0+L1 | —|
+| `validate-templates.ts` | L0 | 1.38.1 | active | roster-tier-consistency (T-20260921-020: roster tier vs extends-resolved frontmatter tier + L0 Tier Ceiling enforcement) common-agents-parity (PM-04b, ADR-0081/T-20260919-001); managed-block-parity PM-04 (T-20260916-009); cross-twin common section parity VA-06 (ADR-0077 — CLAUDE/GEMINI/CODEX twins carry the shared policy set) | —| L0+L1 | —|
 | `validate-variant-readiness.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `verify-country-prune.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `verify-adr-governance.ts` | L0 | 1.7.0 | active | Added bold-line fallback for `**Date**: YYYY-MM-DD` metadata to mirror `extractADRStatus()` pattern (ADR-0084 safety net); WARN on unparseable dates for Accepted/Proposed ADRs | —| L0 | —|
@@ -259,7 +259,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `verify-new-project-tests.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
 | `verify-platform-lifecycle.ts` | L0 | 1.1.3 | active | —| —| L0+L1 | —|
 | `verify-readme-sync.ts` | L0 | 1.4.0 | active | —| —| L0+L1 | —|
-| `verify-scripts.ts` | L0 | 1.8.0 | active | —| —| L0+L1 | —|
+| `verify-scripts.ts` | L0 | 1.8.0 | active | v1.8.0: walkScripts skips `scripts/_legacy/` (adopt-project archive of preserved foreign scripts — not registry-governed). Prior: `--fix` auto-registers unregistered scripts (ADR-0081/T-20260919-002) | —| L0+L1 | —|
 | `verify-skills.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
 | `verify-template-integrity.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `validate-pm-extends.ts` | L0 | 0.3.1 | active | —| —| L0+L1 | —|
