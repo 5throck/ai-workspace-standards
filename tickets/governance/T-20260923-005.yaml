@@ -1,0 +1,28 @@
+schemaVersion: 1
+id: T-20260923-005
+kind: manual
+title: >-
+  promotion/variant-ization skill-asset parity: generateSkillDirectories
+  (helpers/generate-variant.ts) groups only keepInVariant files matching
+  skills/ + .endsWith('.md') and copies ONLY SKILL.md into the four platform
+  mirrors; the copy-remaining loop skips 'skills/' assuming this function
+  handled it (docstring, v1.2.0). Consequence: non-Markdown skill assets
+  (e.g. explain-me's report.html runtime template, future .json/.css skill
+  assets) can be dropped from BOTH the top-level skills/<name>/ copy and the
+  platform mirrors when a variant is promoted (project-to-variant,
+  l3-to-variant-pipeline). Current fleet mirrors are whole-dir complete only
+  because sync-skills' defaultCopyDir re-materializes them from L1 sources —
+  a promotion into a fresh variant template has no such follow-up. Add an
+  E2E assertion: a promoted variant with a multi-file skill (references/
+  subdir + a non-md asset) carries every file into skills/<name>/ AND all
+  four platform mirrors; then fix the copy path (whole-dir cpSync or
+  drop the .md filter)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-23T11:33:59.000Z'
+history:
+  - at: '2026-09-23T11:33:59.000Z'
+    from: null
+    to: backlog
+error: null
