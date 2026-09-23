@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-09-23T01:15:11.361Z
+**Generated**: 2026-09-23T01:52:35.018Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -76,7 +76,7 @@
 | script-lifecycle-manager | 1.2.2 | active | skills/script-lifecycle-manager/SKILL.md | workspace | create script, update script, deprecate script, script lifecycle, manage scripts | pm |
 | security-scan | 1.2.0 | active | skills/security-scan/SKILL.md | workspace | security scan, scan for vulnerabilities, security check, run security | pm |
 | simulate-pipeline | 1.0.2 | active | skills/simulate-pipeline/SKILL.md | workspace | simulate pipeline, simulate project, test scaffolding, dry run project creation, simulate l3 promotion, test l3 pipeline, dry run variant promotion | automation-engineer |
-| skill-graph-analytics | 1.0.0 | active | skills/skill-graph-analytics/SKILL.md | workspace | skill-graph analytics, fleet skill graph, skill graph report, skill graph fleet report, skill convergence triage | pm |
+| skill-graph-analytics | 1.1.0 | active | skills/skill-graph-analytics/SKILL.md | workspace | skill-graph analytics, fleet skill graph, skill graph report, skill graph fleet report, skill convergence triage, orphan agent check, orphan skill check | pm |
 | skill-lifecycle-manager | 1.5.0 | active | skills/skill-lifecycle-manager/SKILL.md | workspace | create skill, new skill, validate skills, skill lifecycle, manage skills, skill request, deprecate skill, remove skill | pm |
 | source-command-commit-push-pr | 1.0.3 | active | skills/source-command-commit-push-pr/SKILL.md | workspace | commit-push-pr, commit and push, create PR | pm |
 | standup-synthesizer | 1.0.0 | active | skills/standup-synthesizer/SKILL.md | workspace | standup digest, daily standup, synthesize standup, work summary | pm |
@@ -128,7 +128,7 @@
 | generate-l3-readme.ts | 1.0.3 | scripts/generate-l3-readme.ts | fs, path |
 | generate-raci.ts | 1.1.0 | scripts/generate-raci.ts | js-yaml |
 | generate-scripts-readme.ts | 1.0.4 | scripts/generate-scripts-readme.ts | N/A |
-| generate-skill-graph.ts | 1.12.0 | scripts/generate-skill-graph.ts | js-yaml |
+| generate-skill-graph.ts | 1.13.0 | scripts/generate-skill-graph.ts | js-yaml |
 | generate-version-manifest.ts | 1.7.1 | scripts/generate-version-manifest.ts | bun, js-yaml |
 | graph-delta-log.ts | 1.0.0 | scripts/graph-delta-log.ts | N/A |
 | ingest-external-skills.ts | 1.1.0 | scripts/ingest-external-skills.ts | N/A |
@@ -157,7 +157,7 @@
 | review-baseline.ts | 1.0.1 | scripts/review-baseline.ts | N/A |
 | setup-github-branch-protection.ts | 1.0.1 | scripts/setup-github-branch-protection.ts | bun |
 | skill-dependency-analysis.ts | 1.0.2 | scripts/skill-dependency-analysis.ts | N/A |
-| skill-graph-fleet-report.ts | 1.0.0 | scripts/skill-graph-fleet-report.ts | N/A |
+| skill-graph-fleet-report.ts | 1.1.0 | scripts/skill-graph-fleet-report.ts | N/A |
 | skill-lifecycle-audit.ts | 1.5.1 | scripts/skill-lifecycle-audit.ts | N/A |
 | skill-session-review.ts | 1.1.0 | scripts/skill-session-review.ts | bun |
 | spec-backfill.ts | 1.0.0 | scripts/spec-backfill.ts | N/A |
