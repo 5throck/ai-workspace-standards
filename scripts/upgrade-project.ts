@@ -1,4 +1,21 @@
 #!/usr/bin/env bun
+// @version 1.44.0
+// v1.44.0 (2026-09-23, upgrade-engine L0-only completion — spec
+//          2026-09-23-upgrade-engine-l0-only-completion-design, T-20260923-003):
+//          PRUNE REMOVED's scripts/ category becomes registry-aware. A
+//          scripts/SCRIPTS.md row whose source cell names the project variant
+//          marks a project-local script (ADR-0031 engagement output) — absence
+//          from the template is its normal state, so the prune now logs KEEP
+//          instead of deleting it (the skills/ category has consulted the
+//          variant manifest since its first fleet catch, 2026-09-12; the
+//          scripts/ category consulted nothing and `git rm`-ed co-newbiz's
+//          registered deploy-web.ts during this cycle's fleet run). A pruned
+//          registered script also gets its registry row dropped
+//          (dropScriptRegistryRows, legitimate-prune-only by construction) —
+//          ghost rows outliving prunes were hand-remediated in the 2026-09-16
+//          resync (sync-agent-status, 10 projects). Scope note: with the L1
+//          engine mirror retired (same spec, T-20260923-004) the prune is what
+//          retires engine copies already delivered to projects.
 // @version 1.43.0
 // v1.43.0 (2026-09-23, adopt-project engine prerequisites — spec
 //          2026-09-23-adopt-project-conversion): two safety patches that external-project
@@ -889,6 +906,49 @@ function reconcileScriptRegistry(scriptRelPath: string): void {
     lines.splice(lastRowIdx + 1, 0, appendedRow);
     writeFileSync(registryPath, lines.join('\n'), 'utf8');
     console.log(`    📝 scripts/SCRIPTS.md: registered ${name} (v${targetVersion})`);
+  }
+}
+
+// ── Prune registry helpers (v1.44.0, T-20260923-003) ─────────────────────────
+// The project SCRIPTS.md row's source cell is the ownership verdict: `L0`/`L1`
+// for template-delivered scripts, the variant name (e.g. `co-newbiz`) for
+// project-local scripts. Both helpers are bounded to the registry table region
+// (before the first `#### \` detail header) — the same boundary
+// reconcileScriptRegistry's append scan respects.
+function scriptRegistryTableRegion(): string {
+  const registryPath = join(projectDir, 'scripts', 'SCRIPTS.md');
+  if (!existsSync(registryPath)) return '';
+  const content = readFileSync(registryPath, 'utf8');
+  const lines = content.split('\n');
+  for (let i = 0; i < lines.length; i++) {
+    if (/^####\s+`/.test(lines[i])) return lines.slice(0, i).join('\n');
+  }
+  return content;
+}
+
+function scriptRegistrySources(name: string): string[] {
+  const table = scriptRegistryTableRegion();
+  if (!table) return [];
+  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const rowRe = new RegExp(`^\\| \`${escaped}\` \\| ([^|]*)\\|`, 'gm');
+  const sources: string[] = [];
+  for (const m of table.matchAll(rowRe)) sources.push(m[1].trim());
+  return sources;
+}
+
+// Drop every registry row for `name`. Called ONLY from the branch that actually
+// deleted the file, so a ghost row can never outlive a legitimate prune (the
+// sync-agent-status ghost class hand-remediated in the 2026-09-16 resync).
+function dropScriptRegistryRows(name: string): void {
+  const registryPath = join(projectDir, 'scripts', 'SCRIPTS.md');
+  if (!existsSync(registryPath)) return;
+  const content = readFileSync(registryPath, 'utf8');
+  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const rowRe = new RegExp(`^\\| \`${escaped}\` \\| [^|]*\\| [^|]*\\|.*\\r?\\n?`, 'gm');
+  const dropped = content.replace(rowRe, '');
+  if (dropped !== content) {
+    writeFileSync(registryPath, dropped, 'utf8');
+    console.log(`    📝 scripts/SCRIPTS.md: dropped \`${name}\` registry row(s) (pruned)`);
   }
 }
 
@@ -2676,6 +2736,15 @@ if (pruneRemoved) {
     } else {
       for (const f of readdirSync(cat.projDir)) {
         if (f.endsWith(cat.ext) && !tplBasenames.has(f) && !(cat.skipFiles || []).includes(f)) {
+          // v1.44.0 (T-20260923-003): a registry row sourced to the variant
+          // name marks a project-local script (ADR-0031 engagement output) —
+          // absence from the template is its normal state, never a prune
+          // signal. The skills/ category has consulted manifests since its
+          // first fleet catch (2026-09-12); scripts/ now does the same.
+          if (cat.label === 'scripts/' && scriptRegistrySources(f).includes(variant)) {
+            console.log(`  KEEP   ${cat.label}${f}  (project-local: registered source ${variant})`);
+            continue;
+          }
           console.log(`  PRUNE  ${cat.label}${f}`);
           if (!dryRun) {
             const rm = spawnSync('git', ['-C', projectDir, 'rm', '-f', `${cat.label}${f}`], { encoding: 'utf8' });
@@ -2689,6 +2758,11 @@ if (pruneRemoved) {
             }
           }
           prunedCount++;
+          // v1.44.0: a pruned registered script must not leave a ghost row —
+          // verify-scripts reads any row whose file is gone as a registry
+          // error. Row-drop is legitimate-prune-only by construction (it
+          // fires only inside the branch that actually deleted the file).
+          if (cat.label === 'scripts/' && !dryRun) dropScriptRegistryRows(f);
         }
       }
     }

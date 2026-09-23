@@ -35,6 +35,14 @@ Invert the default. Classification for every project-relative path lives in one 
 
 ## References
 
+## Amendment 3 (2026-09-23): Amendment 1 completed — engine-only `L0`-only, `lib/upgrade-policy.ts` stays delivered
+
+The 2026-09-23 fleet resync found Amendment 1 never fully executed: the physical L1 mirrors (`templates/common/scripts/upgrade-project.ts`, `templates/common/scripts/helpers/skills-registry.ts`) had existed continuously since the 2026-09-06 post-resync hardening commit, with `L0+L1` registry rows, so TEMPLATE TREE SYNC shipped a fresh inert 165 KB engine copy into all 11 `Projects/co-*` on every upgrade. PM adjudication: complete Amendment 1 (spec `2026-09-23-upgrade-engine-l0-only-completion-design`, T-20260923-004).
+
+- **Physically removed from L1** (this amendment's execution): `templates/common/scripts/upgrade-project.ts`, `templates/common/scripts/helpers/skills-registry.ts`; both registry rows are now layer `L0` (the `new-project.ts` convention). `check-upgrade-coverage.ts` was already correctly absent.
+- **Scope adjustment**: `lib/upgrade-policy.ts` is removed from the L0-only set. Since v1.11.0 it is a leaf data module (`isDeliveredDiff` for dev-sync step 3.9 auto-E5; `MERGE_MANAGED_FILES` / `SCAFFOLD_COMMON_OWNED_FILES` constants) imported by the delivered project scripts `dev-sync.ts` and `validate-templates.ts` — it stays `L0+L1`. The L0-only rule is engine-only: `upgrade-project.ts`, `check-upgrade-coverage.ts`, `helpers/skills-registry.ts`.
+- **Correction of record**: Amendment 1's claim that `reconcileScriptRegistry` drops the stale registry row on prune was false — it only appends/syncs rows (the sync-agent-status ghost rows were hand-remediated in the 2026-09-16 resync). `upgrade-project` v1.44.0 implements registry-aware pruning: a scripts/ row sourced to the variant name survives the prune (KEEP), and a legitimately pruned script's row is dropped (`dropScriptRegistryRows`) — see T-20260923-003.
+
 - Design: `docs/designs/2026-09-11-upgrade-policy-coverage-design.md` (D1–D8, §10 Phase C addendum)
 - CONSTITUTION §6.5 Script Lifecycle (layer model — the upgrade trio is `L0`-only; see Amendment 1)
 - ADR-0060 (auto-activating audit gate precedent), ADR-0031 (L1/L2 fork model — upgrade philosophy), WS-07 (variant `docs/context.md` prohibition)
