@@ -6,6 +6,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-09-24](2026-09-24.md) | feat(audit): add template artifact hygiene check (spec 2026-09-24-template-hygiene-audit-design) |
 | [2026-09-23](2026-09-23.md) | fix(templates): port Language Policy section into CODEX.md platform twin (ADR-0077) |
 | [2026-09-22](2026-09-22.md) | fix(upgrade-policy): claim codex mirrors before the blanket rule and update unit fixtures |
 | [2026-09-21](2026-09-21.md) | chore: update |

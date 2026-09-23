@@ -73,7 +73,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `agent-verify.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
 | `analyze-git-history.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
 | `archive-memory.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
-| `audit.ts` | L0 | 2.39.0 | active | —| —| L0+L1 | —|
+| `audit.ts` | L0 | 2.40.0 | active | v2.40.0: template-artifact hygiene — warn-only, read-only sweep of templates/ for artifact directories (node_modules, dist, build, .venv, .bun), topmost-flag, no-descend, depth cap 8, guard `!LIFECYCLE_ONLY && fs.existsSync('templates')` (spec: docs/designs/2026-09-24-template-hygiene-audit-design.md); TODO(promotion): Warn -> Fail after soak period. Prior: v2.39.0 VERSION_MANIFEST reconciliation gate; v2.38.0 model registry gate | —| L0+L1 | —|
 | `bootstrap-stages.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `check-upgrade-coverage.ts` | L0 | 1.0.0 | active | `--variant`, `--strict`, `--json` | —| L0 | —|
 | `cleanup-completed-md.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
