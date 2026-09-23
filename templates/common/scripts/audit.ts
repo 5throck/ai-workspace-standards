@@ -1,4 +1,14 @@
-// @version 2.39.0
+// @version 2.40.0
+// v2.40.0: Template artifact hygiene check (spec:
+//           docs/designs/2026-09-24-template-hygiene-audit-design.md, Decision 2 as
+//           amended) — warn-only, read-only sweep of templates/ for artifact
+//           DIRECTORIES (node_modules, dist, build, .venv, .bun): topmost-flag,
+//           no-descend, depth cap 8, guard `!LIFECYCLE_ONLY &&
+//           fs.existsSync('templates')`. Nothing previously flagged artifact
+//           accumulation at the source: an 18 MB node_modules/ sat invisibly
+//           (gitignored) inside templates/co-design/playground/ until manual
+//           cleanup (2026-09-24). TODO(promotion): Warn -> Fail after one soak
+//           period if recurrence is observed.
 // v2.39.0: VERSION_MANIFEST reconciliation gate
 //           (spec: docs/designs/2026-09-16-registry-version-parity-hardening-design.md,
 //           T-20260915-004 / finding M7) — when scripts/generate-version-manifest.ts
@@ -2341,6 +2351,68 @@ if (!LIFECYCLE_ONLY) {
     }
     if (nulLintHits === 0) {
         Pass(`'> nul' redirect check: no banned redirects found (${nulLintScanned} files scanned)`); // nul-lint-ignore
+    }
+}
+
+// Check: templates/ artifact hygiene — flag dependency/build residue at the SOURCE.
+// On 2026-09-24 an 18 MB node_modules/ tree (a vite dev dependency) plus a dist/ directory
+// were found inside templates/co-design/playground/ — someone had run `bun install` in the
+// playground during template development, and both sat invisibly (gitignored, 0 tracked
+// files) until manual cleanup. Downstream purge defenses already exist at the delivery
+// points (scripts/helpers/scaffold-markers.ts NEW_PROJECT_COPY_SKIP_ENTRIES /
+// L3_COMMON_OVERLAY_EXCLUDE, scripts/new-project.ts purge SKIP set ~line 766,
+// scripts/create-l3-scaffold.ts COMMON_OVERLAY_EXCLUDE), so nothing user-facing breaks —
+// but nothing flagged accumulation at the source, and detection required a human noticing
+// disk growth. This check closes that gap. It is deliberately READ-ONLY and Warn-only: a
+// name match cannot distinguish untracked residue from content a future template
+// legitimately tracks, so auto-delete here could destroy tracked content (unlike the
+// device-name sweep above, whose targets carry no legitimate content by definition).
+// DIRECTORIES only, per Amendment 1 (2026-09-24) of
+// docs/designs/2026-09-24-template-hygiene-audit-design.md: an earlier draft also flagged
+// artifact FILES (bun.lock, bun.lockb, package-lock.json, propagation-map.json), but those
+// basenames are TRACKED, maintained template assets — templates/common/bun.lock (kept
+// current by dependabot sync, commit 7df3b437), templates/common/scripts/
+// propagation-map.json (PM-03 propagation feature, commit 60686c8f), and
+// templates/co-game/projects/*/bun.lock (game-project template content, commit d551e96a);
+// the same basenames are also tracked at the workspace root. Flagging them Warned on
+// legitimate content on every run. Do NOT re-add file names without re-checking
+// `git ls-files templates/` first.
+// TODO(promotion): promote Warn -> Fail after one soak period if recurrence is observed
+// (docs/designs/2026-09-24-template-hygiene-audit-design.md, Decision 2 as amended).
+// The fs.existsSync guard is CRITICAL, not cosmetic: variant projects (L2/L3) have no
+// templates/ directory and this core script must stay byte-identical across tiers, so the
+// check must no-op silently wherever templates/ is absent.
+if (!LIFECYCLE_ONLY && fs.existsSync('templates')) {
+    // Local Set, not an import of NEW_PROJECT_COPY_SKIP_ENTRIES: delivery-exclusion and
+    // source-hygiene are different semantics. All five entries appear in new-project.ts's
+    // purge SKIP set above; .git is deliberately NOT flagged (it cannot occur nested
+    // without a deliberate submodule). Re-derive consistency against the downstream lists
+    // when editing either side: scaffold-markers.ts NEW_PROJECT_COPY_SKIP_ENTRIES (~line
+    // 240) and L3_COMMON_OVERLAY_EXCLUDE (~line 233), plus the purge SKIP set.
+    const TEMPLATE_ARTIFACT_DIRS = new Set(['node_modules', 'dist', 'build', '.venv', '.bun']);
+    let templateArtifactWarns = 0;
+    const sweepTemplateArtifacts = (dir: string, depth: number): void => {
+        if (depth > 8) return; // guard against pathological trees / symlink loops (mirrors the sweep above)
+        let entries: fs.Dirent[];
+        try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch { return; }
+        for (const entry of entries) {
+            const entryPath = path.join(dir, entry.name);
+            if (!entry.isDirectory()) continue;
+            if (TEMPLATE_ARTIFACT_DIRS.has(entry.name)) {
+                // Flag the topmost occurrence only — node_modules/ alone can hold 10k+
+                // entries, so Warn once and do NOT descend (mirrors SWEEP_SKIP_DIRS above).
+                Warn(`Template artifact directory: ${entryPath} — remove it (never run package-manager installs inside templates/; artifacts ship into every scaffolded project)`);
+                templateArtifactWarns++;
+                continue;
+            }
+            sweepTemplateArtifacts(entryPath, depth + 1);
+        }
+    };
+    // Iterate templates/ entries — never hardcode variant names, so future variants are
+    // covered without touching this check.
+    sweepTemplateArtifacts('templates', 1);
+    if (templateArtifactWarns === 0) {
+        Pass('Template artifact hygiene: no dependency/build artifacts in templates/');
     }
 }
 
