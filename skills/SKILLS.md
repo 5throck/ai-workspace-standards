@@ -36,7 +36,7 @@ Skills with a `skills/<name>/` directory in the workspace root. These are the pr
 | `project-to-variant` | 1.3.0 | active | scaffolding-expert | 2026-08-23 | — | Convert existing standalone project into official variant template |
 | `adopt-project` | 1.1.0 | active | scaffolding-expert | 2026-09-23 | — | Convert an existing external project into a workspace-standard project in place (preserves content + git history); automates variant-conversion-guide §3 Scenario B |
 | `upgrade-project` | 1.5.1 | active | pm | 2026-09-21 | — | Upgrade existing L2/L3 project to current template version |
-| `ensure-github-repo` | 1.0.0 | active | scaffolding-expert | 2026-09-23 | — | Pre-adoption GitHub baseline: checks/creates/pushes/verifies the github repo before adopt-project migration |
+| `migrate-project` | 1.0.0 | active | scaffolding-expert | 2026-09-23 | — | End-to-end external-project migration: GitHub baseline → adopt-project → machine-verified result (artifacts, platform twins, provenance, hooksPath, audit smoke) |
 | `variant-feature` | 1.0.0 | active | scaffolding-expert | 2026-07-31 | — | Add features (agents, skills, scripts, docs) to existing variant |
 | `ticket-run` | 1.0.0 | active | automation-engineer | 2026-07-16 | — | Pulls next waiting service ticket from Phase A queue |
 | `explain-me` | 1.0.0 | experimental | pm | 2026-08-03 | — | Single-file interactive HTML report generation. Inspired by beret21/reportme (MIT). Korean loanword data in references/loanword-refinements.json |
