@@ -18,6 +18,11 @@
       "layer": "L0"
     },
     {
+      "id": "adopt-project",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
       "id": "adr:0001",
       "type": "adr",
       "layer": "L0"
@@ -4741,6 +4746,35 @@
       "from": "accessibility-audit",
       "to": "visual-designer",
       "source": "skill_manifest"
+    },
+    {
+      "type": "follows",
+      "from": "adopt-project",
+      "to": "project-to-variant",
+      "source": "relates_to",
+      "provenance": {
+        "file": "skills/adopt-project/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "references",
+      "from": "adopt-project",
+      "to": "promote-variant",
+      "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "adopt-project",
+      "to": "upgrade-project",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "skills/adopt-project/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     },
     {
       "type": "references",

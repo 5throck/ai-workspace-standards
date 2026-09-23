@@ -11,6 +11,7 @@
 | `abap-code-review` | variant:co-abap | code-writer, code-writer, test-runner, test-runner | phase3, phase4 | abap-dev (composes_with), abap-dev (follows) | — | — |
 | `abap-dev` | variant:co-abap | architect, code-writer, sap-investigator, test-runner | phase1, phase2, phase3, phase4 | dump-monitor (composes_with), research-analysis (composes_with), sap-co (composes_with), sap-co (composes_with), sap-fi (composes_with), sap-fi (follows), sap-le (composes_with), sap-le (composes_with), sap-mm (composes_with), sap-mm (composes_with), sap-pp (composes_with), sap-pp (composes_with), sap-sd (composes_with), sap-sd (composes_with) | — | — |
 | `accessibility-audit` | L0 | ux-researcher, visual-designer | phase2, phase4 | — | — | — |
+| `adopt-project` | L0 | — | — | project-to-variant (follows), upgrade-project (composes_with) | — | — |
 | `agent-lifecycle-manager` | L0 | — | — | skill-lifecycle-manager (composes_with) | — | — |
 | `ai-tell-reduction` | variant:co-news | style-editor, style-editor | phase4 | financial-journalism-style (composes_with) | — | — |
 | `api-documentation` | L0 | technical-writer | — | — | — | — |
