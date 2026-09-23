@@ -3,9 +3,9 @@
 ## Metadata
 
 - **Current Phase**: production
-- **Version**: 1.24.0
+- **Version**: 1.25.0
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-09-20
+- **Last Updated**: 2026-09-23
 - **Last Reviewer**: pm
 - **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort. The duplicate Metadata section (a v1.10.0-era leftover) was merged into this single section on 2026-09-16.
 
@@ -16,6 +16,7 @@
 ## Phase History
 
 - **2026-09-21**: v1.24.0 — git init runs with cwd: projectDir (T-20260921-003: parent-repo reinit inherited the workspace origin); README content_hash + README_ko translated_from_hash refreshed post-substitution (T-20260921-002).
+- **2026-09-23**: v1.25.0 — §2.3b extends-stub resolution and §2.5 L1-B strip extracted verbatim to scripts/helpers/resolve-pm-stub.ts (adopt-project engine prerequisites; behavior unchanged).
 
 | Date | From | To | Reason | Approver |
 |------|------|-----|---------|----------|

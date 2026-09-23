@@ -1,4 +1,17 @@
 #!/usr/bin/env bun
+// @version 1.43.0
+// v1.43.0 (2026-09-23, adopt-project engine prerequisites — spec
+//          2026-09-23-adopt-project-conversion): two safety patches that external-project
+//          adoption depends on. (1) VARIANT-SCOPE SKILL PRUNE now honors the
+//          v1.17.1 safety: a skill declared in the project's variant.json
+//          skill_manifest.variant_specific is kept (an adoption run seeds the manifest
+//          precisely so foreign-domain skills survive the registry prune; previously
+//          this pass had NO manifest check and silently `git rm`-ed adopted skills).
+//          (2) .gitattributes moves out of the blind LOCKED overwrite into
+//          mergeGitattributes() — merge-aware delivery on the mergeGitleaksToml
+//          (v1.10.0) pattern: project-only attribute lines (GitLFS trackers, custom
+//          merge drivers, the scaffold-time `docs/context.md merge=ours` rule) survive
+//          the template overwrite instead of being silently stripped on every upgrade.
 // @version 1.42.0
 // v1.42.0 (2026-09-22, T-20260922-001 follow-up): W2 HARVEST in CONTEXT_COMMONIZATION —
 //           lines UNIQUE to the variant copy inside a removed near-duplicate section are
@@ -1045,12 +1058,47 @@ function mergeGitleaksToml(dest: string, src: string): void {
   console.log(`  ${dryTag}WROTE: .gitleaks.toml`);
 }
 
+/**
+ * .gitattributes is shared boilerplate but routinely carries project-specific attribute
+ * lines (GitLFS trackers, custom merge drivers, project-added eol pins — and the
+ * scaffold-time `docs/context.md merge=ours` rule, which the template itself does not
+ * ship) — a plain LOCKED overwrite silently deletes those, and LFS-tracked files then
+ * round-trip as pointer blobs. Same lesson as mergeGitleaksToml (v1.10.0): preserve any
+ * project-only non-comment attribute lines by appending them into the template content
+ * before writing, rather than dropping them.
+ */
+function mergeGitattributes(dest: string, src: string): void {
+  if (!existsSync(dest)) {
+    if (!dryRun) { mkdirSync(dirname(dest), { recursive: true }); copyFileSync(src, dest); }
+    console.log(`  ${dryTag}WROTE: .gitattributes (new)`);
+    return;
+  }
+  const destContent = readFileSync(dest, 'utf8');
+  const srcContent = readFileSync(src, 'utf8');
+  const srcLines = new Set(srcContent.split('\n').map(l => l.trim()).filter(Boolean));
+  const projectOnly = destContent.split('\n')
+    .map(l => l.trim())
+    .filter(l => l && !l.startsWith('#') && !srcLines.has(l));
+  if (projectOnly.length === 0) {
+    diffSummary(dest, src);
+    if (!dryRun) copyFileSync(src, dest);
+    console.log(`  ${dryTag}WROTE: .gitattributes`);
+    return;
+  }
+  const merged = srcContent.trimEnd() + '\n\n' +
+    '# Preserved from this project\'s prior .gitattributes (not in the current template):\n' +
+    projectOnly.join('\n') + '\n';
+  diffSummary(dest, src);
+  if (!dryRun) writeFileSync(dest, merged, 'utf8');
+  console.log(`  ⚠️  Preserved ${projectOnly.length} project-specific attribute line${projectOnly.length === 1 ? '' : 's'} that the template overwrite would have dropped`);
+  console.log(`  ${dryTag}WROTE: .gitattributes`);
+}
+
 // ── LOCKED files ───────────────────────────────────────────────────────────────
 console.log('--- LOCKED files (always overwrite) ---');
 const LOCKED_FILES = [
   '.githooks/pre-commit', '.githooks/pre-push', '.githooks/commit-msg',
   '.githooks/post-checkout', '.githooks/pre-rebase',
-  '.gitattributes',
 ];
 for (const rel of LOCKED_FILES) {
   const src = resolveTemplate(rel);
@@ -1076,6 +1124,20 @@ for (const rel of LOCKED_FILES) {
   } else {
     console.log(`  LOCKED (merge-aware): ${rel}`);
     mergeGitleaksToml(dest, src);
+    lockedChanged++;
+  }
+}
+// .gitattributes: moved out of blind LOCKED overwrite (v1.43.0) — same merge-aware
+// treatment, for the same reason (see mergeGitattributes()).
+{
+  const rel = '.gitattributes';
+  const src = resolveTemplate(rel);
+  const dest = join(projectDir, rel);
+  if (!src) {
+    console.log(`  SKIP (no template): ${rel}`);
+  } else {
+    console.log(`  LOCKED (merge-aware): ${rel}`);
+    mergeGitattributes(dest, src);
     lockedChanged++;
   }
 }
@@ -2395,6 +2457,14 @@ console.log('--- VARIANT-SCOPE SKILL PRUNE ---');
   } else {
     let foreignPruned = 0;
     for (const { skill, owner } of ownedByOther) {
+      // SAFETY (v1.43.0, v1.17.1 symmetry): a skill the project's own variant.json
+      // deliberately registers in skill_manifest.variant_specific is an adopted
+      // asset, not scaffold residue — an adoption run seeds the manifest precisely
+      // so that foreign-domain skills survive this registry-driven prune.
+      if (projectManifestSkills.has(skill)) {
+        console.log(`  ⚠️  KEEP ${skill}/  (owning variant: ${owner})  — declared in the project variant.json skill_manifest`);
+        continue;
+      }
       for (const dir of ['skills', '.claude/skills', '.gemini/skills', '.agents/skills']) {
         const target = join(projectDir, dir, skill);
         if (!existsSync(target)) continue;

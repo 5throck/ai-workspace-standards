@@ -122,6 +122,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `helpers/scaffold-markers.ts` | L0 | 1.4.0 | active | Shared scaffold marker constants + (marker→source) mapping + delivery-tree derivations + transient test-fixture predicate (T-20260916-001); PlatformProfile 'both'→'all' rename | —| L0+L1 | —|
 | `helpers/template-version.ts` | L0 | 1.1.0 | active | templates/VERSION SSOT reader for scaffold provenance — fails loud on missing/unparseable; resolveProvenanceVersion() pins the shared --version-wins resolution order (T-20260915-011, T-20260916-002) | —| L0 | —|
 | `helpers/pm-md-parser.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
+| `helpers/resolve-pm-stub.ts` | L0 | 1.0.0 | active | Shared agents/pm.md normalization — ADR-0033 extends-stub resolution against the L1 body (H12 non-canonical prose flag) + L1-B metadata strip with project-local lifecycle regeneration; extracted verbatim from new-project §2.3b/§2.5, shared with the adopt-project settling pass | —| L0 | —|
 | `helpers/variant-governance-rules.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `helpers/registries/variant-type-registry.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `helpers/registries/capability-registry.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
@@ -180,7 +181,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `lib/error-handling.ts` | L0 | 1.4.0 | active | —| —| L0+L1 | —|
 | `lib/language-guard.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/git-status.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `lib/pipeline-state.ts` | L0 | 1.1.2 | active | —| —| L0+L1 | —|
+| `lib/pipeline-state.ts` | L0 | 1.2.0 | active | v1.2.0: injectable state file (`setStateFile`), string phase names, snapshot-backed undo (`addRollbackActionWithBackup`; modify/delete/move restore from captured content) for in-project adopt state | —| L0+L1 | —|
 | `lib/platform-context.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/propagation-map-schema.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
 | `lib/managed-block-merge.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
@@ -197,7 +198,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `md-to-ooxml.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `migrate-quality-gates.ts` | L0 | 1.1.0 | active | Convert quality_gates prose entries to decision gates; automate classification (GATE vs INVARIANT vs MANUAL), YAML output, procedure schema updates, and _output-types.yaml enrichment (ADR-0083 P5); decider_agent derived from stage owner_agent, not procedure owner_agent | —| L0+L1 | —|
-| `new-project.ts` | L0 | 1.24.0 | active | §7.7 graft build: global `graft` first, bunx fallback (spec 2026-09-20-graft-scaffold-resilience); `--platform both`→`all` rename, now covers claude+antigravity+codex; Provenance fallback is fail-loud via the templates/VERSION SSOT — silent "unknown" removed, --version still wins as-is (v1.20.0); bare names scaffold to `Projects/<name>`, path-like names stay workspace-relative | —| L0 | —|
+| `new-project.ts` | L0 | 1.25.0 | active | §2.3b extends-stub resolution + §2.5 L1-B strip extracted verbatim to `helpers/resolve-pm-stub.ts` (behavior unchanged); §7.7 graft build: global `graft` first, bunx fallback (spec 2026-09-20-graft-scaffold-resilience); `--platform both`→`all` rename, now covers claude+antigravity+codex; Provenance fallback is fail-loud via the templates/VERSION SSOT — silent "unknown" removed, --version still wins as-is (v1.20.0); bare names scaffold to `Projects/<name>`, path-like names stay workspace-relative | —| L0 | —|
 | `remove-project.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `resolve-variants.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
 | `project-to-variant.ts` | L0 | 1.4.1 | active | `--source`, `--target`, `--dry-run`, `--force`, `--overlay-variant`, `--design-doc`, `--threshold-files`, `--threshold-dirs` | —| L0 | —|
@@ -231,7 +232,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `translate-readme.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `ticket.ts` | L0 | 1.2.0 | active | `create --not-before`, `list --kind`, `list --ready`, `move done --result` (required, not bypassable by --force) | —| L0 | —|
 | `typecheck.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
-| `upgrade-project.ts` | L0 | 1.42.0 | active | `--variant`, `--platform` (claude/antigravity/codex/all — `all` renamed from `both`, now merges CODEX.md too), `--dry-run`, `--prune-removed`, `--rollback`, `--yes`, `--skip-context-commonization`, `--force-context-sync`; COMMON-CONTEXT splice under PRESERVE (T-20260919-003); skill sub-file sync — NEW/UPDATE deliver the whole skill dir, equal-version skills get additive CATCH-UP + DRIFT warnings (2026-09-21); W2 HARVEST — variant-only lines inside removed near-duplicate sections reported as backport candidates (2026-09-22) | —| L0+L1 | —|
+| `upgrade-project.ts` | L0 | 1.43.0 | active | v1.43.0 (adopt-project prerequisites): variant-scope skill prune honors variant.json skill_manifest (v1.17.1 symmetry — adopted foreign skills no longer `git rm`-ed); `.gitattributes` merge-aware LOCKED delivery (`mergeGitattributes`, mergeGitleaksToml pattern). Prior: `--variant`, `--platform` (claude/antigravity/codex/all — `all` renamed from `both`, now merges CODEX.md too), `--dry-run`, `--prune-removed`, `--rollback`, `--yes`, `--skip-context-commonization`, `--force-context-sync`; COMMON-CONTEXT splice under PRESERVE (T-20260919-003); skill sub-file sync — NEW/UPDATE deliver the whole skill dir, equal-version skills get additive CATCH-UP + DRIFT warnings (2026-09-21); W2 HARVEST — variant-only lines inside removed near-duplicate sections reported as backport candidates (2026-09-22) | —| L0+L1 | —|
 | `variant-feature.ts` | L0 | 1.0.0 | active | `--variant`, `--feature`, `--type` | —| L0 | —|
 | `validate-agents.ts` | L0 | 1.3.2 | active | —| —| L0+L1 | —|
 | `validate-doc-folder.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
@@ -254,7 +255,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `verify-new-project-tests.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
 | `verify-platform-lifecycle.ts` | L0 | 1.1.3 | active | —| —| L0+L1 | —|
 | `verify-readme-sync.ts` | L0 | 1.4.0 | active | —| —| L0+L1 | —|
-| `verify-scripts.ts` | L0 | 1.7.0 | active | `--fix` auto-registers unregistered scripts (ADR-0081/T-20260919-002) | —| L0+L1 | —|
+| `verify-scripts.ts` | L0 | 1.8.0 | active | v1.8.0: walkScripts skips `scripts/_legacy/` (adopt-project archive of preserved foreign scripts — not registry-governed). Prior: `--fix` auto-registers unregistered scripts (ADR-0081/T-20260919-002) | —| L0+L1 | —|
 | `verify-skills.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
 | `verify-template-integrity.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `validate-pm-extends.ts` | L0 | 0.3.1 | active | —| —| L0+L1 | —|

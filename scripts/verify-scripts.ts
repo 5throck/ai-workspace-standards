@@ -1,8 +1,13 @@
 #!/usr/bin/env bun
 /**
  * verify-scripts.ts — Script Lifecycle Registry Verifier
- * @version 1.7.0
+ * @version 1.8.0
  *
+ * v1.8.0 (2026-09-23, adopt-project engine prerequisites): walkScripts() skips
+ *         scripts/_legacy/ — the archive where adopt-project parks preserved
+ *         foreign scripts. Archived files keep their original languages and carry
+ *         no @version headers by design, so they are exempt from the registry
+ *         scan; they remain visible to gitleaks and the adopt report.
  * v1.7.0 (ADR-0081 / T-20260919-002): new `--fix` mode — auto-registers the
  *         scripts Check 1 flags as unregistered. A row per script (version
  *         from its @version header, today's date, placeholder description) is
@@ -253,6 +258,12 @@ function walkScripts(dir: string): string[] {
       // Dependency installs (scripts/-local bun install on CI runners) are not
       // workspace scripts — their files must not be flagged as unregistered.
       if (entry.name === "node_modules") return [];
+      // Archived foreign scripts parked by adopt-project (v1.2.0 of this checker's
+      // adoption contract) are preserved project content, not registry-governed
+      // workspace scripts — they keep their original languages and carry no
+      // @version headers by design. The archive stays visible to gitleaks and to
+      // the adopt report instead.
+      if (entry.name === "_legacy") return [];
       // A variant directory with its OWN SCRIPTS.md sub-registry governs itself
       // (the main registry doesn't list its files). Without a sub-registry, the
       // variant's scripts belong to the main registry via their `co-*/…` relative

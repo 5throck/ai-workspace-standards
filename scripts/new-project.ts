@@ -1,5 +1,10 @@
 #!/usr/bin/env bun
-// @version 1.24.0
+// @version 1.25.0
+// v1.25.0 (2026-09-23, adopt-project engine prerequisites): §2.3b extends-stub
+//           resolution and §2.5 L1-B metadata strip extracted verbatim to
+//           scripts/helpers/resolve-pm-stub.ts so the adopt-project settling pass can
+//           normalize agents/pm.md without a third copy of the logic. Behavior
+//           unchanged (same H12 non-canonical prose warning, same output bytes).
 // v1.23.0: graft build (§7.7) tries the global `graft` binary before bunx —
 //          a bunx native postinstall failure (tree-sitter-kotlin on Windows)
 //          leaves a partial temp cache that breaks every later bunx call
@@ -82,13 +87,12 @@ import {
   NEW_PROJECT_L1_ONLY_DIRS,
   NEW_PROJECT_CLEANUP_FILES,
   NEW_PROJECT_LEGACY_L0_SKILLS,
-  isCanonicalPmStubBody,
   VERSION_MANIFEST_GENERATOR_RELPATH,
   VERSION_MANIFEST_RELPATH,
   decideManifestGeneration,
 } from './helpers/scaffold-markers.ts';
+import { resolvePmExtendsStub, stripL1BMetadata } from './helpers/resolve-pm-stub.ts';
 import { SCAFFOLD_COMMON_OWNED_FILES } from './lib/upgrade-policy.ts';
-import * as yaml from 'js-yaml';
 
 // ── Argument parsing ───────────────────────────────────────────────────────────
 let projectName = '';
@@ -701,111 +705,27 @@ for (const srcFile of walkFiles(templatesDir)) {
 makeWritable(projectDir);
 
 // ── 2.3b. Resolve variant pm.md extends-stub against the L1 body ──────────────
-// variant_overrides rendering helpers — mirror resolve-variants.ts (resolvePmBody
-// support): resolve-variants.ts executes main() unconditionally on import, so the
-// two tiny transforms are duplicated here instead of imported.
-function stripVariantSectionMarkers(value: unknown): string {
-  if (value === undefined || value === null) return '';
-  const text = typeof value === 'string' ? value : JSON.stringify(value, null, 2);
-  return text
-    .replace(/^\s*<!--\s*VARIANT-SECTION:\s*[\w-]+\s*-->\s*/gm, '')
-    .replace(/^\s*<!--\s*END VARIANT-SECTION\s*-->\s*/gm, '')
-    .trim();
-}
-
-function removeMarkdownSection(content: string, heading: string): string {
-  const escaped = heading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const level = heading.match(/^#+/)?.[0].length ?? 2;
-  const nextSameOrHigher = `\\n#{1,${level}}\\s+`;
-  return content.replace(new RegExp(`(^|\\n)${escaped}[\\s\\S]*?(?=${nextSameOrHigher}|$)`, 'm'), '\n');
-}
-
-// Variant templates may ship agents/pm.md as an ADR-0033 extends-stub (frontmatter
-// with `extends:` and an empty or prose-only body). The overlay above replaces the
-// full L1 pm.md copied from templates/common, which would leave the project with a
-// near-empty PM agent. If the overlaid file is an extends-stub — detected by
-// `extends:` in the frontmatter REGARDLESS of body emptiness (T-20260912-004: five
-// variants ship prose one-liner stubs that previously skipped resolution and
-// scaffolded a body-less PM agent) — re-attach the L1 body so the project's pm.md
-// is self-contained.
+// Logic extracted verbatim to scripts/helpers/resolve-pm-stub.ts (v1.25.0, adopt-project
+// engine prerequisites) so the adopt-project settling pass can normalize pm.md without a
+// third copy. Behavior unchanged, including the H12 non-canonical prose warning.
 const projPmMd = join(projectDir, 'agents', 'pm.md');
 if (existsSync(projPmMd)) {
-  const pmContent = readFileSync(projPmMd, 'utf8');
-  const pmFmMatch = pmContent.match(/^---\n([\s\S]*?)\n---\n?/);
-  const pmBody = pmFmMatch ? pmContent.slice(pmFmMatch[0].length) : pmContent;
-  if (pmFmMatch && /extends:/.test(pmFmMatch[1])) {
-    const isProseStub = pmBody.trim() !== '';
-    // H6 (2026-09-15 project review): resolve the L1 body from commonDir — the
-    // tag's extracted copy when --version <tag> is used — not the working tree;
-    // mixing tag content with HEAD content broke the provenance recorded in
-    // template-version.txt.
-    const l1PmMd = join(commonDir, 'agents', 'pm.md');
-    if (existsSync(l1PmMd)) {
-      const l1Content = readFileSync(l1PmMd, 'utf8');
-      const l1FmMatch = l1Content.match(/^---\n([\s\S]*?)\n---\n?/);
-      const l1Body = l1FmMatch ? l1Content.slice(l1FmMatch[0].length) : l1Content;
-      // Merge: stub frontmatter wins, missing L1 fields (tier/model/color/description/examples)
-      // are filled in; `extends:` is dropped — the body is inlined, so the pointer would
-      // dangle in the standalone project repo (found by the 2026-09-08 review, Slot A F2).
-    // Note: no `schema` option — js-yaml v5 dropped its DEFAULT_SCHEMA export, and
-    // omitting `schema` already selects the default schema (the previous
-    // `{ schema: yaml.DEFAULT_SCHEMA }` was passing `undefined` at runtime).
-    const stubFm: Record<string, unknown> = (yaml.load(pmFmMatch[1]) as Record<string, unknown>) || {};
-    const l1Fm: Record<string, unknown> = l1FmMatch ? ((yaml.load(l1FmMatch[1]) as Record<string, unknown>) || {}) : {};
-      delete (stubFm as { extends?: unknown }).extends;
-      for (const [k, v] of Object.entries(l1Fm)) {
-        if (stubFm[k] === undefined && k !== 'extends') stubFm[k] = v;
-      }
-      // ADR-0039/ADR-0034: `variant_overrides` (and `remove_sections`) are scaffold-time
-      // override data — render them into real markdown sections appended to the L1 body
-      // (same contract as resolve-variants.ts resolvePmBody), then strip the raw YAML
-      // keys so the scaffolded frontmatter carries neither `extends:` nor
-      // `variant_overrides:`. Empty-body stubs carry neither key today, so their output
-      // is byte-identical to the previous implementation.
-      const overrides = (stubFm.variant_overrides ?? {}) as Record<string, unknown>;
-      const removeSections = Array.isArray(stubFm.remove_sections) ? stubFm.remove_sections as string[] : [];
-      delete (stubFm as { variant_overrides?: unknown }).variant_overrides;
-      delete (stubFm as { remove_sections?: unknown }).remove_sections;
-      let resolvedBody = l1Body;
-      for (const section of removeSections) {
-        resolvedBody = removeMarkdownSection(resolvedBody, section);
-      }
-      const injectedSections = [
-        stripVariantSectionMarkers(overrides['updated_role']),
-        stripVariantSectionMarkers(overrides['governance_workflow']),
-        stripVariantSectionMarkers(overrides['agent_roster']),
-        stripVariantSectionMarkers(overrides['dispatch_protocol']),
-      ].filter(Boolean);
-      if (injectedSections.length > 0) {
-        resolvedBody = `${resolvedBody.trimEnd()}\n\n${injectedSections.join('\n\n')}\n`;
-      }
-      const mergedFm = '---\n' + (yaml.dump(stubFm) as string).trimEnd() + '\n---\n';
-      if (isProseStub) {
-        // Prose stub: the one-liner body ("This co-X PM override inherits the common PM
-        // body…") is stub metadata, not project content — drop it. The project gets the
-        // full L1 body plus any rendered variant_overrides sections.
-        // H12 (T-20260915-010): a NON-canonical prose body is real variant content
-        // about to be discarded — warn loud, naming the variant and file, before
-        // continuing (behavior unchanged; visibility added).
-        if (!isCanonicalPmStubBody(pmBody, variant)) {
-          console.warn(
-            `  ⚠️  agents/pm.md: variant '${variant}' ships a NON-canonical extends-stub body ` +
-              `(${pmBody.trim().length} chars) in templates/${variant}/agents/pm.md — it is not the ` +
-              `canonical stub prose and will be DISCARDED when the templates/common body is attached. ` +
-              `If this body holds real variant content, inline it and remove \`extends:\`; ` +
-              `otherwise restore the canonical stub.`
-          );
-        }
-        writeFileSync(projPmMd, mergedFm + '\n' + resolvedBody, 'utf8');
-        console.log('  ✅ agents/pm.md: resolved prose extends-stub against templates/common body');
-      } else {
-        // Empty stub — output shape unchanged from the previous implementation.
-        writeFileSync(projPmMd, mergedFm + pmBody + (pmBody.endsWith('\n') ? '' : '\n') + resolvedBody, 'utf8');
-        console.log('  ✅ agents/pm.md: resolved empty extends-stub against templates/common body');
-      }
-    } else {
-      console.log('  ⚠️  agents/pm.md: extends-stub but templates/common/agents/pm.md is missing — project ships a stub PM agent');
-    }
+  const stubResult = resolvePmExtendsStub(projPmMd, join(commonDir, 'agents', 'pm.md'), variant);
+  if (stubResult.resolved && stubResult.nonCanonical) {
+    console.warn(
+      `  ⚠️  agents/pm.md: variant '${variant}' ships a NON-canonical extends-stub body ` +
+        `(${stubResult.proseBodyLength} chars) in templates/${variant}/agents/pm.md — it is not the ` +
+        `canonical stub prose and will be DISCARDED when the templates/common body is attached. ` +
+        `If this body holds real variant content, inline it and remove \`extends:\`; ` +
+        `otherwise restore the canonical stub.`
+    );
+  }
+  if (stubResult.resolved && stubResult.shape === 'prose') {
+    console.log('  ✅ agents/pm.md: resolved prose extends-stub against templates/common body');
+  } else if (stubResult.resolved) {
+    console.log('  ✅ agents/pm.md: resolved empty extends-stub against templates/common body');
+  } else if (stubResult.missingL1) {
+    console.log('  ⚠️  agents/pm.md: extends-stub but templates/common/agents/pm.md is missing — project ships a stub PM agent');
   }
 }
 
@@ -909,33 +829,12 @@ if (variant === 'co-consult') {
 }
 
 // ── 2.5. Strip L1-B metadata from agents/pm.md ────────────────────────────────
+// Logic extracted verbatim to scripts/helpers/resolve-pm-stub.ts (v1.25.0) — shared
+// with the adopt-project settling pass. Behavior unchanged.
 const projectDate = new Date().toISOString().slice(0, 10);
 const pmMd = join(projectDir, 'agents', 'pm.md');
 if (existsSync(pmMd)) {
-  let content = readFileSync(pmMd, 'utf8');
-  content = content.replace(/^# @resolved-from:.*\n/m, '');
-  const match = content.match(/^---\n([\s\S]*?)\n---\n?/);
-  if (match) {
-    const fm: Record<string, unknown> = (yaml.load(match[1]) as Record<string, unknown>) || {};
-    // lifecycle is REGENERATED, not deleted. The resolved pm.md inherits L0's block verbatim —
-    // including created/last_updated dates describing the workspace's own history, which are
-    // meaningless in a freshly scaffolded project. But deleting it outright left the project
-    // failing its own post-scaffold audit: scripts/validate-agents.ts requires lifecycle.phase +
-    // lifecycle.governance in every agents/*.md, so pm.md was a guaranteed error in every project
-    // scaffolded from every variant. Rewrite with project-local dates instead.
-    const inherited = (fm.lifecycle ?? {}) as Record<string, unknown>;
-    fm.lifecycle = {
-      phase: inherited.phase ?? 'production',
-      created: projectDate,
-      last_updated: projectDate,
-      governance: 'docs/lifecycle/agents/pm.md',
-    };
-    delete fm.formal_name;
-    delete fm.variant;
-    const newFm = '---\n' + (yaml.dump(fm) as string).trimEnd() + '\n---\n';
-    content = newFm + content.slice(match[0].length);
-  }
-  writeFileSync(pmMd, content, 'utf8');
+  stripL1BMetadata(pmMd, projectDate);
   console.log('  ✅ agents/pm.md: stripped L1-B metadata (@resolved-from, formal_name, variant); regenerated lifecycle with project-local dates');
 }
 

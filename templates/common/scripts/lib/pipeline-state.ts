@@ -4,12 +4,22 @@
  * Rollback capability and intermediate state persistence.
  * Addresses Risk #5: Rollback Capability.
  *
+ * @version 1.2.0
+ * v1.2.0 (2026-09-23, adopt-project engine prerequisites): generalization required by
+ *          in-place adopt flows that must persist state INSIDE the target project
+ *          (.claude/adopt-project-state.json), not the workspace cwd. (1) Injectable
+ *          state file via setStateFile()/resetStateFile() — default .pipeline-state/
+ *          behavior unchanged for existing callers. (2) RollbackAction phase widened
+ *          from the ErrorPhase enum to string so pipelines can name their own phases.
+ *          (3) Snapshot-backed undo: addRollbackActionWithBackup() captures file
+ *          content BEFORE the destructive write, and modify_file/delete_file/move_file
+ *          rollback actions now restore from that snapshot instead of warning.
  * @version 1.1.2
  * @Risk #5: Rollback Capability (P1 - High)
  */
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync, rmSync } from 'fs';
-import { join } from 'path';
+import { join, dirname } from 'path';
 import { ErrorPhase } from './error-handling';
 
 // ============================================================================
@@ -18,17 +28,22 @@ import { ErrorPhase } from './error-handling';
 
 export type PipelineStatus = 'in_progress' | 'completed' | 'failed' | 'rolled_back';
 
+/** Phase names are pipeline-specific since v1.2.0 — ErrorPhase values still accepted. */
+export type PipelinePhase = ErrorPhase | string;
+
 export interface RollbackAction {
-  phase: ErrorPhase;
+  phase: PipelinePhase;
   action: string;
   target: string;
   executed: boolean;
   timestamp: string;
+  /** v1.2.0: file content captured BEFORE the destructive write — enables true undo. */
+  backup?: { encoding: 'utf8'; content: string };
 }
 
 export interface PipelineState {
   status: PipelineStatus;
-  currentPhase: ErrorPhase;
+  currentPhase: PipelinePhase;
   startedAt: string;
   completedAt?: string;
   variantName: string;
@@ -44,14 +59,36 @@ export interface PipelineState {
 const STATE_DIR = join(process.cwd(), '.pipeline-state');
 const STATE_FILE = join(STATE_DIR, 'current-state.json');
 
+let stateFileOverride: string | null = null;
+
+/**
+ * Redirect all state operations to a specific file (v1.2.0). Pipelines that operate
+ * inside a target project call this once at startup, e.g.
+ * `setStateFile(join(projectDir, '.claude', 'adopt-project-state.json'))` — the
+ * default `process.cwd()/.pipeline-state/current-state.json` would otherwise scatter
+ * state into whatever directory the script was launched from.
+ */
+export function setStateFile(path: string): void {
+  stateFileOverride = path;
+}
+
+/** Restore the default state file location (v1.2.0). */
+export function resetStateFile(): void {
+  stateFileOverride = null;
+}
+
+function resolveStateFile(): string {
+  return stateFileOverride ?? STATE_FILE;
+}
+
 /**
  * Initialize pipeline state
  * @version 1.1.0
  */
-export function initializeState(variantName: string, l3ProjectPath?: string): PipelineState {
+export function initializeState(variantName: string, l3ProjectPath?: string, currentPhase: PipelinePhase = 'adr_validation'): PipelineState {
   const state: PipelineState = {
     status: 'in_progress',
-    currentPhase: 'adr_validation' as ErrorPhase,
+    currentPhase,
     startedAt: new Date().toISOString(),
     variantName,
     l3ProjectPath,
@@ -68,12 +105,13 @@ export function initializeState(variantName: string, l3ProjectPath?: string): Pi
  * @version 1.1.0
  */
 export function saveState(state: PipelineState): void {
+  const stateFile = resolveStateFile();
   // Ensure state directory exists
-  if (!existsSync(STATE_DIR)) {
-    mkdirSync(STATE_DIR, { recursive: true });
+  if (!existsSync(dirname(stateFile))) {
+    mkdirSync(dirname(stateFile), { recursive: true });
   }
 
-  writeFileSync(STATE_FILE, JSON.stringify(state, null, 2), 'utf-8');
+  writeFileSync(stateFile, JSON.stringify(state, null, 2), 'utf-8');
 }
 
 /**
@@ -81,12 +119,13 @@ export function saveState(state: PipelineState): void {
  * @version 1.1.0
  */
 export function loadState(): PipelineState | null {
-  if (!existsSync(STATE_FILE)) {
+  const stateFile = resolveStateFile();
+  if (!existsSync(stateFile)) {
     return null;
   }
 
   try {
-    const content = readFileSync(STATE_FILE, 'utf-8');
+    const content = readFileSync(stateFile, 'utf-8');
     return JSON.parse(content) as PipelineState;
   } catch {
     return null;
@@ -97,7 +136,7 @@ export function loadState(): PipelineState | null {
  * Update current phase
  * @version 1.1.0
  */
-export function updatePhase(phase: ErrorPhase): void {
+export function updatePhase(phase: PipelinePhase): void {
   const state = loadState();
   if (!state) {
     throw new Error('No active pipeline state found');
@@ -112,7 +151,7 @@ export function updatePhase(phase: ErrorPhase): void {
  * @version 1.1.0
  */
 export function addRollbackAction(
-  phase: ErrorPhase,
+  phase: PipelinePhase,
   action: string,
   target: string
 ): void {
@@ -127,6 +166,37 @@ export function addRollbackAction(
     target,
     executed: false,
     timestamp: new Date().toISOString(),
+  });
+
+  saveState(state);
+}
+
+/**
+ * Add a rollback action carrying a pre-destruction content snapshot (v1.2.0).
+ * Call this BEFORE overwriting/moving/deleting `target` so the undo pass can
+ * restore the exact prior content instead of warning "cannot restore".
+ */
+export function addRollbackActionWithBackup(
+  phase: PipelinePhase,
+  action: string,
+  target: string
+): void {
+  const state = loadState();
+  if (!state) {
+    throw new Error('No active pipeline state found');
+  }
+
+  const backup = existsSync(target)
+    ? { encoding: 'utf8' as const, content: readFileSync(target, 'utf8') }
+    : undefined;
+
+  state.rollbackActions.push({
+    phase,
+    action,
+    target,
+    executed: false,
+    timestamp: new Date().toISOString(),
+    ...(backup ? { backup } : {}),
   });
 
   saveState(state);
@@ -274,13 +344,25 @@ async function executeRollbackAction(action: RollbackAction): Promise<void> {
       break;
 
     case 'modify_file':
-      // Restore from backup (would need backup mechanism)
-      console.warn(`⚠️  Cannot restore file without backup: ${target}`);
+    case 'delete_file':
+    case 'move_file':
+      // v1.2.0: restore the pre-destruction snapshot when one was recorded.
+      if (action.backup?.encoding === 'utf8') {
+        mkdirSync(dirname(target), { recursive: true });
+        writeFileSync(target, action.backup.content, 'utf8');
+      } else {
+        console.warn(`⚠️  Cannot restore file without backup: ${target}`);
+      }
       break;
 
     case 'update_registry':
       // Restore registry from backup
-      console.warn(`⚠️  Cannot restore registry without backup: ${target}`);
+      if (action.backup?.encoding === 'utf8') {
+        mkdirSync(dirname(target), { recursive: true });
+        writeFileSync(target, action.backup.content, 'utf8');
+      } else {
+        console.warn(`⚠️  Cannot restore registry without backup: ${target}`);
+      }
       break;
 
     default:
@@ -297,7 +379,7 @@ async function executeRollbackAction(action: RollbackAction): Promise<void> {
  * @version 1.1.0
  */
 export async function clearState(): Promise<void> {
-  rmSync(STATE_FILE, { force: true });
+  rmSync(resolveStateFile(), { force: true });
 }
 
 /**
