@@ -730,6 +730,11 @@
       "layer": "variant:co-price"
     },
     {
+      "id": "ensure-github-repo",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
       "id": "environmental-compliance-checker",
       "type": "skill",
       "layer": "variant:co-safety"
@@ -4750,12 +4755,29 @@
     {
       "type": "follows",
       "from": "adopt-project",
+      "to": "ensure-github-repo",
+      "source": "relates_to",
+      "provenance": {
+        "file": "skills/adopt-project/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "references",
+      "from": "adopt-project",
+      "to": "ensure-github-repo",
+      "source": "prose"
+    },
+    {
+      "type": "follows",
+      "from": "adopt-project",
       "to": "project-to-variant",
       "source": "relates_to",
       "provenance": {
         "file": "skills/adopt-project/SKILL.md",
         "field": "relates_to",
-        "index": 1
+        "index": 2
       }
     },
     {
@@ -4773,7 +4795,7 @@
       "provenance": {
         "file": "skills/adopt-project/SKILL.md",
         "field": "relates_to",
-        "index": 0
+        "index": 1
       }
     },
     {
@@ -7310,6 +7332,34 @@
       "from": "engagement-director",
       "to": "procedure.co-price.pricing-security-closeout",
       "source": "raci_matrix"
+    },
+    {
+      "type": "enables",
+      "from": "ensure-github-repo",
+      "to": "adopt-project",
+      "source": "relates_to",
+      "provenance": {
+        "file": "skills/ensure-github-repo/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "references",
+      "from": "ensure-github-repo",
+      "to": "adopt-project",
+      "source": "prose"
+    },
+    {
+      "type": "follows",
+      "from": "ensure-github-repo",
+      "to": "upgrade-project",
+      "source": "relates_to",
+      "provenance": {
+        "file": "skills/ensure-github-repo/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
     },
     {
       "type": "references",

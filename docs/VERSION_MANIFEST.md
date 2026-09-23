@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-09-23T00:43:16.065Z
+**Generated**: 2026-09-23T01:00:01.742Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -9,8 +9,8 @@
 ## Summary
 
 - **Agents**: 9
-- **Skills**: 53
-- **Scripts**: 105 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` plus experiment files under `scripts/experiments/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
+- **Skills**: 54
+- **Scripts**: 106 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` plus experiment files under `scripts/experiments/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
 - **Commands**: 8
 
 ---
@@ -37,7 +37,7 @@
 | Name | Version | Status | Location | Platform | Triggers | Owner |
 |------|---------|--------|----------|----------|----------|-------|
 | accessibility-audit | 1.1.0 | active | skills/accessibility-audit/SKILL.md | workspace | accessibility-audit, /accessibility-audit, axe-core audit, wcag accessibility check, wcag 2.1 aa | pm |
-| adopt-project | 1.0.0 | active | skills/adopt-project/SKILL.md | workspace | adopt external project, adopt project to standard, convert external project to workspace standard, onboard existing project | scaffolding-expert |
+| adopt-project | 1.1.0 | active | skills/adopt-project/SKILL.md | workspace | adopt external project, adopt project to standard, convert external project to workspace standard, onboard existing project | scaffolding-expert |
 | agent-lifecycle-manager | 1.3.0 | active | skills/agent-lifecycle-manager/SKILL.md | workspace | create agent, new agent, validate agents, agent lifecycle, manage agents, hire agent, fire agent, deprecate agent | pm |
 | api-documentation | 1.0.2 | active | skills/api-documentation/SKILL.md | workspace | api documentation, document api, api reference, developer documentation, rest api docs, graphql docs, sdk documentation | pm |
 | ci-triage | 0.1.1 | active | skills/ci-triage/SKILL.md | workspace | ci failure, triage failure, audit gate failed, scaffold failed, fix the pipeline | pm |
@@ -46,6 +46,7 @@
 | decision-record | 1.1.0 | active | templates/common/skills/decision-record/SKILL.md | common | decision record, gate ruling, go/no-go decision, escalation decision, record a decision | pm |
 | design-foundation | 1.0.0 | active | skills/design-foundation/SKILL.md | workspace | design foundation, design principles, design guide, design tokens setup, design decision record | architect |
 | documentation-writing | 1.0.3 | active | skills/documentation-writing/SKILL.md | workspace | write documentation, create guide, draft communication, write manual, create tutorial, documentation, technical writing | pm |
+| ensure-github-repo | 1.0.0 | active | skills/ensure-github-repo/SKILL.md | workspace | check github repo before migration, create github repo for project, prepare github baseline, ensure github repo | scaffolding-expert |
 | evidence-ledger | 1.1.0 | active | templates/common/skills/evidence-ledger/SKILL.md | common | evidence ledger, citation ledger, claim verification, source verification, evidence tracking | pm |
 | explain-me | 1.0.0 | experimental | skills/explain-me/SKILL.md | workspace | /explain-me, /reportme, make a report, create report, explain this topic | pm |
 | finishing-a-development-branch | 1.0.1 | active | skills/finishing-a-development-branch/SKILL.md | workspace | finish branch, complete work, wrap up, finishing a development branch, merge branch, create PR, push and PR | pm |
@@ -98,7 +99,7 @@
 
 | Name | Version | Location | Dependencies |
 |------|---------|----------|--------------|
-| adopt-project.ts | 1.0.0 | scripts/adopt-project.ts | N/A |
+| adopt-project.ts | 1.1.0 | scripts/adopt-project.ts | N/A |
 | agent-create.ts | 1.0.1 | scripts/agent-create.ts | N/A |
 | agent-delete.ts | 1.0.1 | scripts/agent-delete.ts | N/A |
 | agent-lifecycle-audit.ts | 1.3.1 | scripts/agent-lifecycle-audit.ts | N/A |
@@ -119,6 +120,7 @@
 | dispatch-parallel.ts | 1.1.1 | scripts/dispatch-parallel.ts | N/A |
 | dispatch-serial.ts | 1.1.1 | scripts/dispatch-serial.ts | N/A |
 | dispatch.ts | 1.1.1 | scripts/dispatch.ts | N/A |
+| ensure-github-repo.ts | 1.0.0 | scripts/ensure-github-repo.ts | N/A |
 | evidence-backport-scan.ts | 1.0.0 | scripts/evidence-backport-scan.ts | N/A |
 | fix-script-versions.ts | 1.1.1 | scripts/fix-script-versions.ts | fs, path |
 | gen-pr-body.ts | 1.2.0 | scripts/gen-pr-body.ts | bun |
@@ -226,7 +228,7 @@
 **Checked**: Claude (.claude/) vs Gemini (.gemini/)
 
 - **Commands with parity**: 8 / 8
-- **Skills with parity**: 0 / 39 (common-template skills are parity-exempt)
+- **Skills with parity**: 0 / 40 (common-template skills are parity-exempt)
 
 ---
 

@@ -1,5 +1,9 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.1.0
+// v1.1.0 (2026-09-23, pre-adoption GitHub repo readiness — spec
+//          2026-09-23-pre-adoption-github-repo-design): pre-flight warns when the project
+//          has no GitHub remote and points at scripts/ensure-github-repo.ts (check →
+//          create → push → verify) so the history is safe off-machine before migration.
 // v1.0.0 (2026-09-23, adopt-project conversion — spec 2026-09-23-adopt-project-conversion):
 //          In-place conversion of an existing external project into a workspace-standard
 //          project (as if delivered by new-project.ts), preserving project content and
@@ -138,6 +142,13 @@ const porcelain = git(projectDir, 'status', '--porcelain').out;
 if (porcelain && !resuming) {
   fail('Working tree is not clean. Commit or stash everything first — adoption needs a clean baseline for its rollback story.\n'
     + `  ${YELLOW}git -C ${projectDir} status --porcelain${RESET}`);
+}
+
+// GitHub baseline advisory (v1.1.0): adoption preserves history locally, but an
+// off-machine copy should exist BEFORE migrating. Non-fatal — the operator decides.
+if (!git(projectDir, 'remote', '-v').out.includes('github.com')) {
+  console.log(`${YELLOW}⚠️  No GitHub remote configured — migrate only after the history is safe off-machine.${RESET}`);
+  console.log(`       Run first:  bun scripts/ensure-github-repo.ts ${projectDir}   (checks, creates, pushes, verifies)`);
 }
 
 const headSha = git(projectDir, 'rev-parse', 'HEAD');
