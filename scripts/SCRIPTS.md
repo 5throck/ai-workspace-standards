@@ -103,7 +103,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `ensure-github-repo.ts` | L0 | 1.0.0 | active | Pre-adoption GitHub baseline — checks/creates/pushes/verifies: readiness (git+commits+clean+gh auth), github remote detection, `gh repo create` (private default, `--org`/`--public`/`--dry-run`) + push, then mandatory verification (`gh repo view` + `git ls-remote` HEAD-sha match); exit 0 = verified baseline. Spec: docs/designs/2026-09-23-pre-adoption-github-repo-design.md | —| L0 | —|
 | `graph-delta-log.ts` | L0 | 1.0.0 | active | Graph Delta Log — compute and persist per-scope structural diffs between committed and derived skill graphs (ADR-0084 §5); two-layer delivery (workspace root + projects); consumed by evidence-backport-scan.ts maturity bar (M2, M4, M6b tests) | —| L0+L1 | —|
 | `helpers/beta-lifecycle.ts` | L0 | 1.2.1 | active | —| —| L0 | —|
-| `helpers/generate-variant.ts` | L0 | 1.16.0 | active | —| —| L0+L1 | —|
+| `helpers/generate-variant.ts` | L0 | 1.17.0 | active | —| —| L0+L1 | —|
 | `helpers/agent-promote.ts` | L0 | 1.0.1 | active | `--json`, `--help` — ADR-0043 promotion-candidate ANALYSIS (read-only): ≥3-variant agent names, pairwise Role+Responsibilities Jaccard, ≥80% groups reported | —| L0 | —|
 | `experiments/infer-graph-from-phases.ts` | L0 | 0.1.0 | experimental | —| —| L0 | —|
 | `helpers/agent-similarity-analyzer.ts` | L0 | 1.1.1 | active | —| —| L0 | —|

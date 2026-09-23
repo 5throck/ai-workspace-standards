@@ -18,11 +18,25 @@ title: >-
   four platform mirrors; then fix the copy path (whole-dir cpSync or
   drop the .md filter)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-23T11:33:59.000Z'
 history:
   - at: '2026-09-23T11:33:59.000Z'
     from: null
     to: backlog
+  - at: '2026-09-23T12:05:57.000Z'
+    from: backlog
+    to: done
+result: >-
+  Fixed in helpers/generate-variant.ts 1.17.0 (spec
+  2026-09-23-promotion-skill-asset-parity-design): generateSkillDirectories
+  union-and-normalize model — the .md grouping filter is gone (non-Markdown
+  skill assets materialize), subpaths are preserved (mirror references files
+  can no longer collapse into SKILL.md — the last-writer-wins corruption class),
+  and top-level skills/<name>/ plus all four platform mirrors converge to the
+  whole dir with partial-mirror backfill. Regression tests in
+  tests/unit/generate-variant-pipeline-fixes.test.ts (multi-file skill 5-root
+  parity + mirror-sub-file corruption): 9/9 file total, full suite 905/905.
 error: null
+
