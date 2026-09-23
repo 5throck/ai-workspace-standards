@@ -74,7 +74,7 @@
 | `fta-origin-determination` | variant:co-export | fta-origin-analyst, fta-origin-analyst | phase1, phase2 | halal-certification-workflow (follows), logistics-coordination (composes_with), market-entry-strategy (composes_with), trade-documentation-checklist (follows) | — | — |
 | `gabor-granger` | variant:co-price | — | — | price-waterfall-analysis (follows), pricing-playbook (enables), van-westendorp-psm (composes_with) | survey-responses-gg | demand-curve, optimal-price, elasticity-reading |
 | `gas-dispersion-analyzer` | variant:co-safety | — | — | — | — | — |
-| `gateguard` | L0 | — | — | — | — | — |
+| `gateguard` | L0 | — | — | sync | — | — |
 | `ghs-classifier` | variant:co-safety | — | — | — | — | — |
 | `glp-data-integrity-checker` | variant:co-safety | — | — | — | — | — |
 | `glp-study-protocol-validator` | variant:co-safety | — | — | — | — | — |
@@ -145,7 +145,7 @@
 | `pyrophoric-gas-emergency-responder` | variant:co-safety | — | — | — | — | — |
 | `rack-fall-protection-planner` | variant:co-safety | — | — | — | — | — |
 | `refactoring` | variant:co-develop | code-writer, game-debugger, game-developer | phase3, phase4, phase5 | code-review (composes_with) | — | — |
-| `release-template` | L0 | — | — | — | — | — |
+| `release-template` | L0 | — | — | promote-variant | — | — |
 | `research-analysis` | L0 | analyst | — | documentation-writing (enables) | — | — |
 | `risk-assessment` | variant:co-safety | safety-workflow-manager | — | audit-preparation (follows) | — | — |
 | `rolling-stock-maintenance-loto-planner` | variant:co-safety | — | — | — | — | — |
@@ -194,7 +194,7 @@
 | `test-driven-development` | variant:co-develop | game-debugger, game-developer, test-runner, test-runner | phase3, phase4, phase5 | code-review (follows) | — | — |
 | `theme-authoring` | variant:co-deck | pm | — | — | — | — |
 | `thermal-burn-prevention-planner` | variant:co-safety | — | — | — | — | — |
-| `ticket-run` | L0 | — | — | — | — | — |
+| `ticket-run` | L0 | — | — | sync | — | — |
 | `token-usage-lint` | L0 | prototype-engineer, prototype-engineer | phase4 | ui-ux-design-intelligence (follows) | — | — |
 | `tool-box-meeting` | variant:co-safety | — | — | — | — | — |
 | `trade-documentation-checklist` | variant:co-export | trade-documentation-specialist, trade-documentation-specialist | phase3 | logistics-coordination (follows) | — | — |
@@ -207,7 +207,7 @@
 | `van-westendorp-psm` | variant:co-price | — | — | gabor-granger (follows), pricing-playbook (enables) | survey-responses-vw | price-corridor, opp-price-point |
 | `variant-feature` | L0 | — | — | upgrade-project (composes_with) | — | — |
 | `verify-authorization` | variant:co-security | pentester, red-team-lead | phase1, phase3 | stride-threat-matrix (follows) | — | — |
-| `zod-contract-gate` | L0 | — | — | — | — | — |
+| `zod-contract-gate` | L0 | — | — | security-scan | — | — |
 
 ## Lifecycle Phase Grouping
 
@@ -231,7 +231,7 @@ Skills used in specific lifecycle phases (from `variant.json` `skill_manifest`):
 | `phase` | Skill used in a lifecycle phase (from `variant.json` `skill_manifest.phases`) |
 | `supersedes` | Supersession — overrides (manual) or decision-record prose labels |
 | `references` | Backtick reference in SKILL.md/agent/ADR body prose, DEC `knowledge_refs[]` naming an ADR, or skill → `term:` node from references/terms-ko.json (ADR-0072) |
-| `cites_skill` | Decision record `skills_used[]` validated against the skill set (ADR-0061 amendment 2026-08-25) |
+| `cites_skill` | Decision record `skills_used[]` and workflow-doc citations (`doc:` nodes, Source 4.8, ticket T-20260923-001) validated against the skill set |
 | `composes_with` | Typed `relates_to` entry — symmetric, used together in the same phase/workflow (ADR-0060 Amendment 3) |
 | `follows` | Typed `relates_to` entry — sequential/ordering relation, no dependency implication (ADR-0060 Amendment 3) |
 | `enables` | Typed `relates_to` entry — this skill's output unlocks another skill/workflow (ADR-0060 Amendment 3) |
@@ -323,6 +323,26 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `dec:DEC-20260825-02` | decision | `sync` | — | — |
 | `dec:DEC-20260829-01` | decision | `decision-record` | — | — |
 | `dec:DEC-20260829-02` | decision | `decision-record` | — | — |
+| `doc:AGENTS.md` | doc | `agent-lifecycle-manager`, `create-variant`, `decision-record`, `evidence-ledger`, `explain-me`, `handbook`, `handbook-sync-audit`, `i18n-audit`, `i18n-formatting`, `i18n-layout`, `i18n-locale-config`, `meeting-facilitation`, `project-review`, `promote-variant`, `security-scan`, `simulate-pipeline`, `skill-graph-analytics`, `skill-lifecycle-manager`, `source-command-commit-push-pr`, `sync` | — | — |
+| `doc:co-abap/AGENTS.md` | doc | `abap-code-review`, `abap-dev`, `agent-lifecycle-manager`, `desktop-app-fallback`, `dump-monitor`, `performance-tuning`, `post-write-chain`, `sap-co`, `sap-fi`, `sap-le`, `sap-mm`, `sap-pp`, `sap-sd`, `skill-lifecycle-manager`, `source-command-celebrate` | — | — |
+| `doc:co-consult/AGENTS.md` | doc | `agent-lifecycle-manager`, `finishing-a-development-branch`, `hwp-document-processing`, `k-dart`, `k-law`, `platform-command-lifecycle-manager`, `sample-driven-report-writing`, `skill-lifecycle-manager` | — | — |
+| `doc:co-consult/docs/phase-definitions.md` | doc | `consulting-report-writing`, `executive-presentation`, `financial-modeling`, `insight-synthesis`, `narrative-framework`, `project-review`, `solution-design` | — | — |
+| `doc:co-deck/AGENTS.md` | doc | `agent-lifecycle-manager`, `design`, `handbook`, `html-build`, `pdf-export`, `prep-pdf`, `research`, `skill-lifecycle-manager`, `storyline`, `theme-authoring`, `version` | — | — |
+| `doc:co-design/AGENTS.md` | doc | `agent-lifecycle-manager`, `skill-lifecycle-manager` | — | — |
+| `doc:co-design/docs/phase-definitions.md` | doc | `project-review` | — | — |
+| `doc:co-develop/AGENTS.md` | doc | `agent-lifecycle-manager`, `skill-lifecycle-manager` | — | — |
+| `doc:co-develop/docs/phase-definitions.md` | doc | `project-review` | — | — |
+| `doc:co-export/AGENTS.md` | doc | `agent-lifecycle-manager`, `create-variant`, `meeting-facilitation`, `project-review`, `promote-variant`, `security-scan`, `skill-lifecycle-manager`, `source-command-commit-push-pr`, `sync` | — | — |
+| `doc:co-export/docs/phase-definitions.md` | doc | `customs-duty-drawback-workflow`, `project-review` | — | — |
+| `doc:co-game/AGENTS.md` | doc | `agent-lifecycle-manager`, `skill-lifecycle-manager` | — | — |
+| `doc:co-hr/AGENTS.md` | doc | `agent-lifecycle-manager`, `create-variant`, `meeting-facilitation`, `project-review`, `promote-variant`, `security-scan`, `skill-lifecycle-manager`, `source-command-commit-push-pr`, `sync` | — | — |
+| `doc:co-news/AGENTS.md` | doc | `agent-lifecycle-manager`, `create-variant`, `meeting-facilitation`, `project-review`, `promote-variant`, `security-scan`, `skill-lifecycle-manager`, `source-command-commit-push-pr`, `sync` | — | — |
+| `doc:co-price/AGENTS.md` | doc | `agent-lifecycle-manager`, `harness-verification`, `i18n-audit`, `map-channel-enforcement`, `price-waterfall-analysis`, `pricing-governance`, `skill-lifecycle-manager`, `version` | — | — |
+| `doc:co-safety/AGENTS.md` | doc | `agent-lifecycle-manager`, `create-variant`, `k-law`, `meeting-facilitation`, `project-review`, `promote-variant`, `security-scan`, `skill-lifecycle-manager`, `source-command-commit-push-pr`, `sync` | — | — |
+| `doc:co-security/AGENTS.md` | doc | `agent-lifecycle-manager`, `skill-lifecycle-manager` | — | — |
+| `doc:co-security/docs/phase-definitions.md` | doc | `project-review`, `stride-threat-matrix`, `verify-authorization` | — | — |
+| `doc:co-work/AGENTS.md` | doc | `agent-lifecycle-manager`, `skill-lifecycle-manager` | — | — |
+| `doc:co-work/docs/phase-definitions.md` | doc | `project-review` | — | — |
 
 ## Korean Term Vocabulary (terms-ko.json)
 

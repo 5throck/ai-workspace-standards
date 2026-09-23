@@ -1,6 +1,13 @@
 #!/usr/bin/env bun
 /**
  * Skill Relationship Graph Generator
+ * @version 1.13.0 (2026-09-23, orphan audit T-20260923-001): variant agent
+ * discovery skips README and underscore-prefixed files (co-abap agents/README.md
+ * was emitted as an "agent" node); new Source 4.8 workflow-doc citations — a
+ * bounded corpus (platform/agent context docs + procedures/ + process/, L0 and
+ * per-variant) mints `doc:` nodes and `cites_skill` edges so
+ * workflow-dispatched skills are no longer graph-isolated (L0 isolated
+ * 12 → 0, variant 48 → 17).
  * @version 1.12.0 (ADR-0084 Actor Model, 2026-09-19): emit human_role nodes
  * from governance/_human-roles.yaml; add actor_type edge attribute to RACI
  * edges (accountable_for, consulted_on, informed_of, step_by_agent); resolve
@@ -132,7 +139,7 @@ export interface GraphNode {
   // 'stage' = domain execution stage node (DEG, ADR-0083); id form: `stage.<variant>.<id>`
   // 'decision_gate' = decision gate node (DEG, ADR-0083); id form: `gate.<variant>.<id>`
   // 'evidence_model' = evidence schema node (DEG, ADR-0083); id form: `evidence.<variant>.<name>`
-  type: 'skill' | 'agent' | 'decision' | 'adr' | 'procedure' | 'output_type' | 'term' | 'stage' | 'decision_gate' | 'evidence_model' | 'human_role';
+  type: 'skill' | 'agent' | 'decision' | 'adr' | 'procedure' | 'output_type' | 'term' | 'stage' | 'decision_gate' | 'evidence_model' | 'human_role' | 'doc';
   layer: 'L0' | 'L3' | 'common' | `variant:${string}`;
   /** Opaque input/output labels from SKILL.md frontmatter (skill nodes only). */
   inputs?: string[];
@@ -542,7 +549,10 @@ function discoverNodes(): { skills: Map<string, GraphNode>, agents: Map<string, 
       if (existsSync(variantAgentsDir)) {
         const entries = readdirSync(variantAgentsDir);
         for (const entry of entries) {
-          if (entry.endsWith('.md')) {
+          // Exclude folder READMEs and _-prefixed files — same rule as the L0 pass
+          // above; co-abap's agents/README.md was being emitted as an "agent" node
+          // (2026-09-23 orphan audit, ticket T-20260923-001).
+          if (entry.endsWith('.md') && !/^README/.test(entry) && !entry.startsWith('_')) {
             const name = entry.replace('.md', '');
             if (!agents.has(name)) {
               agents.set(name, { id: name, type: 'agent', layer: `variant:${variantName}` });
@@ -1044,6 +1054,83 @@ function deriveDecisionGatesFromYaml(
  * Build the skill graph from all sources
  * Exported for use by verify-skill-graph.ts
  */
+/**
+ * Source 4.8 — Workflow-doc citations (2026-09-23 orphan audit, ticket
+ * T-20260923-001). The prose scan (Source 4) only reads SKILL.md and agent
+ * bodies, so skills dispatched purely through workflow documents were
+ * graph-isolated despite 16–146 doc references each (12 L0 + 48 variant
+ * skills). This scan walks a BOUNDED workflow-doc corpus — L0: the four
+ * platform/agent context docs + procedures/ + process/; per variant: AGENTS.md,
+ * docs/phase-definitions.md, procedures/ + process/ — and for every file that
+ * cites at least one known skill (backtick mention or `skills/<name>/` path)
+ * mints a `doc:` node and `cites_skill` edges. Doc nodes only materialize when
+ * they actually cite a skill, so the node set stays self-limiting.
+ */
+function deriveWorkflowDocCitations(
+  allNodes: Map<string, GraphNode>,
+  knownSkillNames: Set<string>,
+  edges: GraphEdge[],
+  localLayer: GraphNode['layer'],
+): void {
+  const seenCitations = new Set<string>();
+
+  const scanFile = (absPath: string, docId: string, layer: GraphNode['layer']): void => {
+    let content: string;
+    try {
+      content = readFileSync(absPath, 'utf-8');
+    } catch {
+      return;
+    }
+    const hits = new Set<string>(extractBacktickReferences(content, knownSkillNames));
+    for (const m of content.matchAll(/skills\/([a-z0-9][a-z0-9-]*)\//g)) {
+      if (knownSkillNames.has(m[1])) hits.add(m[1]);
+    }
+    if (hits.size === 0) return;
+    if (!allNodes.has(docId)) {
+      allNodes.set(docId, { id: docId, type: 'doc', layer });
+    }
+    for (const skillId of hits) {
+      if (skillId === docId) continue;
+      const key = `${docId}->${skillId}`;
+      if (seenCitations.has(key)) continue;
+      seenCitations.add(key);
+      edges.push({ type: 'cites_skill', from: docId, to: skillId, source: 'workflow-doc' });
+    }
+  };
+
+  const walkDir = (dir: string, docPrefix: string, layer: GraphNode['layer']): void => {
+    if (!existsSync(dir)) return;
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const full = join(dir, entry.name);
+      if (entry.isDirectory()) walkDir(full, docPrefix, layer);
+      else if (entry.isFile() && (entry.name.endsWith('.md') || entry.name.endsWith('.yaml'))) {
+        scanFile(full, `doc:${docPrefix}${entry.name}`, layer);
+      }
+    }
+  };
+
+  // L0 corpus: platform/agent context docs + workflow directories
+  for (const f of ['AGENTS.md', 'CLAUDE.md', 'GEMINI.md', 'CODEX.md']) {
+    if (existsSync(join(ROOT, f))) scanFile(join(ROOT, f), `doc:${f}`, localLayer);
+  }
+  walkDir(join(ROOT, 'procedures'), 'procedures/', localLayer);
+  walkDir(join(ROOT, 'process'), 'process/', localLayer);
+
+  // Variant corpus (L0 graph only — buildScopeGraph has its own node universe)
+  if (existsSync(templatesDir)) {
+    for (const variantName of listVariantDirs(templatesDir)) {
+      const layer: GraphNode['layer'] = `variant:${variantName}`;
+      const vDir = join(templatesDir, variantName);
+      if (existsSync(join(vDir, 'AGENTS.md'))) scanFile(join(vDir, 'AGENTS.md'), `doc:${variantName}/AGENTS.md`, layer);
+      if (existsSync(join(vDir, 'docs', 'phase-definitions.md'))) {
+        scanFile(join(vDir, 'docs', 'phase-definitions.md'), `doc:${variantName}/docs/phase-definitions.md`, layer);
+      }
+      walkDir(join(vDir, 'procedures'), `${variantName}/procedures/`, layer);
+      walkDir(join(vDir, 'process'), `${variantName}/process/`, layer);
+    }
+  }
+}
+
 export function buildGraph(): SkillGraph {
   const { skills, agents } = discoverNodes();
   const allNodes = new Map<string, GraphNode>();
@@ -1242,6 +1329,11 @@ export function buildGraph(): SkillGraph {
       edges.push({ type: 'references', from: agentName, to: ref, source: 'prose' });
     }
   }
+
+  // Source 4.8: Workflow-doc citations (bounded corpus → doc: nodes + cites_skill
+  // edges) — closes the graph-isolation gap for skills dispatched through workflow
+  // documents rather than SKILL.md/agent prose (ticket T-20260923-001).
+  deriveWorkflowDocCitations(allNodes, skillNames, edges, localLayer);
 
   // Source 4.5: Document layer — decision records + ADRs (ADR-0060 amendment
   // 2026-08-25, generalizing the co-newbiz multi-element pilot). Decision
@@ -1781,7 +1873,7 @@ function generateMarkdown(graph: SkillGraph): string {
   lines.push('| `phase` | Skill used in a lifecycle phase (from `variant.json` `skill_manifest.phases`) |');
   lines.push('| `supersedes` | Supersession — overrides (manual) or decision-record prose labels |');
   lines.push('| `references` | Backtick reference in SKILL.md/agent/ADR body prose, DEC `knowledge_refs[]` naming an ADR, or skill → `term:` node from references/terms-ko.json (ADR-0072) |');
-  lines.push('| `cites_skill` | Decision record `skills_used[]` validated against the skill set (ADR-0061 amendment 2026-08-25) |');
+  lines.push('| `cites_skill` | Decision record `skills_used[]` and workflow-doc citations (`doc:` nodes, Source 4.8, ticket T-20260923-001) validated against the skill set |');
   lines.push('| `composes_with` | Typed `relates_to` entry — symmetric, used together in the same phase/workflow (ADR-0060 Amendment 3) |');
   lines.push('| `follows` | Typed `relates_to` entry — sequential/ordering relation, no dependency implication (ADR-0060 Amendment 3) |');
   lines.push('| `enables` | Typed `relates_to` entry — this skill\'s output unlocks another skill/workflow (ADR-0060 Amendment 3) |');
@@ -1798,7 +1890,7 @@ function generateMarkdown(graph: SkillGraph): string {
   lines.push('');
 
   // Decisions & ADRs section (ADR-0060 amendment 2026-08-25)
-  const docNodes = graph.nodes.filter(n => n.type === 'decision' || n.type === 'adr');
+  const docNodes = graph.nodes.filter(n => n.type === 'decision' || n.type === 'adr' || n.type === 'doc');
   if (docNodes.length > 0) {
     lines.push('## Decisions & ADRs');
     lines.push('');

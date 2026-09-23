@@ -695,6 +695,106 @@
       "layer": "variant:co-deck"
     },
     {
+      "id": "doc:AGENTS.md",
+      "type": "doc",
+      "layer": "L0"
+    },
+    {
+      "id": "doc:co-abap/AGENTS.md",
+      "type": "doc",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "doc:co-consult/AGENTS.md",
+      "type": "doc",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "doc:co-consult/docs/phase-definitions.md",
+      "type": "doc",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "doc:co-deck/AGENTS.md",
+      "type": "doc",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "doc:co-design/AGENTS.md",
+      "type": "doc",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "doc:co-design/docs/phase-definitions.md",
+      "type": "doc",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "doc:co-develop/AGENTS.md",
+      "type": "doc",
+      "layer": "variant:co-develop"
+    },
+    {
+      "id": "doc:co-develop/docs/phase-definitions.md",
+      "type": "doc",
+      "layer": "variant:co-develop"
+    },
+    {
+      "id": "doc:co-export/AGENTS.md",
+      "type": "doc",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "doc:co-export/docs/phase-definitions.md",
+      "type": "doc",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "doc:co-game/AGENTS.md",
+      "type": "doc",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "doc:co-hr/AGENTS.md",
+      "type": "doc",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "doc:co-news/AGENTS.md",
+      "type": "doc",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "doc:co-price/AGENTS.md",
+      "type": "doc",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "doc:co-safety/AGENTS.md",
+      "type": "doc",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "doc:co-security/AGENTS.md",
+      "type": "doc",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "doc:co-security/docs/phase-definitions.md",
+      "type": "doc",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "doc:co-work/AGENTS.md",
+      "type": "doc",
+      "layer": "variant:co-work"
+    },
+    {
+      "id": "doc:co-work/docs/phase-definitions.md",
+      "type": "doc",
+      "layer": "variant:co-work"
+    },
+    {
       "id": "docs-writer",
       "type": "agent",
       "layer": "L0"
@@ -2790,16 +2890,6 @@
     },
     {
       "id": "read-only-analyst",
-      "type": "agent",
-      "layer": "variant:co-abap"
-    },
-    {
-      "id": "README",
-      "type": "agent",
-      "layer": "variant:co-abap"
-    },
-    {
-      "id": "README_ko",
       "type": "agent",
       "layer": "variant:co-abap"
     },
@@ -7080,6 +7170,750 @@
       "source": "skill_manifest"
     },
     {
+      "type": "cites_skill",
+      "from": "doc:AGENTS.md",
+      "to": "agent-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:AGENTS.md",
+      "to": "create-variant",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:AGENTS.md",
+      "to": "decision-record",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:AGENTS.md",
+      "to": "evidence-ledger",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:AGENTS.md",
+      "to": "explain-me",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:AGENTS.md",
+      "to": "handbook",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:AGENTS.md",
+      "to": "handbook-sync-audit",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:AGENTS.md",
+      "to": "i18n-audit",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:AGENTS.md",
+      "to": "i18n-formatting",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:AGENTS.md",
+      "to": "i18n-layout",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:AGENTS.md",
+      "to": "i18n-locale-config",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:AGENTS.md",
+      "to": "meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:AGENTS.md",
+      "to": "project-review",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:AGENTS.md",
+      "to": "promote-variant",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:AGENTS.md",
+      "to": "security-scan",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:AGENTS.md",
+      "to": "simulate-pipeline",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:AGENTS.md",
+      "to": "skill-graph-analytics",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:AGENTS.md",
+      "to": "skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:AGENTS.md",
+      "to": "source-command-commit-push-pr",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:AGENTS.md",
+      "to": "sync",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/AGENTS.md",
+      "to": "abap-code-review",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/AGENTS.md",
+      "to": "abap-dev",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/AGENTS.md",
+      "to": "agent-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/AGENTS.md",
+      "to": "desktop-app-fallback",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/AGENTS.md",
+      "to": "dump-monitor",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/AGENTS.md",
+      "to": "performance-tuning",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/AGENTS.md",
+      "to": "post-write-chain",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/AGENTS.md",
+      "to": "sap-co",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/AGENTS.md",
+      "to": "sap-fi",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/AGENTS.md",
+      "to": "sap-le",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/AGENTS.md",
+      "to": "sap-mm",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/AGENTS.md",
+      "to": "sap-pp",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/AGENTS.md",
+      "to": "sap-sd",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/AGENTS.md",
+      "to": "skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/AGENTS.md",
+      "to": "source-command-celebrate",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/AGENTS.md",
+      "to": "agent-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/AGENTS.md",
+      "to": "finishing-a-development-branch",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/AGENTS.md",
+      "to": "hwp-document-processing",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/AGENTS.md",
+      "to": "k-dart",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/AGENTS.md",
+      "to": "k-law",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/AGENTS.md",
+      "to": "platform-command-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/AGENTS.md",
+      "to": "sample-driven-report-writing",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/AGENTS.md",
+      "to": "skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/phase-definitions.md",
+      "to": "consulting-report-writing",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/phase-definitions.md",
+      "to": "executive-presentation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/phase-definitions.md",
+      "to": "financial-modeling",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/phase-definitions.md",
+      "to": "insight-synthesis",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/phase-definitions.md",
+      "to": "narrative-framework",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/phase-definitions.md",
+      "to": "project-review",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/phase-definitions.md",
+      "to": "solution-design",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/AGENTS.md",
+      "to": "agent-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/AGENTS.md",
+      "to": "design",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/AGENTS.md",
+      "to": "handbook",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/AGENTS.md",
+      "to": "html-build",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/AGENTS.md",
+      "to": "pdf-export",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/AGENTS.md",
+      "to": "prep-pdf",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/AGENTS.md",
+      "to": "research",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/AGENTS.md",
+      "to": "skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/AGENTS.md",
+      "to": "storyline",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/AGENTS.md",
+      "to": "theme-authoring",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/AGENTS.md",
+      "to": "version",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/AGENTS.md",
+      "to": "agent-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/AGENTS.md",
+      "to": "skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/docs/phase-definitions.md",
+      "to": "project-review",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/AGENTS.md",
+      "to": "agent-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/AGENTS.md",
+      "to": "skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/docs/phase-definitions.md",
+      "to": "project-review",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/AGENTS.md",
+      "to": "agent-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/AGENTS.md",
+      "to": "create-variant",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/AGENTS.md",
+      "to": "meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/AGENTS.md",
+      "to": "project-review",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/AGENTS.md",
+      "to": "promote-variant",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/AGENTS.md",
+      "to": "security-scan",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/AGENTS.md",
+      "to": "skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/AGENTS.md",
+      "to": "source-command-commit-push-pr",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/AGENTS.md",
+      "to": "sync",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/docs/phase-definitions.md",
+      "to": "customs-duty-drawback-workflow",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/docs/phase-definitions.md",
+      "to": "project-review",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/AGENTS.md",
+      "to": "agent-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/AGENTS.md",
+      "to": "skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/AGENTS.md",
+      "to": "agent-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/AGENTS.md",
+      "to": "create-variant",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/AGENTS.md",
+      "to": "meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/AGENTS.md",
+      "to": "project-review",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/AGENTS.md",
+      "to": "promote-variant",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/AGENTS.md",
+      "to": "security-scan",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/AGENTS.md",
+      "to": "skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/AGENTS.md",
+      "to": "source-command-commit-push-pr",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/AGENTS.md",
+      "to": "sync",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/AGENTS.md",
+      "to": "agent-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/AGENTS.md",
+      "to": "create-variant",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/AGENTS.md",
+      "to": "meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/AGENTS.md",
+      "to": "project-review",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/AGENTS.md",
+      "to": "promote-variant",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/AGENTS.md",
+      "to": "security-scan",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/AGENTS.md",
+      "to": "skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/AGENTS.md",
+      "to": "source-command-commit-push-pr",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/AGENTS.md",
+      "to": "sync",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/AGENTS.md",
+      "to": "agent-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/AGENTS.md",
+      "to": "harness-verification",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/AGENTS.md",
+      "to": "i18n-audit",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/AGENTS.md",
+      "to": "map-channel-enforcement",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/AGENTS.md",
+      "to": "price-waterfall-analysis",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/AGENTS.md",
+      "to": "pricing-governance",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/AGENTS.md",
+      "to": "skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/AGENTS.md",
+      "to": "version",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/AGENTS.md",
+      "to": "agent-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/AGENTS.md",
+      "to": "create-variant",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/AGENTS.md",
+      "to": "k-law",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/AGENTS.md",
+      "to": "meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/AGENTS.md",
+      "to": "project-review",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/AGENTS.md",
+      "to": "promote-variant",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/AGENTS.md",
+      "to": "security-scan",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/AGENTS.md",
+      "to": "skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/AGENTS.md",
+      "to": "source-command-commit-push-pr",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/AGENTS.md",
+      "to": "sync",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-security/AGENTS.md",
+      "to": "agent-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-security/AGENTS.md",
+      "to": "skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-security/docs/phase-definitions.md",
+      "to": "project-review",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-security/docs/phase-definitions.md",
+      "to": "stride-threat-matrix",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-security/docs/phase-definitions.md",
+      "to": "verify-authorization",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/AGENTS.md",
+      "to": "agent-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/AGENTS.md",
+      "to": "skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/docs/phase-definitions.md",
+      "to": "project-review",
+      "source": "workflow-doc"
+    },
+    {
       "type": "used_by",
       "from": "documentation-writing",
       "to": "content-writer",
@@ -8606,6 +9440,13 @@
       "from": "gate.co-security.DG-SECURITY-01",
       "to": "output_type.sarif_export",
       "source": "decision_model"
+    },
+    {
+      "type": "relates_to",
+      "from": "gateguard",
+      "to": "sync",
+      "source": "override",
+      "reason": "Machine-integration edge (2026-09-23 orphan audit, T-20260923-001): gateguard enforces the .githooks pre-commit/pre-push gates that every /sync commit+PR passes through; it is invoked by git hooks, not referenced in workflow-doc prose, so the citation scan cannot see it."
     },
     {
       "type": "follows",
@@ -16942,6 +17783,13 @@
       "source": "skill_manifest"
     },
     {
+      "type": "relates_to",
+      "from": "release-template",
+      "to": "promote-variant",
+      "source": "override",
+      "reason": "Machine-integration edge (2026-09-23 orphan audit, T-20260923-001): release-template tags and releases variant templates as the step after beta promotion; peer lifecycle relation with no procedure-step or prose citation."
+    },
+    {
       "type": "accountable_for",
       "from": "report-writer",
       "to": "procedure.co-security.post-engagement-hardening",
@@ -19487,6 +20335,13 @@
       "source": "prose"
     },
     {
+      "type": "relates_to",
+      "from": "ticket-run",
+      "to": "sync",
+      "source": "override",
+      "reason": "Machine-integration edge (2026-09-23 orphan audit, T-20260923-001): ticket-run executes governance backlog tickets (T-*) whose resolutions land in /sync PRs; the relation lives in AGENTS.md §3.7.5 prose without a backtick skill citation."
+    },
+    {
       "type": "produces",
       "from": "token-usage-lint",
       "to": "output_type.type_system",
@@ -20041,6 +20896,13 @@
       "from": "visual-editor",
       "to": "financial-infographic-svg",
       "source": "prose"
+    },
+    {
+      "type": "relates_to",
+      "from": "zod-contract-gate",
+      "to": "security-scan",
+      "source": "override",
+      "reason": "Machine-integration edge (2026-09-23 orphan audit, T-20260923-001): zod-contract-gate is a peer QA gate validating API contracts alongside security-scan; neither cites the other in SKILL.md prose."
     }
   ]
 }

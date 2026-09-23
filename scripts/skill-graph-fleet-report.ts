@@ -2,7 +2,16 @@
 /**
  * skill-graph-fleet-report.ts — Read-only fleet analytics over per-project skill graphs
  * (skill-graph-analytics skill Step 1).
- * @version 1.0.0
+ * @version 1.1.0
+ *
+ * v1.1.0 (2026-09-23, orphan audit T-20260923-001): adds the ROOT-GRAPH ORPHAN
+ *         cross-check to the report + snapshot (`rootOrphans`). A root skill or
+ *         agent is an orphan CANDIDATE when it is graph-isolated (zero edges);
+ *         each candidate is cross-checked on the other three axes — SKILLS.md
+ *         registry row, platform mirrors, workflow-doc references (bounded
+ *         corpus) — so the weekly cadence sees DEFINITION + REGISTRY + MIRROR +
+ *         REFERENCE side by side instead of a bare isolation list. Snapshot
+ *         addition is backward-compatible (old snapshots lack the field).
  *
  * Every variant project carries its own projection of the workspace skill graph
  * (`Projects/<co-x>/docs/skill-graph.json`), but nothing ever consolidates them:
@@ -50,7 +59,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 
 import { join } from "node:path";
 import { localDateISO } from "./lib/local-date.ts";
 
-const VERSION = "1.0.0";
+const VERSION = "1.1.0";
 
 /** Node as stored in docs/skill-graph.json (id/type/layer observed in the wild). */
 interface GraphNode {
@@ -85,6 +94,16 @@ interface Snapshot {
   fleetPresence: Record<string, number>;
   missingFromProjects: Record<string, string[]>;
   jaccard: Record<string, number>;
+  /** v1.1.0: root-graph orphan cross-check (4-way: definition+registry+mirror+reference). */
+  rootOrphans?: {
+    isolatedSkills: Array<{
+      id: string;
+      registry: boolean;
+      mirrors: string[];
+      docRefs: number;
+    }>;
+    isolatedAgents: string[];
+  };
 }
 
 function parseArgs(): { json: boolean; snapshotDir: string; help: boolean } {
@@ -184,6 +203,59 @@ function fleetSkillSet(
   return { current, previous: prev };
 }
 
+/**
+ * v1.1.0 — Root-graph orphan cross-check. Isolation = zero edges in the root
+ * graph. Each isolated root skill/agent is cross-checked on the remaining axes
+ * of the 4-way orphan criteria (definition=the node itself, registry, mirror,
+ * reference): registry = SKILLS.md row, mirrors = which of the 4 platform
+ * skill bases carry the skill, docRefs = occurrences in the bounded workflow-doc
+ * corpus (platform/agent context docs + procedures/ + process/).
+ */
+function analyzeRootOrphans(
+  rootGraph: SkillGraph,
+): NonNullable<Snapshot["rootOrphans"]> {
+  const connected = new Set<string>();
+  for (const e of rootGraph.edges ?? []) {
+    if (e.from) connected.add(e.from);
+    if (e.to) connected.add(e.to);
+  }
+  const isolated = (rootGraph.nodes ?? []).filter((n) => n.type && !connected.has(n.id));
+
+  const registryPath = join("skills", "SKILLS.md");
+  const registry = existsSync(registryPath) ? readFileSync(registryPath, "utf8") : "";
+  const MIRROR_BASES = [".claude/skills", ".gemini/skills", ".agents/skills", ".codex/skills"];
+
+  const corpusFiles: string[] = [];
+  for (const f of ["AGENTS.md", "CLAUDE.md", "GEMINI.md", "CODEX.md"]) {
+    if (existsSync(f)) corpusFiles.push(f);
+  }
+  const walkCorpus = (dir: string, depth: number): void => {
+    if (depth > 3 || !existsSync(dir)) return;
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const full = join(dir, entry.name);
+      if (entry.isDirectory()) walkCorpus(full, depth + 1);
+      else if (entry.isFile() && (entry.name.endsWith(".md") || entry.name.endsWith(".yaml"))) corpusFiles.push(full);
+    }
+  };
+  walkCorpus(join("procedures"), 0);
+  walkCorpus(join("process"), 0);
+  const corpus = corpusFiles.map((f) => {
+    try { return readFileSync(f, "utf8").toLowerCase(); } catch { return ""; }
+  }).join("\n");
+
+  const isolatedSkills = isolated
+    .filter((n) => n.type === "skill" && n.layer === "L0")
+    .map((n) => ({
+      id: n.id,
+      registry: registry.includes(`| \`${n.id}\``),
+      mirrors: MIRROR_BASES.filter((b) => existsSync(join(b, n.id, "SKILL.md"))),
+      docRefs: corpus.split(n.id.toLowerCase()).length - 1,
+    }));
+  const isolatedAgents = isolated.filter((n) => n.type === "agent" && n.layer === "L0").map((n) => n.id);
+
+  return { isolatedSkills, isolatedAgents };
+}
+
 function markdownReport(
   rootGraph: SkillGraph,
   stats: ProjectStats[],
@@ -193,6 +265,7 @@ function markdownReport(
   jaccard: Record<string, number>,
   diff: { newSkills: string[]; vanishedSkills: string[] } | null,
   diffBase: { file: string; date: string } | null,
+  orphans: NonNullable<Snapshot["rootOrphans"]> | null,
 ): string {
   const lines: string[] = [
     `# skill-graph fleet report — ${localDateISO()}`,
@@ -250,6 +323,29 @@ function markdownReport(
     lines.push(`## Fleet diff vs snapshot ${diffBase?.date ?? "?"} (memory/skill-graph-metrics)`, "");
     lines.push(`- NEW skills (${diff.newSkills.length}): ${diff.newSkills.length > 0 ? diff.newSkills.join(", ") : "—"}`);
     lines.push(`- VANISHED skills (${diff.vanishedSkills.length}): ${diff.vanishedSkills.length > 0 ? diff.vanishedSkills.join(", ") : "—"}`);
+    lines.push("");
+  }
+
+  // v1.1.0 — root-graph orphan cross-check (4-way: definition+registry+mirror+reference)
+  lines.push("## Root-graph orphan candidates (4-way cross-check)", "");
+  if (!orphans || (orphans.isolatedSkills.length === 0 && orphans.isolatedAgents.length === 0)) {
+    lines.push("None — every root skill and agent carries at least one graph edge.");
+    lines.push("");
+  } else {
+    lines.push("Graph-isolated (zero edges). Cross-axes: registry = SKILLS.md row, mirrors = platform skill bases, refs = workflow-doc corpus mentions.");
+    lines.push("Triage: all four axes present → graph-edge gap (file an overrides entry or citation); zero axes → true orphan (retire or wire in).");
+    lines.push("");
+    if (orphans.isolatedAgents.length > 0) {
+      lines.push(`- isolated agents: ${orphans.isolatedAgents.join(", ")}`);
+    }
+    for (const o of orphans.isolatedSkills) {
+      const axes = [
+        o.registry ? "registry ✓" : "registry ✗",
+        `mirrors ${o.mirrors.length}/4`,
+        `refs ${o.docRefs}`,
+      ].join(", ");
+      lines.push(`- ${o.id}: ${axes}`);
+    }
     lines.push("");
   }
   return lines.join("\n");
@@ -347,6 +443,10 @@ same-date). Read-only over all inputs.`);
     jaccard,
   };
 
+  // v1.1.0 — root-graph orphan cross-check
+  const orphans = rootGraph ? analyzeRootOrphans(rootGraph) : null;
+  if (orphans) snapshot.rootOrphans = orphans;
+
   mkdirSync(snapshotDir, { recursive: true });
   const snapshotFile = join(snapshotDir, `snapshot-${today}.json`);
   writeFileSync(snapshotFile, JSON.stringify(snapshot, null, 2) + "\n");
@@ -367,6 +467,7 @@ same-date). Read-only over all inputs.`);
       jaccard,
       diff,
       previous ? { file: previous.file, date: previous.date } : null,
+      orphans,
     ));
   }
   process.exit(0);

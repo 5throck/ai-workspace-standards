@@ -1,15 +1,16 @@
 ---
 name: skill-graph-analytics
-version: 1.0.0
+version: 1.1.0
 description: >
   Weekly fleet analytics over the per-project skill-graph projections:
   consolidate root + Projects/<co-x> graphs into a dated snapshot, triage
-  skill convergence (consolidation/promotion candidates) and delivery drift
-  (root skills missing from projects), and record findings. Use when: the
-  weekly analytics cadence fires (the 02:30 ticket runner may invoke it),
-  the user says "skill-graph analytics", "fleet skill graph", "skill graph
-  report", or asks which skills the project fleet carries, which root skills
-  never reached projects, or what changed fleet-wide since last week.
+  skill convergence (consolidation/promotion candidates), delivery drift
+  (root skills missing from projects), and root-graph orphans (4-way
+  cross-check), and record findings. Use when: the weekly analytics cadence
+  fires (the 02:30 ticket runner may invoke it), the user says "skill-graph
+  analytics", "fleet skill graph", "skill graph report", or asks which skills
+  the project fleet carries, which root skills never reached projects, whether
+  any agent or skill is orphaned, or what changed fleet-wide since last week.
 status: active
 scope: workspace
 l2_propagate: false
@@ -29,6 +30,8 @@ metadata:
     - skill graph report
     - skill graph fleet report
     - skill convergence triage
+    - orphan agent check
+    - orphan skill check
 ---
 
 # Skill: skill-graph-analytics
@@ -70,6 +73,8 @@ exits 1 (fix the generator, `bun scripts/generate-skill-graph.ts`, before triage
   project with rising distance is a delivery-gap signal.
 - **Presence matrix + top skills** — fleet presence counts per skill id.
 - **Root skills missing per project** — the delivery-drift surface.
+- **Root-graph orphan candidates** — graph-isolated root skills/agents with the
+  4-way cross-check axes (see §3.5); feeds the orphan triage rules.
 - **NEW/VANISHED vs the previous snapshot** — fleet-wide skill evolution.
 
 ### 3. Triage (judgment — not automatable)
@@ -79,7 +84,42 @@ exits 1 (fix the generator, `bun scripts/generate-skill-graph.ts`, before triage
 | Skill present in project graphs but **absent from the root graph** | >= 3 project graphs | Consolidation/promotion candidate — file a ticket: `bun scripts/ticket.ts create --manual "skill-graph: <skill-id> converged in N projects, absent from root — consolidation review" --priority normal` (routes through §3.7.5 governance-backlog triage) |
 | **Root skill missing from many projects** | missing from >= 3 project graphs | Delivery-gap candidate — file a ticket naming the skill and the missing projects (likely template-delivery drift; check `templates/common/skills/` and the variant contract) |
 | NEW/VANISHED skills in the diff | any | Verify each is intentional (new skill landed / skill deprecated) — unexplained entries are tickets |
+| **Root-graph orphan candidate** (report section "Root-graph orphan candidates") | any isolated skill/agent | Apply the 4-way orphan criteria below — never treat graph isolation alone as proof of orphanhood |
 | Everything else | — | No action; the snapshot is the record |
+
+### 3.5 Root-graph orphan cross-check (4-way criteria)
+
+A root skill or agent is an **orphan candidate** only when it is graph-isolated
+(zero edges — reported in the fleet report's orphan section since
+fleet-report v1.1.0). Isolation alone is NOT proof: classify each candidate by
+crossing four axes, all reported in the same section:
+
+| Axis | Meaning | How the report shows it |
+|------|---------|------------------------|
+| **Definition** | The node exists in the graph (skills/, agents/) | the isolation list itself |
+| **Registry** | A SKILLS.md / roster row exists | `registry ✓/✗` |
+| **Mirror** | The 4 platform skill bases carry it | `mirrors N/4` |
+| **Reference** | Workflow docs mention it (bounded corpus: platform/agent context docs + procedures/ + process/) | `refs N` |
+
+Triage rules:
+
+- **All four axes present** (registry ✓, mirrors 4/4, refs > 0) → *graph-edge
+  gap*, not an orphan. Fix the graph, not the skill: add a hand-reasoned
+  `docs/skill-graph.overrides.json` entry (`relates_to`, with `reason`/`since`)
+  or a workflow-doc citation, then regenerate.
+- **Definition + Registry only** (no mirror, no refs) → *weak candidate* —
+  wire it into a workflow or schedule deprecation review.
+- **Missing registry row or mirrors** → *delivery drift* — the standard
+  registry/mirror fixes apply before any orphan verdict.
+- **Zero axes beyond definition** → *true orphan* — retire via the
+  skill/agent lifecycle manager.
+- Agent candidates: mirror axis does not apply (agents are not mirrored);
+  weigh roster presence (AGENTS.md §1/§4.1) and doc references instead.
+
+Historical baseline (2026-09-23 audit): 12 L0 + 48 variant skills were
+graph-isolated; the workflow-doc citation scan (generator Source 4.8) plus four
+overrides entries brought L0 isolation to zero — variant-isolated skills remain
+on this cadence's triage list.
 
 **Centrality-readiness note (Phase 2, future work)**: presence counts are a
 blunt proxy for importance. A later phase adds centrality ranking over the root

@@ -1,3 +1,36 @@
 {
-  "edges": []
+  "edges": [
+    {
+      "type": "relates_to",
+      "from": "gateguard",
+      "to": "sync",
+      "reason": "Machine-integration edge (2026-09-23 orphan audit, T-20260923-001): gateguard enforces the .githooks pre-commit/pre-push gates that every /sync commit+PR passes through; it is invoked by git hooks, not referenced in workflow-doc prose, so the citation scan cannot see it.",
+      "since": "2026-09-23",
+      "last_reviewed": "2026-09-23"
+    },
+    {
+      "type": "relates_to",
+      "from": "release-template",
+      "to": "promote-variant",
+      "reason": "Machine-integration edge (2026-09-23 orphan audit, T-20260923-001): release-template tags and releases variant templates as the step after beta promotion; peer lifecycle relation with no procedure-step or prose citation.",
+      "since": "2026-09-23",
+      "last_reviewed": "2026-09-23"
+    },
+    {
+      "type": "relates_to",
+      "from": "ticket-run",
+      "to": "sync",
+      "reason": "Machine-integration edge (2026-09-23 orphan audit, T-20260923-001): ticket-run executes governance backlog tickets (T-*) whose resolutions land in /sync PRs; the relation lives in AGENTS.md §3.7.5 prose without a backtick skill citation.",
+      "since": "2026-09-23",
+      "last_reviewed": "2026-09-23"
+    },
+    {
+      "type": "relates_to",
+      "from": "zod-contract-gate",
+      "to": "security-scan",
+      "reason": "Machine-integration edge (2026-09-23 orphan audit, T-20260923-001): zod-contract-gate is a peer QA gate validating API contracts alongside security-scan; neither cites the other in SKILL.md prose.",
+      "since": "2026-09-23",
+      "last_reviewed": "2026-09-23"
+    }
+  ]
 }
