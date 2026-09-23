@@ -1,5 +1,19 @@
 #!/usr/bin/env bun
-// @version 1.45.0
+// @version 1.45.2
+// v1.45.2 (2026-09-23, T-20260923-003 fleet hardening 2): the walk-based prune
+//          sets re-union the manifest protections the tplBasenames build used —
+//          agents declared in variant.json assetGate.agents survive even when
+//          the variant template does not ship their persona file (co-architect
+//          design-lead/ux-researcher). The skills/ category keeps its original
+//          tplBasenames path (asset gate + project manifest + upstream union).
+// v1.45.1 (2026-09-23, T-20260923-003 fleet hardening): the KEEP verdict
+//          switches from the project row's source cell (unreliable —
+//          project-local scripts are frequently hand-registered with source
+//          `L0`; the first recursive-prune fleet pass misread them as retired
+//          deliveries and was reverted uncommitted) to the UPSTREAM registry:
+//          prune only scripts rowed in the L0/L1 SCRIPTS.md registries;
+//          unregistered and project-sourced scripts survive. Unregistered-file
+//          hygiene stays with verify-scripts at audit time.
 // v1.45.0 (2026-09-23, same spec 2026-09-23-upgrade-engine-l0-only-completion):
 //          (1) PRUNE REMOVED's scripts/ category walks the project and template
 //          trees RECURSIVELY — the pass docstring always said "recursively" but
@@ -921,14 +935,28 @@ function scriptRegistryTableRegion(): string {
   return content;
 }
 
-function scriptRegistrySources(name: string): string[] {
-  const table = scriptRegistryTableRegion();
-  if (!table) return [];
-  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const rowRe = new RegExp(`^\\| \`${escaped}\` \\| ([^|]*)\\|`, 'gm');
-  const sources: string[] = [];
-  for (const m of table.matchAll(rowRe)) sources.push(m[1].trim());
-  return sources;
+function scriptIsRetiredDelivery(name: string): boolean {
+  // v1.45.1: the project row's source cell proved unreliable (project-local
+  // scripts hand-registered with source `L0` — co-consult financial-kpi,
+  // co-deck auto-calibrate, co-newbiz lib/env-keys were nearly pruned by the
+  // source-cell check). The reliable ownership signal is the UPSTREAM
+  // registry: a script ROW in the L0 or L1 SCRIPTS.md registry was
+  // template-delivered, so absence from the current template tree means a
+  // retired delivery (prunable); no upstream row means project-owned content
+  // (KEEP, whatever its source cell claims). Bounded to the registry table
+  // region like the project-side reads.
+  for (const reg of [scriptsMd, join(commonDir, 'scripts', 'SCRIPTS.md')]) {
+    if (!existsSync(reg)) continue;
+    const content = readFileSync(reg, 'utf8');
+    const lines = content.split('\n');
+    let table = content;
+    for (let i = 0; i < lines.length; i++) {
+      if (/^####\s+`/.test(lines[i])) { table = lines.slice(0, i).join('\n'); break; }
+    }
+    const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    if (new RegExp(`^\\| \`${escaped}\` \\|`, 'm').test(table)) return true;
+  }
+  return false;
 }
 
 // Drop every registry row for `name`. Called ONLY from the branch that actually
@@ -2744,18 +2772,30 @@ if (pruneRemoved) {
       };
       const projRels = walkTs(cat.projDir);
       const tplRels = new Set(cat.tplDirs.flatMap((td) => walkTs(td)));
+      // v1.45.2: the walk-based sets must keep the manifest protections the
+      // tplBasenames build used to union in — agents declared in variant.json
+      // assetGate.agents are manifest-blessed project agents even when the
+      // variant template does not ship their persona file (co-architect
+      // design-lead/ux-researcher were nearly pruned by v1.45.1 without this).
+      const manifestKeep = new Set<string>();
+      if (cat.label === 'agents/' && assetGate) {
+        for (const agentFile of assetGate.agents) manifestKeep.add(agentFile);
+      }
       for (const rel of projRels) {
-        if (tplRels.has(rel) || (cat.skipFiles || []).includes(rel)) {
+        if (tplRels.has(rel) || manifestKeep.has(rel) || (cat.skipFiles || []).includes(rel)) {
           continue;
         }
         const f = rel;
-          // v1.44.0 (T-20260923-003): a registry row sourced to the variant
-          // name marks a project-local script (ADR-0031 engagement output) —
-          // absence from the template is its normal state, never a prune
-          // signal. The skills/ category has consulted manifests since its
-          // first fleet catch (2026-09-12); scripts/ now does the same.
-          if (cat.label === 'scripts/' && scriptRegistrySources(f).includes(variant)) {
-            console.log(`  KEEP   ${cat.label}${f}  (project-local: registered source ${variant})`);
+          // v1.45.1 (T-20260923-003, hardened after the first fleet pass):
+          // prune ONLY scripts with an UPSTREAM registry row (L0 or L1) —
+          // those were template-delivered and their absence from the template
+          // tree means a retired delivery (the Amendment-1 engine copies).
+          // Everything else — unregistered strays and project-owned scripts
+          // whatever their source cell claims — is KEEP-uncertain and
+          // survives (ADR-0031); verify-scripts flags genuinely unregistered
+          // files at audit time.
+          if (cat.label === 'scripts/' && !scriptIsRetiredDelivery(f)) {
+            console.log(`  KEEP   ${cat.label}${f}  (project-owned: no upstream delivery row)`);
             continue;
           }
           console.log(`  PRUNE  ${cat.label}${f}`);
