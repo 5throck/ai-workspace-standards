@@ -5,8 +5,18 @@
  * Generates variant project structure from reconciled manifest.
  * Creates variant.json, directory structure, agent overrides, and skill directories.
  *
- * @version 1.16.0
- * @phase 3: Variant Generation
+ * @version 1.17.0
+ *
+ * v1.17.0 (T-20260923-005, spec 2026-09-23-promotion-skill-asset-parity-design):
+ *          generateSkillDirectories union-and-normalize model — groups ALL
+ *          keepInVariant files under skills/<name>/ (drops the .md filter that
+ *          excluded non-Markdown skill assets), preserves subpaths (references/
+ *          GUIDE.md is never renamed to SKILL.md — the old per-mirror
+ *          last-writer-wins collapse corrupted SKILL.md whenever a source
+ *          project's mirrors carried sub-files), and converges the top-level
+ *          skills/<name>/ plus all four platform mirrors to the whole dir
+ *          (partial-mirror sources are backfilled). Byte-preserving
+ *          copyFileSync for skill assets. * @phase 3: Variant Generation
  *
  * v1.16.0: materialize .agents/skills/ and .codex/skills/ mirrors alongside
  *          .claude/.gemini/skills (2026-09-21 review H-3) — a promoted variant
@@ -446,27 +456,31 @@ export function generateSkillDirectories(
 ): string[] {
   const skillDirectories: string[] = [];
 
-  // Group skill files by skill name
-  const skillFiles = new Map<string, ReconciledFile[]>();
+  // v1.17.0 (T-20260923-005, spec 2026-09-23-promotion-skill-asset-parity-design):
+  // union-and-normalize model. Group ALL keepInVariant files under
+  // `skills/<name>/` — the old `.endsWith('.md')` filter dropped non-Markdown
+  // skill assets (explain-me's report.html class) — and record which ROOT
+  // (top-level skills/ vs a platform mirror) each file was scanned from.
+  const skillFiles = new Map<string, Array<{ rel: string; root: 'top' | PlatformKey; sourcePath: string }>>();
 
   for (const file of manifest.keepInVariant) {
     // Normalize to forward slashes so prefix checks match on Windows (same
     // normalization as the agent loop and the copy-remaining loop)
     const normalizedTarget = file.targetPath.replace(/\\/g, '/');
-    if (normalizedTarget.includes('skills/') && normalizedTarget.endsWith('.md')) {
-      // Extract skill name from path (e.g., 'skills/meeting-facilitation/SKILL.md')
-      const match = normalizedTarget.match(/skills\/([^/]+)\//);
-      if (match) {
-        const skillName = match[1];
-        if (!skillFiles.has(skillName)) {
-          skillFiles.set(skillName, []);
-        }
-        skillFiles.get(skillName)!.push(file);
-      }
-    }
+    if (!normalizedTarget.includes('skills/')) continue;
+    const nameMatch = normalizedTarget.match(/skills\/([^/]+)\//);
+    if (!nameMatch) continue;
+    const skillName = nameMatch[1];
+    const marker = `skills/${skillName}/`;
+    const idx = normalizedTarget.indexOf(marker);
+    if (idx === -1) continue;
+    const rel = normalizedTarget.slice(idx + marker.length);
+    if (!rel) continue; // malformed — no content below the skill dir
+    const root = detectSkillRoot(normalizedTarget);
+    if (!skillFiles.has(skillName)) skillFiles.set(skillName, []);
+    skillFiles.get(skillName)!.push({ rel, root, sourcePath: file.sourcePath });
   }
 
-  // Create skill directories
   for (const [skillName, files] of skillFiles.entries()) {
     const claudeSkillDir = join(variantPath, '.claude', 'skills', skillName);
     const geminiSkillDir = join(variantPath, '.gemini', 'skills', skillName);
@@ -474,72 +488,55 @@ export function generateSkillDirectories(
     const codexSkillDir = join(variantPath, '.codex', 'skills', skillName);
     const topLevelSkillDir = join(variantPath, 'skills', skillName);
 
-    createDirectory(claudeSkillDir);
-    createDirectory(geminiSkillDir);
-    createDirectory(agentsSkillDir);
-    createDirectory(codexSkillDir);
+    const roots: Array<{ dir: string; key: PlatformKey | 'top' }> = [
+      { dir: topLevelSkillDir, key: 'top' },
+      { dir: claudeSkillDir, key: 'claude' },
+      { dir: geminiSkillDir, key: 'gemini' },
+      { dir: agentsSkillDir, key: 'agents' },
+      { dir: codexSkillDir, key: 'codex' },
+    ];
+    for (const r of roots) createDirectory(r.dir);
+    skillDirectories.push(topLevelSkillDir, claudeSkillDir, geminiSkillDir, agentsSkillDir, codexSkillDir);
 
-    skillDirectories.push(claudeSkillDir, geminiSkillDir, agentsSkillDir, codexSkillDir);
-
-    // Copy skill files
+    // Canonical content per relPath: the source's top-level copy wins; else any
+    // mirror copy (first found). Mirrors then converge to the whole dir — a
+    // partial-mirror source is backfilled, and a mirror sub-file can never
+    // overwrite SKILL.md (the v1.16.0-and-earlier last-writer-wins collapse).
+    const canonical = new Map<string, string>();
     for (const file of files) {
-      const normalizedTarget = file.targetPath.replace(/\\/g, '/');
-      const isClaude = normalizedTarget.includes('.claude/skills/');
-      const isGemini = normalizedTarget.includes('.gemini/skills/');
-      const isAgents = normalizedTarget.includes('.agents/skills/');
-      const isCodex = normalizedTarget.includes('.codex/skills/');
-
-      if (isClaude) {
-        const targetPath = join(variantPath, '.claude', 'skills', skillName, 'SKILL.md');
-        if (existsSync(file.sourcePath)) {
-          copyFileUTF8(file.sourcePath, targetPath);
-        }
+      if (file.root === 'top' && !canonical.has(file.rel)) {
+        canonical.set(file.rel, file.sourcePath);
       }
-
-      if (isGemini) {
-        const targetPath = join(variantPath, '.gemini', 'skills', skillName, 'SKILL.md');
-        if (existsSync(file.sourcePath)) {
-          copyFileUTF8(file.sourcePath, targetPath);
-        }
-      }
-
-      if (isAgents) {
-        const targetPath = join(variantPath, '.agents', 'skills', skillName, 'SKILL.md');
-        if (existsSync(file.sourcePath)) {
-          copyFileUTF8(file.sourcePath, targetPath);
-        }
-      }
-
-      if (isCodex) {
-        const targetPath = join(variantPath, '.codex', 'skills', skillName, 'SKILL.md');
-        if (existsSync(file.sourcePath)) {
-          copyFileUTF8(file.sourcePath, targetPath);
-        }
+    }
+    for (const file of files) {
+      if (file.root !== 'top' && !canonical.has(file.rel) && existsSync(file.sourcePath)) {
+        canonical.set(file.rel, file.sourcePath);
       }
     }
 
-    // Top-level skills/<name>/SKILL.md (canonical co-consult layout): build it
-    // from the source's top-level copy when present, else mirror a platform
-    // copy, and backfill platform roots whose source had no platform file so
-    // all three skill roots carry the skill.
-    const canonicalSource =
-      files.find((f) => f.targetPath.replace(/\\/g, '/').startsWith('skills/'))?.sourcePath ??
-      files.find((f) => existsSync(f.sourcePath))?.sourcePath;
-    if (canonicalSource && existsSync(canonicalSource)) {
-      createDirectory(topLevelSkillDir);
-      copyFileUTF8(canonicalSource, join(topLevelSkillDir, 'SKILL.md'));
-      skillDirectories.push(topLevelSkillDir);
-
-      for (const platformDir of [claudeSkillDir, geminiSkillDir, agentsSkillDir, codexSkillDir]) {
-        const platformDest = join(platformDir, 'SKILL.md');
-        if (!existsSync(platformDest)) {
-          copyFileUTF8(canonicalSource, platformDest);
-        }
+    for (const [rel, sourcePath] of canonical.entries()) {
+      if (!existsSync(sourcePath)) continue;
+      for (const root of roots) {
+        const dest = join(root.dir, rel);
+        mkdirSync(dirname(dest), { recursive: true });
+        copyFileSync(sourcePath, dest);
       }
     }
   }
 
   return skillDirectories;
+}
+
+/** The four platform skill-mirror roots (keys into the `.claude/.gemini/.agents/.codex` namespace). */
+type PlatformKey = 'claude' | 'gemini' | 'agents' | 'codex';
+
+/** Which skill root a (normalized) manifest targetPath was scanned from. */
+function detectSkillRoot(normalizedTarget: string): PlatformKey | 'top' {
+  if (normalizedTarget.includes('.claude/skills/')) return 'claude';
+  if (normalizedTarget.includes('.gemini/skills/')) return 'gemini';
+  if (normalizedTarget.includes('.agents/skills/')) return 'agents';
+  if (normalizedTarget.includes('.codex/skills/')) return 'codex';
+  return 'top';
 }
 
 // ============================================================================
