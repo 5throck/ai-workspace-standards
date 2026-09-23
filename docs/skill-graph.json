@@ -368,6 +368,11 @@
       "layer": "L0"
     },
     {
+      "id": "adr:0087",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
       "id": "agent-lifecycle-manager",
       "type": "skill",
       "layer": "L0"
@@ -700,7 +705,82 @@
       "layer": "L0"
     },
     {
+      "id": "doc:CLAUDE.md",
+      "type": "doc",
+      "layer": "L0"
+    },
+    {
       "id": "doc:co-abap/AGENTS.md",
+      "type": "doc",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "doc:co-abap/agents/co-analyst.md",
+      "type": "doc",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "doc:co-abap/agents/dba.md",
+      "type": "doc",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "doc:co-abap/agents/devops-admin.md",
+      "type": "doc",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "doc:co-abap/agents/fi-analyst.md",
+      "type": "doc",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "doc:co-abap/agents/i18n-specialist.md",
+      "type": "doc",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "doc:co-abap/agents/le-analyst.md",
+      "type": "doc",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "doc:co-abap/agents/mm-analyst.md",
+      "type": "doc",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "doc:co-abap/agents/pp-analyst.md",
+      "type": "doc",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "doc:co-abap/agents/sd-analyst.md",
+      "type": "doc",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "doc:co-abap/docs/co-abap.context.md",
+      "type": "doc",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "doc:co-abap/docs/transport-release-checklist.md",
+      "type": "doc",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "doc:co-abap/docs/user-guide_ko.md",
+      "type": "doc",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "doc:co-abap/docs/user-guide.md",
+      "type": "doc",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "doc:co-abap/README.md",
       "type": "doc",
       "layer": "variant:co-abap"
     },
@@ -710,7 +790,52 @@
       "layer": "variant:co-consult"
     },
     {
+      "id": "doc:co-consult/agents/i18n-specialist.md",
+      "type": "doc",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "doc:co-consult/docs/co-consult.context.md",
+      "type": "doc",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "doc:co-consult/docs/disclosure-ingestion-contract.md",
+      "type": "doc",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "doc:co-consult/docs/engagement-orchestration.md",
+      "type": "doc",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "doc:co-consult/docs/kickoff-artifact-pack.md",
+      "type": "doc",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "doc:co-consult/docs/market-data-schema.md",
+      "type": "doc",
+      "layer": "variant:co-consult"
+    },
+    {
       "id": "doc:co-consult/docs/phase-definitions.md",
+      "type": "doc",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "doc:co-consult/docs/user-guide_ko.md",
+      "type": "doc",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "doc:co-consult/docs/user-guide.md",
+      "type": "doc",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "doc:co-consult/README.md",
       "type": "doc",
       "layer": "variant:co-consult"
     },
@@ -720,7 +845,92 @@
       "layer": "variant:co-deck"
     },
     {
+      "id": "doc:co-deck/agents/design.md",
+      "type": "doc",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "doc:co-deck/agents/html-build.md",
+      "type": "doc",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "doc:co-deck/agents/i18n-specialist.md",
+      "type": "doc",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "doc:co-deck/agents/image-curator.md",
+      "type": "doc",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "doc:co-deck/agents/measure.md",
+      "type": "doc",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "doc:co-deck/agents/pdf-export.md",
+      "type": "doc",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "doc:co-deck/agents/README.md",
+      "type": "doc",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "doc:co-deck/agents/research.md",
+      "type": "doc",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "doc:co-deck/agents/storyline.md",
+      "type": "doc",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "doc:co-deck/agents/version.md",
+      "type": "doc",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "doc:co-deck/docs/co-deck.context.md",
+      "type": "doc",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "doc:co-deck/docs/lecture-profile.md",
+      "type": "doc",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "doc:co-deck/docs/user-guide_ko.md",
+      "type": "doc",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "doc:co-deck/docs/user-guide.md",
+      "type": "doc",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "doc:co-deck/README.md",
+      "type": "doc",
+      "layer": "variant:co-deck"
+    },
+    {
       "id": "doc:co-design/AGENTS.md",
+      "type": "doc",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "doc:co-design/agents/i18n-specialist.md",
+      "type": "doc",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "doc:co-design/docs/co-design.context.md",
       "type": "doc",
       "layer": "variant:co-design"
     },
@@ -730,7 +940,37 @@
       "layer": "variant:co-design"
     },
     {
+      "id": "doc:co-design/docs/user-guide_ko.md",
+      "type": "doc",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "doc:co-design/docs/user-guide.md",
+      "type": "doc",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "doc:co-design/README.md",
+      "type": "doc",
+      "layer": "variant:co-design"
+    },
+    {
       "id": "doc:co-develop/AGENTS.md",
+      "type": "doc",
+      "layer": "variant:co-develop"
+    },
+    {
+      "id": "doc:co-develop/agents/designer.md",
+      "type": "doc",
+      "layer": "variant:co-develop"
+    },
+    {
+      "id": "doc:co-develop/agents/i18n-specialist.md",
+      "type": "doc",
+      "layer": "variant:co-develop"
+    },
+    {
+      "id": "doc:co-develop/docs/co-develop.context.md",
       "type": "doc",
       "layer": "variant:co-develop"
     },
@@ -740,7 +980,32 @@
       "layer": "variant:co-develop"
     },
     {
+      "id": "doc:co-develop/docs/user-guide_ko.md",
+      "type": "doc",
+      "layer": "variant:co-develop"
+    },
+    {
+      "id": "doc:co-develop/docs/user-guide.md",
+      "type": "doc",
+      "layer": "variant:co-develop"
+    },
+    {
+      "id": "doc:co-develop/README.md",
+      "type": "doc",
+      "layer": "variant:co-develop"
+    },
+    {
       "id": "doc:co-export/AGENTS.md",
+      "type": "doc",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "doc:co-export/agents/i18n-specialist.md",
+      "type": "doc",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "doc:co-export/docs/co-export.context.md",
       "type": "doc",
       "layer": "variant:co-export"
     },
@@ -750,7 +1015,52 @@
       "layer": "variant:co-export"
     },
     {
+      "id": "doc:co-export/docs/tariff-dataset-schema.md",
+      "type": "doc",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "doc:co-export/docs/user-guide_ko.md",
+      "type": "doc",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "doc:co-export/docs/user-guide.md",
+      "type": "doc",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "doc:co-export/README.md",
+      "type": "doc",
+      "layer": "variant:co-export"
+    },
+    {
       "id": "doc:co-game/AGENTS.md",
+      "type": "doc",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "doc:co-game/agents/i18n-specialist.md",
+      "type": "doc",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "doc:co-game/docs/co-game.context.md",
+      "type": "doc",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "doc:co-game/docs/user-guide_ko.md",
+      "type": "doc",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "doc:co-game/docs/user-guide.md",
+      "type": "doc",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "doc:co-game/README.md",
       "type": "doc",
       "layer": "variant:co-game"
     },
@@ -760,7 +1070,107 @@
       "layer": "variant:co-hr"
     },
     {
+      "id": "doc:co-hr/agents/i18n-specialist.md",
+      "type": "doc",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "doc:co-hr/docs/co-hr.context.md",
+      "type": "doc",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "doc:co-hr/docs/engagement-orchestration.md",
+      "type": "doc",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "doc:co-hr/docs/iso-30414-metrics-mapping.md",
+      "type": "doc",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "doc:co-hr/docs/metric-dictionary-schema.md",
+      "type": "doc",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "doc:co-hr/docs/user-guide_ko.md",
+      "type": "doc",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "doc:co-hr/docs/user-guide.md",
+      "type": "doc",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "doc:co-hr/README.md",
+      "type": "doc",
+      "layer": "variant:co-hr"
+    },
+    {
       "id": "doc:co-news/AGENTS.md",
+      "type": "doc",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "doc:co-news/agents/financial-analyst.md",
+      "type": "doc",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "doc:co-news/agents/i18n-specialist.md",
+      "type": "doc",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "doc:co-news/agents/legal-researcher.md",
+      "type": "doc",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "doc:co-news/agents/reporter.md",
+      "type": "doc",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "doc:co-news/agents/style-editor.md",
+      "type": "doc",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "doc:co-news/agents/visual-editor.md",
+      "type": "doc",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "doc:co-news/docs/co-news.context.md",
+      "type": "doc",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "doc:co-news/docs/financial-journalism-style-guide.md",
+      "type": "doc",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "doc:co-news/docs/user-guide_ko.md",
+      "type": "doc",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "doc:co-news/docs/user-guide.md",
+      "type": "doc",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "doc:co-news/docs/wire-format.md",
+      "type": "doc",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "doc:co-news/README.md",
       "type": "doc",
       "layer": "variant:co-news"
     },
@@ -770,7 +1180,207 @@
       "layer": "variant:co-price"
     },
     {
+      "id": "doc:co-price/agents/cpa-auditor.md",
+      "type": "doc",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "doc:co-price/agents/engagement-director.md",
+      "type": "doc",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "doc:co-price/agents/finance-strategy-lead.md",
+      "type": "doc",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "doc:co-price/agents/i18n-specialist.md",
+      "type": "doc",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "doc:co-price/agents/market-intelligence-analyst.md",
+      "type": "doc",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "doc:co-price/agents/pricing-strategist.md",
+      "type": "doc",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "doc:co-price/docs/co-price.context.md",
+      "type": "doc",
+      "layer": "variant:co-price"
+    },
+    {
+      "id": "doc:co-price/README.md",
+      "type": "doc",
+      "layer": "variant:co-price"
+    },
+    {
       "id": "doc:co-safety/AGENTS.md",
+      "type": "doc",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "doc:co-safety/agents/compliance-agent.md",
+      "type": "doc",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "doc:co-safety/agents/ehschem-agent.md",
+      "type": "doc",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "doc:co-safety/agents/ehsconst-agent.md",
+      "type": "doc",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "doc:co-safety/agents/emergency-agent.md",
+      "type": "doc",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "doc:co-safety/agents/food-agent.md",
+      "type": "doc",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "doc:co-safety/agents/gasterm-agent.md",
+      "type": "doc",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "doc:co-safety/agents/gcp-agent.md",
+      "type": "doc",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "doc:co-safety/agents/gdp-agent.md",
+      "type": "doc",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "doc:co-safety/agents/glp-agent.md",
+      "type": "doc",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "doc:co-safety/agents/gmp-agent.md",
+      "type": "doc",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "doc:co-safety/agents/gvp-agent.md",
+      "type": "doc",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "doc:co-safety/agents/i18n-specialist.md",
+      "type": "doc",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "doc:co-safety/agents/legal-agent.md",
+      "type": "doc",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "doc:co-safety/agents/meddevice-agent.md",
+      "type": "doc",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "doc:co-safety/agents/msds-agent.md",
+      "type": "doc",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "doc:co-safety/agents/powergen-agent.md",
+      "type": "doc",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "doc:co-safety/agents/psm-agent.md",
+      "type": "doc",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "doc:co-safety/agents/risk-assessment-agent.md",
+      "type": "doc",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "doc:co-safety/agents/safety-governance-manager.md",
+      "type": "doc",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "doc:co-safety/agents/shipbuilding-agent.md",
+      "type": "doc",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "doc:co-safety/agents/steelmaking-agent.md",
+      "type": "doc",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "doc:co-safety/agents/training-agent.md",
+      "type": "doc",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "doc:co-safety/agents/waste-agent.md",
+      "type": "doc",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "doc:co-safety/docs/co-safety.context.md",
+      "type": "doc",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "doc:co-safety/docs/user-guide_ko.md",
+      "type": "doc",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "doc:co-safety/docs/user-guide.md",
+      "type": "doc",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "doc:co-safety/README.md",
+      "type": "doc",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "doc:co-safety/workflows/_INDEX.md",
+      "type": "doc",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "doc:co-safety/workflows/README.en.md",
+      "type": "doc",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "doc:co-safety/workflows/README.md",
+      "type": "doc",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "doc:co-safety/workflows/REFERENCE-SPEC.md",
+      "type": "doc",
+      "layer": "variant:co-safety"
+    },
+    {
+      "id": "doc:co-safety/workflows/schema.yaml",
       "type": "doc",
       "layer": "variant:co-safety"
     },
@@ -780,7 +1390,67 @@
       "layer": "variant:co-security"
     },
     {
+      "id": "doc:co-security/agents/i18n-specialist.md",
+      "type": "doc",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "doc:co-security/agents/patch-engineer.md",
+      "type": "doc",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "doc:co-security/agents/pentester.md",
+      "type": "doc",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "doc:co-security/agents/README_ko.md",
+      "type": "doc",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "doc:co-security/agents/README.md",
+      "type": "doc",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "doc:co-security/agents/red-team-lead.md",
+      "type": "doc",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "doc:co-security/agents/report-writer.md",
+      "type": "doc",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "doc:co-security/agents/threat-modeler.md",
+      "type": "doc",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "doc:co-security/docs/co-security.context.md",
+      "type": "doc",
+      "layer": "variant:co-security"
+    },
+    {
       "id": "doc:co-security/docs/phase-definitions.md",
+      "type": "doc",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "doc:co-security/docs/user-guide_ko.md",
+      "type": "doc",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "doc:co-security/docs/user-guide.md",
+      "type": "doc",
+      "layer": "variant:co-security"
+    },
+    {
+      "id": "doc:co-security/README.md",
       "type": "doc",
       "layer": "variant:co-security"
     },
@@ -790,9 +1460,34 @@
       "layer": "variant:co-work"
     },
     {
+      "id": "doc:co-work/agents/i18n-specialist.md",
+      "type": "doc",
+      "layer": "variant:co-work"
+    },
+    {
+      "id": "doc:co-work/docs/co-work.context.md",
+      "type": "doc",
+      "layer": "variant:co-work"
+    },
+    {
+      "id": "doc:co-work/docs/document-style-registry.md",
+      "type": "doc",
+      "layer": "variant:co-work"
+    },
+    {
       "id": "doc:co-work/docs/phase-definitions.md",
       "type": "doc",
       "layer": "variant:co-work"
+    },
+    {
+      "id": "doc:co-work/README.md",
+      "type": "doc",
+      "layer": "variant:co-work"
+    },
+    {
+      "id": "doc:GEMINI.md",
+      "type": "doc",
+      "layer": "L0"
     },
     {
       "id": "docs-writer",
@@ -5202,6 +5897,12 @@
       "source": "prose"
     },
     {
+      "type": "references",
+      "from": "adr:0087",
+      "to": "handbook",
+      "source": "prose"
+    },
+    {
       "type": "composes_with",
       "from": "agent-lifecycle-manager",
       "to": "skill-lifecycle-manager",
@@ -7292,6 +7993,12 @@
     },
     {
       "type": "cites_skill",
+      "from": "doc:CLAUDE.md",
+      "to": "meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
       "from": "doc:co-abap/AGENTS.md",
       "to": "abap-code-review",
       "source": "workflow-doc"
@@ -7382,6 +8089,324 @@
     },
     {
       "type": "cites_skill",
+      "from": "doc:co-abap/agents/co-analyst.md",
+      "to": "sap-co",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/agents/dba.md",
+      "to": "performance-tuning",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/agents/devops-admin.md",
+      "to": "dump-monitor",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/agents/fi-analyst.md",
+      "to": "sap-fi",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/agents/i18n-specialist.md",
+      "to": "i18n-audit",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/agents/i18n-specialist.md",
+      "to": "i18n-formatting",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/agents/i18n-specialist.md",
+      "to": "i18n-layout",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/agents/i18n-specialist.md",
+      "to": "i18n-locale-config",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/agents/i18n-specialist.md",
+      "to": "k-dart",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/agents/i18n-specialist.md",
+      "to": "k-kosis",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/agents/i18n-specialist.md",
+      "to": "k-law",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/agents/i18n-specialist.md",
+      "to": "translate",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/agents/le-analyst.md",
+      "to": "sap-le",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/agents/mm-analyst.md",
+      "to": "sap-mm",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/agents/pp-analyst.md",
+      "to": "sap-pp",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/agents/sd-analyst.md",
+      "to": "sap-sd",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/docs/co-abap.context.md",
+      "to": "abap-code-review",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/docs/co-abap.context.md",
+      "to": "abap-dev",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/docs/co-abap.context.md",
+      "to": "desktop-app-fallback",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/docs/co-abap.context.md",
+      "to": "dump-monitor",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/docs/co-abap.context.md",
+      "to": "meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/docs/co-abap.context.md",
+      "to": "performance-tuning",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/docs/co-abap.context.md",
+      "to": "post-write-chain",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/docs/co-abap.context.md",
+      "to": "project-review",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/docs/co-abap.context.md",
+      "to": "sap-co",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/docs/co-abap.context.md",
+      "to": "sap-fi",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/docs/co-abap.context.md",
+      "to": "sap-le",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/docs/co-abap.context.md",
+      "to": "sap-mm",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/docs/co-abap.context.md",
+      "to": "sap-pp",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/docs/co-abap.context.md",
+      "to": "sap-sd",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/docs/co-abap.context.md",
+      "to": "source-command-celebrate",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/docs/co-abap.context.md",
+      "to": "sync",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/docs/transport-release-checklist.md",
+      "to": "abap-dev",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/docs/user-guide_ko.md",
+      "to": "abap-dev",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/docs/user-guide_ko.md",
+      "to": "desktop-app-fallback",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/docs/user-guide_ko.md",
+      "to": "dump-monitor",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/docs/user-guide_ko.md",
+      "to": "performance-tuning",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/docs/user-guide_ko.md",
+      "to": "post-write-chain",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/docs/user-guide_ko.md",
+      "to": "sap-le",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/docs/user-guide_ko.md",
+      "to": "sap-sd",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/docs/user-guide.md",
+      "to": "abap-dev",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/docs/user-guide.md",
+      "to": "desktop-app-fallback",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/docs/user-guide.md",
+      "to": "dump-monitor",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/docs/user-guide.md",
+      "to": "performance-tuning",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/docs/user-guide.md",
+      "to": "post-write-chain",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/docs/user-guide.md",
+      "to": "sap-le",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/docs/user-guide.md",
+      "to": "sap-sd",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/README.md",
+      "to": "abap-dev",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/README.md",
+      "to": "desktop-app-fallback",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/README.md",
+      "to": "dump-monitor",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/README.md",
+      "to": "performance-tuning",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/README.md",
+      "to": "post-write-chain",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/README.md",
+      "to": "source-command-celebrate",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
       "from": "doc:co-consult/AGENTS.md",
       "to": "agent-lifecycle-manager",
       "source": "workflow-doc"
@@ -7413,6 +8438,12 @@
     {
       "type": "cites_skill",
       "from": "doc:co-consult/AGENTS.md",
+      "to": "meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/AGENTS.md",
       "to": "platform-command-lifecycle-manager",
       "source": "workflow-doc"
     },
@@ -7426,6 +8457,312 @@
       "type": "cites_skill",
       "from": "doc:co-consult/AGENTS.md",
       "to": "skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/agents/i18n-specialist.md",
+      "to": "i18n-audit",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/agents/i18n-specialist.md",
+      "to": "i18n-formatting",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/agents/i18n-specialist.md",
+      "to": "i18n-layout",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/agents/i18n-specialist.md",
+      "to": "i18n-locale-config",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/agents/i18n-specialist.md",
+      "to": "k-dart",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/agents/i18n-specialist.md",
+      "to": "k-kosis",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/agents/i18n-specialist.md",
+      "to": "k-law",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/agents/i18n-specialist.md",
+      "to": "translate",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/co-consult.context.md",
+      "to": "agent-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/co-consult.context.md",
+      "to": "change-impact-assessment",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/co-consult.context.md",
+      "to": "company-intelligence",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/co-consult.context.md",
+      "to": "competitive-intelligence",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/co-consult.context.md",
+      "to": "consulting-report-writing",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/co-consult.context.md",
+      "to": "documentation-writing",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/co-consult.context.md",
+      "to": "executive-presentation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/co-consult.context.md",
+      "to": "financial-modeling",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/co-consult.context.md",
+      "to": "financial-statement-analysis",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/co-consult.context.md",
+      "to": "insight-synthesis",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/co-consult.context.md",
+      "to": "k-dart",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/co-consult.context.md",
+      "to": "meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/co-consult.context.md",
+      "to": "narrative-framework",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/co-consult.context.md",
+      "to": "org-readiness-assessment",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/co-consult.context.md",
+      "to": "project-delivery",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/co-consult.context.md",
+      "to": "project-review",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/co-consult.context.md",
+      "to": "research-analysis",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/co-consult.context.md",
+      "to": "skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/co-consult.context.md",
+      "to": "solution-design",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/co-consult.context.md",
+      "to": "stakeholder-alignment",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/co-consult.context.md",
+      "to": "stakeholder-review-management",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/co-consult.context.md",
+      "to": "team-builder",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/co-consult.context.md",
+      "to": "technical-feasibility",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/disclosure-ingestion-contract.md",
+      "to": "financial-statement-analysis",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/disclosure-ingestion-contract.md",
+      "to": "k-dart",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/engagement-orchestration.md",
+      "to": "change-impact-assessment",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/engagement-orchestration.md",
+      "to": "consulting-report-writing",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/engagement-orchestration.md",
+      "to": "executive-presentation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/engagement-orchestration.md",
+      "to": "financial-modeling",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/engagement-orchestration.md",
+      "to": "insight-synthesis",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/engagement-orchestration.md",
+      "to": "narrative-framework",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/engagement-orchestration.md",
+      "to": "org-readiness-assessment",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/engagement-orchestration.md",
+      "to": "project-delivery",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/engagement-orchestration.md",
+      "to": "solution-design",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/engagement-orchestration.md",
+      "to": "stakeholder-alignment",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/engagement-orchestration.md",
+      "to": "stakeholder-review-management",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/engagement-orchestration.md",
+      "to": "technical-feasibility",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/kickoff-artifact-pack.md",
+      "to": "consulting-report-writing",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/kickoff-artifact-pack.md",
+      "to": "insight-synthesis",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/kickoff-artifact-pack.md",
+      "to": "mece-logic-auditor",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/kickoff-artifact-pack.md",
+      "to": "stakeholder-alignment",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/market-data-schema.md",
+      "to": "financial-modeling",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/market-data-schema.md",
+      "to": "financial-statement-analysis",
       "source": "workflow-doc"
     },
     {
@@ -7472,6 +8809,306 @@
     },
     {
       "type": "cites_skill",
+      "from": "doc:co-consult/docs/user-guide_ko.md",
+      "to": "change-impact-assessment",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/user-guide_ko.md",
+      "to": "company-intelligence",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/user-guide_ko.md",
+      "to": "competitive-intelligence",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/user-guide_ko.md",
+      "to": "consulting-report-writing",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/user-guide_ko.md",
+      "to": "executive-presentation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/user-guide_ko.md",
+      "to": "financial-modeling",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/user-guide_ko.md",
+      "to": "financial-statement-analysis",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/user-guide_ko.md",
+      "to": "insight-synthesis",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/user-guide_ko.md",
+      "to": "k-dart",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/user-guide_ko.md",
+      "to": "narrative-framework",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/user-guide_ko.md",
+      "to": "org-readiness-assessment",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/user-guide_ko.md",
+      "to": "project-delivery",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/user-guide_ko.md",
+      "to": "solution-design",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/user-guide_ko.md",
+      "to": "stakeholder-alignment",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/user-guide_ko.md",
+      "to": "stakeholder-review-management",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/user-guide_ko.md",
+      "to": "technical-feasibility",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/user-guide.md",
+      "to": "change-impact-assessment",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/user-guide.md",
+      "to": "company-intelligence",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/user-guide.md",
+      "to": "competitive-intelligence",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/user-guide.md",
+      "to": "consulting-report-writing",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/user-guide.md",
+      "to": "executive-presentation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/user-guide.md",
+      "to": "financial-modeling",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/user-guide.md",
+      "to": "financial-statement-analysis",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/user-guide.md",
+      "to": "insight-synthesis",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/user-guide.md",
+      "to": "k-dart",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/user-guide.md",
+      "to": "narrative-framework",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/user-guide.md",
+      "to": "org-readiness-assessment",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/user-guide.md",
+      "to": "project-delivery",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/user-guide.md",
+      "to": "solution-design",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/user-guide.md",
+      "to": "stakeholder-alignment",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/user-guide.md",
+      "to": "stakeholder-review-management",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/docs/user-guide.md",
+      "to": "technical-feasibility",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/README.md",
+      "to": "change-impact-assessment",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/README.md",
+      "to": "company-intelligence",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/README.md",
+      "to": "competitive-intelligence",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/README.md",
+      "to": "consulting-report-writing",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/README.md",
+      "to": "executive-presentation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/README.md",
+      "to": "financial-modeling",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/README.md",
+      "to": "financial-statement-analysis",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/README.md",
+      "to": "hwp-document-processing",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/README.md",
+      "to": "insight-synthesis",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/README.md",
+      "to": "mece-logic-auditor",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/README.md",
+      "to": "narrative-framework",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/README.md",
+      "to": "org-readiness-assessment",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/README.md",
+      "to": "project-delivery",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/README.md",
+      "to": "sample-driven-report-writing",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/README.md",
+      "to": "solution-design",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/README.md",
+      "to": "stakeholder-alignment",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/README.md",
+      "to": "stakeholder-review-management",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/README.md",
+      "to": "technical-feasibility",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
       "from": "doc:co-deck/AGENTS.md",
       "to": "agent-lifecycle-manager",
       "source": "workflow-doc"
@@ -7492,6 +9129,12 @@
       "type": "cites_skill",
       "from": "doc:co-deck/AGENTS.md",
       "to": "html-build",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/AGENTS.md",
+      "to": "meeting-facilitation",
       "source": "workflow-doc"
     },
     {
@@ -7538,6 +9181,348 @@
     },
     {
       "type": "cites_skill",
+      "from": "doc:co-deck/agents/design.md",
+      "to": "design",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/agents/html-build.md",
+      "to": "html-build",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/agents/i18n-specialist.md",
+      "to": "i18n-audit",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/agents/i18n-specialist.md",
+      "to": "i18n-formatting",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/agents/i18n-specialist.md",
+      "to": "i18n-layout",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/agents/i18n-specialist.md",
+      "to": "i18n-locale-config",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/agents/i18n-specialist.md",
+      "to": "k-dart",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/agents/i18n-specialist.md",
+      "to": "k-kosis",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/agents/i18n-specialist.md",
+      "to": "k-law",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/agents/i18n-specialist.md",
+      "to": "translate",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/agents/image-curator.md",
+      "to": "html-build",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/agents/measure.md",
+      "to": "prep-pdf",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/agents/pdf-export.md",
+      "to": "pdf-export",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/agents/README.md",
+      "to": "html-build",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/agents/README.md",
+      "to": "pdf-export",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/agents/research.md",
+      "to": "research",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/agents/storyline.md",
+      "to": "storyline",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/agents/version.md",
+      "to": "version",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/docs/co-deck.context.md",
+      "to": "agent-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/docs/co-deck.context.md",
+      "to": "design",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/docs/co-deck.context.md",
+      "to": "handbook",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/docs/co-deck.context.md",
+      "to": "html-build",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/docs/co-deck.context.md",
+      "to": "pdf-export",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/docs/co-deck.context.md",
+      "to": "prep-pdf",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/docs/co-deck.context.md",
+      "to": "research",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/docs/co-deck.context.md",
+      "to": "skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/docs/co-deck.context.md",
+      "to": "slide-layout-gate",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/docs/co-deck.context.md",
+      "to": "storyline",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/docs/co-deck.context.md",
+      "to": "theme-authoring",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/docs/co-deck.context.md",
+      "to": "version",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/docs/lecture-profile.md",
+      "to": "html-build",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/docs/lecture-profile.md",
+      "to": "pdf-export",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/docs/lecture-profile.md",
+      "to": "research",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/docs/lecture-profile.md",
+      "to": "storyline",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/docs/user-guide_ko.md",
+      "to": "design",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/docs/user-guide_ko.md",
+      "to": "handbook",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/docs/user-guide_ko.md",
+      "to": "html-build",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/docs/user-guide_ko.md",
+      "to": "pdf-export",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/docs/user-guide_ko.md",
+      "to": "prep-pdf",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/docs/user-guide_ko.md",
+      "to": "research",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/docs/user-guide_ko.md",
+      "to": "storyline",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/docs/user-guide_ko.md",
+      "to": "theme-authoring",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/docs/user-guide_ko.md",
+      "to": "version",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/docs/user-guide.md",
+      "to": "design",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/docs/user-guide.md",
+      "to": "handbook",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/docs/user-guide.md",
+      "to": "html-build",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/docs/user-guide.md",
+      "to": "pdf-export",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/docs/user-guide.md",
+      "to": "prep-pdf",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/docs/user-guide.md",
+      "to": "research",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/docs/user-guide.md",
+      "to": "storyline",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/docs/user-guide.md",
+      "to": "theme-authoring",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/docs/user-guide.md",
+      "to": "version",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/README.md",
+      "to": "html-build",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/README.md",
+      "to": "pdf-export",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/README.md",
+      "to": "prep-pdf",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/README.md",
+      "to": "presenter-mode",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/README.md",
+      "to": "theme-authoring",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
       "from": "doc:co-design/AGENTS.md",
       "to": "agent-lifecycle-manager",
       "source": "workflow-doc"
@@ -7545,6 +9530,72 @@
     {
       "type": "cites_skill",
       "from": "doc:co-design/AGENTS.md",
+      "to": "meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/AGENTS.md",
+      "to": "skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/agents/i18n-specialist.md",
+      "to": "i18n-audit",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/agents/i18n-specialist.md",
+      "to": "i18n-formatting",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/agents/i18n-specialist.md",
+      "to": "i18n-layout",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/agents/i18n-specialist.md",
+      "to": "i18n-locale-config",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/agents/i18n-specialist.md",
+      "to": "k-dart",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/agents/i18n-specialist.md",
+      "to": "k-kosis",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/agents/i18n-specialist.md",
+      "to": "k-law",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/agents/i18n-specialist.md",
+      "to": "translate",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/docs/co-design.context.md",
+      "to": "agent-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/docs/co-design.context.md",
       "to": "skill-lifecycle-manager",
       "source": "workflow-doc"
     },
@@ -7556,8 +9607,56 @@
     },
     {
       "type": "cites_skill",
+      "from": "doc:co-design/docs/user-guide_ko.md",
+      "to": "service-design",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/docs/user-guide_ko.md",
+      "to": "ui-ux-design-intelligence",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/docs/user-guide.md",
+      "to": "service-design",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/docs/user-guide.md",
+      "to": "ui-ux-design-intelligence",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/README.md",
+      "to": "accessibility-audit",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/README.md",
+      "to": "service-design",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/README.md",
+      "to": "ui-ux-design-intelligence",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
       "from": "doc:co-develop/AGENTS.md",
       "to": "agent-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/AGENTS.md",
+      "to": "meeting-facilitation",
       "source": "workflow-doc"
     },
     {
@@ -7568,8 +9667,176 @@
     },
     {
       "type": "cites_skill",
+      "from": "doc:co-develop/agents/designer.md",
+      "to": "code-review",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/agents/designer.md",
+      "to": "refactoring",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/agents/designer.md",
+      "to": "swe-solve",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/agents/designer.md",
+      "to": "test-driven-development",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/agents/designer.md",
+      "to": "ui-ux-design-intelligence",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/agents/i18n-specialist.md",
+      "to": "i18n-audit",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/agents/i18n-specialist.md",
+      "to": "i18n-formatting",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/agents/i18n-specialist.md",
+      "to": "i18n-layout",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/agents/i18n-specialist.md",
+      "to": "i18n-locale-config",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/agents/i18n-specialist.md",
+      "to": "k-dart",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/agents/i18n-specialist.md",
+      "to": "k-kosis",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/agents/i18n-specialist.md",
+      "to": "k-law",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/agents/i18n-specialist.md",
+      "to": "translate",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/docs/co-develop.context.md",
+      "to": "agent-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/docs/co-develop.context.md",
+      "to": "skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
       "from": "doc:co-develop/docs/phase-definitions.md",
       "to": "project-review",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/docs/user-guide_ko.md",
+      "to": "code-review",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/docs/user-guide_ko.md",
+      "to": "project-review",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/docs/user-guide_ko.md",
+      "to": "refactoring",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/docs/user-guide_ko.md",
+      "to": "sync",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/docs/user-guide_ko.md",
+      "to": "test-driven-development",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/docs/user-guide.md",
+      "to": "code-review",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/docs/user-guide.md",
+      "to": "project-review",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/docs/user-guide.md",
+      "to": "refactoring",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/docs/user-guide.md",
+      "to": "sync",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/docs/user-guide.md",
+      "to": "test-driven-development",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/README.md",
+      "to": "code-review",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/README.md",
+      "to": "swe-solve",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/README.md",
+      "to": "test-driven-development",
       "source": "workflow-doc"
     },
     {
@@ -7624,6 +9891,120 @@
       "type": "cites_skill",
       "from": "doc:co-export/AGENTS.md",
       "to": "sync",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/agents/i18n-specialist.md",
+      "to": "i18n-audit",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/agents/i18n-specialist.md",
+      "to": "i18n-formatting",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/agents/i18n-specialist.md",
+      "to": "i18n-layout",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/agents/i18n-specialist.md",
+      "to": "i18n-locale-config",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/agents/i18n-specialist.md",
+      "to": "k-dart",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/agents/i18n-specialist.md",
+      "to": "k-kosis",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/agents/i18n-specialist.md",
+      "to": "k-law",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/agents/i18n-specialist.md",
+      "to": "translate",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/docs/co-export.context.md",
+      "to": "agent-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/docs/co-export.context.md",
+      "to": "customs-duty-drawback-workflow",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/docs/co-export.context.md",
+      "to": "export-control-screening",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/docs/co-export.context.md",
+      "to": "foreign-regulation-monitoring",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/docs/co-export.context.md",
+      "to": "fta-origin-determination",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/docs/co-export.context.md",
+      "to": "halal-certification-workflow",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/docs/co-export.context.md",
+      "to": "hs-classification-workflow",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/docs/co-export.context.md",
+      "to": "logistics-coordination",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/docs/co-export.context.md",
+      "to": "market-entry-strategy",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/docs/co-export.context.md",
+      "to": "skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/docs/co-export.context.md",
+      "to": "trade-documentation-checklist",
       "source": "workflow-doc"
     },
     {
@@ -7640,6 +10021,180 @@
     },
     {
       "type": "cites_skill",
+      "from": "doc:co-export/docs/tariff-dataset-schema.md",
+      "to": "fta-origin-determination",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/docs/tariff-dataset-schema.md",
+      "to": "hs-classification-workflow",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/docs/user-guide_ko.md",
+      "to": "customs-duty-drawback-workflow",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/docs/user-guide_ko.md",
+      "to": "export-control-screening",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/docs/user-guide_ko.md",
+      "to": "foreign-regulation-monitoring",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/docs/user-guide_ko.md",
+      "to": "fta-origin-determination",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/docs/user-guide_ko.md",
+      "to": "halal-certification-workflow",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/docs/user-guide_ko.md",
+      "to": "hs-classification-workflow",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/docs/user-guide_ko.md",
+      "to": "logistics-coordination",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/docs/user-guide_ko.md",
+      "to": "market-entry-strategy",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/docs/user-guide_ko.md",
+      "to": "trade-documentation-checklist",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/docs/user-guide.md",
+      "to": "customs-duty-drawback-workflow",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/docs/user-guide.md",
+      "to": "export-control-screening",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/docs/user-guide.md",
+      "to": "foreign-regulation-monitoring",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/docs/user-guide.md",
+      "to": "fta-origin-determination",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/docs/user-guide.md",
+      "to": "halal-certification-workflow",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/docs/user-guide.md",
+      "to": "hs-classification-workflow",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/docs/user-guide.md",
+      "to": "logistics-coordination",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/docs/user-guide.md",
+      "to": "market-entry-strategy",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/docs/user-guide.md",
+      "to": "trade-documentation-checklist",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/README.md",
+      "to": "customs-duty-drawback-workflow",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/README.md",
+      "to": "export-control-screening",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/README.md",
+      "to": "foreign-regulation-monitoring",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/README.md",
+      "to": "fta-origin-determination",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/README.md",
+      "to": "halal-certification-workflow",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/README.md",
+      "to": "hs-classification-workflow",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/README.md",
+      "to": "logistics-coordination",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/README.md",
+      "to": "market-entry-strategy",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/README.md",
+      "to": "trade-documentation-checklist",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
       "from": "doc:co-game/AGENTS.md",
       "to": "agent-lifecycle-manager",
       "source": "workflow-doc"
@@ -7647,7 +10202,187 @@
     {
       "type": "cites_skill",
       "from": "doc:co-game/AGENTS.md",
+      "to": "meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/AGENTS.md",
       "to": "skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/agents/i18n-specialist.md",
+      "to": "i18n-audit",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/agents/i18n-specialist.md",
+      "to": "i18n-formatting",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/agents/i18n-specialist.md",
+      "to": "i18n-layout",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/agents/i18n-specialist.md",
+      "to": "i18n-locale-config",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/agents/i18n-specialist.md",
+      "to": "k-dart",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/agents/i18n-specialist.md",
+      "to": "k-kosis",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/agents/i18n-specialist.md",
+      "to": "k-law",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/agents/i18n-specialist.md",
+      "to": "translate",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/docs/co-game.context.md",
+      "to": "agent-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/docs/co-game.context.md",
+      "to": "skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/docs/user-guide_ko.md",
+      "to": "agent-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/docs/user-guide_ko.md",
+      "to": "code-review",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/docs/user-guide_ko.md",
+      "to": "meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/docs/user-guide_ko.md",
+      "to": "project-review",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/docs/user-guide_ko.md",
+      "to": "refactoring",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/docs/user-guide_ko.md",
+      "to": "security-scan",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/docs/user-guide_ko.md",
+      "to": "skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/docs/user-guide_ko.md",
+      "to": "test-driven-development",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/docs/user-guide.md",
+      "to": "agent-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/docs/user-guide.md",
+      "to": "code-review",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/docs/user-guide.md",
+      "to": "meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/docs/user-guide.md",
+      "to": "project-review",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/docs/user-guide.md",
+      "to": "refactoring",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/docs/user-guide.md",
+      "to": "security-scan",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/docs/user-guide.md",
+      "to": "skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/docs/user-guide.md",
+      "to": "test-driven-development",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/README.md",
+      "to": "code-review",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/README.md",
+      "to": "sound-synth",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/README.md",
+      "to": "test-driven-development",
       "source": "workflow-doc"
     },
     {
@@ -7706,6 +10441,366 @@
     },
     {
       "type": "cites_skill",
+      "from": "doc:co-hr/agents/i18n-specialist.md",
+      "to": "i18n-audit",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/agents/i18n-specialist.md",
+      "to": "i18n-formatting",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/agents/i18n-specialist.md",
+      "to": "i18n-layout",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/agents/i18n-specialist.md",
+      "to": "i18n-locale-config",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/agents/i18n-specialist.md",
+      "to": "k-dart",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/agents/i18n-specialist.md",
+      "to": "k-kosis",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/agents/i18n-specialist.md",
+      "to": "k-law",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/agents/i18n-specialist.md",
+      "to": "translate",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/docs/co-hr.context.md",
+      "to": "agent-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/docs/co-hr.context.md",
+      "to": "career-path-succession-planning",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/docs/co-hr.context.md",
+      "to": "compensation-benchmarking",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/docs/co-hr.context.md",
+      "to": "consulting-report-writing",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/docs/co-hr.context.md",
+      "to": "hr-metrics-analysis",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/docs/co-hr.context.md",
+      "to": "k-kosis",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/docs/co-hr.context.md",
+      "to": "k-law",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/docs/co-hr.context.md",
+      "to": "learning-curriculum-design",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/docs/co-hr.context.md",
+      "to": "org-design-framework",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/docs/co-hr.context.md",
+      "to": "org-readiness-assessment",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/docs/co-hr.context.md",
+      "to": "performance-system-design",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/docs/co-hr.context.md",
+      "to": "skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/docs/co-hr.context.md",
+      "to": "stakeholder-alignment",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/docs/co-hr.context.md",
+      "to": "talent-acquisition-strategy",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/docs/engagement-orchestration.md",
+      "to": "compensation-benchmarking",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/docs/engagement-orchestration.md",
+      "to": "org-readiness-assessment",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/docs/iso-30414-metrics-mapping.md",
+      "to": "hr-metrics-analysis",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/docs/metric-dictionary-schema.md",
+      "to": "hr-metrics-analysis",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/docs/user-guide_ko.md",
+      "to": "career-path-succession-planning",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/docs/user-guide_ko.md",
+      "to": "compensation-benchmarking",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/docs/user-guide_ko.md",
+      "to": "consulting-report-writing",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/docs/user-guide_ko.md",
+      "to": "hr-metrics-analysis",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/docs/user-guide_ko.md",
+      "to": "k-kosis",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/docs/user-guide_ko.md",
+      "to": "k-law",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/docs/user-guide_ko.md",
+      "to": "learning-curriculum-design",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/docs/user-guide_ko.md",
+      "to": "org-design-framework",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/docs/user-guide_ko.md",
+      "to": "org-readiness-assessment",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/docs/user-guide_ko.md",
+      "to": "performance-system-design",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/docs/user-guide_ko.md",
+      "to": "stakeholder-alignment",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/docs/user-guide_ko.md",
+      "to": "talent-acquisition-strategy",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/docs/user-guide.md",
+      "to": "career-path-succession-planning",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/docs/user-guide.md",
+      "to": "compensation-benchmarking",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/docs/user-guide.md",
+      "to": "consulting-report-writing",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/docs/user-guide.md",
+      "to": "hr-metrics-analysis",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/docs/user-guide.md",
+      "to": "k-kosis",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/docs/user-guide.md",
+      "to": "k-law",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/docs/user-guide.md",
+      "to": "learning-curriculum-design",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/docs/user-guide.md",
+      "to": "org-design-framework",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/docs/user-guide.md",
+      "to": "org-readiness-assessment",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/docs/user-guide.md",
+      "to": "performance-system-design",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/docs/user-guide.md",
+      "to": "stakeholder-alignment",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/docs/user-guide.md",
+      "to": "talent-acquisition-strategy",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/README.md",
+      "to": "career-path-succession-planning",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/README.md",
+      "to": "compensation-benchmarking",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/README.md",
+      "to": "consulting-report-writing",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/README.md",
+      "to": "hr-metrics-analysis",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/README.md",
+      "to": "learning-curriculum-design",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/README.md",
+      "to": "org-design-framework",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/README.md",
+      "to": "org-readiness-assessment",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/README.md",
+      "to": "performance-system-design",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/README.md",
+      "to": "stakeholder-alignment",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/README.md",
+      "to": "talent-acquisition-strategy",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
       "from": "doc:co-news/AGENTS.md",
       "to": "agent-lifecycle-manager",
       "source": "workflow-doc"
@@ -7756,6 +10851,288 @@
       "type": "cites_skill",
       "from": "doc:co-news/AGENTS.md",
       "to": "sync",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/agents/financial-analyst.md",
+      "to": "k-dart",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/agents/i18n-specialist.md",
+      "to": "i18n-audit",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/agents/i18n-specialist.md",
+      "to": "i18n-formatting",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/agents/i18n-specialist.md",
+      "to": "i18n-layout",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/agents/i18n-specialist.md",
+      "to": "i18n-locale-config",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/agents/i18n-specialist.md",
+      "to": "k-dart",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/agents/i18n-specialist.md",
+      "to": "k-kosis",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/agents/i18n-specialist.md",
+      "to": "k-law",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/agents/i18n-specialist.md",
+      "to": "translate",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/agents/legal-researcher.md",
+      "to": "k-law",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/agents/reporter.md",
+      "to": "financial-journalism-style",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/agents/style-editor.md",
+      "to": "ai-tell-reduction",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/agents/style-editor.md",
+      "to": "financial-journalism-style",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/agents/visual-editor.md",
+      "to": "financial-infographic-svg",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/docs/co-news.context.md",
+      "to": "agent-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/docs/co-news.context.md",
+      "to": "ai-tell-reduction",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/docs/co-news.context.md",
+      "to": "financial-infographic-svg",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/docs/co-news.context.md",
+      "to": "financial-journalism-style",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/docs/co-news.context.md",
+      "to": "financial-narrative-brief",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/docs/co-news.context.md",
+      "to": "k-dart",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/docs/co-news.context.md",
+      "to": "k-law",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/docs/co-news.context.md",
+      "to": "skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/docs/co-news.context.md",
+      "to": "source-verification-ledger",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/docs/financial-journalism-style-guide.md",
+      "to": "ai-tell-reduction",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/docs/financial-journalism-style-guide.md",
+      "to": "financial-journalism-style",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/docs/user-guide_ko.md",
+      "to": "ai-tell-reduction",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/docs/user-guide_ko.md",
+      "to": "financial-infographic-svg",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/docs/user-guide_ko.md",
+      "to": "financial-journalism-style",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/docs/user-guide_ko.md",
+      "to": "financial-narrative-brief",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/docs/user-guide_ko.md",
+      "to": "k-dart",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/docs/user-guide_ko.md",
+      "to": "k-law",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/docs/user-guide_ko.md",
+      "to": "source-verification-ledger",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/docs/user-guide.md",
+      "to": "ai-tell-reduction",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/docs/user-guide.md",
+      "to": "financial-infographic-svg",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/docs/user-guide.md",
+      "to": "financial-journalism-style",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/docs/user-guide.md",
+      "to": "financial-narrative-brief",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/docs/user-guide.md",
+      "to": "k-dart",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/docs/user-guide.md",
+      "to": "k-law",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/docs/user-guide.md",
+      "to": "source-verification-ledger",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/docs/wire-format.md",
+      "to": "financial-narrative-brief",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/docs/wire-format.md",
+      "to": "source-verification-ledger",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/docs/wire-format.md",
+      "to": "style-lint-checklist",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/README.md",
+      "to": "ai-tell-reduction",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/README.md",
+      "to": "financial-infographic-svg",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/README.md",
+      "to": "financial-journalism-style",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/README.md",
+      "to": "financial-narrative-brief",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/README.md",
+      "to": "source-verification-ledger",
       "source": "workflow-doc"
     },
     {
@@ -7808,6 +11185,270 @@
     },
     {
       "type": "cites_skill",
+      "from": "doc:co-price/agents/cpa-auditor.md",
+      "to": "double-entry-reconciliation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/agents/cpa-auditor.md",
+      "to": "harness-verification",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/agents/engagement-director.md",
+      "to": "pdf-export",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/agents/finance-strategy-lead.md",
+      "to": "price-waterfall-analysis",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/agents/i18n-specialist.md",
+      "to": "i18n-audit",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/agents/i18n-specialist.md",
+      "to": "i18n-formatting",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/agents/i18n-specialist.md",
+      "to": "i18n-layout",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/agents/i18n-specialist.md",
+      "to": "i18n-locale-config",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/agents/i18n-specialist.md",
+      "to": "k-dart",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/agents/i18n-specialist.md",
+      "to": "k-kosis",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/agents/i18n-specialist.md",
+      "to": "k-law",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/agents/i18n-specialist.md",
+      "to": "translate",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/agents/market-intelligence-analyst.md",
+      "to": "trade-promotion-roi",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/agents/pricing-strategist.md",
+      "to": "map-channel-enforcement",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/agents/pricing-strategist.md",
+      "to": "pricing-governance",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/docs/co-price.context.md",
+      "to": "agent-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/docs/co-price.context.md",
+      "to": "gabor-granger",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/docs/co-price.context.md",
+      "to": "harness-verification",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/docs/co-price.context.md",
+      "to": "i18n-audit",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/docs/co-price.context.md",
+      "to": "prisma-7",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/docs/co-price.context.md",
+      "to": "skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/docs/co-price.context.md",
+      "to": "trade-promotion-roi",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/docs/co-price.context.md",
+      "to": "van-westendorp-psm",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/README.md",
+      "to": "competitive-intelligence",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/README.md",
+      "to": "double-entry-reconciliation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/README.md",
+      "to": "excel-export",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/README.md",
+      "to": "executive-presentation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/README.md",
+      "to": "financial-statement-prep",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/README.md",
+      "to": "gabor-granger",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/README.md",
+      "to": "harness-verification",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/README.md",
+      "to": "i18n-audit",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/README.md",
+      "to": "insight-synthesis",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/README.md",
+      "to": "map-channel-enforcement",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/README.md",
+      "to": "math-function-plotter",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/README.md",
+      "to": "pdf-export",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/README.md",
+      "to": "price-waterfall-analysis",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/README.md",
+      "to": "pricing-governance",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/README.md",
+      "to": "pricing-playbook",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/README.md",
+      "to": "prisma-7",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/README.md",
+      "to": "scenario-comparison",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/README.md",
+      "to": "sheet-model",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/README.md",
+      "to": "trade-promotion-roi",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/README.md",
+      "to": "ui-component-design",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/README.md",
+      "to": "van-westendorp-psm",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
       "from": "doc:co-safety/AGENTS.md",
       "to": "agent-lifecycle-manager",
       "source": "workflow-doc"
@@ -7868,6 +11509,780 @@
     },
     {
       "type": "cites_skill",
+      "from": "doc:co-safety/agents/compliance-agent.md",
+      "to": "k-law",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/agents/ehschem-agent.md",
+      "to": "environmental-compliance-checker",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/agents/ehschem-agent.md",
+      "to": "process-hazard-screening",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/agents/ehschem-agent.md",
+      "to": "tar-planning",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/agents/ehsconst-agent.md",
+      "to": "fall-hazard-assessor",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/agents/ehsconst-agent.md",
+      "to": "safety-inspection-validator",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/agents/emergency-agent.md",
+      "to": "emergency-response",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/agents/food-agent.md",
+      "to": "psm-loto",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/agents/gasterm-agent.md",
+      "to": "construction-permit-overview",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/agents/gasterm-agent.md",
+      "to": "gas-dispersion-analyzer",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/agents/gasterm-agent.md",
+      "to": "tank-integrity-validator",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/agents/gcp-agent.md",
+      "to": "protocol-deviation-analyzer",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/agents/gcp-agent.md",
+      "to": "sae-causality-assessor",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/agents/gdp-agent.md",
+      "to": "dts-verification",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/agents/gdp-agent.md",
+      "to": "temperature-excursion-analyzer",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/agents/glp-agent.md",
+      "to": "glp-data-integrity-checker",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/agents/glp-agent.md",
+      "to": "glp-study-protocol-validator",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/agents/gmp-agent.md",
+      "to": "gmp-qrm",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/agents/gvp-agent.md",
+      "to": "benefit-risk-assessor",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/agents/gvp-agent.md",
+      "to": "signal-detector",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/agents/i18n-specialist.md",
+      "to": "i18n-audit",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/agents/i18n-specialist.md",
+      "to": "i18n-formatting",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/agents/i18n-specialist.md",
+      "to": "i18n-layout",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/agents/i18n-specialist.md",
+      "to": "i18n-locale-config",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/agents/i18n-specialist.md",
+      "to": "k-dart",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/agents/i18n-specialist.md",
+      "to": "k-kosis",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/agents/i18n-specialist.md",
+      "to": "k-law",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/agents/i18n-specialist.md",
+      "to": "translate",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/agents/legal-agent.md",
+      "to": "k-law",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/agents/meddevice-agent.md",
+      "to": "iso14971-risk-scorer",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/agents/msds-agent.md",
+      "to": "chemical-risk-assessment",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/agents/msds-agent.md",
+      "to": "ghs-classifier",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/agents/msds-agent.md",
+      "to": "msds-parser",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/agents/powergen-agent.md",
+      "to": "arc-flash-analyzer",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/agents/powergen-agent.md",
+      "to": "ess-fire-risk-assessor",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/agents/psm-agent.md",
+      "to": "gmp-qrm",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/agents/psm-agent.md",
+      "to": "tank-integrity-validator",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/agents/risk-assessment-agent.md",
+      "to": "fall-hazard-assessor",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/agents/risk-assessment-agent.md",
+      "to": "gmp-qrm",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/agents/risk-assessment-agent.md",
+      "to": "iso14971-risk-scorer",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/agents/safety-governance-manager.md",
+      "to": "k-law",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/agents/shipbuilding-agent.md",
+      "to": "psm-loto",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/agents/steelmaking-agent.md",
+      "to": "psm-loto",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/agents/training-agent.md",
+      "to": "contractor-onboarding",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/agents/waste-agent.md",
+      "to": "psm-loto",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/co-safety.context.md",
+      "to": "agent-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/co-safety.context.md",
+      "to": "k-law",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/co-safety.context.md",
+      "to": "permit-to-work",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/co-safety.context.md",
+      "to": "skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/co-safety.context.md",
+      "to": "tool-box-meeting",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/user-guide_ko.md",
+      "to": "arc-flash-analyzer",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/user-guide_ko.md",
+      "to": "asset-integrity-check",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/user-guide_ko.md",
+      "to": "audit-preparation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/user-guide_ko.md",
+      "to": "compliance-gap",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/user-guide_ko.md",
+      "to": "construction-permit-overview",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/user-guide_ko.md",
+      "to": "contractor-onboarding",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/user-guide_ko.md",
+      "to": "emergency-response",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/user-guide_ko.md",
+      "to": "ess-fire-risk-assessor",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/user-guide_ko.md",
+      "to": "ghs-classifier",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/user-guide_ko.md",
+      "to": "gmp-deviation-capa",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/user-guide_ko.md",
+      "to": "gmp-qrm",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/user-guide_ko.md",
+      "to": "k-law",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/user-guide_ko.md",
+      "to": "msds-parser",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/user-guide_ko.md",
+      "to": "permit-to-work",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/user-guide_ko.md",
+      "to": "process-hazard-screening",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/user-guide_ko.md",
+      "to": "psm-loto",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/user-guide_ko.md",
+      "to": "psm-moc",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/user-guide_ko.md",
+      "to": "risk-assessment",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/user-guide_ko.md",
+      "to": "root-cause-analysis",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/user-guide_ko.md",
+      "to": "sync",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/user-guide_ko.md",
+      "to": "tank-integrity-validator",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/user-guide_ko.md",
+      "to": "tar-planning",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/user-guide_ko.md",
+      "to": "tool-box-meeting",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/user-guide.md",
+      "to": "arc-flash-analyzer",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/user-guide.md",
+      "to": "asset-integrity-check",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/user-guide.md",
+      "to": "audit-preparation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/user-guide.md",
+      "to": "compliance-gap",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/user-guide.md",
+      "to": "construction-permit-overview",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/user-guide.md",
+      "to": "contractor-onboarding",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/user-guide.md",
+      "to": "emergency-response",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/user-guide.md",
+      "to": "ess-fire-risk-assessor",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/user-guide.md",
+      "to": "ghs-classifier",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/user-guide.md",
+      "to": "gmp-deviation-capa",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/user-guide.md",
+      "to": "gmp-qrm",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/user-guide.md",
+      "to": "k-law",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/user-guide.md",
+      "to": "msds-parser",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/user-guide.md",
+      "to": "permit-to-work",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/user-guide.md",
+      "to": "process-hazard-screening",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/user-guide.md",
+      "to": "psm-loto",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/user-guide.md",
+      "to": "psm-moc",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/user-guide.md",
+      "to": "risk-assessment",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/user-guide.md",
+      "to": "root-cause-analysis",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/user-guide.md",
+      "to": "sync",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/user-guide.md",
+      "to": "tank-integrity-validator",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/user-guide.md",
+      "to": "tar-planning",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/user-guide.md",
+      "to": "tool-box-meeting",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/README.md",
+      "to": "compliance-gap",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/README.md",
+      "to": "emergency-response",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/README.md",
+      "to": "permit-to-work",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/README.md",
+      "to": "risk-assessment",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/workflows/_INDEX.md",
+      "to": "fall-hazard-assessor",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/workflows/_INDEX.md",
+      "to": "tool-box-meeting",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/workflows/README.en.md",
+      "to": "k-law",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/workflows/README.md",
+      "to": "benefit-risk-assessor",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/workflows/README.md",
+      "to": "chemical-risk-assessment",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/workflows/README.md",
+      "to": "completion-inspection",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/workflows/README.md",
+      "to": "compliance-gap",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/workflows/README.md",
+      "to": "construction-permit-overview",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/workflows/README.md",
+      "to": "contractor-onboarding",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/workflows/README.md",
+      "to": "dts-verification",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/workflows/README.md",
+      "to": "emergency-response",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/workflows/README.md",
+      "to": "ghs-classifier",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/workflows/README.md",
+      "to": "glp-data-integrity-checker",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/workflows/README.md",
+      "to": "glp-study-protocol-validator",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/workflows/README.md",
+      "to": "gmp-change-control",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/workflows/README.md",
+      "to": "mid-construction-inspection",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/workflows/README.md",
+      "to": "msds-parser",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/workflows/README.md",
+      "to": "permit-to-work",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/workflows/README.md",
+      "to": "pre-construction-technical-review",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/workflows/README.md",
+      "to": "protocol-deviation-analyzer",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/workflows/README.md",
+      "to": "psm-loto",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/workflows/README.md",
+      "to": "risk-assessment",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/workflows/README.md",
+      "to": "sae-causality-assessor",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/workflows/README.md",
+      "to": "signal-detector",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/workflows/README.md",
+      "to": "temperature-excursion-analyzer",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/workflows/README.md",
+      "to": "tool-box-meeting",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/workflows/REFERENCE-SPEC.md",
+      "to": "contractor-onboarding",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/workflows/REFERENCE-SPEC.md",
+      "to": "permit-to-work",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/workflows/schema.yaml",
+      "to": "gmp-deviation-capa",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
       "from": "doc:co-security/AGENTS.md",
       "to": "agent-lifecycle-manager",
       "source": "workflow-doc"
@@ -7875,7 +12290,121 @@
     {
       "type": "cites_skill",
       "from": "doc:co-security/AGENTS.md",
+      "to": "meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-security/AGENTS.md",
       "to": "skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-security/agents/i18n-specialist.md",
+      "to": "i18n-audit",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-security/agents/i18n-specialist.md",
+      "to": "i18n-formatting",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-security/agents/i18n-specialist.md",
+      "to": "i18n-layout",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-security/agents/i18n-specialist.md",
+      "to": "i18n-locale-config",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-security/agents/i18n-specialist.md",
+      "to": "k-dart",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-security/agents/i18n-specialist.md",
+      "to": "k-kosis",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-security/agents/i18n-specialist.md",
+      "to": "k-law",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-security/agents/i18n-specialist.md",
+      "to": "translate",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-security/agents/patch-engineer.md",
+      "to": "verify-authorization",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-security/agents/pentester.md",
+      "to": "verify-authorization",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-security/agents/README_ko.md",
+      "to": "verify-authorization",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-security/agents/README.md",
+      "to": "verify-authorization",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-security/agents/red-team-lead.md",
+      "to": "verify-authorization",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-security/agents/report-writer.md",
+      "to": "verify-authorization",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-security/agents/threat-modeler.md",
+      "to": "verify-authorization",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-security/docs/co-security.context.md",
+      "to": "agent-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-security/docs/co-security.context.md",
+      "to": "skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-security/docs/co-security.context.md",
+      "to": "verify-authorization",
       "source": "workflow-doc"
     },
     {
@@ -7898,8 +12427,44 @@
     },
     {
       "type": "cites_skill",
+      "from": "doc:co-security/docs/user-guide_ko.md",
+      "to": "verify-authorization",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-security/docs/user-guide.md",
+      "to": "verify-authorization",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-security/README.md",
+      "to": "sarif-exporter",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-security/README.md",
+      "to": "stride-threat-matrix",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-security/README.md",
+      "to": "verify-authorization",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
       "from": "doc:co-work/AGENTS.md",
       "to": "agent-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/AGENTS.md",
+      "to": "meeting-facilitation",
       "source": "workflow-doc"
     },
     {
@@ -7910,8 +12475,104 @@
     },
     {
       "type": "cites_skill",
+      "from": "doc:co-work/agents/i18n-specialist.md",
+      "to": "i18n-audit",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/agents/i18n-specialist.md",
+      "to": "i18n-formatting",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/agents/i18n-specialist.md",
+      "to": "i18n-layout",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/agents/i18n-specialist.md",
+      "to": "i18n-locale-config",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/agents/i18n-specialist.md",
+      "to": "k-dart",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/agents/i18n-specialist.md",
+      "to": "k-kosis",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/agents/i18n-specialist.md",
+      "to": "k-law",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/agents/i18n-specialist.md",
+      "to": "translate",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/docs/co-work.context.md",
+      "to": "agent-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/docs/co-work.context.md",
+      "to": "skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/docs/document-style-registry.md",
+      "to": "version",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
       "from": "doc:co-work/docs/phase-definitions.md",
       "to": "project-review",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/README.md",
+      "to": "api-documentation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/README.md",
+      "to": "documentation-writing",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/README.md",
+      "to": "research-analysis",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/README.md",
+      "to": "standup-synthesizer",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:GEMINI.md",
+      "to": "meeting-facilitation",
       "source": "workflow-doc"
     },
     {

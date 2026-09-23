@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /**
  * extract_slidedata.mjs  v1.2.0
  * HTML 슬라이드 파일에서 slideData 배열을 추출하여 slidedata.json으로 저장.

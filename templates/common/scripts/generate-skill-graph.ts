@@ -1,6 +1,11 @@
 #!/usr/bin/env bun
 /**
  * Skill Relationship Graph Generator
+ * @version 1.14.0 (2026-09-23, T-20260923-002 triage): variant citation corpus
+ * widened — docs/*.md top-level files, README.md, recursive agents/** and
+ * workflows/** added per variant, plus path-fragment and README plain-mention
+ * matching, connecting the graph-isolated co-safety/co-price skills that were
+ * cited only from user guides, workflow catalogs, and nested agent bodies.
  * @version 1.13.0 (2026-09-23, orphan audit T-20260923-001): variant agent
  * discovery skips README and underscore-prefixed files (co-abap agents/README.md
  * was emitted as an "agent" node); new Source 4.8 workflow-doc citations — a
@@ -1082,8 +1087,22 @@ function deriveWorkflowDocCitations(
       return;
     }
     const hits = new Set<string>(extractBacktickReferences(content, knownSkillNames));
-    for (const m of content.matchAll(/skills\/([a-z0-9][a-z0-9-]*)\//g)) {
-      if (knownSkillNames.has(m[1])) hits.add(m[1]);
+    // Path-fragment match: `skills/domains/industry/gdp/{a, b}/` brace-expansion
+    // and nested paths (co-safety workflows) — check every path segment against
+    // the known skill set instead of requiring `skills/<name>/` exactly.
+    for (const m of content.matchAll(/skills\/[a-z0-9][a-z0-9./{} ,-]*/g)) {
+      for (const seg of m[0].split(/[^a-z0-9-]+/)) {
+        if (knownSkillNames.has(seg)) hits.add(seg);
+      }
+    }
+    // README skill catalogs list skills as plain prose (e.g. `- **excel-export**:`)
+    // with no backticks or path — allow word-boundary mentions there, and only
+    // there, to keep false positives out of general docs. Hyphenated ids of
+    // length >= 8 are specific enough to be safe.
+    if (docId.endsWith('/README.md')) {
+      for (const name of knownSkillNames) {
+        if (name.includes('-') && name.length >= 8 && new RegExp(`\\b${name}\\b`).test(content)) hits.add(name);
+      }
     }
     if (hits.size === 0) return;
     if (!allNodes.has(docId)) {
@@ -1116,15 +1135,33 @@ function deriveWorkflowDocCitations(
   walkDir(join(ROOT, 'procedures'), 'procedures/', localLayer);
   walkDir(join(ROOT, 'process'), 'process/', localLayer);
 
-  // Variant corpus (L0 graph only — buildScopeGraph has its own node universe)
+  // Variant corpus (L0 graph only — buildScopeGraph has its own node universe).
+  // v1.14.0: widened after the T-20260923-002 triage — co-safety's 13 and
+  // co-price's 3 isolated skills were cited from docs/*.md top-level files
+  // (user guides), the variant README, and NESTED agent bodies
+  // (agents/domains/**), none of which the original corpus covered.
   if (existsSync(templatesDir)) {
     for (const variantName of listVariantDirs(templatesDir)) {
       const layer: GraphNode['layer'] = `variant:${variantName}`;
       const vDir = join(templatesDir, variantName);
       if (existsSync(join(vDir, 'AGENTS.md'))) scanFile(join(vDir, 'AGENTS.md'), `doc:${variantName}/AGENTS.md`, layer);
+      if (existsSync(join(vDir, 'README.md'))) scanFile(join(vDir, 'README.md'), `doc:${variantName}/README.md`, layer);
       if (existsSync(join(vDir, 'docs', 'phase-definitions.md'))) {
         scanFile(join(vDir, 'docs', 'phase-definitions.md'), `doc:${variantName}/docs/phase-definitions.md`, layer);
       }
+      // Top-level docs/*.md only (user guides etc.) — designs/specs/lifecycle churn stays out.
+      const vDocs = join(vDir, 'docs');
+      if (existsSync(vDocs)) {
+        for (const entry of readdirSync(vDocs, { withFileTypes: true })) {
+          if (entry.isFile() && entry.name.endsWith('.md')) {
+            scanFile(join(vDocs, entry.name), `doc:${variantName}/docs/${entry.name}`, layer);
+          }
+        }
+      }
+      // Nested agent bodies (e.g. co-safety agents/domains/**) cite their skills.
+      walkDir(join(vDir, 'agents'), `${variantName}/agents/`, layer);
+      // Workflow catalogs (co-safety workflows/domains/**) — same citation shape.
+      walkDir(join(vDir, 'workflows'), `${variantName}/workflows/`, layer);
       walkDir(join(vDir, 'procedures'), `${variantName}/procedures/`, layer);
       walkDir(join(vDir, 'process'), `${variantName}/process/`, layer);
     }
