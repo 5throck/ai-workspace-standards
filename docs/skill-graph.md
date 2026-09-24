@@ -331,7 +331,6 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-abap/agents/dba.md` | doc | `performance-tuning` | — | — |
 | `doc:co-abap/agents/devops-admin.md` | doc | `dump-monitor` | — | — |
 | `doc:co-abap/agents/fi-analyst.md` | doc | `sap-fi` | — | — |
-| `doc:co-abap/agents/i18n-specialist.md` | doc | `i18n-audit`, `i18n-formatting`, `i18n-layout`, `i18n-locale-config`, `k-dart`, `k-kosis`, `k-law`, `translate` | — | — |
 | `doc:co-abap/agents/le-analyst.md` | doc | `sap-le` | — | — |
 | `doc:co-abap/agents/mm-analyst.md` | doc | `sap-mm` | — | — |
 | `doc:co-abap/agents/pp-analyst.md` | doc | `sap-pp` | — | — |
@@ -342,7 +341,6 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-abap/docs/user-guide.md` | doc | `abap-dev`, `desktop-app-fallback`, `dump-monitor`, `performance-tuning`, `post-write-chain`, `sap-le`, `sap-sd` | — | — |
 | `doc:co-abap/README.md` | doc | `abap-dev`, `desktop-app-fallback`, `dump-monitor`, `performance-tuning`, `post-write-chain`, `source-command-celebrate` | — | — |
 | `doc:co-consult/AGENTS.md` | doc | `agent-lifecycle-manager`, `finishing-a-development-branch`, `hwp-document-processing`, `k-dart`, `k-law`, `meeting-facilitation`, `platform-command-lifecycle-manager`, `sample-driven-report-writing`, `skill-lifecycle-manager` | — | — |
-| `doc:co-consult/agents/i18n-specialist.md` | doc | `i18n-audit`, `i18n-formatting`, `i18n-layout`, `i18n-locale-config`, `k-dart`, `k-kosis`, `k-law`, `translate` | — | — |
 | `doc:co-consult/docs/co-consult.context.md` | doc | `agent-lifecycle-manager`, `change-impact-assessment`, `company-intelligence`, `competitive-intelligence`, `consulting-report-writing`, `documentation-writing`, `executive-presentation`, `financial-modeling`, `financial-statement-analysis`, `insight-synthesis`, `k-dart`, `meeting-facilitation`, `narrative-framework`, `org-readiness-assessment`, `project-delivery`, `project-review`, `research-analysis`, `skill-lifecycle-manager`, `solution-design`, `stakeholder-alignment`, `stakeholder-review-management`, `team-builder`, `technical-feasibility` | — | — |
 | `doc:co-consult/docs/disclosure-ingestion-contract.md` | doc | `financial-statement-analysis`, `k-dart` | — | — |
 | `doc:co-consult/docs/engagement-orchestration.md` | doc | `change-impact-assessment`, `consulting-report-writing`, `executive-presentation`, `financial-modeling`, `insight-synthesis`, `narrative-framework`, `org-readiness-assessment`, `project-delivery`, `solution-design`, `stakeholder-alignment`, `stakeholder-review-management`, `technical-feasibility` | — | — |
@@ -355,7 +353,6 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-deck/AGENTS.md` | doc | `agent-lifecycle-manager`, `design`, `handbook`, `html-build`, `meeting-facilitation`, `pdf-export`, `prep-pdf`, `research`, `skill-lifecycle-manager`, `storyline`, `theme-authoring`, `version` | — | — |
 | `doc:co-deck/agents/design.md` | doc | `design` | — | — |
 | `doc:co-deck/agents/html-build.md` | doc | `html-build` | — | — |
-| `doc:co-deck/agents/i18n-specialist.md` | doc | `i18n-audit`, `i18n-formatting`, `i18n-layout`, `i18n-locale-config`, `k-dart`, `k-kosis`, `k-law`, `translate` | — | — |
 | `doc:co-deck/agents/image-curator.md` | doc | `html-build` | — | — |
 | `doc:co-deck/agents/measure.md` | doc | `prep-pdf` | — | — |
 | `doc:co-deck/agents/pdf-export.md` | doc | `pdf-export` | — | — |
@@ -369,7 +366,6 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-deck/docs/user-guide.md` | doc | `design`, `handbook`, `html-build`, `pdf-export`, `prep-pdf`, `research`, `storyline`, `theme-authoring`, `version` | — | — |
 | `doc:co-deck/README.md` | doc | `html-build`, `pdf-export`, `prep-pdf`, `presenter-mode`, `theme-authoring` | — | — |
 | `doc:co-design/AGENTS.md` | doc | `agent-lifecycle-manager`, `meeting-facilitation`, `skill-lifecycle-manager` | — | — |
-| `doc:co-design/agents/i18n-specialist.md` | doc | `i18n-audit`, `i18n-formatting`, `i18n-layout`, `i18n-locale-config`, `k-dart`, `k-kosis`, `k-law`, `translate` | — | — |
 | `doc:co-design/docs/co-design.context.md` | doc | `agent-lifecycle-manager`, `skill-lifecycle-manager` | — | — |
 | `doc:co-design/docs/phase-definitions.md` | doc | `project-review` | — | — |
 | `doc:co-design/docs/user-guide_ko.md` | doc | `service-design`, `ui-ux-design-intelligence` | — | — |
@@ -377,14 +373,12 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-design/README.md` | doc | `accessibility-audit`, `service-design`, `ui-ux-design-intelligence` | — | — |
 | `doc:co-develop/AGENTS.md` | doc | `agent-lifecycle-manager`, `meeting-facilitation`, `skill-lifecycle-manager` | — | — |
 | `doc:co-develop/agents/designer.md` | doc | `code-review`, `refactoring`, `swe-solve`, `test-driven-development`, `ui-ux-design-intelligence` | — | — |
-| `doc:co-develop/agents/i18n-specialist.md` | doc | `i18n-audit`, `i18n-formatting`, `i18n-layout`, `i18n-locale-config`, `k-dart`, `k-kosis`, `k-law`, `translate` | — | — |
 | `doc:co-develop/docs/co-develop.context.md` | doc | `agent-lifecycle-manager`, `skill-lifecycle-manager` | — | — |
 | `doc:co-develop/docs/phase-definitions.md` | doc | `project-review` | — | — |
 | `doc:co-develop/docs/user-guide_ko.md` | doc | `code-review`, `project-review`, `refactoring`, `sync`, `test-driven-development` | — | — |
 | `doc:co-develop/docs/user-guide.md` | doc | `code-review`, `project-review`, `refactoring`, `sync`, `test-driven-development` | — | — |
 | `doc:co-develop/README.md` | doc | `code-review`, `swe-solve`, `test-driven-development` | — | — |
 | `doc:co-export/AGENTS.md` | doc | `agent-lifecycle-manager`, `create-variant`, `meeting-facilitation`, `project-review`, `promote-variant`, `security-scan`, `skill-lifecycle-manager`, `source-command-commit-push-pr`, `sync` | — | — |
-| `doc:co-export/agents/i18n-specialist.md` | doc | `i18n-audit`, `i18n-formatting`, `i18n-layout`, `i18n-locale-config`, `k-dart`, `k-kosis`, `k-law`, `translate` | — | — |
 | `doc:co-export/docs/co-export.context.md` | doc | `agent-lifecycle-manager`, `customs-duty-drawback-workflow`, `export-control-screening`, `foreign-regulation-monitoring`, `fta-origin-determination`, `halal-certification-workflow`, `hs-classification-workflow`, `logistics-coordination`, `market-entry-strategy`, `skill-lifecycle-manager`, `trade-documentation-checklist` | — | — |
 | `doc:co-export/docs/phase-definitions.md` | doc | `customs-duty-drawback-workflow`, `project-review` | — | — |
 | `doc:co-export/docs/tariff-dataset-schema.md` | doc | `fta-origin-determination`, `hs-classification-workflow` | — | — |
@@ -392,13 +386,11 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-export/docs/user-guide.md` | doc | `customs-duty-drawback-workflow`, `export-control-screening`, `foreign-regulation-monitoring`, `fta-origin-determination`, `halal-certification-workflow`, `hs-classification-workflow`, `logistics-coordination`, `market-entry-strategy`, `trade-documentation-checklist` | — | — |
 | `doc:co-export/README.md` | doc | `customs-duty-drawback-workflow`, `export-control-screening`, `foreign-regulation-monitoring`, `fta-origin-determination`, `halal-certification-workflow`, `hs-classification-workflow`, `logistics-coordination`, `market-entry-strategy`, `trade-documentation-checklist` | — | — |
 | `doc:co-game/AGENTS.md` | doc | `agent-lifecycle-manager`, `meeting-facilitation`, `skill-lifecycle-manager` | — | — |
-| `doc:co-game/agents/i18n-specialist.md` | doc | `i18n-audit`, `i18n-formatting`, `i18n-layout`, `i18n-locale-config`, `k-dart`, `k-kosis`, `k-law`, `translate` | — | — |
 | `doc:co-game/docs/co-game.context.md` | doc | `agent-lifecycle-manager`, `skill-lifecycle-manager` | — | — |
 | `doc:co-game/docs/user-guide_ko.md` | doc | `agent-lifecycle-manager`, `code-review`, `meeting-facilitation`, `project-review`, `refactoring`, `security-scan`, `skill-lifecycle-manager`, `test-driven-development` | — | — |
 | `doc:co-game/docs/user-guide.md` | doc | `agent-lifecycle-manager`, `code-review`, `meeting-facilitation`, `project-review`, `refactoring`, `security-scan`, `skill-lifecycle-manager`, `test-driven-development` | — | — |
 | `doc:co-game/README.md` | doc | `code-review`, `sound-synth`, `test-driven-development` | — | — |
 | `doc:co-hr/AGENTS.md` | doc | `agent-lifecycle-manager`, `create-variant`, `meeting-facilitation`, `project-review`, `promote-variant`, `security-scan`, `skill-lifecycle-manager`, `source-command-commit-push-pr`, `sync` | — | — |
-| `doc:co-hr/agents/i18n-specialist.md` | doc | `i18n-audit`, `i18n-formatting`, `i18n-layout`, `i18n-locale-config`, `k-dart`, `k-kosis`, `k-law`, `translate` | — | — |
 | `doc:co-hr/docs/co-hr.context.md` | doc | `agent-lifecycle-manager`, `career-path-succession-planning`, `compensation-benchmarking`, `consulting-report-writing`, `hr-metrics-analysis`, `k-kosis`, `k-law`, `learning-curriculum-design`, `org-design-framework`, `org-readiness-assessment`, `performance-system-design`, `skill-lifecycle-manager`, `stakeholder-alignment`, `talent-acquisition-strategy` | — | — |
 | `doc:co-hr/docs/engagement-orchestration.md` | doc | `compensation-benchmarking`, `org-readiness-assessment` | — | — |
 | `doc:co-hr/docs/iso-30414-metrics-mapping.md` | doc | `hr-metrics-analysis` | — | — |
@@ -408,7 +400,6 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-hr/README.md` | doc | `career-path-succession-planning`, `compensation-benchmarking`, `consulting-report-writing`, `hr-metrics-analysis`, `learning-curriculum-design`, `org-design-framework`, `org-readiness-assessment`, `performance-system-design`, `stakeholder-alignment`, `talent-acquisition-strategy` | — | — |
 | `doc:co-news/AGENTS.md` | doc | `agent-lifecycle-manager`, `create-variant`, `meeting-facilitation`, `project-review`, `promote-variant`, `security-scan`, `skill-lifecycle-manager`, `source-command-commit-push-pr`, `sync` | — | — |
 | `doc:co-news/agents/financial-analyst.md` | doc | `k-dart` | — | — |
-| `doc:co-news/agents/i18n-specialist.md` | doc | `i18n-audit`, `i18n-formatting`, `i18n-layout`, `i18n-locale-config`, `k-dart`, `k-kosis`, `k-law`, `translate` | — | — |
 | `doc:co-news/agents/legal-researcher.md` | doc | `k-law` | — | — |
 | `doc:co-news/agents/reporter.md` | doc | `financial-journalism-style` | — | — |
 | `doc:co-news/agents/style-editor.md` | doc | `ai-tell-reduction`, `financial-journalism-style` | — | — |
@@ -423,7 +414,6 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-price/agents/cpa-auditor.md` | doc | `double-entry-reconciliation`, `harness-verification` | — | — |
 | `doc:co-price/agents/engagement-director.md` | doc | `pdf-export` | — | — |
 | `doc:co-price/agents/finance-strategy-lead.md` | doc | `price-waterfall-analysis` | — | — |
-| `doc:co-price/agents/i18n-specialist.md` | doc | `i18n-audit`, `i18n-formatting`, `i18n-layout`, `i18n-locale-config`, `k-dart`, `k-kosis`, `k-law`, `translate` | — | — |
 | `doc:co-price/agents/market-intelligence-analyst.md` | doc | `trade-promotion-roi` | — | — |
 | `doc:co-price/agents/pricing-strategist.md` | doc | `map-channel-enforcement`, `pricing-governance` | — | — |
 | `doc:co-price/docs/co-price.context.md` | doc | `agent-lifecycle-manager`, `gabor-granger`, `harness-verification`, `i18n-audit`, `prisma-7`, `skill-lifecycle-manager`, `trade-promotion-roi`, `van-westendorp-psm` | — | — |
@@ -440,7 +430,6 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-safety/agents/glp-agent.md` | doc | `glp-data-integrity-checker`, `glp-study-protocol-validator` | — | — |
 | `doc:co-safety/agents/gmp-agent.md` | doc | `gmp-qrm` | — | — |
 | `doc:co-safety/agents/gvp-agent.md` | doc | `benefit-risk-assessor`, `signal-detector` | — | — |
-| `doc:co-safety/agents/i18n-specialist.md` | doc | `i18n-audit`, `i18n-formatting`, `i18n-layout`, `i18n-locale-config`, `k-dart`, `k-kosis`, `k-law`, `translate` | — | — |
 | `doc:co-safety/agents/legal-agent.md` | doc | `k-law` | — | — |
 | `doc:co-safety/agents/meddevice-agent.md` | doc | `iso14971-risk-scorer` | — | — |
 | `doc:co-safety/agents/msds-agent.md` | doc | `chemical-risk-assessment`, `ghs-classifier`, `msds-parser` | — | — |
@@ -462,7 +451,6 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-safety/workflows/REFERENCE-SPEC.md` | doc | `contractor-onboarding`, `permit-to-work` | — | — |
 | `doc:co-safety/workflows/schema.yaml` | doc | `gmp-deviation-capa` | — | — |
 | `doc:co-security/AGENTS.md` | doc | `agent-lifecycle-manager`, `meeting-facilitation`, `skill-lifecycle-manager` | — | — |
-| `doc:co-security/agents/i18n-specialist.md` | doc | `i18n-audit`, `i18n-formatting`, `i18n-layout`, `i18n-locale-config`, `k-dart`, `k-kosis`, `k-law`, `translate` | — | — |
 | `doc:co-security/agents/patch-engineer.md` | doc | `verify-authorization` | — | — |
 | `doc:co-security/agents/pentester.md` | doc | `verify-authorization` | — | — |
 | `doc:co-security/agents/README_ko.md` | doc | `verify-authorization` | — | — |
@@ -476,7 +464,6 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-security/docs/user-guide.md` | doc | `verify-authorization` | — | — |
 | `doc:co-security/README.md` | doc | `sarif-exporter`, `stride-threat-matrix`, `verify-authorization` | — | — |
 | `doc:co-work/AGENTS.md` | doc | `agent-lifecycle-manager`, `meeting-facilitation`, `skill-lifecycle-manager` | — | — |
-| `doc:co-work/agents/i18n-specialist.md` | doc | `i18n-audit`, `i18n-formatting`, `i18n-layout`, `i18n-locale-config`, `k-dart`, `k-kosis`, `k-law`, `translate` | — | — |
 | `doc:co-work/docs/co-work.context.md` | doc | `agent-lifecycle-manager`, `skill-lifecycle-manager` | — | — |
 | `doc:co-work/docs/document-style-registry.md` | doc | `version` | — | — |
 | `doc:co-work/docs/phase-definitions.md` | doc | `project-review` | — | — |

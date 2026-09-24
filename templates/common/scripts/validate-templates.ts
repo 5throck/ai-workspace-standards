@@ -1,7 +1,20 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.42.0
+ * @version 1.43.0
+ * v1.42.0 → v1.43.0 (2026-09-25, inventory decisions batch — spec
+ *          docs/designs/2026-09-25-inventory-decisions-batch-design.md,
+ *          T-20260924-002 R1.3-R1.5): C-CM-04 platform-skills sweep consumes
+ *          the contract's new common_platform_skill_exclusions section (five
+ *          documented exclusions: create-variant/promote-variant/simulate-
+ *          pipeline L0-only, graft claude-only, sound-synth variant-scoped);
+ *          a stale exclusion (dir gone from every mirror tree) FAILs;
+ *          PLATFORM_SOURCE_KEYS gains codex_source (C-CM-03b now verifies
+ *          .codex mirror-copy version parity for all 22 entries); the
+ *          exemptSkills build uses variant_scoped_skills VALUES (skill names)
+ *          instead of keys (variant names), aligning with C-CM-05 semantics.
+ *          Pure helpers exported for unit test: collectSchemaExemptSkills,
+ *          unlistedPlatformSkillDirs, stalePlatformSkillExclusions.
  * v1.41.0 → v1.42.0 (2026-09-25, variant hygiene batch — spec
  *          docs/designs/2026-09-25-variant-hygiene-batch-design.md, R4):
  *          new `variant-agent-references` check (T-20260924-007c) — every
@@ -2774,10 +2787,14 @@ function checkWorkspaceSchema(): void {
 
 // Platform-tree source keys declared on common_platform_skills entries → the
 // platform directory the propagated copy lives under under templates/common/.
+// codex_source (T-20260924-002, spec 2026-09-25-inventory-decisions-batch-design
+// R1.4): the .codex mirror was previously invisible to C-CM-03b — a version bump
+// on a .codex copy drifted silently. All 22 listed skills carry .codex copies.
 const PLATFORM_SOURCE_KEYS: Readonly<Record<string, string>> = {
   claude_source: '.claude',
   gemini_source: '.gemini',
   agents_source: '.agents',
+  codex_source: '.codex',
 };
 
 /** Map a common_platform_skills entry's declared *_source keys to platform tree dirs. */
@@ -2803,6 +2820,53 @@ export function versionParityIssue(contractVersion: string | undefined, artifact
   if (!contractVersion) return 'missing-contract-version';
   if (!artifactVersion) return 'missing-artifact-version';
   return contractVersion !== artifactVersion ? 'mismatch' : null;
+}
+
+/**
+ * Exempt-skill set for the C-CM-04 exists→listed sweeps, built from
+ * docs/workspace-schema.json. country_scoped_assets.skills is keyed by skill
+ * name; variant_scoped_skills is keyed by VARIANT NAME with skill names as
+ * VALUES — the values are the exempt set. This matches C-CM-05 semantics
+ * (T-20260924-002 R1.5: the pre-1.43 build exempted the variant-scoped KEYS —
+ * variant names, not skill names — a latent inconsistency).
+ */
+export function collectSchemaExemptSkills(schema: {
+  country_scoped_assets?: { skills?: Record<string, unknown> };
+  variant_scoped_skills?: Record<string, string[]>;
+}): Set<string> {
+  return new Set([
+    ...Object.keys(schema.country_scoped_assets?.skills ?? {}),
+    ...Object.values(schema.variant_scoped_skills ?? {}).flat(),
+  ]);
+}
+
+/**
+ * C-CM-04 platform-skills sweep core (pure): from a mirror tree's skill-dir
+ * names (directories carrying a SKILL.md), return those covered by neither the
+ * contract listings (common_skills + common_platform_skills) nor the
+ * schema-exempt / contract-excluded sets.
+ */
+export function unlistedPlatformSkillDirs(
+  dirNames: readonly string[],
+  listed: ReadonlySet<string>,
+  exempt: ReadonlySet<string>,
+  excluded: ReadonlySet<string>,
+): string[] {
+  return dirNames.filter(e => !listed.has(e) && !exempt.has(e) && !excluded.has(e));
+}
+
+/**
+ * C-CM-04 contract-exclusion anti-drift (pure): an exclusion naming a skill
+ * dir that exists in NO mirror tree is stale — the directory was deleted, so
+ * the exclusion record must go too (same direction as the C-CM-05
+ * SINGLE_PLATFORM_EXCEPTIONS stale rule).
+ */
+export function stalePlatformSkillExclusions(
+  exclusions: Iterable<string>,
+  existingNames: Iterable<string>,
+): string[] {
+  const live = new Set(existingNames);
+  return [...exclusions].filter(name => !live.has(name));
 }
 
 export interface ScriptsRegistryRow {
@@ -2936,7 +3000,7 @@ function checkCommonContract(): void {
   for (const [skillName, entry] of platformSkillEntries) {
     const platforms = declaredPlatformTrees(entry as Record<string, unknown>);
     if (platforms.length === 0) {
-      fail('common', 'C-CM-03b', `common-contract.json platform skill '${skillName}' declares no platform source key (claude_source/gemini_source/agents_source)`, `Add the *_source key(s) for the platform tree(s) that carry '${skillName}'`);
+      fail('common', 'C-CM-03b', `common-contract.json platform skill '${skillName}' declares no platform source key (claude_source/gemini_source/agents_source/codex_source)`, `Add the *_source key(s) for the platform tree(s) that carry '${skillName}'`);
     }
     for (const platform of platforms) {
       const copyPath = join(TEMPLATES_DIR, 'common', platform, 'skills', skillName, 'SKILL.md');
@@ -2972,8 +3036,12 @@ function checkCommonContract(): void {
     // Codex leg is DERIVED from `source` (Ruling K, spec
     // 2026-09-25-verifier-platform-expansion-design): sync-skills Phase 1b maps
     // .claude/commands/<x>.md → .codex/prompts/<x>.md unconditionally, so no
-    // codex_source key exists. This couples the check to the sync-skills
-    // mapping; if ADR-0077 D4 changes, this leg moves with it.
+    // codex_source key exists for COMMANDS. This couples the check to the
+    // sync-skills mapping; if ADR-0077 D4 changes, this leg moves with it.
+    // Platform SKILLS are different: their .codex copies are declared
+    // explicitly (codex_source on common_platform_skills entries, R1.4 of
+    // 2026-09-25-inventory-decisions-batch-design) and C-CM-03b verifies their
+    // version parity like any other platform tree.
     // .agents has no command surface (Finding D exclusion).
     const reverseSurfaces: ReadonlyArray<readonly [string, string, 'source' | 'gemini_source']> = [
       ['.claude', 'commands', 'source'],
@@ -3321,11 +3389,13 @@ function checkCommonContract(): void {
 // templates/common/skills/*/ → common_skills, templates/common/.claude|.gemini/commands/*.md →
 // common_commands. Documented exemptions (contract description): country-scoped skills
 // (workspace-schema.json country_scoped_assets.skills) and variant-scoped skills
-// (variant_scoped_skills keys). The platform skill trees (.claude + .gemini, T-20260915-013 —
+// (variant_scoped_skills VALUES — skill names; R1.5 of 2026-09-25-inventory-decisions-
+// batch-design), plus the contract's own common_platform_skill_exclusions records for the
+// platform-skill trees. The platform skill trees (.claude + .gemini, T-20260915-013 —
 // the .gemini tree previously had no reverse arm, so a skill dir could appear there without
-// any contract listing while .claude stayed covered) are checked at WARN only:
-// common_platform_skills records L0 workspace overrides (propagated_to_common), not a full
-// platform inventory — promoting it to a hard inventory is an open scope decision.
+// any contract listing while .claude stayed covered) are checked at WARN only;
+// since the 2026-09-25 full-inventory ruling (T-20260924-002) every dir must be
+// listed, schema-exempt, or contract-excluded — the aggregated WARN signals drift.
 function checkCommonContractReverseCoverage(): void {
   if (!JSON_MODE) console.log('\n=== Check C-CM-04: common-contract.json reverse coverage (exists→listed) ===');
 
@@ -3338,18 +3408,24 @@ function checkCommonContractReverseCoverage(): void {
     return; // already reported by WS-02
   }
 
-  // Exemptions declared by docs/workspace-schema.json
+  // Exemptions declared by docs/workspace-schema.json (country-scoped keys +
+  // variant-scoped VALUES — skill names; R1.5 of 2026-09-25-inventory-decisions-
+  // batch-design fixed the keys-based build that exempted variant NAMES).
   let exemptSkills = new Set<string>();
   const schemaPath = join(ROOT, 'docs', 'workspace-schema.json');
   if (existsSync(schemaPath)) {
     try {
       const schema = JSON.parse(readFileSync(schemaPath, 'utf-8')) as Record<string, any>;
-      exemptSkills = new Set([
-        ...Object.keys(schema.country_scoped_assets?.skills ?? {}),
-        ...Object.keys(schema.variant_scoped_skills ?? {}).filter(k => k !== 'description'),
-      ]);
+      exemptSkills = collectSchemaExemptSkills(schema);
     } catch { /* fall through with no exemptions */ }
   }
+  // Contract-declared exclusions (T-20260924-002 R1.2/R1.3): platform skills
+  // deliberately outside the common inventory (L0-only operator skills, the
+  // claude-only graft tool skill, the variant-scoped sound-synth). A stale
+  // exclusion — the dir is gone from every mirror tree — is a failure below.
+  const platformSkillExclusions = new Set(
+    Object.keys((contract.common_platform_skill_exclusions as Record<string, Record<string, string>>) ?? {}),
+  );
 
   const commonAgents = new Set(Object.keys((contract.common_agents as Record<string, unknown>) ?? {}));
   const commonSkills = new Set(Object.keys((contract.common_skills as Record<string, unknown>) ?? {}));
@@ -3419,20 +3495,41 @@ function checkCommonContractReverseCoverage(): void {
   // ── platform skills: templates/common/.{claude,gemini,agents,codex}/skills/*/
   // — WARN (aggregated), see doc comment. Sweep iterates all four mirror trees
   // (spec site 3d); filesystem-driven and name-keyed, so no contract keys needed.
+  // Contract exclusions (common_platform_skill_exclusions) cover the rest —
+  // full-inventory ruling T-20260924-002: every dir is listed, exempt, or
+  // explicitly excluded; silent omission is gone.
   let platformTreesCovered = 0;
   let platformTreeCount = 0;
+  const listedPlatformNames = new Set([...commonSkills, ...commonPlatformSkills]);
   for (const platform of PLATFORM_MIRROR_DIRS) {
     const platformDir = join(TEMPLATES_DIR, 'common', platform);
     if (!existsSync(platformDir)) continue;
     platformTreeCount++;
-    const unlistedPlatform = readdirSync(platformDir).filter(e => {
-      if (!existsSync(join(platformDir, e, 'SKILL.md'))) return false;
-      return !commonPlatformSkills.has(e) && !commonSkills.has(e) && !exemptSkills.has(e);
-    });
+    const unlistedPlatform = unlistedPlatformSkillDirs(
+      readdirSync(platformDir).filter(e => existsSync(join(platformDir, e, 'SKILL.md'))),
+      listedPlatformNames,
+      exemptSkills,
+      platformSkillExclusions,
+    );
     if (unlistedPlatform.length > 0) {
       warn('common', 'C-CM-04', `${unlistedPlatform.length} platform skill dir(s) under templates/common/${platform}/ are not in common_platform_skills or common_skills: ${unlistedPlatform.slice(0, 12).join(', ')}${unlistedPlatform.length > 12 ? `, +${unlistedPlatform.length - 12} more` : ''}`, `Decide the common_platform_skills inventory scope (full platform inventory vs override record) and list or exempt accordingly`);
     } else {
       platformTreesCovered++;
+    }
+  }
+  // Exclusion anti-drift: an exclusion whose skill dir has vanished from every
+  // mirror tree is stale — the record must be deleted with the directory.
+  if (platformSkillExclusions.size > 0) {
+    const existingPlatformSkillNames = new Set<string>();
+    for (const platform of PLATFORM_MIRROR_DIRS) {
+      const dir = join(TEMPLATES_DIR, 'common', platform);
+      if (!existsSync(dir)) continue;
+      for (const e of readdirSync(dir)) {
+        if (existsSync(join(dir, e, 'SKILL.md'))) existingPlatformSkillNames.add(e);
+      }
+    }
+    for (const name of stalePlatformSkillExclusions(platformSkillExclusions, existingPlatformSkillNames)) {
+      fail('common', 'C-CM-04', `common-contract.json common_platform_skill_exclusions names '${name}' but no templates/common/.{claude,gemini,agents,codex}/skills/${name}/ directory exists — remove the stale exclusion`, `Delete the '${name}' entry from common-contract.json common_platform_skill_exclusions`);
     }
   }
   if (platformTreeCount > 0 && platformTreesCovered === platformTreeCount) {

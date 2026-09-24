@@ -1,4 +1,11 @@
-// @version 1.14.0
+// @version 1.15.0
+// v1.15.0 (2026-09-25, T-20260924-003 — spec
+//         docs/designs/2026-09-25-inventory-decisions-batch-design.md R2.4):
+//         exports isExtendsStub(content) — the ADR-0033 extends-stub shape
+//         test the upgrade agents/ SYNC pass now uses to skip template stub
+//         files (they resolve at scaffold/adopt time; delivering the 8-line
+//         stub over a project's resolved body was the v1.35.0 drift-
+//         reconciliation clobber proven on Projects/co-work agents/pm.md).
 // v1.14.0 (2026-09-25, T-20260924-011 — spec
 //         docs/designs/2026-09-25-codex-merge-claim-routing-design.md D2/D3/R3):
 //         exports VARIANT_ASSET_DIRS_PASS (the pass id already returned for every
@@ -478,6 +485,21 @@ export function lifecyclelessText(text: string): string {
     kept.push(line);
   }
   return text.replace(fm[0], `---\n${kept.join("\n")}\n---`);
+}
+
+/**
+ * True iff the content is an ADR-0033 extends-stub: a frontmatter block whose
+ * body declares `extends:` (the pointer, not a resolved file — a project's
+ * resolved agent never carries the field). T-20260924-003 R2.4: the upgrade
+ * agents/ SYNC pass must skip these template files — the v1.35.0 equal-version
+ * drift reconciliation compared the 8-line template stub against the project's
+ * resolved full body and "restored" the stub over it (the proven pm.md
+ * 349→8-line clobber). Stubs are resolved at scaffold/adopt time by
+ * helpers/resolve-pm-stub.ts.
+ */
+export function isExtendsStub(content: string): boolean {
+  const fm = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  return !!fm && /^extends:\s*\S/m.test(fm[1]);
 }
 
 /** Pipeline-generated paths that never count as hand-authored code in a diff. */

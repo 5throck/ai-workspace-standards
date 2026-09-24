@@ -86,22 +86,7 @@
       "layer": "variant:co-consult"
     },
     {
-      "id": "i18n-audit",
-      "type": "skill",
-      "layer": "common"
-    },
-    {
-      "id": "i18n-formatting",
-      "type": "skill",
-      "layer": "common"
-    },
-    {
       "id": "i18n-layout",
-      "type": "skill",
-      "layer": "common"
-    },
-    {
-      "id": "i18n-locale-config",
       "type": "skill",
       "layer": "common"
     },
@@ -122,11 +107,6 @@
     },
     {
       "id": "k-dart",
-      "type": "skill",
-      "layer": "common"
-    },
-    {
-      "id": "k-kosis",
       "type": "skill",
       "layer": "common"
     },
@@ -339,11 +319,6 @@
       "id": "technology-specialist",
       "type": "agent",
       "layer": "variant:co-consult"
-    },
-    {
-      "id": "translate",
-      "type": "skill",
-      "layer": "L0"
     },
     {
       "id": "workstream-lead",
@@ -1061,78 +1036,6 @@
       "type": "references",
       "from": "hwp-document-processing",
       "to": "sample-driven-report-writing",
-      "source": "prose"
-    },
-    {
-      "type": "used_by",
-      "from": "i18n-audit",
-      "to": "i18n-specialist",
-      "source": "required_skills"
-    },
-    {
-      "type": "used_by",
-      "from": "i18n-formatting",
-      "to": "i18n-specialist",
-      "source": "required_skills"
-    },
-    {
-      "type": "used_by",
-      "from": "i18n-layout",
-      "to": "i18n-specialist",
-      "source": "required_skills"
-    },
-    {
-      "type": "used_by",
-      "from": "i18n-locale-config",
-      "to": "i18n-specialist",
-      "source": "required_skills"
-    },
-    {
-      "type": "references",
-      "from": "i18n-specialist",
-      "to": "i18n-audit",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "i18n-specialist",
-      "to": "i18n-formatting",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "i18n-specialist",
-      "to": "i18n-layout",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "i18n-specialist",
-      "to": "i18n-locale-config",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "i18n-specialist",
-      "to": "k-dart",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "i18n-specialist",
-      "to": "k-kosis",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "i18n-specialist",
-      "to": "k-law",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "i18n-specialist",
-      "to": "translate",
       "source": "prose"
     },
     {

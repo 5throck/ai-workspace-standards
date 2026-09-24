@@ -1,17 +1,17 @@
-# Skills Index — co-security
+# SKILLS.md — Skill Lifecycle Registry
 
-This directory contains variant-specific skills for the `co-security` template.
+Curated registry for the co-security variant-exclusive skills (T-20260924-009). One row per variant-exclusive skill directory; values come from each skill's SKILL.md frontmatter.
 
-## Available Skills
+## Registry
 
-| Skill | Directory | Purpose |
-|-------|-----------|---------|
-| Verify Authorization | `verify-authorization/` | Verify that authorization controls and access rights are properly configured |
-| STRIDE Threat Matrix | `stride-threat-matrix/` | Automated STRIDE threat matrix generation and DREAD risk scoring framework |
-| SARIF Exporter | `sarif-exporter/` | Export security findings and threat matrices into SARIF v2.1.0 JSON format |
-| Finding Reconciliation | `finding-reconciliation/` | Merge duplicate SARIF/scan findings by code location and rule identity into one deduplicated finding set |
-| SAMM Maturity | `samm-maturity/` | SAMM maturity self-assessment producing a scored maturity roadmap per engagement |
-| SPDX SBOM | `spdx-sbom/` | Dependency extraction and SPDX SBOM generation |
+| skill | version | status | owner | last_reviewed | removal-date | notes |
+|-------|---------|--------|-------|---------------|--------------|-------|
+| `finding-reconciliation` | 1.0.0 | active | security-expert | 2026-08-25 | — | co-security only — deduplicate SARIF/scan findings by code location |
+| `samm-maturity` | 1.0.0 | active | pm | 2026-08-24 | — | co-security only — OWASP SAMM self-assessment and maturity roadmap |
+| `sarif-exporter` | 1.0.1 | active | security-expert | 2026-08-25 | — | co-security only — export findings and threat matrices to SARIF v2.1.0 |
+| `spdx-sbom` | 1.0.0 | active | pm | 2026-08-24 | — | co-security only — SPDX 2.3 SBOM generation from dependency manifests |
+| `stride-threat-matrix` | 1.0.0 | active | security-expert | 2026-08-06 | — | co-security only — STRIDE threat matrix generation with DREAD scoring |
+| `verify-authorization` | 1.0.0 | active | pm | 2026-06-13 | — | co-security only — hard gate for signed authorization documents |
 
 ## Usage
 

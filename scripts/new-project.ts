@@ -1,5 +1,12 @@
 #!/usr/bin/env bun
-// @version 1.28.1
+// @version 1.29.0
+// v1.29.0 (2026-09-25, T-20260924-003 — spec
+//           docs/designs/2026-09-25-inventory-decisions-batch-design.md R2.3):
+//           §2.3b generalizes from pm.md-only to EVERY agents/*.md carrying
+//           `extends:` frontmatter — the 13 variant i18n-specialist.md
+//           extends-stubs resolve against templates/common bodies at scaffold
+//           time (one log line per resolved stub); pm.md keeps the H12
+//           canonical-prose check.
 // v1.28.1 (2026-09-24, spec docs/designs/2026-09-24-platform-ssot-constant-design.md):
 //           behavior-neutral constant adoption — the two canonical 5-element
 //           skill-base literals (legacy-skill sweep, l2_propagate sweep)
@@ -156,8 +163,9 @@ import {
   VERSION_MANIFEST_GENERATOR_RELPATH,
   VERSION_MANIFEST_RELPATH,
   decideManifestGeneration,
+  isCanonicalPmStubBody,
 } from './helpers/scaffold-markers.ts';
-import { resolvePmExtendsStub, stripL1BMetadata } from './helpers/resolve-pm-stub.ts';
+import { resolveAgentExtendsStub, stripL1BMetadata } from './helpers/resolve-pm-stub.ts';
 import { applySubstitutions } from './helpers/substitute-placeholders.ts';
 import {
   alignSkillRegistryRowsWithFrontmatter,
@@ -824,28 +832,41 @@ for (const srcFile of walkFiles(templatesDir)) {
 // Ensure variant-overlaid files are also writable
 makeWritable(projectDir);
 
-// ── 2.3b. Resolve variant pm.md extends-stub against the L1 body ──────────────
+// ── 2.3b. Resolve variant agents/*.md extends-stubs against the L1 bodies ────
 // Logic extracted verbatim to scripts/helpers/resolve-pm-stub.ts (v1.25.0, adopt-project
 // engine prerequisites) so the adopt-project settling pass can normalize pm.md without a
-// third copy. Behavior unchanged, including the H12 non-canonical prose warning.
-const projPmMd = join(projectDir, 'agents', 'pm.md');
-if (existsSync(projPmMd)) {
-  const stubResult = resolvePmExtendsStub(projPmMd, join(commonDir, 'agents', 'pm.md'), variant);
-  if (stubResult.resolved && stubResult.nonCanonical) {
-    console.warn(
-      `  ⚠️  agents/pm.md: variant '${variant}' ships a NON-canonical extends-stub body ` +
-        `(${stubResult.proseBodyLength} chars) in templates/${variant}/agents/pm.md — it is not the ` +
-        `canonical stub prose and will be DISCARDED when the templates/common body is attached. ` +
-        `If this body holds real variant content, inline it and remove \`extends:\`; ` +
-        `otherwise restore the canonical stub.`
-    );
-  }
-  if (stubResult.resolved && stubResult.shape === 'prose') {
-    console.log('  ✅ agents/pm.md: resolved prose extends-stub against templates/common body');
-  } else if (stubResult.resolved) {
-    console.log('  ✅ agents/pm.md: resolved empty extends-stub against templates/common body');
-  } else if (stubResult.missingL1) {
-    console.log('  ⚠️  agents/pm.md: extends-stub but templates/common/agents/pm.md is missing — project ships a stub PM agent');
+// third copy. v1.29.0 (T-20260924-003, R2.3): generalized from pm.md-only to EVERY
+// agents/*.md carrying `extends:` frontmatter (the 13 variant i18n-specialist.md
+// stubs resolve here too); pm.md keeps the H12 canonical-prose check injected.
+{
+  const projAgentsDir = join(projectDir, 'agents');
+  if (existsSync(projAgentsDir)) {
+    for (const fname of readdirSync(projAgentsDir).filter(f => f.endsWith('.md')).sort()) {
+      const agentPath = join(projAgentsDir, fname);
+      const stubResult = resolveAgentExtendsStub(
+        agentPath,
+        join(commonDir, 'agents', fname),
+        variant,
+        fname === 'pm.md' ? { isCanonicalStubBody: isCanonicalPmStubBody } : undefined,
+      );
+      const rel = `agents/${fname}`;
+      if (stubResult.resolved && stubResult.nonCanonical) {
+        console.warn(
+          `  ⚠️  ${rel}: variant '${variant}' ships a NON-canonical extends-stub body ` +
+            `(${stubResult.proseBodyLength} chars) in templates/${variant}/agents/${fname} — it is not the ` +
+            `canonical stub prose and will be DISCARDED when the templates/common body is attached. ` +
+            `If this body holds real variant content, inline it and remove \`extends:\`; ` +
+            `otherwise restore the canonical stub.`
+        );
+      }
+      if (stubResult.resolved && stubResult.shape === 'prose') {
+        console.log(`  ✅ ${rel}: resolved prose extends-stub against templates/common body`);
+      } else if (stubResult.resolved) {
+        console.log(`  ✅ ${rel}: resolved empty extends-stub against templates/common body`);
+      } else if (stubResult.missingL1) {
+        console.log(`  ⚠️  ${rel}: extends-stub but templates/common/agents/${fname} is missing — project ships a stub agent`);
+      }
+    }
   }
 }
 

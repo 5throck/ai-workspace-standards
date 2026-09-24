@@ -1,5 +1,11 @@
 #!/usr/bin/env bun
-// @version 1.1.0
+// @version 1.2.0
+// v1.2.0 (2026-09-25, T-20260924-003 — spec
+//          docs/designs/2026-09-25-inventory-decisions-batch-design.md R2.3):
+//          the settling pass generalizes extends-stub resolution from pm.md-only
+//          to EVERY agents/*.md carrying `extends:` frontmatter (the 13 variant
+//          i18n-specialist.md stubs resolve here too); pm.md keeps the H12
+//          canonical-prose check and the L1-B metadata strip.
 // v1.1.0 (2026-09-23, pre-adoption GitHub repo readiness — spec
 //          2026-09-23-pre-adoption-github-repo-design): pre-flight warns when the project
 //          has no GitHub remote and points at scripts/ensure-github-repo.ts (check →
@@ -35,7 +41,8 @@ import { createHash } from 'node:crypto';
 import {
   buildAdoptionPlan, detectHookManagerConflicts, findSecretShapedFiles, type AdoptionPlan,
 } from './helpers/adopt-plan.ts';
-import { resolvePmExtendsStub, stripL1BMetadata } from './helpers/resolve-pm-stub.ts';
+import { resolveAgentExtendsStub, stripL1BMetadata } from './helpers/resolve-pm-stub.ts';
+import { isCanonicalPmStubBody } from './helpers/scaffold-markers.ts';
 import { applyContextTemplate, DEFAULT_PM_ROLE_DESCRIPTIONS } from './helpers/template-utils.ts';
 import { substituteFiles } from './helpers/substitute-placeholders.ts';
 import { blankL0Refs } from './helpers/l0-ref-policy.ts';
@@ -469,13 +476,33 @@ if (existsSync(seededVariantJson) && plan.foreignSkills.length > 0) {
   console.log('  🗑️  variant.json seed removed (scaffold parity)');
 }
 
-// 4. pm.md: self-contained (extends-stub resolution + L1-B strip).
+// 4. agents/*.md: self-contained (extends-stub resolution) + pm L1-B strip.
+// v1.2.0 (T-20260924-003, R2.3): resolution generalized from pm.md-only to EVERY
+// agents/*.md carrying `extends:` frontmatter (the 13 variant i18n-specialist.md
+// stubs resolve here too); pm.md keeps the H12 canonical-prose check injected.
+let pmResolvedAsStub = false;
+{
+  const projAgentsDir = join(projectDir, 'agents');
+  if (existsSync(projAgentsDir)) {
+    for (const fname of readdirSync(projAgentsDir).filter(f => f.endsWith('.md')).sort()) {
+      const agentPath = join(projAgentsDir, fname);
+      const stub = resolveAgentExtendsStub(
+        agentPath,
+        join(COMMON_DIR, 'agents', fname),
+        variant,
+        fname === 'pm.md' ? { isCanonicalStubBody: isCanonicalPmStubBody } : undefined,
+      );
+      if (stub.resolved) {
+        if (fname === 'pm.md') pmResolvedAsStub = true;
+        console.log(`  ✅ agents/${fname}: extends-stub resolved against templates/common body${stub.nonCanonical ? ' (H12: non-canonical prose body discarded — see transcript)' : ''}`);
+      }
+    }
+  }
+}
 const projPmMd = join(projectDir, 'agents', 'pm.md');
 if (existsSync(projPmMd)) {
-  const stub = resolvePmExtendsStub(projPmMd, join(COMMON_DIR, 'agents', 'pm.md'), variant);
   stripL1BMetadata(projPmMd);
-  if (stub.resolved) console.log(`  ✅ agents/pm.md: extends-stub resolved against templates/common body${stub.nonCanonical ? ' (H12: non-canonical prose body discarded — see transcript)' : ''}`);
-  else console.log('  ✅ agents/pm.md: L1-B metadata stripped');
+  if (!pmResolvedAsStub) console.log('  ✅ agents/pm.md: L1-B metadata stripped');
 }
 
 // 5. docs/<variant>.context.md + Template Provenance footer.

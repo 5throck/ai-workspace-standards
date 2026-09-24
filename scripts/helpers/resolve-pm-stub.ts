@@ -1,5 +1,13 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.1.0
+// v1.1.0 (2026-09-25, inventory decisions batch — spec
+//          2026-09-25-inventory-decisions-batch-design, R2.2): generic
+//          `resolveAgentExtendsStub(agentPath, commonAgentPath, variant, opts)`
+//          exported; the pm-flavored canonical-prose check (H12) moves behind
+//          an injected `opts.isCanonicalStubBody` (pm passes
+//          isCanonicalPmStubBody; empty-body stubs like the 13 variant
+//          i18n-specialist.md files skip it). `resolvePmExtendsStub` stays as
+//          a thin back-compat wrapper — public API and behavior unchanged.
 // v1.0.0 (2026-09-23, adopt-project engine prerequisites — spec
 //          2026-09-23-adopt-project-conversion): extracted verbatim from new-project.ts
 //          §2.3b (extends-stub resolution) and §2.5 (L1-B metadata strip) so the
@@ -7,12 +15,13 @@
 //          a third copy of the logic. new-project.ts imports these functions; behavior
 //          is unchanged (the only prior copy lives here now).
 /**
- * Shared agents/pm.md normalization for both project-creation paths:
+ * Shared agents/*.md extends-stub normalization for both project-creation paths:
  *
- * 1. resolvePmExtendsStub — variant templates may ship agents/pm.md as an ADR-0033
- *    extends-stub (frontmatter with `extends:` and an empty or prose-only body).
- *    Scaffolded projects get the L1 body re-attached by new-project §2.3b; an adopted
- *    (converted) project receives the same treatment here, otherwise it ships a
+ * 1. resolveAgentExtendsStub — variant templates may ship agents/<name>.md as an
+ *    ADR-0033 extends-stub (frontmatter with `extends:` and an empty or
+ *    prose-only body). Scaffolded projects get the L1 body re-attached by
+ *    new-project §2.3b; an adopted (converted) project receives the same
+ *    treatment in the adopt-project settling pass; otherwise the project ships a
  *    dangling `extends:` pointer into a directory that does not exist standalone.
  * 2. stripL1BMetadata — drops `@resolved-from`, `formal_name`, and `variant` keys, and
  *    regenerates the `lifecycle:` frontmatter with project-local dates (validate-agents
@@ -54,22 +63,43 @@ export interface ResolvePmStubResult {
   missingL1?: boolean;
 }
 
+/** Generic-call alias for {@link ResolvePmStubResult} (same shape, agent-neutral name). */
+export type ResolveAgentStubResult = ResolvePmStubResult;
+
+export interface ResolveAgentStubOptions {
+  /**
+   * Canonical-prose check for prose-shaped stubs (H12 — a non-canonical prose
+   * body is discarded with a warning). When omitted, prose stubs resolve with
+   * `nonCanonical: false`: there is no canonical prose notion for that agent
+   * (the variant i18n-specialist.md stubs are empty-bodied and never trip it).
+   */
+  isCanonicalStubBody?: (body: string, variant: string) => boolean;
+}
+
 /**
- * Resolve an ADR-0033 extends-stub `pmPath` in place against the L1 body at
- * `commonPmMdPath`. No-op when the file has no `extends:` frontmatter.
+ * Resolve an ADR-0033 extends-stub `agentPath` in place against the L1 body at
+ * `commonAgentPath`. No-op when the file has no `extends:` frontmatter.
+ * Generic form (T-20260924-003 R2.2) — pm is the pm.md-specific invocation
+ * {@link resolvePmExtendsStub}; the variant i18n-specialist.md stubs resolve
+ * with no injected body check.
  */
-export function resolvePmExtendsStub(pmPath: string, commonPmMdPath: string, variant: string): ResolvePmStubResult {
-  const content = readFileSync(pmPath, 'utf8');
+export function resolveAgentExtendsStub(
+  agentPath: string,
+  commonAgentPath: string,
+  variant: string,
+  opts: ResolveAgentStubOptions = {},
+): ResolveAgentStubResult {
+  const content = readFileSync(agentPath, 'utf8');
   const fmMatch = content.match(/^---\n([\s\S]*?)\n---\n?/);
   const body = fmMatch ? content.slice(fmMatch[0].length) : content;
   if (!fmMatch || !/extends:/.test(fmMatch[1])) {
     return { resolved: false };
   }
   const isProseStub = body.trim() !== '';
-  if (!existsSync(commonPmMdPath)) {
+  if (!existsSync(commonAgentPath)) {
     return { resolved: false, missingL1: true };
   }
-  const l1Content = readFileSync(commonPmMdPath, 'utf8');
+  const l1Content = readFileSync(commonAgentPath, 'utf8');
   const l1FmMatch = l1Content.match(/^---\n([\s\S]*?)\n---\n?/);
   const l1Body = l1FmMatch ? l1Content.slice(l1FmMatch[0].length) : l1Content;
   // Merge: stub frontmatter wins, missing L1 fields are filled in; `extends:` is
@@ -104,12 +134,21 @@ export function resolvePmExtendsStub(pmPath: string, commonPmMdPath: string, var
   const mergedFm = '---\n' + (yaml.dump(stubFm) as string).trimEnd() + '\n---\n';
   let nonCanonical = false;
   if (isProseStub) {
-    nonCanonical = !isCanonicalPmStubBody(body, variant);
-    writeFileSync(pmPath, mergedFm + '\n' + resolvedBody, 'utf8');
+    nonCanonical = opts.isCanonicalStubBody ? !opts.isCanonicalStubBody(body, variant) : false;
+    writeFileSync(agentPath, mergedFm + '\n' + resolvedBody, 'utf8');
     return { resolved: true, shape: 'prose', nonCanonical, proseBodyLength: body.trim().length };
   }
-  writeFileSync(pmPath, mergedFm + body + (body.endsWith('\n') ? '' : '\n') + resolvedBody, 'utf8');
+  writeFileSync(agentPath, mergedFm + body + (body.endsWith('\n') ? '' : '\n') + resolvedBody, 'utf8');
   return { resolved: true, shape: 'empty' };
+}
+
+/**
+ * pm.md-specific back-compat wrapper (v1.0.0 public API): resolves an
+ * agents/pm.md extends-stub with the canonical pm stub-prose check (H12)
+ * injected. Delegates verbatim to {@link resolveAgentExtendsStub}.
+ */
+export function resolvePmExtendsStub(pmPath: string, commonPmMdPath: string, variant: string): ResolvePmStubResult {
+  return resolveAgentExtendsStub(pmPath, commonPmMdPath, variant, { isCanonicalStubBody: isCanonicalPmStubBody });
 }
 
 /**

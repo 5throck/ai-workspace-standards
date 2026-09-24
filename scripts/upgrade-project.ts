@@ -1,5 +1,15 @@
 #!/usr/bin/env bun
-// @version 1.48.0
+// @version 1.49.0
+// v1.49.0 (2026-09-25, T-20260924-003 — spec
+//          docs/designs/2026-09-25-inventory-decisions-batch-design.md R2.4):
+//          the agents/ SYNC pass skips template files whose frontmatter
+//          carries `extends:` (pure isExtendsStub from lib/upgrade-policy.ts),
+//          logging `STUB (resolved at scaffold)`. Fixes the v1.35.0 drift
+//          reconciliation clobber: an apply-mode upgrade compared the 8-line
+//          template pm.md stub against the project's resolved 349-line body at
+//          equal version and overwrote it ("DRIFT (restored to canonical)",
+//          proven by Projects/co-work dry-run). Also protects the 13 new
+//          variant i18n-specialist.md stubs.
 // v1.48.0 (2026-09-25, T-20260924-011 — spec
 //          docs/designs/2026-09-25-codex-merge-claim-routing-design.md D2/R4-R6):
 //          the VARIANT ASSET DIRS pass consults resolveClaim per walked file and
@@ -458,6 +468,7 @@ import {
 import {
   TEMPLATE_TREE_SYNC_PASS,
   VARIANT_ASSET_DIRS_PASS,
+  isExtendsStub,
   iterEffectiveTemplateFiles,
   lifecyclelessText,
   mergeSettingsJson,
@@ -1816,6 +1827,18 @@ for (const agentsDir of tplAgentsDirs) {
     if (!statSync(tplFile).isFile()) continue;
     const rel = `agents/${fname}`;
     const projFile = join(projectDir, rel);
+    // T-20260924-003 R2.4 (spec 2026-09-25-inventory-decisions-batch-design):
+    // template extends-stubs (variant pm.md, the 13 variant i18n-specialist.md)
+    // resolve at scaffold/adopt time into self-contained project files. The
+    // v1.35.0 equal-version drift reconciliation below compared the 8-line
+    // template stub against the project's resolved full body and reported
+    // `DRIFT (restored to canonical)` — an apply-mode upgrade clobbered the
+    // project's 349-line resolved PM agent with the stub (proven by dry-run on
+    // Projects/co-work). Stubs never deliver through this pass.
+    if (isExtendsStub(readFileSync(tplFile, 'utf8'))) {
+      console.log(`  STUB (resolved at scaffold): ${rel}`);
+      continue;
+    }
     const tplVer = extractFrontmatterVersion(tplFile);
     if (!tplVer) { console.log(`  SKIP (no version): ${rel}`); continue; }
     const projVer = extractFrontmatterVersion(projFile);

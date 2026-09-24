@@ -735,11 +735,6 @@
       "layer": "variant:co-abap"
     },
     {
-      "id": "doc:co-abap/agents/i18n-specialist.md",
-      "type": "doc",
-      "layer": "variant:co-abap"
-    },
-    {
       "id": "doc:co-abap/agents/le-analyst.md",
       "type": "doc",
       "layer": "variant:co-abap"
@@ -786,11 +781,6 @@
     },
     {
       "id": "doc:co-consult/AGENTS.md",
-      "type": "doc",
-      "layer": "variant:co-consult"
-    },
-    {
-      "id": "doc:co-consult/agents/i18n-specialist.md",
       "type": "doc",
       "layer": "variant:co-consult"
     },
@@ -851,11 +841,6 @@
     },
     {
       "id": "doc:co-deck/agents/html-build.md",
-      "type": "doc",
-      "layer": "variant:co-deck"
-    },
-    {
-      "id": "doc:co-deck/agents/i18n-specialist.md",
       "type": "doc",
       "layer": "variant:co-deck"
     },
@@ -925,11 +910,6 @@
       "layer": "variant:co-design"
     },
     {
-      "id": "doc:co-design/agents/i18n-specialist.md",
-      "type": "doc",
-      "layer": "variant:co-design"
-    },
-    {
       "id": "doc:co-design/docs/co-design.context.md",
       "type": "doc",
       "layer": "variant:co-design"
@@ -965,11 +945,6 @@
       "layer": "variant:co-develop"
     },
     {
-      "id": "doc:co-develop/agents/i18n-specialist.md",
-      "type": "doc",
-      "layer": "variant:co-develop"
-    },
-    {
       "id": "doc:co-develop/docs/co-develop.context.md",
       "type": "doc",
       "layer": "variant:co-develop"
@@ -996,11 +971,6 @@
     },
     {
       "id": "doc:co-export/AGENTS.md",
-      "type": "doc",
-      "layer": "variant:co-export"
-    },
-    {
-      "id": "doc:co-export/agents/i18n-specialist.md",
       "type": "doc",
       "layer": "variant:co-export"
     },
@@ -1040,11 +1010,6 @@
       "layer": "variant:co-game"
     },
     {
-      "id": "doc:co-game/agents/i18n-specialist.md",
-      "type": "doc",
-      "layer": "variant:co-game"
-    },
-    {
       "id": "doc:co-game/docs/co-game.context.md",
       "type": "doc",
       "layer": "variant:co-game"
@@ -1066,11 +1031,6 @@
     },
     {
       "id": "doc:co-hr/AGENTS.md",
-      "type": "doc",
-      "layer": "variant:co-hr"
-    },
-    {
-      "id": "doc:co-hr/agents/i18n-specialist.md",
       "type": "doc",
       "layer": "variant:co-hr"
     },
@@ -1116,11 +1076,6 @@
     },
     {
       "id": "doc:co-news/agents/financial-analyst.md",
-      "type": "doc",
-      "layer": "variant:co-news"
-    },
-    {
-      "id": "doc:co-news/agents/i18n-specialist.md",
       "type": "doc",
       "layer": "variant:co-news"
     },
@@ -1191,11 +1146,6 @@
     },
     {
       "id": "doc:co-price/agents/finance-strategy-lead.md",
-      "type": "doc",
-      "layer": "variant:co-price"
-    },
-    {
-      "id": "doc:co-price/agents/i18n-specialist.md",
       "type": "doc",
       "layer": "variant:co-price"
     },
@@ -1276,11 +1226,6 @@
     },
     {
       "id": "doc:co-safety/agents/gvp-agent.md",
-      "type": "doc",
-      "layer": "variant:co-safety"
-    },
-    {
-      "id": "doc:co-safety/agents/i18n-specialist.md",
       "type": "doc",
       "layer": "variant:co-safety"
     },
@@ -1390,11 +1335,6 @@
       "layer": "variant:co-security"
     },
     {
-      "id": "doc:co-security/agents/i18n-specialist.md",
-      "type": "doc",
-      "layer": "variant:co-security"
-    },
-    {
       "id": "doc:co-security/agents/patch-engineer.md",
       "type": "doc",
       "layer": "variant:co-security"
@@ -1456,11 +1396,6 @@
     },
     {
       "id": "doc:co-work/AGENTS.md",
-      "type": "doc",
-      "layer": "variant:co-work"
-    },
-    {
-      "id": "doc:co-work/agents/i18n-specialist.md",
       "type": "doc",
       "layer": "variant:co-work"
     },
@@ -8125,54 +8060,6 @@
     },
     {
       "type": "cites_skill",
-      "from": "doc:co-abap/agents/i18n-specialist.md",
-      "to": "i18n-audit",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-abap/agents/i18n-specialist.md",
-      "to": "i18n-formatting",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-abap/agents/i18n-specialist.md",
-      "to": "i18n-layout",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-abap/agents/i18n-specialist.md",
-      "to": "i18n-locale-config",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-abap/agents/i18n-specialist.md",
-      "to": "k-dart",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-abap/agents/i18n-specialist.md",
-      "to": "k-kosis",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-abap/agents/i18n-specialist.md",
-      "to": "k-law",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-abap/agents/i18n-specialist.md",
-      "to": "translate",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
       "from": "doc:co-abap/agents/le-analyst.md",
       "to": "sap-le",
       "source": "workflow-doc"
@@ -8469,54 +8356,6 @@
       "type": "cites_skill",
       "from": "doc:co-consult/AGENTS.md",
       "to": "skill-lifecycle-manager",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-consult/agents/i18n-specialist.md",
-      "to": "i18n-audit",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-consult/agents/i18n-specialist.md",
-      "to": "i18n-formatting",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-consult/agents/i18n-specialist.md",
-      "to": "i18n-layout",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-consult/agents/i18n-specialist.md",
-      "to": "i18n-locale-config",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-consult/agents/i18n-specialist.md",
-      "to": "k-dart",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-consult/agents/i18n-specialist.md",
-      "to": "k-kosis",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-consult/agents/i18n-specialist.md",
-      "to": "k-law",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-consult/agents/i18n-specialist.md",
-      "to": "translate",
       "source": "workflow-doc"
     },
     {
@@ -9205,54 +9044,6 @@
     },
     {
       "type": "cites_skill",
-      "from": "doc:co-deck/agents/i18n-specialist.md",
-      "to": "i18n-audit",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-deck/agents/i18n-specialist.md",
-      "to": "i18n-formatting",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-deck/agents/i18n-specialist.md",
-      "to": "i18n-layout",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-deck/agents/i18n-specialist.md",
-      "to": "i18n-locale-config",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-deck/agents/i18n-specialist.md",
-      "to": "k-dart",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-deck/agents/i18n-specialist.md",
-      "to": "k-kosis",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-deck/agents/i18n-specialist.md",
-      "to": "k-law",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-deck/agents/i18n-specialist.md",
-      "to": "translate",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
       "from": "doc:co-deck/agents/image-curator.md",
       "to": "html-build",
       "source": "workflow-doc"
@@ -9553,54 +9344,6 @@
     },
     {
       "type": "cites_skill",
-      "from": "doc:co-design/agents/i18n-specialist.md",
-      "to": "i18n-audit",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-design/agents/i18n-specialist.md",
-      "to": "i18n-formatting",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-design/agents/i18n-specialist.md",
-      "to": "i18n-layout",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-design/agents/i18n-specialist.md",
-      "to": "i18n-locale-config",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-design/agents/i18n-specialist.md",
-      "to": "k-dart",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-design/agents/i18n-specialist.md",
-      "to": "k-kosis",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-design/agents/i18n-specialist.md",
-      "to": "k-law",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-design/agents/i18n-specialist.md",
-      "to": "translate",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
       "from": "doc:co-design/docs/co-design.context.md",
       "to": "agent-lifecycle-manager",
       "source": "workflow-doc"
@@ -9705,54 +9448,6 @@
       "type": "cites_skill",
       "from": "doc:co-develop/agents/designer.md",
       "to": "ui-ux-design-intelligence",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-develop/agents/i18n-specialist.md",
-      "to": "i18n-audit",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-develop/agents/i18n-specialist.md",
-      "to": "i18n-formatting",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-develop/agents/i18n-specialist.md",
-      "to": "i18n-layout",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-develop/agents/i18n-specialist.md",
-      "to": "i18n-locale-config",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-develop/agents/i18n-specialist.md",
-      "to": "k-dart",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-develop/agents/i18n-specialist.md",
-      "to": "k-kosis",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-develop/agents/i18n-specialist.md",
-      "to": "k-law",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-develop/agents/i18n-specialist.md",
-      "to": "translate",
       "source": "workflow-doc"
     },
     {
@@ -9907,54 +9602,6 @@
     },
     {
       "type": "cites_skill",
-      "from": "doc:co-export/agents/i18n-specialist.md",
-      "to": "i18n-audit",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-export/agents/i18n-specialist.md",
-      "to": "i18n-formatting",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-export/agents/i18n-specialist.md",
-      "to": "i18n-layout",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-export/agents/i18n-specialist.md",
-      "to": "i18n-locale-config",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-export/agents/i18n-specialist.md",
-      "to": "k-dart",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-export/agents/i18n-specialist.md",
-      "to": "k-kosis",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-export/agents/i18n-specialist.md",
-      "to": "k-law",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-export/agents/i18n-specialist.md",
-      "to": "translate",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
       "from": "doc:co-export/docs/co-export.context.md",
       "to": "agent-lifecycle-manager",
       "source": "workflow-doc"
@@ -10221,54 +9868,6 @@
       "type": "cites_skill",
       "from": "doc:co-game/AGENTS.md",
       "to": "skill-lifecycle-manager",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-game/agents/i18n-specialist.md",
-      "to": "i18n-audit",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-game/agents/i18n-specialist.md",
-      "to": "i18n-formatting",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-game/agents/i18n-specialist.md",
-      "to": "i18n-layout",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-game/agents/i18n-specialist.md",
-      "to": "i18n-locale-config",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-game/agents/i18n-specialist.md",
-      "to": "k-dart",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-game/agents/i18n-specialist.md",
-      "to": "k-kosis",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-game/agents/i18n-specialist.md",
-      "to": "k-law",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-game/agents/i18n-specialist.md",
-      "to": "translate",
       "source": "workflow-doc"
     },
     {
@@ -10449,54 +10048,6 @@
       "type": "cites_skill",
       "from": "doc:co-hr/AGENTS.md",
       "to": "sync",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-hr/agents/i18n-specialist.md",
-      "to": "i18n-audit",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-hr/agents/i18n-specialist.md",
-      "to": "i18n-formatting",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-hr/agents/i18n-specialist.md",
-      "to": "i18n-layout",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-hr/agents/i18n-specialist.md",
-      "to": "i18n-locale-config",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-hr/agents/i18n-specialist.md",
-      "to": "k-dart",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-hr/agents/i18n-specialist.md",
-      "to": "k-kosis",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-hr/agents/i18n-specialist.md",
-      "to": "k-law",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-hr/agents/i18n-specialist.md",
-      "to": "translate",
       "source": "workflow-doc"
     },
     {
@@ -10873,54 +10424,6 @@
     },
     {
       "type": "cites_skill",
-      "from": "doc:co-news/agents/i18n-specialist.md",
-      "to": "i18n-audit",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-news/agents/i18n-specialist.md",
-      "to": "i18n-formatting",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-news/agents/i18n-specialist.md",
-      "to": "i18n-layout",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-news/agents/i18n-specialist.md",
-      "to": "i18n-locale-config",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-news/agents/i18n-specialist.md",
-      "to": "k-dart",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-news/agents/i18n-specialist.md",
-      "to": "k-kosis",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-news/agents/i18n-specialist.md",
-      "to": "k-law",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-news/agents/i18n-specialist.md",
-      "to": "translate",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
       "from": "doc:co-news/agents/legal-researcher.md",
       "to": "k-law",
       "source": "workflow-doc"
@@ -11217,54 +10720,6 @@
       "type": "cites_skill",
       "from": "doc:co-price/agents/finance-strategy-lead.md",
       "to": "price-waterfall-analysis",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-price/agents/i18n-specialist.md",
-      "to": "i18n-audit",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-price/agents/i18n-specialist.md",
-      "to": "i18n-formatting",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-price/agents/i18n-specialist.md",
-      "to": "i18n-layout",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-price/agents/i18n-specialist.md",
-      "to": "i18n-locale-config",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-price/agents/i18n-specialist.md",
-      "to": "k-dart",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-price/agents/i18n-specialist.md",
-      "to": "k-kosis",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-price/agents/i18n-specialist.md",
-      "to": "k-law",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-price/agents/i18n-specialist.md",
-      "to": "translate",
       "source": "workflow-doc"
     },
     {
@@ -11637,54 +11092,6 @@
       "type": "cites_skill",
       "from": "doc:co-safety/agents/gvp-agent.md",
       "to": "signal-detector",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-safety/agents/i18n-specialist.md",
-      "to": "i18n-audit",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-safety/agents/i18n-specialist.md",
-      "to": "i18n-formatting",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-safety/agents/i18n-specialist.md",
-      "to": "i18n-layout",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-safety/agents/i18n-specialist.md",
-      "to": "i18n-locale-config",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-safety/agents/i18n-specialist.md",
-      "to": "k-dart",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-safety/agents/i18n-specialist.md",
-      "to": "k-kosis",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-safety/agents/i18n-specialist.md",
-      "to": "k-law",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-safety/agents/i18n-specialist.md",
-      "to": "translate",
       "source": "workflow-doc"
     },
     {
@@ -12313,54 +11720,6 @@
     },
     {
       "type": "cites_skill",
-      "from": "doc:co-security/agents/i18n-specialist.md",
-      "to": "i18n-audit",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-security/agents/i18n-specialist.md",
-      "to": "i18n-formatting",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-security/agents/i18n-specialist.md",
-      "to": "i18n-layout",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-security/agents/i18n-specialist.md",
-      "to": "i18n-locale-config",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-security/agents/i18n-specialist.md",
-      "to": "k-dart",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-security/agents/i18n-specialist.md",
-      "to": "k-kosis",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-security/agents/i18n-specialist.md",
-      "to": "k-law",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-security/agents/i18n-specialist.md",
-      "to": "translate",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
       "from": "doc:co-security/agents/patch-engineer.md",
       "to": "verify-authorization",
       "source": "workflow-doc"
@@ -12483,54 +11842,6 @@
       "type": "cites_skill",
       "from": "doc:co-work/AGENTS.md",
       "to": "skill-lifecycle-manager",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-work/agents/i18n-specialist.md",
-      "to": "i18n-audit",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-work/agents/i18n-specialist.md",
-      "to": "i18n-formatting",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-work/agents/i18n-specialist.md",
-      "to": "i18n-layout",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-work/agents/i18n-specialist.md",
-      "to": "i18n-locale-config",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-work/agents/i18n-specialist.md",
-      "to": "k-dart",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-work/agents/i18n-specialist.md",
-      "to": "k-kosis",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-work/agents/i18n-specialist.md",
-      "to": "k-law",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-work/agents/i18n-specialist.md",
-      "to": "translate",
       "source": "workflow-doc"
     },
     {
