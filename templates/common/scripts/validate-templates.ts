@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.40.0
+ * @version 1.41.0
  * v1.40.0 (2026-09-25, platform verifier expansion — spec
  *          docs/designs/2026-09-25-verifier-platform-expansion-design.md,
  *          sites 3a-3e/3g + R6): command checks gain the .codex/prompts mapping
@@ -1979,7 +1979,42 @@ function checkVariantMirrorParity(): void {
     );
   let checked = 0;
   let warnings = 0;
+  let errors = 0;
   if (!existsSync(variantsDir)) return;
+
+  // T-20260924-004 pre-pass: fleet-wide mirror census for peer counting —
+  // which variants' platform mirrors carry each skill.
+  const mirrorCarriers = new Map<string, Set<string>>();
+  const readFmVersion = (skillMd: string): string | null => {
+    try {
+      const fm = readFileSync(skillMd, 'utf-8').match(/^---\n([\s\S]*?)\n---/);
+      if (!fm) return null;
+      const v = fm[1].match(/^version:\s*["']?(\d+\.\d+\.\d+)/m);
+      return v ? v[1] : null;
+    } catch {
+      return null;
+    }
+  };
+  const commonSkillVersions = new Map<string, string>();
+  for (const name of listSkillDirs(join(TEMPLATES_DIR, 'common', 'skills'))) {
+    const v = readFmVersion(join(TEMPLATES_DIR, 'common', 'skills', name, 'SKILL.md'));
+    if (v !== null) commonSkillVersions.set(name, v);
+  }
+  for (const entry of readdirSync(variantsDir, { withFileTypes: true })) {
+    if (!entry.isDirectory() || !entry.name.startsWith('co-')) continue;
+    for (const mirror of PLATFORM_MIRROR_DIRS) {
+      for (const name of listSkillDirs(join(variantsDir, entry.name, mirror))) {
+        if (!mirrorCarriers.has(name)) mirrorCarriers.set(name, new Set());
+        mirrorCarriers.get(name)!.add(entry.name);
+      }
+    }
+  }
+  const semverOlder = (a: string, b: string): boolean => {
+    const pa = a.split('.').map(Number); const pb = b.split('.').map(Number);
+    for (let i = 0; i < 3; i++) { const d = (pa[i] || 0) - (pb[i] || 0); if (d !== 0) return d < 0; }
+    return false;
+  };
+
   for (const entry of readdirSync(variantsDir, { withFileTypes: true })) {
     if (!entry.isDirectory() || !entry.name.startsWith('co-')) continue;
     const vdir = join(variantsDir, entry.name);
@@ -1995,7 +2030,30 @@ function checkVariantMirrorParity(): void {
         const inCommon = commonSkills.has(name);
         const flagged = (inVariant && neverMirror(join(vSkills, name, 'SKILL.md')))
           || (!inVariant && inCommon && neverMirror(join(TEMPLATES_DIR, 'common', 'skills', name, 'SKILL.md')));
-        if ((inVariant || inCommon) && !flagged) continue;
+        if ((inVariant || inCommon) && !flagged) {
+          // T-20260924-004: stale variant platform-mirror copy of a COMMON
+          // skill without variant declaration/SSOT and with no peer carrying
+          // it — the D1/D2 drift class must not regrow silently.
+          if (!inVariant && inCommon) {
+            const mirrorVersion = readFmVersion(join(mirrorDir, name, 'SKILL.md'));
+            const commonVersion = commonSkillVersions.get(name) ?? null;
+            const peerCount = (mirrorCarriers.get(name)?.size ?? 1) - 1;
+            console.log(`TRACE mirror-check: ${entry.name}/${mirror}/${name} inV=${inVariant} inC=${inCommon} flag=${flagged} mv=${mirrorVersion} cv=${commonVersion} peers=${peerCount}`);
+            const verdict = classifyVariantMirrorCopy({
+              inVariant, inCommon, flagged,
+              mirrorVersion, commonVersion, peerCount,
+            });
+            console.log(`TRACE verdict: ${verdict}`);
+            if (verdict === 'fail-stale-orphan') {
+              fail(entry.name, 'variant-mirror-parity',
+                `${mirror}/${name}/ is a stale platform-mirror copy of common skill "${name}" (mirror v${mirrorVersion} vs common v${commonVersion}) with no variant declaration, no skills/ SSOT copy, and no peer carrying it — regrown D1/D2-class drift`,
+                `Delete templates/${entry.name}/${mirror}/${name}/ (stale copy of common v${commonVersion}) or declare the variant-specific copy in variant.json`);
+              errors++;
+              continue;
+            }
+          }
+          continue;
+        }
         warn(entry.name, 'variant-mirror-parity',
           `${mirror}/${name}/ must not be mirrored — ${flagged ? 'the owning skill is flagged mirror:false/security-gate:true' : 'absent from both the variant and the common skills/ tree'}`,
           `Delete templates/${entry.name}/${mirror}/${name}/ (sync-skills never prunes; it will not be resurrected while the flag stands)`);
@@ -2015,6 +2073,38 @@ function checkVariantMirrorParity(): void {
     if (checked === 0) console.log('  (no variant templates with a skills/ tree found)');
     else if (warnings === 0) console.log(`  ✓ ${checked} variant template(s): platform mirrors carry exactly the mirrorable set`);
   }
+}
+
+// T-20260924-004: classify a variant platform-mirror copy of a skill against
+// its owning trees — pure decision core for checkVariantMirrorParity so the
+// stale-orphan arm is unit-testable (positive fixture must FAIL, clean
+// fixture must PASS; the convention from the 09-22 detector review).
+export type VariantMirrorCopyVerdict = 'ok' | 'warn-undeclared' | 'fail-stale-orphan';
+export function classifyVariantMirrorCopy(opts: {
+  inVariant: boolean;
+  inCommon: boolean;
+  flagged: boolean;
+  mirrorVersion: string | null;
+  commonVersion: string | null;
+  peerCount: number; // other variants whose mirrors carry the same skill
+}): VariantMirrorCopyVerdict {
+  const { inVariant, inCommon, flagged } = opts;
+  // Owning-tree flagged skills must not be mirrored.
+  if (flagged) return 'warn-undeclared';
+  // T-20260924-004: stale variant platform-mirror copy of a COMMON skill —
+  // older than the common SSOT, absent from the variant skills/ tree, not
+  // declared in variant.json, and carried by no peer variant → regrown
+  // D1/D2-class drift. Fail so it cannot regrow silently.
+  if (!inVariant && inCommon
+      && opts.mirrorVersion !== null && opts.commonVersion !== null
+      && opts.mirrorVersion !== opts.commonVersion
+      && opts.peerCount === 0) {
+    return 'fail-stale-orphan';
+  }
+  // Same-version undecorated copies (uniform baseline set) or peer-shared
+  // mirrors stay at the pre-existing WARN level; variant skills mirrored to
+  // their own platform dirs are correct.
+  return 'ok';
 }
 
 // Check: roster-tier-consistency (T-20260921-020, validator-hardening) — an
