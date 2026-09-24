@@ -8,12 +8,17 @@ title: >-
   or common_skills; decide full-inventory vs override-record and list or exempt
   accordingly
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-24T00:11:58.277Z'
 history:
   - at: '2026-09-24T00:11:58.277Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-24T23:31:07.258Z'
+    from: backlog
+    to: done
+result: >-
+  common-contract 1.7.0 full-inventory (10 entries + 5 exclusions + codex_source
+  ×22); C-CM-04 WARNs 4→0; exemptSkills values-bug fixed (PR #1066)
 error: null

@@ -9,12 +9,18 @@ title: >-
   writes the mirror, which is how the 2026-09-24 13-row annotation-prose lag
   accumulated); enforce via lifecycle-sync-audit Check B or a new drift check
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-23T23:34:18.642Z'
 history:
   - at: '2026-09-23T23:34:18.642Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-24T23:31:07.246Z'
+    from: backlog
+    to: done
+result: >-
+  generate-scripts-mirror 1.0.0 — L1 mirror now generated (209→128 rows == 128
+  files 1:1); dev-sync 1.18.0 Step 2.6; lifecycle-sync-audit 1.16.0 Check B
+  projection arm (PR #1065)
 error: null

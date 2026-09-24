@@ -16,12 +16,18 @@ title: >-
   scripts/propagate-to-templates.ts --marker-rewrite --dry-run (observation
   source: constitution-s33 implementation verification, 2026-09-24)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-24T01:26:41.376Z'
 history:
   - at: '2026-09-24T01:26:41.376Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-24T23:31:07.167Z'
+    from: backlog
+    to: done
+result: >-
+  Variant-context 26 would-overwrite zones healed via marker-rewrite apply after
+  per-variant zero-loss gate (PR #1062); audit 2.44.0 marker-zone exemption
+  cleared ADR-0050 stale-promoted WARNs
 error: null

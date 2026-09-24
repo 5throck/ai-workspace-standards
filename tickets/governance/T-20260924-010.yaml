@@ -6,12 +6,17 @@ title: >-
   machinery for CODEX.md and .codex settings (codex-settings policy
   adjudication)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-24T14:48:24.244Z'
 history:
   - at: '2026-09-24T14:48:24.244Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-24T23:31:07.208Z'
+    from: backlog
+    to: done
+result: >-
+  COMMON-CODEX pattern in managed-block-merge 1.2.0 — CODEX.md managed-block
+  MERGE real (was silent no-op); CLAUDE.md byte-identical (PR #1064)
 error: null

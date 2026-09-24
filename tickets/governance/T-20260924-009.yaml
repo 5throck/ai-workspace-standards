@@ -24,12 +24,17 @@ title: >-
   inventory vs its registry/index); provenance: scaffold-hygiene-bundle design
   verification, 2026-09-24
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-24T09:51:12.293Z'
 history:
   - at: '2026-09-24T09:51:12.293Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-24T23:31:07.283Z'
+    from: backlog
+    to: done
+result: >-
+  4 variant SKILLS.md registries authored (38 rows == 38 dirs); 7 remaining
+  variants → T-20260925-005 (PR #1066)
 error: null
