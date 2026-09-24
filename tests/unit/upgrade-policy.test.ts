@@ -4,7 +4,14 @@
  * the lib's mirrored pass inventories in lockstep with scripts/upgrade-project.ts literals
  * (the script is a top-level executable and cannot be imported).
  *
- * @version 1.0.0
+ * v1.1.0 (2026-09-24, platform-parity P1 bug 4 — spec
+ *         2026-09-24-platform-parity-p1-bugfixes-design.md D4/D8): CODEX.md
+ *         joins MERGE_MANAGED_FILES — resolveClaim('CODEX.md') must return
+ *         { policy: 'MERGE_MANAGED', pass: 'MERGE' } so the TEMPLATE TREE SYNC
+ *         pass never wholesale-overwrites a project CODEX.md again (the MERGE
+ *         pass, which already lists CODEX.md, becomes the sole delivery channel).
+ *
+ * @version 1.1.0
  */
 import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -32,9 +39,17 @@ describe('upgrade-policy resolveClaim — dedicated passes keep their paths', ()
   });
 
   test('MERGE_MANAGED (platform + gitignore + pm.md + AGENTS.md)', () => {
-    for (const rel of ['CLAUDE.md', 'GEMINI.md', '.gitignore', 'AGENTS.md', 'agents/pm.md']) {
+    for (const rel of ['CLAUDE.md', 'GEMINI.md', 'CODEX.md', '.gitignore', 'AGENTS.md', 'agents/pm.md']) {
       expect(resolveClaim(rel, VARIANT).policy).toBe('MERGE_MANAGED');
     }
+  });
+
+  test('CODEX.md claim is MERGE_MANAGED/MERGE (P1 bug 4 — tree-sync overwrite path is dead)', () => {
+    // Design D4: resolveClaim('CODEX.md') must hit the MERGE_MANAGED_FILES set
+    // (pass 'MERGE') — NOT the blanket root-file SYNC fallback that made the
+    // TEMPLATE TREE SYNC pass destroy every project edit to CODEX.md.
+    expect(resolveClaim('CODEX.md', 'co-design')).toEqual({ policy: 'MERGE_MANAGED', pass: 'MERGE' });
+    expect(resolveClaim('CODEX.md', VARIANT)).toEqual({ policy: 'MERGE_MANAGED', pass: 'MERGE' });
   });
 
   test('variant context file is DOCS_MERGE, parameterized by variant', () => {

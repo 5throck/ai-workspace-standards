@@ -11,6 +11,15 @@
  *   copies). Everything else — unregistered strays and project-owned scripts
  *   whatever their source cell claims — is KEEP-uncertain and survives
  *   (ADR-0031); verify-scripts owns registration hygiene at audit time.
+ *
+ * v1.1.0 (2026-09-24, platform-parity P1 bug 2 — spec
+ *         docs/designs/2026-09-24-platform-parity-p1-bugfixes-design.md D2/D8):
+ *         new VARIANT-SCOPE SKILL PRUNE describe block — a foreign-variant
+ *         skill must be pruned from ALL FOUR platform mirrors; pre-fix the
+ *         prune iterated a 4-element literal without .codex/skills, so the
+ *         foreign skill's codex copy survived every prune run.
+ *
+ * @version 1.1.0
  */
 import { existsSync, mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -139,6 +148,54 @@ describe('upgrade-project.ts PRUNE REMOVED (upstream-row semantics, v1.45.1)', (
       const out = result.stdout ?? '';
       expect(out).toContain('KEEP   scripts/stray-foreign.ts');
       expect(existsSync(join(tmp, 'scripts', 'stray-foreign.ts'))).toBe(true);
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  }, 300000);
+});
+
+// ============================================================================
+// VARIANT-SCOPE SKILL PRUNE — .codex mirror coverage (P1 bug 2, spec
+// 2026-09-24-platform-parity-p1-bugfixes-design.md D2/D8)
+// ============================================================================
+describe('upgrade-project.ts VARIANT-SCOPE SKILL PRUNE — four-mirror coverage (P1 bug 2)', () => {
+  test('foreign-variant skill is pruned from all four platform mirrors including .codex', () => {
+    const tmp = makeTempProject();
+    try {
+      // sound-synth is registered to co-game in the REAL workspace
+      // docs/workspace-schema.json (variant_scoped_skills) — foreign to the
+      // co-develop fixture variant. Seed it in all FOUR platform mirrors
+      // (NOT the top-level skills/ SSOT, so the pre-fix bug is isolated to
+      // the missing .codex element: 3 PRUNE verdicts pre-fix vs 4 post-fix).
+      for (const mirror of ['.claude', '.gemini', '.agents', '.codex']) {
+        mkdirSync(join(tmp, mirror, 'skills', 'sound-synth'), { recursive: true });
+        writeFileSync(
+          join(tmp, mirror, 'skills', 'sound-synth', 'SKILL.md'),
+          '---\nname: sound-synth\ndescription: foreign co-game skill (fixture copy)\n---\n'
+        );
+      }
+      spawnSync('git', ['-C', tmp, 'add', '-A'], { cwd: tmp });
+      spawnSync('git', ['-C', tmp, 'commit', '-q', '-m', 'chore: seed foreign mirrors'], { cwd: tmp });
+
+      const result = spawnSync(
+        'bun',
+        [upgradeScript, tmp, '--variant', VARIANT, '--dry-run', '--yes'],
+        { encoding: 'utf-8', timeout: 300000 }
+      );
+      if (result.status !== 0) {
+        console.error('stdout:', (result.stdout ?? '').slice(-3000));
+        console.error('stderr:', (result.stderr ?? '').slice(0, 2000));
+      }
+      expect(result.status).toBe(0);
+      const out = result.stdout ?? '';
+
+      // Sanity: the three pre-existing mirrors still prune…
+      expect(out).toContain('PRUNE  .claude/skills/sound-synth/');
+      expect(out).toContain('PRUNE  .gemini/skills/sound-synth/');
+      expect(out).toContain('PRUNE  .agents/skills/sound-synth/');
+      // …and the .codex mirror joins them (the regression: pre-fix this
+      // verdict never fired and the codex copy survived every prune run).
+      expect(out).toContain('PRUNE  .codex/skills/sound-synth/');
     } finally {
       rmSync(tmp, { recursive: true, force: true });
     }

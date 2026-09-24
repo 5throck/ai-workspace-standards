@@ -10,7 +10,14 @@
  *         docs/project.md add-if-missing seed step (verdict style, TODO fallback
  *         survival, dry-run parity, AC4 never-overwrite).
  *
- * @version 1.1.0
+ * v1.2.0 (2026-09-24, platform-parity P1 bugs 3+4 — spec
+ *         docs/designs/2026-09-24-platform-parity-p1-bugfixes-design.md D3/D4/D8):
+ *         new CODEX OVERWRITE GUARDS describe block — the VARIANT ASSET DIRS pass
+ *         must skip the variant's top-level .codex/ (project .codex/** is
+ *         ADD_IF_MISSING per upgrade-policy), and a divergent project CODEX.md
+ *         must get no TEMPLATE TREE SYNC overwrite verdict (MERGE_MANAGED claim).
+ *
+ * @version 1.2.0
  */
 import { existsSync, mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -348,6 +355,60 @@ describe('upgrade-project.ts IDENTITY SEED — dirty-tree corner (§13.2 guard)'
       expect(result.status).toBe(0);
       expect(result.stdout).not.toContain('(identity seed');
       expect(readFileSync(dest, 'utf8')).toContain('Uncommitted identity.');
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  }, 300000);
+});
+
+// ============================================================================
+// CODEX OVERWRITE GUARDS (P1 bugs 3+4 — spec 2026-09-24-platform-parity-p1-bugfixes-design.md D3/D4/D8)
+// The VARIANT ASSET DIRS pass must never treat the variant's top-level .codex/
+// as a generic asset dir (project .codex/** is ADD_IF_MISSING, ADR-0076 D4), and
+// a divergent project CODEX.md must get no TEMPLATE TREE SYNC overwrite verdict
+// (CODEX.md joins MERGE_MANAGED_FILES — the MERGE pass owns delivery).
+// ============================================================================
+describe('upgrade-project.ts CODEX OVERWRITE GUARDS (P1 bugs 3+4)', () => {
+  test('divergent project .codex file and CODEX.md get no overwrite verdicts (dry-run exits 0)', () => {
+    const tmp = makeTempProject();
+    try {
+      // Project-owned copy of a co-develop .codex template file, deliberately
+      // divergent — pre-fix the VARIANT ASSET DIRS pass hash-synced it
+      // (UPDATE/COPIED verdicts), overwriting project-owned Codex config.
+      mkdirSync(join(tmp, '.codex', 'prompts'), { recursive: true });
+      writeFileSync(join(tmp, '.codex', 'prompts', 'security-check.md'),
+        '# project-owned security prompt — local customization\n');
+      // Divergent project CODEX.md (committed → clean tree → the tree-sync hash
+      // branch fires pre-fix and wholesale-overwrites with the raw template).
+      writeFileSync(join(tmp, 'CODEX.md'),
+        '# CODEX.md — project-customized\n\nMy local agent instructions that must survive upgrades.\n');
+
+      spawnSync('git', ['-C', tmp, 'add', '-A'], { cwd: tmp });
+      spawnSync('git', ['-C', tmp, 'commit', '-q', '-m', 'chore: project-owned codex state'], { cwd: tmp });
+
+      const result = spawnSync(
+        'bun',
+        [upgradeScript, tmp, '--variant', VARIANT, '--dry-run', '--yes'],
+        { encoding: 'utf-8', timeout: 300000 }
+      );
+      if (result.status !== 0) {
+        console.error('stdout:', (result.stdout ?? '').slice(-3000));
+        console.error('stderr:', (result.stderr ?? '').slice(0, 2000));
+      }
+      // Integration guard (D8): the full run must exit 0 — the skip-set change
+      // must not disturb neighboring passes.
+      expect(result.status).toBe(0);
+      const out = result.stdout ?? '';
+
+      // Bug 3: no VARIANT ASSET DIRS verdict for the project-owned .codex file.
+      expect(out).not.toContain('UPDATE .codex/prompts/security-check.md');
+      expect(out).not.toContain('COPIED: .codex/prompts/security-check.md');
+
+      // Bug 4 (integration assert): no TEMPLATE TREE SYNC overwrite verdict for
+      // the divergent project CODEX.md. (The MERGE pass still prints its own
+      // "MERGE: CODEX.md" line — that is the owning pass, not an overwrite.)
+      expect(out).not.toContain('UPDATE CODEX.md');
+      expect(out).not.toContain('COPIED: CODEX.md');
     } finally {
       rmSync(tmp, { recursive: true, force: true });
     }

@@ -226,12 +226,12 @@ Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 ---
 
 <!-- COMMON-GEMINI:START -->
-### 6. Workspace & Template Boundary Policy
+### 6. Project Boundary Policy
 
-- **Strict CWD Isolation**: When modifying templates (in `templates/`), you MUST strictly limit your working directory (CWD) to the specific template folder.
-- **No Cross-Modification**: Modifying workspace root files and template files in a single task or session is forbidden. Keep workspace root changes and template changes completely isolated.
+- **Strict Scope**: Work only within the current project directory.
+- **No Cross-Project Modification**: Modifying files outside the project root during a session is forbidden.
 
-> For L1-L2 Fork Model and lifecycle management rules, see [docs/context.md](docs/context.md) and [docs/context.md](docs/context.md).
+> For lifecycle management rules, see [docs/context.md — Lifecycle Management](docs/context.md#lifecycle-management).
 <!-- COMMON-GEMINI:END -->
 
 ### MCP Configurations & Absolute Resolving
@@ -345,7 +345,7 @@ Antigravity does not have `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` or `teammateMod
 
 ---
 
-*Last Updated: 2026-09-23 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
+*Last Updated: 2026-09-25 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
 
 
 

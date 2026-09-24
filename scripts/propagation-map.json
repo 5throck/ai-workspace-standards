@@ -167,10 +167,8 @@
       "include_pattern": "*/SKILL.md",
       "recursive": true,
       "l2_drift_eligible": false,
-      "exclude": [
-        "simulate-pipeline"
-      ],
-      "note": "No L2 variant has .agents/skills/ — workspace-root-only platform skills"
+      "exclude": [],
+      "note": "Uniform 4-mirror rule (T-20260916-008): platform mirrors are uniform L0 snapshots; project delivery filters l2_propagate: false skills (new-project sweep, upgrade WORKSPACE-ONLY SKILL SWEEP). The former simulate-pipeline exclude re-created the 3-vs-1 mirror drift the T-20260916-008 scope-skip removal eliminated (platform-parity P1 bugfixes spec, Decision A / D7)."
     },
     "codex-skills": {
       "description": "L0 .codex/skills/ → L1 templates/common/.codex/skills/ — Codex CLI/Desktop App platform skills (ADR-0077)",

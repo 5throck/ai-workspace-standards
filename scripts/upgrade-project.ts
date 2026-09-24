@@ -1,5 +1,15 @@
 #!/usr/bin/env bun
-// @version 1.46.2
+// @version 1.47.0
+// v1.47.0 (2026-09-24, platform-parity P1 bugfixes — spec
+//          docs/designs/2026-09-24-platform-parity-p1-bugfixes-design.md D2+D3):
+//          two .codex omissions closed. (D2) The VARIANT-SCOPE SKILL PRUNE
+//          iterates PLATFORM_SKILL_BASES instead of a 4-element literal — a
+//          foreign-variant skill's .codex copy no longer survives every prune
+//          run. (D3) `.codex` joins VARIANT_ASSET_DIR_SKIP — the variant's
+//          top-level .codex/ stops being hash-synced over project-owned Codex
+//          config (co-abap/co-safety, ADR-0076 D4); .codex/** delivery returns
+//          to the ADD_IF_MISSING claim via TEMPLATE TREE SYNC. The pass's
+//          general resolveClaim bypass is ticketed (T-20260924-011), not fixed.
 // v1.46.2 (2026-09-24, spec docs/designs/2026-09-24-platform-ssot-constant-design.md):
 //          behavior-neutral constant adoption — the two canonical 5-element
 //          skill-base literals (country-prune loop, workspace-only sweep)
@@ -2077,9 +2087,15 @@ if (existsSync(variantSkillsSrc)) {
 // the fix covers every current and future variant that grows one.
 const VARIANT_ASSET_DIR_SKIP = new Set([
   'agents', 'skills', 'scripts', 'docs',
-  '.claude', '.gemini', '.agents', '.git', '.github', '.githooks',
+  '.claude', '.gemini', '.agents', '.codex', '.git', '.github', '.githooks',
   'memory', 'node_modules',
 ]);
+// ^ `.codex` joined in v1.47.0 (platform-parity P1 bug 3 — spec
+//   docs/designs/2026-09-24-platform-parity-p1-bugfixes-design.md D3): without
+//   it the variant's top-level .codex/ was treated as a generic asset dir and
+//   hash-synced over project-owned Codex config, contradicting the .codex/**
+//   ADD_IF_MISSING claim (upgrade-policy). The general resolveClaim bypass of
+//   this pass is a filed follow-up (T-20260924-011), not fixed here.
 const variantAssetDirs = existsSync(templatesDir)
   ? readdirSync(templatesDir, { withFileTypes: true })
       .filter(e => e.isDirectory() && !VARIANT_ASSET_DIR_SKIP.has(e.name))
@@ -2608,7 +2624,7 @@ console.log('--- VARIANT-SCOPE SKILL PRUNE ---');
         console.log(`  ⚠️  KEEP ${skill}/  (owning variant: ${owner})  — declared in the project variant.json skill_manifest`);
         continue;
       }
-      for (const dir of ['skills', '.claude/skills', '.gemini/skills', '.agents/skills']) {
+      for (const dir of PLATFORM_SKILL_BASES) {
         const target = join(projectDir, dir, skill);
         if (!existsSync(target)) continue;
         console.log(`  ${dryTag}PRUNE  ${dir}/${skill}/  (owning variant: ${owner})`);
