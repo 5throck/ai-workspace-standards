@@ -1,4 +1,14 @@
-// @version 2.43.0
+// @version 2.44.0
+// v2.44.0: Marker-zone exemption for the context-overlap checks (spec:
+//           docs/designs/2026-09-25-variant-hygiene-batch-design.md, R2) —
+//           checkStalePromotedContent() and checkVariantContextCommonization()
+//           strip COMMON-CONTEXT marker zones from variant docs/*.context.md
+//           copies (stripMarkerZones, helpers/context-sections.ts 1.7.0)
+//           before section-splitting. Zone content is the sanctioned ADR-0062
+//           delivery channel — dev-sync Step 4.55 already gates its drift — so
+//           an in-sync zone must not read as a stale leftover duplicate (the
+//           26 post-heal false WARNs this fixes). Non-zone duplicates still
+//           warn (fixture: tests/unit/marker-zone-exemption.test.ts).
 // v2.43.0: Platform verifier expansion (spec:
 //           docs/designs/2026-09-25-verifier-platform-expansion-design.md,
 //           sites 2a/2b/2c/2d) — skill-exists sweep iterates PLATFORM_SKILL_BASES
@@ -134,7 +144,7 @@ import * as crypto from 'node:crypto';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { parsePmMd, extractVariantOverrides } from './helpers/pm-md-parser.ts';
 import { sourceShellInjectionPatterns } from './helpers/security-validator.ts';
-import { splitIntoSections, getContentLines } from './helpers/context-sections.ts';
+import { splitIntoSections, getContentLines, stripMarkerZones } from './helpers/context-sections.ts';
 import { findL0LeakLines } from './helpers/l0-ref-policy.ts';
 import * as url from 'node:url';
 import { safeFetch } from './lib/ssrf.ts';
@@ -1982,7 +1992,7 @@ function checkVariantContextCommonization() {
         if (!fs.existsSync(docsDir)) continue;
         for (const file of fs.readdirSync(docsDir)) {
             if (!file.endsWith('.context.md')) continue;
-            const content = readUTF8File(path.join(docsDir, file));
+            const content = stripMarkerZones(readUTF8File(path.join(docsDir, file)));
             for (const { heading, body } of splitIntoSections(content)) {
                 const bodyLines = getContentLines(body);
                 if (bodyLines.size >= 3) { // skip trivial/near-empty sections
@@ -2047,6 +2057,11 @@ checkVariantContextCommonization();
 // against templates/common/docs/context.md's own sections — a >50% overlap here means the
 // variant's copy is stale and should simply be deleted (promote-context-section.ts already did
 // the promotion; nothing left to decide).
+// v2.44.0: COMMON-CONTEXT marker zones are stripped from variant copies before
+// section-splitting (stripMarkerZones, helpers/context-sections.ts 1.7.0) — zone
+// content is the sanctioned ADR-0062 delivery channel whose drift dev-sync Step
+// 4.55 already gates, not a promotion leftover. Duplicates OUTSIDE a zone still
+// warn (spec: docs/designs/2026-09-25-variant-hygiene-batch-design.md, R2).
 function checkStalePromotedContent() {
     const commonContextPath = path.join('templates', 'common', 'docs', 'context.md');
     if (!fs.existsSync(commonContextPath)) return;
@@ -2072,7 +2087,7 @@ function checkStalePromotedContent() {
         for (const file of fs.readdirSync(docsDir)) {
             if (!file.endsWith('.context.md')) continue;
             const filePath = path.join(docsDir, file);
-            const content = readUTF8File(filePath);
+            const content = stripMarkerZones(readUTF8File(filePath));
             for (const { heading, body } of splitIntoSections(content)) {
                 const commonLines = commonByHeading.get(heading);
                 if (!commonLines) continue;

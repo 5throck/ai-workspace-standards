@@ -1,4 +1,13 @@
-// @version 1.6.0
+// @version 1.7.0
+// v1.7.0 (2026-09-25, variant hygiene batch — spec
+//           docs/designs/2026-09-25-variant-hygiene-batch-design.md, R2):
+//           stripMarkerZones() — pure, exported COMMON-CONTEXT zone stripper for
+//           audit.ts's stale-promoted-content and cross-variant commonization
+//           checks. Marker-zone content is the sanctioned ADR-0062 delivery
+//           channel (dev-sync Step 4.55 owns its drift), so it must not read as
+//           a stale leftover duplicate; duplicates OUTSIDE a zone still count.
+//           Tolerates unterminated zones by not stripping (a START with no END
+//           keeps every line — conservative by design).
 // v1.6.0 (2026-09-22, ADR-0050 Part 3 nested-heading fix): findHeadingSpan() /
 //           removeHeadingSpan() — nesting-aware section extraction and removal for
 //           promote-context-section.ts. The promotion tool previously removed a
@@ -303,6 +312,47 @@ const VARIANT_INJECT_END_RE = /<!--\s*END VARIANT-INJECT\s*-->/;
 const VERSION_FOOTER_RE = /\r?\n---\r?\n\r?\n\*[^*\r\n]+version:[^*\r\n]*\*\s*$/;
 
 const COMMON_CONTEXT_BLOCK_RE = /<!--\s*COMMON-CONTEXT:START\s*-->[\s\S]*?<!--\s*\/?COMMON-CONTEXT:END\s*-->/;
+
+/**
+ * Strip complete `<!-- COMMON-CONTEXT:START -->` … `<!-- COMMON-CONTEXT:END -->`
+ * spans (marker lines included) from markdown content (v1.7.0, variant hygiene
+ * batch R2). Pure and order-tolerant: removes every complete span wherever it
+ * appears; content outside spans — including any COMMON-CONTEXT zone in the
+ * middle of an owned section — is preserved byte-for-byte.
+ *
+ * Unterminated-zone tolerance: a START with no later END is NOT stripped. The
+ * span is only removed once its closer is seen; an unclosed zone keeps every
+ * line (conservative — malformed markup must never silently delete content).
+ * A stray END with no opener is likewise kept.
+ *
+ * Consumer: audit.ts's stale-promoted-content and cross-variant commonization
+ * checks strip variant context copies before section-splitting, so sanctioned
+ * marker-zone deliveries (ADR-0062; drift owned by dev-sync Step 4.55) stop
+ * reading as stale leftover duplicates while non-zone duplicates still warn.
+ */
+export function stripMarkerZones(content: string): string {
+  const startRe = /<!--\s*COMMON-CONTEXT\s*:\s*START\s*-->/;
+  const endRe = /<!--\s*\/?\s*COMMON-CONTEXT\s*:\s*END\s*-->/;
+  const lines = content.split('\n');
+
+  // Pass 1: collect COMPLETE spans as inclusive [startIdx, endIdx] line ranges.
+  const spans: Array<[number, number]> = [];
+  let openIdx = -1;
+  for (let i = 0; i < lines.length; i++) {
+    if (openIdx === -1) {
+      if (startRe.test(lines[i])) openIdx = i;
+    } else if (endRe.test(lines[i])) {
+      spans.push([openIdx, i]);
+      openIdx = -1;
+    }
+  }
+  if (spans.length === 0) return content; // unterminated or absent zones: untouched
+
+  // Pass 2: drop only lines inside complete spans.
+  const dropped = new Set<number>();
+  for (const [a, b] of spans) for (let i = a; i <= b; i++) dropped.add(i);
+  return lines.filter((_, i) => !dropped.has(i)).join('\n');
+}
 
 /**
  * Splice the TEMPLATE's COMMON-CONTEXT managed block into a project context

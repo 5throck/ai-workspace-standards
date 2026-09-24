@@ -256,24 +256,6 @@ Each agent must save its deliverables to the designated folder with the specifie
 11. **Portfolio/backtest analytics is out-of-domain for co-consult.** OpenBB-class investment-portfolio capabilities (portfolio construction, strategy backtesting, factor-exposure analysis, P&L attribution, execution analytics) are deliberately NOT part of this variant. co-consult's financial scope is research- and analysis-shaped: company intelligence, financial-statement analysis, and business financial modeling for strategic recommendations, not investment-portfolio management. Operative rule: engagement requests that need portfolio/backtest analytics MUST be scoped out at engagement intake (Phase 1) and recorded in the engagement kickoff artifacts as an external dependency or a follow-up engagement - agents MUST NOT improvise portfolio analytics with `financial-modeling`; that skill models business outcomes (revenue, cost, valuation scenarios), not security portfolios. Decision record: `docs/variant-benchmark-backlog.md` §4, gap closed 2026-08-25 via the record-out-of-domain option (scoping a `portfolio-analytics` skill was rejected: no consulting-workflow consumer, OpenBB parity would drag a data-terminal dependency chain into a strategy variant).
 
 <!-- COMMON-CONTEXT:START -->
-This project follows the workspace coding standards defined in the project's Coding Guidelines section.
-
-Key rules:
-- All operational scripts must be TypeScript (`.ts`) — run via `bun scripts/<name>.ts` (ADR-0036; no `.sh`/`.ps1` pairs)
-- Git hook scripts in `.githooks/` remain Unix shell (`.sh`) for git compatibility
-- All text files saved as **UTF-8 (without BOM)**
-- Commit messages and PR artifacts in **English only**
-<!-- COMMON-CONTEXT:END -->
-
----
-
-*co-consult.context.md version: 2.6 — portfolio/backtest analytics recorded out-of-domain (Domain Rule 11)*
-
-## Template Provenance
-
-- **Template-Version**: 0.5.3
-- **Template-Variant**: co-consult
-<!-- COMMON-CONTEXT:START -->
 ### Instruction Writing Standard (ASD-STE100, ADR-0079)
 
 Development-facing instruction text follows ASD-STE100 (Simplified Technical English) structural rules — in every development domain (web, app, API, scripts, documents).
@@ -289,4 +271,22 @@ PM owns the composition of this project's agent team and rules on skill changes.
 - **Hiring/firing (top-down, PM-decided)**: PM judges timing and target from workflow signals — recurring unmatched work types, role overload, absorbed roles, the periodic roster review — without a blocking user approval. Every decision emits a gate-moment decision record (ADR-0061) before dispatch. Default exit is `status: deprecated`; hard delete requires an explicit user request. Procedure: `agent-lifecycle-manager` skill.
 - **Skill requests (bottom-up, agent-initiated, PM-approved)**: agents file structured request blocks (`create|attach|remove` + evidence) in their task reports and memory logs; PM triages and only approved requests are executed — agents never create, attach, or remove skills unilaterally. Procedure: `skill-lifecycle-manager` skill.
 - **Enforcement**: governance, not code — decision records capture the judgment trail, and the change audits catch structural drift. Full decision: ADR-0080 in the workspace root `docs/adr/`.
+<!-- COMMON-CONTEXT:END -->
+
+---
+
+*co-consult.context.md version: 2.6 — portfolio/backtest analytics recorded out-of-domain (Domain Rule 11)*
+
+## Template Provenance
+
+- **Template-Version**: 0.5.3
+- **Template-Variant**: co-consult
+<!-- COMMON-CONTEXT:START -->
+This project follows the coding standards in the key-rules list below.
+
+Key rules:
+- All operational scripts must be TypeScript (`.ts`) — run via `bun scripts/<name>.ts` (ADR-0036; no `.sh`/`.ps1` pairs)
+- Git hook scripts in `.githooks/` remain Unix shell (`.sh`) for git compatibility
+- All text files saved as **UTF-8 (without BOM)**
+- Commit messages and PR artifacts in **English only**
 <!-- COMMON-CONTEXT:END -->

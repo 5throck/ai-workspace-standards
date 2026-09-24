@@ -1,0 +1,22 @@
+schemaVersion: 1
+id: T-20260925-004
+kind: manual
+title: >-
+  Promote variant-agent-references (validate-templates v1.42.0, T-20260924-007c
+  / spec 2026-09-25-variant-hygiene-batch-design R4) from WARN to FAIL: flip
+  severity on unresolvable agent references in templates/co-*/AGENTS.md and
+  variant scripts after the ADR-0055 green soak. Preconditions: zero WARNs on
+  the fleet at PR land time (verified 2026-09-25); no new variant deliveries
+  carrying unresolved agent names during the soak window; AGENT_REFERENCE_EXEMPT
+  stays empty or fully justified.
+priority: normal
+not_before: '2026-10-09'
+status: backlog
+attempts: 0
+created_at: '2026-09-24T19:02:33.544Z'
+history:
+  - at: '2026-09-24T19:02:33.544Z'
+    from: null
+    to: backlog
+result: null
+error: null

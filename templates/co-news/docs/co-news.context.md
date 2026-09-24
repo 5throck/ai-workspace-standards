@@ -109,13 +109,21 @@ The five Core Principles under Newsroom Guidelines above are the binding rules (
 3. **Wire headers on dispatch deliverables** — every `draft.md`, `final.md`, and brief under `deliverables/drafts/<article>/` carries the wire-format header (slug, dateline/source context, source line) defined in [`docs/wire-format.md`](wire-format.md); the slug is assigned at Phase 3 kickoff and stays stable through publication and corrections **[NEWS-R2]**
 
 <!-- COMMON-CONTEXT:START -->
-This project follows the workspace coding standards defined in the project's Coding Guidelines section.
+### Instruction Writing Standard (ASD-STE100, ADR-0079)
 
-Key rules:
-- All operational scripts must be TypeScript (`.ts`) — run via `bun scripts/<name>.ts` (ADR-0036; no `.sh`/`.ps1` pairs)
-- Git hook scripts in `.githooks/` remain Unix shell (`.sh`) for git compatibility
-- All text files saved as **UTF-8 (without BOM)**
-- Commit messages and PR artifacts in **English only**
+Development-facing instruction text follows ASD-STE100 (Simplified Technical English) structural rules — in every development domain (web, app, API, scripts, documents).
+
+- **Applies to**: requirement statements, task briefs, execution-plan task descriptions, agent dispatch prompts, design-doc requirement sections, API endpoint documentation, and how-to steps.
+- **Rules**: one instruction per sentence (≤ 20 words procedural / ≤ 25 descriptive); active voice with imperative steps; present tense; one term = one meaning (use glossary/registry terms exactly); no idioms; positive phrasing preferred; minimal pronouns; lists for parallel items and tables for structured data.
+- **Enforcement**: advisory — PM conforms task briefs at triage; architect checks requirement sections at Design Gate review. Full decision: ADR-0079 in the workspace root `docs/adr/`.
+
+### PM Team-Management Authority (ADR-0080)
+
+PM owns the composition of this project's agent team and rules on skill changes.
+
+- **Hiring/firing (top-down, PM-decided)**: PM judges timing and target from workflow signals — recurring unmatched work types, role overload, absorbed roles, the periodic roster review — without a blocking user approval. Every decision emits a gate-moment decision record (ADR-0061) before dispatch. Default exit is `status: deprecated`; hard delete requires an explicit user request. Procedure: `agent-lifecycle-manager` skill.
+- **Skill requests (bottom-up, agent-initiated, PM-approved)**: agents file structured request blocks (`create|attach|remove` + evidence) in their task reports and memory logs; PM triages and only approved requests are executed — agents never create, attach, or remove skills unilaterally. Procedure: `skill-lifecycle-manager` skill.
+- **Enforcement**: governance, not code — decision records capture the judgment trail, and the change audits catch structural drift. Full decision: ADR-0080 in the workspace root `docs/adr/`.
 <!-- COMMON-CONTEXT:END -->
 
 ---
@@ -221,21 +229,13 @@ Co-News follows a **newsroom pipeline** dispatch model: Tip -> Research -> Draft
 <!-- END VARIANT-SECTION -->
 
 <!-- COMMON-CONTEXT:START -->
-### Instruction Writing Standard (ASD-STE100, ADR-0079)
+This project follows the coding standards in the key-rules list below.
 
-Development-facing instruction text follows ASD-STE100 (Simplified Technical English) structural rules — in every development domain (web, app, API, scripts, documents).
-
-- **Applies to**: requirement statements, task briefs, execution-plan task descriptions, agent dispatch prompts, design-doc requirement sections, API endpoint documentation, and how-to steps.
-- **Rules**: one instruction per sentence (≤ 20 words procedural / ≤ 25 descriptive); active voice with imperative steps; present tense; one term = one meaning (use glossary/registry terms exactly); no idioms; positive phrasing preferred; minimal pronouns; lists for parallel items and tables for structured data.
-- **Enforcement**: advisory — PM conforms task briefs at triage; architect checks requirement sections at Design Gate review. Full decision: ADR-0079 in the workspace root `docs/adr/`.
-
-### PM Team-Management Authority (ADR-0080)
-
-PM owns the composition of this project's agent team and rules on skill changes.
-
-- **Hiring/firing (top-down, PM-decided)**: PM judges timing and target from workflow signals — recurring unmatched work types, role overload, absorbed roles, the periodic roster review — without a blocking user approval. Every decision emits a gate-moment decision record (ADR-0061) before dispatch. Default exit is `status: deprecated`; hard delete requires an explicit user request. Procedure: `agent-lifecycle-manager` skill.
-- **Skill requests (bottom-up, agent-initiated, PM-approved)**: agents file structured request blocks (`create|attach|remove` + evidence) in their task reports and memory logs; PM triages and only approved requests are executed — agents never create, attach, or remove skills unilaterally. Procedure: `skill-lifecycle-manager` skill.
-- **Enforcement**: governance, not code — decision records capture the judgment trail, and the change audits catch structural drift. Full decision: ADR-0080 in the workspace root `docs/adr/`.
+Key rules:
+- All operational scripts must be TypeScript (`.ts`) — run via `bun scripts/<name>.ts` (ADR-0036; no `.sh`/`.ps1` pairs)
+- Git hook scripts in `.githooks/` remain Unix shell (`.sh`) for git compatibility
+- All text files saved as **UTF-8 (without BOM)**
+- Commit messages and PR artifacts in **English only**
 <!-- COMMON-CONTEXT:END -->
 
 ---
