@@ -220,6 +220,12 @@
       "overridable": false,
       "description": "Lint procedure scanning UI code for hardcoded design values (raw hex, rgb()/hsl(), raw px) that bypass the token layer"
     },
+    "design-foundation": {
+      "source": "skills/design-foundation/SKILL.md",
+      "version": "1.0.0",
+      "overridable": false,
+      "description": "Style-neutral design system derivation: principles, decision record, 3-layer token architecture"
+    },
     "ui-ux-design-intelligence": {
       "source": "skills/ui-ux-design-intelligence/SKILL.md",
       "version": "1.0.1",

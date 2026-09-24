@@ -5,7 +5,7 @@
 > Variant-specific configuration (tech stack, agents, skills, scripts, workflow):
 >   → docs/<variant-name>.context.md
 >
-> ⚠️ This file is IMMUTABLE after project creation.
+> ⚠️ This file is pipeline-maintained — make no hand edits after project creation.
 >    All project-specific changes belong in docs/<variant-name>.context.md
 
 ---
@@ -76,6 +76,7 @@ Standard directory layout for all projects in this workspace:
 ├── skills/       # Reusable workflow skills (SSOT for all platforms)
 ├── .claude/      # Claude Code / Claude Desktop App settings and slash commands
 ├── .gemini/      # Gemini CLI settings and slash commands
+├── .codex/       # Codex CLI / Codex Desktop App settings and prompts
 └── .agents/      # Antigravity / Antigravity CLI settings and slash commands
 ```
 
@@ -153,7 +154,9 @@ Backend/non-UI work is exempt only when the design doc or ADR states the exempti
   inventories and the design-review checklist carry the matching accessibility evidence duties.
 - **Verification**: use the `accessibility-audit` skill where available; otherwise a documented
   manual checklist covering the baseline items above. Design conformance is machine-checked by
-  the blocking design-lint gate and the L0/L1 style-neutrality check (ADR-0064/0066).
+  the blocking design-lint gate and the L0/L1 style-neutrality check (ADR-0064/0066), which
+  verifies that design docs prescribe no colors, fonts, or trends — style decisions stay
+  project-owned.
 
 ### Session Log Format (`memory/YYYY-MM-DD.md`)
 
@@ -202,11 +205,12 @@ assuming one. Convention: [`docs/country-profiles.md`](country-profiles.md).
 
 ### Architecture Decision Records (`docs/adr/`)
 
-Project-level architecture decisions live in `docs/adr/NNNN-<slug>.md` (seeded with a
-README describing the format). One decision per file; immutable once accepted — reversal
-is a NEW record naming its predecessor via `Supersedes:`. Gate-moment rulings (gate
-approvals, escalations, go/no-go) additionally emit a decision record at
-`docs/decisions/DEC-YYYYMMDD-NN.md` — see the `decision-record` skill.
+Project-level architecture decisions live in `docs/adr/NNNN-<slug>.md`. The first
+record creates the directory. One decision per file; immutable once accepted — reversal
+is a NEW record naming its predecessor via `Supersedes:`. Use the 3-section format:
+Context, Decision, Consequences. Gate-moment rulings (gate approvals, escalations,
+go/no-go) additionally emit a decision record at `docs/decisions/DEC-YYYYMMDD-NN.md` —
+see the `decision-record` skill.
 
 ### Language Policy
 
@@ -224,9 +228,7 @@ For files where Korean is legally or academically mandatory (such as statutory t
 lang: ko
 lang_reason: legal # legal | source-material | proper-noun
 ```
-*(This exception is NOT available for operational files like agents, skills, and context files)*
-
-**Skills needing non-English reference data**: since `skills/*.md` can never carry the `lang: ko` exception, store terminology glossaries or source-language excerpts in a non-Markdown file under `skills/<name>/references/` (e.g. `references/terms-ko.json`) instead — language validation scans `.md` and `.yaml`/`.yml` files, so use another format (`.json`, `.csv`, ...) to stay outside the policy. `SKILL.md` stays English-only and links to it.
+*(This exception is NOT available for context.md, CLAUDE.md, GEMINI.md, AGENTS.md, or any variant context.md file. agents/*.md and skills/*.md MAY declare it with a valid lang_reason in frontmatter.)*
 
 ### File Encoding
 
@@ -301,7 +303,7 @@ nativization.
 - `SKILL.md` itself stays English-only and simply points to the reference file (e.g. "See `references/terms-ko.json` for the Korean-original DART terminology mapping").
 - This is the general mechanism for any skill needing source-language reference data — not specific to Korean.
 
-See docs/context.md for the skill-lifecycle registration details.
+Register new skills and skill changes through the `skill-lifecycle-manager` skill. See AGENTS.md §8 (Lifecycle Management) for the governance workflow.
 
 #### Pluggable Variant Audit Hook
 
@@ -313,7 +315,7 @@ A mechanism that allows variant-specific validation checks to be executed during
 ## Coding Guidelines
 
 <!-- COMMON-CONTEXT:START -->
-This project follows the workspace coding standards defined in the project's Coding Guidelines section.
+This project follows the coding standards in the key-rules list below.
 
 Key rules:
 - All operational scripts must be TypeScript (`.ts`) — run via `bun scripts/<name>.ts` (ADR-0036; no `.sh`/`.ps1` pairs)
@@ -342,11 +344,6 @@ All agents must follow this file routing policy. **Creating `.md` files at the p
 | Configuration, tooling files | project root (allowed) |
 
 > **Rule**: When creating any file, always specify the full relative path. If unsure, default to `docs/`. Never create `.md` files at the project root unless it is a standard root file listed above.
-
-### Workspace & Template Boundary Policy
-
-- **Strict CWD Isolation**: When modifying templates (in `templates/`), you MUST strictly limit your working directory (CWD) to the specific template folder.
-- **No Cross-Modification**: Modifying workspace root files and template files in a single task or session is forbidden. Keep workspace root changes and template changes completely isolated.
 
 ---
 
@@ -406,7 +403,7 @@ Use an external computation tool when the task involves ANY of the following:
 ### Required Procedure
 
 1. **Check availability**: verify the tool is installed (`which gfortran`, `python -c "import numpy"`)
-2. **Install if missing**: route through the `stack-setup` agent — **never install tools without security review and explicit user approval**
+2. **Install if missing**: request installation through the PM — **never install tools without security review and explicit user approval**
 3. **Write computation code**: document the algorithm, inputs, units, and assumptions in comments
 4. **Execute and validate**: verify units, test boundary values and edge cases
 5. **Document result**: state `Computed using: <tool> v<version>, code: <file-path>`
@@ -477,11 +474,10 @@ Skill relations are the generated projection per ADR-0060: `docs/skill-graph.jso
 | `dev-sync` | Tier 2 | `package.json` (`bun run dev-sync`) | L0 | active |
 | `sync-md` | Tier 2 | `package.json` (`bun run sync-md`) | L0 | active |
 
-> See SCRIPTS.md in templates/common/scripts/ for full lifecycle registry.
+> See `scripts/SCRIPTS.md` for the full lifecycle registry. Tier 1 is the workspace-root `scripts/` registry; Tier 2 is its published `templates/common/scripts/` snapshot; this project's `scripts/` copy is Tier 3.
 
 ### Hybrid Scripting
 All scripts are TypeScript (`.ts`) executed via Bun — no `.sh`/`.ps1` counterparts (ADR-0036).
-
 
 ## Lifecycle Management
 
@@ -489,7 +485,7 @@ This workspace follows explicit lifecycle management practices for Agents, Skill
 
 ### Procedure Graph
 
-Each template layer owns structured procedures in `procedures/<name>/schema.yaml` (authoring skeleton: `templates/common/procedures/_template/`). Procedures are the canonical source for the workflow graph — validate with `bun scripts/validate-procedures.ts --all`, check coverage with `bun scripts/procedure-coverage.ts` (workspace root — L1 tool, not synced to projects) (gaps become governance tickets via `--tickets`). Never hand-edit procedure-derived graph nodes. See `docs/procedure-schema-spec.md` and constitution §6.7.
+Each template layer owns structured procedures in `procedures/<name>/schema.yaml` (authoring skeleton: `templates/common/procedures/_template/`). Procedures are the canonical source for the workflow graph — validate with `bun scripts/validate-procedures.ts --all`, check coverage with `bun scripts/procedure-coverage.ts` (workspace root — L1 tool, not synced to projects) (gaps become governance tickets via `--tickets`). Never hand-edit procedure-derived graph nodes. Author procedures against `docs/procedure-schema-spec.md`.
 
 ### Common Principles
 
@@ -501,32 +497,6 @@ For full lifecycle procedures:
 - **Agent Lifecycle**: See [AGENTS.md §8 Lifecycle Management](../AGENTS.md)
 - **Skill Lifecycle**: See [AGENTS.md §8 Lifecycle Management](../AGENTS.md)
 - **Script Lifecycle**: See [AGENTS.md §8 Lifecycle Management](../AGENTS.md)
-
-### Context Commonization Review
-
-This file (`docs/context.md`) and each variant's `docs/<variant>.context.md` follow the same
-one-directional inheritance rule ADR-0050 already established for scripts: `docs/context.md`
-(this file) is the SSOT for content genuinely shared by every variant; a `docs/<variant>.context.md`
-may only add variant-specific content, never re-state what belongs here. As the number of variants
-grows, unrelated variants independently reaching for the same wording is expected — left unmanaged,
-that duplication compounds project-by-project instead of being fixed once at the source.
-
-- **Trigger**: after scaffolding a new variant (`create-variant` skill), and at minimum every 5
-  new variants or once per quarter (whichever comes first) since the last review.
-- **Detection**: `scripts/audit.ts`'s `checkVariantContextCommonization()` (mirrors `checkVariantScriptDrift()`)
-  flags `docs/<variant>.context.md` sections with high textual overlap across multiple variants —
-  WARN-only, a first-pass heuristic requiring human judgment, not an auto-fix.
-- **Decision** (architect-owned): content shared by nearly all variants → promote into this file via
-  `scripts/promote-context-section.ts`, so the version-footer sync in `upgrade-project.ts` propagates
-  it everywhere automatically. Content shared by only a subset → extract into a shared skill or
-  `docs/_common/` reference the affected variants opt into, rather than bloating this file (every
-  project pays the cost of reading it — irrelevant content here is a tax on variants that never
-  needed it). Coincidental, likely-to-diverge similarity → leave alone. A high overlap percentage is
-  a hint, not a verdict — `promote-context-section.ts` always shows a per-variant diff before writing
-  anything, since near-identical text can still carry a deliberate, load-bearing difference.
-- Full procedure: `skills/context-commonization-review/SKILL.md`. Full rationale, thresholds, and
-  worked examples: ADR-0050 Part 3 (Variant Script Inheritance and Golden-Reference SSOT) in the
-  workspace root repository — not linked here for the same relative-path reason noted above.
 
 ## Platform Hooks & Governance Enforcement
 
@@ -568,4 +538,4 @@ See the workspace governance documentation (Governance Enforcement Layers) and A
 
 ---
 
-*context.md version: 2.10 — Sequential Branch Dependency Rule now pipeline-injected (COMMON-CONSTITUTION-PR); legacy ADR-0038 subsection removed*
+*context.md version: 2.11 — self-containment remediation: dead referents removed or repointed (D1-D8); design-foundation skill now delivered; Context Commonization Review relocated to workspace governance docs*
