@@ -1,4 +1,13 @@
-// @version 1.1.0
+// @version 1.2.0
+// v1.2.0 (T-20260924-010 — spec docs/designs/2026-09-25-codex-merge-claim-routing-design.md
+//           D1): COMMON-CODEX joins MANAGED_PATTERNS, placed after its COMMON-GEMINI
+//           platform twin. Marker pair matches L0 CODEX.md:86/:173 and
+//           templates/common/CODEX.md:86/:173 exactly. Engine code unchanged —
+//           COMMON-CODEX zones are key-less, so they take the existing positional
+//           path (byte-identical semantics to COMMON-CLAUDE/GEMINI); the MERGE pass
+//           already lists CODEX.md and resolveClaim already routes it MERGE_MANAGED/
+//           MERGE (upgrade-policy 1.13.0), so this pattern is the last missing piece
+//           of the CODEX.md union-merge.
 // v1.1.0 (T-20260917-010): the result carries `snapshots` — the exact project
 //           span(s) an unlabeled count-mismatch reconcile replaces — so the
 //           caller can persist `<target>.pre-reconcile.bak` before writing the
@@ -65,6 +74,7 @@ export const MANAGED_PATTERNS: ManagedPattern[] = [
   { open: /<!-- WORKSPACE-MANAGED(?::[^\-]*?)? -->/, close: '<!-- /WORKSPACE-MANAGED -->', label: 'WORKSPACE-MANAGED' },
   { open: /<!-- COMMON-CLAUDE:START -->/, close: '<!-- COMMON-CLAUDE:END -->', label: 'COMMON-CLAUDE' },
   { open: /<!-- COMMON-GEMINI:START -->/, close: '<!-- COMMON-GEMINI:END -->', label: 'COMMON-GEMINI' },
+  { open: /<!-- COMMON-CODEX:START -->/, close: '<!-- COMMON-CODEX:END -->', label: 'COMMON-CODEX' },
   { open: /<!-- VARIANT-INJECT(?::[^\-]*?)? -->/, close: '<!-- END VARIANT-INJECT -->', label: 'VARIANT-INJECT' },
   { open: /<!-- COMMON-AGENTS:START -->/, close: '<!-- COMMON-AGENTS:END -->', label: 'COMMON-AGENTS' },
   { open: /<!-- COMMON-CONTEXT:START -->/, close: '<!-- COMMON-CONTEXT:END -->', label: 'COMMON-CONTEXT' },

@@ -17,9 +17,19 @@
  *         ADD_IF_MISSING per upgrade-policy), and a divergent project CODEX.md
  *         must get no TEMPLATE TREE SYNC overwrite verdict (MERGE_MANAGED claim).
  *
- * @version 1.2.0
+ * v1.3.0 (2026-09-25, T-20260924-010/-011 — spec
+ *         2026-09-25-codex-merge-claim-routing-design.md D4 rows 2+4): two new
+ *         describe blocks. CODEX MERGE — an apply-mode upgrade merges a stale
+ *         COMMON-CODEX zone into a customized project CODEX.md (byte-identical
+ *         prose outside the zone, no overwrite verdict from any non-MERGE pass).
+ *         VARIANT ASSET DIRS CLAIM ROUTING — a committed project edit under
+ *         procedures/<owned-entry>/ is never overwritten by the asset-dir pass
+ *         (the dedicated PROCEDURES pass owns the entry); a missing entry is
+ *         still seeded NEW.
+ *
+ * @version 1.3.0
  */
-import { existsSync, mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
+import { cpSync, existsSync, mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
@@ -409,6 +419,192 @@ describe('upgrade-project.ts CODEX OVERWRITE GUARDS (P1 bugs 3+4)', () => {
       // "MERGE: CODEX.md" line — that is the owning pass, not an overwrite.)
       expect(out).not.toContain('UPDATE CODEX.md');
       expect(out).not.toContain('COPIED: CODEX.md');
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  }, 300000);
+});
+
+// ============================================================================
+// CODEX MERGE (T-20260924-010 — spec 2026-09-25-codex-merge-claim-routing-design.md D4 row 2)
+// With the COMMON-CODEX pattern in MANAGED_PATTERNS, the MERGE pass delivers the
+// template zone into project CODEX.md copies: stale zone refreshed from the
+// template, prose outside the zone preserved byte-for-byte, no overwrite verdict
+// from any pass other than MERGE.
+// ============================================================================
+describe('upgrade-project.ts CODEX MERGE (COMMON-CODEX zone — T-20260924-010)', () => {
+  const codexTemplatePath = join(workspaceRoot, 'templates', 'common', 'CODEX.md');
+  const ZONE_RE = /<!-- COMMON-CODEX:START -->[\s\S]*?<!-- COMMON-CODEX:END -->/;
+  const PROSE_SENTINEL = 'Project-owned intro line that must survive every upgrade.';
+
+  /** Project CODEX.md seeded from the live common template: zone interior made
+   *  stale (marker text untouched) + one project-owned prose line before the zone. */
+  function seededProjectCodex(): string {
+    const tpl = readFileSync(codexTemplatePath, 'utf8');
+    const tplZone = tpl.match(ZONE_RE)![0];
+    const staleZone = tplZone.replace('Skill Resolution Priority', 'Skill Resolution Priority (STALE COPY)');
+    expect(staleZone).not.toBe(tplZone);
+    return tpl
+      .replace(ZONE_RE, () => staleZone)
+      .replace('<!-- COMMON-CODEX:START -->', () => `${PROSE_SENTINEL}\n\n<!-- COMMON-CODEX:START -->`);
+  }
+
+  function seedCommittedCodex(tmp: string): string {
+    const seeded = seededProjectCodex();
+    writeFileSync(join(tmp, 'CODEX.md'), seeded);
+    spawnSync('git', ['-C', tmp, 'add', '-A'], { cwd: tmp });
+    spawnSync('git', ['-C', tmp, 'commit', '-q', '-m', 'chore: seeded CODEX.md'], { cwd: tmp });
+    return seeded;
+  }
+
+  test('apply run merges the stale COMMON-CODEX zone; customized prose survives byte-identical', () => {
+    const tmp = makeTempProject();
+    try {
+      const seeded = seedCommittedCodex(tmp);
+      const result = spawnSync(
+        'bun',
+        [upgradeScript, tmp, '--variant', VARIANT, '--yes'],
+        { encoding: 'utf-8', timeout: 300000 }
+      );
+      if (result.status !== 0) {
+        console.error('stdout:', (result.stdout ?? '').slice(-3000));
+        console.error('stderr:', (result.stderr ?? '').slice(0, 2000));
+      }
+      expect(result.status).toBe(0);
+      const out = result.stdout ?? '';
+      // The MERGE pass owns the file and delivered the zone union.
+      expect(out).toContain('MERGE: CODEX.md');
+      expect(out).toContain('MERGED COMMON-CODEX block in: CODEX.md');
+
+      const applied = readFileSync(join(tmp, 'CODEX.md'), 'utf8');
+      const tplZone = readFileSync(codexTemplatePath, 'utf8').match(ZONE_RE)![0];
+      const projZone = seeded.match(ZONE_RE)![0];
+      // Zone refreshed to the template's bytes…
+      expect(applied.match(ZONE_RE)![0]).toBe(tplZone);
+      expect(applied).not.toContain('(STALE COPY)');
+      // …and the result is EXACTLY the seeded file with only the zone span
+      // replaced — outside-zone prose byte-identical.
+      expect(applied).toBe(seeded.replace(projZone, () => tplZone));
+      expect(applied).toContain(PROSE_SENTINEL);
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  }, 300000);
+
+  test('no overwrite verdict for CODEX.md from any pass other than MERGE (holds pre- and post-fix)', () => {
+    const tmp = makeTempProject();
+    try {
+      seedCommittedCodex(tmp);
+      const result = spawnSync(
+        'bun',
+        [upgradeScript, tmp, '--variant', VARIANT, '--dry-run', '--yes'],
+        { encoding: 'utf-8', timeout: 300000 }
+      );
+      expect(result.status).toBe(0);
+      const out = result.stdout ?? '';
+      expect(out).toContain('MERGE: CODEX.md');
+      expect(out).not.toContain('UPDATE CODEX.md');
+      expect(out).not.toContain('COPIED: CODEX.md');
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  }, 300000);
+});
+
+// ============================================================================
+// VARIANT ASSET DIRS CLAIM ROUTING (T-20260924-011 — spec 2026-09-25-codex-merge-claim-routing-design.md D4 row 4)
+// The asset-dir pass must deliver only files whose resolveClaim pass is the
+// VARIANT ASSET DIRS pass. procedures/** claims ADD_IF_MISSING on the dedicated
+// PROCEDURES pass — a committed project edit under an owned procedure entry is
+// never overwritten by the asset pass; a missing entry is still seeded NEW.
+// ============================================================================
+describe('upgrade-project.ts VARIANT ASSET DIRS claim routing (T-20260924-011)', () => {
+  test('modified committed procedure file under an owned entry survives the upgrade', () => {
+    const tmp = makeTempProject();
+    try {
+      // Seed procedures/ from the variant template, then:
+      //  - architecture-design/schema.yaml: locally modified + committed (clean tree)
+      //  - technical-planning/: left untouched (hash-equal)
+      //  - security-release-retrospective/: deleted → the PROCEDURES pass must
+      //    still seed it NEW (its add-if-missing contract).
+      const tplProc = join(workspaceRoot, 'templates', VARIANT, 'procedures');
+      mkdirSync(join(tmp, 'procedures'), { recursive: true });
+      for (const entry of ['architecture-design', 'technical-planning', 'security-release-retrospective', '_output-types.yaml']) {
+        const src = join(tplProc, entry);
+        expect(existsSync(src)).toBe(true);
+        cpSync(src, join(tmp, 'procedures', entry), { recursive: true });
+      }
+      const modifiedRel = join('procedures', 'architecture-design', 'schema.yaml');
+      const modifiedContent = readFileSync(join(tmp, modifiedRel), 'utf8')
+        + '\n# project-local workflow edit that must survive the upgrade\n';
+      writeFileSync(join(tmp, modifiedRel), modifiedContent);
+      rmSync(join(tmp, 'procedures', 'security-release-retrospective'), { recursive: true, force: true });
+      spawnSync('git', ['-C', tmp, 'add', '-A'], { cwd: tmp });
+      spawnSync('git', ['-C', tmp, 'commit', '-q', '-m', 'chore: seeded procedures'], { cwd: tmp });
+
+      const result = spawnSync(
+        'bun',
+        [upgradeScript, tmp, '--variant', VARIANT, '--yes'],
+        { encoding: 'utf-8', timeout: 300000 }
+      );
+      if (result.status !== 0) {
+        console.error('stdout:', (result.stdout ?? '').slice(-3000));
+        console.error('stderr:', (result.stderr ?? '').slice(0, 2000));
+      }
+      expect(result.status).toBe(0);
+      const out = result.stdout ?? '';
+
+      // No asset-dir verdict for any procedures/ path — the modified file is
+      // neither UPDATEd nor CONFLICT-reported nor COPIED by this pass.
+      expect(out).not.toContain('UPDATE procedures/');
+      expect(out).not.toContain('CONFLICT procedures/');
+      expect(out).not.toContain('COPIED: procedures/');
+
+      // The dedicated PROCEDURES pass reports the owned entries preserved…
+      expect(out).toContain('OK     procedures/architecture-design/  (project-owned — preserved)');
+      expect(out).toContain('OK     procedures/technical-planning/  (project-owned — preserved)');
+      // …and still seeds the missing entry NEW.
+      expect(out).toContain('NEW    procedures/security-release-retrospective/');
+      expect(existsSync(join(tmp, 'procedures', 'security-release-retrospective'))).toBe(true);
+
+      // Bytes: the committed project edit survived; the untouched entry is
+      // hash-equal to the template (unchanged).
+      expect(readFileSync(join(tmp, modifiedRel), 'utf8')).toBe(modifiedContent);
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  }, 300000);
+
+  test('positive control: a divergent unmodified generic-asset file still gets UPDATE + template content (co-design decisions/)', () => {
+    // D4 row 5: proves the claim filter did not neuter the pass — files whose
+    // claim pass IS the VARIANT ASSET DIRS pass keep the hash-sync semantics.
+    const CONTROL_VARIANT = 'co-design';
+    const tmp = makeTempProject();
+    try {
+      // Seed decisions/gates.yaml from the co-design template, diverge it
+      // project-side, commit (clean tree → UPDATE, not CONFLICT).
+      const rel = join('decisions', 'gates.yaml');
+      const tplContent = readFileSync(join(workspaceRoot, 'templates', CONTROL_VARIANT, rel), 'utf8');
+      mkdirSync(join(tmp, 'decisions'), { recursive: true });
+      writeFileSync(join(tmp, rel), tplContent + '\n# project-side divergence that the pass must overwrite back\n');
+      spawnSync('git', ['-C', tmp, 'add', '-A'], { cwd: tmp });
+      spawnSync('git', ['-C', tmp, 'commit', '-q', '-m', 'chore: diverged decisions file'], { cwd: tmp });
+
+      const result = spawnSync(
+        'bun',
+        [upgradeScript, tmp, '--variant', CONTROL_VARIANT, '--yes'],
+        { encoding: 'utf-8', timeout: 300000 }
+      );
+      if (result.status !== 0) {
+        console.error('stdout:', (result.stdout ?? '').slice(-3000));
+        console.error('stderr:', (result.stderr ?? '').slice(0, 2000));
+      }
+      expect(result.status).toBe(0);
+      const out = result.stdout ?? '';
+      expect(out).toContain('UPDATE decisions/gates.yaml');
+      expect(out).toContain('COPIED: decisions/gates.yaml');
+      // Template content restored (the divergence was overwritten back).
+      expect(readFileSync(join(tmp, rel), 'utf8')).toBe(tplContent);
     } finally {
       rmSync(tmp, { recursive: true, force: true });
     }

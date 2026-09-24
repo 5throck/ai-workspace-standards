@@ -1,4 +1,15 @@
-// @version 1.13.0
+// @version 1.14.0
+// v1.14.0 (2026-09-25, T-20260924-011 — spec
+//         docs/designs/2026-09-25-codex-merge-claim-routing-design.md D2/D3/R3):
+//         exports VARIANT_ASSET_DIRS_PASS (the pass id already returned for every
+//         top-level dir outside KNOWN_TOP_DIRS) alongside TEMPLATE_TREE_SYNC_PASS,
+//         and resolveClaim uses it at the fallback branch — upgrade-project's
+//         VARIANT ASSET DIRS pass now filters every walked file by claim-pass
+//         identity, ending the procedures/** inversion (the asset pass's
+//         hash-sync overwrite contradicted the PROCEDURES pass's per-entry
+//         add-if-missing ownership; the dedicated pass is the sole delivery
+//         channel for procedure entries). No classification changed — only the
+//         pass-id constant is new.
 // v1.13.0 (2026-09-24, platform-parity P1 bug 4 — spec
 //         docs/designs/2026-09-24-platform-parity-p1-bugfixes-design.md D4):
 //         CODEX.md joins MERGE_MANAGED_FILES — resolveClaim returns
@@ -90,6 +101,13 @@ export interface UpgradeClaim {
 
 /** Pass id of the default-policy delivery pass in scripts/upgrade-project.ts. */
 export const TEMPLATE_TREE_SYNC_PASS = 'TEMPLATE TREE SYNC';
+
+/** Pass id of the generic VARIANT ASSET DIRS delivery pass in scripts/upgrade-project.ts
+ *  (every top-level template dir outside KNOWN_TOP_DIRS — co-safety's workflows/,
+ *  co-design's decisions/, …). Exported so the pass's per-file claim filter compares
+ *  identities, not a second hard-coded literal — the same drift class
+ *  TEMPLATE_TREE_SYNC_PASS exists to prevent (T-20260924-011, design D2/D3). */
+export const VARIANT_ASSET_DIRS_PASS = 'VARIANT ASSET DIRS';
 
 // ── Legacy pass inventories (mirrored from scripts/upgrade-project.ts; drift-guarded by tests) ──
 
@@ -321,7 +339,7 @@ export function resolveClaim(relPath: string, variant = ''): UpgradeClaim {
   // get here from such a directory (all known tops are claimed above).
   const top = rel.split('/')[0];
   if (!KNOWN_TOP_DIRS.has(top) && rel.includes('/')) {
-    return { policy: 'SYNC', pass: 'VARIANT ASSET DIRS' };
+    return { policy: 'SYNC', pass: VARIANT_ASSET_DIRS_PASS };
   }
 
   // Root-level files with no dedicated pass (.editorconfig, …): the inversion —

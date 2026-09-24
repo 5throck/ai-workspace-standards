@@ -1,5 +1,17 @@
 #!/usr/bin/env bun
-// @version 1.47.0
+// @version 1.48.0
+// v1.48.0 (2026-09-25, T-20260924-011 — spec
+//          docs/designs/2026-09-25-codex-merge-claim-routing-design.md D2/R4-R6):
+//          the VARIANT ASSET DIRS pass consults resolveClaim per walked file and
+//          delivers only files whose claim pass equals VARIANT_ASSET_DIRS_PASS —
+//          the same pass-identity filter the TEMPLATE TREE SYNC pass applies.
+//          Behavior delta at this commit: exactly procedures/** (claim
+//          ADD_IF_MISSING / pass PROCEDURES) drops out of the pass, ending the
+//          inversion where this pass's hash-sync overwrote modified project
+//          procedure files before the dedicated PROCEDURES pass could preserve
+//          them; skipped files log one summary line per directory (co-safety's
+//          684-file dry-run stays readable). Generic asset dirs keep their
+//          NEW/UPDATE/CONFLICT/COPIED verdicts; `.codex` stays in the skip set.
 // v1.47.0 (2026-09-24, platform-parity P1 bugfixes — spec
 //          docs/designs/2026-09-24-platform-parity-p1-bugfixes-design.md D2+D3):
 //          two .codex omissions closed. (D2) The VARIANT-SCOPE SKILL PRUNE
@@ -445,6 +457,7 @@ import {
 } from './helpers/context-sections.ts';
 import {
   TEMPLATE_TREE_SYNC_PASS,
+  VARIANT_ASSET_DIRS_PASS,
   iterEffectiveTemplateFiles,
   lifecyclelessText,
   mergeSettingsJson,
@@ -2103,16 +2116,28 @@ const variantAssetDirs = existsSync(templatesDir)
   : [];
 if (variantAssetDirs.length > 0) {
   console.log(`--- VARIANT ASSET DIRS: ${variantAssetDirs.join(', ')} ---`);
-  const syncAssetDir = (srcDir: string, dstDir: string, label: string): void => {
+  // v1.48.0 (T-20260924-011 — spec docs/designs/2026-09-25-codex-merge-claim-routing-design.md
+  // D2/R4-R6): the pass consults resolveClaim per walked file and delivers only
+  // files whose claim pass equals VARIANT_ASSET_DIRS_PASS — the same pass-identity
+  // filter the TEMPLATE TREE SYNC pass applies. procedures/** (claim
+  // ADD_IF_MISSING / pass PROCEDURES) drops out: the dedicated PROCEDURES pass is
+  // the sole delivery channel for procedure entries, so a project's committed edit
+  // under an owned `procedures/<entry>/` is no longer overwritten here. The skip
+  // set above stays an independent guard (R5). Skipped files are summarized as one
+  // line per top-level directory, keeping co-safety's 684-file dry-run readable.
+  const syncAssetDir = (srcDir: string, dstDir: string, label: string): number => {
+    let skippedForeignClaim = 0;
     for (const entry of readdirSync(srcDir, { withFileTypes: true })) {
       if (entry.name === '.git' || entry.name === 'node_modules') continue;
       const srcPath = join(srcDir, entry.name);
       const dstPath = join(dstDir, entry.name);
       const relPath = `${label}/${entry.name}`;
       if (entry.isDirectory()) {
-        syncAssetDir(srcPath, dstPath, relPath);
+        skippedForeignClaim += syncAssetDir(srcPath, dstPath, relPath);
         continue;
       }
+      const claim = resolveClaim(relPath, variant);
+      if (claim.pass !== VARIANT_ASSET_DIRS_PASS) { skippedForeignClaim++; continue; }
       if (!existsSync(dstPath)) {
         console.log(`  NEW    ${relPath}`);
         if (!dryRun) { mkdirSync(dirname(dstPath), { recursive: true }); copyFileSync(srcPath, dstPath); }
@@ -2129,9 +2154,13 @@ if (variantAssetDirs.length > 0) {
         syncChanged++;
       }
     }
+    return skippedForeignClaim;
   };
   for (const dirName of variantAssetDirs) {
-    syncAssetDir(join(templatesDir, dirName), join(projectDir, dirName), dirName);
+    const skippedForeignClaim = syncAssetDir(join(templatesDir, dirName), join(projectDir, dirName), dirName);
+    if (skippedForeignClaim > 0) {
+      console.log(`  SKIPPED (claim) ${dirName}/ — ${skippedForeignClaim} file(s) owned by another upgrade pass (not delivered here)`);
+    }
   }
   console.log('  (project-only files under these directories are preserved — not deleted; run with --prune-removed awareness manually if needed)');
   console.log('');
