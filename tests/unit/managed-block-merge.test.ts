@@ -29,7 +29,14 @@
  *
  * Scratch content strings only — no fs, no real templates/.
  *
- * @version 1.0.0
+ * v1.1.0 (2026-09-25, T-20260924-010 — spec
+ *         2026-09-25-codex-merge-claim-routing-design.md D4 row 1): COMMON-CODEX
+ *         zone parity block — merge/appended/reconciled cases mirroring the
+ *         COMMON-CLAUDE/GEMINI coverage. Written BEFORE the MANAGED_PATTERNS
+ *         entry landed (house AC5a: the three tests failed pre-fix with
+ *         "INFO: Template has no managed markers — skipping CODEX.md").
+ *
+ * @version 1.1.0
  */
 import { describe, test, expect } from 'bun:test';
 import {
@@ -330,6 +337,102 @@ describe('dryRun purity and API shape', () => {
     expect(r.content).toBe(proj);
     expect(r.merged).toBe(false);
     expect(r.log).toEqual([`    INFO: Template has no managed markers — skipping ${REL}`]);
+  });
+});
+
+// ── COMMON-CODEX zone (T-20260924-010 — reproduce-then-fix, spec
+//    2026-09-25-codex-merge-claim-routing-design D4 row 1). Pattern parity with
+//    the COMMON-CLAUDE/GEMINI cases above: positional (key-less) merge, append
+//    when the project lacks the zone, snapshot-guarded reconcile on mismatch.
+//    Pre-fix (no MANAGED_PATTERNS entry) every case returned the project
+//    content untouched with `INFO: Template has no managed markers`. ──
+describe('COMMON-CODEX zone (T-20260924-010)', () => {
+  const CODEX_OPEN = '<!-- COMMON-CODEX:START -->';
+  const CODEX_CLOSE = '<!-- COMMON-CODEX:END -->';
+  const ZONE_RE = /<!-- COMMON-CODEX:START -->[\s\S]*?<!-- COMMON-CODEX:END -->/;
+
+  test('merges the template zone into the project copy; outside prose byte-identical', () => {
+    const proj = [
+      '# Codex intro',
+      '',
+      'project-owned prose before the zone',
+      '',
+      CODEX_OPEN,
+      '### 4.5 Skill Resolution Priority (STALE COPY)',
+      'old zone content',
+      CODEX_CLOSE,
+      '',
+      'footer prose that must survive',
+      '',
+    ].join('\n');
+    const tpl = [
+      '# Codex intro',
+      '',
+      CODEX_OPEN,
+      '### 4.5 Skill Resolution Priority',
+      'new zone content from template',
+      CODEX_CLOSE,
+      '',
+    ].join('\n');
+    const r = mergeManagedBlocks(proj, tpl, null, 'CODEX.md', false);
+    expect(r.log).toContain('    MERGED COMMON-CODEX block in: CODEX.md');
+    expect(r.merged).toBe(true);
+    // ONLY the zone span changed — prose before/after preserved byte-for-byte
+    const projZone = proj.match(ZONE_RE)![0];
+    const tplZone = tpl.match(ZONE_RE)![0];
+    expect(r.content).toBe(proj.replace(projZone, () => tplZone));
+    expect(r.content).toContain('project-owned prose before the zone');
+    expect(r.content).toContain('footer prose that must survive');
+    expect(r.content).not.toContain('STALE COPY');
+    expect(r.content).toContain('new zone content from template');
+    // equal counts: positional path, no snapshot
+    expect(r.snapshots).toEqual([]);
+    expect(r.log.join('\n')).not.toContain('count mismatch');
+  });
+
+  test('appends the zone when the project copy lacks it (pre-zone project copy)', () => {
+    const proj = 'prose only, pre-COMMON-CODEX project copy\n';
+    const tpl = `${CODEX_OPEN}\nzone content\n${CODEX_CLOSE}\n`;
+    const r = mergeManagedBlocks(proj, tpl, null, 'CODEX.md', false);
+    expect(r.log).toContain('    APPENDED COMMON-CODEX block to: CODEX.md');
+    expect(r.merged).toBe(true);
+    expect(r.content.endsWith(`${CODEX_OPEN}\nzone content\n${CODEX_CLOSE}\n`)).toBe(true);
+    expect(r.content).toContain('prose only, pre-COMMON-CODEX project copy');
+  });
+
+  test('count-mismatch fires RECONCILED with a snapshot of the exact replaced span', () => {
+    const proj = [
+      'HEAD',
+      '',
+      CODEX_OPEN,
+      'stale one',
+      CODEX_CLOSE,
+      '',
+      'MID PROSE (between project zones)',
+      '',
+      CODEX_OPEN,
+      'stale two',
+      CODEX_CLOSE,
+      '',
+      'TAIL',
+      '',
+    ].join('\n');
+    const tpl = [CODEX_OPEN, 'fresh zone', CODEX_CLOSE, ''].join('\n');
+    const r = mergeManagedBlocks(proj, tpl, null, 'CODEX.md', false);
+    expect(r.log.join('\n')).toContain('count mismatch');
+    expect(r.log).toContain('    RECONCILED COMMON-CODEX blocks in: CODEX.md');
+    expect(r.snapshots).toHaveLength(1);
+    expect(r.snapshots[0]!.rel).toBe('CODEX.md');
+    // the snapshot is the exact project span from the first zone start to the
+    // last zone end (the engine's documented destructive reconcile span)
+    expect(r.snapshots[0]!.content).toBe(
+      proj.slice(proj.indexOf(CODEX_OPEN), proj.lastIndexOf(CODEX_CLOSE) + CODEX_CLOSE.length),
+    );
+    expect(r.content).toContain('fresh zone');
+    expect(r.content).toContain('HEAD');
+    expect(r.content).toContain('TAIL');
+    expect(r.content).not.toContain('stale one');
+    expect(r.content).not.toContain('stale two');
   });
 });
 

@@ -11,7 +11,15 @@
  *         pass never wholesale-overwrites a project CODEX.md again (the MERGE
  *         pass, which already lists CODEX.md, becomes the sole delivery channel).
  *
- * @version 1.1.0
+ * v1.2.0 (2026-09-25, T-20260924-011 — spec
+ *         2026-09-25-codex-merge-claim-routing-design.md D4 row 3): pins the
+ *         claim contract the VARIANT ASSET DIRS pass filter relies on —
+ *         procedures/** resolves ADD_IF_MISSING/PROCEDURES (the dedicated
+ *         pass owns it), generic asset dirs resolve SYNC/VARIANT ASSET DIRS,
+ *         and the exported VARIANT_ASSET_DIRS_PASS constant matches the
+ *         resolveClaim pass id (TEMPLATE_TREE_SYNC_PASS precedent).
+ *
+ * @version 1.2.0
  */
 import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -19,6 +27,7 @@ import { tmpdir } from 'node:os';
 import { describe, test, expect } from 'bun:test';
 import {
   TEMPLATE_TREE_SYNC_PASS,
+  VARIANT_ASSET_DIRS_PASS,
   GOVERNANCE_FILES,
   PLACEHOLDER_ALLOWLIST,
   SCAFFOLD_COMMON_OWNED_FILES,
@@ -115,6 +124,36 @@ describe('upgrade-policy resolveClaim — dedicated passes keep their paths', ()
 
   test('other top-level variant dirs stay with VARIANT ASSET DIRS', () => {
     expect(resolveClaim('workflows/ehs/x.yaml', VARIANT)).toEqual({ policy: 'SYNC', pass: 'VARIANT ASSET DIRS' });
+  });
+});
+
+// ── T-20260924-011 claim-contract pins (spec 2026-09-25-codex-merge-claim-routing-design D4 row 3) ──
+// These pass on the unmodified claim table by design: they pin the contract the
+// VARIANT ASSET DIRS pass filter (upgrade-project.ts) relies on, not a regression.
+describe('upgrade-policy resolveClaim — VARIANT ASSET DIRS pass contract (T-20260924-011 pins)', () => {
+  test('procedures/** (nested) resolves to the dedicated PROCEDURES pass — ADD_IF_MISSING', () => {
+    expect(resolveClaim('procedures/x/y.md', VARIANT)).toEqual({ policy: 'ADD_IF_MISSING', pass: 'PROCEDURES' });
+    expect(resolveClaim('procedures/architecture-design/schema.yaml', VARIANT))
+      .toEqual({ policy: 'ADD_IF_MISSING', pass: 'PROCEDURES' });
+    expect(resolveClaim('procedures/_output-types.yaml', VARIANT))
+      .toEqual({ policy: 'ADD_IF_MISSING', pass: 'PROCEDURES' });
+  });
+
+  test('generic asset dirs resolve to the VARIANT ASSET DIRS pass — SYNC', () => {
+    expect(resolveClaim('workflows/a.yaml', VARIANT)).toEqual({ policy: 'SYNC', pass: 'VARIANT ASSET DIRS' });
+    expect(resolveClaim('decisions/gates.yaml', 'co-design')).toEqual({ policy: 'SYNC', pass: 'VARIANT ASSET DIRS' });
+    expect(resolveClaim('regulations/x.yaml', 'co-safety')).toEqual({ policy: 'SYNC', pass: 'VARIANT ASSET DIRS' });
+  });
+
+  test('CODEX.md claim is unchanged: MERGE_MANAGED on the MERGE pass (AC6)', () => {
+    expect(resolveClaim('CODEX.md', VARIANT)).toEqual({ policy: 'MERGE_MANAGED', pass: 'MERGE' });
+  });
+
+  test('exported VARIANT_ASSET_DIRS_PASS constant matches the resolveClaim pass id', () => {
+    // v1.14.0 (design D2/D3): the pass filter must compare identities, not a
+    // second hard-coded literal — TEMPLATE_TREE_SYNC_PASS precedent.
+    expect(VARIANT_ASSET_DIRS_PASS).toBe('VARIANT ASSET DIRS');
+    expect(resolveClaim('workflows/a.yaml', VARIANT).pass).toBe(VARIANT_ASSET_DIRS_PASS);
   });
 });
 
