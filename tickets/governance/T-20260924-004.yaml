@@ -7,12 +7,28 @@ title: >-
   v1.0.0 and co-consult research-analysis/documentation-writing class removed in
   2026-09-24-variant-skill-mirror-drift-remediation) so the drift cannot regrow
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-24T00:11:58.304Z'
 history:
   - at: '2026-09-24T00:11:58.304Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-24T17:34:27.154Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-24T17:34:27.167Z'
+    from: waiting
+    to: running
+  - at: '2026-09-24T18:01:12.113Z'
+    from: running
+    to: review
+  - at: '2026-09-24T18:01:12.126Z'
+    from: review
+    to: done
+result: >-
+  Implemented in the 09-22 hardening batch (validate-templates 1.41.0 PM-02
+  stale-orphan FAIL arm + classifier, landed via #1024): variant platform-mirror
+  copies of common skills without variant declaration/SSOT and with no peer now
+  FAIL; fixture round-trip verified (4 FAILs injected → 0 after removal)
 error: null
