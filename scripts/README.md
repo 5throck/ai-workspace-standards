@@ -83,6 +83,11 @@ section presence (VARIANT-INJECT: guidelines [REQUIRED] marker enforcement).
 **Usage**: `bun scripts/generate-scripts-readme.ts`
 **Runs automatically**: `bun run dev-sync`
 
+#### `generate-scripts-mirror.ts`
+**Purpose**: Generates the `templates/common/scripts/SCRIPTS.md` registry-table span from the root registry plus the template scripts tree (L1 mirror = derived projection; spec `2026-09-25-propagation-engine-batch-design` §6-D6/§14). L0-only — never appears in its own output.
+**Usage**: `bun scripts/generate-scripts-mirror.ts` (write) | `--check` (compare, exit 1 on drift)
+**Runs automatically**: `bun run dev-sync` (Step 2.6); enforced by `lifecycle-sync-audit` Check B projection arm
+
 #### `compile-tokens.ts`
 **Purpose**: Design token compiler for `co-design`. Reads `templates/co-design/tokens.json` and generates CSS custom properties (`:root { --color-primary: ... }`) and TypeScript constant types (`tokens.ts`) for design system consistency. v1.1.0: a reserved top-level `themes` object (e.g. `dark`, `high-contrast`) compiles to `[data-theme="<name>"]` CSS blocks after `:root` plus a `themes` export in the TS output; a tokens file without `themes` compiles unchanged.
 **Usage**: `bun scripts/compile-tokens.ts [--input <path>] [--out-css <path>] [--out-ts <path>] [--watch] [--check]`
