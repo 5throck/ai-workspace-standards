@@ -1,5 +1,12 @@
 #!/usr/bin/env bun
-// @version 1.46.0
+// @version 1.46.1
+// v1.46.1 (2026-09-24, T-20260924-008 / spec
+//          2026-09-24-skills-registry-overlay-reconcile): mechanical move only —
+//          extractFrontmatterVersionAndReviewed() relocates VERBATIM to
+//          helpers/skills-registry.ts v1.1.0 (shared with new-project's
+//          post-settle registry reconcile) and is imported back. NO behavior
+//          change: the SKILLS_REGISTRY_RECONCILE delivery loop, its
+//          version-less skip, and every other pass are untouched.
 // v1.46.0 (2026-09-24, scaffold identity overview — spec
 //          docs/designs/2026-09-24-scaffold-identity-overview-design.md §13):
 //          IDENTITY SEED step after the TEMPLATE TREE SYNC pass — renders
@@ -409,7 +416,7 @@ import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { extractScriptVersion, preserveLifecycleFrontmatter } from './helpers/upgrade-versions.ts';
 import { applySubstitutions } from './helpers/substitute-placeholders.ts';
-import { reconcileSkillRegistry } from './helpers/skills-registry.ts';
+import { extractFrontmatterVersionAndReviewed, reconcileSkillRegistry } from './helpers/skills-registry.ts';
 import {
   splitIntoSections,
   splitContextFileSections,
@@ -822,29 +829,9 @@ function extractFrontmatterVersion(filePath: string): string {
   return content.match(/^version:\s*["']?(\d+\.\d+\.\d+)/m)?.[1] ?? '';
 }
 
-/**
- * Parse SKILL.md frontmatter to extract version and last_reviewed.
- */
-function extractFrontmatterVersionAndReviewed(filePath: string): {
-  version: string;
-  last_reviewed: string;
-  status?: string;
-  owner?: string;
-} {
-  if (!existsSync(filePath)) return { version: '', last_reviewed: '' };
-  const content = readFileSync(filePath, 'utf8');
-  const versionMatch = content.match(/^version:\s*["']?(\d+\.\d+\.\d+)/m);
-  const reviewedMatch = content.match(/^last_reviewed:\s*["']?(\d{4}-\d{2}-\d{2})/m);
-  const statusMatch = content.match(/^status:\s*["']?([A-Za-z_-]+)/m);
-  const ownerMatch = content.match(/^owner:\s*["']?([^"'\n]+)/m);
-  return {
-    version: versionMatch?.[1] ?? '',
-    last_reviewed: reviewedMatch?.[1] ?? '',
-    status: statusMatch?.[1],
-    owner: ownerMatch?.[1]?.trim(),
-  };
-}
-
+// extractFrontmatterVersionAndReviewed moved VERBATIM to
+// ./helpers/skills-registry.ts (v1.46.1, T-20260924-008) so the fresh-scaffold
+// path shares the same parser; imported back above. No behavior change.
 
 function fileHash(filePath: string): string {
   if (!existsSync(filePath)) return '';

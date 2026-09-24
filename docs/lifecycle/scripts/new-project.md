@@ -3,7 +3,7 @@
 ## Metadata
 
 - **Current Phase**: production
-- **Version**: 1.26.0
+- **Version**: 1.27.0
 - **Owner**: automation-engineer
 - **Last Updated**: 2026-09-24
 - **Last Reviewer**: pm
@@ -31,6 +31,7 @@
 | 2026-09-20 | production | production | v1.22.0: `--platform both` renamed to `all` and expanded to cover all three platforms (claude+antigravity+codex); `all` now keeps CLAUDE.md/GEMINI.md/CODEX.md/.codex/ together instead of just the first two | automation-engineer |
 | 2026-09-20 | production | production | v1.23.0: §7.7 graft build tries the global `graft` binary before bunx (a bunx native postinstall failure leaves a partial temp cache that breaks every later bunx call). Spec: docs/designs/2026-09-20-graft-scaffold-resilience-design.md | automation-engineer |
 | 2026-09-24 | production | production | v1.26.0 (scaffold identity overview): docs/project.md identity seed rendered at scaffold time (§5.2), raw .template.md copy removed; additive --description/--type flags. Spec: docs/designs/2026-09-24-scaffold-identity-overview-design.md | automation-engineer |
+| 2026-09-24 | production | production | v1.27.0 (T-20260924-008): overlay walk skips skills/SKILLS.md (common seed registry survives) + §6.4 post-settle reconcile — prune undelivered rows, update version/last_reviewed from delivered SKILL.md frontmatter, append variant-exclusive rows; idempotent, non-fatal. Spec: docs/designs/2026-09-24-skills-registry-overlay-reconcile-design.md | automation-engineer |
 
 ## Acceptance Criteria
 

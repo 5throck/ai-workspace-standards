@@ -2,9 +2,20 @@
 /**
  * test-new-project.ts — E2E Test for new-project.ts
  *
- * @version 1.4.0
+ * @version 1.5.0
  * @last_updated 2026-09-24
  *
+ * v1.5.0 (2026-09-24, skills registry overlay reconcile — spec
+ *         2026-09-24-skills-registry-overlay-reconcile-design, T-20260924-008):
+ *         Test 29 pins the delivered-registry ↔ delivered-tree bijection on
+ *         the main scaffold (shape-based parse of skills/SKILLS.md vs the
+ *         skills/ dirs; every row's version/last_reviewed must equal the
+ *         delivered SKILL.md frontmatter — the shadow case: co-design's
+ *         accessibility-audit row must carry the delivered frontmatter value,
+ *         NOT the stale overlay 2026-09-12; variant-exclusive service-design
+ *         must have a frontmatter-derived row). Test 30 runs the scaffolded
+ *         project's own skill-lifecycle-audit.ts --json and asserts 0 errors
+ *         (the T-008 baseline was 32 errors on every fresh co-design scaffold).
  * v1.4.0 (2026-09-24, scaffold identity overview — spec
  *         2026-09-24-scaffold-identity-overview-design): Test 27 pins the
  *         identity seed contract on the default (flag-less) scaffold — AC2
@@ -65,6 +76,8 @@
  *   26. common-template delivery parity (derived vs actual)
  *   27. Identity seed — docs/project.md TODO fallback (AC2), docs/context.md pointer (AC3), no .template.md
  *   28. Identity seed — --description/--type render docs/project.md (AC1)
+ *   29. Skills registry ↔ delivered tree bijection (rows = skills dirs; frontmatter values win the shadow case)
+ *   30. Project skill-lifecycle-audit reports 0 errors (T-20260924-008 gate)
  */
 
 import { existsSync, readFileSync, readdirSync, statSync, rmSync } from 'node:fs';
@@ -73,6 +86,7 @@ import { platform } from 'node:process';
 import { $ } from 'bun';
 import { load as yamlLoad } from 'js-yaml';
 import { verifyActualTreeMatchesDerivation } from './helpers/scaffold-markers.ts';
+import { parseSkillRegistryRows } from './helpers/skills-registry.ts';
 
 // ── Args ─────────────────────────────────────────────────────────────────────
 
@@ -828,6 +842,115 @@ try {
         if (existsSync(flaggedDir)) rmSync(flaggedDir, { recursive: true, force: true });
       } catch { /* ignore */ }
     }
+  }
+
+  // ── Test 29: skills registry ↔ delivered tree bijection [T-20260924-008] ──
+  // The delivered skills/SKILLS.md (seeded from templates/common, overlay
+  // skipped, §6.4-reconciled) must list EXACTLY the delivered skills/ dirs
+  // (both audit directions), and every row's version/last_reviewed must equal
+  // the delivered SKILL.md frontmatter — the values skill-lifecycle-audit.ts
+  // itself compares. This pins the shadow case: co-design's variant overlay
+  // carries a stale accessibility-audit row (last_reviewed 2026-09-12) that
+  // must never reach delivery; the delivered frontmatter (2026-09-06 lineage)
+  // wins. Also pins the variant-exclusive append (service-design).
+  console.log('\nTest 29: skills registry ↔ delivered tree bijection');
+  {
+    try {
+      if (!fileExists('skills/SKILLS.md')) {
+        fail('Test 29', 'skills/SKILLS.md not delivered (seed registry missing)');
+      } else {
+        const { rows } = parseSkillRegistryRows(readText('skills/SKILLS.md'));
+        const skillsDir = join(testDir, 'skills');
+        const deliveredNames = new Set<string>();
+        const fmBySkill = new Map<string, { version?: string; last_reviewed?: string }>();
+        for (const entry of readdirSync(skillsDir, { withFileTypes: true })) {
+          if (!entry.isDirectory()) continue;
+          const skillMd = join(skillsDir, entry.name, 'SKILL.md');
+          if (!existsSync(skillMd)) continue;
+          deliveredNames.add(entry.name);
+          const fmMatch = readFileSync(skillMd, 'utf-8').match(/^---\r?\n([\s\S]*?)\r?\n---/);
+          if (fmMatch) {
+            fmBySkill.set(entry.name, ((yamlLoad(fmMatch[1]) ?? {}) as Record<string, unknown>) as { version?: string; last_reviewed?: string });
+          }
+        }
+
+        const problems: string[] = [];
+        const missingRows = [...deliveredNames].filter((n) => !rows.has(n));
+        if (missingRows.length > 0) {
+          problems.push(`delivered skills without a registry row: ${missingRows.sort().join(', ')}`);
+        }
+        const orphanRows = [...rows.keys()].filter((n) => !deliveredNames.has(n));
+        if (orphanRows.length > 0) {
+          problems.push(`registry rows with no delivered skill (undelivered seeds survived): ${orphanRows.sort().join(', ')}`);
+        }
+
+        // Frontmatter-value assertions (the reconcile's update rule): whenever
+        // the delivered SKILL.md declares version/last_reviewed, the row must
+        // match — subsumes the shadow case for every overlaid skill.
+        for (const [name, fm] of fmBySkill) {
+          const row = rows.get(name);
+          if (!row) continue;
+          if (fm.version && row.version !== String(fm.version)) {
+            problems.push(`${name}: row version ${row.version} != delivered SKILL.md ${fm.version}`);
+          }
+          if (fm.last_reviewed && row.lastReviewed !== String(fm.last_reviewed)) {
+            problems.push(`${name}: row last_reviewed ${row.lastReviewed} != delivered SKILL.md ${fm.last_reviewed}`);
+          }
+        }
+
+        // Explicit shadow pin: the co-design overlay's stale 2026-09-12 must
+        // never appear on a delivered row when the frontmatter disagrees.
+        const accFm = fmBySkill.get('accessibility-audit');
+        const accRow = rows.get('accessibility-audit');
+        if (accFm && accRow && accFm.last_reviewed && accRow.lastReviewed !== String(accFm.last_reviewed)) {
+          problems.push(`shadow unresolved: accessibility-audit row carries ${accRow.lastReviewed}, delivered SKILL.md says ${accFm.last_reviewed}`);
+        }
+
+        // Variant-exclusive append pin (co-design ships service-design; the
+        // common seed has no row for it — the reconcile must have added one).
+        if (deliveredNames.has('service-design') && !rows.has('service-design')) {
+          problems.push('service-design delivered but has no registry row (append missing)');
+        }
+
+        if (problems.length > 0) {
+          fail('Test 29', `${problems.length} problem(s): ${problems.slice(0, 8).join('; ')}${problems.length > 8 ? '…' : ''}`);
+        } else {
+          pass(`Test 29 PASSED: registry rows (${rows.size}) == delivered skill dirs (${deliveredNames.size}), frontmatter values win`);
+        }
+      }
+    } catch (e) { fail('Test 29', String(e)); }
+  }
+
+  // ── Test 30: project skill-lifecycle-audit reports 0 errors [T-20260924-008] ──
+  // The project's own audit is the permanent post-scaffold gate and the
+  // instrument that caught the defect (baseline: 35 scanned, 32 errors — 31
+  // missing rows + 1 last_reviewed drift — on every fresh co-design scaffold).
+  // Runs it with --json from the scaffold root and asserts a clean error count.
+  console.log('\nTest 30: project skill-lifecycle-audit — 0 errors');
+  {
+    try {
+      const proc = Bun.spawnSync(['bun', 'scripts/skill-lifecycle-audit.ts', '--json'], {
+        cwd: testDir,
+        stdout: 'pipe',
+        stderr: 'pipe',
+      });
+      const out = proc.stdout.toString();
+      const jsonStart = out.indexOf('{');
+      if (jsonStart === -1) {
+        fail('Test 30', `no JSON output from skill-lifecycle-audit (exit ${proc.exitCode}): ${out.slice(0, 200)}`);
+      } else {
+        const audit = JSON.parse(out.slice(jsonStart)) as {
+          skillsScanned: number;
+          errors: Array<{ message: string; file: string }>;
+        };
+        if (audit.errors.length > 0) {
+          const detail = audit.errors.slice(0, 5).map((e) => `${e.file}: ${e.message}`).join('; ');
+          fail('Test 30', `${audit.errors.length} error(s) (${audit.skillsScanned} skills scanned): ${detail}${audit.errors.length > 5 ? '…' : ''}`);
+        } else {
+          pass(`Test 30 PASSED: project skill-lifecycle-audit clean — 0 errors (${audit.skillsScanned} skills scanned)`);
+        }
+      }
+    } catch (e) { fail('Test 30', String(e)); }
   }
 
   // ── Summary ───────────────────────────────────────────────────────────────
