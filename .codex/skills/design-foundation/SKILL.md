@@ -12,7 +12,6 @@ version: 1.0.0
 last_reviewed: 2026-08-30
 status: active
 scope: common
-l2_propagate: false
 owner: architect
 prerequisites: none
 relates_to:
