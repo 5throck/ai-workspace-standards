@@ -8,7 +8,13 @@ title: >-
   WS-05a in the variant's .claude/.gemini/.agents skill mirrors; clean the L0
   source (workspace root mirrors, all four byte-identical) or give WS-05a a
   policy carve-out; co-design heal copies were WS-05a-remediated by hand
-  (platform-parity P1 bugfixes spec, D7 deviation)
+  (platform-parity P1 bugfixes spec, D7 deviation). SCOPE CONFIRMED 2026-09-25
+  (verifier-platform-expansion spec §8 Finding C, drift-triage disposition c):
+  this ticket also owns the trio version-mismatch class — 24 findings post-heal
+  (co-design x3 pre-existing + 7 healed variants x3 newly exposed: variant
+  .claude/.gemini trio snapshots at 1.0.0 vs SSOT-derived .agents/.codex mirrors
+  at 1.0.1/1.0.2); content and version are resolved together here; WARN soak
+  (T-20260925-002) absorbs until resolved
 priority: normal
 status: backlog
 attempts: 0

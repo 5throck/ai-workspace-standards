@@ -5,8 +5,13 @@
  * Recursively scans L3 project directories and classifies files
  * for variant conversion pipeline.
  *
- * @version 1.4.1
+ * @version 1.5.0
  * @phase 1: L3 Analysis
+ *
+ * v1.5.0 (2026-09-25, spec docs/designs/2026-09-25-verifier-platform-expansion-design.md
+ *  site 13 / D13): SCAN_CATEGORIES.commands gains the .codex/prompts mapping root
+ *  (.agents/commands excluded — Finding D); detectPlatformScope classifies
+ *  .agents/.codex paths as 'agents'/'codex' instead of 'neutral'.
  *
  * v1.4.1 (2026-09-24, spec docs/designs/2026-09-24-platform-ssot-constant-design.md):
  * behavior-neutral constant adoption — SCAN_CATEGORIES.skills becomes
@@ -54,7 +59,7 @@ export interface FileClassification {
   /** Classification based on comparison */
   classification: 'new' | 'modified' | 'identical' | 'conflict';
   /** Platform scope detection */
-  platformScope: 'claude' | 'gemini' | 'both' | 'neutral';
+  platformScope: 'claude' | 'gemini' | 'agents' | 'codex' | 'both' | 'neutral';
 }
 
 export interface L3ScanResult {
@@ -92,7 +97,12 @@ const L1_COMMON = join(L0_ROOT, 'templates', 'common');
 const SCAN_CATEGORIES = {
   agents: ['agents', '.claude/agents', '.gemini/agents'],
   skills: PLATFORM_SKILL_BASES,
-  commands: ['.claude/commands', '.gemini/commands'],
+  // Command surfaces (spec 2026-09-25-verifier-platform-expansion-design site
+  // 13): .codex/prompts is the 1:1 codex mirror of .claude/commands (ADR-0077
+  // D4). .agents/commands is deliberately NOT a scan root — it has no producer
+  // and no documented consumer (design Finding D / N5); promoting it would copy
+  // an ungoverned surface into variants.
+  commands: ['.claude/commands', '.gemini/commands', '.codex/prompts'],
   configs: ['.claude', '.gemini', '.agents', '.codex'],
   scripts: ['scripts'],
   docs: ['docs'],
@@ -136,6 +146,14 @@ function detectPlatformScope(relativePath: string): FileClassification['platform
   }
   if (relativePath.includes('.claude/') && relativePath.includes('.gemini/')) {
     return 'both'; // Should not happen in normal structure
+  }
+  // v1.5.0 (spec 2026-09-25-verifier-platform-expansion-design site 13): the two
+  // newest platform surfaces classify explicitly instead of falling to 'neutral'.
+  if (relativePath.includes('.agents/')) {
+    return 'agents';
+  }
+  if (relativePath.includes('.codex/')) {
+    return 'codex';
   }
   return 'neutral';
 }

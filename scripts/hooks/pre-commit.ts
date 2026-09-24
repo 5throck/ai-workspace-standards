@@ -2,7 +2,13 @@
 /**
  * pre-commit.ts — TS-based pre-commit hook.
  * Replaces the legacy bash/ps1 hooks.
- * @version 1.7.1
+ * @version 1.8.0
+ *
+ * v1.8.0 (2026-09-25, spec docs/designs/2026-09-25-verifier-platform-expansion-design.md
+ *  site 8 / D8): check 6b generalizes to all four platforms — skills regexes
+ *  cover .agents/.codex mirrors; command propagation checks map .claude/commands
+ *  and .gemini/commands to common, plus the .codex/prompts mapping
+ *  (ADR-0077 D4). .agents/commands excluded (Finding D). Severity stays WARN.
  */
 
 import { $ } from "bun";
@@ -261,12 +267,18 @@ async function main() {
   }
 
   // 6b. Platform Skill/Command lifecycle check (non-blocking WARN)
-  const claudeSkillStaged = staged.filter(f => /^\.claude\/skills\/[^/]+\/SKILL\.md$/.test(f.replace(/\\/g, '/')));
-  const geminiSkillStaged = staged.filter(f => /^\.gemini\/skills\/[^/]+\/SKILL\.md$/.test(f.replace(/\\/g, '/')));
+  // D8 (spec 2026-09-25-verifier-platform-expansion-design site 8): all four
+  // platform skill mirrors join the version-field nudge; command propagation
+  // checks map .claude/commands and .gemini/commands to their common
+  // counterparts, and .codex/prompts to the common prompts mapping
+  // (ADR-0077 D4). .agents/commands is excluded — no producer, no documented
+  // consumer (design Finding D; recorded exclusion, not a silent skip).
+  const skillStaged = staged.filter(f => /^\.(claude|gemini|agents|codex)\/skills\/[^/]+\/SKILL\.md$/.test(f.replace(/\\/g, '/')));
   const claudeCommandStaged = staged.filter(f => /^\.claude\/commands\/[^/]+\.md$/.test(f.replace(/\\/g, '/')));
   const geminiCommandStaged = staged.filter(f => /^\.gemini\/commands\/[^/]+\.md$/.test(f.replace(/\\/g, '/')));
+  const codexPromptStaged = staged.filter(f => /^\.codex\/prompts\/[^/]+\.md$/.test(f.replace(/\\/g, '/')));
 
-  for (const f of [...claudeSkillStaged, ...geminiSkillStaged]) {
+  for (const f of skillStaged) {
     try {
       const content = readFileSync(f, 'utf-8');
       if (!/^version:\s*\d+\.\d+\.\d+/m.test(content)) {
@@ -285,6 +297,14 @@ async function main() {
 
   for (const f of geminiCommandStaged) {
     const commonPath = f.replace(/^\.gemini\//, 'templates/common/.gemini/').replace(/\\/g, '/');
+    if (!existsSync(commonPath)) {
+      console.error(`\x1b[33m[WARN]\x1b[0m ${f} — templates/common counterpart missing: ${commonPath}`);
+      console.error(`       Run platform-command-lifecycle-manager skill to propagate.`);
+    }
+  }
+
+  for (const f of codexPromptStaged) {
+    const commonPath = f.replace(/^\.codex\//, 'templates/common/.codex/').replace(/\\/g, '/');
     if (!existsSync(commonPath)) {
       console.error(`\x1b[33m[WARN]\x1b[0m ${f} — templates/common counterpart missing: ${commonPath}`);
       console.error(`       Run platform-command-lifecycle-manager skill to propagate.`);

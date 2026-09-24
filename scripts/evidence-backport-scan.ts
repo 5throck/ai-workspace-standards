@@ -2,7 +2,11 @@
 /**
  * evidence-backport-scan.ts — Evidence Backporting candidate scanner
  * (project-resync skill Step 2b).
- * @version 1.0.0
+ * @version 1.1.0
+ *
+ * v1.1.0 (2026-09-25, spec docs/designs/2026-09-25-verifier-platform-expansion-design.md
+ *  site 14 / D14): the F1/M6 skill-dir literals adopt PLATFORM_SKILL_BASES;
+ *  iteration order is provably verdict-irrelevant (accumulate-only loops).
  *
  * Read-only inspection of Projects/co-* instances to identify evidence
  * planes mature enough to backport into templates/co-<x>/evidence-models/.
@@ -42,8 +46,9 @@
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
+import { PLATFORM_SKILL_BASES } from "./lib/platforms.ts";
 
-const VERSION = "1.0.0";
+const VERSION = "1.1.0";
 
 type Form = "F1" | "F2" | "F3" | "F0" | "MIXED" | "none";
 
@@ -134,7 +139,10 @@ interface FormSignal {
 /** F1: a SKILL.md naming the common `evidence-ledger` base or the 5-column header, plus a materialized ledger table under docs/**. */
 function detectF1(projectPath: string): FormSignal[] {
   const signals: FormSignal[] = [];
-  const skillDirs = ["skills", ".claude/skills", ".agents/skills", ".gemini/skills", ".codex/skills"];
+  // SSOT constant (spec 2026-09-25-verifier-platform-expansion-design site 14);
+  // order provably verdict-irrelevant — accumulate-only loops, no first-wins
+  // dedup or short-circuit (design D14).
+  const skillDirs = PLATFORM_SKILL_BASES;
   const ledgerSkillFiles: string[] = [];
   for (const d of skillDirs) {
     const base = join(projectPath, d);
@@ -537,7 +545,7 @@ function m6aSynonyms(form: Form, planeTargets: string[]): string[] {
 }
 
 function testM6(projectPath: string, form: Form, planeTargets: string[]): M6Result {
-  const skillDirs = ["skills", ".claude/skills", ".agents/skills", ".gemini/skills", ".codex/skills"];
+  const skillDirs = PLATFORM_SKILL_BASES;
   const referencing: string[] = [];
   const synonyms = m6aSynonyms(form, planeTargets);
   for (const d of skillDirs) {

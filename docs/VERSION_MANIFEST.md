@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-09-24T15:21:34.333Z
+**Generated**: 2026-09-24T17:15:13.598Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -107,7 +107,7 @@
 | agent-verify.ts | 1.0.2 | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.2 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.1.0 | scripts/archive-memory.ts | N/A |
-| audit.ts | 2.42.0 | scripts/audit.ts | bun |
+| audit.ts | 2.43.0 | scripts/audit.ts | bun |
 | backport-diff.ts | 1.0.1 | scripts/backport-diff.ts | N/A |
 | bootstrap-stages.ts | 1.0.0 | scripts/bootstrap-stages.ts | fs, js-yaml, path |
 | check-upgrade-coverage.ts | 1.0.0 | scripts/check-upgrade-coverage.ts | N/A |
@@ -121,7 +121,7 @@
 | dispatch-serial.ts | 1.1.1 | scripts/dispatch-serial.ts | N/A |
 | dispatch.ts | 1.1.1 | scripts/dispatch.ts | N/A |
 | ensure-github-repo.ts | 1.0.0 | scripts/ensure-github-repo.ts | N/A |
-| evidence-backport-scan.ts | 1.0.0 | scripts/evidence-backport-scan.ts | N/A |
+| evidence-backport-scan.ts | 1.1.0 | scripts/evidence-backport-scan.ts | N/A |
 | fix-script-versions.ts | 1.1.1 | scripts/fix-script-versions.ts | fs, path |
 | gen-pr-body.ts | 1.2.0 | scripts/gen-pr-body.ts | bun |
 | generate-ide-rules.ts | 1.0.0 | scripts/generate-ide-rules.ts | N/A |
@@ -129,7 +129,7 @@
 | generate-raci.ts | 1.1.0 | scripts/generate-raci.ts | js-yaml |
 | generate-scripts-readme.ts | 1.0.4 | scripts/generate-scripts-readme.ts | N/A |
 | generate-skill-graph.ts | 1.14.0 | scripts/generate-skill-graph.ts | js-yaml |
-| generate-version-manifest.ts | 1.7.1 | scripts/generate-version-manifest.ts | bun, js-yaml |
+| generate-version-manifest.ts | 1.8.0 | scripts/generate-version-manifest.ts | bun, js-yaml |
 | graph-delta-log.ts | 1.0.0 | scripts/graph-delta-log.ts | N/A |
 | ingest-external-skills.ts | 1.1.0 | scripts/ingest-external-skills.ts | N/A |
 | ingest-security-frameworks.ts | 1.1.0 | scripts/ingest-security-frameworks.ts | N/A |
@@ -152,7 +152,7 @@
 | remove-project.ts | 1.0.1 | scripts/remove-project.ts | N/A |
 | render-pdf-deck.ts | 1.0.1 | scripts/render-pdf-deck.ts | N/A |
 | resolve-variants.ts | 1.0.3 | scripts/resolve-variants.ts | fs, js-yaml, path |
-| resync-audit.ts | 1.1.1 | scripts/resync-audit.ts | N/A |
+| resync-audit.ts | 1.2.0 | scripts/resync-audit.ts | N/A |
 | retry-handler.ts | 1.1.0 | scripts/retry-handler.ts | N/A |
 | review-baseline.ts | 1.0.1 | scripts/review-baseline.ts | N/A |
 | setup-github-branch-protection.ts | 1.0.1 | scripts/setup-github-branch-protection.ts | bun |
@@ -163,7 +163,7 @@
 | spec-backfill.ts | 1.0.0 | scripts/spec-backfill.ts | N/A |
 | spec-register.ts | 1.3.0 | scripts/spec-register.ts | N/A |
 | sync-md.ts | 1.4.0 | scripts/sync-md.ts | N/A |
-| sync-skill-status.ts | 1.0.1 | scripts/sync-skill-status.ts | N/A |
+| sync-skill-status.ts | 1.1.0 | scripts/sync-skill-status.ts | N/A |
 | sync-skills-to-l2.ts | 1.0.1 | scripts/sync-skills-to-l2.ts | N/A |
 | sync-skills.ts | 1.8.0 | scripts/sync-skills.ts | N/A |
 | sync-template-deps.ts | 1.0.0 | scripts/sync-template-deps.ts | N/A |
@@ -173,7 +173,7 @@
 | test-extends-validator.ts | 1.0.1 | scripts/test-extends-validator.ts | fs, path |
 | test-l3-to-variant-promotion.ts | 1.6.0 | scripts/test-l3-to-variant-promotion.ts | bun |
 | test-new-project.ts | 1.6.0 | scripts/test-new-project.ts | bun, js-yaml |
-| test-platform-parity.ts | 0.2.4 | scripts/test-platform-parity.ts | fs, path |
+| test-platform-parity.ts | 0.3.0 | scripts/test-platform-parity.ts | fs, path |
 | test-runner.ts | 1.4.0 | scripts/test-runner.ts | fs, os, path |
 | test-scaffold-delivery-parity.ts | 1.0.0 | scripts/test-scaffold-delivery-parity.ts | N/A |
 | test-variant-readiness.ts | 1.0.0 | scripts/test-variant-readiness.ts | N/A |
@@ -185,22 +185,22 @@
 | validate-decisions.ts | 1.0.0 | scripts/validate-decisions.ts | js-yaml |
 | validate-doc-folder.ts | 1.1.0 | scripts/validate-doc-folder.ts | fs, path |
 | validate-docs-links.ts | 1.1.0 | scripts/validate-docs-links.ts | fs, path |
-| validate-md-language.ts | 1.11.0 | scripts/validate-md-language.ts | fs |
+| validate-md-language.ts | 1.12.0 | scripts/validate-md-language.ts | fs |
 | validate-model-registry.ts | 1.4.0 | scripts/validate-model-registry.ts | N/A |
 | validate-pm-extends.ts | 0.3.1 | scripts/validate-pm-extends.ts | N/A |
 | validate-procedures.ts | 1.1.0 | scripts/validate-procedures.ts | js-yaml |
 | validate-process.ts | 1.0.0 | scripts/validate-process.ts | js-yaml |
 | validate-raci.ts | 1.2.0 | scripts/validate-raci.ts | js-yaml |
 | validate-skills.ts | 1.5.1 | scripts/validate-skills.ts | N/A |
-| validate-templates.ts | 1.39.0 | scripts/validate-templates.ts | js-yaml |
+| validate-templates.ts | 1.40.0 | scripts/validate-templates.ts | js-yaml |
 | validate-variant-readiness.ts | 1.1.0 | scripts/validate-variant-readiness.ts | N/A |
 | variant-feature.ts | 1.0.0 | scripts/variant-feature.ts | N/A |
 | verify-adr-governance.ts | 1.7.0 | scripts/verify-adr-governance.ts | N/A |
 | verify-agent-deliverables.ts | 1.0.1 | scripts/verify-agent-deliverables.ts | fs |
-| verify-country-prune.ts | 1.0.0 | scripts/verify-country-prune.ts | N/A |
+| verify-country-prune.ts | 1.1.0 | scripts/verify-country-prune.ts | N/A |
 | verify-memory.ts | 1.2.0 | scripts/verify-memory.ts | fs, path |
 | verify-new-project-tests.ts | 1.0.3 | scripts/verify-new-project-tests.ts | N/A |
-| verify-platform-lifecycle.ts | 1.1.3 | scripts/verify-platform-lifecycle.ts | N/A |
+| verify-platform-lifecycle.ts | 1.2.0 | scripts/verify-platform-lifecycle.ts | N/A |
 | verify-readme-sync.ts | 1.4.0 | scripts/verify-readme-sync.ts | bun, fs, path |
 | verify-scripts.ts | 1.8.0 | scripts/verify-scripts.ts | fs, path |
 | verify-skill-graph.ts | 1.6.0 | scripts/verify-skill-graph.ts | N/A |
@@ -213,23 +213,25 @@
 
 | Name | File | Platform | Skill Integration |
 |------|------|----------|-------------------|
-| changelog | .claude/commands/changelog.md | both | N/A |
-| commit-push-pr | .claude/commands/commit-push-pr.md | both | N/A |
-| gateguard | .claude/commands/gateguard.md | both | N/A |
-| meeting | .claude/commands/meeting.md | both | N/A |
-| memlog | .claude/commands/memlog.md | both | N/A |
-| new-task | .claude/commands/new-task.md | both | N/A |
-| project-review | .claude/commands/project-review.md | both | N/A |
-| sync | .claude/commands/sync.md | both | N/A |
+| changelog | .claude/commands/changelog.md | all | N/A |
+| commit-push-pr | .claude/commands/commit-push-pr.md | all | N/A |
+| gateguard | .claude/commands/gateguard.md | all | N/A |
+| meeting | .claude/commands/meeting.md | all | N/A |
+| memlog | .claude/commands/memlog.md | all | N/A |
+| new-task | .claude/commands/new-task.md | all | N/A |
+| project-review | .claude/commands/project-review.md | all | N/A |
+| sync | .claude/commands/sync.md | all | N/A |
 
 ---
 
 ## Platform Parity Status
 
-**Checked**: Claude (.claude/) vs Gemini (.gemini/)
+**Checked**: Claude (.claude/), Gemini (.gemini/), Antigravity (.agents/), Codex (.codex/ prompts mapping)
 
-- **Commands with parity**: 8 / 8
-- **Skills with parity**: 0 / 40 (common-template skills are parity-exempt)
+- **Commands with parity (gemini mirror)**: 8 / 8
+- **Commands with codex prompts mapping**: 8 / 8
+- **Skills in all four mirrors**: 0 / 40
+- **Skills in claude+gemini only (both)**: 0 / 40 (common-template skills are parity-exempt)
 
 ---
 

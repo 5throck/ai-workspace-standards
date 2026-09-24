@@ -1,8 +1,13 @@
 #!/usr/bin/env bun
 /**
  * verify-country-prune.ts
- * @version 1.0.0
- * @last_updated 2026-08-23
+ * @version 1.1.0
+ * @last_updated 2026-09-25
+ *
+ * v1.1.0 (2026-09-25, spec docs/designs/2026-09-25-verifier-platform-expansion-design.md
+ *  site 7 / D7): fixture harness adopts PLATFORM_SKILL_BASES — .codex/skills
+ *  fixtures are now created and their pruning asserted, aligning the verifier
+ *  with the pruner (already 5-element). No producer change.
  *
  * Verifies the country-scoped asset pruning mechanism (skills, scripts, env blocks).
  * Creates temporary fixtures and runs prune-country-scoped-assets.ts to validate
@@ -10,7 +15,7 @@
  * region-neutral (none), and unbalanced marker edge cases.
  *
  * Pruning rules:
- * - Skills: removes <target>/{skills,.claude/skills,.gemini/skills,.agents/skills}/<name>/
+ * - Skills: removes <target>/{skills,.claude/skills,.gemini/skills,.agents/skills,.codex/skills}/<name>/
  * - Scripts: removes <target>/scripts/<name>*
  * - Env blocks: parses .env.sample for # >>> country-scoped:<CODE> marker blocks
  *              and deletes blocks whose CODE != target country. For "none", deletes ALL blocks.
@@ -27,6 +32,7 @@ import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
+import { PLATFORM_SKILL_BASES } from './lib/platforms.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -82,7 +88,10 @@ DATABASE_URL=postgresql://localhost/test
  * Create minimal skill fixture files
  */
 function createSkillFixtures(dir: string): void {
-  const skillDirs = ['skills', '.claude/skills', '.gemini/skills', '.agents/skills'];
+  // SSOT constant (spec 2026-09-25-verifier-platform-expansion-design site 7):
+  // the harness previously created/asserted only 4 of the 5 bases the pruner
+  // already iterates — stale verifier literal, not a producer gap (design D7).
+  const skillDirs = PLATFORM_SKILL_BASES;
 
   for (const skillDir of skillDirs) {
     // Create nested directory structure using mkdirSync with recursive
@@ -175,7 +184,7 @@ function testUSNonMatching(): void {
     let allPassed = true;
 
     // Check that KR skills are removed
-    const skillDirs = ['skills', '.claude/skills', '.gemini/skills', '.agents/skills'];
+    const skillDirs = PLATFORM_SKILL_BASES;
     for (const skillDir of skillDirs) {
       if (!assertNotExists(join(tempDir, skillDir, 'k-law'), testName)) allPassed = false;
       if (!assertNotExists(join(tempDir, skillDir, 'k-dart'), testName)) allPassed = false;
@@ -225,7 +234,7 @@ function testNoneRegionNeutral(): void {
     let allPassed = true;
 
     // Check that KR skills are removed
-    const skillDirs = ['skills', '.claude/skills', '.gemini/skills', '.agents/skills'];
+    const skillDirs = PLATFORM_SKILL_BASES;
     for (const skillDir of skillDirs) {
       if (!assertNotExists(join(tempDir, skillDir, 'k-law'), testName)) allPassed = false;
       if (!assertNotExists(join(tempDir, skillDir, 'k-dart'), testName)) allPassed = false;
@@ -273,7 +282,7 @@ function testKRMatching(): void {
     let allPassed = true;
 
     // Check that KR skills are kept
-    const skillDirs = ['skills', '.claude/skills', '.gemini/skills', '.agents/skills'];
+    const skillDirs = PLATFORM_SKILL_BASES;
     for (const skillDir of skillDirs) {
       if (!assertExists(join(tempDir, skillDir, 'k-law', 'SKILL.md'), testName)) allPassed = false;
       if (!assertExists(join(tempDir, skillDir, 'k-dart', 'SKILL.md'), testName)) allPassed = false;
