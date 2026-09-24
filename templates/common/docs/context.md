@@ -88,7 +88,7 @@ Standard directory layout for all projects in this workspace:
 
 | File | Purpose |
 |------|---------|
-| `docs/context.md` | This file — immutable project identity |
+| `docs/context.md` | This file — pipeline-maintained shared reference; make no hand edits |
 | `docs/<variant>.context.md` | Variant config — tech stack, agents, skills, scripts, workflow |
 | `CLAUDE.md` | Claude Code session behavior and slash commands |
 | `GEMINI.md` | Gemini CLI / Antigravity session behavior |
@@ -538,4 +538,4 @@ See the workspace governance documentation (Governance Enforcement Layers) and A
 
 ---
 
-*context.md version: 2.11 — self-containment remediation: dead referents removed or repointed (D1-D8); design-foundation skill now delivered; Context Commonization Review relocated to workspace governance docs*
+*context.md version: 2.12 — Key Files: context.md row corrected to pipeline-maintained (was "immutable")*
