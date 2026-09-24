@@ -23,12 +23,18 @@ title: >-
   T-20260924-004); provenance: found 2026-09-24 during the
   context-md-self-containment-remediation Addendum 2 repo-wide stack-setup sweep
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-24T03:37:17.305Z'
 history:
   - at: '2026-09-24T03:37:17.305Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-24T23:31:07.181Z'
+    from: backlog
+    to: done
+result: >-
+  stack-setup phantom removed from 10 variant AGENTS.md + co-abap setup.ts
+  1.0.3; checkVariantAgentReferences validator 1.42.0 WARN-soak via
+  T-20260925-004 (PR #1062)
 error: null

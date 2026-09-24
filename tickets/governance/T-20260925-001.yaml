@@ -16,12 +16,18 @@ title: >-
   at 1.0.1/1.0.2); content and version are resolved together here; WARN soak
   (T-20260925-002) absorbs until resolved
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-24T15:01:47.555Z'
 history:
   - at: '2026-09-24T15:01:47.555Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-24T23:31:07.195Z'
+    from: backlog
+    to: done
+result: >-
+  WS-05a ruled L0-naming-legal (adapted-copy pattern permanent); 48 stale
+  .claude/.gemini trio copies healed to canonical; generate-variant 1.19.0 seam
+  adaptation (PR #1062)
 error: null
