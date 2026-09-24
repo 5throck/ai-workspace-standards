@@ -1,0 +1,34 @@
+schemaVersion: 1
+id: T-20260924-007
+kind: manual
+title: >-
+  variant-level stack-setup phantom cleanup: the stack-setup agent exists only
+  as local agents in co-develop/co-game — root agents/ has 9 files with none and
+  templates/common/agents/ has 3; the root+L1 AGENTS.md references are being
+  fixed in the context-md-self-containment-remediation change set (R16) but 10
+  variant AGENTS.md copies still carry the phantom (co-deck, co-consult,
+  co-design, co-work, co-hr, co-news, co-safety, co-abap, co-export,
+  co-security) and will NOT self-heal (AGENTS.md propagates root->L1 via
+  --governance-l1; variant copies are L1->L2 delivered and only refresh via
+  upgrade-project); sharpest instance:
+  templates/co-abap/scripts/co-abap/setup.ts (lines ~20, ~373, ~375) instructs
+  users to invoke the stack-setup agent and points at agents/stack-setup.md,
+  which co-abap does not ship (24 agent files verified) — user-facing broken
+  guidance in variant tooling; co-develop/co-game references resolve against
+  their real local stack-setup agents (leave); co-price has no hit; Decision
+  needed: per-variant disposition (drop the reference vs ship a local agent),
+  the co-abap setup.ts rewrite, and whether
+  validate-templates/lifecycle-sync-audit should flag agent references that
+  resolve at neither L0 nor the variant (regrowth prevention, sibling of
+  T-20260924-004); provenance: found 2026-09-24 during the
+  context-md-self-containment-remediation Addendum 2 repo-wide stack-setup sweep
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-24T03:37:17.305Z'
+history:
+  - at: '2026-09-24T03:37:17.305Z'
+    from: null
+    to: backlog
+result: null
+error: null

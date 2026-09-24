@@ -2,7 +2,7 @@
 
 - **Date**: 2026-09-24
 - **Author**: Template Architect (Phase 1-2, Design Gate per ADR-0074)
-- **Status**: Implemented (2026-09-24 — delivered with the design-foundation skill delivery pipeline in the same change set; Amendments: §8.13 placement revised to §8.18 at implementation review)
+- **Status**: Implemented (2026-09-24 — delivered with the design-foundation skill delivery pipeline in the same change set; Amendments: §8.13 placement revised to §8.18 at implementation review; Addendum 2 §15 (2026-09-24): two post-implementation residuals contracted — context.md Key Files row, AGENTS.md `stack-setup` phantom)
 - **Audience**: docs-writer, automation-engineer, PM (approval), auditor (QA)
 - **Sibling context**: `2026-09-24-constitution-s33-context-injection-design.md` (zone mechanics), tickets T-20260924-001..006
 
@@ -425,3 +425,102 @@ the subsection.
    the engineer's verification battery must not treat its absence as a D7 failure.
 2. Spec `2026-09-24-context-md-self-containment-remediation-design` remains **status: draft**
    until the QA gate; the registry is not moved to implemented by this addendum.
+
+---
+
+## 15. Addendum 2 (2026-09-24) — post-implementation residuals: context.md Key Files row and the AGENTS.md `stack-setup` phantom
+
+Post-implementation audits on 2026-09-24 (delivered-tree QA plus a repo-wide phantom sweep) found
+two residuals in the same falsity families this spec already remediated. Both are contracted here.
+Registry status of this spec stays **`implemented`** — this is a document-only extension; no
+registry touch (precedent: the s33 sibling's post-implementation Amendment 2 records the same
+ruling).
+
+**Supersession.** §3 (Non-goals) excludes "the same phantom `stack-setup` references in root
+`AGENTS.md` §7 and `templates/common/AGENTS.md:598`" (restated at the end of §6.5). Read that
+exclusion as superseded by this section: the AGENTS.md phantom is now in scope (R16). No other §3
+row changes. Also for the record: §14 item 2 described the pre-QA-gate state; the registry has
+since moved to `implemented` (same day, after the QA gate).
+
+### 15.1 R15 — context.md L91 Key Files row (residual 1)
+
+Defect: the `docs/context.md` row in the Key Files table still reads "This file — immutable
+project identity". Same falsity family as the L8 drive-by fixed in delivery ("pipeline-maintained
+— make no hand edits after project creation"): the file is pipeline-maintained, not immutable.
+
+Contract (docs-writer, `templates/common/docs/context.md`):
+
+- L91: replace `This file — immutable project identity` with
+  `This file — pipeline-maintained shared reference; make no hand edits`.
+- Footer: bump to
+  `*context.md version: 2.12 — Key Files: context.md row corrected to pipeline-maintained (was "immutable")*`.
+
+No zone interaction: L91 and the footer sit outside every marker zone. R15 introduces no
+L0-pattern content, so the `blankL0Refs` delivery-simulation expectation is unchanged.
+
+### 15.2 R16 — AGENTS.md §7 Computational Integrity bullet (residual 2)
+
+Defect: the bullet routes high-precision computation "via the `stack-setup` agent". Verified
+phantom at every layer the bullet is delivered to: workspace-root `agents/` holds 9 files, none
+named stack-setup; `templates/common/agents/` holds 3. (The name resolves in exactly two delivered
+variants — co-develop, co-game — see §15.3.)
+
+Contract (docs-writer, root `AGENTS.md:620` — the L1 copy follows by propagation, never by hand).
+
+Replace the sentence:
+
+> For aerospace, aviation, precision control, or regulated financial computations, delegate to a validated external tool (Fortran, Python+NumPy/SciPy, Julia, etc.) via the `stack-setup` agent.
+
+with:
+
+> For aerospace, aviation, precision control, or regulated financial computations, delegate to a validated external tool (Fortran, Python+NumPy/SciPy, Julia, etc.). If the tool is missing, request installation through the PM — **never install tools without security review and explicit user approval**.
+
+This applies the D4 (context.md L406) replacement pattern to the AGENTS.md carrier: only the
+phantom agent pointer is replaced. The validated-external-tool substance stays verbatim — the
+tool list, the approximate-labeling rule, and the compute-via-executed-code rule. Nothing else in
+the bullet changes.
+
+Propagation (automation-engineer): root edit lands first, then run
+`bun scripts/propagate-to-templates.ts --governance-l1`. That flag mode is the L0→L1 deployment
+carrying `AGENTS.md → templates/common/AGENTS.md` (`GOVERNANCE_L1_FILES`,
+`scripts/propagate-to-templates.ts:1082-1087`); it is not a propagation-map.json domain. Do not
+route this through the `governance-agents` domain: that domain is the L1→L2 COMMON-AGENTS
+zone injector, and the bullet sits outside the COMMON-AGENTS markers (L1 markers L224-292,
+bullet L598), so zone injection cannot carry it. The replacement wording is transform-neutral
+(no CONSTITUTION.md references, no workspace-root-only paths), so the L1 copy lands equal to the
+L0 sentence. Sequencing mirrors §7.2: prose before propagation, or the propagate ships the old
+wording.
+
+### 15.3 Repo-wide `stack-setup` disposition (verification input)
+
+Post-fix acceptance is NOT "zero hits repo-wide" — most hits are genuine records of delivered
+things. The engineer classifies every remaining hit into this table in the task report; an
+unclassifiable hit blocks the PR.
+
+| Class | Hits | Disposition |
+|-------|------|-------------|
+| Phantom carrier (this contract) | root `AGENTS.md:620`; `templates/common/AGENTS.md:598` | fixed by R16 + `--governance-l1` |
+| Resolving variant carriers | `co-develop/AGENTS.md:568`, `co-game/AGENTS.md:642` | leave — `agents/stack-setup.md` exists in both variants; referent resolves |
+| Phantom variant carriers (follow-up ticket, NOT this change) | 10 variants, bullet at: co-deck:740, co-consult:620, co-design:576, co-work:560, co-hr:671, co-news:601, co-safety:1068, co-abap:404, co-export:643, co-security:546 | L2-owned prose outside the COMMON-AGENTS zone — does not self-heal from the L1 fix; each variant edits via its own pipeline (co-price carries no hit) |
+| Genuine delivered agents | everything under `templates/co-develop/` and `templates/co-game/` (agent file, variant.json, rosters, raci/gates/stages, procedures, user guides, lifecycle records, variant skill-graph.json); `templates/README.md:40` + `README_ko.md:40` | leave — accurate records of delivered agents |
+| Genuine delivered tooling and skill config | `zod-contract-gate/SKILL.md:57` agentRole enum (root `skills/` + 4 platform mirrors + 5 template mirrors); `templates/common/scripts/generate-ide-rules.ts:149,256`; `templates/common/scripts/helpers/merge-frontmatter.ts:860` | leave — project-side role lists for rosters that ship stack-setup; inert elsewhere |
+| Generated or historical records | `docs/skill-graph.json`; `docs/variant-benchmark-backlog.md`; `docs/variant-roadmap-2026-q3-q4.md`; `docs/designs/` records (`variant-templates-advancement-design.md`, `2026-08-29-procedure-coverage-and-l0-design.md`, `pm-md-group-type-mapping-spec.md`, `pm-md-variant-specific-content-injection-design.md`, this doc's D4 record); `docs/lifecycle/templates/co-develop.md`, `co-game.md` | leave — never retro-edit design history or generated graphs |
+
+Sharper variant-level phantom found during the sweep (file it, do not fix here):
+`templates/co-abap/scripts/co-abap/setup.ts:20,373,375` instructs the user to invoke the
+`stack-setup` agent and points at `agents/stack-setup.md` — co-abap ships no such agent file
+(verified: 24 agent files, none named stack-setup). User-facing script output referencing a
+missing file. Candidate follow-up ticket alongside the 10 variant AGENTS.md rows.
+
+### 15.4 Addendum acceptance criteria
+
+| # | Criterion | Verification |
+|---|-----------|--------------|
+| AC11 | context.md L91 carries the R15 wording; footer reads 2.12; no other line changed. | diff |
+| AC12 | Root AGENTS.md carries the R16 replacement; the same bullet in `templates/common/AGENTS.md` is byte-equal to root after `--governance-l1`; COMMON-AGENTS zone parity (validate-templates PM-02/PM-03) stays green — the edit is outside the zone. | grep + validate-templates |
+| AC13 | Phantom-class sweep result per §15.3 (zero hits in the phantom-carrier class); `bun scripts/audit.ts` exits 0; L0 Leakage gate green; `blankL0Refs` simulation on the fixed context.md keeps the unchanged expectation. | sweep + audit + inline probe |
+
+Platform impact: no platform behavior file changes — root AGENTS.md is platform-neutral
+governance; templates/common gains the refreshed `AGENTS.md` (via `--governance-l1`) and the
+edited `docs/context.md` (in place; no propagation needed — `templates/common/docs/context.md`
+has no root counterpart).
