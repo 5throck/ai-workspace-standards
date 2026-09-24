@@ -2,8 +2,11 @@
 /**
  * skill-graph-fleet-report.ts — Read-only fleet analytics over per-project skill graphs
  * (skill-graph-analytics skill Step 1).
- * @version 1.1.0
+ * @version 1.1.1
  *
+ * v1.1.1 (2026-09-24, spec docs/designs/2026-09-24-platform-ssot-constant-design.md):
+ *         behavior-neutral constant adoption — the MIRROR_BASES literal becomes
+ *         PLATFORM_MIRROR_DIRS (./lib/platforms.ts). NO behavior change.
  * v1.1.0 (2026-09-23, orphan audit T-20260923-001): adds the ROOT-GRAPH ORPHAN
  *         cross-check to the report + snapshot (`rootOrphans`). A root skill or
  *         agent is an orphan CANDIDATE when it is graph-isolated (zero edges);
@@ -58,8 +61,9 @@
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { localDateISO } from "./lib/local-date.ts";
+import { PLATFORM_MIRROR_DIRS } from "./lib/platforms.ts";
 
-const VERSION = "1.1.0";
+const VERSION = "1.1.1";
 
 /** Node as stored in docs/skill-graph.json (id/type/layer observed in the wild). */
 interface GraphNode {
@@ -223,7 +227,7 @@ function analyzeRootOrphans(
 
   const registryPath = join("skills", "SKILLS.md");
   const registry = existsSync(registryPath) ? readFileSync(registryPath, "utf8") : "";
-  const MIRROR_BASES = [".claude/skills", ".gemini/skills", ".agents/skills", ".codex/skills"];
+  const MIRROR_BASES = PLATFORM_MIRROR_DIRS;
 
   const corpusFiles: string[] = [];
   for (const f of ["AGENTS.md", "CLAUDE.md", "GEMINI.md", "CODEX.md"]) {

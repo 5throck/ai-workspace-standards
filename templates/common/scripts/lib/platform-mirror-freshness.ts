@@ -1,7 +1,12 @@
 #!/usr/bin/env bun
 /**
  * Platform Mirror Freshness — pure comparison helpers
- * @version 1.0.1
+ * @version 1.1.0
+ *
+ * v1.1.0: the PLATFORM_MIRROR_DIRS definition moved to lib/platforms.ts (the
+ *         platform-list SSOT); this module imports and re-exports it for
+ *         back-compat — no behavior change (spec:
+ *         docs/designs/2026-09-24-platform-ssot-constant-design.md).
  *
  * T-20260916-008: the four L1 platform skill mirrors
  * (templates/common/.{claude,gemini,agents,codex}/skills) are propagated
@@ -26,14 +31,12 @@
 
 import { readdirSync, readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
+import { PLATFORM_MIRROR_DIRS } from './platforms.ts';
 
-/** The four platform skill-mirror dirs under templates/common/. */
-export const PLATFORM_MIRROR_DIRS: readonly string[] = [
-  '.claude/skills',
-  '.gemini/skills',
-  '.agents/skills',
-  '.codex/skills',
-];
+// Back-compat re-export: the definition lives in lib/platforms.ts; the two
+// historical importers (validate-templates.ts, tests/unit/platform-mirror-
+// freshness.test.ts) keep importing the symbol from here.
+export { PLATFORM_MIRROR_DIRS };
 
 /**
  * Extract the `version:` frontmatter value from SKILL.md text.

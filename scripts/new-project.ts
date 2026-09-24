@@ -1,5 +1,9 @@
 #!/usr/bin/env bun
-// @version 1.28.0
+// @version 1.28.1
+// v1.28.1 (2026-09-24, spec docs/designs/2026-09-24-platform-ssot-constant-design.md):
+//           behavior-neutral constant adoption — the two canonical 5-element
+//           skill-base literals (legacy-skill sweep, l2_propagate sweep)
+//           become PLATFORM_SKILL_BASES (lib/platforms.ts). NO behavior change.
 // v1.28.0 (2026-09-24, scaffold hygiene bundle — spec
 //           docs/designs/2026-09-24-scaffold-hygiene-bundle-design.md, R6/D5):
 //           the argument parse loop gains a catch-all — any `--` token that
@@ -163,6 +167,7 @@ import {
   reconcileSkillRegistry,
 } from './helpers/skills-registry.ts';
 import { SCAFFOLD_COMMON_OWNED_FILES } from './lib/upgrade-policy.ts';
+import { PLATFORM_SKILL_BASES } from './lib/platforms.ts';
 
 // ── Argument parsing ───────────────────────────────────────────────────────────
 let projectName = '';
@@ -1254,7 +1259,7 @@ for (const f of cleanupFiles) {
 // (single source: helpers/scaffold-markers.ts — T-20260915-003)
 const LEGACY_L0_SKILLS = NEW_PROJECT_LEGACY_L0_SKILLS;
 for (const skill of LEGACY_L0_SKILLS) {
-  for (const base of ['skills', '.claude/skills', '.gemini/skills', '.agents/skills', '.codex/skills']) {
+  for (const base of PLATFORM_SKILL_BASES) {
     const dp = join(projectDir, base, skill);
     if (existsSync(dp)) rmSync(dp, { recursive: true });
   }
@@ -1264,7 +1269,7 @@ for (const skill of LEGACY_L0_SKILLS) {
 // (`.claude/skills/`, `.gemini/skills/`, `.agents/skills/`, `.codex/skills/`)
 // would otherwise survive into the scaffolded project and register with the
 // platform harness. (.agents/skills was missing until the 2026-09-21 review C-1.)
-const projectSkillBases = ['skills', '.claude/skills', '.gemini/skills', '.agents/skills', '.codex/skills'];
+const projectSkillBases = PLATFORM_SKILL_BASES;
 for (const base of projectSkillBases) {
   const baseDir = join(projectDir, base);
   if (!existsSync(baseDir)) continue;
