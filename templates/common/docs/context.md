@@ -447,6 +447,19 @@ Use an external computation tool when the task involves ANY of the following:
 
 > Conflicted-PR recovery (ADR-0081): when origin/main advances past your branch, merge it in early — dev-sync warns at pre-flight naming the diverged shared pipeline files. If a merge conflict lands despite §3.3, resolve it and conclude through the gates with /sync --conclude-merge (bare git commit stays blocked).
 
+<!-- COMMON-CONSTITUTION-PR:START -->
+#### Sequential Branch Dependency Rule (§3.3)
+
+Merge a previously opened PR before branching for the next task. Run parallel
+PR branches only when the execution plan explicitly justifies each PR as safe
+to leave open. `dev-sync.ts` touches shared pipeline files on every commit
+(`CHANGELOG.md`, `memory/YYYY-MM-DD.md`, `docs/VERSION_MANIFEST.md`, generated
+READMEs). Parallel unmerged branches therefore conflict by default. A conflict
+may still land despite this rule. Recover per ADR-0081: conclude through the
+gates with `/sync --conclude-merge`. Rule origin: ADR-0038. Hardening decisions
+and follow-up tickets: ADR-0081, T-20260918-001..004.
+<!-- COMMON-CONSTITUTION-PR:END -->
+
 ---
 
 ## Skill Relationship Graph
@@ -551,13 +564,8 @@ This is enforced automatically via hooks on Claude Code CLI (configurable `--mod
 - **Prohibition of `> nul`**: Writing `> nul` or `2> nul` inside Git Bash or Bun/Node child processes creates a physical file named `nul` on Windows because Bash interprets `nul` as a relative file path.
 - **Git Ignore & Audit Protection**: `.gitignore` explicitly excludes `nul` and `NUL`. `scripts/audit.ts` automatically detects and removes physical `WINDOWS_DEVICE_NAMES` artifacts.
 
-### Sequential Branch Dependency & Pipeline Integrity (ADR-0038)
-
-- **Sequential PR Merge Rule**: Before executing `/sync` to open a new PR while a prior PR from the same session is unmerged, merge the prior PR first. Shared pipeline files (`CHANGELOG.md`, `memory/YYYY-MM-DD.md`, `VERSION_MANIFEST.md`) are updated on every commit, so parallel branches conflict by default.
-- **Pluggable Variant Audit Hook**: Core scripts (`scripts/dev-sync.ts`, `scripts/audit.ts`) are immutable across variants. Projects requiring custom validation rules must implement them in `scripts/audit-variant.ts`.
-
 See the workspace governance documentation (Governance Enforcement Layers) and ADR-0021 (Platform Settings Parity Policy) in the workspace root repository for full specification — not linked here since this file's relative path to the workspace root differs across project depths (L2 vs. L3) and after Phase B promotion.
 
 ---
 
-*context.md version: 2.9 — PM Team-Management Authority (ADR-0080) section added under Architecture*
+*context.md version: 2.10 — Sequential Branch Dependency Rule now pipeline-injected (COMMON-CONSTITUTION-PR); legacy ADR-0038 subsection removed*

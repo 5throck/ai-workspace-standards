@@ -1,4 +1,25 @@
-// @version 1.16.0
+// @version 1.17.0
+// v1.17.0: two changes in one bump. (1) feat(propagation): Step 4.55
+//           marker-rewrite drift-check domain list gains 'constitution-context-pr'
+//           — the §3.3 COMMON-CONSTITUTION-PR zone (context.md →
+//           templates/common/docs/context.md) is now drift-checked at sync time
+//           alongside the pilot domains. One-line list extension; the map-derived
+//           refactor stays future work. (2) fix(scoped-staging): step 6.5 no longer
+//           fatals on staged deletions under SYNC_SCOPED_STAGING=1 — a path the
+//           cached diff records as removed (`D`, or the SOURCE of a staged
+//           `R<score>` rename) exists in neither worktree nor index, so a plain
+//           pathspec `git add` exits 128 AND poisons the whole batch (one bad
+//           pathspec stages nothing). The add step now parses the cached
+//           name-status (parseCachedNameStatus, lib/git-status.ts 1.1.0), SKIPS
+//           index-removed paths (index already holds the desired state), batch-adds
+//           present paths in one call, attempts each remaining absent path
+//           per-path with .nothrow() (resolves while the index still holds it,
+//           e.g. staged-add-whose-worktree-file-vanished), and fails closed —
+//           loud ❌ + exit 1 — when a committable path matches neither worktree
+//           nor index (true ghost). The WARN-soak branch (bare `git add -A`) is
+//           unchanged. Both changes: spec
+//           docs/designs/2026-09-24-constitution-s33-context-injection-design.md
+//           (Amendment 2, §13).
 // v1.15.0 (ADR-0081 / T-20260918-002): main-integration hardening — two
 //           additions, CONSTITUTION §3.3 unchanged as the primary rule.
 //           (1) Pre-flight main-drift detection: after the language gate, a
@@ -86,7 +107,7 @@ import * as path from 'node:path';
 import * as crypto from 'node:crypto';
 import { withRetry, DEFAULT_CONFIG } from './retry-handler.ts';
 import { hasNonEnglish } from './lib/language-guard.ts';
-import { parseStatusPorcelain } from './lib/git-status.ts';
+import { parseCachedNameStatus, parseStatusPorcelain } from './lib/git-status.ts';
 import { sharedPipelineFilesChanged, parseUnresolvedConflicts } from './helpers/merge-state.ts';
 import { isDeliveredDiff } from './lib/upgrade-policy.ts';
 
@@ -94,6 +115,7 @@ const GREEN = '\x1b[32m';
 const RED = '\x1b[31m';
 const YELLOW = '\x1b[33m';
 const CYAN = '\x1b[36m';
+const DIM = '\x1b[2m';
 const RESET = '\x1b[0m';
 
 // Workspace root guard — dev-sync must run from the workspace root it belongs to.
@@ -682,7 +704,11 @@ if (isWorkspaceRoot) {
 
 // ── Step 4.55: COMMON-CONTEXT marker-rewrite drift check (WARN stage, L0-only) ──
 // Per ADR-0062 + the ADR-0055 WARN-first playbook: the pilot propagation domains
-// (constitution-context, variant-context) are checked for zone drift at sync time.
+// (constitution-context, variant-context) plus constitution-context-pr (the §3.3
+// COMMON-CONSTITUTION-PR zone; spec
+// 2026-09-24-constitution-s33-context-injection-design) are checked for zone
+// drift at sync time. Hardcoded list, not map-derived — a naive derivation would
+// also pull in --docs-mode domains (e.g. governance-agents), changing check scope.
 // Dry-run only — drift is reported as a WARN (non-fatal); the operator runs
 // `bun scripts/propagate-to-templates.ts --marker-rewrite --domain <name> --apply`
 // manually to refresh zones. Promotion to a hard gate waits for pilot soak.
@@ -690,7 +716,7 @@ if (isWorkspaceRoot) {
 // (design doc: docs/designs/2026-08-24-marker-propagation-engine-design.md).
 if (isWorkspaceRoot && isL0Context) {
     console.log('\n🔍 COMMON-CONTEXT marker-rewrite drift check (WARN stage)...');
-    for (const domain of ['constitution-context', 'variant-context']) {
+    for (const domain of ['constitution-context', 'constitution-context-pr', 'variant-context']) {
         try {
             const res = await $`bun scripts/propagate-to-templates.ts --marker-rewrite --domain ${domain}`.nothrow();
             const out = res.stdout.toString();
@@ -1021,8 +1047,41 @@ if (scopedStaging) {
     }
     try {
         if (committable.size > 0) {
-            const addRes = await $`git add -- ${[...committable].sort()}`.nothrow();
-            if (addRes.exitCode !== 0) throw new Error(addRes.stderr.toString());
+            // Staged-deletion handling (spec Amendment 2 §13,
+            // docs/designs/2026-09-24-constitution-s33-context-injection-design.md):
+            // a path the cached diff records as removed (`D`, or the SOURCE of a
+            // staged `R<score>` rename) exists in neither worktree nor index — a
+            // plain pathspec `git add` exits 128, and one poisoned pathspec makes
+            // the whole batch stage nothing. Those paths are skipped (the index
+            // already holds the desired state); present paths stage in one batch;
+            // every remaining absent path is attempted per-path — plain add still
+            // resolves while the index holds the path (staged-add-whose-worktree-
+            // file-vanished). A per-path failure is a true ghost: fail closed
+            // rather than silently under-deliver the commit.
+            const nsRes = await $`git diff --cached --name-status -z`.quiet().nothrow();
+            if (nsRes.exitCode !== 0) throw new Error(nsRes.stderr.toString());
+            const indexRemoved = parseCachedNameStatus(nsRes.stdout.toString());
+            const skip = [...committable].filter(p => indexRemoved.has(p)).sort();
+            if (skip.length > 0) {
+                console.log(`${DIM}   scoped staging: skipping ${skip.length} path(s) already removed in the index (staged deletion / rename source) — index state preserved${RESET}`);
+            }
+            const toStage = [...committable].filter(p => !indexRemoved.has(p)).sort();
+            const present = toStage.filter(p => fs.existsSync(p));
+            const absent = toStage.filter(p => !fs.existsSync(p));
+            if (present.length > 0) {
+                const addRes = await $`git add -- ${present}`.nothrow();
+                if (addRes.exitCode !== 0) throw new Error(addRes.stderr.toString());
+            }
+            for (const p of absent) {
+                const addRes = await $`git add -- ${p}`.nothrow();
+                if (addRes.exitCode !== 0) {
+                    console.log(`${RED}❌ git add failed for '${p}' — path matches neither the worktree nor the index (ghost path; possibly deleted mid-run after the scoped-staging snapshot).${RESET}`);
+                    console.error(addRes.stderr.toString());
+                    if (import.meta.main) {
+                      process.exit(1);
+                    }
+                }
+            }
         }
     } catch (e) {
         console.log(`${RED}❌ git add failed: ${e}${RESET}`);

@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-09-23T23:37:22.330Z
+**Generated**: 2026-09-24T01:05:36.582Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -116,7 +116,7 @@
 | compile-tokens.ts | 1.2.0 | scripts/compile-tokens.ts | N/A |
 | create-l3-scaffold.ts | 1.16.0 | scripts/create-l3-scaffold.ts | N/A |
 | design-lint.ts | 1.0.0 | scripts/design-lint.ts | N/A |
-| dev-sync.ts | 1.16.0 | scripts/dev-sync.ts | bun |
+| dev-sync.ts | 1.17.0 | scripts/dev-sync.ts | bun |
 | dispatch-parallel.ts | 1.1.1 | scripts/dispatch-parallel.ts | N/A |
 | dispatch-serial.ts | 1.1.1 | scripts/dispatch-serial.ts | N/A |
 | dispatch.ts | 1.1.1 | scripts/dispatch.ts | N/A |
