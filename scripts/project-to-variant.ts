@@ -1,4 +1,11 @@
-// @version 1.4.1
+// @version 1.5.0
+// v1.5.0 (2026-09-24, platform-parity P1 bug 1 — spec
+//          docs/designs/2026-09-24-platform-parity-p1-bugfixes-design.md D1):
+//          shouldSkip adopts PLATFORM_SKILL_BASES (lib/platforms.ts) — the
+//          scoped-skill exclusion now covers .codex/skills, so country-scoped
+//          skills no longer leak from a source project's codex mirror into the
+//          promoted variant (the l3-to-variant-pipeline twin already covered
+//          all five roots).
 // v1.4.1: variantization checklist now names CODEX.md beside CLAUDE.md/GEMINI.md (ADR-0077
 //          twin set — COMMON-CODEX marker pairs, templates/common/{CLAUDE,GEMINI,CODEX}.md).
 // v1.4.0: Overlay guard + rollback (design docs/designs/2026-09-16-variant-ization-overlay-guard-design.md,
@@ -37,6 +44,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { evaluateVariantOverlayTarget } from './lib/variant-overlay-guard.ts';
+import { PLATFORM_SKILL_BASES } from './lib/platforms.ts';
 import {
   discardOverlaySnapshot,
   restoreOverlaySnapshot,
@@ -195,13 +203,16 @@ function shouldSkip(rel: string): boolean {
   if (SKIP_PATTERNS.some(p => p.test(rel))) return true;
 
   // Check for scoped skills (e.g., skills/k-law/, .claude/skills/k-dart/, etc.)
+  // v1.5.0 (platform-parity P1 bug 1 — spec
+  //   docs/designs/2026-09-24-platform-parity-p1-bugfixes-design.md D1): the
+  //   four hardcoded roots become PLATFORM_SKILL_BASES (lib/platforms.ts) —
+  //   .codex/skills joins, so a country-scoped skill's codex copy can no
+  //   longer count Variant-unique and leak into the promoted variant.
   for (const scopedSkill of scopedSkills) {
-    if (rel === `skills/${scopedSkill}/` ||
-        rel.startsWith(`skills/${scopedSkill}/`) ||
-        rel.startsWith(`.claude/skills/${scopedSkill}/`) ||
-        rel.startsWith(`.gemini/skills/${scopedSkill}/`) ||
-        rel.startsWith(`.agents/skills/${scopedSkill}/`)) {
-      return true;
+    for (const base of PLATFORM_SKILL_BASES) {
+      if (rel.startsWith(`${base}/${scopedSkill}/`)) {
+        return true;
+      }
     }
   }
 

@@ -139,12 +139,12 @@ The High/Medium/Low tier concept and its usage rules are the Single Source of Tr
 - **Medium-tier** → `gpt-5.6-terra`
 - **Low-tier** → `gpt-5.6-luna`
 
-### 7. Workspace & Template Boundary Policy
+### 7. Project Boundary Policy
 
-- **Strict CWD Isolation**: When modifying templates (in `templates/`), you MUST strictly limit your working directory (CWD) to the specific template folder.
-- **No Cross-Modification**: Modifying workspace root files and template files in a single task or session is forbidden. Keep workspace root changes and template changes completely isolated.
+- **Strict Scope**: Work only within the current project directory.
+- **No Cross-Project Modification**: Modifying files outside the project root during a session is forbidden.
 
-> For L1-L2 Fork Model and lifecycle management rules, see [docs/context.md](docs/context.md) and [docs/context.md](docs/context.md).
+> For lifecycle management rules, see [docs/context.md — Lifecycle Management](docs/context.md#lifecycle-management)
 
 ### 8. Custom Command Error Recovery
 If a custom prompt or background script returns a non-zero exit code:

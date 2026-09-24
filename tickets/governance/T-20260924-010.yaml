@@ -1,0 +1,17 @@
+schemaVersion: 1
+id: T-20260924-010
+kind: manual
+title: >-
+  Codex managed-block policy split: COMMON-CODEX in MANAGED_PATTERNS + merge
+  machinery for CODEX.md and .codex settings (codex-settings policy
+  adjudication)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-24T14:48:24.244Z'
+history:
+  - at: '2026-09-24T14:48:24.244Z'
+    from: null
+    to: backlog
+result: null
+error: null

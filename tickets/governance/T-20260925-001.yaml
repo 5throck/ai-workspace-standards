@@ -1,0 +1,21 @@
+schemaVersion: 1
+id: T-20260925-001
+kind: manual
+title: >-
+  platform-command-lifecycle-manager L0 source names L0-only tooling (bun
+  scripts/validate-templates.ts in Verification block) — every future variant
+  promotion via copyL0CommonSkills (4-platform, platform-parity spec D6) trips
+  WS-05a in the variant's .claude/.gemini/.agents skill mirrors; clean the L0
+  source (workspace root mirrors, all four byte-identical) or give WS-05a a
+  policy carve-out; co-design heal copies were WS-05a-remediated by hand
+  (platform-parity P1 bugfixes spec, D7 deviation)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-24T15:01:47.555Z'
+history:
+  - at: '2026-09-24T15:01:47.555Z'
+    from: null
+    to: backlog
+result: null
+error: null

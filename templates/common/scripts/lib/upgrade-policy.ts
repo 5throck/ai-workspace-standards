@@ -1,4 +1,10 @@
-// @version 1.12.0
+// @version 1.13.0
+// v1.13.0 (2026-09-24, platform-parity P1 bug 4 — spec
+//         docs/designs/2026-09-24-platform-parity-p1-bugfixes-design.md D4):
+//         CODEX.md joins MERGE_MANAGED_FILES — resolveClaim returns
+//         { policy: 'MERGE_MANAGED', pass: 'MERGE' }, so the TEMPLATE TREE SYNC
+//         pass can no longer wholesale-overwrite a divergent project CODEX.md
+//         (the destructive overwrite path is dead; the MERGE pass owns delivery).
 // v1.12.0 (2026-09-24, scaffold identity overview — spec
 //         2026-09-24-scaffold-identity-overview-design): docs/project.md claims
 //         ADD_IF_MISSING on the TEMPLATE TREE SYNC pass (project-owned identity
@@ -173,11 +179,23 @@ const PRESERVE_FILES = new Set([
 
 const LOCKED_FILES = new Set(['.gitattributes', '.gitleaks.toml']);
 
-/** Files whose WORKSPACE-MANAGED blocks upgrade MERGE unions into projects. Exported
- *  so the validate-templates managed-block-parity arm (PM-04) enforces common→variant
- *  parity over exactly this set — one SSOT for "which files carry managed blocks"
- *  (T-20260917-001). */
-export const MERGE_MANAGED_FILES = new Set(['CLAUDE.md', 'GEMINI.md', '.gitignore', 'AGENTS.md', 'agents/pm.md']);
+/**
+ * Files whose WORKSPACE-MANAGED blocks upgrade MERGE unions into projects. Exported
+ * so the validate-templates managed-block-parity arm (PM-04) enforces common→variant
+ * parity over exactly this set — one SSOT for "which files carry managed blocks"
+ * (T-20260917-001).
+ *
+ * CODEX.md joined in v1.13.0 (platform-parity P1 bug 4 — spec
+ * docs/designs/2026-09-24-platform-parity-p1-bugfixes-design.md D4): without it
+ * resolveClaim('CODEX.md') fell through to the blanket root-file SYNC claim and
+ * the TEMPLATE TREE SYNC pass wholesale-overwrote every project CODEX.md edit on
+ * upgrade (CODEX.md carries no inline version footer, so the hash branch always
+ * fired). MERGE membership makes the MERGE pass — which already lists CODEX.md —
+ * the sole delivery channel. The merge is a no-op today (no COMMON-CODEX pattern
+ * in managed-block-merge MANAGED_PATTERNS); when that pattern lands
+ * (T-20260924-010) union-merge activates with no further claim change.
+ */
+export const MERGE_MANAGED_FILES = new Set(['CLAUDE.md', 'GEMINI.md', 'CODEX.md', '.gitignore', 'AGENTS.md', 'agents/pm.md']);
 
 /** Common-owned scaffold files: delivered by templates/common/ and sacred to the
  *  project — a variant template must never carry them (WS-07) and new-project's

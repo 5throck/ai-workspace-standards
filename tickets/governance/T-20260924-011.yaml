@@ -1,0 +1,17 @@
+schemaVersion: 1
+id: T-20260924-011
+kind: manual
+title: >-
+  VARIANT ASSET DIRS pass resolveClaim bypass: asset-dir sync never consults
+  resolveClaim for any directory it walks (relies on isLocallyModified CONFLICT
+  warnings instead)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-24T14:48:24.257Z'
+history:
+  - at: '2026-09-24T14:48:24.257Z'
+    from: null
+    to: backlog
+result: null
+error: null

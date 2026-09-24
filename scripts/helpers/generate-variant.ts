@@ -5,8 +5,18 @@
  * Generates variant project structure from reconciled manifest.
  * Creates variant.json, directory structure, agent overrides, and skill directories.
  *
- * @version 1.17.0
+ * @version 1.18.0
  *
+ * v1.18.0 (2026-09-24, platform-parity P1 bug 6 — spec
+ *          docs/designs/2026-09-24-platform-parity-p1-bugfixes-design.md D6):
+ *          copyL0CommonSkills seeds the four L0-common lifecycle skills into
+ *          ALL FOUR platform mirrors (.claude/.gemini/.agents/.codex) — the
+ *          const covered .claude/.gemini only, so promoted variants' .agents
+ *          and .codex mirrors lacked the trio (live drift healed separately on
+ *          templates/co-design per design D7). Existing copy semantics
+ *          unchanged (SKILL.md-only, workspace skills/ fallback, existsSync
+ *          source guard). copyL0CommonSkills also exported for its regression
+ *          test. NO other behavior change.
  * v1.17.0 (T-20260923-005, spec 2026-09-23-promotion-skill-asset-parity-design):
  *          generateSkillDirectories union-and-normalize model — groups ALL
  *          keepInVariant files under skills/<name>/ (drops the .md filter that
@@ -1234,11 +1244,16 @@ See [\`agents/README.md\`](../agents/README.md) for the full workflow and agent 
 }
 
 /**
- * Copy L0 common skills from templates/common into the variant's .claude/ and .gemini/ skill dirs.
+ * Copy L0 common skills from templates/common into the variant's four platform
+ * skill mirrors (.claude, .gemini, .agents, .codex).
  * These 4 skills are required in every variant.
- * @version 1.0.0
+ * @version 1.1.0
  */
-function copyL0CommonSkills(variantPath: string): void {
+// Exported for tests/unit/generate-variant-l0-common-mirrors.test.ts (P1 bug 6
+// regression, spec 2026-09-24-platform-parity-p1-bugfixes-design.md D6/D8); the
+// script is a top-level executable, so import.meta.main keeps the run path out
+// of imports.
+export function copyL0CommonSkills(variantPath: string): void {
   const L0_COMMON_SKILLS = [
     'agent-lifecycle-manager',
     'finishing-a-development-branch',
@@ -1246,7 +1261,12 @@ function copyL0CommonSkills(variantPath: string): void {
     'platform-skill-lifecycle-manager',
   ];
 
-  const platforms = ['.claude', '.gemini'] as const;
+  // v1.18.0 (platform-parity P1 bug 6 — spec
+  //   docs/designs/2026-09-24-platform-parity-p1-bugfixes-design.md D6): the
+  //   const was ['.claude', '.gemini'] only, so promoted variants' .agents/
+  //   .codex mirrors lacked the L0-common trio. Sources exist in all four
+  //   templates/common/.{claude,gemini,agents,codex}/skills/.
+  const platforms = ['.claude', '.gemini', '.agents', '.codex'] as const;
 
   for (const platform of platforms) {
     for (const skillName of L0_COMMON_SKILLS) {

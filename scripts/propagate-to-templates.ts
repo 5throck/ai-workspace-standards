@@ -5,8 +5,21 @@
  * Replaces publish-to-template.ts (deprecated v1.8.0). Single authoritative script
  * for all L0→L1 propagation. Config-driven via propagation-map.json (SSOT for exclusions).
  *
- * @version 2.16.0
+ * @version 2.17.0
  *
+ * v2.17.0 (2026-09-24, platform-parity P1 bug 5 — spec
+ *          docs/designs/2026-09-24-platform-parity-p1-bugfixes-design.md D5):
+ *          Phase B-7 boundary transforms repaired and completed. The GEMINI
+ *          regex matched the pre-restructure orphan-END shape and silently
+ *          stopped matching after the L0 GEMINI.md gained a proper
+ *          COMMON-GEMINI marker pair — templates/common/GEMINI.md shipped the
+ *          workspace-only "Workspace & Template Boundary Policy" in every
+ *          scaffold. It now matches the marker pair and captures the heading
+ *          number. A NEW CODEX.md branch replaces the section in place
+ *          (heading-to-next-heading inside the single COMMON-CODEX zone);
+ *          Windows/Git-Bash sections stay (they exist in L1 CLAUDE/GEMINI too).
+ *          A B-8 fatal guard dies() when the workspace heading survives any of
+ *          the three outputs — the silent no-op was the bug.
  * v2.16.0 (2026-09-16-template-tree-infra-consistency-design.md):
  *          T-20260916-008. Removed the claude-skills/gemini-skills/
  *          agents-skills scope-skip in collectDiffs — it filtered
@@ -110,6 +123,7 @@ import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { parseScriptLayers, includeSkillInL1, includeScriptInL1 } from './helpers/layer-filter.ts';
 import { scrubConstitutionRefs } from './lib/constitution-scrub.ts';
+import { die } from './lib/error-handling.ts';
 import * as yaml from 'js-yaml';
 import {
   findMarkerZones,
@@ -1088,7 +1102,10 @@ const GOVERNANCE_L1_FILES = [
 ];
 
 // Reference transformation rules: CONSTITUTION.md → docs/context.md
-function applyGovernanceTransforms(content: string, filename: string, targetPath?: string): string {
+// Exported for tests/unit/governance-boundary-l1.test.ts (P1 bug 5 regression,
+// spec 2026-09-24-platform-parity-p1-bugfixes-design.md D5/D8); the script is a
+// top-level executable, so import.meta.main keeps the run path out of imports.
+export function applyGovernanceTransforms(content: string, filename: string, targetPath?: string): string {
   // ── Phase A: CONSTITUTION.md reference replacement ───────────────────────
   content = scrubConstitutionRefs(content, undefined, targetPath);
 
@@ -1115,12 +1132,27 @@ function applyGovernanceTransforms(content: string, filename: string, targetPath
 
     // B-6. Platform Note line containing "L0-only task classification"
     content = content.replace(/^\*\*Platform Note\*\*:.*L0-only task classification.*\n/m, '');
+  }
 
-    // B-7. Workspace & Template Boundary Policy section.
-    //      CLAUDE.md: section is wrapped in COMMON-CLAUDE:START/END markers (§9).
-    //      GEMINI.md: section has an orphan COMMON-GEMINI:END with no START (§6),
-    //                 preceded by a --- separator.
-    if (filename === 'CLAUDE.md') {
+  // B-7. Workspace & Template Boundary Policy section.
+  //      All three platform docs carry the L0-only section; each branch
+  //      replaces it with the project-applicable "Project Boundary Policy"
+  //      (same two bullets + lifecycle pointer as the CLAUDE reference).
+  //      CLAUDE.md: section is wrapped in COMMON-CLAUDE:START/END markers (§9).
+  //      GEMINI.md: v2.17.0 (platform-parity P1 bug 5 — spec
+  //                 docs/designs/2026-09-24-platform-parity-p1-bugfixes-design.md
+  //                 D5) — the former regex matched the pre-restructure
+  //                 orphan-END shape and silently stopped matching after the
+  //                 L0 GEMINI.md gained a proper marker pair (:228-235). Now
+  //                 matches the pair and captures the heading number so a
+  //                 future renumber cannot un-match the replacement.
+  //      CODEX.md:  NEW in v2.17.0 — the section sits inside the single
+  //                 COMMON-CODEX zone (not its own marker pair), matched
+  //                 heading-to-next-heading. The Windows/Git-Bash and
+  //                 Codex-hook sections STAY: they exist identically in the
+  //                 L1 CLAUDE.md/GEMINI.md and are project-applicable.
+  //      (Gate: own `if` — CODEX.md is included here but NOT in B-1..B-6 above.)
+  if (filename === 'CLAUDE.md') {
       const boundaryStart = `<!-- COMMON-CLAUDE:START -->`;
       const boundaryEnd   = `<!-- COMMON-CLAUDE:END -->`;
       const boundaryPattern = new RegExp(
@@ -1136,15 +1168,43 @@ function applyGovernanceTransforms(content: string, filename: string, targetPath
         `${boundaryEnd}`;
       content = content.replace(boundaryPattern, l1BoundaryReplacement);
     } else if (filename === 'GEMINI.md') {
-      // Orphan END marker — match from the --- separator before the section heading.
-      const geminiBoundaryPattern = /---\n\n### \d+\. Workspace & Template Boundary Policy[\s\S]*?<!-- COMMON-GEMINI:END -->/;
-      const geminiBoundaryReplacement =
-        `---\n\n### 6. Project Boundary Policy\n\n` +
+      const geminiBoundaryPattern =
+        /<!-- COMMON-GEMINI:START -->\s*### (\d+)\. Workspace & Template Boundary Policy[\s\S]*?<!-- COMMON-GEMINI:END -->/;
+      const geminiBoundaryReplacement = (n: string) =>
+        `<!-- COMMON-GEMINI:START -->\n` +
+        `### ${n}. Project Boundary Policy\n\n` +
         `- **Strict Scope**: Work only within the current project directory.\n` +
         `- **No Cross-Project Modification**: Modifying files outside the project root during a session is forbidden.\n\n` +
         `> For lifecycle management rules, see [docs/context.md — Lifecycle Management](docs/context.md#lifecycle-management).\n` +
         `<!-- COMMON-GEMINI:END -->`;
-      content = content.replace(geminiBoundaryPattern, geminiBoundaryReplacement);
+      content = content.replace(geminiBoundaryPattern, (_, n) => geminiBoundaryReplacement(n));
+    } else if (filename === 'CODEX.md') {
+      // Matched heading-to-next-heading; the captured number keeps the section
+      // numbering stable. The trailing \n keeps the blank line before the next
+      // heading (the match consumes the section's own line terminator).
+      const codexBoundaryPattern =
+        /### (\d+)\. Workspace & Template Boundary Policy[\s\S]*?(?=\n### \d+\. )/;
+      const codexReplacement = (n: string) =>
+        `### ${n}. Project Boundary Policy\n\n` +
+        `- **Strict Scope**: Work only within the current project directory.\n` +
+        `- **No Cross-Project Modification**: Modifying files outside the project root during a session is forbidden.\n\n` +
+        `> For lifecycle management rules, see [docs/context.md — Lifecycle Management](docs/context.md#lifecycle-management)\n`;
+      content = content.replace(codexBoundaryPattern, (_, n) => codexReplacement(n));
+    }
+
+  // ── Phase B-8 (v2.17.0, D5): fatal guard — the boundary removal is a
+  //    governance invariant. Bug 5's failure mode was a SILENT no-op (stale
+  //    regex); if the workspace-only heading survives any of the three outputs,
+  //    fail loudly instead of shipping workspace policy into every scaffold.
+  //    Scope: the three platform docs only — AGENTS.md has no boundary section.
+  if (filename === 'CLAUDE.md' || filename === 'GEMINI.md' || filename === 'CODEX.md') {
+    if (content.includes('Workspace & Template Boundary Policy')) {
+      die(
+        `governance-l1: "${filename}" still carries the workspace-only "Workspace & Template Boundary Policy" ` +
+        `after the B-7 transform — the branch regex no longer matches the L0 structure. ` +
+        `Repair the pattern; never silently ship the workspace boundary policy to scaffolds ` +
+        `(spec docs/designs/2026-09-24-platform-parity-p1-bugfixes-design.md D5).`
+      );
     }
   }
 
