@@ -1,0 +1,27 @@
+schemaVersion: 1
+id: T-20260924-005
+kind: manual
+title: >-
+  variant-context zone drift (fleet-wide): propagate-to-templates
+  --marker-rewrite reports 26 would-overwrite zones in the variant-context
+  domain (marker COMMON-CONTEXT) across all 13 variant context.md files — the
+  zones lag their source sections; pre-existing at main HEAD a1aa6d17 (verified
+  2026-09-24 by reproducing at HEAD in a throwaway worktree: Would overwrite:
+  26, In sync: 17), unrelated to the constitution-s33 change that observed it.
+  Decision needed: per-variant triage of each of the 26 zones — intentional
+  variant-specific content (declare/record as overlay) vs stale copy (remediate
+  via --marker-rewrite --apply after triage); then decide the enforcement
+  contract — should dev-sync Step 4.55 / lifecycle-sync-audit flag
+  would-overwrite growth so drift cannot silently regrow? Reproduce: bun
+  scripts/propagate-to-templates.ts --marker-rewrite --dry-run (observation
+  source: constitution-s33 implementation verification, 2026-09-24)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-24T01:26:41.376Z'
+history:
+  - at: '2026-09-24T01:26:41.376Z'
+    from: null
+    to: backlog
+result: null
+error: null
