@@ -10,7 +10,7 @@
  *
  * v1.5.0 (2026-09-25, spec docs/designs/2026-09-25-verifier-platform-expansion-design.md
  *  site 13 / D13): SCAN_CATEGORIES.commands gains the .codex/prompts mapping root
- *  (.agents/commands excluded — Finding D); detectPlatformScope classifies
+ *  (.agents/commands excluded — L0-resident by design, T-20260925-003); detectPlatformScope classifies
  *  .agents/.codex paths as 'agents'/'codex' instead of 'neutral'.
  *
  * v1.4.1 (2026-09-24, spec docs/designs/2026-09-24-platform-ssot-constant-design.md):
@@ -99,9 +99,11 @@ const SCAN_CATEGORIES = {
   skills: PLATFORM_SKILL_BASES,
   // Command surfaces (spec 2026-09-25-verifier-platform-expansion-design site
   // 13): .codex/prompts is the 1:1 codex mirror of .claude/commands (ADR-0077
-  // D4). .agents/commands is deliberately NOT a scan root — it has no producer
-  // and no documented consumer (design Finding D / N5); promoting it would copy
-  // an ungoverned surface into variants.
+  // D4). .agents/commands is deliberately NOT a scan root — it is L0-resident
+  // by design, consumed by the Antigravity CLI at the workspace root (spec
+  // docs/designs/2026-09-25-propagation-engine-batch-design.md §6-D8, ticket
+  // T-20260925-003); promoting it would copy a workspace-only surface into
+  // variants.
   commands: ['.claude/commands', '.gemini/commands', '.codex/prompts'],
   configs: ['.claude', '.gemini', '.agents', '.codex'],
   scripts: ['scripts'],

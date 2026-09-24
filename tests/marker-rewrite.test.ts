@@ -1,9 +1,14 @@
 /**
  * Marker-rewrite engine fixture tests
- * @version 1.0.1
+ * @version 1.1.0
  *
  * Tests for the --marker-rewrite mode in propagate-to-templates.ts
  * covering marker zones and intentional-duplicate markers.
+ * v1.1.0: append-on-missing engine assertions (spec
+ *         2026-09-25-propagation-engine-batch-design, AC-1/AC-6) — the pilot
+ *         domain's dry-run is append-clean, the false "will inject on --apply"
+ *         promise is gone from output AND source, the map opt-in count is 1,
+ *         and the truthful flag-off wording is present.
  */
 
 import { spawnSync } from 'node:child_process';
@@ -204,5 +209,44 @@ describe('Line ending preservation', () => {
         rmSync(tempDir, { recursive: true, force: true });
       }
     }
+  });
+});
+
+describe('Append-on-missing engine (spec 2026-09-25-propagation-engine-batch-design)', () => {
+  test('AC-6: pilot domain dry-run is append-clean and carries no injection promise', () => {
+    const { stdout, exitCode } = runScript(['--marker-rewrite', '--domain', 'constitution-context-pr', '--dry-run']);
+    expect(exitCode).toBe(0);
+    // The new summary counter is present and zero (its zone exists everywhere).
+    expect(stdout).toContain('Would append: 0');
+    expect(stdout).toContain('Would overwrite: 0');
+    // The false promise string is gone from the output.
+    expect(stdout).not.toContain('will inject on --apply');
+  });
+
+  test('AC-6: full dry-run output never promises injection on --apply', () => {
+    const { stdout, exitCode } = runScript(['--marker-rewrite', '--dry-run']);
+    expect(exitCode).toBe(0);
+    expect(stdout).not.toContain('will inject on --apply');
+  });
+
+  test('AC-6: the misleading string is deleted from the engine source', () => {
+    const source = readFileSync(scriptPath, 'utf-8');
+    expect(source).not.toContain('will inject on --apply');
+    // The truthful flag-off wording (design D4 message 1) is in place.
+    expect(source).toContain('append-on-missing not enabled for this domain');
+  });
+
+  test('AC-1: append_on_missing opt-in appears on exactly one map line (pilot domain only)', () => {
+    const mapSource = readFileSync(join(workspaceRoot, 'scripts', 'propagation-map.json'), 'utf-8');
+    const occurrences = mapSource.split('\n').filter((l) => l.includes('append_on_missing'));
+    expect(occurrences.length).toBe(1);
+    // The single occurrence belongs to the pilot domain's object.
+    const pilotIdx = mapSource.indexOf('"constitution-context-pr"');
+    const flagIdx = mapSource.indexOf('append_on_missing');
+    const nextDomainIdx = mapSource.indexOf('"variant-context"');
+    expect(flagIdx).toBeGreaterThan(pilotIdx);
+    expect(flagIdx).toBeLessThan(nextDomainIdx);
+    // The pilot also declares its anchor (R13).
+    expect(mapSource).toContain('"insert_after_marker": "COMMON-CONSTITUTION"');
   });
 });

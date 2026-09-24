@@ -601,6 +601,12 @@ Skills are distributed to the four platform directories via `scripts/sync-skills
 - **Phase 2**: Shortcut skills that only exist in `.agents/skills/` are back-synced to `.claude/skills/` and `.gemini/skills/`.
 - **Special**: `meeting-facilitation` SKILL.md is also synced to `.claude/commands/meeting.md` and `.gemini/commands/meeting.md`.
 
+### `.agents/commands/` — L0-Resident by Design
+
+The workspace root's `.agents/commands/` directory holds 7 command files (`changelog.md`, `commit-push-pr.md`, `meeting.md`, `memlog.md`, `new-task.md`, `project-review.md`, `sync.md`). The consumer is the Antigravity CLI reading the workspace root — exactly where the operator runs Antigravity — so the surface needs no propagation to function. 4 of the 7 files carry Antigravity-adapted content (platform-specific prose, or `meeting.md` as an Antigravity skill-shim rather than a copy of `.claude/commands/meeting.md`), so a 1:1 mirror contract is factually wrong for this surface. `templates/common/.agents/` has never carried a `commands/` directory — there is no L1/variant demand, and the surface is intentionally NOT propagated.
+
+Maintenance rule: update root `.agents/commands/*.md` in the same commit as their `.claude/commands` counterparts (see the `platform-command-lifecycle-manager` skill). Because the surface is workspace-only, it is excluded from all command-parity checks and propagation domains by recorded decision, not by omission: `audit.ts` command parity, `validate-templates.ts` COMMAND_SURFACES, `verify-platform-lifecycle.ts` Check G, `helpers/scan-l3-project.ts` scan roots, and the `pre-commit.ts` / `post-write-lifecycle-check.ts` command checks. Ruling: spec `2026-09-25-propagation-engine-batch-design` §6-D8 (ticket T-20260925-003). `gateguard.md` has no `.agents` copy — intentional (its skip-marker class), not an action item.
+
 ---
 
 

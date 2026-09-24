@@ -8,7 +8,8 @@
  *  site 8 / D8): check 6b generalizes to all four platforms — skills regexes
  *  cover .agents/.codex mirrors; command propagation checks map .claude/commands
  *  and .gemini/commands to common, plus the .codex/prompts mapping
- *  (ADR-0077 D4). .agents/commands excluded (Finding D). Severity stays WARN.
+ *  (ADR-0077 D4). .agents/commands excluded (L0-resident by design, ticket
+ *  T-20260925-003). Severity stays WARN.
  */
 
 import { $ } from "bun";
@@ -271,8 +272,10 @@ async function main() {
   // platform skill mirrors join the version-field nudge; command propagation
   // checks map .claude/commands and .gemini/commands to their common
   // counterparts, and .codex/prompts to the common prompts mapping
-  // (ADR-0077 D4). .agents/commands is excluded — no producer, no documented
-  // consumer (design Finding D; recorded exclusion, not a silent skip).
+  // (ADR-0077 D4). .agents/commands is excluded — L0-resident by design,
+  // consumed by the Antigravity CLI at the workspace root (spec
+  // docs/designs/2026-09-25-propagation-engine-batch-design.md §6-D8, ticket
+  // T-20260925-003; recorded exclusion, not a silent skip).
   const skillStaged = staged.filter(f => /^\.(claude|gemini|agents|codex)\/skills\/[^/]+\/SKILL\.md$/.test(f.replace(/\\/g, '/')));
   const claudeCommandStaged = staged.filter(f => /^\.claude\/commands\/[^/]+\.md$/.test(f.replace(/\\/g, '/')));
   const geminiCommandStaged = staged.filter(f => /^\.gemini\/commands\/[^/]+\.md$/.test(f.replace(/\\/g, '/')));

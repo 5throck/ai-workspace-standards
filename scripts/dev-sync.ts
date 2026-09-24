@@ -1,4 +1,15 @@
-// @version 1.17.0
+// @version 1.18.0
+// v1.18.0: Step 2.6 runs `generate-scripts-mirror.ts` in write mode (Step 2.5
+//           existsSync + hard-exit idiom) on every sync — the L1 SCRIPTS.md
+//           registry span is a generated projection, so drift cannot land in a
+//           /sync commit (T-20260924-001, spec:
+//           docs/designs/2026-09-25-propagation-engine-batch-design.md R20).
+// v1.17.1: Step 4.55 also parses the marker-rewrite engine's new
+//           `Would append: N` summary counter (propagate-to-templates 2.18.0,
+//           T-20260924-006 — opt-in append-on-missing) and WARNs on the sum of
+//           would-overwrite + would-append, so a pending append can no longer
+//           hide behind the overwrite-only drift gate (spec:
+//           docs/designs/2026-09-25-propagation-engine-batch-design.md R12).
 // v1.17.0: two changes in one bump. (1) feat(propagation): Step 4.55
 //           marker-rewrite drift-check domain list gains 'constitution-context-pr'
 //           — the §3.3 COMMON-CONSTITUTION-PR zone (CONSTITUTION.md →
@@ -378,6 +389,19 @@ if (fs.existsSync(genReadmeTs)) {
     }
 }
 
+// 2.6 Generate templates/common/scripts/SCRIPTS.md registry span (T-20260924-001)
+const genMirrorTs = path.join('scripts', 'generate-scripts-mirror.ts');
+if (fs.existsSync(genMirrorTs)) {
+    try {
+        await $`bun ${genMirrorTs}`;
+    } catch (e) {
+        console.log(`${RED}❌ generate-scripts-mirror.ts failed: ${e}${RESET}`);
+        if (import.meta.main) {
+          process.exit(1);
+        }
+    }
+}
+
 // 3. Block if [Unreleased] section has no bullet items
 if (fs.existsSync('CHANGELOG.md')) {
     const clCheck = fs.readFileSync('CHANGELOG.md', 'utf-8');
@@ -722,15 +746,19 @@ if (isWorkspaceRoot && isL0Context) {
             const out = res.stdout.toString();
             const m = out.match(/Would overwrite: (\d+)/);
             const wouldOverwrite = m ? parseInt(m[1], 10) : null;
+            // v1.17.1: the append-on-missing engine adds a second drift counter —
+            // a pending append is drift the same way a pending overwrite is.
+            const a = out.match(/Would append: (\d+)/);
+            const wouldAppend = a ? parseInt(a[1], 10) : null;
             if (res.exitCode !== 0) {
                 console.log(`${YELLOW}⚠️  marker-rewrite check failed for domain '${domain}' (exit ${res.exitCode}) — investigate manually${RESET}`);
-            } else if (wouldOverwrite === null) {
+            } else if (wouldOverwrite === null || wouldAppend === null) {
                 console.log(`${YELLOW}⚠️  marker-rewrite output for domain '${domain}' had no drift counter — investigate manually${RESET}`);
-            } else if (wouldOverwrite > 0) {
-                console.log(`${YELLOW}⚠️  COMMON-CONTEXT drift in domain '${domain}': ${wouldOverwrite} zone(s) would be overwritten${RESET}`);
+            } else if (wouldOverwrite + wouldAppend > 0) {
+                console.log(`${YELLOW}⚠️  COMMON-CONTEXT drift in domain '${domain}': ${wouldOverwrite} zone(s) would be overwritten, ${wouldAppend} zone(s) would be appended${RESET}`);
                 console.log(`${YELLOW}   Refresh manually: bun scripts/propagate-to-templates.ts --marker-rewrite --domain ${domain} --apply${RESET}`);
             } else {
-                console.log(`${GREEN}✓ COMMON-CONTEXT domain '${domain}' in sync (0 would-overwrite)${RESET}`);
+                console.log(`${GREEN}✓ COMMON-CONTEXT domain '${domain}' in sync (0 would-overwrite, 0 would-append)${RESET}`);
             }
         } catch {
             console.log(`${YELLOW}⚠️  marker-rewrite check could not run for domain '${domain}' — investigate manually${RESET}`);

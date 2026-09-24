@@ -1226,8 +1226,10 @@ function checkAgentsRoster(variant: string): void {
 // Command surfaces (spec 2026-09-25-verifier-platform-expansion-design site 3a):
 // .claude/commands and .gemini/commands are 1:1 mirrors (modulo gemini-parity:
 // skip); .codex/prompts is the codex mapping of the same SSOT (ADR-0077 D4).
-// .agents/commands is EXCLUDED — no producer, no documented consumer (design
-// Finding D; recorded exclusion, not a silent skip).
+// .agents/commands is EXCLUDED — L0-resident by design, consumed by the
+// Antigravity CLI at the workspace root (spec
+// docs/designs/2026-09-25-propagation-engine-batch-design.md §6-D8, ticket
+// T-20260925-003); recorded exclusion, not a silent skip.
 const COMMAND_SURFACES: ReadonlyArray<readonly [string, string]> = [
   ['.claude', 'commands'],
   ['.gemini', 'commands'],

@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Shared Marker Parser
- * @version 1.2.0
+ * @version 1.3.0
  *
  * Common marker parsing logic for:
  * - propagate-to-templates.ts (marker-rewrite engine)
@@ -16,6 +16,14 @@
  * Maintains ADR-0062 requirement: shared parser ensures rewrite engine and strict gate
  * agree on marker syntax and hash computation.
  *
+ * v1.3.0: appendMissingZones() — pure, placement-controlled append of missing
+ *          marker zones (T-20260924-006, spec
+ *          docs/designs/2026-09-25-propagation-engine-batch-design.md).
+ *          Appends only the unmatched source tail (existing zones keep their
+ *          k-th ↔ k-th pairing); inserts after the LAST zone of an anchor
+ *          marker when one is given, at end-of-file otherwise, and derives NO
+ *          placement (returns content unchanged) when the anchor marker has no
+ *          zone in the target — fail-safe skip, never an EOF fallback.
  * v1.2.0: grammar-complete parseIntentionalDuplicateLine() (T-20260912-029) —
  *          a line parses only when it contains a COMPLETE one-line comment
  *          (<!-- ... -->) whose name carries the workspace standards §<digits>
@@ -394,6 +402,100 @@ export function extractSectionContent(filePath: string): string | null {
 // ============================================================================
 // INTENTIONAL-DUPLICATE REWRITE APPLICATION
 // ============================================================================
+
+// ============================================================================
+// MARKER ZONE APPEND (append-on-missing, T-20260924-006)
+// ============================================================================
+
+/** Where the appended block landed. 'none' = nothing appended (no placement). */
+export type AppendPlacement = 'after-anchor' | 'eof' | 'none';
+
+export interface AppendMissingZonesResult {
+  /** Content after the append (byte-identical to the input when appended = 0). */
+  content: string;
+  /** Number of zones appended (0 when the tail is empty or placement failed). */
+  appended: number;
+  /** Placement resolution outcome. */
+  placement: AppendPlacement;
+}
+
+/** Escape a string for literal use inside a RegExp. */
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
+ * Append the unmatched source-section tail to a target file's content
+ * (pure helper — the CLI extraction of the marker-engine append path; the
+ * `managed-block-merge` precedent of extracting the core so tests can run it
+ * against in-memory fixtures while the CLI stays thin).
+ *
+ * Contract (spec docs/designs/2026-09-25-propagation-engine-batch-design.md,
+ * §4.1 R3–R9, §6-D2/D3):
+ * - Only the tail is appended: existing zones keep their k-th ↔ k-th pairing;
+ *   sections k+1..n (k = existingZones.length) append in source order as ONE
+ *   contiguous block. Each appended zone is the source section's fullBlock
+ *   (marker START line + post-scrub content + marker END line).
+ * - Placement resolution order:
+ *   1. `options.anchorMarker` set and the target has ≥1 zone of that marker →
+ *      insert after the LAST such zone's END line ('after-anchor').
+ *   2. `options.anchorMarker` set and no zone of it exists → NO placement is
+ *      derived: the input is returned unchanged ('none'). Never an EOF
+ *      fallback — a wrong anchor name degrades to today's skip behavior.
+ *   3. No `options.anchorMarker` → insert after the last non-empty line,
+ *      preserving the trailing newline ('eof').
+ * - Content is normalized to LF (the caller's normalize-and-reapply path
+ *   re-applies the target's detected line ending, so appended content rides
+ *   the same path as rewritten zones and CRLF targets never see \r\r\n).
+ * - `existingZones` is used for its count only; `sourceSections` entries are
+ *   used for their `fullBlock`. Both arrays are never mutated.
+ */
+export function appendMissingZones(
+  variantContent: string,
+  existingZones: MarkerZone[],
+  sourceSections: ZoneExtractionResult[],
+  marker: string,
+  options: { anchorMarker?: string } = {},
+): AppendMissingZonesResult {
+  void marker; // reserved for interface symmetry with the rewrite engine
+  const tail = sourceSections.slice(existingZones.length);
+  if (tail.length === 0) {
+    return { content: variantContent, appended: 0, placement: 'none' };
+  }
+
+  const norm = (s: string) => s.replace(/\r\n/g, '\n');
+  const working = norm(variantContent);
+  const lines = working.split('\n');
+  const blockLines = tail.map((s) => norm(s.fullBlock)).join('\n').split('\n');
+
+  let insertAfter: number;
+  let placement: AppendPlacement;
+
+  if (options.anchorMarker) {
+    const endPattern = new RegExp(`<!--\\s*${escapeRegExp(options.anchorMarker)}:END\\s*-->`);
+    let lastAnchorEnd = -1;
+    for (let i = 0; i < lines.length; i++) {
+      if (endPattern.test(lines[i])) lastAnchorEnd = i;
+    }
+    if (lastAnchorEnd === -1) {
+      // Anchor missing → no placement derivable. Fail-safe: return the input
+      // unchanged so the CLI can skip the target truthfully (R5).
+      return { content: variantContent, appended: 0, placement: 'none' };
+    }
+    insertAfter = lastAnchorEnd;
+    placement = 'after-anchor';
+  } else {
+    let lastNonEmpty = -1;
+    for (let i = 0; i < lines.length; i++) {
+      if (lines[i].trim() !== '') lastNonEmpty = i;
+    }
+    insertAfter = lastNonEmpty; // -1 on an empty file → insert at index 0
+    placement = 'eof';
+  }
+
+  lines.splice(insertAfter + 1, 0, ...blockLines);
+  return { content: lines.join('\n'), appended: tail.length, placement };
+}
 
 /**
  * Apply pre-computed stale-marker rewrites to one file's lines in a single

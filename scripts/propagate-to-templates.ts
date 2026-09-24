@@ -5,8 +5,24 @@
  * Replaces publish-to-template.ts (deprecated v1.8.0). Single authoritative script
  * for all L0→L1 propagation. Config-driven via propagation-map.json (SSOT for exclusions).
  *
- * @version 2.17.0
+ * @version 2.18.0
  *
+ * v2.18.0 (2026-09-25, propagation-engine batch — spec
+ *          docs/designs/2026-09-25-propagation-engine-batch-design.md,
+ *          T-20260924-006): runMarkerRewrite gains opt-in append-on-missing.
+ *          Domains may declare `append_on_missing` (+ optional
+ *          `insert_after_marker` anchor): when existing zones < source
+ *          sections, the unmatched source tail appends as one contiguous
+ *          block after the LAST anchor zone (or at end-of-file when no anchor
+ *          is declared); an unresolvable anchor derives no placement and the
+ *          target is skipped — never an EOF fallback. Existing zones keep
+ *          their k-th ↔ k-th pairing (rewrites run before the append so
+ *          recorded line numbers stay valid). The false "zones present (will
+ *          be injected on --apply)" skip message is replaced with truthful
+ *          per-state wording, and the dry-run summary gains a `Would append: N`
+ *          counter (parsed by dev-sync Step 4.55). Pilot enablement:
+ *          constitution-context-pr only (zero live diff — its zone already
+ *          exists in every target).
  * v2.17.0 (2026-09-24, platform-parity P1 bug 5 — spec
  *          docs/designs/2026-09-24-platform-parity-p1-bugfixes-design.md D5):
  *          Phase B-7 boundary transforms repaired and completed. The GEMINI
@@ -133,6 +149,7 @@ import {
   extractSectionContent,
   resolveConstitutionSource,
   applyIntentionalDuplicateRewrites,
+  appendMissingZones,
   type MarkerZone,
   type IntentionalDuplicateMarker
 } from './helpers/markers.ts';
@@ -210,6 +227,14 @@ interface Domain {
   /** Marker-rewrite only: apply scrubConstitutionRefs to source zone content before
    *  propagating, so L0→L1 marker zones never leak docs/constitution/ links. */
   scrub_constitution_refs?: boolean;
+  /** Marker-rewrite only: opt-in append of missing marker zones (T-20260924-006).
+   *  Default false — domains without the flag keep the fail-safe warn-and-skip. */
+  append_on_missing?: boolean;
+  /** Marker-rewrite only: anchor marker name. When the append path fires, the new
+   *  block inserts after the LAST zone of this marker; when the anchor has no zone
+   *  in the target, the target is skipped (no end-of-file fallback). Absent field
+   *  = end-of-file placement. */
+  insert_after_marker?: string;
 }
 
 interface PropagationMap {
@@ -1574,6 +1599,7 @@ function runMarkerRewrite(mapPath: string, isDryRun: boolean): void {
   }
 
   let totalOverwritten = 0;
+  let totalAppended = 0;
   let totalInSync = 0;
   let totalSkipped = 0;
 
@@ -1588,9 +1614,11 @@ function runMarkerRewrite(mapPath: string, isDryRun: boolean): void {
       marker: d.marker as string,
       variants: d.target_variants as string[],
       scrub: d.scrub_constitution_refs === true,
+      appendOnMissing: d.append_on_missing === true,
+      anchorMarker: (d as any).insert_after_marker as string | undefined,
     }));
 
-  for (const { sourceFile, targetFile, marker, variants, scrub } of markerInjectDomains) {
+  for (const { sourceFile, targetFile, marker, variants, scrub, appendOnMissing, anchorMarker } of markerInjectDomains) {
     const sourcePath = join(workspaceRoot, sourceFile);
     if (!existsSync(sourcePath)) {
       console.log(`  ${C.yellow}⚠️  ${sourceFile} not found, skipping${C.reset}`);
@@ -1640,8 +1668,10 @@ function runMarkerRewrite(mapPath: string, isDryRun: boolean): void {
       // zones would always report "no matching source section".
       const existingZones = findMarkerZones(variantPath).filter(z => z.marker === marker);
 
-      if (existingZones.length === 0) {
-        console.log(`    ${C.dim}—  ${variantLabel}: no ${marker} zones present (will inject on --apply)${C.reset}`);
+      if (existingZones.length === 0 && !appendOnMissing) {
+        // Truthful skip (v2.18.0, D4): the old message promised injection on
+        // --apply, which never happened. Flag-off domains skip with remediation.
+        console.log(`    ${C.dim}—  ${variantLabel}: no ${marker} zones present — append-on-missing not enabled for this domain; add the zone manually or set append_on_missing in propagation-map.json${C.reset}`);
         totalSkipped++;
         continue;
       }
@@ -1683,6 +1713,37 @@ function runMarkerRewrite(mapPath: string, isDryRun: boolean): void {
         console.log(`    ${C.green}✓  Overwrote ${variantLabel} zone "${marker}" (${zone.startLine}-${zone.endLine}): ${newZoneLines.length - zoneLineCount > 0 ? '+' : ''}${newZoneLines.length - zoneLineCount} lines${C.reset}`);
         fileOverwritten = true;
         totalOverwritten++;
+      }
+
+      // Append-on-missing (v2.18.0, T-20260924-006): fires only for domains
+      // that opted in via `append_on_missing` and only when existing zones <
+      // source sections (0 existing = bootstrap; k existing = unmatched tail).
+      // Runs AFTER the rewrite loop so the zones' recorded line numbers stay
+      // valid — the append shifts only lines BELOW the insertion point.
+      if (appendOnMissing && existingZones.length < sourceSections.length) {
+        const result = appendMissingZones(variantContent, existingZones, variantSections, marker, { anchorMarker });
+        if (result.placement === 'none' || result.appended === 0) {
+          // Anchor declared but unresolvable → fail-safe skip (R5). No
+          // end-of-file fallback — a wrong anchor name degrades to a skip.
+          if (existingZones.length === 0) {
+            console.log(`    ${C.yellow}⚠️  ${variantLabel}: no ${marker} zones present and anchor ${anchorMarker} not found — skipped (no placement derived)${C.reset}`);
+          } else {
+            console.log(`    ${C.yellow}⚠️  ${variantLabel}: ${existingZones.length} existing ${marker} zone(s) but anchor ${anchorMarker} not found — skipped (no placement derived)${C.reset}`);
+          }
+          totalSkipped++;
+        } else if (result.appended > 0) {
+          variantContent = result.content;
+          fileOverwritten = true;
+          totalAppended += result.appended;
+          const where = result.placement === 'after-anchor'
+            ? `(after ${anchorMarker} zone)`
+            : '(at end-of-file)';
+          if (isDryRun) {
+            console.log(`    ${C.cyan}[dry-run] would append ${result.appended} zone(s) to ${variantLabel} ${where}${C.reset}`);
+          } else {
+            console.log(`    ${C.green}✅ appended ${result.appended} zone(s) to ${variantLabel} ${where}${C.reset}`);
+          }
+        }
       }
 
       // Write file if changed — normalize to LF first, then re-apply the
@@ -1819,7 +1880,7 @@ function runMarkerRewrite(mapPath: string, isDryRun: boolean): void {
     }
   }
 
-  console.log(`\n${C.green}Marker rewrite complete.${C.reset} ${isDryRun ? 'Would overwrite' : 'Overwritten'}: ${totalOverwritten}, In sync: ${totalInSync}, Skipped: ${totalSkipped}`);
+  console.log(`\n${C.green}Marker rewrite complete.${C.reset} ${isDryRun ? 'Would overwrite' : 'Overwritten'}: ${totalOverwritten}, ${isDryRun ? 'Would append' : 'Appended'}: ${totalAppended}, In sync: ${totalInSync}, Skipped: ${totalSkipped}`);
 }
 
 // ── Main dispatch ──────────────────────────────────────────────────────────────

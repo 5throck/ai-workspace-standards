@@ -7,7 +7,7 @@
  *   F: n-way version synchronization across the 4 platform mirrors
  *   G: command propagation to templates/common/ — .claude/commands and
  *      .gemini/commands 1:1, plus the .codex/prompts mapping (ADR-0077 D4);
- *      .agents/commands excluded (no producer/consumer — Finding D)
+ *      .agents/commands excluded (L0-resident by design — T-20260925-003)
  *   H: Platform Skill propagation to templates/common/ (4 mirrors, Tier 1 only)
  *
  * Tier 1 vs Tier 3 auto-detection: if variant.json exists in cwd, runs Tier 3 subset (E+F only).
@@ -171,8 +171,10 @@ function checkF(): void {
 // gemini-parity: skip marker). The .codex leg verifies the ADR-0077 D4 mapping
 // (SSOT .claude/commands → templates/common/.codex/prompts) with NO skip
 // marker — Phase 1b mirrors unconditionally, a deliberate asymmetry.
-// .agents/commands is excluded: no producer, no documented consumer (design
-// Finding D — govern-or-retire ticket; recorded exclusion, not a silent skip).
+// .agents/commands is excluded: L0-resident by design, consumed by the
+// Antigravity CLI at the workspace root (spec
+// docs/designs/2026-09-25-propagation-engine-batch-design.md §6-D8, ticket
+// T-20260925-003); recorded exclusion, not a silent skip.
 function checkG(): void {
   if (IS_TIER3) return; // Tier 3 projects don't have templates/common/
   if (!JSON_MODE) console.log('\n=== Check G: Platform Command propagation to templates/common/ (Tier 1 -> Tier 2) ===');
