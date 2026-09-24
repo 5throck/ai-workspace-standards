@@ -88,7 +88,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `backport-diff.ts` | L0 | 1.0.1 | active | Backport candidate differ — read-only 5-surface diff of a project's committed LOCAL-WORK (`git diff <base>..HEAD`) against its best-matching template source (variant → common → L0) per docs/designs/2026-08-28-project-template-backport-design.md §Method; emits per-file surface / divergence direction (project-ahead / template-ahead / both-changed / in-sync / project-only) / +added/-removed; project-resync Step 2 support | —| L0 | —|
 | `evidence-backport-scan.ts` | L0 | 1.0.0 | active | Evidence Backporting scanner — read-only form detection (F1/F2/F3/F0/MIXED) + M1-M6 maturity bar over Projects/co-* evidence planes (ADR-0084 Decision 6, design §4); consumes graph-delta-log.ts output for M2/M4/M6b with git-log fallback; project-resync Step 2b | —| L0+L1 | —|
 | `create-l3-scaffold.ts` | L0 | 1.16.0 | active | Step 8.5 graft build: global `graft` first, bunx fallback (spec 2026-09-20-graft-scaffold-resilience) | —| L0 | —|
-| `dev-sync.ts` | L0 | 1.16.0 | active | main-drift pre-flight warning (`--require-current-main` abort) + sanctioned `--conclude-merge` conflicted-merge path (ADR-0081/T-20260918-002) | —| L0+L1 | —|
+| `dev-sync.ts` | L0 | 1.17.0 | active | v1.17.0: Step 4.55 marker-rewrite drift-check list gains `constitution-context-pr` + step 6.5 scoped-staging deletion handling — skip index-removed `D`/staged-rename-source paths, batch-add present paths, per-path add for absent ones, fail-closed ghost exit 1 (spec: docs/designs/2026-09-24-constitution-s33-context-injection-design.md Amendment 2 §13); Prior: main-drift pre-flight warning (`--require-current-main` abort) + sanctioned `--conclude-merge` conflicted-merge path (ADR-0081/T-20260918-002) | —| L0+L1 | —|
 | `dispatch-parallel.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
 | `dispatch-serial.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
 | `dispatch.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
@@ -182,7 +182,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `lib/encoding-utils.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `lib/error-handling.ts` | L0 | 1.4.0 | active | —| —| L0+L1 | —|
 | `lib/language-guard.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `lib/git-status.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
+| `lib/git-status.ts` | L0 | 1.1.0 | active | v1.1.0: adds `parseCachedNameStatus()` — cached name-status removal parser (`D` paths + staged-rename sources) for dev-sync step 6.5 scoped-staging deletion handling (spec: docs/designs/2026-09-24-constitution-s33-context-injection-design.md §13); Prior: `parseStatusPorcelain()` S0/S1 snapshot parser (2026-09-12 scoped staging) | —| L0+L1 | —|
 | `lib/pipeline-state.ts` | L0 | 1.2.0 | active | v1.2.0: injectable state file (`setStateFile`), string phase names, snapshot-backed undo (`addRollbackActionWithBackup`; modify/delete/move restore from captured content) for in-project adopt state | —| L0+L1 | —|
 | `lib/platform-context.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/propagation-map-schema.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
