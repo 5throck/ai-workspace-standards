@@ -70,6 +70,8 @@ __pycache__/
 
 # --- Claude local settings (personal, not shared) ---
 .claude/settings.local.json
+# --- Graft helper machine-local override (issue #1048: baked path stays untracked) ---
+.claude/helpers/graft.local.json
 # --- Claude Code worktrees (ephemeral, agent-created) ---
 .claude/worktrees/
 # --- Claude Code runtime artifacts (not shared) ---

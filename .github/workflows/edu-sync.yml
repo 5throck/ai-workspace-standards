@@ -121,6 +121,7 @@ jobs:
       - name: Update education content (patch generation only — unprivileged)
         id: edu
         if: steps.changes.outputs.lines != '0' && steps.pat.outputs.present == 'true'
+        uses: anthropics/claude-code-action@9171db3e57d6a3140a37ddc2ba92788584e0ead6 # v1 (commit dereferenced from tag object d9fa72aedd427e79c6dcec0388f2656619eb3c6a; fixes #849: step lacked `uses` and was rejected at workflow startup)
         env:
           # T-20260912-026: the agent is deliberately run WITHOUT the PAT and
           # WITHOUT any GitHub write token. It edits local clones, commits to

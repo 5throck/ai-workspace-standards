@@ -32,7 +32,7 @@
 # a union merge may need a quick manual pass; transient duplicates in fully-regenerated
 # files (VERSION_MANIFEST.md, scripts/README.md) are overwritten at the next sync.
 CHANGELOG.md merge=union
-memory/*.md merge=union
+memory/**/*.md merge=union
 docs/VERSION_MANIFEST.md merge=union
 scripts/README.md merge=union
 templates/CHANGELOG.md merge=union
