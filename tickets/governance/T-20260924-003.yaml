@@ -1,0 +1,20 @@
+schemaVersion: 1
+id: T-20260924-003
+kind: manual
+title: >-
+  Choose common-agent inheritance model for i18n-specialist duplicates (13
+  variants carry byte-identical agents/i18n-specialist.md; C-AG-01 warns) —
+  options: (1) remove file+manifest entry, keep AGENTS.md roster row; (2)
+  pm-style extends-stub pattern for common agents; (3) declare intentional via
+  expected_override_all_variants:true in common-contract.json; apply the
+  coordinated 3-layer fix (file, variant.json agents entry, AGENTS.md roster)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-24T00:11:58.292Z'
+history:
+  - at: '2026-09-24T00:11:58.292Z'
+    from: null
+    to: backlog
+result: null
+error: null
