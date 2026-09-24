@@ -1,4 +1,11 @@
-// @version 2.40.0
+// @version 2.41.0
+// v2.41.0: Live context placeholder check gains docs/project.md (spec:
+//           docs/designs/2026-09-24-scaffold-identity-overview-design.md, R8) —
+//           the project-owned identity seed joins the per-project scan scope
+//           (docs/context.md + docs/*.context.md + docs/project.md), same
+//           placeholder regex family, still WARN-only: an undescribed project
+//           (TODO(project-overview) fallback lines) is a quality signal from its
+//           first audit run, not a broken build.
 // v2.40.0: Template artifact hygiene check (spec:
 //           docs/designs/2026-09-24-template-hygiene-audit-design.md, Decision 2 as
 //           amended) — warn-only, read-only sweep of templates/ for artifact
@@ -604,6 +611,9 @@ if (!LIFECYCLE_ONLY) {
                 if (f.endsWith('.context.md')) files.push(path.join('docs', f));
             }
         }
+        // R8 (2026-09-24-scaffold-identity-overview-design): the project-owned
+        // identity seed joins the scan scope — same regex family, WARN-only.
+        if (fs.existsSync(path.join('docs', 'project.md'))) files.push(path.join('docs', 'project.md'));
         const placeholderRe = /\[(Project Name|One-sentence description[^\]]*|TODO|TBD)\]|<variant-name>|<project-name>/i;
         const hits: string[] = [];
         for (const file of files) {

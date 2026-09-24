@@ -1,7 +1,19 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.38.1
+ * @version 1.39.0
+ * v1.39.0 (2026-09-24, scaffold identity overview — spec
+ *          docs/designs/2026-09-24-scaffold-identity-overview-design.md):
+ *          new `project-identity-placeholder` — fleet-level, WARN-only sweep of
+ *          every delivered Projects/<name>/docs/ pair, reusing audit.ts's
+ *          live-placeholder regex family (no new marker vocabulary): a project
+ *          docs/project.md still carrying the TODO(project-overview) identity
+ *          fallback, or a docs/context.md still carrying literal template
+ *          placeholders (pre-2.13 residue), warns until the project team fills
+ *          the identity seed. The regrowth-prevention sibling of
+ *          T-20260924-004/007 for the identity class; per-project counterpart
+ *          lives in audit.ts v2.41.0.
+ *
  * v1.38.1 (2026-09-23, 2026-09-23-upgrade-engine-l0-only-completion-design):
  *          C-SK-02 allowedWithExtends gains `description` — the persona-integrity
  *          field (validate-agents 1.3.2) required on extends-stubs whose extends
@@ -4661,6 +4673,39 @@ function checkPmExtendsStubBodies(): void {
   }
 }
 
+// Check: project-identity-placeholder (spec
+// docs/designs/2026-09-24-scaffold-identity-overview-design.md, R9/D4) — the
+// fleet-level, WARN-only sibling of audit.ts's per-project live-placeholder
+// scan (audit.ts v2.41.0 added docs/project.md to its scope). Scans every
+// delivered Projects/<name>/docs/ for residual identity placeholders using the
+// SAME regex family as audit.ts (no new marker vocabulary): a docs/project.md
+// still carrying the TODO(project-overview) fallback, or a docs/context.md
+// still carrying the literal template placeholders (pre-2.13 residue), stays
+// visible until the project team fills the identity seed. Regrowth-prevention
+// sibling of T-20260924-004/007 for the identity class.
+function checkProjectIdentityPlaceholders(): void {
+  const projectsDir = join(ROOT, 'Projects');
+  if (!existsSync(projectsDir)) return;
+  const placeholderRe = /\[(Project Name|One-sentence description[^\]]*|TODO|TBD)\]|<variant-name>|<project-name>/i;
+  for (const entry of readdirSync(projectsDir, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    if (isTransientTestFixture(entry.name)) continue; // E2E staging dirs (T-20260916-001)
+    const project = entry.name;
+    const projectMdPath = join(projectsDir, project, 'docs', 'project.md');
+    const contextMdPath = join(projectsDir, project, 'docs', 'context.md');
+    if (existsSync(projectMdPath) && placeholderRe.test(readFileSync(projectMdPath, 'utf-8'))) {
+      warn(project, 'project-identity-placeholder',
+        `Projects/${project}/docs/project.md still carries the TODO(project-overview) identity fallback`,
+        'Fill Description/Type in docs/project.md (scaffold flags --description/--type, or edit the file by hand — upgrades never overwrite it)');
+    }
+    if (existsSync(contextMdPath) && placeholderRe.test(readFileSync(contextMdPath, 'utf-8'))) {
+      warn(project, 'project-identity-placeholder',
+        `Projects/${project}/docs/context.md still carries literal template placeholders (pre-2.13 residue)`,
+        'Run upgrade-project (the 2.13 footer delivers the docs/project.md pointer section), then fill docs/project.md');
+    }
+  }
+}
+
 function main(): number {
   if (!JSON_MODE) {
     console.log(`${colors.cyan}Template Lifecycle Validator${colors.reset}`);
@@ -4754,6 +4799,7 @@ function main(): number {
   checkScaffoldMarkerSources();                                  // T-20260915-002: scaffolder markers vs source templates
   checkPmExtendsStubBodies();                                    // T-20260915-010: variant pm.md extends-stub bodies
   checkVariantReadinessGate();   // VRG-01: continuous Variant Readiness Gate enforcement
+  checkProjectIdentityPlaceholders(); // fleet WARN: Projects/*/docs identity placeholders (spec 2026-09-24-scaffold-identity-overview-design)
 
   // B-07: Sync validated variant info back to VERSION_REGISTRY.json
   if (!JSON_MODE) console.log('\n=== B-07: VERSION_REGISTRY.json sync ===');

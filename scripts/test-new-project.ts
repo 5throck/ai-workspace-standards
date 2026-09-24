@@ -2,9 +2,18 @@
 /**
  * test-new-project.ts — E2E Test for new-project.ts
  *
- * @version 1.3.0
- * @last_updated 2026-09-20
+ * @version 1.4.0
+ * @last_updated 2026-09-24
  *
+ * v1.4.0 (2026-09-24, scaffold identity overview — spec
+ *         2026-09-24-scaffold-identity-overview-design): Test 27 pins the
+ *         identity seed contract on the default (flag-less) scaffold — AC2
+ *         TODO(project-overview) fallback in docs/project.md matching the
+ *         audit.ts placeholder regex, AC3 pointer section in docs/context.md
+ *         (heading kept, literal placeholders gone, footer 2.13), and no
+ *         project.template.md anywhere in the delivered tree. Test 28 scaffolds
+ *         a second project WITH --description/--type and pins AC1: identity
+ *         fields rendered, fallback gone, raw template copy absent.
  * v1.3.0: --platform 'both' renamed to 'all' and Test 8 now also covers
  *         --platform codex explicitly and asserts CODEX.md/.codex/ under
  *         --platform all (all three platforms), matching new-project.ts.
@@ -53,6 +62,9 @@
  *   20-22. pm.md marker/frontmatter/invariant-section checks
  *   23-24. Smoke tests — dev-sync/sync-md/verify-readme-sync present
  *   25. pm.md extends-stub fully resolved (no extends / no variant_overrides / substantive body)
+ *   26. common-template delivery parity (derived vs actual)
+ *   27. Identity seed — docs/project.md TODO fallback (AC2), docs/context.md pointer (AC3), no .template.md
+ *   28. Identity seed — --description/--type render docs/project.md (AC1)
  */
 
 import { existsSync, readFileSync, readdirSync, statSync, rmSync } from 'node:fs';
@@ -729,6 +741,94 @@ try {
       pass('Test 26 PASSED: actual scaffold matches deriveNewProjectDelivery exactly');
     }
   } catch (e) { fail('Test 26', String(e)); }
+
+  // ── Test 27: Identity seed — default scaffold [AC2 + AC3, spec 2026-09-24-scaffold-identity-overview-design] ──
+  // The main harness scaffold carries NO --description/--type, so docs/project.md
+  // must keep the TODO(project-overview) fallback (matching the audit.ts
+  // placeholder regex family), docs/context.md must carry the byte-stable pointer
+  // section (heading kept, literal placeholders gone, footer 2.13), and the raw
+  // project.template.md copy must be absent from the delivered tree.
+  console.log('\nTest 27: Identity seed — TODO fallback, context.md pointer, no raw template copy');
+  {
+    const auditPlaceholderRe = /\[(Project Name|One-sentence description[^\]]*|TODO|TBD)\]|<variant-name>|<project-name>/i;
+    try {
+      if (!fileExists('docs/project.md')) {
+        fail('Test 27', 'docs/project.md not found (identity seed was not rendered)');
+      } else {
+        const projectMd = readText('docs/project.md');
+        const problems: string[] = [];
+        if (!projectMd.includes('TODO(project-overview)')) {
+          problems.push('docs/project.md lost the TODO(project-overview) fallback line');
+        }
+        if (!auditPlaceholderRe.test(projectMd)) {
+          problems.push('docs/project.md does not match the audit.ts placeholder regex (fallback invisible to audit)');
+        }
+        if (problems.length > 0) fail('Test 27 (AC2 fallback)', problems.join('; '));
+        else pass('Test 27 PASSED (AC2): docs/project.md keeps TODO(project-overview), audit-regex visible');
+      }
+
+      try {
+        const ctx = readText('docs/context.md');
+        const ctxProblems: string[] = [];
+        if (!ctx.includes('## Project Overview')) ctxProblems.push('missing "## Project Overview" heading');
+        if (!ctx.includes('docs/project.md')) ctxProblems.push('missing pointer to docs/project.md');
+        if (ctx.includes('[One-sentence description')) ctxProblems.push('literal description placeholder still present');
+        if (ctx.includes('web | cli | api | mcp')) ctxProblems.push('literal Type placeholder still present');
+        if (!/\*context\.md version: 2\.13\b/.test(ctx)) ctxProblems.push('version footer is not 2.13');
+        if (ctxProblems.length > 0) fail('Test 27 (AC3 pointer)', ctxProblems.join('; '));
+        else pass('Test 27 PASSED (AC3): docs/context.md has the pointer section, no literal placeholders, footer 2.13');
+      } catch (e) { fail('Test 27 (AC3 pointer)', String(e)); }
+
+      const templateCopies = findFiles(testDir, 'project.template.md');
+      if (templateCopies.length > 0) {
+        fail('Test 27 (raw template)', `project.template.md delivered into the tree: ${templateCopies.join(', ')}`);
+      } else {
+        pass('Test 27 PASSED (template removal): no project.template.md in the delivered tree');
+      }
+    } catch (e) { fail('Test 27', String(e)); }
+  }
+
+  // ── Test 28: Identity seed — flags render docs/project.md [AC1, spec 2026-09-24-scaffold-identity-overview-design] ──
+  // A second scaffold WITH --description/--type must render the identity fields
+  // into docs/project.md (fallback gone) and leave no raw template copy.
+  console.log('\nTest 28: Identity seed — --description/--type rendered into docs/project.md');
+  {
+    const flaggedDir = `tests/.temp/Test-${projectName}-identity`;
+    const flagTestRel = (rel: string) => readFileSync(join(flaggedDir, rel), 'utf-8');
+    try {
+      const result = await $`bun scripts/new-project.ts ${flaggedDir} --variant ${variantArg} --platform ${platformArg} --yes --description "Test identity seed one-sentence description." --type cli`.nothrow();
+      if (result.exitCode !== 0 || !existsSync(flaggedDir)) {
+        fail('Test 28', `flagged scaffold failed (exit ${result.exitCode})`);
+      } else if (!existsSync(join(flaggedDir, 'docs', 'project.md'))) {
+        fail('Test 28', 'docs/project.md not rendered in the flagged scaffold');
+      } else {
+        const projectMd = flagTestRel('docs/project.md');
+        const problems: string[] = [];
+        if (!projectMd.includes('Test identity seed one-sentence description.')) {
+          problems.push('--description not rendered into docs/project.md');
+        }
+        if (!/- \*\*Type\*\*: cli\b/m.test(projectMd)) {
+          problems.push('--type cli not rendered into docs/project.md');
+        }
+        if (projectMd.includes('TODO(project-overview)')) {
+          problems.push('TODO(project-overview) fallback survived a flagged scaffold');
+        }
+        if (findFiles(flaggedDir, 'project.template.md').length > 0) {
+          problems.push('project.template.md delivered into the flagged scaffold');
+        }
+        if (problems.length > 0) {
+          fail('Test 28', problems.join('; '));
+        } else {
+          pass('Test 28 PASSED (AC1): --description/--type rendered, fallback gone, no raw template copy');
+        }
+      }
+    } catch (e) { fail('Test 28', String(e)); }
+    finally {
+      try {
+        if (existsSync(flaggedDir)) rmSync(flaggedDir, { recursive: true, force: true });
+      } catch { /* ignore */ }
+    }
+  }
 
   // ── Summary ───────────────────────────────────────────────────────────────
   console.log('\n' + '─'.repeat(50));

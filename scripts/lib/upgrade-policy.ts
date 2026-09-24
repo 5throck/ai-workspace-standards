@@ -1,4 +1,16 @@
-// @version 1.11.0
+// @version 1.12.0
+// v1.12.0 (2026-09-24, scaffold identity overview — spec
+//         2026-09-24-scaffold-identity-overview-design): docs/project.md claims
+//         ADD_IF_MISSING on the TEMPLATE TREE SYNC pass (project-owned identity
+//         seed — upgrade copies it only when absent, never overwrites); without
+//         the explicit claim the deny-list fallback (SYNC) would wholesale-copy
+//         the template seed over user content on every upgrade (the co-abap
+//         docs/context.md regression class). docs/project.template.md joins
+//         TEMPLATE_ONLY (scaffold-removed): new-project renders it into
+//         docs/project.md and deletes the raw copy, so an upgrade must never
+//         resurrect it. This claim MUST land in the same change set as the
+//         docs/context.md 2.13 footer bump — the bump is what makes every
+//         project's next upgrade walk the TEMPLATE TREE SYNC pass.
 // v1.10.0 (2026-09-21, rollout hardening): isDeliveredDiff() — a changed-file list
 //         is fully explained by a recorded upgrade delivery (delivered files ∪
 //         pipeline artifacts) so dev-sync step 3.9 can auto-apply E5 (sync-only)
@@ -123,11 +135,21 @@ const TEMPLATE_ONLY_DIRS = [
 
 const TEMPLATE_ONLY_FILES = new Set([
   'docs/variant.context.template.md',
+  'docs/project.template.md', // rendered into docs/project.md at scaffold time, then removed (spec 2026-09-24-scaffold-identity-overview-design)
   'agents/lifecycle-manager.md',
   'agents/_COMMON.md',
   'agents/pm.md.backup',
   'scripts/propagation-map.json',
 ]);
+
+/** Project-owned identity seed (spec 2026-09-24-scaffold-identity-overview-design,
+ *  §13.2 guard retention): DEFENSIVE NO-OP as a claim — the TEMPLATE TREE SYNC
+ *  walk enumerates template-side files only, so this claim never fires (the seed
+ *  is delivered by upgrade-project's dedicated IDENTITY SEED step). It stays as
+ *  the guard: if a future change ever put docs/project.md template-side, the
+ *  deny-list fallback (SYNC) would wholesale-copy over user content, and this
+ *  claim still blocks that (the co-abap docs/context.md regression class). */
+const ADD_IF_MISSING_FILES = new Set(['docs/project.md']);
 
 /** Project runtime / generated state — exists in projects but is never template-delivered. */
 const PROJECT_STATE_FILES = new Set([
@@ -214,6 +236,11 @@ export function resolveClaim(relPath: string, variant = ''): UpgradeClaim {
   if (PRESERVE_FILES.has(rel)) return { policy: 'PRESERVE', pass: '(project-owned)' };
   if ((GOVERNANCE_FILES as readonly string[]).includes(rel)) {
     return { policy: 'ADD_IF_MISSING', pass: 'GOVERNANCE FILES' };
+  }
+  // Project-owned identity seed — claim must sit ABOVE the docs/ fallback SYNC
+  // branch below (spec 2026-09-24-scaffold-identity-overview-design, R6/D2).
+  if (ADD_IF_MISSING_FILES.has(rel)) {
+    return { policy: 'ADD_IF_MISSING', pass: TEMPLATE_TREE_SYNC_PASS };
   }
 
   if (LOCKED_FILES.has(rel) || underDir(rel, '.githooks')) return { policy: 'LOCKED', pass: 'LOCKED' };

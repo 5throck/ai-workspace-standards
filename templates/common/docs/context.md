@@ -12,9 +12,9 @@
 
 ## Project Overview
 
-[One-sentence description of what this project does and who it's for.]
+Identity: [docs/project.md](project.md) — project-owned; the upgrade pipeline
+seeds it once and never overwrites it.
 
-**Type**: web | cli | api | mcp
 **Status**: Active development
 
 ---
@@ -538,4 +538,4 @@ See the workspace governance documentation (Governance Enforcement Layers) and A
 
 ---
 
-*context.md version: 2.12 — Key Files: context.md row corrected to pipeline-maintained (was "immutable")*
+*context.md version: 2.13 — Project Overview is now a two-line pointer to project-owned docs/project.md (identity seed, spec 2026-09-24-scaffold-identity-overview-design)*

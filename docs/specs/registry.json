@@ -1294,6 +1294,15 @@
       "source": "architect",
       "created": "2026-09-24",
       "last_updated": "2026-09-24"
+    },
+    {
+      "id": "2026-09-24-scaffold-identity-overview-design",
+      "title": "scaffold identity overview design",
+      "file": "docs/designs/2026-09-24-scaffold-identity-overview-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-24",
+      "last_updated": "2026-09-24"
     }
   ]
 }

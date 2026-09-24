@@ -4,7 +4,13 @@
  * pass must now reach existing projects — the variant docs tree, .github/, platform
  * settings.json (JSON-merged), root stragglers — while project-owned files stay untouched.
  *
- * @version 1.0.0
+ * v1.1.0 (2026-09-24, scaffold identity overview — spec
+ *         2026-09-24-scaffold-identity-overview-design.md §13): new IDENTITY SEED
+ *         describe block — AC5a regression for upgrade-project's dedicated
+ *         docs/project.md add-if-missing seed step (verdict style, TODO fallback
+ *         survival, dry-run parity, AC4 never-overwrite).
+ *
+ * @version 1.1.0
  */
 import { existsSync, mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -246,4 +252,104 @@ describe('upgrade-project.ts docs/context.md CONTEXT PRESERVE gate', () => {
       rmSync(tmp, { recursive: true, force: true });
     }
   }, 400000);
+});
+
+// ── IDENTITY SEED (AC5a regression — spec 2026-09-24-scaffold-identity-overview-design §13) ──
+// The TEMPLATE TREE SYNC walk enumerates template-side files only, so docs/project.md can
+// never be delivered by the upgrade-policy ADD_IF_MISSING claim (no template-side
+// counterpart; docs/project.template.md stays TEMPLATE_ONLY). §13 added a dedicated
+// add-if-missing seed step after that pass. These tests pin the seed contract: verdict
+// style, TODO(project-overview) fallback survival (audit-WARN-visible per R4), dry-run
+// write parity, and the AC4 never-overwrite guarantee.
+describe('upgrade-project.ts IDENTITY SEED (docs/project.md, §13.2)', () => {
+  test('AC5a-a: absent docs/project.md → dry-run prints the seed verdict, writes nothing', () => {
+    const tmp = makeTempProject();
+    try {
+      const result = spawnSync('bun', [upgradeScript, tmp, '--variant', VARIANT, '--dry-run', '--yes'],
+        { encoding: 'utf-8', timeout: 300000 });
+      expect(result.status).toBe(0);
+      expect(result.stdout).toContain('NEW    docs/project.md  (identity seed — add-if-missing)');
+      expect(existsSync(join(tmp, 'docs', 'project.md'))).toBe(false);
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  }, 300000);
+
+  test('AC5a-b: apply run seeds docs/project.md with the TODO(project-overview) fallback intact', () => {
+    const tmp = makeTempProject();
+    try {
+      const result = spawnSync('bun', [upgradeScript, tmp, '--variant', VARIANT, '--yes'],
+        { encoding: 'utf-8', timeout: 300000 });
+      expect(result.status).toBe(0);
+      expect(result.stdout).toContain('NEW    docs/project.md  (identity seed — add-if-missing)');
+      const seeded = readFileSync(join(tmp, 'docs', 'project.md'), 'utf8');
+      // applySubstitutions rendered the project name from basename(projectDir)…
+      expect(seeded).not.toContain('[Project Name]');
+      // …while the non-token TODO(project-overview) fallback lines survived untouched
+      // (an undescribed seeded project lands in the audit-WARN-visible state R4 intends).
+      expect(seeded).toContain('TODO(project-overview): [One-sentence description');
+      expect(seeded).toContain('TODO(project-overview): [TBD]');
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  }, 300000);
+
+  test('AC5a-c: second run seeds nothing — no verdict, file byte-unchanged', () => {
+    const tmp = makeTempProject();
+    try {
+      const first = spawnSync('bun', [upgradeScript, tmp, '--variant', VARIANT, '--yes'],
+        { encoding: 'utf-8', timeout: 300000 });
+      expect(first.status).toBe(0);
+      const seeded = readFileSync(join(tmp, 'docs', 'project.md'), 'utf8');
+
+      const second = spawnSync('bun', [upgradeScript, tmp, '--variant', VARIANT, '--yes'],
+        { encoding: 'utf-8', timeout: 300000 });
+      expect(second.status).toBe(0);
+      expect(second.stdout).not.toContain('(identity seed');
+      expect(readFileSync(join(tmp, 'docs', 'project.md'), 'utf8')).toBe(seeded);
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  }, 600000);
+
+  test('AC5a-d: pre-existing user-edited docs/project.md is never written (AC4)', () => {
+    const tmp = makeTempProject();
+    try {
+      const dest = join(tmp, 'docs', 'project.md');
+      mkdirSync(join(tmp, 'docs'), { recursive: true });
+      writeFileSync(dest, '# user-edited — Project Overview\n\n- **Description**: Our real description.\n- **Type**: api\n');
+      spawnSync('git', ['-C', tmp, 'add', '-A'], { cwd: tmp });
+      spawnSync('git', ['-C', tmp, 'commit', '-q', '-m', 'chore: user identity'], { cwd: tmp });
+
+      const result = spawnSync('bun', [upgradeScript, tmp, '--variant', VARIANT, '--dry-run', '--yes'],
+        { encoding: 'utf-8', timeout: 300000 });
+      expect(result.status).toBe(0);
+      expect(result.stdout).not.toContain('(identity seed');
+      expect(readFileSync(dest, 'utf8')).toContain('Our real description.');
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  }, 300000);
+});
+
+describe('upgrade-project.ts IDENTITY SEED — dirty-tree corner (§13.2 guard)', () => {
+  test('AC5a-e: present-but-uncommitted docs/project.md is never seeded (dirty-tree guard)', () => {
+    const tmp = makeTempProject();
+    try {
+      const dest = join(tmp, 'docs', 'project.md');
+      mkdirSync(join(tmp, 'docs'), { recursive: true });
+      // Present but deliberately NOT committed (no HEAD in this fixture, so the
+      // pre-upgrade rollback snapshot is skipped and the file stays on disk):
+      // preUpgradeDirty carries the path, and isLocallyModified must keep the
+      // seed off — AC4 holds for dirty trees, not just committed ones.
+      writeFileSync(dest, '# user-edited uncommitted — Project Overview\n\n- **Description**: Uncommitted identity.\n- **Type**: web\n');
+      const result = spawnSync('bun', [upgradeScript, tmp, '--variant', VARIANT, '--yes'],
+        { encoding: 'utf-8', timeout: 300000 });
+      expect(result.status).toBe(0);
+      expect(result.stdout).not.toContain('(identity seed');
+      expect(readFileSync(dest, 'utf8')).toContain('Uncommitted identity.');
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  }, 300000);
 });

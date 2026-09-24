@@ -1,5 +1,19 @@
 #!/usr/bin/env bun
-// @version 1.25.0
+// @version 1.26.0
+// v1.26.0 (2026-09-24, scaffold identity overview — spec
+//           2026-09-24-scaffold-identity-overview-design): §5.2 renders the new
+//           identity seed docs/project.md from
+//           templates/common/docs/project.template.md (SSOT) via the shared
+//           applySubstitutions() token map, then removes the raw .template.md
+//           copy from the delivered tree (also in NEW_PROJECT_CLEANUP_FILES —
+//           upgrades never resurrect it). New additive flags --description
+//           "<one sentence>" and --type web|cli|api|mcp fill the identity
+//           fields; when a flag is absent the template's TODO(project-overview)
+//           fallback line stays (matches the audit.ts placeholder regex family,
+//           so an undescribed project is WARN-visible from its first audit).
+//           docs/context.md's Overview section is a byte-stable pointer to
+//           docs/project.md (template footer 2.13), so the upgrade wholesale
+//           SYNC can never again destroy project identity in place.
 // v1.25.0 (2026-09-23, adopt-project engine prerequisites): §2.3b extends-stub
 //           resolution and §2.5 L1-B metadata strip extracted verbatim to
 //           scripts/helpers/resolve-pm-stub.ts so the adopt-project settling pass can
@@ -64,7 +78,7 @@
 //           line (docs/context.md version footer survives for upgrade version-sync);
 //           shared pattern moved to helpers/l0-ref-policy.ts.
 // new-project.ts — Scaffold a new project under Projects/ (or an explicit workspace-relative path)
-// Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|codex|all] [--version X.Y.Z] [--country <CODE>]
+// Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|codex|all] [--version X.Y.Z] [--country <CODE>] [--description "<one sentence>"] [--type web|cli|api|mcp]
 //
 // Migrated from new-project.sh/ps1 per ADR-0036. No file permission manipulation.
 
@@ -92,6 +106,7 @@ import {
   decideManifestGeneration,
 } from './helpers/scaffold-markers.ts';
 import { resolvePmExtendsStub, stripL1BMetadata } from './helpers/resolve-pm-stub.ts';
+import { applySubstitutions } from './helpers/substitute-placeholders.ts';
 import { SCAFFOLD_COMMON_OWNED_FILES } from './lib/upgrade-policy.ts';
 
 // ── Argument parsing ───────────────────────────────────────────────────────────
@@ -100,10 +115,26 @@ let variant = '';
 let templateVer = '';
 let platform = 'all';
 let country = '';
+let projectDescription = '';
+let projectType = '';
 
 const args = process.argv.slice(2);
 for (let i = 0; i < args.length; i++) {
   if (args[i] === '--variant' && args[i + 1]) { variant = args[++i]; continue; }
+  if (args[i] === '--description' && args[i + 1]) {
+    projectDescription = args[++i];
+    continue;
+  }
+  if (args[i] === '--type' && args[i + 1]) {
+    projectType = args[++i];
+    if (!['web', 'cli', 'api', 'mcp'].includes(projectType)) {
+      console.error(`❌ Invalid --type value: '${projectType}'. Use one of: web, cli, api, mcp.`);
+      if (import.meta.main) {
+        process.exit(1);
+      }
+    }
+    continue;
+  }
   if (args[i] === '--version' && args[i + 1]) {
     templateVer = args[++i];
     // Strict allowlist: only alphanumeric, dots, hyphens, underscores — no shell metacharacters
@@ -132,7 +163,8 @@ for (let i = 0; i < args.length; i++) {
 }
 
 if (!projectName) {
-  console.error('Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|codex|all] [--version X.Y.Z] [--country <CODE>]');
+  console.error('Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|codex|all] [--version X.Y.Z] [--country <CODE>] [--description "<one sentence>"] [--type web|cli|api|mcp]');
+  console.error('       --description/--type are optional; when omitted, docs/project.md keeps its TODO(project-overview) fallback lines.');
   if (import.meta.main) {
     process.exit(1);
   }
@@ -943,6 +975,56 @@ if (existsSync(substitutePlaceholders)) {
   }
 } else {
   console.log('⚠️  Placeholder substitution skipped (helper missing)');
+}
+
+// ── 5.2. Render docs/project.md (project identity seed — spec 2026-09-24-scaffold-identity-overview-design) ──
+// The SSOT is templates/common/docs/project.template.md: copied into the project
+// tree by the common copy, rendered here into docs/project.md, then removed from
+// the delivered tree (also listed in NEW_PROJECT_CLEANUP_FILES, so upgrades never
+// re-deliver the raw copy — upgrade-policy TEMPLATE_ONLY). The render reuses the
+// shared applySubstitutions() token map (behavior identical to the §5 sweep), then
+// fills the --description/--type identity fields; absent flags keep the template's
+// TODO(project-overview) fallback lines, which match the audit.ts placeholder
+// regex family so an undescribed project stays WARN-visible.
+{
+  const identityTemplatePath = join(commonDir, 'docs', 'project.template.md');
+  const deliveredTemplateCopy = join(projectDir, 'docs', 'project.template.md');
+  const identityOutPath = join(projectDir, 'docs', 'project.md');
+  if (existsSync(identityTemplatePath)) {
+    try {
+      let identity = applySubstitutions(readFileSync(identityTemplatePath, 'utf-8'), {
+        projectName: basename(projectName),
+        description: projectDescription || 'A new project',
+        characteristics: '',
+        variantName: variant,
+        countryDisplayName: '',
+      });
+      if (projectDescription) {
+        identity = identity.replace(
+          /^- \*\*Description\*\*: TODO\(project-overview\): \[One-sentence description[^\]]*\]$/m,
+          () => `- **Description**: ${projectDescription}`,
+        );
+      }
+      if (projectType) {
+        identity = identity.replace(
+          /^- \*\*Type\*\*: TODO\(project-overview\): \[TBD\][^\n]*$/m,
+          () => `- **Type**: ${projectType}`,
+        );
+      }
+      writeFileSync(identityOutPath, identity, 'utf-8');
+      console.log('  ✅ docs/project.md rendered from the identity seed template');
+    } catch (err) {
+      console.error(`❌ Failed to render docs/project.md from the identity seed: ${(err as Error).message}`);
+      if (import.meta.main) process.exit(1);
+    }
+    // The raw .template.md copy never ships: rendered output replaces it.
+    if (existsSync(deliveredTemplateCopy)) {
+      rmSync(deliveredTemplateCopy);
+      console.log('  🗑️  Removed raw template copy: docs/project.template.md');
+    }
+  } else if ((projectDescription || projectType) && existsSync(join(projectDir, 'docs'))) {
+    console.warn('  ⚠️  docs/project.template.md not found in the template source — docs/project.md was NOT rendered (old template version?)');
+  }
 }
 
 // ── 5.5b. Update lifecycle.statusSince in variant.json ────────────────────────
