@@ -39,12 +39,21 @@ title: >-
   identically at HEAD 7101a0cf by lifecycle-manager via a scratch scaffold
   (tests/.temp/lc-repro-t008-scratch, deleted after capture)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-24T05:22:02.098Z'
 history:
   - at: '2026-09-24T05:22:02.098Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-24T09:51:21.162Z'
+    from: backlog
+    to: done
+result: >-
+  skills-registry reconcile shipped in new-project 1.27.0 via PR #1054 (merged
+  2026-09-24): the delivered project's skills/SKILLS.md is reconciled
+  post-overlay so the registry covers the delivered skills. Fresh-scaffold
+  verification: post-scaffold audit 0 FAIL; skill-lifecycle-audit inside the
+  fresh scaffold 0 errors vs the 32-error baseline recorded at T-20260924-008
+  creation (reproduced at HEAD 7101a0cf).
 error: null
