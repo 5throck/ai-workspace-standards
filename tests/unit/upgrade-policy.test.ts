@@ -19,7 +19,13 @@
  *         and the exported VARIANT_ASSET_DIRS_PASS constant matches the
  *         resolveClaim pass id (TEMPLATE_TREE_SYNC_PASS precedent).
  *
- * @version 1.2.0
+ * v1.3.0 (2026-09-25, T-20260924-003 — spec
+ *         docs/designs/2026-09-25-inventory-decisions-batch-design.md R2.4):
+ *         pins isExtendsStub — true on the 13 variant i18n-specialist.md stubs
+ *         and the 13 pm.md stubs (real template files), false on full bodies,
+ *         frontmatter without extends:, and prose mentions outside frontmatter.
+ *
+ * @version 1.3.0
  */
 import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -31,6 +37,7 @@ import {
   GOVERNANCE_FILES,
   PLACEHOLDER_ALLOWLIST,
   SCAFFOLD_COMMON_OWNED_FILES,
+  isExtendsStub,
   mergeSettingsData,
   mergeSettingsJson,
   resolveClaim,
@@ -347,5 +354,49 @@ describe('SCAFFOLD_COMMON_OWNED_FILES (T-20260917-009)', () => {
     const src = readFileSync(resolve(import.meta.dir, '..', '..', 'scripts', 'validate-templates.ts'), 'utf-8');
     expect(src).toMatch(/SCAFFOLD_COMMON_OWNED_FILES/);
     expect(src).not.toMatch(/const variantContextMd = join\(TEMPLATES_DIR, variant, 'docs', 'context.md'\)/);
+  });
+});
+
+describe('isExtendsStub (T-20260924-003 R2.4)', () => {
+  const templatesDir = resolve(import.meta.dir, '..', '..', 'templates');
+  const STUB_VARIANTS = [
+    'co-abap', 'co-consult', 'co-deck', 'co-design', 'co-develop', 'co-export',
+    'co-game', 'co-hr', 'co-news', 'co-price', 'co-safety', 'co-security', 'co-work',
+  ];
+
+  test('true on all 13 variant i18n-specialist stubs (real template files)', () => {
+    for (const variant of STUB_VARIANTS) {
+      const content = readFileSync(join(templatesDir, variant, 'agents', 'i18n-specialist.md'), 'utf-8');
+      if (!isExtendsStub(content)) {
+        throw new Error(`${variant}/agents/i18n-specialist.md is not an extends-stub`);
+      }
+    }
+    expect(STUB_VARIANTS.length).toBe(13);
+  });
+
+  test('true on all 13 variant pm.md stubs (real template files)', () => {
+    for (const variant of STUB_VARIANTS) {
+      const content = readFileSync(join(templatesDir, variant, 'agents', 'pm.md'), 'utf-8');
+      expect(isExtendsStub(content)).toBe(true);
+    }
+  });
+
+  test('false on full agent bodies (common i18n-specialist, root automation-engineer)', () => {
+    const commonI18n = readFileSync(join(templatesDir, 'common', 'agents', 'i18n-specialist.md'), 'utf-8');
+    expect(isExtendsStub(commonI18n)).toBe(false);
+    const rootAgent = readFileSync(
+      resolve(import.meta.dir, '..', '..', 'agents', 'automation-engineer.md'),
+      'utf-8',
+    );
+    expect(isExtendsStub(rootAgent)).toBe(false);
+  });
+
+  test('false on no-frontmatter content and on frontmatter without extends:', () => {
+    expect(isExtendsStub('# Just a body\n')).toBe(false);
+    expect(isExtendsStub('---\nname: pm\n---\nbody')).toBe(false);
+    // A resolved project file never carries the extends: pointer.
+    expect(isExtendsStub('---\nname: pm\nrole: resolved\n---\n# PM\n')).toBe(false);
+    // Prose mentions of "extends:" outside frontmatter do not count.
+    expect(isExtendsStub('---\nname: pm\n---\nThe pattern extends: something.\n')).toBe(false);
   });
 });

@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-09-24T22:08:38.373Z
+**Generated**: 2026-09-24T23:24:52.888Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -99,7 +99,7 @@
 
 | Name | Version | Location | Dependencies |
 |------|---------|----------|--------------|
-| adopt-project.ts | 1.1.0 | scripts/adopt-project.ts | N/A |
+| adopt-project.ts | 1.2.0 | scripts/adopt-project.ts | N/A |
 | agent-create.ts | 1.0.1 | scripts/agent-create.ts | N/A |
 | agent-delete.ts | 1.0.1 | scripts/agent-delete.ts | N/A |
 | agent-lifecycle-audit.ts | 1.3.1 | scripts/agent-lifecycle-audit.ts | N/A |
@@ -141,7 +141,7 @@
 | md-to-ooxml.ts | 1.2.0 | scripts/md-to-ooxml.ts | fs, path |
 | migrate-project.ts | 1.0.0 | scripts/migrate-project.ts | N/A |
 | migrate-quality-gates.ts | 1.1.0 | scripts/migrate-quality-gates.ts | fs, js-yaml, path |
-| new-project.ts | 1.28.1 | scripts/new-project.ts | N/A |
+| new-project.ts | 1.29.0 | scripts/new-project.ts | N/A |
 | procedure-coverage.ts | 1.0.0 | scripts/procedure-coverage.ts | js-yaml |
 | project-to-variant.ts | 1.5.0 | scripts/project-to-variant.ts | N/A |
 | promote-context-section.ts | 1.1.0 | scripts/promote-context-section.ts | N/A |
@@ -181,7 +181,7 @@
 | ticket.ts | 1.2.0 | scripts/ticket.ts | N/A |
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, fs, path |
 | typecheck.ts | 1.1.1 | scripts/typecheck.ts | N/A |
-| upgrade-project.ts | 1.48.0 | scripts/upgrade-project.ts | N/A |
+| upgrade-project.ts | 1.49.0 | scripts/upgrade-project.ts | N/A |
 | validate-agents.ts | 1.3.2 | scripts/validate-agents.ts | N/A |
 | validate-decisions.ts | 1.0.0 | scripts/validate-decisions.ts | js-yaml |
 | validate-doc-folder.ts | 1.1.0 | scripts/validate-doc-folder.ts | fs, path |
@@ -193,7 +193,7 @@
 | validate-process.ts | 1.0.0 | scripts/validate-process.ts | js-yaml |
 | validate-raci.ts | 1.2.0 | scripts/validate-raci.ts | js-yaml |
 | validate-skills.ts | 1.5.1 | scripts/validate-skills.ts | N/A |
-| validate-templates.ts | 1.42.0 | scripts/validate-templates.ts | js-yaml |
+| validate-templates.ts | 1.43.0 | scripts/validate-templates.ts | js-yaml |
 | validate-variant-readiness.ts | 1.1.0 | scripts/validate-variant-readiness.ts | N/A |
 | variant-feature.ts | 1.0.0 | scripts/variant-feature.ts | N/A |
 | verify-adr-governance.ts | 1.7.0 | scripts/verify-adr-governance.ts | N/A |

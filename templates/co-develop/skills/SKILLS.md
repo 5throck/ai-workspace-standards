@@ -1,15 +1,15 @@
-# Skills Index — co-develop
+# SKILLS.md — Skill Lifecycle Registry
 
-This directory contains variant-specific skills for the `co-develop` template.
+Curated registry for the co-develop variant-exclusive skills (T-20260924-009). One row per variant-exclusive skill directory; values come from each skill's SKILL.md frontmatter.
 
-## Available Skills
+## Registry
 
-| Skill | Directory | Purpose |
-|-------|-----------|---------|
-| Code Review | `code-review/` | Conducts thorough code reviews focusing on correctness, maintainability, security, and best practices — reviewing pull requests, evaluating code quality, providing constructive feedback, ensuring code standards compliance |
-| Refactoring | `refactoring/` | Improves code structure and design while preserving behavior using systematic refactoring techniques — cleaning up code, reducing duplication, improving maintainability, paying down technical debt |
-| SWE Solve | `swe-solve/` | Autonomous 4-stage issue-to-PR resolution pipeline for software engineering tasks, featuring test-driven validation and pull-request synthesis |
-| Test-Driven Development | `test-driven-development/` | Implements software using Test-Driven Development (TDD) methodology with the red-green-refactor cycle — developing new features, fixing bugs with tests, ensuring code reliability through a test-first approach |
+| skill | version | status | owner | last_reviewed | removal-date | notes |
+|-------|---------|--------|-------|---------------|--------------|-------|
+| `code-review` | 1.0.0 | active | pm | 2026-07-19 | — | co-develop only — correctness/maintainability/security-focused code reviews |
+| `refactoring` | 1.0.0 | active | pm | 2026-07-19 | — | co-develop only — behavior-preserving structural improvement |
+| `swe-solve` | 1.1.1 | active | pm | 2026-08-25 | — | co-develop only — autonomous issue-to-PR resolution pipeline |
+| `test-driven-development` | 1.0.0 | active | pm | 2026-07-19 | — | co-develop only — TDD red-green-refactor implementation |
 
 ## Usage
 

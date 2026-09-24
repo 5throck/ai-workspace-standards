@@ -6,12 +6,24 @@
  * metadata strip) — the adopt-project settling pass depends on the same
  * behavior for converted projects.
  *
- * @version 1.0.0
+ * v1.1.0 (2026-09-25, inventory decisions batch — spec
+ *         docs/designs/2026-09-25-inventory-decisions-batch-design.md R2.2):
+ *         covers the generic resolveAgentExtendsStub wrapper — i18n-specialist
+ *         name resolution, the injected canonical-prose check (pm passes it,
+ *         generic callers omit it), the missing-L1 branch, and the back-compat
+ *         resolvePmExtendsStub delegation.
+ *
+ * @version 1.1.0
  */
 import { describe, test, expect, afterEach } from 'bun:test';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { resolvePmExtendsStub, stripL1BMetadata } from '../../scripts/helpers/resolve-pm-stub.ts';
+import {
+  resolveAgentExtendsStub,
+  resolvePmExtendsStub,
+  stripL1BMetadata,
+} from '../../scripts/helpers/resolve-pm-stub.ts';
+import { isCanonicalPmStubBody } from '../../scripts/helpers/scaffold-markers.ts';
 
 const scratchRoot = path.resolve(import.meta.dir, '..', '.temp', 'resolve-pm-stub-test');
 
@@ -136,6 +148,94 @@ describe('resolvePmExtendsStub', () => {
     expect(result.missingL1).toBe(true);
     // The stub file is left untouched
     expect(fs.readFileSync(stub, 'utf8')).toContain('extends:');
+  });
+});
+
+describe('resolveAgentExtendsStub (generic wrapper, T-20260924-003 R2.2)', () => {
+  test('resolves a non-pm empty stub (i18n-specialist shape) without an injected body check', () => {
+    const agentPath = writeProjectPmMd(
+      [
+        'extends: ../../common/agents/i18n-specialist.md',
+        'name: i18n-specialist',
+        "description: 'Owns locale configuration.'",
+        'variant: co-consult',
+        'version: "1.0.0"',
+        'last_updated: "2026-09-25"',
+      ].join('\n'),
+      '',
+    );
+    const l1Path = path.join(scratchRoot, 'common-i18n.md');
+    fs.writeFileSync(l1Path, L1_PM_MD.replace('name: pm', 'name: i18n-specialist'));
+
+    const result = resolveAgentExtendsStub(agentPath, l1Path, 'co-consult');
+
+    expect(result.resolved).toBe(true);
+    expect(result.shape).toBe('empty');
+    expect(result.nonCanonical).toBeUndefined(); // empty shape carries no H12 verdict
+    const content = fs.readFileSync(agentPath, 'utf8');
+    expect(content).not.toContain('extends:'); // pointer dropped — self-contained
+    expect(content).toContain('Dispatch Protocol'); // L1 body inlined
+    expect(content).toContain('name: i18n-specialist'); // stub frontmatter wins
+    expect(content).toContain('lifecycle:'); // L1 frontmatter fields filled in
+  });
+
+  test('a prose stub WITHOUT an injected check resolves with nonCanonical: false (no canonical prose notion)', () => {
+    const agentPath = writeProjectPmMd(
+      'name: i18n-specialist\nextends: ../../common/agents/i18n-specialist.md',
+      'Some prose stub body that has no canonical counterpart.',
+    );
+    const l1Path = path.join(scratchRoot, 'common-i18n.md');
+    fs.writeFileSync(l1Path, L1_PM_MD);
+
+    const result = resolveAgentExtendsStub(agentPath, l1Path, 'co-deck');
+
+    expect(result.resolved).toBe(true);
+    expect(result.shape).toBe('prose');
+    expect(result.nonCanonical).toBe(false);
+    expect(fs.readFileSync(agentPath, 'utf8')).toContain('Dispatch Protocol');
+  });
+
+  test('back-compat: resolvePmExtendsStub still injects the canonical pm prose check (H12 fires)', () => {
+    const agentPath = writeProjectPmMd(
+      'name: pm\nextends: ../../common/agents/pm.md',
+      'Real variant content about the co-legal jurisdiction workflow that must not be silently dropped.',
+    );
+    const l1Path = path.join(scratchRoot, 'common-pm.md');
+    fs.writeFileSync(l1Path, L1_PM_MD);
+
+    const viaWrapper = resolvePmExtendsStub(agentPath, l1Path, 'co-legal');
+    // Injecting the same pm check through the generic option classifies the
+    // same prose body identically — proving the wrapper is pure delegation.
+    const equivalent = writeProjectPmMd(
+      'name: pm\nextends: ../../common/agents/pm.md',
+      'Real variant content about the co-legal jurisdiction workflow that must not be silently dropped.',
+    );
+    const viaGeneric = resolveAgentExtendsStub(equivalent, l1Path, 'co-legal', {
+      isCanonicalStubBody: isCanonicalPmStubBody,
+    });
+    expect(viaWrapper.resolved).toBe(true);
+    expect(viaWrapper.nonCanonical).toBe(true);
+    expect(viaWrapper.proseBodyLength).toBeGreaterThan(0);
+    expect(viaGeneric.resolved).toBe(true);
+    expect(viaGeneric.nonCanonical).toBe(true);
+  });
+
+  test('missing-L1 branch: the generic wrapper leaves the stub untouched and reports missingL1', () => {
+    const agentPath = writeProjectPmMd(
+      'name: i18n-specialist\nextends: ../../common/agents/i18n-specialist.md',
+      '',
+    );
+    const result = resolveAgentExtendsStub(agentPath, path.join(scratchRoot, 'absent.md'), 'co-work');
+    expect(result.resolved).toBe(false);
+    expect(result.missingL1).toBe(true);
+    expect(fs.readFileSync(agentPath, 'utf8')).toContain('extends:');
+  });
+
+  test('no-ops on a self-contained non-pm agent (no extends: frontmatter)', () => {
+    const agentPath = writeProjectPmMd('name: i18n-specialist\nrole: already resolved', '# Body\n');
+    expect(
+      resolveAgentExtendsStub(agentPath, path.join(scratchRoot, 'nope.md'), 'co-work').resolved,
+    ).toBe(false);
   });
 });
 
