@@ -1303,6 +1303,15 @@
       "source": "manual",
       "created": "2026-09-24",
       "last_updated": "2026-09-24"
+    },
+    {
+      "id": "2026-09-24-skills-registry-overlay-reconcile-design",
+      "title": "skills registry overlay reconcile design",
+      "file": "docs/designs/2026-09-24-skills-registry-overlay-reconcile-design.md",
+      "status": "implemented",
+      "source": "architect",
+      "created": "2026-09-24",
+      "last_updated": "2026-09-24"
     }
   ]
 }

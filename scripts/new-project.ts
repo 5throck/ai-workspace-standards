@@ -1,5 +1,37 @@
 #!/usr/bin/env bun
-// @version 1.26.0
+// @version 1.27.0
+// v1.27.0 (2026-09-24, skills registry overlay reconcile — spec
+//           docs/designs/2026-09-24-skills-registry-overlay-reconcile-design.md,
+//           T-20260924-008): every fresh scaffold delivered a broken
+//           skills/SKILLS.md — the variant overlay walk clobbered the common
+//           63-row seed registry with the variant's 4-row (or non-registry)
+//           index, and the post-scaffold audit then reported 31 missing-row +
+//           1 last_reviewed-drift errors (35 scanned) on every co-design
+//           scaffold. Two changes: (1) the overlay walk now skips
+//           skills/SKILLS.md (local skip, NOT the shared
+//           SCAFFOLD_COMMON_OWNED_FILES set — that set drives validate-templates
+//           WS-07 "variants must not carry the file", wrong policy for a file
+//           variants legitimately ship as template docs), so the common
+//           registry survives as the seed; (2) a post-settle reconcile section
+//           (§6.4) runs after the last skill-tree mutation (the
+//           l2_propagate:false sweep) and before the workspace-script sweep:
+//           pruneSkillRegistryRows drops rows for undelivered skills
+//           (region-pruned k-*, swept L1-only skills, workspace-root-only
+//           seeds), collectDeliveredSkills + reconcileSkillRegistry update
+//           version/last_reviewed from the DELIVERED SKILL.md frontmatter
+//           (delivered frontmatter wins the shadow case — the audit's own
+//           comparison basis) and append rows for variant-exclusive skills
+//           (e.g. service-design). Two placement/alignment passes complete the
+//           audit contract fleet-wide (found by the --all-variants E2E): fold
+//           the seed's `### Variant-Exclusive Skills` rows into the `###
+//           Workspace Skills` table (skill-lifecycle-audit.ts's registry parser
+//           reads ONLY the latter) and align surviving rows' status/owner with
+//           the delivered frontmatter (the design §10 remedy, applied
+//           scaffold-side only — reconcileSkillRegistry stays frozen, AC8).
+//           Idempotent; non-fatal (INFO skip when the
+//           registry is absent) — the post-scaffold audit stays the gate.
+//           Shared machinery lives in helpers/skills-registry.ts v1.1.0;
+//           upgrade-project imports the moved frontmatter parser verbatim.
 // v1.26.0 (2026-09-24, scaffold identity overview — spec
 //           2026-09-24-scaffold-identity-overview-design): §5.2 renders the new
 //           identity seed docs/project.md from
@@ -107,6 +139,13 @@ import {
 } from './helpers/scaffold-markers.ts';
 import { resolvePmExtendsStub, stripL1BMetadata } from './helpers/resolve-pm-stub.ts';
 import { applySubstitutions } from './helpers/substitute-placeholders.ts';
+import {
+  alignSkillRegistryRowsWithFrontmatter,
+  collectDeliveredSkills,
+  foldVariantExclusiveRowsIntoWorkspaceSection,
+  pruneSkillRegistryRows,
+  reconcileSkillRegistry,
+} from './helpers/skills-registry.ts';
 import { SCAFFOLD_COMMON_OWNED_FILES } from './lib/upgrade-policy.ts';
 
 // ── Argument parsing ───────────────────────────────────────────────────────────
@@ -729,6 +768,18 @@ for (const srcFile of walkFiles(templatesDir)) {
     console.log(`  ⏭️  Skipped variant overlay (owned by templates/common/): ${relPath}`);
     continue;
   }
+  // T-20260924-008: the variant skills registry must not clobber the common
+  // 63-row seed — the variant copies are template-side documentation (co-design
+  // ships 4 rows, co-abap a non-registry table), and letting them win left every
+  // scaffold with a registry that contradicts the delivered tree. The common
+  // registry stays as the seed; the §6.4 reconcile below prunes/updates/appends
+  // rows to match the final delivered tree. Local skip, NOT SCAFFOLD_COMMON_
+  // OWNED_FILES: that set drives validate-templates WS-07 (variants must not
+  // carry the file at all) — variants legitimately ship their SKILLS.md.
+  if (relPath === 'skills/SKILLS.md') {
+    console.log(`  ⏭️  Skipped variant overlay (registry reconcile seeds from common): ${relPath}`);
+    continue;
+  }
   const destFile = join(projectDir, relPath);
   mkdirSync(dirname(destFile), { recursive: true });
   copyFileSync(srcFile, destFile);
@@ -1194,6 +1245,91 @@ for (const base of projectSkillBases) {
         console.log(`  🗑️  Excluded L1-only skill (${base}): ${skillName}`);
       }
     }
+  }
+}
+
+// ── 6.4. Reconcile skills/SKILLS.md against the delivered skill tree ─────────
+// T-20260924-008 (spec 2026-09-24-skills-registry-overlay-reconcile): the last
+// mutation of the delivered skills/ tree happened above — the k-* region prune
+// (§2.4), the legacy-L0 removal, and the l2_propagate:false sweep. This is the
+// first point where the delivered tree is final, and it sits upstream of the
+// consumers that read the registry or the tree (skill-graph generation §7.7,
+// VERSION_MANIFEST skills↔manifest parity §7.8, and the post-scaffold audit,
+// whose skill-lifecycle-audit enforces a registry↔tree bijection in BOTH
+// directions). The seed is the common registry (the §2 overlay skip above
+// protected it); this step then makes the delivered registry a pure function
+// of the delivered tree, in five passes:
+//   1. FOLD — move the seed's `### Variant-Exclusive Skills` rows into the
+//      `### Workspace Skills` table (the audit's parser reads ONLY the latter
+//      when the heading exists; rows left behind reported `Missing registry
+//      row` on 7/13 variants during the fleet E2E) and drop the emptied
+//      template-side section.
+//   2. PRUNE — drop rows for undelivered skills (region-pruned k-*, swept
+//      L1-only skills, workspace-root-only seeds).
+//   3. RECONCILE — update version/last_reviewed from the DELIVERED SKILL.md
+//      frontmatter (delivered frontmatter wins the shadow case — it is exactly
+//      what the audit compares) and append rows for variant-exclusive skills
+//      (e.g. co-design's service-design). Shared with the upgrade path.
+//   4. ALIGN — rewrite surviving rows' status/owner cells from the delivered
+//      frontmatter (the design §10 remedy, applied scaffold-side only: the
+//      shared reconcileSkillRegistry stays frozen so upgrade output is
+//      byte-identical — AC8).
+//   5. WRITE — only when the content changed.
+// Idempotent (a second run changes nothing) and non-fatal (INFO skip when the
+// registry is absent) — the post-scaffold audit is the gate.
+{
+  const registryPath = join(projectDir, 'skills', 'SKILLS.md');
+  const skillsDir = join(projectDir, 'skills');
+  if (!existsSync(registryPath)) {
+    console.log('  ℹ️  skills/SKILLS.md not found — skipping registry reconcile');
+  } else {
+    const before = readFileSync(registryPath, 'utf-8');
+
+    // Pass 1 — fold variant-exclusive rows into the audit-visible section.
+    const folded = foldVariantExclusiveRowsIntoWorkspaceSection(before);
+    if (folded.moved > 0) {
+      console.log(`  📥 FOLDED ${folded.moved} variant-exclusive row(s) into the Workspace section`);
+    }
+
+    // Pass 2 — prune to the delivered tree. Keep-set is DIR-based (dirs
+    // containing a SKILL.md), not collect-based: a delivered SKILL.md whose
+    // frontmatter lacks a parseable version keeps its seed row, and the
+    // reconcile below skips it — matching the upgrade path's
+    // `if (!fm.version) continue` delivery semantics (D3).
+    const keepNames = new Set<string>();
+    if (existsSync(skillsDir)) {
+      for (const entry of readdirSync(skillsDir)) {
+        if (existsSync(join(skillsDir, entry, 'SKILL.md'))) keepNames.add(entry);
+      }
+    }
+    const { content: prunedContent, pruned } = pruneSkillRegistryRows(folded.content, keepNames);
+
+    // Passes 3+4 — reconcile from the delivered frontmatter, then align
+    // status/owner (the scaffold-only stronger rule).
+    const delivered = collectDeliveredSkills(skillsDir);
+    const { content: reconciledContent, updated, added } = reconcileSkillRegistry(prunedContent, delivered);
+    const { content: finalContent, aligned } = alignSkillRegistryRowsWithFrontmatter(reconciledContent, delivered);
+
+    for (const skill of pruned) {
+      console.log(`  ✂️  PRUNED registry row: ${skill} (skill not delivered)`);
+    }
+    for (const skill of updated) {
+      console.log(`  🔄 UPDATED registry row: ${skill} (version/last_reviewed from delivered SKILL.md)`);
+    }
+    for (const skill of added) {
+      console.log(`  ➕ ADDED registry row: ${skill} (newly delivered skill)`);
+    }
+    for (const skill of aligned) {
+      console.log(`  🔧 ALIGNED registry row: ${skill} (status/owner from delivered SKILL.md)`);
+    }
+    if (finalContent !== before) {
+      writeFileSync(registryPath, finalContent, 'utf-8');
+    }
+    console.log(
+      `  ✅ skills/SKILLS.md reconciled against delivered tree ` +
+        `(${delivered.length} skills: ${folded.moved} folded, ${pruned.length} pruned, ` +
+        `${updated.length} updated, ${added.length} added, ${aligned.length} aligned)`,
+    );
   }
 }
 
