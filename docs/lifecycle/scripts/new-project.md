@@ -3,9 +3,9 @@
 ## Metadata
 
 - **Current Phase**: production
-- **Version**: 1.25.0
+- **Version**: 1.26.0
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-09-23
+- **Last Updated**: 2026-09-24
 - **Last Reviewer**: pm
 - **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort. The duplicate Metadata section (a v1.10.0-era leftover) was merged into this single section on 2026-09-16.
 
@@ -17,6 +17,7 @@
 
 - **2026-09-21**: v1.24.0 — git init runs with cwd: projectDir (T-20260921-003: parent-repo reinit inherited the workspace origin); README content_hash + README_ko translated_from_hash refreshed post-substitution (T-20260921-002).
 - **2026-09-23**: v1.25.0 — §2.3b extends-stub resolution and §2.5 L1-B strip extracted verbatim to scripts/helpers/resolve-pm-stub.ts (adopt-project engine prerequisites; behavior unchanged).
+- **2026-09-24**: v1.26.0 — §5.2 renders docs/project.md from the identity seed template (templates/common/docs/project.template.md) and removes the raw copy; additive --description/--type flags fill the identity fields, absent flags keep the audit-visible TODO(project-overview) fallback. Spec: docs/designs/2026-09-24-scaffold-identity-overview-design.md
 
 | Date | From | To | Reason | Approver |
 |------|------|-----|---------|----------|
@@ -29,6 +30,7 @@
 | 2026-09-17 | production | production | v1.21.0 (T-20260917-009): VARIANT_OVERLAY_SKIP derives from the upgrade-policy SCAFFOLD_COMMON_OWNED_FILES classification (hand list removed). Spec: docs/designs/2026-09-17-governance-backlog-batch-design.md | automation-engineer |
 | 2026-09-20 | production | production | v1.22.0: `--platform both` renamed to `all` and expanded to cover all three platforms (claude+antigravity+codex); `all` now keeps CLAUDE.md/GEMINI.md/CODEX.md/.codex/ together instead of just the first two | automation-engineer |
 | 2026-09-20 | production | production | v1.23.0: §7.7 graft build tries the global `graft` binary before bunx (a bunx native postinstall failure leaves a partial temp cache that breaks every later bunx call). Spec: docs/designs/2026-09-20-graft-scaffold-resilience-design.md | automation-engineer |
+| 2026-09-24 | production | production | v1.26.0 (scaffold identity overview): docs/project.md identity seed rendered at scaffold time (§5.2), raw .template.md copy removed; additive --description/--type flags. Spec: docs/designs/2026-09-24-scaffold-identity-overview-design.md | automation-engineer |
 
 ## Acceptance Criteria
 

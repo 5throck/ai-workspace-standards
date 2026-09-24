@@ -1,5 +1,20 @@
 #!/usr/bin/env bun
-// @version 1.45.3
+// @version 1.46.0
+// v1.46.0 (2026-09-24, scaffold identity overview — spec
+//          docs/designs/2026-09-24-scaffold-identity-overview-design.md §13):
+//          IDENTITY SEED step after the TEMPLATE TREE SYNC pass — renders
+//          templates/common/docs/project.template.md into docs/project.md ONLY
+//          when absent (existing file → no write, no verdict; AC4 never
+//          overwritten). The sync pass's template-side walk can never deliver
+//          that path (no template-side counterpart; the ADD_IF_MISSING claim is
+//          a defensive no-op), so without this step the v2.13 context.md pointer
+//          upgrade would dangle in every existing project. Rendering reuses
+//          applySubstitutions() (one render path with new-project §5.2) from the
+//          run's resolved commonDir (H6 parity); TODO(project-overview) fallback
+//          lines survive — seeded undescribed projects land audit-WARN-visible.
+//          A present-but-uncommitted docs/project.md also skips the seed (the
+//          pre-upgrade stash push -u hides it from the fs check; isLocallyModified
+//          still sees it), so AC4 holds for dirty trees too.
 // v1.45.3 (2026-09-23, root-debris incident hardening): templatesDir invariant —
 //          an empty variant collapsing templatesDir onto the templates ROOT now
 //          fails closed before any pass runs (see the invariant comment below).
@@ -393,6 +408,7 @@ import { resolve, join, dirname, basename, isAbsolute, relative } from 'node:pat
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { extractScriptVersion, preserveLifecycleFrontmatter } from './helpers/upgrade-versions.ts';
+import { applySubstitutions } from './helpers/substitute-placeholders.ts';
 import { reconcileSkillRegistry } from './helpers/skills-registry.ts';
 import {
   splitIntoSections,
@@ -2364,6 +2380,45 @@ console.log('--- TEMPLATE TREE SYNC: uncovered template files (default policy) -
   }
   if (treeChanged === 0) console.log('  (no uncovered template files — project already at parity)');
   console.log('');
+}
+
+// ── IDENTITY SEED: docs/project.md (add-if-missing render — spec
+//    2026-09-24-scaffold-identity-overview-design.md §13.2) ─────────────────────
+// The TEMPLATE TREE SYNC walk above enumerates TEMPLATE-SIDE files only, so the
+// upgrade-policy ADD_IF_MISSING claim for docs/project.md can never fire there
+// (the path has no template-side counterpart — only the .template.md SSOT, which
+// stays TEMPLATE_ONLY/scaffold-removed). This dedicated step closes that delivery
+// gap. Seed ONLY when docs/project.md is absent: an existing file (fresh scaffold,
+// or any project that already filled it) produces no write and no verdict
+// (AC4: never overwritten). Rendering reuses the SAME applySubstitutions() path
+// new-project §5.2 uses, read from THIS run's resolved commonDir (H6 parity —
+// the tag-extracted copy under --version <tag>); the TODO(project-overview)
+// fallback lines are not tokens and survive rendering untouched, so a seeded
+// undescribed project lands in exactly the audit-WARN-visible state R4 intends.
+{
+  const identityTplPath = join(commonDir, 'docs', 'project.template.md');
+  const identityDestPath = join(projectDir, 'docs', 'project.md');
+  // isLocallyModified covers the dirty-tree corner: a user-edited but UNCOMMITTED
+  // docs/project.md is snapshotted into preUpgradeDirty before the pre-upgrade
+  // stash (push -u) removes it from disk — without this guard the seed would fire
+  // on the stashed-clean tree and the pop would leave the seeded form on top
+  // (AC4 violation for uncommitted identity content). Present-but-dirty → skip.
+  if (existsSync(identityTplPath) && !existsSync(identityDestPath) && !isLocallyModified(identityDestPath)) {
+    console.log('  NEW    docs/project.md  (identity seed — add-if-missing)');
+    if (!dryRun) {
+      const identityRendered = applySubstitutions(readFileSync(identityTplPath, 'utf8'), {
+        projectName: basename(projectDir),
+        description: 'A new project',
+        characteristics: '',
+        variantName: variant,
+        countryDisplayName: '',
+      });
+      mkdirSync(dirname(identityDestPath), { recursive: true });
+      writeFileSync(identityDestPath, identityRendered, 'utf8');
+    }
+    console.log(`  ${dryTag}COPIED: docs/project.md`);
+    treeChanged++;
+  }
 }
 
 // ── ENV_SAMPLE SYNC: .env.sample (country-aware template delivery, merge-based) ───────────

@@ -1,8 +1,15 @@
 #!/usr/bin/env bun
 /**
  * Shared Scaffold Delivery Contracts
- * @version 1.4.0
+ * @version 1.5.0
  *
+ * v1.5.0 (2026-09-24, scaffold identity overview — spec
+ *         2026-09-24-scaffold-identity-overview-design): docs/project.template.md
+ *         joins NEW_PROJECT_CLEANUP_FILES (new-project §5.2 renders it into
+ *         docs/project.md and removes the raw copy, same lifecycle as
+ *         docs/variant.context.template.md) and docs/project.md joins
+ *         POST_DELIVERY_ARTIFACTS (a scaffold-time render, not a common-tree
+ *         relpath — the E2E pinning checks subtract it from actual trees).
  * v1.4.0: PlatformProfile's 'both' renamed to 'all' and its delivery-derivation
  * meaning expanded to include the codex platform (CODEX.md/.codex/), matching
  * the same rename in new-project.ts/upgrade-project.ts/test-new-project.ts —
@@ -268,6 +275,10 @@ export const NEW_PROJECT_L1_ONLY_DIRS: readonly string[] = [
 export const NEW_PROJECT_CLEANUP_FILES: readonly string[] = [
   'scripts/propagation-map.json', 'variant.json', 'agents/pm.md.backup',
   'docs/variant.context.template.md',
+  // Rendered into docs/project.md at scaffold time (§5.2), then the raw copy is
+  // removed — same copy-then-remove lifecycle as docs/variant.context.template.md.
+  // (spec 2026-09-24-scaffold-identity-overview-design)
+  'docs/project.template.md',
 ];
 
 /** Legacy hardcoded L0-only skills new-project removes as a safety net. */
@@ -400,10 +411,13 @@ export type PlatformProfile = 'claude' | 'antigravity' | 'all' | 'codex';
  * delivered into a scaffolded project because scaffold-time steps run after
  * delivery: dependency install, git init, graft index build, lockfile
  * regeneration. The E2E pinning checks subtract these from ACTUAL scaffolded
- * trees before comparing against the derivations.
+ * trees before comparing against the derivations. docs/project.md joins as the
+ * scaffold-time RENDER of the delivered docs/project.template.md raw copy
+ * (removed post-render; not a common-tree relpath, so it can never join the
+ * derivation universe — spec 2026-09-24-scaffold-identity-overview-design).
  */
 export const POST_DELIVERY_ARTIFACTS: { exact: readonly string[]; prefixes: readonly string[] } = {
-  exact: ['bun.lock', 'bun.lockb', 'package-lock.json'],
+  exact: ['bun.lock', 'bun.lockb', 'package-lock.json', 'docs/project.md'],
   prefixes: ['node_modules/', '.git/', 'graft/'],
 };
 
