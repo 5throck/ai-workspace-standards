@@ -1348,6 +1348,15 @@
       "source": "architect",
       "created": "2026-09-24",
       "last_updated": "2026-09-24"
+    },
+    {
+      "id": "2026-09-22-variant-mirror-stale-orphan-check-design",
+      "title": "variant mirror stale orphan check design",
+      "file": "docs/designs/2026-09-22-variant-mirror-stale-orphan-check-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-24",
+      "last_updated": "2026-09-24"
     }
   ]
 }
