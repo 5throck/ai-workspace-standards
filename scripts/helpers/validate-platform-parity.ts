@@ -2,10 +2,29 @@
 /**
  * Platform Parity Validator
  *
- * Validates cross-platform parity between .claude/ and .gemini/ directories.
- * Ensures structural equivalence, settings schema parity, and command/skill alignment.
+ * Validates cross-platform parity between a variant's platform mirrors, using
+ * .claude/ as the SSOT-side reference (spec
+ * 2026-09-25-verifier-platform-expansion-design site 12, ruling D12):
+ * structural equivalence, settings schema parity, and command/skill alignment
+ * across .gemini/, .agents/ and .codex/ (mapping-aware for codex).
  *
- * @version 1.1.1
+ * Mapping semantics (ADR-0077 D4): .claude/commands/<x>.md is the commands
+ * SSOT; codex consumes it as .codex/prompts/<x>.md (1:1 name mirror). Codex
+ * files that are neither skills nor prompts (e.g. config.toml) are OUT OF
+ * SCOPE: settings.json is a Claude/Gemini concept and .codex/config.toml
+ * schema parity is a content-policy decision, not a verifier expansion.
+ * .agents/commands is excluded — no producer, no documented consumer (design
+ * Finding D; recorded exclusion, not a silent skip).
+ *
+ * Skip markers (D3.4 generalized): `mirror-parity: skip` in a .claude file's
+ * frontmatter means "claude-only parity" for all three non-claude mirrors;
+ * `gemini-parity: skip` is accepted as a legacy alias.
+ *
+ * Severity: FATAL findings gate the pipeline (Phase 6). Findings involving the
+ * .agents/.codex trees are net-new coverage soaking as WARNING-severity
+ * violations (ADR-0055) — the dated promotion ticket flips them to fatal.
+ *
+ * @version 1.2.0
  * @phase 3: Platform Parity Validation
  *
  * Dependencies:
@@ -13,10 +32,10 @@
  * - lib/error-handling.ts (Error management)
  */
 
-import { join, relative, dirname } from 'path';
-import { existsSync, readFileSync, readdirSync, statSync } from 'fs';
+import { join, relative } from 'path';
+import { existsSync, readFileSync, readdirSync } from 'fs';
 import { readUTF8File } from '../lib/encoding-utils.ts';
-import { ErrorPhase, fatalError, warningError } from '../lib/error-handling.ts';
+import { ErrorPhase, fatalError } from '../lib/error-handling.ts';
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -38,11 +57,18 @@ export interface ParityValidationResult {
 
 export interface ParityViolation {
   /** Violation type */
-  type: 'claude_only' | 'gemini_only' | 'schema_mismatch' | 'content_divergence' | 'missing_gemini_parity_skip';
+  type:
+    | 'claude_only'
+    | 'gemini_only'
+    | 'agents_only'
+    | 'codex_only'
+    | 'schema_mismatch'
+    | 'content_divergence'
+    | 'missing_gemini_parity_skip';
   /** File path relative to variant root */
   filePath: string;
-  /** Which platform has the file */
-  platform: 'claude' | 'gemini' | 'both';
+  /** Which platform has the file (single mirror) or 'both' for schema issues */
+  platform: 'claude' | 'gemini' | 'agents' | 'codex' | 'both';
   /** Severity */
   severity: 'fatal' | 'warning' | 'info';
   /** Description of the violation */
@@ -51,15 +77,25 @@ export interface ParityViolation {
   remediation: string;
 }
 
-export interface PlatformFileManifest {
-  /** Files only in .claude/ */
-  claudeOnly: string[];
-  /** Files only in .gemini/ */
-  geminiOnly: string[];
-  /** Files in both platforms */
-  both: string[];
-  /** Files marked with gemini-parity: skip */
+/** Per-mirror comparison outcome against the .claude/ reference tree. */
+interface MirrorManifest {
+  platform: 'gemini' | 'agents' | 'codex';
+  /** Claude-side relative paths missing from this mirror */
+  missingFromMirror: string[];
+  /** Mirror-side relative paths with no .claude/ counterpart */
+  mirrorOnly: string[];
+  /** Claude-side relative paths present in both */
+  matched: string[];
+  /** Claude-side paths carrying a skip marker (claude-only parity) */
   skipped: string[];
+}
+
+export interface PlatformFileManifest {
+  gemini: MirrorManifest;
+  agents: MirrorManifest;
+  codex: MirrorManifest;
+  /** Files present in both .claude/ and .gemini/ (legacy summary field) */
+  both: string[];
 }
 
 // ============================================================================
@@ -124,91 +160,44 @@ function scanDirectoryRecursively(dirPath: string, extensions: string[] = []): s
 }
 
 /**
- * Check if file has gemini-parity: skip frontmatter
- * @version 1.1.0
+ * Check if file carries a claude-only parity skip marker. `mirror-parity:
+ * skip` is the canonical marker; `gemini-parity: skip` is accepted as a
+ * legacy alias (D3.4 generalized semantics).
+ * @version 1.2.0
  */
-function hasGeminiParitySkip(filePath: string): boolean {
+function hasMirrorParitySkip(filePath: string): boolean {
   try {
     const content = readUTF8File(filePath);
-    const match = content.match(/gemini-parity:\s*skip/i);
-    return match !== null;
+    return /(^|\n)(mirror-parity|gemini-parity):\s*skip\s*(\n|$)/.test(content);
   } catch {
     return false;
   }
 }
 
 /**
- * Extract frontmatter from file
- * @version 1.1.0
+ * Translate a mirror-side relative path into its .claude/-side counterpart.
+ * Codex is mapping-aware: prompts/<x>.md ↔ commands/<x>.md (ADR-0077 D4);
+ * codex files that are neither skills/ nor prompts/ are out of scope (null).
+ * gemini/agents map 1:1 (agents/commands excluded — Finding D).
+ * @version 1.2.0
  */
-function extractFrontmatter(filePath: string): Record<string, any> | null {
-  try {
-    const content = readUTF8File(filePath);
-
-    // Check for YAML frontmatter
-    const frontmatterRegex = /^---\s*\n([\s\S]*?)\n---/;
-    const match = content.match(frontmatterRegex);
-
-    if (!match) {
-      return null;
+function mirrorToClaudeRelative(
+  platform: 'gemini' | 'agents' | 'codex',
+  relativePath: string,
+): string | null {
+  if (platform === 'codex') {
+    if (relativePath.startsWith('skills/') || relativePath.startsWith('agents/')) {
+      return relativePath;
     }
-
-    const frontmatterText = match[1];
-    const frontmatter: Record<string, any> = {};
-
-    // Simple YAML parser (simplified for common use cases)
-    const lines = frontmatterText.split('\n');
-    for (const line of lines) {
-      const colonIndex = line.indexOf(':');
-      if (colonIndex > 0) {
-        const key = line.substring(0, colonIndex).trim();
-        const value = line.substring(colonIndex + 1).trim();
-
-        // Parse boolean, number, string, array
-        if (value === 'true') {
-          frontmatter[key] = true;
-        } else if (value === 'false') {
-          frontmatter[key] = false;
-        } else if (value.startsWith('[') && value.endsWith(']')) {
-          frontmatter[key] = value.slice(1, -1).split(',').map(s => s.trim());
-        } else if (!isNaN(parseFloat(value))) {
-          frontmatter[key] = parseFloat(value);
-        } else {
-          frontmatter[key] = value;
-        }
-      }
+    if (relativePath.startsWith('prompts/')) {
+      return `commands/${relativePath.slice('prompts/'.length)}`;
     }
-
-    return frontmatter;
-  } catch {
-    return null;
+    return null; // config.toml and other codex-native files: out of scope
   }
-}
-
-/**
- * Compare JSON schemas for shared tier settings
- * @version 1.1.0
- */
-function compareSharedSettingsSchema(
-  claudeSettings: Record<string, any>,
-  geminiSettings: Record<string, any>
-): string[] {
-  const mismatches: string[] = [];
-
-  // Check shared tier keys
-  for (const key of SETTINGS_JSON_SCHEMA.shared) {
-    const claudeValue = JSON.stringify(claudeSettings[key]);
-    const geminiValue = JSON.stringify(geminiSettings[key]);
-
-    if (claudeValue !== geminiValue) {
-      mismatches.push(
-        `Shared tier setting '${key}' differs: ` +
-        `claude=${claudeValue}, gemini=${geminiValue}`
-      );
-    }
+  if (platform === 'agents' && relativePath.startsWith('commands/')) {
+    return null; // .agents/commands ungoverned surface (Finding D exclusion)
   }
-
-  return mismatches;
+  return relativePath;
 }
 
 // ============================================================================
@@ -216,59 +205,66 @@ function compareSharedSettingsSchema(
 // ============================================================================
 
 /**
- * Build platform file manifest
- * @version 1.1.0
+ * Build the per-mirror platform file manifest (.claude/ as reference)
+ * @version 1.2.0
  */
 function buildPlatformManifest(variantPath: string): PlatformFileManifest {
   const claudePath = join(variantPath, '.claude');
-  const geminiPath = join(variantPath, '.gemini');
+
+  const makeMirror = (platform: 'gemini' | 'agents' | 'codex'): MirrorManifest => ({
+    platform,
+    missingFromMirror: [],
+    mirrorOnly: [],
+    matched: [],
+    skipped: [],
+  });
 
   const manifest: PlatformFileManifest = {
-    claudeOnly: [],
-    geminiOnly: [],
+    gemini: makeMirror('gemini'),
+    agents: makeMirror('agents'),
+    codex: makeMirror('codex'),
     both: [],
-    skipped: [],
   };
 
-  // Scan .claude/
-  if (existsSync(claudePath)) {
-    const claudeFiles = scanDirectoryRecursively(claudePath, ['.md', '.json']);
+  if (!existsSync(claudePath)) return manifest;
 
-    for (const claudeFile of claudeFiles) {
-      const relativePath = relative(claudePath, claudeFile);
+  const mirrors: ReadonlyArray<readonly ['gemini' | 'agents' | 'codex', MirrorManifest]> = [
+    ['gemini', manifest.gemini],
+    ['agents', manifest.agents],
+    ['codex', manifest.codex],
+  ];
+  const mirrorRoots = new Map(mirrors.map(([p]) => [p, join(variantPath, `.${p}`)]));
 
-      // Check for gemini-parity: skip
-      if (hasGeminiParitySkip(claudeFile)) {
-        manifest.skipped.push(relativePath);
-        continue;
-      }
-
-      // Check if corresponding file exists in .gemini/
-      const geminiFile = join(geminiPath, relativePath);
-      if (!existsSync(geminiFile)) {
-        manifest.claudeOnly.push(relativePath);
-      } else {
-        manifest.both.push(relativePath);
+  // Reference side: every .claude file maps into each mirror's namespace
+  const claudeFiles = scanDirectoryRecursively(claudePath, ['.md', '.json']);
+  for (const claudeFile of claudeFiles) {
+    const relativePath = relative(claudePath, claudeFile);
+    if (hasMirrorParitySkip(claudeFile)) {
+      for (const [, m] of mirrors) m.skipped.push(relativePath);
+      continue;
+    }
+    let inAllMirrors = true;
+    for (const [platform, m] of mirrors) {
+      const mirrorFile = join(mirrorRoots.get(platform)!, relativePath);
+      if (!existsSync(mirrorFile)) {
+        m.missingFromMirror.push(relativePath);
+        inAllMirrors = false;
       }
     }
+    if (inAllMirrors) manifest.both.push(relativePath);
   }
 
-  // Scan .gemini/
-  if (existsSync(geminiPath)) {
-    const geminiFiles = scanDirectoryRecursively(geminiPath, ['.md', '.json']);
-
-    for (const geminiFile of geminiFiles) {
-      const relativePath = relative(geminiPath, geminiFile);
-
-      // Skip if already counted in "both"
-      if (manifest.both.includes(relativePath)) {
-        continue;
-      }
-
-      // Check if corresponding file exists in .claude/
-      const claudeFile = join(claudePath, relativePath);
-      if (!existsSync(claudeFile)) {
-        manifest.geminiOnly.push(relativePath);
+  // Mirror side: files with no .claude/ counterpart (mapping-aware)
+  for (const [platform, m] of mirrors) {
+    const mirrorRoot = mirrorRoots.get(platform)!;
+    if (!existsSync(mirrorRoot)) continue;
+    const mirrorFiles = scanDirectoryRecursively(mirrorRoot, ['.md', '.json']);
+    for (const mirrorFile of mirrorFiles) {
+      const mirrorRelative = relative(mirrorRoot, mirrorFile);
+      const claudeRelative = mirrorToClaudeRelative(platform, mirrorRelative);
+      if (claudeRelative === null) continue; // out-of-scope mirror file
+      if (!existsSync(join(claudePath, claudeRelative))) {
+        m.mirrorOnly.push(mirrorRelative);
       }
     }
   }
@@ -277,7 +273,9 @@ function buildPlatformManifest(variantPath: string): PlatformFileManifest {
 }
 
 /**
- * Validate settings.json schema parity
+ * Validate settings.json schema parity (stays claude↔gemini: settings.json is
+ * a Claude/Gemini concept; .codex/config.toml schema parity is out of scope —
+ * documented in the module header)
  * @version 1.1.0
  */
 function validateSettingsParity(variantPath: string): ParityViolation[] {
@@ -348,41 +346,70 @@ function validateSettingsParity(variantPath: string): ParityViolation[] {
   return violations;
 }
 
+function compareSharedSettingsSchema(
+  claudeSettings: Record<string, any>,
+  geminiSettings: Record<string, any>
+): string[] {
+  const mismatches: string[] = [];
+
+  // Check shared tier keys
+  for (const key of SETTINGS_JSON_SCHEMA.shared) {
+    const claudeValue = JSON.stringify(claudeSettings[key]);
+    const geminiValue = JSON.stringify(geminiSettings[key]);
+
+    if (claudeValue !== geminiValue) {
+      mismatches.push(
+        `Shared tier setting '${key}' differs: ` +
+        `claude=${claudeValue}, gemini=${geminiValue}`
+      );
+    }
+  }
+
+  return mismatches;
+}
+
 /**
- * Validate command parity
- * @version 1.1.0
+ * Validate command parity across the three mirrors. The codex manifest is
+ * mapping-aware (prompts ↔ commands), so a codex gap surfaces here too.
+ * .gemini findings keep pre-existing fatal severity; .agents/.codex findings
+ * are net-new coverage soaking at warning severity (ADR-0055) —
+ * TODO(promotion): flip to fatal.
+ * @version 1.2.0
  */
 function validateCommandParity(manifest: PlatformFileManifest): ParityViolation[] {
   const violations: ParityViolation[] = [];
 
-  // Check commands/ directory
-  for (const claudeOnly of manifest.claudeOnly) {
-    if (claudeOnly.startsWith('commands/') && claudeOnly.endsWith('.md')) {
-      // Check if has gemini-parity: skip
-      if (manifest.skipped.includes(claudeOnly)) {
-        continue;
-      }
+  for (const m of [manifest.gemini, manifest.agents, manifest.codex]) {
+    const soak = m.platform !== 'gemini'; // TODO(promotion): flip to fatal after soak
+    const severity = soak ? 'warning' : 'fatal';
+    const soakNote = soak ? ' (soak: WARN until promotion)' : '';
 
+    for (const rel of m.missingFromMirror) {
+      if (!rel.startsWith('commands/') || !rel.endsWith('.md')) continue;
+      if (m.skipped.includes(rel)) continue;
       violations.push({
         type: 'claude_only',
-        filePath: `.claude/${claudeOnly}`,
+        filePath: `.claude/${rel}`,
         platform: 'claude',
-        severity: 'fatal',
-        description: `Command file exists only in .claude/: ${claudeOnly}`,
-        remediation: `Create corresponding file in .gemini/commands/ or add 'gemini-parity: skip' to frontmatter`,
+        severity,
+        description: `Command file exists only in .claude/ — no .${m.platform}/ counterpart: ${rel}${soakNote}`,
+        remediation: m.platform === 'codex'
+          ? `Run sync-skills (Phase 1b mirrors .claude/commands to .codex/prompts unconditionally)`
+          : `Create corresponding file in .${m.platform}/commands/ or add 'mirror-parity: skip' to frontmatter`,
       });
     }
-  }
 
-  for (const geminiOnly of manifest.geminiOnly) {
-    if (geminiOnly.startsWith('commands/') && geminiOnly.endsWith('.md')) {
+    for (const rel of m.mirrorOnly) {
+      if (!rel.endsWith('.md')) continue;
+      const isCommand = rel.startsWith('commands/') || rel.startsWith('prompts/');
+      if (!isCommand) continue;
       violations.push({
-        type: 'gemini_only',
-        filePath: `.gemini/${geminiOnly}`,
-        platform: 'gemini',
-        severity: 'fatal',
-        description: `Command file exists only in .gemini/: ${geminiOnly}`,
-        remediation: `Create corresponding file in .claude/commands/`,
+        type: `${m.platform}_only` as ParityViolation['type'],
+        filePath: `.${m.platform}/${rel}`,
+        platform: m.platform,
+        severity,
+        description: `Command file exists only in .${m.platform}/: ${rel}${soakNote}`,
+        remediation: `Create corresponding file in .claude/commands/ (the commands SSOT)`,
       });
     }
   }
@@ -391,40 +418,42 @@ function validateCommandParity(manifest: PlatformFileManifest): ParityViolation[
 }
 
 /**
- * Validate skill parity
- * @version 1.1.0
+ * Validate skill parity across the three mirrors.
+ * .gemini findings keep pre-existing fatal severity; .agents/.codex findings
+ * are net-new coverage soaking at warning severity (ADR-0055) —
+ * TODO(promotion): flip to fatal.
+ * @version 1.2.0
  */
 function validateSkillParity(manifest: PlatformFileManifest): ParityViolation[] {
   const violations: ParityViolation[] = [];
 
-  // Check skills/ directory
-  for (const claudeOnly of manifest.claudeOnly) {
-    if (claudeOnly.startsWith('skills/') && claudeOnly.endsWith('SKILL.md')) {
-      // Check if has gemini-parity: skip
-      if (manifest.skipped.includes(claudeOnly)) {
-        continue;
-      }
+  for (const m of [manifest.gemini, manifest.agents, manifest.codex]) {
+    const soak = m.platform !== 'gemini'; // TODO(promotion): flip to fatal after soak
+    const severity = soak ? 'warning' : 'fatal';
+    const soakNote = soak ? ' (soak: WARN until promotion)' : '';
 
+    for (const rel of m.missingFromMirror) {
+      if (!rel.startsWith('skills/') || !rel.endsWith('SKILL.md')) continue;
+      if (m.skipped.includes(rel)) continue;
       violations.push({
         type: 'claude_only',
-        filePath: `.claude/${claudeOnly}`,
+        filePath: `.claude/${rel}`,
         platform: 'claude',
-        severity: 'fatal',
-        description: `Skill exists only in .claude/: ${claudeOnly}`,
-        remediation: `Create corresponding skill in .gemini/skills/ or add 'gemini-parity: skip' to frontmatter`,
+        severity,
+        description: `Skill exists only in .claude/ — no .${m.platform}/ counterpart: ${rel}${soakNote}`,
+        remediation: `Create corresponding skill in .${m.platform}/skills/ or add 'mirror-parity: skip' to frontmatter`,
       });
     }
-  }
 
-  for (const geminiOnly of manifest.geminiOnly) {
-    if (geminiOnly.startsWith('skills/') && geminiOnly.endsWith('SKILL.md')) {
+    for (const rel of m.mirrorOnly) {
+      if (!rel.startsWith('skills/') || !rel.endsWith('SKILL.md')) continue;
       violations.push({
-        type: 'gemini_only',
-        filePath: `.gemini/${geminiOnly}`,
-        platform: 'gemini',
-        severity: 'fatal',
-        description: `Skill exists only in .gemini/: ${geminiOnly}`,
-        remediation: `Create corresponding skill in .claude/skills/`,
+        type: `${m.platform}_only` as ParityViolation['type'],
+        filePath: `.${m.platform}/${rel}`,
+        platform: m.platform,
+        severity,
+        description: `Skill exists only in .${m.platform}/: ${rel}${soakNote}`,
+        remediation: `Create corresponding skill in .claude/skills/ (the SSOT-side reference)`,
       });
     }
   }
@@ -433,34 +462,34 @@ function validateSkillParity(manifest: PlatformFileManifest): ParityViolation[] 
 }
 
 /**
- * Validate agent parity
- * @version 1.1.0
+ * Validate agent parity across the three mirrors (warning severity — agents/
+ * mirrors are advisory on every platform).
+ * @version 1.2.0
  */
 function validateAgentParity(manifest: PlatformFileManifest): ParityViolation[] {
   const violations: ParityViolation[] = [];
 
-  // Check agents/ directory
-  for (const claudeOnly of manifest.claudeOnly) {
-    if (claudeOnly.startsWith('agents/') && claudeOnly.endsWith('.md')) {
+  for (const m of [manifest.gemini, manifest.agents, manifest.codex]) {
+    for (const rel of m.missingFromMirror) {
+      if (!rel.startsWith('agents/') || !rel.endsWith('.md')) continue;
       violations.push({
         type: 'claude_only',
-        filePath: `.claude/${claudeOnly}`,
+        filePath: `.claude/${rel}`,
         platform: 'claude',
         severity: 'warning',
-        description: `Agent file exists only in .claude/: ${claudeOnly}`,
-        remediation: `Create corresponding agent in .gemini/agents/ if applicable to Gemini platform`,
+        description: `Agent file exists only in .claude/ — no .${m.platform}/ counterpart: ${rel}`,
+        remediation: `Create corresponding agent in .${m.platform}/agents/ if applicable to the platform`,
       });
     }
-  }
 
-  for (const geminiOnly of manifest.geminiOnly) {
-    if (geminiOnly.startsWith('agents/') && geminiOnly.endsWith('.md')) {
+    for (const rel of m.mirrorOnly) {
+      if (!rel.startsWith('agents/') || !rel.endsWith('.md')) continue;
       violations.push({
-        type: 'gemini_only',
-        filePath: `.gemini/${geminiOnly}`,
-        platform: 'gemini',
+        type: `${m.platform}_only` as ParityViolation['type'],
+        filePath: `.${m.platform}/${rel}`,
+        platform: m.platform,
         severity: 'warning',
-        description: `Agent file exists only in .gemini/: ${geminiOnly}`,
+        description: `Agent file exists only in .${m.platform}/: ${rel}`,
         remediation: `Create corresponding agent in .claude/agents/ if applicable to Claude platform`,
       });
     }
@@ -475,7 +504,7 @@ function validateAgentParity(manifest: PlatformFileManifest): ParityViolation[] 
 
 /**
  * Validate platform parity for a variant
- * @version 1.1.0
+ * @version 1.2.0
  */
 export async function validatePlatformParity(variantPath: string): Promise<ParityValidationResult> {
   console.log(`\n=== Validating Platform Parity ===`);
@@ -494,14 +523,14 @@ export async function validatePlatformParity(variantPath: string): Promise<Parit
   const violations: ParityViolation[] = [];
 
   // Build platform file manifest
-  console.log(`=== Building Platform Manifest ===`);
+  console.log(`=== Building Platform Manifest (.claude/ reference ↔ .gemini/.agents/.codex mirrors) ===`);
   const manifest = buildPlatformManifest(variantPath);
-  console.log(`Claude-only files: ${manifest.claudeOnly.length}`);
-  console.log(`Gemini-only files: ${manifest.geminiOnly.length}`);
-  console.log(`Both platforms: ${manifest.both.length}`);
-  console.log(`Skipped (gemini-parity: skip): ${manifest.skipped.length}`);
+  console.log(`Gemini — missing: ${manifest.gemini.missingFromMirror.length}, mirror-only: ${manifest.gemini.mirrorOnly.length}, skipped: ${manifest.gemini.skipped.length}`);
+  console.log(`Agents — missing: ${manifest.agents.missingFromMirror.length}, mirror-only: ${manifest.agents.mirrorOnly.length}, skipped: ${manifest.agents.skipped.length}`);
+  console.log(`Codex (mapping-aware) — missing: ${manifest.codex.missingFromMirror.length}, mirror-only: ${manifest.codex.mirrorOnly.length}, skipped: ${manifest.codex.skipped.length}`);
+  console.log(`Files in both .claude/ and .gemini/: ${manifest.both.length}`);
 
-  // Validate settings.json parity
+  // Validate settings.json parity (claude↔gemini — see module header)
   console.log(`\n=== Validating settings.json Parity ===`);
   const settingsViolations = validateSettingsParity(variantPath);
   violations.push(...settingsViolations);
@@ -525,10 +554,10 @@ export async function validatePlatformParity(variantPath: string): Promise<Parit
   violations.push(...agentViolations);
   console.log(`Found ${agentViolations.length} violations`);
 
-  // Compute summary
+  // Compute summary (legacy fields preserved for callers; gemini-based)
   const summary = {
-    claudeOnlyFiles: manifest.claudeOnly.length,
-    geminiOnlyFiles: manifest.geminiOnly.length,
+    claudeOnlyFiles: manifest.gemini.missingFromMirror.length,
+    geminiOnlyFiles: manifest.gemini.mirrorOnly.length,
     bothPlatformsFiles: manifest.both.length,
     totalViolations: violations.length,
   };

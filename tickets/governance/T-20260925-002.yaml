@@ -1,0 +1,28 @@
+schemaVersion: 1
+id: T-20260925-002
+kind: manual
+title: >-
+  Promote platform verifier expansion soak WARNs to Fail (spec
+  2026-09-25-verifier-platform-expansion-design §6/§13): flip the net-new
+  4-platform check coverage shipped in WARN mode — verify-platform-lifecycle
+  Check E (.agents/.codex missing-version), Check F (non claude-gemini version
+  mismatches), Check G (.codex/prompts mapping leg), Check H (.agents/.codex
+  propagation); validate-templates C-CM-04 .codex/prompts reverse+sweep legs and
+  .agents/.codex platform-skills sweep, VA-03 .agents/.codex counterpart legs,
+  P-01b CODEX.md leg, mirror-hygiene check; audit.ts command-parity
+  .codex/prompts leg; validators/platform-parity-validator +
+  helpers/validate-platform-parity .agents/.codex findings. Preconditions: the
+  T-20260925-001 class (trio version mismatches, 24 findings post-heal) must be
+  dispositioned before promotion; no un-dispositioned WARN may survive (design
+  §7 hard rule). Severity flip only — message text unchanged.
+priority: normal
+not_before: '2026-10-09'
+status: backlog
+attempts: 0
+created_at: '2026-09-24T16:45:24.557Z'
+history:
+  - at: '2026-09-24T16:45:24.557Z'
+    from: null
+    to: backlog
+result: null
+error: null

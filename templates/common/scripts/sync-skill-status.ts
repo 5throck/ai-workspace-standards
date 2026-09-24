@@ -1,14 +1,23 @@
 #!/usr/bin/env bun
 /**
  * Skill Status Synchronization Script
- * @version 1.0.1
+ * @version 1.1.0
  * Synchronizes skill status between SKILL.md and registry tables
+ *
+ * v1.1.0 (spec 2026-09-25-verifier-platform-expansion-design site 5, ruling D5):
+ * scan scope widened from the two-platform-era ['skills', '.claude/skills']
+ * literal to PLATFORM_SKILL_BASES (all five bases), plus the SSOT-precedence
+ * guard: when a skill exists in skills/ (the SSOT), the SSOT's status wins and
+ * mirror copies are skipped — a stale mirror copy carrying status: deprecated
+ * after an SSOT re-activation must not flip the registry. Mirrors speak only
+ * for platform-only skills (e.g. graft).
  */
 
 import { readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { cwd } from 'node:process';
 import { execFileSync } from 'node:child_process';
+import { PLATFORM_SKILL_BASES } from './lib/platforms.ts';
 
 const colors = {
   red: '\x1b[31m',
@@ -21,9 +30,20 @@ const colors = {
 const args = process.argv.slice(2);
 const targetIdx = args.indexOf('--target');
 const ROOT = targetIdx !== -1 && args[targetIdx + 1] ? args[targetIdx + 1] : cwd();
-const SKILL_DIRS = ['skills', '.claude/skills'];
+const SSOT_DIR = 'skills';
+const SKILL_DIRS = PLATFORM_SKILL_BASES;
 const AGENTS_MD = join(ROOT, 'AGENTS.md');
 const CONTEXT_MD = join(ROOT, 'docs', 'context.md');
+
+// SSOT-precedence guard (D5): skill names owned by skills/ — mirror copies of
+// these are skipped; mirrors only speak for platform-only skills.
+const ssotSkillNames = new Set<string>(
+  existsSync(join(ROOT, SSOT_DIR))
+    ? readdirSync(join(ROOT, SSOT_DIR), { withFileTypes: true })
+        .filter(f => f.isDirectory() && existsSync(join(ROOT, SSOT_DIR, f.name, 'SKILL.md')))
+        .map(f => f.name)
+    : [],
+);
 
 console.log(`${colors.cyan}=== Skill Status Synchronization ===${colors.reset}\n`);
 
@@ -38,6 +58,11 @@ for (const dir of SKILL_DIRS) {
     .map(f => f.name);
 
   for (const skillName of skillDirs) {
+    // SSOT-precedence guard: mirrors of SSOT skills never override skills/.
+    if (dir !== SSOT_DIR && ssotSkillNames.has(skillName)) {
+      console.log(`${colors.cyan}⓾ ${dir}/${skillName}: SSOT copy exists in ${SSOT_DIR}/ — mirror skipped (SSOT precedence)${colors.reset}`);
+      continue;
+    }
     const skillFile = join(fullDir, skillName, 'SKILL.md');
     
     if (!existsSync(skillFile)) continue;

@@ -1,5 +1,10 @@
 #!/usr/bin/env bun
-// @version 1.11.0
+// @version 1.12.0
+// v1.12.0 (2026-09-25, spec docs/designs/2026-09-25-verifier-platform-expansion-design.md
+//           site 4): official patterns gain CODEX.md and the
+//           .agents/{skills,commands}/ + .codex/{skills,prompts}/ trees
+//           (byte-copies of already-scanned SSOT content; .agents/commands
+//           included read-only despite the Finding-D adjudication).
 /**
  * Markdown/YAML Language Validation Script with I18N Support
  *
@@ -154,7 +159,7 @@ function parseLangDeclaration(content: string, isPlainYaml: boolean): { lang?: s
  *
  * Only validates these allowlisted paths:
  * - agents/ (subdirectories)
- * - AGENTS.md, CLAUDE.md, GEMINI.md, context.md, CHANGELOG.md, SECURITY.md
+ * - AGENTS.md, CLAUDE.md, GEMINI.md, CODEX.md, context.md, CHANGELOG.md, SECURITY.md
  * - docs/constitution/ (subdirectories)
  * - docs/governance/ (subdirectories)
  * - docs/designs/ (design docs may use lang frontmatter exceptions)
@@ -164,6 +169,8 @@ function parseLangDeclaration(content: string, isPlainYaml: boolean): { lang?: s
  * - skills/ (subdirectories)
  * - .claude/skills/, .claude/commands/ (subdirectories)
  * - .gemini/skills/, .gemini/commands/ (subdirectories)
+ * - .agents/skills/, .agents/commands/ (subdirectories)
+ * - .codex/skills/, .codex/prompts/ (subdirectories)
  * - templates/ (subdirectories)
  *
  * Directory-prefixed patterns match both `.md` and `.yaml`/`.yml` files; the
@@ -192,6 +199,15 @@ function isOfficialDocument(filePath: string): boolean {
     /^\.claude\/commands\/.*\.(md|ya?ml)$/,
     /^\.gemini\/skills\/.*\.(md|ya?ml)$/,
     /^\.gemini\/commands\/.*\.(md|ya?ml)$/,
+    // Spec 2026-09-25-verifier-platform-expansion-design site 4: the two
+    // newest platform surfaces join the official-document scan. .agents/commands
+    // is included despite having no producer yet (Finding D): the check is
+    // read-only and the files are English today.
+    /^CODEX\.md$/,
+    /^\.agents\/skills\/.*\.(md|ya?ml)$/,
+    /^\.agents\/commands\/.*\.(md|ya?ml)$/,
+    /^\.codex\/skills\/.*\.(md|ya?ml)$/,
+    /^\.codex\/prompts\/.*\.(md|ya?ml)$/,
     /^templates\/.*\.(md|ya?ml)$/,
   ];
 

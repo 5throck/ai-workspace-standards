@@ -10,6 +10,8 @@ import {
     parseSkillFrontmatter,
     parseAgentFrontmatter,
     detectDrift,
+    deriveSkillsPlatform,
+    deriveCommandPlatform,
     type SkillInfo,
     type AgentInfo,
     type CommandInfo,
@@ -124,6 +126,60 @@ describe('detectDrift', () => {
         ];
         const issues = detectDrift(noAgents, skills, commands);
         expect(issues.some(i => i.includes('commit-push-pr') && i.includes('no matching skill'))).toBe(false);
+    });
+});
+
+describe('deriveSkillsPlatform (D10 vocabulary)', () => {
+    const mirrors4 = { claude: true, gemini: true, agents: true, codex: true };
+
+    test('workspace SSOT presence wins (unchanged)', () => {
+        expect(deriveSkillsPlatform({ inWorkspace: true, inCommonTemplate: false, mirrors: mirrors4 })).toBe('workspace');
+    });
+
+    test('common-template scan context without SSOT copy stays common (unchanged)', () => {
+        expect(deriveSkillsPlatform({ inWorkspace: false, inCommonTemplate: true, mirrors: { claude: false, gemini: false, agents: false, codex: false } })).toBe('common');
+    });
+
+    test("claude+gemini mirrors exactly → 'both' (LEGACY pin, must keep passing)", () => {
+        expect(deriveSkillsPlatform({ inWorkspace: false, inCommonTemplate: false, mirrors: { claude: true, gemini: true, agents: false, codex: false } })).toBe('both');
+    });
+
+    test("all four mirrors → 'all'", () => {
+        expect(deriveSkillsPlatform({ inWorkspace: false, inCommonTemplate: false, mirrors: mirrors4 })).toBe('all');
+    });
+
+    test("claude-only → 'claude' (unchanged)", () => {
+        expect(deriveSkillsPlatform({ inWorkspace: false, inCommonTemplate: false, mirrors: { claude: true, gemini: false, agents: false, codex: false } })).toBe('claude');
+    });
+
+    test("codex-only → 'codex' (new vocabulary)", () => {
+        expect(deriveSkillsPlatform({ inWorkspace: false, inCommonTemplate: false, mirrors: { claude: false, gemini: false, agents: false, codex: true } })).toBe('codex');
+    });
+
+    test("claude+codex partial combination → 'codex+claude' (descending, D10 example)", () => {
+        expect(deriveSkillsPlatform({ inWorkspace: false, inCommonTemplate: false, mirrors: { claude: true, gemini: false, agents: false, codex: true } })).toBe('codex+claude');
+    });
+
+    test("claude+agents+gemini partial combination → 'gemini+claude+agents'", () => {
+        expect(deriveSkillsPlatform({ inWorkspace: false, inCommonTemplate: false, mirrors: { claude: true, gemini: true, agents: true, codex: false } })).toBe('gemini+claude+agents');
+    });
+});
+
+describe('deriveCommandPlatform (D10 vocabulary)', () => {
+    test('no mirrors → claude (unchanged)', () => {
+        expect(deriveCommandPlatform(false, false)).toBe('claude');
+    });
+
+    test('gemini mirror only → both (LEGACY pin, must keep passing)', () => {
+        expect(deriveCommandPlatform(true, false)).toBe('both');
+    });
+
+    test('gemini mirror + codex prompt → all (prompt detection)', () => {
+        expect(deriveCommandPlatform(true, true)).toBe('all');
+    });
+
+    test('codex prompt without gemini mirror is not all — the mapping still needs the 1:1 gemini leg', () => {
+        expect(deriveCommandPlatform(false, true)).toBe('claude');
     });
 });
 

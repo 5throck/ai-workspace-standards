@@ -1,4 +1,13 @@
-// @version 1.7.1
+// @version 1.8.0
+// v1.8.0 (spec docs/designs/2026-09-25-verifier-platform-expansion-design.md,
+//           site 10 / D10): skills platform vocabulary extended to the four
+//           mirror era — 'both' keeps meaning claude+gemini exactly (legacy,
+//           test-pinned), 'all' means all four mirrors, any other partial
+//           combination renders as '+'.joined descending platform names,
+//           single-platform presence renders the platform name (agents/codex
+//           joined the vocabulary). Command platform gains 'all' when the codex
+//           prompts mapping carries the command (ADR-0077 D4). Platform Parity
+//           Status section names all four surfaces with per-surface counts.
 // v1.7.1: scripts-table sort gained a full-path tiebreaker — basename ties
 //           (e.g. scripts/x.ts vs scripts/<variant>/x.ts) previously fell back
 //           to readdir insertion order, which differs between macOS and Linux,
@@ -262,6 +271,46 @@ async function collectAgents(): Promise<AgentInfo[]> {
 // reporting that previously emitted one row/issue per distribution copy).
 const SKILL_SCAN_DIRS = ['skills', path.join('.claude', 'skills'), path.join('templates', 'common', 'skills')];
 
+/**
+ * Derive the skills-table `platform` vocabulary for one skill (D10):
+ *   'workspace' — present in the skills/ SSOT (highest priority, unchanged)
+ *   'common'    — common-template scan context without an SSOT copy (unchanged)
+ *   'both'      — claude+gemini mirrors exactly (LEGACY value, test-pinned)
+ *   'all'       — all four mirrors carry the skill
+ *   <name>      — exactly one mirror carries it ('claude' | 'gemini' | 'agents' | 'codex')
+ *   n+m         — any other partial combination, '+'.joined in DESCENDING
+ *                 platform-name order (e.g. claude+codex → 'codex+claude')
+ * @version 1.8.0
+ */
+export function deriveSkillsPlatform(opts: {
+    inWorkspace: boolean;
+    inCommonTemplate: boolean;
+    mirrors: { claude: boolean; gemini: boolean; agents: boolean; codex: boolean };
+}): string {
+    if (opts.inWorkspace) return 'workspace';
+    if (opts.inCommonTemplate) return 'common';
+    const present = (Object.entries(opts.mirrors) as Array<[string, boolean]>)
+        .filter(([, v]) => v)
+        .map(([k]) => k);
+    if (present.length === 0) return 'workspace';
+    if (present.length === 4) return 'all';
+    if (present.length === 2 && present.includes('claude') && present.includes('gemini')) return 'both';
+    if (present.length === 1) return present[0];
+    return [...present].sort((a, b) => b.localeCompare(a)).join('+');
+}
+
+/**
+ * Derive the commands-table `platform` vocabulary for one command (D10):
+ * 'claude' (no mirror carries it) | 'both' (gemini 1:1 mirror, legacy value) |
+ * 'all' (gemini mirror AND the codex prompts mapping both carry it).
+ * @version 1.8.0
+ */
+export function deriveCommandPlatform(hasGemini: boolean, hasCodexPrompt: boolean): string {
+    if (hasGemini && hasCodexPrompt) return 'all';
+    if (hasGemini) return 'both';
+    return 'claude';
+}
+
 async function collectSkills(): Promise<SkillInfo[]> {
     const seen = new Map<string, SkillInfo>();
 
@@ -278,14 +327,15 @@ async function collectSkills(): Promise<SkillInfo[]> {
             const { version, triggers, owner, status, parseError } = parseSkillFrontmatter(content);
 
             const inWorkspace = fs.existsSync(path.join('skills', dir, 'SKILL.md'));
-            const inClaude = fs.existsSync(path.join('.claude', 'skills', dir, 'SKILL.md'));
-            const inGemini = fs.existsSync(path.join('.gemini', 'skills', dir, 'SKILL.md'));
+            const mirrors = {
+                claude: fs.existsSync(path.join('.claude', 'skills', dir, 'SKILL.md')),
+                gemini: fs.existsSync(path.join('.gemini', 'skills', dir, 'SKILL.md')),
+                agents: fs.existsSync(path.join('.agents', 'skills', dir, 'SKILL.md')),
+                codex: fs.existsSync(path.join('.codex', 'skills', dir, 'SKILL.md')),
+            };
             const inCommonTemplate = skillsDir.startsWith(path.join('templates', 'common'));
 
-            let platform = 'workspace';
-            if (inCommonTemplate && !inWorkspace) platform = 'common';
-            else if (!inWorkspace && inClaude && inGemini) platform = 'both';
-            else if (!inWorkspace && inClaude) platform = 'claude';
+            const platform = deriveSkillsPlatform({ inWorkspace, inCommonTemplate, mirrors });
 
             seen.set(dir, {
                 name: dir,
@@ -351,9 +401,11 @@ async function collectCommands(): Promise<CommandInfo[]> {
         const content = fs.readFileSync(filePath, 'utf-8');
         const geminiCmd = path.join('.gemini', 'commands', file);
         const hasGemini = fs.existsSync(geminiCmd);
+        // Codex consumes .claude/commands as .codex/prompts (ADR-0077 D4 mapping)
+        const codexPrompt = path.join('.codex', 'prompts', file);
+        const hasCodexPrompt = fs.existsSync(codexPrompt);
 
-        let platform = 'claude';
-        if (hasGemini) platform = 'both';
+        const platform = deriveCommandPlatform(hasGemini, hasCodexPrompt);
 
         const skillMatch = /^>.*?Skill:\s*(.+?)$/m.exec(content);
         commands.push({
@@ -638,10 +690,12 @@ function renderManifest(data: ManifestData): string {
 
 ## Platform Parity Status
 
-**Checked**: Claude (.claude/) vs Gemini (.gemini/)
+**Checked**: Claude (.claude/), Gemini (.gemini/), Antigravity (.agents/), Codex (.codex/ prompts mapping)
 
-- **Commands with parity**: ${commands.filter(c => c.platform === 'both').length} / ${commands.length}
-- **Skills with parity**: ${skills.filter(s => s.platform === 'both').length} / ${skills.filter(s => s.platform !== 'common').length} (common-template skills are parity-exempt)
+- **Commands with parity (gemini mirror)**: ${commands.filter(c => c.platform === 'both' || c.platform === 'all').length} / ${commands.length}
+- **Commands with codex prompts mapping**: ${commands.filter(c => c.platform === 'all').length} / ${commands.length}
+- **Skills in all four mirrors**: ${skills.filter(s => s.platform === 'all').length} / ${skills.filter(s => s.platform !== 'common').length}
+- **Skills in claude+gemini only (both)**: ${skills.filter(s => s.platform === 'both').length} / ${skills.filter(s => s.platform !== 'common').length} (common-template skills are parity-exempt)
 
 ---
 

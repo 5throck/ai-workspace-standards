@@ -5,9 +5,14 @@
  * Validates platform parity between L0 workspace files and their L1/L2 counterparts.
  * Enforces ADR-0033 platform parity rules.
  *
- * @version 0.2.4
+ * @version 0.3.0
  * @author automation-engineer
  * @license MIT
+ *
+ * v0.3.0 (2026-09-25, spec docs/designs/2026-09-25-verifier-platform-expansion-design.md
+ *  site 11 / D11): FILE_MAPPINGS gains CODEX.md (L0→L1, informational existence
+ *  check like CLAUDE.md/GEMINI.md; CODEX.md section parity stays deferred per
+ *  that spec's D3.5).
  *
  * Usage:
  *   bun scripts/test-platform-parity.ts [--fix] [--verbose]
@@ -300,6 +305,12 @@ const FILE_MAPPINGS = {
   'GEMINI.md': {
     L1: 'templates/common/GEMINI.md',
     // L2 variants use L1 common files - no need to check individual L2 files
+  },
+  'CODEX.md': {
+    L1: 'templates/common/CODEX.md',
+    // L2 variants use L1 common files - no need to check individual L2 files
+    // (spec 2026-09-25-verifier-platform-expansion-design site 11: the distributor
+    // publishes all four root docs; the verifier half must check all four)
   },
   'agents/pm.md': {
     L1: 'templates/common/agents/pm.md',
@@ -618,8 +629,12 @@ async function main() {
     // Check L1
     const l1Path = join(process.cwd(), mappings.L1);
 
-    // For CLAUDE.md and GEMINI.md, L0→L1 check is informational only (L1 has intentional CONSTITUTION.md → workspace standards transformation)
-    if (sourceFile === 'CLAUDE.md' || sourceFile === 'GEMINI.md') {
+    // For CLAUDE.md, GEMINI.md and CODEX.md, L0→L1 check is informational only
+    // (L1 has intentional CONSTITUTION.md → workspace standards transformation).
+    // CODEX.md joins per spec 2026-09-25-verifier-platform-expansion-design site
+    // 11 (D11); CODEX.md section parity stays deferred per that spec's D3.5 —
+    // no PARITY_RULES entry is invented for it.
+    if (sourceFile === 'CLAUDE.md' || sourceFile === 'GEMINI.md' || sourceFile === 'CODEX.md') {
       // Just verify L1 file exists, don't compare content
       if (!existsSync(l1Path)) {
         results.push({

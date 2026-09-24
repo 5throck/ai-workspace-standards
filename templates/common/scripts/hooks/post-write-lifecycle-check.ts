@@ -10,7 +10,10 @@
  *   Gemini CLI       — automatic via AfterTool hook (--platform gemini)
  *   Antigravity      — hooks do not fire (prompt enforcement)
  *
- * @version 1.1.0
+ * @version 1.2.0
+ * v1.2.0 (spec 2026-09-25-verifier-platform-expansion-design site 9, D9):
+ * checks 1-4 generalize to all four platforms, mapping-aware (.codex/prompts
+ * mapping leg added; .agents/commands excluded per Finding D).
  */
 
 import { $ } from 'bun';
@@ -41,18 +44,24 @@ function hasVersionField(filePath: string): boolean {
 
 /**
  * Run the 5 lifecycle checks against a list of changed files.
+ *
+ * D9 (spec 2026-09-25-verifier-platform-expansion-design site 9): checks 1-4
+ * generalize to all four platforms, mapping-aware — the skills check covers
+ * the .agents/.codex mirrors too, and the commands propagation check adds the
+ * .codex/prompts mapping (ADR-0077 D4). .agents/commands is excluded — no
+ * producer, no documented consumer (design Finding D; recorded exclusion).
  */
 function checkFiles(changed: string[]): number {
   let lifecycleIssues = 0;
 
-  // Check 1: .claude/skills/*/SKILL.md — must have version: field
-  const claudeSkills = changed.filter(f => /^\.claude\/skills\/[^/]+\/SKILL\.md$/.test(f));
-  for (const f of claudeSkills) {
+  // Check 1: .{claude,gemini,agents,codex}/skills/*/SKILL.md — version field + propagation
+  const platformSkills = changed.filter(f => /^\.(claude|gemini|agents|codex)\/skills\/[^/]+\/SKILL\.md$/.test(f));
+  for (const f of platformSkills) {
     if (existsSync(f) && !hasVersionField(f)) {
       warn(`${f} — missing 'version: X.Y.Z' in frontmatter. Add version: 1.0.0 for new skills.`);
       lifecycleIssues++;
     } else if (existsSync(f)) {
-      const commonPath = f.replace(/^\.claude\//, 'templates/common/.claude/');
+      const commonPath = f.replace(/^\.(claude|gemini|agents|codex)\//, 'templates/common/.$1/');
       if (!existsSync(commonPath)) {
         warn(`${f} — not propagated to ${commonPath}. Run platform-skill-lifecycle-manager skill.`);
         lifecycleIssues++;
@@ -60,38 +69,22 @@ function checkFiles(changed: string[]): number {
     }
   }
 
-  // Check 2: .gemini/skills/*/SKILL.md — must have version: field
-  const geminiSkills = changed.filter(f => /^\.gemini\/skills\/[^/]+\/SKILL\.md$/.test(f));
-  for (const f of geminiSkills) {
-    if (existsSync(f) && !hasVersionField(f)) {
-      warn(`${f} — missing 'version: X.Y.Z' in frontmatter.`);
-      lifecycleIssues++;
-    } else if (existsSync(f)) {
-      const commonPath = f.replace(/^\.gemini\//, 'templates/common/.gemini/');
-      if (!existsSync(commonPath)) {
-        warn(`${f} — not propagated to ${commonPath}. Run platform-skill-lifecycle-manager skill.`);
+  // Check 3: command surfaces — .claude/commands and .gemini/commands (1:1),
+  // .codex/prompts (mapping) — check template propagation
+  const commandSurfaces: ReadonlyArray<readonly [RegExp, string]> = [
+    [/^\.claude\/commands\/[^/]+\.md$/, 'templates/common/.claude/commands/'],
+    [/^\.gemini\/commands\/[^/]+\.md$/, 'templates/common/.gemini/commands/'],
+    [/^\.codex\/prompts\/[^/]+\.md$/, 'templates/common/.codex/prompts/'],
+  ];
+  for (const f of changed) {
+    for (const [pattern, commonPrefix] of commandSurfaces) {
+      if (!pattern.test(f)) continue;
+      const fileName = f.replace(/\\/g, '/').split('/').pop();
+      const commonPath = `${commonPrefix}${fileName}`;
+      if (existsSync(f) && !existsSync(commonPath)) {
+        warn(`${f} — not propagated to ${commonPath}. Run platform-command-lifecycle-manager skill.`);
         lifecycleIssues++;
       }
-    }
-  }
-
-  // Check 3: .claude/commands/*.md — check template propagation
-  const claudeCommands = changed.filter(f => /^\.claude\/commands\/[^/]+\.md$/.test(f));
-  for (const f of claudeCommands) {
-    const commonPath = f.replace(/^\.claude\//, 'templates/common/.claude/');
-    if (existsSync(f) && !existsSync(commonPath)) {
-      warn(`${f} — not propagated to ${commonPath}. Run platform-command-lifecycle-manager skill.`);
-      lifecycleIssues++;
-    }
-  }
-
-  // Check 4: .gemini/commands/*.md — check template propagation
-  const geminiCommands = changed.filter(f => /^\.gemini\/commands\/[^/]+\.md$/.test(f));
-  for (const f of geminiCommands) {
-    const commonPath = f.replace(/^\.gemini\//, 'templates/common/.gemini/');
-    if (existsSync(f) && !existsSync(commonPath)) {
-      warn(`${f} — not propagated to ${commonPath}. Run platform-command-lifecycle-manager skill.`);
-      lifecycleIssues++;
     }
   }
 

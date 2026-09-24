@@ -2,7 +2,11 @@
 /**
  * resync-audit.ts — Provenance audit of uncommitted content in Projects/co-*
  * (project-resync skill Step 0).
- * @version 1.1.1
+ * @version 1.2.0
+ *
+ * v1.2.0 (2026-09-25, spec docs/designs/2026-09-25-verifier-platform-expansion-design.md
+ *  site 6): TEMPLATE_DELIVERED_PREFIXES gains ".codex/" — .codex/** files in
+ *  delivered projects now participate in the template-delivery comparison.
  *
  * Before any project sync pushes local work to GitHub, this tool answers the
  * diligence question: is each dirty/untracked file CURRENT work worth
@@ -127,7 +131,7 @@ function sourceCandidates(projectPath: string, relFile: string): string[] {
 
 /** Prefixes whose files are considered template-delivered (sync waves). */
 const TEMPLATE_DELIVERED_PREFIXES = [
-  "skills/", ".claude/", ".gemini/", ".agents/", "scripts/", "agents/",
+  "skills/", ".claude/", ".gemini/", ".agents/", ".codex/", "scripts/", "agents/",
   "docs/constitution/", "docs/context.md",
 ];
 

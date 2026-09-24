@@ -1,4 +1,11 @@
-// @version 2.42.0
+// @version 2.43.0
+// v2.43.0: Platform verifier expansion (spec:
+//           docs/designs/2026-09-25-verifier-platform-expansion-design.md,
+//           sites 2a/2b/2c/2d) — skill-exists sweep iterates PLATFORM_SKILL_BASES
+//           (all five bases); command parity gains the .codex/prompts mapping
+//           leg (ADR-0077 D4, no skip marker, WARN severity preserved);
+//           zero-width/BOM scan dirs gain the .agents/.codex trees; stale-ref
+//           scan gains CODEX.md.
 // v2.42.0: Live context placeholder WARN gains the remediation path (spec:
 //           docs/designs/2026-09-24-scaffold-hygiene-bundle-design.md, R7/D6) —
 //           the WARN now names the fix, not just the files: fill the
@@ -132,6 +139,7 @@ import { findL0LeakLines } from './helpers/l0-ref-policy.ts';
 import * as url from 'node:url';
 import { safeFetch } from './lib/ssrf.ts';
 import { detectEncoding, detectHomoglyphs, detectZeroWidthChars, readUTF8File } from './lib/encoding-utils.ts';
+import { PLATFORM_SKILL_BASES } from './lib/platforms.ts';
 
 const _TRACKED_CO_VARIANTS: Set<string> | null = (() => {
   try {
@@ -372,7 +380,11 @@ if (!LIFECYCLE_ONLY) {
     let bomErrors = 0;
     let searchDirs = ['.'];
     if (!fs.existsSync(projectCtxPath) && fs.existsSync('templates')) {
-    searchDirs = ['agents', 'docs', 'memory', 'scripts', 'skills', 'templates', '.claude'];
+    // Zero-width/homoglyph scan covers the .agents and .codex platform trees
+    // too — whole-tree by design: .codex/prompts/*.md is as much an injection
+    // surface as a skill mirror (spec 2026-09-25-verifier-platform-expansion-design
+    // site 2c; .json/.toml files are outside the Markdown/YAML scan filter).
+    searchDirs = ['agents', 'docs', 'memory', 'scripts', 'skills', 'templates', '.claude', '.agents', '.codex'];
     if (fs.existsSync('.')) {
         for (const file of fs.readdirSync('.')) {
             if (file.endsWith('.md')) {
@@ -714,7 +726,10 @@ function hasSkillMdRecursive(dir: string): boolean {
     }
     return false;
 }
-for (const skillsDir of ['skills', path.join('.claude', 'skills')]) {
+// skill-exists sweep covers all five bases (skills/ SSOT + the four platform
+// mirrors) via the SSOT constant — spec
+// 2026-09-25-verifier-platform-expansion-design site 2a.
+for (const skillsDir of PLATFORM_SKILL_BASES) {
     if (fs.existsSync(skillsDir)) {
         for (const dir of fs.readdirSync(skillsDir)) {
             const fullDir = path.join(skillsDir, dir);
@@ -1040,7 +1055,7 @@ if (!LIFECYCLE_ONLY && fs.existsSync(claudeCommandsDir)) {
         const filePath = path.join(claudeCommandsDir, file);
         const content = readUTF8File(filePath);
         if (/^gemini-parity:\s*skip/m.test(content)) continue;
-        
+
         const geminiCmd = path.join('.gemini', 'commands', file);
         if (!fs.existsSync(geminiCmd)) {
             Warn(`Command parity gap: .claude/commands/${file} has no matching .gemini/commands/${file} (add 'gemini-parity: skip' to frontmatter for intentional Claude-only commands)`);
@@ -1049,6 +1064,28 @@ if (!LIFECYCLE_ONLY && fs.existsSync(claudeCommandsDir)) {
     }
     if (parityWarnings === 0) {
         Pass('Command parity: all .claude/commands/ files have matching .gemini/commands/ files');
+    }
+
+    // .codex leg (spec 2026-09-25-verifier-platform-expansion-design site 2b):
+    // the ADR-0077 D4 mapping — .claude/commands is the commands SSOT and
+    // sync-skills Phase 1b mirrors it to .codex/prompts UNCONDITIONALLY, so the
+    // gemini-parity: skip marker does NOT apply here (documented asymmetry).
+    // WARN severity preserved (this check is non-blocking). .agents/commands is
+    // excluded — no producer, no documented consumer (design Finding D ticket).
+    const codexPromptsDir = path.join('templates', 'common', '.codex', 'prompts');
+    if (fs.existsSync(codexPromptsDir)) {
+        let codexWarnings = 0;
+        const codexPrompts = new Set(fs.readdirSync(codexPromptsDir).filter(f => f.endsWith('.md')));
+        for (const file of fs.readdirSync(claudeCommandsDir)) {
+            if (!file.endsWith('.md')) continue;
+            if (!codexPrompts.has(file)) {
+                Warn(`Command parity gap (codex mapping): .claude/commands/${file} has no templates/common/.codex/prompts/${file} counterpart`);
+                codexWarnings++;
+            }
+        }
+        if (codexWarnings === 0) {
+            Pass('Command parity (codex): all .claude/commands/ files have .codex/prompts counterparts');
+        }
     }
 }
 
@@ -1408,6 +1445,7 @@ function checkStaleShellReferences() {
         'README.md',
         'AGENTS.md',
         'GEMINI.md',
+        'CODEX.md',
         'docs/constitution/09-operations-workflow.md',
         '.githooks/pre-push',
         '.githooks/commit-msg',
