@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-09-24T09:17:43.992Z
+**Generated**: 2026-09-24T10:46:53.178Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -107,7 +107,7 @@
 | agent-verify.ts | 1.0.2 | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.2 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.1.0 | scripts/archive-memory.ts | N/A |
-| audit.ts | 2.41.0 | scripts/audit.ts | bun |
+| audit.ts | 2.42.0 | scripts/audit.ts | bun |
 | backport-diff.ts | 1.0.1 | scripts/backport-diff.ts | N/A |
 | bootstrap-stages.ts | 1.0.0 | scripts/bootstrap-stages.ts | fs, js-yaml, path |
 | check-upgrade-coverage.ts | 1.0.0 | scripts/check-upgrade-coverage.ts | N/A |
@@ -140,7 +140,7 @@
 | md-to-ooxml.ts | 1.2.0 | scripts/md-to-ooxml.ts | fs, path |
 | migrate-project.ts | 1.0.0 | scripts/migrate-project.ts | N/A |
 | migrate-quality-gates.ts | 1.1.0 | scripts/migrate-quality-gates.ts | fs, js-yaml, path |
-| new-project.ts | 1.27.0 | scripts/new-project.ts | N/A |
+| new-project.ts | 1.28.0 | scripts/new-project.ts | N/A |
 | procedure-coverage.ts | 1.0.0 | scripts/procedure-coverage.ts | js-yaml |
 | project-to-variant.ts | 1.4.1 | scripts/project-to-variant.ts | N/A |
 | promote-context-section.ts | 1.1.0 | scripts/promote-context-section.ts | N/A |
@@ -172,7 +172,7 @@
 | test-adopt-project.ts | 1.0.0 | scripts/test-adopt-project.ts | N/A |
 | test-extends-validator.ts | 1.0.1 | scripts/test-extends-validator.ts | fs, path |
 | test-l3-to-variant-promotion.ts | 1.6.0 | scripts/test-l3-to-variant-promotion.ts | bun |
-| test-new-project.ts | 1.5.0 | scripts/test-new-project.ts | bun, js-yaml |
+| test-new-project.ts | 1.6.0 | scripts/test-new-project.ts | bun, js-yaml |
 | test-platform-parity.ts | 0.2.4 | scripts/test-platform-parity.ts | fs, path |
 | test-runner.ts | 1.4.0 | scripts/test-runner.ts | fs, os, path |
 | test-scaffold-delivery-parity.ts | 1.0.0 | scripts/test-scaffold-delivery-parity.ts | N/A |

@@ -2,9 +2,16 @@
 /**
  * test-new-project.ts — E2E Test for new-project.ts
  *
- * @version 1.5.0
+ * @version 1.6.0
  * @last_updated 2026-09-24
  *
+ * v1.6.0 (2026-09-24, scaffold hygiene bundle — spec
+ *         2026-09-24-scaffold-hygiene-bundle-design): Test 0c pins the
+ *         unknown-flag hard error (AC4) of new-project.ts v1.28.0 — a
+ *         `--` token matching no known flag (`--varaint x`) exits non-zero,
+ *         the output names the offending token and lists the six valid
+ *         flags, and no directory is created (the parse-loop catch-all fires
+ *         before any write).
  * v1.5.0 (2026-09-24, skills registry overlay reconcile — spec
  *         2026-09-24-skills-registry-overlay-reconcile-design, T-20260924-008):
  *         Test 29 pins the delivered-registry ↔ delivered-tree bijection on
@@ -212,6 +219,23 @@ try {
       syntaxOk = false;
     }
   } catch (e) { fail('Test 0b', String(e)); syntaxOk = false; }
+
+  // 0c: Unknown-flag hard error (R6/AC4, 2026-09-24-scaffold-hygiene-bundle-design)
+  // — a `--` token matching no known flag must exit non-zero BEFORE any write:
+  // the output names the offending token and lists the valid flags, and the
+  // target directory is never created.
+  try {
+    const typoDir = 'tests/.temp/Test-flag-typo-unknown';
+    rmSync(typoDir, { recursive: true, force: true });
+    const res = await $`bun scripts/new-project.ts ${typoDir} --variant ${variantArg} --varaint x`.nothrow();
+    const output = (res.stdout.toString() + res.stderr.toString()).trim();
+    if (res.exitCode !== 0 && output.includes('--varaint') && output.includes('--variant') && !existsSync(typoDir)) {
+      pass('Test 0c PASSED: unknown flag `--varaint` hard error — token named, valid flags listed, no directory created');
+    } else {
+      fail('Test 0c', `unknown flag not rejected (exit ${res.exitCode}, dir created: ${existsSync(typoDir)}):\n${output.slice(0, 300)}`);
+      syntaxOk = false;
+    }
+  } catch (e) { fail('Test 0c', String(e)); syntaxOk = false; }
 
 
   // 0e: Verify new-project.sh template validation logic checks common/ and variant/ separately.

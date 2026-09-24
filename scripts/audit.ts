@@ -1,4 +1,13 @@
-// @version 2.41.0
+// @version 2.42.0
+// v2.42.0: Live context placeholder WARN gains the remediation path (spec:
+//           docs/designs/2026-09-24-scaffold-hygiene-bundle-design.md, R7/D6) —
+//           the WARN now names the fix, not just the files: fill the
+//           placeholder fields in the listed file(s), or re-scaffold with
+//           --description "<one sentence>" --type web|cli|api|mcp to pre-fill
+//           docs/project.md. Severity unchanged — WARN is the designed nag for
+//           the TODO(project-overview) fallback, and one message continues to
+//           serve all scanned files (docs/context.md, docs/*.context.md,
+//           docs/project.md).
 // v2.41.0: Live context placeholder check gains docs/project.md (spec:
 //           docs/designs/2026-09-24-scaffold-identity-overview-design.md, R8) —
 //           the project-owned identity seed joins the per-project scan scope
@@ -624,7 +633,11 @@ if (!LIFECYCLE_ONLY) {
                 recordSkippedFile(file, e?.code || e?.message || 'read error');
             }
         }
-        if (hits.length > 0) Warn(`Live context placeholder check: ${hits.length} file(s) still contain scaffold placeholders: ${hits.join(', ')}`);
+        // R7 (2026-09-24-scaffold-hygiene-bundle-design): the WARN names the
+        // remediation, not just the files. One generic message serves all
+        // scanned files (docs/context.md, docs/*.context.md, docs/project.md);
+        // severity stays WARN — the nag is designed (D6).
+        if (hits.length > 0) Warn(`Live context placeholder check: ${hits.length} file(s) still contain scaffold placeholders: ${hits.join(', ')} — fill the placeholder fields (project name, one-sentence description, TODO/TBD items) in the listed file(s), or re-scaffold with --description "<one sentence>" --type web|cli|api|mcp to pre-fill docs/project.md`);
         else Pass('Live context placeholder check: no unfilled scaffold placeholders found');
     }
 

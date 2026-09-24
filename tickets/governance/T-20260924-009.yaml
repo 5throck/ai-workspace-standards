@@ -1,0 +1,35 @@
+schemaVersion: 1
+id: T-20260924-009
+kind: manual
+title: >-
+  variant-exclusive skill metadata loss: the common seed registry's ###
+  Variant-Exclusive Skills section (28 rows, own variant-column schema:
+  skill|version|status|owner|last_reviewed|removal-date|variant) is being
+  dropped from templates/common/skills/SKILLS.md in the scaffold-hygiene-bundle
+  change set, and for 27 of those 28 skills the dropped rows are the ONLY
+  structured registry record anywhere — variant SKILLS.md files parse to 0 rows
+  per parseSkillRegistryRows (co-consult, co-deck, co-security, co-develop all
+  0; only co-game carries 5 parseable rows incl. sound-synth, the 1 exception);
+
+  the skills themselves exist as dirs in the variant trees (verified:
+  financial-modeling and mece-logic-auditor in co-consult — an 18-dir index, the
+  biggest gap; sound-synth in co-game);
+
+  Decision needed: should variant SKILLS.md registries be authored in the
+  parseable common format (if so, which variant first and at what priority —
+  co-consult's 18-dir index is the biggest gap), or is the variant-exclusive
+  metadata formally abandoned;
+
+  sibling of T-20260924-002/-003/-004 (same contract-inventory family: delivered
+  inventory vs its registry/index); provenance: scaffold-hygiene-bundle design
+  verification, 2026-09-24
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-24T09:51:12.293Z'
+history:
+  - at: '2026-09-24T09:51:12.293Z'
+    from: null
+    to: backlog
+result: null
+error: null

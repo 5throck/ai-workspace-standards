@@ -1,5 +1,21 @@
 #!/usr/bin/env bun
-// @version 1.27.0
+// @version 1.28.0
+// v1.28.0 (2026-09-24, scaffold hygiene bundle — spec
+//           docs/designs/2026-09-24-scaffold-hygiene-bundle-design.md, R6/D5):
+//           the argument parse loop gains a catch-all — any `--` token that
+//           matched no known flag, or a known flag left without a value, is a
+//           HARD ERROR (exit 1) that names the offending token, lists the six
+//           valid flags, and prints the usage line, BEFORE any write. This
+//           command re-initializes a directory, so silently dropping explicit
+//           intent is not acceptable: a live `--varaint co-design` run
+//           proceeded on the positional fallback and built the right thing
+//           only by luck. Uniform across all flags (`--varaint`,
+//           `--platfrom`, and a trailing valueless `--variant` all fail the
+//           same way). `--yes`/`-y` are exempt from the catch-all: the
+//           auto-confirm prompt scan consumes them from process.argv
+//           directly, not through this loop. Value-consumption semantics (a
+//           flag eating the next `--` token as its value) stay as documented
+//           residual risk RR1 of the same design.
 // v1.27.0 (2026-09-24, skills registry overlay reconcile — spec
 //           docs/designs/2026-09-24-skills-registry-overlay-reconcile-design.md,
 //           T-20260924-008): every fresh scaffold delivered a broken
@@ -199,6 +215,22 @@ for (let i = 0; i < args.length; i++) {
   }
   if (!projectName && !args[i].startsWith('--')) { projectName = args[i]; continue; }
   if (projectName && !variant && !args[i].startsWith('--')) { variant = args[i]; continue; }
+  // R6 (2026-09-24-scaffold-hygiene-bundle-design, D5): catch-all — a `--` token
+  // that reached this point matched no known flag, or was a known flag left
+  // without a value (those guards require a truthy next token). Hard error
+  // before any write: this command re-initializes a directory, so
+  // explicit-but-typo'd intent (`--varaint`, `--platfrom`) must never be
+  // silently dropped. `--yes` is exempt — the auto-confirm prompt scan below
+  // consumes it from process.argv directly (it never takes a value here).
+  if (args[i].startsWith('--') && args[i] !== '--yes') {
+    console.error(`❌ Unknown flag: '${args[i]}'.`);
+    console.error('   Valid flags: --variant <co-variant> | --description "<one sentence>" | --type web|cli|api|mcp | --version X.Y.Z | --platform claude|antigravity|codex|all | --country <CODE>');
+    console.error('   Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|codex|all] [--version X.Y.Z] [--country <CODE>] [--description "<one sentence>"] [--type web|cli|api|mcp]');
+    if (import.meta.main) {
+      process.exit(1);
+    }
+    continue;
+  }
 }
 
 if (!projectName) {
