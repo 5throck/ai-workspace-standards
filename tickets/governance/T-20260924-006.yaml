@@ -1,0 +1,29 @@
+schemaVersion: 1
+id: T-20260924-006
+kind: manual
+title: >-
+  runMarkerRewrite append-on-missing support: runMarkerRewrite
+  (scripts/propagate-to-templates.ts, marker-inject loop ~lines 1577-1620) only
+  rewrites zones that ALREADY exist in the target; when a target file lacks the
+  zone it prints no zones present (will inject on --apply) and skips — so
+  bootstrap is always a manual hand-insertion of the marker pair (as done for
+  COMMON-CONSTITUTION historically and COMMON-CONSTITUTION-PR today, per
+  docs/designs/2026-09-24-constitution-s33-context-injection-design.md §13
+  context and Amendment 1 decisions); also verify whether the (will inject on
+  --apply) log message is truthful — if --apply does not actually inject, the
+  message is misleading and should be fixed as part of this item. Decision
+  needed: design an append-on-missing contract — WHERE to insert a missing zone
+  (end-of-file? adjacent to a sibling zone? a configured anchor?) since
+  marker-inject cannot know placement; whether missing-zone handling should be
+  opt-in per domain (a new map field) or global; and the fail-safe default if no
+  placement is derivable (current skip + corrected message)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-24T01:26:41.388Z'
+history:
+  - at: '2026-09-24T01:26:41.388Z'
+    from: null
+    to: backlog
+result: null
+error: null
