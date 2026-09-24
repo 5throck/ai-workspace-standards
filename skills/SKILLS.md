@@ -23,7 +23,7 @@ Skills with a `skills/<name>/` directory in the workspace root. These are the pr
 | `meeting-facilitation` | 1.4.3 | active | pm | 2026-09-05 | — | Canonical meeting skill; `meeting` is a trigger alias, not a separate skill directory |
 | `project-review` | 1.3.0 | active | pm | 2026-09-14 | — | — |
 | `promote-variant` | 1.4.0 | active | pm | 2026-08-24 | — | Workspace operator only — not deployed to L2 |
-| `platform-command-lifecycle-manager` | 1.0.2 | active | pm | 2026-05-31 | — | Mirrored 2026-09-04 from .claude/skills |
+| `platform-command-lifecycle-manager` | 1.0.3 | active | pm | 2026-09-25 | — | Mirrored 2026-09-04 from .claude/skills |
 | `platform-skill-lifecycle-manager` | 1.0.2 | active | pm | 2026-05-31 | — | Mirrored 2026-09-04 from .claude/skills |
 | `script-lifecycle-manager` | 1.2.2 | active | pm | 2026-05-30 | — | — |
 | `security-scan` | 1.2.0 | active | pm | 2026-08-30 | — | Reassigned from security-expert — not defined in templates/common/agents/ or any variant, caused orphan on every propagated variant |

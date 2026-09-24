@@ -309,7 +309,7 @@
     "platform-command-lifecycle-manager": {
       "claude_source": ".claude/skills/platform-command-lifecycle-manager/SKILL.md",
       "gemini_source": ".gemini/skills/platform-command-lifecycle-manager/SKILL.md",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "description": "Platform command lifecycle management for .claude/commands/ and .gemini/commands/",
       "propagated_to_common": true
     },

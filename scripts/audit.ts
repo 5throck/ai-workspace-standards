@@ -1081,7 +1081,9 @@ if (!LIFECYCLE_ONLY && fs.existsSync(claudeCommandsDir)) {
     // sync-skills Phase 1b mirrors it to .codex/prompts UNCONDITIONALLY, so the
     // gemini-parity: skip marker does NOT apply here (documented asymmetry).
     // WARN severity preserved (this check is non-blocking). .agents/commands is
-    // excluded — no producer, no documented consumer (design Finding D ticket).
+    // excluded — L0-resident by design (spec
+    // docs/designs/2026-09-25-propagation-engine-batch-design.md §6-D8, ticket
+    // T-20260925-003); its consumer is the Antigravity CLI at the workspace root.
     const codexPromptsDir = path.join('templates', 'common', '.codex', 'prompts');
     if (fs.existsSync(codexPromptsDir)) {
         let codexWarnings = 0;

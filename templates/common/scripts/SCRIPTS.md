@@ -65,28 +65,77 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `archive-memory.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `audit.ts` | L0 | 2.44.0 | active | v2.44.0 marker-zone exemption (spec docs/designs/2026-09-25-variant-hygiene-batch-design.md, R2): checkStalePromotedContent + checkVariantContextCommonization strip COMMON-CONTEXT marker zones (stripMarkerZones, helpers/context-sections.ts 1.7.0) before section-splitting — sanctioned ADR-0062 zone deliveries stop reading as stale leftover duplicates (26 post-heal false WARNs → 0); non-zone duplicates still warn (fixture tests/unit/marker-zone-exemption.test.ts). Prior: v2.43.0 platform verifier expansion (spec docs/designs/2026-09-25-verifier-platform-expansion-design.md, sites 2a-2d): skill-exists sweeps PLATFORM_SKILL_BASES; command parity gains the .codex/prompts mapping leg; zero-width/BOM scan dirs gain .agents/.codex; stale-ref scan gains CODEX.md. Prior: v2.42.0 (scaffold hygiene bundle, spec docs/designs/2026-09-24-scaffold-hygiene-bundle-design.md): live-placeholder WARN names the remediation — fill the placeholder fields in the listed file(s), or re-scaffold with --description/--type to pre-fill docs/project.md; severity unchanged (the nag is designed). Prior: v2.41.0: live-placeholder scan gains docs/project.md — the identity seed joins the per-project WARN scope, same regex family (spec: docs/designs/2026-09-24-scaffold-identity-overview-design.md). Prior: v2.40.0 template-artifact hygiene — warn-only read-only sweep of templates/ for artifact directories; v2.39.0 VERSION_MANIFEST reconciliation gate; v2.38.0 model registry gate | —| L0+L1 | —|
 | `bootstrap-stages.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `check-upgrade-coverage.ts` | L0 | 1.0.0 | active | `--variant`, `--strict`, `--json` | —| L0 | —|
 | `cleanup-completed-md.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `clear-pm-approval.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/local-date.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `lib/managed-block-merge.ts` | L0 | 1.2.0 | active | v1.2.0 (T-20260924-010, spec docs/designs/2026-09-25-codex-merge-claim-routing-design.md D1): COMMON-CODEX joins MANAGED_PATTERNS (after its COMMON-GEMINI twin) — the CODEX.md MERGE pass union-merge activates; engine untouched (pattern-generic positional path) | —| L0 | —|
 | `compile-tokens.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `design-lint.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `create-l3-scaffold.ts` | L0 | 1.16.0 | active | Step 8.5 graft build: global `graft` first, bunx fallback (spec 2026-09-20-graft-scaffold-resilience) | —| L0 | —|
-| `dev-sync.ts` | L0 | 1.17.0 | active | v1.17.0: Step 4.55 marker-rewrite drift-check list gains `constitution-context-pr` + step 6.5 scoped-staging deletion handling — skip index-removed `D`/staged-rename-source paths, batch-add present paths, per-path add for absent ones, fail-closed ghost exit 1 (spec: docs/designs/2026-09-24-constitution-s33-context-injection-design.md Amendment 2 §13); Prior: main-drift pre-flight warning (`--require-current-main` abort) + sanctioned `--conclude-merge` conflicted-merge path (ADR-0081/T-20260918-002) | —| L0+L1 | —|
+| `evidence-backport-scan.ts` | L0 | 1.1.0 | active | v1.1.0 F1/M6 skill-dir literals adopt PLATFORM_SKILL_BASES, order provably verdict-irrelevant (spec docs/designs/2026-09-25-verifier-platform-expansion-design.md site 14). Evidence Backporting scanner — read-only form detection (F1/F2/F3/F0/MIXED) + M1-M6 maturity bar over Projects/co-* evidence planes (ADR-0084 Decision 6, design §4); consumes graph-delta-log.ts output for M2/M4/M6b with git-log fallback; project-resync Step 2b | —| L0+L1 | —|
+| `dev-sync.ts` | L0 | 1.18.0 | active | v1.18.0 (propagation-engine batch, spec docs/designs/2026-09-25-propagation-engine-batch-design.md T-20260924-001): Step 2.6 runs `generate-scripts-mirror.ts` in write mode (Step 2.5 existsSync + hard-exit idiom) so L1 SCRIPTS.md registry drift cannot land in a /sync commit; Prior: v1.17.1: Step 4.55 also parses the marker-rewrite `Would append: N` counter and WARNs on would-overwrite + would-append, so a pending append cannot hide behind the overwrite-only gate (spec docs/designs/2026-09-25-propagation-engine-batch-design.md R12); Prior: v1.17.0: Step 4.55 marker-rewrite drift-check list gains `constitution-context-pr` + step 6.5 scoped-staging deletion handling — skip index-removed `D`/staged-rename-source paths, batch-add present paths, per-path add for absent ones, fail-closed ghost exit 1 (spec: docs/designs/2026-09-24-constitution-s33-context-injection-design.md Amendment 2 §13); Prior: main-drift pre-flight warning (`--require-current-main` abort) + sanctioned `--conclude-merge` conflicted-merge path (ADR-0081/T-20260918-002) | —| L0+L1 | —|
 | `dispatch-parallel.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
 | `dispatch-serial.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
 | `dispatch.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
-| `fix-script-versions.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `gen-pr-body.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `generate-ide-rules.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `generate-l3-readme.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
-| `generate-scripts-readme.ts` | L0 | 1.0.4 | active | —| —| L0 | —|
 | `generate-raci.ts` | L0 | 1.1.0 | active | RACI matrix generator per ADR-0083 P4, ADR-0084 §3.4; derives A/R from procedures, accepts explicit C/I; loads governance/_human-roles.yaml when present; emits actor_types map when registry exists; sets schema_version: "1.1" for registries | —| L0+L1 | —|
 | `generate-skill-graph.ts` | L0 | 1.14.0 | active | DEG v1 per ADR-0083; ADR-0084 §3.4: human_role nodes from governance/_human-roles.yaml; actor_type edge attribute on RACI edges (accountable_for, consulted_on, informed_of, step_by_agent); v1.13.0: variant agent discovery skips README*/_ files (co-abap README nodes, T-20260923-001) + Source 4.8 workflow-doc citations — bounded corpus mints `doc:` nodes and `cites_skill` edges so workflow-dispatched skills are no longer graph-isolated; v1.14.0: variant corpus widened (docs/*.md, README.md, agents/**, workflows/**) + path-fragment/README-plain matching — variant isolation 17 → 0 (T-20260923-002) | —| L0+L1 | —|
 | `generate-version-manifest.ts` | L0 | 1.8.0 | active | v1.8.0 platform vocabulary: skills gain all/+-combos/single-platform names (both stays claude+gemini exactly); commands gain the all value via the codex prompts mapping; parity-status section names all four surfaces (spec docs/designs/2026-09-25-verifier-platform-expansion-design.md site 10, D10). Prior: scripts-table sort uses a full-path tiebreaker so basename ties (scripts/x.ts vs scripts/<variant>/x.ts) stop depending on readdir order (macOS vs Linux drift); date-masked `--check` — Last Modified columns excluded from comparison unconditionally (ADR-0081/T-20260918-001); emits `validate-md-language:allowlist` markers around the generated Skills table (T-20260912-015) | —| L0+L1 | —|
-| `evidence-backport-scan.ts` | L0 | 1.1.0 | active | v1.1.0 F1/M6 skill-dir literals adopt PLATFORM_SKILL_BASES, order provably verdict-irrelevant (spec docs/designs/2026-09-25-verifier-platform-expansion-design.md site 14). Evidence Backporting scanner — read-only form detection (F1/F2/F3/F0/MIXED) + M1-M6 maturity bar over Projects/co-* evidence planes (ADR-0084 Decision 6, design §4); consumes graph-delta-log.ts output for M2/M4/M6b with git-log fallback; project-resync Step 2b | —| L0+L1 | —|
 | `graph-delta-log.ts` | L0 | 1.0.0 | active | Graph Delta Log — compute and persist per-scope structural diffs between committed and derived skill graphs (ADR-0084 §5); two-layer delivery (workspace root + projects); consumed by evidence-backport-scan.ts maturity bar (M2, M4, M6b tests) | —| L0+L1 | —|
+| `helpers/generate-variant.ts` | L0 | 1.19.0 | active | v1.19.0 (variant hygiene batch, spec docs/designs/2026-09-25-variant-hygiene-batch-design.md R6): copyL0CommonSkills applies the WS-05a adaptation at the delivery seam — adaptL0ToolingReferences swaps the raw L0-only validator line for the workspace-only comment when present, byte-preserving otherwise (stops the per-promotion hand-remediation treadmill). Prior: v1.18.0 (platform-parity P1 bugfixes, spec docs/designs/2026-09-24-platform-parity-p1-bugfixes-design.md D6): copyL0CommonSkills → all four platform mirrors (was .claude/.gemini only; promoted variants' .agents/.codex lacked the L0-common trio) | —| L0+L1 | —|
+| `helpers/layer-filter.ts` | L0 | 1.5.0 | active | —| —| L0+L1 | —|
+| `helpers/extends-validator.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
+| `helpers/upgrade-versions.ts` | L0+L1 | 1.0.1 | active | —| —| L0+L1 | —|
+| `helpers/merge-frontmatter.ts` | L0 | 1.8.6 | active | —| —| L0+L1 | —|
+| `helpers/security-validator.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
+| `helpers/l0-ref-policy.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
+| `helpers/context-sections.ts` | L0 | 1.7.0 | active | v1.7.0 (variant hygiene batch, spec docs/designs/2026-09-25-variant-hygiene-batch-design.md R2): stripMarkerZones() — pure COMMON-CONTEXT zone stripper for audit.ts v2.44.0 overlap checks; unterminated zones are not stripped. Prior: CRLF-tolerant footer parsing (T-20260918-005); spliceCommonContextBlock delivers policy under PRESERVE (T-20260919-003); nesting-aware findHeadingSpan/removeHeadingSpan — promoted `##` sections carry their `###` children (2026-09-22). | —| L0+L1 | —|
+| `helpers/markers.ts` | L0 | 1.3.0 | active | v1.3.0 (T-20260924-006, spec docs/designs/2026-09-25-propagation-engine-batch-design.md): pure appendMissingZones() — placement-controlled append of missing marker zones (after the LAST zone of an anchor marker or at end-of-file; anchor missing = no placement, fail-safe skip); existing zones keep k-th↔k-th pairing | —| L0+L1 | —|
+| `helpers/merge-state.ts` | L0 | 1.0.0 | active | §3.3 shared-file taxonomy + unresolved-conflict parsing for dev-sync main-drift/--conclude-merge (ADR-0081/T-20260918-002) | —| L0+L1 | —|
+| `helpers/scaffold-markers.ts` | L0 | 1.5.1 | active | docs/project.template.md joins NEW_PROJECT_CLEANUP_FILES (rendered into docs/project.md at scaffold time, raw copy removed); docs/project.md joins POST_DELIVERY_ARTIFACTS (spec: docs/designs/2026-09-24-scaffold-identity-overview-design.md). Prior: shared scaffold marker constants + (marker→source) mapping + delivery-tree derivations + transient test-fixture predicate (T-20260916-001) | —| L0+L1 | —|
+| `helpers/pm-md-parser.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
+| `helpers/template-utils.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
+| `helpers/rollback-partial-project.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
+| `helpers/mirror-hygiene.ts` | L0 | 1.0.0 | active | v1.0.0 mirror-hygiene scanner (R6, spec docs/designs/2026-09-25-verifier-platform-expansion-design.md): a platform skill mirror contains only skill directories; stray files (SKILLS.md/README*.md) and non-skill dirs are findings; wired into validate-templates checkMirrorHygiene (WARN soak) | —| L0+L1 | —|
+| `hooks/gateguard-fact-force.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
+| `hooks/post-write-lifecycle-check.ts` | L0 | 1.2.0 | active | v1.2.0 checks 1-4 generalize to four platforms mapping-aware (.codex/prompts leg; .agents/commands excluded per Finding D) (spec docs/designs/2026-09-25-verifier-platform-expansion-design.md site 9) | —| L0+L1 | —|
+| `hooks/pre-commit.ts` | L0 | 1.8.0 | active | v1.8.0 check 6b generalizes to four platforms (skills regexes + .codex/prompts mapping leg), WARN severity preserved (spec docs/designs/2026-09-25-verifier-platform-expansion-design.md site 8) | —| L0+L1 | —|
+| `hooks/pre-push.ts` | L0 | 1.4.1 | active | —| —| L0+L1 | —|
+| `lib/context-md-schema.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
+| `lib/auth.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
+| `lib/constitution-scrub.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
+| `lib/encoding-utils.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
+| `lib/error-handling.ts` | L0 | 1.4.0 | active | —| —| L0+L1 | —|
+| `lib/language-guard.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
+| `lib/git-status.ts` | L0 | 1.1.0 | active | v1.1.0: adds `parseCachedNameStatus()` — cached name-status removal parser (`D` paths + staged-rename sources) for dev-sync step 6.5 scoped-staging deletion handling (spec: docs/designs/2026-09-24-constitution-s33-context-injection-design.md §13); Prior: `parseStatusPorcelain()` S0/S1 snapshot parser (2026-09-12 scoped staging) | —| L0+L1 | —|
+| `lib/pipeline-state.ts` | L0 | 1.2.0 | active | v1.2.0: injectable state file (`setStateFile`), string phase names, snapshot-backed undo (`addRollbackActionWithBackup`; modify/delete/move restore from captured content) for in-project adopt state | —| L0+L1 | —|
+| `lib/platform-context.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
+| `lib/propagation-map-schema.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
+| `lib/managed-block-parity.ts` | L0 | 1.2.0 | active | COMMON-AGENTS zone extraction/parity (ADR-0081/T-20260919-001); keyed WORKSPACE-MANAGED blocks (T-20260916-009) | —| L0+L1 | —|
+| `lib/platform-delivery.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
+| `lib/ssrf.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
+| `lib/upgrade-policy.ts` | L0 | 1.14.0 | active | v1.14.0 (T-20260924-011, spec docs/designs/2026-09-25-codex-merge-claim-routing-design.md D2/D3): exports VARIANT_ASSET_DIRS_PASS and resolveClaim uses it at the generic-asset fallback — upgrade-project's VARIANT ASSET DIRS pass now filters every walked file by claim-pass identity, so procedures/** leaves the pass (the dedicated PROCEDURES pass is the sole delivery channel). Prior: v1.13.0 (platform-parity P1 bugfixes, spec docs/designs/2026-09-24-platform-parity-p1-bugfixes-design.md D4): CODEX.md joins MERGE_MANAGED_FILES — resolveClaim returns MERGE_MANAGED/MERGE, so TEMPLATE TREE SYNC can no longer wholesale-overwrite a project CODEX.md (merge machinery itself: T-20260924-010). Prior: docs/project.md claims ADD_IF_MISSING on the TEMPLATE TREE SYNC pass (project-owned identity seed — seeded only when absent, never overwritten); docs/project.template.md joins TEMPLATE_ONLY (spec: docs/designs/2026-09-24-scaffold-identity-overview-design.md). Prior: exports `lifecyclelessText()` + `isDeliveredDiff()` (dev-sync 3.9 auto-E5); `.codex/skills + .codex/prompts` claims ride the sync-skills mirror pass (T-20260921-009/C-1, ADR-0085 D2) | —| L0+L1 | —|
+| `lib/dependency-guard.ts` | L0 | 1.0.2 | active | DEPENDENCY GUARD — scans delivered scripts' bare-package imports vs project package.json, reports missing packages in the upgrade plan (T-20260920-001) | —| L0+L1 | —|
+| `lib/variant-overlay-guard.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
+| `lib/platform-mirror-freshness.ts` | L0 | 1.1.0 | active | Pure platform-skill-mirror vs skills/ SSOT version comparison for the platform-mirror-freshness check (T-20260916-008) | —| L0+L1 | —|
+| `lib/platforms.ts` | L0 | 1.0.0 | active | Platform-list SSOT constants (PLATFORM_SKILL_BASES, PLATFORM_MIRROR_DIRS); Step 1 of the platform-parity program (spec: docs/designs/2026-09-24-platform-ssot-constant-design.md) | —| L0+L1 | —|
+| `lifecycle-sync-audit.ts` | L0 | 1.16.0 | active | v1.16.0 (T-20260924-001, spec docs/designs/2026-09-25-propagation-engine-batch-design.md R21): Check B projection arm — imports the generator's pure builder, regenerates the expected mirror registry span, and byte-compares it with templates/common/scripts/SCRIPTS.md (fix hint names `bun scripts/generate-scripts-mirror.ts`); existsSync-guarded dynamic import keeps the L1 copy functional where the L0-only generator is absent; existing version/file-existence checks retained | —| L0+L1 | —|
+| `lint-instructions.ts` | L0 | 1.0.0 | active | `--dir`, `--strict` | —| L0+L1 | —|
+| `md-to-ooxml.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
+| `migrate-quality-gates.ts` | L0 | 1.1.0 | active | Convert quality_gates prose entries to decision gates; automate classification (GATE vs INVARIANT vs MANUAL), YAML output, procedure schema updates, and _output-types.yaml enrichment (ADR-0083 P5); decider_agent derived from stage owner_agent, not procedure owner_agent | —| L0+L1 | —|
+| `resolve-variants.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
+| `qa-gate.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
+| `readme-lifecycle-audit.ts` | L0 | 1.0.4 | active | —| —| L0+L1 | —|
+| `render-pdf-deck.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
+| `retry-handler.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
+| `setup-github-branch-protection.ts` | L0 | 1.0.1 | active | `--repo`, `--branch`, `--check` (repeatable), `--dry-run` | —| L0+L1 | —|
+| `spec-register.ts` | L0 | 1.3.0 | active | `--file`, `--source`, `--update`, `--status`, `--list`, `--ref`, `--id` | —| L0+L1 | —|
+| `skill-lifecycle-audit.ts` | L0 | 1.5.1 | active | —| —| L0+L1 | —|
+| `skill-session-review.ts` | L0 | 1.1.0 | active | `--date`, `--json`, `--dry-run` | —| L0+L1 | —|
+| `sync-md.ts` | L0 | 1.4.0 | active | —| —| L0+L1 | —|
+| `sync-skill-status.ts` | L0 | 1.1.0 | active | v1.1.0 scan scope adopts PLATFORM_SKILL_BASES + SSOT-precedence guard (skills/ status wins; mirrors speak only for platform-only skills) (spec docs/designs/2026-09-25-verifier-platform-expansion-design.md site 5, D5) | — | L0+L1 | — |
+| `sync-skills.ts` | L0 | 1.8.0 | active | `--dir <path>`, `--all-variants` | — | L0+L1 | — |
+| `team-builder.ts` | L0 | 1.4.0 | active | —| —| L0+L1 | —|
+| `test-runner.ts` | L0 | 1.4.0 | active | `--parallel`, `--sequential`, `--concurrency <n>`, `--timeout <ms>` | —| L0+L1 | —|
 | `handbook/apply-handbook-theme.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `handbook/build-search-index.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `handbook/check-a11y.ts` | L0 | 1.0.0 | active | — | — | common | — |
@@ -110,137 +159,11 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `handbook/update-footers.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `handbook/validate-handbook.ts` | L0 | 1.1.0 | active | — | — | common | — |
 | `handbook/validate-nav.ts` | L0 | 1.0.0 | active | — | — | common | — |
-| `helpers/beta-lifecycle.ts` | L0 | 1.2.1 | active | —| —| L0 | —|
-| `helpers/generate-variant.ts` | L0 | 1.19.0 | active | v1.19.0 (variant hygiene batch, spec docs/designs/2026-09-25-variant-hygiene-batch-design.md R6): copyL0CommonSkills applies the WS-05a adaptation at the delivery seam — adaptL0ToolingReferences swaps the raw L0-only validator line for the workspace-only comment when present, byte-preserving otherwise (stops the per-promotion hand-remediation treadmill). Prior: v1.18.0 (platform-parity P1 bugfixes, spec docs/designs/2026-09-24-platform-parity-p1-bugfixes-design.md D6): copyL0CommonSkills → all four platform mirrors (was .claude/.gemini only; promoted variants' .agents/.codex lacked the L0-common trio) | —| L0+L1 | —|
-| `helpers/agent-promote.ts` | L0 | 1.0.1 | active | `--json`, `--help` — ADR-0043 promotion-candidate ANALYSIS (read-only): ≥3-variant agent names, pairwise Role+Responsibilities Jaccard, ≥80% groups reported | —| L0 | —|
-| `helpers/agent-similarity-analyzer.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
-| `helpers/golden-reference-loader.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `helpers/skills-registry.ts` | L0 | 1.1.0 | active | v1.1.0 (T-20260924-008, spec docs/designs/2026-09-24-skills-registry-overlay-reconcile-design.md): adds collectDeliveredSkills + pruneSkillRegistryRows (fresh-scaffold reconcile half); extractFrontmatterVersionAndReviewed moved in verbatim from upgrade-project.ts. v1.0.0: parse/reconcile project skills/SKILLS.md (T-20260922-001) | —| L0 | —|
-| `helpers/inject-skills.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `helpers/integration-helpers.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
-| `helpers/layer-filter.ts` | L0 | 1.5.0 | active | —| —| L0+L1 | —|
-| `helpers/lifecycle-governance.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
-| `helpers/extends-validator.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
-| `helpers/upgrade-versions.ts` | L0+L1 | 1.0.1 | active | —| —| L0+L1 | —|
-| `helpers/merge-frontmatter.ts` | L0 | 1.8.6 | active | —| —| L0+L1 | —|
-| `helpers/security-validator.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
-| `helpers/l0-ref-policy.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
-| `helpers/context-sections.ts` | L0 | 1.7.0 | active | v1.7.0 (variant hygiene batch, spec docs/designs/2026-09-25-variant-hygiene-batch-design.md R2): stripMarkerZones() — pure COMMON-CONTEXT zone stripper for audit.ts v2.44.0 overlap checks; unterminated zones are not stripped. Prior: CRLF-tolerant footer parsing (T-20260918-005); spliceCommonContextBlock delivers policy under PRESERVE (T-20260919-003); nesting-aware findHeadingSpan/removeHeadingSpan — promoted `##` sections carry their `###` children (2026-09-22). | —| L0+L1 | —|
-| `helpers/markers.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
-| `helpers/merge-state.ts` | L0 | 1.0.0 | active | §3.3 shared-file taxonomy + unresolved-conflict parsing for dev-sync main-drift/--conclude-merge (ADR-0081/T-20260918-002) | —| L0+L1 | —|
-| `helpers/scaffold-markers.ts` | L0 | 1.5.1 | active | docs/project.template.md joins NEW_PROJECT_CLEANUP_FILES (rendered into docs/project.md at scaffold time, raw copy removed); docs/project.md joins POST_DELIVERY_ARTIFACTS (spec: docs/designs/2026-09-24-scaffold-identity-overview-design.md). Prior: shared scaffold marker constants + (marker→source) mapping + delivery-tree derivations + transient test-fixture predicate (T-20260916-001) | —| L0+L1 | —|
-| `helpers/pm-md-parser.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
-| `helpers/variant-governance-rules.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
-| `helpers/registries/variant-type-registry.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `helpers/registries/capability-registry.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `helpers/registries/promotion-policy.ts` | L0 | 1.2.1 | active | —| —| L0 | —|
-| `helpers/registries/validation-policy.ts` | L0 | 1.2.1 | active | —| —| L0 | —|
-| `helpers/registries/index.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `helpers/plugins/variant-plugin.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `helpers/plugins/game-plugin.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `helpers/plugins/security-plugin.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `helpers/plugins/development-plugin.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `helpers/plugins/design-plugin.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `helpers/plugins/consulting-plugin.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `helpers/plugins/collaboration-plugin.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `helpers/plugins/lecture-plugin.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `helpers/plugins/index.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `helpers/workspace-integration.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `helpers/reconcile-with-l0-l1.ts` | L0 | 1.3.1 | active | —| —| L0 | —|
-| `helpers/normalize-agent-skills.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
-| `helpers/prune-country-scoped-assets.ts` | L0 | 0.3.4 | active | —| —| L0 | —|
-| `helpers/scan-l3-project.ts` | L0 | 1.5.0 | active | v1.5.0 commands roots gain .codex/prompts (.agents/commands excluded per Finding D); detectPlatformScope classifies agents/codex (spec docs/designs/2026-09-25-verifier-platform-expansion-design.md site 13) | —| L0 | —|
-| `helpers/substitute-placeholders.ts` | L0 | 1.3.0 | active | v1.3.0: exported pure `applySubstitutions`/`substituteFiles` (strict-UTF-8 guard, explicit file list) for adopt's scoped substitution; CLI flow guarded by import.meta.main, behavior unchanged | —| L0 | —|
-| `helpers/template-utils.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
-| `helpers/rollback-partial-project.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
-| `helpers/template-validation.ts` | L0 | 1.0.2 | active | —| —| L0 | —|
-| `helpers/update-variant-lifecycle.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
-| `helpers/validate-output.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
-| `helpers/validate-platform-parity.ts` | L0 | 1.2.0 | active | v1.2.0 4-platform manifest rework: per-mirror comparison vs .claude reference; codex prompts mapping; skip markers generalized; .agents/.codex findings soak at warning (spec docs/designs/2026-09-25-verifier-platform-expansion-design.md site 12, D12) | —| L0 | —|
-| `helpers/mirror-hygiene.ts` | L0 | 1.0.0 | active | v1.0.0 mirror-hygiene scanner (R6, spec docs/designs/2026-09-25-verifier-platform-expansion-design.md): a platform skill mirror contains only skill directories; stray files (SKILLS.md/README*.md) and non-skill dirs are findings; wired into validate-templates checkMirrorHygiene (WARN soak) | —| L0+L1 | —|
-| `helpers/ticket-schema.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
-| `helpers/ticket-store.ts` | L0 | 1.2.1 | active | MoveOptions.result written to the ticket on done transitions (T-20260912-023); id allocation scans both tickets/ and tickets/governance/ so a create can never mint a same-day id that shadows or is shadowed across directories (T-20260912-025) | —| L0 | —|
 | `tests/apply-handbook-theme.test.ts` | L0 | 1.0.1 | active | — | — | common | — |
 | `tests/check-structure.test.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `tests/deploy-readme-patch.test.ts` | L0 | 1.0.0 | active | — | — | common | — |
-| `validators/types.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `validators/variant-json-validator.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `validators/extends-validator-wrapper.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `validators/capability-validator.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `validators/schema-validator.ts` | L0 | 1.4.0 | active | —| —| L0 | —|
-| `validators/orphan-reference-validator.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `validators/duplicate-validator.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `validators/platform-parity-validator.ts` | L0 | 1.1.0 | active | v1.1.0 4-platform rework: per-mirror skill/command comparison vs .claude; codex prompts name-mapping; skip-marker honor; settings stays claude-gemini (spec docs/designs/2026-09-25-verifier-platform-expansion-design.md site 12, D12) | —| L0 | —|
-| `validators/index.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `helpers/write-scripts-snapshot.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
-| `hooks/_test-consumer.ts` | L0 | 1.0.0 | active | —| —| L0-only | —|
-| `hooks/_test-module.ts` | L0 | 1.0.0 | active | —| —| L0-only | —|
-| `hooks/agent-model-gate.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `hooks/gateguard-fact-force.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
-| `hooks/post-write-lifecycle-check.ts` | L0 | 1.2.0 | active | v1.2.0 checks 1-4 generalize to four platforms mapping-aware (.codex/prompts leg; .agents/commands excluded per Finding D) (spec docs/designs/2026-09-25-verifier-platform-expansion-design.md site 9) | —| L0+L1 | —|
-| `hooks/pre-commit.ts` | L0 | 1.8.0 | active | v1.8.0 check 6b generalizes to four platforms (skills regexes + .codex/prompts mapping leg), WARN severity preserved (spec docs/designs/2026-09-25-verifier-platform-expansion-design.md site 8) | —| L0+L1 | —|
-| `hooks/pre-push.ts` | L0 | 1.4.1 | active | —| —| L0+L1 | —|
-| `ingest-external-skills.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `ingest-security-frameworks.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `l3-to-variant-pipeline.ts` | L0 | 1.20.0 | active | `--overlay-variant` | —| L0 | —|
-| `regenerate-agents-md.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `lib/agent-override-merge.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
-| `lib/context-md-schema.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
-| `lib/auth.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `lib/encoding-utils.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
-| `lib/error-handling.ts` | L0 | 1.4.0 | active | —| —| L0+L1 | —|
-| `lib/language-guard.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `lib/git-status.ts` | L0 | 1.1.0 | active | v1.1.0: adds `parseCachedNameStatus()` — cached name-status removal parser (`D` paths + staged-rename sources) for dev-sync step 6.5 scoped-staging deletion handling (spec: docs/designs/2026-09-24-constitution-s33-context-injection-design.md §13); Prior: `parseStatusPorcelain()` S0/S1 snapshot parser (2026-09-12 scoped staging) | —| L0+L1 | —|
-| `lib/pipeline-state.ts` | L0 | 1.2.0 | active | v1.2.0: injectable state file (`setStateFile`), string phase names, snapshot-backed undo (`addRollbackActionWithBackup`; modify/delete/move restore from captured content) for in-project adopt state | —| L0+L1 | —|
-| `lib/platform-context.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `lib/propagation-map-schema.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
-| `lib/managed-block-parity.ts` | L0 | 1.2.0 | active | COMMON-AGENTS zone extraction/parity (ADR-0081/T-20260919-001); keyed WORKSPACE-MANAGED blocks (T-20260916-009) | —| L0+L1 | —|
-| `lib/platform-delivery.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `lib/ssrf.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
-| `lib/constitution-scrub.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `lib/upgrade-policy.ts` | L0 | 1.14.0 | active | v1.14.0 (T-20260924-011, spec docs/designs/2026-09-25-codex-merge-claim-routing-design.md D2/D3): exports VARIANT_ASSET_DIRS_PASS and resolveClaim uses it at the generic-asset fallback — upgrade-project's VARIANT ASSET DIRS pass now filters every walked file by claim-pass identity, so procedures/** leaves the pass (the dedicated PROCEDURES pass is the sole delivery channel). Prior: v1.13.0 (platform-parity P1 bugfixes, spec docs/designs/2026-09-24-platform-parity-p1-bugfixes-design.md D4): CODEX.md joins MERGE_MANAGED_FILES — resolveClaim returns MERGE_MANAGED/MERGE, so TEMPLATE TREE SYNC can no longer wholesale-overwrite a project CODEX.md (merge machinery itself: T-20260924-010). Prior: docs/project.md claims ADD_IF_MISSING on the TEMPLATE TREE SYNC pass (project-owned identity seed — seeded only when absent, never overwritten); docs/project.template.md joins TEMPLATE_ONLY (spec: docs/designs/2026-09-24-scaffold-identity-overview-design.md). Prior: exports `lifecyclelessText()` + `isDeliveredDiff()` (dev-sync 3.9 auto-E5); `.codex/skills + .codex/prompts` claims ride the sync-skills mirror pass (T-20260921-009/C-1, ADR-0085 D2) | —| L0+L1 | —|
-| `lib/dependency-guard.ts` | L0 | 1.0.2 | active | DEPENDENCY GUARD — scans delivered scripts' bare-package imports vs project package.json, reports missing packages in the upgrade plan (T-20260920-001) | —| L0+L1 | —|
-| `lib/variant-overlay-guard.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `lib/platform-mirror-freshness.ts` | L0 | 1.1.0 | active | Pure platform-skill-mirror vs skills/ SSOT version comparison for the platform-mirror-freshness check (T-20260916-008) | —| L0+L1 | —|
-| `lib/platforms.ts` | L0 | 1.0.0 | active | Platform-list SSOT constants (PLATFORM_SKILL_BASES, PLATFORM_MIRROR_DIRS); Step 1 of the platform-parity program (spec: docs/designs/2026-09-24-platform-ssot-constant-design.md) | —| L0+L1 | —|
-| `lifecycle-sync-audit.ts` | L0 | 1.15.0 | active | —| —| L0+L1 | —|
-| `lint-instructions.ts` | L0 | 1.0.0 | active | `--dir`, `--strict` | —| L0+L1 | —|
-| `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `md-to-ooxml.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
-| `migrate-quality-gates.ts` | L0 | 1.1.0 | active | Convert quality_gates prose entries to decision gates; automate classification (GATE vs INVARIANT vs MANUAL), YAML output, procedure schema updates, and _output-types.yaml enrichment (ADR-0083 P5); decider_agent derived from stage owner_agent, not procedure owner_agent | —| L0+L1 | —|
-| `new-project.ts` | L0 | 1.28.1 | active | v1.28.0 (scaffold hygiene bundle, spec docs/designs/2026-09-24-scaffold-hygiene-bundle-design.md): parse-loop catch-all — any unknown or valueless `--` flag is a hard error (exit 1) before any write, naming the offending token and listing the six valid flags; `--yes` exempt (consumed by the auto-confirm argv scan). Prior: v1.27.0 (T-20260924-008, spec docs/designs/2026-09-24-skills-registry-overlay-reconcile-design.md): overlay walk skips `skills/SKILLS.md` (common 63-row registry stays as seed) + new §6.4 post-settle reconcile — prunes rows for undelivered skills, updates version/last_reviewed from delivered SKILL.md frontmatter, appends variant-exclusive rows; idempotent, non-fatal. Prior: §5.2 renders docs/project.md from the identity seed template (templates/common/docs/project.template.md) and removes the raw copy; new additive --description/--type flags fill the identity fields, absent flags keep the audit-visible TODO(project-overview) fallback (spec: docs/designs/2026-09-24-scaffold-identity-overview-design.md). Prior: §2.3b extends-stub resolution + §2.5 L1-B strip extracted verbatim to `helpers/resolve-pm-stub.ts`; §7.7 graft build: global `graft` first, bunx fallback; bare names scaffold to `Projects/<name>`, path-like names stay workspace-relative | —| L0 | —|
-| `remove-project.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
-| `resolve-variants.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
-| `project-to-variant.ts` | L0 | 1.5.0 | active | v1.5.0 (platform-parity P1 bugfixes, spec docs/designs/2026-09-24-platform-parity-p1-bugfixes-design.md D1): shouldSkip adopts PLATFORM_SKILL_BASES — .codex/skills joins the scoped-skill exclusion (country-scoped skills no longer leak from a source project's codex mirror). Flags: `--source`, `--target`, `--dry-run`, `--force`, `--overlay-variant`, `--design-doc`, `--threshold-files`, `--threshold-dirs` | —| L0 | —|
-| `promote-context-section.ts` | L0 | 1.1.0 | active | `--heading`, `--variants`, `--source`, `--after-heading`, `--dry-run`; nesting-aware removal — promoted `##` sections remove their nested `###` subsections too (2026-09-22) | —| L0 | —|
-| `propagate-to-templates.ts` | L0 | 2.17.0 | active | v2.17.0 (platform-parity P1 bugfixes, spec docs/designs/2026-09-24-platform-parity-p1-bugfixes-design.md D5): B-7 GEMINI boundary regex repaired to the marker-pair form (captures heading number), NEW CODEX.md branch replaces the section in place, B-8 fatal guard when the workspace heading survives any output. Flags: `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--json`, `--governance-l1`, `--docs`, `--include-disabled`, `--marker-rewrite` | —| L0 | —|
-| `qa-gate.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
-| `readme-lifecycle-audit.ts` | L0 | 1.0.4 | active | —| —| L0+L1 | —|
-| `render-pdf-deck.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
-| `retry-handler.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
-| `setup-github-branch-protection.ts` | L0 | 1.0.1 | active | `--repo`, `--branch`, `--check` (repeatable), `--dry-run` | —| L0+L1 | —|
-| `skill-dependency-analysis.ts` | L0 | 1.0.2 | active | —| —| L0 | —|
-| `spec-backfill.ts` | L0 | 1.0.0 | active | `--dry-run`, `--check` | —| L0 | —|
-| `spec-register.ts` | L0 | 1.3.0 | active | `--file`, `--source`, `--update`, `--status`, `--list`, `--ref`, `--id` | —| L0+L1 | —|
-| `skill-lifecycle-audit.ts` | L0 | 1.5.1 | active | —| —| L0+L1 | —|
-| `skill-session-review.ts` | L0 | 1.1.0 | active | `--date`, `--json`, `--dry-run` | —| L0+L1 | —|
-| `sync-md.ts` | L0 | 1.4.0 | active | —| —| L0+L1 | —|
-| `sync-skill-status.ts` | L0 | 1.1.0 | active | v1.1.0 scan scope adopts PLATFORM_SKILL_BASES + SSOT-precedence guard (skills/ status wins; mirrors speak only for platform-only skills) (spec docs/designs/2026-09-25-verifier-platform-expansion-design.md site 5, D5) | — | L0+L1 | — |
-| `sync-skills-to-l2.ts` | L0 | 1.0.1 | active | — | — | L0 | — |
-| `sync-template-deps.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `sync-skills.ts` | L0 | 1.8.0 | active | `--dir <path>`, `--all-variants` | — | L0+L1 | — |
-| `tag-template.ts` | L0 | 1.1.0 | active | `--dry-run`, `--no-push`, `--fail-on-push-error` | —| L0 | —|
-| `team-builder.ts` | L0 | 1.4.0 | active | —| —| L0+L1 | —|
-| `test-platform-parity.ts` | L0 | 0.3.0 | active | v0.3.0 FILE_MAPPINGS gains CODEX.md L0→L1 (informational existence check; section parity deferred per D3.5) (spec docs/designs/2026-09-25-verifier-platform-expansion-design.md site 11) | —| L0 | —|
-| `test-new-project.ts` | L0 | 1.6.0 | active | v1.6.0 (scaffold hygiene bundle, spec docs/designs/2026-09-24-scaffold-hygiene-bundle-design.md): Test 0c pins the unknown-flag hard error (AC4) — `--varaint` exits non-zero, token named, valid flags listed, no directory created. Prior: v1.5.0 (T-20260924-008, spec docs/designs/2026-09-24-skills-registry-overlay-reconcile-design.md): Test 29 pins the delivered-registry ↔ delivered-tree bijection (frontmatter values win the shadow case; service-design row present); Test 30 runs the project's skill-lifecycle-audit and asserts 0 errors. Prior: Tests 27-28 pin the identity seed contract: TODO(project-overview) fallback + docs/context.md pointer on the default scaffold (AC2/AC3), --description/--type rendering on a flagged scaffold (AC1) (spec: docs/designs/2026-09-24-scaffold-identity-overview-design.md). Prior: Test 8 covers `--platform codex` and asserts CODEX.md/.codex/ under `all` | —| L0 | —|
-| `test-extends-validator.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
-| `test-l3-to-variant-promotion.ts` | L0 | 1.6.0 | active | —| —| L0 | —|
-| `test-runner.ts` | L0 | 1.4.0 | active | `--parallel`, `--sequential`, `--concurrency <n>`, `--timeout <ms>` | —| L0+L1 | —|
 | `translate-readme.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `ticket.ts` | L0 | 1.2.0 | active | `create --not-before`, `list --kind`, `list --ready`, `move done --result` (required, not bypassable by --force) | —| L0 | —|
 | `typecheck.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
-| `upgrade-project.ts` | L0 | 1.48.0 | active | v1.48.0 (T-20260924-011, spec docs/designs/2026-09-25-codex-merge-claim-routing-design.md D2/R4-R6): the VARIANT ASSET DIRS pass consults resolveClaim per walked file and delivers only VARIANT_ASSET_DIRS_PASS claims (procedures/** drops out; skipped files log one summary line per directory; generic asset dirs keep NEW/UPDATE/CONFLICT/COPIED; `.codex` stays in the skip set). Prior: v1.47.0 (platform-parity P1 bugfixes, spec docs/designs/2026-09-24-platform-parity-p1-bugfixes-design.md D2+D3): foreign-variant skill prune iterates PLATFORM_SKILL_BASES (a foreign skill's .codex copy no longer survives the prune); `.codex` joins VARIANT_ASSET_DIR_SKIP (the variant's top-level .codex/ is no longer hash-synced over project-owned Codex config — general resolveClaim bypass: T-20260924-011). Prior: v1.46.1 (T-20260924-008): mechanical move only — extractFrontmatterVersionAndReviewed relocated verbatim to `helpers/skills-registry.ts` and imported back; NO behavior change. Prior: v1.46.0 (scaffold identity overview §13, spec docs/designs/2026-09-24-scaffold-identity-overview-design.md): IDENTITY SEED step after TEMPLATE TREE SYNC — renders docs/project.template.md into docs/project.md ONLY when absent (existing file → no write, no verdict; AC4); sync pass walk untouched (its ADD_IF_MISSING claim for that path is a defensive no-op). Prior: v1.44.0 (T-20260923-003/-004): PRUNE REMOVED scripts/ category registry-aware — variant-sourced rows KEEP, pruned rows dropped; L1 engine mirror retired (ADR-0073 Amd. 1+3). Prior: v1.43.0 (adopt-project prerequisites): variant-scope skill prune honors variant.json skill_manifest; `.gitattributes` merge-aware LOCKED delivery. Prior: `--variant`/`--platform`/`--dry-run`/`--prune-removed`/`--rollback`/`--yes`/`--skip-context-commonization`/`--force-context-sync`; COMMON-CONTEXT splice under PRESERVE (T-20260919-003); skill sub-file sync (2026-09-21); W2 HARVEST (2026-09-22) | —| L0 | —|
-| `variant-feature.ts` | L0 | 1.0.0 | active | `--variant`, `--feature`, `--type` | —| L0 | —|
 | `validate-agents.ts` | L0 | 1.3.2 | active | —| —| L0+L1 | —|
 | `validate-doc-folder.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `validate-docs-links.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
@@ -248,22 +171,18 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `validate-model-registry.ts` | L0 | 1.4.0 | active | —| —| L0+L1 | —|
 | `validate-process.ts` | L0 | 1.0.0 | active | Process/stages validation (ADR-0083 DEG-P-*), distinctness check (`--determinism` flag) | —| L0+L1 | —|
 | `validate-raci.ts` | L0 | 1.2.0 | active | RACI validation per ADR-0083 DEG-R-01..05 + ADR-0084 DEG-R-06/07; DEG-R-06: human-accountable must match gate; DEG-R-07: actor_types key set must equal R/A/C/I union | —| L0+L1 | —|
-| `validate-procedures.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `validate-skills.ts` | L0 | 1.5.1 | active | —| —| L0+L1 | —|
+| `validate-procedures.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `validate-decisions.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `validate-templates.ts` | L0 | 1.42.0 | active | v1.42.0 variant-agent-references (T-20260924-007c, spec docs/designs/2026-09-25-variant-hygiene-batch-design.md, R4): agent references in variant AGENTS.md + variant scripts must resolve at variant/common/root agents/ trees; pure cores classifyAgentReference + extractAgentReferenceCandidates exported for tests/unit/variant-agent-reference.test.ts; WARN soak (ADR-0055), dated promotion ticket T-20260925-004. Prior: v1.40.0 platform verifier expansion (spec docs/designs/2026-09-25-verifier-platform-expansion-design.md, sites 3a-3e/3g + R6): command checks gain the .codex/prompts leg (C-CM-04 codex derived from source per Ruling K); platform-skills sweep iterates four mirror trees; VA-03 becomes 4-mirror parity with generalized skip marker (mirror-parity: skip, gemini-parity: skip as legacy alias); P-01b CODEX.md leg; new mirror-hygiene check. Net-new coverage soaks in WARN (ADR-0055). Prior: project-identity-placeholder — fleet WARN over Projects/*/docs/ reusing the audit placeholder regex; identity residue stays visible until filled (spec: docs/designs/2026-09-24-scaffold-identity-overview-design.md). Prior: roster-tier-consistency (T-20260921-020); common-agents-parity PM-04b (ADR-0081/T-20260919-001); managed-block-parity PM-04 (T-20260916-009); cross-twin common section parity VA-06 (ADR-0077) | —| L0+L1 | —|
 | `validate-variant-readiness.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
-| `verify-country-prune.ts` | L0 | 1.1.0 | active | v1.1.0 fixture harness adopts PLATFORM_SKILL_BASES — .codex/skills fixtures created and pruning asserted; pruner already 5-element (spec docs/designs/2026-09-25-verifier-platform-expansion-design.md site 7, D7) | —| L0 | —|
-| `verify-adr-governance.ts` | L0 | 1.7.0 | active | Added bold-line fallback for `**Date**: YYYY-MM-DD` metadata to mirror `extractADRStatus()` pattern (ADR-0084 safety net); WARN on unparseable dates for Accepted/Proposed ADRs | —| L0 | —|
 | `verify-agent-deliverables.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `verify-skill-graph.ts` | L0 | 1.6.0 | active | —| —| L0+L1 | —|
 | `verify-memory.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
-| `verify-new-project-tests.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
 | `verify-platform-lifecycle.ts` | L0 | 1.2.0 | active | v1.2.0 Check E/H iterate the four mirrors; Check F becomes n-way version sync (.claude-gemini disagreement keeps fail, other shapes soak WARN); Check G gains the .codex/prompts mapping leg; .agents/commands excluded per Finding D (spec docs/designs/2026-09-25-verifier-platform-expansion-design.md sites 1a-1d, D1) | —| L0+L1 | —|
 | `verify-readme-sync.ts` | L0 | 1.4.0 | active | —| —| L0+L1 | —|
 | `verify-scripts.ts` | L0 | 1.8.0 | active | v1.8.0: walkScripts skips `scripts/_legacy/` (adopt-project archive of preserved foreign scripts — not registry-governed). Prior: `--fix` auto-registers unregistered scripts (ADR-0081/T-20260919-002) | —| L0+L1 | —|
 | `verify-skills.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
-| `verify-template-integrity.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `validate-pm-extends.ts` | L0 | 0.3.1 | active | —| —| L0+L1 | —|
 
 ---

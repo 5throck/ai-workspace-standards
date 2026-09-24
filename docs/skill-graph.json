@@ -7952,6 +7952,12 @@
     {
       "type": "cites_skill",
       "from": "doc:AGENTS.md",
+      "to": "platform-command-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:AGENTS.md",
       "to": "project-review",
       "source": "workflow-doc"
     },

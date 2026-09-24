@@ -241,7 +241,9 @@
       "target_variants": [
         "common"
       ],
-      "note": "Single-zone domain: §3.3 travels under its own marker so positional pairing cannot disturb the two COMMON-CONSTITUTION zone pairs. Source zone is scrub-neutral by construction — plain-text ADR/ticket refs only, no markdown links, no docs/constitution/ paths (no scrub rule covers docs/adr/ links). ADR-0062 lineage; spec: docs/designs/2026-09-24-constitution-s33-context-injection-design.md.",
+      "append_on_missing": true,
+      "insert_after_marker": "COMMON-CONSTITUTION",
+      "note": "Single-zone domain: §3.3 travels under its own marker so positional pairing cannot disturb the two COMMON-CONSTITUTION zone pairs. Source zone is scrub-neutral by construction — plain-text ADR/ticket refs only, no markdown links, no docs/constitution/ paths (no scrub rule covers docs/adr/ links). ADR-0062 lineage; spec: docs/designs/2026-09-24-constitution-s33-context-injection-design.md. Bootstrap append pilot (missing COMMON-CONSTITUTION-PR zones insert after the last COMMON-CONSTITUTION zone; anchor missing = fail-safe skip), enabled 2026-09-25 per spec docs/designs/2026-09-25-propagation-engine-batch-design.md R13/D5 — zero live diff today since its zone already exists in every current target.",
       "scrub_constitution_refs": true
     },
     "variant-context": {

@@ -324,7 +324,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `dec:DEC-20260825-02` | decision | `sync` | — | — |
 | `dec:DEC-20260829-01` | decision | `decision-record` | — | — |
 | `dec:DEC-20260829-02` | decision | `decision-record` | — | — |
-| `doc:AGENTS.md` | doc | `agent-lifecycle-manager`, `create-variant`, `decision-record`, `evidence-ledger`, `explain-me`, `handbook`, `handbook-sync-audit`, `i18n-audit`, `i18n-formatting`, `i18n-layout`, `i18n-locale-config`, `meeting-facilitation`, `project-review`, `promote-variant`, `security-scan`, `simulate-pipeline`, `skill-graph-analytics`, `skill-lifecycle-manager`, `source-command-commit-push-pr`, `sync` | — | — |
+| `doc:AGENTS.md` | doc | `agent-lifecycle-manager`, `create-variant`, `decision-record`, `evidence-ledger`, `explain-me`, `handbook`, `handbook-sync-audit`, `i18n-audit`, `i18n-formatting`, `i18n-layout`, `i18n-locale-config`, `meeting-facilitation`, `platform-command-lifecycle-manager`, `project-review`, `promote-variant`, `security-scan`, `simulate-pipeline`, `skill-graph-analytics`, `skill-lifecycle-manager`, `source-command-commit-push-pr`, `sync` | — | — |
 | `doc:CLAUDE.md` | doc | `meeting-facilitation` | — | — |
 | `doc:co-abap/AGENTS.md` | doc | `abap-code-review`, `abap-dev`, `agent-lifecycle-manager`, `desktop-app-fallback`, `dump-monitor`, `performance-tuning`, `post-write-chain`, `sap-co`, `sap-fi`, `sap-le`, `sap-mm`, `sap-pp`, `sap-sd`, `skill-lifecycle-manager`, `source-command-celebrate` | — | — |
 | `doc:co-abap/agents/co-analyst.md` | doc | `sap-co` | — | — |

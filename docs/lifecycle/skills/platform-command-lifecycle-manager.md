@@ -3,9 +3,9 @@
 ## Metadata
 - **Skill**: platform-command-lifecycle-manager
 - **Status**: active
-- **Version**: 1.0.2
+- **Version**: 1.0.3
 - **Created**: 2026-09-04
-- **Last Updated**: 2026-09-04
+- **Last Updated**: 2026-09-25
 
 ## Description
 Guides creation and lifecycle management of platform commands
@@ -14,6 +14,8 @@ L0↔L1 propagation rules, parity validation via `scripts/validate-templates.ts`
 and AGENTS.md §8 lifecycle trigger bookkeeping.
 
 ## Changelog
+
+- **1.0.3** (2026-09-25): patch bump — `.agents/commands` lockstep note added to the Propagation Rule (spec `2026-09-25-propagation-engine-batch-design` §6-D8/R25, ticket T-20260925-003); last_reviewed refreshed.
 
 - **1.0.2** (2026-09-21): patch bump — deliver accumulated template content to the fleet (equal-version content drift measured 2026-09-21; upgrade-project 1.37 UPDATE delivery).
 

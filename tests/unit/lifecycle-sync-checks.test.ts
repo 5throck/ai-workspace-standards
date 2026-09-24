@@ -9,7 +9,13 @@
  * warned permanently before). Remaining drift is a FAILURE, and the fix hint
  * must never recommend an action that clobbers the intentional state.
  *
- * @version 1.4.3
+ * @version 1.5.0
+ * v1.5.0 (T-20260924-001, spec 2026-09-25-propagation-engine-batch-design):
+ *         Check B projection arm — compareMirrorProjection semantics
+ *         (AC-12: drifted fixture → error whose fix hint names the generator;
+ *         identical → clean) plus a live-state run of runCheckBProjection on
+ *         the post-normalization tree.
+ * v1.4.3: new-project record pin 1.28.0 → 1.28.1 (platform-SSOT constant
  * v1.4.3: new-project record pin 1.28.0 → 1.28.1 (platform-SSOT constant
  *         adoption — behavior-neutral, spec
  *         docs/designs/2026-09-24-platform-ssot-constant-design.md).
@@ -35,10 +41,13 @@ import {
   runCheckC,
   runCheckE,
   runCheckH,
+  runCheckBProjection,
+  compareMirrorProjection,
   compareScriptRecordVersion,
   extractRecordField,
   parseSkillFrontmatter,
 } from '../../scripts/lifecycle-sync-audit.ts';
+import { buildMirrorRegistrySpan, extractRegistrySpan } from '../../scripts/generate-scripts-mirror.ts';
 
 const workspaceRoot = resolve(import.meta.dir, '..', '..');
 
@@ -163,5 +172,46 @@ describe('lifecycle-sync-audit Check H (script record version gate, T-20260915-0
       );
       expect(extractRecordField(content, 'Version')).toBe(version);
     }
+  });
+});
+
+describe('lifecycle-sync-audit Check B projection arm (T-20260924-001, AC-12)', () => {
+  const HEADER = '| script | source | version | status | removal-date | security-advisory | layer | pair |';
+  const SEPARATOR = '|--------|--------|---------|--------|--------------|-------------------|-------|------|';
+  const row = (key: string, version = '1.0.0') =>
+    `| \`${key}\` | L0 | ${version} | active | —| —| L0+L1 | —|`;
+
+  test('a drifted fixture produces an error whose fix hint names the generator', () => {
+    const expected = [HEADER, SEPARATOR, row('audit.ts', '2.0.0')].join('\n');
+    const drifted = [HEADER, SEPARATOR, row('audit.ts', '9.9.9')].join('\n');
+    const issues = compareMirrorProjection(expected, drifted);
+    expect(issues).toHaveLength(1);
+    expect(issues[0].level).toBe('error');
+    expect(issues[0].fix).toBe('bun scripts/generate-scripts-mirror.ts');
+    expect(issues[0].file).toBe('templates/common/scripts/SCRIPTS.md');
+  });
+
+  test('an identical projection is clean', () => {
+    const span = [HEADER, SEPARATOR, row('audit.ts', '2.0.0')].join('\n');
+    expect(compareMirrorProjection(span, span)).toEqual([]);
+  });
+
+  test('a missing mirror span (no | script | header) is an error naming the generator', () => {
+    const issues = compareMirrorProjection([HEADER, SEPARATOR].join('\n'), null);
+    expect(issues).toHaveLength(1);
+    expect(issues[0].level).toBe('error');
+    expect(issues[0].fix).toBe('bun scripts/generate-scripts-mirror.ts');
+  });
+
+  test('live state: runCheckBProjection reports no issue on the normalized tree', async () => {
+    const issues = await runCheckBProjection();
+    expect(issues).toEqual([]);
+  });
+
+  test('live state: the projection matches the mirror byte-for-byte (independent rebuild)', () => {
+    const rootContent = readFileSync(join(workspaceRoot, 'scripts', 'SCRIPTS.md'), 'utf-8');
+    const mirrorContent = readFileSync(join(workspaceRoot, 'templates', 'common', 'scripts', 'SCRIPTS.md'), 'utf-8');
+    const expected = buildMirrorRegistrySpan(rootContent, join(workspaceRoot, 'templates', 'common', 'scripts'));
+    expect(extractRegistrySpan(mirrorContent)).toBe(expected);
   });
 });

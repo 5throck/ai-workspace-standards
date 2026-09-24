@@ -1,14 +1,14 @@
 ---
 name: platform-command-lifecycle-manager
 status: active
-version: 1.0.2
+version: 1.0.3
 description: >
   Manages the creation, registration, and propagation of platform commands
   in .claude/commands/ and .gemini/commands/ directories. Use when: adding new commands,
   ensuring parity between Claude and Gemini command directories, or propagating commands to templates/common/.
 owner: pm
 scope: common
-last_reviewed: 2026-05-31
+last_reviewed: 2026-09-25
 metadata:
   type: process
   triggers:
@@ -51,6 +51,8 @@ Use this skill when:
 templates/common/.claude/commands/<name>.md   ← Template propagation (Claude)
 templates/common/.gemini/commands/<name>.md   ← Template propagation (if not skip)
 ```
+
+**`.agents/commands` lockstep (spec `2026-09-25-propagation-engine-batch-design` §6-D8)**: root `.agents/commands/*.md` updates ride the same commit as their `.claude/commands` counterparts (4 of 7 files carry Antigravity-adapted content — not a 1:1 mirror). The surface is L0-resident by design; no propagation target exists.
 
 ## Verification
 

@@ -13,7 +13,8 @@
  * @version 1.2.0
  * v1.2.0 (spec 2026-09-25-verifier-platform-expansion-design site 9, D9):
  * checks 1-4 generalize to all four platforms, mapping-aware (.codex/prompts
- * mapping leg added; .agents/commands excluded per Finding D).
+ * mapping leg added; .agents/commands excluded per the L0-resident ruling,
+ * ticket T-20260925-003).
  */
 
 import { $ } from 'bun';
@@ -48,8 +49,10 @@ function hasVersionField(filePath: string): boolean {
  * D9 (spec 2026-09-25-verifier-platform-expansion-design site 9): checks 1-4
  * generalize to all four platforms, mapping-aware — the skills check covers
  * the .agents/.codex mirrors too, and the commands propagation check adds the
- * .codex/prompts mapping (ADR-0077 D4). .agents/commands is excluded — no
- * producer, no documented consumer (design Finding D; recorded exclusion).
+ * .codex/prompts mapping (ADR-0077 D4). .agents/commands is excluded —
+ * L0-resident by design (spec
+ * docs/designs/2026-09-25-propagation-engine-batch-design.md §6-D8, ticket
+ * T-20260925-003; recorded exclusion).
  */
 function checkFiles(changed: string[]): number {
   let lifecycleIssues = 0;

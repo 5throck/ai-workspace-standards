@@ -13,12 +13,20 @@ title: >-
   redistribute its content. Until resolved, the exclusion stands as a recorded
   decision, not a silent skip.
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-24T16:45:24.584Z'
 history:
   - at: '2026-09-24T16:45:24.584Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-24T21:12:17.372Z'
+    from: backlog
+    to: done
+result: >-
+  Ruled L0-resident by design (option a, spec
+  2026-09-25-propagation-engine-batch-design §6-D8): active Antigravity CLI
+  workspace command surface (WS1 M9/M10 parity deliverable, same-commit lockstep
+  with .claude/commands, 4/7 files Antigravity-adapted); documentation + the 5
+  standing recorded exclusions replace machinery; no propagation target exists
 error: null
