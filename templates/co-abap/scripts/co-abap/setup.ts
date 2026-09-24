@@ -1,5 +1,8 @@
 #!/usr/bin/env bun
-// @version 1.0.2
+// @version 1.0.3
+// v1.0.3: UNKNOWN-STACK guidance routes tool installation through the PM with the
+//         security-review clause (spec docs/designs/2026-09-25-variant-hygiene-batch-design.md,
+//         R3b) — the previous text invoked a setup agent this variant never shipped.
 // setup.ts - Post-scaffold environment setup
 // Detects OS and tech stack, installs dependencies, audits licenses, copies .env,
 // and makes initial commit.
@@ -17,7 +20,7 @@
 //   Elixir     mix.exs               → mix deps.get
 //   C/C++      CMakeLists.txt        → cmake -B build (configure only)
 //              Makefile              → info only (not run automatically)
-//   Unknown    (none of the above)   → stack-setup agent invocation required
+//   Unknown    (none of the above)   → manual setup via PM-approved tool installation
 //
 // Usage: bun scripts/setup.ts [--skip-install] [--skip-license-check] [--skip-commit] [--with-gemini-plugins]
 
@@ -370,17 +373,17 @@ async function main() {
       console.log("  No recognized project manifest found in this directory.");
       console.log("  Automatic dependency installation has been skipped.");
       console.log("");
-      console.log("  To set up this project, invoke the stack-setup agent:");
+      console.log("  To set up this project, install your stack's tooling manually:");
       console.log("");
-      console.log(`${CYAN}  Agent: agents/stack-setup.md${RESET}`);
+      console.log(`${CYAN}  Route: request tool installation through the PM${RESET}`);
       console.log("");
-      console.log("  The agent will:");
-      console.log("    1. Search for the correct setup procedure for your stack");
-      console.log("    2. Perform a security review of all proposed commands");
-      console.log("    3. Present the plan with risk assessment for your approval");
-      console.log("    4. Execute ONLY after explicit confirmation");
+      console.log("  The process:");
+      console.log("    1. Identify the canonical installer for your stack");
+      console.log("    2. Request installation through the PM, listing the proposed commands");
+      console.log("    3. Every install command passes security review first");
+      console.log("    4. Execute ONLY after explicit approval");
       console.log("");
-      console.log(`${RED}  ⛔ Do NOT run any install commands without agent security review.${RESET}`);
+      console.log(`${RED}  ⛔ Do NOT run any install commands without security review and explicit user approval.${RESET}`);
       console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
       console.log("");
     }

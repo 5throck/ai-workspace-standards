@@ -1,8 +1,24 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.41.0
- * v1.40.0 (2026-09-25, platform verifier expansion — spec
+ * @version 1.42.0
+ * v1.41.0 → v1.42.0 (2026-09-25, variant hygiene batch — spec
+ *          docs/designs/2026-09-25-variant-hygiene-batch-design.md, R4):
+ *          new `variant-agent-references` check (T-20260924-007c) — every
+ *          agent reference in templates/co-<v>/AGENTS.md and the variant
+ *          scripts tree (agents/<name>.md path refs +
+ *          backtick `<name>` agent mentions) must resolve at
+ *          templates/<v>/agents/, templates/common/agents/, or the workspace
+ *          root agents/. Catches the stack setup phantom class (10 variant
+ *          AGENTS.md copies + co-abap setup.ts shipped guidance naming an
+ *          agent the variant never had). Pure cores exported for unit test
+ *          (T-004 convention): classifyAgentReference (resolution decision,
+ *          explicit AGENT_REFERENCE_EXEMPT escape hatch) +
+ *          extractAgentReferenceCandidates (path/backtick extraction with
+ *          line numbers). Wired next to WS-05a in the per-variant loop.
+ *          Severity: WARN per ADR-0055 soak — dated WARN->FAIL promotion
+ *          ticket filed at implementation (see the PR).
+ * v1.41.0 (2026-09-25, platform verifier expansion — spec
  *          docs/designs/2026-09-25-verifier-platform-expansion-design.md,
  *          sites 3a-3e/3g + R6): command checks gain the .codex/prompts mapping
  *          leg (C-CM-04 codex coverage derived from `source` per Ruling K;
@@ -3978,6 +3994,150 @@ function checkL0OnlyToolRefsInVariantCommandSkills(variant: string): void {
   if (checked > 0) pass(`WS-05a: ${variant} command/skill markdown has no L0-only tool references (${checked} file(s) checked)`);
 }
 
+// ============================================================================
+// T-20260924-007c: unresolvable agent-reference detector
+// (spec: docs/designs/2026-09-25-variant-hygiene-batch-design.md, R4)
+//
+// Sibling of T-20260924-004's checkVariantMirrorParity/classifyVariantMirrorCopy
+// — that check covers skill platform-mirror DIRECTORIES and version comparison;
+// this one covers agent-name REFERENCES in variant AGENTS.md prose and variant
+// scripts. The live instance: 10 variant AGENTS.md copies + co-abap setup.ts
+// routed work to a phantom stack setup agent the variant never shipped (user-facing
+// broken guidance, invisible to every standing detector). Distinct inputs, no
+// shared logic beyond the variant iteration loop.
+//
+// Pure cores are exported for tests/unit/variant-agent-reference.test.ts
+// (T-004 convention: decision table + injected-phantom fixture).
+// ============================================================================
+
+/** Explicit exemption list (R4 escape hatch): agent names allowed to appear in
+ *  variant deliverables without a resolvable agent file. Keep minimal — every
+ *  entry needs a written justification here. Names that resolve at any of the
+ *  three trees never need an entry. */
+const AGENT_REFERENCE_EXEMPT = new Set<string>([
+  // (empty at v1.42.0 — the healed fleet resolves cleanly)
+]);
+
+export type AgentReferenceVerdict = 'resolved' | 'unresolved';
+
+/** Pure resolution decision: a reference resolves when the name is exempt or
+ *  an agent file exists at the variant, common, or workspace-root agents/ tree
+ *  (resolution order per design R4). */
+export function classifyAgentReference(opts: {
+  name: string;
+  inVariantAgents: boolean;  // templates/<v>/agents/<name>.md exists
+  inCommonAgents: boolean;   // templates/common/agents/<name>.md exists
+  inRootAgents: boolean;     // agents/<name>.md exists (L0)
+  exempt: boolean;           // name on AGENT_REFERENCE_EXEMPT
+}): AgentReferenceVerdict {
+  if (opts.exempt) return 'resolved';
+  if (opts.inVariantAgents || opts.inCommonAgents || opts.inRootAgents) return 'resolved';
+  return 'unresolved';
+}
+
+export interface AgentReferenceCandidate {
+  /** Extracted agent name. */
+  name: string;
+  /** 1-based line number of the reference (for WARN file:line naming). */
+  line: number;
+}
+
+// Reference shape 1: `agents/<name>.md` path references (prose links, code
+// strings, roster rows). Underscore-leading internal fragments (agents/_COMMON)
+// are not agent references and don't match.
+const AGENT_PATH_REF_RE = /\bagents\/([A-Za-z0-9][A-Za-z0-9_-]*)\.md\b/g;
+// Reference shape 2: backtick-adjacent `<name>` agent mentions ("the
+// stack setup agent").
+const AGENT_BACKTICK_MENTION_RE = /`([A-Za-z0-9][A-Za-z0-9_-]*)`\s+agents?\b/g;
+
+/** Pure extraction: every agent-reference candidate in one file's content,
+ *  deduplicated per (name, line). */
+export function extractAgentReferenceCandidates(content: string): AgentReferenceCandidate[] {
+  const candidates: AgentReferenceCandidate[] = [];
+  const seen = new Set<string>();
+  const lines = content.split(/\r?\n/);
+  for (let i = 0; i < lines.length; i++) {
+    for (const m of lines[i].matchAll(AGENT_PATH_REF_RE)) {
+      const key = `${m[1]}:${i + 1}`;
+      if (!seen.has(key)) { seen.add(key); candidates.push({ name: m[1], line: i + 1 }); }
+    }
+    for (const m of lines[i].matchAll(AGENT_BACKTICK_MENTION_RE)) {
+      const key = `${m[1]}:${i + 1}`;
+      if (!seen.has(key)) { seen.add(key); candidates.push({ name: m[1], line: i + 1 }); }
+    }
+  }
+  return candidates;
+}
+
+/** Check: variant-agent-references — agent references in templates/<v>/AGENTS.md
+ *  and the variant scripts tree (.ts files, recursive) must resolve at
+ *  templates/<v>/agents/, templates/common/agents/, or the workspace-root
+ *  agents/. WARN-mode per ADR-0055 soak (dated promotion ticket filed at
+ *  implementation). */
+function checkVariantAgentReferences(variant: string, opts?: {
+  /** Directory-root override for fixture tests (defaults to the real templates/). */
+  templatesDir?: string;
+  /** Finding sink override for fixture tests (defaults to the module warn()). */
+  report?: (finding: string) => void;
+}): void {
+  const templatesDir = opts?.templatesDir ?? TEMPLATES_DIR;
+  const quiet = opts !== undefined;
+  const FIX =
+    'Fix the reference so it names an agent that exists at templates/<variant>/agents/, templates/common/agents/, or the workspace-root agents/ — or remove it. A legitimately agent-shaped name that must stay unresolvable goes on AGENT_REFERENCE_EXEMPT with a justification.';
+  const report = opts?.report ?? ((finding: string) => warn(variant, 'variant-agent-references', finding, FIX));
+
+  if (!quiet && !JSON_MODE) {
+    console.log(`\n=== Check T-007c: agent references resolve in ${variant} AGENTS.md and scripts ===`);
+  }
+
+  const variantAgentsDir = join(templatesDir, variant, 'agents');
+  const commonAgentsDir = join(TEMPLATES_DIR, 'common', 'agents');
+  const rootAgentsDir = join(ROOT, 'agents');
+  const resolves = (name: string): boolean =>
+    existsSync(join(variantAgentsDir, `${name}.md`)) ||
+    existsSync(join(commonAgentsDir, `${name}.md`)) ||
+    existsSync(join(rootAgentsDir, `${name}.md`));
+
+  // Scan set: the variant's AGENTS.md + every .ts under its scripts/ tree.
+  const scanFiles: Array<{ abs: string; rel: string }> = [];
+  const agentsMd = join(templatesDir, variant, 'AGENTS.md');
+  if (existsSync(agentsMd)) scanFiles.push({ abs: agentsMd, rel: `templates/${variant}/AGENTS.md` });
+  const scriptsDir = join(templatesDir, variant, 'scripts');
+  const walkTs = (dir: string): void => {
+    if (!existsSync(dir)) return;
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const full = join(dir, entry.name);
+      if (entry.isDirectory()) { walkTs(full); continue; }
+      if (entry.name.endsWith('.ts')) scanFiles.push({ abs: full, rel: relative(ROOT, full).replace(/\\/g, '/') });
+    }
+  };
+  walkTs(scriptsDir);
+
+  let unresolvedCount = 0;
+  let candidatesChecked = 0;
+  for (const file of scanFiles) {
+    let content: string;
+    try { content = readFileSync(file.abs, 'utf-8'); } catch { continue; }
+    for (const candidate of extractAgentReferenceCandidates(content)) {
+      candidatesChecked++;
+      const verdict = classifyAgentReference({
+        name: candidate.name,
+        inVariantAgents: existsSync(join(variantAgentsDir, `${candidate.name}.md`)),
+        inCommonAgents: existsSync(join(commonAgentsDir, `${candidate.name}.md`)),
+        inRootAgents: existsSync(join(rootAgentsDir, `${candidate.name}.md`)),
+        exempt: AGENT_REFERENCE_EXEMPT.has(candidate.name),
+      });
+      if (verdict === 'resolved') continue;
+      unresolvedCount++;
+      report(`${file.rel}:${candidate.line} references agent "${candidate.name}" — no templates/${variant}/agents/${candidate.name}.md, no templates/common/agents/${candidate.name}.md, no agents/${candidate.name}.md`);
+    }
+  }
+
+  if (!quiet && unresolvedCount === 0 && scanFiles.length > 0) {
+    pass(`variant-agent-references: ${variant} agent references all resolve (${candidatesChecked} candidate(s) in ${scanFiles.length} file(s))`);
+  }
+}
+
 // Check WS-06: Skills in templates/co-*/skills/ must be variant-scoped (L0+L2)
 function checkVariantSkillsLayer(variant: string, _skillLayerMap: Map<string, import('./helpers/layer-filter.js').LayerValue>): void {
   if (!JSON_MODE) console.log(`\n=== Check WS-06: Variant skills must be L0+L2 in ${variant}/skills/ ===`);
@@ -4983,6 +5143,7 @@ function main(): number {
       checkL0ScriptsNotInVariants(variant, scriptLayerMap);       // WS-04
       checkL0L1ScriptsNotInVariants(variant, scriptLayerMap);     // WS-05
       checkL0OnlyToolRefsInVariantCommandSkills(variant);         // WS-05a
+      checkVariantAgentReferences(variant);                        // T-007c: agent references resolve (WARN soak)
       checkVariantSkillsLayer(variant, skillLayerMap);             // WS-06
     checkNoVariantLocalContextMd(variant);                       // WS-07
     checkNoVariantVersionManifest(variant);                      // T-20260916-010: no stub/full manifest in variant templates

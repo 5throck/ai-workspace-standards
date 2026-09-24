@@ -5,8 +5,20 @@
  * Generates variant project structure from reconciled manifest.
  * Creates variant.json, directory structure, agent overrides, and skill directories.
  *
- * @version 1.18.0
+ * @version 1.19.0
  *
+ * v1.19.0 (2026-09-25, variant hygiene batch — spec
+ *          docs/designs/2026-09-25-variant-hygiene-batch-design.md R6/§5.2):
+ *          the WS-05a adaptation moves INTO the delivery seam —
+ *          copyL0CommonSkills now applies the one-line L0-tooling swap
+ *          (adaptL0ToolingReferences: raw `bun scripts/validate-templates.ts`
+ *          command → the workspace-only comment) to every delivered SKILL.md
+ *          whose source carries the line; content without the line stays
+ *          byte-preserving. Stops every future variant promotion from
+ *          re-seeding unadapted copies that re-trip WS-05a and force the D7
+ *          hand-remediation treadmill. Copy semantics otherwise unchanged
+ *          (SKILL.md-only, workspace skills/ fallback, existsSync source
+ *          guard, export kept for the regression test).
  * v1.18.0 (2026-09-24, platform-parity P1 bug 6 — spec
  *          docs/designs/2026-09-24-platform-parity-p1-bugfixes-design.md D6):
  *          copyL0CommonSkills seeds the four L0-common lifecycle skills into
@@ -1253,6 +1265,12 @@ See [\`agents/README.md\`](../agents/README.md) for the full workflow and agent 
 // regression, spec 2026-09-24-platform-parity-p1-bugfixes-design.md D6/D8); the
 // script is a top-level executable, so import.meta.main keeps the run path out
 // of imports.
+//
+// v1.19.0 seam (spec docs/designs/2026-09-25-variant-hygiene-batch-design.md
+// R6): every delivered SKILL.md passes through adaptL0ToolingReferences()
+// below — the WS-05a adaptation applied AT THE DELIVERY SEAM so future
+// variant promotions stop seeding unadapted copies that re-trip WS-05a and
+// force the D7 hand-remediation treadmill.
 export function copyL0CommonSkills(variantPath: string): void {
   const L0_COMMON_SKILLS = [
     'agent-lifecycle-manager',
@@ -1277,14 +1295,49 @@ export function copyL0CommonSkills(variantPath: string): void {
         if (existsSync(wsSkillMd)) {
           const destDir = join(variantPath, platform, 'skills', skillName);
           createDirectory(destDir);
-          copyFileUTF8(wsSkillMd, join(destDir, 'SKILL.md'));
+          copySkillMdAdapted(wsSkillMd, join(destDir, 'SKILL.md'));
         }
         continue;
       }
       const destDir = join(variantPath, platform, 'skills', skillName);
       createDirectory(destDir);
-      copyFileUTF8(srcSkillMd, join(destDir, 'SKILL.md'));
+      copySkillMdAdapted(srcSkillMd, join(destDir, 'SKILL.md'));
     }
+  }
+}
+
+/**
+ * WS-05a delivery-seam adaptation (v1.19.0, spec
+ * docs/designs/2026-09-25-variant-hygiene-batch-design.md R6 / §5.2): variant
+ * projects have no workspace-root tooling, so a delivered skill copy must not
+ * give the actionable `bun scripts/validate-templates.ts` command. When the
+ * source line is present it is replaced with the canonical one-line-for-two
+ * comment swap; content WITHOUT the line is byte-preserved (the adaptation is
+ * pattern-gated, never a blanket rewrite).
+ */
+const WS05A_FORBIDDEN_LINE_RE = /^[ \t]*bun scripts\/validate-templates\.ts[ \t]*$/m;
+const WS05A_ADAPTED_COMMENT = [
+  '# Workspace-only template validator: run it from the workspace root (L0-only',
+  '# tooling — not shipped inside projects), never inside a variant/project.',
+].join('\n');
+
+export function adaptL0ToolingReferences(content: string): string {
+  if (!WS05A_FORBIDDEN_LINE_RE.test(content)) return content;
+  return content.replace(WS05A_FORBIDDEN_LINE_RE, WS05A_ADAPTED_COMMENT);
+}
+
+function copySkillMdAdapted(sourcePath: string, targetPath: string): void {
+  try {
+    const content = adaptL0ToolingReferences(readUTF8File(sourcePath));
+    writeUTF8File(targetPath, content);
+  } catch (error) {
+    throw fatalError(
+      ErrorPhase.VARIANT_GENERATION,
+      'FILE_COPY_FAILED',
+      `Failed to copy file from ${sourcePath} to ${targetPath}`,
+      error instanceof Error ? error.message : String(error),
+      'Ensure source file exists and is readable'
+    );
   }
 }
 

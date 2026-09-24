@@ -1,6 +1,6 @@
 ---
 # co-deck — Variant Configuration
-# Last Updated: 2026-09-21
+# Last Updated: 2026-09-25
 ---
 
 > Extends docs/context.md. This file IS the customization layer for this project.
@@ -676,24 +676,6 @@ This ensures the same `agents/*.md` files work under Claude, Gemini, and any fut
 ---
 
 <!-- COMMON-CONTEXT:START -->
-This project follows the workspace coding standards defined in the project's Coding Guidelines section.
-
-Key rules:
-- All operational scripts must be TypeScript (`.ts`) — run via `bun scripts/<name>.ts` (ADR-0036; no `.sh`/`.ps1` pairs)
-- Git hook scripts in `.githooks/` remain Unix shell (`.sh`) for git compatibility
-- All text files saved as **UTF-8 (without BOM)**
-- Commit messages and PR artifacts in **English only**
-<!-- COMMON-CONTEXT:END -->
-
----
-
-*co-deck.context.md version: 4.5 — layout gate (Domain Rule 18, [DECK-R2]) — estimate-layout.ts v1.2.0 `--lint` checks slidedata.json against the merged content_constraints; FAIL blocks PDF export; `slide-layout-gate` skill owns the gate procedure (2026-08-26); previous: 4.4 handbook search index is manifest-driven (`search-manifest.json` → `build-search-index.ts` → `search-data.js`), validation layered and aggregated via `validate-handbook.ts` (8 check groups); 4.3 merged Architecture Principles (Why Multi-Agent, Harness Pattern, Layer Separation, AI Neutrality) from root ARCHITECTURE.md*
-
-## Template Provenance
-
-- **Template-Version**: 0.5.4
-- **Template-Variant**: co-deck
-<!-- COMMON-CONTEXT:START -->
 ### Instruction Writing Standard (ASD-STE100, ADR-0079)
 
 Development-facing instruction text follows ASD-STE100 (Simplified Technical English) structural rules — in every development domain (web, app, API, scripts, documents).
@@ -709,4 +691,22 @@ PM owns the composition of this project's agent team and rules on skill changes.
 - **Hiring/firing (top-down, PM-decided)**: PM judges timing and target from workflow signals — recurring unmatched work types, role overload, absorbed roles, the periodic roster review — without a blocking user approval. Every decision emits a gate-moment decision record (ADR-0061) before dispatch. Default exit is `status: deprecated`; hard delete requires an explicit user request. Procedure: `agent-lifecycle-manager` skill.
 - **Skill requests (bottom-up, agent-initiated, PM-approved)**: agents file structured request blocks (`create|attach|remove` + evidence) in their task reports and memory logs; PM triages and only approved requests are executed — agents never create, attach, or remove skills unilaterally. Procedure: `skill-lifecycle-manager` skill.
 - **Enforcement**: governance, not code — decision records capture the judgment trail, and the change audits catch structural drift. Full decision: ADR-0080 in the workspace root `docs/adr/`.
+<!-- COMMON-CONTEXT:END -->
+
+---
+
+*co-deck.context.md version: 4.5 — layout gate (Domain Rule 18, [DECK-R2]) — estimate-layout.ts v1.2.0 `--lint` checks slidedata.json against the merged content_constraints; FAIL blocks PDF export; `slide-layout-gate` skill owns the gate procedure (2026-08-26); previous: 4.4 handbook search index is manifest-driven (`search-manifest.json` → `build-search-index.ts` → `search-data.js`), validation layered and aggregated via `validate-handbook.ts` (8 check groups); 4.3 merged Architecture Principles (Why Multi-Agent, Harness Pattern, Layer Separation, AI Neutrality) from root ARCHITECTURE.md*
+
+## Template Provenance
+
+- **Template-Version**: 0.5.4
+- **Template-Variant**: co-deck
+<!-- COMMON-CONTEXT:START -->
+This project follows the coding standards in the key-rules list below.
+
+Key rules:
+- All operational scripts must be TypeScript (`.ts`) — run via `bun scripts/<name>.ts` (ADR-0036; no `.sh`/`.ps1` pairs)
+- Git hook scripts in `.githooks/` remain Unix shell (`.sh`) for git compatibility
+- All text files saved as **UTF-8 (without BOM)**
+- Commit messages and PR artifacts in **English only**
 <!-- COMMON-CONTEXT:END -->

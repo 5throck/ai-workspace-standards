@@ -1,12 +1,13 @@
 ---
 name: platform-command-lifecycle-manager
 status: active
-version: 1.0.0
+version: 1.0.2
 description: >
   Manages the creation, registration, and propagation of platform commands
   in .claude/commands/ and .gemini/commands/ directories. Use when: adding new commands,
   ensuring parity between Claude and Gemini command directories, or propagating commands to templates/common/.
 owner: pm
+scope: common
 last_reviewed: 2026-05-31
 metadata:
   type: process
@@ -55,5 +56,6 @@ templates/common/.gemini/commands/<name>.md   ← Template propagation (if not s
 
 ```bash
 bun scripts/verify-platform-lifecycle.ts
-bun scripts/audit.ts
+# Workspace-only template validator: run it from the workspace root (L0-only
+# tooling — not shipped inside projects), never inside a variant/project.
 ```
