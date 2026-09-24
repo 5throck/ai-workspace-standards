@@ -5,8 +5,12 @@
  * Recursively scans L3 project directories and classifies files
  * for variant conversion pipeline.
  *
- * @version 1.4.0
+ * @version 1.4.1
  * @phase 1: L3 Analysis
+ *
+ * v1.4.1 (2026-09-24, spec docs/designs/2026-09-24-platform-ssot-constant-design.md):
+ * behavior-neutral constant adoption — SCAN_CATEGORIES.skills becomes
+ * PLATFORM_SKILL_BASES (../lib/platforms.ts). NO behavior change.
  *
  * Dependencies:
  * - lib/encoding-utils.ts (UTF-8 handling)
@@ -22,6 +26,7 @@ import { join, relative, basename } from 'path';
 import { createHash } from 'crypto';
 import { readUTF8File, detectEncoding } from '../lib/encoding-utils.ts';
 import { fatalError, warningError, ErrorPhase, ErrorSeverity } from '../lib/error-handling.ts';
+import { PLATFORM_SKILL_BASES } from '../lib/platforms.ts';
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -86,7 +91,7 @@ const L1_COMMON = join(L0_ROOT, 'templates', 'common');
 // files at promotion, and .codex skill copies were never classified).
 const SCAN_CATEGORIES = {
   agents: ['agents', '.claude/agents', '.gemini/agents'],
-  skills: ['skills', '.claude/skills', '.gemini/skills', '.agents/skills', '.codex/skills'],
+  skills: PLATFORM_SKILL_BASES,
   commands: ['.claude/commands', '.gemini/commands'],
   configs: ['.claude', '.gemini', '.agents', '.codex'],
   scripts: ['scripts'],

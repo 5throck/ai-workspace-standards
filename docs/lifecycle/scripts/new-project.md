@@ -3,7 +3,7 @@
 ## Metadata
 
 - **Current Phase**: production
-- **Version**: 1.28.0
+- **Version**: 1.28.1
 - **Owner**: automation-engineer
 - **Last Updated**: 2026-09-24
 - **Last Reviewer**: pm
@@ -33,6 +33,7 @@
 | 2026-09-24 | production | production | v1.26.0 (scaffold identity overview): docs/project.md identity seed rendered at scaffold time (§5.2), raw .template.md copy removed; additive --description/--type flags. Spec: docs/designs/2026-09-24-scaffold-identity-overview-design.md | automation-engineer |
 | 2026-09-24 | production | production | v1.27.0 (T-20260924-008): overlay walk skips skills/SKILLS.md (common seed registry survives) + §6.4 post-settle reconcile — prune undelivered rows, update version/last_reviewed from delivered SKILL.md frontmatter, append variant-exclusive rows; idempotent, non-fatal. Spec: docs/designs/2026-09-24-skills-registry-overlay-reconcile-design.md | automation-engineer |
 | 2026-09-24 | production | production | v1.28.0 (scaffold hygiene bundle): parse-loop catch-all — any unknown or valueless `--` flag is a hard error (exit 1) before any write, naming the offending token and listing the six valid flags; `--yes` exempt (consumed by the auto-confirm argv scan). Spec: docs/designs/2026-09-24-scaffold-hygiene-bundle-design.md | automation-engineer |
+| 2026-09-24 | production | production | v1.28.1 (platform-SSOT constant, spec docs/designs/2026-09-24-platform-ssot-constant-design.md): behavior-neutral — the two canonical 5-element skill-base literals become PLATFORM_SKILL_BASES (lib/platforms.ts v1.0.0); NO behavior change | automation-engineer |
 
 ## Acceptance Criteria
 

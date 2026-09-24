@@ -1321,6 +1321,15 @@
       "source": "manual",
       "created": "2026-09-24",
       "last_updated": "2026-09-24"
+    },
+    {
+      "id": "2026-09-24-platform-ssot-constant-design",
+      "title": "platform ssot constant design",
+      "file": "docs/designs/2026-09-24-platform-ssot-constant-design.md",
+      "status": "implemented",
+      "source": "architect",
+      "created": "2026-09-24",
+      "last_updated": "2026-09-24"
     }
   ]
 }

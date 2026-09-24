@@ -1,5 +1,9 @@
 #!/usr/bin/env bun
-// @version 1.46.1
+// @version 1.46.2
+// v1.46.2 (2026-09-24, spec docs/designs/2026-09-24-platform-ssot-constant-design.md):
+//          behavior-neutral constant adoption — the two canonical 5-element
+//          skill-base literals (country-prune loop, workspace-only sweep)
+//          become PLATFORM_SKILL_BASES (lib/platforms.ts). NO behavior change.
 // v1.46.1 (2026-09-24, T-20260924-008 / spec
 //          2026-09-24-skills-registry-overlay-reconcile): mechanical move only —
 //          extractFrontmatterVersionAndReviewed() relocates VERBATIM to
@@ -438,6 +442,7 @@ import {
 } from './lib/upgrade-policy.ts';
 import { missingDependencies, scanDeliveredScripts } from './lib/dependency-guard.ts';
 import { mergeEnvSample, pruneCountryScopedEnvBlocks } from './lib/env-sample.ts';
+import { PLATFORM_SKILL_BASES } from './lib/platforms.ts';
 import {
   buildMergedTemplateBlocks,
   mergeManagedBlocks,
@@ -2506,7 +2511,7 @@ let countryPrunedSkills = 0;
       console.log(`  ⚠️  KEEP ${skillName}/  (${scopedCountry}-scoped, project country ${detectedCountry})  — declared in the project variant.json skill_manifest`);
       continue;
     }
-    for (const skillBase of ['skills', '.claude/skills', '.gemini/skills', '.agents/skills', '.codex/skills']) {
+    for (const skillBase of PLATFORM_SKILL_BASES) {
       const projSkillDir = join(projectDir, skillBase, skillName);
       if (!existsSync(projSkillDir)) continue;
       const skillMd = join(projSkillDir, 'SKILL.md');
@@ -3029,7 +3034,7 @@ console.log('');
 // from the already-swept skill set.
 console.log('--- WORKSPACE-ONLY SKILL SWEEP (l2_propagate: false) ---');
 {
-  const sweepBases = ['skills', '.claude/skills', '.gemini/skills', '.agents/skills', '.codex/skills'];
+  const sweepBases = PLATFORM_SKILL_BASES;
   // Keep in sync with NEW_PROJECT_LEGACY_L0_SKILLS in helpers/scaffold-markers.ts.
   const LEGACY_L0_SKILLS = ['simulate-project-creation'];
   let sweptSkills = 0;

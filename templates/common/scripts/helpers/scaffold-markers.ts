@@ -1,8 +1,13 @@
 #!/usr/bin/env bun
 /**
  * Shared Scaffold Delivery Contracts
- * @version 1.5.0
+ * @version 1.5.1
  *
+ * v1.5.1 (2026-09-24, spec docs/designs/2026-09-24-platform-ssot-constant-design.md):
+ *         behavior-neutral constant adoption — the three canonical 5-element
+ *         skill-base literals (schema prune, l2_propagate sweep derivation,
+ *         legacy-L0 predicate) become PLATFORM_SKILL_BASES (../lib/platforms.ts).
+ *         NO behavior change.
  * v1.5.0 (2026-09-24, scaffold identity overview — spec
  *         2026-09-24-scaffold-identity-overview-design): docs/project.template.md
  *         joins NEW_PROJECT_CLEANUP_FILES (new-project §5.2 renders it into
@@ -70,6 +75,7 @@
 import { readdirSync, readFileSync, existsSync } from 'node:fs';
 import { join, basename } from 'node:path';
 import { includeScriptInL3, parseScriptLayers } from './layer-filter.ts';
+import { PLATFORM_SKILL_BASES } from '../lib/platforms.ts';
 
 // ============================================================================
 // 1. Scaffold marker constants (T-20260915-002 / C3)
@@ -472,7 +478,7 @@ function pruneRegionNeutral(rels: Set<string>, workspaceRoot: string): void {
   } catch {
     return; // unparseable schema — model nothing (the prune helper fails loud at runtime)
   }
-  const skillBases = ['skills', '.claude/skills', '.gemini/skills', '.agents/skills', '.codex/skills'];
+  const skillBases = PLATFORM_SKILL_BASES;
   const prunedSkillNames = Object.keys(scoped?.skills ?? {});
   const pruneDirs = Object.keys(scoped?.dirs ?? {});
   for (const rel of [...rels]) {
@@ -762,7 +768,7 @@ function collectL2PropagateFalseSkills(commonDir: string): Map<string, Set<strin
   // All five skill bases — the runtime sweep in new-project.ts must stay in sync.
   // .agents/skills was missing here, so flagged skills leaked via that mirror
   // while the derivation (and Test 26) stayed green (2026-09-21 review C-1).
-  const bases = ['skills', '.claude/skills', '.gemini/skills', '.agents/skills', '.codex/skills'];
+  const bases = PLATFORM_SKILL_BASES;
   for (const base of bases) {
     const baseDir = join(commonDir, base);
     const names = new Set<string>();
@@ -799,7 +805,7 @@ function isL2PropagateFalseSkillRel(
 }
 
 function isLegacyL0SkillRel(rel: string): boolean {
-  const bases = ['skills', '.claude/skills', '.gemini/skills', '.agents/skills', '.codex/skills'];
+  const bases = PLATFORM_SKILL_BASES;
   for (const base of bases) {
     if (rel.startsWith(`${base}/`)) {
       const skillName = rel.slice(base.length + 1).split('/')[0];

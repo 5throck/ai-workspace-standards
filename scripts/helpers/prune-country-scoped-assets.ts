@@ -1,5 +1,9 @@
 #!/usr/bin/env bun
-// @version 0.3.3
+// @version 0.3.4
+// v0.3.4 (2026-09-24, spec docs/designs/2026-09-24-platform-ssot-constant-design.md):
+//         behavior-neutral constant adoption — the multi-line 5-element
+//         skill-dir literal in pruneSkill() becomes PLATFORM_SKILL_BASES
+//         (../lib/platforms.ts, same element sequence). NO behavior change.
 // v0.3.3: Context-doc reference scrub accepts an optional <variant> argument and
 //         scrubs every existing candidate (docs/context.md for L3 drafts,
 //         docs/<variant>.context.md for projects, docs/<basename>.context.md).
@@ -43,6 +47,7 @@ import { resolve, join, dirname } from 'node:path';
 import { basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { pruneCountryScopedEnvBlocks } from '../lib/env-sample.ts';
+import { PLATFORM_SKILL_BASES } from '../lib/platforms.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -135,13 +140,7 @@ function pruneSkill(skillName: string, scopedCountry: string): void {
   }
 
   // Mirror locations for skills
-  const skillDirs = [
-    'skills',
-    '.claude/skills',
-    '.gemini/skills',
-    '.agents/skills',
-    '.codex/skills'
-  ];
+  const skillDirs = PLATFORM_SKILL_BASES;
 
   let removed = false;
   for (const skillDir of skillDirs) {
