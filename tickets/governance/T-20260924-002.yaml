@@ -1,0 +1,19 @@
+schemaVersion: 1
+id: T-20260924-002
+kind: manual
+title: >-
+  Decide common_platform_skills inventory scope in common-contract.json —
+  validate-templates C-CM-05/WS-02 warns that 16 (.claude) / 15 (.gemini)
+  platform skill dirs under templates/common are not in common_platform_skills
+  or common_skills; decide full-inventory vs override-record and list or exempt
+  accordingly
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-24T00:11:58.277Z'
+history:
+  - at: '2026-09-24T00:11:58.277Z'
+    from: null
+    to: backlog
+result: null
+error: null
