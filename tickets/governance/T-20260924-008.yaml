@@ -1,0 +1,50 @@
+schemaVersion: 1
+id: T-20260924-008
+kind: manual
+title: >-
+  fresh co-design scaffold FAILS skill-lifecycle-audit: variant skills/SKILLS.md
+  clobbers the common registry at delivery — new-project.ts step 1 copyDir lays
+  templates/common/skills (40 dirs, all scope: common) plus its 63-row registry,
+  then the step-2 variant overlay copies templates/co-design/skills over the
+  tree and skills/SKILLS.md is NOT in SCAFFOLD_COMMON_OWNED_FILES
+  (scaffold-markers.ts has no SKILLS.md entry), so co-design's 4-row variant
+  index (accessibility-audit, service-design, token-usage-lint,
+  ui-ux-design-intelligence — an overlay that itself defers to the common index,
+  not a truncated copy; 3 of the 4 shadow same-named common dirs) wins; the
+  delivered project ships 35 skill dirs (region-neutral prune drops the 6 k-*
+  skills; 34 surviving common + variant-exclusive service-design) against a
+  4-row registry → bun scripts/skill-lifecycle-audit.ts inside the fresh
+  scaffold: 35 skills scanned, 32 errors (31 'Missing skills/SKILLS.md registry
+  row' + 1 'Registry last_reviewed drift for accessibility-audit:
+  SKILL.md=2026-09-06, SKILLS.md=2026-09-12' — the overlay also shadows common
+  SKILL.md files), so audit.ts Skill audit FAILs on EVERY fresh co-design
+  scaffold (reproduced at HEAD 7101a0cf); note upgrade-project already
+  self-heals via its SKILLS_REGISTRY_RECONCILE step (reconcileSkillRegistry adds
+  missing rows, added after T-20260922-001 forced a manual backfill) but
+  new-project.ts has no equivalent; Decision needed: should variant SKILLS.md be
+  an OVERLAY that merges with the common registry at delivery — and is that
+  merge (a) a new-project post-overlay responsibility (e.g. reuse
+  reconcileSkillRegistry from helpers/skills-registry.ts), (b) a
+  scaffold-markers contract entry (add skills/SKILLS.md to
+  SCAFFOLD_COMMON_OWNED_FILES so the variant file cannot clobber — which loses
+  variant rows and needs them a new home), or (c) co-design's SKILLS.md carrying
+  only variant-specific rows with the merged (or common) registry delivered as
+  the SSOT — i.e. define what the delivered project's registry is and who
+  composes it; then add a regrowth-prevention validator check that the delivered
+  registry covers the delivered skills (sibling of
+  T-20260924-004/T-20260924-007); same contract-inventory family as
+  T-20260924-002 and T-20260924-004 (delivered inventory vs its registry/index);
+  provenance: reported 2026-09-24 by automation-engineer during the
+  scaffold-identity implementation's fresh-scaffold simulation, reproduced
+  identically at HEAD 7101a0cf by lifecycle-manager via a scratch scaffold
+  (tests/.temp/lc-repro-t008-scratch, deleted after capture)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-24T05:22:02.098Z'
+history:
+  - at: '2026-09-24T05:22:02.098Z'
+    from: null
+    to: backlog
+result: null
+error: null
