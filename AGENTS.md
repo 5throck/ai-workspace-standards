@@ -582,7 +582,7 @@ Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 
 ### Platform Skills Distribution
 
-Skills are distributed to all three platform directories via `scripts/sync-skills.ts`:
+Skills are distributed to the four platform directories via `scripts/sync-skills.ts`; the Claude Desktop App consumes the same skills without a repository surface:
 
 | Platform | Directory | Registration |
 |----------|-----------|--------------|
@@ -590,6 +590,8 @@ Skills are distributed to all three platform directories via `scripts/sync-skill
 | Gemini CLI | `.gemini/skills/` | `.gemini/skills.json` |
 | Codex (CLI + Desktop App) | `.codex/skills/` | — (skills discovered via `.codex/prompts/` + config) |
 | Antigravity | `.agents/skills/` | `.agents/skills.json` |
+
+> **Claude Desktop App**: Agent Skills consumer — reads no project-embedded directory; consumes the SKILL.md open format via claude.ai/Desktop upload (Settings → Capabilities) or the `/v1/skills` API; content source: `skills/` SSOT and `.claude/skills/` mirrors.
 
 > Phase 1 distributes every SSOT skill to all four platform directories; the Phase 2
 > back-sync target list is dynamic and currently empty (all former `.agents`-only

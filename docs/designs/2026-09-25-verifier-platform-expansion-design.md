@@ -315,3 +315,51 @@ Estimated first-run findings at Phase-2 completion: **56 + 1 surface** (§8); at
 - ADR-0055 (spec-check soak-then-block), ADR-0059 Stage 2b, ADR-0074 (Design Gate), ADR-0065, ADR-0070, ADR-0077 D4 (codex prompts mirror), ADR-0079 (STE)
 - Tickets: T-20260924-002 (contract inventory scope — Ruling K boundary), T-20260925-001 (Finding C owner), T-20260923-005 (skill-asset parity, sibling class)
 - SSOT: `scripts/lib/platforms.ts`; commands mapping: `scripts/sync-skills.ts:319-343`
+
+---
+
+## 17. Addendum — 2026-09-25 (post-QA): Advisory A1 correction + Step 4 authorization
+
+QA gate: **PASS** with one advisory assigned to the architect. The implementation landed through Phase 3 (heals A and B applied; promotion ticket **T-20260925-002** filed, `not_before: 2026-10-09`). This addendum amends by reference; the original sections above stand as history.
+
+### 17.1 A1 (accepted) — Finding C is procedurally tracked, not machine-WARNed
+
+**Advisory**: N6 claims "the expanded Check F will WARN on it during soak" for Finding C, but Check F is ROOT-scope-only; no expanded check compares VERSIONS across a variant template's mirrors.
+
+**Verification (accepted)**: `verify-platform-lifecycle.ts:21` sets `ROOT = process.cwd()`; Check F (`:99-102`) joins only `ROOT`-rooted mirror paths, and Tier auto-detect (`:24`) scopes the script to the workspace root or a project checkout — never `templates/co-*/`. VA-03 (`validate-templates.ts:3351-3399`) and the D12 parity modules are presence/set-only (SKILL.md existence and file sets); none compares frontmatter `version:` across a variant template's mirrors. The advisory is factually correct: **the 24 Finding-C mismatches will never appear as WARN output of any check in this spec.**
+
+**Corrected statements** (superseding the original wording):
+
+| Location | Original (incorrect) | Corrected |
+|---|---|---|
+| §3 N6 | "The expanded Check F will WARN on it during soak" | Finding C is procedurally tracked in T-20260925-001 (scope confirmed 2026-09-25: the trio version-mismatch class, 24 findings post-heal). No check in this spec emits machine output for it; the WARN soak (T-20260925-002) absorbs the class procedurally — its promotion precondition conditions on the class's disposition, not on live WARN lines. Machine enforcement of variant-mirror version sync is follow-up scope |
+| §8 Finding C disposition | "WARN-soak absorbs this" | "(c) T-20260925-001 (scope confirmed): content and version resolved together there; no machine finding is emitted — tracked procedurally" |
+| §8 post-heal sentence | "3 findings (C) remain at promotion time" | "0 machine findings remain; the Finding-C class (24 variant-mirror version mismatches post-heal) is owned by T-20260925-001" |
+| §13 estimate | "at Phase-3 completion: 3 WARN + 1 ticket" | "at Phase-3 completion: 0 machine WARN; Finding-C class (24) + Finding-D ticket tracked procedurally" |
+| AC-6 | "reports only findings C (3, WARN) and the Finding-D exclusion" | "reports no un-dispositioned machine findings; the Finding-C class (24) is recorded as T-20260925-001-owned and the Finding-D exclusion is documented" |
+
+**Live-state reconciliation** (verified 2026-09-25): the post-heal class is **24** variant-mirror version mismatches — 8 variants (co-design pre-existing + the 7 healed variants) × 3 trio skills, where every variant's `.claude`/`.gemini` trio snapshot sits at 1.0.0 while the SSOT-derived `.agents`/`.codex` mirrors sit at 1.0.1/1.0.2. Pre-heal my §8 scan saw only co-design's 3 because absence of a mirror is not a version mismatch — heal A exposed the class. T-20260925-001's prose carries the SCOPE CONFIRMED record; T-20260925-002's precondition references the class disposition. Both are surface-count-accurate.
+
+**Follow-up scope ruling**: machine enforcement of variant-mirror version sync belongs in **`validate-templates.ts` as a VA-04-style version-sync arm alongside VA-03's presence check** — not in `verify-platform-lifecycle.ts`, whose Tier auto-detect deliberately scopes it to ROOT/project checkouts; iterating `templates/co-*/` there would merge Tier-1 SSOT scope with L2 template scope. Candidate vehicle: a future spec or the T-20260925-002 promotion review. Not added in this spec.
+
+### 17.2 Step 4 contract — Claude Desktop App documentation (authorized)
+
+**Decision**: the Claude Desktop App is an **Agent Skills consumer with no repository surface**. The four repo surfaces (`.claude/`, `.gemini/`, `.agents/`, `.codex/`) remain the delivery truth.
+
+**Rationale** (recorded per the authorization):
+
+1. Claude Desktop reads no project-embedded directory — skills reach it via claude.ai/Desktop upload (Settings → Capabilities) or the `/v1/skills` API.
+2. Inventing a repo surface for it would create an orphan mirror class — delivered inventory with no producer/consumer contract, the exact T-004/T-009 failure mode (the contract-inventory family; same genus as Finding D's `.agents/commands` adjudication).
+3. Its content source is already governed: the `skills/` SSOT and the `.claude/skills/` mirrors.
+
+**Dispatch to docs-writer** — AGENTS.md §6 "Platform Skills Distribution":
+
+1. Insert as the **final row** of the table (repo surfaces first, consumer last):
+
+```
+| Claude Desktop App | — (no repository surface) | Agent Skills consumer — reads no project-embedded directory; consumes the SKILL.md open format via claude.ai/Desktop upload (Settings → Capabilities) or the `/v1/skills` API; content source: `skills/` SSOT and `.claude/skills/` mirrors |
+```
+
+2. Fix the stale intro line (AGENTS.md:585, "distributed to all three platform directories" — there are four mirrors) to read: "Skills are distributed to the four platform directories via `scripts/sync-skills.ts`; the Claude Desktop App consumes the same skills without a repository surface:"
+
+**Companion wording contract**: T-20260925-002's prose is verified surface-accurate (it enumerates check legs only; no surface-count claim) — no edit required. Standing rule for this program's references: surface enumerations read "four repo surfaces; Claude Desktop App documented as consumer" — never "five surfaces", never a Desktop directory.
