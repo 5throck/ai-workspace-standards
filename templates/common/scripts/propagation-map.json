@@ -269,6 +269,16 @@
       ],
       "exclude_variants": [],
       "note": "All 11 variants converted (2026-08-24). Pilot phase complete. ADR-0062. co-price/co-safety added 2026-09-13 (T-20260913-002): their docs/<variant>.context.md files were variant-authored without a COMMON-CONTEXT zone — the Coding Guidelines key-rules zone inserted and both listed, completing 13/13 variant coverage. Note: before 2026-09-13 propagate-to-templates publishDocs() ignored target_file and could never refresh these zones (v2.15.0 fix). target_variants must equal the templates/co-* dir set minus exclude_variants — enforced by validate-templates PM-03 (T-20260915-005)."
+    },
+    "hermes-skills": {
+      "description": "L0 .hermes/skills/ → L1 templates/common/.hermes/skills/ — Hermes Agent platform skills (ADR-0088)",
+      "source": ".hermes/skills",
+      "target": "templates/common/.hermes/skills",
+      "include_pattern": "*/SKILL.md",
+      "recursive": true,
+      "l2_drift_eligible": false,
+      "exclude": [],
+      "note": "Same B-03/mirror:false exclusions as the other platform mirrors (enforced in sync-skills.ts); L2 variant mirrors come from sync-skills --all-variants over each variant's own skills/ SSOT"
     }
   }
 }

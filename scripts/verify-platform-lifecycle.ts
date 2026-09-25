@@ -3,20 +3,20 @@
  * verify-platform-lifecycle.ts — Platform Skill and Command lifecycle verification.
  *
  * Checks:
- *   E: platform mirror skills/ version: field completeness (4 mirrors)
- *   F: n-way version synchronization across the 4 platform mirrors
+ *   E: platform mirror skills/ version: field completeness (5 mirrors)
+ *   F: n-way version synchronization across the 5 platform mirrors
  *   G: command propagation to templates/common/ — .claude/commands and
  *      .gemini/commands 1:1, plus the .codex/prompts mapping (ADR-0077 D4);
  *      .agents/commands excluded (L0-resident by design — T-20260925-003)
- *   H: Platform Skill propagation to templates/common/ (4 mirrors, Tier 1 only)
+ *   H: Platform Skill propagation to templates/common/ (5 mirrors, Tier 1 only)
  *
  * Tier 1 vs Tier 3 auto-detection: if variant.json exists in cwd, runs Tier 3 subset (E+F only).
  *
- * Net-new coverage (.agents/.codex legs, codex prompts leg) soaks in WARN per
+ * Net-new coverage (.agents/.codex/.hermes legs, codex prompts leg) soaks in WARN per
  * ADR-0055; the dated promotion ticket flips those to fail. Pre-existing
  * .claude/.gemini semantics keep their severity.
  *
- * @version 1.2.0
+ * @version 1.3.0
  */
 
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
@@ -40,7 +40,8 @@ const VERSION_EXEMPT_PLATFORM_SKILLS = new Set([
 ]);
 
 // Net-new mirror legs soak in WARN (ADR-0055) — TODO(promotion): flip to fail.
-const SOAK_MIRRORS = new Set(['.agents/skills', '.codex/skills']);
+// .hermes/skills joined in ADR-0088 W2 (same onboarding path as .agents/.codex).
+const SOAK_MIRRORS = new Set(['.agents/skills', '.codex/skills', '.hermes/skills']);
 
 function platformOf(mirrorDir: string): string {
   return mirrorDir.split('/')[0];
@@ -247,7 +248,7 @@ function checkH(): void {
     for (const mirrorDir of PLATFORM_MIRROR_DIRS) {
       const platform = platformOf(mirrorDir);
       const commonPath = join(ROOT, 'templates', 'common', mirrorDir, skillName, 'SKILL.md');
-      // Net-new mirrors (.agents/.codex) soak in WARN — TODO(promotion): flip to fail.
+      // Net-new mirrors (.agents/.codex/.hermes) soak in WARN — TODO(promotion): flip to fail.
       const emit = SOAK_MIRRORS.has(mirrorDir) ? warn : fail;
       if (!existsSync(commonPath)) {
         emit('platform-skill-propagation',

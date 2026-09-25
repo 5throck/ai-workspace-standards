@@ -215,6 +215,7 @@
       "node_modules",
       ".antigravitycli",
       ".codex",
+      ".hermes",
       ".github",
       "Projects",
       ".pipeline-state",

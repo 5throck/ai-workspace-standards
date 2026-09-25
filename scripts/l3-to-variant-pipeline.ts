@@ -11,9 +11,12 @@
  * - Wave 3: Platform parity validation (validate-platform-parity.ts)
  * - Wave 3: Workspace integration (integration-helpers.ts)
  *
- * @version 1.20.0
+ * @version 1.21.0
  * @phase: Complete pipeline orchestration
  *
+ * v1.21.0 (2026-09-25, ADR-0088 W2): matchCountryScopedSkill recognizes
+ *          .hermes/skills/ mirror paths — country-scoped skills can no longer
+ *          leak into a promoted variant via the fifth platform mirror.
  * v1.19.0 (2026-09-16): Overlay guard + module-level rollback (design
  *          docs/designs/2026-09-16-variant-ization-overlay-guard-design.md,
  *          tickets T-20260916-003/-004). PHASE 0.6 (new) — fail-closed
@@ -280,7 +283,8 @@ function matchCountryScopedSkill(targetPath: string, scopedSkills: Set<string>):
       normalized.startsWith(`.claude/skills/${name}/`) ||
       normalized.startsWith(`.gemini/skills/${name}/`) ||
       normalized.startsWith(`.agents/skills/${name}/`) ||
-      normalized.startsWith(`.codex/skills/${name}/`)
+      normalized.startsWith(`.codex/skills/${name}/`) ||
+      normalized.startsWith(`.hermes/skills/${name}/`)
     ) {
       return name;
     }

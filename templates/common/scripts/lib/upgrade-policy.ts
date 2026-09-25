@@ -1,4 +1,9 @@
-// @version 1.16.0
+// @version 1.17.0
+// v1.17.0 (2026-09-25, ADR-0088 W2): `.hermes` joins the platform set —
+//          `.hermes/skills` claims SYNC via sync-skills.ts (platform mirror)
+//          above every blanket rule (the graft fleet-gap ordering invariant),
+//          `.hermes` joins the blanket SYNC claim (no project-owned config
+//          exists today; reclassify if one appears) and KNOWN_TOP_DIRS.
 // v1.16.0 (2026-09-25, registry & platform-policy completeness batch — spec
 //          docs/designs/2026-09-25-registry-policy-completeness-design.md
 //          R4): `.agents/mcp.json` joins JSON_MERGE_FILES (design D6) — same
@@ -255,7 +260,7 @@ const TRAVERSAL_SKIP_DIRS = new Set(['node_modules', '.git', '.gateguard-state']
  *  top level belongs to the generic VARIANT ASSET DIRS pass). */
 const KNOWN_TOP_DIRS = new Set([
   'agents', 'skills', 'scripts', 'docs', 'procedures',
-  '.claude', '.gemini', '.agents', '.codex', '.githooks', '.github', '.git', 'memory', 'node_modules',
+  '.claude', '.gemini', '.agents', '.codex', '.hermes', '.githooks', '.github', '.git', 'memory', 'node_modules',
 ]);
 
 function underDir(rel: string, dir: string): boolean {
@@ -328,13 +333,12 @@ export function resolveClaim(relPath: string, variant = ''): UpgradeClaim {
   // it — the TEMPLATE TREE SYNC pass must claim it explicitly or the fleet never receives it.
   if (underDir(rel, '.claude/skills/graft')) return { policy: 'SYNC', pass: TEMPLATE_TREE_SYNC_PASS };
   // Platform skill mirrors are distributed by the post-upgrade sync-skills.ts run, not file
-  // passes. Codex mirrors (ADR-0077 W1/W4) joined them in the 2026-09-21 review (C-1): the
-  // former dedicated TEMPLATE TREE SYNC claim re-delivered l2_propagate:false skills from
-  // the L1 .codex mirror into projects. This group MUST stay ABOVE the blanket `.codex/**`
-  // rule below, or the blanket ADD_IF_MISSING swallows the mirrors and fleet projects
+  // passes. Codex mirrors (ADR-0077 W1/W4) joined them in the 2026-09-21 review (C-1); the
+  // Hermes mirror (ADR-0088 W2) joins the same group. This group MUST stay ABOVE the blanket
+  // `.codex/**` rule below, or the blanket ADD_IF_MISSING swallows the mirrors and fleet projects
   // never receive skill/prompt updates (graft fleet-gap class).
   if (underDir(rel, '.claude/skills') || underDir(rel, '.gemini/skills') || underDir(rel, '.agents/skills')
-    || underDir(rel, '.codex/skills') || underDir(rel, '.codex/prompts')) {
+    || underDir(rel, '.codex/skills') || underDir(rel, '.codex/prompts') || underDir(rel, '.hermes/skills')) {
     return { policy: 'SYNC', pass: 'sync-skills.ts (platform mirror)' };
   }
   // Codex project config is per-project by nature (project MCP servers + codex hooks, e.g.
@@ -349,8 +353,10 @@ export function resolveClaim(relPath: string, variant = ''): UpgradeClaim {
   // existing projects drift by design; a drift DETECTOR is a candidate follow-up.
   if (underDir(rel, '.codex')) return { policy: 'ADD_IF_MISSING', pass: TEMPLATE_TREE_SYNC_PASS };
 
-  // Registration pointers + platform settings extras: default sync (static today, format may evolve)
-  if (underDir(rel, '.claude') || underDir(rel, '.gemini') || underDir(rel, '.agents')) {
+  // Registration pointers + platform settings extras: default sync (static today, format may evolve).
+  // `.hermes` (ADR-0088) is skills-mirror-only today — the mirror claim above owns `.hermes/skills`;
+  // anything else under `.hermes` (none exists yet) defaults to SYNC like the other registration dirs.
+  if (underDir(rel, '.claude') || underDir(rel, '.gemini') || underDir(rel, '.agents') || underDir(rel, '.hermes')) {
     return { policy: 'SYNC', pass: TEMPLATE_TREE_SYNC_PASS };
   }
 

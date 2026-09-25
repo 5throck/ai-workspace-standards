@@ -1,8 +1,13 @@
 #!/usr/bin/env bun
 /**
  * Shared Scaffold Delivery Contracts
- * @version 1.5.1
+ * @version 1.6.0
  *
+ * v1.6.0 (2026-09-25, ADR-0088 W2): PlatformProfile gains 'hermes' —
+ *         deriveNewProjectDelivery models the new-project hermes-primary
+ *         profile (keeps .hermes/, drops CLAUDE.md/GEMINI.md) and the
+ *         hermes-opt-out strip for every other profile, mirroring the
+ *         new-project.ts §2.7 semantics this derivation must match (Test 26).
  * v1.5.1 (2026-09-24, spec docs/designs/2026-09-24-platform-ssot-constant-design.md):
  *         behavior-neutral constant adoption — the three canonical 5-element
  *         skill-base literals (schema prune, l2_propagate sweep derivation,
@@ -410,7 +415,7 @@ export const REVIEWED_DELIVERY_EXCLUSIONS: readonly ReviewedDeliveryExclusion[] 
 // 6. Delivery-tree derivation (T-20260915-003 / H13)
 // ============================================================================
 
-export type PlatformProfile = 'claude' | 'antigravity' | 'all' | 'codex';
+export type PlatformProfile = 'claude' | 'antigravity' | 'all' | 'codex' | 'hermes';
 
 /**
  * Relpaths (forward slashes) of files under templates/common/ that are NOT
@@ -540,8 +545,10 @@ export function deriveNewProjectDelivery(
     if (top === 'memory' && rel.endsWith('.md')) continue; // §memory clear
     if (basename(rel) === '.gitkeep') continue;
     if (platform !== 'codex' && platform !== 'all' && (rel === 'CODEX.md' || rel.startsWith('.codex/'))) continue;
+    if (platform !== 'hermes' && platform !== 'all' && rel.startsWith('.hermes/')) continue;
     if (platform === 'claude' && rel === 'GEMINI.md') continue;
     if (platform === 'antigravity' && rel === 'CLAUDE.md') continue;
+    if (platform === 'hermes' && (rel === 'CLAUDE.md' || rel === 'GEMINI.md')) continue;
     if (isL2PropagateFalseSkillRel(rel, l2PropagateFalseSkills)) continue;
     if (isLegacyL0SkillRel(rel)) continue;
     // §L0-only script removal: the script shells out to layer-filter

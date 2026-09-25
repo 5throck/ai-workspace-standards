@@ -3,7 +3,7 @@
 ## Metadata
 
 - **Current Phase**: production
-- **Version**: 1.29.0
+- **Version**: 1.30.0
 - **Owner**: automation-engineer
 - **Last Updated**: 2026-09-25
 - **Last Reviewer**: pm
@@ -18,6 +18,8 @@
 - **2026-09-21**: v1.24.0 — git init runs with cwd: projectDir (T-20260921-003: parent-repo reinit inherited the workspace origin); README content_hash + README_ko translated_from_hash refreshed post-substitution (T-20260921-002).
 - **2026-09-23**: v1.25.0 — §2.3b extends-stub resolution and §2.5 L1-B strip extracted verbatim to scripts/helpers/resolve-pm-stub.ts (adopt-project engine prerequisites; behavior unchanged).
 - **2026-09-24**: v1.26.0 — §5.2 renders docs/project.md from the identity seed template (templates/common/docs/project.template.md) and removes the raw copy; additive --description/--type flags fill the identity fields, absent flags keep the audit-visible TODO(project-overview) fallback. Spec: docs/designs/2026-09-24-scaffold-identity-overview-design.md
+- **2026-09-24**: v1.29.0 — §2.3b generalizes extends-stub resolution to every agents/*.md carrying `extends:` frontmatter (13 variant i18n-specialist stubs now resolve against templates/common bodies). Spec: docs/designs/2026-09-25-inventory-decisions-batch-design.md
+- **2026-09-25**: v1.30.0 — `--platform hermes` profile joins (ADR-0088 W2): hermes-primary keeps `.hermes/` and drops CLAUDE.md/GEMINI.md; all other profiles are hermes-opt-out.
 
 | Date | From | To | Reason | Approver |
 |------|------|-----|---------|----------|
@@ -35,6 +37,8 @@
 | 2026-09-24 | production | production | v1.28.0 (scaffold hygiene bundle): parse-loop catch-all — any unknown or valueless `--` flag is a hard error (exit 1) before any write, naming the offending token and listing the six valid flags; `--yes` exempt (consumed by the auto-confirm argv scan). Spec: docs/designs/2026-09-24-scaffold-hygiene-bundle-design.md | automation-engineer |
 | 2026-09-25 | production | production | v1.29.0 (T-20260924-003): §2.3b generalizes extends-stub resolution from pm.md-only to EVERY agents/*.md carrying `extends:` frontmatter — the 13 variant i18n-specialist.md stubs resolve against templates/common bodies at scaffold time; pm.md keeps the H12 canonical-prose check. Spec: docs/designs/2026-09-25-inventory-decisions-batch-design.md | automation-engineer |
 | 2026-09-24 | production | production | v1.28.1 (platform-SSOT constant, spec docs/designs/2026-09-24-platform-ssot-constant-design.md): behavior-neutral — the two canonical 5-element skill-base literals become PLATFORM_SKILL_BASES (lib/platforms.ts v1.0.0); NO behavior change | automation-engineer |
+| 2026-09-24 | production | production | v1.29.0 catch-up (record synced to SCRIPTS.md SSOT): §2.3b extends-stub resolution generalized to all agents/*.md stubs | automation-engineer |
+| 2026-09-25 | production | production | v1.30.0 (ADR-0088 W2): `--platform hermes` profile — hermes-primary keeps `.hermes/`, drops legacy twins; other profiles hermes-opt-out | automation-engineer |
 
 ## Acceptance Criteria
 

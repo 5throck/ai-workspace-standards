@@ -2,7 +2,10 @@
 /**
  * backport-diff.ts — 5-surface backport candidate differ for committed
  * Projects/co-* LOCAL-WORK (project-resync skill Step 2 support).
- * @version 1.0.1
+ * @version 1.0.2
+ *
+ * v1.0.2 (2026-09-25, ADR-0088 W2): the .hermes platform mirror joins the
+ *         skills-classification regex (five-mirror parity).
  *
  * Supports the Step 2 human backport review: after a project's LOCAL-WORK is
  * committed (Step 1), this tool diffs the committed range over the project's
@@ -172,10 +175,10 @@ function variantName(projectPath: string): string | null {
 /** Surface classification of a project-relative file (5-surface method). */
 export function surfaceFor(relFile: string): Surface {
   if (relFile.startsWith("skills/")) return "skills";
-  // Platform skill mirrors (.claude/.gemini/.agents/.codex) carry the same
+  // Platform skill mirrors (.claude/.gemini/.agents/.codex/.hermes) carry the same
   // skill content — count them toward the skills surface (template-delivered
   // prefixes per resync-audit.ts).
-  if (/^\.(?:claude|gemini|agents|codex)\/skills\//.test(relFile)) return "skills";
+  if (/^\.(?:claude|gemini|agents|codex|hermes)\/skills\//.test(relFile)) return "skills";
   if (relFile.startsWith("scripts/helpers/")) return "helpers";
   if (relFile.startsWith("scripts/")) return "scripts";
   if (relFile.startsWith("agents/")) return "agents";

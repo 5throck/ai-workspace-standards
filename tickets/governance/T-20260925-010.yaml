@@ -1,0 +1,26 @@
+schemaVersion: 1
+id: T-20260925-010
+kind: manual
+title: >-
+  verify-platform-lifecycle.ts Check G pair-based gap (pre-existing, now
+  three platforms behind): the command-propagation loop hardcodes
+  ['.claude', '.gemini'] (line ~182), so the version-completeness and
+  parity arms never see .codex (ADR-0077 never added it) or .hermes
+  (ADR-0088 D8 deliberately did not extend it — Hermes has no commands
+  mirror, but the loop's structure remains pair-based). Generalize Check G
+  to the PLATFORM_MIRROR_DIRS constant with per-platform exemption markers
+  (hermes: no commands/prompts leg by design — record a documented exclusion,
+  not a silent skip, per the .agents/commands precedent T-20260925-003).
+  Related deferred refactor: PLATFORM_SKILL_BASES/MIRROR_DIRS consumers that
+  still hold inline literals (second consecutive deferral of the N-platform
+  refactor noted in ADR-0088 Consequences).
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-09-25T00:00:00.000Z'
+history:
+  - at: '2026-09-25T00:00:00.000Z'
+    from: null
+    to: backlog
+result: null
+error: null

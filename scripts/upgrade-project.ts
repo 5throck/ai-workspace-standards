@@ -1,5 +1,9 @@
 #!/usr/bin/env bun
-// @version 1.50.0
+// @version 1.51.0
+// v1.51.0 (2026-09-25, ADR-0088 W2): `.hermes` joins the platform set — usage/
+//          validation lists, VARIANT_ASSET_DIR_SKIP, upstream skill-name sources,
+//          and both mirrorRoot sweeps (prune + retirement discriminator) cover the
+//          fifth platform mirror.
 // v1.50.0 (2026-09-25, Design Gate delivery repair — spec
 //          docs/designs/2026-09-25-registry-policy-completeness-design.md W5
 //          follow-up): SYNC_IF_NEWER scripts/ walk is fully recursive — the
@@ -425,7 +429,7 @@
 //         numbers on existing rows, "Unregistered script" for newly-added files) and
 //         required manual reconciliation every time.
 // upgrade-project.ts — Upgrade an existing project to the current template version
-// Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform claude|antigravity|codex|all] [--dry-run] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization] [--force-context-sync]
+// Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform claude|antigravity|codex|hermes|all] [--dry-run] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization] [--force-context-sync]
 // v1.9.0: Moved docs/context.md from DOCS_MERGE (managed-block merge) to VARIANT_DOCS_SYNC
 //           (version-footer sync) — the common template carries no managed-block markers,
 //           so the merge path was a silent no-op despite the file's *context.md version: X.Y*
@@ -514,11 +518,11 @@ for (let i = 0; i < args.length; i++) {
 }
 
 if (!projectPath) {
-  console.error('Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform claude|antigravity|codex|all] [--dry-run] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization] [--force-context-sync]');
+  console.error('Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform claude|antigravity|codex|hermes|all] [--dry-run] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization] [--force-context-sync]');
   process.exit(1);
 }
-if (!['claude', 'antigravity', 'codex', 'all'].includes(platform)) {
-  console.error('ERROR: --platform must be one of: claude, antigravity, codex, all');
+if (!['claude', 'antigravity', 'codex', 'hermes', 'all'].includes(platform)) {
+  console.error('ERROR: --platform must be one of: claude, antigravity, codex, hermes, all');
   process.exit(1);
 }
 
@@ -2149,7 +2153,7 @@ if (existsSync(variantSkillsSrc)) {
 // the fix covers every current and future variant that grows one.
 const VARIANT_ASSET_DIR_SKIP = new Set([
   'agents', 'skills', 'scripts', 'docs',
-  '.claude', '.gemini', '.agents', '.codex', '.git', '.github', '.githooks',
+  '.claude', '.gemini', '.agents', '.codex', '.hermes', '.git', '.github', '.githooks',
   'memory', 'node_modules',
 ]);
 // ^ `.codex` joined in v1.47.0 (platform-parity P1 bug 3 — spec
@@ -2990,15 +2994,18 @@ if (pruneRemoved) {
     join(workspaceRoot, '.claude', 'skills'),
     join(workspaceRoot, '.gemini', 'skills'),
     join(workspaceRoot, '.agents', 'skills'),
+    join(workspaceRoot, '.hermes', 'skills'),
     join(commonDir, 'skills'),
     join(commonDir, '.claude', 'skills'),
     join(commonDir, '.gemini', 'skills'),
     join(commonDir, '.agents', 'skills'),
+    join(commonDir, '.hermes', 'skills'),
     join(templatesDir, 'skills'),
     join(templatesDir, '.claude', 'skills'),
     join(templatesDir, '.gemini', 'skills'),
     join(templatesDir, '.agents', 'skills'),
     join(templatesDir, '.codex', 'skills'),
+    join(templatesDir, '.hermes', 'skills'),
   ];
   for (const src of upstreamNameSources) {
     if (!existsSync(src)) continue;
@@ -3007,7 +3014,7 @@ if (pruneRemoved) {
     }
   }
   const mirrorPruneCount = { n: 0 };
-  for (const mirrorRoot of ['.claude', '.gemini', '.agents', '.codex']) {
+  for (const mirrorRoot of ['.claude', '.gemini', '.agents', '.codex', '.hermes']) {
     const projMirror = join(projectDir, mirrorRoot, 'skills');
     if (!existsSync(projMirror)) continue;
     // A project-authored skills/<name>/ SSOT (standalone-track projects like
@@ -3032,7 +3039,7 @@ if (pruneRemoved) {
       const mirrorSkill = join(projectDir, 'skills', name, 'SKILL.md');
       if (existsSync(mirrorSkill)) return false;
       let status = '';
-      for (const mirrorRoot of ['.claude', '.gemini', '.agents', '.codex']) {
+      for (const mirrorRoot of ['.claude', '.gemini', '.agents', '.codex', '.hermes']) {
         const mf = join(projectDir, mirrorRoot, 'skills', name, 'SKILL.md');
         if (existsSync(mf)) {
           const m = readFileSync(mf, 'utf8').match(/^status:\s*(\S+)/m);

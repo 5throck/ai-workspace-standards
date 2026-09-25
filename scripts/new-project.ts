@@ -1,5 +1,9 @@
 #!/usr/bin/env bun
-// @version 1.29.0
+// @version 1.30.0
+// v1.30.0 (2026-09-25, ADR-0088 W2): `hermes` joins the --platform profiles —
+//           hermes-primary keeps .hermes/ and drops the legacy instruction twins
+//           (AGENTS.md is the Hermes instruction file); all other profiles are
+//           hermes-opt-out. Usage strings and validation extended.
 // v1.29.0 (2026-09-25, T-20260924-003 — spec
 //           docs/designs/2026-09-25-inventory-decisions-batch-design.md R2.3):
 //           §2.3b generalizes from pm.md-only to EVERY agents/*.md carrying
@@ -137,7 +141,7 @@
 //           line (docs/context.md version footer survives for upgrade version-sync);
 //           shared pattern moved to helpers/l0-ref-policy.ts.
 // new-project.ts — Scaffold a new project under Projects/ (or an explicit workspace-relative path)
-// Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|codex|all] [--version X.Y.Z] [--country <CODE>] [--description "<one sentence>"] [--type web|cli|api|mcp]
+// Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|codex|hermes|all] [--version X.Y.Z] [--country <CODE>] [--description "<one sentence>"] [--type web|cli|api|mcp]
 //
 // Migrated from new-project.sh/ps1 per ADR-0036. No file permission manipulation.
 
@@ -237,8 +241,8 @@ for (let i = 0; i < args.length; i++) {
   // consumes it from process.argv directly (it never takes a value here).
   if (args[i].startsWith('--') && args[i] !== '--yes') {
     console.error(`❌ Unknown flag: '${args[i]}'.`);
-    console.error('   Valid flags: --variant <co-variant> | --description "<one sentence>" | --type web|cli|api|mcp | --version X.Y.Z | --platform claude|antigravity|codex|all | --country <CODE>');
-    console.error('   Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|codex|all] [--version X.Y.Z] [--country <CODE>] [--description "<one sentence>"] [--type web|cli|api|mcp]');
+    console.error('   Valid flags: --variant <co-variant> | --description "<one sentence>" | --type web|cli|api|mcp | --version X.Y.Z | --platform claude|antigravity|codex|hermes|all | --country <CODE>');
+    console.error('   Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|codex|hermes|all] [--version X.Y.Z] [--country <CODE>] [--description "<one sentence>"] [--type web|cli|api|mcp]');
     if (import.meta.main) {
       process.exit(1);
     }
@@ -247,7 +251,7 @@ for (let i = 0; i < args.length; i++) {
 }
 
 if (!projectName) {
-  console.error('Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|codex|all] [--version X.Y.Z] [--country <CODE>] [--description "<one sentence>"] [--type web|cli|api|mcp]');
+  console.error('Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|codex|hermes|all] [--version X.Y.Z] [--country <CODE>] [--description "<one sentence>"] [--type web|cli|api|mcp]');
   console.error('       --description/--type are optional; when omitted, docs/project.md keeps its TODO(project-overview) fallback lines.');
   if (import.meta.main) {
     process.exit(1);
@@ -270,8 +274,8 @@ if (projectName.length > 64) {
 }
 
 // Validate platform
-if (!['claude', 'antigravity', 'all', 'codex'].includes(platform)) {
-  console.error('❌ --platform must be: claude, antigravity, codex, or all (default: all)');
+if (!['claude', 'antigravity', 'all', 'codex', 'hermes'].includes(platform)) {
+  console.error('❌ --platform must be: claude, antigravity, codex, hermes, or all (default: all)');
   if (import.meta.main) {
     process.exit(1);
   }
@@ -996,6 +1000,18 @@ if (platform !== 'codex' && platform !== 'all') {
   for (const f of [join(projectDir, 'CODEX.md'), join(projectDir, '.codex')]) {
     if (existsSync(f)) rmSync(f, { recursive: true });
   }
+}
+// ADR-0088: `hermes` is a hermes-primary profile — Hermes reads AGENTS.md natively, so the
+// legacy instruction twins are dropped (codex-primary analogy). `.hermes/` is kept by `hermes`
+// and `all`; every other profile is hermes-opt-out (platform dir = template overlay).
+if (platform === 'hermes') {
+  for (const f of [join(projectDir, 'CLAUDE.md'), join(projectDir, 'GEMINI.md')]) {
+    if (existsSync(f)) rmSync(f);
+  }
+}
+if (platform !== 'hermes' && platform !== 'all') {
+  const h = join(projectDir, '.hermes');
+  if (existsSync(h)) rmSync(h, { recursive: true });
 }
 
 // Remove .cmd files

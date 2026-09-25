@@ -2,9 +2,11 @@
 /**
  * test-new-project.ts — E2E Test for new-project.ts
  *
- * @version 1.6.0
- * @last_updated 2026-09-24
+ * @version 1.7.0
+ * @last_updated 2026-09-25
  *
+ * v1.7.0 (2026-09-25, ADR-0088 W2): Test 8 covers the hermes profile (.hermes/
+ *         present, legacy twins removed) and platform=all asserts .hermes/ too.
  * v1.6.0 (2026-09-24, scaffold hygiene bundle — spec
  *         2026-09-24-scaffold-hygiene-bundle-design): Test 0c pins the
  *         unknown-flag hard error (AC4) of new-project.ts v1.28.0 — a
@@ -52,7 +54,7 @@
  * Tests the OUTPUT of new-project, not the mechanism inside it.
  *
  * Usage:
- *   bun scripts/test-new-project.ts <TestProjectName> [--variant co-develop] [--platform all|claude|antigravity|codex] [--all-variants]
+ *   bun scripts/test-new-project.ts <TestProjectName> [--variant co-develop] [--platform all|claude|antigravity|codex|hermes] [--all-variants]
  *
  * Test coverage:
  *   0.  Script syntax validation (bash -n / powershell parser — runs before project creation)
@@ -134,7 +136,7 @@ if (allVariants && import.meta.main) {
 }
 
 if (!projectName) {
-  console.error('Usage: bun scripts/test-new-project.ts <TestProjectName> [--variant co-develop] [--platform all|claude|antigravity|codex] [--all-variants]');
+  console.error('Usage: bun scripts/test-new-project.ts <TestProjectName> [--variant co-develop] [--platform all|claude|antigravity|codex|hermes] [--all-variants]');
   if (import.meta.main) {
     process.exit(1);
   }
@@ -400,15 +402,25 @@ try {
       const hasCodexDir = fileExists('.codex');
       if (!hasCodexMd || !hasCodexDir) fail('Test 8', `codex files expected: CODEX.md=${hasCodexMd} .codex/=${hasCodexDir}`);
       else                             pass('Test 8 PASSED: CODEX.md and .codex/ present for codex platform');
+    } else if (platformArg === 'hermes') {
+      const hasHermesDir = fileExists('.hermes');
+      const hasClaudeMd  = fileExists('CLAUDE.md');
+      const hasGeminiMd  = fileExists('GEMINI.md');
+      if (!hasHermesDir || hasClaudeMd || hasGeminiMd) {
+        fail('Test 8', `hermes files expected: .hermes/=${hasHermesDir} CLAUDE.md absent=${!hasClaudeMd} GEMINI.md absent=${!hasGeminiMd}`);
+      } else {
+        pass('Test 8 PASSED: .hermes/ present and legacy twins removed for hermes platform');
+      }
     } else {
       const hasClaude   = fileExists('CLAUDE.md');
       const hasGemini   = fileExists('GEMINI.md');
       const hasCodexMd  = fileExists('CODEX.md');
       const hasCodexDir = fileExists('.codex');
-      if (!hasClaude || !hasGemini || !hasCodexMd || !hasCodexDir) {
-        fail('Test 8', `All files expected: CLAUDE.md=${hasClaude} GEMINI.md=${hasGemini} CODEX.md=${hasCodexMd} .codex/=${hasCodexDir}`);
+      const hasHermesDir = fileExists('.hermes');
+      if (!hasClaude || !hasGemini || !hasCodexMd || !hasCodexDir || !hasHermesDir) {
+        fail('Test 8', `All files expected: CLAUDE.md=${hasClaude} GEMINI.md=${hasGemini} CODEX.md=${hasCodexMd} .codex/=${hasCodexDir} .hermes/=${hasHermesDir}`);
       } else {
-        pass('Test 8 PASSED: CLAUDE.md, GEMINI.md, CODEX.md, and .codex/ all present for platform=all');
+        pass('Test 8 PASSED: CLAUDE.md, GEMINI.md, CODEX.md, .codex/, and .hermes/ all present for platform=all');
       }
     }
   } catch (e) { fail('Test 8', String(e)); }
@@ -767,7 +779,7 @@ try {
       which: 'new-project',
       actualRoot: testDir,
       commonDir: join(process.cwd(), 'templates', 'common'),
-      platform: platformArg as 'claude' | 'antigravity' | 'all' | 'codex',
+      platform: platformArg as 'claude' | 'antigravity' | 'all' | 'codex' | 'hermes',
     });
     if (!verdict.ok) {
       const detail = [

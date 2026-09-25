@@ -1,4 +1,5 @@
 ---
+catalog-parity: skip  # variant-maintained fork — excluded from the root Variant-Exclusive catalog (W5 disposition)
 name: pdf-export
 scope: co-price
 description: PDF report generation for client-facing deliverables

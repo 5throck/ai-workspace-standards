@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Course Overview | co-deck Handbook</title>
+  <link rel="stylesheet" href="assets/css/handbook-variables.css">
+  <link rel="stylesheet" href="assets/css/handbook-components.css">
+  <style>
+    /* ===== CSS Variables ===== */
+    :root {
+      --bg: #ffffff;
+      --bg2: #f5f5f7;
+      --text: #1d1d1f;
+      --text-muted: #6e6e73;
+      --border: #d2d2d7;
+      --accent: #0066cc;
+      --accent-hover: #004499;
+      --bg-info: #e8f4fd;
+      --bg-note: #fffbe6;
+      --bg-warn: #fff3e0;
+      --bg-success: #e8f5e9;
+      --bg-error: #fdecea;
+      --sidebar-width: 220px;
+      --header-height: 56px;
+      --code-bg: #f5f5f7;
+      --shadow: 0 1px 3px rgba(0,0,0,0.08);
+      --radius: 6px;
+    }
+    [data-theme="dark"] {
+      --bg: #1a1a2e;
+      --bg2: #16213e;
+      --text: #e0e0e0;
+      --text-muted: #a0a0a0;
+      --border: #333355;
+      --accent: #4da6ff;
+      --accent-hover: #80bfff;
+      --bg-info: #1a3a5c;
+      --bg-note: #3d3520;
+      --bg-warn: #3d2e1a;
+      --bg-success: #1a3d2e;
+      --bg-error: #3d1a1a;
+      --code-bg: #0f0f23;
+      --shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+      background-color: var(--bg); color: var(--text); line-height: 1.6;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    /* ===== Header ===== */
+    .site-header { position: fixed; top: 0; left: 0; right: 0; height: var(--header-height); background-color: var(--bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 20px; z-index: 100; transition: background-color 0.2s, color 0.2s; }
+    .site-header .logo { font-weight: 700; font-size: 1.1rem; color: var(--accent); text-decoration: none; margin-right: 24px; white-space: nowrap; transition: color 0.2s; }
+    .site-header .search-input { flex: 0 1 320px; padding: 6px 12px; border: 1px solid var(--border); border-radius: var(--radius); background-color: var(--bg2); color: var(--text); font-size: 0.875rem; transition: background-color 0.2s, color 0.2s, border-color 0.2s; }
+    .site-header .search-input::placeholder { color: var(--text-muted); }
+    .site-header .header-actions { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+    .dark-mode-toggle { background: none; border: 1px solid var(--border); border-radius: var(--radius); padding: 6px 10px; cursor: pointer; color: var(--text); font-size: 0.875rem; transition: background-color 0.2s, color 0.2s, border-color 0.2s; }
+    .dark-mode-toggle:hover { background-color: var(--bg2); }
+    .lang-switcher { padding: 6px 10px; border: 1px solid var(--border); border-radius: var(--radius); background-color: var(--bg2); color: var(--text); font-size: 0.875rem; cursor: pointer; transition: background-color 0.2s, color 0.2s, border-color 0.2s; }
+
+    /* ===== Sidebar ===== */
+    .sidebar { position: fixed; top: var(--header-height); left: 0; width: var(--sidebar-width); height: calc(100vh - var(--header-height)); overflow-y: auto; background-color: var(--bg2); border-right: 1px solid var(--border); padding: 16px 0; transition: background-color 0.2s, color 0.2s; }
+    .sidebar nav ul { list-style: none; }
+    .sidebar nav ul li a { display: block; padding: 8px 20px; color: var(--text-muted); text-decoration: none; font-size: 0.875rem; transition: background-color 0.2s, color 0.2s; }
+    .sidebar nav ul li a:hover, .sidebar nav ul li a.active { color: var(--accent); background-color: var(--bg); }
+
+    /* ===== Main Content ===== */
+    .main-content { margin-left: var(--sidebar-width); margin-top: var(--header-height); padding: 32px 40px 60px; min-height: calc(100vh - var(--header-height)); }
+    .main-content article { max-width: 860px; }
+
+    /* ===== Section Cards ===== */
+    .overview-card {
+      background-color: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 24px; margin-bottom: 20px;
+      transition: background-color 0.2s, border-color 0.2s;
+    }
+    .overview-card h2 {
+      font-size: 1.125rem; font-weight: 700; margin-bottom: 12px;
+      color: var(--accent); transition: color 0.2s;
+    }
+    .overview-card h2 .card-number {
+      display: inline-block; width: 28px; height: 28px; line-height: 28px;
+      text-align: center; border-radius: 50%;
+      background-color: var(--accent); color: var(--bg);
+      font-size: 0.75rem; font-weight: 700; margin-right: 8px;
+      transition: background-color 0.2s, color 0.2s;
+    }
+    .overview-card p, .overview-card ul, .overview-card ol {
+      color: var(--text); transition: color 0.2s;
+    }
+    .overview-card ul, .overview-card ol {
+      padding-left: 20px; margin-top: 8px;
+    }
+    .overview-card li {
+      margin-bottom: 4px; font-size: 0.9375rem;
+    }
+
+    /* ===== Topic Tags ===== */
+    .topic-tags {
+      display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;
+    }
+    .topic-tag {
+      padding: 4px 12px; border-radius: 12px;
+      background-color: var(--bg-info); color: var(--accent);
+      font-size: 0.8125rem; font-weight: 500;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    /* ===== Chapter Nav ===== */
+    .chapter-nav { display: flex; justify-content: space-between; margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--border); transition: border-color 0.2s; }
+    .chapter-nav a { padding: 10px 20px; border: 1px solid var(--border); border-radius: var(--radius); color: var(--accent); text-decoration: none; font-size: 0.875rem; transition: background-color 0.2s, border-color 0.2s, color 0.2s; }
+    .chapter-nav a:hover { background-color: var(--bg2); }
+
+    /* ===== Footer ===== */
+    .site-footer { margin-left: var(--sidebar-width); padding: 24px 40px; border-top: 1px solid var(--border); font-size: 0.8125rem; color: var(--text-muted); text-align: center; transition: background-color 0.2s, color 0.2s; }
+    .site-footer a { color: var(--accent); text-decoration: none; }
+
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main-content, .site-footer { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="site-header">
+    <a href="index.html" class="logo">co-deck</a>
+    <input type="search" class="search-input" placeholder="Search handbook..." id="site-search">
+    <div class="header-actions">
+      <button class="dark-mode-toggle" id="dark-mode-toggle" aria-label="Toggle dark mode">&#9790;</button>
+      <select class="lang-switcher" id="lang-switcher">
+        <option value="ko" selected>KR</option>
+        <option value="en">EN</option>
+      </select>
+    </div>
+  </header>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <nav>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="course-overview.html" class="active">Course Overview</a></li>
+        <li><a href="chapter.html">Chapters</a></li>
+        <li><a href="manual.html">Reference</a></li>
+        <li><a href="examples.html">Examples</a></li>
+        <li><a href="quiz.html">Quiz</a></li>
+        <li><a href="instructor-guide.html">Instructor Guide</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <article>
+      <h1>Course Overview</h1>
+
+      <!-- Section 1: 한 줄 요약 -->
+      <div class="overview-card">
+        <h2><span class="card-number">1</span> 한 줄 요약</h2>
+        <p><!-- ONE_LINE_SUMMARY: Brief course summary in one line --></p>
+      </div>
+
+      <!-- Section 2: 학습 목표 -->
+      <div class="overview-card">
+        <h2><span class="card-number">2</span> 학습 목표</h2>
+        <ul>
+          <li><!-- LEARNING_OBJECTIVE_1 --></li>
+          <li><!-- LEARNING_OBJECTIVE_2 --></li>
+          <li><!-- LEARNING_OBJECTIVE_3 --></li>
+        </ul>
+      </div>
+
+      <!-- Section 3: 대상자 -->
+      <div class="overview-card">
+        <h2><span class="card-number">3</span> 대상자</h2>
+        <p><!-- TARGET_AUDIENCE: Who this course is for --></p>
+      </div>
+
+      <!-- Section 4: 사전 요구사항 -->
+      <div class="overview-card">
+        <h2><span class="card-number">4</span> 사전 요구사항</h2>
+        <ul>
+          <li><!-- PREREQUISITE_1 --></li>
+          <li><!-- PREREQUISITE_2 --></li>
+        </ul>
+      </div>
+
+      <!-- Section 5: 강의 형태 -->
+      <div class="overview-card">
+        <h2><span class="card-number">5</span> 강의 형태</h2>
+        <p><!-- COURSE_FORMAT: e.g. Hands-on workshop, lecture + lab --></p>
+      </div>
+
+      <!-- Section 6: 강의 일정 -->
+      <div class="overview-card">
+        <h2><span class="card-number">6</span> 강의 일정</h2>
+        <div class="table-schedule"><table>
+          <thead>
+            <tr>
+              <th>Day</th>
+              <th>Time</th>
+              <th>Session</th>
+              <th>Duration</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Day 1</td>
+              <td class="time-block">09:00 - 10:30</td>
+              <td><!-- SESSION_TITLE --></td>
+              <td>90 min</td>
+            </tr>
+            <tr>
+              <td>Day 1</td>
+              <td class="time-block">10:45 - 12:15</td>
+              <td><!-- SESSION_TITLE --></td>
+              <td>90 min</td>
+            </tr>
+            <tr>
+              <td>Day 1</td>
+              <td class="time-block">13:30 - 15:00</td>
+              <td><!-- SESSION_TITLE --></td>
+              <td>90 min</td>
+            </tr>
+            <tr>
+              <td>Day 1</td>
+              <td class="time-block">15:15 - 16:45</td>
+              <td><!-- SESSION_TITLE --></td>
+              <td>90 min</td>
+            </tr>
+            <!-- Repeat rows for additional days/sessions -->
+            <!-- TEMPLATE_ITERATE: schedule_rows -->
+          </tbody>
+        </table></div>
+      </div>
+
+      <!-- Section 7: 다루는 주제 -->
+      <div class="overview-card">
+        <h2><span class="card-number">7</span> 다루는 주제</h2>
+        <div class="topic-tags">
+          <span class="topic-tag"><!-- TOPIC_1 --></span>
+          <span class="topic-tag"><!-- TOPIC_2 --></span>
+          <span class="topic-tag"><!-- TOPIC_3 --></span>
+          <!-- Repeat topic tags as needed -->
+          <!-- TEMPLATE_ITERATE: topic_tags -->
+        </div>
+      </div>
+
+      <!-- Section 8: 수료 후 얻게 되는 것 -->
+      <div class="overview-card">
+        <h2><span class="card-number">8</span> 수료 후 얻게 되는 것</h2>
+        <ul>
+          <li><!-- OUTCOME_1 --></li>
+          <li><!-- OUTCOME_2 --></li>
+          <li><!-- OUTCOME_3 --></li>
+        </ul>
+      </div>
+
+      <!-- Section 9: 강사 정보 -->
+      <div class="overview-card">
+        <h2><span class="card-number">9</span> 강사 정보</h2>
+        <p><!-- INSTRUCTOR_INFO: Instructor name, role, bio --></p>
+      </div>
+
+      <!-- Chapter Nav -->
+      <nav class="chapter-nav">
+        <a href="index.html">&laquo; Previous</a>
+        <a href="chapter.html">Next &raquo;</a>
+      </nav>
+    </article>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <p>&copy; 2026 co-deck. All rights reserved.</p>
+    <p>Powered by <a href="#">co-deck</a></p>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="assets/js/dark-mode-toggle.js"></script>
+  <script src="assets/js/site-search.js"></script>
+  <script src="assets/js/lang-switcher.js"></script>
+  <script src="assets/js/inpage-search.js"></script>
+</body>
+</html>

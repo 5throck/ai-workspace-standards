@@ -1,0 +1,27 @@
+schemaVersion: 1
+id: T-20260925-008
+kind: manual
+title: >-
+  Hermes Agent end-to-end live verification (ADR-0088 N4 follow-up): the
+  Wave-0 spike verified the integration code paths at source level only
+  (NousResearch/hermes-agent @ 59004a6 — parse_frontmatter tolerance,
+  PROJECT_SKILLS_SUBDIRS = (.hermes/skills, .agents/skills),
+  build_context_files_prompt AGENTS.md-native entry). Needed: install
+  hermes-agent locally, load a workspace SKILL.md from .hermes/skills in a
+  scaffolded project, confirm (1) unknown frontmatter keys (scope, owner,
+  metadata.triggers) stay inert, (2) AGENTS.md is picked up as project
+  instructions, (3) /<skill-name> invocation works, (4) document the
+  skills.trusted_project_dirs onboarding step from real config output. On
+  success, flip the verify-platform-lifecycle.ts .hermes/skills leg from
+  SOAK_MIRRORS WARN to fail (ADR-0055 promotion, TODO(promotion) marker at
+  scripts/verify-platform-lifecycle.ts SOAK_MIRRORS).
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-25T00:00:00.000Z'
+history:
+  - at: '2026-09-25T00:00:00.000Z'
+    from: null
+    to: backlog
+result: null
+error: null
