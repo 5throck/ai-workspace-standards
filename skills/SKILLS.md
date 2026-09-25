@@ -64,20 +64,13 @@ Skills registered in the catalog but without a `skills/<name>/` directory in the
 | skill | version | status | owner | last_reviewed | removal-date | variant |
 |-------|---------|--------|-------|---------------|--------------|---------|
 | `change-impact-assessment` | 1.0.0 | active | change-management-partner | 2026-06-13 | — | co-consult only |
-| `competitive-intelligence` | 1.0.0 | active | pm | 2026-06-06 | — | co-consult only |
-| `consulting-report-writing` | 1.0.0 | active | pm | 2026-06-06 | — | co-consult only |
 | `design` | 1.2.1 | active | design | 2026-08-24 | — | co-deck only |
-| `executive-presentation` | 1.0.0 | active | pm | 2026-06-06 | — | co-consult only |
 | `financial-modeling` | 1.0.1 | active | strategy-analyst | 2026-08-26 | — | co-consult only |
 | `html-build` | 1.5.0 | active | html-build | 2026-06-24 | — | co-deck only |
-| `insight-synthesis` | 1.0.0 | active | pm | 2026-06-06 | — | co-consult only |
 | `narrative-framework` | 1.0.0 | active | communications-lead | 2026-06-13 | — | co-consult only |
-| `org-readiness-assessment` | 1.0.0 | active | pm | 2026-06-06 | — | co-consult only |
 | `project-delivery` | 1.0.0 | active | delivery-manager | 2026-06-13 | — | co-consult only |
-| `pdf-export` | 1.3.0 | active | pm | 2026-06-20 | — | co-deck only |
 | `research` | 1.2.1 | active | research | 2026-08-23 | — | co-deck only |
 | `solution-design` | 1.0.0 | active | solutions-architect | 2026-06-13 | — | co-consult only |
-| `stakeholder-alignment` | 1.0.0 | active | pm | 2026-06-06 | — | co-consult only |
 | `stakeholder-review-management` | 1.0.0 | active | delivery-manager | 2026-06-13 | — | co-consult only |
 | `storyline` | 1.2.0 | active | storyline | 2026-06-19 | — | co-deck only |
 | `technical-feasibility` | 1.0.0 | active | solutions-architect | 2026-06-13 | — | co-consult only |

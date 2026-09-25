@@ -1,4 +1,5 @@
 ---
+catalog-parity: skip  # variant-maintained fork — excluded from the root Variant-Exclusive catalog (W5 disposition)
 name: executive-presentation
 scope: co-consult
 description: >

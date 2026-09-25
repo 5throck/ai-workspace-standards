@@ -87,12 +87,12 @@ function planRootRegistry(root: string): SurfacePlan | null {
   const rootDelivered = collectDeliveredSkills(rootSkillsDir);
 
   const catalogScan = collectCatalogEntries(join(root, 'templates'), new Set(rootDirs));
-  const catalogSync = syncVariantExclusiveCatalog(catalog, catalogScan.entries, catalogScan.divergentSkills);
+  const catalogSync = syncVariantExclusiveCatalog(catalog, catalogScan.entries, catalogScan.divergentSkills, catalogScan.skippedSkills);
 
   const findings: RegistrySyncFinding[] = [
     ...collectRegistryDrift('skills/SKILLS.md (Workspace Skills)', workspace, rootDelivered, rootDirs),
     ...catalogScan.findings,
-    ...collectCatalogDrift('skills/SKILLS.md (Variant-Exclusive)', catalog, catalogScan.entries, catalogScan.divergentSkills),
+    ...collectCatalogDrift('skills/SKILLS.md (Variant-Exclusive)', catalog, catalogScan.entries, catalogScan.divergentSkills, catalogScan.skippedSkills),
   ];
 
   return {

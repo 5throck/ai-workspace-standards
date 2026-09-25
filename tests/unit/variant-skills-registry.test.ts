@@ -215,6 +215,10 @@ describe('W5 registry surfaces (skill-registry-sync)', () => {
       if (!variant.startsWith('co-')) continue;
       for (const dirName of skillDirs(variant)) {
         if (rootSkillNames.has(dirName)) continue;
+        // catalog-parity: skip forks are excluded from the catalog by design
+        // (W5 disposition — the per-variant registries document each copy).
+        const raw = readFileChecked(join(templatesDir, variant, 'skills', dirName, 'SKILL.md'));
+        if (/^catalog-parity:\s*skip\b/m.test(raw)) continue;
         if (!ownersBySkill.has(dirName)) ownersBySkill.set(dirName, new Set());
         ownersBySkill.get(dirName)!.add(variant);
       }

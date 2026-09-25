@@ -207,6 +207,6 @@ describe('live tree invariants (post-normalization)', () => {
       .filter((l) => l.startsWith('| `'))
       .map((l) => l.split('|')[1].trim().replace(/`/g, ''));
     expect(rowKeys).not.toContain('generate-scripts-mirror.ts');
-    expect(rowKeys).toHaveLength(128); // post-normalization invariant: rows == template .ts files
+    expect(rowKeys).toHaveLength(129); // post-normalization invariant: rows == template .ts files (129 since W5 delivered helpers/skills-registry.ts to L1)
   });
 });

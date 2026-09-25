@@ -83,6 +83,7 @@ function makeFixtureRoot(): string {
       '| `oldskill` | 0.9.0 | active | pm | 2025-01-01 | — | co-x only |',
       '| `ghost-catalog` | 0.9.0 | active | pm | 2025-01-01 | — | co-x only |',
       '| `epsilon` | 0.9.0 | active | pm | 2025-01-01 | — | co-x only |',
+      '| `zeta` | 0.9.0 | active | pm | 2025-01-01 | — | co-x only |',
       '',
     ].join('\n'),
   );
@@ -96,25 +97,28 @@ function makeFixtureRoot(): string {
   );
 
   // Variant co-x: gamma (stale row), oldskill (stale catalog row + own dir),
-  // delta (no row, identical twin in co-y), epsilon (divergent twin in co-y).
-  for (const skill of ['gamma', 'oldskill', 'delta', 'epsilon']) {
+  // delta (no row, identical twin in co-y), epsilon (divergent twin in co-y),
+  // zeta (marker-declared fork: divergent twin in co-y, catalog-parity: skip).
+  for (const skill of ['gamma', 'oldskill', 'delta', 'epsilon', 'zeta']) {
     mkdirSync(join(root, 'templates', 'co-x', 'skills', skill), { recursive: true });
   }
   writeFileSync(join(root, 'templates', 'co-x', 'skills', 'gamma', 'SKILL.md'), skillMd({ name: 'gamma', version: '1.3.0', lastReviewed: '2026-03-03' }));
   writeFileSync(join(root, 'templates', 'co-x', 'skills', 'oldskill', 'SKILL.md'), skillMd({ name: 'oldskill', version: '1.3.0', lastReviewed: '2026-03-03' }));
   writeFileSync(join(root, 'templates', 'co-x', 'skills', 'delta', 'SKILL.md'), skillMd({ name: 'delta', version: '1.0.0', lastReviewed: '2026-04-04' }));
   writeFileSync(join(root, 'templates', 'co-x', 'skills', 'epsilon', 'SKILL.md'), skillMd({ name: 'epsilon', version: '1.0.0', lastReviewed: '2026-05-05' }));
+  writeFileSync(join(root, 'templates', 'co-x', 'skills', 'zeta', 'SKILL.md'), skillMd({ name: 'zeta', version: '1.0.0', lastReviewed: '2026-05-05' }));
   writeFileSync(
     join(root, 'templates', 'co-x', 'skills', 'SKILLS.md'),
     [REGISTRY_HEADER, '| `gamma` | 1.2.0 | active | pm | 2025-01-01 | — | co-x only — stale |', ''].join('\n'),
   );
 
-  // Variant co-y: identical delta, divergent epsilon.
-  for (const skill of ['delta', 'epsilon']) {
+  // Variant co-y: identical delta, divergent epsilon, marker-declared zeta fork.
+  for (const skill of ['delta', 'epsilon', 'zeta']) {
     mkdirSync(join(root, 'templates', 'co-y', 'skills', skill), { recursive: true });
   }
   writeFileSync(join(root, 'templates', 'co-y', 'skills', 'delta', 'SKILL.md'), skillMd({ name: 'delta', version: '1.0.0', lastReviewed: '2026-04-04' }));
   writeFileSync(join(root, 'templates', 'co-y', 'skills', 'epsilon', 'SKILL.md'), skillMd({ name: 'epsilon', version: '2.0.0', lastReviewed: '2026-06-06' }));
+  writeFileSync(join(root, 'templates', 'co-y', 'skills', 'zeta', 'SKILL.md'), '---\ncatalog-parity: skip  # variant-maintained fork\nname: zeta\nversion: 9.9.9\nlast_reviewed: 2026-07-07\n---\n# zeta\n');
   writeFileSync(
     join(root, 'templates', 'co-y', 'skills', 'SKILLS.md'),
     [REGISTRY_HEADER, '| `delta` | 0.9.0 | active | pm | 2025-01-01 | — | co-y only — stale |', ''].join('\n'),
@@ -166,6 +170,7 @@ describe('skill-registry-sync helpers (W5)', () => {
       '| `oldskill` | 0.9.0 | active | pm | 2025-01-01 | — | co-x only |',
       '| `ghost-catalog` | 0.9.0 | active | pm | 2025-01-01 | — | co-x only |',
       '| `epsilon` | 0.9.0 | active | pm | 2025-01-01 | — | co-x only |',
+      '| `zeta` | 0.9.0 | active | pm | 2025-01-01 | — | co-x only |',
       '',
     ].join('\n');
     const entries = [
@@ -173,10 +178,10 @@ describe('skill-registry-sync helpers (W5)', () => {
       { skill: 'delta', version: '1.0.0', status: 'active', owner: 'pm', lastReviewed: '2026-04-04', variants: ['co-x', 'co-y'] },
       { skill: 'gamma', version: '1.3.0', status: 'active', owner: 'pm', lastReviewed: '2026-03-03', variants: ['co-x'] },
     ];
-    const { content, updated, added, pruned } = syncVariantExclusiveCatalog(catalog, entries, new Set(['epsilon']));
+    const { content, updated, added, pruned } = syncVariantExclusiveCatalog(catalog, entries, new Set(['epsilon']), new Set(['zeta']));
     expect(updated).toEqual(['oldskill']);
     expect(added).toEqual(['delta', 'gamma']);
-    expect(pruned).toEqual(['ghost-catalog']);
+    expect(pruned).toEqual(['ghost-catalog', 'zeta']);
     const rows = parseSkillRegistryRows(content).rows;
     expect(rows.get('oldskill')!.version).toBe('1.3.0');
     expect(rows.get('delta')!.notes).toBe('co-x, co-y');
@@ -184,6 +189,8 @@ describe('skill-registry-sync helpers (W5)', () => {
     // Divergent row kept byte-identical.
     expect(rows.get('epsilon')!.version).toBe('0.9.0');
     expect(content).toContain('| `epsilon` | 0.9.0 | active | pm | 2025-01-01 | — | co-x only |');
+    // Marker-declared fork row pruned from the catalog.
+    expect(rows.has('zeta')).toBe(false);
   });
 });
 
@@ -236,6 +243,8 @@ describe('skill-registry-sync CLI over a fixture root (W5)', () => {
     expect(catalogRows.has('ghost-catalog')).toBe(false);
     expect(catalogRows.get('delta')!.notes).toBe('co-x, co-y');
     expect(catalogRows.get('epsilon')!.version).toBe('0.9.0');
+    // Marker-declared fork (zeta) pruned from the catalog without a finding.
+    expect(catalogRows.has('zeta')).toBe(false);
 
     // Common seed refreshed.
     const commonRows = parseSkillRegistryRows(readRegistry(root, ['templates', 'common', 'skills', 'SKILLS.md'])).rows;
@@ -253,6 +262,7 @@ describe('skill-registry-sync CLI over a fixture root (W5)', () => {
     const { exitCode, stdout } = runCli(root, '--check');
     expect(exitCode).toBe(1);
     expect(stdout).toContain('catalog-divergent');
+    expect(stdout).not.toContain('`zeta`'); // marker-declared fork: no finding
     // `broken` keeps its row (fail-closed) and keeps being reported.
     expect(stdout).toContain('[unparseable]');
     expect(stdout).not.toContain('[version-drift]');
@@ -283,11 +293,23 @@ describe('skill-registry-sync CLI over a fixture root (W5)', () => {
 // ── Real-tree day-one state ──────────────────────────────────────────────────
 
 describe('real-tree registry sync state (W5)', () => {
-  test('the only remaining findings are the 7 known catalog-divergent skills', () => {
+  test('every registry surface is converged — zero findings after the fork disposition', () => {
     const findings = collectWorkspaceRegistryFindings(repoRoot);
-    const unexpected = findings.filter((f) => f.kind !== 'catalog-divergent');
-    expect(unexpected).toEqual([]);
-    const divergent = new Set(findings.map((f) => f.skill));
-    expect(divergent).toEqual(new Set(['competitive-intelligence', 'consulting-report-writing', 'executive-presentation', 'insight-synthesis', 'org-readiness-assessment', 'stakeholder-alignment', 'pdf-export']));
+    expect(findings).toEqual([]);
+  });
+
+  test('the 7 dispositioned forks carry catalog-parity: skip and have no catalog row', () => {
+    const forks = ['competitive-intelligence', 'consulting-report-writing', 'executive-presentation', 'insight-synthesis', 'org-readiness-assessment', 'stakeholder-alignment', 'pdf-export'];
+    const { catalog } = splitRootRegistry(readFileSync(join(repoRoot, 'skills', 'SKILLS.md'), 'utf-8'));
+    const rows = parseSkillRegistryRows(catalog).rows;
+    for (const skill of forks) {
+      expect(rows.has(skill)).toBe(false);
+      // Every owning copy declares the disposition in its frontmatter.
+      for (const variant of ['co-consult', 'co-price', 'co-hr', 'co-deck']) {
+        const p = join(repoRoot, 'templates', variant, 'skills', skill, 'SKILL.md');
+        if (!existsSync(p)) continue;
+        expect(readFileSync(p, 'utf-8')).toMatch(/^catalog-parity:\s*skip\b/m);
+      }
+    }
   });
 });
