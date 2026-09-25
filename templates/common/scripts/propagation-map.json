@@ -25,10 +25,10 @@
       "description": "Helper/utility scripts used by scaffolding",
       "source": "scripts/helpers",
       "target": "templates/common/scripts/helpers",
-      "include_pattern": "*.ts",
-      "recursive": false,
+      "include_pattern": "**/*.ts",
+      "recursive": true,
       "l2_drift_eligible": false,
-      "note": "No L2 variant has scripts/helpers/"
+      "note": "No L2 variant has scripts/helpers/. Recursive since W5 follow-up: helpers/registries/* delivers to L1 (audit.ts golden-reference chain); L0-only rows (plugins/*, registries/index) stay filtered by includeScriptInL1."
     },
     "scripts-lib": {
       "description": "Library/utility modules for scripts",
