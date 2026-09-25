@@ -9054,12 +9054,6 @@
     {
       "type": "cites_skill",
       "from": "doc:co-deck/AGENTS.md",
-      "to": "theme-authoring",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-deck/AGENTS.md",
       "to": "version",
       "source": "workflow-doc"
     },

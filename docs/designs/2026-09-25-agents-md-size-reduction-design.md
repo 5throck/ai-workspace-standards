@@ -101,3 +101,25 @@ Each wave lands as its own PR per the Sequential Branch Dependency Rule.
 - Duplication audit: `docs/analysis/2026-09-25-agents-md-duplication-audit.md` (F1–F8 findings feeding D3/D4/D5 and the new size-budget validator)
 - ADR-0088 + its Addendum 1 (truncation origin, config remedy); COMMON-AGENTS marker mechanism (AGENTS.md injection, `propagate-to-templates.ts`)
 - CONSTITUTION §6 (skill lifecycle), `docs/VERSION_MANIFEST.md` (skills SSOT), `variant.json` schema (roster SSOT)
+
+## 15. Addendum 2 — W3 sweep disposition record (2026-09-26)
+
+Mechanical sweep over 12 variants (co-abap EXCLUDED — under parallel restructure by its owning session): §3 subsections with ≥0.7 token overlap vs the L0 canonical thin §3 were dropped as drifted skeleton copies (canonical: docs/governance/agents/pm-gateway-workflow.md); non-matching subsections preserved verbatim in-place as the variant's override content inside §3. §4 → workflow pointer; §5 → execution-plan-templates pointer. Results (orig → current bytes, override blocks):
+
+| Variant | Before | After | Preserved override blocks |
+|---|---:|---:|---:|
+| co-consult | 45,300 | 22,635 | 2 |
+| co-deck | 55,288 | 24,705 | 3 |
+| co-design | 41,536 | 19,628 | 2 |
+| co-develop | 42,241 | 20,615 | 3 |
+| co-export | 53,325 | 28,801 | 2 |
+| co-game | 47,959 | 25,130 | 2 |
+| co-hr | 53,832 | 28,732 | 2 |
+| co-news | 46,195 | 23,445 | 2 |
+| co-price | 30,968 | unchanged (heading structure differs — §3/§4 named differently; needs its own editorial pass, tracked with W1b remainder) |
+| co-safety | 82,099 | 48,412 | 2 |
+| co-security | 39,628 | 18,626 | 2 |
+| co-work | 40,580 | 19,266 | 2 |
+
+Remaining over-budget driver: §1/§2 rosters (up to 14.8k in co-safety) — roster generation (D4) is the next tranche, deferred with W2 completion follow-ups. Budget remains WARN until every file fits.
+

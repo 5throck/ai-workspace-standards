@@ -153,113 +153,24 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 
 ## §3: PM Gateway Workflow
 
+**Thin-dispatcher section (ADR-0090)**: full phase protocol and ADR policy summaries → [`docs/governance/agents/pm-gateway-workflow.md`](docs/governance/agents/pm-gateway-workflow.md).
+
+### §3.6 3-Tier Strategy
+
+<!-- WORKSPACE-MANAGED: tier-model-mapping -->
+- **High-tier**: Complex reasoning, architectural design, planning (claude-opus-5-0 / gemini-3.1-pro / gpt-5.6-sol)
+- **Medium-tier**: Code review, testing, PR review, quality gates (claude-sonnet-5-0 / gemini-3.8-flash / gpt-5.6-terra)
+- **Low-tier**: Fast, repetitive coding, script maintenance (claude-haiku-4-5 / gemini-3.8-flash / gpt-5.6-luna)
+<!-- /WORKSPACE-MANAGED -->
+
+<!-- WORKSPACE-MANAGED: tier-model-mapping -->
+> **Note**: The `Model` column below shows the Claude Code short alias (`sonnet`/`opus`/`haiku`/`fable`) actually passed to the `Agent()` tool's `model` parameter — not the registry ID (e.g. `claude-sonnet-5-0`). See [CLAUDE.md §6](CLAUDE.md#6-native-sub-agents-agent-tool) for the registry-ID → alias translation table. On Gemini/Antigravity, use the literal model ID instead (see GEMINI.md's equivalent example).
+<!-- /WORKSPACE-MANAGED -->
+
+
+
+
 **Integrated from pm.md, CLAUDE.md §5, GEMINI.md §5**
-
-### §3.1 PM Gateway Policy
-
-**Single Point of Entry**: PM is the ONLY agent that users may directly invoke.
-All specialist agents require PM dispatch - enforced at 4 levels.
-
-#### §3.1.1 PM Direct Execution Scope
-
-PM is an escalation gateway, not an executor. **⚠️ CRITICAL**: PM MUST NOT perform Write/Edit on any file except `memory/*.md` and `CHANGELOG.md`. All file modifications MUST be dispatched to project specialists. See [PM Direct Execution Constraints](agents/pm.md#⚠️-critical-pm-direct-execution-constraints) in `agents/pm.md`.
-
-| Category | Tools | Scope |
-|----------|-------|-------|
-| Unconditional | Read, Glob, Grep, Agent, TaskCreate, TaskUpdate, AskUserQuestion, Skill, ToolSearch | Always allowed |
-| Conditional | Write, Edit | `memory/*.md` and `CHANGELOG.md` only |
-| Conditional | Bash | Read-only: `git status/diff/log`, `bun scripts/audit.ts`, `ls`, `cat` |
-| Forbidden | Write, Edit (all other paths) | Must delegate to project specialist |
-| Forbidden | Bash (write/execute patterns) | Must delegate to specialist |
-
-**Rationale**: PM is orchestrator, not executor. Direct execution violates governance separation of concerns. See [Role Clarification](agents/pm.md#⚠️-role-clarification) and [Task Tracking vs Execution](agents/pm.md#task-tracking-vs-execution) in `agents/pm.md`.
-
-When a specialist agent's required tool is denied, PM applies the [Permission Denial Protocol](#3.8-permission-denial-protocol) — never substitutes for the specialist.
-
-#### §3.1.2 PM Role Boundaries
-
-**What PM Does**:
-- Orchestrate multi-agent workflows
-- Create execution plans
-- Dispatch specialist agents
-- Enforce quality gates
-- Track progress
-
-**What PM Does NOT Do**:
-- Directly Edit/Write files (except `memory/*.md`, `CHANGELOG.md`)
-- Implement code or scripts
-- Perform documentation updates (delegate to `[docs specialist]`)
-- Perform design work (delegate to `[design specialist]`)
-
-**Task Owner vs Executor Distinction**:
-- **Task owner (PM)**: PM is accountable for task progress and final delivery
-- **Task executor (specialist)**: Agent who performs the actual work
-- PM creates tasks (owner: pm), dispatches project specialists (executor: `[specialist agent]`), and updates task status upon completion
-
-**User Communication for Specialist Tasks**:
-When work requires specialist delegation, PM uses the following template:
-```
-PM: 🔍 [Task Analysis] This task falls within the [specialist] domain of expertise.
-   Task: [description]
-   Specialist: [specialist name]
-   Reason: [why specialist needed]
-PM: Shall I dispatch [specialist]?
-User: "Yes"
-PM: ▶️ [specialist] dispatch...
-```
-
-**Co-deck Specific Exceptions**:
-For the `co-deck` 11-Stage pipeline:
-
-1. **Optional & Auto-Advance Gates/Stages**: For stages or tasks defined as optional or auto-advancing (e.g., Stage 1.5/Gate 1.5, Stage 3/Gate 3, Stage 4/Gate 4, Stage 5-8, Stage 9-10), the PM dispatches the specialist agent automatically *without* prompting the user for approval.
-2. **Double Hop & Internal Delegation**: Secondary/internal subagent dispatches (such as a read-only specialist agent spawning a writer subagent to write output) are considered implementation details and MUST NOT trigger any user confirmation prompt.
-3. **Gate 3.5 — Image Manifest (Mandatory when the deck uses images)**: Unlike the optional/auto-advance gates above, Gate 3.5 is a **hard gate**. After `image-curator` produces `image-manifest.json`, run `bun scripts/co-deck/validate-image-manifest.ts --workspace presentations/<project>`. The handoff to `html-build` is **BLOCKED** until it exits 0 (no duplicate `content_hash` ERRORs; aspect-ratio WARNs reviewed). Skipped only when the deck uses no images. See [agents/image-curator.md — Gate 3.5 Validation](agents/image-curator.md).
-4. **Gate Protocol**: Mandatory gates require explicit user approval; optional gates proceed after review.
-   - **Gate 2 (Mandatory)** — storyline.md + slide_deck.md ready: "⚠️ Approving starts design and HTML. Approve?"
-   - **Gate 5 (Mandatory)** — sample_5slides.pdf ready: "Check layout and fonts. Generate full PDF? Approve?"
-   - **Gate 1.5 (Optional)** — source-verification.md ready: Output Trust Score and proceed (halt only if Trust Score < 70% and source_verification is enabled).
-   - **Gate 3 (Optional)** — design_spec.md ready: Output theme/spec summary and proceed.
-   - **Gate 4 (Optional)** — HTML draft built: Output built file details and proceed.
-5. **Theme × Style compatibility**: Before confirming `presentation.theme` and `presentation.style` at Stage 0, check `docs/html-themes/THEMES.md` compatibility matrix. Reject incompatible combinations and explain why — the compatibility matrix in THEMES.md is the SSOT.
-6. **Stage 1.5 auto-dispatch**: After Stage 1 completes, ALWAYS read `source_verification` from the project's `lecture-profile.md`. If `true` (the default), auto-dispatch source-verifier immediately without prompting the user.
-7. **Gate 1.5 Trust Score threshold**: Once source-verification.md is ready, evaluate Trust Score against `trust_score_thresholds` in `variant.json`. Halt only if Trust Score < 70% — otherwise proceed automatically.
-8. **Stage 1 Write-Permissions**: Configure the Stage 1 Research Agent with write permissions (`enable_write_tools: true` or as `self`) so it can output research notes without requiring double-hop prompts.
-9. **TypeScript first**: Use `bun scripts/co-deck/` TypeScript scripts for all automated operations. Python is only permitted when the task cannot be accomplished in TypeScript.
-
-See [agents/pm.md](agents/pm.md) for common PM role definition and delegation protocols.
-
-#### §3.1.3 Enforcement Layers
-1. **Tool-Level**: Agent tool rejects non-PM specialist calls (hard enforcement)
-2. **System Prompt-Level**: CLAUDE.md/GEMINI.md rules loaded first
-3. **Agent File-Level**: All specialists have "PM-ONLY INVOCATION" section
-4. **QA Gate-Level**: Auditor detects bypass in Phase 6 QA
-
-#### §3.1.4 Specialist Agent Dispatch Flow
-```
-User Request → PM Triage → Design Approval → Specialist Dispatch → QA Gate → Finalization
-```
-
-#### §3.1.5 Specialist Agent Roster (PM-ONLY INVOCATION)
-
-All specialist agents below are dispatched ONLY through PM:
-
-<!-- VARIANT-DISPATCH-TRIGGERS-START -->
-| `design` | Phase 3 | "lock design style", "pick colors and fonts", "create design_spec.md" |
-| `html-build` | Phase 4 | "generate HTML slides", "build presentation", "create lecture HTML" |
-| `image-curator` | Phase 3.5 | "find images for slides", "download slide images", "search Pixabay", "curate images" |
-| `diagram-specialist` | Phase 3.5 | "generate diagrams", "create chart", "draw flow diagram", "visualize data", "SVG diagram" |
-| `measure` | Phase 4 | "prep for PDF", "validate spec merge", "check fonts" |
-| `pdf-export` | Phase 4, Phase 5 | "generate PDF", "export to PDF", "create sample PDF" |
-| `research` | Phase 1 | "research the topic", "collect sources", "write research notes" |
-| `source-verifier` | Phase 1.5 | "verify sources", "check URLs", "validate research links", "run source check" |
-| `storyline` | Phase 2, Phase 3 | "create storyline", "compose slide deck", "structure chapters" |
-| `version` | Phase 0–6 | "snapshot before edit", "backup file", "restore prior version" |
-| `handbook-writer` | H-2, H-3, H-4 | "write handbook chapters", "create course overview", "generate instructor guide" |
-| `handbook-reviewer` | H-5 | "validate handbook", "run quality checks", "check authoring compliance" |
-<!-- VARIANT-DISPATCH-TRIGGERS-END -->
-**⚠️ IMPORTANT**: Do NOT invoke any specialist agent directly. All requests must go through PM.
-
-> **Execution Plan Format**: For mandatory criteria, boilerplate table, and rules, see [AGENTS.md §5](AGENTS.md#5-execution-plan-templates). For platform-specific dispatch instructions, see `CLAUDE.md §5` or `GEMINI.md §5`.
 
 ### §3.5 Phase Determination (Deliverable-Type Gate)
 
@@ -322,26 +233,6 @@ For complete H-Stage spec, see `skills/handbook/SKILL.md`.
 > **Execution Plan Boilerplate Policy**: For mandatory and discretionary boilerplate cases, see [§3 (PM Gateway Workflow)](AGENTS.md#3-pm-gateway-workflow) above.
 
 
-### §3.6 3-Tier Strategy
-
-When leading execution and improvement tasks, PM MUST use the 3-Tier model strategy:
-
-<!-- WORKSPACE-MANAGED: tier-model-mapping -->
-- **High-tier**: Complex reasoning, architectural design, planning (claude-opus-5-0 / gemini-3.1-pro / gpt-5.6-sol)
-- **Medium-tier**: Code review, testing, PR review, quality gates (claude-sonnet-5-0 / gemini-3.8-flash / gpt-5.6-terra)
-- **Low-tier**: Fast, repetitive coding, script maintenance (claude-haiku-4-5 / gemini-3.8-flash / gpt-5.6-luna)
-<!-- /WORKSPACE-MANAGED -->
-
-### §3.7 Meeting Facilitation
-
-When `/meeting` is invoked, the PM orchestrates structured multi-agent discussions.
-
-**Meeting Process**:
-1. **Open meeting**: Set agenda and objectives
-2. **Facilitate dialogue**: Ensure all specialists contribute
-3. **Synthesize outcomes**: Cross-domain agent synthesizes agreements
-4. **Document results**: Write transcript to `memory/meeting-YYYY-MM-DD-[slug].md`
-
 ### §3.8 Permission Denial Protocol
 
 When a specialist agent's required tool is denied, PM must **not** substitute for the specialist. Instead:
@@ -352,6 +243,10 @@ When a specialist agent's required tool is denied, PM must **not** substitute fo
 4. Halt the blocked task — do not proceed without the required tool
 
 ---
+
+
+---
+
 
 <!-- COMMON-AGENTS:START -->
 ## Language Policy
@@ -423,259 +318,13 @@ Development-facing instruction text — requirement statements, task briefs, exe
 PM owns team composition and skill-change rulings. Hiring and firing: PM decides timing and target from workflow signals — recurring unmatched work types, role overload, absorbed roles, the quarterly roster review — and records every decision (ADR-0061 decision record + memory log) before dispatch; the default exit for a fired agent is `status: deprecated`, and hard delete requires an explicit user request. Skill requests: agents file structured `create|attach|remove` request blocks with evidence in their task reports and memory logs; PM triages them and only approved requests are executed — agents never create, attach, or remove skills unilaterally. Procedures: `agent-lifecycle-manager` and `skill-lifecycle-manager` skills. Full decision: ADR-0080 in the workspace root `docs/adr/`.
 <!-- COMMON-AGENTS:END -->
 
----
-
 ## §4: Other Workflows
 
-### §4.1 PM Subagent Dispatch Protocol
-
-The PM agent follows a three-level inheritance model: **L0 (workspace root)** → **L1 (common template)** → **L2 (variant templates)**.
-
-> **For PM Agent Architecture**: See [docs/context.md](docs/context.md) for complete governance workflow, L0→L1→L2 extends chain resolution, and variant-specific configuration.
-> ℹ️ In-template navigation: `docs/context.md` materializes at scaffold time. The variant-authored context in this template is `docs/co-deck.context.md`.
-
-#### Dispatch Decision
-
-```
-Request received
-  │
-  ├─▶ Read-only? (research, analysis, inspect)
-  │   └─▶ PARALLEL - dispatch multiple agents in a single message
-  │
-  └─▶ Write? (create/edit files, run tests)
-       └─▶ SERIAL - one agent at a time to prevent file lock conflicts
-```
-
-> **Why serial writes?** Concurrent writes to the same files cause merge conflicts and lock contention.
-> Always wait for a write agent to complete before dispatching the next.
-
-#### Cost Optimization (3-Tier Strategy)
-
-The PM uses a 3-tier model strategy to optimize cost and quality:
-
-- **High-tier (Design/Plan)**: Used by the architect and High-tier design specialists for complex reasoning, architectural design, and writing precise sub-agent prompts.
-- **Medium-tier (Review/QA)**: Used by Auditor or Security agents to review code, run tests, and perform quality gates. Acts as an independent supervisor.
-- **Low-tier (Coding/Execute)**: Used by Automation Engineer agents for fast typing, simple repetitive coding, or strictly scoped tasks.
-
-**Tier Adjustment Rules:**
-- The PM can dynamically downgrade an agent's Tier for simple tasks (Assigned <= Baseline) to save costs.
-- The PM can NEVER upgrade a Tier above the baseline.
-- If a downgraded task fails, the PM MUST restore the agent's baseline Tier for the retry.
-
-> **Note on 3-Tier Strategy Models:**
-> The exact model configurations and prompt arguments (e.g. `thinking_level`) are explicitly managed within the workspace configuration files (`CLAUDE.md` and `GEMINI.md`). Please refer to those files for your specific tool's exact AI model mappings and tier strategies.
-
-The PM agent delegates execution to the Low-tier and delegates review to the Medium-tier before finalizing.
-
-#### Dispatch Rules
-
-1. **Autonomous Agent Handoffs** - Agents can dispatch each other directly via JSON contracts without PM intervention for routine workflows
-2. **PM Orchestration Phases** - PM only orchestrates Phases 0 (Team Assembly), 2 (Design Validation), and 5 (Lifecycle Finalization)
-3. **QA Gate** - PM executes qa scripts at Phase 6 (bun scripts/qa-gate.ts)
-4. **Parallel Agent Dispatch** - all parallel agents must be dispatched in one turn for research/analysis phases
-5. **Error handling** - if any parallel agent fails, responsible agent resolves failure before proceeding. Do not skip.
-6. **Max QA iterations** - 2 per review cycle before escalating to PM for intervention
-
-#### Subagent Roster
-
-| Agent | File | Tier | Parallelizable | Write Allowed? |
-|-------|------|------|:--------------:|:--------------:|
-| PM Orchestrator | `agents/pm.md` | Medium | - | orchestrates only |
-
-<!-- VARIANT-SUBAGENT-ROSTER-START -->
-| design | `agents/design.md` | Medium | ⚠️ sequential preferred | project files |
-| html-build | `agents/html-build.md` | Low | ⚠️ sequential preferred | project files |
-| image-curator | `agents/image-curator.md` | Low | ✅ parallel with diagram-specialist | project files |
-| diagram-specialist | `agents/diagram-specialist.md` | Medium | ✅ parallel with image-curator | project files |
-| measure | `agents/measure.md` | Low | ⚠️ sequential preferred | project files |
-| pdf-export | `agents/pdf-export.md` | Low | ⚠️ sequential preferred | project files |
-| research | `agents/research.md` | Medium | ⚠️ sequential preferred | project files |
-| source-verifier | `agents/source-verifier.md` | Medium | ⚠️ sequential preferred | project files |
-| storyline | `agents/storyline.md` | Medium | ⚠️ sequential preferred | project files |
-| version | `agents/version.md` | Low | ✅ | project files |
-| handbook-writer | `agents/handbook-writer.md` | Medium | ⚠️ sequential preferred | project files |
-| handbook-reviewer | `agents/handbook-reviewer.md` | Medium | ⚠️ sequential preferred | project files |
-<!-- VARIANT-SUBAGENT-ROSTER-END -->
-
-> **Agent frontmatter specification**: All agent files must include YAML frontmatter as defined in [docs/context.md](docs/context.md).
-
----
-
-### 4.1.5 Phase Summary
-
-> **Note**: The "Phase" column in this table tracks the 11-stage **pipeline STAGE numbers** referenced in each agent's body text (e.g. design.md: "You own Stage 4"). It is NOT the same as the `phases:` frontmatter field on each agent file, which is a separate, coarser grouping used for dispatch/role-boundary bookkeeping (e.g. design.md declares `phases: [3]`). Do not conflate the two when cross-referencing agent files against this table.
-
-| Phase | Name | PM Role | Specialist Agents |
-|-------|------|---------|-------------------|
-| 0 | Project Initiation | Owner — reads lecture-profile.md, initializes project_state.json | — |
-| 1 | Research | Direct handoff (Gate 1 retired) | `research` |
-| 1.5 | Source Verification | Gate 1.5 reviewer — checks Trust Score, configured at Stage 0 | `source-verifier` (optional) |
-| 2-3 | Storyline | Gate 2 approver — reviews storyline.md and slide_deck.md | `storyline` |
-| 3.5 | Image Curation + Diagram Generation | Observer — reviews image-manifest.json + diagram-manifest.json | `image-curator` ‖ `diagram-specialist` (both optional, run parallel) |
-| 4 | Design | Gate 3 reviewer — optional design spec review | `design` |
-| 5-8 | HTML Build | Gate 4 reviewer — optional HTML preview before measure | `html-build` |
-| 9-10 | PDF Prep | Observer — reviews layout_summary.md | `measure` |
-| 11 | PDF Export | Gate 5 approver — reviews sample PDF before full PDF | `pdf-export` |
-
-> Gates 2, 5 are **mandatory** — PM must obtain explicit user approval before advancing.
-> Gates 1.5, 3, 4 are **optional** — PM may auto-advance or prompt user (Gate 1 is retired).
-
-### §4.2 Co-deck 11-Stage Pipeline
-
-```
-[0] Config (mandatory) → [1] Research → [1.5] Source Verifier (if source_verification: true) → [2-3] Content → [4] Design → [5-8] Build → [9-10] Measure → [11] Export
-                              ↑
-                         [Version] — called before every file edit
-```
-
-**Mandatory approval gates**: Gate 2 (content), Gate 5 (sample PDF).
-*(Gate 1 is retired. Gate 1.5, Gate 3, and Gate 4 are optional / non-blocking review-then-proceed gates.)*
-
-#### Gate Protocol
-
-On reaching a gate, PM outputs a structured summary and waits for explicit user approval (for mandatory gates) or proceeds after review:
-
-- **Gate 1.5 (Optional)** — source-verification.md ready: Output Trust Score and proceed (halt only if Trust Score < 70% and source_verification is enabled).
-- **Gate 2 (Mandatory)** — storyline.md + slide_deck.md ready: "⚠️ Approving starts design and HTML. Approve?"
-- **Gate 3 (Optional)** — design_spec.md ready: Output theme/spec summary and proceed.
-- **Gate 4 (Optional)** — HTML draft built: Output built file details and proceed.
-- **Gate 5 (Mandatory)** — sample_5slides.pdf ready: "Check layout and fonts. Generate full PDF? Approve?"
-
-#### Project State
-
-PM reads and writes `presentations/<lecture>/project_state.json`. Every step has `status` (pending / in_progress / completed) and `approved` (bool). Always update immediately after each step.
-
-#### Rework Rules
-
-When the user requests an edit:
-1. Report downstream impact (which stages need re-run)
-2. Call Version Agent before any file changes
-3. Dispatch the appropriate agent with minimum re-execution scope
-4. Reset downstream steps to "pending" in project_state.json
-5. Skip Measure (Stage 9-10) if layout structure is unchanged
-
-#### Stage 0 — New Project Start (MANDATORY, never skip)
-
-1. Copy the master `docs/lecture-profile.md` to `presentations/<name>/lecture-profile.md`.
-2. Prompt the user to fill in lecture-specific details (title, audience, level, keywords) in the local profile.
-3. **Ask the user to explicitly confirm all settings** (do NOT proceed to Stage 1 until answered):
-   - **Rendering theme** (`presentation.theme`) — HTML structure; read available themes from `docs/html-themes/THEMES.md` registry
-   - **Visual style** (`presentation.style`) — CSS variable set; read available styles from `docs/html-themes/THEMES.md` registry; check the compatibility matrix before accepting
-   - **Source Verification** (`source_verification`: default is `true` — ask user to confirm or disable)
-   - **Divider mode** (`dividers.mode`: `auto` (recommended) | `manual` | `none`)
-   - **Background image** (`background_image.enabled`: `false` (default) | `true`) — if enabled, ask scope (`all` | `divider-cover` | `individual`), source (`download` | `svg`), and overlay preferences; writes to `background_image` section in `lecture-profile.md`
-4. **Check `layout_overrides`**: Read the local `lecture-profile.md` — if `layout_overrides` is present and any value differs from the theme's `theme.json` defaults, warn the user before proceeding:
-   > ⚠️ This project has layout overrides that differ from the global `<theme>` theme defaults:
-   > - `<key>`: `<override_value>` (default: `<theme_default>`)
-   > These will apply to HTML rendering and PDF generation. Continue?
-5. Save the confirmed values to the local `lecture-profile.md`, then initialize `project_state.json` and `memory/keywords.md`.
-6. Dispatch the Research Agent to start Stage 1 (loading the local profile). To prevent double-hop permission prompts and permission errors, configure the Research Agent with write permissions (`enable_write_tools: true` or invoke as a `self` subagent) so it can write research results directly.
-
-#### T-Stage Pipeline (Theme/Style Authoring)
-
-When user requests **"create a new theme"** or **"create a new style"**, enter the T-Stage pipeline instead of the 11-Stage pipeline:
-
-**Style Workflow** (lightweight, 3 steps):
-1. PM collects style name + visual characteristics from user
-2. PM dispatches Design to author `styles/<name>/style.css` (CSS variable overrides only)
-3. PM provides preview link: `docs/html-themes/preview/preview.html?theme=pitch-enhanced&style=<name>` → user approval → register in THEMES.md
-
-**Theme Workflow** (T-Stage, 5 steps):
-```
-T-0: PM — collect theme name + rendering paradigm from user
-T-1: html-build — author template.html (renderSlide, TOC/nav structure)
-T-2: design — author theme.json (content_rules, compatible_styles, recommended_structure)
-T-3: storyline — review content_rules + author recommended_structure
-T-4: PM — provide preview link → user approval → THEMES.md registration
-```
-
-For complete T-Stage spec, see `skills/theme-authoring/SKILL.md`.
-
----
-
-### §4.3 Role Boundary Matrix
-
-Use this to resolve ambiguity when multiple agents could handle a request.
-
-| Scenario | Use | Do NOT use |
-|----------|-----|------------|
-| Orchestrate multi-step task across agents | `pm` | any execution agent |
-
-<!-- VARIANT-ROLE-BOUNDARY-START -->
-| Create or update design_spec.md (colors, fonts, layout) | `design` | `pm` |
-| Generate or update lecture_vN.html from slide_deck.md | `html-build` | `pm` |
-| Search and download images (Pixabay/Unsplash/Pexels) for slides | `image-curator` | `pm` |
-| Generate SVG concept diagrams or data charts from visual_spec | `diagram-specialist` | `pm` |
-| Validate 4-layer spec merge or check/download TTF fonts for PDF prep | `measure` | `pm` |
-| Generate sample PDF or full PDF output | `pdf-export` | `pm` |
-| Search web and write research_notes.md | `research` | `pm` |
-| Validate URLs and cross-check research sources | `source-verifier` | `pm` |
-| Write or revise storyline.md or slide_deck.md | `storyline` | `pm` |
-| Snapshot any lecture file before editing | `version` | `pm` |
-| Write handbook chapters, course overview, or instructor guide | `handbook-writer` | `pm` |
-| Run handbook validation scripts and apply fixes | `handbook-reviewer` | `pm` |
-<!-- VARIANT-ROLE-BOUNDARY-END -->
-
----
+**Thin-dispatcher section (ADR-0090)**: dispatch protocol, role boundary matrix, and schedules → [`docs/governance/agents/workflows.md`](docs/governance/agents/workflows.md).
 
 ## §5: Execution Plan Templates
 
-### §5.1 Standard Execution Plan Template
-
-| # | Task | Agent | Tier | Model |
-|---|------|-------|------|-------|
-| 1 | [task description] | [specialist] | High/Medium/Low | [model] |
-| N | `/sync "type(scope): message"` — lifecycle + audit + commit + push + PR | pm | Medium | [model] |
-
-**Execution Order**: [Parallel | Sequential]
-
-**Key points**:
-- Tier column is MANDATORY (High/Medium/Low)
-- End every plan with the `/sync` row — it covers lifecycle update, audit, commit, push, and PR
-- State parallel vs sequential order below the table
-- "pm (direct)" is FORBIDDEN - PM never executes directly
-
-### §5.2 Platform Parity Considerations
-
-When modifying files that affect both CLAUDE.md and GEMINI.md:
-
-| # | Task | Agent | Tier | Model | Platform |
-|---|------|-------|------|---------|----------|
-| 1 | [task] | [specialist] | [tier] | [model] | Both |
-| N | `/sync "type(scope): message"` — lifecycle + audit + commit + push + PR | pm | Medium | [model] | Both |
-
-**Platform Column**: `Claude` / `Antigravity` / `Both` / `L0-only`
-
-**Note**: See execution plan boilerplate in CLAUDE.md §5, GEMINI.md §5, and agents/pm.md for the Platform column definition.
-
-### §5.3 Example Execution Plans
-
-#### Example 1: Multi-Agent Platform Parity Update
-
-<!-- WORKSPACE-MANAGED: tier-model-mapping -->
-> **Note**: The `Model` column below shows the Claude Code short alias (`sonnet`/`opus`/`haiku`/`fable`) actually passed to the `Agent()` tool's `model` parameter — not the registry ID (e.g. `claude-sonnet-5-0`). See [CLAUDE.md §6](CLAUDE.md#6-native-sub-agents-agent-tool) for the registry-ID → alias translation table. On Gemini/Antigravity, use the literal model ID instead (see GEMINI.md's equivalent example).
-<!-- /WORKSPACE-MANAGED -->
-
-| # | Task | Agent | Tier | Model |
-|---|------|-------|------|-------|
-| 1 | Update agents/pm.md | `[docs specialist]` | Medium | sonnet |
-| 2 | Update scripts/audit.ts | `[implementation specialist]` | Low | haiku |
-| 3 | Update CLAUDE.md §5 | `[docs specialist]` | Medium | sonnet |
-| 4 | Update GEMINI.md §5 | `[docs specialist]` | Medium | sonnet |
-| 5 | `/sync "type(scope): message"` — lifecycle + audit + commit + push + PR | pm | Medium | sonnet |
-
-**Execution Order**: Sequential (platform parity requires CLAUDE.md and GEMINI.md updates together)
-
-#### Example 2: Single Specialist Task
-
-| # | Task | Agent | Tier | Model |
-|---|------|-------|------|-------|
-| 1 | Update project README introduction | `[docs specialist]` | Medium | sonnet |
-| 2 | `/sync "type(scope): message"` — lifecycle + audit + commit + push + PR | pm | Medium | sonnet |
-
-**Execution Order**: Sequential
-
----
+**Thin-dispatcher section (ADR-0090)**: governed by [`docs/governance/agents/execution-plan-templates.md`](docs/governance/agents/execution-plan-templates.md) — Read before writing any execution plan.
 
 ## §6: Skills
 
