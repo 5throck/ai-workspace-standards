@@ -534,6 +534,9 @@ Operational procedures for maintaining workspace health and lifecycle hygiene. *
 
 ### 10. Terminology → Canonical Definitions
 
+- **Load contract**: the binding first-screen obligation in an index-style file (e.g. AGENTS.md under ADR-0090) requiring an agent to Read the owning reference file before executing the workflow it governs. Citing a rule without reading its owning file is a process violation.
+- **Pointer table**: the first-screen table of a thin-dispatcher file mapping task needs to their owning reference files; targets must exist at the consuming layer (pointer-integrity check).
+
 The following terms have precise meanings across all workspace tools, agents, and documentation. Use these exact terms — do not substitute synonyms.
 
 #### Template Variant

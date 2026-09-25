@@ -1,7 +1,17 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.45.0
+ * @version 1.46.0
+ *
+ * v1.46.0 (2026-09-26, ADR-0090 W0): two WARN-stage arms precede the AGENTS.md
+ *         thin-dispatcher restructure — `agents-md-size-budget` (every
+ *         AGENTS.md ≤15,000 chars at L0/L1/L2; FAIL promotion at W4 per
+ *         docs/designs/2026-09-25-agents-md-size-reduction-design.md) and
+ *         `agents-md-pointer-integrity` (markdown references to
+ *         docs/governance/*.md, docs/constitution/*.md and the layer's
+ *         context.md must resolve on disk; multi-base resolution: workspace
+ *         root, templates/common, layer dir). Vacuous until W1 populates
+ *         pointers — by design (C: validators precede restructuring).
  * v1.44.0 → v1.45.0 (2026-09-25, registry & platform-policy completeness batch
  *          — spec docs/designs/2026-09-25-registry-policy-completeness-design.md,
  *          W5/R5.6): new VA-08 skill-registry-sync check — one cross-surface
@@ -5424,6 +5434,80 @@ function main(): number {
     checkUserGuidePair(variant);                                 // WS-11
   }
 
+
+// ── ADR-0090 W0: AGENTS.md thin-dispatcher precursor arms (WARN until W4 promotion) ──
+
+const AGENTS_MD_SIZE_BUDGET = 15_000;
+
+/** Size budget: every AGENTS.md at L0/L1/L2 must fit the thin-dispatcher budget. */
+function checkAgentsMdSizeBudget(): void {
+  if (!JSON_MODE) console.log('\n=== Check agents-md-size-budget: AGENTS.md ≤15,000 chars at every layer (ADR-0090) ===');
+  const targets: Array<{ variant: string; path: string }> = [
+    { variant: 'common', path: join(ROOT, 'AGENTS.md') },
+    { variant: 'common', path: join(TEMPLATES_DIR, 'common', 'AGENTS.md') },
+  ];
+  if (existsSync(TEMPLATES_DIR)) {
+    for (const entry of readdirSync(TEMPLATES_DIR, { withFileTypes: true })) {
+      if (entry.isDirectory() && entry.name.startsWith('co-')) {
+        targets.push({ variant: entry.name, path: join(TEMPLATES_DIR, entry.name, 'AGENTS.md') });
+      }
+    }
+  }
+  for (const t of targets) {
+    if (!existsSync(t.path)) continue;
+    const size = readFileSync(t.path, 'utf-8').length;
+    if (size > AGENTS_MD_SIZE_BUDGET) {
+      warn(t.variant, 'agents-md-size-budget',
+        `${t.path}: ${size.toLocaleString()} chars exceeds the 15,000-char thin-dispatcher budget (ADR-0090) — restructure per docs/designs/2026-09-25-agents-md-size-reduction-design.md`,
+        `Move section bodies to docs/governance/*.md (or the layer's context.md) and keep the pointer table`);
+    } else {
+      pass(`${t.path}: ${size.toLocaleString()} chars (within budget)`);
+    }
+  }
+}
+
+/** Pointer integrity: docs/governance|docs/constitution markdown references in any AGENTS.md must resolve on disk. */
+function checkAgentsMdPointerIntegrity(): void {
+  if (!JSON_MODE) console.log('\n=== Check agents-md-pointer-integrity: AGENTS.md reference pointers resolve (ADR-0090) ===');
+  const targets: Array<{ variant: string; path: string; base: string }> = [
+    { variant: 'common', path: join(ROOT, 'AGENTS.md'), base: ROOT },
+    { variant: 'common', path: join(TEMPLATES_DIR, 'common', 'AGENTS.md'), base: join(TEMPLATES_DIR, 'common') },
+  ];
+  if (existsSync(TEMPLATES_DIR)) {
+    for (const entry of readdirSync(TEMPLATES_DIR, { withFileTypes: true })) {
+      if (entry.isDirectory() && entry.name.startsWith('co-')) {
+        targets.push({ variant: entry.name, path: join(TEMPLATES_DIR, entry.name, 'AGENTS.md'), base: join(TEMPLATES_DIR, entry.name) });
+      }
+    }
+  }
+  let checked = 0;
+  const candidateBases = (base: string): string[] => [ROOT, TEMPLATES_DIR ? join(TEMPLATES_DIR, 'common') : '', base].filter(Boolean);
+  for (const t of targets) {
+    if (!existsSync(t.path)) continue;
+    const refs = [...readFileSync(t.path, 'utf-8').matchAll(/\]\((docs\/(?:governance|constitution)\/[^)`]+)\)/g)].map(m => m[1]);
+    for (const ref of refs) {
+      checked++;
+      const resolvedSomewhere = candidateBases(t.base).some(b => existsSync(join(b, ref)));
+      if (!resolvedSomewhere) {
+        if (ref.startsWith('docs/constitution/')) {
+          warn(t.variant, 'agents-md-pointer-integrity',
+            `${t.path} references '${ref}' — resolves only post-scaffold (constitution docs are delivered at project creation)`,
+            `Verify the file exists in templates delivery; if permanently absent, fix the pointer`);
+        } else {
+          fail(t.variant, 'agents-md-pointer-integrity',
+            `${t.path} references '${ref}' but it does not exist at the workspace root, templates/common, or ${t.base}`,
+            `Create the referenced governance file or fix the pointer`);
+        }
+      }
+    }
+  }
+  if (checked === 0) {
+    pass('agents-md-pointer-integrity: no pointer tables yet (populated at W1) — vacuous pass');
+  } else {
+    pass(`agents-md-pointer-integrity: ${checked} pointer reference(s) resolve`);
+  }
+}
+
   checkVariantIndexCoverage(manifests);                          // WS-12
   checkMirrorHygiene();                                          // R6: mirrors carry only skill dirs (spec 2026-09-25-verifier-platform-expansion-design)
 
@@ -5442,6 +5526,8 @@ function main(): number {
   checkPmExtendsStubBodies();                                    // T-20260915-010: variant pm.md extends-stub bodies
   checkVariantReadinessGate();   // VRG-01: continuous Variant Readiness Gate enforcement
   checkProjectIdentityPlaceholders(); // fleet WARN: Projects/*/docs identity placeholders (spec 2026-09-24-scaffold-identity-overview-design)
+  checkAgentsMdSizeBudget();          // ADR-0090 W0: thin-dispatcher ≤15k budget (WARN; FAIL promotion at W4)
+  checkAgentsMdPointerIntegrity();    // ADR-0090 W0: pointer-table references resolve on disk
 
   // B-07: Sync validated variant info back to VERSION_REGISTRY.json
   if (!JSON_MODE) console.log('\n=== B-07: VERSION_REGISTRY.json sync ===');

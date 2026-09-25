@@ -1263,6 +1263,16 @@ export function applyGovernanceTransforms(content: string, filename: string, tar
       `<!-- VARIANT-AGENT-DETAILS-END -->`;
     content = content.replace(s2Pattern, s2Replacement);
 
+    // B-AGENTS die-guard (ADR-0090 W0): if the §1/§2 structural anchors ever fail to
+    // match (post-restructure heading drift), the placeholder zones above silently
+    // vanish and regenerate-agents-md breaks downstream. Fail loud instead.
+    for (const marker of ['VARIANT-AGENTS-START', 'VARIANT-AGENT-DETAILS-START']) {
+      if (!content.includes(marker)) {
+        die(`Phase B-AGENTS: structural anchor failed — '${marker}' not inserted into AGENTS.md. ` +
+            `The §1/§2 heading pattern no longer matches the workspace source; update the B-A1/B-A2 patterns.`);
+      }
+    }
+
     // B-A3. Remove workspace-only agent rows from §3 3-tier dispatch table
     //       (lifecycle-manager, auditor are L0-only; variants route these phases through PM).
     content = content.replace(/^\| \*\*lifecycle-manager\*\*[^\n]*\n/mg, '');
