@@ -279,6 +279,16 @@
       "l2_drift_eligible": false,
       "exclude": [],
       "note": "Same B-03/mirror:false exclusions as the other platform mirrors (enforced in sync-skills.ts); L2 variant mirrors come from sync-skills --all-variants over each variant's own skills/ SSOT"
+    },
+    "agents-governance-docs": {
+      "description": "L0 docs/governance/agents/*.md → L1 templates/common/docs/governance/agents/ — the thin AGENTS.md pointer-table targets (ADR-0090). Bounded exception to the ADR-0069 docs-domain disablement.",
+      "source": "docs/governance/agents",
+      "target": "templates/common/docs/governance/agents",
+      "include_pattern": "*.md",
+      "recursive": false,
+      "l2_drift_eligible": false,
+      "exclude": [],
+      "note": "Narrow, explicitly-enumerated exception to ADR-0069 (docs domain disabled 2026-07-08): exactly the three AGENTS.md pointer-table targets. Added by ADR-0090 W2."
     }
   }
 }
