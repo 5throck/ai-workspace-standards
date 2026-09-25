@@ -7,12 +7,27 @@ title: >-
   co-safety 60 incl. inherited/common split, co-work 1) —
   inventory-decisions-batch D6 backlog
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-24T22:52:11.417Z'
 history:
   - at: '2026-09-24T22:52:11.417Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-25T12:22:57.736Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-25T12:22:57.750Z'
+    from: waiting
+    to: review
+  - at: '2026-09-25T12:23:13.230Z'
+    from: review
+    to: done
+result: >-
+  Verified complete: all 13 variant SKILLS.md registries carry parseable pipe
+  rows with counts matching this ticket's own inventory (co-abap 13, co-export
+  11, co-hr 12, co-news 6, co-price 22, co-safety 60, co-work 1); the authoring
+  landed via the registry-policy-completeness batch after this ticket was filed.
+  bun scripts/sync-skill-registries.ts --check reports all surfaces converged (0
+  findings). No further work.
 error: null
