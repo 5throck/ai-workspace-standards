@@ -1,5 +1,12 @@
 #!/usr/bin/env bun
-// @version 1.49.0
+// @version 1.50.0
+// v1.50.0 (2026-09-25, Design Gate delivery repair — spec
+//          docs/designs/2026-09-25-registry-policy-completeness-design.md W5
+//          follow-up): SYNC_IF_NEWER scripts/ walk is fully recursive — the
+//          flat one-level walk could not reach helpers/registries/*, so
+//          golden-reference-loader's transitive imports shipped broken in
+//          every project upgrade and the project-side Design Gate spec-check
+//          crashed on import.
 // v1.49.0 (2026-09-25, T-20260924-003 — spec
 //          docs/designs/2026-09-25-inventory-decisions-batch-design.md R2.4):
 //          the agents/ SYNC pass skips template files whose frontmatter
@@ -1574,45 +1581,65 @@ console.log('--- SYNC_IF_NEWER: scripts/ ---');
 const CORE_LOCKED_SCRIPTS = ['scripts/dev-sync.ts', 'scripts/audit.ts'];
 
 // G11: Auto-discover script subdirectories from template instead of hardcoding.
+// v1.50.0 (Design Gate delivery repair, spec docs/designs/2026-09-25-registry-policy-completeness-design.md
+// W5 follow-up): the walk is now fully recursive — the flat one-level walk could
+// not reach second-level template dirs (helpers/registries/*), so
+// golden-reference-loader's transitive imports shipped broken in every project
+// upgrade. Exclusions preserved: dot-dirs, node_modules, temp.
 const tplScriptsRoot = join(commonDir, 'scripts');
-const scriptSubDirs = [''];  // root scripts/ always included
-if (existsSync(tplScriptsRoot)) {
-  for (const entry of readdirSync(tplScriptsRoot)) {
-    const fullPath = join(tplScriptsRoot, entry);
-    if (statSync(fullPath).isDirectory() && !entry.startsWith('.') && entry !== 'node_modules' && entry !== 'temp') {
-      scriptSubDirs.push(entry);
+
+/** Collect every template .ts file under `root` as `scripts/<relPath>` entries. */
+function collectScriptFiles(root: string, dryTag: string): string[] {
+  const found: string[] = [];
+  const walk = (dir: string, rel: string): void => {
+    let entries: string[] = [];
+    try {
+      entries = readdirSync(dir);
+    } catch {
+      return;
     }
-  }
+    for (const entry of entries) {
+      if (entry.startsWith('.') || entry === 'node_modules' || entry === 'temp') continue;
+      const fullPath = join(dir, entry);
+      let stat;
+      try {
+        stat = statSync(fullPath);
+      } catch {
+        continue;
+      }
+      if (stat.isDirectory()) {
+        walk(fullPath, rel ? `${rel}/${entry}` : entry);
+      } else if (stat.isFile() && entry.endsWith('.ts')) {
+        found.push(rel ? `${rel}/${entry}` : entry);
+      }
+    }
+  };
+  walk(root, '');
+  return found.sort();
 }
 
-for (const subDir of scriptSubDirs) {
-  const tplScriptsDir = join(commonDir, 'scripts', subDir);
-  if (!existsSync(tplScriptsDir)) continue;
-  const relPrefix = subDir ? `scripts/${subDir}` : 'scripts';
-  for (const fname of readdirSync(tplScriptsDir)) {
-    if (!fname.endsWith('.ts')) continue;
-    const tplFile = join(tplScriptsDir, fname);
-    if (!statSync(tplFile).isFile()) continue;
-    const rel = `${relPrefix}/${fname}`;
-    const projFile = join(projectDir, rel);
-    const tplVer = extractScriptVersion(tplFile);
-    if (!tplVer) { console.log(`  SKIP (no version): ${rel}`); continue; }
-    const projVer = extractScriptVersion(projFile);
-    if (!existsSync(projFile)) {
-      console.log(`  NEW   ${rel}  (none) → ${tplVer}`);
-      if (!dryRun) { mkdirSync(dirname(projFile), { recursive: true }); copyFileSync(tplFile, projFile); reconcileScriptRegistry(rel); }
-      console.log(`  ${dryTag}COPIED: ${rel}`);
-      syncChanged++;
-    } else if (semverGt(tplVer, projVer)) {
-      // G05: Warn if project file has local modifications.
-      if (existsSync(projFile) && isLocallyModified(projFile)) {
-        console.log(`  ⚠️  CONFLICT ${rel}  ${projVer} → ${tplVer}  (local modifications exist — template will overwrite)`);
-      } else {
-        console.log(`  UPDATE ${rel}  ${projVer} → ${tplVer}`);
-      }
-      if (!dryRun) { copyFileSync(tplFile, projFile); reconcileScriptRegistry(rel); }
-      console.log(`  ${dryTag}COPIED: ${rel}`);
-      syncChanged++;
+for (const rel of collectScriptFiles(tplScriptsRoot, dryTag)) {
+  const relPath = `scripts/${rel}`;
+  const tplFile = join(tplScriptsRoot, rel);
+  const projFile = join(projectDir, relPath);
+  const tplVer = extractScriptVersion(tplFile);
+  if (!tplVer) { console.log(`  SKIP (no version): ${relPath}`); continue; }
+  const projVer = extractScriptVersion(projFile);
+  if (!existsSync(projFile)) {
+    console.log(`  NEW   ${relPath}  (none) → ${tplVer}`);
+    if (!dryRun) { mkdirSync(dirname(projFile), { recursive: true }); copyFileSync(tplFile, projFile); reconcileScriptRegistry(relPath); }
+    console.log(`  ${dryTag}COPIED: ${relPath}`);
+    syncChanged++;
+  } else if (semverGt(tplVer, projVer)) {
+    // G05: Warn if project file has local modifications.
+    if (existsSync(projFile) && isLocallyModified(projFile)) {
+      console.log(`  ⚠️  CONFLICT ${relPath}  ${projVer} → ${tplVer}  (local modifications exist — template will overwrite)`);
+    } else {
+      console.log(`  UPDATE ${relPath}  ${projVer} → ${tplVer}`);
+    }
+    if (!dryRun) { copyFileSync(tplFile, projFile); reconcileScriptRegistry(relPath); }
+    console.log(`  ${dryTag}COPIED: ${relPath}`);
+    syncChanged++;
     } else if (tplVer === projVer && fileHash(tplFile) !== fileHash(projFile)) {
       // v1.17.2 drift reconciliation: equal version but content differs means a
       // locally forked core script that upgrades could never see (version-gated
@@ -1638,7 +1665,6 @@ for (const subDir of scriptSubDirs) {
     } else {
       console.log(`  OK     ${rel}  ${projVer}`);
     }
-  }
 }
 console.log('');
 
