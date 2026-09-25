@@ -1,7 +1,7 @@
 # AGENTS.md Size Reduction Design — Thin Dispatcher, Marker Governance, L0 Diet
 
 - **Date**: 2026-09-25
-- **Status**: Proposed (Row 0; strategy approval flips this to Approved, implementation in waves)
+- **Status**: Approved (user decision 2026-09-26, Option 1 — full restructure; see meeting `memory/meeting-2026-09-26-agents-md-thinning-plan-review.md`)
 - **Related**: ADR-0088 (Hermes platform support — truncation origin), ADR-0074 (Design Gate), ADR-0043/Fork-Model (variant agents), `docs/analysis/2026-09-25-agents-md-size-analysis.md` (measurement input — required reading)
 - **Scope**: Structural remedy for the context-cap truncation finding. Changes AGENTS.md structure at L0/L1/L2, the propagation machinery, and validators. Does NOT change any governance rule's content — rules move or get pointerized, never weakened.
 
@@ -14,6 +14,21 @@ Every AGENTS.md exceeds Hermes Agent's default 20,000-char context-file cap (L0 
 ### 1.1 Duplication-audit evidence (2026-09-25)
 
 The companion duplication audit (`docs/analysis/2026-09-25-agents-md-duplication-audit.md`) confirms the weight is also a dual-maintenance liability: the L0 COMMON-AGENTS zone's ADR-0078/0079/0080 summaries are near-verbatim copies of owned §3 subsections (tok 0.89–0.97); PM Gateway is double-registered in AGENTS §3 vs CONSTITUTION §5.5 (tok 0.66); §1↔§2 roster restatement is HIGH (0.83–0.94) in all 13 variants; the context.md `## Agents` sync rule is unenforced and unmet 13/13 (strict subsets); and audit.ts check #29 silently skips 3 of 12 projects whose AGENTS.md lacks the exact `## §6: Skills` heading.
+
+### 1.2 Design-review amendments (2026-09-26, six-role meeting — A–H)
+
+A six-role review (architect / automation-engineer / docs-writer / auditor / security-expert / red-team; transcript in `memory/meeting-2026-09-26-agents-md-thinning-plan-review.md`) amended this design before implementation:
+
+- **A — Zone reuse**: no second managed zone. The existing COMMON-AGENTS zone (label hardcoded across ~10 consumers) carries the pointer table + load contract. The earlier COMMON-AGENTS-GOVERNANCE new-zone idea is withdrawn.
+- **B — Move target split**: §3/§5 operational bodies → `docs/governance/*.md` (NOT into CONSTITUTION §5.5 — CONSTITUTION.md:169 already delegates AGENTS-ward; CONSTITUTION keeps MUST-level policy only, and its deference anchors retarget to the governance files).
+- **C — Validators first (W0)**: size-budget (WARN), pointer-integrity, audit §-gate alignment, and Phase B-AGENTS die-guard land BEFORE any restructure — no unenforced window.
+- **D — Dedicated AGENTS_RESTRUCTURE upgrade step**: MERGE preserves out-of-zone content, so fleet conversion needs a one-time restructure step (CONTEXT_COMMONIZATION pattern + pre-reconcile snapshots); MERGE alone cannot strip legacy bodies.
+- **E — Mirror twins keep full content**: CLAUDE/GEMINI/CODEX.md (26.7k/26.2k/15.4k) serve cap-less harnesses and keep their bodies; they gain the pointer table for navigation. Platform-parity checks updated to the new AGENTS shape.
+- **F — Security additions**: governance reference-file hash manifest; MERGE divergence WARN (tamper visibility); roster-generation escaping; §3.7.5 partitioned as L0-only (stays inline in L0 AGENTS.md, never ships in fleet-delivered governance files); non-overridable security floor kept inline.
+- **G — Load contract + anchor inventory**: the enforceable load-contract text (meeting transcript) sits in the first screen; anchor updates enumerated (CONSTITUTION ~10, twins ~14, scripts ~10, skill 4-copy sets, README/README_ko) with terminology registration.
+- **H — Mechanical preservation gate**: normalized text-coverage diff of every moved section against the git-history original — relocation-only is machine-verified, not review-verified.
+
+Accepted red-team risks (verbatim dissent in the meeting transcript): objection 3 (adjudication one-way door) mitigated by C+D+H; objection 4 (budget pressure) mitigated by WARN-first and the relocation-only gate; objections 1 (config sufficiency) and 2 (4-harness context loss) accepted by user decision, with E minimizing the loss.
 
 ## 2. Goals / Non-Goals
 
