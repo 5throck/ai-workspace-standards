@@ -115,7 +115,21 @@ Mirrors are then materialized (`sync-skills --all-variants`) as part of W1 execu
 - **Accessibility (ADR-0065)**: exempt — developer-tooling/infrastructure (platform configuration and governance documents); no web/app/CLI user-facing UI is produced.
 - **Preview Verification (ADR-0070)**: exempt — no rendered UI artifact; verification is script-based (§7).
 
-## 10. References
+## 10. Addendum 1 — Context-file truncation finding (2026-09-25, live verification T-20260925-008)
+
+Live E2E (hermes-agent v0.21.4, upstream `59004a6`) surfaced an operational finding beyond the original D7 scope: Hermes caps project context files at `context_file_max_chars` (**default 20,000**; explicit config wins over the dynamic window-derived cap — `agent/prompt_builder.py:1094`), and **every AGENTS.md in the ecosystem exceeds it**:
+
+| Layer | AGENTS.md | Chars |
+|---|---|---|
+| L0 workspace root | `AGENTS.md` | 56,837 |
+| L1 common template | `templates/common/AGENTS.md` | 49,190 |
+| L2 variant templates (13) | `templates/co-*/AGENTS.md` | 27,927 (co-price) – 82,099 (co-safety) |
+
+Truncation keeps only the leading ~20k chars and is silent at the harness UX level (warning in Hermes logs only). Consequence: scaffolded projects lose the governance body that sits beyond the cap — for co-safety the cut lands in the agent roster, dropping ~75% of the file including the entire injected COMMON-AGENTS governance zone.
+
+**Mandatory onboarding step (documented in AGENTS.md §6 platform table and CONSTITUTION §11)**: `hermes config set context_file_max_chars 100000`. A structural remedy (AGENTS.md size reduction across L0/L1/L2) is designed directly — section-level analysis in `docs/analysis/2026-09-25-agents-md-size-analysis.md`, Row 0 design in `docs/designs/2026-09-25-agents-md-size-reduction-design.md`.
+
+## 11. References
 
 - ADR-0088 — decision record (this design's D1–D8, condensed)
 - ADR-0077 — Codex platform support (delivery pattern, incident class, deferred-refactor lineage)
