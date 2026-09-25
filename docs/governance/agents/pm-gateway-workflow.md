@@ -78,3 +78,158 @@ PM owns the composition of the agent team and rules on skill changes:
 
 ---
 
+
+---
+
+### §3.1 Operational Detail (relocated from AGENTS.md, ADR-0090 W1b remainder)
+
+#### §3.1.2 PM Role Boundaries
+
+**What PM Does**:
+- Orchestrate multi-agent workflows
+- Create execution plans
+- Dispatch specialist agents
+- Enforce quality gates
+- Track progress
+
+**What PM Does NOT Do**:
+- Directly Edit/Write files (except `memory/*.md`, `CHANGELOG.md`)
+- Implement code or scripts
+- Perform documentation updates (delegate to docs-writer)
+- Perform design work (delegate to architect)
+
+**Task Owner vs Executor Distinction**:
+- **Task owner (PM)**: PM is accountable for task progress and final delivery
+- **Task executor (specialist)**: Agent who performs the actual work
+- PM creates tasks (owner: pm), dispatches specialists (executor: docs-writer/architect/automation-engineer), and updates task status upon completion
+
+**User Communication for Specialist Tasks**:
+When work requires specialist delegation, PM uses the following template:
+```
+PM: 🔍 [Task Analysis] This task falls within the [specialist] domain of expertise.
+   Task: [description]
+   Specialist: [specialist name]
+   Reason: [why specialist needed]
+PM: Shall I dispatch [specialist]?
+User: "Yes"
+PM: ▶️ [specialist] dispatch...
+```
+
+See [agents/pm.md](agents/pm.md) for complete role definition and delegation protocols.
+
+#### §3.1.3 Enforcement Layers
+1. **Tool-Level**: Agent tool rejects non-PM specialist calls (hard enforcement)
+2. **System Prompt-Level**: CLAUDE.md/GEMINI.md rules loaded first
+3. **Agent File-Level**: All specialists have "PM-ONLY INVOCATION" section
+4. **QA Gate-Level**: Auditor detects bypass in Phase 6 QA
+
+#### §3.1.4 Specialist Agent Dispatch Flow
+```
+User Request → PM Triage → Design Approval → Specialist Dispatch → QA Gate → Finalization
+```
+
+#### §3.1.5 Specialist Agent Roster (PM-ONLY INVOCATION)
+
+All specialist agents below are dispatched ONLY through PM:
+
+| Agent | Phase | Dispatch Trigger |
+|-------|-------|-------------------|
+| **scaffolding-expert** | 0 | "Creating new projects", "Template validation", "Scaffolding tasks" |
+| **architect** | 1-2 | "Architecture design needed", "Project structure planning", "Technical decision making" |
+| **automation-engineer** | 4 | "Creating scripts", "Cross-platform automation", "Implementation tasks" |
+| **docs-writer** | 4 | "Updating documentation", "README creation", "CHANGELOG updates" |
+| **security-expert** | 6 | "Security review", "Hook configuration", "Secret detection" |
+| **lifecycle-manager** | 5 | "Lifecycle finalization", "Governance record sync", "L0->L1 template publishing", "L1->L2 explicit skill/script sync" — invoked on-demand for governance changes; lifecycle finalization runs automatically via `/sync` (**Workspace root only — L0-only agent, NOT available in variant templates**) |
+| **auditor** | 6 | "Quality verification", "Documentation consistency check", "QA gate required" (Workspace root only) |
+| **skill-graph-analyst** | 6 | "Fleet skill-graph analytics", "skill graph report", "skill convergence triage", "weekly analytics cadence" (Workspace root only — L0-only agent; triage only, tickets for promotion candidates) |
+
+
+---
+
+### §3.1 Operational Detail (relocated from AGENTS.md, ADR-0090 W1b remainder)
+
+**User Communication for Specialist Tasks**:
+When work requires specialist delegation, PM uses the following template:
+```
+PM: 🔍 [Task Analysis] This task falls within the [specialist] domain of expertise.
+   Task: [description]
+   Specialist: [specialist name]
+   Reason: [why specialist needed]
+PM: Shall I dispatch [specialist]?
+User: "Yes"
+PM: ▶️ [specialist] dispatch...
+```
+
+See [agents/pm.md](agents/pm.md) for complete role definition and delegation protocols.
+
+#### §3.1.3 Enforcement Layers
+1. **Tool-Level**: Agent tool rejects non-PM specialist calls (hard enforcement)
+2. **System Prompt-Level**: CLAUDE.md/GEMINI.md rules loaded first
+3. **Agent File-Level**: All specialists have "PM-ONLY INVOCATION" section
+4. **QA Gate-Level**: Auditor detects bypass in Phase 6 QA
+
+#### §3.1.4 Specialist Agent Dispatch Flow
+```
+User Request → PM Triage → Design Approval → Specialist Dispatch → QA Gate → Finalization
+```
+
+#### §3.1.5 Specialist Agent Roster (PM-ONLY INVOCATION)
+
+All specialist agents below are dispatched ONLY through PM:
+
+| Agent | Phase | Dispatch Trigger |
+|-------|-------|-------------------|
+| **scaffolding-expert** | 0 | "Creating new projects", "Template validation", "Scaffolding tasks" |
+| **architect** | 1-2 | "Architecture design needed", "Project structure planning", "Technical decision making" |
+| **automation-engineer** | 4 | "Creating scripts", "Cross-platform automation", "Implementation tasks" |
+| **docs-writer** | 4 | "Updating documentation", "README creation", "CHANGELOG updates" |
+| **security-expert** | 6 | "Security review", "Hook configuration", "Secret detection" |
+| **lifecycle-manager** | 5 | "Lifecycle finalization", "Governance record sync", "L0->L1 template publishing", "L1->L2 explicit skill/script sync" — invoked on-demand for governance changes; lifecycle finalization runs automatically via `/sync` (**Workspace root only — L0-only agent, NOT available in variant templates**) |
+| **auditor** | 6 | "Quality verification", "Documentation consistency check", "QA gate required" (Workspace root only) |
+| **skill-graph-analyst** | 6 | "Fleet skill-graph analytics", "skill graph report", "skill convergence triage", "weekly analytics cadence" (Workspace root only — L0-only agent; triage only, tickets for promotion candidates) |
+
+
+---
+
+### §3.1 Operational Detail (relocated from AGENTS.md, ADR-0090 W1b remainder)
+
+**User Communication for Specialist Tasks**:
+When work requires specialist delegation, PM uses the following template:
+```
+PM: 🔍 [Task Analysis] This task falls within the [specialist] domain of expertise.
+   Task: [description]
+   Specialist: [specialist name]
+   Reason: [why specialist needed]
+PM: Shall I dispatch [specialist]?
+User: "Yes"
+PM: ▶️ [specialist] dispatch...
+```
+
+See [agents/pm.md](agents/pm.md) for complete role definition and delegation protocols.
+
+#### §3.1.3 Enforcement Layers
+1. **Tool-Level**: Agent tool rejects non-PM specialist calls (hard enforcement)
+2. **System Prompt-Level**: CLAUDE.md/GEMINI.md rules loaded first
+3. **Agent File-Level**: All specialists have "PM-ONLY INVOCATION" section
+4. **QA Gate-Level**: Auditor detects bypass in Phase 6 QA
+
+#### §3.1.4 Specialist Agent Dispatch Flow
+```
+User Request → PM Triage → Design Approval → Specialist Dispatch → QA Gate → Finalization
+```
+
+#### §3.1.5 Specialist Agent Roster (PM-ONLY INVOCATION)
+
+All specialist agents below are dispatched ONLY through PM:
+
+| Agent | Phase | Dispatch Trigger |
+|-------|-------|-------------------|
+| **scaffolding-expert** | 0 | "Creating new projects", "Template validation", "Scaffolding tasks" |
+| **architect** | 1-2 | "Architecture design needed", "Project structure planning", "Technical decision making" |
+| **automation-engineer** | 4 | "Creating scripts", "Cross-platform automation", "Implementation tasks" |
+| **docs-writer** | 4 | "Updating documentation", "README creation", "CHANGELOG updates" |
+| **security-expert** | 6 | "Security review", "Hook configuration", "Secret detection" |
+| **lifecycle-manager** | 5 | "Lifecycle finalization", "Governance record sync", "L0->L1 template publishing", "L1->L2 explicit skill/script sync" — invoked on-demand for governance changes; lifecycle finalization runs automatically via `/sync` (**Workspace root only — L0-only agent, NOT available in variant templates**) |
+| **auditor** | 6 | "Quality verification", "Documentation consistency check", "QA gate required" (Workspace root only) |
+| **skill-graph-analyst** | 6 | "Fleet skill-graph analytics", "skill graph report", "skill convergence triage", "weekly analytics cadence" (Workspace root only — L0-only agent; triage only, tickets for promotion candidates) |
+

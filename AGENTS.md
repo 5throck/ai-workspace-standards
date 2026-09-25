@@ -97,45 +97,8 @@ When a specialist agent's required tool is denied, PM applies the [Permission De
 - **Task executor (specialist)**: Agent who performs the actual work
 - PM creates tasks (owner: pm), dispatches specialists (executor: docs-writer/architect/automation-engineer), and updates task status upon completion
 
-**User Communication for Specialist Tasks**:
-When work requires specialist delegation, PM uses the following template:
-```
-PM: 🔍 [Task Analysis] This task falls within the [specialist] domain of expertise.
-   Task: [description]
-   Specialist: [specialist name]
-   Reason: [why specialist needed]
-PM: Shall I dispatch [specialist]?
-User: "Yes"
-PM: ▶️ [specialist] dispatch...
-```
 
-See [agents/pm.md](agents/pm.md) for complete role definition and delegation protocols.
-
-#### §3.1.3 Enforcement Layers
-1. **Tool-Level**: Agent tool rejects non-PM specialist calls (hard enforcement)
-2. **System Prompt-Level**: CLAUDE.md/GEMINI.md rules loaded first
-3. **Agent File-Level**: All specialists have "PM-ONLY INVOCATION" section
-4. **QA Gate-Level**: Auditor detects bypass in Phase 6 QA
-
-#### §3.1.4 Specialist Agent Dispatch Flow
-```
-User Request → PM Triage → Design Approval → Specialist Dispatch → QA Gate → Finalization
-```
-
-#### §3.1.5 Specialist Agent Roster (PM-ONLY INVOCATION)
-
-All specialist agents below are dispatched ONLY through PM:
-
-| Agent | Phase | Dispatch Trigger |
-|-------|-------|-------------------|
-| **scaffolding-expert** | 0 | "Creating new projects", "Template validation", "Scaffolding tasks" |
-| **architect** | 1-2 | "Architecture design needed", "Project structure planning", "Technical decision making" |
-| **automation-engineer** | 4 | "Creating scripts", "Cross-platform automation", "Implementation tasks" |
-| **docs-writer** | 4 | "Updating documentation", "README creation", "CHANGELOG updates" |
-| **security-expert** | 6 | "Security review", "Hook configuration", "Secret detection" |
-| **lifecycle-manager** | 5 | "Lifecycle finalization", "Governance record sync", "L0->L1 template publishing", "L1->L2 explicit skill/script sync" — invoked on-demand for governance changes; lifecycle finalization runs automatically via `/sync` (**Workspace root only — L0-only agent, NOT available in variant templates**) |
-| **auditor** | 6 | "Quality verification", "Documentation consistency check", "QA gate required" (Workspace root only) |
-| **skill-graph-analyst** | 6 | "Fleet skill-graph analytics", "skill graph report", "skill convergence triage", "weekly analytics cadence" (Workspace root only — L0-only agent; triage only, tickets for promotion candidates) |
+*Role boundaries, dispatch-communication templates, and specialist-roster detail: [`docs/governance/agents/pm-gateway-workflow.md`](docs/governance/agents/pm-gateway-workflow.md).*
 
 ### §3.7 Meeting Facilitation
 
@@ -217,16 +180,7 @@ PM owns team composition and skill-change rulings. Hiring and firing: PM decides
 
 ## §6: Skills
 
-> **📌 VERSION_MANIFEST is the Single Source of Truth (SSOT)**
->
-> All skill versions, status, and lifecycle metadata are maintained in [`docs/VERSION_MANIFEST.md`](docs/VERSION_MANIFEST.md).
-> The table below provides skill names and locations only. For current versions, status, and detailed metadata, always reference VERSION_MANIFEST.
->
-> **Skill structure specification**: See [docs/constitution/06-skill-lifecycle.md §6 - Skills](docs/constitution/06-skill-lifecycle.md#6-skills) for frontmatter format and session skill registration.
->
-> **Skill discovery & registration**: To make workspace-level skills discoverable and loadable by Claude, Gemini, and Antigravity, the `skills/` folder is registered via `skills.json` files in each platform directory: `.claude/skills.json`, `.gemini/skills.json`, and `.agents/skills.json`. The script `scripts/sync-skills.ts` distributes SSOT skills from `skills/` to `.claude/skills/`, `.gemini/skills/`, `.agents/skills/`, `.codex/skills/`, and `.hermes/skills/`, mirrors `.claude/commands/*.md` to `.codex/prompts/`, and back-syncs shortcut skills (`sync`, `source-command-commit-push-pr`) from `.agents/skills/` to `.claude/skills/` and `.gemini/skills/`.
-
-> **`owner` field definition**: The `owner` field in `SKILL.md` frontmatter identifies the **maintainer responsibility** for that skill — the agent or role accountable for keeping the skill current. It does NOT require that agent to exist in the current project, and does NOT mean that agent is the only one who can invoke the skill.
+**Thin-dispatcher section (ADR-0090 W1b remainder)**: the complete skill/versions/status registry is [`docs/VERSION_MANIFEST.md`](docs/VERSION_MANIFEST.md) (declared SSOT) — **consult it for any skill lookup.** The routing rules below are binding.
 
 ### Skill Resolution Priority
 
@@ -270,36 +224,6 @@ Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 | `explain-me` | `skills/explain-me/` | Single-file interactive HTML report generation (inspired by beret21/reportme) |
 
 > **Complete Skill Registry**: The table above is a curated subset — see `docs/VERSION_MANIFEST.md` for the complete registry of all workspace-level skills with versions, status, and lifecycle metadata.
-
-### Platform Skills Distribution
-
-Skills are distributed to the five platform directories via `scripts/sync-skills.ts`; the Claude Desktop App consumes the same skills without a repository surface:
-
-| Platform | Directory | Registration |
-|----------|-----------|--------------|
-| Claude Code | `.claude/skills/` | `.claude/skills.json` |
-| Gemini CLI | `.gemini/skills/` | `.gemini/skills.json` |
-| Codex (CLI + Desktop App) | `.codex/skills/` | — (skills discovered via `.codex/prompts/` + config) |
-| Antigravity | `.agents/skills/` | `.agents/skills.json` |
-| Hermes Agent | `.hermes/skills/` | — (skills discovered by directory scan; project root must be listed in Hermes' `skills.trusted_project_dirs`, and `hermes config set context_file_max_chars 100000` is REQUIRED onboarding — every AGENTS.md in this ecosystem exceeds Hermes' 20,000-char default and would be silently truncated, ADR-0088 D7) |
-
-> **Claude Desktop App**: Agent Skills consumer — reads no project-embedded directory; consumes the SKILL.md open format via claude.ai/Desktop upload (Settings → Capabilities) or the `/v1/skills` API; content source: `skills/` SSOT and `.claude/skills/` mirrors.
-
-> Phase 1 distributes every SSOT skill to all five platform directories; the Phase 2
-> back-sync target list is dynamic and currently empty (all former `.agents`-only
-> shortcut candidates are SSOT skills today).
-
-- **Phase 1**: Every `skills/*/SKILL.md` directory is copied to all five platform directories.
-- **Phase 2**: Shortcut skills that only exist in `.agents/skills/` are back-synced to `.claude/skills/` and `.gemini/skills/`.
-- **Special**: `meeting-facilitation` SKILL.md is also synced to `.claude/commands/meeting.md` and `.gemini/commands/meeting.md`.
-
-### `.agents/commands/` — L0-Resident by Design
-
-The workspace root's `.agents/commands/` directory holds 7 command files (`changelog.md`, `commit-push-pr.md`, `meeting.md`, `memlog.md`, `new-task.md`, `project-review.md`, `sync.md`). The consumer is the Antigravity CLI reading the workspace root — exactly where the operator runs Antigravity — so the surface needs no propagation to function. 4 of the 7 files carry Antigravity-adapted content (platform-specific prose, or `meeting.md` as an Antigravity skill-shim rather than a copy of `.claude/commands/meeting.md`), so a 1:1 mirror contract is factually wrong for this surface. `templates/common/.agents/` has never carried a `commands/` directory — there is no L1/variant demand, and the surface is intentionally NOT propagated.
-
-Maintenance rule: update root `.agents/commands/*.md` in the same commit as their `.claude/commands` counterparts (see the `platform-command-lifecycle-manager` skill). Because the surface is workspace-only, it is excluded from all command-parity checks and propagation domains by recorded decision, not by omission: `audit.ts` command parity, `validate-templates.ts` COMMAND_SURFACES, `verify-platform-lifecycle.ts` Check G, `helpers/scan-l3-project.ts` scan roots, and the `pre-commit.ts` / `post-write-lifecycle-check.ts` command checks. Ruling: spec `2026-09-25-propagation-engine-batch-design` §6-D8 (ticket T-20260925-003). `gateguard.md` has no `.agents` copy — intentional (its skip-marker class), not an action item.
-
----
 
 
 ## §7: Universal Baseline Behaviors
