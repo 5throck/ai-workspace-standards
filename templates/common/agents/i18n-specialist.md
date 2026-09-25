@@ -13,9 +13,9 @@ model: inherit
 lifecycle:
   phase: production
   created: "2026-08-24"
-  last_updated: "2026-09-15"
+  last_updated: "2026-09-25"
   governance: docs/lifecycle/agents/i18n-specialist.md
-version: "1.0.0"
+version: "1.1.0"
 last_reviewed: "2026-08-24"
 color: cyan
 description: 'Owns locale configuration, locale-specific formatting, and text layout guidance. Use when: "localization review", "locale config", "internationalization"'
@@ -103,6 +103,13 @@ Per constitution §4.3:
 - Advise on encoding, RTL/bidi, and script-appropriate font selection.
 - Review deliverables for locale-consistency (localization review) before they ship.
 - Route jurisdictional questions to domain experts via PM; never absorb them.
+
+## Output Format
+
+- Locale decision records naming the BCP 47 locale ID and its collation, timezone, and display implications
+- Per-locale formatting specification tables (date/number/currency/unit conventions, paper sizes)
+- Localization review findings listing the violating convention, the corrected form, and the owning skill
+- Handoff to PM: locale/format/layout decisions returned for dispatch; jurisdictional questions returned unopened with the owning domain expert named
 
 ## Meeting Participation
 

@@ -1,16 +1,23 @@
 /**
  * Variant skills/SKILLS.md registry parseability (T-20260924-009 R3.5, spec
- * docs/designs/2026-09-25-inventory-decisions-batch-design.md).
+ * docs/designs/2026-09-25-inventory-decisions-batch-design.md; extended for
+ * the remaining seven variants by spec
+ * docs/designs/2026-09-25-registry-policy-completeness-design.md R1.7).
  *
- * Pins the four curated variant registries authored by the inventory-decisions
- * batch: parseSkillRegistryRows must return one row per variant-exclusive skill
- * directory (co-consult 18, co-deck 10, co-security 6, co-develop 4 — the
- * 38-row batch), every row's version/status/owner/last_reviewed must equal the
- * skill's SKILL.md frontmatter, and no row may name a non-existent directory.
- * co-design/co-game were already clean and are pinned too, so the whole
- * registry-covered variant set cannot silently regress.
+ * Pins the eleven curated variant registries: parseSkillRegistryRows must
+ * return one row per skill directory (co-consult 18, co-deck 10, co-security
+ * 6, co-develop 4 — the 38-row inventory batch; co-abap 13, co-export 11,
+ * co-hr 12, co-news 6, co-price 22, co-safety 60, co-work 1 — the 125-row
+ * registry-completeness batch), every row's version/status/owner/last_reviewed
+ * must equal the skill's SKILL.md frontmatter, and no row may name a
+ * non-existent directory. co-design/co-game were already clean and are pinned
+ * too, so the whole registry-covered variant set cannot silently regress.
  *
- * @version 1.0.0
+ * co-safety's inherited/exclusive split is pinned by name: exactly 8 rows are
+ * customized forks of common skills (variant-maintained), the other 52 are
+ * co-safety-exclusive (design §1 classification, R1.5).
+ *
+ * @version 1.1.0
  */
 import { describe, test, expect } from 'bun:test';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
@@ -25,7 +32,28 @@ const EXPECTED_COUNTS: Record<string, number> = {
   'co-deck': 10,
   'co-security': 6,
   'co-develop': 4,
+  'co-abap': 13,
+  'co-export': 11,
+  'co-hr': 12,
+  'co-news': 6,
+  'co-price': 22,
+  'co-safety': 60,
+  'co-work': 1,
 };
+
+// Design §1 audited fork set — the only co-safety rows classified as
+// customized inherited forks (fresh diff vs templates/common/skills/).
+const CO_SAFETY_FORKS = new Set([
+  'agent-lifecycle-manager',
+  'meeting-facilitation',
+  'project-review',
+  'script-lifecycle-manager',
+  'skill-lifecycle-manager',
+  'sync',
+  'team-builder',
+  'translate',
+]);
+const FORK_NOTES_MARKER = 'inherited from common — customized fork (variant-maintained)';
 
 function skillDirs(variant: string): string[] {
   const dir = join(templatesDir, variant, 'skills');
@@ -65,15 +93,47 @@ describe('variant SKILLS.md registries (T-20260924-009 R3.5)', () => {
         expect(row.owner).toBe(String(fm.owner ?? '—'));
         expect(row.lastReviewed).toBe(String(fm.last_reviewed ?? '—'));
         expect(row.removalDate).toBe('—');
-        expect(row.notes).toContain(`${variant} only`);
+        if (variant === 'co-safety' && CO_SAFETY_FORKS.has(row.skill)) {
+          expect(row.notes).toBe(FORK_NOTES_MARKER);
+        } else {
+          expect(row.notes).toContain(`${variant} only`);
+        }
       }
     });
   }
 
-  test('co-consult header opts out of legacy verify-skills regeneration', () => {
-    const content = readFileSync(join(templatesDir, 'co-consult', 'skills', 'SKILLS.md'), 'utf-8');
-    expect(content.startsWith('# SKILLS.md — Skill Lifecycle Registry')).toBe(true);
-    expect(content.startsWith('# Skills Index')).toBe(false);
+  test('curated header opts all 11 registry variants out of legacy verify-skills regeneration', () => {
+    for (const variant of Object.keys(EXPECTED_COUNTS)) {
+      const content = readFileSync(join(templatesDir, variant, 'skills', 'SKILLS.md'), 'utf-8');
+      expect(content.startsWith('# SKILLS.md — Skill Lifecycle Registry')).toBe(true);
+      expect(content.startsWith('# Skills Index')).toBe(false);
+    }
+  });
+
+  test('co-safety: exactly the 8 audited fork names carry the fork notes marker; 52 rows are co-safety only', () => {
+    const content = readFileSync(join(templatesDir, 'co-safety', 'skills', 'SKILLS.md'), 'utf-8');
+    const { rows } = parseSkillRegistryRows(content);
+    const forkRows = [...rows.values()].filter(r => r.notes === FORK_NOTES_MARKER);
+    expect(forkRows.length).toBe(8);
+    expect(new Set(forkRows.map(r => r.skill))).toEqual(CO_SAFETY_FORKS);
+    const exclusiveRows = [...rows.values()].filter(r => r.notes !== FORK_NOTES_MARKER);
+    expect(exclusiveRows.length).toBe(52);
+    for (const row of exclusiveRows) {
+      expect(row.notes).toContain('co-safety only');
+    }
+  });
+
+  test('kept prose survives: co-work promotion note, co-news/co-safety Usage, co-price guide replaced', () => {
+    const coWork = readFileSync(join(templatesDir, 'co-work', 'skills', 'SKILLS.md'), 'utf-8');
+    expect(coWork).toContain('were promoted to `templates/common/skills/` (scope: common)');
+    expect(coWork).toContain('## Usage');
+    for (const variant of ['co-news', 'co-safety']) {
+      const content = readFileSync(join(templatesDir, variant, 'skills', 'SKILLS.md'), 'utf-8');
+      expect(content).toContain('See [`agents/README.md`](../agents/README.md) for the full workflow and agent handoff chain.');
+    }
+    const coPrice = readFileSync(join(templatesDir, 'co-price', 'skills', 'SKILLS.md'), 'utf-8');
+    expect(coPrice).not.toContain('# Agent Skills Guide');
+    expect(coPrice).toContain('## Usage');
   });
 
   test('already-clean variants stay clean (co-design 4/4, co-game 5/5)', () => {

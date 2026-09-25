@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "description": "Declares the common layer contract: which agents and skills are provided by templates/common/, their versions, and override governance rules. Variants inherit these via new-project.ts and may declare overrides in their variant.json. Country-scoped skills (k-law/k-dart/k-kosis, tracked in workspace-schema.json country_scoped_assets) and variant-scoped skills (tracked in variant_scoped_skills, living in templates/co-*/skills/) are deliberately out of this contract. The common_platform_skill_exclusions section records platform skills deliberately outside this inventory (L0-only operator skills, claude-only tools, variant-scoped skills); every skill dir under the templates/common/.{claude,gemini,agents,codex}/skills/ mirrors must be listed here, in common_skills/common_platform_skills, or documented as an exclusion (T-20260924-002 full-inventory ruling).",
   "governance": {
     "anti_swelling_threshold": 0.5,
@@ -36,7 +36,7 @@
     },
     "i18n-specialist": {
       "source": "agents/i18n-specialist.md",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "overridable": true,
       "override_type_allowed": [
         "additive",

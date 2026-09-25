@@ -1,4 +1,14 @@
-// @version 2.44.0
+// @version 2.45.0
+// v2.45.0: Variant agent sections resolves extends-stubs before checking (spec:
+//           docs/designs/2026-09-25-registry-policy-completeness-design.md R2.2)
+//           — checkVariantAgentSections composes ADR-0033 stub bodies through
+//           helpers/resolve-pm-stub.ts composeResolvedAgentContent (pure, no
+//           writes) and validates the RESOLVED content; failures on resolved
+//           bodies report against the underlying common file. Section list now
+//           imported from helpers/golden-reference-loader.ts
+//           AGENT_LAYER1_SECTIONS (inline duplicate deleted). Pairs with the
+//           `## Output Format` section added to the common i18n-specialist body
+//           (R2.3) — the 13 stub WARNs drop to 0.
 // v2.44.0: Marker-zone exemption for the context-overlap checks (spec:
 //           docs/designs/2026-09-25-variant-hygiene-batch-design.md, R2) —
 //           checkStalePromotedContent() and checkVariantContextCommonization()
@@ -143,6 +153,8 @@ import * as os from 'node:os';
 import * as crypto from 'node:crypto';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { parsePmMd, extractVariantOverrides } from './helpers/pm-md-parser.ts';
+import { AGENT_LAYER1_SECTIONS } from './helpers/golden-reference-loader.ts';
+import { composeResolvedAgentContent } from './helpers/resolve-pm-stub.ts';
 import { sourceShellInjectionPatterns } from './helpers/security-validator.ts';
 import { splitIntoSections, getContentLines, stripMarkerZones } from './helpers/context-sections.ts';
 import { findL0LeakLines } from './helpers/l0-ref-policy.ts';
@@ -1192,16 +1204,15 @@ function checkVariantContextGuidelinesSection() {
 }
 
 // Check: Variant specialist agent files have all 7 required Layer 1 sections
+// v2.45.0 (registry completeness R2.2): resolves ADR-0033 extends-stubs through
+// the pure compose path (helpers/resolve-pm-stub.ts composeResolvedAgentContent)
+// and checks the RESOLVED body instead of the raw stub file — an empty stub is
+// no longer a false WARN, and a regression in the underlying common body still
+// is one (reported against the common file). The section list is the
+// golden-reference-loader SSOT (AGENT_LAYER1_SECTIONS); the inline duplicate is
+// deleted.
 function checkVariantAgentSections() {
-  const REQUIRED_SECTIONS = [
-    '## Role',
-    '## ⚠️ PM-ONLY INVOCATION',
-    '## Responsibilities',
-    '## Output Format',
-    '## Constraints',
-    '## Meeting Participation',
-    '## Dispatch Protocol',
-  ];
+  const REQUIRED_SECTIONS = AGENT_LAYER1_SECTIONS;
 
   const templatesDir = 'templates';
   if (!fs.existsSync(templatesDir)) return;
@@ -1212,6 +1223,9 @@ function checkVariantAgentSections() {
   if (variants.length === 0) return;
 
   const failures: string[] = [];
+  // Resolved-stub failures group by the underlying common file (R2.2: report
+  // against the common body when the resolved content lacks a section).
+  const resolvedFailures = new Map<string, { sections: Set<string>; stubs: string[] }>();
   for (const variant of variants) {
     const agentsDir = path.join(templatesDir, variant, 'agents');
     if (!fs.existsSync(agentsDir)) continue;
@@ -1219,12 +1233,38 @@ function checkVariantAgentSections() {
       .filter(f => f.endsWith('.md') && f !== 'pm.md' && !f.startsWith('_') && !f.startsWith('README'));
     for (const file of agentFiles) {
       const filePath = path.join(agentsDir, file);
-      const content = readUTF8File(filePath);
+      const rawContent = readUTF8File(filePath);
+      // ADR-0033 extends-stub detection (regex, not js-yaml — audit.ts runs in
+      // L2/L3 projects where js-yaml may not be installed).
+      const fmMatch = rawContent.match(/^---\n([\s\S]*?)\n---\n?/);
+      const extendsMatch = fmMatch ? fmMatch[1].match(/^extends:\s*["']?([^"'\n]+?)["']?\s*$/m) : null;
+      let content = rawContent;
+      let resolvedFrom: string | null = null;
+      if (extendsMatch) {
+        const commonPath = path.resolve(path.dirname(filePath), extendsMatch[1].trim());
+        const composed = composeResolvedAgentContent(filePath, commonPath, variant);
+        // missingL1 (common body absent): fall back to the raw content — the
+        // resolver would leave the stub untouched in that case.
+        if (!composed.missingL1) {
+          content = composed.content;
+          resolvedFrom = path.relative('.', commonPath);
+        }
+      }
       const missing = REQUIRED_SECTIONS.filter(s => !content.includes(s));
       if (missing.length > 0) {
-        failures.push(`templates/${variant}/agents/${file}: missing ${missing.map(s => `"${s}"`).join(', ')}`);
+        if (resolvedFrom) {
+          const entry = resolvedFailures.get(resolvedFrom) ?? { sections: new Set<string>(), stubs: [] };
+          for (const s of missing) entry.sections.add(s);
+          entry.stubs.push(`templates/${variant}/agents/${file}`);
+          resolvedFailures.set(resolvedFrom, entry);
+        } else {
+          failures.push(`templates/${variant}/agents/${file}: missing ${missing.map(s => `"${s}"`).join(', ')}`);
+        }
       }
     }
+  }
+  for (const [commonFile, entry] of resolvedFailures) {
+    failures.push(`${commonFile} (resolved body for stubs ${entry.stubs.join(', ')}): missing ${[...entry.sections].map(s => `"${s}"`).join(', ')}`);
   }
 
   if (failures.length === 0) {

@@ -1393,6 +1393,15 @@
       "source": "architect",
       "created": "2026-09-24",
       "last_updated": "2026-09-24"
+    },
+    {
+      "id": "2026-09-25-registry-policy-completeness-design",
+      "title": "registry policy completeness design",
+      "file": "docs/designs/2026-09-25-registry-policy-completeness-design.md",
+      "status": "implemented",
+      "source": "architect",
+      "created": "2026-09-25",
+      "last_updated": "2026-09-25"
     }
   ]
 }

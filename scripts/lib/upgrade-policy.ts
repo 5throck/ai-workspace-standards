@@ -1,4 +1,15 @@
-// @version 1.15.0
+// @version 1.16.0
+// v1.16.0 (2026-09-25, registry & platform-policy completeness batch — spec
+//          docs/designs/2026-09-25-registry-policy-completeness-design.md
+//          R4): `.agents/mcp.json` joins JSON_MERGE_FILES (design D6) — same
+//          genus as root `.mcp.json` (ADR-0076 v1.2.0 precedent): pure JSON
+//          carrying MCP server registrations a project may customize; the
+//          blanket `.agents` SYNC claim would destroy project-only servers on
+//          every upgrade. Fleet copies are byte-identical to the template seed
+//          today, so the rollout is a no-op for existing projects and
+//          protective for future ones. `.codex/config.toml` deliberately stays
+//          ADD_IF_MISSING with the rationale documented at the claim site
+//          (design D7).
 // v1.15.0 (2026-09-25, T-20260924-003 — spec
 //         docs/designs/2026-09-25-inventory-decisions-batch-design.md R2.4):
 //         exports isExtendsStub(content) — the ADR-0033 extends-stub shape
@@ -133,9 +144,15 @@ export const WORKSPACE_DOC_DIRS = [
 /** Platform settings files merged (not overwritten) by the TEMPLATE TREE SYNC pass.
  *  graft (ADR-0076): .mcp.json and opencode.json carry MCP server registrations — projects
  *  may hold project-only servers (co-newbiz, co-safety, co-abap), so they deep-merge like
- *  the platform settings instead of syncing. */
+ *  the platform settings instead of syncing. `.agents/mcp.json` joined in v1.16.0 (registry
+ *  completeness R4.1, design D6): same genus as root `.mcp.json` — pure JSON of the same
+ *  shape carrying MCP server registrations. The blanket `.agents` SYNC claim below would
+ *  have destroyed project-only servers on every upgrade; fleet copies are byte-identical
+ *  to the templates/common seed today, so the merge is a no-op rollout (ADR-0076 v1.2.0
+ *  precedent). */
 export const JSON_MERGE_FILES = [
   '.claude/settings.json', '.gemini/settings.json', '.mcp.json', 'opencode.json',
+  '.agents/mcp.json',
 ] as const;
 
 /** Files whose scaffold-delivered copy was intentionally left unsubstituted — `{{tokens}}` are
@@ -322,6 +339,14 @@ export function resolveClaim(relPath: string, variant = ''): UpgradeClaim {
   }
   // Codex project config is per-project by nature (project MCP servers + codex hooks, e.g.
   // co-abap/co-safety): seed add-if-missing only, never overwrite an existing file (ADR-0076 D4).
+  //
+  // Rationale for keeping ADD_IF_MISSING (registry completeness R4.2, design D7, v1.16.0):
+  // `.codex/config.toml` project copies are genuinely customized (co-abap carries
+  // `[features] codex_hooks = true` plus additions; co-consult has diverged ADR references
+  // and content), no TOML parser exists in package.json, and a comment-preserving semantic
+  // TOML merge is new delivery machinery that is deliberately out of scope. Accepted
+  // trade-off: template-side config.toml changes intentionally reach only NEW projects —
+  // existing projects drift by design; a drift DETECTOR is a candidate follow-up.
   if (underDir(rel, '.codex')) return { policy: 'ADD_IF_MISSING', pass: TEMPLATE_TREE_SYNC_PASS };
 
   // Registration pointers + platform settings extras: default sync (static today, format may evolve)

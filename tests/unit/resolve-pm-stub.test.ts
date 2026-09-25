@@ -13,12 +13,20 @@
  *         generic callers omit it), the missing-L1 branch, and the back-compat
  *         resolvePmExtendsStub delegation.
  *
- * @version 1.1.0
+ * v1.2.0 (2026-09-25, registry & platform-policy completeness batch — spec
+ *         docs/designs/2026-09-25-registry-policy-completeness-design.md
+ *         R2.1): covers the pure composeResolvedAgentContent — no-write purity
+ *         (bytes + mtime unchanged), output parity with resolveAgentExtendsStub
+ *         (the resolver consumes the compose path), and the prose/empty/missing-L1
+ *         compose branches.
+ *
+ * @version 1.2.0
  */
 import { describe, test, expect, afterEach } from 'bun:test';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import {
+  composeResolvedAgentContent,
   resolveAgentExtendsStub,
   resolvePmExtendsStub,
   stripL1BMetadata,
@@ -236,6 +244,111 @@ describe('resolveAgentExtendsStub (generic wrapper, T-20260924-003 R2.2)', () =>
     expect(
       resolveAgentExtendsStub(agentPath, path.join(scratchRoot, 'nope.md'), 'co-work').resolved,
     ).toBe(false);
+  });
+});
+
+describe('composeResolvedAgentContent (pure compose, registry completeness R2.1)', () => {
+  function writeAgentFile(frontmatter: string, body: string): string {
+    const p = path.join(scratchRoot, `compose-${Date.now()}-${Math.random().toString(36).slice(2)}.md`);
+    fs.mkdirSync(scratchRoot, { recursive: true });
+    fs.writeFileSync(p, `---\n${frontmatter}\n---\n${body}`);
+    return p;
+  }
+
+  function snapshot(p: string): { bytes: string; mtimeNs: bigint } {
+    const st = fs.statSync(p, { bigint: true });
+    return { bytes: fs.readFileSync(p, 'utf8'), mtimeNs: st.mtimeNs };
+  }
+
+  test('purity: composing an empty stub leaves the file byte- and mtime-identical', () => {
+    const agentPath = writeAgentFile('name: i18n-specialist\nextends: ../../common/agents/i18n-specialist.md', '');
+    const l1Path = path.join(scratchRoot, 'common-i18n.md');
+    fs.writeFileSync(l1Path, L1_PM_MD.replace('name: pm', 'name: i18n-specialist'));
+
+    const before = snapshot(agentPath);
+    composeResolvedAgentContent(agentPath, l1Path, 'co-work');
+    const after = snapshot(agentPath);
+
+    expect(after.bytes).toBe(before.bytes);
+    expect(after.mtimeNs).toBe(before.mtimeNs);
+    expect(after.bytes).toContain('extends:'); // untouched — still a stub
+  });
+
+  test('purity: composing a prose stub leaves the file byte- and mtime-identical', () => {
+    const agentPath = writeAgentFile('name: pm\nextends: ../../common/agents/pm.md', CANONICAL_CO_WORK_STUB_BODY);
+    const l1Path = path.join(scratchRoot, 'common-pm.md');
+    fs.writeFileSync(l1Path, L1_PM_MD);
+
+    const before = snapshot(agentPath);
+    const composed = composeResolvedAgentContent(agentPath, l1Path, 'co-work', {
+      isCanonicalStubBody: isCanonicalPmStubBody,
+    });
+    const after = snapshot(agentPath);
+
+    expect(composed.composed).toBe(true);
+    expect(composed.shape).toBe('prose');
+    expect(after.bytes).toBe(before.bytes);
+    expect(after.mtimeNs).toBe(before.mtimeNs);
+  });
+
+  test('parity: composed content equals exactly what resolveAgentExtendsStub writes (empty shape)', () => {
+    fs.mkdirSync(scratchRoot, { recursive: true });
+    const fm = 'name: i18n-specialist\nextends: ../../common/agents/i18n-specialist.md\nvariant: co-abap';
+    const l1 = L1_PM_MD.replace('name: pm', 'name: i18n-specialist');
+    const composeCommonPath = path.join(scratchRoot, 'compose-common.md');
+    fs.writeFileSync(composeCommonPath, l1);
+
+    const composePath = writeAgentFile(fm, '');
+    const composed = composeResolvedAgentContent(composePath, composeCommonPath, 'co-abap');
+
+    const writerPath = writeAgentFile(fm, '');
+    const writerCommonPath = path.join(scratchRoot, 'writer-common.md');
+    fs.writeFileSync(writerCommonPath, l1);
+    resolveAgentExtendsStub(writerPath, writerCommonPath, 'co-abap');
+
+    expect(composed.composed).toBe(true);
+    expect(fs.readFileSync(writerPath, 'utf8')).toBe(composed.content);
+  });
+
+  test('parity: composed content equals exactly what resolveAgentExtendsStub writes (prose shape)', () => {
+    fs.mkdirSync(scratchRoot, { recursive: true });
+    const fm = 'name: pm\nextends: ../../common/agents/pm.md';
+    const l1Path = path.join(scratchRoot, 'parity-pm-common.md');
+    fs.writeFileSync(l1Path, L1_PM_MD);
+
+    const composePath = writeAgentFile(fm, CANONICAL_CO_WORK_STUB_BODY);
+    const composed = composeResolvedAgentContent(composePath, l1Path, 'co-work', {
+      isCanonicalStubBody: isCanonicalPmStubBody,
+    });
+
+    const writerPath = writeAgentFile(fm, CANONICAL_CO_WORK_STUB_BODY);
+    resolveAgentExtendsStub(writerPath, l1Path, 'co-work', { isCanonicalStubBody: isCanonicalPmStubBody });
+
+    expect(composed.composed).toBe(true);
+    expect(composed.shape).toBe('prose');
+    expect(fs.readFileSync(writerPath, 'utf8')).toBe(composed.content);
+  });
+
+  test('missing-L1 branch: composed:false, missingL1:true, content is the raw stub', () => {
+    const agentPath = writeAgentFile('name: i18n-specialist\nextends: ../../common/agents/i18n-specialist.md', '');
+    const raw = fs.readFileSync(agentPath, 'utf8');
+
+    const composed = composeResolvedAgentContent(agentPath, path.join(scratchRoot, 'absent.md'), 'co-work');
+
+    expect(composed.composed).toBe(false);
+    expect(composed.missingL1).toBe(true);
+    expect(composed.content).toBe(raw);
+  });
+
+  test('no-extends file: composed:false, content is the raw file (full-copy passthrough)', () => {
+    const agentPath = writeAgentFile('name: i18n-specialist\nrole: already resolved', '# Body\n');
+    const raw = fs.readFileSync(agentPath, 'utf8');
+
+    const composed = composeResolvedAgentContent(agentPath, path.join(scratchRoot, 'nope.md'), 'co-work');
+
+    expect(composed.composed).toBe(false);
+    expect(composed.missingL1).toBeUndefined();
+    expect(composed.content).toBe(raw);
   });
 });
 
