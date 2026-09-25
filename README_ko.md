@@ -1,6 +1,6 @@
 ---
-translated_from_hash: 765cf36e9b1b27e1f411c44b6b9d49222325ee2bace842b7bf74ad95e4b66d34
-sync_version: 1
+translated_from_hash: cdb9ffaab8fc86f1ba4e5b45e0df97ddf7c28a6c2adc1a022009024e9f032be7
+sync_version: 2
 ---
 
 **언어**: [English](README.md) · [한국어](README_ko.md) · [Español](README_es.md) · [日本語](README_ja.md)
@@ -232,9 +232,11 @@ C:\git\
 0. `git config core.hooksPath .githooks`
 1. `CONSTITUTION.md` (워크스페이스 표준) 읽기
 2. 프로젝트의 `docs/context.md` 읽기
-3. `AGENTS.md` (공식 에이전트 명단) 읽기
+3. `AGENTS.md` (공유 에이전트 인덱스 — 씬 디스패처; 포인터 테이블에서 거버넌스 참조 파일로 이동) 읽기
 4. 최근 변경 사항 파악을 위해 `memory/MEMORY.md` 확인
 5. `docs/context.md ## Session Start Skills`에서 스킬 로드
+
+> **Hermes Agent 사용자**: `hermes config set context_file_max_chars 100000`을 1회 실행하고(AGENTS.md가 기본 20k 컨텍스트 캡 초과) 프로젝트 루트를 `skills.trusted_project_dirs`에 추가하세요 — ADR-0088/0090 참조.
 
 ---
 
@@ -256,7 +258,7 @@ C:\git\
 
 **💡 Workflow 상세 정보 확인 방법**
 구체적인 에이전트 명단(Roster)과 거버넌스 단계는 프로젝트 생성 후 해당 프로젝트 폴더 내의 다음 문서들에서 관리 및 확인할 수 있습니다:
-1. `AGENTS.md`: 해당 프로젝트에 투입된 전체 에이전트 역할 및 권한 명세
+1. `AGENTS.md`: 공유 에이전트 인덱스(씬 디스패처) — 명단과 `docs/governance/agents/` 포인터 테이블 (ADR-0090)
 2. `docs/context.md`: 프로젝트의 목표 및 초기 세션 시작을 위한 워크플로 컨텍스트
 
 ---
@@ -358,4 +360,4 @@ AGPL-3.0 - [LICENSE](LICENSE) 파일 참조
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-09-21*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-09-26*
