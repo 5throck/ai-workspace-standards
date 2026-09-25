@@ -20,8 +20,15 @@
  *   bun scripts/lifecycle-sync-audit.ts --json
  *   bun scripts/lifecycle-sync-audit.ts --fix
  *
- * @version 1.16.0
+ * @version 1.17.0
  * @last_updated 2026-09-25
+ * v1.17.0 (registry-policy-completeness batch W5, spec
+ *          docs/designs/2026-09-25-registry-policy-completeness-design.md R5.6):
+ *          INTENTIONAL_CROSS_REFS gains 'dev-sync:sync-skill-registries' (L1
+ *          dev-sync Step 4.63 references the L0-only registry sync behind an
+ *          isWorkspaceRoot + existsSync double guard) and
+ *          'validate-templates:sync-skill-registries' (the L1 VA-08 fix hint
+ *          names the L0-only remediation command in a string).
  * v1.16.0 (T-20260924-001, spec
  *          docs/designs/2026-09-25-propagation-engine-batch-design.md R21):
  *          Check B gains a projection arm — imports the mirror generator's
@@ -1182,6 +1189,8 @@ const INTENTIONAL_CROSS_REFS = new Set([
   'audit:spec-register',                          // audit.ts: string mention in warning message only (--spec-check mode)
   'audit:upgrade-project',                        // audit.ts: guarded by existsSync('Projects') — checkProjectDocMarkerDrift skips entirely when Projects/ is absent (gitignored, L0-dev-machine-only directory; scaffolded/L1 projects have no Projects/ to check)
   'audit:test-platform-parity',                   // audit.ts: guarded by existsSync — skipped when L0 script absent (L3/L1 projects have no templates/ to test parity on)
+  'dev-sync:sync-skill-registries',               // dev-sync.ts step 4.63: guarded by isWorkspaceRoot + existsSync — registry convergence is workspace-root-only (W5, spec docs/designs/2026-09-25-registry-policy-completeness-design.md)
+  'validate-templates:sync-skill-registries',     // validate-templates.ts VA-08: string mention in the fix hint only (the L0-only remediation command; W5)
   'dev-sync:verify-adr-governance',               // dev-sync.ts step 3.97: guarded by existsSync — skipped when L0 validator absent (ADR-0059 Stage 2 gate; scaffolded projects have no docs/adr corpus)
   'dev-sync:generate-skill-graph',                // dev-sync.ts step 4.65: guarded by existsSync — skipped when L0 generator absent (ADR-0060 skill graph gate; scaffolded projects ship no skill graph tooling)
   'dev-sync:verify-skill-graph',                  // dev-sync.ts step 4.65: guarded by existsSync — skipped when L0 verifier absent (ADR-0060 skill graph gate; scaffolded projects ship no skill graph tooling)

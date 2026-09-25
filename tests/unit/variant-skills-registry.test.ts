@@ -23,7 +23,7 @@ import { describe, test, expect } from 'bun:test';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import * as yaml from 'js-yaml';
-import { parseSkillRegistryRows } from '../../scripts/helpers/skills-registry.ts';
+import { parseSkillRegistryRows, splitRootRegistry, collectCatalogEntries, formatCatalogVariantCell, type SkillRegistryRow } from '../../scripts/helpers/skills-registry.ts';
 
 const templatesDir = resolve(import.meta.dir, '..', '..', 'templates');
 
@@ -143,6 +143,105 @@ describe('variant SKILLS.md registries (T-20260924-009 R3.5)', () => {
       expect(rows.size).toBe(expected);
       const dirNames = skillDirs(variant);
       for (const dirName of dirNames) expect(rows.has(dirName)).toBe(true);
+      // W5/R5.8: co-design/co-game are inside the value contract too (their
+      // accessibility-audit date drift survived count-only coverage).
+      for (const row of rows.values()) {
+        const fm = frontmatter(variant, row.skill);
+        expect(row.version).toBe(String(fm.version));
+        expect(row.status).toBe(String(fm.status ?? 'active'));
+        expect(row.owner).toBe(String(fm.owner ?? '—'));
+        expect(row.lastReviewed).toBe(String(fm.last_reviewed ?? '—'));
+      }
+    }
+  });
+});
+
+describe('W5 registry surfaces (skill-registry-sync)', () => {
+  const repoRoot = resolve(import.meta.dir, '..', '..');
+
+  function readFileChecked(path: string): string {
+    expect(existsSync(path)).toBe(true);
+    return readFileSync(path, 'utf-8');
+  }
+
+  function expectRowsMatchFrontmatter(rows: SkillRegistryRow[], fmOf: (skill: string) => Record<string, string>): void {
+    for (const row of rows) {
+      const fm = fmOf(row.skill);
+      expect(row.version).toBe(String(fm.version));
+      expect(row.status).toBe(String(fm.status ?? 'active'));
+      expect(row.owner).toBe(String(fm.owner ?? '—'));
+      expect(row.lastReviewed).toBe(String(fm.last_reviewed ?? '—'));
+    }
+  }
+
+  test('common scaffold seed: bijection + frontmatter equality', () => {
+    const content = readFileChecked(join(templatesDir, 'common', 'skills', 'SKILLS.md'));
+    const { rows } = parseSkillRegistryRows(content);
+    const dirs = skillDirs('common');
+    expect(rows.size).toBe(dirs.length);
+    for (const dirName of dirs) expect(rows.has(dirName)).toBe(true);
+    expectRowsMatchFrontmatter([...rows.values()], (skill) => {
+      const raw = readFileChecked(join(templatesDir, 'common', 'skills', skill, 'SKILL.md'));
+      return (yaml.load(raw.match(/^---\n([\s\S]*?)\n---/)![1]) ?? {}) as Record<string, string>;
+    });
+  });
+
+  test('root skills/SKILLS.md workspace section: bijection + frontmatter equality', () => {
+    const content = readFileChecked(join(repoRoot, 'skills', 'SKILLS.md'));
+    const { workspace } = splitRootRegistry(content);
+    const { rows } = parseSkillRegistryRows(workspace);
+    const rootSkillsDir = join(repoRoot, 'skills');
+    const dirs = readdirSync(rootSkillsDir).filter(e => existsSync(join(rootSkillsDir, e, 'SKILL.md'))).sort();
+    expect(rows.size).toBe(dirs.length);
+    for (const dirName of dirs) expect(rows.has(dirName)).toBe(true);
+    expectRowsMatchFrontmatter([...rows.values()], (skill) => {
+      const raw = readFileChecked(join(rootSkillsDir, skill, 'SKILL.md'));
+      return (yaml.load(raw.match(/^---\n([\s\S]*?)\n---/)![1]) ?? {}) as Record<string, string>;
+    });
+  });
+
+  test('root Variant-Exclusive catalog: bijection against variant dirs + values + variant cells', () => {
+    const content = readFileChecked(join(repoRoot, 'skills', 'SKILLS.md'));
+    const { catalog } = splitRootRegistry(content);
+    const rows = [...parseSkillRegistryRows(catalog).rows.values()];
+    expect(rows.length).toBeGreaterThan(0);
+
+    // Every variant-exclusive skill dir (not at root) indexed by name.
+    const rootSkillNames = new Set(
+      readdirSync(join(repoRoot, 'skills')).filter(e => existsSync(join(repoRoot, 'skills', e, 'SKILL.md'))),
+    );
+    const ownersBySkill = new Map<string, Set<string>>();
+    for (const variant of readdirSync(templatesDir).sort()) {
+      if (!variant.startsWith('co-')) continue;
+      for (const dirName of skillDirs(variant)) {
+        if (rootSkillNames.has(dirName)) continue;
+        if (!ownersBySkill.has(dirName)) ownersBySkill.set(dirName, new Set());
+        ownersBySkill.get(dirName)!.add(variant);
+      }
+    }
+    const { divergentSkills } = collectCatalogEntries(join(templatesDir), rootSkillNames);
+
+    for (const row of rows) {
+      const owners = ownersBySkill.get(row.skill);
+      expect(owners).toBeDefined();
+      if (!owners) continue;
+      const sorted = [...owners].sort();
+      const isDivergent = divergentSkills.has(row.skill);
+      if (!isDivergent) {
+        expect(row.notes).toBe(formatCatalogVariantCell(sorted));
+        // Value equality against the (identical) owner frontmatter.
+        const raw = readFileChecked(join(templatesDir, sorted[0]!, 'skills', row.skill, 'SKILL.md'));
+        const fm = (yaml.load(raw.match(/^---\n([\s\S]*?)\n---/)![1]) ?? {}) as Record<string, string>;
+        expect(row.version).toBe(String(fm.version));
+        expect(row.status).toBe(String(fm.status ?? 'active'));
+        expect(row.owner).toBe(String(fm.owner ?? '—'));
+        expect(row.lastReviewed).toBe(String(fm.last_reviewed ?? '—'));
+      }
+    }
+    // Bijection the other way: every non-divergent variant-exclusive skill has a row.
+    for (const skill of ownersBySkill.keys()) {
+      if (divergentSkills.has(skill)) continue; // divergent forks are reported, not cataloged
+      expect(rows.some(r => r.skill === skill)).toBe(true);
     }
   });
 });

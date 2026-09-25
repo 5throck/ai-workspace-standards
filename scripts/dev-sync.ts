@@ -1,4 +1,12 @@
-// @version 1.18.0
+// @version 1.19.0
+// v1.19.0: Step 4.63 runs `sync-skill-registries.ts` (apply mode) after the
+//           4.62 cascade re-publish — every /sync re-converges all skill
+//           registry tables (root workspace rows, root Variant-Exclusive
+//           catalog, common scaffold seed, curated variant registries) with
+//           the SKILL.md frontmatter they document, so a frontmatter bump
+//           plus /sync can no longer leave registry drift behind (spec:
+//           docs/designs/2026-09-25-registry-policy-completeness-design.md
+//           W5/R5.5). Idempotent; non-zero exit (crash) is fatal in L0.
 // v1.18.0: Step 2.6 runs `generate-scripts-mirror.ts` in write mode (Step 2.5
 //           existsSync + hard-exit idiom) on every sync — the L1 SCRIPTS.md
 //           registry span is a generated projection, so drift cannot land in a
@@ -830,6 +838,32 @@ if (isWorkspaceRoot) {
             }
         } else {
             console.log(`${YELLOW}⚠️  Cascade re-publish failed — continuing sync${RESET}`);
+        }
+    }
+}
+
+// 4.63 Skill registry sync — converge every skill registry table with the
+//     SKILL.md frontmatter it documents: root workspace rows, the root
+//     Variant-Exclusive catalog, the common scaffold seed, and the curated
+//     variant registries. Runs after 4.62 so cascaded template copies are in
+//     place. Apply mode is idempotent (exit 0 on drift — fixing it IS the
+//     job); a non-zero exit means the script crashed, which is fatal in L0 —
+//     committing un-converged registries would ship the drift forward.
+//     Design: docs/designs/2026-09-25-registry-policy-completeness-design.md W5.
+if (isWorkspaceRoot && fs.existsSync('scripts/sync-skill-registries.ts')) {
+    console.log('📋 Step 4.63: Syncing skill registries to SKILL.md frontmatter...');
+    const registrySyncRes = await $`bun scripts/sync-skill-registries.ts`.nothrow();
+    if (registrySyncRes.exitCode !== 0) {
+        const regSyncErr = registrySyncRes.stderr ? String(registrySyncRes.stderr).trim() : '';
+        if (isL0Context) {
+            console.error(`${RED}❌ Skill registry sync failed (exit ${registrySyncRes.exitCode}) — fatal in L0 context.${RESET}`);
+            if (regSyncErr) console.error(regSyncErr);
+            if (import.meta.main) {
+                process.exit(1);
+            }
+        } else {
+            console.warn(`${YELLOW}⚠️  Skill registry sync failed (exit ${registrySyncRes.exitCode}) — continuing sync${RESET}`);
+            if (regSyncErr) console.warn(regSyncErr);
         }
     }
 }

@@ -89,6 +89,20 @@ The PR D design estimated "11 fleet/common-delivered skills"; the fresh count is
 - `.codex/config.toml` project copies are **genuinely customized** (co-abap: `[features] codex_hooks = true` plus additions; co-consult: diverged ADR references and content). ADD_IF_MISSING is load-bearing. No TOML parser exists in `package.json`; a comment-preserving semantic TOML merge is new delivery machinery — outside this batch's non-goals.
 - `tests/unit/check-drift-classification.test.ts` pins `classifySettingsDrift` (propagate-to-templates.ts:772) — an **L1→L2** `.gemini/settings.json` classifier. `propagate-to-templates.ts` has no `.agents/mcp.json` / `.codex/config.toml` domain, and no variant carries `.agents/mcp.json`, so **no L1→L2 pair exists for the file** — that test file is not the extension surface (premise corrected with evidence; see D8). The real pins live in `tests/unit/upgrade-policy.test.ts` (JSON_MERGE test at lines 245-247; ADD_IF_MISSING pin for `.codex/config.toml` at line 104) and the `tests/unit/upgrade-tree-sync.test.ts` integration fixture pattern (codex-merge-claim-routing design D5: `mkdtempSync` + `git init` + spawn the real script with `--dry-run`/apply, assert verdicts and bytes; pre/post dry-run diff with an allowlist of permitted differences).
 
+### W5 — skill registry auto-sync + validation (added post-review, 2026-09-25)
+
+A full-tree audit on 2026-09-25 found the same defect class W1 fixed for variants surviving in the three registries no check covers:
+
+| Surface | Finding |
+|---|---|
+| `templates/common/skills/SKILLS.md` (scaffold seed) | **17 of 40 rows stale** vs delivered frontmatter (agent-lifecycle-manager 1.2.0 vs 1.3.0, skill-lifecycle-manager 1.4.0 vs 1.5.0, sync 1.3.0 vs 1.6.0, …). Drift introduced by frontmatter bump commits (e.g. `1d95ccdb`, 2026-09-21) that did not update the seed row. Invisible to every audit — the W1 test covers `templates/co-*` only. |
+| `skills/SKILLS.md` `### Variant-Exclusive Skills` catalog | The catalog was a PARTIAL inventory. Machine truth from the variant trees: 1 ghost row (`measure` — no dir in any variant), 14 stale rows (design 1.2.0 vs 1.2.1, html-build 1.3.1 vs 1.5.0, pdf-export 1.3.0 vs 2.1.1, research 1.2.0 vs 1.2.1, financial-modeling 1.0.0 vs 1.0.1, plus date/owner drift on 8 more), **123 missing rows** (every variant-exclusive skill added since the catalog was authored — co-safety's 52, co-abap's sap-*/abap-*, co-price's pricing set, …), and **7 multi-variant skills with divergent frontmatter** (competitive-intelligence, consulting-report-writing, executive-presentation, insight-synthesis, org-readiness-assessment, stakeholder-alignment, pdf-export) that the sync reports and leaves untouched. The workspace-skills rows above the catalog are clean (40/40). |
+| `templates/co-design/skills/SKILLS.md` | `accessibility-audit` row `last_reviewed 2026-09-12` vs frontmatter `2026-09-06` — survives because co-design/co-game are outside the W1 value-assertion loop (count-only). |
+
+Root cause: registry rows are updated by hand while SKILL.md frontmatter moves with every feature commit, and nothing reconciles one with the other. The scaffold reconcile (`new-project.ts` §6.4) fixes project copies but not the template/root sources, and its "UPDATED" log lines were observed confusing operators (a scaffold run reports drift the operator never authored).
+
+**W5 adds the missing mechanism, not just the fix:** a sync script that converges all four registry surfaces from frontmatter, wired as a dev-sync step so every `/sync` re-converges them, plus a VA-08 validator so non-dev-sync paths still catch drift.
+
 ---
 
 ## 2. Goals
@@ -98,6 +112,7 @@ The PR D design estimated "11 fleet/common-delivered skills"; the fresh count is
 3. G3 (W3): a machine check (VA-07) compares SKILL.md frontmatter versions across each variant's platform mirrors and against authored registry rows; it runs green today and soaks as WARN with a dated promotion ticket.
 4. G4 (W4): `.agents/mcp.json` upgrades by deep merge (project customizations preserved); `.codex/config.toml` keeps ADD_IF_MISSING with a documented rationale; dry-run matrix evidence proves preservation.
 5. G5: declaration/validation/policy truth only. No delivery-behavior change except the W2 common-agent section addition (flagged).
+6. G6 (W5): all four skill registry surfaces (root workspace rows, root Variant-Exclusive catalog, common scaffold seed, 13 curated variant registries) are machine-converged with SKILL.md frontmatter on every `/sync`, and a validator (VA-08, WARN soak) catches drift on every other path.
 
 ## 3. Non-goals
 
@@ -150,6 +165,19 @@ The PR D design estimated "11 fleet/common-delivered skills"; the fresh count is
 - R4.5. Add an integration fixture to `tests/unit/upgrade-tree-sync.test.ts`: a project `.agents/mcp.json` holding a project-only MCP server, with a template seed that adds a server. Assert apply-mode output contains both servers, the preserved list names the project-only entry, and the template server arrives.
 - R4.6. Produce the dry-run matrix evidence (§11): pre/post `--dry-run` diffs over two fixtures with customized `.agents/mcp.json` and `.codex/config.toml`. Only permitted difference: `.agents/mcp.json` verdict lines change from SYNC overwrite to JSON_MERGE; config.toml lines identical pre/post.
 
+### R5 — W5: skill registry auto-sync + validation
+
+- R5.1. Add pure reconcile functions to `scripts/helpers/skills-registry.ts` (v1.1.0 → 1.2.0): `collectRegistryDrift` (drift findings for one registry table vs a frontmatter record set), `splitRootRegistry` (workspace section vs Variant-Exclusive catalog section), `collectCatalogDrift` + `syncVariantExclusiveCatalog` (catalog-specific reconcile — the catalog's 7th column is `variant`, not `notes`), and `collectWorkspaceRegistryFindings` (read-only scan of all four surfaces under a workspace root).
+- R5.2. Add `scripts/sync-skill-registries.ts` (v1.0.0). Default apply mode converges all four surfaces in place; `--check` reports findings and exits 1 on drift (gate mode); `--dry-run` prints the planned changes without writing; `--root <dir>` retargets for fixtures. Idempotent: a second run must change nothing.
+- R5.3. Surfaces: (a) root `skills/SKILLS.md` Workspace Skills rows vs `skills/*/SKILL.md`; (b) root Variant-Exclusive catalog vs `templates/co-*/skills/*/SKILL.md` — prune rows whose skill dir exists in no variant, update values, append missing skills, set the variant cell to the sorted owner-variant list (`co-x only` singular; comma-joined plural); (c) `templates/common/skills/SKILLS.md` vs common dirs; (d) each `templates/co-*/skills/SKILLS.md` vs that variant's own dirs (forks reconcile against fork frontmatter by construction). Apply semantics reuse the scaffold-proven helpers: `pruneSkillRegistryRows` (dir-based keep-set) → `reconcileSkillRegistry` → `alignSkillRegistryRowsWithFrontmatter`.
+- R5.4. Never edit SKILL.md frontmatter, notes cells, or prose. Rows for dirs whose SKILL.md lacks a parseable version are kept and reported (`unparseable` finding), matching VA-07's fail-closed stance. Multi-variant skills with divergent frontmatter across their variants are reported (`catalog-divergent`) and left untouched — the sync never silently picks a winner.
+- R5.5. Wire `dev-sync.ts` Step 4.63 (workspace-root only, immediately after Step 4.62 cascade re-publish, before the commit): run the script in apply mode; non-zero exit (crash) is fatal in L0 context. Bump dev-sync `@version` to 1.19.0.
+- R5.6. Add VA-08 `skill-registry-sync` to `scripts/validate-templates.ts`: a single cross-surface check (called once in the main flow, next to VA-06) backed by `collectWorkspaceRegistryFindings`. Emit WARN per finding with the `(soak: WARN until promotion)` suffix per ADR-0055. Bump validate-templates `@version` to 1.45.0.
+- R5.7. File the promotion ticket `tickets/governance/T-20260925-007.yaml` (`kind: manual`, `not_before: '2026-10-09'` — aligned with the T-20260925-006 window) to flip VA-08 WARNs to Fail. Preconditions identical to R3.6.
+- R5.8. Extend `tests/unit/variant-skills-registry.test.ts`: common-seed bijection + value equality, root workspace-section bijection + value equality, root-catalog bijection against variant dirs + value equality + variant-cell correctness, and co-design/co-game upgraded from count-only to full value equality.
+- R5.9. Add `tests/unit/skill-registry-sync.test.ts`: fixture-based tests for drift detection/update, ghost prune, missing-row append, multi-variant catalog cells, `unparseable` and `catalog-divergent` findings, idempotency, and one CLI integration pass (`--check` exit 1 → apply → `--check` exit 0).
+- R5.10. One-time convergence: run the script over the real tree and commit the result — the 17 common-seed rows, the root-catalog ghost/stale/missing rows, and the co-design row. The mechanism ships already converged.
+
 ---
 
 ## 5. Acceptance criteria
@@ -189,6 +217,15 @@ The PR D design estimated "11 fleet/common-delivered skills"; the fresh count is
 
 - [ ] Full battery green: `bun scripts/audit.ts` (spec-check passes with this registered design), `bun scripts/validate-templates.ts`, `bun test`, `bun scripts/verify-scripts --verify`, lifecycle-sync-audit — no new FAIL/WARN versus the pre-change baseline except the removed findings in AC-2/AC-3.
 - [ ] PR evidence attached: validate-templates and audit tails (before/after), the dry-run matrix diffs, and the new-project fixture log showing the i18n-specialist Output Format section.
+
+### AC-6 (W5)
+
+- [ ] `bun scripts/sync-skill-registries.ts --check` exits 0 with zero findings on the converged tree EXCEPT the 7 known `catalog-divergent` findings (soaked WARNs — variant-maintained forks needing a human ruling); the pre-convergence run reported the expected drift (17 common-seed rows, co-design row, catalog: 1 ghost + 14 stale + 123 missing).
+- [ ] A second consecutive apply run changes no file (idempotency, byte-identical).
+- [ ] Induced-drift fixture (temp root): a stale row is updated, a ghost row pruned, a missing skill appended, a multi-variant skill's variant cell lists both owners, an unparseable-version row is kept and reported, divergent multi-variant frontmatter is reported and left untouched.
+- [ ] `bun scripts/validate-templates.ts` prints the VA-08 pass line with exactly the 7 known `catalog-divergent` WARNs on the converged tree (soak) and no other WARNs; the induced fixture yields the full VA-08 WARN set.
+- [ ] dev-sync Step 4.63 wired: runs on workspace root after 4.62, skipped elsewhere.
+- [ ] The promotion ticket `tickets/governance/T-20260925-007.yaml` exists with `not_before: '2026-10-09'`, `kind: manual`, listing VA-08.
 
 ---
 
@@ -256,6 +293,16 @@ The task brief expected to extend the `classifySettingsDrift` pins for the new p
 
 All four items are small, declaration/validation/policy-level changes; the codex-merge batch (T-010/T-011) shipped comparably scoped upgrade-behavior changes in one PR with fixture evidence. W4 is the only item touching upgrade behavior, and its risk is bounded by the byte-identical fleet state and the D5-style matrix — the PR description carries that evidence, which satisfies the PM's single-PR intent without a split. Order matters once: W1 precedes W3 (VA-07's registry cross-check reads the new rows). W2 is independent; W4 is independent.
 
+### D10 — W5 sync placement: /sync pipeline step, not a hook; validation as WARN-soaked VA-08
+
+| Option | Pro | Con | Decision |
+|---|---|---|---|
+| (a) dev-sync Step 4.63 apply-mode sync | Converges in the same commit that bumps frontmatter; one code path; idempotent so extra runs are free | Registry drift from manual edits persists until the next /sync | **Chosen** |
+| (b) PostToolUse hook on every SKILL.md write | Zero-lag convergence | Fires mid-edit on multi-file changes (partial state); hook latency on every skill touch; /sync remains the commit gate anyway | Rejected |
+| (c) Manual discipline (status quo) | No machinery | This is exactly how the 17-row seed drift, the catalog ghost row, and the co-design row accumulated | Rejected |
+
+Validation is layered: unit tests give fast CI feedback (extended to common seed, root sections, co-design/co-game — the three surfaces whose drift survived precisely because no test read them), VA-08 in validate-templates covers every other execution path and soaks as WARN per ADR-0055 with the T-20260925-007 promotion ticket (same 2026-10-09 window as VA-07's T-20260925-006, so both severity flips land in one review). The catalog section gets a dedicated reconcile because its 7th column is `variant`, not `notes` — running the generic notes-preserving reconcile over it would misread the column. Multi-variant skills (code-review/refactoring/test-driven-development live in co-develop and co-game today) list all owner variants in the cell; divergent frontmatter across owners is reported, never auto-resolved.
+
 ---
 
 ## 7. Accessibility (ADR-0065) and preview verification (ADR-0070) exemptions
@@ -273,6 +320,7 @@ All four items are small, declaration/validation/policy-level changes; the codex
 | Antigravity (GEMINI.md) | None — no `.gemini/` content changes; `.agents/mcp.json` policy change is platform-neutral claim data | N/A (justification: the policy SSOT and validators are platform-neutral; no GEMINI.md surface is touched) |
 | templates/common | Propagation required — the common i18n-specialist body gains a section (W2); `templates/common/scripts/lib/upgrade-policy.ts` L1 mirror updates in lockstep (W4); `templates/common/.agents/mcp.json` is the merge source (unchanged content) | templates/common/agents/i18n-specialist.md, templates/common/scripts/lib/upgrade-policy.ts |
 | Variant templates | 7 `skills/SKILLS.md` registries (W1); 13 i18n-specialist stubs unchanged but resolve against the updated body | templates/{co-abap,co-export,co-hr,co-news,co-price,co-safety,co-work}/skills/SKILLS.md |
+| Workspace root | `skills/SKILLS.md` rows + Variant-Exclusive catalog re-converged (W5); dev-sync gains Step 4.63 | skills/SKILLS.md, scripts/dev-sync.ts |
 
 ---
 
@@ -291,7 +339,9 @@ All four items are small, declaration/validation/policy-level changes; the codex
 | scripts/audit.ts | modify | `checkVariantAgentSections` resolves stubs; import `AGENT_LAYER1_SECTIONS` (R2.2); @version bump |
 | templates/common/agents/i18n-specialist.md | modify | +`## Output Format` section; frontmatter version 1.0.0 → 1.1.0 (R2.3) |
 | docs/templates/common-contract.json | modify | `common_agents["i18n-specialist"].version` → 1.1.0; contract version 1.7.0 → 1.8.0 (R2.4) |
-| scripts/validate-templates.ts | modify | `collectMirrorVersionMismatches` + `checkSkillMirrorVersionSync` (VA-07, WARN soak) wired after VA-03 (R3.1-R3.5); @version bump |
+| scripts/validate-templates.ts | modify | `collectMirrorVersionMismatches` + `checkSkillMirrorVersionSync` (VA-07, WARN soak) wired after VA-03 (R3.1-R3.5); @version bump; **v1.45.0 (W5): VA-08 `skill-registry-sync` cross-surface check (R5.6)** |
+| tickets/governance/T-20260925-007.yaml | create | VA-08 promotion ticket, not_before 2026-10-09 (R5.7) |
+| scripts/dev-sync.ts | modify | v1.19.0 — Step 4.63 `bun scripts/sync-skill-registries.ts` after cascade (R5.5); L1 mirror `templates/common/scripts/dev-sync.ts` in lockstep |
 | scripts/lib/upgrade-policy.ts | modify | v1.16.0 — `JSON_MERGE_FILES` += `.agents/mcp.json`; config.toml rationale comment (R4.1-R4.2) |
 | templates/common/scripts/lib/upgrade-policy.ts | modify | Lockstep mirror of the L0 edit (R4.3) |
 | tickets/governance/T-<next-id>.yaml | create | VA-07 promotion ticket, not_before 2026-10-09 (R3.6) |
@@ -302,8 +352,14 @@ All four items are small, declaration/validation/policy-level changes; the codex
 | tests/unit/upgrade-policy.test.ts | modify | `.agents/mcp.json` JSON_MERGE pin; config.toml pin kept (R4.4) |
 | tests/unit/upgrade-tree-sync.test.ts | modify | mcp.json merge integration fixture (R4.5) |
 | scripts/SCRIPTS.md | modify | Rows + @version bumps for changed scripts (cascade §10) |
+| scripts/helpers/skills-registry.ts | modify | v1.2.0 — `collectRegistryDrift`, `splitRootRegistry`, `collectCatalogDrift`, `syncVariantExclusiveCatalog`, `collectWorkspaceRegistryFindings` (R5.1) |
+| scripts/sync-skill-registries.ts | create | Registry convergence CLI — apply / `--check` / `--dry-run` / `--root` (R5.2) |
+| skills/SKILLS.md | modify | W5 first-run convergence: catalog ghost prune + stale updates + missing rows (R5.10) |
+| templates/common/skills/SKILLS.md | modify | W5 first-run convergence: 17 stale rows refreshed from frontmatter (R5.10) |
+| templates/co-design/skills/SKILLS.md | modify | W5 first-run convergence: accessibility-audit last_reviewed 09-12 → 09-06 (R5.10) |
+| tests/unit/skill-registry-sync.test.ts | create | Fixture + CLI integration tests (R5.9) |
 
-Execution order: Sequential — W1 registries first (W3's cross-check reads them), then W2 (resolver + audit + common body), then W3 (VA-07 + ticket), then W4 (policy + fixtures), then battery + evidence.
+Execution order: Sequential — W1 registries first (W3's cross-check reads them), then W2 (resolver + audit + common body), then W3 (VA-07 + ticket), then W4 (policy + fixtures), then W5 (helpers → CLI → VA-08 → dev-sync step → first-run convergence), then battery + evidence.
 
 ---
 
@@ -312,6 +368,7 @@ Execution order: Sequential — W1 registries first (W3's cross-check reads them
 | Artifact | Trigger | Action |
 |---|---|---|
 | scripts/SCRIPTS.md | audit.ts, resolve-pm-stub.ts, validate-templates.ts, lib/upgrade-policy.ts changed | Bump each `@version` header + Registry row: audit 2.44.0 → 2.45.0; resolve-pm-stub 1.1.0 → 1.2.0; validate-templates 1.43.0 → 1.44.0 (brief said 1.42.0 — actual HEAD is 1.43.0); upgrade-policy 1.15.0 → 1.16.0. Regenerate the scripts mirror |
+| scripts/SCRIPTS.md (W5) | sync-skill-registries.ts created; dev-sync.ts, validate-templates.ts, helpers/skills-registry.ts changed | + Registry row for sync-skill-registries 1.0.0; dev-sync 1.18.0 → 1.19.0; validate-templates 1.44.0 → 1.45.0; skills-registry 1.1.0 → 1.2.0. Regenerate the scripts mirror; L1 mirrors (templates/common/scripts/dev-sync.ts, validate-templates.ts) in lockstep |
 | templates/common/scripts mirrors | validate-templates.ts + lib/upgrade-policy.ts have L1 mirrors | Update `templates/common/scripts/validate-templates.ts` and `templates/common/scripts/lib/upgrade-policy.ts` in lockstep (upgrade-policy.test.ts guards the mirror); check-upgrade-coverage has no L1 mirror (correct per T-20260923-004) |
 | docs/templates/common-contract.json | i18n-specialist entry version change | Entry 1.0.0 → 1.1.0; contract version 1.7.0 → 1.8.0 |
 | docs/VERSION_MANIFEST.md | No root skills/ or agents/ lifecycle changes (the touched agent body is template-side) | None — no-drift confirmation expected at /sync |
@@ -329,6 +386,7 @@ Execution order: Sequential — W1 registries first (W3's cross-check reads them
 3. **W3 before/after**: before — VA-07 does not exist; fleet scan shows 0 mismatches (evidence in §1). After — validate-templates prints VA-07 pass lines, zero WARNs; induced-mismatch temp fixture yields exactly the expected findings (version diff, missing version, skip marker honored, registry disagreement, mirror-only skill ignored); promotion ticket file present with `not_before: '2026-10-09'`.
 4. **W4 dry-run matrix (D5 pattern)**: fixture A (co-develop-shaped minimal project) and fixture B (co-safety-shaped largest project), each seeded with a customized `.agents/mcp.json` (project-only server) and a customized `.codex/config.toml`. Capture pre-change `--dry-run --yes` output, apply the policy change, capture post-change, diff. Permitted differences: only `.agents/mcp.json` verdict lines (SYNC overwrite → JSON_MERGE). Forbidden: any config.toml verdict, any other verdict change. Then the apply-mode integration fixture proves the merged bytes contain both servers and the preserved log line.
 5. **Full battery**: `bun scripts/audit.ts` (spec-check green with this design registered), `bun scripts/validate-templates.ts`, `bun test`, `bun scripts/verify-scripts --verify`, lifecycle-sync-audit, upgrade dry-run on one real project (`Projects/co-work --dry-run`) with no new DRIFT lines. Attach tails + matrix diffs to the PR.
+6. **W5 before/after**: before — the sync script does not exist; a `--check`-equivalent scan reports 17 common-seed drifts + 1 co-design row + catalog (1 ghost, 14 stale, 123 missing, 7 divergent). After — `--check` exits 0 with only the 7 known `catalog-divergent` findings; second apply run is byte-identical (idempotency); the induced-drift fixture reproduces every finding kind; validate-templates prints the VA-08 pass line with only the 7 soaked WARNs. Attach the pre-convergence `--dry-run` output to the PR.
 
 ---
 
@@ -339,7 +397,8 @@ Execution order: Sequential — W1 registries first (W3's cross-check reads them
 3. **W3 VA-07**: add `collectMirrorVersionMismatches` + `checkSkillMirrorVersionSync` (WARN soak, skip-marker honored, registry cross-check) wired after VA-03; helper tests incl. the real-tree zero finding and the induced-mismatch fixture; file the promotion ticket YAML. Expect AC-3 green.
 4. **W4 policy**: `JSON_MERGE_FILES` += `'.agents/mcp.json'` + rationale comments both sides (L0 + L1 mirror); claim-pin tests; `upgrade-tree-sync` merge fixture; run the §11.4 dry-run matrix and save the diffs. Expect AC-4 green.
 5. **Cascades**: @version bumps + SCRIPTS.md rows (audit 2.45.0, resolve-pm-stub 1.2.0, validate-templates 1.44.0, upgrade-policy 1.16.0); L1 mirrors in lockstep; regenerate the scripts mirror.
-6. **Verification**: run the §11 plan; attach all evidence; hand to PM for QA gate and /sync.
+6. **W5 registry sync**: add the pure helpers to skills-registry.ts v1.2.0; write `scripts/sync-skill-registries.ts` v1.0.0 (apply/`--check`/`--dry-run`/`--root`); capture the pre-convergence `--dry-run` output; run apply; add VA-08 to validate-templates v1.45.0 + wire dev-sync v1.19.0 Step 4.63 (L1 mirrors in lockstep); write `tests/unit/skill-registry-sync.test.ts` and extend `variant-skills-registry.test.ts`; file the T-20260925-007 promotion ticket. Expect AC-6 green.
+7. **Verification**: run the §11 plan; attach all evidence; hand to PM for QA gate and /sync.
 
 ### Test list
 
@@ -349,6 +408,8 @@ Execution order: Sequential — W1 registries first (W3's cross-check reads them
 - validate-templates (VA-07): real-tree zero findings ×13 variants; induced version mismatch → 1 finding with both versions; missing version → finding; `mirror-parity: skip` → suppressed; registry-row disagreement → finding; mirror-only adapted copy (no row) → no finding.
 - upgrade-policy: `.agents/mcp.json` → JSON_MERGE/TEMPLATE TREE SYNC; `.codex/config.toml` → ADD_IF_MISSING (kept); L1 mirror byte-parity.
 - upgrade-tree-sync (integration): project-only MCP server survives apply-mode upgrade; template server arrives; preserved list logged.
+- skill-registry-sync: fixture drift → updated/ pruned/ appended correctly; multi-variant catalog cell lists both owners; `unparseable` keeps the row and reports; `catalog-divergent` reports without touching; apply is idempotent (second run zero-change); CLI `--check` exit 1 → apply → exit 0 over a fixture root; `collectWorkspaceRegistryFindings` real-tree zero after convergence.
+- variant-skills-registry (extended): common seed 40-row bijection + frontmatter equality; root workspace-section bijection + equality; root catalog bijection against variant dirs + equality + variant-cell correctness; co-design 4/4 and co-game 5/5 with full value equality.
 
 ---
 
