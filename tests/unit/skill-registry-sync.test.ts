@@ -11,6 +11,7 @@
  */
 import { describe, test, expect, afterAll } from 'bun:test';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import {
   collectRegistryDrift,
@@ -63,7 +64,7 @@ const CATALOG_HEADER = [
 const tmpRoots: string[] = [];
 
 function makeFixtureRoot(): string {
-  const root = mkdtempSync(join(resolve('/tmp'), 'skill-registry-sync-'));
+  const root = mkdtempSync(join(tmpdir(), 'skill-registry-sync-'));
   tmpRoots.push(root);
 
   // Root skills tree: alpha (stale row), ghost-skill (no dir), broken (no version).
