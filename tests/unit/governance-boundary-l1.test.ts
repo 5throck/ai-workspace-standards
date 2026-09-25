@@ -60,11 +60,16 @@ describe('governance-l1 boundary transforms (P1 bug 5)', () => {
     expect(out).toContain('- **No Cross-Project Modification**: Modifying files outside the project root during a session is forbidden.');
   });
 
-  test('CLAUDE.md transform output stays identical to the shipped L1 copy (AC5 byte-preservation)', () => {
+  test('CLAUDE.md transform output stays identical to the shipped L1 copy (AC5 byte-preservation, date-normalized)', () => {
     // publishGovernanceL1 skips the write when transformed === existing
     // ("already in sync") — so this equality is exactly the AC5 guarantee that
     // --governance-l1 --apply leaves templates/common/CLAUDE.md byte-identical.
-    expect(applyGovernanceTransforms(l0('CLAUDE.md'), 'CLAUDE.md')).toBe(l1('CLAUDE.md'));
+    // The `Last Updated: <date>` footer stamps the propagation day, so a run on
+    // any later day would fail a raw byte-compare (T-20260916-013 class) —
+    // normalize the stamp line on both sides; everything else stays byte-exact.
+    const stripStamp = (t: string) => t.replace(/\*Last Updated: \d{4}-\d{2}-\d{2}[^]*/, '*Last Updated: <date>*');
+    expect(stripStamp(applyGovernanceTransforms(l0('CLAUDE.md'), 'CLAUDE.md')))
+      .toBe(stripStamp(l1('CLAUDE.md')));
   });
 
   test('fatal guard: a surviving workspace heading dies() instead of shipping silently', () => {
