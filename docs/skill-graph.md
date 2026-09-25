@@ -322,6 +322,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `adr:0087` | adr | — | handbook | — |
 | `adr:0088` | adr | — | upgrade-project | — |
 | `adr:0089` | adr | — | project-resync, project-review | — |
+| `adr:0090` | adr | — | — | — |
 | `dec:DEC-20260825-01` | decision | — | — | — |
 | `dec:DEC-20260825-02` | decision | `sync` | — | — |
 | `dec:DEC-20260829-01` | decision | `decision-record` | — | — |
@@ -412,7 +413,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-news/docs/user-guide.md` | doc | `ai-tell-reduction`, `financial-infographic-svg`, `financial-journalism-style`, `financial-narrative-brief`, `k-dart`, `k-law`, `source-verification-ledger` | — | — |
 | `doc:co-news/docs/wire-format.md` | doc | `financial-narrative-brief`, `source-verification-ledger`, `style-lint-checklist` | — | — |
 | `doc:co-news/README.md` | doc | `ai-tell-reduction`, `financial-infographic-svg`, `financial-journalism-style`, `financial-narrative-brief`, `source-verification-ledger` | — | — |
-| `doc:co-price/AGENTS.md` | doc | `agent-lifecycle-manager`, `harness-verification`, `i18n-audit`, `map-channel-enforcement`, `price-waterfall-analysis`, `pricing-governance`, `skill-lifecycle-manager`, `version` | — | — |
+| `doc:co-price/AGENTS.md` | doc | `agent-lifecycle-manager`, `harness-verification`, `i18n-audit`, `map-channel-enforcement`, `meeting-facilitation`, `price-waterfall-analysis`, `pricing-governance`, `skill-lifecycle-manager`, `version` | — | — |
 | `doc:co-price/agents/cpa-auditor.md` | doc | `double-entry-reconciliation`, `harness-verification` | — | — |
 | `doc:co-price/agents/engagement-director.md` | doc | `pdf-export` | — | — |
 | `doc:co-price/agents/finance-strategy-lead.md` | doc | `price-waterfall-analysis` | — | — |

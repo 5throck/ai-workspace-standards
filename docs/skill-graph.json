@@ -383,6 +383,11 @@
       "layer": "L0"
     },
     {
+      "id": "adr:0090",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
       "id": "agent-lifecycle-manager",
       "type": "skill",
       "layer": "L0"
@@ -10700,6 +10705,12 @@
       "type": "cites_skill",
       "from": "doc:co-price/AGENTS.md",
       "to": "map-channel-enforcement",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/AGENTS.md",
+      "to": "meeting-facilitation",
       "source": "workflow-doc"
     },
     {

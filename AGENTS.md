@@ -590,7 +590,7 @@ Skills are distributed to the five platform directories via `scripts/sync-skills
 | Gemini CLI | `.gemini/skills/` | `.gemini/skills.json` |
 | Codex (CLI + Desktop App) | `.codex/skills/` | — (skills discovered via `.codex/prompts/` + config) |
 | Antigravity | `.agents/skills/` | `.agents/skills.json` |
-| Hermes Agent | `.hermes/skills/` | — (skills discovered by directory scan; project root must be listed in Hermes' `skills.trusted_project_dirs` — ADR-0088 D7) |
+| Hermes Agent | `.hermes/skills/` | — (skills discovered by directory scan; project root must be listed in Hermes' `skills.trusted_project_dirs`, and `hermes config set context_file_max_chars 100000` is REQUIRED onboarding — every AGENTS.md in this ecosystem exceeds Hermes' 20,000-char default and would be silently truncated, ADR-0088 D7) |
 
 > **Claude Desktop App**: Agent Skills consumer — reads no project-embedded directory; consumes the SKILL.md open format via claude.ai/Desktop upload (Settings → Capabilities) or the `/v1/skills` API; content source: `skills/` SSOT and `.claude/skills/` mirrors.
 

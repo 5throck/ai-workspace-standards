@@ -57,6 +57,6 @@ Every project follows this layout. Omit folders that don't apply to the project 
 - **Shared Memory**: `memory/` is strictly shared across all AI tools - not for general application data or temporary local logs.
 - **Locales**: `locales/` uses flat JSON files matching ISO language codes (`ko.json`, `en.json`, etc.).
 - **Orchestration**: `agents/pm.md` is always created - even for single-agent or simple projects.
-- **Agent Index**: `AGENTS.md` is always created at the project root - it is the canonical agent roster shared by all AI tools. Keep it in sync with `docs/context.md ## Agents` (or `CONSTITUTION.md` for the root workspace).
+- **Agent Index**: `AGENTS.md` is always created at the project root - it is the canonical agent roster shared by all AI tools. Keep it in sync with `docs/context.md ## Agents` (or `CONSTITUTION.md` for the root workspace). Structure and size budget are governed by ADR-0090 (thin dispatcher — pointer/reference model; AGENTS.md ≤15,000 chars at every layer, roster generated from `variant.json` + `agents/*.md`).
 - **Secrets**: `.env.sample` is always committed; `.env` is always in `.gitignore`.
 - **Root Directory Protection (ADR-0025)**: `docs/workspace-schema.json § rootAllowlist` (`files` + `dirs`) is the SSOT for what may exist at the workspace root — a default-deny allowlist. `audit.ts` fails on any root-level item not present in it. Test, debug, and temporary scripts MUST live under `tests/`, never at root; adding a new legitimate root item requires updating `rootAllowlist` in the same change.

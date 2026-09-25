@@ -692,7 +692,7 @@ Governance rules are enforced at three layers, ensuring coverage across all 7 su
 
 Platform extension to OpenAI Codex (CLI + Desktop App) is designed and Accepted per **ADR-0077** (`docs/adr/0077-codex-platform-support.md`): the `.codex/` platform directory, `CODEX.md` twin, and the enforcement-layer rows for the two new surfaces land through the implementation waves defined in `docs/designs/2026-09-12-codex-platform-support-design.md`.
 
-Platform extension to NousResearch Hermes Agent is designed and Accepted per **ADR-0088** (`docs/adr/0088-hermes-agent-platform-support.md`): the `.hermes/` platform directory (skills mirror only — Hermes reads `AGENTS.md` natively and invokes skills as `/<skill-name>`) and the project-root trust-list onboarding step (`skills.trusted_project_dirs`) land through the implementation waves defined in `docs/designs/2026-09-25-hermes-agent-platform-support-design.md`.
+Platform extension to NousResearch Hermes Agent is designed and Accepted per **ADR-0088** (`docs/adr/0088-hermes-agent-platform-support.md`): the `.hermes/` platform directory (skills mirror only — Hermes reads `AGENTS.md` natively and invokes skills as `/<skill-name>`), the project-root trust-list onboarding step (`skills.trusted_project_dirs`), and the mandatory `hermes config set context_file_max_chars 100000` step — every AGENTS.md in the ecosystem (L0 56.8k, L1 49.2k, L2 variants 27.9k–82.1k chars) exceeds Hermes' 20,000-char context-file default and would be silently truncated without it — land through the implementation waves defined in `docs/designs/2026-09-25-hermes-agent-platform-support-design.md` (see its Addendum 1 for the measured truncation evidence).
 
 #### 11.1 Three-Layer Enforcement Model
 
@@ -752,4 +752,4 @@ Agent, skill, and command frontmatter structures are validated against JSON Sche
 
 ---
 
-*Last Updated: 2026-09-25*
+*Last Updated: 2026-09-26*
