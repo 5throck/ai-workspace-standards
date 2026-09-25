@@ -428,122 +428,24 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 
 ## §3: PM Gateway Workflow
 
+**Thin-dispatcher section (ADR-0090)**: full phase protocol and ADR policy summaries → [`docs/governance/agents/pm-gateway-workflow.md`](docs/governance/agents/pm-gateway-workflow.md).
+
+### §3.6 3-Tier Strategy
+
+<!-- WORKSPACE-MANAGED: tier-model-mapping -->
+- **High-tier**: Complex reasoning, architectural design, planning (claude-opus-5-0 / gemini-3.1-pro / gpt-5.6-sol)
+- **Medium-tier**: Code review, testing, PR review, quality gates (claude-sonnet-5-0 / gemini-3.8-flash / gpt-5.6-terra)
+- **Low-tier**: Fast, repetitive coding, script maintenance (claude-haiku-4-5 / gemini-3.8-flash / gpt-5.6-luna)
+<!-- /WORKSPACE-MANAGED -->
+
+<!-- WORKSPACE-MANAGED: tier-model-mapping -->
+> **Note**: The `Model` column below shows the Claude Code short alias (`sonnet`/`opus`/`haiku`/`fable`) actually passed to the `Agent()` tool's `model` parameter — not the registry ID (e.g. `claude-sonnet-5-0`). See [CLAUDE.md §6](CLAUDE.md#6-native-sub-agents-agent-tool) for the registry-ID → alias translation table. On Gemini/Antigravity, use the literal model ID instead (see GEMINI.md's equivalent example).
+<!-- /WORKSPACE-MANAGED -->
+
+
+
+
 **Integrated from pm.md, CLAUDE.md §5, GEMINI.md §5**
-
-### §3.1 PM Gateway Policy
-
-**Single Point of Entry**: PM is the ONLY agent that users may directly invoke.
-All specialist agents require PM dispatch - enforced at 4 levels.
-
-#### §3.1.1 PM Direct Execution Scope
-
-PM is an escalation gateway, not an executor. **⚠️ CRITICAL**: PM MUST NOT perform Write/Edit on any file except `memory/*.md` and `CHANGELOG.md`. All file modifications MUST be dispatched to project specialists. See [PM Direct Execution Constraints](agents/pm.md#⚠️-critical-pm-direct-execution-constraints) in `agents/pm.md`.
-
-| Category | Tools | Scope |
-|----------|-------|-------|
-| Unconditional | Read, Glob, Grep, Agent, TaskCreate, TaskUpdate, AskUserQuestion, Skill, ToolSearch | Always allowed |
-| Conditional | Write, Edit | `memory/*.md` and `CHANGELOG.md` only |
-| Conditional | Bash | Read-only: `git status/diff/log`, `bun scripts/audit.ts`, `ls`, `cat` |
-| Forbidden | Write, Edit (all other paths) | Must delegate to project specialist |
-| Forbidden | Bash (write/execute patterns) | Must delegate to specialist |
-
-**Rationale**: PM is orchestrator, not executor. Direct execution violates governance separation of concerns. See [Role Clarification](agents/pm.md#⚠️-role-clarification) and [Task Tracking vs Execution](agents/pm.md#task-tracking-vs-execution) in `agents/pm.md`.
-
-When a specialist agent's required tool is denied, PM applies the [Permission Denial Protocol](#3.8-permission-denial-protocol) — never substitutes for the specialist.
-
-#### §3.1.2 PM Role Boundaries
-
-**What PM Does**:
-- Orchestrate multi-agent workflows
-- Create execution plans
-- Dispatch specialist agents
-- Enforce quality gates
-- Track progress
-
-**What PM Does NOT Do**:
-- Directly Edit/Write files (except `memory/*.md`, `CHANGELOG.md`)
-- Implement code or scripts
-- Perform documentation updates (delegate to `[docs specialist]`)
-- Perform design work (delegate to `[design specialist]`)
-
-**Task Owner vs Executor Distinction**:
-- **Task owner (PM)**: PM is accountable for task progress and final delivery
-- **Task executor (specialist)**: Agent who performs the actual work
-- PM creates tasks (owner: pm), dispatches project specialists (executor: `[specialist agent]`), and updates task status upon completion
-
-**User Communication for Specialist Tasks**:
-When work requires specialist delegation, PM uses the following template:
-```
-PM: 🔍 [Task Analysis] This task falls within the [specialist] domain of expertise.
-   Task: [description]
-   Specialist: [specialist name]
-   Reason: [why specialist needed]
-PM: Shall I dispatch [specialist]?
-User: "Yes"
-PM: ▶️ [specialist] dispatch...
-```
-
-See [agents/pm.md](agents/pm.md) for complete role definition and delegation protocols.
-
-#### §3.1.3 Enforcement Layers
-1. **Tool-Level**: Agent tool rejects non-PM specialist calls (hard enforcement)
-2. **System Prompt-Level**: CLAUDE.md/GEMINI.md rules loaded first
-3. **Agent File-Level**: All specialists have "PM-ONLY INVOCATION" section
-4. **QA Gate-Level**: Auditor detects bypass in Phase 6 QA
-
-#### §3.1.4 Specialist Agent Dispatch Flow
-```
-User Request → PM Triage → Design Approval → Specialist Dispatch → QA Gate → Finalization
-```
-
-#### §3.1.5 Specialist Agent Roster (PM-ONLY INVOCATION)
-
-All specialist agents below are dispatched ONLY through PM:
-
-<!-- VARIANT-DISPATCH-TRIGGERS-START -->
-| `msds-agent` | — | "msds-agent task needed", "msds-agent work required" |
-| `psm-agent` | — | "psm-agent task needed", "psm-agent work required" |
-| `training-agent` | — | "training-agent task needed", "training-agent work required" |
-| `battery-agent` | — | "battery-agent task needed", "battery-agent work required" |
-| `biotech-agent` | — | "biotech-agent task needed", "biotech-agent work required" |
-| `cosmetics-agent` | — | "cosmetics-agent task needed", "cosmetics-agent work required" |
-| `datacenter-agent` | — | "datacenter-agent task needed", "datacenter-agent work required" |
-| `defense-agent` | — | "defense-agent task needed", "defense-agent work required" |
-| `ehschem-agent` | — | "ehschem-agent task needed", "ehschem-agent work required" |
-| `ehsconst-agent` | — | "ehsconst-agent task needed", "ehsconst-agent work required" |
-| `food-agent` | — | "food-agent task needed", "food-agent work required" |
-| `gasterm-agent` | — | "gasterm-agent task needed", "gasterm-agent work required" |
-| `gcp-agent` | — | "gcp-agent task needed", "gcp-agent work required" |
-| `gdp-agent` | — | "gdp-agent task needed", "gdp-agent work required" |
-| `glp-agent` | — | "glp-agent task needed", "glp-agent work required" |
-| `gmp-agent` | — | "gmp-agent task needed", "gmp-agent work required" |
-| `gvp-agent` | — | "gvp-agent task needed", "gvp-agent work required" |
-| `logistics-agent` | — | "logistics-agent task needed", "logistics-agent work required" |
-| `meddevice-agent` | — | "meddevice-agent task needed", "meddevice-agent work required" |
-| `powergen-agent` | — | "powergen-agent task needed", "powergen-agent work required" |
-| `railway-agent` | — | "railway-agent task needed", "railway-agent work required" |
-| `semicon-agent` | — | "semicon-agent task needed", "semicon-agent work required" |
-| `shipbuilding-agent` | — | "shipbuilding-agent task needed", "shipbuilding-agent work required" |
-| `steelmaking-agent` | — | "steelmaking-agent task needed", "steelmaking-agent work required" |
-| `waste-agent` | — | "waste-agent task needed", "waste-agent work required" |
-| `safety-governance-manager` | 2, 6 | "safety-governance-manager task needed", "safety-governance-manager work required" |
-| `safety-workflow-manager` | — | "safety-workflow-manager task needed", "safety-workflow-manager work required" |
-| `asset-integrity-agent` | — | "asset-integrity-agent task needed", "asset-integrity-agent work required" |
-| `audit-agent` | — | "audit-agent task needed", "audit-agent work required" |
-| `compliance-agent` | — | "compliance-agent task needed", "compliance-agent work required" |
-| `contractor-safety-agent` | — | "contractor-safety-agent task needed", "contractor-safety-agent work required" |
-| `disaster-response-agent` | — | "disaster-response-agent task needed", "disaster-response-agent work required" |
-| `docs-writer` | — | "docs-writer task needed", "docs-writer work required" |
-| `emergency-agent` | — | "emergency-agent task needed", "emergency-agent work required" |
-| `incident-investigation-agent` | — | "incident-investigation-agent task needed", "incident-investigation-agent work required" |
-| `legal-agent` | — | "legal-agent task needed", "legal-agent work required" |
-| `occupational-health-agent` | — | "occupational-health-agent task needed", "occupational-health-agent work required" |
-| `reporting-agent` | — | "reporting-agent task needed", "reporting-agent work required" |
-| `risk-assessment-agent` | — | "risk-assessment-agent task needed", "risk-assessment-agent work required" |
-<!-- VARIANT-DISPATCH-TRIGGERS-END -->
-**⚠️ IMPORTANT**: Do NOT invoke any specialist agent directly. All requests must go through PM.
-
-> **Execution Plan Format**: For mandatory criteria, boilerplate table, and rules, see [§5 Execution Plan Templates](#5-execution-plan-templates). For platform-specific dispatch instructions, see `CLAUDE.md §5` or `GEMINI.md §5`.
 
 ### §3.5 Phase Determination (Deliverable-Type Gate)
 
@@ -607,26 +509,6 @@ Before assigning an agent to any task, PM MUST classify the deliverable type:
 > **Execution Plan Boilerplate Policy**: For mandatory and discretionary boilerplate cases, see [§3 (PM Gateway Workflow)](AGENTS.md#3-pm-gateway-workflow) above.
 
 
-### §3.6 3-Tier Strategy
-
-When leading execution and improvement tasks, PM MUST use the 3-Tier model strategy:
-
-<!-- WORKSPACE-MANAGED: tier-model-mapping -->
-- **High-tier**: Complex reasoning, architectural design, planning (claude-opus-5-0 / gemini-3.1-pro / gpt-5.6-sol)
-- **Medium-tier**: Code review, testing, PR review, quality gates (claude-sonnet-5-0 / gemini-3.8-flash / gpt-5.6-terra)
-- **Low-tier**: Fast, repetitive coding, script maintenance (claude-haiku-4-5 / gemini-3.8-flash / gpt-5.6-luna)
-<!-- /WORKSPACE-MANAGED -->
-
-### §3.7 Meeting Facilitation
-
-When `/meeting` is invoked, the PM orchestrates structured multi-agent discussions.
-
-**Meeting Process**:
-1. **Open meeting**: Set agenda and objectives
-2. **Facilitate dialogue**: Ensure all specialists contribute
-3. **Synthesize outcomes**: Cross-domain agent synthesizes agreements
-4. **Document results**: Write transcript to `memory/meeting-YYYY-MM-DD-[slug].md`
-
 ### §3.8 Permission Denial Protocol
 
 When a specialist agent's required tool is denied, PM must **not** substitute for the specialist. Instead:
@@ -637,6 +519,10 @@ When a specialist agent's required tool is denied, PM must **not** substitute fo
 4. Halt the blocked task — do not proceed without the required tool
 
 ---
+
+
+---
+
 
 <!-- COMMON-AGENTS:START -->
 ## Language Policy
@@ -708,279 +594,13 @@ Development-facing instruction text — requirement statements, task briefs, exe
 PM owns team composition and skill-change rulings. Hiring and firing: PM decides timing and target from workflow signals — recurring unmatched work types, role overload, absorbed roles, the quarterly roster review — and records every decision (ADR-0061 decision record + memory log) before dispatch; the default exit for a fired agent is `status: deprecated`, and hard delete requires an explicit user request. Skill requests: agents file structured `create|attach|remove` request blocks with evidence in their task reports and memory logs; PM triages them and only approved requests are executed — agents never create, attach, or remove skills unilaterally. Procedures: `agent-lifecycle-manager` and `skill-lifecycle-manager` skills. Full decision: ADR-0080 in the workspace root `docs/adr/`.
 <!-- COMMON-AGENTS:END -->
 
----
-
 ## §4: Other Workflows
 
-### §4.1 PM Subagent Dispatch Protocol
-
-The PM agent follows a three-level inheritance model: **L0 (workspace root)** → **L1 (common template)** → **L2 (variant templates)**.
-
-> **For PM Agent Architecture**: See [docs/context.md](docs/context.md) for complete governance workflow, L0→L1→L2 extends chain resolution, and variant-specific configuration.
-> ℹ️ In-template navigation: `docs/context.md` materializes at scaffold time. The variant-authored context in this template is `docs/co-safety.context.md`.
-
-#### Dispatch Decision
-
-```
-Request received
-  │
-  ├─▶ Read-only? (research, analysis, inspect)
-  │   └─▶ PARALLEL - dispatch multiple agents in a single message
-  │
-  └─▶ Write? (create/edit files, run tests)
-       └─▶ SERIAL - one agent at a time to prevent file lock conflicts
-```
-
-> **Why serial writes?** Concurrent writes to the same files cause merge conflicts and lock contention.
-> Always wait for a write agent to complete before dispatching the next.
-
-#### Cost Optimization (3-Tier Strategy)
-
-The PM uses the 3-tier model strategy defined in [§3.6 3-Tier Strategy](#36-3-tier-strategy) above to optimize cost and quality. This subsection adds dispatch-time adjustment rules on top of that base definition:
-
-**Tier Adjustment Rules:**
-- The PM can dynamically downgrade an agent's Tier for simple tasks (Assigned <= Baseline) to save costs.
-- The PM can NEVER upgrade a Tier above the baseline.
-- If a downgraded task fails, the PM MUST restore the agent's baseline Tier for the retry.
-
-> **Note on 3-Tier Strategy Models:**
-> The exact model configurations and prompt arguments (e.g. `thinking_level`) are explicitly managed within the workspace configuration files (`CLAUDE.md` and `GEMINI.md`). Please refer to those files for your specific tool's exact AI model mappings and tier strategies.
-
-The PM agent delegates execution to the Low-tier and delegates review to the Medium-tier before finalizing.
-
-#### Dispatch Rules
-
-1. **Autonomous Agent Handoffs** - Agents can dispatch each other directly via JSON contracts without PM intervention for routine workflows
-2. **PM Orchestration Phases** - PM only orchestrates Phases 0 (Team Assembly), 2 (Design Validation), and 5 (Lifecycle Finalization)
-3. **QA Gate** - PM executes qa scripts at Phase 6 (bun scripts/qa-gate.ts)
-4. **Parallel Agent Dispatch** - all parallel agents must be dispatched in one turn for research/analysis phases
-5. **Error handling** - if any parallel agent fails, responsible agent resolves failure before proceeding. Do not skip.
-6. **Max QA iterations** - 2 per review cycle before escalating to PM for intervention
-
-#### Subagent Roster
-
-| Agent | File | Tier | Parallelizable | Write Allowed? |
-|-------|------|------|:--------------:|:--------------:|
-| PM Orchestrator | `agents/pm.md` | Medium | - | orchestrates only |
-
-<!-- VARIANT-SUBAGENT-ROSTER-START -->
-| msds-agent | `agents/domains/functional/msds/msds-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| psm-agent | `agents/domains/functional/psm/psm-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| training-agent | `agents/domains/functional/training/training-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| battery-agent | `agents/domains/industry/battery/battery-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| biotech-agent | `agents/domains/industry/biotech/biotech-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| cosmetics-agent | `agents/domains/industry/cosmetics/cosmetics-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| datacenter-agent | `agents/domains/industry/datacenter/datacenter-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| defense-agent | `agents/domains/industry/defense/defense-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| ehschem-agent | `agents/domains/industry/ehschem/ehschem-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| ehsconst-agent | `agents/domains/industry/ehsconst/ehsconst-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| food-agent | `agents/domains/industry/food/food-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| gasterm-agent | `agents/domains/industry/gasterm/gasterm-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| gcp-agent | `agents/domains/industry/gcp/gcp-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| gdp-agent | `agents/domains/industry/gdp/gdp-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| glp-agent | `agents/domains/industry/glp/glp-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| gmp-agent | `agents/domains/industry/gmp/gmp-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| gvp-agent | `agents/domains/industry/gvp/gvp-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| logistics-agent | `agents/domains/industry/logistics/logistics-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| meddevice-agent | `agents/domains/industry/meddevice/meddevice-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| powergen-agent | `agents/domains/industry/powergen/powergen-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| railway-agent | `agents/domains/industry/railway/railway-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| semicon-agent | `agents/domains/industry/semicon/semicon-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| shipbuilding-agent | `agents/domains/industry/shipbuilding/shipbuilding-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| steelmaking-agent | `agents/domains/industry/steelmaking/steelmaking-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| waste-agent | `agents/domains/industry/waste/waste-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| safety-governance-manager | `agents/safety-governance-manager.md` | High | ⚠️ sequential preferred | orchestrates only |
-| safety-workflow-manager | `agents/safety-workflow-manager.md` | High | ⚠️ sequential preferred | orchestrates only |
-| asset-integrity-agent | `agents/_shared/asset-integrity-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| audit-agent | `agents/_shared/audit-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| compliance-agent | `agents/_shared/compliance-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| contractor-safety-agent | `agents/_shared/contractor-safety-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| disaster-response-agent | `agents/_shared/disaster-response-agent.md` | High | ⚠️ sequential preferred | orchestrates only |
-| docs-writer | `agents/_shared/docs-writer.md` | Medium | ⚠️ sequential preferred | project files |
-| emergency-agent | `agents/_shared/emergency-agent.md` | High | ⚠️ sequential preferred | orchestrates only |
-| incident-investigation-agent | `agents/_shared/incident-investigation-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| legal-agent | `agents/_shared/legal-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| occupational-health-agent | `agents/_shared/occupational-health-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| reporting-agent | `agents/_shared/reporting-agent.md` | Medium | ⚠️ sequential preferred | project files |
-| risk-assessment-agent | `agents/_shared/risk-assessment-agent.md` | Medium | ⚠️ sequential preferred | project files |
-<!-- VARIANT-SUBAGENT-ROSTER-END -->
-
-> **Agent frontmatter specification**: All agent files must include YAML frontmatter as defined in [docs/context.md](docs/context.md).
-
----
-
-### §4.2 Harness Engineering Workflow
-
-Following the **PM governance workflow** defined in [docs/context.md](docs/context.md):
-
-```
-Phase 0 - Project Initiation (PM-owned)
-  PM assesses workspace requirements
-  PM dynamically creates new agents/skills and resolves R&R overlap
-  PM updates AGENTS.md and maintains skill registry
-
-Phase 1-2 - Planning & Architecture (specialist-autonomous)
-  PM classifies the request; Architect produces implementation plan + ADR
-  Dispatch read-only agents in parallel (analysis, research)
-  PM synthesizes findings → acceptance criteria
-  PM validates design approach and obtains explicit user approval → GATE
-
-Phase 3 - Design Handoff (variant-specific)
-  Architect hands off approved plan to execution agents
-  Agents can dispatch each other directly for routine handoffs
-
-Phase 4 - Execution (specialist-autonomous)
-  `[implementation specialist]` implements per approved plan
-  `[docs specialist]` updates docs as needed
-  Agents can dispatch each other directly for routine handoffs
-
-Phase 5 - Lifecycle Finalization (PM-owned)
-  PM updates governance records for any changed artifacts
-  PM logs decisions to memory/YYYY-MM-DD.md
-
-Phase 6 - Quality Assurance & Finalization (PM-owned)
-  PM executes bun scripts/qa-gate.ts
-  Validates: workspace audit, project tests, documentation consistency
-  Maximum 2 iterations before PM escalation → GATE
-  PM runs /sync "type: description" → PR opened
-```
-
----
-
-### §4.3 Role Boundary Matrix
-
-Use this to resolve ambiguity when multiple agents could handle a request.
-
-| Scenario | Use | Do NOT use |
-|----------|-----|------------|
-| Orchestrate multi-step task across agents | `pm` | any execution agent |
-
-<!-- VARIANT-ROLE-BOUNDARY-START -->
-| MSDS / Chemical Safety specialist — manages chemical substance data, GHS classif | `msds-agent` | `pm` |
-| Process Safety Management specialist — manages PHA, MOC, PSSR, and LOTO for high | `psm-agent` | `pm` |
-| Safety and health education specialist — manages worker training plans, curricul | `training-agent` | `pm` |
-| Secondary Battery Safety specialist — manages battery cell manufacturing safety, | `battery-agent` | `pm` |
-| Biopharmaceutical CDMO & Bio-Lab Safety specialist — manages bioreactor SIP stea | `biotech-agent` | `pm` |
-| Cosmetics Safety specialist — manages cosmetics quality systems, CGMP batch rele | `cosmetics-agent` | `pm` |
-| Data Center Safety specialist — manages hyperscale IT infrastructure safety, lit | `datacenter-agent` | `pm` |
-| Defense & Explosives Safety specialist — manages ammunition propellant mixing ES | `defense-agent` | `pm` |
-| Chemical Plant Safety specialist (`KO term (see glossary)` `KO term (see glossary)`) — `KO term (see glossary)`/`KO term (see glossary)`/`KO term (see glossary)` plant operations | `ehschem-agent` | `pm` |
-| Construction Safety specialist (`construction safety`) — Korean construction industry safety mana | `ehsconst-agent` | `pm` |
-| Food & Beverage Safety specialist — manages food safety systems, HACCP CCP monit | `food-agent` | `pm` |
-| Gas Terminal Safety specialist (`KO term (see glossary)` `KO term (see glossary)KO term (see glossary)gasterm-agent` | `pm` |
-| Good Clinical Practice specialist — clinical trial management, IRB, informed con | `gcp-agent` | `pm` |
-| Good Distribution Practice specialist — pharmaceutical supply chain, storage, tr | `gdp-agent` | `pm` |
-| Good Laboratory Practice specialist — non-clinical safety studies, MFDS + ME + O | `glp-agent` | `pm` |
-| Good Manufacturing Practice (GMP) specialist — manages pharmaceutical quality sy | `gmp-agent` | `pm` |
-| Good Pharmacovigilance Practice specialist — post-market drug safety surveillanc | `gvp-agent` | `pm` |
-| Port Logistics & Automated Warehouse Safety specialist — manages port crane lift | `logistics-agent` | `pm` |
-| Medical Device Safety specialist — KGMP-MD + ISO 13485 + ISO 14971 | `meddevice-agent` | `pm` |
-| Power Generation Safety specialist (`KO term (see glossary)` `KO term (see glossary)KO term (see glossary)Electric Utility ActKO term (see glossary)powergen-agent` | `pm` |
-| Railway & Transit Infrastructure Safety specialist — manages 25kV catenary high- | `railway-agent` | `pm` |
-| Semiconductor & Display Safety specialist — manages cleanroom EHS, special gas h | `semicon-agent` | `pm` |
-| Shipbuilding & Offshore Safety specialist — manages ship tank confined space asp | `shipbuilding-agent` | `pm` |
-| Steelmaking & Heavy Metals Safety specialist — manages molten metal furnace expl | `steelmaking-agent` | `pm` |
-| Environmental Waste & Water Treatment Safety specialist — manages sewage H2S asp | `waste-agent` | `pm` |
-| Strategic safety governance —selects industry profiles, defines KPIs, approves p | `safety-governance-manager` | `pm` |
-| Harness Prompt agent —operational safety workflow execution, dynamic agent team  | `safety-workflow-manager` | `pm` |
-| Asset integrity specialist; preventative maintenance and aging equipment managem | `asset-integrity-agent` | `pm` |
-| Safety audit and evidence traceability —finding documentation, corrective action | `audit-agent` | `pm` |
-| Regulatory compliance validation —gap analysis, compliance checklists, and regul | `compliance-agent` | `pm` |
-| Contractor safety management; onboarding and monitoring of external workers | `contractor-safety-agent` | `pm` |
-| Disaster response specialist; handles natural disasters like typhoons and earthq | `disaster-response-agent` | `pm` |
-| Formats official documentation; enforces English-only policy and specific transl | `docs-writer` | `pm` |
-| Emergency response —scenario classification, immediate protocol activation, CSO  | `emergency-agent` | `pm` |
-| Incident investigation and root cause analysis (RCA) specialist | `incident-investigation-agent` | `pm` |
-| Real-time legal interpretation and compliance advisory based on South Korean EHS | `legal-agent` | `pm` |
-| Occupational health specialist; worker health examinations and environment monit | `occupational-health-agent` | `pm` |
-| Safety KPI reporting specialist; tracks TRIR, LTIR, and near-misses | `reporting-agent` | `pm` |
-| Workplace risk assessment specialist —hazard identification, risk scoring, contr | `risk-assessment-agent` | `pm` |
-<!-- VARIANT-ROLE-BOUNDARY-END -->
-
----
+**Thin-dispatcher section (ADR-0090)**: dispatch protocol, role boundary matrix, and schedules → [`docs/governance/agents/workflows.md`](docs/governance/agents/workflows.md).
 
 ## §5: Execution Plan Templates
 
-### §5.1 Standard Execution Plan Template
-
-> **Design Gate (Row 0)**: Workspace root (L0) and common template (L1) only.
-> L2 variant projects are exempt — they manage their own design workflow.
-
-| # | Task | Agent | Tier | Model | Spec |
-|---|------|-------|------|-------|------|
-| 0 | Create/update design doc → `docs/designs/<spec-id>-design.md` | architect | High | [model] | NEW |
-| 1 | [task description] | [specialist] | High/Medium/Low | [model] | <spec-id> |
-| N | `/sync "type(scope): message"` — lifecycle + audit + commit + push + PR | pm | Medium | [model] | |
-
-**Execution Order**: [Parallel | Sequential]
-
-**Key points**:
-- **Row 0 (Design Gate) is MANDATORY** for L0/L1 — design document must be created/updated before implementation
-- Tier column is MANDATORY (High/Medium/Low)
-- `/sync` is always the final step — it covers lifecycle update, full audit, commit, push, and PR creation
-- No separate Lifecycle Update or Final QA Audit rows needed — `/sync` handles both
-- State parallel vs sequential order below the table
-- "pm (direct)" is FORBIDDEN - PM never executes directly
-- **When a plan spans more than one PR**: merge each PR before branching for the next row's work, per [docs/context.md](docs/context.md) — `dev-sync.ts` touches shared pipeline files (CHANGELOG.md, memory logs, VERSION_MANIFEST.md, generated READMEs) on every commit, so unmerged parallel branches conflict by default. If parallel branches are genuinely required, this plan's Trade-offs section must state why.
-
-### §5.1.1 Design Gate Exemptions
-
-When a task falls into an exempt category, Row 0 is replaced with an exemption marker:
-
-| Category | ID | Description | Row 0 Format |
-|----------|----|-------------|--------------|
-| memory-log | E1 | Session log entry in `memory/YYYY-MM-DD.md` | `── EXEMPT: memory-log ──` |
-| changelog | E2 | `CHANGELOG.md` update only | `── EXEMPT: changelog ──` |
-| hotfix-typo | E3 | Typo fix, single-line change, trivial fix | `── EXEMPT: hotfix-typo ──` |
-| pure-readme | E4 | README.md body text only (no structural/design change) | `── EXEMPT: pure-readme ──` |
-| sync-only | E5 | `/sync` execution only (lifecycle finalization) | `── EXEMPT: sync-only ──` |
-
-**Rules**:
-- Exempt Row 0: Agent/Tier/Model columns left blank (`—`)
-- Only E1–E5 categories may be used — PM cannot invent ad-hoc exemptions
-- Abuse of exemptions is a governance violation
-
-### §5.2 Platform Parity Considerations
-
-When modifying files that affect both CLAUDE.md and GEMINI.md:
-
-| # | Task | Agent | Tier | Model | Spec | Platform |
-|---|------|-------|------|---------|----------|
-| 1 | [task] | [specialist] | [tier] | [model] | Both |
-| N | `/sync "type(scope): message"` | pm | Medium | [model] | Both |
-
-**Platform Column**: `Claude` / `Antigravity` / `Both` / `L0-only`
-
-**Note**: See execution plan boilerplate in CLAUDE.md §5, GEMINI.md §5, and agents/pm.md for the Platform column definition.
-
-### §5.3 Example Execution Plans
-
-#### Example 1: Multi-Agent Platform Parity Update
-
-<!-- WORKSPACE-MANAGED: tier-model-mapping -->
-> **Note**: The `Model` column below shows the Claude Code short alias (`sonnet`/`opus`/`haiku`/`fable`) actually passed to the `Agent()` tool's `model` parameter — not the registry ID (e.g. `claude-sonnet-5-0`). See [CLAUDE.md §6](CLAUDE.md#6-native-sub-agents-agent-tool) for the registry-ID → alias translation table. On Gemini/Antigravity, use the literal model ID instead (see GEMINI.md's equivalent example).
-<!-- /WORKSPACE-MANAGED -->
-
-| # | Task | Agent | Tier | Model | Spec |
-|---|------|-------|------|-------|------|
-| 1 | Update agents/pm.md | `[docs specialist]` | Medium | sonnet | <spec-id> |
-| 2 | Update scripts/audit.ts | `[implementation specialist]` | Low | haiku | <spec-id> |
-| 3 | Update CLAUDE.md §5 | `[docs specialist]` | Medium | sonnet | <spec-id> |
-| 4 | Update GEMINI.md §5 | `[docs specialist]` | Medium | sonnet | <spec-id> |
-| 5 | `/sync "docs(agents): update pm.md and platform dispatch rules"` | pm | Medium | sonnet | |
-
-**Execution Order**: Sequential (platform parity requires CLAUDE.md and GEMINI.md updates together)
-
-#### Example 2: Single Specialist Task
-
-| # | Task | Agent | Tier | Model | Spec |
-|---|------|-------|------|-------|------|
-| 1 | Update project README introduction | `[docs specialist]` | Medium | sonnet | <spec-id> |
-| 2 | `/sync "docs: update project README introduction"` | pm | Medium | sonnet | |
-
-**Execution Order**: Sequential
-
----
+**Thin-dispatcher section (ADR-0090)**: governed by [`docs/governance/agents/execution-plan-templates.md`](docs/governance/agents/execution-plan-templates.md) — Read before writing any execution plan.
 
 ## §6: Skills
 
