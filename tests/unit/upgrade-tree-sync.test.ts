@@ -27,7 +27,14 @@
  *         (the dedicated PROCEDURES pass owns the entry); a missing entry is
  *         still seeded NEW.
  *
- * @version 1.3.0
+ * v1.4.0 (2026-09-25, registry & platform-policy completeness batch — spec
+ *         docs/designs/2026-09-25-registry-policy-completeness-design.md R4.5):
+ *         new MCP JSON MERGE describe block — a project `.agents/mcp.json`
+ *        carrying a project-only MCP server survives an apply-mode upgrade:
+ *        both servers end up in the merged file, the preserved list names the
+ *        project-only entry, and the template server arrives (design D6).
+ *
+ * @version 1.4.0
  */
 import { cpSync, existsSync, mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -605,6 +612,90 @@ describe('upgrade-project.ts VARIANT ASSET DIRS claim routing (T-20260924-011)',
       expect(out).toContain('COPIED: decisions/gates.yaml');
       // Template content restored (the divergence was overwritten back).
       expect(readFileSync(join(tmp, rel), 'utf8')).toBe(tplContent);
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  }, 300000);
+});
+
+// ============================================================================
+// MCP JSON MERGE (.agents/mcp.json — spec 2026-09-25-registry-policy-completeness-design.md R4.5)
+// `.agents/mcp.json` joined JSON_MERGE_FILES in upgrade-policy v1.16.0 (design
+// D6): a project-registered MCP server must survive upgrades (the former
+// blanket `.agents` SYNC claim would have overwritten it), and the template
+// seed's server must still arrive.
+// ============================================================================
+describe('upgrade-project.ts MCP JSON MERGE (.agents/mcp.json, registry completeness R4.5)', () => {
+  test('apply-mode upgrade merges both MCP servers and logs the preserved project-only entry', () => {
+    const tmp = makeTempProject();
+    try {
+      // Project-only MCP server registration (the customization the old SYNC
+      // claim would have destroyed).
+      mkdirSync(join(tmp, '.agents'), { recursive: true });
+      writeFileSync(join(tmp, '.agents', 'mcp.json'), JSON.stringify({
+        mcpServers: {
+          'project-only-server': {
+            command: 'uvx',
+            args: ['project-mcp', 'serve'],
+          },
+        },
+      }, null, 2) + '\n');
+      spawnSync('git', ['-C', tmp, 'add', '-A'], { cwd: tmp });
+      spawnSync('git', ['-C', tmp, 'commit', '-q', '-m', 'chore: project mcp servers'], { cwd: tmp });
+
+      const result = spawnSync(
+        'bun',
+        [upgradeScript, tmp, '--variant', VARIANT, '--yes'],
+        { encoding: 'utf-8', timeout: 300000 }
+      );
+      if (result.status !== 0) {
+        console.error('stdout:', (result.stdout ?? '').slice(-3000));
+        console.error('stderr:', (result.stderr ?? '').slice(0, 2000));
+      }
+      expect(result.status).toBe(0);
+      const out = result.stdout ?? '';
+
+      // The merge verdict names the file and the preserved project-only entry.
+      expect(out).toContain('MERGE  .agents/mcp.json');
+      expect(out).toContain('preserved project-only: mcpServers.project-only-server');
+
+      // Merged bytes: the project-only server survived AND the template seed's
+      // graft server arrived.
+      const merged = JSON.parse(readFileSync(join(tmp, '.agents', 'mcp.json'), 'utf8'));
+      expect(merged.mcpServers['project-only-server']).toEqual({
+        command: 'uvx',
+        args: ['project-mcp', 'serve'],
+      });
+      expect(merged.mcpServers['graft']).toBeDefined();
+
+      // No overwrite verdict from any pass for the file.
+      expect(out).not.toContain('UPDATE .agents/mcp.json');
+      expect(out).not.toContain('COPIED: .agents/mcp.json');
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  }, 300000);
+
+  test('dry-run: .codex/config.toml never appears with a verdict; a present project copy is silent', () => {
+    const tmp = makeTempProject();
+    try {
+      mkdirSync(join(tmp, '.codex'), { recursive: true });
+      writeFileSync(join(tmp, '.codex', 'config.toml'), '[features]\ncodex_hooks = true\n');
+      spawnSync('git', ['-C', tmp, 'add', '-A'], { cwd: tmp });
+      spawnSync('git', ['-C', tmp, 'commit', '-q', '-m', 'chore: project codex config'], { cwd: tmp });
+
+      const result = spawnSync(
+        'bun',
+        [upgradeScript, tmp, '--variant', VARIANT, '--dry-run', '--yes'],
+        { encoding: 'utf-8', timeout: 300000 }
+      );
+      expect(result.status).toBe(0);
+      const out = result.stdout ?? '';
+      // ADD_IF_MISSING on an existing file is a silent seed-only skip — no
+      // config.toml verdict line of any kind in the run output.
+      expect(out).not.toContain('config.toml');
+      // …and the customized project bytes are untouched (dry-run writes nothing).
+      expect(readFileSync(join(tmp, '.codex', 'config.toml'), 'utf8')).toBe('[features]\ncodex_hooks = true\n');
     } finally {
       rmSync(tmp, { recursive: true, force: true });
     }

@@ -1,7 +1,21 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.43.0
+ * @version 1.44.0
+ * v1.43.0 → v1.44.0 (2026-09-25, registry & platform-policy completeness batch
+ *          — spec docs/designs/2026-09-25-registry-policy-completeness-design.md,
+ *          R3): new VA-07 variant-mirror version-sync check (verifier-expansion
+ *          §17.1 advisory A1 follow-up) — collectMirrorVersionMismatches (pure,
+ *          exported) compares SKILL.md frontmatter versions across a variant's
+ *          .claude/.gemini/.agents/.codex mirror skills (present in >= 2
+ *          mirrors; missing version is a finding), cross-checks curated
+ *          skills/SKILLS.md registry rows where they exist (mirror-only
+ *          adapted copies skipped), honors the VA-03 mirror-parity: skip /
+ *          gemini-parity: skip vocabulary, and is wired beside VA-03 in the
+ *          stable-variant loop. Severity: WARN soak per ADR-0055 — promotion
+ *          ticket T-20260925-006 (not_before 2026-10-09, separate from
+ *          T-20260925-002 whose enumerated scope stays intact). Day-one green:
+ *          0 mismatches across the 13-variant fleet.
  * v1.42.0 → v1.43.0 (2026-09-25, inventory decisions batch — spec
  *          docs/designs/2026-09-25-inventory-decisions-batch-design.md,
  *          T-20260924-002 R1.3-R1.5): C-CM-04 platform-skills sweep consumes
@@ -238,6 +252,7 @@ import { join, dirname, resolve, basename, relative } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { load } from 'js-yaml';
+import { parseSkillRegistryRows } from './helpers/skills-registry.ts';
 import { getScriptLayer, getSkillLayer, includeScriptInL1, parseScriptLayers, parseSkillLayers } from './helpers/layer-filter.ts';
 import { isTransientTestFixture } from './helpers/scaffold-markers.ts';
 import { scanMirrorHygiene } from './helpers/mirror-hygiene.ts';
@@ -3721,6 +3736,129 @@ function checkSkillPlatformParity(variant: string): void {
   }
 }
 
+// Check VA-07: SKILL.md frontmatter version sync across a variant's platform
+// mirrors (spec 2026-09-25-registry-policy-completeness-design.md R3, the
+// verifier-expansion design §17.1 accepted advisory A1 follow-up). Primary
+// rule: mirror-to-mirror equality per skill (present in >= 2 mirrors, version
+// via extractFrontmatterVersion; a missing version is a finding — fail-closed).
+// Secondary rule: when the variant's curated skills/SKILLS.md registry yields a
+// row for the skill, each present mirror's version must equal the row version
+// (mirror-only adapted copies have no row and are out of scope by
+// construction — e.g. the WS-05a adapted set). Exemption: the VA-03 vocabulary
+// (`mirror-parity: skip`, legacy `gemini-parity: skip`) excludes the skill.
+// Severity: WARN per ADR-0055 soak.
+// TODO(promotion): flip VA-07 findings to fail when
+// tickets/governance/T-20260925-006.yaml promotes (not_before 2026-10-09).
+export interface MirrorVersionMismatch {
+  skill: string;
+  message: string;
+}
+
+const VA07_MIRROR_DIRS = ['.claude', '.gemini', '.agents', '.codex'] as const;
+
+/**
+ * Pure core of VA-07 (T-004 convention): enumerate the union of skill dirs
+ * across the variant's existing platform-mirror `skills/` trees and collect
+ * version-sync findings. Reads only; emits nothing.
+ */
+export function collectMirrorVersionMismatches(variantDir: string, variant: string): MirrorVersionMismatch[] {
+  const findings: MirrorVersionMismatch[] = [];
+
+  // Authored registry rows (curated SKILLS.md) — the secondary cross-check's
+  // expected versions. An unparseable/absent registry simply contributes no rows.
+  const registryRows = new Map<string, string>();
+  const registryPath = join(variantDir, 'skills', 'SKILLS.md');
+  if (existsSync(registryPath)) {
+    try {
+      const { rows } = parseSkillRegistryRows(readFileSync(registryPath, 'utf-8'));
+      for (const [name, row] of rows) registryRows.set(name, row.version);
+    } catch { /* unreadable registry — no cross-check rows */ }
+  }
+
+  // skill name -> mirror -> frontmatter version (undefined = present but unparseable)
+  const versionsBySkill = new Map<string, Map<string, string | undefined>>();
+  for (const mirror of VA07_MIRROR_DIRS) {
+    const skillsDir = join(variantDir, mirror, 'skills');
+    if (!existsSync(skillsDir)) continue;
+    let skillDirs: string[];
+    try {
+      skillDirs = readdirSync(skillsDir).filter(e => {
+        try { return statSync(join(skillsDir, e)).isDirectory(); } catch { return false; }
+      });
+    } catch { continue; }
+    for (const skill of skillDirs) {
+      const skillMdPath = join(skillsDir, skill, 'SKILL.md');
+      if (!existsSync(skillMdPath)) continue;
+      let version: string | undefined;
+      try {
+        const raw = readFileSync(skillMdPath, 'utf-8');
+        version = extractFrontmatterVersion(raw);
+        // VA-03 exemption vocabulary — one exemption language for the file class.
+        const fmMatch = raw.match(/^---\n([\s\S]*?)\n---/);
+        if (fmMatch) {
+          let fm: Record<string, unknown> = {};
+          try { fm = (load(fmMatch[1]) as Record<string, unknown>) ?? {}; } catch { /* ignore */ }
+          if (fm['mirror-parity'] === 'skip' || fm['gemini-parity'] === 'skip') continue;
+        }
+      } catch { /* unreadable SKILL.md — treated as missing version */ }
+      if (!versionsBySkill.has(skill)) versionsBySkill.set(skill, new Map());
+      versionsBySkill.get(skill)!.set(mirror, version);
+    }
+  }
+
+  for (const [skill, byMirror] of versionsBySkill) {
+    if (byMirror.size < 2) continue; // VA-03 owns presence; VA-07 compares versions
+    const present = [...byMirror.entries()];
+    const versionList = present.map(([m, v]) => `${m}=${v ?? '(missing)'}`).join(', ');
+
+    if (present.some(([, v]) => v === undefined)) {
+      findings.push({
+        skill,
+        message: `${variant}/skills/${skill}: a platform-mirror SKILL.md has no parseable frontmatter version (${versionList})`,
+      });
+      continue; // mirror-to-mirror comparison is meaningless until versions parse
+    }
+
+    const [[baseMirror, baseVersion], ...rest] = present as Array<[string, string]>;
+    const divergent = rest.find(([, v]) => v !== baseVersion);
+    if (divergent) {
+      findings.push({
+        skill,
+        message: `${variant}/skills/${skill}: SKILL.md frontmatter version differs across platform mirrors (${baseMirror}=${baseVersion}, ${divergent[0]}=${divergent[1]}; all: ${versionList})`,
+      });
+    }
+
+    // Secondary rule: registry cross-check (only when a curated row exists —
+    // mirror-only adapted copies are skipped by construction).
+    const rowVersion = registryRows.get(skill);
+    if (rowVersion !== undefined) {
+      for (const [mirror, version] of present as Array<[string, string]>) {
+        if (version !== rowVersion) {
+          findings.push({
+            skill,
+            message: `${variant}/${mirror}/skills/${skill}/SKILL.md version ${version} != ${variant}/skills/SKILLS.md registry row version ${rowVersion}`,
+          });
+        }
+      }
+    }
+  }
+
+  return findings;
+}
+
+/** VA-07 wrapper — wired immediately after checkSkillPlatformParity (VA-03 family). */
+function checkSkillMirrorVersionSync(variant: string): void {
+  if (!JSON_MODE) console.log(`\n=== Check VA-07: skill version sync across platform mirrors (${variant}) ===`);
+  const findings = collectMirrorVersionMismatches(join(TEMPLATES_DIR, variant), variant);
+  // WARN soak per ADR-0055 — severity flip is ticket-gated (T-20260925-006).
+  for (const f of findings) {
+    warn(variant, 'VA-07', `${f.message} (soak: WARN until promotion)`, `Align the SKILL.md frontmatter version across all platform mirrors of ${variant} (and the curated registry row)`);
+  }
+  if (findings.length === 0) {
+    pass(`VA-07: ${variant} -- mirror skill versions in sync (mirrors and registry rows)`);
+  }
+}
+
 // Check WS-03: Common-Contract common_skills must be present in templates/common/skills/
 // common_skills are project skills (L0+L1+L2), provided by templates/common/skills/ at scaffold time.
 // They are NOT expected in templates/co-*/skills/ (empty delta after fork) nor in .claude/skills/.
@@ -5220,6 +5358,7 @@ function main(): number {
       checkPhaseSummaryAgents(variant);
       checkWorkspaceRootAgentIntrusion(variant);
       checkSkillPlatformParity(variant);
+      checkSkillMirrorVersionSync(variant);     // VA-07: mirror version sync (WARN soak, T-20260925-006)
       checkDocumentCommonSections(variant);
       checkCommands(variant);
       // Script parity check removed (dead code after ADR-0036 TypeScript migration)

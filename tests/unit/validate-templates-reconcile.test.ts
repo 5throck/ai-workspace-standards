@@ -14,11 +14,20 @@
  *         full-inventory state (zero unlisted platform skill dirs, all 22
  *         contract entries carry a codex_source).
  *
- * @version 1.1.0
+ * v1.2.0 (2026-09-25, registry & platform-policy completeness batch — spec
+ *         docs/designs/2026-09-25-registry-policy-completeness-design.md, R3):
+ *         pins VA-07 collectMirrorVersionMismatches — real-tree zero findings
+ *         across all 13 variants (day-one green), induced mirror version
+ *         mismatch (exactly one finding listing both versions), missing
+ *         version, mirror-parity: skip suppression, registry-row disagreement,
+ *         and mirror-only adapted copies without a registry row.
+ *
+ * @version 1.2.0
  */
-import { describe, test, expect } from 'bun:test';
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { describe, test, expect, afterEach } from 'bun:test';
+import { existsSync, readFileSync, readdirSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
+import { tmpdir } from 'node:os';
 import {
   findUndeclaredAgents,
   findUndeclaredScripts,
@@ -26,6 +35,7 @@ import {
   declaredPlatformTrees,
   stalePlatformSkillExclusions,
   unlistedPlatformSkillDirs,
+  collectMirrorVersionMismatches,
 } from '../../scripts/validate-templates.ts';
 
 const workspaceRoot = resolve(import.meta.dir, '..', '..');
@@ -90,6 +100,122 @@ describe('findUndeclaredAgents (B-03a)', () => {
     const agents = variantJson('co-safety').agents as Array<{ name: string }>;
     const undeclared = findUndeclaredAgents(join(templatesDir, 'co-safety'), agents);
     expect(undeclared.filter(p => p.includes('_shared') || p.includes('domains'))).toEqual([]);
+  });
+});
+
+describe('VA-07 collectMirrorVersionMismatches (registry completeness R3)', () => {
+  const scratchRoots: string[] = [];
+
+  afterEach(() => {
+    while (scratchRoots.length) rmSync(scratchRoots.pop()!, { recursive: true, force: true });
+  });
+
+  function makeVariantDir(): string {
+    const dir = mkdtempSync(join(tmpdir(), 'va07-'));
+    scratchRoots.push(dir);
+    return dir;
+  }
+
+  function writeSkill(variantDir: string, mirror: string, skill: string, frontmatter: string): void {
+    const dir = join(variantDir, mirror, 'skills', skill);
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(join(dir, 'SKILL.md'), `---\n${frontmatter}\n---\n\nBody.\n`, 'utf-8');
+  }
+
+  function writeRegistryRow(variantDir: string, skill: string, version: string): void {
+    const dir = join(variantDir, 'skills');
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(
+      join(dir, 'SKILLS.md'),
+      [
+        '# SKILLS.md — Skill Lifecycle Registry',
+        '',
+        '## Registry',
+        '',
+        '| skill | version | status | owner | last_reviewed | removal-date | notes |',
+        '|-------|---------|--------|-------|---------------|--------------|-------|',
+        `\| \`${skill}\` | ${version} | active | pm | — | — | test row |`,
+        '',
+      ].join('\n'),
+      'utf-8',
+    );
+  }
+
+  test('day-one green: zero findings across all 13 real variants', () => {
+    const variants = readdirSync(templatesDir)
+      .filter(d => d.startsWith('co-') && existsSync(join(templatesDir, d, 'variant.json')))
+      .sort();
+    expect(variants.length).toBe(13);
+    for (const variant of variants) {
+      const findings = collectMirrorVersionMismatches(join(templatesDir, variant), variant);
+      expect(findings).toEqual([]);
+    }
+  });
+
+  test('induced version mismatch: exactly one finding listing both versions', () => {
+    const variantDir = makeVariantDir();
+    writeSkill(variantDir, '.claude', 'widget-maker', 'version: 1.0.0');
+    writeSkill(variantDir, '.agents', 'widget-maker', 'version: 1.0.2');
+
+    const findings = collectMirrorVersionMismatches(variantDir, 'co-test');
+    expect(findings.length).toBe(1);
+    expect(findings[0]!.skill).toBe('widget-maker');
+    expect(findings[0]!.message).toContain('1.0.0');
+    expect(findings[0]!.message).toContain('1.0.2');
+    expect(findings[0]!.message).toContain('.claude');
+    expect(findings[0]!.message).toContain('.agents');
+  });
+
+  test('a mirror with no parseable version yields a finding', () => {
+    const variantDir = makeVariantDir();
+    writeSkill(variantDir, '.claude', 'widget-maker', 'version: 1.0.0');
+    writeSkill(variantDir, '.codex', 'widget-maker', 'name: widget-maker'); // no version
+
+    const findings = collectMirrorVersionMismatches(variantDir, 'co-test');
+    expect(findings.length).toBe(1);
+    expect(findings[0]!.message).toContain('no parseable frontmatter version');
+  });
+
+  test('mirror-parity: skip suppresses the skill; legacy gemini-parity: skip also suppresses', () => {
+    const variantDir = makeVariantDir();
+    writeSkill(variantDir, '.claude', 'widget-maker', 'version: 1.0.0\nmirror-parity: skip');
+    writeSkill(variantDir, '.agents', 'widget-maker', 'version: 9.9.9');
+    expect(collectMirrorVersionMismatches(variantDir, 'co-test')).toEqual([]);
+
+    const variantDir2 = makeVariantDir();
+    writeSkill(variantDir2, '.gemini', 'widget-maker', 'version: 1.0.0\ngemini-parity: skip');
+    writeSkill(variantDir2, '.codex', 'widget-maker', 'version: 9.9.9');
+    expect(collectMirrorVersionMismatches(variantDir2, 'co-test')).toEqual([]);
+  });
+
+  test('registry-row disagreement yields a finding when versions are mirror-consistent', () => {
+    const variantDir = makeVariantDir();
+    writeSkill(variantDir, '.claude', 'widget-maker', 'version: 1.0.0');
+    writeSkill(variantDir, '.gemini', 'widget-maker', 'version: 1.0.0');
+    writeRegistryRow(variantDir, 'widget-maker', '1.1.0');
+
+    const findings = collectMirrorVersionMismatches(variantDir, 'co-test');
+    expect(findings.length).toBe(2); // one per present mirror
+    for (const f of findings) {
+      expect(f.message).toContain('registry row version 1.1.0');
+    }
+  });
+
+  test('registry-row agreement yields no finding; mirror-only skills without rows are ignored', () => {
+    const variantDir = makeVariantDir();
+    writeSkill(variantDir, '.claude', 'listed-skill', 'version: 1.0.0');
+    writeSkill(variantDir, '.agents', 'listed-skill', 'version: 1.0.0');
+    writeSkill(variantDir, '.claude', 'mirror-only-skill', 'version: 1.0.1'); // WS-05a shape
+    writeSkill(variantDir, '.codex', 'mirror-only-skill', 'version: 1.0.1');
+    writeRegistryRow(variantDir, 'listed-skill', '1.0.0'); // no row for mirror-only-skill
+
+    expect(collectMirrorVersionMismatches(variantDir, 'co-test')).toEqual([]);
+  });
+
+  test('single-mirror skills are out of scope (VA-03 owns presence)', () => {
+    const variantDir = makeVariantDir();
+    writeSkill(variantDir, '.claude', 'lonely-skill', 'version: 1.0.0');
+    expect(collectMirrorVersionMismatches(variantDir, 'co-test')).toEqual([]);
   });
 });
 

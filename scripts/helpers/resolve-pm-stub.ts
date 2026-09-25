@@ -1,5 +1,13 @@
 #!/usr/bin/env bun
-// @version 1.1.0
+// @version 1.2.0
+// v1.2.0 (2026-09-25, registry & platform-policy completeness batch — spec
+//          docs/designs/2026-09-25-registry-policy-completeness-design.md R2.1):
+//          adds the pure, read-only `composeResolvedAgentContent(agentPath,
+//          commonAgentPath, variant, opts)` — it returns exactly the content
+//          `resolveAgentExtendsStub` would write, without touching the
+//          filesystem (validators must not mutate the tree they audit). The
+//          resolver is refactored to consume the compose path, so one merge
+//          implementation exists and parity is structural.
 // v1.1.0 (2026-09-25, inventory decisions batch — spec
 //          2026-09-25-inventory-decisions-batch-design, R2.2): generic
 //          `resolveAgentExtendsStub(agentPath, commonAgentPath, variant, opts)`
@@ -76,29 +84,54 @@ export interface ResolveAgentStubOptions {
   isCanonicalStubBody?: (body: string, variant: string) => boolean;
 }
 
+export interface ComposedResolvedAgent {
+  /**
+   * true when the file carries `extends:` and the L1 body is available — i.e.
+   * `resolveAgentExtendsStub` would rewrite the file to `content`.
+   */
+  composed: boolean;
+  /**
+   * The exact content the resolver would write when `composed` is true; the
+   * file's original content when it would not (no `extends:`, or missing L1 —
+   * the resolver leaves the file untouched in both cases).
+   */
+  content: string;
+  /** stub body shape: 'prose' (non-empty stub body) or 'empty' */
+  shape?: 'prose' | 'empty';
+  /** prose stub whose body is NOT the canonical stub prose (H12 — content discarded) */
+  nonCanonical?: boolean;
+  /** length of the discarded prose body when nonCanonical (for the H12 warning) */
+  proseBodyLength?: number;
+  /** extends-stub detected but the L1 common body was unavailable */
+  missingL1?: boolean;
+}
+
 /**
- * Resolve an ADR-0033 extends-stub `agentPath` in place against the L1 body at
- * `commonAgentPath`. No-op when the file has no `extends:` frontmatter.
- * Generic form (T-20260924-003 R2.2) — pm is the pm.md-specific invocation
- * {@link resolvePmExtendsStub}; the variant i18n-specialist.md stubs resolve
- * with no injected body check.
+ * Pure counterpart to {@link resolveAgentExtendsStub} (v1.2.0, registry
+ * completeness R2.1): compute the resolved, self-contained content an
+ * extends-stub resolves to WITHOUT writing anything. Read-only validators
+ * (audit.ts `checkVariantAgentSections`) compose against this so a section
+ * gate can validate the resolved body end-to-end without mutating the
+ * template tree it audits (design D3 — the in-place writer stays for the
+ * scaffold/adopt delivery paths, which both consume the same merge logic
+ * through {@link resolveAgentExtendsStub}).
  */
-export function resolveAgentExtendsStub(
+export function composeResolvedAgentContent(
   agentPath: string,
   commonAgentPath: string,
   variant: string,
   opts: ResolveAgentStubOptions = {},
-): ResolveAgentStubResult {
+): ComposedResolvedAgent {
   const content = readFileSync(agentPath, 'utf8');
   const fmMatch = content.match(/^---\n([\s\S]*?)\n---\n?/);
   const body = fmMatch ? content.slice(fmMatch[0].length) : content;
   if (!fmMatch || !/extends:/.test(fmMatch[1])) {
-    return { resolved: false };
+    return { composed: false, content };
+  }
+  if (!existsSync(commonAgentPath)) {
+    return { composed: false, content, missingL1: true };
   }
   const isProseStub = body.trim() !== '';
-  if (!existsSync(commonAgentPath)) {
-    return { resolved: false, missingL1: true };
-  }
   const l1Content = readFileSync(commonAgentPath, 'utf8');
   const l1FmMatch = l1Content.match(/^---\n([\s\S]*?)\n---\n?/);
   const l1Body = l1FmMatch ? l1Content.slice(l1FmMatch[0].length) : l1Content;
@@ -132,14 +165,50 @@ export function resolveAgentExtendsStub(
     resolvedBody = `${resolvedBody.trimEnd()}\n\n${injectedSections.join('\n\n')}\n`;
   }
   const mergedFm = '---\n' + (yaml.dump(stubFm) as string).trimEnd() + '\n---\n';
-  let nonCanonical = false;
   if (isProseStub) {
-    nonCanonical = opts.isCanonicalStubBody ? !opts.isCanonicalStubBody(body, variant) : false;
-    writeFileSync(agentPath, mergedFm + '\n' + resolvedBody, 'utf8');
-    return { resolved: true, shape: 'prose', nonCanonical, proseBodyLength: body.trim().length };
+    const nonCanonical = opts.isCanonicalStubBody ? !opts.isCanonicalStubBody(body, variant) : false;
+    return {
+      composed: true,
+      content: mergedFm + '\n' + resolvedBody,
+      shape: 'prose',
+      nonCanonical,
+      proseBodyLength: body.trim().length,
+    };
   }
-  writeFileSync(agentPath, mergedFm + body + (body.endsWith('\n') ? '' : '\n') + resolvedBody, 'utf8');
-  return { resolved: true, shape: 'empty' };
+  return {
+    composed: true,
+    content: mergedFm + body + (body.endsWith('\n') ? '' : '\n') + resolvedBody,
+    shape: 'empty',
+  };
+}
+
+/**
+ * Resolve an ADR-0033 extends-stub `agentPath` in place against the L1 body at
+ * `commonAgentPath`. No-op when the file has no `extends:` frontmatter.
+ * Generic form (T-20260924-003 R2.2) — pm is the pm.md-specific invocation
+ * {@link resolvePmExtendsStub}; the variant i18n-specialist.md stubs resolve
+ * with no injected body check.
+ *
+ * v1.2.0: the merge itself lives in the pure {@link composeResolvedAgentContent};
+ * this writer only performs the filesystem mutation the delivery paths need.
+ */
+export function resolveAgentExtendsStub(
+  agentPath: string,
+  commonAgentPath: string,
+  variant: string,
+  opts: ResolveAgentStubOptions = {},
+): ResolveAgentStubResult {
+  const composed = composeResolvedAgentContent(agentPath, commonAgentPath, variant, opts);
+  if (!composed.composed) {
+    return composed.missingL1 ? { resolved: false, missingL1: true } : { resolved: false };
+  }
+  writeFileSync(agentPath, composed.content, 'utf8');
+  return {
+    resolved: true,
+    shape: composed.shape,
+    nonCanonical: composed.nonCanonical,
+    proseBodyLength: composed.proseBodyLength,
+  };
 }
 
 /**

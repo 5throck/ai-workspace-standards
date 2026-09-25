@@ -25,7 +25,14 @@
  *         and the 13 pm.md stubs (real template files), false on full bodies,
  *         frontmatter without extends:, and prose mentions outside frontmatter.
  *
- * @version 1.3.0
+ * v1.4.0 (2026-09-25, registry & platform-policy completeness batch — spec
+ *         docs/designs/2026-09-25-registry-policy-completeness-design.md R4.4):
+ *         `.agents/mcp.json` joins JSON_MERGE_FILES (design D6 — same genus as
+ *         root `.mcp.json`; project-only MCP servers must survive upgrades);
+ *         the `.codex/config.toml` ADD_IF_MISSING pin stays as the regression
+ *         proof for the documented ADD_IF_MISSING ruling (design D7).
+ *
+ * @version 1.4.0
  */
 import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -35,6 +42,7 @@ import {
   TEMPLATE_TREE_SYNC_PASS,
   VARIANT_ASSET_DIRS_PASS,
   GOVERNANCE_FILES,
+  JSON_MERGE_FILES,
   PLACEHOLDER_ALLOWLIST,
   SCAFFOLD_COMMON_OWNED_FILES,
   isExtendsStub,
@@ -245,6 +253,17 @@ describe('upgrade-policy resolveClaim — default-policy inversion (the gap fix)
   test('platform settings are JSON_MERGE via TEMPLATE TREE SYNC', () => {
     expect(resolveClaim('.claude/settings.json', VARIANT)).toEqual({ policy: 'JSON_MERGE', pass: TEMPLATE_TREE_SYNC_PASS });
     expect(resolveClaim('.gemini/settings.json', VARIANT)).toEqual({ policy: 'JSON_MERGE', pass: TEMPLATE_TREE_SYNC_PASS });
+  });
+
+  test('.agents/mcp.json is JSON_MERGE via TEMPLATE TREE SYNC (registry completeness R4.1, design D6)', () => {
+    // Routed by JSON_MERGE_FILES membership — which must stay ABOVE the
+    // blanket `.agents` SYNC claim in resolveClaim, or the merge is dead code.
+    expect(JSON_MERGE_FILES).toContain('.agents/mcp.json');
+    expect(resolveClaim('.agents/mcp.json', VARIANT)).toEqual({ policy: 'JSON_MERGE', pass: TEMPLATE_TREE_SYNC_PASS });
+  });
+
+  test('.codex/config.toml stays ADD_IF_MISSING (registry completeness R4.2 regression proof, design D7)', () => {
+    expect(resolveClaim('.codex/config.toml', VARIANT)).toEqual({ policy: 'ADD_IF_MISSING', pass: TEMPLATE_TREE_SYNC_PASS });
   });
 
   test('docs workspaces are WORKSPACE seeds (add-if-missing only)', () => {
