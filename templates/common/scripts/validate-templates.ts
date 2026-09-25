@@ -1,12 +1,17 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.46.0
+ * @version 1.46.1
  *
+ * v1.46.1 (2026-09-26, ADR-0090 program closure — design Addendum 3): the
+ *         size-budget arm's WARN message and header note record the user
+ *         decision that the W4 FAIL promotion is cancelled and the budget
+ *         stays a WARN-level visibility metric permanently.
  * v1.46.0 (2026-09-26, ADR-0090 W0): two WARN-stage arms precede the AGENTS.md
  *         thin-dispatcher restructure — `agents-md-size-budget` (every
- *         AGENTS.md ≤15,000 chars at L0/L1/L2; FAIL promotion at W4 per
- *         docs/designs/2026-09-25-agents-md-size-reduction-design.md) and
+ *         AGENTS.md ≤15,000 chars at L0/L1/L2; per user decision 2026-09-26
+ *         (design Addendum 3) this stays a WARN-level visibility metric — the
+ *         W4 FAIL promotion is cancelled) and
  *         `agents-md-pointer-integrity` (markdown references to
  *         docs/governance/*.md, docs/constitution/*.md and the layer's
  *         context.md must resolve on disk; multi-base resolution: workspace
@@ -5458,8 +5463,8 @@ function checkAgentsMdSizeBudget(): void {
     const size = readFileSync(t.path, 'utf-8').length;
     if (size > AGENTS_MD_SIZE_BUDGET) {
       warn(t.variant, 'agents-md-size-budget',
-        `${t.path}: ${size.toLocaleString()} chars exceeds the 15,000-char thin-dispatcher budget (ADR-0090) — restructure per docs/designs/2026-09-25-agents-md-size-reduction-design.md`,
-        `Move section bodies to docs/governance/*.md (or the layer's context.md) and keep the pointer table`);
+        `${t.path}: ${size.toLocaleString()} chars exceeds the 15,000-char thin-dispatcher budget (ADR-0090) — user decision 2026-09-26 (design Addendum 3): WARN-only visibility metric, no FAIL promotion and no further reduction; Hermes consumers use the documented context_file_max_chars config`,
+        `If truncation matters for a harness, see the config backstop in AGENTS.md §6`);
     } else {
       pass(`${t.path}: ${size.toLocaleString()} chars (within budget)`);
     }
