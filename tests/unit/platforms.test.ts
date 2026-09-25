@@ -1,5 +1,6 @@
 /**
- * Tests for lib/platforms.ts (spec: docs/designs/2026-09-24-platform-ssot-constant-design.md).
+ * Tests for lib/platforms.ts (spec: docs/designs/2026-09-24-platform-ssot-constant-design.md;
+ * .hermes added by ADR-0088 W1).
  *
  * The platform-list constants are order-frozen SSOTs: these tests pin exact
  * values AND exact order so a future platform insertion is a reviewed,
@@ -12,33 +13,35 @@ import { PLATFORM_SKILL_BASES, PLATFORM_MIRROR_DIRS } from '../../scripts/lib/pl
 import { PLATFORM_MIRROR_DIRS as MIRROR_DIRS_VIA_FRESHNESS } from '../../scripts/lib/platform-mirror-freshness.ts';
 
 describe('PLATFORM_SKILL_BASES', () => {
-  it('deep-equals the exact 5-element list in exact order (skills/ SSOT first)', () => {
+  it('deep-equals the exact 6-element list in exact order (skills/ SSOT first)', () => {
     expect(PLATFORM_SKILL_BASES).toEqual([
       'skills',
       '.claude/skills',
       '.gemini/skills',
       '.agents/skills',
       '.codex/skills',
+      '.hermes/skills',
     ]);
   });
 
-  it('has exactly 5 elements', () => {
-    expect(PLATFORM_SKILL_BASES).toHaveLength(5);
+  it('has exactly 6 elements', () => {
+    expect(PLATFORM_SKILL_BASES).toHaveLength(6);
   });
 });
 
 describe('PLATFORM_MIRROR_DIRS', () => {
-  it('deep-equals the exact 4-element list in exact order', () => {
+  it('deep-equals the exact 5-element list in exact order', () => {
     expect(PLATFORM_MIRROR_DIRS).toEqual([
       '.claude/skills',
       '.gemini/skills',
       '.agents/skills',
       '.codex/skills',
+      '.hermes/skills',
     ]);
   });
 
-  it('has exactly 4 elements', () => {
-    expect(PLATFORM_MIRROR_DIRS).toHaveLength(4);
+  it('has exactly 5 elements', () => {
+    expect(PLATFORM_MIRROR_DIRS).toHaveLength(5);
   });
 });
 

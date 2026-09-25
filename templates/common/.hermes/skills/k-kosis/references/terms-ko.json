@@ -1,0 +1,28 @@
+{
+  "_note": "Korean-original KOSIS terminology mapping. Non-Markdown reference asset — exempt from the workspace English-only doc policy (CONSTITUTION §6.7). SKILL.md stays English-only and links here. Seed file: service/parameter vocabulary from the official KOSIS Open API docs as recorded in SKILL.md; table-code entries await live verification with a real KOSIS_API_KEY and are marked accordingly.",
+  "version": "0.1.0",
+  "verified": "2026-08-22",
+  "service_names": {
+    "통합검색": { "en": "integrated statistics search", "mapsTo": { "service": "statisticsSearch.do" } },
+    "통계목록조회": { "en": "statistics list browsing", "mapsTo": { "service": "statisticsList.do" } },
+    "통계자료조회": { "en": "statistical data retrieval", "mapsTo": { "service": "Param/statisticsParameterData.do" } },
+    "통계설명": { "en": "statistics metadata/explanation", "mapsTo": { "service": "statisticsExplData.do" } }
+  },
+  "period_types": {
+    "년간": { "en": "annual", "mapsTo": { "prdSe": "Y" } },
+    "분기": { "en": "quarterly", "mapsTo": { "prdSe": "Q" } },
+    "월간": { "en": "monthly", "mapsTo": { "prdSe": "M" } },
+    "일간": { "en": "daily", "mapsTo": { "prdSe": "D" } }
+  },
+  "error_messages": {
+    "데이터가 존재하지 않습니다.": { "en": "no matching data (err 30) — broaden keyword or check orgId/tblId" },
+    "잘못된 요청 변수를 호출 하였습니다.": { "en": "invalid request parameter (err 21) — most often wrong objL1~objL8/itmId for the table" }
+  },
+  "tables": {
+    "인구총조사 인구총표": {
+      "en": "Population Census summary table (illustrative example from SKILL.md)",
+      "mapsTo": { "orgId": "101", "tblId": "DT_1B040A3", "source": "SKILL.md example — placeholder, not live-verified" },
+      "verified": false
+    }
+  }
+}

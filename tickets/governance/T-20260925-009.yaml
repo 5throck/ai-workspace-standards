@@ -1,0 +1,26 @@
+schemaVersion: 1
+id: T-20260925-009
+kind: manual
+title: >-
+  MCP governance-server exposure (ADR-0088 scope-out follow-up): design and
+  implement an MCP server that exposes the workspace governance scripts
+  (ticket.ts, audit.ts --spec-check, spec-register.ts, qa-gate.ts) as MCP
+  tools, so Hermes Agent (native MCP client, docs/adr/0088-hermes-agent-platform-support.md
+  Context) and other MCP-capable harnesses can invoke them directly. This
+  restores the STRUCTURAL enforcement layer of the PM Gateway (tool-level
+  gating is Claude-Code-settings-specific) for harnesses without hook
+  support; until then enforcement for those harnesses is advisory
+  (AGENTS.md prose) plus the commit-time gates (audit.ts, /sync pipeline),
+  which are harness-agnostic. Needs a Design Gate pass (ADR-0074) before
+  implementation: tool surface, transport (stdio via bunx), sandboxing, and
+  whether the server ships as a workspace script or an optional-mcps seed.
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-25T00:00:00.000Z'
+history:
+  - at: '2026-09-25T00:00:00.000Z'
+    from: null
+    to: backlog
+result: null
+error: null

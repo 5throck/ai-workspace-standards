@@ -1,4 +1,5 @@
 ---
+catalog-parity: skip  # variant-maintained fork — excluded from the root Variant-Exclusive catalog (W5 disposition)
 name: pdf-export
 scope: co-deck
 version: 2.1.1

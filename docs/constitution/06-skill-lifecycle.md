@@ -49,7 +49,7 @@ skills/
 
 #### 6.1.1 Skill Discovery & Registration (.agents/skills.json)
 
-For all AI tools (Claude Code, Gemini, and Antigravity) to automatically discover and load skills residing in the `skills/` directory, they must be registered in the workspace customizations configuration:
+For all AI tools (Claude Code, Gemini, and Antigravity) to automatically discover and load skills residing in the `skills/` directory, they must be registered in the workspace customizations configuration. Hermes Agent needs no registration file — it discovers skills by directory scan (`.hermes/skills/`, plus `.agents/skills/`), gated on its user-side `skills.trusted_project_dirs` trust list (ADR-0088 D7):
 - **File Location**: `.agents/skills.json` (at project/workspace root)
 - **Format**:
 ```json

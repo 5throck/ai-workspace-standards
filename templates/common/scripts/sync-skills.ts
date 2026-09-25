@@ -1,5 +1,10 @@
 #!/usr/bin/env bun
-// @version 1.8.0
+// @version 1.9.0
+// v1.9.0 (2026-09-25, ADR-0088 W1): fifth platform target `.hermes/skills/` (NousResearch
+//   Hermes Agent mirror — same B-03/mirror:false exclusions as the other targets). Hermes
+//   scans project-local `<git-root>/.hermes/skills` as its primary skill path (source-
+//   verified: hermes-agent @ 59004a6, agent/skill_utils.py PROJECT_SKILLS_SUBDIRS) and
+//   invokes skills natively as /<skill-name>, so no Phase 1b commands analog exists.
 // v1.8.0 (2026-09-12, T-20260912-017): hardening — (1) advisory concurrency guard:
 //   a PID-stamped `.sync-skills.lock` at the workspace root (PID-validated stale-lock
 //   recovery, mirroring .githooks/post-checkout) makes a second concurrent run fail
@@ -28,11 +33,11 @@
 /**
  * sync-skills.ts
  * Distributes skills from the SSOT (skills/) to .claude/skills/, .gemini/skills/,
- * .agents/skills/, and .codex/skills/.
+ * .agents/skills/, .codex/skills/, and .hermes/skills/.
  * Also back-syncs genuinely .agents-only shortcut skills to .claude and .gemini,
  * and WARNs when an .agents copy diverges from its SSOT counterpart.
  *
- * Phase 1: Copy every skill directory (containing SKILL.md) to all four platform skill directories.
+ * Phase 1: Copy every skill directory (containing SKILL.md) to all five platform skill directories.
  * Phase 1b: Mirror .claude/commands/*.md (commands SSOT) to .codex/prompts/ as Codex prompts.
  * Phase 2: Back-sync shortcut skill dirs that exist ONLY in .agents/skills/ (absent
  *          from the SSOT) to .claude and .gemini; WARN on .agents dirs that diverge
@@ -57,7 +62,7 @@
  * Concurrency: the CLI takes an advisory `.sync-skills.lock` at the workspace root
  * (PID-stamped, stale-lock recovering) and fails fast when another run is active.
  *
- * @version 1.8.0
+ * @version 1.9.0
  */
 
 import * as fs from 'node:fs';
@@ -101,6 +106,7 @@ function dirsFor(root: string): SkillSyncDirs {
         geminiSkills: path.join(root, '.gemini', 'skills'),
         agentsSkills: path.join(root, '.agents', 'skills'),
         codexSkills:  path.join(root, '.codex', 'skills'),
+        hermesSkills: path.join(root, '.hermes', 'skills'),
     };
 }
 
@@ -110,6 +116,7 @@ export interface SkillSyncDirs {
     geminiSkills: string;
     agentsSkills: string;
     codexSkills: string;
+    hermesSkills: string;
 }
 
 export interface SyncSkillsOptions {
@@ -195,13 +202,14 @@ export function dirsEqual(a: string, b: string, depth: number = 0): boolean {
  */
 export async function syncSkills(dirs: SkillSyncDirs, opts: SyncSkillsOptions = {}): Promise<{ errors: string[]; warnings: string[] }> {
     const copyDir = opts.copyDir ?? defaultCopyDir;
-    const { ssotSkills, claudeSkills, geminiSkills, agentsSkills, codexSkills } = dirs;
+    const { ssotSkills, claudeSkills, geminiSkills, agentsSkills, codexSkills, hermesSkills } = dirs;
     const root = path.dirname(ssotSkills);
 
     fs.mkdirSync(claudeSkills, { recursive: true });
     fs.mkdirSync(geminiSkills, { recursive: true });
     fs.mkdirSync(agentsSkills, { recursive: true });
     fs.mkdirSync(codexSkills, { recursive: true });
+    fs.mkdirSync(hermesSkills, { recursive: true });
 
     const errors: string[] = [];
     const warnings: string[] = [];
@@ -260,8 +268,8 @@ export async function syncSkills(dirs: SkillSyncDirs, opts: SyncSkillsOptions = 
 
             // `security-gate: true` skills are a platform-neutral-only hard gate
             // (validate-templates.ts Check B-03) — they must never be mirrored into
-            // .claude/skills/, .gemini/skills/, .agents/skills/, or .codex/skills/,
-            // only skills/.
+            // .claude/skills/, .gemini/skills/, .agents/skills/, .codex/skills/, or
+            // .hermes/skills/, only skills/.
             if (/^security-gate:\s*true\b/m.test(fs.readFileSync(skillMdSrc, 'utf-8'))) {
                 continue;
             }
@@ -273,7 +281,7 @@ export async function syncSkills(dirs: SkillSyncDirs, opts: SyncSkillsOptions = 
                 continue;
             }
 
-            for (const targetDir of [claudeSkills, geminiSkills, agentsSkills, codexSkills]) {
+            for (const targetDir of [claudeSkills, geminiSkills, agentsSkills, codexSkills, hermesSkills]) {
                 const target = path.join(targetDir, item);
                 if (dirsEqual(itemPath, target)) {
                     continue; // idempotent skip — content already matches
@@ -356,13 +364,13 @@ export async function syncSkills(dirs: SkillSyncDirs, opts: SyncSkillsOptions = 
                 const ssotCounterpart = path.join(ssotSkills, item);
                 if (fs.existsSync(ssotCounterpart)) continue; // SSOT-derived — Phase 1 owns it
 
-                // Genuinely .agents-only: back-sync to all four platform mirrors.
-                // .codex was added in the 2026-09-21 review (M-19) — without it the
-                // four-mirror parity principle (ADR-0077 W1) broke for exactly the
-                // skills that only exist via back-sync.
+                // Genuinely .agents-only: back-sync to all five platform mirrors.
+                // .codex was added in the 2026-09-21 review (M-19), .hermes in
+                // ADR-0088 W1 — without them the five-mirror parity principle
+                // breaks for exactly the skills that only exist via back-sync.
                 if (!fs.existsSync(path.join(source, 'SKILL.md'))) continue;
 
-                for (const targetDir of [claudeSkills, geminiSkills, agentsSkills, codexSkills]) {
+                for (const targetDir of [claudeSkills, geminiSkills, agentsSkills, codexSkills, hermesSkills]) {
                     const target = path.join(targetDir, item);
                     if (dirsEqual(source, target)) {
                         continue; // idempotent skip

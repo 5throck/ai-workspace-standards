@@ -1,0 +1,33 @@
+{
+  "_note": "Korean-original data.go.kr Korea Customs Service terminology mapping. Non-Markdown reference asset — exempt from the workspace English-only doc policy (CONSTITUTION §6.7). SKILL.md stays English-only and links here. Endpoint names and field vocabulary live-tested 2026-09-03 with a real key (see SKILL.md); error-code Korean messages are portal documentation.",
+  "version": "0.1.0",
+  "verified": "2026-09-03",
+  "endpoints": {
+    "품목별 국가별 수출입실적(GW)": { "en": "import/export by HS code × country × month", "mapsTo": { "operation": "getNitemtradeList", "baseUrl": "https://apis.data.go.kr/1220000/nitemtrade/getNitemtradeList" } },
+    "품목별 수출입실적(GW)": { "en": "import/export by HS code × month (no country split)", "mapsTo": { "operation": "getItemtradeList", "baseUrl": "https://apis.data.go.kr/1220000/Itemtrade/getItemtradeList" } },
+    "국가별 수출입실적(GW)": { "en": "import/export by country × month (no HS split)", "mapsTo": { "operation": "getNationtradeList", "baseUrl": "https://apis.data.go.kr/1220000/nationtrade/getNationtradeList" } },
+    "수출입총괄(GW)": { "en": "pre-aggregated national monthly total", "mapsTo": { "operation": "getNewtradeList", "baseUrl": "https://apis.data.go.kr/1220000/Newtrade/getNewtradeList" } },
+    "시도별 수출입실적(GW)": { "en": "import/export by Korean province × month", "mapsTo": { "operation": "getSidotradeList", "baseUrl": "https://apis.data.go.kr/1220000/sidotrade/getSidotradeList" }, "verified": false, "note": "live test 2026-09-03 returned err 30 — needs its own per-dataset 활용신청 approval" }
+  },
+  "field_aliases": {
+    "hsCd": { "en": "HS code (nitemtrade) — NOT hsCode; field name differs per endpoint" },
+    "hsCode": { "en": "HS code (Itemtrade) — NOT hsCd; field name differs per endpoint" },
+    "statCd": { "en": "country code" },
+    "statKor": { "en": "product name (Korean)" },
+    "expDlr": { "en": "export amount (USD)" },
+    "expWgt": { "en": "export weight (kg)" },
+    "impDlr": { "en": "import amount (USD)" },
+    "impWgt": { "en": "import weight (kg)" },
+    "balPayments": { "en": "trade balance" },
+    "총계": { "en": "trailing aggregate row on range queries — filter before per-period analysis" }
+  },
+  "portal_terms": {
+    "활용신청": { "en": "per-dataset usage request — a portal-wide serviceKey does not work on a dataset until this dataset's own 신청 is approved" },
+    "개발계정": { "en": "dev account — near-immediate approval, traffic-capped (10,000/day for customs APIs)" },
+    "운영계정": { "en": "production account — requires review and a declared traffic quota" }
+  },
+  "error_messages": {
+    "SERVICE_KEY_IS_NULL": { "en": "error 20 — key missing or not URL-encoded correctly (contains +, /, =)" },
+    "SERVICE_KEY_IS_NOT_REGISTERED_ERROR": { "en": "error 30 / HTTP 403 — key valid portal-wide but not approved for this specific dataset" }
+  }
+}

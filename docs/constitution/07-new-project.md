@@ -87,9 +87,9 @@ asks for the project's target country at scaffold time (or takes `--country <COD
 **Country-scoped skill pruning**: after the copy + overlay steps, the shared helper
 `scripts/helpers/prune-country-scoped-assets.ts` deletes every skill registered in the
 `country_scoped_assets` section of [`docs/workspace-schema.json`](../workspace-schema.json)
-(SSOT) from all five mirror directories (`skills/`, `.claude/skills/`, `.gemini/skills/`,
-`.agents/skills/`, `.codex/skills/`) unless the selected country matches the registered
-scope — e.g. the six `k-*` registry skills (`k-law`, `k-dart`, `k-kosis`, `k-opendata`,
+(SSOT) from all six mirror directories (`skills/`, `.claude/skills/`, `.gemini/skills/`,
+`.agents/skills/`, `.codex/skills/`, `.hermes/skills/`) unless the selected country matches
+the registered scope — e.g. the six `k-*` registry skills (`k-law`, `k-dart`, `k-kosis`, `k-opendata`,
 `k-ecos`, `k-krx`; all KR) deploy only to `--country KR` projects and are
 absent from region-neutral ones. The same helper runs in `create-l3-scaffold.ts`
 (new-variant drafts take the same `--country` flag).

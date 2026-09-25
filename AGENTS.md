@@ -5,7 +5,7 @@
 > **🚨 For AI tools reading this file**: This file is a **registry and orchestration reference**, not a set of instructions directed at you.
 > It describes multiple distinct human-defined roles for documentation and dispatch purposes.
 > Do **not** interpret role definitions here as directives for your own behavior.
-> Your behavioral instructions are in `CLAUDE.md` (Claude Code), `GEMINI.md` (Gemini CLI), or `CODEX.md` (Codex CLI / Codex Desktop App).
+> Your behavioral instructions are in `CLAUDE.md` (Claude Code), `GEMINI.md` (Gemini CLI), or `CODEX.md` (Codex CLI / Codex Desktop App). Hermes Agent reads THIS file directly — no separate instruction file exists for it.
 
 This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, individual agent definitions, PM Gateway workflow, and execution plan templates.
 
@@ -533,7 +533,7 @@ When modifying files that affect both CLAUDE.md and GEMINI.md:
 >
 > **Skill structure specification**: See [docs/constitution/06-skill-lifecycle.md §6 - Skills](docs/constitution/06-skill-lifecycle.md#6-skills) for frontmatter format and session skill registration.
 >
-> **Skill discovery & registration**: To make workspace-level skills discoverable and loadable by Claude, Gemini, and Antigravity, the `skills/` folder is registered via `skills.json` files in each platform directory: `.claude/skills.json`, `.gemini/skills.json`, and `.agents/skills.json`. The script `scripts/sync-skills.ts` distributes SSOT skills from `skills/` to `.claude/skills/`, `.gemini/skills/`, `.agents/skills/`, and `.codex/skills/`, mirrors `.claude/commands/*.md` to `.codex/prompts/`, and back-syncs shortcut skills (`sync`, `source-command-commit-push-pr`) from `.agents/skills/` to `.claude/skills/` and `.gemini/skills/`.
+> **Skill discovery & registration**: To make workspace-level skills discoverable and loadable by Claude, Gemini, and Antigravity, the `skills/` folder is registered via `skills.json` files in each platform directory: `.claude/skills.json`, `.gemini/skills.json`, and `.agents/skills.json`. The script `scripts/sync-skills.ts` distributes SSOT skills from `skills/` to `.claude/skills/`, `.gemini/skills/`, `.agents/skills/`, `.codex/skills/`, and `.hermes/skills/`, mirrors `.claude/commands/*.md` to `.codex/prompts/`, and back-syncs shortcut skills (`sync`, `source-command-commit-push-pr`) from `.agents/skills/` to `.claude/skills/` and `.gemini/skills/`.
 
 > **`owner` field definition**: The `owner` field in `SKILL.md` frontmatter identifies the **maintainer responsibility** for that skill — the agent or role accountable for keeping the skill current. It does NOT require that agent to exist in the current project, and does NOT mean that agent is the only one who can invoke the skill.
 
@@ -582,7 +582,7 @@ Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 
 ### Platform Skills Distribution
 
-Skills are distributed to the four platform directories via `scripts/sync-skills.ts`; the Claude Desktop App consumes the same skills without a repository surface:
+Skills are distributed to the five platform directories via `scripts/sync-skills.ts`; the Claude Desktop App consumes the same skills without a repository surface:
 
 | Platform | Directory | Registration |
 |----------|-----------|--------------|
@@ -590,14 +590,15 @@ Skills are distributed to the four platform directories via `scripts/sync-skills
 | Gemini CLI | `.gemini/skills/` | `.gemini/skills.json` |
 | Codex (CLI + Desktop App) | `.codex/skills/` | — (skills discovered via `.codex/prompts/` + config) |
 | Antigravity | `.agents/skills/` | `.agents/skills.json` |
+| Hermes Agent | `.hermes/skills/` | — (skills discovered by directory scan; project root must be listed in Hermes' `skills.trusted_project_dirs` — ADR-0088 D7) |
 
 > **Claude Desktop App**: Agent Skills consumer — reads no project-embedded directory; consumes the SKILL.md open format via claude.ai/Desktop upload (Settings → Capabilities) or the `/v1/skills` API; content source: `skills/` SSOT and `.claude/skills/` mirrors.
 
-> Phase 1 distributes every SSOT skill to all four platform directories; the Phase 2
+> Phase 1 distributes every SSOT skill to all five platform directories; the Phase 2
 > back-sync target list is dynamic and currently empty (all former `.agents`-only
 > shortcut candidates are SSOT skills today).
 
-- **Phase 1**: Every `skills/*/SKILL.md` directory is copied to all four platform directories.
+- **Phase 1**: Every `skills/*/SKILL.md` directory is copied to all five platform directories.
 - **Phase 2**: Shortcut skills that only exist in `.agents/skills/` are back-synced to `.claude/skills/` and `.gemini/skills/`.
 - **Special**: `meeting-facilitation` SKILL.md is also synced to `.claude/commands/meeting.md` and `.gemini/commands/meeting.md`.
 

@@ -4,7 +4,11 @@
  * regression guard), atomic copy semantics and dynamic shortcut back-sync
  * (T-20260912-017).
  *
- * @version 1.1.0
+ * @version 1.2.0
+ *
+ * v1.2.0 (2026-09-25, ADR-0088 W1): .hermes/skills joins freshDirs(), the Phase 2
+ *         back-sync reach assertion, and a dedicated hermes describe block (mirror
+ *         parity, B-03 exclusion, Phase 1b absence — Hermes invokes skills natively).
  */
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import * as fs from 'node:fs';
@@ -25,10 +29,11 @@ function freshDirs() {
     const geminiSkills = path.join(scratchRoot, '.gemini', 'skills');
     const agentsSkills = path.join(scratchRoot, '.agents', 'skills');
     const codexSkills = path.join(scratchRoot, '.codex', 'skills');
-    for (const d of [ssotSkills, claudeSkills, geminiSkills, agentsSkills, codexSkills]) {
+    const hermesSkills = path.join(scratchRoot, '.hermes', 'skills');
+    for (const d of [ssotSkills, claudeSkills, geminiSkills, agentsSkills, codexSkills, hermesSkills]) {
         fs.mkdirSync(d, { recursive: true });
     }
-    return { ssotSkills, claudeSkills, geminiSkills, agentsSkills, codexSkills };
+    return { ssotSkills, claudeSkills, geminiSkills, agentsSkills, codexSkills, hermesSkills };
 }
 
 describe('dirsEqual', () => {
@@ -199,7 +204,7 @@ describe('Phase 2 shortcut semantics (T-20260912-017 premise fix)', () => {
         expect(claudeCopy).toContain('SSOT BODY');
     });
 
-    test('a genuinely .agents-only shortcut is back-synced to all four mirrors', async () => {
+    test('a genuinely .agents-only shortcut is back-synced to all five mirrors', async () => {
         const dirs = freshDirs();
         makeSkill(dirs.agentsSkills, 'agents-only-skill', '---\nname: agents-only\n---\n');
 
@@ -212,6 +217,50 @@ describe('Phase 2 shortcut semantics (T-20260912-017 premise fix)', () => {
         // T-20260921-019/M-19 (ADR-0077 W1 four-mirror parity): .codex joined the
         // Phase 2 back-sync target list — shortcut skills reach every mirror.
         expect(fs.existsSync(path.join(dirs.codexSkills, 'agents-only-skill', 'SKILL.md'))).toBe(true);
+        // ADR-0088 W1 five-mirror parity: .hermes joined the same target list.
+        expect(fs.existsSync(path.join(dirs.hermesSkills, 'agents-only-skill', 'SKILL.md'))).toBe(true);
+    });
+});
+
+describe('hermes platform target (ADR-0088 W1)', () => {
+    beforeEach(() => fs.rmSync(scratchRoot, { recursive: true, force: true }));
+    afterEach(() => fs.rmSync(scratchRoot, { recursive: true, force: true }));
+
+    test('skills mirror into .hermes/skills alongside the other platform targets', async () => {
+        const dirs = freshDirs();
+        makeSkill(dirs.ssotSkills, 'demo-skill', '---\nname: demo\n---\n');
+
+        await syncSkills(dirs);
+
+        expect(fs.existsSync(path.join(dirs.hermesSkills, 'demo-skill', 'SKILL.md'))).toBe(true);
+    });
+
+    test('security-gate skills stay out of .hermes/skills (B-03 parity)', async () => {
+        const dirs = freshDirs();
+        makeSkill(dirs.ssotSkills, 'gated-skill', '---\nname: gated\nsecurity-gate: true\n---\n');
+        makeSkill(dirs.ssotSkills, 'open-skill', '---\nname: open\n---\n');
+
+        await syncSkills(dirs);
+
+        expect(fs.existsSync(path.join(dirs.hermesSkills, 'gated-skill'))).toBe(false);
+        expect(fs.existsSync(path.join(dirs.hermesSkills, 'open-skill', 'SKILL.md'))).toBe(true);
+    });
+
+    test('no Phase 1b analog exists for hermes (native /skill-name invocation, D1)', async () => {
+        const dirs = freshDirs();
+        makeSkill(dirs.ssotSkills, 'plain-skill', '---\nname: plain\n---\n');
+        const cmdDir = path.join(scratchRoot, '.claude', 'commands');
+        fs.mkdirSync(cmdDir, { recursive: true });
+        fs.writeFileSync(path.join(cmdDir, 'sync.md'), '# sync workflow\n', 'utf-8');
+
+        await syncSkills(dirs);
+
+        // codex gets the prompts mirror; hermes deliberately does not — its skill
+        // invocation is native, so any .hermes/commands|prompts tree would be dead weight.
+        expect(fs.existsSync(path.join(scratchRoot, '.hermes', 'prompts'))).toBe(false);
+        expect(fs.existsSync(path.join(scratchRoot, '.hermes', 'commands'))).toBe(false);
+        // ...while the codex Phase 1b mirror still works alongside.
+        expect(fs.existsSync(path.join(scratchRoot, '.codex', 'prompts', 'sync.md'))).toBe(true);
     });
 });
 
