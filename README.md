@@ -1,6 +1,6 @@
 ---
-sync_version: 1
-content_hash: 765cf36e9b1b27e1f411c44b6b9d49222325ee2bace842b7bf74ad95e4b66d34
+sync_version: 2
+content_hash: cdb9ffaab8fc86f1ba4e5b45e0df97ddf7c28a6c2adc1a022009024e9f032be7
 ---
 
 **Languages**: [English](README.md) · [한국어](README_ko.md) · [Español](README_es.md) · [日本語](README_ja.md)
@@ -22,9 +22,11 @@ Modern AI-assisted development requires more than prompts - it requires **consis
 | Concern | File | Audience |
 |---------|------|----------|
 | Shared workspace standards | [`CONSTITUTION.md`](CONSTITUTION.md) | All AI tools |
+| Shared agent index (thin dispatcher) | [`AGENTS.md`](AGENTS.md) | All AI tools — Hermes Agent reads this file natively |
 | Claude Code behaviors | [`CLAUDE.md`](CLAUDE.md) | Claude Code (CLI + Desktop) |
 | Gemini / Antigravity behaviors | [`GEMINI.md`](GEMINI.md) | Gemini CLI + Antigravity engine |
 | Codex behaviors | [`CODEX.md`](CODEX.md) | Codex (CLI + Desktop App) |
+| Operational workflow references | [`docs/governance/agents/`](docs/governance/agents/) | All AI tools (pointer targets of AGENTS.md, ADR-0090) |
 | Change history | [`CHANGELOG.md`](CHANGELOG.md) | All |
 
 ### Two Philosophies, One Standard
@@ -174,6 +176,7 @@ This gives the PM agent clear context to:
 ```
 C:\git\ (workspace root - this repo)
 ├── CONSTITUTION.md          # Master standard - read first in every session
+├── AGENTS.md                # Shared agent index (thin dispatcher) - all AI tools
 ├── CLAUDE.md                # Claude Code workspace behaviors
 ├── GEMINI.md                # Gemini CLI / Antigravity workspace behaviors
 ├── CODEX.md                 # Codex CLI / Desktop App workspace behaviors
@@ -188,6 +191,7 @@ C:\git\ (workspace root - this repo)
 ├── scripts/                 # Core automation and audit scripts
 ├── .githooks/               # Git hooks for enforcing PR policies and rules
 ├── .claude/ & .gemini/      # AI tools global settings and custom slash commands
+├── docs/governance/agents/  # Operational workflow references (AGENTS.md pointer targets)
 └── templates/               # Versioned AI project templates (co-develop, co-design, etc.)
     ├── common/              # Shared scripts, hooks, and skills across all variants
     ├── co-develop/          # ✅ Stable — full software development agent team
@@ -236,9 +240,11 @@ Every AI session begins by running this checklist (defined in `CONSTITUTION.md`)
 0. `git config core.hooksPath .githooks`
 1. Read `CONSTITUTION.md` (this workspace standard)
 2. Read the project's `docs/context.md` (Skip at workspace root — `CONSTITUTION.md` covers it.)
-3. Read `AGENTS.md` (canonical agent roster)
+3. Read `AGENTS.md` (shared agent index — thin dispatcher; follow its pointer table to the governance references)
 4. Check `memory/MEMORY.md` for recent changes
 5. Load skills from `docs/context.md ## Session Start Skills` (Skip at workspace root — `CONSTITUTION.md` covers it.)
+
+> **Hermes Agent users**: run `hermes config set context_file_max_chars 100000` once (AGENTS.md exceeds the 20k default context cap) and add the project root to `skills.trusted_project_dirs` — see ADR-0088/0090.
 
 ---
 
@@ -262,7 +268,7 @@ Each template variant in this workspace provides a highly optimized, specialized
 
 **💡 How to Check Workflow Details**
 Specific agent rosters and governance phases are managed within the documents of each generated project. After scaffolding a project, check:
-1. `AGENTS.md`: The full specification of agent roles and permissions deployed in the project
+1. `AGENTS.md`: The shared agent index (thin dispatcher) — roster plus a pointer table into `docs/governance/agents/` (ADR-0090)
 2. `docs/context.md`: The project goal and workflow context for initial session kickoff
 
 ---
@@ -365,4 +371,4 @@ AGPL-3.0 - see [LICENSE](LICENSE)
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-09-12*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-09-26*

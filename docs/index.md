@@ -10,7 +10,8 @@ Core system rules, constitution modules, system architecture, security policies,
 
 - **Root Governance Documents**:
   - [`CONSTITUTION.md`](../CONSTITUTION.md) — Workspace constitution and core governance principles
-  - [`AGENTS.md`](../AGENTS.md) — Agent ecosystem definition and PM Gateway workflow
+  - [`AGENTS.md`](../AGENTS.md) — Shared agent index (thin dispatcher, ADR-0090): roster, pointer table into [docs/governance/agents/](governance/agents/), and skill routing
+  - [`docs/governance/agents/`](governance/agents/) — Operational workflow references (PM Gateway protocol, execution-plan templates, dispatch/lifecycle schedules)
   - [`CHANGELOG.md`](../CHANGELOG.md) — Historical version change log and release notes
 - [**Constitution Sections**](constitution/) — Detailed constitutional specification modules:
   - [00 - SSOT Architecture](constitution/00-ssot-architecture.md) — Single Source of Truth rules
