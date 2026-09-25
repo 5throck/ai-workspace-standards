@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Shared Scaffold Delivery Contracts
- * @version 1.6.0
+ * @version 1.6.1
  *
  * v1.6.0 (2026-09-25, ADR-0088 W2): PlatformProfile gains 'hermes' —
  *         deriveNewProjectDelivery models the new-project hermes-primary
@@ -329,6 +329,10 @@ export interface ReviewedDeliveryExclusion {
 }
 
 export const REVIEWED_DELIVERY_EXCLUSIONS: readonly ReviewedDeliveryExclusion[] = [
+  {
+    path: 'docs/governance/agents/',
+    reason: 'ADR-0090 W2: workspace operational reference (AGENTS.md pointer-table targets: pm-gateway-workflow / execution-plan-templates / workflows) — L3 drafts are variant seeds and do not carry workspace-level procedure docs; new-project delivers them from templates/common/docs/governance/agents/',
+  },
   {
     path: '.agents/',
     reason: 'L0-only platform skill mirror; re-synced by scripts/sync-skills.ts (COMMON_OVERLAY_EXCLUDE: synced by a separate mechanism)',

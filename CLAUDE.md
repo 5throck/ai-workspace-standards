@@ -1,14 +1,5 @@
 # CLAUDE.md
 
-<!-- GOVERNANCE-POINTER-TABLE (ADR-0090) -->
-> **Governance references (ADR-0090)**: operational workflow bodies live outside this file — **Read the owning file before governing work**:
-> PM Gateway phase protocol & ADR policy summaries → [`docs/governance/agents/pm-gateway-workflow.md`](docs/governance/agents/pm-gateway-workflow.md) ·
-> Execution plan templates → [`docs/governance/agents/execution-plan-templates.md`](docs/governance/agents/execution-plan-templates.md) ·
-> Dispatch/lifecycle/skill-review schedules → [`docs/governance/agents/workflows.md`](docs/governance/agents/workflows.md) ·
-> Language Policy → [`CONSTITUTION.md §4.1`](CONSTITUTION.md).
-<!-- /GOVERNANCE-POINTER-TABLE -->
-
-
 > **Shared workspace setup, session start checklist, project structure, and design standards live in [`CONSTITUTION.md`](CONSTITUTION.md) - read it first and the files listed in its `## Required Reading` block.**
 <!-- L0-ONLY: This instruction targets the workspace root (L0). L1/L2 projects must NOT reference CONSTITUTION.md — see CONSTITUTION.md §7.5 CONSTITUTION.md Non-Propagation. merge-frontmatter.ts strips CONSTITUTION.md lines from L2 output. -->
 
