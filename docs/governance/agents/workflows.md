@@ -214,3 +214,26 @@ A skill health check should also be run outside the quarterly schedule when:
 
 ---
 
+
+
+---
+
+## §9: Maintenance Rule
+
+When a new `agents/<name>.md` is created, **the developer or AI agent responsible for the change** must:
+1. Use the `agent-lifecycle-manager` skill to guide the process.
+2. Add a row to the Agent Roster table above.
+3. Add a row to the Subagent Roster dispatch table (with Parallelizable / Write Allowed columns).
+4. Ensure the agent file follows the frontmatter specification in [CONSTITUTION.md §5.1](docs/constitution/05-multi-agent-architecture.md#51-agent-file-format-standard-frontmatter).
+5. If the agent uses a skill, add a row to the Skills table above.
+
+When a new skill is created in `skills/` or `.claude/skills/`:
+1. Use the `skill-lifecycle-manager` skill to guide the process.
+2. Add a row to the Skills table above.
+3. Ensure the skill follows the frontmatter specification in [CONSTITUTION.md §6.2](docs/constitution/06-skill-lifecycle.md#62-skill-file-format-standard-frontmatter).
+
+> **For the workspace root**: AGENTS.md is the SSOT. No separate `docs/context.md` sync required.
+> **For individual projects**: Keep AGENTS.md in sync with `docs/context.md ## Agents` per [CONSTITUTION.md §1](CONSTITUTION.md#1-standard-folder-structure).
+
+---
+

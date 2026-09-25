@@ -54,7 +54,112 @@ See [§1 Agent Ecosystem Overview](#1-agent-ecosystem-overview) for the complete
 
 ## §3: PM Gateway Workflow
 
-**Thin-dispatcher section (ADR-0090)**: the PM Gateway is MANDATORY for all substantive work. Core MUST policy (§3.1), the 3-Tier model table (§3.6), meeting facilitation (§3.7), and the L0-only governance-backlog dispatch (§3.7.5) remain below. The detailed phase protocol, permission-denial procedure, and ADR-0078/0079/0080 policy summaries live in [`docs/governance/pm-gateway-workflow.md`](docs/governance/pm-gateway-workflow.md) — **Read it before dispatching specialists or adjudicating governance backlog items.**
+**Thin-dispatcher section (ADR-0090)**: the PM Gateway is MANDATORY for all substantive work. Core MUST policy (§3.1), the 3-Tier model table (§3.6), meeting facilitation (§3.7), and the L0-only governance-backlog dispatch (§3.7.5) remain below. The detailed phase protocol, permission-denial procedure, and ADR-0078/0079/0080 policy summaries live in [`docs/governance/agents/pm-gateway-workflow.md`](docs/governance/agents/pm-gateway-workflow.md) — **Read it before dispatching specialists or adjudicating governance backlog items.**
+
+### §3.1 PM Gateway Policy
+
+**Single Point of Entry**: PM is the ONLY agent that users may directly invoke.
+All specialist agents require PM dispatch - enforced at 4 levels.
+
+#### §3.1.1 PM Direct Execution Scope
+
+PM is an escalation gateway, not an executor. **⚠️ CRITICAL**: PM MUST NOT perform Write/Edit on any file except `memory/*.md` and `CHANGELOG.md`. All file modifications MUST be dispatched to specialists (docs-writer, architect, automation-engineer, auditor). See [PM Direct Execution Constraints](agents/pm.md#pm-direct-execution-scope) in `agents/pm.md`.
+
+| Category | Tools | Scope |
+|----------|-------|-------|
+| Unconditional | Read, Glob, Grep, Agent, TaskCreate, TaskUpdate, AskUserQuestion, Skill, ToolSearch | Always allowed |
+| Conditional | Write, Edit | `memory/*.md` and `CHANGELOG.md` only |
+| Conditional | Bash | Read-only: `git status/diff/log`, `bun scripts/audit.ts`, `ls`, `cat` |
+| Forbidden | Write, Edit (all other paths) | Must delegate to specialist (docs-writer, architect, automation-engineer, auditor) |
+| Forbidden | Bash (write/execute patterns) | Must delegate to specialist |
+
+**Rationale**: PM is orchestrator, not executor. Direct execution violates governance separation of concerns. See [Role Clarification](agents/pm.md#-role-clarification) in `agents/pm.md` and the Task Owner vs Executor Distinction below.
+
+When a specialist agent's required tool is denied, PM applies the [Permission Denial Protocol](#38-permission-denial-protocol) — never substitutes for the specialist.
+
+#### §3.1.2 PM Role Boundaries
+
+**What PM Does**:
+- Orchestrate multi-agent workflows
+- Create execution plans
+- Dispatch specialist agents
+- Enforce quality gates
+- Track progress
+
+**What PM Does NOT Do**:
+- Directly Edit/Write files (except `memory/*.md`, `CHANGELOG.md`)
+- Implement code or scripts
+- Perform documentation updates (delegate to docs-writer)
+- Perform design work (delegate to architect)
+
+**Task Owner vs Executor Distinction**:
+- **Task owner (PM)**: PM is accountable for task progress and final delivery
+- **Task executor (specialist)**: Agent who performs the actual work
+- PM creates tasks (owner: pm), dispatches specialists (executor: docs-writer/architect/automation-engineer), and updates task status upon completion
+
+**User Communication for Specialist Tasks**:
+When work requires specialist delegation, PM uses the following template:
+```
+PM: 🔍 [Task Analysis] This task falls within the [specialist] domain of expertise.
+   Task: [description]
+   Specialist: [specialist name]
+   Reason: [why specialist needed]
+PM: Shall I dispatch [specialist]?
+User: "Yes"
+PM: ▶️ [specialist] dispatch...
+```
+
+See [agents/pm.md](agents/pm.md) for complete role definition and delegation protocols.
+
+#### §3.1.3 Enforcement Layers
+1. **Tool-Level**: Agent tool rejects non-PM specialist calls (hard enforcement)
+2. **System Prompt-Level**: CLAUDE.md/GEMINI.md rules loaded first
+3. **Agent File-Level**: All specialists have "PM-ONLY INVOCATION" section
+4. **QA Gate-Level**: Auditor detects bypass in Phase 6 QA
+
+#### §3.1.4 Specialist Agent Dispatch Flow
+```
+User Request → PM Triage → Design Approval → Specialist Dispatch → QA Gate → Finalization
+```
+
+#### §3.1.5 Specialist Agent Roster (PM-ONLY INVOCATION)
+
+All specialist agents below are dispatched ONLY through PM:
+
+| Agent | Phase | Dispatch Trigger |
+|-------|-------|-------------------|
+| **scaffolding-expert** | 0 | "Creating new projects", "Template validation", "Scaffolding tasks" |
+| **architect** | 1-2 | "Architecture design needed", "Project structure planning", "Technical decision making" |
+| **automation-engineer** | 4 | "Creating scripts", "Cross-platform automation", "Implementation tasks" |
+| **docs-writer** | 4 | "Updating documentation", "README creation", "CHANGELOG updates" |
+| **security-expert** | 6 | "Security review", "Hook configuration", "Secret detection" |
+| **lifecycle-manager** | 5 | "Lifecycle finalization", "Governance record sync", "L0->L1 template publishing", "L1->L2 explicit skill/script sync" — invoked on-demand for governance changes; lifecycle finalization runs automatically via `/sync` (**Workspace root only — L0-only agent, NOT available in variant templates**) |
+| **auditor** | 6 | "Quality verification", "Documentation consistency check", "QA gate required" (Workspace root only) |
+| **skill-graph-analyst** | 6 | "Fleet skill-graph analytics", "skill graph report", "skill convergence triage", "weekly analytics cadence" (Workspace root only — L0-only agent; triage only, tickets for promotion candidates) |
+
+### §3.7 Meeting Facilitation
+
+When `/meeting` is invoked, the PM orchestrates structured multi-agent discussions.
+
+**Meeting Process**:
+1. **Open meeting**: Set agenda and objectives
+2. **Facilitate dialogue**: Ensure all specialists contribute
+3. **Synthesize outcomes**: Cross-domain agent synthesizes agreements
+4. **Document results**: Write transcript to `memory/meeting-YYYY-MM-DD-[slug].md`
+
+### L0→L1→L2 PM Agent Architecture
+
+The PM Agent follows a three-level inheritance model: **L0 (workspace root base)** → **L1 (common template pure-extends)** → **L2 (variant YAML overrides)**. PM files at each level inherit from the previous, with L2 variants adding only YAML frontmatter overrides. See [`agents/pm.md`](agents/pm.md) for the complete specification, [`CONSTITUTION.md §5.5`](CONSTITUTION.md#55-pm-gateway-workflow) for governance workflow details.
+
+**⚠️ IMPORTANT**: Do NOT invoke any specialist agent directly. All requests must go through PM.
+
+> **Execution Plan Format**: For mandatory criteria, boilerplate table, and rules, see [§5 Execution Plan Templates](#5-execution-plan-templates). For platform-specific dispatch instructions, see [CLAUDE.md §5](CLAUDE.md#5-agent-dispatch-rules) or [GEMINI.md §5](GEMINI.md#5-agent-dispatch-rules).
+
+**Integrated from pm.md, CLAUDE.md §5, GEMINI.md §5**
+
+> **⚠️ IMPORTANT**: Do NOT invoke any specialist agent directly. All requests must go through PM.
+
+> **Execution Plan Format**: For mandatory criteria, boilerplate table, and rules, see [§5 Execution Plan Templates](#5-execution-plan-templates). For platform-specific dispatch instructions, see [CLAUDE.md §5](CLAUDE.md#5-agent-dispatch-rules) or [GEMINI.md §5](GEMINI.md#5-agent-dispatch-rules).
 
 ### §3.6 3-Tier Strategy
 
@@ -76,13 +181,39 @@ Deferred governance decisions (e.g. an ADR's soak-period gate) are tracked as `k
 - If acting on it requires implementation work, PM dispatches through the normal PM Gateway path (§3.1–§3.5) like any other task — no new mechanism. If the item is independent of other in-flight work and Agent Teams is enabled for the session, PM may dispatch it as a parallel teammate instead of sequentially.
 
 
+<!-- COMMON-AGENTS:START -->
+## Language Policy
+
+**Canonical home: [`CONSTITUTION.md §4.1`](CONSTITUTION.md)** (ADR-0090 W1b) — English-only rule, translation zones, Korean legal exception, plain-language preference, enforcement, Git/PR artifact language. **Read it before writing any documentation or commit message.**
+
+### Pluggable Variant Audit Hooks and Integrity Protection
+- **Core Script Standardization**: The core synchronization and validation scripts (`scripts/dev-sync.ts` and `scripts/audit.ts`) must remain standardized and identical across all templates and variants. Direct modification of these core scripts in L2 projects is strictly forbidden.
+- **Variant-Specific Audit Hook**: Variant projects requiring custom verification checks must implement them in a pluggable hook script at the path declared in the variant's `variant.json` → `script_manifest` (conventionally `scripts/audit-variant.ts` or `scripts/<variant>/audit-variant.ts`).
+- **Integrity Enforcement**: During template reconciliation (`l3-to-variant-pipeline.ts`), any modified core scripts will be automatically detected and will fail the reconciliation.
+
+### Universal Design Gate (ADR-0074)
+
+Every code change at any tier (L0–L3) must carry spec activity: create/update a design doc at `docs/designs/<spec-id>-design.md` and register it (`bun scripts/spec-register.ts --file <design-doc> --source manual --status implemented`) before `/sync`. The sync-time spec-check (`audit.ts --spec-check`, dev-sync step 3.9) blocks commits without it; trivial changes use `--spec-exempt=E1..E5` (AGENTS.md §5.1.1). Project registries (`docs/specs/registry.json`) are add-if-missing seeds — upgrades never overwrite or prune project entries.
+
+### LLM Work Routing Policy (ADR-0078)
+
+Substantive LLM-assisted development work — generation or modification of code, documents, designs, tests, or scripts — MUST be routed through this project's agent team: `user → PM triage → Design Gate (unless exempt) → specialist dispatch → QA gate → /sync PR`. Querying an external LLM directly (e.g. a web chat) and landing its output in this repository is a policy violation. IDE inline completions and one-off Q&A that never land in the repository are exempt; repository-landing work uses the E1–E5 exemption codes only. An application calling LLM APIs at runtime is an architecture concern covered by the Design Gate (ADR-0074). Enforcement is structural via the existing hard gates — see ADR-0078 (workspace root, `docs/adr/0078-agent-mediated-llm-work-routing.md`) for the full decision.
+
+### Instruction Writing Standard (ASD-STE100, ADR-0079)
+
+Development-facing instruction text — requirement statements, task briefs, execution-plan task descriptions, agent dispatch prompts, design-doc requirement sections, API endpoint documentation, and how-to steps — follows ASD-STE100 (Simplified Technical English) structural rules, in every development domain (web, app, API, scripts, documents). Rules: one instruction per sentence (≤ 20 words procedural / ≤ 25 descriptive); active voice with imperative steps; present tense; one term = one meaning (use glossary/registry terms exactly); no idioms; positive phrasing preferred; minimal pronouns; lists for parallel items and tables for structured data. The STE dictionary is not adopted. Enforcement is advisory: PM conforms task briefs at triage; architect checks requirement sections at Design Gate review. Full policy: §3.10 (workspace root AGENTS.md) and ADR-0079 (`docs/adr/0079-simplified-english-development-instructions.md`).
+
+### PM Team-Management Authority (ADR-0080)
+
+PM owns team composition and skill-change rulings. Hiring and firing: PM decides timing and target from workflow signals — recurring unmatched work types, role overload, absorbed roles, the quarterly roster review — and records every decision (ADR-0061 decision record + memory log) before dispatch; the default exit for a fired agent is `status: deprecated`, and hard delete requires an explicit user request. Skill requests: agents file structured `create|attach|remove` request blocks with evidence in their task reports and memory logs; PM triages them and only approved requests are executed — agents never create, attach, or remove skills unilaterally. Procedures: `agent-lifecycle-manager` and `skill-lifecycle-manager` skills. Full decision: ADR-0080 in the workspace root `docs/adr/`.
+<!-- COMMON-AGENTS:END -->
 ## §4: Other Workflows
 
-**Thin-dispatcher section (ADR-0090)**: subagent dispatch protocol, role boundary matrix, harness engineering workflow, and the lifecycle/skill-review schedules live in [`docs/governance/workflows.md`](docs/governance/workflows.md) — **Read it before orchestrating multi-step or multi-agent work.**
+**Thin-dispatcher section (ADR-0090)**: subagent dispatch protocol, role boundary matrix, harness engineering workflow, and the lifecycle/skill-review schedules live in [`docs/governance/agents/workflows.md`](docs/governance/agents/workflows.md) — **Read it before orchestrating multi-step or multi-agent work.**
 
 ## §5: Execution Plan Templates
 
-**Thin-dispatcher section (ADR-0090)**: execution-plan structure is governed by [`docs/governance/execution-plan-templates.md`](docs/governance/execution-plan-templates.md) — **Read it before writing any execution plan.** It carries the mandatory criteria, boilerplate table, and rules verbatim. The Design Gate (Row 0) remains mandatory at every tier (ADR-0074); exemption codes E1–E5 are defined there.
+**Thin-dispatcher section (ADR-0090)**: execution-plan structure is governed by [`docs/governance/agents/execution-plan-templates.md`](docs/governance/agents/execution-plan-templates.md) — **Read it before writing any execution plan.** It carries the mandatory criteria, boilerplate table, and rules verbatim. The Design Gate (Row 0) remains mandatory at every tier (ADR-0074); exemption codes E1–E5 are defined there.
 
 ## §6: Skills
 
@@ -192,30 +323,15 @@ All agents, regardless of their role, must adhere to the following:
 
 ## §8: Lifecycle Management
 
-**Moved to [`docs/governance/workflows.md`](docs/governance/workflows.md)** (ADR-0090) — Read it before lifecycle finalization. Trigger table: agent/skill/script/variant/governance-tool changes dispatch lifecycle-manager; docs-only and memory-log-only changes do not.
+**Moved to [`docs/governance/agents/workflows.md`](docs/governance/agents/workflows.md)** (ADR-0090) — Read it before lifecycle finalization. Trigger table: agent/skill/script/variant/governance-tool changes dispatch lifecycle-manager; docs-only and memory-log-only changes do not.
 
 ## §9: Maintenance Rule
 
-When a new `agents/<name>.md` is created, **the developer or AI agent responsible for the change** must:
-1. Use the `agent-lifecycle-manager` skill to guide the process.
-2. Add a row to the Agent Roster table above.
-3. Add a row to the Subagent Roster dispatch table (with Parallelizable / Write Allowed columns).
-4. Ensure the agent file follows the frontmatter specification in [CONSTITUTION.md §5.1](docs/constitution/05-multi-agent-architecture.md#51-agent-file-format-standard-frontmatter).
-5. If the agent uses a skill, add a row to the Skills table above.
-
-When a new skill is created in `skills/` or `.claude/skills/`:
-1. Use the `skill-lifecycle-manager` skill to guide the process.
-2. Add a row to the Skills table above.
-3. Ensure the skill follows the frontmatter specification in [CONSTITUTION.md §6.2](docs/constitution/06-skill-lifecycle.md#62-skill-file-format-standard-frontmatter).
-
-> **For the workspace root**: AGENTS.md is the SSOT. No separate `docs/context.md` sync required.
-> **For individual projects**: Keep AGENTS.md in sync with `docs/context.md ## Agents` per [CONSTITUTION.md §1](CONSTITUTION.md#1-standard-folder-structure).
-
----
+**Moved to [`docs/governance/agents/workflows.md`](docs/governance/agents/workflows.md)** (ADR-0090 W1b) — new-agent and new-skill maintenance duties live there. Read it before adding agents or skills.
 
 ## §10: Periodic Skill Review Schedule
 
-**Moved to [`docs/governance/workflows.md`](docs/governance/workflows.md)** (ADR-0090) — quarterly cadence, review steps, trigger conditions, and the deprecation sweep live there. Read it before any quarterly skill review.
+**Moved to [`docs/governance/agents/workflows.md`](docs/governance/agents/workflows.md)** (ADR-0090) — quarterly cadence, review steps, trigger conditions, and the deprecation sweep live there. Read it before any quarterly skill review.
 
 ## Version History
 
