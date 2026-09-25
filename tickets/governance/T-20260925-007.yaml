@@ -1,0 +1,24 @@
+schemaVersion: 1
+id: T-20260925-007
+kind: manual
+title: >-
+  Promote validate-templates VA-08 skill-registry-sync WARNs to Fail (spec
+  2026-09-25-registry-policy-completeness-design W5/R5.7): flip the cross-surface
+  registry-vs-frontmatter check shipped in WARN mode — root skills/SKILLS.md
+  Workspace Skills rows, root Variant-Exclusive Skills catalog,
+  templates/common/skills/SKILLS.md scaffold seed, and the 13 curated
+  templates/co-*/skills/SKILLS.md registries. Preconditions: zero VA-08 WARNs on
+  main at promotion, or each finding dispositioned; the sync script
+  (scripts/sync-skill-registries.ts, dev-sync Step 4.63) is the remediation path.
+  Severity flip only — message text unchanged.
+priority: normal
+not_before: '2026-10-09'
+status: backlog
+attempts: 0
+created_at: '2026-09-25T00:00:00.000Z'
+history:
+  - at: '2026-09-25T00:00:00.000Z'
+    from: null
+    to: backlog
+result: null
+error: null

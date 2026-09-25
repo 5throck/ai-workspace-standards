@@ -1,7 +1,18 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.44.0
+ * @version 1.45.0
+ * v1.44.0 → v1.45.0 (2026-09-25, registry & platform-policy completeness batch
+ *          — spec docs/designs/2026-09-25-registry-policy-completeness-design.md,
+ *          W5/R5.6): new VA-08 skill-registry-sync check — one cross-surface
+ *          pass over every skill registry table (root Workspace Skills rows,
+ *          root Variant-Exclusive catalog, common scaffold seed, curated
+ *          variant registries) via collectWorkspaceRegistryFindings
+ *          (skills-registry helper v1.2.0), asserting rows match the SKILL.md
+ *          frontmatter they document. Wired once in the main flow next to the
+ *          mirror-parity checks. Severity: WARN per ADR-0055 soak.
+ *          TODO(promotion): flip VA-08 findings to fail when
+ *          tickets/governance/T-20260925-007.yaml promotes (not_before 2026-10-09).
  * v1.43.0 → v1.44.0 (2026-09-25, registry & platform-policy completeness batch
  *          — spec docs/designs/2026-09-25-registry-policy-completeness-design.md,
  *          R3): new VA-07 variant-mirror version-sync check (verifier-expansion
@@ -252,7 +263,7 @@ import { join, dirname, resolve, basename, relative } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { load } from 'js-yaml';
-import { parseSkillRegistryRows } from './helpers/skills-registry.ts';
+import { parseSkillRegistryRows, collectWorkspaceRegistryFindings } from './helpers/skills-registry.ts';
 import { getScriptLayer, getSkillLayer, includeScriptInL1, parseScriptLayers, parseSkillLayers } from './helpers/layer-filter.ts';
 import { isTransientTestFixture } from './helpers/scaffold-markers.ts';
 import { scanMirrorHygiene } from './helpers/mirror-hygiene.ts';
@@ -3859,6 +3870,27 @@ function checkSkillMirrorVersionSync(variant: string): void {
   }
 }
 
+// Check VA-08: skill registry tables vs the SKILL.md frontmatter they
+// document (spec 2026-09-25-registry-policy-completeness-design.md W5/R5.6).
+// One cross-surface pass via collectWorkspaceRegistryFindings (skills-registry
+// helper v1.2.0): root Workspace Skills rows, the root Variant-Exclusive
+// catalog, the common scaffold seed, and each curated variant registry.
+// Remediation path: `bun scripts/sync-skill-registries.ts` (dev-sync Step
+// 4.63 re-converges on every /sync). Severity: WARN per ADR-0055 soak.
+// TODO(promotion): flip VA-08 findings to fail when
+// tickets/governance/T-20260925-007.yaml promotes (not_before 2026-10-09).
+function checkSkillRegistrySync(): void {
+  if (!JSON_MODE) console.log(`\n=== Check VA-08: skill registry tables match SKILL.md frontmatter ===`);
+  const findings = collectWorkspaceRegistryFindings(ROOT);
+  // WARN soak per ADR-0055 — severity flip is ticket-gated (T-20260925-007).
+  for (const f of findings) {
+    warn('registries', 'VA-08', `${f.message} (soak: WARN until promotion)`, 'Run: bun scripts/sync-skill-registries.ts (dev-sync Step 4.63 re-converges on every /sync)');
+  }
+  if (findings.length === 0) {
+    pass('VA-08: all skill registry tables match SKILL.md frontmatter');
+  }
+}
+
 // Check WS-03: Common-Contract common_skills must be present in templates/common/skills/
 // common_skills are project skills (L0+L1+L2), provided by templates/common/skills/ at scaffold time.
 // They are NOT expected in templates/co-*/skills/ (empty delta after fork) nor in .claude/skills/.
@@ -5337,6 +5369,7 @@ function main(): number {
   checkVariantScopedSkillLeak();  // B-11: variant_scoped_skills must not live in common
   checkPlatformMirrorFreshness(); // T-20260916-008: platform skill mirrors carry SSOT versions
   checkVariantMirrorParity();     // T-20260921-009: variant mirrors carry the variant skill set
+  checkSkillRegistrySync();       // VA-08: registry rows match SKILL.md frontmatter (WARN soak, T-20260925-007)
   checkRosterTierConsistency();   // T-20260921-020: roster tiers match resolved agent frontmatter tiers
   checkStyleNeutrality();         // B-12: L0/L1 style neutrality (ADR-0064/0066)
 

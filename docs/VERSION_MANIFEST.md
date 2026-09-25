@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-09-25T01:15:39.923Z
+**Generated**: 2026-09-25T07:18:25.967Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 9
 - **Skills**: 54
-- **Scripts**: 108 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` plus experiment files under `scripts/experiments/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
+- **Scripts**: 109 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` plus experiment files under `scripts/experiments/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
 - **Commands**: 8
 
 ---
@@ -116,7 +116,7 @@
 | compile-tokens.ts | 1.2.0 | scripts/compile-tokens.ts | N/A |
 | create-l3-scaffold.ts | 1.16.0 | scripts/create-l3-scaffold.ts | N/A |
 | design-lint.ts | 1.0.0 | scripts/design-lint.ts | N/A |
-| dev-sync.ts | 1.18.0 | scripts/dev-sync.ts | bun |
+| dev-sync.ts | 1.19.0 | scripts/dev-sync.ts | bun |
 | dispatch-parallel.ts | 1.1.1 | scripts/dispatch-parallel.ts | N/A |
 | dispatch-serial.ts | 1.1.1 | scripts/dispatch-serial.ts | N/A |
 | dispatch.ts | 1.1.1 | scripts/dispatch.ts | N/A |
@@ -135,7 +135,7 @@
 | ingest-external-skills.ts | 1.1.0 | scripts/ingest-external-skills.ts | N/A |
 | ingest-security-frameworks.ts | 1.1.0 | scripts/ingest-security-frameworks.ts | N/A |
 | l3-to-variant-pipeline.ts | 1.20.0 | scripts/l3-to-variant-pipeline.ts | child_process, fs, path, process |
-| lifecycle-sync-audit.ts | 1.16.0 | scripts/lifecycle-sync-audit.ts | js-yaml |
+| lifecycle-sync-audit.ts | 1.17.0 | scripts/lifecycle-sync-audit.ts | js-yaml |
 | lint-instructions.ts | 1.0.0 | scripts/lint-instructions.ts | N/A |
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
 | md-to-ooxml.ts | 1.2.0 | scripts/md-to-ooxml.ts | fs, path |
@@ -164,6 +164,7 @@
 | spec-backfill.ts | 1.0.0 | scripts/spec-backfill.ts | N/A |
 | spec-register.ts | 1.3.0 | scripts/spec-register.ts | N/A |
 | sync-md.ts | 1.4.0 | scripts/sync-md.ts | N/A |
+| sync-skill-registries.ts | 1.0.0 | scripts/sync-skill-registries.ts | N/A |
 | sync-skill-status.ts | 1.1.0 | scripts/sync-skill-status.ts | N/A |
 | sync-skills-to-l2.ts | 1.0.1 | scripts/sync-skills-to-l2.ts | N/A |
 | sync-skills.ts | 1.8.0 | scripts/sync-skills.ts | N/A |
@@ -193,7 +194,7 @@
 | validate-process.ts | 1.0.0 | scripts/validate-process.ts | js-yaml |
 | validate-raci.ts | 1.2.0 | scripts/validate-raci.ts | js-yaml |
 | validate-skills.ts | 1.5.1 | scripts/validate-skills.ts | N/A |
-| validate-templates.ts | 1.44.0 | scripts/validate-templates.ts | js-yaml |
+| validate-templates.ts | 1.45.0 | scripts/validate-templates.ts | js-yaml |
 | validate-variant-readiness.ts | 1.1.0 | scripts/validate-variant-readiness.ts | N/A |
 | variant-feature.ts | 1.0.0 | scripts/variant-feature.ts | N/A |
 | verify-adr-governance.ts | 1.7.0 | scripts/verify-adr-governance.ts | N/A |

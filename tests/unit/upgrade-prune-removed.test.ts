@@ -96,12 +96,15 @@ describe('upgrade-project.ts PRUNE REMOVED (upstream-row semantics, v1.45.1)', (
   test('retired delivery (upstream L0 row) is pruned with its row; delivered subdir scripts survive', () => {
     const tmp = makeTempProject();
     try {
+      // helpers/beta-lifecycle.ts is rowed L0-only in the REAL L0 registry
+      // (skills-registry.ts joined L0+L1 in the W5 batch, so it no longer
+      // exercises this path). Pruned recursively from the subdir, row dropped.
       seedScriptRegistry(tmp, [
-        '| `helpers/skills-registry.ts` | L0 | 1.0.0 | active | —| —| L0 | —|',
+        '| `helpers/beta-lifecycle.ts` | L0 | 1.0.0 | active | —| —| L0 | —|',
         '| `deploy-web.ts` | co-develop | 1.0.0 | active | —| —| L3 | —|',
       ]);
       mkdirSync(join(tmp, 'scripts', 'helpers'), { recursive: true });
-      writeFileSync(join(tmp, 'scripts', 'helpers', 'skills-registry.ts'), 'export const HELPER = 1;\n');
+      writeFileSync(join(tmp, 'scripts', 'helpers', 'beta-lifecycle.ts'), 'export const HELPER = 1;\n');
       writeFileSync(join(tmp, 'scripts', 'deploy-web.ts'), 'export const LOCAL = 1;\n');
       spawnSync('git', ['-C', tmp, 'add', '-A'], { cwd: tmp });
       spawnSync('git', ['-C', tmp, 'commit', '-q', '-m', 'chore: pre-upgrade'], { cwd: tmp });
@@ -113,11 +116,9 @@ describe('upgrade-project.ts PRUNE REMOVED (upstream-row semantics, v1.45.1)', (
       );
       expect(result.status).toBe(0);
       const out = result.stdout ?? '';
-      // helpers/skills-registry.ts is rowed in the REAL L0 registry (retired
-      // Amendment-1 delivery): pruned recursively from the subdir, row dropped.
-      expect(out).toContain('PRUNE  scripts/helpers/skills-registry.ts');
-      expect(existsSync(join(tmp, 'scripts', 'helpers', 'skills-registry.ts'))).toBe(false);
-      expect(registryContains(tmp, 'helpers/skills-registry.ts')).toBe(false);
+      expect(out).toContain('PRUNE  scripts/helpers/beta-lifecycle.ts');
+      expect(existsSync(join(tmp, 'scripts', 'helpers', 'beta-lifecycle.ts'))).toBe(false);
+      expect(registryContains(tmp, 'helpers/beta-lifecycle.ts')).toBe(false);
       // Project-local content survives.
       expect(existsSync(join(tmp, 'scripts', 'deploy-web.ts'))).toBe(true);
       expect(registryContains(tmp, 'deploy-web.ts')).toBe(true);
