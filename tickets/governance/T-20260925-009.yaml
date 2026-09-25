@@ -4,23 +4,42 @@ kind: manual
 title: >-
   MCP governance-server exposure (ADR-0088 scope-out follow-up): design and
   implement an MCP server that exposes the workspace governance scripts
-  (ticket.ts, audit.ts --spec-check, spec-register.ts, qa-gate.ts) as MCP
-  tools, so Hermes Agent (native MCP client, docs/adr/0088-hermes-agent-platform-support.md
-  Context) and other MCP-capable harnesses can invoke them directly. This
-  restores the STRUCTURAL enforcement layer of the PM Gateway (tool-level
-  gating is Claude-Code-settings-specific) for harnesses without hook
-  support; until then enforcement for those harnesses is advisory
-  (AGENTS.md prose) plus the commit-time gates (audit.ts, /sync pipeline),
-  which are harness-agnostic. Needs a Design Gate pass (ADR-0074) before
-  implementation: tool surface, transport (stdio via bunx), sandboxing, and
-  whether the server ships as a workspace script or an optional-mcps seed.
+  (ticket.ts, audit.ts --spec-check, spec-register.ts, qa-gate.ts) as MCP tools,
+  so Hermes Agent (native MCP client,
+  docs/adr/0088-hermes-agent-platform-support.md Context) and other MCP-capable
+  harnesses can invoke them directly. This restores the STRUCTURAL enforcement
+  layer of the PM Gateway (tool-level gating is Claude-Code-settings-specific)
+  for harnesses without hook support; until then enforcement for those harnesses
+  is advisory (AGENTS.md prose) plus the commit-time gates (audit.ts, /sync
+  pipeline), which are harness-agnostic. Needs a Design Gate pass (ADR-0074)
+  before implementation: tool surface, transport (stdio via bunx), sandboxing,
+  and whether the server ships as a workspace script or an optional-mcps seed.
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-25T00:00:00.000Z'
 history:
   - at: '2026-09-25T00:00:00.000Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-25T12:22:57.790Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-25T12:22:57.803Z'
+    from: waiting
+    to: review
+  - at: '2026-09-25T12:23:13.287Z'
+    from: review
+    to: done
+result: >-
+  Designed (docs/designs/2026-09-25-mcp-governance-server-design.md; spec
+  2026-09-25-mcp-governance-server-design) and implemented:
+  scripts/mcp-governance-server.ts — zero-dependency stdio MCP server exposing
+  ticket/audit/spec_register/qa_gate with argv allowlists,
+  docs/designs/-confined spec registration, 120s timeout, capped tails.
+  tests/unit/mcp-governance-server.test.ts 5/5 (handshake, tools/list, live
+  ticket-list call, -32602/-32601 rejections). LIVE smoke green: hermes mcp add
+  governance --command bun --args <workspace>/scripts/mcp-governance-server.ts
+  (4/4 tools enabled), hermes mcp test governance lists all four tools. D5:
+  access layer, not a new enforcement gate.
 error: null

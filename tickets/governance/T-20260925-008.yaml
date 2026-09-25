@@ -2,8 +2,8 @@ schemaVersion: 1
 id: T-20260925-008
 kind: manual
 title: >-
-  Hermes Agent end-to-end live verification (ADR-0088 N4 follow-up): the
-  Wave-0 spike verified the integration code paths at source level only
+  Hermes Agent end-to-end live verification (ADR-0088 N4 follow-up): the Wave-0
+  spike verified the integration code paths at source level only
   (NousResearch/hermes-agent @ 59004a6 — parse_frontmatter tolerance,
   PROJECT_SKILLS_SUBDIRS = (.hermes/skills, .agents/skills),
   build_context_files_prompt AGENTS.md-native entry). Needed: install
@@ -16,12 +16,33 @@ title: >-
   SOAK_MIRRORS WARN to fail (ADR-0055 promotion, TODO(promotion) marker at
   scripts/verify-platform-lifecycle.ts SOAK_MIRRORS).
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-25T00:00:00.000Z'
 history:
   - at: '2026-09-25T00:00:00.000Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-25T12:22:57.764Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-25T12:22:57.777Z'
+    from: waiting
+    to: review
+  - at: '2026-09-25T12:23:13.273Z'
+    from: review
+    to: done
+result: >-
+  Live hermes-agent v0.21.4 installed (./activate dev install; upstream main ==
+  pinned 59004a6). E2E vs synthetic scaffolded project: (1)
+  PROJECT_SKILLS_SUBDIRS discovery finds .hermes/skills first (real
+  get_project_skills_dirs); (2) real parse_frontmatter preserves ALL workspace
+  extension keys with correct types; (3) build_context_files_prompt loads
+  AGENTS.md as project context (HERMES.md->AGENTS.md chain); (4) hermes config
+  set skills.trusted_project_dirs works — onboarding documented. FINDING:
+  workspace AGENTS.md (56,850 chars) exceeds Hermes default
+  context_file_max_chars (20,000) and is truncated — pin a larger limit at
+  onboarding. Residual: live /<skill-name> invocation needs a user
+  model-provider session. .hermes legs promoted out of SOAK_MIRRORS to fail
+  severity (verify-platform-lifecycle v1.4.0 + subprocess tests 5/5).
 error: null

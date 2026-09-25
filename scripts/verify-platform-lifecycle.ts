@@ -12,11 +12,13 @@
  *
  * Tier 1 vs Tier 3 auto-detection: if variant.json exists in cwd, runs Tier 3 subset (E+F only).
  *
- * Net-new coverage (.agents/.codex/.hermes legs, codex prompts leg) soaks in WARN per
- * ADR-0055; the dated promotion ticket flips those to fail. Pre-existing
+ * Net-new coverage (.agents/.codex legs, codex prompts leg) soaks in WARN per
+ * ADR-0055; the dated promotion tickets (T-20260925-002, not-before 2026-10-09)
+ * flip those to fail. The .hermes legs were promoted out of soak on 2026-09-25
+ * (T-20260925-008: live hermes-agent E2E verification green). Pre-existing
  * .claude/.gemini semantics keep their severity.
  *
- * @version 1.3.0
+ * @version 1.4.0
  */
 
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
@@ -40,8 +42,11 @@ const VERSION_EXEMPT_PLATFORM_SKILLS = new Set([
 ]);
 
 // Net-new mirror legs soak in WARN (ADR-0055) — TODO(promotion): flip to fail.
-// .hermes/skills joined in ADR-0088 W2 (same onboarding path as .agents/.codex).
-const SOAK_MIRRORS = new Set(['.agents/skills', '.codex/skills', '.hermes/skills']);
+// .hermes/skills joined in ADR-0088 W2 (same onboarding path as .agents/.codex)
+// and was PROMOTED out of soak on 2026-09-25 (T-20260925-008: live hermes-agent
+// v0.21.4 E2E — project skill discovery, frontmatter tolerance, AGENTS.md entry
+// all verified green), so its legs run at fail severity like .claude/.gemini.
+const SOAK_MIRRORS = new Set(['.agents/skills', '.codex/skills']);
 
 function platformOf(mirrorDir: string): string {
   return mirrorDir.split('/')[0];
@@ -167,51 +172,80 @@ function checkF(): void {
   }
 }
 
-// Check G: command propagation to templates/common/ (Tier 1 only)
-// .claude/commands and .gemini/commands mirror 1:1 (gemini honors its
-// gemini-parity: skip marker). The .codex leg verifies the ADR-0077 D4 mapping
-// (SSOT .claude/commands → templates/common/.codex/prompts) with NO skip
-// marker — Phase 1b mirrors unconditionally, a deliberate asymmetry.
-// .agents/commands is excluded: L0-resident by design, consumed by the
-// Antigravity CLI at the workspace root (spec
-// docs/designs/2026-09-25-propagation-engine-batch-design.md §6-D8, ticket
-// T-20260925-003); recorded exclusion, not a silent skip.
-function checkG(): void {
+// ── Commands-surface registry (T-20260925-010: replaces the hardcoded
+// ['.claude','.gemini'] pair loop — every platform's commands surface gets an
+// explicit entry: a governed leg or a RECORDED exclusion, never a silent skip).
+//   .claude/.gemini — 1:1 mirror into templates/common (fail severity, pre-existing)
+//   .codex          — ADR-0077 D4 mapping .claude/commands → .codex/prompts
+//                     (net-new WARN soak; promotion = T-20260925-002, 2026-10-09)
+//   .agents         — L0-resident by design, consumed by the Antigravity CLI at the
+//                     workspace root (spec 2026-09-25-propagation-engine-batch-design
+//                     §6-D8, ticket T-20260925-003)
+//   .hermes         — no commands mirror: skills are invoked natively as
+//                     /<skill-name> (ADR-0088 D1, live-verified T-20260925-008)
+interface CommandsSurface {
+  platform: string;
+  mode: 'mirror-1:1' | 'mapping' | 'excluded';
+  /** soak=true emits WARN instead of FAIL on the mapping leg (ADR-0055). */
+  soak?: boolean;
+  /** Required for mode 'excluded' — the recorded reason an exclusion stands. */
+  exclusionNote?: string;
+}
+
+export const COMMANDS_SURFACES: readonly CommandsSurface[] = [
+  { platform: '.claude', mode: 'mirror-1:1' },
+  { platform: '.gemini', mode: 'mirror-1:1' },
+  { platform: '.codex', mode: 'mapping', soak: true },
+  { platform: '.agents', mode: 'excluded', exclusionNote: 'L0-resident by design — workspace-root Antigravity CLI surface (T-20260925-003)' },
+  { platform: '.hermes', mode: 'excluded', exclusionNote: 'no commands mirror — Hermes invokes skills natively as /<skill-name> (ADR-0088 D1)' },
+];
+
+export function checkG(): void {
   if (IS_TIER3) return; // Tier 3 projects don't have templates/common/
   if (!JSON_MODE) console.log('\n=== Check G: Platform Command propagation to templates/common/ (Tier 1 -> Tier 2) ===');
 
-  for (const platform of ['.claude', '.gemini']) {
-    const cmdDir = join(ROOT, platform, 'commands');
-    const commonCmdDir = join(ROOT, 'templates', 'common', platform, 'commands');
-    if (!existsSync(cmdDir)) continue;
-
-    const rootFiles = readdirSync(cmdDir).filter(f => f.endsWith('.md'));
-    const commonFiles = existsSync(commonCmdDir)
-      ? new Set(readdirSync(commonCmdDir).filter(f => f.endsWith('.md')))
-      : new Set<string>();
-
-    const missing = rootFiles.filter(f => !commonFiles.has(f));
-    if (missing.length > 0) {
-      fail('platform-command-propagation',
-        `${platform}/commands/ files not in templates/common/${platform}/commands/: ${missing.join(', ')}`,
-        `Run platform-command-lifecycle-manager skill`);
-    } else {
-      pass(`${platform}/commands/ → templates/common: all ${rootFiles.length} file(s) propagated`);
-    }
-  }
-
-  // .codex leg: prompts mapping (net-new — soak in WARN; TODO(promotion): flip to fail)
   const claudeCmdDir = join(ROOT, '.claude', 'commands');
-  const codexPromptsDir = join(ROOT, 'templates', 'common', '.codex', 'prompts');
-  if (existsSync(claudeCmdDir)) {
+
+  for (const surface of COMMANDS_SURFACES) {
+    if (surface.mode === 'excluded') {
+      pass(`${surface.platform}/commands: recorded exclusion — ${surface.exclusionNote}`);
+      continue;
+    }
+
+    if (surface.mode === 'mirror-1:1') {
+      const cmdDir = join(ROOT, surface.platform, 'commands');
+      const commonCmdDir = join(ROOT, 'templates', 'common', surface.platform, 'commands');
+      if (!existsSync(cmdDir)) continue;
+
+      const rootFiles = readdirSync(cmdDir).filter(f => f.endsWith('.md'));
+      const commonFiles = existsSync(commonCmdDir)
+        ? new Set(readdirSync(commonCmdDir).filter(f => f.endsWith('.md')))
+        : new Set<string>();
+
+      const missing = rootFiles.filter(f => !commonFiles.has(f));
+      if (missing.length > 0) {
+        fail('platform-command-propagation',
+          `${surface.platform}/commands/ files not in templates/common/${surface.platform}/commands/: ${missing.join(', ')}`,
+          `Run platform-command-lifecycle-manager skill`);
+      } else {
+        pass(`${surface.platform}/commands/ → templates/common: all ${rootFiles.length} file(s) propagated`);
+      }
+      continue;
+    }
+
+    // mode === 'mapping': .codex leg — ADR-0077 D4 (.claude/commands → .codex/prompts),
+    // NO skip marker — Phase 1b mirrors unconditionally, a deliberate asymmetry.
+    const codexPromptsDir = join(ROOT, 'templates', 'common', '.codex', 'prompts');
+    if (!existsSync(claudeCmdDir)) continue;
     const codexPrompts = existsSync(codexPromptsDir)
       ? new Set(readdirSync(codexPromptsDir).filter(f => f.endsWith('.md')))
       : new Set<string>();
     const claudeFiles = readdirSync(claudeCmdDir).filter(f => f.endsWith('.md'));
     const missingPrompts = claudeFiles.filter(f => !codexPrompts.has(f));
+    const emit = surface.soak ? warn : fail;
     if (missingPrompts.length > 0) {
-      warn('platform-command-propagation',
-        `.claude/commands/ files with no templates/common/.codex/prompts/ counterpart (ADR-0077 D4 mapping; no skip marker on the codex leg) (soak: WARN until promotion): ${missingPrompts.join(', ')}`,
+      emit('platform-command-propagation',
+        `.claude/commands/ files with no templates/common/.codex/prompts/ counterpart (ADR-0077 D4 mapping; no skip marker on the codex leg)${surface.soak ? ' (soak: WARN until promotion)' : ''}: ${missingPrompts.join(', ')}`,
         `Re-run sync-skills (Phase 1b propagates prompts unconditionally)`);
     } else {
       pass(`.claude/commands/ → templates/common/.codex/prompts: all ${claudeFiles.length} prompt(s) propagated (mapping)`);
@@ -248,7 +282,8 @@ function checkH(): void {
     for (const mirrorDir of PLATFORM_MIRROR_DIRS) {
       const platform = platformOf(mirrorDir);
       const commonPath = join(ROOT, 'templates', 'common', mirrorDir, skillName, 'SKILL.md');
-      // Net-new mirrors (.agents/.codex/.hermes) soak in WARN — TODO(promotion): flip to fail.
+      // Net-new mirrors (.agents/.codex) soak in WARN — TODO(promotion): flip to fail.
+      // (.hermes promoted 2026-09-25, T-20260925-008.)
       const emit = SOAK_MIRRORS.has(mirrorDir) ? warn : fail;
       if (!existsSync(commonPath)) {
         emit('platform-skill-propagation',
@@ -279,9 +314,9 @@ async function main() {
   }
 }
 
-main().catch(err => {
-  console.error(err);
-  if (import.meta.main) {
+if (import.meta.main) {
+  main().catch(err => {
+    console.error(err);
     process.exit(1);
-  }
-});
+  });
+}

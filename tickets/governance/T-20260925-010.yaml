@@ -2,25 +2,42 @@ schemaVersion: 1
 id: T-20260925-010
 kind: manual
 title: >-
-  verify-platform-lifecycle.ts Check G pair-based gap (pre-existing, now
-  three platforms behind): the command-propagation loop hardcodes
-  ['.claude', '.gemini'] (line ~182), so the version-completeness and
-  parity arms never see .codex (ADR-0077 never added it) or .hermes
-  (ADR-0088 D8 deliberately did not extend it — Hermes has no commands
-  mirror, but the loop's structure remains pair-based). Generalize Check G
-  to the PLATFORM_MIRROR_DIRS constant with per-platform exemption markers
-  (hermes: no commands/prompts leg by design — record a documented exclusion,
-  not a silent skip, per the .agents/commands precedent T-20260925-003).
-  Related deferred refactor: PLATFORM_SKILL_BASES/MIRROR_DIRS consumers that
-  still hold inline literals (second consecutive deferral of the N-platform
-  refactor noted in ADR-0088 Consequences).
+  verify-platform-lifecycle.ts Check G pair-based gap (pre-existing, now three
+  platforms behind): the command-propagation loop hardcodes ['.claude',
+  '.gemini'] (line ~182), so the version-completeness and parity arms never see
+  .codex (ADR-0077 never added it) or .hermes (ADR-0088 D8 deliberately did not
+  extend it — Hermes has no commands mirror, but the loop's structure remains
+  pair-based). Generalize Check G to the PLATFORM_MIRROR_DIRS constant with
+  per-platform exemption markers (hermes: no commands/prompts leg by design —
+  record a documented exclusion, not a silent skip, per the .agents/commands
+  precedent T-20260925-003). Related deferred refactor:
+  PLATFORM_SKILL_BASES/MIRROR_DIRS consumers that still hold inline literals
+  (second consecutive deferral of the N-platform refactor noted in ADR-0088
+  Consequences).
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-25T00:00:00.000Z'
 history:
   - at: '2026-09-25T00:00:00.000Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-25T12:22:57.817Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-25T12:22:57.831Z'
+    from: waiting
+    to: review
+  - at: '2026-09-25T12:23:13.244Z'
+    from: review
+    to: done
+result: >-
+  Check G generalized: hardcoded ['.claude','.gemini'] pair loop replaced by the
+  exported COMMANDS_SURFACES registry — every platform's commands surface is a
+  governed leg (mirror-1:1 .claude/.gemini; ADR-0077 D4 mapping .codex, WARN
+  soak pending T-20260925-002) or a RECORDED exclusion (.agents L0-resident per
+  T-20260925-003; .hermes native /<skill-name> per ADR-0088 D1).
+  import.meta.main guard added; tests/unit/verify-platform-lifecycle.test.ts
+  pins severities + exclusions (5/5). Remaining inline platform literals stay
+  with T-20260925-002's family.
 error: null

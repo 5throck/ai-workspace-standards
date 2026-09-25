@@ -321,6 +321,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `adr:0086` | adr | — | — | — |
 | `adr:0087` | adr | — | handbook | — |
 | `adr:0088` | adr | — | upgrade-project | — |
+| `adr:0089` | adr | — | project-resync, project-review | — |
 | `dec:DEC-20260825-01` | decision | — | — | — |
 | `dec:DEC-20260825-02` | decision | `sync` | — | — |
 | `dec:DEC-20260829-01` | decision | `decision-record` | — | — |
