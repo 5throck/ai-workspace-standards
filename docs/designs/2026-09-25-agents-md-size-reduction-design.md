@@ -123,3 +123,13 @@ Mechanical sweep over 12 variants (co-abap EXCLUDED — under parallel restructu
 
 Remaining over-budget driver: §1/§2 rosters (up to 14.8k in co-safety) — roster generation (D4) is the next tranche, deferred with W2 completion follow-ups. Budget remains WARN until every file fits.
 
+## 16. Addendum 3 — Program closure (2026-09-26, user decision)
+
+The user ruled that AGENTS.md will **not be reduced further** (explicit instruction, 2026-09-26). Consequences:
+
+- The W1b final editorial tranche (§1 roster compression, §7 tighten — the content-adjacent editing flagged by red-team objection 4) is **cancelled**, not deferred.
+- The current state is final: L0 27.1k / L1 ~27k (thin propagated) / L2 18.6k–48.4k. Hermes truncation is handled by the documented config backstop (`context_file_max_chars 100000` — AGENTS.md §6, CONSTITUTION §11, ADR-0088 Addendum 1).
+- `agents-md-size-budget` **stays a WARN-level visibility metric permanently** — the W4 FAIL promotion is cancelled (a FAIL would pressure exactly the content deletion this decision rules out). The validator's remaining value: surfacing future growth of the managed files.
+- Pointer-integrity and the other ADR-0090 W0/W2 checks are unaffected.
+- Fleet conversions already landed (12/12 aligned) and the config backstop remain the standing operational posture.
+
