@@ -14,5 +14,5 @@ Pass `--tasks` flag to automatically convert action items into tracked tasks.
 
 ## Platform Notes
 
-- On Antigravity/Gemini CLI: delegates to `/meeting "project review" --agents [list] --rounds 2 --dialogue`
+- On Antigravity/Gemini CLI: delegates to the meeting-facilitation skill with topic "project review" and options `--agents [list] --rounds 2 --dialogue`
 - On Claude Code: use native `Agent` tool for parallel dispatch

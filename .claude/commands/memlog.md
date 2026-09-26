@@ -40,7 +40,7 @@ Steps:
 
 > **MEMORY.md structure**: MEMORY.md has three sections — Sessions, Meetings, ADRs.
 > - Sessions: auto-updated by this command and the commit-msg hook.
-> - Meetings: register via `bun run scripts/sync-md.ts "DATE" "TOPIC" --meeting` after `/meeting`.
+> - Meetings: register via `bun run scripts/sync-md.ts "DATE" "TOPIC" --meeting` after a meeting-facilitation session.
 > - ADRs: register via `bun run scripts/sync-md.ts "DATE" "TITLE" --adr ADR-NNNN` when creating an ADR file.
 
 Note: `/sync` already runs memlog automatically. Use `/memlog` only when you want to log a session entry without triggering a full sync.

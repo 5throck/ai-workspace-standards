@@ -48,13 +48,13 @@
   "common_skills": {
     "project-review": {
       "source": "skills/project-review/SKILL.md",
-      "version": "1.3.0",
+      "version": "1.3.1",
       "overridable": false,
       "description": "Comprehensive parallel project review — universal across all variants"
     },
     "meeting-facilitation": {
       "source": "skills/meeting-facilitation/SKILL.md",
-      "version": "1.4.3",
+      "version": "1.4.4",
       "overridable": false,
       "description": "Structured multi-agent meeting facilitation"
     },
@@ -255,13 +255,6 @@
       "description": "Generates or updates CHANGELOG.md entries following Keep a Changelog format",
       "propagated_to_common": true
     },
-    "meeting": {
-      "source": ".claude/commands/meeting.md",
-      "gemini_source": ".gemini/commands/meeting.md",
-      "gemini-parity": "full",
-      "description": "Facilitates structured multi-agent meetings with configurable rounds and agent participants",
-      "propagated_to_common": true
-    },
     "memlog": {
       "source": ".claude/commands/memlog.md",
       "gemini_source": ".gemini/commands/memlog.md",
@@ -324,8 +317,8 @@
       "gemini_source": ".gemini/skills/meeting-facilitation/SKILL.md",
       "agents_source": ".agents/skills/meeting-facilitation/SKILL.md",
       "codex_source": ".codex/skills/meeting-facilitation/SKILL.md",
-      "version": "1.4.3",
-      "description": "Structured multi-agent meeting facilitation — delegates to .claude/commands/meeting.md",
+      "version": "1.4.4",
+      "description": "Structured multi-agent meeting facilitation (self-contained skill; legacy /meeting command retired 2026-09-26)",
       "propagated_to_common": true
     },
     "decision-record": {

@@ -170,7 +170,6 @@ Custom slash commands in `.claude/commands/` are natively recognized by Claude C
 | `/new-task "name"` | Create task block in today's memory log | In-session task tracking |
 | `/commit-push-pr` | Commit, push, and open a PR in one step | Standalone commit/PR helper (bypasses full `/sync` pipeline) |
 | `/gateguard` | Investigate importers before first edit per file (GateGuard) | Companion to the PreToolUse GateGuard hook |
-| `/meeting "topic"` | Structured multi-agent discussion | `skills/meeting-facilitation` (special-synced to `.claude/commands/meeting.md`) |
 | `/project-review` | Run a structured project review | Project review workflow command |
 
 > **How commands become Skills**: each `.claude/commands/<name>.md` file is automatically
@@ -228,7 +227,7 @@ When a user request matches a skill trigger, apply this priority order — **enf
 | "brainstorm", "design before coding", "explore options" | `superpowers/brainstorming` | 3 |
 
 When ambiguous, prefer the local skill and confirm intent with the user.
-Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
+Explicit invocation: the `meeting-facilitation` skill with the meeting topic and options (`--agents a,b`, `--rounds N`, `--dialogue`) — the legacy `/meeting` slash command is retired (2026-09-26).
 
 ### 5. Agent Dispatch Rules
 

@@ -94,11 +94,11 @@ Scaffolded projects inherit shared automation scripts from `templates/common/scr
 ## Shared File Sync Rule
 
 Some files are shared between the workspace and templates:
-- `.claude/commands/meeting.md` ↔ `templates/co-develop/.claude/commands/meeting.md`
+- `.claude/commands/memlog.md` ↔ `templates/common/.claude/commands/memlog.md`
 
-When the workspace version changes, manually sync to the template variant:
+When the workspace version changes, manually sync to the common template:
 ```bash
-cp .claude/commands/meeting.md templates/co-develop/.claude/commands/meeting.md
+cp .claude/commands/memlog.md templates/common/.claude/commands/memlog.md
 bun scripts/validate-templates.ts  # confirm no drift
 ```
 
@@ -110,4 +110,4 @@ See [CHANGELOG.md](CHANGELOG.md) for full history.
 - **Minor** bump: new agents, new variants going stable, structural section changes
 - **Patch** bump: documentation and description updates
 
-*Last Updated: 2026-09-06*
+*Last Updated: 2026-09-26*

@@ -3,12 +3,12 @@ name: meeting-facilitation
 status: active
 scope: common
 description: >
-  Facilitates structured multi-agent meetings using the /meeting command for collaborative
-  decision-making and problem resolution. Use when: running agent meetings, coordinating
-  multi-agent discussions, or facilitating collaborative problem-solving sessions.
+  Facilitates structured multi-agent meetings for collaborative decision-making and
+  problem resolution. Use when: running agent meetings, coordinating multi-agent
+  discussions, or facilitating collaborative problem-solving sessions.
 owner: pm
-version: 1.4.3
-last_reviewed: 2026-09-05
+version: 1.4.4
+last_reviewed: 2026-09-26
 prerequisites: []
 metadata:
   type: process
@@ -22,21 +22,27 @@ metadata:
 
 ## Context
 
-This skill is a registration stub for the meeting-facilitation capability. The actual implementation resides in `.claude/commands/meeting.md` and `.gemini/commands/meeting.md`. This file exists to make the skill discoverable via `.agents/skills.json` at Priority 1.
+This skill defines the multi-agent meeting facilitation flow. It is self-contained: the
+skill body below is the specification the PM follows when orchestrating a meeting. The
+legacy `/meeting` slash command was retired on 2026-09-26 — invoke this skill directly
+by name.
 
 ## When to Use
 
 Invoke this skill when the user requests:
-- `/meeting "topic"` — structured multi-agent discussion
+- A structured multi-agent discussion on a named topic
 - Facilitating collaborative decision-making across specialist agents
 - Coordinating agent discussions for design reviews, problem-solving, or planning
 
 ## Execution Steps
 
-This skill delegates entirely to the platform-specific command files:
-1. **Claude Code**: `.claude/commands/meeting.md` handles the full facilitation flow
-2. **Gemini CLI**: `.gemini/commands/meeting.md` handles the full facilitation flow
-3. Both implementations support: agenda setting, round-robin dialogue, outcome synthesis, and transcript logging to `memory/meeting-YYYY-MM-DD-[slug].md`
+The skill runs the facilitation flow directly:
+1. **Agenda setting**: state the topic, objectives, participants, and round count.
+2. **Round-robin dialogue**: each participating agent contributes per round; the PM
+   facilitates and keeps contributions on-agenda.
+3. **Outcome synthesis**: a cross-domain agent (or the PM) synthesizes agreements,
+   open points, and proposed decisions.
+4. **Transcript logging**: write the transcript to `memory/meeting-YYYY-MM-DD-[slug].md`.
 
 ## Output Format
 
