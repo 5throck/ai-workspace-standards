@@ -57,10 +57,6 @@ curl -fsSL https://bun.sh/install | bash
 
 # Or use PowerShell (Windows)
 powershell -c "irm bun.sh/install.ps1 | iex"
-
-# Or use the automated install script
-curl -fsSL https://bun.sh/install | bash  # Unix/Linux/macOS
-powershell -c "irm bun.sh/install.ps1 | iex"      # Windows
 ```
 
 **Verification**:
@@ -222,13 +218,7 @@ echo "  - GitHub CLI (for PR automation)"
 echo "  - uv (for faster Python package management)"
 ```
 
-**Full verification script** (includes optional tools):
-```bash
-# Check all tools including optional
-check-env-full.sh
-```
-
-Save this as `check-environment.sh`, make it executable, and run:
+Save the checklist above as `check-environment.sh`, make it executable, and run:
 ```bash
 chmod +x check-environment.sh
 ./check-environment.sh
@@ -288,9 +278,6 @@ bun scripts/new-project.ts "my-project-name"
 
 # Or specify variant
 bun scripts/new-project.ts "my-project-name" --variant co-design
-
-# Windows PowerShell
-bun scripts/new-project.ts "my-project-name"
 ```
 
 ### 4.5 Verify Workspace Health
@@ -309,7 +296,7 @@ If any command fails, open or update a `ci-failure` issue and assign PM as triag
 
 ```bash
 cd "my-project-name"
-claude    # or agy for Gemini
+claude    # or agy for Gemini, codex for Codex CLI, hermes for Hermes Agent
 ```
 
 ---
@@ -339,8 +326,6 @@ claude    # or agy for Gemini
 - **Solution**: 
   ```bash
   # Reinstall Bun
-  curl -fsSL https://bun.sh/install | bash
-  # Or use the automated script
   curl -fsSL https://bun.sh/install | bash
   ```
 
@@ -384,4 +369,4 @@ After completing the installation:
 
 ---
 
-**Last Updated**: 2026-05-29
+**Last Updated**: 2026-09-27
