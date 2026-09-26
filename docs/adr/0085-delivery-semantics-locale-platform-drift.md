@@ -50,9 +50,10 @@ reads `i18n.locale_codes` from the schema, not per-variant lists). Revisit
 `--locale` only if fleet demand for unattended seeding materializes.
 
 **D2 — Platform mirrors are shared fleet surface; profiles govern primary
-instruction files (T-015).** The four platform mirrors (`.claude`, `.gemini`,
-`.agents`, `.codex`) are one distributed skill surface by construction
-(ADR-0077 W1; `sync-skills.ts` distributes the SSOT to all four on every run,
+instruction files (T-015).** The platform mirrors (`.claude`, `.gemini`,
+`.agents`, `.codex` — joined by `.hermes` per ADR-0088, amendment 2026-09-26)
+are one distributed skill surface by construction
+(ADR-0077 W1; `sync-skills.ts` distributes the SSOT to all five on every run,
 including the post-upgrade invocation). A platform profile (`--platform
 claude|antigravity|codex|all`) selects which **primary instruction file**
 (`CLAUDE.md`/`GEMINI.md`/`CODEX.md`) and which **per-project platform config

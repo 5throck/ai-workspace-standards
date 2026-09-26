@@ -1,0 +1,43 @@
+schemaVersion: 1
+id: T-20260926-024
+kind: manual
+title: >-
+  Standards record-plane batch (2026-09-26 re-verification agent B): (a)
+  CHANGELOG backfill for the ADR-0089/0090/0091 program — 10 merges (#1077 W0/W1
+  thin-dispatcher, #1082-1086, #1090-1093) landed without Unreleased entries,
+  leaving the quarter's largest restructure invisible in the Step-8 record
+  plane; (b) stale '4 platform mirrors' in ADR-0086:100 and ADR-0085:53 —
+  post-ADR-0088 the enumeration is 5 mirrors incl. .hermes (CONSTITUTION.md:744
+  already says 7 surfaces/5 dirs); (c) three active skills (adopt-project 1.1.0,
+  migrate-project 1.0.0, ticket-run 1.0.0) have no docs/lifecycle/skills/
+  records — LC-WARN class invisible to the green baseline.
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-09-26T09:51:59.534Z'
+history:
+  - at: '2026-09-26T09:51:59.534Z'
+    from: null
+    to: backlog
+  - at: '2026-09-26T09:51:59.590Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-26T09:51:59.604Z'
+    from: waiting
+    to: running
+  - at: '2026-09-26T10:00:06.946Z'
+    from: running
+    to: review
+  - at: '2026-09-26T10:00:06.990Z'
+    from: review
+    to: done
+result: >-
+  Landed in batch 4 (PR pending): (a) consolidated retroactive CHANGELOG entry
+  for the ADR-0089/0090/0091 program (#1077-#1093 span); (b) ADR-0086:100 and
+  ADR-0085:53 amended to the 5-mirror enumeration with 2026-09-26 amendment
+  notes; (c) FALSE POSITIVE on existence — all three lifecycle records exist
+  (adopt-project.md, migrate-project.md created 09-23 with the skills;
+  ticket-run.md existed in legacy Phase-History format); ticket-run.md
+  modernized to the current Metadata format. Re-verification agent B finding
+  partially mis-derived.
+error: null

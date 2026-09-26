@@ -1,5 +1,5 @@
 ---
-translated_from_hash: cdb9ffaab8fc86f1ba4e5b45e0df97ddf7c28a6c2adc1a022009024e9f032be7
+translated_from_hash: beabc68329474d9715ad09735dd8275840dbb75ccd16989e03e989399beebdb6
 sync_version: 2
 ---
 
@@ -338,7 +338,7 @@ AI 입문자 및 Claude Desktop App 사용자(macOS, Windows, Linux)를 위한 �
 - **Day 1 — 일반 사용자**: 핵심 AI 개념, Vibe Coding vs. Harness Engineering 원칙, 가드레일, 권한 모델, 기본적인 멀티 에이전트 조작
 - **Day 2 — IT 전문가**: 아키텍처 심층 해설 (SSOT 계층 L0→L1→L2), 엔터프라이즈 배포 전략, 커스텀 바리안트 엔지니어링 (Phase A/B), 종합 실습 프로젝트
 
-모든 개념은 4가지 주요 플랫폼 (Claude Code, Claude Desktop App, Antigravity CLI, Antigravity 2.0)에서 시연됩니다.
+모든 개념은 지원 플랫폼 세트 — 5개 플랫폼 디렉터리 위의 7개 서페이스 (Claude Code CLI + Claude Desktop App, Gemini CLI, Antigravity, Codex CLI + Codex Desktop, Hermes Agent; CONSTITUTION.md §7 참조) — 에서 시연됩니다.
 
 ---
 

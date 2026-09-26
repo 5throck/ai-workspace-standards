@@ -27,13 +27,13 @@ Before assigning an agent to any task, PM MUST classify the deliverable type:
 
 **Tier Ceiling Rule**: An agent's tier may NOT be elevated beyond its defined tier. `automation-engineer` is always Low — assigning it High is a governance violation.
 
-> **Execution Plan Boilerplate Policy**: For boilerplate mandatory/discretionary cases, see [CLAUDE.md §5](CLAUDE.md#5-agent-dispatch-rules) or [GEMINI.md §5](GEMINI.md#5-agent-dispatch-rules).
+> **Execution Plan Boilerplate Policy**: For boilerplate mandatory/discretionary cases, see [CLAUDE.md §5](../../../CLAUDE.md#5-agent-dispatch-rules) or [GEMINI.md §5](../../../GEMINI.md#5-agent-dispatch-rules).
 
 ### §3.8 Permission Denial Protocol
 
 When a specialist agent's required tool is denied, PM must **not** substitute for the specialist. Instead:
 
-1. Identify the denial Type (A/B/C/D) using the classification in [`agents/pm.md`](agents/pm.md#permission-denial-protocol)
+1. Identify the denial Type (A/B/C/D) using the classification in [`agents/pm.md`](../../../agents/pm.md#permission-denial-protocol)
 2. Output the Escalation Template immediately
 3. Log the denial to `memory/YYYY-MM-DD.md`
 4. Halt the blocked task — do not proceed without the required tool
@@ -115,7 +115,7 @@ User: "Yes"
 PM: ▶️ [specialist] dispatch...
 ```
 
-See [agents/pm.md](agents/pm.md) for complete role definition and delegation protocols.
+See [agents/pm.md](../../../agents/pm.md) for complete role definition and delegation protocols.
 
 #### §3.1.3 Enforcement Layers
 1. **Tool-Level**: Agent tool rejects non-PM specialist calls (hard enforcement)
@@ -160,7 +160,7 @@ User: "Yes"
 PM: ▶️ [specialist] dispatch...
 ```
 
-See [agents/pm.md](agents/pm.md) for complete role definition and delegation protocols.
+See [agents/pm.md](../../../agents/pm.md) for complete role definition and delegation protocols.
 
 #### §3.1.3 Enforcement Layers
 1. **Tool-Level**: Agent tool rejects non-PM specialist calls (hard enforcement)
@@ -205,7 +205,7 @@ User: "Yes"
 PM: ▶️ [specialist] dispatch...
 ```
 
-See [agents/pm.md](agents/pm.md) for complete role definition and delegation protocols.
+See [agents/pm.md](../../../agents/pm.md) for complete role definition and delegation protocols.
 
 #### §3.1.3 Enforcement Layers
 1. **Tool-Level**: Agent tool rejects non-PM specialist calls (hard enforcement)

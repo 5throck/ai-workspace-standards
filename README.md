@@ -1,6 +1,6 @@
 ---
 sync_version: 2
-content_hash: cdb9ffaab8fc86f1ba4e5b45e0df97ddf7c28a6c2adc1a022009024e9f032be7
+content_hash: beabc68329474d9715ad09735dd8275840dbb75ccd16989e03e989399beebdb6
 ---
 
 **Languages**: [English](README.md) · [한국어](README_ko.md) · [Español](README_es.md) · [日本語](README_ja.md)
@@ -349,7 +349,7 @@ This handbook is a 2-day intensive curriculum covering:
 - **Day 1 — General Users**: Core AI concepts, Vibe Coding vs. Harness Engineering principles, guardrails, permission models, and basic multi-agent operations.
 - **Day 2 — IT Professionals**: Deep-dive architecture (SSOT hierarchy L0→L1→L2), enterprise deployment strategies, custom variant engineering (Phase A/B), and comprehensive capstone projects.
 
-All concepts are demonstrated across four major platforms (Claude Code, Claude Desktop App, Antigravity CLI, and Antigravity 2.0).
+All concepts are demonstrated across the supported platform set — 7 surfaces on 5 platform directories (Claude Code CLI + Claude Desktop App, Gemini CLI, Antigravity, Codex CLI + Codex Desktop, and Hermes Agent; see CONSTITUTION.md §7).
 
 ---
 

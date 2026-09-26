@@ -1,4 +1,4 @@
-// @version 1.4.0
+// @version 1.4.1
 import { $ } from "bun";
 import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from "fs";
 import { join } from "path";
@@ -365,4 +365,9 @@ async function main() {
     }
 }
 
-main();
+// Import-safe: only run the audit when this module is the entry point
+// (same class as the agent-similarity-analyzer fix, T-20260926-020c —
+// importing the module must not execute the audit).
+if (import.meta.main) {
+    main();
+}

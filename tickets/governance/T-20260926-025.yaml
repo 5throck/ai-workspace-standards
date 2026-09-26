@@ -1,0 +1,43 @@
+schemaVersion: 1
+id: T-20260926-025
+kind: manual
+title: >-
+  Docs links/consistency batch (2026-09-26 re-verification agent D): (a) 10
+  broken links in the relocated
+  docs/governance/agents/{pm-gateway-workflow,workflows}.md —
+  CLAUDE.md/GEMINI.md/CONSTITUTION.md/docs/constitution/* referenced as siblings
+  of their new location; (b) docs/governance/LIFECYCLE_GOVERNANCE.md:9 links
+  lifecycle-governance.json without the ../templates/ prefix and :206-207
+  targets VARIANT_LIFECYCLE*.md which no longer exist (now
+  variant-lifecycle.md); (c) README.md:352 + README_ko.md:341 still say 'four
+  major platforms' vs CONSTITUTION 7 surfaces/5 directories — README's own
+  Hermes section contradicts it.
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-09-26T09:51:59.549Z'
+history:
+  - at: '2026-09-26T09:51:59.549Z'
+    from: null
+    to: backlog
+  - at: '2026-09-26T09:51:59.618Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-26T09:51:59.631Z'
+    from: waiting
+    to: running
+  - at: '2026-09-26T10:00:06.961Z'
+    from: running
+    to: review
+  - at: '2026-09-26T10:00:07.004Z'
+    from: review
+    to: done
+result: >-
+  Landed in batch 4: (a) 10+ broken links fixed across the three relocated
+  docs/governance/agents/* files in BOTH layers (../../../ prefix;
+  execution-plan-templates.md had the same class beyond the reported two files;
+  L1 constitution-doc targets resolve post-scaffold by design); (b)
+  LIFECYCLE_GOVERNANCE.md:9 ../templates/ prefix restored and :206-207 repointed
+  to variant-lifecycle.md; (c) README.md:352 + README_ko.md:341 updated to 7
+  surfaces / 5 platform directories per CONSTITUTION §7.
+error: null

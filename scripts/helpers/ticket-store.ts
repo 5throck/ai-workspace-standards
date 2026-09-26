@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.3.0
+// @version 1.3.1
 // @l2-propagate: false
 // ticket-store.ts — Atomic file I/O for the Phase A ticket queue. Every function
 // takes an explicit directory/path so callers (CLI, skill, tests) never assume a
@@ -41,7 +41,16 @@ function loadYamlCapped<T>(path: string): T {
   return load(readFileSync(path, 'utf-8'), { schema: JSON_SCHEMA }) as T;
 }
 
+/** Ticket id shape enforced at the store boundary (T-20260926-026c): ids reach
+ * `join(dir, `${id}.yaml`)`, so an unvalidated id is a path-escape class — the
+ * MCP governance server already enforces this pattern (mcp-governance-server.ts),
+ * the store must not be weaker than its own tool wrapper. */
+const TICKET_ID_PATTERN = /^T-\d{8}-\d{3,4}$/;
+
 function ticketPath(dir: string, id: string): string {
+  if (!TICKET_ID_PATTERN.test(id)) {
+    throw new Error(`[ticket-store] invalid ticket id: ${JSON.stringify(id)} — expected T-YYYYMMDD-NNN`);
+  }
   return join(dir, `${id}.yaml`);
 }
 

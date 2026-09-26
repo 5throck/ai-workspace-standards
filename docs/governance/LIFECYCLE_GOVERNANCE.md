@@ -6,8 +6,8 @@ lang_reason: source-material
 # Lifecycle Governance
 
 > **Doc intent:** Human-readable governance specification for the 5-domain × 3-layer lifecycle model.
-> Machine-readable policy is in [`lifecycle-governance.json`](lifecycle-governance.json).
-> Last Updated: 2026-09-15
+> Machine-readable policy is in [`lifecycle-governance.json`](../templates/lifecycle-governance.json).
+> Last Updated: 2026-09-26
 
 ---
 
@@ -203,8 +203,8 @@ Use this checklist when creating a new `templates/co-<name>/` variant. Steps are
 | Resource | Purpose |
 |---|---|
 | [`lifecycle-governance.json`](../templates/lifecycle-governance.json) | Machine-readable policy (layer/domain matrix, currentStatus, mandatoryBeforeProjectCreation) |
-| [`VARIANT_LIFECYCLE.md`](VARIANT_LIFECYCLE.md) | Variant promotion rules and state transition diagram |
-| [`VARIANT_LIFECYCLE_INTEGRATION.md`](VARIANT_LIFECYCLE_INTEGRATION.md) | Integration guide for embedding lifecycle checks in CI/CD |
+| [`variant-lifecycle.md`](variant-lifecycle.md) | Variant promotion rules and state transition diagram |
+| [`variant-lifecycle.md` — integration section](variant-lifecycle.md) | Integration guide for embedding lifecycle checks in CI/CD |
 | [`VERSION_REGISTRY.json`](../templates/VERSION_REGISTRY.json) | Canonical version registry for all tracked variants |
 | [`version-registry-schema.md`](version-registry-schema.md) | Schema documentation for VERSION_REGISTRY.json |
 | `../../scripts/audit.ts` | L0 orchestrator — workspace-level audit pipeline |
