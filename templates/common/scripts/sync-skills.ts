@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.9.0
+// @version 1.10.0
 // v1.9.0 (2026-09-25, ADR-0088 W1): fifth platform target `.hermes/skills/` (NousResearch
 //   Hermes Agent mirror — same B-03/mirror:false exclusions as the other targets). Hermes
 //   scans project-local `<git-root>/.hermes/skills` as its primary skill path (source-
@@ -322,6 +322,31 @@ export async function syncSkills(dirs: SkillSyncDirs, opts: SyncSkillsOptions = 
             errors.push(`Phase 1: ${item}: ${msg}`);
             console.error(`  ❌ Error syncing ${item}: ${msg}`);
         }
+    }
+
+    // --- Phase 1c: Remove platform mirror ghosts (project contexts only) ---
+    // A platform skill directory with no skills/ SSOT counterpart is a stale
+    // mirror: scaffold-time distribution ran before the workspace-only sweep,
+    // or the SSOT copy was retired after an earlier sync. Left alone, ghosts
+    // drift per-project (observed: workspace-process skills mirrored into 4
+    // platforms on fresh scaffolds but surviving only as .codex ghosts in
+    // older projects). Gated to project contexts — the workspace root is the
+    // one place platform-only skill directories are legitimate.
+    const isProjectContext = fs.existsSync(path.join(root, '.claude', 'template-version.txt'));
+    if (isProjectContext) {
+        let ghostCount = 0;
+        for (const targetDir of [claudeSkills, geminiSkills, agentsSkills, codexSkills, hermesSkills]) {
+            if (!fs.existsSync(targetDir)) continue;
+            for (const item of fs.readdirSync(targetDir)) {
+                const target = path.join(targetDir, item);
+                if (!fs.statSync(target).isDirectory()) continue;
+                if (fs.existsSync(path.join(ssotSkills, item))) continue;
+                fs.rmSync(target, { recursive: true, force: true });
+                ghostCount++;
+                console.log(`  -> Removed ghost platform mirror ${path.relative(root, target)}/ (no skills/ SSOT counterpart)`);
+            }
+        }
+        if (ghostCount === 0) console.log('  -> No ghost platform mirrors found');
     }
 
     // --- Phase 1b: Mirror .claude/commands/*.md to .codex/prompts/ (ADR-0077 D4) ---
