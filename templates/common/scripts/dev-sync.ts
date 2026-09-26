@@ -1,4 +1,19 @@
-// @version 1.20.0
+// @version 1.21.0
+// v1.21.0: unborn-main branch detection + fresh-repo remote bootstrap
+//           (T-20260926-031, spec
+//           docs/designs/2026-09-26-dev-sync-unborn-main-bootstrap-design.md).
+//           (1) Step 5 resolves the checked-out branch via
+//           `git symbolic-ref --short -q HEAD` first — `git rev-parse
+//           --abbrev-ref HEAD` fails on an unborn branch (fresh scaffold,
+//           zero commits), leaving an empty branch name that skipped pr/*
+//           creation and committed straight onto main, which pre-push then
+//           blocked. (2) New step 6.7: after the PR-branch push, when
+//           `git ls-remote --heads origin main` shows no main, seed
+//           origin/main via the GitHub Contents API (server-side, the
+//           web-UI "initialize with README" equivalent — not a git push,
+//           so the PR-only-main control holds), merge the seed into the
+//           PR branch with --allow-unrelated-histories -X ours, re-push.
+//           No-op whenever origin/main exists.
 // v1.20.0: Step 3.85 VERSION_MANIFEST pre-convergence — audit.ts auto-activates
 //           the manifest reconciliation gate on every invocation including
 //           Step 3.9's --spec-check call, which failed blocking before 4.7
@@ -980,8 +995,18 @@ if (auditRes.exitCode !== 0) {
 // 5. Branch -> commit -> push -> PR
 let currentBranch = "";
 try {
-    const { stdout } = await $`git rev-parse --abbrev-ref HEAD`.quiet().nothrow();
-    currentBranch = stdout.toString().trim();
+    // T-20260926-031: `git rev-parse --abbrev-ref HEAD` fails on an unborn
+    // branch (fresh scaffold, zero commits) — the empty result skipped pr/*
+    // creation and committed straight onto main. `git symbolic-ref` resolves
+    // the checked-out branch even before the first commit; the rev-parse
+    // fallback keeps detached-HEAD semantics unchanged.
+    const symbolic = await $`git symbolic-ref --short -q HEAD`.quiet().nothrow();
+    if (symbolic.exitCode === 0) {
+        currentBranch = symbolic.stdout.toString().trim();
+    } else {
+        const { stdout } = await $`git rev-parse --abbrev-ref HEAD`.quiet().nothrow();
+        currentBranch = stdout.toString().trim();
+    }
 } catch (err) {
   console.error(`[dev-sync] Error: ${err}`);
 }
@@ -1255,6 +1280,76 @@ if (!pushRetry.success) {
     }
 }
 
+// 6.7 Fresh-repo remote bootstrap (T-20260926-031, spec
+// docs/designs/2026-09-26-dev-sync-unborn-main-bootstrap-design.md).
+// The first /sync in a brand-new project pushes a pr/* branch to an EMPTY
+// remote: no origin/main exists, so `gh pr create` has no base branch and the
+// flow dead-ends — while the pre-push hook (by design) blocks every direct
+// push to main, so main is unreachable. Seed origin/main with a minimal
+// README through the GitHub Contents API — a server-side commit, the same
+// one the web UI's "initialize with a README" creates; it is NOT a git push,
+// so the PR-only-main control holds, and all real content still lands through
+// the reviewed PR. Then merge the seed into the PR branch (unrelated
+// histories; `-X ours` keeps the PR branch's README in the add/add) and
+// re-push. No-op whenever origin/main already exists — every normal repo
+// skips this block entirely.
+const lsRemoteMain = await $`git ls-remote --heads origin main`.quiet().nothrow();
+const remoteMainExists = lsRemoteMain.exitCode === 0 && lsRemoteMain.stdout.toString().trim().length > 0;
+if (!remoteMainExists) {
+    console.log(`${CYAN}ℹ️  origin/main does not exist yet — running fresh-repo bootstrap (seed main, merge into '${branch}', re-push)${RESET}`);
+    const remoteUrlRes = await $`git remote get-url origin`.quiet().nothrow();
+    const remoteUrl = remoteUrlRes.stdout.toString().trim();
+    const slugMatch = remoteUrl.match(/github\.com[:/](.+\/.+?)(?:\.git)?$/i);
+    if (!slugMatch) {
+        console.error(`${RED}❌ Fresh-repo bootstrap failed: origin '${remoteUrl}' is not a GitHub slug, cannot seed origin/main.${RESET}`);
+        console.error(`${YELLOW}   Seed main manually (or point origin at GitHub), then re-run /sync to open the PR.${RESET}`);
+        if (import.meta.main) {
+          process.exit(1);
+        }
+    }
+    const repoSlug = slugMatch![1];
+    const ghAuth = await $`gh auth status`.quiet().nothrow();
+    if (ghAuth.exitCode !== 0) {
+        console.error(`${RED}❌ Fresh-repo bootstrap failed: gh is not authenticated, cannot seed origin/main on ${repoSlug}.${RESET}`);
+        console.error(`${YELLOW}   Run 'gh auth login', or seed main manually, then re-run /sync.${RESET}`);
+        if (import.meta.main) {
+          process.exit(1);
+        }
+    }
+    const repoName = repoSlug.split('/')[1] || repoSlug;
+    const seedB64 = Buffer.from(`# ${repoName}\n\nBootstrap seed commit created before the first /sync PR merged. See the PR history for the initial import.\n`).toString('base64');
+    const seedRes = await $`gh api repos/${repoSlug}/contents/README.md -X PUT -f message=${'chore: repo bootstrap seed (pre-first-sync)'} -f content=${seedB64} --jq .commit.sha`.quiet().nothrow();
+    if (seedRes.exitCode !== 0) {
+        console.error(`${RED}❌ Fresh-repo bootstrap failed: could not seed origin/main on ${repoSlug}.${RESET}`);
+        console.error(`${YELLOW}   ${seedRes.stderr.toString().trim().split('\n')[0] || 'gh api error'}${RESET}`);
+        console.error(`${YELLOW}   Seed main manually, then re-run /sync to open the PR.${RESET}`);
+        if (import.meta.main) {
+          process.exit(1);
+        }
+    }
+    const fetchSeed = await $`git fetch origin main`.quiet().nothrow();
+    const mergeSeed = fetchSeed.exitCode === 0
+        ? await $`git merge origin/main --allow-unrelated-histories -X ours --no-edit`.nothrow()
+        : { exitCode: 1, stderr: fetchSeed.stderr };
+    if (mergeSeed.exitCode !== 0) {
+        console.error(`${RED}❌ Fresh-repo bootstrap failed: merging the seed into '${branch}' did not resolve cleanly.${RESET}`);
+        console.error(`${YELLOW}   ${(mergeSeed.stderr?.toString() ?? '').trim().split('\n')[0]}${RESET}`);
+        console.error(`${YELLOW}   Resolve the conflict on '${branch}', push, then re-run /sync (step 7 will open the PR).${RESET}`);
+        if (import.meta.main) {
+          process.exit(1);
+        }
+    }
+    const rePush = await $`git push origin ${branch}`.nothrow();
+    if (rePush.exitCode !== 0) {
+        console.error(`${RED}❌ Fresh-repo bootstrap failed: re-push of '${branch}' was rejected.${RESET}`);
+        console.error(`${YELLOW}   ${rePush.stderr.toString().trim().split('\n')[0]}${RESET}`);
+        if (import.meta.main) {
+          process.exit(1);
+        }
+    }
+    console.log(`${GREEN}✓ Fresh-repo bootstrap complete: origin/main seeded, '${branch}' carries the seed merge — continuing to PR creation${RESET}`);
+}
+
 // 7. Generate PR body and open PR — but skip creation if an OPEN PR already exists
 // for this branch (e.g. re-running /sync to push a follow-up commit onto an open PR).
 // The push above already updated it; calling `gh pr create` again would just fail
@@ -1289,7 +1384,7 @@ if (existingPrUrl) {
             } else {
                 // Same English gate as the commit message above.
                 if (hasNonEnglish(agentBody)) {
-                    console.log(`${RED}❌ Agent-written PR body must be written in English (CONSTITUTION.md §3).${RESET}`);
+                    console.log(`${RED}❌ Agent-written PR body must be written in English (context.md §3).${RESET}`);
                     console.log(`${YELLOW}   Regenerate the body in English and re-run /sync.${RESET}`);
                     if (import.meta.main) {
                         process.exit(1);
