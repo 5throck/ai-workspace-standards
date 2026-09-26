@@ -7,6 +7,8 @@
 > design system is its own `docs/design.md` (project SSOT). Design selection happens at the project level —
 > never at workspace or template level.
 
+> **v1.2 (2026-09-26)**: component inventory scaffold, icon vocabulary requirement, font fallback token contract, pattern field contract; project-specific example pointers genericized (§8).
+
 - **Scope**: All projects scaffolded from this template
 - **Normative source**: `docs/designs/2026-08-30-design-foundation-design.md` (L0)
 - **Companion artifacts**: `docs/design-tokens.template.css` (token scaffold), `design-foundation` skill (derivation procedure)
@@ -44,6 +46,9 @@ fonts, icon sets, interaction patterns, or layout patterns.
 ① Principles  →  ② Tokens  →  ③ Style guide & color system  →  ④ Iconography
 →  ⑤ Components  →  ⑥ Screen patterns  →  ⑦ Screens
 ```
+
+The declared component inventory (layer ⑤) lives in `templates/common/docs/components.template.md` —
+shape-only; entries enter only via the design-phase gate — analogous to the screen-patterns inventory (layer ⑥).
 
 Rules:
 
@@ -121,7 +126,7 @@ design_decisions:
 
 | Area | Decide | Criteria |
 |------|--------|----------|
-| Typography — body | font | Primary-language optimization, screen legibility at 0.8–1rem, licensing |
+| Typography — body | font | Primary-language optimization, screen legibility at 0.8–1rem, licensing; Korean subsetting / `unicode-range` strategy where the primary reading language is Korean |
 | Typography — heading | font | Contrast with body, display weights available |
 | Typography — numeric | font | **`tabular-nums` support mandatory when figures are domain-critical**; alignment of columns of numbers |
 | Color | system + roles | Domain connotation (e.g. finance: profit/loss semantics), AA contrast for all role pairs, brand fit |
@@ -183,6 +188,8 @@ This contract is review-enforced today; automated linting is a tracked backlog i
 - ✓ bg / fg / border semantic triplets exist for each status color
 - ✓ Typography roles defined (body / heading / numeric)
 - ✓ Icon library defined
+- ✓ Icon vocabulary declared (project-declared icon registration; icon-only UI uses registered icons)
+- ✓ Component inventory declared (components.template.md shape; entries added only via the design-phase gate)
 - ✓ WCAG AA target declared
 - ✓ Focus state defined
 - ✓ Non-color state encoding defined
@@ -194,6 +201,7 @@ This contract is review-enforced today; automated linting is a tracked backlog i
 - ✓ Icon-only buttons have accessible labels
 - ✓ Numeric UI uses tabular numerals where appropriate
 - ✓ No hard-coded design values in governed components (raw hex, `rgb()`/`hsl()` literals, raw px spacing)
+- ✓ Icon tokens, where activated, resolve from the registered icon vocabulary (constraint: validation runs against registered decisions, not template content)
 
 Accessibility verification should use the `accessibility-audit` skill (axe-core, WCAG 2.1 AA) rather than
 ad-hoc checks.
@@ -212,7 +220,7 @@ duty of §2b rule 6 / ADR-0070.
 | `token-usage-lint` skill | Hardcoded-value detection; reused, not duplicated |
 | `accessibility-audit` skill | WCAG verification; referenced, not redefined |
 | `ui-ux-design-intelligence` skill (co-design) | Downstream: takes over once tokens and decisions exist (`design-foundation` enables it) |
-| co-price `docs/design.md`, co-newbiz `docs/design-guide.md` | Originating examples of the *method* (Projects/, not templates) |
+| The project's own derived docs (e.g. docs/design.md, docs/design-system/*) | Originating examples exist per project in the workspace — project-specific paths are deliberately not cited here so this spec stays valid in standalone checkouts |
 
 ## 9. Migration Notes
 

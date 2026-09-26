@@ -6,7 +6,7 @@
 - **Date**: 2026-08-30
 - **Status**: Approved
 - **Owner**: architect
-- **Sources**: `Projects/co-price/docs/design.md` (Onyx 2.0), `Projects/co-newbiz/docs/design-guide.md` (Onyx 3.0), `templates/co-design/` (tokens.json, token-usage-lint, accessibility-audit)
+- **Sources**: `Projects/co-price/docs/design.md` (Onyx 2.0), `Projects/co-newbiz/docs/design-system/design-guide.md` (Onyx 3.0), `templates/co-design/` (tokens.json, token-usage-lint, accessibility-audit)
 
 ## 1. Problem Statement
 
