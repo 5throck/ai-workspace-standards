@@ -3,9 +3,9 @@
 ## Metadata
 - **Skill**: design-foundation
 - **Status**: active
-- **Version**: 1.0.0
+- **Version**: 1.1.0
 - **Created**: 2026-08-30
-- **Last Updated**: 2026-08-30
+- **Last Updated**: 2026-09-26
 
 ## Description
 Style-neutral procedure for deriving a project's own design system: domain evidence → design
@@ -17,6 +17,9 @@ Projects/co-price (Onyx 2.0) and Projects/co-newbiz (Onyx 3.0) without prescribi
 
 ## Changelog
 - 2026-08-30: 1.0.0 — created (spec: docs/designs/2026-08-30-design-foundation-design.md)
+- 2026-09-26: 1.1.0 — component inventory scaffold (`components.template.md`), inert icon
+  tokens + icon vocabulary requirement, font fallback token contract, pattern field
+  contract, §8 pointer genericization (spec: docs/designs/2026-09-26-design-foundation-v1.2-design.md)
 
 ## Dependencies
 - None (procedural skill); composes with `token-usage-lint` and `accessibility-audit`; enables
@@ -27,6 +30,7 @@ Projects/co-price (Onyx 2.0) and Projects/co-newbiz (Onyx 3.0) without prescribi
 | Date | From | To | Reason | Approver |
 |------|------|-----|---------|----------|
 | 2026-08-30 | - | active | Initial release with Design Foundation framework | pm |
+| 2026-09-26 | 1.0.0 | 1.1.0 | v1.2 spec wave — coverage gaps closed | PM (user-approved execution plan) |
 
 ## Acceptance Criteria
 

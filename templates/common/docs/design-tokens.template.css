@@ -54,10 +54,13 @@
   --color-danger-500:  <value>;
   --color-info-500:    <value>;
 
-  /* Typography primitives — chosen per project (see design.md typography roles) */
-  --font-body:    <value>;  /* primary reading face  */
-  --font-heading: <value>;  /* display/heading face  */
-  --font-numeric: <value>;  /* MUST support tabular-nums when figures are domain-critical */
+  /* Typography primitives — chosen per project (see design.md typography roles).
+     Fallback stack contract: every --font-* value MUST be a full stack of the
+     form <primary>, <fallback>, <generic>; — at least one fallback face and a
+     terminating generic family. A single-face value fails the contract. */
+  --font-body:    <value>;  /* primary reading face; value MUST be a full stack: Primary Face, Fallback Face, generic-family */
+  --font-heading: <value>;  /* display/heading face; value MUST be a full stack: Primary Face, Fallback Face, generic-family */
+  --font-numeric: <value>;  /* MUST support tabular-nums when figures are domain-critical; value MUST be a full stack: Primary Face, Fallback Face, generic-family */
 
   --text-xs:  <value>;
   --text-sm:  <value>;
@@ -68,6 +71,13 @@
   --font-weight-regular:  <value>;
   --font-weight-bold:     <value>;
   --font-weight-heading:  <value>;
+
+  /* Icon primitives — INERT by default ([DESIGN-R-d]): uncomment ONLY when the
+     iconography decision block in design.md is exercised; pair with the
+     project's registered icon vocabulary.
+       --icon-size:   <value>;    fixed default size, e.g. matching text-md
+       --icon-stroke: <value>;    fixed default stroke per design.md
+  */
 
   /* Spacing scale — base unit per design.md (4px or 8px family) */
   --space-xs:  <value>;
@@ -133,6 +143,11 @@
   --motion-duration-fast:   <primitive>;  /* the compiler emits a prefers-reduced-motion */
   --motion-duration-normal: <primitive>;  /* block zeroing these automatically */
   --motion-duration-slow:   <primitive>;
+
+  /* Icon color — INERT by default ([DESIGN-R-d]): uncomment ONLY when the
+     iconography decision block in design.md is exercised; pair with the
+     project's registered icon vocabulary. */
+  /* --icon-color: <semantic>; */
 }
 
 /* --- Alternate theme(s) — remap semantics ONLY, never primitives ----------- */
@@ -215,8 +230,11 @@
 /* ---------------------------------------------------------------------------
    VALIDATION (see design-foundation.md §7 — review-enforced contract):
    [Required]    default + alternate theme, bg/fg/border triplets, typography
-                 roles, icon library declared in design.md, WCAG AA declared,
-                 focus state, non-color state encoding
+                 roles, icon library declared in design.md, icon vocabulary
+                 declared (§7 [Required] v1.2), component inventory declared,
+                 WCAG AA declared, focus state, non-color state encoding
    [Consistency] no layer bypass, aria-label on icon-only buttons, tabular
-                 numerals in numeric UI, no hard-coded values in components
+                 numerals in numeric UI, no hard-coded values in components,
+                 icon tokens (when activated) resolve from the registered
+                 icon vocabulary
    ========================================================================== */
