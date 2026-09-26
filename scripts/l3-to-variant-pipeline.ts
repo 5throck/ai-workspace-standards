@@ -11,7 +11,7 @@
  * - Wave 3: Platform parity validation (validate-platform-parity.ts)
  * - Wave 3: Workspace integration (integration-helpers.ts)
  *
- * @version 1.21.0
+ * @version 1.21.1
  * @phase: Complete pipeline orchestration
  *
  * v1.21.0 (2026-09-25, ADR-0088 W2): matchCountryScopedSkill recognizes
@@ -743,8 +743,13 @@ export async function executeL3ToVariantPipeline(config: PipelineConfig): Promis
 
       // Roster link validity: every referenced agents/*.md must exist relative
       // to the L3 source root (drifted flat paths were the co-safety failure mode).
+      // The lookbehind keeps the match anchored to a true roster link — an
+      // unanchored pattern also bites the `agents/…` tail of governance links
+      // like docs/governance/agents/pm-gateway-workflow.md, which resolve
+      // against docs/, not the L3 root (broke the promotion E2E after the
+      // ADR-0090 thin-dispatcher wave added those links to L1 common).
       const unresolvedAgentRefs = new Set<string>();
-      for (const refMatch of agentsMdContent.matchAll(/agents\/[A-Za-z0-9_/-]+\.md/g)) {
+      for (const refMatch of agentsMdContent.matchAll(/(?<![A-Za-z0-9_./-])agents\/[A-Za-z0-9_/-]+\.md/g)) {
         const rel = refMatch[0];
         if (!ex35(j35(config.l3ProjectPath, ...rel.split('/')))) {
           unresolvedAgentRefs.add(rel);

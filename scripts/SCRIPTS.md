@@ -177,7 +177,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `hooks/pre-push.ts` | L0 | 1.4.1 | active | —| —| L0+L1 | —|
 | `ingest-external-skills.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `ingest-security-frameworks.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `l3-to-variant-pipeline.ts` | L0 | 1.21.0 | active | `--overlay-variant` | —| L0 | —|
+| `l3-to-variant-pipeline.ts` | L0 | 1.21.1 | active | `--overlay-variant` | —| L0 | —|
 | `regenerate-agents-md.ts` | L0 | 1.2.0 | active | v1.2.0: tier extraction strips inline YAML comments (`medium # model-id` leaked into roster rows). | —| —| L0 | —|
 | `lib/agent-override-merge.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `lib/context-md-schema.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
