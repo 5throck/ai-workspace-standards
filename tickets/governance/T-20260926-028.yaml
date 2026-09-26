@@ -7,12 +7,26 @@ title: >-
   docs/designs/2026-09-26-design-foundation-v1.2-design.md; the registry file
   must be the machine-readable SSOT the lint reduces to set membership)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-26T11:13:35.744Z'
 history:
   - at: '2026-09-26T11:13:35.744Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-26T12:54:00.093Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-26T12:54:00.107Z'
+    from: waiting
+    to: review
+  - at: '2026-09-26T12:54:00.232Z'
+    from: review
+    to: done
+result: >-
+  design-lint v2.0.0 'components' sub-check:
+  docs/design/components.registry.yaml schema (integer version, unique
+  kebab-case ids, required tokens map, typed optionals) + bound-token
+  set-membership against declared custom properties + raw-value detection over
+  governed UI roots (v1.0.0 detector reused, not duplicated)
 error: null

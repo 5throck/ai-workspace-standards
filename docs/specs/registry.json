@@ -1529,6 +1529,16 @@
       "created": "2026-09-26",
       "last_updated": "2026-09-26",
       "meeting_ref": "memory/meeting-2026-09-26-design-foundation-improvements.md"
+    },
+    {
+      "id": "2026-09-26-design-lint-registries-design",
+      "title": "design lint registries design",
+      "file": "docs/designs/2026-09-26-design-lint-registries-design.md",
+      "status": "implemented",
+      "source": "meeting",
+      "created": "2026-09-26",
+      "last_updated": "2026-09-26",
+      "meeting_ref": "memory/meeting-2026-09-26-design-foundation-improvements.md"
     }
   ]
 }
