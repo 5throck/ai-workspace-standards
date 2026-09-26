@@ -1173,7 +1173,7 @@ function printHumanReport(results: CheckResult[]): void {
       for (const f of r.findings) {
         const classification = f.classification ? ` [${f.classification}]` : "";
         console.log(
-          `| ${f.file}${f.line !== undefined ? `:${f.line}` : ""} | ${f.pattern} | ${f.match} | ${f.severity}${classification} | ${f.note ?? ""} |`,
+          `| ${toPosix(f.file)}${f.line !== undefined ? `:${f.line}` : ""} | ${f.pattern} | ${f.match} | ${f.severity}${classification} | ${f.note ?? ""} |`,
         );
       }
     }
