@@ -577,10 +577,10 @@ Before committing an L2 pm.md file:
 ## Related Documentation
 
 - [L1-L2 Fork Model](../adr/0031-l1-l2-fork-model.md)
-- [Variant Creation Workflow](../variant-creation-workflow.md)
-- [PM Agent Role](../../lifecycle/agents/pm.md)
-- [Multi-Agent Architecture](../../workspace-standards/05-multi-agent-architecture.md)
-- [Agent Lifecycle](../../workspace-standards/05.6-agent-lifecycle.md)
+- [Variant Creation Workflow](../_templates/variant-creation-workflow.md)
+- [PM Agent Role](../lifecycle/agents/pm.md)
+- Multi-Agent Architecture
+- Agent Lifecycle
 
 ---
 

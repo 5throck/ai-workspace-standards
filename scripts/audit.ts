@@ -1,4 +1,11 @@
-// @version 2.45.0
+// @version 2.46.0
+// v2.46.0: Docs relative-link gate — spawns scripts/validate-docs-links.ts
+//           (workspace root only, placed after the docs-cluster checks) covering
+//           docs/ root-level files plus templates/common/docs/** recursively,
+//           with the validator's documented post-scaffold resolution allowance
+//           (design-foundation v1.2 PR-2; the design-foundation.md §8 stale
+//           project path rotted under review-only checking). Fails on any
+//           broken relative link or unresolvable anchor fragment.
 // v2.45.0: Variant agent sections resolves extends-stubs before checking (spec:
 //           docs/designs/2026-09-25-registry-policy-completeness-design.md R2.2)
 //           — checkVariantAgentSections composes ADR-0033 stub bodies through
@@ -2167,6 +2174,26 @@ checkTemplateDependencyMirror();
 // Workspace root detection: presence of CONSTITUTION.md (and absence of variant.json)
 // distinguishes the governance root from generated project copies.
 const IS_WORKSPACE_ROOT = fs.existsSync('CONSTITUTION.md') && !fs.existsSync('variant.json');
+
+// ── Docs relative-link gate (design-foundation v1.2 PR-2) ────────────────────
+// design-foundation.md §8 previously shipped a stale project path and rotted
+// under review-only checking (stale path fixed in PR #1102). Spawn the existing
+// validator — the same gate dev-sync runs as pre-flight — which checks docs/
+// root-level files plus templates/common/docs/** (recursive) with a documented
+// post-scaffold resolution allowance. Workspace-root only: the validator is
+// hard-scoped to the L0 docs layout, so project (L2) contexts self-skip.
+if (IS_WORKSPACE_ROOT && fs.existsSync(path.join('scripts', 'validate-docs-links.ts'))) {
+    const { status, stdout, stderr } = spawnSync('bun', ['scripts/validate-docs-links.ts'], {
+        encoding: 'utf-8',
+    });
+    if (status !== 0) {
+        if (stdout) console.log(stdout);
+        if (stderr) console.error(stderr);
+        Fail('docs link validation failed — run scripts/validate-docs-links.ts for details');
+    } else {
+        Pass('Docs link gate: relative links in docs/ root and templates/common/docs resolve');
+    }
+}
 
 // Check: Agent files must have a non-empty ## Required Tools section (workspace root only)
 if (IS_WORKSPACE_ROOT && fs.existsSync('agents')) {
