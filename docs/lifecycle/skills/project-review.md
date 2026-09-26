@@ -44,7 +44,11 @@
 ## Metadata
 
 - **Current Phase**: production
-- **Version**: 1.3.0
+- **Version**: 1.3.1
 - **Owner**: pm
-- **Last Updated**: 2026-09-14
+- **Last Updated**: 2026-09-26
 - **Last Reviewer**: pm
+
+## Changelog
+
+- **1.3.1** (2026-09-26): prose fix — Antigravity fallback now references the meeting-facilitation skill instead of the retired `/meeting` slash command (T-20260926-027, spec 2026-09-26-meeting-command-retirement).

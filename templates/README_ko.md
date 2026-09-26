@@ -93,11 +93,11 @@ bun scripts/new-project.ts my-project --variant co-develop --platform both --ver
 ## 공유 파일 동기화 규칙
 
 일부 파일은 워크스페이스와 템플릿 간에 공유됩니다:
-- `.claude/commands/meeting.md` ↔ `templates/co-develop/.claude/commands/meeting.md`
+- `.claude/commands/memlog.md` ↔ `templates/common/.claude/commands/memlog.md`
 
-워크스페이스 버전이 변경되면 템플릿 variant에 수동으로 동기화합니다:
+워크스페이스 버전이 변경되면 공통 템플릿에 수동으로 동기화합니다:
 ```bash
-cp .claude/commands/meeting.md templates/co-develop/.claude/commands/meeting.md
+cp .claude/commands/memlog.md templates/common/.claude/commands/memlog.md
 bun scripts/validate-templates.ts  # 드리프트 없음 확인
 ```
 
@@ -109,4 +109,4 @@ bun scripts/validate-templates.ts  # 드리프트 없음 확인
 - **Minor** 범프: 신규 에이전트, 신규 variant stable 승격, 구조적 섹션 변경
 - **Patch** 범프: 문서 및 설명 갱신
 
-*Last Updated: 2026-09-11*
+*Last Updated: 2026-09-26*

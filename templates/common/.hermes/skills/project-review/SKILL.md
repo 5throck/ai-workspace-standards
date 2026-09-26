@@ -14,8 +14,8 @@ description: >
   phase schema changes, workspace-schema.json modified, new variant added);
   QA escalation from auditor (audit.ts ERROR >= 3 or security Critical finding).
 owner: pm
-version: 1.3.0
-last_reviewed: 2026-09-14
+version: 1.3.1
+last_reviewed: 2026-09-26
 prerequisites: []
 metadata:
   type: process
@@ -149,7 +149,7 @@ files and cross-validate; mcp__base-map__review_code on critical scripts.]
 **Fallbacks**:
 - Background dispatch blocked by concurrency limits → run slots sequentially
   (foreground), or merge two slots into one prompt.
-- On Antigravity/Gemini CLI: `/meeting "project review" --agents [list] --rounds 2 --dialogue`.
+- On Antigravity/Gemini CLI: the meeting-facilitation skill with topic "project review" and options `--agents [list] --rounds 2 --dialogue` (the legacy `/meeting` slash command is retired).
 - No Agent tool at all: PM role-plays each slot sequentially using the same prompts.
 
 ## Step 4 — Collect, Classify, Persist

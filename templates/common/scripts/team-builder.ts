@@ -3,7 +3,7 @@
  * @description Agent team builder script — execution layer for the team-builder skill.
  *   Receives an approved proposal JSON (from skills/team-builder/SKILL.md Step 5) and
  *   executes all agent/skill changes in a fixed, safe order with checkpoint logging.
- * @version 1.4.0
+ * @version 1.4.1
  * v1.4.0 (2026-09-12, ADR-0077 W2): tier blocks gain the codex platform (falls back to claude tier when absent).
  * @usage bun scripts/team-builder.ts <proposal-json-path> [--dry-run]
  */
@@ -275,7 +275,7 @@ You are the ${a.formalName} for **co-consult**. [Role description to be customiz
 
 ## Meeting Participation
 
-In a \`/meeting\` session, Claude role-plays you inline.
+In a meeting-facilitation session, Claude role-plays you inline.
 
 **Voice & Stance:** [Define voice and stance]
 
