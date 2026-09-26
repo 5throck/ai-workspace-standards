@@ -1,8 +1,15 @@
 #!/usr/bin/env bun
 /**
  * Shared Scaffold Delivery Contracts
- * @version 1.6.1
+ * @version 1.6.2
  *
+ * v1.6.2 (2026-09-26, PR #1102 CI fix): reviewed exclusion for
+ *         docs/components.template.md — the design-foundation v1.2 wave
+ *         added the component-inventory template to templates/common/docs,
+ *         so the new-project\L3 delivery gap needed the same
+ *         COMMON_OVERLAY_EXCLUDE reviewed-gap rule as its sibling
+ *         template docs (design-foundation / design-tokens.template /
+ *         screen-patterns).
  * v1.6.0 (2026-09-25, ADR-0088 W2): PlatformProfile gains 'hermes' —
  *         deriveNewProjectDelivery models the new-project hermes-primary
  *         profile (keeps .hermes/, drops CLAUDE.md/GEMINI.md) and the
@@ -351,6 +358,10 @@ export const REVIEWED_DELIVERY_EXCLUSIONS: readonly ReviewedDeliveryExclusion[] 
   },
   {
     path: 'docs/country-profiles.md',
+    reason: 'top-level docs/ beyond _common excluded by COMMON_OVERLAY_EXCLUDE (H13 reviewed gap)',
+  },
+  {
+    path: 'docs/components.template.md',
     reason: 'top-level docs/ beyond _common excluded by COMMON_OVERLAY_EXCLUDE (H13 reviewed gap)',
   },
   {
