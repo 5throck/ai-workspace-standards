@@ -1510,6 +1510,15 @@
       "source": "manual",
       "created": "2026-09-26",
       "last_updated": "2026-09-26"
+    },
+    {
+      "id": "2026-09-26-dev-sync-unborn-main-bootstrap-design",
+      "title": "dev sync unborn main bootstrap design",
+      "file": "docs/designs/2026-09-26-dev-sync-unborn-main-bootstrap-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-26",
+      "last_updated": "2026-09-26"
     }
   ]
 }
