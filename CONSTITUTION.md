@@ -747,6 +747,9 @@ Platform extension to OpenAI Codex (CLI + Desktop App) is designed and Accepted 
 
 Platform extension to NousResearch Hermes Agent is designed and Accepted per **ADR-0088** (`docs/adr/0088-hermes-agent-platform-support.md`): the `.hermes/` platform directory (skills mirror only — Hermes reads `AGENTS.md` natively and invokes skills as `/<skill-name>`), the project-root trust-list onboarding step (`skills.trusted_project_dirs`), and the mandatory `hermes config set context_file_max_chars 100000` step — every AGENTS.md in the ecosystem (L0 56.8k, L1 49.2k, L2 variants 27.9k–82.1k chars) exceeds Hermes' 20,000-char context-file default and would be silently truncated without it — land through the implementation waves defined in `docs/designs/2026-09-25-hermes-agent-platform-support-design.md` (see its Addendum 1 for the measured truncation evidence).
 
+
+**Project configuration standard (KR profiles & LLM)**: the co-newbiz model is the fleet standard per **ADR-0091** (`docs/adr/0091-kr-profile-llm-config-standard.md`) — four-layer KR profile (country_config / docs/countries / region-profiles provenance-validated YAML / country-scoped env block) and the project-namespaced LLM env pattern (`<PROJ>_LLM_*`, deterministic fallback). `country_config.default` MUST stay `null`; `agents-md-size-budget` remains a WARN-level visibility metric (ADR-0090 Addendum 3).
+
 #### 11.1 Three-Layer Enforcement Model
 
 | Layer | Mechanism | Claude CLI | Claude Desktop App | Gemini CLI | Antigravity |
