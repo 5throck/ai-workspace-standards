@@ -1,0 +1,17 @@
+schemaVersion: 1
+id: T-20260927-008
+kind: manual
+title: >-
+  domain-model: triage project-only process/stages.yaml in Projects/co-newbiz —
+  present in the project but absent from templates/co-newbiz; decide deliberate
+  extension vs backport (ADR-0083/0084 surfaces)
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-09-26T16:54:30.493Z'
+history:
+  - at: '2026-09-26T16:54:30.493Z'
+    from: null
+    to: backlog
+result: null
+error: null
