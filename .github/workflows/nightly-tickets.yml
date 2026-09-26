@@ -1,9 +1,10 @@
 name: Nightly Governance Tickets
 
 # MANUAL-ONLY since 2026-09-19 (ADR-0082): the scheduled GitHub batch was retired;
-# the local ZCode workspace automation (daily 05:30 KST) is now the sole scheduled
-# governance-ticket runner. This workflow is retained for manual dispatch as an
-# emergency fallback batch — dispatch it only when the local runner cannot run.
+# the local ZCode workspace automations (daily 03:00 KST governance-ticket batch;
+# 01:30 KST fleet review+resync) are now the sole scheduled governance-ticket
+# runners. This workflow is retained for manual dispatch as an emergency fallback
+# batch — dispatch it only when the local runner cannot run.
 # The local runner defers (report-only) while a manual dispatch is in progress.
 #
 # Ticket batch runner (project-resync / §3.7.5 companion). Picks ready

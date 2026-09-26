@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.2.0
+// @version 1.2.1
 // @l2-propagate: false
 // ticket.ts — CLI for the Phase A Service Ticket + Kanban system (workspace root only).
 // Usage: bun scripts/ticket.ts <command> [args]
@@ -128,7 +128,13 @@ try {
         }
         thresholdMinutes = Number(flags.minutes);
       }
-      const stale = staleRunningTickets(ticketsDir, thresholdMinutes);
+      // Scan BOTH ticket populations: the service dir and the manual
+      // governance dir — a stuck manual `running` ticket was previously
+      // invisible to the staleness check (T-20260926-020e).
+      const stale = [
+        ...staleRunningTickets(ticketsDir, thresholdMinutes),
+        ...staleRunningTickets(governanceDir, thresholdMinutes),
+      ];
       if (stale.length === 0) { console.log('No stale running tickets.'); break; }
       for (const t of stale) console.log(`⚠️  ${t.id} has been running > ${thresholdMinutes}m`);
       break;

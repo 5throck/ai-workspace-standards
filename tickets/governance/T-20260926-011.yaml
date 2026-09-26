@@ -2,28 +2,36 @@ schemaVersion: 1
 id: T-20260926-011
 kind: manual
 title: >-
-  CI-only flake: generate-scripts-mirror.test.ts R2 live-tree span count 134
-  vs local 133 (bun 1.4.0 CI vs 1.4.2 local suspicion). The R2 invariant
-  ("the generator itself has no registry row in the mirror span") passes
-  locally on the identical commit (bun scripts/test-runner.ts unit green,
-  c77e74db lineage) but fails in CI across ubuntu/macos/windows with
-  Expected 133 / Received 134. Suspects: (a) bun-version regex/parse
-  difference in extractRegistrySpan or the L0 SCRIPTS.md row parser,
-  (b) the pinned toHaveLength(133) needing +1 for a legitimately added row
-  (mcp-governance-server L0 row? excluded by R2 — verify), (c) CI checkout
-  line-ending or locale differences. Reproduce: re-run the failed job on the
-  same sha; add a temporary rowKeys dump at
-  tests/unit/generate-scripts-mirror.test.ts:208-210 to capture the extra
-  key. Until diagnosed, this blocks merges that touch scripts/SCRIPTS.md
-  (branch protection requires the failed check) — interim workaround:
-  --admin merge after local test-runner green (used for PR #1085).
+  CI-only flake: generate-scripts-mirror.test.ts R2 live-tree span count 134 vs
+  local 133 (bun 1.4.0 CI vs 1.4.2 local suspicion). The R2 invariant ("the
+  generator itself has no registry row in the mirror span") passes locally on
+  the identical commit (bun scripts/test-runner.ts unit green, c77e74db lineage)
+  but fails in CI across ubuntu/macos/windows with Expected 133 / Received 134.
+  Suspects: (a) bun-version regex/parse difference in extractRegistrySpan or the
+  L0 SCRIPTS.md row parser, (b) the pinned toHaveLength(133) needing +1 for a
+  legitimately added row (mcp-governance-server L0 row? excluded by R2 —
+  verify), (c) CI checkout line-ending or locale differences. Reproduce: re-run
+  the failed job on the same sha; add a temporary rowKeys dump at
+  tests/unit/generate-scripts-mirror.test.ts:208-210 to capture the extra key.
+  Until diagnosed, this blocks merges that touch scripts/SCRIPTS.md (branch
+  protection requires the failed check) — interim workaround: --admin merge
+  after local test-runner green (used for PR #1085).
 priority: normal
-status: backlog
+status: review
 attempts: 0
 created_at: '2026-09-26T00:00:00.000Z'
 history:
   - at: '2026-09-26T00:00:00.000Z'
     from: null
     to: backlog
+  - at: '2026-09-26T01:50:44.526Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-26T01:50:44.539Z'
+    from: waiting
+    to: running
+  - at: '2026-09-26T01:50:44.552Z'
+    from: running
+    to: review
 result: null
 error: null

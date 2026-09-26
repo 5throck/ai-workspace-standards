@@ -33,8 +33,14 @@ The procedure is reconstructed here from four completed precedents:
 2. **Design-stack promotion** (ADR-0064/0066/0068 series, 2026-08-30) —
    project-proven design-process assets generalized into workspace-wide
    standards through the full design-gate cycle.
-3. **Privacy-checklist VARIANT_DOCS_SYNC** — a project-maintained checklist
-   promoted into the common doc tree and wired into the upgrade delivery path.
+3. **Privacy-checklist variant-scope promotion** (2026-09-06,
+   `memory/archive/2026-09-06.md`) — a project-maintained checklist
+   (`templates/co-develop/docs/privacy-design-checklist.md` + `_ko` twin)
+   promoted into the co-develop VARIANT template doc tree and wired into the
+   upgrade delivery path via what was then the VARIANT_DOCS_SYNC claim
+   (later folded into the template tree sync pass — upgrade-policy D9).
+   A variant-scope counterpoint to precedents 1, 2, and 4, which landed in
+   the common layer.
 4. **Handbook suite promotion** (`docs/designs/2026-08-30-handbook-common-promotion-design.md`,
    2026-08-30) — a project skill suite promoted with sub-file delivery and
    validation at both layers.
@@ -59,10 +65,13 @@ project.
 
 ### 1. Select and justify
 
-Produce a 5-surface diff (project copy vs workspace copy: behavior, interface,
-content, dependencies, consumers) for the candidate asset. Measure the claim
-"genuinely newer or richer" against the diff — newer timestamps alone do not
-qualify. Check Safety Rule 6 (sensitive-content screen: no secrets, client
+Produce a 5-dimension diff (project copy vs workspace copy: behavior,
+interface, content, dependencies, consumers) for the candidate asset. Measure
+the claim "genuinely newer or richer" against the diff — newer timestamps
+alone do not qualify. ("Dimension", not "surface": backport-diff.ts already
+uses "5-surface" for a different enumeration — the compared mirror surfaces —
+and one term must keep one meaning.) Check Safety Rule 6 (sensitive-content
+screen: no secrets, client
 identifiers, or engagement-specific material). Record the justification in the
 promotion record. `skills/project-resync` Step 2 (selective backport) is the
 usual source of candidates; its output feeds this procedure.
@@ -136,7 +145,7 @@ not passed its real gate, whatever `audit.ts` says.
 
 - The next promotion runs from a checklist, not from a memory of four
   precedent conversations.
-- The 5-surface diff and acceptance evidence make "genuinely newer/richer"
+- The 5-dimension diff and acceptance evidence make "genuinely newer/richer"
   auditable after the fact instead of asserted during it.
 - Steps 4–6 and 8 stay tool-enforced; this ADR adds no duplicate enforcement,
   only the narrative contract for the steps tools cannot judge.

@@ -1,6 +1,11 @@
 #!/usr/bin/env bun
-// @version 1.0.1
+// @version 1.1.0
 // agent-promote.ts — ADR-0043 L1 promotion-candidate ANALYSIS (read-only).
+// v1.1.0 (2026-09-26, T-20260926-020c): hasExtendsDeclaration recognizes the
+//           live L2 stub format — frontmatter `extends: ../../common/agents/…`
+//           — alongside the legacy `# @extends: l1/` line-0 comment. The old
+//           test never matched the live format, so all 13 stubs were analyzed
+//           as standalone bodies, inflating scanned/considered counts.
 // v1.0.0 (2026-09-22): replaces the Wave 2b exit-1 stub with a working ANALYSIS
 //           mode implementing the DETECTION half of ADR-0043's promotion gate
 //           rule: for every agent name present in 3 or more templates/co-*/
@@ -130,8 +135,8 @@ function tokenise(text: string): Set<string> {
 
 function jaccard(a: Set<string>, b: Set<string>): number {
   // Two empty extractions carry no similarity evidence — a perfect score here
-  // produced false promotion candidates (T-20260922-030).
-  if (a.size === 0 && b.size === 0) return 0.0;
+  // produced false promotion candidates (T-20260922-030). Either side empty
+  // → 0 (the empty-vs-empty case is subsumed).
   if (a.size === 0 || b.size === 0) return 0.0;
   let intersection = 0;
   for (const token of a) if (b.has(token)) intersection++;
@@ -158,8 +163,17 @@ function discoverAgentFiles(variant: string): string[] {
   ).map(f => join(agentsDir, f));
 }
 
-function hasExtendsDeclaration(content: string): boolean {
-  return /^#\s*@extends:\s*l1\//i.test(content.split('\n')[0] ?? '');
+/**
+ * True when the agent file already extends a common (L1) base — either the
+ * live L2 stub frontmatter (`extends: ../../common/agents/…`, first line
+ * `---`) or the legacy `# @extends: l1/…` first-line comment. Files that
+ * already extend are excluded from promotion analysis: they are by-design
+ * stubs, not duplicated bodies (T-20260926-020c).
+ */
+export function hasExtendsDeclaration(content: string): boolean {
+  if (/^#\s*@extends:\s*l1\//i.test(content.split('\n')[0] ?? '')) return true;
+  const fm = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  return fm !== null && /^\s*extends\s*:/m.test(fm[1]);
 }
 
 export function analyzeL1PromotionCandidates(): AnalysisResult {

@@ -6,7 +6,7 @@ name: Fork Watch
 
 on:
   schedule:
-    - cron: "30 18 * * *" # 03:30 KST daily — staggered after the tickets runner
+    - cron: "30 18 * * *" # 03:30 KST daily (independent schedule — the GitHub tickets runner was retired 2026-09-19, ADR-0082)
   workflow_dispatch: {}
 
 permissions:

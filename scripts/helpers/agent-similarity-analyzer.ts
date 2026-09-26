@@ -11,7 +11,7 @@
  *                     and checks whether the declared version matches
  *                     the current L1 registry version.
  *
- * @version 1.1.1
+ * @version 1.2.0
  * @phase Wave 2a: Agent Similarity Analysis
  *
  * See: docs/adr/0043-l1-agent-layer-hybrid-override.md
@@ -268,20 +268,45 @@ function discoverAgentFiles(
     .map(f => join(agentsDir, f));
 }
 
-/** Returns true if the (normalized) file has "# @extends:" on the first line */
-function hasExtendsDeclaration(normalizedContent: string): boolean {
-  const firstLine = normalizedContent.split('\n')[0] ?? '';
-  return /^#\s*@extends:\s*l1\//i.test(firstLine);
+/** Declared version marker for frontmatter extends stubs — they resolve the
+ * common body at read time (ADR-0033), so there is no pinned version and
+ * version-drift comparison does not apply. */
+export const UNPINNED_EXTENDS = '(unpinned)';
+
+/**
+ * True when the (normalized) file extends an L1 base. The live L2 stub
+ * format declares frontmatter `extends: ../../common/agents/<name>.md`
+ * (first line `---`); the legacy `# @extends: l1/…` first-line comment form
+ * is still recognized. T-20260926-020c: the previous line-0 comment-only
+ * test never matched the live format, so every stub was analyzed as a
+ * standalone body (inflating scanned/considered counts).
+ */
+export function hasExtendsDeclaration(normalizedContent: string): boolean {
+  if (/^#\s*@extends:\s*l1\//i.test(normalizedContent.split('\n')[0] ?? '')) return true;
+  const fm = normalizedContent.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  return fm !== null && /^\s*extends\s*:/m.test(fm[1]);
 }
 
-/** Parses "# @extends: l1/<name>@<version>" from first line of normalized content */
+/**
+ * Parses the extends target from normalized content: the legacy
+ * `# @extends: l1/<name>@<version>` first-line comment, or the frontmatter
+ * `extends: …/common/agents/<name>.md` form (version UNPINNED_EXTENDS).
+ */
 function parseExtendsRef(
   normalizedContent: string
 ): { l1Name: string; version: string } | null {
   const firstLine = normalizedContent.split('\n')[0] ?? '';
   const match = /^#\s*@extends:\s*l1\/([^@\s]+)@([^\s]+)/i.exec(firstLine);
-  if (!match) return null;
-  return { l1Name: match[1].trim(), version: match[2].trim() };
+  if (match) return { l1Name: match[1].trim(), version: match[2].trim() };
+  const fm = normalizedContent.match(/^---\n([\s\S]*?)\n---/);
+  if (fm) {
+    const decl = /^\s*extends\s*:\s*["']?([^"'\s]+)["']?\s*$/m.exec(fm[1]);
+    if (decl) {
+      const name = decl[1].split('/').pop()?.replace(/\.md$/, '');
+      if (name) return { l1Name: name, version: UNPINNED_EXTENDS };
+    }
+  }
+  return null;
 }
 
 // ============================================================================
@@ -570,7 +595,10 @@ export function detectVersionDrift(workspaceRoot: string): DriftReport {
         continue;
       }
 
-      const isDrift = registryVersion !== ref.version;
+      // Frontmatter stubs are unpinned by design: the stub resolves the
+      // common body at read time, so there is no declared version to drift
+      // — a resolvable pointer is current (T-20260926-020c).
+      const isDrift = ref.version !== UNPINNED_EXTENDS && registryVersion !== ref.version;
       const entry: VersionDriftResult = {
         filePath,
         agentName: basename(filePath, '.md'),
@@ -723,9 +751,13 @@ async function main() {
   }
 }
 
-main().catch(err => {
-  console.error('agent-similarity-analyzer error:', err);
-  if (import.meta.main) {
+// Import-safe: only run the CLI when this module is the entry point.
+// Previously main() executed on ANY import (agent-promote imports this
+// helper), silently double-running the analysis and printing a stray
+// report into the importer's output (T-20260926-020c).
+if (import.meta.main) {
+  main().catch(err => {
+    console.error('agent-similarity-analyzer error:', err);
     process.exit(1);
-  }
-});
+  });
+}

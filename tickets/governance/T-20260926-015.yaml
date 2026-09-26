@@ -1,0 +1,31 @@
+schemaVersion: 1
+id: T-20260926-015
+kind: manual
+title: >-
+  edu-sync publisher path allowlist gaps (.github/workflows/edu-sync.yml Publish
+  patches step): (a) symlink blobs inside docs/ pass both the per-patch numstat
+  check and the belt-and-suspenders name-only diff — symlink TARGETS are never
+  inspected; (b) file-mode changes (chmod, exec bits) unwatched; (c) awk '{print
+  $3}' whitespace parsing mis-parses numstat paths containing spaces and rename
+  notation. Reject mode-120000 blobs and non-regular-file changes, parse numstat
+  with tab separators, extend the post-apply diff to name-status+mode (4-domain
+  review 2026-09-26, agent D).
+priority: urgent
+status: review
+attempts: 0
+created_at: '2026-09-26T01:28:02.919Z'
+history:
+  - at: '2026-09-26T01:28:02.919Z'
+    from: null
+    to: backlog
+  - at: '2026-09-26T01:28:24.020Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-26T01:28:24.032Z'
+    from: waiting
+    to: running
+  - at: '2026-09-26T01:50:38.859Z'
+    from: running
+    to: review
+result: null
+error: null

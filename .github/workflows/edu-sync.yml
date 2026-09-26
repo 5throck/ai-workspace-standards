@@ -225,17 +225,43 @@ jobs:
             git checkout -B "$branch"
             for p in "${patches[@]}"; do
               # Deterministic path allowlist: only docs/** may be touched.
-              bad=$(git apply --numstat "$p" | awk '{print $3}' | grep -vE '^docs/' || true)
+              # Tab-separated numstat parsing — whitespace-splitting would
+              # mis-parse paths containing spaces and rename notation
+              # (T-20260926-015).
+              bad=$(git apply --numstat "$p" | awk -F'\t' 'NF>=3 {print $3}' | grep -vE '^docs/' || true)
               if [ -n "$bad" ]; then
                 echo "[$name] REJECTED: $p touches non-docs path(s): $bad"
                 exit 1
               fi
+              # Path scans cannot see blob types: reject symlink (120000)
+              # and gitlink (160000) blobs at patch level — a docs/ symlink
+              # can point outside docs/ and passes both path scans
+              # (T-20260926-015). The post-apply ls-files sweep below is the
+              # authoritative re-check.
+              if grep -Eq '^(new file|deleted file) mode (120000|160000)' "$p"; then
+                echo "[$name] REJECTED: $p creates/removes a non-regular-file blob (symlink/submodule)"
+                exit 1
+              fi
               git am --keep-non-patch "$p"
             done
-            # Belt-and-suspenders: re-verify the whole branch diff post-apply.
+            # Belt-and-suspenders: re-verify the whole branch post-apply —
+            # path allowlist AND blob-type allowlist (regular files only).
             bad=$(git diff --name-only "$base..HEAD" | grep -vE '^docs/' || true)
             if [ -n "$bad" ]; then
               echo "[$name] REJECTED post-apply: non-docs path(s): $bad"
+              exit 1
+            fi
+            badmode=$(git ls-files -s docs/ | awk '$1 != "100644" && $1 != "100755" {print $1, $4}' || true)
+            if [ -n "$badmode" ]; then
+              echo "[$name] REJECTED post-apply: non-regular-file blob(s) under docs/: $badmode"
+              exit 1
+            fi
+            # Tip integrity: the pushed branch must contain EXACTLY the
+            # audited patches — no extra commits from any other source
+            # (T-20260926-015).
+            tipcount=$(git rev-list --count "$base..HEAD")
+            if [ "$tipcount" -ne "${#patches[@]}" ]; then
+              echo "[$name] REJECTED: branch tip carries $tipcount commit(s) but ${#patches[@]} patch(es) were audited"
               exit 1
             fi
             git push origin "$branch"
