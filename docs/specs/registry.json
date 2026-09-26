@@ -1465,6 +1465,15 @@
       "source": "manual",
       "created": "2026-09-26",
       "last_updated": "2026-09-26"
+    },
+    {
+      "id": "2026-09-26-l3-pipeline-roster-regex-design",
+      "title": "l3 pipeline roster regex design",
+      "file": "docs/designs/2026-09-26-l3-pipeline-roster-regex-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-26",
+      "last_updated": "2026-09-26"
     }
   ]
 }
