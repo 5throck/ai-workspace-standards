@@ -6,12 +6,33 @@ title: >-
   present in the project but absent from templates/co-newbiz; decide deliberate
   extension vs backport (ADR-0083/0084 surfaces)
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-26T16:54:30.493Z'
 history:
   - at: '2026-09-26T16:54:30.493Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-26T22:23:49.511Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-26T22:23:49.525Z'
+    from: waiting
+    to: running
+  - at: '2026-09-26T22:25:06.571Z'
+    from: running
+    to: review
+  - at: '2026-09-26T22:25:06.587Z'
+    from: review
+    to: done
+result: >-
+  Adjudicated: DELIBERATE project-side extension (Domain Operating Model Process
+  layer, ADR-0083 P2). Evidence: (1) templates/co-newbiz does not exist —
+  co-newbiz is standalone-track, so 'absent from templates/co-newbiz' names a
+  hypothetical target, not a delivery gap; (2) the content is project-namespaced
+  (owner_agent values are co-newbiz roster agents, e.g. brownfield-agent.md
+  exists); (3) the project's AGENTS.md documents process/flow.spec.yaml +
+  stages.yaml as the project's Process authority (ADR-0074 SSOT). Per the
+  ADR-0086 promotion path the layer rides into a future templates/co-newbiz at
+  variant promotion — not before. No backport, no change.
 error: null
