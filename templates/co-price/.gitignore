@@ -71,6 +71,9 @@ tests/.temp/
 
 # graft's local graph cache — regenerable, not committed (run `graft build`).
 /graft/
+
+# graft helper machine-local override (issue #1048) — untracked by design.
+.claude/helpers/graft.local.json
 <!-- /WORKSPACE-MANAGED -->
 
 # --- co-price variant-specific entries (preserved outside the managed block) ---
