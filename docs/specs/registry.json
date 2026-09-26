@@ -1492,6 +1492,15 @@
       "source": "manual",
       "created": "2026-09-26",
       "last_updated": "2026-09-26"
+    },
+    {
+      "id": "2026-09-26-upgrade-variant-json-delivery-design",
+      "title": "upgrade variant json delivery design",
+      "file": "docs/designs/2026-09-26-upgrade-variant-json-delivery-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-26",
+      "last_updated": "2026-09-26"
     }
   ]
 }

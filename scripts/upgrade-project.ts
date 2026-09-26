@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.52.0
+// @version 1.53.0
 // v1.51.0 (2026-09-25, ADR-0088 W2): `.hermes` joins the platform set — usage/
 //          validation lists, VARIANT_ASSET_DIR_SKIP, upstream skill-name sources,
 //          and both mirrorRoot sweeps (prune + retirement discriminator) cover the
@@ -130,7 +130,7 @@
 //          (v1.10.0) pattern: project-only attribute lines (GitLFS trackers, custom
 //          merge drivers, the scaffold-time `docs/context.md merge=ours` rule) survive
 //          the template overwrite instead of being silently stripped on every upgrade.
-// @version 1.52.0
+// @version 1.53.0
 // v1.52.0 (2026-09-26, T-20260926-021): W2 HARVEST line computation extracted to the
 //           pure helper `harvestVariantOnlyLines` (helpers/context-sections.ts v1.8.0)
 //           and unit-tested; the harvest report now states the comparison is against
@@ -1697,7 +1697,11 @@ if (existsSync(variantScriptsSrc)) {
       const entryRel = rel ? `${rel}/${entry.name}` : entry.name;
       if (entry.isDirectory()) {
         syncVariantScripts(abs, entryRel);
-      } else if (entry.isFile() && (entry.name.endsWith('.ts') || entry.name.endsWith('.mjs'))) {
+      } else if (entry.isFile() && (entry.name.endsWith('.ts') || entry.name.endsWith('.mjs') || entry.name.endsWith('.json'))) {
+        // .json included since 1.44.0: variant config files (atc-rulepack.json,
+        // tsconfig.json) were scaffold-delivered but had no upgrade delivery
+        // path, so post-scaffold template updates never reached live projects.
+        // Unversioned .json flows through the hash-compare branch below.
         seenVariantScripts.add(entryRel);
         const rel2 = `scripts/${variant}/${entryRel}`;
         const projFile = join(projectDir, rel2);
@@ -1754,7 +1758,7 @@ if (existsSync(variantScriptsSrc)) {
       const entryRel = rel ? `${rel}/${entry.name}` : entry.name;
       if (entry.isDirectory()) {
         preserveVariantScripts(abs, entryRel);
-      } else if (entry.isFile() && (entry.name.endsWith('.ts') || entry.name.endsWith('.mjs')) && !seenVariantScripts.has(entryRel)) {
+      } else if (entry.isFile() && (entry.name.endsWith('.ts') || entry.name.endsWith('.mjs') || entry.name.endsWith('.json')) && !seenVariantScripts.has(entryRel)) {
         console.log(`  PRESERVE (project-only): scripts/${variant}/${entryRel}`);
       }
     }
