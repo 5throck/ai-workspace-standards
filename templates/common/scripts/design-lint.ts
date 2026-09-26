@@ -85,12 +85,19 @@ const VERSION = "2.0.0";
 const CHECK_ORDER = ["token-usage", "components", "patterns", "icons", "fonts"] as const;
 type CheckName = (typeof CHECK_ORDER)[number];
 
-/** Registry paths, relative to the project root (design §4.4). */
+/** Registry paths, relative to the project root (design §4.4). POSIX-style literals: the
+ * lint emits forward-slash paths on every platform (workspace output convention); the
+ * filesystem APIs accept them on Windows too. */
 const REGISTRY_PATHS = {
-  components: join("docs", "design", "components.registry.yaml"),
-  patterns: join("docs", "design", "patterns.registry.yaml"),
-  icons: join("docs", "design", "icon-vocabulary.yaml"),
+  components: "docs/design/components.registry.yaml",
+  patterns: "docs/design/patterns.registry.yaml",
+  icons: "docs/design/icon-vocabulary.yaml",
 } as const;
+
+/** Normalize an emitted path to POSIX separators (cross-platform output stability). */
+function toPosix(p: string): string {
+  return p.replace(/\\/g, "/");
+}
 
 /** Terminating generic families accepted by the font stack contract (design §6.4). */
 const GENERIC_FONT_FAMILIES = new Set([
@@ -260,7 +267,7 @@ function uiSourceRoots(projectRoot: string): string[] {
 
 function rawFindingsToFindings(raw: RawFinding[], downgradeToInfo = false): Finding[] {
   return raw.map((f) => ({
-    file: f.file,
+    file: toPosix(f.file),
     line: f.line,
     pattern: f.pattern,
     match: f.match,
@@ -633,7 +640,7 @@ function runTokenUsage(opts: CliOptions): CheckResult {
     if (defaults.length === 0) {
       return skipped(
         "token-usage",
-        `no scan roots found (looked for ${join(root, "playground/src")}, ${join(root, "src")})`,
+        `no scan roots found (looked for ${toPosix(join(root, "playground/src"))}, ${toPosix(join(root, "src"))})`,
       );
     }
     roots = defaults;
@@ -642,7 +649,7 @@ function runTokenUsage(opts: CliOptions): CheckResult {
   let existingRoots = 0;
   for (const scanRoot of roots) {
     if (!existsSync(scanRoot)) {
-      console.log(`design-lint: scan root "${scanRoot}" does not exist — skipped.`);
+      console.log(`design-lint: scan root "${toPosix(scanRoot)}" does not exist — skipped.`);
       continue;
     }
     existingRoots++;
@@ -876,7 +883,7 @@ function runPatterns(opts: CliOptions): CheckResult {
     }
     const { usages, waiver } = extractPatternUsage(content);
     if (usages.length === 0 && !waiver) continue;
-    const relFile = relative(root, file) || file;
+    const relFile = toPosix(relative(root, file) || file);
     if (waiver) {
       findings.push({
         file: relFile,
@@ -1031,7 +1038,7 @@ function runFonts(opts: CliOptions): CheckResult {
       reasons.push(`must terminate in a generic family (${[...GENERIC_FONT_FAMILIES].join(", ")}), got '${last}'`);
     }
     findings.push({
-      file: decl.file,
+      file: toPosix(decl.file),
       line: decl.line,
       pattern: "font-fallback-contract",
       match: `${decl.name}: ${decl.value}`,
@@ -1185,7 +1192,7 @@ function jsonReport(projectRoot: string, results: CheckResult[]): string {
       {
         tool: "design-lint",
         version: VERSION,
-        projectRoot,
+        projectRoot: toPosix(projectRoot),
         checks: results.map((r) => ({
           name: r.name,
           status: r.status,
