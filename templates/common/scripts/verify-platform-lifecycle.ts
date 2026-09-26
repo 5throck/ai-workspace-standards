@@ -12,13 +12,13 @@
  *
  * Tier 1 vs Tier 3 auto-detection: if variant.json exists in cwd, runs Tier 3 subset (E+F only).
  *
- * Net-new coverage (.agents/.codex legs, codex prompts leg) soaks in WARN per
- * ADR-0055; the dated promotion tickets (T-20260925-002, not-before 2026-10-09)
- * flip those to fail. The .hermes legs were promoted out of soak on 2026-09-25
- * (T-20260925-008: live hermes-agent E2E verification green). Pre-existing
- * .claude/.gemini semantics keep their severity.
+ * PROMOTED 2026-09-27 (T-20260925-002, user-authorized early promotion with the
+ * zero-WARN precondition verified): the .agents/.codex legs, the codex prompts
+ * mapping leg, and the Check G .agents lockstep leg all run at fail severity.
+ * The .hermes legs preceded on 2026-09-25 (T-20260925-008: live hermes-agent
+ * E2E verification green). Pre-existing .claude/.gemini semantics unchanged.
  *
- * @version 1.5.0
+ * @version 1.6.0
  */
 
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
@@ -41,12 +41,15 @@ const VERSION_EXEMPT_PLATFORM_SKILLS = new Set([
   '.claude/skills/graft',
 ]);
 
-// Net-new mirror legs soak in WARN (ADR-0055) — TODO(promotion): flip to fail.
+// (Historical) net-new mirror legs soaked in WARN (ADR-0055) until promotion.
 // .hermes/skills joined in ADR-0088 W2 (same onboarding path as .agents/.codex)
 // and was PROMOTED out of soak on 2026-09-25 (T-20260925-008: live hermes-agent
 // v0.21.4 E2E — project skill discovery, frontmatter tolerance, AGENTS.md entry
 // all verified green), so its legs run at fail severity like .claude/.gemini.
-const SOAK_MIRRORS = new Set(['.agents/skills', '.codex/skills']);
+// All platform legs promoted out of WARN soak 2026-09-27 (T-20260925-002;
+// .hermes preceded 2026-09-25, T-20260925-008). The set stays as the mechanism —
+// a future net-new mirror leg soaks by joining it.
+const SOAK_MIRRORS = new Set<string>();
 
 function platformOf(mirrorDir: string): string {
   return mirrorDir.split('/')[0];
@@ -203,8 +206,8 @@ const AGENTS_COMMANDS_EXCLUDED: ReadonlySet<string> = new Set(['gateguard.md']);
 export const COMMANDS_SURFACES: readonly CommandsSurface[] = [
   { platform: '.claude', mode: 'mirror-1:1' },
   { platform: '.gemini', mode: 'mirror-1:1' },
-  { platform: '.codex', mode: 'mapping', soak: true },
-  { platform: '.agents', mode: 'lockstep-root', soak: true },
+  { platform: '.codex', mode: 'mapping' },
+  { platform: '.agents', mode: 'lockstep-root' },
   { platform: '.hermes', mode: 'excluded', exclusionNote: 'no commands mirror — Hermes invokes skills natively as /<skill-name> (ADR-0088 D1)' },
 ];
 
