@@ -303,6 +303,8 @@ Daily cadence that mechanically processes ready `kind: manual` governance ticket
 | 01:30 | Local ZCode fleet runner (workspace automation) | Phase I `project-review` (workspace L0 + `templates/`) + Phase II `project-resync` (`Projects/co-*`); hard stop 04:45; Fridays run FULL review mode (ADR-0089) |
 | 03:00 | Local ZCode ticket runner (workspace automation) | up to 50 tickets / ~5 h |
 | manual | GitHub dispatch (`nightly-tickets.yml`) | emergency fallback only — schedule retired 2026-09-19 |
+| 03:30 daily | GitHub-hosted schedule (`.github/workflows/fork-watch.yml`) | upstream fork watch + report — GitHub-hosted; its schedule changes follow the ADR-0089 schedule-change regime (registered T-20260927-004) |
+| Sat 04:00 | GitHub-hosted schedule (`.github/workflows/edu-sync.yml`) | education-repo content sync via PR (patch allowlist, credential-free agent phase) — GitHub-hosted; its schedule changes follow the ADR-0089 schedule-change regime (registered T-20260927-004) |
 
 **Collision lock** (both local runners): the 01:30 fleet runner and the 03:00 ticket batch share the atomic lock `.pipeline-state/automation.lock` (gitignored). A runner that finds the lock held defers, never skips — it polls until its window ends.
 

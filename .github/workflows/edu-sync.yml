@@ -271,7 +271,7 @@ jobs:
               --body "Automated education-content sync from ai-workspace-standards. Patch bundle: /tmp/edu-patches/$name (${#patches[@]} commit(s)). Applied deterministically by the trusted publisher step — the AI agent ran without credentials. Per-change mapping in /tmp/edu-sync-report.md (attached as run artifact)."
             echo "[$name] published branch $branch + PR"
             any_published=1
-            cd "$RUNNER_WORKSPACE_DIRECTORY" 2>/dev/null || cd -
+            cd "$GITHUB_WORKSPACE" 2>/dev/null || cd -
           done
           [ "$any_published" = "0" ] && echo "No patches published (agent reported no relevant changes)."
           exit 0

@@ -167,5 +167,10 @@
     "raci_file": "governance/raci.yaml",
     "gates_file": "decisions/gates.yaml",
     "evidence_models_dir": "evidence-models/"
+  },
+  "country_config": {
+    "profiles_dir": "docs/countries",
+    "supported": [],
+    "default": null
   }
 }

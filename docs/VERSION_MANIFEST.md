@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-09-26T16:55:14.761Z
+**Generated**: 2026-09-26T22:25:33.273Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -196,7 +196,7 @@
 | validate-process.ts | 1.0.0 | scripts/validate-process.ts | js-yaml |
 | validate-raci.ts | 1.2.0 | scripts/validate-raci.ts | js-yaml |
 | validate-skills.ts | 1.5.1 | scripts/validate-skills.ts | N/A |
-| validate-templates.ts | 1.46.1 | scripts/validate-templates.ts | js-yaml |
+| validate-templates.ts | 1.47.0 | scripts/validate-templates.ts | js-yaml |
 | validate-variant-readiness.ts | 1.1.0 | scripts/validate-variant-readiness.ts | N/A |
 | variant-feature.ts | 1.0.0 | scripts/variant-feature.ts | N/A |
 | verify-adr-governance.ts | 1.7.0 | scripts/verify-adr-governance.ts | N/A |
@@ -204,7 +204,7 @@
 | verify-country-prune.ts | 1.1.0 | scripts/verify-country-prune.ts | N/A |
 | verify-memory.ts | 1.2.0 | scripts/verify-memory.ts | fs, path |
 | verify-new-project-tests.ts | 1.0.3 | scripts/verify-new-project-tests.ts | N/A |
-| verify-platform-lifecycle.ts | 1.4.0 | scripts/verify-platform-lifecycle.ts | N/A |
+| verify-platform-lifecycle.ts | 1.5.0 | scripts/verify-platform-lifecycle.ts | N/A |
 | verify-readme-sync.ts | 1.4.1 | scripts/verify-readme-sync.ts | bun, fs, path |
 | verify-scripts.ts | 1.9.0 | scripts/verify-scripts.ts | fs, path |
 | verify-skill-graph.ts | 1.6.0 | scripts/verify-skill-graph.ts | N/A |
