@@ -35,3 +35,14 @@ D4: The edu-sync hardening is defense-in-depth at three layers (per-patch parse+
 
 - `bun test` 1159/1159 (28 new: resync-audit hardening 7 + extends-stub 13 + mirror pin correction), `bun scripts/typecheck.ts` 0 delta, `verify-scripts --verify` green (new checks 0 findings), `validate-templates` 0 errors (72 adjudicated WARNs), `audit.ts` green, `review-baseline` 6/6.
 - Workflow YAMLs validated (ruby YAML parser).
+
+## 5. Addendum — batch 2 (post-merge remainder, same program)
+
+Batch 1 (§1–§4) landed in PR #1087. The remaining review items landed as batch 2 in the same program:
+
+- R10 (was deferred finding "W2 HARVEST zero test coverage"): the harvest line computation is extracted from upgrade-project v1.42.0's inline block into the pure helper `harvestVariantOnlyLines` (helpers/context-sections v1.8.0) and unit-tested (6 cases); the report now discloses the best-match-section-only comparison scope. upgrade-project 1.52.0. No behavioral change to the removal pass.
+- R11 (was deferred finding "dev-sync audit/regeneration order"): audit.ts auto-activates the VERSION_MANIFEST reconciliation gate on EVERY invocation including Step 3.9's `--spec-check --lifecycle-only` call, which failed blocking before Step 4.7 could regenerate whenever a sync bumped script versions. New Step 3.85 pre-converges the manifest before 3.9; 4.7 stays as final convergence. dev-sync 1.20.0.
+- R12 (was deferred finding "retry/lock rules prompt-only"): designed, not implemented — `docs/designs/2026-09-26-runner-lock-retry-enforcement-design.md` (registered separately, status designed); implementation ticketed T-20260926-021.
+- R13 (A-domain leftovers adjudicated): co-newbiz `docs/security/` is committed project-owned content — no action (T-20260926-023 done); `platform_settings` claude/gemini scope extension is a design-level decision ticketed T-20260926-022.
+
+Verification (batch 2): context-harvest tests 6/6, full `bun test` green, typecheck 0 delta, verify-scripts/validate-templates/audit green, dev-sync pipeline green end-to-end including the new Step 3.85.

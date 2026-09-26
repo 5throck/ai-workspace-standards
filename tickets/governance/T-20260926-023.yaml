@@ -1,0 +1,39 @@
+schemaVersion: 1
+id: T-20260926-023
+kind: manual
+title: >-
+  co-newbiz docs/security/ adjudication — RESOLVED by investigation 2026-09-26:
+  the 5 files (security-baseline(+ko), security-model(+ko), security.md) are
+  COMMITTED project-owned content (git ls-files confirms, tree clean,
+  resync-audit 0 dirty), unreferenced by the co-newbiz
+  template/AGENTS.md/context.md — legitimate project-side structure the upgrade
+  passes correctly leave alone (ADD_IF_MISSING/tree-sync do not touch
+  project-owned dirs). No root-repo action; recorded so the 'nested security/'
+  review finding is dispositioned.
+priority: low
+status: done
+attempts: 0
+created_at: '2026-09-26T03:47:46.521Z'
+history:
+  - at: '2026-09-26T03:47:46.521Z'
+    from: null
+    to: backlog
+  - at: '2026-09-26T03:48:08.157Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-26T03:48:08.170Z'
+    from: waiting
+    to: running
+  - at: '2026-09-26T03:48:16.747Z'
+    from: running
+    to: review
+  - at: '2026-09-26T03:48:16.760Z'
+    from: review
+    to: done
+result: >-
+  Adjudicated by investigation (2026-09-26 batch): docs/security/ in
+  Projects/co-newbiz is committed project-owned content (5 files tracked, tree
+  clean, resync-audit 0 dirty), unreferenced by the co-newbiz template —
+  legitimate project-side structure the upgrade passes correctly leave alone. No
+  root-repo action required.
+error: null
