@@ -4,7 +4,22 @@ const fs = require('fs');
 const { pathToFileURL } = require('url');
 const { execFileSync } = require('child_process');
 const dir = process.env.CLAUDE_PROJECT_DIR || process.cwd();
-const BAKED = "C:\\Users\\USER\\AppData\\Local\\nvm\\v24.15.0\\node_modules\\@nanonets\\graft\\dist\\claude";
+
+// Issue #1048: no machine-local path may live in this tracked file. The graft
+// dist/claude dir is resolved dynamically at runtime (package walk-up from the
+// project dir, then the node lib dir next to the interpreter, then npm's
+// global root). A per-machine override is read ONLY from the untracked sibling
+// graft.local.json: {"baked": "<absolute path to .../@nanonets/graft/dist/claude>"}
+// A missing file or field means no override candidate at all.
+// Caveat: graft's own session-start hook may still rewrite this tracked file
+// (it did while a baked constant lived here). If tracked-file dirt recurs, the
+// follow-up is moving the helpers out of graft's rewrite scope (out of scope).
+function bakedDir() {
+  try {
+    const cfg = JSON.parse(fs.readFileSync(path.join(__dirname, 'graft.local.json'), 'utf8'));
+    return typeof cfg.baked === 'string' && cfg.baked ? cfg.baked : null;
+  } catch { return null; /* no untracked override */ }
+}
 
 // The dist/claude dir of @nanonets/graft resolved from a base whose node_modules is searched.
 function fromPkg(base) {
@@ -54,13 +69,16 @@ function best(dirs, name) {
 }
 
 function entry(name) {
-  // Cheap candidates first, and only shell out to npm when every one of them misses.
-  const cheap = [BAKED, fromPkg(dir), fromPkg(path.join(path.dirname(process.execPath), '..', 'lib'))];
+  // Dynamic candidates first (project walk-up, then the interpreter's lib dir);
+  // only shell out to npm when every one of them misses.
+  const cheap = [fromPkg(dir), fromPkg(path.join(path.dirname(process.execPath), '..', 'lib'))];
   const hit = best(cheap, name);
   if (hit) return path.join(hit, name);
   const gr = globalRoot();
   const global = gr && path.join(gr, '@nanonets', 'graft', 'dist', 'claude');
   if (global && fs.existsSync(path.join(global, name))) return path.join(global, name);
+  const baked = bakedDir(); // optional untracked override, demoted to last (issue #1048)
+  if (baked && fs.existsSync(path.join(baked, name))) return path.join(baked, name);
   return path.join(dir, 'dist', 'claude', name); // last-ditch; import will no-op if absent
 }
 

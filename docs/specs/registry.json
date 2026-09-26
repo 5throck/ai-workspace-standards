@@ -1539,6 +1539,15 @@
       "created": "2026-09-26",
       "last_updated": "2026-09-26",
       "meeting_ref": "memory/meeting-2026-09-26-design-foundation-improvements.md"
+    },
+    {
+      "id": "2026-09-26-graft-helper-1048-propagation-design",
+      "title": "graft helper 1048 propagation design",
+      "file": "docs/designs/2026-09-26-graft-helper-1048-propagation-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-26",
+      "last_updated": "2026-09-26"
     }
   ]
 }
