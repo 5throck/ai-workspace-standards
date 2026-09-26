@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.51.0
+// @version 1.52.0
 // v1.51.0 (2026-09-25, ADR-0088 W2): `.hermes` joins the platform set — usage/
 //          validation lists, VARIANT_ASSET_DIR_SKIP, upstream skill-name sources,
 //          and both mirrorRoot sweeps (prune + retirement discriminator) cover the
@@ -130,6 +130,12 @@
 //          (v1.10.0) pattern: project-only attribute lines (GitLFS trackers, custom
 //          merge drivers, the scaffold-time `docs/context.md merge=ours` rule) survive
 //          the template overwrite instead of being silently stripped on every upgrade.
+// @version 1.52.0
+// v1.52.0 (2026-09-26, T-20260926-021): W2 HARVEST line computation extracted to the
+//           pure helper `harvestVariantOnlyLines` (helpers/context-sections.ts v1.8.0)
+//           and unit-tested; the harvest report now states the comparison is against
+//           the single best-match common section ("not in best-match common ## X").
+//           No behavioral change to the removal pass itself.
 // @version 1.42.0
 // v1.42.0 (2026-09-22, T-20260922-001 follow-up): W2 HARVEST in CONTEXT_COMMONIZATION —
 //           lines UNIQUE to the variant copy inside a removed near-duplicate section are
@@ -472,7 +478,7 @@ import {
   findProjectOnlySections,
   spliceCommonContextBlock,
   classifyCommonizationSection,
-  getContentLines,
+  harvestVariantOnlyLines,
   W2_REMOVE_THRESHOLD,
   W2_REVIEW_FLOOR,
 } from './helpers/context-sections.ts';
@@ -1424,10 +1430,8 @@ if (skipContextCommonization) {
           console.log(`  REVIEW (manual commonization): ${section.heading} (overlap ${verdict.maxSimilarity.toFixed(2)} — kept: section contains managed COMMON-*/VARIANT-INJECT content)`);
         } else {
           removalRanges.push({ start: startLine, end: endLineExclusive, heading: section.heading, similarity: verdict.maxSimilarity, matched: verdict.matchedCommonHeading });
-          const matchedCommon = commonSections.find(s => s.heading === verdict.matchedCommonHeading);
-          const commonLineSet = matchedCommon ? getContentLines(matchedCommon.body) : new Set<string>();
-          const variantOnly = [...getContentLines(section.body)].filter(l => !commonLineSet.has(l));
-          if (variantOnly.length > 0) harvest.push({ heading: section.heading, matched: verdict.matchedCommonHeading, lines: variantOnly });
+          const harvested = harvestVariantOnlyLines(section.body, verdict.matchedCommonHeading, commonSections);
+          if (harvested.lines.length > 0) harvest.push({ heading: section.heading, matched: harvested.matched, lines: harvested.lines });
         }
       } else if (verdict.verdict === 'review') {
         console.log(`  REVIEW (manual commonization): ${section.heading} (overlap ${verdict.maxSimilarity.toFixed(2)})`);
@@ -1463,7 +1467,10 @@ if (skipContextCommonization) {
       console.log('');
       console.log('  W2 HARVEST — backport candidates (variant-only lines inside removed sections):');
       for (const h of harvest) {
-        console.log(`    HARVEST docs/${variant}.context.md ## ${h.heading} — ${h.lines.length} line(s) not in common ## ${h.matched}`);
+        // "best-match" disclosure (T-20260926-021): the comparison is against
+        // the single best-match common section — a line that moved to a
+        // different common section still reports here.
+        console.log(`    HARVEST docs/${variant}.context.md ## ${h.heading} — ${h.lines.length} line(s) not in best-match common ## ${h.matched}`);
         for (const sample of h.lines.slice(0, 3)) console.log(`      - ${sample}`);
         if (h.lines.length > 3) console.log(`      … and ${h.lines.length - 3} more`);
         w2HarvestLines += h.lines.length;

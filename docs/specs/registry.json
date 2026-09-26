@@ -1456,6 +1456,15 @@
       "source": "manual",
       "created": "2026-09-26",
       "last_updated": "2026-09-26"
+    },
+    {
+      "id": "2026-09-26-runner-lock-retry-enforcement-design",
+      "title": "runner lock retry enforcement design",
+      "file": "docs/designs/2026-09-26-runner-lock-retry-enforcement-design.md",
+      "status": "designed",
+      "source": "manual",
+      "created": "2026-09-26",
+      "last_updated": "2026-09-26"
     }
   ]
 }

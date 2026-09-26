@@ -1,4 +1,9 @@
-// @version 1.19.0
+// @version 1.20.0
+// v1.20.0: Step 3.85 VERSION_MANIFEST pre-convergence — audit.ts auto-activates
+//           the manifest reconciliation gate on every invocation including
+//           Step 3.9's --spec-check call, which failed blocking before 4.7
+//           could regenerate whenever a sync bumped script versions
+//           (T-20260926-021). Step 4.7 stays as the final convergence pass.
 // v1.19.0: Step 4.63 runs `sync-skill-registries.ts` (apply mode) after the
 //           4.62 cascade re-publish — every /sync re-converges all skill
 //           registry tables (root workspace rows, root Variant-Exclusive
@@ -477,6 +482,24 @@ if (fs.existsSync(archiveMemoryTs)) {
     const archiveRes = await $`bun ${archiveMemoryTs}`.nothrow();
     if (archiveRes.exitCode !== 0) {
         console.warn(`⚠️  Memory archival had issues (non-blocking, exit ${archiveRes.exitCode})`);
+    }
+}
+
+// 3.85 VERSION_MANIFEST pre-convergence (T-20260926-021)
+// audit.ts auto-activates the VERSION_MANIFEST reconciliation gate on EVERY
+// invocation — including Step 3.9's `--spec-check --lifecycle-only` call — and
+// that gate failed BLOCKING before Step 4.7 could regenerate the manifest
+// whenever this sync bumped script versions (recurring manual
+// regenerate-before-sync dance). Pre-regenerate here so 3.9's audit compares
+// against a fresh manifest. Step 4.7 stays as the final convergence pass —
+// both runs scan the same root-level inputs, so the second is a no-op.
+const preGenManifestTs = path.join('scripts', 'generate-version-manifest.ts');
+if (fs.existsSync(preGenManifestTs)) {
+    const preGenRes = await $`bun ${preGenManifestTs}`.quiet().nothrow();
+    if (preGenRes.exitCode !== 0) {
+        console.warn(`⚠️  Step 3.85: VERSION_MANIFEST pre-regeneration failed (exit ${preGenRes.exitCode}) — Step 3.9 will re-check`);
+    } else {
+        console.log('📋 Step 3.85: VERSION_MANIFEST pre-converged for the 3.9 audit');
     }
 }
 

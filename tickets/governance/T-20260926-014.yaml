@@ -9,7 +9,7 @@ title: >-
   verify-scripts rule failing on header/const mismatch so the class is gated
   (4-domain review 2026-09-26, agent C #3 + agent B).
 priority: high
-status: review
+status: done
 attempts: 0
 created_at: '2026-09-26T01:28:02.906Z'
 history:
@@ -25,5 +25,11 @@ history:
   - at: '2026-09-26T01:50:38.847Z'
     from: running
     to: review
-result: null
+  - at: '2026-09-26T02:00:37.162Z'
+    from: review
+    to: done
+result: >-
+  Landed in PR #1087: backport-diff const VERSION aligned to 1.0.2;
+  verify-scripts 1.9.0 Check 8 fails header-@version vs const-VERSION mismatch
+  (zero findings at introduction).
 error: null

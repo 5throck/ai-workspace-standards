@@ -1,4 +1,4 @@
-// @version 1.7.0
+// @version 1.8.0
 // v1.7.0 (2026-09-25, variant hygiene batch — spec
 //           docs/designs/2026-09-25-variant-hygiene-batch-design.md, R2):
 //           stripMarkerZones() — pure, exported COMMON-CONTEXT zone stripper for
@@ -645,6 +645,29 @@ export function classifyCommonizationSection(
 // ============================================================================
 // UPGRADE-TIME OWNERSHIP DETECTION — docs/context.md preservation (v1.3.0)
 // ============================================================================
+
+/**
+ * W2 HARVEST (introduced upgrade-project v1.42.0 / T-20260922-001; extracted
+ * here as a pure, unit-tested function in T-20260926-021): the variant-only
+ * lines inside a section the commonization pass is about to REMOVE — the set
+ * difference of the section's content lines vs the best-matching common
+ * section's lines. These are backport candidates, not garbage: a genuine
+ * variant improvement inside a near-duplicate section must be reported, not
+ * silently deleted. The comparison is against the SINGLE best-match common
+ * section only — a line that moved to a different common section still
+ * reports as variant-only (conservative: it surfaces for human review, which
+ * the harvest report states explicitly).
+ */
+export function harvestVariantOnlyLines(
+  sectionBody: string,
+  matchedCommonHeading: string | null,
+  commonSections: ContextSection[],
+): { matched: string | null; lines: string[] } {
+  const matchedCommon = commonSections.find((s) => s.heading === matchedCommonHeading);
+  const commonLineSet = matchedCommon ? getContentLines(matchedCommon.body) : new Set<string>();
+  const lines = [...getContentLines(sectionBody)].filter((l) => !commonLineSet.has(l));
+  return { matched: matchedCommonHeading, lines };
+}
 
 export interface ProjectOnlyDetection {
   /**
