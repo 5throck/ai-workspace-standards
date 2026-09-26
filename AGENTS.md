@@ -102,7 +102,7 @@ When a specialist agent's required tool is denied, PM applies the [Permission De
 
 ### §3.7 Meeting Facilitation
 
-When `/meeting` is invoked, the PM orchestrates structured multi-agent discussions.
+When a meeting is requested, the PM orchestrates structured multi-agent discussions via the `meeting-facilitation` skill (`skills/meeting-facilitation/`).
 
 **Meeting Process**:
 1. **Open meeting**: Set agenda and objectives
@@ -208,7 +208,7 @@ When a user request matches a skill trigger, apply this priority order — **enf
 | "brainstorm", "design before coding", "explore options" | `superpowers/brainstorming` | 3 |
 
 When ambiguous, prefer the higher-priority (workspace-level) skill and confirm intent with the user.
-Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
+Explicit invocation: the `meeting-facilitation` skill with the meeting topic and options (`--agents a,b`, `--rounds N`, `--dialogue`) — the legacy `/meeting` slash command is retired (2026-09-26).
 
 **Common workspace-level skills** (curated subset — see `docs/VERSION_MANIFEST.md` for the complete registry):
 
