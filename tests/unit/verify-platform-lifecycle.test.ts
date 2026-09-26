@@ -65,7 +65,7 @@ describe('verify-platform-lifecycle Check G commands-surface registry (T-2026092
         expect(human).toContain('.hermes/commands: recorded exclusion');
     });
 
-    test('the .agents lockstep leg: missing and drifted files soak in WARN (T-20260927-001)', () => {
+    test('the .agents lockstep leg: missing and drifted files FAIL (promoted T-20260925-002)', () => {
         writeCommands(scratch, '.claude/commands', ['sync.md', 'meeting.md']);
         writeCommands(scratch, '.gemini/commands', ['sync.md']);
         writeCommands(scratch, 'templates/common/.claude/commands', ['sync.md']);
@@ -74,9 +74,9 @@ describe('verify-platform-lifecycle Check G commands-surface registry (T-2026092
         writeCommands(scratch, '.agents/commands', ['meeting.md']); // sync.md missing
         fs.writeFileSync(path.join(scratch, '.agents', 'commands', 'meeting.md'), '# drifted\n', 'utf-8'); // content differs
         const { errors, warnings } = runVerifier(scratch);
-        expect(errors.filter(e => e.message.includes('.agents/commands'))).toEqual([]);
-        expect(warnings.some(w => w.message.includes('no .agents/commands/ counterpart') && w.message.includes('sync.md'))).toBe(true);
-        expect(warnings.some(w => w.message.includes('drifted from .claude/commands/') && w.message.includes('meeting.md'))).toBe(true);
+        expect(warnings.filter(w => w.message.includes('.agents/commands'))).toEqual([]);
+        expect(errors.some(e => e.message.includes('no .agents/commands/ counterpart') && e.message.includes('sync.md'))).toBe(true);
+        expect(errors.some(e => e.message.includes('drifted from .claude/commands/') && e.message.includes('meeting.md'))).toBe(true);
     });
 
     test('the .agents lockstep leg: recorded adaptation and exclusion do not fire (T-20260927-001)', () => {
@@ -94,15 +94,15 @@ describe('verify-platform-lifecycle Check G commands-surface registry (T-2026092
         expect(warnings.filter(w => w.message.includes('.agents/commands'))).toEqual([]);
     });
 
-    test('the .codex prompts mapping leg soaks in WARN, not FAIL', () => {
+    test('the .codex prompts mapping leg FAILs on a missing prompt (promoted T-20260925-002)', () => {
         writeCommands(scratch, '.claude/commands', ['sync.md']);
         writeCommands(scratch, '.gemini/commands', ['sync.md']);
         writeCommands(scratch, 'templates/common/.claude/commands', ['sync.md']);
         writeCommands(scratch, 'templates/common/.gemini/commands', ['sync.md']);
         // templates/common/.codex/prompts deliberately missing sync.md
         const { errors, warnings } = runVerifier(scratch);
-        expect(errors.filter(e => e.message.includes('.codex/prompts'))).toEqual([]);
-        expect(warnings.some(w => w.message.includes('.codex/prompts'))).toBe(true);
+        expect(warnings.filter(w => w.message.includes('.codex/prompts'))).toEqual([]);
+        expect(errors.some(e => e.message.includes('.codex/prompts'))).toBe(true);
     });
 });
 
@@ -119,12 +119,12 @@ describe('verify-platform-lifecycle .hermes soak promotion (T-20260925-008)', ()
         expect(warnings.some(w => w.message.includes('.hermes/skills/demo'))).toBe(false);
     });
 
-    test('an .agents mirror skill missing version: still soaks in WARN (promotion pending T-20260925-002)', () => {
+    test('an .agents mirror skill missing version: FAIL (promoted out of soak, T-20260925-002)', () => {
         const skillDir = path.join(scratch, '.agents', 'skills', 'demo');
         fs.mkdirSync(skillDir, { recursive: true });
         fs.writeFileSync(path.join(skillDir, 'SKILL.md'), '---\nname: demo\n---\nbody', 'utf-8');
         const { errors, warnings } = runVerifier(scratch);
-        expect(errors.filter(e => e.message.includes('.agents/skills/demo'))).toEqual([]);
-        expect(warnings.some(w => w.message.includes('.agents/skills/demo') && w.message.includes('soak'))).toBe(true);
+        expect(warnings.filter(w => w.message.includes('.agents/skills/demo'))).toEqual([]);
+        expect(errors.some(e => e.message.includes('.agents/skills/demo') && e.message.includes('version'))).toBe(true);
     });
 });

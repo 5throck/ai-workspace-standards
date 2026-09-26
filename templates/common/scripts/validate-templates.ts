@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.47.0
+ * @version 1.48.0
  *
  * v1.46.1 (2026-09-26, ADR-0090 program closure — design Addendum 3): the
  *         size-budget arm's WARN message and header note record the user
@@ -3890,7 +3890,8 @@ function checkSkillMirrorVersionSync(variant: string): void {
   const findings = collectMirrorVersionMismatches(join(TEMPLATES_DIR, variant), variant);
   // WARN soak per ADR-0055 — severity flip is ticket-gated (T-20260925-006).
   for (const f of findings) {
-    warn(variant, 'VA-07', `${f.message} (soak: WARN until promotion)`, `Align the SKILL.md frontmatter version across all platform mirrors of ${variant} (and the curated registry row)`);
+    // PROMOTED to fail 2026-09-27 (T-20260925-006, zero-WARN precondition verified).
+    fail(variant, 'VA-07', f.message, `Align the SKILL.md frontmatter version across all platform mirrors of ${variant} (and the curated registry row)`);
   }
   if (findings.length === 0) {
     pass(`VA-07: ${variant} -- mirror skill versions in sync (mirrors and registry rows)`);
@@ -3911,7 +3912,8 @@ function checkSkillRegistrySync(): void {
   const findings = collectWorkspaceRegistryFindings(ROOT);
   // WARN soak per ADR-0055 — severity flip is ticket-gated (T-20260925-007).
   for (const f of findings) {
-    warn('registries', 'VA-08', `${f.message} (soak: WARN until promotion)`, 'Run: bun scripts/sync-skill-registries.ts (dev-sync Step 4.63 re-converges on every /sync)');
+    // PROMOTED to fail 2026-09-27 (T-20260925-007, zero-WARN precondition verified).
+    fail('registries', 'VA-08', f.message, 'Run: bun scripts/sync-skill-registries.ts (dev-sync Step 4.63 re-converges on every /sync)');
   }
   if (findings.length === 0) {
     pass('VA-08: all skill registry tables match SKILL.md frontmatter');
@@ -4340,8 +4342,13 @@ export interface AgentReferenceCandidate {
 
 // Reference shape 1: `agents/<name>.md` path references (prose links, code
 // strings, roster rows). Underscore-leading internal fragments (agents/_COMMON)
-// are not agent references and don't match.
-const AGENT_PATH_REF_RE = /\bagents\/([A-Za-z0-9][A-Za-z0-9_-]*)\.md\b/g;
+// are not agent references and don't match. Governance-doc pointers under a
+// `governance/` directory (docs/governance/agents/<name>.md — the ADR-0090
+// thin-dispatcher relocation targets) are NOT agent references: the segment
+// immediately before `agents/` is `governance/`, so a negative lookbehind
+// excludes them (T-20260925-004 precondition — the 33 false positives this
+// removes were the only thing blocking the check's WARN→FAIL promotion).
+const AGENT_PATH_REF_RE = /(?<!governance\/)\bagents\/([A-Za-z0-9][A-Za-z0-9_-]*)\.md\b/g;
 // Reference shape 2: backtick-adjacent `<name>` agent mentions ("the
 // stack setup agent").
 const AGENT_BACKTICK_MENTION_RE = /`([A-Za-z0-9][A-Za-z0-9_-]*)`\s+agents?\b/g;
@@ -4368,8 +4375,9 @@ export function extractAgentReferenceCandidates(content: string): AgentReference
 /** Check: variant-agent-references — agent references in templates/<v>/AGENTS.md
  *  and the variant scripts tree (.ts files, recursive) must resolve at
  *  templates/<v>/agents/, templates/common/agents/, or the workspace-root
- *  agents/. WARN-mode per ADR-0055 soak (dated promotion ticket filed at
- *  implementation). */
+ *  agents/. WARN-mode per ADR-0055 soak at introduction (T-20260924-007c);
+ *  PROMOTED to fail 2026-09-27 (T-20260925-004) after the governance-doc-link
+ *  false positives were fixed at the extractor. */
 function checkVariantAgentReferences(variant: string, opts?: {
   /** Directory-root override for fixture tests (defaults to the real templates/). */
   templatesDir?: string;
@@ -4380,7 +4388,10 @@ function checkVariantAgentReferences(variant: string, opts?: {
   const quiet = opts !== undefined;
   const FIX =
     'Fix the reference so it names an agent that exists at templates/<variant>/agents/, templates/common/agents/, or the workspace-root agents/ — or remove it. A legitimately agent-shaped name that must stay unresolvable goes on AGENT_REFERENCE_EXEMPT with a justification.';
-  const report = opts?.report ?? ((finding: string) => warn(variant, 'variant-agent-references', finding, FIX));
+  // PROMOTED to fail 2026-09-27 (T-20260925-004, user-authorized early promotion):
+  // the ADR-0090 governance-doc-link false positives were root-caused out of the
+  // extractor (governance/ lookbehind), leaving zero findings on the fleet.
+  const report = opts?.report ?? ((finding: string) => fail(variant, 'variant-agent-references', finding, FIX));
 
   if (!quiet && !JSON_MODE) {
     console.log(`\n=== Check T-007c: agent references resolve in ${variant} AGENTS.md and scripts ===`);

@@ -1,0 +1,48 @@
+schema_version: "1.0"
+description: >
+  Region profile contract (design v1.0 section 2-6 / 4-9-1 amendment). Each
+  top-level section is a provenance-bearing unit: source, verified_on, and
+  maintainer are mandatory on every section, not just on the file as a whole
+  — _validate.ts rejects a section missing any of the three (CLAUDE.md
+  Co Newbiz Lifecycle Rules, region-profiles/** row).
+
+required_top_level:
+  - code            # ISO 3166-1 alpha-2
+  - name_ko
+  - merger_control
+  - foreign_investment_screening
+  - labor
+  - tax
+  - fx_and_repatriation
+  - anti_corruption
+  - sanctions_screening
+  - data_transfer
+  - environmental_liability_succession
+  - incentives
+  - typical_closing_weeks
+
+section_shape:
+  # every section listed above except code/name_ko/typical_closing_weeks
+  # must have this shape
+  source: string            # citation — statute name, agency publication, or named advisory source
+  verified_on: date         # ISO-8601 — when a human last confirmed this section against source
+  maintainer: string        # agent_key responsible for keeping this section current
+  data: object              # the actual field content, shape is section-specific (see examples below)
+
+section_field_reference:
+  merger_control: [regime, authority, waiting_period_days, gun_jumping_prohibited]
+  foreign_investment_screening: [regime, authority, mandatory_filing_triggers]
+  labor: [works_council_consultation, collective_notice_days, cba_succession_default]
+  tax: [withholding, transfer_pricing_regime, exit_tax, treaty_network_note]
+  fx_and_repatriation: [capital_controls, repatriation_approval_required]
+  anti_corruption: [regimes]
+  sanctions_screening: [regimes]
+  data_transfer: [regime, cross_border_transfer_mechanism]
+  environmental_liability_succession: [successor_liability_default, remediation_fund_available]
+  incentives: [categories, clawback_norm]
+
+validation_rules:
+  - "Every required_top_level key must be present."
+  - "Every section (except code/name_ko/typical_closing_weeks) must carry source, verified_on, maintainer, and data."
+  - "A section with an empty data object is rejected — an unsourced placeholder is worse than a missing file, since it looks authoritative."
+  - "verified_on must parse as ISO-8601 and must not be in the future."

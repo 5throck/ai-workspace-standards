@@ -1,0 +1,24 @@
+schemaVersion: 1
+id: T-20260927-010
+kind: manual
+title: >-
+  Follow-up from T-20260927-009 (delivery-path design): templates/co-price now
+  carries the four-layer KR profile, but region-profiles/** has NO dedicated
+  upgrade claim — the resolveClaim fallthrough assigns unknown top dirs plain
+  SYNC via VARIANT_ASSET_DIRS_PASS, which would overwrite project-customized
+  KR.yaml deltas (Tooling & Skill Mapping + maintainer fields, ADR-0091 R2) on
+  future upgrades — the procedures/** clobber class (T-20260924-011). Today it
+  is safe (the only copy, Projects/co-price, is byte-identical to the template
+  seed). Needs: ADD_IF_MISSING REGION_PROFILES claim + a dedicated delivery pass
+  in upgrade-project (procedures/** precedent) + new-project country-scaffold
+  wiring + dry-run matrix.
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-26T22:45:21.972Z'
+history:
+  - at: '2026-09-26T22:45:21.972Z'
+    from: null
+    to: backlog
+result: null
+error: null

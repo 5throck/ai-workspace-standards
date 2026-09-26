@@ -1,0 +1,92 @@
+lang: ko
+lang_reason: legal
+code: KR
+name_ko: 대한민국
+
+merger_control:
+  source: "공정거래법 §9(기업결합의 제한), §11(신고의무)"
+  verified_on: "2026-08-19"
+  maintainer: legal-counsel
+  data:
+    regime: "기업결합신고 (공정거래법)"
+    authority: "공정거래위원회"
+    waiting_period_days: 30
+    gun_jumping_prohibited: true
+
+foreign_investment_screening:
+  source: "외국인투자촉진법, 산업기술보호법(국가핵심기술 대상 M&A 사전신고)"
+  verified_on: "2026-08-19"
+  maintainer: legal-counsel
+  data:
+    regime: "외국인투자 신고 + 국가핵심기술 보유기업 대상 사전 승인 (산업기술보호법 §11)"
+    authority: "산업통상자원부 / 국가정보원(국가핵심기술 심의)"
+    mandatory_filing_triggers:
+      - "국가핵심기술 보유기업의 지분 인수, 합병, 영업양수"
+      - "외국인투자 신고 대상 지분율(통상 10%) 이상 취득"
+
+labor:
+  source: "근로기준법 §94(취업규칙 불이익 변경), 근로자참여법"
+  verified_on: "2026-08-19"
+  maintainer: hr-integration-agent
+  data:
+    works_council_consultation: false
+    collective_notice_days: 0
+    cba_succession_default: "합병 시 단체협약 승계가 원칙 (판례상 포괄승계); 영업양도는 개별 판단 필요"
+
+tax:
+  source: "법인세법, 지방세특례제한법, 조세특례제한법"
+  verified_on: "2026-08-19"
+  maintainer: financial-analyst
+  data:
+    withholding: "배당·이자·사용료 소득에 대한 원천징수, 조세조약 시 경감세율 적용"
+    transfer_pricing_regime: "국제조세조정에 관한 법률 — 정상가격 산출방법 신고 의무"
+    exit_tax: "해당 없음 (법인 본점 이전에 대한 별도 출국세 제도 없음, 사업 이전 시 자산 처분 손익 과세)"
+    treaty_network_note: "OECD 회원국 다수와 조세조약 체결 — 대상국별 확인 필요"
+
+fx_and_repatriation:
+  source: "외국환거래법"
+  verified_on: "2026-08-19"
+  maintainer: financial-analyst
+  data:
+    capital_controls: "자본거래 신고제 — 해외직접투자·차입 등은 지정거래외국환은행 신고"
+    repatriation_approval_required: false
+
+anti_corruption:
+  source: "부정청탁금지법(김영란법), 형법상 배임·수뢰죄"
+  verified_on: "2026-08-19"
+  maintainer: legal-counsel
+  data:
+    regimes: ["부정청탁 및 금품등 수수의 금지에 관한 법률", "FCPA(미국 상장/거래 연계 시 역외적용 가능)"]
+
+sanctions_screening:
+  source: "대외무역법(전략물자수출입고시), UN/미국/EU 제재 목록 준용"
+  verified_on: "2026-08-19"
+  maintainer: legal-counsel
+  data:
+    regimes: ["대외무역법 전략물자 수출통제", "OFAC(미국 관련 거래 시)"]
+
+data_transfer:
+  source: "개인정보보호법 §28-8(국외이전)"
+  verified_on: "2026-08-19"
+  maintainer: security-engineer
+  data:
+    regime: "개인정보보호법 국외이전 요건 — 동의, 법령 근거, 인증, 또는 보호수준 동등 인정국"
+    cross_border_transfer_mechanism: "정보주체 동의 또는 개인정보보호위원회 인증 절차"
+
+environmental_liability_succession:
+  source: "토양환경보전법 §10-4(정화책임), 환경정책기본법"
+  verified_on: "2026-08-19"
+  maintainer: technical-dd-agent
+  data:
+    successor_liability_default: "토양오염관리대상시설 양수인은 원인자 불명 시 정화책임 승계 가능 (선의·무과실 항변 있음)"
+    remediation_fund_available: false
+
+incentives:
+  source: "조세특례제한법, 지방투자촉진보조금 지침, 지방세특례제한법, 기회발전특구 관련법"
+  verified_on: "2026-08-19"
+  maintainer: incentive-agent
+  data:
+    categories: ["지방투자촉진보조금(입지·설비·이전)", "외국인투자 조세감면", "지방세 감면(취득세·재산세)", "고용창출장려금", "기회발전특구 특례"]
+    clawback_norm: "최소 운영기간·고용유지 인원 미충족 시 가산금 포함 환수가 일반적"
+
+typical_closing_weeks: 12
