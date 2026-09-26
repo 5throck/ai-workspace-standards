@@ -6,12 +6,18 @@ title: >-
   ops-workflow section 9.8 or an ADR appendix so their changes follow the
   ADR-0089 schedule-change regime
 priority: normal
-status: backlog
+status: running
 attempts: 0
 created_at: '2026-09-26T16:48:14.313Z'
 history:
   - at: '2026-09-26T16:48:14.313Z'
     from: null
     to: backlog
+  - at: '2026-09-26T18:03:03.124Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-26T18:03:03.137Z'
+    from: waiting
+    to: running
 result: null
 error: null

@@ -49,19 +49,49 @@ describe('verify-platform-lifecycle Check G commands-surface registry (T-2026092
         expect(errors.some(e => e.check === 'platform-command-propagation' && e.message.includes('.claude/commands/'))).toBe(true);
     });
 
-    test('fully propagated .claude/.gemini/.codex legs emit no issues and the two recorded exclusions stand', () => {
+    test('fully propagated .claude/.gemini/.codex/.agents legs emit no issues and the .hermes exclusion stands', () => {
         writeCommands(scratch, '.claude/commands', ['sync.md', 'meeting.md']);
         writeCommands(scratch, '.gemini/commands', ['sync.md', 'meeting.md']);
         writeCommands(scratch, 'templates/common/.claude/commands', ['sync.md', 'meeting.md']);
         writeCommands(scratch, 'templates/common/.gemini/commands', ['sync.md', 'meeting.md']);
         writeCommands(scratch, 'templates/common/.codex/prompts', ['sync.md', 'meeting.md']);
+        writeCommands(scratch, '.agents/commands', ['sync.md', 'meeting.md']); // lockstep leg (T-20260927-001)
         const { errors, warnings } = runVerifier(scratch);
         expect(errors.filter(e => e.check === 'platform-command-propagation')).toEqual([]);
         expect(warnings.filter(w => w.check === 'platform-command-propagation')).toEqual([]);
         // Recorded exclusions — explicit pass lines, never silent skips (human mode only).
         const human = runVerifierHuman(scratch);
-        expect(human).toContain('.agents/commands: recorded exclusion');
+        expect(human).toContain('.agents/commands/ ↔ .claude/commands/: lockstep holds');
         expect(human).toContain('.hermes/commands: recorded exclusion');
+    });
+
+    test('the .agents lockstep leg: missing and drifted files soak in WARN (T-20260927-001)', () => {
+        writeCommands(scratch, '.claude/commands', ['sync.md', 'meeting.md']);
+        writeCommands(scratch, '.gemini/commands', ['sync.md']);
+        writeCommands(scratch, 'templates/common/.claude/commands', ['sync.md']);
+        writeCommands(scratch, 'templates/common/.gemini/commands', ['sync.md']);
+        writeCommands(scratch, 'templates/common/.codex/prompts', ['sync.md']);
+        writeCommands(scratch, '.agents/commands', ['meeting.md']); // sync.md missing
+        fs.writeFileSync(path.join(scratch, '.agents', 'commands', 'meeting.md'), '# drifted\n', 'utf-8'); // content differs
+        const { errors, warnings } = runVerifier(scratch);
+        expect(errors.filter(e => e.message.includes('.agents/commands'))).toEqual([]);
+        expect(warnings.some(w => w.message.includes('no .agents/commands/ counterpart') && w.message.includes('sync.md'))).toBe(true);
+        expect(warnings.some(w => w.message.includes('drifted from .claude/commands/') && w.message.includes('meeting.md'))).toBe(true);
+    });
+
+    test('the .agents lockstep leg: recorded adaptation and exclusion do not fire (T-20260927-001)', () => {
+        // commit-push-pr.md is in AGENTS_COMMANDS_ADAPTED (differs freely),
+        // gateguard.md in AGENTS_COMMANDS_EXCLUDED (no .agents copy needed).
+        writeCommands(scratch, '.claude/commands', ['commit-push-pr.md', 'gateguard.md']);
+        writeCommands(scratch, '.gemini/commands', ['commit-push-pr.md', 'gateguard.md']);
+        writeCommands(scratch, 'templates/common/.claude/commands', ['commit-push-pr.md', 'gateguard.md']);
+        writeCommands(scratch, 'templates/common/.gemini/commands', ['commit-push-pr.md', 'gateguard.md']);
+        writeCommands(scratch, 'templates/common/.codex/prompts', ['commit-push-pr.md', 'gateguard.md']);
+        writeCommands(scratch, '.agents/commands', ['commit-push-pr.md']); // adapted content + no gateguard
+        fs.writeFileSync(path.join(scratch, '.agents', 'commands', 'commit-push-pr.md'), '# adapted\n', 'utf-8');
+        const { errors, warnings } = runVerifier(scratch);
+        expect(errors.filter(e => e.message.includes('.agents/commands'))).toEqual([]);
+        expect(warnings.filter(w => w.message.includes('.agents/commands'))).toEqual([]);
     });
 
     test('the .codex prompts mapping leg soaks in WARN, not FAIL', () => {

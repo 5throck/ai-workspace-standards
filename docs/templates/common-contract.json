@@ -239,49 +239,69 @@
       "gemini_source": ".gemini/commands/project-review.md",
       "gemini-parity": "full",
       "description": "Comprehensive project review — machine baseline, scope-triaged agent dispatch, class-tagged findings persisted to docs/reports/, ticketed follow-ups",
-      "propagated_to_common": true
+      "propagated_to_common": true,
+      "agents_source": ".agents/commands/project-review.md",
+      "codex_source": ".codex/prompts/project-review.md",
+      "agents-parity": "full"
     },
     "commit-push-pr": {
       "source": ".claude/commands/commit-push-pr.md",
       "gemini_source": ".gemini/commands/commit-push-pr.md",
       "gemini-parity": "partial",
       "description": "Redirects commit+push+PR requests to /sync pipeline — enforces CHANGELOG, memlog, and audit gates",
-      "propagated_to_common": true
+      "propagated_to_common": true,
+      "agents_source": ".agents/commands/commit-push-pr.md",
+      "codex_source": ".codex/prompts/commit-push-pr.md",
+      "agents-parity": "partial"
     },
     "changelog": {
       "source": ".claude/commands/changelog.md",
       "gemini_source": ".gemini/commands/changelog.md",
       "gemini-parity": "full",
       "description": "Generates or updates CHANGELOG.md entries following Keep a Changelog format",
-      "propagated_to_common": true
+      "propagated_to_common": true,
+      "agents_source": ".agents/commands/changelog.md",
+      "codex_source": ".codex/prompts/changelog.md",
+      "agents-parity": "full"
     },
     "memlog": {
       "source": ".claude/commands/memlog.md",
       "gemini_source": ".gemini/commands/memlog.md",
       "gemini-parity": "full",
       "description": "Creates or updates daily memory log entry in memory/YYYY-MM-DD.md",
-      "propagated_to_common": true
+      "propagated_to_common": true,
+      "agents_source": ".agents/commands/memlog.md",
+      "codex_source": ".codex/prompts/memlog.md",
+      "agents-parity": "full"
     },
     "new-task": {
       "source": ".claude/commands/new-task.md",
       "gemini_source": ".gemini/commands/new-task.md",
       "gemini-parity": "full",
       "description": "Creates a new task definition file with standardized template",
-      "propagated_to_common": true
+      "propagated_to_common": true,
+      "agents_source": ".agents/commands/new-task.md",
+      "codex_source": ".codex/prompts/new-task.md",
+      "agents-parity": "full"
     },
     "gateguard": {
       "source": ".claude/commands/gateguard.md",
       "gemini_source": ".gemini/commands/gateguard.md",
       "gemini-parity": "full",
       "description": "Investigate a file before editing — pre-edit quality gate (companion to the PreToolUse GateGuard hook)",
-      "propagated_to_common": true
+      "propagated_to_common": true,
+      "agents_source": "excluded — L0-resident ruling T-20260925-003: no .agents copy",
+      "codex_source": ".codex/prompts/gateguard.md"
     },
     "sync": {
       "source": ".claude/commands/sync.md",
       "gemini_source": ".gemini/commands/sync.md",
       "gemini-parity": "full",
       "description": "Full pipeline — memlog, sync-md, changelog, audit, commit, push, PR via scripts/dev-sync.ts",
-      "propagated_to_common": true
+      "propagated_to_common": true,
+      "agents_source": ".agents/commands/sync.md",
+      "codex_source": ".codex/prompts/sync.md",
+      "agents-parity": "full"
     }
   },
   "common_platform_skills": {

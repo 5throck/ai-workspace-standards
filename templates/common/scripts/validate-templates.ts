@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.46.1
+ * @version 1.47.0
  *
  * v1.46.1 (2026-09-26, ADR-0090 program closure — design Addendum 3): the
  *         size-budget arm's WARN message and header note record the user
@@ -670,6 +670,33 @@ function checkVariantManifests(): Map<string, VariantManifest> {
         }
       }
 
+      // B-04 (ADR-0091 R3, T-20260927-002): uniform country_config declaration —
+      // adopting or not, every variant.json declares the mechanism
+      // ({ profiles_dir: "docs/countries", supported: [], default: null } for
+      // non-adopting variants); divergence by omission is eliminated.
+      const cc = raw.country_config as Record<string, unknown> | undefined;
+      if (!cc || typeof cc !== 'object' || Array.isArray(cc)) {
+        fail(dir, 'country-config',
+          `templates/${dir}/variant.json missing 'country_config' (ADR-0091 R3 uniform declaration)`,
+          `Add "country_config": { "profiles_dir": "docs/countries", "supported": [], "default": null } (empty supported = non-adopting)`);
+      } else {
+        let ccOk = true;
+        if (cc.profiles_dir !== 'docs/countries') {
+          fail(dir, 'country-config', `country_config.profiles_dir must be "docs/countries", got ${JSON.stringify(cc.profiles_dir)}`);
+          ccOk = false;
+        }
+        if (!Array.isArray(cc.supported)) {
+          fail(dir, 'country-config', `country_config.supported must be an array (empty for non-adopting variants)`);
+          ccOk = false;
+        }
+        if (cc.default !== null) {
+          fail(dir, 'country-config', `country_config.default must be null (country-profiles rule; ADR-0091 R2)`,
+            `Set "default": null — the active country is selected per-project via docs/countries/ACTIVE.md`);
+          ccOk = false;
+        }
+        if (ccOk) pass(`templates/${dir}/variant.json country_config declaration OK (ADR-0091 R3)`);
+      }
+
       // B-03: script_manifest path existence check
       const scriptManifest = raw.script_manifest as { local?: Array<{ name: string; path: string }> } | undefined;
       if (scriptManifest?.local && Array.isArray(scriptManifest.local)) {
@@ -751,8 +778,12 @@ function checkVariantManifests(): Map<string, VariantManifest> {
         if (!countryConfig.profiles_dir || countryConfig.profiles_dir.trim() === '') {
           fail(dir, 'country-config', `templates/${dir}/variant.json country_config.profiles_dir is missing or empty`);
         }
-        if (!countryConfig.supported || !Array.isArray(countryConfig.supported) || countryConfig.supported.length === 0) {
-          fail(dir, 'country-config', `templates/${dir}/variant.json country_config.supported is missing or empty`);
+        // T-20260927-002 (ADR-0091 R3): an EMPTY supported array is now the
+        // canonical non-adopting declaration — divergence by omission is what
+        // B-04 above eliminates. Only a MALFORMED value fails here; the
+        // adopting-path profile-file checks run for each declared code.
+        if (!countryConfig.supported || !Array.isArray(countryConfig.supported)) {
+          fail(dir, 'country-config', `templates/${dir}/variant.json country_config.supported is missing or not an array (use [] for non-adopting variants)`);
         } else {
           // Check each supported code has a profile file
           for (const code of countryConfig.supported) {
