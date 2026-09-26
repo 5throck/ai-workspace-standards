@@ -14,7 +14,7 @@
 
 The PM agent follows a three-level inheritance model: **L0 (workspace root)** → **L1 (common template)** → **L2 (variant templates)**.
 
-> **For PM Agent Architecture**: See [CONSTITUTION.md §5.5 - PM Gateway Workflow](CONSTITUTION.md#55-pm-gateway-workflow) for complete governance workflow, L0→L1→L2 extends chain resolution, and variant-specific configuration.
+> **For PM Agent Architecture**: See [CONSTITUTION.md §5.5 - PM Gateway Workflow](../../../CONSTITUTION.md#55-pm-gateway-workflow) for complete governance workflow, L0→L1→L2 extends chain resolution, and variant-specific configuration.
 
 #### Dispatch Decision
 
@@ -68,13 +68,13 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 | Security & Git Expert | `agents/security-expert.md` | Medium | Review phase | Hook configs only |
 | Skill-Graph Analyst | `agents/skill-graph-analyst.md` | Low | Weekly analytics cadence | Ticket filing only — `bun scripts/ticket.ts create` (Workspace root only — L0-only agent) |
 
-> **Agent frontmatter specification**: All agent files must include YAML frontmatter as defined in [CONSTITUTION.md §5.1](docs/constitution/05-multi-agent-architecture.md#51-agent-file-format-standard-frontmatter).
+> **Agent frontmatter specification**: All agent files must include YAML frontmatter as defined in [CONSTITUTION.md §5.1](../../../docs/constitution/05-multi-agent-architecture.md#51-agent-file-format-standard-frontmatter).
 
 ---
 
 ### §4.2 Harness Engineering Workflow
 
-Following the **PM governance workflow** defined in [CONSTITUTION.md §5.5](CONSTITUTION.md#55-pm-gateway-workflow):
+Following the **PM governance workflow** defined in [CONSTITUTION.md §5.5](../../../CONSTITUTION.md#55-pm-gateway-workflow):
 
 ```
 Phase 0 - Project Initiation (PM-owned)
@@ -158,7 +158,7 @@ PM will produce either a **"no drift" confirmation** or a **drift report + gover
 
 PM does NOT execute finalization updates for: pure documentation changes (body text only), README updates, memory log entries, or changes that do not affect lifecycle-tracked artifacts.
 
-> **For Agent Lifecycle procedures**: See [CONSTITUTION.md §5.6 - Agent Lifecycle Management](CONSTITUTION.md#56-agent-lifecycle-management) for detailed lifecycle procedures.
+> **For Agent Lifecycle procedures**: See [CONSTITUTION.md §5.6 - Agent Lifecycle Management](../../../CONSTITUTION.md#56-agent-lifecycle-management) for detailed lifecycle procedures.
 
 ---
 
@@ -224,16 +224,16 @@ When a new `agents/<name>.md` is created, **the developer or AI agent responsibl
 1. Use the `agent-lifecycle-manager` skill to guide the process.
 2. Add a row to the Agent Roster table above.
 3. Add a row to the Subagent Roster dispatch table (with Parallelizable / Write Allowed columns).
-4. Ensure the agent file follows the frontmatter specification in [CONSTITUTION.md §5.1](docs/constitution/05-multi-agent-architecture.md#51-agent-file-format-standard-frontmatter).
+4. Ensure the agent file follows the frontmatter specification in [CONSTITUTION.md §5.1](../../../docs/constitution/05-multi-agent-architecture.md#51-agent-file-format-standard-frontmatter).
 5. If the agent uses a skill, add a row to the Skills table above.
 
 When a new skill is created in `skills/` or `.claude/skills/`:
 1. Use the `skill-lifecycle-manager` skill to guide the process.
 2. Add a row to the Skills table above.
-3. Ensure the skill follows the frontmatter specification in [CONSTITUTION.md §6.2](docs/constitution/06-skill-lifecycle.md#62-skill-file-format-standard-frontmatter).
+3. Ensure the skill follows the frontmatter specification in [CONSTITUTION.md §6.2](../../../docs/constitution/06-skill-lifecycle.md#62-skill-file-format-standard-frontmatter).
 
 > **For the workspace root**: AGENTS.md is the SSOT. No separate `docs/context.md` sync required.
-> **For individual projects**: Keep AGENTS.md in sync with `docs/context.md ## Agents` per [CONSTITUTION.md §1](CONSTITUTION.md#1-standard-folder-structure).
+> **For individual projects**: Keep AGENTS.md in sync with `docs/context.md ## Agents` per [CONSTITUTION.md §1](../../../CONSTITUTION.md#1-standard-folder-structure).
 
 ---
 

@@ -35,7 +35,7 @@
 - No separate Lifecycle Update or Final QA Audit rows needed — `/sync` handles both
 - State parallel vs sequential order below the table
 - "pm (direct)" is FORBIDDEN - PM never executes directly
-- **When a plan spans more than one PR**: merge each PR before branching for the next row's work, per [CONSTITUTION.md §3.3 Sequential Branch Dependency Rule](docs/constitution/03-pr-workflow.md#33-sequential-branch-dependency-rule) — `dev-sync.ts` touches shared pipeline files (CHANGELOG.md, memory logs, VERSION_MANIFEST.md, generated READMEs) on every commit, so unmerged parallel branches conflict by default. If parallel branches are genuinely required, this plan's Trade-offs section must state why.
+- **When a plan spans more than one PR**: merge each PR before branching for the next row's work, per [CONSTITUTION.md §3.3 Sequential Branch Dependency Rule](../../../docs/constitution/03-pr-workflow.md#33-sequential-branch-dependency-rule) — `dev-sync.ts` touches shared pipeline files (CHANGELOG.md, memory logs, VERSION_MANIFEST.md, generated READMEs) on every commit, so unmerged parallel branches conflict by default. If parallel branches are genuinely required, this plan's Trade-offs section must state why.
 
 ### §5.1.1 Design Gate Exemptions
 
@@ -73,7 +73,7 @@ When modifying files that affect both CLAUDE.md and GEMINI.md:
 #### Example 1: Multi-Agent Platform Parity Update
 
 <!-- WORKSPACE-MANAGED: tier-model-mapping -->
-> **Note**: The `Model` column below shows the Claude Code short alias (`sonnet`/`opus`/`haiku`/`fable`) actually passed to the `Agent()` tool's `model` parameter — not the registry ID (e.g. `claude-sonnet-5-0`). See [CLAUDE.md §6](CLAUDE.md#6-native-sub-agents-agent-tool) for the registry-ID → alias translation table. On Gemini/Antigravity, use the literal model ID instead (see GEMINI.md's equivalent example).
+> **Note**: The `Model` column below shows the Claude Code short alias (`sonnet`/`opus`/`haiku`/`fable`) actually passed to the `Agent()` tool's `model` parameter — not the registry ID (e.g. `claude-sonnet-5-0`). See [CLAUDE.md §6](../../../CLAUDE.md#6-native-sub-agents-agent-tool) for the registry-ID → alias translation table. On Gemini/Antigravity, use the literal model ID instead (see GEMINI.md's equivalent example).
 <!-- /WORKSPACE-MANAGED -->
 
 | # | Task | Agent | Tier | Model | Spec |

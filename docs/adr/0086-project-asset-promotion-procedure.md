@@ -97,8 +97,9 @@ Bump the frontmatter version (strictly above the project copy). Add or update
 the `SKILLS.md`/`SCRIPTS.md` registry rows, the lifecycle record,
 `docs/VERSION_MANIFEST.md`, and the skill-graph data. Update special registries
 and place `.env.sample` in both schema copies when the asset touches
-configuration. Distribute to the 4 platform mirrors (`.claude/`, `.gemini/`,
-`.agents/`, `.codex/`) via `sync-skills.ts`.
+configuration. Distribute to the 5 platform mirrors (`.claude/`, `.gemini/`,
+`.agents/`, `.codex/`, `.hermes/`) via `sync-skills.ts` (amended 2026-09-26 for
+ADR-0088 — .hermes joined the platform set; CONSTITUTION.md §7 counts).
 
 ### 5. Validate
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.1.0
 // v1.0.0 (2026-09-25, T-20260925-009 — spec
 //          docs/designs/2026-09-25-mcp-governance-server-design.md):
 //          initial — stdio MCP server (newline-delimited JSON-RPC 2.0,
@@ -24,12 +24,12 @@
  * Harness registration (documented, never automated): run from the workspace
  * root — `hermes mcp add governance -- bun scripts/mcp-governance-server.ts`.
  *
- * @version 1.0.0
+ * @version 1.1.0
  */
 
 import { execFileSync } from 'node:child_process';
 import { existsSync, realpathSync } from 'node:fs';
-import { join, dirname, resolve, sep } from 'node:path';
+import { join, dirname, resolve, sep, extname } from 'node:path';
 import { createInterface } from 'node:readline';
 import { fileURLToPath } from 'node:url';
 
@@ -134,9 +134,20 @@ function buildArgv(name: string, args: Record<string, unknown>): string[] | stri
     const designsDir = `${realpathSync(join(WORKSPACE_ROOT, 'docs', 'designs'))}${sep}`;
     if (!abs.startsWith(designsDir)) return 'spec_register file must resolve inside docs/designs/';
     if (!existsSync(abs)) return `spec_register file not found: ${file}`;
+    // T-20260926-026b: the directory-prefix check is not sufficient — a
+    // symlink planted inside docs/designs/ can point the WRITE outside the
+    // confined scope. Realpath the leaf and re-verify against the same
+    // confined prefix.
+    const realLeaf = `${realpathSync(abs)}${sep}`;
+    if (!realLeaf.startsWith(designsDir)) return 'spec_register file must resolve inside docs/designs/ (symlink escape rejected)';
+    if (extname(abs) !== '.md') return 'spec_register file must be a .md file';
     const argv = ['scripts/spec-register.ts', '--file', file];
     if (args.update === true) {
-      argv.push('--update', typeof args.id === 'string' ? args.id : '');
+      // T-20260926-026b: an id beginning with '--' would shift argv parsing
+      // downstream — require the registered spec-id shape.
+      const id = typeof args.id === 'string' ? args.id : '';
+      if (!/^[a-z0-9][a-z0-9-]*$/.test(id)) return 'spec_register --update requires a valid spec id (lowercase alphanumeric/dash)';
+      argv.push('--update', id);
       return argv;
     }
     const source = args.source ?? 'manual';
