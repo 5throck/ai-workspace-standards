@@ -1,0 +1,18 @@
+schemaVersion: 1
+id: T-20260926-028
+kind: manual
+title: >-
+  design-lint: components.registry.yaml schema + component-to-token
+  set-membership check (spec
+  docs/designs/2026-09-26-design-foundation-v1.2-design.md; the registry file
+  must be the machine-readable SSOT the lint reduces to set membership)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-26T11:13:35.744Z'
+history:
+  - at: '2026-09-26T11:13:35.744Z'
+    from: null
+    to: backlog
+result: null
+error: null
