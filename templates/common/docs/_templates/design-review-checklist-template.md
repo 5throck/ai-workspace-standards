@@ -21,6 +21,9 @@
 - [ ] Tokens referenced from the project token source (`<design-tokens file>`); no
       hard-coded colors/spacing/fonts introduced. New tokens approved in this document.
 - [ ] Components used exist in the project component inventory; new components approved here.
+- [ ] Consumed components exist in the project's declared component inventory
+      (`components.template.md`); new components are registered via design-document
+      revision BEFORE first implementation (the design-phase gate).
 
 ## C. Interaction standards conformance
 
@@ -33,6 +36,9 @@
 ## D. Iconography
 
 - [ ] Any new icon is registered in the project icon-vocabulary table (one concept = one icon).
+- [ ] Icons used are present in the project's registered icon vocabulary; icon tokens
+      (`--icon-size` / `--icon-stroke` / `--icon-color`), where activated, resolve
+      from that vocabulary.
 - [ ] Icon sizes derive from the project's declared control sizes.
 
 ## E. Accessibility (ADR-0065 / ADR-0068 — mandatory)

@@ -8,8 +8,8 @@ description: >
   creating a project design guide (docs/design.md), setting up a design token
   system, or reviewing a project's design foundation completeness. Does NOT
   prescribe colors, fonts, spacing, or trends — those are project decisions.
-version: 1.0.0
-last_reviewed: 2026-08-30
+version: 1.1.0
+last_reviewed: 2026-09-26
 status: active
 scope: common
 owner: architect
@@ -71,8 +71,9 @@ Optionally add operating rules (P1–P6 style) for machine-checkable constraints
 
 Create `docs/design.md` containing the `design_decisions` YAML block
 (see `docs/design-foundation.md` §4). Every selection — philosophy, color system,
-typography (body/heading/numeric), spacing, radius, motion, iconography — MUST carry a
-`rationale` tracing back to a principle. No arbitrary aesthetic choices.
+typography (body/heading/numeric, each value carrying the fallback stack contract),
+spacing, radius, motion, iconography (backed by a registered vocabulary) — MUST carry
+a `rationale` tracing back to a principle. No arbitrary aesthetic choices.
 
 Provenance chain to preserve:
 
@@ -90,21 +91,28 @@ every `<value>` placeholder according to the decisions. Enforce the architecture
   **`[data-theme="<name>"]`** (default theme on `:root` + at least one alternate, typically dark)
 - Component (`--button-*`, `--card-*`, …) — reference semantics only; no layer bypass
 - If figures are domain-critical: numeric font role with `font-variant-numeric: tabular-nums`
+- If iconography is decided: activate the commented icon tokens
+  (`--icon-size`/`--icon-stroke`/`--icon-color`) and maintain the project's
+  machine-readable icon vocabulary registration
 
 ### Stage 5 — Components
 
 Build UI consuming component tokens only. Multi-encode status signals (color + icon + text);
-`aria-label` on every icon-only control; visible `:focus-visible` state.
+`aria-label` on every icon-only control; visible `:focus-visible` state. Reference
+components only from the declared component inventory (`components.template.md`);
+new components enter via the design-phase gate.
 
 ### Stage 6 — Validation
 
 Run the Design Validation Contract (`docs/design-foundation.md` §7):
 
 - **[Required]** design.md with complete `design_decisions`; token implementation; default +
-  alternate theme; bg/fg/border triplets; typography roles; icon library; WCAG AA declared;
-  focus state; non-color state encoding
+  alternate theme; bg/fg/border triplets; typography roles; icon library; icon vocabulary
+  declared; component inventory declared; WCAG AA declared; focus state; non-color state
+  encoding
 - **[Consistency]** no semantic-layer bypass; accessible labels on icon-only buttons;
-  tabular numerals in numeric UI; no hard-coded values in governed components
+  tabular numerals in numeric UI; no hard-coded values in governed components;
+  icon tokens, where activated, resolve from the registered icon vocabulary
 
 Use `token-usage-lint` where available for hardcoded-value detection, and `accessibility-audit`
 (axe-core, WCAG 2.1 AA) for accessibility verification.

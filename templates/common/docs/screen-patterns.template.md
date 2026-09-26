@@ -5,6 +5,8 @@
 > and reviewed via the design-review checklist (section A). It does NOT prescribe
 > which patterns a project declares or how they look — replace the placeholder rows
 > with the project's own inventory derived via `docs/design-foundation.md`.
+> Pattern/screen compositions reference only components declared in the project's
+> component inventory (`components.template.md`).
 >
 > Reference implementation (NON-normative — it is one variant's own derived
 > inventory, not a recommended or canonical set; a project's inventory is its
@@ -19,10 +21,10 @@ ADR-0068 (Universal Design). Fill per project:
 
 ## Inventory
 
-| # | Pattern | Composes from | Demonstrated a11y requirements |
-|---|---------|---------------|--------------------------------|
-| 1 | <pattern-name> | <components/primitives> | <concrete WCAG 2.1 AA + UD evidence shipped with the pattern> |
-| 2 | <pattern-name> | ... | ... |
+| # | Pattern | Trigger | Layout skeleton | Primary action | Empty / loading / error states | Composes from | Demonstrated a11y requirements |
+|---|---------|---------|-----------------|----------------|--------------------------------|---------------|--------------------------------|
+| 1 | <pattern-name> | <trigger> | <layout skeleton> | <primary action> | <empty/loading/error states> | <components/primitives> | <concrete WCAG 2.1 AA + UD evidence shipped with the pattern> |
+| 2 | <pattern-name> | ... | ... | ... | ... | ... | ... |
 
 (Keep the inventory minimal and genuine: only patterns the project actually
 declares. Add a row via design-document revision BEFORE first implementation —
@@ -39,3 +41,6 @@ the design-phase gate.)
    a11y evidence is not mergeable.
 4. Theme switches (`[data-theme]`) must not alter pattern layout — themes remap
    semantic tokens only; layout tokens stay theme-invariant.
+5. Every declared pattern entry carries the full field contract (trigger, layout
+   skeleton, primary action, empty/loading/error states, component references); a
+   pattern whose entry is incomplete fails the design-phase gate.
