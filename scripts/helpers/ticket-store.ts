@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.2.1
+// @version 1.3.0
 // @l2-propagate: false
 // ticket-store.ts — Atomic file I/O for the Phase A ticket queue. Every function
 // takes an explicit directory/path so callers (CLI, skill, tests) never assume a
@@ -163,15 +163,32 @@ export interface MoveOptions {
   result?: string;
 }
 
+/**
+ * Retry budget: a failed ticket may be re-queued (`failed -> waiting`) at most
+ * this many times before the store refuses and demands escalation
+ * (T-20260926-021, design docs/designs/2026-09-26-runner-lock-retry-enforcement-design.md D2).
+ * Previously attempts incremented forever and the "one retry, then escalate"
+ * rule lived only in runner-prompt prose. `--force` remains the documented
+ * escape; `ticket.ts doctor` surfaces tickets at/over the cap.
+ */
+export const DEFAULT_ATTEMPTS_CAP = 2;
+
 export function moveTicket(dir: string, id: string, to: Status, opts: MoveOptions = {}): Ticket {
   const ticket = readTicket(dir, id);
   const from = ticket.status;
   if (!opts.force && !canTransition(from, to)) {
     throw new Error(`[ticket-store] transition ${from} -> ${to} is not allowed for ${id} (use --force to override)`);
   }
+  const isRetry = from === 'failed' && to === 'waiting';
+  const nextAttempts = isRetry ? ticket.attempts + 1 : ticket.attempts;
+  if (isRetry && nextAttempts > DEFAULT_ATTEMPTS_CAP && !opts.force) {
+    throw new Error(
+      `[ticket-store] ${id} has exhausted its retry budget (this would be attempt ${nextAttempts}, cap ${DEFAULT_ATTEMPTS_CAP}) — escalate to a human instead of re-queuing (use --force to override)`,
+    );
+  }
   ticket.status = to;
   ticket.history.push({ at: nowIso(), from, to });
-  if (from === 'failed' && to === 'waiting') ticket.attempts += 1;
+  if (isRetry) ticket.attempts = nextAttempts;
   if (to === 'failed' && opts.error !== undefined) ticket.error = opts.error;
   if (to === 'done' && opts.result !== undefined) ticket.result = opts.result;
   writeTicketAtomic(dir, ticket);

@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.2.1
+// @version 1.3.0
 // @l2-propagate: false
 // ticket.ts — CLI for the Phase A Service Ticket + Kanban system (workspace root only).
 // Usage: bun scripts/ticket.ts <command> [args]
@@ -9,7 +9,7 @@
 import { resolve, join } from 'node:path';
 import { existsSync } from 'node:fs';
 import {
-  createTicket, listTickets, moveTicket, nextServiceTicket, staleRunningTickets, loadCatalog,
+  createTicket, listTickets, moveTicket, nextServiceTicket, staleRunningTickets, loadCatalog, DEFAULT_ATTEMPTS_CAP,
 } from './helpers/ticket-store.ts';
 import type { Priority, Status, Kind } from './helpers/ticket-schema.ts';
 
@@ -135,8 +135,19 @@ try {
         ...staleRunningTickets(ticketsDir, thresholdMinutes),
         ...staleRunningTickets(governanceDir, thresholdMinutes),
       ];
-      if (stale.length === 0) { console.log('No stale running tickets.'); break; }
+      if (stale.length === 0) { console.log('No stale running tickets.'); }
       for (const t of stale) console.log(`⚠️  ${t.id} has been running > ${thresholdMinutes}m`);
+      // Retry-budget visibility (T-20260926-021): tickets at/over the
+      // attempts cap are escalation candidates — the store refuses to
+      // re-queue them past the cap, so they need a human decision.
+      const capped = [...listTickets(ticketsDir), ...listTickets(governanceDir)]
+        .filter(t => t.status !== 'done' && t.attempts >= DEFAULT_ATTEMPTS_CAP);
+      if (capped.length === 0) {
+        if (stale.length === 0) console.log(`No tickets at/over the retry cap (${DEFAULT_ATTEMPTS_CAP}).`);
+      } else {
+        console.log(`\nTickets at/over the retry cap (${DEFAULT_ATTEMPTS_CAP}) — escalate or dispose:`);
+        for (const t of capped) console.log(`🚧  ${t.id} attempts=${t.attempts} [${t.status}] ${t.kind === 'service' ? t.service : (t.title ?? '').slice(0, 80)}`);
+      }
       break;
     }
     case 'board': {

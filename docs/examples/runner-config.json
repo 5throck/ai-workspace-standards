@@ -1,0 +1,16 @@
+{
+  "$comment": "Machine-readable parameters for the local unattended runners (design docs/designs/2026-09-26-runner-lock-retry-enforcement-design.md D3). Copy to .pipeline-state/runner-config.json (gitignored) to override. The runner prompts reference this file instead of restating numbers — change a limit here, not in a prompt. This committed example documents the current defaults.",
+  "governance_ticket_batch": {
+    "schedule_kst": "03:00",
+    "lock_name": "ticket-batch",
+    "max_tickets": 50,
+    "max_hours": 5,
+    "retry_cap": 2,
+    "escalation": "tickets at/over the retry cap are reported by `bun scripts/ticket.ts doctor` and left for the next attended session; never force past the cap from an unattended run"
+  },
+  "fleet_review_resync": {
+    "schedule_kst": "01:30",
+    "lock_name": "fleet-review",
+    "report_only_while_locked": true
+  }
+}

@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-09-26T03:55:11.969Z
+**Generated**: 2026-09-26T04:36:54.919Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 9
 - **Skills**: 54
-- **Scripts**: 110 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` plus experiment files under `scripts/experiments/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
+- **Scripts**: 111 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` plus experiment files under `scripts/experiments/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
 - **Commands**: 8
 
 ---
@@ -108,6 +108,7 @@
 | analyze-git-history.ts | 1.0.2 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.1.0 | scripts/archive-memory.ts | N/A |
 | audit.ts | 2.45.0 | scripts/audit.ts | bun |
+| automation-lock.ts | 1.0.0 | scripts/automation-lock.ts | N/A |
 | backport-diff.ts | 1.0.2 | scripts/backport-diff.ts | N/A |
 | bootstrap-stages.ts | 1.0.0 | scripts/bootstrap-stages.ts | fs, js-yaml, path |
 | check-upgrade-coverage.ts | 1.0.0 | scripts/check-upgrade-coverage.ts | N/A |
@@ -180,7 +181,7 @@
 | test-runner.ts | 1.4.0 | scripts/test-runner.ts | fs, os, path |
 | test-scaffold-delivery-parity.ts | 1.0.0 | scripts/test-scaffold-delivery-parity.ts | N/A |
 | test-variant-readiness.ts | 1.0.0 | scripts/test-variant-readiness.ts | N/A |
-| ticket.ts | 1.2.1 | scripts/ticket.ts | N/A |
+| ticket.ts | 1.3.0 | scripts/ticket.ts | N/A |
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, fs, path |
 | typecheck.ts | 1.1.1 | scripts/typecheck.ts | N/A |
 | upgrade-project.ts | 1.52.0 | scripts/upgrade-project.ts | N/A |
