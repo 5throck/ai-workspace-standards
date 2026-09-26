@@ -207,6 +207,6 @@ describe('live tree invariants (post-normalization)', () => {
       .filter((l) => l.startsWith('| `'))
       .map((l) => l.split('|')[1].trim().replace(/`/g, ''));
     expect(rowKeys).not.toContain('generate-scripts-mirror.ts');
-    expect(rowKeys).toHaveLength(133); // post-normalization invariant: rows == template .ts files (W5 follow-up: +6 delivered helpers, -1 generate-variant demoted to L0)
+    expect(rowKeys).toHaveLength(134); // post-normalization invariant: rows == template .ts files (W5 follow-up: +6 delivered helpers, -1 generate-variant demoted to L0; ADR-0091 c77e74db: +1 regenerate-agents-md.ts delivered to L1 — this pin lagging the delivery is what tripped CI as T-20260926-011)
   });
 });

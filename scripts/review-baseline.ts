@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.0.1
+// @version 1.0.2
 /**
  * review-baseline.ts — consolidated read-only runner for the project-review
  * Step 0 baseline battery (T-20260912-030).
@@ -76,17 +76,21 @@ for (const v of validators) {
   }
   const failed = !ok;
   results.push({ name: v.name, ok, note });
-  if (!quiet) {
-    console.log(`${failed ? "❌" : "✅"} ${v.name} — ${note}`);
-    if (failed) {
-      const tail = output.trim().split("\n").slice(-8).join("\n");
-      console.error(tail);
-    }
+  if (failed) {
+    // Failure diagnostics are NEVER suppressed, not even under --quiet: the
+    // 01:30 fleet-review runner runs exactly --quiet (design R10), and an
+    // unattended log holding only an exit code is untriageable
+    // (T-20260926-013). Quiet silences passing chatter only.
+    console.error(`❌ ${v.name} — ${note}`);
+    const tail = output.trim().split("\n").slice(-8).join("\n");
+    console.error(tail);
+  } else if (!quiet) {
+    console.log(`✅ ${v.name} — ${note}`);
   }
 }
 
 const failures = results.filter((r) => !r.ok);
-if (!quiet) {
+if (!quiet || failures.length > 0) {
   console.log(`\n=== Review baseline summary: ${results.length - failures.length}/${results.length} green ===`);
   for (const r of results) console.log(`  ${r.ok ? "✅" : "❌"} ${r.name}`);
 }

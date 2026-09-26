@@ -1,0 +1,38 @@
+schemaVersion: 1
+id: T-20260926-016
+kind: manual
+title: >-
+  ADR-0083 was modified by PR #975 (2026-09-19, 'register Domain Operating Model
+  terminology') with no CHANGELOG entry and no amendment note — a silent change
+  to an immutable decision record (4-domain review 2026-09-26, agent D).
+  Reconstruct what changed via git show, add a retroactive CHANGELOG entry, and
+  verify the ADR carries the amendment consistently.
+priority: high
+status: done
+attempts: 0
+created_at: '2026-09-26T01:28:02.932Z'
+history:
+  - at: '2026-09-26T01:28:02.932Z'
+    from: null
+    to: backlog
+  - at: '2026-09-26T01:28:24.045Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-26T01:28:24.057Z'
+    from: waiting
+    to: running
+  - at: '2026-09-26T01:50:38.935Z'
+    from: running
+    to: review
+  - at: '2026-09-26T01:50:38.947Z'
+    from: review
+    to: done
+result: >-
+  Adjudicated FALSE POSITIVE (4-domain review finding D3): git history shows
+  ADR-0083 has exactly two touching commits — creation (#970) and the
+  terminology registration (#975, e841bb9a 2026-09-19). PR #975 landed WITH a
+  detailed CHANGELOG entry ([2026-09-19] 'Registered Domain Operating Model as
+  the official name...') plus a second [2026-09-19] entry for the 4-group
+  restructure, and a memory/2026-09-19.md log (32 lines). The change was never
+  silent; no remediation needed.
+error: null

@@ -8,7 +8,7 @@ name: Nightly Scaffold E2E (all variants)
 # are caught within a day instead of at the next manual smoke test.
 on:
   schedule:
-    - cron: '30 1 * * *' # Every day at 01:30 UTC (after the nightly ticket run)
+    - cron: '30 1 * * *' # Every day at 01:30 UTC (independent schedule — the GitHub nightly ticket batch is retired, ADR-0082; see nightly-tickets.yml)
   workflow_dispatch: {}
 
 permissions:

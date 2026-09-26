@@ -67,7 +67,7 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 
-const VERSION = "1.0.0";
+const VERSION = "1.0.2";
 
 type Surface = "skills" | "scripts" | "helpers" | "context" | "agents" | "other";
 type Direction = "project-ahead" | "template-ahead" | "both-changed" | "in-sync" | "project-only";

@@ -2,7 +2,20 @@
 /**
  * resync-audit.ts — Provenance audit of uncommitted content in Projects/co-*
  * (project-resync skill Step 0).
- * @version 1.2.0
+ * @version 1.3.0
+ *
+ * v1.3.0 (2026-09-26, T-20260926-012 + T-20260926-020):
+ *  - rename guard fixed: git status --porcelain emits ASCII "old -> new",
+ *    not a unicode arrow — the old check never matched, so staged renames
+ *    parsed as a phantom "old -> new" path, failed existsSync, and were
+ *    mislabeled KEEP "deleted in working tree" (parsing extracted to the
+ *    exported porcelainPath helper, unit-tested).
+ *  - an intentionally emptied file can no longer corroborate STALE-RESIDUE
+ *    on mtime alone: line-order agreement over zero non-empty lines is
+ *    vacuous, so corroboratedStale now requires non-empty dirty content.
+ *  - untracked-directory expansion skips VCS-ignored build/output dirs
+ *    (node_modules, dist, build, coverage, ...) that would otherwise flood
+ *    the report with thousands of LOCAL-WORK rows.
  *
  * v1.2.0 (2026-09-25, spec docs/designs/2026-09-25-verifier-platform-expansion-design.md
  *  site 6): TEMPLATE_DELIVERED_PREFIXES gains ".codex/" — .codex/** files in
@@ -54,7 +67,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSy
 import { join, relative, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 
-const VERSION = "1.1.0";
+const VERSION = "1.3.0";
 
 interface FileRow {
   file: string;
@@ -135,16 +148,43 @@ const TEMPLATE_DELIVERED_PREFIXES = [
   "docs/constitution/", "docs/context.md",
 ];
 
-function walkProjectDir(dir: string): string[] {
+/**
+ * Directory names skipped during untracked-directory expansion. These are
+ * VCS-ignored build/output/vendor trees that are routinely present but never
+ * audit-worthy; without this list one untracked node_modules floods the
+ * report with thousands of LOCAL-WORK rows.
+ */
+const SKIP_UNTRACKED_DIR_NAMES = new Set([
+  "node_modules", "dist", "build", "out", "coverage", ".turbo", ".next",
+  ".nuxt", ".cache", ".venv", "venv", "__pycache__", "target", ".bun",
+  ".pytest_cache", ".mypy_cache", "vendor",
+]);
+
+export function walkProjectDir(dir: string): string[] {
   const out: string[] = [];
   if (!existsSync(dir)) return out;
   if (statSync(dir).isFile()) return [dir];
   for (const e of readdirSync(dir, { withFileTypes: true })) {
     const full = join(dir, e.name);
-    if (e.isDirectory()) out.push(...walkProjectDir(full));
-    else out.push(full);
+    if (e.isDirectory()) {
+      if (SKIP_UNTRACKED_DIR_NAMES.has(e.name)) continue;
+      out.push(...walkProjectDir(full));
+    } else out.push(full);
   }
   return out;
+}
+
+/**
+ * Extract the project-relative path from one `git status --porcelain` line.
+ * Rename rows (`R  old -> new`, including copies) carry a combined string
+ * that is not a real path — they return null and the caller audits the
+ * post-move file on a later pass (porcelain emits an ASCII "->", never a
+ * unicode arrow).
+ */
+export function porcelainPath(line: string): string | null {
+  const relFile = line.slice(3).trim();
+  if (relFile.includes("->")) return null;
+  return relFile.replace(/^"(.*)"$/, "$1");
 }
 
 function isTemplateDelivered(relFile: string): boolean {
@@ -210,7 +250,12 @@ export function corroboratedStale(
   dirty: string,
   srcContent: string,
 ): { verdict: "STALE-RESIDUE" | "PRESUME-STALE"; basis: string } {
-  const orderOk = linesInOrder(dirty, srcContent);
+  // An emptied file makes the order check vacuously true (zero non-empty
+  // lines to match), which would let mtime alone corroborate STALE-RESIDUE
+  // for a deliberately cleared/placeholder file — never auto-classify it
+  // as discardable (T-20260926-020a).
+  const dirtyNonEmpty = dirty.split("\n").some((l) => l.trim().length > 0);
+  const orderOk = dirtyNonEmpty && linesInOrder(dirty, srcContent);
   const mtimeOk = mtimeOlder(dirtyPath, src);
   if (orderOk && mtimeOk) {
     const added = srcContent.split("\n").length - dirty.split("\n").length;
@@ -219,7 +264,11 @@ export function corroboratedStale(
       basis: `older revision of ${src} corroborated (mtime older, line order matches; source adds ${added} line(s))`,
     };
   }
-  const why = [orderOk ? null : "line order differs", mtimeOk ? null : "mtime newer"]
+  const why = [
+    dirtyNonEmpty ? null : "file is empty (order check vacuous)",
+    orderOk ? null : "line order differs",
+    mtimeOk ? null : "mtime newer",
+  ]
     .filter(Boolean)
     .join(" + ");
   return {
@@ -412,9 +461,8 @@ Default projects: all Projects/co-*. Never modifies the tree, never pushes.`);
     const rows: FileRow[] = [];
     for (const line of porcelain.split("\n").filter(Boolean)) {
       const state = line.startsWith("??") ? "untracked" : "modified";
-      let relFile = line.slice(3).trim();
-      if (relFile.includes("→")) continue; // renames: audit post-move
-      relFile = relFile.replace(/^"(.*)"$/, "$1");
+      const relFile = porcelainPath(line);
+      if (relFile === null) continue; // renames ('R  old -> new'): audit post-move
       if (state === "untracked" && relFile.endsWith("/")) {
         // untracked directory: expand to its files
         for (const f of walkProjectDir(join(project, relFile))) {
