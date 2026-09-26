@@ -229,7 +229,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `sync-skills-to-l2.ts` | L0 | 1.0.1 | active | — | — | L0 | — |
 | `sync-template-deps.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `sync-skill-registries.ts` | L0 | 1.0.0 | active | `--check`, `--dry-run`, `--root <dir>` | — | L0 | — |
-| `sync-skills.ts` | L0 | 1.9.0 | active | `--dir <path>`, `--all-variants` | — | L0+L1 | — |
+| `sync-skills.ts` | L0 | 1.10.0 | active | `--dir <path>`, `--all-variants` | — | L0+L1 | — |
 | `tag-template.ts` | L0 | 1.1.0 | active | `--dry-run`, `--no-push`, `--fail-on-push-error` | —| L0 | —|
 | `team-builder.ts` | L0 | 1.4.0 | active | —| —| L0+L1 | —|
 | `test-platform-parity.ts` | L0 | 0.3.0 | active | v0.3.0 FILE_MAPPINGS gains CODEX.md L0→L1 (informational existence check; section parity deferred per D3.5) (spec docs/designs/2026-09-25-verifier-platform-expansion-design.md site 11) | —| L0 | —|
