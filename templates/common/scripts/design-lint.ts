@@ -304,7 +304,7 @@ function discoverTokenSourceFiles(projectRoot: string): string[] {
       const dot = entry.name.lastIndexOf(".");
       if (dot === -1 || !TOKEN_SOURCE_EXTENSIONS.has(entry.name.slice(dot))) continue;
       if (!TOKEN_SOURCE_NAME_HINT.test(entry.name)) continue;
-      found.push(join(dir, entry.name));
+      found.push(toPosix(join(dir, entry.name)));
     }
   }
   return found;
@@ -994,7 +994,7 @@ function runIcons(opts: CliOptions): CheckResult {
       } catch {
         continue;
       }
-      const relFile = relative(root, file) || file;
+      const relFile = toPosix(relative(root, file) || file);
       for (const { attr, tag } of conventions) {
         const regex = tag
           ? new RegExp(`<${tag}\\b[^>]*?\\s${attr}\\s*=\\s*["']([^"']+)["']`, "g")
