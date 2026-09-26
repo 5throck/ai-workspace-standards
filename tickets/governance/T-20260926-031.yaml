@@ -7,12 +7,24 @@ title: >-
   docs/designs/2026-09-26-design-foundation-v1.2-design.md; the registry file
   must be the machine-readable SSOT the lint reduces to set membership)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-26T11:13:42.809Z'
 history:
   - at: '2026-09-26T11:13:42.809Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-26T12:54:00.205Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-26T12:54:00.218Z'
+    from: waiting
+    to: review
+  - at: '2026-09-26T12:54:00.272Z'
+    from: review
+    to: done
+result: >-
+  design-lint v2.0.0 'fonts' sub-check: --font-* stack contract (>=2 quote-aware
+  families, terminating generic from closed set incl. system-ui/ui-*); SKIP when
+  no font tokens declared (constraint d)
 error: null

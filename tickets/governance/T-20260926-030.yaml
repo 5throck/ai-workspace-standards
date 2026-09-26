@@ -7,12 +7,26 @@ title: >-
   docs/designs/2026-09-26-design-foundation-v1.2-design.md; the registry file
   must be the machine-readable SSOT the lint reduces to set membership)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-26T11:13:42.781Z'
 history:
   - at: '2026-09-26T11:13:42.781Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-26T12:54:00.178Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-26T12:54:00.191Z'
+    from: waiting
+    to: review
+  - at: '2026-09-26T12:54:00.259Z'
+    from: review
+    to: done
+result: >-
+  design-lint v2.0.0 'icons' sub-check: docs/design/icon-vocabulary.yaml schema
+  + unregistered icon ref detection (quoted name=/icon= attrs plus
+  design.md-declared conventions; dynamic bindings ignored); aria_label_required
+  declarative-only (recorded scope cut — rendered a11y belongs to
+  accessibility-audit)
 error: null

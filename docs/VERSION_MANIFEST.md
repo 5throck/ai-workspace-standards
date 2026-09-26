@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-09-26T12:07:56.459Z
+**Generated**: 2026-09-26T13:12:04.199Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -116,7 +116,7 @@
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | N/A |
 | compile-tokens.ts | 1.2.0 | scripts/compile-tokens.ts | N/A |
 | create-l3-scaffold.ts | 1.16.0 | scripts/create-l3-scaffold.ts | N/A |
-| design-lint.ts | 1.0.0 | scripts/design-lint.ts | N/A |
+| design-lint.ts | 2.0.0 | scripts/design-lint.ts | js-yaml |
 | dev-sync.ts | 1.21.0 | scripts/dev-sync.ts | bun |
 | dispatch-parallel.ts | 1.1.1 | scripts/dispatch-parallel.ts | N/A |
 | dispatch-serial.ts | 1.1.1 | scripts/dispatch-serial.ts | N/A |
