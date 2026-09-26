@@ -1,0 +1,17 @@
+schemaVersion: 1
+id: T-20260927-004
+kind: manual
+title: >-
+  governance: register the edu-sync and fork-watch GitHub-hosted schedules in
+  ops-workflow section 9.8 or an ADR appendix so their changes follow the
+  ADR-0089 schedule-change regime
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-26T16:48:14.313Z'
+history:
+  - at: '2026-09-26T16:48:14.313Z'
+    from: null
+    to: backlog
+result: null
+error: null
