@@ -1,5 +1,14 @@
 # CLAUDE.md
 
+
+<!-- GOVERNANCE-POINTER-TABLE (ADR-0090) -->
+> **Governance references (ADR-0090)**: operational workflow bodies live outside this file — **Read the owning file before governing work**:
+> > PM Gateway phase protocol & ADR policy summaries → [`docs/governance/agents/pm-gateway-workflow.md`](docs/governance/agents/pm-gateway-workflow.md) ·
+> > Execution plan templates → [`docs/governance/agents/execution-plan-templates.md`](docs/governance/agents/execution-plan-templates.md) ·
+> > Dispatch/lifecycle/skill-review schedules → [`docs/governance/agents/workflows.md`](docs/governance/agents/workflows.md) ·
+> > Language Policy → [docs/context.md](docs/context.md).
+<!-- /GOVERNANCE-POINTER-TABLE -->
+
 > **Project context, architecture, coding guidelines, and design standards live in [`docs/context.md`](docs/context.md) - read it first.**
 <!-- L0-ONLY: This instruction targets the workspace root (L0). L1/L2 projects must NOT reference CONSTITUTION.md — see CONSTITUTION.md §7.5 CONSTITUTION.md Non-Propagation. merge-frontmatter.ts strips CONSTITUTION.md lines from L2 output. -->
 
@@ -342,7 +351,7 @@ All shared Git/PR rules are in [docs/context.md](docs/context.md). Claude Code-s
 
 - **PR Language**: Governed by [docs/context.md](docs/context.md). All PR titles, bodies, and review comments must be written in English - no exceptions.
 
-*Last Updated: 2026-09-23 — removed redundant N-1/N boilerplate rows; /sync already covers lifecycle + audit + commit + push + PR; previous: 2026-06-21 inlined N-1/N rows*
+*Last Updated: 2026-09-26 — removed redundant N-1/N boilerplate rows; /sync already covers lifecycle + audit + commit + push + PR; previous: 2026-06-21 inlined N-1/N rows*
 <!-- COMMON-CLAUDE:END -->
 
 

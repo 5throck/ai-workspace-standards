@@ -1,5 +1,14 @@
 # GEMINI.md
 
+
+<!-- GOVERNANCE-POINTER-TABLE (ADR-0090) -->
+> **Governance references (ADR-0090)**: operational workflow bodies live outside this file — **Read the owning file before governing work**:
+> > PM Gateway phase protocol & ADR policy summaries → [`docs/governance/agents/pm-gateway-workflow.md`](docs/governance/agents/pm-gateway-workflow.md) ·
+> > Execution plan templates → [`docs/governance/agents/execution-plan-templates.md`](docs/governance/agents/execution-plan-templates.md) ·
+> > Dispatch/lifecycle/skill-review schedules → [`docs/governance/agents/workflows.md`](docs/governance/agents/workflows.md) ·
+> > Language Policy → [docs/context.md](docs/context.md).
+<!-- /GOVERNANCE-POINTER-TABLE -->
+
 > **Project context, architecture, coding guidelines, and design standards live in [`docs/context.md`](docs/context.md) - read it first.**
 <!-- L0-ONLY: This instruction targets the workspace root (L0). L1/L2 projects must NOT reference CONSTITUTION.md — see CONSTITUTION.md §7.5 CONSTITUTION.md Non-Propagation. merge-frontmatter.ts strips CONSTITUTION.md lines from L2 output. -->
 
@@ -345,10 +354,7 @@ Antigravity does not have `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` or `teammateMod
 
 ---
 
-*Last Updated: 2026-09-25 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
-
-
-
+*Last Updated: 2026-09-26 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
 
 <!-- graft:start -->
 ## Graft — repo context graph

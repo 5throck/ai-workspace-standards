@@ -203,50 +203,7 @@ When a specialist agent's required tool is denied, PM must **not** substitute fo
 <!-- COMMON-AGENTS:START -->
 ## Language Policy
 
-**English-Only Documentation Rule**: All workspace documentation files (.md) must be written in English, with explicit exceptions for recognized locale translation zones and declared Korean legal/regulatory content (see Exceptions below).
-
-### English Documentation Requirement
-- All `.md` files outside locale translation zones (`<lang-code>/`, `locales/<lang-code>/`, and `*_&lt;lang-code&gt;` suffix files) MUST be in English
-- Applies to: README.md, CLAUDE.md, GEMINI.md, AGENTS.md, context.md, CHANGELOG.md, all documentation in docs/, agents/, skills/
-- Rationale: English documentation ensures global accessibility and cross-team collaboration
-
-### Translation Zones (Locale Exceptions)
-- `<lang-code>/` directories — language-specific documentation (e.g. `ko/`, `ja/`)
-- `locales/<lang-code>/` — locale translation files for internationalization (e.g. `locales/ko/`, `locales/zh-CN/`)
-- `*_&lt;lang-code&gt;.md` / `*_&lt;lang-code&gt;.yaml` suffix files — translation mirrors tracked by hash-sync (e.g. `README_ko.md`)
-- These are the ONLY locations where non-English `.md` files are permitted (except declared exceptions)
-- Recognized locale codes (from `docs/workspace-schema.json` `i18n.locale_codes` — 16 codes including `en`, the source language; `en` is not a translation-zone target):
-  `ko`, `ja`, `zh-CN`, `zh-TW`, `de`, `es`, `fr`, `pt`, `vi`, `ms`, `id`, `th`, `ru`, `it`, `ar` (+ `en`)
-
-### Language Policy Exception — Korean Legal/Regulatory Content
-The English-only policy admits a narrow exception for files where Korean is legally or academically mandatory. To declare an exception, add to the file's frontmatter:
-```yaml
-lang: ko
-lang_reason: legal   # legal | source-material | proper-noun
-```
-- `legal`: Statutory texts, ordinances, regulations, contracts where Korean original has legal force.
-- `source-material`: Primary source quotations where English translation would compromise academic accuracy or meaning.
-- `proper-noun`: Files dominated by Korean proper nouns (institution/place/person names).
-
-*Note: Exception is NOT available for: context.md, CLAUDE.md, GEMINI.md, AGENTS.md, or any variant context.md file. It IS available for `agents/*.md` and `skills/*.md` (with `lang_reason` declared).*
-
-### Korean Plain-Language Preference (`순우리말`-First)
-When writing Korean documentation or Korean translation output, prefer native Korean words (`순우리말`) over loanwords (`외래어`) whenever a natural, widely-understood native equivalent exists — e.g. prefer `만들기` over `크리에이션`, `알림` over `노티피케이션`, `모음` over `컬렉션` in general prose.
-- Loanwords effectively settled in Korean (`컴퓨터`, `데이터`, `소프트웨어`, `파일`) and established international technical terms remain permitted — clarity and standard terminology take precedence over forced nativization.
-- Applies immediately to new Korean-language content (including `ko/`, `locales/ko/`, `*_ko.md`, and `lang: ko` exception files).
-- Existing Korean documents are nativized incrementally: apply the preference to touched sections whenever a document is edited for other reasons; no bulk rewrites.
-
-### Enforcement
-- Pre-commit audit checks for Korean content outside ko/ and locales/ko/
-- PR reviews reject non-English documentation outside translation zones
-- Auditor validates compliance during Phase 6 QA gate
-
-### Git/PR Artifacts Language Rule
-- All commit messages: English
-- All PR titles: English
-- All PR descriptions: English
-- All branch names: English
-- Code comments: English (unless documenting locale-specific logic)
+**Canonical home: [docs/context.md](docs/context.md)** (ADR-0090 W1b) — English-only rule, translation zones, Korean legal exception, plain-language preference, enforcement, Git/PR artifact language. **Read it before writing any documentation or commit message.**
 
 ### Pluggable Variant Audit Hooks and Integrity Protection
 - **Core Script Standardization**: The core synchronization and validation scripts (`scripts/dev-sync.ts` and `scripts/audit.ts`) must remain standardized and identical across all templates and variants. Direct modification of these core scripts in L2 projects is strictly forbidden.
