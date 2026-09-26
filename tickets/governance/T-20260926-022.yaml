@@ -10,12 +10,34 @@ title: >-
   the claude/gemini scope as deliberate with a documented rationale.
   Design-level decision, not mechanical.
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-26T03:47:46.509Z'
 history:
   - at: '2026-09-26T03:47:46.509Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-26T04:31:43.916Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-26T04:31:43.928Z'
+    from: waiting
+    to: running
+  - at: '2026-09-26T04:35:00.676Z'
+    from: running
+    to: review
+  - at: '2026-09-26T04:35:00.689Z'
+    from: review
+    to: done
+result: >-
+  Adjudicated: platform_settings tier model stays DELIBERATELY scoped to the
+  settings.json-shaped surfaces (.claude/.gemini). .codex uses config.toml with
+  no TOML merge machinery (template-side changes reach only new projects —
+  upgrade-policy v1.16.0 D6/D7, ADR-0076 v1.2.0 precedent); .agents has no
+  settings file; .hermes onboarding is config-driven (context_file_max_chars,
+  trusted_project_dirs — ADR-0088), not settings.json-shaped.
+  Functional-equivalence parity for those three is governed by their own
+  platform sections. Scope ruling recorded in common-contract.json
+  platform_settings.description; revisit only if a settings-shaped surface
+  appears on another platform.
 error: null
