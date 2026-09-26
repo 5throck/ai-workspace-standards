@@ -1,5 +1,6 @@
 ---
-sync_version: 1
+translated_from_hash: 4936f0646e7d956a936bb648e9ab14836bfe11eaf83c5b71bc18cd6e1f31ae67
+sync_version: 3
 ---
 
 **Idiomas**: [English](README.md) · [한국어](README_ko.md) · [Español](README_es.md) · [日本語](README_ja.md)
@@ -21,8 +22,11 @@ El desarrollo moderno asistido por IA requiere más que simples prompts; requier
 | Interés | Archivo | Audiencia |
 |---------|------|----------|
 | Estándares compartidos del workspace | [`CONSTITUTION.md`](CONSTITUTION.md) | Todas las herramientas de IA |
+| Índice de agentes compartido (dispatcher ligero) | [`AGENTS.md`](AGENTS.md) | Todas las herramientas de IA — Hermes Agent lee este archivo de forma nativa |
 | Comportamientos de Claude Code | [`CLAUDE.md`](CLAUDE.md) | Claude Code (CLI + Desktop) |
 | Comportamientos de Gemini / Antigravity | [`GEMINI.md`](GEMINI.md) | Gemini CLI + motor Antigravity |
+| Comportamientos de Codex | [`CODEX.md`](CODEX.md) | Codex (CLI + Desktop App) |
+| Referencias operativas de flujos de trabajo | [`docs/governance/agents/`](docs/governance/agents/) | Todas las herramientas de IA (destinos de punteros de AGENTS.md, ADR-0090) |
 | Historial de cambios | [`CHANGELOG.md`](CHANGELOG.md) | Todos |
 
 ### Dos Filosofías, Un Estándar
@@ -30,6 +34,12 @@ El desarrollo moderno asistido por IA requiere más que simples prompts; requier
 **Vibe Coding** - La IA toma el volante. El desarrollador describe la intención; los agentes de IA (PM $\rightarrow$ Arquitecto $\rightarrow$ Diseñador $\rightarrow$ Programador $\rightarrow$ Ejecutor de Pruebas) ejecutan el flujo de trabajo completo de forma autónoma. Estos estándares definen las barreras de seguridad que mantienen la ejecución autónoma segura y auditable.
 
 **Harness Engineering** - El desarrollador permanece en el ciclo. Las herramientas de IA son instrumentos de precisión: ediciones quirúrgicas, planes explícitos, puertas de revisión obligatorias. Estos estándares definen el "arnés" (harness) que mantiene la salida de la IA predecible y revisable.
+
+---
+
+### Perfiles de País Integrados
+
+El soporte de jurisdicción coreana viene incluido con el workspace: un **perfil de país KR** (vea el ejemplo en [`templates/co-news/docs/countries/KR.md`](templates/co-news/docs/countries/KR.md)), seis **habilidades `k-*` de datos con alcance KR** (búsqueda de estatutos `k-law`, disclosures `k-dart`, estadísticas `k-kosis`, datos de mercado `k-krx`, macro-financiero `k-ecos`, datos públicos `k-opendata`), y configuración de país por proyecto (`variant.json` `country_config`). Un proyecto declara su país objetivo; los proyectos KR reciben automáticamente las habilidades k-*, los anclajes regulatorios coreanos y el bloque de API keys del país en `.env.sample`. Los perfiles de país se entregan por variante/proyecto en lugar de en la raíz del workspace — vea [`templates/common/docs/country-profiles.md`](templates/common/docs/country-profiles.md) para la referencia compartida. Variantes que actualmente incluyen un perfil KR: co-consult, co-export, co-hr, co-news, co-price y co-safety.
 
 ---
 
@@ -111,12 +121,10 @@ bun scripts/new-project.ts "nombre-de-mi-proyecto"
 bun scripts/new-project.ts "nombre-de-mi-proyecto" --variant co-develop
 
 # Usar una versión específica de la plantilla (ver disponibles: bun scripts/list-template-versions.ts)
-bun scripts/new-project.ts "nombre-de-mi-proyecto" --version 0.5.0
+bun scripts/new-project.ts "nombre-de-mi-proyecto" --version 0.6.0
 ```
 
 > **[Cambio Importante — 11-06-2026]**: `bash scripts/new-project.sh` y `.\scripts\new-project.ps1` han sido reemplazados por `bun scripts/new-project.ts` (ADR-0036). Actualice cualquier alias o tubería de CI en consecuencia.
-
-> **Atajo de herramienta de IA**: En Claude Code, use `/new-project "nombre-de-mi-proyecto"` en lugar de ejecutar el script directamente.
 
 Cada nuevo proyecto se genera a partir de la variante de plantilla seleccionada con `docs/context.md`, `AGENTS.md`, `agents/pm.md` y todos los archivos de configuración requeridos. La versión de la plantilla y la variante se registran en `docs/context.md` para fines de trazabilidad.
 
@@ -164,8 +172,10 @@ Esto le da al agente PM un contexto claro para:
 ```
 C:\git\ (raíz del workspace - este repo)
 ├── CONSTITUTION.md          # Estándar maestro - leer primero en cada sesión
+├── AGENTS.md                # Índice de agentes compartido (dispatcher ligero) - todas las herramientas de IA
 ├── CLAUDE.md                # Comportamientos del workspace para Claude Code
 ├── GEMINI.md                # Comportamientos del workspace para Gemini CLI / Antigravity
+├── CODEX.md                 # Comportamientos del workspace para Codex CLI / Desktop App
 ├── SECURITY.md              # Política estándar de reporte de vulnerabilidades de GitHub
 ├── CHANGELOG.md             # Historial de cambios a nivel de workspace
 ├── README.md                # Este archivo
@@ -176,22 +186,27 @@ C:\git\ (raíz del workspace - este repo)
 ├── tests/                   # Suites de pruebas de integración y unitarias
 ├── scripts/                 # Scripts principales de automatización y auditoría
 ├── .githooks/               # Git hooks para hacer cumplir políticas de PR y reglas
-├── .claude/ & .gemini/      # Configuraciones globales de herramientas de IA y comandos slash personalizados
+├── .claude/ .gemini/ .agents/ .codex/ .hermes/   # Directorios de plataforma de herramientas de IA (ajustes, espejos de skills, comandos slash)
+├── Handbooks/               # Fuentes locales de los manuales de aprendizaje publicados
+├── graft/                   # Grafo de contexto del repo (ADR-0076)
+├── schemas/                 # Esquemas JSON compartidos
+├── tickets/                 # Tickets de decisiones de gobernanza
+├── docs/governance/agents/  # Referencias operativas de flujos de trabajo (destinos de punteros de AGENTS.md)
 └── templates/               # Plantillas de proyectos de IA versionadas (co-develop, co-design, etc.)
     ├── common/              # Scripts, hooks y habilidades compartidas entre todas las variantes
     ├── co-develop/          # ✅ Estable — equipo de agentes para desarrollo completo de software
     ├── co-design/           # ✅ Estable — equipo de agentes especializado en diseño UI/UX
     ├── co-work/             # ✅ Estable — equipo de agentes para colaboración general y documentación
     ├── co-security/         # ✅ Estable — equipo de agentes para red team y modelado de amenazas
-    ├── co-consult/          # ✅ Estable — equipo de agentes para consultoría estratégica y análisis
+    ├── co-consult/          # ✅ Estable — equipo de agentes para consultoría estratégica y análisis (perfil de país KR incluido)
     ├── co-deck/             # ✅ Estable — equipo de agentes para producción de material de lectura y presentaciones
     ├── co-game/             # ✅ Estable — equipo de agentes para desarrollo de juegos en HTML5 Canvas
-    ├── co-export/           # 🔶 Beta — equipo de agentes para cumplimiento de comercio exterior
+    ├── co-export/           # 🔶 Beta — equipo de agentes para cumplimiento de comercio exterior (perfil de país KR incluido)
     ├── co-news/             # 🔶 Beta — equipo de agentes para periodismo empresarial/financiero (perfil de país KR incluido)
     ├── co-abap/             # ✅ Estable — equipo de agentes para desarrollo SAP ABAP
     ├── co-hr/               # 🔶 Beta — equipo de agentes para consultoría de RR. HH. y relaciones laborales (perfil de país KR incluido)
     ├── co-safety/           # 🔶 Beta — equipo de agentes para plataforma de cumplimiento EHS/GxP (incluye perfil de país KR)
-    └── co-price/            # 🔶 Beta — simulador de gestión y consultoría de precios multi-industria (incluye dataset de muestra K-Beauty)
+    └── co-price/            # 🔶 Beta — simulador de gestión y consultoría de precios multi-industria (dataset de muestra K-Beauty, perfil de país KR incluido)
 ```
 
 Cada subproyecto vive en su propio directorio y repositorio git:
@@ -226,10 +241,12 @@ Cada sesión de IA comienza ejecutando esta lista de verificación (definida en 
 
 0. `git config core.hooksPath .githooks`
 1. Leer `CONSTITUTION.md` (estándar de este workspace)
-2. Leer `docs/context.md` del proyecto
-3. Leer `AGENTS.md` (plantilla canónica de agentes)
+2. Leer `docs/context.md` del proyecto (Omitir en la raíz del workspace — `CONSTITUTION.md` lo cubre.)
+3. Leer `AGENTS.md` (índice de agentes compartido — dispatcher ligero; siga su tabla de punteros hacia las referencias de gobernanza)
 4. Revisar `memory/MEMORY.md` para cambios recientes
-5. Cargar habilidades desde `docs/context.md ## Session Start Skills`
+5. Cargar habilidades desde `docs/context.md ## Session Start Skills` (Omitir en la raíz del workspace — `CONSTITUTION.md` lo cubre.)
+
+> **Usuarios de Hermes Agent**: ejecute `hermes config set context_file_max_chars 100000` una vez (AGENTS.md excede el límite de contexto predeterminado de 20k) y agregue la raíz del proyecto a `skills.trusted_project_dirs` — véase ADR-0088/0090.
 
 ---
 
@@ -241,18 +258,19 @@ Cada variante de plantilla en este workspace proporciona un **flujo de trabajo m
 - **co-design**: Un flujo de trabajo nativo de diseño iterativo de 5 fases enfocado en el prototipado rápido y la validación continua del usuario.
 - **co-work**: Un flujo de trabajo de colaboración asíncrona de 6 fases enfocado en la redacción paralela y la revisión continua de los stakeholders.
 - **co-security**: Un flujo de trabajo de compromiso de seguridad de 6 fases que cubre operaciones de Red Team, modelado de amenazas y automatización de parches basada en Ansible.
-- **co-consult**: Un flujo de trabajo de consultoría estratégica de 7 fases que cubre investigación, análisis, creación de entregables y entrega al cliente.
+- **co-consult**: Un flujo de trabajo de consultoría estratégica de 7 fases que cubre investigación, análisis, creación de entregables y entrega al cliente; las anclas de investigación específicas de la jurisdicción se incorporan mediante perfiles de país bajo docs/countries/ (perfil KR incluido)
 - **co-deck**: Un flujo de trabajo de producción de material de lectura de 11 etapas, desde la investigación hasta el PDF listo para imprimir, con 5 puertas de aprobación.
 - **co-game**: Un flujo de trabajo de desarrollo de juegos para juegos de HTML5 Canvas usando Vanilla TypeScript, con agentes especializados en diseño de juegos, géneros arcade/puzzle, arte visual, sonido, implementación del motor, depuración y pruebas.
-- **co-export**: Un flujo de trabajo de cumplimiento de comercio exterior que cubre clasificación arancelaria (SA), control de exportaciones y cribado de sanciones, determinación de origen TLC, devolución de aranceles, coordinación logística, estrategia de entrada en mercados, seguimiento de regulaciones extranjeras y documentación comercial
+- **co-export**: Un flujo de trabajo de cumplimiento de comercio exterior que cubre clasificación arancelaria (SA), control de exportaciones y cribado de sanciones, determinación de origen TLC, devolución de aranceles, coordinación logística, estrategia de entrada en mercados, seguimiento de regulaciones extranjeras y documentación comercial, con contenido de jurisdicción mediante perfiles de país bajo docs/countries/ (perfil KR incluido)
 - **co-news**: Un flujo de trabajo de periodismo empresarial/financiero para reporteros de economía que cubren empresas cotizadas — investigación de disclosures financieros (DART vía k-dart bajo el perfil de país KR), investigación de derecho mercantil (k-law, perfil KR), verificación de hechos con libro de citas, reducción de marcas de IA y generación de infografías financieras. Las fuentes de datos y el derecho específicos de cada jurisdicción se incorporan mediante perfiles de país bajo docs/countries/
 - **co-abap**: Un flujo de desarrollo SAP ABAP de 6 fases con orquestación dirigida por PM, seis analistas de módulos SAP (SD, MM, FI, CO, PP, LE), agentes de ejecución técnica y cadenas de QA automatizadas (SyntaxCheck → RunUnitTests → GetCodeCoverage → RunATCCheck)
 - **co-hr**: Un flujo de consultoría de RR. HH. y relaciones laborales de 4 fases que cubre admisión del encargo, auditoría de cumplimiento de la legislación laboral de la jurisdicción objetivo (perfiles de país bajo docs/countries/ — perfil KR incluido), diseño de HRM/HRD y reestructuración organizativa/gestión del cambio, con integración de investigación regulatoria k-law/k-kosis (habilidades de alcance KR, adjuntas solo a proyectos con país KR) en un equipo de 12 agentes
-- **co-safety**: Un flujo de trabajo EHS/GxP de 6 fases que cubre seguridad laboral coreana (OSHA-KR, SAPA), gestión de seguridad de procesos (PSM), calidad farmacéutica GxP (GMP/GLP/GDP/GCP/GVP), seguridad de dispositivos médicos (KGMP-MD, ISO 13485) y 15 dominios industriales (química, construcción, semiconductores, baterías, astilleros, siderurgia, etc.) con más de 40 agentes especializados
+- **co-safety**: Un flujo de trabajo EHS/GxP de 6 fases que cubre seguridad laboral coreana (OSHA-KR, SAPA), gestión de seguridad de procesos (PSM), calidad farmacéutica GxP (GMP/GLP/GDP/GCP/GVP), seguridad de dispositivos médicos (KGMP-MD, ISO 13485) y 15 dominios industriales (química, construcción, semiconductores, baterías, astilleros, siderurgia, etc.) con más de 40 agentes especializados; el contenido de jurisdicción se incorpora mediante perfiles de país bajo docs/countries/ (perfil KR incluido)
+- **co-price**: Un flujo de trabajo simulador de gestión y consultoría de precios multi-industria que cubre estrategia de precios, estrategia financiera, auditoría CPA, inteligencia de mercado y dirección de encargos en un equipo de 15 agentes, con un dataset de muestra K-Beauty incluido y un perfil de país KR bajo docs/countries/
 
 **💡 Cómo revisar los detalles del flujo de trabajo**
 Las plantillas de agentes específicas y las fases de gobernanza se gestionan dentro de los documentos de cada proyecto generado. Después de crear un proyecto, revise:
-1. `AGENTS.md`: La especificación completa de los roles y permisos de los agentes desplegados en el proyecto.
+1. `AGENTS.md`: El índice de agentes compartido (dispatcher ligero) — roster más una tabla de punteros hacia `docs/governance/agents/` (ADR-0090)
 2. `docs/context.md`: El objetivo del proyecto y el contexto del flujo de trabajo para el inicio de la sesión.
 
 ---
@@ -267,14 +285,15 @@ Los nuevos proyectos se generan a partir de variantes de plantillas versionadas.
 | `co-design` | ✅ Estable | Flujo de diseño UI/UX — PM, Líder de Diseño, Investigador de UX, Diseñador Visual, Ingeniero de Prototipos, Storyteller, Diseñador de Servicios, Experto en Tipografía |
 | `co-work` | ✅ Estable | Flujo de colaboración general — PM, Analista, Redactor Técnico, Redactor de Contenido, Coordinador de Proyecto, Storyteller, Experto en MS365 |
 | `co-security` | ✅ Estable | Flujo de compromiso de seguridad — PM, Líder de Red Team, Pentester, Modelador de Amenazas, Ingeniero de Parches, Redactor de Informes |
-| `co-consult` | ✅ Estable | Flujo de consultoría estratégica — Líder de Compromiso, Analista de Estrategia, Experto en la Industria, Socio de Gestión del Cambio, Líder de Comunicaciones, Arquitecto de Soluciones, y más |
+| `co-consult` | ✅ Estable | Flujo de consultoría estratégica — Líder de Compromiso, Analista de Estrategia, Experto en la Industria, Socio de Gestión del Cambio, Líder de Comunicaciones, Arquitecto de Soluciones, y más. Anclas de investigación de jurisdicción mediante perfiles de país (perfil KR incluido) |
 | `co-deck` | ✅ Estable | Flujo de producción de material de lectura — PM, Versión, Investigación, Guion, Diseño, Construcción, Medición, Exportación |
 | `co-game` | ✅ Estable | Flujo de desarrollo de juegos HTML5 Canvas — PM, Diseñador de Juegos, Diseñadores Arcade/Puzzle, Artista Visual, Diseñador de Sonido, Desarrollador de Juegos, Depurador de Juegos, Ejecutor de Pruebas, Monitor de Seguridad |
-| `co-export` | 🔶 Beta | Cumplimiento de comercio exterior — clasificación arancelaria, control de exportaciones y sanciones, origen TLC, devolución de aranceles, logística, entrada en mercados, seguimiento regulatorio, documentación comercial |
+| `co-export` | 🔶 Beta | Cumplimiento de comercio exterior — clasificación arancelaria, control de exportaciones y sanciones, origen TLC, devolución de aranceles, logística, entrada en mercados, seguimiento regulatorio, documentación comercial. Contenido de jurisdicción mediante perfiles de país (perfil KR incluido) |
 | `co-news` | 🔶 Beta | Periodismo empresarial/financiero — PM, Reportero, Verificador de Hechos, Analista Financiero, Investigador Legal, Editor de Estilo, Editor Visual. Datos de jurisdicción mediante perfiles de país (perfil KR incluido) |
 | `co-abap` | ✅ Estable | Flujo de desarrollo SAP ABAP — PM, Arquitecto, Programador, Ejecutor de Pruebas, DBA, Admin DevOps, Investigadores SAP, Analistas de Módulos (SD, MM, FI, CO, PP, LE), Expertos Interface/Fiori/Form, Monitor de Seguridad |
 | `co-hr` | 🔶 Beta | Consultoría de RR. HH. y relaciones laborales — PM, Analista de Cumplimiento Laboral, Especialista en Relaciones Laborales, Oficial de Seguridad y Salud, Especialista en Adquisición de Talento, Analista de Compensación y Beneficios, Consultor de Gestión del Desempeño, Especialista en L&D, Consultor de Carrera y Sucesión, Consultor de Diseño Organizacional, Socio de Gestión del Cambio, Analista de Datos. Alcance del derecho laboral mediante perfiles de país (perfil KR incluido) |
-| `co-safety` | 🔶 Beta | Plataforma de cumplimiento EHS/GxP — PM/CSO, más de 40 agentes especializados (emergencia, cumplimiento, legal, formación, PSM, riesgo, auditoría, 15 dominios industriales y 5 dominios GxP), integración de investigación regulatoria k-law (alcance KR) |
+| `co-safety` | 🔶 Beta | Plataforma de cumplimiento EHS/GxP — PM/CSO, más de 40 agentes especializados (emergencia, cumplimiento, legal, formación, PSM, riesgo, auditoría, 15 dominios industriales y 5 dominios GxP), integración de investigación regulatoria k-law (alcance KR); contenido de jurisdicción mediante perfiles de país (perfil KR incluido) |
+| `co-price` | 🔶 Beta | Simulador de gestión y consultoría de precios multi-industria — PM, Líder de Estrategia Financiera, Auditor CPA, Estratega de Precios, Analista de Inteligencia de Mercado, Director de Encargo, con dataset de muestra K-Beauty incluido; perfil de país KR incluido |
 
 ### Selección de versión y variante
 
@@ -286,7 +305,7 @@ bun scripts/list-template-versions.ts
 bun scripts/new-project.ts mi-proyecto
 
 # Usar una versión específica
-bun scripts/new-project.ts mi-proyecto --version 0.5.0
+bun scripts/new-project.ts mi-proyecto --version 0.6.0
 
 # Usar una variante específica
 bun scripts/new-project.ts mi-proyecto --variant co-develop
@@ -308,7 +327,7 @@ Verifica: completitud del frontmatter del agente, secciones requeridas (`## Meet
 
 - **`docs/context.md` es la única fuente de verdad** para cada proyecto; todas las herramientas de IA lo comparten.
 - **`CLAUDE.md` / `GEMINI.md` (a nivel de proyecto) contienen solo sobrescrituras específicas de la plataforma.**
-- **Flujo de trabajo solo mediante PR** - todos los cambios llegan a `main` a través de un Pull Request. El push directo está bloqueado por `.githhooks/pre-push`.
+- **Flujo de trabajo solo mediante PR** - todos los cambios llegan a `main` a través de un Pull Request. El push directo está bloqueado por `.githooks/pre-push`.
 - **Conventional Commits** - `feat:` / `fix:` / `docs:` / `refactor:` / `chore:` / `test:` / `perf:` / `ci:` / `style:` / `revert:`
 - **Scripts solo en TypeScript** - todos los archivos en `scripts/` son `.ts` ejecutados vía `bun` (ADR-0036). No hay pares `.sh/.ps1`.
 - **Las Guías de Codificación son auditadas** - `audit.ts` falla la compilación si falta `## Coding Guidelines` en `docs/context.md`.
@@ -332,7 +351,7 @@ Este manual es un programa intensivo de 2 días que cubre:
 - **Día 1 — Usuarios Generales**: Conceptos fundamentales de IA, principios de Vibe Coding vs. Harness Engineering, salvaguardas, modelos de permisos y operaciones básicas multi-agente.
 - **Día 2 — Profesionales de TI**: Arquitectura detallada (jerarquía SSOT L0→L1→L2), estrategias de despliegue empresarial, ingeniería de variantes personalizadas (Fase A/B) y proyectos finales integrales.
 
-Todos los conceptos se demuestran en cuatro plataformas principales (Claude Code, Claude Desktop App, Antigravity CLI y Antigravity 2.0).
+Todos los conceptos se demuestran en el conjunto de plataformas soportadas — 7 superficies en 5 directorios de plataforma (Claude Code CLI + Claude Desktop App, Gemini CLI, Antigravity, Codex CLI + Codex Desktop y Hermes Agent; véase CONSTITUTION.md §11).
 
 ---
 
@@ -354,4 +373,4 @@ AGPL-3.0 - ver [LICENSE](LICENSE)
 
 ---
 
-*Mantenido por [@5throck](https://github.com/5throck) · Última Actualización: 24-08-2026*
+*Mantenido por [@5throck](https://github.com/5throck) · Última Actualización: 2026-09-27*

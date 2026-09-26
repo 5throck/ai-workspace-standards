@@ -1,5 +1,6 @@
 ---
-sync_version: 1
+translated_from_hash: 4936f0646e7d956a936bb648e9ab14836bfe11eaf83c5b71bc18cd6e1f31ae67
+sync_version: 3
 ---
 
 **言語**: [English](README.md) · [한국어](README_ko.md) · [Español](README_es.md) · [日本語](README_ja.md)
@@ -21,8 +22,11 @@ sync_version: 1
 | 関心事 | ファイル | 対象 |
 |---------|---------|------|
 | 共有ワークスペース標準 | [`CONSTITUTION.md`](CONSTITUTION.md) | すべてのAIツール |
+| 共有エージェントインデックス（薄いディスパッチャー） | [`AGENTS.md`](AGENTS.md) | すべてのAIツール — Hermes Agentはこのファイルをネイティブに読み込みます |
 | Claude Codeの動作 | [`CLAUDE.md`](CLAUDE.md) | Claude Code (CLI + Desktop) |
 | Gemini / Antigravityの動作 | [`GEMINI.md`](GEMINI.md) | Gemini CLI + Antigravityエンジン |
+| Codexの動作 | [`CODEX.md`](CODEX.md) | Codex (CLI + Desktop App) |
+| 運用ワークフローリファレンス | [`docs/governance/agents/`](docs/governance/agents/) | すべてのAIツール（AGENTS.mdのポインターターゲット、ADR-0090） |
 | 変更履歴 | [`CHANGELOG.md`](CHANGELOG.md) | すべて |
 
 ### 2つの哲学、1つの標準
@@ -30,6 +34,12 @@ sync_version: 1
 **Vibe Coding** - AIが運転を握ります。開発者が意図を説明し、AIエージェント（PM → アーキテクト → デザイナー → コーダー → テスト実行者）がワークフロー全体を自律的に実行します。これらの標準は、自律的な実行を安全で監査可能に保つガードレールを定義します。
 
 **Harness Engineering** - 開発者がループに留まります。AIツールは精密機器：外科的な編集、明示的な計画、必須のレビューゲートです。これらの標準は、AIの出力を予測可能でレビュー可能に保つハーネスを定義します。
+
+---
+
+### 同梱の国プロファイル (Built-in Country Profiles)
+
+韓国管轄サポートはワークスペースに同梱されています：**KR国プロファイル**（サンプルは[`templates/co-news/docs/countries/KR.md`](templates/co-news/docs/countries/KR.md)を参照）、6つの**KRスコープの`k-*`データスキル**（法令検索`k-law`、開示`k-dart`、統計`k-kosis`、市場データ`k-krx`、マクロ金融`k-ecos`、公的データ`k-opendata`）、およびプロジェクトごとの国設定（`variant.json`の`country_config`）。プロジェクトは対象国を宣言し、KRプロジェクトはk-*スキル、韓国の規制アンカー、`.env.sample`内の国別APIキーブロックを自動的に受け取ります。国プロファイルはワークスペースルートではなくバリアント/プロジェクトごとに同梱されます — 共有リファレンスは[`templates/common/docs/country-profiles.md`](templates/common/docs/country-profiles.md)を参照してください。現在KRプロファイルを同梱しているバリアント：co-consult、co-export、co-hr、co-news、co-price、co-safety。
 
 ---
 
@@ -111,12 +121,10 @@ bun scripts/new-project.ts "my-project-name"
 bun scripts/new-project.ts "my-project-name" --variant co-develop
 
 # 特定のテンプレートバージョンを使用（利用可能: bun scripts/list-template-versions.ts）
-bun scripts/new-project.ts "my-project-name" --version 0.5.0
+bun scripts/new-project.ts "my-project-name" --version 0.6.0
 ```
 
 > **[破壊的変更 — 2026-06-11]**: `bash scripts/new-project.sh`および`.\scripts\new-project.ps1`は`bun scripts/new-project.ts`に置き換えられました（ADR-0036）。それに応じてエイリアスやCIパイプラインを更新してください。
-
-> **AIツールショートカット**: Claude Codeでは、スクリプトを直接実行する代わりに`/new-project "my-project-name"`を使用できます。
 
 各新規プロジェクトは、選択したテンプレートバリアントから`docs/context.md`、`AGENTS.md`、`agents/pm.md`、および必要なすべての設定ファイルとともにスキャフォールドされます。テンプレートのバージョンとバリアントはトレーサビリティのために`docs/context.md`に記録されます。
 
@@ -166,8 +174,10 @@ agy
 ```
 C:\git\ (ワークスペースルート - このリポジトリ)
 ├── CONSTITUTION.md          # マスター標準 - 毎セッションで最初に読む
+├── AGENTS.md                # 共有エージェントインデックス（薄いディスパッチャー） - すべてのAIツール
 ├── CLAUDE.md                # Claude Codeワークスペース動作
 ├── GEMINI.md                # Gemini CLI / Antigravityワークスペース動作
+├── CODEX.md                 # Codex CLI / Desktop Appワークスペース動作
 ├── SECURITY.md              # 標準GitHub脆弱性報告ポリシー
 ├── CHANGELOG.md             # ワークスペースレベルの変更履歴
 ├── README.md                # このファイル（英語）
@@ -180,22 +190,27 @@ C:\git\ (ワークスペースルート - このリポジトリ)
 ├── tests/                   # 統合および単体テストスイート
 ├── scripts/                 # コア自動化および監査スクリプト
 ├── .githooks/               # PRポリシーとルールを強制するGitフック
-├── .claude/ & .gemini/      # AIツールグローバル設定とカスタムスラッシュコマンド
+├── .claude/ .gemini/ .agents/ .codex/ .hermes/   # AIツールプラットフォームディレクトリ（設定、スキルミラー、スラッシュコマンド）
+├── Handbooks/               # 公開学習ハンドブックのローカルソース
+├── graft/                   # リポジトリコンテキストグラフ（ADR-0076）
+├── schemas/                 # 共有JSONスキーマ
+├── tickets/                 # ガバナンス決定チケット
+├── docs/governance/agents/  # 運用ワークフローリファレンス（AGENTS.mdのポインターターゲット）
 └── templates/               # バージョン管理されたAIプロジェクトテンプレート (co-develop, co-design, etc.)
     ├── common/              # すべてのバリアントで共有されるスクリプト、フック、スキル
     ├── co-develop/          # ✅ 安定 — フルソフトウェア開発エージェントチーム
     ├── co-design/           # ✅ 安定 — UI/UXデザイン専門エージェントチーム
     ├── co-work/             # ✅ 安定 — 一般コラボレーション・ドキュメントエージェントチーム
     ├── co-security/         # ✅ 安定 — レッドチーム・脅威モデリングエージェントチーム
-    ├── co-consult/          # ✅ 安定 — 戦略コンサルティング・分析エージェントチーム
+    ├── co-consult/          # ✅ 安定 — 戦略コンサルティング・分析エージェントチーム（KR国プロファイル同梱）
     ├── co-deck/             # ✅ 安定 — 講義・プレゼン資料制作エージェントチーム
     ├── co-game/             # ✅ 安定 — HTML5 Canvasゲーム開発エージェントチーム
-    ├── co-export/           # 🔶 ベータ — 輸出入貿易コンプライアンスエージェントチーム
+    ├── co-export/           # 🔶 ベータ — 輸出入貿易コンプライアンスエージェントチーム（KR国プロファイル同梱）
     ├── co-news/             # 🔶 ベータ — 経済・金融ジャーナリズムエージェントチーム（KR国プロファイル同梱）
     ├── co-abap/             # ✅ 安定 — SAP ABAP開発エージェントチーム
     ├── co-hr/               # 🔶 ベータ — 労務・HRコンサルティングエージェントチーム（KR国プロファイル同梱）
     ├── co-safety/           # 🔶 ベータ — EHS/GxPコンプライアンスプラットフォームエージェントチーム（KR国プロファイル同梱）
-    └── co-price/            # 🔶 ベータ — 多業種対応の価格管理・コンサルティングシミュレータ（K-Beautyサンプルデータ同梱）
+    └── co-price/            # 🔶 ベータ — 多業種対応の価格管理・コンサルティングシミュレータ（K-Beautyサンプルデータ、KR国プロファイル同梱）
 ```
 
 各サブプロジェクトは独自のディレクトリとGitリポジトリに存在します：
@@ -229,10 +244,12 @@ C:\git\
 
 0. `git config core.hooksPath .githooks`
 1. `CONSTITUTION.md`を読む（このワークスペース標準）
-2. プロジェクトの`docs/context.md`を読む
-3. `AGENTS.md`を読む（正規エージェントロスター）
+2. プロジェクトの`docs/context.md`を読む（ワークスペースルートではスキップ — `CONSTITUTION.md`がカバーします。）
+3. `AGENTS.md`を読む（共有エージェントインデックス — 薄いディスパッチャー; ガバナンスリファレンスへのポインターテーブルに従う）
 4. `memory/MEMORY.md`で最近の変更を確認
-5. `docs/context.md ## Session Start Skills`からスキルを読み込む
+5. `docs/context.md ## Session Start Skills`からスキルを読み込む（ワークスペースルートではスキップ — `CONSTITUTION.md`がカバーします。）
+
+> **Hermes Agentユーザー向け**: `hermes config set context_file_max_chars 100000`を一度実行してください（AGENTS.mdはデフォルトの20kコンテキスト上限を超えます）。また、プロジェクトルートを`skills.trusted_project_dirs`に追加してください — ADR-0088/0090を参照。
 
 ---
 
@@ -244,19 +261,19 @@ C:\git\
 - **co-design**: 迅速なプロトタイピングと継続的なユーザー検証に焦点を当てた5フェーズのイテレティブデザインネイティブワークフロー
 - **co-work**: 並列ドラフトと継続的なステークホルダーレビューに焦点を当てた6フェーズの非同期コラボレーションワークフロー
 - **co-security**: レッドチームオペレーション、脅威モデリング、Ansibleベースのパッチ自動化をカバーする6フェーズのセキュリティエンゲージメントワークフロー
-- **co-consult**: リサーチ、分析、成果物作成、クライアント納品をカバーする7フェーズの戦略コンサルティングワークフロー
+- **co-consult**: リサーチ、分析、成果物作成、クライアント納品をカバーする7フェーズの戦略コンサルティングワークフロー。管轄固有のリサーチアンカーはdocs/countries/配下の国プロファイル経由で付加されます（KRプロファイル同梱）
 - **co-deck**: リサーチから印刷可能PDFまでの11ステージの講義資料制作ワークフロー（5つの承認ゲート付き）
 - **co-game**: Vanilla TypeScriptを使用したHTML5 Canvasゲーム開発ワークフロー（ゲームデザイン、アーケード/パズルジャンル、ビジュアルアート、サウンド、エンジン実装、デバッグ、テスト用の専門エージェント）
-- **co-export**: HS分類、輸出管理・制裁スクリーニング、FTA原産地判定、関税還付、物流調整、市場参入戦略、外国規制モニタリング、貿易書類を網羅する貿易コンプライアンスワークフロー
+- **co-export**: HS分類、輸出管理・制裁スクリーニング、FTA原産地判定、関税還付、物流調整、市場参入戦略、外国規制モニタリング、貿易書類を網羅する貿易コンプライアンスワークフロー。管轄コンテンツはdocs/countries/配下の国プロファイル経由で付加されます（KRプロファイル同梱）
 - **co-news**: 上場企業を担当する経済記者向けの経済・金融ジャーナリズムワークフロー — 金融開示リサーチ（DART、KR国プロファイルのk-dart経由）、商法リサーチ（k-law、KRプロファイル）、引用台帳ベースのファクトチェック、AIっぽさの低減、金融インフォグラフィック生成。管轄固有のデータソース・法令はdocs/countries/配下の国プロファイル経由で付加されます（KRプロファイル同梱、他国はプロファイル追加）
 - **co-abap**: PM主導のオーケストレーション、6つのSAPモジュールアナリスト（SD、MM、FI、CO、PP、LE）、技術実行エージェント、自動化QAチェーン（SyntaxCheck → RunUnitTests → GetCodeCoverage → RunATCCheck）を備えた6段階のSAP ABAP開発ワークフロー
 - **co-hr**: 案件インテーク、対象管轄の労働法コンプライアンス監査（docs/countries/配下の国プロファイル — KRプロファイル同梱）、HRM/HRD設計、組織再編・変革管理を網羅する4段階の労務・HRコンサルティングワークフロー（k-law/k-kosis規制リサーチ連携 — KRスコープのスキルでKR対象プロジェクトのみに付加、12エージェントロスター）
-- **co-safety**: 韓国の労働安全（OSHA-KR、SAPA）、プロセス安全管理（PSM）、GxP医薬品品質（GMP/GLP/GDP/GCP/GVP）、医療機器安全（KGMP-MD、ISO 13485）、15の業界ドメイン（化学、建設、半導体、電池、造船、製鉄など）を40名以上の専門エージェントでカバーする6フェーズのEHS/GxPコンプライアンスワークフロー
-- **co-price**: 15人の専門エージェント（財務戦略、コスト管理、P&L監査、価格戦略、市場インテリジェンス、エンゲージメント・ディレクション等）を備えた多業種対応の価格管理・コンサルティングシミュレータ（K-Beautyサンプルデータ同梱） — 複数製品・複数チャネルの価格管理、複式簿記P&L予測、市場調査分析（Van Westendorp / Gabor-Granger）、コストショック感応度、流通トレードライン管理をカバー
+- **co-safety**: 韓国の労働安全（OSHA-KR、SAPA）、プロセス安全管理（PSM）、GxP医薬品品質（GMP/GLP/GDP/GCP/GVP）、医療機器安全（KGMP-MD、ISO 13485）、15の業界ドメイン（化学、建設、半導体、電池、造船、製鉄など）を40名以上の専門エージェントでカバーする6フェーズのEHS/GxPコンプライアンスワークフロー。管轄コンテンツはdocs/countries/配下の国プロファイル経由で付加されます（KRプロファイル同梱）
+- **co-price**: 15人の専門エージェント（財務戦略、コスト管理、P&L監査、価格戦略、市場インテリジェンス、エンゲージメント・ディレクション等）を備えた多業種対応の価格管理・コンサルティングシミュレータ（K-Beautyサンプルデータ同梱） — 複数製品・複数チャネルの価格管理、複式簿記P&L予測、市場調査分析（Van Westendorp / Gabor-Granger）、コストショック感応度、流通トレードライン管理をカバー。管轄コンテンツはdocs/countries/配下の国プロファイル経由で付加されます（KRプロファイル同梱）
 
 **💡 ワークフローの詳細確認方法**
 特定のエージェントロスターとガバナンスフェーズは、各生成プロジェクトのドキュメント内で管理されます。プロジェクトをスキャフォールド後、以下を確認してください：
-1. `AGENTS.md`: プロジェクトにデプロイされたエージェントのロールと権限の完全な仕様
+1. `AGENTS.md`: 共有エージェントインデックス（薄いディスパッチャー） — ロスターと`docs/governance/agents/`へのポインターテーブル（ADR-0090）
 2. `docs/context.md`: 初期セッションキックオフのためのプロジェクト目標とワークフローコンテキスト
 
 ---
@@ -271,15 +288,15 @@ C:\git\
 | `co-design` | ✅ 安定 | UI/UXデザインワークフロー — PM、デザインリード、UXリサーチャー、ビジュアルデザイナー、プロトタイプエンジニア、ストーリーテラー、サービスデザイナー、タイポグラフィエキスパート |
 | `co-work` | ✅ 安定 | 一般コラボレーションワークフロー — PM、アナリスト、テクニカルライター、コンテンツライター、プロジェクトコーディネーター、ストーリーテラー、MS365エキスパート |
 | `co-security` | ✅ 安定 | セキュリティエンゲージメントワークフロー — PM、レッドチームリード、ペンテスター、脅威モデラー、パッチエンジニア、レポートライター |
-| `co-consult` | ✅ 安定 | 戦略コンサルティングワークフロー — エンゲージメントリーダー、ストラテジーアナリスト、業界エキスパート、チェンジマネジメントパートナー、コミュニケーションリード、ソリューションアーキテクトなど |
+| `co-consult` | ✅ 安定 | 戦略コンサルティングワークフロー — エンゲージメントリーダー、ストラテジーアナリスト、業界エキスパート、チェンジマネジメントパートナー、コミュニケーションリード、ソリューションアーキテクトなど。管轄リサーチアンカーは国プロファイル経由（KRプロファイル同梱） |
 | `co-deck` | ✅ 安定 | 講義資料制作ワークフロー — PM、バージョン管理、リサーチ、ストーリーライン、デザイン、ビルド、測定、エクスポート |
 | `co-game` | ✅ 安定 | HTML5 Canvasゲーム開発ワークフロー — PM、ゲームデザイナー、アーケード/パズルデザイナー、ビジュアルアーティスト、サウンドデザイナー、ゲームデベロッパー、ゲームデバッガー、テスト実行者、セキュリティモニター |
-| `co-export` | 🔶 ベータ | 輸出入貿易コンプライアンス — HS分類、輸出管理・制裁スクリーニング、FTA原産地、関税還付、物流、市場参入、規制モニタリング、貿易書類 |
+| `co-export` | 🔶 ベータ | 輸出入貿易コンプライアンス — HS分類、輸出管理・制裁スクリーニング、FTA原産地、関税還付、物流、市場参入、規制モニタリング、貿易書類。管轄コンテンツは国プロファイル経由（KRプロファイル同梱） |
 | `co-news` | 🔶 ベータ | 経済・金融ジャーナリズム — PM、リポーター、ファクトチェッカー、財務アナリスト、法務リサーチャー、スタイル編集者、ビジュアル編集者。管轄データは国プロファイル経由（KRプロファイル同梱） |
 | `co-abap` | ✅ 安定 | SAP ABAP開発ワークフロー — PM、アーキテクト、コーダー、テスト実行者、DBA、DevOps管理者、SAP調査担当、モジュールアナリスト（SD、MM、FI、CO、PP、LE）、Interface/Fiori/Form専門家、セキュリティモニター |
 | `co-hr` | 🔶 ベータ | 労務・HRコンサルティングワークフロー — PM、労務コンプライアンスアナリスト、労働関係スペシャリスト、安全衛生担当、採用スペシャリスト、報酬・給与アナリスト、人事評価コンサルタント、L&Dスペシャリスト、キャリア・後継コンサルタント、組織設計コンサルタント、変革管理パートナー、データアナリスト。労働法の適用範囲は国プロファイル経由（KRプロファイル同梱） |
-| `co-safety` | 🔶 ベータ | EHS/GxPコンプライアンスプラットフォーム — PM/CSO、40名以上の専門エージェント（緊急対応、コンプライアンス、法務、研修、PSM、リスク、監査、15の業界ドメイン、5つのGxPドメイン）、k-law規制リサーチ連携（KRスコープ） |
-| `co-price` | 🔶 ベータ | 多業種対応の価格管理・コンサルティングシミュレータ（K-Beautyサンプルデータ同梱） — PM、リードアーキテクト、コアエンジン開発、CPA監査、財務戦略リード、コスト・資産管理、UX、L10N監査、QA、DevOps、セキュリティ監査/モニター、価格戦略ストラテジスト、市場インテリジェンスアナリスト、エンゲージメントディレクター |
+| `co-safety` | 🔶 ベータ | EHS/GxPコンプライアンスプラットフォーム — PM/CSO、40名以上の専門エージェント（緊急対応、コンプライアンス、法務、研修、PSM、リスク、監査、15の業界ドメイン、5つのGxPドメイン）、k-law規制リサーチ連携（KRスコープ）。管轄コンテンツは国プロファイル経由（KRプロファイル同梱） |
+| `co-price` | 🔶 ベータ | 多業種対応の価格管理・コンサルティングシミュレータ（K-Beautyサンプルデータ同梱） — PM、リードアーキテクト、コアエンジン開発、CPA監査、財務戦略リード、コスト・資産管理、UX、L10N監査、QA、DevOps、セキュリティ監査/モニター、価格戦略ストラテジスト、市場インテリジェンスアナリスト、エンゲージメントディレクター。KR国プロファイル同梱 |
 
 ### バージョンとバリアントの選択
 
@@ -291,7 +308,7 @@ bun scripts/list-template-versions.ts
 bun scripts/new-project.ts my-project
 
 # 特定のバージョンを使用
-bun scripts/new-project.ts my-project --version 0.5.0
+bun scripts/new-project.ts my-project --version 0.6.0
 
 # 特定のバリアントを使用
 bun scripts/new-project.ts my-project --variant co-develop
@@ -337,7 +354,7 @@ AI初心者およびClaude Desktop Appユーザー（macOS、Windows、Linux）�
 - **Day 1 — 一般ユーザー**: AIの基礎概念、Vibe Coding vs. Harness Engineeringの原則、ガードレール、権限モデル、基本的なマルチエージェント操作
 - **Day 2 — IT専門家**: アーキテクチャの詳細解説（SSOT階層 L0→L1→L2）、エンタープライズ展開戦略、カスタムバリアントエンジニアリング（フェーズA/B）、総合演習プロジェクト
 
-すべての概念は4つのプラットフォーム（Claude Code、Claude Desktop App、Antigravity CLI、Antigravity 2.0）でデモンストレーションされます。
+すべての概念は、サポート対象のプラットフォームセット — 5つのプラットフォームディレクトリ上の7サーフェス（Claude Code CLI + Claude Desktop App、Gemini CLI、Antigravity、Codex CLI + Codex Desktop、Hermes Agent；CONSTITUTION.md §11 参照）— でデモンストレーションされます。
 
 ---
 
@@ -359,4 +376,4 @@ AGPL-3.0 - [LICENSE](LICENSE)を参照
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-09-12*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-09-27*

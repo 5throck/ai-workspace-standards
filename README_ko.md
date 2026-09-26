@@ -1,6 +1,6 @@
 ---
-translated_from_hash: beabc68329474d9715ad09735dd8275840dbb75ccd16989e03e989399beebdb6
-sync_version: 2
+translated_from_hash: 4936f0646e7d956a936bb648e9ab14836bfe11eaf83c5b71bc18cd6e1f31ae67
+sync_version: 3
 ---
 
 **언어**: [English](README.md) · [한국어](README_ko.md) · [Español](README_es.md) · [日本語](README_ja.md)
@@ -22,9 +22,11 @@ sync_version: 2
 | 관심사 | 파일 | 대상 |
 |---------|------|----------|
 | 공유 워크스페이스 표준 | [`CONSTITUTION.md`](CONSTITUTION.md) | 모든 AI 도구 |
+| 공유 에이전트 인덱스 (씬 디스패처) | [`AGENTS.md`](AGENTS.md) | 모든 AI 도구 — Hermes Agent는 이 파일을 네이티브로 읽습니다 |
 | Claude Code 행동 지침 | [`CLAUDE.md`](CLAUDE.md) | Claude Code (CLI + Desktop) |
 | Gemini / Antigravity 행동 지침 | [`GEMINI.md`](GEMINI.md) | Gemini CLI + Antigravity 엔진 |
 | Codex 행동 지침 | [`CODEX.md`](CODEX.md) | Codex (CLI + Desktop App) |
+| 운영 워크플로 참조 | [`docs/governance/agents/`](docs/governance/agents/) | 모든 AI 도구 (AGENTS.md의 포인터 대상, ADR-0090) |
 | 변경 이력 | [`CHANGELOG.md`](CHANGELOG.md) | 전체 |
 
 ### 두 가지 철학, 하나의 표준
@@ -37,7 +39,7 @@ sync_version: 2
 
 ### 내장 국가 프로필
 
-한국 관할권 지원이 워크스페이스에 기본 포함되어 있습니다: **KR 국가 프로필**([`templates/co-news/docs/countries/KR.md`](templates/co-news/docs/countries/KR.md) 예시 참고), **KR 스코프 `k-*` 데이터 스킬 6종**(법령 조회 `k-law`, 공시 `k-dart`, 통계 `k-kosis`, 시장 데이터 `k-krx`, 거시경제 `k-ecos`, 공공데이터 `k-opendata`), 프로젝트별 국가 구성(`variant.json` `country_config`). 프로젝트가 대상 국가를 선언하면, KR 프로젝트는 k-* 스킬과 한국 규제 앵커, `.env.sample`의 국가 API 키 블록을 자동으로 받습니다 — 자세한 것은 [`templates/common/docs/country-profiles.md`](templates/common/docs/country-profiles.md)를 참고하세요.
+한국 관할권 지원이 워크스페이스에 기본 포함되어 있습니다: **KR 국가 프로필**([`templates/co-news/docs/countries/KR.md`](templates/co-news/docs/countries/KR.md) 예시 참고), **KR 스코프 `k-*` 데이터 스킬 6종**(법령 조회 `k-law`, 공시 `k-dart`, 통계 `k-kosis`, 시장 데이터 `k-krx`, 거시경제 `k-ecos`, 공공데이터 `k-opendata`), 프로젝트별 국가 구성(`variant.json` `country_config`). 프로젝트가 대상 국가를 선언하면, KR 프로젝트는 k-* 스킬과 한국 규제 앵커, `.env.sample`의 국가 API 키 블록을 자동으로 받습니다 — 자세한 것은 [`templates/common/docs/country-profiles.md`](templates/common/docs/country-profiles.md)를 참고하세요. 현재 KR 프로필을 포함하는 변형: co-consult, co-export, co-hr, co-news, co-price, co-safety.
 
 
 ## 사전 요구 사항 (Prerequisites)
@@ -118,12 +120,10 @@ bun scripts/new-project.ts "my-project-name"
 bun scripts/new-project.ts "my-project-name" --variant co-develop
 
 # 특정 템플릿 버전 사용 (목록 확인: bun scripts/list-template-versions.ts)
-bun scripts/new-project.ts "my-project-name" --version 0.5.0
+bun scripts/new-project.ts "my-project-name" --version 0.6.0
 ```
 
 > **[Breaking Change — 2026-06-11]**: `bash scripts/new-project.sh` 및 `.\scripts\new-project.ps1`은 `bun scripts/new-project.ts`로 대체되었습니다 (ADR-0036). 기존 alias나 CI 파이프라인을 갱신하세요.
-
-> **AI 도구 단축키**: Claude Code에서는 스크립트를 직접 실행하는 대신 `/new-project "my-project-name"`을 사용할 수 있습니다.
 
 각 새 프로젝트는 선택한 template variant를 기반으로 `docs/context.md`, `AGENTS.md`, `agents/pm.md` 및 모든 필수 설정 파일과 함께 생성됩니다. 사용된 템플릿 버전과 variant는 추적 가능성을 위해 `docs/context.md`에 기록됩니다.
 
@@ -171,6 +171,7 @@ agy
 ```
 C:\git\ (워크스페이스 루트 - 현재 저장소)
 ├── CONSTITUTION.md          # 마스터 표준 - 모든 세션에서 가장 먼저 읽어야 함
+├── AGENTS.md                # 공유 에이전트 인덱스 (씬 디스패처) - 모든 AI 도구
 ├── CLAUDE.md                # Claude Code 워크스페이스 동작 설정
 ├── GEMINI.md                # Gemini CLI / Antigravity 워크스페이스 동작 설정
 ├── CODEX.md                 # Codex CLI / Desktop App 워크스페이스 동작 설정
@@ -184,22 +185,27 @@ C:\git\ (워크스페이스 루트 - 현재 저장소)
 ├── tests/                   # Integration and unit test suites
 ├── scripts/                 # 공통 자동화, 템플릿 검증 및 문서 감사 스크립트
 ├── .githooks/               # PR 산출물 강제 및 시크릿 검사를 위한 Git 훅
-├── .claude/ & .gemini/      # AI 툴 전역 설정 및 커스텀 슬래시 명령어
+├── .claude/ .gemini/ .agents/ .codex/ .hermes/   # AI 툴 플랫폼 디렉터리 (설정, 스킬 미러, 슬래시 명령어)
+├── Handbooks/               # 공개 학습 핸드북의 로컬 소스
+├── graft/                   # 저장소 컨텍스트 그래프 (ADR-0076)
+├── schemas/                 # 공유 JSON 스키마
+├── tickets/                 # 거버넌스 의사결정 티켓
+├── docs/governance/agents/  # 운영 워크플로 참조 (AGENTS.md 포인터 대상)
 └── templates/               # 새 프로젝트 스캐폴딩을 위한 버전 관리 템플릿들
     ├── common/              # 모든 템플릿이 공통으로 사용하는 스크립트/스킬/깃훅
     ├── co-develop/          # ✅ Stable — 종합 소프트웨어 개발 에이전트 팀
     ├── co-design/           # ✅ Stable — 특화된 UI/UX 디자인 에이전트 팀
     ├── co-work/             # ✅ Stable — 범용 협업 및 문서화 에이전트 팀
     ├── co-security/         # ✅ Stable — 레드팀 및 위협 모델링 에이전트 팀
-    ├── co-consult/          # ✅ Stable — 전략 컨설팅 및 분석 에이전트 팀
+    ├── co-consult/          # ✅ Stable — 전략 컨설팅 및 분석 에이전트 팀 (KR 국가 프로필 포함)
     ├── co-deck/             # ✅ Stable — 강연 자료 및 프레젠테이션 제작 에이전트 팀
     ├── co-game/             # ✅ Stable — HTML5 Canvas 게임 개발 에이전트 팀
-    ├── co-export/           # 🔶 Beta — 수출입 무역 컴플라이언스 에이전트 팀
+    ├── co-export/           # 🔶 Beta — 수출입 무역 컴플라이언스 에이전트 팀 (KR 국가 프로필 포함)
     ├── co-news/             # 🔶 Beta — 경제/금융 저널리즘 에이전트 팀 (KR 국가 프로필 포함)
     ├── co-abap/             # ✅ Stable — SAP ABAP 개발 에이전트 팀
     ├── co-hr/               # 🔶 Beta — 노무/HR 컨설팅 에이전트 팀 (KR 국가 프로필 포함)
     ├── co-safety/           # 🔶 Beta — EHS/GxP 컴플라이언스 플랫폼 에이전트 팀 (KR 국가 프로필 포함)
-    └── co-price/            # 🔶 Beta — 가격 관리 및 컨설팅 시뮬레이터 (K-Beauty 샘플 데이터셋 포함)
+    └── co-price/            # 🔶 Beta — 가격 관리 및 컨설팅 시뮬레이터 (K-Beauty 샘플 데이터셋, KR 국가 프로필 포함)
 ```
 
 각 하위 프로젝트는 자체 디렉토리 및 개별 Git 저장소로 관리됩니다:
@@ -248,13 +254,15 @@ C:\git\
 - **co-design**: 빠른 프로토타이핑과 지속적인 사용자 검증에 초점을 맞춘 5단계 반복형(Iterative) 디자인 네이티브 워크플로
 - **co-work**: 병렬 작성과 지속적인 이해관계자 검토에 초점을 맞춘 6단계 비동기(Asynchronous) 협업 워크플로
 - **co-security**: 레드팀 운영, 위협 모델링, Ansible 기반 패치 자동화를 포함하는 6단계 보안 인게이지먼트 워크플로
-- **co-consult**: 리서치, 분석, 산출물 작성, 고객 납품을 아우르는 7단계 전략 컨설팅 워크플로
+- **co-consult**: 리서치, 분석, 산출물 작성, 고객 납품을 아우르는 7단계 전략 컨설팅 워크플로 — 관할권별 리서치 앵커는 docs/countries/의 국가 프로필로 연결됩니다 (KR 프로필 포함)
 - **co-deck**: 리서치부터 인쇄 가능한 PDF까지의 11단계 강연 자료 제작 워크플로, 5개의 승인 게이트 포함
 - **co-game**: Vanilla TypeScript 기반 HTML5 Canvas 게임 개발 워크플로, 게임 설계, 아케이드/퍼즐 장르, 비주얼 아트, 사운드, 엔진 구현, 디버깅, 테스트 전문 에이전트 포함
+- **co-export**: HS 분류, 수출 통제 및 제재 스크리닝, FTA 원산지 결정, 관세 환급, 물류 조정, 시장 진출 전략, 해외 규제 모니터링, 무역 서류를 아우르는 무역/수출 규제 컴플라이언스 워크플로 — 관할권 콘텐츠는 docs/countries/의 국가 프로필로 연결됩니다 (KR 프로필 포함)
 - **co-news**: 상장사 보도를 담당하는 경제 기자를 위한 경제/금융 저널리즘 워크플로 — 금융 공시 리서치(DART, KR 국가 프로필의 k-dart), 상법 리서치(k-law, KR 프로필), 인용 레저 기반 팩트체크, AI투 느낌 감소, 금융 인포그래픽 생성. 국가별 데이터 소스·법령은 docs/countries/의 국가 프로필로 연결됩니다 (KR 프로필 기본 포함, 다른 국가는 프로필 추가)
 - **co-abap**: PM 주도 오케스트레이션, 6개 SAP 모듈 애널리스트(SD, MM, FI, CO, PP, LE), 기술 실행 에이전트, 자동화된 QA 체인(SyntaxCheck → RunUnitTests → GetCodeCoverage → RunATCCheck)을 갖춘 6단계 SAP ABAP 개발 워크플로
 - **co-hr**: 인게이지먼트 인테이크, 대상 관할권의 노동법 컴플라이언스 점검(docs/countries/ 하위 국가 프로필 — KR 프로필 기본 포함), HRM/HRD 설계, 조직 재설계/변화관리를 아우르는 4단계 노무/HR 컨설팅 워크플로 — k-law/k-kosis 규제 리서치 연동(KR 스코프 스킬, KR 국가 프로젝트에만 배포), 12개 에이전트 로스터(PM + 전문가 11인)
-- **co-safety**: 한국 산업안전(OSHA-KR, SAPA), 공정안전관리(PSM), GxP 의약품 품질(GMP/GLP/GDP/GCP/GVP), 의료기기 안전(KGMP-MD, ISO 13485), 15개 산업 도메인(화학, 건설, 반도체, 배터리, 조선, 제철 등)을 40명 이상 전문 에이전트로 다루는 6단계 EHS/GxP 컴플라이언스 워크플로
+- **co-safety**: 한국 산업안전(OSHA-KR, SAPA), 공정안전관리(PSM), GxP 의약품 품질(GMP/GLP/GDP/GCP/GVP), 의료기기 안전(KGMP-MD, ISO 13485), 15개 산업 도메인(화학, 건설, 반도체, 배터리, 조선, 제철 등)을 40명 이상 전문 에이전트로 다루는 6단계 EHS/GxP 컴플라이언스 워크플로 — 관할권 콘텐츠는 docs/countries/의 국가 프로필로 연결됩니다 (KR 프로필 포함)
+- **co-price**: 가격 전략, 재무 전략, CPA 감사, 시장 인텔리전스, 인게이지먼트 디렉션을 15개 에이전트 로스터로 아우르는 다산업 가격 관리·컨설팅 시뮬레이터 워크플로 — K-Beauty 샘플 데이터셋과 docs/countries/의 KR 국가 프로필 포함
 
 **💡 Workflow 상세 정보 확인 방법**
 구체적인 에이전트 명단(Roster)과 거버넌스 단계는 프로젝트 생성 후 해당 프로젝트 폴더 내의 다음 문서들에서 관리 및 확인할 수 있습니다:
@@ -273,14 +281,15 @@ C:\git\
 | `co-design` | ✅ Stable | UI/UX 디자인 워크플로 — PM, Design Lead, UX Researcher, Visual Designer, Prototype Engineer, Storyteller, Service Designer, Typography Expert |
 | `co-work` | ✅ Stable | 범용 협업 워크플로 — PM, Analyst, Technical Writer, Content Writer, Project Coordinator, Storyteller, MS365 Expert |
 | `co-security` | ✅ Stable | 보안 인게이지먼트 워크플로 — PM, Red Team Lead, Pentester, Threat Modeler, Patch Engineer, Report Writer |
-| `co-consult` | ✅ Stable | 전략 컨설팅 워크플로 — Engagement Leader, Strategy Analyst, Industry Expert, Change Management Partner, Communications Lead, Solutions Architect 등 |
+| `co-consult` | ✅ Stable | 전략 컨설팅 워크플로 — Engagement Leader, Strategy Analyst, Industry Expert, Change Management Partner, Communications Lead, Solutions Architect 등. 관할권 리서치 앵커는 국가 프로필로 연결 (KR 프로필 포함) |
 | `co-deck` | ✅ Stable | 강연 자료 제작 워크플로 — PM, Version, Research, Storyline, Design, Build, Measure, Export |
 | `co-game` | ✅ Stable | HTML5 Canvas 게임 개발 워크플로 — PM, Game Designer, Arcade/Puzzle Designers, Visual Artist, Sound Designer, Game Developer, Game Debugger, Test Runner, Security Monitor |
-| `co-export` | 🔶 Beta | 수출입 무역 컴플라이언스 워크플로 — PM, HS 분류, 수출 통제, FTA 원산지, 환급, 물류, 시장 진출, 해외 규제 모니터링, 무역 서류 |
+| `co-export` | 🔶 Beta | 수출입 무역 컴플라이언스 워크플로 — PM, HS 분류, 수출 통제, FTA 원산지, 환급, 물류, 시장 진출, 해외 규제 모니터링, 무역 서류. 관할권 콘텐츠는 국가 프로필로 연결 (KR 프로필 포함) |
 | `co-news` | 🔶 Beta | 경제/금융 저널리즘 워크플로 — PM, Reporter, Fact-Checker, Financial Analyst, Legal Researcher, Style Editor, Visual Editor. 국가별 데이터는 국가 프로필로 연결 (KR 프로필 포함) |
 | `co-abap` | ✅ Stable | SAP ABAP 개발 워크플로 — PM, Architect, Code Writer, Test Runner, DBA, DevOps Admin, SAP Investigators, 모듈 애널리스트(SD, MM, FI, CO, PP, LE), Interface/Fiori/Form 전문가, Security Monitor |
 | `co-hr` | 🔶 Beta | 노무/HR 컨설팅 워크플로 — PM, 노동 컴플라이언스 애널리스트, 노사관계 전문가, 안전보건 담당관, 채용 전문가, 보상·복지 애널리스트, 성과관리 컨설턴트, L&D 전문가, 경력·계승 컨설턴트, 조직설계 컨설턴트, 변화관리 파트너, 데이터 애널리스트. 노동법 적용 범위는 국가 프로필로 연결 (KR 프로필 포함) |
-| `co-safety` | 🔶 Beta | EHS/GxP 컴플라이언스 플랫폼 워크플로우 — PM/CSO, 40개 이상 전문 에이전트 (비상대응, 컴플라이언스, 법률, 교육, PSM, 리스크, 감사, 15개 산업 도메인, 5개 GxP 도메인), k-law 규제 연구 통합 (KR 전용) |
+| `co-safety` | 🔶 Beta | EHS/GxP 컴플라이언스 플랫폼 워크플로우 — PM/CSO, 40개 이상 전문 에이전트 (비상대응, 컴플라이언스, 법률, 교육, PSM, 리스크, 감사, 15개 산업 도메인, 5개 GxP 도메인), k-law 규제 연구 통합 (KR 전용). 관할권 콘텐츠는 국가 프로필로 연결 (KR 프로필 포함) |
+| `co-price` | 🔶 Beta | 다산업 가격 관리·컨설팅 시뮬레이터 — PM, Finance Strategy Lead, CPA Auditor, Pricing Strategist, Market Intelligence Analyst, Engagement Director, K-Beauty 샘플 데이터셋 포함. KR 국가 프로필 포함 |
 
 ### 버전 및 Variant 선택
 
@@ -292,7 +301,7 @@ bun scripts/list-template-versions.ts
 bun scripts/new-project.ts my-project
 
 # 특정 버전 지정
-bun scripts/new-project.ts my-project --version 0.5.0
+bun scripts/new-project.ts my-project --version 0.6.0
 
 # 특정 variant 지정
 bun scripts/new-project.ts my-project --variant co-develop
@@ -338,7 +347,7 @@ AI 입문자 및 Claude Desktop App 사용자(macOS, Windows, Linux)를 위한 �
 - **Day 1 — 일반 사용자**: 핵심 AI 개념, Vibe Coding vs. Harness Engineering 원칙, 가드레일, 권한 모델, 기본적인 멀티 에이전트 조작
 - **Day 2 — IT 전문가**: 아키텍처 심층 해설 (SSOT 계층 L0→L1→L2), 엔터프라이즈 배포 전략, 커스텀 바리안트 엔지니어링 (Phase A/B), 종합 실습 프로젝트
 
-모든 개념은 지원 플랫폼 세트 — 5개 플랫폼 디렉터리 위의 7개 서페이스 (Claude Code CLI + Claude Desktop App, Gemini CLI, Antigravity, Codex CLI + Codex Desktop, Hermes Agent; CONSTITUTION.md §7 참조) — 에서 시연됩니다.
+모든 개념은 지원 플랫폼 세트 — 5개 플랫폼 디렉터리 위의 7개 서페이스 (Claude Code CLI + Claude Desktop App, Gemini CLI, Antigravity, Codex CLI + Codex Desktop, Hermes Agent; CONSTITUTION.md §11 참조) — 에서 시연됩니다.
 
 ---
 
@@ -360,4 +369,4 @@ AGPL-3.0 - [LICENSE](LICENSE) 파일 참조
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-09-26*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-09-27*

@@ -157,6 +157,11 @@ skills still being modified, dependency graph, circular dependencies, `scope` fi
 #### `tag-template.ts`
 **Purpose**: Creates the `template-v{templates/VERSION}` git tag and optionally pushes it.
 **Usage**: `bun scripts/tag-template.ts [--dry-run] [--no-push] [--fail-on-push-error]`
+
+#### `auto-release-template.ts`
+**Purpose**: Nightly automatic template release step (ADR-0089 runner host, between Phase I landing and Phase II). Classifies the pending delivered-template diff against `template-v<VERSION>` via the `lib/template-release-classify.ts` rule table, then in `--release` mode composes `release-template.ts --bump <level> --notes "..." --no-tag`. The caller lands the bump via a dev-sync PR and tags post-merge with `tag-template.ts --fail-on-push-error`.
+**Usage**: `bun scripts/auto-release-template.ts [--plan | --dry-run | --release]` — exit 0 ok / 2 manual-review (runner files ticket, skips) / 3 no pending changes / 1 error
+
 #### `verify-skills.ts`
 **Purpose**: Cross-validates skills referenced in `docs/context.md` against actual
 skill files on disk. Detects missing or orphaned skill references.

@@ -1,6 +1,6 @@
 ---
-sync_version: 2
-content_hash: beabc68329474d9715ad09735dd8275840dbb75ccd16989e03e989399beebdb6
+sync_version: 3
+content_hash: 4936f0646e7d956a936bb648e9ab14836bfe11eaf83c5b71bc18cd6e1f31ae67
 ---
 
 **Languages**: [English](README.md) · [한국어](README_ko.md) · [Español](README_es.md) · [日本語](README_ja.md)
@@ -39,7 +39,7 @@ Modern AI-assisted development requires more than prompts - it requires **consis
 
 ### Built-in Country Profiles
 
-Korean jurisdiction support ships with the workspace: a **KR country profile** (see the exemplar at [`templates/co-news/docs/countries/KR.md`](templates/co-news/docs/countries/KR.md)), six **KR-scoped `k-*` data skills** (statute lookup `k-law`, disclosures `k-dart`, statistics `k-kosis`, market data `k-krx`, macro-financial `k-ecos`, public data `k-opendata`), and per-project country configuration (`variant.json` `country_config`). A project declares its target country; KR projects automatically receive the k-* skills, Korean regulatory anchors, and the country API-key block in `.env.sample`. Country profiles ship per-variant/per-project rather than at the workspace root — see [`templates/common/docs/country-profiles.md`](templates/common/docs/country-profiles.md) for the shared reference.
+Korean jurisdiction support ships with the workspace: a **KR country profile** (see the exemplar at [`templates/co-news/docs/countries/KR.md`](templates/co-news/docs/countries/KR.md)), six **KR-scoped `k-*` data skills** (statute lookup `k-law`, disclosures `k-dart`, statistics `k-kosis`, market data `k-krx`, macro-financial `k-ecos`, public data `k-opendata`), and per-project country configuration (`variant.json` `country_config`). A project declares its target country; KR projects automatically receive the k-* skills, Korean regulatory anchors, and the country API-key block in `.env.sample`. Country profiles ship per-variant/per-project rather than at the workspace root — see [`templates/common/docs/country-profiles.md`](templates/common/docs/country-profiles.md) for the shared reference. Variants currently shipping a KR profile: co-consult, co-export, co-hr, co-news, co-price, and co-safety.
 
 ---
 
@@ -126,8 +126,6 @@ bun scripts/new-project.ts "my-project-name" --version 0.6.0
 
 > **[Breaking Change — 2026-06-11]**: `bash scripts/new-project.sh` and `.\scripts\new-project.ps1` have been replaced by `bun scripts/new-project.ts` (ADR-0036). Update any aliases or CI pipelines accordingly.
 
-> **AI tool shortcut**: In Claude Code, use `/new-project "my-project-name"` instead of running the script directly.
-
 Each new project is scaffolded from the selected template variant with `docs/context.md`, `AGENTS.md`, `agents/pm.md`, and all required configuration files. The template version and variant are recorded in `docs/context.md` for traceability.
 
 ### 4. Move to the new project & Start PM Kick-off
@@ -190,7 +188,11 @@ C:\git\ (workspace root - this repo)
 ├── tests/                   # Integration and unit test suites
 ├── scripts/                 # Core automation and audit scripts
 ├── .githooks/               # Git hooks for enforcing PR policies and rules
-├── .claude/ & .gemini/      # AI tools global settings and custom slash commands
+├── .claude/ .gemini/ .agents/ .codex/ .hermes/   # AI tool platform directories (settings, skills mirrors, slash commands)
+├── Handbooks/               # Local sources for the published learning handbooks
+├── graft/                   # Repo context graph (ADR-0076)
+├── schemas/                 # Shared JSON schemas
+├── tickets/                 # Governance decision tickets
 ├── docs/governance/agents/  # Operational workflow references (AGENTS.md pointer targets)
 └── templates/               # Versioned AI project templates (co-develop, co-design, etc.)
     ├── common/              # Shared scripts, hooks, and skills across all variants
@@ -198,15 +200,15 @@ C:\git\ (workspace root - this repo)
     ├── co-design/           # ✅ Stable — specialized UI/UX design agent team
     ├── co-work/             # ✅ Stable — general collaboration and documentation agent team
     ├── co-security/         # ✅ Stable — red team and threat modeling agent team
-    ├── co-consult/          # ✅ Stable — strategy consulting and analysis agent team
+    ├── co-consult/          # ✅ Stable — strategy consulting and analysis agent team (KR country profile included)
     ├── co-deck/             # ✅ Stable — lecture and presentation material production agent team
     ├── co-game/             # ✅ Stable — HTML5 Canvas game development agent team
-    ├── co-export/           # 🔶 Beta — import/export trade compliance agent team
+    ├── co-export/           # 🔶 Beta — import/export trade compliance agent team (KR country profile included)
     ├── co-news/             # 🔶 Beta — business/finance journalism agent team (KR country profile included)
     ├── co-abap/             # ✅ Stable — SAP ABAP development agent team
     ├── co-hr/               # 🔶 Beta — HR & labor-relations consulting agent team (KR country profile included)
     ├── co-safety/           # 🔶 Beta — EHS/GxP compliance platform agent team (KR country profile included)
-    └── co-price/            # 🔶 Beta — pricing management & consulting simulator (K-Beauty sample dataset)
+    └── co-price/            # 🔶 Beta — pricing management & consulting simulator (K-Beauty sample dataset, KR country profile included)
 ```
 
 Each sub-project lives in its own directory and git repository:
@@ -256,15 +258,15 @@ Each template variant in this workspace provides a highly optimized, specialized
 - **co-design**: A 5-phase iterative design-native workflow focused on rapid prototyping and continuous user validation
 - **co-work**: A 6-phase asynchronous collaboration workflow focused on parallel drafting and continuous stakeholder review
 - **co-security**: A 6-phase security engagement workflow covering Red Team ops, threat modeling, and Ansible-based patch automation
-- **co-consult**: A 7-phase strategy consulting workflow covering research, analysis, deliverable creation, and client delivery
+- **co-consult**: A 7-phase strategy consulting workflow covering research, analysis, deliverable creation, and client delivery; jurisdiction-specific research anchors attach via country profiles under docs/countries/ (KR profile included)
 - **co-deck**: An 11-stage lecture material production workflow from research to print-ready PDF, with 5 approval gates
 - **co-game**: A game development workflow for HTML5 Canvas games using Vanilla TypeScript, with specialized agents for game design, arcade/puzzle genres, visual art, sound, engine implementation, debugging, and testing
-- **co-export**: A trade/export-compliance workflow covering HS classification, export control and sanctions screening, FTA origin determination, customs duty drawback, logistics coordination, market entry strategy, foreign regulation monitoring, and trade documentation
+- **co-export**: A trade/export-compliance workflow covering HS classification, export control and sanctions screening, FTA origin determination, customs duty drawback, logistics coordination, market entry strategy, foreign regulation monitoring, and trade documentation, with jurisdiction content via country profiles under docs/countries/ (KR profile included)
 - **co-news**: A business/finance journalism workflow for economics reporters covering listed companies — financial-disclosure research (DART via k-dart under the KR country profile), commercial-law research (k-law, KR profile), fact-checking with citation ledger, AI-tell reduction, and financial infographic generation. Jurisdiction-specific data sources and law attach via country profiles under docs/countries/
 - **co-abap**: A 6-phase SAP ABAP development workflow with PM-led orchestration, six SAP module analysts (SD, MM, FI, CO, PP, LE), technical execution agents, and automated QA chains (SyntaxCheck → RunUnitTests → GetCodeCoverage → RunATCCheck)
 - **co-hr**: A 4-phase HR & labor-relations consulting workflow covering engagement intake, labor-law compliance audit for the target jurisdiction (country profiles under docs/countries/ — KR profile included), HRM/HRD system design, and org restructuring/change management, with k-law/k-kosis regulatory research integration (KR-scoped skills, attached only to KR-country projects) across a 12-agent roster
-- **co-safety**: A 6-phase EHS/GxP compliance workflow covering Korean occupational safety (OSHA-KR, SAPA), process safety management (PSM), GxP pharmaceutical quality (GMP/GLP/GDP/GCP/GVP), medical device safety (KGMP-MD, ISO 13485), and 15 industry-specific domains (chemical, construction, semiconductor, battery, shipbuilding, steelmaking, etc.) across a 40+ agent roster
-- **co-price**: A multi-industry pricing management & consulting simulator workflow covering pricing strategy, finance strategy, CPA auditing, market intelligence, and engagement direction across a 15-agent roster, with a bundled K-Beauty sample dataset
+- **co-safety**: A 6-phase EHS/GxP compliance workflow covering Korean occupational safety (OSHA-KR, SAPA), process safety management (PSM), GxP pharmaceutical quality (GMP/GLP/GDP/GCP/GVP), medical device safety (KGMP-MD, ISO 13485), and 15 industry-specific domains (chemical, construction, semiconductor, battery, shipbuilding, steelmaking, etc.) across a 40+ agent roster; jurisdiction content attaches via country profiles under docs/countries/ (KR profile included)
+- **co-price**: A multi-industry pricing management & consulting simulator workflow covering pricing strategy, finance strategy, CPA auditing, market intelligence, and engagement direction across a 15-agent roster, with a bundled K-Beauty sample dataset and a KR country profile under docs/countries/
 
 **💡 How to Check Workflow Details**
 Specific agent rosters and governance phases are managed within the documents of each generated project. After scaffolding a project, check:
@@ -283,15 +285,15 @@ New projects are scaffolded from versioned template variants. Templates are tagg
 | `co-design` | ✅ Stable | UI/UX design workflow — PM, Design Lead, UX Researcher, Visual Designer, Prototype Engineer, Storyteller, Service Designer, Typography Expert |
 | `co-work` | ✅ Stable | General collaboration workflow — PM, Analyst, Technical Writer, Content Writer, Project Coordinator, Storyteller, MS365 Expert |
 | `co-security` | ✅ Stable | Security engagement workflow — PM, Red Team Lead, Pentester, Threat Modeler, Patch Engineer, Report Writer |
-| `co-consult` | ✅ Stable | Strategy consulting workflow — Engagement Leader, Strategy Analyst, Industry Expert, Change Management Partner, Communications Lead, Solutions Architect, and more |
+| `co-consult` | ✅ Stable | Strategy consulting workflow — Engagement Leader, Strategy Analyst, Industry Expert, Change Management Partner, Communications Lead, Solutions Architect, and more. Jurisdiction research anchors via country profiles (KR profile included) |
 | `co-deck` | ✅ Stable | Lecture material production workflow — PM, Version, Research, Storyline, Design, Build, Measure, Export |
 | `co-game` | ✅ Stable | HTML5 Canvas game development workflow — PM, Game Designer, Arcade/Puzzle Designers, Visual Artist, Sound Designer, Game Developer, Game Debugger, Test Runner, Security Monitor |
-| `co-export` | 🔶 Beta | Import/export trade-compliance AI agent team — HS classification, export control & sanctions screening, FTA origin determination, customs duty drawback, logistics coordination, market entry strategy, foreign regulation monitoring, trade documentation |
+| `co-export` | 🔶 Beta | Import/export trade-compliance AI agent team — HS classification, export control & sanctions screening, FTA origin determination, customs duty drawback, logistics coordination, market entry strategy, foreign regulation monitoring, trade documentation. Jurisdiction content via country profiles (KR profile included) |
 | `co-news` | 🔶 Beta | Business/finance journalism — PM, Reporter, Fact-Checker, Financial Analyst, Legal Researcher, Style Editor, Visual Editor. Jurisdiction data via country profiles (KR profile included) |
 | `co-abap` | ✅ Stable | SAP ABAP development workflow — PM, Architect, Code Writer, Test Runner, DBA, DevOps Admin, SAP Investigators, Module Analysts (SD, MM, FI, CO, PP, LE), Interface/Fiori/Form Experts, Security Monitor |
 | `co-hr` | 🔶 Beta | HR & labor-relations consulting workflow — PM, Labor Compliance Analyst, Labor Relations Specialist, Safety & Health Officer, Talent Acquisition Specialist, Compensation & Benefits Analyst, Performance Management Consultant, L&D Specialist, Career & Succession Consultant, Org Design Consultant, Change Management Partner, Data Analyst. Labor-law scope via country profiles (KR profile included) |
-| `co-safety` | 🔶 Beta | EHS/GxP compliance platform workflow — PM/CSO, 40+ specialist agents (emergency, compliance, legal, training, PSM, risk, audit, 15 industry domains, 5 GxP domains), k-law regulatory research integration (KR-scoped) |
-| `co-price` | 🔶 Beta | Multi-industry pricing management & consulting simulator — PM, Finance Strategy Lead, CPA Auditor, Pricing Strategist, Market Intelligence Analyst, Engagement Director, with bundled K-Beauty sample dataset |
+| `co-safety` | 🔶 Beta | EHS/GxP compliance platform workflow — PM/CSO, 40+ specialist agents (emergency, compliance, legal, training, PSM, risk, audit, 15 industry domains, 5 GxP domains), k-law regulatory research integration (KR-scoped); jurisdiction content via country profiles (KR profile included) |
+| `co-price` | 🔶 Beta | Multi-industry pricing management & consulting simulator — PM, Finance Strategy Lead, CPA Auditor, Pricing Strategist, Market Intelligence Analyst, Engagement Director, with bundled K-Beauty sample dataset; KR country profile included |
 
 ### Selecting a version and variant
 
@@ -349,7 +351,7 @@ This handbook is a 2-day intensive curriculum covering:
 - **Day 1 — General Users**: Core AI concepts, Vibe Coding vs. Harness Engineering principles, guardrails, permission models, and basic multi-agent operations.
 - **Day 2 — IT Professionals**: Deep-dive architecture (SSOT hierarchy L0→L1→L2), enterprise deployment strategies, custom variant engineering (Phase A/B), and comprehensive capstone projects.
 
-All concepts are demonstrated across the supported platform set — 7 surfaces on 5 platform directories (Claude Code CLI + Claude Desktop App, Gemini CLI, Antigravity, Codex CLI + Codex Desktop, and Hermes Agent; see CONSTITUTION.md §7).
+All concepts are demonstrated across the supported platform set — 7 surfaces on 5 platform directories (Claude Code CLI + Claude Desktop App, Gemini CLI, Antigravity, Codex CLI + Codex Desktop, and Hermes Agent; see CONSTITUTION.md §11).
 
 ---
 
@@ -371,4 +373,4 @@ AGPL-3.0 - see [LICENSE](LICENSE)
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-09-26*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-09-27*
