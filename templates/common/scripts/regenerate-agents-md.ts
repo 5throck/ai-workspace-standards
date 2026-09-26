@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * regenerate-agents-md.ts
- * @version 1.2.0
+ * @version 1.3.0
  *
  * v1.2.0 (2026-09-26, tier-extraction hygiene): strip inline YAML
  *         comments in tier.* extraction (`medium # claude-sonnet-5-0` →
@@ -315,6 +315,27 @@ function regenerateVariant(variantName: string, dryRun: boolean): void {
  * roster is derived by scanning agents/*.md (pm.md excluded, same rule as
  * regenerateVariant). Reuses the same L1 template + block pipeline.
  */
+/**
+ * L3-only §6 hygiene: the L1 common §6 skills table also lists L0-only
+ * skills (l2_propagate:false — create-variant, promote-variant,
+ * simulate-pipeline, …) that are never delivered to a project, and a
+ * regenerated L3 AGENTS.md carrying those rows fails the project audit's
+ * stale-§6-skill-path check. Keep a skills-table row only when the
+ * referenced skill directory actually exists in the L3 source. (--variant
+ * mode is unaffected: an L2 template deliberately ships the superset
+ * table; scaffold/upgrade own the project-level sweep.)
+ */
+function pruneUndeliveredSkillRows(generated: string, sourceDir: string): string {
+  return generated
+    .split('\n')
+    .filter((line) => {
+      const m = line.match(/^\| `[^`]+` \| `skills\/([^/`]+)\/`/);
+      if (!m) return true;
+      return fs.existsSync(path.join(sourceDir, 'skills', m[1], 'SKILL.md'));
+    })
+    .join('\n');
+}
+
 function regenerateSource(sourceDir: string, dryRun: boolean): void {
   const agentsDir = path.join(sourceDir, 'agents');
   if (!fs.existsSync(agentsDir)) {
@@ -343,7 +364,7 @@ function regenerateSource(sourceDir: string, dryRun: boolean): void {
 
   const template = fs.readFileSync(COMMON_AGENTS_TEMPLATE, 'utf-8');
   const blocks = generateVariantBlocks(agents);
-  const generated = injectBlocks(template, blocks);
+  const generated = pruneUndeliveredSkillRows(injectBlocks(template, blocks), sourceDir);
   const outputPath = path.join(sourceDir, 'AGENTS.md');
 
   if (dryRun) {

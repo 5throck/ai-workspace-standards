@@ -1483,6 +1483,15 @@
       "source": "manual",
       "created": "2026-09-26",
       "last_updated": "2026-09-26"
+    },
+    {
+      "id": "2026-09-26-regen-agents-md-l3-skill-prune-design",
+      "title": "regen agents md l3 skill prune design",
+      "file": "docs/designs/2026-09-26-regen-agents-md-l3-skill-prune-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-26",
+      "last_updated": "2026-09-26"
     }
   ]
 }

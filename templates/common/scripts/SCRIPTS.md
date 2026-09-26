@@ -105,7 +105,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `hooks/post-write-lifecycle-check.ts` | L0 | 1.2.0 | active | v1.2.0 checks 1-4 generalize to four platforms mapping-aware (.codex/prompts leg; .agents/commands excluded per Finding D) (spec docs/designs/2026-09-25-verifier-platform-expansion-design.md site 9) | —| L0+L1 | —|
 | `hooks/pre-commit.ts` | L0 | 1.8.0 | active | v1.8.0 check 6b generalizes to four platforms (skills regexes + .codex/prompts mapping leg), WARN severity preserved (spec docs/designs/2026-09-25-verifier-platform-expansion-design.md site 8) | —| L0+L1 | —|
 | `hooks/pre-push.ts` | L0 | 1.4.1 | active | —| —| L0+L1 | —|
-| `regenerate-agents-md.ts` | L0 | 1.2.0 | active | v1.2.0: tier extraction strips inline YAML comments (`medium # model-id` leaked into roster rows). | —| —| L0 | —|
+| `regenerate-agents-md.ts` | L0 | 1.3.0 | active | v1.2.0: tier extraction strips inline YAML comments (`medium # model-id` leaked into roster rows). | —| —| L0 | —|
 | `lib/context-md-schema.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `lib/auth.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/constitution-scrub.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
