@@ -128,12 +128,34 @@ export function hermesSpawnArgv(o: HermesSpawnOptions): string[] {
   ];
 }
 
+/** P2-4 (QA fair): spawned runtimes get an ALLOWLIST env — never the full gateway env, which
+ * carries operator secrets (CO_WORKSPACE_API_KEYS etc.). Providers inherit their own prefixed
+ * vars so each CLI reaches its own credentials. */
+const ENV_ALLOW_EXACT = new Set([
+  "PATH", "HOME", "USER", "SHELL", "TERM", "LANG", "LC_ALL", "TZ", "TMPDIR",
+  "HTTPS_PROXY", "HTTP_PROXY", "NO_PROXY",
+]);
+const ENV_ALLOW_PREFIX = /^(HERMES_|ANTHROPIC_|OPENAI_|GOOGLE_|XDG_)/i;
+
+export function allowlistedEnv(base: Record<string, string | undefined> = process.env): Record<string, string | undefined> {
+  const out: Record<string, string | undefined> = {};
+  for (const [k, v] of Object.entries(base)) {
+    if (v === undefined) continue;
+    if (ENV_ALLOW_EXACT.has(k) || ENV_ALLOW_PREFIX.test(k)) out[k] = v;
+  }
+  return out;
+}
+
 /** Per-tenant isolation: HERMES_HOME points at the tenant home so config, credentials, and the
  * session store (state.db) never cross tenants (ADR-0092 D5/D6) — EXCEPT the shared Nous
  * credential store, which every tenant points at so runtime refreshes stay valid everywhere
  * (ADR-0092 Addendum 4; per-tenant auth.json copies went stale and killed the shared refresh token). */
 export function hermesEnv(o: HermesSpawnOptions, base: Record<string, string | undefined> = process.env): Record<string, string | undefined> {
-  const env: Record<string, string | undefined> = { ...base, HERMES_HOME: o.hermesHome, HERMES_ACCEPT_HOOKS: "1" };
+  const env: Record<string, string | undefined> = {
+    ...allowlistedEnv(base),
+    HERMES_HOME: o.hermesHome,
+    HERMES_ACCEPT_HOOKS: "1",
+  };
   if (o.sharedAuthDir) env.HERMES_SHARED_AUTH_DIR = o.sharedAuthDir;
   return env;
 }

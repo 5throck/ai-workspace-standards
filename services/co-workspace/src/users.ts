@@ -312,6 +312,8 @@ export class UserStore {
       this.db
         .query("UPDATE users SET password_hash=? WHERE id=?")
         .run(Bun.password.hashSync(patch.password), userId);
+      // SEC-06: a credential rotation invalidates every existing session.
+      this.db.query("DELETE FROM sessions WHERE user_id=?").run(userId);
     }
     return this.findById(userId);
   }

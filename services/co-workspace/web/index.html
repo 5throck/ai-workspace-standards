@@ -105,12 +105,15 @@
 <body>
 <aside>
   <div class="brand">co-workspace <span>teams</span></div>
-  <button class="newbtn" id="newChat">＋ New chat</button>
-  <div class="userbox">
-    <label>User
-      <input id="user" value="default" placeholder="alice">
+  <div class="ctlgroup" style="flex-direction:column; align-items:stretch; gap:6px; margin-bottom:8px;">
+    <label class="field" style="color:var(--muted); font-size:.74rem;">Variant
+      <select id="model" aria-label="Variant" style="background:var(--input-bg); color:var(--fg); border:1px solid var(--border2); border-radius:7px; padding:7px 9px; font:inherit;"></select>
+    </label>
+    <label style="font-size:.74rem; color:var(--muted); display:flex; gap:6px; align-items:center; cursor:pointer;">
+      <input type="checkbox" id="beta" style="width:auto"> include beta variants
     </label>
   </div>
+  <button class="newbtn" id="newChat">＋ New chat</button>
   <div id="authCard"></div>
   <div class="sidetitle">SESSIONS</div>
   <div id="sessions"></div>
@@ -118,10 +121,6 @@
 <section>
   <header>
     <button class="collapsebtn" id="collapseLeft" title="Toggle sidebar">☰</button>
-    <div class="ctlgroup">
-      <select id="model" aria-label="Variant"></select>
-      <label class="check"><input type="checkbox" id="beta"> include beta</label>
-    </div>
     <span class="pname" id="pnameLabel" style="flex:1"></span>
     <button class="collapsebtn" id="themeBtn" title="Toggle theme">◐</button>
     <button class="collapsebtn" id="collapseRight" title="Toggle artifacts panel">▤ Artifacts</button>
@@ -134,27 +133,28 @@
       (same user + same variant → same session, nothing new is created).
     </div>
   </div>
-  <aside id="artifacts">
-    <div class="tabs">
-      <button data-tab="files" class="active">Files</button>
-      <button data-tab="preview">Preview</button>
-      <button data-tab="history">History</button>
-    </div>
-    <div class="content" id="artifactsContent"></div>
-  </aside>
   <form class="composer" id="composer">
     <textarea id="message" rows="1" placeholder="Ask the team…"></textarea>
     <button type="submit" id="send">Send</button>
   </form>
 </section>
+<aside id="artifacts">
+  <div class="tabs">
+    <button data-tab="files" class="active">Files</button>
+    <button data-tab="preview">Preview</button>
+    <button data-tab="history">History</button>
+  </div>
+  <div class="content" id="artifactsContent"></div>
+</aside>
 <script type="module">
   const $ = (id) => document.getElementById(id);
   const modelSel = $("model"), sessionsEl = $("sessions"), log = $("log"),
         form = $("composer"), input = $("message"), send = $("send"),
-        userIn = $("user"), betaBox = $("beta"), pnameLabel = $("pnameLabel");
+        betaBox = $("beta"), pnameLabel = $("pnameLabel");
   let currentTenantId = "";
   let currentModel = "";
-  let currentUserName = () => (userIn.value.trim() || "default");
+  let me = null;
+  let currentUserName = () => (me?.loginId ?? "default");
 
   function bubble(role, text = "") {
     document.querySelector(".empty")?.remove();
@@ -170,7 +170,6 @@
     const body = await (await fetch("/v1/models")).json();
     const includeBeta = betaBox.checked;
     const catalog = body.data.filter((m) => includeBeta || m.meta?.status !== "beta");
-    variantSel.innerHTML = "";
     modelSel.innerHTML = "";
     for (const m of catalog) {
       const isBeta = m.meta?.status === "beta";
@@ -178,8 +177,7 @@
       const vo = document.createElement("option");
       vo.value = m.id;
       vo.textContent = label;
-      variantSel.appendChild(vo);
-      const mo = document.createElement("option");
+        const mo = document.createElement("option");
       mo.value = m.id;
       mo.textContent = label;
       modelSel.appendChild(mo);
@@ -205,7 +203,7 @@
         row.className = "sess" + (t.tenantId === currentTenantId ? " active" : "");
         const name = t.name ?? t.tenantId;
         const tag = t.status === "failed" ? " ⚠" : t.status === "provisioning" ? " ⏳" : "";
-        row.innerHTML = `<div><div class="nm">${name}${tag}</div>` +
+        row.innerHTML = `<div><div class="nm">${esc(name)}${tag}</div>` +
           `<div class="meta">${t.sessions} turns</div></div>`;
         const del = document.createElement("button");
         del.className = "del"; del.textContent = "Delete"; del.title = "Delete session";
@@ -232,7 +230,6 @@
     currentTenantId = t.tenantId;
     currentModel = t.variant;
     modelSel.value = t.variant;
-    userIn.value = t.ownerPrincipal ?? userIn.value;
     pnameLabel.innerHTML = `project: <b>${t.name ?? t.tenantId}</b> · ${t.sessions} turns`;
     log.innerHTML = "";
     bubble("assistant", `Resumed "${t.name ?? t.tenantId}" (${t.variant}) — ${t.sessions} earlier turns. Continue below.`);
@@ -297,7 +294,7 @@
           if (payload.error) throw new Error(payload.error.message ?? "stream error");
           const delta = payload.choices?.[0]?.delta?.content;
           if (delta) {
-            if (first) { reply.remove(); first = false; reply.remove(); }
+            reply.classList.remove("pending");
             reply.textContent += delta;
             log.scrollTop = log.scrollHeight;
           }
@@ -361,7 +358,7 @@
     for (const e of entries) {
       const row = document.createElement("div");
       row.className = "fileRow " + e.type;
-      row.innerHTML = `<span>${e.type === "dir" ? "📁" : "📄"} ${e.name}</span>` +
+      row.innerHTML = `<span>${e.type === "dir" ? "📁" : "📄"} ${esc(e.name)}</span>` +
         `<span class="size">${e.type === "file" ? (e.size ?? 0) + "B" : ""}</span>`;
       row.addEventListener("click", async () => {
         if (e.type === "dir") {
@@ -390,7 +387,7 @@
     if (res.status === 413) { artContent.innerHTML = '<div class="hint">File exceeds the 256KB preview cap.</div>'; return; }
     if (res.status !== 200) { artContent.innerHTML = '<div class="hint">File not available.</div>'; return; }
     const { content } = await res.json();
-    artContent.innerHTML = `<div class="hint" style="margin-bottom:6px;">${filePath}</div>` +
+    artContent.innerHTML = `<div class="hint" style="margin-bottom:6px;">${esc(filePath)}</div>` +
       `<pre class="preview">${content.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</pre>`;
   }
 
@@ -403,8 +400,8 @@
     for (const t of turns) {
       const div = document.createElement("div");
       div.className = "turnRow";
-      div.innerHTML = `<div class="meta">#${t.seq} · ${t.at} · exit ${t.exitCode} · ${t.inputTokens}→${t.outputTokens} tok</div>` +
-        `<div class="txt">${(t.finalText || "(empty)").slice(0, 220).replace(/&/g, "&amp;").replace(/</g, "&lt;")}</div>`;
+      div.innerHTML = `<div class="meta">#${t.seq} · ${esc(t.at)} · exit ${t.exitCode} · ${t.inputTokens}→${t.outputTokens} tok</div>` +
+        `<div class="txt">${esc((t.finalText || "(empty)").slice(0, 220))}</div>`;
       artContent.appendChild(div);
     }
   }
@@ -442,7 +439,7 @@
     for (const e of entries) {
       const row = document.createElement("div");
       row.className = "fileRow " + e.type;
-      row.innerHTML = `<span>${e.type === "dir" ? "📁" : "📄"} ${e.name}</span>` +
+      row.innerHTML = `<span>${e.type === "dir" ? "📁" : "📄"} ${esc(e.name)}</span>` +
         `<span class="size">${e.type === "file" ? (e.size ?? 0) + "B" : ""}</span>`;
       const relPath = cwd ? `${cwd}/${e.name}` : e.name;
       row.addEventListener("click", () => {
@@ -463,7 +460,6 @@
   });
 
   // ── Wave B1/B3: auth state, login/signup UI, user info, admin panel ──
-  let me: { loginId: string; name: string; role: string } | null = null;
   const authCard = $("authCard");
   const adminMenu = $("adminMenu");
   const adminView = $("adminView");
@@ -471,8 +467,10 @@
   function renderAuthCard() {
     if (me) {
       authCard.innerHTML =
-        `<div id="userInfo"><b>${me.name}</b> · @${me.loginId}<br><span class="hint">${me.role === "admin" ? "administrator" : "member"}</span></div>` +
-        `<button id="profileBtn">Profile</button><button id="logoutBtn" style="background:#8b1f1f;">Sign out</button>`;
+        `<div style="display:flex; align-items:center; justify-content:space-between; gap:6px;">` +
+        `<span style="font-size:.78rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"><b>${esc(me.name)}</b>${me.role === "admin" ? " ·admin" : ""}</span>` +
+        `<span><button id="profileBtn" class="collapsebtn" title="Profile" style="font-size:.75rem;">✎</button>` +
+        `<button id="logoutBtn" class="collapsebtn" title="Sign out" style="font-size:.75rem;">⎋</button></span></div>`;
       $("logoutBtn").addEventListener("click", async () => {
         await fetch("/auth/logout", { method: "POST" });
         me = null;
@@ -542,7 +540,7 @@
     $("log").style.display = "none";
     adminView.innerHTML =
       `<div class="card"><h2>Profile — @${me?.loginId}</h2>` +
-      `<div class="field" style="margin-bottom:6px;"><input id="pf-name" placeholder="Display name" value="${me?.name ?? ""}"></div>` +
+      `<div class="field" style="margin-bottom:6px;"><input id="pf-name" placeholder="Display name" value="${esc(me?.name ?? "")}"></div>` +
       `<div class="field" style="margin-bottom:6px;"><input id="pf-pw" type="password" placeholder="New password (optional)"></div>` +
       `<button id="pf-save">Save</button> <button id="pf-back">Back</button></div>`;
     $("pf-save").addEventListener("click", async () => {
@@ -564,7 +562,7 @@
     });
   }
 
-  async function doLogin(id: string, pw: string) {
+  async function doLogin(id, pw) {
     const res = await fetch("/auth/login", {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -591,7 +589,7 @@
     return rows
       .map(
         ([label, val]) =>
-          `<div class="barRow"><div class="barLabel" title="${label}">${label}</div>` +
+          `<div class="barRow"><div class="barLabel" title="${esc(label)}">${esc(label)}</div>` +
           `<div class="barTrack"><div class="barFill" style="width:${(val / max) * 100}%"></div></div>` +
           `<div class="barVal">${val}${unit}</div></div>`,
       )
@@ -625,8 +623,8 @@
       users
         .map((u: any) => {
           const pu = stats.perUser.find((p: any) => p.principal === u.principal);
-          return `<tr><td>${u.loginId ?? u.principal}${u.role === "admin" ? " ·admin" : ""}</td>` +
-            `<td>${u.status}</td><td>${pu?.tenantCount ?? 0}</td><td>${fmt(pu?.diskBytes ?? 0)}</td>` +
+          return `<tr><td>${esc(u.loginId ?? u.principal)}${u.role === "admin" ? " ·admin" : ""}</td>` +
+            `<td>${esc(u.status)}</td><td>${pu?.tenantCount ?? 0}</td><td>${fmt(pu?.diskBytes ?? 0)}</td>` +
             `<td><button class="collapsebtn" data-reset="${u.id}">reset pw</button> ` +
             `<button class="collapsebtn" data-del="${u.id}" style="color:#f85149;">delete</button></td></tr>`;
         })
@@ -662,12 +660,11 @@ ${body.resetToken}`);
     if (res.status === 200) {
       me = (await res.json()).user;
       applyAdminVisibility();
-      renderAuthCard();
     }
+    renderAuthCard();
   })();
 
   betaBox.addEventListener("change", loadModels);
-  userIn.addEventListener("change", loadSessions);
   send.disabled = false;
   loadModels();
   loadSessions();

@@ -10,6 +10,7 @@
  */
 
 import type { HermesEvent, HermesTurnResult } from "./hermes";
+import { allowlistedEnv } from "./hermes";
 
 export interface AntigravitySpawnOptions {
   agyBin: string;
@@ -91,7 +92,7 @@ export async function runAntigravityTurn(
     stdin: "ignore",
     stdout: "pipe",
     stderr: "pipe",
-    env: o.env ?? process.env,
+    env: allowlistedEnv(o.env ?? process.env),
   });
 
   let sessionId: string | undefined;

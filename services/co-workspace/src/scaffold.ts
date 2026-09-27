@@ -30,7 +30,7 @@ export function scaffoldArgs(req: ScaffoldRequest): string[] {
     "web",
     "--yes",
   ];
-  if (req.description) args.push("--description", req.description);
+  if (req.description) args.push("--description", req.description.replace(/^-+/, "")); // SEC-11: no argv flag injection
   if (req.country) args.push("--country", req.country);
   if (req.templateVersion) args.push("--version", req.templateVersion);
   return args;
