@@ -6,7 +6,7 @@ title: >-
   and the command-mirror lockstep gate (6551e7c7/149fa425) — both missing from
   Unreleased
 priority: low
-status: running
+status: review
 attempts: 0
 created_at: '2026-09-27T00:46:17.334Z'
 history:
@@ -19,5 +19,8 @@ history:
   - at: '2026-09-27T18:05:33.200Z'
     from: waiting
     to: running
+  - at: '2026-09-27T18:17:46.028Z'
+    from: running
+    to: review
 result: null
 error: null

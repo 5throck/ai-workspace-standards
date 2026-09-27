@@ -7,7 +7,7 @@ title: >-
   co-price whose 557-line region-profiles backport e469a29a predates their Last
   Updated stamps
 priority: low
-status: running
+status: review
 attempts: 0
 created_at: '2026-09-27T00:46:17.297Z'
 history:
@@ -20,5 +20,8 @@ history:
   - at: '2026-09-27T18:05:33.153Z'
     from: waiting
     to: running
+  - at: '2026-09-27T18:17:46.001Z'
+    from: running
+    to: review
 result: null
 error: null

@@ -6,7 +6,7 @@ title: >-
   prior push failed, a rerun exits 0 without pushing; add a git ls-remote check
   and push when absent on origin
 priority: normal
-status: running
+status: review
 attempts: 0
 created_at: '2026-09-27T00:46:17.317Z'
 history:
@@ -19,5 +19,8 @@ history:
   - at: '2026-09-27T18:05:33.177Z'
     from: waiting
     to: running
+  - at: '2026-09-27T18:17:46.014Z'
+    from: running
+    to: review
 result: null
 error: null
