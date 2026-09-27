@@ -803,6 +803,9 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
       if (deleted) {
         rmSync(deleted.projectDir, { recursive: true, force: true });
         rmSync(deleted.hermesHome, { recursive: true, force: true });
+        // Remove the tenant's storage folder (<storage>/<principal>/<name>) — it only ever
+        // contains the two dirs above, so this clears the empty shell left behind.
+        rmSync(join(deleted.projectDir, ".."), { recursive: true, force: true });
         state.audit.record(callerPrincipal(state, req) ?? "anonymous", "tenant.delete", tenantId, deleted.variant);
       }
       return jsonResponse({ deleted: tenantId, name: deleted?.name ?? null });
