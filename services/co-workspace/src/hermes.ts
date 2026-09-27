@@ -46,6 +46,8 @@ export interface HermesSpawnOptions {
   extraArgs?: string[];
   /** Comma-separated toolsets passed as `-t` on every spawn (Phase 2 toolset scoping). */
   toolsets?: string;
+  /** QA-07: called with the live child process so the server can cancel a running turn. */
+  onSpawn?: (proc: { kill: (code?: number) => void }) => void;
   env?: Record<string, string | undefined>;
   /** Phase 2 isolation (design 2026-09-27-team-gateway-phase2-hardening, D3): when set, the
    * session runs inside an ephemeral sibling container — only the tenant project dir and
@@ -53,7 +55,15 @@ export interface HermesSpawnOptions {
    * `hostProjectDir`/`hostHermesHome` override the `-v` source paths for the case where the
    * gateway itself runs inside a container (mount sources resolve on the HOST, so they must be
    * host-visible paths; defaults = the gateway-local paths, correct for bare-metal hosts). */
-  container?: { image: string; hostProjectDir?: string; hostHermesHome?: string; hostAuthDir?: string };
+  container?: {
+    image: string;
+    hostProjectDir?: string;
+    hostHermesHome?: string;
+    hostAuthDir?: string;
+    memory?: string;
+    cpus?: string;
+    pidsLimit?: number;
+  };
   /** Shared Nous credential store (HERMES_SHARED_AUTH_DIR) — one token store across the
    * operator + all tenants, refreshed in place (ADR-0092 Addendum 4). */
   sharedAuthDir?: string;
@@ -103,6 +113,15 @@ export function hermesSpawnArgv(o: HermesSpawnOptions): string[] {
     "run",
     "--rm",
     "--interactive",
+    // SEC-10: resource caps + privilege hardening (network stays open — the runtime needs
+    // provider egress; egress policy is the iron-proxy path).
+    ...(o.container.memory ? ["--memory", o.container.memory] : []),
+    ...(o.container.cpus ? ["--cpus", o.container.cpus] : []),
+    ...(o.container.pidsLimit ? ["--pids-limit", String(o.container.pidsLimit)] : []),
+    "--security-opt",
+    "no-new-privileges",
+    "--cap-drop",
+    "ALL",
     "--entrypoint",
     o.hermesBin,
     "--workdir",
@@ -186,6 +205,7 @@ export async function runHermesTurn(
       ? (o.env ?? process.env) // container-side env is set via -e flags in the argv
       : hermesEnv(o, o.env ?? process.env),
   });
+  o.onSpawn?.(proc); // QA-07: cancel support — the server can kill a running turn
   proc.stdin.write(o.message);
   proc.stdin.end();
 
