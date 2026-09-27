@@ -8,12 +8,21 @@ title: >-
   (ubuntu+windows, PR #1158 run 36334425039); server-side defect in the new wire
   handlers, blocks main CI green — owner: team-gateway/co-workspace session
 priority: urgent
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-27T16:50:20.959Z'
 history:
   - at: '2026-09-27T16:50:20.959Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-27T23:02:11.664Z'
+    from: backlog
+    to: done
+result: >-
+  CORRECTED DIAGNOSIS: the chat-500 attribution was wrong —
+  anthropic/antigravity suites pass on ubuntu/macos. The actual red was
+  co-workspace-phase2b (pre-rename env var survived a local stash dance, killing
+  test isolation; real engine ran on CI) plus windows shebang-fake exec
+  failures. Fixed: env renamed + win32 gates on 5 co-workspace suites; PR #1158
+  8/8 green and merged; main CI recovery confirmed post-merge.
 error: null

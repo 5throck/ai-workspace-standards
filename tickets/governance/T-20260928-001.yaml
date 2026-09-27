@@ -7,12 +7,17 @@ title: >-
   (isolation dead, real engine ran on CI); fix landed in the nightly hotfix PR —
   restore requirement: keep this env contract pinned by a test
 priority: urgent
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-27T16:44:14.910Z'
 history:
   - at: '2026-09-27T16:44:14.910Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-27T23:02:11.679Z'
+    from: backlog
+    to: done
+result: >-
+  Env rename + windows skip gates merged via PR #1158 (8/8 green); main CI
+  recovery verified post-merge.
 error: null
