@@ -4,13 +4,13 @@ import { describe, expect, test } from "bun:test";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { loadConfig, resolveVariants } from "../../services/team-gateway/src/config";
+import { loadConfig, resolveVariants } from "../../services/co-workspace/src/config";
 import {
   publicTenant,
   seedHermesHome,
   tenantConfigYaml,
-} from "../../services/team-gateway/src/tenant";
-import { TenantRegistry } from "../../services/team-gateway/src/registry-db";
+} from "../../services/co-workspace/src/tenant";
+import { TenantRegistry } from "../../services/co-workspace/src/registry-db";
 
 function tempDir(): string {
   return join(tmpdir(), `team-gateway-test-${crypto.randomUUID().slice(0, 8)}`);
@@ -88,8 +88,8 @@ describe("TenantRegistry", () => {
     const registry = new TenantRegistry(dataDir);
     const rec = registry.create({ dataDir, variant: "co-consult", key: "co-consult::alice" });
     expect(rec.status).toBe("provisioning");
-    expect(rec.projectDir).toContain(join("tenants", rec.tenantId, "project"));
-    expect(rec.hermesHome).toContain(join("tenants", rec.tenantId, "hermes-home"));
+    expect(rec.projectDir).toContain(join("storage", "shared", rec.tenantId, "project"));
+    expect(rec.hermesHome).toContain(join("storage", "shared", rec.tenantId, "hermes-home"));
     expect(existsSync(registry.registryPath)).toBe(true);
 
     const reloaded = new TenantRegistry(dataDir);

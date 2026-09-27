@@ -10,9 +10,9 @@ import {
   messagePayload,
   messageId,
   parseAnthropicRequest,
-} from "../../services/team-gateway/src/anthropic";
-import { loadConfig } from "../../services/team-gateway/src/config";
-import { createServer, createState } from "../../services/team-gateway/src/server";
+} from "../../services/co-workspace/src/anthropic";
+import { loadConfig } from "../../services/co-workspace/src/config";
+import { createServer, createState } from "../../services/co-workspace/src/server";
 
 describe("parseAnthropicRequest — Messages API shape", () => {
   test("accepts string content and extracts the latest user message", () => {

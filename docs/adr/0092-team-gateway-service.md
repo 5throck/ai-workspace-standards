@@ -43,6 +43,18 @@ A second session runtime is supported: `TEAM_GATEWAY_RUNTIME=antigravity` runs t
 
 A user-reported silent test failure traced to credential death: seeding each tenant `HERMES_HOME` with a COPY of the operator's `auth.json` breaks as soon as any home refreshes the Nous Portal token — refresh tokens are single-use, so the copy goes stale, and every subsequent turn fails with provider-resolution errors while the gateway mechanics stay green. Fix: tenants no longer receive `auth.json` copies; every hermes spawn sets `HERMES_SHARED_AUTH_DIR` (Hermes' native cross-home token store, `hermes_cli/auth_nous.py` — "written on login AND every runtime refresh so the refresh_token stays current") to ONE shared dir, default `<seed>/shared`, configurable via `TEAM_GATEWAY_HERMES_AUTH_DIR`. This amends the seeding behavior in Decision 6 (`.env` is still copied; `auth.json` is not). Recovery note: tokens already invalidated require one interactive `hermes login`.
 
+## Addendum 5 (2026-09-27): co-workspace Rebrand, Accounts with Email Verification, Admin Analytics
+
+Three decisions land together:
+
+1. **Rebrand + port**: the service is renamed **co-workspace** (UI, health payload, compose project/image names, service directory `services/co-workspace/`) and the default port is **9030**. Image names follow (`co-workspace-gateway`, `co-workspace-runtime`).
+2. **PII-safe accounts (amends Wave B1)**: signup collects a **login ID + email + password**; the account stays pending until a verification key from the generated mail is entered. Privacy by data minimization — the raw email lives ONLY in the transient `pending_verifications` row (24h, deleted on verification); the users table keeps `email_hash` (SHA-256) for duplicate detection and never the raw email; login is by ID + password; the admin user list shows login IDs, never emails. The verification "mail" is generated to `<dataDir>/mail-outbox/` (dev/ops channel; a real SMTP integration is operator-side).
+3. **Admin analytics**: `GET /admin/stats` — active/deleted users, tenants by status, total turns + tokens, total and per-principal disk usage (recursive dir size over tenant project + hermes home), tenants-per-variant, and a per-user rollup (tenant count, disk bytes, turns) for graphs. The demo page renders stat cards + horizontal bar charts and a user-management table (reset password → one-time token, delete with `archive|delete` disposition).
+
+Also in this wave: the artifacts right panel (Files/Preview/History) with the tenant-confined files API and per-turn `turns` persistence, collapsible side panels, dark/light theme, sidebar sessions grouped by variant, and Claude Code + Codex CLI runtime adapters (provider disclosure in the models payload). Docker note: a stale container from the pre-rename project kept serving the old port alongside the new deployment — operators must `docker compose -p <old-name> down` (or remove the old container) after the rename.
+
+**Storage layout amendment (same addendum)**: tenant workspaces live under `<DATA_DIR>/storage/<principal>/<projectName>/{project,hermes-home}` — per-user grouping on disk (user request) instead of a flat `tenants/<id>` dir. The scaffold still executes in the workspace clone's `Projects/` (engine constraint) and relocates immediately; legacy `tenants/` paths keep working via per-record absolute paths.
+
 ## References
 
 - Design: `docs/designs/2026-09-27-team-gateway-service-design.md` (verified building blocks, D1–D8, waves, live-verification record)

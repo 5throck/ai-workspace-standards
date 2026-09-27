@@ -1,7 +1,7 @@
 /** Unit tests for the Team Gateway Hermes bridge and OpenAI wire translation (ADR-0092 W3). */
 
 import { describe, expect, test } from "bun:test";
-import { hermesArgs, parseHermesLine, type HermesSpawnOptions } from "../../services/team-gateway/src/hermes";
+import { hermesArgs, parseHermesLine, type HermesSpawnOptions } from "../../services/co-workspace/src/hermes";
 import {
   chunkData,
   completionPayload,
@@ -9,7 +9,7 @@ import {
   doneData,
   modelsPayload,
   parseChatRequest,
-} from "../../services/team-gateway/src/openai";
+} from "../../services/co-workspace/src/openai";
 
 const baseSpawn: HermesSpawnOptions = {
   hermesBin: "hermes",

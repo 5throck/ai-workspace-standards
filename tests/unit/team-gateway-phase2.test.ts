@@ -5,10 +5,10 @@ import { afterAll, describe, expect, test } from "bun:test";
 import { chmodSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { credentialValid, isAuthEnabled, presentedCredential, requestAuthorized } from "../../services/team-gateway/src/auth";
-import { dockerProbe, loadConfig } from "../../services/team-gateway/src/config";
-import { hermesArgs, hermesSpawnArgv, type HermesSpawnOptions } from "../../services/team-gateway/src/hermes";
-import { createServer, createState } from "../../services/team-gateway/src/server";
+import { credentialValid, isAuthEnabled, presentedCredential, requestAuthorized } from "../../services/co-workspace/src/auth";
+import { dockerProbe, loadConfig } from "../../services/co-workspace/src/config";
+import { hermesArgs, hermesSpawnArgv, type HermesSpawnOptions } from "../../services/co-workspace/src/hermes";
+import { createServer, createState } from "../../services/co-workspace/src/server";
 
 const cfgAuth = { apiKeys: ["sk-one", "sk-two"] };
 const req = (headers: Record<string, string>) => new Request("http://x/v1/models", { headers });
@@ -89,7 +89,7 @@ describe("hermes spawn adapter — toolsets and container isolation", () => {
   });
 
   test("hermesEnv carries the shared Nous credential store (Addendum 4)", () => {
-    const { hermesEnv } = require("../../services/team-gateway/src/hermes");
+    const { hermesEnv } = require("../../services/co-workspace/src/hermes");
     const env = hermesEnv({ ...base, sharedAuthDir: "/secrets/shared" }, {});
     expect(env.HERMES_SHARED_AUTH_DIR).toBe("/secrets/shared");
     expect(env.HERMES_HOME).toBe(base.hermesHome);
@@ -211,9 +211,7 @@ echo '{"type":"result","session_id":"s1","exit_code":0,"text":"pong","tokens":{"
       await Bun.sleep(50);
     }
     expect(detail.status).toBe("ready");
-    const projectDir = detail.name
-      ? join(dataDir, "tenants", tenantId, "project")
-      : join(dataDir, "tenants", tenantId, "project");
+    const projectDir = join(dataDir, "storage", "default", tenantId, "project");
     expect(existsSync(projectDir)).toBe(true);
     // owner CAN delete (principal "default" matches) — files removed
     const ok = await fetch(`${base}/tenants/${tenantId}`, {

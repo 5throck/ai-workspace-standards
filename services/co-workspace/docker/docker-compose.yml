@@ -17,9 +17,9 @@ services:
   co-workspace:
     build:
       # NOTE: compose resolves relative paths against THIS FILE's directory
-      # (services/team-gateway/docker/), so three levels up = the repo root.
+      # (services/co-workspace/docker/), so three levels up = the repo root.
       context: ../../../
-      dockerfile: services/team-gateway/docker/Dockerfile
+      dockerfile: services/co-workspace/docker/Dockerfile
     image: co-workspace-gateway:latest
     entrypoint: [] # bypass the base image's s6 init — the server runs as PID 1
     command: ["bun", "src/server.ts"]
@@ -44,7 +44,7 @@ services:
       TEAM_GATEWAY_HERMES_EXTRA_ARGS: ${TEAM_GATEWAY_HERMES_EXTRA_ARGS:-}
       TEAM_GATEWAY_RUNTIME: ${TEAM_GATEWAY_RUNTIME:-hermes}
       TEAM_GATEWAY_ISOLATION: ${TEAM_GATEWAY_ISOLATION:-process}
-      TEAM_GATEWAY_RUNTIME_IMAGE: ${TEAM_GATEWAY_RUNTIME_IMAGE:-team-gateway-runtime:latest}
+      TEAM_GATEWAY_RUNTIME_IMAGE: ${TEAM_GATEWAY_RUNTIME_IMAGE:-co-workspace-runtime:latest}
       TEAM_GATEWAY_RUN_BUDGET_SECONDS: ${TEAM_GATEWAY_RUN_BUDGET_SECONDS:-300}
       TEAM_GATEWAY_MAX_TURNS: ${TEAM_GATEWAY_MAX_TURNS:-100}
       HERMES_BIN: ${HERMES_BIN:-hermes}

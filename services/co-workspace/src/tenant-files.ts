@@ -143,6 +143,24 @@ export class TurnStore {
       .run(tenantId, MAX_TURNS_PER_TENANT, tenantId);
   }
 
+  /** Admin stats: global turn/token totals. */
+  aggregate(): { totalTurns: number; totalInputTokens: number; totalOutputTokens: number } {
+    const row = this.db
+      .query(
+        "SELECT COUNT(*) AS n, COALESCE(SUM(input_tokens),0) AS i, COALESCE(SUM(output_tokens),0) AS o FROM turns",
+      )
+      .get() as { n: number; i: number; o: number };
+    return { totalTurns: row.n, totalInputTokens: row.i, totalOutputTokens: row.o };
+  }
+
+  /** Turn counts grouped by tenant (for per-user rollups). */
+  countsByTenant(): Map<string, number> {
+    const rows = this.db
+      .query("SELECT tenant_id, COUNT(*) AS n FROM turns GROUP BY tenant_id")
+      .all() as { tenant_id: string; n: number }[];
+    return new Map(rows.map((r) => [r.tenant_id, r.n]));
+  }
+
   list(tenantId: string, limit = 50): TurnRecord[] {
     const rows = this.db
       .query(

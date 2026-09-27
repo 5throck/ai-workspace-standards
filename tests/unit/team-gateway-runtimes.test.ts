@@ -2,8 +2,8 @@
  * Event shapes captured live 2026-09-27 (claude 2.1.274, codex CLI). */
 
 import { describe, expect, test } from "bun:test";
-import { claudeArgs, parseClaudeLine } from "../../services/team-gateway/src/claude";
-import { codexArgs, parseCodexLine } from "../../services/team-gateway/src/codex";
+import { claudeArgs, parseClaudeLine } from "../../services/co-workspace/src/claude";
+import { codexArgs, parseCodexLine } from "../../services/co-workspace/src/codex";
 
 describe("claude runtime — args and normalization", () => {
   test("builds the print-mode command with verbose stream-json", () => {

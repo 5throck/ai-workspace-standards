@@ -116,14 +116,20 @@ export class TenantRegistry {
     ownerPrincipal?: string;
   }): TenantRecord {
     const tenantId = genId("gw");
+    // Storage layout (user request): tenants live under <dataDir>/storage/<principal>/<name>/
+    // — per-user grouping on disk. The scaffold still runs in the workspace clone's Projects/
+    // (engine constraint) and is relocated here immediately after.
+    const principal = init.ownerPrincipal ?? "shared";
+    const folder = init.name || tenantId;
+    const storageRoot = join(init.dataDir, "storage", principal, folder);
     const rec: TenantRecord = {
       tenantId,
       key: init.key,
       variant: init.variant,
       status: "provisioning",
       createdAt: new Date().toISOString(),
-      projectDir: join(init.dataDir, "tenants", tenantId, "project"),
-      hermesHome: join(init.dataDir, "tenants", tenantId, "hermes-home"),
+      projectDir: join(storageRoot, "project"),
+      hermesHome: join(storageRoot, "hermes-home"),
       description: init.description,
       name: init.name,
       ownerPrincipal: init.ownerPrincipal,

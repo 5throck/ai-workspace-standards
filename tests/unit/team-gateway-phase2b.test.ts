@@ -4,12 +4,12 @@ import { afterAll, describe, expect, test } from "bun:test";
 import { chmodSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { loadConfig, parseKeyList, readKeysFile } from "../../services/team-gateway/src/config";
-import { assertQuota, windowUsage } from "../../services/team-gateway/src/server";
-import { createServer, createState } from "../../services/team-gateway/src/server";
+import { loadConfig, parseKeyList, readKeysFile } from "../../services/co-workspace/src/config";
+import { assertQuota, windowUsage } from "../../services/co-workspace/src/server";
+import { createServer, createState } from "../../services/co-workspace/src/server";
 // TenantRegistry now lives in registry-db (SQLite store); tests import server-created state only.
-import type { GatewayConfig } from "../../services/team-gateway/src/config";
-import type { TenantRecord } from "../../services/team-gateway/src/tenant";
+import type { GatewayConfig } from "../../services/co-workspace/src/config";
+import type { TenantRecord } from "../../services/co-workspace/src/tenant";
 
 function tenant(overrides: Partial<TenantRecord> = {}): TenantRecord {
   return {
