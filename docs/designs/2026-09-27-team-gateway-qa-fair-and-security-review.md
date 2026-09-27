@@ -27,22 +27,15 @@
 | QA-11 (P2) | Performance | SSE heartbeat (`: ping` every 15s) on all four streaming surfaces |
 | C-fix | Reliability | codex `output` token mis-mapping corrected |
 
-## Deferred backlog (prioritized)
+## Backlog disposition (2026-09-27, second wave — 11 of 12 implemented)
+
+Implemented in this wave: **SEC-05** (in-memory fixed-window rate limiter on `/auth/login|signup|resend` + per-principal tenant cap `CO_WORKSPACE_TENANT_MAX_PER_PRINCIPAL`), **SEC-09** (`CO_WORKSPACE_CSRF_REQUIRED=true` — keyless mutating routes require the `x-requested-with` header; compose default on), **SEC-10** (docker isolation resource caps + `no-new-privileges` + `cap-drop ALL`, configurable via `CO_WORKSPACE_CONTAINER_*`), **SEC-12** (append-only SQLite audit log + `GET /admin/audit`; login success/failure, tenant create/delete, key reload, admin actions recorded), **SEC-14** (outbox sweep at startup, 24h expiry), **QA-07** (`POST /tenants/:id/cancel` + Stop button, per-tenant active-process tracking), **QA-09** (resume replays the last 10 turns from the history store), **QA-10** (`dirSize` async via fs/promises), **QA-12** (`GET /admin/mail-outbox` viewer for remote signups), **QA-13** (session rows show input→output tokens), **QA-14** (history tab caches per tenant, refetches only when the turn count changes).
+
+Still deferred:
 
 | ID | Source | Item | Why deferred |
 |---|---|---|---|
-| SEC-05 | Security | Rate limiting (`/auth/*`, `POST /sessions`), per-principal tenant/pending caps, global spend budget | Needs a limiter design (in-memory vs SQLite) — next hardening wave |
-| SEC-09 | Security | CSRF header requirement in the keyless mode | Phase 0 is loopback-only (accepted posture); breaks many test fixtures — bundle with the limiter |
-| SEC-10 | Security | Container hardening (`--memory/--cpus/--pids-limit/--network none/no-new-privileges`), narrow `/seed` mount | Phase 2 isolation roadmap item |
-| SEC-12 | Security | Append-only audit log (auth events, admin actions, deletes) | Schema + retention design needed |
 | SEC-07 | Security | Shared credential store least-privilege (token broker / RO mount + refresh channel) | Upstream Hermes capability dependent |
-| SEC-14 | Security | Outbox expiry + token-in-body-only when SMTP lands | Mailer is dev-grade by design |
-| QA-07 (P2) | Reliability | Cancel a running turn (`POST /tenants/:id/cancel` + Stop button) | Needs child-process plumbing through the chat lock |
-| QA-09 (P2) | Product | Resume replays prior turns into the chat pane | UX polish; data already in `turns` |
-| QA-10 (P2) | Performance | `dirSize` async/cached (admin stats walk is synchronous) | Admin-only; single-user Phase 0 impact low |
-| QA-12 (P3) | Product | Admin outbox viewer (`GET /admin/mail-outbox`) for remote signups | Pairs with the SMTP wave |
-| QA-13 (P3) | Product | Per-session usage/quota meter in the UI | Data exists in `publicTenant.usage` |
-| QA-14 (P3) | Performance | History tab client cache + `?limit=` | Minor payload cost |
 
 ## Verification
 

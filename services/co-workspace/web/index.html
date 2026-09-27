@@ -203,8 +203,9 @@
         row.className = "sess" + (t.tenantId === currentTenantId ? " active" : "");
         const name = t.name ?? t.tenantId;
         const tag = t.status === "failed" ? " ⚠" : t.status === "provisioning" ? " ⏳" : "";
+        const tok = t.usage ? ` · ${t.usage.inputTokens ?? 0}→${t.usage.outputTokens ?? 0} tok` : "";
         row.innerHTML = `<div><div class="nm">${esc(name)}${tag}</div>` +
-          `<div class="meta">${t.sessions} turns</div></div>`;
+          `<div class="meta">${t.sessions} turns${tok}</div></div>`;
         const del = document.createElement("button");
         del.className = "del"; del.textContent = "Delete"; del.title = "Delete session";
         del.addEventListener("click", async (e) => {
@@ -226,12 +227,20 @@
     }
   }
 
-  function selectSession(t) {
+  async function selectSession(t) {
     currentTenantId = t.tenantId;
     currentModel = t.variant;
     modelSel.value = t.variant;
-    pnameLabel.innerHTML = `project: <b>${t.name ?? t.tenantId}</b> · ${t.sessions} turns`;
+    const usage = t.usage ? ` · ${t.usage.inputTokens ?? 0}→${t.usage.outputTokens ?? 0} tok` : "";
+    pnameLabel.innerHTML = `project: <b>${t.name ?? t.tenantId}</b> · ${t.sessions} turns${usage}`;
     log.innerHTML = "";
+    // QA-09: replay recent turns as read-only bubbles
+    try {
+      const { turns } = await (await fetch(`/tenants/${t.tenantId}/history`)).json();
+      for (const turn of turns.slice(-10).reverse()) {
+        if (turn.finalText) bubble("assistant", `[#${turn.seq}] ${turn.finalText}`);
+      }
+    } catch { /* history is best-effort */ }
     bubble("assistant", `Resumed "${t.name ?? t.tenantId}" (${t.variant}) — ${t.sessions} earlier turns. Continue below.`);
     document.querySelectorAll(".sess").forEach((el) => el.classList.remove("active"));
     document.querySelectorAll(".sess").forEach((el) => {
@@ -246,6 +255,21 @@
     bubble("assistant", "New chat — pick a variant and send a message. The team workspace is reused per (variant, user); a new project is created only if none exists yet.");
   });
 
+  // QA-07: Stop button while a turn is streaming
+  const stopBtn = document.createElement("button");
+  stopBtn.type = "button";
+  stopBtn.textContent = "Stop";
+  stopBtn.className = "composer";
+  stopBtn.style.cssText = "background:#8b1f1f; padding:10px 14px;";
+  stopBtn.addEventListener("click", async () => {
+    if (!currentTenantId) return;
+    await fetch(`/tenants/${currentTenantId}/cancel`, {
+      method: "POST",
+      headers: { "x-requested-with": "co-workspace" },
+    });
+  });
+  form.appendChild(stopBtn);
+
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     const message = input.value.trim();
@@ -257,7 +281,7 @@
     try {
       const res = await fetch("/v1/chat/completions", {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: { "content-type": "application/json", "x-requested-with": "co-workspace" },
         body: JSON.stringify({
           model: modelSel.value,
           user: currentUserName(),
@@ -391,10 +415,22 @@
       `<pre class="preview">${content.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</pre>`;
   }
 
+  const historyCache = new Map();
   async function loadHistoryTab() {
     const tenantId = currentTenantForArtifacts();
     if (!tenantId) { artContent.innerHTML = '<div class="hint">No session selected.</div>'; return; }
+    const detail = await (await fetch(`/tenants/${tenantId}`)).json();
+    const cached = historyCache.get(tenantId);
+    if (cached && cached.sessions === detail.sessions) {
+      renderHistory(cached.turns);
+      return;
+    }
     const { turns } = await (await fetch(`/tenants/${tenantId}/history`)).json();
+    historyCache.set(tenantId, { sessions: detail.sessions, turns });
+    renderHistory(turns);
+  }
+
+  function renderHistory(turns) {
     if (!turns.length) { artContent.innerHTML = '<div class="hint">No turns recorded yet.</div>'; return; }
     artContent.innerHTML = "";
     for (const t of turns) {
@@ -510,7 +546,7 @@
     $("signupBtn").addEventListener("click", async () => {
       const res = await fetch("/auth/signup", {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: { "content-type": "application/json", "x-requested-with": "co-workspace" },
         body: JSON.stringify({ loginId: $("su-id").value, email: $("su-email").value, password: $("su-pw").value }),
       });
       const body = await res.json();
@@ -525,7 +561,7 @@
     $("verifyBtn").addEventListener("click", async () => {
       const res = await fetch("/auth/verify", {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: { "content-type": "application/json", "x-requested-with": "co-workspace" },
         body: JSON.stringify({ token: $("verify-key").value }),
       });
       const body = await res.json();
@@ -546,7 +582,7 @@
     $("pf-save").addEventListener("click", async () => {
       const res = await fetch("/auth/me", {
         method: "PATCH",
-        headers: { "content-type": "application/json" },
+        headers: { "content-type": "application/json", "x-requested-with": "co-workspace" },
         body: JSON.stringify({ name: $("pf-name").value, password: $("pf-pw").value || undefined }),
       });
       if (res.status === 200) {
@@ -565,7 +601,7 @@
   async function doLogin(id, pw) {
     const res = await fetch("/auth/login", {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: { "content-type": "application/json", "x-requested-with": "co-workspace" },
       body: JSON.stringify({ loginId: id, password: pw }),
     });
     const body = await res.json();

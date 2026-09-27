@@ -7,7 +7,7 @@
  * HERMES_HOME isolation, per-tenant chat serialization.
  */
 
-import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { dockerProbe, GatewayConfig, loadConfig, readKeysFile, SERVICE_ROOT } from "./config";
 import { credentialValid, presentedCredential, principalFor, requestAuthorized } from "./auth";
@@ -22,6 +22,7 @@ import {
   clearCookieHeader,
 } from "./users";
 import { googleConfigured, authorizeUrl, makePkce, exchangeCode, fetchProfile } from "./google-sso";
+import { AuditLog, RateLimiter, csrfRequired, sweepOutbox } from "./hardening";
 import { randomBytes } from "node:crypto";
 import { HermesEvent, HermesTurnResult, runHermesTurn } from "./hermes";
 import { runAntigravityTurn } from "./antigravity";
@@ -59,8 +60,14 @@ export interface GatewayState {
   registry: TenantRegistry;
   turns: TurnStore;
   users: UserStore;
+  audit: AuditLog;
+  loginLimiter: RateLimiter;
+  signupLimiter: RateLimiter;
+  sessionLimiter: RateLimiter;
   provisioning: Map<string, Promise<void>>;
   chatLocks: Map<string, Promise<unknown>>;
+  /** QA-07: live child processes per tenant, killable via POST /tenants/:id/cancel. */
+  activeProcs: Map<string, { kill: (code?: number) => void }>;
 }
 
 export function createState(cfg: GatewayConfig = loadConfig()): GatewayState {
@@ -69,9 +76,14 @@ export function createState(cfg: GatewayConfig = loadConfig()): GatewayState {
     cfg,
     turns: new TurnStore(cfg.dataDir),
     users: new UserStore(cfg.dataDir),
+    audit: new AuditLog(cfg.dataDir),
+    loginLimiter: new RateLimiter(10, 15 * 60 * 1000),
+    signupLimiter: new RateLimiter(5, 3600 * 1000),
+    sessionLimiter: new RateLimiter(10, 3600 * 1000),
     registry: new TenantRegistry(cfg.dataDir),
     provisioning: new Map(),
     chatLocks: new Map(),
+    activeProcs: new Map(),
   };
 }
 
@@ -296,6 +308,7 @@ async function runChat(
           extraArgs: state.cfg.hermesExtraArgs,
           toolsets: state.cfg.hermesToolsets,
           sharedAuthDir: resolveAuthDir(state.cfg),
+          onSpawn: (proc) => state.activeProcs.set(rec.tenantId, proc),
           container:
             state.cfg.isolation === "docker"
               ? {
@@ -310,6 +323,9 @@ async function runChat(
                     ?? (state.cfg.dataDirHost
                       ? join(state.cfg.dataDirHost, "shared-auth")
                       : undefined),
+                  memory: state.cfg.containerMemory,
+                  cpus: state.cfg.containerCpus,
+                  pidsLimit: state.cfg.containerPidsLimit,
                 }
               : undefined,
         },
@@ -327,6 +343,7 @@ async function runChat(
       input: n(tokens.input),
       output: n(tokens.output),
     });
+    state.activeProcs.delete(rec.tenantId);
     state.registry.upsert(current);
     state.turns.record(rec.tenantId, {
       sessionId: result.sessionId,
@@ -647,6 +664,17 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
   const path = url.pathname.replace(/\/+$/, "") || "/";
   try {
     const sessionUser = state.users.resolveSession(sessionTokenFromCookie(req));
+    const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
+    // SEC-09: keyless-mode CSRF guard — mutating routes need the custom header (a cross-site
+    // form cannot set it without a preflight; the server sends no CORS headers).
+    const hasCredential = Boolean(sessionUser) || Boolean(presentedCredential(req));
+    if (
+      csrfRequired(state.cfg, hasCredential) &&
+      req.method !== "GET" &&
+      req.headers.get("x-requested-with") !== "co-workspace"
+    ) {
+      throw new HttpError(403, "missing x-requested-with header (CSRF guard)");
+    }
     // Phase 2 auth gate + Wave B: a route passes with a valid API key OR a signed-in session
     // (cookie). Exemptions stay limited to `GET /` and `GET /health`.
     const authorized =
@@ -721,13 +749,22 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
       if (name) {
         if (state.registry.list().some((r) => r.name === name)) name = `${name}-${genId("").slice(0, 6)}`;
       }
+      const owner = callerPrincipal(state, req) ?? "anonymous";
+      if (
+        state.cfg.tenantMaxPerPrincipal > 0 &&
+        state.registry.list().filter((r) => (r.ownerPrincipal ?? "anonymous") === owner).length >=
+          state.cfg.tenantMaxPerPrincipal
+      ) {
+        throw new HttpError(429, `tenant cap reached (${state.cfg.tenantMaxPerPrincipal} per principal)`);
+      }
       const rec = state.registry.create({
         dataDir: state.cfg.dataDir,
         variant,
         name: name || undefined,
         description: typeof body.description === "string" ? body.description : undefined,
-        ownerPrincipal: callerPrincipal(state, req) ?? "anonymous",
+        ownerPrincipal: owner,
       });
+      state.audit.record(owner, "tenant.create", rec.tenantId, variant);
       startProvisioning(state, rec);
       return jsonResponse({ tenantId: rec.tenantId, name: rec.name, status: rec.status }, 202);
     }
@@ -766,6 +803,7 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
       if (deleted) {
         rmSync(deleted.projectDir, { recursive: true, force: true });
         rmSync(deleted.hermesHome, { recursive: true, force: true });
+        state.audit.record(callerPrincipal(state, req) ?? "anonymous", "tenant.delete", tenantId, deleted.variant);
       }
       return jsonResponse({ deleted: tenantId, name: deleted?.name ?? null });
     }
@@ -822,6 +860,7 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
         throw new HttpError(400, "reload would disable auth (empty key pool) — rejected");
       }
       state.cfg.apiKeys = next;
+      state.audit.record("admin", "keys.reload", undefined, `keyCount=${next.length}`);
       return jsonResponse({ reloaded: true, keyCount: next.length });
     }
 
@@ -866,6 +905,7 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
 
     // ── Wave B1: local accounts (PII-safe flow: login ID + email verification) ──
     if (req.method === "POST" && path === "/auth/signup") {
+      if (!state.signupLimiter.allow(clientIp)) throw new HttpError(429, "too many signup attempts — try later");
       const body = (await readJsonBody(req)) as Record<string, unknown>;
       const loginId = typeof body.loginId === "string" ? body.loginId.trim() : "";
       const email = typeof body.email === "string" ? body.email.trim() : "";
@@ -920,11 +960,16 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
     }
 
     if (req.method === "POST" && path === "/auth/login") {
+      if (!state.loginLimiter.allow(clientIp)) throw new HttpError(429, "too many login attempts — try later");
       const body = (await readJsonBody(req)) as Record<string, unknown>;
       const loginId = typeof body.loginId === "string" ? body.loginId.trim() : typeof body.email === "string" ? body.email.split("@")[0] : "";
       const password = typeof body.password === "string" ? body.password : "";
       const user = await state.users.verifyLoginById(loginId, password);
-      if (!user) throw new HttpError(401, "invalid ID or password (or account not yet verified)");
+      if (!user) {
+        state.audit.record(loginId || clientIp, "login.failed");
+        throw new HttpError(401, "invalid ID or password (or account not yet verified)");
+      }
+      state.audit.record(user.principal, "login.success");
       const token = state.users.createSession(user.id);
       return new Response(JSON.stringify({ user: { loginId: user.principal, name: user.name, role: user.role } }), {
         status: 200,
@@ -1028,7 +1073,7 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
         const principal = t.ownerPrincipal ?? "anonymous";
         const entry = perUser.get(principal) ?? { principal, tenantCount: 0, diskBytes: 0, turns: 0 };
         entry.tenantCount += 1;
-        entry.diskBytes += dirSize(t.projectDir) + dirSize(t.hermesHome);
+        entry.diskBytes += (await dirSize(t.projectDir)) + (await dirSize(t.hermesHome));
         entry.turns += turnCounts.get(t.tenantId) ?? 0;
         perUser.set(principal, entry);
       }
@@ -1068,6 +1113,7 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
       const target = state.users.findById(decodeURIComponent(resetRoute[1]));
       if (!target) throw new HttpError(404, "user not found");
       const token = state.users.createResetToken(target.id);
+      state.audit.record(caller.principal, "user.reset-password", target.principal);
       return jsonResponse({ resetToken: token, note: "one-time token, 15-minute expiry; deliver out-of-band" });
     }
 
@@ -1096,7 +1142,46 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
         handled += 1;
       }
       state.users.softDeleteUser(targetId);
+      state.audit.record(caller.principal, "user.delete", target.principal, `disposition=${disposition} tenants=${handled}`);
       return jsonResponse({ deletedUser: target.email, disposition, tenantsHandled: handled });
+    }
+
+    // QA-07: cancel a running turn (kills the child process; the turn settles as partial).
+    const cancelRoute = path.match(/^\/tenants\/([^/]+)\/cancel$/);
+    if (req.method === "POST" && cancelRoute) {
+      const tenantId = decodeURIComponent(cancelRoute[1]);
+      const rec = state.registry.get(tenantId);
+      if (!rec) throw new HttpError(404, `tenant ${tenantId} not found`);
+      requireTenantAccess(state, req, rec);
+      const proc = state.activeProcs.get(tenantId);
+      if (!proc) return jsonResponse({ cancelled: false, reason: "no active turn" });
+      proc.kill(137);
+      state.audit.record(callerPrincipal(state, req) ?? "anonymous", "turn.cancel", tenantId);
+      return jsonResponse({ cancelled: true });
+    }
+
+    if (req.method === "GET" && path === "/admin/audit") {
+      const caller = state.users.resolveSession(sessionTokenFromCookie(req));
+      if (!caller || caller.role !== "admin") throw new HttpError(403, "admin only");
+      return jsonResponse({ entries: state.audit.list(200) });
+    }
+
+    // QA-12: admin outbox viewer — remote signups cannot read a server-local file.
+    if (req.method === "GET" && path === "/admin/mail-outbox") {
+      const caller = state.users.resolveSession(sessionTokenFromCookie(req));
+      if (!caller || caller.role !== "admin") throw new HttpError(403, "admin only");
+      const dir = join(state.cfg.dataDir, "mail-outbox");
+      const files: Array<{ file: string; content: string }> = [];
+      if (existsSync(dir)) {
+        for (const name of readdirSync(dir).sort().reverse().slice(0, 20)) {
+          try {
+            files.push({ file: name, content: readFileSync(join(dir, name), "utf8") });
+          } catch {
+            /* raced */
+          }
+        }
+      }
+      return jsonResponse({ outbox: files });
     }
 
     // Gemini wire (Antigravity/Gemini ecosystem). Model id travels in the URL path.
@@ -1151,6 +1236,9 @@ export function createServer(state: GatewayState) {
 if (import.meta.main) {
   const state = createState();
   bootstrapAdminFromEnv(state);
+  // SEC-14: expire verification mails older than 24h at startup.
+  const swept = sweepOutbox(state.cfg.dataDir);
+  if (swept) console.log(`[co-workspace] outbox sweep: ${swept} expired file(s) removed`);
   // P2-5: a restart orphans in-flight "provisioning" records (the promise map is memory-only).
   for (const t of state.registry.list()) {
     if (t.status === "provisioning") {

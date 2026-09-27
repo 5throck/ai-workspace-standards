@@ -1,6 +1,7 @@
 /** Small shared helpers: ids, directory moves across volumes, JSON persistence, tailing. */
 
 import { copyFileSync, cpSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { stat } from "node:fs/promises";
 import { dirname, join } from "node:path";
 
 export function genId(prefix = "gw"): string {
@@ -38,16 +39,18 @@ export function writeJson(path: string, value: unknown): void {
   writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`);
 }
 
-/** Recursive directory size in bytes (admin usage stats). Missing dir = 0. */
-export function dirSize(dir: string): number {
+/** QA-10: async recursive directory size in bytes (admin usage stats) — does not block the
+ * single-threaded server while walking large tenant trees. Missing dir = 0. */
+export async function dirSize(dir: string): Promise<number> {
   let total = 0;
   if (!existsSync(dir)) return 0;
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     const full = join(dir, entry.name);
-    if (entry.isDirectory()) total += dirSize(full);
-    else {
+    if (entry.isDirectory()) {
+      total += await dirSize(full);
+    } else {
       try {
-        total += statSync(full).size;
+        total += (await stat(full)).size;
       } catch {
         /* raced deletion */
       }

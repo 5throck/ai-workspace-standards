@@ -60,6 +60,14 @@ export interface GatewayConfig {
   /** Web UI requires a signed-in session (`CO_WORKSPACE_LOGIN_REQUIRED=true`); API stays
    * Bearer-key gated. Unset = open web access (Phase 0 mode). */
   loginRequired: boolean;
+  /** SEC-09: mutating routes in keyless mode require the `x-requested-with` header (CSRF guard). */
+  csrfRequired: boolean;
+  /** SEC-05: per-principal tenant cap (`POST /sessions` + lazy creation). 0 = unlimited. */
+  tenantMaxPerPrincipal: number;
+  /** SEC-10: docker isolation resource caps. */
+  containerMemory: string;
+  containerCpus: string;
+  containerPidsLimit: number;
   /** Session runtime: `hermes` (default), `antigravity` (agy), `claude`, or `codex`.
    * Container isolation requires the hermes runtime (the other binaries are not in the image). */
   runtime: "hermes" | "antigravity" | "claude" | "codex";
@@ -172,6 +180,11 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     dataDirHost: env.CO_WORKSPACE_DATA_DIR_HOST || undefined,
     includeBeta: env.CO_WORKSPACE_VARIANTS_INCLUDE_BETA === "true" || env.CO_WORKSPACE_VARIANTS_INCLUDE_BETA === "1",
     loginRequired: env.CO_WORKSPACE_LOGIN_REQUIRED === "true",
+    csrfRequired: env.CO_WORKSPACE_CSRF_REQUIRED === "true",
+    tenantMaxPerPrincipal: numOr0(env.CO_WORKSPACE_TENANT_MAX_PER_PRINCIPAL),
+    containerMemory: env.CO_WORKSPACE_CONTAINER_MEMORY ?? "2g",
+    containerCpus: env.CO_WORKSPACE_CONTAINER_CPUS ?? "2",
+    containerPidsLimit: numOr0(env.CO_WORKSPACE_CONTAINER_PIDS_LIMIT) || 256,
     runtime: (["antigravity", "claude", "codex"] as const).includes(
       env.CO_WORKSPACE_RUNTIME as "antigravity",
     )
