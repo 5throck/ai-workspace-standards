@@ -44,6 +44,9 @@ export interface GatewayConfig {
   isolation: "process" | "docker";
   runtimeImage: string;
   dockerBin: string;
+  /** Host-side path of `dataDir` — used by docker isolation to mount tenant dirs into sibling
+   * containers when the gateway itself runs inside a container (paths must match on the host). */
+  dataDirHost?: string;
   /** Session runtime: `hermes` (default) or `antigravity` (agy headless print mode).
    * Container isolation requires the hermes runtime (the agy binary is not in the image). */
   runtime: "hermes" | "antigravity";
@@ -83,10 +86,11 @@ function numOr0(value: string | undefined): number {
 
 export function loadConfig(env: Record<string, string | undefined> = process.env): GatewayConfig {
   let apiKeys: string[] = [];
-  if (env.TEAM_GATEWAY_API_KEYS !== undefined) {
+  // An empty-string value counts as unset (compose defaults interpolate to ""); only a
+  // non-empty value that parses to zero keys is a misconfiguration (D5 fail-fast).
+  if (env.TEAM_GATEWAY_API_KEYS !== undefined && env.TEAM_GATEWAY_API_KEYS.trim() !== "") {
     apiKeys = env.TEAM_GATEWAY_API_KEYS.split(",").map((s) => s.trim()).filter(Boolean);
     if (apiKeys.length === 0) {
-      // Explicit-but-unusable auth config must not silently disable auth (D5 fail-fast).
       throw new Error("TEAM_GATEWAY_API_KEYS is set but parses to zero keys");
     }
   }
@@ -123,6 +127,7 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     isolation: env.TEAM_GATEWAY_ISOLATION === "docker" ? "docker" : "process",
     runtimeImage: env.TEAM_GATEWAY_RUNTIME_IMAGE ?? "team-gateway-runtime:latest",
     dockerBin: env.TEAM_GATEWAY_DOCKER_BIN ?? "docker",
+    dataDirHost: env.TEAM_GATEWAY_DATA_DIR_HOST || undefined,
     runtime: env.TEAM_GATEWAY_RUNTIME === "antigravity" ? "antigravity" : "hermes",
     antigravityBin: env.TEAM_GATEWAY_ANTIGRAVITY_BIN ?? "agy",
   };

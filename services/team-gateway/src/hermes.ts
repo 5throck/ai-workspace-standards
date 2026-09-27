@@ -49,8 +49,11 @@ export interface HermesSpawnOptions {
   env?: Record<string, string | undefined>;
   /** Phase 2 isolation (design 2026-09-27-team-gateway-phase2-hardening, D3): when set, the
    * session runs inside an ephemeral sibling container — only the tenant project dir and
-   * Hermes home are mounted, at the fixed in-container paths /work/project, /work/hermes-home. */
-  container?: { image: string };
+   * Hermes home are mounted, at the fixed in-container paths /work/project, /work/hermes-home.
+   * `hostProjectDir`/`hostHermesHome` override the `-v` source paths for the case where the
+   * gateway itself runs inside a container (mount sources resolve on the HOST, so they must be
+   * host-visible paths; defaults = the gateway-local paths, correct for bare-metal hosts). */
+  container?: { image: string; hostProjectDir?: string; hostHermesHome?: string };
 }
 
 const MOUNT_PROJECT = "/work/project";
@@ -101,9 +104,9 @@ export function hermesSpawnArgv(o: HermesSpawnOptions): string[] {
     "--workdir",
     MOUNT_PROJECT,
     "-v",
-    `${o.projectDir}:${MOUNT_PROJECT}`,
+    `${o.container.hostProjectDir ?? o.projectDir}:${MOUNT_PROJECT}`,
     "-v",
-    `${o.hermesHome}:${MOUNT_HERMES_HOME}`,
+    `${o.container.hostHermesHome ?? o.hermesHome}:${MOUNT_HERMES_HOME}`,
     "-e",
     `HERMES_HOME=${MOUNT_HERMES_HOME}`,
     "-e",
