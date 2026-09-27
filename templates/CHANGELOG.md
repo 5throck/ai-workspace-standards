@@ -9,13 +9,17 @@ All notable changes to the template variants are documented here.
 - **[2026-08-30]**: Promoted `handbook` (0.4.0) and `handbook-sync-audit` (1.0.0) skills from `co-deck` to `templates/common/skills/` (`1653a84f`).
 
 ## [Unreleased]
+
+## [0.7.0] - 2026-09-27
 ### Changed
+- **[2026-09-27]**: auto-release 2026-09-27: 2508 delivered paths (A 1074 / M 947 / D 211 / R 276)
 - **[2026-09-18]**: `templates/common/agents/pm.md` 1.2.0 — WORKSPACE-MANAGED block gains "Agent Hiring & Firing" (PM-decided timing, deprecate-default exit, hard delete on explicit user request) and "Skill Request Approval" (agent-initiated, PM-approved skill create/attach/remove). Variants inherit via the pm.md extends chain; `templates/common/skills/agent-lifecycle-manager` 1.2.0 and `skill-lifecycle-manager` 1.4.0 published from L0 via `propagate:apply`.
 - **[2026-06-01]**: `co-security` variant: Redesigned workflow by merging Phase 1 and 2 into "Recon & Threat Modeling"
 - **[2026-06-01]**: `co-security` variant: Fixed PM-ONLY Agent Roster in `AGENTS.md` and `docs/co-security.context.md`
 
 ### Fixed
 - **[2026-06-09]**: fix: Windows project folder deletion permissions — enhanced Windows permission handling in `new-project.sh` (v1.7.1) and `new-project.ps1` (v1.7.2) to recursively remove hidden/system/readonly attributes (including inside `.git/`) and transfer ownership to the current user (`takeown`), preventing Windows Explorer administrator prompts during deletion.
+
 ## [0.5.0] - 2026-05-27
 ### Added
 - `.github/pull_request_template.md` with Summary/Changes/Test Plan/Security Checklist sections (#92)
