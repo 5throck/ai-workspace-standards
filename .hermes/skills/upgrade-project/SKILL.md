@@ -1,11 +1,11 @@
 ---
 name: upgrade-project
 description: "Upgrade an existing L2/L3 project to the current template version. Use when: upgrading a variant-based project, syncing template improvements, refreshing scripts/agents/skills/docs/commands."
-version: "1.5.1"
+version: "1.5.2"
 status: active
 scope: workspace
 owner: pm
-last_reviewed: 2026-09-21
+last_reviewed: 2026-09-27
 relates_to:
   - skill: promote-variant
     type: follows
@@ -88,6 +88,8 @@ The merge engine recognizes these marker patterns for section-based merge:
 | WORKSPACE-MANAGED | `<!-- WORKSPACE-MANAGED[:desc] -->` | `<!-- /WORKSPACE-MANAGED -->` | Generic managed sections |
 | COMMON-CLAUDE | `<!-- COMMON-CLAUDE:START -->` | `<!-- COMMON-CLAUDE:END -->` | CLAUDE.md shared sections |
 | COMMON-GEMINI | `<!-- COMMON-GEMINI:START -->` | `<!-- COMMON-GEMINI:END -->` | GEMINI.md shared sections |
+| COMMON-CODEX | `<!-- COMMON-CODEX:START -->` | `<!-- COMMON-CODEX:END -->` | CODEX.md shared sections (managed-block-merge v1.2.0) |
+| COMMON-HERMES | `<!-- COMMON-HERMES:START -->` | `<!-- COMMON-HERMES:END -->` | Hermes.md shared sections, ADR-0093 (managed-block-merge v1.3.0) |
 | VARIANT-INJECT | `<!-- VARIANT-INJECT:label -->` | `<!-- END VARIANT-INJECT -->` | Variant template injection points |
 | COMMON-AGENTS | `<!-- COMMON-AGENTS:START -->` | `<!-- COMMON-AGENTS:END -->` | AGENTS.md shared sections |
 | COMMON-CONTEXT | `<!-- COMMON-CONTEXT:START -->` | `<!-- COMMON-CONTEXT:END -->` | Common coding-guidelines zone merged into `docs/<variant>.context.md` (since v1.26.0 — previously projects had no delivery channel for that zone) |

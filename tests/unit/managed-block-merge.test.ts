@@ -436,6 +436,106 @@ describe('COMMON-CODEX zone (T-20260924-010)', () => {
   });
 });
 
+// ── COMMON-HERMES zone (spec 2026-09-27-hermes-merge-marker-design —
+//    reproduce-then-fix, the Hermes.md counterpart of the COMMON-CODEX block
+//    above). ADR-0093 shipped Hermes.md to L0/L1 with COMMON-HERMES zones, but
+//    without a MANAGED_PATTERNS entry the MERGE pass claimed the file and then
+//    skipped it (`INFO: Template has no managed markers`), so existing L2
+//    projects never received it. Pattern parity with COMMON-CLAUDE/GEMINI/CODEX:
+//    positional (key-less) merge, append when the project lacks the zone,
+//    snapshot-guarded reconcile on mismatch. ──
+describe('COMMON-HERMES zone (Hermes.md delivery)', () => {
+  const HERMES_OPEN = '<!-- COMMON-HERMES:START -->';
+  const HERMES_CLOSE = '<!-- COMMON-HERMES:END -->';
+  const ZONE_RE = /<!-- COMMON-HERMES:START -->[\s\S]*?<!-- COMMON-HERMES:END -->/;
+
+  test('merges the template zone into the project copy; outside prose byte-identical', () => {
+    const proj = [
+      '# Hermes intro',
+      '',
+      'project-owned prose before the zone',
+      '',
+      HERMES_OPEN,
+      '### Platform Mechanics (STALE COPY)',
+      'old zone content',
+      HERMES_CLOSE,
+      '',
+      'footer prose that must survive',
+      '',
+    ].join('\n');
+    const tpl = [
+      '# Hermes intro',
+      '',
+      HERMES_OPEN,
+      '### Hermes Platform Mechanics',
+      'new zone content from template',
+      HERMES_CLOSE,
+      '',
+    ].join('\n');
+    const r = mergeManagedBlocks(proj, tpl, null, 'Hermes.md', false);
+    expect(r.log).toContain('    MERGED COMMON-HERMES block in: Hermes.md');
+    expect(r.merged).toBe(true);
+    // ONLY the zone span changed — prose before/after preserved byte-for-byte
+    const projZone = proj.match(ZONE_RE)![0];
+    const tplZone = tpl.match(ZONE_RE)![0];
+    expect(r.content).toBe(proj.replace(projZone, () => tplZone));
+    expect(r.content).toContain('project-owned prose before the zone');
+    expect(r.content).toContain('footer prose that must survive');
+    expect(r.content).not.toContain('STALE COPY');
+    expect(r.content).toContain('new zone content from template');
+    // equal counts: positional path, no snapshot
+    expect(r.snapshots).toEqual([]);
+    expect(r.log.join('\n')).not.toContain('count mismatch');
+  });
+
+  test('project copy without the zone is no longer an INFO skip — the zone appends', () => {
+    // Pre-fix shape (the actual L2 delivery failure): the project has no
+    // Hermes.md-equivalent zone, the template has one. With the pattern
+    // missing, buildMergedTemplateBlocks returned [] and the MERGE pass logged
+    // `INFO: Template has no managed markers — skipping Hermes.md`.
+    const proj = 'prose only, no Hermes zone yet\n';
+    const tpl = `${HERMES_OPEN}\nzone content\n${HERMES_CLOSE}\n`;
+    const r = mergeManagedBlocks(proj, tpl, null, 'Hermes.md', false);
+    expect(r.log).toContain('    APPENDED COMMON-HERMES block to: Hermes.md');
+    expect(r.merged).toBe(true);
+    expect(r.content.endsWith(`${HERMES_OPEN}\nzone content\n${HERMES_CLOSE}\n`)).toBe(true);
+    expect(r.content).toContain('prose only, no Hermes zone yet');
+  });
+
+  test('count-mismatch fires RECONCILED with a snapshot of the exact replaced span', () => {
+    const proj = [
+      'HEAD',
+      '',
+      HERMES_OPEN,
+      'stale one',
+      HERMES_CLOSE,
+      '',
+      'MID PROSE (between project zones)',
+      '',
+      HERMES_OPEN,
+      'stale two',
+      HERMES_CLOSE,
+      '',
+      'TAIL',
+      '',
+    ].join('\n');
+    const tpl = [HERMES_OPEN, 'fresh zone', HERMES_CLOSE, ''].join('\n');
+    const r = mergeManagedBlocks(proj, tpl, null, 'Hermes.md', false);
+    expect(r.log.join('\n')).toContain('count mismatch');
+    expect(r.log).toContain('    RECONCILED COMMON-HERMES blocks in: Hermes.md');
+    expect(r.snapshots).toHaveLength(1);
+    expect(r.snapshots[0]!.rel).toBe('Hermes.md');
+    expect(r.snapshots[0]!.content).toBe(
+      proj.slice(proj.indexOf(HERMES_OPEN), proj.lastIndexOf(HERMES_CLOSE) + HERMES_CLOSE.length),
+    );
+    expect(r.content).toContain('fresh zone');
+    expect(r.content).toContain('HEAD');
+    expect(r.content).toContain('TAIL');
+    expect(r.content).not.toContain('stale one');
+    expect(r.content).not.toContain('stale two');
+  });
+});
+
 describe('reconcile snapshots (T-20260917-010)', () => {
   test('count-mismatch reconcile captures the exact replaced span', () => {
     const proj = [

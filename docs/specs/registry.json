@@ -1611,6 +1611,15 @@
       "source": "manual",
       "created": "2026-09-27",
       "last_updated": "2026-09-27"
+    },
+    {
+      "id": "2026-09-27-hermes-merge-marker-design",
+      "title": "hermes merge marker design",
+      "file": "docs/designs/2026-09-27-hermes-merge-marker-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-27",
+      "last_updated": "2026-09-27"
     }
   ]
 }
