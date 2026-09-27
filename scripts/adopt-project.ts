@@ -58,7 +58,7 @@ const WORKSPACE_ROOT = resolve(import.meta.dir, '..');
 const TEMPLATES_DIR = join(WORKSPACE_ROOT, 'templates');
 const COMMON_DIR = join(TEMPLATES_DIR, 'common');
 const VARIANT_NAME_RE = /^co-[a-z][a-z0-9-]{1,30}$/;
-const GOVERNED_PLATFORM_TWINS = ['CLAUDE.md', 'GEMINI.md', 'CODEX.md'];
+const GOVERNED_PLATFORM_TWINS = ['CLAUDE.md', 'GEMINI.md', 'CODEX.md', 'Hermes.md']; // Hermes.md joins per ADR-0093
 const GOVERNED_GITHOOKS = new Set(['pre-commit', 'pre-push', 'commit-msg', 'post-checkout', 'pre-rebase', 'README.md']);
 
 function fail(msg: string): never {

@@ -1,4 +1,12 @@
-// @version 1.17.0
+// @version 1.18.0
+// v1.18.0 (2026-09-27, ADR-0093 — spec
+//          docs/designs/2026-09-27-hermes-md-instruction-file-design.md):
+//          Hermes.md joins MERGE_MANAGED_FILES — the Hermes member of the
+//          CLAUDE/GEMINI/CODEX instruction-file family (a Hermes-specific
+//          behavioral file, not an AGENTS.md copy). Same rationale as
+//          CODEX.md's v1.13.0 join: resolveClaim('Hermes.md') must hit the
+//          MERGE pass so TEMPLATE TREE SYNC never wholesale-overwrites a
+//          project's copy; the MERGE push delivers it for hermes/all.
 // v1.17.0 (2026-09-25, ADR-0088 W2): `.hermes` joins the platform set —
 //          `.hermes/skills` claims SYNC via sync-skills.ts (platform mirror)
 //          above every blanket rule (the graft fleet-gap ordering invariant),
@@ -242,7 +250,7 @@ const LOCKED_FILES = new Set(['.gitattributes', '.gitleaks.toml']);
  * in managed-block-merge MANAGED_PATTERNS); when that pattern lands
  * (T-20260924-010) union-merge activates with no further claim change.
  */
-export const MERGE_MANAGED_FILES = new Set(['CLAUDE.md', 'GEMINI.md', 'CODEX.md', '.gitignore', 'AGENTS.md', 'agents/pm.md']);
+export const MERGE_MANAGED_FILES = new Set(['CLAUDE.md', 'GEMINI.md', 'CODEX.md', 'Hermes.md', '.gitignore', 'AGENTS.md', 'agents/pm.md']);
 
 /** Common-owned scaffold files: delivered by templates/common/ and sacred to the
  *  project — a variant template must never carry them (WS-07) and new-project's

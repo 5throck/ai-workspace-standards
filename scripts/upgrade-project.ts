@@ -1,5 +1,12 @@
 #!/usr/bin/env bun
-// @version 1.53.0
+// @version 1.54.0
+// v1.54.0 (2026-09-27, ADR-0093 — spec
+//          docs/designs/2026-09-27-hermes-md-instruction-file-design.md):
+//          Hermes.md joins the MERGE push for platform hermes/all — the Hermes
+//          member of the CLAUDE/GEMINI/CODEX instruction-file family; the
+//          COMMON-HERMES managed block makes the MERGE pass its delivery
+//          channel (resolveClaim returns MERGE_MANAGED via upgrade-policy
+//          v1.18.0).
 // v1.51.0 (2026-09-25, ADR-0088 W2): `.hermes` joins the platform set — usage/
 //          validation lists, VARIANT_ASSET_DIR_SKIP, upstream skill-name sources,
 //          and both mirrorRoot sweeps (prune + retirement discriminator) cover the
@@ -1304,6 +1311,7 @@ const MERGE_FILES: string[] = [];
 if (platform === 'claude' || platform === 'all') MERGE_FILES.push('CLAUDE.md');
 if (platform === 'antigravity' || platform === 'all') MERGE_FILES.push('GEMINI.md');
 if (platform === 'codex' || platform === 'all') MERGE_FILES.push('CODEX.md');
+if (platform === 'hermes' || platform === 'all') MERGE_FILES.push('Hermes.md');
 MERGE_FILES.push(
   '.gitignore', 'agents/pm.md',
 );

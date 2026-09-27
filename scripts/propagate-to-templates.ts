@@ -5,8 +5,16 @@
  * Replaces publish-to-template.ts (deprecated v1.8.0). Single authoritative script
  * for all L0→L1 propagation. Config-driven via propagation-map.json (SSOT for exclusions).
  *
- * @version 2.18.0
+ * @version 2.19.0
  *
+ * v2.19.0 (2026-09-27, ADR-0093 — user directive 2026-09-27; spec
+ *          docs/designs/2026-09-27-hermes-md-instruction-file-design.md):
+ *          Hermes.md joins GOVERNANCE_L1_FILES as the fourth platform
+ *          instruction doc (the Hermes member of the CLAUDE/GEMINI/CODEX
+ *          family — a Hermes-specific behavioral file, NOT an AGENTS.md
+ *          copy). Its B-7 boundary branch shares the CODEX replacement body
+ *          (the section sits inside the single COMMON-HERMES zone — same
+ *          CODEX shape), and the B-8 fatal guard now covers it.
  * v2.18.0 (2026-09-25, propagation-engine batch — spec
  *          docs/designs/2026-09-25-propagation-engine-batch-design.md,
  *          T-20260924-006): runMarkerRewrite gains opt-in append-on-missing.
@@ -104,7 +112,7 @@
  *   --apply                Write changed files to L1
  *   --force                With --apply: skip hash check, always overwrite
  *   --domain <name>        Filter to one domain from propagation-map.json
- *   --governance-l1        Deploy CLAUDE.md, GEMINI.md, AGENTS.md L0→L1 with ref transforms
+ *   --governance-l1        Deploy CLAUDE.md, GEMINI.md, AGENTS.md, CODEX.md, Hermes.md L0→L1 with ref transforms
  *   --docs                 Inject COMMON markers from L1 governance into templates/co-* variants
  *   --check-drift          L1 vs L2 drift report (read-only, uses propagation-map.json)
  *   --json                 With --check-drift: machine-readable JSON output
@@ -1124,6 +1132,7 @@ const GOVERNANCE_L1_FILES = [
   { src: 'GEMINI.md',  dst: 'templates/common/GEMINI.md'  },
   { src: 'AGENTS.md',  dst: 'templates/common/AGENTS.md'  },
   { src: 'CODEX.md',   dst: 'templates/common/CODEX.md'   },
+  { src: 'Hermes.md',  dst: 'templates/common/Hermes.md'  },
 ];
 
 // Reference transformation rules: CONSTITUTION.md → docs/context.md
@@ -1203,10 +1212,13 @@ export function applyGovernanceTransforms(content: string, filename: string, tar
         `> For lifecycle management rules, see [docs/context.md — Lifecycle Management](docs/context.md#lifecycle-management).\n` +
         `<!-- COMMON-GEMINI:END -->`;
       content = content.replace(geminiBoundaryPattern, (_, n) => geminiBoundaryReplacement(n));
-    } else if (filename === 'CODEX.md') {
+    } else if (filename === 'CODEX.md' || filename === 'Hermes.md') {
       // Matched heading-to-next-heading; the captured number keeps the section
       // numbering stable. The trailing \n keeps the blank line before the next
       // heading (the match consumes the section's own line terminator).
+      // Hermes.md joins in v2.19.0 (ADR-0093): its boundary section sits inside
+      // the single COMMON-HERMES zone — the same CODEX shape, so the branch
+      // (and its replacement body) is shared verbatim.
       const codexBoundaryPattern =
         /### (\d+)\. Workspace & Template Boundary Policy[\s\S]*?(?=\n### \d+\. )/;
       const codexReplacement = (n: string) =>
@@ -1221,8 +1233,9 @@ export function applyGovernanceTransforms(content: string, filename: string, tar
   //    governance invariant. Bug 5's failure mode was a SILENT no-op (stale
   //    regex); if the workspace-only heading survives any of the three outputs,
   //    fail loudly instead of shipping workspace policy into every scaffold.
-  //    Scope: the three platform docs only — AGENTS.md has no boundary section.
-  if (filename === 'CLAUDE.md' || filename === 'GEMINI.md' || filename === 'CODEX.md') {
+  //    Scope: the platform docs only — AGENTS.md has no boundary section.
+  //    Hermes.md joins in v2.19.0 (ADR-0093) as the fourth protected platform doc.
+  if (filename === 'CLAUDE.md' || filename === 'GEMINI.md' || filename === 'CODEX.md' || filename === 'Hermes.md') {
     if (content.includes('Workspace & Template Boundary Policy')) {
       die(
         `governance-l1: "${filename}" still carries the workspace-only "Workspace & Template Boundary Policy" ` +
@@ -1431,6 +1444,56 @@ export function applyGovernanceTransforms(content: string, filename: string, tar
       `**Tier Ceiling Rule**: An agent's tier may NOT be elevated beyond its defined tier.\n\n` +
       `> **Execution Plan Boilerplate Policy**: For mandatory and discretionary boilerplate cases, see [§3 (PM Gateway Workflow)](AGENTS.md#§3-pm-gateway-workflow) above.\n\n`;
     content = content.replace(s35Pattern, s35Replacement);
+
+    // B-A13 (v2.19.1, ADR-0090 follow-through): the thin-dispatcher restructure
+    // removed §3.1.5/§3.5/§4.2/§4.3 from the root AGENTS.md, so the B-A8/B-A11
+    // replacement transforms above no longer have source sections to rewrite —
+    // and the four VARIANT placeholder zones vanished from the L1 baseline.
+    // create-l3-scaffold still emits those marker pairs into scaffolded
+    // AGENTS.md, so SCAFFOLD_MARKER_SOURCES requires them in
+    // templates/common/AGENTS.md. Inject the zones at the anchors that exist in
+    // the current root structure (end of §3 dispatch scope, before §5) —
+    // guarded, so the injection is idempotent.
+    if (!content.includes('VARIANT-DISPATCH-TRIGGERS-START')) {
+      content = content.replace(
+        '### §3.6 3-Tier Strategy',
+        `<!-- VARIANT-DISPATCH-TRIGGERS-START -->\n` +
+        `<!-- Define project-specific agent dispatch triggers here. Format:\n` +
+        `     | Agent | Phase | Dispatch Trigger |\n` +
+        `     |-------|-------|------------------|\n` +
+        `     | \`[agent-name]\` | [phase] | "trigger keyword 1", "trigger keyword 2" |\n` +
+        `     See §1 for available agents. -->\n` +
+        `<!-- VARIANT-DISPATCH-TRIGGERS-END -->\n\n` +
+        `<!-- VARIANT-PHASE-GATE-START -->\n` +
+        `<!-- Map deliverable types to your project-specific agents from §1.\n` +
+        `     Example: | Feature implementation | Phase 4 | \`engineer\` | Low | | -->\n` +
+        `<!-- VARIANT-PHASE-GATE-END -->\n\n` +
+        `### §3.6 3-Tier Strategy`
+      );
+    }
+    if (!content.includes('VARIANT-SUBAGENT-ROSTER-START')) {
+      content = content.replace(
+        '## §5: Execution Plan Templates',
+        `<!-- VARIANT-SUBAGENT-ROSTER-START -->\n` +
+        `<!-- Add project-specific specialist agents here. Format:\n` +
+        `     | Agent Name | \`agents/name.md\` | High/Medium/Low | parallel conditions | write scope |\n` +
+        `     See §1 for the agent roster and docs/context.md for frontmatter specification. -->\n` +
+        `<!-- VARIANT-SUBAGENT-ROSTER-END -->\n\n` +
+        `<!-- VARIANT-ROLE-BOUNDARY-START -->\n` +
+        `<!-- VARIANT-ROLE-BOUNDARY-END -->\n\n` +
+        `## §5: Execution Plan Templates`
+      );
+    }
+    // B-A13 die-guard: the two injection anchors are structural — if either
+    // drifts, the placeholder zones silently vanish again (the exact failure
+    // mode the scaffold-marker-source check caught on 2026-09-27). Fail loud.
+    for (const marker of ['VARIANT-DISPATCH-TRIGGERS-START', 'VARIANT-PHASE-GATE-START', 'VARIANT-SUBAGENT-ROSTER-START', 'VARIANT-ROLE-BOUNDARY-START']) {
+      if (!content.includes(marker)) {
+        die(`Phase B-A13: VARIANT placeholder zone '${marker}' missing after injection — ` +
+            `the '### §3.6 3-Tier Strategy' / '## §5: Execution Plan Templates' anchor no longer matches the root AGENTS.md. ` +
+            `Update the B-A13 anchor strings.`);
+      }
+    }
   }
 
   // ── Phase C: CLAUDE.md-only transforms ───────────────────────────────────

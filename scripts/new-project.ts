@@ -1,5 +1,11 @@
 #!/usr/bin/env bun
-// @version 1.30.0
+// @version 1.31.0
+// v1.31.0 (2026-09-27, ADR-0093 — spec
+//           docs/designs/2026-09-27-hermes-md-instruction-file-design.md):
+//           the hermes profile DELIVERS Hermes.md (the Hermes-specific
+//           behavioral instruction file, common-owned — AGENTS.md remains the
+//           SSOT registry). `hermes`/`all` keep it; every other profile prunes
+//           it alongside `.hermes/`.
 // v1.30.0 (2026-09-25, ADR-0088 W2): `hermes` joins the --platform profiles —
 //           hermes-primary keeps .hermes/ and drops the legacy instruction twins
 //           (AGENTS.md is the Hermes instruction file); all other profiles are
@@ -1001,17 +1007,20 @@ if (platform !== 'codex' && platform !== 'all') {
     if (existsSync(f)) rmSync(f, { recursive: true });
   }
 }
-// ADR-0088: `hermes` is a hermes-primary profile — Hermes reads AGENTS.md natively, so the
-// legacy instruction twins are dropped (codex-primary analogy). `.hermes/` is kept by `hermes`
-// and `all`; every other profile is hermes-opt-out (platform dir = template overlay).
+// ADR-0088: `hermes` is a hermes-primary profile — the legacy instruction twins
+// (CLAUDE/GEMINI/CODEX) are dropped (codex-primary analogy); ADR-0093: the hermes
+// instruction file `Hermes.md` (templates/common delivery, common-owned) is KEPT by
+// `hermes`. `.hermes/` is kept by `hermes` and `all`; every other profile is
+// hermes-opt-out (platform dir + Hermes.md = template overlay, removed here).
 if (platform === 'hermes') {
   for (const f of [join(projectDir, 'CLAUDE.md'), join(projectDir, 'GEMINI.md')]) {
     if (existsSync(f)) rmSync(f);
   }
 }
 if (platform !== 'hermes' && platform !== 'all') {
-  const h = join(projectDir, '.hermes');
-  if (existsSync(h)) rmSync(h, { recursive: true });
+  for (const f of [join(projectDir, 'Hermes.md'), join(projectDir, '.hermes')]) {
+    if (existsSync(f)) rmSync(f, { recursive: true });
+  }
 }
 
 // Remove .cmd files
