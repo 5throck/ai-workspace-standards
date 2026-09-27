@@ -31,6 +31,10 @@ The 14 variant team templates (`templates/co-*`) are CLI-harness workspaces: the
 
 Live multi-surface use surfaced demand for Google-ecosystem clients. Antigravity (the IDE/CLI behind the `.agents/` platform mirror) exposes no public model-serving API spec — its extension surface is MCP — so the ecosystem-standard Gemini contract is served instead: `POST /v1beta/models/{model}:generateContent`, `:streamGenerateContent?alt=sse` (per-delta candidate chunks, terminal `finishReason: STOP` + `usageMetadata`), `:countTokens` (chars/4 estimate stub), and `GET /v1beta/models`. This amends Decision 5's surface enumeration ("OpenAI- and Anthropic-compatible" → also Gemini-compatible); all other decisions are unchanged. On this wire `systemInstruction` is ignored (tenant teams define their own instructions from AGENTS.md), and tenant keying uses the optional gateway-extension `user` field, defaulting to `default`.
 
+## Addendum 2 (2026-09-27): Phase 2 Hardening Landed
+
+The §10 roadmap items enforceable by the gateway process are implemented (design `docs/designs/2026-09-27-team-gateway-phase2-hardening-design.md`): optional bearer-key authentication on every non-exempt route (`TEAM_GATEWAY_API_KEYS`; constant-time compare; Phase 0 localhost mode preserved when unset), per-tenant lifetime quotas enforced pre-turn (`TEAM_GATEWAY_TENANT_MAX_TURNS`/`_MAX_TOKENS` → `429`; token counters from the result envelope), first-class toolset scoping (`TEAM_GATEWAY_HERMES_TOOLSETS` → `-t`), and an opt-in per-tenant container isolation mode (`TEAM_GATEWAY_ISOLATION=docker` — per-turn ephemeral sibling container mounting only the tenant project dir and Hermes home; startup fails fast when Docker is unusable; live-verified with a container-side session). Network egress enforcement remains host-side by design (Hermes iron-proxy, operator-deployed) — the gateway contributes toolset scoping and run ceilings, not invented config keys. This addendum records N1/N2/N5 of the Phase 0 design as superseded for this scope.
+
 ## References
 
 - Design: `docs/designs/2026-09-27-team-gateway-service-design.md` (verified building blocks, D1–D8, waves, live-verification record)

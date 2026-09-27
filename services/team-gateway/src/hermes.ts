@@ -44,17 +44,31 @@ export interface HermesSpawnOptions {
   runBudgetSeconds: number;
   maxTurns: number;
   extraArgs?: string[];
+  /** Comma-separated toolsets passed as `-t` on every spawn (Phase 2 toolset scoping). */
+  toolsets?: string;
   env?: Record<string, string | undefined>;
+  /** Phase 2 isolation (design 2026-09-27-team-gateway-phase2-hardening, D3): when set, the
+   * session runs inside an ephemeral sibling container — only the tenant project dir and
+   * Hermes home are mounted, at the fixed in-container paths /work/project, /work/hermes-home. */
+  container?: { image: string };
 }
 
-export function hermesArgs(o: HermesSpawnOptions): string[] {
+const MOUNT_PROJECT = "/work/project";
+const MOUNT_HERMES_HOME = "/work/hermes-home";
+
+/** The inner Hermes command. `paths` lets the container adapter substitute mount points for
+ * host paths (`--in`) while keeping a single command contract. */
+export function hermesArgs(
+  o: HermesSpawnOptions,
+  paths: { projectDir?: string } = {},
+): string[] {
   const args = [
     o.hermesBin,
     "chat",
     "--format",
     "stream-json",
     "--in",
-    o.projectDir,
+    paths.projectDir ?? o.projectDir,
     "--continue",
     o.sessionName,
     "--create-if-missing",
@@ -66,8 +80,35 @@ export function hermesArgs(o: HermesSpawnOptions): string[] {
     "--query-file",
     "-",
   ];
+  if (o.toolsets) args.push("-t", o.toolsets);
   args.push(...(o.extraArgs ?? []));
   return args;
+}
+
+/** Full spawn argv for the configured isolation mode (D3): process mode runs the inner command
+ * directly; docker mode wraps it in an ephemeral sibling container (`docker run --rm -i`) with
+ * only the tenant project dir and Hermes home mounted — nothing else is reachable. */
+export function hermesSpawnArgv(o: HermesSpawnOptions): string[] {
+  const inner = hermesArgs(o, o.container ? { projectDir: MOUNT_PROJECT } : {});
+  if (!o.container) return inner;
+  return [
+    "docker",
+    "run",
+    "--rm",
+    "--interactive",
+    "--workdir",
+    MOUNT_PROJECT,
+    "-v",
+    `${o.projectDir}:${MOUNT_PROJECT}`,
+    "-v",
+    `${o.hermesHome}:${MOUNT_HERMES_HOME}`,
+    "-e",
+    `HERMES_HOME=${MOUNT_HERMES_HOME}`,
+    "-e",
+    "HERMES_ACCEPT_HOOKS=1",
+    o.container.image,
+    ...inner,
+  ];
 }
 
 /** Per-tenant isolation: HERMES_HOME points at the tenant home so config, credentials, and the
@@ -93,12 +134,14 @@ export async function runHermesTurn(
   o: HermesSpawnOptions,
   onEvent?: (evt: HermesEvent) => void,
 ): Promise<HermesTurnResult> {
-  const proc = Bun.spawn(hermesArgs(o), {
-    cwd: o.projectDir,
+  const proc = Bun.spawn(hermesSpawnArgv(o), {
+    cwd: o.container ? undefined : o.projectDir,
     stdin: "pipe",
     stdout: "pipe",
     stderr: "pipe",
-    env: hermesEnv(o, o.env ?? process.env),
+    env: o.container
+      ? (o.env ?? process.env) // container-side env is set via -e flags in the argv
+      : hermesEnv(o, o.env ?? process.env),
   });
   proc.stdin.write(o.message);
   proc.stdin.end();

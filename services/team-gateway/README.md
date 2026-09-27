@@ -130,14 +130,36 @@ The image carries bun + Hermes; the compose file mounts the workspace clone at `
 (provisioning writes `Projects/` there in Phase 0) and a named volume at `/data`. The seed home
 is mounted read-only at `/seed`.
 
-## Limits & security
+## Security (Phase 2 hardening)
 
-Read before exposing this to anyone: **Phase 0 has no authentication and one process per
-variant tenant; the only runtime boundary is the per-tenant `HERMES_HOME`.** Treat the bind
-address as `127.0.0.1` and the operator as the only user. Hardening (auth, per-tenant
-containers, egress policy, quotas, secret manager) is Phase 2 — roadmap in the design doc §10.
+Auth, quotas, toolset scoping, and container isolation are enforced by the gateway:
 
-Known limits: sessions are unattended runs (`--accept-hooks`, pre-scoped toolsets via
-`TEAM_GATEWAY_HERMES_EXTRA_ARGS`); provisioning takes minutes and runs asynchronously; usage
-accounting captures token counts from the terminal result envelope (Hermes does not emit its
-per-run cost report for `chat` runs), and is recorded, not enforced.
+```sh
+TEAM_GATEWAY_API_KEYS="sk-mykey-1,sk-mykey-2" \
+TEAM_GATEWAY_TENANT_MAX_TURNS=200 \
+TEAM_GATEWAY_TENANT_MAX_TOKENS=2000000 \
+TEAM_GATEWAY_HERMES_TOOLSETS="fs,web" \
+TEAM_GATEWAY_ISOLATION=docker \
+bun run dev
+```
+
+- **Auth** — when `TEAM_GATEWAY_API_KEYS` is set, every route except `GET /health` and `GET /`
+  requires a key via `Authorization: Bearer`, `x-api-key`, or `x-goog-api-key` (`401` otherwise).
+  Keys are compared in constant time and never echoed. Unset = Phase 0 localhost mode
+  (a startup warning states it).
+- **Quotas** — `TEAM_GATEWAY_TENANT_MAX_TURNS` / `TEAM_GATEWAY_TENANT_MAX_TOKENS` are per-tenant
+  lifetime caps enforced before a turn starts (`429`, costs nothing). Token counts come from the
+  Hermes result envelope; counters live in the tenant registry.
+- **Toolset scoping** — `TEAM_GATEWAY_HERMES_TOOLSETS` (e.g. `fs,web`) is passed as `-t` on every
+  session: a real per-session tool-confinement knob.
+- **Container isolation** — `TEAM_GATEWAY_ISOLATION=docker` runs each turn inside an ephemeral
+  sibling container (`docker run --rm -i`, image from `TEAM_GATEWAY_RUNTIME_IMAGE`, default
+  `team-gateway-runtime:latest` — build it from `docker/Dockerfile`); only the tenant project dir
+  and Hermes home are mounted. Startup fails fast when Docker is unusable.
+- **Egress** — network egress enforcement is host-side: Hermes iron-proxy (`hermes egress`,
+  TLS-intercepting firewall, operator-deployed) fronts tenant containers/sessions; the gateway
+  contributes toolset scoping + run ceilings. See the iron-proxy docs in the Hermes user guide.
+
+Known limits: provisioning runs asynchronously; usage is metered but not billed; auth is a
+shared bearer-key pool, not per-human identities (key rotation is a restart). Full Phase 2
+design: `docs/designs/2026-09-27-team-gateway-phase2-hardening-design.md`.
