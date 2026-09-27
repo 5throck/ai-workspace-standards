@@ -31,8 +31,9 @@ services:
       TEAM_GATEWAY_DATA_DIR: /data
       TEAM_GATEWAY_DATA_DIR_HOST: ${TEAM_GATEWAY_DATA_DIR_HOST:?set to the absolute host path of the data dir}
       TEAM_GATEWAY_WORKSPACE_DIR: /workspace
-      # "all" auto-discovers every stable templates/co-* — new variants appear without config changes
+      # "all" auto-discovers templates/co-* — stable only by default; INCLUDE_BETA adds beta
       TEAM_GATEWAY_VARIANTS: ${TEAM_GATEWAY_VARIANTS:-all}
+      TEAM_GATEWAY_VARIANTS_INCLUDE_BETA: ${TEAM_GATEWAY_VARIANTS_INCLUDE_BETA:-true}
       TEAM_GATEWAY_TEMPLATE_VERSION: ${TEAM_GATEWAY_TEMPLATE_VERSION:-}
       TEAM_GATEWAY_API_KEYS: ${TEAM_GATEWAY_API_KEYS:-}
       TEAM_GATEWAY_API_KEYS_FILE: /seed/.env.keys
