@@ -743,6 +743,7 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
         service: "co-workspace",
         authEnabled: state.cfg.apiKeys.length > 0,
         googleSso: googleConfigured(),
+        loginRequired: state.cfg.loginRequired,
         isolation: state.cfg.isolation,
         runtime: state.cfg.runtime,
         variants: state.cfg.variants,

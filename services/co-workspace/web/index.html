@@ -115,6 +115,13 @@
   table.admin { width: 100%; border-collapse: collapse; font-size: .78rem; }
   table.admin td, table.admin th { padding: 5px 6px; border-bottom: 1px solid var(--border); text-align: left; }
   #adminView { display: none; flex: 1; overflow: auto; padding: 16px 20px; }
+  #adminView .card { max-width: 560px; background: var(--panel); border: 1px solid var(--border2); border-radius: 12px; padding: 16px 18px; }
+  #adminView .card h2 { margin: 0 0 12px; font-size: 1.05rem; }
+  #adminView .card .field { display: flex; flex-direction: column; gap: 3px; color: var(--muted); margin-bottom: 8px; }
+  #adminView .card input { background: var(--input-bg); color: var(--fg); border: 1px solid var(--border2); border-radius: 7px; padding: 7px 9px; font: inherit; width: 100%; }
+  #adminView .card button { background: #1f6feb; color: #fff; border: 0; border-radius: 7px; padding: 7px 14px; font: inherit; cursor: pointer; }
+  #adminView .card button:hover { background: #388bfd; }
+  .formErr { color: #f85149; font-size: .78rem; min-height: 1em; margin-top: 6px; }
   .gws-hidden { display: none !important; }
   .empty b { color: var(--fg); font-size: 1.05rem; display: block; margin-bottom: 6px; }
 </style>
@@ -198,20 +205,24 @@
     for (const m of catalog) {
       const isBeta = m.meta?.status === "beta";
       const label = isBeta ? `${m.id} · beta` : m.id;
-      const vo = document.createElement("option");
-      vo.value = m.id;
-      vo.textContent = label;
-        const mo = document.createElement("option");
-      mo.value = m.id;
-      mo.textContent = label;
-      modelSel.appendChild(mo);
+      const opt = document.createElement("option");
+      opt.value = m.id;
+      opt.textContent = label;
+      modelSel.appendChild(opt);
     }
   }
 
+  // Untitled legacy sessions predate auto-titling — never expose raw thread ids as names.
+  const displayName = (t) => t.name || (t.status === "failed" ? "Failed session" : "New chat");
+
   async function loadSessions() {
-    const body = await (await fetch("/tenants?mine=1")).json();
     sessionsEl.innerHTML = "";
-    const mine = (body.tenants ?? []).slice().reverse();
+    let mine = [];
+    try {
+      const res = await fetch("/tenants?mine=1");
+      // Signed-out visitors get a 302 to /login (HTML), not a JSON body — treat as empty.
+      if (res.ok) mine = ((await res.json()).tenants ?? []).slice().reverse();
+    } catch { /* network hiccup — show the empty list */ }
     // ChatGPT-pattern: group by recency
     const groups = new Map();
     for (const t of mine) {
@@ -229,8 +240,9 @@
       sessionsEl.appendChild(head);
       for (const t of tenants) {
         const row = document.createElement("div");
-        row.className = "sess" + (t.tenantId === currentTenantId ? " active" : "");
-        const name = t.name ?? t.tenantId;
+        row.className = "sess";
+        row.dataset.tid = t.tenantId;
+        const name = displayName(t);
         const tag = t.status === "failed" ? " ⚠" : t.status === "provisioning" ? " ⏳" : "";
         const tok = t.usage ? ` · ${t.usage.inputTokens ?? 0}→${t.usage.outputTokens ?? 0} tok` : "";
         row.innerHTML = `<div><div class="nm">${esc(name)}${tag}</div>` +
@@ -260,8 +272,9 @@
     currentTenantId = t.tenantId;
     currentModel = t.variant;
     modelSel.value = t.variant;
+    const name = displayName(t);
     const usage = t.usage ? ` · ${t.usage.inputTokens ?? 0}→${t.usage.outputTokens ?? 0} tok` : "";
-    pnameLabel.innerHTML = `project: <b>${t.name ?? t.tenantId}</b> · ${t.sessions} turns${usage}`;
+    pnameLabel.innerHTML = `project: <b>${esc(name)}</b> · ${t.sessions} turns${usage}`;
     log.innerHTML = "";
     // QA-09: replay recent turns as read-only bubbles
     try {
@@ -270,11 +283,8 @@
         if (turn.finalText) bubble("assistant", `[#${turn.seq}] ${turn.finalText}`);
       }
     } catch { /* history is best-effort */ }
-    bubble("assistant", `Resumed "${t.name ?? t.tenantId}" (${t.variant}) — ${t.sessions} earlier turns. Continue below.`);
-    document.querySelectorAll(".sess").forEach((el) => el.classList.remove("active"));
-    document.querySelectorAll(".sess").forEach((el) => {
-      if (el.querySelector(".nm")?.textContent.startsWith(t.name ?? t.tenantId)) el.classList.add("active");
-    });
+    bubble("assistant", `Resumed "${name}" (${t.variant}) — ${t.sessions} earlier turns. Continue below.`);
+    document.querySelectorAll(".sess").forEach((el) => el.classList.toggle("active", el.dataset.tid === currentTenantId));
   }
 
   $("newChat").addEventListener("click", () => {
@@ -353,7 +363,7 @@
       reply.textContent += (reply.textContent ? "\n\n" : "") + `⚠ ${err.message}`;
     } finally {
       reply.classList.remove("pending");
-      send.disabled = false;
+      applyComposerLock();
       $("stopBtn").classList.add("hidden");
     }
   });
@@ -525,6 +535,26 @@
   const adminMenu = $("adminMenu");
   const adminView = $("adminView");
 
+  // Single view switch for the main column: chat (log + composer) vs full-area panels
+  // (profile form, admin panel). Panels always hide the composer — a chat input has no
+  // meaning there and invited typing into a contextless screen.
+  function showView(which) {
+    const chat = which === "chat";
+    log.style.display = chat ? "flex" : "none";
+    adminView.style.display = chat ? "none" : "block";
+    form.style.display = chat ? "" : "none";
+  }
+
+  // Unauthenticated visitors get a locked composer when the deployment demands sign-in,
+  // instead of an invite to type that would only end in a 401 error bubble.
+  let loginRequiredFlag = false;
+  function applyComposerLock() {
+    const lock = loginRequiredFlag && !me;
+    input.disabled = lock;
+    send.disabled = lock;
+    input.placeholder = lock ? "Sign in to chat…" : "Ask the team…";
+  }
+
   function renderAuthCard() {
     if (me) {
       authCard.innerHTML =
@@ -535,12 +565,10 @@
         `<button id="profileBtn" class="collapsebtn" title="Profile" style="font-size:.8rem;">✎</button>` +
         `<button id="logoutBtn" class="collapsebtn" title="Sign out" style="font-size:.8rem;">⎋</button></div>`;
       $("logoutBtn").addEventListener("click", async () => {
-        await fetch("/auth/logout", { method: "POST" });
-        me = null;
-        adminMenu.classList.add("gws-hidden");
-        adminView.style.display = "none";
-        $("log").style.display = "flex";
-        renderAuthCard();
+        // Full reset via reload: keeps the signed-out user from seeing the previous
+        // account's session list, open conversation, or profile/admin panel state.
+        await fetch("/auth/logout", { method: "POST", headers: { "x-requested-with": "co-workspace" } });
+        location.reload();
       });
       $("profileBtn").addEventListener("click", () => renderProfileForm());
     } else {
@@ -599,14 +627,15 @@
   }
 
   function renderProfileForm() {
-    adminView.style.display = "block";
-    $("log").style.display = "none";
+    showView("panel");
     adminView.innerHTML =
-      `<div class="card"><h2>Profile — @${me?.loginId}</h2>` +
+      `<div class="card"><h2>Profile — @${esc(me?.loginId ?? "")}</h2>` +
       `<div class="field" style="margin-bottom:6px;"><input id="pf-name" placeholder="Display name" value="${esc(me?.name ?? "")}"></div>` +
       `<div class="field" style="margin-bottom:6px;"><input id="pf-pw" type="password" placeholder="New password (optional)"></div>` +
-      `<button id="pf-save">Save</button> <button id="pf-back">Back</button></div>`;
+      `<button id="pf-save">Save</button> <button id="pf-back">Back</button>` +
+      `<div class="formErr" id="pf-err" role="alert"></div></div>`;
     $("pf-save").addEventListener("click", async () => {
+      $("pf-err").textContent = "";
       const res = await fetch("/auth/me", {
         method: "PATCH",
         headers: { "content-type": "application/json", "x-requested-with": "co-workspace" },
@@ -615,14 +644,13 @@
       if (res.status === 200) {
         me = (await res.json()).user;
         renderAuthCard();
-        adminView.style.display = "none";
-        $("log").style.display = "flex";
+        showView("chat");
+      } else {
+        const body = await res.json().catch(() => ({}));
+        $("pf-err").textContent = `⚠ ${body.error ?? `save failed (HTTP ${res.status})`}`;
       }
     });
-    $("pf-back").addEventListener("click", () => {
-      adminView.style.display = "none";
-      $("log").style.display = "flex";
-    });
+    $("pf-back").addEventListener("click", () => showView("chat"));
   }
 
   async function doLogin(id, pw) {
@@ -636,6 +664,7 @@
       me = body.user;
       renderAuthCard();
       applyAdminVisibility();
+      applyComposerLock();
       loadSessions();
     } else {
       bubble("assistant", `⚠ ${body.error ?? "login failed"}`);
@@ -662,12 +691,10 @@
   adminMenu.addEventListener("click", async () => {
     const on = adminView.style.display === "block";
     if (on) {
-      adminView.style.display = "none";
-      $("log").style.display = "flex";
+      showView("chat");
       return;
     }
-    adminView.style.display = "block";
-    $("log").style.display = "none";
+    showView("panel");
     adminView.innerHTML = "<div class='hint'>loading…</div>";
     const stats = await (await fetch("/admin/stats")).json();
     const users = (await (await fetch("/admin/users")).json()).users;
@@ -719,12 +746,14 @@ ${body.resetToken}`);
   (async () => {
     const health = await (await fetch("/health")).json();
     googleConfiguredFlag = Boolean(health.googleSso);
+    loginRequiredFlag = Boolean(health.loginRequired);
     const res = await fetch("/auth/me");
     if (res.status === 200) {
       me = (await res.json()).user;
       applyAdminVisibility();
     }
     renderAuthCard();
+    applyComposerLock();
   })();
 
   for (const chip of document.querySelectorAll(".chip")) {
@@ -735,7 +764,7 @@ ${body.resetToken}`);
   }
 
   betaBox.addEventListener("change", loadModels);
-  send.disabled = false;
+  applyComposerLock();
   loadModels();
   loadSessions();
 </script>

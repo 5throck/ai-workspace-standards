@@ -194,7 +194,9 @@ echo '{"type":"result","session_id":"s1","exit_code":0,"text":"ok","tokens":{"in
       await r.text();
     }
     expect(codes).toEqual([200, 200, 429]);
-  });
+    // Provisioning spawns new-project.ts and polls for up to 10s internally — the bun
+    // default 5s timeout flakes on slow CI runners (main went red twice on this).
+  }, 30_000);
 
   test("reload is auth-protected", async () => {
     const res = await fetch(`${base}/admin/reload`, { method: "POST" });

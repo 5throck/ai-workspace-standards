@@ -192,7 +192,7 @@
       "propagation-map.json",
       "services.yaml",
       "fix.mjs",
-      ".DS_Store",
+      ".DS_Store", ".zcodeignore",
       ".cursorrules",
       ".clauderules",
       ".ignore",
