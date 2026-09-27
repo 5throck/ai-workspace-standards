@@ -51,6 +51,7 @@ Skills with a `skills/<name>/` directory in the workspace root. These are the pr
 | `accessibility-audit` | 1.1.0 | active | pm | 2026-09-06 | — | Promoted from co-design (L2-as-basis per ADR-0068 plan): automated WCAG 2.1 AA audits via axe-core |
 | `token-usage-lint` | 1.1.0 | active | pm | 2026-09-06 | — | Promoted from co-design: token SSOT compliance lint; delegates to scripts/design-lint.ts (L0+L1) |
 | `ui-ux-design-intelligence` | 1.0.1 | active | pm | 2026-09-06 | — | Promoted from co-design: component design, visual hierarchy, WCAG checklist; enabled by design-foundation |
+| `service-design` | 1.1.0 | active | pm | 2026-09-27 | — | Promoted from co-design (upgrade-path propagation per PM ruling 2026-09-27): customer journeys, service blueprints, touchpoint design; ADR-0068 diversity-profile review included |
 | `research-analysis` | 1.0.2 | active | pm | 2026-07-19 | — | Promoted from co-work/co-safety duplicate copies — generic research synthesis and evidence gathering, not domain-specific |
 | `context-commonization-review` | 1.1.0 | active | architect | 2026-08-21 | — | Cross-variant docs/<variant>.context.md duplication review — promotes shared content into common docs/context.md (ADR-0050 Part 3) |
 | `gateguard` | 1.0.2 | active | pm | 2026-08-01 | — | Pre-edit fact-forcing quality gate — investigate importers, schemas, scope constraints before editing (Hook-Prompt-Skill 3-layer enforcement) |
@@ -188,7 +189,6 @@ Skills registered in the catalog but without a `skills/<name>/` directory in the
 | `sap-pp` | 1.0.0 | active | pp-analyst | 2026-08-15 | — | co-abap only |
 | `sap-sd` | 1.0.0 | active | sd-analyst | 2026-08-15 | — | co-abap only |
 | `scenario-comparison` | 1.0.0 | active | engagement-director | 2026-08-25 | — | co-price only |
-| `service-design` | 1.1.0 | active | pm | 2026-07-19 | — | co-design only |
 | `sheet-model` | 2.0.0 | active | cpa-auditor | 2026-08-25 | — | co-price only |
 | `signal-detector` | 1.0.0 | active | gvp-agent | — | — | co-safety only |
 | `slide-layout-gate` | 1.0.0 | active | pdf-export | 2026-08-26 | — | co-deck only |

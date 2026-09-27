@@ -31,6 +31,8 @@
 
 Implemented in this wave: **SEC-05** (in-memory fixed-window rate limiter on `/auth/login|signup|resend` + per-principal tenant cap `CO_WORKSPACE_TENANT_MAX_PER_PRINCIPAL`), **SEC-09** (`CO_WORKSPACE_CSRF_REQUIRED=true` — keyless mutating routes require the `x-requested-with` header; compose default on), **SEC-10** (docker isolation resource caps + `no-new-privileges` + `cap-drop ALL`, configurable via `CO_WORKSPACE_CONTAINER_*`), **SEC-12** (append-only SQLite audit log + `GET /admin/audit`; login success/failure, tenant create/delete, key reload, admin actions recorded), **SEC-14** (outbox sweep at startup, 24h expiry), **QA-07** (`POST /tenants/:id/cancel` + Stop button, per-tenant active-process tracking), **QA-09** (resume replays the last 10 turns from the history store), **QA-10** (`dirSize` async via fs/promises), **QA-12** (`GET /admin/mail-outbox` viewer for remote signups), **QA-13** (session rows show input→output tokens), **QA-14** (history tab caches per tenant, refetches only when the turn count changes).
 
+**SEC-05 remnant closed (2026-09-27, same day)**: per-principal lifetime token budget across tenants (`CO_WORKSPACE_PRINCIPAL_MAX_TOKENS`) — enforced on all four chat surfaces before the turn runs; aggregate usage + remaining budget exposed via `/auth/me`.
+
 Still deferred:
 
 | ID | Source | Item | Why deferred |

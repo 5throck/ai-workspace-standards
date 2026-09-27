@@ -220,6 +220,8 @@ duty of §2b rule 6 / ADR-0070.
 | `token-usage-lint` skill | Hardcoded-value detection; reused, not duplicated |
 | `accessibility-audit` skill | WCAG verification; referenced, not redefined |
 | `ui-ux-design-intelligence` skill (co-design) | Downstream: takes over once tokens and decisions exist (`design-foundation` enables it) |
+| `service-design` skill (L0, promoted from co-design 2026-09-27) | Journey/blueprint layer for service-surface design; embeds the ADR-0068 diversity-profile review as a mandatory step |
+| Worked example of this contract (project SSOT, validation contract end-to-end) | `Projects/co-design/docs/design.md` — **workspace fleet repository only**; not delivered to projects and not valid in standalone checkouts (same scoping rule as the row below) |
 | The project's own derived docs (e.g. docs/design.md, docs/design-system/*) | Originating examples exist per project in the workspace — project-specific paths are deliberately not cited here so this spec stays valid in standalone checkouts |
 
 ## 9. Migration Notes

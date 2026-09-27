@@ -166,7 +166,7 @@
 | `scenario-comparison` | variant:co-price | — | — | pricing-governance (enables), prisma-7 (follows), ui-component-design (composes_with) | scenario-snapshots | tri-view-comparison, approval-record |
 | `script-lifecycle-manager` | L0 | — | — | — | — | — |
 | `security-scan` | L0 | — | — | — | — | — |
-| `service-design` | variant:co-design | design-lead, design-lead, service-designer, service-designer | phase1, phase2, phase3 | accessibility-audit (follows), token-usage-lint (follows), ui-ux-design-intelligence (follows) | — | — |
+| `service-design` | L0 | design-lead, design-lead, service-designer, service-designer | phase1, phase2, phase3 | accessibility-audit (follows), token-usage-lint (follows), ui-ux-design-intelligence (follows) | — | — |
 | `sheet-model` | variant:co-price | — | — | — | — | — |
 | `signal-detector` | variant:co-safety | — | — | — | — | — |
 | `simulate-pipeline` | L0 | — | — | — | — | — |

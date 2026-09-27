@@ -180,6 +180,29 @@ export function requireTenantAccess(state: GatewayState, req: Request, rec: Tena
   throw new HttpError(403, `tenant ${rec.tenantId} is owned by ${rec.ownerPrincipal ?? "anonymous"}`);
 }
 
+/** SEC-05 remnant: aggregate token usage across ALL tenants owned by a principal. */
+export function principalTokenUsage(state: GatewayState, principal: string): { input: number; output: number } {
+  let input = 0;
+  let output = 0;
+  for (const t of state.registry.list()) {
+    if ((t.ownerPrincipal ?? "anonymous") !== principal) continue;
+    input += t.inputTokens;
+    output += t.outputTokens;
+  }
+  return { input, output };
+}
+
+/** Per-principal lifetime token budget across tenants (0 = off). */
+export function assertPrincipalQuota(state: GatewayState, principal: string): void {
+  const max = state.cfg.principalMaxTokens;
+  if (max <= 0) return;
+  const usage = principalTokenUsage(state, principal);
+  const used = usage.input + usage.output;
+  if (used >= max) {
+    throw new HttpError(429, `principal token budget exhausted (${used}/${max} tokens across all tenants)`);
+  }
+}
+
 export function tenantKeyFor(variant: string, user: string): string {
   return `${variant}::${user}`;
 }
@@ -819,6 +842,7 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
       const rec = await waitForTenant(state, decodeURIComponent(tenantChat[1]));
       requireTenantAccess(state, req, rec);
       assertQuota(state.cfg, rec);
+      assertPrincipalQuota(state, rec.ownerPrincipal ?? "anonymous");
       return nativeChatResponse(state, rec, message);
     }
 
@@ -836,6 +860,7 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
       }
       const ready = await ensureReady(state, rec);
       assertQuota(state.cfg, ready);
+      assertPrincipalQuota(state, ready.ownerPrincipal ?? "anonymous");
       return await openaiChatResponse(state, ready, parsed.req.message, parsed.req.stream, promise ?? undefined);
     }
 
@@ -849,6 +874,7 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
       if (promise) await promise;
       const ready = await ensureReady(state, rec);
       assertQuota(state.cfg, ready);
+      assertPrincipalQuota(state, ready.ownerPrincipal ?? "anonymous");
       return await anthropicChatResponse(state, ready, parsed.req.message, parsed.req.stream);
     }
 
@@ -991,7 +1017,12 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
     if (req.method === "GET" && path === "/auth/me") {
       const user = state.users.resolveSession(sessionTokenFromCookie(req));
       if (!user) throw new HttpError(401, "not signed in");
-      return jsonResponse({ user: { loginId: user.principal, name: user.name, role: user.role } });
+      const usage = principalTokenUsage(state, user.principal);
+      return jsonResponse({
+        user: { loginId: user.principal, name: user.name, role: user.role },
+        usage: { inputTokens: usage.input, outputTokens: usage.output, totalTokens: usage.input + usage.output },
+        budget: state.cfg.principalMaxTokens > 0 ? { maxTokens: state.cfg.principalMaxTokens } : null,
+      });
     }
 
     if (req.method === "PATCH" && path === "/auth/me") {
@@ -1217,6 +1248,7 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
       if (promise) await promise;
       const ready = await ensureReady(state, rec);
       assertQuota(state.cfg, ready);
+      assertPrincipalQuota(state, ready.ownerPrincipal ?? "anonymous");
       return await geminiChatResponse(state, ready, parsed.req.message, geminiAction[2] === "streamGenerateContent");
     }
 

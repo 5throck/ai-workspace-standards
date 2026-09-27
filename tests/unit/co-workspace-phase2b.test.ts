@@ -155,6 +155,47 @@ echo '{"type":"result","session_id":"s1","exit_code":0,"text":"ok","tokens":{"in
     expect((await models("sk-new")).status).toBe(200);
   });
 
+  test("principal token budget: cross-tenant spend trips 429 (SEC-05 remnant)", async () => {
+    // budget test server shares state; build a dedicated config-based check instead:
+    const cfgB = loadConfig({
+      CO_WORKSPACE_HOST: "127.0.0.1",
+      CO_WORKSPACE_PORT: String(20000 + Math.floor(Math.random() * 20000)),
+      CO_WORKSPACE_DATA_DIR: join(tmpdir(), `gw-budget-${crypto.randomUUID().slice(0, 8)}`),
+      TEAM_GATEWAY_WORKSPACE_DIR: workspaceDir,
+      HERMES_BIN: hermesBin,
+      CO_WORKSPACE_PRINCIPAL_MAX_TOKENS: "4",
+    });
+    const st = createState(cfgB);
+    const srv = createServer(st);
+    const b2 = `http://127.0.0.1:${srv.port}`;
+    afterAll(() => srv.stop(true));
+
+    // provision a tenant and drive 3 turns (each ~15 tokens) against a 100-token budget
+    const prov = await fetch(`${b2}/sessions`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ variant: "co-consult" }),
+    });
+    const { tenantId } = await prov.json();
+    const deadline = Date.now() + 10_000;
+    while (Date.now() < deadline) {
+      const d = await (await fetch(`${b2}/tenants/${tenantId}`)).json();
+      if (d.status !== "provisioning") break;
+      await Bun.sleep(50);
+    }
+    const codes = [];
+    for (let i = 0; i < 3; i++) {
+      const r = await fetch(`${b2}/tenants/${tenantId}/chat`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ message: "hi" }),
+      });
+      codes.push(r.status);
+      await r.text();
+    }
+    expect(codes).toEqual([200, 200, 429]);
+  });
+
   test("reload is auth-protected", async () => {
     const res = await fetch(`${base}/admin/reload`, { method: "POST" });
     expect(res.status).toBe(401);
