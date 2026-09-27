@@ -43,7 +43,7 @@ local-only PoC: loopback bind, no authentication, single process.
 
 ```sh
 bun install          # dev deps for typecheck (typescript, @types/bun)
-bun run dev          # start on 127.0.0.1:8787 (config via TEAM_GATEWAY_* env)
+bun run dev          # start on 127.0.0.1:9030 (config via TEAM_GATEWAY_* env)
 bun run typecheck    # tsc --noEmit over src/
 ```
 

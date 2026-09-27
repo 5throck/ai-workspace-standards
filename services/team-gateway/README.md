@@ -1,8 +1,8 @@
-# Team Gateway
+# co-workspace
 
 Serve the workspace's variant agent teams (`templates/co-*`) over an **OpenAI-compatible web
 API**, backed by headless [Hermes Agent](https://github.com/NousResearch/hermes-agent) sessions.
-Governance: ADR-0092 · Design: `docs/designs/2026-09-27-team-gateway-service-design.md`.
+Formerly "Team Gateway". Governance: ADR-0092 · Design: `docs/designs/2026-09-27-team-gateway-service-design.md`.
 
 **Phase 0 scope (this release):** single variant (`co-consult`), single user, local-only
 (loopback bind, no authentication). Not for untrusted networks — see
@@ -18,7 +18,7 @@ cd services/team-gateway
 bun install
 
 TEAM_GATEWAY_HERMES_SEED_HOME="$HOME/.hermes" bun run dev
-# [team-gateway] listening on http://127.0.0.1:8787
+# [co-workspace] listening on http://127.0.0.1:9030
 ```
 
 `TEAM_GATEWAY_HERMES_SEED_HOME` points at a Hermes home whose `auth.json`/`.env` seed each
@@ -32,7 +32,7 @@ Any OpenAI-wire client works; no plugin needed.
 
 1. Start the gateway (`bun run dev`, above).
 2. Open WebUI → **Settings → Admin Panel → Connections → OpenAI API**.
-3. Add connection: URL `http://127.0.0.1:8787/v1`, key `sk-team-gateway` (any non-empty string).
+3. Add connection: URL `http://127.0.0.1:9030/v1`, key `sk-co-workspace` (any non-empty string).
 4. Models refresh → `co-consult` appears in the model list. Start a chat: the first message
    scaffolds the tenant project (takes a minute or two), then the PM agent team answers.
 
@@ -42,7 +42,7 @@ The same tenants are also served over the Anthropic Messages wire (`/v1/messages
 `@anthropic-ai/sdk`-style clients and `ANTHROPIC_BASE_URL`-based tooling attach directly:
 
 ```sh
-curl -s http://127.0.0.1:8787/v1/messages \
+curl -s http://127.0.0.1:9030/v1/messages \
   -H 'content-type: application/json' \
   -H 'anthropic-version: 2023-06-01' \
   -d '{"model":"co-consult","max_tokens":1024,"stream":true,
@@ -63,7 +63,7 @@ The same tenants are also served over the Gemini wire (`generateContent` /
 speak the Gemini API attach directly:
 
 ```sh
-curl -sN "http://127.0.0.1:8787/v1beta/models/co-consult:streamGenerateContent?alt=sse" \
+curl -sN "http://127.0.0.1:9030/v1beta/models/co-consult:streamGenerateContent?alt=sse" \
   -H 'content-type: application/json' \
   -d '{"contents":[{"role":"user","parts":[{"text":"hi"}]}]}'
 ```
@@ -104,8 +104,8 @@ events to every wire surface.
 | POST | `/tenants/:id/chat` | Raw Hermes stream-json events over SSE + `done` summary |
 
 ```sh
-curl -s http://127.0.0.1:8787/v1/models
-curl -N http://127.0.0.1:8787/v1/chat/completions \
+curl -s http://127.0.0.1:9030/v1/models
+curl -N http://127.0.0.1:9030/v1/chat/completions \
   -H 'content-type: application/json' \
   -d '{"model":"co-consult","stream":true,"messages":[{"role":"user","content":"hi"}]}'
 ```
@@ -118,7 +118,7 @@ limitation).
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `TEAM_GATEWAY_HOST` / `_PORT` | `127.0.0.1` / `8787` | Bind address (keep loopback in Phase 0) |
+| `TEAM_GATEWAY_HOST` / `_PORT` | `127.0.0.1` / `9030` | Bind address (keep loopback in Phase 0) |
 | `TEAM_GATEWAY_DATA_DIR` | `services/team-gateway/data` | Tenant projects, Hermes homes, registry |
 | `TEAM_GATEWAY_WORKSPACE_DIR` | repo root | Workspace clone used for scaffolding |
 | `TEAM_GATEWAY_VARIANTS` | `co-consult` (compose default: `all`) | Variant allowlist — `all` auto-discovers every `status: stable` `templates/co-*` |
@@ -136,8 +136,38 @@ limitation).
 | `TEAM_GATEWAY_ISOLATION` | `process` | `docker` = per-turn ephemeral sibling container |
 | `TEAM_GATEWAY_RUNTIME_IMAGE` | `team-gateway-runtime:latest` | Runtime image for docker isolation |
 | `TEAM_GATEWAY_DOCKER_BIN` | `docker` | Docker CLI binary for the isolation probe |
-| `TEAM_GATEWAY_RUNTIME` | `hermes` | `hermes` or `antigravity` (agy headless print mode) |
-| `TEAM_GATEWAY_ANTIGRAVITY_BIN` | `agy` | Antigravity CLI binary for the antigravity runtime |
+| `TEAM_GATEWAY_RUNTIME` | `hermes` | `hermes` / `antigravity` (agy) / `claude` / `codex` |
+| `TEAM_GATEWAY_ANTIGRAVITY_BIN` | `agy` | Antigravity CLI binary |
+| `TEAM_GATEWAY_CLAUDE_BIN` | `claude` | Claude Code CLI binary |
+| `TEAM_GATEWAY_CODEX_BIN` | `codex` | Codex CLI binary |
+| `TEAM_GATEWAY_ADMIN_EMAIL` | — | Bootstrap admin account email (created at startup) |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` / `GOOGLE_REDIRECT_URI` | — | Google SSO (OAuth code + PKCE) |
+
+### Session runtimes (full matrix)
+
+| Runtime | Command | Provider | Continuity | Credentials | Container isolation |
+|---|---|---|---|---|---|
+| `hermes` | `hermes chat --format stream-json` | operator-configured | named thread (`--continue gw-<tenantId>`) | per-tenant HERMES_HOME (re-seeded per turn) | ✅ |
+| `antigravity` | `agy -p --output-format stream-json` | Google | `--conversation <id>` (persisted) | local Antigravity login | ❌ |
+| `claude` | `claude -p --output-format stream-json --verbose` | Anthropic | `--resume <session_id>` (persisted) | operator `claude login` (`~/.claude`) — never copied | ❌ |
+| `codex` | `codex exec --json` (+ `resume <thread_id>`) | OpenAI | thread id (persisted) | operator `codex login` (`~/.codex`) — never copied | ❌ |
+
+### Runtime Addition Checklist (P6 — standing procedure for any future CLI runtime)
+
+1. **Live protocol probe**: capture the CLI's NDJSON events with a trivial prompt (do not guess shapes).
+2. **Adapter**: `src/<runtime>.ts` — argv builder, defensive event normalizer to the shared shape (`system`/`text`/`result`), turn runner.
+3. **Continuity**: a persisted per-tenant handle (session/thread/conversation id) — no MRU lookups.
+4. **Credential model**: shared location or per-turn re-seed — NEVER token-file copies across homes.
+5. **Isolation matrix**: container isolation requires baking the binary into the runtime image; document ✅/❌.
+6. **Provider disclosure**: add the runtime → provider mapping to `/v1/models` metadata.
+7. **Tests**: canned-JSONL fake binary suite (~8-12 tests), then a live smoke with a remember/recall probe.
+
+### OpenAI SDK contract (P2)
+
+The `/v1` surface serves the SDK core paths: `GET /v1/models` (with `meta` extensions) and
+`POST /v1/chat/completions` (streaming + non-streaming). **The contract is text-out only** —
+tools are executed inside the runtime session, not passed through the wire. `tool_calls`
+passthrough is deliberately out of scope until a concrete client requires it.
 | `HERMES_BIN` | `hermes` | Hermes binary path |
 | `HERMES_INFERENCE_MODEL` / `_PROVIDER` | — | Passed through to Hermes sessions |
 
@@ -152,7 +182,7 @@ docker compose -f services/team-gateway/docker/docker-compose.yml up --build -d
 
 - The image is based on the official `nousresearch/hermes-agent` image (hermes + python) with
   bun + the gateway server added; the compose service overrides the s6 entrypoint to run the
-  server as PID 1. It serves `127.0.0.1:8787`.
+  server as PID 1. It serves `127.0.0.1:9030`.
 - The workspace clone is mounted at `/workspace` (provisioning writes `Projects/` there in
   Phase 0) and the data dir is a BIND mount at `/data` from `TEAM_GATEWAY_DATA_DIR_HOST`.
 - **Docker isolation** (`TEAM_GATEWAY_ISOLATION=docker`) spawns SIBLING containers whose mounts

@@ -57,10 +57,12 @@ export interface GatewayConfig {
   dataDirHost?: string;
   /** P1: catalog beta variants too (`TEAM_GATEWAY_VARIANTS_INCLUDE_BETA=true`). */
   includeBeta: boolean;
-  /** Session runtime: `hermes` (default) or `antigravity` (agy headless print mode).
-   * Container isolation requires the hermes runtime (the agy binary is not in the image). */
-  runtime: "hermes" | "antigravity";
+  /** Session runtime: `hermes` (default), `antigravity` (agy), `claude`, or `codex`.
+   * Container isolation requires the hermes runtime (the other binaries are not in the image). */
+  runtime: "hermes" | "antigravity" | "claude" | "codex";
   antigravityBin: string;
+  claudeBin: string;
+  codexBin: string;
 }
 
 export const SERVICE_ROOT = resolve(import.meta.dir, "..");
@@ -135,7 +137,7 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
   apiKeys = [...new Set([...apiKeys, ...readKeysFile(apiKeysFile)])];
   return {
     host: env.TEAM_GATEWAY_HOST ?? "127.0.0.1",
-    port: num(env.TEAM_GATEWAY_PORT, 8787),
+    port: num(env.TEAM_GATEWAY_PORT, 9030),
     dataDir: resolve(env.TEAM_GATEWAY_DATA_DIR ?? resolve(SERVICE_ROOT, "data")),
     workspaceDir: resolve(env.TEAM_GATEWAY_WORKSPACE_DIR ?? resolve(SERVICE_ROOT, "..", "..")),
     variants: resolveVariants(env.TEAM_GATEWAY_VARIANTS ?? "co-consult", resolve(
@@ -166,8 +168,14 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     dockerBin: env.TEAM_GATEWAY_DOCKER_BIN ?? "docker",
     dataDirHost: env.TEAM_GATEWAY_DATA_DIR_HOST || undefined,
     includeBeta: env.TEAM_GATEWAY_VARIANTS_INCLUDE_BETA === "true" || env.TEAM_GATEWAY_VARIANTS_INCLUDE_BETA === "1",
-    runtime: env.TEAM_GATEWAY_RUNTIME === "antigravity" ? "antigravity" : "hermes",
+    runtime: (["antigravity", "claude", "codex"] as const).includes(
+      env.TEAM_GATEWAY_RUNTIME as "antigravity",
+    )
+      ? (env.TEAM_GATEWAY_RUNTIME as "antigravity" | "claude" | "codex")
+      : "hermes",
     antigravityBin: env.TEAM_GATEWAY_ANTIGRAVITY_BIN ?? "agy",
+    claudeBin: env.TEAM_GATEWAY_CLAUDE_BIN ?? "claude",
+    codexBin: env.TEAM_GATEWAY_CODEX_BIN ?? "codex",
   };
 }
 
