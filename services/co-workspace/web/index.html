@@ -148,6 +148,7 @@
 </aside>
 <script type="module">
   const $ = (id) => document.getElementById(id);
+  const esc = (t) => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   const modelSel = $("model"), sessionsEl = $("sessions"), log = $("log"),
         form = $("composer"), input = $("message"), send = $("send"),
         betaBox = $("beta"), pnameLabel = $("pnameLabel");
