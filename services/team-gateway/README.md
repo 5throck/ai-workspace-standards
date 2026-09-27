@@ -56,6 +56,25 @@ curl -s http://127.0.0.1:8787/v1/messages \
   a named Hermes thread per tenant, identical to the OpenAI surface.
 - `POST /v1/messages/count_tokens` returns a rough chars/4 estimate, not a tokenizer count.
 
+## Connect Gemini-ecosystem clients (Antigravity ecosystem)
+
+The same tenants are also served over the Gemini wire (`generateContent` /
+`streamGenerateContent?alt=sse` / `countTokens` / `models`), so Google-ecosystem tools that
+speak the Gemini API attach directly:
+
+```sh
+curl -sN "http://127.0.0.1:8787/v1beta/models/co-consult:streamGenerateContent?alt=sse" \
+  -H 'content-type: application/json' \
+  -d '{"contents":[{"role":"user","parts":[{"text":"hi"}]}]}'
+```
+
+- `systemInstruction` is ignored (the tenant team defines its own instructions); `generationConfig`
+  is accepted but not enforced.
+- Tenant keying: optional gateway-extension `user` field (default `default`) — continuity is a
+  named Hermes thread per tenant, identical to the other surfaces.
+- Antigravity itself exposes no public model-serving API spec (its extension surface is MCP), so
+  the ecosystem-standard Gemini contract is what is served.
+
 ## Native REST surface
 
 | Method | Path | Purpose |
@@ -65,6 +84,9 @@ curl -s http://127.0.0.1:8787/v1/messages \
 | POST | `/v1/chat/completions` | OpenAI wire; `model` = variant; `stream` supported |
 | POST | `/v1/messages` | Anthropic Messages wire; `model` = variant; `stream` supported |
 | POST | `/v1/messages/count_tokens` | Rough token estimate stub |
+| POST | `/v1beta/models/{model}:generateContent` / `:streamGenerateContent` | Gemini wire; `model` = variant; `stream` via `alt=sse` |
+| POST | `/v1beta/models/{model}:countTokens` | Rough token estimate stub |
+| GET | `/v1beta/models` | Variant catalog as Gemini model list |
 | POST | `/sessions` | Provision a tenant `{variant, description?, country?}` → `202` |
 | GET | `/tenants`, `/tenants/:id` | Registry (status: `provisioning/ready/failed`) |
 | POST | `/tenants/:id/chat` | Raw Hermes stream-json events over SSE + `done` summary |
