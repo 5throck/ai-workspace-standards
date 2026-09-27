@@ -123,7 +123,8 @@ limitation).
 | `TEAM_GATEWAY_WORKSPACE_DIR` | repo root | Workspace clone used for scaffolding |
 | `TEAM_GATEWAY_VARIANTS` | `co-consult` | Comma-separated variant allowlist (the model catalog) |
 | `TEAM_GATEWAY_TEMPLATE_VERSION` | HEAD (`templates/VERSION`) | Pin to a `template-vX.Y.Z` tag |
-| `TEAM_GATEWAY_HERMES_SEED_HOME` | — | Hermes home whose `auth.json`/`.env` seed tenant homes |
+| `TEAM_GATEWAY_HERMES_SEED_HOME` | — | Hermes home whose `.env` seeds tenant homes |
+| `TEAM_GATEWAY_HERMES_AUTH_DIR` | `<seed>/shared` | Shared Nous credential store — ONE token store across operator + tenants; refreshes stay valid everywhere |
 | `TEAM_GATEWAY_HERMES_MODEL` | Hermes auto | Model id stamped into tenant `config.yaml` (`model.default`), e.g. `upstage/solar-pro4:free` |
 | `TEAM_GATEWAY_RUN_BUDGET_SECONDS` | `300` | Wall-clock ceiling per Hermes turn |
 | `TEAM_GATEWAY_MAX_TURNS` | `100` | Tool-iteration ceiling per turn |
@@ -186,6 +187,10 @@ bun run dev
   sibling container (`docker run --rm -i`, image from `TEAM_GATEWAY_RUNTIME_IMAGE`, default
   `team-gateway-runtime:latest` — build it from `docker/Dockerfile`); only the tenant project dir
   and Hermes home are mounted. Startup fails fast when Docker is unusable.
+- **Shared credentials** — tenants do NOT get per-tenant `auth.json` copies (a copied OAuth
+  refresh token goes stale the first time another home refreshes it — found live 2026-09-27).
+  Instead every session sets `HERMES_SHARED_AUTH_DIR` to one shared store (default
+  `<seed>/shared`), so a single `hermes login` covers the operator and all tenants.
 - **Key rotation** — set `TEAM_GATEWAY_API_KEYS_FILE` (one key per line, `#` comments) alongside
   or instead of `TEAM_GATEWAY_API_KEYS`; rotate by rewriting the file and calling
   `POST /admin/reload` with a valid key. Point the file at any managed-secret mount.

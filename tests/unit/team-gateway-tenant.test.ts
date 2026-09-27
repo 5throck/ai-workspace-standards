@@ -95,8 +95,8 @@ describe("seedHermesHome — per-tenant isolation and ADR-0088 D7 trust scoping"
     const rec = registry.create({ dataDir, variant: "co-consult" });
     seedHermesHome(rec, seedHome);
 
-    expect(existsSync(join(rec.hermesHome, "auth.json"))).toBe(true);
     expect(existsSync(join(rec.hermesHome, ".env"))).toBe(true);
+    expect(existsSync(join(rec.hermesHome, "auth.json"))).toBe(false); // tokens come via the shared store (Addendum 4)
     const config = readFileSync(join(rec.hermesHome, "config.yaml"), "utf8");
     expect(config).toContain("trusted_project_dirs:");
     expect(config).toContain(`- ${rec.projectDir}`);

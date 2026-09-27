@@ -51,9 +51,12 @@ export function recordTurnUsage(
   for (const key of keys.slice(0, Math.max(0, keys.length - 8))) delete daily[key];
 }
 
-/** Credential files copied from the operator's seed home. The operator's config.yaml is NEVER
- * copied — the tenant gets a generated one (trust keys only; provider config travels via env). */
-const SEED_COPY_FILES = ["auth.json", ".env"];
+/** Credential files copied from the operator's seed home. `auth.json` is deliberately NOT
+ * copied (ADR-0092 Addendum 4): a copied OAuth refresh token goes stale the first time another
+ * home refreshes it — tenants instead share the operator's token store via
+ * `HERMES_SHARED_AUTH_DIR`. `.env` (non-token tuning) is still copied. The operator's
+ * config.yaml is never copied — tenants get a generated one. */
+const SEED_COPY_FILES = [".env"];
 
 export function tenantPaths(dataDir: string) {
   const tenantsDir = join(dataDir, "tenants");

@@ -138,8 +138,9 @@ describe("gateway server — native provisioning and chat", () => {
     expect(existsSync(join(projectDir, "AGENTS.md"))).toBe(true);
     expect(existsSync(join(projectDir, ".hermes", "skills", "demo.md"))).toBe(true);
     expect(existsSync(join(workspaceDir, "Projects", tenantId))).toBe(false);
-    // The tenant Hermes home carries seeded credentials and a generated trust-scoped config.
-    expect(existsSync(join(dataDir, "tenants", tenantId, "hermes-home", "auth.json"))).toBe(true);
+    // The tenant Hermes home carries a generated trust-scoped config; credentials ride the
+    // shared store at spawn time (Addendum 4), so no auth.json is copied.
+    expect(existsSync(join(dataDir, "tenants", tenantId, "hermes-home", "auth.json"))).toBe(false);
     const config = readFileSync(join(dataDir, "tenants", tenantId, "hermes-home", "config.yaml"), "utf8");
     expect(config).toContain(`- ${projectDir}`);
   });

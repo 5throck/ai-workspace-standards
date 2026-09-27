@@ -88,6 +88,15 @@ describe("hermes spawn adapter — toolsets and container isolation", () => {
     expect(argv[argv.indexOf("--in") + 1]).toBe("/work/project");
   });
 
+  test("hermesEnv carries the shared Nous credential store (Addendum 4)", () => {
+    const { hermesEnv } = require("../../services/team-gateway/src/hermes");
+    const env = hermesEnv({ ...base, sharedAuthDir: "/secrets/shared" }, {});
+    expect(env.HERMES_SHARED_AUTH_DIR).toBe("/secrets/shared");
+    expect(env.HERMES_HOME).toBe(base.hermesHome);
+    const without = hermesEnv(base, {});
+    expect(without.HERMES_SHARED_AUTH_DIR).toBeUndefined();
+  });
+
   test("docker probe verdicts on a fake docker binary", () => {
     const dir = join(tmpdir(), `gw-probe-${crypto.randomUUID().slice(0, 8)}`);
     mkdirSync(dir, { recursive: true });
