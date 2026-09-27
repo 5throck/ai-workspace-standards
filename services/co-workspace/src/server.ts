@@ -779,6 +779,13 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
         if (state.registry.list().some((r) => r.name === name)) name = `${name}-${genId("").slice(0, 6)}`;
       }
       const owner = callerPrincipal(state, req) ?? "anonymous";
+      // One active team per (principal, variant): creation is keyed and idempotent, so a
+      // /sessions-created team is visible to the lazy key lookup instead of diverging.
+      const key = tenantKeyFor(variant, owner);
+      const existing = state.registry.findByKey(key);
+      if (existing) {
+        return jsonResponse({ tenantId: existing.tenantId, name: existing.name, status: existing.status, existing: true });
+      }
       if (
         state.cfg.tenantMaxPerPrincipal > 0 &&
         state.registry.list().filter((r) => (r.ownerPrincipal ?? "anonymous") === owner).length >=
@@ -789,6 +796,7 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
       const rec = state.registry.create({
         dataDir: state.cfg.dataDir,
         variant,
+        key,
         name: name || undefined,
         description: typeof body.description === "string" ? body.description : undefined,
         ownerPrincipal: owner,
@@ -802,7 +810,9 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
       const mine = url.searchParams.get("mine") === "1";
       let list = state.registry.list();
       if (mine) {
-        const principal = principalFor(state.cfg, presentedCredential(req));
+        // Session-aware: a cookie-only caller must match their own tenants, not the
+        // header-credential principal (previously "anonymous" for browser sessions).
+        const principal = callerPrincipal(state, req) ?? "anonymous";
         list = list.filter((r) => (r.ownerPrincipal ?? "anonymous") === principal);
       }
       return jsonResponse({ tenants: list.map(publicTenant) });

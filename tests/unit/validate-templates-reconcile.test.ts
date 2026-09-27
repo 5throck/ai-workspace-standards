@@ -22,7 +22,13 @@
  *         version, mirror-parity: skip suppression, registry-row disagreement,
  *         and mirror-only adapted copies without a registry row.
  *
- * @version 1.2.0
+ * v1.3.0 (2026-09-28, sound-synth orphan-mirror follow-up — spec
+ *         docs/designs/2026-09-28-sound-synth-orphan-mirror-cleanup-design.md
+ *         §5): pins B-11 variantScopedSkillLeaks — fixture detection in the
+ *         canonical tree and each platform mirror, custom mirrorDirs default,
+ *         and the live-tree day-one-green state (zero leaks post-#1162).
+ *
+ * @version 1.3.0
  */
 import { describe, test, expect, afterEach } from 'bun:test';
 import { existsSync, readFileSync, readdirSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
@@ -36,6 +42,7 @@ import {
   stalePlatformSkillExclusions,
   unlistedPlatformSkillDirs,
   collectMirrorVersionMismatches,
+  variantScopedSkillLeaks,
 } from '../../scripts/validate-templates.ts';
 
 const workspaceRoot = resolve(import.meta.dir, '..', '..');
@@ -317,5 +324,56 @@ describe('C-CM-04 platform-skills sweep helpers (T-20260924-002 R1.3-R1.5)', () 
       const dirs = readdirSync(dir).filter(e => existsSync(join(dir, e, 'SKILL.md')));
       expect(unlistedPlatformSkillDirs(dirs, listed, exempt, excluded)).toEqual([]);
     }
+  });
+});
+
+describe('B-11 variantScopedSkillLeaks (sound-synth orphan-mirror follow-up)', () => {
+  let fixture: string;
+  afterEach(() => { if (fixture) rmSync(fixture, { recursive: true, force: true }); fixture = ''; });
+
+  function seed(rel: string): void {
+    mkdirSync(join(fixture, rel), { recursive: true });
+    writeFileSync(join(fixture, rel, 'SKILL.md'), '---\nname: x\n---\n');
+  }
+
+  test('detects the canonical-tree leak', () => {
+    fixture = mkdtempSync(join(tmpdir(), 'b11-'));
+    seed(join('skills', 'sound-synth'));
+    expect(variantScopedSkillLeaks(fixture, ['sound-synth'])).toEqual(['skills/sound-synth']);
+  });
+
+  test('detects a platform-mirror leak — the blind spot that hid the 2026-09-27 orphans', () => {
+    fixture = mkdtempSync(join(tmpdir(), 'b11-'));
+    seed(join('.hermes/skills', 'sound-synth'));
+    expect(variantScopedSkillLeaks(fixture, ['sound-synth'])).toEqual(['.hermes/skills/sound-synth']);
+  });
+
+  test('collects every mirror copy and sorts deterministically', () => {
+    fixture = mkdtempSync(join(tmpdir(), 'b11-'));
+    for (const rel of ['skills/sound-synth', '.claude/skills/sound-synth', '.codex/skills/sound-synth']) seed(rel);
+    expect(variantScopedSkillLeaks(fixture, ['sound-synth'])).toEqual([
+      '.claude/skills/sound-synth',
+      '.codex/skills/sound-synth',
+      'skills/sound-synth',
+    ]);
+  });
+
+  test('mirrorDirs override and multi-skill input work; clean tree returns empty', () => {
+    fixture = mkdtempSync(join(tmpdir(), 'b11-'));
+    seed(join('custom-mirror/skills', 'sound-synth'));
+    expect(variantScopedSkillLeaks(fixture, ['sound-synth'], ['custom-mirror/skills'])).toEqual([
+      'custom-mirror/skills/sound-synth',
+    ]);
+    expect(variantScopedSkillLeaks(fixture, ['sound-synth', 'mece-logic-auditor'])).toEqual([]);
+  });
+
+  test('live tree is day-one green: zero leaks across canonical + all five mirrors (post-#1162)', () => {
+    const schemaPath = join(workspaceRoot, 'docs', 'workspace-schema.json');
+    const schemaLive = JSON.parse(readFileSync(schemaPath, 'utf-8'));
+    const names = Object.entries(schemaLive.variant_scoped_skills ?? {})
+      .filter(([, v]) => Array.isArray(v))
+      .flatMap(([, v]) => v as string[]);
+    expect(names.length).toBeGreaterThan(0);
+    expect(variantScopedSkillLeaks(join(templatesDir, 'common'), names)).toEqual([]);
   });
 });
