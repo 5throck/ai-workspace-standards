@@ -23,7 +23,7 @@ export function modelsPayload(
       id: v,
       object: "model",
       created: 0,
-      owned_by: "team-gateway",
+      owned_by: "co-workspace",
       meta: {
         status: meta[v]?.status ?? "stable",
         runtime: meta[v]?.runtime ?? "hermes",

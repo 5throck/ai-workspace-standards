@@ -8,7 +8,7 @@ import { copyFileSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { genId, readJson, writeJson } from "./util";
 
-export type TenantStatus = "provisioning" | "ready" | "failed";
+export type TenantStatus = "provisioning" | "ready" | "failed" | "archived";
 
 export interface TenantRecord {
   tenantId: string;

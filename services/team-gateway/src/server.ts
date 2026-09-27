@@ -15,8 +15,19 @@ import { presentedCredential, principalFor, requestAuthorized } from "./auth";
 import { scaffoldProject } from "./scaffold";
 import { publicTenant, recordProgress, recordTurnUsage, seedHermesHome, TenantRecord } from "./tenant";
 import { TenantRegistry } from "./registry-db";
+import { listTenantFiles, readTenantFile, TurnStore } from "./tenant-files";
+import {
+  UserStore,
+  sessionTokenFromCookie,
+  sessionCookieHeader,
+  clearCookieHeader,
+} from "./users";
+import { googleConfigured, authorizeUrl, makePkce, exchangeCode, fetchProfile } from "./google-sso";
+import { randomBytes } from "node:crypto";
 import { HermesEvent, HermesTurnResult, runHermesTurn } from "./hermes";
 import { runAntigravityTurn } from "./antigravity";
+import { runClaudeTurn } from "./claude";
+import { runCodexTurn } from "./codex";
 import {
   anthropicEvent,
   anthropicStream,
@@ -47,6 +58,8 @@ import { genId, moveDir } from "./util";
 export interface GatewayState {
   cfg: GatewayConfig;
   registry: TenantRegistry;
+  turns: TurnStore;
+  users: UserStore;
   provisioning: Map<string, Promise<void>>;
   chatLocks: Map<string, Promise<unknown>>;
 }
@@ -55,6 +68,8 @@ export function createState(cfg: GatewayConfig = loadConfig()): GatewayState {
   mkdirSync(cfg.dataDir, { recursive: true });
   return {
     cfg,
+    turns: new TurnStore(cfg.dataDir),
+    users: new UserStore(cfg.dataDir),
     registry: new TenantRegistry(cfg.dataDir),
     provisioning: new Map(),
     chatLocks: new Map(),
@@ -211,6 +226,30 @@ async function runChat(
           onEvent,
         );
       }
+      if (state.cfg.runtime === "claude") {
+        return runClaudeTurn(
+          {
+            claudeBin: state.cfg.claudeBin,
+            projectDir: rec.projectDir,
+            message,
+            sessionId: rec.conversationId,
+            extraArgs: state.cfg.hermesExtraArgs,
+          },
+          onEvent,
+        );
+      }
+      if (state.cfg.runtime === "codex") {
+        return runCodexTurn(
+          {
+            codexBin: state.cfg.codexBin,
+            projectDir: rec.projectDir,
+            message,
+            threadId: rec.conversationId,
+            extraArgs: state.cfg.hermesExtraArgs,
+          },
+          onEvent,
+        );
+      }
       return runHermesTurn(
         {
           hermesBin: state.cfg.hermesBin,
@@ -255,6 +294,13 @@ async function runChat(
       output: n(tokens.output),
     });
     state.registry.upsert(current);
+    state.turns.record(rec.tenantId, {
+      sessionId: result.sessionId,
+      exitCode: result.exitCode,
+      finalText: result.finalText,
+      inputTokens: n(tokens.input),
+      outputTokens: n(tokens.output),
+    });
   }
   return result;
 }
@@ -560,7 +606,7 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
     if (req.method === "GET" && path === "/health") {
       return jsonResponse({
         ok: true,
-        service: "team-gateway",
+        service: "co-workspace",
         authEnabled: state.cfg.apiKeys.length > 0,
         isolation: state.cfg.isolation,
         runtime: state.cfg.runtime,
@@ -576,6 +622,8 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
       const runtimeMeta: Record<string, { runtime: string; provider: string }> = {
         hermes: { runtime: "hermes", provider: "operator-configured" },
         antigravity: { runtime: "antigravity", provider: "Google (via agy)" },
+        claude: { runtime: "claude", provider: "Anthropic (via Claude Code)" },
+        codex: { runtime: "codex", provider: "OpenAI (via Codex CLI)" },
       };
       const rm = runtimeMeta[state.cfg.runtime] ?? { runtime: state.cfg.runtime, provider: "operator-configured" };
       const meta: Record<string, { status?: string; runtime?: string; provider?: string }> = {};
@@ -704,6 +752,198 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
       return jsonResponse(countTokensPayload(estimate));
     }
 
+    // Wave A (P11): tenant files listing / content, and turn history.
+    const filesRoute = path.match(/^\/tenants\/([^/]+)\/files(?:\/(.*))?$/);
+    if (req.method === "GET" && filesRoute) {
+      const rec = state.registry.get(decodeURIComponent(filesRoute[1]));
+      if (!rec) throw new HttpError(404, `tenant ${filesRoute[1]} not found`);
+      const rel = filesRoute[2] ? decodeURIComponent(filesRoute[2]) : "";
+      const entries = listTenantFiles(rec.projectDir, rel);
+      if (entries === null) throw new HttpError(404, "path not found or not allowed");
+      return jsonResponse({ path: rel, entries });
+    }
+
+    const fileRoute = path.match(/^\/tenants\/([^/]+)\/file\/(.+)$/);
+    if (req.method === "GET" && fileRoute) {
+      const rec = state.registry.get(decodeURIComponent(fileRoute[1]));
+      if (!rec) throw new HttpError(404, `tenant ${fileRoute[1]} not found`);
+      const rel = decodeURIComponent(fileRoute[2]);
+      const content = readTenantFile(rec.projectDir, rel);
+      if (content === null) throw new HttpError(404, "file not found or not allowed");
+      if ("tooLarge" in content) throw new HttpError(413, "file exceeds the 256KB preview cap");
+      return jsonResponse({ path: rel, content: content.content });
+    }
+
+    const historyRoute = path.match(/^\/tenants\/([^/]+)\/history$/);
+    if (req.method === "GET" && historyRoute) {
+      const tenantId = decodeURIComponent(historyRoute[1]);
+      if (!state.registry.get(tenantId)) throw new HttpError(404, `tenant ${tenantId} not found`);
+      return jsonResponse({ turns: state.turns.list(tenantId) });
+    }
+
+    // ── Wave B1: local accounts ──
+    if (req.method === "POST" && path === "/auth/signup") {
+      const body = (await readJsonBody(req)) as Record<string, unknown>;
+      const email = typeof body.email === "string" ? body.email.trim() : "";
+      const password = typeof body.password === "string" ? body.password : "";
+      const name = typeof body.name === "string" && body.name.trim() ? body.name.trim() : email.split("@")[0];
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) throw new HttpError(400, "valid email is required");
+      if (password.length < 8) throw new HttpError(400, "password must be at least 8 characters");
+      const user = state.users.createUser({ email, name, password });
+      if (!user) throw new HttpError(409, "an account with this email already exists");
+      const token = state.users.createSession(user.id);
+      return new Response(JSON.stringify({ user: { email: user.email, name: user.name, principal: user.principal, role: user.role } }), {
+        status: 201,
+        headers: { "content-type": "application/json", "set-cookie": sessionCookieHeader(token) },
+      });
+    }
+
+    if (req.method === "POST" && path === "/auth/login") {
+      const body = (await readJsonBody(req)) as Record<string, unknown>;
+      const email = typeof body.email === "string" ? body.email : "";
+      const password = typeof body.password === "string" ? body.password : "";
+      const user = await state.users.verifyLogin(email, password);
+      if (!user) throw new HttpError(401, "invalid email or password");
+      const token = state.users.createSession(user.id);
+      return new Response(JSON.stringify({ user: { email: user.email, name: user.name, principal: user.principal, role: user.role } }), {
+        status: 200,
+        headers: { "content-type": "application/json", "set-cookie": sessionCookieHeader(token) },
+      });
+    }
+
+    if (req.method === "POST" && path === "/auth/logout") {
+      state.users.destroySession(sessionTokenFromCookie(req));
+      return new Response(JSON.stringify({ ok: true }), {
+        status: 200,
+        headers: { "content-type": "application/json", "set-cookie": clearCookieHeader() },
+      });
+    }
+
+    if (req.method === "GET" && path === "/auth/me") {
+      const user = state.users.resolveSession(sessionTokenFromCookie(req));
+      if (!user) throw new HttpError(401, "not signed in");
+      return jsonResponse({ user: { email: user.email, name: user.name, principal: user.principal, role: user.role } });
+    }
+
+    if (req.method === "PATCH" && path === "/auth/me") {
+      const user = state.users.resolveSession(sessionTokenFromCookie(req));
+      if (!user) throw new HttpError(401, "not signed in");
+      const body = (await readJsonBody(req)) as Record<string, unknown>;
+      const updated = state.users.updateProfile(user.id, {
+        name: typeof body.name === "string" ? body.name : undefined,
+        password: typeof body.password === "string" ? body.password : undefined,
+      });
+      if (!updated) throw new HttpError(404, "user not found");
+      return jsonResponse({ user: { email: updated.email, name: updated.name, principal: updated.principal, role: updated.role } });
+    }
+
+    // ── Wave B2: Google SSO ──
+    if (req.method === "GET" && path === "/auth/google/login") {
+      if (!googleConfigured()) throw new HttpError(501, "Google SSO not configured (GOOGLE_CLIENT_ID/SECRET/REDIRECT_URI)");
+      const state = randomBytes(16).toString("hex");
+      const { verifier, challenge } = makePkce();
+      const url = authorizeUrl(process.env.GOOGLE_CLIENT_ID!, process.env.GOOGLE_REDIRECT_URI!, state, challenge);
+      const flags = `HttpOnly; Path=/; SameSite=Lax; Max-Age=600`;
+      return new Response(null, {
+        status: 302,
+        headers: {
+          location: url,
+          "set-cookie": [
+            `gw_oauth_state=${state}; ${flags}`,
+            `gw_oauth_verifier=${verifier}; ${flags}`,
+          ].join(", "),
+        },
+      });
+    }
+
+    if (req.method === "GET" && path === "/auth/google/callback") {
+      if (!googleConfigured()) throw new HttpError(501, "Google SSO not configured");
+      const url = new URL(req.url);
+      const code = url.searchParams.get("code");
+      const returnedState = url.searchParams.get("state");
+      const cookie = req.headers.get("cookie") ?? "";
+      const expectedState = cookie.match(/gw_oauth_state=([^;]+)/)?.[1];
+      const verifier = cookie.match(/gw_oauth_verifier=([^;]+)/)?.[1];
+      if (!code || !returnedState || !expectedState || returnedState !== expectedState || !verifier) {
+        throw new HttpError(400, "invalid OAuth state");
+      }
+      const accessToken = await exchangeCode(code, process.env.GOOGLE_CLIENT_ID!, process.env.GOOGLE_CLIENT_SECRET!, process.env.GOOGLE_REDIRECT_URI!, verifier);
+      const profile = await fetchProfile(accessToken);
+      if (!profile.emailVerified) throw new HttpError(401, "Google email not verified");
+      let user = state.users.findByGoogleSub(profile.sub) ?? state.users.findByEmail(profile.email);
+      if (!user) {
+        user = state.users.createUser({
+          email: profile.email,
+          name: profile.name,
+          password: null,
+          googleSub: profile.sub,
+        });
+        if (!user) throw new HttpError(500, "account creation failed");
+      } else if (!user.googleSub) {
+        state.users.linkGoogleSub(user.id, profile.sub);
+      }
+      const token = state.users.createSession(user.id);
+      return new Response(null, {
+        status: 302,
+        headers: {
+          location: "/",
+          "set-cookie": [
+            sessionCookieHeader(token),
+            "gw_oauth_state=; HttpOnly; Path=/; Max-Age=0",
+            "gw_oauth_verifier=; HttpOnly; Path=/; Max-Age=0",
+          ].join(", "),
+        },
+      });
+    }
+
+    // ── Wave B3: admin ──
+    if (req.method === "GET" && path === "/admin/users") {
+      const caller = state.users.resolveSession(sessionTokenFromCookie(req));
+      if (!caller || caller.role !== "admin") throw new HttpError(403, "admin only");
+      return jsonResponse({ users: state.users.listUsers().map((u) => ({
+        id: u.id, email: u.email, name: u.name, principal: u.principal,
+        role: u.role, createdAt: u.createdAt, deletedAt: u.deletedAt,
+      })) });
+    }
+
+    const resetRoute = path.match(/^\/admin\/users\/([^/]+)\/reset-password$/);
+    if (req.method === "POST" && resetRoute) {
+      const caller = state.users.resolveSession(sessionTokenFromCookie(req));
+      if (!caller || caller.role !== "admin") throw new HttpError(403, "admin only");
+      const target = state.users.findById(decodeURIComponent(resetRoute[1]));
+      if (!target) throw new HttpError(404, "user not found");
+      const token = state.users.createResetToken(target.id);
+      return jsonResponse({ resetToken: token, note: "one-time token, 15-minute expiry; deliver out-of-band" });
+    }
+
+    const deleteRoute = path.match(/^\/admin\/users\/([^/]+)$/);
+    if (req.method === "DELETE" && deleteRoute) {
+      const caller = state.users.resolveSession(sessionTokenFromCookie(req));
+      if (!caller || caller.role !== "admin") throw new HttpError(403, "admin only");
+      const targetId = decodeURIComponent(deleteRoute[1]);
+      const target = state.users.findById(targetId);
+      if (!target) throw new HttpError(404, "user not found");
+      if (target.id === caller.id) throw new HttpError(400, "cannot delete yourself");
+      const disposition = new URL(req.url).searchParams.get("tenants") === "delete" ? "delete" : "archive";
+      let handled = 0;
+      for (const t of state.registry.list()) {
+        if ((t.ownerPrincipal ?? "anonymous") !== target.principal) continue;
+        if (disposition === "delete") {
+          const deleted = state.registry.delete(t.tenantId);
+          if (deleted) {
+            rmSync(deleted.projectDir, { recursive: true, force: true });
+            rmSync(deleted.hermesHome, { recursive: true, force: true });
+          }
+        } else {
+          t.status = "archived";
+          state.registry.upsert(t);
+        }
+        handled += 1;
+      }
+      state.users.softDeleteUser(targetId);
+      return jsonResponse({ deletedUser: target.email, disposition, tenantsHandled: handled });
+    }
+
     // Gemini wire (Antigravity/Gemini ecosystem). Model id travels in the URL path.
     const geminiCount = path.match(/^\/v1beta\/models\/[^/:]+:countTokens$/);
     if (req.method === "POST" && geminiCount) {
@@ -758,18 +998,18 @@ if (import.meta.main) {
   if (state.cfg.isolation === "docker") {
     const probe = dockerProbe(state.cfg.dockerBin);
     if (!probe.ok) {
-      console.error(`[team-gateway] docker isolation unusable: ${probe.error ?? "probe failed"}`);
+      console.error(`[co-workspace] docker isolation unusable: ${probe.error ?? "probe failed"}`);
       process.exit(1);
     }
-    if (state.cfg.runtime === "antigravity") {
-      console.error("[team-gateway] docker isolation requires runtime hermes (agy is not in the runtime image)");
+    if (state.cfg.isolation === "docker" && state.cfg.runtime !== "hermes") {
+      console.error(`[co-workspace] docker isolation requires runtime hermes (got ${state.cfg.runtime})`);
       process.exit(1);
     }
-    console.log(`[team-gateway] docker isolation: server ${probe.version}`);
+    console.log(`[co-workspace] docker isolation: server ${probe.version}`);
   }
   const server = createServer(state);
-  console.log(`[team-gateway] listening on http://${state.cfg.host}:${server.port}`);
-  console.log(`[team-gateway] variants: ${state.cfg.variants.join(", ")}`);
-  console.log(`[team-gateway] data dir: ${state.cfg.dataDir}`);
-  console.log(`[team-gateway] workspace: ${state.cfg.workspaceDir}`);
+  console.log(`[co-workspace] listening on http://${state.cfg.host}:${server.port}`);
+  console.log(`[co-workspace] variants: ${state.cfg.variants.join(", ")}`);
+  console.log(`[co-workspace] data dir: ${state.cfg.dataDir}`);
+  console.log(`[co-workspace] workspace: ${state.cfg.workspaceDir}`);
 }

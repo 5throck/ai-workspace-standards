@@ -30,10 +30,11 @@ COPY services/team-gateway/web ./web
 RUN bun install
 
 ENV TEAM_GATEWAY_HOST=0.0.0.0 \
+    TEAM_GATEWAY_PORT=9030 \
     TEAM_GATEWAY_DATA_DIR=/data \
     TEAM_GATEWAY_WORKSPACE_DIR=/workspace \
     HERMES_BIN=hermes
 
-EXPOSE 8787
+EXPOSE 9030
 ENTRYPOINT []
 CMD ["bun", "src/server.ts"]

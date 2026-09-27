@@ -3,26 +3,55 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Team Gateway</title>
+<title>co-workspace</title>
 <style>
+  :root {
+    --bg: #0d1117; --bg2: #10161d; --panel: #12181f; --border: #21262d; --border2: #30363d;
+    --fg: #e6edf3; --muted: #8b949e; --faint: #6e7681; --accent: #58a6ff; --input-bg: #0d1117;
+  }
+  [data-theme="light"] {
+    --bg: #f6f8fa; --bg2: #ffffff; --panel: #ffffff; --border: #d0d7de; --border2: #d8dee4;
+    --fg: #1f2328; --muted: #656d76; --faint: #8c959f; --accent: #0969da; --input-bg: #ffffff;
+  }
   :root { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
   * { box-sizing: border-box; }
-  body { margin: 0; background: #0d1117; color: #e6edf3; height: 100vh; display: flex; }
+  body { margin: 0; background: var(--bg); color: var(--fg); height: 100vh; display: flex; overflow: hidden; }
+  .collapsed-note { font-size: .7rem; color: #6e7681; writing-mode: vertical-rl; padding: 8px 2px; cursor: pointer; }
+  /* right artifacts panel */
+  #artifacts { width: 380px; min-width: 300px; border-left: 1px solid #21262d; display: flex; flex-direction: column; background: #10161d; }
+  #artifacts .tabs { display: flex; border-bottom: 1px solid var(--border); }
+  #artifacts .tabs button { flex: 1; background: transparent; color: #8b949e; border: 0; padding: 9px 4px; font: inherit; font-size: .78rem; cursor: pointer; }
+  #artifacts .tabs button.active { color: #58a6ff; border-bottom: 2px solid #58a6ff; }
+  #artifacts .content { flex: 1; overflow: auto; padding: 10px 12px; font-size: .82rem; }
+  .fileRow { display: flex; justify-content: space-between; padding: 4px 6px; border-radius: 6px; cursor: pointer; }
+  .fileRow:hover { background: var(--panel); }
+  .fileRow.dir { color: #79c0ff; font-weight: 600; }
+  .fileRow .size { color: #6e7681; font-size: .7rem; }
+  pre.preview { background: #0d1117; border: 1px solid #21262d; border-radius: 8px; padding: 10px; overflow: auto; max-height: 100%; white-space: pre-wrap; font-size: .78rem; }
+  .turnRow { padding: 6px 8px; border-bottom: 1px solid #21262d; font-size: .78rem; }
+  .turnRow .meta { color: #6e7681; font-size: .68rem; }
+  .turnRow .txt { color: var(--fg); margin-top: 3px; }
+  .collapsebtn { background: transparent; color: #8b949e; border: 0; cursor: pointer; font-size: .9rem; padding: 2px 6px; }
+  .collapsebtn:hover { color: #58a6ff; }
+  header .ctlgroup { display: flex; align-items: center; gap: 8px; }
+  header label.check { display: flex; gap: 5px; align-items: center; font-size: .76rem; color: #8b949e; cursor: pointer; }
+  header label.check input { width: auto; }
+  .toast { position: fixed; top: 12px; right: 14px; background: #1c2a3a; border: 1px solid #1f6feb; color: var(--fg); border-radius: 8px; padding: 8px 14px; font-size: .8rem; z-index: 50; }
   .hint { color: #7d8590; }
   /* ── sidebar ── */
-  aside { width: 260px; min-width: 220px; background: #10161d; border-right: 1px solid #21262d;
+  aside { width: 260px; min-width: 220px; background: var(--bg2); border-right: 1px solid var(--border);
           display: flex; flex-direction: column; padding: 12px; gap: 10px; }
   .brand { font-weight: 700; font-size: .95rem; padding: 2px 4px 8px; }
   .brand span { color: #58a6ff; }
   .newbtn { background: #238636; color: #fff; border: 0; border-radius: 8px; padding: 9px; font: inherit; font-weight: 600; cursor: pointer; width: 100%; }
   .userbox { display: flex; flex-direction: column; gap: 4px; font-size: .74rem; color: #8b949e; }
-  .userbox input { background: #0d1117; color: #e6edf3; border: 1px solid #30363d; border-radius: 7px; padding: 7px 9px; font: inherit; }
+  .userbox input { background: var(--bg); color: var(--fg); border: 1px solid #30363d; border-radius: 7px; padding: 7px 9px; font: inherit; }
   .userbox label.check { display: flex; gap: 6px; align-items: center; cursor: pointer; }
   .userbox input[type=checkbox] { width: auto; }
-  #sessions { flex: 1; overflow-y: auto; border-top: 1px solid #21262d; padding-top: 8px; }
+  #sessions { flex: 1; overflow-y: auto; border-top: 1px solid var(--border); padding-top: 8px; }
   .sess { padding: 8px 9px; border-radius: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 6px; }
-  .sess:hover { background: #161b22; }
-  .sess.active { background: #1c2a3a; outline: 1px solid #1f6feb; }
+  .sess:hover { background: var(--panel); }
+  .sess.active { background: var(--bg); outline: 1px solid var(--accent); }
   .sess .nm { font-size: .82rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .sess .meta { color: #6e7681; font-size: .68rem; }
   .sess .del { background: transparent; color: #f85149; border: 0; cursor: pointer; font-size: .75rem; padding: 2px 4px; visibility: hidden; }
@@ -32,41 +61,46 @@
   .grouphead { font-size: .72rem; color: #58a6ff; font-weight: 600; padding: 8px 4px 3px; letter-spacing: .03em; }
   /* ── main column ── */
   section { flex: 1; display: flex; flex-direction: column; min-width: 0; }
-  header { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 1px solid #21262d; }
-  header select { background: #0d1117; color: #e6edf3; border: 1px solid #30363d; border-radius: 8px; padding: 6px 9px; font: inherit; font-size: .85rem; }
-  header .pname { color: #8b949e; font-size: .78rem; overflow: hidden; text-overflow: ellipsis; }
-  header .pname b { color: #c9d1d9; }
+  header { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--border); }
+  header select { background: var(--bg); color: var(--fg); border: 1px solid #30363d; border-radius: 8px; padding: 6px 9px; font: inherit; font-size: .85rem; }
+  header .pname { color: var(--muted); font-size: .78rem; overflow: hidden; text-overflow: ellipsis; }
+  header .pname b { color: var(--fg); }
   #log { flex: 1; overflow-y: auto; padding: 20px 22px; display: flex; flex-direction: column; gap: 12px; }
   .msg { padding: 10px 14px; border-radius: 12px; white-space: pre-wrap; line-height: 1.6; font-size: .92rem; max-width: 82%; }
-  .user { background: #1f6feb22; border: 1px solid #1f6feb55; align-self: flex-end; }
-  .assistant { background: #12181f; border: 1px solid #30363d; align-self: stretch; max-width: 100%; }
+  .user { background: color-mix(in srgb, var(--accent) 14%, transparent); border: 1px solid color-mix(in srgb, var(--accent) 34%, transparent); align-self: flex-end; }
+  .assistant { background: var(--panel); border: 1px solid var(--border2); align-self: stretch; max-width: 100%; }
   .assistant.pending::after { content: "▌"; color: #58a6ff; }
   .progress-inline { color: #e3b341; font-size: .8rem; }
   .composer { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid #21262d; align-items: flex-end; }
-  textarea { flex: 1; background: #0d1117; color: #e6edf3; border: 1px solid #30363d; border-radius: 10px; padding: 10px 12px; font: inherit; min-height: 44px; resize: none; }
+  textarea { flex: 1; background: var(--bg); color: var(--fg); border: 1px solid #30363d; border-radius: 10px; padding: 10px 12px; font: inherit; min-height: 44px; resize: none; }
   .composer button { background: #1f6feb; color: #fff; border: 0; border-radius: 10px; padding: 10px 18px; font: inherit; font-weight: 600; cursor: pointer; }
   .composer button:disabled { opacity: .45; cursor: default; }
   .empty { margin: auto; text-align: center; color: #6e7681; }
-  .empty b { color: #c9d1d9; font-size: 1.05rem; display: block; margin-bottom: 6px; }
+  .empty b { color: var(--fg); font-size: 1.05rem; display: block; margin-bottom: 6px; }
 </style>
 </head>
 <body>
 <aside>
-  <div class="brand">Team Gateway <span>teams</span></div>
+  <div class="brand">co-workspace <span>teams</span></div>
   <button class="newbtn" id="newChat">＋ New chat</button>
   <div class="userbox">
     <label>User
       <input id="user" value="default" placeholder="alice">
     </label>
-    <label class="check"><input type="checkbox" id="beta"> include beta variants</label>
   </div>
   <div class="sidetitle">SESSIONS</div>
   <div id="sessions"></div>
 </aside>
 <section>
   <header>
-    <select id="model" aria-label="Variant"></select>
-    <span class="pname" id="pnameLabel"></span>
+    <button class="collapsebtn" id="collapseLeft" title="Toggle sidebar">☰</button>
+    <div class="ctlgroup">
+      <select id="model" aria-label="Variant"></select>
+      <label class="check"><input type="checkbox" id="beta"> include beta</label>
+    </div>
+    <span class="pname" id="pnameLabel" style="flex:1"></span>
+    <button class="collapsebtn" id="themeBtn" title="Toggle theme">◐</button>
+    <button class="collapsebtn" id="collapseRight" title="Toggle artifacts panel">▤ Artifacts</button>
   </header>
   <div id="log">
     <div class="empty"><b>Ask a variant team</b>
@@ -74,6 +108,14 @@
       (same user + same variant → same session, nothing new is created).
     </div>
   </div>
+  <aside id="artifacts">
+    <div class="tabs">
+      <button data-tab="files" class="active">Files</button>
+      <button data-tab="preview">Preview</button>
+      <button data-tab="history">History</button>
+    </div>
+    <div class="content" id="artifactsContent"></div>
+  </aside>
   <form class="composer" id="composer">
     <textarea id="message" rows="1" placeholder="Ask the team…"></textarea>
     <button type="submit" id="send">Send</button>
@@ -233,6 +275,156 @@
       reply.classList.remove("pending");
       send.disabled = false;
     }
+  });
+
+  // ── Wave A: panel collapse (localStorage) ──
+  function applyCollapse() {
+    const leftCollapsed = localStorage.getItem("gw-collapse-left") === "1";
+    const rightCollapsed = localStorage.getItem("gw-collapse-right") === "1";
+    document.querySelector("aside").style.display = leftCollapsed ? "none" : "flex";
+    const art = $("artifacts");
+    art.style.display = rightCollapsed ? "none" : "flex";
+  }
+  $("collapseLeft").addEventListener("click", () => {
+    localStorage.setItem("gw-collapse-left",
+      localStorage.getItem("gw-collapse-left") === "1" ? "0" : "1");
+    applyCollapse();
+  });
+  $("collapseRight").addEventListener("click", () => {
+    localStorage.setItem("gw-collapse-right",
+      localStorage.getItem("gw-collapse-right") === "1" ? "0" : "1");
+    applyCollapse();
+  });
+  applyCollapse();
+
+  // ── Wave A: artifacts panel (Files / Preview / History) ──
+  let activeTab = "files";
+  let cwd = "";
+  let currentTenantForArtifacts = () => currentTenantId;
+  const artContent = $("artifactsContent");
+
+  async function loadFilesTab() {
+    const tenantId = currentTenantForArtifacts();
+    if (!tenantId) {
+      artContent.innerHTML = '<div class="hint">Select or start a session to browse its workspace.</div>';
+      return;
+    }
+    const res = await fetch(`/tenants/${tenantId}/files/${cwd}`);
+    if (res.status === 404) { artContent.innerHTML = '<div class="hint">No files yet.</div>'; return; }
+    const { entries } = await res.json();
+    artContent.innerHTML = "";
+    if (cwd) {
+      const up = document.createElement("div");
+      up.className = "fileRow dir";
+      up.textContent = "↩ ..";
+      up.addEventListener("click", () => {
+        cwd = cwd.split("/").slice(0, -1).join("/");
+        loadFilesTab();
+      });
+      artContent.appendChild(up);
+    }
+    for (const e of entries) {
+      const row = document.createElement("div");
+      row.className = "fileRow " + e.type;
+      row.innerHTML = `<span>${e.type === "dir" ? "📁" : "📄"} ${e.name}</span>` +
+        `<span class="size">${e.type === "file" ? (e.size ?? 0) + "B" : ""}</span>`;
+      row.addEventListener("click", async () => {
+        if (e.type === "dir") {
+          cwd = cwd ? `${cwd}/${e.name}` : e.name;
+          loadFilesTab();
+        } else {
+          switchTab("preview");
+        }
+      });
+      artContent.appendChild(row);
+    }
+  }
+
+  async function loadPreviewTab(filePath) {
+    const tenantId = currentTenantForArtifacts();
+    if (!tenantId) { artContent.innerHTML = '<div class="hint">No session selected.</div>'; return; }
+    if (!filePath) {
+      // remember the last clicked file path in dataset
+      filePath = artContent.dataset.lastFile ?? "";
+    }
+    if (!filePath) {
+      artContent.innerHTML = '<div class="hint">Click a file in the Files tab to preview it here.</div>';
+      return;
+    }
+    const res = await fetch(`/tenants/${tenantId}/file/${filePath}`);
+    if (res.status === 413) { artContent.innerHTML = '<div class="hint">File exceeds the 256KB preview cap.</div>'; return; }
+    if (res.status !== 200) { artContent.innerHTML = '<div class="hint">File not available.</div>'; return; }
+    const { content } = await res.json();
+    artContent.innerHTML = `<div class="hint" style="margin-bottom:6px;">${filePath}</div>` +
+      `<pre class="preview">${content.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</pre>`;
+  }
+
+  async function loadHistoryTab() {
+    const tenantId = currentTenantForArtifacts();
+    if (!tenantId) { artContent.innerHTML = '<div class="hint">No session selected.</div>'; return; }
+    const { turns } = await (await fetch(`/tenants/${tenantId}/history`)).json();
+    if (!turns.length) { artContent.innerHTML = '<div class="hint">No turns recorded yet.</div>'; return; }
+    artContent.innerHTML = "";
+    for (const t of turns) {
+      const div = document.createElement("div");
+      div.className = "turnRow";
+      div.innerHTML = `<div class="meta">#${t.seq} · ${t.at} · exit ${t.exitCode} · ${t.inputTokens}→${t.outputTokens} tok</div>` +
+        `<div class="txt">${(t.finalText || "(empty)").slice(0, 220).replace(/&/g, "&amp;").replace(/</g, "&lt;")}</div>`;
+      artContent.appendChild(div);
+    }
+  }
+
+  function switchTab(tab) {
+    activeTab = tab;
+    document.querySelectorAll("#artifacts .tabs button").forEach((b) =>
+      b.classList.toggle("active", b.dataset.tab === tab));
+    if (tab === "files") loadFilesTab();
+    else if (tab === "preview") loadPreviewTab();
+    else loadHistoryTab();
+  }
+  for (const btn of document.querySelectorAll("#artifacts .tabs button")) {
+    btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+  }
+  // file click → preview: patch the file-row handler by storing the path
+  const origLoadFilesTab = loadFilesTab;
+  loadFilesTab = async function () {
+    const tenantId = currentTenantForArtifacts();
+    if (!tenantId) {
+      artContent.innerHTML = '<div class="hint">Select or start a session to browse its workspace.</div>';
+      return;
+    }
+    const res = await fetch(`/tenants/${tenantId}/files/${cwd}`);
+    if (res.status === 404) { artContent.innerHTML = '<div class="hint">No files yet.</div>'; return; }
+    const { entries } = await res.json();
+    artContent.innerHTML = "";
+    if (cwd) {
+      const up = document.createElement("div");
+      up.className = "fileRow dir";
+      up.textContent = "↩ ..";
+      up.addEventListener("click", () => { cwd = cwd.split("/").slice(0, -1).join("/"); loadFilesTab(); });
+      artContent.appendChild(up);
+    }
+    for (const e of entries) {
+      const row = document.createElement("div");
+      row.className = "fileRow " + e.type;
+      row.innerHTML = `<span>${e.type === "dir" ? "📁" : "📄"} ${e.name}</span>` +
+        `<span class="size">${e.type === "file" ? (e.size ?? 0) + "B" : ""}</span>`;
+      const relPath = cwd ? `${cwd}/${e.name}` : e.name;
+      row.addEventListener("click", () => {
+        if (e.type === "dir") { cwd = relPath; loadFilesTab(); }
+        else { artContent.dataset.lastFile = relPath; switchTab("preview"); }
+      });
+      artContent.appendChild(row);
+    }
+  };
+
+  // ── theme toggle ──
+  const savedTheme = localStorage.getItem("gw-theme") ?? "dark";
+  document.documentElement.dataset.theme = savedTheme;
+  $("themeBtn").addEventListener("click", () => {
+    const next = document.documentElement.dataset.theme === "light" ? "dark" : "light";
+    document.documentElement.dataset.theme = next;
+    localStorage.setItem("gw-theme", next);
   });
 
   betaBox.addEventListener("change", loadModels);
