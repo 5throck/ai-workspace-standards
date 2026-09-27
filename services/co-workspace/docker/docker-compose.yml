@@ -68,9 +68,11 @@ services:
     volumes:
       - ${CO_WORKSPACE_DATA_DIR_HOST:?set to the absolute host path of the data dir}:/data
       - ../../../:/workspace # Phase 0: provisioning writes Projects/ in the clone; Phase 2 bakes it
-      # seed home: the /seed/shared child bind is RW so tenant refreshes keep the shared Nous
-      # token store current (HERMES_SHARED_AUTH_DIR points every tenant at it)
-      - ${CO_WORKSPACE_HERMES_SEED_HOME:?set CO_WORKSPACE_HERMES_SEED_HOME to a Hermes home with credentials (e.g. ~/.hermes)}:/seed:ro
+      # SEC-07 narrowing: the gateway reads only auth.json + .env from the seed home (per-turn
+      # re-seed) and the RW shared token store — the operator's full Hermes home (config.yaml,
+      # other provider credentials) is NOT mounted.
+      - ${CO_WORKSPACE_HERMES_SEED_HOME:?set CO_WORKSPACE_HERMES_SEED_HOME to a Hermes home with credentials (e.g. ~/.hermes)}/auth.json:/seed/auth.json:ro
+      - ${CO_WORKSPACE_HERMES_SEED_HOME:?set CO_WORKSPACE_HERMES_SEED_HOME to a Hermes home with credentials (e.g. ~/.hermes)}/.env:/seed/.env:ro
       - ${CO_WORKSPACE_HERMES_AUTH_DIR_HOST:-${CO_WORKSPACE_HERMES_SEED_HOME}/shared}:/seed/shared
       # Docker isolation (sibling containers) — required when CO_WORKSPACE_ISOLATION=docker:
       # - /var/run/docker.sock:/var/run/docker.sock
