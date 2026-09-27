@@ -57,6 +57,9 @@ export interface GatewayConfig {
   dataDirHost?: string;
   /** P1: catalog beta variants too (`TEAM_GATEWAY_VARIANTS_INCLUDE_BETA=true`). */
   includeBeta: boolean;
+  /** Web UI requires a signed-in session (`TEAM_GATEWAY_LOGIN_REQUIRED=true`); API stays
+   * Bearer-key gated. Unset = open web access (Phase 0 mode). */
+  loginRequired: boolean;
   /** Session runtime: `hermes` (default), `antigravity` (agy), `claude`, or `codex`.
    * Container isolation requires the hermes runtime (the other binaries are not in the image). */
   runtime: "hermes" | "antigravity" | "claude" | "codex";
@@ -168,6 +171,7 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     dockerBin: env.TEAM_GATEWAY_DOCKER_BIN ?? "docker",
     dataDirHost: env.TEAM_GATEWAY_DATA_DIR_HOST || undefined,
     includeBeta: env.TEAM_GATEWAY_VARIANTS_INCLUDE_BETA === "true" || env.TEAM_GATEWAY_VARIANTS_INCLUDE_BETA === "1",
+    loginRequired: env.TEAM_GATEWAY_LOGIN_REQUIRED === "true",
     runtime: (["antigravity", "claude", "codex"] as const).includes(
       env.TEAM_GATEWAY_RUNTIME as "antigravity",
     )

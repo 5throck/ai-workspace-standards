@@ -8,6 +8,15 @@ Formerly "Team Gateway". Governance: ADR-0092 · Design: `docs/designs/2026-09-2
 (loopback bind, no authentication). Not for untrusted networks — see
 [Limits & security](#limits--security).
 
+## Sign-in & API access
+
+- **Web UI**: when `TEAM_GATEWAY_LOGIN_REQUIRED=true` (compose default), `/` redirects to
+  `/login` — sign in with a local account (ID + password, email-verified at signup) or Google
+  SSO (`GOOGLE_CLIENT_ID/SECRET/REDIRECT_URI`). Profile editing and (for admins) user
+  management live in the app.
+- **API**: Bearer keys (`TEAM_GATEWAY_API_KEYS` or the key file). A signed-in session cookie is
+  also accepted as a credential, so browser and scripts can share one identity.
+
 ## Quickstart (bare metal)
 
 Requirements: bun ≥ 1.1, a Hermes Agent install (`hermes` on PATH, signed in to at least one
