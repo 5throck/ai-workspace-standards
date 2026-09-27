@@ -304,7 +304,7 @@ Checks 6 validation rules: syntax, circular references, depth limits, file exist
 |------|----------------|---------------|
 | `--apply` | L0 → L1(common) sync | Phase A: install scripts into common template |
 | `--dry-run` | L0 → L1(common) diff | Any phase: preview changes before applying |
-| `--governance-l1` | L0 governance → L1(common) | Phase A: deploy CLAUDE.md/GEMINI.md/AGENTS.md to L1 |
+| `--governance-l1` | L0 governance → L1(common) | Phase A: deploy CLAUDE.md/GEMINI.md/AGENTS.md/CODEX.md/Hermes.md to L1 |
 | `--docs` | L1(common) → L1(variants) COMMON marker injection | Phase B: prepare variant-specific governance docs |
 | `--prune` | L1(common) cleanup | Maintenance: remove L0-only orphan files from L1 |
 | `--check-drift` | L1 vs L2 drift report | Any phase: verify L2 variants not diverged from L1 |
