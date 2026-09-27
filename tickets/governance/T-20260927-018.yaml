@@ -1,0 +1,19 @@
+schemaVersion: 1
+id: T-20260927-018
+kind: manual
+title: >-
+  validate-docs-links: consider ignoring link references inside fenced code
+  blocks — the delivered 0.7.0 validator only skips headings inside fences, so
+  template placeholders like ${entry.file} in code samples are flagged as broken
+  links (found via an invalid blackout-era co-abap test; upstream improvement
+  candidate)
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-09-27T01:57:08.299Z'
+history:
+  - at: '2026-09-27T01:57:08.299Z'
+    from: null
+    to: backlog
+result: null
+error: null
