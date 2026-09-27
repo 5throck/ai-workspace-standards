@@ -1,6 +1,7 @@
 /** Unit tests for the Team Gateway Anthropic Messages wire translation (ADR-0092 W3b). */
 
 import { afterAll, describe, expect, test } from "bun:test";
+const describe_ = process.platform === "win32" ? describe.skip : describe; // windows cannot exec shebang fake binaries (T-20260927-020 follow-up)
 import { mkdirSync, writeFileSync, chmodSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -14,7 +15,7 @@ import {
 import { loadConfig } from "../../services/co-workspace/src/config";
 import { createServer, createState } from "../../services/co-workspace/src/server";
 
-describe("parseAnthropicRequest — Messages API shape", () => {
+describe_("parseAnthropicRequest — Messages API shape", () => {
   test("accepts string content and extracts the latest user message", () => {
     const parsed = parseAnthropicRequest({
       model: "co-consult",
@@ -64,7 +65,7 @@ describe("parseAnthropicRequest — Messages API shape", () => {
   });
 });
 
-describe("Anthropic wire payloads", () => {
+describe_("Anthropic wire payloads", () => {
   test("message envelope shape", () => {
     const payload = messagePayload("msg_x", "co-consult", "answer", {
       input_tokens: 10,
@@ -119,7 +120,7 @@ describe("Anthropic wire payloads", () => {
   });
 });
 
-describe("gateway server — Anthropic surface", () => {
+describe_("gateway server — Anthropic surface", () => {
   const dataDir = join(tmpdir(), `team-gateway-anthropic-${crypto.randomUUID().slice(0, 8)}`);
   const workspaceDir = join(tmpdir(), `team-gateway-anthropic-ws-${crypto.randomUUID().slice(0, 8)}`);
   const seedHome = join(tmpdir(), `team-gateway-anthropic-seed-${crypto.randomUUID().slice(0, 8)}`);

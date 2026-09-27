@@ -2,6 +2,7 @@
  * Event shapes captured live from `agy -p --output-format stream-json` (2026-09-27). */
 
 import { afterAll, describe, expect, test } from "bun:test";
+const describe_ = process.platform === "win32" ? describe.skip : describe; // windows cannot exec shebang fake binaries (T-20260927-020 follow-up)
 import { chmodSync, mkdirSync, writeFileSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -9,7 +10,7 @@ import { agyArgs, parseAgyLine } from "../../services/co-workspace/src/antigravi
 import { loadConfig } from "../../services/co-workspace/src/config";
 import { createServer, createState } from "../../services/co-workspace/src/server";
 
-describe("parseAgyLine — agy stream-json normalization", () => {
+describe_("parseAgyLine — agy stream-json normalization", () => {
   test("init event normalizes to system/init with the conversation id", () => {
     const evt = parseAgyLine(
       '{"event":"init","conversation_id":"conv-1","init":{"cwd":"/x","tools":[],"permission_mode":"request-review"}}',
@@ -45,7 +46,7 @@ describe("parseAgyLine — agy stream-json normalization", () => {
   });
 });
 
-describe("agyArgs — headless invocation and explicit continuity", () => {
+describe_("agyArgs — headless invocation and explicit continuity", () => {
   const base = {
     agyBin: "agy",
     projectDir: "/data/tenants/gw-a/project",
@@ -68,7 +69,7 @@ describe("agyArgs — headless invocation and explicit continuity", () => {
   });
 });
 
-describe("gateway server — antigravity runtime end to end (fake agy binary)", () => {
+describe_("gateway server — antigravity runtime end to end (fake agy binary)", () => {
   const dataDir = join(tmpdir(), `gw-agy-${crypto.randomUUID().slice(0, 8)}`);
   const workspaceDir = join(tmpdir(), `gw-agy-ws-${crypto.randomUUID().slice(0, 8)}`);
   mkdirSync(join(workspaceDir, "scripts"), { recursive: true });

@@ -115,7 +115,7 @@ describe_("gateway server — basic routes", () => {
   });
 });
 
-describe("gateway server — native provisioning and chat", () => {
+describe_("gateway server — native provisioning and chat", () => {
   test("POST /sessions provisions a tenant asynchronously; project is relocated and seeded", async () => {
     const res = await fetch(`${base}/sessions`, {
       method: "POST",
@@ -201,7 +201,7 @@ describe("gateway server — native provisioning and chat", () => {
   });
 });
 
-describe("gateway server — OpenAI wire surface", () => {
+describe_("gateway server — OpenAI wire surface", () => {
   test("stream=false returns a single completion with mapped usage", async () => {
     const res = await fetch(`${base}/v1/chat/completions`, {
       method: "POST",
@@ -256,7 +256,7 @@ describe("gateway server — OpenAI wire surface", () => {
   });
 });
 
-describe("handleRequest — direct invocation shares the same state", () => {
+describe_("handleRequest — direct invocation shares the same state", () => {
   test("health via handleRequest without a socket", async () => {
     const res = await handleRequest(state, new Request(`${base}/health`));
     expect(res.status).toBe(200);
