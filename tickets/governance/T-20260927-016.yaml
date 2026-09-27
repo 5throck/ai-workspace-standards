@@ -1,0 +1,19 @@
+schemaVersion: 1
+id: T-20260927-016
+kind: manual
+title: >-
+  URGENT: GitHub Actions minutes/spending limit exhausted on private
+  5throck/co-* repos — all jobs fail instantly with runner=none since 2026-09-25
+  (Documentation Audit + Secret Scan, 3s failures, zero steps); 12 fleet upgrade
+  PRs (v0.7.0) open and locally green but unmergeable until billing/limit is
+  raised; root public repo CI unaffected
+priority: urgent
+status: backlog
+attempts: 0
+created_at: '2026-09-27T01:12:45.663Z'
+history:
+  - at: '2026-09-27T01:12:45.663Z'
+    from: null
+    to: backlog
+result: null
+error: null
