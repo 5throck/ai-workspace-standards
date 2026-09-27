@@ -10,7 +10,8 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { mkdirSync } from "node:fs";
-import { GatewayConfig, loadConfig, SERVICE_ROOT } from "./config";
+import { dockerProbe, GatewayConfig, loadConfig, SERVICE_ROOT } from "./config";
+import { requestAuthorized } from "./auth";
 import { scaffoldProject } from "./scaffold";
 import { publicTenant, seedHermesHome, TenantRecord, TenantRegistry } from "./tenant";
 import { HermesEvent, HermesTurnResult, runHermesTurn } from "./hermes";
@@ -127,6 +128,18 @@ async function waitForTenant(state: GatewayState, tenantId: string): Promise<Ten
   return ensureReady(state, rec);
 }
 
+/** Phase 2 quotas (design 2026-09-27-team-gateway-phase2-hardening, D2): enforced BEFORE any
+ * stream opens, so a rejected turn costs nothing. Lifetime counters, 0 = off. */
+export function assertQuota(cfg: GatewayConfig, rec: TenantRecord): void {
+  if (cfg.tenantMaxTurns > 0 && rec.sessions >= cfg.tenantMaxTurns) {
+    throw new HttpError(429, `tenant turn quota exhausted (${rec.sessions}/${cfg.tenantMaxTurns} turns)`);
+  }
+  const used = rec.inputTokens + rec.outputTokens;
+  if (cfg.tenantMaxTokens > 0 && used >= cfg.tenantMaxTokens) {
+    throw new HttpError(429, `tenant token quota exhausted (${used}/${cfg.tenantMaxTokens} tokens)`);
+  }
+}
+
 /** Serialized per tenant: one Hermes session writer per HERMES_HOME (state.db is a per-home
  * SQLite WAL; concurrent writers across processes are unsafe). */
 async function runChat(
@@ -149,6 +162,9 @@ async function runChat(
           runBudgetSeconds: state.cfg.runBudgetSeconds,
           maxTurns: state.cfg.maxTurns,
           extraArgs: state.cfg.hermesExtraArgs,
+          toolsets: state.cfg.hermesToolsets,
+          container:
+            state.cfg.isolation === "docker" ? { image: state.cfg.runtimeImage } : undefined,
         },
         onEvent,
       ),
@@ -158,6 +174,10 @@ async function runChat(
   if (result.sessionId) {
     const current = state.registry.get(rec.tenantId) ?? rec;
     current.sessions += 1;
+    const tokens = (result.tokens ?? {}) as Record<string, unknown>;
+    const n = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : 0);
+    current.inputTokens += n(tokens.input);
+    current.outputTokens += n(tokens.output);
     state.registry.upsert(current);
   }
   return result;
@@ -405,12 +425,19 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
   const url = new URL(req.url);
   const path = url.pathname.replace(/\/+$/, "") || "/";
   try {
+    // Phase 2 auth gate: `GET /` and `GET /health` stay exempt; everything else requires a
+    // valid key when the key pool is configured (design 2026-09-27-team-gateway-phase2-hardening, D1).
+    if (!requestAuthorized(state.cfg, req, `${req.method} ${path}`)) {
+      throw new HttpError(401, "missing or invalid API key");
+    }
     if (req.method === "GET" && path === "/") return demoPage();
 
     if (req.method === "GET" && path === "/health") {
       return jsonResponse({
         ok: true,
         service: "team-gateway",
+        authEnabled: state.cfg.apiKeys.length > 0,
+        isolation: state.cfg.isolation,
         variants: state.cfg.variants,
         templateVersion: state.cfg.templateVersion ?? "head",
         dataDir: state.cfg.dataDir,
@@ -456,6 +483,7 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
       const message = typeof body.message === "string" ? body.message : "";
       if (!message.trim()) throw new HttpError(400, "message is required");
       const rec = await waitForTenant(state, decodeURIComponent(tenantChat[1]));
+      assertQuota(state.cfg, rec);
       return nativeChatResponse(state, rec, message);
     }
 
@@ -468,6 +496,7 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
       const { rec, promise } = getOrStartTenant(state, parsed.req.model, parsed.req.user);
       if (promise) await promise;
       const ready = await ensureReady(state, rec);
+      assertQuota(state.cfg, ready);
       return await openaiChatResponse(state, ready, parsed.req.message, parsed.req.stream);
     }
 
@@ -480,6 +509,7 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
       const { rec, promise } = getOrStartTenant(state, parsed.req.model, parsed.req.user);
       if (promise) await promise;
       const ready = await ensureReady(state, rec);
+      assertQuota(state.cfg, ready);
       return await anthropicChatResponse(state, ready, parsed.req.message, parsed.req.stream);
     }
 
@@ -518,6 +548,7 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
       const { rec, promise } = getOrStartTenant(state, model, parsed.req.user);
       if (promise) await promise;
       const ready = await ensureReady(state, rec);
+      assertQuota(state.cfg, ready);
       return await geminiChatResponse(state, ready, parsed.req.message, geminiAction[2] === "streamGenerateContent");
     }
 
@@ -539,6 +570,14 @@ export function createServer(state: GatewayState) {
 
 if (import.meta.main) {
   const state = createState();
+  if (state.cfg.isolation === "docker") {
+    const probe = dockerProbe(state.cfg.dockerBin);
+    if (!probe.ok) {
+      console.error(`[team-gateway] docker isolation unusable: ${probe.error ?? "probe failed"}`);
+      process.exit(1);
+    }
+    console.log(`[team-gateway] docker isolation: server ${probe.version}`);
+  }
   const server = createServer(state);
   console.log(`[team-gateway] listening on http://${state.cfg.host}:${server.port}`);
   console.log(`[team-gateway] variants: ${state.cfg.variants.join(", ")}`);

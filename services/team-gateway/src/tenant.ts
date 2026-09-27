@@ -21,8 +21,11 @@ export interface TenantRecord {
   hermesHome: string;
   description?: string;
   error?: string;
-  /** Completed Hermes turns; > 0 means the next turn resumes with `--resume latest`. */
+  /** Completed Hermes turns; > 0 means the thread already exists. */
   sessions: number;
+  /** Cumulative token counters from terminal result envelopes (Phase 2 quota input). */
+  inputTokens: number;
+  outputTokens: number;
 }
 
 /** Credential files copied from the operator's seed home. The operator's config.yaml is NEVER
@@ -75,6 +78,8 @@ export class TenantRegistry {
       hermesHome: join(init.dataDir, "tenants", tenantId, "hermes-home"),
       description: init.description,
       sessions: 0,
+      inputTokens: 0,
+      outputTokens: 0,
     };
     this.upsert(rec);
     return rec;
@@ -117,6 +122,7 @@ export function publicTenant(rec: TenantRecord) {
     createdAt: rec.createdAt,
     description: rec.description,
     sessions: rec.sessions,
+    usage: { inputTokens: rec.inputTokens, outputTokens: rec.outputTokens },
     error: rec.error,
   };
 }
