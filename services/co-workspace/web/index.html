@@ -168,12 +168,21 @@
 
   async function loadModels() {
     const body = await (await fetch("/v1/models")).json();
+    const includeBeta = betaBox.checked;
+    const catalog = body.data.filter((m) => includeBeta || m.meta?.status !== "beta");
+    variantSel.innerHTML = "";
     modelSel.innerHTML = "";
-    for (const m of body.data) {
-      const o = document.createElement("option");
-      o.value = m.id;
-      o.textContent = m.meta?.status === "beta" ? `${m.id} · beta` : m.id;
-      modelSel.appendChild(o);
+    for (const m of catalog) {
+      const isBeta = m.meta?.status === "beta";
+      const label = isBeta ? `${m.id} · beta` : m.id;
+      const vo = document.createElement("option");
+      vo.value = m.id;
+      vo.textContent = label;
+      variantSel.appendChild(vo);
+      const mo = document.createElement("option");
+      mo.value = m.id;
+      mo.textContent = label;
+      modelSel.appendChild(mo);
     }
   }
 

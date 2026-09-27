@@ -597,12 +597,40 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
   const url = new URL(req.url);
   const path = url.pathname.replace(/\/+$/, "") || "/";
   try {
-    // Phase 2 auth gate: `GET /` and `GET /health` stay exempt; everything else requires a
-    // valid key when the key pool is configured (design 2026-09-27-team-gateway-phase2-hardening, D1).
-    if (!requestAuthorized(state.cfg, req, `${req.method} ${path}`)) {
+    const sessionUser = state.users.resolveSession(sessionTokenFromCookie(req));
+    // Phase 2 auth gate + Wave B: a route passes with a valid API key OR a signed-in session
+    // (cookie). Exemptions stay limited to `GET /` and `GET /health`.
+    const authorized =
+      requestAuthorized(state.cfg, req, `${req.method} ${path}`) ||
+      (state.cfg.apiKeys.length > 0 && Boolean(sessionUser));
+    if (!authorized) {
       throw new HttpError(401, "missing or invalid API key");
     }
+    // Wave B gate: when login is required, the web UI demands a session; the API demands a
+    // key (Bearer) or a valid session. Exempt: /login page, /auth/*, /health.
+    if (state.cfg.loginRequired) {
+      const exempt =
+        path === "/login" ||
+        path.startsWith("/auth/") ||
+        path === "/health";
+      if (!exempt && !sessionUser) {
+        if (path === "/" || req.method === "GET") {
+          return new Response(null, { status: 302, headers: { location: "/login" } });
+        }
+        throw new HttpError(401, "sign-in required");
+      }
+    }
     if (req.method === "GET" && path === "/") return demoPage();
+
+    if (req.method === "GET" && path === "/login") {
+      const loginPath = resolve(SERVICE_ROOT, "web", "login.html");
+      if (existsSync(loginPath)) {
+        return new Response(readFileSync(loginPath, "utf8"), {
+          headers: { "content-type": "text/html; charset=utf-8" },
+        });
+      }
+      throw new HttpError(404, "login page not found");
+    }
 
     if (req.method === "GET" && path === "/health") {
       return jsonResponse({

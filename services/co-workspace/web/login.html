@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>co-workspace — sign in</title>
+<style>
+  :root {
+    --bg: #0d1117; --panel: #161b22; --border: #30363d; --fg: #e6edf3; --muted: #8b949e;
+    --accent: #58a6ff; --input-bg: #0d1117;
+  }
+  [data-theme="light"] {
+    --bg: #f6f8fa; --panel: #ffffff; --border: #d0d7de; --fg: #1f2328; --muted: #656d76;
+    --accent: #0969da; --input-bg: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: var(--bg); color: var(--fg);
+         font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 26px 28px; width: 360px; }
+  h1 { font-size: 1.1rem; margin: 0 0 4px; }
+  h1 span { color: var(--accent); }
+  p.sub { color: var(--muted); font-size: .8rem; margin: 0 0 16px; }
+  label { display: flex; flex-direction: column; gap: 4px; font-size: .78rem; color: var(--muted); margin-bottom: 10px; }
+  input { background: var(--input-bg); color: var(--fg); border: 1px solid var(--border); border-radius: 8px; padding: 9px 10px; font: inherit; }
+  input:focus { outline: 1px solid var(--accent); }
+  button { width: 100%; background: #1f6feb; color: #fff; border: 0; border-radius: 8px; padding: 10px; font: inherit; font-weight: 600; cursor: pointer; margin-bottom: 8px; }
+  button.google { background: #5f6368; }
+  button.ghost { background: transparent; color: var(--accent); font-weight: 400; }
+  .msg { min-height: 18px; font-size: .78rem; color: #f85149; margin-bottom: 8px; }
+  .ok { color: #56d364; }
+  .hint { font-size: .72rem; color: var(--muted); margin-top: 10px; line-height: 1.5; }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>co-workspace <span>sign in</span></h1>
+  <p class="sub">Variant agent teams, served over OpenAI/Anthropic/Gemini-compatible APIs.</p>
+  <div class="msg" id="msg"></div>
+
+  <form id="loginForm">
+    <label>Login ID
+      <input id="li-id" autocomplete="username" required>
+    </label>
+    <label>Password
+      <input id="li-pw" type="password" autocomplete="current-password" required>
+    </label>
+    <button type="submit">Sign in</button>
+    <button type="button" class="google hidden" id="googleBtn">Sign in with Google</button>
+    <button type="button" class="ghost" id="toSignup">Create an account →</button>
+  </form>
+
+  <form id="signupForm" class="hidden">
+    <label>Login ID <span>(a-z, 0-9, hyphen)</span>
+      <input id="su-id" autocomplete="username" required>
+    </label>
+    <label>Email <span>(verification mail; discarded after verification)</span>
+      <input id="su-email" type="email" autocomplete="email" required>
+    </label>
+    <label>Password <span>(8+ chars)</span>
+      <input id="su-pw" type="password" autocomplete="new-password" required>
+    </label>
+    <div class="msg" id="su-msg" style="min-height:0;"></div>
+    <div class="field hidden" id="verifyRow">
+      <label>Verification key from mail
+        <input id="verify-key" placeholder="paste the key">
+      </label>
+      <button type="button" id="verifyBtn">Activate account</button>
+    </div>
+    <button type="submit" id="signupBtn">Sign up</button>
+    <button type="button" class="ghost" id="toLogin">← Back to sign in</button>
+  </form>
+
+  <p class="hint">API access uses Bearer keys (configurable via TEAM_GATEWAY_API_KEYS / key file).
+  Your email is used once for verification and then discarded — only a hash is retained.</p>
+</div>
+<script type="module">
+  const $ = (id) => document.getElementById(id);
+  const msg = (t, ok) => { $("msg").textContent = t; $("msg").className = "msg" + (ok ? " ok" : ""); };
+
+  const health = await (await fetch("/health")).json();
+  if (health.googleSso) $("googleBtn").classList.remove("hidden");
+  if (document.documentElement.dataset.theme !== "light") document.documentElement.dataset.theme = "dark";
+  $("googleBtn")?.addEventListener("click", () => { location.href = "/auth/google/login"; });
+
+  $("toSignup").addEventListener("click", () => {
+    $("loginForm").classList.add("hidden");
+    $("signupForm").classList.remove("hidden");
+    msg("");
+  });
+  $("toLogin").addEventListener("click", () => {
+    $("signupForm").classList.add("hidden");
+    $("loginForm").classList.remove("hidden");
+    msg("");
+  });
+
+  $("loginForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const res = await fetch("/auth/login", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ loginId: $("li-id").value, password: $("li-pw").value }),
+    });
+    if (res.status === 200) location.href = "/";
+    else msg((await res.json()).error ?? "login failed");
+  });
+
+  $("signupForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const res = await fetch("/auth/signup", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ loginId: $("su-id").value, email: $("su-email").value, password: $("su-pw").value }),
+    });
+    const body = await res.json();
+    if (res.status === 200) {
+      $("verifyRow").classList.remove("hidden");
+      $("signupBtn").disabled = true;
+      msg("verification mail generated — enter the key to activate", true);
+    } else {
+      msg(body.error ?? "signup failed");
+    }
+  });
+
+  $("verifyBtn").addEventListener("click", async () => {
+    const res = await fetch("/auth/verify", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ token: $("verify-key").value }),
+    });
+    const body = await res.json();
+    if (res.status === 200) {
+      msg("account activated — sign in with your ID", true);
+      setTimeout(() => { $("signupForm").classList.add("hidden"); $("loginForm").classList.remove("hidden"); msg(""); }, 1200);
+    } else {
+      msg(body.error ?? "verification failed");
+    }
+  });
+</script>
+</body>
+</html>

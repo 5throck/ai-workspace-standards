@@ -53,6 +53,8 @@ Three decisions land together:
 
 Also in this wave: the artifacts right panel (Files/Preview/History) with the tenant-confined files API and per-turn `turns` persistence, collapsible side panels, dark/light theme, sidebar sessions grouped by variant, and Claude Code + Codex CLI runtime adapters (provider disclosure in the models payload). Docker note: a stale container from the pre-rename project kept serving the old port alongside the new deployment — operators must `docker compose -p <old-name> down` (or remove the old container) after the rename.
 
+**Login-gate amendment (same addendum)**: `TEAM_GATEWAY_LOGIN_REQUIRED=true` makes the web UI session-gated (redirect to `/login`; local signup with email-verification key, Google SSO button when configured) while the API remains Bearer-key gated — a signed-in session cookie is ALSO accepted as an API credential so the demo page and scripts can share one identity. Login page: `/login`.
+
 **Storage layout amendment (same addendum)**: tenant workspaces live under `<DATA_DIR>/storage/<principal>/<projectName>/{project,hermes-home}` — per-user grouping on disk (user request) instead of a flat `tenants/<id>` dir. The scaffold still executes in the workspace clone's `Projects/` (engine constraint) and relocates immediately; legacy `tenants/` paths keep working via per-record absolute paths.
 
 ## References
