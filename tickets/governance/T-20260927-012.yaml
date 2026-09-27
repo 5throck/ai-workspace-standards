@@ -1,0 +1,18 @@
+schemaVersion: 1
+id: T-20260927-012
+kind: manual
+title: >-
+  validator-hardening: extend the ADR-0091 R3 country_config check to
+  Projects/*/variant.json and fill the missing declarations in
+  Projects/co-export, co-game, co-security — project-side half of T-20260927-002
+  still open (validator scopes templates/ only)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-27T00:46:17.280Z'
+history:
+  - at: '2026-09-27T00:46:17.280Z'
+    from: null
+    to: backlog
+result: null
+error: null
