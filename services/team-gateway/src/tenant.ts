@@ -26,6 +26,27 @@ export interface TenantRecord {
   /** Cumulative token counters from terminal result envelopes (Phase 2 quota input). */
   inputTokens: number;
   outputTokens: number;
+  /** Per-UTC-day buckets for windowed quotas (`TEAM_GATEWAY_QUOTA_WINDOW=daily`); pruned to
+   * the 8 most recent days on write. */
+  daily?: Record<string, { turns: number; inputTokens: number; outputTokens: number }>;
+}
+
+export function recordTurnUsage(
+  rec: TenantRecord,
+  dayKey: string,
+  tokens: { input: number; output: number },
+): void {
+  rec.sessions += 1;
+  rec.inputTokens += tokens.input;
+  rec.outputTokens += tokens.output;
+  const daily = (rec.daily ??= {});
+  const bucket = (daily[dayKey] ??= { turns: 0, inputTokens: 0, outputTokens: 0 });
+  bucket.turns += 1;
+  bucket.inputTokens += tokens.input;
+  bucket.outputTokens += tokens.output;
+  // Prune: keep the 8 most recent day keys so the registry cannot grow unbounded.
+  const keys = Object.keys(daily).sort();
+  for (const key of keys.slice(0, Math.max(0, keys.length - 8))) delete daily[key];
 }
 
 /** Credential files copied from the operator's seed home. The operator's config.yaml is NEVER

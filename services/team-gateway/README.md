@@ -116,6 +116,12 @@ limitation).
 | `TEAM_GATEWAY_RUN_BUDGET_SECONDS` | `300` | Wall-clock ceiling per Hermes turn |
 | `TEAM_GATEWAY_MAX_TURNS` | `100` | Tool-iteration ceiling per turn |
 | `TEAM_GATEWAY_HERMES_EXTRA_ARGS` | — | Extra CLI args (e.g. toolset scoping) |
+| `TEAM_GATEWAY_HERMES_TOOLSETS` | — | Comma-separated Hermes toolsets passed as `-t` on every session |
+| `TEAM_GATEWAY_QUOTA_WINDOW` | `lifetime` | `daily` resets per-tenant quota counters each UTC day |
+| `TEAM_GATEWAY_API_KEYS_FILE` | — | Key file (one per line, `#` comments); union-ed with `TEAM_GATEWAY_API_KEYS`, re-read by `POST /admin/reload` |
+| `TEAM_GATEWAY_ISOLATION` | `process` | `docker` = per-turn ephemeral sibling container |
+| `TEAM_GATEWAY_RUNTIME_IMAGE` | `team-gateway-runtime:latest` | Runtime image for docker isolation |
+| `TEAM_GATEWAY_DOCKER_BIN` | `docker` | Docker CLI binary for the isolation probe |
 | `HERMES_BIN` | `hermes` | Hermes binary path |
 | `HERMES_INFERENCE_MODEL` / `_PROVIDER` | — | Passed through to Hermes sessions |
 
@@ -148,18 +154,22 @@ bun run dev
   Keys are compared in constant time and never echoed. Unset = Phase 0 localhost mode
   (a startup warning states it).
 - **Quotas** — `TEAM_GATEWAY_TENANT_MAX_TURNS` / `TEAM_GATEWAY_TENANT_MAX_TOKENS` are per-tenant
-  lifetime caps enforced before a turn starts (`429`, costs nothing). Token counts come from the
-  Hermes result envelope; counters live in the tenant registry.
+  caps enforced before a turn starts (`429`, costs nothing). `TEAM_GATEWAY_QUOTA_WINDOW=lifetime`
+  (default) or `daily` (UTC-day buckets, reset each day). Token counts come from the Hermes
+  result envelope; counters live in the tenant registry.
 - **Toolset scoping** — `TEAM_GATEWAY_HERMES_TOOLSETS` (e.g. `fs,web`) is passed as `-t` on every
   session: a real per-session tool-confinement knob.
 - **Container isolation** — `TEAM_GATEWAY_ISOLATION=docker` runs each turn inside an ephemeral
   sibling container (`docker run --rm -i`, image from `TEAM_GATEWAY_RUNTIME_IMAGE`, default
   `team-gateway-runtime:latest` — build it from `docker/Dockerfile`); only the tenant project dir
   and Hermes home are mounted. Startup fails fast when Docker is unusable.
+- **Key rotation** — set `TEAM_GATEWAY_API_KEYS_FILE` (one key per line, `#` comments) alongside
+  or instead of `TEAM_GATEWAY_API_KEYS`; rotate by rewriting the file and calling
+  `POST /admin/reload` with a valid key. Point the file at any managed-secret mount.
 - **Egress** — network egress enforcement is host-side: Hermes iron-proxy (`hermes egress`,
   TLS-intercepting firewall, operator-deployed) fronts tenant containers/sessions; the gateway
   contributes toolset scoping + run ceilings. See the iron-proxy docs in the Hermes user guide.
 
 Known limits: provisioning runs asynchronously; usage is metered but not billed; auth is a
-shared bearer-key pool, not per-human identities (key rotation is a restart). Full Phase 2
+shared bearer-key pool, not per-human identities. Full Phase 2
 design: `docs/designs/2026-09-27-team-gateway-phase2-hardening-design.md`.

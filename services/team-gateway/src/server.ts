@@ -10,10 +10,10 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { mkdirSync } from "node:fs";
-import { dockerProbe, GatewayConfig, loadConfig, SERVICE_ROOT } from "./config";
+import { dockerProbe, GatewayConfig, loadConfig, readKeysFile, SERVICE_ROOT } from "./config";
 import { requestAuthorized } from "./auth";
 import { scaffoldProject } from "./scaffold";
-import { publicTenant, seedHermesHome, TenantRecord, TenantRegistry } from "./tenant";
+import { publicTenant, recordTurnUsage, seedHermesHome, TenantRecord, TenantRegistry } from "./tenant";
 import { HermesEvent, HermesTurnResult, runHermesTurn } from "./hermes";
 import {
   anthropicEvent,
@@ -128,15 +128,35 @@ async function waitForTenant(state: GatewayState, tenantId: string): Promise<Ten
   return ensureReady(state, rec);
 }
 
-/** Phase 2 quotas (design 2026-09-27-team-gateway-phase2-hardening, D2): enforced BEFORE any
- * stream opens, so a rejected turn costs nothing. Lifetime counters, 0 = off. */
-export function assertQuota(cfg: GatewayConfig, rec: TenantRecord): void {
-  if (cfg.tenantMaxTurns > 0 && rec.sessions >= cfg.tenantMaxTurns) {
-    throw new HttpError(429, `tenant turn quota exhausted (${rec.sessions}/${cfg.tenantMaxTurns} turns)`);
+/** Usage inside the configured quota window: `daily` reads today's UTC-day bucket, `lifetime`
+ * reads the cumulative counters (design 2026-09-27-team-gateway-phase2-hardening). */
+export function windowUsage(
+  cfg: GatewayConfig,
+  rec: TenantRecord,
+  dayKey = new Date().toISOString().slice(0, 10),
+): { turns: number; tokens: number } {
+  if (cfg.quotaWindow === "daily") {
+    const bucket = rec.daily?.[dayKey];
+    return {
+      turns: bucket?.turns ?? 0,
+      tokens: (bucket?.inputTokens ?? 0) + (bucket?.outputTokens ?? 0),
+    };
   }
-  const used = rec.inputTokens + rec.outputTokens;
-  if (cfg.tenantMaxTokens > 0 && used >= cfg.tenantMaxTokens) {
-    throw new HttpError(429, `tenant token quota exhausted (${used}/${cfg.tenantMaxTokens} tokens)`);
+  return { turns: rec.sessions, tokens: rec.inputTokens + rec.outputTokens };
+}
+
+/** Phase 2 quotas (D2): enforced BEFORE any stream opens, so a rejected turn costs nothing. */
+export function assertQuota(
+  cfg: GatewayConfig,
+  rec: TenantRecord,
+  dayKey = new Date().toISOString().slice(0, 10),
+): void {
+  const usage = windowUsage(cfg, rec, dayKey);
+  if (cfg.tenantMaxTurns > 0 && usage.turns >= cfg.tenantMaxTurns) {
+    throw new HttpError(429, `tenant turn quota exhausted (${usage.turns}/${cfg.tenantMaxTurns} turns, window: ${cfg.quotaWindow})`);
+  }
+  if (cfg.tenantMaxTokens > 0 && usage.tokens >= cfg.tenantMaxTokens) {
+    throw new HttpError(429, `tenant token quota exhausted (${usage.tokens}/${cfg.tenantMaxTokens} tokens, window: ${cfg.quotaWindow})`);
   }
 }
 
@@ -173,11 +193,12 @@ async function runChat(
   const result = await task;
   if (result.sessionId) {
     const current = state.registry.get(rec.tenantId) ?? rec;
-    current.sessions += 1;
     const tokens = (result.tokens ?? {}) as Record<string, unknown>;
     const n = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : 0);
-    current.inputTokens += n(tokens.input);
-    current.outputTokens += n(tokens.output);
+    recordTurnUsage(current, new Date().toISOString().slice(0, 10), {
+      input: n(tokens.input),
+      output: n(tokens.output),
+    });
     state.registry.upsert(current);
   }
   return result;
@@ -511,6 +532,18 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
       const ready = await ensureReady(state, rec);
       assertQuota(state.cfg, ready);
       return await anthropicChatResponse(state, ready, parsed.req.message, parsed.req.stream);
+    }
+
+    // Phase 2 key rotation: re-read the key file and re-union with the process-immutable env
+    // keys — rotation without restart, and a reload can never silently disable auth.
+    if (req.method === "POST" && path === "/admin/reload") {
+      const fileKeys = readKeysFile(state.cfg.apiKeysFile);
+      const next = [...new Set([...state.cfg.apiKeysEnv, ...fileKeys])];
+      if (next.length === 0 && state.cfg.apiKeys.length > 0) {
+        throw new HttpError(400, "reload would disable auth (empty key pool) — rejected");
+      }
+      state.cfg.apiKeys = next;
+      return jsonResponse({ reloaded: true, keyCount: next.length });
     }
 
     if (req.method === "POST" && path === "/v1/messages/count_tokens") {
