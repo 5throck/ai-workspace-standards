@@ -57,6 +57,7 @@ Registry of the skills this template delivers: one row per `templates/common/ski
 | `k-krx` | 1.0.2 | active | financial-analyst | 2026-09-11 | — | KR-scoped; pruned from region-neutral scaffolds. KRX Data Marketplace Open API: KOSPI/KOSDAQ market and stock data |
 | `k-law` | 1.0.2 | active | strategy-analyst | 2026-08-09 | — | KR-scoped; pruned from region-neutral scaffolds. Korea Ministry of Government Legislation Open API: statutes, precedents, ordinances |
 | `k-opendata` | 1.2.2 | active | hs-classification-specialist | 2026-09-03 | — | KR-scoped; pruned from region-neutral scaffolds. Korea Public Data Portal (data.go.kr) Open API gateway for government agency datasets |
+| `service-design` | 1.1.0 | active | pm | 2026-09-27 | — | — |
 
 **Scope notes — registries intentionally absent from this seed:**
 

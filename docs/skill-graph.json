@@ -3751,7 +3751,7 @@
     {
       "id": "service-design",
       "type": "skill",
-      "layer": "variant:co-design"
+      "layer": "L0"
     },
     {
       "id": "service-designer",
@@ -22970,7 +22970,7 @@
       "to": "accessibility-audit",
       "source": "relates_to",
       "provenance": {
-        "file": "templates/co-design/skills/service-design/SKILL.md",
+        "file": "skills/service-design/SKILL.md",
         "field": "relates_to",
         "index": 0
       }
@@ -23045,7 +23045,7 @@
       "to": "token-usage-lint",
       "source": "relates_to",
       "provenance": {
-        "file": "templates/co-design/skills/service-design/SKILL.md",
+        "file": "skills/service-design/SKILL.md",
         "field": "relates_to",
         "index": 2
       }
@@ -23056,7 +23056,7 @@
       "to": "ui-ux-design-intelligence",
       "source": "relates_to",
       "provenance": {
-        "file": "templates/co-design/skills/service-design/SKILL.md",
+        "file": "skills/service-design/SKILL.md",
         "field": "relates_to",
         "index": 1
       }

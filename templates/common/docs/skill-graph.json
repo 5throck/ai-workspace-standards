@@ -173,6 +173,11 @@
       "layer": "common"
     },
     {
+      "id": "service-design",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
       "id": "skill-lifecycle-manager",
       "type": "skill",
       "layer": "common"
@@ -810,6 +815,39 @@
       "from": "security-scan",
       "to": "update-bun-packages",
       "source": "prose"
+    },
+    {
+      "type": "follows",
+      "from": "service-design",
+      "to": "accessibility-audit",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/common/skills/service-design/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "follows",
+      "from": "service-design",
+      "to": "token-usage-lint",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/common/skills/service-design/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
+      "type": "follows",
+      "from": "service-design",
+      "to": "ui-ux-design-intelligence",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/common/skills/service-design/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
     },
     {
       "type": "references",

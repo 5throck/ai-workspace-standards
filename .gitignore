@@ -120,7 +120,7 @@ __pycache__/
 !schemas/
 # Team Gateway service (ADR-0092) — tracked; its runtime data dir is not.
 !services/
-services/team-gateway/data/
+services/co-workspace/data/
 
 nul
 NUL

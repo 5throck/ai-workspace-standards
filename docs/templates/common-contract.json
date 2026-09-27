@@ -231,6 +231,12 @@
       "version": "1.0.1",
       "overridable": false,
       "description": "UI/UX design capabilities: design system creation, component design, visual hierarchy, user-centered design principles"
+    },
+    "service-design": {
+      "source": "skills/service-design/SKILL.md",
+      "version": "1.1.0",
+      "overridable": false,
+      "description": "End-to-end service design: journeys (ADR-0068 diversity profiles), blueprints, touchpoints, validation"
     }
   },
   "common_commands": {

@@ -64,6 +64,8 @@ export interface GatewayConfig {
   csrfRequired: boolean;
   /** SEC-05: per-principal tenant cap (`POST /sessions` + lazy creation). 0 = unlimited. */
   tenantMaxPerPrincipal: number;
+  /** SEC-05 (remnant): per-principal lifetime token budget ACROSS all their tenants. 0 = off. */
+  principalMaxTokens: number;
   /** SEC-10: docker isolation resource caps. */
   containerMemory: string;
   containerCpus: string;
@@ -182,6 +184,7 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     loginRequired: env.CO_WORKSPACE_LOGIN_REQUIRED === "true",
     csrfRequired: env.CO_WORKSPACE_CSRF_REQUIRED === "true",
     tenantMaxPerPrincipal: numOr0(env.CO_WORKSPACE_TENANT_MAX_PER_PRINCIPAL),
+    principalMaxTokens: numOr0(env.CO_WORKSPACE_PRINCIPAL_MAX_TOKENS),
     containerMemory: env.CO_WORKSPACE_CONTAINER_MEMORY ?? "2g",
     containerCpus: env.CO_WORKSPACE_CONTAINER_CPUS ?? "2",
     containerPidsLimit: numOr0(env.CO_WORKSPACE_CONTAINER_PIDS_LIMIT) || 256,
