@@ -3,7 +3,7 @@
 ## Metadata
 
 - **Current Phase**: production
-- **Version**: 1.31.0
+- **Version**: 1.32.0
 - **Owner**: automation-engineer
 - **Last Updated**: 2026-09-27
 - **Last Reviewer**: pm
@@ -40,6 +40,7 @@
 | 2026-09-24 | production | production | v1.29.0 catch-up (record synced to SCRIPTS.md SSOT): §2.3b extends-stub resolution generalized to all agents/*.md stubs | automation-engineer |
 | 2026-09-25 | production | production | v1.30.0 (ADR-0088 W2): `--platform hermes` profile — hermes-primary keeps `.hermes/`, drops legacy twins; other profiles hermes-opt-out | automation-engineer |
 | 2026-09-27 | production | production | v1.31.0 (ADR-0093): hermes profile delivers Hermes.md (Hermes-specific behavioral instruction file, common-owned) — `hermes`/`all` keep it, other profiles prune it alongside `.hermes/`. Spec: docs/designs/2026-09-27-hermes-md-instruction-file-design.md | automation-engineer |
+| 2026-09-27 | production | production | v1.32.0 (T-20260927-019): pinned variant detection repaired — getValidVariants used `git archive <tag> --list` (invalid syntax; every --version scaffold failed); replaced with `git ls-tree -r --name-only <tag> -- templates/`. Live-verified via pinned gateway scaffold (template-v0.7.0). | automation-engineer |
 
 ## Acceptance Criteria
 

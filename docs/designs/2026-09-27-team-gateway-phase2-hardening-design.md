@@ -93,6 +93,11 @@ Exempt from auth: `GET /health`, `GET /` (liveness + static page). Everything el
 - **Key rotation without restart**: `TEAM_GATEWAY_API_KEYS_FILE` — one key per line, `#` comments. Keys = env pool ∪ file keys; `POST /admin/reload` (auth-required) re-reads the file and re-unions with the process-immutable env pool. A reload that would empty the pool while auth is enabled is rejected (`400`). This is the secret-manager-agnostic rotation path: point the file at any managed-secret mount. (Found during implementation: re-parsing `process.env` in the reload path would drop file keys and silently disable auth — the env portion is captured at startup instead.)
 - Tests: window usage with injectable day keys (fresh-day reset), key-list parsing (comments/blanks), rotation flip (`/admin/reload`), reload auth-protection.
 
+## 11. Verification Record (2026-09-27, live)
+
+- Docker isolation live-verified end to end with the production image: `services/team-gateway/docker/Dockerfile` rebased onto the official `nousresearch/hermes-agent` image (PyPI 0.15.2 predates the chat stream-json protocol — wheel builds are upstream-refused by design; the official image is the supported packaging), gateway restart under `TEAM_GATEWAY_ISOLATION=docker` → tenant provision → one live turn inside the ephemeral container (exit 0, container-side session id, correct workspace-team answer, 36k/139 token usage through the container boundary). The isolation adapter passes the Hermes binary as `--entrypoint` because upstream images ship an s6 init entrypoint.
+- Antigravity runtime adapter (ADR-0092 Addendum 3) live-verified: fresh tenant two-turn remember/recall probe answered "remembered" then "77" across `--conversation` turns.
+
 ## 10. References
 
 - ADR-0092 + `docs/designs/2026-09-27-team-gateway-service-design.md` (Phase 0 baseline, §10 roadmap)

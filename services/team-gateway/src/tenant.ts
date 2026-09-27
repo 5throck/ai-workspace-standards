@@ -29,6 +29,8 @@ export interface TenantRecord {
   /** Per-UTC-day buckets for windowed quotas (`TEAM_GATEWAY_QUOTA_WINDOW=daily`); pruned to
    * the 8 most recent days on write. */
   daily?: Record<string, { turns: number; inputTokens: number; outputTokens: number }>;
+  /** Antigravity-runtime conversation id (explicit continuity across turns). */
+  conversationId?: string;
 }
 
 export function recordTurnUsage(

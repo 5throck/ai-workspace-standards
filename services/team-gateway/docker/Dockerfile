@@ -1,21 +1,21 @@
-# Team Gateway — Phase 0 image (ADR-0092 D6).
-# bun (gateway server) + python/Hermes (session runtime) in one container.
-# Build context is the WORKSPACE ROOT (see docker-compose.yml) so the service tree copies in.
+# Team Gateway — Phase 2 image (ADR-0092 Addendum 2/D3).
+# Base = the official Hermes Agent image (carries hermes + python + s6 init; the gateway's
+# per-turn isolation spawns use `--entrypoint hermes` to bypass s6). Adds bun + the gateway
+# server, so ONE image serves both roles: the compose gateway container AND the per-turn
+# isolation runtime (`TEAM_GATEWAY_RUNTIME_IMAGE=team-gateway-runtime:latest`).
+# Build context is the WORKSPACE ROOT (see docker-compose.yml).
 #
 # Phase 0 posture: the workspace clone is MOUNTED at /workspace for provisioning; Phase 2 bakes
 # a pinned workspace snapshot into the image instead.
 
 FROM oven/bun:1 AS bun
 
-FROM python:3.12-slim
+FROM nousresearch/hermes-agent:latest
 
+USER root
 RUN apt-get update \
  && apt-get install -y --no-install-recommends git ca-certificates \
  && rm -rf /var/lib/apt/lists/*
-
-# Hermes Agent runtime (session runner). Pinned ref recommended for deployments:
-#   pip install git+https://github.com/NousResearch/hermes-agent.git@<ref>
-RUN pip install --no-cache-dir git+https://github.com/NousResearch/hermes-agent.git
 
 COPY --from=bun /usr/local/bin/bun /usr/local/bin/bun
 
@@ -32,4 +32,5 @@ ENV TEAM_GATEWAY_HOST=0.0.0.0 \
     HERMES_BIN=hermes
 
 EXPOSE 8787
+ENTRYPOINT []
 CMD ["bun", "src/server.ts"]

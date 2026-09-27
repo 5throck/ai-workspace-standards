@@ -14,12 +14,20 @@ title: >-
   smoke (docs/designs/2026-09-27-team-gateway-service-design.md D8); gateway
   treats the pin flag as unavailable until fixed.
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-27T03:12:39.917Z'
 history:
   - at: '2026-09-27T03:12:39.917Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-27T05:31:06.835Z'
+    from: backlog
+    to: done
+result: >-
+  Fixed in scripts/new-project.ts v1.32.0: getValidVariants replaced the invalid
+  'git archive <tag> --list' with 'git ls-tree -r --name-only <tag> --
+  templates/'. E2E-verified: gateway pinned scaffold
+  (TEAM_GATEWAY_TEMPLATE_VERSION=0.7.0 → template-v0.7.0) completes ready with
+  provenance version=0.7.0.
 error: null

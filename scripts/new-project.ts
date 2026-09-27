@@ -1,5 +1,10 @@
 #!/usr/bin/env bun
-// @version 1.31.0
+// @version 1.32.0
+// v1.32.0 (2026-09-27, T-20260927-019): pinned variant detection repaired — getValidVariants
+// listed the tag tree via `git archive <tag> --list`, which git rejects outright ("extra
+// command line parameter"), so EVERY `--version` scaffold failed even with a valid tag.
+// Replaced with `git ls-tree -r --name-only <tag> -- templates/` (same one-path-per-line
+// contract). Regression: live pinned scaffold template-v0.7.0 via the team-gateway smoke.
 // v1.31.0 (2026-09-27, ADR-0093 — spec
 //           docs/designs/2026-09-27-hermes-md-instruction-file-design.md):
 //           the hermes profile DELIVERS Hermes.md (the Hermes-specific
@@ -344,7 +349,10 @@ try {
 // ── Variant detection & validation ────────────────────────────────────────────
 function getValidVariants(fromTag?: string): string[] {
   if (fromTag) {
-    const result = spawnSync('git', ['-C', workspaceRoot, 'archive', fromTag, '--list'], { encoding: 'utf8' });
+    // T-20260927-019: `git archive <tag> --list` is invalid syntax (git rejects it with
+    // "extra command line parameter", so EVERY pinned scaffold failed). List the tag's tree
+    // contents via ls-tree instead — same output contract (one path per line).
+    const result = spawnSync('git', ['-C', workspaceRoot, 'ls-tree', '-r', '--name-only', fromTag, '--', 'templates/'], { encoding: 'utf8' });
     if (result.status !== 0) return [];
     return result.stdout
       .split('\n')

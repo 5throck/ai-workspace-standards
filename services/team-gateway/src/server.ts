@@ -15,6 +15,7 @@ import { requestAuthorized } from "./auth";
 import { scaffoldProject } from "./scaffold";
 import { publicTenant, recordTurnUsage, seedHermesHome, TenantRecord, TenantRegistry } from "./tenant";
 import { HermesEvent, HermesTurnResult, runHermesTurn } from "./hermes";
+import { runAntigravityTurn } from "./antigravity";
 import {
   anthropicEvent,
   anthropicStream,
@@ -171,8 +172,21 @@ async function runChat(
   const prev = state.chatLocks.get(rec.tenantId) ?? Promise.resolve();
   const task = prev
     .catch(() => undefined)
-    .then(() =>
-      runHermesTurn(
+    .then(() => {
+      if (state.cfg.runtime === "antigravity") {
+        return runAntigravityTurn(
+          {
+            agyBin: state.cfg.antigravityBin,
+            projectDir: rec.projectDir,
+            message,
+            conversationId: rec.conversationId,
+            printTimeoutSeconds: state.cfg.runBudgetSeconds,
+            extraArgs: state.cfg.hermesExtraArgs,
+          },
+          onEvent,
+        );
+      }
+      return runHermesTurn(
         {
           hermesBin: state.cfg.hermesBin,
           projectDir: rec.projectDir,
@@ -187,12 +201,13 @@ async function runChat(
             state.cfg.isolation === "docker" ? { image: state.cfg.runtimeImage } : undefined,
         },
         onEvent,
-      ),
-    );
+      );
+    });
   state.chatLocks.set(rec.tenantId, task.catch(() => undefined));
   const result = await task;
   if (result.sessionId) {
     const current = state.registry.get(rec.tenantId) ?? rec;
+    if (state.cfg.runtime === "antigravity") current.conversationId = result.sessionId;
     const tokens = (result.tokens ?? {}) as Record<string, unknown>;
     const n = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : 0);
     recordTurnUsage(current, new Date().toISOString().slice(0, 10), {
@@ -459,6 +474,7 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
         service: "team-gateway",
         authEnabled: state.cfg.apiKeys.length > 0,
         isolation: state.cfg.isolation,
+        runtime: state.cfg.runtime,
         variants: state.cfg.variants,
         templateVersion: state.cfg.templateVersion ?? "head",
         dataDir: state.cfg.dataDir,
@@ -607,6 +623,10 @@ if (import.meta.main) {
     const probe = dockerProbe(state.cfg.dockerBin);
     if (!probe.ok) {
       console.error(`[team-gateway] docker isolation unusable: ${probe.error ?? "probe failed"}`);
+      process.exit(1);
+    }
+    if (state.cfg.runtime === "antigravity") {
+      console.error("[team-gateway] docker isolation requires runtime hermes (agy is not in the runtime image)");
       process.exit(1);
     }
     console.log(`[team-gateway] docker isolation: server ${probe.version}`);
