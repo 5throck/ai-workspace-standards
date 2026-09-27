@@ -8,7 +8,7 @@ title: >-
   links (found via an invalid blackout-era co-abap test; upstream improvement
   candidate)
 priority: low
-status: review
+status: done
 attempts: 0
 created_at: '2026-09-27T01:57:08.299Z'
 history:
@@ -24,5 +24,10 @@ history:
   - at: '2026-09-27T18:17:46.040Z'
     from: running
     to: review
-result: null
+  - at: '2026-09-27T22:27:10.887Z'
+    from: review
+    to: done
+result: >-
+  Landed and merged via PR #1159 (admin-merge 2026-09-28 over the pre-existing
+  main CI redness; implementation commits verified on main as bdd3d9b3)
 error: null
