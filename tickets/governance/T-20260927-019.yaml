@@ -1,0 +1,25 @@
+schemaVersion: 1
+id: T-20260927-019
+kind: manual
+title: >-
+  fix(scripts): new-project.ts --version pinning broken on main —
+  getValidVariants calls 'git archive <tag> --list' which git rejects ('fatal:
+  extra command line parameter'), so EVERY pinned scaffold exits 1 with 'Could
+  not detect variants from tag' even when template-vX.Y.Z exists (reproduced
+  2026-09-27 on tag template-v0.7.0; bug present in committed HEAD,
+  scripts/new-project.ts:347). Fix: list tree contents via 'git ls-tree -r
+  --name-only <tag> -- templates/' (or reorder to 'git archive --list'-free
+  form) and filter variant.json paths; add a regression test asserting pinned
+  detection works on a real template-v* tag. Found by the team-gateway live
+  smoke (docs/designs/2026-09-27-team-gateway-service-design.md D8); gateway
+  treats the pin flag as unavailable until fixed.
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-27T03:12:39.917Z'
+history:
+  - at: '2026-09-27T03:12:39.917Z'
+    from: null
+    to: backlog
+result: null
+error: null
