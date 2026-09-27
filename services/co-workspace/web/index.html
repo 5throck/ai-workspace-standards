@@ -620,7 +620,7 @@
   }
 
   // ── admin panel with stats + graphs ──
-  function barChart(rows: Array<[string, number]>, unit: string): string {
+  function barChart(rows, unit) {
     const max = Math.max(1, ...rows.map((r) => r[1]));
     return rows
       .map(
@@ -644,21 +644,21 @@
     adminView.innerHTML = "<div class='hint'>loading…</div>";
     const stats = await (await fetch("/admin/stats")).json();
     const users = (await (await fetch("/admin/users")).json()).users;
-    const fmt = (b: number) => (b > 1e9 ? (b / 1e9).toFixed(1) + "GB" : b > 1e6 ? (b / 1e6).toFixed(1) + "MB" : b > 1e3 ? (b / 1e3).toFixed(0) + "KB" : b + "B");
+    const fmt = (b) => (b > 1e9 ? (b / 1e9).toFixed(1) + "GB" : b > 1e6 ? (b / 1e6).toFixed(1) + "MB" : b > 1e3 ? (b / 1e3).toFixed(0) + "KB" : b + "B");
     adminView.innerHTML =
       `<div class="statGrid">` +
       `<div class="statBox"><div class="n">${stats.users.active}</div><div class="l">active users</div></div>` +
-      `<div class="statBox"><div class="n">${Object.values(stats.tenants).reduce((a: number, b: number) => a + b, 0)}</div><div class="l">tenants</div></div>` +
+      `<div class="statBox"><div class="n">${Object.values(stats.tenants).reduce((a, b) => a + b, 0)}</div><div class="l">tenants</div></div>` +
       `<div class="statBox"><div class="n">${fmt(stats.diskBytes)}</div><div class="l">disk usage</div></div>` +
       `</div>` +
-      `<h2 style="font-size:.85rem;">Tenants per user</h2>${barChart(stats.perUser.map((u: any) => [u.principal, u.tenantCount]), "")}` +
-      `<h2 style="font-size:.85rem; margin-top:14px;">Disk usage per user</h2>${barChart(stats.perUser.map((u: any) => [u.principal, u.diskBytes]), "B")}` +
-      `<h2 style="font-size:.85rem; margin-top:14px;">Tenants per variant</h2>${barChart(stats.tenantsPerVariant.map((r: any) => [r.variant, r.count]), "")}` +
+      `<h2 style="font-size:.85rem;">Tenants per user</h2>${barChart(stats.perUser.map((u) => [u.principal, u.tenantCount]), "")}` +
+      `<h2 style="font-size:.85rem; margin-top:14px;">Disk usage per user</h2>${barChart(stats.perUser.map((u) => [u.principal, u.diskBytes]), "B")}` +
+      `<h2 style="font-size:.85rem; margin-top:14px;">Tenants per variant</h2>${barChart(stats.tenantsPerVariant.map((r) => [r.variant, r.count]), "")}` +
       `<h2 style="font-size:.85rem; margin-top:14px;">Users</h2>` +
       `<table class="admin"><thead><tr><th>ID</th><th>Status</th><th>Tenants</th><th>Usage</th><th>Actions</th></tr></thead><tbody>` +
       users
-        .map((u: any) => {
-          const pu = stats.perUser.find((p: any) => p.principal === u.principal);
+        .map((u) => {
+          const pu = stats.perUser.find((p) => p.principal === u.principal);
           return `<tr><td>${esc(u.loginId ?? u.principal)}${u.role === "admin" ? " ·admin" : ""}</td>` +
             `<td>${esc(u.status)}</td><td>${pu?.tenantCount ?? 0}</td><td>${fmt(pu?.diskBytes ?? 0)}</td>` +
             `<td><button class="collapsebtn" data-reset="${u.id}">reset pw</button> ` +
