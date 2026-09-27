@@ -111,7 +111,7 @@ describe('lifecycle-sync-audit Check E (lifecycle record metadata gate)', () => 
     const cases: Array<[string, string, string]> = [
       ['sync', '1.6.0', 'pm'],
       ['security-scan', '1.2.0', 'pm'],
-      ['upgrade-project', '1.5.1', 'pm'],
+      ['upgrade-project', '1.5.2', 'pm'],
     ];
     for (const [skill, version, owner] of cases) {
       const fm = parseSkillFrontmatter(
@@ -162,7 +162,7 @@ describe('lifecycle-sync-audit Check H (script record version gate, T-20260915-0
   test('the three known script records carry a Version field matching SCRIPTS.md', () => {
     const cases: Array<[string, string]> = [
       ['error-handling', '1.4.0'],
-      ['new-project', '1.31.0'],
+      ['new-project', '1.32.0'],
       ['validate-pm-extends', '0.3.1'],
     ];
     for (const [record, version] of cases) {

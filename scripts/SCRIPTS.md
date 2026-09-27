@@ -191,7 +191,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `lib/pipeline-state.ts` | L0 | 1.2.0 | active | v1.2.0: injectable state file (`setStateFile`), string phase names, snapshot-backed undo (`addRollbackActionWithBackup`; modify/delete/move restore from captured content) for in-project adopt state | —| L0+L1 | —|
 | `lib/platform-context.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/propagation-map-schema.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
-| `lib/managed-block-merge.ts` | L0 | 1.2.0 | active | v1.2.0 (T-20260924-010, spec docs/designs/2026-09-25-codex-merge-claim-routing-design.md D1): COMMON-CODEX joins MANAGED_PATTERNS (after its COMMON-GEMINI twin) — the CODEX.md MERGE pass union-merge activates; engine untouched (pattern-generic positional path) | —| L0 | —|
+| `lib/managed-block-merge.ts` | L0 | 1.3.0 | active | v1.3.0 (spec docs/designs/2026-09-27-hermes-merge-marker-design.md): COMMON-HERMES joins MANAGED_PATTERNS (after its COMMON-CODEX twin) — the Hermes.md MERGE delivery to existing L2 projects activates (ADR-0093 shipped the file L0/L1 but the pattern gap made the MERGE pass skip it); engine untouched (pattern-generic positional path). Previous: v1.2.0 (T-20260924-010) COMMON-CODEX joins MANAGED_PATTERNS — the CODEX.md MERGE pass union-merge activates | —| L0 | —|
 | `lib/managed-block-parity.ts` | L0 | 1.2.0 | active | COMMON-AGENTS zone extraction/parity (ADR-0081/T-20260919-001); keyed WORKSPACE-MANAGED blocks (T-20260916-009) | —| L0+L1 | —|
 | `lib/platform-delivery.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/ssrf.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|

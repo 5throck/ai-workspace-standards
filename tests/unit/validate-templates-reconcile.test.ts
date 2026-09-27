@@ -257,7 +257,7 @@ describe('C-CM-04 platform-skills sweep helpers (T-20260924-002 R1.3-R1.5)', () 
   test('real contract exclusions are live: every excluded dir exists in some mirror tree', () => {
     const exclusions = Object.keys(contract.common_platform_skill_exclusions as Record<string, unknown>);
     expect(exclusions.sort()).toEqual(
-      ['create-variant', 'graft', 'promote-variant', 'simulate-pipeline', 'sound-synth'].sort(),
+      ['create-variant', 'graft', 'new-project', 'promote-variant', 'simulate-pipeline', 'sound-synth'].sort(),
     );
     const existing = new Set<string>();
     for (const tree of MIRROR_TREES) {
