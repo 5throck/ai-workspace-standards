@@ -33,6 +33,8 @@ Implemented in this wave: **SEC-05** (in-memory fixed-window rate limiter on `/a
 
 **SEC-05 remnant closed (2026-09-27, same day)**: per-principal lifetime token budget across tenants (`CO_WORKSPACE_PRINCIPAL_MAX_TOKENS`) — enforced on all four chat surfaces before the turn runs; aggregate usage + remaining budget exposed via `/auth/me`.
 
+**Post-fix addendum (live browser repro)**: the SEC-04 XSS fix had escaped 11 call sites but the `esc()` helper definition itself was lost in a later page restructure — every escaped site still threw ReferenceError, breaking renderAuthCard (empty user card) and the admin panel (stuck "loading…"). Fixed by restoring the helper; the web-parse guard test now covers this class (helper defined → script parses).
+
 Still deferred:
 
 | ID | Source | Item | Why deferred |
