@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.2.0
+// @version 1.3.0
 // @description Scans workspace Markdown files for broken relative file links.
 //              Invoked by dev-sync.ts as a pre-flight link validation gate and
 //              spawned by audit.ts as the docs relative-link gate.
@@ -8,6 +8,12 @@
 //              The docs/ subdirectories have many historical cross-references that
 //              are managed by the validate-doc-folder.ts validator separately.
 //              Use --dir to scan a specific directory, --all to scan all of docs/.
+//
+//              v1.3.0 (T-20260927-018): fenced code blocks are dropped before
+//              link matching. Code samples legitimately contain non-links —
+//              template placeholders like ${entry.file} inside Markdown-link
+//              syntax — that the relative-link regex flagged as broken. Fence
+//              semantics match collectAnchorFragments (``` / ~~~ toggles).
 //
 //              v1.1.0 (T-20260910-014): anchor fragments are now verified against
 //              the target file's headings instead of being stripped. A fragment is
@@ -100,6 +106,25 @@ function headingSlug(headingText: string): string {
     .replace(/[̀-ͯ]/g, "") // combining diacritics
     .replace(/[^\p{L}\p{N}\p{M}\s\-_]/gu, "")
     .replace(/\s/g, "-");
+}
+
+/**
+ * v1.3.0 (T-20260927-018): drop fenced code blocks before link matching. Code
+ * samples carry Markdown-link syntax that is documentation, not navigation —
+ * template placeholders like ${entry.file} would otherwise be flagged broken.
+ * Fence semantics match collectAnchorFragments (``` / ~~~ toggles).
+ */
+function stripFencedBlocks(content: string): string {
+  const kept: string[] = [];
+  let inFence = false;
+  for (const line of content.split("\n")) {
+    if (/^\s*(```|~~~)/.test(line)) {
+      inFence = !inFence;
+      continue;
+    }
+    if (!inFence) kept.push(line);
+  }
+  return kept.join("\n");
 }
 
 /**
@@ -203,7 +228,7 @@ function checkFile(mdPath: string): void {
   }
   RELATIVE_LINK_RE.lastIndex = 0;
 
-  for (const match of content.matchAll(RELATIVE_LINK_RE)) {
+  for (const match of stripFencedBlocks(content).matchAll(RELATIVE_LINK_RE)) {
     const href = match[2].trim();
     const fragment = match[3] ? match[3].slice(1) : null;
     // Skip remote URLs, empty hrefs, anchor-only refs, and example placeholders

@@ -10,6 +10,7 @@
 |------|------|-----|---------|----------|
 | 2026-08-25 | - | review | Initial creation — pricing management & consulting variant (converted from co-price project; template added 2026-08-28, PR #723) | pm |
 | 2026-09-10 | review | review | Lifecycle record created (retroactive) | lifecycle-manager |
+| 2026-09-28 | review | review | Record refreshed (T-20260927-013): four-layer KR region-profile backport delivered (region-profiles/{KR.yaml,_schema.yaml,_validate.ts}, docs/countries/ACTIVE.md seed, .env.sample country-scoped marker, variant.json country_config; commit e469a29a, 2026-09-27, T-20260927-009); phase unchanged | governance-ticket-runner |
 
 ## Summary
 
@@ -42,5 +43,5 @@ Pricing management & consulting simulator variant. Multi-product, multi-channel 
 - **Current Phase**: review
 - **Version**: 4.1.0
 - **Owner**: pm
-- **Last Updated**: 2026-09-10
-- **Last Reviewer**: lifecycle-manager
+- **Last Updated**: 2026-09-28
+- **Last Reviewer**: governance-ticket-runner

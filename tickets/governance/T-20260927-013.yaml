@@ -7,12 +7,26 @@ title: >-
   co-price whose 557-line region-profiles backport e469a29a predates their Last
   Updated stamps
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-27T00:46:17.297Z'
 history:
   - at: '2026-09-27T00:46:17.297Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-27T18:05:33.140Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-27T18:05:33.153Z'
+    from: waiting
+    to: running
+  - at: '2026-09-27T18:17:46.001Z'
+    from: running
+    to: review
+  - at: '2026-09-27T22:27:10.846Z'
+    from: review
+    to: done
+result: >-
+  Landed and merged via PR #1159 (admin-merge 2026-09-28 over the pre-existing
+  main CI redness; implementation commits verified on main as bdd3d9b3)
 error: null

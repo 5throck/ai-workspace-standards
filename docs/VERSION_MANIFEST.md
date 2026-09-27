@@ -1,6 +1,7 @@
 # VERSION_MANIFEST.md
 
 **Generated**: 2026-09-27T22:47:29.981Z
+**Generated**: 2026-09-27T22:27:40.749Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -174,7 +175,7 @@
 | sync-skills-to-l2.ts | 1.0.1 | scripts/sync-skills-to-l2.ts | N/A |
 | sync-skills.ts | 1.10.0 | scripts/sync-skills.ts | N/A |
 | sync-template-deps.ts | 1.0.0 | scripts/sync-template-deps.ts | N/A |
-| tag-template.ts | 1.1.0 | scripts/tag-template.ts | bun |
+| tag-template.ts | 1.2.0 | scripts/tag-template.ts | bun |
 | team-builder.ts | 1.4.1 | scripts/team-builder.ts | N/A |
 | test-adopt-project.ts | 1.0.0 | scripts/test-adopt-project.ts | N/A |
 | test-extends-validator.ts | 1.0.1 | scripts/test-extends-validator.ts | fs, path |
@@ -191,7 +192,7 @@
 | validate-agents.ts | 1.3.2 | scripts/validate-agents.ts | N/A |
 | validate-decisions.ts | 1.0.0 | scripts/validate-decisions.ts | js-yaml |
 | validate-doc-folder.ts | 1.1.0 | scripts/validate-doc-folder.ts | fs, path |
-| validate-docs-links.ts | 1.2.0 | scripts/validate-docs-links.ts | fs, path |
+| validate-docs-links.ts | 1.3.0 | scripts/validate-docs-links.ts | fs, path |
 | validate-md-language.ts | 1.12.0 | scripts/validate-md-language.ts | fs |
 | validate-model-registry.ts | 1.4.0 | scripts/validate-model-registry.ts | N/A |
 | validate-pm-extends.ts | 0.3.1 | scripts/validate-pm-extends.ts | N/A |

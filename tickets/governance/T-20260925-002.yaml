@@ -17,7 +17,7 @@ title: >-
   §7 hard rule). Severity flip only — message text unchanged.
 priority: normal
 not_before: '2026-10-09'
-status: review
+status: done
 attempts: 0
 created_at: '2026-09-24T16:45:24.557Z'
 history:
@@ -33,5 +33,11 @@ history:
   - at: '2026-09-26T22:47:16.733Z'
     from: running
     to: review
-result: null
+  - at: '2026-09-27T18:19:13.490Z'
+    from: review
+    to: done
+result: >-
+  Soak WARN-to-FAIL promotion precondition verified (zero findings) and merged
+  via PR #1113 (commit e469a29a); CHANGELOG record backfilled by T-20260927-015
+  (PR #1159)
 error: null
