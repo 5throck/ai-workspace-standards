@@ -7,6 +7,7 @@ import { join } from "node:path";
 import { loadConfig, parseKeyList, readKeysFile } from "../../services/team-gateway/src/config";
 import { assertQuota, windowUsage } from "../../services/team-gateway/src/server";
 import { createServer, createState } from "../../services/team-gateway/src/server";
+// TenantRegistry now lives in registry-db (SQLite store); tests import server-created state only.
 import type { GatewayConfig } from "../../services/team-gateway/src/config";
 import type { TenantRecord } from "../../services/team-gateway/src/tenant";
 

@@ -131,7 +131,8 @@ limitation).
 | `TEAM_GATEWAY_HERMES_EXTRA_ARGS` | — | Extra CLI args (e.g. toolset scoping) |
 | `TEAM_GATEWAY_HERMES_TOOLSETS` | — | Comma-separated Hermes toolsets passed as `-t` on every session |
 | `TEAM_GATEWAY_QUOTA_WINDOW` | `lifetime` | `daily` resets per-tenant quota counters each UTC day |
-| `TEAM_GATEWAY_API_KEYS_FILE` | — | Key file (one per line, `#` comments); union-ed with `TEAM_GATEWAY_API_KEYS`, re-read by `POST /admin/reload` |
+| `TEAM_GATEWAY_API_KEYS_FILE` | — | Key file (one per line, `#` comments; `key:label` maps a key to a trusted principal); union-ed with `TEAM_GATEWAY_API_KEYS`, re-read by `POST /admin/reload` |
+| `TEAM_GATEWAY_VARIANTS_INCLUDE_BETA` | `false` | `true` catalogs beta variants (tagged `beta` in the models payload) |
 | `TEAM_GATEWAY_ISOLATION` | `process` | `docker` = per-turn ephemeral sibling container |
 | `TEAM_GATEWAY_RUNTIME_IMAGE` | `team-gateway-runtime:latest` | Runtime image for docker isolation |
 | `TEAM_GATEWAY_DOCKER_BIN` | `docker` | Docker CLI binary for the isolation probe |
@@ -187,6 +188,16 @@ bun run dev
   sibling container (`docker run --rm -i`, image from `TEAM_GATEWAY_RUNTIME_IMAGE`, default
   `team-gateway-runtime:latest` — build it from `docker/Dockerfile`); only the tenant project dir
   and Hermes home are mounted. Startup fails fast when Docker is unusable.
+- **Auth principals (P9)** — key-file entries may carry a trusted label (`sk-alice:alice`);
+  the label becomes the tenant's `ownerPrincipal` (replaces the spoofable `user` field for
+  ownership). `GET /tenants?mine=1` lists only the caller's tenants. The demo page user input
+  drives the OpenAI `user` field for lazy tenants.
+- **Persistence (Phase 3)** — the tenant registry is a SQLite file (`<dataDir>/tenants/registry.db`,
+  WAL mode; legacy `registry.json` auto-imported on first run). The store sits behind a narrow
+  interface (get/upsert/create/findByKey/list) for a future Postgres implementation.
+- **Beta catalog (P1)** — `TEAM_GATEWAY_VARIANTS_INCLUDE_BETA=true` adds beta variants to
+  `/v1/models`, each tagged `meta.status: "beta"` alongside `meta.runtime`/`meta.provider`
+  (provider-neutrality: the wire contract is neutral; the generating runtime/provider is disclosed).
 - **Shared credentials** — every turn re-copies the seed home's CURRENT `auth.json` into the
   tenant home right before spawn (containerized hermes resolves OAuth from its own home only),
   plus sets `HERMES_SHARED_AUTH_DIR` to one shared store for runtimes that support it. Net

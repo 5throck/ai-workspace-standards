@@ -11,9 +11,10 @@ import { copyFileSync, existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { mkdirSync } from "node:fs";
 import { dockerProbe, GatewayConfig, loadConfig, readKeysFile, SERVICE_ROOT } from "./config";
-import { requestAuthorized } from "./auth";
+import { presentedCredential, principalFor, requestAuthorized } from "./auth";
 import { scaffoldProject } from "./scaffold";
-import { publicTenant, recordTurnUsage, seedHermesHome, TenantRecord, TenantRegistry } from "./tenant";
+import { publicTenant, recordProgress, recordTurnUsage, seedHermesHome, TenantRecord } from "./tenant";
+import { TenantRegistry } from "./registry-db";
 import { HermesEvent, HermesTurnResult, runHermesTurn } from "./hermes";
 import { runAntigravityTurn } from "./antigravity";
 import {
@@ -41,7 +42,7 @@ import {
   modelsPayload,
   parseChatRequest,
 } from "./openai";
-import { moveDir } from "./util";
+import { genId, moveDir } from "./util";
 
 export interface GatewayState {
   cfg: GatewayConfig;
@@ -63,6 +64,8 @@ export function createState(cfg: GatewayConfig = loadConfig()): GatewayState {
 /** Scaffold, relocate, seed the tenant Hermes home; persists terminal status either way. */
 export async function provisionTenant(state: GatewayState, rec: TenantRecord): Promise<void> {
   try {
+    recordProgress(rec, "scaffolding", `${rec.variant} 팀 스캐폴딩 중…`);
+    state.registry.upsert(rec);
     const scaffolded = await scaffoldProject({
       workspaceDir: state.cfg.workspaceDir,
       variant: rec.variant,
@@ -71,9 +74,14 @@ export async function provisionTenant(state: GatewayState, rec: TenantRecord): P
       templateVersion: state.cfg.templateVersion,
       timeoutMs: state.cfg.scaffoldTimeoutMs,
     });
+    recordProgress(rec, "relocating", "테넌트 저장소로 이동 중…");
+    state.registry.upsert(rec);
     moveDir(scaffolded.sourceDir, rec.projectDir);
+    recordProgress(rec, "seeding", "hermes home 시딩 중…");
+    state.registry.upsert(rec);
     seedHermesHome(rec, state.cfg.hermesSeedHome, state.cfg.hermesModel);
     rec.status = "ready";
+    recordProgress(rec, "ready", "세션 준비 완료");
   } catch (err) {
     rec.status = "failed";
     rec.error = String((err as Error)?.message ?? err);
@@ -99,6 +107,18 @@ async function ensureReady(state: GatewayState, rec: TenantRecord): Promise<Tena
     throw new Error(`tenant ${current.tenantId} failed provisioning: ${current.error ?? "unknown"}`);
   }
   throw new Error(`tenant ${current.tenantId} is ${current.status}`);
+}
+
+/** P7: sanitize a user-supplied project name to what the scaffold engine accepts. */
+export function sanitizeProjectName(name: string): string {
+  const cleaned = name
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, "-")
+    .replace(/-{2,}/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 48)
+    .replace(/-+$/g, "");
+  return cleaned;
 }
 
 export function tenantKeyFor(variant: string, user: string): string {
@@ -323,6 +343,7 @@ async function openaiChatResponse(
   rec: TenantRecord,
   message: string,
   stream: boolean,
+  provisioning?: Promise<void>,
 ): Promise<Response> {
   if (!stream) {
     const result = await runChat(state, rec, message);
@@ -344,6 +365,31 @@ async function openaiChatResponse(
     async start(controller) {
       const enc = new TextEncoder();
       try {
+        // P8: while a lazy tenant is provisioning, stream progress as SSE comments
+        // (`: …` lines are wire-legal and ignored by OpenAI clients, visible to humans).
+        if (provisioning) {
+          const emitTrail = () => {
+            for (const p of state.registry.get(rec.tenantId)?.progress ?? []) {
+              controller.enqueue(enc.encode(`: provisioning: [${p.stage}] ${p.label}\n`));
+            }
+          };
+          emitTrail();
+          let ticks = 0;
+          const timer = setInterval(() => {
+            ticks += 1;
+            const cur = state.registry.get(rec.tenantId) ?? rec;
+            if (cur.progress?.length) {
+              const last = cur.progress[cur.progress.length - 1];
+              controller.enqueue(enc.encode(`: provisioning: [${last.stage}] ${last.label}\n`));
+            } else {
+              controller.enqueue(enc.encode(`: provisioning: ${cur.status}…\n`));
+            }
+            if (ticks > 900) clearInterval(timer);
+          }, 1000);
+          await provisioning;
+          clearInterval(timer);
+          controller.enqueue(enc.encode(": provisioning: ready\n\n"));
+        }
         const result = await runChat(state, rec, message, (evt) => {
           if (evt.type !== "text" || typeof evt.text !== "string") return;
           if (!sentRole) {
@@ -472,6 +518,23 @@ async function geminiChatResponse(
 
 const DEMO_PAGE_PATH = resolve(SERVICE_ROOT, "web", "index.html");
 
+const variantStatusCache = new Map<string, string>();
+/** P1: variant lifecycle status for catalog metadata (default "stable" when unreadable). */
+export function variantStatus(cfg: GatewayConfig, variant: string): string {
+  const cached = variantStatusCache.get(variant);
+  if (cached) return cached;
+  try {
+    const v = JSON.parse(readFileSync(join(cfg.workspaceDir, "templates", variant, "variant.json"), "utf8")) as {
+      status?: string;
+    };
+    const status = v.status ?? "stable";
+    variantStatusCache.set(variant, status);
+    return status;
+  } catch {
+    return "stable";
+  }
+}
+
 function demoPage(): Response {
   if (existsSync(DEMO_PAGE_PATH)) {
     return new Response(readFileSync(DEMO_PAGE_PATH, "utf8"), {
@@ -510,7 +573,16 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
     }
 
     if (req.method === "GET" && path === "/v1/models") {
-      return jsonResponse(modelsPayload(state.cfg.variants));
+      const runtimeMeta: Record<string, { runtime: string; provider: string }> = {
+        hermes: { runtime: "hermes", provider: "operator-configured" },
+        antigravity: { runtime: "antigravity", provider: "Google (via agy)" },
+      };
+      const rm = runtimeMeta[state.cfg.runtime] ?? { runtime: state.cfg.runtime, provider: "operator-configured" };
+      const meta: Record<string, { status?: string; runtime?: string; provider?: string }> = {};
+      for (const v of state.cfg.variants) {
+        meta[v] = { status: variantStatus(state.cfg, v), ...rm };
+      }
+      return jsonResponse(modelsPayload(state.cfg.variants, meta));
     }
 
     if (req.method === "POST" && path === "/sessions") {
@@ -520,17 +592,29 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
       if (!state.cfg.variants.includes(variant)) {
         throw new HttpError(400, `variant ${variant} is not in the allowlist: ${state.cfg.variants.join(", ")}`);
       }
+      let name = typeof body.name === "string" ? sanitizeProjectName(body.name) : "";
+      if (name) {
+        if (state.registry.list().some((r) => r.name === name)) name = `${name}-${genId("").slice(0, 6)}`;
+      }
       const rec = state.registry.create({
         dataDir: state.cfg.dataDir,
         variant,
+        name: name || undefined,
         description: typeof body.description === "string" ? body.description : undefined,
+        ownerPrincipal: principalFor(state.cfg, presentedCredential(req)),
       });
       startProvisioning(state, rec);
-      return jsonResponse({ tenantId: rec.tenantId, status: rec.status }, 202);
+      return jsonResponse({ tenantId: rec.tenantId, name: rec.name, status: rec.status }, 202);
     }
 
     if (req.method === "GET" && path === "/tenants") {
-      return jsonResponse({ tenants: state.registry.list().map(publicTenant) });
+      const mine = url.searchParams.get("mine") === "1";
+      let list = state.registry.list();
+      if (mine) {
+        const principal = principalFor(state.cfg, presentedCredential(req));
+        list = list.filter((r) => (r.ownerPrincipal ?? "anonymous") === principal);
+      }
+      return jsonResponse({ tenants: list.map(publicTenant) });
     }
 
     const tenantDetail = path.match(/^\/tenants\/([^/]+)$/);
@@ -557,10 +641,13 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
         throw new HttpError(404, `unknown model: ${parsed.req.model}`);
       }
       const { rec, promise } = getOrStartTenant(state, parsed.req.model, parsed.req.user);
-      if (promise) await promise;
+      if (!rec.ownerPrincipal) {
+        rec.ownerPrincipal = principalFor(state.cfg, presentedCredential(req));
+        state.registry.upsert(rec);
+      }
       const ready = await ensureReady(state, rec);
       assertQuota(state.cfg, ready);
-      return await openaiChatResponse(state, ready, parsed.req.message, parsed.req.stream);
+      return await openaiChatResponse(state, ready, parsed.req.message, parsed.req.stream, promise ?? undefined);
     }
 
     if (req.method === "POST" && path === "/v1/messages") {

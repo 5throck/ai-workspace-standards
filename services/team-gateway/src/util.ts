@@ -5,7 +5,7 @@ import { dirname } from "node:path";
 
 export function genId(prefix = "gw"): string {
   const rand = crypto.randomUUID().replace(/-/g, "").slice(0, 12);
-  return `${prefix}-${rand}`;
+  return prefix ? `${prefix}-${rand}` : rand;
 }
 
 /** Move a directory, falling back to copy+delete across filesystem boundaries (scaffold lives in

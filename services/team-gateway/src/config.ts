@@ -55,6 +55,8 @@ export interface GatewayConfig {
   /** Host-side path of `dataDir` — used by docker isolation to mount tenant dirs into sibling
    * containers when the gateway itself runs inside a container (paths must match on the host). */
   dataDirHost?: string;
+  /** P1: catalog beta variants too (`TEAM_GATEWAY_VARIANTS_INCLUDE_BETA=true`). */
+  includeBeta: boolean;
   /** Session runtime: `hermes` (default) or `antigravity` (agy headless print mode).
    * Container isolation requires the hermes runtime (the agy binary is not in the image). */
   runtime: "hermes" | "antigravity";
@@ -95,7 +97,11 @@ function numOr0(value: string | undefined): number {
 /** Resolve the variant catalog. `all` (or `*`) auto-discovers every `templates/co-*` whose
  * `variant.json` is `status: stable` — new variants appear without config changes. Explicit
  * comma lists are honored verbatim (and may include non-stable variants deliberately). */
-export function resolveVariants(raw: string, workspaceDir: string): string[] {
+export function resolveVariants(
+  raw: string,
+  workspaceDir: string,
+  includeBeta = false,
+): string[] {
   const names = raw.split(",").map((s) => s.trim()).filter(Boolean);
   if (!(names.length === 1 && (names[0] === "all" || names[0] === "*"))) return names;
   const templatesDir = join(workspaceDir, "templates");
@@ -106,7 +112,7 @@ export function resolveVariants(raw: string, workspaceDir: string): string[] {
       const variant = JSON.parse(readFileSync(join(templatesDir, dir, "variant.json"), "utf8")) as {
         status?: string;
       };
-      if (variant.status === "stable") out.push(dir);
+      if (variant.status === "stable" || (includeBeta && variant.status === "beta")) out.push(dir);
     } catch {
       /* unreadable variant.json — not catalog-eligible */
     }
@@ -134,7 +140,7 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     workspaceDir: resolve(env.TEAM_GATEWAY_WORKSPACE_DIR ?? resolve(SERVICE_ROOT, "..", "..")),
     variants: resolveVariants(env.TEAM_GATEWAY_VARIANTS ?? "co-consult", resolve(
       env.TEAM_GATEWAY_WORKSPACE_DIR ?? resolve(SERVICE_ROOT, "..", ".."),
-    )),
+    ), env.TEAM_GATEWAY_VARIANTS_INCLUDE_BETA === "true" || env.TEAM_GATEWAY_VARIANTS_INCLUDE_BETA === "1"),
     templateVersion: env.TEAM_GATEWAY_TEMPLATE_VERSION || undefined,
     hermesBin: env.HERMES_BIN ?? "hermes",
     hermesSeedHome: env.TEAM_GATEWAY_HERMES_SEED_HOME || undefined,
@@ -159,6 +165,7 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     runtimeImage: env.TEAM_GATEWAY_RUNTIME_IMAGE ?? "team-gateway-runtime:latest",
     dockerBin: env.TEAM_GATEWAY_DOCKER_BIN ?? "docker",
     dataDirHost: env.TEAM_GATEWAY_DATA_DIR_HOST || undefined,
+    includeBeta: env.TEAM_GATEWAY_VARIANTS_INCLUDE_BETA === "true" || env.TEAM_GATEWAY_VARIANTS_INCLUDE_BETA === "1",
     runtime: env.TEAM_GATEWAY_RUNTIME === "antigravity" ? "antigravity" : "hermes",
     antigravityBin: env.TEAM_GATEWAY_ANTIGRAVITY_BIN ?? "agy",
   };
