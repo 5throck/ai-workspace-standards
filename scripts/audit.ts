@@ -642,6 +642,7 @@ if (!LIFECYCLE_ONLY) {
     const STANDARD_ROOT_MD = new Set([
         'README.md', 'README_ko.md', 'CHANGELOG.md', 'AGENTS.md',
         'SECURITY.md', 'CONSTITUTION.md', 'CLAUDE.md', 'GEMINI.md', 'CODEX.md',
+        'Hermes.md',
         'PROMOTION_CHECKLIST.md', '_ORIGIN.md', '_COMMON_VERSION.md'
     ]);
     const rootMdFiles = fs.readdirSync('.')

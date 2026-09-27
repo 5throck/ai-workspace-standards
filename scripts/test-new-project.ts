@@ -2,9 +2,15 @@
 /**
  * test-new-project.ts — E2E Test for new-project.ts
  *
- * @version 1.7.0
- * @last_updated 2026-09-25
+ * @version 1.8.0
+ * @last_updated 2026-09-27
  *
+ * v1.8.0 (2026-09-27, ADR-0093 — spec
+ *         docs/designs/2026-09-27-hermes-md-instruction-file-design.md):
+ *         Test 8 hermes branch asserts Hermes.md present (platform=all too);
+ *         Tests 0e/7 stop requiring CLAUDE.md/GEMINI.md under the hermes
+ *         profile (it delivers Hermes.md instead — latent gap, the E2E had
+ *         never run with --platform hermes before).
  * v1.7.0 (2026-09-25, ADR-0088 W2): Test 8 covers the hermes profile (.hermes/
  *         present, legacy twins removed) and platform=all asserts .hermes/ too.
  * v1.6.0 (2026-09-24, scaffold hygiene bundle — spec
@@ -293,8 +299,8 @@ try {
   // 0e (post-scaffold): Verify generated project outputs in testDir contain CLAUDE.md and GEMINI.md
   try {
     const missingScaffolded: string[] = [];
-    if (platformArg !== 'antigravity' && !fileExists('CLAUDE.md')) missingScaffolded.push('CLAUDE.md');
-    if (platformArg !== 'claude' && !fileExists('GEMINI.md')) missingScaffolded.push('GEMINI.md');
+    if (platformArg !== 'antigravity' && platformArg !== 'hermes' && !fileExists('CLAUDE.md')) missingScaffolded.push('CLAUDE.md');
+    if (platformArg !== 'claude' && platformArg !== 'hermes' && !fileExists('GEMINI.md')) missingScaffolded.push('GEMINI.md');
     if (missingScaffolded.length > 0) {
       fail('Test 0e (scaffolded output)', `Generated project in ${testDir} missing: ${missingScaffolded.join(', ')}`);
     } else {
@@ -377,9 +383,10 @@ try {
   console.log('\nTest 7: Required Template Files');
   try {
     const required = ['AGENTS.md', 'agents/pm.md', '.gitignore', '.githooks/pre-commit'];
-    // CLAUDE.md/GEMINI.md depend on --platform
-    if (platformArg !== 'antigravity') required.push('CLAUDE.md');
-    if (platformArg !== 'claude')      required.push('GEMINI.md');
+    // CLAUDE.md/GEMINI.md depend on --platform (the hermes profile drops the
+    // legacy instruction twins — it delivers Hermes.md instead, asserted in Test 8)
+    if (platformArg !== 'antigravity' && platformArg !== 'hermes') required.push('CLAUDE.md');
+    if (platformArg !== 'claude' && platformArg !== 'hermes')      required.push('GEMINI.md');
     const missing = required.filter(f => !fileExists(f));
     if (missing.length > 0) {
       fail('Test 7', `Missing: ${missing.join(', ')}`);
@@ -404,12 +411,13 @@ try {
       else                             pass('Test 8 PASSED: CODEX.md and .codex/ present for codex platform');
     } else if (platformArg === 'hermes') {
       const hasHermesDir = fileExists('.hermes');
+      const hasHermesMd  = fileExists('Hermes.md');
       const hasClaudeMd  = fileExists('CLAUDE.md');
       const hasGeminiMd  = fileExists('GEMINI.md');
-      if (!hasHermesDir || hasClaudeMd || hasGeminiMd) {
-        fail('Test 8', `hermes files expected: .hermes/=${hasHermesDir} CLAUDE.md absent=${!hasClaudeMd} GEMINI.md absent=${!hasGeminiMd}`);
+      if (!hasHermesDir || !hasHermesMd || hasClaudeMd || hasGeminiMd) {
+        fail('Test 8', `hermes files expected: .hermes/=${hasHermesDir} Hermes.md=${hasHermesMd} CLAUDE.md absent=${!hasClaudeMd} GEMINI.md absent=${!hasGeminiMd}`);
       } else {
-        pass('Test 8 PASSED: .hermes/ present and legacy twins removed for hermes platform');
+        pass('Test 8 PASSED: .hermes/ and Hermes.md present, legacy twins removed for hermes platform');
       }
     } else {
       const hasClaude   = fileExists('CLAUDE.md');
@@ -417,10 +425,11 @@ try {
       const hasCodexMd  = fileExists('CODEX.md');
       const hasCodexDir = fileExists('.codex');
       const hasHermesDir = fileExists('.hermes');
-      if (!hasClaude || !hasGemini || !hasCodexMd || !hasCodexDir || !hasHermesDir) {
-        fail('Test 8', `All files expected: CLAUDE.md=${hasClaude} GEMINI.md=${hasGemini} CODEX.md=${hasCodexMd} .codex/=${hasCodexDir} .hermes/=${hasHermesDir}`);
+      const hasHermesMd  = fileExists('Hermes.md');
+      if (!hasClaude || !hasGemini || !hasCodexMd || !hasCodexDir || !hasHermesDir || !hasHermesMd) {
+        fail('Test 8', `All files expected: CLAUDE.md=${hasClaude} GEMINI.md=${hasGemini} CODEX.md=${hasCodexMd} .codex/=${hasCodexDir} .hermes/=${hasHermesDir} Hermes.md=${hasHermesMd}`);
       } else {
-        pass('Test 8 PASSED: CLAUDE.md, GEMINI.md, CODEX.md, .codex/, and .hermes/ all present for platform=all');
+        pass('Test 8 PASSED: CLAUDE.md, GEMINI.md, CODEX.md, .codex/, .hermes/, and Hermes.md all present for platform=all');
       }
     }
   } catch (e) { fail('Test 8', String(e)); }

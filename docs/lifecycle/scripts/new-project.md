@@ -3,9 +3,9 @@
 ## Metadata
 
 - **Current Phase**: production
-- **Version**: 1.30.0
+- **Version**: 1.31.0
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-09-25
+- **Last Updated**: 2026-09-27
 - **Last Reviewer**: pm
 - **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort. The duplicate Metadata section (a v1.10.0-era leftover) was merged into this single section on 2026-09-16.
 
@@ -39,6 +39,7 @@
 | 2026-09-24 | production | production | v1.28.1 (platform-SSOT constant, spec docs/designs/2026-09-24-platform-ssot-constant-design.md): behavior-neutral — the two canonical 5-element skill-base literals become PLATFORM_SKILL_BASES (lib/platforms.ts v1.0.0); NO behavior change | automation-engineer |
 | 2026-09-24 | production | production | v1.29.0 catch-up (record synced to SCRIPTS.md SSOT): §2.3b extends-stub resolution generalized to all agents/*.md stubs | automation-engineer |
 | 2026-09-25 | production | production | v1.30.0 (ADR-0088 W2): `--platform hermes` profile — hermes-primary keeps `.hermes/`, drops legacy twins; other profiles hermes-opt-out | automation-engineer |
+| 2026-09-27 | production | production | v1.31.0 (ADR-0093): hermes profile delivers Hermes.md (Hermes-specific behavioral instruction file, common-owned) — `hermes`/`all` keep it, other profiles prune it alongside `.hermes/`. Spec: docs/designs/2026-09-27-hermes-md-instruction-file-design.md | automation-engineer |
 
 ## Acceptance Criteria
 

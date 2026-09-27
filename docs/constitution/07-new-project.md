@@ -26,6 +26,8 @@ live there as **real, editable files** (not embedded strings).
 > `i18n.locale_codes`) and the language policy text only — locale content setup
 > (`locales/<code>/`, glossaries) is deliberately agent-driven via `i18n-specialist`
 > (ADR-0085). The `--country` jurisdiction axis is separate and automated end-to-end.
+>
+> Programmatic project provisioning (variant agent teams served over an OpenAI-compatible API) is available via the Team Gateway service — [ADR-0092](../adr/0092-team-gateway-service.md).
 
 | Generated file | Purpose | Action needed |
 |----------------|---------|---------------|
