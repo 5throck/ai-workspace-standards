@@ -91,7 +91,10 @@
   .chip:hover { outline: 1px solid var(--accent); }
   .empty { margin: auto; text-align: center; color: #6e7681; }
   /* auth card in sidebar */
-  #authCard { border-top: 1px solid var(--border); padding-top: 8px; display: flex; flex-direction: column; gap: 6px; font-size: .78rem; }
+  #authCard { border-top: 1px solid var(--border); padding-top: 8px; margin-top: auto; display: flex; flex-direction: column; gap: 6px; font-size: .78rem; }
+  .avatar { display: inline-flex; width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+            color: #fff; align-items: center; justify-content: center; font-size: .7rem; font-weight: 700; flex-shrink: 0; }
+  .vtag { color: var(--accent); font-size: .68rem; }
   #authCard input { background: var(--input-bg); color: var(--fg); border: 1px solid var(--border2); border-radius: 7px; padding: 7px 9px; font: inherit; width: 100%; }
   #authCard .field { display: flex; flex-direction: column; gap: 3px; color: var(--muted); }
   #authCard button { background: #1f6feb; color: #fff; border: 0; border-radius: 7px; padding: 7px; font: inherit; cursor: pointer; font-size: .78rem; }
@@ -231,7 +234,7 @@
         const tag = t.status === "failed" ? " ⚠" : t.status === "provisioning" ? " ⏳" : "";
         const tok = t.usage ? ` · ${t.usage.inputTokens ?? 0}→${t.usage.outputTokens ?? 0} tok` : "";
         row.innerHTML = `<div><div class="nm">${esc(name)}${tag}</div>` +
-          `<div class="meta">${t.sessions} turns${tok}</div></div>`;
+          `<div class="meta"><span class="vtag">${esc(t.variant)}</span> · ${t.sessions} turns</div></div>`;
         const del = document.createElement("button");
         del.className = "del"; del.textContent = "Delete"; del.title = "Delete session";
         del.addEventListener("click", async (e) => {
@@ -525,10 +528,12 @@
   function renderAuthCard() {
     if (me) {
       authCard.innerHTML =
-        `<div style="display:flex; align-items:center; justify-content:space-between; gap:6px;">` +
-        `<span style="font-size:.78rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"><b>${esc(me.name)}</b>${me.role === "admin" ? " ·admin" : ""}</span>` +
-        `<span><button id="profileBtn" class="collapsebtn" title="Profile" style="font-size:.75rem;">✎</button>` +
-        `<button id="logoutBtn" class="collapsebtn" title="Sign out" style="font-size:.75rem;">⎋</button></span></div>`;
+        `<div style="display:flex; align-items:center; gap:8px;">` +
+        `<span class="avatar">${esc((me.loginId ?? "?")[0].toUpperCase())}</span>` +
+        `<span style="flex:1; overflow:hidden;"><span style="display:block; font-size:.78rem; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${esc(me.name)}</span>` +
+        `<span style="font-size:.68rem; color:var(--muted);">${esc(me.loginId)}${me.role === "admin" ? " · admin" : ""}</span></span>` +
+        `<button id="profileBtn" class="collapsebtn" title="Profile" style="font-size:.8rem;">✎</button>` +
+        `<button id="logoutBtn" class="collapsebtn" title="Sign out" style="font-size:.8rem;">⎋</button></div>`;
       $("logoutBtn").addEventListener("click", async () => {
         await fetch("/auth/logout", { method: "POST" });
         me = null;
