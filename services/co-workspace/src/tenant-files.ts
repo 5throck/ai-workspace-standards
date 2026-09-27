@@ -25,7 +25,8 @@ function safeResolve(projectDir: string, relPath: string): string | null {
   const root = realpathSync(projectDir);
   const target = join(root, relPath);
   const rel = relative(root, target);
-  if (rel.startsWith("..") || rel === "" || target.includes(`${sep}.git`)) return null;
+  // rel === "" is the tenant root itself — a valid listing target (readTenantFile re-checks isFile).
+  if (rel.startsWith("..") || target.includes(`${sep}.git`)) return null;
   if (!existsSync(target)) return null;
   const real = realpathSync(target);
   if (!real.startsWith(root + sep) && real !== root) return null;
