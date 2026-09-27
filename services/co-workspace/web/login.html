@@ -60,6 +60,9 @@
     <label>Password <span>(8+ chars)</span>
       <input id="su-pw" type="password" autocomplete="new-password" required>
     </label>
+    <label>Confirm password
+      <input id="su-pw2" type="password" autocomplete="new-password" required>
+    </label>
     <div class="msg" id="su-msg" style="min-height:0;"></div>
     <div class="field hidden" id="verifyRow">
       <label>Verification key from mail
@@ -108,6 +111,10 @@
 
   $("signupForm").addEventListener("submit", async (e) => {
     e.preventDefault();
+    if ($("su-pw").value !== $("su-pw2").value) {
+      msg("passwords do not match");
+      return;
+    }
     const res = await fetch("/auth/signup", {
       method: "POST",
       headers: { "content-type": "application/json" },
