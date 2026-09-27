@@ -1,8 +1,19 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.48.0
+ * @version 1.49.0
  *
+ * v1.48.0 → v1.49.0 (2026-09-28, sound-synth orphan-mirror follow-up — spec
+ *         docs/designs/2026-09-28-sound-synth-orphan-mirror-cleanup-design.md
+ *         §5 blind-spot note): B-11 widened from the canonical templates/common/
+ *         skills/ tree to the five platform mirrors (.claude/.gemini/.agents/
+ *         .codex/.hermes/skills) via variantScopedSkillLeaks (pure, exported) —
+ *         the 2026-09-06-class sound-synth orphans survived in exactly those
+ *         mirrors (l2_propagate:false copies contradicting the variant-overlay
+ *         re-delivery) because the original check never scanned them. Severity
+ *         stays fail (a mirror leak actively breaks the nightly scaffold E2E's
+ *         Test 26 delivery parity). Day-one green: 0 leaks across the common
+ *         tree post-cleanup (PR #1162).
  * v1.46.1 (2026-09-26, ADR-0090 program closure — design Addendum 3): the
  *         size-budget arm's WARN message and header note record the user
  *         decision that the W4 FAIL promotion is cancelled and the budget
@@ -1979,11 +1990,14 @@ function checkVariantScriptsLayout(variant: string): void {
   }
 }
 
-// Check B-11: variant_scoped_skills must not leak into templates/common/skills/
-// (registry: docs/workspace-schema.json variant_scoped_skills — see the sound-synth
-// leak of 2026-08-06 that reached 10 of 11 projects via common-promotion + upgrade).
+// Check B-11: variant_scoped_skills must not leak into templates/common — the
+// canonical skills/ tree AND the five platform mirrors (v1.49.0; registry:
+// docs/workspace-schema.json variant_scoped_skills — see the sound-synth leak
+// of 2026-08-06 that reached 10 of 11 projects via common-promotion + upgrade,
+// and its 2026-09-27 orphan-mirror recurrence that broke the nightly scaffold
+// E2E's Test 26 precisely because the platform mirrors were never scanned).
 function checkVariantScopedSkillLeak(): void {
-  if (!JSON_MODE) console.log(`\n=== Check B-11: variant-scoped skills must not live in templates/common ===`);
+  if (!JSON_MODE) console.log(`\n=== Check B-11: variant-scoped skills must not live in templates/common (canonical + platform mirrors) ===`);
   const schemaPath = join(ROOT, 'docs', 'workspace-schema.json');
   if (!existsSync(schemaPath)) {
     warn('root', 'B-11', 'docs/workspace-schema.json not found — variant_scoped_skills check skipped');
@@ -1991,18 +2005,21 @@ function checkVariantScopedSkillLeak(): void {
   }
   const schema = JSON.parse(readFileSync(schemaPath, 'utf-8'));
   const map = schema?.variant_scoped_skills || {};
-  let leaks = 0;
+  const skillNames = new Set<string>();
+  const ownerBySkill = new Map<string, string>();
   for (const [ownerVariant, skills] of Object.entries(map as Record<string, string[]>)) {
     if (ownerVariant === 'description' || !Array.isArray(skills)) continue;
     for (const skill of skills as string[]) {
-      const leaked = join(TEMPLATES_DIR, 'common', 'skills', skill, 'SKILL.md');
-      if (existsSync(leaked)) {
-        fail('root', 'B-11', `variant-exclusive skill '${skill}' (owner: ${ownerVariant}) exists in templates/common/skills/`, `Delete templates/common/skills/${skill}/ — it would be copied into every project by upgrade-project`);
-        leaks++;
-      }
+      skillNames.add(skill);
+      ownerBySkill.set(skill, ownerVariant);
     }
   }
-  if (leaks === 0) pass('templates/common/skills/: no variant-scoped skill leaks');
+  const leaks = variantScopedSkillLeaks(join(TEMPLATES_DIR, 'common'), skillNames);
+  for (const leak of leaks) {
+    const skill = leak.split('/').pop()!;
+    fail('root', 'B-11', `variant-exclusive skill '${skill}' (owner: ${ownerBySkill.get(skill)}) exists in templates/common/${leak}/`, `Delete templates/common/${leak}/ — mirror copies of a variant-scoped skill contradict its variant-overlay re-delivery at scaffold time and break delivery-derivation parity (the 2026-09-27 sound-synth orphan class)`);
+  }
+  if (leaks.length === 0) pass('templates/common (skills/ + 5 platform mirrors): no variant-scoped skill leaks');
 }
 
 // Check: platform-mirror-freshness — L1 platform skill mirrors must carry the
@@ -2920,6 +2937,33 @@ export function stalePlatformSkillExclusions(
 ): string[] {
   const live = new Set(existingNames);
   return [...exclusions].filter(name => !live.has(name));
+}
+
+/**
+ * B-11 variant-scoped leak core (pure): return the common-relative locations
+ * where a variant-scoped skill (SSOT: templates/co-<variant>/skills/, registry:
+ * workspace-schema.json variant_scoped_skills) leaks into the common tree —
+ * the canonical skills/ tree AND the five platform mirrors alike. The 2026-09-06
+ * sound-synth orphans survived precisely in the platform mirrors because the
+ * original B-11 scanned only the canonical tree (fixed v1.49.0).
+ */
+export function variantScopedSkillLeaks(
+  commonDir: string,
+  variantScopedSkills: Iterable<string>,
+  mirrorDirs: readonly string[] = PLATFORM_MIRROR_DIRS,
+): string[] {
+  const leaks: string[] = [];
+  for (const skill of variantScopedSkills) {
+    if (existsSync(join(commonDir, 'skills', skill, 'SKILL.md'))) {
+      leaks.push(`skills/${skill}`);
+    }
+    for (const mirror of mirrorDirs) {
+      if (existsSync(join(commonDir, mirror, skill, 'SKILL.md'))) {
+        leaks.push(`${mirror}/${skill}`);
+      }
+    }
+  }
+  return leaks.sort();
 }
 
 export interface ScriptsRegistryRow {

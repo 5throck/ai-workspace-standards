@@ -1,7 +1,7 @@
 # sound-synth Orphan Mirror Cleanup Design (co-game Scaffold Delivery-Parity Fix)
 
 - **Date**: 2026-09-28
-- **Status**: Implemented (2026-09-28 — stale mirror copies removed; nightly Scaffold E2E co-game failure fixed)
+- **Status**: Implemented (2026-09-28 — stale mirror copies removed AND the §5 B-11 blind-spot follow-up landed same day, validate-templates v1.49.0; nightly Scaffold E2E co-game failure fixed)
 - **Owner**: Automation Engineer
 - **Spec id**: `2026-09-28-sound-synth-orphan-mirror-cleanup-design` (registry: `docs/specs/registry.json`, source: `manual`)
 - **Related ADRs**: ADR-0074 (Universal Design Gate)
@@ -48,3 +48,11 @@ Every OTHER variant's scaffold passed because both sides excluded the phantom pa
 
 - Existing L2 projects are unaffected: only the co-game project has sound-synth mirrors, and its copies are the true variant content (`l2_propagate: true`); no other project ever received the stale copies. No fleet upgrade is needed.
 - Blind-spot note: `validate-templates.ts` Check B-11 ("variant_scoped_skills must not leak into `templates/common/skills/`") inspects only the canonical `skills/` tree — the platform mirrors were outside its scan, which is how the orphans survived. Widening B-11 to the mirrors is a possible follow-up, not done here.
+
+## 7. Addendum (2026-09-28, same day): the §5 follow-up landed
+
+The B-11 blind spot is closed in the same change window (validate-templates v1.48.0 → v1.49.0):
+
+- **D5 — Widened B-11**: the check now scans the canonical `skills/` tree AND the five platform mirrors (`.claude/.gemini/.agents/.codex/.hermes/skills`) via the new pure exported helper `variantScopedSkillLeaks(commonDir, variantScopedSkills, mirrorDirs = PLATFORM_MIRROR_DIRS)`. Severity stays fail — a mirror leak actively breaks the nightly scaffold E2E's Test 26 delivery parity (this is how the orphans were caught). Day-one green: 0 leaks across the common tree post-cleanup (PR #1162).
+- **D6 — Test pin**: `tests/unit/validate-templates-reconcile.test.ts` v1.2.0 → v1.3.0 gains a `B-11 variantScopedSkillLeaks` describe block — canonical-leak detection, platform-mirror-leak detection (the former blind spot), deterministic multi-hit collection, `mirrorDirs` override, and the live-tree day-one-green assertion over the real schema registry.
+- **L1 parity mechanics note**: the L1 mirror (`templates/common/scripts/validate-templates.ts`) is produced by `propagate-to-templates.ts --apply` (CONSTITUTION.md refs scrubbed to context.md), NOT by a raw copy — a manual `cp` fails the `l0-l1-script-parity` check by design. The propagate pass was run before validation.
