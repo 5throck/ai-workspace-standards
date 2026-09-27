@@ -1,39 +1,58 @@
-# Team Gateway — Phase 0 compose (ADR-0092). Build context is the workspace root.
+# Team Gateway compose (ADR-0092 + Phase 2 hardening). Build context is the workspace root.
 #
 # Required environment:
-#   TEAM_GATEWAY_HERMES_SEED_HOME  a Hermes home with credentials (e.g. ~/.hermes);
-#                                  mounted read-only at /seed and copied into tenant homes.
+#   TEAM_GATEWAY_HERMES_SEED_HOME  Hermes home with credentials (e.g. ~/.hermes); mounted
+#                                  read-only at /seed and copied into tenant homes.
+#   TEAM_GATEWAY_DATA_DIR_HOST     ABSOLUTE host path for the gateway data dir — bind-mounted
+#                                  at /data here AND used as the sibling-mount source, so
+#                                  docker-isolation turns can reach tenant dirs (the gateway
+#                                  passes TEAM_GATEWAY_DATA_DIR_HOST down for exactly this).
 #
-# Phase 0 mounts the workspace clone at /workspace (scaffolding writes Projects/ there);
-# Phase 2 replaces this with a baked, pinned workspace image.
+# Phase 0 note: the workspace clone is mounted at /workspace (provisioning writes Projects/
+# there); Phase 2 bakes a pinned workspace image instead.
 
 name: team-gateway
 
 services:
   team-gateway:
     build:
-      context: ../..
+      # NOTE: compose resolves relative paths against THIS FILE's directory
+      # (services/team-gateway/docker/), so three levels up = the repo root.
+      context: ../../../
       dockerfile: services/team-gateway/docker/Dockerfile
+    image: team-gateway-gateway:latest
+    entrypoint: [] # bypass the base image's s6 init — the server runs as PID 1
+    command: ["bun", "src/server.ts"]
     init: true
     ports:
-      - "127.0.0.1:8787:8787" # loopback publish — Phase 0 is local-only (ADR-0092 D6)
+      - "127.0.0.1:8787:8787" # loopback publish — keep unless you front it with auth
     environment:
-      TEAM_GATEWAY_HOST: 0.0.0.0 # inside the container; publish above stays loopback
+      TEAM_GATEWAY_HOST: 0.0.0.0 # inside the container; the publish above stays loopback
       TEAM_GATEWAY_DATA_DIR: /data
+      TEAM_GATEWAY_DATA_DIR_HOST: ${TEAM_GATEWAY_DATA_DIR_HOST:?set to the absolute host path of the data dir}
       TEAM_GATEWAY_WORKSPACE_DIR: /workspace
       TEAM_GATEWAY_VARIANTS: ${TEAM_GATEWAY_VARIANTS:-co-consult}
       TEAM_GATEWAY_TEMPLATE_VERSION: ${TEAM_GATEWAY_TEMPLATE_VERSION:-}
+      TEAM_GATEWAY_API_KEYS: ${TEAM_GATEWAY_API_KEYS:-}
+      TEAM_GATEWAY_API_KEYS_FILE: /seed/.env.keys
+      TEAM_GATEWAY_QUOTA_WINDOW: ${TEAM_GATEWAY_QUOTA_WINDOW:-lifetime}
+      TEAM_GATEWAY_TENANT_MAX_TURNS: ${TEAM_GATEWAY_TENANT_MAX_TURNS:-0}
+      TEAM_GATEWAY_TENANT_MAX_TOKENS: ${TEAM_GATEWAY_TENANT_MAX_TOKENS:-0}
+      TEAM_GATEWAY_HERMES_TOOLSETS: ${TEAM_GATEWAY_HERMES_TOOLSETS:-}
+      TEAM_GATEWAY_HERMES_EXTRA_ARGS: ${TEAM_GATEWAY_HERMES_EXTRA_ARGS:-}
+      TEAM_GATEWAY_RUNTIME: ${TEAM_GATEWAY_RUNTIME:-hermes}
+      TEAM_GATEWAY_ISOLATION: ${TEAM_GATEWAY_ISOLATION:-process}
+      TEAM_GATEWAY_RUNTIME_IMAGE: ${TEAM_GATEWAY_RUNTIME_IMAGE:-team-gateway-runtime:latest}
       TEAM_GATEWAY_RUN_BUDGET_SECONDS: ${TEAM_GATEWAY_RUN_BUDGET_SECONDS:-300}
       TEAM_GATEWAY_MAX_TURNS: ${TEAM_GATEWAY_MAX_TURNS:-100}
-      TEAM_GATEWAY_HERMES_EXTRA_ARGS: ${TEAM_GATEWAY_HERMES_EXTRA_ARGS:-}
       HERMES_BIN: ${HERMES_BIN:-hermes}
       HERMES_INFERENCE_MODEL: ${HERMES_INFERENCE_MODEL:-}
       HERMES_INFERENCE_PROVIDER: ${HERMES_INFERENCE_PROVIDER:-}
+      TEAM_GATEWAY_HERMES_MODEL: ${TEAM_GATEWAY_HERMES_MODEL:-}
       TEAM_GATEWAY_HERMES_SEED_HOME: /seed
     volumes:
-      - team-gateway-data:/data
-      - ../..:/workspace
+      - ${TEAM_GATEWAY_DATA_DIR_HOST:?set to the absolute host path of the data dir}:/data
+      - ../../../:/workspace # Phase 0: provisioning writes Projects/ in the clone; Phase 2 bakes it
       - ${TEAM_GATEWAY_HERMES_SEED_HOME:?set TEAM_GATEWAY_HERMES_SEED_HOME to a Hermes home with credentials (e.g. ~/.hermes)}:/seed:ro
-
-volumes:
-  team-gateway-data:
+      # Docker isolation (sibling containers) — required when TEAM_GATEWAY_ISOLATION=docker:
+      # - /var/run/docker.sock:/var/run/docker.sock

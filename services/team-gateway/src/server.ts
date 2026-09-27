@@ -8,7 +8,7 @@
  */
 
 import { existsSync, readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { join, resolve } from "node:path";
 import { mkdirSync } from "node:fs";
 import { dockerProbe, GatewayConfig, loadConfig, readKeysFile, SERVICE_ROOT } from "./config";
 import { requestAuthorized } from "./auth";
@@ -198,7 +198,17 @@ async function runChat(
           extraArgs: state.cfg.hermesExtraArgs,
           toolsets: state.cfg.hermesToolsets,
           container:
-            state.cfg.isolation === "docker" ? { image: state.cfg.runtimeImage } : undefined,
+            state.cfg.isolation === "docker"
+              ? {
+                  image: state.cfg.runtimeImage,
+                  hostProjectDir: state.cfg.dataDirHost
+                    ? join(state.cfg.dataDirHost, "tenants", rec.tenantId, "project")
+                    : undefined,
+                  hostHermesHome: state.cfg.dataDirHost
+                    ? join(state.cfg.dataDirHost, "tenants", rec.tenantId, "hermes-home")
+                    : undefined,
+                }
+              : undefined,
         },
         onEvent,
       );

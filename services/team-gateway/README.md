@@ -139,16 +139,25 @@ limitation).
 | `HERMES_BIN` | `hermes` | Hermes binary path |
 | `HERMES_INFERENCE_MODEL` / `_PROVIDER` | — | Passed through to Hermes sessions |
 
-## Docker (Phase 0 packaging)
+## Docker
 
 ```sh
-export TEAM_GATEWAY_HERMES_SEED_HOME="$HOME/.hermes"
-docker compose -f services/team-gateway/docker/docker-compose.yml up --build
+export TEAM_GATEWAY_DATA_DIR_HOST=/absolute/host/path/for/data   # e.g. /srv/team-gateway/data
+export TEAM_GATEWAY_HERMES_SEED_HOME="$HOME/.hermes"             # mounted ro at /seed
+export TEAM_GATEWAY_HERMES_MODEL="upstage/solar-pro4:free"       # optional model routing
+docker compose -f services/team-gateway/docker/docker-compose.yml up --build -d
 ```
 
-The image carries bun + Hermes; the compose file mounts the workspace clone at `/workspace`
-(provisioning writes `Projects/` there in Phase 0) and a named volume at `/data`. The seed home
-is mounted read-only at `/seed`.
+- The image is based on the official `nousresearch/hermes-agent` image (hermes + python) with
+  bun + the gateway server added; the compose service overrides the s6 entrypoint to run the
+  server as PID 1. It serves `127.0.0.1:8787`.
+- The workspace clone is mounted at `/workspace` (provisioning writes `Projects/` there in
+  Phase 0) and the data dir is a BIND mount at `/data` from `TEAM_GATEWAY_DATA_DIR_HOST`.
+- **Docker isolation** (`TEAM_GATEWAY_ISOLATION=docker`) spawns SIBLING containers whose mounts
+  resolve on the host — set `TEAM_GATEWAY_DATA_DIR_HOST` to the absolute host path (the gateway
+  passes it down automatically) and additionally mount the Docker socket
+  (`/var/run/docker.sock:/var/run/docker.sock`); the Docker CLI is not baked into the image, so
+  add it (static binary or `docker-cli` package) for this mode.
 
 ## Security (Phase 2 hardening)
 

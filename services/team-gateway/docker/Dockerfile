@@ -17,6 +17,9 @@ RUN apt-get update \
  && apt-get install -y --no-install-recommends git ca-certificates \
  && rm -rf /var/lib/apt/lists/*
 
+# NOTE: docker isolation (TEAM_GATEWAY_ISOLATION=docker) from INSIDE a container additionally
+# needs the docker CLI + a socket mount in the deployment — not baked here (see README).
+
 COPY --from=bun /usr/local/bin/bun /usr/local/bin/bun
 
 WORKDIR /app/services/team-gateway
