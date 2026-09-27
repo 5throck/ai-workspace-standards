@@ -208,6 +208,11 @@
       "layer": "variant:co-safety"
     },
     {
+      "id": "new-project",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
       "id": "output_type.audit_findings",
       "type": "output_type",
       "layer": "variant:co-safety"
@@ -936,8 +941,20 @@
     },
     {
       "type": "references",
+      "from": "script-lifecycle-manager",
+      "to": "new-project",
+      "source": "prose"
+    },
+    {
+      "type": "references",
       "from": "skill-lifecycle-manager",
       "to": "agent-lifecycle-manager",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill-lifecycle-manager",
+      "to": "new-project",
       "source": "prose"
     },
     {

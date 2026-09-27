@@ -117,6 +117,7 @@
 | `msds-parser` | variant:co-safety | — | — | — | — | — |
 | `munitions-magazine-storage-safety-planner` | variant:co-safety | — | — | — | — | — |
 | `narrative-framework` | variant:co-consult | communications-lead, communications-lead | phase3 | consulting-report-writing (composes_with), executive-presentation (composes_with) | — | — |
+| `new-project` | L0 | — | — | adopt-project, upgrade-project (follows) | — | — |
 | `org-design-framework` | variant:co-hr | org-design-consultant, org-design-consultant | phase2, phase3 | hr-metrics-analysis (follows), org-readiness-assessment (composes_with), performance-system-design (composes_with), stakeholder-alignment (composes_with), talent-acquisition-strategy (follows) | — | — |
 | `org-readiness-assessment` | variant:co-consult | change-management-partner, change-management-partner, change-management-partner | phase1, phase1, phase2, phase2 | change-impact-assessment (composes_with), financial-modeling (enables), stakeholder-alignment (composes_with) | — | readiness-scores, capability-gap-analysis, change-mgmt-cost-estimates |
 | `painting-coating-fire-toxic-planner` | variant:co-safety | — | — | — | — | — |
@@ -268,7 +269,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `adr:0033` | adr | — | — | — |
 | `adr:0034` | adr | — | — | — |
 | `adr:0035` | adr | — | — | — |
-| `adr:0036` | adr | — | upgrade-project | — |
+| `adr:0036` | adr | — | new-project, upgrade-project | — |
 | `adr:0037` | adr | — | — | — |
 | `adr:0038` | adr | — | — | — |
 | `adr:0039` | adr | — | — | — |

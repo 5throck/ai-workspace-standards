@@ -2128,6 +2128,11 @@
       "layer": "variant:co-consult"
     },
     {
+      "id": "new-project",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
       "id": "org-design-consultant",
       "type": "agent",
       "layer": "variant:co-hr"
@@ -5576,6 +5581,12 @@
       "type": "references",
       "from": "adr:0032",
       "to": "version",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0036",
+      "to": "new-project",
       "source": "prose"
     },
     {
@@ -16888,6 +16899,52 @@
       "source": "skill_manifest"
     },
     {
+      "type": "references",
+      "from": "new-project",
+      "to": "adopt-project",
+      "source": "prose"
+    },
+    {
+      "type": "relates_to",
+      "from": "new-project",
+      "to": "adopt-project",
+      "source": "relates_to",
+      "provenance": {
+        "file": "skills/new-project/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "references",
+      "from": "new-project",
+      "to": "create-variant",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "new-project",
+      "to": "simulate-pipeline",
+      "source": "prose"
+    },
+    {
+      "type": "follows",
+      "from": "new-project",
+      "to": "upgrade-project",
+      "source": "relates_to",
+      "provenance": {
+        "file": "skills/new-project/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "references",
+      "from": "new-project",
+      "to": "upgrade-project",
+      "source": "prose"
+    },
+    {
       "type": "accountable_for",
       "from": "org-design-consultant",
       "to": "procedure.co-hr.hr-diagnosis",
@@ -22856,6 +22913,12 @@
       "source": "prose"
     },
     {
+      "type": "references",
+      "from": "scaffolding-expert",
+      "to": "new-project",
+      "source": "prose"
+    },
+    {
       "type": "enables",
       "from": "scenario-comparison",
       "to": "pricing-governance",
@@ -22888,6 +22951,12 @@
         "field": "relates_to",
         "index": 2
       }
+    },
+    {
+      "type": "references",
+      "from": "script-lifecycle-manager",
+      "to": "new-project",
+      "source": "prose"
     },
     {
       "type": "references",
@@ -23031,6 +23100,12 @@
       "type": "references",
       "from": "skill-lifecycle-manager",
       "to": "agent-lifecycle-manager",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill-lifecycle-manager",
+      "to": "new-project",
       "source": "prose"
     },
     {

@@ -38,6 +38,7 @@ Skills with a `skills/<name>/` directory in the workspace root. These are the pr
 | `upgrade-project` | 1.5.1 | active | pm | 2026-09-21 | — | Upgrade existing L2/L3 project to current template version |
 | `migrate-project` | 1.0.0 | active | scaffolding-expert | 2026-09-23 | — | End-to-end external-project migration: GitHub baseline → adopt-project → machine-verified result (artifacts, platform twins, provenance, hooksPath, audit smoke) |
 | `variant-feature` | 1.0.0 | active | scaffolding-expert | 2026-07-31 | — | Add features (agents, skills, scripts, docs) to existing variant |
+| `new-project` | 1.0.0 | active | scaffolding-expert | 2026-09-27 | — | Scaffold a fresh project instance from `templates/<variant>` (non-interactive `new-project.ts` dispatch: variant pick, platform profile, identity flags, post-scaffold verification); L0 operator only — not deployed to L2 |
 | `ticket-run` | 1.0.0 | active | automation-engineer | 2026-07-16 | — | Pulls next waiting service ticket from Phase A queue |
 | `explain-me` | 1.0.0 | experimental | pm | 2026-08-03 | — | Single-file interactive HTML report generation. Inspired by beret21/reportme (MIT). Korean loanword data in references/loanword-refinements.json |
 | `design-foundation` | 1.1.0 | active | architect | 2026-09-26 | — | Style-neutral design system derivation framework: principles, decision record, 3-layer token architecture ([data-theme] theming). Spec: templates/common/docs/design-foundation.md |
