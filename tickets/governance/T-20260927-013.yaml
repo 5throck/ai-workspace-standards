@@ -1,0 +1,18 @@
+schemaVersion: 1
+id: T-20260927-013
+kind: manual
+title: >-
+  lifecycle: batch-refresh template lifecycle records left stale by commit
+  6551e7c7 — six siblings (co-abap/deck/develop/game/security/work) plus
+  co-price whose 557-line region-profiles backport e469a29a predates their Last
+  Updated stamps
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-09-27T00:46:17.297Z'
+history:
+  - at: '2026-09-27T00:46:17.297Z'
+    from: null
+    to: backlog
+result: null
+error: null
