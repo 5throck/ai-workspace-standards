@@ -1,255 +1,167 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Team Gateway — demo chat</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Team Gateway</title>
 <style>
   :root { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
-  body { margin: 0; background: #101418; color: #e8eaed; }
-  main { max-width: 760px; margin: 0 auto; padding: 24px 16px 96px; }
-  h1 { font-size: 1.2rem; }
-  h1 span { color: #8ab4f8; }
-  #log { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
-  .msg { padding: 10px 14px; border-radius: 10px; white-space: pre-wrap; line-height: 1.5; }
-  .user { background: #1f2937; align-self: flex-end; max-width: 85%; }
-  .assistant { background: #17202a; border: 1px solid #2c3644; max-width: 100%; }
-  .assistant.pending::after { content: "…"; }
-  form { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
-         width: min(760px, 100%); box-sizing: border-box; padding: 12px 16px;
-         background: #101418; display: flex; gap: 8px; align-items: flex-end; }
-  .field { display: flex; flex-direction: column; gap: 4px; font-size: .8rem; color: #9aa0a6; }
-  #model { background: #1a2129; color: #e8eaed; border: 1px solid #2c3644; border-radius: 8px; padding: 8px; }
-  #message { flex: 1; background: #1a2129; color: #e8eaed; border: 1px solid #2c3644;
-             border-radius: 8px; padding: 10px; resize: vertical; min-height: 44px; font: inherit; }
-  button { background: #8ab4f8; color: #101418; border: 0; border-radius: 8px;
-           padding: 10px 18px; font-weight: 600; cursor: pointer; }
-  button:disabled { opacity: .5; cursor: default; }
-  .note { color: #9aa0a6; font-size: .8rem; }
-  .card { background: #12181f; border: 1px solid #2c3644; border-radius: 10px; padding: 12px 14px; margin-bottom: 12px; }
-  .card h2 { font-size: .8rem; color: #8b949e; margin: 0 0 8px; font-weight: 600; }
-  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; }
-  .field { display: flex; flex-direction: column; gap: 4px; font-size: .75rem; color: #9aa0a6; flex: 1; min-width: 130px; }
-  .card input, .card select { background: #101418; color: #e8eaed; border: 1px solid #2c3644; border-radius: 8px; padding: 7px 9px; font: inherit; }
-  .card button { background: #238636; }
-  .tag { display: inline-block; font-size: .65rem; padding: 1px 6px; border-radius: 999px; margin-left: 6px; vertical-align: middle; }
-  .tag.stable { background: #1a4731; color: #56d364; }
-  .tag.beta { background: #4a3a12; color: #e3b341; }
-  ol.progress { list-style: none; margin: 0; padding: 0; font-size: .82rem; }
-  ol.progress li { padding: 3px 0; color: #6e7681; }
-  ol.progress li.done { color: #7ee787; }
-  ol.progress li.active { color: #e3b341; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #0d1117; color: #e6edf3; height: 100vh; display: flex; }
+  .hint { color: #7d8590; }
+  /* ── sidebar ── */
+  aside { width: 260px; min-width: 220px; background: #10161d; border-right: 1px solid #21262d;
+          display: flex; flex-direction: column; padding: 12px; gap: 10px; }
+  .brand { font-weight: 700; font-size: .95rem; padding: 2px 4px 8px; }
+  .brand span { color: #58a6ff; }
+  .newbtn { background: #238636; color: #fff; border: 0; border-radius: 8px; padding: 9px; font: inherit; font-weight: 600; cursor: pointer; width: 100%; }
+  .userbox { display: flex; flex-direction: column; gap: 4px; font-size: .74rem; color: #8b949e; }
+  .userbox input { background: #0d1117; color: #e6edf3; border: 1px solid #30363d; border-radius: 7px; padding: 7px 9px; font: inherit; }
+  .userbox label.check { display: flex; gap: 6px; align-items: center; cursor: pointer; }
+  .userbox input[type=checkbox] { width: auto; }
+  #sessions { flex: 1; overflow-y: auto; border-top: 1px solid #21262d; padding-top: 8px; }
+  .sess { padding: 8px 9px; border-radius: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+  .sess:hover { background: #161b22; }
+  .sess.active { background: #1c2a3a; outline: 1px solid #1f6feb; }
+  .sess .nm { font-size: .82rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sess .meta { color: #6e7681; font-size: .68rem; }
+  .sess .del { background: transparent; color: #f85149; border: 0; cursor: pointer; font-size: .75rem; padding: 2px 4px; visibility: hidden; }
+  .sess:hover .del { visibility: visible; }
+  .sess .del:hover { text-decoration: underline; }
+  .sidetitle { font-size: .7rem; color: #8b949e; letter-spacing: .05em; }
+  /* ── main column ── */
+  section { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  header { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 1px solid #21262d; }
+  header select { background: #0d1117; color: #e6edf3; border: 1px solid #30363d; border-radius: 8px; padding: 6px 9px; font: inherit; font-size: .85rem; }
+  header .pname { color: #8b949e; font-size: .78rem; overflow: hidden; text-overflow: ellipsis; }
+  header .pname b { color: #c9d1d9; }
+  #log { flex: 1; overflow-y: auto; padding: 20px 22px; display: flex; flex-direction: column; gap: 12px; }
+  .msg { padding: 10px 14px; border-radius: 12px; white-space: pre-wrap; line-height: 1.6; font-size: .92rem; max-width: 82%; }
+  .user { background: #1f6feb22; border: 1px solid #1f6feb55; align-self: flex-end; }
+  .assistant { background: #12181f; border: 1px solid #30363d; align-self: stretch; max-width: 100%; }
+  .assistant.pending::after { content: "▌"; color: #58a6ff; }
+  .progress-inline { color: #e3b341; font-size: .8rem; }
+  .composer { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid #21262d; align-items: flex-end; }
+  textarea { flex: 1; background: #0d1117; color: #e6edf3; border: 1px solid #30363d; border-radius: 10px; padding: 10px 12px; font: inherit; min-height: 44px; resize: none; }
+  .composer button { background: #1f6feb; color: #fff; border: 0; border-radius: 10px; padding: 10px 18px; font: inherit; font-weight: 600; cursor: pointer; }
+  .composer button:disabled { opacity: .45; cursor: default; }
+  .empty { margin: auto; text-align: center; color: #6e7681; }
+  .empty b { color: #c9d1d9; font-size: 1.05rem; display: block; margin-bottom: 6px; }
 </style>
 </head>
 <body>
-<main>
-  <h1>Team Gateway <span>demo chat</span></h1>
-  <p class="note">Dev aid for the OpenAI-compatible API. For a full UI, point Open WebUI at
-    <code>/v1</code> — see the README runbook.</p>
-
-  <div class="card">
-    <h2>① Session setup</h2>
-    <div class="row">
-      <label class="field">User <input id="user" value="default" placeholder="alice"></label>
-      <label class="field">Project name (auto if empty) <input id="pname" placeholder="자동 생성"></label>
-      <label class="field">Variant <select id="variant"></select></label>
-      <label class="field" style="flex:0 0 auto; flex-direction:row; align-items:center; gap:6px; padding-bottom:8px;">
-        <input type="checkbox" id="beta" style="width:auto"> include beta
-      </label>
-      <button id="create" type="button">Create session</button>
+<aside>
+  <div class="brand">Team Gateway <span>teams</span></div>
+  <button class="newbtn" id="newChat">＋ New chat</button>
+  <div class="userbox">
+    <label>User
+      <input id="user" value="default" placeholder="alice">
+    </label>
+    <label class="check"><input type="checkbox" id="beta"> include beta variants</label>
+  </div>
+  <div class="sidetitle">SESSIONS</div>
+  <div id="sessions"></div>
+</aside>
+<section>
+  <header>
+    <select id="model" aria-label="Variant"></select>
+    <span class="pname" id="pnameLabel"></span>
+  </header>
+  <div id="log">
+    <div class="empty"><b>Ask a variant team</b>
+      Pick a team above, type a message — the team workspace is reused automatically
+      (same user + same variant → same session, nothing new is created).
     </div>
   </div>
-
-  <div class="card" id="progCard" style="display:none">
-    <h2>② Provisioning progress <button id="deleteBtn" type="button" style="float:right; background:#8b1f1f; font-size:.7rem; padding:4px 10px;">Delete session</button></h2>
-    <ol class="progress" id="progress"></ol>
-  </div>
-
-  <div class="card">
-    <h2>③ 내 세션 (내 테넌트)
-      <button id="refreshSessions" type="button" style="float:right; background:#1f6feb; font-size:.7rem; padding:4px 10px;">Refresh</button>
-    </h2>
-    <table style="width:100%; border-collapse:collapse; font-size:.82rem;" id="sessionsTable">
-      <tbody></tbody>
-    </table>
-    <p class="hint" style="margin:6px 0 0;">Deletes remove the project files and the session record (owner only).</p>
-  </div>
-
-  <section id="log" aria-live="polite"></section>
-</main>
-<form id="composer">
-  <div class="field">
-    <label for="model">Model (variant)</label>
-    <select id="model" aria-label="Model (variant)"></select>
-  </div>
-  <label class="field" style="flex:1">
-    Message
-    <textarea id="message" rows="1" required placeholder="Ask the team…"></textarea>
-  </label>
-  <button type="submit" id="send">Send</button>
-</form>
+  <form class="composer" id="composer">
+    <textarea id="message" rows="1" placeholder="Ask the team…"></textarea>
+    <button type="submit" id="send">Send</button>
+  </form>
+</section>
 <script type="module">
-  const modelSel = document.getElementById("model");
-  const variantSel = document.getElementById("variant");
-  const betaBox = document.getElementById("beta");
-  const log = document.getElementById("log");
-  const form = document.getElementById("composer");
-  const input = document.getElementById("message");
-  const send = document.getElementById("send");
-  const createBtn = document.getElementById("create");
-  const progCard = document.getElementById("progCard");
-  const progressList = document.getElementById("progress");
-  const userIn = document.getElementById("user");
-  const pnameIn = document.getElementById("pname");
-  let sessionReady = true; // direct /v1 mode works without explicit session
-  let projectName = "";
-
-  const esc = (t) => { const d = document.createElement("span"); d.textContent = t; return d.innerHTML; };
-
-  async function loadModels() {
-    const res = await fetch("/v1/models");
-    const body = await res.json();
-    const stable = body.data.filter((m) => (m.meta?.status ?? "stable") !== "beta");
-    const beta = body.data.filter((m) => m.meta?.status === "beta");
-    for (const [arr, isBeta] of [[stable, false], [beta, true]]) {
-      for (const m of arr) {
-        const opt = document.createElement("option");
-        opt.value = m.id;
-        opt.innerHTML = m.id + (isBeta ? ' <span class="tag beta">beta</span>' : "");
-        if (!isBeta) opt.innerHTML += ' <span class="tag stable">' + (m.meta?.status ?? "stable") + "</span>";
-        variantSel.appendChild(opt.cloneNode(true));
-        modelSel.appendChild(Object.assign(opt, { innerText: m.id + (isBeta ? " ·beta" : "") }));
-      }
-    }
-  }
-
-  function autoName() {
-    const u = (userIn.value || "user").replace(/[^a-z0-9]/gi, "").toLowerCase().slice(0, 10);
-    const v = (variantSel.value || "team").replace(/^co-/, "");
-    return `${v}-${u}-${new Date().toISOString().slice(5, 10).replace("-", "")}`;
-  }
-  userIn.addEventListener("input", () => { pnameIn.placeholder = autoName(); });
-  variantSel.addEventListener("change", () => { pnameIn.placeholder = autoName(); });
-
-  function renderProgress(trail, status) {
-    progCard.style.display = "block";
-    progressList.innerHTML = trail
-      .map((p) => `<li class="${p.stage === "ready" ? "done" : "active"}">${esc(p.label)} — ${p.stage}</li>`)
-      .join("");
-    if (status === "ready") {
-      setTimeout(() => { progCard.style.display = "none"; }, 1500);
-    }
-  }
-
+  const $ = (id) => document.getElementById(id);
+  const modelSel = $("model"), sessionsEl = $("sessions"), log = $("log"),
+        form = $("composer"), input = $("message"), send = $("send"),
+        userIn = $("user"), betaBox = $("beta"), pnameLabel = $("pnameLabel");
   let currentTenantId = "";
-
-  async function loadSessions() {
-    const res = await fetch("/tenants?mine=1");
-    const body = await res.json();
-    const tbody = document.querySelector("#sessionsTable tbody");
-    tbody.innerHTML = "";
-    const mine = body.tenants ?? [];
-    for (const t of mine.slice(-10).reverse()) {
-      const tr = document.createElement("tr");
-      tr.style.borderBottom = "1px solid #21262d";
-      const name = t.name ?? t.tenantId;
-      const statusTag = t.status === "ready"
-        ? '<span class="tag stable">ready</span>'
-        : t.status === "failed"
-          ? '<span class="tag beta">failed</span>'
-          : '<span class="tag beta">provisioning</span>';
-      tr.innerHTML =
-        `<td style="padding:5px 4px;">${name}${statusTag}<br><span style="color:#6e7681; font-size:.7rem;">${t.variant} · ${t.sessions} turns</span></td>` +
-        `<td style="text-align:right;"><button type="button" data-tenant="${t.tenantId}" class="delBtn" style="background:#8b1f1f; font-size:.68rem; padding:3px 8px;">Delete</button></td>`;
-      tbody.appendChild(tr);
-    }
-    if (mine.length === 0) {
-      tbody.innerHTML = '<tr><td style="color:#6e7681; padding:6px 4px;">No sessions yet — create one above.</td></tr>';
-    }
-    for (const btn of tbody.querySelectorAll(".delBtn")) {
-      btn.addEventListener("click", async () => {
-        const tenantId = btn.getAttribute("data-tenant");
-        if (!confirm(`Delete this session? Project files will be removed as well.\n${tenantId}`)) return;
-        const res = await fetch(`/tenants/${tenantId}`, { method: "DELETE" });
-        if (res.status === 200) {
-          if (tenantId === currentTenantId) {
-            currentTenantId = "";
-            sessionReady = false;
-            send.disabled = true;
-            progCard.style.display = "none";
-          }
-          bubble("assistant", `🗑 Session deleted — "${tenantId}"`);
-          loadSessions();
-        } else {
-          const err = await res.json().catch(() => ({ error: res.statusText }));
-          bubble("assistant", `⚠ Delete failed (${res.status}): ${err.error ?? ""}`);
-        }
-      });
-    }
-  }
-  document.getElementById("refreshSessions").addEventListener("click", loadSessions);
-  loadSessions();
-  document.getElementById("deleteBtn").addEventListener("click", async () => {
-    if (!currentTenantId) return;
-    if (!confirm(`Delete this session? Project files will be removed as well.\n${projectName || currentTenantId}`)) return;
-    const res = await fetch(`/tenants/${currentTenantId}`, { method: "DELETE" });
-    if (res.status === 200) {
-      bubble("assistant", `🗑 Session deleted — "${projectName || currentTenantId}"`);
-      progCard.style.display = "none";
-      currentTenantId = "";
-      sessionReady = false;
-      send.disabled = true;
-    } else {
-      const err = await res.json().catch(() => ({ error: res.statusText }));
-      bubble("assistant", `⚠ Delete failed (${res.status}): ${err.error ?? ""}`);
-    }
-  });
-
-  createBtn.addEventListener("click", async () => {
-    createBtn.disabled = true;
-    const variant = variantSel.value;
-    const user = userIn.value.trim() || "default";
-    const name = pnameIn.value.trim();
-    const res = await fetch("/sessions", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ variant, user, ...(name ? { name } : {}) }),
-    });
-    const { tenantId, name: finalName } = await res.json();
-    currentTenantId = tenantId;
-    projectName = finalName || tenantId;
-    // poll progress
-    const timer = setInterval(async () => {
-      const d = await (await fetch(`/tenants/${tenantId}`)).json();
-      renderProgress(d.progress ?? [], d.status);
-      if (d.status === "ready" || d.status === "failed") {
-        clearInterval(timer);
-        createBtn.disabled = false;
-        if (d.status === "ready") {
-          bubble("assistant", `✔ Session ready — project "${projectName}" (${variant}) · tenant for ${user}`);
-          loadSessions();
-        } else {
-          bubble("assistant", `⚠ 프로비저닝 실패: ${d.error ?? "unknown"}`);
-        }
-      }
-    }, 1500);
-  });
+  let currentModel = "";
+  let currentUserName = () => (userIn.value.trim() || "default");
 
   function bubble(role, text = "") {
+    document.querySelector(".empty")?.remove();
     const div = document.createElement("div");
     div.className = `msg ${role}`;
     div.textContent = text;
     log.appendChild(div);
-    window.scrollTo(0, document.body.scrollHeight);
+    log.scrollTop = log.scrollHeight;
     return div;
   }
+
+  async function loadModels() {
+    const body = await (await fetch("/v1/models")).json();
+    modelSel.innerHTML = "";
+    for (const m of body.data) {
+      const o = document.createElement("option");
+      o.value = m.id;
+      o.textContent = m.meta?.status === "beta" ? `${m.id} · beta` : m.id;
+      modelSel.appendChild(o);
+    }
+  }
+
+  async function loadSessions() {
+    const body = await (await fetch("/tenants?mine=1")).json();
+    sessionsEl.innerHTML = "";
+    const mine = (body.tenants ?? []).slice().reverse();
+    for (const t of mine) {
+      const row = document.createElement("div");
+      row.className = "sess" + (t.tenantId === currentTenantId ? " active" : "");
+      const name = t.name ?? t.tenantId;
+      const tag = t.status === "failed" ? " ⚠" : t.status === "provisioning" ? " ⏳" : "";
+      row.innerHTML = `<div><div class="nm">${name}${tag}</div>` +
+        `<div class="meta">${t.variant} · ${t.sessions} turns</div></div>`;
+      const del = document.createElement("button");
+      del.className = "del"; del.textContent = "Delete"; del.title = "Delete session";
+      del.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        if (!confirm(`Delete "${name}"? Project files will be removed.`)) return;
+        const res = await fetch(`/tenants/${t.tenantId}`, { method: "DELETE" });
+        if (res.status === 200) {
+          if (t.tenantId === currentTenantId) { currentTenantId = ""; pnameLabel.textContent = ""; }
+          loadSessions();
+        }
+      });
+      row.appendChild(del);
+      row.addEventListener("click", () => selectSession(t));
+      sessionsEl.appendChild(row);
+    }
+  }
+
+  function selectSession(t) {
+    currentTenantId = t.tenantId;
+    currentModel = t.variant;
+    modelSel.value = t.variant;
+    userIn.value = t.ownerPrincipal ?? userIn.value;
+    pnameLabel.innerHTML = `project: <b>${t.name ?? t.tenantId}</b> · ${t.sessions} turns`;
+    log.innerHTML = "";
+    bubble("assistant", `Resumed "${t.name ?? t.tenantId}" (${t.variant}) — ${t.sessions} earlier turns. Continue below.`);
+    document.querySelectorAll(".sess").forEach((el) => el.classList.remove("active"));
+    document.querySelectorAll(".sess").forEach((el) => {
+      if (el.querySelector(".nm")?.textContent.startsWith(t.name ?? t.tenantId)) el.classList.add("active");
+    });
+  }
+
+  $("newChat").addEventListener("click", () => {
+    currentTenantId = ""; currentModel = "";
+    pnameLabel.textContent = "";
+    log.innerHTML = "";
+    bubble("assistant", "New chat — pick a variant and send a message. The team workspace is reused per (variant, user); a new project is created only if none exists yet.");
+  });
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     const message = input.value.trim();
     if (!message) return;
-    input.value = "";
-    send.disabled = true;
+    input.value = ""; send.disabled = true;
     bubble("user", message);
     const reply = bubble("assistant");
     reply.classList.add("pending");
@@ -259,7 +171,7 @@
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           model: modelSel.value,
-          user: userIn.value.trim() || "default",
+          user: currentUserName(),
           stream: true,
           messages: [{ role: "user", content: message }],
         }),
@@ -270,7 +182,7 @@
       }
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
-      let buffer = "";
+      let buffer = "", first = true;
       for (;;) {
         const { done, value } = await reader.read();
         if (done) break;
@@ -281,7 +193,10 @@
           buffer = buffer.slice(idx + 2);
           for (const line of frame.split("\n")) {
             if (line.startsWith(": provisioning:")) {
-              bubble("assistant", "⏳ " + line.replace(": provisioning: ", ""));
+              const note = document.createElement("div");
+              note.className = "progress-inline";
+              note.textContent = "⏳ " + line.replace(": provisioning: ", "");
+              if (first) { log.appendChild(note); first = false; log.scrollTop = log.scrollHeight; }
               continue;
             }
           }
@@ -290,11 +205,13 @@
           if (payload.error) throw new Error(payload.error.message ?? "stream error");
           const delta = payload.choices?.[0]?.delta?.content;
           if (delta) {
+            if (first) { reply.remove(); first = false; reply.remove(); }
             reply.textContent += delta;
-            window.scrollTo(0, document.body.scrollHeight);
+            log.scrollTop = log.scrollHeight;
           }
         }
       }
+      loadSessions();
     } catch (err) {
       reply.textContent += (reply.textContent ? "\n\n" : "") + `⚠ ${err.message}`;
     } finally {
@@ -303,8 +220,11 @@
     }
   });
 
+  betaBox.addEventListener("change", loadModels);
+  userIn.addEventListener("change", loadSessions);
   send.disabled = false;
   loadModels();
+  loadSessions();
 </script>
 </body>
 </html>
