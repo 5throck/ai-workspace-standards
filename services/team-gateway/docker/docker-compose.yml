@@ -57,6 +57,6 @@ services:
       # seed home: the /seed/shared child bind is RW so tenant refreshes keep the shared Nous
       # token store current (HERMES_SHARED_AUTH_DIR points every tenant at it)
       - ${TEAM_GATEWAY_HERMES_SEED_HOME:?set TEAM_GATEWAY_HERMES_SEED_HOME to a Hermes home with credentials (e.g. ~/.hermes)}:/seed:ro
-      - ${TEAM_GATEWAY_HERMES_AUTH_DIR:-/seed/shared}:/seed/shared
+      - ${TEAM_GATEWAY_HERMES_AUTH_DIR:-${TEAM_GATEWAY_HERMES_SEED_HOME}/shared}:/seed/shared
       # Docker isolation (sibling containers) — required when TEAM_GATEWAY_ISOLATION=docker:
       # - /var/run/docker.sock:/var/run/docker.sock
