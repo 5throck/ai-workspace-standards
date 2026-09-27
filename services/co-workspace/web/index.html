@@ -71,10 +71,24 @@
   .assistant { background: var(--panel); border: 1px solid var(--border2); align-self: stretch; max-width: 100%; }
   .assistant.pending::after { content: "▌"; color: #58a6ff; }
   .progress-inline { color: #e3b341; font-size: .8rem; }
-  .composer { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid #21262d; align-items: flex-end; }
-  textarea { flex: 1; background: var(--bg); color: var(--fg); border: 1px solid #30363d; border-radius: 10px; padding: 10px 12px; font: inherit; min-height: 44px; resize: none; }
-  .composer button { background: #1f6feb; color: #fff; border: 0; border-radius: 10px; padding: 10px 18px; font: inherit; font-weight: 600; cursor: pointer; }
-  .composer button:disabled { opacity: .45; cursor: default; }
+  .composer { padding: 10px 16px 14px; }
+  .composerBox { max-width: 780px; margin: 0 auto; background: var(--input-bg); border: 1px solid var(--border2);
+                 border-radius: 16px; padding: 10px 12px 8px; }
+  .composerBox:focus-within { outline: 1px solid var(--accent); }
+  .composerTools { display: flex; gap: 8px; align-items: center; margin-top: 6px; }
+  .modelPick { background: transparent; color: var(--fg); border: 1px solid var(--border2); border-radius: 8px;
+               padding: 4px 8px; font: inherit; font-size: .78rem; max-width: 180px; }
+  .betaPick { font-size: .74rem; color: var(--muted); display: flex; gap: 4px; align-items: center; cursor: pointer; }
+  .betaPick input { width: auto; }
+  .sendBtn { background: #1f6feb; color: #fff; border: 0; border-radius: 10px; padding: 7px 16px; font: inherit; font-weight: 600; cursor: pointer; }
+  .sendBtn:disabled { opacity: .45; cursor: default; }
+  .stopBtn { background: #8b1f1f; color: #fff; border: 0; border-radius: 10px; padding: 7px 14px; font: inherit; cursor: pointer; font-size: .78rem; }
+  .stopBtn.hidden { display: none; }
+  textarea { width: 100%; background: transparent; color: var(--fg); border: 0; font: inherit; min-height: 44px; resize: none; outline: none; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 16px; }
+  .chip { background: var(--panel); color: var(--fg); border: 1px solid var(--border2); border-radius: 999px;
+          padding: 7px 14px; font: inherit; font-size: .8rem; cursor: pointer; }
+  .chip:hover { outline: 1px solid var(--accent); }
   .empty { margin: auto; text-align: center; color: #6e7681; }
   /* auth card in sidebar */
   #authCard { border-top: 1px solid var(--border); padding-top: 8px; display: flex; flex-direction: column; gap: 6px; font-size: .78rem; }
@@ -105,18 +119,10 @@
 <body>
 <aside>
   <div class="brand">co-workspace <span>teams</span></div>
-  <div class="ctlgroup" style="flex-direction:column; align-items:stretch; gap:6px; margin-bottom:8px;">
-    <label class="field" style="color:var(--muted); font-size:.74rem;">Variant
-      <select id="model" aria-label="Variant" style="background:var(--input-bg); color:var(--fg); border:1px solid var(--border2); border-radius:7px; padding:7px 9px; font:inherit;"></select>
-    </label>
-    <label style="font-size:.74rem; color:var(--muted); display:flex; gap:6px; align-items:center; cursor:pointer;">
-      <input type="checkbox" id="beta" style="width:auto"> include beta variants
-    </label>
-  </div>
   <button class="newbtn" id="newChat">＋ New chat</button>
-  <div id="authCard"></div>
   <div class="sidetitle">SESSIONS</div>
   <div id="sessions"></div>
+  <div id="authCard"></div>
 </aside>
 <section>
   <header>
@@ -128,14 +134,28 @@
   </header>
   <div id="adminView"></div>
   <div id="log">
-    <div class="empty"><b>Ask a variant team</b>
-      Pick a team above, type a message — the team workspace is reused automatically
-      (same user + same variant → same session, nothing new is created).
+    <div class="empty">
+      <b>What can the team do for you?</b>
+      Pick a variant, type a message — the workspace is reused automatically.
+      <div class="chips">
+        <button type="button" class="chip" data-fill="Analyze this data and summarize the key findings">📊 Analyze data</button>
+        <button type="button" class="chip" data-fill="Draft a project plan with milestones and owners">📋 Draft a plan</button>
+        <button type="button" class="chip" data-fill="Research this topic and summarize what you find">🔍 Research</button>
+        <button type="button" class="chip" data-fill="Review this document and suggest improvements">✍️ Review a doc</button>
+      </div>
     </div>
   </div>
   <form class="composer" id="composer">
-    <textarea id="message" rows="1" placeholder="Ask the team…"></textarea>
-    <button type="submit" id="send">Send</button>
+    <div class="composerBox">
+      <textarea id="message" rows="1" placeholder="Ask the team…"></textarea>
+      <div class="composerTools">
+        <select id="model" aria-label="Variant" class="modelPick"></select>
+        <label class="betaPick" title="Include beta variants"><input type="checkbox" id="beta" style="width:auto"> β</label>
+        <span style="flex:1"></span>
+        <button type="button" id="stopBtn" class="stopBtn hidden">■ Stop</button>
+        <button type="submit" id="send" class="sendBtn">Send</button>
+      </div>
+    </div>
   </form>
 </section>
 <aside id="artifacts">
@@ -189,15 +209,20 @@
     const body = await (await fetch("/tenants?mine=1")).json();
     sessionsEl.innerHTML = "";
     const mine = (body.tenants ?? []).slice().reverse();
-    // group by variant
+    // ChatGPT-pattern: group by recency
     const groups = new Map();
     for (const t of mine) {
-      (groups.get(t.variant) ?? groups.set(t.variant, []).get(t.variant)).push(t);
+      const d = new Date(t.createdAt);
+      const days = Math.floor((Date.now() - d.getTime()) / 86400000);
+      const label = days === 0 ? "Today" : days === 1 ? "Yesterday" : days <= 7 ? "Previous 7 days" : "Older";
+      (groups.get(label) ?? groups.set(label, []).get(label)).push(t);
     }
-    for (const [variant, tenants] of [...groups.entries()].sort()) {
+    const order = ["Today", "Yesterday", "Previous 7 days", "Older"];
+    for (const label of order.filter((l) => groups.has(l))) {
+      const tenants = groups.get(label);
       const head = document.createElement("div");
       head.className = "grouphead";
-      head.textContent = `${variant} (${tenants.length})`;
+      head.textContent = label;
       sessionsEl.appendChild(head);
       for (const t of tenants) {
         const row = document.createElement("div");
@@ -256,26 +281,21 @@
     bubble("assistant", "New chat — pick a variant and send a message. The team workspace is reused per (variant, user); a new project is created only if none exists yet.");
   });
 
-  // QA-07: Stop button while a turn is streaming
-  const stopBtn = document.createElement("button");
-  stopBtn.type = "button";
-  stopBtn.textContent = "Stop";
-  stopBtn.className = "composer";
-  stopBtn.style.cssText = "background:#8b1f1f; padding:10px 14px;";
-  stopBtn.addEventListener("click", async () => {
+  // QA-07: Stop button while a turn is streaming (lives in the composer tools)
+  $("stopBtn").addEventListener("click", async () => {
     if (!currentTenantId) return;
     await fetch(`/tenants/${currentTenantId}/cancel`, {
       method: "POST",
       headers: { "x-requested-with": "co-workspace" },
     });
   });
-  form.appendChild(stopBtn);
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     const message = input.value.trim();
     if (!message) return;
     input.value = ""; send.disabled = true;
+    $("stopBtn").classList.remove("hidden");
     bubble("user", message);
     const reply = bubble("assistant");
     reply.classList.add("pending");
@@ -331,6 +351,7 @@
     } finally {
       reply.classList.remove("pending");
       send.disabled = false;
+      $("stopBtn").classList.add("hidden");
     }
   });
 
@@ -700,6 +721,13 @@ ${body.resetToken}`);
     }
     renderAuthCard();
   })();
+
+  for (const chip of document.querySelectorAll(".chip")) {
+    chip.addEventListener("click", () => {
+      input.value = chip.dataset.fill;
+      input.focus();
+    });
+  }
 
   betaBox.addEventListener("change", loadModels);
   send.disabled = false;
