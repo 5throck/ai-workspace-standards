@@ -1,7 +1,7 @@
 /** Small shared helpers: ids, directory moves across volumes, JSON persistence, tailing. */
 
-import { copyFileSync, cpSync, existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
-import { dirname } from "node:path";
+import { copyFileSync, cpSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 
 export function genId(prefix = "gw"): string {
   const rand = crypto.randomUUID().replace(/-/g, "").slice(0, 12);
@@ -36,6 +36,24 @@ export function readJson<T>(path: string): T | null {
 export function writeJson(path: string, value: unknown): void {
   mkdirSync(dirname(path), { recursive: true });
   writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`);
+}
+
+/** Recursive directory size in bytes (admin usage stats). Missing dir = 0. */
+export function dirSize(dir: string): number {
+  let total = 0;
+  if (!existsSync(dir)) return 0;
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) total += dirSize(full);
+    else {
+      try {
+        total += statSync(full).size;
+      } catch {
+        /* raced deletion */
+      }
+    }
+  }
+  return total;
 }
 
 export function tail(text: string, max = 2000): string {

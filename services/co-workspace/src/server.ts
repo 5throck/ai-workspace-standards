@@ -7,9 +7,8 @@
  * HERMES_HOME isolation, per-tenant chat serialization.
  */
 
-import { copyFileSync, existsSync, readFileSync, rmSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { mkdirSync } from "node:fs";
 import { dockerProbe, GatewayConfig, loadConfig, readKeysFile, SERVICE_ROOT } from "./config";
 import { presentedCredential, principalFor, requestAuthorized } from "./auth";
 import { scaffoldProject } from "./scaffold";
@@ -53,7 +52,7 @@ import {
   modelsPayload,
   parseChatRequest,
 } from "./openai";
-import { genId, moveDir } from "./util";
+import { dirSize, genId, moveDir } from "./util";
 
 export interface GatewayState {
   cfg: GatewayConfig;
@@ -145,6 +144,7 @@ export function getOrStartTenant(
   state: GatewayState,
   variant: string,
   user: string,
+  ownerPrincipal?: string,
 ): { rec: TenantRecord; promise?: Promise<void> } {
   const key = tenantKeyFor(variant, user);
   const existing = state.registry.findByKey(key);
@@ -153,6 +153,7 @@ export function getOrStartTenant(
     dataDir: state.cfg.dataDir,
     variant,
     key,
+    ownerPrincipal,
     description: `lazy tenant for ${key}`,
   });
   return { rec, promise: startProvisioning(state, rec) };
@@ -608,6 +609,7 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
         ok: true,
         service: "co-workspace",
         authEnabled: state.cfg.apiKeys.length > 0,
+        googleSso: googleConfigured(),
         isolation: state.cfg.isolation,
         runtime: state.cfg.runtime,
         variants: state.cfg.variants,
@@ -711,7 +713,7 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
       if (!state.cfg.variants.includes(parsed.req.model)) {
         throw new HttpError(404, `unknown model: ${parsed.req.model}`);
       }
-      const { rec, promise } = getOrStartTenant(state, parsed.req.model, parsed.req.user);
+      const { rec, promise } = getOrStartTenant(state, parsed.req.model, parsed.req.user, principalFor(state.cfg, presentedCredential(req)));
       if (!rec.ownerPrincipal) {
         rec.ownerPrincipal = principalFor(state.cfg, presentedCredential(req));
         state.registry.upsert(rec);
@@ -781,31 +783,69 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
       return jsonResponse({ turns: state.turns.list(tenantId) });
     }
 
-    // ── Wave B1: local accounts ──
+    // ── Wave B1: local accounts (PII-safe flow: login ID + email verification) ──
     if (req.method === "POST" && path === "/auth/signup") {
       const body = (await readJsonBody(req)) as Record<string, unknown>;
+      const loginId = typeof body.loginId === "string" ? body.loginId.trim() : "";
       const email = typeof body.email === "string" ? body.email.trim() : "";
       const password = typeof body.password === "string" ? body.password : "";
-      const name = typeof body.name === "string" && body.name.trim() ? body.name.trim() : email.split("@")[0];
+      const name = typeof body.name === "string" && body.name.trim() ? body.name.trim() : loginId;
       if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) throw new HttpError(400, "valid email is required");
       if (password.length < 8) throw new HttpError(400, "password must be at least 8 characters");
-      const user = state.users.createUser({ email, name, password });
-      if (!user) throw new HttpError(409, "an account with this email already exists");
-      const token = state.users.createSession(user.id);
-      return new Response(JSON.stringify({ user: { email: user.email, name: user.name, principal: user.principal, role: user.role } }), {
-        status: 201,
-        headers: { "content-type": "application/json", "set-cookie": sessionCookieHeader(token) },
+      const result = await state.users.createPendingAccount({ loginId, email, password, name });
+      if (!result.ok) {
+        const messages: Record<string, string> = {
+          login_taken: "this login ID is already taken",
+          email_taken: "an account with this email already exists",
+          invalid_login: "login ID must be 3-32 chars: a-z, 0-9, hyphen",
+        };
+        throw new HttpError(409, messages[result.reason] ?? "signup failed");
+      }
+      // Dev mailer: the verification mail is written to the outbox dir (ops forwards or reads
+      // it); a real SMTP integration is operator-side. Token never appears in API responses.
+      const outbox = join(state.cfg.dataDir, "mail-outbox");
+      mkdirSync(outbox, { recursive: true });
+      const verifyUrl = `${url.origin}/auth/verify?token=${result.verificationToken}`;
+      writeFileSync(
+        join(outbox, `${Date.now()}-${loginId}.txt`),
+        `To: ${email}\nSubject: co-workspace account verification\n\nVerify your account (${loginId}):\n${verifyUrl}\n\nOr enter this key in the app: ${result.verificationToken}\n`,
+      );
+      return jsonResponse({
+        ok: true,
+        message: "verification mail sent — enter the key from the mail to activate the account",
       });
+    }
+
+    if (req.method === "POST" && path === "/auth/verify") {
+      const body = (await readJsonBody(req)) as Record<string, unknown>;
+      const token = typeof body.token === "string" ? body.token.trim() : "";
+      const loginId = state.users.verifyEmail(token);
+      if (!loginId) throw new HttpError(400, "invalid or expired verification key");
+      return jsonResponse({ ok: true, loginId, message: "account activated — sign in with your ID" });
+    }
+
+    if (req.method === "POST" && path === "/auth/resend") {
+      const body = (await readJsonBody(req)) as Record<string, unknown>;
+      const loginId = typeof body.loginId === "string" ? body.loginId.trim() : "";
+      const reissued = state.users.reissueVerification(loginId);
+      if (!reissued) throw new HttpError(404, "no pending verification for this ID");
+      const outbox = join(state.cfg.dataDir, "mail-outbox");
+      mkdirSync(outbox, { recursive: true });
+      writeFileSync(
+        join(outbox, `${Date.now()}-${loginId}.txt`),
+        `To: ${reissued.email}\nSubject: co-workspace account verification\n\nKey: ${reissued.token}\n`,
+      );
+      return jsonResponse({ ok: true, message: "verification mail re-sent" });
     }
 
     if (req.method === "POST" && path === "/auth/login") {
       const body = (await readJsonBody(req)) as Record<string, unknown>;
-      const email = typeof body.email === "string" ? body.email : "";
+      const loginId = typeof body.loginId === "string" ? body.loginId.trim() : typeof body.email === "string" ? body.email.split("@")[0] : "";
       const password = typeof body.password === "string" ? body.password : "";
-      const user = await state.users.verifyLogin(email, password);
-      if (!user) throw new HttpError(401, "invalid email or password");
+      const user = await state.users.verifyLoginById(loginId, password);
+      if (!user) throw new HttpError(401, "invalid ID or password (or account not yet verified)");
       const token = state.users.createSession(user.id);
-      return new Response(JSON.stringify({ user: { email: user.email, name: user.name, principal: user.principal, role: user.role } }), {
+      return new Response(JSON.stringify({ user: { loginId: user.principal, name: user.name, role: user.role } }), {
         status: 200,
         headers: { "content-type": "application/json", "set-cookie": sessionCookieHeader(token) },
       });
@@ -822,7 +862,7 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
     if (req.method === "GET" && path === "/auth/me") {
       const user = state.users.resolveSession(sessionTokenFromCookie(req));
       if (!user) throw new HttpError(401, "not signed in");
-      return jsonResponse({ user: { email: user.email, name: user.name, principal: user.principal, role: user.role } });
+      return jsonResponse({ user: { loginId: user.principal, name: user.name, role: user.role } });
     }
 
     if (req.method === "PATCH" && path === "/auth/me") {
@@ -834,7 +874,7 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
         password: typeof body.password === "string" ? body.password : undefined,
       });
       if (!updated) throw new HttpError(404, "user not found");
-      return jsonResponse({ user: { email: updated.email, name: updated.name, principal: updated.principal, role: updated.role } });
+      return jsonResponse({ user: { loginId: updated.principal, name: updated.name, role: updated.role } });
     }
 
     // ── Wave B2: Google SSO ──
@@ -897,12 +937,46 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
     }
 
     // ── Wave B3: admin ──
+    if (req.method === "GET" && path === "/admin/stats") {
+      const caller = state.users.resolveSession(sessionTokenFromCookie(req));
+      if (!caller || caller.role !== "admin") throw new HttpError(403, "admin only");
+      const tenants = state.registry.list();
+      const turnCounts = state.turns.countsByTenant();
+      const perUser = new Map<string, { principal: string; tenantCount: number; diskBytes: number; turns: number }>();
+      for (const t of tenants) {
+        const principal = t.ownerPrincipal ?? "anonymous";
+        const entry = perUser.get(principal) ?? { principal, tenantCount: 0, diskBytes: 0, turns: 0 };
+        entry.tenantCount += 1;
+        entry.diskBytes += dirSize(t.projectDir) + dirSize(t.hermesHome);
+        entry.turns += turnCounts.get(t.tenantId) ?? 0;
+        perUser.set(principal, entry);
+      }
+      const byVariant = new Map<string, number>();
+      const byStatus = new Map<string, number>();
+      for (const t of tenants) {
+        byVariant.set(t.variant, (byVariant.get(t.variant) ?? 0) + 1);
+        byStatus.set(t.status, (byStatus.get(t.status) ?? 0) + 1);
+      }
+      const users = state.users.listUsers();
+      const totals = state.turns.aggregate();
+      return jsonResponse({
+        users: { active: users.filter((u) => !u.deletedAt).length, deleted: users.filter((u) => u.deletedAt).length },
+        tenants: Object.fromEntries(byStatus),
+        diskBytes: [...perUser.values()].reduce((a, b) => a + b.diskBytes, 0),
+        turns: { total: totals.totalTurns, inputTokens: totals.totalInputTokens, outputTokens: totals.totalOutputTokens },
+        tenantsPerVariant: [...byVariant.entries()].map(([variant, count]) => ({ variant, count })),
+        tenantsPerStatus: [...byStatus.entries()].map(([status, count]) => ({ status, count })),
+        perUser: [...perUser.values()].sort((a, b) => b.diskBytes - a.diskBytes),
+      });
+    }
+
     if (req.method === "GET" && path === "/admin/users") {
       const caller = state.users.resolveSession(sessionTokenFromCookie(req));
       if (!caller || caller.role !== "admin") throw new HttpError(403, "admin only");
       return jsonResponse({ users: state.users.listUsers().map((u) => ({
-        id: u.id, email: u.email, name: u.name, principal: u.principal,
-        role: u.role, createdAt: u.createdAt, deletedAt: u.deletedAt,
+        id: u.id, loginId: u.principal, name: u.name, role: u.role,
+        status: u.deletedAt ? "deleted" : state.users.isVerified(u.id) ? "active" : "pending",
+        createdAt: u.createdAt,
       })) });
     }
 

@@ -8,8 +8,8 @@ import { afterAll, describe, expect, test } from "bun:test";
 import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { loadConfig } from "../../services/team-gateway/src/config";
-import { createServer, createState, handleRequest } from "../../services/team-gateway/src/server";
+import { loadConfig } from "../../services/co-workspace/src/config";
+import { createServer, createState, handleRequest } from "../../services/co-workspace/src/server";
 
 function tempDir(): string {
   return join(tmpdir(), `team-gateway-srv-${crypto.randomUUID().slice(0, 8)}`);
@@ -134,14 +134,14 @@ describe("gateway server — native provisioning and chat", () => {
     expect(detail.hermesHome).toBeUndefined(); // internal paths stay server-side
 
     // The scaffolded project was moved out of the workspace clone into the data dir.
-    const projectDir = join(dataDir, "tenants", tenantId, "project");
+    const projectDir = join(dataDir, "storage", "anonymous", tenantId, "project");
     expect(existsSync(join(projectDir, "AGENTS.md"))).toBe(true);
     expect(existsSync(join(projectDir, ".hermes", "skills", "demo.md"))).toBe(true);
     expect(existsSync(join(workspaceDir, "Projects", tenantId))).toBe(false);
     // The tenant Hermes home carries a generated trust-scoped config; credentials ride the
     // shared store at spawn time (Addendum 4), so no auth.json is copied.
-    expect(existsSync(join(dataDir, "tenants", tenantId, "hermes-home", "auth.json"))).toBe(false);
-    const config = readFileSync(join(dataDir, "tenants", tenantId, "hermes-home", "config.yaml"), "utf8");
+    expect(existsSync(join(dataDir, "storage", "anonymous", tenantId, "hermes-home", "auth.json"))).toBe(false);
+    const config = readFileSync(join(dataDir, "storage", "anonymous", tenantId, "hermes-home", "config.yaml"), "utf8");
     expect(config).toContain(`- ${projectDir}`);
   });
 
@@ -178,7 +178,7 @@ describe("gateway server — native provisioning and chat", () => {
       body: JSON.stringify({ message: "and again" }),
     });
     const lastArgs = readFileSync(
-      join(dataDir, "tenants", tenantId, "hermes-home", "last-args.txt"),
+      join(dataDir, "storage", "anonymous", tenantId, "hermes-home", "last-args.txt"),
       "utf8",
     );
     const turns = lastArgs.trim().split("\n");

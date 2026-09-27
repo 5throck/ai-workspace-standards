@@ -98,6 +98,13 @@ Exempt from auth: `GET /health`, `GET /` (liveness + static page). Everything el
 - Docker isolation live-verified end to end with the production image: `services/team-gateway/docker/Dockerfile` rebased onto the official `nousresearch/hermes-agent` image (PyPI 0.15.2 predates the chat stream-json protocol — wheel builds are upstream-refused by design; the official image is the supported packaging), gateway restart under `TEAM_GATEWAY_ISOLATION=docker` → tenant provision → one live turn inside the ephemeral container (exit 0, container-side session id, correct workspace-team answer, 36k/139 token usage through the container boundary). The isolation adapter passes the Hermes binary as `--entrypoint` because upstream images ship an s6 init entrypoint.
 - Antigravity runtime adapter (ADR-0092 Addendum 3) live-verified: fresh tenant two-turn remember/recall probe answered "remembered" then "77" across `--conversation` turns.
 
+## 12. Addendum (2026-09-27, second): Accounts Wave — Verification Flow and Analytics
+
+Post-#1138 additions recorded here (design credit: ADR-0092 Addendum 5):
+- **Email-verification flow**: signup(ID, email, password) → pending account + verification token (24h) → mail to the outbox → key entry activates. PII minimization: raw email discarded on activation, users keep `email_hash`; login by ID.
+- **Admin analytics endpoint** (`/admin/stats`): per-principal tenant counts + recursive disk usage + turn rollups; global status/variant/token aggregates; rendered as bar charts in the demo admin menu.
+- **Files/History APIs** (Wave A): `GET /tenants/:id/files|/file` (tenant-confined, denylist, 256KB cap) and `/tenants/:id/history` backed by the `turns` table (last-100 pruning).
+
 ## 10. References
 
 - ADR-0092 + `docs/designs/2026-09-27-team-gateway-service-design.md` (Phase 0 baseline, §10 roadmap)

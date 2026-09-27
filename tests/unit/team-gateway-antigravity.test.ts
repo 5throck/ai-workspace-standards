@@ -5,9 +5,9 @@ import { afterAll, describe, expect, test } from "bun:test";
 import { chmodSync, mkdirSync, writeFileSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { agyArgs, parseAgyLine } from "../../services/team-gateway/src/antigravity";
-import { loadConfig } from "../../services/team-gateway/src/config";
-import { createServer, createState } from "../../services/team-gateway/src/server";
+import { agyArgs, parseAgyLine } from "../../services/co-workspace/src/antigravity";
+import { loadConfig } from "../../services/co-workspace/src/config";
+import { createServer, createState } from "../../services/co-workspace/src/server";
 
 describe("parseAgyLine — agy stream-json normalization", () => {
   test("init event normalizes to system/init with the conversation id", () => {

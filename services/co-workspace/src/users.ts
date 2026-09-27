@@ -68,6 +68,27 @@ export class UserStore {
       user_id TEXT NOT NULL,
       expires_at TEXT NOT NULL
     );`);
+    this.db.exec(`CREATE TABLE IF NOT EXISTS pending_verifications (
+      token_hash TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      email TEXT NOT NULL,
+      expires_at TEXT NOT NULL
+    );`);
+    // Migration-safe column additions for the PII-safe account model (login by ID; the raw
+    // email is discarded after verification and kept only as a hash for duplicate checks).
+    for (const stmt of [
+      "ALTER TABLE users ADD COLUMN login_id TEXT",
+      "ALTER TABLE users ADD COLUMN email_hash TEXT",
+      "ALTER TABLE users ADD COLUMN verified_at TEXT",
+      "CREATE UNIQUE INDEX IF NOT EXISTS idx_users_login ON users(login_id) WHERE login_id IS NOT NULL",
+      "CREATE INDEX IF NOT EXISTS idx_users_email_hash ON users(email_hash)",
+    ]) {
+      try {
+        this.db.exec(stmt);
+      } catch {
+        /* already applied */
+      }
+    }
   }
 
   private rowToUser(r: Record<string, unknown>): UserRecord {
@@ -158,6 +179,101 @@ export class UserStore {
     if (!user?.passwordHash) return null;
     const ok = await Bun.password.verify(password, user.passwordHash);
     return ok ? user : null;
+  }
+
+  /** ── Wave B1b: PII-safe accounts (login by ID; raw email discarded after verification) ── */
+
+  findByLoginId(loginId: string): UserRecord | null {
+    const r = this.db
+      .query("SELECT * FROM users WHERE login_id = ? AND deleted_at IS NULL")
+      .get(loginId.toLowerCase()) as Record<string, unknown> | null;
+    return r ? this.rowToUser(r) : null;
+  }
+
+  /** Create a PENDING account: login_id + email hash only — the raw email lives solely in the
+   * transient pending_verifications row (needed to deliver the mail) and is dropped on
+   * verification. Returns { ok:false, reason } instead of throwing. */
+  async createPendingAccount(init: {
+    loginId: string;
+    email: string;
+    password: string;
+    name?: string;
+  }): Promise<{ ok: true; verificationToken: string } | { ok: false; reason: "login_taken" | "email_taken" | "invalid_login" }> {
+    const loginId = init.loginId.trim().toLowerCase();
+    if (!/^[a-z0-9][a-z0-9-]{2,31}$/.test(loginId)) return { ok: false, reason: "invalid_login" };
+    if (this.findByLoginId(loginId)) return { ok: false, reason: "login_taken" };
+    const email = init.email.trim().toLowerCase();
+    const emailHash = createHash("sha256").update(email).digest("hex");
+    if (this.findByEmailHash(emailHash)) return { ok: false, reason: "email_taken" };
+    const id = `u-${crypto.randomUUID().replace(/-/g, "").slice(0, 12)}`;
+    const principal = loginId; // principal unification: login ID is the trusted principal
+    const passwordHash = Bun.password.hashSync(init.password);
+    this.db
+      .query(
+        `INSERT INTO users (id, email, name, principal, password_hash, google_sub, role, created_at, deleted_at, login_id, email_hash, verified_at)
+         VALUES (?, NULL, ?, ?, ?, NULL, 'user', ?, NULL, ?, ?, NULL)`,
+      )
+      .run(id, init.name ?? loginId, principal, passwordHash, new Date().toISOString(), loginId, emailHash);
+    const token = randomBytes(24).toString("hex");
+    this.db
+      .query("INSERT INTO pending_verifications (token_hash, user_id, email, expires_at) VALUES (?, ?, ?, ?)")
+      .run(hashToken(token), id, email, new Date(Date.now() + 24 * 3600 * 1000).toISOString());
+    return { ok: true, verificationToken: token };
+  }
+
+  findByEmailHash(emailHash: string): UserRecord | null {
+    const r = this.db
+      .query("SELECT * FROM users WHERE email_hash = ? AND deleted_at IS NULL")
+      .get(emailHash) as Record<string, unknown> | null;
+    return r ? this.rowToUser(r) : null;
+  }
+
+  /** Consume a verification token (24h expiry): activates the account and DROPS the pending
+   * row containing the raw email — post-activation the account is pseudonymous (login_id +
+   * email hash). Returns the login_id on success. */
+  verifyEmail(token: string): string | null {
+    const row = this.db
+      .query("SELECT * FROM pending_verifications WHERE token_hash = ?")
+      .get(hashToken(token)) as Record<string, unknown> | null;
+    if (!row) return null;
+    this.db.query("DELETE FROM pending_verifications WHERE token_hash = ?").run(hashToken(token));
+    if (new Date(row.expires_at as string).getTime() < Date.now()) return null;
+    const userId = row.user_id as string;
+    const user = this.findById(userId);
+    if (!user) return null;
+    this.db.query("UPDATE users SET verified_at=? WHERE id=?").run(new Date().toISOString(), userId);
+    return user.principal;
+  }
+
+  /** Login by ID + password; requires a verified account. */
+  async verifyLoginById(loginId: string, password: string): Promise<UserRecord | null> {
+    const user = this.findByLoginId(loginId);
+    if (!user?.passwordHash) return null;
+    if (!this.isVerified(user.id)) return null;
+    const ok = await Bun.password.verify(password, user.passwordHash);
+    return ok ? user : null;
+  }
+
+  isVerified(userId: string): boolean {
+    const r = this.db.query("SELECT verified_at FROM users WHERE id = ?").get(userId) as
+      | { verified_at: string | null }
+      | null;
+    return Boolean(r?.verified_at);
+  }
+
+  /** Resend support: re-issue a verification token for a still-pending account. */
+  reissueVerification(loginId: string): { token: string; email: string } | null {
+    const user = this.findByLoginId(loginId);
+    if (!user || this.isVerified(user.id)) return null;
+    const pending = this.db
+      .query("SELECT email FROM pending_verifications WHERE user_id = ?")
+      .get(user.id) as { email: string } | null;
+    if (!pending) return null;
+    const token = randomBytes(24).toString("hex");
+    this.db
+      .query("INSERT INTO pending_verifications (token_hash, user_id, email, expires_at) VALUES (?, ?, ?, ?)")
+      .run(hashToken(token), user.id, pending.email, new Date(Date.now() + 24 * 3600 * 1000).toISOString());
+    return { token, email: pending.email };
   }
 
   updateProfile(userId: string, patch: { name?: string; password?: string }): UserRecord | null {

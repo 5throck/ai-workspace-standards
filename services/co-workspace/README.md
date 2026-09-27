@@ -119,7 +119,7 @@ limitation).
 | Variable | Default | Purpose |
 |---|---|---|
 | `TEAM_GATEWAY_HOST` / `_PORT` | `127.0.0.1` / `9030` | Bind address (keep loopback in Phase 0) |
-| `TEAM_GATEWAY_DATA_DIR` | `services/team-gateway/data` | Tenant projects, Hermes homes, registry |
+| `TEAM_GATEWAY_DATA_DIR` | `services/co-workspace/data` | Registry + tenant storage (`storage/<user>/<project>/`) |
 | `TEAM_GATEWAY_WORKSPACE_DIR` | repo root | Workspace clone used for scaffolding |
 | `TEAM_GATEWAY_VARIANTS` | `co-consult` (compose default: `all`) | Variant allowlist — `all` auto-discovers every `status: stable` `templates/co-*` |
 | `TEAM_GATEWAY_TEMPLATE_VERSION` | HEAD (`templates/VERSION`) | Pin to a `template-vX.Y.Z` tag |
@@ -222,6 +222,9 @@ bun run dev
   the label becomes the tenant's `ownerPrincipal` (replaces the spoofable `user` field for
   ownership). `GET /tenants?mine=1` lists only the caller's tenants. The demo page user input
   drives the OpenAI `user` field for lazy tenants.
+- **Storage layout** — tenant workspaces live under `<dataDir>/storage/<principal>/<projectName>/`
+  (project + hermes-home), grouped per user on disk; the scaffold runs briefly in the workspace
+  clone's `Projects/` and is relocated immediately.
 - **Persistence (Phase 3)** — the tenant registry is a SQLite file (`<dataDir>/tenants/registry.db`,
   WAL mode; legacy `registry.json` auto-imported on first run). The store sits behind a narrow
   interface (get/upsert/create/findByKey/list) for a future Postgres implementation.

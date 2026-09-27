@@ -1,9 +1,9 @@
 {
-  "name": "team-gateway",
+  "name": "co-workspace",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Team Gateway — serves variant agent teams (templates/co-*) over an OpenAI-compatible web API via headless Hermes sessions (ADR-0092)",
+  "description": "co-workspace — serves variant agent teams (templates/co-*) over an OpenAI-compatible web API via headless Hermes sessions (ADR-0092)",
   "scripts": {
     "dev": "bun src/server.ts",
     "start": "bun src/server.ts",

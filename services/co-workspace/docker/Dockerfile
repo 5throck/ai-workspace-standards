@@ -2,7 +2,7 @@
 # Base = the official Hermes Agent image (carries hermes + python + s6 init; the gateway's
 # per-turn isolation spawns use `--entrypoint hermes` to bypass s6). Adds bun + the gateway
 # server, so ONE image serves both roles: the compose gateway container AND the per-turn
-# isolation runtime (`TEAM_GATEWAY_RUNTIME_IMAGE=team-gateway-runtime:latest`).
+# isolation runtime (`TEAM_GATEWAY_RUNTIME_IMAGE=co-workspace-runtime:latest`).
 # Build context is the WORKSPACE ROOT (see docker-compose.yml).
 #
 # Phase 0 posture: the workspace clone is MOUNTED at /workspace for provisioning; Phase 2 bakes

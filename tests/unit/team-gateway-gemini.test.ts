@@ -9,9 +9,9 @@ import {
   generateContentPayload,
   geminiStream,
   parseGeminiRequest,
-} from "../../services/team-gateway/src/gemini";
-import { loadConfig } from "../../services/team-gateway/src/config";
-import { createServer, createState } from "../../services/team-gateway/src/server";
+} from "../../services/co-workspace/src/gemini";
+import { loadConfig } from "../../services/co-workspace/src/config";
+import { createServer, createState } from "../../services/co-workspace/src/server";
 
 describe("parseGeminiRequest — generateContent shape", () => {
   test("extracts the latest user turn from contents[].parts", () => {
