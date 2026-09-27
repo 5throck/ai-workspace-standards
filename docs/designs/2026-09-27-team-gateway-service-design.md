@@ -1,10 +1,10 @@
-# Team Gateway Service Design — Serving Variant Agent Teams over an OpenAI- and Anthropic-Compatible Web API
+# Team Gateway Service Design — Serving Variant Agent Teams over OpenAI-, Anthropic-, and Gemini-Compatible Web APIs
 
 - **Spec id**: `2026-09-27-team-gateway-service`
 - **Date**: 2026-09-27
 - **Status**: Approved (Row 0 design; implementation lands with this PR)
 - **Related**: ADR-0092 (this design's decision record), ADR-0074 (Universal Design Gate), ADR-0088 (Hermes Agent platform support), ADR-0089 (template auto-release cadence), ADR-0078 (LLM work routing — see §2 N7), T-20260927-019 (upstream scaffold-pinning defect)
-- **Scope**: Design + Phase 0 implementation of `services/team-gateway/` — a bun HTTP server with a scaffold bridge, a Hermes session bridge, OpenAI- and Anthropic-compatible APIs, Docker packaging, and a single-file demo page, with unit tests. Phase 1 (multi-variant catalog at scale, per-conversation mapping) and Phase 2 (multi-tenant hardening) are roadmap-only (§10).
+- **Scope**: Design + Phase 0 implementation of `services/team-gateway/` — a bun HTTP server with a scaffold bridge, a Hermes session bridge, OpenAI-, Anthropic-, and Gemini-compatible APIs, Docker packaging, and a single-file demo page, with unit tests. Phase 1 (multi-variant catalog at scale, per-conversation mapping) and Phase 2 (multi-tenant hardening) are roadmap-only (§10).
 
 ---
 
@@ -22,7 +22,7 @@ The immediate consumers are Open WebUI (OpenAI wire) and Anthropic Messages-API 
 
 **Goals**
 
-- G1: A single bun HTTP service that serves variant teams over OpenAI-compatible (`/v1/chat/completions`) and Anthropic-compatible (`/v1/messages`) wire surfaces with SSE streaming.
+- G1: A single bun HTTP service that serves variant teams over OpenAI-compatible (`/v1/chat/completions`), Anthropic-compatible (`/v1/messages`), and Gemini-compatible (`:generateContent`/`:streamGenerateContent`) wire surfaces with SSE streaming.
 - G2: On-request tenant provisioning: scaffold from `templates/<variant>` with `--platform hermes`, relocate to the data directory, isolate a per-tenant `HERMES_HOME`, and trust only the tenant project directory.
 - G3: Stateful sessions via `hermes chat --format stream-json` with deterministic named threads, translated to OpenAI chunks and Anthropic events on the wire.
 - G4: Three-tier configuration: infrastructure via env vars, tenant parameters injected at scaffold time, secrets seeded into tenant `HERMES_HOME` and never returned by the API.
@@ -49,6 +49,9 @@ The immediate consumers are Open WebUI (OpenAI wire) and Anthropic Messages-API 
 | POST | `/v1/chat/completions` | OpenAI wire format; `model` = variant | `stream:true` → SSE chunks; `stream:false` → single completion |
 | POST | `/v1/messages` | Anthropic Messages wire; `model` = variant | `stream:true` → `message_start`/`content_block_*`/`message_delta`/`message_stop` frames; `system` ignored (the tenant team defines its own instructions), `max_tokens` accepted but enforced via Hermes ceilings |
 | POST | `/v1/messages/count_tokens` | Rough chars/4 estimate stub | keeps tokenizer-dependent clients from hard-failing |
+| POST | `/v1beta/models/{model}:generateContent` / `:streamGenerateContent` | Gemini wire (Antigravity/Gemini ecosystem); `alt=sse` for streaming | `systemInstruction` ignored; terminal chunk carries `finishReason: STOP` + `usageMetadata` |
+| POST | `/v1beta/models/{model}:countTokens` | Rough chars/4 estimate stub | Gemini ecosystem equivalent |
+| GET | `/v1beta/models` | Variant catalog as Gemini model list | `models/<variant>` names |
 | POST | `/sessions` | Provision a tenant `{variant, name?, description?, country?}` | `202 {tenantId, status}`; async |
 | GET | `/tenants` / `/tenants/:id` | Registry listing / detail | status: `provisioning/ready/failed` |
 | POST | `/tenants/:id/chat` | Native chat `{message}` → SSE event stream | raw Hermes events + `done` summary |
@@ -58,7 +61,7 @@ OpenAI mapping: `model` identifies the variant; the tenant key is `(variant, use
 ## 4. Design Decisions
 
 - **D1 — Code placement: new `services/team-gateway/` (L0).** The service spans server code, Docker assets, and a web page; housing it in `scripts/` would drag Docker/web assets into the L0 tooling surface (SCRIPTS.md registry, tsc zero-error baseline). The directory is self-governing (own `AGENTS.md`) and added to `docs/workspace-schema.json` `rootAllowlist.dirs`. Not shipped to scaffolds.
-- **D2 — One bun server, three wire surfaces.** Native REST for programmatic control; OpenAI-compatible `/v1` so standard chat clients (Open WebUI, curl, SDKs) attach with zero custom code; Anthropic-compatible `/v1/messages` so Messages-API clients (Anthropic SDKs, `ANTHROPIC_BASE_URL`-style tooling) attach the same way. Zero new npm dependencies: `Bun.serve` + hand-rolled SSE/JSONL handling, matching the workspace's dependency posture.
+- **D2 — One bun server, four wire surfaces.** Native REST for programmatic control; OpenAI-compatible `/v1` so standard chat clients (Open WebUI, curl, SDKs) attach with zero custom code; Anthropic-compatible `/v1/messages` so Messages-API clients (Anthropic SDKs, `ANTHROPIC_BASE_URL`-style tooling) attach the same way; Gemini-compatible `/v1beta/models/{model}:generateContent` (plus `streamGenerateContent?alt=sse`, `countTokens` stub, models list) for the Antigravity/Gemini ecosystem — Antigravity itself exposes no public model-serving API spec (its extension surface is MCP), so the ecosystem-standard Gemini contract is what is served, labeled as such. Zero new npm dependencies: `Bun.serve` + hand-rolled SSE/JSONL handling, matching the workspace's dependency posture.
 - **D3 — Session runtime: `hermes chat --format stream-json`, not `-z`.** `-z` prints final text only, hides the session id, and auto-bypasses approvals; `chat --format stream-json` gives the JSONL protocol (session id in `init`/`result`, tool visibility) plus `--run-budget`/`--max-turns` ceilings. The query travels via `--query-file -` (stdin; `-q` takes a value and cannot be combined). Live verification (2026-09-27 smoke): `--usage-file` is parsed only at the top level and does not reach `chat` runs, so token accounting comes from the `result` envelope. Unattended approval posture: pre-mined allowlists (`hermes approvals`), `HERMES_ACCEPT_HOOKS=1` for hooks, tenant-scoped toolsets; validated live — non-TTY chat runs unattended without approval prompts under this posture.
 - **D4 — Provisioning via subprocess + relocate.** `new-project.ts` rejects destinations outside the workspace clone (`:291-312`) and has no import API; the service spawns it in `TEAM_GATEWAY_WORKSPACE_DIR`, then moves the finished project (a self-contained git repo) to `<DATA_DIR>/tenants/<id>/project`. Template upgrades later use `upgrade-project.ts <absolute-path>` which accepts relocated projects.
 - **D5 — Three-tier configuration.** Infra env: `TEAM_GATEWAY_PORT/DATA_DIR/WORKSPACE_DIR/VARIANTS/TEMPLATE_VERSION`, `HERMES_BIN`, `TEAM_GATEWAY_HERMES_MODEL` (stamped into each tenant `config.yaml` as `model.default` — live verification showed tenant homes without a model block resolve to the paid default and fail on credit-less portals), provider pass-through (`HERMES_INFERENCE_MODEL/PROVIDER`). Tenant-injected: variant, description, country at scaffold. Secrets: a seed home (`TEAM_GATEWAY_HERMES_SEED_HOME`, e.g. the operator's `~/.hermes`) has its `auth.json`/`.env` copied into each tenant `HERMES_HOME` at provision; the operator's `config.yaml` is never copied — the tenant gets a generated one (trust keys + optional model block). Secrets are never echoed by any endpoint or log line.

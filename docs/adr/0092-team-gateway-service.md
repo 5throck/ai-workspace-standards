@@ -27,6 +27,10 @@ The 14 variant team templates (`templates/co-*`) are CLI-harness workspaces: the
 - **Cost**: a new L0 surface to maintain (server, Docker, demo page) outside `scripts/` tooling conventions (own tsconfig; no SCRIPTS.md row by design); a coupling to Hermes' stream-JSON protocol — mitigated by pinning the Hermes version per deployment and a defensive parser (unknown events pass through raw); per-tenant scaffold latency (observed ~10–20 s live) handled by async provisioning.
 - **Neutral**: templates and governance rules are untouched; ADR-0078 is not implicated — tenant sessions operate inside their own tenant project instance, while repository-landing work continues to route through the workspace PM Gateway; `.hermes/skills` delivery via the existing sync pipeline is unchanged.
 
+## Addendum 1 (2026-09-27): Gemini Wire Surface
+
+Live multi-surface use surfaced demand for Google-ecosystem clients. Antigravity (the IDE/CLI behind the `.agents/` platform mirror) exposes no public model-serving API spec — its extension surface is MCP — so the ecosystem-standard Gemini contract is served instead: `POST /v1beta/models/{model}:generateContent`, `:streamGenerateContent?alt=sse` (per-delta candidate chunks, terminal `finishReason: STOP` + `usageMetadata`), `:countTokens` (chars/4 estimate stub), and `GET /v1beta/models`. This amends Decision 5's surface enumeration ("OpenAI- and Anthropic-compatible" → also Gemini-compatible); all other decisions are unchanged. On this wire `systemInstruction` is ignored (tenant teams define their own instructions from AGENTS.md), and tenant keying uses the optional gateway-extension `user` field, defaulting to `default`.
+
 ## References
 
 - Design: `docs/designs/2026-09-27-team-gateway-service-design.md` (verified building blocks, D1–D8, waves, live-verification record)

@@ -22,6 +22,7 @@ local-only PoC: loopback bind, no authentication, single process.
 | `src/hermes.ts` | Session spawn, stream-json (JSONL) parsing, `--usage-file` accounting |
 | `src/openai.ts` | OpenAI wire translation (models list, chat completions, SSE chunks) |
 | `src/anthropic.ts` | Anthropic Messages wire translation (`/v1/messages`, event frames, count_tokens stub) |
+| `src/gemini.ts` | Gemini wire translation (`/v1beta` generateContent, event frames, countTokens stub) |
 | `src/server.ts` | Routing, native REST + `/v1` endpoints, per-tenant chat serialization |
 | `web/index.html` | Single-file demo chat page (dev aid, not the product surface) |
 | `docker/` | Dockerfile + compose (build context is the workspace root) |
