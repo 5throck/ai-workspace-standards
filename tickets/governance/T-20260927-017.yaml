@@ -1,0 +1,20 @@
+schemaVersion: 1
+id: T-20260927-017
+kind: manual
+title: >-
+  co-abap: blackout-era project tests broken — lifecycle-l3-baseline.test.ts
+  imports undelivered L0-only scripts/review-baseline.ts and
+  automation-quality-gates.test.ts imports nonexistent export
+  waitForDocumentFonts from render-pdf-deck.ts (both added by remediation #160
+  during the CI quota blackout, never executed); upgrade PR #163 (v0.7.0)
+  blocked on real CI until fixed
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-09-27T01:40:32.747Z'
+history:
+  - at: '2026-09-27T01:40:32.747Z'
+    from: null
+    to: backlog
+result: null
+error: null
