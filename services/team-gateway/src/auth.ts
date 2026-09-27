@@ -7,6 +7,7 @@
  */
 
 import { createHash, timingSafeEqual } from "node:crypto";
+import { readFileSync } from "node:fs";
 
 export const AUTH_EXEMPT_ROUTES: ReadonlySet<string> = new Set(["GET /", "GET /health"]);
 
@@ -36,6 +37,38 @@ export function isAuthEnabled(cfg: { apiKeys: string[] }): boolean {
 export function credentialValid(cfg: { apiKeys: string[] }, presented: string | null): boolean {
   if (presented === null || presented === "") return false;
   return cfg.apiKeys.some((key) => constantTimeEquals(key, presented));
+}
+
+/** P9: a key entry may carry a principal label (`key:label`) — file style only. The label is
+ * a trusted identity for ownership filtering; keys without a label map to the label `default`. */
+export function keyPrincipals(cfg: { apiKeys: string[]; apiKeysFile?: string }): Map<string, string> {
+  const map = new Map<string, string>();
+  for (const key of cfg.apiKeys) map.set(key, "default");
+  if (cfg.apiKeysFile) {
+    try {
+      const text = readFileSync(cfg.apiKeysFile, "utf8");
+      for (const raw of text.split(/\r?\n/)) {
+        const line = raw.replace(/#.*/, "").trim();
+        if (!line) continue;
+        const idx = line.indexOf(":");
+        if (idx > 0) map.set(line.slice(0, idx).trim(), line.slice(idx + 1).trim());
+        else map.set(line, "default");
+      }
+    } catch {
+      /* missing file — env defaults already applied */
+    }
+  }
+  return map;
+}
+
+/** Principal for a presented credential (P9): the trusted label, or "anonymous" when auth is off. */
+export function principalFor(cfg: { apiKeys: string[]; apiKeysFile?: string }, presented: string | null): string {
+  if (presented === null || presented === "") return "anonymous";
+  const map = keyPrincipals(cfg);
+  for (const [key, label] of map) {
+    if (constantTimeEquals(key, presented)) return label;
+  }
+  return "anonymous";
 }
 
 /** Route gate: exempt routes pass; otherwise a valid key is required when auth is on. */

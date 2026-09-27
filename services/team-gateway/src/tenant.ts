@@ -31,6 +31,23 @@ export interface TenantRecord {
   daily?: Record<string, { turns: number; inputTokens: number; outputTokens: number }>;
   /** Antigravity-runtime conversation id (explicit continuity across turns). */
   conversationId?: string;
+  /** Operator/user-facing project name (P7). Falls back to `tenantId` when unset. */
+  name?: string;
+  /** Trusted principal owning this tenant (P9) — from the key-file label, or "anonymous". */
+  ownerPrincipal?: string;
+  /** Provisioning progress trail (P8), newest last, capped at 12 entries. */
+  progress?: TenantProgressEntry[];
+}
+
+export interface TenantProgressEntry {
+  stage: string;
+  label: string;
+  at: string;
+}
+
+export function recordProgress(rec: TenantRecord, stage: string, label: string): void {
+  const entry: TenantProgressEntry = { stage, label, at: new Date().toISOString() };
+  rec.progress = [...(rec.progress ?? []), entry].slice(-12);
 }
 
 export function recordTurnUsage(
@@ -61,55 +78,6 @@ const SEED_COPY_FILES = [".env"];
 export function tenantPaths(dataDir: string) {
   const tenantsDir = join(dataDir, "tenants");
   return { tenantsDir, registryPath: join(tenantsDir, "registry.json") };
-}
-
-export class TenantRegistry {
-  private readonly records = new Map<string, TenantRecord>();
-  readonly registryPath: string;
-
-  constructor(dataDir: string) {
-    const { registryPath } = tenantPaths(dataDir);
-    this.registryPath = registryPath;
-    for (const rec of readJson<TenantRecord[]>(registryPath) ?? []) {
-      this.records.set(rec.tenantId, rec);
-    }
-  }
-
-  list(): TenantRecord[] {
-    return [...this.records.values()].sort((a, b) => a.createdAt.localeCompare(b.createdAt));
-  }
-
-  get(tenantId: string): TenantRecord | undefined {
-    return this.records.get(tenantId);
-  }
-
-  findByKey(key: string): TenantRecord | undefined {
-    return this.list().find((rec) => rec.key === key);
-  }
-
-  upsert(rec: TenantRecord): void {
-    this.records.set(rec.tenantId, rec);
-    writeJson(this.registryPath, this.list());
-  }
-
-  create(init: { dataDir: string; variant: string; key?: string; description?: string }): TenantRecord {
-    const tenantId = genId("gw");
-    const rec: TenantRecord = {
-      tenantId,
-      key: init.key,
-      variant: init.variant,
-      status: "provisioning",
-      createdAt: new Date().toISOString(),
-      projectDir: join(init.dataDir, "tenants", tenantId, "project"),
-      hermesHome: join(init.dataDir, "tenants", tenantId, "hermes-home"),
-      description: init.description,
-      sessions: 0,
-      inputTokens: 0,
-      outputTokens: 0,
-    };
-    this.upsert(rec);
-    return rec;
-  }
 }
 
 export function tenantConfigYaml(projectDir: string, model?: string): string {
@@ -146,9 +114,12 @@ export function publicTenant(rec: TenantRecord) {
     variant: rec.variant,
     status: rec.status,
     createdAt: rec.createdAt,
+    name: rec.name,
+    ownerPrincipal: rec.ownerPrincipal,
     description: rec.description,
     sessions: rec.sessions,
     usage: { inputTokens: rec.inputTokens, outputTokens: rec.outputTokens },
+    progress: rec.progress,
     error: rec.error,
   };
 }

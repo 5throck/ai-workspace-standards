@@ -8,9 +8,9 @@ import { loadConfig, resolveVariants } from "../../services/team-gateway/src/con
 import {
   publicTenant,
   seedHermesHome,
-  TenantRegistry,
   tenantConfigYaml,
 } from "../../services/team-gateway/src/tenant";
+import { TenantRegistry } from "../../services/team-gateway/src/registry-db";
 
 function tempDir(): string {
   return join(tmpdir(), `team-gateway-test-${crypto.randomUUID().slice(0, 8)}`);

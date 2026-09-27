@@ -26,6 +26,19 @@
            padding: 10px 18px; font-weight: 600; cursor: pointer; }
   button:disabled { opacity: .5; cursor: default; }
   .note { color: #9aa0a6; font-size: .8rem; }
+  .card { background: #12181f; border: 1px solid #2c3644; border-radius: 10px; padding: 12px 14px; margin-bottom: 12px; }
+  .card h2 { font-size: .8rem; color: #8b949e; margin: 0 0 8px; font-weight: 600; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; }
+  .field { display: flex; flex-direction: column; gap: 4px; font-size: .75rem; color: #9aa0a6; flex: 1; min-width: 130px; }
+  .card input, .card select { background: #101418; color: #e8eaed; border: 1px solid #2c3644; border-radius: 8px; padding: 7px 9px; font: inherit; }
+  .card button { background: #238636; }
+  .tag { display: inline-block; font-size: .65rem; padding: 1px 6px; border-radius: 999px; margin-left: 6px; vertical-align: middle; }
+  .tag.stable { background: #1a4731; color: #56d364; }
+  .tag.beta { background: #4a3a12; color: #e3b341; }
+  ol.progress { list-style: none; margin: 0; padding: 0; font-size: .82rem; }
+  ol.progress li { padding: 3px 0; color: #6e7681; }
+  ol.progress li.done { color: #7ee787; }
+  ol.progress li.active { color: #e3b341; }
 </style>
 </head>
 <body>
@@ -33,6 +46,25 @@
   <h1>Team Gateway <span>demo chat</span></h1>
   <p class="note">Dev aid for the OpenAI-compatible API. For a full UI, point Open WebUI at
     <code>/v1</code> — see the README runbook.</p>
+
+  <div class="card">
+    <h2>① 세션 설정</h2>
+    <div class="row">
+      <label class="field">사용자 <input id="user" value="default" placeholder="alice"></label>
+      <label class="field">프로젝트 이름 (비우면 자동) <input id="pname" placeholder="자동 생성"></label>
+      <label class="field">Variant <select id="variant"></select></label>
+      <label class="field" style="flex:0 0 auto; flex-direction:row; align-items:center; gap:6px; padding-bottom:8px;">
+        <input type="checkbox" id="beta" style="width:auto"> beta 포함
+      </label>
+      <button id="create" type="button">세션 만들기</button>
+    </div>
+  </div>
+
+  <div class="card" id="progCard" style="display:none">
+    <h2>② 프로비저닝 진행</h2>
+    <ol class="progress" id="progress"></ol>
+  </div>
+
   <section id="log" aria-live="polite"></section>
 </main>
 <form id="composer">
@@ -48,21 +80,84 @@
 </form>
 <script type="module">
   const modelSel = document.getElementById("model");
+  const variantSel = document.getElementById("variant");
+  const betaBox = document.getElementById("beta");
   const log = document.getElementById("log");
   const form = document.getElementById("composer");
   const input = document.getElementById("message");
   const send = document.getElementById("send");
+  const createBtn = document.getElementById("create");
+  const progCard = document.getElementById("progCard");
+  const progressList = document.getElementById("progress");
+  const userIn = document.getElementById("user");
+  const pnameIn = document.getElementById("pname");
+  let sessionReady = true; // direct /v1 mode works without explicit session
+  let projectName = "";
+
+  const esc = (t) => { const d = document.createElement("span"); d.textContent = t; return d.innerHTML; };
 
   async function loadModels() {
     const res = await fetch("/v1/models");
     const body = await res.json();
-    for (const m of body.data) {
-      const opt = document.createElement("option");
-      opt.value = m.id;
-      opt.textContent = m.id;
-      modelSel.appendChild(opt);
+    const stable = body.data.filter((m) => (m.meta?.status ?? "stable") !== "beta");
+    const beta = body.data.filter((m) => m.meta?.status === "beta");
+    for (const [arr, isBeta] of [[stable, false], [beta, true]]) {
+      for (const m of arr) {
+        const opt = document.createElement("option");
+        opt.value = m.id;
+        opt.innerHTML = m.id + (isBeta ? ' <span class="tag beta">beta</span>' : "");
+        if (!isBeta) opt.innerHTML += ' <span class="tag stable">' + (m.meta?.status ?? "stable") + "</span>";
+        variantSel.appendChild(opt.cloneNode(true));
+        modelSel.appendChild(Object.assign(opt, { innerText: m.id + (isBeta ? " ·beta" : "") }));
+      }
     }
   }
+
+  function autoName() {
+    const u = (userIn.value || "user").replace(/[^a-z0-9]/gi, "").toLowerCase().slice(0, 10);
+    const v = (variantSel.value || "team").replace(/^co-/, "");
+    return `${v}-${u}-${new Date().toISOString().slice(5, 10).replace("-", "")}`;
+  }
+  userIn.addEventListener("input", () => { pnameIn.placeholder = autoName(); });
+  variantSel.addEventListener("change", () => { pnameIn.placeholder = autoName(); });
+
+  function renderProgress(trail, status) {
+    progCard.style.display = "block";
+    progressList.innerHTML = trail
+      .map((p) => `<li class="${p.stage === "ready" ? "done" : "active"}">${esc(p.label)} — ${p.stage}</li>`)
+      .join("");
+    if (status === "ready") {
+      setTimeout(() => { progCard.style.display = "none"; }, 1500);
+    }
+  }
+
+  createBtn.addEventListener("click", async () => {
+    createBtn.disabled = true;
+    const variant = variantSel.value;
+    const user = userIn.value.trim() || "default";
+    const name = pnameIn.value.trim();
+    const res = await fetch("/sessions", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ variant, user, ...(name ? { name } : {}) }),
+    });
+    const { tenantId, name: finalName } = await res.json();
+    projectName = finalName || tenantId;
+    // poll progress
+    const timer = setInterval(async () => {
+      const d = await (await fetch(`/tenants/${tenantId}`)).json();
+      renderProgress(d.progress ?? [], d.status);
+      if (d.status === "ready" || d.status === "failed") {
+        clearInterval(timer);
+        createBtn.disabled = false;
+        if (d.status === "ready") {
+          bubble("assistant", `✔ 세션 준비 완료 — 프로젝트 "${projectName}" (${variant}) · ${user} 전용 테넌트`);
+        } else {
+          bubble("assistant", `⚠ 프로비저닝 실패: ${d.error ?? "unknown"}`);
+        }
+      }
+    }, 1500);
+  });
 
   function bubble(role, text = "") {
     const div = document.createElement("div");
@@ -88,7 +183,7 @@
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           model: modelSel.value,
-          user: "demo",
+          user: userIn.value.trim() || "default",
           stream: true,
           messages: [{ role: "user", content: message }],
         }),
@@ -108,6 +203,12 @@
         while ((idx = buffer.indexOf("\n\n")) >= 0) {
           const frame = buffer.slice(0, idx);
           buffer = buffer.slice(idx + 2);
+          for (const line of frame.split("\n")) {
+            if (line.startsWith(": provisioning:")) {
+              bubble("assistant", "⏳ " + line.replace(": provisioning: ", ""));
+              continue;
+            }
+          }
           if (!frame.startsWith("data: ") || frame === "data: [DONE]") continue;
           const payload = JSON.parse(frame.slice(6));
           if (payload.error) throw new Error(payload.error.message ?? "stream error");
@@ -126,6 +227,7 @@
     }
   });
 
+  send.disabled = false;
   loadModels();
 </script>
 </body>

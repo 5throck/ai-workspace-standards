@@ -13,10 +13,23 @@ export interface ParsedChatRequest {
 
 export type ParseResult = { ok: true; req: ParsedChatRequest } | { ok: false; error: string };
 
-export function modelsPayload(variants: string[]) {
+export function modelsPayload(
+  variants: string[],
+  meta: Record<string, { status?: string; runtime?: string; provider?: string }> = {},
+) {
   return {
     object: "list",
-    data: variants.map((v) => ({ id: v, object: "model", created: 0, owned_by: "team-gateway" })),
+    data: variants.map((v) => ({
+      id: v,
+      object: "model",
+      created: 0,
+      owned_by: "team-gateway",
+      meta: {
+        status: meta[v]?.status ?? "stable",
+        runtime: meta[v]?.runtime ?? "hermes",
+        provider: meta[v]?.provider ?? "operator-configured",
+      },
+    })),
   };
 }
 
