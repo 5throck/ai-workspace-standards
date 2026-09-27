@@ -1,12 +1,12 @@
 # Team Gateway compose (ADR-0092 + Phase 2 hardening). Build context is the workspace root.
 #
 # Required environment:
-#   TEAM_GATEWAY_HERMES_SEED_HOME  Hermes home with credentials (e.g. ~/.hermes); mounted
+#   CO_WORKSPACE_HERMES_SEED_HOME  Hermes home with credentials (e.g. ~/.hermes); mounted
 #                                  read-only at /seed and copied into tenant homes.
-#   TEAM_GATEWAY_DATA_DIR_HOST     ABSOLUTE host path for the gateway data dir — bind-mounted
+#   CO_WORKSPACE_DATA_DIR_HOST     ABSOLUTE host path for the gateway data dir — bind-mounted
 #                                  at /data here AND used as the sibling-mount source, so
 #                                  docker-isolation turns can reach tenant dirs (the gateway
-#                                  passes TEAM_GATEWAY_DATA_DIR_HOST down for exactly this).
+#                                  passes CO_WORKSPACE_DATA_DIR_HOST down for exactly this).
 #
 # Phase 0 note: the workspace clone is mounted at /workspace (provisioning writes Projects/
 # there); Phase 2 bakes a pinned workspace image instead.
@@ -27,45 +27,45 @@ services:
     ports:
       - "127.0.0.1:9030:9030" # loopback publish — keep unless you front it with auth
     environment:
-      TEAM_GATEWAY_HOST: 0.0.0.0 # inside the container; the publish above stays loopback
-      TEAM_GATEWAY_DATA_DIR: /data
-      TEAM_GATEWAY_DATA_DIR_HOST: ${TEAM_GATEWAY_DATA_DIR_HOST:?set to the absolute host path of the data dir}
-      TEAM_GATEWAY_WORKSPACE_DIR: /workspace
+      CO_WORKSPACE_HOST: 0.0.0.0 # inside the container; the publish above stays loopback
+      CO_WORKSPACE_DATA_DIR: /data
+      CO_WORKSPACE_DATA_DIR_HOST: ${CO_WORKSPACE_DATA_DIR_HOST:?set to the absolute host path of the data dir}
+      CO_WORKSPACE_WORKSPACE_DIR: /workspace
       # "all" auto-discovers templates/co-* — stable only by default; INCLUDE_BETA adds beta
-      TEAM_GATEWAY_VARIANTS: ${TEAM_GATEWAY_VARIANTS:-all}
-      TEAM_GATEWAY_VARIANTS_INCLUDE_BETA: ${TEAM_GATEWAY_VARIANTS_INCLUDE_BETA:-true}
-      TEAM_GATEWAY_TEMPLATE_VERSION: ${TEAM_GATEWAY_TEMPLATE_VERSION:-}
-      TEAM_GATEWAY_API_KEYS: ${TEAM_GATEWAY_API_KEYS:-}
-      TEAM_GATEWAY_API_KEYS_FILE: /seed/.env.keys
-      TEAM_GATEWAY_QUOTA_WINDOW: ${TEAM_GATEWAY_QUOTA_WINDOW:-lifetime}
-      TEAM_GATEWAY_TENANT_MAX_TURNS: ${TEAM_GATEWAY_TENANT_MAX_TURNS:-0}
-      TEAM_GATEWAY_TENANT_MAX_TOKENS: ${TEAM_GATEWAY_TENANT_MAX_TOKENS:-0}
-      TEAM_GATEWAY_HERMES_TOOLSETS: ${TEAM_GATEWAY_HERMES_TOOLSETS:-}
-      TEAM_GATEWAY_HERMES_EXTRA_ARGS: ${TEAM_GATEWAY_HERMES_EXTRA_ARGS:-}
-      TEAM_GATEWAY_RUNTIME: ${TEAM_GATEWAY_RUNTIME:-hermes}
-      TEAM_GATEWAY_ISOLATION: ${TEAM_GATEWAY_ISOLATION:-process}
-      TEAM_GATEWAY_RUNTIME_IMAGE: ${TEAM_GATEWAY_RUNTIME_IMAGE:-co-workspace-runtime:latest}
-      TEAM_GATEWAY_RUN_BUDGET_SECONDS: ${TEAM_GATEWAY_RUN_BUDGET_SECONDS:-300}
-      TEAM_GATEWAY_MAX_TURNS: ${TEAM_GATEWAY_MAX_TURNS:-100}
+      CO_WORKSPACE_VARIANTS: ${CO_WORKSPACE_VARIANTS:-all}
+      CO_WORKSPACE_VARIANTS_INCLUDE_BETA: ${CO_WORKSPACE_VARIANTS_INCLUDE_BETA:-true}
+      CO_WORKSPACE_TEMPLATE_VERSION: ${CO_WORKSPACE_TEMPLATE_VERSION:-}
+      CO_WORKSPACE_API_KEYS: ${CO_WORKSPACE_API_KEYS:-}
+      CO_WORKSPACE_API_KEYS_FILE: /seed/.env.keys
+      CO_WORKSPACE_QUOTA_WINDOW: ${CO_WORKSPACE_QUOTA_WINDOW:-lifetime}
+      CO_WORKSPACE_TENANT_MAX_TURNS: ${CO_WORKSPACE_TENANT_MAX_TURNS:-0}
+      CO_WORKSPACE_TENANT_MAX_TOKENS: ${CO_WORKSPACE_TENANT_MAX_TOKENS:-0}
+      CO_WORKSPACE_HERMES_TOOLSETS: ${CO_WORKSPACE_HERMES_TOOLSETS:-}
+      CO_WORKSPACE_HERMES_EXTRA_ARGS: ${CO_WORKSPACE_HERMES_EXTRA_ARGS:-}
+      CO_WORKSPACE_RUNTIME: ${CO_WORKSPACE_RUNTIME:-hermes}
+      CO_WORKSPACE_ISOLATION: ${CO_WORKSPACE_ISOLATION:-process}
+      CO_WORKSPACE_RUNTIME_IMAGE: ${CO_WORKSPACE_RUNTIME_IMAGE:-co-workspace-runtime:latest}
+      CO_WORKSPACE_RUN_BUDGET_SECONDS: ${CO_WORKSPACE_RUN_BUDGET_SECONDS:-300}
+      CO_WORKSPACE_MAX_TURNS: ${CO_WORKSPACE_MAX_TURNS:-100}
       HERMES_BIN: ${HERMES_BIN:-hermes}
       HERMES_INFERENCE_MODEL: ${HERMES_INFERENCE_MODEL:-}
       HERMES_INFERENCE_PROVIDER: ${HERMES_INFERENCE_PROVIDER:-}
-      TEAM_GATEWAY_HERMES_MODEL: ${TEAM_GATEWAY_HERMES_MODEL:-}
-      TEAM_GATEWAY_LOGIN_REQUIRED: ${TEAM_GATEWAY_LOGIN_REQUIRED:-true}
+      CO_WORKSPACE_HERMES_MODEL: ${CO_WORKSPACE_HERMES_MODEL:-}
+      CO_WORKSPACE_LOGIN_REQUIRED: ${CO_WORKSPACE_LOGIN_REQUIRED:-true}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
       GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-}
-      TEAM_GATEWAY_ADMIN_EMAIL: ${TEAM_GATEWAY_ADMIN_EMAIL:-}
-      TEAM_GATEWAY_HERMES_SEED_HOME: /seed
-      TEAM_GATEWAY_HERMES_AUTH_DIR: ${TEAM_GATEWAY_HERMES_AUTH_DIR:-/seed/shared}
+      CO_WORKSPACE_ADMIN_EMAIL: ${CO_WORKSPACE_ADMIN_EMAIL:-}
+      CO_WORKSPACE_HERMES_SEED_HOME: /seed
+      CO_WORKSPACE_HERMES_AUTH_DIR: ${CO_WORKSPACE_HERMES_AUTH_DIR:-/seed/shared}
       # host path of the shared store — sibling containers mount THIS (resolved on the host)
-      TEAM_GATEWAY_HERMES_AUTH_DIR_HOST: ${TEAM_GATEWAY_HERMES_AUTH_DIR_HOST:-${TEAM_GATEWAY_HERMES_SEED_HOME}/shared}
+      CO_WORKSPACE_HERMES_AUTH_DIR_HOST: ${CO_WORKSPACE_HERMES_AUTH_DIR_HOST:-${CO_WORKSPACE_HERMES_SEED_HOME}/shared}
     volumes:
-      - ${TEAM_GATEWAY_DATA_DIR_HOST:?set to the absolute host path of the data dir}:/data
+      - ${CO_WORKSPACE_DATA_DIR_HOST:?set to the absolute host path of the data dir}:/data
       - ../../../:/workspace # Phase 0: provisioning writes Projects/ in the clone; Phase 2 bakes it
       # seed home: the /seed/shared child bind is RW so tenant refreshes keep the shared Nous
       # token store current (HERMES_SHARED_AUTH_DIR points every tenant at it)
-      - ${TEAM_GATEWAY_HERMES_SEED_HOME:?set TEAM_GATEWAY_HERMES_SEED_HOME to a Hermes home with credentials (e.g. ~/.hermes)}:/seed:ro
-      - ${TEAM_GATEWAY_HERMES_AUTH_DIR_HOST:-${TEAM_GATEWAY_HERMES_SEED_HOME}/shared}:/seed/shared
-      # Docker isolation (sibling containers) — required when TEAM_GATEWAY_ISOLATION=docker:
+      - ${CO_WORKSPACE_HERMES_SEED_HOME:?set CO_WORKSPACE_HERMES_SEED_HOME to a Hermes home with credentials (e.g. ~/.hermes)}:/seed:ro
+      - ${CO_WORKSPACE_HERMES_AUTH_DIR_HOST:-${CO_WORKSPACE_HERMES_SEED_HOME}/shared}:/seed/shared
+      # Docker isolation (sibling containers) — required when CO_WORKSPACE_ISOLATION=docker:
       # - /var/run/docker.sock:/var/run/docker.sock

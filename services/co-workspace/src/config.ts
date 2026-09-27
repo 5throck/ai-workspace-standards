@@ -1,6 +1,6 @@
 /**
  * Team Gateway configuration — three tiers (ADR-0092 D5):
- *   infra   → TEAM_GATEWAY_* / HERMES_BIN env vars (this module)
+ *   infra   → CO_WORKSPACE_* / HERMES_BIN env vars (this module)
  *   tenant  → variant / description / country injected at scaffold time (scaffold.ts)
  *   secrets → seeded into each tenant HERMES_HOME (tenant.ts); never echoed by any endpoint
  */
@@ -55,9 +55,9 @@ export interface GatewayConfig {
   /** Host-side path of `dataDir` — used by docker isolation to mount tenant dirs into sibling
    * containers when the gateway itself runs inside a container (paths must match on the host). */
   dataDirHost?: string;
-  /** P1: catalog beta variants too (`TEAM_GATEWAY_VARIANTS_INCLUDE_BETA=true`). */
+  /** P1: catalog beta variants too (`CO_WORKSPACE_VARIANTS_INCLUDE_BETA=true`). */
   includeBeta: boolean;
-  /** Web UI requires a signed-in session (`TEAM_GATEWAY_LOGIN_REQUIRED=true`); API stays
+  /** Web UI requires a signed-in session (`CO_WORKSPACE_LOGIN_REQUIRED=true`); API stays
    * Bearer-key gated. Unset = open web access (Phase 0 mode). */
   loginRequired: boolean;
   /** Session runtime: `hermes` (default), `antigravity` (agy), `claude`, or `codex`.
@@ -129,57 +129,57 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
   let apiKeys: string[] = [];
   // An empty-string value counts as unset (compose defaults interpolate to ""); only a
   // non-empty value that parses to zero keys is a misconfiguration (D5 fail-fast).
-  if (env.TEAM_GATEWAY_API_KEYS !== undefined && env.TEAM_GATEWAY_API_KEYS.trim() !== "") {
-    apiKeys = env.TEAM_GATEWAY_API_KEYS.split(",").map((s) => s.trim()).filter(Boolean);
+  if (env.CO_WORKSPACE_API_KEYS !== undefined && env.CO_WORKSPACE_API_KEYS.trim() !== "") {
+    apiKeys = env.CO_WORKSPACE_API_KEYS.split(",").map((s) => s.trim()).filter(Boolean);
     if (apiKeys.length === 0) {
-      throw new Error("TEAM_GATEWAY_API_KEYS is set but parses to zero keys");
+      throw new Error("CO_WORKSPACE_API_KEYS is set but parses to zero keys");
     }
   }
-  const apiKeysFile = env.TEAM_GATEWAY_API_KEYS_FILE || undefined;
+  const apiKeysFile = env.CO_WORKSPACE_API_KEYS_FILE || undefined;
   const apiKeysEnv = [...apiKeys];
   apiKeys = [...new Set([...apiKeys, ...readKeysFile(apiKeysFile)])];
   return {
-    host: env.TEAM_GATEWAY_HOST ?? "127.0.0.1",
-    port: num(env.TEAM_GATEWAY_PORT, 9030),
-    dataDir: resolve(env.TEAM_GATEWAY_DATA_DIR ?? resolve(SERVICE_ROOT, "data")),
-    workspaceDir: resolve(env.TEAM_GATEWAY_WORKSPACE_DIR ?? resolve(SERVICE_ROOT, "..", "..")),
-    variants: resolveVariants(env.TEAM_GATEWAY_VARIANTS ?? "co-consult", resolve(
-      env.TEAM_GATEWAY_WORKSPACE_DIR ?? resolve(SERVICE_ROOT, "..", ".."),
-    ), env.TEAM_GATEWAY_VARIANTS_INCLUDE_BETA === "true" || env.TEAM_GATEWAY_VARIANTS_INCLUDE_BETA === "1"),
-    templateVersion: env.TEAM_GATEWAY_TEMPLATE_VERSION || undefined,
+    host: env.CO_WORKSPACE_HOST ?? "127.0.0.1",
+    port: num(env.CO_WORKSPACE_PORT, 9030),
+    dataDir: resolve(env.CO_WORKSPACE_DATA_DIR ?? resolve(SERVICE_ROOT, "data")),
+    workspaceDir: resolve(env.CO_WORKSPACE_WORKSPACE_DIR ?? resolve(SERVICE_ROOT, "..", "..")),
+    variants: resolveVariants(env.CO_WORKSPACE_VARIANTS ?? "co-consult", resolve(
+      env.CO_WORKSPACE_WORKSPACE_DIR ?? resolve(SERVICE_ROOT, "..", ".."),
+    ), env.CO_WORKSPACE_VARIANTS_INCLUDE_BETA === "true" || env.CO_WORKSPACE_VARIANTS_INCLUDE_BETA === "1"),
+    templateVersion: env.CO_WORKSPACE_TEMPLATE_VERSION || undefined,
     hermesBin: env.HERMES_BIN ?? "hermes",
-    hermesSeedHome: env.TEAM_GATEWAY_HERMES_SEED_HOME || undefined,
-    hermesAuthDir: env.TEAM_GATEWAY_HERMES_AUTH_DIR || undefined,
-    hermesAuthDirHost: env.TEAM_GATEWAY_HERMES_AUTH_DIR_HOST || undefined,
-    hermesModel: env.TEAM_GATEWAY_HERMES_MODEL || undefined,
-    runBudgetSeconds: num(env.TEAM_GATEWAY_RUN_BUDGET_SECONDS, 300),
-    maxTurns: num(env.TEAM_GATEWAY_MAX_TURNS, 100),
-    scaffoldTimeoutMs: num(env.TEAM_GATEWAY_SCAFFOLD_TIMEOUT_MS, 600_000),
-    hermesExtraArgs: (env.TEAM_GATEWAY_HERMES_EXTRA_ARGS ?? "")
+    hermesSeedHome: env.CO_WORKSPACE_HERMES_SEED_HOME || undefined,
+    hermesAuthDir: env.CO_WORKSPACE_HERMES_AUTH_DIR || undefined,
+    hermesAuthDirHost: env.CO_WORKSPACE_HERMES_AUTH_DIR_HOST || undefined,
+    hermesModel: env.CO_WORKSPACE_HERMES_MODEL || undefined,
+    runBudgetSeconds: num(env.CO_WORKSPACE_RUN_BUDGET_SECONDS, 300),
+    maxTurns: num(env.CO_WORKSPACE_MAX_TURNS, 100),
+    scaffoldTimeoutMs: num(env.CO_WORKSPACE_SCAFFOLD_TIMEOUT_MS, 600_000),
+    hermesExtraArgs: (env.CO_WORKSPACE_HERMES_EXTRA_ARGS ?? "")
       .split(" ")
       .map((s) => s.trim())
       .filter(Boolean),
     apiKeys,
     apiKeysEnv,
     apiKeysFile,
-    quotaWindow: env.TEAM_GATEWAY_QUOTA_WINDOW === "daily" ? "daily" : "lifetime",
-    tenantMaxTurns: numOr0(env.TEAM_GATEWAY_TENANT_MAX_TURNS),
-    tenantMaxTokens: numOr0(env.TEAM_GATEWAY_TENANT_MAX_TOKENS),
-    hermesToolsets: env.TEAM_GATEWAY_HERMES_TOOLSETS || undefined,
-    isolation: env.TEAM_GATEWAY_ISOLATION === "docker" ? "docker" : "process",
-    runtimeImage: env.TEAM_GATEWAY_RUNTIME_IMAGE ?? "team-gateway-runtime:latest",
-    dockerBin: env.TEAM_GATEWAY_DOCKER_BIN ?? "docker",
-    dataDirHost: env.TEAM_GATEWAY_DATA_DIR_HOST || undefined,
-    includeBeta: env.TEAM_GATEWAY_VARIANTS_INCLUDE_BETA === "true" || env.TEAM_GATEWAY_VARIANTS_INCLUDE_BETA === "1",
-    loginRequired: env.TEAM_GATEWAY_LOGIN_REQUIRED === "true",
+    quotaWindow: env.CO_WORKSPACE_QUOTA_WINDOW === "daily" ? "daily" : "lifetime",
+    tenantMaxTurns: numOr0(env.CO_WORKSPACE_TENANT_MAX_TURNS),
+    tenantMaxTokens: numOr0(env.CO_WORKSPACE_TENANT_MAX_TOKENS),
+    hermesToolsets: env.CO_WORKSPACE_HERMES_TOOLSETS || undefined,
+    isolation: env.CO_WORKSPACE_ISOLATION === "docker" ? "docker" : "process",
+    runtimeImage: env.CO_WORKSPACE_RUNTIME_IMAGE ?? "team-gateway-runtime:latest",
+    dockerBin: env.CO_WORKSPACE_DOCKER_BIN ?? "docker",
+    dataDirHost: env.CO_WORKSPACE_DATA_DIR_HOST || undefined,
+    includeBeta: env.CO_WORKSPACE_VARIANTS_INCLUDE_BETA === "true" || env.CO_WORKSPACE_VARIANTS_INCLUDE_BETA === "1",
+    loginRequired: env.CO_WORKSPACE_LOGIN_REQUIRED === "true",
     runtime: (["antigravity", "claude", "codex"] as const).includes(
-      env.TEAM_GATEWAY_RUNTIME as "antigravity",
+      env.CO_WORKSPACE_RUNTIME as "antigravity",
     )
-      ? (env.TEAM_GATEWAY_RUNTIME as "antigravity" | "claude" | "codex")
+      ? (env.CO_WORKSPACE_RUNTIME as "antigravity" | "claude" | "codex")
       : "hermes",
-    antigravityBin: env.TEAM_GATEWAY_ANTIGRAVITY_BIN ?? "agy",
-    claudeBin: env.TEAM_GATEWAY_CLAUDE_BIN ?? "claude",
-    codexBin: env.TEAM_GATEWAY_CODEX_BIN ?? "codex",
+    antigravityBin: env.CO_WORKSPACE_ANTIGRAVITY_BIN ?? "agy",
+    claudeBin: env.CO_WORKSPACE_CLAUDE_BIN ?? "claude",
+    codexBin: env.CO_WORKSPACE_CODEX_BIN ?? "codex",
   };
 }
 

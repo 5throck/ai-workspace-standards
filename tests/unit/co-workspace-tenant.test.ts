@@ -30,15 +30,15 @@ describe("GatewayConfig (loadConfig)", () => {
 
   test("env overrides apply, variants split on commas, junk numbers fall back", () => {
     const cfg = loadConfig({
-      TEAM_GATEWAY_HOST: "0.0.0.0",
-      TEAM_GATEWAY_PORT: "9999",
-      TEAM_GATEWAY_VARIANTS: "co-consult, co-develop ,,",
-      TEAM_GATEWAY_TEMPLATE_VERSION: "0.7.0",
-      TEAM_GATEWAY_RUN_BUDGET_SECONDS: "not-a-number",
-      TEAM_GATEWAY_MAX_TURNS: "42",
-      TEAM_GATEWAY_HERMES_SEED_HOME: "/seed",
+      CO_WORKSPACE_HOST: "0.0.0.0",
+      CO_WORKSPACE_PORT: "9999",
+      CO_WORKSPACE_VARIANTS: "co-consult, co-develop ,,",
+      CO_WORKSPACE_TEMPLATE_VERSION: "0.7.0",
+      CO_WORKSPACE_RUN_BUDGET_SECONDS: "not-a-number",
+      CO_WORKSPACE_MAX_TURNS: "42",
+      CO_WORKSPACE_HERMES_SEED_HOME: "/seed",
       HERMES_BIN: "/usr/local/bin/hermes",
-      TEAM_GATEWAY_HERMES_EXTRA_ARGS: "--yolo  --verbose",
+      CO_WORKSPACE_HERMES_EXTRA_ARGS: "--yolo  --verbose",
     });
     expect(cfg.host).toBe("0.0.0.0");
     expect(cfg.port).toBe(9999);

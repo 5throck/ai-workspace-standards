@@ -113,12 +113,12 @@ echo '{"type":"result","session_id":"s1","exit_code":0,"text":"ok","tokens":{"in
   chmodSync(hermesBin, 0o755);
 
   const cfg = loadConfig({
-    TEAM_GATEWAY_HOST: "127.0.0.1",
-    TEAM_GATEWAY_PORT: String(20000 + Math.floor(Math.random() * 20000)),
-    TEAM_GATEWAY_DATA_DIR: dataDir,
-    TEAM_GATEWAY_WORKSPACE_DIR: workspaceDir,
+    CO_WORKSPACE_HOST: "127.0.0.1",
+    CO_WORKSPACE_PORT: String(20000 + Math.floor(Math.random() * 20000)),
+    CO_WORKSPACE_DATA_DIR: dataDir,
+    CO_WORKSPACE_WORKSPACE_DIR: workspaceDir,
     HERMES_BIN: hermesBin,
-    TEAM_GATEWAY_API_KEYS_FILE: keysFile,
+    CO_WORKSPACE_API_KEYS_FILE: keysFile,
   });
   expect(cfg.apiKeys).toEqual(["sk-old"]);
   const server = createServer(createState(cfg));
