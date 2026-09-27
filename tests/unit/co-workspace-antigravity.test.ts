@@ -97,13 +97,13 @@ echo '{"event":"result","result":{"conversation_id":"conv-agy","status":"SUCCESS
 
   process.env.AGY_LOG = join(dataDir, "agy-args.log");
   const cfg = loadConfig({
-    TEAM_GATEWAY_HOST: "127.0.0.1",
-    TEAM_GATEWAY_PORT: String(20000 + Math.floor(Math.random() * 20000)),
-    TEAM_GATEWAY_DATA_DIR: dataDir,
-    TEAM_GATEWAY_WORKSPACE_DIR: workspaceDir,
-    TEAM_GATEWAY_VARIANTS: "co-consult",
-    TEAM_GATEWAY_RUNTIME: "antigravity",
-    TEAM_GATEWAY_ANTIGRAVITY_BIN: agyBin,
+    CO_WORKSPACE_HOST: "127.0.0.1",
+    CO_WORKSPACE_PORT: String(20000 + Math.floor(Math.random() * 20000)),
+    CO_WORKSPACE_DATA_DIR: dataDir,
+    CO_WORKSPACE_WORKSPACE_DIR: workspaceDir,
+    CO_WORKSPACE_VARIANTS: "co-consult",
+    CO_WORKSPACE_RUNTIME: "antigravity",
+    CO_WORKSPACE_ANTIGRAVITY_BIN: agyBin,
     AGY_LOG: join(dataDir, "agy-args.log"),
   });
   const server = createServer(createState(cfg));

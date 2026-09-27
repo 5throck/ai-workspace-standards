@@ -148,13 +148,13 @@ echo '{"type":"result","session_id":"sess-a","exit_code":0,"text":"Hello from fa
   chmodSync(hermesBin, 0o755);
 
   const cfg = loadConfig({
-    TEAM_GATEWAY_HOST: "127.0.0.1",
-    TEAM_GATEWAY_PORT: String(20000 + Math.floor(Math.random() * 20000)),
-    TEAM_GATEWAY_DATA_DIR: dataDir,
-    TEAM_GATEWAY_WORKSPACE_DIR: workspaceDir,
-    TEAM_GATEWAY_VARIANTS: "co-consult",
+    CO_WORKSPACE_HOST: "127.0.0.1",
+    CO_WORKSPACE_PORT: String(20000 + Math.floor(Math.random() * 20000)),
+    CO_WORKSPACE_DATA_DIR: dataDir,
+    CO_WORKSPACE_WORKSPACE_DIR: workspaceDir,
+    CO_WORKSPACE_VARIANTS: "co-consult",
     HERMES_BIN: hermesBin,
-    TEAM_GATEWAY_HERMES_SEED_HOME: seedHome,
+    CO_WORKSPACE_HERMES_SEED_HOME: seedHome,
   });
   const state = createState(cfg);
   const server = createServer(state);

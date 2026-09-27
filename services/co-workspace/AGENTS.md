@@ -1,12 +1,12 @@
-# AGENTS.md — services/team-gateway
+# AGENTS.md — services/co-workspace
 
 > Component instructions for AI tools working in this directory. Workspace-wide rules live in
 > the repository root `AGENTS.md`; governance record: ADR-0092, design:
-> `docs/designs/2026-09-27-team-gateway-service-design.md`.
+> `docs/designs/2026-09-27-co-workspace-service-design.md`.
 
 ## What this is
 
-Team Gateway serves the workspace's variant agent teams (`templates/co-*`) over an
+co-workspace serves the workspace's variant agent teams (`templates/co-*`) over an
 OpenAI-compatible web API. On request it scaffolds a tenant project with
 `scripts/new-project.ts --platform hermes`, relocates it into the data directory, and runs
 headless Hermes sessions (`hermes chat -q --format stream-json`) inside it. Phase 0 is a
@@ -16,7 +16,7 @@ local-only PoC: loopback bind, no authentication, single process.
 
 | Path | Purpose |
 |---|---|
-| `src/config.ts` | Three-tier config; infrastructure tier reads `TEAM_GATEWAY_*` env vars |
+| `src/config.ts` | Three-tier config; infrastructure tier reads `CO_WORKSPACE_*` env vars |
 | `src/scaffold.ts` | Subprocess bridge to `scripts/new-project.ts` (no import API exists) |
 | `src/tenant.ts` | Tenant registry (`<dataDir>/tenants/registry.json`), per-tenant `HERMES_HOME` seeding |
 | `src/hermes.ts` | Session spawn, stream-json (JSONL) parsing, `--usage-file` accounting |
@@ -43,9 +43,9 @@ local-only PoC: loopback bind, no authentication, single process.
 
 ```sh
 bun install          # dev deps for typecheck (typescript, @types/bun)
-bun run dev          # start on 127.0.0.1:9030 (config via TEAM_GATEWAY_* env)
+bun run dev          # start on 127.0.0.1:9030 (config via CO_WORKSPACE_* env)
 bun run typecheck    # tsc --noEmit over src/
 ```
 
-Unit tests live in the workspace suite: `bun test tests/unit/team-gateway-*.test.ts`
+Unit tests live in the workspace suite: `bun test tests/unit/co-workspace-*.test.ts`
 (fake scaffold + fake Hermes binaries; no network, no LLM calls).

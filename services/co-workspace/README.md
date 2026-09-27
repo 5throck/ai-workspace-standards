@@ -2,7 +2,7 @@
 
 Serve the workspace's variant agent teams (`templates/co-*`) over an **OpenAI-compatible web
 API**, backed by headless [Hermes Agent](https://github.com/NousResearch/hermes-agent) sessions.
-Formerly "Team Gateway". Governance: ADR-0092 · Design: `docs/designs/2026-09-27-team-gateway-service-design.md`.
+Formerly "co-workspace". Governance: ADR-0092 · Design: `docs/designs/2026-09-27-co-workspace-service-design.md`.
 
 **Phase 0 scope (this release):** single variant (`co-consult`), single user, local-only
 (loopback bind, no authentication). Not for untrusted networks — see
@@ -10,11 +10,11 @@ Formerly "Team Gateway". Governance: ADR-0092 · Design: `docs/designs/2026-09-2
 
 ## Sign-in & API access
 
-- **Web UI**: when `TEAM_GATEWAY_LOGIN_REQUIRED=true` (compose default), `/` redirects to
+- **Web UI**: when `CO_WORKSPACE_LOGIN_REQUIRED=true` (compose default), `/` redirects to
   `/login` — sign in with a local account (ID + password, email-verified at signup) or Google
   SSO (`GOOGLE_CLIENT_ID/SECRET/REDIRECT_URI`). Profile editing and (for admins) user
   management live in the app.
-- **API**: Bearer keys (`TEAM_GATEWAY_API_KEYS` or the key file). A signed-in session cookie is
+- **API**: Bearer keys (`CO_WORKSPACE_API_KEYS` or the key file). A signed-in session cookie is
   also accepted as a credential, so browser and scripts can share one identity.
 
 ## Quickstart (bare metal)
@@ -23,16 +23,16 @@ Requirements: bun ≥ 1.1, a Hermes Agent install (`hermes` on PATH, signed in t
 provider), and this workspace checkout.
 
 ```sh
-cd services/team-gateway
+cd services/co-workspace
 bun install
 
-TEAM_GATEWAY_HERMES_SEED_HOME="$HOME/.hermes" bun run dev
+CO_WORKSPACE_HERMES_SEED_HOME="$HOME/.hermes" bun run dev
 # [co-workspace] listening on http://127.0.0.1:9030
 ```
 
-`TEAM_GATEWAY_HERMES_SEED_HOME` points at a Hermes home whose `auth.json`/`.env` seed each
+`CO_WORKSPACE_HERMES_SEED_HOME` points at a Hermes home whose `auth.json`/`.env` seed each
 tenant's isolated `HERMES_HOME` (its `config.yaml` is **not** copied — tenants get a generated
-one). Set `TEAM_GATEWAY_HERMES_MODEL` to route tenants to a specific model (e.g. a free tier);
+one). Set `CO_WORKSPACE_HERMES_MODEL` to route tenants to a specific model (e.g. a free tier);
 without it Hermes auto-resolves, which may select a paid model.
 
 ## Connect Open WebUI
@@ -86,14 +86,14 @@ curl -sN "http://127.0.0.1:9030/v1beta/models/co-consult:streamGenerateContent?a
 
 ## Session runtimes
 
-`TEAM_GATEWAY_RUNTIME` selects how tenant turns execute (default `hermes`):
+`CO_WORKSPACE_RUNTIME` selects how tenant turns execute (default `hermes`):
 
 | Runtime | Command | Notes |
 |---|---|---|
 | `hermes` | `hermes chat --format stream-json` | Named threads (`--continue gw-<tenantId>`), per-tenant `HERMES_HOME`, toolset scoping, container isolation supported |
 | `antigravity` | `agy -p … --output-format stream-json` | Continuity via explicit `--conversation <id>` persisted on the tenant record; auth via the local Antigravity login; container isolation NOT supported (agy is not in the runtime image) |
 
-`TEAM_GATEWAY_ANTIGRAVITY_BIN` overrides the `agy` path. Both runtimes emit the same normalized
+`CO_WORKSPACE_ANTIGRAVITY_BIN` overrides the `agy` path. Both runtimes emit the same normalized
 events to every wire surface.
 
 ## Native REST surface
@@ -127,29 +127,29 @@ limitation).
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `TEAM_GATEWAY_HOST` / `_PORT` | `127.0.0.1` / `9030` | Bind address (keep loopback in Phase 0) |
-| `TEAM_GATEWAY_DATA_DIR` | `services/co-workspace/data` | Registry + tenant storage (`storage/<user>/<project>/`) |
-| `TEAM_GATEWAY_WORKSPACE_DIR` | repo root | Workspace clone used for scaffolding |
-| `TEAM_GATEWAY_VARIANTS` | `co-consult` (compose default: `all`) | Variant allowlist — `all` auto-discovers every `status: stable` `templates/co-*` |
-| `TEAM_GATEWAY_TEMPLATE_VERSION` | HEAD (`templates/VERSION`) | Pin to a `template-vX.Y.Z` tag |
-| `TEAM_GATEWAY_HERMES_SEED_HOME` | — | Hermes home whose `.env` seeds tenant homes |
-| `TEAM_GATEWAY_HERMES_AUTH_DIR` | `<seed>/shared` | Shared Nous credential store — ONE token store across operator + tenants; refreshes stay valid everywhere |
-| `TEAM_GATEWAY_HERMES_MODEL` | Hermes auto | Model id stamped into tenant `config.yaml` (`model.default`), e.g. `upstage/solar-pro4:free` |
-| `TEAM_GATEWAY_RUN_BUDGET_SECONDS` | `300` | Wall-clock ceiling per Hermes turn |
-| `TEAM_GATEWAY_MAX_TURNS` | `100` | Tool-iteration ceiling per turn |
-| `TEAM_GATEWAY_HERMES_EXTRA_ARGS` | — | Extra CLI args (e.g. toolset scoping) |
-| `TEAM_GATEWAY_HERMES_TOOLSETS` | — | Comma-separated Hermes toolsets passed as `-t` on every session |
-| `TEAM_GATEWAY_QUOTA_WINDOW` | `lifetime` | `daily` resets per-tenant quota counters each UTC day |
-| `TEAM_GATEWAY_API_KEYS_FILE` | — | Key file (one per line, `#` comments; `key:label` maps a key to a trusted principal); union-ed with `TEAM_GATEWAY_API_KEYS`, re-read by `POST /admin/reload` |
-| `TEAM_GATEWAY_VARIANTS_INCLUDE_BETA` | `false` | `true` catalogs beta variants (tagged `beta` in the models payload) |
-| `TEAM_GATEWAY_ISOLATION` | `process` | `docker` = per-turn ephemeral sibling container |
-| `TEAM_GATEWAY_RUNTIME_IMAGE` | `team-gateway-runtime:latest` | Runtime image for docker isolation |
-| `TEAM_GATEWAY_DOCKER_BIN` | `docker` | Docker CLI binary for the isolation probe |
-| `TEAM_GATEWAY_RUNTIME` | `hermes` | `hermes` / `antigravity` (agy) / `claude` / `codex` |
-| `TEAM_GATEWAY_ANTIGRAVITY_BIN` | `agy` | Antigravity CLI binary |
-| `TEAM_GATEWAY_CLAUDE_BIN` | `claude` | Claude Code CLI binary |
-| `TEAM_GATEWAY_CODEX_BIN` | `codex` | Codex CLI binary |
-| `TEAM_GATEWAY_ADMIN_EMAIL` | — | Bootstrap admin account email (created at startup) |
+| `CO_WORKSPACE_HOST` / `_PORT` | `127.0.0.1` / `9030` | Bind address (keep loopback in Phase 0) |
+| `CO_WORKSPACE_DATA_DIR` | `services/co-workspace/data` | Registry + tenant storage (`storage/<user>/<project>/`) |
+| `CO_WORKSPACE_WORKSPACE_DIR` | repo root | Workspace clone used for scaffolding |
+| `CO_WORKSPACE_VARIANTS` | `co-consult` (compose default: `all`) | Variant allowlist — `all` auto-discovers every `status: stable` `templates/co-*` |
+| `CO_WORKSPACE_TEMPLATE_VERSION` | HEAD (`templates/VERSION`) | Pin to a `template-vX.Y.Z` tag |
+| `CO_WORKSPACE_HERMES_SEED_HOME` | — | Hermes home whose `.env` seeds tenant homes |
+| `CO_WORKSPACE_HERMES_AUTH_DIR` | `<seed>/shared` | Shared Nous credential store — ONE token store across operator + tenants; refreshes stay valid everywhere |
+| `CO_WORKSPACE_HERMES_MODEL` | Hermes auto | Model id stamped into tenant `config.yaml` (`model.default`), e.g. `upstage/solar-pro4:free` |
+| `CO_WORKSPACE_RUN_BUDGET_SECONDS` | `300` | Wall-clock ceiling per Hermes turn |
+| `CO_WORKSPACE_MAX_TURNS` | `100` | Tool-iteration ceiling per turn |
+| `CO_WORKSPACE_HERMES_EXTRA_ARGS` | — | Extra CLI args (e.g. toolset scoping) |
+| `CO_WORKSPACE_HERMES_TOOLSETS` | — | Comma-separated Hermes toolsets passed as `-t` on every session |
+| `CO_WORKSPACE_QUOTA_WINDOW` | `lifetime` | `daily` resets per-tenant quota counters each UTC day |
+| `CO_WORKSPACE_API_KEYS_FILE` | — | Key file (one per line, `#` comments; `key:label` maps a key to a trusted principal); union-ed with `CO_WORKSPACE_API_KEYS`, re-read by `POST /admin/reload` |
+| `CO_WORKSPACE_VARIANTS_INCLUDE_BETA` | `false` | `true` catalogs beta variants (tagged `beta` in the models payload) |
+| `CO_WORKSPACE_ISOLATION` | `process` | `docker` = per-turn ephemeral sibling container |
+| `CO_WORKSPACE_RUNTIME_IMAGE` | `co-workspace-runtime:latest` | Runtime image for docker isolation |
+| `CO_WORKSPACE_DOCKER_BIN` | `docker` | Docker CLI binary for the isolation probe |
+| `CO_WORKSPACE_RUNTIME` | `hermes` | `hermes` / `antigravity` (agy) / `claude` / `codex` |
+| `CO_WORKSPACE_ANTIGRAVITY_BIN` | `agy` | Antigravity CLI binary |
+| `CO_WORKSPACE_CLAUDE_BIN` | `claude` | Claude Code CLI binary |
+| `CO_WORKSPACE_CODEX_BIN` | `codex` | Codex CLI binary |
+| `CO_WORKSPACE_ADMIN_EMAIL` | — | Bootstrap admin account email (created at startup) |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` / `GOOGLE_REDIRECT_URI` | — | Google SSO (OAuth code + PKCE) |
 
 ### Session runtimes (full matrix)
@@ -183,19 +183,19 @@ passthrough is deliberately out of scope until a concrete client requires it.
 ## Docker
 
 ```sh
-export TEAM_GATEWAY_DATA_DIR_HOST=/absolute/host/path/for/data   # e.g. /srv/team-gateway/data
-export TEAM_GATEWAY_HERMES_SEED_HOME="$HOME/.hermes"             # mounted ro at /seed
-export TEAM_GATEWAY_HERMES_MODEL="upstage/solar-pro4:free"       # optional model routing
-docker compose -f services/team-gateway/docker/docker-compose.yml up --build -d
+export CO_WORKSPACE_DATA_DIR_HOST=/absolute/host/path/for/data   # e.g. /srv/co-workspace/data
+export CO_WORKSPACE_HERMES_SEED_HOME="$HOME/.hermes"             # mounted ro at /seed
+export CO_WORKSPACE_HERMES_MODEL="upstage/solar-pro4:free"       # optional model routing
+docker compose -f services/co-workspace/docker/docker-compose.yml up --build -d
 ```
 
 - The image is based on the official `nousresearch/hermes-agent` image (hermes + python) with
   bun + the gateway server added; the compose service overrides the s6 entrypoint to run the
   server as PID 1. It serves `127.0.0.1:9030`.
 - The workspace clone is mounted at `/workspace` (provisioning writes `Projects/` there in
-  Phase 0) and the data dir is a BIND mount at `/data` from `TEAM_GATEWAY_DATA_DIR_HOST`.
-- **Docker isolation** (`TEAM_GATEWAY_ISOLATION=docker`) spawns SIBLING containers whose mounts
-  resolve on the host — set `TEAM_GATEWAY_DATA_DIR_HOST` to the absolute host path (the gateway
+  Phase 0) and the data dir is a BIND mount at `/data` from `CO_WORKSPACE_DATA_DIR_HOST`.
+- **Docker isolation** (`CO_WORKSPACE_ISOLATION=docker`) spawns SIBLING containers whose mounts
+  resolve on the host — set `CO_WORKSPACE_DATA_DIR_HOST` to the absolute host path (the gateway
   passes it down automatically) and additionally mount the Docker socket
   (`/var/run/docker.sock:/var/run/docker.sock`); the Docker CLI is not baked into the image, so
   add it (static binary or `docker-cli` package) for this mode.
@@ -205,27 +205,27 @@ docker compose -f services/team-gateway/docker/docker-compose.yml up --build -d
 Auth, quotas, toolset scoping, and container isolation are enforced by the gateway:
 
 ```sh
-TEAM_GATEWAY_API_KEYS="sk-mykey-1,sk-mykey-2" \
-TEAM_GATEWAY_TENANT_MAX_TURNS=200 \
-TEAM_GATEWAY_TENANT_MAX_TOKENS=2000000 \
-TEAM_GATEWAY_HERMES_TOOLSETS="fs,web" \
-TEAM_GATEWAY_ISOLATION=docker \
+CO_WORKSPACE_API_KEYS="sk-mykey-1,sk-mykey-2" \
+CO_WORKSPACE_TENANT_MAX_TURNS=200 \
+CO_WORKSPACE_TENANT_MAX_TOKENS=2000000 \
+CO_WORKSPACE_HERMES_TOOLSETS="fs,web" \
+CO_WORKSPACE_ISOLATION=docker \
 bun run dev
 ```
 
-- **Auth** — when `TEAM_GATEWAY_API_KEYS` is set, every route except `GET /health` and `GET /`
+- **Auth** — when `CO_WORKSPACE_API_KEYS` is set, every route except `GET /health` and `GET /`
   requires a key via `Authorization: Bearer`, `x-api-key`, or `x-goog-api-key` (`401` otherwise).
   Keys are compared in constant time and never echoed. Unset = Phase 0 localhost mode
   (a startup warning states it).
-- **Quotas** — `TEAM_GATEWAY_TENANT_MAX_TURNS` / `TEAM_GATEWAY_TENANT_MAX_TOKENS` are per-tenant
-  caps enforced before a turn starts (`429`, costs nothing). `TEAM_GATEWAY_QUOTA_WINDOW=lifetime`
+- **Quotas** — `CO_WORKSPACE_TENANT_MAX_TURNS` / `CO_WORKSPACE_TENANT_MAX_TOKENS` are per-tenant
+  caps enforced before a turn starts (`429`, costs nothing). `CO_WORKSPACE_QUOTA_WINDOW=lifetime`
   (default) or `daily` (UTC-day buckets, reset each day). Token counts come from the Hermes
   result envelope; counters live in the tenant registry.
-- **Toolset scoping** — `TEAM_GATEWAY_HERMES_TOOLSETS` (e.g. `fs,web`) is passed as `-t` on every
+- **Toolset scoping** — `CO_WORKSPACE_HERMES_TOOLSETS` (e.g. `fs,web`) is passed as `-t` on every
   session: a real per-session tool-confinement knob.
-- **Container isolation** — `TEAM_GATEWAY_ISOLATION=docker` runs each turn inside an ephemeral
-  sibling container (`docker run --rm -i`, image from `TEAM_GATEWAY_RUNTIME_IMAGE`, default
-  `team-gateway-runtime:latest` — build it from `docker/Dockerfile`); only the tenant project dir
+- **Container isolation** — `CO_WORKSPACE_ISOLATION=docker` runs each turn inside an ephemeral
+  sibling container (`docker run --rm -i`, image from `CO_WORKSPACE_RUNTIME_IMAGE`, default
+  `co-workspace-runtime:latest` — build it from `docker/Dockerfile`); only the tenant project dir
   and Hermes home are mounted. Startup fails fast when Docker is unusable.
 - **Auth principals (P9)** — key-file entries may carry a trusted label (`sk-alice:alice`);
   the label becomes the tenant's `ownerPrincipal` (replaces the spoofable `user` field for
@@ -237,7 +237,7 @@ bun run dev
 - **Persistence (Phase 3)** — the tenant registry is a SQLite file (`<dataDir>/tenants/registry.db`,
   WAL mode; legacy `registry.json` auto-imported on first run). The store sits behind a narrow
   interface (get/upsert/create/findByKey/list) for a future Postgres implementation.
-- **Beta catalog (P1)** — `TEAM_GATEWAY_VARIANTS_INCLUDE_BETA=true` adds beta variants to
+- **Beta catalog (P1)** — `CO_WORKSPACE_VARIANTS_INCLUDE_BETA=true` adds beta variants to
   `/v1/models`, each tagged `meta.status: "beta"` alongside `meta.runtime`/`meta.provider`
   (provider-neutrality: the wire contract is neutral; the generating runtime/provider is disclosed).
 - **Shared credentials** — every turn re-copies the seed home's CURRENT `auth.json` into the
@@ -245,8 +245,8 @@ bun run dev
   plus sets `HERMES_SHARED_AUTH_DIR` to one shared store for runtimes that support it. Net
   effect: a single `hermes login` covers the operator and all tenants; re-login when tokens
   expire (pure-container deployments without host-side hermes usage).
-- **Key rotation** — set `TEAM_GATEWAY_API_KEYS_FILE` (one key per line, `#` comments) alongside
-  or instead of `TEAM_GATEWAY_API_KEYS`; rotate by rewriting the file and calling
+- **Key rotation** — set `CO_WORKSPACE_API_KEYS_FILE` (one key per line, `#` comments) alongside
+  or instead of `CO_WORKSPACE_API_KEYS`; rotate by rewriting the file and calling
   `POST /admin/reload` with a valid key. Point the file at any managed-secret mount.
 - **Egress** — network egress enforcement is host-side: Hermes iron-proxy (`hermes egress`,
   TLS-intercepting firewall, operator-deployed) fronts tenant containers/sessions; the gateway
@@ -254,4 +254,4 @@ bun run dev
 
 Known limits: provisioning runs asynchronously; usage is metered but not billed; auth is a
 shared bearer-key pool, not per-human identities. Full Phase 2
-design: `docs/designs/2026-09-27-team-gateway-phase2-hardening-design.md`.
+design: `docs/designs/2026-09-27-co-workspace-phase2-hardening-design.md`.

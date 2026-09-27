@@ -116,12 +116,12 @@ describe("hermes spawn adapter — toolsets and container isolation", () => {
 describe("config — Phase 2 tiers", () => {
   test("auth/quotas/isolation parse with fail-fast on empty key config", () => {
     const cfg = loadConfig({
-      TEAM_GATEWAY_API_KEYS: "k1, k2",
-      TEAM_GATEWAY_TENANT_MAX_TURNS: "50",
-      TEAM_GATEWAY_TENANT_MAX_TOKENS: "0",
-      TEAM_GATEWAY_HERMES_TOOLSETS: "fs,web",
-      TEAM_GATEWAY_ISOLATION: "docker",
-      TEAM_GATEWAY_RUNTIME_IMAGE: "tgr:1",
+      CO_WORKSPACE_API_KEYS: "k1, k2",
+      CO_WORKSPACE_TENANT_MAX_TURNS: "50",
+      CO_WORKSPACE_TENANT_MAX_TOKENS: "0",
+      CO_WORKSPACE_HERMES_TOOLSETS: "fs,web",
+      CO_WORKSPACE_ISOLATION: "docker",
+      CO_WORKSPACE_RUNTIME_IMAGE: "tgr:1",
     });
     expect(cfg.apiKeys).toEqual(["k1", "k2"]);
     expect(cfg.tenantMaxTurns).toBe(50);
@@ -129,7 +129,7 @@ describe("config — Phase 2 tiers", () => {
     expect(cfg.hermesToolsets).toBe("fs,web");
     expect(cfg.isolation).toBe("docker");
     expect(cfg.runtimeImage).toBe("tgr:1");
-    expect(() => loadConfig({ TEAM_GATEWAY_API_KEYS: " , " })).toThrow();
+    expect(() => loadConfig({ CO_WORKSPACE_API_KEYS: " , " })).toThrow();
   });
 
   test("defaults keep Phase 0 mode: no auth, no quotas, process isolation", () => {
@@ -169,13 +169,13 @@ echo '{"type":"result","session_id":"s1","exit_code":0,"text":"pong","tokens":{"
   chmodSync(hermesBin, 0o755);
 
   const cfg = loadConfig({
-    TEAM_GATEWAY_HOST: "127.0.0.1",
-    TEAM_GATEWAY_PORT: String(20000 + Math.floor(Math.random() * 20000)),
-    TEAM_GATEWAY_DATA_DIR: dataDir,
-    TEAM_GATEWAY_WORKSPACE_DIR: workspaceDir,
+    CO_WORKSPACE_HOST: "127.0.0.1",
+    CO_WORKSPACE_PORT: String(20000 + Math.floor(Math.random() * 20000)),
+    CO_WORKSPACE_DATA_DIR: dataDir,
+    CO_WORKSPACE_WORKSPACE_DIR: workspaceDir,
     HERMES_BIN: hermesBin,
-    TEAM_GATEWAY_API_KEYS: "sk-test",
-    TEAM_GATEWAY_TENANT_MAX_TURNS: "2",
+    CO_WORKSPACE_API_KEYS: "sk-test",
+    CO_WORKSPACE_TENANT_MAX_TURNS: "2",
   });
   const server = createServer(createState(cfg));
   const base = `http://127.0.0.1:${server.port}`;

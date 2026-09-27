@@ -26,7 +26,7 @@ export interface TenantRecord {
   /** Cumulative token counters from terminal result envelopes (Phase 2 quota input). */
   inputTokens: number;
   outputTokens: number;
-  /** Per-UTC-day buckets for windowed quotas (`TEAM_GATEWAY_QUOTA_WINDOW=daily`); pruned to
+  /** Per-UTC-day buckets for windowed quotas (`CO_WORKSPACE_QUOTA_WINDOW=daily`); pruned to
    * the 8 most recent days on write. */
   daily?: Record<string, { turns: number; inputTokens: number; outputTokens: number }>;
   /** Antigravity-runtime conversation id (explicit continuity across turns). */
@@ -90,7 +90,7 @@ export function tenantConfigYaml(projectDir: string, model?: string): string {
     `    - ${projectDir}`,
   ];
   if (model) {
-    lines.push("", "# Model routing stamped by the gateway (TEAM_GATEWAY_HERMES_MODEL).", "model:", `  default: "${model}"`);
+    lines.push("", "# Model routing stamped by the gateway (CO_WORKSPACE_HERMES_MODEL).", "model:", `  default: "${model}"`);
   }
   return lines.join("\n") + "\n";
 }

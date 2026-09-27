@@ -105,7 +105,7 @@ export class UserStore {
     };
   }
 
-  /** Bootstrap the admin from TEAM_GATEWAY_ADMIN_EMAIL (idempotent). */
+  /** Bootstrap the admin from CO_WORKSPACE_ADMIN_EMAIL (idempotent). */
   bootstrapAdmin(email: string): UserRecord | null {
     const existing = this.findByEmail(email);
     if (existing) {
