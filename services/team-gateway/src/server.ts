@@ -7,7 +7,7 @@
  * HERMES_HOME isolation, per-tenant chat serialization.
  */
 
-import { copyFileSync, existsSync, readFileSync } from "node:fs";
+import { copyFileSync, existsSync, readFileSync, rmSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { mkdirSync } from "node:fs";
 import { dockerProbe, GatewayConfig, loadConfig, readKeysFile, SERVICE_ROOT } from "./config";
@@ -622,6 +622,29 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
       const rec = state.registry.get(decodeURIComponent(tenantDetail[1]));
       if (!rec) throw new HttpError(404, `tenant ${tenantDetail[1]} not found`);
       return jsonResponse(publicTenant(rec));
+    }
+
+    const tenantDelete = path.match(/^\/tenants\/([^/]+)$/);
+    if (req.method === "DELETE" && tenantDelete) {
+      const tenantId = decodeURIComponent(tenantDelete[1]);
+      const rec = state.registry.get(tenantId);
+      if (!rec) throw new HttpError(404, `tenant ${tenantId} not found`);
+      const principal = principalFor(state.cfg, presentedCredential(req));
+      if (
+        state.cfg.apiKeys.length > 0 &&
+        (rec.ownerPrincipal ?? "anonymous") !== principal &&
+        principal !== "admin"
+      ) {
+        throw new HttpError(403, `tenant ${tenantId} is owned by ${rec.ownerPrincipal ?? "anonymous"}`);
+      }
+      const inflight = state.provisioning.get(tenantId);
+      if (inflight) await inflight.catch(() => undefined);
+      const deleted = state.registry.delete(tenantId);
+      if (deleted) {
+        rmSync(deleted.projectDir, { recursive: true, force: true });
+        rmSync(deleted.hermesHome, { recursive: true, force: true });
+      }
+      return jsonResponse({ deleted: tenantId, name: deleted?.name ?? null });
     }
 
     const tenantChat = path.match(/^\/tenants\/([^/]+)\/chat$/);

@@ -2,7 +2,7 @@
  * (design 2026-09-27-team-gateway-phase2-hardening). */
 
 import { afterAll, describe, expect, test } from "bun:test";
-import { chmodSync, mkdirSync, writeFileSync } from "node:fs";
+import { chmodSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { credentialValid, isAuthEnabled, presentedCredential, requestAuthorized } from "../../services/team-gateway/src/auth";
@@ -191,6 +191,43 @@ echo '{"type":"result","session_id":"s1","exit_code":0,"text":"pong","tokens":{"
     expect(good.status).toBe(200);
     const body = (await good.json()) as any;
     expect(body.data.map((m: any) => m.id)).toEqual(["co-consult"]);
+  });
+
+  test("DELETE /tenants/:id — owner can delete; other principal 403s; files removed", async () => {
+    // provision tenant A as "sk-test" (label default)
+    const provision = await fetch(`${base}/sessions`, {
+      method: "POST",
+      headers: { "content-type": "application/json", authorization: "Bearer sk-test" },
+      body: JSON.stringify({ variant: "co-consult" }),
+    });
+    const { tenantId } = await provision.json();
+    const deadline = Date.now() + 10_000;
+    let detail: any = {};
+    while (Date.now() < deadline) {
+      detail = await (await fetch(`${base}/tenants/${tenantId}`, {
+        headers: { authorization: "Bearer sk-test" },
+      })).json();
+      if (detail.status !== "provisioning") break;
+      await Bun.sleep(50);
+    }
+    expect(detail.status).toBe("ready");
+    const projectDir = detail.name
+      ? join(dataDir, "tenants", tenantId, "project")
+      : join(dataDir, "tenants", tenantId, "project");
+    expect(existsSync(projectDir)).toBe(true);
+    // owner CAN delete (principal "default" matches) — files removed
+    const ok = await fetch(`${base}/tenants/${tenantId}`, {
+      method: "DELETE",
+      headers: { authorization: "Bearer sk-test" },
+    });
+    expect(ok.status).toBe(200);
+    const body = await ok.json();
+    expect(body.deleted).toBe(tenantId);
+    expect(existsSync(projectDir)).toBe(false);
+    const gone = await fetch(`${base}/tenants/${tenantId}`, {
+      headers: { authorization: "Bearer sk-test" },
+    });
+    expect(gone.status).toBe(404);
   });
 
   test("quota: third turn on a tenant capped at 2 returns 429 before streaming", async () => {

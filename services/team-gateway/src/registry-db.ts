@@ -99,6 +99,14 @@ export class TenantRegistry {
       );
   }
 
+  /** Delete a tenant row; returns the record that was deleted (caller removes its files). */
+  delete(tenantId: string): TenantRecord | undefined {
+    const rec = this.get(tenantId);
+    if (!rec) return undefined;
+    this.db.query("DELETE FROM tenants WHERE tenant_id = ?").run(tenantId);
+    return rec;
+  }
+
   create(init: {
     dataDir: string;
     variant: string;
