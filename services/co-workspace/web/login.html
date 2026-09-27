@@ -102,7 +102,7 @@
     e.preventDefault();
     const res = await fetch("/auth/login", {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: { "content-type": "application/json", "x-requested-with": "co-workspace" },
       body: JSON.stringify({ loginId: $("li-id").value, password: $("li-pw").value }),
     });
     if (res.status === 200) location.href = "/";
@@ -117,7 +117,7 @@
     }
     const res = await fetch("/auth/signup", {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: { "content-type": "application/json", "x-requested-with": "co-workspace" },
       body: JSON.stringify({ loginId: $("su-id").value, email: $("su-email").value, password: $("su-pw").value }),
     });
     const body = await res.json();
@@ -133,7 +133,7 @@
   $("verifyBtn").addEventListener("click", async () => {
     const res = await fetch("/auth/verify", {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: { "content-type": "application/json", "x-requested-with": "co-workspace" },
       body: JSON.stringify({ token: $("verify-key").value }),
     });
     const body = await res.json();
