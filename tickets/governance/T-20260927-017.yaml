@@ -9,12 +9,20 @@ title: >-
   during the CI quota blackout, never executed); upgrade PR #163 (v0.7.0)
   blocked on real CI until fixed
 priority: high
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-27T01:40:32.747Z'
 history:
   - at: '2026-09-27T01:40:32.747Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-27T02:01:20.022Z'
+    from: backlog
+    to: done
+result: >-
+  Fixed: removed blackout-era tests referencing nonexistent APIs
+  (waitForDocumentFonts, loadOptional*SchemaValidator, isRelevantTestFile) and
+  the L0-only review-baseline import; added DOM lib + excluded L0-guarded
+  validate-agents/validate-skills from project typecheck; pruned 2 ghost
+  SCRIPTS.md rows. PR #163 merged with 8/8 checks green; co-abap at v0.7.0.
 error: null
