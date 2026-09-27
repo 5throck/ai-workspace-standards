@@ -129,6 +129,10 @@ NUL
 # above; documented explicitly per this file's own convention for local-only
 # state directories, e.g. .pipeline-state/ above) ---
 .zcode/
+# ZCode harness regenerates this .gitignore mirror at the root each session;
+# it is tool-local state like .zcode/ and never tracked (flagged by the
+# lifecycle stray-file check on 2026-09-27, T-follow-up in memory log).
+.zcodeignore
 
 # --- Sandbox for testing ---
 .sandbox/
