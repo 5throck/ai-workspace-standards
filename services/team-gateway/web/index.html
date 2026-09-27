@@ -48,21 +48,31 @@
     <code>/v1</code> — see the README runbook.</p>
 
   <div class="card">
-    <h2>① 세션 설정</h2>
+    <h2>① Session setup</h2>
     <div class="row">
-      <label class="field">사용자 <input id="user" value="default" placeholder="alice"></label>
-      <label class="field">프로젝트 이름 (비우면 자동) <input id="pname" placeholder="자동 생성"></label>
+      <label class="field">User <input id="user" value="default" placeholder="alice"></label>
+      <label class="field">Project name (auto if empty) <input id="pname" placeholder="자동 생성"></label>
       <label class="field">Variant <select id="variant"></select></label>
       <label class="field" style="flex:0 0 auto; flex-direction:row; align-items:center; gap:6px; padding-bottom:8px;">
-        <input type="checkbox" id="beta" style="width:auto"> beta 포함
+        <input type="checkbox" id="beta" style="width:auto"> include beta
       </label>
-      <button id="create" type="button">세션 만들기</button>
+      <button id="create" type="button">Create session</button>
     </div>
   </div>
 
   <div class="card" id="progCard" style="display:none">
-    <h2>② 프로비저닝 진행 <button id="deleteBtn" type="button" style="float:right; background:#8b1f1f; font-size:.7rem; padding:4px 10px;">Delete session</button></h2>
+    <h2>② Provisioning progress <button id="deleteBtn" type="button" style="float:right; background:#8b1f1f; font-size:.7rem; padding:4px 10px;">Delete session</button></h2>
     <ol class="progress" id="progress"></ol>
+  </div>
+
+  <div class="card">
+    <h2>③ 내 세션 (내 테넌트)
+      <button id="refreshSessions" type="button" style="float:right; background:#1f6feb; font-size:.7rem; padding:4px 10px;">Refresh</button>
+    </h2>
+    <table style="width:100%; border-collapse:collapse; font-size:.82rem;" id="sessionsTable">
+      <tbody></tbody>
+    </table>
+    <p class="hint" style="margin:6px 0 0;">Deletes remove the project files and the session record (owner only).</p>
   </div>
 
   <section id="log" aria-live="polite"></section>
@@ -132,6 +142,53 @@
   }
 
   let currentTenantId = "";
+
+  async function loadSessions() {
+    const res = await fetch("/tenants?mine=1");
+    const body = await res.json();
+    const tbody = document.querySelector("#sessionsTable tbody");
+    tbody.innerHTML = "";
+    const mine = body.tenants ?? [];
+    for (const t of mine.slice(-10).reverse()) {
+      const tr = document.createElement("tr");
+      tr.style.borderBottom = "1px solid #21262d";
+      const name = t.name ?? t.tenantId;
+      const statusTag = t.status === "ready"
+        ? '<span class="tag stable">ready</span>'
+        : t.status === "failed"
+          ? '<span class="tag beta">failed</span>'
+          : '<span class="tag beta">provisioning</span>';
+      tr.innerHTML =
+        `<td style="padding:5px 4px;">${name}${statusTag}<br><span style="color:#6e7681; font-size:.7rem;">${t.variant} · ${t.sessions} turns</span></td>` +
+        `<td style="text-align:right;"><button type="button" data-tenant="${t.tenantId}" class="delBtn" style="background:#8b1f1f; font-size:.68rem; padding:3px 8px;">Delete</button></td>`;
+      tbody.appendChild(tr);
+    }
+    if (mine.length === 0) {
+      tbody.innerHTML = '<tr><td style="color:#6e7681; padding:6px 4px;">No sessions yet — create one above.</td></tr>';
+    }
+    for (const btn of tbody.querySelectorAll(".delBtn")) {
+      btn.addEventListener("click", async () => {
+        const tenantId = btn.getAttribute("data-tenant");
+        if (!confirm(`Delete this session? Project files will be removed as well.\n${tenantId}`)) return;
+        const res = await fetch(`/tenants/${tenantId}`, { method: "DELETE" });
+        if (res.status === 200) {
+          if (tenantId === currentTenantId) {
+            currentTenantId = "";
+            sessionReady = false;
+            send.disabled = true;
+            progCard.style.display = "none";
+          }
+          bubble("assistant", `🗑 Session deleted — "${tenantId}"`);
+          loadSessions();
+        } else {
+          const err = await res.json().catch(() => ({ error: res.statusText }));
+          bubble("assistant", `⚠ Delete failed (${res.status}): ${err.error ?? ""}`);
+        }
+      });
+    }
+  }
+  document.getElementById("refreshSessions").addEventListener("click", loadSessions);
+  loadSessions();
   document.getElementById("deleteBtn").addEventListener("click", async () => {
     if (!currentTenantId) return;
     if (!confirm(`Delete this session? Project files will be removed as well.\n${projectName || currentTenantId}`)) return;
@@ -169,7 +226,8 @@
         clearInterval(timer);
         createBtn.disabled = false;
         if (d.status === "ready") {
-          bubble("assistant", `✔ 세션 준비 완료 — 프로젝트 "${projectName}" (${variant}) · ${user} 전용 테넌트`);
+          bubble("assistant", `✔ Session ready — project "${projectName}" (${variant}) · tenant for ${user}`);
+          loadSessions();
         } else {
           bubble("assistant", `⚠ 프로비저닝 실패: ${d.error ?? "unknown"}`);
         }
