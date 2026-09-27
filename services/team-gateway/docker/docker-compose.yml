@@ -1,0 +1,39 @@
+# Team Gateway — Phase 0 compose (ADR-0092). Build context is the workspace root.
+#
+# Required environment:
+#   TEAM_GATEWAY_HERMES_SEED_HOME  a Hermes home with credentials (e.g. ~/.hermes);
+#                                  mounted read-only at /seed and copied into tenant homes.
+#
+# Phase 0 mounts the workspace clone at /workspace (scaffolding writes Projects/ there);
+# Phase 2 replaces this with a baked, pinned workspace image.
+
+name: team-gateway
+
+services:
+  team-gateway:
+    build:
+      context: ../..
+      dockerfile: services/team-gateway/docker/Dockerfile
+    init: true
+    ports:
+      - "127.0.0.1:8787:8787" # loopback publish — Phase 0 is local-only (ADR-0092 D6)
+    environment:
+      TEAM_GATEWAY_HOST: 0.0.0.0 # inside the container; publish above stays loopback
+      TEAM_GATEWAY_DATA_DIR: /data
+      TEAM_GATEWAY_WORKSPACE_DIR: /workspace
+      TEAM_GATEWAY_VARIANTS: ${TEAM_GATEWAY_VARIANTS:-co-consult}
+      TEAM_GATEWAY_TEMPLATE_VERSION: ${TEAM_GATEWAY_TEMPLATE_VERSION:-}
+      TEAM_GATEWAY_RUN_BUDGET_SECONDS: ${TEAM_GATEWAY_RUN_BUDGET_SECONDS:-300}
+      TEAM_GATEWAY_MAX_TURNS: ${TEAM_GATEWAY_MAX_TURNS:-100}
+      TEAM_GATEWAY_HERMES_EXTRA_ARGS: ${TEAM_GATEWAY_HERMES_EXTRA_ARGS:-}
+      HERMES_BIN: ${HERMES_BIN:-hermes}
+      HERMES_INFERENCE_MODEL: ${HERMES_INFERENCE_MODEL:-}
+      HERMES_INFERENCE_PROVIDER: ${HERMES_INFERENCE_PROVIDER:-}
+      TEAM_GATEWAY_HERMES_SEED_HOME: /seed
+    volumes:
+      - team-gateway-data:/data
+      - ../..:/workspace
+      - ${TEAM_GATEWAY_HERMES_SEED_HOME:?set TEAM_GATEWAY_HERMES_SEED_HOME to a Hermes home with credentials (e.g. ~/.hermes)}:/seed:ro
+
+volumes:
+  team-gateway-data:

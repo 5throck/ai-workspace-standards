@@ -1,4 +1,4 @@
-// @version 1.0.1
+// @version 1.0.2
 // scripts/helpers/upgrade-versions.ts
 // Pure version-extraction and frontmatter-merge helpers for upgrade-project.ts.
 // Extracted so the version-detection logic is unit-testable (the CLI script's
@@ -50,6 +50,19 @@ export function preserveLifecycleFrontmatter(tplContent: string, projContent: st
 
   const lifecycleBlock = block.join("\n");
   const tplLines = tplContent.split("\n");
+
+  // If the template frontmatter already carries a `lifecycle:` block, replace it
+  // in place with the project's block. Appending a second block would create a
+  // duplicate YAML key — parsers take last-key-wins, silently discarding the
+  // project's newer governance data (2026-09-25 co-abap review, finding #1).
+  const tplLifecycleIdx = tplLines.findIndex(l => /^lifecycle:\s*$/.test(l));
+  if (tplLifecycleIdx !== -1) {
+    let tplBlockEnd = tplLifecycleIdx + 1;
+    while (tplBlockEnd < tplLines.length && /^\s{2,}\S/.test(tplLines[tplBlockEnd])) tplBlockEnd++;
+    tplLines.splice(tplLifecycleIdx, tplBlockEnd - tplLifecycleIdx, ...block);
+    return tplLines.join("\n");
+  }
+
   // Insert before the closing `---` of the template frontmatter.
   let closingIdx = -1;
   for (let i = 1; i < tplLines.length; i++) {
