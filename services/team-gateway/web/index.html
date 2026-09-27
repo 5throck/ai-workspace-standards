@@ -61,7 +61,7 @@
   </div>
 
   <div class="card" id="progCard" style="display:none">
-    <h2>② 프로비저닝 진행 <button id="deleteBtn" type="button" style="float:right; background:#8b1f1f; font-size:.7rem; padding:4px 10px;">세션 삭제</button></h2>
+    <h2>② 프로비저닝 진행 <button id="deleteBtn" type="button" style="float:right; background:#8b1f1f; font-size:.7rem; padding:4px 10px;">Delete session</button></h2>
     <ol class="progress" id="progress"></ol>
   </div>
 
@@ -134,17 +134,17 @@
   let currentTenantId = "";
   document.getElementById("deleteBtn").addEventListener("click", async () => {
     if (!currentTenantId) return;
-    if (!confirm(`세션을 삭제할까요? 프로젝트 파일도 함께 제거됩니다.\n${projectName || currentTenantId}`)) return;
+    if (!confirm(`Delete this session? Project files will be removed as well.\n${projectName || currentTenantId}`)) return;
     const res = await fetch(`/tenants/${currentTenantId}`, { method: "DELETE" });
     if (res.status === 200) {
-      bubble("assistant", `🗑 세션 삭제 완료 — 프로젝트 "${projectName || currentTenantId}"`);
+      bubble("assistant", `🗑 Session deleted — "${projectName || currentTenantId}"`);
       progCard.style.display = "none";
       currentTenantId = "";
       sessionReady = false;
       send.disabled = true;
     } else {
       const err = await res.json().catch(() => ({ error: res.statusText }));
-      bubble("assistant", `⚠ 삭제 실패 (${res.status}): ${err.error ?? ""}`);
+      bubble("assistant", `⚠ Delete failed (${res.status}): ${err.error ?? ""}`);
     }
   });
 
