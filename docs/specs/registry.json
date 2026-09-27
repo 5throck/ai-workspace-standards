@@ -1629,6 +1629,15 @@
       "source": "manual",
       "created": "2026-09-27",
       "last_updated": "2026-09-27"
+    },
+    {
+      "id": "2026-09-28-sound-synth-orphan-mirror-cleanup-design",
+      "title": "sound synth orphan mirror cleanup design",
+      "file": "docs/designs/2026-09-28-sound-synth-orphan-mirror-cleanup-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-27",
+      "last_updated": "2026-09-27"
     }
   ]
 }
