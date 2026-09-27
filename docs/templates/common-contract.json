@@ -629,6 +629,10 @@
     "sound-synth": {
       "reason": "variant-scoped co-game skill (workspace-schema.json variant_scoped_skills) — outside the common contract by its own description",
       "since": "2026-09-25"
+    },
+    "new-project": {
+      "reason": "L0-only operator skill — root skills/ SSOT, l2_propagate: false, never delivered to L2 scaffolds (SKILLS.md: L0 operator only); mirror copies exist under templates/common platform dirs and the upgrade WORKSPACE-ONLY SKILL SWEEP removes them from projects",
+      "since": "2026-09-27"
     }
   }
 }
