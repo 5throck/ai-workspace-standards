@@ -10,7 +10,7 @@
 import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { dockerProbe, GatewayConfig, loadConfig, readKeysFile, SERVICE_ROOT } from "./config";
-import { presentedCredential, principalFor, requestAuthorized } from "./auth";
+import { credentialValid, presentedCredential, principalFor, requestAuthorized } from "./auth";
 import { scaffoldProject } from "./scaffold";
 import { publicTenant, recordProgress, recordTurnUsage, seedHermesHome, TenantRecord } from "./tenant";
 import { TenantRegistry } from "./registry-db";
@@ -133,6 +133,39 @@ export function sanitizeProjectName(name: string): string {
     .slice(0, 48)
     .replace(/-+$/g, "");
   return cleaned;
+}
+
+/** Wave B3/SEC-13: bootstrap the admin account at startup (idempotent). */
+export function bootstrapAdminFromEnv(state: GatewayState): void {
+  const email = process.env.CO_WORKSPACE_ADMIN_EMAIL;
+  if (!email) return;
+  const admin = state.users.bootstrapAdmin(email);
+  if (admin) console.log(`[co-workspace] admin bootstrapped: ${admin.principal} (${email})`);
+}
+
+/** SEC-01: resolve the caller's trusted principal — session first, then key label. */
+export function callerPrincipal(state: GatewayState, req: Request): string | null {
+  const sessionUser = state.users.resolveSession(sessionTokenFromCookie(req));
+  if (sessionUser) return sessionUser.principal;
+  const cred = presentedCredential(req);
+  if (cred && credentialValid(state.cfg, cred)) return principalFor(state.cfg, cred);
+  return null;
+}
+
+export function isAdminCaller(state: GatewayState, req: Request): boolean {
+  const sessionUser = state.users.resolveSession(sessionTokenFromCookie(req));
+  return sessionUser?.role === "admin";
+}
+
+/** SEC-01: tenant access requires owner match, admin role, or the Phase 0 open mode
+ * (no keys, no login requirement, anonymous-owned tenant). */
+export function requireTenantAccess(state: GatewayState, req: Request, rec: TenantRecord): void {
+  if (isAdminCaller(state, req)) return;
+  const openMode = state.cfg.apiKeys.length === 0 && !state.cfg.loginRequired;
+  if (openMode && (rec.ownerPrincipal ?? "anonymous") === "anonymous") return;
+  const caller = callerPrincipal(state, req);
+  if (caller && rec.ownerPrincipal && rec.ownerPrincipal === caller) return;
+  throw new HttpError(403, `tenant ${rec.tenantId} is owned by ${rec.ownerPrincipal ?? "anonymous"}`);
 }
 
 export function tenantKeyFor(variant: string, user: string): string {
@@ -287,7 +320,7 @@ async function runChat(
   const result = await task;
   if (result.sessionId) {
     const current = state.registry.get(rec.tenantId) ?? rec;
-    if (state.cfg.runtime === "antigravity") current.conversationId = result.sessionId;
+    if (state.cfg.runtime !== "hermes") current.conversationId = result.sessionId;
     const tokens = (result.tokens ?? {}) as Record<string, unknown>;
     const n = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : 0);
     recordTurnUsage(current, new Date().toISOString().slice(0, 10), {
@@ -329,6 +362,20 @@ class HttpError extends Error {
   constructor(readonly status: number, message: string) {
     super(message);
   }
+}
+
+/** P2-11 (QA fair): keep SSE connections alive through silent tool phases — a comment ping
+ * every 15s, cleared when the stream ends. */
+function startHeartbeat(controller: ReadableStreamDefaultController<Uint8Array>): () => void {
+  const ping = new TextEncoder().encode(": ping\n\n");
+  const timer = setInterval(() => {
+    try {
+      controller.enqueue(ping);
+    } catch {
+      clearInterval(timer);
+    }
+  }, 15_000);
+  return () => clearInterval(timer);
 }
 
 const SSE_HEADERS = {
@@ -541,6 +588,7 @@ async function geminiChatResponse(
   const frames = geminiStream();
   const body = new ReadableStream<Uint8Array>({
     async start(controller) {
+      const stopPing = startHeartbeat(controller);
       try {
         const result = await runChat(state, rec, message, (evt) => {
           if (evt.type !== "text" || typeof evt.text !== "string") return;
@@ -556,6 +604,7 @@ async function geminiChatResponse(
           ),
         );
       } finally {
+        stopPing();
         controller.close();
       }
     },
@@ -642,8 +691,6 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
         runtime: state.cfg.runtime,
         variants: state.cfg.variants,
         templateVersion: state.cfg.templateVersion ?? "head",
-        dataDir: state.cfg.dataDir,
-        hermesBin: state.cfg.hermesBin,
         tenants: state.registry.list().length,
       });
     }
@@ -679,7 +726,7 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
         variant,
         name: name || undefined,
         description: typeof body.description === "string" ? body.description : undefined,
-        ownerPrincipal: principalFor(state.cfg, presentedCredential(req)),
+        ownerPrincipal: callerPrincipal(state, req) ?? "anonymous",
       });
       startProvisioning(state, rec);
       return jsonResponse({ tenantId: rec.tenantId, name: rec.name, status: rec.status }, 202);
@@ -699,6 +746,7 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
     if (req.method === "GET" && tenantDetail) {
       const rec = state.registry.get(decodeURIComponent(tenantDetail[1]));
       if (!rec) throw new HttpError(404, `tenant ${tenantDetail[1]} not found`);
+      requireTenantAccess(state, req, rec);
       return jsonResponse(publicTenant(rec));
     }
 
@@ -707,16 +755,13 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
       const tenantId = decodeURIComponent(tenantDelete[1]);
       const rec = state.registry.get(tenantId);
       if (!rec) throw new HttpError(404, `tenant ${tenantId} not found`);
-      const principal = principalFor(state.cfg, presentedCredential(req));
-      if (
-        state.cfg.apiKeys.length > 0 &&
-        (rec.ownerPrincipal ?? "anonymous") !== principal &&
-        principal !== "admin"
-      ) {
-        throw new HttpError(403, `tenant ${tenantId} is owned by ${rec.ownerPrincipal ?? "anonymous"}`);
-      }
+      requireTenantAccess(state, req, rec);
       const inflight = state.provisioning.get(tenantId);
       if (inflight) await inflight.catch(() => undefined);
+      const chatLock = state.chatLocks.get(tenantId);
+      if (chatLock) await chatLock.catch(() => undefined);
+      state.chatLocks.delete(tenantId);
+      state.turns.deleteTenant(tenantId);
       const deleted = state.registry.delete(tenantId);
       if (deleted) {
         rmSync(deleted.projectDir, { recursive: true, force: true });
@@ -731,6 +776,7 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
       const message = typeof body.message === "string" ? body.message : "";
       if (!message.trim()) throw new HttpError(400, "message is required");
       const rec = await waitForTenant(state, decodeURIComponent(tenantChat[1]));
+      requireTenantAccess(state, req, rec);
       assertQuota(state.cfg, rec);
       return nativeChatResponse(state, rec, message);
     }
@@ -741,7 +787,8 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
       if (!state.cfg.variants.includes(parsed.req.model)) {
         throw new HttpError(404, `unknown model: ${parsed.req.model}`);
       }
-      const { rec, promise } = getOrStartTenant(state, parsed.req.model, parsed.req.user, principalFor(state.cfg, presentedCredential(req)));
+      const principal = callerPrincipal(state, req) ?? parsed.req.user;
+      const { rec, promise } = getOrStartTenant(state, parsed.req.model, principal);
       if (!rec.ownerPrincipal) {
         rec.ownerPrincipal = principalFor(state.cfg, presentedCredential(req));
         state.registry.upsert(rec);
@@ -766,7 +813,9 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
 
     // Phase 2 key rotation: re-read the key file and re-union with the process-immutable env
     // keys — rotation without restart, and a reload can never silently disable auth.
+    // SEC-03: admin-only.
     if (req.method === "POST" && path === "/admin/reload") {
+      if (!isAdminCaller(state, req)) throw new HttpError(403, "admin only");
       const fileKeys = readKeysFile(state.cfg.apiKeysFile);
       const next = [...new Set([...state.cfg.apiKeysEnv, ...fileKeys])];
       if (next.length === 0 && state.cfg.apiKeys.length > 0) {
@@ -788,6 +837,7 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
       const rec = state.registry.get(decodeURIComponent(filesRoute[1]));
       if (!rec) throw new HttpError(404, `tenant ${filesRoute[1]} not found`);
       const rel = filesRoute[2] ? decodeURIComponent(filesRoute[2]) : "";
+      requireTenantAccess(state, req, rec);
       const entries = listTenantFiles(rec.projectDir, rel);
       if (entries === null) throw new HttpError(404, "path not found or not allowed");
       return jsonResponse({ path: rel, entries });
@@ -798,6 +848,7 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
       const rec = state.registry.get(decodeURIComponent(fileRoute[1]));
       if (!rec) throw new HttpError(404, `tenant ${fileRoute[1]} not found`);
       const rel = decodeURIComponent(fileRoute[2]);
+      requireTenantAccess(state, req, rec);
       const content = readTenantFile(rec.projectDir, rel);
       if (content === null) throw new HttpError(404, "file not found or not allowed");
       if ("tooLarge" in content) throw new HttpError(413, "file exceeds the 256KB preview cap");
@@ -807,7 +858,9 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
     const historyRoute = path.match(/^\/tenants\/([^/]+)\/history$/);
     if (req.method === "GET" && historyRoute) {
       const tenantId = decodeURIComponent(historyRoute[1]);
-      if (!state.registry.get(tenantId)) throw new HttpError(404, `tenant ${tenantId} not found`);
+      const rec = state.registry.get(tenantId);
+      if (!rec) throw new HttpError(404, `tenant ${tenantId} not found`);
+      requireTenantAccess(state, req, rec);
       return jsonResponse({ turns: state.turns.list(tenantId) });
     }
 
@@ -875,7 +928,7 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
       const token = state.users.createSession(user.id);
       return new Response(JSON.stringify({ user: { loginId: user.principal, name: user.name, role: user.role } }), {
         status: 200,
-        headers: { "content-type": "application/json", "set-cookie": sessionCookieHeader(token) },
+        headers: { "content-type": "application/json", "set-cookie": sessionCookieHeader(token, state.cfg.loginRequired) },
       });
     }
 
@@ -956,7 +1009,7 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
         headers: {
           location: "/",
           "set-cookie": [
-            sessionCookieHeader(token),
+            sessionCookieHeader(token, state.cfg.loginRequired),
             "gw_oauth_state=; HttpOnly; Path=/; Max-Age=0",
             "gw_oauth_verifier=; HttpOnly; Path=/; Max-Age=0",
           ].join(", "),
@@ -1097,6 +1150,15 @@ export function createServer(state: GatewayState) {
 
 if (import.meta.main) {
   const state = createState();
+  bootstrapAdminFromEnv(state);
+  // P2-5: a restart orphans in-flight "provisioning" records (the promise map is memory-only).
+  for (const t of state.registry.list()) {
+    if (t.status === "provisioning") {
+      t.status = "failed";
+      t.error = "interrupted by server restart — create a new session";
+      state.registry.upsert(t);
+    }
+  }
   if (state.cfg.isolation === "docker") {
     const probe = dockerProbe(state.cfg.dockerBin);
     if (!probe.ok) {

@@ -9,6 +9,7 @@
  */
 
 import type { HermesEvent, HermesTurnResult } from "./hermes";
+import { allowlistedEnv } from "./hermes";
 
 export interface CodexSpawnOptions {
   codexBin: string;
@@ -63,7 +64,7 @@ export function parseCodexLine(line: string): HermesEvent | null {
       text: "",
       tokens: {
         input: usage.input_tokens,
-        output: usage.cached_input_tokens,
+        output: usage.output_tokens,
         total: usage.total_tokens,
       },
       raw: rec,
@@ -84,7 +85,7 @@ export async function runCodexTurn(
     stdin: "ignore",
     stdout: "pipe",
     stderr: "pipe",
-    env: o.env ?? process.env,
+    env: allowlistedEnv(o.env ?? process.env),
   });
 
   let sessionId: string | undefined;

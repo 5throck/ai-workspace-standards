@@ -86,7 +86,7 @@ writeFileSync(\`Projects/\${name}/AGENTS.md\`, "# fake\\n");
   writeFileSync(
     agyBin,
     `#!/bin/sh
-printf '%s\\n' "$*" >> "$AGY_LOG"
+printf '%s\\n' "$*" >> "$HERMES_FAKE_LOG"
 cat > /dev/null
 echo '{"event":"init","conversation_id":"conv-agy","init":{"cwd":"."}}'
 echo '{"event":"step_update","step_update":{"step_index":1,"state":"ACTIVE","step_type":"agent_response","text_delta":"Hello from fake agy"}}'
@@ -95,7 +95,7 @@ echo '{"event":"result","result":{"conversation_id":"conv-agy","status":"SUCCESS
   );
   chmodSync(agyBin, 0o755);
 
-  process.env.AGY_LOG = join(dataDir, "agy-args.log");
+  process.env.HERMES_FAKE_LOG = join(dataDir, "agy-args.log");
   const cfg = loadConfig({
     CO_WORKSPACE_HOST: "127.0.0.1",
     CO_WORKSPACE_PORT: String(20000 + Math.floor(Math.random() * 20000)),
@@ -104,7 +104,7 @@ echo '{"event":"result","result":{"conversation_id":"conv-agy","status":"SUCCESS
     CO_WORKSPACE_VARIANTS: "co-consult",
     CO_WORKSPACE_RUNTIME: "antigravity",
     CO_WORKSPACE_ANTIGRAVITY_BIN: agyBin,
-    AGY_LOG: join(dataDir, "agy-args.log"),
+    HERMES_FAKE_LOG: join(dataDir, "agy-args.log"),
   });
   const server = createServer(createState(cfg));
   const base = `http://127.0.0.1:${server.port}`;

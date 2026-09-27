@@ -121,7 +121,11 @@ echo '{"type":"result","session_id":"s1","exit_code":0,"text":"ok","tokens":{"in
     CO_WORKSPACE_API_KEYS_FILE: keysFile,
   });
   expect(cfg.apiKeys).toEqual(["sk-old"]);
-  const server = createServer(createState(cfg));
+  const state = createState(cfg);
+  // SEC-03: /admin/reload is admin-only — create an admin session for the rotation test.
+  const admin = state.users.createUser({ email: "admin@test.local", name: "admin", password: "adminpass123", role: "admin" });
+  const adminCookie = `gw_session=${state.users.createSession(admin!.id)}`;
+  const server = createServer(state);
   const base = `http://127.0.0.1:${server.port}`;
   afterAll(() => server.stop(true));
 
@@ -136,7 +140,7 @@ echo '{"type":"result","session_id":"s1","exit_code":0,"text":"ok","tokens":{"in
     writeFileSync(keysFile, "sk-old\nsk-new\n");
     const reload = await fetch(`${base}/admin/reload`, {
       method: "POST",
-      headers: { authorization: "Bearer sk-old" },
+      headers: { cookie: adminCookie },
     });
     expect(((await reload.json()) as any).keyCount).toBe(2);
     expect((await models("sk-new")).status).toBe(200);
@@ -144,7 +148,7 @@ echo '{"type":"result","session_id":"s1","exit_code":0,"text":"ok","tokens":{"in
     writeFileSync(keysFile, "sk-new\n");
     const reload2 = await fetch(`${base}/admin/reload`, {
       method: "POST",
-      headers: { authorization: "Bearer sk-new" },
+      headers: { cookie: adminCookie },
     });
     expect(((await reload2.json()) as any).keyCount).toBe(1);
     expect((await models("sk-old")).status).toBe(401);

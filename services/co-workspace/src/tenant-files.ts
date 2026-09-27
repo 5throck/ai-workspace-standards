@@ -161,6 +161,10 @@ export class TurnStore {
     return new Map(rows.map((r) => [r.tenant_id, r.n]));
   }
 
+  deleteTenant(tenantId: string): void {
+    this.db.query("DELETE FROM turns WHERE tenant_id = ?").run(tenantId);
+  }
+
   list(tenantId: string, limit = 50): TurnRecord[] {
     const rows = this.db
       .query(

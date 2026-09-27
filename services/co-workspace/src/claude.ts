@@ -9,6 +9,7 @@
  */
 
 import type { HermesEvent, HermesTurnResult } from "./hermes";
+import { allowlistedEnv } from "./hermes";
 
 export interface ClaudeSpawnOptions {
   claudeBin: string;
@@ -86,7 +87,7 @@ export async function runClaudeTurn(
     stdin: "ignore",
     stdout: "pipe",
     stderr: "pipe",
-    env: o.env ?? process.env,
+    env: allowlistedEnv(o.env ?? process.env),
   });
 
   let sessionId: string | undefined;
