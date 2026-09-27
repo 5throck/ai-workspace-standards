@@ -75,6 +75,18 @@ curl -sN "http://127.0.0.1:8787/v1beta/models/co-consult:streamGenerateContent?a
 - Antigravity itself exposes no public model-serving API spec (its extension surface is MCP), so
   the ecosystem-standard Gemini contract is what is served.
 
+## Session runtimes
+
+`TEAM_GATEWAY_RUNTIME` selects how tenant turns execute (default `hermes`):
+
+| Runtime | Command | Notes |
+|---|---|---|
+| `hermes` | `hermes chat --format stream-json` | Named threads (`--continue gw-<tenantId>`), per-tenant `HERMES_HOME`, toolset scoping, container isolation supported |
+| `antigravity` | `agy -p … --output-format stream-json` | Continuity via explicit `--conversation <id>` persisted on the tenant record; auth via the local Antigravity login; container isolation NOT supported (agy is not in the runtime image) |
+
+`TEAM_GATEWAY_ANTIGRAVITY_BIN` overrides the `agy` path. Both runtimes emit the same normalized
+events to every wire surface.
+
 ## Native REST surface
 
 | Method | Path | Purpose |
@@ -122,6 +134,8 @@ limitation).
 | `TEAM_GATEWAY_ISOLATION` | `process` | `docker` = per-turn ephemeral sibling container |
 | `TEAM_GATEWAY_RUNTIME_IMAGE` | `team-gateway-runtime:latest` | Runtime image for docker isolation |
 | `TEAM_GATEWAY_DOCKER_BIN` | `docker` | Docker CLI binary for the isolation probe |
+| `TEAM_GATEWAY_RUNTIME` | `hermes` | `hermes` or `antigravity` (agy headless print mode) |
+| `TEAM_GATEWAY_ANTIGRAVITY_BIN` | `agy` | Antigravity CLI binary for the antigravity runtime |
 | `HERMES_BIN` | `hermes` | Hermes binary path |
 | `HERMES_INFERENCE_MODEL` / `_PROVIDER` | — | Passed through to Hermes sessions |
 

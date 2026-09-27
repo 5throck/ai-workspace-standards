@@ -96,6 +96,8 @@ export function hermesSpawnArgv(o: HermesSpawnOptions): string[] {
     "run",
     "--rm",
     "--interactive",
+    "--entrypoint",
+    o.hermesBin,
     "--workdir",
     MOUNT_PROJECT,
     "-v",
@@ -107,7 +109,7 @@ export function hermesSpawnArgv(o: HermesSpawnOptions): string[] {
     "-e",
     "HERMES_ACCEPT_HOOKS=1",
     o.container.image,
-    ...inner,
+    ...inner.slice(1), // drop the bin — it moved to --entrypoint
   ];
 }
 

@@ -44,6 +44,10 @@ export interface GatewayConfig {
   isolation: "process" | "docker";
   runtimeImage: string;
   dockerBin: string;
+  /** Session runtime: `hermes` (default) or `antigravity` (agy headless print mode).
+   * Container isolation requires the hermes runtime (the agy binary is not in the image). */
+  runtime: "hermes" | "antigravity";
+  antigravityBin: string;
 }
 
 export const SERVICE_ROOT = resolve(import.meta.dir, "..");
@@ -119,6 +123,8 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     isolation: env.TEAM_GATEWAY_ISOLATION === "docker" ? "docker" : "process",
     runtimeImage: env.TEAM_GATEWAY_RUNTIME_IMAGE ?? "team-gateway-runtime:latest",
     dockerBin: env.TEAM_GATEWAY_DOCKER_BIN ?? "docker",
+    runtime: env.TEAM_GATEWAY_RUNTIME === "antigravity" ? "antigravity" : "hermes",
+    antigravityBin: env.TEAM_GATEWAY_ANTIGRAVITY_BIN ?? "agy",
   };
 }
 

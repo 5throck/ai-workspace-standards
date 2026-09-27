@@ -72,6 +72,8 @@ describe("hermes spawn adapter — toolsets and container isolation", () => {
   test("docker mode: ephemeral sibling container mounts only the tenant dirs", () => {
     const argv = hermesSpawnArgv({ ...base, container: { image: "team-gateway-runtime:latest" } });
     expect(argv.slice(0, 4)).toEqual(["docker", "run", "--rm", "--interactive"]);
+    expect(argv).toContain("--entrypoint");
+    expect(argv[argv.indexOf("--entrypoint") + 1]).toBe("hermes");
     expect(argv).toContain("--workdir");
     expect(argv).toContain("/work/project");
     const vIdx = argv.indexOf("-v");
