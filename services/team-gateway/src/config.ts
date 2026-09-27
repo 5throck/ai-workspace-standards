@@ -5,6 +5,7 @@
  *   secrets → seeded into each tenant HERMES_HOME (tenant.ts); never echoed by any endpoint
  */
 
+import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 export interface GatewayConfig {
@@ -23,8 +24,16 @@ export interface GatewayConfig {
   scaffoldTimeoutMs: number;
   hermesExtraArgs: string[];
   /** Phase 2 hardening (design 2026-09-27-team-gateway-phase2-hardening). */
-  /** Bearer keys for every non-exempt route; empty = auth disabled (Phase 0 localhost mode). */
+  /** Bearer keys for every non-exempt route; empty = auth disabled (Phase 0 localhost mode).
+   * Union of env keys + key-file keys; mutated in place by `POST /admin/reload`. */
   apiKeys: string[];
+  /** Env-derived portion of `apiKeys` — process-immutable; reload re-unions it with the file. */
+  apiKeysEnv: string[];
+  /** File with one key per line (lines starting with # are comments). Re-read by
+   * `POST /admin/reload` — rotation without restart. */
+  apiKeysFile?: string;
+  /** Quota window: `lifetime` (default) or `daily` (UTC-day buckets, counters reset per day). */
+  quotaWindow: "lifetime" | "daily";
   /** Per-tenant lifetime turn cap; 0 = off. */
   tenantMaxTurns: number;
   /** Per-tenant lifetime total-token cap; 0 = off. */
@@ -45,6 +54,24 @@ function num(value: string | undefined, fallback: number): number {
 }
 
 /** Like `num` but 0 is a meaningful value ("off"), and only non-finite/negative falls back. */
+/** Parse a key list: comma-separated (env style) or line-per-key (file style, `#` comments). */
+export function parseKeyList(text: string, separator: "," | "lines" = ","): string[] {
+  const parts = separator === "," ? text.split(",") : text.split(/\r?\n/);
+  return parts
+    .map((s) => (separator === "lines" ? s.replace(/#.*/, "").trim() : s.trim()))
+    .filter((s) => s.length > 0);
+}
+
+/** Read keys from a file (one per line, `#` comments). Missing file = empty. */
+export function readKeysFile(path: string | undefined): string[] {
+  if (!path) return [];
+  try {
+    return parseKeyList(readFileSync(path, "utf8"), "lines");
+  } catch {
+    return [];
+  }
+}
+
 function numOr0(value: string | undefined): number {
   const parsed = Number(value);
   return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
@@ -59,6 +86,9 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
       throw new Error("TEAM_GATEWAY_API_KEYS is set but parses to zero keys");
     }
   }
+  const apiKeysFile = env.TEAM_GATEWAY_API_KEYS_FILE || undefined;
+  const apiKeysEnv = [...apiKeys];
+  apiKeys = [...new Set([...apiKeys, ...readKeysFile(apiKeysFile)])];
   return {
     host: env.TEAM_GATEWAY_HOST ?? "127.0.0.1",
     port: num(env.TEAM_GATEWAY_PORT, 8787),
@@ -80,6 +110,9 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
       .map((s) => s.trim())
       .filter(Boolean),
     apiKeys,
+    apiKeysEnv,
+    apiKeysFile,
+    quotaWindow: env.TEAM_GATEWAY_QUOTA_WINDOW === "daily" ? "daily" : "lifetime",
     tenantMaxTurns: numOr0(env.TEAM_GATEWAY_TENANT_MAX_TURNS),
     tenantMaxTokens: numOr0(env.TEAM_GATEWAY_TENANT_MAX_TOKENS),
     hermesToolsets: env.TEAM_GATEWAY_HERMES_TOOLSETS || undefined,

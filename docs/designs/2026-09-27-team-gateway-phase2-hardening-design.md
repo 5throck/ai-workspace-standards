@@ -87,6 +87,12 @@ Exempt from auth: `GET /health`, `GET /` (liveness + static page). Everything el
 - **Accessibility (ADR-0065)**: exempt — HTTP API hardening; the demo page gains one optional labeled input (API key) using semantic form controls.
 - **Preview Verification (ADR-0070)**: exempt — no shipped rendered UI change beyond the dev-aid input; verification is API/test-based (§7).
 
+## 10. Addendum (2026-09-27, same-day wave 2): Windowed Quotas + Key Rotation
+
+- **Windowed quotas**: `TEAM_GATEWAY_QUOTA_WINDOW=lifetime|daily` (default lifetime). `daily` reads per-UTC-day buckets (`rec.daily`, pruned to the 8 most recent days on write) so caps reset each day; `lifetime` reads the cumulative counters. `assertQuota`/`windowUsage` take an injectable day key for deterministic testing.
+- **Key rotation without restart**: `TEAM_GATEWAY_API_KEYS_FILE` — one key per line, `#` comments. Keys = env pool ∪ file keys; `POST /admin/reload` (auth-required) re-reads the file and re-unions with the process-immutable env pool. A reload that would empty the pool while auth is enabled is rejected (`400`). This is the secret-manager-agnostic rotation path: point the file at any managed-secret mount. (Found during implementation: re-parsing `process.env` in the reload path would drop file keys and silently disable auth — the env portion is captured at startup instead.)
+- Tests: window usage with injectable day keys (fresh-day reset), key-list parsing (comments/blanks), rotation flip (`/admin/reload`), reload auth-protection.
+
 ## 10. References
 
 - ADR-0092 + `docs/designs/2026-09-27-team-gateway-service-design.md` (Phase 0 baseline, §10 roadmap)
