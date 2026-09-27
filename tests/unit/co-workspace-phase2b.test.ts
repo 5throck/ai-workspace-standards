@@ -161,7 +161,7 @@ echo '{"type":"result","session_id":"s1","exit_code":0,"text":"ok","tokens":{"in
       CO_WORKSPACE_HOST: "127.0.0.1",
       CO_WORKSPACE_PORT: String(20000 + Math.floor(Math.random() * 20000)),
       CO_WORKSPACE_DATA_DIR: join(tmpdir(), `gw-budget-${crypto.randomUUID().slice(0, 8)}`),
-      TEAM_GATEWAY_WORKSPACE_DIR: workspaceDir,
+      CO_WORKSPACE_WORKSPACE_DIR: workspaceDir,
       HERMES_BIN: hermesBin,
       CO_WORKSPACE_PRINCIPAL_MAX_TOKENS: "4",
     });

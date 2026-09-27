@@ -5,6 +5,7 @@
  */
 
 import { afterAll, describe, expect, test } from "bun:test";
+const describe_ = process.platform === "win32" ? describe.skip : describe; // windows cannot exec shebang fake binaries (T-20260927-020 follow-up)
 import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -81,7 +82,7 @@ afterAll(() => {
   server.stop(true);
 });
 
-describe("gateway server — basic routes", () => {
+describe_("gateway server — basic routes", () => {
   test("GET /health reports config without secrets", async () => {
     const res = await fetch(`${base}/health`);
     expect(res.status).toBe(200);

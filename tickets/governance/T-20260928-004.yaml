@@ -1,0 +1,18 @@
+schemaVersion: 1
+id: T-20260928-004
+kind: manual
+title: >-
+  co-workspace: finish the team-gateway to co-workspace rename — dead design-doc
+  links in README.md and component AGENTS.md, circular Formerly-quote, stale
+  default image name team-gateway-runtime, missing .env.keys mount in compose,
+  ADR-0092 rename addendum, component AGENTS.md invariants/layout refresh
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-27T16:44:14.951Z'
+history:
+  - at: '2026-09-27T16:44:14.951Z'
+    from: null
+    to: backlog
+result: null
+error: null
