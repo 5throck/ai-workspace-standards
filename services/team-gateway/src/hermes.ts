@@ -53,11 +53,15 @@ export interface HermesSpawnOptions {
    * `hostProjectDir`/`hostHermesHome` override the `-v` source paths for the case where the
    * gateway itself runs inside a container (mount sources resolve on the HOST, so they must be
    * host-visible paths; defaults = the gateway-local paths, correct for bare-metal hosts). */
-  container?: { image: string; hostProjectDir?: string; hostHermesHome?: string };
+  container?: { image: string; hostProjectDir?: string; hostHermesHome?: string; hostAuthDir?: string };
+  /** Shared Nous credential store (HERMES_SHARED_AUTH_DIR) — one token store across the
+   * operator + all tenants, refreshed in place (ADR-0092 Addendum 4). */
+  sharedAuthDir?: string;
 }
 
 const MOUNT_PROJECT = "/work/project";
 const MOUNT_HERMES_HOME = "/work/hermes-home";
+const MOUNT_SHARED_AUTH = "/work/shared-auth";
 
 /** The inner Hermes command. `paths` lets the container adapter substitute mount points for
  * host paths (`--in`) while keeping a single command contract. */
@@ -111,15 +115,27 @@ export function hermesSpawnArgv(o: HermesSpawnOptions): string[] {
     `HERMES_HOME=${MOUNT_HERMES_HOME}`,
     "-e",
     "HERMES_ACCEPT_HOOKS=1",
+    ...(o.sharedAuthDir
+      ? [
+          "-v",
+          `${o.container.hostAuthDir ?? o.sharedAuthDir}:${MOUNT_SHARED_AUTH}`,
+          "-e",
+          `HERMES_SHARED_AUTH_DIR=${MOUNT_SHARED_AUTH}`,
+        ]
+      : []),
     o.container.image,
     ...inner.slice(1), // drop the bin — it moved to --entrypoint
   ];
 }
 
 /** Per-tenant isolation: HERMES_HOME points at the tenant home so config, credentials, and the
- * session store (state.db) never cross tenants (ADR-0092 D5/D6). */
+ * session store (state.db) never cross tenants (ADR-0092 D5/D6) — EXCEPT the shared Nous
+ * credential store, which every tenant points at so runtime refreshes stay valid everywhere
+ * (ADR-0092 Addendum 4; per-tenant auth.json copies went stale and killed the shared refresh token). */
 export function hermesEnv(o: HermesSpawnOptions, base: Record<string, string | undefined> = process.env): Record<string, string | undefined> {
-  return { ...base, HERMES_HOME: o.hermesHome, HERMES_ACCEPT_HOOKS: "1" };
+  const env: Record<string, string | undefined> = { ...base, HERMES_HOME: o.hermesHome, HERMES_ACCEPT_HOOKS: "1" };
+  if (o.sharedAuthDir) env.HERMES_SHARED_AUTH_DIR = o.sharedAuthDir;
+  return env;
 }
 
 export interface HermesTurnResult {

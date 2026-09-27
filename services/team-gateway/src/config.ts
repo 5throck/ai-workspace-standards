@@ -17,6 +17,11 @@ export interface GatewayConfig {
   templateVersion?: string;
   hermesBin: string;
   hermesSeedHome?: string;
+  /** Shared Nous credential store dir handed to every tenant via `HERMES_SHARED_AUTH_DIR`
+   * (default: `<hermesSeedHome>/shared`). All tenants + the operator share ONE token store,
+   * so a runtime refresh stays valid everywhere — per-tenant auth.json copies go stale and
+   * invalidate the shared refresh token (found live, 2026-09-27). */
+  hermesAuthDir?: string;
   /** Model id stamped into every tenant config.yaml (`model.default`); unset = Hermes auto. */
   hermesModel?: string;
   runBudgetSeconds: number;
@@ -109,6 +114,7 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     templateVersion: env.TEAM_GATEWAY_TEMPLATE_VERSION || undefined,
     hermesBin: env.HERMES_BIN ?? "hermes",
     hermesSeedHome: env.TEAM_GATEWAY_HERMES_SEED_HOME || undefined,
+    hermesAuthDir: env.TEAM_GATEWAY_HERMES_AUTH_DIR || undefined,
     hermesModel: env.TEAM_GATEWAY_HERMES_MODEL || undefined,
     runBudgetSeconds: num(env.TEAM_GATEWAY_RUN_BUDGET_SECONDS, 300),
     maxTurns: num(env.TEAM_GATEWAY_MAX_TURNS, 100),

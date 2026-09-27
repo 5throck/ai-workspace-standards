@@ -197,6 +197,7 @@ async function runChat(
           maxTurns: state.cfg.maxTurns,
           extraArgs: state.cfg.hermesExtraArgs,
           toolsets: state.cfg.hermesToolsets,
+          sharedAuthDir: resolveAuthDir(state.cfg),
           container:
             state.cfg.isolation === "docker"
               ? {
@@ -206,6 +207,9 @@ async function runChat(
                     : undefined,
                   hostHermesHome: state.cfg.dataDirHost
                     ? join(state.cfg.dataDirHost, "tenants", rec.tenantId, "hermes-home")
+                    : undefined,
+                  hostAuthDir: state.cfg.dataDirHost
+                    ? join(state.cfg.dataDirHost, "shared-auth")
                     : undefined,
                 }
               : undefined,
@@ -227,6 +231,12 @@ async function runChat(
     state.registry.upsert(current);
   }
   return result;
+}
+
+/** Shared credential store for tenant sessions (ADR-0092 Addendum 4): defaults to the seed
+ * home's `shared/` dir — the operator's own Nous token store, refreshed in place. */
+export function resolveAuthDir(cfg: GatewayConfig): string | undefined {
+  return cfg.hermesAuthDir ?? (cfg.hermesSeedHome ? join(cfg.hermesSeedHome, "shared") : undefined);
 }
 
 function usageSummary(result: HermesTurnResult | undefined) {
