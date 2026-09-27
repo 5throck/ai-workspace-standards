@@ -7,7 +7,7 @@
  * HERMES_HOME isolation, per-tenant chat serialization.
  */
 
-import { existsSync, readFileSync } from "node:fs";
+import { copyFileSync, existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { mkdirSync } from "node:fs";
 import { dockerProbe, GatewayConfig, loadConfig, readKeysFile, SERVICE_ROOT } from "./config";
@@ -173,6 +173,11 @@ async function runChat(
   const task = prev
     .catch(() => undefined)
     .then(() => {
+      // Keep the tenant home's credentials current: the containerized hermes (older release
+      // lineage) resolves OAuth from its OWN home's auth.json and cannot consult the shared
+      // store, so each turn re-copies the operator's CURRENT auth.json (Addendum 4 note).
+      const seedAuth = state.cfg.hermesSeedHome ? join(state.cfg.hermesSeedHome, "auth.json") : undefined;
+      if (seedAuth && existsSync(seedAuth)) copyFileSync(seedAuth, join(rec.hermesHome, "auth.json"));
       if (state.cfg.runtime === "antigravity") {
         return runAntigravityTurn(
           {
@@ -208,9 +213,10 @@ async function runChat(
                   hostHermesHome: state.cfg.dataDirHost
                     ? join(state.cfg.dataDirHost, "tenants", rec.tenantId, "hermes-home")
                     : undefined,
-                  hostAuthDir: state.cfg.dataDirHost
-                    ? join(state.cfg.dataDirHost, "shared-auth")
-                    : undefined,
+                  hostAuthDir: state.cfg.hermesAuthDirHost
+                    ?? (state.cfg.dataDirHost
+                      ? join(state.cfg.dataDirHost, "shared-auth")
+                      : undefined),
                 }
               : undefined,
         },

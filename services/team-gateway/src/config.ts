@@ -5,8 +5,8 @@
  *   secrets → seeded into each tenant HERMES_HOME (tenant.ts); never echoed by any endpoint
  */
 
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { join, resolve } from "node:path";
 
 export interface GatewayConfig {
   host: string;
@@ -22,6 +22,9 @@ export interface GatewayConfig {
    * so a runtime refresh stays valid everywhere — per-tenant auth.json copies go stale and
    * invalidate the shared refresh token (found live, 2026-09-27). */
   hermesAuthDir?: string;
+  /** Host-side path of `hermesAuthDir` — sibling-container mount sources resolve on the host
+   * when the gateway itself is containerized (same pattern as `dataDirHost`). */
+  hermesAuthDirHost?: string;
   /** Model id stamped into every tenant config.yaml (`model.default`); unset = Hermes auto. */
   hermesModel?: string;
   runBudgetSeconds: number;
@@ -89,6 +92,28 @@ function numOr0(value: string | undefined): number {
   return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
 }
 
+/** Resolve the variant catalog. `all` (or `*`) auto-discovers every `templates/co-*` whose
+ * `variant.json` is `status: stable` — new variants appear without config changes. Explicit
+ * comma lists are honored verbatim (and may include non-stable variants deliberately). */
+export function resolveVariants(raw: string, workspaceDir: string): string[] {
+  const names = raw.split(",").map((s) => s.trim()).filter(Boolean);
+  if (!(names.length === 1 && (names[0] === "all" || names[0] === "*"))) return names;
+  const templatesDir = join(workspaceDir, "templates");
+  if (!existsSync(templatesDir)) return [];
+  const out: string[] = [];
+  for (const dir of readdirSync(templatesDir).filter((d) => d.startsWith("co-")).sort()) {
+    try {
+      const variant = JSON.parse(readFileSync(join(templatesDir, dir, "variant.json"), "utf8")) as {
+        status?: string;
+      };
+      if (variant.status === "stable") out.push(dir);
+    } catch {
+      /* unreadable variant.json — not catalog-eligible */
+    }
+  }
+  return out;
+}
+
 export function loadConfig(env: Record<string, string | undefined> = process.env): GatewayConfig {
   let apiKeys: string[] = [];
   // An empty-string value counts as unset (compose defaults interpolate to ""); only a
@@ -107,14 +132,14 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     port: num(env.TEAM_GATEWAY_PORT, 8787),
     dataDir: resolve(env.TEAM_GATEWAY_DATA_DIR ?? resolve(SERVICE_ROOT, "data")),
     workspaceDir: resolve(env.TEAM_GATEWAY_WORKSPACE_DIR ?? resolve(SERVICE_ROOT, "..", "..")),
-    variants: (env.TEAM_GATEWAY_VARIANTS ?? "co-consult")
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean),
+    variants: resolveVariants(env.TEAM_GATEWAY_VARIANTS ?? "co-consult", resolve(
+      env.TEAM_GATEWAY_WORKSPACE_DIR ?? resolve(SERVICE_ROOT, "..", ".."),
+    )),
     templateVersion: env.TEAM_GATEWAY_TEMPLATE_VERSION || undefined,
     hermesBin: env.HERMES_BIN ?? "hermes",
     hermesSeedHome: env.TEAM_GATEWAY_HERMES_SEED_HOME || undefined,
     hermesAuthDir: env.TEAM_GATEWAY_HERMES_AUTH_DIR || undefined,
+    hermesAuthDirHost: env.TEAM_GATEWAY_HERMES_AUTH_DIR_HOST || undefined,
     hermesModel: env.TEAM_GATEWAY_HERMES_MODEL || undefined,
     runBudgetSeconds: num(env.TEAM_GATEWAY_RUN_BUDGET_SECONDS, 300),
     maxTurns: num(env.TEAM_GATEWAY_MAX_TURNS, 100),

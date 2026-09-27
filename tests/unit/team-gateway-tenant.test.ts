@@ -4,7 +4,7 @@ import { describe, expect, test } from "bun:test";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { loadConfig } from "../../services/team-gateway/src/config";
+import { loadConfig, resolveVariants } from "../../services/team-gateway/src/config";
 import {
   publicTenant,
   seedHermesHome,
@@ -49,6 +49,35 @@ describe("GatewayConfig (loadConfig)", () => {
     expect(cfg.hermesSeedHome).toBe("/seed");
     expect(cfg.hermesBin).toBe("/usr/local/bin/hermes");
     expect(cfg.hermesExtraArgs).toEqual(["--yolo", "--verbose"]);
+  });
+});
+
+describe("resolveVariants — catalog expansion", () => {
+  test("explicit comma lists are honored verbatim", () => {
+    expect(resolveVariants("co-consult, co-price", "/nowhere")).toEqual(["co-consult", "co-price"]);
+  });
+
+  test("all auto-discovers stable variants only from the workspace tree", () => {
+    const ws = join(tmpdir(), `gw-variants-${crypto.randomUUID().slice(0, 8)}`);
+    for (const [name, status] of [
+      ["co-stable-a", "stable"],
+      ["co-beta", "beta"],
+      ["co-broken", "stable"],
+    ] as const) {
+      mkdirSync(join(ws, "templates", name), { recursive: true });
+      writeFileSync(
+        join(ws, "templates", name, "variant.json"),
+        name === "co-broken" ? "{ not json" : JSON.stringify({ status }),
+      );
+    }
+    mkdirSync(join(ws, "templates", "not-a-variant"), { recursive: true });
+    const variants = resolveVariants("all", ws);
+    expect(variants).toEqual(["co-stable-a"]); // beta and unreadable are excluded
+    expect(resolveVariants("*", ws)).toEqual(["co-stable-a"]);
+  });
+
+  test("all with no templates dir yields empty catalog", () => {
+    expect(resolveVariants("all", join(tmpdir(), `gw-empty-${crypto.randomUUID().slice(0, 8)}`))).toEqual([]);
   });
 });
 
