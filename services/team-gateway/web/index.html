@@ -29,6 +29,7 @@
   .sess:hover .del { visibility: visible; }
   .sess .del:hover { text-decoration: underline; }
   .sidetitle { font-size: .7rem; color: #8b949e; letter-spacing: .05em; }
+  .grouphead { font-size: .72rem; color: #58a6ff; font-weight: 600; padding: 8px 4px 3px; letter-spacing: .03em; }
   /* ── main column ── */
   section { flex: 1; display: flex; flex-direction: column; min-width: 0; }
   header { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 1px solid #21262d; }
@@ -112,27 +113,41 @@
     const body = await (await fetch("/tenants?mine=1")).json();
     sessionsEl.innerHTML = "";
     const mine = (body.tenants ?? []).slice().reverse();
+    // group by variant
+    const groups = new Map();
     for (const t of mine) {
-      const row = document.createElement("div");
-      row.className = "sess" + (t.tenantId === currentTenantId ? " active" : "");
-      const name = t.name ?? t.tenantId;
-      const tag = t.status === "failed" ? " ⚠" : t.status === "provisioning" ? " ⏳" : "";
-      row.innerHTML = `<div><div class="nm">${name}${tag}</div>` +
-        `<div class="meta">${t.variant} · ${t.sessions} turns</div></div>`;
-      const del = document.createElement("button");
-      del.className = "del"; del.textContent = "Delete"; del.title = "Delete session";
-      del.addEventListener("click", async (e) => {
-        e.stopPropagation();
-        if (!confirm(`Delete "${name}"? Project files will be removed.`)) return;
-        const res = await fetch(`/tenants/${t.tenantId}`, { method: "DELETE" });
-        if (res.status === 200) {
-          if (t.tenantId === currentTenantId) { currentTenantId = ""; pnameLabel.textContent = ""; }
-          loadSessions();
-        }
-      });
-      row.appendChild(del);
-      row.addEventListener("click", () => selectSession(t));
-      sessionsEl.appendChild(row);
+      (groups.get(t.variant) ?? groups.set(t.variant, []).get(t.variant)).push(t);
+    }
+    for (const [variant, tenants] of [...groups.entries()].sort()) {
+      const head = document.createElement("div");
+      head.className = "grouphead";
+      head.textContent = `${variant} (${tenants.length})`;
+      sessionsEl.appendChild(head);
+      for (const t of tenants) {
+        const row = document.createElement("div");
+        row.className = "sess" + (t.tenantId === currentTenantId ? " active" : "");
+        const name = t.name ?? t.tenantId;
+        const tag = t.status === "failed" ? " ⚠" : t.status === "provisioning" ? " ⏳" : "";
+        row.innerHTML = `<div><div class="nm">${name}${tag}</div>` +
+          `<div class="meta">${t.sessions} turns</div></div>`;
+        const del = document.createElement("button");
+        del.className = "del"; del.textContent = "Delete"; del.title = "Delete session";
+        del.addEventListener("click", async (e) => {
+          e.stopPropagation();
+          if (!confirm(`Delete "${name}"? Project files will be removed.`)) return;
+          const res = await fetch(`/tenants/${t.tenantId}`, { method: "DELETE" });
+          if (res.status === 200) {
+            if (t.tenantId === currentTenantId) { currentTenantId = ""; pnameLabel.textContent = ""; }
+            loadSessions();
+          }
+        });
+        row.appendChild(del);
+        row.addEventListener("click", () => selectSession(t));
+        sessionsEl.appendChild(row);
+      }
+    }
+    if (mine.length === 0) {
+      sessionsEl.innerHTML = '<div class="hint" style="padding:6px 4px;">No sessions yet.</div>';
     }
   }
 
