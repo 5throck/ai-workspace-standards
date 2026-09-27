@@ -29,3 +29,24 @@ Requirement (user, 2026-09-27): create `Hermes.md` — an instruction file for t
 
 - Design: `docs/designs/2026-09-27-hermes-md-instruction-file-design.md` (background, requirements R1–R8, alternatives, verification)
 - ADR-0088 (Hermes platform support — D2 as amended, F3 first-found-wins chain, Addendum 1 truncation finding), ADR-0077 (Codex twin delivery pattern), ADR-0035/ADR-0048 (AGENTS.md structure/SSOT)
+
+## Amendment 1 (2026-09-27): COMMON-HERMES merge-pattern activation — existing-L2 delivery went live
+
+Decision D3 specified "MERGE-managed upgrade delivery" for `Hermes.md`, but the initial
+implementation (commit `1865ea0b`, same day) shipped the file only to L0/L1 and to NEW
+scaffolds: `MANAGED_PATTERNS` in `scripts/lib/managed-block-merge.ts` had no
+`COMMON-HERMES` entry, so the upgrade MERGE pass claimed the file
+(`MERGE_MANAGED_FILES` already listed it, upgrade-policy v1.18.0) and then skipped every
+existing project with `INFO: Template has no managed markers — skipping Hermes.md`.
+Discovered during the 2026-09-27 post-v0.7.0 fleet upgrade of all 12 `Projects/co-*`
+projects: none of them received the file.
+
+Activated by managed-block-merge v1.2.0 → v1.3.0 (spec
+`docs/designs/2026-09-27-hermes-merge-marker-design.md`, PR #1129): the `COMMON-HERMES`
+pattern joins `MANAGED_PATTERNS` after its COMMON-CODEX twin (key-less zones, positional
+path — engine code unchanged; the COMMON-CODEX precedent of T-20260924-010 D1 applied to
+the Hermes family member). upgrade-project skill 1.5.2 documents the marker pair, and the
+same-day fleet re-upgrade delivered `Hermes.md` to all 12 existing projects (12 per-project
+PRs, all merged 2026-09-27). Scaffold semantics were verified correct independently:
+new-project v1.31.0 keeps the file on the `hermes`/`all` profiles (the default), and the
+new-project E2E Test 8 asserts `Hermes.md` present for platform=all.

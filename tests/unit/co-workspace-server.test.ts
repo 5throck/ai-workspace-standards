@@ -146,6 +146,57 @@ describe_("gateway server — native provisioning and chat", () => {
     expect(config).toContain(`- ${projectDir}`);
   });
 
+  test("POST /sessions is idempotent per (principal, variant) and stamps the lazy-lookup key", async () => {
+    const first = await fetch(`${base}/sessions`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ variant: "co-develop" }),
+    });
+    expect(first.status).toBe(202);
+    const created = await first.json();
+
+    const second = await fetch(`${base}/sessions`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ variant: "co-develop" }),
+    });
+    expect(second.status).toBe(200);
+    const again = await second.json();
+    expect(again.existing).toBe(true);
+    expect(again.tenantId).toBe(created.tenantId);
+  });
+
+  test("a /sessions-created team is the tenant the web wire resolves (no divergence)", async () => {
+    // Signed-in web flow: the session principal is the tenant key's user component, so the
+    // composer's chat must resolve to the created team rather than lazily spawning another.
+    const user = state.users.createUser({ email: "team@test.local", name: "team", password: "teampass123", role: "user" });
+    const cookie = `gw_session=${state.users.createSession(user!.id)}`;
+    const create = await fetch(`${base}/sessions`, {
+      method: "POST",
+      headers: { "content-type": "application/json", cookie },
+      body: JSON.stringify({ variant: "co-consult", name: "divergence-probe" }),
+    });
+    expect(create.status).toBe(202);
+    const { tenantId } = await create.json();
+    await waitFor("team ready", async () => {
+      const detail = await (await fetch(`${base}/tenants/${tenantId}`, { headers: { cookie } })).json();
+      return detail.status === "ready";
+    });
+
+    const tenantsBefore = (await (await fetch(`${base}/tenants?mine=1`, { headers: { cookie } })).json()).tenants.length;
+    const chat = await fetch(`${base}/v1/chat/completions`, {
+      method: "POST",
+      headers: { "content-type": "application/json", cookie },
+      body: JSON.stringify({ model: "co-consult", stream: false, messages: [{ role: "user", content: "hi" }] }),
+    });
+    expect(chat.status).toBe(200);
+    await chat.text();
+    const mine = (await (await fetch(`${base}/tenants?mine=1`, { headers: { cookie } })).json()).tenants;
+    expect(mine.length).toBe(tenantsBefore); // no second tenant spawned
+    expect(mine.map((t: any) => t.tenantId)).toContain(tenantId);
+    expect(mine.find((t: any) => t.tenantId === tenantId).sessions).toBe(1); // the turn landed on the created team
+  });
+
   test("POST /tenants/:id/chat streams raw Hermes events and a done summary", async () => {
     const tenants = (await (await fetch(`${base}/tenants`)).json()).tenants;
     const tenantId = tenants[0].tenantId;
