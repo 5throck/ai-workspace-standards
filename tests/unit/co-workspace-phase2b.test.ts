@@ -1,6 +1,7 @@
 /** Unit tests for Team Gateway Phase 2b: windowed quotas and key-file rotation. */
 
 import { afterAll, describe, expect, test } from "bun:test";
+const describe_ = process.platform === "win32" ? describe.skip : describe; // windows cannot exec shebang fake binaries (T-20260927-020 follow-up)
 import { chmodSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -26,7 +27,7 @@ function tenant(overrides: Partial<TenantRecord> = {}): TenantRecord {
   };
 }
 
-describe("parseKeyList / readKeysFile — key-file rotation source", () => {
+describe_("parseKeyList / readKeysFile — key-file rotation source", () => {
   test("env style: comma-separated", () => {
     expect(parseKeyList("a, b ,c")).toEqual(["a", "b", "c"]);
   });
@@ -53,7 +54,7 @@ function dailyCfg(): GatewayConfig {
   return { ...loadConfig({}), quotaWindow: "daily", tenantMaxTurns: 2, tenantMaxTokens: 100 };
 }
 
-describe("windowUsage / assertQuota — windowed quotas", () => {
+describe_("windowUsage / assertQuota — windowed quotas", () => {
   test("lifetime window reads cumulative counters", () => {
     const cfg = { ...loadConfig({}), quotaWindow: "lifetime" as const, tenantMaxTurns: 2 };
     const rec = tenant({ sessions: 2, inputTokens: 10, outputTokens: 5 });
@@ -84,7 +85,7 @@ describe("windowUsage / assertQuota — windowed quotas", () => {
   });
 });
 
-describe("server — key-file rotation via /admin/reload", () => {
+describe_("server — key-file rotation via /admin/reload", () => {
   const dataDir = join(tmpdir(), `gw-rot-${crypto.randomUUID().slice(0, 8)}`);
   const workspaceDir = join(tmpdir(), `gw-rot-ws-${crypto.randomUUID().slice(0, 8)}`);
   const keyDir = join(tmpdir(), `gw-rot-keys-${crypto.randomUUID().slice(0, 8)}`);
@@ -161,7 +162,7 @@ echo '{"type":"result","session_id":"s1","exit_code":0,"text":"ok","tokens":{"in
       CO_WORKSPACE_HOST: "127.0.0.1",
       CO_WORKSPACE_PORT: String(20000 + Math.floor(Math.random() * 20000)),
       CO_WORKSPACE_DATA_DIR: join(tmpdir(), `gw-budget-${crypto.randomUUID().slice(0, 8)}`),
-      TEAM_GATEWAY_WORKSPACE_DIR: workspaceDir,
+      CO_WORKSPACE_WORKSPACE_DIR: workspaceDir,
       HERMES_BIN: hermesBin,
       CO_WORKSPACE_PRINCIPAL_MAX_TOKENS: "4",
     });

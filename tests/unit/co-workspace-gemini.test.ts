@@ -1,6 +1,7 @@
 /** Unit tests for the Team Gateway Gemini wire translation (Antigravity/Gemini ecosystem). */
 
 import { afterAll, describe, expect, test } from "bun:test";
+const describe_ = process.platform === "win32" ? describe.skip : describe; // windows cannot exec shebang fake binaries (T-20260927-020 follow-up)
 import { chmodSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -13,7 +14,7 @@ import {
 import { loadConfig } from "../../services/co-workspace/src/config";
 import { createServer, createState } from "../../services/co-workspace/src/server";
 
-describe("parseGeminiRequest — generateContent shape", () => {
+describe_("parseGeminiRequest — generateContent shape", () => {
   test("extracts the latest user turn from contents[].parts", () => {
     const parsed = parseGeminiRequest({
       contents: [
@@ -50,7 +51,7 @@ describe("parseGeminiRequest — generateContent shape", () => {
   });
 });
 
-describe("Gemini wire payloads", () => {
+describe_("Gemini wire payloads", () => {
   test("generateContent envelope shape", () => {
     const payload = generateContentPayload("answer", {
       promptTokenCount: 10,
@@ -82,7 +83,7 @@ describe("Gemini wire payloads", () => {
   });
 });
 
-describe("gateway server — Gemini surface", () => {
+describe_("gateway server — Gemini surface", () => {
   const dataDir = join(tmpdir(), `team-gateway-gemini-${crypto.randomUUID().slice(0, 8)}`);
   const workspaceDir = join(tmpdir(), `team-gateway-gemini-ws-${crypto.randomUUID().slice(0, 8)}`);
   mkdirSync(join(workspaceDir, "scripts"), { recursive: true });

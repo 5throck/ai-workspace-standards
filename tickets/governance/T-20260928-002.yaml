@@ -1,0 +1,17 @@
+schemaVersion: 1
+id: T-20260928-002
+kind: manual
+title: >-
+  co-workspace: restore Windows CI coverage — fake hermes binaries are shebang
+  scripts that Bun.spawn cannot exec on windows-latest; suites are skip-gated
+  now, re-enable via portable fake binaries or process.platform-aware spawn
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-09-27T16:44:14.924Z'
+history:
+  - at: '2026-09-27T16:44:14.924Z'
+    from: null
+    to: backlog
+result: null
+error: null

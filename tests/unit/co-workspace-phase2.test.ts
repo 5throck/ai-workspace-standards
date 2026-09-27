@@ -2,6 +2,7 @@
  * (design 2026-09-27-team-gateway-phase2-hardening). */
 
 import { afterAll, describe, expect, test } from "bun:test";
+const describe_ = process.platform === "win32" ? describe.skip : describe; // windows cannot exec shebang fake binaries (T-20260927-020 follow-up)
 import { chmodSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -13,7 +14,7 @@ import { createServer, createState } from "../../services/co-workspace/src/serve
 const cfgAuth = { apiKeys: ["sk-one", "sk-two"] };
 const req = (headers: Record<string, string>) => new Request("http://x/v1/models", { headers });
 
-describe("auth — header styles, constant-time path, exemptions", () => {
+describe_("auth — header styles, constant-time path, exemptions", () => {
   test("accepts Bearer, x-api-key, and x-goog-api-key headers", () => {
     expect(presentedCredential(req({ authorization: "Bearer sk-one" }))).toBe("sk-one");
     expect(presentedCredential(req({ "x-api-key": "sk-one" }))).toBe("sk-one");
@@ -45,7 +46,7 @@ describe("auth — header styles, constant-time path, exemptions", () => {
   });
 });
 
-describe("hermes spawn adapter — toolsets and container isolation", () => {
+describe_("hermes spawn adapter — toolsets and container isolation", () => {
   const base: HermesSpawnOptions = {
     hermesBin: "hermes",
     projectDir: "/data/tenants/gw-x/project",
@@ -113,7 +114,7 @@ describe("hermes spawn adapter — toolsets and container isolation", () => {
   });
 });
 
-describe("config — Phase 2 tiers", () => {
+describe_("config — Phase 2 tiers", () => {
   test("auth/quotas/isolation parse with fail-fast on empty key config", () => {
     const cfg = loadConfig({
       CO_WORKSPACE_API_KEYS: "k1, k2",
@@ -142,7 +143,7 @@ describe("config — Phase 2 tiers", () => {
   });
 });
 
-describe("server — auth and quota enforcement", () => {
+describe_("server — auth and quota enforcement", () => {
   const dataDir = join(tmpdir(), `gw-p2-${crypto.randomUUID().slice(0, 8)}`);
   const workspaceDir = join(tmpdir(), `gw-p2-ws-${crypto.randomUUID().slice(0, 8)}`);
   mkdirSync(join(workspaceDir, "scripts"), { recursive: true });
