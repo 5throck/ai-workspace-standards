@@ -8,12 +8,18 @@ title: >-
   links (found via an invalid blackout-era co-abap test; upstream improvement
   candidate)
 priority: low
-status: backlog
+status: running
 attempts: 0
 created_at: '2026-09-27T01:57:08.299Z'
 history:
   - at: '2026-09-27T01:57:08.299Z'
     from: null
     to: backlog
+  - at: '2026-09-27T18:05:33.211Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-27T18:05:33.222Z'
+    from: waiting
+    to: running
 result: null
 error: null

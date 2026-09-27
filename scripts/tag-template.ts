@@ -1,6 +1,11 @@
 #!/usr/bin/env bun
-// @version 1.1.0
+// @version 1.2.0
 // tag-template.ts - Publish a new template version git tag
+//
+// v1.2.0 (T-20260927-014): a tag that exists locally but is missing on origin
+// (a prior run whose push failed) no longer short-circuits to exit 0 — the run
+// checks `git ls-remote --tags origin` and recovers by pushing the existing
+// local tag. --no-push skips the recovery; --fail-on-push-error still escalates.
 
 import { $ } from 'bun';
 import * as path from 'node:path';
@@ -35,7 +40,27 @@ const tagName = `template-v${version}`;
 const existingTags = await $`git -C ${workspaceRoot} tag -l ${tagName}`.quiet().nothrow();
 const tagExists = existingTags.stdout.toString().trim() === tagName;
 if (tagExists) {
-  console.log(`${GREEN}✅ tag ${tagName} already exists. Nothing to do.${RESET}`);
+  // v1.2.0 (T-20260927-014): local existence alone proves nothing — a prior run
+  // may have created the tag but failed the push. Recover instead of exiting 0.
+  const remoteCheck = await $`git -C ${workspaceRoot} ls-remote --tags origin ${tagName}`.quiet().nothrow();
+  const onOrigin = remoteCheck.stdout.toString().trim().length > 0;
+  if (onOrigin) {
+    console.log(`${GREEN}✅ tag ${tagName} exists locally and on origin. Nothing to do.${RESET}`);
+  } else if (noPush) {
+    console.log(`${YELLOW}⚠ tag ${tagName} exists locally but is missing on origin (--no-push: recovery push skipped)${RESET}`);
+  } else {
+    const recoverResult = await $`git -C ${workspaceRoot} push origin ${tagName}`.quiet().nothrow();
+    if (recoverResult.exitCode === 0) {
+      console.log(`${GREEN}✅ tag ${tagName} existed locally but was missing on origin — recovery push published it${RESET}`);
+    } else {
+      const stderr = recoverResult.stderr.toString().trim();
+      console.log(`${YELLOW}⚠ tag ${tagName} exists locally, is missing on origin, and the recovery push failed: ${stderr}${RESET}`);
+      console.log(`${YELLOW}  Run: git push origin ${tagName}${RESET}`);
+      if (failOnPushError && import.meta.main) {
+        process.exit(1);
+      }
+    }
+  }
   if (import.meta.main) {
     process.exit(0);
   }
