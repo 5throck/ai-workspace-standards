@@ -49,7 +49,7 @@ export class UserStore {
     this.db.exec("PRAGMA journal_mode = WAL;");
     this.db.exec(`CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY,
-      email TEXT UNIQUE NOT NULL,
+      email TEXT UNIQUE,
       name TEXT NOT NULL,
       principal TEXT UNIQUE NOT NULL,
       password_hash TEXT,
@@ -74,6 +74,32 @@ export class UserStore {
       email TEXT NOT NULL,
       expires_at TEXT NOT NULL
     );`);
+    // Migration: pre-PII-safe databases carry `email NOT NULL`, which breaks signups that
+    // legitimately store a NULL email (the raw email is discarded after verification). Rebuild
+    // the table without the constraint, preserving every row and its unique indexes.
+    const cols = this.db.query("PRAGMA table_info(users)").all() as Array<{ name: string; notnull: number }>;
+    const emailCol = cols.find((c) => c.name === "email");
+    if (emailCol?.notnull) {
+      this.db.exec(`CREATE TABLE users_rebuild (
+        id TEXT PRIMARY KEY,
+        email TEXT UNIQUE,
+        name TEXT NOT NULL,
+        principal TEXT UNIQUE NOT NULL,
+        password_hash TEXT,
+        google_sub TEXT,
+        role TEXT NOT NULL DEFAULT 'user',
+        created_at TEXT NOT NULL,
+        deleted_at TEXT,
+        login_id TEXT,
+        email_hash TEXT,
+        verified_at TEXT
+      );`);
+      this.db.exec(`INSERT INTO users_rebuild
+        (id, email, name, principal, password_hash, google_sub, role, created_at, deleted_at, login_id, email_hash, verified_at)
+        SELECT id, email, name, principal, password_hash, google_sub, role, created_at, deleted_at, login_id, email_hash, verified_at FROM users;`);
+      this.db.exec("DROP TABLE users;");
+      this.db.exec("ALTER TABLE users_rebuild RENAME TO users;");
+    }
     // Migration-safe column additions for the PII-safe account model (login by ID; the raw
     // email is discarded after verification and kept only as a hash for duplicate checks).
     for (const stmt of [

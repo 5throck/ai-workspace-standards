@@ -5,6 +5,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { loadConfig, resolveVariants } from "../../services/co-workspace/src/config";
+import { UserStore } from "../../services/co-workspace/src/users";
 import {
   publicTenant,
   seedHermesHome,
@@ -49,6 +50,29 @@ describe("GatewayConfig (loadConfig)", () => {
     expect(cfg.hermesSeedHome).toBe("/seed");
     expect(cfg.hermesBin).toBe("/usr/local/bin/hermes");
     expect(cfg.hermesExtraArgs).toEqual(["--yolo", "--verbose"]);
+  });
+});
+
+describe("UserStore — PII-safe signup (NOT NULL regression, live-found 2026-09-27)", () => {
+  test("createPendingAccount works despite the legacy email NOT NULL constraint", async () => {
+    const dataDir = join(tmpdir(), `gw-signup-${crypto.randomUUID().slice(0, 8)}`);
+    mkdirSync(dataDir, { recursive: true });
+    const store = new UserStore(dataDir);
+    const result = await store.createPendingAccount({
+      loginId: "techcross",
+      email: "techcross@gmail.com",
+      password: "longenough1",
+    });
+    expect(result.ok).toBe(true);
+    // verify the account activates and logs in by ID
+    if (result.ok) {
+      const loginId = store.verifyEmail(result.verificationToken);
+      expect(loginId).toBe("techcross");
+      const user = await store.verifyLoginById("techcross", "longenough1");
+      expect(user?.principal).toBe("techcross");
+      // raw email must not persist post-verification
+      expect(store.findByEmail("techcross@gmail.com")).toBeNull();
+    }
   });
 });
 
