@@ -43,3 +43,14 @@ Dry-runs: all 12 projects show real delivery plans (~6–7 locked + 2–3 manage
 | co-security | 0 | 0 | 1 (upgrade v0.7.0) | 0.6.0 |
 
 All repos returned to main + pulled; upgrade branches preserved on remotes via the open PRs. Once T-20260927-016 is resolved (billing), the 12 PRs merge and the next cycle's final table returns to zeros.
+
+## Addendum — merge authorization wave (user-directed, 2026-09-27 ~11:00 KST)
+
+The user authorized proceeding with the 12 halted merges. Reconnaissance re-classified the fleet: co-safety #177 (public) was 7/7 GREEN/CLEAN; co-abap #163 (public) CONFLICTING; the 10 private PRs UNSTABLE/MERGEABLE (failing checks are non-required — free private repos have no branch protection; quota still active).
+
+- **co-safety #177 merged first** (only fully-green PR — strongest canary); post-merge local verify green.
+- **co-abap #163**: update-branch hit a real conflict (main's #161 multi-OS CI vs template ci.yml) — resolved via the project's sanctioned `dev-sync --conclude-merge` path after three gate fixes (VERSION_MANIFEST regen; README hash refresh + README_ko mirror; direct-commit hook requires the pipeline). Merged branch then failed REAL public CI 6/8: two blackout-era project tests (added in remediation #160 during the quota blackout, never executed) reference undelivered/nonexistent modules. **PR left OPEN — T-20260927-017 filed.** Not a 0.7.0 packaging defect (co-safety proves the delivery CI-sound).
+- **10 private PRs merged** (co-export #27, co-consult #67, co-deck #107, co-design #5, co-develop #149, co-game #24, co-newbiz #418, co-price #123, co-security #50, co-architect #348) under explicit user authorization: failing checks are quota artifacts (runner=none, never executed), all ten locally green (audit + verify-scripts + 0.7.0), precedent T-20260926-011. Documented exception to the never-merge-red rule.
+- Post-merge: all repos returned to main + pulled (co-design main tracking fixed — was untracked since its 09-25 creation), pr/* branches deleted remote+local, full verification loop 12/12 audit-green.
+
+**Final state**: 11/12 projects at v0.7.0 with green audits and zero open PRs; co-abap at 0.6.0 with #163 open pending T-20260927-017. T-20260927-016 remains OPEN (quota still active — blocks all future private-repo CI).
