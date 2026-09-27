@@ -22,11 +22,11 @@ RUN apt-get update \
 
 COPY --from=bun /usr/local/bin/bun /usr/local/bin/bun
 
-WORKDIR /app/services/team-gateway
-COPY services/team-gateway/package.json ./
-COPY services/team-gateway/tsconfig.json ./
-COPY services/team-gateway/src ./src
-COPY services/team-gateway/web ./web
+WORKDIR /app/services/co-workspace
+COPY services/co-workspace/package.json ./
+COPY services/co-workspace/tsconfig.json ./
+COPY services/co-workspace/src ./src
+COPY services/co-workspace/web ./web
 RUN bun install
 
 ENV TEAM_GATEWAY_HOST=0.0.0.0 \
