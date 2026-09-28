@@ -122,6 +122,15 @@
   #adminView .card button { background: #1f6feb; color: #fff; border: 0; border-radius: 7px; padding: 7px 14px; font: inherit; cursor: pointer; }
   #adminView .card button:hover { background: #388bfd; }
   .formErr { color: #f85149; font-size: .78rem; min-height: 1em; margin-top: 6px; }
+  .modalWrap { position: fixed; inset: 0; background: rgba(0,0,0,.55); display: flex; align-items: center; justify-content: center; z-index: 100; }
+  .modal { background: var(--panel); border: 1px solid var(--border2); border-radius: 12px; padding: 18px 20px; width: min(460px, 92vw); }
+  .modal h3 { margin: 0 0 10px; font-size: 1rem; color: var(--fg); }
+  .modal .field { display: flex; flex-direction: column; gap: 3px; color: var(--muted); margin-bottom: 8px; font-size: .78rem; }
+  .modal input { background: var(--input-bg); color: var(--fg); border: 1px solid var(--border2); border-radius: 7px; padding: 7px 9px; font: inherit; width: 100%; }
+  .modal .row { display: flex; gap: 8px; justify-content: flex-end; align-items: center; margin-top: 10px; }
+  .modal .row .spacer { flex: 1; }
+  .modal button { background: #1f6feb; color: #fff; border: 0; border-radius: 7px; padding: 7px 14px; font: inherit; cursor: pointer; }
+  .modal .copyStatus { color: var(--muted); font-size: .74rem; }
   .gws-hidden { display: none !important; }
   .empty b { color: var(--fg); font-size: 1.05rem; display: block; margin-bottom: 6px; }
 </style>
@@ -530,6 +539,35 @@
     localStorage.setItem("gw-theme", next);
   });
 
+  // Reusable modal (R1+): overlay + themed card. dismissible=false renders a blocking
+  // dialog (used for the forced first-login password change).
+  function showModal({ title, bodyHtml, dismissible = true }) {
+    const wrap = document.createElement("div");
+    wrap.className = "modalWrap";
+    wrap.innerHTML = `<div class="modal" role="dialog" aria-modal="true" aria-label="${esc(title)}"><h3>${esc(title)}</h3>${bodyHtml}</div>`;
+    document.body.appendChild(wrap);
+    if (dismissible) wrap.addEventListener("click", (e) => { if (e.target === wrap) wrap.remove(); });
+    return wrap;
+  }
+
+  // Clipboard ladder: secure-context async API → execCommand fallback (LAN http) → manual hint.
+  async function copyText(text, input, statusEl) {
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+      } else if (input) {
+        input.focus(); input.select();
+        if (!document.execCommand("copy")) throw new Error("execCommand refused");
+      } else {
+        throw new Error("no fallback input");
+      }
+      statusEl.textContent = "Copied to clipboard.";
+    } catch {
+      if (input) { input.focus(); input.select(); }
+      statusEl.textContent = "Copy unavailable here — text selected: press Ctrl-C / Cmd-C.";
+    }
+  }
+
   // ── Wave B1/B3: auth state, login/signup UI, user info, admin panel ──
   const authCard = $("authCard");
   const adminMenu = $("adminMenu");
@@ -654,6 +692,38 @@
     $("pf-back").addEventListener("click", () => showView("chat"));
   }
 
+  // R1: a temp-password login must rotate before the app is usable (blocking modal; the
+  // rotation purges sessions, so the user signs in again with the new password).
+  function forcePasswordChange() {
+    const wrap = showModal({ title: "Set a new password", dismissible: false, bodyHtml: `
+      <div class="field">Your account uses a temporary password from your administrator. Choose a new password to continue.</div>
+      <div class="field"><input id="fp-new" type="password" placeholder="New password (8+)" autocomplete="new-password"></div>
+      <div class="field"><input id="fp-new2" type="password" placeholder="Repeat new password" autocomplete="new-password"></div>
+      <div class="formErr" id="fp-err" role="alert"></div>
+      <div class="row"><button id="fp-save">Save and continue</button></div>` });
+    wrap.querySelector("#fp-save").addEventListener("click", async () => {
+      const a = wrap.querySelector("#fp-new").value;
+      const b = wrap.querySelector("#fp-new2").value;
+      const err = wrap.querySelector("#fp-err");
+      if (a.length < 8) { err.textContent = "⚠ Password must be at least 8 characters."; return; }
+      if (a !== b) { err.textContent = "⚠ Passwords do not match."; return; }
+      const res = await fetch("/auth/me", {
+        method: "PATCH",
+        headers: { "content-type": "application/json", "x-requested-with": "co-workspace" },
+        body: JSON.stringify({ password: a }),
+      });
+      if (res.status === 200) {
+        wrap.remove();
+        await fetch("/auth/logout", { method: "POST", headers: { "x-requested-with": "co-workspace" } });
+        alert("Password updated. Sign in with your new password.");
+        location.assign("/login");
+      } else {
+        const body = await res.json().catch(() => ({}));
+        err.textContent = `⚠ ${body.error ?? "change failed"}`;
+      }
+    });
+  }
+
   async function doLogin(id, pw) {
     const res = await fetch("/auth/login", {
       method: "POST",
@@ -667,6 +737,7 @@
       applyAdminVisibility();
       applyComposerLock();
       loadSessions();
+      if (me.mustChangePassword) forcePasswordChange();
     } else {
       bubble("assistant", `⚠ ${body.error ?? "login failed"}`);
     }
@@ -716,7 +787,7 @@
           const pu = stats.perUser.find((p) => p.principal === u.principal);
           return `<tr><td>${esc(u.loginId ?? u.principal)}${u.role === "admin" ? " ·admin" : ""}</td>` +
             `<td>${esc(u.status)}</td><td>${pu?.tenantCount ?? 0}</td><td>${fmt(pu?.diskBytes ?? 0)}</td>` +
-            `<td><button class="collapsebtn" data-reset="${u.id}">reset pw</button> ` +
+            `<td><button class="collapsebtn" data-reset="${u.id}" data-name="${esc(u.loginId)}">reset pw</button> ` +
             `<button class="collapsebtn" data-del="${u.id}" style="color:#f85149;">delete</button></td></tr>`;
         })
         .join("") +
@@ -725,8 +796,17 @@
       btn.addEventListener("click", async () => {
         const res = await fetch(`/admin/users/${btn.getAttribute("data-reset")}/reset-password`, { method: "POST" });
         const body = await res.json();
-        alert(`One-time reset token (15 min):
-${body.resetToken}`);
+        if (res.status !== 200) { alert(body.error ?? "reset failed"); return; }
+        const wrap = showModal({ title: `Temporary password for @${btn.getAttribute("data-name")}`, bodyHtml: `
+          <div class="field">Give this one-time password to the user. It expires in 15 minutes and must be changed at first sign-in.</div>
+          <div class="field"><input id="rp-val" readonly value="${esc(body.tempPassword)}" style="font-family: ui-monospace, monospace; letter-spacing: 1px;"></div>
+          <div class="formErr" id="rp-err" role="status"></div>
+          <div class="row"><span class="copyStatus" id="rp-status" role="status"></span><span class="spacer"></span>
+          <button id="rp-copy" type="button">Copy</button><button id="rp-close" type="button" class="ghost" style="background:transparent;color:var(--muted);border:1px solid var(--border2);">Close</button></div>` });
+        const val = wrap.querySelector("#rp-val");
+        val.focus(); val.select();
+        wrap.querySelector("#rp-copy").addEventListener("click", () => copyText(val.value, val, wrap.querySelector("#rp-status")));
+        wrap.querySelector("#rp-close").addEventListener("click", () => wrap.remove());
       });
     }
     for (const btn of adminView.querySelectorAll("[data-del]")) {
@@ -752,6 +832,7 @@ ${body.resetToken}`);
     if (res.status === 200) {
       me = (await res.json()).user;
       applyAdminVisibility();
+      if (me.mustChangePassword) forcePasswordChange();
     }
     renderAuthCard();
     applyComposerLock();

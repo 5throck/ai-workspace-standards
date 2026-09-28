@@ -156,6 +156,55 @@ echo '{"type":"result","session_id":"s1","exit_code":0,"text":"ok","tokens":{"in
     expect((await models("sk-new")).status).toBe(200);
   });
 
+  test("admin reset issues a copyable temp password: forced rotation, session purge, expiry", async () => {
+    const target = state.users.createUser({ email: "resetme@test.local", name: "resetme", password: "oldpass123", role: "user" });
+    const targetSession = state.users.createSession(target!.id);
+
+    const reset = await fetch(`${base}/admin/users/${target!.id}/reset-password`, {
+      method: "POST",
+      headers: { cookie: adminCookie },
+    });
+    expect(reset.status).toBe(200);
+    const { tempPassword, resetToken } = await reset.json();
+    expect(typeof tempPassword).toBe("string");
+    expect(tempPassword.startsWith("co-")).toBe(true);
+    expect(resetToken).toBeUndefined();
+
+    // the old session was purged at reset time (SEC-06)
+    const purged = await fetch(`${base}/auth/me`, { headers: { cookie: `gw_session=${targetSession}` } });
+    expect(purged.status).toBe(401);
+
+    // login with the temp password works and flags the forced change
+    const login = await fetch(`${base}/auth/login`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ loginId: "resetme", password: tempPassword }),
+    });
+    expect(login.status).toBe(200);
+    const loginBody = await login.json();
+    expect(loginBody.user.mustChangePassword).toBe(true);
+
+    // completing the rotation clears the flag and purges sessions again
+    const me = await fetch(`${base}/auth/me`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json", "x-requested-with": "co-workspace", cookie: login.headers.get("set-cookie")!.split(";")[0] },
+      body: JSON.stringify({ password: "brandnew123" }),
+    });
+    expect(me.status).toBe(200);
+
+    const relogin = await fetch(`${base}/auth/login`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ loginId: "resetme", password: "brandnew123" }),
+    });
+    expect(relogin.status).toBe(200);
+    expect((await relogin.json()).user.mustChangePassword).toBe(false);
+
+    // non-admin cannot issue resets
+    const denied = await fetch(`${base}/admin/users/${target!.id}/reset-password`, { method: "POST" });
+    expect(denied.status).toBe(401);
+  });
+
   test("GET /tenants?mine=1 matches the cookie-session principal, not header credentials", async () => {
     const user = state.users.createUser({ email: "mine@test.local", name: "mine", password: "minepass123", role: "user" });
     const cookie = `gw_session=${state.users.createSession(user!.id)}`;
