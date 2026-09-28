@@ -79,6 +79,9 @@ services:
       # other provider credentials) is NOT mounted.
       - ${CO_WORKSPACE_HERMES_SEED_HOME:?set CO_WORKSPACE_HERMES_SEED_HOME to a Hermes home with credentials (e.g. ~/.hermes)}/auth.json:/seed/auth.json:ro
       - ${CO_WORKSPACE_HERMES_SEED_HOME:?set CO_WORKSPACE_HERMES_SEED_HOME to a Hermes home with credentials (e.g. ~/.hermes)}/.env:/seed/.env:ro
+      # CO_WORKSPACE_API_KEYS_FILE points here; without the mount readKeysFile() silently
+      # returns [] and file-based keys never work in the container.
+      - ${CO_WORKSPACE_API_KEYS_FILE_HOST:-${CO_WORKSPACE_HERMES_SEED_HOME}/.env.keys}:/seed/.env.keys:ro
       - ${CO_WORKSPACE_HERMES_AUTH_DIR_HOST:-${CO_WORKSPACE_HERMES_SEED_HOME}/shared}:/seed/shared
       # Docker isolation (sibling containers) — required when CO_WORKSPACE_ISOLATION=docker:
       - /var/run/docker.sock:/var/run/docker.sock

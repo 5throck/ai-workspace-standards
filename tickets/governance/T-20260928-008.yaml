@@ -1,0 +1,16 @@
+schemaVersion: 1
+id: T-20260928-008
+kind: manual
+title: >-
+  co-workspace: artifacts panel keeps hardcoded dark colors in light theme —
+  tokenize to CSS vars
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-09-28T05:01:46.169Z'
+history:
+  - at: '2026-09-28T05:01:46.169Z'
+    from: null
+    to: backlog
+result: null
+error: null

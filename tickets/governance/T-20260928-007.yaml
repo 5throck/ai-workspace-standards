@@ -1,0 +1,17 @@
+schemaVersion: 1
+id: T-20260928-007
+kind: manual
+title: >-
+  co-workspace: security hardening bundle — narrow the /auth/* keyless prefix to
+  an explicit route allowlist, scope GET /tenants metadata to owner-or-admin,
+  decouple the session Secure flag from loginRequired
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-28T05:01:46.156Z'
+history:
+  - at: '2026-09-28T05:01:46.156Z'
+    from: null
+    to: backlog
+result: null
+error: null

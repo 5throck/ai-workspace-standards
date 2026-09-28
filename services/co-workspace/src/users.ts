@@ -112,6 +112,7 @@ export class UserStore {
       "ALTER TABLE users ADD COLUMN temp_password_expires TEXT",
       "CREATE UNIQUE INDEX IF NOT EXISTS idx_users_login ON users(login_id) WHERE login_id IS NOT NULL",
       "CREATE INDEX IF NOT EXISTS idx_users_email_hash ON users(email_hash)",
+      "CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email_hash_unique ON users(email_hash) WHERE email_hash IS NOT NULL",
     ]) {
       try {
         this.db.exec(stmt);
@@ -405,9 +406,11 @@ export class UserStore {
    * of the target is purged (SEC-06). First login with it forces a rotation. */
   createTempPassword(userId: string): string {
     const alphabet = "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-    const bytes = randomBytes(8);
+    // 12 chars from a 58-char alphabet (~70 bits) — the review's M1: 8 chars (~45 bits)
+    // was thin for even a 15-minute one-shot credential.
+    const bytes = randomBytes(12);
     const body = Array.from(bytes, (b) => alphabet[b % alphabet.length]).join("");
-    const temp = `co-${body.slice(0, 4)}-${body.slice(4)}`;
+    const temp = `co-${body.slice(0, 4)}-${body.slice(4, 8)}-${body.slice(8)}`;
     this.db
       .query("UPDATE users SET password_hash=?, must_change_password=1, temp_password_expires=? WHERE id=?")
       .run(Bun.password.hashSync(temp), new Date(Date.now() + 15 * 60 * 1000).toISOString(), userId);

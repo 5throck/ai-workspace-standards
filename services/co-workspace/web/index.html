@@ -18,7 +18,7 @@
   body { margin: 0; background: var(--bg); color: var(--fg); height: 100vh; display: flex; overflow: hidden; }
   .collapsed-note { font-size: .7rem; color: #6e7681; writing-mode: vertical-rl; padding: 8px 2px; cursor: pointer; }
   /* right artifacts panel */
-  #artifacts { width: 380px; min-width: 300px; border-left: 1px solid var(--border); display: flex; flex-direction: column; background: #10161d; }
+  #artifacts { width: 380px; min-width: 300px; border-left: 1px solid var(--border); display: flex; flex-direction: column; background: var(--bg2); }
   #artifacts .tabs { display: flex; border-bottom: 1px solid var(--border); }
   #artifacts .tabs button { flex: 1; background: transparent; color: #8b949e; border: 0; padding: 9px 4px; font: inherit; font-size: .78rem; cursor: pointer; }
   #artifacts .tabs button.active { color: #58a6ff; border-bottom: 2px solid #58a6ff; }
@@ -27,9 +27,9 @@
   .fileRow:hover { background: var(--panel); }
   .fileRow.dir { color: #79c0ff; font-weight: 600; }
   .fileRow .size { color: #6e7681; font-size: .7rem; }
-  pre.preview { background: #0d1117; border: 1px solid #21262d; border-radius: 8px; padding: 10px; overflow: auto; max-height: 100%; white-space: pre-wrap; font-size: .78rem; }
-  .turnRow { padding: 6px 8px; border-bottom: 1px solid #21262d; font-size: .78rem; }
-  .turnRow .meta { color: #6e7681; font-size: .68rem; }
+  pre.preview { background: var(--input-bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px; overflow: auto; max-height: 100%; white-space: pre-wrap; font-size: .78rem; }
+  .turnRow { padding: 6px 8px; border-bottom: 1px solid var(--border); font-size: .78rem; }
+  .turnRow .meta { color: var(--muted); font-size: .68rem; }
   .turnRow .txt { color: var(--fg); margin-top: 3px; }
   .collapsebtn { background: transparent; color: #8b949e; border: 0; cursor: pointer; font-size: .9rem; padding: 2px 6px; }
   .collapsebtn:hover { color: #58a6ff; }

@@ -59,7 +59,7 @@ Also in this wave: the artifacts right panel (Files/Preview/History) with the te
 
 **Storage layout amendment (same addendum)**: tenant workspaces live under `<DATA_DIR>/storage/<principal>/<projectName>/{project,hermes-home}` — per-user grouping on disk (user request) instead of a flat `tenants/<id>` dir. The scaffold still executes in the workspace clone's `Projects/` (engine constraint) and relocates immediately; legacy `tenants/` paths keep working via per-record absolute paths.
 
-## Addendum 5 (2026-09-28) — usability wave, account hardening, docker isolation deployment
+## Addendum 6 (2026-09-28) — usability wave, account hardening, docker isolation deployment
 
 User-approved wave (design: `docs/designs/2026-09-28-co-workspace-usability-wave-design.md`; meeting: `memory/meeting-2026-09-28-co-workspace-improvements.md`; PRs #1164–#1185):
 
