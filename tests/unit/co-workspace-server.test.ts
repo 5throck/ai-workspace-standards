@@ -140,7 +140,12 @@ describe("gateway server — basic routes", () => {
     state.registry.delete(evil.tenantId);
   });
 
-  test("hostSidePath remaps dataDir-prefixed record paths onto the host root", () => {
+  // POSIX path literals with exact-string assertions — hostSidePath output goes
+  // through path.join, so the pinned strings cannot hold on win32 (docker
+  // isolation itself is a Linux-host deployment; the whole-file win32 gate this
+  // suite previously had shielded this test — T-20260929-001 un-gating exposed it).
+  const hostPathTest = process.platform === "win32" ? test.skip : test;
+  hostPathTest("hostSidePath remaps dataDir-prefixed record paths onto the host root", () => {
     const cfg = { dataDir: "/data", dataDirHost: "/host/root" };
     expect(hostSidePath(cfg, "/data/storage/techcross/x/project")).toBe("/host/root/storage/techcross/x/project");
     expect(hostSidePath(cfg, "/data/tenants/users.db")).toBe("/host/root/tenants/users.db");
