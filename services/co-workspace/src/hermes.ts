@@ -122,6 +122,10 @@ export function hermesSpawnArgv(o: HermesSpawnOptions): string[] {
     "no-new-privileges",
     "--cap-drop",
     "ALL",
+    // Run as the hermes image's unprivileged user: its entrypoint shim short-circuits for
+    // non-root, so no SETUID caps are needed under the cap-drop above.
+    "--user",
+    "10000:10000",
     "--entrypoint",
     o.hermesBin,
     "--workdir",

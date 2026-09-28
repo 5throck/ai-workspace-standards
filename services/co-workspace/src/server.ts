@@ -7,12 +7,12 @@
  * HERMES_HOME isolation, per-tenant chat serialization.
  */
 
-import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { chownSync, copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { dockerProbe, GatewayConfig, loadConfig, readKeysFile, SERVICE_ROOT } from "./config";
 import { credentialValid, presentedCredential, principalFor, requestAuthorized } from "./auth";
 import { scaffoldProject } from "./scaffold";
-import { publicTenant, recordProgress, recordTurnUsage, seedHermesHome, TenantRecord } from "./tenant";
+import { chownTree, publicTenant, recordProgress, recordTurnUsage, seedHermesHome, TenantRecord } from "./tenant";
 import { TenantRegistry } from "./registry-db";
 import { listTenantFiles, readTenantFile, TurnStore } from "./tenant-files";
 import {
@@ -106,6 +106,12 @@ export async function provisionTenant(state: GatewayState, rec: TenantRecord): P
     recordProgress(rec, "seeding", "seeding hermes home…");
     state.registry.upsert(rec);
     seedHermesHome(rec, state.cfg.hermesSeedHome, state.cfg.hermesModel);
+    if (state.cfg.isolation === "docker") {
+      // The isolated turn runs as the hermes image's UID 10000 — the tenant tree must be
+      // owned by it (the scaffold subprocess wrote everything as root).
+      chownTree(rec.hermesHome, 10000, 10000);
+      chownTree(rec.projectDir, 10000, 10000);
+    }
     rec.status = "ready";
     recordProgress(rec, "ready", "session ready");
   } catch (err) {
@@ -300,7 +306,10 @@ async function runChat(
       // lineage) resolves OAuth from its OWN home's auth.json and cannot consult the shared
       // store, so each turn re-copies the operator's CURRENT auth.json (Addendum 4 note).
       const seedAuth = state.cfg.hermesSeedHome ? join(state.cfg.hermesSeedHome, "auth.json") : undefined;
-      if (seedAuth && existsSync(seedAuth)) copyFileSync(seedAuth, join(rec.hermesHome, "auth.json"));
+      if (seedAuth && existsSync(seedAuth)) {
+        copyFileSync(seedAuth, join(rec.hermesHome, "auth.json"));
+        if (state.cfg.isolation === "docker") chownSync(join(rec.hermesHome, "auth.json"), 10000, 10000);
+      }
       if (state.cfg.runtime === "antigravity") {
         return runAntigravityTurn(
           {
