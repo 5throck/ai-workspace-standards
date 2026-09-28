@@ -7,7 +7,7 @@ title: >-
   default image name team-gateway-runtime, missing .env.keys mount in compose,
   ADR-0092 rename addendum, component AGENTS.md invariants/layout refresh
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-09-27T16:44:14.951Z'
 history:
@@ -29,5 +29,11 @@ history:
   - at: '2026-09-28T22:36:53.141Z'
     from: running
     to: review
-result: null
+  - at: '2026-09-28T22:51:14.256Z'
+    from: review
+    to: done
+result: >-
+  Landed and merged via PR #1210 (regular merge 2026-09-29 after CI went green
+  on all three OSes; the two win32 test gates exposed by the un-gating were
+  platform-gated in the final commits)
 error: null

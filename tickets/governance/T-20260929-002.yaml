@@ -7,7 +7,7 @@ title: >-
   hooks only), so upgrade-project aborts (T-20260921-001 class) and instances
   are invisible to fleet git operations until first commit
 priority: normal
-status: running
+status: done
 attempts: 0
 created_at: '2026-09-28T16:40:18.683Z'
 history:
@@ -20,5 +20,13 @@ history:
   - at: '2026-09-28T18:05:21.847Z'
     from: waiting
     to: running
-result: null
+  - at: '2026-09-28T22:51:33.508Z'
+    from: running
+    to: review
+  - at: '2026-09-28T22:51:33.521Z'
+    from: review
+    to: done
+result: >-
+  Landed and merged via PR #1210 (regular merge 2026-09-29 after CI went green
+  on all three OSes); E2E 41/41 with the initial-commit assertion
 error: null
