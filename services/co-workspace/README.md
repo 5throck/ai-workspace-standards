@@ -172,21 +172,18 @@ continuity handle → credential model → isolation matrix → provider disclos
 
 ## Docker deployment
 
-Use a **durable clone** as the deploy root (compose builds from it and mounts it at
+Deploy from **this workspace checkout** (compose builds from it and mounts it at
 `/workspace` for scaffolding) and keep deployment paths in `docker/.env` (local-only,
-never committed):
+never committed). Set `CO_WORKSPACE_DATA_DIR_HOST` to a durable host directory — team
+storage must survive reboots, so keep it off `/tmp`:
 
 ```sh
-git clone https://github.com/5throck/ai-workspace-standards.git ~/co-workspace-workspace
-cd ~/co-workspace-workspace && bun install
-
 cat > services/co-workspace/docker/.env <<'ENV'
-CO_WORKSPACE_DATA_DIR_HOST=/Users/techcross/git/ai_workspace/Storage
-CO_WORKSPACE_WORKSPACE_DIR_HOST=/Users/techcross/co-workspace-workspace
-CO_WORKSPACE_HERMES_SEED_HOME=/Users/techcross/.hermes
-CO_WORKSPACE_HERMES_MODEL=upstage/solar-pro4:free
+CO_WORKSPACE_DATA_DIR_HOST=/absolute/durable/path/for/Storage
+CO_WORKSPACE_HERMES_SEED_HOME=/Users/you/.hermes
 CO_WORKSPACE_ISOLATION=docker
 CO_WORKSPACE_RUNTIME_IMAGE=co-workspace-gateway:latest
+CO_WORKSPACE_HERMES_MODEL=upstage/solar-pro4:free
 ENV
 
 cd services/co-workspace/docker
