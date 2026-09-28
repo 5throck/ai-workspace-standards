@@ -31,7 +31,7 @@ export interface GatewayConfig {
   maxTurns: number;
   scaffoldTimeoutMs: number;
   hermesExtraArgs: string[];
-  /** Phase 2 hardening (design 2026-09-27-team-gateway-phase2-hardening). */
+  /** Phase 2 hardening (design 2026-09-27-team-gateway-phase2-hardening (now docs/designs/2026-09-27-co-workspace-phase2-hardening-design.md)). */
   /** Bearer keys for every non-exempt route; empty = auth disabled (Phase 0 localhost mode).
    * Union of env keys + key-file keys; mutated in place by `POST /admin/reload`. */
   apiKeys: string[];
@@ -177,7 +177,7 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     tenantMaxTokens: numOr0(env.CO_WORKSPACE_TENANT_MAX_TOKENS),
     hermesToolsets: env.CO_WORKSPACE_HERMES_TOOLSETS || undefined,
     isolation: env.CO_WORKSPACE_ISOLATION === "docker" ? "docker" : "process",
-    runtimeImage: env.CO_WORKSPACE_RUNTIME_IMAGE ?? "team-gateway-runtime:latest",
+    runtimeImage: env.CO_WORKSPACE_RUNTIME_IMAGE ?? "co-workspace-runtime:latest",
     dockerBin: env.CO_WORKSPACE_DOCKER_BIN ?? "docker",
     dataDirHost: env.CO_WORKSPACE_DATA_DIR_HOST || undefined,
     includeBeta: env.CO_WORKSPACE_VARIANTS_INCLUDE_BETA === "true" || env.CO_WORKSPACE_VARIANTS_INCLUDE_BETA === "1",

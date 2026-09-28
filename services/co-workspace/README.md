@@ -103,7 +103,7 @@ rough chars/4 estimate, not a tokenizer count.
 | GET | `/` , `/login` | Web app (redirects when signed out) / sign-in page — `Cache-Control: no-cache` |
 | GET | `/health` | Liveness + config summary (no secrets) |
 | POST | `/sessions` | Create a team `{variant, name?, description?}` → `202`; idempotent per (principal, variant) → `200` + `existing: true` |
-| GET | `/tenants?mine=1` , `/tenants/:id` | Registry (session-aware ownership; status: `provisioning/ready/failed`) |
+| GET | `/tenants` , `/tenants?mine=1` , `/tenants/:id` | Registry (status: `provisioning/ready/failed`) — admins see all teams, everyone else only their own |
 | DELETE | `/tenants/:id` | Remove the team: registry row, project files, Hermes home, history |
 | POST | `/tenants/:id/chat` | Raw Hermes stream-json events over SSE + `done`; streams provisioning stages while the team prepares |
 | POST | `/tenants/:id/cancel` | Cancel a running turn |
