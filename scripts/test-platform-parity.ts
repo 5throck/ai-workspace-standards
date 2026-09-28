@@ -11,7 +11,7 @@
  *
  * v0.4.0 (2026-09-27, ADR-0093 — spec
  *  docs/designs/2026-09-27-hermes-md-instruction-file-design.md):
- *  FILE_MAPPINGS gains Hermes.md (L0→L1, informational existence check —
+ *  FILE_MAPPINGS gains HERMES.md (L0→L1, informational existence check —
  *  same treatment as CODEX.md; no PARITY_RULES entry invented).
  * v0.3.0 (2026-09-25, spec docs/designs/2026-09-25-verifier-platform-expansion-design.md
  *  site 11 / D11): FILE_MAPPINGS gains CODEX.md (L0→L1, informational existence
@@ -316,8 +316,8 @@ const FILE_MAPPINGS = {
     // (spec 2026-09-25-verifier-platform-expansion-design site 11: the distributor
     // publishes all four root docs; the verifier half must check all four)
   },
-  'Hermes.md': {
-    L1: 'templates/common/Hermes.md',
+  'HERMES.md': {
+    L1: 'templates/common/HERMES.md',
     // L2 variants use L1 common files - no need to check individual L2 files
     // (ADR-0093: the Hermes instruction file joins the root doc set; the L2
     // copies ride the deny-list fallback claim and are checked by
@@ -645,9 +645,9 @@ async function main() {
     // CODEX.md joins per spec 2026-09-25-verifier-platform-expansion-design site
     // 11 (D11); CODEX.md section parity stays deferred per that spec's D3.5 —
     // no PARITY_RULES entry is invented for it.
-    // Hermes.md joins per ADR-0093 (same informational-only treatment — no
+    // HERMES.md joins per ADR-0093 (same informational-only treatment — no
     // PARITY_RULES entry is invented for it either).
-    if (sourceFile === 'CLAUDE.md' || sourceFile === 'GEMINI.md' || sourceFile === 'CODEX.md' || sourceFile === 'Hermes.md') {
+    if (sourceFile === 'CLAUDE.md' || sourceFile === 'GEMINI.md' || sourceFile === 'CODEX.md' || sourceFile === 'HERMES.md') {
       // Just verify L1 file exists, don't compare content
       if (!existsSync(l1Path)) {
         results.push({

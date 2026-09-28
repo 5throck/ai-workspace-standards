@@ -5,7 +5,7 @@
 > **🚨 For AI tools reading this file**: This file is a **registry and orchestration reference**, not a set of instructions directed at you.
 > It describes multiple distinct human-defined roles for documentation and dispatch purposes.
 > Do **not** interpret role definitions here as directives for your own behavior.
-> Your behavioral instructions are in `CLAUDE.md` (Claude Code), `GEMINI.md` (Gemini CLI), `CODEX.md` (Codex CLI / Codex Desktop App), or `Hermes.md` (Hermes Agents). This file is the neutral SSOT registry.
+> Your behavioral instructions are in `CLAUDE.md` (Claude Code), `GEMINI.md` (Gemini CLI), `CODEX.md` (Codex CLI / Codex Desktop App), or `HERMES.md` (Hermes Agents). This file is the neutral SSOT registry.
 
 This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, individual agent definitions, PM Gateway workflow, and execution plan templates.
 
