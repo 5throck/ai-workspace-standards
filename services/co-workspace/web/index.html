@@ -18,7 +18,7 @@
   body { margin: 0; background: var(--bg); color: var(--fg); height: 100vh; display: flex; overflow: hidden; }
   .collapsed-note { font-size: .7rem; color: #6e7681; writing-mode: vertical-rl; padding: 8px 2px; cursor: pointer; }
   /* right artifacts panel */
-  #artifacts { width: 380px; min-width: 300px; border-left: 1px solid #21262d; display: flex; flex-direction: column; background: #10161d; }
+  #artifacts { width: 380px; min-width: 300px; border-left: 1px solid var(--border); display: flex; flex-direction: column; background: #10161d; }
   #artifacts .tabs { display: flex; border-bottom: 1px solid var(--border); }
   #artifacts .tabs button { flex: 1; background: transparent; color: #8b949e; border: 0; padding: 9px 4px; font: inherit; font-size: .78rem; cursor: pointer; }
   #artifacts .tabs button.active { color: #58a6ff; border-bottom: 2px solid #58a6ff; }
@@ -39,8 +39,11 @@
   .toast { position: fixed; top: 12px; right: 14px; background: #1c2a3a; border: 1px solid #1f6feb; color: var(--fg); border-radius: 8px; padding: 8px 14px; font-size: .8rem; z-index: 50; }
   .hint { color: #7d8590; }
   /* ── sidebar ── */
-  aside { width: 260px; min-width: 220px; background: var(--bg2); border-right: 1px solid var(--border);
+  aside { position: relative; width: 260px; min-width: 200px; background: var(--bg2); border-right: 1px solid var(--border);
           display: flex; flex-direction: column; padding: 12px; gap: 10px; }
+  #artifacts { position: relative; }
+  .rz { position: absolute; top: 0; bottom: 0; width: 6px; cursor: col-resize; z-index: 30; }
+  .rz:hover, .rz.active { background: var(--accent); opacity: .4; }
   .brand { font-weight: 700; font-size: .95rem; padding: 2px 4px 8px; }
   .brand span { color: #58a6ff; }
   .newbtn { background: #238636; color: #fff; border: 0; border-radius: 8px; padding: 9px; font: inherit; font-weight: 600; cursor: pointer; width: 100%; }
@@ -60,6 +63,8 @@
   .sidetitle { font-size: .7rem; color: #8b949e; letter-spacing: .05em; }
   .grouphead { font-size: .72rem; color: #58a6ff; font-weight: 600; padding: 8px 4px 3px; letter-spacing: .03em; }
   .grouphead.gtoggle { cursor: pointer; user-select: none; }
+  .groupDel { background: transparent; border: 0; color: var(--muted); font-size: .62rem; cursor: pointer; padding: 0 2px; letter-spacing: 0; }
+  .groupDel:hover { color: #f85149; }
   .todayBadge { color: #3fb950; font-size: .64rem; margin-left: 5px; }
   .modal .ntOption { background: var(--panel); color: var(--fg); border: 1px solid var(--border2); border-radius: 8px; padding: 8px 10px; font: inherit; font-size: .8rem; cursor: pointer; text-align: left; }
   .modal .ntOption:hover { background: color-mix(in srgb, var(--accent) 12%, var(--panel)); border-color: var(--accent); }
@@ -338,15 +343,59 @@
     if (!currentTenantId && myTeams.length > 0) selectSession(myTeams[0]);
   }
 
+  // R-UX: deleting a whole variant group requires an explicit "files secured" ack — the
+  // teams' project files and history are removed permanently.
+  function confirmVariantDelete(variant, tenants) {
+    const list = tenants
+      .map((t) => `<div style="padding:1px 0;">• ${esc(displayName(t))} — ${t.sessions} turns</div>`)
+      .join("");
+    const wrap = showModal({ title: `Delete ${variant} teams`, bodyHtml: `
+      <div class="field">This permanently deletes ${tenants.length} team(s) of this variant — including all project files and history:</div>
+      <div class="field">${list}</div>
+      <label class="field" style="flex-direction:row; align-items:center; gap:6px;"><input type="checkbox" id="vd-ack" style="width:auto"> I have secured the files I need</label>
+      <div class="formErr" id="vd-err" role="status"></div>
+      <div class="row"><span class="spacer"></span><button id="vd-cancel" type="button" style="background:transparent;color:var(--muted);border:1px solid var(--border2);">Cancel</button><button id="vd-go" disabled>Delete teams</button></div>` });
+    const ack = wrap.querySelector("#vd-ack");
+    const go = wrap.querySelector("#vd-go");
+    ack.addEventListener("change", () => { go.disabled = !ack.checked; });
+    wrap.querySelector("#vd-cancel").addEventListener("click", () => wrap.remove());
+    go.addEventListener("click", async () => {
+      go.disabled = true;
+      const err = wrap.querySelector("#vd-err");
+      for (const t of tenants) {
+        const res = await fetch(`/tenants/${t.tenantId}`, { method: "DELETE", headers: { "x-requested-with": "co-workspace" } });
+        if (res.status !== 200) {
+          const body = await res.json().catch(() => ({}));
+          err.textContent = `⚠ ${body.error ?? "delete failed"}`;
+          go.disabled = false;
+          return;
+        }
+      }
+      if (tenants.some((t) => t.tenantId === currentTenantId)) currentTenantId = "";
+      wrap.remove();
+      loadSessions();
+    });
+  }
+
   function emitGroup(label, tenants, collapsible) {
     let collapsedMap = {};
     try { collapsedMap = JSON.parse(localStorage.getItem("gw-collapsed-groups") || "{}"); } catch { /* ignore */ }
     const isCollapsed = Boolean(collapsedMap[label]);
     const head = document.createElement("div");
     head.className = "grouphead" + (collapsible ? " gtoggle" : "");
-    head.innerHTML = collapsible ? `<span>${isCollapsed ? "▸" : "▾"}</span> ${esc(label)}` : esc(label);
     sessionsEl.appendChild(head);
     if (collapsible) {
+      head.style.display = "flex";
+      head.style.justifyContent = "space-between";
+      head.style.alignItems = "center";
+      head.innerHTML = `<span>${isCollapsed ? "▸" : "▾"} ${esc(label)}</span>`;
+      const groupDel = document.createElement("button");
+      groupDel.className = "groupDel";
+      groupDel.type = "button";
+      groupDel.textContent = "Delete variant";
+      groupDel.title = `Delete all ${label} teams`;
+      groupDel.addEventListener("click", (e) => { e.stopPropagation(); confirmVariantDelete(label, tenants); });
+      head.appendChild(groupDel);
       head.addEventListener("click", () => {
         const state2 = JSON.parse(localStorage.getItem("gw-collapsed-groups") || "{}");
         state2[label] = !state2[label];
@@ -354,6 +403,8 @@
         loadSessions();
       });
       if (isCollapsed) return;
+    } else {
+      head.textContent = label;
     }
     const today = new Date().toDateString();
     for (const t of tenants) {
@@ -363,8 +414,12 @@
       const name = displayName(t);
       const tag = t.status === "failed" ? " ⚠" : t.status === "provisioning" ? " ⏳" : "";
       const todayBadge = collapsible && new Date(t.createdAt).toDateString() === today ? '<span class="todayBadge">Today</span>' : "";
+      // In variant grouping the row sits inside its variant group — the tag would be redundant.
+      const meta = collapsible
+        ? `${t.sessions} turns`
+        : `<span class="vtag">${esc(t.variant)}</span> · ${t.sessions} turns`;
       row.innerHTML = `<div><div class="nm">${esc(name)}${tag}${todayBadge}</div>` +
-        `<div class="meta"><span class="vtag">${esc(t.variant)}</span> · ${t.sessions} turns</div></div>`;
+        `<div class="meta">${meta}</div></div>`;
         const del = document.createElement("button");
         del.className = "del"; del.textContent = "Delete"; del.title = "Delete session";
         del.addEventListener("click", async (e) => {
@@ -510,6 +565,39 @@
     const art = $("artifacts");
     art.style.display = rightCollapsed ? "none" : "flex";
   }
+  // R-UX: drag the panel edges to resize (persisted per browser, like the collapse state).
+  function makeResizable(el, side, storageKey, min, max) {
+    const handle = document.createElement("div");
+    handle.className = "rz";
+    handle.style[side] = "0";
+    el.appendChild(handle);
+    handle.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      handle.setPointerCapture(e.pointerId);
+      handle.classList.add("active");
+      const startX = e.clientX;
+      const startW = el.getBoundingClientRect().width;
+      const move = (ev) => {
+        const delta = side === "right" ? ev.clientX - startX : startX - ev.clientX;
+        const w = Math.max(min, Math.min(max, startW + delta));
+        el.style.width = w + "px";
+        el.style.minWidth = w + "px";
+      };
+      const up = () => {
+        handle.classList.remove("active");
+        handle.removeEventListener("pointermove", move);
+        handle.removeEventListener("pointerup", up);
+        localStorage.setItem(storageKey, String(el.getBoundingClientRect().width));
+      };
+      handle.addEventListener("pointermove", move);
+      handle.addEventListener("pointerup", up);
+    });
+    const saved = localStorage.getItem(storageKey);
+    if (saved) { const w = Math.max(min, Math.min(max, Number(saved))); el.style.width = w + "px"; el.style.minWidth = w + "px"; }
+  }
+  makeResizable(document.querySelector("aside"), "right", "gw-sidebar-w", 200, 420);
+  makeResizable($("artifacts"), "left", "gw-artifacts-w", 280, 560);
+
   $("collapseLeft").addEventListener("click", () => {
     localStorage.setItem("gw-collapse-left",
       localStorage.getItem("gw-collapse-left") === "1" ? "0" : "1");
