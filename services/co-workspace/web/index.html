@@ -333,6 +333,9 @@
     if (mine.length === 0) {
       sessionsEl.innerHTML = '<div class="hint" style="padding:6px 4px;">No teams yet — create one to start.</div>';
     }
+    // Boot/reload: the composer shows a team, so it must actually BE selected (ChatGPT
+    // pattern — reopen the most recent team); otherwise a send would hit "no team".
+    if (!currentTenantId && myTeams.length > 0) selectSession(myTeams[0]);
   }
 
   function emitGroup(label, tenants, collapsible) {
