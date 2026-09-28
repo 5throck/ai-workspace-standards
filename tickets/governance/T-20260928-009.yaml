@@ -5,12 +5,17 @@ title: >-
   validator-hardening: add a regression test that POST /admin/reload with an
   emptied key file returns 400 and leaves keys unchanged
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-28T05:01:46.183Z'
 history:
   - at: '2026-09-28T05:01:46.183Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-28T05:14:19.613Z'
+    from: backlog
+    to: done
+result: >-
+  Regression test added in PR #1188: reload with emptied key file returns 400
+  and leaves keys unchanged
 error: null

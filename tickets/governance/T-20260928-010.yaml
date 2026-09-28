@@ -5,12 +5,15 @@ title: >-
   validator-hardening: add a unique partial index on users(email_hash) so
   email-change collisions are enforced by SQLite, not app logic
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-28T05:01:46.197Z'
 history:
   - at: '2026-09-28T05:01:46.197Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-28T05:14:19.629Z'
+    from: backlog
+    to: done
+result: 'Unique partial index idx_users_email_hash_unique added in PR #1188'
 error: null
