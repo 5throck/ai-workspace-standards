@@ -259,7 +259,7 @@ async function waitForTenant(state: GatewayState, tenantId: string): Promise<Ten
 }
 
 /** Usage inside the configured quota window: `daily` reads today's UTC-day bucket, `lifetime`
- * reads the cumulative counters (design 2026-09-27-team-gateway-phase2-hardening). */
+ * reads the cumulative counters (design 2026-09-27-team-gateway-phase2-hardening (now docs/designs/2026-09-27-co-workspace-phase2-hardening-design.md)). */
 export function windowUsage(
   cfg: GatewayConfig,
   rec: TenantRecord,
@@ -746,7 +746,7 @@ function demoPage(): Response {
       headers: htmlHeaders(),
     });
   }
-  return new Response("<!doctype html><title>team-gateway</title><p>demo page not built</p>", {
+  return new Response("<!doctype html><title>co-workspace</title><p>demo page not built</p>", {
     headers: { "content-type": "text/html; charset=utf-8" },
   });
 }
@@ -877,11 +877,12 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
     }
 
     if (req.method === "GET" && path === "/tenants") {
+      // Review hardening (T-20260928-007): cross-user tenant metadata (owner, names, usage,
+      // provisioning error strings) is not world-readable — admins see everything, everyone
+      // else is scoped to their own teams (`?mine=1` remains accepted for compat).
       const mine = url.searchParams.get("mine") === "1";
       let list = state.registry.list();
-      if (mine) {
-        // Session-aware: a cookie-only caller must match their own tenants, not the
-        // header-credential principal (previously "anonymous" for browser sessions).
+      if (!isAdminCaller(state, req)) {
         const principal = callerPrincipal(state, req) ?? "anonymous";
         list = list.filter((r) => (r.ownerPrincipal ?? "anonymous") === principal);
       }

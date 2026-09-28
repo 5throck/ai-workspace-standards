@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.49.0
+ * @version 1.50.0
  *
  * v1.48.0 → v1.49.0 (2026-09-28, sound-synth orphan-mirror follow-up — spec
  *         docs/designs/2026-09-28-sound-synth-orphan-mirror-cleanup-design.md
@@ -5403,6 +5403,40 @@ function checkPmExtendsStubBodies(): void {
 // still carrying the literal template placeholders (pre-2.13 residue), stays
 // visible until the project team fills the identity seed. Regrowth-prevention
 // sibling of T-20260924-004/007 for the identity class.
+// T-20260927-012 (validator-hardening, ADR-0091 R3): the B-04 uniform country_config
+// declaration check scopes templates/ only — project-side variant.json could drift by
+// omission. Every delivered Projects/<name>/variant.json declares the mechanism too.
+function checkProjectCountryConfigDeclarations(): void {
+  const projectsDir = join(ROOT, 'Projects');
+  if (!existsSync(projectsDir)) return;
+  for (const entry of readdirSync(projectsDir, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    if (isTransientTestFixture(entry.name)) continue; // E2E staging dirs (T-20260916-001)
+    const variantJsonPath = join(projectsDir, entry.name, 'variant.json');
+    if (!existsSync(variantJsonPath)) continue; // projects without a variant.json are out of scope
+    let raw: Record<string, unknown> | null = null;
+    try {
+      raw = JSON.parse(readFileSync(variantJsonPath, 'utf-8')) as Record<string, unknown>;
+    } catch {
+      fail(entry.name, 'country-config', `Projects/${entry.name}/variant.json is not valid JSON`,
+        'Fix the JSON syntax — the project-side copy must stay parseable for upgrade tooling');
+      continue;
+    }
+    const cc = raw.country_config as Record<string, unknown> | undefined;
+    if (!cc || typeof cc !== 'object' || Array.isArray(cc)) {
+      fail(entry.name, 'country-config',
+        `Projects/${entry.name}/variant.json missing 'country_config' (ADR-0091 R3 uniform declaration)`,
+        'Copy the country_config block from the variant template\'s variant.json (empty supported = non-adopting)');
+    } else if (cc.profiles_dir !== 'docs/countries' || !Array.isArray(cc.supported)) {
+      fail(entry.name, 'country-config',
+        `Projects/${entry.name}/variant.json country_config diverges from the ADR-0091 R3 shape (profiles_dir="docs/countries", supported array)`,
+        'Re-sync the country_config block from the variant template\'s variant.json');
+    } else {
+      pass(`Projects/${entry.name}/variant.json country_config declaration OK (ADR-0091 R3)`);
+    }
+  }
+}
+
 function checkProjectIdentityPlaceholders(): void {
   const projectsDir = join(ROOT, 'Projects');
   if (!existsSync(projectsDir)) return;
@@ -5597,6 +5631,7 @@ function checkAgentsMdPointerIntegrity(): void {
   checkPmExtendsStubBodies();                                    // T-20260915-010: variant pm.md extends-stub bodies
   checkVariantReadinessGate();   // VRG-01: continuous Variant Readiness Gate enforcement
   checkProjectIdentityPlaceholders(); // fleet WARN: Projects/*/docs identity placeholders (spec 2026-09-24-scaffold-identity-overview-design)
+  checkProjectCountryConfigDeclarations(); // T-20260927-012: project-side half of the ADR-0091 R3 uniform declaration
   checkAgentsMdSizeBudget();          // ADR-0090 W0: thin-dispatcher ≤15k budget (WARN; FAIL promotion at W4)
   checkAgentsMdPointerIntegrity();    // ADR-0090 W0: pointer-table references resolve on disk
 
