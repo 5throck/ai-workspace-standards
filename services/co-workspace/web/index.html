@@ -102,7 +102,7 @@
   #userInfo { font-size: .78rem; color: var(--muted); }
   #userInfo b { color: var(--fg); }
   /* admin */
-  #adminMenu { position: absolute; top: 10px; right: 14px; background: var(--panel); border: 1px solid var(--border2); border-radius: 8px; padding: 6px 10px; font-size: .78rem; cursor: pointer; }
+  #adminMenu { background: var(--panel); color: var(--fg); border: 1px solid var(--border2); border-radius: 8px; padding: 6px 10px; font: inherit; font-size: .78rem; cursor: pointer; }
   .barRow { display: flex; align-items: center; gap: 8px; margin: 4px 0; font-size: .78rem; }
   .barLabel { width: 120px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .barTrack { flex: 1; background: var(--input-bg); border-radius: 4px; height: 14px; overflow: hidden; }
@@ -138,9 +138,9 @@
   <header>
     <button class="collapsebtn" id="collapseLeft" title="Toggle sidebar">☰</button>
     <span class="pname" id="pnameLabel" style="flex:1"></span>
+    <button id="adminMenu" class="gws-hidden">⚙ Admin</button>
     <button class="collapsebtn" id="themeBtn" title="Toggle theme">◐</button>
     <button class="collapsebtn" id="collapseRight" title="Toggle artifacts panel">▤ Artifacts</button>
-    <button id="adminMenu" class="gws-hidden">⚙ Admin</button>
   </header>
   <div id="adminView"></div>
   <div id="log">
@@ -565,10 +565,11 @@
         `<button id="profileBtn" class="collapsebtn" title="Profile" style="font-size:.8rem;">✎</button>` +
         `<button id="logoutBtn" class="collapsebtn" title="Sign out" style="font-size:.8rem;">⎋</button></div>`;
       $("logoutBtn").addEventListener("click", async () => {
-        // Full reset via reload: keeps the signed-out user from seeing the previous
-        // account's session list, open conversation, or profile/admin panel state.
+        if (!confirm("Sign out of co-workspace?")) return;
+        // Full reset: keeps the signed-out user from seeing the previous account's
+        // session list, open conversation, or profile/admin panel state.
         await fetch("/auth/logout", { method: "POST", headers: { "x-requested-with": "co-workspace" } });
-        location.reload();
+        location.assign("/login");
       });
       $("profileBtn").addEventListener("click", () => renderProfileForm());
     } else {
