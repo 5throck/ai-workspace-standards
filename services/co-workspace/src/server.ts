@@ -878,10 +878,10 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
     }
 
     if (req.method === "GET" && path === "/tenants") {
-      // Review hardening (T-20260928-007): cross-user tenant metadata (owner, names, usage,
-      // provisioning error strings) is not world-readable — admins see everything, everyone
-      // else is scoped to their own teams (`?mine=1` remains accepted for compat).
-      const mine = url.searchParams.get("mine") === "1";
+      // T-20260928-007: cross-user tenant metadata (owner, names, usage, provisioning
+      // error strings) is not world-readable — admins see all, others see their own.
+      // `?mine=1` remains accepted for backwards compat (same as the default for
+      // non-admin callers).
       let list = state.registry.list();
       if (!isAdminCaller(state, req)) {
         const principal = callerPrincipal(state, req) ?? "anonymous";
@@ -1153,7 +1153,7 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
       const token = state.users.createSession(user.id);
       return new Response(JSON.stringify({ user: { loginId: user.principal, name: user.name, role: user.role, mustChangePassword: Boolean(user.mustChangePassword) } }), {
         status: 200,
-        headers: { "content-type": "application/json", "set-cookie": sessionCookieHeader(token, state.cfg.loginRequired) },
+        headers: { "content-type": "application/json", "set-cookie": sessionCookieHeader(token, state.cfg.cookieSecure ?? false) },
       });
     }
 
@@ -1253,7 +1253,7 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
         headers: {
           location: "/",
           "set-cookie": [
-            sessionCookieHeader(token, state.cfg.loginRequired),
+            sessionCookieHeader(token, state.cfg.cookieSecure ?? false),
             "gw_oauth_state=; HttpOnly; Path=/; Max-Age=0",
             "gw_oauth_verifier=; HttpOnly; Path=/; Max-Age=0",
           ].join(", "),
