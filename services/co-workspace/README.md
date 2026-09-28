@@ -175,11 +175,12 @@ continuity handle → credential model → isolation matrix → provider disclos
 Deploy from **this workspace checkout** (compose builds from it and mounts it at
 `/workspace` for scaffolding) and keep deployment paths in `docker/.env` (local-only,
 never committed). Set `CO_WORKSPACE_DATA_DIR_HOST` to a durable host directory — team
-storage must survive reboots, so keep it off `/tmp`:
+storage must survive reboots, so keep it off `/tmp` (the default
+`services/co-workspace/data` inside this checkout qualifies — it is gitignored):
 
 ```sh
 cat > services/co-workspace/docker/.env <<'ENV'
-CO_WORKSPACE_DATA_DIR_HOST=/absolute/durable/path/for/Storage
+CO_WORKSPACE_DATA_DIR_HOST=/absolute/durable/path/for/services/co-workspace/data
 CO_WORKSPACE_HERMES_SEED_HOME=/Users/you/.hermes
 CO_WORKSPACE_ISOLATION=docker
 CO_WORKSPACE_RUNTIME_IMAGE=co-workspace-gateway:latest
