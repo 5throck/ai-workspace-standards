@@ -5580,6 +5580,12 @@
     {
       "type": "references",
       "from": "adr:0032",
+      "to": "sound-synth",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0032",
       "to": "version",
       "source": "prose"
     },

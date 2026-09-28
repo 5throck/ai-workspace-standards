@@ -330,3 +330,31 @@ Recorded in `docs/decisions/DEC-20260829-02.md`; implemented in
 variants, the skill is variant-exclusive → `L0+L2`, authored directly in
 `templates/co-<variant>/skills/`. Do not create an L0 or common base "for later";
 promote to `L0+L1` only when a second variant genuinely needs the skill.
+
+## Amendment 2 (2026-09-28): Variant-scoped skill leak enforcement closed across the platform mirrors
+
+Amendment 1's enforcement list included WS-02/B-11 ("leaks into `templates/common/skills/`
+FAIL"), but B-11 scanned only the canonical `templates/common/skills/` tree — the five
+platform mirrors (`.claude/.gemini/.agents/.codex/.hermes/skills`) were outside its scan.
+That gap let a real recurrence through: five diverged `sound-synth` (co-game, `L0+L2`)
+mirror copies carrying stale `l2_propagate: false` frontmatter sat in `templates/common`
+until they broke the nightly scaffold E2E's Test 26 delivery parity (co-game, 2026-09-27 —
+the owning variant's overlay legitimately re-delivers the skill into the mirrors at
+scaffold time, while the common-template delivery derivation excluded the stale copies).
+
+Closed by PRs #1162 + #1163 (spec
+`docs/designs/2026-09-28-sound-synth-orphan-mirror-cleanup-design.md`, §5 + §7):
+
+- The five orphan copies were deleted, and the stale
+  `common_platform_skill_exclusions.sound-synth` contract entry was removed with them
+  (the root `skills/` SSOT and root mirrors never carried the skill, so the L0→L1
+  cascade cannot re-seed the copies).
+- B-11 widened (validate-templates v1.49.0): the new pure helper `variantScopedSkillLeaks`
+  scans the canonical tree AND all five platform mirrors; severity stays fail — a mirror
+  leak of this class actively breaks delivery-derivation parity. Day-one green
+  (0 leaks across the common tree).
+
+The Structural Rules table above is unchanged in intent: "`templates/common/skills/` —
+L0+L1 only (B-11)" now reads as covering the platform mirrors as well, and the
+`L0+L2` single-authoritative-copy rule is finally machine-enforced at every mirror
+surface, not just the canonical tree.
