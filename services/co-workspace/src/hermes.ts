@@ -53,7 +53,7 @@ export interface HermesSpawnOptions {
   /** QA-07: called with the live child process so the server can cancel a running turn. */
   onSpawn?: (proc: { kill: (code?: number) => void }) => void;
   env?: Record<string, string | undefined>;
-  /** Phase 2 isolation (design docs/designs/2026-09-27-team-gateway-phase2-hardening-design.md, D3): when set, the
+  /** Phase 2 isolation (design docs/designs/2026-09-27-co-workspace-phase2-hardening-design.md, D3): when set, the
    * session runs inside an ephemeral sibling container — only the tenant project dir and
    * Hermes home are mounted, at the fixed in-container paths /work/project, /work/hermes-home.
    * `hostProjectDir`/`hostHermesHome` override the `-v` source paths for the case where the

@@ -12,7 +12,7 @@ import { loadConfig } from "../../services/co-workspace/src/config";
 import { createServer, createState, handleRequest, hostSidePath } from "../../services/co-workspace/src/server";
 
 function tempDir(): string {
-  return join(tmpdir(), `team-gateway-srv-${crypto.randomUUID().slice(0, 8)}`);
+  return join(tmpdir(), `co-workspace-srv-${crypto.randomUUID().slice(0, 8)}`);
 }
 
 const FAKE_SCAFFOLD = `import { mkdirSync, writeFileSync } from "node:fs";

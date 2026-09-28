@@ -3,7 +3,7 @@
 - **Date**: 2026-09-27
 - **Status**: Implemented (Wave 1) + Backlog (deferred items below)
 - **Origin**: user-requested QA fair (4 reviewers) + co-security PM security assessment; consolidated by PM
-- **Related**: ADR-0092 (Addendum 4/5), spec `2026-09-27-team-gateway-phase2-hardening`
+- **Related**: ADR-0092 (Addendum 4/5), spec `2026-09-27-co-workspace-phase2-hardening`
 
 ## Implemented this round (17 items)
 

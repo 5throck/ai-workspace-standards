@@ -2,7 +2,7 @@
 
 > Component instructions for AI tools working in this directory. Workspace-wide rules live in
 > the repository root `AGENTS.md`; governance record: ADR-0092, design:
-> `docs/designs/2026-09-27-team-gateway-service-design.md`.
+> `docs/designs/2026-09-27-co-workspace-service-design.md`.
 
 ## What this is
 

@@ -33,7 +33,7 @@ Live multi-surface use surfaced demand for Google-ecosystem clients. Antigravity
 
 ## Addendum 2 (2026-09-27): Phase 2 Hardening Landed
 
-The §10 roadmap items enforceable by the gateway process are implemented (design `docs/designs/2026-09-27-team-gateway-phase2-hardening-design.md`): optional bearer-key authentication on every non-exempt route (`TEAM_GATEWAY_API_KEYS`; constant-time compare; Phase 0 localhost mode preserved when unset), per-tenant lifetime quotas enforced pre-turn (`TEAM_GATEWAY_TENANT_MAX_TURNS`/`_MAX_TOKENS` → `429`; token counters from the result envelope), first-class toolset scoping (`TEAM_GATEWAY_HERMES_TOOLSETS` → `-t`), and an opt-in per-tenant container isolation mode (`TEAM_GATEWAY_ISOLATION=docker` — per-turn ephemeral sibling container mounting only the tenant project dir and Hermes home; startup fails fast when Docker is unusable; live-verified with a container-side session). Network egress enforcement remains host-side by design (Hermes iron-proxy, operator-deployed) — the gateway contributes toolset scoping and run ceilings, not invented config keys. This addendum records N1/N2/N5 of the Phase 0 design as superseded for this scope.
+The §10 roadmap items enforceable by the gateway process are implemented (design `docs/designs/2026-09-27-co-workspace-phase2-hardening-design.md`): optional bearer-key authentication on every non-exempt route (`TEAM_GATEWAY_API_KEYS`; constant-time compare; Phase 0 localhost mode preserved when unset), per-tenant lifetime quotas enforced pre-turn (`TEAM_GATEWAY_TENANT_MAX_TURNS`/`_MAX_TOKENS` → `429`; token counters from the result envelope), first-class toolset scoping (`TEAM_GATEWAY_HERMES_TOOLSETS` → `-t`), and an opt-in per-tenant container isolation mode (`TEAM_GATEWAY_ISOLATION=docker` — per-turn ephemeral sibling container mounting only the tenant project dir and Hermes home; startup fails fast when Docker is unusable; live-verified with a container-side session). Network egress enforcement remains host-side by design (Hermes iron-proxy, operator-deployed) — the gateway contributes toolset scoping and run ceilings, not invented config keys. This addendum records N1/N2/N5 of the Phase 0 design as superseded for this scope.
 
 ## Addendum 3 (2026-09-27): Antigravity Headless Runtime
 
@@ -72,7 +72,7 @@ User-approved wave (design: `docs/designs/2026-09-28-co-workspace-usability-wave
 
 ## References
 
-- Design: `docs/designs/2026-09-27-team-gateway-service-design.md` (verified building blocks, D1–D8, waves, live-verification record)
+- Design: `docs/designs/2026-09-27-co-workspace-service-design.md` (verified building blocks, D1–D8, waves, live-verification record)
 - ADR-0088 (Hermes platform support — trust posture, `--platform hermes` scaffold profile), ADR-0089 (template auto-release), ADR-0074 (Universal Design Gate), ADR-0078 (LLM work routing scope note)
 - `scripts/new-project.ts` (unattended scaffold; destination constraints), T-20260927-019 (pinned-scaffold defect)
 - Hermes CLI (installed v0.21.x): `chat --format stream-json`, `HERMES_HOME`, `skills.trusted_project_dirs`, `--continue`/`--create-if-missing`, `run_agent.CLI_FAMILY_SOURCES`

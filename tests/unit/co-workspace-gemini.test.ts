@@ -83,8 +83,8 @@ describe("Gemini wire payloads", () => {
 });
 
 describe("gateway server — Gemini surface", () => {
-  const dataDir = join(tmpdir(), `team-gateway-gemini-${crypto.randomUUID().slice(0, 8)}`);
-  const workspaceDir = join(tmpdir(), `team-gateway-gemini-ws-${crypto.randomUUID().slice(0, 8)}`);
+  const dataDir = join(tmpdir(), `co-workspace-gemini-${crypto.randomUUID().slice(0, 8)}`);
+  const workspaceDir = join(tmpdir(), `co-workspace-gemini-ws-${crypto.randomUUID().slice(0, 8)}`);
   mkdirSync(join(workspaceDir, "scripts"), { recursive: true });
   writeFileSync(
     join(workspaceDir, "scripts", "new-project.ts"),
@@ -94,7 +94,7 @@ mkdirSync(\`Projects/\${name}/.hermes/skills\`, { recursive: true });
 writeFileSync(\`Projects/\${name}/AGENTS.md\`, "# fake tenant\\n");
 `,
   );
-  const hermesBinDir = join(tmpdir(), `team-gateway-gemini-bin-${crypto.randomUUID().slice(0, 8)}`);
+  const hermesBinDir = join(tmpdir(), `co-workspace-gemini-bin-${crypto.randomUUID().slice(0, 8)}`);
   mkdirSync(hermesBinDir, { recursive: true });
   const hermesBin = join(hermesBinDir, "fake-hermes.ts");
   writeFileSync(

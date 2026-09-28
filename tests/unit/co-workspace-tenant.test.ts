@@ -14,7 +14,7 @@ import {
 import { TenantRegistry } from "../../services/co-workspace/src/registry-db";
 
 function tempDir(): string {
-  return join(tmpdir(), `team-gateway-test-${crypto.randomUUID().slice(0, 8)}`);
+  return join(tmpdir(), `co-workspace-test-${crypto.randomUUID().slice(0, 8)}`);
 }
 
 describe("GatewayConfig (loadConfig)", () => {

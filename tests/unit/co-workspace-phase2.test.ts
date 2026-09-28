@@ -1,5 +1,5 @@
 /** Unit tests for Team Gateway Phase 2 hardening: auth, quotas, isolation adapter
- * (design 2026-09-27-team-gateway-phase2-hardening). */
+ * (design 2026-09-27-co-workspace-phase2-hardening). */
 
 import { afterAll, describe, expect, test } from "bun:test";
 import { chmodSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
@@ -70,7 +70,7 @@ describe("hermes spawn adapter — toolsets and container isolation", () => {
   });
 
   test("docker mode: ephemeral sibling container mounts only the tenant dirs", () => {
-    const argv = hermesSpawnArgv({ ...base, container: { image: "team-gateway-runtime:latest" } });
+    const argv = hermesSpawnArgv({ ...base, container: { image: "co-workspace-runtime:latest" } });
     expect(argv.slice(0, 4)).toEqual(["docker", "run", "--rm", "--interactive"]);
     expect(argv).toContain("--entrypoint");
     expect(argv[argv.indexOf("--entrypoint") + 1]).toBe("hermes");
@@ -82,7 +82,7 @@ describe("hermes spawn adapter — toolsets and container isolation", () => {
     expect(argv[vIdx2 + 1]).toBe("/data/tenants/gw-x/hermes-home:/work/hermes-home");
     expect(argv).toContain("-e");
     expect(argv.filter((a) => a === "-v")).toHaveLength(2); // exactly two mounts, nothing else
-    expect(argv).toContain("team-gateway-runtime:latest");
+    expect(argv).toContain("co-workspace-runtime:latest");
     // inner command keeps its contract, with the in-container project path
     expect(argv).toContain("--continue");
     expect(argv[argv.indexOf("--in") + 1]).toBe("/work/project");

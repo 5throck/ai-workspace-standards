@@ -259,7 +259,7 @@ async function waitForTenant(state: GatewayState, tenantId: string): Promise<Ten
 }
 
 /** Usage inside the configured quota window: `daily` reads today's UTC-day bucket, `lifetime`
- * reads the cumulative counters (design docs/designs/2026-09-27-team-gateway-phase2-hardening-design.md). */
+ * reads the cumulative counters (design docs/designs/2026-09-27-co-workspace-phase2-hardening-design.md). */
 export function windowUsage(
   cfg: GatewayConfig,
   rec: TenantRecord,

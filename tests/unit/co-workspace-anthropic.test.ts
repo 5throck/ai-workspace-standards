@@ -120,9 +120,9 @@ describe("Anthropic wire payloads", () => {
 });
 
 describe("gateway server — Anthropic surface", () => {
-  const dataDir = join(tmpdir(), `team-gateway-anthropic-${crypto.randomUUID().slice(0, 8)}`);
-  const workspaceDir = join(tmpdir(), `team-gateway-anthropic-ws-${crypto.randomUUID().slice(0, 8)}`);
-  const seedHome = join(tmpdir(), `team-gateway-anthropic-seed-${crypto.randomUUID().slice(0, 8)}`);
+  const dataDir = join(tmpdir(), `co-workspace-anthropic-${crypto.randomUUID().slice(0, 8)}`);
+  const workspaceDir = join(tmpdir(), `co-workspace-anthropic-ws-${crypto.randomUUID().slice(0, 8)}`);
+  const seedHome = join(tmpdir(), `co-workspace-anthropic-seed-${crypto.randomUUID().slice(0, 8)}`);
   mkdirSync(join(workspaceDir, "scripts"), { recursive: true });
   mkdirSync(seedHome, { recursive: true });
   writeFileSync(
@@ -133,7 +133,7 @@ mkdirSync(\`Projects/\${name}/.hermes/skills\`, { recursive: true });
 writeFileSync(\`Projects/\${name}/AGENTS.md\`, "# fake tenant\\n");
 `,
   );
-  const hermesBinDir = join(tmpdir(), `team-gateway-anthropic-bin-${crypto.randomUUID().slice(0, 8)}`);
+  const hermesBinDir = join(tmpdir(), `co-workspace-anthropic-bin-${crypto.randomUUID().slice(0, 8)}`);
   mkdirSync(hermesBinDir, { recursive: true });
   const hermesBin = join(hermesBinDir, "fake-hermes.ts");
   writeFileSync(

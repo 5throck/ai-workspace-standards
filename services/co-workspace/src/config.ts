@@ -36,7 +36,7 @@ export interface GatewayConfig {
   maxTurns: number;
   scaffoldTimeoutMs: number;
   hermesExtraArgs: string[];
-  /** Phase 2 hardening (design docs/designs/2026-09-27-team-gateway-phase2-hardening-design.md). */
+  /** Phase 2 hardening (design docs/designs/2026-09-27-co-workspace-phase2-hardening-design.md). */
   /** Bearer keys for every non-exempt route; empty = auth disabled (Phase 0 localhost mode).
    * Union of env keys + key-file keys; mutated in place by `POST /admin/reload`. */
   apiKeys: string[];
