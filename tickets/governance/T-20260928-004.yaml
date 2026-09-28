@@ -7,7 +7,7 @@ title: >-
   default image name team-gateway-runtime, missing .env.keys mount in compose,
   ADR-0092 rename addendum, component AGENTS.md invariants/layout refresh
 priority: normal
-status: running
+status: review
 attempts: 0
 created_at: '2026-09-27T16:44:14.951Z'
 history:
@@ -26,5 +26,8 @@ history:
   - at: '2026-09-28T22:32:27.187Z'
     from: review
     to: running
+  - at: '2026-09-28T22:36:53.141Z'
+    from: running
+    to: review
 result: null
 error: null
