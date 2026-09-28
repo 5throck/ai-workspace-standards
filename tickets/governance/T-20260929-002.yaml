@@ -7,12 +7,18 @@ title: >-
   hooks only), so upgrade-project aborts (T-20260921-001 class) and instances
   are invisible to fleet git operations until first commit
 priority: normal
-status: backlog
+status: running
 attempts: 0
 created_at: '2026-09-28T16:40:18.683Z'
 history:
   - at: '2026-09-28T16:40:18.683Z'
     from: null
     to: backlog
+  - at: '2026-09-28T18:05:21.834Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-28T18:05:21.847Z'
+    from: waiting
+    to: running
 result: null
 error: null
