@@ -7,6 +7,9 @@
 #                                  at /data here AND used as the sibling-mount source, so
 #                                  docker-isolation turns can reach tenant dirs (the gateway
 #                                  passes CO_WORKSPACE_DATA_DIR_HOST down for exactly this).
+# Optional environment (see volumes below):
+#   CO_WORKSPACE_WORKSPACE_DIR_HOST  Host path of a dedicated workspace CLONE for scaffolding
+#                                    (defaults to this repo's checkout). Keep it off /tmp.
 #
 # Phase 0 note: the workspace clone is mounted at /workspace (provisioning writes Projects/
 # there); Phase 2 bakes a pinned workspace image instead.
@@ -67,7 +70,10 @@ services:
       CO_WORKSPACE_HERMES_AUTH_DIR_HOST: ${CO_WORKSPACE_HERMES_AUTH_DIR_HOST:-${CO_WORKSPACE_HERMES_SEED_HOME}/shared}
     volumes:
       - ${CO_WORKSPACE_DATA_DIR_HOST:?set to the absolute host path of the data dir}:/data
-      - ../../../:/workspace # Phase 0: provisioning writes Projects/ in the clone; Phase 2 bakes it
+      # Workspace clone used for scaffolding. Default: the repo checkout three levels up.
+      # For durable deployments set CO_WORKSPACE_WORKSPACE_DIR_HOST to a dedicated clone
+      # (e.g. /srv/co-workspace-workspace) — /tmp clones vanish on reboot.
+      - ${CO_WORKSPACE_WORKSPACE_DIR_HOST:-../../../}:/workspace
       # SEC-07 narrowing: the gateway reads only auth.json + .env from the seed home (per-turn
       # re-seed) and the RW shared token store — the operator's full Hermes home (config.yaml,
       # other provider credentials) is NOT mounted.
