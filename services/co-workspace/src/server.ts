@@ -8,11 +8,11 @@
  */
 
 import { chownSync, copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
-import { join, resolve, sep } from "node:path";
+import { basename, dirname, join, resolve, sep } from "node:path";
 import { dockerProbe, GatewayConfig, loadConfig, readKeysFile, SERVICE_ROOT } from "./config";
 import { credentialValid, presentedCredential, principalFor, requestAuthorized } from "./auth";
 import { scaffoldProject } from "./scaffold";
-import { chownTree, publicTenant, recordProgress, recordTurnUsage, seedHermesHome, TenantRecord } from "./tenant";
+import { chownTree, publicTenant, recordProgress, recordTurnUsage, seedHermesHome, sweepTenantStragglers, TenantRecord } from "./tenant";
 import { TenantRegistry } from "./registry-db";
 import { listTenantFiles, readTenantFile, TurnStore } from "./tenant-files";
 import {
@@ -939,6 +939,10 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
         // Remove the tenant's storage folder (<storage>/<principal>/<name>) — it only ever
         // contains the two dirs above, so this clears the empty shell left behind.
         rmSync(tenantFolder, { recursive: true, force: true });
+        // User-reported 2026-09-29: legacy layout bugs left malformed siblings (e.g.
+        // <tenantId>project) next to the canonical folder — the folder rm never matched
+        // them and deleted tenants kept straggling data on disk.
+        sweepTenantStragglers(dirname(tenantFolder), tenantId, basename(tenantFolder));
         state.audit.record(callerPrincipal(state, req) ?? "anonymous", "tenant.delete", tenantId, deleted.variant);
       }
       return jsonResponse({ deleted: tenantId, name: deleted?.name ?? null });
@@ -1360,6 +1364,14 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
           if (deleted) {
             rmSync(deleted.projectDir, { recursive: true, force: true });
             rmSync(deleted.hermesHome, { recursive: true, force: true });
+            // Same straggler sweep as the tenant DELETE route — the user-delete path
+            // previously left the parent shell and any malformed siblings behind.
+            const folder = resolve(deleted.projectDir, "..");
+            const storageRoot = resolve(state.cfg.dataDir, "storage");
+            if (folder.startsWith(storageRoot + sep)) {
+              rmSync(folder, { recursive: true, force: true });
+              sweepTenantStragglers(dirname(folder), deleted.tenantId, basename(folder));
+            }
           }
         } else {
           t.status = "archived";
