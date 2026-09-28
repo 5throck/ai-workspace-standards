@@ -335,11 +335,12 @@
   }
 
   function emitGroup(label, tenants, collapsible) {
-    let collapsed = {};
-    try { collapsed = JSON.parse(localStorage.getItem("gw-collapsed-groups") || "{}"); } catch { /* ignore */ }
+    let collapsedMap = {};
+    try { collapsedMap = JSON.parse(localStorage.getItem("gw-collapsed-groups") || "{}"); } catch { /* ignore */ }
+    const isCollapsed = Boolean(collapsedMap[label]);
     const head = document.createElement("div");
     head.className = "grouphead" + (collapsible ? " gtoggle" : "");
-    head.innerHTML = collapsible ? `<span>${collapsed ? "▸" : "▾"}</span> ${esc(label)}` : esc(label);
+    head.innerHTML = collapsible ? `<span>${isCollapsed ? "▸" : "▾"}</span> ${esc(label)}` : esc(label);
     sessionsEl.appendChild(head);
     if (collapsible) {
       head.addEventListener("click", () => {
@@ -348,7 +349,7 @@
         localStorage.setItem("gw-collapsed-groups", JSON.stringify(state2));
         loadSessions();
       });
-      if (collapsed) return;
+      if (isCollapsed) return;
     }
     const today = new Date().toDateString();
     for (const t of tenants) {
