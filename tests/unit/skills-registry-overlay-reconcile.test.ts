@@ -360,3 +360,23 @@ describe('pre-fold pipeline (prune + reconcile on an unsectioned seed)', () => {
     expect(rows.size).toBe(2);
   });
 });
+
+describe('upgrade-project registry pass: reconcile → align (v1.56.0)', () => {
+  test('local skill replaced by the L0 copy: row owner follows the delivered SKILL.md', () => {
+    // co-architect 2026-09-28: service-design 1.0.0 (owner service-designer)
+    // was replaced by L0 service-design 1.1.0 (owner pm); reconcile alone
+    // bumped the version but left the owner cell, failing the skill audit.
+    const registry = [
+      '| Skill | Version | Status | Owner | Last Reviewed | Removal Date | Notes |',
+      '|---|---|---|---|---|---|---|',
+      '| `service-design` | 1.0.0 | active | service-designer | 2026-09-09 | — | — |',
+      '',
+    ].join('\n');
+    const delivered = [{ skill: 'service-design', version: '1.1.0', status: 'active', owner: 'pm', lastReviewed: '2026-09-27' }];
+    const reconciled = reconcileSkillRegistry(registry, delivered);
+    expect(reconciled.content).toContain('| service-designer |');
+    const { content, aligned } = alignSkillRegistryRowsWithFrontmatter(reconciled.content, delivered);
+    expect(aligned).toEqual(['service-design']);
+    expect(content).toContain('| `service-design` | 1.1.0 | active | pm | 2026-09-27 |');
+  });
+});
