@@ -207,6 +207,17 @@ export function tenantKeyFor(variant: string, user: string): string {
   return `${variant}::${user}`;
 }
 
+// R5: walking every tenant's file tree per panel-open is O(total files); a 60s TTL keeps
+// the admin panel instant at many tenants (freshness tradeoff is fine for stats).
+const diskSizeCache = new Map<string, { bytes: number; at: number }>();
+async function cachedDirSize(tenantId: string, projectDir: string, hermesHome: string): Promise<number> {
+  const hit = diskSizeCache.get(tenantId);
+  if (hit && Date.now() - hit.at < 60_000) return hit.bytes;
+  const bytes = (await dirSize(projectDir)) + (await dirSize(hermesHome));
+  diskSizeCache.set(tenantId, { bytes, at: Date.now() });
+  return bytes;
+}
+
 /** OpenAI-surface lazy tenant: find by key, or create and start provisioning. */
 export function getOrStartTenant(
   state: GatewayState,
@@ -1185,7 +1196,7 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
         const principal = t.ownerPrincipal ?? "anonymous";
         const entry = perUser.get(principal) ?? { principal, tenantCount: 0, diskBytes: 0, turns: 0 };
         entry.tenantCount += 1;
-        entry.diskBytes += (await dirSize(t.projectDir)) + (await dirSize(t.hermesHome));
+        entry.diskBytes += await cachedDirSize(t.tenantId, t.projectDir, t.hermesHome);
         entry.turns += turnCounts.get(t.tenantId) ?? 0;
         perUser.set(principal, entry);
       }
