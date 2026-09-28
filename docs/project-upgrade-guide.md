@@ -83,13 +83,19 @@ outside marker pairs (e.g. a project's own `## <Variant> Context` tail section) 
 |------|--------|--------|
 | CLAUDE.md | `<!-- COMMON-CLAUDE:START --> ... <!-- COMMON-CLAUDE:END -->` | ✅ Active (since v1.3.0) |
 | GEMINI.md | `<!-- COMMON-GEMINI:START --> ... <!-- COMMON-GEMINI:END -->` | ✅ Active (since v1.3.0) |
+| CODEX.md | `<!-- COMMON-CODEX:START --> ... <!-- COMMON-CODEX:END -->` | ✅ Active (managed-block-merge v1.2.0, ADR-0077 family) |
+| Hermes.md | `<!-- COMMON-HERMES:START --> ... <!-- COMMON-HERMES:END -->` | ✅ Active (managed-block-merge v1.3.0, ADR-0093 Amendment 1) |
 | .gitignore | `<!-- WORKSPACE-MANAGED -->` | ✅ Active (markers shipped in `templates/common/.gitignore`) |
 | agents/pm.md | Extends pattern (`extends:` frontmatter, not markers) | ✅ Active (ADR-0033) |
 
-> ⚠️ **Failure mode**: if a project's CLAUDE.md or GEMINI.md is ever hand-rewritten and the
-> `COMMON-CLAUDE`/`COMMON-GEMINI` marker comments are not preserved around the copied sections,
-> `upgrade-project.ts` loses its merge point for that file — the MERGE step silently no-ops for
-> it on every future upgrade, and the file drifts out of sync permanently. This happened to
+> ⚠️ **Failure mode**: if a project's instruction-family file (CLAUDE.md, GEMINI.md, CODEX.md,
+> Hermes.md) is ever hand-rewritten and its `COMMON-*` marker comments are not preserved around
+> the copied sections, `upgrade-project.ts` loses its merge point for that file — the MERGE step
+> silently no-ops for it on every future upgrade, and the file drifts out of sync permanently.
+> The 2026-09-27 Hermes.md case showed a second form of the same loss: when the merge engine's
+> pattern table lacks the marker (`MANAGED_PATTERNS`), a newly shipped family file can never
+> reach EXISTING projects even though the template carries it — first delivery then requires a
+> marker-table fix plus a re-upgrade (ADR-0093 Amendment 1). This happened to
 > `Projects/co-price` and `Projects/co-abap` in 2026-08 (CLAUDE.md rewritten with 0-1 of 9
 > expected markers, GEMINI.md with 0-1 of 4). See §6 and §7 below.
 
