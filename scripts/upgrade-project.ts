@@ -1,5 +1,12 @@
 #!/usr/bin/env bun
-// @version 1.55.0
+// @version 1.56.0
+// v1.56.0 (2026-09-28): SKILLS_REGISTRY_RECONCILE also aligns each row's
+//          status/owner with the delivered SKILL.md frontmatter via
+//          alignSkillRegistryRowsWithFrontmatter (previously scaffold-only).
+//          An upgrade that replaced a project-local skill with the L0 copy
+//          (co-architect service-design: owner service-designer → pm) left
+//          the registry row stale and failed the project's skill audit with
+//          `Registry owner drift`.
 // v1.55.0 (2026-09-28, ADR-0093 Amendment 2): legacy `Hermes.md` is renamed to
 //          `HERMES.md` before the MERGE pass. Hermes discovers only
 //          `.hermes.md`/`HERMES.md` (agent/prompt_builder.py), so the mixed-case
@@ -482,7 +489,7 @@ import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { extractScriptVersion, preserveLifecycleFrontmatter } from './helpers/upgrade-versions.ts';
 import { applySubstitutions } from './helpers/substitute-placeholders.ts';
-import { extractFrontmatterVersionAndReviewed, reconcileSkillRegistry } from './helpers/skills-registry.ts';
+import { extractFrontmatterVersionAndReviewed, reconcileSkillRegistry, alignSkillRegistryRowsWithFrontmatter } from './helpers/skills-registry.ts';
 import {
   splitIntoSections,
   splitContextFileSections,
@@ -2770,7 +2777,7 @@ console.log('--- VARIANT-SCOPE SKILL PRUNE ---');
 console.log('');
 
 // ── SKILLS_REGISTRY_RECONCILE: version, last_reviewed, and missing rows ───────
-console.log('--- SKILLS_REGISTRY_RECONCILE: version, last_reviewed, missing rows ---');
+console.log('--- SKILLS_REGISTRY_RECONCILE: version, last_reviewed, status/owner, missing rows ---');
 const projSkillsPath = join(projectDir, 'skills');
 const registryPath = join(projectDir, 'skills', 'SKILLS.md');
 if (existsSync(registryPath) && existsSync(projSkillsPath)) {
@@ -2804,14 +2811,22 @@ if (existsSync(registryPath) && existsSync(projSkillsPath)) {
   // forced a manual backfill across 11 projects when T-007 contract-skill
   // delivery landed new skills (T-20260922-001). Emitted cells are always
   // unquoted (helpers/skills-registry.ts).
-  const { content: updatedRegistry, updated, added } = reconcileSkillRegistry(registryContent, delivered);
+  const reconciled = reconcileSkillRegistry(registryContent, delivered);
+  const { updated, added } = reconciled;
+  // SKILL.md frontmatter is the source of truth the skill audit checks rows
+  // against; the delivered frontmatter can change owner/status (e.g. a local
+  // skill replaced by the L0 copy), so align those cells too.
+  const { content: updatedRegistry, aligned } = alignSkillRegistryRowsWithFrontmatter(reconciled.content, delivered);
   for (const skill of updated) {
     console.log(`  ${dryTag}RECONCILED: ${skill} (version/last_reviewed updated)`);
   }
   for (const skill of added) {
     console.log(`  ${dryTag}ADDED ROW: ${skill} (newly delivered skill had no registry row)`);
   }
-  const registryChanged = updated.length + added.length > 0;
+  for (const skill of aligned) {
+    console.log(`  ${dryTag}ALIGNED: ${skill} (status/owner set from SKILL.md frontmatter)`);
+  }
+  const registryChanged = updated.length + added.length + aligned.length > 0;
 
   if (registryChanged && !dryRun) {
     writeFileSync(registryPath, updatedRegistry, 'utf8');
