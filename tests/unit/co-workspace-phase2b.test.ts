@@ -205,6 +205,46 @@ echo '{"type":"result","session_id":"s1","exit_code":0,"text":"ok","tokens":{"in
     expect(denied.status).toBe(401);
   });
 
+  test("account self-service: password change needs current credential; email change verifies; admin renames", async () => {
+    const { createHash } = await import("node:crypto");
+    const sha = (v: string) => createHash("sha256").update(v).digest("hex");
+    const u = state.users.createUser({ email: "selfsvc@test.local", name: "selfsvc", password: "startpass123", role: "user" });
+    const cookie = `gw_session=${state.users.createSession(u!.id)}`;
+    const patchHeaders = { "content-type": "application/json", cookie, "x-requested-with": "co-workspace" };
+
+    const bad = await fetch(`${base}/auth/me`, { method: "PATCH", headers: patchHeaders, body: JSON.stringify({ currentPassword: "wrong", password: "newpass123" }) });
+    expect(bad.status).toBe(403);
+
+    const ok = await fetch(`${base}/auth/me`, { method: "PATCH", headers: patchHeaders, body: JSON.stringify({ currentPassword: "startpass123", password: "newpass123" }) });
+    expect(ok.status).toBe(200);
+    // the performing session survives (SEC-06 scope: other sessions invalidated)
+    expect((await fetch(`${base}/auth/me`, { headers: { cookie } })).status).toBe(200);
+
+    // email change: stage via the store (token only travels by mail), verify via the route
+    const staged = state.users.createEmailChange(u!.id, "newaddr@test.local");
+    expect(staged.ok).toBe(true);
+    const stagedToken = staged.ok ? staged.token : "";
+    const verify = await fetch(`${base}/auth/email/verify`, { method: "POST", headers: { "content-type": "application/json", cookie }, body: JSON.stringify({ token: stagedToken }) });
+    expect(verify.status).toBe(200);
+    expect(state.users.findByEmailHash(sha("newaddr@test.local"))?.id).toBe(u!.id);
+
+    // colliding email change is rejected at staging time (unique email hash across accounts)
+    const u2 = state.users.createUser({ email: "other@test.local", name: "other", password: "otherpass123", role: "user" });
+    const collide = state.users.createEmailChange(u2!.id, "newaddr@test.local");
+    expect(collide.ok).toBe(false);
+    expect(!collide.ok && collide.reason).toBe("email_taken");
+    // unchanged email is a no-op rejection
+    const same = state.users.createEmailChange(u!.id, "newaddr@test.local");
+    expect(!same.ok && same.reason).toBe("unchanged");
+
+    // admin rename works; unauthenticated rename is denied
+    const rename = await fetch(`${base}/admin/users/${u!.id}/name`, { method: "PATCH", headers: { "content-type": "application/json", cookie: adminCookie, "x-requested-with": "co-workspace" }, body: JSON.stringify({ name: "Renamed By Admin" }) });
+    expect(rename.status).toBe(200);
+    expect((await rename.json()).user.name).toBe("Renamed By Admin");
+    const denied = await fetch(`${base}/admin/users/${u!.id}/name`, { method: "PATCH", headers: { "content-type": "application/json", "x-requested-with": "co-workspace" }, body: JSON.stringify({ name: "Nope" }) });
+    expect(denied.status).toBe(401);
+  });
+
   test("GET /tenants?mine=1 matches the cookie-session principal, not header credentials", async () => {
     const user = state.users.createUser({ email: "mine@test.local", name: "mine", password: "minepass123", role: "user" });
     const cookie = `gw_session=${state.users.createSession(user!.id)}`;

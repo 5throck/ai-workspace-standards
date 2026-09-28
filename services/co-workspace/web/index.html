@@ -600,7 +600,7 @@
         `<span class="avatar">${esc((me.loginId ?? "?")[0].toUpperCase())}</span>` +
         `<span style="flex:1; overflow:hidden;"><span style="display:block; font-size:.78rem; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${esc(me.name)}</span>` +
         `<span style="font-size:.68rem; color:var(--muted);">${esc(me.loginId)}${me.role === "admin" ? " · admin" : ""}</span></span>` +
-        `<button id="profileBtn" class="collapsebtn" title="Profile" style="font-size:.8rem;">✎</button>` +
+        `<button id="profileBtn" class="collapsebtn" title="Account settings" style="font-size:.8rem;">✎</button>` +
         `<button id="logoutBtn" class="collapsebtn" title="Sign out" style="font-size:.8rem;">⎋</button></div>`;
       $("logoutBtn").addEventListener("click", async () => {
         if (!confirm("Sign out of co-workspace?")) return;
@@ -609,7 +609,7 @@
         await fetch("/auth/logout", { method: "POST", headers: { "x-requested-with": "co-workspace" } });
         location.assign("/login");
       });
-      $("profileBtn").addEventListener("click", () => renderProfileForm());
+      $("profileBtn").addEventListener("click", () => renderAccountModal());
     } else {
       authCard.innerHTML =
         `<div class="field"><b>Sign in</b></div>` +
@@ -665,61 +665,71 @@
     $("toLogin").addEventListener("click", renderAuthCard);
   }
 
-  function renderProfileForm() {
-    showView("panel");
-    adminView.innerHTML =
-      `<div class="card"><h2>Profile — @${esc(me?.loginId ?? "")}</h2>` +
-      `<div class="field" style="margin-bottom:6px;"><input id="pf-name" placeholder="Display name" value="${esc(me?.name ?? "")}"></div>` +
-      `<div class="field" style="margin-bottom:6px;"><input id="pf-pw" type="password" placeholder="New password (optional)"></div>` +
-      `<button id="pf-save">Save</button> <button id="pf-back">Back</button>` +
-      `<div class="formErr" id="pf-err" role="alert"></div></div>`;
-    $("pf-save").addEventListener("click", async () => {
-      $("pf-err").textContent = "";
-      const res = await fetch("/auth/me", {
-        method: "PATCH",
-        headers: { "content-type": "application/json", "x-requested-with": "co-workspace" },
-        body: JSON.stringify({ name: $("pf-name").value, password: $("pf-pw").value || undefined }),
-      });
+  // R3: account modal — password change (popup, current credential required) and
+  // self-service email change (verification key from the outbox mail). The display-name
+  // self-edit form was removed (renames are an admin action now).
+  function renderAccountModal() {
+    const wrap = showModal({ title: `Account — @${me?.loginId ?? ""}`, bodyHtml: `
+      <h3 style="font-size:.85rem; margin: 12px 0 6px;">Change password</h3>
+      <div class="field"><input id="ac-cur" type="password" placeholder="Current password" autocomplete="current-password"></div>
+      <div class="field"><input id="ac-new" type="password" placeholder="New password (8+)" autocomplete="new-password"></div>
+      <div class="field"><input id="ac-new2" type="password" placeholder="Repeat new password" autocomplete="new-password"></div>
+      <div class="row" style="justify-content:flex-start;"><button id="ac-pw-save">Change password</button></div>
+      <div class="formErr" id="ac-pw-err" role="alert"></div>
+      <h3 style="font-size:.85rem; margin: 14px 0 6px;">Change email</h3>
+      <div class="field"><input id="ac-email" type="email" placeholder="New email (a verification key will be sent)" autocomplete="email"></div>
+      <div class="row" style="justify-content:flex-start;"><button id="ac-email-send" class="ghost" style="background:transparent;color:var(--fg);border:1px solid var(--border2);">Send verification</button></div>
+      <div class="field" id="ac-verify-row" style="display:none;"><input id="ac-verify-key" placeholder="Verification key from the mail"></div>
+      <div class="row" style="justify-content:flex-start; display:none;" id="ac-verify-rowbtn"><button id="ac-email-verify">Confirm email</button></div>
+      <div class="formErr" id="ac-email-err" role="alert"></div>
+      <div class="row"><span class="spacer"></span><button id="ac-close" type="button" style="background:transparent;color:var(--muted);border:1px solid var(--border2);">Close</button></div>` });
+    const authHeaders = { "content-type": "application/json", "x-requested-with": "co-workspace" };
+    wrap.querySelector("#ac-close").addEventListener("click", () => wrap.remove());
+    wrap.querySelector("#ac-pw-save").addEventListener("click", async () => {
+      const err = wrap.querySelector("#ac-pw-err");
+      err.textContent = "";
+      const cur = wrap.querySelector("#ac-cur").value;
+      const a = wrap.querySelector("#ac-new").value;
+      const b = wrap.querySelector("#ac-new2").value;
+      if (!cur) { err.textContent = "⚠ Current password is required."; return; }
+      if (a.length < 8) { err.textContent = "⚠ New password must be at least 8 characters."; return; }
+      if (a !== b) { err.textContent = "⚠ New passwords do not match."; return; }
+      const res = await fetch("/auth/me", { method: "PATCH", headers: authHeaders, body: JSON.stringify({ currentPassword: cur, password: a }) });
       if (res.status === 200) {
-        me = (await res.json()).user;
-        renderAuthCard();
-        showView("chat");
+        err.textContent = "";
+        err.style.color = "#3fb950";
+        err.textContent = "✔ Password changed. Other sessions were signed out.";
       } else {
         const body = await res.json().catch(() => ({}));
-        $("pf-err").textContent = `⚠ ${body.error ?? `save failed (HTTP ${res.status})`}`;
+        err.textContent = `⚠ ${body.error ?? `change failed (HTTP ${res.status})`}`;
       }
     });
-    $("pf-back").addEventListener("click", () => showView("chat"));
-  }
-
-  // R1: a temp-password login must rotate before the app is usable (blocking modal; the
-  // rotation purges sessions, so the user signs in again with the new password).
-  function forcePasswordChange() {
-    const wrap = showModal({ title: "Set a new password", dismissible: false, bodyHtml: `
-      <div class="field">Your account uses a temporary password from your administrator. Choose a new password to continue.</div>
-      <div class="field"><input id="fp-new" type="password" placeholder="New password (8+)" autocomplete="new-password"></div>
-      <div class="field"><input id="fp-new2" type="password" placeholder="Repeat new password" autocomplete="new-password"></div>
-      <div class="formErr" id="fp-err" role="alert"></div>
-      <div class="row"><button id="fp-save">Save and continue</button></div>` });
-    wrap.querySelector("#fp-save").addEventListener("click", async () => {
-      const a = wrap.querySelector("#fp-new").value;
-      const b = wrap.querySelector("#fp-new2").value;
-      const err = wrap.querySelector("#fp-err");
-      if (a.length < 8) { err.textContent = "⚠ Password must be at least 8 characters."; return; }
-      if (a !== b) { err.textContent = "⚠ Passwords do not match."; return; }
-      const res = await fetch("/auth/me", {
-        method: "PATCH",
-        headers: { "content-type": "application/json", "x-requested-with": "co-workspace" },
-        body: JSON.stringify({ password: a }),
-      });
+    wrap.querySelector("#ac-email-send").addEventListener("click", async () => {
+      const err = wrap.querySelector("#ac-email-err");
+      err.textContent = "";
+      err.style.color = "";
+      const res = await fetch("/auth/email/change", { method: "POST", headers: authHeaders, body: JSON.stringify({ email: wrap.querySelector("#ac-email").value }) });
+      const body = await res.json().catch(() => ({}));
       if (res.status === 200) {
-        wrap.remove();
-        await fetch("/auth/logout", { method: "POST", headers: { "x-requested-with": "co-workspace" } });
-        alert("Password updated. Sign in with your new password.");
-        location.assign("/login");
+        wrap.querySelector("#ac-verify-row").style.display = "flex";
+        wrap.querySelector("#ac-verify-rowbtn").style.display = "flex";
+        err.textContent = `✔ ${body.message}`;
+        err.style.color = "#3fb950";
       } else {
-        const body = await res.json().catch(() => ({}));
-        err.textContent = `⚠ ${body.error ?? "change failed"}`;
+        err.textContent = `⚠ ${body.error ?? "request failed"}`;
+      }
+    });
+    wrap.querySelector("#ac-email-verify").addEventListener("click", async () => {
+      const err = wrap.querySelector("#ac-email-err");
+      err.textContent = "";
+      err.style.color = "";
+      const res = await fetch("/auth/email/verify", { method: "POST", headers: authHeaders, body: JSON.stringify({ token: wrap.querySelector("#ac-verify-key").value.trim() }) });
+      const body = await res.json().catch(() => ({}));
+      if (res.status === 200) {
+        err.style.color = "#3fb950";
+        err.textContent = "✔ Email updated.";
+      } else {
+        err.textContent = `⚠ ${body.error ?? "verification failed"}`;
       }
     });
   }
@@ -787,11 +797,32 @@
           const pu = stats.perUser.find((p) => p.principal === u.principal);
           return `<tr><td>${esc(u.loginId ?? u.principal)}${u.role === "admin" ? " ·admin" : ""}</td>` +
             `<td>${esc(u.status)}</td><td>${pu?.tenantCount ?? 0}</td><td>${fmt(pu?.diskBytes ?? 0)}</td>` +
-            `<td><button class="collapsebtn" data-reset="${u.id}" data-name="${esc(u.loginId)}">reset pw</button> ` +
+            `<td><button class="collapsebtn" data-rename="${u.id}" data-name="${esc(u.loginId)}" data-cur="${esc(u.name)}">rename</button> ` +
+            `<button class="collapsebtn" data-reset="${u.id}" data-name="${esc(u.loginId)}">reset pw</button> ` +
             `<button class="collapsebtn" data-del="${u.id}" style="color:#f85149;">delete</button></td></tr>`;
         })
         .join("") +
       `</tbody></table>`;
+    for (const btn of adminView.querySelectorAll("[data-rename]")) {
+      btn.addEventListener("click", () => {
+        const wrap = showModal({ title: `Rename @${btn.getAttribute("data-name")}`, bodyHtml: `
+          <div class="field"><input id="rn-val" value="${esc(btn.getAttribute("data-cur") ?? "")}" placeholder="Display name (1-80 chars)"></div>
+          <div class="formErr" id="rn-err" role="alert"></div>
+          <div class="row"><span class="spacer"></span><button id="rn-save">Save</button>
+          <button id="rn-close" type="button" style="background:transparent;color:var(--muted);border:1px solid var(--border2);">Cancel</button></div>` });
+        wrap.querySelector("#rn-close").addEventListener("click", () => wrap.remove());
+        wrap.querySelector("#rn-val").focus();
+        wrap.querySelector("#rn-save").addEventListener("click", async () => {
+          const res = await fetch(`/admin/users/${btn.getAttribute("data-rename")}/name`, {
+            method: "PATCH",
+            headers: { "content-type": "application/json", "x-requested-with": "co-workspace" },
+            body: JSON.stringify({ name: wrap.querySelector("#rn-val").value.trim() }),
+          });
+          if (res.status === 200) { wrap.remove(); adminMenu.click(); adminMenu.click(); }
+          else { const body = await res.json().catch(() => ({})); wrap.querySelector("#rn-err").textContent = `⚠ ${body.error ?? "rename failed"}`; }
+        });
+      });
+    }
     for (const btn of adminView.querySelectorAll("[data-reset]")) {
       btn.addEventListener("click", async () => {
         const res = await fetch(`/admin/users/${btn.getAttribute("data-reset")}/reset-password`, { method: "POST" });
