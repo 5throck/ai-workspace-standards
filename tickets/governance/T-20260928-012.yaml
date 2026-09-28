@@ -5,7 +5,7 @@ title: >-
   co-workspace: extract testable pure helpers (donut slice math, session
   grouping) from the single-file web app and unit-test them
 priority: low
-status: running
+status: review
 attempts: 0
 created_at: '2026-09-28T05:02:03.896Z'
 history:
@@ -18,5 +18,8 @@ history:
   - at: '2026-09-28T18:16:25.394Z'
     from: waiting
     to: running
+  - at: '2026-09-28T18:38:45.086Z'
+    from: running
+    to: review
 result: null
 error: null

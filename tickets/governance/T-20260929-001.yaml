@@ -7,12 +7,21 @@ title: >-
   co-workspace-server/anthropic/gemini/antigravity/phase2 still whole-file
   skip-gated on win32 with shebang fakes
 priority: normal
-status: backlog
+status: review
 attempts: 0
 created_at: '2026-09-28T16:40:18.669Z'
 history:
   - at: '2026-09-28T16:40:18.669Z'
     from: null
     to: backlog
+  - at: '2026-09-28T18:39:22.269Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-28T18:39:22.284Z'
+    from: waiting
+    to: running
+  - at: '2026-09-28T18:39:22.299Z'
+    from: running
+    to: review
 result: null
 error: null
