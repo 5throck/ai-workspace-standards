@@ -1647,6 +1647,15 @@
       "source": "manual",
       "created": "2026-09-27",
       "last_updated": "2026-09-28"
+    },
+    {
+      "id": "2026-09-27-team-gateway-qa-fair-and-security-review",
+      "title": "team gateway qa fair and security review",
+      "file": "docs/designs/2026-09-27-team-gateway-qa-fair-and-security-review.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-28",
+      "last_updated": "2026-09-28"
     }
   ]
 }
