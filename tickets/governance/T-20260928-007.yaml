@@ -6,12 +6,15 @@ title: >-
   an explicit route allowlist, scope GET /tenants metadata to owner-or-admin,
   decouple the session Secure flag from loginRequired
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-28T05:01:46.156Z'
 history:
   - at: '2026-09-28T05:01:46.156Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-28T07:42:38.134Z'
+    from: backlog
+    to: done
+result: 'Completed in PR #1195 (backlog batch 2)'
 error: null
