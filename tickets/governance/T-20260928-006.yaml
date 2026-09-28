@@ -5,12 +5,17 @@ title: >-
   co-workspace: server-side user pagination when listUsers exceeds ~150 users
   (wave design §D-PR4 follow-up)
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-28T05:01:46.142Z'
 history:
   - at: '2026-09-28T05:01:46.142Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-28T09:06:31.539Z'
+    from: backlog
+    to: done
+result: >-
+  Server-side user pagination implemented in PR #1198: GET
+  /admin/users?q=&page=&pageSize= + web search/pager
 error: null
