@@ -1061,6 +1061,7 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
     }
 
     if (req.method === "POST" && path === "/auth/verify") {
+      if (!state.signupLimiter.allow(clientIp)) throw new HttpError(429, "too many attempts — try later");
       const body = (await readJsonBody(req)) as Record<string, unknown>;
       const token = typeof body.token === "string" ? body.token.trim() : "";
       const loginId = state.users.verifyEmail(token);
@@ -1107,10 +1108,13 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
     }
 
     if (req.method === "POST" && path === "/auth/resend") {
+      if (!state.signupLimiter.allow(clientIp)) throw new HttpError(429, "too many attempts — try later");
       const body = (await readJsonBody(req)) as Record<string, unknown>;
       const loginId = typeof body.loginId === "string" ? body.loginId.trim() : "";
       const reissued = state.users.reissueVerification(loginId);
-      if (!reissued) throw new HttpError(404, "no pending verification for this ID");
+      // Uniform response: a 404-vs-ok difference would let callers enumerate which login
+      // IDs have pending verifications (and spam the outbox for existing ones).
+      if (!reissued) return jsonResponse({ ok: true, message: "if the account is pending, a verification mail was sent" });
       const outbox = join(state.cfg.dataDir, "mail-outbox");
       mkdirSync(outbox, { recursive: true });
       writeFileSync(
@@ -1341,7 +1345,7 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
       }
       state.users.softDeleteUser(targetId);
       state.audit.record(caller.principal, "user.delete", target.principal, `disposition=${disposition} tenants=${handled}`);
-      return jsonResponse({ deletedUser: target.email, disposition, tenantsHandled: handled });
+      return jsonResponse({ deletedUser: target.principal, disposition, tenantsHandled: handled });
     }
 
     // QA-07: cancel a running turn (kills the child process; the turn settles as partial).

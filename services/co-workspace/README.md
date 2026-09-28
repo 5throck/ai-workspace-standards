@@ -147,23 +147,23 @@ continuity handle → credential model → isolation matrix → provider disclos
 | `CO_WORKSPACE_DATA_DIR_HOST` | — | Host path of the data dir (bind + docker-isolation sibling mounts) |
 | `CO_WORKSPACE_WORKSPACE_DIR` | repo root | Workspace clone used for scaffolding |
 | `CO_WORKSPACE_VARIANTS` | compose: `all` | Variant allowlist — `all` auto-discovers every `status: stable` `templates/co-*` |
-| `CO_WORKSPACE_VARIANTS_INCLUDE_BETA` | `false` | Adds beta variants to the catalog (tagged `meta.status: "beta"`); also selectable per-creation in the New-team modal |
+| `CO_WORKSPACE_VARIANTS_INCLUDE_BETA` | `false` (compose: `true`) | Adds beta variants to the catalog (tagged `meta.status: "beta"`); also selectable per-creation in the New-team modal |
 | `CO_WORKSPACE_TEMPLATE_VERSION` | HEAD (`templates/VERSION`) | Pin to a `template-vX.Y.Z` tag |
 | `CO_WORKSPACE_HERMES_SEED_HOME` | — | Hermes home whose `auth.json`/`.env` seed team homes |
 | `CO_WORKSPACE_HERMES_AUTH_DIR` (+`_HOST`) | `<seed>/shared` | Shared credential store — one token store across operator and teams |
 | `CO_WORKSPACE_HERMES_MODEL` | Hermes auto | Model id stamped into team `config.yaml` (`model.default`), e.g. `upstage/solar-pro4:free` |
 | `CO_WORKSPACE_RUN_BUDGET_SECONDS` / `MAX_TURNS` | `300` / `100` | Wall-clock and tool-iteration ceilings per turn |
-| `CO_WORKSPACE_HERMES_TOOLSETS` / `_EXTRA_ARGS` | — | Toolset scoping (`-t`) and extra CLI args per session |
+| `CO_WORKSPACE_HERMES_TOOLSETS` / `CO_WORKSPACE_HERMES_EXTRA_ARGS` | — | Toolset scoping (`-t`) and extra CLI args per session |
 | `CO_WORKSPACE_QUOTA_WINDOW` | `lifetime` | `daily` resets per-team quota counters each UTC day |
 | `CO_WORKSPACE_API_KEYS` / `_API_KEYS_FILE` | — | Bearer keys (`key:label` maps a key to a trusted principal); the file re-reads on `POST /admin/reload` |
 | `CO_WORKSPACE_LOGIN_REQUIRED` | compose: `true` | Web app requires a session; keyless visitors are redirected |
 | `CO_WORKSPACE_CSRF_REQUIRED` | compose: `true` | Keyless mutating requests need `x-requested-with: co-workspace` |
-| `CO_WORKSPACE_TENANT_MAX_PER_PRINCIPAL` | `0` (=unlimited) | Teams per principal — set a positive value for multi-user deployments |
+| `CO_WORKSPACE_TENANT_MAX_PER_PRINCIPAL` | `0` (=unlimited; compose: `10`) | Teams per principal — set a positive value for multi-user deployments |
 | `CO_WORKSPACE_TENANT_MAX_TURNS` / `_MAX_TOKENS` | `0` | Per-team turn/token caps (`429`, enforced before a turn starts) |
 | `CO_WORKSPACE_ISOLATION` | `process` | `docker` = per-turn ephemeral sibling container (tenant files only) |
 | `CO_WORKSPACE_RUNTIME_IMAGE` | `co-workspace-runtime:latest` | Runtime image for docker isolation (the gateway image also qualifies — it carries hermes) |
 | `CO_WORKSPACE_DOCKER_BIN` | `docker` | Docker CLI used for isolation spawns |
-| `CO_WORKSPACE_CONTAINER_MEMORY` / `_CPUS` / `_PIDS_LIMIT` | `2g` / `2` / `256` | Resource caps for isolated turns |
+| `CO_WORKSPACE_CONTAINER_MEMORY` / `CO_WORKSPACE_CONTAINER_CPUS` / `CO_WORKSPACE_CONTAINER_PIDS_LIMIT` | `2g` / `2` / `256` | Resource caps for isolated turns |
 | `CO_WORKSPACE_RUNTIME` | `hermes` | `hermes` / `antigravity` (agy) / `claude` / `codex` |
 | `CO_WORKSPACE_ADMIN_EMAIL` | — | Bootstrap admin account (created at startup) |
 | `GOOGLE_CLIENT_ID` / `_SECRET` / `_REDIRECT_URI` | — | Google SSO |
@@ -216,10 +216,13 @@ docker compose build && docker compose up -d
 - **PII** — raw emails live ≤24 h in a pending-verification row and are then dropped;
   accounts keep only a SHA-256 email hash. Admins can rename users but cannot read or
   set their email.
-- **Known tradeoffs** (documented, by design): the shared provider token store is
-  bind-mounted into isolated turns (one login covers all teams — team-scoped token
-  separation is future work); the dev mailer writes verification mails to a local
-  outbox instead of SMTP; rate limiters are in-memory.
+- **Known tradeoffs** (documented, by design): in docker mode each team's Hermes home is
+  re-seeded with the operator's CURRENT `auth.json` every turn — one login covers all
+  teams, and the copy is readable by the isolated turn (process mode instead binds the
+  shared token store; team-scoped token separation is future work). The dev mailer
+  writes verification mails to a local outbox instead of SMTP. Rate limiters are
+  in-memory; session-authenticated mutations rely on SameSite=Lax (the CSRF header
+  guards keyless requests).
 
 Known limits: provisioning is asynchronous; usage is metered but not billed; multi-team
 per variant (beyond one per user) is future work. History: Phase 2 hardening design

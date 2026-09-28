@@ -292,6 +292,53 @@ echo '{"type":"result","session_id":"s1","exit_code":0,"text":"ok","tokens":{"in
     expect(text).toContain('"exitCode":0');
   }, 20_000);
 
+  test("reload with an emptied key file is rejected and leaves keys unchanged (T-20260928-009)", async () => {
+    const before = state.cfg.apiKeys.slice();
+    writeFileSync(keysFile, "# emptied\n");
+    const res = await fetch(`${base}/admin/reload`, { method: "POST", headers: { cookie: adminCookie } });
+    expect(res.status).toBe(400);
+    expect(state.cfg.apiKeys).toEqual(before);
+    // restore for the suites that follow
+    writeFileSync(keysFile, "sk-new\n");
+    const ok = await fetch(`${base}/admin/reload`, { method: "POST", headers: { cookie: adminCookie } });
+    expect(ok.status).toBe(200);
+  });
+
+  test("admin rename: PATCH /admin/users/:id/name renames; unauthenticated rename denied (T-20260928-011)", async () => {
+    const u = state.users.createUser({ email: "rename-me@test.local", name: "Original Name", password: "renamepass123", role: "user" });
+    const denied = await fetch(`${base}/admin/users/${u!.id}/name`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json", "x-requested-with": "co-workspace" },
+      body: JSON.stringify({ name: "Nope" }),
+    });
+    expect(denied.status).toBe(401);
+    const ok = await fetch(`${base}/admin/users/${u!.id}/name`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json", cookie: adminCookie, "x-requested-with": "co-workspace" },
+      body: JSON.stringify({ name: "Renamed Person" }),
+    });
+    expect(ok.status).toBe(200);
+    expect((await ok.json()).user.name).toBe("Renamed Person");
+  });
+
+  test("auth hardening: /auth/resend is uniform + rate-limited; admin delete stops leaking raw email (review D)", async () => {
+    // uniform response for a non-pending ID (no enumeration)
+    const r1 = await fetch(`${base}/auth/resend`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ loginId: "no-such-user" }),
+    });
+    expect(r1.status).toBe(200);
+    expect((await r1.json()).ok).toBe(true);
+    // admin delete no longer returns the raw email
+    const victim = state.users.createUser({ email: "victim@test.local", name: "victim", password: "victimpw123", role: "user" });
+    const del = await fetch(`${base}/admin/users/${victim!.id}?tenants=delete`, { method: "DELETE", headers: { cookie: adminCookie } });
+    expect(del.status).toBe(200);
+    const body = await del.json();
+    expect(body.deletedUser).toBe(victim!.principal);
+    expect(body.deletedUser).not.toContain("@");
+  });
+
   test("GET /tenants?mine=1 matches the cookie-session principal, not header credentials", async () => {
     const user = state.users.createUser({ email: "mine@test.local", name: "mine", password: "minepass123", role: "user" });
     const cookie = `gw_session=${state.users.createSession(user!.id)}`;
