@@ -2,7 +2,6 @@
  * Event shapes captured live from `agy -p --output-format stream-json` (2026-09-27). */
 
 import { afterAll, describe, expect, test } from "bun:test";
-const describe_ = process.platform === "win32" ? describe.skip : describe; // windows cannot exec shebang fake binaries (T-20260927-020 follow-up)
 import { chmodSync, mkdirSync, writeFileSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -10,7 +9,7 @@ import { agyArgs, parseAgyLine } from "../../services/co-workspace/src/antigravi
 import { loadConfig } from "../../services/co-workspace/src/config";
 import { createServer, createState } from "../../services/co-workspace/src/server";
 
-describe_("parseAgyLine — agy stream-json normalization", () => {
+describe("parseAgyLine — agy stream-json normalization", () => {
   test("init event normalizes to system/init with the conversation id", () => {
     const evt = parseAgyLine(
       '{"event":"init","conversation_id":"conv-1","init":{"cwd":"/x","tools":[],"permission_mode":"request-review"}}',
@@ -46,7 +45,7 @@ describe_("parseAgyLine — agy stream-json normalization", () => {
   });
 });
 
-describe_("agyArgs — headless invocation and explicit continuity", () => {
+describe("agyArgs — headless invocation and explicit continuity", () => {
   const base = {
     agyBin: "agy",
     projectDir: "/data/tenants/gw-a/project",
@@ -69,7 +68,7 @@ describe_("agyArgs — headless invocation and explicit continuity", () => {
   });
 });
 
-describe_("gateway server — antigravity runtime end to end (fake agy binary)", () => {
+describe("gateway server — antigravity runtime end to end (fake agy binary)", () => {
   const dataDir = join(tmpdir(), `gw-agy-${crypto.randomUUID().slice(0, 8)}`);
   const workspaceDir = join(tmpdir(), `gw-agy-ws-${crypto.randomUUID().slice(0, 8)}`);
   mkdirSync(join(workspaceDir, "scripts"), { recursive: true });
@@ -83,15 +82,18 @@ writeFileSync(\`Projects/\${name}/AGENTS.md\`, "# fake\\n");
   );
   const binDir = join(tmpdir(), `gw-agy-bin-${crypto.randomUUID().slice(0, 8)}`);
   mkdirSync(binDir, { recursive: true });
-  const agyBin = join(binDir, "fake-agy.sh");
+  const agyBin = join(binDir, "fake-agy.ts");
   writeFileSync(
     agyBin,
-    `#!/bin/sh
-printf '%s\\n' "$*" >> "$HERMES_FAKE_LOG"
-cat > /dev/null
-echo '{"event":"init","conversation_id":"conv-agy","init":{"cwd":"."}}'
-echo '{"event":"step_update","step_update":{"step_index":1,"state":"ACTIVE","step_type":"agent_response","text_delta":"Hello from fake agy"}}'
-echo '{"event":"result","result":{"conversation_id":"conv-agy","status":"SUCCESS","response":"Hello from fake agy","num_turns":1,"usage":{"input_tokens":5,"output_tokens":3,"total_tokens":8}}}'
+    // T-20260929-001: portable fake binary — bun runs the .ts directly on every OS
+    // (Windows Bun.spawn cannot exec shebang scripts); prefix support mirrors hermes.
+    `import { appendFileSync } from "node:fs";
+const argv = process.argv.slice(2);
+if (process.env.HERMES_FAKE_LOG) appendFileSync(process.env.HERMES_FAKE_LOG, argv.join(" ") + "\\n");
+await Bun.stdin.text();
+console.log('{"event":"init","conversation_id":"conv-agy","init":{"cwd":"."}}')
+console.log('{"event":"step_update","step_update":{"step_index":1,"state":"ACTIVE","step_type":"agent_response","text_delta":"Hello from fake agy"}}')
+console.log('{"event":"result","result":{"conversation_id":"conv-agy","status":"SUCCESS","response":"Hello from fake agy","num_turns":1,"usage":{"input_tokens":5,"output_tokens":3,"total_tokens":8}}}')
 `,
   );
   chmodSync(agyBin, 0o755);
@@ -105,6 +107,7 @@ echo '{"event":"result","result":{"conversation_id":"conv-agy","status":"SUCCESS
     CO_WORKSPACE_VARIANTS: "co-consult",
     CO_WORKSPACE_RUNTIME: "antigravity",
     CO_WORKSPACE_ANTIGRAVITY_BIN: agyBin,
+    CO_WORKSPACE_ANTIGRAVITY_BIN_PREFIX: "bun", // T-20260929-001: portable fake runs via bun
     HERMES_FAKE_LOG: join(dataDir, "agy-args.log"),
   });
   const server = createServer(createState(cfg));

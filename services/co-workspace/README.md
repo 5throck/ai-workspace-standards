@@ -3,7 +3,7 @@
 Serve the workspace's variant agent teams (`templates/co-*`) as **chat sessions over
 OpenAI/Anthropic/Gemini-compatible web APIs**, backed by headless
 [Hermes Agent](https://github.com/NousResearch/hermes-agent) runtimes.
-Governance: ADR-0092 · Design: `docs/designs/2026-09-27-co-workspace-service-design.md`,
+Governance: ADR-0092 · Design: `docs/designs/2026-09-27-team-gateway-service-design.md`,
 `docs/designs/2026-09-28-co-workspace-usability-wave-design.md`.
 
 **Current posture:** multi-user (sign-in required, per-user identity and quotas), a web
@@ -226,5 +226,5 @@ docker compose build && docker compose up -d
 
 Known limits: provisioning is asynchronous; usage is metered but not billed; multi-team
 per variant (beyond one per user) is future work. History: Phase 2 hardening design
-`docs/designs/2026-09-27-co-workspace-phase2-hardening-design.md`, usability wave
+`docs/designs/2026-09-27-team-gateway-phase2-hardening-design.md`, usability wave
 `docs/designs/2026-09-28-co-workspace-usability-wave-design.md`.

@@ -1,7 +1,6 @@
 /** Unit tests for the Team Gateway Anthropic Messages wire translation (ADR-0092 W3b). */
 
 import { afterAll, describe, expect, test } from "bun:test";
-const describe_ = process.platform === "win32" ? describe.skip : describe; // windows cannot exec shebang fake binaries (T-20260927-020 follow-up)
 import { mkdirSync, writeFileSync, chmodSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -15,7 +14,7 @@ import {
 import { loadConfig } from "../../services/co-workspace/src/config";
 import { createServer, createState } from "../../services/co-workspace/src/server";
 
-describe_("parseAnthropicRequest — Messages API shape", () => {
+describe("parseAnthropicRequest — Messages API shape", () => {
   test("accepts string content and extracts the latest user message", () => {
     const parsed = parseAnthropicRequest({
       model: "co-consult",
@@ -65,7 +64,7 @@ describe_("parseAnthropicRequest — Messages API shape", () => {
   });
 });
 
-describe_("Anthropic wire payloads", () => {
+describe("Anthropic wire payloads", () => {
   test("message envelope shape", () => {
     const payload = messagePayload("msg_x", "co-consult", "answer", {
       input_tokens: 10,
@@ -120,7 +119,7 @@ describe_("Anthropic wire payloads", () => {
   });
 });
 
-describe_("gateway server — Anthropic surface", () => {
+describe("gateway server — Anthropic surface", () => {
   const dataDir = join(tmpdir(), `team-gateway-anthropic-${crypto.randomUUID().slice(0, 8)}`);
   const workspaceDir = join(tmpdir(), `team-gateway-anthropic-ws-${crypto.randomUUID().slice(0, 8)}`);
   const seedHome = join(tmpdir(), `team-gateway-anthropic-seed-${crypto.randomUUID().slice(0, 8)}`);
@@ -136,14 +135,15 @@ writeFileSync(\`Projects/\${name}/AGENTS.md\`, "# fake tenant\\n");
   );
   const hermesBinDir = join(tmpdir(), `team-gateway-anthropic-bin-${crypto.randomUUID().slice(0, 8)}`);
   mkdirSync(hermesBinDir, { recursive: true });
-  const hermesBin = join(hermesBinDir, "fake-hermes.sh");
+  const hermesBin = join(hermesBinDir, "fake-hermes.ts");
   writeFileSync(
     hermesBin,
-    `#!/bin/sh
-cat > /dev/null
-echo '{"type":"system","subtype":"init","model":"fake-model","session_id":"sess-a","timestamp":1}'
-echo '{"type":"text","text":"Hello from fake hermes","timestamp":2}'
-echo '{"type":"result","session_id":"sess-a","exit_code":0,"text":"Hello from fake hermes","tokens":{"input":11,"output":7,"total":18},"duration_ms":5,"timestamp":3}'
+    // T-20260929-001: portable fake binary — bun runs the .ts directly on every OS
+    // (Windows Bun.spawn cannot exec shebang scripts).
+    `await Bun.stdin.text();
+console.log('{"type":"system","subtype":"init","model":"fake-model","session_id":"sess-a","timestamp":1}');
+console.log('{"type":"text","text":"Hello from fake hermes","timestamp":2}');
+console.log('{"type":"result","session_id":"sess-a","exit_code":0,"text":"Hello from fake hermes","tokens":{"input":11,"output":7,"total":18},"duration_ms":5,"timestamp":3}');
 `,
   );
   chmodSync(hermesBin, 0o755);
@@ -155,6 +155,7 @@ echo '{"type":"result","session_id":"sess-a","exit_code":0,"text":"Hello from fa
     CO_WORKSPACE_WORKSPACE_DIR: workspaceDir,
     CO_WORKSPACE_VARIANTS: "co-consult",
     HERMES_BIN: hermesBin,
+    HERMES_BIN_PREFIX: "bun", // T-20260929-001: portable fake runs via bun
     CO_WORKSPACE_HERMES_SEED_HOME: seedHome,
   });
   const state = createState(cfg);

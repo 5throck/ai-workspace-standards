@@ -210,6 +210,9 @@
   <div class="content" id="artifactsContent"></div>
 </aside>
 <script type="module">
+  // T-20260928-012: pure helpers (donut slice math, recency grouping) live in
+  // /app-helpers.js so they can be unit-tested without a browser.
+  import { prepareDonutSlices, RECENCY_GROUP_ORDER, recencyGroupLabel } from "./app-helpers.js";
   const $ = (id) => document.getElementById(id);
   const esc = (t) => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   const modelSel = $("model"), sessionsEl = $("sessions"), log = $("log"),
@@ -327,13 +330,10 @@
       for (const label of labels) emitGroup(label, groups.get(label), grouping === "variant");
     } else {
       for (const t of mine) {
-        const d = new Date(t.createdAt);
-        const days = Math.floor((Date.now() - d.getTime()) / 86400000);
-        const label = days === 0 ? "Today" : days === 1 ? "Yesterday" : days <= 7 ? "Previous 7 days" : "Older";
+        const label = recencyGroupLabel(t.createdAt);
         (groups.get(label) ?? groups.set(label, []).get(label)).push(t);
       }
-      const order = ["Today", "Yesterday", "Previous 7 days", "Older"];
-      for (const label of order.filter((l) => groups.has(l))) emitGroup(label, groups.get(label), false);
+      for (const label of RECENCY_GROUP_ORDER.filter((l) => groups.has(l))) emitGroup(label, groups.get(label), false);
     }
     if (mine.length === 0) {
       sessionsEl.innerHTML = '<div class="hint" style="padding:6px 4px;">No teams yet — create one to start.</div>';
@@ -988,11 +988,7 @@
   // R5: dependency-free SVG donut (stroke-dasharray on a ~100-unit circumference ring).
   // Top-7 slices + "others"; the legend carries the numbers (chart is the shape, table the detail).
   function donutChart(title, slices, unit) {
-    const sorted = slices.filter((s) => s.value > 0).sort((a, b) => b.value - a.value);
-    const top = sorted.slice(0, 7);
-    const rest = sorted.slice(7).reduce((a, s) => a + s.value, 0);
-    if (rest > 0) top.push({ label: "others", value: rest });
-    const total = top.reduce((a, s) => a + s.value, 0);
+    const { top, total } = prepareDonutSlices(slices);
     const colors = ["#58a6ff", "#3fb950", "#d29922", "#f778ba", "#bc8cff", "#39c5cf", "#ff7b72", "#6e7681"];
     let offset = 25;
     const segs = top.map((sl, i) => {

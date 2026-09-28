@@ -2,7 +2,6 @@
  * (design 2026-09-27-team-gateway-phase2-hardening). */
 
 import { afterAll, describe, expect, test } from "bun:test";
-const describe_ = process.platform === "win32" ? describe.skip : describe; // windows cannot exec shebang fake binaries (T-20260927-020 follow-up)
 import { chmodSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -14,7 +13,7 @@ import { createServer, createState } from "../../services/co-workspace/src/serve
 const cfgAuth = { apiKeys: ["sk-one", "sk-two"] };
 const req = (headers: Record<string, string>) => new Request("http://x/v1/models", { headers });
 
-describe_("auth — header styles, constant-time path, exemptions", () => {
+describe("auth — header styles, constant-time path, exemptions", () => {
   test("accepts Bearer, x-api-key, and x-goog-api-key headers", () => {
     expect(presentedCredential(req({ authorization: "Bearer sk-one" }))).toBe("sk-one");
     expect(presentedCredential(req({ "x-api-key": "sk-one" }))).toBe("sk-one");
@@ -46,7 +45,7 @@ describe_("auth — header styles, constant-time path, exemptions", () => {
   });
 });
 
-describe_("hermes spawn adapter — toolsets and container isolation", () => {
+describe("hermes spawn adapter — toolsets and container isolation", () => {
   const base: HermesSpawnOptions = {
     hermesBin: "hermes",
     projectDir: "/data/tenants/gw-x/project",
@@ -114,7 +113,7 @@ describe_("hermes spawn adapter — toolsets and container isolation", () => {
   });
 });
 
-describe_("config — Phase 2 tiers", () => {
+describe("config — Phase 2 tiers", () => {
   test("auth/quotas/isolation parse with fail-fast on empty key config", () => {
     const cfg = loadConfig({
       CO_WORKSPACE_API_KEYS: "k1, k2",
@@ -143,7 +142,7 @@ describe_("config — Phase 2 tiers", () => {
   });
 });
 
-describe_("server — auth and quota enforcement", () => {
+describe("server — auth and quota enforcement", () => {
   const dataDir = join(tmpdir(), `gw-p2-${crypto.randomUUID().slice(0, 8)}`);
   const workspaceDir = join(tmpdir(), `gw-p2-ws-${crypto.randomUUID().slice(0, 8)}`);
   mkdirSync(join(workspaceDir, "scripts"), { recursive: true });
@@ -157,14 +156,15 @@ writeFileSync(\`Projects/\${name}/AGENTS.md\`, "# fake\\n");
   );
   const binDir = join(tmpdir(), `gw-p2-bin-${crypto.randomUUID().slice(0, 8)}`);
   mkdirSync(binDir, { recursive: true });
-  const hermesBin = join(binDir, "fake-hermes.sh");
+  const hermesBin = join(binDir, "fake-hermes.ts");
   writeFileSync(
     hermesBin,
-    `#!/bin/sh
-cat > /dev/null
-echo '{"type":"system","subtype":"init","model":"m","session_id":"s1","timestamp":1}'
-echo '{"type":"text","text":"pong","timestamp":2}'
-echo '{"type":"result","session_id":"s1","exit_code":0,"text":"pong","tokens":{"input":10,"output":5,"total":15},"duration_ms":3,"timestamp":3}'
+    // T-20260929-001: portable fake binary — bun runs the .ts directly on every OS
+    // (Windows Bun.spawn cannot exec shebang scripts).
+    `await Bun.stdin.text();
+console.log('{"type":"system","subtype":"init","model":"m","session_id":"s1","timestamp":1}');
+console.log('{"type":"text","text":"pong","timestamp":2}');
+console.log('{"type":"result","session_id":"s1","exit_code":0,"text":"pong","tokens":{"input":10,"output":5,"total":15},"duration_ms":3,"timestamp":3}');
 `,
   );
   chmodSync(hermesBin, 0o755);
@@ -175,6 +175,7 @@ echo '{"type":"result","session_id":"s1","exit_code":0,"text":"pong","tokens":{"
     CO_WORKSPACE_DATA_DIR: dataDir,
     CO_WORKSPACE_WORKSPACE_DIR: workspaceDir,
     HERMES_BIN: hermesBin,
+    HERMES_BIN_PREFIX: "bun", // T-20260929-001: portable fake runs via bun
     CO_WORKSPACE_API_KEYS: "sk-test",
     CO_WORKSPACE_TENANT_MAX_TURNS: "2",
   });
