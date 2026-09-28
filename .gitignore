@@ -121,10 +121,7 @@ __pycache__/
 # Team Gateway service (ADR-0092) — tracked; its runtime data dir is not.
 !services/
 services/co-workspace/data/
-# Deployed gateway tenant storage (bind-mounted at /data via CO_WORKSPACE_DATA_DIR_HOST;
-# local deployment decision 2026-09-28) — runtime data, never tracked. Allowlisted in
-# docs/workspace-schema.json rootAllowlist.dirs so the lifecycle stray check passes.
-/Storage/
+# Gateway tenant storage now lives at services/co-workspace/data/ (already ignored above).
 
 nul
 NUL
