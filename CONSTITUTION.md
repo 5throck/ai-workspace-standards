@@ -747,7 +747,7 @@ Platform extension to OpenAI Codex (CLI + Desktop App) was designed and Accepted
 
 Platform extension to NousResearch Hermes Agent was designed and Accepted per **ADR-0088** (`docs/adr/0088-hermes-agent-platform-support.md`); the `.hermes/` platform directory (skills mirror only — Hermes reads `AGENTS.md` natively and invokes skills as `/<skill-name>`), the project-root trust-list onboarding step (`skills.trusted_project_dirs`), and the mandatory `hermes config set context_file_max_chars 100000` step — every AGENTS.md in the ecosystem (L0 56.8k, L1 49.2k, L2 variants 27.9k–82.1k chars) exceeds Hermes' 20,000-char context-file default and would be silently truncated without it — have landed per the implementation waves defined in `docs/designs/2026-09-25-hermes-agent-platform-support-design.md` (see its Addendum 1 for the measured truncation evidence).
 
-Amended 2026-09-27 by **ADR-0093** (`docs/adr/0093-hermes-md-instruction-file.md`): the Hermes platform now carries its own behavioral instruction file `Hermes.md` at L0/L1/L2 — a self-sufficient thin file (under Hermes' 20,000-char context budget) that names this registry as SSOT — replacing the no-twin posture for the instruction layer only.
+Amended 2026-09-27 by **ADR-0093** (`docs/adr/0093-hermes-md-instruction-file.md`): the Hermes platform now carries its own behavioral instruction file `HERMES.md` at L0/L1/L2 — a self-sufficient thin file (under Hermes' 20,000-char context budget) that names this registry as SSOT — replacing the no-twin posture for the instruction layer only.
 
 
 **Project configuration standard (KR profiles & LLM)**: the co-newbiz model is the fleet standard per **ADR-0091** (`docs/adr/0091-kr-profile-llm-config-standard.md`) — four-layer KR profile (country_config / docs/countries / region-profiles provenance-validated YAML / country-scoped env block) and the project-namespaced LLM env pattern (`<PROJ>_LLM_*`, deterministic fallback). `country_config.default` MUST stay `null`; `agents-md-size-budget` remains a WARN-level visibility metric (ADR-0090 Addendum 3).
@@ -810,4 +810,4 @@ Agent, skill, and command frontmatter structures are validated against JSON Sche
 
 ---
 
-*Last Updated: 2026-09-27*
+*Last Updated: 2026-09-28*

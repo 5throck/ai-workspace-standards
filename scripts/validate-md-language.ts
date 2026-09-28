@@ -9,7 +9,7 @@
  * Markdown/YAML Language Validation Script with I18N Support
  *
  * Policy: Official documents and governance files must contain English sentences.
- * Validates only allowlisted paths: agents/, AGENTS.md, CLAUDE.md, GEMINI.md, CODEX.md, Hermes.md,
+ * Validates only allowlisted paths: agents/, AGENTS.md, CLAUDE.md, GEMINI.md, CODEX.md, HERMES.md,
  * CONSTITUTION.md, CHANGELOG.md, docs/constitution/, docs/governance/, docs/designs/,
  * docs/adr/, docs/decisions/, docs/VERSION_MANIFEST.md, skills/,
  * .claude/skills/, .gemini/skills/, .claude/commands/, .gemini/commands/,
@@ -126,7 +126,7 @@ interface Violation {
 function isProtectedPath(filePath: string): boolean {
   const normalized = filePath.replace(/\\/g, '/');
   const basename = normalized.split('/').pop() ?? '';
-  if (['CLAUDE.md', 'GEMINI.md', 'CODEX.md', 'Hermes.md', 'CONSTITUTION.md', 'AGENTS.md'].includes(basename)) return true;
+  if (['CLAUDE.md', 'GEMINI.md', 'CODEX.md', 'HERMES.md', 'CONSTITUTION.md', 'AGENTS.md'].includes(basename)) return true;
   if (basename.endsWith('.context.md')) return true;
   return false;
 }
@@ -159,7 +159,7 @@ function parseLangDeclaration(content: string, isPlainYaml: boolean): { lang?: s
  *
  * Only validates these allowlisted paths:
  * - agents/ (subdirectories)
- * - AGENTS.md, CLAUDE.md, GEMINI.md, CODEX.md, Hermes.md, CONSTITUTION.md, CHANGELOG.md, SECURITY.md
+ * - AGENTS.md, CLAUDE.md, GEMINI.md, CODEX.md, HERMES.md, CONSTITUTION.md, CHANGELOG.md, SECURITY.md
  * - docs/constitution/ (subdirectories)
  * - docs/governance/ (subdirectories)
  * - docs/designs/ (design docs may use lang frontmatter exceptions)
@@ -443,7 +443,7 @@ async function validateMarkdownLanguage(): Promise<void> {
       console.log(`      Reason: ${v.reason}\n`);
     });
     console.log("Policy: Official documents must be in English. Korean exception requires 'lang: ko' + 'lang_reason: legal|source-material|proper-noun' in frontmatter (Markdown) or as a top-level key (plain YAML). Legacy 'language: ko' declarations are accepted with a migration warning — prefer 'lang: ko'.");
-    console.log("Exception NOT available for: CLAUDE.md, GEMINI.md, CODEX.md, Hermes.md, CONSTITUTION.md, AGENTS.md, *.context.md");
+    console.log("Exception NOT available for: CLAUDE.md, GEMINI.md, CODEX.md, HERMES.md, CONSTITUTION.md, AGENTS.md, *.context.md");
     console.log("See: CONSTITUTION.md — Language Policy Exception — Korean Legal/Regulatory Content\n");
     process.exit(1);
   }

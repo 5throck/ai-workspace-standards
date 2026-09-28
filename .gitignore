@@ -62,6 +62,9 @@ Desktop.ini
 .vscode/
 *.swp
 *.swo
+# Generated IDE rule files (scripts/generate-ide-rules.ts) — regenerable, not committed
+.cursorrules
+.clauderules
 
 # --- Python compiled ---
 __pycache__/

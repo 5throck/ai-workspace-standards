@@ -26,6 +26,9 @@ Desktop.ini
 .idea/
 .vscode/
 *.swp
+# Generated IDE rule files (scripts/generate-ide-rules.ts) — regenerable, not committed
+.cursorrules
+.clauderules
 
 # Local AI settings (personal overrides — never shared)
 .claude/settings.local.json

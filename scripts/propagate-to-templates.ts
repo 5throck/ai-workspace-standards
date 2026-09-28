@@ -9,7 +9,7 @@
  *
  * v2.19.0 (2026-09-27, ADR-0093 — user directive 2026-09-27; spec
  *          docs/designs/2026-09-27-hermes-md-instruction-file-design.md):
- *          Hermes.md joins GOVERNANCE_L1_FILES as the fourth platform
+ *          HERMES.md joins GOVERNANCE_L1_FILES as the fourth platform
  *          instruction doc (the Hermes member of the CLAUDE/GEMINI/CODEX
  *          family — a Hermes-specific behavioral file, NOT an AGENTS.md
  *          copy). Its B-7 boundary branch shares the CODEX replacement body
@@ -112,7 +112,7 @@
  *   --apply                Write changed files to L1
  *   --force                With --apply: skip hash check, always overwrite
  *   --domain <name>        Filter to one domain from propagation-map.json
- *   --governance-l1        Deploy CLAUDE.md, GEMINI.md, AGENTS.md, CODEX.md, Hermes.md L0→L1 with ref transforms
+ *   --governance-l1        Deploy CLAUDE.md, GEMINI.md, AGENTS.md, CODEX.md, HERMES.md L0→L1 with ref transforms
  *   --docs                 Inject COMMON markers from L1 governance into templates/co-* variants
  *   --check-drift          L1 vs L2 drift report (read-only, uses propagation-map.json)
  *   --json                 With --check-drift: machine-readable JSON output
@@ -1132,7 +1132,7 @@ const GOVERNANCE_L1_FILES = [
   { src: 'GEMINI.md',  dst: 'templates/common/GEMINI.md'  },
   { src: 'AGENTS.md',  dst: 'templates/common/AGENTS.md'  },
   { src: 'CODEX.md',   dst: 'templates/common/CODEX.md'   },
-  { src: 'Hermes.md',  dst: 'templates/common/Hermes.md'  },
+  { src: 'HERMES.md',  dst: 'templates/common/HERMES.md'  },
 ];
 
 // Reference transformation rules: CONSTITUTION.md → docs/context.md
@@ -1212,11 +1212,11 @@ export function applyGovernanceTransforms(content: string, filename: string, tar
         `> For lifecycle management rules, see [docs/context.md — Lifecycle Management](docs/context.md#lifecycle-management).\n` +
         `<!-- COMMON-GEMINI:END -->`;
       content = content.replace(geminiBoundaryPattern, (_, n) => geminiBoundaryReplacement(n));
-    } else if (filename === 'CODEX.md' || filename === 'Hermes.md') {
+    } else if (filename === 'CODEX.md' || filename === 'HERMES.md') {
       // Matched heading-to-next-heading; the captured number keeps the section
       // numbering stable. The trailing \n keeps the blank line before the next
       // heading (the match consumes the section's own line terminator).
-      // Hermes.md joins in v2.19.0 (ADR-0093): its boundary section sits inside
+      // HERMES.md joins in v2.19.0 (ADR-0093): its boundary section sits inside
       // the single COMMON-HERMES zone — the same CODEX shape, so the branch
       // (and its replacement body) is shared verbatim.
       const codexBoundaryPattern =
@@ -1234,8 +1234,8 @@ export function applyGovernanceTransforms(content: string, filename: string, tar
   //    regex); if the workspace-only heading survives any of the three outputs,
   //    fail loudly instead of shipping workspace policy into every scaffold.
   //    Scope: the platform docs only — AGENTS.md has no boundary section.
-  //    Hermes.md joins in v2.19.0 (ADR-0093) as the fourth protected platform doc.
-  if (filename === 'CLAUDE.md' || filename === 'GEMINI.md' || filename === 'CODEX.md' || filename === 'Hermes.md') {
+  //    HERMES.md joins in v2.19.0 (ADR-0093) as the fourth protected platform doc.
+  if (filename === 'CLAUDE.md' || filename === 'GEMINI.md' || filename === 'CODEX.md' || filename === 'HERMES.md') {
     if (content.includes('Workspace & Template Boundary Policy')) {
       die(
         `governance-l1: "${filename}" still carries the workspace-only "Workspace & Template Boundary Policy" ` +

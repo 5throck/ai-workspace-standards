@@ -7,7 +7,7 @@
 // contract). Regression: live pinned scaffold template-v0.7.0 via the team-gateway smoke.
 // v1.31.0 (2026-09-27, ADR-0093 — spec
 //           docs/designs/2026-09-27-hermes-md-instruction-file-design.md):
-//           the hermes profile DELIVERS Hermes.md (the Hermes-specific
+//           the hermes profile DELIVERS HERMES.md (the Hermes-specific
 //           behavioral instruction file, common-owned — AGENTS.md remains the
 //           SSOT registry). `hermes`/`all` keep it; every other profile prunes
 //           it alongside `.hermes/`.
@@ -1017,16 +1017,16 @@ if (platform !== 'codex' && platform !== 'all') {
 }
 // ADR-0088: `hermes` is a hermes-primary profile — the legacy instruction twins
 // (CLAUDE/GEMINI/CODEX) are dropped (codex-primary analogy); ADR-0093: the hermes
-// instruction file `Hermes.md` (templates/common delivery, common-owned) is KEPT by
+// instruction file `HERMES.md` (templates/common delivery, common-owned) is KEPT by
 // `hermes`. `.hermes/` is kept by `hermes` and `all`; every other profile is
-// hermes-opt-out (platform dir + Hermes.md = template overlay, removed here).
+// hermes-opt-out (platform dir + HERMES.md = template overlay, removed here).
 if (platform === 'hermes') {
   for (const f of [join(projectDir, 'CLAUDE.md'), join(projectDir, 'GEMINI.md')]) {
     if (existsSync(f)) rmSync(f);
   }
 }
 if (platform !== 'hermes' && platform !== 'all') {
-  for (const f of [join(projectDir, 'Hermes.md'), join(projectDir, '.hermes')]) {
+  for (const f of [join(projectDir, 'HERMES.md'), join(projectDir, '.hermes')]) {
     if (existsSync(f)) rmSync(f, { recursive: true });
   }
 }

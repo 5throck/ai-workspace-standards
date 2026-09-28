@@ -63,7 +63,7 @@ describe('upgrade-policy resolveClaim — dedicated passes keep their paths', ()
   });
 
   test('MERGE_MANAGED (platform + gitignore + pm.md + AGENTS.md)', () => {
-    for (const rel of ['CLAUDE.md', 'GEMINI.md', 'CODEX.md', 'Hermes.md', '.gitignore', 'AGENTS.md', 'agents/pm.md']) {
+    for (const rel of ['CLAUDE.md', 'GEMINI.md', 'CODEX.md', 'HERMES.md', '.gitignore', 'AGENTS.md', 'agents/pm.md']) {
       expect(resolveClaim(rel, VARIANT).policy).toBe('MERGE_MANAGED');
     }
   });
@@ -76,12 +76,12 @@ describe('upgrade-policy resolveClaim — dedicated passes keep their paths', ()
     expect(resolveClaim('CODEX.md', VARIANT)).toEqual({ policy: 'MERGE_MANAGED', pass: 'MERGE' });
   });
 
-  test('Hermes.md claim is MERGE_MANAGED/MERGE (ADR-0093 — same delivery channel as CODEX.md)', () => {
+  test('HERMES.md claim is MERGE_MANAGED/MERGE (ADR-0093 — same delivery channel as CODEX.md)', () => {
     // ADR-0093: the Hermes instruction file joins MERGE_MANAGED_FILES so the
     // MERGE pass (platform hermes/all) is its sole delivery channel and the
     // blanket root-file SYNC fallback can never overwrite a project copy.
-    expect(resolveClaim('Hermes.md', 'co-design')).toEqual({ policy: 'MERGE_MANAGED', pass: 'MERGE' });
-    expect(resolveClaim('Hermes.md', VARIANT)).toEqual({ policy: 'MERGE_MANAGED', pass: 'MERGE' });
+    expect(resolveClaim('HERMES.md', 'co-design')).toEqual({ policy: 'MERGE_MANAGED', pass: 'MERGE' });
+    expect(resolveClaim('HERMES.md', VARIANT)).toEqual({ policy: 'MERGE_MANAGED', pass: 'MERGE' });
   });
 
   test('variant context file is DOCS_MERGE, parameterized by variant', () => {

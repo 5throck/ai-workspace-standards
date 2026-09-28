@@ -437,14 +437,14 @@ describe('COMMON-CODEX zone (T-20260924-010)', () => {
 });
 
 // ── COMMON-HERMES zone (spec 2026-09-27-hermes-merge-marker-design —
-//    reproduce-then-fix, the Hermes.md counterpart of the COMMON-CODEX block
-//    above). ADR-0093 shipped Hermes.md to L0/L1 with COMMON-HERMES zones, but
+//    reproduce-then-fix, the HERMES.md counterpart of the COMMON-CODEX block
+//    above). ADR-0093 shipped HERMES.md to L0/L1 with COMMON-HERMES zones, but
 //    without a MANAGED_PATTERNS entry the MERGE pass claimed the file and then
 //    skipped it (`INFO: Template has no managed markers`), so existing L2
 //    projects never received it. Pattern parity with COMMON-CLAUDE/GEMINI/CODEX:
 //    positional (key-less) merge, append when the project lacks the zone,
 //    snapshot-guarded reconcile on mismatch. ──
-describe('COMMON-HERMES zone (Hermes.md delivery)', () => {
+describe('COMMON-HERMES zone (HERMES.md delivery)', () => {
   const HERMES_OPEN = '<!-- COMMON-HERMES:START -->';
   const HERMES_CLOSE = '<!-- COMMON-HERMES:END -->';
   const ZONE_RE = /<!-- COMMON-HERMES:START -->[\s\S]*?<!-- COMMON-HERMES:END -->/;
@@ -472,8 +472,8 @@ describe('COMMON-HERMES zone (Hermes.md delivery)', () => {
       HERMES_CLOSE,
       '',
     ].join('\n');
-    const r = mergeManagedBlocks(proj, tpl, null, 'Hermes.md', false);
-    expect(r.log).toContain('    MERGED COMMON-HERMES block in: Hermes.md');
+    const r = mergeManagedBlocks(proj, tpl, null, 'HERMES.md', false);
+    expect(r.log).toContain('    MERGED COMMON-HERMES block in: HERMES.md');
     expect(r.merged).toBe(true);
     // ONLY the zone span changed — prose before/after preserved byte-for-byte
     const projZone = proj.match(ZONE_RE)![0];
@@ -490,13 +490,13 @@ describe('COMMON-HERMES zone (Hermes.md delivery)', () => {
 
   test('project copy without the zone is no longer an INFO skip — the zone appends', () => {
     // Pre-fix shape (the actual L2 delivery failure): the project has no
-    // Hermes.md-equivalent zone, the template has one. With the pattern
+    // HERMES.md-equivalent zone, the template has one. With the pattern
     // missing, buildMergedTemplateBlocks returned [] and the MERGE pass logged
-    // `INFO: Template has no managed markers — skipping Hermes.md`.
+    // `INFO: Template has no managed markers — skipping HERMES.md`.
     const proj = 'prose only, no Hermes zone yet\n';
     const tpl = `${HERMES_OPEN}\nzone content\n${HERMES_CLOSE}\n`;
-    const r = mergeManagedBlocks(proj, tpl, null, 'Hermes.md', false);
-    expect(r.log).toContain('    APPENDED COMMON-HERMES block to: Hermes.md');
+    const r = mergeManagedBlocks(proj, tpl, null, 'HERMES.md', false);
+    expect(r.log).toContain('    APPENDED COMMON-HERMES block to: HERMES.md');
     expect(r.merged).toBe(true);
     expect(r.content.endsWith(`${HERMES_OPEN}\nzone content\n${HERMES_CLOSE}\n`)).toBe(true);
     expect(r.content).toContain('prose only, no Hermes zone yet');
@@ -520,11 +520,11 @@ describe('COMMON-HERMES zone (Hermes.md delivery)', () => {
       '',
     ].join('\n');
     const tpl = [HERMES_OPEN, 'fresh zone', HERMES_CLOSE, ''].join('\n');
-    const r = mergeManagedBlocks(proj, tpl, null, 'Hermes.md', false);
+    const r = mergeManagedBlocks(proj, tpl, null, 'HERMES.md', false);
     expect(r.log.join('\n')).toContain('count mismatch');
-    expect(r.log).toContain('    RECONCILED COMMON-HERMES blocks in: Hermes.md');
+    expect(r.log).toContain('    RECONCILED COMMON-HERMES blocks in: HERMES.md');
     expect(r.snapshots).toHaveLength(1);
-    expect(r.snapshots[0]!.rel).toBe('Hermes.md');
+    expect(r.snapshots[0]!.rel).toBe('HERMES.md');
     expect(r.snapshots[0]!.content).toBe(
       proj.slice(proj.indexOf(HERMES_OPEN), proj.lastIndexOf(HERMES_CLOSE) + HERMES_CLOSE.length),
     );

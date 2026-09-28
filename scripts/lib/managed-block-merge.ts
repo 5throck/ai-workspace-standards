@@ -1,11 +1,11 @@
 // @version 1.3.0
 // v1.3.0 (spec docs/designs/2026-09-27-hermes-merge-marker-design.md):
 //           COMMON-HERMES joins MANAGED_PATTERNS, placed after its COMMON-CODEX
-//           platform twin — the Hermes.md counterpart of v1.2.0's COMMON-CODEX
-//           addition. Marker pair matches templates/common/Hermes.md:24/:76 and
-//           every templates/co-*/Hermes.md exactly (ADR-0093 delivered the file
+//           platform twin — the HERMES.md counterpart of v1.2.0's COMMON-CODEX
+//           addition. Marker pair matches templates/common/HERMES.md:24/:76 and
+//           every templates/co-*/HERMES.md exactly (ADR-0093 delivered the file
 //           to L0/L1 on 2026-09-27 but existing L2 projects never received it:
-//           upgrade-policy already lists Hermes.md in MERGE_MANAGED_FILES, so
+//           upgrade-policy already lists HERMES.md in MERGE_MANAGED_FILES, so
 //           the MERGE pass claimed it and then skipped it with `INFO: Template
 //           has no managed markers` because this table lacked the pattern).
 //           COMMON-HERMES zones are key-less — positional path, byte-identical

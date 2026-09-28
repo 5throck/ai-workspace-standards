@@ -1,8 +1,14 @@
 #!/usr/bin/env bun
-// @version 1.54.0
+// @version 1.55.0
+// v1.55.0 (2026-09-28, ADR-0093 Amendment 2): legacy `Hermes.md` is renamed to
+//          `HERMES.md` before the MERGE pass. Hermes discovers only
+//          `.hermes.md`/`HERMES.md` (agent/prompt_builder.py), so the mixed-case
+//          name was invisible on case-sensitive filesystems (Linux, Docker).
+//          Two-step rename via a temp name so case-insensitive filesystems
+//          (macOS/Windows) also record the new case.
 // v1.54.0 (2026-09-27, ADR-0093 — spec
 //          docs/designs/2026-09-27-hermes-md-instruction-file-design.md):
-//          Hermes.md joins the MERGE push for platform hermes/all — the Hermes
+//          HERMES.md joins the MERGE push for platform hermes/all — the Hermes
 //          member of the CLAUDE/GEMINI/CODEX instruction-file family; the
 //          COMMON-HERMES managed block makes the MERGE pass its delivery
 //          channel (resolveClaim returns MERGE_MANAGED via upgrade-policy
@@ -469,7 +475,7 @@
 
 import {
   existsSync, mkdirSync, copyFileSync, cpSync, readFileSync, writeFileSync,
-  readdirSync, statSync, rmSync, realpathSync,
+  readdirSync, statSync, rmSync, realpathSync, renameSync,
 } from 'node:fs';
 import { resolve, join, dirname, basename, isAbsolute, relative } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -1305,13 +1311,34 @@ for (const rel of LOCKED_FILES) {
 }
 console.log('');
 
+// ── Legacy Hermes.md → HERMES.md rename (ADR-0093 Amendment 2) ─────────────────
+{
+  const names = readdirSync(projectDir);
+  if (names.includes('Hermes.md') && !names.includes('HERMES.md')) {
+    console.log(`  ${dryTag}RENAME: Hermes.md → HERMES.md`);
+    if (!dryRun) {
+      // git with core.ignorecase keeps the old index case after a plain fs
+      // rename, so tracked files go through `git mv` (two steps, same reason).
+      const tracked = spawnSync('git', ['ls-files', '--error-unmatch', 'Hermes.md'], { cwd: projectDir }).status === 0;
+      const tmpName = '.hermes-md-rename.tmp';
+      if (tracked) {
+        spawnSync('git', ['mv', 'Hermes.md', tmpName], { cwd: projectDir, stdio: 'inherit' });
+        spawnSync('git', ['mv', tmpName, 'HERMES.md'], { cwd: projectDir, stdio: 'inherit' });
+      } else {
+        renameSync(join(projectDir, 'Hermes.md'), join(projectDir, tmpName));
+        renameSync(join(projectDir, tmpName), join(projectDir, 'HERMES.md'));
+      }
+    }
+  }
+}
+
 // ── MERGE files ────────────────────────────────────────────────────────────────
 console.log('--- MERGE files (WORKSPACE-MANAGED sections) ---');
 const MERGE_FILES: string[] = [];
 if (platform === 'claude' || platform === 'all') MERGE_FILES.push('CLAUDE.md');
 if (platform === 'antigravity' || platform === 'all') MERGE_FILES.push('GEMINI.md');
 if (platform === 'codex' || platform === 'all') MERGE_FILES.push('CODEX.md');
-if (platform === 'hermes' || platform === 'all') MERGE_FILES.push('Hermes.md');
+if (platform === 'hermes' || platform === 'all') MERGE_FILES.push('HERMES.md');
 MERGE_FILES.push(
   '.gitignore', 'agents/pm.md',
 );
