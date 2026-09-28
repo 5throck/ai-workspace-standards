@@ -393,7 +393,28 @@
         if (turn.finalText) bubble("assistant", `[#${turn.seq}] ${turn.finalText}`);
       }
     } catch { /* history is best-effort */ }
-    bubble("assistant", `Resumed "${name}" (${t.variant}) — ${t.sessions} earlier turns. Continue below.`);
+    if (t.status === "provisioning") {
+      // R7: a freshly created team streams its provisioning stages into the log until ready.
+      const note = bubble("assistant", "⏳ Preparing the team workspace…");
+      const timer = setInterval(async () => {
+        if (currentTenantId !== t.tenantId) { clearInterval(timer); return; }
+        const d = await (await fetch(`/tenants/${t.tenantId}`)).json().catch(() => null);
+        if (!d) return;
+        const last = d.progress?.[d.progress.length - 1];
+        note.textContent = `⏳ [${last?.stage ?? "preparing"}] ${last?.label ?? "…"}`;
+        if (d.status === "ready") {
+          clearInterval(timer);
+          note.textContent = `✔ Team "${name}" is ready — send your first message below.`;
+          loadSessions();
+        } else if (d.status === "failed") {
+          clearInterval(timer);
+          note.textContent = `⚠ Team provisioning failed: ${d.error ?? "unknown"} — delete it and create a new team.`;
+          loadSessions();
+        }
+      }, 1000);
+    } else {
+      bubble("assistant", `Resumed "${name}" (${t.variant}) — ${t.sessions} earlier turns. Continue below.`);
+    }
     document.querySelectorAll(".sess").forEach((el) => el.classList.toggle("active", el.dataset.tid === currentTenantId));
   }
 
@@ -433,6 +454,7 @@
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "", first = true;
+      let progressNote = null;
       for (;;) {
         const { done, value } = await reader.read();
         if (done) break;
@@ -441,6 +463,16 @@
         while ((idx = buffer.indexOf("\n\n")) >= 0) {
           const frame = buffer.slice(0, idx);
           buffer = buffer.slice(idx + 2);
+          for (const line of frame.split("\n")) {
+            if (!line.startsWith(": provisioning:")) continue;
+            // Live provisioning stages while the team prepares (R7 feedback).
+            if (!progressNote) {
+              progressNote = document.createElement("div");
+              progressNote.className = "progress-inline";
+              log.insertBefore(progressNote, reply);
+            }
+            progressNote.textContent = "⏳ " + line.replace(": provisioning: ", "");
+          }
           if (!frame.startsWith("data: ")) continue;
           const payload = JSON.parse(frame.slice(6));
           if (payload.type === "text" && typeof payload.text === "string") {

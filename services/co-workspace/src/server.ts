@@ -464,7 +464,32 @@ function nativeChatResponse(state: GatewayState, rec: TenantRecord, message: str
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       try {
-        const result = await runChat(state, rec, message, (evt) =>
+        // R7 UX: while the team is still provisioning, stream its progress stages as `: …`
+        // comment frames (wire-legal SSE comments) so the wait is visible in the client.
+        let current = state.registry.get(rec.tenantId) ?? rec;
+        if (current.status === "provisioning") {
+          const deadline = Date.now() + state.cfg.scaffoldTimeoutMs + 5_000;
+          while (Date.now() < deadline) {
+            current = state.registry.get(rec.tenantId) ?? current;
+            const last = current.progress?.[current.progress.length - 1];
+            controller.enqueue(
+              new TextEncoder().encode(
+                `: provisioning: ${last ? `[${last.stage}] ${last.label}` : current.status + "…"}\n\n`,
+              ),
+            );
+            if (current.status !== "provisioning") break;
+            await Bun.sleep(1000);
+          }
+          if (current.status === "failed") {
+            throw new Error(`team provisioning failed: ${current.error ?? "unknown"}`);
+          }
+          if (current.status === "provisioning") {
+            throw new Error("team provisioning timed out — try again shortly");
+          }
+        }
+        assertQuota(state.cfg, current);
+        assertPrincipalQuota(state, current.ownerPrincipal ?? "anonymous");
+        const result = await runChat(state, current, message, (evt) =>
           controller.enqueue(sseData(evt)),
         );
         controller.enqueue(
@@ -872,10 +897,18 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
       const body = (await readJsonBody(req)) as Record<string, unknown>;
       const message = typeof body.message === "string" ? body.message : "";
       if (!message.trim()) throw new HttpError(400, "message is required");
-      const rec = await waitForTenant(state, decodeURIComponent(tenantChat[1]));
+      const rec = state.registry.get(decodeURIComponent(tenantChat[1]));
+      if (!rec) throw new HttpError(404, `tenant ${tenantChat[1]} not found`);
       requireTenantAccess(state, req, rec);
-      assertQuota(state.cfg, rec);
-      assertPrincipalQuota(state, rec.ownerPrincipal ?? "anonymous");
+      // Quota trips stay a plain 429 before streaming for ready tenants (contract of the
+      // 429-before-streaming tests); a provisioning team is checked once it turns ready,
+      // inside the stream where the progress frames are already flowing.
+      if (rec.status !== "provisioning") {
+        assertQuota(state.cfg, rec);
+        assertPrincipalQuota(state, rec.ownerPrincipal ?? "anonymous");
+      }
+      // The stream starts immediately: provisioning progress is streamed as `: …` comment
+      // frames while the team prepares, instead of the response blocking until ready.
       return nativeChatResponse(state, rec, message);
     }
 
