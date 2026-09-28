@@ -61,8 +61,9 @@
   .grouphead { font-size: .72rem; color: #58a6ff; font-weight: 600; padding: 8px 4px 3px; letter-spacing: .03em; }
   .grouphead.gtoggle { cursor: pointer; user-select: none; }
   .todayBadge { color: #3fb950; font-size: .64rem; margin-left: 5px; }
-  .ntOption { background: var(--panel); color: var(--fg); border: 1px solid var(--border2); border-radius: 8px; padding: 8px 10px; font: inherit; font-size: .8rem; cursor: pointer; text-align: left; }
-  .ntOption:hover { outline: 1px solid var(--accent); }
+  .modal .ntOption { background: var(--panel); color: var(--fg); border: 1px solid var(--border2); border-radius: 8px; padding: 8px 10px; font: inherit; font-size: .8rem; cursor: pointer; text-align: left; }
+  .modal .ntOption:hover { background: color-mix(in srgb, var(--accent) 12%, var(--panel)); border-color: var(--accent); }
+  .modal .ntOption.selected { background: #1f6feb; color: #fff; border-color: #1f6feb; }
   /* ── main column ── */
   section { flex: 1; display: flex; flex-direction: column; min-width: 0; }
   header { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--border); }
@@ -1051,6 +1052,15 @@
   for (const chip of document.querySelectorAll(".chip")) {
     chip.addEventListener("click", () => openNewTeamModal(chip.dataset.fill));
   }
+
+  // Enter sends, Shift+Enter breaks a line. isComposing guards the IME case: pressing
+  // Enter to commit a Korean/Chinese candidate must not fire the message.
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey && !e.isComposing) {
+      e.preventDefault();
+      if (!send.disabled) form.requestSubmit();
+    }
+  });
 
   const groupToggle = $("groupToggle");
   function applyGroupToggle() {
