@@ -996,6 +996,44 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
       return jsonResponse({ ok: true, loginId, message: "account activated — sign in with your ID" });
     }
 
+    if (req.method === "POST" && path === "/auth/email/change") {
+      if (!state.sessionLimiter.allow(clientIp)) throw new HttpError(429, "too many attempts — try later");
+      const user = state.users.resolveSession(sessionTokenFromCookie(req));
+      if (!user) throw new HttpError(401, "not signed in");
+      const body = (await readJsonBody(req)) as Record<string, unknown>;
+      const email = typeof body.email === "string" ? body.email.trim() : "";
+      const result = state.users.createEmailChange(user.id, email);
+      if (!result.ok) {
+        const messages: Record<string, string> = {
+          email_taken: "an account with this email already exists",
+          unchanged: "this is already the email on your account",
+          invalid_email: "valid email is required",
+        };
+        throw new HttpError(result.reason === "email_taken" ? 409 : 400, messages[result.reason]);
+      }
+      // Dev mailer (same as signup): the confirmation mail is written to the outbox dir.
+      const outbox = join(state.cfg.dataDir, "mail-outbox");
+      mkdirSync(outbox, { recursive: true });
+      writeFileSync(
+        join(outbox, `${Date.now()}-${user.principal}-email-change.txt`),
+        `To: ${email}\nSubject: co-workspace email change\n\nConfirm the new email for ${user.principal}.\nEnter this key in the app: ${result.token}\n`,
+      );
+      return jsonResponse({ ok: true, message: "verification mail sent — enter the key from the mail to confirm the new email" });
+    }
+
+    if (req.method === "POST" && path === "/auth/email/verify") {
+      const user = state.users.resolveSession(sessionTokenFromCookie(req));
+      if (!user) throw new HttpError(401, "not signed in");
+      const body = (await readJsonBody(req)) as Record<string, unknown>;
+      const token = typeof body.token === "string" ? body.token.trim() : "";
+      const result = state.users.verifyEmailChange(token);
+      if (!result.ok) {
+        throw new HttpError(result.reason === "email_taken" ? 409 : 400, result.reason === "email_taken" ? "an account with this email already exists" : "invalid or expired verification key");
+      }
+      state.audit.record(user.principal, "user.email-change");
+      return jsonResponse({ ok: true, message: "email updated" });
+    }
+
     if (req.method === "POST" && path === "/auth/resend") {
       const body = (await readJsonBody(req)) as Record<string, unknown>;
       const loginId = typeof body.loginId === "string" ? body.loginId.trim() : "";
@@ -1055,20 +1093,25 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
       const user = state.users.resolveSession(sessionTokenFromCookie(req));
       if (!user) throw new HttpError(401, "not signed in");
       const body = (await readJsonBody(req)) as Record<string, unknown>;
-      const password = typeof body.password === "string" ? body.password : undefined;
-      let updated: ReturnType<UserStore["findById"]>;
-      if (password && user.mustChangePassword) {
-        // R1 forced rotation: completes the temp-credential flow and rotates sessions —
-        // the client signs in again with the new password.
-        updated = state.users.completeTempPasswordChange(user.id, password);
-        if (updated) state.audit.record(updated.principal, "user.password.rotation");
-      } else {
-        updated = state.users.updateProfile(user.id, {
-          name: typeof body.name === "string" ? body.name : undefined,
-          password,
-        });
+      const password = typeof body.password === "string" ? body.password : "";
+      if (!password) throw new HttpError(400, "password is required");
+      if (password.length < 8) throw new HttpError(400, "password must be at least 8 characters");
+      if (user.mustChangePassword) {
+        // R1 forced rotation: the temp credential was verified at sign-in; completing it
+        // rotates sessions — the client signs in again with the new password.
+        const updated = state.users.completeTempPasswordChange(user.id, password);
+        if (!updated) throw new HttpError(404, "user not found");
+        state.audit.record(updated.principal, "user.password.rotation");
+        return jsonResponse({ ok: true, message: "password updated — sign in with your new password" });
       }
+      // R3: a normal password change must present the current credential.
+      const currentPassword = typeof body.currentPassword === "string" ? body.currentPassword : "";
+      if (!currentPassword || !(await Bun.password.verify(currentPassword, user.passwordHash ?? ""))) {
+        throw new HttpError(403, "current password is incorrect");
+      }
+      const updated = state.users.changePassword(user.id, password, sessionTokenFromCookie(req));
       if (!updated) throw new HttpError(404, "user not found");
+      state.audit.record(updated.principal, "user.password.change");
       return jsonResponse({ user: { loginId: updated.principal, name: updated.name, role: updated.role } });
     }
 
@@ -1184,6 +1227,20 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
       const tempPassword = state.users.createTempPassword(target.id);
       state.audit.record(caller.principal, "user.reset-password", target.principal);
       return jsonResponse({ tempPassword, note: "one-time temp password, 15-minute expiry; forced change at first sign-in" });
+    }
+
+    const renameRoute = path.match(/^\/admin\/users\/([^/]+)\/name$/);
+    if (req.method === "PATCH" && renameRoute) {
+      const caller = state.users.resolveSession(sessionTokenFromCookie(req));
+      if (!caller || caller.role !== "admin") throw new HttpError(403, "admin only");
+      const target = state.users.findById(decodeURIComponent(renameRoute[1]));
+      if (!target) throw new HttpError(404, "user not found");
+      const body = (await readJsonBody(req)) as Record<string, unknown>;
+      const name = typeof body.name === "string" ? body.name.trim() : "";
+      if (!name || name.length > 80) throw new HttpError(400, "name must be 1-80 characters");
+      const updated = state.users.renameUser(target.id, name);
+      state.audit.record(caller.principal, "user.rename", target.principal, name);
+      return jsonResponse({ user: { loginId: updated!.principal, name: updated!.name, role: updated!.role } });
     }
 
     const deleteRoute = path.match(/^\/admin\/users\/([^/]+)$/);

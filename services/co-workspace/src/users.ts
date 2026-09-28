@@ -308,20 +308,70 @@ export class UserStore {
     return { token, email: pending.email };
   }
 
-  updateProfile(userId: string, patch: { name?: string; password?: string }): UserRecord | null {
+  /** R3: self-service password change. The caller must have verified the current
+   * credential. The session that performed the change survives (SEC-06: every OTHER
+   * session of the user is invalidated). */
+  changePassword(userId: string, newPassword: string, keepToken?: string | null): UserRecord | null {
     const user = this.findById(userId);
     if (!user) return null;
-    if (patch.name) {
-      this.db.query("UPDATE users SET name=? WHERE id=?").run(patch.name, userId);
-    }
-    if (patch.password) {
-      this.db
-        .query("UPDATE users SET password_hash=? WHERE id=?")
-        .run(Bun.password.hashSync(patch.password), userId);
-      // SEC-06: a credential rotation invalidates every existing session.
+    this.db.query("UPDATE users SET password_hash=? WHERE id=?").run(Bun.password.hashSync(newPassword), userId);
+    if (keepToken) {
+      this.db.query("DELETE FROM sessions WHERE user_id=? AND token_hash != ?").run(userId, hashToken(keepToken));
+    } else {
       this.db.query("DELETE FROM sessions WHERE user_id=?").run(userId);
     }
     return this.findById(userId);
+  }
+
+  /** R3 (admin): change a user's display name. */
+  renameUser(userId: string, name: string): UserRecord | null {
+    const user = this.findById(userId);
+    if (!user) return null;
+    this.db.query("UPDATE users SET name=? WHERE id=?").run(name, userId);
+    return this.findById(userId);
+  }
+
+  /** R3: self-service email change, verification-required. Stages the new address as a
+   * pending verification (raw email lives ≤24h there; only the hash lands on the account,
+   * preserving the PII-safe invariant). */
+  createEmailChange(
+    userId: string,
+    email: string,
+  ): { ok: true; token: string } | { ok: false; reason: "email_taken" | "invalid_email" | "unchanged" } {
+    const normalized = email.trim().toLowerCase();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(normalized)) return { ok: false, reason: "invalid_email" };
+    const emailHash = createHash("sha256").update(normalized).digest("hex");
+    const current = this.db.query("SELECT email_hash FROM users WHERE id = ?").get(userId) as
+      | { email_hash: string | null }
+      | null;
+    if (!current) return { ok: false, reason: "invalid_email" };
+    if (current.email_hash === emailHash) return { ok: false, reason: "unchanged" };
+    if (this.findByEmailHash(emailHash)) return { ok: false, reason: "email_taken" };
+    this.db.query("DELETE FROM pending_verifications WHERE user_id=?").run(userId); // supersede prior staging
+    const token = randomBytes(24).toString("hex");
+    this.db
+      .query("INSERT INTO pending_verifications (token_hash, user_id, email, expires_at) VALUES (?, ?, ?, ?)")
+      .run(hashToken(token), userId, normalized, new Date(Date.now() + 24 * 3600 * 1000).toISOString());
+    return { ok: true, token };
+  }
+
+  /** Consume a staged email change: swap the account's email hash — the raw email is
+   * dropped with the pending row. */
+  verifyEmailChange(token: string): { ok: true; principal: string } | { ok: false; reason: "invalid" | "email_taken" } {
+    const row = this.db
+      .query("SELECT * FROM pending_verifications WHERE token_hash = ?")
+      .get(hashToken(token)) as Record<string, unknown> | null;
+    if (!row) return { ok: false, reason: "invalid" };
+    this.db.query("DELETE FROM pending_verifications WHERE token_hash = ?").run(hashToken(token));
+    if (new Date(row.expires_at as string).getTime() < Date.now()) return { ok: false, reason: "invalid" };
+    const email = (row.email as string).trim().toLowerCase();
+    const emailHash = createHash("sha256").update(email).digest("hex");
+    const holder = this.findByEmailHash(emailHash);
+    if (holder && holder.id !== row.user_id) return { ok: false, reason: "email_taken" };
+    this.db.query("UPDATE users SET email_hash=? WHERE id=?").run(emailHash, row.user_id as string);
+    const user = this.findById(row.user_id as string);
+    if (!user) return { ok: false, reason: "invalid" };
+    return { ok: true, principal: user.principal };
   }
 
   /** Create a login session; returns the raw token (cookie value). Stored hashed. */
