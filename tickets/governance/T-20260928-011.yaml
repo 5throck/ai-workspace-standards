@@ -5,12 +5,15 @@ title: >-
   co-workspace: add a server test for PATCH /admin/users/:id/name (rename +
   non-admin denial)
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-28T05:01:46.212Z'
 history:
   - at: '2026-09-28T05:01:46.212Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-28T05:24:20.895Z'
+    from: backlog
+    to: done
+result: 'Fixed in PR #1188: rename endpoint tests (200 + unauthenticated 401)'
 error: null
