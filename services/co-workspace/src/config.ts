@@ -18,6 +18,9 @@ export interface GatewayConfig {
   hermesBin: string;
   /** Interpreter prefix for hermesBin — Windows CI passes ["bun"]. Production never sets it. */
   hermesBinPrefix?: string[];
+  /** Independent Secure cookie flag — set when the deployment serves over HTTPS,
+   * regardless of loginRequired (which only gates the web UI). */
+  cookieSecure?: boolean;
   hermesSeedHome?: string;
   /** Shared Nous credential store dir handed to every tenant via `HERMES_SHARED_AUTH_DIR`
    * (default: `<hermesSeedHome>/shared`). All tenants + the operator share ONE token store,
@@ -161,6 +164,7 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     templateVersion: env.CO_WORKSPACE_TEMPLATE_VERSION || undefined,
     hermesBin: env.HERMES_BIN ?? "hermes",
     hermesBinPrefix: env.HERMES_BIN_PREFIX ? env.HERMES_BIN_PREFIX.split(" ") : undefined,
+    cookieSecure: env.CO_WORKSPACE_COOKIE_SECURE === "true",
     hermesSeedHome: env.CO_WORKSPACE_HERMES_SEED_HOME || undefined,
     hermesAuthDir: env.CO_WORKSPACE_HERMES_AUTH_DIR || undefined,
     hermesAuthDirHost: env.CO_WORKSPACE_HERMES_AUTH_DIR_HOST || undefined,
