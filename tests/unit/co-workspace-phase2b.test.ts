@@ -245,6 +245,53 @@ echo '{"type":"result","session_id":"s1","exit_code":0,"text":"ok","tokens":{"in
     expect(denied.status).toBe(401);
   });
 
+  test("native chat streams provisioning progress while the team prepares", async () => {
+    // slow scaffold ⇒ the chat must surface `: provisioning:` frames instead of hanging silent
+    const ws = join(tmpdir(), `gw-slow-ws-${crypto.randomUUID().slice(0, 8)}`);
+    mkdirSync(join(ws, "scripts"), { recursive: true });
+    writeFileSync(
+      join(ws, "scripts", "new-project.ts"),
+      `const end = Date.now() + 1500; while (Date.now() < end);\n` +
+        `const { mkdirSync } = require("node:fs"); mkdirSync(\`Projects/\${process.argv[2]}\`, { recursive: true });\n`,
+    );
+    const binDir = join(tmpdir(), `gw-slow-bin-${crypto.randomUUID().slice(0, 8)}`);
+    mkdirSync(binDir, { recursive: true });
+    const hermesBin = join(binDir, "fake-hermes.sh");
+    writeFileSync(
+      hermesBin,
+      `#!/bin/sh\ncat > /dev/null\necho '{"type":"result","session_id":"s9","exit_code":0,"text":"ok","tokens":{"input":1,"output":1,"total":2},"duration_ms":1}'\n`,
+    );
+    chmodSync(hermesBin, 0o755);
+    const cfgS = loadConfig({
+      CO_WORKSPACE_HOST: "127.0.0.1",
+      CO_WORKSPACE_PORT: String(20000 + Math.floor(Math.random() * 20000)),
+      CO_WORKSPACE_DATA_DIR: join(tmpdir(), `gw-slow-data-${crypto.randomUUID().slice(0, 8)}`),
+      CO_WORKSPACE_WORKSPACE_DIR: ws,
+      HERMES_BIN: hermesBin,
+    });
+    const st = createState(cfgS);
+    const srv = createServer(st);
+    afterAll(() => srv.stop(true));
+    const b2 = `http://127.0.0.1:${srv.port}`;
+    const prov = await fetch(`${b2}/sessions`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ variant: "co-consult" }),
+    });
+    expect(prov.status).toBe(202);
+    const { tenantId } = await prov.json();
+    const chat = await fetch(`${b2}/tenants/${tenantId}/chat`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ message: "hi" }),
+    });
+    expect(chat.status).toBe(200);
+    const text = await chat.text();
+    expect(text).toContain(": provisioning:");
+    expect(text).toContain('"type":"done"');
+    expect(text).toContain('"exitCode":0');
+  }, 20_000);
+
   test("GET /tenants?mine=1 matches the cookie-session principal, not header credentials", async () => {
     const user = state.users.createUser({ email: "mine@test.local", name: "mine", password: "minepass123", role: "user" });
     const cookie = `gw_session=${state.users.createSession(user!.id)}`;
