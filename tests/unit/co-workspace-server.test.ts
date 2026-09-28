@@ -105,6 +105,30 @@ describe_("gateway server — basic routes", () => {
     expect(missing.status).toBe(404);
   });
 
+  test("tenant delete refuses records whose paths escape the storage root (T-20260928-003)", async () => {
+    // forge a tenant whose projectDir points OUTSIDE <dataDir>/storage
+    const evil = state.registry.create({
+      dataDir: cfg.dataDir,
+      variant: "co-consult",
+      key: "co-consult::anonymous",
+      ownerPrincipal: "anonymous", // open-mode caller can reach it (requireTenantAccess passes)
+      description: "tampered record",
+    });
+    const tampered = state.registry.get(evil.tenantId)!;
+    tampered.projectDir = join(dataDir, "storage"); // delete would rm -rf the whole storage root
+    tampered.hermesHome = join(dataDir, "storage");
+    state.registry.upsert(tampered);
+    mkdirSync(join(dataDir, "storage"), { recursive: true }); // this test never provisions — make the root exist
+    writeFileSync(join(dataDir, "storage", "sentinel.txt"), "keep me");
+
+    const res = await fetch(`${base}/tenants/${evil.tenantId}`, { method: "DELETE" });
+    expect(res.status).toBe(500);
+    expect((await res.json()).error).toContain("escapes");
+    // the storage root and its sentinel survived (nothing was removed)
+    expect(existsSync(join(dataDir, "storage", "sentinel.txt"))).toBe(true);
+    state.registry.delete(evil.tenantId);
+  });
+
   test("hostSidePath remaps dataDir-prefixed record paths onto the host root", () => {
     const cfg = { dataDir: "/data", dataDirHost: "/host/root" };
     expect(hostSidePath(cfg, "/data/storage/techcross/x/project")).toBe("/host/root/storage/techcross/x/project");
