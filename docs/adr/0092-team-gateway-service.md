@@ -59,6 +59,17 @@ Also in this wave: the artifacts right panel (Files/Preview/History) with the te
 
 **Storage layout amendment (same addendum)**: tenant workspaces live under `<DATA_DIR>/storage/<principal>/<projectName>/{project,hermes-home}` — per-user grouping on disk (user request) instead of a flat `tenants/<id>` dir. The scaffold still executes in the workspace clone's `Projects/` (engine constraint) and relocates immediately; legacy `tenants/` paths keep working via per-record absolute paths.
 
+## Addendum 5 (2026-09-28) — usability wave, account hardening, docker isolation deployment
+
+User-approved wave (design: `docs/designs/2026-09-28-co-workspace-usability-wave-design.md`; meeting: `memory/meeting-2026-09-28-co-workspace-improvements.md`; PRs #1164–#1185):
+
+- **Tenant-identity invariant (normative)**: one active team per (principal, variant), registry key `<variant>::<principal>`. `POST /sessions` is keyed and idempotent (`202` create / `200 existing`); the web surface never auto-creates (composer targets `POST /tenants/:id/chat`); the API wires keep lazy provisioning as their contract. Fixed en route: `?mine=1` now resolves the session-cookie principal, and `/sessions` stamps the registry key (created-vs-lazy divergence closed).
+- **Accounts**: admin reset issues a one-time **temp password** (15 min, target sessions purged, forced first-login rotation) — the dead one-time-token flow is retired; self-service password change requires the current credential; self-service email change is verification-based and keeps hash-only storage; admins rename users but never read emails. Fixed: `/auth/*` is reachable without API keys (sign-in was impossible with keys configured); `createUser` stamps `login_id`/`verified_at`.
+- **Web UX**: variant-grouped sidebar with persisted recency toggle; native chat streams live provisioning stages (SSE `: provisioning:` frames); New-team creation modal (beta toggle, typed message carried through creation); Enter sends / Shift+Enter newline (IME-safe); resizable sidebar/artifacts panels; `Cache-Control: no-cache` on HTML pages (browsers were running stale builds across redeploys).
+- **Admin panel**: composition donuts (tenants by status / by variant / users by state; SVG, top-7+others), per-user ranking bars, users table with client-side search + paging; per-tenant disk sizing cached 60 s.
+- **Docker isolation deployed**: the gateway image bakes the docker CLI and the compose mounts the host socket; per-turn siblings run as the hermes image's unprivileged user (10000) with SEC-10 caps and only the team's project + Hermes home mounted; the shared-auth store bind is skipped in docker mode (it flipped provider resolution → exit 111 — process mode keeps it); sibling host mounts derive from `CO_WORKSPACE_DATA_DIR_HOST` via `hostSidePath` (layout-agnostic).
+- **Deployment posture**: single-tree deploys from the workspace checkout; compose `.env` (local-only) carries host paths — `CO_WORKSPACE_DATA_DIR_HOST` points at a durable `Storage/` bind, `/workspace` is the checkout itself.
+
 ## References
 
 - Design: `docs/designs/2026-09-27-team-gateway-service-design.md` (verified building blocks, D1–D8, waves, live-verification record)

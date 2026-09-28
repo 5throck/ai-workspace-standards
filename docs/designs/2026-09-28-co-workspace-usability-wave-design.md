@@ -1,7 +1,7 @@
 # co-workspace Usability Wave Design (R1–R7)
 
 - **Date**: 2026-09-28
-- **Status**: Approved (Row 0 design; user answered all five decision points on 2026-09-28)
+- **Status**: Implemented (2026-09-28 — PRs #1164, #1165, #1167, #1168, #1169, #1170 + #1171/#1176/#1178 follow-ups; docker isolation activated via PRs #1180/#1181/#1182)
 - **Related**: ADR-0092 (Team Gateway / co-workspace), ADR-0074 (Universal Design Gate), ADR-0065 (accessibility), ADR-0070 (preview verification), meeting transcript `memory/meeting-2026-09-28-co-workspace-improvements.md`
 - **Scope**: Seven usability changes to `services/co-workspace` (web UI + server), delivered as sequential PRs (PR0–PR5). No changes to the template catalog, workspace governance, or the public API wire contracts.
 
