@@ -59,6 +59,10 @@
   .sess .del:hover { text-decoration: underline; }
   .sidetitle { font-size: .7rem; color: #8b949e; letter-spacing: .05em; }
   .grouphead { font-size: .72rem; color: #58a6ff; font-weight: 600; padding: 8px 4px 3px; letter-spacing: .03em; }
+  .grouphead.gtoggle { cursor: pointer; user-select: none; }
+  .todayBadge { color: #3fb950; font-size: .64rem; margin-left: 5px; }
+  .ntOption { background: var(--panel); color: var(--fg); border: 1px solid var(--border2); border-radius: 8px; padding: 8px 10px; font: inherit; font-size: .8rem; cursor: pointer; text-align: left; }
+  .ntOption:hover { outline: 1px solid var(--accent); }
   /* ── main column ── */
   section { flex: 1; display: flex; flex-direction: column; min-width: 0; }
   header { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--border); }
@@ -151,8 +155,10 @@
 <body>
 <aside>
   <div class="brand">co-workspace <span>teams</span></div>
-  <button class="newbtn" id="newChat">＋ New chat</button>
-  <div class="sidetitle">SESSIONS</div>
+  <button class="newbtn" id="newTeam">＋ New team</button>
+  <div class="sidetitle" style="display:flex; align-items:center; justify-content:space-between;">SESSIONS
+    <button class="collapsebtn" id="groupToggle" title="Switch between variant and recency grouping" aria-pressed="true" style="font-size:.64rem; letter-spacing:0;">variant ▾</button>
+  </div>
   <div id="sessions"></div>
   <div id="authCard"></div>
 </aside>
@@ -168,7 +174,7 @@
   <div id="log">
     <div class="empty">
       <b>What can the team do for you?</b>
-      Pick a variant, type a message — the workspace is reused automatically.
+      Create a team from a variant, then chat — teams are private to you and reused when you return.
       <div class="chips">
         <button type="button" class="chip" data-fill="Analyze this data and summarize the key findings">📊 Analyze data</button>
         <button type="button" class="chip" data-fill="Draft a project plan with milestones and owners">📋 Draft a plan</button>
@@ -182,7 +188,6 @@
       <textarea id="message" rows="1" placeholder="Ask the team…"></textarea>
       <div class="composerTools">
         <select id="model" aria-label="Variant" class="modelPick"></select>
-        <label class="betaPick" title="Include beta variants"><input type="checkbox" id="beta" style="width:auto"> β</label>
         <span style="flex:1"></span>
         <button type="button" id="stopBtn" class="stopBtn hidden">■ Stop</button>
         <button type="submit" id="send" class="sendBtn">Send</button>
@@ -203,7 +208,9 @@
   const esc = (t) => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   const modelSel = $("model"), sessionsEl = $("sessions"), log = $("log"),
         form = $("composer"), input = $("message"), send = $("send"),
-        betaBox = $("beta"), pnameLabel = $("pnameLabel");
+        pnameLabel = $("pnameLabel");
+  let catalog = [];   // full variant catalog (New-team modal)
+  let myTeams = [];   // the signed-in user's teams (composer select + sidebar)
   let currentTenantId = "";
   let currentModel = "";
   let me = null;
@@ -219,20 +226,69 @@
     return div;
   }
 
+  // R7: /v1/models is the creation catalog; the composer select is driven by the user's
+  // teams (renderTeamSelect) so only created teams are chattable.
   async function loadModels() {
     const body = await (await fetch("/v1/models")).json();
-    const includeBeta = betaBox.checked;
-    const catalog = body.data.filter((m) => includeBeta || m.meta?.status !== "beta");
+    catalog = body.data ?? [];
+  }
+
+  // R7: the composer targets a team; switching the select switches teams.
+  function renderTeamSelect() {
     modelSel.innerHTML = "";
-    for (const m of catalog) {
-      const isBeta = m.meta?.status === "beta";
-      const label = isBeta ? `${m.id} · beta` : m.id;
+    for (const t of myTeams) {
       const opt = document.createElement("option");
-      opt.value = m.id;
-      opt.textContent = label;
+      opt.value = t.tenantId;
+      opt.textContent = t.variant + (t.name ? ` · ${t.name}` : "");
       modelSel.appendChild(opt);
     }
+    if (currentTenantId) modelSel.value = currentTenantId;
   }
+  modelSel.addEventListener("change", () => {
+    const team = myTeams.find((t) => t.tenantId === modelSel.value);
+    if (team) selectSession(team);
+  });
+
+  // R7: explicit team creation from the catalog (beta behind its own toggle, persisted).
+  function openNewTeamModal(presetMessage = "") {
+    const authHeaders = { "content-type": "application/json", "x-requested-with": "co-workspace" };
+    const wrap = showModal({ title: "New team", bodyHtml: `
+      <div class="field"><input id="nt-name" placeholder="Team name (optional)"></div>
+      <label class="betaPick" style="margin: 2px 0 8px;"><input type="checkbox" id="nt-beta" style="width:auto"> include beta variants</label>
+      <div id="nt-list" style="display:flex; flex-direction:column; gap:6px; max-height:280px; overflow:auto;"></div>
+      <div class="formErr" id="nt-err" role="alert"></div>
+      <div class="row"><span class="spacer"></span><button id="nt-close" type="button" style="background:transparent;color:var(--muted);border:1px solid var(--border2);">Close</button></div>` });
+    const betaBox2 = wrap.querySelector("#nt-beta");
+    betaBox2.checked = localStorage.getItem("gw-beta") === "1";
+    const renderList = () => {
+      const list = catalog.filter((m) => betaBox2.checked || m.meta?.status !== "beta");
+      wrap.querySelector("#nt-list").innerHTML = list
+        .map((m) => `<button type="button" class="ntOption" data-variant="${esc(m.id)}">${esc(m.id)}${m.meta?.status === "beta" ? " · beta" : ""}</button>`)
+        .join("") || `<div class="hint">No variants available.</div>`;
+      for (const b of wrap.querySelectorAll(".ntOption")) {
+        b.addEventListener("click", () => createTeam(b.dataset.variant));
+      }
+    };
+    betaBox2.addEventListener("change", () => { localStorage.setItem("gw-beta", betaBox2.checked ? "1" : "0"); renderList(); });
+    wrap.querySelector("#nt-close").addEventListener("click", () => wrap.remove());
+    const createTeam = async (variant) => {
+      const name = wrap.querySelector("#nt-name").value.trim();
+      const res = await fetch("/sessions", { method: "POST", headers: authHeaders, body: JSON.stringify({ variant, name: name || undefined }) });
+      const body = await res.json().catch(() => ({}));
+      if (res.status === 202 || res.status === 200) {
+        wrap.remove();
+        await loadSessions();
+        const team = myTeams.find((t) => t.tenantId === body.tenantId);
+        if (team) selectSession(team);
+        if (presetMessage) { input.value = presetMessage; form.requestSubmit(); }
+      } else {
+        wrap.querySelector("#nt-err").textContent = `⚠ ${body.error ?? "team creation failed"}`;
+        if (presetMessage) input.value = presetMessage; // never lose the typed message
+      }
+    };
+    renderList();
+  }
+  $("newTeam").addEventListener("click", () => openNewTeamModal());
 
   // Untitled legacy sessions predate auto-titling — never expose raw thread ids as names.
   const displayName = (t) => t.name || (t.status === "failed" ? "Failed session" : "New chat");
@@ -245,30 +301,65 @@
       // Signed-out visitors get a 302 to /login (HTML), not a JSON body — treat as empty.
       if (res.ok) mine = ((await res.json()).tenants ?? []).slice().reverse();
     } catch { /* network hiccup — show the empty list */ }
-    // ChatGPT-pattern: group by recency
+    myTeams = mine;
+    renderTeamSelect();
+    // R6: variant grouping by default (catalog order, recency inside, collapsible);
+    // the persisted toggle flips back to the recency grouping.
+    const grouping = localStorage.getItem("gw-grouping") ?? "variant";
     const groups = new Map();
-    for (const t of mine) {
-      const d = new Date(t.createdAt);
-      const days = Math.floor((Date.now() - d.getTime()) / 86400000);
-      const label = days === 0 ? "Today" : days === 1 ? "Yesterday" : days <= 7 ? "Previous 7 days" : "Older";
-      (groups.get(label) ?? groups.set(label, []).get(label)).push(t);
+    if (grouping === "variant") {
+      for (const t of mine) {
+        const g = groups.get(t.variant) ?? [];
+        g.push(t);
+        groups.set(t.variant, g);
+      }
+      const catalogOrder = catalog.map((m) => m.id);
+      const labels = [...groups.keys()].sort((a, b) => {
+        const ia = catalogOrder.indexOf(a), ib = catalogOrder.indexOf(b);
+        return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib) || a.localeCompare(b);
+      });
+      for (const label of labels) emitGroup(label, groups.get(label), grouping === "variant");
+    } else {
+      for (const t of mine) {
+        const d = new Date(t.createdAt);
+        const days = Math.floor((Date.now() - d.getTime()) / 86400000);
+        const label = days === 0 ? "Today" : days === 1 ? "Yesterday" : days <= 7 ? "Previous 7 days" : "Older";
+        (groups.get(label) ?? groups.set(label, []).get(label)).push(t);
+      }
+      const order = ["Today", "Yesterday", "Previous 7 days", "Older"];
+      for (const label of order.filter((l) => groups.has(l))) emitGroup(label, groups.get(label), false);
     }
-    const order = ["Today", "Yesterday", "Previous 7 days", "Older"];
-    for (const label of order.filter((l) => groups.has(l))) {
-      const tenants = groups.get(label);
-      const head = document.createElement("div");
-      head.className = "grouphead";
-      head.textContent = label;
-      sessionsEl.appendChild(head);
-      for (const t of tenants) {
-        const row = document.createElement("div");
-        row.className = "sess";
-        row.dataset.tid = t.tenantId;
-        const name = displayName(t);
-        const tag = t.status === "failed" ? " ⚠" : t.status === "provisioning" ? " ⏳" : "";
-        const tok = t.usage ? ` · ${t.usage.inputTokens ?? 0}→${t.usage.outputTokens ?? 0} tok` : "";
-        row.innerHTML = `<div><div class="nm">${esc(name)}${tag}</div>` +
-          `<div class="meta"><span class="vtag">${esc(t.variant)}</span> · ${t.sessions} turns</div></div>`;
+    if (mine.length === 0) {
+      sessionsEl.innerHTML = '<div class="hint" style="padding:6px 4px;">No teams yet — create one to start.</div>';
+    }
+  }
+
+  function emitGroup(label, tenants, collapsible) {
+    let collapsed = {};
+    try { collapsed = JSON.parse(localStorage.getItem("gw-collapsed-groups") || "{}"); } catch { /* ignore */ }
+    const head = document.createElement("div");
+    head.className = "grouphead" + (collapsible ? " gtoggle" : "");
+    head.innerHTML = collapsible ? `<span>${collapsed ? "▸" : "▾"}</span> ${esc(label)}` : esc(label);
+    sessionsEl.appendChild(head);
+    if (collapsible) {
+      head.addEventListener("click", () => {
+        const state2 = JSON.parse(localStorage.getItem("gw-collapsed-groups") || "{}");
+        state2[label] = !state2[label];
+        localStorage.setItem("gw-collapsed-groups", JSON.stringify(state2));
+        loadSessions();
+      });
+      if (collapsed) return;
+    }
+    const today = new Date().toDateString();
+    for (const t of tenants) {
+      const row = document.createElement("div");
+      row.className = "sess";
+      row.dataset.tid = t.tenantId;
+      const name = displayName(t);
+      const tag = t.status === "failed" ? " ⚠" : t.status === "provisioning" ? " ⏳" : "";
+      const todayBadge = collapsible && new Date(t.createdAt).toDateString() === today ? '<span class="todayBadge">Today</span>' : "";
+      row.innerHTML = `<div><div class="nm">${esc(name)}${tag}${todayBadge}</div>` +
+        `<div class="meta"><span class="vtag">${esc(t.variant)}</span> · ${t.sessions} turns</div></div>`;
         const del = document.createElement("button");
         del.className = "del"; del.textContent = "Delete"; del.title = "Delete session";
         del.addEventListener("click", async (e) => {
@@ -283,17 +374,13 @@
         row.appendChild(del);
         row.addEventListener("click", () => selectSession(t));
         sessionsEl.appendChild(row);
-      }
-    }
-    if (mine.length === 0) {
-      sessionsEl.innerHTML = '<div class="hint" style="padding:6px 4px;">No sessions yet.</div>';
     }
   }
 
   async function selectSession(t) {
     currentTenantId = t.tenantId;
     currentModel = t.variant;
-    modelSel.value = t.variant;
+    modelSel.value = t.tenantId;
     const name = displayName(t);
     const usage = t.usage ? ` · ${t.usage.inputTokens ?? 0}→${t.usage.outputTokens ?? 0} tok` : "";
     pnameLabel.innerHTML = `project: <b>${esc(name)}</b> · ${t.sessions} turns${usage}`;
@@ -309,12 +396,7 @@
     document.querySelectorAll(".sess").forEach((el) => el.classList.toggle("active", el.dataset.tid === currentTenantId));
   }
 
-  $("newChat").addEventListener("click", () => {
-    currentTenantId = ""; currentModel = "";
-    pnameLabel.textContent = "";
-    log.innerHTML = "";
-    bubble("assistant", "New chat — pick a variant and send a message. The team workspace is reused per (variant, user); a new project is created only if none exists yet.");
-  });
+
 
   // QA-07: Stop button while a turn is streaming (lives in the composer tools)
   $("stopBtn").addEventListener("click", async () => {
@@ -329,24 +411,22 @@
     event.preventDefault();
     const message = input.value.trim();
     if (!message) return;
+    if (!currentTenantId) { openNewTeamModal(message); return; }
     input.value = ""; send.disabled = true;
     $("stopBtn").classList.remove("hidden");
     bubble("user", message);
     const reply = bubble("assistant");
     reply.classList.add("pending");
     try {
-      const res = await fetch("/v1/chat/completions", {
+      // R7: chat targets the selected team explicitly — the web surface never auto-creates.
+      const res = await fetch(`/tenants/${currentTenantId}/chat`, {
         method: "POST",
         headers: { "content-type": "application/json", "x-requested-with": "co-workspace" },
-        body: JSON.stringify({
-          model: modelSel.value,
-          user: currentUserName(),
-          stream: true,
-          messages: [{ role: "user", content: message }],
-        }),
+        body: JSON.stringify({ message }),
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({ error: res.statusText }));
+        if (res.status === 404) { currentTenantId = ""; loadSessions(); }
         throw new Error(err.error ?? `HTTP ${res.status}`);
       }
       const reader = res.body.getReader();
@@ -360,24 +440,19 @@
         while ((idx = buffer.indexOf("\n\n")) >= 0) {
           const frame = buffer.slice(0, idx);
           buffer = buffer.slice(idx + 2);
-          for (const line of frame.split("\n")) {
-            if (line.startsWith(": provisioning:")) {
-              const note = document.createElement("div");
-              note.className = "progress-inline";
-              note.textContent = "⏳ " + line.replace(": provisioning: ", "");
-              if (first) { log.appendChild(note); first = false; log.scrollTop = log.scrollHeight; }
-              continue;
-            }
-          }
-          if (!frame.startsWith("data: ") || frame === "data: [DONE]") continue;
+          if (!frame.startsWith("data: ")) continue;
           const payload = JSON.parse(frame.slice(6));
-          if (payload.error) throw new Error(payload.error.message ?? "stream error");
-          const delta = payload.choices?.[0]?.delta?.content;
-          if (delta) {
+          if (payload.type === "text" && typeof payload.text === "string") {
             reply.classList.remove("pending");
-            reply.textContent += delta;
+            reply.textContent += payload.text;
             log.scrollTop = log.scrollHeight;
+          } else if (payload.type === "error") {
+            throw new Error(payload.error ?? "stream error");
+          } else if (payload.type === "tool_use") {
+            if (!first) reply.classList.add("pending");
           }
+          // "done" and tool_result/system events need no UI of their own — the reply
+          // accumulates from text deltas, matching the raw stream contract.
         }
       }
       loadSessions();
@@ -604,6 +679,8 @@
     input.disabled = lock;
     send.disabled = lock;
     input.placeholder = lock ? "Sign in to chat…" : "Ask the team…";
+    const newTeamBtn = $("newTeam");
+    if (newTeamBtn) newTeamBtn.disabled = lock;
   }
 
   function renderAuthCard() {
@@ -939,13 +1016,21 @@
   })();
 
   for (const chip of document.querySelectorAll(".chip")) {
-    chip.addEventListener("click", () => {
-      input.value = chip.dataset.fill;
-      input.focus();
-    });
+    chip.addEventListener("click", () => openNewTeamModal(chip.dataset.fill));
   }
 
-  betaBox.addEventListener("change", loadModels);
+  const groupToggle = $("groupToggle");
+  function applyGroupToggle() {
+    const grouping = localStorage.getItem("gw-grouping") ?? "variant";
+    groupToggle.textContent = grouping === "variant" ? "variant ▾" : "recency ▾";
+    groupToggle.setAttribute("aria-pressed", grouping === "variant" ? "true" : "false");
+  }
+  groupToggle.addEventListener("click", () => {
+    localStorage.setItem("gw-grouping", (localStorage.getItem("gw-grouping") ?? "variant") === "variant" ? "recency" : "variant");
+    applyGroupToggle();
+    loadSessions();
+  });
+  applyGroupToggle();
   applyComposerLock();
   loadModels();
   loadSessions();
