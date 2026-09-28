@@ -1,7 +1,7 @@
 /** Unit tests for Team Gateway Phase 2b: windowed quotas and key-file rotation. */
 
 import { afterAll, describe, expect, test } from "bun:test";
-const describe_ = process.platform === "win32" ? describe.skip : describe; // windows cannot exec shebang fake binaries (T-20260927-020 follow-up)
+
 import { chmodSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -27,7 +27,7 @@ function tenant(overrides: Partial<TenantRecord> = {}): TenantRecord {
   };
 }
 
-describe_("parseKeyList / readKeysFile — key-file rotation source", () => {
+describe("parseKeyList / readKeysFile — key-file rotation source", () => {
   test("env style: comma-separated", () => {
     expect(parseKeyList("a, b ,c")).toEqual(["a", "b", "c"]);
   });
@@ -54,7 +54,7 @@ function dailyCfg(): GatewayConfig {
   return { ...loadConfig({}), quotaWindow: "daily", tenantMaxTurns: 2, tenantMaxTokens: 100 };
 }
 
-describe_("windowUsage / assertQuota — windowed quotas", () => {
+describe("windowUsage / assertQuota — windowed quotas", () => {
   test("lifetime window reads cumulative counters", () => {
     const cfg = { ...loadConfig({}), quotaWindow: "lifetime" as const, tenantMaxTurns: 2 };
     const rec = tenant({ sessions: 2, inputTokens: 10, outputTokens: 5 });
@@ -85,7 +85,7 @@ describe_("windowUsage / assertQuota — windowed quotas", () => {
   });
 });
 
-describe_("server — key-file rotation via /admin/reload", () => {
+describe("server — key-file rotation via /admin/reload", () => {
   const dataDir = join(tmpdir(), `gw-rot-${crypto.randomUUID().slice(0, 8)}`);
   const workspaceDir = join(tmpdir(), `gw-rot-ws-${crypto.randomUUID().slice(0, 8)}`);
   const keyDir = join(tmpdir(), `gw-rot-keys-${crypto.randomUUID().slice(0, 8)}`);
@@ -103,12 +103,13 @@ writeFileSync(\`Projects/\${name}/AGENTS.md\`, "# fake\\n");
   writeFileSync(keysFile, "sk-old\n");
   const binDir = join(tmpdir(), `gw-rot-bin-${crypto.randomUUID().slice(0, 8)}`);
   mkdirSync(binDir, { recursive: true });
-  const hermesBin = join(binDir, "fake-hermes.sh");
+  // T-20260928-002: portable fake binary — bun runs the .ts directly on every OS
+  // (Windows Bun.spawn cannot exec shebang scripts).
+  const hermesBin = join(binDir, "fake-hermes.ts");
   writeFileSync(
     hermesBin,
-    `#!/bin/sh
-cat > /dev/null
-echo '{"type":"result","session_id":"s1","exit_code":0,"text":"ok","tokens":{"input":1,"output":1,"total":2},"duration_ms":1,"timestamp":1}'
+    `const args = await Bun.stdin.text();
+console.log(JSON.stringify({ type: "result", session_id: "s1", exit_code: 0, text: "ok", tokens: { input: 1, output: 1, total: 2 }, duration_ms: 1, timestamp: 1 }));
 `,
   );
   chmodSync(hermesBin, 0o755);
@@ -119,6 +120,7 @@ echo '{"type":"result","session_id":"s1","exit_code":0,"text":"ok","tokens":{"in
     CO_WORKSPACE_DATA_DIR: dataDir,
     CO_WORKSPACE_WORKSPACE_DIR: workspaceDir,
     HERMES_BIN: hermesBin,
+    HERMES_BIN_PREFIX: "bun",
     CO_WORKSPACE_API_KEYS_FILE: keysFile,
   });
   expect(cfg.apiKeys).toEqual(["sk-old"]);
@@ -254,20 +256,20 @@ echo '{"type":"result","session_id":"s1","exit_code":0,"text":"ok","tokens":{"in
       `const end = Date.now() + 1500; while (Date.now() < end);\n` +
         `const { mkdirSync } = require("node:fs"); mkdirSync(\`Projects/\${process.argv[2]}\`, { recursive: true });\n`,
     );
-    const binDir = join(tmpdir(), `gw-slow-bin-${crypto.randomUUID().slice(0, 8)}`);
-    mkdirSync(binDir, { recursive: true });
-    const hermesBin = join(binDir, "fake-hermes.sh");
+    const hermesBin = join(binDir, "fake-hermes.ts");
     writeFileSync(
       hermesBin,
-      `#!/bin/sh\ncat > /dev/null\necho '{"type":"result","session_id":"s9","exit_code":0,"text":"ok","tokens":{"input":1,"output":1,"total":2},"duration_ms":1}'\n`,
+      `import { appendFileSync } from "node:fs";
+await Bun.stdin.text();
+console.log(JSON.stringify({ type: "result", session_id: "s9", exit_code: 0, text: "ok", tokens: { input: 1, output: 1, total: 2 }, duration_ms: 1 }));\n`,
     );
-    chmodSync(hermesBin, 0o755);
     const cfgS = loadConfig({
       CO_WORKSPACE_HOST: "127.0.0.1",
       CO_WORKSPACE_PORT: String(20000 + Math.floor(Math.random() * 20000)),
       CO_WORKSPACE_DATA_DIR: join(tmpdir(), `gw-slow-data-${crypto.randomUUID().slice(0, 8)}`),
       CO_WORKSPACE_WORKSPACE_DIR: ws,
       HERMES_BIN: hermesBin,
+      HERMES_BIN_PREFIX: "bun",
     });
     const st = createState(cfgS);
     const srv = createServer(st);
@@ -359,6 +361,7 @@ echo '{"type":"result","session_id":"s1","exit_code":0,"text":"ok","tokens":{"in
       CO_WORKSPACE_DATA_DIR: join(tmpdir(), `gw-budget-${crypto.randomUUID().slice(0, 8)}`),
       CO_WORKSPACE_WORKSPACE_DIR: workspaceDir,
       HERMES_BIN: hermesBin,
+      HERMES_BIN_PREFIX: "bun",
       CO_WORKSPACE_PRINCIPAL_MAX_TOKENS: "4",
     });
     const st = createState(cfgB);

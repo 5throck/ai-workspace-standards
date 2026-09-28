@@ -16,6 +16,8 @@ export interface GatewayConfig {
   variants: string[];
   templateVersion?: string;
   hermesBin: string;
+  /** Interpreter prefix for hermesBin — Windows CI passes ["bun"]. Production never sets it. */
+  hermesBinPrefix?: string[];
   hermesSeedHome?: string;
   /** Shared Nous credential store dir handed to every tenant via `HERMES_SHARED_AUTH_DIR`
    * (default: `<hermesSeedHome>/shared`). All tenants + the operator share ONE token store,
@@ -158,6 +160,7 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     ), env.CO_WORKSPACE_VARIANTS_INCLUDE_BETA === "true" || env.CO_WORKSPACE_VARIANTS_INCLUDE_BETA === "1"),
     templateVersion: env.CO_WORKSPACE_TEMPLATE_VERSION || undefined,
     hermesBin: env.HERMES_BIN ?? "hermes",
+    hermesBinPrefix: env.HERMES_BIN_PREFIX ? env.HERMES_BIN_PREFIX.split(" ") : undefined,
     hermesSeedHome: env.CO_WORKSPACE_HERMES_SEED_HOME || undefined,
     hermesAuthDir: env.CO_WORKSPACE_HERMES_AUTH_DIR || undefined,
     hermesAuthDirHost: env.CO_WORKSPACE_HERMES_AUTH_DIR_HOST || undefined,

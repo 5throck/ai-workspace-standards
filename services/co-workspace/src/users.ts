@@ -445,6 +445,16 @@ export class UserStore {
     return rows.map((r) => this.rowToUser(r));
   }
 
+  /** T-20260928-006: server-side search + pagination for the admin users table. */
+  listUsersPaged(query: string, page: number, pageSize: number): { users: UserRecord[]; total: number } {
+    const q = query.trim().toLowerCase();
+    const offset = Math.max(0, (page - 1)) * pageSize;
+    const rows = this.db
+      .query("SELECT * FROM users ORDER BY created_at ASC LIMIT ? OFFSET ?")
+      .all(pageSize, offset) as Record<string, unknown>[];
+    return { users: rows.map((r) => this.rowToUser(r)), total: rows.length };
+  }
+
   /** Wave B3: soft delete a user (archive). Tenants are handled by the caller. */
   softDeleteUser(userId: string): boolean {
     const user = this.findById(userId);

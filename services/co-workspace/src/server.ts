@@ -350,6 +350,7 @@ async function runChat(
       return runHermesTurn(
         {
           hermesBin: state.cfg.hermesBin,
+          binPrefix: state.cfg.hermesBinPrefix,
           projectDir: rec.projectDir,
           hermesHome: rec.hermesHome,
           message,
