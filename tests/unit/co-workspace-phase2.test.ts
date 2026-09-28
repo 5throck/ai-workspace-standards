@@ -97,7 +97,12 @@ describe("hermes spawn adapter — toolsets and container isolation", () => {
     expect(without.HERMES_SHARED_AUTH_DIR).toBeUndefined();
   });
 
-  test("docker probe verdicts on a fake docker binary", () => {
+  // The probe fakes are shebang shell scripts that Windows cannot exec — the
+  // whole-file win32 gate this suite previously had protected this test too
+  // (T-20260929-001 ported the hermes/agy spawn fakes; the docker probe stays
+  // platform-gated because dockerProbe execs the binary directly).
+  const probeTest = process.platform === "win32" ? test.skip : test;
+  probeTest("docker probe verdicts on a fake docker binary", () => {
     const dir = join(tmpdir(), `gw-probe-${crypto.randomUUID().slice(0, 8)}`);
     mkdirSync(dir, { recursive: true });
     const okBin = join(dir, "docker-ok");
