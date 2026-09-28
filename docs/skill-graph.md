@@ -265,7 +265,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `adr:0028` | adr | — | — | — |
 | `adr:0029` | adr | — | version | — |
 | `adr:0031` | adr | — | — | — |
-| `adr:0032` | adr | — | meeting-facilitation, version | — |
+| `adr:0032` | adr | — | meeting-facilitation, sound-synth, version | — |
 | `adr:0033` | adr | — | — | — |
 | `adr:0034` | adr | — | — | — |
 | `adr:0035` | adr | — | — | — |
