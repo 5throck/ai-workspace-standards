@@ -105,6 +105,15 @@ describe_("gateway server — basic routes", () => {
     expect(missing.status).toBe(404);
   });
 
+  test("HTML pages force revalidation so redeploys are picked up", async () => {
+    const page = await fetch(`${base}/`);
+    expect(page.headers.get("cache-control")).toBe("no-cache");
+    await page.text();
+    const login = await fetch(`${base}/login`);
+    expect(login.headers.get("cache-control")).toBe("no-cache");
+    await login.text();
+  });
+
   test("POST /sessions rejects variants outside the allowlist", async () => {
     const res = await fetch(`${base}/sessions`, {
       method: "POST",

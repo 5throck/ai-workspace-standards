@@ -695,6 +695,13 @@ async function geminiChatResponse(
 
 const DEMO_PAGE_PATH = resolve(SERVICE_ROOT, "web", "index.html");
 
+/** The single-file app ships without versioned asset URLs — `no-cache` forces revalidation
+ * on every load, otherwise browsers heuristically cache the page across redeploys and run
+ * stale code for days (the "nothing changed" report of 2026-09-27/28). */
+function htmlHeaders(): Record<string, string> {
+  return { "content-type": "text/html; charset=utf-8", "cache-control": "no-cache" };
+}
+
 const variantStatusCache = new Map<string, string>();
 /** P1: variant lifecycle status for catalog metadata (default "stable" when unreadable). */
 export function variantStatus(cfg: GatewayConfig, variant: string): string {
@@ -715,7 +722,7 @@ export function variantStatus(cfg: GatewayConfig, variant: string): string {
 function demoPage(): Response {
   if (existsSync(DEMO_PAGE_PATH)) {
     return new Response(readFileSync(DEMO_PAGE_PATH, "utf8"), {
-      headers: { "content-type": "text/html; charset=utf-8" },
+      headers: htmlHeaders(),
     });
   }
   return new Response("<!doctype html><title>team-gateway</title><p>demo page not built</p>", {
@@ -773,7 +780,7 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
       const loginPath = resolve(SERVICE_ROOT, "web", "login.html");
       if (existsSync(loginPath)) {
         return new Response(readFileSync(loginPath, "utf8"), {
-          headers: { "content-type": "text/html; charset=utf-8" },
+          headers: htmlHeaders(),
         });
       }
       throw new HttpError(404, "login page not found");
