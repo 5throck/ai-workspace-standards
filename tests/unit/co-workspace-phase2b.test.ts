@@ -156,6 +156,18 @@ echo '{"type":"result","session_id":"s1","exit_code":0,"text":"ok","tokens":{"in
     expect((await models("sk-new")).status).toBe(200);
   });
 
+  test("GET /tenants?mine=1 matches the cookie-session principal, not header credentials", async () => {
+    const user = state.users.createUser({ email: "mine@test.local", name: "mine", password: "minepass123", role: "user" });
+    const cookie = `gw_session=${state.users.createSession(user!.id)}`;
+    const principal = user!.principal;
+    state.registry.create({ dataDir: cfg.dataDir, variant: "co-consult", key: `co-consult::${principal}`, ownerPrincipal: principal });
+    state.registry.create({ dataDir: cfg.dataDir, variant: "co-develop", key: "co-develop::someoneelse", ownerPrincipal: "someoneelse" });
+
+    const mine = (await (await fetch(`${base}/tenants?mine=1`, { headers: { cookie } })).json()).tenants;
+    expect(mine.length).toBe(1);
+    expect(mine[0].ownerPrincipal).toBe(principal);
+  });
+
   test("principal token budget: cross-tenant spend trips 429 (SEC-05 remnant)", async () => {
     // budget test server shares state; build a dedicated config-based check instead:
     const cfgB = loadConfig({
