@@ -349,7 +349,11 @@ async function runChat(
           maxTurns: state.cfg.maxTurns,
           extraArgs: state.cfg.hermesExtraArgs,
           toolsets: state.cfg.hermesToolsets,
-          sharedAuthDir: resolveAuthDir(state.cfg),
+          // Docker isolation: the tenant home is re-seeded with the CURRENT seed auth.json
+          // every turn, so the shared-store bind adds nothing — and empirically flips hermes
+          // onto the shared Nous store, failing the turn (exit 111, observed 2026-09-28).
+          // Process-mode tenants keep the shared store (single HOME, refreshes stay valid).
+          sharedAuthDir: state.cfg.isolation === "docker" ? undefined : resolveAuthDir(state.cfg),
           onSpawn: (proc) => state.activeProcs.set(rec.tenantId, proc),
           container:
             state.cfg.isolation === "docker"
