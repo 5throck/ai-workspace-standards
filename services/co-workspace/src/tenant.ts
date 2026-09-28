@@ -4,7 +4,7 @@
  * carries the ADR-0088 D7 trust posture scoped to the tenant project directory.
  */
 
-import { copyFileSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { chownSync, copyFileSync, existsSync, mkdirSync, readdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { genId, readJson, writeJson } from "./util";
 
@@ -93,6 +93,22 @@ export function tenantConfigYaml(projectDir: string, model?: string): string {
     lines.push("", "# Model routing stamped by the gateway (CO_WORKSPACE_HERMES_MODEL).", "model:", `  default: "${model}"`);
   }
   return lines.join("\n") + "\n";
+}
+
+/** Docker isolation runs the turn as the hermes image's unprivileged UID 10000 — align the
+ * tenant tree ownership so that user can read/write it. Best-effort: failures tolerated. */
+export function chownTree(root: string, uid: number, gid: number): void {
+  if (!existsSync(root)) return;
+  try {
+    chownSync(root, uid, gid);
+  } catch { /* best effort */ }
+  for (const entry of readdirSync(root, { withFileTypes: true })) {
+    const child = join(root, entry.name);
+    if (entry.isDirectory()) chownTree(child, uid, gid);
+    else {
+      try { chownSync(child, uid, gid); } catch { /* best effort */ }
+    }
+  }
 }
 
 export function seedHermesHome(rec: TenantRecord, seedHome?: string, model?: string): void {
