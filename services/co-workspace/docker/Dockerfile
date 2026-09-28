@@ -17,10 +17,11 @@ RUN apt-get update \
  && apt-get install -y --no-install-recommends git ca-certificates \
  && rm -rf /var/lib/apt/lists/*
 
-# NOTE: docker isolation (CO_WORKSPACE_ISOLATION=docker) from INSIDE a container additionally
-# needs the docker CLI + a socket mount in the deployment — not baked here (see README).
+# Docker isolation (CO_WORKSPACE_ISOLATION=docker) from INSIDE a container needs the docker
+# CLI to spawn sibling containers — baked via the official docker:cli image (no apt repo churn).
 
 COPY --from=bun /usr/local/bin/bun /usr/local/bin/bun
+COPY --from=docker:cli /usr/local/bin/docker /usr/local/bin/docker
 
 WORKDIR /app/services/co-workspace
 COPY services/co-workspace/package.json ./
