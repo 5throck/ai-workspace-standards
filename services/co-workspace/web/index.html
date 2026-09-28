@@ -221,6 +221,10 @@
   let catalog = [];   // full variant catalog (New-team modal)
   let myTeams = [];   // the signed-in user's teams (composer select + sidebar)
   let currentTenantId = "";
+  // Single provisioning poller per tenant — the double-select (createTeam's explicit
+  // selectSession + loadSessions's boot-select of the same new team) used to start two
+  // polls, double the "ready" bubble, and double-fire loadSessions on completion.
+  let provisionPollTimer = null;
   let currentModel = "";
   let me = null;
   let currentUserName = () => (me?.loginId ?? "default");
@@ -302,7 +306,14 @@
   // Untitled legacy sessions predate auto-titling — never expose raw thread ids as names.
   const displayName = (t) => t.name || (t.status === "failed" ? "Failed session" : "New chat");
 
+  // User-reported duplicate-sidebar fix (2026-09-29): two concurrent loadSessions
+  // calls (the provisioning poll firing loadSessions while createTeam's own call is
+  // still in flight) interleave as clear→clear→fetch→fetch→render→render and paint
+  // the same group twice. A render generation guard makes the newest call win and
+  // stale loads abort before rendering.
+  let loadSessionsSeq = 0;
   async function loadSessions() {
+    const seq = ++loadSessionsSeq;
     sessionsEl.innerHTML = "";
     let mine = [];
     try {
@@ -310,6 +321,7 @@
       // Signed-out visitors get a 302 to /login (HTML), not a JSON body — treat as empty.
       if (res.ok) mine = ((await res.json()).tenants ?? []).slice().reverse();
     } catch { /* network hiccup — show the empty list */ }
+    if (seq !== loadSessionsSeq) return; // superseded — never paint a stale snapshot
     myTeams = mine;
     renderTeamSelect();
     // R6: variant grouping by default (catalog order, recency inside, collapsible);
@@ -438,6 +450,7 @@
   }
 
   async function selectSession(t) {
+    if (currentTenantId === t.tenantId && provisionPollTimer) return; // already watching this provisioning tenant
     currentTenantId = t.tenantId;
     currentModel = t.variant;
     modelSel.value = t.tenantId;
@@ -455,22 +468,24 @@
     if (t.status === "provisioning") {
       // R7: a freshly created team streams its provisioning stages into the log until ready.
       const note = bubble("assistant", "⏳ Preparing the team workspace…");
+      if (provisionPollTimer) { clearInterval(provisionPollTimer); provisionPollTimer = null; }
       const timer = setInterval(async () => {
-        if (currentTenantId !== t.tenantId) { clearInterval(timer); return; }
+        if (currentTenantId !== t.tenantId) { clearInterval(timer); provisionPollTimer = null; return; }
         const d = await (await fetch(`/tenants/${t.tenantId}`)).json().catch(() => null);
         if (!d) return;
         const last = d.progress?.[d.progress.length - 1];
         note.textContent = `⏳ [${last?.stage ?? "preparing"}] ${last?.label ?? "…"}`;
         if (d.status === "ready") {
-          clearInterval(timer);
+          clearInterval(timer); provisionPollTimer = null;
           note.textContent = `✔ Team "${name}" is ready — send your first message below.`;
           loadSessions();
         } else if (d.status === "failed") {
-          clearInterval(timer);
+          clearInterval(timer); provisionPollTimer = null;
           note.textContent = `⚠ Team provisioning failed: ${d.error ?? "unknown"} — delete it and create a new team.`;
           loadSessions();
         }
       }, 1000);
+      provisionPollTimer = timer;
     } else {
       bubble("assistant", `Resumed "${name}" (${t.variant}) — ${t.sessions} earlier turns. Continue below.`);
     }

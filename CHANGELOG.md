@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+- **[2026-09-29]**: fix(services): **co-workspace duplicate-sidebar render + delete disk leftovers (user-reported with screenshot).** (1) Creating a team could paint the sidebar twice — the provisioning poll's completion `loadSessions()` raced createTeam's own `loadSessions()` (clear→clear→fetch→fetch→render→render interleave), so the SAME single tenant rendered as two identical variant groups with two "Team is ready" bubbles (the live registry proved one row; the double-fire came from loadSessions's boot-select and createTeam's explicit select targeting the same new team). Fixed with a render-generation guard (the newest load wins; stale loads abort before painting) and a single provisioning poller per tenant (re-selecting an already-watched tenant is a no-op). (2) Deleting a team left unreferenced data on disk: legacy layout bugs had written malformed siblings (e.g. `<tenantId>project`, `<tenantId>hermes-home` — separator swallowed) next to the canonical folder, which the folder rm never matched. The DELETE route — and the admin user-delete route, which also never removed the parent shell — now sweep tenantId-prefixed stragglers under the principal storage dir (`sweepTenantStragglers`, containment-guarded); the two live orphans (292K) were removed and a registry-vs-disk audit confirms only the live tenant's tree remains. Tests: sweep unit tests; 1381 pass, service tsc clean.
 - **[2026-09-28]**: fix(upgrade): **upgrade-project v1.56.0 — skills registry rows now take status/owner from the delivered SKILL.md.** SKILLS_REGISTRY_RECONCILE only updated version/last_reviewed, so when an upgrade replaced a project-local skill with the L0 copy (co-architect `service-design`: owner `service-designer` → `pm`) the registry row kept the old owner and the project's skill audit failed with `Registry owner drift`. The pass now runs `alignSkillRegistryRowsWithFrontmatter` (previously scaffold-only) after reconcile; regression test added.
 
 - **[2026-09-28]**: fix(hermes): **`Hermes.md` renamed to `HERMES.md` at L0, L1, and all 13 L2 variants (ADR-0093 Amendment 2).** Hermes Agent discovers its project instruction file by exact name (`.hermes.md` / `HERMES.md`, `agent/prompt_builder.py`); the mixed-case file was found only on case-insensitive filesystems and was skipped on Linux, including the co-workspace Docker runtime. All live references (new-project, upgrade-project, adopt-project, propagate-to-templates, audit, validate-md-language, parity/E2E/unit tests, workspace-schema allowlist, upgrade-project skill docs) follow the new name. upgrade-project v1.55.0 renames a project's legacy `Hermes.md` before the MERGE pass (`git mv` when tracked; two-step temp rename so case-insensitive filesystems record the change). Also untracked the stale generated `.clauderules` / `.cursorrules` (output of `generate-ide-rules.ts`, last regenerated 2026-08-06, unread by Claude Code) and added both to the L0 and `templates/common` `.gitignore`.
@@ -1747,8 +1748,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-*Last Updated: 2026-09-28*
-*Last Updated: 2026-09-28*
+*Last Updated: 2026-09-29*
+*Last Updated: 2026-09-29*
 
 ### Changed
 - **[2026-06-06]**: chore: update validate-templates.ts and SKILLS.md - improve template validation checks and skill registration consistency

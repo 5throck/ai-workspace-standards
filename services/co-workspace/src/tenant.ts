@@ -4,9 +4,28 @@
  * carries the ADR-0088 D7 trust posture scoped to the tenant project directory.
  */
 
-import { chownSync, copyFileSync, existsSync, mkdirSync, readdirSync, writeFileSync } from "node:fs";
+import { chownSync, copyFileSync, existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { genId, readJson, writeJson } from "./util";
+
+/**
+ * User-reported 2026-09-29: deleted tenants left unreferenced data on disk. Besides the
+ * canonical tree the delete route already removes, legacy layout bugs had written
+ * malformed siblings next to it (e.g. `<tenantId>project` with the separator swallowed)
+ * that no later delete ever matched. After the canonical folder is removed, sweep
+ * tenantId-prefixed stragglers under the principal storage dir. Returns what was removed.
+ */
+export function sweepTenantStragglers(principalDir: string, tenantId: string, keepFolderName: string): string[] {
+  const removed: string[] = [];
+  if (!existsSync(principalDir)) return removed;
+  for (const entry of readdirSync(principalDir, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    if (entry.name === keepFolderName || !entry.name.startsWith(tenantId)) continue;
+    rmSync(join(principalDir, entry.name), { recursive: true, force: true });
+    removed.push(entry.name);
+  }
+  return removed;
+}
 
 export type TenantStatus = "provisioning" | "ready" | "failed" | "archived";
 

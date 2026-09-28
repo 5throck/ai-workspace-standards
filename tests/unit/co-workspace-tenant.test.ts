@@ -1,7 +1,7 @@
 /** Unit tests for Team Gateway tenant registry, HERMES_HOME seeding, and config (ADR-0092 W2). */
 
 import { describe, expect, test } from "bun:test";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { loadConfig, resolveVariants } from "../../services/co-workspace/src/config";
@@ -9,6 +9,7 @@ import { UserStore } from "../../services/co-workspace/src/users";
 import {
   publicTenant,
   seedHermesHome,
+  sweepTenantStragglers,
   tenantConfigYaml,
 } from "../../services/co-workspace/src/tenant";
 import { TenantRegistry } from "../../services/co-workspace/src/registry-db";
@@ -194,5 +195,25 @@ describe("publicTenant — internal paths stay server-side", () => {
     expect(pub.variant).toBe("co-consult");
     expect("hermesHome" in pub).toBe(false);
     expect("projectDir" in pub).toBe(false);
+  });
+});
+
+describe("sweepTenantStragglers (user-reported 2026-09-29: deleted tenants left disk data)", () => {
+  test("removes tenantId-prefixed malformed siblings, keeps the canonical folder and unrelated dirs", () => {
+    const principalDir = tempDir();
+    mkdirSync(join(principalDir, "gw-abc123"), { recursive: true });
+    mkdirSync(join(principalDir, "gw-abc123project"), { recursive: true });
+    mkdirSync(join(principalDir, "gw-abc123hermes-home"), { recursive: true });
+    mkdirSync(join(principalDir, "gw-other999"), { recursive: true });
+    writeFileSync(join(principalDir, "gw-abc123project", "leftover.txt"), "x");
+    const removed = sweepTenantStragglers(principalDir, "gw-abc123", "gw-abc123");
+    expect(removed.sort()).toEqual(["gw-abc123hermes-home", "gw-abc123project"]);
+    expect(existsSync(join(principalDir, "gw-abc123"))).toBe(true);
+    expect(existsSync(join(principalDir, "gw-other999"))).toBe(true);
+    rmSync(principalDir, { recursive: true, force: true });
+  });
+
+  test("a missing principal dir is a no-op", () => {
+    expect(sweepTenantStragglers(join(tempDir(), "missing"), "gw-x", "gw-x")).toEqual([]);
   });
 });
