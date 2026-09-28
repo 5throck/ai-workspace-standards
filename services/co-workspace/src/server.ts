@@ -705,7 +705,13 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
     }
     // Phase 2 auth gate + Wave B: a route passes with a valid API key OR a signed-in session
     // (cookie). Exemptions stay limited to `GET /` and `GET /health`.
+    // /auth/* is the self-service auth surface (login/logout/signup/verify/me): it must stay
+    // reachable without an API key even when keys are configured, or sign-in itself is
+    // impossible. The routes authenticate themselves; the loginRequired gate below still
+    // exempts them from session demands.
+    const authRoute = path.startsWith("/auth/");
     const authorized =
+      authRoute ||
       requestAuthorized(state.cfg, req, `${req.method} ${path}`) ||
       (state.cfg.apiKeys.length > 0 && Boolean(sessionUser));
     if (!authorized) {
@@ -1014,9 +1020,13 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
         state.audit.record(loginId || clientIp, "login.failed");
         throw new HttpError(401, "invalid ID or password (or account not yet verified)");
       }
+      if (state.users.tempPasswordExpired(user)) {
+        state.audit.record(user.principal, "login.failed");
+        throw new HttpError(403, "temporary password expired — ask your administrator for a new one");
+      }
       state.audit.record(user.principal, "login.success");
       const token = state.users.createSession(user.id);
-      return new Response(JSON.stringify({ user: { loginId: user.principal, name: user.name, role: user.role } }), {
+      return new Response(JSON.stringify({ user: { loginId: user.principal, name: user.name, role: user.role, mustChangePassword: Boolean(user.mustChangePassword) } }), {
         status: 200,
         headers: { "content-type": "application/json", "set-cookie": sessionCookieHeader(token, state.cfg.loginRequired) },
       });
@@ -1035,7 +1045,7 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
       if (!user) throw new HttpError(401, "not signed in");
       const usage = principalTokenUsage(state, user.principal);
       return jsonResponse({
-        user: { loginId: user.principal, name: user.name, role: user.role },
+        user: { loginId: user.principal, name: user.name, role: user.role, mustChangePassword: Boolean(user.mustChangePassword) },
         usage: { inputTokens: usage.input, outputTokens: usage.output, totalTokens: usage.input + usage.output },
         budget: state.cfg.principalMaxTokens > 0 ? { maxTokens: state.cfg.principalMaxTokens } : null,
       });
@@ -1045,10 +1055,19 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
       const user = state.users.resolveSession(sessionTokenFromCookie(req));
       if (!user) throw new HttpError(401, "not signed in");
       const body = (await readJsonBody(req)) as Record<string, unknown>;
-      const updated = state.users.updateProfile(user.id, {
-        name: typeof body.name === "string" ? body.name : undefined,
-        password: typeof body.password === "string" ? body.password : undefined,
-      });
+      const password = typeof body.password === "string" ? body.password : undefined;
+      let updated: ReturnType<UserStore["findById"]>;
+      if (password && user.mustChangePassword) {
+        // R1 forced rotation: completes the temp-credential flow and rotates sessions —
+        // the client signs in again with the new password.
+        updated = state.users.completeTempPasswordChange(user.id, password);
+        if (updated) state.audit.record(updated.principal, "user.password.rotation");
+      } else {
+        updated = state.users.updateProfile(user.id, {
+          name: typeof body.name === "string" ? body.name : undefined,
+          password,
+        });
+      }
       if (!updated) throw new HttpError(404, "user not found");
       return jsonResponse({ user: { loginId: updated.principal, name: updated.name, role: updated.role } });
     }
@@ -1162,9 +1181,9 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
       if (!caller || caller.role !== "admin") throw new HttpError(403, "admin only");
       const target = state.users.findById(decodeURIComponent(resetRoute[1]));
       if (!target) throw new HttpError(404, "user not found");
-      const token = state.users.createResetToken(target.id);
+      const tempPassword = state.users.createTempPassword(target.id);
       state.audit.record(caller.principal, "user.reset-password", target.principal);
-      return jsonResponse({ resetToken: token, note: "one-time token, 15-minute expiry; deliver out-of-band" });
+      return jsonResponse({ tempPassword, note: "one-time temp password, 15-minute expiry; forced change at first sign-in" });
     }
 
     const deleteRoute = path.match(/^\/admin\/users\/([^/]+)$/);

@@ -17,6 +17,8 @@ export interface UserRecord {
   name: string;
   principal: string;
   passwordHash: string | null; // null for SSO-only accounts
+  mustChangePassword?: boolean; // R1: set when the password is an admin-issued temp credential
+  tempPasswordExpires?: string | null;
   googleSub: string | null;
   role: "user" | "admin";
   createdAt: string;
@@ -106,6 +108,8 @@ export class UserStore {
       "ALTER TABLE users ADD COLUMN login_id TEXT",
       "ALTER TABLE users ADD COLUMN email_hash TEXT",
       "ALTER TABLE users ADD COLUMN verified_at TEXT",
+      "ALTER TABLE users ADD COLUMN must_change_password INTEGER",
+      "ALTER TABLE users ADD COLUMN temp_password_expires TEXT",
       "CREATE UNIQUE INDEX IF NOT EXISTS idx_users_login ON users(login_id) WHERE login_id IS NOT NULL",
       "CREATE INDEX IF NOT EXISTS idx_users_email_hash ON users(email_hash)",
     ]) {
@@ -126,6 +130,8 @@ export class UserStore {
       passwordHash: (r.password_hash as string | null) ?? null,
       googleSub: (r.google_sub as string | null) ?? null,
       role: (r.role as "user" | "admin") ?? "user",
+      mustChangePassword: Boolean(r.must_change_password),
+      tempPasswordExpires: (r.temp_password_expires as string | null) ?? null,
       createdAt: r.created_at as string,
       deletedAt: (r.deleted_at as string | null) ?? null,
     };
@@ -164,10 +170,10 @@ export class UserStore {
     const passwordHash = init.password ? Bun.password.hashSync(init.password) : null;
     this.db
       .query(
-        `INSERT INTO users (id, email, name, principal, password_hash, google_sub, role, created_at, deleted_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL)`,
+        `INSERT INTO users (id, email, name, principal, login_id, password_hash, google_sub, role, created_at, deleted_at, verified_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?)`,
       )
-      .run(id, email, init.name, principal, passwordHash, init.googleSub ?? null, init.role ?? "user", new Date().toISOString());
+      .run(id, email, init.name, principal, principal, passwordHash, init.googleSub ?? null, init.role ?? "user", new Date().toISOString(), new Date().toISOString());
     return this.findByEmail(email);
   }
 
@@ -344,23 +350,35 @@ export class UserStore {
     if (token) this.db.query("DELETE FROM sessions WHERE token_hash = ?").run(hashToken(token));
   }
 
-  /** Wave B3: one-time password-reset token (returned raw, stored hashed, 15-min expiry). */
-  createResetToken(userId: string): string {
-    const token = randomBytes(24).toString("hex");
+  /** Usability wave R1: an admin reset issues a one-time TEMP PASSWORD — shown once to the
+   * admin (stored only as its argon2id hash), 15-minute expiry, and every existing session
+   * of the target is purged (SEC-06). First login with it forces a rotation. */
+  createTempPassword(userId: string): string {
+    const alphabet = "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    const bytes = randomBytes(8);
+    const body = Array.from(bytes, (b) => alphabet[b % alphabet.length]).join("");
+    const temp = `co-${body.slice(0, 4)}-${body.slice(4)}`;
     this.db
-      .query("INSERT INTO reset_tokens (token_hash, user_id, expires_at) VALUES (?, ?, ?)")
-      .run(hashToken(token), userId, new Date(Date.now() + 15 * 60 * 1000).toISOString());
-    return token;
+      .query("UPDATE users SET password_hash=?, must_change_password=1, temp_password_expires=? WHERE id=?")
+      .run(Bun.password.hashSync(temp), new Date(Date.now() + 15 * 60 * 1000).toISOString(), userId);
+    this.db.query("DELETE FROM sessions WHERE user_id=?").run(userId);
+    return temp;
   }
 
-  consumeResetToken(token: string): string | null {
-    const row = this.db
-      .query("SELECT * FROM reset_tokens WHERE token_hash = ?")
-      .get(hashToken(token)) as Record<string, unknown> | null;
-    if (!row) return null;
-    this.db.query("DELETE FROM reset_tokens WHERE token_hash = ?").run(hashToken(token));
-    if (new Date(row.expires_at as string).getTime() < Date.now()) return null;
-    return row.user_id as string;
+  /** True when the account still carries an admin-issued temp credential past its expiry. */
+  tempPasswordExpired(user: UserRecord): boolean {
+    return Boolean(user.mustChangePassword) && new Date(user.tempPasswordExpires ?? 0).getTime() < Date.now();
+  }
+
+  /** Complete the forced first-login rotation: clear the temp flag and rotate sessions
+   * (SEC-06) — the caller re-signs-in with the new password. */
+  completeTempPasswordChange(userId: string, newPassword: string): UserRecord | null {
+    if (!this.findById(userId)) return null;
+    this.db
+      .query("UPDATE users SET password_hash=?, must_change_password=0, temp_password_expires=NULL WHERE id=?")
+      .run(Bun.password.hashSync(newPassword), userId);
+    this.db.query("DELETE FROM sessions WHERE user_id=?").run(userId);
+    return this.findById(userId);
   }
 
   /** Wave B2: record the Google subject on an account linked by verified email. */
