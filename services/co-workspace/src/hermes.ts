@@ -33,6 +33,10 @@ export function parseHermesLine(line: string): HermesEvent | null {
 
 export interface HermesSpawnOptions {
   hermesBin: string;
+  /** Interpreter prefix for hermesBin — Windows CI passes ["bun"] so a plain .ts fake
+   * binary can stand in for the real executable (shebang scripts are not directly
+   * exec-able there). Production never sets it. */
+  binPrefix?: string[];
   projectDir: string;
   hermesHome: string;
   message: string;
@@ -80,6 +84,7 @@ export function hermesArgs(
   paths: { projectDir?: string } = {},
 ): string[] {
   const args = [
+    ...(o.binPrefix ?? []),
     o.hermesBin,
     "chat",
     "--format",
