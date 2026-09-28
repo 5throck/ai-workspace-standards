@@ -6,12 +6,19 @@ title: >-
   delete flow — assert resolved parent starts with the tenant storage root
   (defense-in-depth)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-27T16:44:14.938Z'
 history:
   - at: '2026-09-27T16:44:14.938Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-28T05:37:40.153Z'
+    from: backlog
+    to: done
+result: >-
+  Containment validation moved before all rmSync calls in DELETE /tenants/:id
+  (PR #1192): tenant folder must sit under <dataDir>/storage and hermesHome
+  inside it; regression test forges an escaping record and asserts 500 +
+  sentinel survival
 error: null
