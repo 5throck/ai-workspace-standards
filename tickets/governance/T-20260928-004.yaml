@@ -7,12 +7,17 @@ title: >-
   default image name team-gateway-runtime, missing .env.keys mount in compose,
   ADR-0092 rename addendum, component AGENTS.md invariants/layout refresh
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-27T16:44:14.951Z'
 history:
   - at: '2026-09-27T16:44:14.951Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-28T07:45:24.470Z'
+    from: backlog
+    to: done
+result: >-
+  Completed in PR #1195 (backlog batch 2): see PR description for per-ticket
+  changes
 error: null
