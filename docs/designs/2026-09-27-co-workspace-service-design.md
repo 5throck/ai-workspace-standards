@@ -1,6 +1,6 @@
 # Team Gateway Service Design — Serving Variant Agent Teams over OpenAI-, Anthropic-, and Gemini-Compatible Web APIs
 
-- **Spec id**: `2026-09-27-team-gateway-service`
+- **Spec id**: `2026-09-27-co-workspace-service`
 - **Date**: 2026-09-27
 - **Status**: Approved (Row 0 design; implementation lands with this PR)
 - **Related**: ADR-0092 (this design's decision record), ADR-0074 (Universal Design Gate), ADR-0088 (Hermes Agent platform support), ADR-0089 (template auto-release cadence), ADR-0078 (LLM work routing — see §2 N7), T-20260927-019 (upstream scaffold-pinning defect)
@@ -107,7 +107,7 @@ Provisioning is asynchronous: `POST /sessions` returns `202` and the scaffold co
 
 ## 7. Verification Plan
 
-1. `bun test tests/unit/team-gateway-server.test.ts tests/unit/team-gateway-jsonl.test.ts tests/unit/team-gateway-tenant.test.ts tests/unit/team-gateway-anthropic.test.ts` — routing, JSONL parsing/translation, registry + config seeding against temp dirs; Hermes and scaffold invoked through configurable binaries faked in tests.
+1. `bun test tests/unit/co-workspace-server.test.ts tests/unit/co-workspace-jsonl.test.ts tests/unit/co-workspace-tenant.test.ts tests/unit/co-workspace-anthropic.test.ts` — routing, JSONL parsing/translation, registry + config seeding against temp dirs; Hermes and scaffold invoked through configurable binaries faked in tests.
 2. `bun scripts/audit.ts` — root allowlist gate (with `services/` registered) and spec-check green.
 3. Service typecheck: `bun run typecheck` inside `services/team-gateway/`.
 4. Local smoke (live, executed 2026-09-27): start the server with `TEAM_GATEWAY_DATA_DIR` pointed at a scratch dir; `GET /health`; `POST /sessions {variant: co-consult}` → `ready`; assert the relocated project contains `.hermes/skills` (55 skills), `AGENTS.md`, and a seeded `HERMES_HOME` (`auth.json`/`.env` copied, generated `config.yaml` trusting only the tenant dir); `GET /v1/models`; native chat turn 1 answered via the live LLM (exit 0, session id captured, tokens recorded); native turn 2 verified named-thread continuity (same session id, memory of turn 1, cache-reuse on input tokens); `POST /v1/chat/completions` (`stream:false`) returned a proper completion with mapped usage; the Anthropic surface was verified live on the same tenant (`/v1/messages` streaming emitted the full six-event frame sequence; a remember-then-recall probe on one `metadata.user_id` key answered "77" across turns, sessions counter incremented per turn). The live LLM leg used the operator's local Hermes credentials; no secrets entered the repo.

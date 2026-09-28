@@ -79,6 +79,8 @@ export interface GatewayConfig {
    * Container isolation requires the hermes runtime (the other binaries are not in the image). */
   runtime: "hermes" | "antigravity" | "claude" | "codex";
   antigravityBin: string;
+  /** Interpreter prefix for antigravityBin — Windows CI passes ["bun"]. Production never sets it. */
+  antigravityBinPrefix?: string[];
   claudeBin: string;
   codexBin: string;
 }
@@ -201,6 +203,9 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
       ? (env.CO_WORKSPACE_RUNTIME as "antigravity" | "claude" | "codex")
       : "hermes",
     antigravityBin: env.CO_WORKSPACE_ANTIGRAVITY_BIN ?? "agy",
+    antigravityBinPrefix: env.CO_WORKSPACE_ANTIGRAVITY_BIN_PREFIX
+      ? env.CO_WORKSPACE_ANTIGRAVITY_BIN_PREFIX.split(" ")
+      : undefined,
     claudeBin: env.CO_WORKSPACE_CLAUDE_BIN ?? "claude",
     codexBin: env.CO_WORKSPACE_CODEX_BIN ?? "codex",
   };

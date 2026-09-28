@@ -1,6 +1,6 @@
 # Team Gateway Phase 2 Hardening Design — Auth, Quotas, Toolset Scoping, Container Isolation
 
-- **Spec id**: `2026-09-27-team-gateway-phase2-hardening`
+- **Spec id**: `2026-09-27-co-workspace-phase2-hardening`
 - **Date**: 2026-09-27
 - **Status**: Approved (Row 0 design; implementation lands in the same PR)
 - **Related**: ADR-0092 (Team Gateway — this implements its §10 Phase 2 roadmap), ADR-0074 (Universal Design Gate), ADR-0088 (Hermes platform support), T-20260927-019 (pinned-scaffold defect, unrelated but concurrent)
@@ -107,6 +107,6 @@ Post-#1138 additions recorded here (design credit: ADR-0092 Addendum 5):
 
 ## 10. References
 
-- ADR-0092 + `docs/designs/2026-09-27-team-gateway-service-design.md` (Phase 0 baseline, §10 roadmap)
+- ADR-0092 + `docs/designs/2026-09-27-co-workspace-service-design.md` (Phase 0 baseline, §10 roadmap)
 - Hermes CLI: `chat -t/--toolsets`, `egress` (iron-proxy, operator-side), `HERMES_ACCEPT_HOOKS`
 - Docker CLI: `run --rm -i --workdir -v -e` (isolation adapter contract)

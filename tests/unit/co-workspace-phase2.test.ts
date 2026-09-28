@@ -1,8 +1,7 @@
 /** Unit tests for Team Gateway Phase 2 hardening: auth, quotas, isolation adapter
- * (design 2026-09-27-team-gateway-phase2-hardening). */
+ * (design 2026-09-27-co-workspace-phase2-hardening). */
 
 import { afterAll, describe, expect, test } from "bun:test";
-const describe_ = process.platform === "win32" ? describe.skip : describe; // windows cannot exec shebang fake binaries (T-20260927-020 follow-up)
 import { chmodSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -14,7 +13,7 @@ import { createServer, createState } from "../../services/co-workspace/src/serve
 const cfgAuth = { apiKeys: ["sk-one", "sk-two"] };
 const req = (headers: Record<string, string>) => new Request("http://x/v1/models", { headers });
 
-describe_("auth — header styles, constant-time path, exemptions", () => {
+describe("auth — header styles, constant-time path, exemptions", () => {
   test("accepts Bearer, x-api-key, and x-goog-api-key headers", () => {
     expect(presentedCredential(req({ authorization: "Bearer sk-one" }))).toBe("sk-one");
     expect(presentedCredential(req({ "x-api-key": "sk-one" }))).toBe("sk-one");
@@ -46,7 +45,7 @@ describe_("auth — header styles, constant-time path, exemptions", () => {
   });
 });
 
-describe_("hermes spawn adapter — toolsets and container isolation", () => {
+describe("hermes spawn adapter — toolsets and container isolation", () => {
   const base: HermesSpawnOptions = {
     hermesBin: "hermes",
     projectDir: "/data/tenants/gw-x/project",
@@ -71,7 +70,7 @@ describe_("hermes spawn adapter — toolsets and container isolation", () => {
   });
 
   test("docker mode: ephemeral sibling container mounts only the tenant dirs", () => {
-    const argv = hermesSpawnArgv({ ...base, container: { image: "team-gateway-runtime:latest" } });
+    const argv = hermesSpawnArgv({ ...base, container: { image: "co-workspace-runtime:latest" } });
     expect(argv.slice(0, 4)).toEqual(["docker", "run", "--rm", "--interactive"]);
     expect(argv).toContain("--entrypoint");
     expect(argv[argv.indexOf("--entrypoint") + 1]).toBe("hermes");
@@ -83,7 +82,7 @@ describe_("hermes spawn adapter — toolsets and container isolation", () => {
     expect(argv[vIdx2 + 1]).toBe("/data/tenants/gw-x/hermes-home:/work/hermes-home");
     expect(argv).toContain("-e");
     expect(argv.filter((a) => a === "-v")).toHaveLength(2); // exactly two mounts, nothing else
-    expect(argv).toContain("team-gateway-runtime:latest");
+    expect(argv).toContain("co-workspace-runtime:latest");
     // inner command keeps its contract, with the in-container project path
     expect(argv).toContain("--continue");
     expect(argv[argv.indexOf("--in") + 1]).toBe("/work/project");
@@ -98,7 +97,12 @@ describe_("hermes spawn adapter — toolsets and container isolation", () => {
     expect(without.HERMES_SHARED_AUTH_DIR).toBeUndefined();
   });
 
-  test("docker probe verdicts on a fake docker binary", () => {
+  // The probe fakes are shebang shell scripts that Windows cannot exec — the
+  // whole-file win32 gate this suite previously had protected this test too
+  // (T-20260929-001 ported the hermes/agy spawn fakes; the docker probe stays
+  // platform-gated because dockerProbe execs the binary directly).
+  const probeTest = process.platform === "win32" ? test.skip : test;
+  probeTest("docker probe verdicts on a fake docker binary", () => {
     const dir = join(tmpdir(), `gw-probe-${crypto.randomUUID().slice(0, 8)}`);
     mkdirSync(dir, { recursive: true });
     const okBin = join(dir, "docker-ok");
@@ -114,7 +118,7 @@ describe_("hermes spawn adapter — toolsets and container isolation", () => {
   });
 });
 
-describe_("config — Phase 2 tiers", () => {
+describe("config — Phase 2 tiers", () => {
   test("auth/quotas/isolation parse with fail-fast on empty key config", () => {
     const cfg = loadConfig({
       CO_WORKSPACE_API_KEYS: "k1, k2",
@@ -143,7 +147,7 @@ describe_("config — Phase 2 tiers", () => {
   });
 });
 
-describe_("server — auth and quota enforcement", () => {
+describe("server — auth and quota enforcement", () => {
   const dataDir = join(tmpdir(), `gw-p2-${crypto.randomUUID().slice(0, 8)}`);
   const workspaceDir = join(tmpdir(), `gw-p2-ws-${crypto.randomUUID().slice(0, 8)}`);
   mkdirSync(join(workspaceDir, "scripts"), { recursive: true });
@@ -157,14 +161,15 @@ writeFileSync(\`Projects/\${name}/AGENTS.md\`, "# fake\\n");
   );
   const binDir = join(tmpdir(), `gw-p2-bin-${crypto.randomUUID().slice(0, 8)}`);
   mkdirSync(binDir, { recursive: true });
-  const hermesBin = join(binDir, "fake-hermes.sh");
+  const hermesBin = join(binDir, "fake-hermes.ts");
   writeFileSync(
     hermesBin,
-    `#!/bin/sh
-cat > /dev/null
-echo '{"type":"system","subtype":"init","model":"m","session_id":"s1","timestamp":1}'
-echo '{"type":"text","text":"pong","timestamp":2}'
-echo '{"type":"result","session_id":"s1","exit_code":0,"text":"pong","tokens":{"input":10,"output":5,"total":15},"duration_ms":3,"timestamp":3}'
+    // T-20260929-001: portable fake binary — bun runs the .ts directly on every OS
+    // (Windows Bun.spawn cannot exec shebang scripts).
+    `await Bun.stdin.text();
+console.log('{"type":"system","subtype":"init","model":"m","session_id":"s1","timestamp":1}');
+console.log('{"type":"text","text":"pong","timestamp":2}');
+console.log('{"type":"result","session_id":"s1","exit_code":0,"text":"pong","tokens":{"input":10,"output":5,"total":15},"duration_ms":3,"timestamp":3}');
 `,
   );
   chmodSync(hermesBin, 0o755);
@@ -175,6 +180,7 @@ echo '{"type":"result","session_id":"s1","exit_code":0,"text":"pong","tokens":{"
     CO_WORKSPACE_DATA_DIR: dataDir,
     CO_WORKSPACE_WORKSPACE_DIR: workspaceDir,
     HERMES_BIN: hermesBin,
+    HERMES_BIN_PREFIX: "bun", // T-20260929-001: portable fake runs via bun
     CO_WORKSPACE_API_KEYS: "sk-test",
     CO_WORKSPACE_TENANT_MAX_TURNS: "2",
   });

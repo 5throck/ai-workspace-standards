@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-09-28T17:02:31.137Z
+**Generated**: 2026-09-28T22:47:44.054Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -146,7 +146,7 @@
 | md-to-ooxml.ts | 1.2.0 | scripts/md-to-ooxml.ts | fs, path |
 | migrate-project.ts | 1.0.0 | scripts/migrate-project.ts | N/A |
 | migrate-quality-gates.ts | 1.1.0 | scripts/migrate-quality-gates.ts | fs, js-yaml, path |
-| new-project.ts | 1.32.0 | scripts/new-project.ts | N/A |
+| new-project.ts | 1.33.0 | scripts/new-project.ts | N/A |
 | procedure-coverage.ts | 1.0.0 | scripts/procedure-coverage.ts | js-yaml |
 | project-to-variant.ts | 1.5.0 | scripts/project-to-variant.ts | N/A |
 | promote-context-section.ts | 1.1.0 | scripts/promote-context-section.ts | N/A |
@@ -179,7 +179,7 @@
 | test-adopt-project.ts | 1.0.0 | scripts/test-adopt-project.ts | N/A |
 | test-extends-validator.ts | 1.0.1 | scripts/test-extends-validator.ts | fs, path |
 | test-l3-to-variant-promotion.ts | 1.6.0 | scripts/test-l3-to-variant-promotion.ts | bun |
-| test-new-project.ts | 1.8.0 | scripts/test-new-project.ts | bun, js-yaml |
+| test-new-project.ts | 1.9.0 | scripts/test-new-project.ts | bun, js-yaml |
 | test-platform-parity.ts | 0.4.0 | scripts/test-platform-parity.ts | fs, path |
 | test-runner.ts | 1.4.0 | scripts/test-runner.ts | fs, os, path |
 | test-scaffold-delivery-parity.ts | 1.0.0 | scripts/test-scaffold-delivery-parity.ts | N/A |

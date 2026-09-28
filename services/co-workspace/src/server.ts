@@ -314,6 +314,7 @@ async function runChat(
         return runAntigravityTurn(
           {
             agyBin: state.cfg.antigravityBin,
+            binPrefix: state.cfg.antigravityBinPrefix,
             projectDir: rec.projectDir,
             message,
             conversationId: rec.conversationId,
@@ -806,6 +807,18 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
         });
       }
       throw new HttpError(404, "login page not found");
+    }
+
+    // T-20260928-012: the demo app's pure helpers module (imported by the
+    // index.html module script). Same no-cache posture as the HTML pages.
+    if (req.method === "GET" && path === "/app-helpers.js") {
+      const helpersPath = resolve(SERVICE_ROOT, "web", "app-helpers.js");
+      if (existsSync(helpersPath)) {
+        return new Response(readFileSync(helpersPath, "utf8"), {
+          headers: { "content-type": "text/javascript; charset=utf-8", "cache-control": "no-cache" },
+        });
+      }
+      throw new HttpError(404, "app helpers not found");
     }
 
     if (req.method === "GET" && path === "/health") {

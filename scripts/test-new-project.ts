@@ -2,9 +2,11 @@
 /**
  * test-new-project.ts — E2E Test for new-project.ts
  *
- * @version 1.8.0
- * @last_updated 2026-09-27
+ * @version 1.9.0
+ * @last_updated 2026-09-29
  *
+ * v1.9.0 (2026-09-29, T-20260929-002): Test 4 also asserts the initial
+ *         scaffold commit (HEAD exists) seeded by new-project.ts v1.33.0.
  * v1.8.0 (2026-09-27, ADR-0093 — spec
  *         docs/designs/2026-09-27-hermes-md-instruction-file-design.md):
  *         Test 8 hermes branch asserts HERMES.md present (platform=all too);
@@ -346,7 +348,14 @@ try {
       if (!hooksPath.includes('.githooks')) {
         fail('Test 4', `core.hooksPath = "${hooksPath}" (expected .githooks)`);
       } else {
-        pass('Test 4 PASSED: git init + core.hooksPath configured');
+        // T-20260929-002: the scaffold seeds an initial commit — zero-commit
+        // scaffolds abort upgrade-project (T-20260921-001 class).
+        const head = await $`git -C ${testDir} rev-parse --verify HEAD`.nothrow();
+        if (head.exitCode !== 0) {
+          fail('Test 4', 'no initial scaffold commit (HEAD missing)');
+        } else {
+          pass('Test 4 PASSED: git init + core.hooksPath configured + initial commit present');
+        }
       }
     }
   } catch (e) { fail('Test 4', String(e)); }

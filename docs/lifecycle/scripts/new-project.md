@@ -3,10 +3,10 @@
 ## Metadata
 
 - **Current Phase**: production
-- **Version**: 1.32.0
+- **Version**: 1.33.0
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-09-27
-- **Last Reviewer**: pm
+- **Last Updated**: 2026-09-29
+- **Last Reviewer**: automation-engineer
 - **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort. The duplicate Metadata section (a v1.10.0-era leftover) was merged into this single section on 2026-09-16.
 
 ## Created
@@ -41,6 +41,7 @@
 | 2026-09-25 | production | production | v1.30.0 (ADR-0088 W2): `--platform hermes` profile — hermes-primary keeps `.hermes/`, drops legacy twins; other profiles hermes-opt-out | automation-engineer |
 | 2026-09-27 | production | production | v1.31.0 (ADR-0093): hermes profile delivers HERMES.md (Hermes-specific behavioral instruction file, common-owned) — `hermes`/`all` keep it, other profiles prune it alongside `.hermes/`. Spec: docs/designs/2026-09-27-hermes-md-instruction-file-design.md | automation-engineer |
 | 2026-09-27 | production | production | v1.32.0 (T-20260927-019): pinned variant detection repaired — getValidVariants used `git archive <tag> --list` (invalid syntax; every --version scaffold failed); replaced with `git ls-tree -r --name-only <tag> -- templates/`. Live-verified via pinned gateway scaffold (template-v0.7.0). | automation-engineer |
+| 2026-09-29 | production | production | v1.33.0 (T-20260929-002): §9.5 seeds the initial scaffold commit (`chore: initial scaffold (new-project)`) — zero-commit scaffolds abort upgrade-project (T-20260921-001 class); the seed commit satisfies the scaffolded pre-commit sync-context contract with a single-use nonce. §5a hashes README via verify-readme-sync's own computeContentHash (local strip kept the frontmatter's trailing newline — stale-by-construction hashes) and stamps the Last Updated date so the hook auto-date is a no-op. E2E Test 4 asserts HEAD exists (test-new-project 1.9.0). | automation-engineer |
 
 ## Acceptance Criteria
 

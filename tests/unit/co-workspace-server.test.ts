@@ -5,7 +5,6 @@
  */
 
 import { afterAll, describe, expect, test } from "bun:test";
-const describe_ = process.platform === "win32" ? describe.skip : describe; // windows cannot exec shebang fake binaries (T-20260927-020 follow-up)
 import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -13,7 +12,7 @@ import { loadConfig } from "../../services/co-workspace/src/config";
 import { createServer, createState, handleRequest, hostSidePath } from "../../services/co-workspace/src/server";
 
 function tempDir(): string {
-  return join(tmpdir(), `team-gateway-srv-${crypto.randomUUID().slice(0, 8)}`);
+  return join(tmpdir(), `co-workspace-srv-${crypto.randomUUID().slice(0, 8)}`);
 }
 
 const FAKE_SCAFFOLD = `import { mkdirSync, writeFileSync } from "node:fs";
@@ -25,14 +24,17 @@ writeFileSync(\`Projects/\${name}/package.json\`, "{}\\n");
 writeFileSync(\`Projects/\${name}/.hermes/skills/demo.md\`, "---\\nname: demo\\n---\\n");
 `;
 
-const FAKE_HERMES = `#!/bin/sh
-printf '%s\\n' "$*" >> "$HERMES_HOME/last-args.txt"
-cat > /dev/null
-echo '{"type":"system","subtype":"init","model":"fake-model","session_id":"sess-1","timestamp":1}'
-echo '{"type":"tool_use","name":"read_file","tool_call_id":"t1","timestamp":2}'
-echo '{"type":"tool_result","name":"read_file","tool_call_id":"t1","output":"ok","duration_ms":3,"is_error":false,"timestamp":3}'
-echo '{"type":"text","text":"Hello from fake hermes","timestamp":4}'
-echo '{"type":"result","session_id":"sess-1","exit_code":0,"text":"Hello from fake hermes","tokens":{"input":11,"output":7,"total":18},"duration_ms":5,"timestamp":5}'
+const FAKE_HERMES = `// T-20260929-001: portable fake binary — bun runs the .ts directly on every OS
+// (Windows Bun.spawn cannot exec shebang scripts).
+import { appendFileSync } from "node:fs";
+const argv = process.argv.slice(2);
+if (process.env.HERMES_HOME) appendFileSync(process.env.HERMES_HOME + "/last-args.txt", argv.join(" ") + "\\n");
+await Bun.stdin.text();
+console.log('{"type":"system","subtype":"init","model":"fake-model","session_id":"sess-1","timestamp":1}')
+console.log('{"type":"tool_use","name":"read_file","tool_call_id":"t1","timestamp":2}')
+console.log('{"type":"tool_result","name":"read_file","tool_call_id":"t1","output":"ok","duration_ms":3,"is_error":false,"timestamp":3}')
+console.log('{"type":"text","text":"Hello from fake hermes","timestamp":4}')
+console.log('{"type":"result","session_id":"sess-1","exit_code":0,"text":"Hello from fake hermes","tokens":{"input":11,"output":7,"total":18},"duration_ms":5,"timestamp":5}')
 `;
 
 const dataDir = tempDir();
@@ -43,7 +45,7 @@ mkdirSync(seedHome, { recursive: true });
 writeFileSync(join(workspaceDir, "scripts", "new-project.ts"), FAKE_SCAFFOLD);
 const hermesBinDir = tempDir();
 mkdirSync(hermesBinDir, { recursive: true });
-const hermesBin = join(hermesBinDir, "fake-hermes.sh");
+const hermesBin = join(hermesBinDir, "fake-hermes.ts");
 writeFileSync(hermesBin, FAKE_HERMES);
 chmodSync(hermesBin, 0o755);
 writeFileSync(join(seedHome, "auth.json"), '{"seeded":true}');
@@ -55,6 +57,7 @@ const cfg = loadConfig({
   CO_WORKSPACE_WORKSPACE_DIR: workspaceDir,
   CO_WORKSPACE_VARIANTS: "co-consult,co-develop",
   HERMES_BIN: hermesBin,
+  HERMES_BIN_PREFIX: "bun", // T-20260929-001: portable fake runs via bun
   CO_WORKSPACE_HERMES_SEED_HOME: seedHome,
 });
 
@@ -82,7 +85,7 @@ afterAll(() => {
   server.stop(true);
 });
 
-describe_("gateway server — basic routes", () => {
+describe("gateway server — basic routes", () => {
   test("GET /health reports config without secrets", async () => {
     const res = await fetch(`${base}/health`);
     expect(res.status).toBe(200);
@@ -90,6 +93,14 @@ describe_("gateway server — basic routes", () => {
     expect(body.ok).toBe(true);
     expect(body.variants).toEqual(["co-consult", "co-develop"]);
     expect(JSON.stringify(body)).not.toContain("SECRET");
+  });
+
+  test("GET /app-helpers.js serves the extracted pure helpers (T-20260928-012)", async () => {
+    const res = await fetch(`${base}/app-helpers.js`);
+    expect(res.status).toBe(200);
+    expect(res.headers.get("content-type")).toContain("text/javascript");
+    expect(res.headers.get("cache-control")).toContain("no-cache");
+    expect(await res.text()).toContain("prepareDonutSlices");
   });
 
   test("GET /v1/models exposes the variant allowlist", async () => {
@@ -129,7 +140,12 @@ describe_("gateway server — basic routes", () => {
     state.registry.delete(evil.tenantId);
   });
 
-  test("hostSidePath remaps dataDir-prefixed record paths onto the host root", () => {
+  // POSIX path literals with exact-string assertions — hostSidePath output goes
+  // through path.join, so the pinned strings cannot hold on win32 (docker
+  // isolation itself is a Linux-host deployment; the whole-file win32 gate this
+  // suite previously had shielded this test — T-20260929-001 un-gating exposed it).
+  const hostPathTest = process.platform === "win32" ? test.skip : test;
+  hostPathTest("hostSidePath remaps dataDir-prefixed record paths onto the host root", () => {
     const cfg = { dataDir: "/data", dataDirHost: "/host/root" };
     expect(hostSidePath(cfg, "/data/storage/techcross/x/project")).toBe("/host/root/storage/techcross/x/project");
     expect(hostSidePath(cfg, "/data/tenants/users.db")).toBe("/host/root/tenants/users.db");
@@ -155,7 +171,7 @@ describe_("gateway server — basic routes", () => {
   });
 });
 
-describe_("gateway server — native provisioning and chat", () => {
+describe("gateway server — native provisioning and chat", () => {
   test("POST /sessions provisions a tenant asynchronously; project is relocated and seeded", async () => {
     const res = await fetch(`${base}/sessions`, {
       method: "POST",
@@ -292,7 +308,7 @@ describe_("gateway server — native provisioning and chat", () => {
   });
 });
 
-describe_("gateway server — OpenAI wire surface", () => {
+describe("gateway server — OpenAI wire surface", () => {
   test("stream=false returns a single completion with mapped usage", async () => {
     const res = await fetch(`${base}/v1/chat/completions`, {
       method: "POST",
@@ -347,7 +363,7 @@ describe_("gateway server — OpenAI wire surface", () => {
   });
 });
 
-describe_("handleRequest — direct invocation shares the same state", () => {
+describe("handleRequest — direct invocation shares the same state", () => {
   test("health via handleRequest without a socket", async () => {
     const res = await handleRequest(state, new Request(`${base}/health`));
     expect(res.status).toBe(200);

@@ -1577,9 +1577,9 @@
       "last_updated": "2026-09-26"
     },
     {
-      "id": "2026-09-27-team-gateway-service-design",
+      "id": "2026-09-27-co-workspace-service-design",
       "title": "team gateway service design",
-      "file": "docs/designs/2026-09-27-team-gateway-service-design.md",
+      "file": "docs/designs/2026-09-27-co-workspace-service-design.md",
       "status": "implemented",
       "source": "manual",
       "created": "2026-09-27",
@@ -1604,9 +1604,9 @@
       "last_updated": "2026-09-27"
     },
     {
-      "id": "2026-09-27-team-gateway-phase2-hardening-design",
+      "id": "2026-09-27-co-workspace-phase2-hardening-design",
       "title": "team gateway phase2 hardening design",
-      "file": "docs/designs/2026-09-27-team-gateway-phase2-hardening-design.md",
+      "file": "docs/designs/2026-09-27-co-workspace-phase2-hardening-design.md",
       "status": "implemented",
       "source": "manual",
       "created": "2026-09-27",
@@ -1649,9 +1649,9 @@
       "last_updated": "2026-09-28"
     },
     {
-      "id": "2026-09-27-team-gateway-qa-fair-and-security-review",
+      "id": "2026-09-27-co-workspace-qa-fair-and-security-review",
       "title": "team gateway qa fair and security review",
-      "file": "docs/designs/2026-09-27-team-gateway-qa-fair-and-security-review.md",
+      "file": "docs/designs/2026-09-27-co-workspace-qa-fair-and-security-review.md",
       "status": "implemented",
       "source": "manual",
       "created": "2026-09-28",

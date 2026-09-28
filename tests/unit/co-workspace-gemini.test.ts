@@ -1,7 +1,6 @@
 /** Unit tests for the Team Gateway Gemini wire translation (Antigravity/Gemini ecosystem). */
 
 import { afterAll, describe, expect, test } from "bun:test";
-const describe_ = process.platform === "win32" ? describe.skip : describe; // windows cannot exec shebang fake binaries (T-20260927-020 follow-up)
 import { chmodSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -14,7 +13,7 @@ import {
 import { loadConfig } from "../../services/co-workspace/src/config";
 import { createServer, createState } from "../../services/co-workspace/src/server";
 
-describe_("parseGeminiRequest — generateContent shape", () => {
+describe("parseGeminiRequest — generateContent shape", () => {
   test("extracts the latest user turn from contents[].parts", () => {
     const parsed = parseGeminiRequest({
       contents: [
@@ -51,7 +50,7 @@ describe_("parseGeminiRequest — generateContent shape", () => {
   });
 });
 
-describe_("Gemini wire payloads", () => {
+describe("Gemini wire payloads", () => {
   test("generateContent envelope shape", () => {
     const payload = generateContentPayload("answer", {
       promptTokenCount: 10,
@@ -83,9 +82,9 @@ describe_("Gemini wire payloads", () => {
   });
 });
 
-describe_("gateway server — Gemini surface", () => {
-  const dataDir = join(tmpdir(), `team-gateway-gemini-${crypto.randomUUID().slice(0, 8)}`);
-  const workspaceDir = join(tmpdir(), `team-gateway-gemini-ws-${crypto.randomUUID().slice(0, 8)}`);
+describe("gateway server — Gemini surface", () => {
+  const dataDir = join(tmpdir(), `co-workspace-gemini-${crypto.randomUUID().slice(0, 8)}`);
+  const workspaceDir = join(tmpdir(), `co-workspace-gemini-ws-${crypto.randomUUID().slice(0, 8)}`);
   mkdirSync(join(workspaceDir, "scripts"), { recursive: true });
   writeFileSync(
     join(workspaceDir, "scripts", "new-project.ts"),
@@ -95,16 +94,17 @@ mkdirSync(\`Projects/\${name}/.hermes/skills\`, { recursive: true });
 writeFileSync(\`Projects/\${name}/AGENTS.md\`, "# fake tenant\\n");
 `,
   );
-  const hermesBinDir = join(tmpdir(), `team-gateway-gemini-bin-${crypto.randomUUID().slice(0, 8)}`);
+  const hermesBinDir = join(tmpdir(), `co-workspace-gemini-bin-${crypto.randomUUID().slice(0, 8)}`);
   mkdirSync(hermesBinDir, { recursive: true });
-  const hermesBin = join(hermesBinDir, "fake-hermes.sh");
+  const hermesBin = join(hermesBinDir, "fake-hermes.ts");
   writeFileSync(
     hermesBin,
-    `#!/bin/sh
-cat > /dev/null
-echo '{"type":"system","subtype":"init","model":"fake-model","session_id":"sess-g","timestamp":1}'
-echo '{"type":"text","text":"Hello from fake hermes","timestamp":2}'
-echo '{"type":"result","session_id":"sess-g","exit_code":0,"text":"Hello from fake hermes","tokens":{"input":11,"output":7,"total":18},"duration_ms":5,"timestamp":3}'
+    // T-20260929-001: portable fake binary — bun runs the .ts directly on every OS
+    // (Windows Bun.spawn cannot exec shebang scripts).
+    `await Bun.stdin.text();
+console.log('{"type":"system","subtype":"init","model":"fake-model","session_id":"sess-g","timestamp":1}');
+console.log('{"type":"text","text":"Hello from fake hermes","timestamp":2}');
+console.log('{"type":"result","session_id":"sess-g","exit_code":0,"text":"Hello from fake hermes","tokens":{"input":11,"output":7,"total":18},"duration_ms":5,"timestamp":3}');
 `,
   );
   chmodSync(hermesBin, 0o755);
@@ -116,6 +116,7 @@ echo '{"type":"result","session_id":"sess-g","exit_code":0,"text":"Hello from fa
     CO_WORKSPACE_WORKSPACE_DIR: workspaceDir,
     CO_WORKSPACE_VARIANTS: "co-consult",
     HERMES_BIN: hermesBin,
+    HERMES_BIN_PREFIX: "bun", // T-20260929-001: portable fake runs via bun
   });
   const server = createServer(createState(cfg));
   const base = `http://127.0.0.1:${server.port}`;

@@ -1,5 +1,5 @@
 /**
- * Phase 2 authentication (design 2026-09-27-team-gateway-phase2-hardening, D1).
+ * Phase 2 authentication (design 2026-09-27-co-workspace-phase2-hardening, D1).
  * Bearer-key auth for every non-exempt route. Keys come from `CO_WORKSPACE_API_KEYS`;
  * an empty pool keeps the Phase 0 localhost mode (auth disabled, startup warns).
  * Comparison hashes both sides (SHA-256) before a constant-time compare — no length,

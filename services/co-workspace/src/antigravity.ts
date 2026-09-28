@@ -14,6 +14,8 @@ import { allowlistedEnv } from "./hermes";
 
 export interface AntigravitySpawnOptions {
   agyBin: string;
+  /** Interpreter prefix for agyBin — Windows CI passes ["bun"]. Production never sets it. */
+  binPrefix?: string[];
   projectDir: string;
   message: string;
   /** Previous conversation id for this tenant; when set, resumes it via `--conversation`. */
@@ -25,6 +27,7 @@ export interface AntigravitySpawnOptions {
 
 export function agyArgs(o: AntigravitySpawnOptions): string[] {
   const args = [
+    ...(o.binPrefix ?? []),
     o.agyBin,
     "-p",
     o.message,

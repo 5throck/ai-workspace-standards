@@ -1,5 +1,17 @@
 #!/usr/bin/env bun
-// @version 1.32.0
+// @version 1.33.0
+// v1.33.0 (2026-09-29, T-20260929-002): initial scaffold commit — after setup,
+// a fresh scaffold with zero commits is seeded with `chore: initial scaffold
+// (new-project)` (upgrade-project aborts on zero-commit targets, T-20260921-001
+// class; gateway tenants inherit the fix through the new-project subprocess).
+// The seed commit satisfies the scaffolded pre-commit hook's sync-context
+// contract with a fresh single-use nonce (pipeline-equivalent: the post-
+// scaffold audit has just run). Same ticket: §5a now hashes via
+// verify-readme-sync's own computeContentHash — the locally-duplicated strip
+// kept the frontmatter's trailing newline and hashed a different body, so
+// every scaffold shipped a stale-by-construction content_hash (the blocked
+// seed commit surfaced it). Idempotent and non-fatal on hook refusal (tree
+// stays staged, manual retry hint printed).
 // v1.32.0 (2026-09-27, T-20260927-019): pinned variant detection repaired — getValidVariants
 // listed the tag tree via `git archive <tag> --list`, which git rejects outright ("extra
 // command line parameter"), so EVERY `--version` scaffold failed even with a valid tag.
@@ -158,13 +170,15 @@
 
 import {
   existsSync, mkdirSync, rmSync, readdirSync, statSync,
-  readFileSync, writeFileSync, copyFileSync, appendFileSync, chmodSync, mkdtempSync,
+  readFileSync, writeFileSync, copyFileSync, appendFileSync, chmodSync, mkdtempSync, unlinkSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { createHash } from 'node:crypto';
+import { randomUUID } from 'node:crypto';
 import { resolve, join, dirname, basename, relative } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { applyContextTemplate, DEFAULT_PM_ROLE_DESCRIPTIONS } from './helpers/template-utils.ts';
+import { computeContentHash } from './verify-readme-sync.ts';
+import { localDateISO } from './lib/local-date.ts';
 import { rollbackPartialProject } from './helpers/rollback-partial-project.ts';
 import { blankL0Refs } from './helpers/l0-ref-policy.ts';
 import { resolveProvenanceVersion } from './helpers/template-version.ts';
@@ -1255,19 +1269,31 @@ if (existsSync(gitattributes)) {
   writeFileSync(gitattributes, 'docs/context.md merge=ours\n');
 }
 
-// ── 5a. Refresh README hashes (v1.24.0, T-20260921-002) ──────────────────────
+// ── 5a. Refresh README hashes (v1.24.0, T-20260921-002; v1.33.0 T-20260929-002) ──
 // Placeholder substitution rewrites README.md after the template recorded its
 // content_hash, and README_ko.md's translated_from_hash goes stale with it —
-// the project's very first /sync then fails verify-readme-sync twice. Refresh
-// both hashes now, from the FINAL substituted bodies.
+// the project's very first verify-readme-sync run then fails. Refresh both
+// hashes now from the FINAL body — via verify-readme-sync's OWN
+// computeContentHash. The v1.24.0..v1.32.0 locally-duplicated strip kept the
+// frontmatter's trailing newline while the checker consumes it, so every
+// scaffold shipped a stale-by-construction hash. The delivered README also
+// carries the template's Last Updated date — stamped to the scaffold date
+// here, so the pre-commit hook's Last Updated auto-date (which fires on the
+// seed commit) is a same-value no-op instead of mutating the body after the
+// hash below is recorded (surfaced by the T-20260929-002 seed commit).
 {
-  const strip = (t: string): string => t.replace(/^---\r?\n[\s\S]*?\r?\n---/, '');
-  const bodyHash = (t: string): string => createHash('sha256').update(strip(t), 'utf-8').digest('hex');
   const enPath = join(projectDir, 'README.md');
   const koPath = join(projectDir, 'README_ko.md');
   if (existsSync(enPath)) {
+    const today = localDateISO();
+    for (const p of [enPath, koPath]) {
+      if (!existsSync(p)) continue;
+      const before = readFileSync(p, 'utf-8');
+      const after = before.replace(/(Last Updated:) \d{4}-\d{2}-\d{2}/g, `$1 ${today}`);
+      if (after !== before) writeFileSync(p, after, 'utf-8');
+    }
+    const h = computeContentHash(enPath);
     const en = readFileSync(enPath, 'utf-8');
-    const h = bodyHash(en);
     const updated = /^content_hash:/m.test(en)
       ? en.replace(/^content_hash:\s*.+$/m, `content_hash: ${h}`)
       : en.replace(/^(---\r?\n[\s\S]*?)(---)/m, `$1content_hash: ${h}\n$2`);
@@ -1726,6 +1752,43 @@ if (existsSync(setupTs)) {
   // Pass relative path to bash to avoid Windows path separator issues
   const result = spawnSync('bash', ['scripts/setup.sh'], { stdio: 'inherit', cwd: projectDir });
   if (result.status !== 0) console.log("\n⚠️  Setup encountered an error — run 'bash scripts/setup.sh' manually to retry.");
+}
+
+// ── 9.5. Initial scaffold commit (T-20260929-002) ─────────────────────────────
+// A scaffold with zero commits is invisible to fleet git operations and
+// upgrade-project aborts on it (T-20260921-001 class). Seed the repo with the
+// scaffold result. The scaffolded pre-commit hook verifies the sync-context
+// pair (a nonce file at the repo root matching DEV_SYNC_CONTEXT) before any
+// commit lands — the same contract dev-sync satisfies for every pipeline
+// commit. The seed commit is pipeline-equivalent (the post-scaffold audit in
+// section 8 has just run), so it satisfies that contract with a fresh
+// single-use nonce, removed after the commit. Non-fatal: an identity or hook
+// failure leaves the tree staged for a manual first commit.
+const initialHeadCheck = spawnSync('git', ['rev-parse', '--verify', 'HEAD'], { cwd: projectDir, stdio: 'pipe' });
+if (initialHeadCheck.status !== 0) {
+  console.log('\nCreating the initial scaffold commit…');
+  spawnSync('git', ['add', '-A'], { stdio: 'inherit', cwd: projectDir });
+  const syncContext = randomUUID();
+  const contextFileName = `.sync_context.${syncContext}.tmp`;
+  const contextFilePath = join(projectDir, contextFileName);
+  writeFileSync(contextFilePath, syncContext);
+  const initialCommit = spawnSync('git', ['commit', '-m', 'chore: initial scaffold (new-project)'], {
+    stdio: 'inherit',
+    cwd: projectDir,
+    env: {
+      ...process.env,
+      SYNC_ACTIVE: '1',
+      DEV_SYNC_CONTEXT: syncContext,
+      DEV_SYNC_CONTEXT_FILE: contextFilePath,
+    },
+  });
+  try { unlinkSync(contextFilePath); } catch { /* already removed */ }
+  if (initialCommit.status !== 0) {
+    console.log('  ⚠️  Initial commit did not land (pre-commit hook or git identity) — files are staged.');
+    console.log(`       Manual retry: cd "${projectDir}" && git commit -m "chore: initial scaffold"`);
+  } else {
+    console.log('  ✅ Initial scaffold commit created');
+  }
 }
 
 // ── 10. Final banner ──────────────────────────────────────────────────────────

@@ -47,4 +47,4 @@ The workspace's project-creation engine (`scripts/new-project.ts`, v1.30+) is E2
 
 - `scripts/new-project.ts` (engine usage, flags, gates, rollback), `docs/lifecycle/scripts/new-project.md`
 - `skills/create-variant/SKILL.md`, `skills/adopt-project/SKILL.md`, `skills/upgrade-project/SKILL.md` (boundary siblings)
-- `docs/designs/2026-09-27-team-gateway-service-design.md` (live smoke evidence for unattended engine use), T-20260927-011 (dead reference removal), T-20260927-019 (pinning defect)
+- `docs/designs/2026-09-27-co-workspace-service-design.md` (live smoke evidence for unattended engine use), T-20260927-011 (dead reference removal), T-20260927-019 (pinning defect)
