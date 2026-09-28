@@ -66,7 +66,7 @@ export function generateContentPayload(content: string, usage: {
       },
     ],
     usageMetadata: usage,
-    modelVersion: "team-gateway",
+    modelVersion: "co-workspace",
   };
 }
 
@@ -105,7 +105,7 @@ export function geminiStream(): GeminiStreamHandles {
           candidatesTokenCount: outputTokens,
           totalTokenCount: inputTokens + outputTokens,
         },
-        modelVersion: "team-gateway",
+        modelVersion: "co-workspace",
       }),
     ],
   };
