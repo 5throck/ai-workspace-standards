@@ -8,7 +8,7 @@
  */
 
 import { chownSync, copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { join, resolve, sep } from "node:path";
 import { dockerProbe, GatewayConfig, loadConfig, readKeysFile, SERVICE_ROOT } from "./config";
 import { credentialValid, presentedCredential, principalFor, requestAuthorized } from "./auth";
 import { scaffoldProject } from "./scaffold";
@@ -910,11 +910,20 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
       state.turns.deleteTenant(tenantId);
       const deleted = state.registry.delete(tenantId);
       if (deleted) {
+        // T-20260928-003 (defense-in-depth): a tampered/legacy record must never point any
+        // rmSync below outside the tenant storage root — validate BEFORE removing anything.
+        // (The projectDir rmSync alone could otherwise wipe <storage> itself when a forged
+        // record points projectDir at the storage root.)
+        const tenantFolder = resolve(deleted.projectDir, "..");
+        const storageRoot = resolve(state.cfg.dataDir, "storage");
+        if (!tenantFolder.startsWith(storageRoot + sep) || !resolve(deleted.hermesHome).startsWith(tenantFolder + sep)) {
+          throw new HttpError(500, `refusing to delete: tenant folder ${tenantFolder} escapes ${storageRoot}`);
+        }
         rmSync(deleted.projectDir, { recursive: true, force: true });
         rmSync(deleted.hermesHome, { recursive: true, force: true });
         // Remove the tenant's storage folder (<storage>/<principal>/<name>) — it only ever
         // contains the two dirs above, so this clears the empty shell left behind.
-        rmSync(join(deleted.projectDir, ".."), { recursive: true, force: true });
+        rmSync(tenantFolder, { recursive: true, force: true });
         state.audit.record(callerPrincipal(state, req) ?? "anonymous", "tenant.delete", tenantId, deleted.variant);
       }
       return jsonResponse({ deleted: tenantId, name: deleted?.name ?? null });
