@@ -218,6 +218,14 @@ async function cachedDirSize(tenantId: string, projectDir: string, hermesHome: s
   return bytes;
 }
 
+/** Host-side equivalent of a container path under <dataDir> (docker isolation mounts must
+ * resolve on the host — CO_WORKSPACE_DATA_DIR_HOST). Undefined when dataDirHost is unset. */
+export function hostSidePath(cfg: GatewayConfig, absPath: string): string | undefined {
+  if (!cfg.dataDirHost) return undefined;
+  const rel = absPath.slice(cfg.dataDir.length);
+  return join(cfg.dataDirHost, rel);
+}
+
 /** OpenAI-surface lazy tenant: find by key, or create and start provisioning. */
 export function getOrStartTenant(
   state: GatewayState,
@@ -347,12 +355,12 @@ async function runChat(
             state.cfg.isolation === "docker"
               ? {
                   image: state.cfg.runtimeImage,
-                  hostProjectDir: state.cfg.dataDirHost
-                    ? join(state.cfg.dataDirHost, "tenants", rec.tenantId, "project")
-                    : undefined,
-                  hostHermesHome: state.cfg.dataDirHost
-                    ? join(state.cfg.dataDirHost, "tenants", rec.tenantId, "hermes-home")
-                    : undefined,
+                  // Host-side equivalents of the tenant's container paths: record paths live
+                  // under <dataDir>/…, remap the prefix onto dataDirHost. (The old
+                  // `tenants/<id>/…` hardcode mounted empty dirs — per-user storage moved
+                  // tenant files under storage/<principal>/<project>.)
+                  hostProjectDir: hostSidePath(state.cfg, rec.projectDir),
+                  hostHermesHome: hostSidePath(state.cfg, rec.hermesHome),
                   hostAuthDir: state.cfg.hermesAuthDirHost
                     ?? (state.cfg.dataDirHost
                       ? join(state.cfg.dataDirHost, "shared-auth")

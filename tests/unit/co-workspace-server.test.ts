@@ -10,7 +10,7 @@ import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "n
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { loadConfig } from "../../services/co-workspace/src/config";
-import { createServer, createState, handleRequest } from "../../services/co-workspace/src/server";
+import { createServer, createState, handleRequest, hostSidePath } from "../../services/co-workspace/src/server";
 
 function tempDir(): string {
   return join(tmpdir(), `team-gateway-srv-${crypto.randomUUID().slice(0, 8)}`);
@@ -103,6 +103,13 @@ describe_("gateway server — basic routes", () => {
     expect(page.headers.get("content-type")).toContain("text/html");
     const missing = await fetch(`${base}/nope`, { method: "POST" });
     expect(missing.status).toBe(404);
+  });
+
+  test("hostSidePath remaps dataDir-prefixed record paths onto the host root", () => {
+    const cfg = { dataDir: "/data", dataDirHost: "/host/root" };
+    expect(hostSidePath(cfg, "/data/storage/techcross/x/project")).toBe("/host/root/storage/techcross/x/project");
+    expect(hostSidePath(cfg, "/data/tenants/users.db")).toBe("/host/root/tenants/users.db");
+    expect(hostSidePath({ dataDir: "/data" }, "/data/x")).toBeUndefined();
   });
 
   test("HTML pages force revalidation so redeploys are picked up", async () => {
