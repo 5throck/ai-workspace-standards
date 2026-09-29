@@ -12,7 +12,7 @@ import { basename, dirname, join, resolve, sep } from "node:path";
 import { dockerProbe, GatewayConfig, loadConfig, readKeysFile, resolveLlmProviderKey, resolveLlmProviderName, SERVICE_ROOT } from "./config";
 import { credentialValid, presentedCredential, principalFor, requestAuthorized } from "./auth";
 import { scaffoldProject } from "./scaffold";
-import { chownTree, publicTenant, recordProgress, recordTurnUsage, seedHermesHome, sweepTenantStragglers, tenantConfigYaml, TenantRecord } from "./tenant";
+import { chownTree, publicTenant, recordProgress, recordTurnUsage, seedHermesHome, sweepTenantStragglers, tenantConfigYaml, TenantRecord, writeTenantConfig } from "./tenant";
 import { TenantRegistry } from "./registry-db";
 import { listTenantFiles, readTenantFile, TurnStore } from "./tenant-files";
 import {
@@ -347,7 +347,7 @@ async function runChat(
       // (no provider key) the stamp carries NO provider lines — stamping `provider: custom`
       // unconditionally would break the OAuth/shared-store tenants.
       const providerKey = resolveLlmProviderKey(state.cfg);
-      writeFileSync(
+      writeTenantConfig(
         join(rec.hermesHome, "config.yaml"),
         tenantConfigYaml(
           rec.projectDir,

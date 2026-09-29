@@ -4,7 +4,7 @@
  * carries the ADR-0088 D7 trust posture scoped to the tenant project directory.
  */
 
-import { chownSync, copyFileSync, existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { chmodSync, chownSync, copyFileSync, existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { genId, readJson, writeJson } from "./util";
 
@@ -99,6 +99,27 @@ export function tenantPaths(dataDir: string) {
   return { tenantsDir, registryPath: join(tenantsDir, "registry.json") };
 }
 
+/** YAML double-quoted scalar (JSON strings are valid YAML). Newlines/CR are rejected outright. */
+function yamlScalar(field: string, value: string): string {
+  if (/[\r\n]/.test(value)) throw new Error(`tenant config: ${field} must not contain newline characters`);
+  return JSON.stringify(value);
+}
+
+/** Provider names stay bare for ordinary identifiers (unchanged output); anything else is quoted. */
+function providerScalar(v: string): string {
+  const q = yamlScalar("provider", v);
+  return /^[A-Za-z0-9_.-]+$/.test(v) ? v : q;
+}
+
+/** Writes the tenant config.yaml (it carries the provider key) owner-only. The mode applies to
+ * new files; an existing file is chmod'ed. Ownership is untouched: in docker mode chownTree
+ * hands the file to uid 10000 (its 0600 owner, the uid that runs the turn); per-turn rewrites
+ * keep that owner. */
+export function writeTenantConfig(path: string, content: string): void {
+  writeFileSync(path, content, { mode: 0o600 });
+  try { chmodSync(path, 0o600); } catch { /* best effort (not owner) */ }
+}
+
 export function tenantConfigYaml(
   projectDir: string,
   model?: string,
@@ -122,19 +143,19 @@ export function tenantConfigYaml(
   }
   if (model || opts?.providerName || opts?.providerBaseUrl) {
     lines.push("# Model routing stamped by the gateway (CO_WORKSPACE_HERMES_MODEL / CO_WORKSPACE_LLM_*).", "model:");
-    if (model) lines.push(`  default: "${model}"`);
+    if (model) lines.push(`  default: ${yamlScalar("model", model)}`);
     if (opts?.providerName || opts?.providerBaseUrl) {
-      lines.push(`  provider: ${opts?.providerName || "custom"}`);
+      lines.push(`  provider: ${providerScalar(opts?.providerName || "custom")}`);
     }
     if (opts?.providerBaseUrl) {
-      lines.push(`  base_url: "${opts.providerBaseUrl}"`);
+      lines.push(`  base_url: ${yamlScalar("base_url", opts.providerBaseUrl)}`);
     }
     // Live-verified 2026-09-29: hermes agent turns resolve the provider key through the
     // profile secret scope, which deliberately does NOT borrow the ambient env — the key
     // must live in the tenant config (a sibling turn with only the env key 401'd with a
     // placeholder while the config-stamped key authenticated).
     if (opts?.providerApiKey) {
-      lines.push(`  api_key: "${opts.providerApiKey}"`);
+      lines.push(`  api_key: ${yamlScalar("api_key", opts.providerApiKey)}`);
     }
   }
   return lines.join("\n") + "\n";
@@ -170,7 +191,7 @@ export function seedHermesHome(
       if (existsSync(src)) copyFileSync(src, join(rec.hermesHome, name));
     }
   }
-  writeFileSync(
+  writeTenantConfig(
     join(rec.hermesHome, "config.yaml"),
     tenantConfigYaml(rec.projectDir, model, {
       providerName: provider?.name,

@@ -148,7 +148,7 @@ export function hermesSpawnArgv(o: HermesSpawnOptions): string[] {
     `HERMES_HOME=${MOUNT_HERMES_HOME}`,
     "-e",
     "HERMES_ACCEPT_HOOKS=1",
-    ...(o.providerKeyEnv ? ["-e", `${o.providerKeyEnv.name}=${o.providerKeyEnv.value}`] : []),
+    ...(o.providerKeyEnv ? ["-e", o.providerKeyEnv.name] : []),
     ...(o.sharedAuthDir
       ? [
           "-v",
@@ -195,6 +195,19 @@ export function hermesEnv(o: HermesSpawnOptions, base: Record<string, string | u
   return env;
 }
 
+/** Env of the `docker run` CLI process. The provider key is passed as a bare `-e NAME` in the
+ * argv (never `NAME=value`, which leaks via ps / docker inspect of the CLI) and docker copies
+ * it from THIS env — so it is injected explicitly, independent of the prefix allowlist. */
+export function dockerCliEnv(o: HermesSpawnOptions, base: Record<string, string | undefined> = process.env): Record<string, string | undefined> {
+  const env = allowlistedEnv(base);
+  // The docker CLI locates its daemon/config through DOCKER_* (HOST, CONTEXT, CONFIG, ...).
+  for (const [k, v] of Object.entries(base)) {
+    if (v !== undefined && /^DOCKER_/.test(k)) env[k] = v;
+  }
+  if (o.providerKeyEnv) env[o.providerKeyEnv.name] = o.providerKeyEnv.value;
+  return env;
+}
+
 export interface HermesTurnResult {
   exitCode: number | null;
   sessionId?: string;
@@ -218,7 +231,7 @@ export async function runHermesTurn(
     stdout: "pipe",
     stderr: "pipe",
     env: o.container
-      ? (o.env ?? process.env) // container-side env is set via -e flags in the argv
+      ? dockerCliEnv(o, o.env ?? process.env)
       : hermesEnv(o, o.env ?? process.env),
   });
   o.onSpawn?.(proc); // QA-07: cancel support — the server can kill a running turn

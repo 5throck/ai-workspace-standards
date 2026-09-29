@@ -5,12 +5,14 @@ import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { loadConfig, resolveLlmProviderKey, resolveLlmProviderName, resolveVariants } from "../../services/co-workspace/src/config";
+import { statSync } from "node:fs";
 import { UserStore } from "../../services/co-workspace/src/users";
 import {
   publicTenant,
   seedHermesHome,
   sweepTenantStragglers,
   tenantConfigYaml,
+  writeTenantConfig,
 } from "../../services/co-workspace/src/tenant";
 import { TenantRegistry } from "../../services/co-workspace/src/registry-db";
 
@@ -269,5 +271,31 @@ describe("sweepTenantStragglers (user-reported 2026-09-29: deleted tenants left 
 
   test("a missing principal dir is a no-op", () => {
     expect(sweepTenantStragglers(join(tempDir(), "missing"), "gw-x", "gw-x")).toEqual([]);
+  });
+});
+
+describe("tenant config hardening (T-20260929-006)", () => {
+  test("values are YAML-escaped; ordinary values unchanged", () => {
+    const y = tenantConfigYaml("/p", "m", { providerName: "custom", providerBaseUrl: "https://x/v1", providerApiKey: 'sk-a"b\\c' });
+    expect(y).toContain('  api_key: "sk-a\\"b\\\\c"');
+    expect(y).toContain('  base_url: "https://x/v1"');
+    expect(y).toContain('  default: "m"');
+  });
+  test("newline in any value is rejected", () => {
+    expect(() => tenantConfigYaml("/p", "m", { providerName: "c", providerApiKey: "k\nx: 1" })).toThrow(/newline/);
+    expect(() => tenantConfigYaml("/p", "m\r", { providerName: "c" })).toThrow(/newline/);
+  });
+  // POSIX permission bits are not enforced on Windows (files report 0666).
+  test.skipIf(process.platform === "win32")("config file is written 0600, including when it already exists", () => {
+    const d = tempDir();
+    mkdirSync(d, { recursive: true });
+    const f = join(d, "config.yaml");
+    writeFileSync(f, "old", { mode: 0o644 });
+    writeTenantConfig(f, "new");
+    expect(statSync(f).mode & 0o777).toBe(0o600);
+    rmSync(f);
+    writeTenantConfig(f, "new");
+    expect(statSync(f).mode & 0o777).toBe(0o600);
+    rmSync(d, { recursive: true, force: true });
   });
 });
