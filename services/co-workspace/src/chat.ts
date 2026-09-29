@@ -1,0 +1,196 @@
+import { chownSync, copyFileSync, existsSync } from "node:fs";
+import { join } from "node:path";
+import { GatewayConfig, resolveLlmProviderKey, resolveLlmProviderName } from "./config";
+import { recordTurnUsage, tenantConfigYaml, TenantRecord, writeTenantConfig } from "./tenant";
+import { HermesEvent, HermesTurnResult, runHermesTurn } from "./hermes";
+import { runAntigravityTurn } from "./antigravity";
+import { runClaudeTurn } from "./claude";
+import { runCodexTurn } from "./codex";
+import type { GatewayState } from "./state";
+import { hostSidePath } from "./lifecycle";
+
+/** Serialized per tenant: one Hermes session writer per HERMES_HOME (state.db is a per-home
+ * SQLite WAL; concurrent writers across processes are unsafe). */
+export async function runChat(
+  state: GatewayState,
+  rec: TenantRecord,
+  message: string,
+  onEvent?: (evt: HermesEvent) => void,
+  onProc?: (proc: { kill: (code?: number) => void }) => void,
+): Promise<HermesTurnResult> {
+  const prev = state.chatLocks.get(rec.tenantId) ?? Promise.resolve();
+  const task = prev
+    .catch(() => undefined)
+    .then(() => {
+      // Keep the tenant home's credentials current: the containerized hermes (older release
+      // lineage) resolves OAuth from its OWN home's auth.json and cannot consult the shared
+      // store, so each turn re-copies the operator's CURRENT auth.json (Addendum 4 note).
+      // Provider-key mode (design 2026-09-29-co-workspace-provider-key-config) skips this —
+      // static provider keys need no OAuth tokens, and copying them was the refresh-token-
+      // reuse revocation class (Nous invalid_grant, 2026-09-29).
+      const seedAuth = resolveLlmProviderKey(state.cfg)
+        ? undefined
+        : state.cfg.hermesSeedHome
+          ? join(state.cfg.hermesSeedHome, "auth.json")
+          : undefined;
+      if (seedAuth && existsSync(seedAuth)) {
+        copyFileSync(seedAuth, join(rec.hermesHome, "auth.json"));
+        if (state.cfg.isolation === "docker") chownSync(join(rec.hermesHome, "auth.json"), 10000, 10000);
+      }
+      // Re-stamp the tenant config.yaml every turn: provider/base-url/model changes apply
+      // to EXISTING tenants on their next turn (no re-provisioning needed). In legacy mode
+      // (no provider key) the stamp carries NO provider lines — stamping `provider: custom`
+      // unconditionally would break the OAuth/shared-store tenants.
+      const providerKey = resolveLlmProviderKey(state.cfg);
+      writeTenantConfig(
+        join(rec.hermesHome, "config.yaml"),
+        tenantConfigYaml(
+          rec.projectDir,
+          state.cfg.hermesModel,
+          providerKey
+            ? {
+                providerName: resolveLlmProviderName(state.cfg),
+                providerBaseUrl: state.cfg.llmBaseUrl,
+                providerApiKey: state.cfg.llmApiKey,
+                agentReasoningEffort: state.cfg.hermesReasoningEffort ?? "low",
+              }
+            : undefined,
+        ),
+      );
+      if (state.cfg.runtime === "antigravity") {
+        return runAntigravityTurn(
+          {
+            agyBin: state.cfg.antigravityBin,
+            binPrefix: state.cfg.antigravityBinPrefix,
+            projectDir: rec.projectDir,
+            message,
+            conversationId: rec.conversationId,
+            printTimeoutSeconds: state.cfg.runBudgetSeconds,
+            extraArgs: state.cfg.hermesExtraArgs,
+          },
+          onEvent,
+        );
+      }
+      if (state.cfg.runtime === "claude") {
+        return runClaudeTurn(
+          {
+            claudeBin: state.cfg.claudeBin,
+            projectDir: rec.projectDir,
+            message,
+            sessionId: rec.conversationId,
+            extraArgs: state.cfg.hermesExtraArgs,
+          },
+          onEvent,
+        );
+      }
+      if (state.cfg.runtime === "codex") {
+        return runCodexTurn(
+          {
+            codexBin: state.cfg.codexBin,
+            projectDir: rec.projectDir,
+            message,
+            threadId: rec.conversationId,
+            extraArgs: state.cfg.hermesExtraArgs,
+          },
+          onEvent,
+        );
+      }
+      return runHermesTurn(
+        {
+          hermesBin: state.cfg.hermesBin,
+          binPrefix: state.cfg.hermesBinPrefix,
+          providerKeyEnv: resolveLlmProviderKey(state.cfg) ?? undefined,
+          projectDir: rec.projectDir,
+          hermesHome: rec.hermesHome,
+          message,
+          sessionName: `gw-${rec.tenantId}`,
+          runBudgetSeconds: state.cfg.runBudgetSeconds,
+          maxTurns: state.cfg.maxTurns,
+          extraArgs: state.cfg.hermesExtraArgs,
+          toolsets: state.cfg.hermesToolsets,
+          // Docker isolation: the tenant home is re-seeded with the CURRENT seed auth.json
+          // every turn, so the shared-store bind adds nothing — and empirically flips hermes
+          // onto the shared Nous store, failing the turn (exit 111, observed 2026-09-28).
+          // Process-mode tenants keep the shared store (single HOME, refreshes stay valid).
+          sharedAuthDir: state.cfg.isolation === "docker" ? undefined : resolveAuthDir(state.cfg),
+          onSpawn: (proc) => {
+            state.activeProcs.set(rec.tenantId, proc);
+            onProc?.(proc);
+          },
+          container:
+            state.cfg.isolation === "docker"
+              ? {
+                  image: state.cfg.runtimeImage,
+                  // Host-side equivalents of the tenant's container paths: record paths live
+                  // under <dataDir>/…, remap the prefix onto dataDirHost. (The old
+                  // `tenants/<id>/…` hardcode mounted empty dirs — per-user storage moved
+                  // tenant files under storage/<principal>/<project>.)
+                  hostProjectDir: hostSidePath(state.cfg, rec.projectDir),
+                  hostHermesHome: hostSidePath(state.cfg, rec.hermesHome),
+                  hostAuthDir: state.cfg.hermesAuthDirHost
+                    ?? (state.cfg.dataDirHost
+                      ? join(state.cfg.dataDirHost, "shared-auth")
+                      : undefined),
+                  memory: state.cfg.containerMemory,
+                  cpus: state.cfg.containerCpus,
+                  pidsLimit: state.cfg.containerPidsLimit,
+                }
+              : undefined,
+        },
+        onEvent,
+      );
+    });
+  const tail = task.catch(() => undefined);
+  state.chatLocks.set(rec.tenantId, tail);
+  let result: HermesTurnResult;
+  try {
+    result = await task;
+  } finally {
+    state.activeProcs.delete(rec.tenantId);
+    // Prune only when no later turn has queued behind this one.
+    if (state.chatLocks.get(rec.tenantId) === tail) state.chatLocks.delete(rec.tenantId);
+  }
+  if (result.sessionId) {
+    const current = state.registry.get(rec.tenantId) ?? rec;
+    if (state.cfg.runtime !== "hermes") current.conversationId = result.sessionId;
+    // Auto-title (ChatGPT pattern): a session with no user-provided name takes its title
+    // from the first message that drove a completed turn.
+    if (!current.name && message.trim()) {
+      current.name = message.replace(/\s+/g, " ").trim().slice(0, 48) || current.tenantId;
+    }
+    const tokens = (result.tokens ?? {}) as Record<string, unknown>;
+    const n = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : 0);
+    recordTurnUsage(current, new Date().toISOString().slice(0, 10), {
+      input: n(tokens.input),
+      output: n(tokens.output),
+    });
+    state.registry.upsert(current);
+    state.turns.record(rec.tenantId, {
+      sessionId: result.sessionId,
+      exitCode: result.exitCode,
+      finalText: result.finalText,
+      inputTokens: n(tokens.input),
+      outputTokens: n(tokens.output),
+    });
+  }
+  return result;
+}
+
+/** Shared credential store for tenant sessions (ADR-0092 Addendum 4): defaults to the seed
+ * home's `shared/` dir — the operator's own Nous token store, refreshed in place. */
+export function resolveAuthDir(cfg: GatewayConfig): string | undefined {
+  return cfg.hermesAuthDir ?? (cfg.hermesSeedHome ? join(cfg.hermesSeedHome, "shared") : undefined);
+}
+
+export function usageSummary(result: HermesTurnResult | undefined) {
+  const t = (result?.tokens ?? {}) as Record<string, unknown>;
+  const n = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : undefined);
+  const any = n(t.input) ?? n(t.output) ?? n(t.total);
+  return any === undefined && !result?.sessionId
+    ? null
+    : {
+        inputTokens: n(t.input),
+        outputTokens: n(t.output),
+        totalTokens: n(t.total),
+      };
+}
