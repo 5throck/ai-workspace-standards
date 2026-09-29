@@ -8,9 +8,13 @@
 # Phase 0 posture: the workspace clone is MOUNTED at /workspace for provisioning; Phase 2 bakes
 # a pinned workspace snapshot into the image instead.
 
-FROM oven/bun:1 AS bun
+# HERMES_TAG: pin to a specific tag or digest for reproducible builds (default: latest).
+# Declared before the first FROM so it is global and usable in the FROM line below.
+ARG HERMES_TAG=latest
 
-FROM nousresearch/hermes-agent:latest
+FROM oven/bun:1.4 AS bun
+
+FROM nousresearch/hermes-agent:${HERMES_TAG}
 
 USER root
 RUN apt-get update \
@@ -25,10 +29,11 @@ COPY --from=docker:cli /usr/local/bin/docker /usr/local/bin/docker
 
 WORKDIR /app/services/co-workspace
 COPY services/co-workspace/package.json ./
+COPY services/co-workspace/bun.lock ./
 COPY services/co-workspace/tsconfig.json ./
 COPY services/co-workspace/src ./src
 COPY services/co-workspace/web ./web
-RUN bun install
+RUN bun install --frozen-lockfile --production
 
 ENV CO_WORKSPACE_HOST=0.0.0.0 \
     CO_WORKSPACE_PORT=9030 \

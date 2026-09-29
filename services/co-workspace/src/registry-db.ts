@@ -43,6 +43,11 @@ export class TenantRegistry {
     this.migrateLegacy(join(dataDir, "tenants", "registry.json"));
   }
 
+  /** Release the SQLite handle (checkpoints WAL); needed before deleting the data dir on Windows. */
+  close(): void {
+    this.db.close();
+  }
+
   private migrateLegacy(jsonPath: string): void {
     try {
       if (!existsSync(jsonPath)) return;
@@ -51,8 +56,8 @@ export class TenantRegistry {
       const count = this.db.query("SELECT COUNT(*) AS n FROM tenants").get() as { n: number };
       if (count.n > 0) return;
       for (const rec of legacy) this.upsert(rec);
-    } catch {
-      /* unreadable legacy file — start fresh */
+    } catch (err) {
+      console.error("[co-workspace] legacy registry.json unreadable, starting fresh:", (err as Error).message);
     }
   }
 

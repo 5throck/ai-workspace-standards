@@ -7,7 +7,7 @@
  */
 
 import { createHash, timingSafeEqual } from "node:crypto";
-import { readFileSync } from "node:fs";
+import { readKeyEntries } from "./config";
 
 export const AUTH_EXEMPT_ROUTES: ReadonlySet<string> = new Set(["GET /", "GET /health"]);
 
@@ -44,20 +44,7 @@ export function credentialValid(cfg: { apiKeys: string[] }, presented: string | 
 export function keyPrincipals(cfg: { apiKeys: string[]; apiKeysFile?: string }): Map<string, string> {
   const map = new Map<string, string>();
   for (const key of cfg.apiKeys) map.set(key, "default");
-  if (cfg.apiKeysFile) {
-    try {
-      const text = readFileSync(cfg.apiKeysFile, "utf8");
-      for (const raw of text.split(/\r?\n/)) {
-        const line = raw.replace(/#.*/, "").trim();
-        if (!line) continue;
-        const idx = line.indexOf(":");
-        if (idx > 0) map.set(line.slice(0, idx).trim(), line.slice(idx + 1).trim());
-        else map.set(line, "default");
-      }
-    } catch {
-      /* missing file — env defaults already applied */
-    }
-  }
+  for (const e of readKeyEntries(cfg.apiKeysFile)) map.set(e.key, e.label);
   return map;
 }
 

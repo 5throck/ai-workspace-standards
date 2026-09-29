@@ -106,3 +106,16 @@ T-20260929-004 (C1, C2, plus the same pattern on the Gemini route at `server.ts`
 Behavior change: the body `user` / `metadata.user_id` no longer selects a tenant (one tenant per principal per variant); tenants created earlier under `variant::<body user>` keys are no longer found.
 
 New finding during the fix: `key:label` lines in the key file are kept whole in `cfg.apiKeys`, so labels never resolve (own ticket).
+
+## Remaining-items pass (same day)
+
+All findings ticketed on 2026-09-29 were closed across PRs 1225-1232 plus this pass, except the items below.
+
+Closed in this pass: H8, M1, M2, M3, M5, M7, M8, M11, M14, M15, M16, M17 and T-20260929-013 (design by the architect agent; the PM verified with mutation checks on H8 and M3). The architect found H8 narrower than reported: only the `CO_WORKSPACE_ADMIN_EMAIL`-bootstrapped admin can be matched by email, since self-service accounts store no plaintext email; the guard is defense in depth. M5 had a second bug: the `.git` substring match also blocked `.github` and `.gitignore`.
+
+Still open (need live docker validation, a refactor, or an operator decision):
+- T-20260929-014 (non-root gateway, docker socket proxy), M6 (minimal seed-home mount): need live docker.
+- M12 (`server.ts` split): large refactor, separate PR.
+- M4 (Secure cookie default): breaks `http://localhost` login if defaulted on; opt-in via `CO_WORKSPACE_COOKIE_SECURE` exists.
+- M13 (orphan child processes after restart), M20 (`services.yaml` registration), M21 (rotate the key in `docker/.env` if it was ever echoed), T-20260929-003 (turn latency research).
+- M7 second half (token in the mail URL) is already mitigated: `/auth/verify` is POST-only.

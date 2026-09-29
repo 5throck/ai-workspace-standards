@@ -23,7 +23,7 @@ import {
 } from "./users";
 import { googleConfigured, authorizeUrl, makePkce, exchangeCode, fetchProfile } from "./google-sso";
 import { AuditLog, RateLimiter, csrfRequired, sweepOutbox } from "./hardening";
-import { randomBytes } from "node:crypto";
+import { randomBytes, timingSafeEqual } from "node:crypto";
 import { HermesEvent, HermesTurnResult, runHermesTurn } from "./hermes";
 import { runAntigravityTurn } from "./antigravity";
 import { runClaudeTurn } from "./claude";
@@ -925,6 +925,22 @@ export function resolveClientIp(trustProxy: boolean, req: Request, peerIp?: stri
   return peerIp || "local";
 }
 
+/** M2: constant-time comparison of the OAuth `state` param against the cookie value. */
+export function oauthStateMatches(returned: string | null | undefined, expected: string | null | undefined): boolean {
+  if (!returned || !expected) return false;
+  const a = Buffer.from(returned);
+  const b = Buffer.from(expected);
+  return a.length === b.length && timingSafeEqual(a, b);
+}
+
+/** M8: startup warning text when the gateway is reachable without any credential. */
+export function openModeWarning(cfg: { apiKeys: string[]; loginRequired: boolean }): string | null {
+  if (cfg.apiKeys.length === 0 && !cfg.loginRequired) {
+    return "[co-workspace] OPEN MODE: no API keys and login not required — anonymous tenants are reachable by anyone who can reach this port";
+  }
+  return null;
+}
+
 export async function handleRequest(state: GatewayState, req: Request, peerIp?: string): Promise<Response> {
   const url = new URL(req.url);
   const path = url.pathname.replace(/\/+$/, "") || "/";
@@ -933,9 +949,9 @@ export async function handleRequest(state: GatewayState, req: Request, peerIp?: 
     const clientIp = resolveClientIp(state.cfg.trustProxy, req, peerIp);
     // SEC-09: keyless-mode CSRF guard — mutating routes need the custom header (a cross-site
     // form cannot set it without a preflight; the server sends no CORS headers).
-    const hasCredential = Boolean(sessionUser) || Boolean(presentedCredential(req));
+    const hasApiKey = credentialValid(state.cfg, presentedCredential(req));
     if (
-      csrfRequired(state.cfg, hasCredential) &&
+      csrfRequired(state.cfg, hasApiKey) &&
       req.method !== "GET" &&
       req.headers.get("x-requested-with") !== "co-workspace"
     ) {
@@ -1218,11 +1234,12 @@ export async function handleRequest(state: GatewayState, req: Request, peerIp?: 
       // Dev mailer: the verification mail is written to the outbox dir (ops forwards or reads
       // it); a real SMTP integration is operator-side. Token never appears in API responses.
       const outbox = join(state.cfg.dataDir, "mail-outbox");
-      mkdirSync(outbox, { recursive: true });
+      mkdirSync(outbox, { recursive: true, mode: 0o700 });
       const verifyUrl = `${url.origin}/auth/verify?token=${result.verificationToken}`;
       writeFileSync(
         join(outbox, `${Date.now()}-${loginId}.txt`),
         `To: ${email}\nSubject: co-workspace account verification\n\nVerify your account (${loginId}):\n${verifyUrl}\n\nOr enter this key in the app: ${result.verificationToken}\n`,
+        { mode: 0o600 },
       );
       return jsonResponse({
         ok: true,
@@ -1256,10 +1273,11 @@ export async function handleRequest(state: GatewayState, req: Request, peerIp?: 
       }
       // Dev mailer (same as signup): the confirmation mail is written to the outbox dir.
       const outbox = join(state.cfg.dataDir, "mail-outbox");
-      mkdirSync(outbox, { recursive: true });
+      mkdirSync(outbox, { recursive: true, mode: 0o700 });
       writeFileSync(
         join(outbox, `${Date.now()}-${user.principal}-email-change.txt`),
         `To: ${email}\nSubject: co-workspace email change\n\nConfirm the new email for ${user.principal}.\nEnter this key in the app: ${result.token}\n`,
+        { mode: 0o600 },
       );
       return jsonResponse({ ok: true, message: "verification mail sent — enter the key from the mail to confirm the new email" });
     }
@@ -1286,10 +1304,11 @@ export async function handleRequest(state: GatewayState, req: Request, peerIp?: 
       // IDs have pending verifications (and spam the outbox for existing ones).
       if (!reissued) return jsonResponse({ ok: true, message: "if the account is pending, a verification mail was sent" });
       const outbox = join(state.cfg.dataDir, "mail-outbox");
-      mkdirSync(outbox, { recursive: true });
+      mkdirSync(outbox, { recursive: true, mode: 0o700 });
       writeFileSync(
         join(outbox, `${Date.now()}-${loginId}.txt`),
         `To: ${reissued.email}\nSubject: co-workspace account verification\n\nKey: ${reissued.token}\n`,
+        { mode: 0o600 },
       );
       return jsonResponse({ ok: true, message: "verification mail re-sent" });
     }
@@ -1368,20 +1387,15 @@ export async function handleRequest(state: GatewayState, req: Request, peerIp?: 
     // ── Wave B2: Google SSO ──
     if (req.method === "GET" && path === "/auth/google/login") {
       if (!googleConfigured()) throw new HttpError(501, "Google SSO not configured (GOOGLE_CLIENT_ID/SECRET/REDIRECT_URI)");
-      const state = randomBytes(16).toString("hex");
+      const secureFlag = state.cfg.cookieSecure ? "; Secure" : "";
+      const oauthState = randomBytes(16).toString("hex");
       const { verifier, challenge } = makePkce();
-      const url = authorizeUrl(process.env.GOOGLE_CLIENT_ID!, process.env.GOOGLE_REDIRECT_URI!, state, challenge);
-      const flags = `HttpOnly; Path=/; SameSite=Lax; Max-Age=600`;
-      return new Response(null, {
-        status: 302,
-        headers: {
-          location: url,
-          "set-cookie": [
-            `gw_oauth_state=${state}; ${flags}`,
-            `gw_oauth_verifier=${verifier}; ${flags}`,
-          ].join(", "),
-        },
-      });
+      const url = authorizeUrl(process.env.GOOGLE_CLIENT_ID!, process.env.GOOGLE_REDIRECT_URI!, oauthState, challenge);
+      const flags = `HttpOnly; Path=/; SameSite=Lax; Max-Age=600${secureFlag}`;
+      const headers = new Headers({ location: url });
+      headers.append("set-cookie", `gw_oauth_state=${oauthState}; ${flags}`);
+      headers.append("set-cookie", `gw_oauth_verifier=${verifier}; ${flags}`);
+      return new Response(null, { status: 302, headers });
     }
 
     if (req.method === "GET" && path === "/auth/google/callback") {
@@ -1392,36 +1406,42 @@ export async function handleRequest(state: GatewayState, req: Request, peerIp?: 
       const cookie = req.headers.get("cookie") ?? "";
       const expectedState = cookie.match(/gw_oauth_state=([^;]+)/)?.[1];
       const verifier = cookie.match(/gw_oauth_verifier=([^;]+)/)?.[1];
-      if (!code || !returnedState || !expectedState || returnedState !== expectedState || !verifier) {
+      if (!code || !returnedState || !expectedState || !verifier || !oauthStateMatches(returnedState, expectedState)) {
         throw new HttpError(400, "invalid OAuth state");
       }
       const accessToken = await exchangeCode(code, process.env.GOOGLE_CLIENT_ID!, process.env.GOOGLE_CLIENT_SECRET!, process.env.GOOGLE_REDIRECT_URI!, verifier);
       const profile = await fetchProfile(accessToken);
       if (!profile.emailVerified) throw new HttpError(401, "Google email not verified");
-      let user = state.users.findByGoogleSub(profile.sub) ?? state.users.findByEmail(profile.email);
+      let user = state.users.findByGoogleSub(profile.sub);
       if (!user) {
-        user = state.users.createUser({
-          email: profile.email,
-          name: profile.name,
-          password: null,
-          googleSub: profile.sub,
-        });
-        if (!user) throw new HttpError(500, "account creation failed");
-      } else if (!user.googleSub) {
-        state.users.linkGoogleSub(user.id, profile.sub);
+        const byEmail = state.users.findByEmail(profile.email);
+        if (byEmail) {
+          if (byEmail.googleSub && byEmail.googleSub !== profile.sub) {
+            throw new HttpError(409, "account is linked to a different Google identity");
+          }
+          // H8: never bind a Google identity to an account whose email was not verified.
+          if (!state.users.isVerified(byEmail.id)) {
+            throw new HttpError(409, "an unverified account uses this email — sign in with your ID and password to link Google");
+          }
+          if (!byEmail.googleSub) state.users.linkGoogleSub(byEmail.id, profile.sub);
+          user = byEmail;
+        } else {
+          user = state.users.createUser({
+            email: profile.email,
+            name: profile.name,
+            password: null,
+            googleSub: profile.sub,
+          });
+          if (!user) throw new HttpError(500, "account creation failed");
+        }
       }
       const token = state.users.createSession(user.id);
-      return new Response(null, {
-        status: 302,
-        headers: {
-          location: "/",
-          "set-cookie": [
-            sessionCookieHeader(token, state.cfg.cookieSecure ?? false),
-            "gw_oauth_state=; HttpOnly; Path=/; Max-Age=0",
-            "gw_oauth_verifier=; HttpOnly; Path=/; Max-Age=0",
-          ].join(", "),
-        },
-      });
+      const secureFlag = state.cfg.cookieSecure ? "; Secure" : "";
+      const headers = new Headers({ location: "/" });
+      headers.append("set-cookie", sessionCookieHeader(token, state.cfg.cookieSecure ?? false));
+      headers.append("set-cookie", `gw_oauth_state=; HttpOnly; Path=/; SameSite=Lax; Max-Age=0${secureFlag}`);
+      headers.append("set-cookie", `gw_oauth_verifier=; HttpOnly; Path=/; SameSite=Lax; Max-Age=0${secureFlag}`);
+      return new Response(null, { status: 302, headers });
     }
 
     // ── Wave B3: admin ──
@@ -1619,6 +1639,8 @@ if (import.meta.main) {
   // SEC-14: expire verification mails older than 24h at startup.
   const swept = sweepOutbox(state.cfg.dataDir);
   if (swept) console.log(`[co-workspace] outbox sweep: ${swept} expired file(s) removed`);
+  const openWarn = openModeWarning(state.cfg);
+  if (openWarn) console.warn(openWarn);
   // P2-5: a restart orphans in-flight "provisioning" records (the promise map is memory-only).
   for (const t of state.registry.list()) {
     if (t.status === "provisioning") {

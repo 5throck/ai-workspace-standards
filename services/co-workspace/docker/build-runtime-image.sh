@@ -13,6 +13,11 @@ CHECKOUT="${1:-$HOME/.hermes/hermes-agent}"
 STAGE="$SCRIPT_DIR/runtime-hermes"
 IMAGE="${CO_WORKSPACE_RUNTIME_IMAGE:-co-workspace-runtime:latest}"
 
+# Preflight: check for required tools and base image
+command -v rsync >/dev/null 2>&1 || { echo "[FAIL] rsync not found" >&2; exit 1; }
+command -v docker >/dev/null 2>&1 || { echo "[FAIL] docker not found" >&2; exit 1; }
+docker image inspect co-workspace-gateway:latest >/dev/null 2>&1 || { echo "[FAIL] base image co-workspace-gateway:latest missing — run docker compose build first" >&2; exit 1; }
+
 if [ ! -d "$CHECKOUT/agent" ] || [ ! -f "$CHECKOUT/cli.py" ]; then
     echo "[FAIL] $CHECKOUT does not look like a hermes-agent checkout (agent/, cli.py missing)" >&2
     exit 1
@@ -23,6 +28,7 @@ mkdir -p "$STAGE"
 rsync -a --delete \
     --exclude '.git' --exclude 'node_modules' --exclude 'venv' \
     --exclude '__pycache__' --exclude '*.pyc' \
+    --exclude '.env' --exclude '.env.*' --exclude '*.key' --exclude '*.pem' --exclude 'auth.json' \
     "$CHECKOUT/" "$STAGE/hermes-agent/"
 
 echo "[2/3] Building $IMAGE…"

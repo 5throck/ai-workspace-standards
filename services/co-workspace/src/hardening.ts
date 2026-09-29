@@ -69,12 +69,12 @@ export class AuditLog {
   }
 }
 
-/** SEC-09: keyless-mode CSRF guard — mutating routes must carry a custom header a cross-site
- * form cannot set without a CORS preflight (the server sends none). */
-export function csrfRequired(cfg: { csrfRequired: boolean; apiKeys: string[]; loginRequired: boolean }, hasCredential: boolean): boolean {
+/** SEC-09: CSRF guard — mutating routes must carry a custom header a cross-site form cannot
+ * set without a CORS preflight (the server sends none). Only a valid API-key/Bearer credential
+ * is exempt: browsers attach session cookies automatically, so a cookie must not exempt. */
+export function csrfRequired(cfg: { csrfRequired: boolean }, hasApiKeyCredential: boolean): boolean {
   if (!cfg.csrfRequired) return false;
-  if (hasCredential) return false; // keyed/session requests are already credentialed
-  return true;
+  return !hasApiKeyCredential;
 }
 
 /** SEC-14: delete outbox files older than `maxAgeMs` (default 24h). Runs at startup. */

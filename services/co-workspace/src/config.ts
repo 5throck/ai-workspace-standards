@@ -110,6 +110,11 @@ function num(value: string | undefined, fallback: number): number {
 }
 
 /** Like `num` but 0 is a meaningful value ("off"), and only non-finite/negative falls back. */
+function numOr0(value: string | undefined): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
+}
+
 /** Parse a key list: comma-separated (env style) or line-per-key (file style, `#` comments). */
 export function parseKeyList(text: string, separator: "," | "lines" = ","): string[] {
   const parts = separator === "," ? text.split(",") : text.split(/\r?\n/);
@@ -118,19 +123,48 @@ export function parseKeyList(text: string, separator: "," | "lines" = ","): stri
     .filter((s) => s.length > 0);
 }
 
-/** Read keys from a file (one per line, `#` comments). Missing file = empty. */
-export function readKeysFile(path: string | undefined): string[] {
+const warnedMissingKeyFiles = new Set<string>();
+
+/** Parse key entries from a file with optional labels (key:label format). Returns key and label pairs. */
+export function readKeyEntries(path: string | undefined): Array<{ key: string; label: string }> {
   if (!path) return [];
   try {
-    return parseKeyList(readFileSync(path, "utf8"), "lines");
-  } catch {
-    return [];
+    const text = readFileSync(path, "utf8");
+    const entries: Array<{ key: string; label: string }> = [];
+    for (const raw of text.split(/\r?\n/)) {
+      const line = raw.replace(/#.*/, "").trim();
+      if (!line) continue;
+      const idx = line.indexOf(":");
+      if (idx > 0) {
+        entries.push({
+          key: line.slice(0, idx).trim(),
+          label: line.slice(idx + 1).trim() || "default",
+        });
+      } else {
+        entries.push({
+          key: line,
+          label: "default",
+        });
+      }
+    }
+    return entries;
+  } catch (err) {
+    const error = err as NodeJS.ErrnoException;
+    if (error.code === "ENOENT") {
+      // keyPrincipals() runs per authenticated request — warn once per path, not per request.
+      if (!warnedMissingKeyFiles.has(path)) {
+        warnedMissingKeyFiles.add(path);
+        console.warn(`[co-workspace] API key file not found: ${path}`);
+      }
+      return [];
+    }
+    throw new Error(`[co-workspace] cannot read API key file ${path}: ${error.message}`);
   }
 }
 
-function numOr0(value: string | undefined): number {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
+/** Read keys from a file (one per line, `#` comments). Missing file = empty. */
+export function readKeysFile(path: string | undefined): string[] {
+  return readKeyEntries(path).map((e) => e.key);
 }
 
 /** Resolve the variant catalog. `all` (or `*`) auto-discovers every `templates/co-*` whose

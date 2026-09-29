@@ -13,6 +13,14 @@ import { join, relative, sep } from "node:path";
 const MAX_FILE_BYTES = 256 * 1024;
 const DENYLIST_NAMES = new Set([".env", "auth.json", "auth.lock", "state.db", "state.db-wal", "state.db-shm"]);
 
+export function isDeniedName(name: string): boolean {
+  if (DENYLIST_NAMES.has(name)) return true;
+  if (name === ".git") return true;
+  if (name === ".env" || name.startsWith(".env.")) return true;
+  if (/\.(pem|key|p12|pfx)$/i.test(name)) return true;
+  return false;
+}
+
 export interface FileEntry {
   name: string;
   type: "file" | "dir";
@@ -26,11 +34,11 @@ function safeResolve(projectDir: string, relPath: string): string | null {
   const target = join(root, relPath);
   const rel = relative(root, target);
   // rel === "" is the tenant root itself — a valid listing target (readTenantFile re-checks isFile).
-  if (rel.startsWith("..") || target.includes(`${sep}.git`)) return null;
+  if (rel.startsWith("..") || (rel !== "" && rel.split(sep).some(isDeniedName))) return null;
   if (!existsSync(target)) return null;
   const real = realpathSync(target);
   if (!real.startsWith(root + sep) && real !== root) return null;
-  if (DENYLIST_NAMES.has(target.split(sep).pop() ?? "")) return null;
+  if (real !== root && relative(root, real).split(sep).some(isDeniedName)) return null;
   return target;
 }
 
@@ -45,7 +53,7 @@ export function listTenantFiles(projectDir: string, relPath = ""): FileEntry[] |
   if (!statSync(target).isDirectory()) return null;
   const out: FileEntry[] = [];
   for (const name of readdirSync(target).sort()) {
-    if (DENYLIST_NAMES.has(name) || name === ".git") continue;
+    if (isDeniedName(name)) continue;
     const full = join(target, name);
     const st = statSync(full);
     out.push({
