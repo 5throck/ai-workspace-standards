@@ -42,6 +42,10 @@ export interface GatewayConfig {
   /** Provider selector mirroring the co-newbiz scheme: `openai | anthropic | gemini | custom`
    * (unset/`none` = off; default `custom` when a key is present). R6 of the provider-key design. */
   llmProvider?: string;
+  /** Default reasoning effort stamped into the tenant config (`agent.reasoning_effort`).
+   * Some models (e.g. glm-5.3-flash) reject requests without an effort — default "low"
+   * in key mode so turns work with zero operator flags; empty string = omit the stamp. */
+  hermesReasoningEffort?: string;
   runBudgetSeconds: number;
   maxTurns: number;
   scaffoldTimeoutMs: number;
@@ -184,6 +188,7 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     llmBaseUrl: env.CO_WORKSPACE_LLM_BASE_URL || undefined,
     llmApiKey: env.CO_WORKSPACE_LLM_API_KEY || undefined,
     llmProvider: env.CO_WORKSPACE_LLM_PROVIDER || undefined,
+    hermesReasoningEffort: env.CO_WORKSPACE_HERMES_REASONING_EFFORT,
     runBudgetSeconds: num(env.CO_WORKSPACE_RUN_BUDGET_SECONDS, 300),
     maxTurns: num(env.CO_WORKSPACE_MAX_TURNS, 100),
     scaffoldTimeoutMs: num(env.CO_WORKSPACE_SCAFFOLD_TIMEOUT_MS, 600_000),

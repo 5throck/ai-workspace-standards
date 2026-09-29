@@ -63,6 +63,10 @@ services:
       CO_WORKSPACE_LLM_PROVIDER: ${CO_WORKSPACE_LLM_PROVIDER:-}
       CO_WORKSPACE_LLM_BASE_URL: ${CO_WORKSPACE_LLM_BASE_URL:-}
       CO_WORKSPACE_LLM_API_KEY: ${CO_WORKSPACE_LLM_API_KEY:-}
+      # Default reasoning effort stamped into team config.yaml (agent.reasoning_effort).
+      # glm-5.3-flash rejects effort-less requests — the default "low" lets turns run
+      # with zero operator flags; set low|high|max (or empty to omit the stamp).
+      CO_WORKSPACE_HERMES_REASONING_EFFORT: ${CO_WORKSPACE_HERMES_REASONING_EFFORT:-low}
       CO_WORKSPACE_LOGIN_REQUIRED: ${CO_WORKSPACE_LOGIN_REQUIRED:-true}
       CO_WORKSPACE_CSRF_REQUIRED: ${CO_WORKSPACE_CSRF_REQUIRED:-true}
       CO_WORKSPACE_TENANT_MAX_PER_PRINCIPAL: ${CO_WORKSPACE_TENANT_MAX_PER_PRINCIPAL:-10}
