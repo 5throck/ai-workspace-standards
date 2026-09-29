@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { randomBytes } from "node:crypto";
 import { sessionTokenFromCookie, sessionCookieHeader, clearCookieHeader } from "../users";
 import { googleConfigured, authorizeUrl, makePkce, exchangeCode, fetchProfile } from "../google-sso";
-import { HttpError, jsonResponse, readJsonBody } from "../http";
+import { HttpError, cookieSecureFor, jsonResponse, readJsonBody } from "../http";
 import { principalTokenUsage, oauthStateMatches } from "../access";
 import type { GatewayState } from "../state";
 import type { Ctx } from "./ctx";
@@ -133,7 +133,7 @@ export async function handleAuth(state: GatewayState, req: Request, ctx: Ctx): P
     const token = state.users.createSession(user.id);
     return new Response(JSON.stringify({ user: { loginId: user.principal, name: user.name, role: user.role, mustChangePassword: Boolean(user.mustChangePassword) } }), {
       status: 200,
-      headers: { "content-type": "application/json", "set-cookie": sessionCookieHeader(token, state.cfg.cookieSecure ?? false) },
+      headers: { "content-type": "application/json", "set-cookie": sessionCookieHeader(token, cookieSecureFor(state.cfg, req)) },
     });
   }
 
@@ -185,7 +185,7 @@ export async function handleAuth(state: GatewayState, req: Request, ctx: Ctx): P
   // ── Wave B2: Google SSO ──
   if (req.method === "GET" && path === "/auth/google/login") {
     if (!googleConfigured()) throw new HttpError(501, "Google SSO not configured (GOOGLE_CLIENT_ID/SECRET/REDIRECT_URI)");
-    const secureFlag = state.cfg.cookieSecure ? "; Secure" : "";
+    const secureFlag = cookieSecureFor(state.cfg, req) ? "; Secure" : "";
     const oauthState = randomBytes(16).toString("hex");
     const { verifier, challenge } = makePkce();
     const url = authorizeUrl(process.env.GOOGLE_CLIENT_ID!, process.env.GOOGLE_REDIRECT_URI!, oauthState, challenge);
@@ -234,9 +234,9 @@ export async function handleAuth(state: GatewayState, req: Request, ctx: Ctx): P
       }
     }
     const token = state.users.createSession(user.id);
-    const secureFlag = state.cfg.cookieSecure ? "; Secure" : "";
+    const secureFlag = cookieSecureFor(state.cfg, req) ? "; Secure" : "";
     const headers = new Headers({ location: "/" });
-    headers.append("set-cookie", sessionCookieHeader(token, state.cfg.cookieSecure ?? false));
+    headers.append("set-cookie", sessionCookieHeader(token, cookieSecureFor(state.cfg, req)));
     headers.append("set-cookie", `gw_oauth_state=; HttpOnly; Path=/; SameSite=Lax; Max-Age=0${secureFlag}`);
     headers.append("set-cookie", `gw_oauth_verifier=; HttpOnly; Path=/; SameSite=Lax; Max-Age=0${secureFlag}`);
     return new Response(null, { status: 302, headers });
