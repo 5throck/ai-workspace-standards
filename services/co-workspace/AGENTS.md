@@ -2,15 +2,21 @@
 
 > Component instructions for AI tools working in this directory. Workspace-wide rules live in
 > the repository root `AGENTS.md`; governance record: ADR-0092, design:
-> `docs/designs/2026-09-27-co-workspace-service-design.md`.
+> `docs/designs/2026-09-27-co-workspace-service-design.md`. Related designs:
+> `2026-09-27-co-workspace-phase2-hardening-design.md`,
+> `2026-09-27-co-workspace-qa-fair-and-security-review.md`,
+> `2026-09-28-co-workspace-usability-wave-design.md`,
+> `2026-09-29-co-workspace-provider-key-config-design.md` (all under `docs/designs/`).
 
 ## What this is
 
 co-workspace serves the workspace's variant agent teams (`templates/co-*`) over an
 OpenAI-compatible web API. On request it scaffolds a tenant project with
 `scripts/new-project.ts --platform hermes`, relocates it into the data directory, and runs
-headless Hermes sessions (`hermes chat -q --format stream-json`) inside it. Phase 0 is a
-local-only PoC: loopback bind, no authentication, single process.
+headless Hermes sessions (`hermes chat -q --format stream-json`) inside it. The service is
+multi-user: sign-in is required by default in compose (`CO_WORKSPACE_LOGIN_REQUIRED`), with
+per-user accounts, CSRF guard, quotas, and opt-in docker isolation per turn. Bare-metal runs
+still default to a loopback bind. Current behavior: `README.md` (Security model).
 
 ## Layout
 
@@ -24,9 +30,17 @@ local-only PoC: loopback bind, no authentication, single process.
 | `src/anthropic.ts` | Anthropic Messages wire translation (`/v1/messages`, event frames, count_tokens stub) |
 | `src/gemini.ts` | Gemini wire translation (`/v1beta` generateContent, event frames, countTokens stub) |
 | `src/server.ts` | Routing, native REST + `/v1` endpoints, per-tenant chat serialization |
+| `src/auth.ts` | Bearer-key auth (constant-time compare), exempt routes |
+| `src/users.ts` | Local accounts, hashed sessions, signup/login/profile, email-hash storage |
+| `src/google-sso.ts` | Google SSO (OAuth code flow, state + PKCE) |
+| `src/registry-db.ts` | SQLite tenant registry (`<variant>::<principal>` key) |
+| `src/tenant-files.ts` | Tenant-confined read-only files API and per-turn history store |
+| `src/hardening.ts` | Rate limiter, CSRF guard, audit log, mail-outbox expiry |
+| `src/claude.ts` / `src/codex.ts` / `src/antigravity.ts` | Alternative runtime adapters (Claude Code, Codex CLI, Antigravity), normalized to the hermes event shape |
+| `src/util.ts` | Shared helpers: ids, cross-volume moves, JSON persistence, tailing |
 | `web/index.html` | Single-file demo chat page (dev aid, not the product surface) |
 | `docker/` | Dockerfile + compose (build context is the workspace root) |
-| `data/` | Runtime data (gitignored): tenants, projects, Hermes homes, usage reports |
+| `data/` | Runtime data (gitignored): accounts, registry, `storage/<principal>/<project>/` team files, Hermes homes, usage reports |
 
 ## Invariants
 
@@ -36,7 +50,7 @@ local-only PoC: loopback bind, no authentication, single process.
   project directory (ADR-0088 D7 posture). Never widen it.
 - `--usage-file` does not reach `chat` runs (top-level `-z` feature, live-verified): token
   accounting comes from the terminal `result` envelope.
-- Secrets (seeded `auth.json` / `.env`) never appear in API responses or logs. In provider key mode the provider key is stored in plaintext in each tenant's `config.yaml` (`model.api_key`) by necessity — hermes turns do not read it from env; accepted risk documented in ADR-0092 Addendum 9.
+- Secrets (seeded `auth.json` / `.env`, provider keys, session tokens) never appear in API responses or logs. In provider key mode the provider key is stored in plaintext in each tenant's `config.yaml` (`model.api_key`) by necessity — hermes turns do not read it from env; accepted risk documented in ADR-0092 Addendum 9.
 - Zero new runtime npm dependencies; bun built-ins only.
 
 ## Commands

@@ -4,7 +4,7 @@
 - **Status**: implemented
 - **Spec id**: `2026-09-29-co-workspace-provider-key-config`
 - **Owner**: governance-ticket-runner (user-directed architecture change)
-- **Related**: ADR-0092 (Addendum 4 shared credential store; Addendum 5 SEC-07; Addendum 7 seed directory bind), `docs/designs/2026-09-27-co-workspace-phase2-hardening-design.md` (docker isolation)
+- **Related**: ADR-0092 (Addendum 10 corrects R2/R6; Addendum 4 shared credential store; Addendum 5 SEC-07; Addendum 7 seed directory bind), `docs/designs/2026-09-27-co-workspace-phase2-hardening-design.md` (docker isolation)
 
 ## R1 — Problem
 
@@ -22,25 +22,29 @@ the operator as configuration — the API Key + Base URL that LLM providers issu
 
 | Config | Meaning |
 |--------|---------|
-| `CO_WORKSPACE_LLM_PROVIDER` | Selector mirroring the co-newbiz scheme: `openai \| anthropic \| gemini \| custom` (default `custom` when a key is set; `none`/unset = off) |
+| `CO_WORKSPACE_LLM_PROVIDER` | Selector mirroring the co-newbiz scheme: `openai \| anthropic \| gemini \| zai \| custom` (default `custom` when a key is set; `none`/unset = off) |
 | `CO_WORKSPACE_LLM_BASE_URL` | OpenAI-compatible base URL (e.g. `https://api.openai.com/v1`); required for `custom`, optional override for named providers |
 | `CO_WORKSPACE_LLM_API_KEY` | The provider's API key |
 | `CO_WORKSPACE_HERMES_MODEL` | Model id (existing knob, unchanged) |
 
 Provider resolution (R6): the selector picks which env var carries the key —
 `openai`/`custom` → `OPENAI_API_KEY`, `anthropic` → `ANTHROPIC_API_KEY`,
-`gemini` → `GOOGLE_API_KEY` (hermes's env allowlist passes the `GOOGLE_` prefix) —
-and the value stamped into tenant config.yaml as `model.provider`. Unset selector
+`gemini` → `GOOGLE_API_KEY` (an exact name in hermes's env allowlist — the `GOOGLE_`
+prefix is not allowlisted because `GOOGLE_CLIENT_SECRET` is a gateway secret), `zai` →
+`ZAI_API_KEY` — and the selector value (lower-cased) is stamped into tenant config.yaml
+as `model.provider`. Unset selector
 with a key present = `custom` (backward compatible with the first key-mode release).
 
 When `llmApiKey` is configured:
 
-- **Tenant config.yaml** (generated at provisioning) stamps
-  `model.provider: custom`, `model.base_url`, and `model.default` — the Hermes
-  custom-provider contract.
-- **Turn spawn** injects the key as `OPENAI_API_KEY` into the isolated container
-  (`-e` flag) and into the process-mode spawn env (hermesEnv). The key never
-  lands on disk in the tenant home and never appears in logs.
+- **Tenant config.yaml** (re-stamped every turn) stamps `model.provider` (the
+  selector value; `custom` by default), `model.base_url`, and `model.default`.
+  *(Original text said `provider: custom` always and the key env was always
+  `OPENAI_API_KEY`; corrected by ADR-0092 Addendum 10.)*
+- **Turn spawn** injects the key under the provider's env name (see the resolution
+  table above) into the isolated container (`-e NAME`) and into the process-mode spawn
+  env (hermesEnv). *(Superseded in part by R8: the key is also stamped as
+  `model.api_key` in the tenant config.yaml, so "never lands on disk" no longer holds.)*
 - **The per-turn auth.json re-seed is skipped** — no OAuth token is copied
   anywhere, so the refresh-token reuse class is structurally gone.
 
@@ -65,7 +69,8 @@ so both paths are stamped explicitly — still per-tenant, never blanket (ADR-00
 - [x] `loadConfig` parses `CO_WORKSPACE_LLM_BASE_URL` / `CO_WORKSPACE_LLM_API_KEY`.
 - [x] `tenantConfigYaml` stamps `provider: custom` + `base_url` when configured, and
       the output is unchanged when not configured.
-- [x] `hermesSpawnArgv` (docker) and `hermesEnv` (process) inject `OPENAI_API_KEY`
+- [x] `hermesSpawnArgv` (docker) and `hermesEnv` (process) inject the provider's key
+      env name (`OPENAI_API_KEY` / `ANTHROPIC_API_KEY` / `GOOGLE_API_KEY` / `ZAI_API_KEY`)
       only when the key is configured.
 - [x] runChat skips the auth.json re-seed when the key is configured.
 - [x] compose passes both variables through (empty default = off).
@@ -89,3 +94,24 @@ Consequences and accepted risk:
 - Hardening that ships with T-20260929-006: YAML-safe quoting of stamped values,
   restrictive file mode where possible, and passing the key to docker as `-e NAME`
   (no value on argv). See ADR-0092 Addendum 9.
+
+## R6b — Provider selector: `zai` and stamped provider name
+
+`zai` is a fifth selector value (`config.ts` `resolveLlmProviderKey`): key env
+`ZAI_API_KEY`, paired with `https://api.z.ai/api/anthropic`. `model.provider` is stamped
+from `resolveLlmProviderName` — the selector value, lower-cased, default `custom`.
+Any unrecognized selector value falls back to `OPENAI_API_KEY` as the key env name.
+
+## R7 — Default reasoning effort
+
+Thinking-mandatory models (e.g. glm-5.3-flash) reject effort-less requests.
+`CO_WORKSPACE_HERMES_REASONING_EFFORT` is stamped as `agent.reasoning_effort` in
+tenant config.yaml (`tenantConfigYaml`). In key mode an unset variable resolves to
+`low` (a nullish default in `server.ts`); an explicitly empty value is preserved by
+`loadConfig` and omits the stamp. Compose uses `${VAR-low}` (no colon) so an empty
+host value stays empty instead of becoming `low`.
+
+- [x] `tenantConfigYaml` stamps `agent.reasoning_effort` only when non-empty.
+- [x] Key-mode default is `low`; empty omits.
+- [x] Acceptance R2/R6 statements corrected for `zai` and per-provider env names
+      (ADR-0092 Addendum 10).

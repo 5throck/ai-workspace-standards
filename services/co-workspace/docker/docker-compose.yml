@@ -65,8 +65,9 @@ services:
       CO_WORKSPACE_LLM_API_KEY: ${CO_WORKSPACE_LLM_API_KEY:-}
       # Default reasoning effort stamped into team config.yaml (agent.reasoning_effort).
       # glm-5.3-flash rejects effort-less requests — the default "low" lets turns run
-      # with zero operator flags; set low|high|max (or empty to omit the stamp).
-      CO_WORKSPACE_HERMES_REASONING_EFFORT: ${CO_WORKSPACE_HERMES_REASONING_EFFORT:-low}
+      # with zero operator flags; set low|high|max. No colon in `-low`: unset -> low, but
+      # an explicitly EMPTY value stays empty and omits the stamp (server.ts keeps "" as-is).
+      CO_WORKSPACE_HERMES_REASONING_EFFORT: ${CO_WORKSPACE_HERMES_REASONING_EFFORT-low}
       CO_WORKSPACE_LOGIN_REQUIRED: ${CO_WORKSPACE_LOGIN_REQUIRED:-true}
       CO_WORKSPACE_CSRF_REQUIRED: ${CO_WORKSPACE_CSRF_REQUIRED:-true}
       CO_WORKSPACE_TRUST_PROXY: ${CO_WORKSPACE_TRUST_PROXY:-false}
@@ -95,7 +96,7 @@ services:
       # failing every turn with ENOENT on the per-turn re-seed. Trade-off: the whole
       # Hermes home (config.yaml, other provider credentials) is container-visible
       # read-only; accepted for the local single-operator deployment (ADR-0092
-      # Addendum 6). The server reads only auth.json + .env from it.
+      # Addendum 7). The server reads only auth.json + .env from it.
       - ${CO_WORKSPACE_HERMES_SEED_HOME:?set CO_WORKSPACE_HERMES_SEED_HOME to a Hermes home with credentials (e.g. ~/.hermes)}:/seed-home:ro
       # CO_WORKSPACE_API_KEYS_FILE points here; without the mount readKeysFile() silently
       # returns [] and file-based keys never work in the container.

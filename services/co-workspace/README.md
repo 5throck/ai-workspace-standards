@@ -60,21 +60,36 @@ only that team's files. See [Security model](#security-model).
 
 ## Quickstart (bare metal)
 
-Requirements: bun ≥ 1.1, a Hermes Agent install (`hermes` on PATH, signed in to at least
-one provider), and this workspace checkout.
+Requirements: bun >= 1.1, a Hermes Agent install (`hermes` on PATH), this workspace
+checkout, and LLM credentials in one of two modes.
+
+**Recommended: provider key + base-url mode.** A static provider key needs no OAuth
+tokens, so the per-turn `auth.json` re-seed is skipped.
 
 ```sh
 cd services/co-workspace
 bun install
 
-CO_WORKSPACE_HERMES_SEED_HOME="$HOME/.hermes" bun run dev
+CO_WORKSPACE_LLM_PROVIDER=custom \
+CO_WORKSPACE_LLM_BASE_URL=https://api.openai.com/v1 \
+CO_WORKSPACE_LLM_API_KEY=<provider key> \
+CO_WORKSPACE_HERMES_MODEL=<model id> bun run dev
 # [co-workspace] listening on http://127.0.0.1:9030
 ```
 
-`CO_WORKSPACE_HERMES_SEED_HOME` points at a Hermes home whose `auth.json`/`.env` seed each
-team's isolated `HERMES_HOME` (its `config.yaml` is generated — trust keys scope project
-skills to the team directory, and `CO_WORKSPACE_HERMES_MODEL` stamps `model.default`).
-Without an explicit model, Hermes auto-resolves one — which may be a paid model.
+`CO_WORKSPACE_HERMES_MODEL` is stamped as `model.default` into each team's generated
+`config.yaml` (trust keys there scope project skills to the team directory). Without an
+explicit model, Hermes auto-resolves one, which may be a paid model. See the
+configuration table for the provider selector.
+
+**Legacy/alternative: seed-home (OAuth) mode**, used when no key is configured:
+
+```sh
+CO_WORKSPACE_HERMES_SEED_HOME="$HOME/.hermes" bun run dev
+```
+
+`CO_WORKSPACE_HERMES_SEED_HOME` points at a Hermes home (signed in to at least one
+provider) whose `auth.json`/`.env` seed each team's isolated `HERMES_HOME`.
 
 ## API wires (OpenAI / Anthropic / Gemini)
 
@@ -149,11 +164,11 @@ continuity handle → credential model → isolation matrix → provider disclos
 | `CO_WORKSPACE_VARIANTS` | compose: `all` | Variant allowlist — `all` auto-discovers every `status: stable` `templates/co-*` |
 | `CO_WORKSPACE_VARIANTS_INCLUDE_BETA` | `false` (compose: `true`) | Adds beta variants to the catalog (tagged `meta.status: "beta"`); also selectable per-creation in the New-team modal |
 | `CO_WORKSPACE_TEMPLATE_VERSION` | HEAD (`templates/VERSION`) | Pin to a `template-vX.Y.Z` tag |
-| `CO_WORKSPACE_HERMES_SEED_HOME` | — | Hermes home whose `auth.json`/`.env` seed team homes |
+| `CO_WORKSPACE_HERMES_SEED_HOME` | — | Legacy/alternative (no provider key): Hermes home whose `auth.json`/`.env` seed team homes |
 | `CO_WORKSPACE_HERMES_AUTH_DIR` (+`_HOST`) | `<seed>/shared` | Shared credential store — one token store across operator and teams |
 | `CO_WORKSPACE_HERMES_MODEL` | Hermes auto | Model id stamped into team `config.yaml` (`model.default`), e.g. `upstage/solar-pro4:free` |
 | `CO_WORKSPACE_LLM_PROVIDER` + `CO_WORKSPACE_LLM_BASE_URL` + `CO_WORKSPACE_LLM_API_KEY` | — (off) | **Provider key+base-url mode** (recommended; co-newbiz scheme): `PROVIDER` selects `openai \| anthropic \| gemini \| zai \| custom` (default `custom`; `none` = off). Teams authenticate with a static provider key — stamped into team `config.yaml` (`model.api_key`; hermes agent turns resolve keys through their secret scope and do not borrow ambient env) plus injected as the provider's env name (`OPENAI_API_KEY` / `ANTHROPIC_API_KEY` / `GOOGLE_API_KEY` / `ZAI_API_KEY`) — and `model.provider`/`model.base_url` are stamped into team `config.yaml`; the OAuth auth.json re-seed is skipped. `zai` pairs with `https://api.z.ai/api/anthropic` (the coding-plan endpoint; hermes's `zai` provider preserves dotted model ids like `GLM-5.3-Flash`). `BASE_URL` is required for `custom`, optional override for named providers. Unset key = legacy shared-store/auth.json path. The stamped key is plaintext on the tenant's disk — use a dedicated low-limit key (ADR-0092 Addendum 9) |
-| `CO_WORKSPACE_HERMES_REASONING_EFFORT` | `low` (key mode) | Default effort stamped into team `config.yaml` (`agent.reasoning_effort`) — thinking-mandatory models (glm-5.3-flash) reject effort-less requests, so key-mode turns run with zero operator flags. `low \| high \| max`; set empty to omit the stamp |
+| `CO_WORKSPACE_HERMES_REASONING_EFFORT` | `low` (key mode) | Default effort stamped into team `config.yaml` (`agent.reasoning_effort`) — thinking-mandatory models (glm-5.3-flash) reject effort-less requests, so key-mode turns run with zero operator flags. `low \| high \| max`; an explicitly empty value omits the stamp (compose uses `${VAR-low}`, so empty is kept, not defaulted) |
 | `CO_WORKSPACE_RUN_BUDGET_SECONDS` / `MAX_TURNS` | `300` / `100` | Wall-clock and tool-iteration ceilings per turn |
 | `CO_WORKSPACE_HERMES_TOOLSETS` / `CO_WORKSPACE_HERMES_EXTRA_ARGS` | — | Toolset scoping (`-t`) and extra CLI args per session |
 | `CO_WORKSPACE_QUOTA_WINDOW` | `lifetime` | `daily` resets per-team quota counters each UTC day |
@@ -239,13 +254,20 @@ docker compose build && docker compose up -d
   override is included, and is meant for single-operator deployments. Running the gateway
   as non-root and fronting the socket with a socket proxy are NOT done yet (follow-up of
   T-20260929-005; needs live docker validation).
-- **Known tradeoffs** (documented, by design): in docker mode each team's Hermes home is
-  re-seeded with the operator's CURRENT `auth.json` every turn — one login covers all
-  teams, and the copy is readable by the isolated turn (process mode instead binds the
-  shared token store; team-scoped token separation is future work). The dev mailer
-  writes verification mails to a local outbox instead of SMTP. Rate limiters are
-  in-memory; session-authenticated mutations rely on SameSite=Lax (the CSRF header
-  guards keyless requests).
+- **Known tradeoffs** (documented, by design):
+  - *Provider key mode (recommended)*: no OAuth token is copied, so the refresh-token-reuse
+    revocation class is gone. The key is stored in plaintext in each team's `config.yaml`
+    (`model.api_key`; hermes turns do not read it from env) and is readable by the team's own
+    tools, including in docker mode where the Hermes home is mounted read-write. Use a
+    dedicated, low-limit key (ADR-0092 Addendum 9).
+  - *Seed-home/OAuth mode (legacy)*: every turn, each team's Hermes home is re-seeded with the
+    operator's CURRENT `auth.json` — one login covers all teams, but the copy is readable by
+    the turn, and multiple homes refreshing the same single-use token can get the session
+    revoked (the reason provider key mode exists). Process mode additionally binds the shared
+    token store; team-scoped token separation is future work.
+  - The dev mailer writes verification mails to a local outbox instead of SMTP. Rate limiters
+    are in-memory; session-authenticated mutations rely on SameSite=Lax (the CSRF header
+    guards keyless requests).
 
 Known limits: provisioning is asynchronous; usage is metered but not billed; multi-team
 per variant (beyond one per user) is future work. History: Phase 2 hardening design
