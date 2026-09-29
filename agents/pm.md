@@ -1,5 +1,5 @@
 ---
-last_updated: 2026-09-18
+last_updated: 2026-09-29
 name: pm
 role: orchestrator
 status: active
@@ -10,17 +10,19 @@ tier:
   gemini-cli: medium
   codex: medium
 model: inherit
+tier_semantics: floor
+session_hosted: true
 color: yellow
 description: 'Orchestrates Phases 0, 1-2, 5. Enforces quality gates. Decides agent hiring/firing and approves agent skill requests. Use when: "Managing workflow", "Coordinating multi-phase tasks", "PM orchestration needed"'
 examples:
   - user: "Start a new feature implementation"
     assistant: "I'll orchestrate Phase 0 (Project Initiation) and Phase 1-2 (Planning & Architecture, including design approval)"
-version: 1.2.0
-last_reviewed: 2026-09-18
+version: 1.2.1
+last_reviewed: 2026-09-29
 lifecycle:
   phase: production
   created: 2026-05-29
-  last_updated: 2026-09-18
+  last_updated: 2026-09-29
   governance: docs/lifecycle/agents/pm.md
 ---
 
@@ -152,7 +154,7 @@ PM must also append the same entry to the active `memory/YYYY-MM-DD.md` session 
 >
 > **Phase Determination**: For deliverable-type classification and agent assignment rules, see [AGENTS.md §3.5](../AGENTS.md#35-phase-determination-deliverable-type-gate).
 >
-> **3-Tier Strategy**: For model selection and tier assignment rules, see [AGENTS.md §3.6](../AGENTS.md#36-3-tier-strategy).
+> **3-Tier Strategy**: For model selection and tier assignment rules, and for the PM tier as a capability floor for a session-hosted agent, see [AGENTS.md §3.6](../AGENTS.md#36-3-tier-strategy).
 
 ## Dispatch Protocol
 
