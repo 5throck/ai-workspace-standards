@@ -317,7 +317,7 @@ export function assertQuota(
 
 /** Serialized per tenant: one Hermes session writer per HERMES_HOME (state.db is a per-home
  * SQLite WAL; concurrent writers across processes are unsafe). */
-async function runChat(
+export async function runChat(
   state: GatewayState,
   rec: TenantRecord,
   message: string,
@@ -442,8 +442,16 @@ async function runChat(
         onEvent,
       );
     });
-  state.chatLocks.set(rec.tenantId, task.catch(() => undefined));
-  const result = await task;
+  const tail = task.catch(() => undefined);
+  state.chatLocks.set(rec.tenantId, tail);
+  let result: HermesTurnResult;
+  try {
+    result = await task;
+  } finally {
+    state.activeProcs.delete(rec.tenantId);
+    // Prune only when no later turn has queued behind this one.
+    if (state.chatLocks.get(rec.tenantId) === tail) state.chatLocks.delete(rec.tenantId);
+  }
   if (result.sessionId) {
     const current = state.registry.get(rec.tenantId) ?? rec;
     if (state.cfg.runtime !== "hermes") current.conversationId = result.sessionId;
@@ -458,7 +466,6 @@ async function runChat(
       input: n(tokens.input),
       output: n(tokens.output),
     });
-    state.activeProcs.delete(rec.tenantId);
     state.registry.upsert(current);
     state.turns.record(rec.tenantId, {
       sessionId: result.sessionId,
@@ -488,6 +495,48 @@ function usageSummary(result: HermesTurnResult | undefined) {
         outputTokens: n(t.output),
         totalTokens: n(t.total),
       };
+}
+
+const DELETE_WAIT_MS = 30_000;
+
+async function boundedWait(p: Promise<unknown> | undefined, ms = DELETE_WAIT_MS): Promise<void> {
+  if (!p) return;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  await Promise.race([
+    p.catch(() => undefined),
+    new Promise<void>((r) => { timer = setTimeout(r, ms); }),
+  ]);
+  if (timer) clearTimeout(timer);
+}
+
+/**
+ * Single tenant-delete implementation for the tenant DELETE route and the admin user delete
+ * (T-20260929-007). Order matters: validate paths first (a tampered record throws with the
+ * registry row, turn history and files untouched, so a corrected delete can be retried), then
+ * quiesce the tenant, remove files, and only then drop the registry/history state.
+ */
+export async function deleteTenantData(state: GatewayState, rec: TenantRecord, actor: string): Promise<void> {
+  const tenantId = rec.tenantId;
+  // T-20260928-003: a tampered/legacy record must never point any rmSync outside the tenant
+  // storage root (projectDir at the storage root would otherwise wipe <storage> itself).
+  const tenantFolder = resolve(rec.projectDir, "..");
+  const storageRoot = resolve(state.cfg.dataDir, "storage");
+  if (!tenantFolder.startsWith(storageRoot + sep) || !resolve(rec.hermesHome).startsWith(tenantFolder + sep)) {
+    throw new HttpError(500, `refusing to delete: tenant folder ${tenantFolder} escapes ${storageRoot}`);
+  }
+  state.activeProcs.get(tenantId)?.kill();
+  await boundedWait(state.provisioning.get(tenantId));
+  await boundedWait(state.chatLocks.get(tenantId));
+  rmSync(rec.projectDir, { recursive: true, force: true });
+  rmSync(rec.hermesHome, { recursive: true, force: true });
+  // The folder only ever holds the two dirs above; clear the shell, then legacy stragglers.
+  rmSync(tenantFolder, { recursive: true, force: true });
+  sweepTenantStragglers(dirname(tenantFolder), tenantId, basename(tenantFolder));
+  state.turns.deleteTenant(tenantId);
+  state.registry.delete(tenantId);
+  state.chatLocks.delete(tenantId);
+  state.activeProcs.delete(tenantId);
+  state.audit.record(actor, "tenant.delete", tenantId, rec.variant);
 }
 
 class HttpError extends Error {
@@ -970,35 +1019,8 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
       const rec = state.registry.get(tenantId);
       if (!rec) throw new HttpError(404, `tenant ${tenantId} not found`);
       requireTenantAccess(state, req, rec);
-      const inflight = state.provisioning.get(tenantId);
-      if (inflight) await inflight.catch(() => undefined);
-      const chatLock = state.chatLocks.get(tenantId);
-      if (chatLock) await chatLock.catch(() => undefined);
-      state.chatLocks.delete(tenantId);
-      state.turns.deleteTenant(tenantId);
-      const deleted = state.registry.delete(tenantId);
-      if (deleted) {
-        // T-20260928-003 (defense-in-depth): a tampered/legacy record must never point any
-        // rmSync below outside the tenant storage root — validate BEFORE removing anything.
-        // (The projectDir rmSync alone could otherwise wipe <storage> itself when a forged
-        // record points projectDir at the storage root.)
-        const tenantFolder = resolve(deleted.projectDir, "..");
-        const storageRoot = resolve(state.cfg.dataDir, "storage");
-        if (!tenantFolder.startsWith(storageRoot + sep) || !resolve(deleted.hermesHome).startsWith(tenantFolder + sep)) {
-          throw new HttpError(500, `refusing to delete: tenant folder ${tenantFolder} escapes ${storageRoot}`);
-        }
-        rmSync(deleted.projectDir, { recursive: true, force: true });
-        rmSync(deleted.hermesHome, { recursive: true, force: true });
-        // Remove the tenant's storage folder (<storage>/<principal>/<name>) — it only ever
-        // contains the two dirs above, so this clears the empty shell left behind.
-        rmSync(tenantFolder, { recursive: true, force: true });
-        // User-reported 2026-09-29: legacy layout bugs left malformed siblings (e.g.
-        // <tenantId>project) next to the canonical folder — the folder rm never matched
-        // them and deleted tenants kept straggling data on disk.
-        sweepTenantStragglers(dirname(tenantFolder), tenantId, basename(tenantFolder));
-        state.audit.record(callerPrincipal(state, req) ?? "anonymous", "tenant.delete", tenantId, deleted.variant);
-      }
-      return jsonResponse({ deleted: tenantId, name: deleted?.name ?? null });
+      await deleteTenantData(state, rec, callerPrincipal(state, req) ?? "anonymous");
+      return jsonResponse({ deleted: tenantId, name: rec.name ?? null });
     }
 
     const tenantChat = path.match(/^\/tenants\/([^/]+)\/chat$/);
@@ -1407,21 +1429,15 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
       if (target.id === caller.id) throw new HttpError(400, "cannot delete yourself");
       const disposition = new URL(req.url).searchParams.get("tenants") === "delete" ? "delete" : "archive";
       let handled = 0;
+      const errors: Array<{ tenantId: string; error: string }> = [];
       for (const t of state.registry.list()) {
         if ((t.ownerPrincipal ?? "anonymous") !== target.principal) continue;
         if (disposition === "delete") {
-          const deleted = state.registry.delete(t.tenantId);
-          if (deleted) {
-            rmSync(deleted.projectDir, { recursive: true, force: true });
-            rmSync(deleted.hermesHome, { recursive: true, force: true });
-            // Same straggler sweep as the tenant DELETE route — the user-delete path
-            // previously left the parent shell and any malformed siblings behind.
-            const folder = resolve(deleted.projectDir, "..");
-            const storageRoot = resolve(state.cfg.dataDir, "storage");
-            if (folder.startsWith(storageRoot + sep)) {
-              rmSync(folder, { recursive: true, force: true });
-              sweepTenantStragglers(dirname(folder), deleted.tenantId, basename(folder));
-            }
+          try {
+            await deleteTenantData(state, t, caller.principal);
+          } catch (err) {
+            errors.push({ tenantId: t.tenantId, error: err instanceof Error ? err.message : String(err) });
+            continue;
           }
         } else {
           t.status = "archived";
@@ -1431,7 +1447,7 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
       }
       state.users.softDeleteUser(targetId);
       state.audit.record(caller.principal, "user.delete", target.principal, `disposition=${disposition} tenants=${handled}`);
-      return jsonResponse({ deletedUser: target.principal, disposition, tenantsHandled: handled });
+      return jsonResponse({ deletedUser: target.principal, disposition, tenantsHandled: handled, ...(errors.length ? { errors } : {}) });
     }
 
     // QA-07: cancel a running turn (kills the child process; the turn settles as partial).

@@ -269,6 +269,15 @@ describe("sweepTenantStragglers (user-reported 2026-09-29: deleted tenants left 
     rmSync(principalDir, { recursive: true, force: true });
   });
 
+  test("leaves a sibling that merely starts with the tenantId (e.g. `<id>-notes`)", () => {
+    const principalDir = tempDir();
+    mkdirSync(join(principalDir, "gw-abc123-notes"), { recursive: true });
+    mkdirSync(join(principalDir, "gw-abc123project"), { recursive: true });
+    expect(sweepTenantStragglers(principalDir, "gw-abc123", "gw-abc123")).toEqual(["gw-abc123project"]);
+    expect(existsSync(join(principalDir, "gw-abc123-notes"))).toBe(true);
+    rmSync(principalDir, { recursive: true, force: true });
+  });
+
   test("a missing principal dir is a no-op", () => {
     expect(sweepTenantStragglers(join(tempDir(), "missing"), "gw-x", "gw-x")).toEqual([]);
   });
