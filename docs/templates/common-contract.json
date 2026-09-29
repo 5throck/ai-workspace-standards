@@ -13,7 +13,7 @@
   "common_agents": {
     "pm": {
       "source": "agents/pm.md",
-      "version": "1.2.0",
+      "version": "1.2.1",
       "overridable": true,
       "override_type_allowed": [
         "additive",

@@ -9,6 +9,8 @@ All notable changes to the template variants are documented here.
 - **[2026-08-30]**: Promoted `handbook` (0.4.0) and `handbook-sync-audit` (1.0.0) skills from `co-deck` to `templates/common/skills/` (`1653a84f`).
 
 ## [Unreleased]
+### Changed
+- **[2026-09-29]**: `templates/common/agents/pm.md` 1.2.1 and `templates/common/AGENTS.md` §3.6 — the PM tier is now a capability floor for a session-hosted agent on every platform (`tier_semantics: floor`, `session_hosted: true`, "Tier semantics" note). New scaffolds get the change. Existing projects do not get the AGENTS.md note through upgrade, because it sits outside the managed blocks.
 
 ## [0.8.1] - 2026-09-29
 ### Changed
