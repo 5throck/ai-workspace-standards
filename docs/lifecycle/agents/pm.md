@@ -13,6 +13,7 @@
 | 2026-06-23 | production | production | ADR-0047: Migrated co-work/co-design pm.md to frontmatter-only extends (redundant body cleanup) | lifecycle-manager |
 | 2026-06-23 | production | production | ADR-0048: Migrated co-deck pm.md domain orchestration to AGENTS.md §4.2, converted pm.md to frontmatter-only. All 6 variants now follow identical 7-line minimal frontmatter pattern. | lifecycle-manager |
 | 2026-09-18 | production | production | v1.2.0: Added Agent Hiring & Firing authority (PM-decided timing, deprecate-default exit, ADR-0061 decision records) and Skill Request Approval (agent-initiated, PM-approved) | pm |
+| 2026-09-29 | production | production | v1.2.1: PM tier defined as a capability floor for session-hosted agents (tier_semantics, session_hosted); spec 2026-09-29-pm-tier-capability-floor-design | pm |
 
 ## Acceptance Criteria
 
@@ -66,6 +67,6 @@
 
 - **Current Phase**: production
 - **Owner**: pm
-- **Last Updated**: 2026-09-18 (record refreshed after v1.2.0 hiring/firing + skill request approval rollout; Instruction Writing Duty section landed 2026-09-17)
+- **Last Updated**: 2026-09-29 (v1.2.1: PM tier defined as a capability floor)
 - **Last Reviewer**: lifecycle-manager
 
