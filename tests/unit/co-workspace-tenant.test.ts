@@ -285,7 +285,8 @@ describe("tenant config hardening (T-20260929-006)", () => {
     expect(() => tenantConfigYaml("/p", "m", { providerName: "c", providerApiKey: "k\nx: 1" })).toThrow(/newline/);
     expect(() => tenantConfigYaml("/p", "m\r", { providerName: "c" })).toThrow(/newline/);
   });
-  test("config file is written 0600, including when it already exists", () => {
+  // POSIX permission bits are not enforced on Windows (files report 0666).
+  test.skipIf(process.platform === "win32")("config file is written 0600, including when it already exists", () => {
     const d = tempDir();
     mkdirSync(d, { recursive: true });
     const f = join(d, "config.yaml");
