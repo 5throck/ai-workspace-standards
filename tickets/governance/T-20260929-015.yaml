@@ -1,0 +1,20 @@
+schemaVersion: 1
+id: T-20260929-015
+kind: manual
+title: >-
+  dev-sync step 4.51 runs 'propagate-to-templates.ts --governance-l1' without
+  --apply (a dry run that always exits 0), so root edits to
+  CLAUDE/GEMINI/AGENTS/CODEX/HERMES.md, including the COMMON-AGENTS zone, never
+  reach templates/common during /sync; pass --apply (and run the --docs variant
+  injection), fail the step when L1 stays out of sync, and add a regression test
+  (found in the PM tier-floor series, PRs 1233-1239)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-29T14:25:51.311Z'
+history:
+  - at: '2026-09-29T14:25:51.311Z'
+    from: null
+    to: backlog
+result: null
+error: null
