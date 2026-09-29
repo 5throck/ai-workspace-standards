@@ -20,9 +20,9 @@
 
    | Task | Agent | Tier | Model | Platform |
    |------|-------|------|-------|----------|
-   | Financial narrative brief | financial-analyst | High | claude-opus-5-0 | Claude Code |
-   | Legal context brief | legal-researcher | High | claude-opus-5-0 | Claude Code |
-   | Draft article | reporter | Medium | claude-sonnet-5-0 | Claude Code |
+   | Financial narrative brief | financial-analyst | High | claude-opus-5-5 | Claude Code |
+   | Legal context brief | legal-researcher | High | claude-opus-5-5 | Claude Code |
+   | Draft article | reporter | Medium | claude-sonnet-5-5 | Claude Code |
 
 4. The **Source Verification Gate** is hard: the reporter is never dispatched while the
    citation ledger shows any `UNVERIFIED` claim (2+ independent sources per claim).

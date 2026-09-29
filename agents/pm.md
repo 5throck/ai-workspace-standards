@@ -4,11 +4,11 @@ name: pm
 role: orchestrator
 status: active
 tier:
-  claude: medium        # claude-sonnet-5-0
-  gemini: medium        # gemini-3.8-flash
-  antigravity: medium   # gemini-3.8-flash
-  gemini-cli: medium    # gemini-3.8-flash
-  codex: medium         # gpt-5.6-terra
+  claude: medium
+  gemini: medium
+  antigravity: medium
+  gemini-cli: medium
+  codex: medium
 model: inherit
 color: yellow
 description: 'Orchestrates Phases 0, 1-2, 5. Enforces quality gates. Decides agent hiring/firing and approves agent skill requests. Use when: "Managing workflow", "Coordinating multi-phase tasks", "PM orchestration needed"'

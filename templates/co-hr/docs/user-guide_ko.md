@@ -1,5 +1,5 @@
 ---
-translated_from_hash: e4d898417c9d02cd2b743611515d62fb79d026e648cff134135b31ed2d59142e
+translated_from_hash: d18e58aab4046f7c5b0b1ed89c1ffc207ad796e33483dd05dbce826dc21f17fc
 ---
 # Co-HR 사용자 가이드
 
@@ -22,8 +22,8 @@ translated_from_hash: e4d898417c9d02cd2b743611515d62fb79d026e648cff134135b31ed2d
 
    | 작업 | 에이전트 | 티어 | 모델 | 플랫폼 |
    |------|----------|------|------|--------|
-   | 법령 리서치 (대상 관할권 노동법) | labor-compliance-analyst | High | claude-opus-5-0 | Claude Code |
-   | 인력 데이터 분석 | data-analyst | Medium | claude-sonnet-5-0 | Claude Code |
+   | 법령 리서치 (대상 관할권 노동법) | labor-compliance-analyst | High | claude-opus-5-5 | Claude Code |
+   | 인력 데이터 분석 | data-analyst | Medium | claude-sonnet-5-5 | Claude Code |
 
 4. 승인되면 전문가 에이전트가 실행됩니다 — 리서치는 안전한 범위에서 병렬, 쓰기는
    순차 처리됩니다. 법적 노출이 있는 engagement는 설계 착수 전 **컴플라이언스

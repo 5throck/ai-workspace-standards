@@ -19,7 +19,7 @@
 ### Production Phase
 
 - [x] Agent role clearly defined: Orchestrates Phases 0, 2, 5, 6 only
-- [x] Tier assignment: Medium-tier (claude-sonnet-5-0, gemini-3.8-flash, gpt-5.6-terra)
+- [x] Tier assignment: Medium-tier
 - [x] Single entry point: All agent dispatch goes through PM
 - [x] 3-tier strategy enforcement documented
 - [x] Agent roster specified (architect, automation-engineer, etc.)

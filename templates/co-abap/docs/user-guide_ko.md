@@ -1,5 +1,5 @@
 ---
-translated_from_hash: c900c2ecbdf27a3b4105e28984ed81bfa47d696b5e610e7fc178f245c3ededbf
+translated_from_hash: 615086131b378c7048584d0be427ac29dae1e341578f93c23d6fc67a763d4380
 ---
 # Co-ABAP 사용자 가이드
 
@@ -22,8 +22,8 @@ translated_from_hash: c900c2ecbdf27a3b4105e28984ed81bfa47d696b5e610e7fc178f245c3
 
    | 작업 | 에이전트 | 티어 | 모델 | 플랫폼 |
    |------|----------|------|------|--------|
-   | 모듈 요구사항 분석 | sd-analyst | Medium | claude-sonnet-5-0 | Claude Code |
-   | ABAP 구현 | code-writer | Medium | claude-sonnet-5-0 | Claude Code |
+   | 모듈 요구사항 분석 | sd-analyst | Medium | claude-sonnet-5-5 | Claude Code |
+   | ABAP 구현 | code-writer | Medium | claude-sonnet-5-5 | Claude Code |
    | QA 체인 | test-runner | Low | claude-haiku-4-5 | Claude Code |
 
 4. 구현은 `code-writer`가 수행하며, 모든 `WriteSource` / `EditSource` 직후에

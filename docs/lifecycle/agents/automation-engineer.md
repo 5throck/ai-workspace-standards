@@ -15,7 +15,7 @@
 ### Production Phase
 
 - [x] Agent role clearly defined: Cross-platform scripting specialist
-- [x] Tier assignment: Low-tier (claude-haiku-4-5) for simple tasks
+- [x] Tier assignment: Low-tier for simple tasks
 - [x] Script responsibilities specified: .ps1, .sh, tool maintenance
 - [x] Cross-platform compatibility expertise documented
 - [x] Successfully validated in implementation workflows

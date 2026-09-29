@@ -8,10 +8,10 @@ capabilities:
   - asset-pipeline
   - visual-design
 tier:
-  claude: medium        # claude-sonnet-5-0
-  gemini: medium        # gemini-3.8-flash
-  antigravity: medium   # gemini-3.8-flash
-  gemini-cli: medium    # gemini-3.8-flash
+  claude: medium
+  gemini: medium
+  antigravity: medium
+  gemini-cli: medium
 model: inherit
 color: magenta
 description: >

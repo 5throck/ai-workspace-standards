@@ -248,8 +248,8 @@ dispatch triggers: `AGENTS.md` Specialist Agent Roster.
 
   | Tier | Registry Model ID | `Agent(model: ...)` value (Short Alias) |
   |------|-------------------|------------------------------------------|
-  | High | `claude-opus-5-0` | `opus` |
-  | Medium | `claude-sonnet-5-0` | `sonnet` |
+  | High | `claude-opus-5-5` | `opus` |
+  | Medium | `claude-sonnet-5-5` | `sonnet` |
   | Low | `claude-haiku-4-5` | `haiku` |
 
   Omitting `model` causes the subagent to silently inherit the parent session's model regardless of the tier written in the plan table. Verify the `model` argument (e.g. `model = "haiku"`) is present on every `Agent()` call before dispatching — do not rely on `subagent_type` alone.
@@ -276,7 +276,7 @@ PM owns the composition of this project's agent team and rules on skill changes.
 <!-- COMMON-CONTEXT:END -->
 
 ---
-*co-safety.context.md version: 1.2 — PM model-ID table refreshed to current registry (claude-opus-5-0 / claude-sonnet-5-0) (2026-09-13); previous: 1.1 COMMON-CONTEXT zone added (T-20260913-002); 1.0 version footer added (2026-09-11)*
+*co-safety.context.md version: 1.2 — PM model-ID table refreshed to current registry (claude-opus-5-5 / claude-sonnet-5-5) (2026-09-13); previous: 1.1 COMMON-CONTEXT zone added (T-20260913-002); 1.0 version footer added (2026-09-11)*
 <!-- COMMON-CONTEXT:START -->
 This project follows the coding standards in the key-rules list below.
 

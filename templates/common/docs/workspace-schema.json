@@ -46,8 +46,8 @@
   },
   "models": {
     "claude": {
-      "high": "claude-opus-5-0",
-      "medium": "claude-sonnet-5-0",
+      "high": "claude-opus-5-5",
+      "medium": "claude-sonnet-5-5",
       "low": "claude-haiku-4-5"
     },
     "gemini": {

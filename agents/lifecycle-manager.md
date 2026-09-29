@@ -6,11 +6,11 @@ status: active
 version: 1.1.0
 last_reviewed: 2026-07-31
 tier:
-  claude: medium        # claude-sonnet-5-0
-  gemini: medium        # gemini-3.8-flash
-  antigravity: medium   # gemini-3.8-flash
-  gemini-cli: medium    # gemini-3.8-flash
-  codex: medium    # gpt-5.6-terra
+  claude: medium
+  gemini: medium
+  antigravity: medium
+  gemini-cli: medium
+  codex: medium
 model: inherit
 color: teal
 description: >

@@ -8,10 +8,10 @@ capabilities:
   - game-loop
   - engine-implementation
 tier:
-  claude: low        # claude-haiku-4-5
-  gemini: low        # gemini-3.8-flash
-  antigravity: low   # gemini-3.8-flash
-  gemini-cli: low    # gemini-3.8-flash
+  claude: low
+  gemini: low
+  antigravity: low
+  gemini-cli: low
 model: inherit
 color: cyan
 description: >

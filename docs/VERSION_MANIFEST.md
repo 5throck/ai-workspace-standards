@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-09-29T02:46:17.793Z
+**Generated**: 2026-09-29T03:18:58.193Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -19,15 +19,15 @@
 
 | Name | File | Tier | Model | Last Modified |
 |------|------|------|-------|---------------|
-| architect | agents/architect.md | high | inherit | 2026-09-17 |
-| auditor | agents/auditor.md | medium | inherit | 2026-09-12 |
-| automation-engineer | agents/automation-engineer.md | low | inherit | 2026-09-12 |
-| docs-writer | agents/docs-writer.md | medium | inherit | 2026-09-17 |
-| lifecycle-manager | agents/lifecycle-manager.md | medium | inherit | 2026-09-15 |
-| pm | agents/pm.md | medium | inherit | 2026-09-18 |
-| scaffolding-expert | agents/scaffolding-expert.md | low | inherit | 2026-09-12 |
-| security-expert | agents/security-expert.md | medium | inherit | 2026-09-12 |
-| skill-graph-analyst | agents/skill-graph-analyst.md | low | inherit | 2026-09-21 |
+| architect | agents/architect.md | high | inherit | 2026-09-29 |
+| auditor | agents/auditor.md | medium | inherit | 2026-09-29 |
+| automation-engineer | agents/automation-engineer.md | low | inherit | 2026-09-29 |
+| docs-writer | agents/docs-writer.md | medium | inherit | 2026-09-29 |
+| lifecycle-manager | agents/lifecycle-manager.md | medium | inherit | 2026-09-29 |
+| pm | agents/pm.md | medium | inherit | 2026-09-29 |
+| scaffolding-expert | agents/scaffolding-expert.md | low | inherit | 2026-09-29 |
+| security-expert | agents/security-expert.md | medium | inherit | 2026-09-29 |
+| skill-graph-analyst | agents/skill-graph-analyst.md | low | inherit | 2026-09-29 |
 
 ---
 
@@ -199,7 +199,7 @@
 | validate-process.ts | 1.0.0 | scripts/validate-process.ts | js-yaml |
 | validate-raci.ts | 1.2.0 | scripts/validate-raci.ts | js-yaml |
 | validate-skills.ts | 1.5.1 | scripts/validate-skills.ts | N/A |
-| validate-templates.ts | 1.50.0 | scripts/validate-templates.ts | js-yaml |
+| validate-templates.ts | 1.50.1 | scripts/validate-templates.ts | js-yaml |
 | validate-variant-readiness.ts | 1.1.0 | scripts/validate-variant-readiness.ts | N/A |
 | variant-feature.ts | 1.0.0 | scripts/variant-feature.ts | N/A |
 | verify-adr-governance.ts | 1.7.0 | scripts/verify-adr-governance.ts | N/A |
