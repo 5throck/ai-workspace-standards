@@ -100,5 +100,5 @@ services:
       # returns [] and file-based keys never work in the container.
       - ${CO_WORKSPACE_API_KEYS_FILE_HOST:-${CO_WORKSPACE_HERMES_SEED_HOME}/.env.keys}:/seed/.env.keys:ro
       - ${CO_WORKSPACE_HERMES_AUTH_DIR_HOST:-${CO_WORKSPACE_HERMES_SEED_HOME}/shared}:/seed/shared
-      # Docker isolation (sibling containers) — required when CO_WORKSPACE_ISOLATION=docker:
-      - /var/run/docker.sock:/var/run/docker.sock
+      # NOTE: the Docker socket is intentionally NOT mounted here (host-root equivalent).
+      # For CO_WORKSPACE_ISOLATION=docker, also include docker-compose.isolation.yml.
