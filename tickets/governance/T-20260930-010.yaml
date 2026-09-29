@@ -1,0 +1,18 @@
+schemaVersion: 1
+id: T-20260930-010
+kind: manual
+title: >-
+  co-workspace: perceived-latency quick win - send an immediate thinking SSE
+  comment, add heartbeats to the native and OpenAI paths, and map reasoning/tool
+  events to comment frames (see
+  docs/reports/2026-09-30-co-workspace-turn-latency-research.md)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-29T22:54:34.603Z'
+history:
+  - at: '2026-09-29T22:54:34.603Z'
+    from: null
+    to: backlog
+result: null
+error: null
