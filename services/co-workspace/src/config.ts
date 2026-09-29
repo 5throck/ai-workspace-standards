@@ -227,9 +227,11 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
 /** Provider-key mode resolution (R6, design 2026-09-29-co-workspace-provider-key-config):
  * the selector picks which env var carries the key — openai/custom → OPENAI_API_KEY,
  * anthropic → ANTHROPIC_API_KEY, gemini → GOOGLE_API_KEY (hermes's env allowlist passes
- * the GOOGLE_ prefix) — mirroring the co-newbiz scheme
- * (`openai | anthropic | gemini | custom`; unset/`none` = off, default `custom` when a
- * key is present). Null = provider-key mode is off → legacy shared-store path. */
+ * the GOOGLE_ prefix), zai → ZAI_API_KEY (hermes's `zai` provider is first-class and
+ * preserves dotted model ids on Z.AI's anthropic-compatible endpoint) — mirroring the
+ * co-newbiz scheme (`openai | anthropic | gemini | custom`; unset/`none` = off, default
+ * `custom` when a key is present). Null = provider-key mode is off → legacy
+ * shared-store path. */
 export function resolveLlmProviderKey(cfg: GatewayConfig): { name: string; value: string } | null {
   if (!cfg.llmApiKey) return null;
   const name = (cfg.llmProvider || "custom").trim().toLowerCase();
@@ -237,6 +239,7 @@ export function resolveLlmProviderKey(cfg: GatewayConfig): { name: string; value
   const keyEnv =
     name === "anthropic" ? "ANTHROPIC_API_KEY"
     : name === "gemini" ? "GOOGLE_API_KEY"
+    : name === "zai" ? "ZAI_API_KEY"
     : "OPENAI_API_KEY"; // openai | custom | any OpenAI-compatible provider name
   return { name: keyEnv, value: cfg.llmApiKey };
 }
