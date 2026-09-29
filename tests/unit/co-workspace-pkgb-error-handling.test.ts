@@ -49,13 +49,15 @@ describe("registry migrateLegacy error handling — M11", () => {
     console.error = (...args: unknown[]) => {
       errorCalls.push(String(args[0]));
     };
+    let registry: TenantRegistry | undefined;
     try {
-      const registry = new TenantRegistry(dataDir);
+      registry = new TenantRegistry(dataDir);
       expect(registry.list()).toEqual([]);
       expect(errorCalls.length).toBe(1);
       expect(errorCalls[0]).toContain("legacy registry.json unreadable");
     } finally {
       console.error = originalError;
+      registry?.close(); // Windows cannot delete an open SQLite file
       rmSync(dataDir, { recursive: true, force: true });
     }
   });

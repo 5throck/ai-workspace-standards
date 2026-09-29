@@ -43,6 +43,11 @@ export class TenantRegistry {
     this.migrateLegacy(join(dataDir, "tenants", "registry.json"));
   }
 
+  /** Release the SQLite handle (checkpoints WAL); needed before deleting the data dir on Windows. */
+  close(): void {
+    this.db.close();
+  }
+
   private migrateLegacy(jsonPath: string): void {
     try {
       if (!existsSync(jsonPath)) return;

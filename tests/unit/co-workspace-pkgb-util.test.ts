@@ -1,7 +1,7 @@
 /** Package B tests: M15 util.ts exports. */
 
 import { afterAll, describe, expect, test } from "bun:test";
-import { mkdirSync, rmSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { genId, readJson, writeJson, moveDir, tail } from "../../services/co-workspace/src/util";
@@ -26,7 +26,7 @@ describe("readJson — M15", () => {
     mkdirSync(dir, { recursive: true });
     try {
       const file = join(dir, "bad.json");
-      Bun.write(file, "{invalid}");
+      writeFileSync(file, "{invalid}");
       expect(readJson(file)).toBeNull();
     } finally {
       rmSync(dir, { recursive: true, force: true });
@@ -82,12 +82,11 @@ describe("moveDir — M15", () => {
     const dst = join(base, "dst");
     mkdirSync(src, { recursive: true });
     try {
-      Bun.write(join(src, "file.txt"), "content");
+      // Synchronous write: an un-awaited async write would race the rename (and fail on Windows).
+      writeFileSync(join(src, "file.txt"), "content");
       moveDir(src, dst);
-      const content = await Bun.file(join(dst, "file.txt")).text();
-      expect(content).toBe("content");
-      // Note: on same filesystem, src is renamed, so it won't exist
-      // But the test structure may not allow checking this reliably
+      expect(readFileSync(join(dst, "file.txt"), "utf8")).toBe("content");
+      expect(existsSync(src)).toBe(false);
     } finally {
       rmSync(base, { recursive: true, force: true });
     }
