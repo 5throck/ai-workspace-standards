@@ -111,17 +111,21 @@ describe("Google SSO hardening (M1/M2/H8)", () => {
     });
   }
 
-  test("sso login sets two cookies", async () => {
-    enableGoogle();
-    for (const secure of [true, false]) {
+  // makeState opens a SQLite registry, which is slow on Windows CI.
+  function assertSSOLoginSetsTwoCookies(secure: boolean) {
+    return async () => {
+      enableGoogle();
       const { state } = makeState({ CO_WORKSPACE_COOKIE_SECURE: secure ? "true" : "false" });
       const res = await handleRequest(state, new Request("http://127.0.0.1/auth/google/login"));
       expect(res.status).toBe(302);
       const cookies = res.headers.getSetCookie();
       expect(cookies.length).toBe(2);
       for (const c of cookies) expect(c.includes("Secure")).toBe(secure);
-    }
-  });
+    };
+  }
+
+  test("sso login sets two cookies (Secure)", assertSSOLoginSetsTwoCookies(true), 20000);
+  test("sso login sets two cookies (not Secure)", assertSSOLoginSetsTwoCookies(false), 20000);
 
   test("sso callback rejects mismatched state with 400", async () => {
     enableGoogle({ sub: "s1", email: "x@example.com" });
