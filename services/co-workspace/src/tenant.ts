@@ -13,14 +13,17 @@ import { genId, readJson, writeJson } from "./util";
  * canonical tree the delete route already removes, legacy layout bugs had written
  * malformed siblings next to it (e.g. `<tenantId>project` with the separator swallowed)
  * that no later delete ever matched. After the canonical folder is removed, sweep
- * tenantId-prefixed stragglers under the principal storage dir. Returns what was removed.
+ * the exact malformed shapes (`<tenantId>project`, `<tenantId>hermes-home`) under the principal storage dir. Returns what was removed.
  */
 export function sweepTenantStragglers(principalDir: string, tenantId: string, keepFolderName: string): string[] {
   const removed: string[] = [];
   if (!existsSync(principalDir)) return removed;
   for (const entry of readdirSync(principalDir, { withFileTypes: true })) {
     if (!entry.isDirectory()) continue;
-    if (entry.name === keepFolderName || !entry.name.startsWith(tenantId)) continue;
+    // Only the exact legacy malformed shapes (separator swallowed) — never a bare prefix match,
+    // which would also hit unrelated siblings such as `<tenantId>-notes`.
+    if (entry.name === keepFolderName) continue;
+    if (entry.name !== `${tenantId}project` && entry.name !== `${tenantId}hermes-home`) continue;
     rmSync(join(principalDir, entry.name), { recursive: true, force: true });
     removed.push(entry.name);
   }
