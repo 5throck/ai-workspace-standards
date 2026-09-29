@@ -6,6 +6,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-09-30](2026-09-30.md) | fix(services): stop docker-mode turn containers on cancel and reap orphans on restart |
 | [2026-09-29](2026-09-29.md) | docs(review): daily fleet review 2026-09-29 |
 | [2026-09-28](2026-09-28.md) | chore: update |
 | [2026-09-27](2026-09-27.md) | docs(review): daily fleet review 2026-09-27 |
@@ -13,7 +14,7 @@
 | [2026-09-25](2026-09-25.md) | fix(platform): fix six P1 platform-parity bugs (codex omission/overwrite class) |
 | [2026-09-24](2026-09-24.md) | feat(audit): add template artifact hygiene check (spec 2026-09-24-template-hygiene-audit-design) |
 | [2026-09-23](2026-09-23.md) | fix(templates): port Language Policy section into CODEX.md platform twin (ADR-0077) |
-| [2026-09-22](2026-09-22.md) | fix(upgrade-policy): claim codex mirrors before the blanket rule and update unit fixtures |
+| 2026-09-22 | fix(upgrade-policy): claim codex mirrors before the blanket rule and update unit fixtures |
 | 2026-09-21 | chore: update |
 | 2026-09-20 | feat(governance): implement ADR-0084 actor model and graph delta log |
 | 2026-09-12 | docs(consistency): resolve stale claims across upgrade-policy doc fleet (audit comment, non-goals, gitignore merge) |

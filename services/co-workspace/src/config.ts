@@ -71,6 +71,8 @@ export interface GatewayConfig {
   isolation: "process" | "docker";
   runtimeImage: string;
   dockerBin: string;
+  /** Label value tagging this gateway's sibling turn containers so the boot reaper only removes its own. */
+  instanceId: string;
   /** Host-side path of `dataDir` — used by docker isolation to mount tenant dirs into sibling
    * containers when the gateway itself runs inside a container (paths must match on the host). */
   dataDirHost?: string;
@@ -243,6 +245,7 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     isolation: env.CO_WORKSPACE_ISOLATION === "docker" ? "docker" : "process",
     runtimeImage: env.CO_WORKSPACE_RUNTIME_IMAGE ?? "co-workspace-runtime:latest",
     dockerBin: env.CO_WORKSPACE_DOCKER_BIN ?? "docker",
+    instanceId: env.CO_WORKSPACE_INSTANCE_ID || "default",
     dataDirHost: env.CO_WORKSPACE_DATA_DIR_HOST || undefined,
     includeBeta: env.CO_WORKSPACE_VARIANTS_INCLUDE_BETA === "true" || env.CO_WORKSPACE_VARIANTS_INCLUDE_BETA === "1",
     loginRequired: env.CO_WORKSPACE_LOGIN_REQUIRED === "true",

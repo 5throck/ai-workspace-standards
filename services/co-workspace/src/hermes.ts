@@ -72,6 +72,13 @@ export interface HermesSpawnOptions {
     memory?: string;
     cpus?: string;
     pidsLimit?: number;
+    /** Docker CLI binary (CO_WORKSPACE_DOCKER_BIN); default "docker". */
+    dockerBin?: string;
+    /** Container name — enables kill-by-name on cancel/delete/disconnect. */
+    name?: string;
+    tenantId?: string;
+    /** Gateway instance id label for the boot reaper. */
+    instance?: string;
   };
   /** Shared Nous credential store (HERMES_SHARED_AUTH_DIR) — one token store across the
    * operator + all tenants, refreshed in place (ADR-0092 Addendum 4). */
@@ -115,14 +122,37 @@ export function hermesArgs(
 /** Full spawn argv for the configured isolation mode (D3): process mode runs the inner command
  * directly; docker mode wraps it in an ephemeral sibling container (`docker run --rm -i`) with
  * only the tenant project dir and Hermes home mounted — nothing else is reachable. */
+/** Unique, docker-valid container name for one turn (<= 63 chars). */
+export function turnContainerName(tenantId: string): string {
+  return "co-workspace-turn-" + tenantId.replace(/[^a-zA-Z0-9_.-]/g, "-").slice(0, 36) + "-" + crypto.randomUUID().slice(0, 8);
+}
+
+function stopContainer(bin: string, name: string): void {
+  try {
+    const p = Bun.spawn([bin, "kill", name], { stdout: "ignore", stderr: "ignore" });
+    p.exited.catch(() => {});
+  } catch {
+    /* best effort */
+  }
+}
+
 export function hermesSpawnArgv(o: HermesSpawnOptions): string[] {
   const inner = hermesArgs(o, o.container ? { projectDir: MOUNT_PROJECT } : {});
   if (!o.container) return inner;
   return [
-    "docker",
+    o.container.dockerBin ?? "docker",
     "run",
     "--rm",
     "--interactive",
+    // --init: without a PID-1 reaper the container ignores SIGTERM from the docker CLI.
+    "--init",
+    ...(o.container.name ? ["--name", o.container.name] : []),
+    "--label",
+    "co-workspace.turn=1",
+    ...(o.container.tenantId
+      ? ["--label", `co-workspace.tenant=${o.container.tenantId.replace(/[^a-zA-Z0-9_.-]/g, "-")}`]
+      : []),
+    ...(o.container.instance ? ["--label", `co-workspace.instance=${o.container.instance}`] : []),
     // SEC-10: resource caps + privilege hardening (network stays open — the runtime needs
     // provider egress; egress policy is the iron-proxy path).
     ...(o.container.memory ? ["--memory", o.container.memory] : []),
@@ -238,7 +268,18 @@ export async function runHermesTurn(
       ? dockerCliEnv(o, o.env ?? process.env)
       : hermesEnv(o, o.env ?? process.env),
   });
-  o.onSpawn?.(proc); // QA-07: cancel support — the server can kill a running turn
+  const c = o.container;
+  // Killing the `docker run` CLI does not stop the container; kill it by name too.
+  o.onSpawn?.(
+    c?.name
+      ? {
+          kill: (code?: number) => {
+            proc.kill(code);
+            stopContainer(c.dockerBin ?? "docker", c.name!);
+          },
+        }
+      : proc,
+  ); // QA-07: cancel support — the server can kill a running turn
   proc.stdin.write(o.message);
   proc.stdin.end();
 

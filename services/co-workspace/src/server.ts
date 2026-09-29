@@ -28,6 +28,7 @@ import { handleFiles } from "./routes/files";
 import { handleAuth } from "./routes/auth";
 import { handleAdmin } from "./routes/admin";
 import { handleGemini } from "./routes/gemini";
+import { reapOrphanedTurns } from "./reaper";
 
 export { resolveClientIp } from "./http";
 export { createState } from "./state";
@@ -128,6 +129,9 @@ if (import.meta.main) {
   if (swept) console.log(`[co-workspace] outbox sweep: ${swept} expired file(s) removed`);
   const openWarn = openModeWarning(state.cfg);
   if (openWarn) console.warn(openWarn);
+  // chatLocks/activeProcs are memory-only: docker mode is covered by the orphan reaper below,
+  // process mode children die with the gateway container (bare-host `bun`: stop the process
+  // group or accept up to runBudgetSeconds of orphan runtime).
   // P2-5: a restart orphans in-flight "provisioning" records (the promise map is memory-only).
   for (const t of state.registry.list()) {
     if (t.status === "provisioning") {
@@ -147,6 +151,9 @@ if (import.meta.main) {
       process.exit(1);
     }
     console.log(`[co-workspace] docker isolation: server ${probe.version}`);
+    const reap = reapOrphanedTurns(state.cfg);
+    if (reap.error) console.warn(`[co-workspace] orphan turn reap failed: ${reap.error}`);
+    else console.log(`[co-workspace] orphan turn reap: found ${reap.found}, removed ${reap.killed}`);
   }
   const server = createServer(state);
   console.log(`[co-workspace] listening on http://${state.cfg.host}:${server.port}`);
