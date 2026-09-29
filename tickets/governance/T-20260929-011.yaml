@@ -1,0 +1,16 @@
+schemaVersion: 1
+id: T-20260929-011
+kind: manual
+title: >-
+  validator-hardening: add a co-workspace env-parity check diffing config.ts env
+  reads against docker-compose.yml and .env.sample
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-29T04:55:25.707Z'
+history:
+  - at: '2026-09-29T04:55:25.707Z'
+    from: null
+    to: backlog
+result: null
+error: null
