@@ -5,7 +5,7 @@
  */
 import { test, expect } from "bun:test";
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync, existsSync } from "node:fs";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 import { tmpdir } from "node:os";
 import { findAgentFiles } from "../../scripts/agent-lifecycle-audit";
 import { findMalformedRegistryRows } from "../../scripts/verify-scripts";
@@ -17,7 +17,7 @@ test("findAgentFiles counts named agents in agents/ even without role/color", ()
     writeFileSync(join(root, "agents", "a.md"), "---\nname: a\ndescription: does a\n---\nbody\n");
     writeFileSync(join(root, "agents", "nameless.md"), "---\ndescription: x\n---\n");
     writeFileSync(join(root, "agents", "README_ko.md"), "---\nname: readme\n---\n");
-    const found = findAgentFiles(join(root, "agents"), 0, true).map((f) => f.split("/").pop());
+    const found = findAgentFiles(join(root, "agents"), 0, true).map((f) => basename(f));
     expect(found).toEqual(["a.md"]);
   } finally {
     rmSync(root, { recursive: true, force: true });
