@@ -1,0 +1,17 @@
+schemaVersion: 1
+id: T-20260930-006
+kind: manual
+title: >-
+  co-workspace: tenant.delete leaves an orphaned tenant dir under data/tenants
+  (audit.db row 60 deleted 09-28, directory survives with empty
+  hermes-home/project) — rm the tenant root on delete
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-09-29T16:40:39.622Z'
+history:
+  - at: '2026-09-29T16:40:39.622Z'
+    from: null
+    to: backlog
+result: null
+error: null

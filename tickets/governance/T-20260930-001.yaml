@@ -1,0 +1,18 @@
+schemaVersion: 1
+id: T-20260930-001
+kind: manual
+title: >-
+  lifecycle: stamp the 8 agent-record refreshes from commit 5b2778b8 — model-ID
+  comment drops edited
+  docs/lifecycle/agents/{architect,auditor,automation-engineer,docs-writer,lifecycle-manager,scaffolding-expert,security-expert,skill-graph-analyst}.md
+  without Last Updated bumps or history rows (convention per auditor record)
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-09-29T16:40:39.561Z'
+history:
+  - at: '2026-09-29T16:40:39.561Z'
+    from: null
+    to: backlog
+result: null
+error: null

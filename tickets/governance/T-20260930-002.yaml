@@ -1,0 +1,17 @@
+schemaVersion: 1
+id: T-20260930-002
+kind: manual
+title: >-
+  registry-hygiene: repair the malformed SCRIPTS.md row for
+  regenerate-agents-md.ts (duplicated cells '| —| —| L0 | —|') that makes
+  verify-scripts unable to parse its pair (1 standing warning)
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-09-29T16:40:39.574Z'
+history:
+  - at: '2026-09-29T16:40:39.574Z'
+    from: null
+    to: backlog
+result: null
+error: null
