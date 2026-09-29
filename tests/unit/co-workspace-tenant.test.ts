@@ -30,6 +30,18 @@ describe("GatewayConfig (loadConfig)", () => {
     expect(cfg.hermesSeedHome).toBeUndefined();
   });
 
+  test("provider key+base-url parse (design 2026-09-29-co-workspace-provider-key-config)", () => {
+    const cfg = loadConfig({
+      CO_WORKSPACE_LLM_BASE_URL: "https://api.example.com/v1",
+      CO_WORKSPACE_LLM_API_KEY: "sk-test",
+    });
+    expect(cfg.llmBaseUrl).toBe("https://api.example.com/v1");
+    expect(cfg.llmApiKey).toBe("sk-test");
+    const off = loadConfig({});
+    expect(off.llmBaseUrl).toBeUndefined();
+    expect(off.llmApiKey).toBeUndefined();
+  });
+
   test("env overrides apply, variants split on commas, junk numbers fall back", () => {
     const cfg = loadConfig({
       CO_WORKSPACE_HOST: "0.0.0.0",
@@ -182,6 +194,19 @@ describe("seedHermesHome — per-tenant isolation and ADR-0088 D7 trust scoping"
     const yaml = tenantConfigYaml("/data/tenants/gw-1/project");
     expect(yaml).toContain("- /data/tenants/gw-1/project");
     expect(yaml.match(/trusted_project_dirs:/g)?.length).toBe(1);
+  });
+
+  test("provider key mode stamps the custom provider and base_url (2026-09-29 design)", () => {
+    const yaml = tenantConfigYaml("/data/tenants/gw-1/project", "my-model", {
+      providerBaseUrl: "https://api.example.com/v1",
+    });
+    expect(yaml).toContain('default: "my-model"');
+    expect(yaml).toContain("provider: custom");
+    expect(yaml).toContain('base_url: "https://api.example.com/v1"');
+    // Isolated turns mount the same project at /work/project — both trust paths explicit.
+    expect(yaml).toContain("- /work/project");
+    const withoutProvider = tenantConfigYaml("/data/tenants/gw-1/project", "my-model");
+    expect(withoutProvider).not.toContain("provider: custom");
   });
 });
 

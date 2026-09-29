@@ -152,6 +152,7 @@ continuity handle → credential model → isolation matrix → provider disclos
 | `CO_WORKSPACE_HERMES_SEED_HOME` | — | Hermes home whose `auth.json`/`.env` seed team homes |
 | `CO_WORKSPACE_HERMES_AUTH_DIR` (+`_HOST`) | `<seed>/shared` | Shared credential store — one token store across operator and teams |
 | `CO_WORKSPACE_HERMES_MODEL` | Hermes auto | Model id stamped into team `config.yaml` (`model.default`), e.g. `upstage/solar-pro4:free` |
+| `CO_WORKSPACE_LLM_BASE_URL` + `CO_WORKSPACE_LLM_API_KEY` | — (off) | **Provider key+base-url mode** (recommended): teams authenticate with a static provider key against an OpenAI-compatible base URL — the key is injected as `OPENAI_API_KEY` into the turn, `model.provider: custom`/`model.base_url` are stamped into team `config.yaml`, and the OAuth auth.json re-seed is skipped. Unset = legacy shared-store/auth.json path |
 | `CO_WORKSPACE_RUN_BUDGET_SECONDS` / `MAX_TURNS` | `300` / `100` | Wall-clock and tool-iteration ceilings per turn |
 | `CO_WORKSPACE_HERMES_TOOLSETS` / `CO_WORKSPACE_HERMES_EXTRA_ARGS` | — | Toolset scoping (`-t`) and extra CLI args per session |
 | `CO_WORKSPACE_QUOTA_WINDOW` | `lifetime` | `daily` resets per-team quota counters each UTC day |

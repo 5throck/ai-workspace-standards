@@ -55,6 +55,13 @@ services:
       HERMES_INFERENCE_MODEL: ${HERMES_INFERENCE_MODEL:-}
       HERMES_INFERENCE_PROVIDER: ${HERMES_INFERENCE_PROVIDER:-}
       CO_WORKSPACE_HERMES_MODEL: ${CO_WORKSPACE_HERMES_MODEL:-}
+      # Provider key+base-url mode (design 2026-09-29-co-workspace-provider-key-config):
+      # set BOTH to have isolated turns authenticate with a static provider key
+      # (injected as OPENAI_API_KEY) against an OpenAI-compatible base_url — instead of
+      # the per-turn auth.json re-seed (OAuth refresh-token reuse revoked the Nous
+      # session, 2026-09-29). Leave empty to keep the legacy shared-store path.
+      CO_WORKSPACE_LLM_BASE_URL: ${CO_WORKSPACE_LLM_BASE_URL:-}
+      CO_WORKSPACE_LLM_API_KEY: ${CO_WORKSPACE_LLM_API_KEY:-}
       CO_WORKSPACE_LOGIN_REQUIRED: ${CO_WORKSPACE_LOGIN_REQUIRED:-true}
       CO_WORKSPACE_CSRF_REQUIRED: ${CO_WORKSPACE_CSRF_REQUIRED:-true}
       CO_WORKSPACE_TENANT_MAX_PER_PRINCIPAL: ${CO_WORKSPACE_TENANT_MAX_PER_PRINCIPAL:-10}
