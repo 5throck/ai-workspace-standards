@@ -7,21 +7,32 @@
 # ONLY and cannot inspect the container-create body, so a compromised gateway can still
 # create a privileged container or bind-mount `/`. This REDUCES but does NOT REMOVE
 # host-root equivalence. Follow-up: rootless Docker or a create-body-validating broker.
+# CONTAINERS=1 also lets the gateway LIST and INSPECT every container on this Docker daemon
+# (including other projects' containers; verified live 2026-09-30: `docker ps -a` listed all
+# of them and `docker inspect` returns their environment). Reading container logs is also
+# part of the CONTAINERS group but was not tested. It cannot exec into containers or touch
+# images, volumes, networks or `docker info` (all 403, verified live). Do not run other
+# sensitive workloads on the same daemon as the gateway.
 # Single-operator deployments only. The runtime image must be pre-built (IMAGES=0 makes a
 # missing image fail fast instead of pulling).
 services:
   docker-proxy:
-    # Pin a digest for production; the version tag is unverified here.
+    # Tag 0.3.0 verified to exist (2026-09-30); pin a digest for production.
     image: tecnativa/docker-socket-proxy:0.3.0
     restart: unless-stopped
-    read_only: true
+    # No `read_only: true`: the image entrypoint renders /usr/local/etc/haproxy/haproxy.cfg from
+    # haproxy.cfg.template in the same directory at start-up, so a read-only root filesystem
+    # crash-loops the container (observed live), and a tmpfs over that directory hides the
+    # template. Hardening left in place: read-only socket mount, no published ports, an
+    # internal-only network.
     tmpfs: [/run]
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       # Needed for `docker run` (create/start/attach/wait), `docker kill` on cancel and the
-      # boot reaper's `docker ps` / `docker rm -f`. The exact flag set for
-      # attach/wait/kill/rm through the proxy is UNVERIFIED until a live run.
+      # boot reaper's `docker ps` / `docker rm -f`. Verified live (2026-09-30, Docker 29.8.1):
+      # create/attach/start/wait, kill (cancel), rm -f (reaper) and `docker version` (startup
+      # probe) all work with exactly this flag set; exec/image/volume/network/info are 403.
       CONTAINERS: 1
       POST: 1
       DELETE: 1

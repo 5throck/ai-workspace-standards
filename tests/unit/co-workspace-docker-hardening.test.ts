@@ -69,6 +69,17 @@ describe("isolation override", () => {
       if (m) expect(m[1]).toBe("0");
     }
   });
+  test("proxy enables the verified endpoint groups the gateway needs", () => {
+    // Verified live (Docker 29.8.1): kill (cancel), rm -f (reaper), start/stop need these.
+    const p = noComments(proxy);
+    for (const k of ["CONTAINERS", "POST", "DELETE", "ALLOW_START", "ALLOW_STOP", "ALLOW_RESTARTS"]) {
+      expect(p).toMatch(new RegExp(`^\\s+${k}: 1`, "m"));
+    }
+  });
+  test("proxy root filesystem stays writable (entrypoint renders haproxy.cfg at start)", () => {
+    // `read_only: true` crash-loops tecnativa/docker-socket-proxy:0.3.0 (observed live).
+    expect(noComments(proxy)).not.toMatch(/read_only:\s*true/);
+  });
   test("proxy publishes nothing; dockerapi is internal", () => {
     expect(proxy).not.toContain("ports:");
     expect(iso).toMatch(/networks:\n {2}dockerapi:\n {4}internal: true/);

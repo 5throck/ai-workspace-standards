@@ -263,8 +263,10 @@ docker compose build && docker compose up -d
   / `_GID`. On Linux, `chown -R 10000:10000` the data dir (`CO_WORKSPACE_DATA_DIR_HOST`) and
   the shared auth dir once, and make the workspace clone writable by uid 10000; macOS Docker
   Desktop maps ownership, so no chown is needed. The gateway skips its best-effort tenant
-  chown when not root and logs `running as uid N` at boot. Live behavior on the hermes base
-  image is unverified.
+  chown when not root and logs `running as uid N` at boot. Verified live (2026-09-30, macOS
+  Docker Desktop): the hermes base image already has uid/gid 10000, and as that uid the image
+  runs bun, git and the docker CLI with a writable `HOME`; provisioning, turns and delete work
+  with no permission errors. Linux host bind-mount ownership is not yet verified.
 - **Docker socket** — the gateway does not mount the raw socket. `docker-compose.isolation.yml`
   adds a `docker-proxy` service (tecnativa/docker-socket-proxy, read-only socket mount, no
   published ports) on an internal-only `dockerapi` network; the gateway uses
@@ -273,9 +275,17 @@ docker compose build && docker compose up -d
   system and more; `IMAGES=0` means a missing runtime image fails fast instead of pulling.
   **Residual risk**: the proxy filters by endpoint only and cannot inspect the create body, so
   a compromised gateway can still create a privileged container or bind-mount `/` — this
-  reduces but does NOT remove host-root equivalence (follow-up: rootless Docker or a
-  create-body-validating broker). The exact proxy flag set for run/attach/wait/kill/rm is
-  unverified until a live run. Single-operator deployments only.
+  reduces but does NOT remove host-root equivalence (follow-up: rootless Docker or a broker
+  exposing only run/list/kill for its own labeled containers). Confirmed live: with
+  `CONTAINERS=1` the gateway can list every container on the daemon (`docker ps -a`) and
+  `docker inspect` returns container environment variables; container logs share that endpoint
+  group (not tested). Do not run other sensitive workloads on the same Docker daemon as the
+  gateway. Verified live (2026-09-30, Docker 29.8.1): create/attach/start/wait, cancel (kill)
+  and the boot orphan reaper (ps + rm -f) work through the proxy with `INFO=0`, and image,
+  volume, network, exec and info calls return 403. The proxy root filesystem must stay
+  writable (its entrypoint renders `haproxy.cfg` at start; `read_only: true` crash-loops it).
+  Not yet verified: a real provider turn end to end, Google SSO, legacy OAuth seed mode.
+  Single-operator deployments only.
 - **Seed home is optional** — the base compose no longer mounts a Hermes home. Legacy OAuth
   mode adds `docker-compose.seed.yml` (mounts `CO_WORKSPACE_HERMES_SEED_HOME` read-only at
   `/seed-home`); provider key mode needs no seed home. The `.env.keys` and shared-store host
