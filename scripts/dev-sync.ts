@@ -1,4 +1,7 @@
-// @version 1.21.0
+// @version 1.21.1
+// v1.21.1 (2026-09-29): step 3.9 auto-E5 parses `git status --porcelain -uall` by column
+//          (slice(3)) — the old `^\S+\s+` strip left `M path` for unstaged-only lines and
+//          directory entries for untracked dirs, so upgrade diffs never matched the manifest.
 // v1.21.0: unborn-main branch detection + fresh-repo remote bootstrap
 //           (T-20260926-031, spec
 //           docs/designs/2026-09-26-dev-sync-unborn-main-bootstrap-design.md).
@@ -539,9 +542,9 @@ if (fs.existsSync(specRegPath)) {
         if (fs.existsSync(manifestPath)) {
             try {
                 const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
-                const st = await $`git status --porcelain`.quiet().nothrow();
+                const st = await $`git status --porcelain -uall`.quiet().nothrow();
                 const changedFiles = String(st.stdout ?? '').split('\n')
-                    .map(l => l.replace(/^\S+\s+/, '').trim().replace(/^"|"$/g, ''))
+                    .map(l => l.slice(3).replace(/^.* -> /, '').trim().replace(/^"|"$/g, ''))
                     .filter(Boolean);
                 if (isDeliveredDiff(changedFiles, manifest.files ?? [])) {
                     console.log(`${YELLOW}ℹ️  Step 3.9: diff fully explained by upgrade delivery — auto-applying E5 (sync-only).${RESET}`);

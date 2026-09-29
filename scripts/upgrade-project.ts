@@ -1,5 +1,11 @@
 #!/usr/bin/env bun
-// @version 1.57.0
+// @version 1.58.0
+// v1.58.0 (2026-09-29): agents/ SYNC renders `[Project Name]` / `{{PROJECT_NAME}}` with the
+//          project name before the drift compare and on every write — raw template text
+//          made scaffolded names read as drift and reverted them to the placeholder
+//          (co-work v0.8.1 upgrade; co-deck/co-design/co-develop agents already hit).
+//          Delivery manifest now parses `git status --porcelain -uall` by column, so
+//          unstaged-only paths lose their status prefix and new directories list files.
 // v1.57.0 (2026-09-29): agent tier-comment migration — strips stale `# <model-id>`
 //          comments from project agents/*.md tier lines (scaffold-time copies such as
 //          i18n-specialist.md are never re-delivered); the registry resolves models.
@@ -1909,12 +1915,21 @@ const projectManifestSkills: Set<string> = (() => {
 // ── SYNC_IF_NEWER: agents/ ────────────────────────────────────────────────────
 // Writes the template agent content over the project file, preserving the
 // project's local `lifecycle:` frontmatter block (L3 governance records).
+// Agent templates carry scaffold placeholders (`[Project Name]`); render only the
+// project-name tokens so the drift compare and every write see what the scaffold
+// produced — raw template text reverted substituted names on each upgrade.
+function renderAgentTemplate(tplFile: string): string {
+  return readFileSync(tplFile, 'utf8')
+    .replace(/\[Project Name\]/g, basename(projectDir))
+    .replace(/\{\{PROJECT_NAME\}\}/g, basename(projectDir));
+}
+
 function writeAgentWithLifecycle(tplFile: string, projFile: string): void {
+  const rendered = renderAgentTemplate(tplFile);
   if (existsSync(projFile)) {
-    const merged = preserveLifecycleFrontmatter(readFileSync(tplFile, 'utf8'), readFileSync(projFile, 'utf8'));
-    writeFileSync(projFile, merged);
+    writeFileSync(projFile, preserveLifecycleFrontmatter(rendered, readFileSync(projFile, 'utf8')));
   } else {
-    copyFileSync(tplFile, projFile);
+    writeFileSync(projFile, rendered);
   }
 }
 
@@ -1956,7 +1971,7 @@ for (const agentsDir of tplAgentsDirs) {
         continue;
       }
       console.log(`  NEW   ${rel}  (none) → ${tplVer}`);
-      if (!dryRun) { mkdirSync(dirname(projFile), { recursive: true }); copyFileSync(tplFile, projFile); }
+      if (!dryRun) { mkdirSync(dirname(projFile), { recursive: true }); writeAgentWithLifecycle(tplFile, projFile); }
       console.log(`  ${dryTag}COPIED: ${rel}`);
       syncChanged++;
     } else if (!projVer) {
@@ -1974,7 +1989,7 @@ for (const agentsDir of tplAgentsDirs) {
       if (!dryRun) writeAgentWithLifecycle(tplFile, projFile);
       console.log(`  ${dryTag}COPIED: ${rel}`);
       syncChanged++;
-    } else if (lifecyclelessText(readFileSync(tplFile, 'utf8')) !== lifecyclelessText(readFileSync(projFile, 'utf8'))) {
+    } else if (lifecyclelessText(renderAgentTemplate(tplFile)) !== lifecyclelessText(readFileSync(projFile, 'utf8'))) {
       // v1.35.0 drift reconciliation (T-20260920-002): equal frontmatter version
       // but lifecycle-stripped content differs — the same version-gated skip that
       // v1.17.2 fixed for scripts/ (i18n-specialist's 2026-09-15 codex-tier update
@@ -3288,9 +3303,11 @@ if (syncChanged > 0 && existsSync(syncSkillsScript)) {
 // hardening design). Written in apply mode only, before sync-skills runs.
 if (!dryRun) {
   try {
-    const por = spawnSync('git', ['-C', projectDir, 'status', '--porcelain'], { encoding: 'utf8' });
+    const por = spawnSync('git', ['-C', projectDir, 'status', '--porcelain', '-uall'], { encoding: 'utf8' });
     const files = (por.stdout || '').split('\n')
-      .map(l => l.replace(/^\S+\s+/, '').trim().replace(/^"|"$/g, ''))
+      // XY status is two columns + space; the first column is blank for unstaged-only
+      // changes, so strip by position. -uall lists new files, not their directories.
+      .map(l => l.slice(3).replace(/^.* -> /, '').trim().replace(/^"|"$/g, ''))
       .filter(Boolean);
     mkdirSync(join(projectDir, '.claude'), { recursive: true });
     writeFileSync(
