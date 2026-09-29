@@ -1,0 +1,13 @@
+# Legacy OAuth mode only: mounts the operator's Hermes home into the gateway.
+# Provider key mode (CO_WORKSPACE_LLM_*) does not need it.
+# Usage: COMPOSE_FILE=docker-compose.yml:docker-compose.isolation.yml:docker-compose.seed.yml
+services:
+  co-workspace:
+    environment:
+      CO_WORKSPACE_HERMES_SEED_HOME: /seed-home
+    volumes:
+      # SEC-07 note (2026-09-29 amendment): mounted as a DIRECTORY (read-only). Per-file
+      # binds (auth.json, .env) pin the inode and silently broke whenever Hermes refreshed
+      # its credentials on the host. Trade-off: the whole Hermes home is container-visible
+      # read-only; accepted for the local single-operator deployment (ADR-0092 Addendum 7).
+      - ${CO_WORKSPACE_HERMES_SEED_HOME:?set CO_WORKSPACE_HERMES_SEED_HOME to a Hermes home with credentials (e.g. ~/.hermes)}:/seed-home:ro

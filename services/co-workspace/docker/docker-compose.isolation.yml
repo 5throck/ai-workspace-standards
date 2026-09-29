@@ -2,9 +2,52 @@
 # Usage: docker compose -f docker-compose.yml -f docker-compose.isolation.yml up -d
 #   or set COMPOSE_FILE=docker-compose.yml:docker-compose.isolation.yml in .env.
 #
-# WARNING: required for CO_WORKSPACE_ISOLATION=docker. This grants the gateway control of
-# the host Docker daemon (host-root equivalent). Single-operator deployments only.
+# WARNING: the gateway no longer mounts the raw Docker socket; a socket proxy holds it and
+# the gateway reaches it over an internal-only network. The proxy filters by API endpoint
+# ONLY and cannot inspect the container-create body, so a compromised gateway can still
+# create a privileged container or bind-mount `/`. This REDUCES but does NOT REMOVE
+# host-root equivalence. Follow-up: rootless Docker or a create-body-validating broker.
+# Single-operator deployments only. The runtime image must be pre-built (IMAGES=0 makes a
+# missing image fail fast instead of pulling).
 services:
-  co-workspace:
+  docker-proxy:
+    # Pin a digest for production; the version tag is unverified here.
+    image: tecnativa/docker-socket-proxy:0.3.0
+    restart: unless-stopped
+    read_only: true
+    tmpfs: [/run]
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      # Needed for `docker run` (create/start/attach/wait), `docker kill` on cancel and the
+      # boot reaper's `docker ps` / `docker rm -f`. The exact flag set for
+      # attach/wait/kill/rm through the proxy is UNVERIFIED until a live run.
+      CONTAINERS: 1
+      POST: 1
+      DELETE: 1
+      ALLOW_START: 1
+      ALLOW_STOP: 1
+      ALLOW_RESTARTS: 1
+      EXEC: 0
+      IMAGES: 0
+      VOLUMES: 0
+      NETWORKS: 0
+      INFO: 0
+      BUILD: 0
+      SWARM: 0
+      SECRETS: 0
+      SYSTEM: 0
+      PLUGINS: 0
+      AUTH: 0
+      COMMIT: 0
+    networks: [dockerapi]
+
+  co-workspace:
+    environment:
+      DOCKER_HOST: tcp://docker-proxy:2375
+    depends_on: [docker-proxy]
+    networks: [default, dockerapi]
+
+networks:
+  dockerapi:
+    internal: true

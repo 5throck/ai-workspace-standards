@@ -5,12 +5,30 @@ title: >-
   validator-hardening: add a co-workspace env-parity check diffing config.ts env
   reads against docker-compose.yml and .env.sample
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-29T04:55:25.707Z'
 history:
   - at: '2026-09-29T04:55:25.707Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-29T22:23:41.892Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-29T22:23:41.915Z'
+    from: waiting
+    to: running
+  - at: '2026-09-29T22:23:41.943Z'
+    from: running
+    to: review
+  - at: '2026-09-29T22:23:42.051Z'
+    from: review
+    to: done
+result: >-
+  Verified implemented on main by the owning session:
+  tests/unit/co-workspace-env-parity.test.ts (marked T-20260929-011, finding
+  H12) is a ratchet scanning all src/*.ts env reads against docker-compose.yml
+  and docker/.env.sample with reasoned, rot-checking exemption maps
+  (COMPOSE_EXEMPT/SAMPLE_EXEMPT — e.g. runtime binary overrides are
+  bare-metal-only by design). 7 tests pass on main; closing as complete.
 error: null

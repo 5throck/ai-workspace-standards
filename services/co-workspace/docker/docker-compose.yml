@@ -1,14 +1,21 @@
 # Team Gateway compose (ADR-0092 + Phase 2 hardening). Build context is the workspace root.
 #
+# The gateway runs NON-ROOT (uid:gid 10000:10000, no-new-privileges, all caps dropped).
+# On LINUX the operator must once `chown -R 10000:10000` CO_WORKSPACE_DATA_DIR_HOST and the
+# shared auth dir, and the workspace clone must be writable by uid 10000. macOS Docker
+# Desktop maps ownership, so no chown is needed there. Override with
+# CO_WORKSPACE_GATEWAY_UID / CO_WORKSPACE_GATEWAY_GID.
+#
 # Required environment:
-#   CO_WORKSPACE_HERMES_SEED_HOME  Hermes home with credentials (e.g. ~/.hermes); mounted
-#                                  read-only at /seed-home (directory bind — survives Hermes
-#                                  credential refreshes) and copied into tenant homes.
 #   CO_WORKSPACE_DATA_DIR_HOST     ABSOLUTE host path for the gateway data dir — bind-mounted
 #                                  at /data here AND used as the sibling-mount source, so
 #                                  docker-isolation turns can reach tenant dirs (the gateway
 #                                  passes CO_WORKSPACE_DATA_DIR_HOST down for exactly this).
 # Optional environment (see volumes below):
+#   CO_WORKSPACE_HERMES_SEED_HOME    Legacy OAuth mode only: add docker-compose.seed.yml to
+#                                    COMPOSE_FILE to mount it read-only at /seed-home. Without
+#                                    the override no Hermes home is mounted. When set, the
+#                                    .env.keys / shared-store host defaults stay under it.
 #   CO_WORKSPACE_WORKSPACE_DIR_HOST  Host path of a dedicated workspace CLONE for scaffolding
 #                                    (defaults to this repo's checkout). Keep it off /tmp.
 #
@@ -28,6 +35,9 @@ services:
     entrypoint: [] # bypass the base image's s6 init — the server runs as PID 1
     command: ["bun", "src/server.ts"]
     init: true
+    user: "${CO_WORKSPACE_GATEWAY_UID:-10000}:${CO_WORKSPACE_GATEWAY_GID:-10000}"
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: [ALL]
     ports:
       - "127.0.0.1:9030:9030" # loopback publish — keep unless you front it with auth
     environment:
@@ -85,28 +95,22 @@ services:
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
       GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-}
       CO_WORKSPACE_ADMIN_EMAIL: ${CO_WORKSPACE_ADMIN_EMAIL:-}
-      CO_WORKSPACE_HERMES_SEED_HOME: /seed-home
+      # Empty by default: the seed-home mount is optional. docker-compose.seed.yml sets
+      # /seed-home. Never interpolate the host-side CO_WORKSPACE_HERMES_SEED_HOME here.
+      CO_WORKSPACE_HERMES_SEED_HOME: ${CO_WORKSPACE_HERMES_SEED_HOME_IN_CONTAINER:-}
       CO_WORKSPACE_HERMES_AUTH_DIR: ${CO_WORKSPACE_HERMES_AUTH_DIR:-/seed/shared}
       # host path of the shared store — sibling containers mount THIS (resolved on the host)
-      CO_WORKSPACE_HERMES_AUTH_DIR_HOST: ${CO_WORKSPACE_HERMES_AUTH_DIR_HOST:-${CO_WORKSPACE_HERMES_SEED_HOME}/shared}
+      CO_WORKSPACE_HERMES_AUTH_DIR_HOST: ${CO_WORKSPACE_HERMES_AUTH_DIR_HOST:-${CO_WORKSPACE_HERMES_SEED_HOME:-${CO_WORKSPACE_DATA_DIR_HOST}/seed}/shared}
     volumes:
       - ${CO_WORKSPACE_DATA_DIR_HOST:?set to the absolute host path of the data dir}:/data
       # Workspace clone used for scaffolding. Default: the repo checkout three levels up.
       # For durable deployments set CO_WORKSPACE_WORKSPACE_DIR_HOST to a dedicated clone
       # (e.g. /srv/co-workspace-workspace) — /tmp clones vanish on reboot.
       - ${CO_WORKSPACE_WORKSPACE_DIR_HOST:-../../../}:/workspace
-      # SEC-07 note (2026-09-29 amendment): the seed home is mounted as a DIRECTORY
-      # (read-only). The previous per-file binds (auth.json, .env) silently broke
-      # whenever Hermes refreshed its credentials on the host — a single-file bind
-      # pins the inode, and the container kept reading the detached (empty) file,
-      # failing every turn with ENOENT on the per-turn re-seed. Trade-off: the whole
-      # Hermes home (config.yaml, other provider credentials) is container-visible
-      # read-only; accepted for the local single-operator deployment (ADR-0092
-      # Addendum 7). The server reads only auth.json + .env from it.
-      - ${CO_WORKSPACE_HERMES_SEED_HOME:?set CO_WORKSPACE_HERMES_SEED_HOME to a Hermes home with credentials (e.g. ~/.hermes)}:/seed-home:ro
+      # The Hermes seed home is NOT mounted here (optional, M6): see docker-compose.seed.yml.
       # CO_WORKSPACE_API_KEYS_FILE points here; without the mount readKeysFile() silently
       # returns [] and file-based keys never work in the container.
-      - ${CO_WORKSPACE_API_KEYS_FILE_HOST:-${CO_WORKSPACE_HERMES_SEED_HOME}/.env.keys}:/seed/.env.keys:ro
-      - ${CO_WORKSPACE_HERMES_AUTH_DIR_HOST:-${CO_WORKSPACE_HERMES_SEED_HOME}/shared}:/seed/shared
-      # NOTE: the Docker socket is intentionally NOT mounted here (host-root equivalent).
+      - ${CO_WORKSPACE_API_KEYS_FILE_HOST:-${CO_WORKSPACE_HERMES_SEED_HOME:-${CO_WORKSPACE_DATA_DIR_HOST}/seed}/.env.keys}:/seed/.env.keys:ro
+      - ${CO_WORKSPACE_HERMES_AUTH_DIR_HOST:-${CO_WORKSPACE_HERMES_SEED_HOME:-${CO_WORKSPACE_DATA_DIR_HOST}/seed}/shared}:/seed/shared
+      # NOTE: the Docker socket is intentionally NOT mounted here.
       # For CO_WORKSPACE_ISOLATION=docker, also include docker-compose.isolation.yml.

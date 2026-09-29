@@ -35,7 +35,7 @@ export async function runChat(
           : undefined;
       if (seedAuth && existsSync(seedAuth)) {
         copyFileSync(seedAuth, join(rec.hermesHome, "auth.json"));
-        if (state.cfg.isolation === "docker") chownSync(join(rec.hermesHome, "auth.json"), 10000, 10000);
+        if (state.cfg.isolation === "docker" && process.getuid?.() === 0) chownSync(join(rec.hermesHome, "auth.json"), 10000, 10000);
       }
       // Re-stamp the tenant config.yaml every turn: provider/base-url/model changes apply
       // to EXISTING tenants on their next turn (no re-provisioning needed). In legacy mode

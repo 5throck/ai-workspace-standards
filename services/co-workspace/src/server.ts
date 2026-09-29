@@ -122,6 +122,7 @@ export function createServer(state: GatewayState) {
 }
 
 if (import.meta.main) {
+  console.log(`[co-workspace] running as uid ${process.getuid?.() ?? "n/a"}`);
   const state = createState();
   bootstrapAdminFromEnv(state);
   // SEC-14: expire verification mails older than 24h at startup.
