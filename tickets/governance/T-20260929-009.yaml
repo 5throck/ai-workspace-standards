@@ -5,12 +5,29 @@ title: >-
   co-workspace: exact-name env allowlist for spawned runtimes and trusted-proxy
   handling for X-Forwarded-For rate limiting
 priority: high
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-29T04:55:25.678Z'
 history:
   - at: '2026-09-29T04:55:25.678Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-29T18:09:56.756Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-29T18:09:56.768Z'
+    from: waiting
+    to: running
+  - at: '2026-09-29T18:09:56.779Z'
+    from: running
+    to: review
+  - at: '2026-09-29T18:09:56.835Z'
+    from: review
+    to: done
+result: >-
+  Verified implemented on main: CO_WORKSPACE_HERMES_EXTRA_ARGS-independent env
+  allowlist + trusted-proxy client IP (resolveClientIp(state.cfg.trustProxy,
+  req, peerIp) in server.ts) and the regression suite
+  tests/unit/co-workspace-h5h7.test.ts (T-20260929-009 marker). Landed by the
+  owning session; closing as complete.
 error: null

@@ -9,6 +9,7 @@
 | Date | From | To | Reason | Approver |
 |------|------|-----|---------|----------|
 | 2026-05-29 | - | production | Initial auditor agent established | lifecycle-manager |
+| 2026-09-29 | production | production | Tier-line model-ID literals dropped in agents/auditor.md (commit 5b2778b8 — Claude High/Medium tiers → opus-5-5 / sonnet-5-5); record stamped (T-20260930-001) | lifecycle-manager |
 
 ## Acceptance Criteria
 
@@ -73,5 +74,5 @@
 
 - **Current Phase**: production
 - **Owner**: auditor
-- **Last Updated**: 2026-09-15 (record refreshed to match agents/auditor.md 2026-09-12 changes — Check F rollout)
+- **Last Updated**: 2026-09-29
 - **Last Reviewer**: lifecycle-manager

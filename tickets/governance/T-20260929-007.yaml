@@ -5,12 +5,28 @@ title: >-
   co-workspace: unify tenant and admin-user delete into one validated
   deleteTenantData with path guard before registry removal
 priority: high
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-29T04:55:25.648Z'
 history:
   - at: '2026-09-29T04:55:25.648Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-29T18:09:56.790Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-29T18:09:56.801Z'
+    from: waiting
+    to: running
+  - at: '2026-09-29T18:09:56.812Z'
+    from: running
+    to: review
+  - at: '2026-09-29T18:09:56.847Z'
+    from: review
+    to: done
+result: >-
+  Verified implemented on main: unified deleteTenantData in
+  services/co-workspace/src/lifecycle.ts (containment path guard BEFORE registry
+  removal, admin user-delete and tenant DELETE both route through it — server.ts
+  re-exports it). Landed by the owning session; closing as complete.
 error: null

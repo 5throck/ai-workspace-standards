@@ -1,4 +1,9 @@
-// @version 1.21.1
+// @version 1.22.0
+// v1.22.0 (2026-09-30, T-20260929-015): step 4.51 governance-l1 publish passes --apply
+// plus the --docs marker injection (the flagless form was a dry run that always exited 0,
+// so L0 instruction-file edits never reached templates/common during /sync), and a dry-run
+// verification afterwards fails the step when L1 stays out of sync. Regression coverage in
+// tests/unit/dev-sync-pipeline-order.test.ts.
 // v1.21.1 (2026-09-29): step 3.9 auto-E5 parses `git status --porcelain -uall` by column
 //          (slice(3)) — the old `^\S+\s+` strip left `M path` for unstaged-only lines and
 //          directory entries for untracked dirs, so upgrade diffs never matched the manifest.
@@ -724,13 +729,18 @@ if (isWorkspaceRoot) {
 }
 
 // ── Step 4.51: Governance L0→L1 file deployment (CLAUDE/GEMINI/AGENTS/CODEX.md) ──
-//     ADR-0077 D11: the four instruction twins ride governance-l1 so model/registry
+//     ADR-0077 D11: the instruction twins ride governance-l1 so model/registry
 //     edits at L0 reach templates/common in the same sync instead of waiting for a
 //     manual `--governance-l1` run. Fatal in L0 context, same contract as 4.5.
+//     v1.22.0 (T-20260929-015): the invocation now passes --apply (the flagless form
+//     is a dry run that only printed the pending governance deployments and always
+//     exited 0, so L0 edits to CLAUDE/GEMINI/AGENTS/CODEX/HERMES.md never reached
+//     templates/common during /sync) plus the --docs marker injection, and a dry-run
+//     verification afterwards fails the step if L1 is still out of sync.
 if (isWorkspaceRoot && isL0Context) {
     console.log('\n📘 Publishing governance instruction files L0→L1 (CLAUDE/GEMINI/AGENTS/CODEX.md)...');
     try {
-        const govRes = await $`bun scripts/propagate-to-templates.ts --governance-l1`.nothrow();
+        const govRes = await $`bun scripts/propagate-to-templates.ts --apply --governance-l1 --docs`.nothrow();
         if (govRes.exitCode !== 0) {
             console.log(`${RED}❌ governance-l1 publish failed — fatal in L0 context${RESET}`);
             if (import.meta.main) {
@@ -739,6 +749,15 @@ if (isWorkspaceRoot && isL0Context) {
         }
     } catch (e) {
         console.log(`${RED}❌ governance-l1 publish errored — fatal in L0 context: ${e}${RESET}`);
+        if (import.meta.main) {
+          process.exit(1);
+        }
+    }
+    // Fail the step when L1 STAYS out of sync after the apply (belt-and-suspenders:
+    // the dry run exits 1 on any pending diff).
+    const govVerify = await $`bun scripts/propagate-to-templates.ts --governance-l1 --docs`.nothrow();
+    if (govVerify.exitCode !== 0) {
+        console.log(`${RED}❌ governance-l1 still out of sync after apply — fatal in L0 context${RESET}`);
         if (import.meta.main) {
           process.exit(1);
         }

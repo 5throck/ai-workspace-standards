@@ -7,12 +7,30 @@ title: >-
   2026-09-27-co-workspace-*-design files (actual: team-gateway-* names);
   T-20260928-004 closed with these remaining
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-29T16:40:39.598Z'
 history:
   - at: '2026-09-29T16:40:39.598Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-29T18:02:26.888Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-29T18:02:26.901Z'
+    from: waiting
+    to: running
+  - at: '2026-09-29T18:02:39.189Z'
+    from: running
+    to: review
+  - at: '2026-09-29T18:02:39.202Z'
+    from: review
+    to: done
+result: >-
+  Verified stale on main (2026-09-30): all three referenced design docs EXIST
+  under their post-rename co-workspace-* names
+  (2026-09-27-co-workspace-{service,phase2-hardening,qa-fair-and-security-review}.md
+  — renamed by the T-20260928-004 rework merged in PR #1219), README.md:6/:229
+  and AGENTS.md:5 resolve to them, zero team-gateway references remain in the
+  service docs. The ticket's premise predates the rename merge; no fix needed.
 error: null

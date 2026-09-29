@@ -45,4 +45,16 @@ describe('dev-sync pipeline step ordering', () => {
     const firstApplyIndex = matches[0].index;
     expect(firstApplyIndex).toBeLessThan(syncSkillsIndex);
   });
+
+  test('step 4.51 governance-l1 runs with --apply plus the --docs injection (T-20260929-015)', () => {
+    const invocation = devSyncSource.indexOf('propagate-to-templates.ts --apply --governance-l1 --docs');
+    expect(invocation).toBeGreaterThan(-1);
+    // The deployment precedes sync-skills.ts in the pipeline (4.51 < 4.6).
+    const syncSkillsIndex = devSyncSource.indexOf('bun scripts/sync-skills.ts');
+    expect(invocation).toBeLessThan(syncSkillsIndex);
+    // A dry-run verification must follow the apply: it exits 1 when L1 stays
+    // out of sync, failing the step instead of silently skipping the publish.
+    const verify = devSyncSource.indexOf('propagate-to-templates.ts --governance-l1 --docs`', invocation);
+    expect(verify).toBeGreaterThan(invocation);
+  });
 });
