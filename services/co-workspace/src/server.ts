@@ -110,7 +110,11 @@ export async function provisionTenant(state: GatewayState, rec: TenantRecord): P
       state.cfg.hermesSeedHome,
       state.cfg.hermesModel,
       resolveLlmProviderKey(state.cfg)
-        ? { name: resolveLlmProviderName(state.cfg), baseUrl: state.cfg.llmBaseUrl }
+        ? {
+            name: resolveLlmProviderName(state.cfg),
+            baseUrl: state.cfg.llmBaseUrl,
+            apiKey: state.cfg.llmApiKey,
+          }
         : undefined,
     );
     if (state.cfg.isolation === "docker") {
@@ -335,7 +339,11 @@ async function runChat(
           rec.projectDir,
           state.cfg.hermesModel,
           providerKey
-            ? { providerName: resolveLlmProviderName(state.cfg), providerBaseUrl: state.cfg.llmBaseUrl }
+            ? {
+                providerName: resolveLlmProviderName(state.cfg),
+                providerBaseUrl: state.cfg.llmBaseUrl,
+                providerApiKey: state.cfg.llmApiKey,
+              }
             : undefined,
         ),
       );
