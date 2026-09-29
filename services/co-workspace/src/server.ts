@@ -322,6 +322,7 @@ export async function runChat(
   rec: TenantRecord,
   message: string,
   onEvent?: (evt: HermesEvent) => void,
+  onProc?: (proc: { kill: (code?: number) => void }) => void,
 ): Promise<HermesTurnResult> {
   const prev = state.chatLocks.get(rec.tenantId) ?? Promise.resolve();
   const task = prev
@@ -418,7 +419,10 @@ export async function runChat(
           // onto the shared Nous store, failing the turn (exit 111, observed 2026-09-28).
           // Process-mode tenants keep the shared store (single HOME, refreshes stay valid).
           sharedAuthDir: state.cfg.isolation === "docker" ? undefined : resolveAuthDir(state.cfg),
-          onSpawn: (proc) => state.activeProcs.set(rec.tenantId, proc),
+          onSpawn: (proc) => {
+            state.activeProcs.set(rec.tenantId, proc);
+            onProc?.(proc);
+          },
           container:
             state.cfg.isolation === "docker"
               ? {
@@ -546,17 +550,84 @@ class HttpError extends Error {
 }
 
 /** P2-11 (QA fair): keep SSE connections alive through silent tool phases — a comment ping
- * every 15s, cleared when the stream ends. */
-function startHeartbeat(controller: ReadableStreamDefaultController<Uint8Array>): () => void {
+ * every 15s, cleared when the stream ends or the client cancels. */
+function startHeartbeat(sink: SseSink): void {
   const ping = new TextEncoder().encode(": ping\n\n");
-  const timer = setInterval(() => {
-    try {
-      controller.enqueue(ping);
-    } catch {
-      clearInterval(timer);
-    }
-  }, 15_000);
-  return () => clearInterval(timer);
+  sink.track(setInterval(() => sink.enqueue(ping), 15_000));
+}
+
+interface SseSink {
+  /** Never throws; a no-op once the client cancelled or the stream closed. */
+  enqueue(chunk: Uint8Array): void;
+  isClosed(): boolean;
+  /** Register a timer to clear on close/cancel. */
+  track(timer: ReturnType<typeof setInterval>): void;
+  /** Pass to runChat's `onProc` so a client disconnect kills THIS stream's turn. */
+  onProc(proc: { kill: (code?: number) => void }): void;
+}
+
+/** Shared SSE plumbing (T-20260929-008): tracks client disconnect via cancel(), makes
+ * enqueue/close safe after cancel, clears timers, and kills the turn this stream started.
+ * Cancel support is hermes-only: the antigravity/claude/codex run functions expose no
+ * onSpawn/kill hook, so their turns run to completion after a disconnect (known limitation). */
+function sseStream(run: (sink: SseSink) => Promise<void>): ReadableStream<Uint8Array> {
+  let closed = false;
+  let proc: { kill: (code?: number) => void } | undefined;
+  const timers = new Set<ReturnType<typeof setInterval>>();
+  let controller!: ReadableStreamDefaultController<Uint8Array>;
+  const clearTimers = () => {
+    for (const t of timers) clearInterval(t);
+    timers.clear();
+  };
+  const sink: SseSink = {
+    enqueue(chunk) {
+      if (closed) return;
+      try {
+        controller.enqueue(chunk);
+      } catch {
+        closed = true;
+        clearTimers();
+      }
+    },
+    isClosed: () => closed,
+    track: (t) => {
+      if (closed) clearInterval(t);
+      else timers.add(t);
+    },
+    onProc(p) {
+      proc = p;
+      if (closed) p.kill(); // cancelled while queued behind another turn
+    },
+  };
+  return new ReadableStream<Uint8Array>({
+    async start(c) {
+      controller = c;
+      try {
+        await run(sink);
+      } catch {
+        // run() handles its own errors; never let one escape as an unhandled rejection
+      } finally {
+        clearTimers();
+        if (!closed) {
+          closed = true;
+          try {
+            c.close();
+          } catch {
+            // already closed/cancelled
+          }
+        }
+      }
+    },
+    cancel() {
+      closed = true;
+      clearTimers();
+      try {
+        proc?.kill();
+      } catch {
+        // process already gone
+      }
+    },
+  });
 }
 
 const SSE_HEADERS = {
@@ -586,8 +657,7 @@ async function readJsonBody(req: Request): Promise<unknown> {
 
 /** Native chat → raw Hermes events (SSE) + a terminal done event. */
 function nativeChatResponse(state: GatewayState, rec: TenantRecord, message: string): Response {
-  const stream = new ReadableStream<Uint8Array>({
-    async start(controller) {
+  const stream = sseStream(async (sink) => {
       try {
         // R7 UX: while the team is still provisioning, stream its progress stages as `: …`
         // comment frames (wire-legal SSE comments) so the wait is visible in the client.
@@ -597,12 +667,12 @@ function nativeChatResponse(state: GatewayState, rec: TenantRecord, message: str
           while (Date.now() < deadline) {
             current = state.registry.get(rec.tenantId) ?? current;
             const last = current.progress?.[current.progress.length - 1];
-            controller.enqueue(
+            sink.enqueue(
               new TextEncoder().encode(
                 `: provisioning: ${last ? `[${last.stage}] ${last.label}` : current.status + "…"}\n\n`,
               ),
             );
-            if (current.status !== "provisioning") break;
+            if (current.status !== "provisioning" || sink.isClosed()) break;
             await Bun.sleep(1000);
           }
           if (current.status === "failed") {
@@ -614,10 +684,9 @@ function nativeChatResponse(state: GatewayState, rec: TenantRecord, message: str
         }
         assertQuota(state.cfg, current);
         assertPrincipalQuota(state, current.ownerPrincipal ?? "anonymous");
-        const result = await runChat(state, current, message, (evt) =>
-          controller.enqueue(sseData(evt)),
-        );
-        controller.enqueue(
+        if (sink.isClosed()) return;
+        const result = await runChat(state, current, message, (evt) => sink.enqueue(sseData(evt)), sink.onProc);
+        sink.enqueue(
           sseData({
             type: "done",
             sessionId: result.sessionId ?? null,
@@ -627,18 +696,15 @@ function nativeChatResponse(state: GatewayState, rec: TenantRecord, message: str
           }),
         );
       } catch (err) {
-        controller.enqueue(sseData({ type: "error", error: String((err as Error)?.message ?? err) }));
-      } finally {
-        controller.close();
+        sink.enqueue(sseData({ type: "error", error: String((err as Error)?.message ?? err) }));
       }
-    },
   });
   return new Response(stream, { headers: SSE_HEADERS });
 }
 
 /** OpenAI chat completions: stream=true → role chunk, content chunks, finish chunk, [DONE];
  * stream=false → single completion JSON. */
-async function openaiChatResponse(
+export async function openaiChatResponse(
   state: GatewayState,
   rec: TenantRecord,
   message: string,
@@ -661,8 +727,7 @@ async function openaiChatResponse(
   const created = Math.floor(Date.now() / 1000);
   const model = rec.variant;
   let sentRole = false;
-  const body = new ReadableStream<Uint8Array>({
-    async start(controller) {
+  const body = sseStream(async (sink) => {
       const enc = new TextEncoder();
       try {
         // P8: while a lazy tenant is provisioning, stream progress as SSE comments
@@ -670,7 +735,7 @@ async function openaiChatResponse(
         if (provisioning) {
           const emitTrail = () => {
             for (const p of state.registry.get(rec.tenantId)?.progress ?? []) {
-              controller.enqueue(enc.encode(`: provisioning: [${p.stage}] ${p.label}\n`));
+              sink.enqueue(enc.encode(`: provisioning: [${p.stage}] ${p.label}\n`));
             }
           };
           emitTrail();
@@ -680,37 +745,39 @@ async function openaiChatResponse(
             const cur = state.registry.get(rec.tenantId) ?? rec;
             if (cur.progress?.length) {
               const last = cur.progress[cur.progress.length - 1];
-              controller.enqueue(enc.encode(`: provisioning: [${last.stage}] ${last.label}\n`));
+              sink.enqueue(enc.encode(`: provisioning: [${last.stage}] ${last.label}\n`));
             } else {
-              controller.enqueue(enc.encode(`: provisioning: ${cur.status}…\n`));
+              sink.enqueue(enc.encode(`: provisioning: ${cur.status}…\n`));
             }
             if (ticks > 900) clearInterval(timer);
           }, 1000);
-          await provisioning;
-          clearInterval(timer);
-          controller.enqueue(enc.encode(": provisioning: ready\n\n"));
+          sink.track(timer);
+          try {
+            await provisioning;
+          } finally {
+            clearInterval(timer); // H4: also on rejection
+          }
+          sink.enqueue(enc.encode(": provisioning: ready\n\n"));
         }
+        if (sink.isClosed()) return;
         const result = await runChat(state, rec, message, (evt) => {
           if (evt.type !== "text" || typeof evt.text !== "string") return;
           if (!sentRole) {
             sentRole = true;
-            controller.enqueue(enc.encode(chunkData(id, model, created, { role: "assistant" }, null)));
+            sink.enqueue(enc.encode(chunkData(id, model, created, { role: "assistant" }, null)));
           }
-          controller.enqueue(enc.encode(chunkData(id, model, created, { content: evt.text }, null)));
-        });
-        controller.enqueue(enc.encode(chunkData(id, model, created, {}, "stop")));
-        controller.enqueue(enc.encode(doneData()));
+          sink.enqueue(enc.encode(chunkData(id, model, created, { content: evt.text }, null)));
+        }, sink.onProc);
+        sink.enqueue(enc.encode(chunkData(id, model, created, {}, "stop")));
+        sink.enqueue(enc.encode(doneData()));
       } catch (err) {
-        controller.enqueue(
+        sink.enqueue(
           enc.encode(
             `data: ${JSON.stringify({ error: { message: String((err as Error)?.message ?? err) } })}\n\n`,
           ),
         );
-        controller.enqueue(enc.encode(doneData()));
-      } finally {
-        controller.close();
+        sink.enqueue(enc.encode(doneData()));
       }
-    },
   });
   return new Response(body, { headers: SSE_HEADERS });
 }
@@ -737,11 +804,10 @@ async function anthropicChatResponse(
   const id = messageId();
   const model = rec.variant;
   const frames = anthropicStream(id, model);
-  const body = new ReadableStream<Uint8Array>({
-    async start(controller) {
+  const body = sseStream(async (sink) => {
       try {
         let startedContent = false;
-        const enqueue = (frameset: Uint8Array[]) => frameset.forEach((f) => controller.enqueue(f));
+        const enqueue = (frameset: Uint8Array[]) => frameset.forEach((f) => sink.enqueue(f));
         enqueue(frames.messageStart());
         const result = await runChat(state, rec, message, (evt) => {
           if (evt.type !== "text" || typeof evt.text !== "string") return;
@@ -750,22 +816,19 @@ async function anthropicChatResponse(
             enqueue(frames.contentStart());
           }
           enqueue(frames.contentDelta(evt.text));
-        });
+        }, sink.onProc);
         if (startedContent) enqueue(frames.contentStop());
         const tokens = (result.tokens ?? {}) as Record<string, unknown>;
         const n = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : 0);
         enqueue(frames.messageStop(n(tokens.input), n(tokens.output)));
       } catch (err) {
-        controller.enqueue(
+        sink.enqueue(
           anthropicEvent("error", {
             type: "error",
             error: { type: "api_error", message: String((err as Error)?.message ?? err) },
           }),
         );
-      } finally {
-        controller.close();
       }
-    },
   });
   return new Response(body, { headers: SSE_HEADERS });
 }
@@ -792,28 +855,23 @@ async function geminiChatResponse(
     );
   }
   const frames = geminiStream();
-  const body = new ReadableStream<Uint8Array>({
-    async start(controller) {
-      const stopPing = startHeartbeat(controller);
+  const body = sseStream(async (sink) => {
+      startHeartbeat(sink);
       try {
         const result = await runChat(state, rec, message, (evt) => {
           if (evt.type !== "text" || typeof evt.text !== "string") return;
-          frames.delta(evt.text).forEach((f) => controller.enqueue(f));
-        });
+          frames.delta(evt.text).forEach((f) => sink.enqueue(f));
+        }, sink.onProc);
         const tokens = (result.tokens ?? {}) as Record<string, unknown>;
         const n = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : 0);
-        frames.end(n(tokens.input), n(tokens.output)).forEach((f) => controller.enqueue(f));
+        frames.end(n(tokens.input), n(tokens.output)).forEach((f) => sink.enqueue(f));
       } catch (err) {
-        controller.enqueue(
+        sink.enqueue(
           new TextEncoder().encode(
             `data: ${JSON.stringify(geminiError(500, String((err as Error)?.message ?? err)))}\n\n`,
           ),
         );
-      } finally {
-        stopPing();
-        controller.close();
       }
-    },
   });
   return new Response(body, { headers: SSE_HEADERS });
 }
@@ -1459,7 +1517,7 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
       requireTenantAccess(state, req, rec);
       const proc = state.activeProcs.get(tenantId);
       if (!proc) return jsonResponse({ cancelled: false, reason: "no active turn" });
-      proc.kill(137);
+      proc.kill();
       state.audit.record(callerPrincipal(state, req) ?? "anonymous", "turn.cancel", tenantId);
       return jsonResponse({ cancelled: true });
     }
