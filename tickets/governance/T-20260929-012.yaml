@@ -5,12 +5,30 @@ title: >-
   validator-hardening: add a test asserting no gateway secret
   (GOOGLE_CLIENT_SECRET, provider keys) survives allowlistedEnv
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-29T04:55:25.721Z'
 history:
   - at: '2026-09-29T04:55:25.721Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-29T18:09:56.719Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-29T18:09:56.733Z'
+    from: waiting
+    to: running
+  - at: '2026-09-29T18:09:56.745Z'
+    from: running
+    to: review
+  - at: '2026-09-29T18:09:56.824Z'
+    from: review
+    to: done
+result: >-
+  Verified implemented on main: the allowlistedEnv deny-list (ENV_DENY:
+  GOOGLE_CLIENT_*, CO_WORKSPACE_*) is in services/co-workspace/src/hermes.ts and
+  the requested regression test exists as tests/unit/co-workspace-h5h7.test.ts
+  (marked T-20260929-012 test half — secrets dropped across
+  allowlistedEnv/hermesEnv/dockerCliEnv + a compose-derived name check). Landed
+  by the T-20260929-009 session; closing as complete.
 error: null

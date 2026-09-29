@@ -2,12 +2,6 @@
 
 All notable changes to the template variants are documented here.
 
-## [0.6.0] - 2026-08-28
-### Added
-- **[2026-08-28]**: LICENSE rollout — template license mechanism introduced via `a5714968` (AGPL license template rollout across templates and variants).
-- **[2026-08-28]**: Promoted 6 generic skills from `co-safety`/`co-work` to `templates/common/skills/` (`70fef8bf`).
-- **[2026-08-30]**: Promoted `handbook` (0.4.0) and `handbook-sync-audit` (1.0.0) skills from `co-deck` to `templates/common/skills/` (`1653a84f`).
-
 ## [Unreleased]
 ### Changed
 - **[2026-09-29]**: `templates/common/agents/pm.md` — the 3-Tier Strategy pointer now links to "PM Tier Semantics" in the COMMON-AGENTS zone of `AGENTS.md`. The upgrade merge delivers that zone to existing projects. The pm.md body block also reaches existing projects, so the link now resolves there.
@@ -17,7 +11,7 @@ All notable changes to the template variants are documented here.
 ### Changed
 - **[2026-09-29]**: auto-release 2026-09-29: 50 delivered paths (A 0 / M 50 / D 0 / R 0)
 
-## [0.8.0] - 2026-09-28
+## [0.8.0] - 2026-09-29
 ### Changed
 - **[2026-09-29]**: auto-release 2026-09-29: 54 delivered paths (A 25 / M 24 / D 5 / R 0)
 
@@ -30,6 +24,12 @@ All notable changes to the template variants are documented here.
 
 ### Fixed
 - **[2026-06-09]**: fix: Windows project folder deletion permissions — enhanced Windows permission handling in `new-project.sh` (v1.7.1) and `new-project.ps1` (v1.7.2) to recursively remove hidden/system/readonly attributes (including inside `.git/`) and transfer ownership to the current user (`takeown`), preventing Windows Explorer administrator prompts during deletion.
+
+## [0.6.0] - 2026-08-28
+### Added
+- **[2026-08-28]**: LICENSE rollout — template license mechanism introduced via `a5714968` (AGPL license template rollout across templates and variants).
+- **[2026-08-28]**: Promoted 6 generic skills from `co-safety`/`co-work` to `templates/common/skills/` (`70fef8bf`).
+- **[2026-08-30]**: Promoted `handbook` (0.4.0) and `handbook-sync-audit` (1.0.0) skills from `co-deck` to `templates/common/skills/` (`1653a84f`).
 
 ## [0.5.0] - 2026-05-27
 ### Added

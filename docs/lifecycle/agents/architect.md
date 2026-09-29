@@ -9,6 +9,7 @@
 | Date | From | To | Reason | Approver |
 |------|------|-----|---------|----------|
 | 2026-05-29 | - | production | Initial architect agent established | lifecycle-manager |
+| 2026-09-29 | production | production | Tier-line model-ID literals dropped in agents/architect.md (commit 5b2778b8 — Claude High/Medium tiers → opus-5-5 / sonnet-5-5); record stamped (T-20260930-001) | lifecycle-manager |
 
 ## Acceptance Criteria
 
@@ -56,5 +57,5 @@
 
 - **Current Phase**: production
 - **Owner**: architect
-- **Last Updated**: 2026-09-17 (Design Gate STE constraint added per ADR-0079 — instruction-policy wiring spec)
+- **Last Updated**: 2026-09-29
 - **Last Reviewer**: lifecycle-manager

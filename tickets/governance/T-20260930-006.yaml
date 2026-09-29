@@ -6,12 +6,29 @@ title: >-
   (audit.db row 60 deleted 09-28, directory survives with empty
   hermes-home/project) — rm the tenant root on delete
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-29T16:40:39.622Z'
 history:
   - at: '2026-09-29T16:40:39.622Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-29T18:11:48.051Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-29T18:11:48.062Z'
+    from: waiting
+    to: running
+  - at: '2026-09-29T18:11:48.074Z'
+    from: running
+    to: review
+  - at: '2026-09-29T18:11:48.085Z'
+    from: review
+    to: done
+result: >-
+  Verified clean on main (2026-09-30): the orphaned data/tenants/gw-fd71bde230fa
+  directory was already removed during the 2026-09-29 straggler cleanup
+  (T-20260928-006 follow-up) — data/tenants holds only the DBs, storage/ holds
+  only live tenants, and deleteTenantData + sweepTenantStragglers prevent
+  recurrence. No fix needed.
 error: null

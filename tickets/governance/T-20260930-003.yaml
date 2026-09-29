@@ -6,12 +6,18 @@ title: >-
   [Unreleased] and [0.8.1]; [0.8.0] mis-dated 09-28 with a 09-29 entry) and
   check auto-release-template.ts prepend logic against the ordered layout
 priority: normal
-status: backlog
+status: running
 attempts: 0
 created_at: '2026-09-29T16:40:39.586Z'
 history:
   - at: '2026-09-29T16:40:39.586Z'
     from: null
     to: backlog
+  - at: '2026-09-29T18:03:39.570Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-29T18:03:39.582Z'
+    from: waiting
+    to: running
 result: null
 error: null
