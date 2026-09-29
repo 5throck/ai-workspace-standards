@@ -216,6 +216,7 @@ describe("seedHermesHome — per-tenant isolation and ADR-0088 D7 trust scoping"
       providerName: "custom",
       providerBaseUrl: "https://api.example.com/v1",
       providerApiKey: "sk-test",
+      agentReasoningEffort: "low",
     });
     expect(yaml).toContain('default: "my-model"');
     expect(yaml).toContain("provider: custom");
@@ -225,9 +226,13 @@ describe("seedHermesHome — per-tenant isolation and ADR-0088 D7 trust scoping"
     // Hermes agent turns resolve the key through the profile secret scope (the ambient
     // env is deliberately not borrowed) — the key must be stamped into the config.
     expect(yaml).toContain('api_key: "sk-test"');
+    // Thinking-mandatory models (glm-5.3-flash) reject effort-less requests — the
+    // stamped agent default effort lets turns run with zero operator flags (R7).
+    expect(yaml).toContain("agent:\n  reasoning_effort: low");
     const withoutProvider = tenantConfigYaml("/data/tenants/gw-1/project", "my-model");
     expect(withoutProvider).not.toContain("provider:");
     expect(withoutProvider).not.toContain("api_key:");
+    expect(withoutProvider).not.toContain("reasoning_effort:");
     const named = tenantConfigYaml("/data/tenants/gw-1/project", "m", { providerName: "anthropic" });
     expect(named).toContain("provider: anthropic");
     expect(named).not.toContain("base_url:");

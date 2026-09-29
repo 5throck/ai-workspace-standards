@@ -116,6 +116,7 @@ export async function provisionTenant(state: GatewayState, rec: TenantRecord): P
             apiKey: state.cfg.llmApiKey,
           }
         : undefined,
+      resolveLlmProviderKey(state.cfg) ? state.cfg.hermesReasoningEffort ?? "low" : undefined,
     );
     if (state.cfg.isolation === "docker") {
       // The isolated turn runs as the hermes image's UID 10000 — the tenant tree must be
@@ -343,6 +344,7 @@ async function runChat(
                 providerName: resolveLlmProviderName(state.cfg),
                 providerBaseUrl: state.cfg.llmBaseUrl,
                 providerApiKey: state.cfg.llmApiKey,
+                agentReasoningEffort: state.cfg.hermesReasoningEffort ?? "low",
               }
             : undefined,
         ),
