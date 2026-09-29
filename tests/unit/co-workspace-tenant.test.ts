@@ -50,6 +50,7 @@ describe("GatewayConfig (loadConfig)", () => {
     expect(resolveLlmProviderKey(loadConfig({ ...withKey, CO_WORKSPACE_LLM_PROVIDER: "openai" }))?.name).toBe("OPENAI_API_KEY");
     expect(resolveLlmProviderKey(loadConfig({ ...withKey, CO_WORKSPACE_LLM_PROVIDER: "anthropic" }))?.name).toBe("ANTHROPIC_API_KEY");
     expect(resolveLlmProviderKey(loadConfig({ ...withKey, CO_WORKSPACE_LLM_PROVIDER: "gemini" }))?.name).toBe("GOOGLE_API_KEY");
+    expect(resolveLlmProviderKey(loadConfig({ ...withKey, CO_WORKSPACE_LLM_PROVIDER: "zai" }))?.name).toBe("ZAI_API_KEY");
     expect(resolveLlmProviderName(loadConfig({ ...withKey, CO_WORKSPACE_LLM_PROVIDER: "anthropic" }))).toBe("anthropic");
     // none / unset key = off → legacy shared-store path
     expect(resolveLlmProviderKey(loadConfig({ ...withKey, CO_WORKSPACE_LLM_PROVIDER: "none" }))).toBeNull();
