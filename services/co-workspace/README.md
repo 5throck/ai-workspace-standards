@@ -175,7 +175,9 @@ continuity handle → credential model → isolation matrix → provider disclos
 
 Deploy from **this workspace checkout** (compose builds from it and mounts it at
 `/workspace` for scaffolding) and keep deployment paths in `docker/.env` (local-only,
-never committed). Set `CO_WORKSPACE_DATA_DIR_HOST` to a durable host directory — team
+never committed). The full variable inventory — provider key+base-url mode, quotas,
+SSO, isolation knobs — lives in **`docker/.env.sample`**: copy it to `.env` and fill
+in values. Set `CO_WORKSPACE_DATA_DIR_HOST` to a durable host directory — team
 storage must survive reboots, so keep it off `/tmp` (the default
 `services/co-workspace/data` inside this checkout qualifies — it is gitignored):
 
@@ -184,8 +186,13 @@ cat > services/co-workspace/docker/.env <<'ENV'
 CO_WORKSPACE_DATA_DIR_HOST=/absolute/durable/path/for/services/co-workspace/data
 CO_WORKSPACE_HERMES_SEED_HOME=/Users/you/.hermes
 CO_WORKSPACE_ISOLATION=docker
-CO_WORKSPACE_RUNTIME_IMAGE=co-workspace-gateway:latest
+# Build it once from your working Hermes build: ./build-runtime-image.sh
+CO_WORKSPACE_RUNTIME_IMAGE=co-workspace-runtime:latest
 CO_WORKSPACE_HERMES_MODEL=upstage/solar-pro4:free
+# Provider key mode (recommended over the OAuth flow) — full inventory in .env.sample:
+#CO_WORKSPACE_LLM_PROVIDER=custom
+#CO_WORKSPACE_LLM_BASE_URL=https://api.openai.com/v1
+#CO_WORKSPACE_LLM_API_KEY=your_provider_api_key_here
 ENV
 
 cd services/co-workspace/docker
