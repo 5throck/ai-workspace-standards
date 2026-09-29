@@ -3,8 +3,8 @@ extends: ../../../agents/pm.md
 name: pm
 formal_name: Project Manager (PM) Agent
 status: active
-version: "1.2.0"
-last_updated: "2026-09-18"
+version: "1.2.1"
+last_updated: "2026-09-29"
 tier:
   claude: medium
   gemini: medium
@@ -12,6 +12,8 @@ tier:
   gemini-cli: medium
   codex: medium
 model: inherit
+tier_semantics: floor
+session_hosted: true
 color: yellow
 description: 'Orchestrates multi-agent workflows. Enforces quality gates. Decides agent hiring/firing and approves agent skill requests. Use when: "Managing workflow", "Coordinating multi-phase tasks", "PM orchestration needed"'
 examples:
@@ -164,7 +166,7 @@ PM must also append the same entry to the active `memory/YYYY-MM-DD.md` session 
 >
 > **Phase Determination**: For deliverable-type classification and agent assignment rules, see [AGENTS.md §3.5](AGENTS.md#35-phase-determination-deliverable-type-gate).
 >
-> **3-Tier Strategy**: For model selection and tier assignment rules, see [AGENTS.md §3.6](AGENTS.md#36-3-tier-strategy).
+> **3-Tier Strategy**: For model selection and tier assignment rules, and for the PM tier as a capability floor for a session-hosted agent, see [AGENTS.md §3.6](AGENTS.md#36-3-tier-strategy).
 
 ## Meeting Facilitation
 

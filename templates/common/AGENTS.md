@@ -134,6 +134,7 @@ When leading execution and improvement tasks, PM MUST use the 3-Tier model strat
 > **Note**: The `Model` column below shows the Claude Code short alias (`sonnet`/`opus`/`haiku`/`fable`) actually passed to the `Agent()` tool's `model` parameter — not the registry ID (e.g. `claude-sonnet-5-5`). See [CLAUDE.md §6](CLAUDE.md#6-native-sub-agents-agent-tool) for the registry-ID → alias translation table. On Gemini/Antigravity, use the literal model ID instead (see GEMINI.md's equivalent example).
 <!-- /WORKSPACE-MANAGED -->
 
+> **Tier semantics**: For a dispatched subagent, the tier selects the model that the platform dispatch mechanism uses for that subagent. For a session-hosted agent (the PM), the tier is a minimum capability floor. The user selects the session model. A higher model is allowed. A model below the floor is a warning. The PM states its model in one line, `PM running on: <model>`, in the header of its execution plan. The same rule applies on every platform. The model ID for each platform stays in the registry.
 
 ### §3.7.5 Governance Backlog Dispatch
 
