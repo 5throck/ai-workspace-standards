@@ -9,7 +9,7 @@ Governance: ADR-0092 · Design: `docs/designs/2026-09-27-co-workspace-service-de
 **Current posture:** multi-user (sign-in required, per-user identity and quotas), a web
 app with explicit **team** creation, an account model with verified email changes and
 admin-issued temporary passwords, an admin panel (stats, users, audit), and
-**docker isolation** — each agent turn runs in an ephemeral sibling container that mounts
+**docker isolation** (opt-in via the socket override) — each agent turn runs in an ephemeral sibling container that mounts
 only that team's files. See [Security model](#security-model).
 
 ## How it works — teams
@@ -187,6 +187,8 @@ cat > services/co-workspace/docker/.env <<'ENV'
 CO_WORKSPACE_DATA_DIR_HOST=/absolute/durable/path/for/services/co-workspace/data
 CO_WORKSPACE_HERMES_SEED_HOME=/Users/you/.hermes
 CO_WORKSPACE_ISOLATION=docker
+# Docker isolation needs the socket override (host-root equivalent — see Security model):
+COMPOSE_FILE=docker-compose.yml:docker-compose.isolation.yml
 # Build it once from your working Hermes build: ./build-runtime-image.sh
 CO_WORKSPACE_RUNTIME_IMAGE=co-workspace-runtime:latest
 CO_WORKSPACE_HERMES_MODEL=upstage/solar-pro4:free
@@ -204,8 +206,10 @@ docker compose build && docker compose up -d
 - The image is based on the official `nousresearch/hermes-agent` image (hermes + python)
   with bun + the gateway server added; **one image serves both roles** — the gateway
   container and the per-turn docker-isolation runtime (`CO_WORKSPACE_RUNTIME_IMAGE`).
-  The docker CLI is baked in via `COPY --from=docker:cli` and the host socket is mounted
-  (`/var/run/docker.sock`) for sibling spawns.
+  The docker CLI is baked in via `COPY --from=docker:cli`. The host socket
+  (`/var/run/docker.sock`) is NOT mounted by default: docker isolation requires the
+  `docker/docker-compose.isolation.yml` override, enabled via `COMPOSE_FILE` in `.env`
+  or `docker compose -f docker-compose.yml -f docker-compose.isolation.yml ...`.
 - Provisioning scaffolds into the clone's `Projects/` and relocates the team immediately;
   docker-isolated turns run as the unprivileged runtime user (10000) and the team tree is
   chowned to it at provisioning.
@@ -225,6 +229,11 @@ docker compose build && docker compose up -d
 - **PII** — raw emails live ≤24 h in a pending-verification row and are then dropped;
   accounts keep only a SHA-256 email hash. Admins can rename users but cannot read or
   set their email.
+- **Docker socket** — `CO_WORKSPACE_ISOLATION=docker` needs `/var/run/docker.sock` mounted
+  into the gateway, which is host-root equivalent; it is only mounted when the isolation
+  override is included, and is meant for single-operator deployments. Running the gateway
+  as non-root and fronting the socket with a socket proxy are NOT done yet (follow-up of
+  T-20260929-005; needs live docker validation).
 - **Known tradeoffs** (documented, by design): in docker mode each team's Hermes home is
   re-seeded with the operator's CURRENT `auth.json` every turn — one login covers all
   teams, and the copy is readable by the isolated turn (process mode instead binds the

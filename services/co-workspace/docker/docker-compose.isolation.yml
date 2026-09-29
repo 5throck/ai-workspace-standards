@@ -1,0 +1,10 @@
+# Override enabling CO_WORKSPACE_ISOLATION=docker.
+# Usage: docker compose -f docker-compose.yml -f docker-compose.isolation.yml up -d
+#   or set COMPOSE_FILE=docker-compose.yml:docker-compose.isolation.yml in .env.
+#
+# WARNING: required for CO_WORKSPACE_ISOLATION=docker. This grants the gateway control of
+# the host Docker daemon (host-root equivalent). Single-operator deployments only.
+services:
+  co-workspace:
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
