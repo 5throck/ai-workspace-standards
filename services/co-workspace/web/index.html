@@ -437,7 +437,7 @@
         del.addEventListener("click", async (e) => {
           e.stopPropagation();
           if (!confirm(`Delete "${name}"? Project files will be removed.`)) return;
-          const res = await fetch(`/tenants/${t.tenantId}`, { method: "DELETE" });
+          const res = await fetch(`/tenants/${t.tenantId}`, { method: "DELETE", headers: { "x-requested-with": "co-workspace" } });
           if (res.status === 200) {
             if (t.tenantId === currentTenantId) { currentTenantId = ""; pnameLabel.textContent = ""; }
             loadSessions();
@@ -1105,7 +1105,7 @@
     }
     for (const btn of adminView.querySelectorAll("[data-reset]")) {
       btn.addEventListener("click", async () => {
-        const res = await fetch(`/admin/users/${btn.getAttribute("data-reset")}/reset-password`, { method: "POST" });
+        const res = await fetch(`/admin/users/${btn.getAttribute("data-reset")}/reset-password`, { method: "POST", headers: { "x-requested-with": "co-workspace" } });
         const body = await res.json();
         if (res.status !== 200) { alert(body.error ?? "reset failed"); return; }
         const wrap = showModal({ title: `Temporary password for @${btn.getAttribute("data-name")}`, bodyHtml: `
@@ -1124,7 +1124,7 @@
       btn.addEventListener("click", async () => {
         const disposition = prompt(`Delete user — tenant disposition?\n'delete' = remove tenant files, 'archive' = keep (default)`, "archive");
         if (disposition === null) return;
-        const res = await fetch(`/admin/users/${btn.getAttribute("data-del")}?tenants=${disposition === "delete" ? "delete" : "archive"}`, { method: "DELETE" });
+        const res = await fetch(`/admin/users/${btn.getAttribute("data-del")}?tenants=${disposition === "delete" ? "delete" : "archive"}`, { method: "DELETE", headers: { "x-requested-with": "co-workspace" } });
         const body = await res.json();
         alert(`User deleted · tenants handled: ${body.tenantsHandled} (${body.disposition})`);
         adminMenu.click();

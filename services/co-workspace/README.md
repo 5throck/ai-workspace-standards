@@ -172,7 +172,7 @@ continuity handle → credential model → isolation matrix → provider disclos
 | `CO_WORKSPACE_RUN_BUDGET_SECONDS` / `MAX_TURNS` | `300` / `100` | Wall-clock and tool-iteration ceilings per turn |
 | `CO_WORKSPACE_HERMES_TOOLSETS` / `CO_WORKSPACE_HERMES_EXTRA_ARGS` | — | Toolset scoping (`-t`) and extra CLI args per session |
 | `CO_WORKSPACE_QUOTA_WINDOW` | `lifetime` | `daily` resets per-team quota counters each UTC day |
-| `CO_WORKSPACE_API_KEYS` / `_API_KEYS_FILE` | — | Bearer keys (`key:label` maps a key to a trusted principal); the file re-reads on `POST /admin/reload` |
+| `CO_WORKSPACE_API_KEYS` / `_API_KEYS_FILE` | — | Bearer keys; `key:label` (key file only) maps a key to a trusted principal; the file re-reads on `POST /admin/reload` |
 | `CO_WORKSPACE_LOGIN_REQUIRED` | compose: `true` | Web app requires a session; keyless visitors are redirected |
 | `CO_WORKSPACE_CSRF_REQUIRED` | compose: `true` | Keyless mutating requests need `x-requested-with: co-workspace` |
 | `CO_WORKSPACE_TRUST_PROXY` | `false` | Key auth rate limits on the right-most `X-Forwarded-For` hop (set only behind a reverse proxy); otherwise the socket peer IP |
