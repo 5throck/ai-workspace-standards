@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-09-29T03:11:17.444Z
+**Generated**: 2026-09-29T03:13:36.132Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -19,15 +19,15 @@
 
 | Name | File | Tier | Model | Last Modified |
 |------|------|------|-------|---------------|
-| architect | agents/architect.md | high | inherit | 2026-09-17 |
-| auditor | agents/auditor.md | medium | inherit | 2026-09-12 |
-| automation-engineer | agents/automation-engineer.md | low | inherit | 2026-09-12 |
-| docs-writer | agents/docs-writer.md | medium | inherit | 2026-09-17 |
-| lifecycle-manager | agents/lifecycle-manager.md | medium | inherit | 2026-09-15 |
-| pm | agents/pm.md | medium | inherit | 2026-09-18 |
-| scaffolding-expert | agents/scaffolding-expert.md | low | inherit | 2026-09-12 |
-| security-expert | agents/security-expert.md | medium | inherit | 2026-09-12 |
-| skill-graph-analyst | agents/skill-graph-analyst.md | low | inherit | 2026-09-21 |
+| architect | agents/architect.md | high | inherit | 2026-09-29 |
+| auditor | agents/auditor.md | medium | inherit | 2026-09-29 |
+| automation-engineer | agents/automation-engineer.md | low | inherit | 2026-09-29 |
+| docs-writer | agents/docs-writer.md | medium | inherit | 2026-09-29 |
+| lifecycle-manager | agents/lifecycle-manager.md | medium | inherit | 2026-09-29 |
+| pm | agents/pm.md | medium | inherit | 2026-09-29 |
+| scaffolding-expert | agents/scaffolding-expert.md | low | inherit | 2026-09-29 |
+| security-expert | agents/security-expert.md | medium | inherit | 2026-09-29 |
+| skill-graph-analyst | agents/skill-graph-analyst.md | low | inherit | 2026-09-29 |
 
 ---
 
