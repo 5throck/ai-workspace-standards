@@ -170,6 +170,11 @@ Development-facing instruction text — requirement statements, task briefs, exe
 ### PM Team-Management Authority (ADR-0080)
 
 PM owns team composition and skill-change rulings. Hiring and firing: PM decides timing and target from workflow signals — recurring unmatched work types, role overload, absorbed roles, the quarterly roster review — and records every decision (ADR-0061 decision record + memory log) before dispatch; the default exit for a fired agent is `status: deprecated`, and hard delete requires an explicit user request. Skill requests: agents file structured `create|attach|remove` request blocks with evidence in their task reports and memory logs; PM triages them and only approved requests are executed — agents never create, attach, or remove skills unilaterally. Procedures: `agent-lifecycle-manager` and `skill-lifecycle-manager` skills. Full decision: ADR-0080 in the workspace root `docs/adr/`.
+
+### PM Tier Semantics
+
+The tier of a dispatched subagent selects the model that the platform dispatch mechanism uses for that subagent. The tier of a session-hosted agent (the PM) is a minimum capability floor, because the user selects the session model. A higher model is allowed. A model below the floor is a warning. The rule applies on every platform. The PM states its model in one line, `PM running on: <model>`, in the header of its execution plan. Full decision: design 2026-09-29-pm-tier-capability-floor-design in the workspace root docs/designs/.
+
 <!-- COMMON-AGENTS:END -->
 
 ## §4: Other Workflows

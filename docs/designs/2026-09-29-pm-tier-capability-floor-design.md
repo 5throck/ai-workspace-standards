@@ -94,18 +94,45 @@ bun scripts/audit.ts
 
 | ID | Scope | Change | Status |
 |----|-------|--------|--------|
-| A | Root (this PR) | Move the rule `PM running on: <model>` to `docs/governance/agents/execution-plan-templates.md` §5.1, Key points. `AGENTS.md` §3.6 keeps the tier semantics. | In progress |
-| B | `templates/common` only (separate PR, after A is merged) | Apply the same change to the L1 template. See the details below. | Pending |
+| A | Root | Move the rule `PM running on: <model>` to `docs/governance/agents/execution-plan-templates.md` §5.1, Key points. `AGENTS.md` §3.6 keeps the tier semantics. | Done (PR 1235) |
+| B | `templates/common` | Apply the frontmatter change to the L1 template. See the details below. | Done (PR 1236) |
+| C | Root (this PR) | Deliver the tier semantics to existing projects. See the details below. | In progress |
+| D | Templates (separate PR, after C is merged) | Replace the template note with a pointer. See the details below. | Pending |
 
 ### Follow-up B details
 
-- `templates/common/agents/pm.md` is the L1 file. It has its own `tier:` block and extends the root `agents/pm.md`.
-- Each variant `pm.md` extends the L1 file. Thus, variants inherit new frontmatter keys.
-- Add `tier_semantics: floor` and `session_hosted: true` as top-level keys. Do not put them in the `tier:` block.
-- If the template `AGENTS.md` has a §3.6, add the tier-semantics note to it.
-- Existing projects receive this change through the upgrade flow.
+- `tier_semantics: floor` and `session_hosted: true` are top-level frontmatter keys in `templates/common/agents/pm.md`. They are not in the `tier:` block.
+- These keys reach new scaffolds only. Frontmatter is project-owned, so existing projects do not get the keys.
+- Verification: a dry run of `scripts/upgrade-project.ts` on `Projects/co-work`. For `agents/pm.md`, the upgrade merges only the WORKSPACE-MANAGED body block ("PM agent body"). The dry run then reports the file as "STUB (resolved at scaffold)".
+- No script reads these keys at this time. They are descriptive metadata.
+- The upgrade flow does not deliver the note in the template `AGENTS.md` §3.6 to existing projects. The note is outside all managed blocks. Follow-up C supplies the delivery channel.
+- Root-file exception: PR 1236 also changed `docs/templates/common-contract.json` (pm version 1.2.1). `validate-templates.ts` requires that the contract version is equal to the L1 agent version. The maintainer approved this exception to `CLAUDE.md` §9.
 
-### Why A and B are separate PRs
+### Follow-up C details
+
+- The rule "PM Tier Semantics" moves into the COMMON-AGENTS zone of `AGENTS.md`.
+- The sync pipeline propagates this zone to `templates/common` and to the variants.
+- The upgrade flow merges this zone into existing projects. Verification: the dry run reports "MERGED COMMON-AGENTS block in: AGENTS.md".
+- `AGENTS.md` §3.6 keeps a one-line pointer to the rule.
+- `agents/pm.md` points to the new anchor `#pm-tier-semantics`. The `pm.md` body block reaches existing projects.
+
+### Follow-up D details
+
+- In `templates/common/AGENTS.md` §3.6, replace the full note with the same one-line pointer.
+- In the L1 `agents/pm.md`, set the pointer target to `#pm-tier-semantics`.
+- No version bump is necessary. The body block merges without a version bump.
+
+### Rejected alternative (delivery channel)
+
+| Alternative | Reason for rejection |
+|-------------|----------------------|
+| A new keyed WORKSPACE-MANAGED block in §3.6 | `validate-templates.ts` (managed-block-parity) requires each common keyed block to exist, wrapped, in each variant template. This needs 14 file edits. The COMMON-AGENTS zone is already propagated and delivered. |
+
+### Why root and template changes are separate PRs
 
 - `CLAUDE.md` §9 forbids changes to workspace root files and template files in one task.
-- The Sequential Branch Dependency Rule requires that A merges before B opens.
+- The Sequential Branch Dependency Rule requires that the root PR merges before the template PR opens (A before B, C before D).
+
+### CI note
+
+The CI check `test (windows-latest)` failed on an unrelated test. PR 1237 fixed it.
