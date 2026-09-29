@@ -115,7 +115,7 @@ Closed in this pass: H8, M1, M2, M3, M5, M7, M8, M11, M14, M15, M16, M17 and T-2
 
 Still open (need live docker validation, a refactor, or an operator decision):
 - T-20260929-014 (non-root gateway, docker socket proxy), M6 (minimal seed-home mount): need live docker.
-- M12 (`server.ts` split): large refactor, separate PR.
+- M12 (`server.ts` split): DONE in a follow-up PR (pure-move split into 9 modules + `routes/*`; `server.ts` 1,669 -> 156 lines). Follow-ups deliberately left out: route table, relocating `/admin/reload` and `/tenants/:id/cancel`, SSE-boilerplate dedup, test import-path updates.
 - M4 (Secure cookie default): breaks `http://localhost` login if defaulted on; opt-in via `CO_WORKSPACE_COOKIE_SECURE` exists.
 - M13 (orphan child processes after restart), M20 (`services.yaml` registration), M21 (rotate the key in `docker/.env` if it was ever echoed), T-20260929-003 (turn latency research).
 - M7 second half (token in the mail URL) is already mitigated: `/auth/verify` is POST-only.

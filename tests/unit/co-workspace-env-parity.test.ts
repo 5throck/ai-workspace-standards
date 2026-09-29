@@ -132,7 +132,11 @@ describe("checkParity / collectors (synthetic inputs)", () => {
 describe("co-workspace env parity (real files)", () => {
   const srcDir = join(SVC, "src");
   const read = new Set<string>();
-  for (const f of readdirSync(srcDir).filter((f) => f.endsWith(".ts"))) {
+  // Recursive: route handlers live in src/routes/ (M12 split) and must be scanned too.
+  const files = (readdirSync(srcDir, { recursive: true }) as string[])
+    .map((f) => f.replaceAll("\\", "/"))
+    .filter((f) => f.endsWith(".ts"));
+  for (const f of files) {
     for (const v of collectReadVars(readFileSync(join(srcDir, f), "utf8"))) read.add(v);
   }
   const compose = collectComposeVars(readFileSync(join(SVC, "docker/docker-compose.yml"), "utf8"));
@@ -141,6 +145,7 @@ describe("co-workspace env parity (real files)", () => {
   test("scanner sees the service's env surface", () => {
     expect(read.size).toBeGreaterThan(30);
     expect(read.has("CO_WORKSPACE_COOKIE_SECURE")).toBe(true);
+    expect(files).toContain("routes/auth.ts"); // subdirectories are scanned
   });
 
   test("every read var is passed through docker-compose.yml or exempt", () => {
