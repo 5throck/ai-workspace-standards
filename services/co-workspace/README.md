@@ -181,6 +181,10 @@ continuity handle → credential model → isolation matrix → provider disclos
 | `CO_WORKSPACE_ISOLATION` | `process` | `docker` = per-turn ephemeral sibling container (tenant files only) |
 | `CO_WORKSPACE_RUNTIME_IMAGE` | `co-workspace-runtime:latest` | Runtime image for docker isolation (the gateway image also qualifies — it carries hermes) |
 | `CO_WORKSPACE_DOCKER_BIN` | `docker` | Docker CLI used for isolation spawns |
+| `CO_WORKSPACE_COOKIE_SECURE` | `false` | Set `true` when served over TLS to add `Secure` to session cookies (compose passes it through) |
+| `CO_WORKSPACE_PRINCIPAL_MAX_TOKENS` | `0` (=unlimited) | Token cap across all of a principal's teams |
+| `CO_WORKSPACE_SCAFFOLD_TIMEOUT_MS` | `600000` | Time limit for scaffolding a team (ms) |
+| `CO_WORKSPACE_CLAUDE_BIN` / `_CODEX_BIN` / `_ANTIGRAVITY_BIN` (+`_ANTIGRAVITY_BIN_PREFIX`) / `HERMES_BIN_PREFIX` | — | Bare-metal binary/wrapper overrides (not wired into compose; those CLIs are not in the gateway image) |
 | `CO_WORKSPACE_CONTAINER_MEMORY` / `CO_WORKSPACE_CONTAINER_CPUS` / `CO_WORKSPACE_CONTAINER_PIDS_LIMIT` | `2g` / `2` / `256` | Resource caps for isolated turns |
 | `CO_WORKSPACE_RUNTIME` | `hermes` | `hermes` / `antigravity` (agy) / `claude` / `codex` |
 | `CO_WORKSPACE_ADMIN_EMAIL` | — | Bootstrap admin account (created at startup) |
