@@ -1,0 +1,18 @@
+schemaVersion: 1
+id: T-20260930-009
+kind: manual
+title: >-
+  co-workspace: operator verification still open after PRs 1245-1247 -
+  real-provider chat turn in docker mode, Linux bind-mount ownership for uid
+  10000, Google SSO, legacy OAuth mode with docker-compose.seed.yml (live run so
+  far used dummy provider values on macOS Docker Desktop)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-29T22:51:32.392Z'
+history:
+  - at: '2026-09-29T22:51:32.392Z'
+    from: null
+    to: backlog
+result: null
+error: null

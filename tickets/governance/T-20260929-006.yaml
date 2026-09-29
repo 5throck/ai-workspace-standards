@@ -5,12 +5,28 @@ title: >-
   co-workspace: stop stamping the provider API key into tenant config.yaml or
   document the trade-off in ADR-0092 Addendum 9
 priority: high
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-29T04:55:25.634Z'
 history:
   - at: '2026-09-29T04:55:25.634Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-29T22:51:20.683Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-29T22:51:20.694Z'
+    from: waiting
+    to: running
+  - at: '2026-09-29T22:51:20.706Z'
+    from: running
+    to: review
+  - at: '2026-09-29T22:51:20.718Z'
+    from: review
+    to: done
+result: >-
+  Hardened and documented rather than removed (live-verified that hermes needs
+  the key in the tenant config.yaml): PR #1227 YAML-safe quoting, config.yaml
+  mode 0600, docker -e NAME without the value on argv, docker CLI env allowlist
+  plus DOCKER_*; ADR-0092 Addendum 9 and design R8 record the accepted risk.
 error: null

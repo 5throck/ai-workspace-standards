@@ -1,0 +1,17 @@
+schemaVersion: 1
+id: T-20260930-008
+kind: manual
+title: >-
+  co-workspace: replace the docker socket proxy with rootless Docker or a
+  create-body-validating broker (proxy cannot inspect the container-create body;
+  CONTAINERS=1 lets the gateway list and inspect every container on the daemon)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-29T22:51:32.376Z'
+history:
+  - at: '2026-09-29T22:51:32.376Z'
+    from: null
+    to: backlog
+result: null
+error: null

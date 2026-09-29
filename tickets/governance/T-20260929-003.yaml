@@ -5,12 +5,31 @@ title: >-
   co-workspace turn latency: thinking model + uncached team-context prefill
   (~16-26s) — mitigation research
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-29T02:55:01.627Z'
 history:
   - at: '2026-09-29T02:55:01.627Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-29T22:54:34.649Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-29T22:54:34.661Z'
+    from: waiting
+    to: running
+  - at: '2026-09-29T22:54:34.673Z'
+    from: running
+    to: review
+  - at: '2026-09-29T22:54:34.685Z'
+    from: review
+    to: done
+result: >-
+  Research complete:
+  docs/reports/2026-09-30-co-workspace-turn-latency-research.md. Fixed per-turn
+  overhead is under 1 s (measured: container about 0.17 s, plus Hermes start
+  about 0.42 s total); the 16-26 s is model time (thinking, about 13k-20k tokens
+  of prefill, growing history), estimated because no real key was available.
+  Actionable work moved to two follow-up tickets (UX quick win; instrumentation
+  and real-key measurement).
 error: null

@@ -5,12 +5,30 @@ title: >-
   co-workspace: mount docker.sock only in a docker-isolation compose override
   and run the gateway as non-root
 priority: high
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-29T04:55:25.618Z'
 history:
   - at: '2026-09-29T04:55:25.618Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-29T22:51:20.635Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-29T22:51:20.646Z'
+    from: waiting
+    to: running
+  - at: '2026-09-29T22:51:20.658Z'
+    from: running
+    to: review
+  - at: '2026-09-29T22:51:20.670Z'
+    from: review
+    to: done
+result: >-
+  Done across PRs #1226 (docker.sock moved to the opt-in
+  docker-compose.isolation.yml override), #1245 and #1246 (non-root gateway,
+  socket proxy, optional seed home; the proxy read_only crash-loop found by the
+  live run was fixed in #1246). Residual risk (proxy cannot inspect the
+  container-create body; CONTAINERS=1 exposes list/inspect of all containers) is
+  documented in ADR-0092 Addendum 11 and tracked as a follow-up.
 error: null

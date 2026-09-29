@@ -5,12 +5,30 @@ title: >-
   co-workspace: add abort handling to SSE streams so client disconnect cancels
   the turn and frees chatLocks
 priority: high
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-29T04:55:25.664Z'
 history:
   - at: '2026-09-29T04:55:25.664Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-29T22:51:20.730Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-29T22:51:20.742Z'
+    from: waiting
+    to: running
+  - at: '2026-09-29T22:51:20.755Z'
+    from: running
+    to: review
+  - at: '2026-09-29T22:51:20.767Z'
+    from: review
+    to: done
+result: >-
+  Fixed in PR #1229: shared sseStream helper on the native, OpenAI, Anthropic
+  and Gemini surfaces cancels the turn on client disconnect, makes enqueue/close
+  non-throwing, and clears the provisioning interval in a finally; also fixed
+  the Bun kill(137) bug that made POST /tenants/:id/cancel return 500. PR #1242
+  later made docker-mode cancel stop the real container (docker kill by name,
+  --init).
 error: null
