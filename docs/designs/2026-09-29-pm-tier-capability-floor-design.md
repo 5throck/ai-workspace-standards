@@ -89,3 +89,23 @@ bun scripts/validate-model-registry.ts
 bun scripts/validate-templates.ts
 bun scripts/audit.ts
 ```
+
+## R9 — Follow-ups
+
+| ID | Scope | Change | Status |
+|----|-------|--------|--------|
+| A | Root (this PR) | Move the rule `PM running on: <model>` to `docs/governance/agents/execution-plan-templates.md` §5.1, Key points. `AGENTS.md` §3.6 keeps the tier semantics. | In progress |
+| B | `templates/common` only (separate PR, after A is merged) | Apply the same change to the L1 template. See the details below. | Pending |
+
+### Follow-up B details
+
+- `templates/common/agents/pm.md` is the L1 file. It has its own `tier:` block and extends the root `agents/pm.md`.
+- Each variant `pm.md` extends the L1 file. Thus, variants inherit new frontmatter keys.
+- Add `tier_semantics: floor` and `session_hosted: true` as top-level keys. Do not put them in the `tier:` block.
+- If the template `AGENTS.md` has a §3.6, add the tier-semantics note to it.
+- Existing projects receive this change through the upgrade flow.
+
+### Why A and B are separate PRs
+
+- `CLAUDE.md` §9 forbids changes to workspace root files and template files in one task.
+- The Sequential Branch Dependency Rule requires that A merges before B opens.
