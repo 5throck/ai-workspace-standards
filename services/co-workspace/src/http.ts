@@ -33,6 +33,20 @@ export function resolveClientIp(trustProxy: boolean, req: Request, peerIp?: stri
   return peerIp || "local";
 }
 
+/** Whether the session cookie gets `Secure` for this request. true/false force it; "auto"
+ * (or unset) is Secure over an https URL, or — only when trustProxy — when the right-most
+ * X-Forwarded-Proto entry (the hop the trusted proxy appended) is https. */
+export function cookieSecureFor(cfg: { cookieSecure?: boolean | "auto"; trustProxy?: boolean }, req: Request): boolean {
+  if (cfg.cookieSecure === true) return true;
+  if (cfg.cookieSecure === false) return false;
+  if (new URL(req.url).protocol === "https:") return true;
+  if (cfg.trustProxy) {
+    const parts = (req.headers.get("x-forwarded-proto") ?? "").split(",");
+    return (parts[parts.length - 1] ?? "").trim().toLowerCase() === "https";
+  }
+  return false;
+}
+
 /** The single-file app ships without versioned asset URLs — `no-cache` forces revalidation
  * on every load, otherwise browsers heuristically cache the page across redeploys and run
  * stale code for days (the "nothing changed" report of 2026-09-27/28). */

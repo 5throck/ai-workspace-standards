@@ -119,3 +119,11 @@ Still open (need live docker validation, a refactor, or an operator decision):
 - M4 (Secure cookie default): breaks `http://localhost` login if defaulted on; opt-in via `CO_WORKSPACE_COOKIE_SECURE` exists.
 - M13 (orphan child processes after restart), M20 (`services.yaml` registration), M21 (rotate the key in `docker/.env` if it was ever echoed), T-20260929-003 (turn latency research).
 - M7 second half (token in the mail URL) is already mitigated: `/auth/verify` is POST-only.
+
+## Closing pass (2026-09-30)
+
+Closed since the remaining-items pass: M13 (turn containers get `--init`, a name and labels; `docker kill` on cancel/delete/disconnect; boot reaper), M6 and T-20260929-014 (non-root gateway behind a docker socket proxy, optional seed home), M4 (tri-state cookie `Secure`, `auto` default) and M20 (decided: not registered in `services.yaml`, ADR-0092 Addendum 12). Two report claims were wrong: the M20 allowlist claim (the top-level `services` directory is allowlisted) and, per the architect, H8's exposure being wider than the admin bootstrap account.
+
+Live verification (2026-09-30, Docker 29.8.1, isolated compose project): the gateway image builds, uid 10000 runs bun/git/docker, the proxy `0.3.0` tag exists, the proxy blocks exec/images/volumes/networks/info, and team create, a chat turn, cancel, delete and the restart reaper all work through it. The run found a real bug in the merged design: the proxy image crash-loops with `read_only: true` (fixed and test-guarded). It also made the residual risk concrete: with `CONTAINERS=1` the gateway can list and inspect every container on the daemon.
+
+Still open: rootless Docker or a create-body-validating broker (the proxy cannot inspect the container-create body); M21 (operator: rotate the key in `docker/.env` if it was ever exposed); T-20260929-003 (turn latency research); a real-provider end-to-end turn, Linux bind-mount ownership and legacy OAuth mode with the seed override remain unverified.
