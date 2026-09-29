@@ -7,7 +7,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { credentialValid, isAuthEnabled, presentedCredential, requestAuthorized } from "../../services/co-workspace/src/auth";
 import { dockerProbe, loadConfig } from "../../services/co-workspace/src/config";
-import { hermesArgs, hermesSpawnArgv, type HermesSpawnOptions } from "../../services/co-workspace/src/hermes";
+import { hermesArgs, hermesEnv, hermesSpawnArgv, type HermesSpawnOptions } from "../../services/co-workspace/src/hermes";
 import { createServer, createState } from "../../services/co-workspace/src/server";
 
 const cfgAuth = { apiKeys: ["sk-one", "sk-two"] };
@@ -67,6 +67,21 @@ describe("hermes spawn adapter — toolsets and container isolation", () => {
     expect(argv[0]).toBe("hermes");
     expect(argv).toContain("--in");
     expect(argv).not.toContain("docker");
+  });
+
+  test("provider key mode injects OPENAI_API_KEY (design 2026-09-29-co-workspace-provider-key-config)", () => {
+    const dockerArgv = hermesSpawnArgv({
+      ...base,
+      providerApiKey: "sk-test",
+      container: { image: "co-workspace-runtime:latest" },
+    });
+    expect(dockerArgv).toContain("OPENAI_API_KEY=sk-test");
+    // docker -e flags must precede the image
+    expect(dockerArgv.indexOf("OPENAI_API_KEY=sk-test")).toBeLessThan(dockerArgv.indexOf("co-workspace-runtime:latest"));
+    expect(hermesSpawnArgv(base)).not.toContain("OPENAI_API_KEY=sk-test");
+    const env = hermesEnv({ ...base, providerApiKey: "sk-test" }, {});
+    expect(env.OPENAI_API_KEY).toBe("sk-test");
+    expect(hermesEnv(base, {}).OPENAI_API_KEY).toBeUndefined();
   });
 
   test("docker mode: ephemeral sibling container mounts only the tenant dirs", () => {

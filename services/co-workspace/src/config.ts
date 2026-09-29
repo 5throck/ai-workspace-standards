@@ -32,6 +32,13 @@ export interface GatewayConfig {
   hermesAuthDirHost?: string;
   /** Model id stamped into every tenant config.yaml (`model.default`); unset = Hermes auto. */
   hermesModel?: string;
+  /** Provider key+base-url mode (design 2026-09-29-co-workspace-provider-key-config):
+   * when the key is set, isolated turns inject it as OPENAI_API_KEY and the tenant
+   * config stamps model.provider=custom + model.base_url; the per-turn auth.json
+   * re-seed is skipped (the copy-based OAuth flow caused the 2026-09-29
+   * refresh-token-reuse revocation). Unset = legacy shared-store/auth.json path. */
+  llmBaseUrl?: string;
+  llmApiKey?: string;
   runBudgetSeconds: number;
   maxTurns: number;
   scaffoldTimeoutMs: number;
@@ -171,6 +178,8 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     hermesAuthDir: env.CO_WORKSPACE_HERMES_AUTH_DIR || undefined,
     hermesAuthDirHost: env.CO_WORKSPACE_HERMES_AUTH_DIR_HOST || undefined,
     hermesModel: env.CO_WORKSPACE_HERMES_MODEL || undefined,
+    llmBaseUrl: env.CO_WORKSPACE_LLM_BASE_URL || undefined,
+    llmApiKey: env.CO_WORKSPACE_LLM_API_KEY || undefined,
     runBudgetSeconds: num(env.CO_WORKSPACE_RUN_BUDGET_SECONDS, 300),
     maxTurns: num(env.CO_WORKSPACE_MAX_TURNS, 100),
     scaffoldTimeoutMs: num(env.CO_WORKSPACE_SCAFFOLD_TIMEOUT_MS, 600_000),

@@ -1,0 +1,64 @@
+# co-workspace Provider Key+Base-URL Configuration — Design
+
+- **Date**: 2026-09-29
+- **Status**: implemented
+- **Spec id**: `2026-09-29-co-workspace-provider-key-config`
+- **Owner**: governance-ticket-runner (user-directed architecture change)
+- **Related**: ADR-0092 (Addendum 4 shared credential store; Addendum 5 SEC-07; Addendum 7 seed directory bind), `docs/designs/2026-09-27-team-gateway-phase2-hardening-design.md` (docker isolation)
+
+## R1 — Problem
+
+Docker-isolated turns authenticate the tenant Hermes via a per-turn copy of the
+operator's OAuth `auth.json` (runChat re-seed). On 2026-09-29 Nous Portal revoked
+the session (`invalid_grant` — refresh-token reuse): every Hermes instance sharing
+the copied `auth.json` is an independent refresher of the SAME single-use refresh
+token, so the isolation architecture itself violates the OAuth provider's rotation
+contract. Any copy-based credential mechanism will recur this failure class.
+
+## R2 — Decision
+
+Replace the copy-based OAuth path with **static provider credentials** supplied by
+the operator as configuration — the API Key + Base URL that LLM providers issue:
+
+| Config | Meaning |
+|--------|---------|
+| `CO_WORKSPACE_LLM_BASE_URL` | OpenAI-compatible base URL (e.g. `https://api.openai.com/v1`) |
+| `CO_WORKSPACE_LLM_API_KEY` | The provider's API key |
+| `CO_WORKSPACE_HERMES_MODEL` | Model id (existing knob, unchanged) |
+
+When `llmApiKey` is configured:
+
+- **Tenant config.yaml** (generated at provisioning) stamps
+  `model.provider: custom`, `model.base_url`, and `model.default` — the Hermes
+  custom-provider contract.
+- **Turn spawn** injects the key as `OPENAI_API_KEY` into the isolated container
+  (`-e` flag) and into the process-mode spawn env (hermesEnv). The key never
+  lands on disk in the tenant home and never appears in logs.
+- **The per-turn auth.json re-seed is skipped** — no OAuth token is copied
+  anywhere, so the refresh-token reuse class is structurally gone.
+
+When `llmApiKey` is NOT configured, the legacy shared-store/auth.json behavior is
+preserved unchanged (deployment compatibility until the operator migrates).
+
+## R3 — Trust-path note
+
+The generated config.yaml trusts the tenant project directory. Isolated turns
+mount the project at `/work/project` (the gateway-side copy sits under `/data/...`),
+so both paths are stamped explicitly — still per-tenant, never blanket (ADR-0088 D7).
+
+## R4 — Non-goals
+
+- Per-tenant provider/model selection (one deployment-wide provider).
+- Migrating the antigravity/claude/codex runtimes (they carry their own binaries
+  and credential surfaces).
+- Removing the shared-store process-mode path (it remains the no-key fallback).
+
+## R5 — Acceptance criteria
+
+- [x] `loadConfig` parses `CO_WORKSPACE_LLM_BASE_URL` / `CO_WORKSPACE_LLM_API_KEY`.
+- [x] `tenantConfigYaml` stamps `provider: custom` + `base_url` when configured, and
+      the output is unchanged when not configured.
+- [x] `hermesSpawnArgv` (docker) and `hermesEnv` (process) inject `OPENAI_API_KEY`
+      only when the key is configured.
+- [x] runChat skips the auth.json re-seed when the key is configured.
+- [x] compose passes both variables through (empty default = off).

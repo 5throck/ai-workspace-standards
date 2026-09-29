@@ -37,6 +37,10 @@ export interface HermesSpawnOptions {
    * binary can stand in for the real executable (shebang scripts are not directly
    * exec-able there). Production never sets it. */
   binPrefix?: string[];
+  /** Static provider credential (design 2026-09-29-co-workspace-provider-key-config):
+   * injected as OPENAI_API_KEY into the turn env (docker `-e` / process env). Hermes's
+   * custom-provider mode reads model.base_url from the tenant config.yaml. */
+  providerApiKey?: string;
   projectDir: string;
   hermesHome: string;
   message: string;
@@ -143,6 +147,7 @@ export function hermesSpawnArgv(o: HermesSpawnOptions): string[] {
     `HERMES_HOME=${MOUNT_HERMES_HOME}`,
     "-e",
     "HERMES_ACCEPT_HOOKS=1",
+    ...(o.providerApiKey ? ["-e", `OPENAI_API_KEY=${o.providerApiKey}`] : []),
     ...(o.sharedAuthDir
       ? [
           "-v",
@@ -185,6 +190,7 @@ export function hermesEnv(o: HermesSpawnOptions, base: Record<string, string | u
     HERMES_ACCEPT_HOOKS: "1",
   };
   if (o.sharedAuthDir) env.HERMES_SHARED_AUTH_DIR = o.sharedAuthDir;
+  if (o.providerApiKey) env.OPENAI_API_KEY = o.providerApiKey;
   return env;
 }
 
