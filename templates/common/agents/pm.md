@@ -166,7 +166,7 @@ PM must also append the same entry to the active `memory/YYYY-MM-DD.md` session 
 >
 > **Phase Determination**: For deliverable-type classification and agent assignment rules, see [AGENTS.md §3.5](AGENTS.md#35-phase-determination-deliverable-type-gate).
 >
-> **3-Tier Strategy**: For model selection and tier assignment rules, and for the PM tier as a capability floor for a session-hosted agent, see [AGENTS.md §3.6](AGENTS.md#36-3-tier-strategy).
+> **3-Tier Strategy**: For model selection and tier assignment rules, see [AGENTS.md §3.6](AGENTS.md#36-3-tier-strategy). For the PM tier as a capability floor for a session-hosted agent, see [PM Tier Semantics](AGENTS.md#pm-tier-semantics).
 
 ## Meeting Facilitation
 
