@@ -4,6 +4,8 @@
 //          project name before the drift compare and on every write — raw template text
 //          made scaffolded names read as drift and reverted them to the placeholder
 //          (co-work v0.8.1 upgrade; co-deck/co-design/co-develop agents already hit).
+//          Delivery manifest now parses `git status --porcelain -uall` by column, so
+//          unstaged-only paths lose their status prefix and new directories list files.
 // v1.57.0 (2026-09-29): agent tier-comment migration — strips stale `# <model-id>`
 //          comments from project agents/*.md tier lines (scaffold-time copies such as
 //          i18n-specialist.md are never re-delivered); the registry resolves models.
@@ -3301,9 +3303,11 @@ if (syncChanged > 0 && existsSync(syncSkillsScript)) {
 // hardening design). Written in apply mode only, before sync-skills runs.
 if (!dryRun) {
   try {
-    const por = spawnSync('git', ['-C', projectDir, 'status', '--porcelain'], { encoding: 'utf8' });
+    const por = spawnSync('git', ['-C', projectDir, 'status', '--porcelain', '-uall'], { encoding: 'utf8' });
     const files = (por.stdout || '').split('\n')
-      .map(l => l.replace(/^\S+\s+/, '').trim().replace(/^"|"$/g, ''))
+      // XY status is two columns + space; the first column is blank for unstaged-only
+      // changes, so strip by position. -uall lists new files, not their directories.
+      .map(l => l.slice(3).replace(/^.* -> /, '').trim().replace(/^"|"$/g, ''))
       .filter(Boolean);
     mkdirSync(join(projectDir, '.claude'), { recursive: true });
     writeFileSync(
