@@ -1,8 +1,9 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.50.1
+ * @version 1.50.2
  *
+ * v1.50.2: When templates/common is absent (variant or project context), main() returns 0 and reports "not applicable" in JSON and text modes.
  * v1.48.0 → v1.49.0 (2026-09-28, sound-synth orphan-mirror follow-up — spec
  *         docs/designs/2026-09-28-sound-synth-orphan-mirror-cleanup-design.md
  *         §5 blind-spot note): B-11 widened from the canonical templates/common/
@@ -5465,6 +5466,18 @@ function main(): number {
     console.log(`${colors.cyan}Template Lifecycle Validator${colors.reset}`);
     console.log(`${colors.dim}Root: ${ROOT}${colors.reset}`);
     console.log(`${colors.dim}Variant filter: ${variantArg}${colors.reset}`);
+  }
+
+  // Project (L3) roots carry no templates/common — every check below assumes the
+  // L0/L1 template tree and would fail or crash with ENOENT, so skip cleanly.
+  if (!existsSync(join(TEMPLATES_DIR, 'common'))) {
+    const summary = 'not applicable: no templates/common (variant/project context)';
+    if (JSON_MODE) {
+      console.log(JSON.stringify({ variantsScanned: 0, errors: [], warnings: [], summary }, null, 2));
+    } else {
+      console.log(`\n${colors.green}✓ Template validation ${summary}${colors.reset}`);
+    }
+    return 0;
   }
 
   loadGovernance();

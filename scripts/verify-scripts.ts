@@ -1,8 +1,9 @@
 #!/usr/bin/env bun
 /**
  * verify-scripts.ts — Script Lifecycle Registry Verifier
- * @version 1.9.0
+ * @version 1.10.0
  *
+ * v1.10.0: ERROR on SCRIPTS.md registry rows with column count ≠ 8. Exported REGISTRY_COLUMN_COUNT and findMalformedRegistryRows for test coverage.
  * v1.8.0 (2026-09-23, adopt-project engine prerequisites): walkScripts() skips
  *         scripts/_legacy/ — the archive where adopt-project parks preserved
  *         foreign scripts. Archived files keep their original languages and carry
@@ -196,6 +197,28 @@ interface RegistryEntry {
 }
 
 // ── Registry Parser ──────────────────────────────────────────────────────────
+
+export const REGISTRY_COLUMN_COUNT = 8;
+
+/** Registry data rows whose column count differs from the 8-column header. */
+export function findMalformedRegistryRows(content: string): { script: string; columns: number }[] {
+  const bad: { script: string; columns: number }[] = [];
+  let inRegistry = false;
+  let headerParsed = false;
+  for (const line of content.split("\n")) {
+    if (line.startsWith("## Registry")) { inRegistry = true; headerParsed = false; continue; }
+    if (inRegistry && line.startsWith("## ")) break;
+    if (!inRegistry) continue;
+    const trimmed = line.trim();
+    if (!trimmed.startsWith("|") || trimmed.startsWith("|-")) continue;
+    const cols = trimmed.split("|").slice(1, -1).map((c) => c.trim());
+    if (!headerParsed) { headerParsed = true; continue; }
+    if (cols.length !== REGISTRY_COLUMN_COUNT) {
+      bad.push({ script: (cols[0] ?? "").replace(/`/g, ""), columns: cols.length });
+    }
+  }
+  return bad;
+}
 
 function parseRegistry(content: string): RegistryEntry[] {
   const lines = content.split("\n");
@@ -398,6 +421,12 @@ function verify(): boolean {
   const content = readFileSync(scriptsMdPath, "utf-8");
   const registry = parseRegistry(content);
   const actualScripts = getActualScripts();
+
+  for (const row of findMalformedRegistryRows(content)) {
+    errors.push(
+      `Malformed registry row: \`${row.script}\` has ${row.columns} columns, expected ${REGISTRY_COLUMN_COUNT} (script|source|version|status|removal-date|security-advisory|layer|pair)`
+    );
+  }
 
   const registeredNames = new Set(registry.map((e) => e.script));
   const actualNames = new Set(actualScripts);
