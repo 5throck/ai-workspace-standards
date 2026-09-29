@@ -581,3 +581,39 @@ describe('reconcile snapshots (T-20260917-010)', () => {
     expect(r.content).toBe(proj);
   });
 });
+
+describe('hyphenated and repeated keys (tier-model-mapping, 2026-09-29)', () => {
+  const blk = (key: string, body: string) => `<!-- WORKSPACE-MANAGED: ${key} -->\n${body}\n<!-- /WORKSPACE-MANAGED -->`;
+
+  test('a hyphenated key is recognized and keeps its full name', () => {
+    const [{ blocks }] = findManagedBlocks(blk('tier-model-mapping', 'x')).filter((m) => m.pattern.label === 'WORKSPACE-MANAGED');
+    expect(blocks.map((b) => b.key)).toEqual(['tier-model-mapping']);
+  });
+
+  test('repeated keys pair by occurrence order, each replaced in place', () => {
+    const proj = `head\n${blk('tier-model-mapping', 'OLD-LIST')}\nmid\n${blk('tier-model-mapping', 'OLD-NOTE')}\ntail`;
+    const tpl = `${blk('tier-model-mapping', 'NEW-LIST')}\n${blk('tier-model-mapping', 'NEW-NOTE')}`;
+    const r = mergeManagedBlocks(proj, tpl, null, 'AGENTS.md', false);
+    expect(r.content).toBe(`head\n${blk('tier-model-mapping', 'NEW-LIST')}\nmid\n${blk('tier-model-mapping', 'NEW-NOTE')}\ntail`);
+  });
+
+  test('common contributes every occurrence of a repeated key the variant lacks', () => {
+    const proj = `a\n${blk('tier-model-mapping', 'OLD-LIST')}\nb\n${blk('tier-model-mapping', 'OLD-NOTE')}\nc`;
+    const common = `${blk('tier-model-mapping', 'NEW-LIST')}\n${blk('tier-model-mapping', 'NEW-NOTE')}`;
+    const r = mergeManagedBlocks(proj, 'no markers here', common, 'AGENTS.md', false);
+    expect(r.content).toContain('NEW-LIST');
+    expect(r.content).toContain('NEW-NOTE');
+    expect(r.content).not.toContain('OLD-');
+  });
+});
+
+describe('repeated-key insert placement', () => {
+  const blk = (key: string, body: string) => `<!-- WORKSPACE-MANAGED: ${key} -->\n${body}\n<!-- /WORKSPACE-MANAGED -->`;
+  test('a missing later occurrence is inserted right after the earlier one', () => {
+    const proj = `top\n${blk('tier-model-mapping', 'OLD-LIST')}\n## Next\nbody\n${blk('graft repo context graph', 'G')}`;
+    const tpl = `${blk('tier-model-mapping', 'NEW-LIST')}\n${blk('tier-model-mapping', 'NEW-NOTE')}`;
+    const r = mergeManagedBlocks(proj, tpl, null, 'AGENTS.md', false);
+    expect(r.content.indexOf('NEW-NOTE')).toBeGreaterThan(r.content.indexOf('NEW-LIST'));
+    expect(r.content.indexOf('NEW-NOTE')).toBeLessThan(r.content.indexOf('## Next'));
+  });
+});
