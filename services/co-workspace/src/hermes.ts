@@ -168,13 +168,17 @@ export function hermesSpawnArgv(o: HermesSpawnOptions): string[] {
 const ENV_ALLOW_EXACT = new Set([
   "PATH", "HOME", "USER", "SHELL", "TERM", "LANG", "LC_ALL", "TZ", "TMPDIR",
   "HTTPS_PROXY", "HTTP_PROXY", "NO_PROXY",
+  "GOOGLE_API_KEY", "GEMINI_API_KEY", // gemini provider keys (exact — the GOOGLE_ prefix is NOT allowed)
 ]);
-const ENV_ALLOW_PREFIX = /^(HERMES_|ANTHROPIC_|OPENAI_|GOOGLE_|XDG_)/i;
+const ENV_ALLOW_PREFIX = /^(HERMES_|ANTHROPIC_|OPENAI_|XDG_)/i;
+/** Defense in depth: gateway-only secrets are denied even if a future prefix/exact change would
+ * match them (GOOGLE_CLIENT_* is the gateway's SSO secret and must never reach spawned agents). */
+const ENV_DENY = /^(GOOGLE_CLIENT_ID|GOOGLE_CLIENT_SECRET|GOOGLE_REDIRECT_URI|CO_WORKSPACE_)/i;
 
 export function allowlistedEnv(base: Record<string, string | undefined> = process.env): Record<string, string | undefined> {
   const out: Record<string, string | undefined> = {};
   for (const [k, v] of Object.entries(base)) {
-    if (v === undefined) continue;
+    if (v === undefined || ENV_DENY.test(k)) continue;
     if (ENV_ALLOW_EXACT.has(k) || ENV_ALLOW_PREFIX.test(k)) out[k] = v;
   }
   return out;

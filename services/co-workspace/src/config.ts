@@ -81,6 +81,9 @@ export interface GatewayConfig {
   loginRequired: boolean;
   /** SEC-09: mutating routes in keyless mode require the `x-requested-with` header (CSRF guard). */
   csrfRequired: boolean;
+  /** H7: trust `X-Forwarded-For` (right-most hop) for rate-limit keys. Default false: the
+   * socket peer address is used. Enable ONLY behind a reverse proxy that appends the client IP. */
+  trustProxy: boolean;
   /** SEC-05: per-principal tenant cap (`POST /sessions` + lazy creation). 0 = unlimited. */
   tenantMaxPerPrincipal: number;
   /** SEC-05 (remnant): per-principal lifetime token budget ACROSS all their tenants. 0 = off. */
@@ -210,6 +213,7 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     includeBeta: env.CO_WORKSPACE_VARIANTS_INCLUDE_BETA === "true" || env.CO_WORKSPACE_VARIANTS_INCLUDE_BETA === "1",
     loginRequired: env.CO_WORKSPACE_LOGIN_REQUIRED === "true",
     csrfRequired: env.CO_WORKSPACE_CSRF_REQUIRED === "true",
+    trustProxy: env.CO_WORKSPACE_TRUST_PROXY === "true" || env.CO_WORKSPACE_TRUST_PROXY === "1",
     tenantMaxPerPrincipal: numOr0(env.CO_WORKSPACE_TENANT_MAX_PER_PRINCIPAL),
     principalMaxTokens: numOr0(env.CO_WORKSPACE_PRINCIPAL_MAX_TOKENS),
     containerMemory: env.CO_WORKSPACE_CONTAINER_MEMORY ?? "2g",
@@ -231,8 +235,8 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
 
 /** Provider-key mode resolution (R6, design 2026-09-29-co-workspace-provider-key-config):
  * the selector picks which env var carries the key — openai/custom → OPENAI_API_KEY,
- * anthropic → ANTHROPIC_API_KEY, gemini → GOOGLE_API_KEY (hermes's env allowlist passes
- * the GOOGLE_ prefix), zai → ZAI_API_KEY (hermes's `zai` provider is first-class and
+ * anthropic → ANTHROPIC_API_KEY, gemini → GOOGLE_API_KEY (an exact name in hermes's env
+ * allowlist; the GOOGLE_ prefix is not allowed because GOOGLE_CLIENT_SECRET is a gateway secret), zai → ZAI_API_KEY (hermes's `zai` provider is first-class and
  * preserves dotted model ids on Z.AI's anthropic-compatible endpoint) — mirroring the
  * co-newbiz scheme (`openai | anthropic | gemini | custom`; unset/`none` = off, default
  * `custom` when a key is present). Null = provider-key mode is off → legacy

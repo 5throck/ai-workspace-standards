@@ -913,12 +913,24 @@ function demoPage(): Response {
   });
 }
 
-export async function handleRequest(state: GatewayState, req: Request): Promise<Response> {
+/** Client IP for rate limiting. Untrusted (default): the socket peer, "local" when unknown.
+ * trustProxy: the RIGHT-most X-Forwarded-For entry — the hop the trusted proxy appended; the
+ * left-most entries are client-supplied and spoofable. Falls back to the peer address. */
+export function resolveClientIp(trustProxy: boolean, req: Request, peerIp?: string): string {
+  if (trustProxy) {
+    const parts = (req.headers.get("x-forwarded-for") ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+    const last = parts[parts.length - 1];
+    if (last) return last;
+  }
+  return peerIp || "local";
+}
+
+export async function handleRequest(state: GatewayState, req: Request, peerIp?: string): Promise<Response> {
   const url = new URL(req.url);
   const path = url.pathname.replace(/\/+$/, "") || "/";
   try {
     const sessionUser = state.users.resolveSession(sessionTokenFromCookie(req));
-    const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
+    const clientIp = resolveClientIp(state.cfg.trustProxy, req, peerIp);
     // SEC-09: keyless-mode CSRF guard — mutating routes need the custom header (a cross-site
     // form cannot set it without a preflight; the server sends no CORS headers).
     const hasCredential = Boolean(sessionUser) || Boolean(presentedCredential(req));
@@ -1287,6 +1299,10 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
       const body = (await readJsonBody(req)) as Record<string, unknown>;
       const loginId = typeof body.loginId === "string" ? body.loginId.trim() : typeof body.email === "string" ? body.email.split("@")[0] : "";
       const password = typeof body.password === "string" ? body.password : "";
+      // Per-account limit: a distributed attacker cannot brute-force one account across IPs.
+      if (loginId && !state.loginLimiter.allow(`login:${loginId.toLowerCase()}`)) {
+        throw new HttpError(429, "too many login attempts — try later");
+      }
       const user = await state.users.verifyLoginById(loginId, password);
       if (!user) {
         state.audit.record(loginId || clientIp, "login.failed");
@@ -1593,7 +1609,7 @@ export function createServer(state: GatewayState) {
     port: state.cfg.port,
     hostname: state.cfg.host,
     idleTimeout: 255,
-    fetch: (req) => handleRequest(state, req),
+    fetch: (req, server) => handleRequest(state, req, server.requestIP(req)?.address),
   });
 }
 

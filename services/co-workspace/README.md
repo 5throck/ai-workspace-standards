@@ -160,6 +160,7 @@ continuity handle → credential model → isolation matrix → provider disclos
 | `CO_WORKSPACE_API_KEYS` / `_API_KEYS_FILE` | — | Bearer keys (`key:label` maps a key to a trusted principal); the file re-reads on `POST /admin/reload` |
 | `CO_WORKSPACE_LOGIN_REQUIRED` | compose: `true` | Web app requires a session; keyless visitors are redirected |
 | `CO_WORKSPACE_CSRF_REQUIRED` | compose: `true` | Keyless mutating requests need `x-requested-with: co-workspace` |
+| `CO_WORKSPACE_TRUST_PROXY` | `false` | Key auth rate limits on the right-most `X-Forwarded-For` hop (set only behind a reverse proxy); otherwise the socket peer IP |
 | `CO_WORKSPACE_TENANT_MAX_PER_PRINCIPAL` | `0` (=unlimited; compose: `10`) | Teams per principal — set a positive value for multi-user deployments |
 | `CO_WORKSPACE_TENANT_MAX_TURNS` / `_MAX_TOKENS` | `0` | Per-team turn/token caps (`429`, enforced before a turn starts) |
 | `CO_WORKSPACE_ISOLATION` | `process` | `docker` = per-turn ephemeral sibling container (tenant files only) |
@@ -226,6 +227,10 @@ docker compose build && docker compose up -d
   caps, `no-new-privileges`, `cap-drop ALL`, non-root runtime user) mounting only that
   team's project dir and Hermes home. Process mode (default in bare-metal quickstarts)
   shares the gateway container's filesystem — fine for a trusted single operator only.
+- **Rate limiting** — login/signup limits key on the socket peer IP (never a client-supplied
+  `X-Forwarded-For`), and logins are additionally limited per login ID. Behind Docker's
+  bridge NAT all direct clients share one socket IP, so the per-IP limit is effectively
+  global unless a reverse proxy is trusted via `CO_WORKSPACE_TRUST_PROXY=true`.
 - **PII** — raw emails live ≤24 h in a pending-verification row and are then dropped;
   accounts keep only a SHA-256 email hash. Admins can rename users but cannot read or
   set their email.
