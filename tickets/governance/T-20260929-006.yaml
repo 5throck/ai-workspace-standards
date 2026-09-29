@@ -1,0 +1,16 @@
+schemaVersion: 1
+id: T-20260929-006
+kind: manual
+title: >-
+  co-workspace: stop stamping the provider API key into tenant config.yaml or
+  document the trade-off in ADR-0092 Addendum 9
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-09-29T04:55:25.634Z'
+history:
+  - at: '2026-09-29T04:55:25.634Z'
+    from: null
+    to: backlog
+result: null
+error: null

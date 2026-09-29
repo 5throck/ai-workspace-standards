@@ -264,6 +264,19 @@ export function getOrStartTenant(
   return { rec, promise: startProvisioning(state, rec) };
 }
 
+/** Lazy-tenant resolution for the OpenAI/Anthropic/Gemini surfaces. The tenant is keyed on the
+ * authenticated principal (same key as /sessions), never on a client-supplied body user. */
+export function resolveLazyTenant(
+  state: GatewayState,
+  req: Request,
+  variant: string,
+): { rec: TenantRecord; promise?: Promise<void> } {
+  const principal = callerPrincipal(state, req) ?? "anonymous";
+  const found = getOrStartTenant(state, variant, principal, principal);
+  requireTenantAccess(state, req, found.rec);
+  return found;
+}
+
 async function waitForTenant(state: GatewayState, tenantId: string): Promise<TenantRecord> {
   const rec = state.registry.get(tenantId);
   if (!rec) throw new HttpError(404, `tenant ${tenantId} not found`);
@@ -1014,12 +1027,8 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
       if (!state.cfg.variants.includes(parsed.req.model)) {
         throw new HttpError(404, `unknown model: ${parsed.req.model}`);
       }
-      const principal = callerPrincipal(state, req) ?? parsed.req.user;
-      const { rec, promise } = getOrStartTenant(state, parsed.req.model, principal);
-      if (!rec.ownerPrincipal) {
-        rec.ownerPrincipal = principalFor(state.cfg, presentedCredential(req));
-        state.registry.upsert(rec);
-      }
+      // parsed.req.user is intentionally ignored: tenant selection uses the authenticated principal.
+      const { rec, promise } = resolveLazyTenant(state, req, parsed.req.model);
       const ready = await ensureReady(state, rec);
       assertQuota(state.cfg, ready);
       assertPrincipalQuota(state, ready.ownerPrincipal ?? "anonymous");
@@ -1032,7 +1041,8 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
       if (!state.cfg.variants.includes(parsed.req.model)) {
         throw new HttpError(404, `unknown model: ${parsed.req.model}`);
       }
-      const { rec, promise } = getOrStartTenant(state, parsed.req.model, parsed.req.user);
+      // parsed.req.user (metadata.user_id) is intentionally ignored for tenant selection.
+      const { rec, promise } = resolveLazyTenant(state, req, parsed.req.model);
       if (promise) await promise;
       const ready = await ensureReady(state, rec);
       assertQuota(state.cfg, ready);
@@ -1488,7 +1498,8 @@ export async function handleRequest(state: GatewayState, req: Request): Promise<
       }
       const parsed = parseGeminiRequest(await readJsonBody(req));
       if (!parsed.ok) throw new HttpError(400, parsed.error);
-      const { rec, promise } = getOrStartTenant(state, model, parsed.req.user);
+      // parsed.req.user is intentionally ignored for tenant selection.
+      const { rec, promise } = resolveLazyTenant(state, req, model);
       if (promise) await promise;
       const ready = await ensureReady(state, rec);
       assertQuota(state.cfg, ready);

@@ -1,0 +1,16 @@
+schemaVersion: 1
+id: T-20260929-003
+kind: manual
+title: >-
+  co-workspace turn latency: thinking model + uncached team-context prefill
+  (~16-26s) — mitigation research
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-29T02:55:01.627Z'
+history:
+  - at: '2026-09-29T02:55:01.627Z'
+    from: null
+    to: backlog
+result: null
+error: null
