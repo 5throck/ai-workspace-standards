@@ -1,4 +1,9 @@
-// @version 1.3.0
+// @version 1.4.0
+// v1.4.0 (2026-09-29): WORKSPACE-MANAGED keys may contain hyphens (`tier-model-mapping`
+//           was never matched, so model bumps never reached projects); repeated keys pair
+//           by occurrence order (fresh scan per replace) and a missing later occurrence is
+//           inserted after its predecessor; common contributes every occurrence of a key
+//           the variant lacks. VARIANT-INJECT key matching is unchanged.
 // v1.3.0 (spec docs/designs/2026-09-27-hermes-merge-marker-design.md):
 //           COMMON-HERMES joins MANAGED_PATTERNS, placed after its COMMON-CODEX
 //           platform twin — the HERMES.md counterpart of v1.2.0's COMMON-CODEX
@@ -82,7 +87,7 @@ export interface ManagedPattern {
 }
 
 export const MANAGED_PATTERNS: ManagedPattern[] = [
-  { open: /<!-- WORKSPACE-MANAGED(?::[^\-]*?)? -->/, close: '<!-- /WORKSPACE-MANAGED -->', label: 'WORKSPACE-MANAGED' },
+  { open: /<!-- WORKSPACE-MANAGED(?::[^>]*?)? -->/, close: '<!-- /WORKSPACE-MANAGED -->', label: 'WORKSPACE-MANAGED' },
   { open: /<!-- COMMON-CLAUDE:START -->/, close: '<!-- COMMON-CLAUDE:END -->', label: 'COMMON-CLAUDE' },
   { open: /<!-- COMMON-GEMINI:START -->/, close: '<!-- COMMON-GEMINI:END -->', label: 'COMMON-GEMINI' },
   { open: /<!-- COMMON-CODEX:START -->/, close: '<!-- COMMON-CODEX:END -->', label: 'COMMON-CODEX' },
@@ -180,8 +185,11 @@ export function buildMergedTemplateBlocks(
         tplBlocksByKey.set(pattern.label, { pattern, blocksByKey: new Map(), blocksByIndex: [] });
       }
       const entry = tplBlocksByKey.get(pattern.label)!;
+      // Keys the variant already defines win; common contributes every
+      // occurrence (repeated keys included) of the keys it alone defines.
+      const variantKeys = new Set(entry.blocksByKey.keys());
       for (const block of commonBlocks) {
-        if (!entry.blocksByKey.has(block.key)) {
+        if (!variantKeys.has(block.key)) {
           entry.blocksByKey.set(block.key, block);
           entry.blocksByIndex.push(block);
         }
@@ -279,12 +287,6 @@ export function mergeManagedBlocks(
     // Scan the project's blocks for this label (pre-keyed-phase offsets).
     const projBlocksAll = scanPatternBlocks(updated, pattern);
 
-    // Build map of project blocks by key/index
-    const projBlocksByKey = new Map<string, ManagedBlock>();
-    for (const block of projBlocksAll) {
-      projBlocksByKey.set(block.key, block);
-    }
-
     // T-20260916-012 fix 1: count ONLY unlabeled project occurrences for the
     // unlabeled reconciliation. Keyed blocks belong to the keyed phase below
     // and must never influence — or be consumed by — the positional phase.
@@ -294,9 +296,15 @@ export function mergeManagedBlocks(
     const keyedTplBlocks = tplBlocks.filter(b => b.key);
     const unlabeledTplBlocks = tplBlocks.filter(b => !b.key);
 
-    // Process keyed blocks: match by key, insert if not found
+    // Process keyed blocks: match by key, insert if not found. A key may
+    // repeat (AGENTS.md carries two `tier-model-mapping` blocks), so the Nth
+    // template occurrence pairs with the Nth project occurrence, and the
+    // project is re-scanned each time so offsets never go stale.
+    const keySeen = new Map<string, number>();
     for (const tplBlock of keyedTplBlocks) {
-      const projBlock = projBlocksByKey.get(tplBlock.key);
+      const nth = keySeen.get(tplBlock.key) ?? 0;
+      keySeen.set(tplBlock.key, nth + 1);
+      const projBlock = scanPatternBlocks(updated, pattern).filter((b) => b.key === tplBlock.key)[nth];
       if (projBlock) {
         // Found by key — replace it
         updated = updated.slice(0, projBlock.start) + tplBlock.matched + updated.slice(projBlock.end);
@@ -304,7 +312,11 @@ export function mergeManagedBlocks(
         log.push(`    ${dryTag}MERGED ${pattern.label}:${tplBlock.key} in: ${rel}`);
       } else {
         // Not found by key — insert with insertion anchor logic
-        const insertionPos = findInsertionPosition(updated, rel, tplBlock.key, pattern);
+        // A repeated key's later occurrence goes right after its predecessor.
+        const prevSameKey = nth > 0
+          ? scanPatternBlocks(updated, pattern).filter((b) => b.key === tplBlock.key)[nth - 1]
+          : undefined;
+        const insertionPos = prevSameKey ? prevSameKey.end : findInsertionPosition(updated, rel, tplBlock.key, pattern);
         updated = updated.slice(0, insertionPos) + '\n\n' + tplBlock.matched + '\n' + updated.slice(insertionPos);
         merged = true;
         log.push(`    ${dryTag}INSERTED ${pattern.label}:${tplBlock.key} in: ${rel}`);

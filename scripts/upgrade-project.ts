@@ -1,5 +1,8 @@
 #!/usr/bin/env bun
-// @version 1.56.0
+// @version 1.57.0
+// v1.57.0 (2026-09-29): agent tier-comment migration — strips stale `# <model-id>`
+//          comments from project agents/*.md tier lines (scaffold-time copies such as
+//          i18n-specialist.md are never re-delivered); the registry resolves models.
 // v1.56.0 (2026-09-28): SKILLS_REGISTRY_RECONCILE also aligns each row's
 //          status/owner with the delivered SKILL.md frontmatter via
 //          alignSkillRegistryRowsWithFrontmatter (previously scaffold-only).
@@ -1622,6 +1625,28 @@ if (existsSync(skillsMdPath)) {
 } else {
   console.log("  INFO: skills/SKILLS.md not found — skipping migration");
 }
+console.log('');
+
+// ── Agent tier-comment migration (model IDs live only in the registry) ────────
+// Agent tier lines carry the tier word only; docs/workspace-schema.json resolves
+// the model. Scaffold-time agent copies (e.g. i18n-specialist.md) are never
+// re-delivered, so strip their stale `# <model-id>` comments here.
+console.log('--- Agent tier-comment migration ---');
+const agentsDirPath = join(projectDir, 'agents');
+let tierCommentsStripped = 0;
+if (existsSync(agentsDirPath)) {
+  for (const name of readdirSync(agentsDirPath).filter(f => f.endsWith('.md')).sort()) {
+    const agentPath = join(agentsDirPath, name);
+    const before = readFileSync(agentPath, 'utf8');
+    const after = before.replace(/^(  [a-z-]+: *(?:high|medium|low)) *#.*$/gm, '$1');
+    if (after !== before) {
+      if (!dryRun) writeFileSync(agentPath, after, 'utf8');
+      console.log(`  ${dryTag}MIGRATED: agents/${name} — tier-line model comments removed`);
+      tierCommentsStripped++;
+    }
+  }
+}
+if (tierCommentsStripped === 0) console.log('  INFO: no agent tier-line model comments found');
 console.log('');
 
 
