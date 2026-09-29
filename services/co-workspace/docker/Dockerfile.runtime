@@ -1,0 +1,18 @@
+# Runtime image for docker-isolated turns (CO_WORKSPACE_RUNTIME_IMAGE).
+#
+# Base = the gateway image (carries bun + hermes + the docker CLI), with the
+# workspace checkout's Hermes build copied over the base image's /opt/hermes.
+#
+# Why: the published nousresearch/hermes-agent image can lag the operator's
+# working Hermes build by thousands of commits; the older in-container build
+# cannot resolve shared-store-era credentials (hermes auth status nous →
+# "logged out") and every isolated turn fails at provider resolution. Rebuild
+# this image whenever the workspace's Hermes build moves:
+#   ./build-runtime-image.sh   (rsync-stages the checkout, then builds)
+#
+# Layout note: the base image's /opt/hermes IS a hermes-agent source tree, so
+# copying the checkout over it updates the code in place — the image's python
+# env and entrypoint shim stay untouched.
+
+FROM co-workspace-gateway:latest
+COPY hermes-agent/ /opt/hermes/

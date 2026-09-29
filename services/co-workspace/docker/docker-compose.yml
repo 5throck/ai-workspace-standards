@@ -2,7 +2,8 @@
 #
 # Required environment:
 #   CO_WORKSPACE_HERMES_SEED_HOME  Hermes home with credentials (e.g. ~/.hermes); mounted
-#                                  read-only at /seed and copied into tenant homes.
+#                                  read-only at /seed-home (directory bind — survives Hermes
+#                                  credential refreshes) and copied into tenant homes.
 #   CO_WORKSPACE_DATA_DIR_HOST     ABSOLUTE host path for the gateway data dir — bind-mounted
 #                                  at /data here AND used as the sibling-mount source, so
 #                                  docker-isolation turns can reach tenant dirs (the gateway
@@ -64,7 +65,7 @@ services:
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
       GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-}
       CO_WORKSPACE_ADMIN_EMAIL: ${CO_WORKSPACE_ADMIN_EMAIL:-}
-      CO_WORKSPACE_HERMES_SEED_HOME: /seed
+      CO_WORKSPACE_HERMES_SEED_HOME: /seed-home
       CO_WORKSPACE_HERMES_AUTH_DIR: ${CO_WORKSPACE_HERMES_AUTH_DIR:-/seed/shared}
       # host path of the shared store — sibling containers mount THIS (resolved on the host)
       CO_WORKSPACE_HERMES_AUTH_DIR_HOST: ${CO_WORKSPACE_HERMES_AUTH_DIR_HOST:-${CO_WORKSPACE_HERMES_SEED_HOME}/shared}
@@ -74,11 +75,15 @@ services:
       # For durable deployments set CO_WORKSPACE_WORKSPACE_DIR_HOST to a dedicated clone
       # (e.g. /srv/co-workspace-workspace) — /tmp clones vanish on reboot.
       - ${CO_WORKSPACE_WORKSPACE_DIR_HOST:-../../../}:/workspace
-      # SEC-07 narrowing: the gateway reads only auth.json + .env from the seed home (per-turn
-      # re-seed) and the RW shared token store — the operator's full Hermes home (config.yaml,
-      # other provider credentials) is NOT mounted.
-      - ${CO_WORKSPACE_HERMES_SEED_HOME:?set CO_WORKSPACE_HERMES_SEED_HOME to a Hermes home with credentials (e.g. ~/.hermes)}/auth.json:/seed/auth.json:ro
-      - ${CO_WORKSPACE_HERMES_SEED_HOME:?set CO_WORKSPACE_HERMES_SEED_HOME to a Hermes home with credentials (e.g. ~/.hermes)}/.env:/seed/.env:ro
+      # SEC-07 note (2026-09-29 amendment): the seed home is mounted as a DIRECTORY
+      # (read-only). The previous per-file binds (auth.json, .env) silently broke
+      # whenever Hermes refreshed its credentials on the host — a single-file bind
+      # pins the inode, and the container kept reading the detached (empty) file,
+      # failing every turn with ENOENT on the per-turn re-seed. Trade-off: the whole
+      # Hermes home (config.yaml, other provider credentials) is container-visible
+      # read-only; accepted for the local single-operator deployment (ADR-0092
+      # Addendum 6). The server reads only auth.json + .env from it.
+      - ${CO_WORKSPACE_HERMES_SEED_HOME:?set CO_WORKSPACE_HERMES_SEED_HOME to a Hermes home with credentials (e.g. ~/.hermes)}:/seed-home:ro
       # CO_WORKSPACE_API_KEYS_FILE points here; without the mount readKeysFile() silently
       # returns [] and file-based keys never work in the container.
       - ${CO_WORKSPACE_API_KEYS_FILE_HOST:-${CO_WORKSPACE_HERMES_SEED_HOME}/.env.keys}:/seed/.env.keys:ro
