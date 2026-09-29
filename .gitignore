@@ -125,6 +125,8 @@ __pycache__/
 !services/
 services/co-workspace/data/
 # Gateway tenant storage now lives at services/co-workspace/data/ (already ignored above).
+# Runtime-image staging for the hermes bake (build-runtime-image.sh) is local-only.
+services/co-workspace/docker/runtime-hermes/
 
 nul
 NUL
