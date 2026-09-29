@@ -35,12 +35,22 @@ COPY services/co-workspace/src ./src
 COPY services/co-workspace/web ./web
 RUN bun install --frozen-lockfile --production
 
-ENV CO_WORKSPACE_HOST=0.0.0.0 \
+# Non-root gateway. uid/gid 10000 matches the sibling turn containers (`--user 10000:10000`
+# in src/hermes.ts), so files the gateway creates are already owned by the turn user. The
+# hermes base image is not inspected here; the numeric uid needs no passwd entry. HOME is
+# writable for bun caches; the app tree is chowned so bun can write beside it.
+RUN git config --system safe.directory '*' \
+ && mkdir -p /home/gw \
+ && chown -R 10000:10000 /home/gw /app/services/co-workspace
+
+ENV HOME=/home/gw \
+    CO_WORKSPACE_HOST=0.0.0.0 \
     CO_WORKSPACE_PORT=9030 \
     CO_WORKSPACE_DATA_DIR=/data \
     CO_WORKSPACE_WORKSPACE_DIR=/workspace \
     HERMES_BIN=hermes
 
+USER 10000:10000
 EXPOSE 9030
 ENTRYPOINT []
 CMD ["bun", "src/server.ts"]

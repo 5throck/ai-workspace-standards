@@ -6,12 +6,29 @@ title: >-
   regenerate-agents-md.ts (duplicated cells '| —| —| L0 | —|') that makes
   verify-scripts unable to parse its pair (1 standing warning)
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-29T16:40:39.574Z'
 history:
   - at: '2026-09-29T16:40:39.574Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-29T22:23:41.839Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-29T22:23:41.855Z'
+    from: waiting
+    to: running
+  - at: '2026-09-29T22:23:41.875Z'
+    from: running
+    to: review
+  - at: '2026-09-29T22:23:42.030Z'
+    from: review
+    to: done
+result: >-
+  Implemented and merged in PR #1243: the regenerate-agents-md.ts row's layer
+  value had drained into the pair cell — repaired to L0+L1 (the script ships in
+  templates/common/scripts/), the L1 mirror regenerated (134 rows, R1-mirrored),
+  and verify-scripts now reports 0 warnings (the standing PAIR MISSING warning
+  is cleared).
 error: null

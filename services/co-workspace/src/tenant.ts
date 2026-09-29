@@ -167,6 +167,7 @@ export function tenantConfigYaml(
 /** Docker isolation runs the turn as the hermes image's unprivileged UID 10000 — align the
  * tenant tree ownership so that user can read/write it. Best-effort: failures tolerated. */
 export function chownTree(root: string, uid: number, gid: number): void {
+  if (process.getuid?.() !== 0) return; // non-root gateway: chown would fail; files are already ours
   if (!existsSync(root)) return;
   try {
     chownSync(root, uid, gid);

@@ -97,6 +97,25 @@ Addendum 8 and design R2/R6 under-described the shipped provider mode. Verified 
 - **Gemini env name** in Addendum 8 and the design (`GOOGLE_API_KEY`) is unchanged and correct; the design's earlier claim that the allowlist passes the whole `GOOGLE_` prefix is withdrawn.
 - **Compose socket note (amends Addendum 6)**: the base compose no longer mounts the Docker socket; `CO_WORKSPACE_ISOLATION=docker` requires also including `docker/docker-compose.isolation.yml`.
 
+## Addendum 11 (2026-09-30): Non-root gateway, docker socket proxy, optional seed home
+
+**Context**: findings C3 and M6 and ticket T-20260929-014 of `docs/reports/2026-09-29-project-review-co-workspace.md`. Addendum 10 moved the raw `docker.sock` mount into the opt-in `docker-compose.isolation.yml`; the gateway still ran as root with the socket (host-root equivalent) and always mounted the whole Hermes seed home (Addendum 7).
+
+**Decision**:
+- The gateway container runs as `10000:10000` (`CO_WORKSPACE_GATEWAY_UID/GID` override) with `no-new-privileges` and all capabilities dropped. This is the same uid as the sibling turn containers (`--user 10000:10000`), so files it creates are already owned by the turn user. `chownTree` in `src/tenant.ts` is a no-op unless the process is root.
+- Docker isolation no longer mounts the socket into the gateway. A `tecnativa/docker-socket-proxy` service holds it read-only on an internal-only network; the gateway uses `DOCKER_HOST=tcp://docker-proxy:2375` (passed through by `dockerCliEnv`). Enabled groups: containers, POST, DELETE, start/stop/restarts. Disabled: exec, images, volumes, networks, info, build, swarm, secrets, system, plugins, auth, commit.
+- The Hermes seed home mount moved to the optional `docker-compose.seed.yml` (legacy OAuth mode only).
+
+**Consequences**:
+1. Residual risk (honest): the proxy filters by API endpoint only and cannot inspect the container-create body. A compromised gateway can still request a privileged container or a bind mount of `/`. Host-root equivalence is reduced, not removed. Follow-ups: rootless Docker or a create-body-validating broker.
+2. Operational changes for existing deployments:
+   - On Linux, chown the data dir and the shared auth dir to 10000 once (macOS Docker Desktop maps ownership). The workspace clone must be writable by uid 10000.
+   - Docker isolation now starts a proxy container, so its image must be pulled at `docker compose up`. It needs the pre-built runtime image: with `IMAGES=0` a missing image fails fast instead of pulling.
+   - With a `COMPOSE_FILE` from before this change, the seed home is no longer mounted. Operators of legacy OAuth mode, or relying on the seed `.env` copied into tenant homes, must add `docker-compose.seed.yml`.
+   - The `.env.keys` and shared-store host defaults still fall back to `CO_WORKSPACE_HERMES_SEED_HOME` when set, otherwise to `<data dir>/seed`.
+
+**Unverified (needs a live run)**: the proxy image tag (`0.3.0` in the compose) and the exact flag set for attach/wait/kill/rm through it; `docker version` with INFO off; that uid 10000 can run bun and git on the Hermes base image; the full flow with a real provider.
+
 ## References
 
 - Design: `docs/designs/2026-09-27-co-workspace-service-design.md` (verified building blocks, D1–D8, waves, live-verification record)

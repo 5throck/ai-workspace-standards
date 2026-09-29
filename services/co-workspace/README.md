@@ -206,10 +206,12 @@ storage must survive reboots, so keep it off `/tmp` (the default
 ```sh
 cat > services/co-workspace/docker/.env <<'ENV'
 CO_WORKSPACE_DATA_DIR_HOST=/absolute/durable/path/for/services/co-workspace/data
-CO_WORKSPACE_HERMES_SEED_HOME=/Users/you/.hermes
 CO_WORKSPACE_ISOLATION=docker
-# Docker isolation needs the socket override (host-root equivalent — see Security model):
+# Docker isolation adds a socket proxy (see Security model):
 COMPOSE_FILE=docker-compose.yml:docker-compose.isolation.yml
+# Legacy OAuth mode only: also mount the Hermes home via the seed override:
+#CO_WORKSPACE_HERMES_SEED_HOME=/Users/you/.hermes
+#COMPOSE_FILE=docker-compose.yml:docker-compose.isolation.yml:docker-compose.seed.yml
 # Build it once from your working Hermes build: ./build-runtime-image.sh
 CO_WORKSPACE_RUNTIME_IMAGE=co-workspace-runtime:latest
 CO_WORKSPACE_HERMES_MODEL=upstage/solar-pro4:free
@@ -228,9 +230,10 @@ docker compose build && docker compose up -d
   with bun + the gateway server added; **one image serves both roles** — the gateway
   container and the per-turn docker-isolation runtime (`CO_WORKSPACE_RUNTIME_IMAGE`).
   The docker CLI is baked in via `COPY --from=docker:cli`. The host socket
-  (`/var/run/docker.sock`) is NOT mounted by default: docker isolation requires the
-  `docker/docker-compose.isolation.yml` override, enabled via `COMPOSE_FILE` in `.env`
-  or `docker compose -f docker-compose.yml -f docker-compose.isolation.yml ...`.
+  (`/var/run/docker.sock`) is never mounted into the gateway: docker isolation requires the
+  `docker/docker-compose.isolation.yml` override (a socket proxy), enabled via `COMPOSE_FILE`
+  in `.env` or `docker compose -f docker-compose.yml -f docker-compose.isolation.yml ...`.
+  The runtime image must be pre-built (`./build-runtime-image.sh`).
 - Provisioning scaffolds into the clone's `Projects/` and relocates the team immediately;
   docker-isolated turns run as the unprivileged runtime user (10000) and the team tree is
   chowned to it at provisioning.
@@ -254,11 +257,29 @@ docker compose build && docker compose up -d
 - **PII** — raw emails live ≤24 h in a pending-verification row and are then dropped;
   accounts keep only a SHA-256 email hash. Admins can rename users but cannot read or
   set their email.
-- **Docker socket** — `CO_WORKSPACE_ISOLATION=docker` needs `/var/run/docker.sock` mounted
-  into the gateway, which is host-root equivalent; it is only mounted when the isolation
-  override is included, and is meant for single-operator deployments. Running the gateway
-  as non-root and fronting the socket with a socket proxy are NOT done yet (follow-up of
-  T-20260929-005; needs live docker validation).
+- **Non-root gateway** — the gateway container runs as uid:gid 10000:10000 (matching the
+  sibling turn containers, so files it creates are already owned by the turn user) with
+  `no-new-privileges` and all capabilities dropped. Override with `CO_WORKSPACE_GATEWAY_UID`
+  / `_GID`. On Linux, `chown -R 10000:10000` the data dir (`CO_WORKSPACE_DATA_DIR_HOST`) and
+  the shared auth dir once, and make the workspace clone writable by uid 10000; macOS Docker
+  Desktop maps ownership, so no chown is needed. The gateway skips its best-effort tenant
+  chown when not root and logs `running as uid N` at boot. Live behavior on the hermes base
+  image is unverified.
+- **Docker socket** — the gateway does not mount the raw socket. `docker-compose.isolation.yml`
+  adds a `docker-proxy` service (tecnativa/docker-socket-proxy, read-only socket mount, no
+  published ports) on an internal-only `dockerapi` network; the gateway uses
+  `DOCKER_HOST=tcp://docker-proxy:2375`. The proxy allows container endpoints with POST/DELETE
+  (create/start/stop/kill/rm/ps) and denies exec, images, volumes, networks, build, swarm,
+  system and more; `IMAGES=0` means a missing runtime image fails fast instead of pulling.
+  **Residual risk**: the proxy filters by endpoint only and cannot inspect the create body, so
+  a compromised gateway can still create a privileged container or bind-mount `/` — this
+  reduces but does NOT remove host-root equivalence (follow-up: rootless Docker or a
+  create-body-validating broker). The exact proxy flag set for run/attach/wait/kill/rm is
+  unverified until a live run. Single-operator deployments only.
+- **Seed home is optional** — the base compose no longer mounts a Hermes home. Legacy OAuth
+  mode adds `docker-compose.seed.yml` (mounts `CO_WORKSPACE_HERMES_SEED_HOME` read-only at
+  `/seed-home`); provider key mode needs no seed home. The `.env.keys` and shared-store host
+  paths default under the seed home when set, otherwise under `<data dir>/seed`.
 - **Known tradeoffs** (documented, by design):
   - *Provider key mode (recommended)*: no OAuth token is copied, so the refresh-token-reuse
     revocation class is gone. The key is stored in plaintext in each team's `config.yaml`
