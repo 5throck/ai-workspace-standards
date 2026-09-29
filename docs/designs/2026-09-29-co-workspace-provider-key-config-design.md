@@ -4,7 +4,7 @@
 - **Status**: implemented
 - **Spec id**: `2026-09-29-co-workspace-provider-key-config`
 - **Owner**: governance-ticket-runner (user-directed architecture change)
-- **Related**: ADR-0092 (Addendum 4 shared credential store; Addendum 5 SEC-07; Addendum 7 seed directory bind), `docs/designs/2026-09-27-team-gateway-phase2-hardening-design.md` (docker isolation)
+- **Related**: ADR-0092 (Addendum 4 shared credential store; Addendum 5 SEC-07; Addendum 7 seed directory bind), `docs/designs/2026-09-27-co-workspace-phase2-hardening-design.md` (docker isolation)
 
 ## R1 — Problem
 
@@ -69,3 +69,23 @@ so both paths are stamped explicitly — still per-tenant, never blanket (ADR-00
       only when the key is configured.
 - [x] runChat skips the auth.json re-seed when the key is configured.
 - [x] compose passes both variables through (empty default = off).
+
+## R8 — Provider key is stamped into tenant config.yaml (plaintext)
+
+`tenantConfigYaml` writes `model.api_key` into each tenant's `<hermesHome>/config.yaml`
+on every turn (re-stamped, like provider/base_url). This is required, not optional:
+live-verified 2026-09-29 that hermes agent turns resolve the provider key through the
+profile secret scope and do not borrow ambient env (an env-only turn returned 401).
+The env injection from R2 is kept in addition.
+
+Consequences and accepted risk:
+
+- In docker isolation the tenant hermes home is mounted read-write into the turn
+  container, so the agent's own tools can read the key; a prompt-injected turn could
+  exfiltrate it (network egress is open). The per-tenant files API is rooted at the
+  tenant project directory only, not the hermes home, so the key is not served there.
+- Accepted for the single-operator deployment: use a dedicated, scoped, low-limit
+  provider key and rotate it on suspicion.
+- Hardening that ships with T-20260929-006: YAML-safe quoting of stamped values,
+  restrictive file mode where possible, and passing the key to docker as `-e NAME`
+  (no value on argv). See ADR-0092 Addendum 9.

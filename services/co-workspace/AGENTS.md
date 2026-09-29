@@ -36,7 +36,7 @@ local-only PoC: loopback bind, no authentication, single process.
   project directory (ADR-0088 D7 posture). Never widen it.
 - `--usage-file` does not reach `chat` runs (top-level `-z` feature, live-verified): token
   accounting comes from the terminal `result` envelope.
-- Secrets (seeded `auth.json` / `.env`) never appear in API responses or logs.
+- Secrets (seeded `auth.json` / `.env`) never appear in API responses or logs. In provider key mode the provider key is stored in plaintext in each tenant's `config.yaml` (`model.api_key`) by necessity — hermes turns do not read it from env; accepted risk documented in ADR-0092 Addendum 9.
 - Zero new runtime npm dependencies; bun built-ins only.
 
 ## Commands

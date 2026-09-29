@@ -7,7 +7,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { credentialValid, isAuthEnabled, presentedCredential, requestAuthorized } from "../../services/co-workspace/src/auth";
 import { dockerProbe, loadConfig } from "../../services/co-workspace/src/config";
-import { hermesArgs, hermesEnv, hermesSpawnArgv, type HermesSpawnOptions } from "../../services/co-workspace/src/hermes";
+import { dockerCliEnv, hermesArgs, hermesEnv, hermesSpawnArgv, type HermesSpawnOptions } from "../../services/co-workspace/src/hermes";
 import { createServer, createState } from "../../services/co-workspace/src/server";
 
 const cfgAuth = { apiKeys: ["sk-one", "sk-two"] };
@@ -75,10 +75,17 @@ describe("hermes spawn adapter — toolsets and container isolation", () => {
       providerKeyEnv: { name: "OPENAI_API_KEY", value: "sk-test" },
       container: { image: "co-workspace-runtime:latest" },
     });
-    expect(dockerArgv).toContain("OPENAI_API_KEY=sk-test");
+    // bare `-e NAME` (value inherited from the docker CLI env) — the key never enters argv
+    const eIdx = dockerArgv.indexOf("OPENAI_API_KEY");
+    expect(dockerArgv[eIdx - 1]).toBe("-e");
+    expect(dockerArgv.join("\n")).not.toContain("sk-test");
     // docker -e flags must precede the image
-    expect(dockerArgv.indexOf("OPENAI_API_KEY=sk-test")).toBeLessThan(dockerArgv.indexOf("co-workspace-runtime:latest"));
-    expect(hermesSpawnArgv(base)).not.toContain("OPENAI_API_KEY=sk-test");
+    expect(eIdx).toBeLessThan(dockerArgv.indexOf("co-workspace-runtime:latest"));
+    expect(hermesSpawnArgv(base)).not.toContain("OPENAI_API_KEY");
+    const cliEnv = dockerCliEnv({ ...base, providerKeyEnv: { name: "ZAI_API_KEY", value: "sk-z" } }, { PATH: "/bin", CO_WORKSPACE_API_KEYS: "secret", DOCKER_HOST: "unix:///tmp/d.sock" });
+    expect(cliEnv.ZAI_API_KEY).toBe("sk-z");
+    expect(cliEnv.DOCKER_HOST).toBe("unix:///tmp/d.sock");
+    expect(cliEnv.CO_WORKSPACE_API_KEYS).toBeUndefined();
     const env = hermesEnv({ ...base, providerKeyEnv: { name: "ANTHROPIC_API_KEY", value: "sk-a" } }, {});
     expect(env.ANTHROPIC_API_KEY).toBe("sk-a");
     expect(hermesEnv(base, {}).OPENAI_API_KEY).toBeUndefined();
