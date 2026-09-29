@@ -15,7 +15,7 @@
 ### Production Phase
 
 - [x] Agent role clearly defined: Security specialist
-- [x] Tier assignment: Medium-tier (claude-sonnet-5-0)
+- [x] Tier assignment: Medium-tier
 - [x] Security responsibilities specified: Git hooks, .gitleaks, credential management
 - [x] Successfully validated in security workflows
 

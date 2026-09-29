@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.50.0
+ * @version 1.50.1
  *
  * v1.48.0 → v1.49.0 (2026-09-28, sound-synth orphan-mirror follow-up — spec
  *         docs/designs/2026-09-28-sound-synth-orphan-mirror-cleanup-design.md
@@ -4136,7 +4136,7 @@ function extractMarkedSections(content: string, markerName: string): Array<{head
 // A literal outside a managed section silently stalls at its layer on the next model refresh.
 function checkModelLiteralPlacement(): void {
   if (!JSON_MODE) console.log(`\n=== Check MM-01: Model literal placement (instruction twins) ===`);
-  const LITERAL = /\b(?:gpt-5\.6-(?:sol|terra|luna)|claude-opus-5-0|claude-sonnet-5-0|claude-haiku-4-5|gemini-3\.\d+(?:\.\d+)?-(?:pro|flash))\b/i;
+  const LITERAL = /\b(?:gpt-5\.6-(?:sol|terra|luna)|claude-(?:opus|sonnet)-5-[05]|claude-haiku-4-5|gemini-3\.\d+(?:\.\d+)?-(?:pro|flash))\b/i;
   const STARTS = /<!--\s*(?:COMMON-(?:CLAUDE|GEMINI|CODEX|AGENTS):START|WORKSPACE-MANAGED:[^>]*?)\s*-->/;
   const ENDS = /<!--\s*(?:\/WORKSPACE-MANAGED|COMMON-(?:CLAUDE|GEMINI|CODEX|AGENTS):END)\s*-->/;
   const files = [

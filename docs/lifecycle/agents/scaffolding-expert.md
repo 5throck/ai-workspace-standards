@@ -15,7 +15,7 @@
 ### Production Phase
 
 - [x] Agent role clearly defined: Project scaffolding specialist
-- [x] Tier assignment: Low-tier (claude-haiku-4-5) for scaffolding tasks
+- [x] Tier assignment: Low-tier for scaffolding tasks
 - [x] Scaffolding responsibilities specified: New project setup, template synchronization
 - [x] UTF-8 enforcement documented
 - [x] Successfully validated in scaffolding workflows

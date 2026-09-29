@@ -15,7 +15,7 @@
 ### Production Phase
 
 - [x] Agent role clearly defined: fleet skill-graph analytics specialist (triage only)
-- [x] Tier assignment: Low-tier (claude-haiku-4-5) — lightweight read-only analyst + ticket filing
+- [x] Tier assignment: Low-tier — lightweight read-only analyst + ticket filing
 - [x] Lifecycle responsibilities specified: weekly report run, convergence/delivery-gap triage, ticket filing, four-section reporting
 - [x] Explicit non-goals documented: no skill modification, no promotion execution, tickets only
 - [x] Registered in docs/workspace-schema.json `agent_tiers` (SSOT) and AGENTS.md rosters

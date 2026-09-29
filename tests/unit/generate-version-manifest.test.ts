@@ -188,7 +188,7 @@ describe('parseAgentFrontmatter', () => {
         ['---',
          'name: pm',
          'tier:',
-         '  claude: medium        # claude-sonnet-5-0',
+         '  claude: medium        # claude-sonnet-5-5',
          '  gemini: medium',
          'model: inherit',
          '---',
