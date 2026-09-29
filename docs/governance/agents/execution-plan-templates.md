@@ -31,6 +31,7 @@
 - **Design docs for user-facing features MUST include an Accessibility section** (target level, affected interaction areas, verification method) per ADR-0065 — accessibility is a mandatory consideration for web/app/CLI/document feature development (WCAG 2.1 AA baseline); backend/non-UI work is exempt only with an explicit statement
 - **Design docs for user-facing web/app UI MUST include a Preview Verification note** (rendered check at ≥ 2 declared breakpoints, ≥ 1 key interaction, evidence attached) per ADR-0070 — a UI change is not done until it was seen rendered; pure backend/non-UI work is exempt only with an explicit statement
 - Tier column is MANDATORY (High/Medium/Low)
+- Every execution plan starts with one line: "PM running on: <model>". The line records the model of the current session. The PM tier is a capability floor for a session-hosted agent, see [AGENTS.md §3.6](../../../AGENTS.md#36-3-tier-strategy) (a higher model is allowed; a model below the tier is a warning).
 - `/sync` is always the final step — it covers lifecycle update, full audit, commit, push, and PR creation
 - No separate Lifecycle Update or Final QA Audit rows needed — `/sync` handles both
 - State parallel vs sequential order below the table
@@ -76,6 +77,8 @@ When modifying files that affect both CLAUDE.md and GEMINI.md:
 > **Note**: The `Model` column below shows the Claude Code short alias (`sonnet`/`opus`/`haiku`/`fable`) actually passed to the `Agent()` tool's `model` parameter — not the registry ID (e.g. `claude-sonnet-5-5`). See [CLAUDE.md §6](../../../CLAUDE.md#6-native-sub-agents-agent-tool) for the registry-ID → alias translation table. On Gemini/Antigravity, use the literal model ID instead (see GEMINI.md's equivalent example).
 <!-- /WORKSPACE-MANAGED -->
 
+PM running on: <model>
+
 | # | Task | Agent | Tier | Model | Spec |
 |---|------|-------|------|-------|------|
 | 1 | Update agents/pm.md | docs-writer | Medium | sonnet | <spec-id> |
@@ -87,6 +90,8 @@ When modifying files that affect both CLAUDE.md and GEMINI.md:
 **Execution Order**: Sequential (platform parity requires CLAUDE.md and GEMINI.md updates together)
 
 #### Example 2: Single Specialist Task
+
+PM running on: <model>
 
 | # | Task | Agent | Tier | Model | Spec |
 |---|------|-------|------|-------|------|
