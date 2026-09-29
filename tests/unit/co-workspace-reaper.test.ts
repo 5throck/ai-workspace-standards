@@ -129,7 +129,9 @@ describe("kill wrapper", () => {
     const log = join(dir, "log");
     try {
       const bin = fakeBin(dir, "docker", `${logCmd(log)}
-if [ "$1" = run ]; then sleep 5; fi`);
+# exec: the shell becomes sleep, so SIGTERM ends it (and closes stdout) immediately instead of
+# leaving a sleep child that keeps the pipe open for the full duration.
+if [ "$1" = run ]; then exec sleep 5; fi`);
       let handle: { kill: (c?: number) => void } | undefined;
       const p = runHermesTurn({
         ...base,
@@ -151,5 +153,5 @@ if [ "$1" = run ]; then sleep 5; fi`);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
-  });
+  }, 15_000);
 });
