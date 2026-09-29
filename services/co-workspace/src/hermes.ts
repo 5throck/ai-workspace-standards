@@ -38,9 +38,10 @@ export interface HermesSpawnOptions {
    * exec-able there). Production never sets it. */
   binPrefix?: string[];
   /** Static provider credential (design 2026-09-29-co-workspace-provider-key-config):
-   * injected as OPENAI_API_KEY into the turn env (docker `-e` / process env). Hermes's
-   * custom-provider mode reads model.base_url from the tenant config.yaml. */
-  providerApiKey?: string;
+   * injected into the turn env under the resolved name (docker `-e` / process env) —
+   * the name comes from resolveLlmProviderKey (OPENAI_API_KEY / ANTHROPIC_API_KEY /
+   * GOOGLE_API_KEY). Hermes's provider config comes from the tenant config.yaml. */
+  providerKeyEnv?: { name: string; value: string };
   projectDir: string;
   hermesHome: string;
   message: string;
@@ -147,7 +148,7 @@ export function hermesSpawnArgv(o: HermesSpawnOptions): string[] {
     `HERMES_HOME=${MOUNT_HERMES_HOME}`,
     "-e",
     "HERMES_ACCEPT_HOOKS=1",
-    ...(o.providerApiKey ? ["-e", `OPENAI_API_KEY=${o.providerApiKey}`] : []),
+    ...(o.providerKeyEnv ? ["-e", `${o.providerKeyEnv.name}=${o.providerKeyEnv.value}`] : []),
     ...(o.sharedAuthDir
       ? [
           "-v",
@@ -190,7 +191,7 @@ export function hermesEnv(o: HermesSpawnOptions, base: Record<string, string | u
     HERMES_ACCEPT_HOOKS: "1",
   };
   if (o.sharedAuthDir) env.HERMES_SHARED_AUTH_DIR = o.sharedAuthDir;
-  if (o.providerApiKey) env.OPENAI_API_KEY = o.providerApiKey;
+  if (o.providerKeyEnv) env[o.providerKeyEnv.name] = o.providerKeyEnv.value;
   return env;
 }
 

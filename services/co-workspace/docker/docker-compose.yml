@@ -60,6 +60,7 @@ services:
       # (injected as OPENAI_API_KEY) against an OpenAI-compatible base_url — instead of
       # the per-turn auth.json re-seed (OAuth refresh-token reuse revoked the Nous
       # session, 2026-09-29). Leave empty to keep the legacy shared-store path.
+      CO_WORKSPACE_LLM_PROVIDER: ${CO_WORKSPACE_LLM_PROVIDER:-}
       CO_WORKSPACE_LLM_BASE_URL: ${CO_WORKSPACE_LLM_BASE_URL:-}
       CO_WORKSPACE_LLM_API_KEY: ${CO_WORKSPACE_LLM_API_KEY:-}
       CO_WORKSPACE_LOGIN_REQUIRED: ${CO_WORKSPACE_LOGIN_REQUIRED:-true}

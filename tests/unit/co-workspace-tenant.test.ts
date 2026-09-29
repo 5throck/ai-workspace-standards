@@ -4,7 +4,7 @@ import { describe, expect, test } from "bun:test";
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { loadConfig, resolveVariants } from "../../services/co-workspace/src/config";
+import { loadConfig, resolveLlmProviderKey, resolveLlmProviderName, resolveVariants } from "../../services/co-workspace/src/config";
 import { UserStore } from "../../services/co-workspace/src/users";
 import {
   publicTenant,
@@ -40,6 +40,20 @@ describe("GatewayConfig (loadConfig)", () => {
     const off = loadConfig({});
     expect(off.llmBaseUrl).toBeUndefined();
     expect(off.llmApiKey).toBeUndefined();
+  });
+
+  test("provider selector resolution mirrors the co-newbiz scheme (R6)", () => {
+    const withKey = { CO_WORKSPACE_LLM_API_KEY: "sk" };
+    // default custom → OPENAI_API_KEY
+    expect(resolveLlmProviderKey(loadConfig(withKey))).toEqual({ name: "OPENAI_API_KEY", value: "sk" });
+    expect(resolveLlmProviderName(loadConfig(withKey))).toBe("custom");
+    expect(resolveLlmProviderKey(loadConfig({ ...withKey, CO_WORKSPACE_LLM_PROVIDER: "openai" }))?.name).toBe("OPENAI_API_KEY");
+    expect(resolveLlmProviderKey(loadConfig({ ...withKey, CO_WORKSPACE_LLM_PROVIDER: "anthropic" }))?.name).toBe("ANTHROPIC_API_KEY");
+    expect(resolveLlmProviderKey(loadConfig({ ...withKey, CO_WORKSPACE_LLM_PROVIDER: "gemini" }))?.name).toBe("GOOGLE_API_KEY");
+    expect(resolveLlmProviderName(loadConfig({ ...withKey, CO_WORKSPACE_LLM_PROVIDER: "anthropic" }))).toBe("anthropic");
+    // none / unset key = off → legacy shared-store path
+    expect(resolveLlmProviderKey(loadConfig({ ...withKey, CO_WORKSPACE_LLM_PROVIDER: "none" }))).toBeNull();
+    expect(resolveLlmProviderKey(loadConfig({}))).toBeNull();
   });
 
   test("env overrides apply, variants split on commas, junk numbers fall back", () => {
@@ -198,6 +212,7 @@ describe("seedHermesHome — per-tenant isolation and ADR-0088 D7 trust scoping"
 
   test("provider key mode stamps the custom provider and base_url (2026-09-29 design)", () => {
     const yaml = tenantConfigYaml("/data/tenants/gw-1/project", "my-model", {
+      providerName: "custom",
       providerBaseUrl: "https://api.example.com/v1",
     });
     expect(yaml).toContain('default: "my-model"');
@@ -206,7 +221,10 @@ describe("seedHermesHome — per-tenant isolation and ADR-0088 D7 trust scoping"
     // Isolated turns mount the same project at /work/project — both trust paths explicit.
     expect(yaml).toContain("- /work/project");
     const withoutProvider = tenantConfigYaml("/data/tenants/gw-1/project", "my-model");
-    expect(withoutProvider).not.toContain("provider: custom");
+    expect(withoutProvider).not.toContain("provider:");
+    const named = tenantConfigYaml("/data/tenants/gw-1/project", "m", { providerName: "anthropic" });
+    expect(named).toContain("provider: anthropic");
+    expect(named).not.toContain("base_url:");
   });
 });
 
