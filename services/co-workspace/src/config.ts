@@ -39,6 +39,9 @@ export interface GatewayConfig {
    * refresh-token-reuse revocation). Unset = legacy shared-store/auth.json path. */
   llmBaseUrl?: string;
   llmApiKey?: string;
+  /** Provider selector mirroring the co-newbiz scheme: `openai | anthropic | gemini | custom`
+   * (unset/`none` = off; default `custom` when a key is present). R6 of the provider-key design. */
+  llmProvider?: string;
   runBudgetSeconds: number;
   maxTurns: number;
   scaffoldTimeoutMs: number;
@@ -180,6 +183,7 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     hermesModel: env.CO_WORKSPACE_HERMES_MODEL || undefined,
     llmBaseUrl: env.CO_WORKSPACE_LLM_BASE_URL || undefined,
     llmApiKey: env.CO_WORKSPACE_LLM_API_KEY || undefined,
+    llmProvider: env.CO_WORKSPACE_LLM_PROVIDER || undefined,
     runBudgetSeconds: num(env.CO_WORKSPACE_RUN_BUDGET_SECONDS, 300),
     maxTurns: num(env.CO_WORKSPACE_MAX_TURNS, 100),
     scaffoldTimeoutMs: num(env.CO_WORKSPACE_SCAFFOLD_TIMEOUT_MS, 600_000),
@@ -218,6 +222,28 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     claudeBin: env.CO_WORKSPACE_CLAUDE_BIN ?? "claude",
     codexBin: env.CO_WORKSPACE_CODEX_BIN ?? "codex",
   };
+}
+
+/** Provider-key mode resolution (R6, design 2026-09-29-co-workspace-provider-key-config):
+ * the selector picks which env var carries the key — openai/custom → OPENAI_API_KEY,
+ * anthropic → ANTHROPIC_API_KEY, gemini → GOOGLE_API_KEY (hermes's env allowlist passes
+ * the GOOGLE_ prefix) — mirroring the co-newbiz scheme
+ * (`openai | anthropic | gemini | custom`; unset/`none` = off, default `custom` when a
+ * key is present). Null = provider-key mode is off → legacy shared-store path. */
+export function resolveLlmProviderKey(cfg: GatewayConfig): { name: string; value: string } | null {
+  if (!cfg.llmApiKey) return null;
+  const name = (cfg.llmProvider || "custom").trim().toLowerCase();
+  if (name === "none") return null;
+  const keyEnv =
+    name === "anthropic" ? "ANTHROPIC_API_KEY"
+    : name === "gemini" ? "GOOGLE_API_KEY"
+    : "OPENAI_API_KEY"; // openai | custom | any OpenAI-compatible provider name
+  return { name: keyEnv, value: cfg.llmApiKey };
+}
+
+/** The provider name stamped into tenant config.yaml (`model.provider`). */
+export function resolveLlmProviderName(cfg: GatewayConfig): string {
+  return (cfg.llmProvider || "custom").trim().toLowerCase();
 }
 
 /** Fail-fast probe for docker isolation mode (D5): the CLI must answer `docker version`. */

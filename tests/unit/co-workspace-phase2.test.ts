@@ -69,18 +69,18 @@ describe("hermes spawn adapter — toolsets and container isolation", () => {
     expect(argv).not.toContain("docker");
   });
 
-  test("provider key mode injects OPENAI_API_KEY (design 2026-09-29-co-workspace-provider-key-config)", () => {
+  test("provider key mode injects the resolved env name (design 2026-09-29-co-workspace-provider-key-config)", () => {
     const dockerArgv = hermesSpawnArgv({
       ...base,
-      providerApiKey: "sk-test",
+      providerKeyEnv: { name: "OPENAI_API_KEY", value: "sk-test" },
       container: { image: "co-workspace-runtime:latest" },
     });
     expect(dockerArgv).toContain("OPENAI_API_KEY=sk-test");
     // docker -e flags must precede the image
     expect(dockerArgv.indexOf("OPENAI_API_KEY=sk-test")).toBeLessThan(dockerArgv.indexOf("co-workspace-runtime:latest"));
     expect(hermesSpawnArgv(base)).not.toContain("OPENAI_API_KEY=sk-test");
-    const env = hermesEnv({ ...base, providerApiKey: "sk-test" }, {});
-    expect(env.OPENAI_API_KEY).toBe("sk-test");
+    const env = hermesEnv({ ...base, providerKeyEnv: { name: "ANTHROPIC_API_KEY", value: "sk-a" } }, {});
+    expect(env.ANTHROPIC_API_KEY).toBe("sk-a");
     expect(hermesEnv(base, {}).OPENAI_API_KEY).toBeUndefined();
   });
 

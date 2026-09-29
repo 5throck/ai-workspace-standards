@@ -22,9 +22,16 @@ the operator as configuration — the API Key + Base URL that LLM providers issu
 
 | Config | Meaning |
 |--------|---------|
-| `CO_WORKSPACE_LLM_BASE_URL` | OpenAI-compatible base URL (e.g. `https://api.openai.com/v1`) |
+| `CO_WORKSPACE_LLM_PROVIDER` | Selector mirroring the co-newbiz scheme: `openai \| anthropic \| gemini \| custom` (default `custom` when a key is set; `none`/unset = off) |
+| `CO_WORKSPACE_LLM_BASE_URL` | OpenAI-compatible base URL (e.g. `https://api.openai.com/v1`); required for `custom`, optional override for named providers |
 | `CO_WORKSPACE_LLM_API_KEY` | The provider's API key |
 | `CO_WORKSPACE_HERMES_MODEL` | Model id (existing knob, unchanged) |
+
+Provider resolution (R6): the selector picks which env var carries the key —
+`openai`/`custom` → `OPENAI_API_KEY`, `anthropic` → `ANTHROPIC_API_KEY`,
+`gemini` → `GOOGLE_API_KEY` (hermes's env allowlist passes the `GOOGLE_` prefix) —
+and the value stamped into tenant config.yaml as `model.provider`. Unset selector
+with a key present = `custom` (backward compatible with the first key-mode release).
 
 When `llmApiKey` is configured:
 

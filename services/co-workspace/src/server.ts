@@ -9,7 +9,7 @@
 
 import { chownSync, copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { basename, dirname, join, resolve, sep } from "node:path";
-import { dockerProbe, GatewayConfig, loadConfig, readKeysFile, SERVICE_ROOT } from "./config";
+import { dockerProbe, GatewayConfig, loadConfig, readKeysFile, resolveLlmProviderKey, resolveLlmProviderName, SERVICE_ROOT } from "./config";
 import { credentialValid, presentedCredential, principalFor, requestAuthorized } from "./auth";
 import { scaffoldProject } from "./scaffold";
 import { chownTree, publicTenant, recordProgress, recordTurnUsage, seedHermesHome, sweepTenantStragglers, tenantConfigYaml, TenantRecord } from "./tenant";
@@ -105,7 +105,14 @@ export async function provisionTenant(state: GatewayState, rec: TenantRecord): P
     moveDir(scaffolded.sourceDir, rec.projectDir);
     recordProgress(rec, "seeding", "seeding hermes home…");
     state.registry.upsert(rec);
-    seedHermesHome(rec, state.cfg.hermesSeedHome, state.cfg.hermesModel, state.cfg.llmBaseUrl);
+    seedHermesHome(
+      rec,
+      state.cfg.hermesSeedHome,
+      state.cfg.hermesModel,
+      resolveLlmProviderKey(state.cfg)
+        ? { name: resolveLlmProviderName(state.cfg), baseUrl: state.cfg.llmBaseUrl }
+        : undefined,
+    );
     if (state.cfg.isolation === "docker") {
       // The isolated turn runs as the hermes image's UID 10000 — the tenant tree must be
       // owned by it (the scaffold subprocess wrote everything as root).
@@ -308,7 +315,7 @@ async function runChat(
       // Provider-key mode (design 2026-09-29-co-workspace-provider-key-config) skips this —
       // static provider keys need no OAuth tokens, and copying them was the refresh-token-
       // reuse revocation class (Nous invalid_grant, 2026-09-29).
-      const seedAuth = state.cfg.llmApiKey
+      const seedAuth = resolveLlmProviderKey(state.cfg)
         ? undefined
         : state.cfg.hermesSeedHome
           ? join(state.cfg.hermesSeedHome, "auth.json")
@@ -318,10 +325,19 @@ async function runChat(
         if (state.cfg.isolation === "docker") chownSync(join(rec.hermesHome, "auth.json"), 10000, 10000);
       }
       // Re-stamp the tenant config.yaml every turn: provider/base-url/model changes apply
-      // to EXISTING tenants on their next turn (no re-provisioning needed).
+      // to EXISTING tenants on their next turn (no re-provisioning needed). In legacy mode
+      // (no provider key) the stamp carries NO provider lines — stamping `provider: custom`
+      // unconditionally would break the OAuth/shared-store tenants.
+      const providerKey = resolveLlmProviderKey(state.cfg);
       writeFileSync(
         join(rec.hermesHome, "config.yaml"),
-        tenantConfigYaml(rec.projectDir, state.cfg.hermesModel, { providerBaseUrl: state.cfg.llmBaseUrl }),
+        tenantConfigYaml(
+          rec.projectDir,
+          state.cfg.hermesModel,
+          providerKey
+            ? { providerName: resolveLlmProviderName(state.cfg), providerBaseUrl: state.cfg.llmBaseUrl }
+            : undefined,
+        ),
       );
       if (state.cfg.runtime === "antigravity") {
         return runAntigravityTurn(
@@ -365,7 +381,7 @@ async function runChat(
         {
           hermesBin: state.cfg.hermesBin,
           binPrefix: state.cfg.hermesBinPrefix,
-          providerApiKey: state.cfg.llmApiKey,
+          providerKeyEnv: resolveLlmProviderKey(state.cfg) ?? undefined,
           projectDir: rec.projectDir,
           hermesHome: rec.hermesHome,
           message,
