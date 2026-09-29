@@ -19,8 +19,8 @@
 
    | Task | Agent | Tier | Model | Platform |
    |------|-------|------|-------|----------|
-   | Statutory research (labor law of the target jurisdiction) | labor-compliance-analyst | High | claude-opus-5-0 | Claude Code |
-   | Workforce data analysis | data-analyst | Medium | claude-sonnet-5-0 | Claude Code |
+   | Statutory research (labor law of the target jurisdiction) | labor-compliance-analyst | High | claude-opus-5-5 | Claude Code |
+   | Workforce data analysis | data-analyst | Medium | claude-sonnet-5-5 | Claude Code |
 
 4. Once approved, specialists run — research in parallel where safe, writes serialized.
    Engagements with legal exposure pass a **compliance cross-validation** step

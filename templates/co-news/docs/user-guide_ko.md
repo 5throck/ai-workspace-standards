@@ -1,5 +1,5 @@
 ---
-translated_from_hash: e3cd2937d9f34d39e3baa2e59ee1bb001dd1c7459fadd4a26ca0be03744c531d
+translated_from_hash: 4e53f944d6f4d3d56a591911ec86d229b50e7ebc2586be02f9e29bfa90027652
 ---
 # Co-News 사용자 가이드
 
@@ -21,9 +21,9 @@ translated_from_hash: e3cd2937d9f34d39e3baa2e59ee1bb001dd1c7459fadd4a26ca0be0374
 
    | 작업 | 에이전트 | 티어 | 모델 | 플랫폼 |
    |------|----------|------|------|--------|
-   | 재무 내러티브 브리프 | financial-analyst | High | claude-opus-5-0 | Claude Code |
-   | 법률 맥락 브리프 | legal-researcher | High | claude-opus-5-0 | Claude Code |
-   | 기사 초고 | reporter | Medium | claude-sonnet-5-0 | Claude Code |
+   | 재무 내러티브 브리프 | financial-analyst | High | claude-opus-5-5 | Claude Code |
+   | 법률 맥락 브리프 | legal-researcher | High | claude-opus-5-5 | Claude Code |
+   | 기사 초고 | reporter | Medium | claude-sonnet-5-5 | Claude Code |
 
 4. **출처 검증 게이트**는 절대 규칙입니다: 인용 원장(ledger)에 `UNVERIFIED` 주장이
    하나라도 남아 있으면 reporter는 디스패치되지 않습니다 (주장당 2개 이상의 독립

@@ -1,5 +1,5 @@
 ---
-translated_from_hash: e2d594ac8f83b8625c23b77ba813d66fa8b0da97efec75866ecdee08ff4543dd
+translated_from_hash: 9286bd940f9a65649c68464ade1e3f76099874efc53afb0bf3730c1ff03718ef
 ---
 # Co-Export 사용자 가이드
 
@@ -23,9 +23,9 @@ translated_from_hash: e2d594ac8f83b8625c23b77ba813d66fa8b0da97efec75866ecdee08ff
 
    | 작업 | 에이전트 | 티어 | 모델 | 플랫폼 |
    |------|----------|------|------|--------|
-   | HS 분류 리서치 | hs-classification-specialist | High | claude-opus-5-0 | Claude Code |
-   | FTA 원산지 판정 | fta-origin-analyst | High | claude-opus-5-0 | Claude Code |
-   | 무역 서류 준비 | trade-documentation-specialist | Medium | claude-sonnet-5-0 | Claude Code |
+   | HS 분류 리서치 | hs-classification-specialist | High | claude-opus-5-5 | Claude Code |
+   | FTA 원산지 판정 | fta-origin-analyst | High | claude-opus-5-5 | Claude Code |
+   | 무역 서류 준비 | trade-documentation-specialist | Medium | claude-sonnet-5-5 | Claude Code |
 
 4. Phase 2는 **필수 사용자 승인 게이트**입니다: PM이 컴플라이언스 + 전략 결과를
    종합해 제시하며, 승인되지 않은 결과로는 Phase 3 실행 작업이 절대 시작되지

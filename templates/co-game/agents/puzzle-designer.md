@@ -8,10 +8,10 @@ capabilities:
   - game-design
   - puzzle-mechanics
 tier:
-  claude: high        # claude-opus-5-0
-  gemini: high        # gemini-3.1-pro
-  antigravity: high   # gemini-3.1-pro
-  gemini-cli: high    # gemini-3.1-pro
+  claude: high
+  gemini: high
+  antigravity: high
+  gemini-cli: high
 model: inherit
 color: purple
 description: >

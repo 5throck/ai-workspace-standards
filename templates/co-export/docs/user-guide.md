@@ -20,9 +20,9 @@
 
    | Task | Agent | Tier | Model | Platform |
    |------|-------|------|-------|----------|
-   | HS classification research | hs-classification-specialist | High | claude-opus-5-0 | Claude Code |
-   | FTA origin determination | fta-origin-analyst | High | claude-opus-5-0 | Claude Code |
-   | Trade document preparation | trade-documentation-specialist | Medium | claude-sonnet-5-0 | Claude Code |
+   | HS classification research | hs-classification-specialist | High | claude-opus-5-5 | Claude Code |
+   | FTA origin determination | fta-origin-analyst | High | claude-opus-5-5 | Claude Code |
+   | Trade document preparation | trade-documentation-specialist | Medium | claude-sonnet-5-5 | Claude Code |
 
 4. Phase 2 is a **mandatory user-approval gate**: the PM synthesizes compliance + strategy
    findings and presents them — no Phase 3 execution work begins on unapproved findings,
