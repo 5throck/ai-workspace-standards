@@ -1,0 +1,19 @@
+schemaVersion: 1
+id: T-20260930-005
+kind: manual
+title: >-
+  agents/pm: decide fleet backfill-or-accept for the PM tier-floor semantics —
+  pm.md 1.2.1 (tier_semantics: floor, session_hosted: true) is
+  template-forward-only; 13 fleet pm.md copies (and co-work at 1.1.0) lack it
+  and upgrades deliberately preserve the override (contract marks pm
+  overridable)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-29T16:40:39.610Z'
+history:
+  - at: '2026-09-29T16:40:39.610Z'
+    from: null
+    to: backlog
+result: null
+error: null

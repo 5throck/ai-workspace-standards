@@ -5,12 +5,18 @@ title: >-
   co-workspace: labelled key-file lines (key:label) are treated as whole keys,
   so labels never resolve and bare keys get 401
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-29T04:59:33.275Z'
 history:
   - at: '2026-09-29T04:59:33.275Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-29T16:40:39.549Z'
+    from: backlog
+    to: done
+result: >-
+  CORRECTED: the key:label fix landed via PR #1227 (342d616f) and was already
+  live when this run-5 review found the ticket open — root CHANGELOG Unreleased
+  documents it. Closing as landed.
 error: null

@@ -2,7 +2,7 @@ import { chownSync, copyFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { GatewayConfig, resolveLlmProviderKey, resolveLlmProviderName } from "./config";
 import { recordTurnUsage, tenantConfigYaml, TenantRecord, writeTenantConfig } from "./tenant";
-import { HermesEvent, HermesTurnResult, runHermesTurn } from "./hermes";
+import { HermesEvent, HermesTurnResult, runHermesTurn, turnContainerName } from "./hermes";
 import { runAntigravityTurn } from "./antigravity";
 import { runClaudeTurn } from "./claude";
 import { runCodexTurn } from "./codex";
@@ -121,6 +121,10 @@ export async function runChat(
             state.cfg.isolation === "docker"
               ? {
                   image: state.cfg.runtimeImage,
+                  dockerBin: state.cfg.dockerBin,
+                  name: turnContainerName(rec.tenantId),
+                  tenantId: rec.tenantId,
+                  instance: state.cfg.instanceId,
                   // Host-side equivalents of the tenant's container paths: record paths live
                   // under <dataDir>/…, remap the prefix onto dataDirHost. (The old
                   // `tenants/<id>/…` hardcode mounted empty dirs — per-user storage moved

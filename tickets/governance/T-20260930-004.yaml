@@ -1,0 +1,18 @@
+schemaVersion: 1
+id: T-20260930-004
+kind: manual
+title: >-
+  co-workspace: fix 3 dead design-doc links left by the rename — README.md:6,229
+  and component AGENTS.md:5 still point at nonexistent
+  2026-09-27-co-workspace-*-design files (actual: team-gateway-* names);
+  T-20260928-004 closed with these remaining
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-29T16:40:39.598Z'
+history:
+  - at: '2026-09-29T16:40:39.598Z'
+    from: null
+    to: backlog
+result: null
+error: null

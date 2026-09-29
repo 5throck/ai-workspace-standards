@@ -181,6 +181,7 @@ continuity handle → credential model → isolation matrix → provider disclos
 | `CO_WORKSPACE_ISOLATION` | `process` | `docker` = per-turn ephemeral sibling container (tenant files only) |
 | `CO_WORKSPACE_RUNTIME_IMAGE` | `co-workspace-runtime:latest` | Runtime image for docker isolation (the gateway image also qualifies — it carries hermes) |
 | `CO_WORKSPACE_DOCKER_BIN` | `docker` | Docker CLI used for isolation spawns |
+| `CO_WORKSPACE_INSTANCE_ID` | `default` | Label value on turn containers; at boot the gateway removes leftover turn containers carrying its own id (set distinct ids when several gateways share one Docker daemon) |
 | `CO_WORKSPACE_COOKIE_SECURE` | `false` | Set `true` when served over TLS to add `Secure` to session cookies (compose passes it through) |
 | `CO_WORKSPACE_PRINCIPAL_MAX_TOKENS` | `0` (=unlimited) | Token cap across all of a principal's teams |
 | `CO_WORKSPACE_SCAFFOLD_TIMEOUT_MS` | `600000` | Time limit for scaffolding a team (ms) |
@@ -269,6 +270,7 @@ docker compose build && docker compose up -d
     the turn, and multiple homes refreshing the same single-use token can get the session
     revoked (the reason provider key mode exists). Process mode additionally binds the shared
     token store; team-scoped token separation is future work.
+  - *Restart and orphan turns*: `chatLocks`/`activeProcs` are memory-only. Docker mode is covered by the boot reaper (removes leftover labeled turn containers); process mode children die with the gateway container (bare-host `bun`: stop the process group or accept up to `runBudgetSeconds` of orphan runtime).
   - The dev mailer writes verification mails to a local outbox instead of SMTP. Rate limiters
     are in-memory; session-authenticated mutations rely on SameSite=Lax (the CSRF header
     guards keyless requests).
