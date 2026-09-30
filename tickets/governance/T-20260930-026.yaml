@@ -6,27 +6,35 @@ title: >-
   to the L0 CI template so template resyncs stop deleting project unit-test jobs
 priority: normal
 description: >-
-  Deferred item D8 from Projects/co-newbiz docs/reports/2026-09-22-project-review-full.md
-  (user-approved). Evidence: co-newbiz .github/workflows/ci.yml lost its live
-  unit-test job to a fleet template resync twice (commit 6fcaf043 on 2026-09-23
-  replaced it with the template's commented-out `# test-node` / `# test-python`
-  stubs; it had been re-added in 758ba8ed and 5baaa7b1). The L0 template
+  Deferred item D8 from Projects/co-newbiz
+  docs/reports/2026-09-22-project-review-full.md (user-approved). Evidence:
+  co-newbiz .github/workflows/ci.yml lost its live unit-test job to a fleet
+  template resync twice (commit 6fcaf043 on 2026-09-23 replaced it with the
+  template's commented-out `# test-node` / `# test-python` stubs; it had been
+  re-added in 758ba8ed and 5baaa7b1). The L0 template
   templates/common/.github/workflows/ci.yml has no live test job (only those
   commented stubs), so every resync clobbers a project-added test job again.
   Reference job: co-newbiz PR #427 (commit e2b77b43), job "Unit + Script Tests"
-  (checkout, setup-bun, bun install --frozen-lockfile, web-next deps, python venv,
-  `bun run test:unit`, `bun run test:scripts`). Design question: ship a default
-  test job in the template gated on a `test` script in package.json, vs make the
-  resync preserve project-local jobs, vs both. Fleet impact: measure across
-  sibling projects' ci.yml before deciding; a PM spot check on 2026-09-30 found a
-  live test job only in co-newbiz (0 in the other 12 Projects/*), so today only
-  co-newbiz is actively harmed, but no other project has test CI either.
-status: backlog
+  (checkout, setup-bun, bun install --frozen-lockfile, web-next deps, python
+  venv, `bun run test:unit`, `bun run test:scripts`). Design question: ship a
+  default test job in the template gated on a `test` script in package.json, vs
+  make the resync preserve project-local jobs, vs both. Fleet impact: measure
+  across sibling projects' ci.yml before deciding; a PM spot check on 2026-09-30
+  found a live test job only in co-newbiz (0 in the other 12 Projects/*), so
+  today only co-newbiz is actively harmed, but no other project has test CI
+  either.
+status: running
 attempts: 0
 created_at: '2026-09-30T05:08:55.597Z'
 history:
   - at: '2026-09-30T05:08:55.597Z'
     from: null
     to: backlog
+  - at: '2026-09-30T21:36:11.948Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-30T21:36:11.961Z'
+    from: waiting
+    to: running
 result: null
 error: null
