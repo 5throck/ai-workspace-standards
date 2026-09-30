@@ -7,12 +7,21 @@ title: >-
   v0.8.x delivery) — triage the failing variant/step from run 36682032034 and
   fix or raise the job timeout
 priority: normal
-status: backlog
+status: review
 attempts: 0
 created_at: '2026-09-30T16:39:22.918Z'
 history:
   - at: '2026-09-30T16:39:22.918Z'
     from: null
     to: backlog
+  - at: '2026-09-30T18:18:14.184Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-30T18:18:14.195Z'
+    from: waiting
+    to: running
+  - at: '2026-09-30T18:18:14.207Z'
+    from: running
+    to: review
 result: null
 error: null
