@@ -7,23 +7,49 @@ title: >-
   placeholder text that audit flags
 priority: normal
 description: >-
-  Root-cause fix for pipeline-maintained scaffold placeholders (from the co-newbiz
-  2026-09-30 project review; user-approved). Affected files: docs/context.md and
-  docs/project.md, whose header says "pipeline-maintained, no hand edits", yet
-  writeContextMd in scripts/helpers/pm-md-parser.ts emits scaffold placeholders
-  ([Project Name], TODO/TBD description/type) and nothing populates real values at
-  new-project or template-sync/upgrade time — so audit.ts's live-context placeholder
-  WARN (v2.41.0/v2.42.0 check family) returns on every upgrade in every variant
-  project. Reference stopgap: co-newbiz PR #426 hand-filled the fields, which the
-  next template sync will overwrite. Design question to settle before dispatch:
-  should the scaffold/upgrade pipeline accept --description/--type inputs at
-  new-project time, derive them from existing project docs on upgrade, or both?
-status: backlog
+  Root-cause fix for pipeline-maintained scaffold placeholders (from the
+  co-newbiz 2026-09-30 project review; user-approved). Affected files:
+  docs/context.md and docs/project.md, whose header says "pipeline-maintained,
+  no hand edits", yet writeContextMd in scripts/helpers/pm-md-parser.ts emits
+  scaffold placeholders ([Project Name], TODO/TBD description/type) and nothing
+  populates real values at new-project or template-sync/upgrade time — so
+  audit.ts's live-context placeholder WARN (v2.41.0/v2.42.0 check family)
+  returns on every upgrade in every variant project. Reference stopgap:
+  co-newbiz PR #426 hand-filled the fields, which the next template sync will
+  overwrite. Design question to settle before dispatch: should the
+  scaffold/upgrade pipeline accept --description/--type inputs at new-project
+  time, derive them from existing project docs on upgrade, or both?
+status: done
 attempts: 0
 created_at: '2026-09-30T00:21:10.872Z'
 history:
   - at: '2026-09-30T00:21:10.872Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-30T01:24:49.784Z'
+    from: backlog
+    to: running
+  - at: '2026-09-30T01:24:49.798Z'
+    from: running
+    to: done
+result: >-
+  Root cause was the upgrade write path, not the scaffold: new-project already
+  renders identity (applySubstitutions at §5 + --description/--type identity
+  fill at §5.2), and docs/project.md seeding is add-if-missing rendered — but
+  upgrade-project's TEMPLATE TREE SYNC wrote docs/context.md as RAW template
+  bytes, so the [Project Name] H1 and docs/<variant>.context.md table pointers
+  regressed on every version-bumped re-delivery, re-tripping the audit
+  placeholder WARN (and dooming the co-newbiz PR #426 hand-fill stopgap). Fix
+  (upgrade-project v1.60.0, spec 2026-09-30-scaffold-upgrade-identity-design
+  registered): the docs/context.md write path — both the wholesale copy and the
+  CONTEXT PRESERVE managed-block splice — now renders the shared
+  applySubstitutions map (project name + variant, one render path with
+  new-project §5 and the v1.58.0 agents/ precedent; token-idempotent). Design
+  question settled and recorded: name/variant render deterministically;
+  description/type stay explicit human input (scaffold flags or hand-fill) —
+  upgrades never overwrite project.md, undescribed projects stay WARN-visible by
+  the identity spec's R4. Tests: the three CONTEXT PRESERVE delivery tests now
+  assert the rendered template incl. the backtick <variant> rule (18/18),
+  upgrade family 90/90, typecheck at baseline, verify-scripts green with the
+  1.60.0/1.19.0 registry rows.
 error: null

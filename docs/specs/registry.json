@@ -1683,6 +1683,51 @@
       "source": "manual",
       "created": "2026-09-30",
       "last_updated": "2026-09-30"
+    },
+    {
+      "id": "2026-09-30-coworkspace-latency-ux-design",
+      "title": "coworkspace latency ux design",
+      "file": "docs/designs/2026-09-30-coworkspace-latency-ux-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-30",
+      "last_updated": "2026-09-30"
+    },
+    {
+      "id": "2026-09-30-region-profiles-upgrade-claim-design",
+      "title": "region profiles upgrade claim design",
+      "file": "docs/designs/2026-09-30-region-profiles-upgrade-claim-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-30",
+      "last_updated": "2026-09-30"
+    },
+    {
+      "id": "2026-09-30-scaffold-upgrade-identity-design",
+      "title": "scaffold upgrade identity design",
+      "file": "docs/designs/2026-09-30-scaffold-upgrade-identity-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-30",
+      "last_updated": "2026-09-30"
+    },
+    {
+      "id": "2026-09-30-coworkspace-docker-broker-design",
+      "title": "coworkspace docker broker design",
+      "file": "docs/designs/2026-09-30-coworkspace-docker-broker-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-30",
+      "last_updated": "2026-09-30"
+    },
+    {
+      "id": "2026-09-30-coworkspace-web-split-plan",
+      "title": "coworkspace web split plan",
+      "file": "docs/designs/2026-09-30-coworkspace-web-split-plan.md",
+      "status": "planned",
+      "source": "manual",
+      "created": "2026-09-30",
+      "last_updated": "2026-09-30"
     }
   ]
 }

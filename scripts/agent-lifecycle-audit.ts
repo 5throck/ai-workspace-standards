@@ -9,9 +9,13 @@
  *   bun scripts/agent-lifecycle-audit.ts
  *   bun scripts/agent-lifecycle-audit.ts --json   # JSON output
  *
- * @version 1.4.0
+ * @version 1.5.0
  * @l2-propagate false
  * @last_updated 2026-09-30
+ * v1.5.0: Check 11 compares against the newest non-sync-only commit (DEC-20260930-01
+ *         ruling 2, T-20260930-024) — `chore(upgrade): template sync`,
+ *         `chore(templates): auto-release`, and `propagate sync` cascade commits no
+ *         longer make frontmatter last_updated look stale.
  * v1.4.0: In root agents/ directory, any .md with a name: frontmatter key is an agent (description: accepted; excludes README*, AGENTS.md). Check 3 accepts role OR description.
  * v1.3.1: Check 12 gated to IS_WORKSPACE_ROOT — project snapshots keep delivered owners as-is (co-safety virtual domain owners would otherwise fail project-side audits).
  * @license MIT
@@ -300,6 +304,21 @@ export function isFrontmatterStale(frontmatterDate: string, lastCommitDate: stri
   return frontmatterDate < lastCommitDate;
 }
 
+// Sync-only commit subjects (DEC-20260930-01 ruling 2, T-20260930-024): pipeline
+// cuts that copy template content without a content decision of their own.
+// `chore(upgrade): template sync vX` — fleet upgrade delivery into project repos;
+// `chore(templates): auto-release vX` — template release cut at L0;
+// `... propagate sync ...` — L1 publish cascade into platform mirrors.
+const SYNC_ONLY_COMMIT_PATTERNS: RegExp[] = [
+  /^chore\(upgrade\): template sync\b/i,
+  /^chore\(templates\): auto-release\b/i,
+  /\bpropagate sync\b/i,
+];
+
+export function isSyncOnlyCommitSubject(subject: string): boolean {
+  return SYNC_ONLY_COMMIT_PATTERNS.some((re) => re.test(subject));
+}
+
 // ── v1.3.0 lifecycle-modernization checks (2026-09-21) ──────────────────────
 
 /** An agent name resolves if a roster entry, an agent file, or a variant agent file exists. */
@@ -371,11 +390,23 @@ function extractFrontmatterDate(filePath: string, field: string): string | null 
 
 // Last git commit date (YYYY-MM-DD) for a file; null when git is unavailable or the
 // file has no commits yet (freshly added, uncommitted).
-function lastCommitDate(filePath: string): string | null {
+/** Newest commit touching the file that is not a sync-only pipeline cut
+ *  (DEC-20260930-01 ruling 2): upgrade template-sync, auto-release, and
+ *  propagate-sync cascade commits are skipped so copying template content
+ *  alone never makes frontmatter last_updated look stale. Returns null when
+ *  git history is unavailable or every commit touching the file is sync-only. */
+export function lastContentCommitDate(filePath: string, repoCwd: string = cwd()): string | null {
   try {
-    const result = spawnSync('git', ['log', '-1', '--format=%cs', '--', filePath], { encoding: 'utf-8' });
-    const date = (result.stdout || '').trim();
-    return /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : null;
+    const result = spawnSync('git', ['log', '-n', '200', '--format=%cs%x09%s', '--', filePath], { encoding: 'utf-8', cwd: repoCwd });
+    for (const line of (result.stdout || '').split('\n')) {
+      const trimmed = line.trim();
+      const tabIdx = trimmed.indexOf('\t');
+      if (tabIdx === -1) continue;
+      const date = trimmed.slice(0, tabIdx);
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) continue;
+      if (!isSyncOnlyCommitSubject(trimmed.slice(tabIdx + 1))) return date;
+    }
+    return null;
   } catch {
     return null;
   }
@@ -507,10 +538,12 @@ function auditAgents(jsonMode = false): AuditResult {
 
     // Check 11: Stale last_updated (T-20260909-004) — the file's git history moved
     // past its declared last_updated without the lifecycle metadata being refreshed.
-    // Archived agents are exempt: stale metadata is expected there by definition.
+    // Sync-only pipeline commits (upgrade template-sync, auto-release, propagate
+    // cascade) are skipped per DEC-20260930-01 ruling 2. Archived agents are
+    // exempt: stale metadata is expected there by definition.
     if (frontmatter.status !== 'archived' && !relPath.includes('_archive')) {
       const fmDate = parseFrontmatterDate(extractFrontmatterDate(agentFile, 'last_updated'));
-      const commitDate = lastCommitDate(agentFile);
+      const commitDate = lastContentCommitDate(agentFile);
       if (fmDate && commitDate && isFrontmatterStale(fmDate, commitDate)) {
         warnings.push({
           level: 'warning',

@@ -268,22 +268,24 @@ docker compose build && docker compose up -d
   runs bun, git and the docker CLI with a writable `HOME`; provisioning, turns and delete work
   with no permission errors. Linux host bind-mount ownership is not yet verified.
 - **Docker socket** — the gateway does not mount the raw socket. `docker-compose.isolation.yml`
-  adds a `docker-proxy` service (tecnativa/docker-socket-proxy, read-only socket mount, no
-  published ports) on an internal-only `dockerapi` network; the gateway uses
-  `DOCKER_HOST=tcp://docker-proxy:2375`. The proxy allows container endpoints with POST/DELETE
-  (create/start/stop/kill/rm/ps) and denies exec, images, volumes, networks, build, swarm,
-  system and more; `IMAGES=0` means a missing runtime image fails fast instead of pulling.
-  **Residual risk**: the proxy filters by endpoint only and cannot inspect the create body, so
-  a compromised gateway can still create a privileged container or bind-mount `/` — this
-  reduces but does NOT remove host-root equivalence (follow-up: rootless Docker or a broker
-  exposing only run/list/kill for its own labeled containers). Confirmed live: with
-  `CONTAINERS=1` the gateway can list every container on the daemon (`docker ps -a`) and
-  `docker inspect` returns container environment variables; container logs share that endpoint
-  group (not tested). Do not run other sensitive workloads on the same Docker daemon as the
-  gateway. Verified live (2026-09-30, Docker 29.8.1): create/attach/start/wait, cancel (kill)
-  and the boot orphan reaper (ps + rm -f) work through the proxy with `INFO=0`, and image,
-  volume, network, exec and info calls return 403. The proxy root filesystem must stay
-  writable (its entrypoint renders `haproxy.cfg` at start; `read_only: true` crash-loops it).
+  adds a `docker-broker` service (our create-body-validating broker, `src/docker-broker.ts`,
+  in the same gateway image via a command override; read-only socket mount, no published ports)
+  on an internal-only `dockerapi` network; the gateway uses `DOCKER_HOST=tcp://docker-broker:2375`.
+  Three controls (T-20260930-008, replacing the endpoint-only tecnativa/docker-socket-proxy):
+  (1) create-body validation — image allowlist (`CO_WORKSPACE_RUNTIME_IMAGE`), no Privileged,
+  CapDrop ALL, no-new-privileges, user 10000:10000, bind sources restricted under
+  `CO_WORKSPACE_DATA_DIR_HOST`, no host Pid/Network mode, no devices, Memory/PidsLimit caps
+  required; (2) name scoping — create/start/wait/kill/attach/inspect/remove resolve only
+  `co-workspace-turn-*` containers, and the container list is filtered to that fleet, so other
+  daemons' containers and their environments are invisible; (3) endpoint allowlist — version
+  probe, container create/start/wait/attach/kill, list, inspect, delete; exec, images, volumes,
+  networks, build, swarm, info and more are 403. **Residual risk (accepted)**: a compromised
+  gateway can still manage the turn containers it legitimately owns; rootless Docker removes
+  the remaining host-root equivalence and stays the long-term direction. Do not run other
+  sensitive workloads on the same Docker daemon as the gateway. The broker runs as root with
+  all capabilities dropped and a read-only filesystem (root is required for the socket's
+  root:root 660 DAC check). `IMAGES=0` semantics carry over: the broker's image allowlist
+  makes a missing runtime image fail at create time instead of pulling.
   Not yet verified: a real provider turn end to end, Google SSO, legacy OAuth seed mode.
   Single-operator deployments only.
 - **Seed home is optional** — the base compose no longer mounts a Hermes home. Legacy OAuth

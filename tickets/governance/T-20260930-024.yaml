@@ -5,12 +5,32 @@ title: >-
   Make agent-lifecycle-audit Check 11 ignore template-sync/upgrade/propagate
   commits when comparing last_updated (DEC-20260930-01)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-30T00:13:08.888Z'
 history:
   - at: '2026-09-30T00:13:08.888Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-30T00:42:30.350Z'
+    from: backlog
+    to: running
+  - at: '2026-09-30T00:42:30.366Z'
+    from: running
+    to: done
+result: >-
+  Implemented DEC-20260930-01 ruling 2 in agent-lifecycle-audit v1.5.0 (L0 +
+  byte-identical L1 mirror, both SCRIPTS.md rows bumped): new exported
+  isSyncOnlyCommitSubject matches chore(upgrade): template sync,
+  chore(templates): auto-release, and propagate-sync cascade subjects; new
+  lastContentCommitDate walks git log -n 200 --format=%cs%x09%s and returns the
+  newest non-sync-only commit date (null when history is unavailable or
+  all-sync-only); Check 11 now compares frontmatter last_updated against that
+  date instead of the raw newest commit. Tests:
+  tests/unit/agent-lifecycle-stale-date.test.ts v1.1.0 — subject-pattern cases
+  plus git-fixture integration tests (skips newer sync-only commit, null when
+  all sync-only, null outside a repo) — 14/14 pass; verify-scripts green at L0
+  (206 scripts) and L1 (134 scripts); live audit run exits 0 with the same 8
+  legitimate content-staleness warnings (09-29 tier upgrade commits are real
+  content edits and correctly still warn).
 error: null

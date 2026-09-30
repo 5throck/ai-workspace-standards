@@ -7,12 +7,34 @@ title: >-
   cached_tokens, prefix stability, time to first token, history growth (see
   docs/reports/2026-09-30-co-workspace-turn-latency-research.md section 4)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-29T22:54:34.631Z'
 history:
   - at: '2026-09-29T22:54:34.631Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-30T01:01:13.764Z'
+    from: backlog
+    to: running
+  - at: '2026-09-30T01:01:13.777Z'
+    from: running
+    to: done
+result: >-
+  Implemented the per-stage turn timing instrumentation per research section 4
+  (spec 2026-09-30-coworkspace-latency-ux-design). New src/timing.ts: TurnTiming
+  emits one structured [turn-timing] JSON line per stage (ts, turn key, stage,
+  ms_total, ms_stage); CO_WORKSPACE_TURN_TIMING=0 silences (default on), added
+  to docker-compose.yml + .env.sample (env-parity green). Stages: chat.ts
+  t0/t_lock/t_stamp/turn_done (tokens + provider cache fields verbatim);
+  hermes.ts
+  t_spawn/t_first_byte/t_system/t_first_tool/t_first_text/t_result/t_exit/turn_summary;
+  responses.ts t_first_sse_frame per surface. Join key: deterministic
+  turnLogKey(tenantId) (turnContainerName is per-call unique — container name,
+  not a key); chat.ts injects its timer into runHermesTurn (new timing?:
+  TurnTiming option) so all stages share one timeline. Test asserts one shared
+  key across chat+hermes stages, the full stage set, and cached_tokens
+  pass-through. Operator measurement with a real provider key remains open under
+  T-20260930-009 (operator verification) — the instrumentation it needs is now
+  in place. Full suite: 243 pass / 0 fail.
 error: null

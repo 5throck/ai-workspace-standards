@@ -8,12 +8,27 @@ title: >-
   and upgrades deliberately preserve the override (contract marks pm
   overridable)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-29T16:40:39.610Z'
 history:
   - at: '2026-09-29T16:40:39.610Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-30T00:34:56.170Z'
+    from: backlog
+    to: running
+  - at: '2026-09-30T00:35:02.994Z'
+    from: running
+    to: done
+result: >-
+  Decision recorded as DEC-20260930-02 (docs/decisions/DEC-20260930-02.md):
+  accept forward-only delivery of tier_semantics: floor / session_hosted: true.
+  Rationale: the operative PM Tier Semantics rule already reached existing
+  projects through the upgrade-merged COMMON-AGENTS zone of AGENTS.md (design
+  2026-09-29 follow-up C); the missing frontmatter keys are descriptive metadata
+  no script reads; pm.md frontmatter is project-owned and the 13 fleet copies
+  are deliberately divergent (1.0.0-2.0.1); fleet repos are unmergeable until
+  the Actions billing issue clears. Revisit trigger recorded: backfill only if a
+  future validator consumes the keys.
 error: null

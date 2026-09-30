@@ -226,7 +226,14 @@ describe('upgrade-project.ts docs/context.md CONTEXT PRESERVE gate', () => {
       const liveVersion = readFileSync(contextTemplatePath, 'utf8').match(/\*context\.md version: [^*\n]+\*/);
       expect(liveVersion).not.toBeNull();
       expect(applied).toContain(liveVersion![0]);
-      expect(applied).toBe(readFileSync(contextTemplatePath, 'utf8'));
+      // T-20260930-025: the copy renders the scaffold placeholder map — compare
+      // against the RENDERED template ([Project Name] -> project dir basename,
+      // <variant-name> -> variant), not the raw template bytes.
+      const renderedTemplate = readFileSync(contextTemplatePath, 'utf8')
+        .replace(/\[Project Name\]/g, require('node:path').basename(tmp))
+        .replace(/<variant-name>/g, VARIANT)
+        .replace(/`([^`]*)<variant>([^`]*)`/g, `\`$1${VARIANT}$2\``);
+      expect(applied).toBe(renderedTemplate);
     } finally {
       rmSync(tmp, { recursive: true, force: true });
     }
@@ -250,9 +257,13 @@ describe('upgrade-project.ts docs/context.md CONTEXT PRESERVE gate', () => {
       expect(result.stdout).not.toContain('CONTEXT PRESERVE');
       expect(result.stdout).toMatch(/UPDATE docs\/context\.md/);
 
-      // The template version was applied (current pre-preservation behavior preserved).
-      expect(readFileSync(join(tmp, 'docs', 'context.md'), 'utf8'))
-        .toBe(readFileSync(contextTemplatePath, 'utf8'));
+      // The template version was applied (current pre-preservation behavior preserved),
+      // with the scaffold placeholder map rendered (T-20260930-025).
+      const renderedTpl = readFileSync(contextTemplatePath, 'utf8')
+        .replace(/\[Project Name\]/g, require('node:path').basename(tmp))
+        .replace(/<variant-name>/g, VARIANT)
+        .replace(/`([^`]*)<variant>([^`]*)`/g, `\`$1${VARIANT}$2\``);
+      expect(readFileSync(join(tmp, 'docs', 'context.md'), 'utf8')).toBe(renderedTpl);
     } finally {
       rmSync(tmp, { recursive: true, force: true });
     }

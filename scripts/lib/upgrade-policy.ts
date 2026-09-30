@@ -1,4 +1,8 @@
-// @version 1.18.0
+// @version 1.19.0
+// v1.19.0 (2026-09-30, T-20260927-010): `region-profiles/**` claims ADD_IF_MISSING on
+//          the new dedicated REGION PROFILES pass — the ADR-0091 structured regulatory
+//          layer is delivered once and never overwritten (project deltas are
+//          intentional; prevents the procedures/** clobber class on co-price KR.yaml).
 // v1.18.0 (2026-09-27, ADR-0093 — spec
 //          docs/designs/2026-09-27-hermes-md-instruction-file-design.md):
 //          HERMES.md joins MERGE_MANAGED_FILES — the Hermes member of the
@@ -139,6 +143,14 @@ export const TEMPLATE_TREE_SYNC_PASS = 'TEMPLATE TREE SYNC';
  *  identities, not a second hard-coded literal — the same drift class
  *  TEMPLATE_TREE_SYNC_PASS exists to prevent (T-20260924-011, design D2/D3). */
 export const VARIANT_ASSET_DIRS_PASS = 'VARIANT ASSET DIRS';
+
+/** Pass id of the dedicated REGION PROFILES delivery pass (T-20260927-010): add-if-missing
+ *  per file for `region-profiles/**` — the ADR-0091 structured regulatory layer. Project
+ *  deltas (Tooling & Skill Mapping, maintainer fields — ADR-0091 R2) are intentional, so a
+ *  template update must never overwrite a delivered file (the procedures/** clobber class,
+ *  T-20260924-011). Without the claim the resolveClaim fallthrough assigned these paths
+ *  plain SYNC on the VARIANT ASSET DIRS pass. */
+export const REGION_PROFILES_PASS = 'REGION PROFILES';
 
 // ── Legacy pass inventories (mirrored from scripts/upgrade-project.ts; drift-guarded by tests) ──
 
@@ -335,6 +347,11 @@ export function resolveClaim(relPath: string, variant = ''): UpgradeClaim {
   }
 
   if (underDir(rel, 'procedures')) return { policy: 'ADD_IF_MISSING', pass: 'PROCEDURES' };
+
+  // region-profiles/** (T-20260927-010): the ADR-0091 structured regulatory layer is
+  // delivered once (scaffold or first upgrade carrying it) and is never overwritten —
+  // project deltas are intentional (ADR-0091 R2). Dedicated REGION PROFILES pass.
+  if (underDir(rel, 'region-profiles')) return { policy: 'ADD_IF_MISSING', pass: REGION_PROFILES_PASS };
 
   // graft repo-index skill (ADR-0076): hand-maintained OUTSIDE the SSOT skills/ (claude-only
   // by design, C-CM-05 exception), so the post-upgrade sync-skills.ts run can never deliver

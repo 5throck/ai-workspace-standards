@@ -6,12 +6,42 @@ title: >-
   create-body-validating broker (proxy cannot inspect the container-create body;
   CONTAINERS=1 lets the gateway list and inspect every container on the daemon)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-29T22:51:32.376Z'
 history:
   - at: '2026-09-29T22:51:32.376Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-30T01:33:37.533Z'
+    from: backlog
+    to: running
+  - at: '2026-09-30T01:33:37.546Z'
+    from: running
+    to: done
+result: >-
+  Built the create-body-validating broker (spec
+  2026-09-30-coworkspace-docker-broker-design, registered):
+  services/co-workspace/src/docker-broker.ts runs in the existing gateway image
+  via a compose command override — no new image. Three controls the
+  endpoint-only tecnativa proxy could not express: (1) create-body validation
+  fail-closed (image allowlist = CO_WORKSPACE_RUNTIME_IMAGE, no Privileged,
+  CapDrop ALL, no-new-privileges, User 10000:10000, bind/mount sources only
+  under CO_WORKSPACE_DATA_DIR_HOST — unset rejects ALL binds, no host
+  Pid/Network mode, no devices, Memory/PidsLimit caps required); (2) name
+  scoping — container ops resolve only co-workspace-turn-* refs and GET
+  /containers/json is fleet-filtered upstream of the gateway (other daemons'
+  containers and their env are now invisible); (3) endpoint allowlist limited to
+  the live-verified set (version probe, create/start/wait/attach/kill, list,
+  inspect, delete — exec/images/volumes/networks/info/build/swarm are 403).
+  Broker runs root (socket 660 DAC) with cap_drop ALL + read_only +
+  no-new-privileges. docker-compose.isolation.yml rewired to the docker-broker
+  service; docker-hardening tests rewritten for the new architecture; four
+  CO_WORKSPACE_BROKER_* envs documented in .env.sample + compose-exempt with
+  reasons; README isolation section rewritten. Tests: new broker suite 10/10
+  (unit matrix + e2e through the real createBrokerHandler vs a fake upstream),
+  full co-workspace 252/252. Rootless Docker stays the recorded long-term
+  direction (operator host migration); residual accepted risk: a compromised
+  gateway still manages its own turn containers. Live end-to-end with the broker
+  in the path folds into T-20260930-009 operator verification.
 error: null

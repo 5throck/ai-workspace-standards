@@ -55,9 +55,10 @@ describe('variant asset-dir claim collision guard (T-20260924-011 fleet static g
     expect(variants).toHaveLength(13);
   });
 
-  test('every walked asset file resolves to VARIANT ASSET DIRS, except procedures/** → PROCEDURES', () => {
+  test('every walked asset file resolves to VARIANT ASSET DIRS, except procedures/** → PROCEDURES and region-profiles/** → REGION PROFILES', () => {
     const foreign: string[] = [];
     const proceduresPassRels: string[] = [];
+    const regionProfilesPassRels: string[] = [];
     for (const variant of variants) {
       const variantDir = join(templatesDir, variant);
       const topDirs = readdirSync(variantDir, { withFileTypes: true })
@@ -69,6 +70,10 @@ describe('variant asset-dir claim collision guard (T-20260924-011 fleet static g
           if (claim.pass === VARIANT_ASSET_DIRS_PASS) continue;
           if (claim.pass === 'PROCEDURES') {
             proceduresPassRels.push(`${variant}/${rel}`);
+            continue;
+          }
+          if (claim.pass === 'REGION PROFILES') {
+            regionProfilesPassRels.push(`${variant}/${rel}`);
             continue;
           }
           foreign.push(`${variant}/${rel} → pass '${claim.pass}' (policy ${claim.policy})`);
@@ -85,6 +90,31 @@ describe('variant asset-dir claim collision guard (T-20260924-011 fleet static g
     // And the set is non-empty — every variant ships procedures, so a silent
     // regression to zero coverage cannot pass unnoticed.
     expect(proceduresPassRels.length).toBeGreaterThan(0);
+    // T-20260927-010: the REGION PROFILES-pass set is exactly the region-profiles/**
+    // rels; today only co-price's template ships the corpus, so the set is asserted
+    // non-empty and correctly rooted.
+    for (const entry of regionProfilesPassRels) {
+      expect(entry.includes('/region-profiles/')).toBe(true);
+    }
+    expect(regionProfilesPassRels.slice().sort()).toEqual([
+      'co-price/region-profiles/KR.yaml',
+      'co-price/region-profiles/_schema.yaml',
+      'co-price/region-profiles/_validate.ts',
+    ]);
+  });
+
+  test('every region-profiles/** file in the walk resolves to the REGION PROFILES pass (no under-claim)', () => {
+    let checked = 0;
+    for (const variant of variants) {
+      const rpDir = join(templatesDir, variant, 'region-profiles');
+      if (statSync(rpDir, { throwIfNoEntry: false })?.isDirectory()) {
+        for (const rel of walkFiles(rpDir, 'region-profiles')) {
+          expect(resolveClaim(rel, variant)).toEqual({ policy: 'ADD_IF_MISSING', pass: 'REGION PROFILES' });
+          checked++;
+        }
+      }
+    }
+    expect(checked).toBe(3);
   });
 
   test('every procedures/** file in the walk resolves to the PROCEDURES pass (no under-claim)', () => {

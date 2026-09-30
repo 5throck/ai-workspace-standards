@@ -51,37 +51,35 @@ describe("base compose", () => {
 
 describe("isolation override", () => {
   const iso = noComments(read("docker-compose.isolation.yml"));
-  const proxy = serviceBlock(read("docker-compose.isolation.yml"), "docker-proxy");
+  const broker = serviceBlock(read("docker-compose.isolation.yml"), "docker-broker");
   const gw = serviceBlock(read("docker-compose.isolation.yml"), "co-workspace");
-  test("socket only in the proxy block, read-only", () => {
-    expect(iso.match(/docker\.sock/g)?.length).toBe(2); // host path + container path, same line
-    expect(proxy).toMatch(/\/var\/run\/docker\.sock:\/var\/run\/docker\.sock:ro/);
+  test("socket only in the broker block, read-only", () => {
+    // host path + container path on the mount line, plus the CO_WORKSPACE_BROKER_SOCKET value.
+    expect(iso.match(/docker\.sock/g)?.length).toBe(3);
+    expect(broker).toMatch(/\/var\/run\/docker\.sock:\/var\/run\/docker\.sock:ro/);
     expect(gw).not.toContain("docker.sock");
   });
-  test("gateway uses the proxy over DOCKER_HOST", () => {
-    expect(gw).toContain("DOCKER_HOST: tcp://docker-proxy:2375");
+  test("broker is the create-body-validating broker, not the endpoint-only proxy", () => {
+    // T-20260930-008: the tecnativa/docker-socket-proxy is replaced by our broker
+    // (src/docker-broker.ts) — the endpoint filter cannot see the create body.
+    expect(broker).toMatch(/command:\s*\["bun",\s*"src\/docker-broker\.ts"\]/);
+    expect(iso).not.toContain("tecnativa");
+    expect(broker).toMatch(/CO_WORKSPACE_BROKER_NAME_PREFIX/);
+    // Policy inputs mirror the gateway's own config — both sides must agree.
+    expect(broker).toMatch(/CO_WORKSPACE_RUNTIME_IMAGE/);
+    expect(broker).toMatch(/CO_WORKSPACE_DATA_DIR_HOST/);
   });
-  test("proxy endpoint flags", () => {
-    expect(proxy).toMatch(/CONTAINERS: 1/);
-    expect(proxy).toMatch(/POST: 1/);
-    for (const k of ["EXEC", "IMAGES", "VOLUMES", "BUILD", "SWARM", "SYSTEM"]) {
-      const m = proxy.match(new RegExp(`^\\s+${k}: (\\d)`, "m"));
-      if (m) expect(m[1]).toBe("0");
-    }
+  test("broker runs root (socket DAC) with every capability dropped and a read-only fs", () => {
+    expect(broker).toMatch(/user:\s*"0:0"/);
+    expect(broker).toMatch(/cap_drop:\s*\[ALL\]/);
+    expect(broker).toMatch(/no-new-privileges/);
+    expect(broker).toMatch(/read_only:\s*true/);
   });
-  test("proxy enables the verified endpoint groups the gateway needs", () => {
-    // Verified live (Docker 29.8.1): kill (cancel), rm -f (reaper), start/stop need these.
-    const p = noComments(proxy);
-    for (const k of ["CONTAINERS", "POST", "DELETE", "ALLOW_START", "ALLOW_STOP", "ALLOW_RESTARTS"]) {
-      expect(p).toMatch(new RegExp(`^\\s+${k}: 1`, "m"));
-    }
+  test("gateway reaches the broker over DOCKER_HOST", () => {
+    expect(gw).toContain("DOCKER_HOST: tcp://docker-broker:2375");
   });
-  test("proxy root filesystem stays writable (entrypoint renders haproxy.cfg at start)", () => {
-    // `read_only: true` crash-loops tecnativa/docker-socket-proxy:0.3.0 (observed live).
-    expect(noComments(proxy)).not.toMatch(/read_only:\s*true/);
-  });
-  test("proxy publishes nothing; dockerapi is internal", () => {
-    expect(proxy).not.toContain("ports:");
+  test("broker publishes nothing; dockerapi is internal", () => {
+    expect(broker).not.toContain("ports:");
     expect(iso).toMatch(/networks:\n {2}dockerapi:\n {4}internal: true/);
   });
 });

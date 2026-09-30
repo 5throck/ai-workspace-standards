@@ -6,12 +6,29 @@ title: >-
   an explicit route allowlist, scope GET /tenants metadata to owner-or-admin,
   decouple the session Secure flag from loginRequired
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-28T05:01:46.156Z'
 history:
   - at: '2026-09-28T05:01:46.156Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-30T00:47:46.039Z'
+    from: backlog
+    to: running
+  - at: '2026-09-30T00:47:46.056Z'
+    from: running
+    to: done
+result: >-
+  Verified all three bundle items landed and green; no code change needed. (1)
+  /auth/* keyless prefix replaced by an explicit allowlist in T-20260928-013 —
+  the keyless string now only survives as the SEC-09 CSRF guard config comment
+  (config.ts:84, server.ts:59). (2) GET /tenants scoped to owner-or-admin in
+  routes/tenants.ts:69-80 with the T-20260928-007 comment; non-admin callers get
+  only their own tenants, ?mine=1 accepted for back-compat. (3) session Secure
+  flag decoupled from loginRequired via tri-state cookieSecure (true/false/auto
+  with trustProxy right-most-hop logic) in http.ts:36-41 (cookieSecureFor),
+  delivered in PRs #1247-1249 with
+  tests/unit/co-workspace-cookie-secure.test.ts. Full co-workspace suite green:
+  240 pass / 0 fail across 25 files (incl. auth-hardening + cookie-secure).
 error: null

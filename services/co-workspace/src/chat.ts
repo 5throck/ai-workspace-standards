@@ -8,6 +8,7 @@ import { runClaudeTurn } from "./claude";
 import { runCodexTurn } from "./codex";
 import type { GatewayState } from "./state";
 import { hostSidePath } from "./lifecycle";
+import { TurnTiming, turnLogKey } from "./timing";
 
 /** Serialized per tenant: one Hermes session writer per HERMES_HOME (state.db is a per-home
  * SQLite WAL; concurrent writers across processes are unsafe). */
@@ -18,10 +19,15 @@ export async function runChat(
   onEvent?: (evt: HermesEvent) => void,
   onProc?: (proc: { kill: (code?: number) => void }) => void,
 ): Promise<HermesTurnResult> {
+  // T-20260930-011: per-stage timing, keyed by the turn container name so the
+  // chat.ts / hermes.ts / responses.ts lines join on one key (research §4).
+  const timing = new TurnTiming(turnLogKey(rec.tenantId));
+  timing.mark("t0", { tenant: rec.tenantId, runtime: state.cfg.runtime, isolation: state.cfg.isolation });
   const prev = state.chatLocks.get(rec.tenantId) ?? Promise.resolve();
   const task = prev
     .catch(() => undefined)
     .then(() => {
+      timing.mark("t_lock");
       // Keep the tenant home's credentials current: the containerized hermes (older release
       // lineage) resolves OAuth from its OWN home's auth.json and cannot consult the shared
       // store, so each turn re-copies the operator's CURRENT auth.json (Addendum 4 note).
@@ -57,6 +63,7 @@ export async function runChat(
             : undefined,
         ),
       );
+      timing.mark("t_stamp");
       if (state.cfg.runtime === "antigravity") {
         return runAntigravityTurn(
           {
@@ -108,6 +115,8 @@ export async function runChat(
           maxTurns: state.cfg.maxTurns,
           extraArgs: state.cfg.hermesExtraArgs,
           toolsets: state.cfg.hermesToolsets,
+          // One shared timing timeline: hermes stages join the chat.ts t0 line.
+          timing,
           // Docker isolation: the tenant home is re-seeded with the CURRENT seed auth.json
           // every turn, so the shared-store bind adds nothing — and empirically flips hermes
           // onto the shared Nous store, failing the turn (exit 111, observed 2026-09-28).
@@ -164,6 +173,19 @@ export async function runChat(
     }
     const tokens = (result.tokens ?? {}) as Record<string, unknown>;
     const n = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : 0);
+    // Surface any provider cache fields verbatim (cached / cache_read / cache_creation…)
+    // so the operator measurement can read prefix-cache hits straight from the log.
+    const cacheFields: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(tokens)) {
+      if (/cache/i.test(k) && (typeof v === "number" || typeof v === "string")) cacheFields[k] = v;
+    }
+    timing.mark("turn_done", {
+      exitCode: result.exitCode,
+      input: n(tokens.input) || undefined,
+      output: n(tokens.output) || undefined,
+      total: n(tokens.total) || undefined,
+      ...cacheFields,
+    });
     recordTurnUsage(current, new Date().toISOString().slice(0, 10), {
       input: n(tokens.input),
       output: n(tokens.output),

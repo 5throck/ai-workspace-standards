@@ -7,6 +7,20 @@ export function startHeartbeat(sink: SseSink): void {
   sink.track(setInterval(() => sink.enqueue(ping), 15_000));
 }
 
+/** T-20260930-010 (perceived-latency quick win): surface progress-worthy Hermes events as
+ * `: …` comment frames so the OpenAI/Anthropic/Gemini builders (which forward only `text`)
+ * still show tool activity during the silent thinking phase. Comments are wire-legal SSE
+ * and ignored by protocol clients. Returns null for events that should not surface. */
+export function turnProgressComment(evt: { type: string; [key: string]: unknown }): string | null {
+  if (evt.type === "tool_use" && typeof evt.name === "string") return `: tool: ${evt.name}…\n\n`;
+  if (evt.type === "tool_result" && typeof evt.name === "string") {
+    const ms = typeof evt.duration_ms === "number" ? ` (${evt.duration_ms}ms)` : "";
+    return `: tool: ${evt.name} done${ms}\n\n`;
+  }
+  if (evt.type === "system") return ": turn: runtime ready\n\n";
+  return null;
+}
+
 export interface SseSink {
   /** Never throws; a no-op once the client cancelled or the stream closed. */
   enqueue(chunk: Uint8Array): void;

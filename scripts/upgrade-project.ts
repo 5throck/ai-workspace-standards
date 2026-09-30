@@ -1,5 +1,16 @@
 #!/usr/bin/env bun
-// @version 1.58.0
+// @version 1.60.0
+// v1.60.0 (2026-09-30, T-20260930-025): docs/context.md re-delivery renders the scaffold
+//          placeholder map (applySubstitutions — [Project Name], <variant-name>) before
+//          every write (wholesale + PRESERVE splice), so version-bumped template copies
+//          stop regressing the substituted project identity that trips the audit
+//          placeholder WARN every upgrade. Decision recorded: description/type stay
+//          explicit human input (scaffold --description/--type or hand-fill) — they are
+//          not deterministically derivable, and upgrades never overwrite project.md.
+// v1.59.0 (2026-09-30, T-20260927-010): new REGION PROFILES SYNC pass — per-file
+//          add-if-missing delivery of region-profiles/** (the v1.19.0 upgrade-policy
+//          claim routes the paths here, out of the VARIANT ASSET DIRS hash-sync), so a
+//          template update never overwrites a project-customized profile (ADR-0091 R2).
 // v1.58.0 (2026-09-29): agents/ SYNC renders `[Project Name]` / `{{PROJECT_NAME}}` with the
 //          project name before the drift compare and on every write — raw template text
 //          made scaffolded names read as drift and reverted them to the placeholder
@@ -2427,6 +2438,39 @@ let proceduresCopied = 0;
 }
 console.log('');
 
+// ── REGION PROFILES SYNC: ADR-0091 structured regulatory layer (add-if-missing) ──
+// `region-profiles/**` (T-20260927-010) is delivered once and never overwritten:
+// project deltas on a delivered profile (Tooling & Skill Mapping, maintainer
+// fields — ADR-0091 R2) are intentional, and re-delivering a template update
+// would clobber them (the procedures/** clobber class, T-20260924-011). The
+// v1.19.0 upgrade-policy claim routes these paths to THIS pass (dropping them
+// out of the VARIANT ASSET DIRS hash-sync); per-file add-if-missing semantics
+// match the claim. Variant template is the only source — region profiles are
+// variant-specific (no templates/common counterpart).
+console.log('--- REGION PROFILES SYNC (add-if-missing) ---');
+let regionProfilesCopied = 0;
+{
+  // templatesDir is already the variant template dir (templates/<variant>).
+  const srcDir = join(templatesDir, 'region-profiles');
+  const dstDir = join(projectDir, 'region-profiles');
+  if (existsSync(srcDir)) {
+    for (const entry of readdirSync(srcDir, { withFileTypes: true })) {
+      if (entry.isDirectory()) continue; // the corpus is flat files (KR.yaml, _schema.yaml, _validate.ts)
+      const rel = `region-profiles/${entry.name}`;
+      if (existsSync(join(dstDir, entry.name))) {
+        console.log(`  OK     ${rel}  (project-owned — preserved)`);
+        continue;
+      }
+      console.log(`  NEW    ${rel}`);
+      if (!dryRun) { mkdirSync(dstDir, { recursive: true }); copyFileSync(join(srcDir, entry.name), join(dstDir, entry.name)); }
+      regionProfilesCopied++;
+      syncChanged++;
+    }
+  }
+  if (regionProfilesCopied === 0) console.log('  OK     region-profiles/ already in sync');
+}
+console.log('');
+
 // ── TEMPLATE TREE SYNC: template files no dedicated pass claims (default policy) ──────────────
 // 2026-09-11-upgrade-policy-coverage-design.md: upgrade coverage used to be enumeration, so
 // files with no claiming pass were silently never delivered (most of the variant docs tree,
@@ -2541,7 +2585,17 @@ console.log('--- TEMPLATE TREE SYNC: uncovered template files (default policy) -
           // sections (e.g. PM Team-Management Authority) are never starved.
           const spliced = spliceCommonContextBlock(readFileSync(dest, 'utf8'), readFileSync(abs, 'utf8'));
           if (spliced.changed) {
-            if (!dryRun) writeFileSync(dest, spliced.content);
+            if (!dryRun) {
+              // Same placeholder render as the wholesale write below — a template block
+              // carrying tokens must not regress the substituted name under PRESERVE.
+              writeFileSync(dest, applySubstitutions(spliced.content, {
+                projectName: basename(projectDir),
+                description: '',
+                characteristics: '',
+                variantName: variant,
+                countryDisplayName: '',
+              }));
+            }
             console.log(`      ${dryTag}MERGED COMMON-CONTEXT block in: ${rel} (managed-zone policy content delivers under PRESERVE)`);
             treeChanged++;
           }
@@ -2556,7 +2610,25 @@ console.log('--- TEMPLATE TREE SYNC: uncovered template files (default policy) -
       } else {
         console.log(`  UPDATE ${rel}  ${reason}`);
       }
-      if (!dryRun) copyFileSync(abs, dest);
+      if (!dryRun) {
+        if (rel === 'docs/context.md') {
+          // T-20260930-025: render the scaffold placeholder map ([Project Name],
+          // <variant-name>, …) before every write — the template bytes carry
+          // `[Project Name]` in the H1, so each version-bumped re-delivery regressed
+          // the substituted name and re-tripped the audit placeholder WARN (v1.58.0
+          // agents/ precedent; one render path with new-project §5 via the shared
+          // applySubstitutions). Pure and token-idempotent for already-rendered text.
+          writeFileSync(dest, applySubstitutions(readFileSync(abs, 'utf8'), {
+            projectName: basename(projectDir),
+            description: '',
+            characteristics: '',
+            variantName: variant,
+            countryDisplayName: '',
+          }));
+        } else {
+          copyFileSync(abs, dest);
+        }
+      }
       console.log(`  ${dryTag}COPIED: ${rel}`);
       treeChanged++;
     }

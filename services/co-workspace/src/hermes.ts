@@ -12,11 +12,12 @@
  * aborting the stream.
  */
 
+import { TurnTiming } from "./timing";
+
 export interface HermesEvent {
   type: string;
   [key: string]: unknown;
 }
-
 export function parseHermesLine(line: string): HermesEvent | null {
   const trimmed = line.trim();
   if (!trimmed) return null;
@@ -83,6 +84,9 @@ export interface HermesSpawnOptions {
   /** Shared Nous credential store (HERMES_SHARED_AUTH_DIR) — one token store across the
    * operator + all tenants, refreshed in place (ADR-0092 Addendum 4). */
   sharedAuthDir?: string;
+  /** T-20260930-011: caller-owned stage timer so hermes stages join the chat.ts t0
+   * timeline under one turn key; direct callers get a local timer instead. */
+  timing?: TurnTiming;
 }
 
 const MOUNT_PROJECT = "/work/project";
@@ -259,6 +263,10 @@ export async function runHermesTurn(
   o: HermesSpawnOptions,
   onEvent?: (evt: HermesEvent) => void,
 ): Promise<HermesTurnResult> {
+  // T-20260930-011: stage timing (research §4). With an injected timer the stages join
+  // the chat.ts timeline; direct callers time from the spawn instead.
+  const timing = o.timing ?? new TurnTiming(o.container?.name ?? o.sessionName);
+  const tSpawn0 = Date.now();
   const proc = Bun.spawn(hermesSpawnArgv(o), {
     cwd: o.container ? undefined : o.projectDir,
     stdin: "pipe",
@@ -268,6 +276,7 @@ export async function runHermesTurn(
       ? dockerCliEnv(o, o.env ?? process.env)
       : hermesEnv(o, o.env ?? process.env),
   });
+  timing.mark("t_spawn", { ms_since_t0: Date.now() - tSpawn0 });
   const c = o.container;
   // Killing the `docker run` CLI does not stop the container; kill it by name too.
   o.onSpawn?.(
@@ -287,6 +296,11 @@ export async function runHermesTurn(
   let result: HermesEvent | undefined;
   let finalText = "";
   let buffer = "";
+  let sawFirstByte = false;
+  let sawSystem = false;
+  let sawFirstTool = false;
+  let sawFirstText = false;
+  let sawResult = false;
   const decoder = new TextDecoder();
   const reader = (proc.stdout as ReadableStream<Uint8Array>).getReader();
 
@@ -295,11 +309,29 @@ export async function runHermesTurn(
     if (!evt) return;
     if (evt.type === "system" && typeof evt.session_id === "string") {
       sessionId = evt.session_id;
+      if (!sawSystem) {
+        sawSystem = true;
+        timing.mark("t_system", { model: evt.model, session_id: evt.session_id });
+      }
     } else if (evt.type === "text" && typeof evt.text === "string") {
       finalText += evt.text;
+      if (!sawFirstText) {
+        sawFirstText = true;
+        timing.mark("t_first_text");
+      }
+    } else if (evt.type === "tool_use" && !sawFirstTool) {
+      sawFirstTool = true;
+      timing.mark("t_first_tool", { name: evt.name });
     } else if (evt.type === "result") {
       result = evt;
       if (typeof evt.session_id === "string") sessionId = evt.session_id;
+      if (!sawResult) {
+        sawResult = true;
+        timing.mark("t_result", {
+          exit_code: evt.exit_code,
+          duration_ms: evt.duration_ms,
+        });
+      }
     }
     onEvent?.(evt);
   };
@@ -308,6 +340,10 @@ export async function runHermesTurn(
     for (;;) {
       const { done, value } = await reader.read();
       if (done) break;
+      if (!sawFirstByte) {
+        sawFirstByte = true;
+        timing.mark("t_first_byte");
+      }
       buffer += decoder.decode(value, { stream: true });
       let idx: number;
       while ((idx = buffer.indexOf("\n")) >= 0) {
@@ -323,12 +359,28 @@ export async function runHermesTurn(
     proc.exited,
     readLoop,
   ]);
+  timing.mark("t_exit", { exitCode });
 
   if (result && typeof result.text === "string" && result.text) finalText = result.text;
   const tokens =
     result && typeof result.tokens === "object" && result.tokens !== null
       ? (result.tokens as Record<string, unknown>)
       : undefined;
+
+  // Derived stage split (research §4): start = t_system - t_spawn; prefill + thinking =
+  // t_first_text - t_system; generation = t_result - t_first_text. Surface any provider
+  // cache fields so cached_tokens is readable straight from the log.
+  const cacheFields: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(tokens ?? {})) {
+    if (/cache/i.test(k) && (typeof v === "number" || typeof v === "string")) cacheFields[k] = v;
+  }
+  timing.mark("turn_summary", {
+    exitCode,
+    input: typeof tokens?.input === "number" ? tokens.input : undefined,
+    output: typeof tokens?.output === "number" ? tokens.output : undefined,
+    total: typeof tokens?.total === "number" ? tokens.total : undefined,
+    ...cacheFields,
+  });
 
   return {
     exitCode,
