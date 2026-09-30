@@ -40,6 +40,7 @@ import {
   type PolicyConfig,
   type RouteDecision,
 } from "./docker-broker-policy";
+import { constantTimeEquals } from "./auth";
 
 export interface BrokerConfig {
   policy: PolicyConfig;
@@ -594,7 +595,11 @@ export function startBroker(cfg: BrokerConfig): BrokerHandle {
     const s = st(c);
     if (cfg.brokerToken !== undefined) {
       const tok = s.head?.headers["x-co-workspace-token"];
-      if (tok !== cfg.brokerToken) return respond(c, 403, "volume control token mismatch");
+      // T-20261001-002: constant-time compare per the codebase standard (auth.ts) —
+      // the route is internal-network only, defense-in-depth for a leaked token map.
+      if (typeof tok !== "string" || !constantTimeEquals(tok, cfg.brokerToken)) {
+        return respond(c, 403, "volume control token mismatch");
+      }
     }
     if (cfg.policy.dataVolume === undefined) return respond(c, 403, "volume control route requires volume mode");
     let req: { op?: unknown; subpath?: unknown };

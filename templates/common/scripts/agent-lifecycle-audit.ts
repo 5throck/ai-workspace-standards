@@ -9,7 +9,11 @@
  *   bun scripts/agent-lifecycle-audit.ts
  *   bun scripts/agent-lifecycle-audit.ts --json   # JSON output
  *
- * @version 1.5.0
+ * @version 1.6.0
+ *          v1.6.0 (T-20261001-004): Check 8-10 resolve the tier through the extends
+ *          chain for extends-stub agents (delivered pm.md copies inherit tier from
+ *          their target); stubs whose template-relative extends cannot be resolved at
+ *          the audit location are exempted instead of failing with "Missing tier".
  * @l2-propagate false
  * @last_updated 2026-09-30
  * v1.5.0: Check 11 compares against the newest non-sync-only commit (DEC-20260930-01
@@ -27,7 +31,7 @@
  */
 
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
-import { join, relative, dirname, basename } from 'node:path';
+import { join, relative, dirname, basename, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { cwd } from 'node:process';
 
@@ -38,6 +42,8 @@ interface AgentFrontmatter {
   color?: string;
   description?: string;
   responsibilities?: string[];
+  /** Extends-stub pointer to the frontmatter source (delivered pm.md copies). */
+  extends?: string;
   tier?: {
     claude?: 'high' | 'medium' | 'low';
     antigravity?: 'high' | 'medium' | 'low';
@@ -170,6 +176,32 @@ function parseAgentFrontmatter(filePath: string): AgentFrontmatter | null {
   } catch {
     return null;
   }
+}
+
+/**
+ * T-20261001-004: resolve the effective tier for an agent file. Extends-stub agents
+ * (delivered pm.md copies) inherit frontmatter from their target — a stub legitimately
+ * carries no tier of its own. Follows the extends chain (bounded depth, cycle-safe via
+ * file identity); returns undefined when the chain cannot be resolved at this location
+ * (project-level stubs whose template-relative extends only resolves in the template
+ * tree) — such stubs are EXEMPT from the tier checks rather than failed on inherited
+ * metadata.
+ */
+function resolveEffectiveTier(
+  agentFile: string,
+  frontmatter: Record<string, unknown>,
+  visited: Set<string> = new Set(),
+): AgentFrontmatter['tier'] | undefined {
+  const tier = frontmatter.tier as AgentFrontmatter['tier'] | undefined;
+  if (tier) return tier;
+  const extendsPath = typeof frontmatter.extends === 'string' ? frontmatter.extends.trim() : '';
+  if (!extendsPath) return undefined;
+  const target = resolve(dirname(agentFile), extendsPath);
+  if (visited.has(target) || !existsSync(target)) return undefined;
+  visited.add(target);
+  const parent = parseAgentFrontmatter(target);
+  if (!parent) return undefined;
+  return resolveEffectiveTier(target, parent as unknown as Record<string, unknown>, visited);
 }
 
 // Recursively find all agent files
@@ -616,19 +648,24 @@ function auditAgents(jsonMode = false): AuditResult {
       }
     }
 
-    // Check 8: Tier validation - missing tier field
-    if (!frontmatter.tier) {
-      errors.push({
-        level: 'error',
-        file: relPath,
-        message: 'Missing tier field in frontmatter',
-        fix: "Add tier field with claude, antigravity, and gemini-cli specifications",
-      });
+    // Check 8: Tier validation — extends-stubs inherit tier from their target
+    // (T-20261001-004): a stub without its own tier is legitimate; follow the chain
+    // and exempt the stub when the chain cannot be resolved at this location.
+    const effectiveTier = resolveEffectiveTier(agentFile, frontmatter as unknown as Record<string, unknown>);
+    if (!effectiveTier) {
+      if (!frontmatter.extends) {
+        errors.push({
+          level: 'error',
+          file: relPath,
+          message: 'Missing tier field in frontmatter',
+          fix: "Add tier field with claude, antigravity, and gemini-cli specifications",
+        });
+      }
     } else {
       // Check 9: Tier validation - missing platforms
       const requiredPlatforms = ['claude', 'antigravity', 'gemini-cli'] as const;
       for (const platform of requiredPlatforms) {
-        if (!frontmatter.tier[platform]) {
+        if (!effectiveTier[platform]) {
           errors.push({
             level: 'error',
             file: relPath,
@@ -638,11 +675,11 @@ function auditAgents(jsonMode = false): AuditResult {
         } else {
           // Check 10: Tier validation - invalid tier values
           const validTiers = ['high', 'medium', 'low'];
-          if (!validTiers.includes(frontmatter.tier[platform])) {
+          if (!validTiers.includes(effectiveTier[platform])) {
             errors.push({
               level: 'error',
               file: relPath,
-              message: `Invalid tier.${platform} value: "${frontmatter.tier[platform]}"`,
+              message: `Invalid tier.${platform} value: "${effectiveTier[platform]}"`,
               fix: `Use one of: ${validTiers.join(', ')}`,
             });
           }

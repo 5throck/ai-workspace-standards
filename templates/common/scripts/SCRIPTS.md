@@ -58,7 +58,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 |--------|--------|---------|--------|--------------|-------------------|-------|------|
 | `agent-create.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `agent-delete.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
-| `agent-lifecycle-audit.ts` | L0 | 1.5.0 | active | v1.5.0: Check 11 ignores sync-only pipeline commits (DEC-20260930-01) | —| L0+L1 | —|
+| `agent-lifecycle-audit.ts` | L0 | 1.6.0 | active | v1.5.0: Check 11 ignores sync-only pipeline commits (DEC-20260930-01) | —| L0+L1 | —|
 | `agent-list.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `agent-verify.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
 | `analyze-git-history.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|

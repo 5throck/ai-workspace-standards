@@ -9629,12 +9629,6 @@
     {
       "type": "cites_skill",
       "from": "doc:co-export/AGENTS.md",
-      "to": "create-variant",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-export/AGENTS.md",
       "to": "meeting-facilitation",
       "source": "workflow-doc"
     },
@@ -9642,12 +9636,6 @@
       "type": "cites_skill",
       "from": "doc:co-export/AGENTS.md",
       "to": "project-review",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-export/AGENTS.md",
-      "to": "promote-variant",
       "source": "workflow-doc"
     },
     {
@@ -10079,12 +10067,6 @@
     {
       "type": "cites_skill",
       "from": "doc:co-hr/AGENTS.md",
-      "to": "create-variant",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-hr/AGENTS.md",
       "to": "meeting-facilitation",
       "source": "workflow-doc"
     },
@@ -10092,12 +10074,6 @@
       "type": "cites_skill",
       "from": "doc:co-hr/AGENTS.md",
       "to": "project-review",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-hr/AGENTS.md",
-      "to": "promote-variant",
       "source": "workflow-doc"
     },
     {
@@ -10445,12 +10421,6 @@
     {
       "type": "cites_skill",
       "from": "doc:co-news/AGENTS.md",
-      "to": "create-variant",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-news/AGENTS.md",
       "to": "meeting-facilitation",
       "source": "workflow-doc"
     },
@@ -10458,12 +10428,6 @@
       "type": "cites_skill",
       "from": "doc:co-news/AGENTS.md",
       "to": "project-review",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-news/AGENTS.md",
-      "to": "promote-variant",
       "source": "workflow-doc"
     },
     {
@@ -11003,12 +10967,6 @@
     {
       "type": "cites_skill",
       "from": "doc:co-safety/AGENTS.md",
-      "to": "create-variant",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-safety/AGENTS.md",
       "to": "k-law",
       "source": "workflow-doc"
     },
@@ -11022,12 +10980,6 @@
       "type": "cites_skill",
       "from": "doc:co-safety/AGENTS.md",
       "to": "project-review",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-safety/AGENTS.md",
-      "to": "promote-variant",
       "source": "workflow-doc"
     },
     {

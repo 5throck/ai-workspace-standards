@@ -612,8 +612,6 @@ Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 | `project-review` | `skills/project-review/` | Multi-agent parallel project review |
 | `meeting-facilitation` | `skills/meeting-facilitation/` | Multi-agent meeting orchestration |
 | `security-scan` | `skills/security-scan/` | Security and secret detection |
-| `create-variant` | `skills/create-variant/` | New variant scaffolding |
-| `promote-variant` | `skills/promote-variant/` | Variant promotion to official |
 
 ### Platform Skills Distribution
 

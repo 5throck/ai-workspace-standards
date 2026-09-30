@@ -9,12 +9,31 @@ title: >-
   templates/common L1 copy + re-deliver via upgrade; blocks fleet upgrade PR
   merges alongside T-20261001-003-class issues
 priority: urgent
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-30T16:55:33.410Z'
 history:
   - at: '2026-09-30T16:55:33.410Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-30T18:03:01.246Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-30T18:03:01.259Z'
+    from: waiting
+    to: running
+  - at: '2026-09-30T18:03:01.272Z'
+    from: running
+    to: review
+  - at: '2026-09-30T18:03:01.284Z'
+    from: review
+    to: done
+result: >-
+  Verified on main (2026-10-01): root scripts/SCRIPTS.md:182 and the L1 mirror
+  templates/common/scripts/SCRIPTS.md:108 both carry the repaired 8-column row
+  (layer L0+L1, pair —) from T-20260930-002 / PR #1243 — the repair is complete
+  on both copies. Remaining scope (re-delivery to v0.8.x projects via upgrade)
+  is gated by T-20261001-004 (agent-lifecycle-audit false-positive fails project
+  audits) and T-20260927-016 (Actions billing blocks the 12 fleet PR merges);
+  the delivered projects' stale copies clear on their next upgrade.
 error: null
