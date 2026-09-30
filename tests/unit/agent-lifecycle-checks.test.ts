@@ -68,7 +68,57 @@ describe('agent-lifecycle-audit v1.3.0 lifecycle checks', () => {
     }
   }, 120000);
 
-  test('Check 14 FAILs when a deprecated agent lacks a removal_review date', () => {
+describe('agent-lifecycle-audit v1.6.0 extends-stub tier resolution (T-20261001-004)', () => {
+  test('an extends-stub pm.md with a resolvable chain inherits the tier and passes', () => {
+    const tmp = makeTempWorkspace();
+    try {
+      writeAgent(tmp, 'pm', 'name: pm\nrole: orchestrator\nstatus: active\nextends: ./pm-base.md\n');
+      // The chain target carries the tier (the L1 body source).
+      mkdirSync(join(tmp, 'agents'), { recursive: true });
+      writeFileSync(
+        join(tmp, 'agents', 'pm-base.md'),
+        '---\nname: pm-base\ntier:\n  claude: high\n  antigravity: medium\n  gemini-cli: low\n---\n\n# pm-base\n'
+      );
+      const { status, out } = runAudit(tmp);
+      expect(out).not.toContain('Missing tier field in frontmatter');
+      expect(out).not.toContain('Missing tier.');
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  }, 120000);
+
+  test('an extends-stub with an unresolvable chain is exempt from the tier checks', () => {
+    const tmp = makeTempWorkspace();
+    try {
+      // The delivered-project shape: the template-relative extends does not resolve
+      // at the audit location (the tier is inherited at the template level).
+      writeAgent(tmp, 'pm', 'name: pm\nrole: orchestrator\nstatus: active\nextends: ../../common/agents/pm.md\n');
+      const { status, out } = runAudit(tmp);
+      expect(out).not.toContain('Missing tier field in frontmatter');
+      expect(out).not.toContain('Missing tier.');
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  }, 120000);
+
+  test('a resolved tier with an invalid value still FAILs (validation follows the chain)', () => {
+    const tmp = makeTempWorkspace();
+    try {
+      writeAgent(tmp, 'pm', 'name: pm\nrole: orchestrator\nstatus: active\nextends: ./pm-base.md\n');
+      writeFileSync(
+        join(tmp, 'agents', 'pm-base.md'),
+        '---\nname: pm-base\ntier:\n  claude: maximum\n  antigravity: medium\n  gemini-cli: low\n---\n\n# pm-base\n'
+      );
+      const { status, out } = runAudit(tmp);
+      expect(status).toBe(1);
+      expect(out).toContain("Invalid tier.claude value");
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  }, 120000);
+});
+
+    test('Check 14 FAILs when a deprecated agent lacks a removal_review date', () => {
     const tmp = makeTempWorkspace();
     try {
       writeAgent(tmp, 'pm', 'name: pm\nrole: orchestrator\nstatus: active\n');

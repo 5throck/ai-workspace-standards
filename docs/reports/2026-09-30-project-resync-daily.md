@@ -1,45 +1,43 @@
-# Project Resync Cycle — Projects/co-* — 2026-09-30
+# Project Resync Cycle — Projects/co-* — 2026-10-01 (upgrade wave HELD on 2 upstream defects)
 
 **Cycle**: daily fleet-review runner, Phase II (full resync) — main CI green, no degraded mode
-**Fleet**: 13 projects (glob-derived; +co-work new instance created 09-28)
-**Phase I context**: review run 5 report docs/reports/2026-09-30-project-review-daily.md; PRs #1206/#1207 (review), #1208 (v0.8.1→ template-v0.8.1 release chain was 09-29; this cycle: v0.8.2 bump prepared → deferred, see 6b)
+**Fleet**: 13 projects (12 committed + co-work new instance)
+**Phase I context**: review run 5 report docs/reports/2026-09-30-project-review-daily.md
 
 ## Steps 0–1 — Provenance + sync
 
-12 committed projects: dirty 0, empty verdicts. **Projects/co-work (new instance, zero commits)**: 758-file scaffold audit — 92 LOCAL-WORK (scaffold infra) / 117 STALE-RESIDUE (pre-0.8.1 template copies) / 362 untracked-matching / 1 PRESUME-STALE. Disposition: destructive discard deferred (instance adjudication probe-vs-tenant is an owner call); initial scaffold commit made via the project's own dev-sync (a393d80) + private remote bootstrapped (5throck/co-work, default branch carries the scaffold; direct-main push blocked by the delivered pre-push hook — branch hygiene owner follow-up with T-20260929-002).
+12 committed projects clean. co-work: initial scaffold committed (a393d80) + private remote bootstrapped (5throck/co-work, default branch); adjudication pending (owner).
 
 ## Steps 2–2d — Backport/DOM
 
-No template-promotion candidates (instance divergence = scaffold-version skew, self-healing via upgrade). DOM/echo clean.
+No template-promotion candidates. DOM/echo clean. new-project skill L0-only confirmed (no ticket).
 
-## Step 2b — Evidence scan
+## Steps 4–5 — Upgrade wave (HELD on 2 upstream defects)
 
-Deferred to the next full cycle (no new local work to scan; prior cycles: 0 PROMOTABLE).
+All 13 dry-runs: uniform ~4 locked + HERMES delivery plans. Real upgrades executed and locally verified on 12 projects (audit/verify-scripts ran; HERMES.md delivered). **Pushes/merges HALTED by 2 upstream defects in the delivered 0.8.x validators:**
 
-## Steps 4–5 — Upgrade wave (v0.8.x delivery: fleet HERMES.md upkeep + contract/schema updates)
+1. **agent-lifecycle-audit false-positive on extends-stub pm.md** — "Missing tier field in frontmatter" fires on agents/pm.md files that are extends-stubs legitimately inheriting tier from templates/common/agents/pm.md 1.2.1. Affects ~10 fleet projects. → **T-20261001-003 (URGENT)**.
+2. **Malformed SCRIPTS.md row (9 columns)** — root scripts/SCRIPTS.md:201 regenerate-agents-md row still carries duplicated tail cells (T-20260930-002's fix was partial; root tolerates as warning, the v0.8.x-delivered project validators ERROR). → **T-20261001-006 (URGENT)**.
 
-All 12 committed projects upgraded (locked ~4-5 + managed merges each), local verify green, template-version stamped. Delivery/merge results:
+Additionally: **GH007 email-privacy push rejections** — 5 upgrade pushes rejected (commits carried the global techcross@gmail.com identity; the GitHub account now blocks private-email pushes). Fixed per-repo: user.email = 10958964+5throck@users.noreply.github.com + soft-reset + dev-sync re-land (PRs #184/#170 created; co-consult/deck/design re-landed on their PR branches).
 
-- **Merged**: co-safety #184 (public, CLEAN 7/7-era), co-abap #170 (public, CLEAN), **+ 6 instant auto-merges on PR creation** (co-architect, co-export, co-game, co-newbiz, co-price, co-security — no required checks on those private repos; merges happened on delivery, noted for the record).
-- **OPEN (3)**: co-consult #73, co-deck #115, co-design #15 — private repos where the quota-failed checks surface as the PR's own failing checks (UNSTABLE not BLOCKED, but left per the never-merge-red rule absent wave-specific authorization).
-- **GH007 incident (new)**: 5 pushes rejected by GitHub email-privacy protection (GH007) — the upgrade commits carried the global `techcross@gmail.com` identity while the account now blocks private-email pushes. Fixed per-repo: `user.email = 10958964+5throck@users.noreply.github.com` + soft-reset + dev-sync re-land (PRs re-created). Root repo identity unchanged (its pushes passed — timing-dependent enforcement observed).
+## Step 6 — Final state (upgrade commits local; PRs where pushable)
 
-## Step 6 — Final state
+| Project | state | upgrade delivery |
+|---|---|---|
+| co-abap | PR #170 open (re-landed post-GH007) | v0.8.x on PR |
+| co-consult | PR #73 carries delivery + main @ 0.8.1 | v0.8.x on PR branch |
+| co-deck | PR #115 carries delivery | v0.8.x on PR branch |
+| co-design | PR #15 carries delivery | v0.8.x on PR branch |
+| co-develop | PR #159 open | v0.8.x on PR |
+| co-export/game/newbiz/price/security | auto-merged (0.8.1 delivery, pre-defect discovery) | delivered |
+| co-safety | PR #184 open (re-landed post-GH007) | v0.8.x on PR |
+| co-work | initial scaffold on private remote default branch | adjudication pending |
 
-| Project | dirty | unpushed | open PRs | template-version |
-|---|---|---|---|---|
-| co-abap | 0 | 0 | 0 (merged #170) | 0.8.1 |
-| co-architect | 0 | 0 | 0 (auto-merged) | 0.8.1 |
-| co-consult | 0 | 0 | 1 (#73, quota) | 0.8.1 on PR |
-| co-deck | 0 | 0 | 1 (#115, quota) | 0.8.1 on PR |
-| co-design | 0 | 0 | 1 (#15, quota) | 0.8.1 on PR |
-| co-develop | 0 | 0 | 1 (#159, quota) | 0.8.1 on PR |
-| co-export | 0 | 0 | 0 (auto-merged) | 0.8.1 |
-| co-game | 0 | 0 | 0 (auto-merged) | 0.8.1 |
-| co-newbiz | 0 | 0 | 0 (auto-merged) | 0.8.1 |
-| co-price | 0 | 0 | 0 (auto-merged) | 0.8.1 |
-| co-safety | 0 | 0 | 0 (merged #184 canary) | 0.8.1 |
-| co-security | 0 | 0 | 0 (auto-merged) | 0.8.1 |
-| co-work | preserved on private remote default branch | — | adjudication pending (owner) | 0.8.1 |
+Local trees: upgrade commits committed on PR/local branches; repos returned toward their default branches where clean.
 
-**6b note**: the v0.8.2 bump was prepared but refused by the clean-tree guard (concurrent branch race) — T-20260930-007 filed; the 19-path delta was delivered file-level by this wave regardless; the release stamp lands on the first clean-main retry.
+## Blockers (owner/next-cycle)
+
+- **T-20261001-003/-006 (URGENT)**: fix the 2 delivered-validator defects at root (scripts/agent-lifecycle-audit.ts extends-stub handling; SCRIPTS.md 8-column row) + re-release → then the 12 upgrade PRs merge / re-deliver.
+- **T-20260927-016 (URGENT, human)**: Actions quota — still active; the 3+10 private merges/PRs ride over it.
+- **co-work adjudication** (owner): keep-vs-delete.
