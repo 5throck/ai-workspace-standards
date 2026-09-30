@@ -387,7 +387,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-develop/docs/user-guide_ko.md` | doc | `code-review`, `project-review`, `refactoring`, `sync`, `test-driven-development` | — | — |
 | `doc:co-develop/docs/user-guide.md` | doc | `code-review`, `project-review`, `refactoring`, `sync`, `test-driven-development` | — | — |
 | `doc:co-develop/README.md` | doc | `code-review`, `swe-solve`, `test-driven-development` | — | — |
-| `doc:co-export/AGENTS.md` | doc | `agent-lifecycle-manager`, `create-variant`, `meeting-facilitation`, `project-review`, `promote-variant`, `security-scan`, `skill-lifecycle-manager`, `source-command-commit-push-pr`, `sync` | — | — |
+| `doc:co-export/AGENTS.md` | doc | `agent-lifecycle-manager`, `meeting-facilitation`, `project-review`, `security-scan`, `skill-lifecycle-manager`, `source-command-commit-push-pr`, `sync` | — | — |
 | `doc:co-export/docs/co-export.context.md` | doc | `agent-lifecycle-manager`, `customs-duty-drawback-workflow`, `export-control-screening`, `foreign-regulation-monitoring`, `fta-origin-determination`, `halal-certification-workflow`, `hs-classification-workflow`, `logistics-coordination`, `market-entry-strategy`, `skill-lifecycle-manager`, `trade-documentation-checklist` | — | — |
 | `doc:co-export/docs/phase-definitions.md` | doc | `customs-duty-drawback-workflow`, `project-review` | — | — |
 | `doc:co-export/docs/tariff-dataset-schema.md` | doc | `fta-origin-determination`, `hs-classification-workflow` | — | — |
@@ -399,7 +399,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-game/docs/user-guide_ko.md` | doc | `agent-lifecycle-manager`, `code-review`, `meeting-facilitation`, `project-review`, `refactoring`, `security-scan`, `skill-lifecycle-manager`, `test-driven-development` | — | — |
 | `doc:co-game/docs/user-guide.md` | doc | `agent-lifecycle-manager`, `code-review`, `meeting-facilitation`, `project-review`, `refactoring`, `security-scan`, `skill-lifecycle-manager`, `test-driven-development` | — | — |
 | `doc:co-game/README.md` | doc | `code-review`, `sound-synth`, `test-driven-development` | — | — |
-| `doc:co-hr/AGENTS.md` | doc | `agent-lifecycle-manager`, `create-variant`, `meeting-facilitation`, `project-review`, `promote-variant`, `security-scan`, `skill-lifecycle-manager`, `source-command-commit-push-pr`, `sync` | — | — |
+| `doc:co-hr/AGENTS.md` | doc | `agent-lifecycle-manager`, `meeting-facilitation`, `project-review`, `security-scan`, `skill-lifecycle-manager`, `source-command-commit-push-pr`, `sync` | — | — |
 | `doc:co-hr/docs/co-hr.context.md` | doc | `agent-lifecycle-manager`, `career-path-succession-planning`, `compensation-benchmarking`, `consulting-report-writing`, `hr-metrics-analysis`, `k-kosis`, `k-law`, `learning-curriculum-design`, `org-design-framework`, `org-readiness-assessment`, `performance-system-design`, `skill-lifecycle-manager`, `stakeholder-alignment`, `talent-acquisition-strategy` | — | — |
 | `doc:co-hr/docs/engagement-orchestration.md` | doc | `compensation-benchmarking`, `org-readiness-assessment` | — | — |
 | `doc:co-hr/docs/iso-30414-metrics-mapping.md` | doc | `hr-metrics-analysis` | — | — |
@@ -407,7 +407,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-hr/docs/user-guide_ko.md` | doc | `career-path-succession-planning`, `compensation-benchmarking`, `consulting-report-writing`, `hr-metrics-analysis`, `k-kosis`, `k-law`, `learning-curriculum-design`, `org-design-framework`, `org-readiness-assessment`, `performance-system-design`, `stakeholder-alignment`, `talent-acquisition-strategy` | — | — |
 | `doc:co-hr/docs/user-guide.md` | doc | `career-path-succession-planning`, `compensation-benchmarking`, `consulting-report-writing`, `hr-metrics-analysis`, `k-kosis`, `k-law`, `learning-curriculum-design`, `org-design-framework`, `org-readiness-assessment`, `performance-system-design`, `stakeholder-alignment`, `talent-acquisition-strategy` | — | — |
 | `doc:co-hr/README.md` | doc | `career-path-succession-planning`, `compensation-benchmarking`, `consulting-report-writing`, `hr-metrics-analysis`, `learning-curriculum-design`, `org-design-framework`, `org-readiness-assessment`, `performance-system-design`, `stakeholder-alignment`, `talent-acquisition-strategy` | — | — |
-| `doc:co-news/AGENTS.md` | doc | `agent-lifecycle-manager`, `create-variant`, `meeting-facilitation`, `project-review`, `promote-variant`, `security-scan`, `skill-lifecycle-manager`, `source-command-commit-push-pr`, `sync` | — | — |
+| `doc:co-news/AGENTS.md` | doc | `agent-lifecycle-manager`, `meeting-facilitation`, `project-review`, `security-scan`, `skill-lifecycle-manager`, `source-command-commit-push-pr`, `sync` | — | — |
 | `doc:co-news/agents/financial-analyst.md` | doc | `k-dart` | — | — |
 | `doc:co-news/agents/legal-researcher.md` | doc | `k-law` | — | — |
 | `doc:co-news/agents/reporter.md` | doc | `financial-journalism-style` | — | — |
@@ -427,7 +427,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-price/agents/pricing-strategist.md` | doc | `map-channel-enforcement`, `pricing-governance` | — | — |
 | `doc:co-price/docs/co-price.context.md` | doc | `agent-lifecycle-manager`, `gabor-granger`, `harness-verification`, `i18n-audit`, `prisma-7`, `skill-lifecycle-manager`, `trade-promotion-roi`, `van-westendorp-psm` | — | — |
 | `doc:co-price/README.md` | doc | `competitive-intelligence`, `double-entry-reconciliation`, `excel-export`, `executive-presentation`, `financial-statement-prep`, `gabor-granger`, `harness-verification`, `i18n-audit`, `insight-synthesis`, `map-channel-enforcement`, `math-function-plotter`, `pdf-export`, `price-waterfall-analysis`, `pricing-governance`, `pricing-playbook`, `prisma-7`, `scenario-comparison`, `sheet-model`, `trade-promotion-roi`, `ui-component-design`, `van-westendorp-psm` | — | — |
-| `doc:co-safety/AGENTS.md` | doc | `agent-lifecycle-manager`, `create-variant`, `k-law`, `meeting-facilitation`, `project-review`, `promote-variant`, `security-scan`, `skill-lifecycle-manager`, `source-command-commit-push-pr`, `sync` | — | — |
+| `doc:co-safety/AGENTS.md` | doc | `agent-lifecycle-manager`, `k-law`, `meeting-facilitation`, `project-review`, `security-scan`, `skill-lifecycle-manager`, `source-command-commit-push-pr`, `sync` | — | — |
 | `doc:co-safety/agents/compliance-agent.md` | doc | `k-law` | — | — |
 | `doc:co-safety/agents/ehschem-agent.md` | doc | `environmental-compliance-checker`, `process-hazard-screening`, `tar-planning` | — | — |
 | `doc:co-safety/agents/ehsconst-agent.md` | doc | `fall-hazard-assessor`, `safety-inspection-validator` | — | — |

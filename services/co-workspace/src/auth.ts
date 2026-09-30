@@ -19,7 +19,7 @@ function sha256(value: string): Buffer {
   return createHash("sha256").update(value).digest();
 }
 
-function constantTimeEquals(a: string, b: string): boolean {
+export function constantTimeEquals(a: string, b: string): boolean {
   return timingSafeEqual(sha256(a), sha256(b));
 }
 
