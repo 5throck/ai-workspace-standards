@@ -1,0 +1,40 @@
+schemaVersion: 1
+id: T-20260930-032
+kind: manual
+title: >-
+  Fix dangling pm.md extends path in co-export (../../common/agents/pm.md does
+  not resolve at project level)
+priority: normal
+description: >-
+  Survey (read-only, 2026-09-30; every Projects/*/agents/pm.md extends line,
+  resolved relative to its agents/ dir; L0 scripts/validate-pm-extends.ts 0.3.1
+  run on each file): DANGLING, validator INVALID (missing) - co-abap,
+  co-consult, co-deck, co-develop, co-export, co-game, co-price, co-safety,
+  co-security, all "extends: ../../common/agents/pm.md", which resolves to
+  Projects/common/agents/pm.md (does not exist); it is the template-relative
+  path (templates/co-x/agents -> templates/common/agents) copied verbatim. VALID
+  only because of the local layout - co-architect, co-newbiz use
+  "../../../agents/pm.md", which reaches ai_workspace/agents/pm.md only under
+  ai_workspace/Projects/ (validator resolves relative to the file, then
+  workspace-root-relative; a standalone clone would dangle). No extends -
+  co-design, co-work (VALID). Verification: the validator is not wired into
+  audit.ts, dev-sync.ts, git hooks, or CI at L0 or in any project, so no gate
+  fails today (project-local copies exit 1 when run by hand); hence priority
+  normal everywhere. Context: the project pm.md bodies are already fully
+  resolved at scaffold (new-project.ts 2.3b, 340+ lines), so the extends line is
+  stale metadata, not a live inheritance. Action for co-export: remove the stale
+  extends line (the body is already resolved) or point it at a path that
+  resolves at project level, then confirm validate-pm-extends.ts exits 0. Land
+  after, or together with, the root-cause ticket T-20260930-037, otherwise the
+  next template upgrade can re-copy the template-relative path. No --not-before:
+  this does not depend on a pending template upgrade date, only on
+  T-20260930-037.
+status: backlog
+attempts: 0
+created_at: '2026-09-30T05:21:41.681Z'
+history:
+  - at: '2026-09-30T05:21:41.681Z'
+    from: null
+    to: backlog
+result: null
+error: null
