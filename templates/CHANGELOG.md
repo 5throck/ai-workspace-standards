@@ -3,7 +3,10 @@
 All notable changes to the template variants are documented here.
 
 ## [Unreleased]
+
+## [0.8.2] - 2026-09-30
 ### Changed
+- **[2026-09-30]**: auto-release 2026-09-30: 22 delivered paths (A 0 / M 22 / D 0 / R 0)
 - **[2026-09-29]**: `templates/common/agents/pm.md` — the 3-Tier Strategy pointer now links to "PM Tier Semantics" in the COMMON-AGENTS zone of `AGENTS.md`. The upgrade merge delivers that zone to existing projects. The pm.md body block also reaches existing projects, so the link now resolves there.
 - **[2026-09-29]**: `templates/common/agents/pm.md` 1.2.1 and `templates/common/AGENTS.md` §3.6 — the PM tier is now a capability floor for a session-hosted agent on every platform (`tier_semantics: floor`, `session_hosted: true`, "Tier semantics" note). New scaffolds get the change. Existing projects do not get the AGENTS.md note through upgrade, because it sits outside the managed blocks.
 
