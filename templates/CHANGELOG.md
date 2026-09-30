@@ -3,6 +3,8 @@
 All notable changes to the template variants are documented here.
 
 ## [Unreleased]
+### Added
+- **[2026-10-01]**: `templates/common/.github/workflows/ci.yml` (T-20260930-026 PR-B, ADR-0094) — the workflow now carries `# PROJECT-JOBS-BEGIN`/`# PROJECT-JOBS-END` markers; upgrade-project preserves the region between them as project-owned (validated, not trusted). A new opt-in `unit-tests` job (gated by the `CI_ENABLE_DEFAULT_UNIT_TESTS` repository variable, 15-minute timeout, `persist-credentials: false`, pinned Bun `1.3.x`) runs `test:unit` when package.json defines it; the old commented test-python/test-node stubs were removed — stack-specific jobs now belong inside the project region.
 
 ## [0.8.3] - 2026-09-30
 ### Changed

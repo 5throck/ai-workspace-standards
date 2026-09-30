@@ -224,8 +224,11 @@ describe('legacy (marker-less) migration', () => {
     expect(r.migrated).toEqual([]);
   });
 
-  test('real marker-less template (pre-PR-B): identical project is a no-op', () => {
-    const tpl = readFileSync(resolve(import.meta.dir, '..', '..', 'templates', 'common', '.github', 'workflows', 'ci.yml'), 'utf8');
+  test('real marker-less template (pre-PR-B fixture): identical project is a no-op', () => {
+    // The live template carries markers since PR-B; the legacy migration path is exercised
+    // against the saved pre-PR-B snapshot instead.
+    const tpl = readFileSync(resolve(import.meta.dir, '..', 'fixtures', 'ci-workflow', 'template-pre-pr-b.yml'), 'utf8');
+    expect(tpl.includes('PROJECT-JOBS-BEGIN')).toBe(false);
     const r = mergeCiWorkflow(tpl, tpl, { allowTriggerPermDiff: false });
     expect(r.ok).toBe(true);
     expect(r.content).toBe(tpl);
