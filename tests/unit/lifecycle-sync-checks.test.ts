@@ -15,7 +15,6 @@
  *         (AC-12: drifted fixture → error whose fix hint names the generator;
  *         identical → clean) plus a live-state run of runCheckBProjection on
  *         the post-normalization tree.
- * v1.4.4: new-project record pin 1.33.0 → 1.34.0 (T-20260930-037 pm.md extends retarget).
  * v1.4.3: new-project record pin 1.28.0 → 1.28.1 (platform-SSOT constant
  * v1.4.3: new-project record pin 1.28.0 → 1.28.1 (platform-SSOT constant
  *         adoption — behavior-neutral, spec
@@ -163,7 +162,7 @@ describe('lifecycle-sync-audit Check H (script record version gate, T-20260915-0
   test('the three known script records carry a Version field matching SCRIPTS.md', () => {
     const cases: Array<[string, string]> = [
       ['error-handling', '1.4.0'],
-      ['new-project', '1.34.0'],
+      ['new-project', '1.33.0'],
       ['validate-pm-extends', '0.3.1'],
     ];
     for (const [record, version] of cases) {

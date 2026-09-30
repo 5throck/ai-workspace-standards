@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.61.0
+// @version 1.60.0
 // v1.60.0 (2026-09-30, T-20260930-025): docs/context.md re-delivery renders the scaffold
 //          placeholder map (applySubstitutions — [Project Name], <variant-name>) before
 //          every write (wholesale + PRESERVE splice), so version-bumped template copies
@@ -538,7 +538,6 @@ import {
   buildMergedTemplateBlocks,
   mergeManagedBlocks,
 } from './lib/managed-block-merge.ts';
-import { fixPmExtendsPointer } from './helpers/resolve-pm-stub.ts';
 
 // ── Argument parsing ───────────────────────────────────────────────────────────
 let projectPath = '';
@@ -1376,14 +1375,6 @@ for (const rel of MERGE_FILES) {
   if (!src) { console.log(`  SKIP (no template): ${rel}`); continue; }
   console.log(`  MERGE: ${rel}`);
   mergeWorkspaceManaged(dest, src, rel);
-  // T-20260930-037: when mergeWorkspaceManaged CREATES agents/pm.md it copies the
-  // variant template stub verbatim — `extends: ../../common/agents/pm.md` dangles
-  // in the delivered project (`Projects/<variant>/common/` does not exist).
-  // Retarget it so the upgrade pass also fixes an existing project's pm.md.
-  // Dry-run never writes; the fix is idempotent (no-op on the correct form).
-  if (rel === 'agents/pm.md' && !dryRun && existsSync(dest) && fixPmExtendsPointer(dest)) {
-    console.log(`    ✅ ${rel}: retargeted dangling template-form extends pointer to ../../../agents/pm.md (T-20260930-037)`);
-  }
   mergeChanged++;
 }
 console.log('');

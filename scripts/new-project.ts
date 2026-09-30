@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.34.0
+// @version 1.33.0
 // v1.33.0 (2026-09-29, T-20260929-002): initial scaffold commit — after setup,
 // a fresh scaffold with zero commits is seeded with `chore: initial scaffold
 // (new-project)` (upgrade-project aborts on zero-commit targets, T-20260921-001
@@ -194,7 +194,7 @@ import {
   decideManifestGeneration,
   isCanonicalPmStubBody,
 } from './helpers/scaffold-markers.ts';
-import { fixPmExtendsPointer, resolveAgentExtendsStub, stripL1BMetadata } from './helpers/resolve-pm-stub.ts';
+import { resolveAgentExtendsStub, stripL1BMetadata } from './helpers/resolve-pm-stub.ts';
 import { applySubstitutions } from './helpers/substitute-placeholders.ts';
 import {
   alignSkillRegistryRowsWithFrontmatter,
@@ -897,15 +897,6 @@ makeWritable(projectDir);
         console.log(`  ✅ ${rel}: resolved empty extends-stub against templates/common body`);
       } else if (stubResult.missingL1) {
         console.log(`  ⚠️  ${rel}: extends-stub but templates/common/agents/${fname} is missing — project ships a stub agent`);
-      }
-      // T-20260930-037: when the stub survives (resolution skipped or missingL1),
-      // its `extends:` pointer is still the template-relative
-      // `../../common/agents/pm.md`, which dangles in the delivered project —
-      // `Projects/<variant>/common/` does not exist. Retarget it to the
-      // project-relative workspace-root form. pm.md ONLY (i18n-specialist stubs
-      // are validated in-tree and must keep their template form).
-      if (fname === 'pm.md' && !stubResult.resolved && fixPmExtendsPointer(agentPath)) {
-        console.log(`  ✅ ${rel}: retargeted dangling template-form extends pointer to ../../../agents/pm.md (T-20260930-037)`);
       }
     }
   }
