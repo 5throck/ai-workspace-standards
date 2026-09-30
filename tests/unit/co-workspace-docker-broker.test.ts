@@ -218,6 +218,41 @@ describe("docker CLI sequence (A1) through the raw broker", () => {
   );
 
   test.skipIf(posixOnly)(
+    "large attach output (2 MiB) is forwarded whole — backpressure probe (T-009)",
+    async () => {
+      const e = setup({ fake: { attachOutputBytes: 2 * 1024 * 1024 } });
+      expect(statusOf(await doCreate(e))).toBe(201);
+      const a = await connect(e.broker.port);
+      a.write(req("POST", `/v1.56/containers/${ID}/attach?stderr=1&stdin=1&stdout=1&stream=1`, {
+        "Content-Type": "text/plain",
+        "Content-Length": "0",
+        Connection: "Upgrade",
+        Upgrade: "tcp",
+      }));
+      await a.waitFor((b) => b.includes("\r\n\r\n"));
+      a.write("go");
+      a.shutdown();
+      await a.closed;
+      const out = a.received();
+      // Locate the stdout frame by its header (stream 1, declared length = the full 2 MiB):
+      // the frame is intact only if the broker forwarded the pump's partial writes verbatim.
+      const hdr = Buffer.alloc(8);
+      hdr[0] = 1;
+      hdr.writeUInt32BE(2 * 1024 * 1024, 4);
+      const at = out.indexOf(hdr);
+      expect(at).toBeGreaterThan(0);
+      // The full 2 MiB payload arrives after the header...
+      expect(out.subarray(at + 8, at + 12).toString()).toBe("xxxx");
+      expect(out.length).toBe(at + 8 + 2 * 1024 * 1024 + 8 + Buffer.byteLength("err-line\n"));
+      // ...followed by the stderr frame...
+      expect(out.indexOf(dockerFrame(2, "err-line\n"))).toBe(at + 8 + 2 * 1024 * 1024);
+      // ...and the connection closes cleanly after the payload (no truncation, no hang).
+      expect(a.isClosed()).toBe(true);
+    },
+    T,
+  );
+
+  test.skipIf(posixOnly)(
     "kill by name and DELETE by short id resolve to the full id; version passes",
     async () => {
       const e = setup();
