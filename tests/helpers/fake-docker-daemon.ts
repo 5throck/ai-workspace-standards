@@ -72,6 +72,10 @@ interface ConnState {
   buf: Buffer;
   mode: "http" | "raw";
   attachIdx: number;
+  /** Output bytes queued but not yet fully accepted by the socket (partial-write pump). */
+  out: Buffer[];
+  /** True while pump() is looping for this connection (drain re-entry guard). */
+  pumping: boolean;
 }
 
 export function startFakeDockerDaemon(options: FakeDaemonOptions = {}): FakeDaemon {
@@ -81,6 +85,31 @@ export function startFakeDockerDaemon(options: FakeDaemonOptions = {}): FakeDaem
   const attachStdin: string[] = [];
   const containers = new Map<string, FakeContainer>();
   const sockets = new Set<Socket<ConnState>>();
+
+  // Bun unix-socket write() is PARTIAL: it accepts ~8 KiB per call and returns the accepted
+  // byte count; the tail of a larger buffer is silently dropped unless re-queued and pumped
+  // on the drain event (measured on macOS, 256 KiB write -> 8192 accepted).
+  function queueOutput(s: Socket<ConnState>, chunks: Buffer[]): void {
+    s.data.out.push(...chunks);
+    pump(s);
+  }
+  function pump(s: Socket<ConnState>): void {
+    if (s.data.pumping) return;
+    s.data.pumping = true;
+    try {
+      while (s.data.out.length > 0) {
+        const b = s.data.out[0];
+        const n = s.write(b);
+        if (n < b.length) {
+          s.data.out[0] = b.subarray(n);
+          return;
+        }
+        s.data.out.shift();
+      }
+    } finally {
+      s.data.pumping = false;
+    }
+  }
 
   function lookup(ref: string): FakeContainer | undefined {
     for (const c of containers.values()) {
@@ -94,8 +123,11 @@ export function startFakeDockerDaemon(options: FakeDaemonOptions = {}): FakeDaem
     allowHalfOpen: true,
     socket: {
       open(s) {
-        s.data = { buf: Buffer.alloc(0), mode: "http", attachIdx: -1 };
+        s.data = { buf: Buffer.alloc(0), mode: "http", attachIdx: -1, out: [], pumping: false };
         sockets.add(s);
+      },
+      drain(s) {
+        pump(s);
       },
       data(s, chunk) {
         const d = s.data;
@@ -191,9 +223,22 @@ export function startFakeDockerDaemon(options: FakeDaemonOptions = {}): FakeDaem
         const d = s.data;
         if (d.mode === "raw") {
           // Client half-closed stdin: reply with output frames AFTER the FIN, then close.
-          s.write(dockerFrame(1, `echo:${attachStdin[d.attachIdx]}`));
-          s.write(dockerFrame(2, "err-line\n"));
-          s.end();
+          if ((options.attachOutputBytes ?? 0) > 0) {
+            const big = options.attachOutputBytes!;
+            queueOutput(s, [dockerFrame(1, "x".repeat(big)), dockerFrame(2, "err-line\n")]);
+            // Only end() once the queue drains: polled (5 ms) because Bun exposes no
+            // drain-complete callback on Socket.
+            const t = setInterval(() => {
+              if (s.data.out.length === 0) {
+                clearInterval(t);
+                s.end();
+              }
+            }, 5);
+          } else {
+            s.write(dockerFrame(1, `echo:${attachStdin[d.attachIdx]}`));
+            s.write(dockerFrame(2, "err-line\n"));
+            s.end();
+          }
         } else {
           s.end();
         }
