@@ -268,24 +268,39 @@ docker compose build && docker compose up -d
   runs bun, git and the docker CLI with a writable `HOME`; provisioning, turns and delete work
   with no permission errors. Linux host bind-mount ownership is not yet verified.
 - **Docker socket** — the gateway does not mount the raw socket. `docker-compose.isolation.yml`
-  adds a `docker-broker` service (our create-body-validating broker, `src/docker-broker.ts`,
-  in the same gateway image via a command override; read-only socket mount, no published ports)
-  on an internal-only `dockerapi` network; the gateway uses `DOCKER_HOST=tcp://docker-broker:2375`.
-  Three controls (T-20260930-008, replacing the endpoint-only tecnativa/docker-socket-proxy):
-  (1) create-body validation — image allowlist (`CO_WORKSPACE_RUNTIME_IMAGE`), no Privileged,
-  CapDrop ALL, no-new-privileges, user 10000:10000, bind sources restricted under
-  `CO_WORKSPACE_DATA_DIR_HOST`, no host Pid/Network mode, no devices, Memory/PidsLimit caps
-  required; (2) name scoping — create/start/wait/kill/attach/inspect/remove resolve only
-  `co-workspace-turn-*` containers, and the container list is filtered to that fleet, so other
-  daemons' containers and their environments are invisible; (3) endpoint allowlist — version
-  probe, container create/start/wait/attach/kill, list, inspect, delete; exec, images, volumes,
-  networks, build, swarm, info and more are 403. **Residual risk (accepted)**: a compromised
-  gateway can still manage the turn containers it legitimately owns; rootless Docker removes
-  the remaining host-root equivalence and stays the long-term direction. Do not run other
-  sensitive workloads on the same Docker daemon as the gateway. The broker runs as root with
-  all capabilities dropped and a read-only filesystem (root is required for the socket's
-  root:root 660 DAC check). `IMAGES=0` semantics carry over: the broker's image allowlist
-  makes a missing runtime image fail at create time instead of pulling.
+  adds a `docker-broker` service (`src/docker-broker.ts` plus the pure policy module
+  `src/docker-broker-policy.ts`, in the same gateway image via a command override; read-only
+  socket mount, no published ports) on an internal-only `dockerapi` network; the gateway uses
+  `DOCKER_HOST=tcp://docker-broker:2375`. The broker is a raw socket proxy (T-20260930-027,
+  replacing the endpoint-only tecnativa proxy and the first fetch-based broker, which was
+  bypassable and could not carry `docker run -i`). Real controls: (1) one request per
+  connection, strictly parsed (16 KiB head, 64 KiB body, `Transfer-Encoding` rejected), the
+  upstream head rebuilt from scratch, and any pipelined bytes close the connection; (2) the
+  create body is validated by a strict JSON scanner (duplicate or case-variant keys rejected),
+  an exact allowlist of every key at every level, and is forwarded as the canonical
+  re-serialized text, never the raw text. Dangerous HostConfig fields must equal the CLI
+  default; the top-level `User` must be `10000:10000`; `CapDrop` exactly `["ALL"]`;
+  `SecurityOpt` exactly `["no-new-privileges"]`; the image must equal
+  `CO_WORKSPACE_RUNTIME_IMAGE`; resource caps come from the gateway's env; `Binds` must be
+  exactly `<DATA>/storage/<P>/<N>/project` and `.../hermes-home` onto `/work/project` and
+  `/work/hermes-home`; (3) the broker walks the bind sources with `lstat` at create and
+  re-checks them against the recorded binds at start (the data dir is mounted read-only into
+  the broker at the same host path for this); (4) container refs are resolved through an
+  internal inspect whose result is never relayed, and are forwarded only if the name matches
+  the turn pattern and the container carries this instance's label; the list route is
+  filtered the same way. Inspect, resize, exec, images, volumes, networks, build, swarm and
+  info are not allowed; versioned (`/v1.NN/...`) paths are accepted, paths containing `%` are
+  not. **Residual risk (accepted)**: a symlink swap between the start-time check and the
+  daemon resolving the bind source cannot be closed by any string or `lstat` check while the
+  gateway can write the data dir; the broker narrows it to milliseconds, and rootless Docker
+  or userns-remap is the only complete fix. A compromised gateway can also still create,
+  start and kill the turn containers it legitimately owns, within the policy bounds. The
+  broker runs as root (needed for the socket's root:root 660 check) with all capabilities
+  dropped and a read-only filesystem. Do not run other sensitive workloads on the same Docker
+  daemon as the gateway. `IMAGES=0` semantics carry over: the image allowlist makes a missing
+  runtime image fail at create time instead of pulling. Not verified: Docker Desktop versus
+  Linux symlink semantics on real bind mounts, Linux data-dir ownership with the read-only
+  broker mount, output backpressure under very large output.
   Not yet verified: a real provider turn end to end, Google SSO, legacy OAuth seed mode.
   Single-operator deployments only.
 - **Seed home is optional** — the base compose no longer mounts a Hermes home. Legacy OAuth

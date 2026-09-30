@@ -1,7 +1,9 @@
 # co-workspace Create-Body-Validating Docker Socket Broker — Design
 
+> Superseded in part by 2026-09-30-coworkspace-docker-broker-raw-proxy-design (T-20260930-027): the HostConfig.User check, inspect-by-name scoping and fetch-based forwarding described here were wrong or unworkable.
+
 - **Date**: 2026-09-30
-- **Status**: implemented
+- **Status**: superseded in part by `2026-09-30-coworkspace-docker-broker-raw-proxy-design` (T-20260930-027)
 - **Spec id**: `2026-09-30-coworkspace-docker-broker-design`
 - **Owner**: automation-engineer (dispatched for T-20260930-008)
 - **Related**: ADR-0092, `services/co-workspace/src/docker-broker.ts`, `docker/docker-compose.isolation.yml`, live proxy findings recorded 2026-09-30 (isolation compose WARNING block)

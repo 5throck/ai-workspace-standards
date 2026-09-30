@@ -64,7 +64,11 @@ describe("isolation override", () => {
     // (src/docker-broker.ts) — the endpoint filter cannot see the create body.
     expect(broker).toMatch(/command:\s*\["bun",\s*"src\/docker-broker\.ts"\]/);
     expect(iso).not.toContain("tecnativa");
-    expect(broker).toMatch(/CO_WORKSPACE_BROKER_NAME_PREFIX/);
+    // T-20260930-027: scoping is by name regex + instance label (no name-prefix env); the
+    // broker gets a read-only view of the data dir for the bind lstat walk.
+    expect(broker).not.toMatch(/CO_WORKSPACE_BROKER_NAME_PREFIX/);
+    expect(broker).toMatch(/CO_WORKSPACE_INSTANCE_ID/);
+    expect(broker).toMatch(/\$\{CO_WORKSPACE_DATA_DIR_HOST[^}]*\}:\$\{CO_WORKSPACE_DATA_DIR_HOST\}:ro/);
     // Policy inputs mirror the gateway's own config — both sides must agree.
     expect(broker).toMatch(/CO_WORKSPACE_RUNTIME_IMAGE/);
     expect(broker).toMatch(/CO_WORKSPACE_DATA_DIR_HOST/);
