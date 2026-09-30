@@ -29,12 +29,21 @@ description: >-
   next template upgrade can re-copy the template-relative path. No --not-before:
   this does not depend on a pending template upgrade date, only on
   T-20260930-037.
-status: backlog
+status: review
 attempts: 0
 created_at: '2026-09-30T05:21:41.668Z'
 history:
   - at: '2026-09-30T05:21:41.668Z'
     from: null
     to: backlog
+  - at: '2026-09-30T13:36:15.106Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-30T13:36:15.118Z'
+    from: waiting
+    to: running
+  - at: '2026-09-30T13:58:57.711Z'
+    from: running
+    to: review
 result: null
 error: null

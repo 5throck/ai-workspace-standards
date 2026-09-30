@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.2.0
+// @version 1.3.0
 // v1.2.0 (2026-09-25, registry & platform-policy completeness batch — spec
 //          docs/designs/2026-09-25-registry-policy-completeness-design.md R2.1):
 //          adds the pure, read-only `composeResolvedAgentContent(agentPath,
@@ -218,6 +218,40 @@ export function resolveAgentExtendsStub(
  */
 export function resolvePmExtendsStub(pmPath: string, commonPmMdPath: string, variant: string): ResolvePmStubResult {
   return resolveAgentExtendsStub(pmPath, commonPmMdPath, variant, { isCanonicalStubBody: isCanonicalPmStubBody });
+}
+
+// T-20260930-037: the template stub's `extends:` pointer is relative to the
+// TEMPLATE tree (`templates/<variant>/agents/pm.md` → `templates/common/`). When
+// a stub survives into a delivered project (missingL1 scaffold, or the
+// upgrade-project MERGE create path), that same string dangles —
+// `Projects/<variant>/common/` does not exist. The project-relative form points
+// at the workspace-root `agents/pm.md`.
+const PM_EXTENDS_TEMPLATE_FORM = /^extends:\s*['"]?\.\.\/\.\.\/common\/agents\/pm\.md['"]?\s*$/m;
+const PM_EXTENDS_PROJECT_FORM = "extends: ../../../agents/pm.md";
+
+/**
+ * Pure T-20260930-037 rewrite: in `agents/pm.md` content, retarget the template
+ * stub pointer `extends: ../../common/agents/pm.md` to the project-relative
+ * `extends: ../../../agents/pm.md` (workspace-root agents/pm.md). ONLY that
+ * exact pointer is rewritten — every other `extends:` value passes through
+ * untouched (the 13 i18n-specialist stubs keep their template-relative form,
+ * which still resolves correctly inside templates/ where they are validated).
+ */
+export function rewritePmExtendsPointer(content: string): string {
+  return content.replace(PM_EXTENDS_TEMPLATE_FORM, PM_EXTENDS_PROJECT_FORM);
+}
+
+/**
+ * In-place counterpart to {@link rewritePmExtendsPointer}: rewrite the pm.md at
+ * `pmPath` only when it carries the dangling template-form pointer. Returns
+ * true when the file was rewritten.
+ */
+export function fixPmExtendsPointer(pmPath: string): boolean {
+  const content = readFileSync(pmPath, 'utf8');
+  const rewritten = rewritePmExtendsPointer(content);
+  if (rewritten === content) return false;
+  writeFileSync(pmPath, rewritten, 'utf8');
+  return true;
 }
 
 /**

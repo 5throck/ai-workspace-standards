@@ -3,9 +3,9 @@
 ## Metadata
 
 - **Current Phase**: production
-- **Version**: 1.33.0
+- **Version**: 1.34.0
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-09-29
+- **Last Updated**: 2026-09-30
 - **Last Reviewer**: automation-engineer
 - **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort. The duplicate Metadata section (a v1.10.0-era leftover) was merged into this single section on 2026-09-16.
 
@@ -15,6 +15,7 @@
 
 ## Phase History
 
+| 2026-09-30 | production | production | v1.34.0 (T-20260930-037): section 2.3b retargets a SURVIVING pm.md extends stub in place (missing-L1 / unresolved path) to the project-resolvable ../../../agents/pm.md; fully-resolved scaffolds unchanged. Design: docs/designs/2026-09-30-pm-extends-pointer-retarget-design.md. | automation-engineer |
 - **2026-09-21**: v1.24.0 — git init runs with cwd: projectDir (T-20260921-003: parent-repo reinit inherited the workspace origin); README content_hash + README_ko translated_from_hash refreshed post-substitution (T-20260921-002).
 - **2026-09-23**: v1.25.0 — §2.3b extends-stub resolution and §2.5 L1-B strip extracted verbatim to scripts/helpers/resolve-pm-stub.ts (adopt-project engine prerequisites; behavior unchanged).
 - **2026-09-24**: v1.26.0 — §5.2 renders docs/project.md from the identity seed template (templates/common/docs/project.template.md) and removes the raw copy; additive --description/--type flags fill the identity fields, absent flags keep the audit-visible TODO(project-overview) fallback. Spec: docs/designs/2026-09-24-scaffold-identity-overview-design.md
