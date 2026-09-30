@@ -1,4 +1,9 @@
-// @version 1.19.0
+// @version 1.20.0
+// v1.20.0 (2026-10-01, T-20260930-026 PR-A, ADR-0094): `.github/workflows/ci.yml` joins
+//          MERGE_MANAGED_FILES (was the final SYNC whole-file overwrite, which erased any
+//          project job — co-newbiz lost its unit-test job twice). The MERGE pass routes it
+//          to lib/ci-workflow-merge.ts: template-owned jobs stay authoritative, only the
+//          validated PROJECT-JOBS region is project-owned; fail-closed, atomic write.
 // v1.19.0 (2026-09-30, T-20260927-010): `region-profiles/**` claims ADD_IF_MISSING on
 //          the new dedicated REGION PROFILES pass — the ADR-0091 structured regulatory
 //          layer is delivered once and never overwritten (project deltas are
@@ -262,7 +267,7 @@ const LOCKED_FILES = new Set(['.gitattributes', '.gitleaks.toml']);
  * in managed-block-merge MANAGED_PATTERNS); when that pattern lands
  * (T-20260924-010) union-merge activates with no further claim change.
  */
-export const MERGE_MANAGED_FILES = new Set(['CLAUDE.md', 'GEMINI.md', 'CODEX.md', 'HERMES.md', '.gitignore', 'AGENTS.md', 'agents/pm.md']);
+export const MERGE_MANAGED_FILES = new Set(['CLAUDE.md', 'GEMINI.md', 'CODEX.md', 'HERMES.md', '.gitignore', 'AGENTS.md', 'agents/pm.md', '.github/workflows/ci.yml']);
 
 /** Common-owned scaffold files: delivered by templates/common/ and sacred to the
  *  project — a variant template must never carry them (WS-07) and new-project's

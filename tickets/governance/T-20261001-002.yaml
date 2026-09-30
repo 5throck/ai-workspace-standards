@@ -7,7 +7,7 @@ title: >-
   hashes both sides before timingSafeEqual (auth.ts:22-24) — reuse
   constantTimeEquals (defense-in-depth; route is internal-network only)
 priority: low
-status: review
+status: done
 attempts: 0
 created_at: '2026-09-30T16:39:22.931Z'
 history:
@@ -23,5 +23,11 @@ history:
   - at: '2026-09-30T18:18:14.169Z'
     from: running
     to: review
-result: null
+  - at: '2026-09-30T21:10:13.939Z'
+    from: review
+    to: done
+result: >-
+  Fixed in commit 4928c07d: docker-broker.ts control-route token check now uses
+  constantTimeEquals from auth.ts (hash-both-sides timingSafeEqual), verified in
+  code at docker-broker.ts:600.
 error: null

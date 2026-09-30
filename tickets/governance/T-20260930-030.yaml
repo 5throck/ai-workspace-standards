@@ -29,7 +29,7 @@ description: >-
   next template upgrade can re-copy the template-relative path. No --not-before:
   this does not depend on a pending template upgrade date, only on
   T-20260930-037.
-status: review
+status: done
 attempts: 0
 created_at: '2026-09-30T05:21:41.654Z'
 history:
@@ -45,5 +45,11 @@ history:
   - at: '2026-09-30T13:58:57.695Z'
     from: running
     to: review
-result: null
+  - at: '2026-09-30T21:14:05.142Z'
+    from: review
+    to: done
+result: >-
+  Premise invalid: ../../common/agents/pm.md is the correct L1 pointer
+  (ADR-0039); the retarget to ../../../agents/pm.md violated the L2-L1-L0 chain
+  and was reverted in PR #1268 (see T-20261001-003).
 error: null

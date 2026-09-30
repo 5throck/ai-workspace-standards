@@ -29,12 +29,27 @@ description: >-
   next template upgrade can re-copy the template-relative path. No --not-before:
   this does not depend on a pending template upgrade date, only on
   T-20260930-037.
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-30T05:21:41.681Z'
 history:
   - at: '2026-09-30T05:21:41.681Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-30T21:14:05.303Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-30T21:14:05.315Z'
+    from: waiting
+    to: running
+  - at: '2026-09-30T21:14:05.327Z'
+    from: running
+    to: review
+  - at: '2026-09-30T21:14:05.339Z'
+    from: review
+    to: done
+result: >-
+  Premise invalid: ../../common/agents/pm.md is the correct L1 pointer
+  (ADR-0039), not a dangling path; the batch retarget was reverted in PR #1268
+  (T-20261001-003). No change needed.
 error: null

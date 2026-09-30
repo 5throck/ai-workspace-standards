@@ -1,5 +1,13 @@
 #!/usr/bin/env bun
-// @version 1.60.0
+// @version 1.61.0
+// v1.61.0 (2026-10-01, T-20260930-026 PR-A, ADR-0094): `.github/workflows/ci.yml` joins the
+//          MERGE pass (upgrade-policy v1.20.0 claim) via lib/ci-workflow-merge.ts —
+//          template-owned jobs authoritative, PROJECT-JOBS region preserved, legacy
+//          marker-less files migrated by text-slice copy. Fail-closed: any validation
+//          error prints `code: detail`, writes nothing, and the run exits 1 after the
+//          MERGE pass; writes go temp file -> re-validate -> atomic rename. New flag
+//          `--accept-ci-perm-diff` accepts template `on`/`permissions` replacing differing
+//          project values. --dry-run never writes and prints a per-project diff summary.
 // v1.60.0 (2026-09-30, T-20260930-025): docs/context.md re-delivery renders the scaffold
 //          placeholder map (applySubstitutions — [Project Name], <variant-name>) before
 //          every write (wholesale + PRESERVE splice), so version-bumped template copies
@@ -475,7 +483,7 @@
 //         numbers on existing rows, "Unregistered script" for newly-added files) and
 //         required manual reconciliation every time.
 // upgrade-project.ts — Upgrade an existing project to the current template version
-// Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform claude|antigravity|codex|hermes|all] [--dry-run] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization] [--force-context-sync]
+// Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform claude|antigravity|codex|hermes|all] [--dry-run] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization] [--force-context-sync] [--accept-ci-perm-diff]
 // v1.9.0: Moved docs/context.md from DOCS_MERGE (managed-block merge) to VARIANT_DOCS_SYNC
 //           (version-footer sync) — the common template carries no managed-block markers,
 //           so the merge path was a silent no-op despite the file's *context.md version: X.Y*
@@ -538,6 +546,7 @@ import {
   buildMergedTemplateBlocks,
   mergeManagedBlocks,
 } from './lib/managed-block-merge.ts';
+import { applyCiWorkflowMerge } from './lib/ci-workflow-merge.ts';
 
 // ── Argument parsing ───────────────────────────────────────────────────────────
 let projectPath = '';
@@ -549,6 +558,7 @@ let rollback = false;
 let yesFlag = false;
 let skipContextCommonization = false;
 let forceContextSync = false;
+let acceptCiPermDiff = false;
 
 const args = process.argv.slice(2);
 for (let i = 0; i < args.length; i++) {
@@ -560,11 +570,12 @@ for (let i = 0; i < args.length; i++) {
   if (args[i] === '--yes' || args[i] === '-y') { yesFlag = true; continue; }
   if (args[i] === '--skip-context-commonization') { skipContextCommonization = true; continue; }
   if (args[i] === '--force-context-sync') { forceContextSync = true; continue; }
+  if (args[i] === '--accept-ci-perm-diff') { acceptCiPermDiff = true; continue; }
   if (!projectPath && !args[i].startsWith('--')) { projectPath = args[i]; continue; }
 }
 
 if (!projectPath) {
-  console.error('Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform claude|antigravity|codex|hermes|all] [--dry-run] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization] [--force-context-sync]');
+  console.error('Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform claude|antigravity|codex|hermes|all] [--dry-run] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization] [--force-context-sync] [--accept-ci-perm-diff]');
   process.exit(1);
 }
 if (!['claude', 'antigravity', 'codex', 'hermes', 'all'].includes(platform)) {
@@ -1176,6 +1187,34 @@ function mergeWorkspaceManaged(projectFile: string, templateFile: string, rel: s
   }
 }
 
+const CI_WORKFLOW_REL = '.github/workflows/ci.yml';
+
+/** ci.yml MERGE (ADR-0094): fail-closed, atomic. Returns false on validation failure
+ *  (nothing written). Dry-run prints the per-project summary and never writes. */
+function mergeCiWorkflowFile(projectFile: string, templateFile: string, rel: string): boolean {
+  const outcome = applyCiWorkflowMerge(projectFile, templateFile, { dryRun, allowTriggerPermDiff: acceptCiPermDiff });
+  const r = outcome.result;
+  for (const w of r?.warnings ?? []) console.log(`    WARN: ${w}`);
+  if (r?.diff) for (const line of r.diff.split('\n')) console.log(`    DIFF ${line}`);
+  switch (outcome.status) {
+    case 'error':
+      for (const e of outcome.errors) console.error(`    ERROR ${rel} ${e.code}: ${e.detail}`);
+      return false;
+    case 'unchanged':
+      console.log(`    ${dryTag}no change: ${rel}`);
+      break;
+    case 'would-create':
+    case 'created':
+      console.log(`    ${dryTag}CREATED: ${rel}`);
+      break;
+    default: {
+      const migrated = r && r.migrated.length > 0 ? ` — MIGRATED PROJECT-JOBS: ${r.migrated.join(', ')}` : '';
+      console.log(`    ${dryTag}${outcome.status === 'would-update' ? 'WOULD UPDATE' : 'UPDATED'}: ${rel}${migrated}`);
+    }
+  }
+  return true;
+}
+
 /** Check if a project file had local modifications at upgrade start (H1: judged
  *  against the pre-upgrade dirty snapshot, NOT live git status — apply mode
  *  stashes the tree, which would otherwise erase the CONFLICT verdicts the
@@ -1367,15 +1406,24 @@ if (platform === 'antigravity' || platform === 'all') MERGE_FILES.push('GEMINI.m
 if (platform === 'codex' || platform === 'all') MERGE_FILES.push('CODEX.md');
 if (platform === 'hermes' || platform === 'all') MERGE_FILES.push('HERMES.md');
 MERGE_FILES.push(
-  '.gitignore', 'agents/pm.md',
+  '.gitignore', 'agents/pm.md', CI_WORKFLOW_REL,
 );
+let ciMergeFailed = false;
 for (const rel of MERGE_FILES) {
   const src = resolveTemplate(rel);
   const dest = join(projectDir, rel);
   if (!src) { console.log(`  SKIP (no template): ${rel}`); continue; }
   console.log(`  MERGE: ${rel}`);
+  if (rel === CI_WORKFLOW_REL) {
+    if (!mergeCiWorkflowFile(dest, src, rel)) ciMergeFailed = true;
+    continue;
+  }
   mergeWorkspaceManaged(dest, src, rel);
   mergeChanged++;
+}
+if (ciMergeFailed) {
+  console.error(`\nERROR: ${CI_WORKFLOW_REL} merge failed validation — nothing was written for it. Fix the listed problems (or migrate manually) and re-run.`);
+  process.exit(1);
 }
 console.log('');
 
