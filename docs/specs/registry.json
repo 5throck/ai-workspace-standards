@@ -1715,7 +1715,7 @@
       "id": "2026-09-30-coworkspace-docker-broker-design",
       "title": "coworkspace docker broker design",
       "file": "docs/designs/2026-09-30-coworkspace-docker-broker-design.md",
-      "status": "implemented",
+      "status": "superseded",
       "source": "manual",
       "created": "2026-09-30",
       "last_updated": "2026-09-30"
@@ -1726,6 +1726,15 @@
       "file": "docs/designs/2026-09-30-coworkspace-web-split-plan.md",
       "status": "planned",
       "source": "manual",
+      "created": "2026-09-30",
+      "last_updated": "2026-09-30"
+    },
+    {
+      "id": "2026-09-30-coworkspace-docker-broker-raw-proxy-design",
+      "title": "coworkspace docker broker raw proxy design",
+      "file": "docs/designs/2026-09-30-coworkspace-docker-broker-raw-proxy-design.md",
+      "status": "implemented",
+      "source": "architect",
       "created": "2026-09-30",
       "last_updated": "2026-09-30"
     }

@@ -1,0 +1,18 @@
+schemaVersion: 1
+id: T-20260930-038
+kind: manual
+title: >-
+  co-workspace: close the bind-source symlink race with rootless Docker or
+  userns-remap (the raw broker narrows the create-to-start window to
+  milliseconds but cannot remove it while the gateway can write the data dir;
+  see ADR-0092 Addendum 13)
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-09-30T05:57:56.935Z'
+history:
+  - at: '2026-09-30T05:57:56.935Z'
+    from: null
+    to: backlog
+result: null
+error: null

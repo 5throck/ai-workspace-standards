@@ -8,12 +8,32 @@ title: >-
   per docs/reports/2026-09-30-co-workspace-docker-broker-security-review.md and
   live-verify before relying on it
 priority: urgent
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-30T05:14:27.843Z'
 history:
   - at: '2026-09-30T05:14:27.843Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-30T05:57:56.949Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-30T05:57:56.962Z'
+    from: waiting
+    to: running
+  - at: '2026-09-30T05:57:56.974Z'
+    from: running
+    to: review
+  - at: '2026-09-30T05:57:56.986Z'
+    from: review
+    to: done
+result: >-
+  Fixed: docker-broker rewritten as a raw socket proxy with a strict create-body
+  allowlist (src/docker-broker-policy.ts, src/docker-broker.ts); review findings
+  F1-F5, F6-F8, F10-F13 closed, F3 narrowed (symlink race window reduced to
+  milliseconds; rootless Docker/userns-remap tracked in a new low-priority
+  ticket). Verified against a real docker CLI capture (fixture), 378
+  unit/integration tests with PM mutation checks, and live on Docker 29.8.1
+  (full turn, cancel, delete, reaper, 24 attacks all blocked). Docs: ADR-0092
+  Addendum 13, design 2026-09-30-coworkspace-docker-broker-raw-proxy-design.
 error: null

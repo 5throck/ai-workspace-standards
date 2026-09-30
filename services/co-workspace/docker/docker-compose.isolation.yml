@@ -2,21 +2,26 @@
 # Usage: docker compose -f docker-compose.yml -f docker-compose.isolation.yml up -d
 #   or set COMPOSE_FILE=docker-compose.yml:docker-compose.isolation.yml in .env.
 #
-# The gateway never mounts the raw Docker socket. Since T-20260930-008 the socket is held
-# by OUR create-body-validating broker (src/docker-broker.ts, same gateway image, command
-# override) — not the endpoint-only tecnativa/docker-socket-proxy. Three controls the
-# endpoint filter cannot express:
-#   1. create-body validation: image allowlist, no Privileged, CapDrop ALL,
-#      no-new-privileges, user 10000:10000, binds only under CO_WORKSPACE_DATA_DIR_HOST,
-#      no host Pid/Network mode, no devices, Memory/PidsLimit caps required.
-#   2. name scoping: create/start/wait/kill/attach/inspect/remove resolve only
-#      co-workspace-turn-* containers, and the container LIST is filtered to that fleet —
-#      other daemons' containers (and their env, seen via inspect) are invisible.
-#   3. endpoint allowlist: version probe, container create/start/wait/attach/kill, list,
-#      inspect, delete. Exec/images/volumes/networks/info/build/swarm are 403.
-# Residual risk (accepted, single-operator): a compromised gateway can still manage the
-# turn containers it legitimately owns; rootless Docker removes the remaining host-root
-# equivalence and stays the long-term direction.
+# The gateway never mounts the raw Docker socket. The socket is held by OUR broker
+# (src/docker-broker.ts, same gateway image, command override; T-20260930-008, rewritten as a
+# raw one-request-per-connection front end in T-20260930-027). Controls:
+#   1. create-body allowlist with canonical rebuild: every key of the create body is checked
+#      against an exact-case allowlist (image, entrypoint, top-level User 10000:10000, env,
+#      labels, CapDrop ALL, no-new-privileges, resource caps, exactly two binds of the shape
+#      <DATA_HOST>/storage/<P>/<N>/{project,hermes-home}); the broker forwards a body rebuilt
+#      from the validated values only, never the raw client text.
+#   2. ref resolution by label + name: every container ref is resolved through an internal
+#      inspect (never relayed) and must name a co-workspace-turn-* container labelled with this
+#      CO_WORKSPACE_INSTANCE_ID; the forwarded ref is rewritten to the full 64-hex id. The
+#      container list is filtered the same way.
+#   3. lstat walk at create AND at start: every bind path component under the (read-only
+#      mounted) data dir must be a real directory, not a symlink, and the binds at start must
+#      equal the binds recorded at create.
+#   4. endpoint allowlist: _ping, version, list, create, attach, start, wait, kill, delete.
+#      No inspect, no resize, no exec/images/volumes/networks/info/build/swarm (403).
+# Residual risk (accepted, single-operator): a compromised gateway (it has the data dir RW)
+# can still race a symlink swap between the start re-check and the daemon's mount (TOCTOU,
+# milliseconds). Rootless Docker or userns-remap is the only complete fix.
 # Single-operator deployments only. The runtime image must be pre-built (IMAGES=0 makes a
 # missing image fail fast instead of pulling).
 services:
@@ -39,13 +44,21 @@ services:
     security_opt: ["no-new-privileges"]
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      # Read-only view of the data dir at its HOST path, for the lstat walk of bind sources.
+      - ${CO_WORKSPACE_DATA_DIR_HOST:?set to the absolute host path of the data dir}:${CO_WORKSPACE_DATA_DIR_HOST}:ro
     environment:
       CO_WORKSPACE_BROKER_PORT: 2375
       CO_WORKSPACE_BROKER_SOCKET: /var/run/docker.sock
-      CO_WORKSPACE_BROKER_NAME_PREFIX: co-workspace-turn-
-      # Policy inputs mirroring the gateway's own config (both sides must agree).
+      CO_WORKSPACE_BROKER_MAX_CONN: ${CO_WORKSPACE_BROKER_MAX_CONN:-64}
+      # Policy inputs mirroring the gateway's own config (same names and defaults as
+      # docker-compose.yml — both sides must agree).
       CO_WORKSPACE_RUNTIME_IMAGE: ${CO_WORKSPACE_RUNTIME_IMAGE:-co-workspace-runtime:latest}
       CO_WORKSPACE_DATA_DIR_HOST: ${CO_WORKSPACE_DATA_DIR_HOST:?set to the absolute host path of the data dir}
+      CO_WORKSPACE_INSTANCE_ID: ${CO_WORKSPACE_INSTANCE_ID:-default}
+      CO_WORKSPACE_CONTAINER_MEMORY: ${CO_WORKSPACE_CONTAINER_MEMORY:-2g}
+      CO_WORKSPACE_CONTAINER_CPUS: ${CO_WORKSPACE_CONTAINER_CPUS:-2}
+      CO_WORKSPACE_CONTAINER_PIDS_LIMIT: ${CO_WORKSPACE_CONTAINER_PIDS_LIMIT:-256}
+      HERMES_BIN: ${HERMES_BIN:-hermes}
     networks: [dockerapi]
 
   co-workspace:

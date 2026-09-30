@@ -1,239 +1,738 @@
 /**
- * Create-body-validating Docker socket broker (T-20260930-008).
+ * Docker socket broker for CO_WORKSPACE_ISOLATION=docker (T-20260930-027, design B.1).
  *
- * Replaces the tecnativa/docker-socket-proxy sidecar: the endpoint filter alone cannot
- * inspect the container-create body, so a compromised gateway could still create a
- * privileged container or bind-mount `/` (docker-compose.isolation.yml WARNING, verified
- * live 2026-09-30). This broker adds three controls the endpoint filter cannot express:
- *
- *   1. Create-body validation — image allowlist, no Privileged, CapDrop ALL,
- *      no-new-privileges, fixed uid:gid user, bind sources restricted to the gateway
- *      data-dir host prefix, no host Pid/Network mode, no devices, resource caps present.
- *   2. Name scoping — create/start/wait/kill/attach/inspect/remove only resolve containers
- *      whose name starts with the gateway's turn prefix, so the daemon's other workloads
- *      are invisible even though the gateway still runs `docker ps` for its boot reaper
- *      (the list response is filtered to the prefix before it reaches the gateway).
- *   3. Endpoint allowlist — exactly the verified set (isolation compose, 2026-09-30):
- *      version probe, container create/start/wait/attach/kill, list, inspect, delete.
- *      Everything else (exec, images, volumes, networks, info, build, swarm…) is 403.
+ * A RAW TCP front end (Bun.listen) in front of the Docker unix socket. The earlier
+ * Bun.serve + fetch broker could not carry `attach` (hijacked stream, half-close) and let a
+ * compromised gateway smuggle requests. This version:
+ *   - accepts exactly ONE request per client connection, parsed strictly (16 KiB head cap,
+ *     head/body timeouts, no Transfer-Encoding, no duplicate headers, no obs-fold, no bare CR/LF);
+ *     client bytes beyond the declared body of that one request are never forwarded;
+ *   - decides every request with the pure policy module (docker-broker-policy.ts): endpoint
+ *     allowlist (no inspect, no resize), query allowlist, create-body allowlist with a canonical
+ *     rebuild (the raw body is never forwarded), lstat walk of the bind sources;
+ *   - resolves every container ref with an INTERNAL inspect (never relayed) and only forwards
+ *     containers named co-workspace-turn-* that carry this instance's label, rewritten to the
+ *     full 64-hex Id; re-checks the binds on disk right before /start;
+ *   - rebuilds every upstream request head from scratch (client headers are never forwarded).
+ * Residual risk: a compromised gateway can still race the symlink check between /start's
+ * re-check and the daemon's mount (TOCTOU); rootless Docker or userns-remap is the only full fix.
  *
  * Run (same gateway image, command override in docker-compose.isolation.yml):
  *   bun src/docker-broker.ts
  *
  * Env: CO_WORKSPACE_BROKER_PORT (2375), CO_WORKSPACE_BROKER_SOCKET (/var/run/docker.sock),
- * CO_WORKSPACE_BROKER_UPSTREAM (http URL override — tests only), CO_WORKSPACE_BROKER_NAME_PREFIX
- * (co-workspace-turn-), CO_WORKSPACE_RUNTIME_IMAGE (image allowlist), CO_WORKSPACE_DATA_DIR_HOST
- * (bind source prefix; set for containerized gateways — compose already requires it).
+ * CO_WORKSPACE_BROKER_MAX_CONN (64), plus the policy inputs read by loadPolicyConfig
+ * (CO_WORKSPACE_RUNTIME_IMAGE, CO_WORKSPACE_DATA_DIR_HOST, CO_WORKSPACE_INSTANCE_ID, HERMES_BIN,
+ * CO_WORKSPACE_CONTAINER_MEMORY / _CPUS / _PIDS_LIMIT).
  */
 
-export interface CreateBodyValidation {
-  ok: boolean;
-  reason?: string;
-}
+import type { Socket, TCPSocketListener } from "bun";
+import {
+  checkRoute,
+  loadPolicyConfig,
+  MAX_CREATE_BODY_BYTES,
+  NAME_RE,
+  validateBindsOnDisk,
+  validateCreate,
+  filterContainerList,
+  type PolicyConfig,
+  type RouteDecision,
+} from "./docker-broker-policy";
 
 export interface BrokerConfig {
+  policy: PolicyConfig;
+  socketPath: string;
   port: number;
-  socket: string;
-  upstream?: string;
-  namePrefix: string;
-  runtimeImage: string;
-  dataDirHost?: string;
+  hostname: string;
+  maxConn: number;
+  headTimeoutMs: number;
+  bodyTimeoutMs: number;
+  /** Timeout for buffered and piped upstream exchanges (not wait, not attach). */
+  upstreamTimeoutMs: number;
+  log: (line: string) => void;
 }
 
 export function loadBrokerConfig(env: Record<string, string | undefined> = process.env): BrokerConfig {
+  const maxConn = Number(env.CO_WORKSPACE_BROKER_MAX_CONN ?? 64);
   return {
+    policy: loadPolicyConfig(env),
+    socketPath: env.CO_WORKSPACE_BROKER_SOCKET || "/var/run/docker.sock",
     port: Number(env.CO_WORKSPACE_BROKER_PORT ?? 2375),
-    socket: env.CO_WORKSPACE_BROKER_SOCKET ?? "/var/run/docker.sock",
-    upstream: env.CO_WORKSPACE_BROKER_UPSTREAM || undefined,
-    namePrefix: env.CO_WORKSPACE_BROKER_NAME_PREFIX ?? "co-workspace-turn-",
-    runtimeImage: env.CO_WORKSPACE_RUNTIME_IMAGE ?? "co-workspace-runtime:latest",
-    dataDirHost: env.CO_WORKSPACE_DATA_DIR_HOST || undefined,
+    hostname: "0.0.0.0",
+    maxConn: Number.isInteger(maxConn) && maxConn > 0 ? maxConn : 64,
+    headTimeoutMs: 10_000,
+    bodyTimeoutMs: 10_000,
+    upstreamTimeoutMs: 30_000,
+    log: (line) => console.log(`[docker-broker] ${line}`),
   };
 }
 
-/** True when a container name (Docker reports them with a leading slash) belongs to
- *  this gateway's turn fleet. */
-export function isOwnContainerName(name: string, prefix: string): boolean {
-  const bare = name.startsWith("/") ? name.slice(1) : name;
-  return bare.startsWith(prefix);
+const MAX_HEAD_BYTES = 16 * 1024;
+const MAX_RESPONSE_BYTES = 4 * 1024 * 1024;
+/** Pause the producing side when the consumer's write queue exceeds this. */
+const HIGH_WATER = 1024 * 1024;
+const HEX64_RE = /^[0-9a-f]{64}$/;
+const CRLF2 = Buffer.from("\r\n\r\n");
+
+const STATUS_TEXT: Record<number, string> = {
+  400: "Bad Request",
+  403: "Forbidden",
+  404: "Not Found",
+  408: "Request Timeout",
+  413: "Payload Too Large",
+  431: "Request Header Fields Too Large",
+  500: "Internal Server Error",
+  502: "Bad Gateway",
+  503: "Service Unavailable",
+};
+
+// ---------------------------------------------------------------------------------------------
+// Strict request-head parsing
+// ---------------------------------------------------------------------------------------------
+
+interface ParsedHead {
+  method: string;
+  target: string;
+  /** Lower-case header names; duplicates are rejected during parsing. */
+  headers: Record<string, string>;
+  contentLength: number;
 }
 
-/** Validate a POST /containers/create JSON body against the isolation policy.
- *  Pure — every rule the live turn containers satisfy by construction (chat.ts container
- *  options: CapDrop ALL, user 10000:10000, no-new-privileges, memory/cpus/pids caps,
- *  binds only under the host data dir). */
-export function validateCreateBody(
-  body: {
-    Image?: unknown;
-    HostConfig?: {
-      Privileged?: unknown;
-      CapDrop?: unknown;
-      SecurityOpt?: unknown;
-      User?: unknown;
-      Binds?: unknown;
-      Mounts?: Array<{ Type?: unknown; Source?: unknown }>;
-      PidMode?: unknown;
-      NetworkMode?: unknown;
-      Devices?: unknown;
-      Memory?: unknown;
-      PidsLimit?: unknown;
-    };
-  },
-  cfg: Pick<BrokerConfig, "runtimeImage" | "dataDirHost">,
-): CreateBodyValidation {
-  if (typeof body.Image !== "string" || !body.Image) return { ok: false, reason: "Image missing" };
-  const allowedImage = cfg.runtimeImage;
-  const imageOk = body.Image === allowedImage ||
-    (allowedImage.split(":")[0] !== "" && body.Image.split(":")[0] === allowedImage.split(":")[0] && allowedImage.split(":").length === 1);
-  if (!imageOk) return { ok: false, reason: `Image ${body.Image} is not the allowlisted runtime (${allowedImage})` };
+type HeadResult = { ok: true; head: ParsedHead } | { ok: false; status: number; reason: string };
 
-  const hc = body.HostConfig ?? {};
-  if (hc.Privileged === true) return { ok: false, reason: "Privileged containers are not allowed" };
-  if (!Array.isArray(hc.CapDrop) || !hc.CapDrop.includes("ALL")) {
-    return { ok: false, reason: "HostConfig.CapDrop must include ALL" };
-  }
-  if (!Array.isArray(hc.SecurityOpt) || !hc.SecurityOpt.includes("no-new-privileges")) {
-    return { ok: false, reason: "HostConfig.SecurityOpt must include no-new-privileges" };
-  }
-  if (hc.User !== "10000:10000") return { ok: false, reason: 'HostConfig.User must be "10000:10000"' };
-  if (hc.PidMode === "host") return { ok: false, reason: "PidMode host is not allowed" };
-  if (hc.NetworkMode === "host") return { ok: false, reason: "NetworkMode host is not allowed" };
-  if (Array.isArray(hc.Devices) && hc.Devices.length > 0) return { ok: false, reason: "Devices are not allowed" };
-  if (typeof hc.Memory !== "number" || hc.Memory <= 0) return { ok: false, reason: "HostConfig.Memory cap required" };
-  if (typeof hc.PidsLimit !== "number" || hc.PidsLimit <= 0) return { ok: false, reason: "HostConfig.PidsLimit cap required" };
+const REQUEST_LINE_RE = /^(GET|HEAD|POST|DELETE) (\S+) HTTP\/1\.1$/;
+const HEADER_RE = /^([A-Za-z0-9-]+):[ \t]*(.*?)[ \t]*$/;
+// Visible ASCII, space and tab only in header values.
+const HEADER_VALUE_RE = /^[\t\x20-\x7e]*$/;
 
-  if (!cfg.dataDirHost) return { ok: false, reason: "broker misconfigured: CO_WORKSPACE_DATA_DIR_HOST unset — no bind can be validated" };
-  const prefix = cfg.dataDirHost.replace(/\/+$/, "") + "/";
-  if (Array.isArray(hc.Binds)) {
-    for (const bind of hc.Binds) {
-      if (typeof bind !== "string") return { ok: false, reason: "HostConfig.Binds entries must be strings" };
-      // "src:dst[:opts]" — the source is the first colon-separated part (absolute host path).
-      const src = bind.split(":")[0];
-      if (!src || !src.startsWith(prefix)) return { ok: false, reason: `Bind source outside the data dir: ${bind}` };
+export function parseRequestHead(text: string): HeadResult {
+  const lines = text.split("\r\n");
+  for (const l of lines) {
+    if (l.includes("\r") || l.includes("\n")) return { ok: false, status: 400, reason: "bare CR or LF in head" };
+  }
+  const rl = lines[0].match(REQUEST_LINE_RE);
+  if (!rl) return { ok: false, status: 400, reason: "malformed request line" };
+  const headers: Record<string, string> = {};
+  for (const l of lines.slice(1)) {
+    if (l.startsWith(" ") || l.startsWith("\t")) return { ok: false, status: 400, reason: "obs-fold header" };
+    const m = l.match(HEADER_RE);
+    if (!m) return { ok: false, status: 400, reason: "malformed header" };
+    const name = m[1].toLowerCase();
+    if (!HEADER_VALUE_RE.test(m[2])) return { ok: false, status: 400, reason: "control character in header" };
+    if (Object.prototype.hasOwnProperty.call(headers, name)) return { ok: false, status: 400, reason: `duplicate header ${name}` };
+    headers[name] = m[2];
+  }
+  if (headers["transfer-encoding"] !== undefined) return { ok: false, status: 400, reason: "transfer-encoding not allowed" };
+  let contentLength = 0;
+  const cl = headers["content-length"];
+  if (cl !== undefined) {
+    if (!/^\d{1,6}$/.test(cl)) return { ok: false, status: 400, reason: "invalid content-length" };
+    contentLength = Number(cl);
+  }
+  return { ok: true, head: { method: rl[1], target: rl[2], headers, contentLength } };
+}
+
+// ---------------------------------------------------------------------------------------------
+// Backpressure-aware writer
+// ---------------------------------------------------------------------------------------------
+
+type AnySocket = Socket<unknown>;
+
+class Writer {
+  private queue: Buffer[] = [];
+  private queued = 0;
+  private finish: "none" | "end" | "shutdown" = "none";
+  onLow?: () => void;
+  constructor(private readonly sock: AnySocket) {}
+
+  get backlog(): number {
+    return this.queued;
+  }
+
+  write(data: Uint8Array): void {
+    if (this.finish !== "none" || data.length === 0) return;
+    if (this.queued > 0) {
+      this.push(Buffer.from(data));
+      return;
     }
+    const n = this.sock.write(data);
+    if (n < data.length) this.push(Buffer.from(data.subarray(Math.max(n, 0))));
   }
-  if (Array.isArray(hc.Mounts)) {
-    for (const m of hc.Mounts) {
-      if (m.Type === "volume") return { ok: false, reason: "Volume mounts are not allowed" };
-      if (typeof m.Source !== "string" || !m.Source.startsWith(prefix)) {
-        return { ok: false, reason: `Mount source outside the data dir: ${String(m.Source)}` };
+
+  private push(b: Buffer): void {
+    this.queue.push(b);
+    this.queued += b.length;
+  }
+
+  /** Called from the socket's drain handler. */
+  drain(): void {
+    while (this.queue.length) {
+      const b = this.queue[0];
+      const n = this.sock.write(b);
+      if (n < b.length) {
+        this.queue[0] = b.subarray(Math.max(n, 0));
+        this.queued -= Math.max(n, 0);
+        return;
       }
+      this.queue.shift();
+      this.queued -= b.length;
     }
+    if (this.queued < HIGH_WATER) this.onLow?.();
+    this.applyFinish();
   }
-  return { ok: true };
+
+  /** Flush then half-close (FIN) the write side; reading continues. */
+  shutdown(): void {
+    if (this.finish === "none") this.finish = "shutdown";
+    if (this.queued === 0) this.applyFinish();
+  }
+
+  /** Flush then close. */
+  end(): void {
+    this.finish = "end";
+    if (this.queued === 0) this.applyFinish();
+  }
+
+  private applyFinish(): void {
+    if (this.queued > 0) return;
+    if (this.finish === "shutdown") this.sock.shutdown();
+    else if (this.finish === "end") this.sock.end();
+  }
 }
 
-/** Route policy: true when the broker forwards this request upstream. Pure. */
-export function isAllowedRequest(
-  method: string,
-  pathWithQuery: string,
-  prefix: string,
-): { allowed: boolean; reason?: string; scopedName?: string } {
-  const path = pathWithQuery.split("?")[0];
-  if (method === "GET" && (path === "/version" || path === "/_ping")) return { allowed: true };
-  if (method === "GET" && path === "/containers/json") return { allowed: true };
-  if (method === "POST" && path === "/containers/create") {
-    const name = new URLSearchParams(pathWithQuery.split("?")[1] ?? "").get("name") ?? "";
-    if (!name.startsWith(prefix)) return { allowed: false, reason: `container name must start with ${prefix}` };
-    return { allowed: true, scopedName: name };
-  }
-  const containerOp = path.match(/^\/containers\/([^/]+)(\/.*)?$/);
-  if (containerOp) {
-    const ref = decodeURIComponent(containerOp[1]);
-    const action = containerOp[2] ?? "";
-    if (!ref.startsWith(prefix)) {
-      return { allowed: false, reason: `container ref outside the ${prefix} fleet` };
-    }
-    if (method === "POST" && ["/start", "/wait", "/kill", "/attach"].includes(action)) return { allowed: true, scopedName: ref };
-    if (method === "GET" && action === "/json") return { allowed: true, scopedName: ref };
-    if (method === "DELETE" && action === "") return { allowed: true, scopedName: ref };
-  }
-  return { allowed: false, reason: `endpoint not in the broker allowlist: ${method} ${path}` };
+// ---------------------------------------------------------------------------------------------
+// Broker
+// ---------------------------------------------------------------------------------------------
+
+interface CacheEntry {
+  name: string;
+  /** Binds recorded at create (only known for containers created through this broker process). */
+  binds?: string[];
 }
 
-/** Filter a GET /containers/json response body down to the gateway's own fleet. */
-export function filterContainerList(body: unknown, prefix: string): unknown {
-  if (!Array.isArray(body)) return body;
-  return body.filter((c) =>
-    Array.isArray((c as { Names?: unknown }).Names) &&
-    ((c as { Names: string[] }).Names.some((n) => isOwnContainerName(n, prefix))),
-  );
+type Phase = "head" | "body" | "busy" | "relay" | "tunnel" | "done";
+
+interface ClientState {
+  phase: Phase;
+  buf: Buffer;
+  head?: ParsedHead;
+  decision?: Extract<RouteDecision, { allowed: true }>;
+  started: number;
+  timer?: ReturnType<typeof setTimeout>;
+  writer: Writer;
+  upstream?: AnySocket;
+  upWriter?: Writer;
+  counted: boolean;
+  logged: boolean;
+  clientEnded: boolean;
+  upstreamEnded: boolean;
 }
 
-/** The broker's request handler: policy enforcement + upstream forwarding. Exported so
- *  tests drive the exact production handler (import.meta.main just serves it). */
-export function createBrokerHandler(cfg: BrokerConfig): (req: Request) => Promise<Response> {
-  /** Forward to the upstream: a TCP URL (tests) or the Docker unix socket
-   *  (Bun fetch's non-standard `unix` option). */
-  function forward(target: string, init: RequestInit): Promise<Response> {
-    if (cfg.upstream) {
-      return fetch(cfg.upstream.replace(/\/$/, "") + target, init);
-    }
-    return fetch(`http://docker${target}`, { ...init, unix: cfg.socket } as RequestInit);
+export interface BrokerHandle {
+  port: number;
+  stop(): Promise<void>;
+}
+
+export function startBroker(cfg: BrokerConfig): BrokerHandle {
+  const cache = new Map<string, CacheEntry>();
+  const clients = new Set<AnySocket>();
+  const upstreams = new Set<AnySocket>();
+  let active = 0;
+
+  const st = (c: AnySocket) => c.data as ClientState;
+
+  function logLine(s: ClientState, verdict: string, reason: string): void {
+    if (s.logged) return;
+    s.logged = true;
+    const method = s.head?.method ?? "-";
+    const norm = s.decision?.norm ?? "-";
+    cfg.log(`${method} ${norm} ${verdict} ${reason.replace(/\s+/g, "_") || "-"} ${Date.now() - s.started}ms`);
   }
 
-  return async function brokerFetch(req: Request): Promise<Response> {
-    const url = new URL(req.url);
-    const target = url.pathname + url.search;
-    const policy = isAllowedRequest(req.method, target, cfg.namePrefix);
-    if (!policy.allowed) {
-      return new Response(JSON.stringify({ error: `docker broker: ${policy.reason}` }), {
-        status: 403,
-        headers: { "content-type": "application/json" },
-      });
+  function clearTimer(s: ClientState): void {
+    if (s.timer) clearTimeout(s.timer);
+    s.timer = undefined;
+  }
+
+  function closeAll(c: AnySocket): void {
+    const s = st(c);
+    s.phase = "done";
+    clearTimer(s);
+    try {
+      s.upstream?.end();
+    } catch {
+      /* already closed */
     }
     try {
-      if (req.method === "POST" && url.pathname === "/containers/create") {
-        const raw = await req.text();
-        let body: unknown;
-        try {
-          body = JSON.parse(raw);
-        } catch {
-          return new Response(JSON.stringify({ error: "docker broker: create body is not valid JSON" }), { status: 400 });
-        }
-        const verdict = validateCreateBody(body as Parameters<typeof validateCreateBody>[0], cfg);
-        if (!verdict.ok) {
-          return new Response(JSON.stringify({ error: `docker broker: ${verdict.reason}` }), { status: 403 });
-        }
-        const upstream = await forward(target, {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: raw,
-        });
-        return new Response(upstream.body, { status: upstream.status, headers: upstream.headers });
-      }
-      const init: RequestInit = { method: req.method, headers: req.headers };
-      if (req.method === "POST" || req.method === "DELETE") {
-        // Forward the (usually empty) body; attaches stream through untouched.
-        init.body = req.body;
-        (init as { duplex?: string }).duplex = "half";
-      }
-      const upstream = await forward(target, init);
-      if (req.method === "GET" && url.pathname === "/containers/json") {
-        try {
-          const list = await upstream.json();
-          return new Response(JSON.stringify(filterContainerList(list, cfg.namePrefix)), {
-            status: upstream.status,
-            headers: { "content-type": "application/json" },
-          });
-        } catch {
-          return new Response(upstream.body, { status: upstream.status, headers: upstream.headers });
-        }
-      }
-      return new Response(upstream.body, { status: upstream.status, headers: upstream.headers });
-    } catch (err) {
-      console.error(`[docker-broker] upstream error: ${(err as Error).message}`);
-      return new Response(JSON.stringify({ error: "docker broker: upstream unreachable" }), { status: 502 });
+      c.end();
+    } catch {
+      /* already closed */
     }
+  }
+
+  function respond(c: AnySocket, status: number, message: string, verdict = "deny"): void {
+    const s = st(c);
+    logLine(s, verdict, message);
+    clearTimer(s);
+    s.phase = "done";
+    const body = status === 204 ? "" : JSON.stringify({ message: `docker broker: ${message}` });
+    const isHead = s.head?.method === "HEAD";
+    const head =
+      `HTTP/1.1 ${status} ${STATUS_TEXT[status] ?? "Error"}\r\n` +
+      `Content-Type: application/json\r\nContent-Length: ${Buffer.byteLength(body)}\r\nConnection: close\r\n\r\n`;
+    s.writer.write(Buffer.from(isHead ? head : head + body));
+    s.writer.end();
+    try {
+      s.upstream?.end();
+    } catch {
+      /* ignore */
+    }
+  }
+
+  function respondRaw(c: AnySocket, status: number, statusText: string, contentType: string, apiVersion: string | null, body: Buffer): void {
+    const s = st(c);
+    clearTimer(s);
+    s.phase = "done";
+    const safeText = /^[\x20-\x7e]{0,64}$/.test(statusText) && statusText ? statusText : STATUS_TEXT[status] ?? "OK";
+    let head = `HTTP/1.1 ${status} ${safeText}\r\n`;
+    if (contentType && /^[\x20-\x7e]{1,128}$/.test(contentType)) head += `Content-Type: ${contentType}\r\n`;
+    if (apiVersion && /^[0-9.]{1,8}$/.test(apiVersion)) head += `Api-Version: ${apiVersion}\r\n`;
+    const noBody = s.head?.method === "HEAD" || status === 204 || status === 304;
+    head += `Content-Length: ${noBody ? 0 : body.length}\r\nConnection: close\r\n\r\n`;
+    s.writer.write(Buffer.from(head));
+    if (!noBody) s.writer.write(body);
+    s.writer.end();
+  }
+
+  /** Rebuilt upstream head: never forwards client headers except sanitized UA / content type. */
+  function upstreamHead(method: string, path: string, h: Record<string, string>, bodyLen: number, upgrade: boolean): string {
+    const ua = h["user-agent"] && /^[\x20-\x7e]{1,256}$/.test(h["user-agent"]) ? h["user-agent"] : "co-workspace-docker-broker";
+    let head = `${method} ${path} HTTP/1.1\r\nHost: docker\r\nUser-Agent: ${ua}\r\n`;
+    const ct = h["content-type"];
+    if (ct && /^[A-Za-z0-9!#$%&'*+.^_`|~/-]{1,100}(;[\x20-\x7e]{0,100})?$/.test(ct)) head += `Content-Type: ${ct}\r\n`;
+    if (method === "POST" || bodyLen > 0) head += `Content-Length: ${bodyLen}\r\n`;
+    head += upgrade ? "Connection: Upgrade\r\nUpgrade: tcp\r\n\r\n" : "Connection: close\r\n\r\n";
+    return head;
+  }
+
+  async function upstreamFetch(path: string, init: RequestInit & { timeoutMs?: number }): Promise<Response> {
+    const { timeoutMs, ...rest } = init;
+    return fetch(`http://docker${path}`, {
+      ...rest,
+      unix: cfg.socketPath,
+      signal: AbortSignal.timeout(timeoutMs ?? cfg.upstreamTimeoutMs),
+    } as RequestInit);
+  }
+
+  async function readCapped(res: Response): Promise<Buffer | null> {
+    if (!res.body) return Buffer.alloc(0);
+    const reader = res.body.getReader();
+    const parts: Buffer[] = [];
+    let total = 0;
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      total += value.length;
+      if (total > MAX_RESPONSE_BYTES) {
+        await reader.cancel().catch(() => {});
+        return null;
+      }
+      parts.push(Buffer.from(value));
+    }
+    return Buffer.concat(parts);
+  }
+
+  function forwardQuery(rawQuery: string): string {
+    const q = new URLSearchParams(rawQuery).toString();
+    return q ? `?${q}` : "";
+  }
+
+  function forgetRef(ref: string): void {
+    for (const [id, e] of cache) if (id.startsWith(ref) || e.name === ref) cache.delete(id);
+  }
+
+  type Resolved =
+    | { ok: true; id: string; name: string; binds: unknown }
+    | { ok: false; status: number; reason: string };
+
+  /** Internal inspect; the daemon's answer is never relayed to the client. */
+  async function resolveRef(versionPrefix: string, ref: string): Promise<Resolved> {
+    let res: Response;
+    try {
+      res = await upstreamFetch(`${versionPrefix}/containers/${encodeURIComponent(ref)}/json`, { method: "GET" });
+    } catch {
+      return { ok: false, status: 502, reason: "upstream unreachable" };
+    }
+    const body = await readCapped(res).catch(() => null);
+    if (res.status === 404) {
+      forgetRef(ref);
+      return { ok: false, status: 404, reason: "no such container" };
+    }
+    if (res.status !== 200 || !body) return { ok: false, status: 502, reason: "container lookup failed" };
+    let info: any;
+    try {
+      info = JSON.parse(body.toString("utf8"));
+    } catch {
+      return { ok: false, status: 502, reason: "container lookup failed" };
+    }
+    const id = info?.Id;
+    const rawName = info?.Name;
+    if (typeof id !== "string" || !HEX64_RE.test(id)) return { ok: false, status: 502, reason: "container lookup failed" };
+    if (typeof rawName !== "string" || !rawName.startsWith("/") || !NAME_RE.test(rawName.slice(1))) {
+      return { ok: false, status: 403, reason: "container not managed by this gateway" };
+    }
+    const name = rawName.slice(1);
+    const labels = info?.Config?.Labels;
+    if (!labels || typeof labels !== "object" || labels["co-workspace.instance"] !== cfg.policy.instanceId) {
+      return { ok: false, status: 403, reason: "container not managed by this gateway" };
+    }
+    if (NAME_RE.test(ref) ? ref !== name : !id.startsWith(ref)) {
+      return { ok: false, status: 403, reason: "container ref mismatch" };
+    }
+    const prev = cache.get(id);
+    cache.set(id, { name, binds: prev?.binds });
+    return { ok: true, id, name, binds: info?.HostConfig?.Binds };
+  }
+
+  async function handleCreate(c: AnySocket, d: Extract<RouteDecision, { allowed: true }>, body: Buffer): Promise<void> {
+    const s = st(c);
+    const verdict = validateCreate(body.toString("utf8"), cfg.policy, d.name!);
+    if (!verdict.ok) return respond(c, 403, verdict.reason);
+    const disk = validateBindsOnDisk(verdict.facts.binds, cfg.policy.dataDirHost);
+    if (!disk.ok) return respond(c, 403, disk.reason);
+    let res: Response;
+    try {
+      res = await upstreamFetch(`${d.versionPrefix}${d.norm}${forwardQuery(d.rawQuery)}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "User-Agent": s.head?.headers["user-agent"] ?? "co-workspace-docker-broker" },
+        body: verdict.canonicalText,
+      });
+    } catch {
+      return respond(c, 502, "upstream unreachable", "error");
+    }
+    const out = await readCapped(res).catch(() => null);
+    if (!out) return respond(c, 502, "upstream response too large or failed", "error");
+    if (res.status === 201) {
+      try {
+        const id = JSON.parse(out.toString("utf8"))?.Id;
+        if (typeof id === "string" && HEX64_RE.test(id)) cache.set(id, { name: d.name!, binds: verdict.facts.binds });
+      } catch {
+        /* relay anyway */
+      }
+    }
+    logLine(s, "allow", `status_${res.status}`);
+    respondRaw(c, res.status, res.statusText, res.headers.get("content-type") ?? "application/json", res.headers.get("api-version"), out);
+  }
+
+  async function handleList(c: AnySocket, d: Extract<RouteDecision, { allowed: true }>): Promise<void> {
+    const s = st(c);
+    let res: Response;
+    try {
+      res = await upstreamFetch(`${d.versionPrefix}${d.norm}${forwardQuery(d.rawQuery)}`, { method: "GET" });
+    } catch {
+      return respond(c, 502, "upstream unreachable", "error");
+    }
+    const out = await readCapped(res).catch(() => null);
+    if (!out) return respond(c, 502, "upstream response too large or failed", "error");
+    let body = out;
+    if (res.status === 200) {
+      try {
+        body = Buffer.from(JSON.stringify(filterContainerList(JSON.parse(out.toString("utf8")), cfg.policy)));
+      } catch {
+        return respond(c, 502, "upstream list unparseable", "error");
+      }
+    }
+    logLine(s, "allow", `status_${res.status}`);
+    respondRaw(c, res.status, res.statusText, "application/json", res.headers.get("api-version"), body);
+  }
+
+  function sameBinds(a: unknown, b: string[] | undefined): boolean {
+    return Array.isArray(a) && Array.isArray(b) && a.length === b.length && a.every((x, i) => x === b[i]);
+  }
+
+  /** Piped and upgrade routes: raw upstream connection with a rebuilt head. */
+  async function handleStream(c: AnySocket, d: Extract<RouteDecision, { allowed: true }>): Promise<void> {
+    const s = st(c);
+    let path = `${d.versionPrefix}${d.norm}`;
+    if (d.ref !== undefined) {
+      const r = await resolveRef(d.versionPrefix, d.ref);
+      if (s.phase === "done") return;
+      if (!r.ok) return respond(c, r.status, r.reason, r.status === 502 ? "error" : "deny");
+      if (d.op === "start") {
+        const recorded = cache.get(r.id)?.binds;
+        if (!recorded) return respond(c, 403, "start of a container not created through this broker");
+        if (!sameBinds(r.binds, recorded)) return respond(c, 403, "binds changed since create");
+        const disk = validateBindsOnDisk(recorded, cfg.policy.dataDirHost);
+        if (!disk.ok) return respond(c, 403, disk.reason);
+      }
+      if (d.op === "delete") cache.delete(r.id);
+      const action = d.op === "delete" ? "" : `/${d.op}`;
+      path = `${d.versionPrefix}/containers/${r.id}${action}`;
+    }
+    path += forwardQuery(d.rawQuery);
+    const upgrade = d.mode === "upgrade";
+    const headers = s.head!.headers;
+    const upHead = upstreamHead(s.head!.method, path, upgrade ? { ...headers, "content-type": headers["content-type"] ?? "text/plain" } : headers, 0, upgrade);
+
+    let upHeadBuf = Buffer.alloc(0);
+    let upHeadDone = !upgrade;
+    let up: AnySocket;
+    try {
+      up = await Bun.connect({
+        unix: cfg.socketPath,
+        allowHalfOpen: true,
+        socket: {
+          data(u, chunk) {
+            if (s.phase === "done") return;
+            if (!upHeadDone) {
+              upHeadBuf = Buffer.concat([upHeadBuf, chunk]);
+              const i = upHeadBuf.indexOf(CRLF2);
+              if (i < 0) {
+                if (upHeadBuf.length > MAX_HEAD_BYTES) {
+                  logLine(s, "error", "upstream head too large");
+                  closeAll(c);
+                }
+                return;
+              }
+              upHeadDone = true;
+              const firstLine = upHeadBuf.subarray(0, upHeadBuf.indexOf("\r\n")).toString("latin1");
+              if (/^HTTP\/1\.1 101 /.test(firstLine + " ")) {
+                s.phase = "tunnel";
+                logLine(s, "allow", "upgraded");
+              } else {
+                logLine(s, "allow", "upgrade_refused");
+              }
+              s.writer.write(upHeadBuf);
+              upHeadBuf = Buffer.alloc(0);
+            } else {
+              s.writer.write(chunk);
+            }
+            if (s.writer.backlog > HIGH_WATER) u.pause();
+          },
+          drain() {
+            s.upWriter?.drain();
+          },
+          end() {
+            s.upstreamEnded = true;
+            if (s.phase === "tunnel" && !s.clientEnded) {
+              s.writer.shutdown();
+            } else {
+              clearTimer(s);
+              s.phase = "done";
+              s.writer.end();
+              up?.end();
+            }
+          },
+          close() {
+            upstreams.delete(up);
+            clearTimer(s);
+            if (s.phase !== "done") {
+              s.phase = "done";
+              s.writer.end();
+            }
+          },
+          error() {
+            /* close follows */
+          },
+        },
+      });
+    } catch {
+      return respond(c, 502, "upstream unreachable", "error");
+    }
+    upstreams.add(up);
+    if (s.phase === "done") {
+      up.end();
+      return;
+    }
+    s.upstream = up;
+    s.upWriter = new Writer(up);
+    s.upWriter.onLow = () => c.resume();
+    s.writer.onLow = () => up.resume();
+    s.phase = "relay";
+    if (!upgrade) logLine(s, "allow", d.op);
+    s.upWriter.write(Buffer.from(upHead, "latin1"));
+    if (d.op !== "wait" && !upgrade) {
+      s.timer = setTimeout(() => {
+        logLine(s, "error", "upstream timeout");
+        closeAll(c);
+      }, cfg.upstreamTimeoutMs);
+    }
+  }
+
+  async function dispatch(c: AnySocket, body: Buffer): Promise<void> {
+    const s = st(c);
+    const d = s.decision!;
+    try {
+      if (d.op === "create") await handleCreate(c, d, body);
+      else if (d.op === "list") await handleList(c, d);
+      else await handleStream(c, d);
+    } catch (e) {
+      if (s.phase !== "done") respond(c, 500, "internal error", "error");
+    }
+  }
+
+  function onHeadComplete(c: AnySocket, headText: string, rest: Buffer): void {
+    const s = st(c);
+    const parsed = parseRequestHead(headText);
+    if (!parsed.ok) return respond(c, parsed.status, parsed.reason);
+    s.head = parsed.head;
+    const decision = checkRoute(parsed.head.method, parsed.head.target, cfg.policy, parsed.head.headers);
+    if (!decision.allowed) return respond(c, decision.status, decision.reason);
+    s.decision = decision;
+    const len = parsed.head.contentLength;
+    if (decision.op === "create") {
+      if (len > MAX_CREATE_BODY_BYTES) return respond(c, 413, "create body too large");
+    } else if (len !== 0) {
+      return respond(c, 400, "request body not allowed on this route");
+    }
+    s.buf = rest;
+    s.phase = "body";
+    clearTimer(s);
+    s.timer = setTimeout(() => respond(c, 408, "body timeout"), cfg.bodyTimeoutMs);
+    onBodyData(c);
+  }
+
+  function onBodyData(c: AnySocket): void {
+    const s = st(c);
+    const len = s.head!.contentLength;
+    if (s.buf.length > len) {
+      logLine(s, "deny", "pipelined");
+      closeAll(c);
+      return;
+    }
+    if (s.buf.length < len) return;
+    clearTimer(s);
+    const body = s.buf;
+    s.buf = Buffer.alloc(0);
+    s.phase = "busy";
+    void dispatch(c, body);
+  }
+
+  const listener: TCPSocketListener<ClientState> = Bun.listen<ClientState>({
+    hostname: cfg.hostname,
+    port: cfg.port,
+    allowHalfOpen: true,
+    socket: {
+      open(c) {
+        const s: ClientState = {
+          phase: "head",
+          buf: Buffer.alloc(0),
+          started: Date.now(),
+          writer: new Writer(c as AnySocket),
+          counted: false,
+          logged: false,
+          clientEnded: false,
+          upstreamEnded: false,
+        };
+        c.data = s;
+        clients.add(c as AnySocket);
+        if (active >= cfg.maxConn) {
+          respond(c as AnySocket, 503, "too many connections", "limit");
+          return;
+        }
+        active++;
+        s.counted = true;
+        s.timer = setTimeout(() => {
+          if (s.phase === "head") respond(c as AnySocket, 408, "head timeout");
+        }, cfg.headTimeoutMs);
+      },
+      data(c, chunk) {
+        const s = c.data;
+        const sock = c as AnySocket;
+        switch (s.phase) {
+          case "head": {
+            s.buf = Buffer.concat([s.buf, chunk]);
+            const i = s.buf.indexOf(CRLF2);
+            if (i < 0) {
+              if (s.buf.length > MAX_HEAD_BYTES) respond(sock, 431, "request head too large");
+              return;
+            }
+            if (i > MAX_HEAD_BYTES) return respond(sock, 431, "request head too large");
+            onHeadComplete(sock, s.buf.subarray(0, i).toString("latin1"), s.buf.subarray(i + 4));
+            return;
+          }
+          case "body":
+            s.buf = Buffer.concat([s.buf, chunk]);
+            onBodyData(sock);
+            return;
+          case "tunnel":
+            s.upWriter!.write(chunk);
+            if (s.upWriter!.backlog > HIGH_WATER) sock.pause();
+            return;
+          case "done":
+            return;
+          default:
+            // busy / relay: bytes beyond the one parsed request are never forwarded.
+            logLine(s, "deny", "pipelined");
+            closeAll(sock);
+        }
+      },
+      drain(c) {
+        c.data.writer.drain();
+      },
+      end(c) {
+        const s = c.data;
+        s.clientEnded = true;
+        if (s.phase === "tunnel") {
+          if (s.upstreamEnded) closeAll(c as AnySocket);
+          else s.upWriter!.shutdown();
+        } else if (s.phase === "head" || s.phase === "body") {
+          clearTimer(s);
+          s.phase = "done";
+          c.end();
+        }
+        // busy / relay: the response is still sent to the half-closed client.
+      },
+      close(c) {
+        const s = c.data;
+        clients.delete(c as AnySocket);
+        if (s?.counted) {
+          s.counted = false;
+          active--;
+        }
+        if (!s) return;
+        clearTimer(s);
+        if (s.phase !== "done") logLine(s, "abort", "client closed");
+        s.phase = "done";
+        try {
+          s.upstream?.end();
+        } catch {
+          /* ignore */
+        }
+      },
+      error() {
+        /* close follows */
+      },
+    },
+  });
+
+  return {
+    port: listener.port,
+    async stop() {
+      listener.stop(true);
+      for (const u of upstreams) {
+        try {
+          u.end();
+        } catch {
+          /* ignore */
+        }
+      }
+      for (const c of clients) {
+        try {
+          c.end();
+        } catch {
+          /* ignore */
+        }
+      }
+      await Bun.sleep(0);
+    },
   };
 }
 
 if (import.meta.main) {
   const cfg = loadBrokerConfig();
-  Bun.serve({
-    port: cfg.port,
-    idleTimeout: 0, // long attaches/waits must not be cut by the broker
-    fetch: createBrokerHandler(cfg),
-  });
-  console.log(`[docker-broker] listening on :${cfg.port} -> ${cfg.upstream ?? `unix:${cfg.socket}`} (fleet prefix ${cfg.namePrefix})`);
+  const h = startBroker(cfg);
+  cfg.log(
+    `listening on ${cfg.hostname}:${h.port} -> unix:${cfg.socketPath} (instance ${cfg.policy.instanceId}, image ${cfg.policy.runtimeImage}, max ${cfg.maxConn} conns)`,
+  );
 }
