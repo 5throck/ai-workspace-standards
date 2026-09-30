@@ -53,3 +53,20 @@ Out of scope (stays as-is, separate work):
 
 - Existing Projects keep a stale `/meeting` copy until their next `/sync` upgrade — acceptable per audit principle 4 (Projects land via re-sync).
 - The audit's remaining doc-replacement program (L2/Projects prose) proceeds independently; this change removes the structural root so no new `/meeting` command copies are delivered.
+
+## 6. Follow-up (2026-09-30, post-merge residue sweep)
+
+A post-merge audit of the landed retirement (8ccbeeb0) found two governance surfaces the
+change missed — both pure residue of the retired command, no behavior change:
+
+- `docs/templates/lifecycle-governance.json`: the `newVariantChecklist` still carried the two
+  "Create .claude/.gemini commands/meeting.md (copy from templates/common)" steps. Removed;
+  history entry `meeting-command-retirement-followup` appended; `lastUpdated` bumped.
+- `docs/governance/LIFECYCLE_GOVERNANCE.md`: the prose twin of the same checklist carried the
+  same two steps. Removed.
+
+Verified clean on main (no action needed): `scripts/validate-templates.ts` (Check 8 removed
+with explanatory comment), `templates/README.md`/`README_ko.md` (Shared-File-Sync section
+rewritten to a live example), `CLAUDE.md`/`templates/common/CLAUDE.md` (command-table row
+removed, explicit-invocation note retained), `templates/common/GEMINI.md` (intercept rule
+removed), skill SSOT self-contained at 1.4.4.

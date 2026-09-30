@@ -7,7 +7,7 @@ lang_reason: source-material
 
 > **Doc intent:** Human-readable governance specification for the 5-domain × 3-layer lifecycle model.
 > Machine-readable policy is in [`lifecycle-governance.json`](../templates/lifecycle-governance.json).
-> Last Updated: 2026-09-26
+> Last Updated: 2026-09-30
 
 ---
 
@@ -184,8 +184,6 @@ Use this checklist when creating a new `templates/co-<name>/` variant. Steps are
 - [ ] Create `agents/` directory with at least `pm.md` (status: `draft`)
 - [ ] Create `AGENTS.md` roster listing all agent files
 - [ ] Create `skills/` directory with at least `agent-lifecycle-manager/`
-- [ ] Create `.claude/commands/meeting.md` (copy from `templates/common/.claude/commands/meeting.md`)
-- [ ] Create `.gemini/commands/meeting.md` (copy from `templates/common/.gemini/commands/meeting.md`)
 - [ ] Create `docs/<variant>.context.md` with architecture overview
 - [ ] Create `README.md` (English) following the README Standard — 7 required sections: Overview, Quick Start, Team Mission, Meet the AI Team, Skills, How to Collaborate, Variant Type (see `docs/governance/variant-contract.md` "README Standard")
 - [ ] Create `README_ko.md` (Korean) mirroring the same 7 sections (`개요 · 빠른 시작 · 팀 미션 · AI 팀 소개 · 스킬 · 협업 방법 · 변형 유형`)
