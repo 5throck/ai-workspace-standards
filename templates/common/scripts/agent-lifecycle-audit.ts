@@ -9,9 +9,10 @@
  *   bun scripts/agent-lifecycle-audit.ts
  *   bun scripts/agent-lifecycle-audit.ts --json   # JSON output
  *
- * @version 1.3.1
+ * @version 1.4.0
  * @l2-propagate false
- * @last_updated 2026-09-21
+ * @last_updated 2026-09-30
+ * v1.4.0: In root agents/ directory, any .md with a name: frontmatter key is an agent (description: accepted; excludes README*, AGENTS.md). Check 3 accepts role OR description.
  * v1.3.1: Check 12 gated to IS_WORKSPACE_ROOT — project snapshots keep delivered owners as-is (co-safety virtual domain owners would otherwise fail project-side audits).
  * @license MIT
  *
@@ -168,7 +169,7 @@ function parseAgentFrontmatter(filePath: string): AgentFrontmatter | null {
 }
 
 // Recursively find all agent files
-function findAgentFiles(dir: string, depth = 0): string[] {
+export function findAgentFiles(dir: string, depth = 0, explicitAgentsDir = false): string[] {
   const agents: string[] = [];
 
   if (!existsSync(dir)) return agents;
@@ -178,7 +179,7 @@ function findAgentFiles(dir: string, depth = 0): string[] {
   if (dir === ROOT) {
     const agentsDir = join(dir, 'agents');
     if (existsSync(agentsDir)) {
-      return findAgentFiles(agentsDir);
+      return findAgentFiles(agentsDir, 0, true);
     }
     return agents;
   }
@@ -193,7 +194,7 @@ function findAgentFiles(dir: string, depth = 0): string[] {
     if (entry.isDirectory()) {
       if (entry.name === 'node_modules' || entry.name === '_archive' ||
           entry.name === 'skills' || entry.name === 'commands') continue;
-      agents.push(...findAgentFiles(fullPath, depth + 1));
+      agents.push(...findAgentFiles(fullPath, depth + 1, explicitAgentsDir));
     } else if (entry.name.endsWith('.md') &&
                entry.name !== 'AGENTS.md' &&
                entry.name !== 'README.md' &&
@@ -203,6 +204,12 @@ function findAgentFiles(dir: string, depth = 0): string[] {
       const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
       if (frontmatterMatch) {
         const fm = frontmatterMatch[1];
+        // Inside the explicit agents/ directory, a named frontmatter is enough
+        // (project agents use description: and no role:).
+        if (explicitAgentsDir) {
+          if (/^name:/m.test(fm) && !entry.name.startsWith('README')) agents.push(fullPath);
+          continue;
+        }
         // Agents have 'role:' or 'color:' in frontmatter; skills have 'description:' instead
         if ((fm.includes('role:') || fm.includes('color:')) && !fm.includes('description: This skill should be used')) {
           agents.push(fullPath);
@@ -446,12 +453,12 @@ function auditAgents(jsonMode = false): AuditResult {
     }
 
     // Check 3: Missing role
-    if (!frontmatter.role) {
+    if (!frontmatter.role && !frontmatter.description) {
       warnings.push({
         level: 'warning',
         file: relPath,
-        message: 'Missing role in frontmatter',
-        fix: "Add 'role: brief description of agent role'",
+        message: 'Missing role and description in frontmatter',
+        fix: "Add 'role: brief description of agent role' (or 'description:')",
       });
     }
 
