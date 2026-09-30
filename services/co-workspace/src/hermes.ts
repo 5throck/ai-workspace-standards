@@ -70,6 +70,11 @@ export interface HermesSpawnOptions {
     hostProjectDir?: string;
     hostHermesHome?: string;
     hostAuthDir?: string;
+    /** T-20260930-038 volume mode: named data volume + storage/<P>/<N> base inside it. When
+     * set, the two tenant -v binds are replaced by --mount type=volume,...,volume-subpath=...
+     * flags (no host path is named, closing the F3 bind-source TOCTOU). */
+    dataVolume?: string;
+    subpathBase?: string;
     memory?: string;
     cpus?: string;
     pidsLimit?: number;
@@ -174,10 +179,22 @@ export function hermesSpawnArgv(o: HermesSpawnOptions): string[] {
     o.hermesBin,
     "--workdir",
     MOUNT_PROJECT,
-    "-v",
-    `${o.container.hostProjectDir ?? o.projectDir}:${MOUNT_PROJECT}`,
-    "-v",
-    `${o.container.hostHermesHome ?? o.hermesHome}:${MOUNT_HERMES_HOME}`,
+    ...(o.container.dataVolume
+      ? (() => {
+          if (!o.container!.subpathBase) throw new Error("volume mode requires container.subpathBase");
+          if (o.sharedAuthDir) throw new Error("sharedAuthDir is not supported in volume mode (use provider-key credential mode)");
+          const base = o.container.subpathBase.replace(/\/+$/, "");
+          return [
+            "--mount", `type=volume,src=${o.container.dataVolume},dst=${MOUNT_PROJECT},volume-subpath=${base}/project`,
+            "--mount", `type=volume,src=${o.container.dataVolume},dst=${MOUNT_HERMES_HOME},volume-subpath=${base}/hermes-home`,
+          ];
+        })()
+      : [
+          "-v",
+          `${o.container.hostProjectDir ?? o.projectDir}:${MOUNT_PROJECT}`,
+          "-v",
+          `${o.container.hostHermesHome ?? o.hermesHome}:${MOUNT_HERMES_HOME}`,
+        ]),
     "-e",
     `HERMES_HOME=${MOUNT_HERMES_HOME}`,
     "-e",

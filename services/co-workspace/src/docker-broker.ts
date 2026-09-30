@@ -32,6 +32,8 @@ import {
   loadPolicyConfig,
   MAX_CREATE_BODY_BYTES,
   NAME_RE,
+  semanticEqual,
+  SUBPATH_BASE_RE,
   validateBindsOnDisk,
   validateCreate,
   filterContainerList,
@@ -49,6 +51,13 @@ export interface BrokerConfig {
   bodyTimeoutMs: number;
   /** Timeout for buffered and piped upstream exchanges (not wait, not attach). */
   upstreamTimeoutMs: number;
+  /** Defense in depth for the /coworkspace/volume control route (T-20260930-038): when set,
+   * requests must carry X-Co-Workspace-Token with this exact value. The internal dockerapi
+   * network is the primary control; the token is optional extra hardening. */
+  brokerToken?: string;
+  /** Image for the broker-internal volume init/rm helper containers (pinned by digest in
+   * docker-compose.volume.yml). */
+  volumeInitImage: string;
   log: (line: string) => void;
 }
 
@@ -60,6 +69,8 @@ export function loadBrokerConfig(env: Record<string, string | undefined> = proce
     port: Number(env.CO_WORKSPACE_BROKER_PORT ?? 2375),
     hostname: "0.0.0.0",
     maxConn: Number.isInteger(maxConn) && maxConn > 0 ? maxConn : 64,
+    volumeInitImage: env.CO_WORKSPACE_VOLUME_INIT_IMAGE || "alpine:3.20",
+    brokerToken: env.CO_WORKSPACE_BROKER_TOKEN || undefined,
     headTimeoutMs: 10_000,
     bodyTimeoutMs: 10_000,
     upstreamTimeoutMs: 30_000,
@@ -208,6 +219,8 @@ interface CacheEntry {
   name: string;
   /** Binds recorded at create (only known for containers created through this broker process). */
   binds?: string[];
+  /** Canonical mounts recorded at create (volume mode, T-20260930-038). */
+  mounts?: unknown[];
 }
 
 type Phase = "head" | "body" | "busy" | "relay" | "tunnel" | "done";
@@ -352,7 +365,7 @@ export function startBroker(cfg: BrokerConfig): BrokerHandle {
   }
 
   type Resolved =
-    | { ok: true; id: string; name: string; binds: unknown }
+    | { ok: true; id: string; name: string; binds: unknown; mounts: unknown }
     | { ok: false; status: number; reason: string };
 
   /** Internal inspect; the daemon's answer is never relayed to the client. */
@@ -390,16 +403,21 @@ export function startBroker(cfg: BrokerConfig): BrokerHandle {
       return { ok: false, status: 403, reason: "container ref mismatch" };
     }
     const prev = cache.get(id);
-    cache.set(id, { name, binds: prev?.binds });
-    return { ok: true, id, name, binds: info?.HostConfig?.Binds };
+    cache.set(id, { name, binds: prev?.binds, mounts: prev?.mounts });
+    return { ok: true, id, name, binds: info?.HostConfig?.Binds, mounts: info?.HostConfig?.Mounts };
   }
 
   async function handleCreate(c: AnySocket, d: Extract<RouteDecision, { allowed: true }>, body: Buffer): Promise<void> {
     const s = st(c);
     const verdict = validateCreate(body.toString("utf8"), cfg.policy, d.name!);
     if (!verdict.ok) return respond(c, 403, verdict.reason);
-    const disk = validateBindsOnDisk(verdict.facts.binds, cfg.policy.dataDirHost);
-    if (!disk.ok) return respond(c, 403, disk.reason);
+    // Volume mode (T-20260930-038): no host paths exist to walk - the daemon enforces subpath
+    // containment inside the named volume, so the on-disk lstat walk is skipped entirely.
+    if (cfg.policy.dataVolume === undefined) {
+      const disk = validateBindsOnDisk(verdict.facts.binds, cfg.policy.dataDirHost);
+      if (!disk.ok) return respond(c, 403, disk.reason);
+    }
+
     let res: Response;
     try {
       res = await upstreamFetch(`${d.versionPrefix}${d.norm}${forwardQuery(d.rawQuery)}`, {
@@ -415,7 +433,9 @@ export function startBroker(cfg: BrokerConfig): BrokerHandle {
     if (res.status === 201) {
       try {
         const id = JSON.parse(out.toString("utf8"))?.Id;
-        if (typeof id === "string" && HEX64_RE.test(id)) cache.set(id, { name: d.name!, binds: verdict.facts.binds });
+        if (typeof id === "string" && HEX64_RE.test(id)) {
+          cache.set(id, { name: d.name!, binds: verdict.facts.binds, mounts: verdict.facts.mounts });
+        }
       } catch {
         /* relay anyway */
       }
@@ -446,6 +466,10 @@ export function startBroker(cfg: BrokerConfig): BrokerHandle {
     respondRaw(c, res.status, res.statusText, "application/json", res.headers.get("api-version"), body);
   }
 
+  function isPlainObject(v: unknown): v is Record<string, unknown> {
+    return typeof v === "object" && v !== null && !Array.isArray(v);
+  }
+
   function sameBinds(a: unknown, b: string[] | undefined): boolean {
     return Array.isArray(a) && Array.isArray(b) && a.length === b.length && a.every((x, i) => x === b[i]);
   }
@@ -459,11 +483,17 @@ export function startBroker(cfg: BrokerConfig): BrokerHandle {
       if (s.phase === "done") return;
       if (!r.ok) return respond(c, r.status, r.reason, r.status === 502 ? "error" : "deny");
       if (d.op === "start") {
-        const recorded = cache.get(r.id)?.binds;
-        if (!recorded) return respond(c, 403, "start of a container not created through this broker");
-        if (!sameBinds(r.binds, recorded)) return respond(c, 403, "binds changed since create");
-        const disk = validateBindsOnDisk(recorded, cfg.policy.dataDirHost);
-        if (!disk.ok) return respond(c, 403, disk.reason);
+        if (cfg.policy.dataVolume !== undefined) {
+          const recordedMounts = cache.get(r.id)?.mounts;
+          if (!recordedMounts) return respond(c, 403, "start of a container not created through this broker");
+          if (!semanticEqual(r.mounts, recordedMounts)) return respond(c, 403, "mounts changed since create");
+        } else {
+          const recorded = cache.get(r.id)?.binds;
+          if (!recorded) return respond(c, 403, "start of a container not created through this broker");
+          if (!sameBinds(r.binds, recorded)) return respond(c, 403, "binds changed since create");
+          const disk = validateBindsOnDisk(recorded, cfg.policy.dataDirHost);
+          if (!disk.ok) return respond(c, 403, disk.reason);
+        }
       }
       if (d.op === "delete") cache.delete(r.id);
       const action = d.op === "delete" ? "" : `/${d.op}`;
@@ -559,12 +589,121 @@ export function startBroker(cfg: BrokerConfig): BrokerHandle {
     }
   }
 
+  /** Parse + validate the POST /coworkspace/volume control body, then run the helper. */
+  async function handleVolumeControl(c: AnySocket, body: Buffer): Promise<void> {
+    const s = st(c);
+    if (cfg.brokerToken !== undefined) {
+      const tok = s.head?.headers["x-co-workspace-token"];
+      if (tok !== cfg.brokerToken) return respond(c, 403, "volume control token mismatch");
+    }
+    if (cfg.policy.dataVolume === undefined) return respond(c, 403, "volume control route requires volume mode");
+    let req: { op?: unknown; subpath?: unknown };
+    try {
+      req = JSON.parse(body.toString("utf8"));
+    } catch {
+      return respond(c, 400, "control body must be JSON");
+    }
+    if (!isPlainObject(req)) return respond(c, 400, "control body must be a JSON object");
+    if (req.op !== "init" && req.op !== "rm") return respond(c, 400, "op must be init or rm");
+    if (typeof req.subpath !== "string") return respond(c, 400, "subpath must be a string");
+    if (req.subpath.includes("..") || req.subpath.startsWith("/")) return respond(c, 400, "subpath not allowed");
+    // The gateway sends the tenant BASE (storage/<P>/<N>); the helper appends the project /
+    // hermes-home leaves itself (design 2026-09-30, section 5). Leaf-carrying subpaths are the
+    // create-body concern (SUBPATH_RE), not this control route's.
+    if (!SUBPATH_BASE_RE.test(req.subpath)) return respond(c, 400, "subpath not allowed");
+    logLine(s, "allow", `volume_${req.op}`);
+    try {
+      await runVolumeHelper(req.op, req.subpath);
+    } catch (e) {
+      return respond(c, 502, `volume helper failed: ${String((e as Error)?.message ?? e).slice(0, 300)}`, "error");
+    }
+    return respond(c, 204, "ok");
+  }
+
+  /**
+   * Broker-internal volume helper (design 2026-09-30, section 5): create -> start -> wait ->
+   * delete a short-lived alpine container that mkdir/chowns (init) or rm -rf (rm) a tenant
+   * subpath inside the data volume. The name is deliberately outside NAME_RE, so the gateway
+   * can never route it; the body is broker-constructed from the regex-validated subpath (its
+   * charset contains no shell metacharacters) and the config image - no client bytes.
+   *
+   * LIVE-VERIFIED CONSTRAINT (dockerd 29.8.1): the daemon lstats VolumeOptions.Subpath at
+   * START and refuses a mount whose subpath does not exist yet. The init helper therefore
+   * mounts the volume ROOT (no Subpath) and creates the subpath itself; subpath mounts only
+   * work after init. rm mounts the root for the same reason (and because the leaf dirs may
+   * not exist). The helper is broker-spawned with fixed argv components, so the extra
+   * volume-root visibility is within the broker's existing root-equivalent trust.
+   */
+  async function runVolumeHelper(op: "init" | "rm", subpath: string): Promise<void> {
+    const name = `co-workspace-vol-control-${Math.floor(Math.random() * 0xffffffff).toString(16).padStart(8, "0")}`;
+    const leaf = op === "init"
+      ? "mkdir -p /v/" + subpath + "/project /v/" + subpath + "/hermes-home && chown -R 10000:10000 /v/" + subpath + " && chmod 700 /v/" + subpath
+      : "rm -rf /v/" + subpath;
+    const body = JSON.stringify({
+      Image: cfg.volumeInitImage,
+      Cmd: ["sh", "-c", leaf],
+      Labels: { "co-workspace.volctl": "1" },
+      HostConfig: {
+        // Volume ROOT mount (no Subpath): the daemon lstats VolumeOptions.Subpath at start,
+        // so a subpath mount would fail before mkdir could run (live-verified, 29.8.1).
+        Mounts: [{ Type: "volume", Source: cfg.policy.dataVolume, Target: "/v" }],
+      },
+    });
+    const mk = async (path: string, init: RequestInit): Promise<Response> => upstreamFetch(path, { timeoutMs: 60_000, ...init });
+    const id = await (async () => {
+      const res = await mk(`/containers/create?name=${encodeURIComponent(name)}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body,
+      });
+      const out = await readCapped(res).catch(() => null);
+      const parsed = out ? JSON.parse(out.toString("utf8")) : {};
+      if (res.status !== 201 || typeof parsed?.Id !== "string") {
+        throw new Error(`helper create failed (${res.status}): ${String(parsed?.message ?? "no body").slice(0, 200)}`);
+      }
+      return parsed.Id as string;
+    })();
+    try {
+      const start = await mk(`/containers/${id}/start`, { method: "POST" });
+      if (start.status !== 204) throw new Error(`helper start failed (${start.status})`);
+      const wait = await mk(`/containers/${id}/wait`, { method: "POST" });
+      const wout = await readCapped(wait).catch(() => null);
+      const code = wout ? (JSON.parse(wout.toString("utf8"))?.StatusCode) : undefined;
+      if (wait.status !== 200 || code !== 0) {
+        // Best-effort stderr tail from the daemon's multiplexed log stream.
+        let tail = `exit ${String(code)}`;
+        try {
+          const logs = await mk(`/containers/${id}/logs?stdout=1&stderr=1&tail=40`, { method: "GET" });
+          const lout = await readCapped(logs).catch(() => null);
+          if (lout) {
+            // Strip 8-byte docker stream frame headers; non-TTY logs only (helper has no Tty).
+            const parts: string[] = [];
+            let off = 0;
+            while (off + 8 <= lout.length) {
+              const n = lout.readUInt32BE(off + 4);
+              parts.push(lout.subarray(off + 8, Math.min(off + 8 + n, lout.length)).toString("utf8"));
+              off += 8 + n;
+            }
+            tail += ": " + parts.join("").slice(-400);
+          }
+        } catch {
+          /* tail is best effort */
+        }
+        throw new Error(`helper failed (${tail.slice(0, 480)})`);
+      }
+    } finally {
+      await mk(`/containers/${id}?force=1&v=1`, { method: "DELETE" }).catch(() => {});
+    }
+  }
+
   async function dispatch(c: AnySocket, body: Buffer): Promise<void> {
     const s = st(c);
     const d = s.decision!;
     try {
       if (d.op === "create") await handleCreate(c, d, body);
       else if (d.op === "list") await handleList(c, d);
+      else if (d.op === "volume") await handleVolumeControl(c, body);
+      else if (d.op === "volinspect") await handleStream(c, d);
       else await handleStream(c, d);
     } catch (e) {
       if (s.phase !== "done") respond(c, 500, "internal error", "error");
@@ -582,6 +721,8 @@ export function startBroker(cfg: BrokerConfig): BrokerHandle {
     const len = parsed.head.contentLength;
     if (decision.op === "create") {
       if (len > MAX_CREATE_BODY_BYTES) return respond(c, 413, "create body too large");
+    } else if (decision.op === "volume") {
+      if (len > MAX_CREATE_BODY_BYTES) return respond(c, 413, "control body too large");
     } else if (len !== 0) {
       return respond(c, 400, "request body not allowed on this route");
     }

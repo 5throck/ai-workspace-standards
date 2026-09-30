@@ -12,7 +12,7 @@
  */
 
 
-import { dockerProbe } from "./config";
+import { dockerProbe, dockerVolumeProbe } from "./config";
 import { credentialValid, presentedCredential, requestAuthorized } from "./auth";
 import { sessionTokenFromCookie } from "./users";
 import { csrfRequired, sweepOutbox } from "./hardening";
@@ -152,6 +152,17 @@ if (import.meta.main) {
       process.exit(1);
     }
     console.log(`[co-workspace] docker isolation: server ${probe.version}`);
+    if (state.cfg.dataVolume) {
+      const vp = dockerVolumeProbe(state.cfg.dockerBin, state.cfg.dataVolume);
+      if (!vp.ok) {
+        console.error(
+          `[co-workspace] data volume "${state.cfg.dataVolume}" missing or uninspectable: ${vp.error ?? "probe failed"}` +
+            ` - run: docker volume create ${state.cfg.dataVolume}`,
+        );
+        process.exit(1);
+      }
+      console.log(`[co-workspace] volume mode: tenant data volume "${state.cfg.dataVolume}" ok`);
+    }
     const reap = reapOrphanedTurns(state.cfg);
     if (reap.error) console.warn(`[co-workspace] orphan turn reap failed: ${reap.error}`);
     else console.log(`[co-workspace] orphan turn reap: found ${reap.found}, removed ${reap.killed}`);

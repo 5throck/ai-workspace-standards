@@ -39,9 +39,9 @@ services:
     security_opt: ["no-new-privileges:true"]
     cap_drop: [ALL]
     ports:
-      - "127.0.0.1:9030:9030" # loopback publish — keep unless you front it with auth
+      - "192.168.0.44:9030:9030" # LAN publish (local deployment tweak) — web sign-in gate is on; add API keys before wider exposure
     environment:
-      CO_WORKSPACE_HOST: 0.0.0.0 # inside the container; the publish above stays loopback
+      CO_WORKSPACE_HOST: 0.0.0.0 # inside the container; the publish above binds the host LAN IP
       CO_WORKSPACE_DATA_DIR: /data
       CO_WORKSPACE_DATA_DIR_HOST: ${CO_WORKSPACE_DATA_DIR_HOST:?set to the absolute host path of the data dir}
       CO_WORKSPACE_WORKSPACE_DIR: /workspace

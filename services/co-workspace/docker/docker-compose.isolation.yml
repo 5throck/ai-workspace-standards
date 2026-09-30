@@ -22,6 +22,13 @@
 # Residual risk (accepted, single-operator): a compromised gateway (it has the data dir RW)
 # can still race a symlink swap between the start re-check and the daemon's mount (TOCTOU,
 # milliseconds). Rootless Docker or userns-remap is the only complete fix.
+#
+# VOLUME MODE (T-20260930-038): layering docker-compose.volume.yml moves tenant data into a
+# named volume (--mount type=volume,...,volume-subpath=...). That override DROPS this file's
+# read-only data-dir mount (nothing to lstat-walk) and enables the broker-internal
+# POST /coworkspace/volume control route (init/rm helpers; NOT part of the docker endpoint
+# allowlist above, and 403 in bind mode). Env pass-through added by the override:
+# CO_WORKSPACE_DATA_VOLUME, CO_WORKSPACE_BROKER_TOKEN, CO_WORKSPACE_VOLUME_INIT_IMAGE.
 # Single-operator deployments only. The runtime image must be pre-built (IMAGES=0 makes a
 # missing image fail fast instead of pulling).
 services:

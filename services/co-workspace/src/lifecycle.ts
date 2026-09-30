@@ -1,5 +1,5 @@
 import { rmSync } from "node:fs";
-import { basename, dirname, join, resolve, sep } from "node:path";
+import { basename, dirname, join, relative, resolve, sep } from "node:path";
 import { GatewayConfig, resolveLlmProviderKey, resolveLlmProviderName } from "./config";
 import { scaffoldProject } from "./scaffold";
 import { chownTree, recordProgress, seedHermesHome, sweepTenantStragglers, TenantRecord } from "./tenant";
@@ -42,8 +42,14 @@ export async function provisionTenant(state: GatewayState, rec: TenantRecord): P
     if (state.cfg.isolation === "docker") {
       // The isolated turn runs as the hermes image's UID 10000 — the tenant tree must be
       // owned by it (the scaffold subprocess wrote everything as root).
-      chownTree(rec.hermesHome, 10000, 10000);
-      chownTree(rec.projectDir, 10000, 10000);
+      if (state.cfg.dataVolume) {
+        // Volume mode (T-20260930-038): ownership is fixed by a broker-internal helper
+        // container on the volume subpath; chownTree cannot reach into the volume.
+        await brokerVolumeControl("init", tenantSubpathBase(state.cfg, rec));
+      } else {
+        chownTree(rec.hermesHome, 10000, 10000);
+        chownTree(rec.projectDir, 10000, 10000);
+      }
     }
     rec.status = "ready";
     recordProgress(rec, "ready", "session ready");
@@ -102,8 +108,39 @@ export async function cachedDirSize(tenantId: string, projectDir: string, hermes
   return bytes;
 }
 
+/** T-20260930-038 volume mode: `storage/<P>/<N>` for a tenant record - the subpath inside
+ * the data volume, matching what hostSidePath's bind sources express on the host. */
+export function tenantSubpathBase(cfg: GatewayConfig, rec: TenantRecord): string {
+  const rel = relative(resolve(cfg.dataDir, "storage"), resolve(rec.projectDir, ".."));
+  if (!rel || rel.startsWith("..")) {
+    throw new Error(`tenant folder ${rec.projectDir} is not under ${cfg.dataDir}/storage`);
+  }
+  return `storage/${rel.split(sep).join("/")}`;
+}
+
+/** Broker volume control route client (POST /coworkspace/volume). The gateway has no docker
+ * socket; DOCKER_HOST (tcp://docker-broker:2375 in compose) names the broker. */
+async function brokerVolumeControl(op: "init" | "rm", subpath: string): Promise<void> {
+  const m = (process.env.DOCKER_HOST ?? "").match(/^tcp:\/\/([^/:]+)(?::(\d+))?$/);
+  if (!m) throw new Error(`volume mode requires DOCKER_HOST=tcp://<broker>:<port> (got ${process.env.DOCKER_HOST ?? "unset"})`);
+  const token = process.env.CO_WORKSPACE_BROKER_TOKEN;
+  const res = await fetch(`http://${m[1]}:${m[2] ?? 2375}/coworkspace/volume`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      ...(token ? { "x-co-workspace-token": token } : {}),
+    },
+    body: JSON.stringify({ op, subpath }),
+    signal: AbortSignal.timeout(120_000),
+  });
+  if (res.status !== 204) {
+    throw new Error(`broker volume ${op} failed (${res.status}): ${(await res.text()).slice(0, 300)}`);
+  }
+}
+
 /** Host-side equivalent of a container path under <dataDir> (docker isolation mounts must
- * resolve on the host — CO_WORKSPACE_DATA_DIR_HOST). Undefined when dataDirHost is unset. */
+ * resolve on the host — CO_WORKSPACE_DATA_DIR_HOST). Undefined when dataDirHost is unset.
+ * BIND MODE ONLY: in volume mode tenant data lives in the data volume, not on the host. */
 export function hostSidePath(cfg: GatewayConfig, absPath: string): string | undefined {
   if (!cfg.dataDirHost) return undefined;
   const rel = absPath.slice(cfg.dataDir.length);
@@ -179,11 +216,24 @@ export async function deleteTenantData(state: GatewayState, rec: TenantRecord, a
   state.activeProcs.get(tenantId)?.kill();
   await boundedWait(state.provisioning.get(tenantId));
   await boundedWait(state.chatLocks.get(tenantId));
-  rmSync(rec.projectDir, { recursive: true, force: true });
-  rmSync(rec.hermesHome, { recursive: true, force: true });
-  // The folder only ever holds the two dirs above; clear the shell, then legacy stragglers.
-  rmSync(tenantFolder, { recursive: true, force: true });
-  sweepTenantStragglers(dirname(tenantFolder), tenantId, basename(tenantFolder));
+  if (state.cfg.isolation === "docker" && state.cfg.dataVolume) {
+    // Volume mode (T-20260930-038): rmSync cannot reach into the volume - the broker helper
+    // removes the subpath. On failure the registry row stays (status failed, retryable).
+    try {
+      await brokerVolumeControl("rm", tenantSubpathBase(state.cfg, rec));
+    } catch (err) {
+      rec.status = "failed";
+      rec.error = String((err as Error)?.message ?? err);
+      state.registry.upsert(rec);
+      throw new HttpError(502, `tenant data removal failed: ${rec.error}`);
+    }
+  } else {
+    rmSync(rec.projectDir, { recursive: true, force: true });
+    rmSync(rec.hermesHome, { recursive: true, force: true });
+    // The folder only ever holds the two dirs above; clear the shell, then legacy stragglers.
+    rmSync(tenantFolder, { recursive: true, force: true });
+    sweepTenantStragglers(dirname(tenantFolder), tenantId, basename(tenantFolder));
+  }
   state.turns.deleteTenant(tenantId);
   state.registry.delete(tenantId);
   state.chatLocks.delete(tenantId);

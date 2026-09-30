@@ -148,6 +148,10 @@ Addendum 8 and design R2/R6 under-described the shipped provider mode. Verified 
 
 **Unverified**: Docker Desktop versus Linux symlink semantics on real bind mounts; backpressure under very large output; a real provider turn end to end; Linux data-dir ownership with the read-only broker mount.
 
+## Addendum 14 (2026-09-30): opt-in volume-subpath mode closes the bind-source symlink race (T-20260930-038)
+
+Setting `CO_WORKSPACE_DATA_VOLUME` to a Docker volume name switches tenant storage from host binds (`HostConfig.Binds` plus the broker's lstat walk) to daemon-side volume-subpath mounts (`HostConfig.Mounts` with `VolumeOptions.Subpath`). Because the subpath is resolved by the daemon from the volume root and can never name a host path, the F3 bind-source symlink TOCTOU is closed by construction in this mode: live on dockerd 29.8.1, a symlink planted inside the volume at the mounted subpath is rejected at mount time with "path concatenation escapes the base directory" instead of being followed. The default bind mode is unchanged, and its accepted milliseconds-wide check-to-mount race remains documented residual risk; rootless Docker or userns-remap stays the only complete daemon-level fix for the remaining trust assumptions.
+
 ## References
 
 - Design: `docs/designs/2026-09-27-co-workspace-service-design.md` (verified building blocks, D1–D8, waves, live-verification record)

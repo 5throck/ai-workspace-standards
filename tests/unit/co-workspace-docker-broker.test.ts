@@ -11,13 +11,15 @@ import { mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, symlinkSync
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { loadBrokerConfig, parseRequestHead, startBroker, type BrokerConfig, type BrokerHandle } from "../../services/co-workspace/src/docker-broker";
-import { validateCreate } from "../../services/co-workspace/src/docker-broker-policy";
+import { loadPolicyConfig, validateCreate } from "../../services/co-workspace/src/docker-broker-policy";
 import { dockerFrame, startFakeDockerDaemon, type FakeDaemon, type FakeDaemonOptions } from "../helpers/fake-docker-daemon";
 
 const posixOnly = process.platform === "win32";
 const T = 15_000;
 const FIXTURE = JSON.parse(readFileSync(join(import.meta.dir, "../fixtures/docker-cli/create-request.json"), "utf8"));
+const VFIXTURE = JSON.parse(readFileSync(join(import.meta.dir, "../fixtures/docker-cli/create-request-volume.json"), "utf8"));
 const NAME = new URLSearchParams(FIXTURE.query).get("name") as string;
+const VNAME = new URLSearchParams(VFIXTURE.query).get("name") as string;
 const ID = "c".repeat(64);
 const UA = FIXTURE.headers["user-agent"] as string;
 
@@ -415,6 +417,186 @@ describe("attacks through the socket", () => {
       const s = await exchange(e.broker.port, req("POST", `/v1.56/containers/${ID}/start`, { "Content-Length": "0" }));
       expect(statusOf(s)).toBe(403);
       expect(e.fake.requests.some((r) => r.path.endsWith("/start"))).toBe(false);
+    },
+    T,
+  );
+});
+
+// =============================================================================================
+// T-20260930-038: volume-subpath mode through the raw broker (design 2026-09-30, sections 4-5)
+// =============================================================================================
+
+const VOLDATA = "cow-vol-test";
+
+function volumeBody(vol: string): string {
+  return (VFIXTURE.body as string).split("<VOL>").join(vol);
+}
+
+/** Volume-mode env: same harness as setup(), with CO_WORKSPACE_DATA_VOLUME set. */
+function setupVolume(opts: { cfg?: Partial<BrokerConfig>; fake?: FakeDaemonOptions } = {}): Env {
+  return setup({
+    fake: opts.fake,
+    cfg: { ...opts.cfg, policy: { ...loadPolicyConfig({}), dataVolume: VOLDATA } },
+  });
+}
+
+async function doVolCreate(e: Env, body = volumeBody(VOLDATA), name = VNAME): Promise<string> {
+  return exchange(
+    e.broker.port,
+    req("POST", `/v1.56/containers/create?name=${VNAME}`, { "Content-Type": "application/json" }, body),
+  );
+}
+
+describe("volume mode through the raw broker (T-20260930-038)", () => {
+  test.skipIf(posixOnly)(
+    "create is accepted, canonical mounts forwarded, start re-check passes on identical Mounts",
+    async () => {
+      const e = setupVolume();
+      const port = e.broker.port;
+      const created = await doVolCreate(e);
+      expect(statusOf(created)).toBe(201);
+      const v = validateCreate(volumeBody(VOLDATA), e.cfg.policy, VNAME);
+      expect(v.ok).toBe(true);
+      const up = e.fake.requests.find((r) => r.path.endsWith("/containers/create"))!;
+      expect(up.body).toBe(v.canonicalText);
+      const canonicalMounts = JSON.parse(up.body).HostConfig.Mounts;
+      expect(canonicalMounts).toEqual([
+        { Type: "volume", Source: VOLDATA, Target: "/work/project", VolumeOptions: { Subpath: "storage/default/demo/project" } },
+        { Type: "volume", Source: VOLDATA, Target: "/work/hermes-home", VolumeOptions: { Subpath: "storage/default/demo/hermes-home" } },
+      ]);
+      const s = await exchange(port, req("POST", `/v1.56/containers/${ID}/start`, { "Content-Length": "0" }));
+      expect(statusOf(s)).toBe(204);
+    },
+    T,
+  );
+
+  test.skipIf(posixOnly)(
+    "start is denied when a Subpath in the daemon-reported Mounts changed since create",
+    async () => {
+      const e = setupVolume();
+      expect(statusOf(await doVolCreate(e))).toBe(201);
+      e.fake.containers.get(ID)!.Mounts![0].VolumeOptions.Subpath = "../escape";
+      const s = await exchange(e.broker.port, req("POST", `/v1.56/containers/${ID}/start`, { "Content-Length": "0" }));
+      expect(statusOf(s)).toBe(403);
+      expect(bodyOf(s)).toContain("mounts changed since create");
+      expect(e.fake.requests.some((r) => r.path.endsWith("/start"))).toBe(false);
+    },
+    T,
+  );
+
+  test.skipIf(posixOnly)(
+    "volume-mode create attacks -> 403 and the daemon receives nothing",
+    async () => {
+      const e = setupVolume();
+      for (const [label, mut] of [
+        ["subpath .. escape", (b: any) => (b.HostConfig.Mounts[0].VolumeOptions.Subpath = "../escape")],
+        ["subpath absolute", (b: any) => (b.HostConfig.Mounts[0].VolumeOptions.Subpath = "/abs")],
+        ["subpath a/../b traversal", (b: any) => (b.HostConfig.Mounts[0].VolumeOptions.Subpath = "storage/default/../demo/project")],
+        ["subpath missing leaf", (b: any) => (b.HostConfig.Mounts[0].VolumeOptions.Subpath = "storage/default/demo")],
+        ["wrong Source volume", (b: any) => (b.HostConfig.Mounts[0].Source = "other-volume")],
+        ["non-volume Type", (b: any) => (b.HostConfig.Mounts[0].Type = "bind")],
+        ["third mount entry", (b: any) => b.HostConfig.Mounts.push(b.HostConfig.Mounts[0])],
+        ["mixed Binds+Mounts", (b: any) => (b.HostConfig.Binds = ["/etc:/work/project"])],
+        ["Binds-only in volume mode", (b: any) => delete b.HostConfig.Mounts],
+        ["extra VolumeOptions key", (b: any) => (b.HostConfig.Mounts[0].VolumeOptions.Labels = { a: "b" })],
+        ["ReadOnly mount", (b: any) => (b.HostConfig.Mounts[0].ReadOnly = true)],
+        ["duplicate target", (b: any) => {
+          b.HostConfig.Mounts[1].Target = "/work/project";
+          b.HostConfig.Mounts[1].VolumeOptions.Subpath = "storage/default/demo/project";
+        }],
+        ["wrong Target", (b: any) => (b.HostConfig.Mounts[0].Target = "/work/other")],
+        ["principal/name mismatch", (b: any) => (b.HostConfig.Mounts[1].VolumeOptions.Subpath = "storage/other/demo/hermes-home")],
+      ] as Array<[string, (b: any) => void]>) {
+        const body = JSON.parse(volumeBody(VOLDATA));
+        mut(body);
+        const r = await doVolCreate(e, JSON.stringify(body));
+        expect(statusOf(r)).toBe(403);
+        expect(e.fake.requests.length).toBe(0);
+        void label;
+      }
+    },
+    T,
+  );
+
+  test.skipIf(posixOnly)(
+    "bind-mode broker denies /coworkspace/volume before anything reaches the daemon",
+    async () => {
+      const e = setup();
+      const r = await exchange(
+        e.broker.port,
+        req("POST", "/coworkspace/volume", { "Content-Type": "application/json" }, JSON.stringify({ op: "init", subpath: "storage/default/demo" })),
+      );
+      expect(statusOf(r)).toBe(403);
+      expect(e.fake.requests.length).toBe(0);
+    },
+    T,
+  );
+
+  test.skipIf(posixOnly)(
+    "volume mode: init helper runs (reserved name, broker-built body) and attacks are rejected",
+    async () => {
+      const e = setupVolume();
+      const port = e.broker.port;
+      const ctrl = (body: string, headers: Record<string, string> = {}) =>
+        exchange(port, req("POST", "/coworkspace/volume", { "Content-Type": "application/json", ...headers }, body));
+
+      expect(statusOf(await ctrl("not json"))).toBe(400);
+      expect(statusOf(await ctrl(JSON.stringify({ op: "exec", subpath: "storage/default/demo" })))).toBe(400);
+      for (const bad of ["../escape", "/abs", "storage/default/demo/project", "storage/../x/demo"]) {
+        expect(statusOf(await ctrl(JSON.stringify({ op: "init", subpath: bad })))).toBe(400);
+      }
+      expect(e.fake.requests.length).toBe(0);
+
+      const ok = await ctrl(JSON.stringify({ op: "init", subpath: "storage/default/demo" }));
+      expect(statusOf(ok)).toBe(204);
+      const helper = e.fake.requests.find((r) => r.target.startsWith("/containers/create?name=co-workspace-vol-control-"))!;
+      expect(helper).toBeDefined();
+      const hbody = JSON.parse(helper.body);
+      expect(hbody.Cmd).toEqual([
+        "sh", "-c",
+        "mkdir -p /v/storage/default/demo/project /v/storage/default/demo/hermes-home && chown -R 10000:10000 /v/storage/default/demo && chmod 700 /v/storage/default/demo",
+      ]);
+      expect(hbody.HostConfig.Mounts).toEqual([
+        { Type: "volume", Source: VOLDATA, Target: "/v" },
+      ]);
+      // helper start + wait + forced delete happened
+      expect(e.fake.requests.some((r) => /^\/containers\/[^/]+\/start$/.test(r.path))).toBe(true);
+      expect(e.fake.requests.some((r) => r.path.endsWith("/wait"))).toBe(true);
+      expect(e.fake.requests.some((r) => r.method === "DELETE")).toBe(true);
+    },
+    T,
+  );
+
+  test.skipIf(posixOnly)(
+    "volume-mode boot probe passthrough: GET /volumes/<dataVolume> is relayed, others denied",
+    async () => {
+      const e = setupVolume();
+      const get = (t: string) => exchange(e.broker.port, req("GET", t, { "Content-Length": "0" }));
+      // The fake daemon 404s unknown routes: a 404 here proves the broker RELAYED the request.
+      expect(statusOf(await get(`/v1.56/volumes/${VOLDATA}`))).toBe(404);
+      expect(e.fake.requests.some((r) => r.path === "/v1.56/volumes/cow-vol-test")).toBe(true);
+      const denied1 = await get(`/v1.56/volumes/other`);
+      expect(statusOf(denied1)).toBe(403);
+      const denied2 = await get(`/v1.56/volumes`);
+      expect(statusOf(denied2)).toBe(403);
+      expect(e.fake.requests.some((r) => r.path.includes("/volumes/other") || r.path === "/v1.56/volumes")).toBe(false);
+    },
+    T,
+  );
+
+  test.skipIf(posixOnly)(
+    "volume control token: mismatch is 403 (defense in depth), correct token passes",
+    async () => {
+      const e = setupVolume({ cfg: { brokerToken: "s3cret" } });
+      const ctrl = (headers: Record<string, string>) =>
+        exchange(
+          e.broker.port,
+          req("POST", "/coworkspace/volume", { "Content-Type": "application/json", ...headers }, JSON.stringify({ op: "rm", subpath: "storage/default/demo" })),
+        );
+      expect(statusOf(await ctrl({}))).toBe(403);
+      expect(statusOf(await ctrl({ "X-Co-Workspace-Token": "wrong" }))).toBe(403);
+      expect(e.fake.requests.length).toBe(0);
+      expect(statusOf(await ctrl({ "X-Co-Workspace-Token": "s3cret" }))).toBe(204);
     },
     T,
   );
