@@ -2,61 +2,56 @@
 # Usage: docker compose -f docker-compose.yml -f docker-compose.isolation.yml up -d
 #   or set COMPOSE_FILE=docker-compose.yml:docker-compose.isolation.yml in .env.
 #
-# WARNING: the gateway no longer mounts the raw Docker socket; a socket proxy holds it and
-# the gateway reaches it over an internal-only network. The proxy filters by API endpoint
-# ONLY and cannot inspect the container-create body, so a compromised gateway can still
-# create a privileged container or bind-mount `/`. This REDUCES but does NOT REMOVE
-# host-root equivalence. Follow-up: rootless Docker or a create-body-validating broker.
-# CONTAINERS=1 also lets the gateway LIST and INSPECT every container on this Docker daemon
-# (including other projects' containers; verified live 2026-09-30: `docker ps -a` listed all
-# of them and `docker inspect` returns their environment). Reading container logs is also
-# part of the CONTAINERS group but was not tested. It cannot exec into containers or touch
-# images, volumes, networks or `docker info` (all 403, verified live). Do not run other
-# sensitive workloads on the same daemon as the gateway.
+# The gateway never mounts the raw Docker socket. Since T-20260930-008 the socket is held
+# by OUR create-body-validating broker (src/docker-broker.ts, same gateway image, command
+# override) — not the endpoint-only tecnativa/docker-socket-proxy. Three controls the
+# endpoint filter cannot express:
+#   1. create-body validation: image allowlist, no Privileged, CapDrop ALL,
+#      no-new-privileges, user 10000:10000, binds only under CO_WORKSPACE_DATA_DIR_HOST,
+#      no host Pid/Network mode, no devices, Memory/PidsLimit caps required.
+#   2. name scoping: create/start/wait/kill/attach/inspect/remove resolve only
+#      co-workspace-turn-* containers, and the container LIST is filtered to that fleet —
+#      other daemons' containers (and their env, seen via inspect) are invisible.
+#   3. endpoint allowlist: version probe, container create/start/wait/attach/kill, list,
+#      inspect, delete. Exec/images/volumes/networks/info/build/swarm are 403.
+# Residual risk (accepted, single-operator): a compromised gateway can still manage the
+# turn containers it legitimately owns; rootless Docker removes the remaining host-root
+# equivalence and stays the long-term direction.
 # Single-operator deployments only. The runtime image must be pre-built (IMAGES=0 makes a
 # missing image fail fast instead of pulling).
 services:
-  docker-proxy:
-    # Tag 0.3.0 verified to exist (2026-09-30); pin a digest for production.
-    image: tecnativa/docker-socket-proxy:0.3.0
+  docker-broker:
+    # Same gateway image (ships src/docker-broker.ts); command override starts the broker.
+    image: ${CO_WORKSPACE_GATEWAY_IMAGE:-co-workspace-gateway:latest}
+    build:
+      # compose resolves relative paths against THIS FILE's directory (three levels up
+      # = the repo root), same as the gateway build in docker-compose.yml.
+      context: ../../../
+      dockerfile: services/co-workspace/docker/Dockerfile
+    command: ["bun", "src/docker-broker.ts"]
     restart: unless-stopped
-    # No `read_only: true`: the image entrypoint renders /usr/local/etc/haproxy/haproxy.cfg from
-    # haproxy.cfg.template in the same directory at start-up, so a read-only root filesystem
-    # crash-loops the container (observed live), and a tmpfs over that directory hides the
-    # template. Hardening left in place: read-only socket mount, no published ports, an
-    # internal-only network.
+    # Root is required to read the host socket (root:root 660, DAC bypass); every
+    # capability is still dropped and the filesystem is read-only.
+    user: "0:0"
+    read_only: true
     tmpfs: [/run]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges"]
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
-      # Needed for `docker run` (create/start/attach/wait), `docker kill` on cancel and the
-      # boot reaper's `docker ps` / `docker rm -f`. Verified live (2026-09-30, Docker 29.8.1):
-      # create/attach/start/wait, kill (cancel), rm -f (reaper) and `docker version` (startup
-      # probe) all work with exactly this flag set; exec/image/volume/network/info are 403.
-      CONTAINERS: 1
-      POST: 1
-      DELETE: 1
-      ALLOW_START: 1
-      ALLOW_STOP: 1
-      ALLOW_RESTARTS: 1
-      EXEC: 0
-      IMAGES: 0
-      VOLUMES: 0
-      NETWORKS: 0
-      INFO: 0
-      BUILD: 0
-      SWARM: 0
-      SECRETS: 0
-      SYSTEM: 0
-      PLUGINS: 0
-      AUTH: 0
-      COMMIT: 0
+      CO_WORKSPACE_BROKER_PORT: 2375
+      CO_WORKSPACE_BROKER_SOCKET: /var/run/docker.sock
+      CO_WORKSPACE_BROKER_NAME_PREFIX: co-workspace-turn-
+      # Policy inputs mirroring the gateway's own config (both sides must agree).
+      CO_WORKSPACE_RUNTIME_IMAGE: ${CO_WORKSPACE_RUNTIME_IMAGE:-co-workspace-runtime:latest}
+      CO_WORKSPACE_DATA_DIR_HOST: ${CO_WORKSPACE_DATA_DIR_HOST:?set to the absolute host path of the data dir}
     networks: [dockerapi]
 
   co-workspace:
     environment:
-      DOCKER_HOST: tcp://docker-proxy:2375
-    depends_on: [docker-proxy]
+      DOCKER_HOST: tcp://docker-broker:2375
+    depends_on: [docker-broker]
     networks: [default, dockerapi]
 
 networks:

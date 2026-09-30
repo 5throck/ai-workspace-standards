@@ -7,12 +7,32 @@ title: >-
   events to comment frames (see
   docs/reports/2026-09-30-co-workspace-turn-latency-research.md)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-29T22:54:34.603Z'
 history:
   - at: '2026-09-29T22:54:34.603Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-30T01:01:13.735Z'
+    from: backlog
+    to: running
+  - at: '2026-09-30T01:01:13.748Z'
+    from: running
+    to: done
+result: >-
+  Implemented the perceived-latency quick win per
+  docs/reports/2026-09-30-co-workspace-turn-latency-research.md section 2 (spec
+  2026-09-30-coworkspace-latency-ux-design, registered). All four streaming
+  builders in services/co-workspace/src/responses.ts (native, OpenAI, Anthropic,
+  Gemini) now emit an immediate ': thinking…' SSE comment frame before the turn
+  starts, register startHeartbeat (15s ': ping' — previously Gemini-only), and
+  map progress-worthy Hermes events via new turnProgressComment in sse.ts
+  (tool_use -> ': tool: <name>…', tool_result -> ': tool: <name> done (<ms>ms)',
+  system init -> ': turn: runtime ready'); comments are wire-legal SSE that
+  protocol clients ignore. New tests/unit/co-workspace-latency-ux.test.ts covers
+  the comment mapping and the full OpenAI stream shape (thinking first frame,
+  runtime-ready + tool comments, role-before-content, [DONE]); 3 pre-existing
+  SSE parsers updated to skip comment frames per SSE spec client behavior. Full
+  co-workspace suite: 243 pass / 0 fail.
 error: null

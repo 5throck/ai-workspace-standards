@@ -3,7 +3,8 @@ import { anthropicEvent, anthropicStream, messagePayload, messageId } from "./an
 import { generateContentPayload, geminiError, geminiStream } from "./gemini";
 import { chunkData, completionId, completionPayload, completionUsage, doneData } from "./openai";
 import { jsonResponse } from "./http";
-import { startHeartbeat, sseStream, SSE_HEADERS, sseData } from "./sse";
+import { startHeartbeat, sseStream, SSE_HEADERS, sseData, turnProgressComment } from "./sse";
+import { TurnTiming, turnLogKey } from "./timing";
 import type { GatewayState } from "./state";
 import { assertPrincipalQuota, assertQuota } from "./access";
 import { runChat, usageSummary } from "./chat";
@@ -38,7 +39,21 @@ export function nativeChatResponse(state: GatewayState, rec: TenantRecord, messa
         assertQuota(state.cfg, current);
         assertPrincipalQuota(state, current.ownerPrincipal ?? "anonymous");
         if (sink.isClosed()) return;
-        const result = await runChat(state, current, message, (evt) => sink.enqueue(sseData(evt)), sink.onProc);
+        // T-20260930-010: show the silent thinking phase immediately and keep the
+        // connection warm while the model works (native clients already see every raw
+        // Hermes event; the comment frames cover the gap before the first event).
+        const enc = new TextEncoder();
+        sink.enqueue(enc.encode(": thinking…\n\n"));
+        startHeartbeat(sink);
+        const timing = new TurnTiming(turnLogKey(rec.tenantId));
+        let sawFirstFrame = false;
+        const result = await runChat(state, current, message, (evt) => {
+          if (!sawFirstFrame) {
+            sawFirstFrame = true;
+            timing.mark("t_first_sse_frame", { surface: "native", evt: evt.type });
+          }
+          sink.enqueue(sseData(evt));
+        }, sink.onProc);
         sink.enqueue(
           sseData({
             type: "done",
@@ -113,7 +128,20 @@ export async function openaiChatResponse(
           sink.enqueue(enc.encode(": provisioning: ready\n\n"));
         }
         if (sink.isClosed()) return;
+        // T-20260930-010: the OpenAI builder forwards only `text` events, so clients saw
+        // nothing for the whole thinking phase — emit an immediate comment frame, keep a
+        // heartbeat running, and map tool/system events to progress comments.
+        startHeartbeat(sink);
+        sink.enqueue(enc.encode(": thinking…\n\n"));
+        const timing = new TurnTiming(turnLogKey(rec.tenantId));
+        let sawFirstFrame = false;
         const result = await runChat(state, rec, message, (evt) => {
+          if (!sawFirstFrame) {
+            sawFirstFrame = true;
+            timing.mark("t_first_sse_frame", { surface: "openai", evt: evt.type });
+          }
+          const progress = turnProgressComment(evt);
+          if (progress) sink.enqueue(enc.encode(progress));
           if (evt.type !== "text" || typeof evt.text !== "string") return;
           if (!sentRole) {
             sentRole = true;
@@ -161,8 +189,21 @@ export async function anthropicChatResponse(
       try {
         let startedContent = false;
         const enqueue = (frameset: Uint8Array[]) => frameset.forEach((f) => sink.enqueue(f));
+        const enc = new TextEncoder();
         enqueue(frames.messageStart());
+        // T-20260930-010: immediate progress frame + heartbeat; the Anthropic builder
+        // forwards only `text`, so tool/system events surface as SSE comments.
+        startHeartbeat(sink);
+        sink.enqueue(enc.encode(": thinking…\n\n"));
+        const timing = new TurnTiming(turnLogKey(rec.tenantId));
+        let sawFirstFrame = false;
         const result = await runChat(state, rec, message, (evt) => {
+          if (!sawFirstFrame) {
+            sawFirstFrame = true;
+            timing.mark("t_first_sse_frame", { surface: "anthropic", evt: evt.type });
+          }
+          const progress = turnProgressComment(evt);
+          if (progress) sink.enqueue(enc.encode(progress));
           if (evt.type !== "text" || typeof evt.text !== "string") return;
           if (!startedContent) {
             startedContent = true;
@@ -210,8 +251,20 @@ export async function geminiChatResponse(
   const frames = geminiStream();
   const body = sseStream(async (sink) => {
       startHeartbeat(sink);
+      const enc = new TextEncoder();
+      // T-20260930-010: parity with the other surfaces — immediate progress frame and
+      // tool/system events as comments (the Gemini builder forwards only `text` deltas).
+      sink.enqueue(enc.encode(": thinking…\n\n"));
+      const timing = new TurnTiming(turnLogKey(rec.tenantId));
+      let sawFirstFrame = false;
       try {
         const result = await runChat(state, rec, message, (evt) => {
+          if (!sawFirstFrame) {
+            sawFirstFrame = true;
+            timing.mark("t_first_sse_frame", { surface: "gemini", evt: evt.type });
+          }
+          const progress = turnProgressComment(evt);
+          if (progress) sink.enqueue(enc.encode(progress));
           if (evt.type !== "text" || typeof evt.text !== "string") return;
           frames.delta(evt.text).forEach((f) => sink.enqueue(f));
         }, sink.onProc);

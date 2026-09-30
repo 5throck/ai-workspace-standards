@@ -7,12 +7,29 @@ title: >-
   (fix-services-stop-docker-mode-turn-conta, PR #1242); retry on the first clean
   main checkout
 priority: high
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-29T16:45:10.448Z'
 history:
   - at: '2026-09-29T16:45:10.448Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-30T00:45:50.788Z'
+    from: backlog
+    to: running
+  - at: '2026-09-30T00:45:50.804Z'
+    from: running
+    to: done
+result: >-
+  Retried from a fresh clean main checkout (full temp clone of origin/main @
+  ad4b595b, zero dirty files) per the ticket's retry condition. bun
+  scripts/auto-release-template.ts --release succeeded: templates/VERSION 0.8.1
+  -> 0.8.2, [Unreleased] provenance entry synthesized, patch cut with 22
+  delivered paths (A 0 / M 22 / D 0 / R 0 — PM tier-floor delivery into 13
+  variant AGENTS.md + 9 common files). Landed as PR #1252 (branch
+  pr/20260930-094500-chore-templates-auto-release-v0-8-2, commit 6e017f69,
+  touches only templates/VERSION + templates/CHANGELOG.md) with auto-merge
+  enabled under ADR-0089 R27 (currently waiting on required checks; root public
+  repo CI unaffected by the billing issue). Post-merge step recorded in the PR
+  body: bun scripts/tag-template.ts --fail-on-push-error.
 error: null

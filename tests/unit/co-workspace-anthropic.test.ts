@@ -196,9 +196,10 @@ console.log('{"type":"result","session_id":"sess-a","exit_code":0,"text":"Hello 
     });
     expect(res.headers.get("content-type")).toContain("text/event-stream");
     const text = await res.text();
+    // Protocol events only: SSE comment frames (": …", T-20260930-010) carry no event line.
     const events = text
       .split("\n\n")
-      .filter(Boolean)
+      .filter((frame) => frame.startsWith("event: "))
       .map((frame) => frame.split("\n")[0].replace("event: ", ""));
     expect(events).toEqual([
       "message_start",

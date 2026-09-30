@@ -5,12 +5,29 @@ title: >-
   co-workspace: plan a split of web/index.html (view modules) and server.ts
   (routers) at the next feature wave — file sizes 1173/1466 lines
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-28T05:02:03.944Z'
 history:
   - at: '2026-09-28T05:02:03.944Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-30T01:34:29.787Z'
+    from: backlog
+    to: running
+  - at: '2026-09-30T01:34:29.800Z'
+    from: running
+    to: done
+result: >-
+  Plan delivered as docs/designs/2026-09-30-coworkspace-web-split-plan.md (spec
+  registered, status planned). Half the ticket is already overtaken by events:
+  server.ts is 164 lines (the router split landed as src/routes/* — eight
+  modules, no further server split needed). The remaining half is web/index.html
+  (1184 lines): the plan targets a build-step-free ES-module split (index.html =
+  DOM + boot, app.js wiring, api.js fetch/SSE,
+  views/{sessions,chat,donut,tenant-admin}.js, styles.css; pure frame-parsing
+  moves to a tested src/web-frames.ts mirroring the T-20260930-010 comment-frame
+  wire), with a verbatim-move-first rule, an execution checklist for the feature
+  wave, and the explicit 'why not now' (stable file, behavior-neutral move wants
+  the T-20260930-009 operator verification wave alongside).
 error: null

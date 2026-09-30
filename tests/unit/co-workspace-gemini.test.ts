@@ -147,9 +147,10 @@ console.log('{"type":"result","session_id":"sess-g","exit_code":0,"text":"Hello 
     });
     expect(res.headers.get("content-type")).toContain("text/event-stream");
     const text = await res.text();
+    // SSE comments (": …" progress frames, T-20260930-010) are not data frames.
     const frames = text
       .split("\n\n")
-      .filter(Boolean)
+      .filter((frame) => frame.startsWith("data: "))
       .map((frame) => JSON.parse(frame.replace(/^data: /, "")));
     expect(frames[0].candidates[0].content.parts[0].text).toBe("Hello from fake hermes");
     expect(frames.at(-1).candidates[0].finishReason).toBe("STOP");

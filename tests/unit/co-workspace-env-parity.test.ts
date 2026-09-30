@@ -20,6 +20,10 @@ const COMPOSE_EXEMPT: Record<string, string> = {
   CO_WORKSPACE_CODEX_BIN: "codex CLI is not installed in the gateway image; runtime only usable on a bare-metal run",
   CO_WORKSPACE_ANTIGRAVITY_BIN: "agy CLI is not installed in the gateway image; runtime only usable on a bare-metal run",
   CO_WORKSPACE_ANTIGRAVITY_BIN_PREFIX: "agy CLI is not installed in the gateway image; runtime only usable on a bare-metal run",
+  CO_WORKSPACE_BROKER_PORT: "docker socket broker env — set on the docker-broker service in docker-compose.isolation.yml, not on the gateway",
+  CO_WORKSPACE_BROKER_SOCKET: "docker socket broker env — set on the docker-broker service in docker-compose.isolation.yml, not on the gateway",
+  CO_WORKSPACE_BROKER_NAME_PREFIX: "docker socket broker env — set on the docker-broker service in docker-compose.isolation.yml, not on the gateway",
+  CO_WORKSPACE_BROKER_UPSTREAM: "tcp upstream override for broker tests only; production uses the unix socket set in docker-compose.isolation.yml",
 };
 
 /** Vars read by src/ but intentionally NOT documented in .env.sample. */

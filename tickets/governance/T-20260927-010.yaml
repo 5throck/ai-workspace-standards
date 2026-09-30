@@ -13,12 +13,37 @@ title: >-
   in upgrade-project (procedures/** precedent) + new-project country-scaffold
   wiring + dry-run matrix.
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-26T22:45:21.972Z'
 history:
   - at: '2026-09-26T22:45:21.972Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-30T01:18:09.309Z'
+    from: backlog
+    to: running
+  - at: '2026-09-30T01:18:09.325Z'
+    from: running
+    to: done
+result: >-
+  Implemented per spec 2026-09-30-region-profiles-upgrade-claim-design
+  (registered). (1) Claim: upgrade-policy v1.19.0 (L0 + L1 lib mirror) —
+  region-profiles/** now claims ADD_IF_MISSING on new REGION_PROFILES_PASS, out
+  of the VARIANT ASSET DIRS hash-sync fallthrough. (2) Delivery pass:
+  upgrade-project v1.59.0 (L0-only engine per ADR-0073 Amendment 1 — the engine
+  L1 mirror removed in e9eff16a was NOT recreated; a first-cut double-path bug
+  join(templatesDir, variant,...) was caught by the dry-run NEW-path probe since
+  templatesDir is already the variant dir) — new REGION PROFILES SYNC block
+  after PROCEDURES: per-file add-if-missing from
+  templates/<variant>/region-profiles, existing files OK (project-owned —
+  preserved). (3) Scaffold wiring: no change needed — the variant overlay walk
+  already delivers region-profiles at scaffold (verified in new-project.ts copy
+  pass). (4) Dry-run matrix: co-price SKIPPED (claim) x3 in asset-dirs +
+  per-file project-owned OK; NEW path proven with KR.yaml temporarily absent
+  (dry run writes nothing, file restored); co-newbiz project-local corpus +
+  co-work/safety/export/consult already in sync. Tests: fleet static guard
+  extended (exact 3-file REGION PROFILES set + no-under-claim walk), upgrade
+  family 90/90, check-upgrade-coverage --strict clean, verify-scripts L0/L1
+  green, typecheck at baseline.
 error: null

@@ -135,9 +135,10 @@ console.log('{"event":"result","result":{"conversation_id":"conv-agy","status":"
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ message: "hello" }),
     });
+    // SSE comments (": …" progress frames, T-20260930-010) are not data events.
     const events = (await res.text())
       .split("\n\n")
-      .filter(Boolean)
+      .filter((f) => f.startsWith("data: "))
       .map((f) => JSON.parse(f.replace(/^data: /, "")));
     const done = events.find((e) => e.type === "done");
     expect(done.finalText).toBe("Hello from fake agy");
@@ -150,11 +151,13 @@ console.log('{"event":"result","result":{"conversation_id":"conv-agy","status":"
   test("second turn resumes the same conversation explicitly", async () => {
     const tenants = (await (await fetch(`${base}/tenants`)).json()).tenants;
     const tenantId = tenants[0].tenantId;
-    await fetch(`${base}/tenants/${tenantId}/chat`, {
+    // Drain the stream: the turn is only guaranteed complete once the body ends.
+    const res = await fetch(`${base}/tenants/${tenantId}/chat`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ message: "again" }),
     });
+    await res.text();
     const log = readFileSync(join(dataDir, "agy-args.log"), "utf8").trim().split("\n");
     expect(log).toHaveLength(2);
     expect(log[1]).toContain("--conversation");

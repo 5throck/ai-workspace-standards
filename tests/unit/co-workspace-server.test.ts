@@ -280,11 +280,13 @@ describe("gateway server — native provisioning and chat", () => {
   test("second native turn continues the same named thread", async () => {
     const tenants = (await (await fetch(`${base}/tenants`)).json()).tenants;
     const tenantId = tenants[0].tenantId;
-    await fetch(`${base}/tenants/${tenantId}/chat`, {
+    // Drain the stream: the turn is only guaranteed complete once the body ends.
+    const res2 = await fetch(`${base}/tenants/${tenantId}/chat`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ message: "and again" }),
     });
+    await res2.text();
     const lastArgs = readFileSync(
       join(dataDir, "storage", "anonymous", tenantId, "hermes-home", "last-args.txt"),
       "utf8",

@@ -7,12 +7,34 @@ title: >-
   Projects/co-export, co-game, co-security — project-side half of T-20260927-002
   still open (validator scopes templates/ only)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-27T00:46:17.280Z'
 history:
   - at: '2026-09-27T00:46:17.280Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-09-30T01:08:20.451Z'
+    from: backlog
+    to: running
+  - at: '2026-09-30T01:08:20.465Z'
+    from: running
+    to: done
+result: >-
+  Both halves landed. (1) Validator: the project-side check already exists and
+  is wired — scripts/validate-templates.ts checkProjectCountryConfigDeclarations
+  (line 5410, called at 5647) validates every Projects/*/variant.json against
+  the ADR-0091 R3 shape (profiles_dir=docs/countries, supported array; fail on
+  missing/diverging declarations, projects without variant.json skipped as out
+  of scope). (2) Declaration fill: the four projects missing variant.json
+  entirely (co-export, co-game, co-security, plus co-work, scaffolded after the
+  ticket was filed) each received a minimal variant.json — identity fields
+  mirrored from their variant template, the country_config declaration
+  (co-export supported [KR] matching its KR.md + ACTIVE.md; the others []
+  region-neutral), lifecycle from the template, and deliberately empty
+  agents/skills rosters so loadProjectAssetGate stays null (ungated — zero
+  upgrade-behavior change; roster fill is a separate per-project decision).
+  validate-templates now passes 13/13 project declarations. Landed via the /sync
+  pipeline as PRs: 5throck/co-export#33, co-game#32, co-security#57, co-work#2
+  (CI pending on the Actions billing issue T-20260927-016).
 error: null
