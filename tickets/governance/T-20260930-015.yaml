@@ -1,0 +1,17 @@
+schemaVersion: 1
+id: T-20260930-015
+kind: manual
+title: >-
+  Backfill agent frontmatter in co-develop after agent-lifecycle-audit 1.4.0
+  lands (1 error, 9 warnings)
+priority: high
+not_before: '2026-10-07'
+status: backlog
+attempts: 0
+created_at: '2026-09-30T00:13:08.778Z'
+history:
+  - at: '2026-09-30T00:13:08.778Z'
+    from: null
+    to: backlog
+result: null
+error: null
