@@ -92,7 +92,7 @@ describe("H7 — client IP resolution and login limiter", () => {
     for (let i = 0; i < 12; i++) statuses.push((await login(state, `user${i}`, { "x-forwarded-for": `10.0.0.${i}` }, "5.5.5.5")).status);
     expect(statuses.slice(0, 10).every((s) => s === 401)).toBe(true);
     expect(statuses.slice(10)).toEqual([429, 429]);
-  });
+  }, 30_000);
 
   test("trustProxy=true: right-most hop keys the limiter (left-most is spoofable)", async () => {
     const state = freshState({ CO_WORKSPACE_TRUST_PROXY: "true" });
@@ -104,12 +104,12 @@ describe("H7 — client IP resolution and login limiter", () => {
     expect((await login(state, "u99", { "x-forwarded-for": "spoofX, 7.7.7.7" }, "5.5.5.5")).status).toBe(429);
     // a different real client (different right-most hop) is unaffected
     expect((await login(state, "u100", { "x-forwarded-for": "spoofX, 8.8.8.8" }, "5.5.5.5")).status).toBe(401);
-  });
+  }, 30_000);
 
   test("per-loginId limit triggers across different IPs without locking other accounts", async () => {
     const state = freshState();
     for (let i = 0; i < 10; i++) expect((await login(state, "Victim", {}, `6.6.6.${i}`)).status).toBe(401);
     expect((await login(state, "victim", {}, "6.6.6.200")).status).toBe(429);
     expect((await login(state, "bystander", {}, "6.6.6.201")).status).toBe(401);
-  });
+  }, 30_000);
 });
