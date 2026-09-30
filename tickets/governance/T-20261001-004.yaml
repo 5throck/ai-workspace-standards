@@ -1,0 +1,20 @@
+schemaVersion: 1
+id: T-20261001-004
+kind: manual
+title: >-
+  URGENT: delivered agent-lifecycle-audit (v0.8.x) false-positives on
+  extends-stub pm.md — co-safety audit fails 'Missing tier field in frontmatter'
+  on agents/pm.md which is an extends-stub that legitimately inherits tier from
+  templates/common/agents/pm.md (1.2.1); blocks ALL 12 v0.8.x upgrade PR merges;
+  fix: follow the extends chain or exempt extends-stubs in
+  scripts/agent-lifecycle-audit.ts, then re-deliver
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-30T16:55:33.363Z'
+history:
+  - at: '2026-09-30T16:55:33.363Z'
+    from: null
+    to: backlog
+result: null
+error: null
