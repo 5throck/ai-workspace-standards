@@ -2,7 +2,7 @@
 /**
  * test-new-project.ts — E2E Test for new-project.ts
  *
- * @version 1.9.0
+ * @version 1.10.0
  * @last_updated 2026-09-29
  *
  * v1.9.0 (2026-09-29, T-20260929-002): Test 4 also asserts the initial
@@ -98,7 +98,7 @@
  */
 
 import { existsSync, readFileSync, readdirSync, statSync, rmSync } from 'node:fs';
-import { join, basename } from 'node:path';
+import { join, basename, dirname, resolve } from 'node:path';
 import { platform } from 'node:process';
 import { $ } from 'bun';
 import { load as yamlLoad } from 'js-yaml';
@@ -1006,6 +1006,36 @@ try {
       }
     } catch (e) { fail('Test 30', String(e)); }
   }
+
+  // ── Test 31: pm.md extends pointer must be project-resolvable [T-20260930-037] ──
+  // The fully-resolved scaffold has NO `extends:` (Test 25). When a stub pointer
+  // DOES survive (missingL1 scaffold, upgrade MERGE create), it must never be the
+  // template-relative `../../common/agents/pm.md` — that dangles in the delivered
+  // project because `Projects/<variant>/common/` does not exist. The only
+  // acceptable pointer is `../../../agents/pm.md`, which must resolve to the
+  // workspace-root agents/pm.md.
+  console.log('\nTest 31: pm.md extends pointer resolvable (no dangling ../../common form)');
+  try {
+    const pmPath = join(testDir, 'agents', 'pm.md');
+    const rootPmPath = join(process.cwd(), 'agents', 'pm.md');
+    if (!existsSync(pmPath)) {
+      fail('Test 31', 'agents/pm.md not found');
+    } else if (!existsSync(rootPmPath)) {
+      fail('Test 31', `workspace-root ${rootPmPath} not found — cannot verify pointer resolution`);
+    } else {
+      const pmContent = readFileSync(pmPath, 'utf-8');
+      if (pmContent.includes('../../common/agents/pm.md')) {
+        fail('Test 31', 'pm.md carries the dangling template-form pointer ../../common/agents/pm.md (does not exist in the project)');
+      } else {
+        const m = pmContent.match(/^extends:\s*['"]?([^'"\n]+)['"]?\s*$/m);
+        if (m && resolve(dirname(pmPath), m[1]) !== rootPmPath) {
+          fail('Test 31', `extends pointer '${m[1]}' resolves to ${resolve(dirname(pmPath), m[1])}, expected ${rootPmPath}`);
+        } else {
+          pass(`Test 31 PASSED: pm.md extends pointer ${m ? `'${m[1]}'` : '(none — fully resolved)'} is project-resolvable`);
+        }
+      }
+    }
+  } catch (e) { fail('Test 31', String(e)); }
 
   // ── Summary ───────────────────────────────────────────────────────────────
   console.log('\n' + '─'.repeat(50));
