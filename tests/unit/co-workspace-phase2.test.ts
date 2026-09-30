@@ -34,6 +34,9 @@ describe("auth — header styles, constant-time path, exemptions", () => {
     const keyed = req({ authorization: "Bearer sk-one" });
     expect(requestAuthorized(cfgAuth, keyless, "GET /")).toBe(true);
     expect(requestAuthorized(cfgAuth, keyless, "GET /health")).toBe(true);
+    // The sign-in page must stay reachable keyless, or a fresh browser (no session yet)
+    // can never sign in once keys are configured (design 2026-09-30-coworkspace-login-exempt).
+    expect(requestAuthorized(cfgAuth, keyless, "GET /login")).toBe(true);
     expect(requestAuthorized(cfgAuth, keyless, "GET /v1/models")).toBe(false);
     expect(requestAuthorized(cfgAuth, keyless, "POST /v1/chat/completions")).toBe(false);
     expect(requestAuthorized(cfgAuth, keyed, "POST /v1/chat/completions")).toBe(true);

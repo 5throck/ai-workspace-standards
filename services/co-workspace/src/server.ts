@@ -67,7 +67,7 @@ export async function handleRequest(state: GatewayState, req: Request, peerIp?: 
       throw new HttpError(403, "missing x-requested-with header (CSRF guard)");
     }
     // Phase 2 auth gate + Wave B: a route passes with a valid API key OR a signed-in session
-    // (cookie). Exemptions stay limited to `GET /` and `GET /health`.
+    // (cookie). Exemptions: `GET /`, `GET /health`, and the sign-in page itself (`GET /login`).
     // /auth/* is the self-service auth surface (login/logout/signup/verify/me): it must stay
     // reachable without an API key even when keys are configured, or sign-in itself is
     // impossible. The routes authenticate themselves; the loginRequired gate below still
@@ -81,13 +81,14 @@ export async function handleRequest(state: GatewayState, req: Request, peerIp?: 
       throw new HttpError(401, "missing or invalid API key");
     }
     // Wave B gate: when login is required, the web UI demands a session; the API demands a
-    // key (Bearer) or a valid session. Exempt: /login page, /auth/*, /health.
+    // key (Bearer) or a valid session — a key-authenticated caller satisfies the demand
+    // without a session. Exempt: /login page, /auth/*, /health.
     if (state.cfg.loginRequired) {
       const exempt =
         path === "/login" ||
         path.startsWith("/auth/") ||
         path === "/health";
-      if (!exempt && !sessionUser) {
+      if (!exempt && !sessionUser && !hasApiKey) {
         if (path === "/" || req.method === "GET") {
           return new Response(null, { status: 302, headers: { location: "/login" } });
         }

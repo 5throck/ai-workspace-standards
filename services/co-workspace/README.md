@@ -173,7 +173,8 @@ continuity handle → credential model → isolation matrix → provider disclos
 | `CO_WORKSPACE_HERMES_TOOLSETS` / `CO_WORKSPACE_HERMES_EXTRA_ARGS` | — | Toolset scoping (`-t`) and extra CLI args per session |
 | `CO_WORKSPACE_QUOTA_WINDOW` | `lifetime` | `daily` resets per-team quota counters each UTC day |
 | `CO_WORKSPACE_API_KEYS` / `_API_KEYS_FILE` | — | Bearer keys; `key:label` (key file only) maps a key to a trusted principal; the file re-reads on `POST /admin/reload` |
-| `CO_WORKSPACE_LOGIN_REQUIRED` | compose: `true` | Web app requires a session; keyless visitors are redirected |
+| `CO_WORKSPACE_LOGIN_REQUIRED` | compose: `true` | Web app requires a session; keyless, sessionless visitors are redirected. A valid Bearer key satisfies the demand without a session, so keys and the login gate compose (ADR-0092 Addendum 15) |
+| `CO_WORKSPACE_PUBLISH` | `127.0.0.1` | Host IP of the compose publish binding; `0.0.0.0` exposes the gateway on all interfaces — keep auth on before widening (see Security model) |
 | `CO_WORKSPACE_CSRF_REQUIRED` | compose: `true` | Keyless mutating requests need `x-requested-with: co-workspace` |
 | `CO_WORKSPACE_TRUST_PROXY` | `false` | Key auth rate limits on the right-most `X-Forwarded-For` hop (set only behind a reverse proxy); otherwise the socket peer IP |
 | `CO_WORKSPACE_TENANT_MAX_PER_PRINCIPAL` | `0` (=unlimited; compose: `10`) | Teams per principal — set a positive value for multi-user deployments |
@@ -244,6 +245,10 @@ docker compose build && docker compose up -d
   sessions stored hashed. `key:label` file entries map API keys to trusted principals.
   `/auth/*` is intentionally reachable without an API key; every other route demands a
   key or a session, and admin routes demand the admin role.
+- **Composability** — API keys and the login-required web UI stack: the sign-in page
+  (`GET /login`) is key-exempt so a fresh browser can always sign in, and a valid Bearer
+  key satisfies the session demand on API routes — one deployment serves browser users
+  (session) and wire clients (key) at once (ADR-0092 Addendum 15).
 - **Authorization** — tenant reads/writes/deletes are owner-or-admin (`requireTenantAccess`);
   `?mine=1` is session-aware; keyless mutating requests require the CSRF header.
 - **Isolation** — docker mode runs each turn in an ephemeral sibling (memory/cpus/pids
