@@ -640,12 +640,14 @@ Used by `upgrade-project.ts` (v1.22.0+) to classify every template file during a
 |------|----------|---------|
 | **LOCKED** | Always overwritten; diff shown before overwrite | `.githooks/*`, `.gitattributes`, `.gitleaks.toml` |
 | **MERGE** | Only managed sections replaced; rest preserved | `CLAUDE.md`, `GEMINI.md`, `.gitignore`, `agents/pm.md`, `docs/<variant>.context.md` |
-| **SYNC (default)** | Add if missing; update on inline version or hash change (⚠️ conflict warning on local modifications) | Rest of the `docs/` tree, `.github/`, `.editorconfig` |
+| **SYNC (default)** | Add if missing; update on inline version or hash change (⚠️ conflict warning on local modifications) | Rest of the `docs/` tree, `.github/` (except `.github/workflows/ci.yml`, see ADR-0094), `.editorconfig` |
 | **JSON_MERGE** | Platform settings deep-merged; project-only array entries preserved | `.claude/settings.json`, `.gemini/settings.json`, `.mcp.json`, `opencode.json` (ADR-0076) |
 | **WORKSPACE** | Seeds add-if-missing; never overwritten or pruned | `docs/{designs,drafts,reports,research,findings,threat-models,lifecycle}/` |
 | **ADD_IF_MISSING** | Copied only when absent | `LICENSE`, `SECURITY.md`, `procedures/`, `.codex/` (ADR-0076) |
 | **PRESERVE / PROJECT_STATE** | Never touched | `README.md`, `CHANGELOG.md`, `docs/README(+_ko)`, `memory/`, `package.json`, `src/` |
 | **TEMPLATE_ONLY** | Staging zones the scaffold deletes — never upgrade-delivered | `docs/{adr,specs,variants,_templates,_examples}`, `docs/_common` |
+
+`.github/workflows/ci.yml` is merge-managed per **ADR-0094** (`docs/adr/0094-ci-workflow-project-jobs-merge.md`): template-owned jobs stay authoritative, project-only jobs live in a `# PROJECT-JOBS-BEGIN/END` region, and the merge result is parsed and validated fail-closed before an atomic write (the region is untrusted input).
 
 `docs/skill-graph.json` is REGENERATED in place; the upgrader itself is workspace-side (`L0`-only, ADR-0073 Amendment 1 — run `bun scripts/upgrade-project.ts Projects/<name>` from the workspace root). Report and gate: `bun scripts/check-upgrade-coverage.ts [--strict]`.
 
@@ -810,4 +812,4 @@ Agent, skill, and command frontmatter structures are validated against JSON Sche
 
 ---
 
-*Last Updated: 2026-09-29*
+*Last Updated: 2026-10-01*

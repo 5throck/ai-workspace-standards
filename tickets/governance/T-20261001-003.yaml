@@ -10,7 +10,7 @@ title: >-
   L2-to-L0 sync tool; audit any fleet-wide pm.md touch mechanism before
   re-attempting
 priority: urgent
-status: review
+status: done
 attempts: 0
 created_at: '2026-09-30T16:50:36.362Z'
 history:
@@ -26,5 +26,13 @@ history:
   - at: '2026-09-30T20:57:31.550Z'
     from: running
     to: review
-result: null
+  - at: '2026-09-30T21:14:05.192Z'
+    from: review
+    to: done
+result: >-
+  Root cause: the PM session's own pm.md extends retarget
+  (T-20260930-030/031/036 local edit plus PR #1263 pipeline change) pointed
+  projects at L0 and skipped L1 (ADR-0039). Reverted in PR #1268; deployed
+  projects carry ../../common/agents/pm.md; design doc marked superseded;
+  follow-up investigation ticket opened (service ticket T-20261001-007).
 error: null

@@ -42,6 +42,7 @@ import {
   TEMPLATE_TREE_SYNC_PASS,
   VARIANT_ASSET_DIRS_PASS,
   GOVERNANCE_FILES,
+  MERGE_MANAGED_FILES,
   JSON_MERGE_FILES,
   PLACEHOLDER_ALLOWLIST,
   SCAFFOLD_COMMON_OWNED_FILES,
@@ -255,7 +256,8 @@ describe('upgrade-policy resolveClaim — default-policy inversion (the gap fix)
 
   test('.github/ lands on TEMPLATE TREE SYNC (previously claimed by nobody)', () => {
     expect(resolveClaim('.github/CODEOWNERS', VARIANT).pass).toBe(TEMPLATE_TREE_SYNC_PASS);
-    expect(resolveClaim('.github/workflows/ci.yml', VARIANT).pass).toBe(TEMPLATE_TREE_SYNC_PASS);
+    // ci.yml left the SYNC default for MERGE_MANAGED in ADR-0094 (T-20260930-026).
+    expect(resolveClaim('.github/workflows/ci.yml', VARIANT)).toEqual({ policy: 'MERGE_MANAGED', pass: 'MERGE' });
   });
 
   test('platform settings are JSON_MERGE via TEMPLATE TREE SYNC', () => {
@@ -294,6 +296,31 @@ describe('upgrade-policy drift guard vs scripts/upgrade-project.ts literals', ()
     expect(m).not.toBeNull();
     const literal = [...m![1].matchAll(/'([^']+)'/g)].map(x => x[1]);
     expect(literal).toEqual([...GOVERNANCE_FILES]);
+  });
+
+  // ADR-0094: the MERGE pass list is a hardcoded literal, NOT derived from
+  // MERGE_MANAGED_FILES — adding a file to the set alone delivers nothing.
+  test('every MERGE_MANAGED_FILES member has a delivery site in the MERGE or DOCS_MERGE pass', () => {
+    const pushed = new Set<string>();
+    for (const m of src.matchAll(/MERGE_FILES\.push\(([\s\S]*?)\);/g)) {
+      for (const q of m[1].matchAll(/'([^']+)'/g)) pushed.add(q[1]);
+    }
+    const docsMerge = src.match(/const DOCS_MERGE_FILES: string\[\] = \[([^\]]*)\]/);
+    expect(docsMerge).not.toBeNull();
+    for (const q of docsMerge![1].matchAll(/'([^']+)'/g)) pushed.add(q[1]);
+    // The script names ci.yml through a const; resolve it for the comparison.
+    const ciConst = src.match(/const CI_WORKFLOW_REL = '([^']+)'/);
+    expect(ciConst).not.toBeNull();
+    if (/MERGE_FILES\.push\([^)]*CI_WORKFLOW_REL/.test(src)) pushed.add(ciConst![1]);
+
+    const platformGated = new Set(['CLAUDE.md', 'GEMINI.md', 'CODEX.md', 'HERMES.md']);
+    for (const f of MERGE_MANAGED_FILES) {
+      if (platformGated.has(f)) {
+        expect(src).toContain(`MERGE_FILES.push('${f}')`);
+      } else {
+        expect(pushed.has(f)).toBe(true);
+      }
+    }
   });
 });
 
