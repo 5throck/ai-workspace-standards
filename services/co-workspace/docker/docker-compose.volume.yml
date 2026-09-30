@@ -1,0 +1,33 @@
+# Third override: opt-in volume-subpath mode (T-20260930-038).
+# Layer: COMPOSE_FILE=docker-compose.yml:docker-compose.isolation.yml:docker-compose.volume.yml
+#
+# Tenant data moves from host binds (<DATA_HOST>/storage/<P>/<N>) into a named Docker volume;
+# turn containers mount it via `--mount type=volume,...,volume-subpath=...`, so no host path is
+# ever named to the daemon and the bind-source symlink TOCTOU (F3) is closed (design
+# docs/designs/2026-09-30-coworkspace-volume-subpath-design.md).
+#
+# One-time setup (operator-run; the gateway boot probe asserts existence and fails fast):
+#   docker volume create coworkspace-data
+#
+# This file is also the env-parity surface for CO_WORKSPACE_DATA_VOLUME /
+# CO_WORKSPACE_BROKER_TOKEN / CO_WORKSPACE_VOLUME_INIT_IMAGE (the parity ratchet in
+# tests/unit/co-workspace-env-parity.test.ts unions this file's environment blocks).
+services:
+  docker-broker:
+    # Volume mode drops the read-only data-dir mount: no host path is named any more, so the
+    # broker has nothing to lstat-walk. Only the docker socket remains.
+    volumes: !override
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      CO_WORKSPACE_DATA_VOLUME: ${CO_WORKSPACE_DATA_VOLUME:?set the tenant data volume name}
+      CO_WORKSPACE_BROKER_TOKEN: ${CO_WORKSPACE_BROKER_TOKEN:-}
+      # Helper image for the broker-internal volume init/rm containers. Pin by digest for
+      # supply-chain hygiene, e.g. alpine:3.20@sha256:<digest>.
+      CO_WORKSPACE_VOLUME_INIT_IMAGE: ${CO_WORKSPACE_VOLUME_INIT_IMAGE:-alpine:3.20}
+
+  co-workspace:
+    environment:
+      # The gateway needs the volume name for the turn --mount argv and the lifecycle
+      # provisioning/delete control calls (same value as the broker side).
+      CO_WORKSPACE_DATA_VOLUME: ${CO_WORKSPACE_DATA_VOLUME:?set the tenant data volume name}
+      CO_WORKSPACE_BROKER_TOKEN: ${CO_WORKSPACE_BROKER_TOKEN:-}

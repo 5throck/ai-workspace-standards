@@ -9,7 +9,11 @@
 import { createHash, timingSafeEqual } from "node:crypto";
 import { readKeyEntries } from "./config";
 
-export const AUTH_EXEMPT_ROUTES: ReadonlySet<string> = new Set(["GET /", "GET /health"]);
+// GET /login must stay keyless: with keys configured, a fresh browser has no session yet,
+// so gating the sign-in page makes sign-in itself impossible. The page holds no data and
+// POST /auth/login carries its own rate limits; the loginRequired gate still demands a
+// session for everything the page leads to.
+export const AUTH_EXEMPT_ROUTES: ReadonlySet<string> = new Set(["GET /", "GET /health", "GET /login"]);
 
 function sha256(value: string): Buffer {
   return createHash("sha256").update(value).digest();

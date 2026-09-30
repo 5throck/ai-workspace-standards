@@ -19,6 +19,11 @@ export interface PolicyConfig {
   runtimeImage: string;
   /** Host-side data dir (bind sources must live under `<dataDirHost>/storage`). Undefined = every create is rejected. */
   dataDirHost?: string;
+  /** Named tenant data volume (T-20260930-038 volume-subpath mode). Set = volume mode: the
+   * broker validates HostConfig.Mounts instead of Binds and skips the on-disk lstat walk
+   * (the daemon enforces subpath containment). Exactly one of dataDirHost/dataVolume storage
+   * validations is active per boot. */
+  dataVolume?: string;
   instanceId: string;
   hermesBin: string;
   memoryCapBytes: number;
@@ -32,6 +37,19 @@ export const NAME_RE = /^co-workspace-turn-[A-Za-z0-9_.-]{1,36}-[0-9a-f]{8}$/;
 const HEX_ID_RE = /^[0-9a-f]{12,64}$/;
 const TENANT_RE = /^[A-Za-z0-9_.-]{1,128}$/;
 const PN_RE = /^(?!\.{1,2}$)[A-Za-z0-9@._+-]{1,128}$/;
+/** Docker's own volume-name charset (design 2026-09-30, section 2). */
+export const VOLUME_NAME_RE = /^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$/;
+/**
+ * Tenant storage subpath inside the data volume: storage/<P>/<N>/(project|hermes-home).
+ * <P>/<N> reuse PN_RE. The regex alone rejects "..", ".", absolute, empty, backslash and any
+ * traversal shape; callers additionally deny ".." / leading "/" for an explicit log reason.
+ */
+export const SUBPATH_RE =
+  /^storage\/((?!\.{1,2}$)[A-Za-z0-9@._+-]{1,128})\/((?!\.{1,2}$)[A-Za-z0-9@._+-]{1,128})\/(project|hermes-home)$/;
+/** Tenant subpath BASE inside the data volume (storage/<P>/<N>): the form the gateway sends to
+ * the /coworkspace/volume control route; the helper appends the leaves itself. */
+export const SUBPATH_BASE_RE =
+  /^storage\/((?!\.{1,2}$)[A-Za-z0-9@._+-]{1,128})\/((?!\.{1,2}$)[A-Za-z0-9@._+-]{1,128})$/;
 
 export const MAX_CREATE_BODY_BYTES = 64 * 1024;
 const MAX_JSON_DEPTH = 32;
@@ -64,9 +82,14 @@ export function loadPolicyConfig(env: Record<string, string | undefined>): Polic
   const cpuCap = Number(cpuStr);
   if (!Number.isFinite(cpuCap) || cpuCap <= 0) throw new Error(`invalid CO_WORKSPACE_CONTAINER_CPUS: ${cpuStr}`);
   const dataDirHost = env.CO_WORKSPACE_DATA_DIR_HOST || undefined;
+  const dataVolume = env.CO_WORKSPACE_DATA_VOLUME || undefined;
+  if (dataVolume && !VOLUME_NAME_RE.test(dataVolume)) {
+    throw new Error(`invalid CO_WORKSPACE_DATA_VOLUME: ${dataVolume}`);
+  }
   return {
     runtimeImage: env.CO_WORKSPACE_RUNTIME_IMAGE ?? "co-workspace-runtime:latest",
     dataDirHost: dataDirHost ? stripTrailingSlash(dataDirHost) : undefined,
+    dataVolume,
     instanceId: env.CO_WORKSPACE_INSTANCE_ID || "default",
     hermesBin: env.HERMES_BIN || "hermes",
     memoryCapBytes,
@@ -234,10 +257,12 @@ export interface CreateFacts {
   tenant: string;
   principal: string;
   project: string;
-  /** Validated bind strings as forwarded (host source:target[:rw]). */
+  /** Validated bind strings as forwarded (host source:target[:rw]). Empty in volume mode. */
   binds: string[];
-  /** Host source paths of the binds (for validateBindsOnDisk). */
+  /** Host source paths of the binds (for validateBindsOnDisk). Empty in volume mode. */
   bindSources: string[];
+  /** Canonical mounts recorded at create (volume mode only; empty in bind mode). */
+  mounts: Obj[];
 }
 
 export type CreateResult =
@@ -344,7 +369,7 @@ export function tenantPartOfName(name: string): string {
 export function validateCreate(bodyText: string, cfg: PolicyConfig, name: string): CreateResult {
   try {
     if (!NAME_RE.test(name)) rej("container name not allowed");
-    if (!cfg.dataDirHost) rej("data dir host not configured");
+    if (!cfg.dataVolume && !cfg.dataDirHost) rej("data dir host not configured");
     const scanned = scanJson(bodyText);
     if (!scanned.ok) return { ok: false, reason: scanned.reason };
     const body = scanned.value;
@@ -435,10 +460,25 @@ export function validateCreate(bodyText: string, cfg: PolicyConfig, name: string
     // --- HostConfig ---
     if (!isObj(b.HostConfig)) rej("HostConfig required");
     const hc = b.HostConfig as Obj;
-    checkKeys(hc, HC_KEYS, "HostConfig", HC_FORBIDDEN);
+    const volumeMode = cfg.dataVolume !== undefined;
+    // HC_FORBIDDEN is mode-dependent: Mounts is only reachable in volume mode.
+    const hcForbidden = volumeMode ? new Set([...HC_FORBIDDEN].filter((k) => k !== "Mounts")) : HC_FORBIDDEN;
+    // Volume mode adds Mounts to the allowlist (it is forbidden in bind mode).
+    checkKeys(hc, volumeMode ? new Set([...HC_KEYS, "Mounts"]) : HC_KEYS, "HostConfig", hcForbidden);
     const hcOut: Obj = {};
-    const bindRes = validateBindShape(hc.Binds, cfg.dataDirHost as string);
-    hcOut.Binds = bindRes.binds;
+    let bindRes: ReturnType<typeof validateBindShape> | undefined;
+    let mres: ReturnType<typeof validateMounts> | undefined;
+    let mounts: Obj[] = [];
+    if (volumeMode) {
+      if (has(hc, "Binds") && !isEmptyish(hc.Binds)) rej("HostConfig.Binds not allowed in volume mode");
+      hcOut.Binds = null;
+      mres = validateMounts(hc.Mounts, cfg);
+      mounts = mres.mounts;
+      hcOut.Mounts = mounts;
+    } else {
+      bindRes = validateBindShape(hc.Binds, cfg.dataDirHost as string);
+      hcOut.Binds = bindRes.binds;
+    }
     for (const k of HC_DEFAULT_FALSE) {
       if (has(hc, k)) {
         if (hc[k] !== false) rej(`HostConfig.${k} must be false`);
@@ -530,15 +570,16 @@ export function validateCreate(bodyText: string, cfg: PolicyConfig, name: string
       facts: {
         name,
         tenant: tenant as string,
-        principal: bindRes.principal,
-        project: bindRes.project,
-        binds: bindRes.binds,
-        bindSources: bindRes.sources,
+        principal: (volumeMode ? mres : bindRes)!.principal,
+        project: (volumeMode ? mres : bindRes)!.project,
+        binds: bindRes?.binds ?? [],
+        bindSources: bindRes?.sources ?? [],
+        mounts,
       },
     };
   } catch (e) {
     if (e instanceof Reject) return { ok: false, reason: e.message };
-    return { ok: false, reason: "create body rejected" };
+    return { ok: false, reason: "create body rejected", error: String((e as Error)?.message ?? e) } as { ok: false; reason: string; error?: string };
   }
 }
 
@@ -576,6 +617,62 @@ function validateBindShape(
 }
 
 // ---------------------------------------------------------------------------------------------
+// Volume-mode mount validation (T-20260930-038)
+// ---------------------------------------------------------------------------------------------
+
+const MOUNT_KEYS = new Set(["Type", "Source", "Target", "ReadOnly", "VolumeOptions"]);
+
+/**
+ * Volume-mode create validation and canonical rebuild (design 2026-09-30, section 4.1).
+ * Key-allowlisted entries only; extra keys rejected. The canonical rebuild re-emits ONLY
+ * validated fields (Type/Source/Target/VolumeOptions.Subpath) - everything else the CLI sent
+ * (Consistency, NoCopy, Labels, DriverConfig, ...) is dropped and re-defaulted by the daemon.
+ */
+export function validateMounts(
+  v: unknown,
+  cfg: Pick<PolicyConfig, "dataVolume">,
+): { mounts: Obj[]; principal: string; project: string } {
+  const dv = cfg.dataVolume as string;
+  if (!Array.isArray(v) || v.length !== 2) rej("HostConfig.Mounts must have exactly 2 entries");
+  const seen = new Set<string>();
+  let principal = "";
+  let project = "";
+  const mounts: Obj[] = [];
+  for (const e of v as unknown[]) {
+    if (!isObj(e)) rej("mount entry must be an object");
+    checkKeys(e as Obj, MOUNT_KEYS, "HostConfig.Mounts[]");
+    const m = e as Obj;
+    if (m.Type !== "volume") rej("mount Type must be volume");
+    if (m.Source !== dv) rej("mount Source not allowed");
+    if (m.Target !== MOUNT_PROJECT && m.Target !== MOUNT_HERMES_HOME) rej("mount Target not allowed");
+    if (seen.has(m.Target as string)) rej("duplicate mount target");
+    if (has(m, "ReadOnly") && m.ReadOnly !== false) rej("mount ReadOnly must be false");
+    if (!has(m, "VolumeOptions") || !isObj(m.VolumeOptions)) rej("mount VolumeOptions object required");
+    const vo = m.VolumeOptions as Obj;
+    checkKeys(vo, new Set(["Subpath"]), "HostConfig.Mounts[].VolumeOptions");
+    const sp = vo.Subpath;
+    if (typeof sp !== "string") rej("mount Subpath must be a string");
+    const s = sp as string;
+    if (s.includes("..") || s.startsWith("/")) rej("mount Subpath not allowed");
+    if (!SUBPATH_RE.test(s)) rej("mount Subpath not allowed");
+    const cm = s.match(SUBPATH_RE)!;
+    const [, p, n, leaf] = cm!;
+    if (!principal) {
+      principal = p;
+      project = n;
+    } else if (p !== principal || n !== project) {
+      rej("mounts must share the same principal and name");
+    }
+    // Leaf must correspond to the mount target (the /work/project mount -> .../project).
+    if ((m.Target === MOUNT_PROJECT) !== (leaf === "project")) rej("mount Subpath/target mismatch");
+    seen.add(m.Target as string);
+    mounts.push({ Type: "volume", Source: dv, Target: m.Target, VolumeOptions: { Subpath: s } });
+  }
+  // Exactly 2 entries with distinct validated targets => both present exactly once. Canonical
+  // order is project first regardless of client order (same invariant as the bind rebuild).
+  mounts.sort((a, b) => (a.Target === MOUNT_PROJECT ? -1 : 1));
+  return { mounts, principal, project };
+}
 // On-disk bind containment (symlink walk)
 // ---------------------------------------------------------------------------------------------
 
@@ -630,7 +727,7 @@ export function validateBindsOnDisk(
 // Routes
 // ---------------------------------------------------------------------------------------------
 
-export type RouteOp = "ping" | "version" | "list" | "create" | "attach" | "start" | "wait" | "kill" | "delete";
+export type RouteOp = "ping" | "version" | "list" | "create" | "attach" | "start" | "wait" | "kill" | "delete" | "volume" | "volinspect";
 
 export type RouteDecision =
   | {
@@ -721,6 +818,28 @@ export function checkRoute(
     const name = query.get("name");
     if (name === undefined || !NAME_RE.test(name)) return deny("container name not allowed");
     return { ...base, op: "create", mode: "buffered", name };
+  }
+
+  // T-20260930-038: broker-internal volume lifecycle control route. Volume mode only (403 in
+  // bind mode, unconditionally); handled in docker-broker.ts OUTSIDE the docker-path policy
+  // with a broker-constructed body — the gateway can only name op + a regex-validated subpath.
+  if (norm === "/coworkspace/volume") {
+    if (!_cfg?.dataVolume) return deny("volume control route requires volume mode");
+    if (method !== "POST") return deny("method not allowed");
+    return unknownKey([]) ?? { ...base, op: "volume", mode: "buffered" };
+  }
+
+  // T-20260930-038: the gateway's volume-mode boot probe runs `docker volume inspect <name>`
+  // with DOCKER_HOST pointing at this broker. Allow exactly that: GET of THIS boot's data
+  // volume only, volume mode only. The response is volume metadata (no host paths).
+  if (norm.startsWith("/volumes/")) {
+    if (!_cfg?.dataVolume) return deny("volume routes require volume mode");
+    if (method !== "GET") return deny("method not allowed");
+    if (norm !== `/volumes/${_cfg.dataVolume}`) return deny("only the data volume may be inspected");
+    return unknownKey([]) ?? { ...base, op: "volinspect", mode: "piped" };
+  }
+  if (norm === "/volumes") {
+    return deny("volume listing not allowed");
   }
 
   const cm = norm.match(CONTAINER_ROUTE_RE);

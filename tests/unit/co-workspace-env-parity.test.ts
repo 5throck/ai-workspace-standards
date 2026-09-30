@@ -9,6 +9,10 @@ import { join } from "node:path";
 
 const SVC = join(import.meta.dir, "../../services/co-workspace");
 const COMPOSE_REL = "services/co-workspace/docker/docker-compose.yml";
+/** Volume-mode override (T-20260930-038): its environment blocks are part of the compose
+ * surface - declaring CO_WORKSPACE_DATA_VOLUME etc. there is the parity mechanism (design
+ * 2026-09-30, section 7), so the ratchet unions it with the base compose file. */
+const COMPOSE_VOLUME_OVERRIDE_REL = "services/co-workspace/docker/docker-compose.volume.yml";
 const SAMPLE_REL = "services/co-workspace/docker/.env.sample";
 const NAME = "(?:CO_WORKSPACE_|HERMES_|GOOGLE_)[A-Z0-9_]*";
 
@@ -143,6 +147,10 @@ describe("co-workspace env parity (real files)", () => {
     for (const v of collectReadVars(readFileSync(join(srcDir, f), "utf8"))) read.add(v);
   }
   const compose = collectComposeVars(readFileSync(join(SVC, "docker/docker-compose.yml"), "utf8"));
+  const composeSurface = new Set([
+    ...compose,
+    ...collectComposeVars(readFileSync(join(SVC, "docker/docker-compose.volume.yml"), "utf8")),
+  ]);
   const sample = collectSampleVars(readFileSync(join(SVC, "docker/.env.sample"), "utf8"));
 
   test("scanner sees the service's env surface", () => {
@@ -151,8 +159,8 @@ describe("co-workspace env parity (real files)", () => {
     expect(files).toContain("routes/auth.ts"); // subdirectories are scanned
   });
 
-  test("every read var is passed through docker-compose.yml or exempt", () => {
-    expect(checkParity(read, compose, COMPOSE_EXEMPT, COMPOSE_REL, "COMPOSE_EXEMPT")).toEqual([]);
+  test("every read var is passed through docker-compose.yml (+ volume override) or exempt", () => {
+    expect(checkParity(read, composeSurface, COMPOSE_EXEMPT, COMPOSE_REL, "COMPOSE_EXEMPT")).toEqual([]);
   });
 
   test("every read var is documented in .env.sample or exempt", () => {

@@ -76,6 +76,11 @@ export interface GatewayConfig {
   /** Host-side path of `dataDir` — used by docker isolation to mount tenant dirs into sibling
    * containers when the gateway itself runs inside a container (paths must match on the host). */
   dataDirHost?: string;
+  /** T-20260930-038 volume-subpath mode: named Docker volume holding `storage/<P>/<N>/...`.
+   * Set = volume mode (turn containers mount via --mount type=volume,...,volume-subpath=...);
+   * unset = bind mode (host paths, unchanged). Validated against Docker's volume-name charset;
+   * invalid value fails closed at boot. */
+  dataVolume?: string;
   /** P1: catalog beta variants too (`CO_WORKSPACE_VARIANTS_INCLUDE_BETA=true`). */
   includeBeta: boolean;
   /** Web UI requires a signed-in session (`CO_WORKSPACE_LOGIN_REQUIRED=true`); API stays
@@ -247,6 +252,7 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     dockerBin: env.CO_WORKSPACE_DOCKER_BIN ?? "docker",
     instanceId: env.CO_WORKSPACE_INSTANCE_ID || "default",
     dataDirHost: env.CO_WORKSPACE_DATA_DIR_HOST || undefined,
+    dataVolume: parseDataVolume(env.CO_WORKSPACE_DATA_VOLUME),
     includeBeta: env.CO_WORKSPACE_VARIANTS_INCLUDE_BETA === "true" || env.CO_WORKSPACE_VARIANTS_INCLUDE_BETA === "1",
     loginRequired: env.CO_WORKSPACE_LOGIN_REQUIRED === "true",
     csrfRequired: env.CO_WORKSPACE_CSRF_REQUIRED === "true",
@@ -268,6 +274,39 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     claudeBin: env.CO_WORKSPACE_CLAUDE_BIN ?? "claude",
     codexBin: env.CO_WORKSPACE_CODEX_BIN ?? "codex",
   };
+}
+
+/** Volume-subpath mode name validation (design 2026-09-30, section 2): Docker's own
+ * volume-name charset. Invalid value fails closed at boot. Empty/undefined = bind mode. */
+export const DATA_VOLUME_RE = /^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$/;
+
+function parseDataVolume(raw: string | undefined): string | undefined {
+  const v = (raw ?? "").trim();
+  if (!v) return undefined;
+  if (!DATA_VOLUME_RE.test(v)) throw new Error(`invalid CO_WORKSPACE_DATA_VOLUME: ${v}`);
+  return v;
+}
+
+/** Fail-fast volume-mode probe (design 2026-09-30, section 6.1): the data volume must already
+ * exist (`docker volume create <name>` is operator-run per the runbook); a missing volume
+ * fails startup with a remediation message instead of a mid-turn daemon error. */
+export function dockerVolumeProbe(dockerBin: string, volume: string): { ok: boolean; error?: string } {
+  try {
+    const proc = Bun.spawnSync([dockerBin, "volume", "inspect", volume], {
+      stdout: "pipe",
+      stderr: "pipe",
+      stdin: "ignore",
+    });
+    if (proc.exitCode !== 0) {
+      return {
+        ok: false,
+        error: new TextDecoder().decode(proc.stderr || proc.stdout).slice(0, 300),
+      };
+    }
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: String((err as Error)?.message ?? err) };
+  }
 }
 
 /** Provider-key mode resolution (R6, design 2026-09-29-co-workspace-provider-key-config):

@@ -1737,6 +1737,24 @@
       "source": "architect",
       "created": "2026-09-30",
       "last_updated": "2026-09-30"
+    },
+    {
+      "id": "2026-09-30-coworkspace-volume-subpath-design",
+      "title": "coworkspace volume subpath design",
+      "file": "docs/designs/2026-09-30-coworkspace-volume-subpath-design.md",
+      "status": "draft",
+      "source": "architect",
+      "created": "2026-09-30",
+      "last_updated": "2026-09-30"
+    },
+    {
+      "id": "2026-09-30-coworkspace-login-exempt-design",
+      "title": "coworkspace login exempt design",
+      "file": "docs/designs/2026-09-30-coworkspace-login-exempt-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-30",
+      "last_updated": "2026-09-30"
     }
   ]
 }

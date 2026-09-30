@@ -198,3 +198,32 @@ describe("outbox and open mode (M7/M8)", () => {
     expect(openModeWarning({ apiKeys: [], loginRequired: true })).toBeNull();
   });
 });
+
+describe("loginRequired wave B gate (design 2026-09-30-coworkspace-login-exempt)", () => {
+  function get(path: string, headers: Record<string, string> = {}): Request {
+    return new Request(`http://127.0.0.1${path}`, { method: "GET", headers });
+  }
+
+  test("sign-in page reachable keyless while keys are configured", async () => {
+    const { state } = makeState({ CO_WORKSPACE_LOGIN_REQUIRED: "true", CO_WORKSPACE_API_KEYS: "k-valid" });
+    const res = await handleRequest(state, get("/login"));
+    expect(res.status).toBe(200);
+  });
+
+  test("key-authenticated GET skips the session demand (no 302)", async () => {
+    const { state } = makeState({ CO_WORKSPACE_LOGIN_REQUIRED: "true", CO_WORKSPACE_API_KEYS: "k-valid" });
+    const res = await handleRequest(state, get("/tenants", { authorization: "Bearer k-valid" }));
+    expect(res.status).toBe(200);
+  });
+
+  test("unauthenticated: web shell redirects to /login, tenant API 401s at the key gate", async () => {
+    const { state } = makeState({ CO_WORKSPACE_LOGIN_REQUIRED: "true", CO_WORKSPACE_API_KEYS: "k-valid" });
+    const root = await handleRequest(state, get("/"));
+    expect(root.status).toBe(302);
+    expect(root.headers.get("location")).toBe("/login");
+    // With keys configured the route gate (which runs first) 401s keyless sessionless
+    // requests; the Wave B 302 path only applies when auth is disabled.
+    const tenants = await handleRequest(state, get("/tenants"));
+    expect(tenants.status).toBe(401);
+  });
+});

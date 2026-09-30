@@ -39,9 +39,11 @@ services:
     security_opt: ["no-new-privileges:true"]
     cap_drop: [ALL]
     ports:
-      - "127.0.0.1:9030:9030" # loopback publish — keep unless you front it with auth
+      # D6 loopback default; set CO_WORKSPACE_PUBLISH=0.0.0.0 in .env to expose on all
+      # interfaces — turn on auth first (CO_WORKSPACE_LOGIN_REQUIRED / CO_WORKSPACE_API_KEYS).
+      - "${CO_WORKSPACE_PUBLISH:-127.0.0.1}:9030:9030"
     environment:
-      CO_WORKSPACE_HOST: 0.0.0.0 # inside the container; the publish above stays loopback
+      CO_WORKSPACE_HOST: 0.0.0.0 # inside the container; the publish above binds every host interface
       CO_WORKSPACE_DATA_DIR: /data
       CO_WORKSPACE_DATA_DIR_HOST: ${CO_WORKSPACE_DATA_DIR_HOST:?set to the absolute host path of the data dir}
       CO_WORKSPACE_WORKSPACE_DIR: /workspace

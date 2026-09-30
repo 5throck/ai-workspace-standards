@@ -7,7 +7,7 @@ import { runAntigravityTurn } from "./antigravity";
 import { runClaudeTurn } from "./claude";
 import { runCodexTurn } from "./codex";
 import type { GatewayState } from "./state";
-import { hostSidePath } from "./lifecycle";
+import { hostSidePath, tenantSubpathBase } from "./lifecycle";
 import { TurnTiming, turnLogKey } from "./timing";
 
 /** Serialized per tenant: one Hermes session writer per HERMES_HOME (state.db is a per-home
@@ -138,8 +138,14 @@ export async function runChat(
                   // under <dataDir>/…, remap the prefix onto dataDirHost. (The old
                   // `tenants/<id>/…` hardcode mounted empty dirs — per-user storage moved
                   // tenant files under storage/<principal>/<project>.)
-                  hostProjectDir: hostSidePath(state.cfg, rec.projectDir),
-                  hostHermesHome: hostSidePath(state.cfg, rec.hermesHome),
+                  // Volume mode (T-20260930-038): no host path is named - the turn mounts
+                  // the data volume at storage/<P>/<N>/{project,hermes-home} subpaths.
+                  ...(state.cfg.dataVolume
+                    ? { dataVolume: state.cfg.dataVolume, subpathBase: tenantSubpathBase(state.cfg, rec) }
+                    : {
+                        hostProjectDir: hostSidePath(state.cfg, rec.projectDir),
+                        hostHermesHome: hostSidePath(state.cfg, rec.hermesHome),
+                      }),
                   hostAuthDir: state.cfg.hermesAuthDirHost
                     ?? (state.cfg.dataDirHost
                       ? join(state.cfg.dataDirHost, "shared-auth")

@@ -17,16 +17,36 @@ import {
   semanticEqual,
   validateBindsOnDisk,
   validateCreate,
+  validateMounts,
   type PolicyConfig,
 } from "../../services/co-workspace/src/docker-broker-policy";
 
 const DATA = "/srv/co-data";
+const VOL = "cow-data-vol";
 const FIXTURE = JSON.parse(readFileSync(join(import.meta.dir, "../fixtures/docker-cli/create-request.json"), "utf8"));
+const VFIXTURE = JSON.parse(readFileSync(join(import.meta.dir, "../fixtures/docker-cli/create-request-volume.json"), "utf8"));
 const NAME = new URLSearchParams(FIXTURE.query).get("name") as string;
+const VNAME = new URLSearchParams(VFIXTURE.query).get("name") as string;
 const CFG: PolicyConfig = { ...loadPolicyConfig({}), dataDirHost: DATA };
+const VCFG: PolicyConfig = { ...loadPolicyConfig({}), dataVolume: VOL };
 
 function fixtureText(): string {
   return (FIXTURE.body as string).split("<DATA>").join(DATA);
+}
+function volumeFixtureText(): string {
+  return (VFIXTURE.body as string).split("<VOL>").join(VOL);
+}
+function volumeFixtureBody(): any {
+  return JSON.parse(volumeFixtureText());
+}
+function vrun(mut: (b: any) => void, name = VNAME): ReturnType<typeof validateCreate> {
+  const b = volumeFixtureBody();
+  mut(b);
+  return validateCreate(JSON.stringify(b), VCFG, name);
+}
+function expectReject(res: ReturnType<typeof validateCreate>, reason: string) {
+  expect(res.ok).toBe(false);
+  if (!res.ok) expect(res.reason).toContain(reason);
 }
 function fixtureBody(): any {
   return JSON.parse(fixtureText());
@@ -515,5 +535,142 @@ describe("validateBindsOnDisk (real temp dirs)", () => {
     expect(validateBindsOnDisk(["/etc:/work/project"], "/d").ok).toBe(false);
     expect(validateBindsOnDisk(["/d/storage/../x:/work/project"], "/d").ok).toBe(false);
     expect(validateBindsOnDisk([], undefined).ok).toBe(false);
+  });
+});
+
+// =============================================================================================
+// T-20260930-038: opt-in volume-subpath mode (design 2026-09-30, section 4.1 / section 8)
+// =============================================================================================
+
+describe("validateCreate: volume-mode fixture (T-20260930-038)", () => {
+  test("captured volume fixture is accepted; canonical rebuild keeps only validated fields", () => {
+    const res = validateCreate(volumeFixtureText(), VCFG, VNAME);
+    if (!res.ok) throw new Error(res.reason);
+    // The canonical rebuild drops the CLI's Consistency/NoCopy/Labels/DriverConfig defaults.
+    const hc = res.canonical.HostConfig as any;
+    expect(hc.Binds).toBe(null);
+    expect(hc.Mounts).toEqual([
+      { Type: "volume", Source: VOL, Target: "/work/project", VolumeOptions: { Subpath: "storage/default/demo/project" } },
+      { Type: "volume", Source: VOL, Target: "/work/hermes-home", VolumeOptions: { Subpath: "storage/default/demo/hermes-home" } },
+    ]);
+    expect(Object.keys(hc.Mounts[0]).sort()).toEqual(["Source", "Target", "Type", "VolumeOptions"]);
+    expect(Object.keys(hc.Mounts[0].VolumeOptions)).toEqual(["Subpath"]);
+    expect(res.facts.principal).toBe("default");
+    expect(res.facts.project).toBe("demo");
+    expect(res.facts.binds).toEqual([]);
+    expect(res.facts.mounts).toEqual(hc.Mounts);
+  });
+  test("bind-mode fixture is REJECTED in volume mode (mixed shapes across modes)", () => {
+    expectReject(validateCreate(fixtureText(), VCFG, NAME), "not allowed");
+  });
+  test("volume fixture is rejected in bind mode (Mounts forbidden)", () => {
+    expectReject(validateCreate(volumeFixtureText(), CFG, VNAME), "forbidden key HostConfig.Mounts");
+  });
+  test("loadPolicyConfig rejects an invalid volume name (fail closed)", () => {
+    expect(() => loadPolicyConfig({ CO_WORKSPACE_DATA_VOLUME: "-bad name" })).toThrow("invalid CO_WORKSPACE_DATA_VOLUME");
+    expect(loadPolicyConfig({ CO_WORKSPACE_DATA_VOLUME: VOL }).dataVolume).toBe(VOL);
+  });
+  test("validateMounts direct: canonical order is project-first regardless of client order", () => {
+    const b = volumeFixtureBody();
+    const mounts = b.HostConfig.Mounts.slice().reverse();
+    const r = validateMounts(mounts, VCFG);
+    expect(r.mounts[0].Target).toBe("/work/project");
+    expect(r.principal).toBe("default");
+    expect(r.project).toBe("demo");
+  });
+});
+
+describe("validateCreate: volume-mode attack table (design section 8)", () => {
+  test("subpath .. escape", () => {
+    expectReject(vrun((b) => { b.HostConfig.Mounts[0].VolumeOptions.Subpath = "../escape"; }), "mount Subpath not allowed");
+  });
+  test("subpath absolute", () => {
+    expectReject(vrun((b) => { b.HostConfig.Mounts[0].VolumeOptions.Subpath = "/abs"; }), "mount Subpath not allowed");
+  });
+  test("subpath empty", () => {
+    expectReject(vrun((b) => { b.HostConfig.Mounts[0].VolumeOptions.Subpath = ""; }), "mount Subpath not allowed");
+  });
+  test("subpath symlink-ish traversal inside the path (a/../b)", () => {
+    expectReject(vrun((b) => { b.HostConfig.Mounts[0].VolumeOptions.Subpath = "storage/default/../demo/project"; }), "mount Subpath not allowed");
+  });
+  test("subpath wrong leaf (not project|hermes-home)", () => {
+    expectReject(vrun((b) => { b.HostConfig.Mounts[0].VolumeOptions.Subpath = "storage/default/demo/other"; }), "mount Subpath not allowed");
+  });
+  test("subpath principal segment traversal (storage/../n/project)", () => {
+    expectReject(vrun((b) => { b.HostConfig.Mounts[0].VolumeOptions.Subpath = "storage/../demo/project"; }), "mount Subpath not allowed");
+  });
+  test("subpath missing leaf shape (storage/<P>/<N> without the leaf)", () => {
+    expectReject(vrun((b) => { b.HostConfig.Mounts[0].VolumeOptions.Subpath = "storage/default/demo"; }), "mount Subpath not allowed");
+  });
+  test("wrong Source volume", () => {
+    expectReject(vrun((b) => { b.HostConfig.Mounts[0].Source = "other-volume"; }), "mount Source not allowed");
+  });
+  test("non-volume Type (bind / tmpfs)", () => {
+    expectReject(vrun((b) => { b.HostConfig.Mounts[0].Type = "bind"; }), "mount Type must be volume");
+    expectReject(vrun((b) => { b.HostConfig.Mounts[0].Type = "tmpfs"; }), "mount Type must be volume");
+  });
+  test("third mount entry", () => {
+    expectReject(vrun((b) => {
+      b.HostConfig.Mounts.push({ Type: "volume", Source: VOL, Target: "/work/project", VolumeOptions: { Subpath: "storage/default/demo/project" } });
+    }), "exactly 2 entries");
+  });
+  test("missing hermes-home mount (single entry)", () => {
+    expectReject(vrun((b) => { b.HostConfig.Mounts = b.HostConfig.Mounts.slice(0, 1); }), "exactly 2 entries");
+  });
+  test("duplicate target", () => {
+    expectReject(vrun((b) => {
+      b.HostConfig.Mounts[1].Target = "/work/project";
+      b.HostConfig.Mounts[1].VolumeOptions.Subpath = "storage/default/demo/project";
+    }), "duplicate mount target");
+  });
+  test("mixed Binds+Mounts is denied outright", () => {
+    expectReject(vrun((b) => { b.HostConfig.Binds = ["/etc:/work/project"]; }), "not allowed in volume mode");
+  });
+  test("Binds-only in volume mode (Mounts absent)", () => {
+    expectReject(vrun((b) => { delete b.HostConfig.Mounts; }), "exactly 2 entries");
+  });
+  test("extra VolumeOptions keys (Labels / DriverConfig)", () => {
+    expectReject(vrun((b) => { b.HostConfig.Mounts[0].VolumeOptions.Labels = { a: "b" }; }), "unknown key HostConfig.Mounts[].VolumeOptions.Labels");
+    expectReject(vrun((b) => { b.HostConfig.Mounts[0].VolumeOptions.DriverConfig = {}; }), "unknown key HostConfig.Mounts[].VolumeOptions.DriverConfig");
+  });
+  test("ReadOnly mount", () => {
+    expectReject(vrun((b) => { b.HostConfig.Mounts[0].ReadOnly = true; }), "mount ReadOnly must be false");
+  });
+  test("top-level mount key Consistency present", () => {
+    expectReject(vrun((b) => { b.HostConfig.Mounts[0].Consistency = "default"; }), "unknown key HostConfig.Mounts[].Consistency");
+  });
+  test("wrong principal/name mismatch across mounts", () => {
+    expectReject(vrun((b) => { b.HostConfig.Mounts[1].VolumeOptions.Subpath = "storage/other/demo/hermes-home"; }), "same principal and name");
+  });
+  test("wrong Target", () => {
+    expectReject(vrun((b) => { b.HostConfig.Mounts[0].Target = "/work/other"; }), "mount Target not allowed");
+  });
+});
+
+describe("checkRoute: /coworkspace/volume control route (T-20260930-038)", () => {
+  test("403 in bind mode, unconditionally", () => {
+    for (const c of [CFG, { ...CFG, dataVolume: undefined }]) {
+      const r = checkRoute("POST", "/coworkspace/volume", c, {});
+      expect(r.allowed).toBe(false);
+      if (!r.allowed) expect(r.reason).toContain("volume control route requires volume mode");
+    }
+  });
+  test("volume mode: GET on the control route is denied", () => {
+    const ok = checkRoute("GET", "/coworkspace/volume", VCFG, {});
+    expect(ok.allowed).toBe(false);
+  });
+  test("volume mode: POST allowed (op volume), unknown query key denied", () => {
+    const ok = checkRoute("POST", "/coworkspace/volume", VCFG, {});
+    expect(ok.allowed && ok.op === "volume" && ok.mode === "buffered").toBe(true);
+    expect(checkRoute("POST", "/coworkspace/volume?extra=1", VCFG, {}).allowed).toBe(false);
+  });
+  test("volume mode: only the boot data volume may be inspected, GET only", () => {
+    const ok = checkRoute("GET", `/volumes/${VOL}`, VCFG, {});
+    expect(ok.allowed && ok.op === "volinspect" && ok.mode === "piped").toBe(true);
+    expect(checkRoute("GET", "/volumes/other-volume", VCFG, {}).allowed).toBe(false);
+    expect(checkRoute("GET", "/volumes", VCFG, {}).allowed).toBe(false);
+    expect(checkRoute("POST", `/volumes/${VOL}`, VCFG, {}).allowed).toBe(false);
+    expect(checkRoute("GET", `/volumes/${VOL}`, CFG, {}).allowed).toBe(false);
+    expect(checkRoute("GET", `/volumes/${VOL}?extra=1`, VCFG, {}).allowed).toBe(false);
   });
 });

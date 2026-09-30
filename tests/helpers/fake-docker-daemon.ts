@@ -24,6 +24,8 @@ export interface FakeContainer {
   Name: string;
   Labels: Record<string, string>;
   Binds: string[] | null;
+  /** HostConfig.Mounts as recorded at create (T-20260930-038); null when absent. */
+  Mounts: unknown[] | null;
 }
 
 export interface FakeReply {
@@ -41,6 +43,8 @@ export interface FakeDaemonOptions {
   override?: (req: RecordedRequest) => FakeReply | undefined;
   /** Containers served on GET /containers/json (list). */
   list?: unknown[];
+  /** On attach stdin FIN, emit stdout frames totaling this many bytes (backpressure test). */
+  attachOutputBytes?: number;
 }
 
 export interface FakeDaemon {
@@ -146,7 +150,13 @@ export function startFakeDockerDaemon(options: FakeDaemonOptions = {}): FakeDaem
               /* recorded anyway */
             }
             const name = new URLSearchParams(target.split("?")[1] ?? "").get("name") ?? "";
-            containers.set(id, { Id: id, Name: `/${name}`, Labels: parsed?.Labels ?? {}, Binds: parsed?.HostConfig?.Binds ?? null });
+            containers.set(id, {
+              Id: id,
+              Name: `/${name}`,
+              Labels: parsed?.Labels ?? {},
+              Binds: parsed?.HostConfig?.Binds ?? null,
+              Mounts: parsed?.HostConfig?.Mounts ?? null,
+            });
             send({ status: "201 Created", body: JSON.stringify({ Id: id, Warnings: [] }) });
           } else if ((m = norm.match(/^\/containers\/([^/]+)\/json$/))) {
             const c = lookup(decodeURIComponent(m[1]));
@@ -154,7 +164,12 @@ export function startFakeDockerDaemon(options: FakeDaemonOptions = {}): FakeDaem
             else
               send({
                 status: "200 OK",
-                body: JSON.stringify({ Id: c.Id, Name: c.Name, Config: { Labels: c.Labels, Env: ["SECRET=x"] }, HostConfig: { Binds: c.Binds } }),
+                body: JSON.stringify({
+                  Id: c.Id,
+                  Name: c.Name,
+                  Config: { Labels: c.Labels, Env: ["SECRET=x"] },
+                  HostConfig: { Binds: c.Binds, Mounts: c.Mounts },
+                }),
               });
           } else if (/^\/containers\/[^/]+\/attach$/.test(norm)) {
             s.write("HTTP/1.1 101 UPGRADED\r\nContent-Type: application/vnd.docker.raw-stream\r\nConnection: Upgrade\r\nUpgrade: tcp\r\n\r\n");

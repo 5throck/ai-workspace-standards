@@ -12,7 +12,7 @@
  */
 
 
-import { dockerProbe } from "./config";
+import { dockerProbe, dockerVolumeProbe } from "./config";
 import { credentialValid, presentedCredential, requestAuthorized } from "./auth";
 import { sessionTokenFromCookie } from "./users";
 import { csrfRequired, sweepOutbox } from "./hardening";
@@ -67,7 +67,7 @@ export async function handleRequest(state: GatewayState, req: Request, peerIp?: 
       throw new HttpError(403, "missing x-requested-with header (CSRF guard)");
     }
     // Phase 2 auth gate + Wave B: a route passes with a valid API key OR a signed-in session
-    // (cookie). Exemptions stay limited to `GET /` and `GET /health`.
+    // (cookie). Exemptions: `GET /`, `GET /health`, and the sign-in page itself (`GET /login`).
     // /auth/* is the self-service auth surface (login/logout/signup/verify/me): it must stay
     // reachable without an API key even when keys are configured, or sign-in itself is
     // impossible. The routes authenticate themselves; the loginRequired gate below still
@@ -81,13 +81,14 @@ export async function handleRequest(state: GatewayState, req: Request, peerIp?: 
       throw new HttpError(401, "missing or invalid API key");
     }
     // Wave B gate: when login is required, the web UI demands a session; the API demands a
-    // key (Bearer) or a valid session. Exempt: /login page, /auth/*, /health.
+    // key (Bearer) or a valid session — a key-authenticated caller satisfies the demand
+    // without a session. Exempt: /login page, /auth/*, /health.
     if (state.cfg.loginRequired) {
       const exempt =
         path === "/login" ||
         path.startsWith("/auth/") ||
         path === "/health";
-      if (!exempt && !sessionUser) {
+      if (!exempt && !sessionUser && !hasApiKey) {
         if (path === "/" || req.method === "GET") {
           return new Response(null, { status: 302, headers: { location: "/login" } });
         }
@@ -152,6 +153,17 @@ if (import.meta.main) {
       process.exit(1);
     }
     console.log(`[co-workspace] docker isolation: server ${probe.version}`);
+    if (state.cfg.dataVolume) {
+      const vp = dockerVolumeProbe(state.cfg.dockerBin, state.cfg.dataVolume);
+      if (!vp.ok) {
+        console.error(
+          `[co-workspace] data volume "${state.cfg.dataVolume}" missing or uninspectable: ${vp.error ?? "probe failed"}` +
+            ` - run: docker volume create ${state.cfg.dataVolume}`,
+        );
+        process.exit(1);
+      }
+      console.log(`[co-workspace] volume mode: tenant data volume "${state.cfg.dataVolume}" ok`);
+    }
     const reap = reapOrphanedTurns(state.cfg);
     if (reap.error) console.warn(`[co-workspace] orphan turn reap failed: ${reap.error}`);
     else console.log(`[co-workspace] orphan turn reap: found ${reap.found}, removed ${reap.killed}`);
