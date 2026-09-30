@@ -31,12 +31,21 @@ description: >-
   there is git-tracked, so L0 is consistent across machines only while that
   tracked copy matches disk. Option (a) must decide how to treat a
   tracked-but-tool-managed dir like the L0 one.
-status: backlog
+status: review
 attempts: 0
 created_at: '2026-09-30T20:48:58.250Z'
 history:
   - at: '2026-09-30T20:48:58.250Z'
     from: null
     to: backlog
+  - at: '2026-09-30T23:14:53.219Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-30T23:14:53.232Z'
+    from: waiting
+    to: running
+  - at: '2026-09-30T23:27:56.295Z'
+    from: running
+    to: review
 result: null
 error: null

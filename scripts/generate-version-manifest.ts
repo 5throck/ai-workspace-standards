@@ -1,4 +1,18 @@
-// @version 1.8.0
+// @version 1.9.0
+// v1.9.0 (T-20261001-007): machine-independent enumeration. The collectors now
+//           filter candidates against one `git ls-files -z` query, so untracked
+//           tool-managed directories (e.g. .claude/skills/graft on a machine
+//           where graft installs itself without committing) no longer inflate
+//           the counts or flip mirror flags; a clean tracked-only checkout
+//           regenerates a byte-identical manifest. A null tracked set (git
+//           missing / not a repository) is fail-open, preserving v1.8.0
+//           behavior in non-git contexts. isTracked() is exported for unit
+//           coverage with an injected set. Follow-up (PR #1271 E2E): per-root
+//           fail-open via trackedFilterForRoot() — a walked root carrying ZERO
+//           tracked entries is a fresh-scaffold context, not a drift context,
+//           so its on-disk candidates are kept; the blanket filter previously
+//           stripped every row from a fresh scaffold's manifest (test-new-project
+//           E2E: dozens of "missing skills/<name>/" findings).
 // v1.8.0 (spec docs/designs/2026-09-25-verifier-platform-expansion-design.md,
 //           site 10 / D10): skills platform vocabulary extended to the four
 //           mirror era — 'both' keeps meaning claude+gemini exactly (legacy,
@@ -230,6 +244,63 @@ function extractScriptDependencies(content: string): string[] {
 // commit-push-pr: pure redirect stub to /sync (workspace enforcement banner);
 // flagged as drift in variants that lack the source-command-<name> alias skill
 // (fixed at L0 because core scripts are immutable at L2/L3).
+// T-20261001-007: the manifest must be machine-independent. Tools (e.g. graft)
+// install skill directories into .claude/skills/ without committing them, so a
+// machine carrying such untracked directories counted more skills than a clean
+// tracked-only checkout and the --check drift gate failed on whichever side
+// regenerated. One `git ls-files -z` query builds the tracked set; collectors
+// drop any candidate that is not in it. Cached per process.
+let trackedFilesCache: Set<string> | null | undefined;
+
+function getTrackedFiles(): Set<string> | null {
+    if (trackedFilesCache !== undefined) return trackedFilesCache;
+    try {
+        const { status, stdout } = spawnSync('git', ['ls-files', '-z'], { encoding: 'utf-8' });
+        trackedFilesCache = status === 0
+            ? new Set(stdout.split('\0').filter(Boolean).map(normalizePath))
+            : null;
+    } catch {
+        trackedFilesCache = null;
+    }
+    return trackedFilesCache;
+}
+
+/**
+ * True when filePath is git-tracked. Untracked (tool-managed) files must never
+ * enter the manifest. A null tracked set (git unavailable / not a repository)
+ * is fail-open: every candidate passes, preserving v1.8.0 behavior in
+ * non-git contexts. Exported for unit coverage with an injected set.
+ */
+export function isTracked(tracked: Set<string> | null, filePath: string): boolean {
+    if (tracked === null) return true;
+    return tracked.has(normalizePath(filePath));
+}
+
+/**
+ * Per-root fail-open (T-20261001-007 follow-up, PR #1271 E2E): a freshly
+ * scaffolded project has ZERO tracked files, so the blanket tracked-set filter
+ * stripped every skill/agent/script/command from the generated manifest and
+ * registry-parity checks failed with dozens of "missing skills/<name>/"
+ * findings. A root that carries no tracked entries is a fresh-scaffold
+ * context, not a drift context — enumeration must keep its on-disk candidates.
+ * When at least one entry under the root IS tracked (the workspace case:
+ * .claude/skills with 56 committed + graft untracked), the filter applies
+ * normally. Returns a per-path predicate scoped to one walked root.
+ */
+export function trackedFilterForRoot(tracked: Set<string> | null, root: string): (filePath: string) => boolean {
+    if (tracked === null) return () => true;
+    const prefix = normalizePath(root) + '/';
+    let anyTracked = false;
+    for (const file of tracked) {
+        if (file.startsWith(prefix)) {
+            anyTracked = true;
+            break;
+        }
+    }
+    if (!anyTracked) return () => true;
+    return filePath => tracked.has(normalizePath(filePath));
+}
+
 const COMMAND_SKILL_EXEMPT = new Set(['changelog', 'meeting', 'memlog', 'new-task', 'commit-push-pr']);
 const SKILL_METADATA_EXEMPT = new Set([
     // ADR-0076 / 2026-09-12 graft wiring refresh: tool-owned Claude-only skill
@@ -247,10 +318,13 @@ async function collectAgents(): Promise<AgentInfo[]> {
     const agents: AgentInfo[] = [];
     const agentsDir = 'agents';
     if (!fs.existsSync(agentsDir)) return agents;
+    const tracked = getTrackedFiles();
+    const keep = trackedFilterForRoot(tracked, agentsDir);
 
     for (const file of fs.readdirSync(agentsDir)) {
         if (!file.endsWith('.md') || file === '_COMMON.md' || file === 'README.md') continue;
         const filePath = path.join(agentsDir, file);
+        if (!keep(filePath)) continue;
         const content = fs.readFileSync(filePath, 'utf-8');
         const { tier, model } = parseAgentFrontmatter(content);
         const lastModified = await getGitTimestamp(filePath);
@@ -313,25 +387,38 @@ export function deriveCommandPlatform(hasGemini: boolean, hasCodexPrompt: boolea
 
 async function collectSkills(): Promise<SkillInfo[]> {
     const seen = new Map<string, SkillInfo>();
+    const tracked = getTrackedFiles();
+    const keepWorkspace = trackedFilterForRoot(tracked, 'skills');
+    const keepClaude = trackedFilterForRoot(tracked, path.join('.claude', 'skills'));
+    const keepGemini = trackedFilterForRoot(tracked, path.join('.gemini', 'skills'));
+    const keepAgentsMirror = trackedFilterForRoot(tracked, path.join('.agents', 'skills'));
+    const keepCodex = trackedFilterForRoot(tracked, path.join('.codex', 'skills'));
 
     for (const skillsDir of SKILL_SCAN_DIRS) {
         if (!fs.existsSync(skillsDir)) continue;
+        const keep = trackedFilterForRoot(tracked, skillsDir);
         for (const dir of fs.readdirSync(skillsDir)) {
             if (seen.has(dir)) continue; // already recorded from a higher-priority dir
             const skillPath = path.join(skillsDir, dir);
             if (!fs.statSync(skillPath).isDirectory()) continue;
             const skillMd = path.join(skillPath, 'SKILL.md');
             if (!fs.existsSync(skillMd)) continue;
+            if (!keep(skillMd)) continue;
 
             const content = fs.readFileSync(skillMd, 'utf-8');
             const { version, triggers, owner, status, parseError } = parseSkillFrontmatter(content);
 
-            const inWorkspace = fs.existsSync(path.join('skills', dir, 'SKILL.md'));
+            const inWorkspace = fs.existsSync(path.join('skills', dir, 'SKILL.md'))
+                && keepWorkspace(path.join('skills', dir, 'SKILL.md'));
             const mirrors = {
-                claude: fs.existsSync(path.join('.claude', 'skills', dir, 'SKILL.md')),
-                gemini: fs.existsSync(path.join('.gemini', 'skills', dir, 'SKILL.md')),
-                agents: fs.existsSync(path.join('.agents', 'skills', dir, 'SKILL.md')),
-                codex: fs.existsSync(path.join('.codex', 'skills', dir, 'SKILL.md')),
+                claude: fs.existsSync(path.join('.claude', 'skills', dir, 'SKILL.md'))
+                    && keepClaude(path.join('.claude', 'skills', dir, 'SKILL.md')),
+                gemini: fs.existsSync(path.join('.gemini', 'skills', dir, 'SKILL.md'))
+                    && keepGemini(path.join('.gemini', 'skills', dir, 'SKILL.md')),
+                agents: fs.existsSync(path.join('.agents', 'skills', dir, 'SKILL.md'))
+                    && keepAgentsMirror(path.join('.agents', 'skills', dir, 'SKILL.md')),
+                codex: fs.existsSync(path.join('.codex', 'skills', dir, 'SKILL.md'))
+                    && keepCodex(path.join('.codex', 'skills', dir, 'SKILL.md')),
             };
             const inCommonTemplate = skillsDir.startsWith(path.join('templates', 'common'));
 
@@ -356,6 +443,8 @@ async function collectScripts(): Promise<ScriptInfo[]> {
     const scripts: ScriptInfo[] = [];
     const scriptsDir = 'scripts';
     if (!fs.existsSync(scriptsDir)) return scripts;
+    const tracked = getTrackedFiles();
+    const keep = trackedFilterForRoot(tracked, scriptsDir);
 
     // Subdirectories excluded from the CLI script collection. Library/helper
     // modules (helpers, lib, validators, hooks) are not standalone executable
@@ -372,7 +461,7 @@ async function collectScripts(): Promise<ScriptInfo[]> {
                 // Skip excluded subdirectories — their modules are not standalone CLI scripts
                 if (EXCLUDED_SUBDIRS.has(item)) continue;
                 walkDir(itemPath, callback);
-            } else if (item.endsWith('.ts')) {
+            } else if (item.endsWith('.ts') && keep(itemPath)) {
                 callback(itemPath);
             }
         }
@@ -394,16 +483,21 @@ async function collectCommands(): Promise<CommandInfo[]> {
     const commands: CommandInfo[] = [];
     const commandsDir = path.join('.claude', 'commands');
     if (!fs.existsSync(commandsDir)) return commands;
+    const tracked = getTrackedFiles();
+    const keep = trackedFilterForRoot(tracked, commandsDir);
+    const keepGemini = trackedFilterForRoot(tracked, path.join('.gemini', 'commands'));
+    const keepCodex = trackedFilterForRoot(tracked, path.join('.codex', 'prompts'));
 
     for (const file of fs.readdirSync(commandsDir)) {
         if (!file.endsWith('.md')) continue;
         const filePath = path.join(commandsDir, file);
+        if (!keep(filePath)) continue;
         const content = fs.readFileSync(filePath, 'utf-8');
         const geminiCmd = path.join('.gemini', 'commands', file);
-        const hasGemini = fs.existsSync(geminiCmd);
+        const hasGemini = fs.existsSync(geminiCmd) && keepGemini(geminiCmd);
         // Codex consumes .claude/commands as .codex/prompts (ADR-0077 D4 mapping)
         const codexPrompt = path.join('.codex', 'prompts', file);
-        const hasCodexPrompt = fs.existsSync(codexPrompt);
+        const hasCodexPrompt = fs.existsSync(codexPrompt) && keepCodex(codexPrompt);
 
         const platform = deriveCommandPlatform(hasGemini, hasCodexPrompt);
 
@@ -487,7 +581,7 @@ interface ManifestData {
     driftIssues: string[];
 }
 
-async function collectManifestData(): Promise<ManifestData> {
+export async function collectManifestData(): Promise<ManifestData> {
     const [agents, skills, scripts, commands] = await Promise.all([
         collectAgents(),
         collectSkills(),
