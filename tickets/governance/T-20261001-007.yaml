@@ -1,0 +1,42 @@
+schemaVersion: 1
+id: T-20261001-007
+kind: manual
+title: >-
+  Make the VERSION_MANIFEST generator and audit ignore untracked tool-managed
+  skill directories (e.g. .claude/skills/graft) so the manifest is
+  machine-independent
+priority: normal
+description: >-
+  Evidence (co-newbiz session, 2026-10-01; user-directed cleanup): in
+  Projects/co-newbiz, bun scripts/audit.ts fails with "VERSION_MANIFEST drift
+  detected: docs/VERSION_MANIFEST.md is stale" whenever an UNTRACKED,
+  machine-generated skill directory exists under .claude/skills. Observed with
+  .claude/skills/graft/SKILL.md, which the graft tool creates each session (the
+  session-start hook refreshes it). Cause: scripts/generate-version-manifest.ts
+  has SKILL_SCAN_DIRS = ['skills', '.claude/skills', 'templates/common/skills']
+  (L272) and lists skill directories with fs.readdirSync on disk (L317-319). The
+  manifest therefore counts 106 skills on a machine where graft wrote the file
+  and 105 where it did not, and the committed manifest can match only one.
+  Adding the path to .gitignore does not help, because the generator reads the
+  disk, not git. Workaround used in co-newbiz: move .claude/skills/graft aside
+  during audit/sync and restore it afterwards. Design options: (a) the generator
+  skips skill dirs that are not git-tracked (git ls-files), or that match a
+  configurable ignore/allow list of tool-managed skills; (b) the generator
+  counts only directories in the project's own skill registry or propagation
+  map; (c) the audit compares against a manifest generated with the same filter.
+  Fleet measurement (read-only, PM, 2026-10-01): of the 13 Projects/*, only
+  co-newbiz has a .claude/skills/graft directory, and none of its files are
+  tracked, so co-newbiz is the only project hit today. Every project that adopts
+  graft would hit it. The L0 root also has .claude/skills/graft, but one file
+  there is git-tracked, so L0 is consistent across machines only while that
+  tracked copy matches disk. Option (a) must decide how to treat a
+  tracked-but-tool-managed dir like the L0 one.
+status: backlog
+attempts: 0
+created_at: '2026-09-30T20:48:58.250Z'
+history:
+  - at: '2026-09-30T20:48:58.250Z'
+    from: null
+    to: backlog
+result: null
+error: null
