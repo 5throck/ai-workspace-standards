@@ -1,0 +1,16 @@
+schemaVersion: 1
+id: T-20260930-024
+kind: manual
+title: >-
+  Make agent-lifecycle-audit Check 11 ignore template-sync/upgrade/propagate
+  commits when comparing last_updated (DEC-20260930-01)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-09-30T00:13:08.888Z'
+history:
+  - at: '2026-09-30T00:13:08.888Z'
+    from: null
+    to: backlog
+result: null
+error: null
