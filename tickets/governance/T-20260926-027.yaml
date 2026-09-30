@@ -12,12 +12,18 @@ title: >-
   descriptions. Decision ticket — dispatch via
   platform-command-lifecycle-manager skill.
 priority: low
-status: backlog
+status: review
 attempts: 0
 created_at: '2026-09-26T09:51:59.577Z'
 history:
   - at: '2026-09-26T09:51:59.577Z'
     from: null
     to: backlog
+  - at: '2026-09-30T02:35:43.113Z'
+    from: backlog
+    to: waiting
+  - at: '2026-09-30T02:35:43.289Z'
+    from: waiting
+    to: review
 result: null
 error: null

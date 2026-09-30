@@ -20,7 +20,7 @@ Skills with a `skills/<name>/` directory in the workspace root. These are the pr
 | `agent-lifecycle-manager` | 1.3.0 | active | pm | 2026-09-21 | — | PM-led hiring/firing workflows + skill attach/detach rules |
 | `create-variant` | 1.4.2 | active | pm | 2026-09-21 | — | Workspace operator only — not deployed to L2 |
 | `finishing-a-development-branch` | 1.0.1 | active | pm | 2026-06-13 | — | Workspace override — redirects branch completion to /sync (mirrored 2026-09-04 from .claude/skills) |
-| `meeting-facilitation` | 1.4.3 | active | pm | 2026-09-05 | — | Canonical meeting skill; `meeting` is a trigger alias, not a separate skill directory |
+| `meeting-facilitation` | 1.5.0 | active | pm | 2026-09-30 | — | Canonical meeting skill; `meeting` is a trigger alias, not a separate skill directory |
 | `project-review` | 1.3.0 | active | pm | 2026-09-14 | — | — |
 | `promote-variant` | 1.4.0 | active | pm | 2026-08-24 | — | Workspace operator only — not deployed to L2 |
 | `platform-command-lifecycle-manager` | 1.0.3 | active | pm | 2026-09-25 | — | Mirrored 2026-09-04 from .claude/skills |

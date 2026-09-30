@@ -5,7 +5,7 @@
 - **Status**: retired
 - **Version**: 1.4.0
 - **Created**: 2026-09-04
-- **Last Updated**: 2026-09-10
+- **Last Updated**: 2026-09-30
 - **Successor**: `meeting-facilitation` (canonical meeting skill; `meeting` remains a trigger alias, not a skill directory)
 
 ## Description
@@ -26,6 +26,7 @@ the platform skills distribution policy.
 |------|------|-----|---------|----------|
 | 2026-09-04 | - | production | Record created retrospectively; skill long active and registered | pm |
 | 2026-09-09 | production | retired | Shortcut skill directory removed; `/meeting` delegates to `meeting-facilitation` | pm |
+| 2026-09-30 | retired | retired | Remaining command surface (.claude/.gemini/.agents/commands/meeting.md, .codex/prompts/meeting.md at L0 + templates/common mirrors) retired; explicit meeting-facilitation skill invocation is the only path (T-20260926-027) | pm |
 
 ## Acceptance Criteria
 

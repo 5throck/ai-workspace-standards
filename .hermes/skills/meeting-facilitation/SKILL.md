@@ -3,12 +3,12 @@ name: meeting-facilitation
 status: active
 scope: common
 description: >
-  Facilitates structured multi-agent meetings using the /meeting command for collaborative
-  decision-making and problem resolution. Use when: running agent meetings, coordinating
-  multi-agent discussions, or facilitating collaborative problem-solving sessions.
+  Facilitates structured multi-agent meetings for collaborative decision-making and
+  problem resolution. Use when: running agent meetings, coordinating multi-agent
+  discussions, or facilitating collaborative problem-solving sessions.
 owner: pm
-version: 1.4.3
-last_reviewed: 2026-09-05
+version: 1.5.0
+last_reviewed: 2026-09-30
 prerequisites: []
 metadata:
   type: process
@@ -22,21 +22,24 @@ metadata:
 
 ## Context
 
-This skill is a registration stub for the meeting-facilitation capability. The actual implementation resides in `.claude/commands/meeting.md` and `.gemini/commands/meeting.md`. This file exists to make the skill discoverable via `.agents/skills.json` at Priority 1.
+This skill is the single source of truth for multi-agent meeting facilitation. It is
+invoked explicitly — the legacy `/meeting` slash command was retired on 2026-09-26
+(AGENTS.md §6) and its command files were removed on 2026-09-30 (T-20260926-027).
 
 ## When to Use
 
-Invoke this skill when the user requests:
-- `/meeting "topic"` — structured multi-agent discussion
+Invoke this skill when the user requests a meeting, for example:
+- `meeting-facilitation "topic" --agents a,b --rounds N --dialogue` — structured multi-agent discussion
 - Facilitating collaborative decision-making across specialist agents
 - Coordinating agent discussions for design reviews, problem-solving, or planning
 
 ## Execution Steps
 
-This skill delegates entirely to the platform-specific command files:
-1. **Claude Code**: `.claude/commands/meeting.md` handles the full facilitation flow
-2. **Gemini CLI**: `.gemini/commands/meeting.md` handles the full facilitation flow
-3. Both implementations support: agenda setting, round-robin dialogue, outcome synthesis, and transcript logging to `memory/meeting-YYYY-MM-DD-[slug].md`
+1. **Agenda**: state the meeting objective and the decision to be explored.
+2. **Round-robin dialogue**: each dispatched agent contributes per round (`--agents` selects
+   participants, `--rounds` bounds the exchange, `--dialogue` enables free-form cross-talk).
+3. **Outcome synthesis**: one cross-domain agent synthesizes agreements and open points.
+4. **Transcript**: write the full record to `memory/meeting-YYYY-MM-DD-[slug].md`.
 
 ## Output Format
 

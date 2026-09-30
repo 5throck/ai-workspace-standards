@@ -1,5 +1,9 @@
 #!/usr/bin/env bun
-// @version 1.10.0
+// @version 1.11.0
+// v1.11.0 (2026-09-30, T-20260926-027): removed the meeting-facilitation →
+//   .claude|gemini/commands/meeting.md special-case derivation. The /meeting
+//   command surface is retired (AGENTS.md §6, 2026-09-26); the command files
+//   were content-less stubs regenerated from the skill SSOT on every run.
 // v1.9.0 (2026-09-25, ADR-0088 W1): fifth platform target `.hermes/skills/` (NousResearch
 //   Hermes Agent mirror — same B-03/mirror:false exclusions as the other targets). Hermes
 //   scans project-local `<git-root>/.hermes/skills` as its primary skill path (source-
@@ -42,7 +46,6 @@
  * Phase 2: Back-sync shortcut skill dirs that exist ONLY in .agents/skills/ (absent
  *          from the SSOT) to .claude and .gemini; WARN on .agents dirs that diverge
  *          from their SSOT counterpart (SSOT wins — see the Phase 2 comment).
- * Special: meeting-facilitation SKILL.md is also synced to .claude/commands/meeting.md and .gemini/commands/meeting.md.
  *
  * Idempotent: a target is only overwritten when its content differs from the
  * source (dirsEqual()); unchanged skills are left untouched on repeat runs
@@ -288,34 +291,6 @@ export async function syncSkills(dirs: SkillSyncDirs, opts: SyncSkillsOptions = 
                 }
                 copyDir(itemPath, target);
                 console.log(`  -> Synced ${item} to ${path.relative(root, targetDir)}/`);
-            }
-
-            // Special logic for commands derived from skills — workspace root ONLY.
-            // Variant `.claude|gemini/commands/meeting.md` files are Fork-Model overlays
-            // (e.g. co-safety's adjudicated divergence, T-20260910-022); regenerating them
-            // from the variant's own meeting-facilitation SKILL.md would clobber the
-            // adapted frontmatter (scope/audit_exception) that the variant registry
-            // validates against.
-            if (item === 'meeting-facilitation' && path.resolve(root) === workspaceRoot) {
-                const claudeCmdDir = path.join(root, '.claude', 'commands');
-                const geminiCmdDir = path.join(root, '.gemini', 'commands');
-                fs.mkdirSync(claudeCmdDir, { recursive: true });
-                fs.mkdirSync(geminiCmdDir, { recursive: true });
-
-                const skillMdPath = path.join(itemPath, 'SKILL.md');
-                if (fs.existsSync(skillMdPath)) {
-                    const claudeCmdTarget = path.join(claudeCmdDir, 'meeting.md');
-                    if (!dirsEqual(skillMdPath, claudeCmdTarget)) {
-                        fs.copyFileSync(skillMdPath, claudeCmdTarget);
-                        console.log(`  -> Synced SKILL.md to .claude/commands/meeting.md`);
-                    }
-
-                    const geminiCmdTarget = path.join(geminiCmdDir, 'meeting.md');
-                    if (!dirsEqual(skillMdPath, geminiCmdTarget)) {
-                        fs.copyFileSync(skillMdPath, geminiCmdTarget);
-                        console.log(`  -> Synced SKILL.md to .gemini/commands/meeting.md`);
-                    }
-                }
             }
         } catch (err) {
             const msg = (err instanceof Error) ? err.message : String(err);

@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-09-26T13:12:04.199Z
+**Generated**: 2026-09-30T02:47:21.237Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -11,7 +11,7 @@
 - **Agents**: 9
 - **Skills**: 54
 - **Scripts**: 111 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` plus experiment files under `scripts/experiments/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
-- **Commands**: 8
+- **Commands**: 7
 
 ---
 
@@ -63,7 +63,7 @@
 | k-krx | 1.0.2 | active | templates/common/skills/k-krx/SKILL.md | common | k-krx, /k-krx, KRX, `한국거래소`, `KRX Open API`, `정보데이터시스템`, `주식 시세`, `코스피`, `코스닥`, `코넥스`, `일별매매정보`, `종목기본정보`, Korean stock market data, KOSPI market data, KOSDAQ market data | financial-analyst |
 | k-law | 1.0.2 | active | templates/common/skills/k-law/SKILL.md | common | k-law, /k-law, `법령`, `법률`, `법령정보`, `법령검색`, `판례`, law, statute, legal search, Korea law | strategy-analyst |
 | k-opendata | 1.2.2 | active | templates/common/skills/k-opendata/SKILL.md | common | k-opendata, /k-opendata, 공공데이터포털, data.go.kr, `관세청`, `수출입무역통계`, `품목별 국가별 수출입실적`, Korea Customs Service trade statistics, HS code trade data | hs-classification-specialist |
-| meeting-facilitation | 1.4.3 | active | skills/meeting-facilitation/SKILL.md | workspace | meeting, agent discussion, collaborative decision, multi-agent coordination, facilitate meeting | pm |
+| meeting-facilitation | 1.5.0 | active | skills/meeting-facilitation/SKILL.md | workspace | meeting, agent discussion, collaborative decision, multi-agent coordination, facilitate meeting | pm |
 | migrate-project | 1.0.0 | active | skills/migrate-project/SKILL.md | workspace | migrate project, adopt and verify migration, run project migration, full project migration flow | scaffolding-expert |
 | platform-command-lifecycle-manager | 1.0.3 | active | skills/platform-command-lifecycle-manager/SKILL.md | workspace | create platform command, new .claude command, new .gemini command, platform command lifecycle, command parity, propagate command | pm |
 | platform-skill-lifecycle-manager | 1.0.2 | active | skills/platform-skill-lifecycle-manager/SKILL.md | workspace | create platform skill, new .claude skill, new .gemini skill, platform skill version, platform skill lifecycle, update platform skill | pm |
@@ -169,7 +169,7 @@
 | sync-skill-registries.ts | 1.0.0 | scripts/sync-skill-registries.ts | N/A |
 | sync-skill-status.ts | 1.1.0 | scripts/sync-skill-status.ts | N/A |
 | sync-skills-to-l2.ts | 1.0.1 | scripts/sync-skills-to-l2.ts | N/A |
-| sync-skills.ts | 1.10.0 | scripts/sync-skills.ts | N/A |
+| sync-skills.ts | 1.11.0 | scripts/sync-skills.ts | N/A |
 | sync-template-deps.ts | 1.0.0 | scripts/sync-template-deps.ts | N/A |
 | tag-template.ts | 1.1.0 | scripts/tag-template.ts | bun |
 | team-builder.ts | 1.4.0 | scripts/team-builder.ts | N/A |
@@ -196,7 +196,7 @@
 | validate-process.ts | 1.0.0 | scripts/validate-process.ts | js-yaml |
 | validate-raci.ts | 1.2.0 | scripts/validate-raci.ts | js-yaml |
 | validate-skills.ts | 1.5.1 | scripts/validate-skills.ts | N/A |
-| validate-templates.ts | 1.46.1 | scripts/validate-templates.ts | js-yaml |
+| validate-templates.ts | 1.47.0 | scripts/validate-templates.ts | js-yaml |
 | validate-variant-readiness.ts | 1.1.0 | scripts/validate-variant-readiness.ts | N/A |
 | variant-feature.ts | 1.0.0 | scripts/variant-feature.ts | N/A |
 | verify-adr-governance.ts | 1.7.0 | scripts/verify-adr-governance.ts | N/A |
@@ -220,7 +220,6 @@
 | changelog | .claude/commands/changelog.md | all | N/A |
 | commit-push-pr | .claude/commands/commit-push-pr.md | all | N/A |
 | gateguard | .claude/commands/gateguard.md | all | N/A |
-| meeting | .claude/commands/meeting.md | all | N/A |
 | memlog | .claude/commands/memlog.md | all | N/A |
 | new-task | .claude/commands/new-task.md | all | N/A |
 | project-review | .claude/commands/project-review.md | all | N/A |
@@ -232,8 +231,8 @@
 
 **Checked**: Claude (.claude/), Gemini (.gemini/), Antigravity (.agents/), Codex (.codex/ prompts mapping)
 
-- **Commands with parity (gemini mirror)**: 8 / 8
-- **Commands with codex prompts mapping**: 8 / 8
+- **Commands with parity (gemini mirror)**: 7 / 7
+- **Commands with codex prompts mapping**: 7 / 7
 - **Skills in all four mirrors**: 0 / 40
 - **Skills in claude+gemini only (both)**: 0 / 40 (common-template skills are parity-exempt)
 

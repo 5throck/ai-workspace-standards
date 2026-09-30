@@ -90,17 +90,6 @@ bun scripts/new-project.ts my-project --variant co-develop --platform both --ver
 - **`dev-sync.ts` (v1.5.0)**: 전체 개발 동기화 파이프라인 (`bun run dev-sync "feat: msg"` 또는 `--body-file <path>`). 사전 문서 링크 검증 게이트 (`bun scripts/validate-docs-links.ts`), 세션 로깅, MEMORY.md 인덱싱, CHANGELOG 검사, 감사 게이트, 민감 파일 감지, git commit/push 및 GitHub PR 생성을 포함합니다.
 - **`test-runner.ts` (v1.1.0)**: 테스트 스위트 실행기 (`bun scripts/test-runner.ts [suite] [flags]`). `unit`, `integration`, `scenarios`, `scripts` 스위트를 지원하며 병렬 실행 (`--parallel`/`--sequential`), 워커 풀 동시성 제어 (`--concurrency <n>`), 테스트별 타임아웃 (`--timeout <ms>`), 격리된 워커 임시 디렉토리 (`TEST_TEMP_DIR`)를 제공합니다.
 
-## 공유 파일 동기화 규칙
-
-일부 파일은 워크스페이스와 템플릿 간에 공유됩니다:
-- `.claude/commands/meeting.md` ↔ `templates/co-develop/.claude/commands/meeting.md`
-
-워크스페이스 버전이 변경되면 템플릿 variant에 수동으로 동기화합니다:
-```bash
-cp .claude/commands/meeting.md templates/co-develop/.claude/commands/meeting.md
-bun scripts/validate-templates.ts  # 드리프트 없음 확인
-```
-
 ## 버전 정책
 
 전체 이력은 [CHANGELOG.md](CHANGELOG.md)를 참조하세요.
@@ -109,4 +98,4 @@ bun scripts/validate-templates.ts  # 드리프트 없음 확인
 - **Minor** 범프: 신규 에이전트, 신규 variant stable 승격, 구조적 섹션 변경
 - **Patch** 범프: 문서 및 설명 갱신
 
-*Last Updated: 2026-09-11*
+*Last Updated: 2026-09-30*

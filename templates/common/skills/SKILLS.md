@@ -19,7 +19,7 @@ Registry of the skills this template delivers: one row per `templates/common/ski
 |-------|---------|--------|-------|---------------|--------------|-------|
 | `agent-lifecycle-manager` | 1.3.0 | active | pm | 2026-09-21 | — | PM-led hiring/firing workflows + skill attach/detach rules |
 | `finishing-a-development-branch` | 1.0.1 | active | pm | 2026-06-13 | — | Workspace override — redirects branch completion to /sync (mirrored 2026-09-04 from .claude/skills) |
-| `meeting-facilitation` | 1.4.3 | active | pm | 2026-09-05 | — | Canonical meeting skill; `meeting` is a trigger alias, not a separate skill directory |
+| `meeting-facilitation` | 1.5.0 | active | pm | 2026-09-30 | — | Canonical meeting skill; `meeting` is a trigger alias, not a separate skill directory |
 | `project-review` | 1.3.0 | active | pm | 2026-09-14 | — | — |
 | `platform-command-lifecycle-manager` | 1.0.3 | active | pm | 2026-09-25 | — | Mirrored 2026-09-04 from .claude/skills |
 | `platform-skill-lifecycle-manager` | 1.0.2 | active | pm | 2026-05-31 | — | Mirrored 2026-09-04 from .claude/skills |

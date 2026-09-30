@@ -1,7 +1,11 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.46.1
+ * @version 1.47.0
+ *
+ * v1.47.0 (2026-09-30, T-20260926-027): removed meeting.md from the shared
+ *         command list and dropped Check 8 (root-vs-common shared file sync) —
+ *         the /meeting command surface is retired (AGENTS.md §6, 2026-09-26).
  *
  * v1.46.1 (2026-09-26, ADR-0090 program closure — design Addendum 3): the
  *         size-budget arm's WARN message and header note record the user
@@ -1295,7 +1299,7 @@ const SOAK_COMMAND_SURFACES = new Set(['.codex/prompts']);
 function checkCommands(variant: string): void {
   if (!JSON_MODE) console.log(`\n=== Check 6: commands in ${variant} ===`);
 
-  const allSharedCommands = ['changelog.md', 'commit-push-pr.md', 'gateguard.md', 'meeting.md', 'memlog.md', 'new-task.md', 'project-review.md', 'sync.md'];
+  const allSharedCommands = ['changelog.md', 'commit-push-pr.md', 'gateguard.md', 'memlog.md', 'new-task.md', 'project-review.md', 'sync.md'];
 
   if (variant === 'common') {
     // common/ must have all shared commands in every command surface
@@ -1336,27 +1340,6 @@ function checkCommands(variant: string): void {
 }
 
 // Check 7: scripts and .githooks parity — removed (dead code after ADR-0036 TypeScript migration)
-
-// Check 8: Shared file sync warning
-function checkSharedFileSync(): void {
-  if (!JSON_MODE) console.log('\n=== Check 8: Shared file sync ===');
-  const workspaceMeeting = join(ROOT, '.claude', 'commands', 'meeting.md');
-  const templateMeeting = join(TEMPLATES_DIR, 'common', '.claude', 'commands', 'meeting.md');
-
-  if (!existsSync(workspaceMeeting) || !existsSync(templateMeeting)) {
-    // One or both missing — skip silently
-    return;
-  }
-
-  const wsContent = normalizeContent(readFileSync(workspaceMeeting, 'utf-8'));
-  const tplContent = normalizeContent(readFileSync(templateMeeting, 'utf-8'));
-
-  if (wsContent !== tplContent) {
-    warn('root', 'shared-sync', 'meeting.md differs between workspace and templates/common', 'Run: cp .claude/commands/meeting.md templates/common/.claude/commands/meeting.md');
-  } else {
-    pass('meeting.md: workspace and common are in sync');
-  }
-}
 
 // Check 11: README presence in stable variants
 function checkReadmePresence(variant: string): void {
@@ -5518,7 +5501,6 @@ function checkAgentsMdPointerIntegrity(): void {
 
   checkCountryProfileDivergence();                               // B-05: cross-variant last_verified divergence
 
-  checkSharedFileSync();
   checkL0L1ScriptParity();
   checkPlatformDocumentationParity();
   checkRootCommonCommandsParity();

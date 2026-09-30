@@ -15,6 +15,7 @@
 | 2026-05-30 | production | production | Updated to v1.3.1: Enforced English and UTF-8 encoding standard across SKILL.md and resolved text corruption | antigravity |
 | 2026-08-16 | production | production | Version drift fix: aligned lifecycle doc to v1.4.0 per SKILL.md | lifecycle-manager |
 | 2026-09-05 | production | production | Updated to v1.4.1: Added Governance Rules section (dissent seat, PROPOSAL-not-decision, verbatim dissent preservation) — generic rules back-ported from Projects/co-newbiz v1.5.0 | zcode |
+| 2026-09-30 | production | production | Updated to v1.5.0: removed /meeting command delegation — skill is now self-contained with explicit invocation; the command surface was retired at L0/L1 (T-20260926-027) | pm |
 
 ## Acceptance Criteria
 
@@ -40,12 +41,14 @@
 
 - **Current Phase**: production
 - **Owner**: pm
-- **Last Updated**: 2026-09-05
+- **Last Updated**: 2026-09-30
 - **Last Reviewer**: lifecycle-manager
 
 ## Changelog
 
+- **1.5.0** (2026-09-30): removed delegation to `.claude/commands/meeting.md` / `.gemini/commands/meeting.md`; documents explicit skill invocation (`--agents`, `--rounds`, `--dialogue`). Command surface retired per T-20260926-027.
+
 - **1.4.3** (2026-09-21): patch bump — deliver accumulated template content to the fleet (equal-version content drift measured 2026-09-21; upgrade-project 1.37 UPDATE delivery).
 
 - **1.4.2** (2026-09-21): patch bump — deliver accumulated template content that predated this version to the fleet (equal-version content drift measured 2026-09-21; upgrade-project 1.37 UPDATE delivery).
-- **Version**: 1.4.3
+- **Version**: 1.5.0

@@ -91,17 +91,6 @@ Scaffolded projects inherit shared automation scripts from `templates/common/scr
 - **`dev-sync.ts` (v1.5.0)**: Full development sync pipeline (`bun run dev-sync "feat: msg"` or `--body-file <path>`). Includes pre-flight markdown link validation gate (`bun scripts/validate-docs-links.ts`), session logging, MEMORY.md indexing, CHANGELOG check, audit gate, sensitive file detection, git commit/push, and GitHub PR creation.
 - **`test-runner.ts` (v1.1.0)**: Test suite runner (`bun scripts/test-runner.ts [suite] [flags]`). Supports `unit`, `integration`, `scenarios`, and `scripts` suites with parallel execution (`--parallel`/`--sequential`), worker pool concurrency control (`--concurrency <n>`), per-test timeouts (`--timeout <ms>`), and isolated worker temp directories (`TEST_TEMP_DIR`).
 
-## Shared File Sync Rule
-
-Some files are shared between the workspace and templates:
-- `.claude/commands/meeting.md` ↔ `templates/co-develop/.claude/commands/meeting.md`
-
-When the workspace version changes, manually sync to the template variant:
-```bash
-cp .claude/commands/meeting.md templates/co-develop/.claude/commands/meeting.md
-bun scripts/validate-templates.ts  # confirm no drift
-```
-
 ## Version Policy
 
 See [CHANGELOG.md](CHANGELOG.md) for full history.
@@ -110,4 +99,4 @@ See [CHANGELOG.md](CHANGELOG.md) for full history.
 - **Minor** bump: new agents, new variants going stable, structural section changes
 - **Patch** bump: documentation and description updates
 
-*Last Updated: 2026-09-06*
+*Last Updated: 2026-09-30*
