@@ -236,12 +236,12 @@ describe('C-CM-04 platform-skills sweep helpers (T-20260924-002 R1.3-R1.5)', () 
   const MIRROR_TREES = ['.claude/skills', '.gemini/skills', '.agents/skills', '.codex/skills'];
 
   test('exclusion acceptance: a listed, exempt, or excluded dir never comes back unlisted', () => {
-    const dirs = ['upgrade-project', 'sound-synth', 'graft', 'meeting-facilitation', 'handbook'];
+    const dirs = ['upgrade-project', 'sound-synth', 'create-variant', 'meeting-facilitation', 'handbook'];
     const unlisted = unlistedPlatformSkillDirs(
       dirs,
       new Set(Object.keys(contract.common_platform_skills)),
       new Set(['sound-synth']), // variant-scoped value
-      new Set(Object.keys(contract.common_platform_skill_exclusions)), // graft etc.
+      new Set(Object.keys(contract.common_platform_skill_exclusions)), // create-variant etc.
     );
     expect(unlisted).toEqual([]);
   });
@@ -264,7 +264,7 @@ describe('C-CM-04 platform-skills sweep helpers (T-20260924-002 R1.3-R1.5)', () 
   test('real contract exclusions are live: every excluded dir exists in some mirror tree', () => {
     const exclusions = Object.keys(contract.common_platform_skill_exclusions as Record<string, unknown>);
     expect(exclusions.sort()).toEqual(
-      ['create-variant', 'graft', 'new-project', 'promote-variant', 'simulate-pipeline'].sort(),
+      ['create-variant', 'new-project', 'promote-variant', 'simulate-pipeline'].sort(),
     );
     const existing = new Set<string>();
     for (const tree of MIRROR_TREES) {
