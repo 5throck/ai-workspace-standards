@@ -35,6 +35,45 @@ jobs:
       - name: Run audit
         run: bun scripts/audit.ts
 
+  dependency-audit:
+    name: Dependency Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        if: ${{ hashFiles('bun.lock') != '' }}
+        run: bun install --frozen-lockfile
+
+      - name: Security audit - dependency vulnerabilities
+        shell: bash
+        run: |
+          # Fleet dependency-vulnerability gate (2026-10-01 fleet assessment FW-1).
+          # Threshold matches the L0 root gate (.github/workflows/test.yml):
+          # fail on high or critical; low/moderate findings are reported only.
+          # bun audit exits 1 whenever any finding exists, so the exit code
+          # alone cannot separate findings from infrastructure failures — the
+          # severity summary line is the source of truth, and empty output is
+          # treated as a loud infra failure.
+          audit_output=$(bun audit 2>&1) || true
+          echo "$audit_output"
+          if [ -z "$audit_output" ]; then
+            echo "ERROR: bun audit produced no output (possible registry/infrastructure failure)."
+            exit 1
+          fi
+          if echo "$audit_output" | grep -qE '[1-9][0-9]* (high|critical)'; then
+            echo "ERROR: High or critical vulnerabilities found. See audit output above."
+            exit 1
+          fi
+          echo "Security check passed (no high/critical vulnerabilities)."
+
+
   secret-scan:
     name: Secret Scan
     runs-on: ubuntu-latest
