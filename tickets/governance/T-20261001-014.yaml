@@ -1,0 +1,45 @@
+schemaVersion: 1
+id: T-20261001-014
+kind: manual
+title: >-
+  co-workspace: R1 forced first-login password rotation was dead code —
+  web/index.html called forcePasswordChange() (never defined, ReferenceError at
+  login/boot) so a must-change session landed in the normal app; add the
+  blocking rotation dialog and a server gate confining must-change sessions to
+  /auth/* plus shell pages (GET /, /login, /app-helpers.js, /health) with 403
+  elsewhere
+priority: high
+status: done
+attempts: 0
+created_at: '2026-10-01T04:38:20.086Z'
+history:
+  - at: '2026-10-01T04:38:20.086Z'
+    from: null
+    to: backlog
+  - at: '2026-10-01T04:38:40.734Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-01T04:38:40.748Z'
+    from: waiting
+    to: review
+  - at: '2026-10-01T04:38:40.761Z'
+    from: review
+    to: done
+result: >-
+  Fixed on branch pr/20261001-105028-chore-update: (1) web/index.html —
+  implemented forcePasswordChange() as a dismissible=false modal (showModal
+  already supported it); new password 2x, PATCH /auth/me without currentPassword
+  (temp credential verified at sign-in), then drop to signed-out card for
+  re-login (rotation purges sessions server-side, users.ts
+  completeTempPasswordChange). (2) src/server.ts — R1 gate after the
+  loginRequired block: a must-change session gets 403 'password change required'
+  on everything outside /auth/* and the GET shell pages (/, /login,
+  /app-helpers.js, /health); API-key callers carry no session and pass. (3)
+  tests/unit/co-workspace-phase2b.test.ts — new test 'R1 gate: a must-change
+  session is confined to the auth surface and shell pages' (403 on /tenants +
+  /v1/models, 200 shell + /auth/me flag, rotation, re-login 200). Verification:
+  phase2b 18 pass; auth-hardening/phase2/latency-ux/h5h7 43 pass; remaining
+  co-workspace suites pass; tsc --noEmit clean; index.html module script
+  syntax-checked. The 7 failures in untracked WIP team-gateway-server.test.ts
+  are pre-existing (identical with changes stashed).
+error: null

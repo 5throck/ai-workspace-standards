@@ -207,6 +207,53 @@ console.log(JSON.stringify({ type: "result", session_id: "s1", exit_code: 0, tex
     expect(denied.status).toBe(401);
   });
 
+  test("R1 gate: a must-change session is confined to the auth surface and shell pages", async () => {
+    const gated = state.users.createUser({ email: "gated@test.local", name: "gated", password: "oldpass123", role: "user" });
+    const reset = await fetch(`${base}/admin/users/${gated!.id}/reset-password`, {
+      method: "POST",
+      headers: { cookie: adminCookie },
+    });
+    const { tempPassword } = await reset.json();
+    const login = await fetch(`${base}/auth/login`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ loginId: "gated", password: tempPassword }),
+    });
+    expect(login.status).toBe(200);
+    const cookie = login.headers.get("set-cookie")!.split(";")[0];
+
+    // core API areas answer 403 while the temp credential is un-rotated …
+    const tenants = await fetch(`${base}/tenants`, { headers: { cookie } });
+    expect(tenants.status).toBe(403);
+    expect(((await tenants.json()) as any).error).toContain("password change required");
+    const compat = await fetch(`${base}/v1/models`, { headers: { cookie } });
+    expect(compat.status).toBe(403);
+    // … the shell page still loads (the forced-change dialog renders on it) …
+    const shell = await fetch(`${base}/`, { headers: { cookie } });
+    expect(shell.status).toBe(200);
+    // … and the auth surface stays reachable: the flag via /auth/me.
+    const meRes = await fetch(`${base}/auth/me`, { headers: { cookie } });
+    expect(meRes.status).toBe(200);
+    expect(((await meRes.json()) as any).user.mustChangePassword).toBe(true);
+
+    // completing the rotation re-opens the API for the next session
+    const rotated = await fetch(`${base}/auth/me`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json", "x-requested-with": "co-workspace", cookie },
+      body: JSON.stringify({ password: "freshpass123" }),
+    });
+    expect(rotated.status).toBe(200);
+    const relogin = await fetch(`${base}/auth/login`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ loginId: "gated", password: "freshpass123" }),
+    });
+    expect(relogin.status).toBe(200);
+    const freshCookie = relogin.headers.get("set-cookie")!.split(";")[0];
+    const tenantsAfter = await fetch(`${base}/tenants`, { headers: { cookie: freshCookie } });
+    expect(tenantsAfter.status).toBe(200);
+  });
+
   test("account self-service: password change needs current credential; email change verifies; admin renames", async () => {
     const { createHash } = await import("node:crypto");
     const sha = (v: string) => createHash("sha256").update(v).digest("hex");

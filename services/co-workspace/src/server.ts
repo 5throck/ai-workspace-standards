@@ -95,6 +95,17 @@ export async function handleRequest(state: GatewayState, req: Request, peerIp?: 
         throw new HttpError(401, "sign-in required");
       }
     }
+    // R1 gate: a session opened with an admin-issued temp credential is confined to the
+    // auth surface (finish the rotation via PATCH /auth/me, sign out) plus the shell pages
+    // the forced-change dialog renders on. Every other area — tenants, chat, admin, files —
+    // answers 403 until the password is rotated. API-key callers carry no session, so they
+    // pass; a caller presenting both satisfies the gate only via the session branch.
+    if (sessionUser?.mustChangePassword) {
+      const shell = req.method === "GET" && ["/", "/login", "/app-helpers.js", "/health"].includes(path);
+      if (!authRoute && !shell) {
+        throw new HttpError(403, "password change required — your sign-in used a temporary password");
+      }
+    }
     const ctx: Ctx = { url, path, sessionUser, clientIp };
     const routed =
       (await handlePublic(state, req, ctx)) ??

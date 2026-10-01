@@ -135,3 +135,28 @@ invariant implementations must preserve.
 | Single-file front-end concentration | Small sequential PRs, parse guard per PR, GUI pass per wave |
 | Donut misread (dissent seat HOLD recorded) | Composition subjects per user decision; top-7+others cap; legends carry numbers; per-user detail stays tabular |
 | Parallel working-tree sessions sweep uncommitted changes | Re-apply + immediate commit (encountered 2026-09-28 during PR0; recovery documented in memory log) |
+
+## 9. Addendum (2026-10-01): R1 forced-rotation enforcement repaired (T-20261001-014)
+
+Fleet verification found the R1 forced first-login rotation shipped as dead code:
+`web/index.html` called `forcePasswordChange()` at login (R1 invariant step 3) and
+at boot, but no implementation of the function ever landed — a must-change session
+dropped straight into the normal app, and the boot-path ReferenceError also skipped
+`renderAuthCard()`. The server likewise had no gate, so an un-rotated temp-credential
+session could use every API area.
+
+Repair (both halves of the R1 shape (A) contract, invariant-restoring):
+
+1. **Web** — `forcePasswordChange()` implemented as the designed blocking dialog
+   (`showModal` `dismissible: false`): new password twice, `PATCH /auth/me` without
+   `currentPassword` (the temp credential was verified at sign-in), then drop to the
+   signed-out card for re-login — rotation purges every session server-side
+   (`completeTempPasswordChange`, SEC-06), so the client must re-authenticate.
+2. **Server** — a must-change session is confined to `/auth/*` plus the GET shell
+   pages the dialog renders on (`/`, `/login`, `/app-helpers.js`, `/health`);
+   everything else answers `403 password change required` until rotation completes.
+   API-key callers carry no session and are unaffected.
+
+Test: `co-workspace-phase2b` "R1 gate: a must-change session is confined to the auth
+surface and shell pages" (403 on `/tenants` and `/v1/models`, 200 shell + `/auth/me`
+flag, rotation, re-login 200). Full co-workspace suites and typecheck green.
