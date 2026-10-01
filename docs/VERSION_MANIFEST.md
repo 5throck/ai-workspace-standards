@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-10-01T08:48:37.081Z
+**Generated**: 2026-10-01T09:47:50.258Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 9
 - **Skills**: 56
-- **Scripts**: 113 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` plus experiment files under `scripts/experiments/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
+- **Scripts**: 115 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` plus experiment files under `scripts/experiments/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
 - **Commands**: 7
 
 ---
@@ -138,11 +138,13 @@
 | graph-delta-log.ts | 1.0.0 | scripts/graph-delta-log.ts | N/A |
 | ingest-external-skills.ts | 1.1.0 | scripts/ingest-external-skills.ts | N/A |
 | ingest-security-frameworks.ts | 1.1.0 | scripts/ingest-security-frameworks.ts | N/A |
+| install-upstream-mcp.ts | 1.1.0 | scripts/install-upstream-mcp.ts | N/A |
 | l3-to-variant-pipeline.ts | 1.21.1 | scripts/l3-to-variant-pipeline.ts | child_process, fs, path, process |
 | lifecycle-sync-audit.ts | 1.17.0 | scripts/lifecycle-sync-audit.ts | js-yaml |
 | lint-instructions.ts | 1.0.0 | scripts/lint-instructions.ts | N/A |
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
 | mcp-governance-server.ts | 1.1.0 | scripts/mcp-governance-server.ts | N/A |
+| mcp-upstream-server.ts | 1.2.0 | scripts/mcp-upstream-server.ts | js-yaml |
 | md-to-ooxml.ts | 1.2.0 | scripts/md-to-ooxml.ts | fs, path |
 | migrate-project.ts | 1.0.0 | scripts/migrate-project.ts | N/A |
 | migrate-quality-gates.ts | 1.1.0 | scripts/migrate-quality-gates.ts | fs, js-yaml, path |
@@ -185,7 +187,7 @@
 | test-runner.ts | 1.4.0 | scripts/test-runner.ts | fs, os, path |
 | test-scaffold-delivery-parity.ts | 1.0.0 | scripts/test-scaffold-delivery-parity.ts | N/A |
 | test-variant-readiness.ts | 1.0.0 | scripts/test-variant-readiness.ts | N/A |
-| ticket.ts | 1.4.0 | scripts/ticket.ts | N/A |
+| ticket.ts | 1.5.2 | scripts/ticket.ts | N/A |
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, fs, path |
 | typecheck.ts | 1.1.1 | scripts/typecheck.ts | N/A |
 | upgrade-project.ts | 1.61.0 | scripts/upgrade-project.ts | N/A |
