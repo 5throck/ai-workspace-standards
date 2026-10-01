@@ -21,7 +21,7 @@ let binDir: string;
 
 function desktopPath(): string {
   if (platform() === 'darwin') return join(home, 'Library', 'Application Support', 'Claude', 'claude_desktop_config.json');
-  if (IS_WIN) return join(process.env.APPDATA || join(home, 'AppData', 'Roaming'), 'Claude', 'claude_desktop_config.json');
+  if (IS_WIN) return join(home, 'AppData', 'Roaming', 'Claude', 'claude_desktop_config.json');
   return join(home, 'no-claude-desktop-on-this-platform');
 }
 const claudePath = () => join(home, '.claude.json');

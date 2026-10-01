@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
-// @version 2.0.0
+// @version 2.0.1
+// v2.0.1 (2026-10-01): with UPSTREAM_INSTALL_HOME set, %APPDATA% no longer leaks the real Windows profile into the Claude Desktop path.
 // v2.0.0 (2026-10-01): registers the server for every supported surface (Claude Code, Claude Desktop App,
 //          Antigravity IDE/CLI, Gemini CLI, Codex CLI/Desktop, Hermes Agent/CLI) with one target per config file
 //          (--target claude|claude-desktop|antigravity|gemini|codex|hermes|all; default all, undetected clients are skipped).
@@ -157,7 +158,11 @@ const claude = jsonAdapter({
 // the Claude Desktop App has no Linux build, so Linux has no path.
 function claudeDesktopConfigPath(): string | null {
   if (platform() === 'win32') {
-    return join(process.env.APPDATA || join(home(), 'AppData', 'Roaming'), 'Claude', 'claude_desktop_config.json');
+    // With the test seam active, %APPDATA% must not leak the real user profile into a test run.
+    const appData = process.env.UPSTREAM_INSTALL_HOME
+      ? join(home(), 'AppData', 'Roaming')
+      : process.env.APPDATA || join(home(), 'AppData', 'Roaming');
+    return join(appData, 'Claude', 'claude_desktop_config.json');
   }
   if (platform() === 'darwin') {
     return join(home(), 'Library', 'Application Support', 'Claude', 'claude_desktop_config.json');
@@ -358,7 +363,7 @@ function main(): void {
   };
   const { targets, explicit } = parseTargets(args);
 
-  console.log(`Upstream MCP Server Installer v2.0.0`);
+  console.log(`Upstream MCP Server Installer v2.0.1`);
   console.log(`  Workspace: ${WORKSPACE_ROOT}`);
   console.log(`  Targets:   ${targets.join(', ')}`);
   console.log();
