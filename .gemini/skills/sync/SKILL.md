@@ -1,7 +1,7 @@
 ---
 name: sync
 description: Runs the full project sync pipeline — lifecycle update, audit, L0→L1 publish, commit, push, and PR creation.
-version: 1.6.0
+version: 1.7.0
 last_reviewed: 2026-09-17
 status: active
 scope: common
@@ -39,7 +39,7 @@ Runs the full project sync pipeline (`scripts/dev-sync.ts`). This is the single 
 
 ## Execution Steps
 
-0. **Stage the task files** (BEFORE invoking the pipeline): `git add <task files>`. Only explicitly task-staged files plus files the pipeline itself generates (memory log, VERSION_MANIFEST, propagation output, ...) are committable. Dev-sync snapshots the working tree at start and at commit time. Any working-tree change that is neither task-staged nor pipeline-generated is reported as a WARN (swept in during the current soak; promotion will EXCLUDE it — preview with `SYNC_SCOPED_STAGING=1` or `--scoped-staging`; design: `docs/designs/2026-09-12-dev-sync-scoped-staging-design.md`). Never rely on `git add -A` to pick up your edits. Never leave unrelated dirt in the tree when syncing.
+0. **Stage the task files** (BEFORE invoking the pipeline): `git add <task files>`. Only explicitly task-staged files plus files the pipeline itself generates (memory log, VERSION_MANIFEST, propagation output, ...) are committable. Dev-sync snapshots the working tree at start and at commit time. Any working-tree change that is neither task-staged nor pipeline-generated is EXCLUDED from the commit by default (scoped staging, T-20261001-015 soak exit; design: `docs/designs/2026-09-12-dev-sync-scoped-staging-design.md`) — stage everything the commit needs explicitly. To restore the legacy WARN-soak sweep, set `SYNC_SCOPED_STAGING=0` or pass `--warn-staging`. Never rely on `git add -A` to pick up your edits. Never leave unrelated dirt in the tree when syncing.
 
 1. **Write the PR body** (the agent writes it — never shell out to an LLM CLI):
    - Inspect the change: `git diff HEAD~1 --stat` and `git diff HEAD~1 --name-only` (first 30 files).
@@ -97,7 +97,7 @@ Runs the full project sync pipeline (`scripts/dev-sync.ts`). This is the single 
 | 4.7 | VERSION_MANIFEST.md Generation | **FATAL** | Generates `VERSION_MANIFEST.md` via `generate-version-manifest.ts` |
 | 4.9 | AUDIT GATE | **FATAL** | Runs `audit.ts` — must exit 0 before proceeding. Includes the auto-activating gates: skill-graph drift (ADR-0060) and upgrade coverage (`check-upgrade-coverage.ts --strict`, ADR-0073) |
 | 5 | Branch Creation | **FATAL** | Creates `pr/<timestamp>-<slug>` branch if on main/master; reuses existing branch otherwise |
-| 6 | Sensitive File Guard + Scoped Staging + Commit/Push | **FATAL** | Guards against `.pem`, `.key`, `.env`, `credentials.json`, etc.; scoped-staging check (S0/S1 tree snapshots — WARN-lists files that are neither task-staged nor pipeline-generated; `SYNC_SCOPED_STAGING=1` excludes them), then `git add`, `git commit`, `git push` |
+| 6 | Sensitive File Guard + Scoped Staging + Commit/Push | **FATAL** | Guards against `.pem`, `.key`, `.env`, `credentials.json`, etc.; scoped-staging check (S0/S1 tree snapshots — WARN-lists files that are neither task-staged nor pipeline-generated; excluded by default; `SYNC_SCOPED_STAGING=0`/`--warn-staging` restore the legacy sweep), then `git add`, `git commit`, `git push` |
 | 7 | PR Creation | **FATAL** | If `--body-file` was passed, validates it (English) and opens the PR via `gh pr create --body-file`; otherwise falls back to `gen-pr-body.ts` template, `.github/pull_request_template.md`, then `gh pr create --fill`; idempotent — updates existing PR if one already exists for the branch |
 
 4. If audit fails, fix the reported issue before re-running.

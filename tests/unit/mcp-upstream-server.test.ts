@@ -11,7 +11,7 @@ import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { spawn, execFileSync, spawnSync, type ChildProcess } from 'node:child_process';
 import {
   mkdtempSync, mkdirSync, writeFileSync, readFileSync, readdirSync, existsSync, rmSync,
-  realpathSync, symlinkSync, cpSync,
+  realpathSync, symlinkSync, cpSync, utimesSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve, isAbsolute } from 'node:path';
@@ -1293,5 +1293,39 @@ describe('13.14 SCRIPTS.md registry', () => {
       const row = md.split('\n').find((l) => l.startsWith(`| \`${name}\` | L0 | ${ver} |`));
       expect(row).toBeDefined();
     }
+  });
+});
+
+describe('T-20261001-017 intake hardening (lock + retention)', () => {
+  test('stale intake lock is taken over and removed after the run', async () => {
+    const proj = ws.project('co-test');
+    seedKnown(ws, 'co-test');
+    const lockDir = join(ws.logsDir, '.intake-lock');
+    mkdirSync(lockDir, { recursive: true });
+    const old = new Date(Date.now() - 60_000);
+    utimesSync(lockDir, old, old); // stale: crashed server
+    const r = await open(proj).create({ ...good(), project_root: proj });
+    expect(r.rpc.error).toBeUndefined();
+    expect(existsSync(lockDir)).toBe(false);
+  });
+
+  test('fresh lock + deadline 0 falls open and proceeds unlocked', async () => {
+    const proj = ws.project('co-test');
+    seedKnown(ws, 'co-test');
+    mkdirSync(join(ws.logsDir, '.intake-lock'), { recursive: true }); // fresh — held by "another" instance
+    const r = await open(proj, { UPSTREAM_LOCK_TIMEOUT_MS: '0' }).create({ ...good(), project_root: proj });
+    // fail-open: the request proceeds exactly as it would have pre-lock (v1.4.0 behavior)
+    expect(r.rpc.error).toBeUndefined();
+  });
+
+  test('startup prunes daily audit logs past retention; known-projects.json survives', async () => {
+    const proj = ws.project('co-test');
+    seedKnown(ws, 'co-test');
+    const oldDay = new Date(Date.now() - 100 * 86_400_000).toISOString().slice(0, 10); // 100d ago > 90d retention
+    writeFileSync(join(ws.logsDir, `${oldDay}.jsonl`), '{"ts":"old","outcome":"accepted"}\n', 'utf-8');
+    const s = open(proj);
+    await s.send('initialize', {});
+    expect(existsSync(join(ws.logsDir, `${oldDay}.jsonl`))).toBe(false);
+    expect(existsSync(join(ws.logsDir, 'known-projects.json'))).toBe(true);
   });
 });

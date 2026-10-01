@@ -1,5 +1,11 @@
 #!/usr/bin/env bun
-// @version 1.5.2
+// @version 1.7.0
+// v1.7.0 (2026-10-01, T-20261001-017): `show` falls back to readTicketRaw when schema
+//           validation fails — a corrupt/hand-edited ticket renders with a loud banner
+//           instead of an opaque schema error (repair path for the upstream flow).
+// v1.6.0 (2026-10-01, T-20261001-016): `triage` and `resolve` subcommands — PM writes
+//           upstream.triage / upstream.resolution without hand-editing YAML (§3.12);
+//           TICKET_WORKSPACE_ROOT env is a test seam (pattern: UPSTREAM_INSTALL_HOME).
 // v1.5.2 (2026-10-01, security review): boundary escaping runs on an NFKC-folded copy and neutralizes
 //           angle-bracket lookalikes that NFKC does not fold.
 // v1.5.1 (2026-10-01): boundary-tag escaping is case-insensitive, whitespace-tolerant and
@@ -18,11 +24,17 @@
 import { resolve, join } from 'node:path';
 import {
   createTicket, listTickets, moveTicket, nextServiceTicket, staleRunningTickets, loadCatalog, DEFAULT_ATTEMPTS_CAP,
-  resolveTicketLocation, readTicket,
+  resolveTicketLocation, readTicket, readTicketRaw, setUpstreamTriage, setUpstreamResolution,
 } from './helpers/ticket-store.ts';
+import { dump } from 'js-yaml';
 import type { Priority, Status, Kind, Ticket } from './helpers/ticket-schema.ts';
 
-const workspaceRoot = resolve(import.meta.dir, '..');
+// Test seam (T-20261001-016): TICKET_WORKSPACE_ROOT redirects the tickets/ root for
+// subprocess CLI tests — same pattern as the installer's UPSTREAM_INSTALL_HOME.
+// Never set it in normal operation; the default is always the script's own workspace.
+const workspaceRoot = process.env.TICKET_WORKSPACE_ROOT
+  ? resolve(process.env.TICKET_WORKSPACE_ROOT)
+  : resolve(import.meta.dir, '..');
 // Service tickets: ephemeral execution-queue instances (tickets/*.yaml is gitignored — Task 8).
 const ticketsDir = join(workspaceRoot, 'tickets');
 // Manual (Governance Backlog) tickets: deliberately git-tracked so deferred decisions survive
@@ -42,7 +54,7 @@ function resolveTicketDir(id: string): { dir: string; id: string } {
 
 const [, , cmd, ...rest] = process.argv;
 
-const BOOLEAN_FLAGS = new Set(['manual', 'force', 'json', 'html', 'ready']);
+const BOOLEAN_FLAGS = new Set(['manual', 'force', 'json', 'html', 'ready', 'confirm-reviewed']);
 
 function parseFlags(args: string[]): { positional: string[]; flags: Record<string, string | boolean> } {
   const positional: string[] = [];
@@ -192,7 +204,19 @@ try {
       const id = positional[0];
       if (!id) fail('usage: ticket.ts show <id>');
       const { dir, id: bareId } = resolveTicketDir(id);
-      const ticket = readTicket(dir, bareId);
+      let ticket: Ticket;
+      try {
+        ticket = readTicket(dir, bareId);
+      } catch (err) {
+        // T-20261001-017: a corrupt/hand-edited ticket must be visible for repair,
+        // not just a schema error. Raw YAML is PM- or requester-authored content —
+        // boundary-tag escaped. `doctor` still reports it once repaired fields validate.
+        const raw = readTicketRaw(dir, bareId);
+        console.log(`\n🚨 CORRUPT TICKET — failed schema validation: ${(err as Error).message}`);
+        console.log('   Raw YAML below (NOT validated — repair by hand, then re-check with `bun scripts/ticket.ts show`):');
+        console.log(escapeBoundaryTags(dump(raw)));
+        break;
+      }
       console.log(`\n📋 Ticket: ${ticket.id}`);
       console.log(`   Status: ${ticket.status}`);
       console.log(`   Kind: ${ticket.kind}`);
@@ -209,6 +233,45 @@ try {
         console.log(formatUpstreamBlock(ticket));
       }
       console.log('');
+      break;
+    }
+    case 'triage': {
+      // T-20261001-016 — PM triage of an upstream request (§3.12 steps 3/5).
+      const { positional, flags } = parseFlags(rest);
+      const [id, verdict] = positional;
+      if (!id || (verdict !== 'inbox' && verdict !== 'ready')) {
+        fail('usage: ticket.ts triage <U-id> <inbox|ready> [--confirm-reviewed] — ready on a flagged ticket requires --confirm-reviewed');
+      }
+      const { dir, id: bareId } = resolveTicketDir(id);
+      const t = setUpstreamTriage(dir, bareId, verdict, { confirmReviewed: flags['confirm-reviewed'] === true });
+      console.log(`✅ ${id}: upstream.triage=${verdict}, status=${t.status}`);
+      break;
+    }
+    case 'resolve': {
+      // T-20261001-016 — record the PM resolution and close (§3.12 step 8).
+      const { positional, flags } = parseFlags(rest);
+      const id = positional[0];
+      const outcome = flags.outcome as string | undefined;
+      const summary = flags.summary as string | undefined;
+      const prUrl = flags['pr-url'] as string | undefined;
+      const templateVersion = flags['template-version'] as string | undefined;
+      if (!id || !outcome || typeof summary !== 'string' || summary.trim() === '') {
+        fail('usage: ticket.ts resolve <U-id> --outcome <fixed|rejected|local-only|duplicate> --summary "<text>" [--pr-url <url>] [--template-version <ver>|unreleased]');
+      }
+      if (!['fixed', 'rejected', 'local-only', 'duplicate'].includes(outcome)) {
+        fail(`--outcome must be fixed | rejected | local-only | duplicate (got: ${outcome})`);
+      }
+      if (prUrl !== undefined && !/^https:\/\/\S+$/.test(prUrl)) {
+        fail(`--pr-url must be an https URL (got: ${prUrl})`);
+      }
+      const { dir, id: bareId } = resolveTicketDir(id);
+      const t = setUpstreamResolution(
+        dir,
+        bareId,
+        { outcome: outcome as 'fixed' | 'rejected' | 'local-only' | 'duplicate', pr_url: prUrl, template_version: templateVersion, summary },
+        summary,
+      );
+      console.log(`✅ ${id}: outcome=${outcome}, status=${t.status}, resolution recorded`);
       break;
     }
     case 'doctor': {
@@ -264,7 +327,7 @@ ${lanes.map(lane => `<div class="lane"><h3>${escapeHtml(lane)}</h3>${tickets.fil
       break;
     }
     default:
-      console.log('usage: bun scripts/ticket.ts <create|list|show|next|move|board|doctor> ...');
+      console.log('usage: bun scripts/ticket.ts <create|list|show|next|move|triage|resolve|board|doctor> ...');
       process.exit(cmd ? 1 : 0);
   }
 } catch (err) {

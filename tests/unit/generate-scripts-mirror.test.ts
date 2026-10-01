@@ -207,6 +207,6 @@ describe('live tree invariants (post-normalization)', () => {
       .filter((l) => l.startsWith('| `'))
       .map((l) => l.split('|')[1].trim().replace(/`/g, ''));
     expect(rowKeys).not.toContain('generate-scripts-mirror.ts');
-    expect(rowKeys).toHaveLength(135); // post-normalization invariant: rows == template .ts files (T-20260930-026: +1 lib/ci-workflow-merge.ts delivered to L1; W5 follow-up: +6 delivered helpers, -1 generate-variant demoted to L0; ADR-0091 c77e74db: +1 regenerate-agents-md.ts delivered to L1 — this pin lagging the delivery is what tripped CI as T-20260926-011)
+    expect(rowKeys).toHaveLength(136); // post-normalization invariant: rows == template .ts files (T-20260930-026: +1 lib/ci-workflow-merge.ts delivered to L1; W5 follow-up: +6 delivered helpers, -1 generate-variant demoted to L0; ADR-0091 c77e74db: +1 regenerate-agents-md.ts delivered to L1 — this pin lagging the delivery is what tripped CI as T-20260926-011; T-20261001-018: +1 validate-surface-registry.ts delivered to L1)
   });
 });
