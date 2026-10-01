@@ -3,6 +3,7 @@
 All notable changes to the template variants are documented here.
 
 ## [Unreleased]
+- ci.yml: unit-tests job flips to default-on (Release 2, ADR-0094/T-20260930-026) — set the repository variable CI_SKIP_DEFAULT_UNIT_TESTS to true to opt out; Release 1 opt-in verified live on co-newbiz.
 ### Added
 - **[2026-10-01]**: `templates/common/.github/workflows/ci.yml` (T-20260930-026 PR-B, ADR-0094) — the workflow now carries `# PROJECT-JOBS-BEGIN`/`# PROJECT-JOBS-END` markers; upgrade-project preserves the region between them as project-owned (validated, not trusted). A new opt-in `unit-tests` job (gated by the `CI_ENABLE_DEFAULT_UNIT_TESTS` repository variable, 15-minute timeout, `persist-credentials: false`, pinned Bun `1.3.x`) runs `test:unit` when package.json defines it; the old commented test-python/test-node stubs were removed — stack-specific jobs now belong inside the project region.
 
