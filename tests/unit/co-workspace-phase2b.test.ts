@@ -315,6 +315,8 @@ console.log(JSON.stringify({ type: "result", session_id: "s9", exit_code: 0, tex
       CO_WORKSPACE_PORT: String(20000 + Math.floor(Math.random() * 20000)),
       CO_WORKSPACE_DATA_DIR: join(tmpdir(), `gw-slow-data-${crypto.randomUUID().slice(0, 8)}`),
       CO_WORKSPACE_WORKSPACE_DIR: ws,
+      // Anonymous provisioning flow — opt into the 2026-10-02 gate design's knob.
+      CO_WORKSPACE_ALLOW_ANON_PROVISIONING: "true",
       HERMES_BIN: hermesBin,
       HERMES_BIN_PREFIX: "bun",
     });
@@ -407,6 +409,8 @@ console.log(JSON.stringify({ type: "result", session_id: "s9", exit_code: 0, tex
       CO_WORKSPACE_PORT: String(20000 + Math.floor(Math.random() * 20000)),
       CO_WORKSPACE_DATA_DIR: join(tmpdir(), `gw-budget-${crypto.randomUUID().slice(0, 8)}`),
       CO_WORKSPACE_WORKSPACE_DIR: workspaceDir,
+      // Anonymous provisioning flow — opt into the 2026-10-02 gate design's knob.
+      CO_WORKSPACE_ALLOW_ANON_PROVISIONING: "true",
       HERMES_BIN: hermesBin,
       HERMES_BIN_PREFIX: "bun",
       CO_WORKSPACE_PRINCIPAL_MAX_TOKENS: "4",

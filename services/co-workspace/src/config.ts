@@ -93,6 +93,10 @@ export interface GatewayConfig {
   trustProxy: boolean;
   /** SEC-05: per-principal tenant cap (`POST /sessions` + lazy creation). 0 = unlimited. */
   tenantMaxPerPrincipal: number;
+  /** 2026-10-02 gate design (D1/D4): allow UNAUTHENTICATED callers to provision new tenants.
+   *  Default false — provisioning is privileged (spawns the scaffold engine inside the
+   *  workspace); open mode keeps granting reachability of existing tenants only. */
+  allowAnonProvisioning: boolean;
   /** SEC-05 (remnant): per-principal lifetime token budget ACROSS all their tenants. 0 = off. */
   principalMaxTokens: number;
   /** SEC-10: docker isolation resource caps. */
@@ -258,6 +262,7 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     csrfRequired: env.CO_WORKSPACE_CSRF_REQUIRED === "true",
     trustProxy: env.CO_WORKSPACE_TRUST_PROXY === "true" || env.CO_WORKSPACE_TRUST_PROXY === "1",
     tenantMaxPerPrincipal: numOr0(env.CO_WORKSPACE_TENANT_MAX_PER_PRINCIPAL),
+    allowAnonProvisioning: env.CO_WORKSPACE_ALLOW_ANON_PROVISIONING === "true",
     principalMaxTokens: numOr0(env.CO_WORKSPACE_PRINCIPAL_MAX_TOKENS),
     containerMemory: env.CO_WORKSPACE_CONTAINER_MEMORY ?? "2g",
     containerCpus: env.CO_WORKSPACE_CONTAINER_CPUS ?? "2",

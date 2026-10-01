@@ -56,6 +56,9 @@ const cfg = loadConfig({
   CO_WORKSPACE_DATA_DIR: dataDir,
   CO_WORKSPACE_WORKSPACE_DIR: workspaceDir,
   CO_WORKSPACE_VARIANTS: "co-consult,co-develop",
+  // These tests exercise provisioning/chat mechanics anonymously (open mode); the
+  // 2026-10-02 gate design defaults that off, so opt the sandbox back in.
+  CO_WORKSPACE_ALLOW_ANON_PROVISIONING: "true",
   HERMES_BIN: hermesBin,
   HERMES_BIN_PREFIX: "bun", // T-20260929-001: portable fake runs via bun
   CO_WORKSPACE_HERMES_SEED_HOME: seedHome,

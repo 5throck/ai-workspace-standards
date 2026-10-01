@@ -51,6 +51,9 @@ const cfg = loadConfig({
   CO_WORKSPACE_DATA_DIR: dataDir,
   CO_WORKSPACE_WORKSPACE_DIR: workspaceDir,
   CO_WORKSPACE_VARIANTS: "co-consult,co-develop",
+  // Anonymous chat flows exercise cancel semantics, not auth — opt into the
+  // 2026-10-02 gate design's provisioning knob so the gate stays out of the way.
+  CO_WORKSPACE_ALLOW_ANON_PROVISIONING: "true",
   HERMES_BIN: hermesBin,
   HERMES_BIN_PREFIX: "bun",
   CO_WORKSPACE_HERMES_SEED_HOME: seedHome,

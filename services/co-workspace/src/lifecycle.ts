@@ -1,4 +1,4 @@
-import { rmSync } from "node:fs";
+import { readdirSync, rmSync } from "node:fs";
 import { basename, dirname, join, relative, resolve, sep } from "node:path";
 import { GatewayConfig, resolveLlmProviderKey, resolveLlmProviderName } from "./config";
 import { scaffoldProject } from "./scaffold";
@@ -6,10 +6,11 @@ import { chownTree, recordProgress, seedHermesHome, sweepTenantStragglers, Tenan
 import { dirSize, moveDir } from "./util";
 import { HttpError } from "./http";
 import type { GatewayState } from "./state";
-import { callerPrincipal, requireTenantAccess } from "./access";
+import { callerPrincipal, requireTenantAccess, assertProvisioningAllowed, assertTenantCap } from "./access";
 
 /** Scaffold, relocate, seed the tenant Hermes home; persists terminal status either way. */
 export async function provisionTenant(state: GatewayState, rec: TenantRecord): Promise<void> {
+  let relocated = false;
   try {
     recordProgress(rec, "scaffolding", `scaffolding ${rec.variant} team…`);
     state.registry.upsert(rec);
@@ -24,6 +25,7 @@ export async function provisionTenant(state: GatewayState, rec: TenantRecord): P
     recordProgress(rec, "relocating", "moving to tenant storage…");
     state.registry.upsert(rec);
     moveDir(scaffolded.sourceDir, rec.projectDir);
+    relocated = true;
     recordProgress(rec, "seeding", "seeding hermes home…");
     state.registry.upsert(rec);
     seedHermesHome(
@@ -56,8 +58,45 @@ export async function provisionTenant(state: GatewayState, rec: TenantRecord): P
   } catch (err) {
     rec.status = "failed";
     rec.error = String((err as Error)?.message ?? err);
+    // 2026-10-02 gate design G5: a pre-relocation failure must not leave the scaffolded
+    // Projects/<tenantId> source dir behind (orphan class: gw-fd71bde230fa, gw-76f6b4c9c6ff).
+    if (!relocated) removeUnrelocatedScaffold(state, rec);
   }
   state.registry.upsert(rec);
+}
+
+/** Path-guarded removal of the scaffold source dir (`<workspaceDir>/Projects/<tenantId>`)
+ * after a failed pre-relocation provisioning. Guarded like deleteTenantData: the resolved
+ * path must be exactly the tenant's own directory under Projects/. */
+export function removeUnrelocatedScaffold(state: GatewayState, rec: TenantRecord): void {
+  const projectsRoot = resolve(state.cfg.workspaceDir, "Projects");
+  const sourceDir = resolve(projectsRoot, rec.tenantId);
+  if (sourceDir.startsWith(projectsRoot + sep) && basename(sourceDir) === rec.tenantId) {
+    rmSync(sourceDir, { recursive: true, force: true });
+  }
+}
+
+/** 2026-10-02 gate design G5: reconcile Projects/ against the registry at boot — remove
+ * `gw-<12hex>` dirs with no registry row (a gateway death mid-scaffold leaves these; no
+ * catch block can run then). Never touches `co-*` dirs (human bare-name scaffolds). */
+export function sweepOrphanedScaffolds(state: GatewayState): { removed: string[]; error?: string } {
+  const projectsRoot = resolve(state.cfg.workspaceDir, "Projects");
+  let names: string[];
+  try {
+    names = readdirSync(projectsRoot);
+  } catch (err) {
+    return { removed: [], error: String((err as Error)?.message ?? err) };
+  }
+  const removed: string[] = [];
+  for (const name of names) {
+    if (!/^gw-[0-9a-f]{12}$/.test(name) || state.registry.get(name)) continue;
+    const dir = resolve(projectsRoot, name);
+    if (!dir.startsWith(projectsRoot + sep)) continue;
+    rmSync(dir, { recursive: true, force: true });
+    removed.push(name);
+    state.audit.record("system", "scaffold.sweep", name, "orphaned Projects/ scaffold removed at boot");
+  }
+  return { removed };
 }
 
 export function startProvisioning(state: GatewayState, rec: TenantRecord): Promise<void> {
@@ -147,7 +186,11 @@ export function hostSidePath(cfg: GatewayConfig, absPath: string): string | unde
   return join(cfg.dataDirHost, rel);
 }
 
-/** OpenAI-surface lazy tenant: find by key, or create and start provisioning. */
+/** OpenAI-surface lazy tenant: find by key, or create and start provisioning. The
+ * per-principal cap is enforced here — at creation time only, after the existing-key
+ * short-circuit — so it covers the lazy surfaces, which previously skipped it entirely
+ * (2026-10-02 gate design G4). Creation is audited (`tenant.create.lazy`); POST /sessions
+ * creation is audited at its call site. */
 export function getOrStartTenant(
   state: GatewayState,
   variant: string,
@@ -157,6 +200,7 @@ export function getOrStartTenant(
   const key = tenantKeyFor(variant, user);
   const existing = state.registry.findByKey(key);
   if (existing) return { rec: existing };
+  assertTenantCap(state, ownerPrincipal ?? "anonymous");
   const rec = state.registry.create({
     dataDir: state.cfg.dataDir,
     variant,
@@ -164,16 +208,21 @@ export function getOrStartTenant(
     ownerPrincipal,
     description: `lazy tenant for ${key}`,
   });
+  state.audit.record(ownerPrincipal ?? "anonymous", "tenant.create.lazy", rec.tenantId, variant);
   return { rec, promise: startProvisioning(state, rec) };
 }
 
-/** Lazy-tenant resolution for the OpenAI/Anthropic/Gemini surfaces. The tenant is keyed on the
+/** Lazy-tenant resolution for the OpenAI/Anthropic/Gemini surfaces. Check-then-create:
+ * the provisioning gate runs BEFORE any registry row or Projects/ directory exists
+ * (previously the create ran first and the access check after — an unauthenticated
+ * request in open mode could spawn a full scaffold). The tenant is keyed on the
  * authenticated principal (same key as /sessions), never on a client-supplied body user. */
 export function resolveLazyTenant(
   state: GatewayState,
   req: Request,
   variant: string,
 ): { rec: TenantRecord; promise?: Promise<void> } {
+  assertProvisioningAllowed(state, req, variant);
   const principal = callerPrincipal(state, req) ?? "anonymous";
   const found = getOrStartTenant(state, variant, principal, principal);
   requireTenantAccess(state, req, found.rec);
