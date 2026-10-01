@@ -21,12 +21,27 @@ title: >-
   pm-gateway-workflow.md §3.12. Human-in-the-loop stays: ready only authorizes
   investigation, the fix ships as a PR the user merges.
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-01T10:06:13.552Z'
 history:
   - at: '2026-10-01T10:06:13.552Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-01T20:40:31.145Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-01T20:40:31.158Z'
+    from: waiting
+    to: running
+  - at: '2026-10-01T20:40:31.171Z'
+    from: running
+    to: review
+  - at: '2026-10-01T20:40:31.184Z'
+    from: review
+    to: done
+result: >-
+  ticket.ts triage/resolve + store setUpstreamTriage/setUpstreamResolution
+  implemented in PR #1298; flagged promotion gated, write-once resolution,
+  governance/U- prefixes fixed; 3.12 rewritten
 error: null

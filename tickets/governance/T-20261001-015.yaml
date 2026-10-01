@@ -18,12 +18,27 @@ title: >-
   step 0 wording) + a CHANGELOG/regen run; consider whether .gitignore-first for
   known tool artifacts (e.g. .claude/skills/graft) belongs in the same change.
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-01T06:23:45.743Z'
 history:
   - at: '2026-10-01T06:23:45.743Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-01T20:40:31.064Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-01T20:40:31.079Z'
+    from: waiting
+    to: running
+  - at: '2026-10-01T20:40:31.094Z'
+    from: running
+    to: review
+  - at: '2026-10-01T20:40:31.130Z'
+    from: review
+    to: done
+result: >-
+  dev-sync 1.23.0 default flip implemented, tested (9 scoped-staging cases),
+  shipped in PR #1298; sync SKILL.md 1.7.0; gitignore-first rejected with
+  rationale in Amendment 3
 error: null

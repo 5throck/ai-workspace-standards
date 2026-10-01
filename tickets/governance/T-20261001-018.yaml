@@ -19,12 +19,27 @@ title: >-
   table (one source). Scope: new check plus tests; no change to the registry
   itself.
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-01T10:58:42.635Z'
 history:
   - at: '2026-10-01T10:58:42.635Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-01T20:40:31.247Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-01T20:40:31.259Z'
+    from: waiting
+    to: running
+  - at: '2026-10-01T20:40:31.271Z'
+    from: running
+    to: review
+  - at: '2026-10-01T20:40:31.284Z'
+    from: review
+    to: done
+result: >-
+  validate-surface-registry.ts 1.0.0 implemented in PR #1298: registry parse,
+  one-source compare, L0/L1/L2 coverage, mirror:false honored, SCAFFOLD_COMPOSED
+  exclusion, surface-gaps.json WARN/FAIL, audit gate
 error: null

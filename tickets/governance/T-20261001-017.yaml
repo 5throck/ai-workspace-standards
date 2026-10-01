@@ -20,12 +20,27 @@ title: >-
   retention decision, as tests plus minimal hardening in scripts/mcp-upstream-
   server.ts; no behaviour change to the approved design.
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-01T10:06:13.588Z'
 history:
   - at: '2026-10-01T10:06:13.588Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-01T20:40:31.197Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-01T20:40:31.210Z'
+    from: waiting
+    to: running
+  - at: '2026-10-01T20:40:31.222Z'
+    from: running
+    to: review
+  - at: '2026-10-01T20:40:31.234Z'
+    from: review
+    to: done
+result: >-
+  intake lock (stale takeover, fail-open UPSTREAM_LOCK_TIMEOUT_MS) + 90-day
+  retention (Q6 resolved) + corrupt-ticket show fallback implemented in PR
+  #1298; 73 server tests green
 error: null
