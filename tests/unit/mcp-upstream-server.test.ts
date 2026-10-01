@@ -1177,7 +1177,12 @@ describe('UPSTREAM_WORKSPACE_ROOT seam', () => {
 describe('13.13 installer (dry-run only)', () => {
   const installer = join(REPO_ROOT, 'scripts', 'install-upstream-mcp.ts');
   const run = (home: string, ...args: string[]) =>
-    spawnSync('bun', [installer, ...args], { encoding: 'utf-8', env: { ...process.env, HOME: home, USERPROFILE: home } });
+    // v2 installer: UPSTREAM_INSTALL_HOME isolates every client config; --target claude keeps these
+    // tests on the original ~/.claude.json behaviour (other targets are covered in install-upstream-mcp.test.ts).
+    spawnSync('bun', [installer, '--target', 'claude', ...args], {
+      encoding: 'utf-8',
+      env: { ...process.env, HOME: home, USERPROFILE: home, UPSTREAM_INSTALL_HOME: home },
+    });
 
   test('13. --dry-run with no config prints the intended entry and writes nothing', () => {
     const home = realpathSync(mkdtempSync(join(tmpdir(), 'upstream-home-')));
@@ -1188,7 +1193,7 @@ describe('13.13 installer (dry-run only)', () => {
       expect(r.stdout).toContain('ai-workspace-upstream');
       // The installer prints JSON-style forward slashes on Windows (normalizePathForJson).
       expect(r.stdout.replace(/\\/g, '/')).toContain(join(REPO_ROOT, 'scripts', 'mcp-upstream-server.ts').replace(/\\/g, '/'));
-      const cmd = /"command": "([^"]+)"/.exec(r.stdout)![1];
+      const cmd = /"command":"([^"]+)"/.exec(r.stdout)![1];
       expect(isAbsolute(cmd)).toBe(true);
       expect(cmd).not.toBe('bun');
       expect(readdirSync(home).filter((f) => f.includes('claude'))).toEqual([]);
@@ -1197,8 +1202,8 @@ describe('13.13 installer (dry-run only)', () => {
 
   test('13c. (source-level check, not a behavioural test) config write goes through temp file + renameSync', () => {
     const src = readFileSync(installer, 'utf-8');
-    expect(src).toMatch(/writeFileSync\(tmpPath[\s\S]*renameSync\(tmpPath, configPath\)/);
-    expect(src).not.toMatch(/writeFileSync\(configPath/);
+    expect(src).toMatch(/writeFileSync\(tmpPath[\s\S]*renameSync\(tmpPath, path\)/);
+    expect(src).not.toMatch(/writeFileSync\(path,/);
   });
 
   test('13b. --dry-run with an existing config leaves it byte-identical and creates no backup; --uninstall --dry-run too', () => {
@@ -1213,7 +1218,7 @@ describe('13.13 installer (dry-run only)', () => {
       const r2 = run(home, '--dry-run', '--force');
       expect(r2.status).toBe(0);
       expect(r2.stdout).toContain('[DRY RUN]');
-      expect(isAbsolute(/"command": "([^"]+)"/.exec(r2.stdout)![1])).toBe(true);
+      expect(isAbsolute(/"command":"([^"]+)"/.exec(r2.stdout)![1])).toBe(true);
       const r3 = run(home, '--uninstall', '--dry-run');
       expect(r3.status).toBe(0);
       expect(readFileSync(cfg, 'utf-8')).toBe(original);
