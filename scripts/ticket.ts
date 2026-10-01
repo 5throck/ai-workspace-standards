@@ -1,15 +1,17 @@
 #!/usr/bin/env bun
-// @version 1.3.0
+// @version 1.4.0
 // @l2-propagate: false
 // ticket.ts — CLI for the Phase A Service Ticket + Kanban system (workspace root only).
 // Usage: bun scripts/ticket.ts <command> [args]
+//   move <id>: <id> may be bare (resolved against both stores; ambiguous ids error)
+//   or explicitly prefixed as service/<id> / governance/<id> (T-20261001-009).
 // Design: docs/superpowers/specs/2026-07-16-service-ticket-kanban-design.md,
 //         docs/designs/2026-08-16-governance-backlog-design.md (not_before / --ready / --kind)
 
 import { resolve, join } from 'node:path';
-import { existsSync } from 'node:fs';
 import {
   createTicket, listTickets, moveTicket, nextServiceTicket, staleRunningTickets, loadCatalog, DEFAULT_ATTEMPTS_CAP,
+  resolveTicketLocation,
 } from './helpers/ticket-store.ts';
 import type { Priority, Status, Kind } from './helpers/ticket-schema.ts';
 
@@ -23,9 +25,12 @@ const governanceDir = join(ticketsDir, 'governance');
 const catalogPath = join(workspaceRoot, 'services.yaml');
 
 /** kind: manual tickets live in governanceDir; kind: service tickets live in ticketsDir.
- * Used by commands (move) that take only an id, not a kind. */
-function resolveTicketDir(id: string): string {
-  return existsSync(join(governanceDir, `${id}.yaml`)) ? governanceDir : ticketsDir;
+ * Used by commands (move) that take only an id, not a kind. Delegates to the
+ * store-level resolver (T-20261001-009): a bare id present in BOTH stores is
+ * ambiguous and errors; `service/<id>` / `governance/<id>` pick one explicitly. */
+function resolveTicketDir(id: string): { dir: string; id: string } {
+  const loc = resolveTicketLocation(ticketsDir, governanceDir, id);
+  return { dir: loc.dir, id: loc.id };
 }
 
 const [, , cmd, ...rest] = process.argv;
@@ -115,7 +120,8 @@ try {
           fail('usage: ticket.ts move <id> done --result "<text>" — moving to done requires a non-empty --result outcome summary (--force does not bypass this)');
         }
       }
-      const moved = moveTicket(resolveTicketDir(id), id, status as Status, { force: Boolean(flags.force), error: flags.error as string | undefined, result: flags.result as string | undefined });
+      const { dir, id: bareId } = resolveTicketDir(id);
+      const moved = moveTicket(dir, bareId, status as Status, { force: Boolean(flags.force), error: flags.error as string | undefined, result: flags.result as string | undefined });
       console.log(`✅ ${id} -> ${moved.status}`);
       break;
     }

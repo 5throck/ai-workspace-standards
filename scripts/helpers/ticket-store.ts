@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.3.1
+// @version 1.4.0
 // @l2-propagate: false
 // ticket-store.ts — Atomic file I/O for the Phase A ticket queue. Every function
 // takes an explicit directory/path so callers (CLI, skill, tests) never assume a
@@ -162,6 +162,41 @@ export function createTicket(dir: string, input: CreateTicketInput): Ticket {
     return ticket;
   }
   throw new Error(`[ticket-store] could not allocate a ticket id after ${MAX_ATTEMPTS} attempts`);
+}
+
+/** Maps a CLI-level id to the store that owns it (T-20261001-009). Service and
+ * governance tickets share the `T-YYYYMMDD-NNN` id format but live in different
+ * directories, so a bare id can be ambiguous. Accepts the explicit forms
+ * `service/<id>` and `governance/<id>`; a bare id resolves only when it exists
+ * in exactly one store, and throws naming both paths otherwise. */
+export function resolveTicketLocation(
+  serviceDir: string,
+  governanceDir: string,
+  id: string,
+): { dir: string; kind: Kind; id: string } {
+  const explicit = /^(service|governance)\/(T-\d{8}-\d{3,4})$/.exec(id);
+  if (explicit) {
+    return explicit[1] === 'governance'
+      ? { dir: governanceDir, kind: 'manual', id: explicit[2] }
+      : { dir: serviceDir, kind: 'service', id: explicit[2] };
+  }
+  if (!TICKET_ID_PATTERN.test(id)) {
+    throw new Error(`[ticket-store] invalid ticket id: ${JSON.stringify(id)} — expected T-YYYYMMDD-NNN (optionally prefixed service/<id> or governance/<id>)`);
+  }
+  const servicePath = join(serviceDir, `${id}.yaml`);
+  const governancePath = join(governanceDir, `${id}.yaml`);
+  const inService = existsSync(servicePath);
+  const inGovernance = existsSync(governancePath);
+  if (inService && inGovernance) {
+    throw new Error(
+      `[ticket-store] ambiguous ticket id ${id}: it exists in BOTH stores — ` +
+      `${governancePath} and ${servicePath}. ` +
+      `Re-run with 'governance/${id}' or 'service/${id}' to pick one.`,
+    );
+  }
+  if (inGovernance) return { dir: governanceDir, kind: 'manual', id };
+  if (inService) return { dir: serviceDir, kind: 'service', id };
+  throw new Error(`[ticket-store] ticket not found: ${id} (looked in ${servicePath} and ${governancePath})`);
 }
 
 export interface MoveOptions {
