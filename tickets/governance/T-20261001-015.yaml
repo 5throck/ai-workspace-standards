@@ -1,0 +1,29 @@
+schemaVersion: 1
+id: T-20261001-015
+kind: manual
+title: >-
+  Proposal: flip the dev-sync step 6.5 staging default from the ADR-0055 WARN
+  soak to SYNC_SCOPED_STAGING exclusion (scoped-staging design 2026-09-12 soak
+  exit). Evidence from PR #1280 (2026-10-01): a sync run swept 4 foreign WIP
+  test files (tests/unit/team-gateway-*.test.ts, broken imports) plus an
+  unrelated memory/skill-review edit into the fix commit; the pre-push
+  changed-path gate then blocked the push, and repair required a full reset +
+  re-stage + --scoped-staging re-run because the pre-commit hook correctly
+  blocks direct amends (both bare git commit and SYNC_ACTIVE=1 env manipulation
+  are refused). The soak's stated end state (promotion will EXCLUDE un-staged
+  files) is where we already had to operate manually; running the exclusion by
+  default removes the footgun while the WARN inventory stays available via the
+  preview mode (SYNC_SCOPED_STAGING unset = current behavior). Scope:
+  dev-sync.ts step 6.5 default flip + skill doc update (skills/sync/SKILL.md
+  step 0 wording) + a CHANGELOG/regen run; consider whether .gitignore-first for
+  known tool artifacts (e.g. .claude/skills/graft) belongs in the same change.
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-01T06:23:45.743Z'
+history:
+  - at: '2026-10-01T06:23:45.743Z'
+    from: null
+    to: backlog
+result: null
+error: null
