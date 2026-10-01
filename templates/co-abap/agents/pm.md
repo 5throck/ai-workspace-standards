@@ -5,4 +5,12 @@ description: 'Orchestrates multi-agent workflows. Enforces quality gates. Decide
 variant: co-abap
 version: "1.0.0"
 last_updated: "2026-08-15"
+status: active
+tier:
+  claude: medium
+  gemini: medium
+  antigravity: medium
+  gemini-cli: medium
+  codex: medium
+model: inherit
 ---
