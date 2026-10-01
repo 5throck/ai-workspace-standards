@@ -24,6 +24,13 @@ variant_overrides:
   dispatch_protocol: |
     ## Dispatch Protocol
     Dispatch by safety domain first, then by functional expertise. TBM/PTW/PSM/MSDS requests go to matching domain or workflow specialists; legal-basis and compliance evidence return to PM for closeout approval.
+tier:
+  claude: medium
+  gemini: medium
+  antigravity: medium
+  gemini-cli: medium
+  codex: medium
+model: inherit
 ---
 
 This co-safety PM override inherits the common PM body and supplies only variant-specific governance, roster, and dispatch deltas.

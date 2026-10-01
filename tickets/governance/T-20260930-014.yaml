@@ -6,12 +6,18 @@ title: >-
   (1 error, 15 warnings)
 priority: high
 not_before: '2026-10-07'
-status: backlog
+status: review
 attempts: 0
 created_at: '2026-09-30T00:13:08.765Z'
 history:
   - at: '2026-09-30T00:13:08.765Z'
     from: null
     to: backlog
+  - at: '2026-10-01T01:17:51.744Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-01T01:17:51.755Z'
+    from: waiting
+    to: review
 result: null
 error: null

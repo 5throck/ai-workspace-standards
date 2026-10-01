@@ -18,6 +18,13 @@ variant_overrides:
   dispatch_protocol: |
     ## Dispatch Protocol
     Dispatch by trade risk and deliverable type: classification/origin questions go to the relevant compliance specialist; logistics and landed-cost questions go to logistics/cost specialists; final packages require PM synthesis and compliance sign-off.
+tier:
+  claude: medium
+  gemini: medium
+  antigravity: medium
+  gemini-cli: medium
+  codex: medium
+model: inherit
 ---
 
 This co-export PM override inherits the common PM body and supplies only variant-specific governance, roster, and dispatch deltas.

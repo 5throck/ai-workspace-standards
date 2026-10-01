@@ -5,4 +5,12 @@ description: 'Orchestrates multi-agent workflows. Enforces quality gates. Decide
 variant: co-deck
 version: "1.1.0"
 last_updated: "2026-06-23"
+status: active
+tier:
+  claude: medium
+  gemini: medium
+  antigravity: medium
+  gemini-cli: medium
+  codex: medium
+model: inherit
 ---

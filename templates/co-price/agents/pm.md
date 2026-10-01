@@ -18,6 +18,13 @@ variant_overrides:
   dispatch_protocol: |
     ## Dispatch Protocol
     Dispatch by pricing method and deliverable: research and model design to pricing specialists, financial reconciliation to finance specialists, localization to l10n, and executive-ready synthesis to PM.
+tier:
+  claude: medium
+  gemini: medium
+  antigravity: medium
+  gemini-cli: medium
+  codex: medium
+model: inherit
 ---
 
 This co-price PM override inherits the common PM body and supplies only variant-specific governance, roster, and dispatch deltas.

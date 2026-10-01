@@ -6,12 +6,18 @@ title: >-
   lands (1 error, 11 warnings)
 priority: high
 not_before: '2026-10-07'
-status: backlog
+status: review
 attempts: 0
 created_at: '2026-09-30T00:13:08.791Z'
 history:
   - at: '2026-09-30T00:13:08.791Z'
     from: null
     to: backlog
+  - at: '2026-10-01T01:17:51.791Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-01T01:17:51.802Z'
+    from: waiting
+    to: review
 result: null
 error: null

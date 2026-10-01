@@ -5,4 +5,12 @@ description: 'Owns locale configuration, locale-specific formatting, and text la
 variant: co-deck
 version: "1.0.0"
 last_updated: "2026-09-25"
+status: active
+tier:
+  claude: medium
+  gemini: medium
+  antigravity: medium
+  gemini-cli: medium
+  codex: medium
+model: inherit
 ---
