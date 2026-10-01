@@ -23,7 +23,7 @@ description: >-
   found a live test job only in co-newbiz (0 in the other 12 Projects/*), so
   today only co-newbiz is actively harmed, but no other project has test CI
   either.
-status: running
+status: done
 attempts: 0
 created_at: '2026-09-30T05:08:55.597Z'
 history:
@@ -36,5 +36,16 @@ history:
   - at: '2026-09-30T21:36:11.961Z'
     from: waiting
     to: running
-result: null
+  - at: '2026-10-01T01:50:51.768Z'
+    from: running
+    to: review
+  - at: '2026-10-01T01:50:51.783Z'
+    from: review
+    to: done
+result: >-
+  Complete: PR-A #1269 (merge-managed ci.yml, fail-closed validator, ADR-0094),
+  PR-B #1270 (template PROJECT-JOBS region + opt-in job), co-newbiz rollout #437
+  (Release 1 verified live: green CI with job correctly skipped), PR-C #1276
+  (default-on with CI_SKIP_DEFAULT_UNIT_TESTS opt-out). Fleet picks up the
+  default-on job via normal resync; projects not ready set the skip variable.
 error: null

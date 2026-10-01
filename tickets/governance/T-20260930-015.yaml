@@ -6,7 +6,7 @@ title: >-
   lands (1 error, 9 warnings)
 priority: high
 not_before: '2026-10-07'
-status: review
+status: done
 attempts: 0
 created_at: '2026-09-30T00:13:08.778Z'
 history:
@@ -19,5 +19,11 @@ history:
   - at: '2026-10-01T01:17:51.779Z'
     from: waiting
     to: review
-result: null
+  - at: '2026-10-01T01:22:02.774Z'
+    from: review
+    to: done
+result: >-
+  Backfill landed in PR #1275 (22 files, +173): extends-stub frontmatters
+  backfilled with status active, 5-platform medium tier block, model inherit;
+  verified by direct field scan (audit CLI does not scan templates/).
 error: null
