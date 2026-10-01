@@ -1,0 +1,28 @@
+schemaVersion: 1
+id: T-20261001-020
+kind: manual
+title: >-
+  Verify the multi-surface upstream-MCP installer where CI cannot (follow-up to
+  ADR-0097). Not exercised so far: (1) a real Windows machine, including the
+  claude_desktop_config.json location under %APPDATA%, forward-slash paths in
+  the written configs and bun.exe as an absolute command; CI Windows runs only
+  the temp-home simulation; (2) a real Gemini CLI, which was not installed on
+  the author machine, so the ~/.gemini/settings.json path and the mcpServers
+  entry were checked against documentation only; (3) tool visibility after a
+  client restart on each surface (Claude Desktop, Antigravity IDE and CLI, Codex
+  CLI and Desktop, Hermes Agent and CLI): confirm that upstream_request_create
+  and upstream_request_status are listed, and call upstream_request_status from
+  each client once. Record the result per surface in design Appendix B and open
+  a gap row (CONSTITUTION §11.0 rule 1) for any surface that fails. Scope:
+  manual verification and documentation; fix the installer only if a real defect
+  shows up.
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-01T10:58:42.664Z'
+history:
+  - at: '2026-10-01T10:58:42.664Z'
+    from: null
+    to: backlog
+result: null
+error: null
