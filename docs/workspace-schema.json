@@ -84,7 +84,7 @@
     }
   },
   "_notes": {
-    "variant_specific": "Variant-specific phase names (e.g., co-security Phase 3 = Threat Modeling) are declared in each variant's variant.json under phases.phase3_name",
+    "variant_specific": "Variant-specific phase numbering and names are declared in each variant's docs/phase-definitions.md and docs/<variant>.context.md workflow table (ADR-0096); this canonical list is the workspace-root schema and is not a per-variant naming rule",
     "variant_agents": "Variant-specific agent tiers are declared in each variant agent's frontmatter tier block (templates/<variant>/agents/*.md); variant.json carries only the agent roster (name/file pairs), not tiers"
   },
   "i18n": {

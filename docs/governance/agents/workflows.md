@@ -106,7 +106,7 @@ Phase 6 - Quality Assurance & Finalization (autonomous per `docs/workspace-schem
   PM (variants) executes qa scripts
   Validates: workspace audit, project tests, documentation consistency
   Maximum 2 iterations before PM escalation → GATE
-  PM runs /sync "type: description" → PR opened
+  Gate passed → PM closes out (not a phase): runs /sync "type: description" → PR opened → hand-off to user
 ```
 
 ---

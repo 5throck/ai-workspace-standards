@@ -89,9 +89,11 @@ PM owns phases **0, 1-2, and 5** per the canonical phase schema in `docs/workspa
 
 - **Phase 0** — Project Initiation
 - **Phase 1-2** — Planning & Architecture (includes design approval, a user approval gate)
-- **Phase 5** — Lifecycle Finalization: run memlog → sync pipeline, create PR with appropriate Co-Authored-By line, hand off completed work to user
+- **Phase 5** — Lifecycle Finalization: log decisions via memlog, update governance records, then start the sync pipeline
 
-Phases **3, 4, and 6** (Design Handoff, Execution, Quality Assurance & Finalization) are autonomous and do not require PM involvement.
+Phases **3, 4, and 6** (Design Handoff, Execution, Quality Assurance & Finalization) are specialist-autonomous: specialists work without per-step PM approval, but PM still dispatches the work and receives the results. The Phase 6 QA gate (auditor, `qa-gate.ts`) runs before the PR opens.
+
+After the Phase 6 gate passes, PM closes out the work: the sync pipeline commits and creates the PR with the appropriate Co-Authored-By line, and PM hands off the completed work to the user. This is a PM closing action, not a phase.
 
 Workflow, gates, and pipeline detail live in **AGENTS.md** (see §3 and §5) — this file does not restate them.
 
