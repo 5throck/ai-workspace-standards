@@ -46,7 +46,8 @@ export {
   oauthStateMatches,
   openModeWarning,
 } from "./access";
-export { provisionTenant, sanitizeProjectName, tenantKeyFor, hostSidePath, getOrStartTenant, resolveLazyTenant, deleteTenantData } from "./lifecycle";
+export { provisionTenant, sanitizeProjectName, tenantKeyFor, hostSidePath, getOrStartTenant, resolveLazyTenant, deleteTenantData, removeUnrelocatedScaffold, sweepOrphanedScaffolds } from "./lifecycle";
+import { sweepOrphanedScaffolds } from "./lifecycle";
 export { runChat, resolveAuthDir } from "./chat";
 export { openaiChatResponse } from "./responses";
 
@@ -152,6 +153,13 @@ if (import.meta.main) {
       t.error = "interrupted by server restart — create a new session";
       state.registry.upsert(t);
     }
+  }
+  // 2026-10-02 gate design G5: remove Projects/gw-<12hex> dirs with no registry row —
+  // the residue of scaffolds killed by a gateway death mid-provision (no catch ran).
+  const sweptScaffolds = sweepOrphanedScaffolds(state);
+  if (sweptScaffolds.error) console.warn(`[co-workspace] scaffold sweep failed: ${sweptScaffolds.error}`);
+  else if (sweptScaffolds.removed.length > 0) {
+    console.log(`[co-workspace] scaffold sweep: removed ${sweptScaffolds.removed.join(", ")}`);
   }
   if (state.cfg.isolation === "docker") {
     const probe = dockerProbe(state.cfg.dockerBin);

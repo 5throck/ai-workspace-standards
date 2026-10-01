@@ -86,6 +86,9 @@ services:
       CO_WORKSPACE_CSRF_REQUIRED: ${CO_WORKSPACE_CSRF_REQUIRED:-true}
       CO_WORKSPACE_TRUST_PROXY: ${CO_WORKSPACE_TRUST_PROXY:-false}
       CO_WORKSPACE_TENANT_MAX_PER_PRINCIPAL: ${CO_WORKSPACE_TENANT_MAX_PER_PRINCIPAL:-10}
+      # false = provisioning needs a credential even in open mode (2026-10-02 gate design).
+      # true = anonymous visitors may spawn new teams (bounded by TENANT_MAX_PER_PRINCIPAL).
+      CO_WORKSPACE_ALLOW_ANON_PROVISIONING: ${CO_WORKSPACE_ALLOW_ANON_PROVISIONING:-false}
       # true only when served over TLS (reverse proxy) — adds the Secure attribute to session cookies
       CO_WORKSPACE_COOKIE_SECURE: ${CO_WORKSPACE_COOKIE_SECURE:-auto}
       CO_WORKSPACE_PRINCIPAL_MAX_TOKENS: ${CO_WORKSPACE_PRINCIPAL_MAX_TOKENS:-0}

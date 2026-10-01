@@ -52,6 +52,9 @@ const cfg = loadConfig({
   CO_WORKSPACE_DATA_DIR: dataDir,
   CO_WORKSPACE_WORKSPACE_DIR: workspaceDir,
   CO_WORKSPACE_VARIANTS: "co-consult",
+  // Anonymous provisioning progress timing is the subject here — opt into the
+  // 2026-10-02 gate design's knob so the gate stays out of the way.
+  CO_WORKSPACE_ALLOW_ANON_PROVISIONING: "true",
   HERMES_BIN: join(binDir, "fake-hermes.ts"),
   HERMES_BIN_PREFIX: "bun",
   CO_WORKSPACE_HERMES_SEED_HOME: seedHome,

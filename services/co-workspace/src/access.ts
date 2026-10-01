@@ -41,6 +41,31 @@ export function requireTenantAccess(state: GatewayState, req: Request, rec: Tena
   throw new HttpError(403, `tenant ${rec.tenantId} is owned by ${rec.ownerPrincipal ?? "anonymous"}`);
 }
 
+/** 2026-10-02 gate-anonymous-tenant-provisioning design (D1/D2/D6): provisioning is a
+ * privileged operation — it spawns the scaffold engine inside the workspace — so a
+ * credential (session or API key) or an explicit opt-in is required to create a tenant.
+ * Reachability of existing tenants (requireTenantAccess, open mode) is a separate,
+ * weaker property and stays unchanged. */
+export function assertProvisioningAllowed(state: GatewayState, req: Request, variant: string): void {
+  if (callerPrincipal(state, req) !== null) return;
+  if (state.cfg.allowAnonProvisioning) return;
+  state.audit.record("anonymous", "tenant.provision.denied", variant, "unauthenticated");
+  throw new HttpError(401, "authentication required to create a session — sign in or present an API key");
+}
+
+/** SEC-05, single shared implementation: at most `tenantMaxPerPrincipal` tenants per
+ * principal (0 = unlimited). Called at creation time only, after the existing-key
+ * short-circuit, so reaching one's current team is never capped. Covers POST /sessions
+ * and the lazy surfaces alike (the lazy path previously skipped this cap entirely). */
+export function assertTenantCap(state: GatewayState, owner: string): void {
+  const max = state.cfg.tenantMaxPerPrincipal;
+  if (max <= 0) return;
+  const owned = state.registry.list().filter((r) => (r.ownerPrincipal ?? "anonymous") === owner).length;
+  if (owned >= max) {
+    throw new HttpError(429, `tenant cap reached (${owned}/${max} per principal)`);
+  }
+}
+
 /** SEC-05 remnant: aggregate token usage across ALL tenants owned by a principal. */
 export function principalTokenUsage(state: GatewayState, principal: string): { input: number; output: number } {
   let input = 0;
@@ -104,10 +129,22 @@ export function oauthStateMatches(returned: string | null | undefined, expected:
   return a.length === b.length && timingSafeEqual(a, b);
 }
 
-/** M8: startup warning text when the gateway is reachable without any credential. */
-export function openModeWarning(cfg: { apiKeys: string[]; loginRequired: boolean }): string | null {
+/** M8: startup warning text when the gateway is reachable without any credential. The
+ * second line states the provisioning posture so the operator can see the effective
+ * gate at boot (2026-10-02 gate design, D2). */
+export function openModeWarning(cfg: {
+  apiKeys: string[];
+  loginRequired: boolean;
+  allowAnonProvisioning?: boolean;
+}): string | null {
   if (cfg.apiKeys.length === 0 && !cfg.loginRequired) {
-    return "[co-workspace] OPEN MODE: no API keys and login not required — anonymous tenants are reachable by anyone who can reach this port";
+    const posture = cfg.allowAnonProvisioning
+      ? "[co-workspace] OPEN MODE: anonymous provisioning is ENABLED (CO_WORKSPACE_ALLOW_ANON_PROVISIONING=true)"
+      : "[co-workspace] OPEN MODE: anonymous provisioning is GATED (set CO_WORKSPACE_ALLOW_ANON_PROVISIONING=true to allow)";
+    return [
+      "[co-workspace] OPEN MODE: no API keys and login not required — anonymous tenants are reachable by anyone who can reach this port",
+      posture,
+    ].join("\n");
   }
   return null;
 }

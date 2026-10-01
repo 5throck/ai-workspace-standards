@@ -4,7 +4,7 @@ import { modelsPayload } from "../openai";
 import { genId } from "../util";
 import { HttpError, jsonResponse, readJsonBody } from "../http";
 import { variantStatus } from "../pages";
-import { callerPrincipal, isAdminCaller, requireTenantAccess, assertPrincipalQuota, assertQuota } from "../access";
+import { callerPrincipal, isAdminCaller, requireTenantAccess, assertPrincipalQuota, assertQuota, assertProvisioningAllowed, assertTenantCap } from "../access";
 import { sanitizeProjectName, tenantKeyFor, startProvisioning, deleteTenantData } from "../lifecycle";
 import { nativeChatResponse } from "../responses";
 import type { GatewayState } from "../state";
@@ -34,6 +34,8 @@ export async function handleTenants(state: GatewayState, req: Request, ctx: Ctx)
     if (!state.cfg.variants.includes(variant)) {
       throw new HttpError(400, `variant ${variant} is not in the allowlist: ${state.cfg.variants.join(", ")}`);
     }
+    // 2026-10-02 gate design D3: provisioning is privileged — gate before any create.
+    assertProvisioningAllowed(state, req, variant);
     let name = typeof body.name === "string" ? sanitizeProjectName(body.name) : "";
     if (name) {
       if (state.registry.list().some((r) => r.name === name)) name = `${name}-${genId("").slice(0, 6)}`;
@@ -46,13 +48,7 @@ export async function handleTenants(state: GatewayState, req: Request, ctx: Ctx)
     if (existing) {
       return jsonResponse({ tenantId: existing.tenantId, name: existing.name, status: existing.status, existing: true });
     }
-    if (
-      state.cfg.tenantMaxPerPrincipal > 0 &&
-      state.registry.list().filter((r) => (r.ownerPrincipal ?? "anonymous") === owner).length >=
-        state.cfg.tenantMaxPerPrincipal
-    ) {
-      throw new HttpError(429, `tenant cap reached (${state.cfg.tenantMaxPerPrincipal} per principal)`);
-    }
+    assertTenantCap(state, owner);
     const rec = state.registry.create({
       dataDir: state.cfg.dataDir,
       variant,
