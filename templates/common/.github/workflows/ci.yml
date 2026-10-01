@@ -13,6 +13,7 @@ jobs:
   audit:
     name: Documentation Audit
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -20,6 +21,7 @@ jobs:
           # `git log` — a depth-1 clone collapses every date to the checkout
           # commit and makes the gate fail on any manifest generated elsewhere.
           fetch-depth: 0
+          persist-credentials: false
 
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
@@ -36,17 +38,21 @@ jobs:
   secret-scan:
     name: Secret Scan
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       # Run the gitleaks binary directly rather than gitleaks/gitleaks-action.
       # The action requires a GITLEAKS_LICENSE for private repositories and needs
       # pull-requests:read to annotate PRs — neither is warranted here, since all
       # this job needs is a pass/fail scan. Config comes from .gitleaks.toml.
       - name: Run gitleaks
-        uses: docker://ghcr.io/gitleaks/gitleaks:v8.28.0
+        # Digest = ghcr.io/gitleaks/gitleaks:v8.28.0 multi-arch index
+        # (fetched 2026-10-01 via the ghcr registry API, anonymous pull token).
+        uses: docker://ghcr.io/gitleaks/gitleaks@sha256:cdbb7c955abce02001a9f6c9f602fb195b7fadc1e812065883f695d1eeaba854
         with:
           args: detect --source=/github/workspace --config=/github/workspace/.gitleaks.toml --redact --verbose --no-banner
 

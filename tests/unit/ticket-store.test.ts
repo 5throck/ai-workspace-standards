@@ -46,6 +46,20 @@ describe('createTicket', () => {
     expect(ids.size).toBe(10);
   });
 
+  test('sequences past an existing 4-digit id without wasting collision retries (v1.4.1, review M1)', () => {
+    // v1.4.0 read a fixed 3-char slice, so a pre-existing T-<today>-1000.yaml
+    // truncated to 1000 -> "100" and the next guess started at 101, colliding
+    // its way up; the parse now reads the full digit run.
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    const prefix = `T-${yyyy}${mm}${dd}`;
+    writeFileSync(join(dir, `${prefix}-1000.yaml`), 'id: dummy\n');
+    const t = createTicket(dir, { kind: 'manual', title: 'after 4-digit', priority: 'normal' });
+    expect(t.id).toBe(`${prefix}-1001`);
+  });
+
   test('allocates an id that does not collide with the governance directory (T-20260912-025)', () => {
     // move/list resolve ids with governance/ precedence, so a same-day id
     // allocated in tickets/ root must not shadow-match one already handed

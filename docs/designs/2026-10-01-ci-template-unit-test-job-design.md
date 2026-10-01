@@ -2,7 +2,8 @@
 
 - Ticket: T-20260930-026 (deferred D8 from co-newbiz 2026-09-22 full project review)
 - Date: 2026-10-01 | Author: architect | Status: Proposed, amended per binding security review
-  (APPROVE-WITH-CHANGES). Design Gate row 0 (ADR-0074); implementation blocked until approved.
+  (APPROVE-WITH-CHANGES). Design Gate row 0 (ADR-0074). Implementation landed 2026-10-01
+  (ADR-0094 Accepted; registry status `implemented`).
 - Scope: L0 `templates/common/.github/workflows/ci.yml`, `scripts/lib/upgrade-policy.ts`,
   `scripts/lib/managed-block-merge.ts`, `scripts/upgrade-project.ts`
 

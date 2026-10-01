@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.4.0
+// @version 1.4.1
 // @l2-propagate: false
 // ticket-store.ts — Atomic file I/O for the Phase A ticket queue. Every function
 // takes an explicit directory/path so callers (CLI, skill, tests) never assume a
@@ -107,7 +107,13 @@ function nextSeqGuess(dir: string, prefix: string): number {
     if (!existsSync(d)) continue;
     for (const f of readdirSync(d)) {
       if (!f.startsWith(prefix) || !f.endsWith('.yaml')) continue;
-      const n = parseInt(f.slice(prefix.length + 1, prefix.length + 4), 10);
+      // v1.4.1 (2026-10-01 review M1): read to the end of the digit run — the
+      // fixed 3-char slice truncated 4-digit ids (e.g. T-20260912-1000.yaml)
+      // to their first 3 digits, so max-seq guesses started over low and
+      // burned collision retries. (Collisions still self-corrected via the
+      // `wx` retry; this just stops wasting scans.)
+      const seqMatch = /^T-\d{8}-(\d+)\.yaml$/.exec(f);
+      const n = seqMatch ? parseInt(seqMatch[1], 10) : NaN;
       if (!Number.isNaN(n) && n > max) max = n;
     }
   }

@@ -1,0 +1,14 @@
+schemaVersion: 1
+id: T-20261001-013
+kind: manual
+title: 'docs: fix unparseable date frontmatter in ADRs 0033/0035/0037/0038/0040'
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-10-01T02:12:50.404Z'
+history:
+  - at: '2026-10-01T02:12:50.404Z'
+    from: null
+    to: backlog
+result: null
+error: null
