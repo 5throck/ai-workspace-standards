@@ -964,6 +964,41 @@
     });
   }
 
+  // R1 forced rotation: a must-change session (admin-issued temp credential) gets a
+  // blocking dialog — no overlay click-away, no app use until a new password is set.
+  // The rotation PATCH omits currentPassword (the temp credential was verified at
+  // sign-in) and purges every session server-side, so the app drops to the signed-out
+  // card and the user signs in again with the new password.
+  function forcePasswordChange() {
+    const wrap = showModal({ title: "Set a new password", dismissible: false, bodyHtml: `
+      <div class="hint">Your sign-in used a temporary password. Choose a new one to continue.</div>
+      <div class="field"><input id="fc-new" type="password" placeholder="New password (8+)" autocomplete="new-password"></div>
+      <div class="field"><input id="fc-new2" type="password" placeholder="Repeat new password" autocomplete="new-password"></div>
+      <div class="row" style="justify-content:flex-start;"><button id="fc-save">Save and sign in again</button></div>
+      <div class="formErr" id="fc-err" role="alert"></div>` });
+    const err = wrap.querySelector("#fc-err");
+    wrap.querySelector("#fc-save").addEventListener("click", async () => {
+      err.textContent = "";
+      err.style.color = "";
+      const a = wrap.querySelector("#fc-new").value;
+      const b = wrap.querySelector("#fc-new2").value;
+      if (a.length < 8) { err.textContent = "⚠ New password must be at least 8 characters."; return; }
+      if (a !== b) { err.textContent = "⚠ New passwords do not match."; return; }
+      const res = await fetch("/auth/me", { method: "PATCH", headers: { "content-type": "application/json", "x-requested-with": "co-workspace" }, body: JSON.stringify({ password: a }) });
+      const body = await res.json().catch(() => ({}));
+      if (res.status === 200) {
+        wrap.remove();
+        me = null;
+        renderAuthCard();
+        applyAdminVisibility();
+        applyComposerLock();
+        bubble("assistant", `✔ ${body.message ?? "password updated — sign in with your new password"}`);
+      } else {
+        err.textContent = `⚠ ${body.error ?? `change failed (HTTP ${res.status})`}`;
+      }
+    });
+  }
+
   async function doLogin(id, pw) {
     const res = await fetch("/auth/login", {
       method: "POST",
