@@ -85,6 +85,8 @@ The `description` field is how the AI tool selects the right agent - always writ
 
 #### 5.4 PM Governance Workflow (6 Phases)
 
+This is the **workspace-root** schema. Projects and variants declare their own phase numbering in `docs/phase-definitions.md`; PM duties (initiation, approval gates, finalization) are fixed, PR creation is a PM close-out after the QA gate, and projects have no auditor agent — see [ADR-0096](../adr/0096-variant-phase-ownership-and-qa-gate.md).
+
 ```
 Phase 0 - Project Initiation (PM-owned)
   PM assesses workspace requirements
@@ -112,7 +114,7 @@ Phase 6 - Quality Assurance & Finalization (specialist-autonomous)
   auditor executes qa-gate.ts autonomously
   Validates: workspace audit, project tests, documentation consistency
   Maximum 2 iterations before PM escalation → GATE
-  PM runs /sync "type: description" → PR opened
+  Gate passed → PM closes out (not a phase): runs /sync "type: description" → PR opened → hand-off to user
 ```
 
 > **Gate-moment decision records**: every gate ruling above — Design Gate Row 0 rulings, escalations, and go/no-go decisions — must emit a decision record (`docs/decisions/DEC-YYYYMMDD-NN.md`) before dispatch continues, per ADR-0061.
