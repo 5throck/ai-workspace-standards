@@ -562,4 +562,4 @@ See the workspace governance documentation (Governance Enforcement Layers) and A
 
 ---
 
-*context.md version: 2.13 — Project Overview is now a two-line pointer to project-owned docs/project.md (identity seed, spec 2026-09-24-scaffold-identity-overview-design)*
+*context.md version: 2.14 — Supported Surfaces section delivered to projects (footer bump: the section was added at 2.13 without a version bump, so same-version project copies never received it; T-20261001-021)*
