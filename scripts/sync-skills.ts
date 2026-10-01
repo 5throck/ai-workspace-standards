@@ -1,5 +1,13 @@
 #!/usr/bin/env bun
-// @version 1.10.0
+// @version 1.11.0
+// v1.11.0 (2026-10-01): Phase 1c is provenance-based — user-added platform skills are never
+//   removed. sync-skills records the skills it mirrors in `skills/.sync-skills-managed.json`
+//   (project contexts) and removes a platform mirror only when it is recorded there AND its
+//   skills/ SSOT skill is gone (retired). Platform skills never mirrored by this tool, and
+//   every orphan on a run with no/corrupt manifest, are kept. Previously any platform dir
+//   without a SSOT counterpart was deleted on every sync, which also pre-empted the Phase 2
+//   .agents-only back-sync. Legacy workspace-process ghosts in older projects are left to
+//   upgrade-project's WORKSPACE-ONLY SKILL SWEEP (stock-copy/CONFLICT safe).
 // v1.9.0 (2026-09-25, ADR-0088 W1): fifth platform target `.hermes/skills/` (NousResearch
 //   Hermes Agent mirror — same B-03/mirror:false exclusions as the other targets). Hermes
 //   scans project-local `<git-root>/.hermes/skills` as its primary skill path (source-
@@ -193,6 +201,40 @@ export function dirsEqual(a: string, b: string, depth: number = 0): boolean {
     return fs.readFileSync(a).equals(fs.readFileSync(b));
 }
 
+/** Provenance record of the skills this tool mirrored (lives in the skills/ SSOT dir). */
+const MANAGED_MIRRORS_FILE = '.sync-skills-managed.json';
+
+/**
+ * Reads the managed-mirror manifest. Missing or unreadable → empty set (nothing is
+ * considered ours, so nothing is ever removed on that basis); unreadable also warns.
+ */
+function readManagedMirrors(manifestPath: string, warnings: string[]): Set<string> {
+    if (!fs.existsSync(manifestPath)) return new Set();
+    try {
+        const parsed = JSON.parse(fs.readFileSync(manifestPath, 'utf-8')) as { mirrored?: unknown };
+        if (!Array.isArray(parsed.mirrored)) throw new Error('"mirrored" is not an array');
+        return new Set(parsed.mirrored.filter((n): n is string => typeof n === 'string'));
+    } catch (err) {
+        const msg = (err instanceof Error) ? err.message : String(err);
+        warnings.push(`${MANAGED_MIRRORS_FILE} unreadable (${msg}) — treating every platform skill as user-owned this run`);
+        console.warn(`  ⚠️  ${MANAGED_MIRRORS_FILE} unreadable (${msg}) — no mirrors will be removed this run`);
+        return new Set();
+    }
+}
+
+/** Records the skills mirrored by this run; rewrites only when the content changes. */
+function writeManagedMirrors(manifestPath: string, mirrored: Set<string>, warnings: string[]): void {
+    const content = JSON.stringify({ version: 1, mirrored: [...mirrored].sort() }, null, 2) + '\n';
+    try {
+        if (fs.existsSync(manifestPath) && fs.readFileSync(manifestPath, 'utf-8') === content) return;
+        fs.writeFileSync(manifestPath, content, 'utf-8');
+    } catch (err) {
+        const msg = (err instanceof Error) ? err.message : String(err);
+        warnings.push(`could not write ${MANAGED_MIRRORS_FILE}: ${msg}`);
+        console.warn(`  ⚠️  Could not write ${MANAGED_MIRRORS_FILE}: ${msg}`);
+    }
+}
+
 /**
  * Runs the full skill distribution (Phase 1: SSOT -> platform dirs; Phase 2:
  * .agents/ shortcut skills back-synced to .claude/.gemini). Each skill/item
@@ -256,6 +298,8 @@ export async function syncSkills(dirs: SkillSyncDirs, opts: SyncSkillsOptions = 
     }
 
     // --- Phase 1: Distribute SSOT skills to all three platform directories ---
+    // Names this run mirrored; recorded in the managed-mirror manifest for Phase 1c.
+    const mirrored = new Set<string>();
     for (const item of fs.readdirSync(ssotSkills)) {
         try {
             const itemPath = path.join(ssotSkills, item);
@@ -280,6 +324,7 @@ export async function syncSkills(dirs: SkillSyncDirs, opts: SyncSkillsOptions = 
                 continue;
             }
 
+            mirrored.add(item);
             for (const targetDir of [claudeSkills, geminiSkills, agentsSkills, codexSkills, hermesSkills]) {
                 const target = path.join(targetDir, item);
                 if (dirsEqual(itemPath, target)) {
@@ -296,32 +341,39 @@ export async function syncSkills(dirs: SkillSyncDirs, opts: SyncSkillsOptions = 
         }
     }
 
-    // --- Phase 1c: Remove platform mirror ghosts (project contexts only) ---
-    // A platform skill directory with no skills/ SSOT counterpart is a stale
-    // mirror: scaffold-time distribution ran before the workspace-only sweep,
-    // or the SSOT copy was retired after an earlier sync. Left alone, ghosts
-    // drift per-project (observed: workspace-process skills mirrored into 4
-    // platforms on fresh scaffolds but surviving only as .codex ghosts in
-    // older projects). Gated to project contexts — the workspace root is the
-    // one place platform-only skill directories are legitimate.
+    // --- Phase 1c: Remove retired platform mirrors (project contexts only) ---
+    // A mirror this tool itself created earlier (recorded in the managed-mirror
+    // manifest) whose skills/ SSOT counterpart has since been retired is a stale
+    // ghost: left alone it drifts per-project. Ownership is provenance-based —
+    // a platform skill directory that was never mirrored by sync-skills (a skill
+    // the project's user added, or anything unknown) is NEVER removed here, and
+    // with no manifest yet (first run, fresh clone, corrupt file) nothing is
+    // removed. Workspace-only skills leaked by older scaffolds are handled by
+    // upgrade-project's WORKSPACE-ONLY SKILL SWEEP, which has its own
+    // stock-copy/CONFLICT safety. Gated to project contexts — the workspace root
+    // is the one place platform-only skill directories are legitimate.
     // Platform-independent marker (2026-10-01): project-root template-version.txt,
     // legacy .claude/template-version.txt accepted for pre-move projects.
     const isProjectContext = fs.existsSync(path.join(root, 'template-version.txt'))
       || fs.existsSync(path.join(root, '.claude', 'template-version.txt'));
     if (isProjectContext) {
-        let ghostCount = 0;
+        const manifestPath = path.join(ssotSkills, MANAGED_MIRRORS_FILE);
+        const previouslyMirrored = readManagedMirrors(manifestPath, warnings);
+        let retiredCount = 0;
         for (const targetDir of [claudeSkills, geminiSkills, agentsSkills, codexSkills, hermesSkills]) {
             if (!fs.existsSync(targetDir)) continue;
             for (const item of fs.readdirSync(targetDir)) {
                 const target = path.join(targetDir, item);
                 if (!fs.statSync(target).isDirectory()) continue;
                 if (fs.existsSync(path.join(ssotSkills, item))) continue;
+                if (!previouslyMirrored.has(item)) continue; // not ours — user-added or unknown
                 fs.rmSync(target, { recursive: true, force: true });
-                ghostCount++;
-                console.log(`  -> Removed ghost platform mirror ${path.relative(root, target)}/ (no skills/ SSOT counterpart)`);
+                retiredCount++;
+                console.log(`  -> Removed retired platform mirror ${path.relative(root, target)}/ (its skills/ SSOT skill no longer exists)`);
             }
         }
-        if (ghostCount === 0) console.log('  -> No ghost platform mirrors found');
+        if (retiredCount === 0) console.log('  -> No retired platform mirrors found');
+        writeManagedMirrors(manifestPath, mirrored, warnings);
     }
 
     // --- Phase 1b: Mirror .claude/commands/*.md to .codex/prompts/ (ADR-0077 D4) ---

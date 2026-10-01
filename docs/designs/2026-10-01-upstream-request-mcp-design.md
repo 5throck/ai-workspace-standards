@@ -472,3 +472,30 @@ coverage rule (every surface works). The marker moves to the project root.
   copy in the same pass (one-time migration, logged in the write line).
 - **Version**: server bumps to 1.3.0; SCRIPTS.md row updated. `last-upgrade-delivery.json`
   stays at `.claude/` — it is upgrade bookkeeping, not identity, and is out of scope here.
+
+## Appendix D — Self-declared identity fallback for GUI clients (2026-10-01)
+
+Incident: a `co-newbiz` agent running in the Claude Desktop App could not file. Evidence:
+the running server processes' parent was `Claude.app/Contents/Helpers/disclaimer`, their
+environment carried only `HOME`, and the audit log's `cwd_hash` for the rejections matched
+`sha256("/")` exactly — the desktop app spawns stdio servers with cwd=/ and no project
+signal, so §6's cwd-based identity (G3) cannot work there.
+
+Decision (server v1.4.0): both tools accept an optional `project_root` string. It is used
+only when `resolveProject(cwd)` fails, and it goes through the identical filesystem checks
+(direct child of `Projects/`, `co-*` name, real `.git`, provenance marker with `variant=`).
+Because identity is then requester-attested rather than client-attested:
+
+- the ticket is forced `flagged: true` with `triage_reasons: ["identity:self_declared", …]`,
+  which forces `triage: inbox` — a human sees every self-declared request;
+- audit lines carry `identity: "cwd" | "declared"`;
+- when cwd DOES resolve, it wins and `project_root` is ignored (client-attested identity
+  is never downgraded);
+- `upstream_request_status` accepts the same fallback (read-only exposure is limited to
+  tickets the declared project would see anyway).
+
+Spoofing note: a project agent declaring another project's root was already possible for
+any local process with shell access (tickets and `~/.claude.json` are writable locally);
+the flag + forced inbox keeps human review as the compensating control, consistent with
+D5 enforcement honesty and the untrusted-content posture. The REGISTRATION_RULE message
+and the server instructions name the fallback so desktop agents can self-serve.

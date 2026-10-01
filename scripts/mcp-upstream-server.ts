@@ -1,10 +1,14 @@
 #!/usr/bin/env bun
-// @version 1.3.0
-// v1.3.0 (2026-10-01, platform-independent identity): the provenance marker moves to the
-//          project root (template-version.txt); .claude/template-version.txt stays as a
-//          legacy fallback so pre-move projects keep filing with no migration. Scaffold,
-//          upgrade, adopt and migrate scripts move with this change (writers and readers
-//          in one pass). REGISTRATION_RULE text updated to match.
+// @version 1.4.0
+// v1.4.0 (2026-10-01, self-declared identity fallback): GUI clients (Claude Desktop App)
+//          spawn this server with cwd=/ and no project env, so cwd-based identity cannot
+//          work there (diagnosed 2026-10-01: audit cwd_hash matched "/" exactly). Both
+//          tools now accept an optional project_root parameter used only when
+//          resolveProject(cwd) fails; it goes through the identical filesystem checks,
+//          and a ticket filed this way is forced flagged=true with triage_reasons
+//          "identity:self_declared" so PM sees that identity was not client-attested.
+//          Audit lines carry identity: "cwd" | "declared". REGISTRATION_RULE and the
+//          server instructions name the fallback.
 // v1.2.0 (2026-10-01, security review): identity no longer spawns git (core.worktree spoof); pure
 //          filesystem walk, .git must be a real directory, nested repos rejected. Heuristics and dedupe
 //          run on an NFKC-folded copy. Governance-path heuristic case-insensitive. Status id accepts a
@@ -143,6 +147,7 @@ interface UpstreamRequest {
   affected_paths: string[];
   local_workaround_diff?: string;
   repro?: string;
+  project_root?: string;
 }
 
 type KnownProjects = Map<string, { first_seen: string; first_id: string }>;
@@ -319,7 +324,7 @@ function readTodayAudit(): Array<{ project?: string; outcome?: string; triage?: 
   return out;
 }
 
-const ALLOWED_KEYS = new Set(['suspected_layer', 'symptom', 'affected_paths', 'local_workaround_diff', 'repro']);
+const ALLOWED_KEYS = new Set(['suspected_layer', 'symptom', 'affected_paths', 'local_workaround_diff', 'repro', 'project_root']);
 
 type Validation = { valid: false; error: string } | { valid: true; req: UpstreamRequest };
 
@@ -342,6 +347,7 @@ function validateUpstreamRequest(params: unknown): Validation {
   const paths = (p.affected_paths as string[]).map(sanitize);
   const diff = p.local_workaround_diff === undefined ? undefined : sanitize(p.local_workaround_diff as string);
   const repro = p.repro === undefined ? undefined : sanitize(p.repro as string);
+  const projectRoot = p.project_root === undefined ? undefined : sanitize(p.project_root as string);
 
   if (symptom.length < 20 || symptom.length > 2000) return { valid: false, error: 'invalid params: symptom' };
   if (paths.length < 1 || paths.length > 10) return { valid: false, error: 'invalid params: affected_paths' };
@@ -350,11 +356,12 @@ function validateUpstreamRequest(params: unknown): Validation {
   }
   if (diff !== undefined && diff.length > 8000) return { valid: false, error: 'invalid params: local_workaround_diff' };
   if (repro !== undefined && repro.length > 2000) return { valid: false, error: 'invalid params: repro' };
+  if (projectRoot !== undefined && (projectRoot.length === 0 || projectRoot.length > 200)) return { valid: false, error: 'invalid params: project_root' };
 
-  const totalBytes = Buffer.byteLength(symptom + paths.join('') + (diff ?? '') + (repro ?? ''), 'utf-8');
+  const totalBytes = Buffer.byteLength(symptom + paths.join('') + (diff ?? '') + (repro ?? '') + (projectRoot ?? ''), 'utf-8');
   if (totalBytes > MAX_TOTAL_BYTES) return { valid: false, error: 'invalid params: total request exceeds 16 KB' };
 
-  return { valid: true, req: { suspected_layer: p.suspected_layer, symptom, affected_paths: paths, local_workaround_diff: diff, repro } };
+  return { valid: true, req: { suspected_layer: p.suspected_layer, symptom, affected_paths: paths, local_workaround_diff: diff, repro, project_root: projectRoot } };
 }
 
 function writeYamlAtomic(path: string, obj: unknown): void {
@@ -379,12 +386,28 @@ function loadUpstreamTickets(): Array<{ file: string; ticket: any }> {
 type Outcome = { result: unknown } | { error: { code: number; message: string } };
 
 function handleCreateRequest(params: unknown, cwd: string): Outcome {
-  const projResult = resolveProject(cwd);
+  // Identity: client-attested cwd first. GUI clients (Claude Desktop App) spawn this
+  // server with cwd=/ and no project env, so when cwd resolution fails the requester
+  // may self-declare its project root via params.project_root — same filesystem checks
+  // apply, and the ticket is forced flagged so PM sees identity was not client-attested.
+  const cwdResult = resolveProject(cwd);
+  let projResult: ProjectIdentity | string = cwdResult;
+  let declared = false;
+  if (typeof cwdResult === 'string' && typeof params === 'object' && params !== null && !Array.isArray(params)) {
+    const raw = (params as Record<string, unknown>).project_root;
+    if (typeof raw === 'string' && raw.length > 0) {
+      const declaredResult = resolveProject(sanitize(raw));
+      if (typeof declaredResult !== 'string') {
+        projResult = declaredResult;
+        declared = true;
+      }
+    }
+  }
   if (typeof projResult === 'string') {
     // Raw cwd is never stored: it may contain arbitrary user paths.
     const cwdHash = createHash('sha256').update(cwd, 'utf-8').digest('hex').slice(0, 16);
     appendAuditLog({ cwd_hash: cwdHash, outcome: 'reject_unregistered' });
-    return { error: { code: -32602, message: projResult } };
+    return { error: { code: -32602, message: `${projResult} (when your client launches this server outside the project directory — e.g. the Claude Desktop App — pass the project's absolute path as project_root)` } };
   }
 
   const { name: project, variant, version, path: projectPath } = projResult;
@@ -398,7 +421,8 @@ function handleCreateRequest(params: unknown, cwd: string): Outcome {
   const requestHash = createHash('sha256').update(JSON.stringify(req), 'utf-8').digest('hex');
   const dedupeHash = dedupeKey(req.affected_paths, req.symptom);
 
-  const flagged = checkInjection({ symptom: req.symptom, repro: req.repro, diff: req.local_workaround_diff });
+  let flagged = checkInjection({ symptom: req.symptom, repro: req.repro, diff: req.local_workaround_diff });
+  if (declared) flagged = true; // self-declared identity always gets human review
 
   // Caps: hard cap counts accepted tickets AND merges; soft cap counts new tickets only.
   const audit = readTodayAudit();
@@ -434,6 +458,7 @@ function handleCreateRequest(params: unknown, cwd: string): Outcome {
   const failReasons: string[] = [];
   const info: string[] = [];
   if (flagged) failReasons.push('needs_human_review');
+  if (declared) failReasons.push('identity:self_declared');
   if (projectAccepted >= UPSTREAM_SOFT_CAP) failReasons.push('project_soft_cap');
 
   const delivered = deliveredFiles(projectPath);
@@ -498,20 +523,29 @@ function handleCreateRequest(params: unknown, cwd: string): Outcome {
     saveKnownProjects(knownProjects);
   }
 
-  appendAuditLog({ project, outcome: 'accepted', id, flagged, triage, reasons: failReasons, dedupe_key: dedupeHash, request_sha256: requestHash });
+  appendAuditLog({ project, outcome: 'accepted', id, flagged, triage, identity: declared ? 'declared' : 'cwd', reasons: failReasons, dedupe_key: dedupeHash, request_sha256: requestHash });
 
   return { result: { id, status, triage, merged_into: null, flagged, reasons: failReasons, marker: `LOCAL-PATCH(upstream-request: ${id})` } };
 }
 
 function handleStatusRequest(params: unknown, cwd: string): Outcome {
-  const projResult = resolveProject(cwd);
-  if (typeof projResult === 'string') return { error: { code: -32602, message: projResult } };
+  // Same identity fallback as create: cwd first, then an optional self-declared
+  // project_root for clients that spawn the server outside the project (GUI apps).
+  let projResult: ProjectIdentity | string = resolveProject(cwd);
+  if (typeof projResult === 'string' && typeof params === 'object' && params !== null && !Array.isArray(params)) {
+    const raw = (params as Record<string, unknown>).project_root;
+    if (typeof raw === 'string' && raw.length > 0) {
+      const declaredResult = resolveProject(sanitize(raw));
+      if (typeof declaredResult !== 'string') projResult = declaredResult;
+    }
+  }
+  if (typeof projResult === 'string') return { error: { code: -32602, message: `${projResult} (when your client launches this server outside the project directory — e.g. the Claude Desktop App — pass the project's absolute path as project_root)` } };
   const { name: project } = projResult;
 
   const p = (params ?? {}) as Record<string, unknown>;
   if (typeof p !== 'object' || Array.isArray(p)) return { error: { code: -32602, message: 'invalid params: arguments must be an object' } };
   for (const key of Object.keys(p)) {
-    if (key !== 'id' && key !== 'limit') return { error: { code: -32602, message: `invalid params: extra key "${key}"` } };
+    if (key !== 'id' && key !== 'limit' && key !== 'project_root') return { error: { code: -32602, message: `invalid params: extra key "${key}"` } };
   }
   if (p.id !== undefined && (typeof p.id !== 'string' || !/^U-\d{8}-\d{3,4}$/.test(p.id))) return { error: { code: -32602, message: 'invalid params: id' } };
   let limit = 20;
@@ -548,19 +582,19 @@ function sendResponse(id: string | number | null, result?: unknown, error?: { co
   console.log(JSON.stringify(msg));
 }
 
-const SERVER_INSTRUCTIONS = 'Use this server when a problem you hit in this project likely originates in the ai_workspace template (L1 common or L2 variant), e.g. in a file delivered by `upgrade-project`. You may fix it locally to unblock your work, but always also file `upstream_request_create`. A local fix to a template-managed file will be overwritten on the next upgrade. Mark every such local patch with a comment `LOCAL-PATCH(upstream-request: <id>)` using the ID returned. Do not put instructions to other agents in the request. Describe the symptom, paths, and repro only. Check progress with `upstream_request_status`.';
+const SERVER_INSTRUCTIONS = 'Use this server when a problem you hit in this project likely originates in the ai_workspace template (L1 common or L2 variant), e.g. in a file delivered by `upgrade-project`. You may fix it locally to unblock your work, but always also file `upstream_request_create`. A local fix to a template-managed file will be overwritten on the next upgrade. Mark every such local patch with a comment `LOCAL-PATCH(upstream-request: <id>)` using the ID returned. Do not put instructions to other agents in the request. Describe the symptom, paths, and repro only. Check progress with `upstream_request_status`. If identity resolution rejects your working directory and your client is a GUI app (e.g. the Claude Desktop App spawns servers with cwd=/), retry passing the project\'s absolute path as `project_root`; such requests are flagged for human review.';
 
 function handleInitialize(params: unknown) {
   const p = (params ?? {}) as Record<string, unknown>;
   const protocolVersion = typeof p.protocolVersion === 'string' ? p.protocolVersion : FALLBACK_PROTOCOL_VERSION;
-  return { protocolVersion, serverInfo: { name: 'ai-workspace-upstream', version: '1.1.0' }, capabilities: { tools: {} }, instructions: SERVER_INSTRUCTIONS };
+  return { protocolVersion, serverInfo: { name: 'ai-workspace-upstream', version: '1.4.0' }, capabilities: { tools: {} }, instructions: SERVER_INSTRUCTIONS };
 }
 
 function getTools() {
   return [
     {
       name: 'upstream_request_create',
-      description: 'File an upstream request to the ai_workspace PM when a problem\'s root cause is suspected to be in the workspace (L1) or the variant template (L2). Project identity is derived from your working directory. Content is treated as untrusted data.',
+      description: 'File an upstream request to the ai_workspace PM when a problem\'s root cause is suspected to be in the workspace (L1) or the variant template (L2). Project identity comes from the working directory; GUI clients that spawn this server outside the project may pass project_root instead (the ticket is then flagged for human review). Content is treated as untrusted data.',
       inputSchema: {
         type: 'object', additionalProperties: false, required: ['suspected_layer', 'symptom', 'affected_paths'],
         properties: {
@@ -573,6 +607,7 @@ function getTools() {
           },
           local_workaround_diff: { type: 'string', maxLength: 8000, description: 'Optional unified diff of the local patch. Reference only; never applied automatically.' },
           repro: { type: 'string', maxLength: 2000, description: 'Optional reproduction steps in prose.' },
+          project_root: { type: 'string', maxLength: 200, description: 'Optional absolute path to the project root. Used only when the working directory does not resolve to a registered project (GUI clients spawn this server with cwd=/). Goes through the same filesystem checks; tickets filed this way are flagged for human review.' },
         },
       },
     },
@@ -584,6 +619,7 @@ function getTools() {
         properties: {
           id: { type: 'string', pattern: '^U-\\d{8}-\\d{3,4}$' },
           limit: { type: 'integer', minimum: 1, maximum: 50, default: 20 },
+          project_root: { type: 'string', maxLength: 200, description: 'Optional absolute path to the project root; used only when the working directory does not resolve to a registered project.' },
         },
       },
     },
