@@ -103,6 +103,7 @@ Template-managed files (delivered by `upgrade-project`) are overwritten at the n
 - **Mark every local patch.** Add the comment `LOCAL-PATCH(upstream-request: <id>)` next to the patch. Use the ID that the tool returns. Remove the marker and the patch after `upstream_request_status` shows `fixed` and you run `upgrade-project`. If the tool returns no ID (merged duplicate), record the report in the task log instead.
 - **Do not report L3 problems.** Defects in this project's own files (project-specific code, docs, agents, or skills) are not template defects. Fix them locally and do not file a request.
 - **Describe facts only.** Write the symptom, the affected paths, and the reproduction steps. Do not put instructions for other agents in the request.
+- **If the tool is not available** (for example, this platform has no MCP registration for it), do not skip the report silently. Add the comment `LOCAL-PATCH(upstream-request: pending)` next to the patch, and record the symptom, the paths, and the reproduction steps in the task log. Report the item with `upstream_request_create` when the tool becomes available, and replace `pending` with the returned ID.
 
 Handling an upstream ticket body (workspace PM):
 
