@@ -1,9 +1,9 @@
 # Upstream Request MCP Server Design — Project-to-Workspace Root-Cause Reporting
 
 - **Date**: 2026-10-01
-- **Status**: Approved (decisions resolved 2026-10-01; see Appendix A — Decision record)
+- **Status**: Approved (decisions resolved 2026-10-01; see Appendix A — Decision record). Amended 2026-10-01: the installer covers every supported surface (Appendix B, ADR-0097).
 - **Spec ID**: 2026-10-01-upstream-request-mcp-design
-- **Related**: [2026-09-25-mcp-governance-server-design.md](2026-09-25-mcp-governance-server-design.md) (stdio zero-dep pattern, D5 enforcement honesty), [2026-08-16-governance-backlog-design.md](2026-08-16-governance-backlog-design.md) (`kind: manual` tickets in git-tracked `tickets/governance/`), ADR-0031 (Fork Model), ADR-0074 (Universal Design Gate), AGENTS.md §3.1 (PM Gateway)
+- **Related**: ADR-0097 (supported-surface registry and multi-surface registration), [2026-09-25-mcp-governance-server-design.md](2026-09-25-mcp-governance-server-design.md) (stdio zero-dep pattern, D5 enforcement honesty), [2026-08-16-governance-backlog-design.md](2026-08-16-governance-backlog-design.md) (`kind: manual` tickets in git-tracked `tickets/governance/`), ADR-0031 (Fork Model), ADR-0074 (Universal Design Gate), AGENTS.md §3.1 (PM Gateway)
 - **Scope**: Design of `scripts/mcp-upstream-server.ts` (new stdio MCP server, name `ai-workspace-upstream`), `scripts/install-upstream-mcp.ts` (user-level registration), ticket schema additions in `scripts/helpers/ticket-schema.ts`, PM triage rules. No implementation in this document.
 
 ---
@@ -337,16 +337,17 @@ Behavior:
 
 1. Resolve `WORKSPACE_ROOT = resolve(import.meta.dir, '..')` and `serverPath = join(WORKSPACE_ROOT, 'scripts/mcp-upstream-server.ts')`. Both are absolute.
 2. Resolve the `bun` executable as an absolute path (`Bun.which('bun')` or `process.execPath`). GUI-launched clients such as the Claude Desktop App may not inherit the shell `PATH`.
-3. Preferred path: `claude mcp add --scope user ai-workspace-upstream -- <bunAbs> <serverPath>` via `execFileSync` (argv array), run only if `claude mcp get ai-workspace-upstream` shows the entry missing or different. Fallback when the `claude` CLI is absent: read the user config (`~/.claude.json`, top-level `mcpServers`), merge the single key `ai-workspace-upstream` = `{ "type": "stdio", "command": <bunAbs>, "args": [<serverPath>] }`, back up to `~/.claude.json.bak-<ts>`, and write atomically. Other keys are never touched.
+3. Register through one adapter per config file (amended 2026-10-01, Appendix B). `claude` merges `{ "type": "stdio", "command": <bunAbs>, "args": [<serverPath>] }` into `~/.claude.json` `mcpServers`; `claude-desktop`, `antigravity` and `gemini` merge `{ command, args }` into their JSON configs; `codex` runs `codex mcp get --json | add | remove` through an argv array; `hermes` edits only the `mcp_servers:` block of `config.yaml` as text. Every JSON write backs the file up to `<file>.bak-<ts>` and writes it atomically (temp file, then rename). Other keys are never touched. A config that cannot be parsed is never treated as empty.
 4. Idempotent: identical entry → no-op, exit 0. A different entry → print the diff and require `--force`.
 5. `--dry-run` prints the intended change. `--uninstall` removes only this key.
 6. Refuse to register `ai-workspace-governance` or any other key (scope guard, per N3).
-7. Print the follow-up instruction: restart the client and verify with `claude mcp list`.
+7. Print the follow-up instruction per registered client (restart; `claude mcp list`, `gemini mcp list`, `codex mcp list` where the client has one).
+8. Targets: `--target claude|claude-desktop|antigravity|gemini|codex|hermes|all` (default `all`). A client that is not installed is skipped under `all`; an explicit target for an absent client exits 1. Any conflict or failure exits 1.
 
 Portability notes:
 - The absolute paths are machine-specific, which is why this goes in user-level config and never in a committed `.mcp.json`. The script must be re-run after moving the checkout. It warns if `serverPath` contains spaces (passing argv is fine, but other clients' configs may not be).
 - Windows: use `bun.exe`'s absolute path, forward-slash paths in JSON, and the config path `%USERPROFILE%\.claude.json`. No `> nul` usage (CLAUDE.md safeguard).
-- Other harnesses (Gemini CLI, Codex, Hermes) get documented one-line equivalents only (governance-server D4 posture). Automating those is out of scope for Phase 1.
+- Other harnesses: superseded by Appendix B (2026-10-01). The installer covers every surface in CONSTITUTION §11.0, not Claude only.
 
 This is a user-config write, so the PM must get explicit user approval before running the installer (CLAUDE.md "persistent configuration" category). The script itself never runs automatically, including from `/sync`.
 
@@ -386,18 +387,20 @@ Target `tests/unit/mcp-upstream-server.test.ts`, with the subprocess handshake m
 | Phase | Content |
 |---|---|
 | 1 | `ticket-schema.ts` `upstream` block + `U-` ID; `ticket-store.ts` id pattern; `mcp-upstream-server.ts`; `install-upstream-mcp.ts`; `ticket.ts list --upstream` / `show` with boundary rendering; PM rule text in `agents/pm.md` + `docs/governance/agents/pm-gateway-workflow.md`; unit tests; SCRIPTS.md L0 entries (not propagated to templates — the server is L0-only, like the governance server D3) |
-| 2 | Short project-side rule in `templates/common` instruction files (CLAUDE.md/AGENTS.md twins): "report suspected L1/L2 root causes via `upstream_request_create`; mark local patches." **Dependency:** the known dev-sync governance-l1 dry-run gap (root instruction-file edits are not deployed to `templates/common` by `/sync`) means this text must be edited directly under `templates/common/` in a separate template-scoped task (CLAUDE.md §9 boundary policy), not via root edits. The server's `instructions` field carries the guidance in Phase 1 regardless. |
+| 2 | Project-side reporting rule in `templates/common/agents/pm.md` ("Upstream Reporting Duty"). All platform instruction files (`CLAUDE.md`, `GEMINI.md`, `CODEX.md`, `HERMES.md`, `AGENTS.md`) already load that file, so one edit reaches every surface. `templates/common/agents/pm.md` is skipped by the propagation scripts and is edited directly, so the dev-sync governance-l1 dry-run gap does not apply. Version pinned in `docs/templates/common-contract.json`. |
 | 3 | `upgrade-project` LOCAL-PATCH marker report; `audit.ts` check that `U-` requester fields match the intake log hash; worktree identity support; optional machine-local explicit allowlist (D1); cap review after two weeks of audit logs (D2) |
 
 ### 14.1 PR split
 
-Per CONSTITUTION §3.3 (sequential branches) and CLAUDE.md §9 (no root and template changes in one task), delivery is three sequential PRs. Each is merged by the user before the next branch is cut fresh from `main`.
+Per CONSTITUTION §3.3 (sequential branches) and CLAUDE.md §9 (no root and template changes in one task), delivery is five sequential PRs (PR-D and PR-E were added on 2026-10-01 when the multi-surface requirement arrived). Each is merged by the user before the next branch is cut fresh from `main`.
 
 | PR | Content |
 |---|---|
 | PR-A | This design doc (with decision record) plus the meeting transcript `memory/meeting-2026-10-01-upstream-request-mcp.md`. No code. |
 | PR-B | Root implementation = Phase 1: server, `ticket-schema.ts`/`ticket-store.ts` changes, `ticket.ts` rendering, unit tests, PM triage docs (`agents/pm.md`, `pm-gateway-workflow.md`), SCRIPTS.md, and `scripts/install-upstream-mcp.ts`. Agents never run the installer; the user runs it after review (§11). |
-| PR-C | Phase 2 `templates/common` rules text only, in a separate CWD-isolated session after PR-B is merged. |
+| PR-C | Phase 2 `templates/common/agents/pm.md` rules text (including the `pending` fallback when a surface has no tool) plus the version pin in `docs/templates/common-contract.json`. |
+| PR-D | Root: installer 2.0.0 for all surfaces, `scripts/helpers/mcp-config-edit.ts`, tests, SCRIPTS.md, CONSTITUTION §11.0, ADR-0097, this design's Appendix B. |
+| PR-E | Templates only: the Supported Surfaces section in `templates/common/docs/context.md`. |
 
 ## 15. Open Questions
 
@@ -424,3 +427,26 @@ Decided by the user after a PM-facilitated role discussion (architect, security-
 **D4 — Status mapping (former Q1).** `inbox` is stored as `status: backlog`, `ready` as `status: waiting`; `upstream.triage` is authoritative. No new status values.
 
 **D5 — PR split.** PR-A design doc and meeting transcript; PR-B root implementation (installer included, never run by agents); PR-C `templates/common` rules text in a separate CWD-isolated session. Each PR is merged before the next branch is cut (CONSTITUTION §3.3). See §14.1.
+
+## Appendix B — Multi-surface registration (2026-10-01)
+
+Decided by the user: the workspace and all templates must support Claude Code, Claude Desktop App, Antigravity, Antigravity CLI, Codex CLI, Codex Desktop App, Hermes Agent and Hermes CLI (CONSTITUTION §11.0). `scripts/install-upstream-mcp.ts` v2.0.0 therefore registers `ai-workspace-upstream` in one config file per target. A target covers every client that reads that file.
+
+| Target | Clients covered | Config | Method | Official source (checked 2026-10-01) |
+|---|---|---|---|---|
+| `claude` | Claude Code CLI; Code tab of the Claude Desktop App | `~/.claude.json` `mcpServers` | JSON merge, `type: "stdio"` | https://code.claude.com/docs/en/mcp |
+| `claude-desktop` | Claude Desktop App (chat) | `claude_desktop_config.json` (macOS `~/Library/Application Support/Claude/`, Windows `%APPDATA%\Claude\`) | JSON merge; only if the file exists; no Linux path (the app has no Linux build) | https://modelcontextprotocol.io/docs/develop/connect-local-servers |
+| `antigravity` | Antigravity IDE; Antigravity CLI | `~/.gemini/config/mcp_config.json` `mcpServers` (shared by IDE and CLI) | JSON merge; only if the file exists | https://antigravity.google/docs/mcp |
+| `gemini` | Gemini CLI (legacy Google path) | `~/.gemini/settings.json` `mcpServers` | JSON merge | https://geminicli.com/docs/tools/mcp-server/ |
+| `codex` | Codex CLI; Codex Desktop App (ChatGPT app) | `~/.codex/config.toml` `[mcp_servers.<name>]` (shared) | `codex mcp get --json` / `add` / `remove` | https://learn.chatgpt.com/docs/extend/mcp?surface=cli |
+| `hermes` | Hermes Agent; Hermes CLI | `~/.hermes/config.yaml` `mcp_servers:` (or `$HERMES_HOME`) | text edit of the block, verified by a YAML parse; the `hermes` CLI is never run | https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp |
+
+Notes and gaps:
+
+- **Hermes CLI is not used.** Launching `hermes` triggers a self-update and rebuild (observed 2026-10-01 in a throwaway `HERMES_HOME`), and `hermes mcp add` is discovery-first. The installer edits only the `mcp_servers:` block and refuses to write unless the parsed result differs from the original by exactly that one entry.
+- **Codex CLI subcommands.** The official page documents `codex mcp list|add|login`. The installer also uses `get --json` and `remove`, which exist in the installed CLI (verified against the real binary in a temporary `CODEX_HOME`) but are not documented. If an older Codex lacks them, the Codex target fails loudly and writes nothing.
+- **Antigravity path.** The official page gives `~/.gemini/config/mcp_config.json` for both IDE and CLI. `docs/graft-platform-integration.md` warns that the registry path can vary by version, so the installer edits the file only if Antigravity already created it, and otherwise points to `graft init --agents antigravity`.
+- **Claude Desktop (chat).** Only macOS and Windows are documented. The entry has no `type` field, as in the vendor's own examples.
+- **Behavior.** Default `--target all` skips clients that are not installed; an explicit `--target` for an absent client exits 1. Any conflict or failure exits 1. `UPSTREAM_INSTALL_HOME` is a test seam that redirects every target (and `CODEX_HOME`) to a temporary home.
+- **Not covered by the installer:** project-level files (`.agents/mcp_config.json`, `.gemini/settings.json`, `.codex/config.toml`, `.mcp.json`). The server is machine-global by design (G2).
+

@@ -278,7 +278,7 @@ Full details: [`docs/constitution/06-skill-lifecycle.md`](docs/constitution/06-s
 
 Skills are reusable workflows defined as `skills/<name>/SKILL.md` or `.claude/skills/<name>/SKILL.md`. To enable automated skill discovery by Claude, Gemini, and Antigravity, the `skills/` directory must be registered in the customizations configuration file `.agents/skills.json` at the root of the workspace or project. Hermes Agent discovers skills by directory scan (`.hermes/skills/`, plus `.agents/skills/`), gated on its user-side `skills.trusted_project_dirs` trust list (ADR-0088 D7). When creating a new skill, use the `skill-creator` plugin and complete the registration checklist: add to `docs/context.md ## Skills` (individual projects) and `AGENTS.md ## Skills` (workspace root). Skills have four states: **draft**, **active**, **deprecated** (archive after 30 days), **archived** (delete after 90 days). Version bump rules: **patch** (1.0.x) for wording fixes, **minor** (1.x.0) for new steps, **major** (x.0.0) for rewrites. Shared skills (`owner: [agent1, agent2]`) require both owners' approval.
 
-**Cross-Platform Skill Availability**: The `skills/<name>/` directory is the Single Source of Truth (SSOT) for all skill definitions. Every skill defined in `skills/` MUST be available on all supported AI platforms (Claude Code, Claude Desktop App, Gemini CLI, Antigravity, Antigravity CLI, Codex CLI, Codex Desktop App, Hermes Agent). Platform-specific distribution directories (`.claude/skills/`, `.gemini/skills/`, `.agents/skills/`, `.codex/skills/`, `.hermes/skills/`) serve as derived copies only — they MUST NOT be the sole location of any skill. Variant templates MUST maintain skill parity across the platform directories their profile ships. Platform-specific configuration files (`skills.json`) register these directories for discovery, but the canonical definition always resides in `skills/`.
+**Cross-Platform Skill Availability**: The `skills/<name>/` directory is the Single Source of Truth (SSOT) for all skill definitions. Every skill defined in `skills/` MUST be available on all supported surfaces (§11.0: Claude Code, Claude Desktop App, Antigravity, Antigravity CLI, Codex CLI, Codex Desktop App, Hermes Agent, Hermes CLI; Gemini CLI as the legacy Google path). Platform-specific distribution directories (`.claude/skills/`, `.gemini/skills/`, `.agents/skills/`, `.codex/skills/`, `.hermes/skills/`) serve as derived copies only — they MUST NOT be the sole location of any skill. Variant templates MUST maintain skill parity across the platform directories their profile ships. Platform-specific configuration files (`skills.json`) register these directories for discovery, but the canonical definition always resides in `skills/`.
 
 **Skill Relationship Graph (ADR-0060, Amendments 1–9)**: Skill-to-skill relations are managed in three layers — typed `relates_to` frontmatter (permanent), per-scope `skill-graph.overrides.json` (experimental; `reason`/`since` required, 90-day review, `suppress` markers), and the always-regenerated `docs/skill-graph.json` projection. Relations flow variant skill → L1 or same-variant targets only; the graph is regenerated at every lifecycle boundary (scaffold, promotion, upgrade, `/sync` step 4.65) and `validate-skills.ts` / `validate-decisions.ts` run as fail-closed `/sync` gates (step 3.96), including the auto-activating drift gate (Amendment 9, 2026-09-06). Security findings on a skill follow the mandatory **security-hold protocol** (`security_hold: true` quarantine with a `removal-date` ≤ 30 days; see §6.2). → Details: [§6.2.1 Skill Relation System](docs/constitution/06-skill-lifecycle.md).
 
@@ -744,7 +744,7 @@ A mechanism that allows variant-specific validation checks to be executed during
 ### 11. Governance Enforcement Layers
 Full details: [`docs/designs/ecc-phase1-governance-design.md`](docs/designs/ecc-phase1-governance-design.md)
 
-Governance rules are enforced at three layers, ensuring coverage across all 7 supported surfaces on 5 platform directories (Claude Code CLI + Claude Desktop App, Gemini CLI, Antigravity, Codex CLI + Codex Desktop App, Hermes Agent).
+Governance rules are enforced at three layers, ensuring coverage across every supported surface in the §11.0 registry (Claude Code, Claude Desktop App, Antigravity, Antigravity CLI, Codex CLI, Codex Desktop App, Hermes Agent, Hermes CLI; Gemini CLI as the legacy Google path).
 
 Platform extension to OpenAI Codex (CLI + Desktop App) was designed and Accepted per **ADR-0077** (`docs/adr/0077-codex-platform-support.md`); the `.codex/` platform directory, the `CODEX.md` twin, and the enforcement-layer rows for the two new surfaces have landed per the implementation waves defined in `docs/designs/2026-09-12-codex-platform-support-design.md`.
 
@@ -754,6 +754,31 @@ Amended 2026-09-27 by **ADR-0093** (`docs/adr/0093-hermes-md-instruction-file.md
 
 
 **Project configuration standard (KR profiles & LLM)**: the co-newbiz model is the fleet standard per **ADR-0091** (`docs/adr/0091-kr-profile-llm-config-standard.md`) — four-layer KR profile (country_config / docs/countries / region-profiles provenance-validated YAML / country-scoped env block) and the project-namespaced LLM env pattern (`<PROJ>_LLM_*`, deterministic fallback). `country_config.default` MUST stay `null`; `agents-md-size-budget` remains a WARN-level visibility metric (ADR-0090 Addendum 3).
+
+#### 11.0 Supported Surfaces — Mandatory Coverage
+
+The workspace root (L0) and every template (L1 `templates/common/`, L2 `templates/co-*/`) MUST support all of the following surfaces. This list is the registry; the counts and tables elsewhere in this section derive from it. Decision record: [`ADR-0097`](docs/adr/0097-supported-surfaces-registry-and-multi-surface-registration.md).
+
+| # | Surface | Family | Instruction file | Machine-global MCP config |
+|---|---------|--------|------------------|---------------------------|
+| 1 | Claude Code | Anthropic | `CLAUDE.md` | `~/.claude.json` |
+| 2 | Claude Desktop App | Anthropic | `CLAUDE.md` (Code tab, bundled CLI) | `~/.claude.json` (Code tab); `claude_desktop_config.json` (chat) |
+| 3 | Antigravity | Google | `GEMINI.md` | `~/.gemini/config/mcp_config.json` |
+| 4 | Antigravity CLI | Google | `GEMINI.md`, `AGENTS.md` | `~/.gemini/config/mcp_config.json` (shared with #3) |
+| 5 | Codex CLI | OpenAI | `CODEX.md`, `AGENTS.md` | `~/.codex/config.toml` |
+| 6 | Codex Desktop App | OpenAI | `CODEX.md`, `AGENTS.md` | `~/.codex/config.toml` (shared with #5) |
+| 7 | Hermes Agent | Nous Research | `HERMES.md`, `AGENTS.md` | `~/.hermes/config.yaml` |
+| 8 | Hermes CLI | Nous Research | `HERMES.md`, `AGENTS.md` | `~/.hermes/config.yaml` (shared with #7) |
+
+Gemini CLI (`.gemini/`) remains supported as the legacy path of the Google family while its settings files ship.
+
+Rules:
+
+1. **Coverage.** Every new or changed governance rule, instruction text, skill, command, hook, script, or tool registration MUST work on all eight surfaces. If a capability cannot reach a surface, record the gap (surface, reason, fallback, ticket) in the change's design document or PR. Never omit a surface silently.
+2. **Single source.** Shared behavior lives in one source (`agents/pm.md`, `skills/`, `AGENTS.md`). Platform instruction files point to it and do not copy it.
+3. **Machine-global registrations** (for example MCP servers) are delivered by an idempotent installer that the user runs, with `--dry-run` and `--uninstall`. It covers every config file in the table. It skips a client that is not installed, and it never creates a config that the client owns. `scripts/install-upstream-mcp.ts` is the reference implementation.
+4. **Verify against the vendor.** Before an installer or a template writes a client config, confirm the path and the format in the vendor's official documentation, and record the source URL in the design document. Do not infer a format from a local file alone.
+5. **Scope.** This section applies to the workspace root and to all templates. A template or a project that cannot meet it records the gap under rule 1.
 
 #### 11.1 Three-Layer Enforcement Model
 

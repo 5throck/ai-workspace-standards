@@ -60,7 +60,10 @@ session's working directory, so the repo resolves automatically.)
 ### Antigravity (IDE / CLI)
 
 Register graft in Antigravity's machine-global MCP registry with graft's own writer —
-it owns the correct path for the installed version, so never hand-code it:
+it owns the correct path for the installed version, so never hand-code it. (Antigravity's
+documentation, antigravity.google/docs/mcp, gives `~/.gemini/config/mcp_config.json` as the
+shared global file for the IDE and the CLI. `scripts/install-upstream-mcp.ts` edits that file
+only when it already exists; see ADR-0097.)
 
 ```bash
 graft init --agents antigravity    # or: bunx @nanonets/graft init --agents antigravity
