@@ -1,0 +1,19 @@
+{
+  "$comment": "Self-managed tool surfaces (design 2026-10-02-self-managed-tool-surfaces, T-20261002-001). Each tool owns the listed repo-relative paths: it installs and rewrites them itself, so the workspace does not track them (gitignored), validators skip them, and templates do not ship them. Add a future self-managing tool here instead of inventing ad-hoc ignores. The skills/<name>/ SSOT copy of a tool's skill MAY stay tracked when it is stable and carries valid frontmatter (graft keeps it as the documented workspace skill).",
+  "tools": [
+    {
+      "name": "graft",
+      "reason": "graft CLI self-installs and rewrites its own surfaces: the session-start hook re-bakes helper paths (dirty-file churn, PR #1280 class) and rewrites the platform-mirror SKILL.md copies stripping their frontmatter (version:-missing gate failures). Custody transferred 2026-10-02; the tracked skills/graft/ SSOT copy remains the workspace skill, with platform mirrors owned by the tool.",
+      "paths": [
+        ".claude/skills/graft/",
+        ".agents/skills/graft/",
+        ".codex/skills/graft/",
+        ".gemini/skills/graft/",
+        ".hermes/skills/graft/",
+        ".claude/helpers/graft-hooks.cjs",
+        ".claude/helpers/graft-statusline.cjs",
+        ".claude/helpers/graft.local.json"
+      ]
+    }
+  ]
+}

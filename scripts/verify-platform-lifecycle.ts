@@ -22,6 +22,7 @@
  */
 
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { selfManagedMirrorSkills } from './lib/self-managed-tools.ts';
 import { join } from 'node:path';
 import { PLATFORM_MIRROR_DIRS } from './lib/platforms.ts';
 
@@ -34,10 +35,11 @@ const IS_TIER3 = existsSync(join(ROOT, 'variant.json')) || !existsSync(join(ROOT
 const LEVEL = IS_TIER3 ? 'Tier 3' : 'Tier 1 SSOT';
 
 const issues: Array<{ level: 'error' | 'warning'; check: string; message: string; fix?: string }> = [];
-// Empty since the ADR-0076 amendment moved graft into the skills/ SSOT (it was the only
-// entry: a Claude-only, tool-owned skill). The set stays as the mechanism — a future
-// tool-owned mirror skill joins it as `<platform>/skills/<name>`.
-const VERSION_EXEMPT_PLATFORM_SKILLS = new Set<string>();
+// Seeded from docs/self-managed-surfaces.json (T-20261002-001): tool-owned mirror
+// skills whose frontmatter the owning tool rewrites are exempt from version checks.
+// The set stays as the mechanism — a future tool-owned mirror skill joins it via the
+// registry, not by editing this file.
+const VERSION_EXEMPT_PLATFORM_SKILLS = selfManagedMirrorSkills(ROOT);
 
 // (Historical) net-new mirror legs soaked in WARN (ADR-0055) until promotion.
 // .hermes/skills joined in ADR-0088 W2 (same onboarding path as .agents/.codex)

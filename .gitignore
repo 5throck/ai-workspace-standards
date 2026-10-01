@@ -75,6 +75,14 @@ __pycache__/
 .claude/settings.local.json
 # --- Graft helper machine-local override (issue #1048: baked path stays untracked) ---
 .claude/helpers/graft.local.json
+# graft tool-owned mirrors + helpers (self-managed, design 2026-10-02-self-managed-tool-surfaces):
+.claude/skills/graft/
+.agents/skills/graft/
+.codex/skills/graft/
+.gemini/skills/graft/
+.hermes/skills/graft/
+.claude/helpers/graft-hooks.cjs
+.claude/helpers/graft-statusline.cjs
 # --- Claude Code worktrees (ephemeral, agent-created) ---
 .claude/worktrees/
 # --- Claude Code runtime artifacts (not shared) ---
