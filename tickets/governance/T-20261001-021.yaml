@@ -16,12 +16,31 @@ title: >-
   that hosts project sessions (user-run). Scope: fleet rollout and verification;
   no new code.
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-01T10:58:42.677Z'
 history:
   - at: '2026-10-01T10:58:42.677Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-01T20:57:02.193Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-01T20:57:02.209Z'
+    from: waiting
+    to: running
+  - at: '2026-10-01T20:57:02.224Z'
+    from: running
+    to: review
+  - at: '2026-10-01T20:57:02.240Z'
+    from: review
+    to: done
+result: >-
+  Template v0.9.0 released (tag template-v0.9.0) and delivered to all 13
+  Projects/co-* via upgrade-project + per-project dev-sync PRs
+  (#177/#360/#79/#121/#20/#165/#39/#38/#444/#135/#190/#62/#6, all merged).
+  Verified: agents/pm.md Upstream Reporting Duty 13/13, docs/context.md
+  Supported Surfaces 13/13 (footer bumped 2.13->2.14 to fix the version-less
+  section addition), no stale pm.md overrides. User-run install-upstream-mcp.ts
+  remains per hosting machine.
 error: null
