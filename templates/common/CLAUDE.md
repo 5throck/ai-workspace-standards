@@ -143,6 +143,8 @@ Spawn a teammate using the automation-engineer agent type to implement the scrip
 > - **Antigravity CLI** ❌ Not supported — use Agent Manager (UI-based) instead. See GEMINI.md §Agent Manager.
 
 <!-- COMMON-CLAUDE:START -->
+> **Mandatory**: Read [`AGENTS.md`](AGENTS.md) first and follow its content in every task. It is the SSOT registry for the agent roster, PM Gateway workflow, tier model, skill resolution priority, and universal baseline behaviors; this file carries platform-specific behavior only.
+
 #### teammateMode (Claude Code Agent Teams execution mode)
 
 **teammateMode** specifies the parallel execution mode when Agent Teams is enabled in Claude Code.
