@@ -2,7 +2,7 @@
 
 
 <!-- GOVERNANCE-POINTER-TABLE (ADR-0090) -->
-> **Governance references (ADR-0090)**: operational workflow bodies live outside this file — **Read the owning file before governing work**:
+> **Governance references (ADR-0090)**: [`AGENTS.md`](AGENTS.md) is the SSOT registry — **read it first**, and Read the owning governance documents it points to before executing their workflows. Operational workflow bodies live outside this file — **Read the owning file before governing work**:
 > > PM Gateway phase protocol & ADR policy summaries → [`docs/governance/agents/pm-gateway-workflow.md`](docs/governance/agents/pm-gateway-workflow.md) ·
 > > Execution plan templates → [`docs/governance/agents/execution-plan-templates.md`](docs/governance/agents/execution-plan-templates.md) ·
 > > Dispatch/lifecycle/skill-review schedules → [`docs/governance/agents/workflows.md`](docs/governance/agents/workflows.md) ·
@@ -242,7 +242,7 @@ Before any multi-agent dispatch (2+ agents), PM **must** output an execution pla
 <!-- COMMON-CLAUDE:START -->
 ## Execution Plan Boilerplate
 
-The execution plan table format, the Design Gate (Row 0) rule, exemption categories, and the `/sync`-as-final-step rule are the Single Source of Truth in **[AGENTS.md §5.1 Standard Execution Plan Template](AGENTS.md#51-standard-execution-plan-template)** and **[§5.1.1 Design Gate Exemptions](AGENTS.md#511-design-gate-exemptions)** — do not restate them here.
+The execution plan table format, the Design Gate (Row 0) rule, exemption categories, and the `/sync`-as-final-step rule are the Single Source of Truth in **[Execution Plan Templates §5.1 Standard Execution Plan Template](docs/governance/agents/execution-plan-templates.md#51-standard-execution-plan-template)** and **[§5.1.1 Design Gate Exemptions](docs/governance/agents/execution-plan-templates.md#511-design-gate-exemptions)** — do not restate them here.
 
 > **Note (Claude Code-specific)**: The `Model` column shows the Claude Code short alias (`sonnet`/`opus`/`haiku`/`fable`) actually passed to the `Agent()` tool's `model` parameter — not the registry ID (e.g. `claude-sonnet-5-5`). See §6 (Native Sub-agents) below for the registry-ID → alias translation table. On Gemini/Antigravity, use the literal model ID instead (see GEMINI.md's equivalent note).
 <!-- Note: `fable` is a forward-looking alias not yet registered in docs/workspace-schema.json; do not use until added to the schema -->
@@ -272,7 +272,7 @@ Agent(
 >
 > **Automated enforcement (Claude Code CLI only)**: `scripts/hooks/agent-model-gate.ts` runs as a `PreToolUse` hook (matcher: `Agent`) and asks for confirmation whenever an `Agent()` call dispatches one of the 8 workspace-root agents (`pm`, `architect`, `auditor`, `lifecycle-manager`, `automation-engineer`, `docs-writer`, `scaffolding-expert`, `security-expert`) without a valid `model` alias — this is the check that catches the High/Low-tier (`opus`/`haiku`) silent-fallback bug described above before it happens. L0-only; not propagated to `templates/common/` since variant projects have their own agent rosters without a workspace-wide tier registry.
 
-Each implementation task follows the **Phase 4 execution loop** (see [AGENTS.md - Subagent Roster](AGENTS.md#subagent-roster)):
+Each implementation task follows the **Phase 4 execution loop** (see [AGENTS.md - Agent Roster](AGENTS.md#1-agent-ecosystem-overview)):
 1. **automation-engineer** implements the changes (or code-writer for project-specific agents).
 2. **PM** verifies against acceptance criteria by running `bun scripts/audit.ts` directly.
 3. **Quality gate (audit script)** validates compliance.
@@ -350,7 +350,7 @@ All shared Git/PR rules are in [docs/context.md](docs/context.md). Claude Code-s
 
 - **PR Language**: Governed by [docs/context.md](docs/context.md). All PR titles, bodies, and review comments must be written in English - no exceptions.
 
-*Last Updated: 2026-09-29 — removed redundant N-1/N boilerplate rows; /sync already covers lifecycle + audit + commit + push + PR; previous: 2026-06-21 inlined N-1/N rows*
+*Last Updated: 2026-10-01 — removed redundant N-1/N boilerplate rows; /sync already covers lifecycle + audit + commit + push + PR; previous: 2026-06-21 inlined N-1/N rows*
 <!-- COMMON-CLAUDE:END -->
 
 

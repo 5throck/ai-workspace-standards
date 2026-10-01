@@ -22,6 +22,10 @@ regexes = [
   '''YOUR_SECRET''',
   # gitleaks:allow inline marker (single-line suppression)
   '''gitleaks:allow''',
+  # sha256 hex digests written by scripts/mcp-upstream-server.ts into upstream
+  # tickets (dedupe_key, request_sha256) and the intake audit log — gitleaks'
+  # generic-api-key rule trips on 64-char hex (U-20261001-001, 2026-10-01)
+  '''^[a-f0-9]{64}$''',
 ]
 # Paths to skip entirely
 paths = [
