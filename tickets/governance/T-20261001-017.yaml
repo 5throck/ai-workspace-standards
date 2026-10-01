@@ -3,24 +3,22 @@ id: T-20261001-017
 kind: manual
 title: >-
   Close the untested spots in the upstream-request MCP server and installer
-  (follow-up to PR #1286). Not covered by tests or CI today: (1) races between
+  (follow-up to PR #1286). Still not covered by tests or CI: (1) races between
   parallel server instances on the daily cap counters, known-projects.json
   first-seen state and U- id allocation (id allocation uses linkSync with EEXIST
   retry, but cap counting and the first-seen check are read-then-write), so two
   projects filing at once can exceed the soft/hard/global caps or both skip the
   first-request inbox gate; consider a lock file or re-check after write; (2)
-  the installer's real write path: atomic temp-file plus renameSync, backup of
-  an existing ~/.claude.json, idempotent second run, and --uninstall removing
-  only its own key are verified only by a source-level check, because tests run
-  --dry-run only; add a behavioural test against a temp HOME including a
-  Windows-style config path; (3) the Windows registration path (absolute
-  bun.exe, USERPROFILE config location, forward-slash JSON paths) was exercised
-  in CI only through dry-run output; (4) the PM-facing rendering of a corrupt or
-  hand-edited upstream block in ticket.ts show. Also decide whether the
-  logs/upstream-intake/*.jsonl audit log needs a retention policy
-  (known-projects.json must survive pruning; design Q6). Scope: tests plus
-  minimal hardening in scripts/mcp-upstream-server.ts and
-  scripts/install-upstream-mcp.ts; no behaviour change to the approved design.
+  and (3), the installer's real write path and the Windows registration path,
+  were closed by PR #1289 (installer 2.0.x: behavioural temp-home tests for
+  atomic write, backup, idempotent re-run, --force and --uninstall, and a
+  Windows %APPDATA% isolation fix); the remaining real-Windows run moved to
+  T-20261001-020; (4) the PM-facing rendering of a corrupt or hand-edited
+  upstream block in ticket.ts show. Also decide whether the logs/upstream-
+  intake/*.jsonl audit log needs a retention policy (known-projects.json must
+  survive pruning; design Q6). Remaining scope: items (1) and (4) plus the
+  retention decision, as tests plus minimal hardening in scripts/mcp-upstream-
+  server.ts; no behaviour change to the approved design.
 priority: normal
 status: backlog
 attempts: 0

@@ -1,0 +1,30 @@
+schemaVersion: 1
+id: T-20261001-018
+kind: manual
+title: >-
+  Add a validator for the CONSTITUTION §11.0 supported-surface registry
+  (follow-up to ADR-0097). The rule that the workspace root and every template
+  support all eight surfaces (Claude Code, Claude Desktop App, Antigravity,
+  Antigravity CLI, Codex CLI, Codex Desktop App, Hermes Agent, Hermes CLI;
+  Gemini CLI as the legacy Google path) is enforced only by review and by the
+  installer tests today. Build a check, for example in validate-templates.ts or
+  audit.ts, that reads the §11.0 table and verifies per surface that the
+  instruction file exists at L0, L1 and every L2 variant overlay or is delivered
+  at scaffold, that the platform directory (.claude, .gemini, .agents, .codex,
+  .hermes) ships where the profile says it does, and that every skill is
+  mirrored on each shipped platform directory. Report a documented gap row
+  (surface, reason, fallback, ticket) as a WARN with the ticket id, and an
+  undocumented gap as a FAIL. Keep CONSTITUTION §11.0 and
+  templates/common/docs/context.md Supported Surfaces in sync with the same
+  table (one source). Scope: new check plus tests; no change to the registry
+  itself.
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-01T10:58:42.635Z'
+history:
+  - at: '2026-10-01T10:58:42.635Z'
+    from: null
+    to: backlog
+result: null
+error: null
