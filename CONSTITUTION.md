@@ -268,6 +268,7 @@ Variant `pm.md` files extend the L1 common PM via the ADR-0039 `extends` frontma
   - **Frontmatter-only extends stub** — a minimal YAML frontmatter with `extends: ../../common/agents/pm.md` and a `variant:` field as the sole differentiator (ADR-0047: *Variant PM Extends Redundant Body Cleanup*).
   - **Stub plus `variant_overrides:` frontmatter keys** — the same stub with a `variant_overrides:` block holding `governance_workflow` / `agent_roster` / `dispatch_protocol` deltas as the only additions (ADR-0048: *Variant PM Architecture — AGENTS.md as Workflow SSOT*).
 - Variant `pm.md` files must NEVER duplicate the core PM body; domain workflow orchestration belongs in the variant's `AGENTS.md`, not in `pm.md` (ADR-0048).
+- At L3 (a project's own `agents/pm.md`), an extends pointer is valid iff it resolves on disk from the project file's location, per [ADR-0095](docs/adr/0095-l3-extends-pointer-resolution.md) — the dangling `../../common/agents/pm.md` form is invalid and is corrected by pointer swap to the L0 `../../../agents/pm.md`.
 - `bun scripts/validate-pm-extends.ts` verifies extends-chain integrity after any change.
 
 ---

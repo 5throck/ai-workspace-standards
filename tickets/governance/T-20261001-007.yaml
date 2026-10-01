@@ -31,7 +31,7 @@ description: >-
   there is git-tracked, so L0 is consistent across machines only while that
   tracked copy matches disk. Option (a) must decide how to treat a
   tracked-but-tool-managed dir like the L0 one.
-status: review
+status: done
 attempts: 0
 created_at: '2026-09-30T20:48:58.250Z'
 history:
@@ -47,5 +47,12 @@ history:
   - at: '2026-09-30T23:27:56.295Z'
     from: running
     to: review
-result: null
+  - at: '2026-09-30T23:57:32.242Z'
+    from: review
+    to: done
+result: >-
+  Generator v1.9.0: git ls-files tracked set with per-root fail-open (a root
+  with zero tracked entries, i.e. a fresh scaffold, keeps on-disk candidates; a
+  partially-tracked root excludes untracked entries). Machine-independent both
+  directions; scaffold E2E 41/41; CI green; merged in PR #1271.
 error: null
