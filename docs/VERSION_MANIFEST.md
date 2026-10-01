@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-10-01T12:46:56.981Z
+**Generated**: 2026-10-01T13:12:12.279Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -144,7 +144,7 @@
 | lint-instructions.ts | 1.0.0 | scripts/lint-instructions.ts | N/A |
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
 | mcp-governance-server.ts | 1.1.0 | scripts/mcp-governance-server.ts | N/A |
-| mcp-upstream-server.ts | 1.3.0 | scripts/mcp-upstream-server.ts | js-yaml |
+| mcp-upstream-server.ts | 1.4.0 | scripts/mcp-upstream-server.ts | js-yaml |
 | md-to-ooxml.ts | 1.2.0 | scripts/md-to-ooxml.ts | fs, path |
 | migrate-project.ts | 1.0.0 | scripts/migrate-project.ts | N/A |
 | migrate-quality-gates.ts | 1.1.0 | scripts/migrate-quality-gates.ts | fs, js-yaml, path |
@@ -175,7 +175,7 @@
 | sync-skill-registries.ts | 1.0.0 | scripts/sync-skill-registries.ts | N/A |
 | sync-skill-status.ts | 1.1.0 | scripts/sync-skill-status.ts | N/A |
 | sync-skills-to-l2.ts | 1.0.1 | scripts/sync-skills-to-l2.ts | N/A |
-| sync-skills.ts | 1.10.0 | scripts/sync-skills.ts | N/A |
+| sync-skills.ts | 1.11.0 | scripts/sync-skills.ts | N/A |
 | sync-template-deps.ts | 1.0.0 | scripts/sync-template-deps.ts | N/A |
 | tag-template.ts | 1.2.0 | scripts/tag-template.ts | bun |
 | team-builder.ts | 1.4.1 | scripts/team-builder.ts | N/A |

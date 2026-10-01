@@ -329,16 +329,6 @@ describe('graft skill in the SSOT (ADR-0076 amendment)', () => {
         }
     });
 
-    test('a graft-named mirror without an SSOT counterpart is a ghost like any other skill', async () => {
-        const dirs = freshDirs();
-        fs.writeFileSync(path.join(scratchRoot, '.claude', 'template-version.txt'), '1.0.0\n', 'utf-8');
-        makeSkill(dirs.geminiSkills, 'graft', '---\nname: graft\n---\n');
-
-        await syncSkills(dirs);
-
-        expect(fs.existsSync(path.join(dirs.geminiSkills, 'graft'))).toBe(false);
-    });
-
     test('the SSOT copy overwrites a graft-rewritten .claude copy (mirror, not tool-owned)', async () => {
         const dirs = projectDirsWithGraft();
         makeSkill(dirs.claudeSkills, 'graft', '---\nname: graft\n---\n# rewritten by graft init\n');
@@ -346,5 +336,97 @@ describe('graft skill in the SSOT (ADR-0076 amendment)', () => {
         await syncSkills(dirs);
 
         expect(fs.readFileSync(path.join(dirs.claudeSkills, 'graft', 'SKILL.md'), 'utf-8')).toContain('version: 1.0.0');
+    });
+});
+
+describe('user-added platform skills are never removed (Phase 1c provenance)', () => {
+    beforeEach(() => fs.rmSync(scratchRoot, { recursive: true, force: true }));
+    afterEach(() => fs.rmSync(scratchRoot, { recursive: true, force: true }));
+
+    const manifestOf = (dirs: ReturnType<typeof freshDirs>) =>
+        path.join(dirs.ssotSkills, '.sync-skills-managed.json');
+
+    function projectDirs() {
+        const dirs = freshDirs();
+        fs.writeFileSync(path.join(scratchRoot, 'template-version.txt'), '1.0.0\n', 'utf-8');
+        return dirs;
+    }
+
+    const platformDirs = (d: ReturnType<typeof freshDirs>) =>
+        [d.claudeSkills, d.geminiSkills, d.agentsSkills, d.codexSkills, d.hermesSkills];
+
+    test('a skill the user added to a platform dir survives repeated syncs', async () => {
+        const dirs = projectDirs();
+        makeSkill(dirs.ssotSkills, 'workspace-skill', '---\nname: ws\n---\n');
+        makeSkill(dirs.claudeSkills, 'my-own-skill', '---\nname: mine\n---\n');
+        makeSkill(dirs.geminiSkills, 'another-own-skill', '---\nname: other\n---\n');
+
+        await syncSkills(dirs);
+        await syncSkills(dirs);
+
+        expect(fs.existsSync(path.join(dirs.claudeSkills, 'my-own-skill', 'SKILL.md'))).toBe(true);
+        expect(fs.existsSync(path.join(dirs.geminiSkills, 'another-own-skill', 'SKILL.md'))).toBe(true);
+    });
+
+    test('a user-added .agents-only skill is back-synced (Phase 2) instead of being swept', async () => {
+        const dirs = projectDirs();
+        makeSkill(dirs.ssotSkills, 'workspace-skill', '---\nname: ws\n---\n');
+        makeSkill(dirs.agentsSkills, 'agents-only-skill', '---\nname: ao\n---\n');
+
+        await syncSkills(dirs);
+
+        for (const dir of platformDirs(dirs)) {
+            expect(fs.existsSync(path.join(dir, 'agents-only-skill', 'SKILL.md'))).toBe(true);
+        }
+    });
+
+    test('with no manifest yet, an unmatched mirror is kept and the manifest is created', async () => {
+        const dirs = projectDirs();
+        makeSkill(dirs.ssotSkills, 'workspace-skill', '---\nname: ws\n---\n');
+        makeSkill(dirs.codexSkills, 'legacy-leftover', '---\nname: old\n---\n');
+
+        await syncSkills(dirs);
+
+        expect(fs.existsSync(path.join(dirs.codexSkills, 'legacy-leftover'))).toBe(true);
+        expect(JSON.parse(fs.readFileSync(manifestOf(dirs), 'utf-8')).mirrored).toEqual(['workspace-skill']);
+    });
+
+    test('a mirror sync-skills created is removed once its SSOT skill is retired', async () => {
+        const dirs = projectDirs();
+        makeSkill(dirs.ssotSkills, 'retiring-skill', '---\nname: r\n---\n');
+        makeSkill(dirs.claudeSkills, 'my-own-skill', '---\nname: mine\n---\n');
+        await syncSkills(dirs);
+        expect(fs.existsSync(path.join(dirs.geminiSkills, 'retiring-skill'))).toBe(true);
+
+        fs.rmSync(path.join(dirs.ssotSkills, 'retiring-skill'), { recursive: true, force: true });
+        await syncSkills(dirs);
+
+        for (const dir of platformDirs(dirs)) {
+            expect(fs.existsSync(path.join(dir, 'retiring-skill'))).toBe(false);
+        }
+        expect(fs.existsSync(path.join(dirs.claudeSkills, 'my-own-skill'))).toBe(true);
+        expect(JSON.parse(fs.readFileSync(manifestOf(dirs), 'utf-8')).mirrored).toEqual([]);
+    });
+
+    test('a corrupt manifest warns and removes nothing', async () => {
+        const dirs = projectDirs();
+        makeSkill(dirs.claudeSkills, 'orphan-skill', '---\nname: o\n---\n');
+        fs.writeFileSync(manifestOf(dirs), '{ not json', 'utf-8');
+
+        const result = await syncSkills(dirs);
+
+        expect(fs.existsSync(path.join(dirs.claudeSkills, 'orphan-skill'))).toBe(true);
+        expect(result.warnings.some(w => w.includes('.sync-skills-managed.json unreadable'))).toBe(true);
+    });
+
+    test('the workspace root (no project marker) neither sweeps nor writes a manifest', async () => {
+        const dirs = freshDirs();
+        makeSkill(dirs.ssotSkills, 'workspace-skill', '---\nname: ws\n---\n');
+        makeSkill(dirs.claudeSkills, 'platform-only', '---\nname: po\n---\n');
+
+        await syncSkills(dirs);
+
+        expect(fs.existsSync(path.join(dirs.claudeSkills, 'platform-only'))).toBe(true);
+        expect(fs.existsSync(manifestOf(dirs))).toBe(false);
     });
 });

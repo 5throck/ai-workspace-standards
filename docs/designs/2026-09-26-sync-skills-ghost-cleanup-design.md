@@ -3,7 +3,7 @@
 | Field | Value |
 |-------|-------|
 | Date | 2026-09-26 |
-| Status | implemented |
+| Status | implemented (amended 2026-10-01 — see Amendment) |
 | Spec ID | `sync-skills-ghost-cleanup` |
 | Governing anchor | ADR-0077 (platform mirrors); Fork Model delivery contract (ADR-0031) |
 | Related | `scripts/sync-skills.ts` 1.9.0 → 1.10.0 (Phase 1c); found via the 2026-09-26 fresh-scaffold drift comparison |
@@ -38,3 +38,28 @@ workspace-process skills available in projects, they belong in the project skill
 | second run | `No ghost platform mirrors found` (idempotent) |
 | workspace-root run | Phase 1c skipped (no project marker) |
 | `Projects/co-abap` audit after regenerating skill-graph + VERSION_MANIFEST | all checks passed |
+
+## Amendment (2026-10-01) — provenance-based sweep; user-added skills are never removed
+
+**Problem.** The Phase 1c rule above ("a project's platform mirrors mirror its skills/ SSOT exactly") deleted *any*
+platform skill directory without a `skills/` counterpart — including skills a project's user added on purpose
+(e.g. a `.claude/skills/<name>/` created after scaffolding) and `graft`. It also ran before Phase 2, so it
+pre-empted the `.agents`-only back-sync. Requirement: a skill the user added must not be removed without an
+explicit request.
+
+**Change (sync-skills 1.11.0).** Ownership is provenance, not absence from the SSOT:
+
+- sync-skills records the skills it mirrors in `skills/.sync-skills-managed.json` (project contexts only).
+- Phase 1c removes a platform mirror only when its name is in that record **and** its `skills/` SSOT skill no
+  longer exists (a retired workspace skill).
+- Anything never mirrored by the tool is kept. With no manifest (first run after this change, fresh clone) or an
+  unreadable one, nothing is removed — the failure mode is conservative.
+- Legacy workspace-process ghosts in older projects are not Phase 1c's job: `upgrade-project`'s
+  WORKSPACE-ONLY SKILL SWEEP removes stock copies and surfaces CONFLICTs for modified ones.
+
+**Verified-safe other paths.** country/variant PRUNE (registry names, CONFLICT/KEEP), `--prune-removed`
+(explicit flag), retired-skill PRUNE (explicit `status: retired|deprecated`), WORKSPACE-ONLY SWEEP (stock only).
+Phase 1c was the only unguarded removal of unknown skills.
+
+**Verification.** `tests/unit/sync-skills.test.ts` — "user-added platform skills are never removed" block
+(survives repeated syncs; `.agents`-only back-sync; no-manifest keep; retired removal; corrupt manifest; workspace root).

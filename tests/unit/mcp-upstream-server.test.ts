@@ -343,6 +343,50 @@ describe('13.2 identity', () => {
       expect(r.rpc.error?.code).toBe(-32602);
     }
   });
+
+  test('2h. GUI clients: unregistered cwd + valid project_root files a flagged ticket (identity:self_declared)', async () => {
+    const proj = ws.project('co-test');
+    seedKnown(ws, 'co-test');
+    const r = await open(ws.root).create({ ...good(), project_root: proj });
+    expect(r.rpc.error).toBeUndefined();
+    expect(r.body.triage).toBe('inbox'); // flagged identity forces inbox
+    expect(r.body.flagged).toBe(true);
+    expect(r.body.reasons).toContain('identity:self_declared');
+    const t = readTicketYaml(r.body.id);
+    expect(t.upstream.project).toBe('co-test');
+    expect(t.upstream.triage_reasons).toContain('identity:self_declared');
+    validateTicket(t);
+  });
+
+  test('2i. unregistered cwd + INVALID project_root is still rejected with the rule text', async () => {
+    ws.project('co-test');
+    const r = await open(ws.root).create({ ...good(), project_root: ws.root });
+    expect(r.rpc.error?.code).toBe(-32602);
+    expect(r.rpc.error?.message).toMatch(/unregistered working directory/);
+    expect(r.rpc.error?.message).toContain('project_root'); // message names the fallback
+    expect(ticketFiles()).toEqual([]);
+  });
+
+  test('2j. cwd-attested identity wins: project_root pointing elsewhere is ignored', async () => {
+    const a = ws.project('co-test');
+    const b = ws.project('co-other', { variant: 'co-other' });
+    seedKnown(ws, 'co-test');
+    const r = await open(a).create({ ...good(), project_root: b });
+    expect(r.rpc.error).toBeUndefined();
+    expect(readTicketYaml(r.body.id).upstream.project).toBe('co-test');
+    expect(r.body.reasons).not.toContain('identity:self_declared');
+  });
+
+  test('2k. status accepts the same project_root fallback for GUI clients', async () => {
+    const proj = ws.project('co-test');
+    const filed = await open(proj).create(good());
+    expect(filed.rpc.error).toBeUndefined();
+    const s = await open(ws.root).status({ project_root: proj });
+    expect(s.rpc.error).toBeUndefined();
+    expect(s.body.requests.map((x: any) => x.id)).toContain(filed.body.id);
+    const bad = await open(ws.root).status();
+    expect(bad.rpc.error?.code).toBe(-32602);
+  });
 });
 
 // =====================================================================
