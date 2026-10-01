@@ -8,12 +8,30 @@ title: >-
   PRs (v0.7.0) open and locally green but unmergeable until billing/limit is
   raised; root public repo CI unaffected
 priority: urgent
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-09-27T01:12:45.663Z'
 history:
   - at: '2026-09-27T01:12:45.663Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-01T01:33:52.833Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-01T01:33:52.849Z'
+    from: waiting
+    to: running
+  - at: '2026-10-01T01:33:52.862Z'
+    from: running
+    to: review
+  - at: '2026-10-01T01:33:52.875Z'
+    from: review
+    to: done
+result: >-
+  Resolved: Actions spending limit raised (verified 2026-10-01 ~00:00-01:30 UTC)
+  - co-newbiz run 36793993418 executed real jobs (Secret Scan/Doc
+  Audit/Unit+Script Tests all success, Unit Tests correctly skipped as opt-in)
+  and co-deck ran two green CI runs at 01:27-01:28 UTC after PR #116. The 12
+  v0.7.0 fleet upgrade PRs blocked on this are superseded by the v0.8.3
+  deliveries that have since merged.
 error: null
