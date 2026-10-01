@@ -1,5 +1,10 @@
 #!/usr/bin/env bun
-// @version 1.5.0
+// @version 1.7.0
+// v1.7.0 (2026-10-01, T-20261001-017): readTicketRaw — parse WITHOUT validateTicket so a
+//           corrupt/hand-edited ticket can be rendered for repair (ticket.ts show fallback).
+// v1.6.0 (2026-10-01, T-20261001-016): setUpstreamTriage / setUpstreamResolution — PM triage
+//           and reply-back for upstream request tickets (design §12); requester-controlled
+//           upstream fields are never touched by either function.
 // v1.5.0 (2026-10-01): widen ID pattern to accept U-YYYYMMDD-NNN upstream
 //           request tickets (design 2026-10-01-upstream-request-mcp-design.md).
 // @l2-propagate: false
@@ -21,6 +26,7 @@ import {
   type Priority,
   type Status,
   type Ticket,
+  type UpstreamBlock,
 } from './ticket-schema.ts';
 
 const MAX_YAML_BYTES = 64 * 1024;
@@ -63,6 +69,16 @@ function writeTicketAtomic(dir: string, ticket: Ticket): void {
   const tmpPath = `${finalPath}.tmp-${process.pid}-${Date.now()}`;
   writeFileSync(tmpPath, dump(ticket), 'utf-8');
   renameSync(tmpPath, finalPath);
+}
+
+/** T-20261001-017 — raw parse WITHOUT validateTicket. The repair path for a corrupt or
+ * hand-edited ticket: `ticket.ts show` falls back to this when validation fails, so the PM
+ * can see (and hand-fix) the file instead of hitting a schema error. Returns the parsed
+ * object as-is; the caller owns the untrusted-rendering duty. */
+export function readTicketRaw(dir: string, id: string): Ticket {
+  const path = ticketPath(dir, id);
+  if (!existsSync(path)) throw new Error(`[ticket-store] ticket not found: ${id}`);
+  return loadYamlCapped<Ticket>(path);
 }
 
 export function readTicket(dir: string, id: string): Ticket {
@@ -183,8 +199,13 @@ export function resolveTicketLocation(
   governanceDir: string,
   id: string,
 ): { dir: string; kind: Kind; id: string } {
-  const explicit = /^(service|governance)\/(T-\d{8}-\d{3,4})$/.exec(id);
+  const explicit = /^(service|governance)\/([TU]-\d{8}-\d{3,4})$/.exec(id);
   if (explicit) {
+    // T-20261001-016: upstream request tickets (U-) are kind: manual by schema —
+    // an explicit service/ prefix on a U- id is a caller error, not a lookup miss.
+    if (explicit[1] === 'service' && explicit[2].startsWith('U-')) {
+      throw new Error(`[ticket-store] upstream request tickets (${explicit[2]}) are kind: manual — use 'governance/${explicit[2]}' or the bare id`);
+    }
     return explicit[1] === 'governance'
       ? { dir: governanceDir, kind: 'manual', id: explicit[2] }
       : { dir: serviceDir, kind: 'service', id: explicit[2] };
@@ -246,6 +267,64 @@ export function moveTicket(dir: string, id: string, to: Status, opts: MoveOption
   if (to === 'done' && opts.result !== undefined) ticket.result = opts.result;
   writeTicketAtomic(dir, ticket);
   return ticket;
+}
+
+/** T-20261001-016 — PM triage of an upstream request (pm-gateway-workflow §3.12).
+ * Sets `upstream.triage` and moves the status in step: inbox -> backlog, ready -> waiting.
+ * Human-in-the-loop: a `flagged: true` ticket is never promoted to ready without
+ * `confirmReviewed` (the CLI surfaces this as --confirm-reviewed). Only the triage
+ * field and the status change — every requester-controlled upstream field is immutable. */
+export function setUpstreamTriage(
+  dir: string,
+  id: string,
+  triage: 'inbox' | 'ready',
+  opts: { confirmReviewed?: boolean } = {},
+): Ticket {
+  const ticket = readTicket(dir, id);
+  if (!ticket.upstream) throw new Error(`[ticket-store] ${id} is not an upstream ticket (no upstream block)`);
+  if (triage === 'ready' && ticket.upstream.flagged && !opts.confirmReviewed) {
+    throw new Error(`[ticket-store] ${id} is flagged for human review — promote to ready only with confirmReviewed (--confirm-reviewed)`);
+  }
+  ticket.upstream.triage = triage;
+  writeTicketAtomic(dir, ticket);
+  const target: Status = triage === 'ready' ? 'waiting' : 'backlog';
+  if (ticket.status !== target) {
+    // The adjacency map has no backward edge, so an inbox demotion from a
+    // waiting/review ticket needs --force. This is a demotion (never skips a
+    // forward gate) and the triage field + history entry carry the audit trail.
+    moveTicket(dir, id, target, { force: triage === 'inbox' });
+  }
+  return readTicket(dir, id);
+}
+
+/** T-20261001-016 — record the PM's resolution on an upstream request and close the
+ * ticket (pm-gateway-workflow §3.12 step 8). Walks the LEGAL adjacency path to done
+ * (backlog -> waiting -> running -> review -> done; failed re-enters at waiting) —
+ * never a --force jump, so every hop lands in the history. Writes the outcome into
+ * `upstream.resolution` AND the ticket `result` field (the done-transition summary
+ * the CLI requires). Requester-controlled upstream fields stay untouched. */
+export function setUpstreamResolution(
+  dir: string,
+  id: string,
+  resolution: NonNullable<UpstreamBlock['resolution']>,
+  summary: string,
+): Ticket {
+  const ticket = readTicket(dir, id);
+  if (!ticket.upstream) throw new Error(`[ticket-store] ${id} is not an upstream ticket (no upstream block)`);
+  if (ticket.upstream.resolution) throw new Error(`[ticket-store] ${id} already carries a resolution — a closed request is never re-resolved`);
+  if (ticket.status === 'done') throw new Error(`[ticket-store] ${id} is already done`);
+  ticket.upstream.resolution = resolution;
+  ticket.result = summary;
+  writeTicketAtomic(dir, ticket);
+  const order: Status[] = ['backlog', 'waiting', 'running', 'review', 'done'];
+  let cur = readTicket(dir, id).status;
+  while (cur !== 'done') {
+    const next: Status = cur === 'failed' ? 'waiting' : order[order.indexOf(cur) + 1];
+    if (!next) throw new Error(`[ticket-store] ${id}: no legal hop from ${cur} toward done`);
+    moveTicket(dir, id, next, next === 'done' ? { result: summary } : {});
+    cur = readTicket(dir, id).status;
+  }
+  return readTicket(dir, id);
 }
 
 /** Pulls the highest-priority waiting service ticket (urgent > high > normal > low,

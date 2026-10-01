@@ -3239,6 +3239,25 @@ if (fs.existsSync(path.join('scripts', 'check-upgrade-coverage.ts'))) {
     }
 }
 
+// ── §11.0 surface registry gate (T-20261001-018, ADR-0097) ────────────────────
+// When scripts/validate-surface-registry.ts exists, the CONSTITUTION §11.0 registry
+// must be backed by the filesystem: instruction files at L0/L1 (+ static L2 files),
+// platform dirs per family, L2 skill mirroring (mirror:false honored), and the
+// templates/common/docs/context.md table identical to CONSTITUTION (one source).
+// Documented gaps (docs/surface-gaps.json) surface as WARNs; undocumented gaps FAIL.
+if (fs.existsSync(path.join('scripts', 'validate-surface-registry.ts'))) {
+    const { status, stdout, stderr } = spawnSync('bun', ['scripts/validate-surface-registry.ts', '--strict'], {
+        encoding: 'utf-8',
+    });
+    if (status !== 0) {
+        if (stdout) console.log(stdout);
+        if (stderr) console.error(stderr);
+        Fail('Surface registry gate failed — bun scripts/validate-surface-registry.ts lists the violations');
+    } else {
+        Pass('Surface registry gate: §11.0 coverage verified at L0/L1/L2 (strict)');
+    }
+}
+
 // ── Model registry gate (2026-09-15-agent-metadata-drift-check-design.md) ─────
 // When scripts/validate-model-registry.ts exists, agents/*.md frontmatter model
 // comments AND the tier→model mapping prose (AGENTS.md §3.6 / CLAUDE.md /

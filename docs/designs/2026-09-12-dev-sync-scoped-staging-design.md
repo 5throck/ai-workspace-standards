@@ -80,3 +80,26 @@ Non-UI change (no rendered web/app UI). **Exempt with explicit statement** per A
 - `bun run test` — repo-scoped suite (test-runner.ts).
 - `bun scripts/typecheck.ts` — `tsc --noEmit` over `scripts/` (zero-error baseline preserved).
 - Full `/sync` (audit gate, spec-check satisfied by this design doc + registry entry).
+
+## Amendment 3 — Soak exit: exclusion is the default (2026-10-01, T-20261001-015)
+
+The ADR-0055 WARN soak is over. PR #1280 (2026-10-01) demonstrated the predicted
+failure mode live: a sync run swept 4 foreign WIP test files plus an unrelated
+memory edit into a fix commit, the pre-push changed-path gate then blocked the
+push, and repair required a full reset + re-stage + `--scoped-staging` re-run
+because the pre-commit hook correctly refuses amends. Operating manually in the
+soak's stated end state proved the promotion is safe as the default.
+
+Decision (ticket T-20261001-015):
+
+- `dev-sync.ts` step 6.5 defaults to scoped staging (exclusion). Implementation
+  is dev-sync v1.23.0: the declaration reads `SYNC_SCOPED_STAGING !== '0'`.
+- Opt-out back to the WARN soak: `SYNC_SCOPED_STAGING=0` or `--warn-staging`
+  (new argv flag). `SYNC_SCOPED_STAGING=1` and `--scoped-staging` remain
+  accepted no-ops so existing automation and docs keep working.
+- `skills/sync/SKILL.md` step 0 wording updated to state the exclusion default.
+- `.gitignore`-first for tool artifacts (`.claude/skills/graft` etc.) was
+  considered and REJECTED for this change: those files are template-delivered
+  and tracked; gitignoring them would break mirror-parity validation and hide
+  real drift. Scoped staging already protects them by default (un-staged
+  rewrites are excluded), and a legit graft-helper update stages explicitly.

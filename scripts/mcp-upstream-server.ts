@@ -1,5 +1,10 @@
 #!/usr/bin/env bun
-// @version 1.4.0
+// @version 1.5.0
+// v1.5.0 (2026-10-01, T-20261001-017): intake critical section (cap read -> audit append)
+//           runs under a mkdir lock with stale-takeover and fail-open deadline (parallel server
+//           instances can no longer double-spend the caps); daily audit logs prune after 90
+//           days at startup (retention decision, design Q6 — known-projects.json survives);
+//           UPSTREAM_LOCK_TIMEOUT_MS is a test seam.
 // v1.4.0 (2026-10-01, self-declared identity fallback): GUI clients (Claude Desktop App)
 //          spawn this server with cwd=/ and no project env, so cwd-based identity cannot
 //          work there (diagnosed 2026-10-01: audit cwd_hash matched "/" exactly). Both
@@ -29,7 +34,7 @@
 import { createHash } from 'node:crypto';
 import {
   existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync, realpathSync,
-  renameSync, appendFileSync, linkSync, unlinkSync, statSync, lstatSync,
+  renameSync, appendFileSync, linkSync, unlinkSync, statSync, lstatSync, rmSync,
 } from 'node:fs';
 import { join, dirname, resolve, basename, isAbsolute, sep } from 'node:path';
 import { createInterface } from 'node:readline';
@@ -324,6 +329,76 @@ function readTodayAudit(): Array<{ project?: string; outcome?: string; triage?: 
   return out;
 }
 
+/** T-20261001-017 — intake lock. The daily-cap counters, the known-projects first-seen
+ * state and the audit append are read-then-write, so two parallel server instances could
+ * double-spend the caps or double-record the first-seen gate. A mkdir-based lock is atomic
+ * on every filesystem; a crashed server's stale lock is taken over after 30s, and a deadline
+ * of UPSTREAM_LOCK_TIMEOUT_MS (default 5s, 0 disables waiting) falls OPEN to the previous
+ * single-instance behavior rather than refusing service. */
+const INTAKE_LOCK_DIR = join(LOGS_DIR, '.intake-lock');
+const INTAKE_LOCK_STALE_MS = 30_000;
+
+function intakeLockTimeoutMs(): number {
+  // NOT readCap: the caps must stay positive, but a 0 lock deadline is the
+  // documented fail-open switch (tests / operators who prefer availability).
+  const raw = process.env.UPSTREAM_LOCK_TIMEOUT_MS;
+  if (raw === undefined || raw === '') return 5000;
+  if (/^\d{1,6}$/.test(raw.trim())) return parseInt(raw, 10);
+  console.error(`[mcp-upstream-server] invalid UPSTREAM_LOCK_TIMEOUT_MS=${JSON.stringify(raw)}; using default 5000`);
+  return 5000;
+}
+
+function withIntakeLock<T>(fn: () => T): T {
+  mkdirSync(LOGS_DIR, { recursive: true });
+  const deadline = Date.now() + intakeLockTimeoutMs();
+  for (;;) {
+    try {
+      mkdirSync(INTAKE_LOCK_DIR);
+      break;
+    } catch (err) {
+      if ((err as NodeJS.ErrnoException).code !== 'EEXIST') throw err;
+      try {
+        if (Date.now() - statSync(INTAKE_LOCK_DIR).mtimeMs > INTAKE_LOCK_STALE_MS) {
+          rmSync(INTAKE_LOCK_DIR, { recursive: true, force: true });
+        }
+      } catch { /* racer removed it first — loop and retry */ }
+      if (Date.now() >= deadline) {
+        // Fail-open: proceed unlocked (single-instance behavior). The window this
+        // leaves open is the pre-lock race the design accepted for v1.4.0.
+        return fn();
+      }
+      Bun.sleepSync(25);
+    }
+  }
+  try {
+    return fn();
+  } finally {
+    rmSync(INTAKE_LOCK_DIR, { recursive: true, force: true });
+  }
+}
+
+/** T-20261001-017 — audit-log retention (design Q6 decision): daily `.jsonl` audit
+ * files are pruned after 90 days at server startup; `known-projects.json` (first-seen
+ * state) and the lock dir are never touched. Non-fatal by design. */
+const LOG_RETENTION_DAYS = 90;
+
+function pruneOldLogs(now = Date.now()): number {
+  let pruned = 0;
+  try {
+    if (!existsSync(LOGS_DIR)) return 0;
+    for (const f of readdirSync(LOGS_DIR)) {
+      const m = /^(\d{4}-\d{2}-\d{2})\.jsonl$/.exec(f);
+      if (!m) continue;
+      const ageDays = (now - Date.parse(`${m[1]}T00:00:00Z`)) / 86_400_000;
+      if (ageDays > LOG_RETENTION_DAYS) {
+        unlinkSync(join(LOGS_DIR, f));
+        pruned++;
+      }
+    }
+  } catch { /* retention is best-effort — never block intake */ }
+  return pruned;
+}
+
 const ALLOWED_KEYS = new Set(['suspected_layer', 'symptom', 'affected_paths', 'local_workaround_diff', 'repro', 'project_root']);
 
 type Validation = { valid: false; error: string } | { valid: true; req: UpstreamRequest };
@@ -424,108 +499,113 @@ function handleCreateRequest(params: unknown, cwd: string): Outcome {
   let flagged = checkInjection({ symptom: req.symptom, repro: req.repro, diff: req.local_workaround_diff });
   if (declared) flagged = true; // self-declared identity always gets human review
 
-  // Caps: hard cap counts accepted tickets AND merges; soft cap counts new tickets only.
-  const audit = readTodayAudit();
-  const projectAccepted = audit.filter((e) => e.project === project && e.outcome === 'accepted').length;
-  const projectMerged = audit.filter((e) => e.project === project && e.outcome === 'merged').length;
-  if (projectAccepted + projectMerged >= UPSTREAM_HARD_CAP) {
-    appendAuditLog({ project, outcome: 'reject_hard_cap', flagged, dedupe_key: dedupeHash, request_sha256: requestHash });
-    return { error: { code: -32000, message: `rate_limited: per-project hard cap reached (${projectAccepted + projectMerged}/${UPSTREAM_HARD_CAP}/day)` } };
-  }
-
-  // C5: merge into an open duplicate. A merge never changes the existing ticket's triage.
-  const dup = loadUpstreamTickets().find(({ ticket }) => ticket.status !== 'done' && ticket.upstream.dedupe_key === dedupeHash);
-  if (dup) {
-    const entry: Record<string, unknown> = { project, at: new Date().toISOString() };
-    if (flagged) entry.flagged = true;
-    dup.ticket.upstream.duplicates = [...(dup.ticket.upstream.duplicates ?? []), entry];
-    writeYamlAtomic(join(TICKETS_DIR, dup.file), dup.ticket);
-    appendAuditLog({ project, outcome: 'merged', id: dup.ticket.id, flagged, reasons: flagged ? ['needs_human_review'] : [], dedupe_key: dedupeHash, request_sha256: requestHash });
-    if (dup.ticket.upstream.project !== project) {
-      // Cross-project merge: acknowledge only. The foreign ticket's id/status/triage stay private.
-      return { result: { merged: true, flagged, reasons: flagged ? ['needs_human_review'] : [] } };
+  // T-20261001-017: the cap counters, the known-projects first-seen state and the audit
+  // append are read-then-write — the whole accept/merge/reject path runs under the intake
+  // lock so parallel server instances serialize (id allocation itself stays EEXIST-retried).
+  return withIntakeLock(() => {
+    // Caps: hard cap counts accepted tickets AND merges; soft cap counts new tickets only.
+    const audit = readTodayAudit();
+    const projectAccepted = audit.filter((e) => e.project === project && e.outcome === 'accepted').length;
+    const projectMerged = audit.filter((e) => e.project === project && e.outcome === 'merged').length;
+    if (projectAccepted + projectMerged >= UPSTREAM_HARD_CAP) {
+      appendAuditLog({ project, outcome: 'reject_hard_cap', flagged, dedupe_key: dedupeHash, request_sha256: requestHash });
+      return { error: { code: -32000, message: `rate_limited: per-project hard cap reached (${projectAccepted + projectMerged}/${UPSTREAM_HARD_CAP}/day)` } };
     }
-    return {
-      result: {
-        id: dup.ticket.id, status: dup.ticket.status, triage: dup.ticket.upstream.triage,
-        merged_into: dup.ticket.id, flagged, reasons: flagged ? ['needs_human_review'] : [],
-        marker: `LOCAL-PATCH(upstream-request: ${dup.ticket.id})`,
-      },
+
+    // C5: merge into an open duplicate. A merge never changes the existing ticket's triage.
+    const dup = loadUpstreamTickets().find(({ ticket }) => ticket.status !== 'done' && ticket.upstream.dedupe_key === dedupeHash);
+    if (dup) {
+      const entry: Record<string, unknown> = { project, at: new Date().toISOString() };
+      if (flagged) entry.flagged = true;
+      dup.ticket.upstream.duplicates = [...(dup.ticket.upstream.duplicates ?? []), entry];
+      writeYamlAtomic(join(TICKETS_DIR, dup.file), dup.ticket);
+      appendAuditLog({ project, outcome: 'merged', id: dup.ticket.id, flagged, reasons: flagged ? ['needs_human_review'] : [], dedupe_key: dedupeHash, request_sha256: requestHash });
+      if (dup.ticket.upstream.project !== project) {
+        // Cross-project merge: acknowledge only. The foreign ticket's id/status/triage stay private.
+        return { result: { merged: true, flagged, reasons: flagged ? ['needs_human_review'] : [] } };
+      }
+      return {
+        result: {
+          id: dup.ticket.id, status: dup.ticket.status, triage: dup.ticket.upstream.triage,
+          merged_into: dup.ticket.id, flagged, reasons: flagged ? ['needs_human_review'] : [],
+          marker: `LOCAL-PATCH(upstream-request: ${dup.ticket.id})`,
+        },
+      };
+    }
+
+    // Evaluate every auto-ready condition so triage_reasons is complete (§8).
+    const failReasons: string[] = [];
+    const info: string[] = [];
+    if (flagged) failReasons.push('needs_human_review');
+    if (declared) failReasons.push('identity:self_declared');
+    if (projectAccepted >= UPSTREAM_SOFT_CAP) failReasons.push('project_soft_cap');
+
+    const delivered = deliveredFiles(projectPath);
+    for (const path of req.affected_paths) {
+      const m = templateManagement(path, variant);
+      if (!m.managed) failReasons.push(`path_not_template_managed: ${path}`);
+      if (m.l0Origin) info.push(`info:l0_origin ${path} <- ${m.l0Origin}`);
+      info.push(`info:in_last_delivery ${path}=${delivered.has(path)}`);
+    }
+
+    const knownProjects = loadKnownProjects();
+    const isFirstRequest = !knownProjects.has(project);
+    if (isFirstRequest) failReasons.push('first_request_from_project');
+
+    const globalReady = audit.filter((e) => e.outcome === 'accepted' && e.triage === 'ready').length;
+    if (globalReady >= UPSTREAM_GLOBAL_READY_CAP) failReasons.push('global_ready_cap');
+
+    const triage: 'inbox' | 'ready' = failReasons.length === 0 ? 'ready' : 'inbox';
+    const status = triage === 'ready' ? 'waiting' : 'backlog';
+    const now = new Date().toISOString();
+
+    const upstreamBlock: Record<string, unknown> = {
+      project, variant, template_version: version, source: `project/${project}`,
+      trust: 'untrusted', suspected_layer: req.suspected_layer, symptom: req.symptom,
+      affected_paths: req.affected_paths,
     };
-  }
+    if (req.local_workaround_diff !== undefined) upstreamBlock.local_workaround_diff = req.local_workaround_diff;
+    if (req.repro !== undefined) upstreamBlock.repro = req.repro;
+    Object.assign(upstreamBlock, {
+      triage, flagged, triage_reasons: [...failReasons, ...info], dedupe_key: dedupeHash,
+      // Seeded with the originating report so `duplicates` lists every report (design §13 test 8).
+      duplicates: [{ project, at: now }],
+    });
 
-  // Evaluate every auto-ready condition so triage_reasons is complete (§8).
-  const failReasons: string[] = [];
-  const info: string[] = [];
-  if (flagged) failReasons.push('needs_human_review');
-  if (declared) failReasons.push('identity:self_declared');
-  if (projectAccepted >= UPSTREAM_SOFT_CAP) failReasons.push('project_soft_cap');
+    mkdirSync(TICKETS_DIR, { recursive: true });
+    let id = '';
+    let written = false;
+    for (let attempt = 0; attempt < 20 && !written; attempt++) {
+      id = `${todayPrefix()}-${String(nextSeqForToday() + attempt).padStart(3, '0')}`;
+      const ticket = {
+        schemaVersion: 1, id, kind: 'manual', title: `Upstream request from ${project}`, priority: 'normal',
+        status, attempts: 0, created_at: now,
+        history: [{ at: now, from: null, to: status }],
+        result: null, error: null, upstream: upstreamBlock,
+      };
+      const ticketPath = join(TICKETS_DIR, `${id}.yaml`);
+      const tmpPath = `${ticketPath}.tmp-${process.pid}-${Date.now()}-${attempt}`;
+      writeFileSync(tmpPath, dump(ticket, { schema: JSON_SCHEMA, lineWidth: -1 }), 'utf-8');
+      try {
+        linkSync(tmpPath, ticketPath); // fails with EEXIST if another process took this id
+        written = true;
+      } catch (err) {
+        if ((err as NodeJS.ErrnoException).code !== 'EEXIST') { unlinkSync(tmpPath); throw err; }
+      }
+      unlinkSync(tmpPath);
+    }
+    if (!written) throw new Error('could not allocate a ticket id');
 
-  const delivered = deliveredFiles(projectPath);
-  for (const path of req.affected_paths) {
-    const m = templateManagement(path, variant);
-    if (!m.managed) failReasons.push(`path_not_template_managed: ${path}`);
-    if (m.l0Origin) info.push(`info:l0_origin ${path} <- ${m.l0Origin}`);
-    info.push(`info:in_last_delivery ${path}=${delivered.has(path)}`);
-  }
+    // known-projects.json is updated only after the ticket write succeeded.
+    if (isFirstRequest) {
+      knownProjects.set(project, { first_seen: now, first_id: id });
+      saveKnownProjects(knownProjects);
+    }
 
-  const knownProjects = loadKnownProjects();
-  const isFirstRequest = !knownProjects.has(project);
-  if (isFirstRequest) failReasons.push('first_request_from_project');
+    appendAuditLog({ project, outcome: 'accepted', id, flagged, triage, identity: declared ? 'declared' : 'cwd', reasons: failReasons, dedupe_key: dedupeHash, request_sha256: requestHash });
 
-  const globalReady = audit.filter((e) => e.outcome === 'accepted' && e.triage === 'ready').length;
-  if (globalReady >= UPSTREAM_GLOBAL_READY_CAP) failReasons.push('global_ready_cap');
-
-  const triage: 'inbox' | 'ready' = failReasons.length === 0 ? 'ready' : 'inbox';
-  const status = triage === 'ready' ? 'waiting' : 'backlog';
-  const now = new Date().toISOString();
-
-  const upstreamBlock: Record<string, unknown> = {
-    project, variant, template_version: version, source: `project/${project}`,
-    trust: 'untrusted', suspected_layer: req.suspected_layer, symptom: req.symptom,
-    affected_paths: req.affected_paths,
-  };
-  if (req.local_workaround_diff !== undefined) upstreamBlock.local_workaround_diff = req.local_workaround_diff;
-  if (req.repro !== undefined) upstreamBlock.repro = req.repro;
-  Object.assign(upstreamBlock, {
-    triage, flagged, triage_reasons: [...failReasons, ...info], dedupe_key: dedupeHash,
-    // Seeded with the originating report so `duplicates` lists every report (design §13 test 8).
-    duplicates: [{ project, at: now }],
+    return { result: { id, status, triage, merged_into: null, flagged, reasons: failReasons, marker: `LOCAL-PATCH(upstream-request: ${id})` } };
   });
-
-  mkdirSync(TICKETS_DIR, { recursive: true });
-  let id = '';
-  let written = false;
-  for (let attempt = 0; attempt < 20 && !written; attempt++) {
-    id = `${todayPrefix()}-${String(nextSeqForToday() + attempt).padStart(3, '0')}`;
-    const ticket = {
-      schemaVersion: 1, id, kind: 'manual', title: `Upstream request from ${project}`, priority: 'normal',
-      status, attempts: 0, created_at: now,
-      history: [{ at: now, from: null, to: status }],
-      result: null, error: null, upstream: upstreamBlock,
-    };
-    const ticketPath = join(TICKETS_DIR, `${id}.yaml`);
-    const tmpPath = `${ticketPath}.tmp-${process.pid}-${Date.now()}-${attempt}`;
-    writeFileSync(tmpPath, dump(ticket, { schema: JSON_SCHEMA, lineWidth: -1 }), 'utf-8');
-    try {
-      linkSync(tmpPath, ticketPath); // fails with EEXIST if another process took this id
-      written = true;
-    } catch (err) {
-      if ((err as NodeJS.ErrnoException).code !== 'EEXIST') { unlinkSync(tmpPath); throw err; }
-    }
-    unlinkSync(tmpPath);
-  }
-  if (!written) throw new Error('could not allocate a ticket id');
-
-  // known-projects.json is updated only after the ticket write succeeded.
-  if (isFirstRequest) {
-    knownProjects.set(project, { first_seen: now, first_id: id });
-    saveKnownProjects(knownProjects);
-  }
-
-  appendAuditLog({ project, outcome: 'accepted', id, flagged, triage, identity: declared ? 'declared' : 'cwd', reasons: failReasons, dedupe_key: dedupeHash, request_sha256: requestHash });
-
-  return { result: { id, status, triage, merged_into: null, flagged, reasons: failReasons, marker: `LOCAL-PATCH(upstream-request: ${id})` } };
 }
 
 function handleStatusRequest(params: unknown, cwd: string): Outcome {
@@ -635,6 +715,8 @@ function dispatchToolCall(params: unknown): Outcome {
 }
 
 async function main(): Promise<void> {
+  const pruned = pruneOldLogs();
+  if (pruned > 0) console.error(`[mcp-upstream-server] pruned ${pruned} audit log(s) older than ${LOG_RETENTION_DAYS} days`);
   const rl = createInterface({ input: process.stdin });
   for await (const line of rl) {
     if (!line.trim()) continue;

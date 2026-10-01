@@ -1,0 +1,4 @@
+{
+  "$comment": "Documented §11.0 surface gaps (T-20261001-018). Each row: surface (registry name), check (instruction-file | platform-dir | skill-mirror | *), reason, fallback, ticket. A finding matching a row renders as WARN naming the ticket; every other finding is a FAIL (CONSTITUTION §11.0 rule 1 — never omit a surface silently).",
+  "gaps": []
+}
