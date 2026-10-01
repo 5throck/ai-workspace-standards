@@ -1790,6 +1790,15 @@
       "created": "2026-10-01",
       "last_updated": "2026-10-01",
       "review_note": "hygiene sweep 2026-10-01 (T-20261001-011): reviewed — status approved is within the 14-day adjudication window; no action required."
+    },
+    {
+      "id": "2026-10-01-fleet-security-remediation-design",
+      "title": "fleet security remediation design",
+      "file": "docs/designs/2026-10-01-fleet-security-remediation-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-10-01",
+      "last_updated": "2026-10-01"
     }
   ]
 }
