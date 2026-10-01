@@ -223,6 +223,11 @@
       "layer": "common"
     },
     {
+      "id": "upgrade-project",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
       "id": "zod-contract-gate",
       "type": "skill",
       "layer": "common"
@@ -791,6 +796,12 @@
       "type": "references",
       "from": "pm",
       "to": "skill-lifecycle-manager",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "pm",
+      "to": "upgrade-project",
       "source": "prose"
     },
     {
