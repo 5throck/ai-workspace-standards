@@ -223,6 +223,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `retry-handler.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `setup-github-branch-protection.ts` | L0 | 1.0.1 | active | `--repo`, `--branch`, `--check` (repeatable), `--dry-run` | —| L0+L1 | —|
 | `skill-dependency-analysis.ts` | L0 | 1.0.2 | active | —| —| L0 | —|
+| `spec-hygiene-sweep.ts` | L0 | 1.0.0 | active | v1.0.0 (T-20261001-011): weekly spec-hygiene sweep — flags docs/specs/registry.json entries with status `approved` whose created date is >14 days old and that show no progression (an implemented/superseded/archived transition would have changed the status); prints id, age-in-days, title, doc path; exit 1 when any are found (weekly job/CI gate), 0 otherwise; `--json` for machine consumption; detection only — `--fix` deliberately unsupported (adjudication is human/PM work); pure `findStaleApprovedSpecs` selector unit-tested in tests/unit/spec-hygiene-sweep.test.ts | —| L0 | —|
 | `spec-backfill.ts` | L0 | 1.0.0 | active | `--dry-run`, `--check` | —| L0 | —|
 | `spec-register.ts` | L0 | 1.3.0 | active | `--file`, `--source`, `--update`, `--status`, `--list`, `--ref`, `--id` | —| L0+L1 | —|
 | `skill-lifecycle-audit.ts` | L0 | 1.5.1 | active | —| —| L0+L1 | —|

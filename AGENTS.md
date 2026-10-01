@@ -141,7 +141,7 @@ When leading execution and improvement tasks, PM MUST use the 3-Tier model strat
 
 ### §3.7.5 Governance Backlog Dispatch
 
-**Workspace root only** — `scripts/ticket.ts` and `tickets/` do not exist in variant projects (`@l2-propagate: false`); this section intentionally lives in `AGENTS.md` (L0-only SSOT, never propagated) rather than `agents/pm.md`, which extends into every variant's PM.
+**Workspace root only** — `scripts/ticket.ts` and `tickets/` do not exist in variant projects (`@l2-propagate: false`); this section intentionally lives in `AGENTS.md` (L0-only SSOT, never propagated) rather than `agents/pm.md`, which extends into every variant's PM. Service tickets (`tickets/*.yaml`) are gitignored by design — their `history[]` field is the audit trail; governance tickets (`tickets/governance/`) are tracked in git.
 
 Deferred governance decisions (e.g. an ADR's soak-period gate) are tracked as `kind: manual` tickets with an optional `not_before` date — see [docs/designs/2026-08-16-governance-backlog-design.md](docs/designs/2026-08-16-governance-backlog-design.md). When `bun scripts/ticket.ts list --ready --kind manual` surfaces a ticket (at session start or during the Weekly Health Check, [CONSTITUTION.md §Session start checklist](CONSTITUTION.md) and [§9.1](docs/constitution/09-operations-workflow.md#91-weekly-agentskill-health-check)):
 

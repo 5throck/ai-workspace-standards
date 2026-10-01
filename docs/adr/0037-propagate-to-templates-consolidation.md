@@ -1,5 +1,6 @@
 ---
 status: "Accepted"
+date: 2026-06-13
 ---
 
 # ADR-0037: Consolidate publish-to-template.ts into propagate-to-templates.ts v2.0.0

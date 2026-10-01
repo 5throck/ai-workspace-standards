@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-10-01T02:41:21.183Z
+**Generated**: 2026-10-01T02:56:09.307Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 9
 - **Skills**: 56
-- **Scripts**: 112 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` plus experiment files under `scripts/experiments/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
+- **Scripts**: 113 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` plus experiment files under `scripts/experiments/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
 - **Commands**: 7
 
 ---
@@ -167,6 +167,7 @@
 | skill-lifecycle-audit.ts | 1.5.1 | scripts/skill-lifecycle-audit.ts | N/A |
 | skill-session-review.ts | 1.1.0 | scripts/skill-session-review.ts | bun |
 | spec-backfill.ts | 1.0.0 | scripts/spec-backfill.ts | N/A |
+| spec-hygiene-sweep.ts | 1.0.0 | scripts/spec-hygiene-sweep.ts | N/A |
 | spec-register.ts | 1.3.0 | scripts/spec-register.ts | N/A |
 | sync-md.ts | 1.4.0 | scripts/sync-md.ts | N/A |
 | sync-skill-registries.ts | 1.0.0 | scripts/sync-skill-registries.ts | N/A |
