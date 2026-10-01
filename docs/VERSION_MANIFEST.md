@@ -1,6 +1,7 @@
 # VERSION_MANIFEST.md
 
 **Generated**: 2026-10-01T21:22:08.393Z
+**Generated**: 2026-10-01T21:21:24.057Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -182,7 +183,7 @@
 | test-adopt-project.ts | 1.0.0 | scripts/test-adopt-project.ts | N/A |
 | test-extends-validator.ts | 1.0.1 | scripts/test-extends-validator.ts | fs, path |
 | test-l3-to-variant-promotion.ts | 1.6.0 | scripts/test-l3-to-variant-promotion.ts | bun |
-| test-new-project.ts | 1.9.0 | scripts/test-new-project.ts | bun, js-yaml |
+| test-new-project.ts | 1.10.0 | scripts/test-new-project.ts | bun, js-yaml |
 | test-platform-parity.ts | 0.4.0 | scripts/test-platform-parity.ts | fs, path |
 | test-runner.ts | 1.4.0 | scripts/test-runner.ts | fs, os, path |
 | test-scaffold-delivery-parity.ts | 1.0.0 | scripts/test-scaffold-delivery-parity.ts | N/A |
