@@ -86,6 +86,8 @@ args = ["@nanonets/graft", "mcp"]
 Keep command executable paths relative to the project directory for portable cross-platform runs; Codex resolves them against the project root. Per-project MCP servers (e.g. co-abap's `vsp`) live in the project's own `config.toml` and are never overwritten by template upgrades (ADD_IF_MISSING).
 
 <!-- COMMON-CODEX:START -->
+> **Mandatory**: Read [`AGENTS.md`](AGENTS.md) first and follow its content in every task. It is the SSOT registry for the agent roster, PM Gateway workflow, tier model, skill resolution priority, and universal baseline behaviors; this file carries platform-specific behavior only.
+
 ### 4.5 Skill Resolution Priority
 
 When a user request matches a skill trigger, apply this priority order — **enforced every session, regardless of platform**:
