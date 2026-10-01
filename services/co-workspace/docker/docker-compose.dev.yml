@@ -1,0 +1,22 @@
+# Development overlay: live gateway source reflection — NO image rebuild needed.
+# Layer: COMPOSE_FILE=docker-compose.yml:docker-compose.dev.yml
+# (design docs/designs/2026-10-02-coworkspace-docker-redeploy-design.md)
+#
+# Binds the checkout's src/ and web/ over the copies baked into the image and runs the
+# server under `bun --watch` (full process restart on change — the gateway holds
+# per-process state such as chat locks and SSE writers, so hot-swapping module state is
+# unsafe). Editing services/co-workspace/src/** or web/** is reflected on the restart
+# that follows each save; the tenant registry survives (it lives on /data), in-memory
+# login sessions do not.
+#
+# STILL requires an image rebuild (./rebuild.sh) when: the Dockerfile, package.json /
+# bun.lock (dependency set), or the base hermes image tag changes. Template edits need
+# nothing at all (live /workspace mount). The docker-broker service (isolation layer) is
+# intentionally NOT overridden here — layering dev mode on isolation rebuilds the broker
+# through ./rebuild.sh like any other image change.
+services:
+  co-workspace:
+    command: ["bun", "--watch", "src/server.ts"]
+    volumes:
+      - ../../../services/co-workspace/src:/app/services/co-workspace/src
+      - ../../../services/co-workspace/web:/app/services/co-workspace/web

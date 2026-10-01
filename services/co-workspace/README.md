@@ -239,6 +239,40 @@ docker compose build && docker compose up -d
   docker-isolated turns run as the unprivileged runtime user (10000) and the team tree is
   chowned to it at provisioning.
 
+### Reflecting development changes into Docker
+
+What a code change needs before the running stack serves it:
+
+| You changed | How it reaches Docker |
+| --- | --- |
+| `templates/**` (L1/L2 team templates) | Nothing — `/workspace` is a live bind mount; the next tenant provisioning scaffolds from the edited templates |
+| `services/co-workspace/src/**` or `web/**` | `./rebuild.sh` — rebuilds the image and recreates the containers; or layer `docker-compose.dev.yml` (below) to reflect edits live |
+| The Hermes checkout (`~/.hermes/hermes-agent`) | `./rebuild.sh --runtime` — also rebuilds the per-turn runtime image |
+| `Dockerfile`, `package.json`/`bun.lock`, compose files | `./rebuild.sh` |
+
+One command for the common case (run from `services/co-workspace/docker/`; it preserves
+your `COMPOSE_FILE` layering from `.env`):
+
+```sh
+./rebuild.sh            # gateway image + container recreation
+./rebuild.sh --runtime  # + turn runtime image from the Hermes checkout
+```
+
+For an inner-loop development cycle (edit → save → the container restarts with the new
+source, no image build), layer the dev overlay:
+
+```sh
+# in docker/.env
+COMPOSE_FILE=docker-compose.yml:docker-compose.dev.yml
+docker compose up -d
+```
+
+`docker-compose.dev.yml` bind-mounts `src/` and `web/` over the baked copies and runs
+`bun --watch src/server.ts`: the gateway process restarts on each source save (the
+tenant registry on `/data` survives; in-memory login sessions do not). Dependency
+changes (`package.json`/`bun.lock`) still need `./rebuild.sh` — the dev overlay mounts
+source only, not `node_modules`.
+
 ## Security model
 
 - **Identity** — per-user accounts (login ID + password, optional Google SSO) with
