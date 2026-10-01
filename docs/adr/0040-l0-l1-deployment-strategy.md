@@ -1,5 +1,6 @@
 ---
 status: "Accepted"
+date: 2026-06-09
 ---
 
 # ADR-0040: L0→L1 Deployment Strategy

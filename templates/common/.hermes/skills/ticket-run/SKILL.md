@@ -21,7 +21,7 @@ metadata:
 
 ## Context
 
-Executes exactly one `kind: service` ticket per invocation (no internal polling loop — repeated processing is the caller's responsibility). Never touches `kind: manual` tickets. Design: `docs/superpowers/specs/2026-07-16-service-ticket-kanban-design.md`.
+Executes exactly one `kind: service` ticket per invocation (no internal polling loop — repeated processing is the caller's responsibility). Never touches `kind: manual` tickets. Service tickets (`tickets/*.yaml`) are gitignored by design — their `history[]` field is the audit trail; governance tickets (`tickets/governance/`) are tracked in git. Design: `docs/superpowers/specs/2026-07-16-service-ticket-kanban-design.md`.
 
 ## Execution Steps
 

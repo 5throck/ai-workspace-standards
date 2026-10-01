@@ -5,12 +5,25 @@ title: >-
   ticket-run skill: document the service-ticket gitignore rule in
   ticket-run/SKILL.md and AGENTS.md section 3.7.5
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-01T02:12:50.392Z'
 history:
   - at: '2026-10-01T02:12:50.392Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-01T02:50:03.810Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-01T02:50:03.823Z'
+    from: waiting
+    to: review
+  - at: '2026-10-01T02:55:12.870Z'
+    from: review
+    to: done
+result: >-
+  Landed in the review-fix batch PR (see #1278 successor): gitignore rule
+  documented in ticket-run/SKILL.md + AGENTS.md 3.7.5; ADR date frontmatter
+  fixed for 0033/0035/0037/0038/0040 with git-history provenance;
+  verify-adr-governance fully green.
 error: null

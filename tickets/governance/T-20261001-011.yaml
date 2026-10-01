@@ -5,12 +5,33 @@ title: >-
   validator-hardening: add a weekly hygiene sweep for specs approved >14 days
   without progression (implement/supersede/re-confirm)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-01T02:12:50.379Z'
 history:
   - at: '2026-10-01T02:12:50.379Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-01T02:55:23.458Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-01T02:55:23.473Z'
+    from: waiting
+    to: running
+  - at: '2026-10-01T02:55:23.486Z'
+    from: running
+    to: review
+  - at: '2026-10-01T02:55:23.498Z'
+    from: review
+    to: done
+result: >-
+  spec-hygiene-sweep.ts v1.0.0 landed (approved>14d detection, exit-1 gate,
+  --json; 9 unit tests). Adjudicated by evidence:
+  2026-09-15-upgrade-project-drift-fixes -> implemented (managed-block-merge
+  hyphen keys, manifest delivery, registry reconciliation);
+  2026-06-02-governance-docs-architecture-design LEFT approved (121d, P2
+  fragment assembly genuinely unimplemented, ADR-0022 references it) -
+  review_note records evidence; PM to decide implement-vs-supersede separately.
+  7 within-window entries got review_notes. id/created anomaly fixed
+  (created=2026-06-03 per git 50a694ad).
 error: null

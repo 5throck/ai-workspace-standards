@@ -1,5 +1,6 @@
 ---
 status: "Accepted"
+date: 2026-06-07
 ---
 
 # ADR-0038: Deprecate Auto-Mode from PM Agents

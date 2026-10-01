@@ -1,5 +1,6 @@
 ---
 status: "Accepted"
+date: 2026-06-06
 ---
 
 # ADR-0033: Variant-Specific Skills & Scripts Blueprint
