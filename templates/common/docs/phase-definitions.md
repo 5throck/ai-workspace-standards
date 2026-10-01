@@ -1,6 +1,8 @@
 # Phase Definitions
 
-This document defines the standard workflow phases used across all variants. Each variant customizes the specialist agents for phases 1–5 while the overall structure remains consistent.
+This document defines the **default** workflow phases. A variant follows this structure unless its own `docs/phase-definitions.md` says otherwise. Variants always choose their specialist agents; some also rename, add, or renumber phases (for example half-steps such as 1.5 or 3.5, or a publication gate in place of finalization). When a variant document and this document disagree, the variant document wins.
+
+`docs/workspace-schema.json` carries the workspace-level canonical phase list (0, 1-2, 3, 4, 5, 6). It is a reference for workspace tooling, not a per-variant naming rule: variants keep the numbers they declare here.
 
 ---
 
@@ -67,8 +69,9 @@ Some variants combine phases 1 and 2 when research and architecture planning are
 - **Output**: governance records updated, drift report or "no drift" confirmation
 
 ### Phase 6 — Quality Assurance & Finalization
-**PM owns**: finalizes the session.
-- PM runs the workspace-level audit (`project-review` where available)
+**PM owns**: finalizes the session. Projects have no separate auditor agent — the QA gate is a contract that PM runs with the project's scripts and the variant's own domain reviewers.
+- PM runs `bun scripts/audit.ts` (and the `project-review` skill where available)
+- The variant names its domain reviewers for this gate (for example a fact-checker or QA reviewer); PM collects their sign-off
 - Maximum 2 fix iterations before escalating to user
 - PM runs `/sync` pipeline
 - PR opened with English title and description
@@ -79,7 +82,7 @@ Some variants combine phases 1 and 2 when research and architecture planning are
 
 ## Variant Customization Points
 
-Each variant declares its specialist agents per phase in `AGENTS.md § Phase Summary` and each agent's `agents/<name>.md` frontmatter:
+Each variant declares its specialist agents per phase in its own `docs/phase-definitions.md`, in the `AGENTS.md` §3.5 Phase Determination table, and in each agent's `agents/<name>.md` frontmatter:
 
 ```yaml
 # Example agent frontmatter
@@ -89,7 +92,7 @@ handoff_from: [pm]
 required_skills: [skill-name]
 ```
 
-The PM role and Phase 0/5/6 structure are identical across all variants. Variants differ in phases 1–4.
+By default PM owns Phases 0, 5, and 6 and the approval gate in Phase 2, and variants differ in phases 1–4. Variants that remap these (see their own `docs/phase-definitions.md`) must keep the same PM duties: initiation, every approval gate, and finalization (memlog → `/sync` → PR → hand-off).
 
 ---
 
