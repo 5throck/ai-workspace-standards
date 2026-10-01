@@ -3,14 +3,33 @@ id: U-20261002-001
 kind: manual
 title: Upstream request from co-newbiz
 priority: normal
-status: waiting
+status: done
 attempts: 0
-created_at: 2026-10-01T20:11:46.696Z
+created_at: '2026-10-01T20:11:46.696Z'
 history:
-  - at: 2026-10-01T20:11:46.696Z
+  - at: '2026-10-01T20:11:46.696Z'
     from: null
     to: waiting
-result: null
+  - at: '2026-10-01T21:46:23.339Z'
+    from: waiting
+    to: running
+  - at: '2026-10-01T21:46:23.340Z'
+    from: running
+    to: review
+  - at: '2026-10-01T21:46:23.341Z'
+    from: review
+    to: done
+result: >-
+  Root cause confirmed live: the default unit-tests job installed only the root
+  lockfile while tests import from app/web-next (own bun.lock). Fixed
+  generically in templates/common ci.yml (workspace PR #1303, lands next
+  release): the Install step now also runs bun install --frozen-lockfile in
+  every nested lockfile directory (5 other projects had the same latent
+  breakage). Delivered to co-newbiz (PR #445) - the reported 'Cannot find module
+  next/server' is gone from the post-merge run. Residual python-dependent test
+  failures in the default Bun-only job are a separate, expected limitation;
+  co-newbiz now sets CI_SKIP_DEFAULT_UNIT_TESTS=true and keeps its green
+  project-owned Unit + Script Tests job.
 error: null
 upstream:
   project: co-newbiz
@@ -19,10 +38,25 @@ upstream:
   source: project/co-newbiz
   trust: untrusted
   suspected_layer: L1
-  symptom: 'The opt-in workspace `unit-tests` CI job (ci.yml line ~98, outside the PROJECT-JOB markers) runs only root `bun install --frozen-lockfile` (line ~136) and then `bun run test:unit`. In co-newbiz, unit tests import app/web-next/lib modules that need dependencies installed in app/web-next (for example next/server via lib/envelope.ts), so the job fails with "Cannot find module ''next/server''" in CI while the same suite passes locally and passes in the project "Unit + Script Tests" job, which does run `bun install --frozen-lockfile --cwd app/web-next` (line ~163). Expected: the workspace unit-tests job either installs project workspace dependencies when present, or documents that projects whose unit tests reach a workspace app must use the project-jobs section instead. ADR-0094 introduced this job.'
+  symptom: >-
+    The opt-in workspace `unit-tests` CI job (ci.yml line ~98, outside the
+    PROJECT-JOB markers) runs only root `bun install --frozen-lockfile` (line
+    ~136) and then `bun run test:unit`. In co-newbiz, unit tests import
+    app/web-next/lib modules that need dependencies installed in app/web-next
+    (for example next/server via lib/envelope.ts), so the job fails with "Cannot
+    find module 'next/server'" in CI while the same suite passes locally and
+    passes in the project "Unit + Script Tests" job, which does run `bun install
+    --frozen-lockfile --cwd app/web-next` (line ~163). Expected: the workspace
+    unit-tests job either installs project workspace dependencies when present,
+    or documents that projects whose unit tests reach a workspace app must use
+    the project-jobs section instead. ADR-0094 introduced this job.
   affected_paths:
     - .github/workflows/ci.yml
-  repro: 'On 5throck/co-newbiz main (merge of PR #442, 2026-10-01) and on PR #443: check "Unit Tests" fails with "Cannot find module ''next/server''" from app/web-next/lib/envelope.ts while check "Unit + Script Tests" passes. Locally, bun run test:unit passes after a full install.'
+  repro: >-
+    On 5throck/co-newbiz main (merge of PR #442, 2026-10-01) and on PR #443:
+    check "Unit Tests" fails with "Cannot find module 'next/server'" from
+    app/web-next/lib/envelope.ts while check "Unit + Script Tests" passes.
+    Locally, bun run test:unit passes after a full install.
   triage: ready
   flagged: false
   triage_reasons:
@@ -30,4 +64,19 @@ upstream:
   dedupe_key: 6866ebc7f563e73748d884604e28eb04c80956618a9d48fbc068057810049ba8
   duplicates:
     - project: co-newbiz
-      at: 2026-10-01T20:11:46.696Z
+      at: '2026-10-01T20:11:46.696Z'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1303
+    template_version: unreleased
+    summary: >-
+      Root cause confirmed live: the default unit-tests job installed only the
+      root lockfile while tests import from app/web-next (own bun.lock). Fixed
+      generically in templates/common ci.yml (workspace PR #1303, lands next
+      release): the Install step now also runs bun install --frozen-lockfile in
+      every nested lockfile directory (5 other projects had the same latent
+      breakage). Delivered to co-newbiz (PR #445) - the reported 'Cannot find
+      module next/server' is gone from the post-merge run. Residual
+      python-dependent test failures in the default Bun-only job are a separate,
+      expected limitation; co-newbiz now sets CI_SKIP_DEFAULT_UNIT_TESTS=true
+      and keeps its green project-owned Unit + Script Tests job.
