@@ -58,7 +58,8 @@ test('collector spawned from a subdirectory sees the same repo root and tracked 
         const inner = join(fixtureRoot, 'inner', 'deep');
         const fromRoot = runCollectorFrom(fixtureRoot);
         const fromSub = runCollectorFrom(inner);
-        expect(fromSub.root).toBe(normalize(fromRoot.root));
+        const uni = (p2: string) => p2.replaceAll('\\', '/');
+        expect(uni(fromSub.root)).toBe(uni(normalize(fromRoot.root)));
         expect(normalize(fromSub.root)).toBe(normalize(fixtureRoot));
         expect(fromSub.tracked).toEqual(fromRoot.tracked);
         expect(fromRoot.tracked).toContain('scripts/placeholder.txt');
