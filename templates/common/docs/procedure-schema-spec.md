@@ -2,7 +2,7 @@
 
 Author-facing specification for structured procedure definitions across all
 variant templates. This document is 1:1 with the normative design document
-[`docs/designs/2026-08-29-procedure-schema-design.md`](../../../docs/designs/2026-08-29-procedure-schema-design.md)
+`docs/designs/2026-08-29-procedure-schema-design.md` (workspace-root design document; not present in this standalone repository)
 at the workspace root. Where wording differs, the design document governs.
 
 ---
