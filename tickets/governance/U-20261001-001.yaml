@@ -1,0 +1,44 @@
+schemaVersion: 1
+id: U-20261001-001
+kind: manual
+title: Upstream request from co-newbiz
+priority: normal
+status: backlog
+attempts: 0
+created_at: 2026-10-01T13:17:38.109Z
+history:
+  - at: 2026-10-01T13:17:38.109Z
+    from: null
+    to: backlog
+result: null
+error: null
+upstream:
+  project: co-newbiz
+  variant: co-newbiz
+  template_version: 0.8.3
+  source: project/co-newbiz
+  trust: untrusted
+  suspected_layer: L1
+  symptom: 'Platform instruction files (CLAUDE.md, GEMINI.md, CODEX.md, HERMES.md) do not contain a mandatory directive to read AGENTS.md before any task and to Read the owning governance documents it points to. Observed: an agent built an execution plan table from memory without reading the template, because CLAUDE.md links to AGENTS.md#51-standard-execution-plan-template while the project AGENTS.md has no section 3 or 5.1 (the content lives in docs/governance/agents/execution-plan-templates.md). The plan lacked Row 0, the Spec column and the PM-running-on line. Expected: each platform file states that reading AGENTS.md first is mandatory, and that owning documents it points to must be Read before executing their workflows. Secondary: the section 5.1 anchors in CLAUDE.md, GEMINI.md and CODEX.md are dangling after the ADR-0090 relocation. A project-only edit is overwritten on upgrade, so the fix is needed at template level.'
+  affected_paths:
+    - CLAUDE.md
+    - GEMINI.md
+    - CODEX.md
+    - HERMES.md
+    - AGENTS.md
+  repro: Open the project AGENTS.md and search for the headings 'Standard Execution Plan Template' and a section 3 heading. Neither exists. Follow the AGENTS.md section 5.1 link from CLAUDE.md; it does not resolve.
+  triage: inbox
+  flagged: true
+  triage_reasons:
+    - needs_human_review
+    - identity:self_declared
+    - first_request_from_project
+    - info:in_last_delivery CLAUDE.md=false
+    - info:in_last_delivery GEMINI.md=false
+    - info:in_last_delivery CODEX.md=false
+    - info:in_last_delivery HERMES.md=false
+    - info:in_last_delivery AGENTS.md=true
+  dedupe_key: ca79cbb63400266c4a2f53b6bfb8b203b48a45a2ea53f1cd7277eacf2c8c5727
+  duplicates:
+    - project: co-newbiz
+      at: 2026-10-01T13:17:38.109Z
