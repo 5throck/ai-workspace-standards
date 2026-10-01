@@ -1,0 +1,32 @@
+schemaVersion: 1
+id: T-20261001-016
+kind: manual
+title: >-
+  Add ticket.ts commands to set upstream.triage and upstream.resolution on U-
+  upstream-request tickets (follow-up to PR #1286, design
+  docs/designs/2026-10-01-upstream-request-mcp-design.md §12). Gap:
+  pm-gateway-workflow.md §3.12 and agents/pm.md tell the root PM to promote an
+  inbox ticket to ready and to record the reply-back (upstream.resolution:
+  outcome fixed|rejected|local-only|duplicate, pr_url, template_version,
+  summary), but no ticket.ts command writes these fields, so the PM must
+  hand-edit YAML. Scope: new ticket.ts subcommands (for example 'triage <id>
+  ready|inbox' and 'resolve <id> --outcome ... --summary ...') that validate
+  through ticket-schema.ts (upstream block only on kind: manual, U- ids only, no
+  executable fields), keep requester-controlled fields immutable, refuse to
+  promote a flagged:true ticket without an explicit --confirm-reviewed flag,
+  move the ticket status in step (inbox=backlog, ready=waiting, resolved=done)
+  and append to history; status tool then returns the resolution to the
+  requesting project. Tests in tests/unit/ticket-schema.test.ts and a ticket.ts
+  CLI test; bump ticket.ts version and SCRIPTS.md; document the commands in
+  pm-gateway-workflow.md §3.12. Human-in-the-loop stays: ready only authorizes
+  investigation, the fix ships as a PR the user merges.
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-01T10:06:13.552Z'
+history:
+  - at: '2026-10-01T10:06:13.552Z'
+    from: null
+    to: backlog
+result: null
+error: null
