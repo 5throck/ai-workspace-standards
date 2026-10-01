@@ -80,7 +80,7 @@ Standard directory layout for all projects in this workspace:
 └── .agents/      # Antigravity / Antigravity CLI settings and slash commands
 ```
 
-**Cross-Platform Skill Availability**: `skills/` is the Single Source of Truth (SSOT) for all skill definitions. Every skill MUST be available on all AI platforms (Claude Code, Claude Desktop App, Gemini CLI, Antigravity, Antigravity CLI). Platform distribution directories (`.claude/skills/`, `.gemini/skills/`, `.agents/skills/`) are derived copies — they MUST NOT be the sole location of any skill.
+**Cross-Platform Skill Availability**: `skills/` is the Single Source of Truth (SSOT) for all skill definitions. Every skill MUST be available on all supported surfaces (see Supported Surfaces below: Claude Code, Claude Desktop App, Antigravity, Antigravity CLI, Codex CLI, Codex Desktop App, Hermes Agent, Hermes CLI; Gemini CLI as the legacy Google path). Platform distribution directories (`.claude/skills/`, `.gemini/skills/`, `.agents/skills/`) are derived copies — they MUST NOT be the sole location of any skill.
 
 ---
 
@@ -497,6 +497,30 @@ For full lifecycle procedures:
 - **Agent Lifecycle**: See [AGENTS.md §8 Lifecycle Management](../AGENTS.md)
 - **Skill Lifecycle**: See [AGENTS.md §8 Lifecycle Management](../AGENTS.md)
 - **Script Lifecycle**: See [AGENTS.md §8 Lifecycle Management](../AGENTS.md)
+
+## Supported Surfaces — Mandatory Coverage
+
+This project and its template lineage MUST support all of the following surfaces.
+
+| # | Surface | Family | Instruction file | Machine-global MCP config |
+|---|---------|--------|------------------|---------------------------|
+| 1 | Claude Code | Anthropic | `CLAUDE.md` | `~/.claude.json` |
+| 2 | Claude Desktop App | Anthropic | `CLAUDE.md` (Code tab, bundled CLI) | `~/.claude.json` (Code tab); `claude_desktop_config.json` (chat) |
+| 3 | Antigravity | Google | `GEMINI.md` | `~/.gemini/config/mcp_config.json` |
+| 4 | Antigravity CLI | Google | `GEMINI.md`, `AGENTS.md` | `~/.gemini/config/mcp_config.json` (shared with #3) |
+| 5 | Codex CLI | OpenAI | `CODEX.md`, `AGENTS.md` | `~/.codex/config.toml` |
+| 6 | Codex Desktop App | OpenAI | `CODEX.md`, `AGENTS.md` | `~/.codex/config.toml` (shared with #5) |
+| 7 | Hermes Agent | Nous Research | `HERMES.md`, `AGENTS.md` | `~/.hermes/config.yaml` |
+| 8 | Hermes CLI | Nous Research | `HERMES.md`, `AGENTS.md` | `~/.hermes/config.yaml` (shared with #7) |
+
+Gemini CLI (`.gemini/`) remains supported as the legacy path of the Google family while its settings files ship.
+
+Rules:
+
+1. **Coverage.** Every new or changed rule, instruction text, skill, command, hook, script, or tool registration MUST work on all eight surfaces. If a capability cannot reach a surface, record the gap (surface, reason, fallback, ticket) in the design document or PR. Never omit a surface silently.
+2. **Single source.** Shared behavior lives in one source (`agents/pm.md`, `skills/`, `AGENTS.md`). Platform instruction files point to it and do not copy it.
+3. **Machine-global registrations** (for example MCP servers) are delivered by an idempotent installer that the user runs, with `--dry-run` and `--uninstall`. It covers every config file in the table, skips a client that is not installed, and never creates a config that the client owns.
+4. **Verify against the vendor.** Before an installer or a template writes a client config, confirm the path and the format in the vendor's official documentation, and record the source URL in the design document. Do not infer a format from a local file alone.
 
 ## Platform Hooks & Governance Enforcement
 
