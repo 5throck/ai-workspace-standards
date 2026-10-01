@@ -11,7 +11,8 @@
  *
  * `templates/VERSION` is the Single Source of Truth for the template version
  * recorded in scaffold provenance (`_ORIGIN.md`, `_COMMON_VERSION.md`,
- * `docs/VERSION_MANIFEST.md` stub, and `.claude/template-version.txt`, whose
+ * `docs/VERSION_MANIFEST.md` stub, and `template-version.txt` (project root;
+ * legacy `.claude/template-version.txt` accepted), whose
  * `version=` field upgrade-project's version-sync consumes).
  *
  * T-20260915-011 (M11): create-l3-scaffold.ts previously parsed the version

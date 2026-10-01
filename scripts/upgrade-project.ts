@@ -510,7 +510,7 @@
 
 import {
   existsSync, mkdirSync, copyFileSync, cpSync, readFileSync, writeFileSync,
-  readdirSync, statSync, rmSync, realpathSync, renameSync,
+  readdirSync, statSync, rmSync, realpathSync, renameSync, unlinkSync,
 } from 'node:fs';
 import { resolve, join, dirname, basename, isAbsolute, relative } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -661,7 +661,12 @@ if (gitCheck.status !== 0) {
 const versionFile = join(workspaceRoot, 'templates', 'VERSION');
 const currentVersion = existsSync(versionFile) ? readFileSync(versionFile, 'utf8').trim() : 'unknown';
 
-const templateVersionFile = join(projectDir, '.claude', 'template-version.txt');
+// Platform-independent provenance marker (2026-10-01): canonical at the project root,
+// with the pre-move .claude/template-version.txt still read and migrated on rewrite.
+const canonicalMarker = join(projectDir, 'template-version.txt');
+const legacyMarker = join(projectDir, '.claude', 'template-version.txt');
+const templateVersionFile = existsSync(canonicalMarker) ? canonicalMarker : legacyMarker;
+const legacyMarkerPresent = existsSync(legacyMarker);
 let detectedVersion = 'unknown';
 let detectedVariant = '';
 // Country provenance (ADR-0057/0058): scaffold-time country= line is the primary
@@ -3298,15 +3303,15 @@ if (pruneRemoved) {
 // without it (pre-v1.10.1 behavior) erased the project's country provenance and
 // downgraded KR projects to region-neutral on the next upgrade.
 if (!dryRun) {
-  mkdirSync(join(projectDir, '.claude'), { recursive: true });
   writeFileSync(
-    templateVersionFile,
+    canonicalMarker,
     `variant=${variant}\nversion=${currentVersion}\nplatform=${platform}\ncountry=${detectedCountry}\nupgraded=${new Date().toISOString()}\n`,
     'utf8'
   );
-  console.log(`Written: .claude/template-version.txt (version=${currentVersion}, country=${detectedCountry})`);
+  if (legacyMarkerPresent) unlinkSync(legacyMarker); // one-time legacy → canonical migration
+  console.log(`Written: template-version.txt (version=${currentVersion}, country=${detectedCountry}${legacyMarkerPresent ? ', migrated from .claude/' : ''})`);
 } else {
-  console.log(`[DRY RUN] Would write: .claude/template-version.txt (version=${currentVersion}, country=${detectedCountry})`);
+  console.log(`[DRY RUN] Would write: template-version.txt (version=${currentVersion}, country=${detectedCountry}${legacyMarkerPresent ? ', migrated from .claude/' : ''})`);
 }
 console.log('');
 
@@ -3350,9 +3355,7 @@ console.log('');
 // them into the platform mirrors; sweep every base so existing projects self-heal.
 // Stock copies (byte-equal to the L1 mirror or a variant overlay) are removed;
 // diverged + locally-modified copies surface a CONFLICT and are kept, mirroring the
-// country-prune safety model. `.claude/skills/graft` is exempt (C-CM-05 claude-only
-// exception, hand-maintained outside the SSOT and delivered by TEMPLATE TREE SYNC).
-// MUST run before the post-upgrade sync-skills.ts invoke so mirrors are regenerated
+// country-prune safety model. MUST run before the post-upgrade sync-skills.ts invoke so mirrors are regenerated
 // from the already-swept skill set.
 console.log('--- WORKSPACE-ONLY SKILL SWEEP (l2_propagate: false) ---');
 {
@@ -3364,7 +3367,6 @@ console.log('--- WORKSPACE-ONLY SKILL SWEEP (l2_propagate: false) ---');
     const sweepDir = join(projectDir, sweepBase);
     if (!existsSync(sweepDir)) continue;
     for (const skillName of readdirSync(sweepDir)) {
-      if (sweepBase === '.claude/skills' && skillName === 'graft') continue;
       const sweepSkillMd = join(sweepDir, skillName, 'SKILL.md');
       if (!existsSync(sweepSkillMd)) continue;
       let flagged = false;

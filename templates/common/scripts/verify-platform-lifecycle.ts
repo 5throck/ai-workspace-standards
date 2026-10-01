@@ -34,12 +34,10 @@ const IS_TIER3 = existsSync(join(ROOT, 'variant.json')) || !existsSync(join(ROOT
 const LEVEL = IS_TIER3 ? 'Tier 3' : 'Tier 1 SSOT';
 
 const issues: Array<{ level: 'error' | 'warning'; check: string; message: string; fix?: string }> = [];
-const VERSION_EXEMPT_PLATFORM_SKILLS = new Set([
-  // ADR-0076 and the 2026-09-12 graft wiring refresh define this as a
-  // Claude-only, tool-owned skill. graft rewrites the frontmatter on version
-  // bumps, so workspace lifecycle fields would create recurring churn.
-  '.claude/skills/graft',
-]);
+// Empty since the ADR-0076 amendment moved graft into the skills/ SSOT (it was the only
+// entry: a Claude-only, tool-owned skill). The set stays as the mechanism — a future
+// tool-owned mirror skill joins it as `<platform>/skills/<name>`.
+const VERSION_EXEMPT_PLATFORM_SKILLS = new Set<string>();
 
 // (Historical) net-new mirror legs soaked in WARN (ADR-0055) until promotion.
 // .hermes/skills joined in ADR-0088 W2 (same onboarding path as .agents/.codex)

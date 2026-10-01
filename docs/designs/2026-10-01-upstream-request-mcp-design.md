@@ -1,7 +1,7 @@
 # Upstream Request MCP Server Design — Project-to-Workspace Root-Cause Reporting
 
 - **Date**: 2026-10-01
-- **Status**: Approved (decisions resolved 2026-10-01; see Appendix A — Decision record). Amended 2026-10-01: the installer covers every supported surface (Appendix B, ADR-0097).
+- **Status**: Approved (decisions resolved 2026-10-01; see Appendix A — Decision record). Amended 2026-10-01: the installer covers every supported surface (Appendix B, ADR-0097). Amended 2026-10-01: the identity marker is platform-independent — canonical at the project root (`template-version.txt`), with `.claude/template-version.txt` kept as a legacy fallback (§6, Appendix C).
 - **Spec ID**: 2026-10-01-upstream-request-mcp-design
 - **Related**: ADR-0097 (supported-surface registry and multi-surface registration), [2026-09-25-mcp-governance-server-design.md](2026-09-25-mcp-governance-server-design.md) (stdio zero-dep pattern, D5 enforcement honesty), [2026-08-16-governance-backlog-design.md](2026-08-16-governance-backlog-design.md) (`kind: manual` tickets in git-tracked `tickets/governance/`), ADR-0031 (Fork Model), ADR-0074 (Universal Design Gate), AGENTS.md §3.1 (PM Gateway)
 - **Scope**: Design of `scripts/mcp-upstream-server.ts` (new stdio MCP server, name `ai-workspace-upstream`), `scripts/install-upstream-mcp.ts` (user-level registration), ticket schema additions in `scripts/helpers/ticket-schema.ts`, PM triage rules. No implementation in this document.
@@ -126,7 +126,7 @@ Response (MCP text content, JSON):
 
 | Code | Message | Cause |
 |---|---|---|
-| `-32602` | `unregistered working directory: requester must be a direct child of Projects/ matching ^co-[a-z0-9-]{1,40}$ with .claude/template-version.txt` | C1 fails (§6). The message states the rule, including that only `co-*` projects may file in v1. |
+| `-32602` | `unregistered working directory: requester must be a direct child of Projects/ matching ^co-[a-z0-9-]{1,40}$ with template-version.txt at the project root (legacy .claude/template-version.txt accepted)` | C1 fails (§6). The message states the rule, including that only `co-*` projects may file in v1. |
 | `-32602` | `invalid params: <field>` | C2 fails (unknown key, length cap, path pattern, 16 KB total cap) |
 | `-32000` | `rate_limited: per-project hard cap reached (<N>/day)` | C4 hard cap (`UPSTREAM_HARD_CAP`, default 30; merges count) |
 
@@ -179,7 +179,7 @@ export type UpstreamTriage = 'inbox' | 'ready';
 
 export interface UpstreamBlock {
   project: string;            // e.g. "co-work" — server-derived
-  variant: string | null;     // from project's .claude/template-version.txt
+  variant: string | null;     // from project's template-version.txt (root; legacy .claude/ accepted)
   template_version: string | null; // ditto, at intake time
   source: string;             // "project/<name>" — server-set
   trust: 'untrusted';         // constant
@@ -223,7 +223,7 @@ Rules added to `validateTicket`:
 
 **Finding: there is no project registry file.** `Projects/` is gitignored at the root (`.gitignore` line 10, `/*/`), and every `Projects/<name>` is an independent git repo. The de facto registration markers written by `new-project.ts` / `adopt-project.ts` / `upgrade-project.ts` are:
 
-- `Projects/<name>/.claude/template-version.txt` (`variant=…`, `version=…`, `upgraded=…`)
+- `Projects/<name>/template-version.txt` (`variant=…`, `version=…`, `upgraded=…`) — canonical since the 2026-10-01 platform-independence amendment (Appendix C). Pre-move projects carry it at `.claude/template-version.txt`; both are accepted, root first.
 - `Projects/<name>/variant.json`
 
 Algorithm (in `resolveProject(cwd)`):
@@ -232,7 +232,7 @@ Algorithm (in `resolveProject(cwd)`):
 2. `projectsDir = realpathSync(join(WORKSPACE_ROOT, 'Projects'))`. Walk up from `real` until the parent equals `projectsDir`; that directory is `root`. If the walk leaves the tree without meeting `projectsDir`, reject. **Git is never consulted for the project root:** `git rev-parse --show-toplevel` honors the repo's own `core.worktree`, which the requesting agent controls, so a project could set it to another project's path and file or read as that project (security review finding 1, 2026-10-01).
 3. Require `root/.git` to be a real directory (`lstat`; a `.git` file or symlink means worktree or submodule and is rejected). Any `.git` strictly below `root` on the path to `real` (inclusive of `real`) means a nested repo and is rejected. A plain subdirectory of the project is accepted.
 4. `name = basename(root)`, matching the single named constant `REQUESTER_NAME_RE = /^co-[a-z0-9-]{1,40}$/`. Only `co-*` projects may file in v1; `gw-*` is excluded (Appendix A, D3). Enabling another prefix later is a one-line change to this constant only.
-5. Require `root/.claude/template-version.txt` to exist and parse with a `variant=` line. Require `name` to be listed in the enumerated registry (step 6).
+5. Require a provenance marker to exist and parse with a `variant=` line: `root/template-version.txt` (canonical, platform-independent) or `root/.claude/template-version.txt` (legacy fallback for pre-move projects), checked in that fixed order. Require `name` to be listed in the enumerated registry (step 6).
 6. Registry = the set of `Projects/*` directories that pass steps 4 and 5, enumerated at server start and refreshed at most once per minute. This keeps the source of truth on disk and needs no new file. **Decided (v1): directory rule only.** An optional machine-local explicit allowlist is deferred to a later phase (Appendix A, D1).
 7. Anything else is rejected with `-32602` "unregistered working directory" plus the rule text (§4.1 Tool errors). It is audit-logged with the cwd hashed rather than stored raw, to avoid logging arbitrary user paths.
 
@@ -246,7 +246,7 @@ The workspace root itself is not a project, so a root PM session calling `create
 
 An `affected_paths` entry counts as template-managed (L1/L2) if any of the following is true, checked in order:
 
-1. **L2**: `templates/<variant>/<path>` exists, where `<variant>` comes from the project's `.claude/template-version.txt`.
+1. **L2**: `templates/<variant>/<path>` exists, where `<variant>` comes from the project's provenance marker (`template-version.txt` at the project root; legacy `.claude/template-version.txt` accepted).
 2. **L1**: `templates/common/<path>` exists.
 3. **L0→L1 propagation**: `<path>` falls under a domain's `target` in `scripts/propagation-map.json` (v1.11.0; domains include `scripts`, `scripts-helpers`, `scripts-hooks`, `scripts-lib`, `claude-skills`, `gemini-skills`, `claude-commands`, `gemini-commands`, `codex-skills`, `hermes-skills`, `docs`, `governance-agents`, `constitution-context`, `agents-governance-docs`, …), with the domain's `include_pattern` applied. The domain `source` is then recorded as the L0 origin so PM knows the root file to edit.
 
@@ -450,3 +450,25 @@ Notes and gaps:
 - **Behavior.** Default `--target all` skips clients that are not installed; an explicit `--target` for an absent client exits 1. Any conflict or failure exits 1. `UPSTREAM_INSTALL_HOME` is a test seam that redirects every target (and `CODEX_HOME`) to a temporary home.
 - **Not covered by the installer:** project-level files (`.agents/mcp_config.json`, `.gemini/settings.json`, `.codex/config.toml`, `.mcp.json`). The server is machine-global by design (G2).
 
+
+## Appendix C — Platform-independent identity marker (2026-10-01)
+
+Decided by the user after the multi-surface registration landed (Appendix B): tying the
+identity marker to `.claude/` names a specific surface, which contradicts the ADR-0097
+coverage rule (every surface works). The marker moves to the project root.
+
+- **Canonical location**: `Projects/<name>/template-version.txt` (project root). Writers:
+  `new-project.ts` §5.6 (drops its `.claude/` mkdir — the platform overlay ships that
+  directory only when a surface needs it, and `upgrade-project.ts` creates it itself for
+  `last-upgrade-delivery.json`), `create-l3-scaffold.ts` §6.6, and `upgrade-project.ts`'s
+  post-upgrade rewrite — which is also the mint path for `adopt-project.ts` and
+  `migrate-project.ts`, both thin orchestrators over the engine.
+- **Legacy fallback**: every reader accepts the pre-move `.claude/template-version.txt`
+  (root checked first, fixed order, first hit wins): `mcp-upstream-server.ts`
+  (`resolveProject`), `upgrade-project.ts` (read + detection), `adopt-project.ts` (state
+  detection + country rewrite), `skill-lifecycle-audit.ts`, `sync-skills.ts`.
+- **Migration**: no bulk rewrite. A pre-move project keeps filing through the fallback;
+  its next `upgrade-project` run rewrites the marker to the root and deletes the legacy
+  copy in the same pass (one-time migration, logged in the write line).
+- **Version**: server bumps to 1.3.0; SCRIPTS.md row updated. `last-upgrade-delivery.json`
+  stays at `.claude/` — it is upgrade bookkeeping, not identity, and is out of scope here.

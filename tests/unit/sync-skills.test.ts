@@ -4,7 +4,10 @@
  * regression guard), atomic copy semantics and dynamic shortcut back-sync
  * (T-20260912-017).
  *
- * @version 1.2.0
+ * @version 1.3.0
+ *
+ * v1.3.0 (2026-10-01, ADR-0076 amendment): graft joins the skills/ SSOT — regression
+ *         block pinning all-five-platform mirroring and survival of the Phase 1c sweep.
  *
  * v1.2.0 (2026-09-25, ADR-0088 W1): .hermes/skills joins freshDirs(), the Phase 2
  *         back-sync reach assertion, and a dedicated hermes describe block (mirror
@@ -300,5 +303,48 @@ describe('codex platform target (ADR-0077 W1)', () => {
         const mirrored = path.join(scratchRoot, '.codex', 'prompts', 'sync.md');
         expect(fs.existsSync(mirrored)).toBe(true);
         expect(fs.readFileSync(mirrored, 'utf-8')).toContain('sync workflow');
+    });
+});
+
+describe('graft skill in the SSOT (ADR-0076 amendment)', () => {
+    beforeEach(() => fs.rmSync(scratchRoot, { recursive: true, force: true }));
+    afterEach(() => fs.rmSync(scratchRoot, { recursive: true, force: true }));
+
+    function projectDirsWithGraft() {
+        const dirs = freshDirs();
+        // Project context (Phase 1c active): the marker the ghost sweep gates on.
+        fs.writeFileSync(path.join(scratchRoot, '.claude', 'template-version.txt'), '1.0.0\n', 'utf-8');
+        makeSkill(dirs.ssotSkills, 'graft', '---\nname: graft\nversion: 1.0.0\n---\n# graft\n');
+        return dirs;
+    }
+
+    test('graft mirrors to all five platform skill dirs and survives the ghost sweep', async () => {
+        const dirs = projectDirsWithGraft();
+
+        await syncSkills(dirs);
+        await syncSkills(dirs); // a second run must not remove it (the original bug)
+
+        for (const dir of [dirs.claudeSkills, dirs.geminiSkills, dirs.agentsSkills, dirs.codexSkills, dirs.hermesSkills]) {
+            expect(fs.existsSync(path.join(dir, 'graft', 'SKILL.md'))).toBe(true);
+        }
+    });
+
+    test('a graft-named mirror without an SSOT counterpart is a ghost like any other skill', async () => {
+        const dirs = freshDirs();
+        fs.writeFileSync(path.join(scratchRoot, '.claude', 'template-version.txt'), '1.0.0\n', 'utf-8');
+        makeSkill(dirs.geminiSkills, 'graft', '---\nname: graft\n---\n');
+
+        await syncSkills(dirs);
+
+        expect(fs.existsSync(path.join(dirs.geminiSkills, 'graft'))).toBe(false);
+    });
+
+    test('the SSOT copy overwrites a graft-rewritten .claude copy (mirror, not tool-owned)', async () => {
+        const dirs = projectDirsWithGraft();
+        makeSkill(dirs.claudeSkills, 'graft', '---\nname: graft\n---\n# rewritten by graft init\n');
+
+        await syncSkills(dirs);
+
+        expect(fs.readFileSync(path.join(dirs.claudeSkills, 'graft', 'SKILL.md'), 'utf-8')).toContain('version: 1.0.0');
     });
 });

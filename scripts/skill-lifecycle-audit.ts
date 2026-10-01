@@ -88,10 +88,12 @@ const CONSTITUTION_FILE = join(ROOT, 'CONSTITUTION.md');
 // generic placeholder for skills not yet tied to one specific variant name.
 const CURRENT_VARIANT_NAME = basename(ROOT);
 // In a scaffolded project the skills' variant scope is the VARIANT name recorded
-// in .claude/template-version.txt — not the project directory name (a project
-// named `co-develop-demo` still carries `scope: co-develop` skills).
+// in template-version.txt (project root; legacy .claude/template-version.txt
+// accepted) — not the project directory name (a project named `co-develop-demo`
+// still carries `scope: co-develop` skills).
 const PROJECT_VARIANT_NAME = (() => {
-  const tv = join(ROOT, '.claude', 'template-version.txt');
+  const canonical = join(ROOT, 'template-version.txt');
+  const tv = existsSync(canonical) ? canonical : join(ROOT, '.claude', 'template-version.txt');
   if (!existsSync(tv)) return '';
   const m = readFileSync(tv, 'utf-8').match(/^variant=(\S+)/m);
   return m ? m[1].trim() : '';

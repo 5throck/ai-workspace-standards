@@ -52,7 +52,7 @@ export interface HistoryEntry {
 
 export interface UpstreamBlock {
   project: string;                           // e.g. "co-work" — server-derived
-  variant: string | null;                   // from project's .claude/template-version.txt
+  variant: string | null;                   // from project's template-version.txt (root; legacy .claude/ accepted)
   template_version: string | null;          // at intake time
   source: string;                           // "project/<name>" — server-set
   trust: 'untrusted';                       // constant

@@ -237,6 +237,12 @@
       "version": "1.1.0",
       "overridable": false,
       "description": "End-to-end service design: journeys (ADR-0068 diversity profiles), blueprints, touchpoints, validation"
+    },
+    "graft": {
+      "source": "skills/graft/SKILL.md",
+      "version": "1.0.0",
+      "overridable": false,
+      "description": "Repo context graph: get code context from graft/ before grepping or reading source files (ADR-0076)"
     }
   },
   "common_commands": {
@@ -629,7 +635,7 @@
       "since": "2026-09-25"
     },
     "graft": {
-      "reason": "claude-only tool skill — root .claude/skills/ only, no frontmatter version; the C-CM-05 SINGLE_PLATFORM_EXCEPTIONS byte-identity rule stays the enforcement point",
+      "reason": "transitional — graft moved into the root skills/ SSOT (ADR-0076 amendment); this exclusion is removed and graft is listed in common_skills when templates/common/skills/graft lands (template PR)",
       "since": "2026-09-25"
     },
     "new-project": {

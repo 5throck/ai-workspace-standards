@@ -348,7 +348,7 @@ if (projectName.includes('/') && MANAGED_TOP_LEVEL_DIRS.has(projectName.split('/
 // without --version, templates/VERSION must be readable — a missing or
 // unparseable SSOT aborts here, BEFORE any scaffolding work (tag extraction,
 // readiness gate, copy), so no project can ever record an "unknown"
-// provenance version in docs/<variant>.context.md or .claude/template-version.txt.
+// provenance version in docs/<variant>.context.md or template-version.txt.
 let templateVersion = '';
 try {
   templateVersion = resolveProvenanceVersion(templateVer, workspaceRoot);
@@ -1239,12 +1239,13 @@ if (existsSync(variantContextMd)) {
   }
 }
 
-// ── 5.6. Write .claude/template-version.txt ───────────────────────────────────
-const claudeDir = join(projectDir, '.claude');
-mkdirSync(claudeDir, { recursive: true });
+// ── 5.6. Write template-version.txt (platform-independent provenance marker) ──
+// Canonical since 2026-10-01: the marker lives at the project root, not under a
+// platform dir. Readers (upgrade-project, mcp-upstream-server) keep accepting the
+// legacy .claude/template-version.txt as a fallback, so pre-move projects work.
 const countryLine = selectedCountry ? `country=${selectedCountry}\n` : `country=none\n`;
 writeFileSync(
-  join(claudeDir, 'template-version.txt'),
+  join(projectDir, 'template-version.txt'),
   `variant=${variant}\nversion=${templateVersion}\nplatform=${platform}\n${countryLine}created=${new Date().toISOString()}\n`
 );
 

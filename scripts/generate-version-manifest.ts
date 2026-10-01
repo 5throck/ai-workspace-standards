@@ -338,12 +338,9 @@ export function trackedFilterForRoot(tracked: Set<string> | null, root: string):
 }
 
 const COMMAND_SKILL_EXEMPT = new Set(['changelog', 'meeting', 'memlog', 'new-task', 'commit-push-pr']);
-const SKILL_METADATA_EXEMPT = new Set([
-    // ADR-0076 / 2026-09-12 graft wiring refresh: tool-owned Claude-only skill
-    // with canonical graft frontmatter; workspace lifecycle fields are not
-    // reattached because graft rewrites this file on version bumps.
-    'graft',
-]);
+// Empty since the ADR-0076 amendment moved graft (its only entry) into the skills/ SSOT with
+// full workspace lifecycle frontmatter. Kept as the mechanism for a future tool-owned skill.
+const SKILL_METADATA_EXEMPT = new Set<string>();
 
 function hasGeminiParitySkip(content: string): boolean {
     return /^gemini-parity:\s*skip/m.test(content);

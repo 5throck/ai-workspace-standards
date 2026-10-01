@@ -80,6 +80,7 @@
 | `gmp-change-control` | variant:co-safety | — | — | — | — | — |
 | `gmp-deviation-capa` | variant:co-safety | — | — | — | — | — |
 | `gmp-qrm` | variant:co-safety | — | — | — | — | — |
+| `graft` | L0 | — | — | — | — | — |
 | `halal-certification-workflow` | variant:co-export | halal-certification-specialist, halal-certification-specialist | phase1, phase2 | export-control-screening (follows), hs-classification-workflow (composes_with), market-entry-strategy (composes_with) | — | — |
 | `handbook` | common | handbook-reviewer, handbook-writer | — | — | — | — |
 | `handbook-sync-audit` | common | — | — | — | — | — |
@@ -309,7 +310,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `adr:0073` | adr | — | upgrade-project | — |
 | `adr:0074` | adr | — | upgrade-project | — |
 | `adr:0075` | adr | — | gmp-change-control, gmp-deviation-capa, gmp-qrm, psm-loto, psm-moc | — |
-| `adr:0076` | adr | — | — | — |
+| `adr:0076` | adr | — | graft | — |
 | `adr:0077` | adr | — | — | — |
 | `adr:0078` | adr | — | — | — |
 | `adr:0079` | adr | — | — | — |
@@ -330,6 +331,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `adr:0094` | adr | — | — | — |
 | `adr:0095` | adr | — | — | — |
 | `adr:0096` | adr | — | project-review | — |
+| `adr:0097` | adr | — | — | — |
 | `dec:DEC-20260825-01` | decision | — | — | — |
 | `dec:DEC-20260825-02` | decision | `sync` | — | — |
 | `dec:DEC-20260829-01` | decision | `decision-record` | — | — |

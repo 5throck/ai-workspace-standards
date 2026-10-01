@@ -25,7 +25,7 @@ Requirement (user, 2026-09-12): graft must work on **Codex, Claude Code, Claude 
 2. **`bunx @nanonets/graft mcp` is the one committed launcher** (D2). Machine-global configs may use the native binary. Root `npx` launchers are converted in the same change.
 3. **The template (L1) is the distribution point** (D3): the full 8-surface graft config lands in `templates/common`; both scaffold flows (`create-l3-scaffold.ts`, `new-project.ts`) deliver it by construction, plus a non-fatal first `graft build`.
 4. **The fleet is served by the upgrade engine, not by new passes** (D4, extending ADR-0073's deliver-by-default engine): `.mcp.json`/`opencode.json` join `JSON_MERGE_FILES` (project-owned MCP servers survive the union); `.claude/skills/graft/**` is special-cased to the TEMPLATE TREE SYNC pass before the platform-mirror rule (the skill is hand-maintained outside the SSOT, so `sync-skills.ts` can never deliver it — the verified fleet-gap root cause); `.codex/**` is `ADD_IF_MISSING` (co-abap/co-safety own their config); doc blocks and `.gitignore` ride the existing MERGE pass via `WORKSPACE-MANAGED` markers.
-5. **The graft skill stays Claude-only and hand-maintained** (D6) — two byte-identical copies (root + `templates/common`), outside the SSOT `skills/`, preserving the C-CM-05 single-platform exception; a validate-templates anti-drift check pins the copies. Other platforms consume graft through MCP + instruction blocks, not skill files.
+5. ~~**The graft skill stays Claude-only and hand-maintained** (D6) — two byte-identical copies (root + `templates/common`), outside the SSOT `skills/`, preserving the C-CM-05 single-platform exception; a validate-templates anti-drift check pins the copies. Other platforms consume graft through MCP + instruction blocks, not skill files.~~ **Superseded 2026-10-01 — see Amendment 1 below.**
 6. **Freshness stays manual** (D8, user decision 2026-09-12): graft tools self-refresh before answering; no CI or pre-push `graft check` gate.
 
 ## Consequences
@@ -39,3 +39,19 @@ Requirement (user, 2026-09-12): graft must work on **Codex, Claude Code, Claude 
 - Design: `docs/designs/2026-09-12-graft-multiplatform-rollout-design.md` (D1–D8, verification §6)
 - ADR-0073 (policy-driven upgrade coverage — the engine this ADR extends), ADR-0021 (platform settings parity — `.gemini/settings.json` shared by Gemini CLI and Antigravity), ADR-0031 (L1/L2 fork model)
 - C-CM-05 (`scripts/validate-templates.ts`) — graft claude-only exception + new anti-drift check
+
+## Amendment 1 (2026-10-01) — graft skill moves into the skills/ SSOT, all five platforms
+
+**Trigger.** `sync-skills.ts` Phase 1c (ghost-mirror sweep, 1.10.0) deletes any platform skill directory with no `skills/` SSOT counterpart in project contexts. Because D6 kept graft outside the SSOT, every project sync removed `.claude/skills/graft/` — an incident across the whole fleet. The first fix (exempting `graft` from the sweep) kept the Claude-only design but left the other four platforms without the skill.
+
+**Decision (supersedes D6 / Decision item 5).** The graft skill is an ordinary workspace skill:
+
+1. `skills/graft/SKILL.md` is the SSOT (full lifecycle frontmatter, `l2_propagate: true`). `sync-skills.ts` mirrors it to `.claude`, `.gemini`, `.agents`, `.codex`, `.hermes` like any skill, and the template (L1) carries the same SSOT plus mirrors.
+2. Every graft-only exception is removed: the `.claude/skills/graft/**` → TEMPLATE TREE SYNC rule (`upgrade-policy.ts`), the WORKSPACE-ONLY SKILL SWEEP skip (`upgrade-project.ts`), the C-CM-05 single-platform exception and its byte-identity anti-drift check (`validate-templates.ts`), and the version/metadata exemptions (`verify-platform-lifecycle.ts`, `generate-version-manifest.ts`). The Phase 1c sweep stays generic.
+3. Fleet delivery rides the standard engine: `skills/**` via the normal rule, platform mirrors via the post-upgrade `sync-skills.ts` run.
+
+**Maintenance contract.** `graft init`/upgrade rewrites only the `.claude/skills/graft/SKILL.md` copy. After upgrading graft, copy the new body into `skills/graft/SKILL.md` (keep the workspace frontmatter) and run `bun scripts/sync-skills.ts`. Until that is done, the next sync overwrites the graft-rewritten `.claude` copy from the SSOT (mirror semantics — accepted).
+
+**Consequences.** Positive: the skill reaches all five platforms; the ghost-sweep incident class and ~6 special cases disappear. Cost: graft's tool-owned rewrite and the SSOT can diverge until the manual refresh above; the rejected-alternative from the rollout design (non-goal 1) is accepted with that cost.
+
+**Rollout.** Two sequential PRs per the Workspace & Template Boundary Policy: (1) root — SSOT, script exemption removals, ADR/design; (2) `templates/common` — SSOT + mirrors, matching script copies, `common-contract.json` (drop the transitional `graft` exclusion, list graft in `common_skills`), template release.

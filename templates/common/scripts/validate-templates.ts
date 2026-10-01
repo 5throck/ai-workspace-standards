@@ -3174,9 +3174,8 @@ function checkCommonContract(): void {
   //   mirrored  — a bulk-propagated copy of a workspace skills/<name>/ skill
   //   country   — country-scoped (workspace-schema.json country_scoped_assets.skills)
   //   variant   — variant-scoped (workspace-schema.json variant_scoped_skills)
-  //   claude-only tool skills with no Gemini distribution (graft — the graft/
-  //     index is a Claude Code CLI integration; verified against the exclusion
-  //     allowlist so a silent second exception cannot appear unnoticed)
+  // (graft's former claude-only exception ended with its move into the skills/ SSOT,
+  // ADR-0076 amendment — it is now an ordinary mirrored skill.)
   const platformSkills = contract.common_platform_skills as Record<string, unknown> | undefined;
   if (platformSkills) {
     const schemaPath = join(ROOT, 'docs', 'workspace-schema.json');
@@ -3192,13 +3191,6 @@ function checkCommonContract(): void {
         variantScoped = new Set(Object.values(wsSchema.variant_scoped_skills ?? {}).flat());
       } catch { /* workspace-schema checks report their own drift */ }
     }
-    // Explicit allowlist: platform skills that are intentionally unlisted. Every
-    // entry must carry its reason — the check fails if an allowlisted name
-    // disappears, so the list cannot rot.
-    const SINGLE_PLATFORM_EXCEPTIONS: Record<string, string> = {
-      graft: 'claude-only tool skill — the graft/ repo index is a Claude Code CLI integration with no Gemini distribution',
-    };
-
     const skillDir = join(TEMPLATES_DIR, 'common', '.claude', 'skills');
     if (existsSync(skillDir)) {
       let unlistedErrors = 0;
@@ -3210,27 +3202,8 @@ function checkCommonContract(): void {
         if (existsSync(join(ROOT, 'skills', name, 'SKILL.md'))) continue; // mirrored workspace skill
         if (countryScoped.has(name)) continue; // country-scoped — contract description excludes
         if (variantScoped.has(name)) continue; // variant-scoped — contract description excludes
-        if (SINGLE_PLATFORM_EXCEPTIONS[name]) {
-          // Anti-drift (ADR-0076 D6): the skill is hand-maintained as exactly two
-          // byte-identical copies (root + template) — divergence means an edit
-          // landed on one side only, and the next upgrade would ship the stale one.
-          const rootCopy = join(ROOT, '.claude', 'skills', name, 'SKILL.md');
-          const templateCopy = join(skillDir, name, 'SKILL.md');
-          if (existsSync(rootCopy) && readFileSync(rootCopy, 'utf-8') !== readFileSync(templateCopy, 'utf-8')) {
-            fail('common', 'C-CM-05', `hand-maintained skill '${name}' copies diverge — root .claude/skills/${name}/SKILL.md and templates/common/.claude/skills/${name}/SKILL.md must stay byte-identical`, `Overwrite the stale copy with the fresher one (root and template must match)`);
-            unlistedErrors++;
-          } else {
-            pass(`C-CM-05: platform skill '${name}' unlisted by exception — ${SINGLE_PLATFORM_EXCEPTIONS[name]}`);
-          }
-          continue;
-        }
-        fail('common', 'C-CM-05', `templates/common/.claude/skills/${name}/ exists but is not declared in common-contract.json common_platform_skills and matches no documented exclusion class`, `Add "${name}" to common_platform_skills, or register it in workspace-schema.json country_scoped_assets/variant_scoped_skills, or document an exclusion in the C-CM-05 exception list`);
+        fail('common', 'C-CM-05', `templates/common/.claude/skills/${name}/ exists but is not declared in common-contract.json common_platform_skills and matches no documented exclusion class`, `Add "${name}" to common_platform_skills, or register it in workspace-schema.json country_scoped_assets/variant_scoped_skills`);
         unlistedErrors++;
-      }
-      for (const name of Object.keys(SINGLE_PLATFORM_EXCEPTIONS)) {
-        if (!existsSync(join(skillDir, name, 'SKILL.md'))) {
-          fail('common', 'C-CM-05', `C-CM-05 exception list names '${name}' but templates/common/.claude/skills/${name}/ no longer exists — remove the stale exception`, `Delete the '${name}' entry from the C-CM-05 SINGLE_PLATFORM_EXCEPTIONS allowlist`);
-        }
       }
       if (unlistedErrors === 0) {
         pass('C-CM-05: all templates/common platform skills declared or explicitly excluded');
