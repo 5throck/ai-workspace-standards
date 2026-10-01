@@ -1,5 +1,7 @@
 #!/usr/bin/env bun
-// @version 1.4.1
+// @version 1.5.0
+// v1.5.0 (2026-10-01): widen ID pattern to accept U-YYYYMMDD-NNN upstream
+//           request tickets (design 2026-10-01-upstream-request-mcp-design.md).
 // @l2-propagate: false
 // ticket-store.ts — Atomic file I/O for the Phase A ticket queue. Every function
 // takes an explicit directory/path so callers (CLI, skill, tests) never assume a
@@ -44,12 +46,13 @@ function loadYamlCapped<T>(path: string): T {
 /** Ticket id shape enforced at the store boundary (T-20260926-026c): ids reach
  * `join(dir, `${id}.yaml`)`, so an unvalidated id is a path-escape class — the
  * MCP governance server already enforces this pattern (mcp-governance-server.ts),
- * the store must not be weaker than its own tool wrapper. */
-const TICKET_ID_PATTERN = /^T-\d{8}-\d{3,4}$/;
+ * the store must not be weaker than its own tool wrapper. Widened in v1.5.0 to
+ * accept upstream request IDs (U-YYYYMMDD-NNN; design 2026-10-01). */
+const TICKET_ID_PATTERN = /^[TU]-\d{8}-\d{3,4}$/;
 
 function ticketPath(dir: string, id: string): string {
   if (!TICKET_ID_PATTERN.test(id)) {
-    throw new Error(`[ticket-store] invalid ticket id: ${JSON.stringify(id)} — expected T-YYYYMMDD-NNN`);
+    throw new Error(`[ticket-store] invalid ticket id: ${JSON.stringify(id)} — expected T-YYYYMMDD-NNN or U-YYYYMMDD-NNN`);
   }
   return join(dir, `${id}.yaml`);
 }

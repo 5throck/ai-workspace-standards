@@ -160,3 +160,38 @@ describe('validateTicket attempts ↔ history (T-20260917-003)', () => {
     expect(() => validateTicket(ticket)).toThrow(/attempts/);
   });
 });
+
+describe('validateTicket upstream block (design 2026-10-01 §5.2)', () => {
+  const upstream = () => ({
+    project: 'co-test', variant: 'co-test', template_version: '0.1.0', source: 'project/co-test', trust: 'untrusted',
+    suspected_layer: 'L1', symptom: 'x'.repeat(30), affected_paths: ['scripts/a.ts'],
+    triage: 'inbox', flagged: false, triage_reasons: [], dedupe_key: 'abc', duplicates: [],
+  });
+  const base = (over: Record<string, unknown> = {}) => ({
+    schemaVersion: 1, id: 'U-20261001-001', kind: 'manual', priority: 'normal', status: 'backlog', attempts: 0,
+    created_at: '2026-10-01T00:00:00.000Z', history: [{ at: '2026-10-01T00:00:00.000Z', from: null, to: 'backlog' }],
+    result: null, error: null, upstream: upstream(), ...over,
+  });
+  const withUp = (o: Record<string, unknown>) => base({ upstream: { ...upstream(), ...o } });
+
+  test('a well-formed upstream ticket validates', () => { expect(() => validateTicket(base())).not.toThrow(); });
+  test('upstream on a service ticket is rejected', () => {
+    expect(() => validateTicket(base({ kind: 'service', service: 'audit' }))).toThrow(/only on kind: manual/);
+  });
+  test('upstream with inputs or a T- id is rejected', () => {
+    expect(() => validateTicket(base({ inputs: { a: 'b' } }))).toThrow(/inputs/);
+    expect(() => validateTicket(base({ id: 'T-20261001-001' }))).toThrow(/U-YYYYMMDD-NNN/);
+  });
+  test('trust must be untrusted; source must equal project/<project>', () => {
+    expect(() => validateTicket(withUp({ trust: 'trusted' }))).toThrow(/trust/);
+    expect(() => validateTicket(withUp({ source: 'project/co-other' }))).toThrow(/source/);
+    expect(() => validateTicket(withUp({ source: 'co-test' }))).toThrow(/source/);
+  });
+  test('caps and path pattern are re-checked at validation', () => {
+    expect(() => validateTicket(withUp({ symptom: 'short' }))).toThrow(/symptom/);
+    expect(() => validateTicket(withUp({ affected_paths: ['../x'] }))).toThrow(/affected_paths/);
+    expect(() => validateTicket(withUp({ affected_paths: [] }))).toThrow(/affected_paths/);
+    expect(() => validateTicket(withUp({ repro: 'r'.repeat(2001) }))).toThrow(/repro/);
+    expect(() => validateTicket(withUp({ triage: 'maybe' }))).toThrow(/triage/);
+  });
+});

@@ -67,6 +67,6 @@
 
 - **Current Phase**: production
 - **Owner**: pm
-- **Last Updated**: 2026-09-29 (v1.2.1: PM tier defined as a capability floor)
+- **Last Updated**: 2026-10-01 (v1.2.2: added Upstream Request Tickets rule section)
 - **Last Reviewer**: lifecycle-manager
 

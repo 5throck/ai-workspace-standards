@@ -1,19 +1,26 @@
 #!/usr/bin/env bun
-// @version 1.4.0
+// @version 1.5.2
+// v1.5.2 (2026-10-01, security review): boundary escaping runs on an NFKC-folded copy and neutralizes
+//           angle-bracket lookalikes that NFKC does not fold.
+// v1.5.1 (2026-10-01): boundary-tag escaping is case-insensitive, whitespace-tolerant and
+//           escapes every `<untrusted-upstream-request` variant; opening tag carries id/project/flagged
+//           attributes (design §9 L3); non-upstream `title` guarded in show.
 // @l2-propagate: false
 // ticket.ts — CLI for the Phase A Service Ticket + Kanban system (workspace root only).
 // Usage: bun scripts/ticket.ts <command> [args]
 //   move <id>: <id> may be bare (resolved against both stores; ambiguous ids error)
 //   or explicitly prefixed as service/<id> / governance/<id> (T-20261001-009).
+//   show <id>: display full ticket with upstream request boundary tags when present.
 // Design: docs/superpowers/specs/2026-07-16-service-ticket-kanban-design.md,
-//         docs/designs/2026-08-16-governance-backlog-design.md (not_before / --ready / --kind)
+//         docs/designs/2026-08-16-governance-backlog-design.md (not_before / --ready / --kind),
+//         docs/designs/2026-10-01-upstream-request-mcp-design.md (§14.1)
 
 import { resolve, join } from 'node:path';
 import {
   createTicket, listTickets, moveTicket, nextServiceTicket, staleRunningTickets, loadCatalog, DEFAULT_ATTEMPTS_CAP,
-  resolveTicketLocation,
+  resolveTicketLocation, readTicket,
 } from './helpers/ticket-store.ts';
-import type { Priority, Status, Kind } from './helpers/ticket-schema.ts';
+import type { Priority, Status, Kind, Ticket } from './helpers/ticket-schema.ts';
 
 const workspaceRoot = resolve(import.meta.dir, '..');
 // Service tickets: ephemeral execution-queue instances (tickets/*.yaml is gitignored — Task 8).
@@ -60,6 +67,54 @@ function escapeHtml(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
+/** Angle-bracket lookalikes that NFKC leaves untouched (NFKC itself folds U+FF1C/FF1E, U+FE64/FE65). */
+const OPEN_LOOKALIKES = /[\u2039\u27E8\u27EA\u276E\u2329\u3008\u300A\u276C\u29FC\u02C2\u1438\u2770\uFF1C\uFE64]/g;
+const CLOSE_LOOKALIKES = /[\u203A\u27E9\u27EB\u276F\u232A\u3009\u300B\u276D\u29FD\u02C3\u1433\u2771\uFF1E\uFE65]/g;
+
+function escapeBoundaryTags(s: string): string {
+  // Display-only fold: compatibility forms (fullwidth etc.) become ASCII so they cannot dodge the
+  // tag match; lookalike brackets are neutralized outright. Then any boundary tag variant is escaped.
+  const folded = s.normalize('NFKC').replace(OPEN_LOOKALIKES, '&lt;').replace(CLOSE_LOOKALIKES, '&gt;');
+  return folded.replace(/<(\s*\/?\s*untrusted-upstream-request)/gi, '&lt;$1');
+}
+
+function formatUpstreamBlock(ticket: Ticket): string {
+  if (!ticket.upstream) return '';
+  const u = ticket.upstream;
+  const lines: string[] = [];
+
+  if (u.flagged) lines.push('🚩 FLAGGED - needs human review');
+
+  lines.push(`<untrusted-upstream-request id="${ticket.id}" project="${u.project}" flagged="${u.flagged}">`);
+  lines.push(`Project: ${u.project || 'unknown'}`);
+  lines.push(`Layer: ${u.suspected_layer}`);
+  lines.push(`Triage: ${u.triage}`);
+  if (u.triage_reasons && u.triage_reasons.length > 0) {
+    lines.push(`Reasons: ${u.triage_reasons.join(', ')}`);
+  }
+  lines.push('');
+  lines.push('Symptom:');
+  lines.push(escapeBoundaryTags(u.symptom));
+  lines.push('');
+  if (u.affected_paths && u.affected_paths.length > 0) {
+    lines.push(`Affected paths: ${u.affected_paths.join(', ')}`);
+    lines.push('');
+  }
+  if (u.repro) {
+    lines.push('Repro:');
+    lines.push(escapeBoundaryTags(u.repro));
+    lines.push('');
+  }
+  if (u.local_workaround_diff) {
+    lines.push('Local workaround:');
+    lines.push(escapeBoundaryTags(u.local_workaround_diff));
+    lines.push('');
+  }
+  lines.push(`</untrusted-upstream-request>`);
+
+  return lines.join('\n');
+}
+
 try {
   switch (cmd) {
     case 'create': {
@@ -93,12 +148,19 @@ try {
       // in separate directories (ephemeral vs. git-tracked); merge both unless --kind narrows it.
       const listFilter = { status: flags.status as Status | undefined, ready: flags.ready === true ? true : undefined };
       const kindFilter = flags.kind as Kind | undefined;
-      const tickets = [
+      const upstreamOnly = flags.upstream === true;
+      let tickets = [
         ...(kindFilter === 'manual' ? [] : listTickets(ticketsDir, { ...listFilter, kind: 'service' })),
         ...(kindFilter === 'service' ? [] : listTickets(governanceDir, { ...listFilter, kind: 'manual' })),
       ];
+      if (upstreamOnly) {
+        tickets = tickets.filter(t => t.upstream !== undefined);
+      }
       if (flags.json) console.log(JSON.stringify(tickets, null, 2));
-      else for (const t of tickets) console.log(`${t.id}  [${t.status}]  ${t.kind === 'service' ? t.service : t.title}  (${t.priority})${t.not_before ? `  not-before:${t.not_before}` : ''}`);
+      else for (const t of tickets) {
+        const flaggedMarker = t.upstream?.flagged ? ' 🚩' : '';
+        console.log(`${t.id}  [${t.status}]  ${t.kind === 'service' ? t.service : t.title}  (${t.priority})${t.not_before ? `  not-before:${t.not_before}` : ''}${flaggedMarker}`);
+      }
       break;
     }
     case 'next': {
@@ -123,6 +185,30 @@ try {
       const { dir, id: bareId } = resolveTicketDir(id);
       const moved = moveTicket(dir, bareId, status as Status, { force: Boolean(flags.force), error: flags.error as string | undefined, result: flags.result as string | undefined });
       console.log(`✅ ${id} -> ${moved.status}`);
+      break;
+    }
+    case 'show': {
+      const { positional } = parseFlags(rest);
+      const id = positional[0];
+      if (!id) fail('usage: ticket.ts show <id>');
+      const { dir, id: bareId } = resolveTicketDir(id);
+      const ticket = readTicket(dir, bareId);
+      console.log(`\n📋 Ticket: ${ticket.id}`);
+      console.log(`   Status: ${ticket.status}`);
+      console.log(`   Kind: ${ticket.kind}`);
+      console.log(`   Priority: ${ticket.priority}`);
+      if (ticket.kind === 'service') {
+        console.log(`   Service: ${ticket.service}`);
+      } else {
+        console.log(`   Title: ${ticket.title}`);
+      }
+      console.log(`   Created: ${ticket.created_at}`);
+      if (ticket.not_before) console.log(`   Not before: ${ticket.not_before}`);
+      if (ticket.upstream) {
+        console.log('\n--- Upstream Request ---');
+        console.log(formatUpstreamBlock(ticket));
+      }
+      console.log('');
       break;
     }
     case 'doctor': {
@@ -178,7 +264,7 @@ ${lanes.map(lane => `<div class="lane"><h3>${escapeHtml(lane)}</h3>${tickets.fil
       break;
     }
     default:
-      console.log('usage: bun scripts/ticket.ts <create|list|next|move|board|doctor> ...');
+      console.log('usage: bun scripts/ticket.ts <create|list|show|next|move|board|doctor> ...');
       process.exit(cmd ? 1 : 0);
   }
 } catch (err) {

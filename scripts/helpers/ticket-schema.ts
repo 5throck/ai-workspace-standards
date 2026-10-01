@@ -1,5 +1,8 @@
 #!/usr/bin/env bun
-// @version 1.2.0
+// @version 1.3.1
+// v1.3.1 (2026-10-01): upstream tickets must use a U-YYYYMMDD-NNN id and carry no inputs.
+// v1.3.0 (2026-10-01): add upstream request block (kind: manual only, design
+//           docs/designs/2026-10-01-upstream-request-mcp-design.md §5).
 // v1.2.0 (T-20260917-003): attempts is validated against history — it must
 //           equal the count of failed → waiting transitions, so the field can
 //           no longer sit at an unmaintained value.
@@ -14,6 +17,8 @@ export type Status = 'backlog' | 'waiting' | 'running' | 'review' | 'done' | 'fa
 export type Kind = 'service' | 'manual';
 export type Priority = 'low' | 'normal' | 'high' | 'urgent';
 export type RunType = 'skill' | 'script';
+export type UpstreamLayer = 'L1' | 'L2' | 'unsure';
+export type UpstreamTriage = 'inbox' | 'ready';
 
 export interface RunDef {
   type: RunType;
@@ -45,6 +50,30 @@ export interface HistoryEntry {
   to: Status;
 }
 
+export interface UpstreamBlock {
+  project: string;                           // e.g. "co-work" — server-derived
+  variant: string | null;                   // from project's .claude/template-version.txt
+  template_version: string | null;          // at intake time
+  source: string;                           // "project/<name>" — server-set
+  trust: 'untrusted';                       // constant
+  suspected_layer: UpstreamLayer;
+  symptom: string;
+  affected_paths: string[];
+  local_workaround_diff?: string;
+  repro?: string;
+  triage: UpstreamTriage;
+  flagged: boolean;
+  triage_reasons: string[];                 // failed auto-ready conditions
+  dedupe_key: string;                       // sha256 hash, hex
+  duplicates: Array<{ project: string; at: string }>;  // merged reports
+  resolution?: {
+    outcome: 'fixed' | 'rejected' | 'local-only' | 'duplicate';
+    pr_url?: string;
+    template_version?: string;               // template release containing the fix
+    summary?: string;                        // PM-written, trusted
+  };
+}
+
 export interface Ticket {
   schemaVersion: number;
   id: string;
@@ -65,6 +94,7 @@ export interface Ticket {
   history: HistoryEntry[];
   result: string | null;
   error: string | null;
+  upstream?: UpstreamBlock;  // optional, allowed only on kind: manual
 }
 
 /** Adjacency-only state machine. `--force` in the CLI bypasses this; every other
@@ -157,6 +187,50 @@ export function validateTicket(obj: unknown): asserts obj is Ticket {
     if (typeof t.inputs !== 'object' || t.inputs === null) fail('ticket.inputs must be an object');
     for (const key of Object.keys(t.inputs as Record<string, unknown>)) {
       if (!INPUT_NAME_PATTERN.test(key)) fail(`ticket.inputs key fails allowlist: ${JSON.stringify(key)}`);
+    }
+  }
+  // Upstream block validation (design 2026-10-01-upstream-request-mcp-design.md §5)
+  if (t.upstream !== undefined) {
+    if (t.kind !== 'manual') fail('upstream block is allowed only on kind: manual');
+    if (t.service !== undefined) fail('upstream tickets must not carry a service field');
+    if (t.inputs !== undefined) fail('upstream tickets must not carry inputs');
+    if (!/^U-\d{8}-\d{3,4}$/.test(t.id as string)) fail(`upstream ticket id must match U-YYYYMMDD-NNN: ${JSON.stringify(t.id)}`);
+    const u = t.upstream as Record<string, unknown>;
+    if (typeof u.project !== 'string' || u.project.length === 0) fail('upstream.project must be a non-empty string');
+    if (u.trust !== 'untrusted') fail('upstream.trust must be "untrusted"');
+    if (typeof u.source !== 'string' || !/^project\/[a-z0-9-]+$/.test(u.source)) fail(`upstream.source must match ^project/[a-z0-9-]+$: ${JSON.stringify(u.source)}`);
+    if (u.source !== `project/${u.project}`) fail(`upstream.source must equal "project/${u.project}", got "${u.source}"`);
+    if (u.suspected_layer !== 'L1' && u.suspected_layer !== 'L2' && u.suspected_layer !== 'unsure') fail(`upstream.suspected_layer must be L1 | L2 | unsure`);
+    if (typeof u.symptom !== 'string' || u.symptom.length < 20 || u.symptom.length > 2000) fail('upstream.symptom must be 20-2000 chars');
+    if (!Array.isArray(u.affected_paths)) fail('upstream.affected_paths must be an array');
+    if (u.affected_paths.length === 0 || u.affected_paths.length > 10) fail('upstream.affected_paths must have 1-10 items');
+    for (const p of u.affected_paths as unknown[]) {
+      if (typeof p !== 'string' || p.length > 200 || !/^(?!\/)(?!.*\.\.)[A-Za-z0-9._\-\/]+$/.test(p)) {
+        fail(`upstream.affected_paths entry fails pattern: ${JSON.stringify(p)}`);
+      }
+    }
+    if (u.local_workaround_diff !== undefined) {
+      if (typeof u.local_workaround_diff !== 'string' || u.local_workaround_diff.length > 8000) fail('upstream.local_workaround_diff must be ≤8000 chars');
+    }
+    if (u.repro !== undefined) {
+      if (typeof u.repro !== 'string' || u.repro.length > 2000) fail('upstream.repro must be ≤2000 chars');
+    }
+    if (u.triage !== 'inbox' && u.triage !== 'ready') fail('upstream.triage must be inbox | ready');
+    if (typeof u.flagged !== 'boolean') fail('upstream.flagged must be a boolean');
+    if (!Array.isArray(u.triage_reasons)) fail('upstream.triage_reasons must be an array');
+    if (typeof u.dedupe_key !== 'string' || u.dedupe_key.length === 0) fail('upstream.dedupe_key must be a non-empty string');
+    if (!Array.isArray(u.duplicates)) fail('upstream.duplicates must be an array');
+    for (const dup of u.duplicates as unknown[]) {
+      if (typeof dup !== 'object' || dup === null) fail('upstream.duplicates entry must be an object');
+      const d = dup as Record<string, unknown>;
+      if (typeof d.project !== 'string' || d.project.length === 0) fail('upstream.duplicates[].project must be a non-empty string');
+      if (typeof d.at !== 'string' || d.at.length === 0) fail('upstream.duplicates[].at must be a non-empty string');
+    }
+    if (u.resolution !== undefined) {
+      if (typeof u.resolution !== 'object' || u.resolution === null) fail('upstream.resolution must be an object');
+      const res = u.resolution as Record<string, unknown>;
+      const validOutcomes = ['fixed', 'rejected', 'local-only', 'duplicate'];
+      if (!validOutcomes.includes(res.outcome as string)) fail(`upstream.resolution.outcome must be one of: ${validOutcomes.join(', ')}`);
     }
   }
 }

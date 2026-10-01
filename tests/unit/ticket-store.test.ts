@@ -199,6 +199,20 @@ describe('nextServiceTicket', () => {
   test('returns null when no waiting service tickets exist', () => {
     expect(nextServiceTicket(dir)).toBeNull();
   });
+
+  test('never returns an upstream (U-) ticket, even when it is waiting with high priority in the same directory', () => {
+    writeFileSync(join(dir, 'U-20261001-001.yaml'), [
+      'schemaVersion: 1', 'id: U-20261001-001', 'kind: manual', 'title: Upstream request from co-test', 'priority: urgent',
+      'status: waiting', 'attempts: 0', 'created_at: "2026-10-01T00:00:00.000Z"',
+      'history:', '  - at: "2026-10-01T00:00:00.000Z"', '    from: null', '    to: waiting', 'result: null', 'error: null',
+      'upstream:', '  project: co-test', '  variant: co-test', '  template_version: 0.1.0', '  source: project/co-test', '  trust: untrusted',
+      '  suspected_layer: L1', '  symptom: "a symptom that is long enough here"', '  affected_paths: [scripts/a.ts]',
+      '  triage: ready', '  flagged: false', '  triage_reasons: []', '  dedupe_key: abc', '  duplicates: []', '',
+    ].join('\n'));
+    expect(listTickets(dir).map(t => t.id)).toEqual(['U-20261001-001']);
+    expect(nextServiceTicket(dir)).toBeNull();
+    expect(listTickets(dir, { status: 'waiting', kind: 'service' })).toEqual([]);
+  });
 });
 
 describe('staleRunningTickets', () => {
