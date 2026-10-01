@@ -47,6 +47,7 @@ function normalize(p: string): string {
 }
 
 test('collector spawned from a subdirectory sees the same repo root and tracked set as from the root', () => {
+    mkdirSync(join(process.cwd(), 'tests', '.temp'), { recursive: true });
     const fixtureRoot = mkdtempSync(join(process.cwd(), 'tests', '.temp', 'repo-root-'));
     try {
         initGitRepo(fixtureRoot);
