@@ -10,7 +10,11 @@ import { join } from 'node:path';
 // previously the subdirectory invocation silently narrowed `git ls-files` to
 // that subtree and corrupted the drift gate.
 
-const SCRIPT = new URL('../../scripts/generate-version-manifest.ts', import.meta.url).pathname;
+// fileURLToPath: .pathname yields "/D:/a/..." on Windows, which bun cannot resolve.
+const SCRIPT = (() => {
+  const { fileURLToPath } = require('node:url') as typeof import('node:url');
+  return fileURLToPath(new URL('../../scripts/generate-version-manifest.ts', import.meta.url));
+})();
 
 function runCollectorFrom(cwd: string): { root: string; tracked: string[] | null } {
     const code = [
