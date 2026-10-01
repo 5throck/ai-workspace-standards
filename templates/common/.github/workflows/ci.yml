@@ -53,10 +53,11 @@ jobs:
   unit-tests:
     name: Unit Tests
     runs-on: ubuntu-latest
-    # Release 1 (T-20260930-026, ADR-0094): opt-in. Set the repository variable
-    # CI_ENABLE_DEFAULT_UNIT_TESTS to "true" to enable; Release 2 flips this to
-    # default-on with CI_SKIP_DEFAULT_UNIT_TESTS as the skip switch.
-    if: ${{ vars.CI_ENABLE_DEFAULT_UNIT_TESTS == 'true' }}
+    # Release 2 (T-20260930-026, ADR-0094): default-on. Set the repository
+    # variable CI_SKIP_DEFAULT_UNIT_TESTS to "true" to opt out. (Release 1 used
+    # the inverse opt-in CI_ENABLE_DEFAULT_UNIT_TESTS and was verified live on
+    # co-newbiz: green run, job correctly skipped without the variable.)
+    if: ${{ vars.CI_SKIP_DEFAULT_UNIT_TESTS != 'true' }}
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
