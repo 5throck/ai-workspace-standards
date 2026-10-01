@@ -151,8 +151,10 @@ function open(cwd: string, env: Record<string, string> = {}): Session {
 }
 
 beforeEach(() => { ws = makeWorkspace(); sessions = []; });
+/** Close every server session; call before removing any directory a session used as its cwd (Windows locks it). */
+async function closeAll(): Promise<void> { await Promise.all(sessions.map((s) => s.close())); }
 afterEach(async () => {
-  await Promise.all(sessions.map((s) => s.close()));
+  await closeAll();
   rmSync(ws.root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
@@ -268,7 +270,7 @@ describe('13.2 identity', () => {
         expect(r.rpc.error?.message).toMatch(/unregistered working directory/);
       }
       expect(ticketFiles()).toEqual([]);
-    } finally { rmSync(outside, { recursive: true, force: true }); }
+    } finally { await closeAll(); rmSync(outside, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 }); }
   });
 
   test('2d. nested repo inside a registered project resolves to the nested toplevel and is rejected', async () => {
@@ -308,8 +310,9 @@ describe('13.2 identity', () => {
       expect(ok.rpc.error).toBeUndefined();
       expect(readTicketYaml(ok.body.id).upstream.project).toBe('co-test');
     } finally {
-      rmSync(outsideRepo, { recursive: true, force: true });
-      rmSync(linkDir, { recursive: true, force: true });
+      await closeAll();
+      rmSync(outsideRepo, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
+      rmSync(linkDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
     }
   });
 
@@ -1005,7 +1008,7 @@ describe('13.12 audit log', () => {
       expect(lines[3]).toMatchObject({ outcome: 'merged', id: merged.body.id });
       expect(lines[4]).toMatchObject({ flagged: true, triage: 'inbox', id: flagged.body.id, reasons: ['needs_human_review'] });
       for (const l of lines) expect(typeof l.ts).toBe('string');
-    } finally { rmSync(outside, { recursive: true, force: true }); }
+    } finally { await closeAll(); rmSync(outside, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 }); }
   });
 
   test('e2e. create then status shows the new request; marker matches the id', async () => {
@@ -1032,7 +1035,7 @@ describe('review fix 1: identity without git (core.worktree spoof)', () => {
     expect(v.rpc.error).toBeUndefined();
     execFileSync('git', ['-C', attacker, 'config', 'core.worktree', victim]);
     const probe = execFileSync('git', ['-C', attacker, 'rev-parse', '--show-toplevel'], { encoding: 'utf-8' }).trim();
-    expect(realpathSync(probe)).toBe(realpathSync(victim)); // the attack primitive is real
+    expect(realpathSync.native(probe)).toBe(realpathSync.native(victim)); // the attack primitive is real
     const s = open(attacker);
     const own = await s.create({ ...good(), affected_paths: ['docs/guide.md'], symptom: `${SYMPTOM} attacker-own` });
     expect(own.rpc.error).toBeUndefined();
@@ -1183,7 +1186,8 @@ describe('13.13 installer (dry-run only)', () => {
       expect(r.status).toBe(0);
       expect(r.stdout).toContain('[DRY RUN]');
       expect(r.stdout).toContain('ai-workspace-upstream');
-      expect(r.stdout).toContain(join(REPO_ROOT, 'scripts', 'mcp-upstream-server.ts'));
+      // The installer prints JSON-style forward slashes on Windows (normalizePathForJson).
+      expect(r.stdout.replace(/\\/g, '/')).toContain(join(REPO_ROOT, 'scripts', 'mcp-upstream-server.ts').replace(/\\/g, '/'));
       const cmd = /"command": "([^"]+)"/.exec(r.stdout)![1];
       expect(isAbsolute(cmd)).toBe(true);
       expect(cmd).not.toBe('bun');
