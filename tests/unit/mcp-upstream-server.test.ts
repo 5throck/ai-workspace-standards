@@ -56,8 +56,7 @@ function makeWorkspace(): Workspace {
       mkdirSync(dir, { recursive: true });
       execFileSync('git', ['init', '-q', dir]);
       if (opts.withMarker !== false) {
-        mkdirSync(join(dir, '.claude'), { recursive: true });
-        writeFileSync(join(dir, '.claude', 'template-version.txt'),
+        writeFileSync(join(dir, 'template-version.txt'),
           opts.templateVersionText ?? `variant=${opts.variant ?? name}\nversion=0.8.1\nplatform=all\n`);
       }
       return dir;
@@ -252,8 +251,19 @@ describe('13.2 identity', () => {
     const r = await open(ws.root).create(good());
     expect(r.rpc.error?.code).toBe(-32602);
     expect(r.rpc.error?.message).toContain('^co-[a-z0-9-]{1,40}$');
-    expect(r.rpc.error?.message).toContain('.claude/template-version.txt');
+    expect(r.rpc.error?.message).toContain('template-version.txt at the project root');
     expect(ticketFiles()).toEqual([]);
+  });
+
+  test('2c-legacy. a pre-move project carrying only .claude/template-version.txt still files (legacy fallback)', async () => {
+    const proj = join(ws.projects, 'co-legacy');
+    mkdirSync(proj, { recursive: true });
+    execFileSync('git', ['init', '-q', proj]);
+    mkdirSync(join(proj, '.claude'), { recursive: true });
+    writeFileSync(join(proj, '.claude', 'template-version.txt'), 'variant=co-legacy\nversion=0.8.1\nplatform=all\n');
+    const r = await open(proj).create(good());
+    expect(r.rpc.error).toBeUndefined();
+    expect(readTicketYaml(r.body.id).upstream.project).toBe('co-legacy');
   });
 
   test('2c. unregistered directories are rejected: no marker file, no variant line, not a git repo, plain dir', async () => {
@@ -637,6 +647,7 @@ describe('13.7 template-managed check', () => {
   test('7d. last-upgrade-delivery.json is informational only (in_last_delivery recorded, never sufficient)', async () => {
     const proj = ws.project('co-test');
     seedKnown(ws, 'co-test');
+    mkdirSync(join(proj, '.claude'), { recursive: true });
     writeFileSync(join(proj, '.claude', 'last-upgrade-delivery.json'), JSON.stringify({ files: ['docs/notes.md', 'only-l1.txt'] }));
     const r = await open(proj).create({ ...good(), affected_paths: ['docs/notes.md', 'only-l1.txt'] });
     expect(r.body.triage).toBe('inbox');

@@ -1128,19 +1128,18 @@ function main(): void {
     createLectureScaffold(projectDir);
   }
 
-  // Step 6.6: write .claude/template-version.txt — provenance for upgrade-project.ts
-  // (mirrors new-project.ts §5.6 field order: variant/version/platform/country/created).
+  // Step 6.6: write template-version.txt at the project root (platform-independent
+  // since 2026-10-01) — provenance for upgrade-project.ts (mirrors new-project.ts §5.6
+  // field order: variant/version/platform/country/created).
   // M11: the version comes from the already-read templates/VERSION SSOT
   // (commonVersion) — the previous silent "unknown" fallback is removed.
-  const claudeDir = path.join(projectDir, ".claude");
-  fs.mkdirSync(claudeDir, { recursive: true });
   const templateVersion = commonVersion;
   const scaffoldCountry = args.country || "none";
   fs.writeFileSync(
-    path.join(claudeDir, "template-version.txt"),
+    path.join(projectDir, "template-version.txt"),
     `variant=${toVariantSlug(args.variant)}\nversion=${templateVersion}\nplatform=both\ncountry=${scaffoldCountry}\ncreated=${new Date().toISOString()}\n`
   );
-  log(`🧾 Wrote .claude/template-version.txt (variant=${toVariantSlug(args.variant)}, version=${templateVersion}, country=${scaffoldCountry})`);
+  log(`🧾 Wrote template-version.txt (variant=${toVariantSlug(args.variant)}, version=${templateVersion}, country=${scaffoldCountry})`);
 
   // Step 7: git init
   initGit(projectDir);

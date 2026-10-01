@@ -99,7 +99,7 @@ try {
     expect(r.status === 1, 'adoption aborts with exit 1');
     expect(r.output.includes('secret-shaped'), 'refusal names the secret-shaped finding');
     expect(r.output.includes('.env'), 'refusal names the offending path');
-    expect(!fs.existsSync(path.join(dir, '.claude', 'template-version.txt')), 'no provenance written on refusal');
+    expect(!fs.existsSync(path.join(dir, 'template-version.txt')), 'no provenance written on refusal');
     expect(fs.readFileSync(path.join(dir, 'README.md'), 'utf8').includes('My own words'), 'README untouched');
   }
 
@@ -165,7 +165,7 @@ try {
     expect(fs.existsSync(path.join(dir, 'docs', 'context.md')), 'docs/context.md delivered');
     expect(fs.existsSync(path.join(dir, 'docs', `${VARIANT}.context.md`)), `docs/${VARIANT}.context.md present`);
     expect(fs.existsSync(path.join(dir, '.githooks', 'pre-commit')), '.githooks/pre-commit delivered (LOCKED)');
-    expect(fs.existsSync(path.join(dir, '.claude', 'template-version.txt')), 'provenance marker minted');
+    expect(fs.existsSync(path.join(dir, 'template-version.txt')), 'provenance marker minted (project root)');
     expect(fs.existsSync(path.join(dir, '.claude', 'last-upgrade-delivery.json')), 'delivery manifest written');
     expect(fs.existsSync(path.join(dir, 'scripts', 'SCRIPTS.md')), 'project SCRIPTS.md delivered');
     expect(fs.existsSync(path.join(dir, 'memory', 'MEMORY.md')), 'memory/MEMORY.md seeded');

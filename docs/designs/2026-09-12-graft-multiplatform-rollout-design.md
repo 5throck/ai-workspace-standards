@@ -24,7 +24,7 @@ graft (repo context graph, `@nanonets/graft`) has been running at the workspace 
 
 ## 3. Non-goals
 
-- Moving the graft skill into the SSOT `skills/` (sync-skills would mirror it to `.gemini/skills` + `.agents/skills`, breaking the claude-only design pinned by the C-CM-05 exception in `validate-templates.ts`).
+- ~~Moving the graft skill into the SSOT `skills/`~~ **Reversed 2026-10-01 (ADR-0076 Amendment 1)** — original rationale: (sync-skills would mirror it to `.gemini/skills` + `.agents/skills`, breaking the claude-only design pinned by the C-CM-05 exception in `validate-templates.ts`).
 - CI freshness gating (`graft check`) — user decision 2026-09-12: keep manual. Graft tools self-refresh before answering, so the graph is effectively fresh without a gate.
 - ~~Rolling graft into `templates/co-*` variant templates by hand~~ **Superseded during implementation**: the 13 variant templates own `.claude/settings.json`/`.gemini/settings.json` (variant wins in the effective tree), so `templates/common`-only settings changes never reach the 9 fleet projects that pair with a variant template. All 13 L2 templates received the same graft additions via merge-preserving injection (`mergeSettingsJson` — variant-only keys such as co-price's `pricing-sim` MCP server survive), the WORKSPACE-MANAGED graft block in their `AGENTS.md`, and `/graft/` in their `.gitignore`. Variant `CLAUDE.md`/`GEMINI.md` are mostly absent — the MERGE pass's common fallback delivers the block for those.
 - Per-repo Claude Desktop entries for the whole fleet — the Desktop config is one machine-global file; document the snippet, register frequently-used repos only.
@@ -78,6 +78,8 @@ Doc blocks and `.gitignore` need no new code — they ride the existing MERGE pa
 - `skills/create-variant/SKILL.md`: document the automatic graft step, add graft presence to the verification checklist, and note the AGENTS.md graft block.
 
 ### D6 — Skill stays hand-maintained; drift check added
+
+> **Superseded 2026-10-01 (ADR-0076 Amendment 1):** graft is now a `skills/` SSOT skill mirrored to all five platforms; the byte-identity drift check and the claude-only exception were removed. The text below is the historical decision.
 
 The graft SKILL.md exists as exactly two copies (root `.claude/skills/graft/`, `templates/common/.claude/skills/graft/`), byte-identical, outside the SSOT. `validate-templates.ts` C-CM-05 gains an anti-drift comparison of the two copies (fails when they diverge), alongside the existing anti-rot existence check. `triggers` metadata is added to fix the VERSION_MANIFEST warning, and the "covers: spans" prose is corrected to describe the actual card format (signature bullets with line spans).
 

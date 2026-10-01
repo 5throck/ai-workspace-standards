@@ -1,5 +1,10 @@
 #!/usr/bin/env bun
-// @version 1.2.0
+// @version 1.3.0
+// v1.3.0 (2026-10-01, platform-independent identity): the provenance marker moves to the
+//          project root (template-version.txt); .claude/template-version.txt stays as a
+//          legacy fallback so pre-move projects keep filing with no migration. Scaffold,
+//          upgrade, adopt and migrate scripts move with this change (writers and readers
+//          in one pass). REGISTRATION_RULE text updated to match.
 // v1.2.0 (2026-10-01, security review): identity no longer spawns git (core.worktree spoof); pure
 //          filesystem walk, .git must be a real directory, nested repos rejected. Heuristics and dedupe
 //          run on an NFKC-folded copy. Governance-path heuristic case-insensitive. Status id accepts a
@@ -47,7 +52,12 @@ const WORKSPACE_ROOT = resolveWorkspaceRoot();
 const FALLBACK_PROTOCOL_VERSION = '2024-11-05';
 
 const REQUESTER_NAME_RE = /^co-[a-z0-9-]{1,40}$/;
-const REGISTRATION_RULE = 'unregistered working directory: requester must be a direct child of Projects/ matching ^co-[a-z0-9-]{1,40}$ with .claude/template-version.txt (only co-* projects may file in v1)';
+// Identity marker is platform-independent: the canonical location is the project root,
+// with the pre-2026-10-01 `.claude/template-version.txt` kept as a legacy fallback so
+// projects scaffolded before the move keep filing without a migration (fixed order,
+// first hit wins).
+const IDENTITY_PATHS = ['template-version.txt', join('.claude', 'template-version.txt')] as const;
+const REGISTRATION_RULE = `unregistered working directory: requester must be a direct child of Projects/ matching ^co-[a-z0-9-]{1,40}$ with template-version.txt at the project root (legacy .claude/template-version.txt accepted) (only co-* projects may file in v1)`;
 const PROJECTS_DIR = resolve(WORKSPACE_ROOT, 'Projects');
 const TEMPLATES_DIR = resolve(WORKSPACE_ROOT, 'templates');
 const PROPAGATION_MAP = resolve(WORKSPACE_ROOT, 'scripts', 'propagation-map.json');
@@ -181,9 +191,15 @@ function resolveProject(cwd: string): ProjectIdentity | string {
     const g = lstatSync(join(root, '.git'));
     if (!g.isDirectory()) return REGISTRATION_RULE;
 
-    const tvFile = join(root, '.claude', 'template-version.txt');
-    if (!existsSync(tvFile)) return REGISTRATION_RULE;
-    const text = readFileSync(tvFile, 'utf-8');
+    let text: string | null = null;
+    for (const rel of IDENTITY_PATHS) {
+      const tvFile = join(root, rel);
+      if (existsSync(tvFile)) {
+        text = readFileSync(tvFile, 'utf-8');
+        break;
+      }
+    }
+    if (text === null) return REGISTRATION_RULE;
     const vm = /^variant=([a-z0-9-]+)\s*$/m.exec(text);
     if (!vm) return REGISTRATION_RULE;
     const verm = /^version=(\S+)\s*$/m.exec(text);

@@ -131,7 +131,12 @@ if (git(projectDir, 'rev-parse', '--git-dir').status !== 0) fail('Not a git repo
 // Adoption-state detection runs BEFORE the clean-tree check: a freshly adopted (not yet
 // committed) project has a dirty tree by design, and the operator must be told the
 // maintenance path, not scolded about cleanliness.
-const markerPath = join(projectDir, '.claude', 'template-version.txt');
+// Platform-independent marker (2026-10-01): canonical at the project root; the
+// pre-move .claude/template-version.txt is still recognized for state detection
+// and the country rewrite below.
+const markerPath = existsSync(join(projectDir, 'template-version.txt'))
+  ? join(projectDir, 'template-version.txt')
+  : join(projectDir, '.claude', 'template-version.txt');
 const ctxCommonPath = join(projectDir, 'docs', 'context.md');
 const stateFile = join(WORKSPACE_ROOT, 'tests', '.temp', `adopt-project-state-${createHash('sha256').update(projectDir).digest('hex').slice(0, 12)}.json`);
 const resuming = existsSync(stateFile);

@@ -35,7 +35,7 @@ describe('buildVerificationPlan', () => {
     const plan = buildVerificationPlan('co-legal', 'all');
     const targets = plan.map(c => c.target);
     expect(targets).toContain('docs/co-legal.context.md');
-    const marker = plan.find(c => c.target === '.claude/template-version.txt' && c.expect);
+    const marker = plan.find(c => c.target === 'template-version.txt' && c.expect);
     expect(marker?.expect).toBe('variant=co-legal');
   });
 
@@ -51,10 +51,10 @@ describe('evaluateArtifactChecks', () => {
   test('passes on a satisfied project and fails on missing artifacts and unexpected files', () => {
     const projectDir = path.join(scratchRoot, 'proj');
     fs.mkdirSync(path.join(projectDir, 'docs'), { recursive: true });
-    for (const f of ['AGENTS.md', 'docs/context.md', 'docs/co-unit.context.md', '.claude/template-version.txt']) {
+    for (const f of ['AGENTS.md', 'docs/context.md', 'docs/co-unit.context.md', 'template-version.txt']) {
       const p = path.join(projectDir, f);
       fs.mkdirSync(path.dirname(p), { recursive: true });
-      fs.writeFileSync(p, f === '.claude/template-version.txt' ? 'variant=co-unit\nversion=0.6.0\n' : 'x\n');
+      fs.writeFileSync(p, f === 'template-version.txt' ? 'variant=co-unit\nversion=0.6.0\n' : 'x\n');
     }
     fs.writeFileSync(path.join(projectDir, '.gitattributes'), '* text=auto\ndocs/context.md merge=ours\n');
 
@@ -66,7 +66,7 @@ describe('evaluateArtifactChecks', () => {
     // CLAUDE.md required file was never created — that must fail.
     expect(failed).toContain('CLAUDE.md delivered (platform=claude)');
     expect(results.find(r => r.check.target === 'AGENTS.md')?.pass).toBe(true);
-    expect(results.find(r => r.check.target === '.claude/template-version.txt' && r.check.expect)?.pass).toBe(true);
+    expect(results.find(r => r.check.target === 'template-version.txt' && r.check.expect)?.pass).toBe(true);
     expect(results.find(r => r.check.target === 'GEMINI.md')?.pass).toBe(true); // absent as required
     expect(results.find(r => r.check.target === '.gitattributes')?.pass).toBe(true);
   });

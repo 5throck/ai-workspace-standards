@@ -304,7 +304,10 @@ export async function syncSkills(dirs: SkillSyncDirs, opts: SyncSkillsOptions = 
     // platforms on fresh scaffolds but surviving only as .codex ghosts in
     // older projects). Gated to project contexts — the workspace root is the
     // one place platform-only skill directories are legitimate.
-    const isProjectContext = fs.existsSync(path.join(root, '.claude', 'template-version.txt'));
+    // Platform-independent marker (2026-10-01): project-root template-version.txt,
+    // legacy .claude/template-version.txt accepted for pre-move projects.
+    const isProjectContext = fs.existsSync(path.join(root, 'template-version.txt'))
+      || fs.existsSync(path.join(root, '.claude', 'template-version.txt'));
     if (isProjectContext) {
         let ghostCount = 0;
         for (const targetDir of [claudeSkills, geminiSkills, agentsSkills, codexSkills, hermesSkills]) {

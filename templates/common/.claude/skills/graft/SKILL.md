@@ -1,9 +1,25 @@
 ---
 name: graft
-description: This repo is indexed by graft/. For ANY task here, whether
-  understanding how something works, finding where code lives, tracing what
-  calls a symbol or what a change breaks, or scoping an edit, get your context
-  from graft before grepping or reading source files.
+description: >
+  This repo is indexed by graft/. For ANY task here, whether understanding how
+  something works, finding where code lives, tracing what calls a symbol or what
+  a change breaks, or scoping an edit, get your context from graft before
+  grepping or reading source files.
+version: 1.0.0
+last_reviewed: 2026-10-01
+status: active
+scope: common
+l2_propagate: true
+owner: pm
+prerequisites: graft CLI
+metadata:
+  type: process
+  triggers:
+    - graft
+    - repo context graph
+    - find where code lives
+    - what calls this symbol
+    - blast radius
 ---
 
 # graft
@@ -154,3 +170,10 @@ When the graft MCP server is connected, these are exposed as tools too:
 `graft_find_code`, `graft_find_all`, `graft_file_api`, `graft_trace_calls` (with
 `direction` / `depth`), `graft_repo_map`, `graft_check_freshness`. Use whichever surface is
 available; the guidance is identical.
+
+## Maintenance (workspace)
+This skill lives in the `skills/` SSOT and is mirrored to every platform skill
+directory by `scripts/sync-skills.ts` (ADR-0076 amendment; it was previously
+Claude-only and hand-maintained). `graft init` rewrites only the `.claude/` copy,
+so after upgrading graft: copy the new body above into this file (keep the
+frontmatter above), then run `bun scripts/sync-skills.ts` to re-mirror.

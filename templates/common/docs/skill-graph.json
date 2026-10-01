@@ -63,6 +63,11 @@
       "layer": "common"
     },
     {
+      "id": "graft",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
       "id": "handbook",
       "type": "skill",
       "layer": "common"

@@ -74,8 +74,8 @@ export function buildVerificationPlan(variant: string, platform: PlatformProfile
     { kind: 'file', target: 'scripts/SCRIPTS.md', label: 'project SCRIPTS.md registry delivered', hard: true },
     { kind: 'file', target: 'memory/MEMORY.md', label: 'memory/MEMORY.md seeded', hard: true },
     { kind: 'file', target: 'CHANGELOG.md', label: 'CHANGELOG.md seeded', hard: true },
-    { kind: 'file', target: '.claude/template-version.txt', label: 'provenance marker minted', hard: true },
-    { kind: 'file-content', target: '.claude/template-version.txt', expect: `variant=${variant}`, label: `marker declares variant=${variant}`, hard: true },
+    { kind: 'file', target: 'template-version.txt', label: 'provenance marker minted (project root)', hard: true },
+    { kind: 'file-content', target: 'template-version.txt', expect: `variant=${variant}`, label: `marker declares variant=${variant}`, hard: true },
     { kind: 'file', target: '.claude/last-upgrade-delivery.json', label: 'delivery manifest written', hard: true },
   ];
   const twins = expectedPlatformTwins(platform);

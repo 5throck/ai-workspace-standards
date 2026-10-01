@@ -1,4 +1,7 @@
-// @version 1.20.0
+// @version 1.21.0
+// v1.21.0 (2026-10-01, ADR-0076 amendment): the `.claude/skills/graft/**` → TEMPLATE TREE
+//          SYNC special case is removed. graft moved into the skills/ SSOT, so it is delivered
+//          by the platform-mirror rule (sync-skills.ts) to all five platform dirs like any skill.
 // v1.20.0 (2026-10-01, T-20260930-026 PR-A, ADR-0094): `.github/workflows/ci.yml` joins
 //          MERGE_MANAGED_FILES (was the final SYNC whole-file overwrite, which erased any
 //          project job — co-newbiz lost its unit-test job twice). The MERGE pass routes it
@@ -358,10 +361,6 @@ export function resolveClaim(relPath: string, variant = ''): UpgradeClaim {
   // project deltas are intentional (ADR-0091 R2). Dedicated REGION PROFILES pass.
   if (underDir(rel, 'region-profiles')) return { policy: 'ADD_IF_MISSING', pass: REGION_PROFILES_PASS };
 
-  // graft repo-index skill (ADR-0076): hand-maintained OUTSIDE the SSOT skills/ (claude-only
-  // by design, C-CM-05 exception), so the post-upgrade sync-skills.ts run can never deliver
-  // it — the TEMPLATE TREE SYNC pass must claim it explicitly or the fleet never receives it.
-  if (underDir(rel, '.claude/skills/graft')) return { policy: 'SYNC', pass: TEMPLATE_TREE_SYNC_PASS };
   // Platform skill mirrors are distributed by the post-upgrade sync-skills.ts run, not file
   // passes. Codex mirrors (ADR-0077 W1/W4) joined them in the 2026-09-21 review (C-1); the
   // Hermes mirror (ADR-0088 W2) joins the same group. This group MUST stay ABOVE the blanket

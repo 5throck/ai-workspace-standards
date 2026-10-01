@@ -490,12 +490,12 @@ try {
     }
   } catch (e) { fail('Test 11', String(e)); }
 
-  // ── Test 12: .claude/template-version.txt [maps to: step 5.6] ──────────────
-  console.log('\nTest 12: .claude/template-version.txt');
+  // ── Test 12: template-version.txt at project root [maps to: step 5.6] ──────
+  console.log('\nTest 12: template-version.txt (project root)');
   try {
-    const tvPath = '.claude/template-version.txt';
+    const tvPath = 'template-version.txt';
     if (!fileExists(tvPath)) {
-      fail('Test 12', '.claude/template-version.txt not found');
+      fail('Test 12', 'template-version.txt not found at project root');
     } else {
       const content = readText(tvPath);
       const hasVariant  = content.includes('variant=');

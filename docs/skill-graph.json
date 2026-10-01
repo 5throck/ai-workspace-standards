@@ -1846,6 +1846,11 @@
       "layer": "variant:co-safety"
     },
     {
+      "id": "graft",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
       "id": "gui-scripter",
       "type": "agent",
       "layer": "variant:co-abap"
@@ -5845,6 +5850,12 @@
       "type": "references",
       "from": "adr:0075",
       "to": "psm-moc",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0076",
+      "to": "graft",
       "source": "prose"
     },
     {
