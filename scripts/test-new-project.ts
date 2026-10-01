@@ -2,7 +2,10 @@
 /**
  * test-new-project.ts — E2E Test for new-project.ts
  *
- * @version 1.9.0
+ * @version 1.10.0
+ * v1.10.0 (2026-10-02): Test 27 footer pin 2.13 → 2.14 — templates/common/docs/context.md gained a
+ * footer bump for the Supported Surfaces delivery (T-20261001-021); the pin lagged the bump and
+ * tripped the scripts E2E suite in CI as the 2026-09-30 T-20260926-011 pin class did.
  * @last_updated 2026-09-29
  *
  * v1.9.0 (2026-09-29, T-20260929-002): Test 4 also asserts the initial
@@ -38,7 +41,7 @@
  *         identity seed contract on the default (flag-less) scaffold — AC2
  *         TODO(project-overview) fallback in docs/project.md matching the
  *         audit.ts placeholder regex, AC3 pointer section in docs/context.md
- *         (heading kept, literal placeholders gone, footer 2.13), and no
+ *         (heading kept, literal placeholders gone, footer 2.14 — bumped from 2.13 for the Supported Surfaces delivery, T-20261001-021), and no
  *         project.template.md anywhere in the delivered tree. Test 28 scaffolds
  *         a second project WITH --description/--type and pins AC1: identity
  *         fields rendered, fallback gone, raw template copy absent.
@@ -814,7 +817,7 @@ try {
   // The main harness scaffold carries NO --description/--type, so docs/project.md
   // must keep the TODO(project-overview) fallback (matching the audit.ts
   // placeholder regex family), docs/context.md must carry the byte-stable pointer
-  // section (heading kept, literal placeholders gone, footer 2.13), and the raw
+  // section (heading kept, literal placeholders gone, footer 2.14), and the raw
   // project.template.md copy must be absent from the delivered tree.
   console.log('\nTest 27: Identity seed — TODO fallback, context.md pointer, no raw template copy');
   {
@@ -842,9 +845,9 @@ try {
         if (!ctx.includes('docs/project.md')) ctxProblems.push('missing pointer to docs/project.md');
         if (ctx.includes('[One-sentence description')) ctxProblems.push('literal description placeholder still present');
         if (ctx.includes('web | cli | api | mcp')) ctxProblems.push('literal Type placeholder still present');
-        if (!/\*context\.md version: 2\.13\b/.test(ctx)) ctxProblems.push('version footer is not 2.13');
+        if (!/\*context\.md version: 2\.14\b/.test(ctx)) ctxProblems.push('version footer is not 2.14');
         if (ctxProblems.length > 0) fail('Test 27 (AC3 pointer)', ctxProblems.join('; '));
-        else pass('Test 27 PASSED (AC3): docs/context.md has the pointer section, no literal placeholders, footer 2.13');
+        else pass('Test 27 PASSED (AC3): docs/context.md has the pointer section, no literal placeholders, footer 2.14');
       } catch (e) { fail('Test 27 (AC3 pointer)', String(e)); }
 
       const templateCopies = findFiles(testDir, 'project.template.md');
