@@ -147,6 +147,7 @@ import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { parseScriptLayers, includeSkillInL1, includeScriptInL1 } from './helpers/layer-filter.ts';
 import { scrubConstitutionRefs } from './lib/constitution-scrub.ts';
+import { isSelfManagedPath } from './lib/self-managed-tools.ts';
 import { die } from './lib/error-handling.ts';
 import * as yaml from 'js-yaml';
 import {
@@ -587,6 +588,11 @@ function collectDiffs(mapPath: string): FileDiff[] {
         status = sha256(srcContent) === sha256(tgtContent) ? 'in-sync' : 'differs';
       }
 
+      // T-20261002-001: self-managed tool surfaces are excluded at GENERATION
+      // time — filtered here (not only in applyDiffs) so they are neither applied
+      // nor reported as missing, keeping the governance-l1 post-check honest.
+      if (isSelfManagedPath(sourcePath) || isSelfManagedPath(targetPath)) continue;
+
       diffs.push({ domain: domainName, relativePath: relPath, sourcePath, targetPath, status });
     }
   }
@@ -908,6 +914,9 @@ function applyDiffs(diffs: FileDiff[]): number {
   let copied = 0;
   let failed = 0;
   for (const d of diffs) {
+    // T-20261002-001: self-managed tool surfaces (docs/self-managed-surfaces.json)
+    // are tool-owned — the propagator never delivers them into templates.
+    if (isSelfManagedPath(d.sourcePath) || isSelfManagedPath(d.targetPath)) continue;
     try {
       const targetDir = dirname(d.targetPath);
       if (!existsSync(targetDir)) {

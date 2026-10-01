@@ -241,8 +241,8 @@
     "graft": {
       "source": "skills/graft/SKILL.md",
       "version": "1.0.0",
-      "overridable": false,
-      "description": "Repo context graph: get code context from graft/ before grepping or reading source files (ADR-0076)"
+      "l2_propagate": true,
+      "description": "Repo context graph: get code context from graft/ before grepping or reading source files (ADR-0076). Platform mirrors of this skill are SELF-MANAGED by the graft CLI (docs/self-managed-surfaces.json) and are not shipped by the template lineage."
     }
   },
   "common_commands": {

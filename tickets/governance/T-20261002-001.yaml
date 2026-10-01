@@ -1,0 +1,33 @@
+schemaVersion: 1
+id: T-20261002-001
+kind: manual
+title: >-
+  Exclude self-managed tool surfaces (graft) from governed skill/template
+  management
+priority: high
+status: done
+attempts: 0
+created_at: '2026-10-01T21:55:35.118Z'
+history:
+  - at: '2026-10-01T21:55:35.118Z'
+    from: null
+    to: backlog
+  - at: '2026-10-01T22:04:03.887Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-01T22:04:03.922Z'
+    from: waiting
+    to: running
+  - at: '2026-10-01T22:04:03.935Z'
+    from: running
+    to: review
+  - at: '2026-10-01T22:04:03.947Z'
+    from: review
+    to: done
+result: >-
+  Generic self-managed-surfaces registry + shared loader implemented; graft
+  mirrors/helpers transferred to tool custody (gitignore + untracked), platform
+  mirrors withdrawn from templates/common, verify-platform-lifecycle exemption
+  seeded from the registry, propagate skip wired. All gates green (unit suite,
+  E2E 41/41, validate-templates 0 errors).
+error: null
