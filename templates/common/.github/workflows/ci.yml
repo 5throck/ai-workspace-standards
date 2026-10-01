@@ -133,7 +133,18 @@ jobs:
 
       - name: Install dependencies
         if: steps.detect.outputs.has_unit == 'true'
-        run: bun install --frozen-lockfile
+        # Root install first, then every nested project directory that carries
+        # its own bun.lock — projects commonly host an app workspace (e.g.
+        # app/web-next, projects/<game>) outside the root lockfile, and unit
+        # tests import from those packages (U-20261002-001: co-newbiz failed
+        # with "Cannot find module 'next/server'" before this step existed).
+        # frozen-lockfile keeps every install reproducible.
+        run: |
+          bun install --frozen-lockfile
+          find . -mindepth 2 -maxdepth 4 \( -name 'bun.lock' -o -name 'bun.lockb' \) \
+            -not -path '*/node_modules/*' | while read -r lock; do
+              (cd "$(dirname "$lock")" && bun install --frozen-lockfile)
+            done
 
       - name: Run unit tests
         if: steps.detect.outputs.has_unit == 'true'

@@ -185,3 +185,20 @@ across all 13 is still required after PR-A lands (the new code does not exist ye
   (manual migration, reported with an error code).
 - Runner behaviour unobservable until Actions minutes return (T-20260927-016); follow-up ticket to
   confirm first green runs, then opt into required checks.
+
+## 11. Amendment (2026-10-02, U-20261002-001) — nested-lockfile installs
+
+Live CI on co-newbiz failed with "Cannot find module 'next/server'" in the
+default Unit Tests job: the root `bun install --frozen-lockfile` does not cover
+project directories that carry their OWN bun.lock (app/web-next), and unit
+tests import from those packages. Five more projects host nested lockfiles
+(co-architect, co-design, co-game x4, co-safety, co-security), making this a
+fleet-wide latent breakage of the default-on job.
+
+Fix: the Install step now walks nested lockfiles (`find . -mindepth 2
+-maxdepth 4 -name 'bun.lock*' -not -path '*/node_modules/*'`) and runs
+`bun install --frozen-lockfile` per directory — generic, reproducible, and
+still zero-config for simple projects. Documentation-only fallback (steering
+such projects to the PROJECT-JOB region) was considered and rejected: the
+default job is on by default, so silent CI breakage would remain the failure
+mode for every future nested-layout project.
