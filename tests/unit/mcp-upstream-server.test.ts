@@ -131,7 +131,15 @@ class Session {
     const rpc = await this.tool('upstream_request_status', args);
     return { rpc, body: rpc.result ? JSON.parse(rpc.result.content[0].text) : null };
   }
-  close(): void { this.child.kill(); }
+  /** Kill and wait for exit: Windows locks a running process's cwd, so the temp workspace cannot be removed before this resolves. */
+  close(): Promise<void> {
+    if (this.child.exitCode !== null || this.child.signalCode !== null) return Promise.resolve();
+    return new Promise((res) => {
+      const t = setTimeout(res, 5_000);
+      this.child.once('exit', () => { clearTimeout(t); res(); });
+      this.child.kill();
+    });
+  }
 }
 
 let ws: Workspace;
@@ -143,9 +151,9 @@ function open(cwd: string, env: Record<string, string> = {}): Session {
 }
 
 beforeEach(() => { ws = makeWorkspace(); sessions = []; });
-afterEach(() => {
-  for (const s of sessions) s.close();
-  rmSync(ws.root, { recursive: true, force: true });
+afterEach(async () => {
+  await Promise.all(sessions.map((s) => s.close()));
+  rmSync(ws.root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
 const SYMPTOM = 'upgrade-project overwrote the local fix and the hook fails again afterwards';
