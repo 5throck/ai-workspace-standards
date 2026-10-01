@@ -1769,16 +1769,16 @@
       "id": "2026-10-01-ci-template-unit-test-job-design",
       "title": "ci template unit test job design",
       "file": "docs/designs/2026-10-01-ci-template-unit-test-job-design.md",
-      "status": "draft",
+      "status": "implemented",
       "source": "architect",
       "created": "2026-09-30",
-      "last_updated": "2026-09-30"
+      "last_updated": "2026-10-01"
     },
     {
       "id": "2026-10-01-l3-pm-stub-decision-design",
       "title": "l3 pm stub decision design",
       "file": "docs/designs/2026-10-01-l3-pm-stub-decision-design.md",
-      "status": "draft",
+      "status": "approved",
       "source": "architect",
       "created": "2026-10-01",
       "last_updated": "2026-10-01"

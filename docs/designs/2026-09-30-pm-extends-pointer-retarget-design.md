@@ -1,12 +1,13 @@
 # Design: project-resolvable pm.md extends pointer (T-20260930-037)
 
 Status: SUPERSEDED and reverted (2026-10-01). The retarget rule below pointed a project
-`pm.md` at the L0 root `agents/pm.md`, which skips the L1 layer (`templates/common/agents/pm.md`)
-and violates the L2 to L1 extends chain of ADR-0039. T-20261001-003 reported the fleet effect;
-the nightly runner had already restored `../../common/agents/pm.md` in the deployed projects.
-The pipeline code, its tests, and the version bumps were reverted. The original "dangling
-pointer" premise was wrong: `../../common/agents/pm.md` is the correct L1 pointer, and a
-scaffold normally inlines the L1 body and drops `extends`. Open question kept for follow-up:
+`pm.md` at the L0 root `agents/pm.md`; the pipeline change was reverted in PR #1268, and the
+nightly runner had already restored `../../common/agents/pm.md` in the deployed projects
+(the pipeline code, its tests, and the version bumps were reverted with it).
+**Final ruling: ADR-0095 (Accepted 2026-10-01) — an L3 extends pointer is valid iff it
+resolves on disk; the dangling `../../common` form is invalid; this design's L0 retarget
+direction was subsequently adopted by decision rather than by its own mechanism.**
+Historical note: T-20261001-003 reported the fleet effect. Open question kept for follow-up:
 why `upgrade-project` MERGE creation copies a stub verbatim instead of resolving it against L1.
 Source: PM triage of T-20260930-030/031/036 (dangling `pm.md` extends in variant projects).
 

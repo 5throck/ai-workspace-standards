@@ -1,4 +1,12 @@
-// @version 1.9.0
+// @version 1.10.0
+// v1.10.0 (2026-10-01 project review H1): the repo root is resolved ONCE at
+//           startup (`git rev-parse --show-toplevel` anchored at the caller's
+//           process.cwd() — the walked tree — with a graceful cwd fallback) and
+//           passed as `cwd` to EVERY git spawn (`git ls-files`, `git log`,
+//           `git rev-parse --is-shallow-repository`). Previously the spawns
+//           inherited the process cwd, so invoking the collector logic from a
+//           subdirectory resolved the tracked set against the wrong tree and
+//           silently corrupted the drift gate (verified in the review).
 // v1.9.0 (T-20261001-007): machine-independent enumeration. The collectors now
 //           filter candidates against one `git ls-files -z` query, so untracked
 //           tool-managed directories (e.g. .claude/skills/graft on a machine
@@ -78,6 +86,33 @@ import * as yaml from 'js-yaml';
 const MANIFEST_PATH = path.join('docs', 'VERSION_MANIFEST.md');
 const MANIFEST_VERSION = '1.0';
 
+// ── Repo root resolution (2026-10-01 review H1) ──────────────────────────────
+// Every git spawn must run against the REPOSITORY ROOT, not whatever directory
+// the process happens to sit in: `git ls-files` inside a subdirectory only
+// lists that subtree, which silently emptied the tracked set (open in
+// trackedFilterForRoot) and corrupted the drift gate. The anchor is
+// process.cwd() — the caller's working tree — NOT import.meta.dir: the script
+// file may live in an L0 workspace while enumerating a scaffolded project
+// checkout, and anchoring at the file's own location would resolve the wrong
+// repository. Falls back to process.cwd() itself when git is unavailable or
+// this is not a repository (fail-open, same spirit as the v1.9.0 tracked-set
+// fail-open); an explicit cwd fallback keeps every git spawn well-defined.
+let repoRootCache: string | undefined;
+
+export function resolveRepoRoot(): string {
+    if (repoRootCache !== undefined) return repoRootCache;
+    try {
+        const { status, stdout } = spawnSync('git', ['rev-parse', '--show-toplevel'], {
+            encoding: 'utf-8',
+            cwd: process.cwd(),
+        });
+        repoRootCache = status === 0 && stdout.trim() ? stdout.trim() : process.cwd();
+    } catch {
+        repoRootCache = process.cwd();
+    }
+    return repoRootCache;
+}
+
 const GREEN = '\x1b[32m';
 const CYAN = '\x1b[36m';
 const RED = '\x1b[31m';
@@ -118,7 +153,7 @@ export interface CommandInfo {
 
 async function getGitTimestamp(filePath: string): Promise<string> {
     try {
-        const { stdout } = await $`git log -1 --format=%ct ${filePath}`.quiet().nothrow();
+        const { stdout } = await $`git -C ${resolveRepoRoot()} log -1 --format=%ct ${filePath}`.quiet().nothrow();
         if (!stdout.toString().trim()) return 'N/A';
         const timestamp = parseInt(stdout.toString().trim(), 10);
         return new Date(timestamp * 1000).toISOString().split('T')[0];
@@ -136,6 +171,7 @@ export function isShallowRepository(): boolean {
     try {
         const { status, stdout } = spawnSync('git', ['rev-parse', '--is-shallow-repository'], {
             encoding: 'utf-8',
+            cwd: resolveRepoRoot(),
         });
         return status === 0 && stdout.trim() === 'true';
     } catch {
@@ -252,10 +288,10 @@ function extractScriptDependencies(content: string): string[] {
 // drop any candidate that is not in it. Cached per process.
 let trackedFilesCache: Set<string> | null | undefined;
 
-function getTrackedFiles(): Set<string> | null {
+export function getTrackedFiles(): Set<string> | null {
     if (trackedFilesCache !== undefined) return trackedFilesCache;
     try {
-        const { status, stdout } = spawnSync('git', ['ls-files', '-z'], { encoding: 'utf-8' });
+        const { status, stdout } = spawnSync('git', ['ls-files', '-z'], { encoding: 'utf-8', cwd: resolveRepoRoot() });
         trackedFilesCache = status === 0
             ? new Set(stdout.split('\0').filter(Boolean).map(normalizePath))
             : null;

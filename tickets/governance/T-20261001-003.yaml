@@ -35,4 +35,7 @@ result: >-
   projects at L0 and skipped L1 (ADR-0039). Reverted in PR #1268; deployed
   projects carry ../../common/agents/pm.md; design doc marked superseded;
   follow-up investigation ticket opened (service ticket T-20261001-007).
+  Correction 2026-10-01: ADR-0095 later ruled the dangling form invalid and
+  the L0 pointer valid at L3; the pointer swap completed across all 9 repos
+  the same day.
 error: null
