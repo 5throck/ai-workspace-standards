@@ -5,7 +5,7 @@
  * Replaces publish-to-template.ts (deprecated v1.8.0). Single authoritative script
  * for all L0→L1 propagation. Config-driven via propagation-map.json (SSOT for exclusions).
  *
- * @version 2.19.0
+ * @version 2.19.1
  *
  * v2.19.0 (2026-09-27, ADR-0093 — user directive 2026-09-27; spec
  *          docs/designs/2026-09-27-hermes-md-instruction-file-design.md):
@@ -1256,7 +1256,7 @@ export function applyGovernanceTransforms(content: string, filename: string, tar
       `### 🎯 Agent Roster (Roles Overview)\n\n` +
       `| Agent | File | Tier | Role |\n` +
       `|-------|------|------|------|\n` +
-      `| **Project Manager (PM) Agent** | [\`agents/pm.md\`](agents/pm.md) | High | Orchestrates team assembly (Phase 0), design validation (Phase 2), and lifecycle finalization (Phase 6). **PM does NOT execute code or documentation directly — all specialist work dispatched through PM.** |\n\n` +
+      `| **Project Manager (PM) Agent** | [\`agents/pm.md\`](agents/pm.md) | High | Orchestrates team assembly, approval gates, and lifecycle finalization (phase numbers are variant-specific; see \`docs/phase-definitions.md\`). **PM does NOT execute code or documentation directly — all specialist work dispatched through PM.** |\n\n` +
       `<!-- VARIANT-AGENTS-START -->\n` +
       `<!-- Define project-specific specialist agents here.\n` +
       `     Each row: | Agent Name | [\`agents/name.md\`](agents/name.md) | Tier | Role description |\n` +
