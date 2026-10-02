@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
-// @version 1.8.0
+// @version 1.9.0
+// v1.9.0 (2026-10-02, T-20261002-010 M10): the upstream resolution walk for kind manual skips the service-runner running hop — backlog -> waiting -> review -> done (design §5.1).
 // v1.8.0 (2026-10-02, T-20261002-003/-005): withTicketLock — shared per-directory ticket
 //           lock (owner token, fail-closed, atomic stale takeover) wrapping every
 //           existing-ticket mutation, closing the H4 lost-update class against the server
@@ -433,7 +434,11 @@ export function setUpstreamResolution(
       }
       throw new Error(`[ticket-store] ${id} is already done`);
     }
-    const order: Status[] = ['backlog', 'waiting', 'running', 'review', 'done'];
+    // M10 (T-20261002-010): kind manual never enters the service-runner 'running' hop —
+    // design §5.1 maps investigation to review, reached directly from waiting.
+    const order: Status[] = ticket.kind === 'manual'
+      ? ['backlog', 'waiting', 'review', 'done']
+      : ['backlog', 'waiting', 'running', 'review', 'done'];
     let hop: Status = ticket.status;
     const chain: Status[] = [];
     while (hop !== 'done') {

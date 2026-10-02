@@ -1,4 +1,12 @@
 {
   "$comment": "Documented §11.0 surface gaps (T-20261001-018). Each row: surface (registry name), check (instruction-file | platform-dir | skill-mirror | *), reason, fallback, ticket. A finding matching a row renders as WARN naming the ticket; every other finding is a FAIL (CONSTITUTION §11.0 rule 1 — never omit a surface silently).",
-  "gaps": []
+  "gaps": [
+    {
+      "surface": "Antigravity CLI",
+      "check": "*",
+      "reason": "The Antigravity CLI-specific config path ~/.gemini/antigravity-cli/mcp_config.json (design Appendix B, ADR-0097) is not covered by install-upstream-mcp.ts, which registers the Antigravity family at the shared ~/.gemini/config/mcp_config.json (CONSTITUTION §11.0 row 3/4). The CLI is expected to read the shared file (row 4 says shared with #3); the CLI-specific path is a fallback some builds use.",
+      "fallback": "Antigravity CLI users on builds that only read the CLI-specific path register the server by hand or via the CLI's own mcp command; the shared registration covers the IDE and default CLI builds.",
+      "ticket": "T-20261002-010"
+    }
+  ]
 }

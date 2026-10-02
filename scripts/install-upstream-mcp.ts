@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
-// @version 2.1.1
+// @version 2.2.0
+// v2.2.0 (2026-10-02, T-20261002-010 M9): codex --force captures the previous registration and RESTORES it when the add fails — a failed force no longer deletes the user's old entry.
 // v2.1.1 (2026-10-02, T-20261002-009): exports TARGET_CONFIG_FILES (registry-facing target->file map) and import-guards main(); no behavior change.
 // v2.1.0 (2026-10-02, T-20261002-006): file-write hardening (review H5) — backupAndWrite
 //          preserves the original file mode, resolves symlinked configs to their real file,
@@ -282,9 +283,20 @@ const codex: Adapter = {
     return { command: String(t.command ?? ''), args: Array.isArray(t.args) ? t.args.map(String) : [] };
   },
   write(entry) {
-    if (this.read() !== null) this.remove(); // replace (only reached with --force)
+    // M9 (T-20261002-010): --force used to remove-then-add with no recovery — a failed
+    // add left the user's old registration deleted. Capture the previous entry and
+    // restore it when the add fails.
+    const previous = this.read();
+    if (previous !== null) this.remove(); // replace (only reached with --force)
     const r = runCodex(['mcp', 'add', SERVER_NAME, '--', entry.command, ...entry.args]);
-    if (r.status !== 0) fail(`codex mcp add failed: ${(r.stderr || r.stdout).trim()}`);
+    if (r.status !== 0) {
+      if (previous !== null) {
+        const restore = runCodex(['mcp', 'add', SERVER_NAME, '--', previous.command, ...previous.args]);
+        const restoredNote = restore.status === 0 ? 'previous registration restored' : 'RESTORE FAILED — re-register the previous codex entry by hand';
+        fail(`codex mcp add failed (${(r.stderr || r.stdout).trim()}); ${restoredNote}`);
+      }
+      fail(`codex mcp add failed: ${(r.stderr || r.stdout).trim()}`);
+    }
   },
   remove() {
     const r = runCodex(['mcp', 'remove', SERVER_NAME]);

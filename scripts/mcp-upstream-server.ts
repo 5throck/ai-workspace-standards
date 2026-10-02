@@ -1,5 +1,14 @@
 #!/usr/bin/env bun
-// @version 1.7.0
+// @version 1.8.0
+// v1.8.0 (2026-10-02, T-20261002-010): M5 — intake lock gains an owner token, atomic
+//           stale takeover and FAIL-CLOSED semantics: a lock timeout now answers
+//           retryable -32000 instead of silently proceeding unlocked; M6 — reject-path
+//           audit writes are capped per project per process-day (REJECT_AUDIT_CAP) so a
+//           caller looping invalid requests cannot grow the log unboundedly; M11 —
+//           JSON-RPC ping handler, envelope validation (-32700/-32600), a 1 MB stdin
+//           line cap, and retryable failures returned as result.isError so hint text
+//           reaches the agent. Remaining tool-error transport (JSON-RPC error objects)
+//           stays as an accepted deviation, documented in the batch design §F.
 // v1.7.0 (2026-10-02, T-20261002-004/-008): upstream_request_status audit-logs every
 //           call (outcome: status, identity cwd|declared) and REDACTS resolution
 //           content (summary/pr_url) when identity was self-declared project_root —
@@ -56,7 +65,7 @@ const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 
 /** T-20261002-008 (M1): single version constant — the @version header above and
  * serverInfo.version must stay identical; a unit test pins the two literals. */
-export const SERVER_VERSION = '1.7.0';
+export const SERVER_VERSION = '1.8.0';
 
 // TEST-ONLY SEAM: UPSTREAM_WORKSPACE_ROOT overrides the workspace root that is otherwise
 // derived from this script's path. It exists so tests can run the real server against a
@@ -333,6 +342,29 @@ function appendAuditLog(entry: Record<string, unknown>): void {
   appendFileSync(join(LOGS_DIR, `${todayStr()}.jsonl`), JSON.stringify({ ts: new Date().toISOString(), ...entry }) + '\n', 'utf-8');
 }
 
+// M6 (T-20261002-010): reject-path audit lines are written OUTSIDE the intake lock by
+// untrusted callers — a client looping invalid requests would grow the log unboundedly
+// and slow every cap read. Writes are capped per project per process-day; past the cap
+// the caller still gets its error, the log just stops recording repeats.
+const REJECT_AUDIT_CAP = 50;
+const rejectAuditCounts = new Map<string, { day: string; count: number }>();
+
+/** Test seam: the reject cap is per-process state; tests reset it so reject-line
+ * counts stay deterministic across cases. */
+export function _resetRejectAuditForTests(): void {
+  rejectAuditCounts.clear();
+}
+
+function appendRejectAudit(project: string, entry: Record<string, unknown>): void {
+  const day = todayStr();
+  const key = project || '(unregistered)';
+  const rec = rejectAuditCounts.get(key);
+  const count = rec && rec.day === day ? rec.count : 0;
+  if (count >= REJECT_AUDIT_CAP) return;
+  rejectAuditCounts.set(key, { day, count: count + 1 });
+  appendAuditLog(entry);
+}
+
 function readTodayAudit(): Array<{ project?: string; outcome?: string; triage?: string }> {
   const todayLog = join(LOGS_DIR, `${todayStr()}.jsonl`);
   if (!existsSync(todayLog)) return [];
@@ -363,8 +395,11 @@ function intakeLockTimeoutMs(): number {
   return 5000;
 }
 
+class IntakeLockTimeoutError extends Error {}
+
 function withIntakeLock<T>(fn: () => T): T {
   mkdirSync(LOGS_DIR, { recursive: true });
+  const token = createHash('sha256').update(`${process.pid}-${Date.now()}-${Math.random()}`).digest('hex').slice(0, 16);
   const deadline = Date.now() + intakeLockTimeoutMs();
   for (;;) {
     try {
@@ -372,23 +407,39 @@ function withIntakeLock<T>(fn: () => T): T {
       break;
     } catch (err) {
       if ((err as NodeJS.ErrnoException).code !== 'EEXIST') throw err;
+      // M5: stale takeover via ATOMIC RENAME — exactly one waiter wins; the old
+      // rmSync-then-retry let two waiters both "remove" the same stale lock.
+      let stale = false;
       try {
-        if (Date.now() - statSync(INTAKE_LOCK_DIR).mtimeMs > INTAKE_LOCK_STALE_MS) {
-          rmSync(INTAKE_LOCK_DIR, { recursive: true, force: true });
-        }
-      } catch { /* racer removed it first — loop and retry */ }
+        stale = Date.now() - statSync(INTAKE_LOCK_DIR).mtimeMs > INTAKE_LOCK_STALE_MS;
+      } catch { /* vanished between EEXIST and stat — loop and retry mkdir */ }
+      if (stale) {
+        try {
+          const stalePath = `${INTAKE_LOCK_DIR}.stale-${process.pid}-${Date.now()}`;
+          renameSync(INTAKE_LOCK_DIR, stalePath);
+          rmSync(stalePath, { recursive: true, force: true });
+          continue;
+        } catch { /* another waiter won the rename — wait */ }
+      }
+      // M5: FAIL CLOSED. The old fail-open let a contended lock silently degrade to
+      // the pre-lock race (double-spent caps, double first-seen). Callers convert
+      // IntakeLockTimeoutError into a retryable -32000 answer.
       if (Date.now() >= deadline) {
-        // Fail-open: proceed unlocked (single-instance behavior). The window this
-        // leaves open is the pre-lock race the design accepted for v1.4.0.
-        return fn();
+        throw new IntakeLockTimeoutError(`intake lock busy after ${intakeLockTimeoutMs()}ms — another server instance is mid-intake; retry shortly`);
       }
       Bun.sleepSync(25);
     }
   }
   try {
+    writeFileSync(join(INTAKE_LOCK_DIR, 'owner'), JSON.stringify({ pid: process.pid, token, at: new Date().toISOString() }), 'utf-8');
+  } catch { /* stolen between mkdir and owner write — release below is a no-op */ }
+  try {
     return fn();
   } finally {
-    rmSync(INTAKE_LOCK_DIR, { recursive: true, force: true });
+    try {
+      const owner = JSON.parse(readFileSync(join(INTAKE_LOCK_DIR, 'owner'), 'utf-8')) as { token?: string };
+      if (owner.token === token) rmSync(INTAKE_LOCK_DIR, { recursive: true, force: true });
+    } catch { /* lock already gone (stale-taken) — nothing to release */ }
   }
 }
 
@@ -413,6 +464,9 @@ function pruneOldLogs(now = Date.now()): number {
   } catch { /* retention is best-effort — never block intake */ }
   return pruned;
 }
+
+// M11: stdin line cap enforced before JSON.parse (see the request loop).
+const MAX_LINE_BYTES = 1_000_000;
 
 const ALLOWED_KEYS = new Set(['suspected_layer', 'symptom', 'affected_paths', 'local_workaround_diff', 'repro', 'project_root']);
 
@@ -496,19 +550,25 @@ function handleCreateRequest(params: unknown, cwd: string): Outcome {
   if (typeof projResult === 'string') {
     // Raw cwd is never stored: it may contain arbitrary user paths.
     const cwdHash = createHash('sha256').update(cwd, 'utf-8').digest('hex').slice(0, 16);
-    appendAuditLog({ cwd_hash: cwdHash, outcome: 'reject_unregistered' });
+    appendRejectAudit('', { cwd_hash: cwdHash, outcome: 'reject_unregistered' });
     return { error: { code: -32602, message: `${projResult} (when your client launches this server outside the project directory — e.g. the Claude Desktop App — pass the project's absolute path as project_root)` } };
   }
 
   const { name: project, variant, version, path: projectPath } = projResult;
   const valResult = validateUpstreamRequest(params);
   if (!valResult.valid) {
-    appendAuditLog({ project, outcome: 'reject_invalid' });
+    appendRejectAudit(project, { project, outcome: 'reject_invalid' });
     return { error: { code: -32602, message: valResult.error } };
   }
 
   const req = valResult.req;
-  const requestHash = createHash('sha256').update(JSON.stringify(req), 'utf-8').digest('hex');
+  // M12 (T-20261002-010): the hash covers exactly the STORED request fields — the old
+  // JSON.stringify(req) included project_root, which the ticket never stores, so the
+  // digest could not be recomputed from the ticket for the audit-immutability check.
+  const requestHash = createHash('sha256').update(JSON.stringify({
+    suspected_layer: req.suspected_layer, symptom: req.symptom, affected_paths: req.affected_paths,
+    local_workaround_diff: req.local_workaround_diff, repro: req.repro,
+  }), 'utf-8').digest('hex');
   const dedupeHash = dedupeKey(req.affected_paths, req.symptom);
 
   let flagged = checkInjection({ symptom: req.symptom, repro: req.repro, diff: req.local_workaround_diff });
@@ -517,7 +577,8 @@ function handleCreateRequest(params: unknown, cwd: string): Outcome {
   // T-20261001-017: the cap counters, the known-projects first-seen state and the audit
   // append are read-then-write — the whole accept/merge/reject path runs under the intake
   // lock so parallel server instances serialize (id allocation itself stays EEXIST-retried).
-  return withIntakeLock(() => {
+  try {
+    return withIntakeLock(() => {
     // Caps: hard cap counts accepted tickets AND merges; soft cap counts new tickets only.
     const audit = readTodayAudit();
     const projectAccepted = audit.filter((e) => e.project === project && e.outcome === 'accepted').length;
@@ -572,8 +633,15 @@ function handleCreateRequest(params: unknown, cwd: string): Outcome {
     }
 
     const knownProjects = loadKnownProjects();
-    const isFirstRequest = !knownProjects.has(project);
-    if (isFirstRequest) failReasons.push('first_request_from_project');
+    // M7 (T-20261002-010): the first-request gate is a TRUST-BUILDING gate, not a
+    // permanent label — a project whose ticket the PM resolved as fixed|local-only has
+    // earned trust, so its NEXT genuine defect is not auto-demoted to inbox.
+    const trustedByResolution = loadUpstreamTickets().some(({ ticket }) =>
+      ticket.upstream.project === project &&
+      ticket.upstream.resolution &&
+      (ticket.upstream.resolution.outcome === 'fixed' || ticket.upstream.resolution.outcome === 'local-only'));
+    const isFirstRequest = !knownProjects.has(project) && !trustedByResolution;
+    if (!knownProjects.has(project) && !trustedByResolution) failReasons.push('first_request_from_project');
 
     const globalReady = audit.filter((e) => e.outcome === 'accepted' && e.triage === 'ready').length;
     if (globalReady >= UPSTREAM_GLOBAL_READY_CAP) failReasons.push('global_ready_cap');
@@ -628,7 +696,13 @@ function handleCreateRequest(params: unknown, cwd: string): Outcome {
     appendAuditLog({ project, outcome: 'accepted', id, flagged, triage, identity: declared ? 'declared' : 'cwd', reasons: failReasons, dedupe_key: dedupeHash, request_sha256: requestHash });
 
     return { result: { id, status, triage, merged_into: null, flagged, reasons: failReasons, marker: `LOCAL-PATCH(upstream-request: ${id})` } };
-  });
+    });
+  } catch (err) {
+    if (err instanceof IntakeLockTimeoutError) {
+      return { error: { code: -32000, message: `rate_limited: ${err.message}` } };
+    }
+    throw err;
+  }
 }
 
 function handleStatusRequest(params: unknown, cwd: string): Outcome {
@@ -752,20 +826,52 @@ async function main(): Promise<void> {
   const rl = createInterface({ input: process.stdin });
   for await (const line of rl) {
     if (!line.trim()) continue;
+    // M11: cap the raw line BEFORE parsing — a hostile client can otherwise feed an
+    // arbitrarily large line straight into JSON.parse.
+    if (Buffer.byteLength(line, 'utf-8') > MAX_LINE_BYTES) {
+      sendResponse(null, undefined, { code: -32600, message: `invalid request: line exceeds ${MAX_LINE_BYTES} bytes` });
+      continue;
+    }
     let id: string | number | null = null;
+    let msg: JsonRpcMessage;
     try {
-      const msg = JSON.parse(line) as JsonRpcMessage;
+      msg = JSON.parse(line) as JsonRpcMessage;
+    } catch {
+      // M11: malformed JSON is a parse error (-32700), not an internal error.
+      sendResponse(null, undefined, { code: -32700, message: 'parse error: line is not valid JSON' });
+      continue;
+    }
+    try {
       id = msg.id ?? null;
+      // M11: envelope validation — batch arrays, non-objects and wrong jsonrpc
+      // versions get the standard -32600 instead of undefined behavior.
+      if (typeof msg !== 'object' || msg === null || Array.isArray(msg) || msg.jsonrpc !== '2.0') {
+        sendResponse(id, undefined, { code: -32600, message: 'invalid request: expected a JSON-RPC 2.0 message object with jsonrpc "2.0"' });
+        continue;
+      }
       const { method, params } = msg;
 
       if (method === 'initialize') {
         sendResponse(id, handleInitialize(params));
+      } else if (method === 'ping') {
+        // M11: the MCP ping — previously answered -32601, which made clients
+        // classify a healthy server as dead.
+        sendResponse(id, {});
       } else if (method === 'tools/list') {
         sendResponse(id, { tools: getTools() });
       } else if (method === 'tools/call') {
         const outcome = dispatchToolCall(params);
-        if ('error' in outcome) sendResponse(id, undefined, outcome.error);
-        else sendResponse(id, { isError: false, content: [{ type: 'text', text: JSON.stringify(outcome.result) }] });
+        if ('error' in outcome) {
+          if (outcome.error.code === -32000) {
+            // M11/M5: retryable failures travel as result.isError so the retry hint
+            // reaches the agent instead of dying in a transport-level error object.
+            sendResponse(id, { isError: true, content: [{ type: 'text', text: JSON.stringify({ error: outcome.error }) }] });
+          } else {
+            sendResponse(id, undefined, outcome.error);
+          }
+        } else {
+          sendResponse(id, { isError: false, content: [{ type: 'text', text: JSON.stringify(outcome.result) }] });
+        }
       } else if (typeof method === 'string' && method.startsWith('notifications/')) {
         // notifications carry no response
       } else if (msg.id !== undefined) {
