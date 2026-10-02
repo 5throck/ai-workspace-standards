@@ -220,9 +220,22 @@ jobs:
             fi
             echo "[$name] ${#patches[@]} patch(es) to publish"
             cd "$dir"
-            base=$(git rev-parse HEAD)
+            # Rebuild deterministically from the pristine remote tip. The agent
+            # legitimately leaves HEAD on its edu-sync branch with the patches
+            # already applied; resetting to wherever the agent left HEAD makes
+            # `git am` re-apply already-applied patches (run failure 2026-10-02,
+            # design 2026-10-03-edu-sync-publisher-base-reset). The exported
+            # patch bundle is the source of truth; the agent's local branch
+            # state is expendable.
+            default_ref=$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null || true)
+            if [ -z "$default_ref" ]; then
+              echo "[$name] cannot resolve remote default branch (origin/HEAD missing)"
+              exit 1
+            fi
+            base=$(git rev-parse "$default_ref")
             branch="edu-sync/$DATE"
-            git checkout -B "$branch"
+            git checkout -f -B "$branch" "$default_ref"
+            git clean -fd
             for p in "${patches[@]}"; do
               # Deterministic path allowlist: only docs/** may be touched.
               # Tab-separated numstat parsing — whitespace-splitting would
@@ -264,11 +277,21 @@ jobs:
               echo "[$name] REJECTED: branch tip carries $tipcount commit(s) but ${#patches[@]} patch(es) were audited"
               exit 1
             fi
-            git push origin "$branch"
+            # Force-push is safe: the tip was just rebuilt from the current
+            # remote tip plus exactly the audited patches, and every commit
+            # passed the gates above. A non-fast-forward reject could only
+            # come from a stale branch left by an earlier same-day run.
+            git push --force origin "$branch"
             subject=$(git log --format=%s -1)
-            gh pr create -R "5throck/$name" --head "$branch" \
-              --title "Edu sync $DATE: $subject" \
-              --body "Automated education-content sync from ai-workspace-standards. Patch bundle: /tmp/edu-patches/$name (${#patches[@]} commit(s)). Applied deterministically by the trusted publisher step — the AI agent ran without credentials. Per-change mapping in /tmp/edu-sync-report.md (attached as run artifact)."
+            existing_pr=$(gh pr list -R "5throck/$name" --head "$branch" --state open \
+              --json number --jq '.[0].number // ""')
+            if [ -n "$existing_pr" ]; then
+              echo "[$name] PR #$existing_pr already open for $branch; branch force-pushed in place"
+            else
+              gh pr create -R "5throck/$name" --head "$branch" \
+                --title "Edu sync $DATE: $subject" \
+                --body "Automated education-content sync from ai-workspace-standards. Patch bundle: /tmp/edu-patches/$name (${#patches[@]} commit(s)). Applied deterministically by the trusted publisher step — the AI agent ran without credentials. Per-change mapping in /tmp/edu-sync-report.md (attached as run artifact)."
+            fi
             echo "[$name] published branch $branch + PR"
             any_published=1
             cd "$GITHUB_WORKSPACE" 2>/dev/null || cd -
