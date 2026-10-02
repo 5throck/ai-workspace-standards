@@ -289,6 +289,30 @@
       "l2_drift_eligible": false,
       "exclude": [],
       "note": "Narrow, explicitly-enumerated exception to ADR-0069 (docs domain disabled 2026-07-08): exactly the three AGENTS.md pointer-table targets. Added by ADR-0090 W2."
+    },
+    "hermes-bootstrap": {
+      "description": "templates/common/HERMES.md Session-bootstrap head block -> variant HERMES.md marker zones (T-20261002-011). The bootstrap block is the ONLY managed zone; variant-authored body content below the markers is never touched.",
+      "mode": "marker-inject",
+      "source_file": "templates/common/HERMES.md",
+      "target_file": "HERMES.md",
+      "marker": "COMMON-HERMES-BOOTSTRAP",
+      "target_variants": [
+        "co-abap",
+        "co-consult",
+        "co-deck",
+        "co-design",
+        "co-develop",
+        "co-export",
+        "co-game",
+        "co-hr",
+        "co-news",
+        "co-price",
+        "co-safety",
+        "co-security",
+        "co-work"
+      ],
+      "exclude_variants": [],
+      "note": "Added 2026-10-02 (T-20261002-011): the PM-role-bootstrap head block was hand-delivered to all 13 variants in one combined PR; this domain makes future edits propagate. Markers added to all 14 files in the same change."
     }
   }
 }

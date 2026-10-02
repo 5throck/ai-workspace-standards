@@ -21,6 +21,7 @@ import {
   parseContextTable,
   checkLayer,
   validateSurfaceRegistry,
+  compareInstallerConfigs,
   SCAFFOLD_COMPOSED,
 } from '../../scripts/validate-surface-registry.ts';
 import { readFileSync } from 'node:fs';
@@ -128,5 +129,43 @@ describe('synthetic workspace (FAIL and gap-WARN paths)', () => {
     writeFileSync(p, drifted, 'utf-8');
     const findings = validateSurfaceRegistry(ws);
     expect(findings.some((x) => x.severity === 'FAIL' && x.check === 'one-source')).toBe(true);
+  });
+});
+
+describe('installer-config comparison (T-20261002-009, M3)', () => {
+  const rows = (mcpConfigs: string[]) =>
+    mcpConfigs.map((mcpConfig, i) => ({ num: i + 1, surface: `s${i}`, family: 'f', instructionFiles: ['CLAUDE.md'], mcpConfig }));
+
+  test('every installer target file present in the §11.0 column → no findings', () => {
+    const reg = rows([
+      '`~/.claude.json`', '`~/.claude.json` (Code tab); `claude_desktop_config.json` (chat)',
+      '`~/.gemini/config/mcp_config.json`', '`~/.gemini/config/mcp_config.json` (shared with #3)',
+      '`~/.codex/config.toml`', '`~/.codex/config.toml` (shared with #5)',
+      '`~/.hermes/config.yaml`', '`~/.hermes/config.yaml` (shared with #7)',
+    ]);
+    expect(compareInstallerConfigs(reg, {
+      claude: '~/.claude.json', 'claude-desktop': 'claude_desktop_config.json',
+      antigravity: '~/.gemini/config/mcp_config.json', gemini: '~/.gemini/settings.json',
+      codex: '~/.codex/config.toml', hermes: '~/.hermes/config.yaml',
+    })).toEqual([]);
+  });
+
+  test('an installer file the column does not name is a FAIL; the legacy gemini path is allowed', () => {
+    const reg = rows(['`~/.claude.json`', '`~/.claude.json`', '`~/.gemini/config/mcp_config.json`', '`~/.gemini/config/mcp_config.json`', '`~/.codex/config.toml`', '`~/.codex/config.toml`', '`~/.hermes/config.yaml`', '`~/.hermes/config.yaml`']);
+    const findings = compareInstallerConfigs(reg, {
+      claude: '~/.claude.json', antigravity: '~/.gemini/config/mcp_config.json',
+      gemini: '~/.gemini/settings.json', codex: '~/.codex/config.toml', hermes: '~/.hermes/config.yaml',
+      vscode: '~/.vscode/mcp.json',
+    });
+    expect(findings).toHaveLength(1);
+    expect(findings[0].message).toContain('vscode');
+    expect(findings[0].message).toContain('~/.vscode/mcp.json');
+  });
+
+  test('a column file no installer target writes is a FAIL', () => {
+    const reg = rows(['`~/.claude.json`', '`~/.newclient/config.json`', '`~/.claude.json`', '`~/.claude.json`', '`~/.claude.json`', '`~/.claude.json`', '`~/.claude.json`', '`~/.claude.json`']);
+    const findings = compareInstallerConfigs(reg, { claude: '~/.claude.json' });
+    expect(findings).toHaveLength(1);
+    expect(findings[0].message).toContain('~/.newclient/config.json');
   });
 });

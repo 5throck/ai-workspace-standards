@@ -1,9 +1,11 @@
 # HERMES.md
 
+<!-- COMMON-HERMES-BOOTSTRAP:START -->
 > **Session bootstrap (mandatory)**: Before your first response in every session, read the full contents of [`AGENTS.md`](AGENTS.md) and [`agents/pm.md`](agents/pm.md).
 > This applies to every request. Short questions, Q&A, and non-code questions are not exempt.
 > Read them once per session, and again after the context is cleared or compacted.
 > Q&A-only turns need no execution plan table. Multi-step work still follows the PM Gateway.
+<!-- COMMON-HERMES-BOOTSTRAP:END -->
 
 > **Behavioral instructions for the Hermes Agents platform (NousResearch/hermes-agent) in this workspace.**
 > **[`AGENTS.md`](AGENTS.md) is the neutral SSOT registry — read it first** (agent roster §1, PM Gateway §3, workflows §4–5, skills §6, baseline §7) and the governance docs it points to when needed. `CLAUDE.md`, `GEMINI.md`, and `CODEX.md` are sibling platform instruction files; this file is the Hermes member of that family — self-sufficient on essentials, thin everywhere else (ADR-0093).
