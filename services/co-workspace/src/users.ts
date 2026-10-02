@@ -424,13 +424,20 @@ export class UserStore {
   }
 
   /** Complete the forced first-login rotation: clear the temp flag and rotate sessions
-   * (SEC-06) — the caller re-signs-in with the new password. */
-  completeTempPasswordChange(userId: string, newPassword: string): UserRecord | null {
+   * (SEC-06: every OTHER session is invalidated). The session that performed the rotation
+   * SURVIVES and continues into the app — R3 parity (2026-10-02 rotation-keeps-session
+   * design): the old purge-everything variant dropped the just-authenticated user onto
+   * the signed-out sidebar card and forced a confusing re-login. */
+  completeTempPasswordChange(userId: string, newPassword: string, keepToken?: string | null): UserRecord | null {
     if (!this.findById(userId)) return null;
     this.db
       .query("UPDATE users SET password_hash=?, must_change_password=0, temp_password_expires=NULL WHERE id=?")
       .run(Bun.password.hashSync(newPassword), userId);
-    this.db.query("DELETE FROM sessions WHERE user_id=?").run(userId);
+    if (keepToken) {
+      this.db.query("DELETE FROM sessions WHERE user_id=? AND token_hash != ?").run(userId, hashToken(keepToken));
+    } else {
+      this.db.query("DELETE FROM sessions WHERE user_id=?").run(userId);
+    }
     return this.findById(userId);
   }
 

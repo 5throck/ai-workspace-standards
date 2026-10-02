@@ -165,11 +165,14 @@ export async function handleAuth(state: GatewayState, req: Request, ctx: Ctx): P
     if (password.length < 8) throw new HttpError(400, "password must be at least 8 characters");
     if (user.mustChangePassword) {
       // R1 forced rotation: the temp credential was verified at sign-in; completing it
-      // rotates sessions — the client signs in again with the new password.
-      const updated = state.users.completeTempPasswordChange(user.id, password);
+      // rotates OTHER sessions and keeps the rotating one — the client stays signed in
+      // (2026-10-02 rotation-keeps-session design; the purge-everything variant dumped
+      // the user onto the signed-out sidebar card for a confusing re-login). The R1
+      // confinement gate lifts with the flag, so this session is now fully privileged.
+      const updated = state.users.completeTempPasswordChange(user.id, password, sessionTokenFromCookie(req));
       if (!updated) throw new HttpError(404, "user not found");
       state.audit.record(updated.principal, "user.password.rotation");
-      return jsonResponse({ ok: true, message: "password updated — sign in with your new password" });
+      return jsonResponse({ user: { loginId: updated.principal, name: updated.name, role: updated.role } });
     }
     // R3: a normal password change must present the current credential.
     const currentPassword = typeof body.currentPassword === "string" ? body.currentPassword : "";

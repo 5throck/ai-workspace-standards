@@ -186,13 +186,22 @@ console.log(JSON.stringify({ type: "result", session_id: "s1", exit_code: 0, tex
     const loginBody = await login.json();
     expect(loginBody.user.mustChangePassword).toBe(true);
 
-    // completing the rotation clears the flag and purges sessions again
+    // completing the rotation clears the flag, invalidates OTHER sessions, and KEEPS
+    // the rotating session signed in (2026-10-02 rotation-keeps-session design)
+    const rotationCookie = login.headers.get("set-cookie")!.split(";")[0];
     const me = await fetch(`${base}/auth/me`, {
       method: "PATCH",
-      headers: { "content-type": "application/json", "x-requested-with": "co-workspace", cookie: login.headers.get("set-cookie")!.split(";")[0] },
+      headers: { "content-type": "application/json", "x-requested-with": "co-workspace", cookie: rotationCookie },
       body: JSON.stringify({ password: "brandnew123" }),
     });
     expect(me.status).toBe(200);
+    const rotatedBody = (await me.json()) as any;
+    expect(rotatedBody.user.loginId).toBe("resetme");
+
+    // the session that performed the rotation continues into the app, un-confined
+    const keptSession = await fetch(`${base}/auth/me`, { headers: { cookie: rotationCookie } });
+    expect(keptSession.status).toBe(200);
+    expect(((await keptSession.json()) as any).user.mustChangePassword).toBe(false);
 
     const relogin = await fetch(`${base}/auth/login`, {
       method: "POST",
@@ -236,13 +245,16 @@ console.log(JSON.stringify({ type: "result", session_id: "s1", exit_code: 0, tex
     expect(meRes.status).toBe(200);
     expect(((await meRes.json()) as any).user.mustChangePassword).toBe(true);
 
-    // completing the rotation re-opens the API for the next session
+    // completing the rotation lifts the R1 confinement on the SAME session
+    // (rotation-keeps-session design) — the API opens without a re-login
     const rotated = await fetch(`${base}/auth/me`, {
       method: "PATCH",
       headers: { "content-type": "application/json", "x-requested-with": "co-workspace", cookie },
       body: JSON.stringify({ password: "freshpass123" }),
     });
     expect(rotated.status).toBe(200);
+    const tenantsSameSession = await fetch(`${base}/tenants`, { headers: { cookie } });
+    expect(tenantsSameSession.status).toBe(200);
     const relogin = await fetch(`${base}/auth/login`, {
       method: "POST",
       headers: { "content-type": "application/json" },
