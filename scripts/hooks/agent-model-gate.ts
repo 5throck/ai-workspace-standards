@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.1.0
+// @version 1.1.1
 /**
  * agent-model-gate.ts — PreToolUse gate enforcing the 3-Tier Cost Optimization
  * strategy (CLAUDE.md §6 / AGENTS.md §3.6) on Agent tool dispatches.
@@ -29,8 +29,12 @@
  */
 
 import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 
-const WORKSPACE_ROOT = new URL('../..', import.meta.url).pathname;
+// fileURLToPath, not URL.pathname: on Windows the pathname keeps a leading slash and
+// percent-encoded spaces, producing an unusable root (T-20261002-013; same fix as
+// pm-role-bootstrap.ts, PR #1317).
+const WORKSPACE_ROOT = fileURLToPath(new URL('../..', import.meta.url));
 const SCHEMA_PATH = `${WORKSPACE_ROOT}docs/workspace-schema.json`;
 
 const VALID_ALIASES = new Set(['sonnet', 'opus', 'haiku', 'fable']);
