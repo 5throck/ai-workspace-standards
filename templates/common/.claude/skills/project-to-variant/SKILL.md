@@ -1,7 +1,7 @@
 ---
 name: project-to-variant
 description: "Convert an existing standalone project into an official variant template. Use when: a proven project should become a reusable template for future projects."
-version: "1.3.0"
+version: 1.3.0
 status: active
 scope: workspace
 owner: scaffolding-expert

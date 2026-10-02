@@ -1,7 +1,7 @@
 ---
 name: upgrade-project
 description: "Upgrade an existing L2/L3 project to the current template version. Use when: upgrading a variant-based project, syncing template improvements, refreshing scripts/agents/skills/docs/commands."
-version: "1.5.2"
+version: 1.5.2
 status: active
 scope: workspace
 owner: pm
