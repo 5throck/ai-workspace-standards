@@ -20,7 +20,11 @@
  *   bun scripts/lifecycle-sync-audit.ts --json
  *   bun scripts/lifecycle-sync-audit.ts --fix
  *
- * @version 1.17.0
+ * @version 1.17.1
+ *
+ * v1.17.1 (2026-10-02): INTENTIONAL_CROSS_REFS gains audit:validate-ticket-doc-commands and
+ *          audit:sync-variant-settings — both existsSync-guarded L0-only spawns in audit.ts
+ *          (T-20261002-008/-011).
  * @last_updated 2026-09-25
  * v1.17.0 (registry-policy-completeness batch W5, spec
  *          docs/designs/2026-09-25-registry-policy-completeness-design.md R5.6):
@@ -1188,6 +1192,8 @@ const INTENTIONAL_CROSS_REFS = new Set([
   'verify-skills:upgrade-project',              // verify-skills.ts: warning string mention only
   'audit:spec-register',                          // audit.ts: string mention in warning message only (--spec-check mode)
   'audit:upgrade-project',                        // audit.ts: guarded by existsSync('Projects') — checkProjectDocMarkerDrift skips entirely when Projects/ is absent (gitignored, L0-dev-machine-only directory; scaffolded/L1 projects have no Projects/ to check)
+  'audit:validate-ticket-doc-commands',           // audit.ts: spawnSync guarded by existsSync — skipped when the L0-only lint is absent (T-20261002-008)
+  'audit:sync-variant-settings',                  // audit.ts: spawnSync guarded by existsSync — skipped when the L0-only sync is absent (T-20261002-011)
   'audit:test-platform-parity',                   // audit.ts: guarded by existsSync — skipped when L0 script absent (L3/L1 projects have no templates/ to test parity on)
   'dev-sync:sync-skill-registries',               // dev-sync.ts step 4.63: guarded by isWorkspaceRoot + existsSync — registry convergence is workspace-root-only (W5, spec docs/designs/2026-09-25-registry-policy-completeness-design.md)
   'validate-templates:sync-skill-registries',     // validate-templates.ts VA-08: string mention in the fix hint only (the L0-only remediation command; W5)

@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
-// @version 2.1.0
+// @version 2.1.1
+// v2.1.1 (2026-10-02, T-20261002-009): exports TARGET_CONFIG_FILES (registry-facing target->file map) and import-guards main(); no behavior change.
 // v2.1.0 (2026-10-02, T-20261002-006): file-write hardening (review H5) — backupAndWrite
 //          preserves the original file mode, resolves symlinked configs to their real file,
 //          re-checks mtime before rename (a concurrent client edit aborts retryably), and
@@ -458,4 +459,18 @@ function main(): void {
   process.exit([...results.values()].includes('failed') ? 1 : 0);
 }
 
-main();
+// T-20261002-009 (M3): the CONSTITUTION-facing identity of every config file this
+// installer writes (home-relative, `~/` prefixes matching the §11.0 table text).
+// The registry comparison in validate-surface-registry.ts imports this — a new
+// target whose file is not in the §11.0 "Machine-global MCP config" column now
+// fails the surface registry check instead of shipping silently.
+export const TARGET_CONFIG_FILES: Record<TargetId, string> = {
+  'claude': '~/.claude.json',
+  'claude-desktop': 'claude_desktop_config.json',
+  'antigravity': '~/.gemini/config/mcp_config.json',
+  'gemini': '~/.gemini/settings.json', // legacy Google-family path (§11.0 trailing note)
+  'codex': '~/.codex/config.toml',
+  'hermes': '~/.hermes/config.yaml',
+};
+
+if (import.meta.main) main();
