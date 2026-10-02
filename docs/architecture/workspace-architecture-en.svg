@@ -1,0 +1,468 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2600 2050" width="2600" height="2050" lang="en" font-family="'Helvetica Neue',Helvetica,Arial,'Apple SD Gothic Neo',sans-serif">
+<title>ai_workspace Integrated Architecture</title>
+<desc>An architecture diagram showing on one page: the deployment and upgrade flow from the L0 workspace root through L1 templates/common, L2 templates/co-* variants, and L3 Projects/co-* instances; the reverse flow of backport-promotion upstream requests; the ticket state machine; the co-workspace provisioning pipeline; and the governance control plane.</desc>
+<defs><marker id="mb" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="16" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L14,7 L0,14 z" fill="#1f6feb"/></marker><marker id="mg" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="16" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L14,7 L0,14 z" fill="#1a7f37"/></marker><marker id="mo" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="16" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L14,7 L0,14 z" fill="#bc4c00"/></marker><marker id="mp" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="16" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L14,7 L0,14 z" fill="#8250df"/></marker><marker id="mt" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="16" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L14,7 L0,14 z" fill="#0a7f7f"/></marker><marker id="my" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="16" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L14,7 L0,14 z" fill="#57606a"/></marker><marker id="mr" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="16" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L14,7 L0,14 z" fill="#cf222e"/></marker></defs>
+<rect width="2600" height="2050" fill="#fafafa"/>
+<text x="40" y="46" font-size="30" fill="#1f2328" font-weight="700">ai_workspace Integrated Architecture — L0→L1→L2→L3 · Backport · Tickets · co-workspace</text>
+<text x="40" y="78" font-size="16" fill="#424a53">As of: 2026-10-02 · templates/VERSION 0.9.0 · Basis: CONSTITUTION, ADR-0031/0092/0097, docs/designs/*</text>
+<rect x="40" y="100" width="1560" height="200" rx="14" fill="#f1f3f5" stroke="#57606a" stroke-width="2.5"/>
+<text x="62" y="130" font-size="21" fill="#424a53" font-weight="700">Governance &amp; Control Plane</text>
+<text x="365" y="130" font-size="14" fill="#424a53">L0 only · PM Gateway</text>
+<rect x="60" y="150" width="180" height="70" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="2.5"/>
+<text x="150" y="191" font-size="17" fill="#1f2328" font-weight="700" text-anchor="middle">User</text>
+<path d="M242 185 H275" fill="none" stroke="#57606a" stroke-width="4" marker-end="url(#my)"/>
+<rect x="278" y="150" width="180" height="70" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="2.5"/>
+<text x="368" y="182" font-size="17" fill="#1f2328" font-weight="700" text-anchor="middle">PM</text>
+<text x="368" y="204" font-size="14" fill="#424a53" text-anchor="middle">triage</text>
+<path d="M460 185 H493" fill="none" stroke="#57606a" stroke-width="4" marker-end="url(#my)"/>
+<rect x="496" y="150" width="180" height="70" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="2.5"/>
+<text x="586" y="182" font-size="17" fill="#1f2328" font-weight="700" text-anchor="middle">Design Gate</text>
+<text x="586" y="204" font-size="14" fill="#424a53" text-anchor="middle">ADR-0074</text>
+<path d="M678 185 H711" fill="none" stroke="#57606a" stroke-width="4" marker-end="url(#my)"/>
+<rect x="714" y="150" width="180" height="70" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="2.5"/>
+<text x="804" y="182" font-size="17" fill="#1f2328" font-weight="700" text-anchor="middle">Specialist Agents</text>
+<text x="804" y="204" font-size="14" fill="#424a53" text-anchor="middle">dispatch ×7</text>
+<path d="M896 185 H929" fill="none" stroke="#57606a" stroke-width="4" marker-end="url(#my)"/>
+<rect x="932" y="150" width="180" height="70" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="2.5"/>
+<text x="1022" y="182" font-size="17" fill="#1f2328" font-weight="700" text-anchor="middle">QA gate</text>
+<text x="1022" y="204" font-size="14" fill="#424a53" text-anchor="middle">audit · spec-check</text>
+<path d="M1114 185 H1147" fill="none" stroke="#57606a" stroke-width="4" marker-end="url(#my)"/>
+<rect x="1150" y="150" width="180" height="70" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="2.5"/>
+<text x="1240" y="182" font-size="17" fill="#1f2328" font-weight="700" text-anchor="middle">/sync</text>
+<text x="1240" y="204" font-size="14" fill="#424a53" text-anchor="middle">dev-sync.ts</text>
+<path d="M1332 185 H1365" fill="none" stroke="#57606a" stroke-width="4" marker-end="url(#my)"/>
+<rect x="1368" y="150" width="180" height="70" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="2.5"/>
+<text x="1458" y="182" font-size="17" fill="#1f2328" font-weight="700" text-anchor="middle">PR</text>
+<text x="1458" y="204" font-size="14" fill="#424a53" text-anchor="middle">human merge</text>
+<text x="60" y="262" font-size="14" fill="#424a53">Tier: High=opus · Medium=sonnet · Low=haiku</text>
+<text x="60" y="284" font-size="14" fill="#424a53">main is PR-only</text>
+<circle cx="1104" cy="152" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>
+<text x="1104" y="158" font-size="16" fill="#ffffff" font-weight="700" text-anchor="middle">1</text>
+<circle cx="1322" cy="152" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>
+<text x="1322" y="158" font-size="16" fill="#ffffff" font-weight="700" text-anchor="middle">3</text>
+<rect x="1620" y="100" width="940" height="200" rx="14" fill="#f1f3f5" stroke="#57606a" stroke-width="2.5"/>
+<text x="1642" y="130" font-size="21" fill="#424a53" font-weight="700">Instructions &amp; Records SSOT</text>
+<rect x="1640" y="150" width="440" height="36" rx="10" fill="#ffffff" stroke="#57606a" stroke-width="1.6"/>
+<text x="1654" y="174" font-size="15" fill="#424a53" font-weight="700">CONSTITUTION.md · L0 only</text>
+<rect x="1640" y="196" width="440" height="36" rx="10" fill="#ffffff" stroke="#57606a" stroke-width="1.6"/>
+<text x="1654" y="220" font-size="15" fill="#424a53" font-weight="700">CLAUDE · GEMINI · CODEX · HERMES.md</text>
+<rect x="1640" y="242" width="440" height="36" rx="10" fill="#ffffff" stroke="#57606a" stroke-width="1.6"/>
+<text x="1654" y="266" font-size="15" fill="#424a53" font-weight="700">specs/registry.json</text>
+<rect x="2100" y="150" width="440" height="36" rx="10" fill="#ffffff" stroke="#57606a" stroke-width="1.6"/>
+<text x="2114" y="174" font-size="15" fill="#424a53" font-weight="700">AGENTS.md · registry</text>
+<rect x="2100" y="196" width="440" height="36" rx="10" fill="#ffffff" stroke="#57606a" stroke-width="1.6"/>
+<text x="2114" y="220" font-size="15" fill="#424a53" font-weight="700">docs/adr · designs · decisions</text>
+<rect x="2100" y="242" width="440" height="36" rx="10" fill="#ffffff" stroke="#57606a" stroke-width="1.6"/>
+<text x="2114" y="266" font-size="15" fill="#424a53" font-weight="700">memory/ · CHANGELOG.md</text>
+<circle cx="2056" cy="196" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>
+<text x="2056" y="202" font-size="16" fill="#ffffff" font-weight="700" text-anchor="middle">2</text>
+<rect x="40" y="320" width="2520" height="380" rx="14" fill="#fbfcfe" stroke="#1f6feb" stroke-width="2.5"/>
+<text x="62" y="350" font-size="21" fill="#0550ae" font-weight="700">Layer Stack</text>
+<text x="210" y="350" font-size="14" fill="#424a53">Fork Model (ADR-0031) — one-way copy top-down, no auto sync</text>
+<rect x="60" y="410" width="470" height="260" rx="14" fill="#eaf3ff" stroke="#1f6feb" stroke-width="3"/>
+<text x="78" y="444" font-size="21" fill="#0550ae" font-weight="700">L0 · workspace root</text>
+<text x="78" y="468" font-size="14" fill="#424a53">single editable location (source of truth)</text>
+<rect x="78" y="488" width="119" height="28" rx="14" fill="#ffffff" stroke="#57606a" stroke-width="1.6"/>
+<text x="87" y="507" font-size="14" fill="#1f2328">scripts/ ≈150</text>
+<rect x="205" y="488" width="112" height="28" rx="14" fill="#ffffff" stroke="#57606a" stroke-width="1.6"/>
+<text x="214" y="507" font-size="14" fill="#1f2328">agents/ pm+7</text>
+<rect x="324" y="488" width="83" height="28" rx="14" fill="#ffffff" stroke="#57606a" stroke-width="1.6"/>
+<text x="333" y="507" font-size="14" fill="#1f2328">skills/ 43</text>
+<rect x="416" y="488" width="55" height="28" rx="14" fill="#ffffff" stroke="#57606a" stroke-width="1.6"/>
+<text x="425" y="507" font-size="14" fill="#1f2328">docs/</text>
+<rect x="78" y="524" width="84" height="28" rx="14" fill="#ffffff" stroke="#57606a" stroke-width="1.6"/>
+<text x="87" y="543" font-size="14" fill="#1f2328">services/</text>
+<rect x="170" y="524" width="77" height="28" rx="14" fill="#ffffff" stroke="#57606a" stroke-width="1.6"/>
+<text x="180" y="543" font-size="14" fill="#1f2328">tickets/</text>
+<rect x="255" y="524" width="96" height="28" rx="14" fill="#ffffff" stroke="#57606a" stroke-width="1.6"/>
+<text x="264" y="543" font-size="14" fill="#1f2328">Handbooks/</text>
+<rect x="359" y="524" width="63" height="28" rx="14" fill="#ffffff" stroke="#57606a" stroke-width="1.6"/>
+<text x="368" y="543" font-size="14" fill="#1f2328">graft/</text>
+<rect x="730" y="410" width="470" height="260" rx="14" fill="#eaf3ff" stroke="#1f6feb" stroke-width="3"/>
+<text x="748" y="444" font-size="21" fill="#0550ae" font-weight="700">L1 · templates/common</text>
+<text x="748" y="468" font-size="14" fill="#424a53">common base</text>
+<rect x="748" y="488" width="66" height="28" rx="14" fill="#ffffff" stroke="#57606a" stroke-width="1.6"/>
+<text x="757" y="507" font-size="14" fill="#1f2328">agents</text>
+<rect x="822" y="488" width="58" height="28" rx="14" fill="#ffffff" stroke="#57606a" stroke-width="1.6"/>
+<text x="831" y="507" font-size="14" fill="#1f2328">skills</text>
+<rect x="888" y="488" width="71" height="28" rx="14" fill="#ffffff" stroke="#57606a" stroke-width="1.6"/>
+<text x="897" y="507" font-size="14" fill="#1f2328">scripts</text>
+<rect x="967" y="488" width="98" height="28" rx="14" fill="#ffffff" stroke="#57606a" stroke-width="1.6"/>
+<text x="976" y="507" font-size="14" fill="#1f2328">procedures</text>
+<rect x="1073" y="488" width="98" height="28" rx="14" fill="#ffffff" stroke="#57606a" stroke-width="1.6"/>
+<text x="1082" y="507" font-size="14" fill="#1f2328">governance</text>
+<rect x="748" y="524" width="146" height="28" rx="14" fill="#ffffff" stroke="#57606a" stroke-width="1.6"/>
+<text x="757" y="543" font-size="14" fill="#1f2328">common-contract</text>
+<rect x="902" y="524" width="128" height="28" rx="14" fill="#ffffff" stroke="#cf222e" stroke-width="1.6" stroke-dasharray="6 3"/>
+<text x="911" y="543" font-size="14" fill="#1f2328">No L0 experts</text>
+<rect x="1400" y="410" width="470" height="260" rx="14" fill="#eaf3ff" stroke="#1f6feb" stroke-width="3"/>
+<text x="1418" y="444" font-size="21" fill="#0550ae" font-weight="700">L2 · templates/co-* (13)</text>
+<text x="1418" y="468" font-size="14" fill="#424a53">8 stable (solid) · 5 beta (dashed)</text>
+<rect x="1418" y="488" width="74" height="28" rx="14" fill="#d6e8ff" stroke="#57606a" stroke-width="1.6"/>
+<text x="1427" y="507" font-size="14" fill="#1f2328">co-abap</text>
+<rect x="1500" y="488" width="95" height="28" rx="14" fill="#d6e8ff" stroke="#57606a" stroke-width="1.6"/>
+<text x="1509" y="507" font-size="14" fill="#1f2328">co-consult</text>
+<rect x="1603" y="488" width="74" height="28" rx="14" fill="#d6e8ff" stroke="#57606a" stroke-width="1.6"/>
+<text x="1612" y="507" font-size="14" fill="#1f2328">co-deck</text>
+<rect x="1685" y="488" width="87" height="28" rx="14" fill="#d6e8ff" stroke="#57606a" stroke-width="1.6"/>
+<text x="1694" y="507" font-size="14" fill="#1f2328">co-design</text>
+<rect x="1418" y="524" width="95" height="28" rx="14" fill="#d6e8ff" stroke="#57606a" stroke-width="1.6"/>
+<text x="1427" y="543" font-size="14" fill="#1f2328">co-develop</text>
+<rect x="1521" y="524" width="78" height="28" rx="14" fill="#d6e8ff" stroke="#57606a" stroke-width="1.6"/>
+<text x="1530" y="543" font-size="14" fill="#1f2328">co-game</text>
+<rect x="1607" y="524" width="103" height="28" rx="14" fill="#d6e8ff" stroke="#57606a" stroke-width="1.6"/>
+<text x="1616" y="543" font-size="14" fill="#1f2328">co-security</text>
+<rect x="1718" y="524" width="78" height="28" rx="14" fill="#d6e8ff" stroke="#57606a" stroke-width="1.6"/>
+<text x="1727" y="543" font-size="14" fill="#1f2328">co-work</text>
+<rect x="1418" y="560" width="90" height="28" rx="14" fill="#fff0d1" stroke="#8a5a00" stroke-width="1.6" stroke-dasharray="6 3"/>
+<text x="1427" y="579" font-size="14" fill="#1f2328">co-export</text>
+<rect x="1516" y="560" width="165" height="28" rx="14" fill="#fff0d1" stroke="#8a5a00" stroke-width="1.6" stroke-dasharray="6 3"/>
+<text x="1525" y="579" font-size="14" fill="#1f2328">co-hr</text>
+<rect x="1569" y="563" width="101" height="22" rx="6" fill="#ffffff" stroke="#cf222e" stroke-width="1.5"/>
+<text x="1573" y="579" font-size="14" fill="#a40e26" font-weight="700">No project</text>
+<rect x="1418" y="596" width="186" height="28" rx="14" fill="#fff0d1" stroke="#8a5a00" stroke-width="1.6" stroke-dasharray="6 3"/>
+<text x="1427" y="615" font-size="14" fill="#1f2328">co-news</text>
+<rect x="1491" y="599" width="101" height="22" rx="6" fill="#ffffff" stroke="#cf222e" stroke-width="1.5"/>
+<text x="1495" y="615" font-size="14" fill="#a40e26" font-weight="700">No project</text>
+<rect x="1612" y="596" width="79" height="28" rx="14" fill="#fff0d1" stroke="#8a5a00" stroke-width="1.6" stroke-dasharray="6 3"/>
+<text x="1621" y="615" font-size="14" fill="#1f2328">co-price</text>
+<rect x="1699" y="596" width="90" height="28" rx="14" fill="#fff0d1" stroke="#8a5a00" stroke-width="1.6" stroke-dasharray="6 3"/>
+<text x="1708" y="615" font-size="14" fill="#1f2328">co-safety</text>
+<rect x="2070" y="410" width="470" height="260" rx="14" fill="#eaf3ff" stroke="#1f6feb" stroke-width="3"/>
+<text x="2088" y="444" font-size="21" fill="#0550ae" font-weight="700">L3 · Projects/co-* (13)</text>
+<text x="2088" y="468" font-size="14" fill="#424a53">all on template-version 0.9.0</text>
+<rect x="2088" y="488" width="74" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
+<text x="2097" y="507" font-size="14" fill="#1f2328">co-abap</text>
+<rect x="2170" y="488" width="204" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
+<text x="2179" y="507" font-size="14" fill="#1f2328">co-architect</text>
+<rect x="2276" y="491" width="87" height="22" rx="6" fill="#ffffff" stroke="#cf222e" stroke-width="1.5"/>
+<text x="2280" y="507" font-size="14" fill="#a40e26" font-weight="700">No template</text>
+<rect x="2382" y="488" width="95" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
+<text x="2391" y="507" font-size="14" fill="#1f2328">co-consult</text>
+<rect x="2088" y="524" width="74" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
+<text x="2097" y="543" font-size="14" fill="#1f2328">co-deck</text>
+<rect x="2170" y="524" width="87" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
+<text x="2179" y="543" font-size="14" fill="#1f2328">co-design</text>
+<rect x="2265" y="524" width="95" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
+<text x="2274" y="543" font-size="14" fill="#1f2328">co-develop</text>
+<rect x="2368" y="524" width="90" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
+<text x="2377" y="543" font-size="14" fill="#1f2328">co-export</text>
+<rect x="2088" y="560" width="78" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
+<text x="2097" y="579" font-size="14" fill="#1f2328">co-game</text>
+<rect x="2174" y="560" width="184" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
+<text x="2183" y="579" font-size="14" fill="#1f2328">co-newbiz</text>
+<rect x="2261" y="563" width="87" height="22" rx="6" fill="#ffffff" stroke="#cf222e" stroke-width="1.5"/>
+<text x="2265" y="579" font-size="14" fill="#a40e26" font-weight="700">No template</text>
+<rect x="2366" y="560" width="79" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
+<text x="2375" y="579" font-size="14" fill="#1f2328">co-price</text>
+<rect x="2088" y="596" width="90" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
+<text x="2097" y="615" font-size="14" fill="#1f2328">co-safety</text>
+<rect x="2186" y="596" width="103" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
+<text x="2195" y="615" font-size="14" fill="#1f2328">co-security</text>
+<rect x="2297" y="596" width="78" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
+<text x="2306" y="615" font-size="14" fill="#1f2328">co-work</text>
+<circle cx="2526" cy="414" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>
+<text x="2526" y="420" font-size="16" fill="#ffffff" font-weight="700" text-anchor="middle">5</text>
+<circle cx="1856" cy="414" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>
+<text x="1856" y="420" font-size="16" fill="#ffffff" font-weight="700" text-anchor="middle">6</text>
+<path d="M533 480 H727" fill="none" stroke="#1f6feb" stroke-width="7" marker-end="url(#mb)"/>
+<rect x="578" y="466" width="104" height="28" rx="14" fill="#ffffff" stroke="#1f6feb" stroke-width="2"/>
+<text x="630" y="485" font-size="15" fill="#1f2328" font-weight="700" text-anchor="middle">propagate</text>
+<text x="630" y="520" font-size="14" fill="#424a53" text-anchor="middle">marker rewrite</text>
+<path d="M1203 480 H1397" fill="none" stroke="#1f6feb" stroke-width="7" marker-end="url(#mb)"/>
+<rect x="1239" y="466" width="121" height="28" rx="14" fill="#ffffff" stroke="#1f6feb" stroke-width="2"/>
+<text x="1300" y="485" font-size="15" fill="#1f2328" font-weight="700" text-anchor="middle">scaffold once</text>
+<text x="1300" y="520" font-size="14" fill="#a40e26" font-weight="700" text-anchor="middle">no auto propagation</text>
+<text x="1300" y="542" font-size="14" fill="#a40e26" font-weight="700" text-anchor="middle">drift is report-only</text>
+<path d="M1873 480 H2067" fill="none" stroke="#1f6feb" stroke-width="7" marker-end="url(#mb)"/>
+<rect x="1908" y="466" width="124" height="28" rx="14" fill="#ffffff" stroke="#1f6feb" stroke-width="2"/>
+<text x="1970" y="485" font-size="15" fill="#1f2328" font-weight="700" text-anchor="middle">new-project</text>
+<text x="1970" y="520" font-size="14" fill="#424a53" text-anchor="middle">--variant</text>
+<circle cx="1362" cy="456" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>
+<text x="1362" y="462" font-size="16" fill="#ffffff" font-weight="700" text-anchor="middle">4</text>
+<path d="M965 408 V382 H2305 V407" fill="none" stroke="#1a7f37" stroke-width="6" marker-end="url(#mg)"/>
+<path d="M1635 408 V382" fill="none" stroke="#1a7f37" stroke-width="6"/>
+<circle cx="1635" cy="382" r="7" fill="#1a7f37"/>
+<rect x="1223" y="368" width="155" height="28" rx="14" fill="#ffffff" stroke="#1a7f37" stroke-width="2"/>
+<text x="1300" y="387" font-size="15" fill="#1f2328" font-weight="700" text-anchor="middle">upgrade-project</text>
+<text x="1900" y="374" font-size="14" fill="#116329" font-weight="700" text-anchor="middle">L1 + L2 → L3 · L0-only engine</text>
+<path d="M1450 672 V690 H770 V796" fill="none" stroke="#1f6feb" stroke-width="6" marker-end="url(#mb)"/>
+<rect x="1045" y="676" width="131" height="28" rx="14" fill="#ffffff" stroke="#1f6feb" stroke-width="2"/>
+<text x="1110" y="695" font-size="15" fill="#1f2328" font-weight="700" text-anchor="middle">L2 template use</text>
+<path d="M2300 672 V742" fill="none" stroke="#bc4c00" stroke-width="5" stroke-dasharray="10 6" marker-end="url(#mo)"/>
+<rect x="2253" y="693" width="95" height="28" rx="14" fill="#ffffff" stroke="#bc4c00" stroke-width="2"/>
+<text x="2300" y="712" font-size="15" fill="#1f2328" font-weight="700" text-anchor="middle">backport</text>
+<path d="M1800 745 V674" fill="none" stroke="#bc4c00" stroke-width="5" stroke-dasharray="10 6" marker-end="url(#mo)"/>
+<rect x="1765" y="698" width="70" height="28" rx="14" fill="#ffffff" stroke="#bc4c00" stroke-width="2"/>
+<text x="1800" y="717" font-size="15" fill="#1f2328" font-weight="700" text-anchor="middle">promote</text>
+<rect x="40" y="725" width="1250" height="465" rx="14" fill="#eaf3ff" stroke="#1f6feb" stroke-width="2.5"/>
+<text x="62" y="755" font-size="21" fill="#0550ae" font-weight="700">co-workspace</text>
+<text x="237" y="755" font-size="14" fill="#424a53">services/co-workspace · ADR-0092</text>
+<rect x="62" y="800" width="160" height="80" rx="12" fill="#ffffff" stroke="#1f6feb" stroke-width="2.5"/>
+<text x="142" y="837" font-size="17" fill="#1f2328" font-weight="700" text-anchor="middle">Client</text>
+<text x="142" y="859" font-size="14" fill="#424a53" text-anchor="middle">web · API compatible</text>
+<path d="M224 840 H268" fill="none" stroke="#1f6feb" stroke-width="5" marker-end="url(#mb)"/>
+<rect x="271" y="800" width="160" height="80" rx="12" fill="#ffffff" stroke="#1f6feb" stroke-width="2.5"/>
+<text x="351" y="837" font-size="17" fill="#1f2328" font-weight="700" text-anchor="middle">Gateway</text>
+<text x="351" y="859" font-size="14" fill="#424a53" text-anchor="middle">:9030 · auth</text>
+<path d="M433 840 H477" fill="none" stroke="#1f6feb" stroke-width="5" marker-end="url(#mb)"/>
+<rect x="480" y="800" width="160" height="80" rx="12" fill="#ffffff" stroke="#1f6feb" stroke-width="2.5"/>
+<text x="560" y="837" font-size="17" fill="#1f2328" font-weight="700" text-anchor="middle">registry-db</text>
+<text x="560" y="859" font-size="14" fill="#424a53" text-anchor="middle">team keys · quotas</text>
+<path d="M642 840 H686" fill="none" stroke="#1f6feb" stroke-width="5" marker-end="url(#mb)"/>
+<rect x="689" y="800" width="160" height="80" rx="12" fill="#ffffff" stroke="#1f6feb" stroke-width="2.5"/>
+<text x="769" y="837" font-size="17" fill="#1f2328" font-weight="700" text-anchor="middle">Provisioning</text>
+<text x="769" y="859" font-size="14" fill="#424a53" text-anchor="middle">new-project.ts</text>
+<path d="M851 840 H895" fill="none" stroke="#1f6feb" stroke-width="5" marker-end="url(#mb)"/>
+<rect x="898" y="800" width="160" height="80" rx="12" fill="#ffffff" stroke="#1f6feb" stroke-width="2.5"/>
+<text x="978" y="837" font-size="17" fill="#1f2328" font-weight="700" text-anchor="middle">docker-broker</text>
+<text x="978" y="859" font-size="14" fill="#424a53" text-anchor="middle">socket proxy</text>
+<path d="M1060 840 H1104" fill="none" stroke="#1f6feb" stroke-width="5" marker-end="url(#mb)"/>
+<rect x="1107" y="800" width="160" height="80" rx="12" fill="#ffffff" stroke="#1f6feb" stroke-width="2.5"/>
+<text x="1187" y="837" font-size="17" fill="#1f2328" font-weight="700" text-anchor="middle">Turn container</text>
+<text x="1187" y="859" font-size="14" fill="#424a53" text-anchor="middle">ephemeral per turn</text>
+<rect x="62" y="902" width="66" height="28" rx="14" fill="#ffffff" stroke="#57606a" stroke-width="1.6"/>
+<text x="71" y="921" font-size="14" fill="#1f2328">Web UI</text>
+<rect x="136" y="902" width="66" height="28" rx="14" fill="#ffffff" stroke="#57606a" stroke-width="1.6"/>
+<text x="145" y="921" font-size="14" fill="#1f2328">Gemini</text>
+<rect x="62" y="938" width="107" height="28" rx="14" fill="#ffffff" stroke="#57606a" stroke-width="1.6"/>
+<text x="71" y="957" font-size="14" fill="#1f2328">OpenAI wire</text>
+<rect x="62" y="974" width="88" height="28" rx="14" fill="#ffffff" stroke="#57606a" stroke-width="1.6"/>
+<text x="71" y="993" font-size="14" fill="#1f2328">Anthropic</text>
+<rect x="271" y="902" width="93" height="28" rx="14" fill="#ffffff" stroke="#57606a" stroke-width="1.6"/>
+<text x="280" y="921" font-size="14" fill="#1f2328">auth · SSO</text>
+<rect x="372" y="902" width="55" height="28" rx="14" fill="#ffffff" stroke="#57606a" stroke-width="1.6"/>
+<text x="381" y="921" font-size="14" fill="#1f2328">CSRF</text>
+<rect x="271" y="938" width="66" height="28" rx="14" fill="#ffffff" stroke="#57606a" stroke-width="1.6"/>
+<text x="280" y="957" font-size="14" fill="#1f2328">reaper</text>
+<rect x="480" y="902" width="58" height="28" rx="14" fill="#ffffff" stroke="#57606a" stroke-width="1.6"/>
+<text x="489" y="921" font-size="14" fill="#1f2328">quota</text>
+<rect x="546" y="902" width="72" height="28" rx="14" fill="#ffffff" stroke="#57606a" stroke-width="1.6"/>
+<text x="555" y="921" font-size="14" fill="#1f2328">team key</text>
+<rect x="689" y="902" width="123" height="28" rx="14" fill="#d6e8ff" stroke="#57606a" stroke-width="1.6"/>
+<text x="698" y="921" font-size="14" fill="#1f2328">stable catalog</text>
+<rect x="689" y="938" width="96" height="28" rx="14" fill="#fff0d1" stroke="#8a5a00" stroke-width="1.6" stroke-dasharray="6 3"/>
+<text x="698" y="957" font-size="14" fill="#1f2328">beta toggle</text>
+<rect x="689" y="974" width="146" height="28" rx="14" fill="#ffffff" stroke="#57606a" stroke-width="1.6"/>
+<text x="698" y="993" font-size="14" fill="#1f2328">/workspace mount</text>
+<rect x="898" y="902" width="119" height="28" rx="14" fill="#ffffff" stroke="#57606a" stroke-width="1.6"/>
+<text x="907" y="921" font-size="14" fill="#1f2328">socket read-only</text>
+<rect x="898" y="938" width="133" height="28" rx="14" fill="#ffffff" stroke="#57606a" stroke-width="1.6"/>
+<text x="907" y="957" font-size="14" fill="#1f2328">dockerapi intranet</text>
+<rect x="1107" y="902" width="114" height="28" rx="14" fill="#d8f3df" stroke="#1a7f37" stroke-width="1.6"/>
+<text x="1116" y="921" font-size="14" fill="#1f2328">cap-drop ALL</text>
+<rect x="1107" y="938" width="150" height="28" rx="14" fill="#d8f3df" stroke="#1a7f37" stroke-width="1.6"/>
+<text x="1116" y="957" font-size="14" fill="#1f2328">no-new-privileges</text>
+<rect x="1107" y="974" width="83" height="28" rx="14" fill="#d8f3df" stroke="#1a7f37" stroke-width="1.6"/>
+<text x="1116" y="993" font-size="14" fill="#1f2328">uid 10000</text>
+<text x="62" y="1086" font-size="15" fill="#0550ae" font-weight="700">Runtime</text>
+<rect x="130" y="1068" width="176" height="28" rx="14" fill="#d8f3df" stroke="#1a7f37" stroke-width="1.6"/>
+<text x="139" y="1087" font-size="14" fill="#1f2328">hermes · docker isolated</text>
+<rect x="314" y="1068" width="100" height="28" rx="14" fill="#ffffff" stroke="#57606a" stroke-width="1.6" stroke-dasharray="6 3"/>
+<text x="323" y="1087" font-size="14" fill="#1f2328">antigravity</text>
+<rect x="422" y="1068" width="63" height="28" rx="14" fill="#ffffff" stroke="#57606a" stroke-width="1.6" stroke-dasharray="6 3"/>
+<text x="431" y="1087" font-size="14" fill="#1f2328">claude</text>
+<rect x="493" y="1068" width="58" height="28" rx="14" fill="#ffffff" stroke="#57606a" stroke-width="1.6" stroke-dasharray="6 3"/>
+<text x="502" y="1087" font-size="14" fill="#1f2328">codex</text>
+<text x="700" y="1088" font-size="14" fill="#424a53">← dashed: not isolated (operator login)</text>
+<rect x="62" y="1128" width="1206" height="46" rx="10" fill="#fff0f0" stroke="#cf222e" stroke-width="3"/>
+<text x="80" y="1157" font-size="15" fill="#a40e26" font-weight="700">⚠ Tenants (Projects/gw-*) sit outside the backport · upgrade · upstream loop — upgrade path unverified</text>
+<rect x="1320" y="745" width="1240" height="135" rx="12" fill="#fff3e8" stroke="#bc4c00" stroke-width="2" stroke-dasharray="9 5"/>
+<text x="1340" y="773" font-size="16" fill="#1f2328" font-weight="700">A · Backporting — project-resync (human review required)</text>
+<rect x="1340" y="790" width="150" height="68" rx="10" fill="#ffffff" stroke="#bc4c00" stroke-width="2.2"/>
+<text x="1415" y="821" font-size="14" fill="#1f2328" font-weight="700" text-anchor="middle">① source audit</text>
+<text x="1415" y="843" font-size="14" fill="#424a53" text-anchor="middle">resync-audit</text>
+<path d="M1492 824.0 H1512" fill="none" stroke="#bc4c00" stroke-width="3.5" stroke-dasharray="10 6" marker-end="url(#mo)"/>
+<rect x="1515" y="790" width="150" height="68" rx="10" fill="#ffffff" stroke="#bc4c00" stroke-width="2.2"/>
+<text x="1590" y="821" font-size="14" fill="#1f2328" font-weight="700" text-anchor="middle">② project sync</text>
+<text x="1590" y="843" font-size="14" fill="#424a53" text-anchor="middle">dev-sync</text>
+<path d="M1667 824.0 H1687" fill="none" stroke="#bc4c00" stroke-width="3.5" stroke-dasharray="10 6" marker-end="url(#mo)"/>
+<rect x="1690" y="790" width="150" height="68" rx="10" fill="#ffffff" stroke="#bc4c00" stroke-width="2.2"/>
+<text x="1765" y="821" font-size="14" fill="#1f2328" font-weight="700" text-anchor="middle">③ select backport</text>
+<text x="1765" y="843" font-size="14" fill="#424a53" text-anchor="middle">backport-diff</text>
+<path d="M1842 824.0 H1862" fill="none" stroke="#bc4c00" stroke-width="3.5" stroke-dasharray="10 6" marker-end="url(#mo)"/>
+<rect x="1865" y="790" width="150" height="68" rx="10" fill="#ffffff" stroke="#bc4c00" stroke-width="2.2"/>
+<text x="1940" y="821" font-size="14" fill="#1f2328" font-weight="700" text-anchor="middle">④ evidence scan</text>
+<text x="1940" y="843" font-size="14" fill="#424a53" text-anchor="middle">F0–F3 · M1–M6</text>
+<path d="M2017 824.0 H2037" fill="none" stroke="#bc4c00" stroke-width="3.5" stroke-dasharray="10 6" marker-end="url(#mo)"/>
+<rect x="2040" y="790" width="150" height="68" rx="10" fill="#ffffff" stroke="#bc4c00" stroke-width="2.2"/>
+<text x="2115" y="821" font-size="14" fill="#1f2328" font-weight="700" text-anchor="middle">⑤ fleet check</text>
+<text x="2115" y="843" font-size="14" fill="#424a53" text-anchor="middle">report-only</text>
+<path d="M2192 824.0 H2212" fill="none" stroke="#bc4c00" stroke-width="3.5" stroke-dasharray="10 6" marker-end="url(#mo)"/>
+<rect x="2215" y="790" width="150" height="68" rx="10" fill="#ffffff" stroke="#bc4c00" stroke-width="2.2"/>
+<text x="2290" y="821" font-size="14" fill="#1f2328" font-weight="700" text-anchor="middle">⑥ root /sync</text>
+<text x="2290" y="843" font-size="14" fill="#424a53" text-anchor="middle">PR merge</text>
+<path d="M2367 824.0 H2387" fill="none" stroke="#bc4c00" stroke-width="3.5" stroke-dasharray="10 6" marker-end="url(#mo)"/>
+<rect x="2390" y="790" width="150" height="68" rx="10" fill="#ffffff" stroke="#bc4c00" stroke-width="2.2"/>
+<text x="2465" y="821" font-size="14" fill="#1f2328" font-weight="700" text-anchor="middle">⑦ upgrade</text>
+<text x="2465" y="843" font-size="14" fill="#424a53" text-anchor="middle">project refresh</text>
+<rect x="1320" y="895" width="1240" height="110" rx="12" fill="#fff3e8" stroke="#bc4c00" stroke-width="2" stroke-dasharray="9 5"/>
+<text x="1340" y="923" font-size="16" fill="#1f2328" font-weight="700">B · New variant promotion (L3 → new variant)</text>
+<rect x="1340" y="935" width="200" height="58" rx="10" fill="#ffffff" stroke="#bc4c00" stroke-width="2.2"/>
+<text x="1440" y="969" font-size="14" fill="#1f2328" font-weight="700" text-anchor="middle">L3 project</text>
+<path d="M1542 964.0 H1587" fill="none" stroke="#bc4c00" stroke-width="3.5" stroke-dasharray="10 6" marker-end="url(#mo)"/>
+<rect x="1590" y="935" width="200" height="58" rx="10" fill="#ffffff" stroke="#bc4c00" stroke-width="2.2" stroke-dasharray="9 5"/>
+<text x="1690" y="961" font-size="14" fill="#1f2328" font-weight="700" text-anchor="middle">beta variant</text>
+<text x="1690" y="983" font-size="14" fill="#424a53" text-anchor="middle">templates/co-x</text>
+<path d="M1792 964.0 H1837" fill="none" stroke="#bc4c00" stroke-width="3.5" stroke-dasharray="10 6" marker-end="url(#mo)"/>
+<rect x="1840" y="935" width="200" height="58" rx="10" fill="#ffffff" stroke="#bc4c00" stroke-width="2.2"/>
+<text x="1940" y="961" font-size="14" fill="#1f2328" font-weight="700" text-anchor="middle">promote-variant</text>
+<text x="1940" y="983" font-size="14" fill="#424a53" text-anchor="middle">PROMOTION_CHECKLIST</text>
+<path d="M2042 964.0 H2087" fill="none" stroke="#bc4c00" stroke-width="3.5" stroke-dasharray="10 6" marker-end="url(#mo)"/>
+<rect x="2090" y="935" width="200" height="58" rx="10" fill="#ffffff" stroke="#bc4c00" stroke-width="2.2"/>
+<text x="2190" y="969" font-size="14" fill="#1f2328" font-weight="700" text-anchor="middle">stable variant</text>
+<path d="M2292 964.0 H2337" fill="none" stroke="#bc4c00" stroke-width="3.5" stroke-dasharray="10 6" marker-end="url(#mo)"/>
+<rect x="2340" y="935" width="200" height="58" rx="10" fill="#ffffff" stroke="#bc4c00" stroke-width="2.2"/>
+<text x="2440" y="961" font-size="14" fill="#1f2328" font-weight="700" text-anchor="middle">release-template</text>
+<text x="2440" y="983" font-size="14" fill="#424a53" text-anchor="middle">templates/VERSION</text>
+<rect x="1320" y="1020" width="1240" height="165" rx="12" fill="#f4effd" stroke="#8250df" stroke-width="2" stroke-dasharray="9 5"/>
+<text x="1340" y="1048" font-size="16" fill="#1f2328" font-weight="700">C · Upstream requests — MCP ai-workspace-upstream</text>
+<rect x="1340" y="1062" width="150" height="66" rx="10" fill="#ffffff" stroke="#8250df" stroke-width="2.2"/>
+<text x="1415" y="1100" font-size="14" fill="#1f2328" font-weight="700" text-anchor="middle">project session</text>
+<path d="M1492 1095.0 H1512" fill="none" stroke="#8250df" stroke-width="3.5" stroke-dasharray="10 6" marker-end="url(#mp)"/>
+<rect x="1515" y="1062" width="150" height="66" rx="10" fill="#ffffff" stroke="#8250df" stroke-width="2.2"/>
+<text x="1590" y="1092" font-size="14" fill="#1f2328" font-weight="700" text-anchor="middle">MCP server</text>
+<text x="1590" y="1114" font-size="14" fill="#424a53" text-anchor="middle">create · status</text>
+<path d="M1667 1095.0 H1687" fill="none" stroke="#8250df" stroke-width="3.5" stroke-dasharray="10 6" marker-end="url(#mp)"/>
+<rect x="1690" y="1062" width="150" height="66" rx="10" fill="#ffffff" stroke="#8250df" stroke-width="2.2"/>
+<text x="1765" y="1092" font-size="14" fill="#1f2328" font-weight="700" text-anchor="middle">server validation</text>
+<text x="1765" y="1114" font-size="14" fill="#424a53" text-anchor="middle">anti-injection</text>
+<path d="M1842 1095.0 H1862" fill="none" stroke="#8250df" stroke-width="3.5" stroke-dasharray="10 6" marker-end="url(#mp)"/>
+<rect x="1865" y="1062" width="150" height="66" rx="10" fill="#ffffff" stroke="#8250df" stroke-width="2.2"/>
+<text x="1940" y="1092" font-size="14" fill="#1f2328" font-weight="700" text-anchor="middle">U-* ticket</text>
+<text x="1940" y="1114" font-size="14" fill="#424a53" text-anchor="middle">inbox | ready</text>
+<path d="M2017 1095.0 H2037" fill="none" stroke="#8250df" stroke-width="3.5" stroke-dasharray="10 6" marker-end="url(#mp)"/>
+<rect x="2040" y="1062" width="150" height="66" rx="10" fill="#ffffff" stroke="#8250df" stroke-width="2.2"/>
+<text x="2115" y="1092" font-size="14" fill="#1f2328" font-weight="700" text-anchor="middle">root PM fix</text>
+<text x="2115" y="1114" font-size="14" fill="#424a53" text-anchor="middle">repro → PR</text>
+<path d="M2192 1095.0 H2212" fill="none" stroke="#8250df" stroke-width="3.5" stroke-dasharray="10 6" marker-end="url(#mp)"/>
+<rect x="2215" y="1062" width="150" height="66" rx="10" fill="#ffffff" stroke="#8250df" stroke-width="2.2"/>
+<text x="2290" y="1092" font-size="14" fill="#1f2328" font-weight="700" text-anchor="middle">status check</text>
+<text x="2290" y="1114" font-size="14" fill="#424a53" text-anchor="middle">resolution</text>
+<path d="M2367 1095.0 H2387" fill="none" stroke="#8250df" stroke-width="3.5" stroke-dasharray="10 6" marker-end="url(#mp)"/>
+<rect x="2390" y="1062" width="150" height="66" rx="10" fill="#ffffff" stroke="#8250df" stroke-width="2.2"/>
+<text x="2465" y="1092" font-size="14" fill="#1f2328" font-weight="700" text-anchor="middle">strip patch notes</text>
+<text x="2465" y="1114" font-size="14" fill="#424a53" text-anchor="middle">LOCAL-PATCH</text>
+<text x="1340" y="1160" font-size="14" fill="#6639ba" font-weight="700">Request body is data — not instructions</text>
+<circle cx="1836" cy="1126" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>
+<text x="1836" y="1132" font-size="16" fill="#ffffff" font-weight="700" text-anchor="middle">8</text>
+<rect x="40" y="1215" width="2520" height="405" rx="14" fill="#e5f6f6" stroke="#0a7f7f" stroke-width="2.5"/>
+<text x="62" y="1245" font-size="21" fill="#0b5d5d" font-weight="700">Ticket System</text>
+<text x="224" y="1245" font-size="14" fill="#424a53">scripts/ticket.ts</text>
+<circle cx="2526" cy="1245" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>
+<text x="2526" y="1251" font-size="16" fill="#ffffff" font-weight="700" text-anchor="middle">7</text>
+<rect x="60" y="1265" width="540" height="80" rx="12" fill="#ffffff" stroke="#0a7f7f" stroke-width="2.5"/>
+<text x="330" y="1302" font-size="18" fill="#1f2328" font-weight="700" text-anchor="middle">service tickets</text>
+<text x="330" y="1324" font-size="14" fill="#424a53" text-anchor="middle">tickets/*.yaml · git-ignored · cron</text>
+<rect x="640" y="1265" width="540" height="80" rx="12" fill="#ffffff" stroke="#0a7f7f" stroke-width="2.5"/>
+<text x="910" y="1302" font-size="18" fill="#1f2328" font-weight="700" text-anchor="middle">governance tickets</text>
+<text x="910" y="1324" font-size="14" fill="#424a53" text-anchor="middle">tickets/governance/ · git-tracked · incl. U-*</text>
+<text x="1240" y="1277" font-size="15" fill="#0b5d5d" font-weight="700">Executors</text>
+<rect x="1240" y="1291" width="119" height="28" rx="14" fill="#ffffff" stroke="#0a7f7f" stroke-width="1.6"/>
+<text x="1249" y="1310" font-size="14" fill="#1f2328">local 05:30 KST</text>
+<rect x="1367" y="1291" width="169" height="28" rx="14" fill="#ffffff" stroke="#0a7f7f" stroke-width="1.6"/>
+<text x="1376" y="1310" font-size="14" fill="#1f2328">at start: list --ready</text>
+<rect x="1544" y="1291" width="120" height="28" rx="14" fill="#ffffff" stroke="#0a7f7f" stroke-width="1.6"/>
+<text x="1553" y="1310" font-size="14" fill="#1f2328">Fri healthcheck</text>
+<rect x="1673" y="1291" width="173" height="28" rx="14" fill="#ffffff" stroke="#0a7f7f" stroke-width="1.6"/>
+<text x="1682" y="1310" font-size="14" fill="#1f2328">nightly-tickets (manual)</text>
+<rect x="1853" y="1291" width="177" height="28" rx="14" fill="#ffffff" stroke="#0a7f7f" stroke-width="1.6"/>
+<text x="1862" y="1310" font-size="14" fill="#1f2328">mcp-governance (local)</text>
+<rect x="80" y="1450" width="140" height="48" rx="24" fill="#ffffff" stroke="#0a7f7f" stroke-width="3.5"/>
+<text x="150" y="1481" font-size="17" fill="#0b5d5d" font-weight="700" text-anchor="middle">backlog</text>
+<rect x="350" y="1450" width="140" height="48" rx="24" fill="#ffffff" stroke="#0a7f7f" stroke-width="3.5"/>
+<text x="420" y="1481" font-size="17" fill="#0b5d5d" font-weight="700" text-anchor="middle">waiting</text>
+<rect x="620" y="1450" width="140" height="48" rx="24" fill="#ffffff" stroke="#0a7f7f" stroke-width="3.5"/>
+<text x="690" y="1481" font-size="17" fill="#0b5d5d" font-weight="700" text-anchor="middle">running</text>
+<rect x="890" y="1450" width="140" height="48" rx="24" fill="#ffffff" stroke="#0a7f7f" stroke-width="3.5"/>
+<text x="960" y="1481" font-size="17" fill="#0b5d5d" font-weight="700" text-anchor="middle">review</text>
+<rect x="1160" y="1450" width="140" height="48" rx="24" fill="#c9eeee" stroke="#0a7f7f" stroke-width="3.5"/>
+<text x="1230" y="1481" font-size="17" fill="#0b5d5d" font-weight="700" text-anchor="middle">done</text>
+<path d="M222 1474 H346" fill="none" stroke="#0a7f7f" stroke-width="4.5" marker-end="url(#mt)"/>
+<path d="M492 1474 H616" fill="none" stroke="#0a7f7f" stroke-width="4.5" marker-end="url(#mt)"/>
+<path d="M762 1474 H886" fill="none" stroke="#0a7f7f" stroke-width="4.5" marker-end="url(#mt)"/>
+<path d="M1032 1474 H1156" fill="none" stroke="#0a7f7f" stroke-width="4.5" marker-end="url(#mt)"/>
+<rect x="1050" y="1460" width="90" height="28" rx="14" fill="#ffffff" stroke="#0a7f7f" stroke-width="2"/>
+<text x="1095" y="1479" font-size="15" fill="#1f2328" font-weight="700" text-anchor="middle">human only</text>
+<rect x="620" y="1540" width="140" height="42" rx="21" fill="#ffffff" stroke="#cf222e" stroke-width="3.5"/>
+<text x="690" y="1568" font-size="17" fill="#a40e26" font-weight="700" text-anchor="middle">failed</text>
+<path d="M690 1500 V1538" fill="none" stroke="#0a7f7f" stroke-width="4.5" marker-end="url(#mt)"/>
+<path d="M618 1561 H450 V1502" fill="none" stroke="#0a7f7f" stroke-width="4.5" marker-end="url(#mt)"/>
+<rect x="499" y="1547" width="70" height="28" rx="14" fill="#ffffff" stroke="#0a7f7f" stroke-width="2"/>
+<text x="534" y="1566" font-size="15" fill="#1f2328" font-weight="700" text-anchor="middle">retry</text>
+<path d="M420 1448 V1418 H960 V1446" fill="none" stroke="#0a7f7f" stroke-width="4" stroke-dasharray="10 6" marker-end="url(#mt)"/>
+<rect x="633" y="1404" width="115" height="28" rx="14" fill="#ffffff" stroke="#0a7f7f" stroke-width="2"/>
+<text x="690" y="1423" font-size="15" fill="#1f2328" font-weight="700" text-anchor="middle">manual direct</text>
+<text x="1360" y="1445" font-size="15" fill="#6639ba" font-weight="700">U-* state mapping</text>
+<rect x="1360" y="1461" width="125" height="28" rx="14" fill="#ffffff" stroke="#8250df" stroke-width="1.6" stroke-dasharray="6 3"/>
+<text x="1369" y="1480" font-size="14" fill="#1f2328">inbox = backlog</text>
+<rect x="1493" y="1461" width="129" height="28" rx="14" fill="#ffffff" stroke="#8250df" stroke-width="1.6" stroke-dasharray="6 3"/>
+<text x="1502" y="1480" font-size="14" fill="#1f2328">ready = waiting</text>
+<rect x="1630" y="1461" width="154" height="28" rx="14" fill="#ffffff" stroke="#8250df" stroke-width="1.6" stroke-dasharray="6 3"/>
+<text x="1639" y="1480" font-size="14" fill="#1f2328">investigating = review</text>
+<rect x="1792" y="1461" width="110" height="28" rx="14" fill="#ffffff" stroke="#8250df" stroke-width="1.6" stroke-dasharray="6 3"/>
+<text x="1801" y="1480" font-size="14" fill="#1f2328">closed = done</text>
+<rect x="40" y="1645" width="2520" height="235" rx="14" fill="#f1f3f5" stroke="#57606a" stroke-width="2.5"/>
+<text x="62" y="1675" font-size="21" fill="#424a53" font-weight="700">Easy-to-Miss Details</text>
+<rect x="60" y="1697" width="600" height="68" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="1.8"/>
+<circle cx="94" cy="1731" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>
+<text x="94" y="1737" font-size="16" fill="#ffffff" font-weight="700" text-anchor="middle">1</text>
+<text x="126" y="1738" font-size="17" fill="#1f2328" font-weight="700">Gate chain: hook → audit → PR</text>
+<rect x="682" y="1697" width="600" height="68" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="1.8"/>
+<circle cx="716" cy="1731" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>
+<text x="716" y="1737" font-size="16" fill="#ffffff" font-weight="700" text-anchor="middle">2</text>
+<text x="748" y="1738" font-size="17" fill="#1f2328" font-weight="700">8 platform surfaces, skills/ is SSOT</text>
+<rect x="1304" y="1697" width="600" height="68" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="1.8"/>
+<circle cx="1338" cy="1731" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>
+<text x="1338" y="1737" font-size="16" fill="#ffffff" font-weight="700" text-anchor="middle">3</text>
+<text x="1370" y="1738" font-size="17" fill="#1f2328" font-weight="700">/sync regenerates derived artifacts</text>
+<rect x="1926" y="1697" width="600" height="68" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="1.8"/>
+<circle cx="1960" cy="1731" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>
+<text x="1960" y="1737" font-size="16" fill="#ffffff" font-weight="700" text-anchor="middle">4</text>
+<text x="1992" y="1738" font-size="17" fill="#1f2328" font-weight="700">no auto L1→L2 propagation</text>
+<rect x="60" y="1781" width="600" height="68" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="1.8"/>
+<circle cx="94" cy="1815" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>
+<text x="94" y="1821" font-size="16" fill="#ffffff" font-weight="700" text-anchor="middle">5</text>
+<text x="126" y="1822" font-size="17" fill="#1f2328" font-weight="700">3 version axes · projects all at 0.9.0</text>
+<rect x="682" y="1781" width="600" height="68" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="1.8"/>
+<circle cx="716" cy="1815" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>
+<text x="716" y="1821" font-size="16" fill="#ffffff" font-weight="700" text-anchor="middle">6</text>
+<text x="748" y="1822" font-size="17" fill="#1f2328" font-weight="700">4 unmatched variant/project pairs</text>
+<rect x="1304" y="1781" width="600" height="68" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="1.8"/>
+<circle cx="1338" cy="1815" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>
+<text x="1338" y="1821" font-size="16" fill="#ffffff" font-weight="700" text-anchor="middle">7</text>
+<text x="1370" y="1822" font-size="17" fill="#1f2328" font-weight="700">automation: 05:30 · Fridays · monthly</text>
+<rect x="1926" y="1781" width="600" height="68" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="1.8"/>
+<circle cx="1960" cy="1815" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>
+<text x="1960" y="1821" font-size="16" fill="#ffffff" font-weight="700" text-anchor="middle">8</text>
+<text x="1992" y="1822" font-size="17" fill="#1f2328" font-weight="700">trust boundary: requests are data only</text>
+<rect x="40" y="1905" width="2520" height="100" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="1.5"/>
+<text x="62" y="1938" font-size="15" fill="#1f2328" font-weight="700">Legend</text>
+<line x1="118" y1="1933" x2="178" y2="1933" stroke="#1f6feb" stroke-width="5" marker-end="url(#mb)"/>
+<text x="192" y="1938" font-size="14" fill="#1f2328">deploy · scaffold</text>
+<line x1="331.4" y1="1933" x2="391.4" y2="1933" stroke="#1a7f37" stroke-width="5" marker-end="url(#mg)"/>
+<text x="405" y="1938" font-size="14" fill="#1f2328">upgrade</text>
+<line x1="515.4" y1="1933" x2="575.4" y2="1933" stroke="#bc4c00" stroke-width="5" stroke-dasharray="10 6" marker-end="url(#mo)"/>
+<text x="589" y="1938" font-size="14" fill="#1f2328">backport · promote (rev)</text>
+<line x1="771.64" y1="1933" x2="831.64" y2="1933" stroke="#8250df" stroke-width="5" stroke-dasharray="10 6" marker-end="url(#mp)"/>
+<text x="846" y="1938" font-size="14" fill="#1f2328">upstream request</text>
+<line x1="986.02" y1="1933" x2="1046.02" y2="1933" stroke="#0a7f7f" stroke-width="5" marker-end="url(#mt)"/>
+<text x="1060" y="1938" font-size="14" fill="#1f2328">ticket flow</text>
+<line x1="1160.22" y1="1933" x2="1220.22" y2="1933" stroke="#57606a" stroke-width="5" marker-end="url(#my)"/>
+<text x="1234" y="1938" font-size="14" fill="#1f2328">governance · PR gate</text>
+<text x="62" y="1980" font-size="15" fill="#1f2328" font-weight="700">Chips</text>
+<rect x="118" y="1964" width="40" height="24" rx="12" fill="#d6e8ff" stroke="#57606a" stroke-width="1.6"/>
+<text x="170" y="1982" font-size="14" fill="#1f2328">stable (solid)</text>
+<rect x="294.06" y="1964" width="40" height="24" rx="12" fill="#fff0d1" stroke="#8a5a00" stroke-width="1.6" stroke-dasharray="6 3"/>
+<text x="346" y="1982" font-size="14" fill="#1f2328">beta (dashed)</text>
+<rect x="456.82" y="1964" width="40" height="24" rx="12" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
+<text x="509" y="1982" font-size="14" fill="#1f2328">L3 project</text>
+<rect x="622.24" y="1964" width="70" height="24" rx="6" fill="#ffffff" stroke="#cf222e" stroke-width="1.5"/>
+<text x="628" y="1982" font-size="14" fill="#a40e26" font-weight="700">none</text>
+<text x="704" y="1982" font-size="14" fill="#1f2328">= unmatched item</text>
+<rect x="830.8199999999999" y="1964" width="40" height="24" rx="6" fill="#fff0f0" stroke="#cf222e" stroke-width="2.5"/>
+<text x="883" y="1982" font-size="14" fill="#1f2328">⚠ outside loop · unpropagated</text>
+<circle cx="1120" cy="1976" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>
+<text x="1121" y="1982" font-size="16" fill="#ffffff" font-weight="700" text-anchor="middle">n</text>
+<text x="1147" y="1982" font-size="14" fill="#1f2328">= linked to numbered notes</text>
+</svg>
