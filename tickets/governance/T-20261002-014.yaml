@@ -1,0 +1,20 @@
+schemaVersion: 1
+id: T-20261002-014
+kind: manual
+title: >-
+  validator-hardening: weekly full-history gitleaks scan pins binary 8.30.1 and
+  .github/gitleaks-full.toml uses plural [[allowlists]], which gitleaks 8.24.x
+  silently ignores (2026-10-02 incident: 27 known false positives reported) —
+  add a CI smoke assertion that scans a fixture secret matching an allowlisted
+  shape and requires 0 findings, so future config/binary version skew fails
+  loudly instead of surfacing known FPs
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-02T09:42:36.838Z'
+history:
+  - at: '2026-10-02T09:42:36.838Z'
+    from: null
+    to: backlog
+result: null
+error: null
