@@ -4,7 +4,7 @@
  * Validates that all agents/*.md frontmatter model comments match docs/workspace-schema.json models block,
  * and that the tier→model mapping prose in AGENTS.md §3.6 / CLAUDE.md / GEMINI.md / CODEX.md
  * names exactly the models the registry declares for each tier.
- * Level: L0 | Status: active | @version 1.4.0
+ * Level: L0 | Status: active | @version 1.4.1
  *
  * v1.4.0 (T-20260916-011): the CODEX.md prose target is now platform-delivery
  * aware. Projects scaffolded without the codex platform carry neither
@@ -15,11 +15,12 @@
  * target file exists, are behaviorally unchanged.
  */
 import { readFileSync, readdirSync, existsSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { join } from "node:path";
 import { die } from "./lib/error-handling.ts";
 import { partitionProseTargetsByDelivery } from "./lib/platform-delivery.ts";
 
-const WORKSPACE_ROOT = new URL("..", import.meta.url).pathname
+const WORKSPACE_ROOT = fileURLToPath(new URL("..", import.meta.url))
   .replace(/\/$/, "")
   .replace(/^\/([A-Z]:)/, "$1");
 

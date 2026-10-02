@@ -11,7 +11,7 @@
  * - Wave 3: Platform parity validation (validate-platform-parity.ts)
  * - Wave 3: Workspace integration (integration-helpers.ts)
  *
- * @version 1.21.1
+ * @version 1.21.2
  * @phase: Complete pipeline orchestration
  *
  * v1.21.0 (2026-09-25, ADR-0088 W2): matchCountryScopedSkill recognizes
@@ -131,6 +131,7 @@
  */
 
 import { join, basename, dirname, resolve } from 'path';
+import { fileURLToPath } from 'url';
 import { existsSync, mkdirSync, readFileSync } from 'fs';
 import { cwd } from 'process';
 import { execFileSync, spawnSync } from 'child_process';
@@ -1583,7 +1584,7 @@ async function main() {
   // silently degrade or fail. Fail loudly until all paths are import.meta-anchored
   // like upgrade-project/project-to-variant.
   {
-    let scriptRoot = new URL('..', import.meta.url).pathname;
+    let scriptRoot = fileURLToPath(new URL('..', import.meta.url));
     scriptRoot = scriptRoot.replace(/^\/([A-Z]:)/, '$1').replace(/\/$/, '');
     if (process.cwd().replace(/[\\/]+$/, '') !== scriptRoot) {
       console.error(`ERROR: l3-to-variant-pipeline.ts must run from the workspace root (expected cwd ${scriptRoot}, got ${process.cwd()}).`);

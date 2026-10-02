@@ -1,7 +1,8 @@
 #!/usr/bin/env bun
+import { fileURLToPath } from 'node:url';
 /**
  * Serial Agent Dispatcher
- * @version 1.1.1
+ * @version 1.1.2
  * Automates dispatching subagents that must run sequentially
  *
  * This dispatcher is for tasks with dependencies:
@@ -236,7 +237,7 @@ export async function runCli(
     try {
       const pipelinePath = args[pipelineFileIndex + 1];
       // Security: reject absolute paths and paths outside workspace
-      const workspaceRoot = new URL('..', import.meta.url).pathname;
+      const workspaceRoot = fileURLToPath(new URL('..', import.meta.url));
       const resolved = pipelinePath.startsWith('.') ? pipelinePath : pipelinePath;
       const isAbsolute = pipelinePath.startsWith('/') || pipelinePath.startsWith('\\') || /^[A-Za-z]:/.test(pipelinePath);
       if (isAbsolute) {

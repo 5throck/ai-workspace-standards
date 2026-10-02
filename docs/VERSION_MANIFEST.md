@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-10-02T11:37:42.616Z
+**Generated**: 2026-10-02T11:43:06.099Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -24,7 +24,7 @@
 | automation-engineer | agents/automation-engineer.md | low | inherit | 2026-09-29 |
 | docs-writer | agents/docs-writer.md | medium | inherit | 2026-09-29 |
 | lifecycle-manager | agents/lifecycle-manager.md | medium | inherit | 2026-09-29 |
-| pm | agents/pm.md | medium | inherit | 2026-10-01 |
+| pm | agents/pm.md | medium | inherit | 2026-10-02 |
 | scaffolding-expert | agents/scaffolding-expert.md | low | inherit | 2026-09-29 |
 | security-expert | agents/security-expert.md | medium | inherit | 2026-09-29 |
 | skill-graph-analyst | agents/skill-graph-analyst.md | low | inherit | 2026-09-29 |
@@ -122,7 +122,7 @@
 | design-lint.ts | 2.0.0 | scripts/design-lint.ts | js-yaml |
 | dev-sync.ts | 1.23.0 | scripts/dev-sync.ts | bun |
 | dispatch-parallel.ts | 1.1.1 | scripts/dispatch-parallel.ts | N/A |
-| dispatch-serial.ts | 1.1.1 | scripts/dispatch-serial.ts | N/A |
+| dispatch-serial.ts | 1.1.2 | scripts/dispatch-serial.ts | N/A |
 | dispatch.ts | 1.1.1 | scripts/dispatch.ts | N/A |
 | ensure-github-repo.ts | 1.0.0 | scripts/ensure-github-repo.ts | N/A |
 | evidence-backport-scan.ts | 1.1.0 | scripts/evidence-backport-scan.ts | N/A |
@@ -139,7 +139,7 @@
 | ingest-external-skills.ts | 1.1.0 | scripts/ingest-external-skills.ts | N/A |
 | ingest-security-frameworks.ts | 1.1.0 | scripts/ingest-security-frameworks.ts | N/A |
 | install-upstream-mcp.ts | 2.1.1 | scripts/install-upstream-mcp.ts | N/A |
-| l3-to-variant-pipeline.ts | 1.21.1 | scripts/l3-to-variant-pipeline.ts | child_process, fs, path, process |
+| l3-to-variant-pipeline.ts | 1.21.2 | scripts/l3-to-variant-pipeline.ts | child_process, fs, path, process, url |
 | lifecycle-sync-audit.ts | 1.17.1 | scripts/lifecycle-sync-audit.ts | js-yaml |
 | lint-instructions.ts | 1.0.0 | scripts/lint-instructions.ts | N/A |
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
@@ -197,7 +197,7 @@
 | validate-doc-folder.ts | 1.1.0 | scripts/validate-doc-folder.ts | fs, path |
 | validate-docs-links.ts | 1.3.0 | scripts/validate-docs-links.ts | fs, path |
 | validate-md-language.ts | 1.12.0 | scripts/validate-md-language.ts | fs |
-| validate-model-registry.ts | 1.4.0 | scripts/validate-model-registry.ts | N/A |
+| validate-model-registry.ts | 1.4.1 | scripts/validate-model-registry.ts | N/A |
 | validate-pm-extends.ts | 0.3.1 | scripts/validate-pm-extends.ts | N/A |
 | validate-procedures.ts | 1.1.0 | scripts/validate-procedures.ts | js-yaml |
 | validate-process.ts | 1.0.0 | scripts/validate-process.ts | js-yaml |
