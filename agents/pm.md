@@ -1,5 +1,5 @@
 ---
-last_updated: 2026-10-01
+last_updated: 2026-10-02
 name: pm
 role: orchestrator
 status: active

@@ -138,7 +138,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `retry-handler.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `setup-github-branch-protection.ts` | L0 | 1.0.1 | active | `--repo`, `--branch`, `--check` (repeatable), `--dry-run` | —| L0+L1 | —|
 | `spec-register.ts` | L0 | 1.3.0 | active | `--file`, `--source`, `--update`, `--status`, `--list`, `--ref`, `--id` | —| L0+L1 | —|
-| `skill-lifecycle-audit.ts` | L0 | 1.5.1 | active | —| —| L0+L1 | —|
+| `skill-lifecycle-audit.ts` | L0 | 1.5.2 | active | v1.5.2 (2026-10-02): LC check exempts self-managed skills (isSelfManagedPath from docs/self-managed-surfaces.json) — a tool-owned SKILL.md contradicts a hand-maintained lifecycle record; exempted skills print an informational line instead of a WARN (T-20261002-001 follow-up). Prior: — | —| L0+L1 | —|
 | `skill-session-review.ts` | L0 | 1.1.0 | active | `--date`, `--json`, `--dry-run` | —| L0+L1 | —|
 | `sync-md.ts` | L0 | 1.4.0 | active | —| —| L0+L1 | —|
 | `sync-skill-status.ts` | L0 | 1.1.0 | active | v1.1.0 scan scope adopts PLATFORM_SKILL_BASES + SSOT-precedence guard (skills/ status wins; mirrors speak only for platform-only skills) (spec docs/designs/2026-09-25-verifier-platform-expansion-design.md site 5, D5) | — | L0+L1 | — |
