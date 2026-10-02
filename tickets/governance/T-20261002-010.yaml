@@ -9,12 +9,38 @@ title: >-
   the Low list in docs/reports/2026-10-02-project-review-upstream.md (review
   M5-M13).
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-02T07:57:34.681Z'
 history:
   - at: '2026-10-02T07:57:34.681Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-02T11:48:07.403Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-02T11:48:07.420Z'
+    from: waiting
+    to: running
+  - at: '2026-10-02T12:11:44.147Z'
+    from: running
+    to: review
+  - at: '2026-10-02T12:11:44.168Z'
+    from: review
+    to: done
+result: >-
+  Implemented across PR #1327 (M8) and PR #1330 (M5 fail-closed intake lock with
+  owner token + atomic takeover + retryable -32000, M6 reject-audit cap, M7
+  trust gate on fixed/local-only, M9 codex --force restore + Antigravity CLI gap
+  in docs/surface-gaps.json, M10 manual walk skips running + [FLAGGED] list with
+  counts, M11 ping/envelope/line-cap + isError for retryable family, M12 hash
+  over stored fields + registry/design amended, M13 config-edit
+  BOM/quoted-key/EOL/empty fixes). ACCEPTED-AS-DOCUMENTED (design §F): remaining
+  tool-error transport as JSON-RPC error objects (59 pinned assertions;
+  conversion judged churn>benefit this pass) and the Low list items (unbounded
+  duplicates vs MAX_YAML_BYTES, -32603-vs--32602 nuance, UTC/local log-pruning
+  mismatch, Hermes sameEntry enabled field, fsync, existence-oracle merge,
+  design wording nits, English-only injection denylist residual). DEFERRED:
+  Phase-3 LOCAL-PATCH upgrade report -> T-20261002-015 (backlog). Tests: 12+ new
+  (parallel intake, M13 edge cases); all batteries green.
 error: null

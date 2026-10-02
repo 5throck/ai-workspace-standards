@@ -6,12 +6,28 @@ title: >-
   with pruning, mtime re-check, require --apply, reject unknown flags and
   valueless --target (review H5, M4).
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-02T07:57:34.630Z'
 history:
   - at: '2026-10-02T07:57:34.630Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-02T10:42:23.506Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-02T10:55:38.908Z'
+    from: waiting
+    to: running
+  - at: '2026-10-02T10:55:38.926Z'
+    from: running
+    to: review
+  - at: '2026-10-02T10:55:38.953Z'
+    from: review
+    to: done
+result: >-
+  Implemented in PR #1325: backupAndWrite preserves file mode, realpath-resolves
+  symlinked configs, mtime re-check before rename, 0600 backups pruned to newest
+  5 (H5); CLI requires --apply, rejects unknown flags and valueless --target
+  (M4). 9 new tests.
 error: null

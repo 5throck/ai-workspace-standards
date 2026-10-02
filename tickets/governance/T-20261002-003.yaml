@@ -6,12 +6,29 @@ title: >-
   before writing, write once or resume safely, and refuse triage inbox on done
   tickets (review H2).
 priority: high
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-02T07:57:34.591Z'
 history:
   - at: '2026-10-02T07:57:34.591Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-02T10:16:59.889Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-02T10:42:07.813Z'
+    from: waiting
+    to: running
+  - at: '2026-10-02T10:42:07.835Z'
+    from: running
+    to: review
+  - at: '2026-10-02T10:42:07.856Z'
+    from: review
+    to: done
+result: >-
+  Implemented in PR #1324: setUpstreamTriage/setUpstreamResolution validate the
+  whole operation before any write (done refuses triage; illegal ready
+  promotions refuse pre-write); the resolution walk lands resolution + history
+  hops + done in one atomic write and is resumable for pre-existing stranded
+  resolutions.
 error: null

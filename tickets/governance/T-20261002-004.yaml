@@ -6,12 +6,28 @@ title: >-
   upstream_request_status for declared identity and record the trust-boundary
   downgrade in the design (review H3).
 priority: high
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-02T07:57:34.605Z'
 history:
   - at: '2026-10-02T07:57:34.605Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-02T10:42:23.489Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-02T10:55:38.855Z'
+    from: waiting
+    to: running
+  - at: '2026-10-02T10:55:38.872Z'
+    from: running
+    to: review
+  - at: '2026-10-02T10:55:38.889Z'
+    from: review
+    to: done
+result: >-
+  Implemented in PR #1325: status calls audit-logged (identity cwd vs declared);
+  self-declared project_root identity gets redacted results (ids/status/triage
+  only, no resolution summary or PR URL); trust-boundary downgrade documented in
+  the design §6 addendum.
 error: null

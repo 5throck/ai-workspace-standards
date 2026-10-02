@@ -6,12 +6,29 @@ title: >-
   header version, and that governance docs only name existing ticket.ts
   subcommands (review M1, H1).
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-02T07:57:34.656Z'
 history:
   - at: '2026-10-02T07:57:34.656Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-02T10:42:23.523Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-02T10:55:38.969Z'
+    from: waiting
+    to: running
+  - at: '2026-10-02T10:55:38.984Z'
+    from: running
+    to: review
+  - at: '2026-10-02T10:55:38.999Z'
+    from: review
+    to: done
+result: >-
+  Implemented in PR #1325: SERVER_VERSION single constant feeds
+  serverInfo.version, test pins header-constant-response equality (M1); new
+  validate-ticket-doc-commands.ts lint wired into audit.ts — governance docs may
+  only name real ticket.ts subcommands parsed from the CLI usage line (H1 lint
+  half).
 error: null

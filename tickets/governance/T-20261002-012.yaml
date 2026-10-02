@@ -5,14 +5,32 @@ title: >-
   Add Gemini SessionStart hook for PM role bootstrap after vendor-doc
   verification
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-02T09:05:09.218Z'
 history:
   - at: '2026-10-02T09:05:09.218Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-02T12:11:08.008Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-02T12:11:08.027Z'
+    from: waiting
+    to: running
+  - at: '2026-10-02T12:11:08.043Z'
+    from: running
+    to: review
+  - at: '2026-10-02T12:11:08.058Z'
+    from: review
+    to: done
+result: >-
+  Implemented in PR #1331: vendor-doc verified (geminicli.com/docs/hooks —
+  SessionStart fires on startup/resume/clear, same settings shape as Claude
+  Code); bootstrap hook added to .gemini/settings.json at L0 and propagated to
+  templates/common + all 13 variants; shared keys deep-equal per the
+  platform_settings contract (0 unexpected drift); verification URLs recorded in
+  the PM-bootstrap design addendum.
 error: null
 notes: >-
   F2 of spec 2026-10-02-pm-role-bootstrap-design: verify Gemini CLI vendor docs
