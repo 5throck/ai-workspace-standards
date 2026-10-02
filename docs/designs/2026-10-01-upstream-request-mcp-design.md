@@ -343,6 +343,14 @@ Behavior:
 6. Refuse to register `ai-workspace-governance` or any other key (scope guard, per N3).
 7. Print the follow-up instruction per registered client (restart; `claude mcp list`, `gemini mcp list`, `codex mcp list` where the client has one).
 8. Targets: `--target claude|claude-desktop|antigravity|gemini|codex|hermes|all` (default `all`). A client that is not installed is skipped under `all`; an explicit target for an absent client exits 1. Any conflict or failure exits 1.
+9. Hermes config discovery (amended 2026-10-03). `hermesConfigPath()` resolves the Hermes home in this order, and the first match wins:
+   1. `UPSTREAM_INSTALL_HOME` (test seam) gives `<UPSTREAM_INSTALL_HOME>/.hermes`.
+   2. `HERMES_HOME`, when set, is used as is.
+   3. `~/.hermes` is used if `~/.hermes/config.yaml` exists.
+   4. On `win32` only, `%LOCALAPPDATA%\hermes` is used if `%LOCALAPPDATA%\hermes\config.yaml` exists.
+   5. Otherwise the target is reported as not installed.
+
+   Rationale: on a real Windows 11 host the Hermes home is `%LOCALAPPDATA%\hermes` (with `config.yaml`, `SOUL.md` and `auth.json`), and `~/.hermes` does not exist. The previous order checked only steps 1 to 3, so the installer missed an installed Hermes. The function takes an injectable `{ env, platform, homedir }` argument that defaults to `process.env`, `process.platform` and `os.homedir()`. No other installer behavior changes.
 
 Portability notes:
 - The absolute paths are machine-specific, which is why this goes in user-level config and never in a committed `.mcp.json`. The script must be re-run after moving the checkout. It warns if `serverPath` contains spaces (passing argv is fine, but other clients' configs may not be).
@@ -380,6 +388,7 @@ Target `tests/unit/mcp-upstream-server.test.ts`, with the subprocess handshake m
 11. Status scoping: project A cannot see project B's ID ("not found").
 12. Audit log: one JSONL line per attempt, including rejects.
 13. Installer (`tests/unit/install-upstream-mcp.test.ts`, with HOME pointed at a tmp dir): first run writes the entry, second is a no-op, a different entry requires `--force`, other keys are preserved, and `--uninstall` removes only the server's own key.
+13a. Hermes discovery (`tests/unit/install-upstream-mcp.test.ts`): each branch of §11 item 9 uses its own tmp dirs and the injectable `{ env, platform, homedir }` seam. Cases: `UPSTREAM_INSTALL_HOME` wins over everything; `HERMES_HOME` wins over both home paths; `~/.hermes` is chosen only when its `config.yaml` exists; with `platform: 'win32'` and `LOCALAPPDATA` set to a tmp dir holding `hermes/config.yaml`, that path is chosen; the same layout with `platform: 'linux'` is not chosen; no candidate returns not installed.
 14. `bun scripts/audit.ts` and `qa-gate.ts` stay green; the SCRIPTS.md registry includes both new scripts (L0).
 
 ## 14. Rollout / Phases
@@ -439,7 +448,7 @@ Decided by the user: the workspace and all templates must support Claude Code, C
 | `antigravity` | Antigravity IDE; Antigravity CLI | `~/.gemini/config/mcp_config.json` `mcpServers` (shared by IDE and CLI) | JSON merge; only if the file exists | https://antigravity.google/docs/mcp |
 | `gemini` | Gemini CLI (legacy Google path) | `~/.gemini/settings.json` `mcpServers` | JSON merge | https://geminicli.com/docs/tools/mcp-server/ |
 | `codex` | Codex CLI; Codex Desktop App (ChatGPT app) | `~/.codex/config.toml` `[mcp_servers.<name>]` (shared) | `codex mcp get --json` / `add` / `remove` | https://learn.chatgpt.com/docs/extend/mcp?surface=cli |
-| `hermes` | Hermes Agent; Hermes CLI | `~/.hermes/config.yaml` `mcp_servers:` (or `$HERMES_HOME`) | text edit of the block, verified by a YAML parse; the `hermes` CLI is never run | https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp |
+| `hermes` | Hermes Agent; Hermes CLI | `~/.hermes/config.yaml` `mcp_servers:` (or `$HERMES_HOME`; on Windows `%LOCALAPPDATA%\hermes\config.yaml`, see §11 item 9) | text edit of the block, verified by a YAML parse; the `hermes` CLI is never run | https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp |
 
 Notes and gaps:
 
@@ -451,6 +460,26 @@ Notes and gaps:
 - **Vendor re-check (2026-10-01, T-20261001-019).** (1) *Codex subcommands*: `codex mcp get --json` and `remove` are confirmed real — they exist in the installed CLI (verified earlier against the real binary in a temporary `CODEX_HOME`) and in the Codex CLI source (the MCP CLI command handlers cover `add|login|list|get|remove`; community references agree), while the vendor web page still documents only `list|add|login`. Decision: keep using `get --json`/`remove` with the existing loud-fail for an older CLI; re-check again when Codex ships its next major version. (2) *Antigravity create-if-absent*: **decided NO — the installer keeps editing the registry only when Antigravity already created it.** The official page still documents `~/.gemini/config/mcp_config.json` as the global registry shared by the IDE and the CLI, but a vendor-repo issue reports the Antigravity CLI actually reading `~/.gemini/antigravity-cli/mcp_config.json` — creating the file when absent risks registering into a file a CLI version never reads. The `graft init --agents antigravity` pointer in the skip message stays; revisit if the vendor settles the path question. (3) *Claude Desktop paths* re-verified: macOS `~/Library/Application Support/Claude/` and Windows `%APPDATA%\Claude\` only (no Linux build) — unchanged. (4) *Hermes*: `$HERMES_HOME`/`~/.hermes/config.yaml` re-verified against the vendor doc — unchanged.
 - **Not covered by the installer:** project-level files (`.agents/mcp_config.json`, `.gemini/settings.json`, `.codex/config.toml`, `.mcp.json`). The server is machine-global by design (G2).
 
+### Real-machine verification (T-20261001-020, 2026-10-02; updated 2026-10-03)
+
+The installer was run once per surface with `--apply` after user approval. The machine is a real Windows 11 host. The server handshake returned `serverInfo.name` `ai-workspace-upstream` and exactly the two tools `upstream_request_create` and `upstream_request_status`.
+
+| Surface | Result | Evidence | Open item |
+|---|---|---|---|
+| Claude Code (Code tab of the Claude Desktop App, `~/.claude.json`) | Verified | `upstream_request_status` was exposed and called. A cwd at the workspace root was rejected, as designed. With `project_root=C:/git/ai_workspace/Projects/co-newbiz` the call returned that project's two requests, `U-20261002-001` and `U-20261001-001`, both `done`. | None. |
+| Antigravity | Verified | The tool was called from `Projects/co-deck`. It returned `requests: []`. The server `instructions` were delivered. | None. |
+| Codex | Registered, tool call not confirmed | `codex mcp list` shows the entry. The test session searched the source code instead of calling the MCP tool. | Retest from a fresh session in `Projects/co-*` with an explicit instruction to call the MCP tool. |
+| Claude Desktop App chat tab (`%APPDATA%Claudeclaude_desktop_config.json`) | Registered, not confirmed | The entry is registered. This surface is distinct from the Code tab. | Restart the app and confirm a tool call. |
+| Hermes | Registered, not confirmed | Hermes is installed, and its home is `%LOCALAPPDATA%\hermes`. The installer missed it, which is a defect fixed by §11 item 9. It was registered on 2026-10-03 with a `HERMES_HOME` override, and `config.yaml` was backed up to `config.yaml.bak-<ts>`. | Restart Hermes and confirm a tool call. |
+| Gemini CLI | Not verified | The client is not installed on this machine. | Gap per CONSTITUTION §11.0 rule 1. |
+
+Corrections and notes:
+
+- **Hermes.** The 2026-10-02 finding "not installed" was wrong. The cause was that the installer checked only `~/.hermes`, which does not exist on Windows hosts.
+- **Gemini CLI.** CONSTITUTION §11.0 rule 1 requires a gap row for every unverified surface. Keep this row until a machine with the client is available.
+- **Unverified LOCAL-PATCH marker.** A Hermes session reported a `LOCAL-PATCH` marker for `U-20261002-002`. No ticket with that ID exists in the root `tickets/` store. Treat the marker as unverified. It is outside the scope of this ticket.
+
+Remaining manual steps for the user: retest Codex as described above. Restart the Claude Desktop App chat tab and Hermes. Call `upstream_request_status` once in each of those clients.
 
 ## Appendix C — Platform-independent identity marker (2026-10-01)
 

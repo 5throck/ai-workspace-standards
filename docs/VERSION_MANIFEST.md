@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-10-02T17:02:01.797Z
+**Generated**: 2026-10-02T23:12:35.992Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -138,7 +138,7 @@
 | graph-delta-log.ts | 1.0.0 | scripts/graph-delta-log.ts | N/A |
 | ingest-external-skills.ts | 1.1.0 | scripts/ingest-external-skills.ts | N/A |
 | ingest-security-frameworks.ts | 1.1.0 | scripts/ingest-security-frameworks.ts | N/A |
-| install-upstream-mcp.ts | 2.2.0 | scripts/install-upstream-mcp.ts | N/A |
+| install-upstream-mcp.ts | 2.2.1 | scripts/install-upstream-mcp.ts | N/A |
 | l3-to-variant-pipeline.ts | 1.21.2 | scripts/l3-to-variant-pipeline.ts | child_process, fs, path, process, url |
 | lifecycle-sync-audit.ts | 1.17.1 | scripts/lifecycle-sync-audit.ts | js-yaml |
 | lint-instructions.ts | 1.0.0 | scripts/lint-instructions.ts | N/A |
