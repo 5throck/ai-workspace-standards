@@ -1943,6 +1943,15 @@
       "source": "manual",
       "created": "2026-10-02",
       "last_updated": "2026-10-02"
+    },
+    {
+      "id": "2026-10-01-variant-phase-ownership-design",
+      "title": "variant phase ownership design",
+      "file": "docs/designs/2026-10-01-variant-phase-ownership-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-10-02",
+      "last_updated": "2026-10-02"
     }
   ]
 }

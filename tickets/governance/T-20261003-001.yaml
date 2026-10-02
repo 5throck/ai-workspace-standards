@@ -1,0 +1,19 @@
+schemaVersion: 1
+id: T-20261003-001
+kind: manual
+title: >-
+  gitleaks-full: allowlist the curl-auth-header example class —
+  .hermes/skills/api-documentation/SKILL.md:133 (+template copy) uses
+  example.com curl auth headers that the deep-audit flags; 64-hex dedupe_key
+  class already allowlisted at gitleaks-full.toml:81, this class is not (found
+  via run 36964030574 10-02 deep audit; expect red again 10-09)
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-10-02T16:43:11.032Z'
+history:
+  - at: '2026-10-02T16:43:11.032Z'
+    from: null
+    to: backlog
+result: null
+error: null
