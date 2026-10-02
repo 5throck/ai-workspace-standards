@@ -15,6 +15,10 @@
 #   * [[allowlists]] (plural) is REQUIRED: gitleaks ≥8.30 rejects mixing the
 #     deprecated singular [allowlist] with [[allowlists]], and separate entries
 #     keep each entry's conditions independent (never cross-combined).
+#   * Binary-version requirement: the plural [[allowlists]] form is silently
+#     ignored by gitleaks 8.24.x (verified 2026-10-02: no suppression applied,
+#     every entry no-ops). weekly-health-check.yml pins 8.30.1 accordingly —
+#     bump both together.
 #   * Used by: .github/workflows/weekly-health-check.yml ("Secret scanning -
 #     full history (deep audit)" and the conditional "Projects/ working tree"
 #     hygiene report) via --config. Local equivalent:
@@ -45,6 +49,19 @@ commits = [
 ]
 
 [[allowlists]]
+description = "security-validator negative-test fixtures in tests/unit/security-validator.test.ts (commit c2296cc9, 2026-09-20; obvious dummy values 'sk-1234567890' and a truncated JWT header with literal dots, used as the validator's own secret-detection test inputs — same class as the 3845d1a6 entry above). Commit-scoped so a FUTURE commit reintroducing secret-shaped strings in that path is still reported."
+commits = [
+  'c2296cc9cbcf8776664af4371cc4fadd9466dd06',
+]
+
+[[allowlists]]
+description = "CHANGELOG triage prose quoting obviously fake values (commits 7b5f7bf2 + d4775956; the 2026-09-12 Projects/ false-positive-triage entry quotes a pw_-prefixed dummy fixture password and the stage6_validation UI i18n key as documentation of what was triaged, not credentials — same class as the 3aca7460 entry above). Commit-scoped so future CHANGELOG secret-shaped text still reports."
+commits = [
+  '7b5f7bf2c442c9d0d97e494a54d1889b580cbe5c',
+  'd477595607b1f7d1064e29748a9ea611a1d467f2',
+]
+
+[[allowlists]]
 description = "Placeholder value shapes used by .env.sample templates and documentation examples (same patterns as the root .gitleaks.toml — value-shape exclusions, not path exclusions)"
 regexes = [
   '''your[_-]?(api[_-]?)?key[_-]?here''',
@@ -56,6 +73,12 @@ regexes = [
   '''YOUR_SECRET''',
   # gitleaks:allow inline suppression marker
   '''gitleaks:allow''',
+  # 64-char lowercase hex sha256 digests written by scripts/mcp-upstream-server.ts
+  # into tickets/governance/*.yaml dedupe_key fields — parity with the root
+  # .gitleaks.toml (generic-api-key trips on 64-char hex; triaged 2026-10-01,
+  # U-20261001-001). Anchored to the exact shape; same accepted trade-off as the
+  # root config: a real 64-char-hex secret elsewhere is not flagged by this rule.
+  '''^[a-f0-9]{64}$''',
 ]
 
 # ——— 2026-09-12 Projects/ working-tree triage (100 findings → 90 verified FPs).

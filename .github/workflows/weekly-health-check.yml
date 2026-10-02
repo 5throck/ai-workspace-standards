@@ -61,11 +61,14 @@ jobs:
         # to every PR scan. This weekly deep audit applies the SAME default rule
         # set WITHOUT the path allowlists (.github/gitleaks-full.toml — verified
         # false positives only in ITS allowlist) across the FULL git history
-        # (fetch-depth: 0 in the checkout step). Pinned install mirrors the
-        # hook-secret-gates job in test.yml.
+        # (fetch-depth: 0 in the checkout step). Pinned to 8.30.1 — deliberately
+        # NOT the 8.24.3 used by test.yml's hook smoke test: .github/gitleaks-full.toml
+        # uses the plural [[allowlists]] form, which 8.24.x silently ignores (no
+        # suppression applied — every verified-FP entry no-ops, empirically verified
+        # 2026-10-02), so the audit would report ~25 already-triaged false positives.
         shell: bash
         run: |
-          GITLEAKS_VERSION=8.24.3
+          GITLEAKS_VERSION=8.30.1
           curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" -o /tmp/gitleaks.tgz
           sudo tar -xzf /tmp/gitleaks.tgz -C /usr/local/bin gitleaks
           gitleaks version
@@ -86,7 +89,8 @@ jobs:
             echo "Projects/ not present (untracked local dir) — hygiene report skipped."
             exit 0
           fi
-          GITLEAKS_VERSION=8.24.3
+          # Same pin as the full-history audit above ([[allowlists]] needs ≥8.25-era semantics; verified on 8.30.1).
+          GITLEAKS_VERSION=8.30.1
           curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" -o /tmp/gitleaks.tgz
           sudo tar -xzf /tmp/gitleaks.tgz -C /usr/local/bin gitleaks
           set -o pipefail
