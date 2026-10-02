@@ -195,3 +195,86 @@ describe('validateTicket upstream block (design 2026-10-01 §5.2)', () => {
     expect(() => validateTicket(withUp({ triage: 'maybe' }))).toThrow(/triage/);
   });
 });
+
+describe('upstream cross-field invariants (T-20261002-007, M2)', () => {
+  const upstream = () => ({
+    project: 'co-test', variant: 'co-test', template_version: '0.1.0', source: 'project/co-test', trust: 'untrusted',
+    suspected_layer: 'L2', symptom: 'A symptom long enough to pass the twenty-character floor.',
+    affected_paths: ['skills/SKILLS.md'],
+    triage: 'inbox', flagged: false, triage_reasons: [], dedupe_key: 'abc', duplicates: [],
+  });
+  const base = (over: Record<string, unknown> = {}) => ({
+    schemaVersion: 1, id: 'U-20261002-001', kind: 'manual', priority: 'normal', status: 'backlog', attempts: 0,
+    created_at: '2026-10-02T00:00:00.000Z', history: [{ at: '2026-10-02T00:00:00.000Z', from: null, to: 'backlog' }],
+    result: null, error: null, upstream: upstream(), ...over,
+  });
+  const withUp = (o: Record<string, unknown>) => base({ upstream: { ...upstream(), ...o } });
+
+  test('project must match ^co-[a-z0-9-]{1,40}$', () => {
+    expect(() => validateTicket(withUp({ project: 'not-co' }))).toThrow(/co-\[a-z0-9-\]/);
+    expect(() => validateTicket(withUp({ project: '' }))).toThrow(/co-\[a-z0-9-\]/);
+    expect(() => validateTicket(withUp({ project: `co-${'x'.repeat(41)}` }))).toThrow(/co-\[a-z0-9-\]/);
+  });
+
+  test('template_version and variant must be string or null', () => {
+    expect(() => validateTicket(withUp({ template_version: 3 }))).toThrow(/template_version/);
+    expect(() => validateTicket(withUp({ variant: 7 }))).toThrow(/variant/);
+    expect(() => validateTicket(withUp({ template_version: null, variant: null }))).not.toThrow();
+  });
+
+  test('triage↔status consistency: inbox ⇒ backlog|done; ready ⇒ waiting|review|done', () => {
+    expect(() => validateTicket(withUp({ triage: 'inbox', }))).not.toThrow();      // backlog ✓
+    expect(() => validateTicket(withUp({ triage: 'ready' }))).toThrow(/inconsistent/); // ready + backlog ✗
+    expect(() => validateTicket(base({
+      status: 'done',
+      history: [
+        { at: 'x', from: null, to: 'backlog' },
+        { at: 'x', from: 'backlog', to: 'waiting' },
+        { at: 'x', from: 'waiting', to: 'running' },
+        { at: 'x', from: 'running', to: 'review' },
+        { at: 'x', from: 'review', to: 'done' },
+      ],
+      upstream: { ...upstream(), triage: 'ready', resolution: { outcome: 'fixed', summary: 's' } },
+    }))).not.toThrow(); // ready + done ✓
+    expect(() => validateTicket(base({
+      status: 'waiting',
+      history: [{ at: 'x', from: null, to: 'backlog' }, { at: 'x', from: 'backlog', to: 'waiting' }],
+      upstream: { ...upstream(), triage: 'ready' },
+    }))).not.toThrow(); // ready + waiting ✓
+  });
+
+  test('done requires a resolution; resolution requires a non-empty summary', () => {
+    expect(() => validateTicket(base({
+      status: 'done',
+      history: [
+        { at: 'x', from: null, to: 'backlog' },
+        { at: 'x', from: 'backlog', to: 'waiting' },
+        { at: 'x', from: 'waiting', to: 'running' },
+        { at: 'x', from: 'running', to: 'review' },
+        { at: 'x', from: 'review', to: 'done' },
+      ],
+    }))).toThrow(/requires upstream\.resolution/);
+    expect(() => validateTicket(withUp({ resolution: { outcome: 'fixed' } }))).toThrow(/summary/);
+    expect(() => validateTicket(withUp({ resolution: { outcome: 'fixed', summary: '   ' } }))).toThrow(/summary/);
+  });
+
+  test('resolution pr_url must be https and template_version a non-empty string', () => {
+    expect(() => validateTicket(withUp({ resolution: { outcome: 'fixed', summary: 's', pr_url: 'http://x' } }))).toThrow(/https/);
+    expect(() => validateTicket(withUp({ resolution: { outcome: 'fixed', summary: 's', template_version: '' } }))).toThrow(/template_version/);
+    expect(() => validateTicket(withUp({ resolution: { outcome: 'fixed', summary: 's', pr_url: 'https://github.com/x/pull/1', template_version: 'unreleased' } }))).not.toThrow();
+  });
+
+  test('legacy real tickets stay valid (U-20261001-001 shape: done + inbox + no resolution.template_version)', () => {
+    expect(() => validateTicket(base({
+      status: 'done',
+      history: [
+        { at: 'x', from: null, to: 'backlog' },
+        { at: 'x', from: 'backlog', to: 'waiting' },
+        { at: 'x', from: 'waiting', to: 'running' },
+        { at: 'x', from: 'running', to: 'review' },
+        { at: 'x', from: 'review', to: 'done' },
+      ],
+      upstream: { ...upstream(), triage: 'inbox', resolution: { outcome: 'fixed', pr_url: 'https://github.com/x/pull/2', summary: 'legacy' } },
+    }))).not.toThrow();
+  });
+});

@@ -1916,6 +1916,15 @@
       "source": "manual",
       "created": "2026-10-02",
       "last_updated": "2026-10-02"
+    },
+    {
+      "id": "2026-10-02-upstream-review-backlog-remediations-design",
+      "title": "upstream review backlog remediations design",
+      "file": "docs/designs/2026-10-02-upstream-review-backlog-remediations-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-10-02",
+      "last_updated": "2026-10-02"
     }
   ]
 }

@@ -1,5 +1,9 @@
 #!/usr/bin/env bun
-// @version 1.5.0
+// @version 1.6.0
+// v1.6.0 (2026-10-02, T-20261002-005): the merge path's ticket read-modify-write runs
+//           under the SHARED ticket lock from helpers/ticket-store.ts (nested inside
+//           the intake lock), so it can no longer silently overwrite a concurrent PM
+//           triage/resolve write (review H4 lost-update class).
 // v1.5.0 (2026-10-01, T-20261001-017): intake critical section (cap read -> audit append)
 //           runs under a mkdir lock with stale-takeover and fail-open deadline (parallel server
 //           instances can no longer double-spend the caps); daily audit logs prune after 90
@@ -40,6 +44,7 @@ import { join, dirname, resolve, basename, isAbsolute, sep } from 'node:path';
 import { createInterface } from 'node:readline';
 import { fileURLToPath } from 'node:url';
 import { load, dump, JSON_SCHEMA } from 'js-yaml';
+import { withTicketLock } from './helpers/ticket-store.ts';
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 
@@ -513,12 +518,20 @@ function handleCreateRequest(params: unknown, cwd: string): Outcome {
     }
 
     // C5: merge into an open duplicate. A merge never changes the existing ticket's triage.
-    const dup = loadUpstreamTickets().find(({ ticket }) => ticket.status !== 'done' && ticket.upstream.dedupe_key === dedupeHash);
-    if (dup) {
+    // T-20261002-005 (H4): the read-modify-write of the ticket file runs under the
+    // SHARED ticket lock so a concurrent PM triage/resolve (ticket-store) cannot be
+    // silently overwritten. Always nested INSIDE the intake lock (ordering
+    // intake -> ticket is never inverted, so no deadlock).
+    const dup = withTicketLock(TICKETS_DIR, `merge:${dedupeHash.slice(0, 8)}`, () => {
+      const found = loadUpstreamTickets().find(({ ticket }) => ticket.status !== 'done' && ticket.upstream.dedupe_key === dedupeHash);
+      if (!found) return null;
       const entry: Record<string, unknown> = { project, at: new Date().toISOString() };
       if (flagged) entry.flagged = true;
-      dup.ticket.upstream.duplicates = [...(dup.ticket.upstream.duplicates ?? []), entry];
-      writeYamlAtomic(join(TICKETS_DIR, dup.file), dup.ticket);
+      found.ticket.upstream.duplicates = [...(found.ticket.upstream.duplicates ?? []), entry];
+      writeYamlAtomic(join(TICKETS_DIR, found.file), found.ticket);
+      return found;
+    });
+    if (dup) {
       appendAuditLog({ project, outcome: 'merged', id: dup.ticket.id, flagged, reasons: flagged ? ['needs_human_review'] : [], dedupe_key: dedupeHash, request_sha256: requestHash });
       if (dup.ticket.upstream.project !== project) {
         // Cross-project merge: acknowledge only. The foreign ticket's id/status/triage stay private.

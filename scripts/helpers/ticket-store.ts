@@ -1,5 +1,10 @@
 #!/usr/bin/env bun
-// @version 1.7.0
+// @version 1.8.0
+// v1.8.0 (2026-10-02, T-20261002-003/-005): withTicketLock — shared per-directory ticket
+//           lock (owner token, fail-closed, atomic stale takeover) wrapping every
+//           existing-ticket mutation, closing the H4 lost-update class against the server
+//           merge path; setUpstreamTriage/setUpstreamResolution validate the whole
+//           operation BEFORE any write and the resolution walk is resumable (H2).
 // v1.7.0 (2026-10-01, T-20261001-017): readTicketRaw — parse WITHOUT validateTicket so a
 //           corrupt/hand-edited ticket can be rendered for repair (ticket.ts show fallback).
 // v1.6.0 (2026-10-01, T-20261001-016): setUpstreamTriage / setUpstreamResolution — PM triage
@@ -11,9 +16,11 @@
 // ticket-store.ts — Atomic file I/O for the Phase A ticket queue. Every function
 // takes an explicit directory/path so callers (CLI, skill, tests) never assume a
 // fixed workspace location.
-// Design: docs/superpowers/specs/2026-07-16-service-ticket-kanban-design.md
+// Design: docs/superpowers/specs/2026-07-16-service-ticket-kanban-design.md,
+//         docs/designs/2026-10-02-upstream-review-backlog-remediations-design.md (§A)
 
-import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, writeFileSync, openSync, closeSync, statSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, writeFileSync, openSync, closeSync, statSync, rmSync } from 'node:fs';
+import { randomBytes } from 'node:crypto';
 import { join, dirname, basename, relative, resolve, isAbsolute } from 'node:path';
 import { load, dump, JSON_SCHEMA } from 'js-yaml';
 import {
@@ -69,6 +76,87 @@ function writeTicketAtomic(dir: string, ticket: Ticket): void {
   const tmpPath = `${finalPath}.tmp-${process.pid}-${Date.now()}`;
   writeFileSync(tmpPath, dump(ticket), 'utf-8');
   renameSync(tmpPath, finalPath);
+}
+
+// ——— T-20261002-005 (H4): shared ticket lock ———
+// The server's merge path and this store's read-modify-write mutations previously
+// used different (or no) locks, so concurrent processes could silently drop each
+// other's writes (lost triage, lost duplicates entry, lost resolution). Every
+// existing-ticket mutation now runs under ONE per-directory mkdir lock, shared
+// with the server by import. Fail-CLOSED on timeout: ticket mutations are
+// sub-second, and a silent fail-open is exactly the lost-update class this closes.
+const TICKET_LOCK_STALE_MS = 30_000;
+const TICKET_LOCK_POLL_MS = 20;
+
+function ticketLockTimeoutMs(): number {
+  const raw = process.env.TICKET_LOCK_TIMEOUT_MS;
+  if (raw === undefined || raw === '') return 5000;
+  if (/^\d{1,6}$/.test(raw.trim())) return parseInt(raw, 10);
+  return 5000;
+}
+
+function readLockOwner(lockDir: string): string {
+  try {
+    const owner = JSON.parse(readFileSync(join(lockDir, 'owner'), 'utf-8')) as { pid?: number; holder?: string };
+    return `pid ${owner.pid ?? '?'} (${owner.holder ?? 'unknown'})`;
+  } catch {
+    return 'unknown holder';
+  }
+}
+
+/** Runs `fn` while holding the per-directory ticket lock (`<dir>/.ticket-lock`).
+ * Stale locks (>30s, crashed holder) are taken over by ATOMIC RENAME — exactly one
+ * waiter wins the rename, so two waiters can never both "remove" the same lock.
+ * Release only removes a lock whose owner token still matches ours, so a holder
+ * whose lock was stolen after a pathological >30s operation cannot delete the
+ * new holder's lock. NOT re-entrant: nested calls deadlock on the timeout. */
+export function withTicketLock<T>(dir: string, holder: string, fn: () => T): T {
+  mkdirSync(dir, { recursive: true });
+  const lockDir = join(dir, '.ticket-lock');
+  const token = randomBytes(8).toString('hex');
+  const deadline = Date.now() + ticketLockTimeoutMs();
+  for (;;) {
+    try {
+      mkdirSync(lockDir);
+      break;
+    } catch (err) {
+      if ((err as NodeJS.ErrnoException).code !== 'EEXIST') throw err;
+      // Stale takeover ONLY for a lock older than TICKET_LOCK_STALE_MS — a fresh
+      // lock belongs to an active holder, and renaming it away would break the
+      // mutual exclusion this lock exists to provide.
+      let stale = false;
+      try {
+        stale = Date.now() - statSync(lockDir).mtimeMs > TICKET_LOCK_STALE_MS;
+      } catch { /* vanished between EEXIST and stat — loop and retry mkdir */ }
+      if (stale) {
+        try {
+          // Atomic takeover: the rename succeeds for exactly one waiter.
+          const stalePath = `${lockDir}.stale-${process.pid}-${Date.now()}`;
+          renameSync(lockDir, stalePath);
+          rmSync(stalePath, { recursive: true, force: true });
+          continue;
+        } catch { /* another waiter won the rename, or already removed it — wait */ }
+      }
+      if (Date.now() >= deadline) {
+        throw new Error(
+          `[ticket-store] could not acquire the ticket lock at ${lockDir} within ${ticketLockTimeoutMs()}ms ` +
+          `(held by ${readLockOwner(lockDir)}) — retry, and check for a stuck server process`,
+        );
+      }
+      Bun.sleepSync(TICKET_LOCK_POLL_MS);
+    }
+  }
+  try {
+    writeFileSync(join(lockDir, 'owner'), JSON.stringify({ pid: process.pid, token, holder, at: nowIso() }), 'utf-8');
+  } catch { /* the lock was stolen between mkdir and owner write — release below is a no-op */ }
+  try {
+    return fn();
+  } finally {
+    try {
+      const owner = JSON.parse(readFileSync(join(lockDir, 'owner'), 'utf-8')) as { token?: string };
+      if (owner.token === token) rmSync(lockDir, { recursive: true, force: true });
+    } catch { /* lock already gone (stale-taken) — nothing to release */ }
+  }
 }
 
 /** T-20261001-017 — raw parse WITHOUT validateTicket. The repair path for a corrupt or
@@ -248,6 +336,11 @@ export interface MoveOptions {
 export const DEFAULT_ATTEMPTS_CAP = 2;
 
 export function moveTicket(dir: string, id: string, to: Status, opts: MoveOptions = {}): Ticket {
+  return withTicketLock(dir, `move:${id}`, () => moveTicketUnlocked(dir, id, to, opts));
+}
+
+/** Core transition — caller MUST already hold the ticket lock (see withTicketLock). */
+function moveTicketUnlocked(dir: string, id: string, to: Status, opts: MoveOptions = {}): Ticket {
   const ticket = readTicket(dir, id);
   const from = ticket.status;
   if (!opts.force && !canTransition(from, to)) {
@@ -273,28 +366,44 @@ export function moveTicket(dir: string, id: string, to: Status, opts: MoveOption
  * Sets `upstream.triage` and moves the status in step: inbox -> backlog, ready -> waiting.
  * Human-in-the-loop: a `flagged: true` ticket is never promoted to ready without
  * `confirmReviewed` (the CLI surfaces this as --confirm-reviewed). Only the triage
- * field and the status change — every requester-controlled upstream field is immutable. */
+ * field and the status change — every requester-controlled upstream field is immutable.
+ * T-20261002-003 (H2): the whole operation is validated BEFORE anything is written —
+ * a done ticket refuses both triage values, and a ready promotion from a status
+ * without a forward edge to waiting (e.g. review) throws with nothing mutated.
+ * T-20261002-007 (M2): triage + status + history hop land in ONE atomic write so the
+ * file never rests in a state the schema invariants reject (e.g. ready+backlog). */
 export function setUpstreamTriage(
   dir: string,
   id: string,
   triage: 'inbox' | 'ready',
   opts: { confirmReviewed?: boolean } = {},
 ): Ticket {
-  const ticket = readTicket(dir, id);
-  if (!ticket.upstream) throw new Error(`[ticket-store] ${id} is not an upstream ticket (no upstream block)`);
-  if (triage === 'ready' && ticket.upstream.flagged && !opts.confirmReviewed) {
-    throw new Error(`[ticket-store] ${id} is flagged for human review — promote to ready only with confirmReviewed (--confirm-reviewed)`);
-  }
-  ticket.upstream.triage = triage;
-  writeTicketAtomic(dir, ticket);
-  const target: Status = triage === 'ready' ? 'waiting' : 'backlog';
-  if (ticket.status !== target) {
-    // The adjacency map has no backward edge, so an inbox demotion from a
-    // waiting/review ticket needs --force. This is a demotion (never skips a
-    // forward gate) and the triage field + history entry carry the audit trail.
-    moveTicket(dir, id, target, { force: triage === 'inbox' });
-  }
-  return readTicket(dir, id);
+  return withTicketLock(dir, `triage:${id}`, () => {
+    const ticket = readTicket(dir, id);
+    if (!ticket.upstream) throw new Error(`[ticket-store] ${id} is not an upstream ticket (no upstream block)`);
+    if (ticket.status === 'done') {
+      throw new Error(`[ticket-store] ${id} is done — a closed request is never re-triaged`);
+    }
+    if (triage === 'ready' && ticket.upstream.flagged && !opts.confirmReviewed) {
+      throw new Error(`[ticket-store] ${id} is flagged for human review — promote to ready only with confirmReviewed (--confirm-reviewed)`);
+    }
+    const target: Status = triage === 'ready' ? 'waiting' : 'backlog';
+    if (ticket.status !== target && triage === 'ready' && !canTransition(ticket.status, target)) {
+      throw new Error(
+        `[ticket-store] transition ${ticket.status} -> ${target} is not allowed for ${id} (ready promotion refused, nothing written)`,
+      );
+    }
+    ticket.upstream.triage = triage;
+    if (ticket.status !== target) {
+      // The adjacency map has no backward edge, so an inbox demotion from a
+      // waiting/review ticket needs --force. This is a demotion (never skips a
+      // forward gate) and the triage field + this history entry carry the audit trail.
+      ticket.history.push({ at: nowIso(), from: ticket.status, to: target });
+      ticket.status = target;
+    }
+    writeTicketAtomic(dir, ticket);
+    return readTicket(dir, id);
+  });
 }
 
 /** T-20261001-016 — record the PM's resolution on an upstream request and close the
@@ -302,29 +411,61 @@ export function setUpstreamTriage(
  * (backlog -> waiting -> running -> review -> done; failed re-enters at waiting) —
  * never a --force jump, so every hop lands in the history. Writes the outcome into
  * `upstream.resolution` AND the ticket `result` field (the done-transition summary
- * the CLI requires). Requester-controlled upstream fields stay untouched. */
+ * the CLI requires). Requester-controlled upstream fields stay untouched.
+ * T-20261002-003 (H2): the full hop chain is validated with canTransition BEFORE
+ * anything is written, and the whole walk lands in ONE atomic write — a crash can no
+ * longer strand a resolution on a not-done ticket. A ticket that ALREADY carries a
+ * resolution but is not yet done (legacy hand-edit or pre-1.8.0 crash) resumes the
+ * walk instead of being refused; only status done + existing resolution is
+ * "never re-resolved". */
 export function setUpstreamResolution(
   dir: string,
   id: string,
   resolution: NonNullable<UpstreamBlock['resolution']>,
   summary: string,
 ): Ticket {
-  const ticket = readTicket(dir, id);
-  if (!ticket.upstream) throw new Error(`[ticket-store] ${id} is not an upstream ticket (no upstream block)`);
-  if (ticket.upstream.resolution) throw new Error(`[ticket-store] ${id} already carries a resolution — a closed request is never re-resolved`);
-  if (ticket.status === 'done') throw new Error(`[ticket-store] ${id} is already done`);
-  ticket.upstream.resolution = resolution;
-  ticket.result = summary;
-  writeTicketAtomic(dir, ticket);
-  const order: Status[] = ['backlog', 'waiting', 'running', 'review', 'done'];
-  let cur = readTicket(dir, id).status;
-  while (cur !== 'done') {
-    const next: Status = cur === 'failed' ? 'waiting' : order[order.indexOf(cur) + 1];
-    if (!next) throw new Error(`[ticket-store] ${id}: no legal hop from ${cur} toward done`);
-    moveTicket(dir, id, next, next === 'done' ? { result: summary } : {});
-    cur = readTicket(dir, id).status;
-  }
-  return readTicket(dir, id);
+  return withTicketLock(dir, `resolve:${id}`, () => {
+    const ticket = readTicket(dir, id);
+    if (!ticket.upstream) throw new Error(`[ticket-store] ${id} is not an upstream ticket (no upstream block)`);
+    if (ticket.status === 'done') {
+      if (ticket.upstream.resolution) {
+        throw new Error(`[ticket-store] ${id} already carries a resolution — a closed request is never re-resolved`);
+      }
+      throw new Error(`[ticket-store] ${id} is already done`);
+    }
+    const order: Status[] = ['backlog', 'waiting', 'running', 'review', 'done'];
+    let hop: Status = ticket.status;
+    const chain: Status[] = [];
+    while (hop !== 'done') {
+      const next: Status = hop === 'failed' ? 'waiting' : order[order.indexOf(hop) + 1];
+      if (!next || !canTransition(hop, next)) {
+        throw new Error(`[ticket-store] ${id}: no legal hop from ${hop} toward done (nothing written)`);
+      }
+      chain.push(next);
+      hop = next;
+    }
+    // Preserve moveTicket's retry-budget rule for the failed -> waiting hop.
+    if (ticket.status === 'failed' && ticket.attempts + 1 > DEFAULT_ATTEMPTS_CAP) {
+      throw new Error(
+        `[ticket-store] ${id} has exhausted its retry budget (attempts ${ticket.attempts}, cap ${DEFAULT_ATTEMPTS_CAP}) — escalate to a human instead of re-queuing (use --force to override)`,
+      );
+    }
+    if (!ticket.upstream.resolution) {
+      ticket.upstream.resolution = resolution;
+    }
+    let from: Status = ticket.status;
+    for (const to of chain) {
+      ticket.history.push({ at: nowIso(), from, to });
+      from = to;
+    }
+    ticket.status = 'done';
+    ticket.result = summary;
+    // Keep attempts equal to its definition (failed → waiting hop count) — a failed
+    // ticket re-entering through waiting adds one hop, same as moveTicket does.
+    ticket.attempts = ticket.history.filter(h => h.from === 'failed' && h.to === 'waiting').length;
+    writeTicketAtomic(dir, ticket);
+    return readTicket(dir, id);
+  });
 }
 
 /** Pulls the highest-priority waiting service ticket (urgent > high > normal > low,
