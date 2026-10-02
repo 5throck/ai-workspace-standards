@@ -3,6 +3,8 @@
 All notable changes to the template variants are documented here.
 
 ## [Unreleased]
+### Added
+- **[2026-10-02]**: PM role bootstrap (spec 2026-10-02-pm-role-bootstrap-design) — new projects now ship the SessionStart hook `scripts/hooks/pm-role-bootstrap.ts` and a top-of-file "Session bootstrap (mandatory)" block in CLAUDE.md, GEMINI.md, CODEX.md and HERMES.md. Existing projects receive the hook and the settings.json entry through upgrade-project. They do not receive the top block.
 
 ## [0.9.0] - 2026-10-01
 ### Changed

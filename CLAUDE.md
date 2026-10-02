@@ -1,5 +1,10 @@
 # CLAUDE.md
 
+> **Session bootstrap (mandatory)**: Before your first response in every session, use the Read tool on [`AGENTS.md`](AGENTS.md) and [`agents/pm.md`](agents/pm.md).
+> This applies to every request. Short questions, Q&A, and non-code questions are not exempt.
+> Read them once per session, and again after the context is cleared or compacted.
+> Q&A-only turns need no execution plan table. Multi-step work still follows the PM Gateway.
+
 
 <!-- GOVERNANCE-POINTER-TABLE (ADR-0090) -->
 > **Governance references (ADR-0090)**: [`AGENTS.md`](AGENTS.md) is the SSOT registry — **read it first**, and Read the owning governance documents it points to before executing their workflows. Operational workflow bodies live outside this file — **Read the owning file before governing work**:
@@ -352,7 +357,7 @@ All shared Git/PR rules are in [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr
 
 - **PR Language**: Governed by [CONSTITUTION.md §3 - Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
 
-*Last Updated: 2026-10-01 — removed redundant N-1/N boilerplate rows; /sync already covers lifecycle + audit + commit + push + PR; previous: 2026-06-21 inlined N-1/N rows*
+*Last Updated: 2026-10-02 — removed redundant N-1/N boilerplate rows; /sync already covers lifecycle + audit + commit + push + PR; previous: 2026-06-21 inlined N-1/N rows*
 <!-- COMMON-CLAUDE:END -->
 
 

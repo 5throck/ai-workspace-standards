@@ -1,5 +1,10 @@
 # CODEX.md
 
+> **Session bootstrap (mandatory)**: Before your first response in every session, read the full contents of [`AGENTS.md`](AGENTS.md) and [`agents/pm.md`](agents/pm.md).
+> This applies to every request. Short questions, Q&A, and non-code questions are not exempt.
+> Read them once per session, and again after the context is cleared or compacted.
+> Q&A-only turns need no execution plan table. Multi-step work still follows the PM Gateway.
+
 > **Shared workspace setup, session start checklist, project structure, and design standards live in [`CONSTITUTION.md`](CONSTITUTION.md) - read it first and the files listed in its `## Required Reading` block.**
 <!-- L0-ONLY: This instruction targets the workspace root (L0). L1/L2 projects must NOT reference CONSTITUTION.md — see CONSTITUTION.md §7.5 CONSTITUTION.md Non-Propagation. merge-frontmatter.ts strips CONSTITUTION.md lines from L2 output. -->
 
