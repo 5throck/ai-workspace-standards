@@ -117,3 +117,13 @@ description = "Next.js build artifacts (.next/ at any project depth, incl. app/<
 paths = [
   '''Projects/[^/]+/.*\.next/''',
 ]
+
+[[allowlists]]
+description = "api-documentation skill's worked curl example (the Authorization: Bearer how-to) — generic-api-key captures the example request line; verified 2026-10-03 (weekly deep audit run 36964030574, red again expected 10-09). Path-scoped to the skill doc and its template copy so a real bearer secret elsewhere is still reported"
+paths = [
+  '''\.hermes/skills/api-documentation/SKILL\.md$''',
+  '''templates/common/skills/api-documentation/SKILL\.md$''',
+]
+regexes = [
+  '''curl -X GET "https://api\.example\.com/v1/users" \\''',
+]

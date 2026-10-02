@@ -7974,6 +7974,12 @@
     {
       "type": "cites_skill",
       "from": "doc:AGENTS.md",
+      "to": "graft",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:AGENTS.md",
       "to": "handbook",
       "source": "workflow-doc"
     },
@@ -8089,6 +8095,12 @@
       "type": "cites_skill",
       "from": "doc:co-abap/AGENTS.md",
       "to": "dump-monitor",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/AGENTS.md",
+      "to": "graft",
       "source": "workflow-doc"
     },
     {
@@ -8431,6 +8443,12 @@
       "type": "cites_skill",
       "from": "doc:co-consult/AGENTS.md",
       "to": "finishing-a-development-branch",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/AGENTS.md",
+      "to": "graft",
       "source": "workflow-doc"
     },
     {
@@ -9090,6 +9108,12 @@
     {
       "type": "cites_skill",
       "from": "doc:co-deck/AGENTS.md",
+      "to": "graft",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/AGENTS.md",
       "to": "handbook",
       "source": "workflow-doc"
     },
@@ -9211,6 +9235,12 @@
       "type": "cites_skill",
       "from": "doc:co-deck/docs/co-deck.context.md",
       "to": "design",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/docs/co-deck.context.md",
+      "to": "graft",
       "source": "workflow-doc"
     },
     {
@@ -9444,6 +9474,12 @@
     {
       "type": "cites_skill",
       "from": "doc:co-design/AGENTS.md",
+      "to": "graft",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/AGENTS.md",
       "to": "meeting-facilitation",
       "source": "workflow-doc"
     },
@@ -9517,6 +9553,12 @@
       "type": "cites_skill",
       "from": "doc:co-develop/AGENTS.md",
       "to": "agent-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/AGENTS.md",
+      "to": "graft",
       "source": "workflow-doc"
     },
     {
@@ -9661,6 +9703,12 @@
       "type": "cites_skill",
       "from": "doc:co-export/AGENTS.md",
       "to": "agent-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/AGENTS.md",
+      "to": "graft",
       "source": "workflow-doc"
     },
     {
@@ -9960,6 +10008,12 @@
     {
       "type": "cites_skill",
       "from": "doc:co-game/AGENTS.md",
+      "to": "graft",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/AGENTS.md",
       "to": "meeting-facilitation",
       "source": "workflow-doc"
     },
@@ -10099,6 +10153,12 @@
       "type": "cites_skill",
       "from": "doc:co-hr/AGENTS.md",
       "to": "agent-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/AGENTS.md",
+      "to": "graft",
       "source": "workflow-doc"
     },
     {
@@ -10458,6 +10518,12 @@
     {
       "type": "cites_skill",
       "from": "doc:co-news/AGENTS.md",
+      "to": "graft",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/AGENTS.md",
       "to": "meeting-facilitation",
       "source": "workflow-doc"
     },
@@ -10734,6 +10800,12 @@
     {
       "type": "cites_skill",
       "from": "doc:co-price/AGENTS.md",
+      "to": "graft",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-price/AGENTS.md",
       "to": "harness-verification",
       "source": "workflow-doc"
     },
@@ -10999,6 +11071,12 @@
       "type": "cites_skill",
       "from": "doc:co-safety/AGENTS.md",
       "to": "agent-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/AGENTS.md",
+      "to": "graft",
       "source": "workflow-doc"
     },
     {
@@ -11778,6 +11856,12 @@
     {
       "type": "cites_skill",
       "from": "doc:co-security/AGENTS.md",
+      "to": "graft",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-security/AGENTS.md",
       "to": "meeting-facilitation",
       "source": "workflow-doc"
     },
@@ -11899,6 +11983,12 @@
       "type": "cites_skill",
       "from": "doc:co-work/AGENTS.md",
       "to": "agent-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/AGENTS.md",
+      "to": "graft",
       "source": "workflow-doc"
     },
     {
