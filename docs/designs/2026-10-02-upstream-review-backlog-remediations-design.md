@@ -85,3 +85,7 @@ Not autonomously executable (requires a real Windows machine, a real Gemini CLI 
 ## Verification
 
 Per PR: `bun scripts/audit.ts`, `bun scripts/validate-templates.ts`, `bun scripts/verify-scripts.ts --verify`, `bun scripts/test-runner.ts unit` (or the repo's `bun test` battery), plus the targeted new tests. Final: fresh `workflow_dispatch` of the weekly health check stays green and the 3-OS CI matrix passes on every PR.
+
+## Group G — T-20261002-015 (delivered 2026-10-02)
+
+The Phase-3 LOCAL-PATCH upgrade report ships as `helpers/local-patch-scan.ts` (pure marker scanner) plus an upgrade-project pre-delivery scan: before any delivery write, the project tree is scanned for `LOCAL-PATCH(upstream-request: <id>|pending)` markers and the upgrade summary lists every marked file with its ticket id, so an operator sees which local patches an upgrade overwrites.
