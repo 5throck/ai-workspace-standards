@@ -1,10 +1,13 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.50.4
+ * @version 1.50.5
  *
- * v1.50.4 (2026-10-02): pointer-integrity strips the #anchor fragment before the file
- *          existence check — anchored references misclassified as post-scaffold-only WARNs.
+ * v1.50.5 (2026-10-03, design 2026-10-03-validator-warning-fixes-design):
+ *          repoint size-budget Fix string to HERMES.md "Hermes Platform Mechanics" +
+ *          CONSTITUTION.md §11; v1.50.4 (2026-10-02): pointer-integrity strips the
+ *          #anchor fragment before the file existence check — anchored references
+ *          misclassified as post-scaffold-only WARNs.
  * v1.50.3 (2026-10-02): C-SK-02 allowedWithExtends gains `tier` and `model` — the PM
  *          Tier Semantics fields (design 2026-09-29) are documented optional fields that the
  *          11 variant pm.md extends-stubs legitimately carry; the WARNs were schema lag.
@@ -5561,7 +5564,7 @@ function checkAgentsMdSizeBudget(): void {
     if (size > AGENTS_MD_SIZE_BUDGET) {
       warn(t.variant, 'agents-md-size-budget',
         `${t.path}: ${size.toLocaleString()} chars exceeds the 15,000-char thin-dispatcher budget (ADR-0090) — user decision 2026-09-26 (design Addendum 3): WARN-only visibility metric, no FAIL promotion and no further reduction; Hermes consumers use the documented context_file_max_chars config`,
-        `If truncation matters for a harness, see the config backstop in AGENTS.md §6`);
+        `If truncation matters for a harness, see the config backstop in HERMES.md "Hermes Platform Mechanics" (context_file_max_chars) and CONSTITUTION.md §11`);
     } else {
       pass(`${t.path}: ${size.toLocaleString()} chars (within budget)`);
     }
