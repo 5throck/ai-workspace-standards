@@ -36,6 +36,8 @@ A legacy file without markers is migrated by copying the original text slice of 
 Two template releases after this scripts/policy change: PR-B adds the markers and an opt-in `unit-tests` job (`vars.CI_ENABLE_DEFAULT_UNIT_TESTS`), resyncing co-newbiz alone first; PR-C flips it to default-on with a `CI_SKIP_DEFAULT_UNIT_TESTS` skip after PR-B is clean across the fleet. Dry-run evidence for all 13 projects is attached to T-20260930-026.
 Amendment (2026-10-01): rollout pacing was compressed — PR-C (default-on) landed before the fleet-wide PR-B resync completed (only co-newbiz carried PROJECT-JOBS markers at that point). This is mitigated because the unit-tests job self-skips when the project has no `test:unit` script, and adoption completes via each project's normal resync.
 
+Amendment (2026-10-03): template-owned job values such as the Bun pin are template-authoritative, because only the PROJECT-JOBS region is project-owned and every resync overwrites local edits elsewhere. A defect in such a value (the `latest`/`"1.3.x"` pin that could not parse lockfileVersion 2, U-20261002-002) is therefore fixed in the template default, not by project-local patches. The pin now tracks the Bun minor line that writes the fleet's bun.lock (1.4.x) and is bumped deliberately with any lockfileVersion change, never `latest`. See design section 12 (`docs/designs/2026-10-01-ci-template-unit-test-job-design.md`) and PR #1338.
+
 ## Consequences
 
 - Projects can no longer edit template-owned jobs in `ci.yml`; project jobs live in the region.
