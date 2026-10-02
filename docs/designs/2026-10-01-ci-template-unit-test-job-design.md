@@ -60,7 +60,7 @@ job (PR #427); a fleet resync removed it (6fcaf043) and it was hand re-added on 
       - uses: actions/checkout@<40-hex> # v4
         with: { fetch-depth: 1, persist-credentials: false }
       - uses: oven-sh/setup-bun@<40-hex> # v2.2.0
-        with: { bun-version: "1.3.x" }   # pinned; exact value chosen in PR-B to match root
+        with: { bun-version: "1.4.x" }   # pinned; exact value chosen in PR-B to match root; see §12
       - name: Detect test:unit script
         id: detect
         run: |   # sets has_unit=true/false; prints "::notice::unit-tests skipped: no test:unit" when false
@@ -202,3 +202,27 @@ still zero-config for simple projects. Documentation-only fallback (steering
 such projects to the PROJECT-JOB region) was considered and rejected: the
 default job is on by default, so silent CI breakage would remain the failure
 mode for every future nested-layout project.
+
+## 12. Amendment (2026-10-03, U-20261002-002) — Bun pin tracks the lockfile toolchain
+
+After the 2026-10-01 fleet resync, fleet CI failed: the template pinned
+`bun-version: latest` (two install jobs) and `"1.3.x"` (unit-tests job), while
+project bun.lock files are lockfileVersion 2, written by Bun 1.4.x. CI resolved
+Bun 1.3.14, which cannot parse that lockfile, so `bun install --frozen-lockfile`
+failed (co-design CI run 36924701121). This supersedes the `"1.3.x"` example
+value in §5.
+
+Root cause in this design's terms: under ADR-0094 the template-owned jobs are
+authoritative and only the PROJECT-JOBS region is project-owned, so a
+project-local pin patch on a template-owned job is overwritten by every resync.
+The correct fix point is the template default, not pin preservation.
+
+Fix: PR #1338 (merged 2026-10-02) pins all three `bun-version` values to
+`"1.4.x"` in the template. Existing projects receive it via upgrade-project (the
+LOCAL-PATCH report lists any marked local pin patches).
+
+Pin policy: the template's Bun pin must track the Bun minor line that writes the
+fleet's bun.lock (currently 1.4); bump it deliberately together with any
+lockfileVersion change; never `latest`. The regression test
+`tests/unit/ci-template-bun-pin.test.ts` fails if any bun-version in the
+template is `latest` or older than 1.4. Ticket U-20261002-002 is resolved `fixed`.

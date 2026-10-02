@@ -9,11 +9,14 @@
  *   bun scripts/agent-lifecycle-audit.ts
  *   bun scripts/agent-lifecycle-audit.ts --json   # JSON output
  *
- * @version 1.6.0
- *          v1.6.0 (T-20261001-004): Check 8-10 resolve the tier through the extends
- *          chain for extends-stub agents (delivered pm.md copies inherit tier from
- *          their target); stubs whose template-relative extends cannot be resolved at
- *          the audit location are exempted instead of failing with "Missing tier".
+ * @version 1.7.0
+ *          v1.7.0 (2026-10-03, design 2026-10-03-validator-warning-fixes-design):
+ *          Check 11 skips metadata-only commits via isMetadataOnlyChange
+ *          (amends DEC-20260930-01 ruling 2); v1.6.0 (T-20261001-004): Check 8-10
+ *          resolve the tier through the extends chain for extends-stub agents
+ *          (delivered pm.md copies inherit tier from their target); stubs whose
+ *          template-relative extends cannot be resolved at the audit location are
+ *          exempted instead of failing with "Missing tier".
  * @l2-propagate false
  * @last_updated 2026-09-30
  * v1.5.0: Check 11 compares against the newest non-sync-only commit (DEC-20260930-01
@@ -351,6 +354,61 @@ export function isSyncOnlyCommitSubject(subject: string): boolean {
   return SYNC_ONLY_COMMIT_PATTERNS.some((re) => re.test(subject));
 }
 
+/** True when a git diff contains only changes to `last_updated:` lines.
+ *  Metadata-only commits are those where every changed line (starting with +/-)
+ *  in the hunk body (after @@) matches /^[+-]last_updated:/, excluding diff headers
+ *  (diff --git, index, ---, +++, new file, deleted file, old/new mode, similarity, rename)
+ *  which appear only before the first @@ line. Empty diffs (mode-only, rename-only)
+ *  return false (fail-open). Used by lastContentCommitDate to skip bump commits that
+ *  don't represent content changes. */
+export function isMetadataOnlyChange(diffText: string): boolean {
+  const lines = diffText.split('\n');
+  let hasChangedLines = false;
+  let inHunk = false;
+
+  for (const line of lines) {
+    // Empty lines are always skipped
+    if (!line.trim()) continue;
+
+    // "\ No newline at end of file" is metadata, skip it
+    if (line.startsWith('\\ ')) continue;
+
+    // @@ marks the start of the hunk body; headers end
+    if (line.startsWith('@@')) {
+      inHunk = true;
+      continue;
+    }
+
+    // Before first @@: skip all diff headers
+    if (!inHunk) {
+      if (line.startsWith('diff --git')) continue;
+      if (line.startsWith('index')) continue;
+      if (line.startsWith('---')) continue;
+      if (line.startsWith('+++')) continue;
+      if (line.startsWith('new file')) continue;
+      if (line.startsWith('deleted file')) continue;
+      if (line.startsWith('old mode')) continue;
+      if (line.startsWith('new mode')) continue;
+      if (line.startsWith('similarity')) continue;
+      if (line.startsWith('rename')) continue;
+      // If we encounter something else before @@, skip it
+      continue;
+    }
+
+    // In hunk body: check if this is a changed line
+    if (line.startsWith('+') || line.startsWith('-')) {
+      hasChangedLines = true;
+      // All changed lines must match /^[+-]last_updated:/
+      if (!/^[+-]last_updated:/.test(line)) {
+        return false; // Found a changed line that isn't last_updated
+      }
+    }
+  }
+
+  // True only if we found at least one changed line and all are last_updated
+  return hasChangedLines;
+}
+
 // ── v1.3.0 lifecycle-modernization checks (2026-09-21) ──────────────────────
 
 /** An agent name resolves if a roster entry, an agent file, or a variant agent file exists. */
@@ -425,18 +483,46 @@ function extractFrontmatterDate(filePath: string, field: string): string | null 
 /** Newest commit touching the file that is not a sync-only pipeline cut
  *  (DEC-20260930-01 ruling 2): upgrade template-sync, auto-release, and
  *  propagate-sync cascade commits are skipped so copying template content
- *  alone never makes frontmatter last_updated look stale. Returns null when
- *  git history is unavailable or every commit touching the file is sync-only. */
+ *  alone never makes frontmatter last_updated look stale. Metadata-only commits
+ *  (changing only last_updated: lines) are also skipped per isMetadataOnlyChange.
+ *  Returns null when git history is unavailable or every commit touching the file
+ *  is sync-only. */
 export function lastContentCommitDate(filePath: string, repoCwd: string = cwd()): string | null {
   try {
-    const result = spawnSync('git', ['log', '-n', '200', '--format=%cs%x09%s', '--', filePath], { encoding: 'utf-8', cwd: repoCwd });
+    const result = spawnSync('git', ['log', '-n', '200', '--format=%H%x09%cs%x09%s', '--', filePath], { encoding: 'utf-8', cwd: repoCwd });
     for (const line of (result.stdout || '').split('\n')) {
       const trimmed = line.trim();
-      const tabIdx = trimmed.indexOf('\t');
-      if (tabIdx === -1) continue;
-      const date = trimmed.slice(0, tabIdx);
+      if (!trimmed) continue;
+
+      // Parse: SHA<tab>date<tab>subject
+      const parts = trimmed.split('\t');
+      if (parts.length < 3) continue;
+
+      const sha = parts[0];
+      const date = parts[1];
+      const subject = parts.slice(2).join('\t');
+
       if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) continue;
-      if (!isSyncOnlyCommitSubject(trimmed.slice(tabIdx + 1))) return date;
+
+      // Skip sync-only commits
+      if (isSyncOnlyCommitSubject(subject)) continue;
+
+      // For non-sync-only commits, check if it's metadata-only by running git show
+      try {
+        const showResult = spawnSync('git', ['show', sha, '-U0', '--format=', '--', filePath], {
+          encoding: 'utf-8',
+          cwd: repoCwd,
+        });
+        if (showResult.status === 0 && isMetadataOnlyChange(showResult.stdout || '')) {
+          // Metadata-only commit; skip it
+          continue;
+        }
+      } catch {
+        // git show failed; treat as content commit (fail-open)
+      }
+
+      // Return the first non-skipped commit
+      return date;
     }
     return null;
   } catch {
@@ -571,8 +657,9 @@ function auditAgents(jsonMode = false): AuditResult {
     // Check 11: Stale last_updated (T-20260909-004) — the file's git history moved
     // past its declared last_updated without the lifecycle metadata being refreshed.
     // Sync-only pipeline commits (upgrade template-sync, auto-release, propagate
-    // cascade) are skipped per DEC-20260930-01 ruling 2. Archived agents are
-    // exempt: stale metadata is expected there by definition.
+    // cascade) are skipped per DEC-20260930-01 ruling 2. Metadata-only commits
+    // (changing only last_updated: lines) are also skipped per isMetadataOnlyChange.
+    // Archived agents are exempt: stale metadata is expected there by definition.
     if (frontmatter.status !== 'archived' && !relPath.includes('_archive')) {
       const fmDate = parseFrontmatterDate(extractFrontmatterDate(agentFile, 'last_updated'));
       const commitDate = lastContentCommitDate(agentFile);
