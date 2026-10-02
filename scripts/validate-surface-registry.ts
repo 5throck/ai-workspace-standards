@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
-// @version 1.1.0
+// @version 1.1.1
+// v1.1.1 (2026-10-02): loadInstallerConfigFiles reads the installer TARGET_CONFIG_FILES block at
 // v1.1.0 (2026-10-02, T-20261002-009): compareInstallerConfigs — every config file the
 // v1.0.0 (2026-10-01, T-20261001-018): initial validator for the CONSTITUTION §11.0
 //           supported-surface registry (ADR-0097 follow-up). Closes the "enforced only
@@ -25,7 +26,6 @@
 
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { TARGET_CONFIG_FILES } from './install-upstream-mcp.ts';
 
 const SURFACES_SECTION = '#### 11.0 Supported Surfaces';
 const CONTEXT_SECTION = '## Supported Surfaces — Mandatory Coverage';
@@ -254,6 +254,22 @@ export function compareInstallerConfigs(
   return findings;
 }
 
+
+/** The installer is the SSOT for the target→file map, but this validator also runs
+ * inside scaffolded/E2E-fixture workspaces where install-upstream-mcp.ts (L0-only)
+ * is absent — a static import would crash there. Read the exported map from the
+ * source instead; returns null when the installer is not in context (nothing to
+ * compare) or the map block cannot be parsed. */
+export function loadInstallerConfigFiles(rootDir: string): Record<string, string> | null {
+  const p = join(rootDir, 'scripts', 'install-upstream-mcp.ts');
+  if (!existsSync(p)) return null;
+  const block = /export const TARGET_CONFIG_FILES[^=]*= \{([\s\S]*?)\};/.exec(readFileSync(p, 'utf-8'));
+  if (!block) return null;
+  const map: Record<string, string> = {};
+  for (const m of block[1].matchAll(/'([^']+)':\s*'([^']+)'/g)) map[m[1]] = m[2];
+  return Object.keys(map).length > 0 ? map : null;
+}
+
 export function validateSurfaceRegistry(rootDir: string): Finding[] {  const constitutionMd = readFileSync(join(rootDir, 'CONSTITUTION.md'), 'utf-8');
   const registry = parseSurfaceRegistry(constitutionMd);
   const gaps = loadGaps(rootDir);
@@ -263,7 +279,12 @@ export function validateSurfaceRegistry(rootDir: string): Finding[] {  const con
   // §11.0 "Machine-global MCP config" column, and every non-shared file the column
   // names must be covered by an installer target. The installer module is the SSOT
   // for the target→file mapping (its main() is import-guarded).
-  findings.push(...compareInstallerConfigs(registry, TARGET_CONFIG_FILES));
+  const installerFiles = loadInstallerConfigFiles(rootDir);
+  if (installerFiles) {
+    findings.push(...compareInstallerConfigs(registry, installerFiles));
+  } else if (existsSync(join(rootDir, 'scripts', 'install-upstream-mcp.ts'))) {
+    findings.push({ severity: 'WARN', check: 'installer-config', message: 'install-upstream-mcp.ts present but TARGET_CONFIG_FILES could not be parsed — installer↔registry comparison skipped' });
+  }
 
   // One-source rule: the L1 context copy must carry the same 8 rows.
   const contextPath = join(rootDir, 'templates', 'common', 'docs', 'context.md');
