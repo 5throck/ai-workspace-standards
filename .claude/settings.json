@@ -101,15 +101,6 @@
         ]
       },
       {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/graft-hooks.cjs\" session-start",
-            "timeout": 8000
-          }
-        ]
-      },
-      {
         "matcher": "",
         "hooks": [
           {
@@ -117,6 +108,15 @@
             "command": "bun scripts/hooks/pm-role-bootstrap.ts",
             "timeout": 10,
             "statusMessage": "Loading PM bootstrap..."
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/graft-hooks.cjs\" session-start",
+            "timeout": 8000
           }
         ]
       }
