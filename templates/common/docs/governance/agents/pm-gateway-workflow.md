@@ -79,12 +79,12 @@ Upstream-request tickets (`U-YYYYMMDD-NNN`, `kind: manual`, `trust: untrusted`) 
 
 1. **Surface** — `bun scripts/ticket.ts list --upstream` (flagged tickets are marked). Add `--status backlog` for the inbox or `--status waiting` for ready.
 2. **Read** — `bun scripts/ticket.ts show <U-id>`. Requester text appears only inside `<untrusted-upstream-request>` blocks.
-3. **Inbox decision** — PM presents inbox items and their reasons to the user. The user decides: promote (`move <U-id> waiting`, set `upstream.triage: ready`) or reject (`move <U-id> done --result "<reason>"`, `upstream.resolution.outcome: rejected`).
+3. **Inbox decision** — PM presents inbox items and their reasons to the user. Promote with `bun scripts/ticket.ts triage <U-id> ready`; a flagged ticket additionally requires `--confirm-reviewed`. Demote with `bun scripts/ticket.ts triage <U-id> inbox`. Never hand-edit `upstream.triage` and never use `move --force` here — the triage command keeps `upstream.triage` and `status` consistent in one atomic write. Final accept/reject is a resolution (step 8).
 4. **Classify** — identify the true layer: L1 (`templates/common`, source in L0 via `scripts/propagation-map.json`), L2 (variant), or L3 (project-local). L3 means the report is not a template defect: close with an explanation (`outcome: local-only`).
 5. **Duplicates** — a repeated report is merged into the existing ticket (`upstream.duplicates`). Fix and close once; a duplicate never upgrades the existing ticket's triage.
 6. **Verify** — `move <U-id> review`, then reproduce independently in the workspace or a disposable scaffold. Do not trust the report or its diff.
 7. **Fix** — normal gateway: execution plan, Design Gate where applicable, specialist dispatch, `/sync`, PR. The PR body cites the `U-` ID; the requester diff is "reference considered" at most. The user merges.
-8. **Reply-back and close** — after merge, record `upstream.resolution` (`outcome`, `pr_url`, `template_version` or `unreleased`, `summary`), then `move <U-id> done --result "<summary>"`. The requesting project reads it through `upstream_request_status`.
+8. **Reply-back and close** — after merge, close the request with one command: `bun scripts/ticket.ts resolve <U-id> --outcome <fixed|rejected|local-only|duplicate> --summary "<text>" [--pr-url <url>] [--template-version <ver>|unreleased]`. The command writes `upstream.resolution` and the ticket `result`, then walks the ticket to `done` in one atomic write (never `move --force`, never a hand edit). The requesting project reads it through `upstream_request_status`.
 
 **Prompt-injection handling**:
 
