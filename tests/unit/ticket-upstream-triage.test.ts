@@ -11,13 +11,14 @@
  * @version 1.0.0
  */
 import { test, expect, describe, beforeEach, afterEach } from 'bun:test';
-import { mkdtempSync, rmSync, writeFileSync, mkdirSync } from 'node:fs';
+import { mkdtempSync, rmSync, writeFileSync, mkdirSync, existsSync, utimesSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { dump } from 'js-yaml';
 import {
   createTicket,
   readTicket,
+  moveTicket,
   setUpstreamTriage,
   setUpstreamResolution,
 } from '../../scripts/helpers/ticket-store.ts';
@@ -35,6 +36,7 @@ afterEach(() => {
 
 /** Hand-writes a valid upstream request ticket (the MCP server's intake shape). */
 function writeUpstreamTicket(overrides: Partial<Ticket> & { id: string; flagged?: boolean }): Ticket {
+  const { upstream: upstreamOverride, ...rest } = overrides;
   const t: Ticket = {
     schemaVersion: 1,
     id: overrides.id,
@@ -61,9 +63,9 @@ function writeUpstreamTicket(overrides: Partial<Ticket> & { id: string; flagged?
       triage_reasons: [],
       dedupe_key: 'a'.repeat(64),
       duplicates: [],
-      ...overrides.upstream,
+      ...upstreamOverride,
     } as Ticket['upstream'],
-    ...overrides,
+    ...rest,
   } as Ticket;
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, `${overrides.id}.yaml`), dump(t), 'utf-8');
@@ -137,6 +139,103 @@ describe('setUpstreamResolution (store)', () => {
     expect(after.upstream!.project).toBe(original.upstream!.project);
     expect(after.upstream!.affected_paths).toEqual(original.upstream!.affected_paths);
     expect(after.upstream!.dedupe_key).toBe(original.upstream!.dedupe_key);
+  });
+});
+
+describe('setUpstreamTriage / setUpstreamResolution validate-before-write (T-20261002-003, H2)', () => {
+  test('refuses both triage values on a done ticket — a closed request is never re-triaged', () => {
+    writeUpstreamTicket({ id: 'U-20261002-951' });
+    setUpstreamResolution(dir, 'U-20261002-951', { outcome: 'fixed', summary: 'shipped' }, 'shipped');
+    expect(() => setUpstreamTriage(dir, 'U-20261002-951', 'inbox')).toThrow(/never re-triaged/);
+    expect(() => setUpstreamTriage(dir, 'U-20261002-951', 'ready')).toThrow(/never re-triaged/);
+    const t = readTicket(dir, 'U-20261002-951');
+    expect(t.status).toBe('done'); // inbox-on-done no longer reopens the ticket
+    expect(t.upstream!.triage).toBe('inbox'); // unchanged by the refused call
+  });
+
+  test('ready promotion from review throws BEFORE anything is written (old code could strand triage=ready on status=review)', () => {
+    // hand-write a ticket sitting in review, already triaged ready (legal pair) —
+    // a SECOND ready promotion has no forward edge from review and must refuse pre-write
+    const t = writeUpstreamTicket({
+      id: 'U-20261002-952',
+      status: 'review',
+      history: [
+        { at: new Date().toISOString(), from: null, to: 'backlog' },
+        { at: new Date().toISOString(), from: 'backlog', to: 'waiting' },
+        { at: new Date().toISOString(), from: 'waiting', to: 'review' },
+      ],
+      upstream: { triage: 'ready' },
+    } as Partial<Ticket> & { id: string });
+    expect(t.upstream!.triage).toBe('ready');
+    expect(() => setUpstreamTriage(dir, 'U-20261002-952', 'ready'))
+      .toThrow(/ready promotion refused, nothing written/);
+    const after = readTicket(dir, 'U-20261002-952');
+    expect(after.status).toBe('review'); // nothing moved
+    expect(after.history).toHaveLength(3); // no history entry appended
+  });
+
+  test('resolution walk is resumable: resolution present + status review completes to done', () => {
+    // simulate a crash mid-walk (old code wrote resolution before walking and then
+    // refused every retry): resolution present, status stopped at review
+    writeUpstreamTicket({
+      id: 'U-20261002-953',
+      status: 'review',
+      history: [
+        { at: new Date().toISOString(), from: null, to: 'backlog' },
+        { at: new Date().toISOString(), from: 'backlog', to: 'waiting' },
+        { at: new Date().toISOString(), from: 'waiting', to: 'running' },
+        { at: new Date().toISOString(), from: 'running', to: 'review' },
+      ],
+      upstream: { triage: 'ready', resolution: { outcome: 'fixed', pr_url: 'https://github.com/x/pull/9', summary: 'crash-test' } },
+    } as Partial<Ticket> & { id: string });
+    const t = setUpstreamResolution(dir, 'U-20261002-953', { outcome: 'fixed', summary: 'resumed' }, 'resumed');
+    expect(t.status).toBe('done');
+    expect(t.upstream!.resolution!.summary).toBe('crash-test'); // original resolution preserved
+    expect(t.result).toBe('resumed'); // done hop stamps the completing call's summary
+  });
+
+  test('done + resolution is still refused as "never re-resolved"', () => {
+    writeUpstreamTicket({ id: 'U-20261002-954' });
+    setUpstreamResolution(dir, 'U-20261002-954', { outcome: 'rejected', summary: 'wontfix' }, 'wontfix');
+    expect(() =>
+      setUpstreamResolution(dir, 'U-20261002-954', { outcome: 'fixed', summary: 'second' }, 'second'),
+    ).toThrow(/never re-resolved/);
+  });
+});
+
+describe('withTicketLock (T-20261002-005, H4)', () => {
+  test('mutations release the lock on success', () => {
+    writeUpstreamTicket({ id: 'U-20261002-961' });
+    setUpstreamTriage(dir, 'U-20261002-961', 'ready');
+    expect(existsSync(join(dir, '.ticket-lock'))).toBe(false);
+  });
+
+  test('a held lock fails CLOSED within the timeout and the mutation is refused', () => {
+    const t = writeUpstreamTicket({ id: 'U-20261002-962' });
+    mkdirSync(join(dir, '.ticket-lock'), { recursive: true });
+    writeFileSync(join(dir, '.ticket-lock', 'owner'), JSON.stringify({ pid: 999999, token: 'other', holder: 'test-simulation' }), 'utf-8');
+    const prev = process.env.TICKET_LOCK_TIMEOUT_MS;
+    process.env.TICKET_LOCK_TIMEOUT_MS = '60';
+    try {
+      expect(() => moveTicket(dir, t.id, 'waiting')).toThrow(/could not acquire the ticket lock/);
+      expect(() => setUpstreamTriage(dir, t.id, 'ready')).toThrow(/could not acquire the ticket lock/);
+    } finally {
+      if (prev === undefined) delete process.env.TICKET_LOCK_TIMEOUT_MS;
+      else process.env.TICKET_LOCK_TIMEOUT_MS = prev;
+    }
+    expect(readTicket(dir, t.id).status).toBe('backlog'); // untouched
+  });
+
+  test('a STALE lock (>30s) is taken over atomically and the mutation proceeds', () => {
+    const t = writeUpstreamTicket({ id: 'U-20261002-963' });
+    const lockDir = join(dir, '.ticket-lock');
+    mkdirSync(lockDir, { recursive: true });
+    writeFileSync(join(lockDir, 'owner'), JSON.stringify({ pid: 999999, token: 'crashed', holder: 'crashed-process' }), 'utf-8');
+    const old = new Date(Date.now() - 60_000);
+    utimesSync(lockDir, old, old);
+    const moved = moveTicket(dir, t.id, 'waiting');
+    expect(moved.status).toBe('waiting');
+    expect(existsSync(lockDir)).toBe(false);
   });
 });
 

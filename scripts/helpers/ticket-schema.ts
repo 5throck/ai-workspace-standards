@@ -1,5 +1,10 @@
 #!/usr/bin/env bun
-// @version 1.3.1
+// @version 1.4.0
+// v1.4.0 (2026-10-02, T-20261002-007): upstream cross-field invariants — project
+//           format ^co-[a-z0-9-]{1,40}$, template_version/variant string|null,
+//           triage↔status consistency (inbox ⇒ backlog|done; ready ⇒ waiting|review|done),
+//           done ⇒ resolution present, resolution summary required + https pr_url +
+//           string template_version (review M2).
 // v1.3.1 (2026-10-01): upstream tickets must use a U-YYYYMMDD-NNN id and carry no inputs.
 // v1.3.0 (2026-10-01): add upstream request block (kind: manual only, design
 //           docs/designs/2026-10-01-upstream-request-mcp-design.md §5).
@@ -196,7 +201,10 @@ export function validateTicket(obj: unknown): asserts obj is Ticket {
     if (t.inputs !== undefined) fail('upstream tickets must not carry inputs');
     if (!/^U-\d{8}-\d{3,4}$/.test(t.id as string)) fail(`upstream ticket id must match U-YYYYMMDD-NNN: ${JSON.stringify(t.id)}`);
     const u = t.upstream as Record<string, unknown>;
-    if (typeof u.project !== 'string' || u.project.length === 0) fail('upstream.project must be a non-empty string');
+    // T-20261002-007 (M2): format checks — project identity, intake version/variant types.
+    if (typeof u.project !== 'string' || !/^co-[a-z0-9-]{1,40}$/.test(u.project)) fail(`upstream.project must match ^co-[a-z0-9-]{1,40}$: ${JSON.stringify(u.project)}`);
+    if (u.template_version !== undefined && u.template_version !== null && typeof u.template_version !== 'string') fail('upstream.template_version must be a string or null');
+    if (u.variant !== undefined && u.variant !== null && typeof u.variant !== 'string') fail('upstream.variant must be a string or null');
     if (u.trust !== 'untrusted') fail('upstream.trust must be "untrusted"');
     if (typeof u.source !== 'string' || !/^project\/[a-z0-9-]+$/.test(u.source)) fail(`upstream.source must match ^project/[a-z0-9-]+$: ${JSON.stringify(u.source)}`);
     if (u.source !== `project/${u.project}`) fail(`upstream.source must equal "project/${u.project}", got "${u.source}"`);
@@ -216,6 +224,14 @@ export function validateTicket(obj: unknown): asserts obj is Ticket {
       if (typeof u.repro !== 'string' || u.repro.length > 2000) fail('upstream.repro must be ≤2000 chars');
     }
     if (u.triage !== 'inbox' && u.triage !== 'ready') fail('upstream.triage must be inbox | ready');
+    // T-20261002-007 (M2): triage↔status consistency — the store writes them in
+    // step, so a file where they disagree is hand-editing or a crashed write.
+    const triageStatusConsistent = u.triage === 'inbox'
+      ? (t.status === 'backlog' || t.status === 'done')
+      : (t.status === 'waiting' || t.status === 'review' || t.status === 'done');
+    if (!triageStatusConsistent) {
+      fail(`upstream.triage ${JSON.stringify(u.triage)} is inconsistent with status ${JSON.stringify(t.status)} (inbox ⇒ backlog|done; ready ⇒ waiting|review|done)`);
+    }
     if (typeof u.flagged !== 'boolean') fail('upstream.flagged must be a boolean');
     if (!Array.isArray(u.triage_reasons)) fail('upstream.triage_reasons must be an array');
     if (typeof u.dedupe_key !== 'string' || u.dedupe_key.length === 0) fail('upstream.dedupe_key must be a non-empty string');
@@ -226,11 +242,20 @@ export function validateTicket(obj: unknown): asserts obj is Ticket {
       if (typeof d.project !== 'string' || d.project.length === 0) fail('upstream.duplicates[].project must be a non-empty string');
       if (typeof d.at !== 'string' || d.at.length === 0) fail('upstream.duplicates[].at must be a non-empty string');
     }
+    if (t.status === 'done' && u.resolution === undefined) fail('upstream ticket at status done requires upstream.resolution (T-20261002-007)');
     if (u.resolution !== undefined) {
       if (typeof u.resolution !== 'object' || u.resolution === null) fail('upstream.resolution must be an object');
       const res = u.resolution as Record<string, unknown>;
       const validOutcomes = ['fixed', 'rejected', 'local-only', 'duplicate'];
       if (!validOutcomes.includes(res.outcome as string)) fail(`upstream.resolution.outcome must be one of: ${validOutcomes.join(', ')}`);
+      // T-20261002-007 (M2): resolution shape — summary required, https pr_url, string template_version.
+      if (typeof res.summary !== 'string' || (res.summary as string).trim() === '') fail('upstream.resolution.summary must be a non-empty string');
+      if (res.pr_url !== undefined && (typeof res.pr_url !== 'string' || !/^https:\/\/\S+$/.test(res.pr_url))) {
+        fail('upstream.resolution.pr_url must be an https URL');
+      }
+      if (res.template_version !== undefined && (typeof res.template_version !== 'string' || (res.template_version as string).trim() === '')) {
+        fail('upstream.resolution.template_version must be a non-empty string');
+      }
     }
   }
 }
