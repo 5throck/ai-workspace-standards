@@ -500,3 +500,23 @@ any local process with shell access (tickets and `~/.claude.json` are writable l
 the flag + forced inbox keeps human review as the compensating control, consistent with
 D5 enforcement honesty and the untrusted-content posture. The REGISTRATION_RULE message
 and the server instructions name the fallback so desktop agents can self-serve.
+
+---
+
+## Addendum (2026-10-02, T-20261002-004 — trust-boundary downgrade for self-declared identity)
+
+The `project_root` identity fallback (v1.4.0) is a **trust-boundary downgrade**: a caller
+that self-declares its project root (GUI clients spawning the server with `cwd=/`) is
+acting on an UNVERIFIED identity until the PM reviews the flagged ticket. Effective
+2026-10-02 (server v1.7.0, review H3):
+
+1. `upstream_request_status` calls are audit-logged (`outcome: "status"`,
+   `identity: "cwd" | "declared"`) — status access is now visible in the audit trail,
+   not just create/merge.
+2. A declared-identity status result is REDACTED: the caller receives ticket ids,
+   status, triage and created_at only — never the resolution summary, PR URL or any
+   other project's ticket content, matching §6's "status returns no other project's
+   content" even under a self-declared identity.
+
+Operators who need full status fidelity for automation should rely on client-attested
+cwd identity (run the client inside the project directory), not `project_root`.
