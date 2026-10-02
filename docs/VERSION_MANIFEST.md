@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-10-02T12:57:22.507Z
+**Generated**: 2026-10-02T13:36:30.987Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -19,15 +19,15 @@
 
 | Name | File | Tier | Model | Last Modified |
 |------|------|------|-------|---------------|
-| architect | agents/architect.md | high | inherit | 2026-09-29 |
-| auditor | agents/auditor.md | medium | inherit | 2026-10-01 |
-| automation-engineer | agents/automation-engineer.md | low | inherit | 2026-09-29 |
-| docs-writer | agents/docs-writer.md | medium | inherit | 2026-09-29 |
-| lifecycle-manager | agents/lifecycle-manager.md | medium | inherit | 2026-09-29 |
+| architect | agents/architect.md | high | inherit | 2026-10-02 |
+| auditor | agents/auditor.md | medium | inherit | 2026-10-02 |
+| automation-engineer | agents/automation-engineer.md | low | inherit | 2026-10-02 |
+| docs-writer | agents/docs-writer.md | medium | inherit | 2026-10-02 |
+| lifecycle-manager | agents/lifecycle-manager.md | medium | inherit | 2026-10-02 |
 | pm | agents/pm.md | medium | inherit | 2026-10-02 |
-| scaffolding-expert | agents/scaffolding-expert.md | low | inherit | 2026-09-29 |
-| security-expert | agents/security-expert.md | medium | inherit | 2026-09-29 |
-| skill-graph-analyst | agents/skill-graph-analyst.md | low | inherit | 2026-09-29 |
+| scaffolding-expert | agents/scaffolding-expert.md | low | inherit | 2026-10-02 |
+| security-expert | agents/security-expert.md | medium | inherit | 2026-10-02 |
+| skill-graph-analyst | agents/skill-graph-analyst.md | low | inherit | 2026-10-02 |
 
 ---
 
@@ -204,7 +204,7 @@
 | validate-raci.ts | 1.2.0 | scripts/validate-raci.ts | js-yaml |
 | validate-skills.ts | 1.5.1 | scripts/validate-skills.ts | N/A |
 | validate-surface-registry.ts | 1.1.1 | scripts/validate-surface-registry.ts | N/A |
-| validate-templates.ts | 1.50.2 | scripts/validate-templates.ts | js-yaml |
+| validate-templates.ts | 1.50.4 | scripts/validate-templates.ts | js-yaml |
 | validate-ticket-doc-commands.ts | 1.0.0 | scripts/validate-ticket-doc-commands.ts | N/A |
 | validate-variant-readiness.ts | 1.1.0 | scripts/validate-variant-readiness.ts | N/A |
 | variant-feature.ts | 1.0.0 | scripts/variant-feature.ts | N/A |
