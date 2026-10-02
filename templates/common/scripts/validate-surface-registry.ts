@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.1.0
+// v1.1.0 (2026-10-02, T-20261002-009): compareInstallerConfigs — every config file the
 // v1.0.0 (2026-10-01, T-20261001-018): initial validator for the CONSTITUTION §11.0
 //           supported-surface registry (ADR-0097 follow-up). Closes the "enforced only
 //           by review" honesty gap recorded in ADR-0097 Consequences.
@@ -24,6 +25,7 @@
 
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
+import { TARGET_CONFIG_FILES } from './install-upstream-mcp.ts';
 
 const SURFACES_SECTION = '#### 11.0 Supported Surfaces';
 const CONTEXT_SECTION = '## Supported Surfaces — Mandatory Coverage';
@@ -215,11 +217,53 @@ export function checkLayer(opts: CheckOptions, layer: string, root: string, opts
 }
 
 /** Full check: registry parse, one-source sync, L0/L1/L2 coverage. */
-export function validateSurfaceRegistry(rootDir: string): Finding[] {
-  const constitutionMd = readFileSync(join(rootDir, 'CONSTITUTION.md'), 'utf-8');
+/** T-20261002-009 (M3): compare the installer's target→config-file mapping with the
+ * §11.0 "Machine-global MCP config" column. Paths are compared as the `code`-quoted
+ * tokens the table carries; "(shared with #N)" annotations are ignored (shared files
+ * dedupe to one token). The legacy Gemini settings path is allowed by the §11.0
+ * trailing note even though no table row names it. */
+export function compareInstallerConfigs(
+  registry: SurfaceRow[],
+  installerFiles: Record<string, string>,
+): Finding[] {
+  const findings: Finding[] = [];
+  const registryTokens = new Set<string>();
+  for (const row of registry) {
+    for (const m of row.mcpConfig.matchAll(/`([^`]+)`/g)) registryTokens.add(m[1].trim());
+  }
+  // Documented exception: §11.0's trailing note keeps Gemini CLI (~/.gemini/settings.json)
+  // as the legacy Google-family path; the table rows name only the Antigravity file.
+  const LEGACY_ALLOWED = new Set(['~/.gemini/settings.json']);
+
+  for (const [target, file] of Object.entries(installerFiles)) {
+    if (!registryTokens.has(file) && !LEGACY_ALLOWED.has(file)) {
+      findings.push({
+        severity: 'FAIL', check: 'installer-config',
+        message: `installer target "${target}" writes ${file} — not named by the §11.0 Machine-global MCP config column (add the row/column, or remove the target)`,
+      });
+    }
+  }
+  for (const token of registryTokens) {
+    if (!Object.values(installerFiles).includes(token)) {
+      findings.push({
+        severity: 'FAIL', check: 'installer-config',
+        message: `§11.0 Machine-global MCP config names ${token} — no installer target writes it (add a target to install-upstream-mcp.ts, or mark the gap in docs/surface-gaps.json)`,
+      });
+    }
+  }
+  return findings;
+}
+
+export function validateSurfaceRegistry(rootDir: string): Finding[] {  const constitutionMd = readFileSync(join(rootDir, 'CONSTITUTION.md'), 'utf-8');
   const registry = parseSurfaceRegistry(constitutionMd);
   const gaps = loadGaps(rootDir);
   const findings: Finding[] = [];
+
+  // T-20261002-009 (M3): every config file the installer writes must be named by the
+  // §11.0 "Machine-global MCP config" column, and every non-shared file the column
+  // names must be covered by an installer target. The installer module is the SSOT
+  // for the target→file mapping (its main() is import-guarded).
+  findings.push(...compareInstallerConfigs(registry, TARGET_CONFIG_FILES));
 
   // One-source rule: the L1 context copy must carry the same 8 rows.
   const contextPath = join(rootDir, 'templates', 'common', 'docs', 'context.md');
