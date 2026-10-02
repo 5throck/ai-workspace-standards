@@ -1,7 +1,13 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.50.2
+ * @version 1.50.4
+ *
+ * v1.50.4 (2026-10-02): pointer-integrity strips the #anchor fragment before the file
+ *          existence check — anchored references misclassified as post-scaffold-only WARNs.
+ * v1.50.3 (2026-10-02): C-SK-02 allowedWithExtends gains `tier` and `model` — the PM
+ *          Tier Semantics fields (design 2026-09-29) are documented optional fields that the
+ *          11 variant pm.md extends-stubs legitimately carry; the WARNs were schema lag.
  *
  * v1.50.2: When templates/common is absent (variant or project context), main() returns 0 and reports "not applicable" in JSON and text modes.
  * v1.48.0 → v1.49.0 (2026-09-28, sound-synth orphan-mirror follow-up — spec
@@ -3354,6 +3360,10 @@ function checkCommonContract(): void {
           'extends', 'name', 'variant', 'version', 'last_updated', 'status',
           'remove_sections', 'variant_overrides', 'owner', 'capabilities', 'lifecycle',
           'description',
+          // PM Tier Semantics (design 2026-09-29): variant pm.md stubs carry the
+          // per-platform tier mapping and model override — documented optional fields
+          // in docs/architecture/extends-pattern.md, present on the L1 pm.md they extend.
+          'tier', 'model',
         ]);
         const fieldKeys = Object.keys(variantFields);
         const unexpectedKeys = fieldKeys.filter(k => !allowedWithExtends.has(k));
@@ -5579,7 +5589,12 @@ function checkAgentsMdPointerIntegrity(): void {
     const refs = [...readFileSync(t.path, 'utf-8').matchAll(/\]\((docs\/(?:governance|constitution)\/[^)`]+)\)/g)].map(m => m[1]);
     for (const ref of refs) {
       checked++;
-      const resolvedSomewhere = candidateBases(t.base).some(b => existsSync(join(b, ref)));
+      // v1.50.4: strip the #anchor fragment before the existence check — anchors are
+      // in-page headings, not file names, so `docs/x.md#section` never existsSync'd and
+      // every anchored constitution reference misclassified as post-scaffold-only
+      // (observed 2026-10-02: the AGENTS.md §9.1 weekly-check pointer).
+      const refFile = ref.split('#')[0];
+      const resolvedSomewhere = candidateBases(t.base).some(b => existsSync(join(b, refFile)));
       if (!resolvedSomewhere) {
         if (ref.startsWith('docs/constitution/')) {
           warn(t.variant, 'agents-md-pointer-integrity',
