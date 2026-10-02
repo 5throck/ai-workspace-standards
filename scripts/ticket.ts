@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
-// @version 1.7.0
+// @version 1.8.0
+// v1.8.0 (2026-10-02, T-20261002-010 M10): list — upstream listings sort flagged tickets first, mark them [FLAGGED], and print inbox/ready/flagged counts (design §9 L3).
 // v1.7.0 (2026-10-01, T-20261001-017): `show` falls back to readTicketRaw when schema
 //           validation fails — a corrupt/hand-edited ticket renders with a loud banner
 //           instead of an opaque schema error (repair path for the upstream flow).
@@ -169,9 +170,22 @@ try {
         tickets = tickets.filter(t => t.upstream !== undefined);
       }
       if (flags.json) console.log(JSON.stringify(tickets, null, 2));
-      else for (const t of tickets) {
-        const flaggedMarker = t.upstream?.flagged ? ' 🚩' : '';
-        console.log(`${t.id}  [${t.status}]  ${t.kind === 'service' ? t.service : t.title}  (${t.priority})${t.not_before ? `  not-before:${t.not_before}` : ''}${flaggedMarker}`);
+      else {
+        // M10 (design §9 L3): flagged tickets sort first and carry a [FLAGGED] prefix;
+        // upstream listings end with triage counts.
+        const upstream = tickets.filter(t => t.upstream !== undefined);
+        if (upstreamOnly && upstream.length > 0) {
+          tickets = [...tickets].sort((a, b) => Number(b.upstream?.flagged ?? false) - Number(a.upstream?.flagged ?? false) || a.id.localeCompare(b.id));
+        }
+        for (const t of tickets) {
+          const flaggedMarker = t.upstream?.flagged ? ' [FLAGGED]' : '';
+          console.log(`${t.id}  [${t.status}]  ${t.kind === 'service' ? t.service : t.title}  (${t.priority})${t.not_before ? `  not-before:${t.not_before}` : ''}${flaggedMarker}`);
+        }
+        if (upstreamOnly && upstream.length > 0) {
+          const inbox = upstream.filter(t => t.upstream!.triage === 'inbox').length;
+          const ready = upstream.filter(t => t.upstream!.triage === 'ready').length;
+          console.log(`\n${upstream.length} upstream ticket(s): ${inbox} inbox, ${ready} ready, ${upstream.filter(t => t.upstream!.flagged).length} flagged`);
+        }
       }
       break;
     }

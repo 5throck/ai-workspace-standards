@@ -117,9 +117,9 @@ describe('setUpstreamResolution (store)', () => {
     expect(t.status).toBe('done');
     expect(t.upstream!.resolution!.outcome).toBe('fixed');
     expect(t.result).toBe('delivered in 0.9.0');
-    // legal adjacency walk: backlog -> waiting -> running -> review -> done
+    // M10: kind manual skips the service-runner hop — backlog -> waiting -> review -> done
     const hops = t.history.map(h => h.to);
-    expect(hops).toEqual(['backlog', 'waiting', 'running', 'review', 'done']);
+    expect(hops).toEqual(['backlog', 'waiting', 'review', 'done']);
   });
 
   test('resolution is write-once', () => {

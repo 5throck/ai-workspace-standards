@@ -111,3 +111,51 @@ describe('readHermesMcpEntry / removeHermesMcpEntry', () => {
     expect(removeHermesMcpEntry(BASE, NAME)).toBe(BASE);
   });
 });
+
+describe('M13 edge cases (T-20261002-010)', () => {
+  const NAME = 'ai-workspace-upstream';
+  const ENTRY = { command: '/usr/local/bin/bun', args: ['/x/mcp-upstream-server.ts'] };
+
+  test('a UTF-8 BOM before the config content is recognized, not duplicated', () => {
+    const original = '\uFEFFmodel:\n  default: hermes\n';
+    const out = setHermesMcpEntry(original, NAME, ENTRY);
+    expect(out.startsWith('\uFEFF')).toBe(true);
+    const doc = load(out.replace(/^\uFEFF/, ''), { schema: JSON_SCHEMA }) as any;
+    expect(doc.mcp_servers[NAME].command).toBe(ENTRY.command);
+    expect(Object.keys(doc).filter((k) => k.includes('mcp_servers'))).toEqual(['mcp_servers']);
+  });
+
+  test('a quoted top-level "mcp_servers": key is recognized, not duplicated', () => {
+    const original = 'other: true\n"mcp_servers":\n  keep:\n    command: c\n';
+    const out = setHermesMcpEntry(original, NAME, ENTRY);
+    const doc = load(out, { schema: JSON_SCHEMA }) as any;
+    expect(doc.mcp_servers.keep).toBeDefined();
+    expect(doc.mcp_servers[NAME].command).toBe(ENTRY.command);
+  });
+
+  test('an empty file gains the block without crashing', () => {
+    const out = setHermesMcpEntry('', NAME, ENTRY);
+    const doc = load(out, { schema: JSON_SCHEMA }) as any;
+    expect(doc.mcp_servers[NAME].command).toBe(ENTRY.command);
+  });
+
+  test('mixed EOL files keep each line terminator (no CRLF normalization)', () => {
+    const original = 'model: x\r\nother: 1\nmcp_servers:\r\n  old:\r\n    command: c\n';
+    const out = setHermesMcpEntry(original, NAME, ENTRY);
+    const crlfCount = (out.match(/\r\n/g) ?? []).length;
+    const lfOnly = (out.match(/(?<!\r)\n/g) ?? []).length;
+    expect(crlfCount).toBeGreaterThan(0);
+    expect(lfOnly).toBeGreaterThan(0); // the LF lines were not converted to CRLF
+    const doc = load(out, { schema: JSON_SCHEMA }) as any;
+    expect(doc.mcp_servers[NAME].command).toBe(ENTRY.command);
+  });
+
+  test('remove round-trips a quoted-key config', () => {
+    const original = 'other: true\n"mcp_servers":\n  keep:\n    command: c\n';
+    const added = setHermesMcpEntry(original, NAME, ENTRY);
+    const removed = removeHermesMcpEntry(added, NAME);
+    const doc = load(removed, { schema: JSON_SCHEMA }) as any;
+    expect(doc.mcp_servers[NAME]).toBeUndefined();
+    expect(doc.mcp_servers.keep).toBeDefined();
+  });
+});

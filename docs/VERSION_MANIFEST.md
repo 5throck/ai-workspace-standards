@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-10-02T11:44:35.955Z
+**Generated**: 2026-10-02T12:02:26.061Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -138,13 +138,13 @@
 | graph-delta-log.ts | 1.0.0 | scripts/graph-delta-log.ts | N/A |
 | ingest-external-skills.ts | 1.1.0 | scripts/ingest-external-skills.ts | N/A |
 | ingest-security-frameworks.ts | 1.1.0 | scripts/ingest-security-frameworks.ts | N/A |
-| install-upstream-mcp.ts | 2.1.1 | scripts/install-upstream-mcp.ts | N/A |
+| install-upstream-mcp.ts | 2.2.0 | scripts/install-upstream-mcp.ts | N/A |
 | l3-to-variant-pipeline.ts | 1.21.2 | scripts/l3-to-variant-pipeline.ts | child_process, fs, path, process, url |
 | lifecycle-sync-audit.ts | 1.17.1 | scripts/lifecycle-sync-audit.ts | js-yaml |
 | lint-instructions.ts | 1.0.0 | scripts/lint-instructions.ts | N/A |
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
 | mcp-governance-server.ts | 1.1.0 | scripts/mcp-governance-server.ts | N/A |
-| mcp-upstream-server.ts | 1.7.0 | scripts/mcp-upstream-server.ts | js-yaml |
+| mcp-upstream-server.ts | 1.8.0 | scripts/mcp-upstream-server.ts | js-yaml |
 | md-to-ooxml.ts | 1.2.0 | scripts/md-to-ooxml.ts | fs, path |
 | migrate-project.ts | 1.0.0 | scripts/migrate-project.ts | N/A |
 | migrate-quality-gates.ts | 1.1.0 | scripts/migrate-quality-gates.ts | fs, js-yaml, path |
@@ -188,7 +188,7 @@
 | test-runner.ts | 1.4.0 | scripts/test-runner.ts | fs, os, path |
 | test-scaffold-delivery-parity.ts | 1.0.0 | scripts/test-scaffold-delivery-parity.ts | N/A |
 | test-variant-readiness.ts | 1.0.0 | scripts/test-variant-readiness.ts | N/A |
-| ticket.ts | 1.7.0 | scripts/ticket.ts | js-yaml |
+| ticket.ts | 1.8.0 | scripts/ticket.ts | js-yaml |
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, fs, path |
 | typecheck.ts | 1.1.1 | scripts/typecheck.ts | N/A |
 | upgrade-project.ts | 1.61.0 | scripts/upgrade-project.ts | N/A |
