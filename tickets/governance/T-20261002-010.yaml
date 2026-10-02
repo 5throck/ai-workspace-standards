@@ -1,0 +1,20 @@
+schemaVersion: 1
+id: T-20261002-010
+kind: manual
+title: >-
+  Close remaining upstream MCP review items: fail-closed lock plus
+  parallel-instance test, reject-path caps, first-request gate semantics,
+  template-copy of section 3.12, Antigravity CLI surface gap, MCP
+  ping/isError/envelope handling, Phase 3 audit-hash and registry status, and
+  the Low list in docs/reports/2026-10-02-project-review-upstream.md (review
+  M5-M13).
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-02T07:57:34.681Z'
+history:
+  - at: '2026-10-02T07:57:34.681Z'
+    from: null
+    to: backlog
+result: null
+error: null

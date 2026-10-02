@@ -1,0 +1,17 @@
+schemaVersion: 1
+id: T-20261002-009
+kind: manual
+title: >-
+  validator-hardening: make validate-surface-registry.ts compare
+  install-upstream-mcp.ts targets with the CONSTITUTION 11.0 Machine-global MCP
+  config column (review M3).
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-02T07:57:34.668Z'
+history:
+  - at: '2026-10-02T07:57:34.668Z'
+    from: null
+    to: backlog
+result: null
+error: null
