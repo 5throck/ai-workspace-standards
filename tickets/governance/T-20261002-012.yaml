@@ -1,0 +1,20 @@
+schemaVersion: 1
+id: T-20261002-012
+kind: manual
+title: >-
+  Add Gemini SessionStart hook for PM role bootstrap after vendor-doc
+  verification
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-02T09:05:09.218Z'
+history:
+  - at: '2026-10-02T09:05:09.218Z'
+    from: null
+    to: backlog
+result: null
+error: null
+notes: >-
+  F2 of spec 2026-10-02-pm-role-bootstrap-design: verify Gemini CLI vendor docs
+  first that a session-start hook can pass text to the model. Do not implement
+  before verification.

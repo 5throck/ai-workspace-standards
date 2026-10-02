@@ -1907,6 +1907,15 @@
       "source": "manual",
       "created": "2026-10-02",
       "last_updated": "2026-10-02"
+    },
+    {
+      "id": "2026-10-02-pm-role-bootstrap-design",
+      "title": "pm role bootstrap design",
+      "file": "docs/designs/2026-10-02-pm-role-bootstrap-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-10-02",
+      "last_updated": "2026-10-02"
     }
   ]
 }

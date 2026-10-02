@@ -1,5 +1,10 @@
 # GEMINI.md
 
+> **Session bootstrap (mandatory)**: Before your first response in every session, use your file-read tool on [`AGENTS.md`](AGENTS.md) and [`agents/pm.md`](agents/pm.md).
+> This applies to every request. Short questions, Q&A, and non-code questions are not exempt.
+> Read them once per session, and again after the context is cleared or compacted.
+> Q&A-only turns need no execution plan table. Multi-step work still follows the PM Gateway.
+
 
 <!-- GOVERNANCE-POINTER-TABLE (ADR-0090) -->
 > **Governance references (ADR-0090)**: [`AGENTS.md`](AGENTS.md) is the SSOT registry — **read it first**, and Read the owning governance documents it points to before executing their workflows. Operational workflow bodies live outside this file — **Read the owning file before governing work**:
@@ -354,7 +359,7 @@ Antigravity does not have `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` or `teammateMod
 
 ---
 
-*Last Updated: 2026-10-01 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
+*Last Updated: 2026-10-02 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
 
 <!-- graft:start -->
 ## Graft — repo context graph

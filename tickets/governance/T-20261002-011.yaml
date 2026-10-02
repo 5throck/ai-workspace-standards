@@ -1,0 +1,22 @@
+schemaVersion: 1
+id: T-20261002-011
+kind: manual
+title: >-
+  Add propagation domains for variant HERMES.md heads and variant
+  .claude/settings.json SessionStart entries
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-02T09:05:07.226Z'
+history:
+  - at: '2026-10-02T09:05:07.226Z'
+    from: null
+    to: backlog
+result: null
+error: null
+notes: >-
+  The PM role bootstrap spec 2026-10-02-pm-role-bootstrap-design edited the head
+  of 13 templates/co-*/HERMES.md and 13 templates/co-*/.claude/settings.json
+  plus templates/common/.claude/settings.json by hand because no propagation
+  domain writes them. Next head change would need the same 14 manual edits.
+  Propose a propagate-to-templates.ts domain with an idempotency test.
