@@ -2,8 +2,13 @@
 /**
  * pre-commit.ts — TS-based pre-commit hook.
  * Replaces the legacy bash/ps1 hooks.
- * @version 1.8.0
+ * @version 1.9.0
  *
+ * v1.9.0 (2026-10-02): check 6b command counterpart check becomes L0-only —
+ *  skipped when templates/common does not exist (recorded exclusion, D8 style
+ *  like .agents/commands): L2 projects and scaffold commits have no mapping
+ *  target, so every staged command warned there (observed 21x on the
+ *  gw-76f6b4c9c6ff scaffold's initial commit, 2026-10-01). Severity stays WARN.
  * v1.8.0 (2026-09-25, spec docs/designs/2026-09-25-verifier-platform-expansion-design.md
  *  site 8 / D8): check 6b generalizes to all four platforms — skills regexes
  *  cover .agents/.codex mirrors; command propagation checks map .claude/commands
@@ -281,6 +286,12 @@ async function main() {
   const geminiCommandStaged = staged.filter(f => /^\.gemini\/commands\/[^/]+\.md$/.test(f.replace(/\\/g, '/')));
   const codexPromptStaged = staged.filter(f => /^\.codex\/prompts\/[^/]+\.md$/.test(f.replace(/\\/g, '/')));
 
+  // The command counterpart check is L0-only (recorded exclusion, D8 style like the
+  // .agents/commands exclusion below): L2/L3 projects and scaffold commits have no
+  // templates/common tree to map to, so every staged command warned there — observed
+  // 21x on the gw-76f6b4c9c6ff scaffold's initial commit (2026-10-01).
+  const commandCheckL0 = existsSync('templates/common');
+
   for (const f of skillStaged) {
     try {
       const content = readFileSync(f, 'utf-8');
@@ -290,27 +301,29 @@ async function main() {
     } catch { /* file may be deleted */ }
   }
 
-  for (const f of claudeCommandStaged) {
-    const commonPath = f.replace(/^\.claude\//, 'templates/common/.claude/').replace(/\\/g, '/');
-    if (!existsSync(commonPath)) {
-      console.error(`\x1b[33m[WARN]\x1b[0m ${f} — templates/common counterpart missing: ${commonPath}`);
-      console.error(`       Run platform-command-lifecycle-manager skill to propagate.`);
+  if (commandCheckL0) {
+    for (const f of claudeCommandStaged) {
+      const commonPath = f.replace(/^\.claude\//, 'templates/common/.claude/').replace(/\\/g, '/');
+      if (!existsSync(commonPath)) {
+        console.error(`\x1b[33m[WARN]\x1b[0m ${f} — templates/common counterpart missing: ${commonPath}`);
+        console.error(`       Run platform-command-lifecycle-manager skill to propagate.`);
+      }
     }
-  }
 
-  for (const f of geminiCommandStaged) {
-    const commonPath = f.replace(/^\.gemini\//, 'templates/common/.gemini/').replace(/\\/g, '/');
-    if (!existsSync(commonPath)) {
-      console.error(`\x1b[33m[WARN]\x1b[0m ${f} — templates/common counterpart missing: ${commonPath}`);
-      console.error(`       Run platform-command-lifecycle-manager skill to propagate.`);
+    for (const f of geminiCommandStaged) {
+      const commonPath = f.replace(/^\.gemini\//, 'templates/common/.gemini/').replace(/\\/g, '/');
+      if (!existsSync(commonPath)) {
+        console.error(`\x1b[33m[WARN]\x1b[0m ${f} — templates/common counterpart missing: ${commonPath}`);
+        console.error(`       Run platform-command-lifecycle-manager skill to propagate.`);
+      }
     }
-  }
 
-  for (const f of codexPromptStaged) {
-    const commonPath = f.replace(/^\.codex\//, 'templates/common/.codex/').replace(/\\/g, '/');
-    if (!existsSync(commonPath)) {
-      console.error(`\x1b[33m[WARN]\x1b[0m ${f} — templates/common counterpart missing: ${commonPath}`);
-      console.error(`       Run platform-command-lifecycle-manager skill to propagate.`);
+    for (const f of codexPromptStaged) {
+      const commonPath = f.replace(/^\.codex\//, 'templates/common/.codex/').replace(/\\/g, '/');
+      if (!existsSync(commonPath)) {
+        console.error(`\x1b[33m[WARN]\x1b[0m ${f} — templates/common counterpart missing: ${commonPath}`);
+        console.error(`       Run platform-command-lifecycle-manager skill to propagate.`);
+      }
     }
   }
 

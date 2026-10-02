@@ -1,7 +1,7 @@
 ---
 name: variant-feature
 description: "Add features to an existing variant template. Use when: extending a variant with new agents, skills, scripts, or documentation."
-version: "1.0.0"
+version: 1.0.0
 status: active
 scope: workspace
 owner: scaffolding-expert
