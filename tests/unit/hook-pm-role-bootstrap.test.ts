@@ -16,15 +16,21 @@ interface HookResult {
  * cwd can be overridden to test behavior in different directories.
  */
 function runHook(stdinJson: string, cwd?: string): HookResult {
+  const env: Record<string, string> = { ...process.env };
+
+  if (cwd) {
+    env.CLAUDE_PROJECT_DIR = cwd;
+  } else {
+    // Explicitly remove CLAUDE_PROJECT_DIR when cwd is not given
+    delete env.CLAUDE_PROJECT_DIR;
+  }
+
   const result = spawnSync('bun', [HOOK_PATH], {
     input: stdinJson,
     encoding: 'utf-8',
     timeout: 10000,
     cwd: cwd || import.meta.dir.replace(/[/\\]tests[/\\]unit$/, ''),
-    env: {
-      ...process.env,
-      CLAUDE_PROJECT_DIR: cwd || undefined,
-    },
+    env,
   });
 
   return {
@@ -114,5 +120,24 @@ describe('PM Role Bootstrap hook script', () => {
 
     expect(result.exitCode).toBe(0);
     expect(result.stdout.trim()).toBe('');
+  });
+
+  test('Case 7: no CLAUDE_PROJECT_DIR — root falls back to the script location and still emits the JSON', () => {
+    const input = JSON.stringify({
+      hook_event_name: 'SessionStart',
+      source: 'startup',
+    });
+    // Run hook WITHOUT CLAUDE_PROJECT_DIR set — relies on default cwd (project root)
+    // and import.meta.url fallback to resolve workspace root
+    const result = runHook(input);
+
+    expect(result.exitCode).toBe(0);
+    // Should still emit JSON when CLAUDE_PROJECT_DIR is not set and hook resolves from import.meta.url
+    expect(result.stdout).toBeTruthy();
+
+    // Parse and validate output
+    const parsed = JSON.parse(result.stdout.trim());
+    expect(parsed.hookSpecificOutput).toBeDefined();
+    expect(parsed.hookSpecificOutput.hookEventName).toBe('SessionStart');
   });
 });

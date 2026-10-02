@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.0.1
 /**
  * pm-role-bootstrap.ts — SessionStart hook for PM role bootstrap.
  * Injects a reminder that the agent must read AGENTS.md and agents/pm.md
@@ -8,13 +8,14 @@
  * Triggered by SessionStart hook on all four sources: startup, resume, clear, compact.
  * Fails open: any error exits 0 with no stdout, after writing a warning to stderr.
  *
- * @version 1.0.0
+ * @version 1.0.1
  */
 
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const WORKSPACE_ROOT = process.env.CLAUDE_PROJECT_DIR || new URL('../..', import.meta.url).pathname;
+const WORKSPACE_ROOT = process.env.CLAUDE_PROJECT_DIR || fileURLToPath(new URL('../..', import.meta.url));
 
 const BOOTSTRAP_TEXT = `PM bootstrap (workspace rule): You are the PM agent for this session.
 Before your first response, Read AGENTS.md and agents/pm.md with the Read tool.

@@ -177,7 +177,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `hooks/_test-module.ts` | L0 | 1.0.0 | active | —| —| L0-only | —|
 | `hooks/agent-model-gate.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `hooks/gateguard-fact-force.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
-| `hooks/pm-role-bootstrap.ts` | L0 | 1.0.0 | active | SessionStart hook (all sources: startup, resume, clear, compact) injecting PM bootstrap reminder to read AGENTS.md and agents/pm.md before first response — design spec docs/designs/2026-10-02-pm-role-bootstrap-design.md | —| L0+L1 | —|
+| `hooks/pm-role-bootstrap.ts` | L0 | 1.0.1 | active | SessionStart hook (all sources: startup, resume, clear, compact) injecting PM bootstrap reminder to read AGENTS.md and agents/pm.md before first response — design spec docs/designs/2026-10-02-pm-role-bootstrap-design.md | —| L0+L1 | —|
 | `hooks/post-write-lifecycle-check.ts` | L0 | 1.2.0 | active | v1.2.0 checks 1-4 generalize to four platforms mapping-aware (.codex/prompts leg; .agents/commands excluded per Finding D) (spec docs/designs/2026-09-25-verifier-platform-expansion-design.md site 9) | —| L0+L1 | —|
 | `hooks/pre-commit.ts` | L0 | 1.9.0 | active | v1.9.0: check 6b command counterpart check scoped to L0 (skipped when templates/common is absent — L2/scaffold commits have no mapping target; observed 21 WARNs on the gw-76f6b4c9c6ff scaffold commit). Prior: v1.8.0 check 6b generalizes to four platforms (skills regexes + .codex/prompts mapping leg), WARN severity preserved (spec docs/designs/2026-09-25-verifier-platform-expansion-design.md site 8) | —| L0+L1 | —|
 | `hooks/pre-push.ts` | L0 | 1.4.1 | active | —| —| L0+L1 | —|
