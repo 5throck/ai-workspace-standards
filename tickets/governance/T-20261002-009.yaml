@@ -6,12 +6,29 @@ title: >-
   install-upstream-mcp.ts targets with the CONSTITUTION 11.0 Machine-global MCP
   config column (review M3).
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-02T07:57:34.668Z'
 history:
   - at: '2026-10-02T07:57:34.668Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-02T11:00:40.553Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-02T11:14:39.379Z'
+    from: waiting
+    to: running
+  - at: '2026-10-02T11:14:39.400Z'
+    from: running
+    to: review
+  - at: '2026-10-02T11:14:39.420Z'
+    from: review
+    to: done
+result: >-
+  Implemented in PR #1326: validate-surface-registry 1.1.0
+  compareInstallerConfigs — installer TARGET_CONFIG_FILES (exported from
+  install-upstream-mcp 2.1.1) must all be named by the §11.0 Machine-global MCP
+  config column and vice versa; legacy gemini settings path allowed per the
+  §11.0 trailing note.
 error: null

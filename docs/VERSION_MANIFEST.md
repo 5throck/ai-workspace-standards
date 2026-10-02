@@ -1,6 +1,7 @@
 # VERSION_MANIFEST.md
 
 **Generated**: 2026-10-02T11:49:36.274Z
+**Generated**: 2026-10-02T13:36:30.987Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -19,15 +20,15 @@
 
 | Name | File | Tier | Model | Last Modified |
 |------|------|------|-------|---------------|
-| architect | agents/architect.md | high | inherit | 2026-09-29 |
-| auditor | agents/auditor.md | medium | inherit | 2026-10-01 |
-| automation-engineer | agents/automation-engineer.md | low | inherit | 2026-09-29 |
-| docs-writer | agents/docs-writer.md | medium | inherit | 2026-09-29 |
-| lifecycle-manager | agents/lifecycle-manager.md | medium | inherit | 2026-09-29 |
+| architect | agents/architect.md | high | inherit | 2026-10-02 |
+| auditor | agents/auditor.md | medium | inherit | 2026-10-02 |
+| automation-engineer | agents/automation-engineer.md | low | inherit | 2026-10-02 |
+| docs-writer | agents/docs-writer.md | medium | inherit | 2026-10-02 |
+| lifecycle-manager | agents/lifecycle-manager.md | medium | inherit | 2026-10-02 |
 | pm | agents/pm.md | medium | inherit | 2026-10-02 |
-| scaffolding-expert | agents/scaffolding-expert.md | low | inherit | 2026-09-29 |
-| security-expert | agents/security-expert.md | medium | inherit | 2026-09-29 |
-| skill-graph-analyst | agents/skill-graph-analyst.md | low | inherit | 2026-09-29 |
+| scaffolding-expert | agents/scaffolding-expert.md | low | inherit | 2026-10-02 |
+| security-expert | agents/security-expert.md | medium | inherit | 2026-10-02 |
+| skill-graph-analyst | agents/skill-graph-analyst.md | low | inherit | 2026-10-02 |
 
 ---
 
@@ -138,13 +139,13 @@
 | graph-delta-log.ts | 1.0.0 | scripts/graph-delta-log.ts | N/A |
 | ingest-external-skills.ts | 1.1.0 | scripts/ingest-external-skills.ts | N/A |
 | ingest-security-frameworks.ts | 1.1.0 | scripts/ingest-security-frameworks.ts | N/A |
-| install-upstream-mcp.ts | 2.1.1 | scripts/install-upstream-mcp.ts | N/A |
+| install-upstream-mcp.ts | 2.2.0 | scripts/install-upstream-mcp.ts | N/A |
 | l3-to-variant-pipeline.ts | 1.21.2 | scripts/l3-to-variant-pipeline.ts | child_process, fs, path, process, url |
 | lifecycle-sync-audit.ts | 1.17.1 | scripts/lifecycle-sync-audit.ts | js-yaml |
 | lint-instructions.ts | 1.0.0 | scripts/lint-instructions.ts | N/A |
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
 | mcp-governance-server.ts | 1.1.0 | scripts/mcp-governance-server.ts | N/A |
-| mcp-upstream-server.ts | 1.7.0 | scripts/mcp-upstream-server.ts | js-yaml |
+| mcp-upstream-server.ts | 1.8.0 | scripts/mcp-upstream-server.ts | js-yaml |
 | md-to-ooxml.ts | 1.2.0 | scripts/md-to-ooxml.ts | fs, path |
 | migrate-project.ts | 1.0.0 | scripts/migrate-project.ts | N/A |
 | migrate-quality-gates.ts | 1.1.0 | scripts/migrate-quality-gates.ts | fs, js-yaml, path |
@@ -166,7 +167,7 @@
 | setup-github-branch-protection.ts | 1.0.1 | scripts/setup-github-branch-protection.ts | bun |
 | skill-dependency-analysis.ts | 1.0.2 | scripts/skill-dependency-analysis.ts | N/A |
 | skill-graph-fleet-report.ts | 1.1.1 | scripts/skill-graph-fleet-report.ts | N/A |
-| skill-lifecycle-audit.ts | 1.5.1 | scripts/skill-lifecycle-audit.ts | N/A |
+| skill-lifecycle-audit.ts | 1.5.2 | scripts/skill-lifecycle-audit.ts | N/A |
 | skill-session-review.ts | 1.1.0 | scripts/skill-session-review.ts | bun |
 | spec-backfill.ts | 1.0.0 | scripts/spec-backfill.ts | N/A |
 | spec-hygiene-sweep.ts | 1.0.0 | scripts/spec-hygiene-sweep.ts | N/A |
@@ -188,10 +189,10 @@
 | test-runner.ts | 1.4.0 | scripts/test-runner.ts | fs, os, path |
 | test-scaffold-delivery-parity.ts | 1.0.0 | scripts/test-scaffold-delivery-parity.ts | N/A |
 | test-variant-readiness.ts | 1.0.0 | scripts/test-variant-readiness.ts | N/A |
-| ticket.ts | 1.7.0 | scripts/ticket.ts | js-yaml |
+| ticket.ts | 1.8.0 | scripts/ticket.ts | js-yaml |
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, fs, path |
 | typecheck.ts | 1.1.1 | scripts/typecheck.ts | N/A |
-| upgrade-project.ts | 1.61.0 | scripts/upgrade-project.ts | N/A |
+| upgrade-project.ts | 1.62.0 | scripts/upgrade-project.ts | N/A |
 | validate-agents.ts | 1.3.2 | scripts/validate-agents.ts | N/A |
 | validate-decisions.ts | 1.0.0 | scripts/validate-decisions.ts | js-yaml |
 | validate-doc-folder.ts | 1.1.0 | scripts/validate-doc-folder.ts | fs, path |
@@ -204,7 +205,7 @@
 | validate-raci.ts | 1.2.0 | scripts/validate-raci.ts | js-yaml |
 | validate-skills.ts | 1.5.1 | scripts/validate-skills.ts | N/A |
 | validate-surface-registry.ts | 1.1.1 | scripts/validate-surface-registry.ts | N/A |
-| validate-templates.ts | 1.50.2 | scripts/validate-templates.ts | js-yaml |
+| validate-templates.ts | 1.50.4 | scripts/validate-templates.ts | js-yaml |
 | validate-ticket-doc-commands.ts | 1.0.0 | scripts/validate-ticket-doc-commands.ts | N/A |
 | validate-variant-readiness.ts | 1.1.0 | scripts/validate-variant-readiness.ts | N/A |
 | variant-feature.ts | 1.0.0 | scripts/variant-feature.ts | N/A |

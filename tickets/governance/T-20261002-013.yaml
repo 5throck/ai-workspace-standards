@@ -5,14 +5,30 @@ title: >-
   Fix Windows path resolution in scripts/hooks/agent-model-gate.ts (new
   URL(...).pathname)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-02T09:24:42.000Z'
 history:
   - at: '2026-10-02T09:24:42.000Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-02T11:47:34.876Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-02T11:47:34.891Z'
+    from: waiting
+    to: running
+  - at: '2026-10-02T11:47:34.907Z'
+    from: running
+    to: review
+  - at: '2026-10-02T11:47:34.922Z'
+    from: review
+    to: done
+result: >-
+  Implemented in PR #1328: fileURLToPath(new URL(...)) replaces the URL.pathname
+  workspace-root pattern in agent-model-gate.ts and three sibling instances
+  (dispatch-serial, l3-to-variant-pipeline, validate-model-registry) — repo-wide
+  grep of the pattern is now 0.
 error: null
 notes: >-
   scripts/hooks/agent-model-gate.ts line 33 builds WORKSPACE_ROOT with `new
@@ -27,5 +43,6 @@ notes: >-
   test that runs the hook with no CLAUDE_PROJECT_DIR from an unrelated cwd.
   Other L0/L1 hook scripts with same pattern (grep results):
   scripts/dispatch-serial.ts:239, scripts/l3-to-variant-pipeline.ts:1586,
-  scripts/validate-model-registry.ts:22, templates/common/scripts/validate-model-registry.ts:22,
+  scripts/validate-model-registry.ts:22,
+  templates/common/scripts/validate-model-registry.ts:22,
   templates/common/scripts/dispatch-serial.ts:239. All need the same fix.

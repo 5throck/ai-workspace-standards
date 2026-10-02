@@ -1,5 +1,5 @@
 ---
-last_updated: 2026-09-17
+last_updated: 2026-09-29
 name: Template Architect
 role: specialist
 status: active

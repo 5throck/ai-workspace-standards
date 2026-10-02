@@ -5,12 +5,29 @@ title: >-
   Serialize PM CLI triage/resolve against the server merge path with one shared
   ticket lock or mtime re-check, plus a concurrency test (review H4).
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-02T07:57:34.618Z'
 history:
   - at: '2026-10-02T07:57:34.618Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-02T10:16:59.901Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-02T10:42:07.871Z'
+    from: waiting
+    to: running
+  - at: '2026-10-02T10:42:07.886Z'
+    from: running
+    to: review
+  - at: '2026-10-02T10:42:07.901Z'
+    from: review
+    to: done
+result: >-
+  Implemented in PR #1324: withTicketLock (per-directory mkdir lock, owner
+  token, atomic stale takeover, fail-closed timeout) wraps every existing-ticket
+  mutation in ticket-store and the server merge path (nested inside the intake
+  lock) — the H4 lost-update class is closed; tested for contention, stale
+  takeover and release.
 error: null

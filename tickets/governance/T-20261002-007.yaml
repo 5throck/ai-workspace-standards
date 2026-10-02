@@ -6,12 +6,28 @@ title: >-
   triage/status/resolution invariants and upstream field format checks (review
   M2).
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-02T07:57:34.643Z'
 history:
   - at: '2026-10-02T07:57:34.643Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-02T10:16:59.915Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-02T10:42:07.916Z'
+    from: waiting
+    to: running
+  - at: '2026-10-02T10:42:07.930Z'
+    from: running
+    to: review
+  - at: '2026-10-02T10:42:07.946Z'
+    from: review
+    to: done
+result: >-
+  Implemented in PR #1324: validateTicket enforces upstream project format,
+  template_version/variant types, triage↔status consistency, done ⇒ resolution,
+  resolution summary required + https pr_url + string template_version; both
+  real legacy tickets verified compatible (no migration).
 error: null

@@ -5,12 +5,28 @@ title: >-
   Rewrite pm-gateway-workflow.md section 3.12 (L0 and templates/common) and
   agents/pm.md around ticket.ts triage/resolve/--confirm-reviewed (review H1).
 priority: high
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-02T07:57:34.575Z'
 history:
   - at: '2026-10-02T07:57:34.575Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-02T11:35:18.705Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-02T11:35:18.722Z'
+    from: waiting
+    to: running
+  - at: '2026-10-02T11:40:40.031Z'
+    from: running
+    to: review
+  - at: '2026-10-02T11:40:40.046Z'
+    from: review
+    to: done
+result: >-
+  Implemented in PR #1327: pm-gateway-workflow.md §3.12 steps 3/8 rewritten
+  around ticket.ts triage/resolve (hand-edits and move --force forbidden);
+  agents/pm.md gains both commands; L1 copies converted to L0-only pointers per
+  M8. Doc-command lint green.
 error: null

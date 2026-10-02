@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.61.0
+// @version 1.62.0
 // v1.61.0 (2026-10-01, T-20260930-026 PR-A, ADR-0094): `.github/workflows/ci.yml` joins the
 //          MERGE pass (upgrade-policy v1.20.0 claim) via lib/ci-workflow-merge.ts —
 //          template-owned jobs authoritative, PROJECT-JOBS region preserved, legacy
@@ -516,6 +516,7 @@ import { resolve, join, dirname, basename, isAbsolute, relative } from 'node:pat
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { extractScriptVersion, preserveLifecycleFrontmatter } from './helpers/upgrade-versions.ts';
+import { scanLocalPatches } from './helpers/local-patch-scan.ts';
 import { applySubstitutions } from './helpers/substitute-placeholders.ts';
 import { extractFrontmatterVersionAndReviewed, reconcileSkillRegistry, alignSkillRegistryRowsWithFrontmatter } from './helpers/skills-registry.ts';
 import {
@@ -1227,6 +1228,20 @@ function mergeCiWorkflowFile(projectFile: string, templateFile: string, rel: str
 function isLocallyModified(filePath: string): boolean {
   const rel = relative(projectDir, filePath).replace(/\\/g, '/');
   return preUpgradeDirty.has(rel);
+}
+
+// ── T-20261002-015: LOCAL-PATCH report ────────────────────────────────────────
+// Scanned BEFORE any delivery write: the whole point is to surface local patches
+// this upgrade is about to overwrite (after the pass they are already gone).
+const localPatchFindings = scanLocalPatches(projectDir);
+if (localPatchFindings.length > 0) {
+  console.log('\n--- LOCAL-PATCH report (upstream-request markers in this project) ---');
+  console.log(`  ⚠️  ${localPatchFindings.length} LOCAL-PATCH marker(s) found:`);
+  for (const f of localPatchFindings.slice(0, 40)) console.log(`    ${f.file} — ticket ${f.id}`);
+  if (localPatchFindings.length > 40) console.log(`    …and ${localPatchFindings.length - 40} more`);
+  console.log('  This upgrade may overwrite the marked files. Re-apply a patch only if its');
+  console.log('  upstream_request_status does not already report it fixed in a newer template.');
+  console.log('');
 }
 
 let lockedChanged = 0, mergeChanged = 0, preserveListed = 0, syncChanged = 0;
@@ -3502,6 +3517,7 @@ console.log(`  Tree-sync delivered  : ${treeChanged}`);
 console.log(`  Preserve files listed: ${preserveListed}`);
 console.log(`  W2 harvest candidates: ${w2HarvestLines} variant-only line(s) (informational — see W2 HARVEST above)`);
 console.log(`  Country skills pruned: ${countryPrunedSkills}${dryRun ? ' (dry-run count)' : ''}`);
+console.log(`  LOCAL-PATCH markers  : ${localPatchFindings.length}${localPatchFindings.length > 0 ? ' (see report above)' : ''}`);
 if (pruneRemoved) console.log(`  Files pruned         : ${prunedCount}`);
 console.log(`  Security checks      : ${securityPass ? 'PASSED' : 'FAILED (see above)'}`);
 if (dryRun) console.log('\n  [DRY RUN] No files were modified.');

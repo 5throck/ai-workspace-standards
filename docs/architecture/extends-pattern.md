@@ -412,8 +412,8 @@ Since ADR-0048 (June 2026), all variant pm.md files follow a frontmatter-only ex
 | `capabilities` | No | L2 | Capability declarations merged into the resolved pm.md; read by `capability-validator.ts` |
 | `formal_name` | No | L0, L1 | Human-readable name |
 | `status` | No | All | `active` / `deprecated` / `draft` |
-| `tier` | No | L0, L1 | Per-platform model tier mapping (`claude`, `gemini`, `antigravity`, `gemini-cli`) |
-| `model` | No | L0, L1 | Model override strategy (`inherit` or explicit model name) |
+| `tier` | No | L0, L1, L2 (pm.md stubs) | Per-platform model tier mapping (`claude`, `gemini`, `antigravity`, `gemini-cli`) |
+| `model` | No | L0, L1, L2 (pm.md stubs) | Model override strategy (`inherit` or explicit model name) |
 | `color` | No | L0, L1 | Display color for tool UI |
 | `description` | No | L0, L1 | Agent description with trigger phrases |
 | `examples` | No | L0, L1 | Usage example pairs (`user` / `assistant`) |

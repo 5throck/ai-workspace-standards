@@ -17,6 +17,15 @@
         "type": "command",
         "command": "git config core.hooksPath .githooks",
         "statusMessage": "Configuring git hooks..."
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun scripts/hooks/pm-role-bootstrap.ts",
+            "timeout": 8000
+          }
+        ]
       }
     ],
     "AfterTool": [
