@@ -274,10 +274,13 @@ describe('write gating and file hygiene (T-20261002-006, H5+M4)', () => {
     chmodSync(claudePath(), 0o640);
     const r = run(['--target', 'claude']);
     expect(r.code).toBe(0);
-    expect((statSync(claudePath()).mode & 0o777).toString(8)).toBe('640'); // mode preserved (H5)
     const backup = readdirSync(home).find((f) => f.startsWith('.claude.json.bak-'));
     expect(backup).toBeDefined();
-    expect((statSync(join(home, backup!)).mode & 0o777).toString(8)).toBe('600'); // backup 0600 (H5)
+    if (!IS_WIN) {
+      // Windows ignores POSIX modes — the preservation assertions are POSIX-only.
+      expect((statSync(claudePath()).mode & 0o777).toString(8)).toBe('640'); // mode preserved (H5)
+      expect((statSync(join(home, backup!)).mode & 0o777).toString(8)).toBe('600'); // backup 0600 (H5)
+    }
   });
 
   test('a symlinked config is updated at its real file, not replaced by a regular file (H5)', () => {
