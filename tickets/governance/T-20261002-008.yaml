@@ -1,0 +1,17 @@
+schemaVersion: 1
+id: T-20261002-008
+kind: manual
+title: >-
+  validator-hardening: add checks that serverInfo.version equals the script
+  header version, and that governance docs only name existing ticket.ts
+  subcommands (review M1, H1).
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-02T07:57:34.656Z'
+history:
+  - at: '2026-10-02T07:57:34.656Z'
+    from: null
+    to: backlog
+result: null
+error: null

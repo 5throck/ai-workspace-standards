@@ -1,0 +1,17 @@
+schemaVersion: 1
+id: T-20261002-006
+kind: manual
+title: >-
+  Harden installer file writes: preserve mode, resolve symlinks, 0600 backups
+  with pruning, mtime re-check, require --apply, reject unknown flags and
+  valueless --target (review H5, M4).
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-02T07:57:34.630Z'
+history:
+  - at: '2026-10-02T07:57:34.630Z'
+    from: null
+    to: backlog
+result: null
+error: null

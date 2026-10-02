@@ -1,0 +1,16 @@
+schemaVersion: 1
+id: T-20261002-002
+kind: manual
+title: >-
+  Rewrite pm-gateway-workflow.md section 3.12 (L0 and templates/common) and
+  agents/pm.md around ticket.ts triage/resolve/--confirm-reviewed (review H1).
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-10-02T07:57:34.575Z'
+history:
+  - at: '2026-10-02T07:57:34.575Z'
+    from: null
+    to: backlog
+result: null
+error: null
