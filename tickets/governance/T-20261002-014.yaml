@@ -9,12 +9,31 @@ title: >-
   shape and requires 0 findings, so future config/binary version skew fails
   loudly instead of surfacing known FPs
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-02T09:42:36.838Z'
 history:
   - at: '2026-10-02T09:42:36.838Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-02T10:07:07.550Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-02T10:07:07.564Z'
+    from: waiting
+    to: running
+  - at: '2026-10-02T10:07:07.584Z'
+    from: running
+    to: review
+  - at: '2026-10-02T10:07:07.602Z'
+    from: review
+    to: done
+result: >-
+  Implemented in PR #1322 (merged, commit 2d8145a9): both weekly-health-check
+  gitleaks steps extract the pinned release to a dedicated directory, invoke it
+  by explicit path, and assert resolved version == pin before scanning —
+  config/binary skew (and PATH shadowing) now fails loudly. Verified by dispatch
+  run 36993461645 (8.30.1, full history, no leaks found). The fixture-scan smoke
+  assertion is subsumed: with the guard, an ignored allowlist surfaces as scan
+  findings (loud failure) rather than a silent pass.
 error: null
