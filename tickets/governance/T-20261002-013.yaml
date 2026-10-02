@@ -1,0 +1,31 @@
+schemaVersion: 1
+id: T-20261002-013
+kind: manual
+title: >-
+  Fix Windows path resolution in scripts/hooks/agent-model-gate.ts (new
+  URL(...).pathname)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-02T09:24:42.000Z'
+history:
+  - at: '2026-10-02T09:24:42.000Z'
+    from: null
+    to: backlog
+result: null
+error: null
+notes: >-
+  scripts/hooks/agent-model-gate.ts line 33 builds WORKSPACE_ROOT with `new
+  URL('../..', import.meta.url).pathname`. On Windows this returns `/D:/a/...`
+  (with leading slash), so SCHEMA_PATH points to a path that does not exist and
+  the gate fails open silently (the schema-missing branch warns on stderr and
+  skips). Same pattern broke scripts/hooks/pm-role-bootstrap.ts on
+  windows-latest CI and was fixed in v1.0.1 with `fileURLToPath(new URL('../..',
+  import.meta.url))` (PR 1317, spec 2026-10-02-pm-role-bootstrap-design).
+  Proposed fix: use `fileURLToPath` from node:url in agent-model-gate.ts, bump
+  @version from 1.1.0 to 1.1.1, update the scripts/SCRIPTS.md row, and add a
+  test that runs the hook with no CLAUDE_PROJECT_DIR from an unrelated cwd.
+  Other L0/L1 hook scripts with same pattern (grep results):
+  scripts/dispatch-serial.ts:239, scripts/l3-to-variant-pipeline.ts:1586,
+  scripts/validate-model-registry.ts:22, templates/common/scripts/validate-model-registry.ts:22,
+  templates/common/scripts/dispatch-serial.ts:239. All need the same fix.
