@@ -7,12 +7,21 @@ title: >-
   SKILL.md one-call discipline + auto-refresh); pick one SSOT and reference the
   other
 priority: low
-status: backlog
+status: review
 attempts: 0
 created_at: '2026-10-02T16:43:11.048Z'
 history:
   - at: '2026-10-02T16:43:11.048Z'
     from: null
     to: backlog
+  - at: '2026-10-02T18:25:19.574Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-02T18:25:19.588Z'
+    from: waiting
+    to: running
+  - at: '2026-10-02T18:25:19.602Z'
+    from: running
+    to: review
 result: null
 error: null
