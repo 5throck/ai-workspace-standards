@@ -356,3 +356,21 @@ Run from the workspace root unless stated:
   - F2: Gemini hook (vendor-doc check first).
   - A propagation domain for variant HERMES.md heads and settings.json (the PM will file a ticket).
   - F3: reconsider a tool-call block if live checks still show skipped reads.
+
+---
+
+## Addendum (2026-10-02, T-20261002-012 — Gemini SessionStart hook delivered)
+
+Vendor-doc verification (CONSTITUTION §11.0 rule 4): the Gemini CLI hooks system is
+documented at https://geminicli.com/docs/hooks (SessionStart fires on startup, resume
+and clear — the same trigger set as the Claude Code hook), the settings shape at
+https://geminicli.com/docs/hooks/writing-hooks (`.gemini/settings.json` →
+`hooks.SessionStart: [{ matcher, hooks: [{ type: "command", command }]}]`) and the
+configuration reference at https://geminicli.com/docs/reference/configuration
+(`hooks.SessionStart`, default `[]`). The shape is identical to the Claude Code
+contract this design already uses.
+
+Delivery: the `bun scripts/hooks/pm-role-bootstrap.ts` SessionStart entry was added to
+`.gemini/settings.json` at L0 and propagated through the gemini-settings mirror
+(L1 templates/common + all 13 L2 variants — shared keys are deep-equal per the
+platform_settings contract; the drift report shows 0 unexpected rows).
