@@ -6,7 +6,7 @@
  */
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, readdirSync, existsSync, rmSync, chmodSync, realpathSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, readdirSync, existsSync, rmSync, chmodSync, realpathSync, statSync, lstatSync, symlinkSync } from 'node:fs';
 import { tmpdir, platform } from 'node:os';
 import { join, resolve, dirname } from 'node:path';
 import { load, JSON_SCHEMA } from 'js-yaml';
@@ -60,9 +60,12 @@ if (a[1] === 'get') {
   chmodSync(bin, 0o755);
 }
 
-function run(args: string[], opts: { noCodex?: boolean } = {}) {
+function run(args: string[], opts: { noCodex?: boolean; apply?: boolean } = {}) {
   const path = opts.noCodex ? '/usr/bin:/bin' : `${binDir}${IS_WIN ? ';' : ':'}/usr/bin:/bin`;
-  const r = spawnSync(process.execPath, [installer, ...args], {
+  // T-20261002-006: writes require --apply — tests that intend a real write get the
+  // flag appended automatically; pass apply:false to exercise the bare/dry behavior.
+  const argv = opts.apply === false || args.includes('--apply') ? args : [...args, '--apply'];
+  const r = spawnSync(process.execPath, [installer, ...argv], {
     encoding: 'utf-8',
     env: { ...process.env, UPSTREAM_INSTALL_HOME: home, PATH: path, CODEX_HOME: '', HERMES_HOME: '' },
   });
@@ -236,5 +239,63 @@ describe('target selection', () => {
     expect(readFileSync(hermesPath(), 'utf-8')).toContain(NAME);
     expect(r.out).toContain('Skipped');
     expect(existsSync(desktopPath())).toBe(false);
+  });
+});
+
+describe('write gating and file hygiene (T-20261002-006, H5+M4)', () => {
+  test('a BARE run is read-only and exits 2 — no config is written', () => {
+    writeJson(claudePath(), { mcpServers: { keep: { command: 'x' } } });
+    const before = readFileSync(claudePath(), 'utf-8');
+    const r = run(['--target', 'claude'], { apply: false });
+    expect(r.code).toBe(2);
+    expect(r.out).toContain('--apply');
+    expect(readFileSync(claudePath(), 'utf-8')).toBe(before);
+  });
+
+  test('an explicit --dry-run is an intentional no-op exiting 0', () => {
+    writeJson(claudePath(), { mcpServers: {} });
+    expect(run(['--target', 'claude', '--dry-run'], { apply: false }).code).toBe(0);
+  });
+
+  test('an unknown flag (--dryrun typo) is a hard error, not a silent all-targets write', () => {
+    const r = run(['--dryrun'], { apply: false });
+    expect(r.code).toBe(2);
+    expect(r.out).toContain('Unknown flag');
+  });
+
+  test('a valueless trailing --target is a hard error', () => {
+    const r = run(['--target'], { apply: false });
+    expect(r.code).toBe(2);
+    expect(r.out).toContain('--target requires a value');
+  });
+
+  test('backupAndWrite preserves the original file mode and writes 0600 backups', () => {
+    writeJson(claudePath(), { mcpServers: { keep: { command: 'x' } } });
+    chmodSync(claudePath(), 0o640);
+    const r = run(['--target', 'claude']);
+    expect(r.code).toBe(0);
+    expect((statSync(claudePath()).mode & 0o777).toString(8)).toBe('640'); // mode preserved (H5)
+    const backup = readdirSync(home).find((f) => f.startsWith('.claude.json.bak-'));
+    expect(backup).toBeDefined();
+    expect((statSync(join(home, backup!)).mode & 0o777).toString(8)).toBe('600'); // backup 0600 (H5)
+  });
+
+  test('a symlinked config is updated at its real file, not replaced by a regular file (H5)', () => {
+    const realConfig = join(home, 'real-claude.json');
+    writeJson(realConfig, { mcpServers: { keep: { command: 'x' } } });
+    symlinkSync(realConfig, claudePath());
+    const r = run(['--target', 'claude']);
+    expect(r.code).toBe(0);
+    const lstatBefore = lstatSync(claudePath());
+    expect(lstatBefore.isSymbolicLink()).toBe(true); // the link survives
+    expect(readJson(realConfig).mcpServers[NAME]).toBeDefined(); // the real file was updated
+  });
+
+  test('backups are pruned to the newest 5 per config (H5)', () => {
+    writeJson(claudePath(), { mcpServers: {} });
+    for (let i = 0; i < 7; i++) writeFileSync(join(home, `.claude.json.bak-${1000000000000 + i}`), 'old');
+    expect(run(['--target', 'claude']).code).toBe(0);
+    const backups = readdirSync(home).filter((f) => f.startsWith('.claude.json.bak-'));
+    expect(backups.length).toBeLessThanOrEqual(5);
   });
 });

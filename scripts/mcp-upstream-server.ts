@@ -1,5 +1,11 @@
 #!/usr/bin/env bun
-// @version 1.6.0
+// @version 1.7.0
+// v1.7.0 (2026-10-02, T-20261002-004/-008): upstream_request_status audit-logs every
+//           call (outcome: status, identity cwd|declared) and REDACTS resolution
+//           content (summary/pr_url) when identity was self-declared project_root —
+//           a declared caller learns ids + status/triage only (review H3; design §6
+//           addendum). serverInfo.version now derives from the single SERVER_VERSION
+//           constant pinned to the @version header (review M1).
 // v1.6.0 (2026-10-02, T-20261002-005): the merge path's ticket read-modify-write runs
 //           under the SHARED ticket lock from helpers/ticket-store.ts (nested inside
 //           the intake lock), so it can no longer silently overwrite a concurrent PM
@@ -47,6 +53,10 @@ import { load, dump, JSON_SCHEMA } from 'js-yaml';
 import { withTicketLock } from './helpers/ticket-store.ts';
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
+
+/** T-20261002-008 (M1): single version constant — the @version header above and
+ * serverInfo.version must stay identical; a unit test pins the two literals. */
+export const SERVER_VERSION = '1.7.0';
 
 // TEST-ONLY SEAM: UPSTREAM_WORKSPACE_ROOT overrides the workspace root that is otherwise
 // derived from this script's path. It exists so tests can run the real server against a
@@ -625,11 +635,15 @@ function handleStatusRequest(params: unknown, cwd: string): Outcome {
   // Same identity fallback as create: cwd first, then an optional self-declared
   // project_root for clients that spawn the server outside the project (GUI apps).
   let projResult: ProjectIdentity | string = resolveProject(cwd);
+  let declared = false;
   if (typeof projResult === 'string' && typeof params === 'object' && params !== null && !Array.isArray(params)) {
     const raw = (params as Record<string, unknown>).project_root;
     if (typeof raw === 'string' && raw.length > 0) {
       const declaredResult = resolveProject(sanitize(raw));
-      if (typeof declaredResult !== 'string') projResult = declaredResult;
+      if (typeof declaredResult !== 'string') {
+        projResult = declaredResult;
+        declared = true;
+      }
     }
   }
   if (typeof projResult === 'string') return { error: { code: -32602, message: `${projResult} (when your client launches this server outside the project directory — e.g. the Claude Desktop App — pass the project's absolute path as project_root)` } };
@@ -647,11 +661,16 @@ function handleStatusRequest(params: unknown, cwd: string): Outcome {
     limit = p.limit;
   }
 
+  // T-20261002-004 (H3): every status call is audit-logged, and a DECLARED identity
+  // (self-declared project_root — unverified until PM review) gets redacted results:
+  // ids + status/triage only, never another project's resolution summary or PR URL.
+  appendAuditLog({ project, outcome: 'status', identity: declared ? 'declared' : 'cwd' });
+
   const mine = loadUpstreamTickets()
     .filter(({ ticket }) => ticket.upstream.project === project && (p.id === undefined || ticket.id === p.id))
     .map(({ ticket }) => ({
       id: ticket.id, status: ticket.status, triage: ticket.upstream.triage, created_at: ticket.created_at,
-      resolution: ticket.upstream.resolution ?? null,
+      resolution: declared ? undefined : (ticket.upstream.resolution ?? null),
     }))
     .sort((a, b) => b.id.localeCompare(a.id))
     .slice(0, limit);
@@ -680,7 +699,7 @@ const SERVER_INSTRUCTIONS = 'Use this server when a problem you hit in this proj
 function handleInitialize(params: unknown) {
   const p = (params ?? {}) as Record<string, unknown>;
   const protocolVersion = typeof p.protocolVersion === 'string' ? p.protocolVersion : FALLBACK_PROTOCOL_VERSION;
-  return { protocolVersion, serverInfo: { name: 'ai-workspace-upstream', version: '1.4.0' }, capabilities: { tools: {} }, instructions: SERVER_INSTRUCTIONS };
+  return { protocolVersion, serverInfo: { name: 'ai-workspace-upstream', version: SERVER_VERSION }, capabilities: { tools: {} }, instructions: SERVER_INSTRUCTIONS };
 }
 
 function getTools() {

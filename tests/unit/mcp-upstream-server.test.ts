@@ -387,6 +387,47 @@ describe('13.2 identity', () => {
     const bad = await open(ws.root).status();
     expect(bad.rpc.error?.code).toBe(-32602);
   });
+
+  test('2l. declared-identity status is REDACTED (no resolution content) and audit-logged (T-20261002-004, H3)', async () => {
+    const proj = ws.project('co-test');
+    seedKnown(ws, 'co-test');
+    const filed = await open(proj).create(good());
+    expect(filed.rpc.error).toBeUndefined();
+    // PM resolves the ticket so a resolution with a summary + PR URL exists
+    const { setUpstreamResolution } = await import('../../scripts/helpers/ticket-store.ts');
+    setUpstreamResolution(
+      ws.ticketsDir,
+      filed.body.id,
+      { outcome: 'fixed', pr_url: 'https://github.com/x/pull/77', template_version: '0.9.0', summary: 'SECRET-RESOLUTION-SUMMARY shipped in 0.9.0' },
+      'SECRET-RESOLUTION-SUMMARY shipped in 0.9.0',
+    );
+    // cwd-attested status sees the full resolution
+    const cwdStatus = await open(proj).status({ id: filed.body.id });
+    expect(cwdStatus.rpc.error).toBeUndefined();
+    expect(cwdStatus.body.requests[0].resolution.summary).toContain('SECRET-RESOLUTION-SUMMARY');
+    // declared identity (self-declared project_root) gets ids + status/triage only
+    const declaredStatus = await open(ws.root).status({ id: filed.body.id, project_root: proj });
+    expect(declaredStatus.rpc.error).toBeUndefined();
+    expect(declaredStatus.body.requests[0].id).toBe(filed.body.id);
+    expect(declaredStatus.body.requests[0].status).toBe('done');
+    expect(declaredStatus.body.requests[0].resolution).toBeUndefined();
+    // both calls are audit-logged with their identity
+    const today = new Date().toISOString().split('T')[0];
+    const audit = readFileSync(join(ws.logsDir, `${today}.jsonl`), 'utf-8');
+    const lines = audit.trim().split('\n').map((l) => JSON.parse(l));
+    expect(lines.filter((e) => e.outcome === 'status' && e.identity === 'cwd').length).toBeGreaterThanOrEqual(1);
+    expect(lines.filter((e) => e.outcome === 'status' && e.identity === 'declared').length).toBeGreaterThanOrEqual(1);
+  });
+
+  test('2m. serverInfo.version equals the @version header constant (T-20261002-008, M1)', async () => {
+    const s = open(ws.root);
+    const init = await s.send('initialize', { protocolVersion: '2025-06-18' });
+    const header = readFileSync(serverPath, 'utf-8').match(/@version\s+([\d.]+)/)![1];
+    const constant = readFileSync(serverPath, 'utf-8').match(/export const SERVER_VERSION = '([\d.]+)'/)![1];
+    expect(constant).toBe(header);
+    expect(init.result.serverInfo.version).toBe(header);
+    s.child.kill();
+  });
 });
 
 // =====================================================================

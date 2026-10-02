@@ -1,5 +1,11 @@
 #!/usr/bin/env bun
-// @version 2.0.1
+// @version 2.1.0
+// v2.1.0 (2026-10-02, T-20261002-006): file-write hardening (review H5) — backupAndWrite
+//          preserves the original file mode, resolves symlinked configs to their real file,
+//          re-checks mtime before rename (a concurrent client edit aborts retryably), and
+//          writes 0600 backups pruned to the last 5; CLI (review M4) — a bare run is a
+//          read-only summary (exit 2), writes require --apply, and unknown flags or a
+//          valueless --target are hard errors instead of a silent all-targets write.
 // v2.0.1 (2026-10-01): with UPSTREAM_INSTALL_HOME set, %APPDATA% no longer leaks the real Windows profile into the Claude Desktop path.
 // v2.0.0 (2026-10-01): registers the server for every supported surface (Claude Code, Claude Desktop App,
 //          Antigravity IDE/CLI, Gemini CLI, Codex CLI/Desktop, Hermes Agent/CLI) with one target per config file
@@ -15,7 +21,7 @@
 // Test seam: UPSTREAM_INSTALL_HOME replaces the home directory for every target (and CODEX_HOME for
 // the codex child process), so tests never touch the real user configs.
 
-import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync, renameSync } from 'node:fs';
+import { chmodSync, copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, realpathSync, statSync, unlinkSync, writeFileSync, renameSync } from 'node:fs';
 import { join, dirname, resolve, basename, isAbsolute } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { homedir, platform } from 'node:os';
@@ -69,16 +75,50 @@ function fail(message: string): never {
   throw new Error(message);
 }
 
+/** T-20261002-006 (H5): backups hold full copies of secret-bearing client configs
+ * (OAuth tokens, env) — 0600, pruned to the newest KEEP_BACKUPS per config. */
+const KEEP_BACKUPS = 5;
+
+function pruneOldBackups(configPath: string): void {
+  const dir = dirname(configPath);
+  const stem = basename(configPath);
+  const prefix = `${stem}.bak-`;
+  try {
+    const backups = readdirSync(dir)
+      .filter((f) => f.startsWith(prefix))
+      .sort((a, b) => a.localeCompare(b)); // timestamp suffix sorts lexicographically
+    for (const f of backups.slice(0, Math.max(0, backups.length - KEEP_BACKUPS))) {
+      try { unlinkSync(join(dir, f)); } catch { /* best-effort pruning */ }
+    }
+  } catch { /* best-effort pruning — never block the install */ }
+}
+
 function backupAndWrite(path: string, content: string): void {
   if (existsSync(path)) {
+    // H5: a symlinked client config must be updated at its REAL file — writing
+    // through the link path would replace the link with a regular file.
+    const realPath = realpathSync(path);
+    const mtimeBefore = statSync(realPath).mtimeMs;
+    const mode = statSync(realPath).mode & 0o777;
     const backupPath = `${path}.bak-${Date.now()}`;
-    copyFileSync(path, backupPath);
+    copyFileSync(realPath, backupPath);
+    chmodSync(backupPath, 0o600);
+    pruneOldBackups(path);
     console.log(`  Backed up existing config to: ${backupPath}`);
-  } else {
-    mkdirSync(dirname(path), { recursive: true });
+    // H5: re-check mtime before the rename — a client that saved the config while
+    // we were composing would be silently overwritten by the rename.
+    if (statSync(realPath).mtimeMs !== mtimeBefore) {
+      fail(`config changed while installing (${path}) — a client wrote it concurrently; re-run the installer`);
+    }
+    const tmpPath = `${realPath}.tmp-${process.pid}-${Date.now()}`;
+    writeFileSync(tmpPath, content, { encoding: 'utf-8', mode });
+    renameSync(tmpPath, realPath);
+    return;
   }
+  mkdirSync(dirname(path), { recursive: true });
+  // New config files can end up holding env secrets — restrictive from birth.
   const tmpPath = `${path}.tmp-${process.pid}-${Date.now()}`;
-  writeFileSync(tmpPath, content, 'utf-8');
+  writeFileSync(tmpPath, content, { encoding: 'utf-8', mode: 0o600 });
   renameSync(tmpPath, path);
 }
 
@@ -293,11 +333,26 @@ const ADAPTERS: Record<TargetId, Adapter> = {
 
 // ---------- main ----------
 
+const KNOWN_FLAGS = new Set(['--target', '--dry-run', '--uninstall', '--force', '--apply']);
+
 function parseTargets(args: string[]): { targets: TargetId[]; explicit: boolean } {
+  // T-20261002-006 (M4): unknown flags and a valueless trailing --target used to be
+  // silently ignored — `--dryrun` or a dangling `--target` produced a REAL write to
+  // every detected client. Both are hard errors now.
+  const unknown = args.filter((a) => a.startsWith('--') && !KNOWN_FLAGS.has(a) && !a.startsWith('--target='));
+  if (unknown.length) {
+    console.error(`✗ Unknown flag(s): ${unknown.join(', ')} (known: ${[...KNOWN_FLAGS].join(', ')})`);
+    process.exit(2);
+  }
   const values: string[] = [];
   for (let i = 0; i < args.length; i++) {
-    if (args[i] === '--target' && args[i + 1]) values.push(...args[++i].split(','));
-    else if (args[i].startsWith('--target=')) values.push(...args[i].slice('--target='.length).split(','));
+    if (args[i] === '--target') {
+      if (!args[i + 1] || args[i + 1].startsWith('--')) {
+        console.error('✗ --target requires a value (claude|claude-desktop|antigravity|gemini|codex|hermes|all)');
+        process.exit(2);
+      }
+      values.push(...args[++i].split(','));
+    } else if (args[i].startsWith('--target=')) values.push(...args[i].slice('--target='.length).split(','));
   }
   if (values.length === 0 || values.includes('all')) return { targets: ALL_TARGETS, explicit: values.length > 0 };
   const bad = values.filter((v) => !ALL_TARGETS.includes(v as TargetId));
@@ -356,15 +411,20 @@ function runTarget(a: Adapter, entry: McpStdioEntry, flags: { dryRun: boolean; u
 
 function main(): void {
   const args = process.argv.slice(2);
+  // T-20261002-006 (M4): writes REQUIRE --apply. A bare run (or --dry-run) is a
+  // read-only summary exiting 2 — previously a bare run wrote to every detected client.
+  const apply = args.includes('--apply');
+  const dryRun = !apply || args.includes('--dry-run');
   const flags = {
-    dryRun: args.includes('--dry-run'),
+    dryRun,
     uninstall: args.includes('--uninstall'),
     force: args.includes('--force'),
   };
   const { targets, explicit } = parseTargets(args);
 
-  console.log(`Upstream MCP Server Installer v2.0.1`);
+  console.log(`Upstream MCP Server Installer v2.1.0`);
   console.log(`  Workspace: ${WORKSPACE_ROOT}`);
+  console.log(`  Mode:      ${apply ? 'APPLY (writes configs)' : 'DRY RUN (read-only — pass --apply to write)'}`);
   console.log(`  Targets:   ${targets.join(', ')}`);
   console.log();
 
@@ -388,7 +448,12 @@ function main(): void {
       console.log(`  ${ADAPTERS[id].label}: ${ADAPTERS[id].nextSteps.join('; ')}`);
     }
   }
-  if (flags.dryRun) console.log(`Run without --dry-run to apply.`);
+  if (!apply) {
+    console.log(`Run again with --apply to write the configs.`);
+    // A BARE run (no --apply, no --dry-run) exits 2 — the caller probably forgot the
+    // flag. An explicit --dry-run is an intentional no-op and exits like a success.
+    process.exit(args.includes('--dry-run') ? [...results.values()].includes('failed') ? 1 : 0 : 2);
+  }
 
   process.exit([...results.values()].includes('failed') ? 1 : 0);
 }
