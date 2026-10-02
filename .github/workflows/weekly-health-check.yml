@@ -66,13 +66,27 @@ jobs:
         # uses the plural [[allowlists]] form, which 8.24.x silently ignores (no
         # suppression applied — every verified-FP entry no-ops, empirically verified
         # 2026-10-02), so the audit would report ~25 already-triaged false positives.
+        # The binary is extracted to a dedicated directory and invoked BY PATH with
+        # a version assertion: the gitleaks-action step above prepends its own
+        # pinned /tmp/gitleaks-<v> directory to PATH, so a bare `gitleaks` call
+        # silently resolves to THAT binary even after a /usr/local/bin install
+        # (observed 2026-10-02: this scan ran 8.24.3 against the 8.30.1 pin).
         shell: bash
         run: |
           GITLEAKS_VERSION=8.30.1
+          GITLEAKS_DIR=/tmp/weekly-gitleaks-${GITLEAKS_VERSION}
           curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" -o /tmp/gitleaks.tgz
-          sudo tar -xzf /tmp/gitleaks.tgz -C /usr/local/bin gitleaks
-          gitleaks version
-          gitleaks detect --config .github/gitleaks-full.toml --redact --verbose
+          rm -rf "$GITLEAKS_DIR"
+          mkdir -p "$GITLEAKS_DIR"
+          tar -xzf /tmp/gitleaks.tgz -C "$GITLEAKS_DIR" gitleaks
+          GITLEAKS="$GITLEAKS_DIR/gitleaks"
+          chmod +x "$GITLEAKS"
+          ACTUAL="$("$GITLEAKS" version)"
+          if [ "$ACTUAL" != "$GITLEAKS_VERSION" ]; then
+            echo "ERROR: gitleaks binary is $ACTUAL, expected $GITLEAKS_VERSION (PATH shadowing?)"
+            exit 1
+          fi
+          "$GITLEAKS" detect --config .github/gitleaks-full.toml --redact --verbose
 
       - name: Secret scanning - Projects/ working tree (local hygiene report)
         # Projects/ is intentionally untracked (user engagement repos — outside
@@ -89,13 +103,25 @@ jobs:
             echo "Projects/ not present (untracked local dir) — hygiene report skipped."
             exit 0
           fi
-          # Same pin as the full-history audit above ([[allowlists]] needs ≥8.25-era semantics; verified on 8.30.1).
+          # Same install scheme as the full-history audit above: dedicated dir +
+          # explicit-path invocation + version assertion (gitleaks-action's PATH
+          # entry would otherwise shadow /usr/local/bin).
           GITLEAKS_VERSION=8.30.1
+          GITLEAKS_DIR=/tmp/weekly-gitleaks-${GITLEAKS_VERSION}
           curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" -o /tmp/gitleaks.tgz
-          sudo tar -xzf /tmp/gitleaks.tgz -C /usr/local/bin gitleaks
+          rm -rf "$GITLEAKS_DIR"
+          mkdir -p "$GITLEAKS_DIR"
+          tar -xzf /tmp/gitleaks.tgz -C "$GITLEAKS_DIR" gitleaks
+          GITLEAKS="$GITLEAKS_DIR/gitleaks"
+          chmod +x "$GITLEAKS"
+          ACTUAL="$("$GITLEAKS" version)"
+          if [ "$ACTUAL" != "$GITLEAKS_VERSION" ]; then
+            echo "ERROR: gitleaks binary is $ACTUAL, expected $GITLEAKS_VERSION (PATH shadowing?)"
+            exit 1
+          fi
           set -o pipefail
           LOG=$(mktemp)
-          if gitleaks detect --no-git --source Projects --config .github/gitleaks-full.toml --redact --verbose 2>&1 | tee "$LOG"; then
+          if "$GITLEAKS" detect --no-git --source Projects --config .github/gitleaks-full.toml --redact --verbose 2>&1 | tee "$LOG"; then
             echo "Projects/ working tree: no secret-shaped findings."
           else
             echo "----------------------------------------------------------------"
