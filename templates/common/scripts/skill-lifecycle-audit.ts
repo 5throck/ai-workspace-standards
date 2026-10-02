@@ -9,7 +9,7 @@
  *   bun scripts/skill-lifecycle-audit.ts
  *   bun scripts/skill-lifecycle-audit.ts --json   # JSON output
  *
- * @version 1.5.1
+ * @version 1.5.2
  * v1.5.1: scope validation accepts the project's variant name from
  *         .claude/template-version.txt (project dir name != variant name);
  *         orphaned-owner WARN gated to the workspace-root authoring surface.
@@ -20,6 +20,7 @@
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { join, dirname, relative, basename } from 'node:path';
 import { cwd } from 'node:process';
+import { isSelfManagedPath } from './lib/self-managed-tools.ts';
 
 interface SkillFrontmatter {
   name: string;
@@ -647,14 +648,20 @@ function auditSkills(jsonMode = false): AuditResult {
           fix: `Move the reference to the agent-relations section or cite the actual skill name`,
         });
       }
-      // Check LC (v1.5.0): active skills must carry a lifecycle record
-      if (frontmatter.status === 'active' && !existsSync(join(ROOT, 'docs', 'lifecycle', 'skills', `${frontmatter.name}.md`))) {
+      // Check LC (v1.5.0): active skills must carry a lifecycle record.
+      // T-20261002-001 follow-up: a self-managed skill (e.g. graft — its SKILL.md is
+      // owned by the tool, not the workspace) is exempt; the tool refreshes it on every
+      // version bump and a hand-maintained record would just drift.
+      const selfManaged = isSelfManagedPath(relPath);
+      if (frontmatter.status === 'active' && !selfManaged && !existsSync(join(ROOT, 'docs', 'lifecycle', 'skills', `${frontmatter.name}.md`))) {
         warnings.push({
           level: 'warning',
           file: relPath,
           message: `No lifecycle record: docs/lifecycle/skills/${frontmatter.name}.md is missing for an active skill`,
           fix: `Create the record (Created / Phase History / Acceptance Criteria / Metadata)`,
         });
+      } else if (frontmatter.status === 'active' && selfManaged && !existsSync(join(ROOT, 'docs', 'lifecycle', 'skills', `${frontmatter.name}.md`))) {
+        if (!jsonMode) console.log(`  ℹ️  lifecycle: ${relPath} is self-managed (docs/self-managed-surfaces.json) — lifecycle record not required`);
       }
     }
   }

@@ -67,6 +67,6 @@
 
 - **Current Phase**: production
 - **Owner**: pm
-- **Last Updated**: 2026-10-01 (v1.2.2: added Upstream Request Tickets rule section)
+- **Last Updated**: 2026-10-02 (v1.2.2: added Upstream Request Tickets rule section)
 - **Last Reviewer**: lifecycle-manager
 

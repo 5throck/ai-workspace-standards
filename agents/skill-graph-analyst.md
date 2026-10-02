@@ -1,5 +1,5 @@
 ---
-last_updated: 2026-09-22
+last_updated: 2026-09-29
 name: Skill-Graph Analyst
 role: specialist
 status: active

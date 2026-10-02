@@ -1,5 +1,5 @@
 ---
-last_updated: 2026-09-12
+last_updated: 2026-09-29
 name: Security & Git Expert
 role: specialist
 status: active
