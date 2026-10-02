@@ -5,14 +5,31 @@ title: >-
   Add propagation domains for variant HERMES.md heads and variant
   .claude/settings.json SessionStart entries
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-02T09:05:07.226Z'
 history:
   - at: '2026-10-02T09:05:07.226Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-02T11:00:40.570Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-02T11:14:39.438Z'
+    from: waiting
+    to: running
+  - at: '2026-10-02T11:14:39.459Z'
+    from: running
+    to: review
+  - at: '2026-10-02T11:14:39.475Z'
+    from: review
+    to: done
+result: >-
+  Implemented in PR #1326: hermes-bootstrap marker-inject domain (markers in all
+  14 HERMES.md files, 13 zones verified in sync) and sync-variant-settings.ts —
+  managed SessionStart entries synced common-to-13-variants with a --check drift
+  gate wired into audit (JSON cannot host marker zones, hence the dedicated
+  structured sync).
 error: null
 notes: >-
   The PM role bootstrap spec 2026-10-02-pm-role-bootstrap-design edited the head
