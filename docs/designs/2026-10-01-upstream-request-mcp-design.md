@@ -460,26 +460,28 @@ Notes and gaps:
 - **Vendor re-check (2026-10-01, T-20261001-019).** (1) *Codex subcommands*: `codex mcp get --json` and `remove` are confirmed real — they exist in the installed CLI (verified earlier against the real binary in a temporary `CODEX_HOME`) and in the Codex CLI source (the MCP CLI command handlers cover `add|login|list|get|remove`; community references agree), while the vendor web page still documents only `list|add|login`. Decision: keep using `get --json`/`remove` with the existing loud-fail for an older CLI; re-check again when Codex ships its next major version. (2) *Antigravity create-if-absent*: **decided NO — the installer keeps editing the registry only when Antigravity already created it.** The official page still documents `~/.gemini/config/mcp_config.json` as the global registry shared by the IDE and the CLI, but a vendor-repo issue reports the Antigravity CLI actually reading `~/.gemini/antigravity-cli/mcp_config.json` — creating the file when absent risks registering into a file a CLI version never reads. The `graft init --agents antigravity` pointer in the skip message stays; revisit if the vendor settles the path question. (3) *Claude Desktop paths* re-verified: macOS `~/Library/Application Support/Claude/` and Windows `%APPDATA%\Claude\` only (no Linux build) — unchanged. (4) *Hermes*: `$HERMES_HOME`/`~/.hermes/config.yaml` re-verified against the vendor doc — unchanged.
 - **Not covered by the installer:** project-level files (`.agents/mcp_config.json`, `.gemini/settings.json`, `.codex/config.toml`, `.mcp.json`). The server is machine-global by design (G2).
 
-### Real-machine verification (T-20261001-020, 2026-10-02; updated 2026-10-03)
+### Real-machine verification (T-20261001-020, 2026-10-02; finalized 2026-10-03)
 
-The installer was run once per surface with `--apply` after user approval. The machine is a real Windows 11 host. The server handshake returned `serverInfo.name` `ai-workspace-upstream` and exactly the two tools `upstream_request_create` and `upstream_request_status`.
+The installer was run once per surface with `--apply` after user approval. All evidence comes from one real Windows 11 host, with installer v2.2.1 for Hermes. The server handshake returned `serverInfo.name` `ai-workspace-upstream` and exactly the two tools `upstream_request_create` and `upstream_request_status`.
 
 | Surface | Result | Evidence | Open item |
 |---|---|---|---|
 | Claude Code (Code tab of the Claude Desktop App, `~/.claude.json`) | Verified | `upstream_request_status` was exposed and called. A cwd at the workspace root was rejected, as designed. With `project_root=C:/git/ai_workspace/Projects/co-newbiz` the call returned that project's two requests, `U-20261002-001` and `U-20261001-001`, both `done`. | None. |
 | Antigravity | Verified | The tool was called from `Projects/co-deck`. It returned `requests: []`. The server `instructions` were delivered. | None. |
-| Codex | Registered, tool call not confirmed | `codex mcp list` shows the entry. The test session searched the source code instead of calling the MCP tool. | Retest from a fresh session in `Projects/co-*` with an explicit instruction to call the MCP tool. |
-| Claude Desktop App chat tab (`%APPDATA%Claudeclaude_desktop_config.json`) | Registered, not confirmed | The entry is registered. This surface is distinct from the Code tab. | Restart the app and confirm a tool call. |
-| Hermes | Registered, not confirmed | Hermes is installed, and its home is `%LOCALAPPDATA%\hermes`. The installer missed it, which is a defect fixed by §11 item 9. It was registered on 2026-10-03 with a `HERMES_HOME` override, and `config.yaml` was backed up to `config.yaml.bak-<ts>`. | Restart Hermes and confirm a tool call. |
+| Codex (desktop app) | Verified | `codex mcp get ai-workspace-upstream --json` shows an enabled stdio entry with the `bun.exe` absolute path and no tool filters. Two earlier attempts failed because the model searched source and docs instead of calling the tool. After the prompt "call the MCP tool directly, do not search source or docs", the call returned `{"requests":[]}`. | None. |
+| Claude Desktop App chat tab (`%APPDATA%\Claude\claude_desktop_config.json`) | Verified | The tool loaded and was called. The server resolved project `co-consult` and returned an empty list. | None. |
+| Hermes | Verified | Hermes is installed, and its home is `%LOCALAPPDATA%\hermes`. The earlier "not installed" finding was an installer defect, fixed in installer 2.2.1 (§11 item 9). A call from a non-`co-*` cwd was rejected as designed with the `project_root` hint. With `project_root=C:/git/ai_workspace/Projects/co-design` it returned one request, `U-20261002-002` (status `done`). | None. |
 | Gemini CLI | Not verified | The client is not installed on this machine. | Gap per CONSTITUTION §11.0 rule 1. |
 
 Corrections and notes:
 
 - **Hermes.** The 2026-10-02 finding "not installed" was wrong. The cause was that the installer checked only `~/.hermes`, which does not exist on Windows hosts.
 - **Gemini CLI.** CONSTITUTION §11.0 rule 1 requires a gap row for every unverified surface. Keep this row until a machine with the client is available.
-- **Unverified LOCAL-PATCH marker.** A Hermes session reported a `LOCAL-PATCH` marker for `U-20261002-002`. No ticket with that ID exists in the root `tickets/` store. Treat the marker as unverified. It is outside the scope of this ticket.
+- **Claude Desktop App chat tab.** The empty result alone does not show whether the identity came from the cwd or from `project_root`.
+- **Codex lesson.** Instruct the client explicitly to call the MCP tool, or the model may search source and docs instead.
+- **`U-20261002-002` is a real request.** It was filed from `co-design`, and its ticket landed in `tickets/governance` via the PR #1342-era `main`. This supersedes the earlier "unverified LOCAL-PATCH marker" note.
 
-Remaining manual steps for the user: retest Codex as described above. Restart the Claude Desktop App chat tab and Hermes. Call `upstream_request_status` once in each of those clients.
+Only Gemini CLI remains open.
 
 ## Appendix C — Platform-independent identity marker (2026-10-01)
 
