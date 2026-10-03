@@ -7,7 +7,7 @@ title: >-
   SKILL.md one-call discipline + auto-refresh); pick one SSOT and reference the
   other
 priority: low
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-02T16:43:11.048Z'
 history:
@@ -23,5 +23,19 @@ history:
   - at: '2026-10-02T18:25:19.602Z'
     from: running
     to: review
-result: null
+  - at: '2026-10-03T05:35:18.616Z'
+    from: review
+    to: done
+result: >-
+  Closed without a workspace edit (user review decision 2026-10-03): both texts
+  in question are self-managed graft surfaces per design
+  2026-10-02-self-managed-tool-surfaces (T-20261002-001). The AGENTS.md graft
+  block is graft-maintained between graft:start/graft:end markers — hand edits
+  are churn (rewritten by the next graft init) — and skills/graft/SKILL.md is
+  the documented workspace skill copy graft keeps. The 'Re-ask freely' vs 'don't
+  re-ask' drift is therefore an upstream graft CLI internal-consistency matter,
+  not a workspace documentation defect; the workspace keeps only the documented
+  SSOT copy and no longer governs graft content. If the contradiction ever
+  causes real agent confusion, report it upstream to the graft project instead
+  of patching either file here.
 error: null
