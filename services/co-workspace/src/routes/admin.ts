@@ -47,7 +47,12 @@ export async function handleAdmin(state: GatewayState, req: Request, ctx: Ctx): 
     const caller = state.users.resolveSession(sessionTokenFromCookie(req));
     if (!caller || caller.role !== "admin") throw new HttpError(403, "admin only");
     return jsonResponse({ users: state.users.listUsers().map((u) => ({
-      id: u.id, loginId: u.principal, name: u.name, role: u.role,
+      id: u.id,
+      // principal is the trusted ownership label — the admin panel joins /admin/stats
+      // perUser (keyed by tenant ownerPrincipal) on it. Omitting it made every row's
+      // Tenants/Usage render as 0 (found live, 2026-10-03).
+      principal: u.principal,
+      loginId: u.principal, name: u.name, role: u.role,
       status: u.deletedAt ? "deleted" : state.users.isVerified(u.id) ? "active" : "pending",
       createdAt: u.createdAt,
     })) });
