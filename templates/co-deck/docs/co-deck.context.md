@@ -1,6 +1,6 @@
 ---
 # co-deck — Variant Configuration
-# Last Updated: 2026-09-25
+# Last Updated: 2026-10-03
 ---
 
 > Extends docs/context.md. This file IS the customization layer for this project.
@@ -79,6 +79,7 @@ Three flags control agent execution in the co-deck pipeline:
 | research | `skills/research/SKILL.md` | research | active |
 | storyline | `skills/storyline/SKILL.md` | storyline | active |
 | design | `skills/design/SKILL.md` | design | active |
+| graft | `skills/graft/SKILL.md` | graft | active |
 | html-build | `skills/html-build/SKILL.md` | html-build | active |
 | prep-pdf | `skills/prep-pdf/SKILL.md` | measure | active |
 | pdf-export | `skills/pdf-export/SKILL.md` | pdf-export | active |
