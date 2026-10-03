@@ -716,3 +716,48 @@ The harness must answer server-originated requests on the child's stdin.
 - **Q9**: Should `client_roots` become auto-ready after the first trusted request, or stay inbox-only until a later review? *Default:* auto-ready after one PM-resolved `cwd` or `client_roots` ticket (E.5).
 - **Q10**: Should `project_root` narrow multiple candidates (accept when it matches one of them) instead of falling back? *Default:* no; fall back to `self_declared` for simplicity.
 - **Q11**: Is 2 s the right timeout for cold-starting desktop clients? *Default:* 2 s plus one retry per session; revisit with Phase A `latency_ms` data.
+
+### E.11 Field results (2026-10-03, Phase A+B on a real Windows host)
+
+This subsection records measurements from `logs/upstream-intake/2026-10-03.jsonl`.
+Times are UTC.
+Raw root paths are never logged, only 16-hex hashes.
+
+**Table 1: client support measured at `initialize`**
+
+| client_name | roots_supported | roots_list_changed | Likely client |
+|-------------|-----------------|--------------------|---------------|
+| `mcp` | false | false | Probably Hermes (generic Python MCP SDK name; inference, not proven) |
+| `claude-ai` | false | false | Claude Desktop chat tab |
+| `local-agent-mode-ai-workspace-upstream` | true | true | Claude Desktop agent mode |
+| `claude-code` | true | true | Claude Code (CLI and Desktop Code tab) |
+
+**Table 2: probes**
+
+| Client opened at | Client | Roots returned | candidate_count | would_resolve |
+|------------------|--------|----------------|-----------------|---------------|
+| Workspace root (root hash `6b61e77aaaa7268e`) | roots-capable clients | n/a | 0 | false |
+| `Projects/co-architect` | agent mode | 2 | 1 | true |
+| `Projects/co-architect` | `claude-code` | 1 | 1 | true |
+
+The workspace-root result is expected, because the workspace root is not a `Projects/co-*` child.
+Probe latency ranged from 2 ms to 709 ms, and one `claude-code` probe took 370 ms.
+All probes finished well under the 2000 ms limit.
+
+**Outcome**
+
+- An unattended `upstream_request_status` call with no arguments returned `{"requests":[]}` for `co-architect`.
+- The audit line recorded outcome `status`, project `co-architect`, and identity_source `client_roots`.
+- The workspace-root filter dropped the workspace root and kept exactly one candidate when two roots were sent.
+
+**Conclusions**
+
+1. The `roots/list` flow, async dispatch, and candidate selection work end to end.
+2. The tier helps only clients that advertise `roots` and are opened inside a `Projects/co-*` folder.
+3. The Claude Desktop chat tab (`claude-ai`) and the `mcp` client do not advertise `roots`, so they still need `project_root` (`self_declared`).
+4. Phase B stays enabled because 2 of 4 observed client types support `roots`, so the E.6 shelve condition does not apply.
+
+**Open items (not yet measured)**
+
+- **Q12**: The create path with identity_source `client_roots` is unmeasured, including the inbox policy and the first-trusted-request unlock (E.5).
+- **Q13**: It is unconfirmed whether the `mcp` client is Hermes.
