@@ -216,6 +216,9 @@ describe("loginRequired wave B gate (design 2026-09-30-coworkspace-login-exempt)
     expect(res.status).toBe(200);
   });
 
+  // The makeState bootstrap (argon2id admin hashing) is CPU-bound — on slow
+  // windows runners the default 5s test timeout flakes (T-20261004-002, run
+  // 37116607423: 11.7s). Room to breathe, still fails on real defects.
   test("unauthenticated: web shell redirects to /login, tenant API 401s at the key gate", async () => {
     const { state } = makeState({ CO_WORKSPACE_LOGIN_REQUIRED: "true", CO_WORKSPACE_API_KEYS: "k-valid" });
     const root = await handleRequest(state, get("/"));
@@ -225,5 +228,5 @@ describe("loginRequired wave B gate (design 2026-09-30-coworkspace-login-exempt)
     // requests; the Wave B 302 path only applies when auth is disabled.
     const tenants = await handleRequest(state, get("/tenants"));
     expect(tenants.status).toBe(401);
-  });
+  }, 15000);
 });
