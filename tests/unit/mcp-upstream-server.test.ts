@@ -389,6 +389,19 @@ describe('13.2 identity', () => {
     expect(ticketFiles()).toEqual([]);
   });
 
+  test('2i-unc. UNC / device-path project_root is rejected on the raw string (no filesystem resolution)', async () => {
+    // T-20261003-004: realpathSync on a UNC path would stall on the network and leak SMB
+    // credentials. The guard must fire before any fs call, so this expectation holds even
+    // though the UNC target does not exist and is never contacted.
+    ws.project('co-test');
+    for (const unc of ['\\\\?\\UNC\\localhost\\c$\\temp', '\\\\fileserver\\share\\proj', '\\\\?\\C:\\elsewhere']) {
+      const r = await open(ws.root).create({ ...good(), project_root: unc });
+      expect(r.rpc.error?.code).toBe(-32602);
+      expect(r.rpc.error?.message).toMatch(/unregistered working directory/);
+    }
+    expect(ticketFiles()).toEqual([]);
+  });
+
   test('2j. cwd-attested identity wins: project_root pointing elsewhere is ignored', async () => {
     const a = ws.project('co-test');
     const b = ws.project('co-other', { variant: 'co-other' });
