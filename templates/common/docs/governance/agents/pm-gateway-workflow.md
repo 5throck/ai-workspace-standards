@@ -75,7 +75,7 @@ PM owns the composition of the agent team and rules on skill changes:
 
 ### §3.12 Upstream Request Triage
 
-Upstream-request tickets (`U-YYYYMMDD-NNN`, `kind: manual`, `trust: untrusted`) are filed by other projects through the global MCP server `scripts/mcp-upstream-server.ts`. Inbox = `status: backlog`; ready = `status: waiting`; `upstream.triage` is authoritative. Design: `docs/designs/2026-10-01-upstream-request-mcp-design.md` (§8, §9, §12).
+Upstream-request tickets (`U-YYYYMMDD-NNN`, `kind: manual`, `trust: untrusted`) are filed by other projects through the global MCP server `scripts/mcp-upstream-server.ts`. Inbox = `status: backlog`; ready = `status: waiting`; `upstream.triage` is authoritative. Identity tiers (server v1.9.0, design Appendix E): `cwd` > `client_roots` > `self_declared`. A ticket carrying `identity: client_roots_untrusted` stays flagged until the project has a PM-resolved `cwd`/`client_roots`-attested ticket; only then do later `self_declared` filings auto-ready. Never downgrade the identity flag by hand. Design: `docs/designs/2026-10-01-upstream-request-mcp-design.md` (§8, §9, §12, Appendix E).
 
 1. **Surface** — `bun scripts/ticket.ts list --upstream` (flagged tickets are marked). Add `--status backlog` for the inbox or `--status waiting` for ready.
 2. **Read** — `bun scripts/ticket.ts show <U-id>`. Requester text appears only inside `<untrusted-upstream-request>` blocks.

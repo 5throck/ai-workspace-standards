@@ -1,5 +1,9 @@
 #!/usr/bin/env bun
-// @version 1.9.0
+// @version 1.9.1
+// v1.9.1 (2026-10-03, T-20261003-004): resolveProject rejects UNC / extended-length device
+//           paths (\\server\share, \\?\UNC\, \\?\C:\) on the raw string BEFORE realpathSync —
+//           closing the same stall + SMB credential-leak class E.4 already drops for
+//           roots/list, now covering the cwd and self_declared project_root entrances.
 // v1.9.0 (2026-10-03, T-20261003-003): client-attested identity via MCP roots/list (design
 //           Appendix E, Phases A+B). tools/call is now asynchronous so the read loop keeps
 //           answering while a server-originated srv-roots-<n> request is in flight; the
@@ -78,7 +82,7 @@ const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 
 /** T-20261002-008 (M1): single version constant — the @version header above and
  * serverInfo.version must stay identical; a unit test pins the two literals. */
-export const SERVER_VERSION = '1.9.0';
+export const SERVER_VERSION = '1.9.1';
 
 // TEST-ONLY SEAM: UPSTREAM_WORKSPACE_ROOT overrides the workspace root that is otherwise
 // derived from this script's path. It exists so tests can run the real server against a
@@ -236,6 +240,11 @@ interface ProjectIdentity { name: string; path: string; variant: string; version
 
 function resolveProject(cwd: string): ProjectIdentity | string {
   try {
+    // UNC / extended-length device paths (\\server\share, \\?\UNC\, \\?\C:\) are rejected on the
+    // raw string BEFORE any filesystem call: realpathSync on a UNC path can stall on the network
+    // and leak SMB credentials (T-20261003-004; the roots/list tier already drops these in E.4 —
+    // this guards the cwd and self-declared project_root entrances too).
+    if (cwd.startsWith('\\\\')) return REGISTRATION_RULE;
     // Identity is derived from the filesystem only. git is never consulted: `git rev-parse` honors
     // the repo's own core.worktree, which the project agent controls.
     const realCwd = realpathSync(cwd);

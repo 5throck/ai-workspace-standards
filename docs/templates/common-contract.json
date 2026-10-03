@@ -237,12 +237,6 @@
       "version": "1.1.0",
       "overridable": false,
       "description": "End-to-end service design: journeys (ADR-0068 diversity profiles), blueprints, touchpoints, validation"
-    },
-    "graft": {
-      "source": "skills/graft/SKILL.md",
-      "version": "1.0.0",
-      "l2_propagate": true,
-      "description": "Repo context graph: get code context from graft/ before grepping or reading source files (ADR-0076). Platform mirrors of this skill are SELF-MANAGED by the graft CLI (docs/self-managed-surfaces.json) and are not shipped by the template lineage."
     }
   },
   "common_commands": {
@@ -526,6 +520,24 @@
       "L0+L1+L2": "Propagated to all layers including L2 projects"
     }
   },
+  "common_platform_skill_exclusions": {
+    "create-variant": {
+      "reason": "L0-only operator skill — root skills/ SSOT, never delivered to L2 scaffolds (AGENTS.md §6)",
+      "since": "2026-09-25"
+    },
+    "promote-variant": {
+      "reason": "L0-only operator skill — root skills/ SSOT, never delivered to L2 scaffolds (AGENTS.md §6)",
+      "since": "2026-09-25"
+    },
+    "simulate-pipeline": {
+      "reason": "L0-only operator skill — root skills/ SSOT, never delivered to L2 scaffolds (AGENTS.md §6)",
+      "since": "2026-09-25"
+    },
+    "new-project": {
+      "reason": "L0-only operator skill — root skills/ SSOT, l2_propagate: false, never delivered to L2 scaffolds (SKILLS.md: L0 operator only); mirror copies exist under templates/common platform dirs and the upgrade WORKSPACE-ONLY SKILL SWEEP removes them from projects",
+      "since": "2026-09-27"
+    }
+  },
   "platform_settings": {
     "description": "Classifies .claude/settings.json and .gemini/settings.json keys into tiers. SSOT for platform settings parity governance. Tier definitions: shared=required in both, claude_only=Claude Code exclusive (absent from .gemini is correct), gemini_only=Gemini CLI exclusive (absent from .claude is correct). Note: Antigravity (VS Code extension) shares .gemini/settings.json but does NOT fire hooks. SCOPE RULING (T-20260926-022, 2026-09-26): the tier model is DELIBERATELY scoped to the two settings.json-shaped surfaces (.claude/.gemini). .codex uses config.toml (no TOML merge machinery; template-side changes reach only new projects — ADR-0076 D7 precedent, upgrade-policy v1.16.0 D6/D7), .agents is a read-only skill-mirror surface with no settings file, and .hermes onboarding is config-driven (`context_file_max_chars`, `trusted_project_dirs` — ADR-0088), not settings.json-shaped. Functional-equivalence parity for those three is governed by their own platform sections, not by this tier table; revisit only if a settings-shaped surface appears on another platform.",
     "parity_principle": "functional_equivalence",
@@ -535,71 +547,6 @@
         "hooks.SessionStart": {
           "description": "Session start hook — both platforms support SessionStart",
           "validation": "array"
-        }
-      }
-    },
-    "claude_only": {
-      "description": "Settings exclusive to Claude Code. Gemini CLI does not support these. Absent from .gemini/settings.json is CORRECT behavior, not a parity violation.",
-      "keys": {
-        "permissions": {
-          "description": "Claude Code permission allowlist (allow/deny tool patterns)",
-          "reason_excluded": "Antigravity uses a different permission model"
-        },
-        "env": {
-          "description": "Environment variables injected into Claude Code session",
-          "reason_excluded": "Antigravity env injection uses different mechanism"
-        },
-        "teammateMode": {
-          "description": "Agent Teams display mode (auto/in-process/tmux)",
-          "reason_excluded": "Agent Teams is Claude Code-only; Antigravity uses Agent Manager UI"
-        },
-        "hooks.TeammateIdle": {
-          "description": "Fires when a Claude Code Agent Teams teammate becomes idle",
-          "reason_excluded": "TeammateIdle event does not exist in Antigravity"
-        },
-        "hooks.TaskCreated": {
-          "description": "Fires when an Agent Teams task is created",
-          "reason_excluded": "TaskCreated event does not exist in Antigravity"
-        },
-        "hooks.TaskCompleted": {
-          "description": "Fires when an Agent Teams task is marked complete",
-          "reason_excluded": "TaskCompleted event does not exist in Antigravity"
-        },
-        "hooks.PreToolUse": {
-          "description": "Pre-tool-use hook — fires before Claude Code executes a tool. Supports permissionDecision (allow/deny/ask/defer) and updatedInput.",
-          "reason_excluded": "Gemini CLI uses BeforeTool event instead"
-        },
-        "hooks.PostToolUse": {
-          "description": "Post-tool-use hook — fires after Claude Code executes Write/Edit tools. Moved from shared to claude_only since Gemini CLI uses AfterTool.",
-          "reason_excluded": "Gemini CLI uses AfterTool event instead"
-        },
-        "hooks.PreCompact": {
-          "description": "Pre-compaction hook — fires before Claude Code compacts conversation context",
-          "reason_excluded": "Gemini CLI uses PreCompress event instead"
-        },
-        "hooks.WorktreeCreate": {
-          "description": "Fires when a Claude Code git worktree is created",
-          "reason_excluded": "WorktreeCreate event does not exist in Gemini CLI"
-        },
-        "hooks.UserPromptSubmit": {
-          "description": "Prompt-submission hook — graft upkeep at turn start (graft-hooks.cjs prompt, ADR-0076)",
-          "reason_excluded": "UserPromptSubmit event does not exist in Gemini CLI"
-        },
-        "hooks.Stop": {
-          "description": "Turn-end hook — graft graph projection rebuild (graft-hooks.cjs stop, ADR-0076)",
-          "reason_excluded": "Stop event does not exist in Gemini CLI"
-        },
-        "statusLine": {
-          "description": "Claude Code statusline command — graft-statusline.cjs (ADR-0076)",
-          "reason_excluded": "No statusline setting in Gemini CLI / Antigravity"
-        },
-        "subagentStatusLine": {
-          "description": "Claude Code subagent statusline command — graft-statusline.cjs (ADR-0076)",
-          "reason_excluded": "No subagent statusline setting in Gemini CLI / Antigravity"
-        },
-        "footerLinksRegexes": {
-          "description": "Claude Code footer link patterns — graft/ markdown cards clickable (ADR-0076)",
-          "reason_excluded": "No footer-links setting in Gemini CLI / Antigravity"
         }
       }
     },
@@ -619,24 +566,6 @@
           "reason_excluded": "Claude Code uses PreCompact event instead"
         }
       }
-    }
-  },
-  "common_platform_skill_exclusions": {
-    "create-variant": {
-      "reason": "L0-only operator skill — root skills/ SSOT, never delivered to L2 scaffolds (AGENTS.md §6)",
-      "since": "2026-09-25"
-    },
-    "promote-variant": {
-      "reason": "L0-only operator skill — root skills/ SSOT, never delivered to L2 scaffolds (AGENTS.md §6)",
-      "since": "2026-09-25"
-    },
-    "simulate-pipeline": {
-      "reason": "L0-only operator skill — root skills/ SSOT, never delivered to L2 scaffolds (AGENTS.md §6)",
-      "since": "2026-09-25"
-    },
-    "new-project": {
-      "reason": "L0-only operator skill — root skills/ SSOT, l2_propagate: false, never delivered to L2 scaffolds (SKILLS.md: L0 operator only); mirror copies exist under templates/common platform dirs and the upgrade WORKSPACE-ONLY SKILL SWEEP removes them from projects",
-      "since": "2026-09-27"
     }
   }
 }
