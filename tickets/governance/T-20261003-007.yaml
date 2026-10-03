@@ -1,0 +1,17 @@
+schemaVersion: 1
+id: T-20261003-007
+kind: manual
+title: >-
+  co-deck: adopt Issue #1048 graft dynamic resolver helpers (replace BAKED-path
+  generation in .claude/helpers/graft-*.cjs to match fleet; land via co-deck's
+  own next resync per ADR-0031 report-only echo rule)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-03T02:39:17.432Z'
+history:
+  - at: '2026-10-03T02:39:17.432Z'
+    from: null
+    to: backlog
+result: null
+error: null
