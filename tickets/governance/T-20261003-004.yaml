@@ -11,12 +11,29 @@ title: >-
   file chain (L0 agents/pm.md -> templates/common -> variants, mind the
   lifecycle layer rule).
 priority: high
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-03T00:36:33.842Z'
 history:
   - at: '2026-10-03T00:36:33.842Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-03T05:23:23.887Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-03T05:23:23.998Z'
+    from: waiting
+    to: review
+  - at: '2026-10-03T05:23:24.519Z'
+    from: review
+    to: done
+result: >-
+  Completed 2026-10-03 via ai-workspace-standards PR #1353: (1) resolveProject
+  rejects UNC / extended-length device paths on the raw string before
+  realpathSync (server v1.9.1, SCRIPTS.md row updated, black-box test 2i-unc;
+  E.4 already covered roots/list); (2) ADR-0097 Decision item 8 documents the
+  client-attested identity tier; (3) identity:client_roots_untrusted triage line
+  added to pm-gateway-workflow.md §3.12, L0 agents/pm.md, and the L1
+  templates/common/agents/pm.md note (variants via sync). Full suite 1988 pass /
+  0 fail.
 error: null
