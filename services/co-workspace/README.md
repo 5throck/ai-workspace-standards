@@ -173,6 +173,21 @@ codex — the operator guarantees the base URL speaks that protocol. `zai` + cla
 `CO_WORKSPACE_LLM_BASE_URL` pointing at the Anthropic-compatible endpoint
 (`https://api.z.ai/api/anthropic`).
 
+### CLI refresh (2026-10-03 cli-refresh design)
+
+claude/codex are **pinned** in `docker/Dockerfile` and bump deliberately (never silent
+`latest` — the Bun-pin policy precedent); a weekly scheduled workflow
+(`cli-version-drift.yml`) opens an issue when a pin lags npm latest. After merging a bump,
+refresh the running stack with:
+
+    ./docker/rebuild.sh --runtime
+
+which rebuilds the gateway image AND the per-turn runtime image (it builds FROM the gateway
+image, so it inherits the baked CLIs — `--runtime` is required for turn parity). hermes
+tracks the workspace checkout (`build-runtime-image.sh` rsyncs it); the agy installer has
+no versioned artifact, so image rebuilds pick up current-at-build (caveat recorded in the
+design). In-container background self-updates are inert by design.
+
 ## Configuration (environment)
 
 | Variable | Default | Purpose |
