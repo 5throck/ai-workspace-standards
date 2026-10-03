@@ -1,0 +1,18 @@
+schemaVersion: 1
+id: T-20261003-027
+kind: manual
+title: >-
+  co-workspace session hardening: 24h absolute / 4h idle session expiry
+  (operator-configurable), password re-confirmation for destructive admin ops,
+  user-facing session list + revoke-others/all, passwordless-admin first-time
+  password set
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-10-03T12:05:58.363Z'
+history:
+  - at: '2026-10-03T12:05:58.363Z'
+    from: null
+    to: backlog
+result: null
+error: null

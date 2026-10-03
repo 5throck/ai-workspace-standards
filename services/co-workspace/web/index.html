@@ -912,9 +912,39 @@
       <div class="field" id="ac-verify-row" style="display:none;"><input id="ac-verify-key" placeholder="Verification key from the mail"></div>
       <div class="row" style="justify-content:flex-start; display:none;" id="ac-verify-rowbtn"><button id="ac-email-verify">Confirm email</button></div>
       <div class="formErr" id="ac-email-err" role="alert"></div>
+      <h3 style="font-size:.85rem; margin: 14px 0 6px;">Sessions</h3>
+      <div id="ac-sessions" class="hint" style="margin:0 0 6px;">loading…</div>
+      <div class="row" style="justify-content:flex-start; gap:8px;">
+        <button id="ac-sess-others" class="ghost" style="background:transparent;color:var(--fg);border:1px solid var(--border2);">Sign out other sessions</button>
+        <button id="ac-sess-all" style="color:#f85149;background:transparent;border:1px solid var(--border2);">Sign out everywhere</button>
+      </div>
+      <div class="formErr" id="ac-sess-err" role="alert"></div>
       <div class="row"><span class="spacer"></span><button id="ac-close" type="button" style="background:transparent;color:var(--muted);border:1px solid var(--border2);">Close</button></div>` });
     const authHeaders = { "content-type": "application/json", "x-requested-with": "co-workspace" };
     wrap.querySelector("#ac-close").addEventListener("click", () => wrap.remove());
+    // session-hardening D7: list + revoke the caller's sessions
+    const sessList = wrap.querySelector("#ac-sessions");
+    const sessErr = wrap.querySelector("#ac-sess-err");
+    async function refreshSessions() {
+      try {
+        const body = await (await fetch("/auth/sessions", { headers: authHeaders })).json();
+        sessList.innerHTML = (body.sessions ?? []).map((x) =>
+          `${x.current ? "<b>this session</b>" : "other session"} — last active ${esc(String(x.lastActive).slice(0, 16).replace("T", " "))} UTC`).join("<br>") || "no sessions";
+      } catch { sessList.textContent = "could not load sessions"; }
+    }
+    refreshSessions();
+    wrap.querySelector("#ac-sess-others").addEventListener("click", async () => {
+      const res = await fetch("/auth/sessions/revoke-others", { method: "POST", headers: authHeaders });
+      const body = await res.json().catch(() => ({}));
+      sessErr.style.color = res.status === 200 ? "#3fb950" : "#f85149";
+      sessErr.textContent = res.status === 200 ? `✔ ${body.message}` : `⚠ ${body.error ?? "revoke failed"}`;
+      if (res.status === 200) refreshSessions();
+    });
+    wrap.querySelector("#ac-sess-all").addEventListener("click", async () => {
+      const res = await fetch("/auth/sessions/revoke-all", { method: "POST", headers: authHeaders });
+      if (res.status === 200) { wrap.remove(); location.href = "/login"; }
+      else sessErr.textContent = "⚠ revoke-all failed";
+    });
     wrap.querySelector("#ac-pw-save").addEventListener("click", async () => {
       const err = wrap.querySelector("#ac-pw-err");
       err.textContent = "";
@@ -1140,9 +1170,29 @@
         });
       });
     }
+    // session-hardening D7: destructive admin ops re-confirm the operator password
+    // (x-admin-password header) — the server rejects without it (403).
+    function askAdminPassword(title) {
+      return new Promise((resolve) => {
+        const wrap = showModal({ title, bodyHtml: `
+          <div class="field">Confirm your password to run this action (session-hardening: destructive admin operations require re-authentication).</div>
+          <div class="field"><input id="ap-val" type="password" autocomplete="current-password"></div>
+          <div class="formErr" id="ap-err" role="alert"></div>
+          <div class="row"><span class="spacer"></span><button id="ap-ok">Confirm</button>
+          <button id="ap-cancel" type="button" class="ghost" style="background:transparent;color:var(--muted);border:1px solid var(--border2);">Cancel</button></div>` });
+        const input = wrap.querySelector("#ap-val");
+        input.focus();
+        const done = (v) => { wrap.remove(); resolve(v); };
+        wrap.querySelector("#ap-cancel").addEventListener("click", () => done(null));
+        wrap.querySelector("#ap-ok").addEventListener("click", () => done(input.value));
+        input.addEventListener("keydown", (e) => { if (e.key === "Enter") done(input.value); });
+      });
+    }
     for (const btn of adminView.querySelectorAll("[data-reset]")) {
       btn.addEventListener("click", async () => {
-        const res = await fetch(`/admin/users/${btn.getAttribute("data-reset")}/reset-password`, { method: "POST", headers: { "x-requested-with": "co-workspace" } });
+        const pw = await askAdminPassword(`Reset password for @${btn.getAttribute("data-name")} — confirm your password`);
+        if (pw === null) return;
+        const res = await fetch(`/admin/users/${btn.getAttribute("data-reset")}/reset-password`, { method: "POST", headers: { "x-requested-with": "co-workspace", "x-admin-password": pw } });
         const body = await res.json();
         if (res.status !== 200) { alert(body.error ?? "reset failed"); return; }
         const wrap = showModal({ title: `Temporary password for @${btn.getAttribute("data-name")}`, bodyHtml: `
@@ -1161,7 +1211,9 @@
       btn.addEventListener("click", async () => {
         const disposition = prompt(`Delete user — tenant disposition?\n'delete' = remove tenant files, 'archive' = keep (default)`, "archive");
         if (disposition === null) return;
-        const res = await fetch(`/admin/users/${btn.getAttribute("data-del")}?tenants=${disposition === "delete" ? "delete" : "archive"}`, { method: "DELETE", headers: { "x-requested-with": "co-workspace" } });
+        const pw = await askAdminPassword(`Delete @${btn.getAttribute("data-name")} — confirm your password`);
+        if (pw === null) return;
+        const res = await fetch(`/admin/users/${btn.getAttribute("data-del")}?tenants=${disposition === "delete" ? "delete" : "archive"}`, { method: "DELETE", headers: { "x-requested-with": "co-workspace", "x-admin-password": pw } });
         const body = await res.json();
         alert(`User deleted · tenants handled: ${body.tenantsHandled} (${body.disposition})`);
         adminMenu.click();

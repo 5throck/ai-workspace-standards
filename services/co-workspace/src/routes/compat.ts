@@ -1,4 +1,5 @@
 import { readKeysFile } from "../config";
+import { requireAdminReauth } from "../access";
 import { countTokensPayload, estimateTokens, parseAnthropicRequest } from "../anthropic";
 import { parseChatRequest } from "../openai";
 import { HttpError, jsonResponse, readJsonBody } from "../http";
@@ -44,6 +45,8 @@ export async function handleCompat(state: GatewayState, req: Request, ctx: Ctx):
   // SEC-03: admin-only.
   if (req.method === "POST" && path === "/admin/reload") {
     if (!isAdminCaller(state, req)) throw new HttpError(403, "admin only");
+    // session-hardening D4: key rotation is destructive-adjacent — re-present the password.
+    await requireAdminReauth(state, req);
     const fileKeys = readKeysFile(state.cfg.apiKeysFile);
     const next = [...new Set([...state.cfg.apiKeysEnv, ...fileKeys])];
     if (next.length === 0 && state.cfg.apiKeys.length > 0) {
