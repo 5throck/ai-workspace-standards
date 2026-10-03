@@ -51,15 +51,18 @@ export function cookieSecureFor(cfg: { cookieSecure?: boolean | "auto"; trustPro
  * on every load, otherwise browsers heuristically cache the page across redeploys and run
  * stale code for days (the "nothing changed" report of 2026-09-27/28).
  *
- * CSP (2026-10-03 review M2): the app's scripts are INLINE modules (index.html/login.html),
- * so `script-src 'unsafe-inline'` is unavoidable today — the header's value is what it still
- * blocks: external-origin script/img/connect exfiltration, plugin content, framing, and
- * base-tag hijacking. Splitting the module out (web-split plan) can tighten script-src. */
+ * CSP (2026-10-03 review M2; corrected same day — the first version omitted 'self' from
+ * script-src, which blocked the app's own /app-helpers.js module and killed the entire
+ * page init: theme toggle, artifacts panel, and the logged-in identity all dead):
+ * the app's scripts are INLINE modules (index.html/login.html) plus one same-origin
+ * module file, so script-src needs both 'unsafe-inline' and 'self'. The header still
+ * blocks external-origin script/connect exfiltration, plugin content, framing, and
+ * base-tag hijacking. */
 export function htmlHeaders(): Record<string, string> {
   return {
     "content-type": "text/html; charset=utf-8",
     "cache-control": "no-cache",
     "content-security-policy":
-      "default-src 'self'; script-src 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'",
+      "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'",
   };
 }
