@@ -1,4 +1,5 @@
 import { readdirSync, rmSync } from "node:fs";
+import type { Dirent } from "node:fs";
 import { basename, dirname, join, relative, resolve, sep } from "node:path";
 import { GatewayConfig, resolveLlmProviderKey, resolveLlmProviderName } from "./config";
 import { scaffoldProject } from "./scaffold";
@@ -101,6 +102,54 @@ export function sweepOrphanedScaffolds(state: GatewayState): { removed: string[]
     state.audit.record("system", "scaffold.sweep", name, "orphaned Projects/ scaffold removed at boot");
   }
   return { removed };
+}
+
+/** T-20261003-026: reconcile the storage tree against the registry at boot — remove
+ * `storage/<principal>/<name>` tenant folders with no registry row (a gateway death after
+ * relocation, or a partial delete, leaves these; found live: 09-29 testing residue with a
+ * stale auth.json). EVERY registered tenant's own folder — `resolve(projectDir, "..")`, the
+ * same parent deleteTenantData removes — is exempt, whatever its name. Guards mirror
+ * sweepOrphanedScaffolds: the resolved dir must stay under the storage root, symlinks are
+ * skipped (never followed), read errors are tolerated (top level reported, an unreadable
+ * principal dir skipped), and an undeletable folder is reported instead of blocking boot. */
+export function sweepOrphanedStorage(state: GatewayState): { removed: string[]; error?: string } {
+  const storageRoot = resolve(state.cfg.dataDir, "storage");
+  let principals: Dirent[];
+  try {
+    principals = readdirSync(storageRoot, { withFileTypes: true });
+  } catch (err) {
+    return { removed: [], error: String((err as Error)?.message ?? err) };
+  }
+  const kept = new Set<string>();
+  for (const rec of state.registry.list()) kept.add(resolve(rec.projectDir, ".."));
+  const removed: string[] = [];
+  const errors: string[] = [];
+  for (const principal of principals) {
+    if (principal.isSymbolicLink() || !principal.isDirectory()) continue;
+    const principalDir = resolve(storageRoot, principal.name);
+    if (!principalDir.startsWith(storageRoot + sep)) continue;
+    let entries: Dirent[];
+    try {
+      entries = readdirSync(principalDir, { withFileTypes: true });
+    } catch {
+      continue; // unreadable principal dir — its children cannot be classified; leave it
+    }
+    for (const entry of entries) {
+      if (entry.isSymbolicLink() || !entry.isDirectory()) continue;
+      const dir = resolve(principalDir, entry.name);
+      if (!dir.startsWith(storageRoot + sep) || kept.has(dir)) continue;
+      const rel = `${principal.name}/${entry.name}`;
+      try {
+        rmSync(dir, { recursive: true, force: true });
+      } catch (err) {
+        errors.push(`${rel}: ${String((err as Error)?.message ?? err)}`);
+        continue;
+      }
+      removed.push(rel);
+      state.audit.record("system", "storage.sweep", rel, "orphaned storage folder removed at boot");
+    }
+  }
+  return { removed, ...(errors.length > 0 ? { error: errors.join("; ") } : {}) };
 }
 
 export function startProvisioning(state: GatewayState, rec: TenantRecord): Promise<void> {
