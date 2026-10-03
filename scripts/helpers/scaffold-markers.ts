@@ -1,7 +1,11 @@
 #!/usr/bin/env bun
 /**
  * Shared Scaffold Delivery Contracts
- * @version 1.6.2
+ * @version 1.7.0
+ *
+ * v1.7.0 (2026-10-03, T-20261003-010): drop the graft repo-context-graph marker
+ *          constants and registry entries — the block was withdrawn from
+ *          templates/common/AGENTS.md and create-l3-scaffold no longer injects it.
  *
  * v1.6.2 (2026-09-26, PR #1102 CI fix): reviewed exclusion for
  *         docs/components.template.md — the design-foundation v1.2 wave
