@@ -6,7 +6,7 @@ title: >-
   generation in .claude/helpers/graft-*.cjs to match fleet; land via co-deck's
   own next resync per ADR-0031 report-only echo rule)
 priority: normal
-status: waiting
+status: done
 attempts: 0
 created_at: '2026-10-03T02:39:17.432Z'
 history:
@@ -16,5 +16,19 @@ history:
   - at: '2026-10-03T02:48:15.038Z'
     from: backlog
     to: waiting
-result: null
+  - at: '2026-10-03T03:36:18.817Z'
+    from: waiting
+    to: review
+  - at: '2026-10-03T03:36:34.217Z'
+    from: review
+    to: done
+result: >-
+  Superseded by the custody-transfer approach (design
+  2026-10-02-self-managed-tool-surfaces point 6), completed in co-deck PR #126:
+  instead of committing dynamic-resolver content into tool-owned surfaces,
+  co-deck now tracks ZERO graft surfaces (5 mirrors + 2 baked-path helpers
+  untracked; only skills/graft/SKILL.md SSOT remains, with l2_propagate:false +
+  mirror:false). This removes the machine-local BAKED paths from the fleet's
+  tracked files — the ticket's actual goal — without pinning generated content
+  in git. On-disk helpers keep working; fresh clones run graft init once.
 error: null

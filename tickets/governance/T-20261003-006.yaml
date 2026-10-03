@@ -7,7 +7,7 @@ title: >-
   tracked file breaks dev-sync git add when dirtied; co-abap-plugin fixed
   2026-10-03) and add self-managed-surface skip to sync-skills/dev-sync
 priority: high
-status: waiting
+status: done
 attempts: 0
 created_at: '2026-10-03T02:39:09.230Z'
 history:
@@ -17,5 +17,20 @@ history:
   - at: '2026-10-03T02:48:14.908Z'
     from: backlog
     to: waiting
-result: null
+  - at: '2026-10-03T03:36:18.721Z'
+    from: waiting
+    to: review
+  - at: '2026-10-03T03:36:34.107Z'
+    from: review
+    to: done
+result: >-
+  Completed 2026-10-03 via PR ai-workspace-standards#1350 (root+template SSOT
+  l2_propagate:false + mirror:false — supersedes the proposed sync-skills code
+  skip: sync-skills honors the mirror: field, so the data fix achieves the same
+  no-regeneration guarantee with no code change) and per-project PRs
+  co-abap#181, co-architect#363, co-consult#82, co-design#27, co-develop#170,
+  co-newbiz#452, co-safety#193, co-security#67, co-abap-plugin#101: every
+  project now tracks ZERO graft mirrors (verified git ls-files empty
+  fleet-wide). Remaining template helper/hook/contract withdrawal split to
+  follow-up T-20261003-010.
 error: null

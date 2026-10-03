@@ -1,0 +1,21 @@
+schemaVersion: 1
+id: T-20261003-010
+kind: manual
+title: >-
+  Complete self-managed-tool-surfaces design point 5 in full: withdraw graft
+  from templates/common (delete .claude/helpers/graft-*.cjs, drop the graft row
+  + graft hook descriptions from docs/templates/common-contract.json, and review
+  the graft hook blocks in the template settings.json wiring). The 2026-10-03 PR
+  #1350 completed only the SSOT l2_propagate/mirror:false rollout; template
+  helpers+hooks+contract rows still ship and fresh scaffolds get hook references
+  whose files only materialize after graft init.
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-03T03:36:09.447Z'
+history:
+  - at: '2026-10-03T03:36:09.447Z'
+    from: null
+    to: backlog
+result: null
+error: null
