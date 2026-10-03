@@ -117,6 +117,9 @@ console.log('{"type":"result","session_id":"sess-g","exit_code":0,"text":"Hello 
     CO_WORKSPACE_VARIANTS: "co-consult",
     // Anonymous lazy-provisioning flow — opt into the 2026-10-02 gate design's knob.
     CO_WORKSPACE_ALLOW_ANON_PROVISIONING: "true",
+    CO_WORKSPACE_TENANT_MAX_TURNS: "100",
+    CO_WORKSPACE_TENANT_MAX_TOKENS: "100000",
+    CO_WORKSPACE_PRINCIPAL_MAX_TOKENS: "200000",
     HERMES_BIN: hermesBin,
     HERMES_BIN_PREFIX: "bun", // T-20260929-001: portable fake runs via bun
   });

@@ -138,22 +138,27 @@ export class UserStore {
     };
   }
 
-  /** Bootstrap the admin from CO_WORKSPACE_ADMIN_EMAIL (idempotent). */
-  bootstrapAdmin(email: string): UserRecord | null {
+  /** Bootstrap the admin from CO_WORKSPACE_ADMIN_EMAIL (idempotent). When the email matches
+   * an EXISTING non-admin user, that user is promoted — loud for the operator (2026-10-03
+   * review M5): the return carries `promoted` so the caller logs and audits it, and the
+   * promoted user's live sessions are invalidated so the grant takes effect on a fresh
+   * sign-in rather than silently upgrading an in-flight session. */
+  bootstrapAdmin(email: string): { user: UserRecord | null; promoted: boolean } {
     const existing = this.findByEmail(email);
     if (existing) {
       if (existing.role !== "admin") {
         this.db.query("UPDATE users SET role='admin' WHERE id=?").run(existing.id);
-        return { ...existing, role: "admin" };
+        this.db.query("DELETE FROM sessions WHERE user_id=?").run(existing.id);
+        return { user: { ...existing, role: "admin" }, promoted: true };
       }
-      return existing;
+      return { user: existing, promoted: false };
     }
-    return this.createUser({
+    return { user: this.createUser({
       email,
       name: email.split("@")[0],
       password: null,
       role: "admin",
-    });
+    }), promoted: false };
   }
 
   createUser(init: {
@@ -357,14 +362,17 @@ export class UserStore {
   }
 
   /** Consume a staged email change: swap the account's email hash — the raw email is
-   * dropped with the pending row. */
-  verifyEmailChange(token: string): { ok: true; principal: string } | { ok: false; reason: "invalid" | "email_taken" } {
+   * dropped with the pending row. `expectUserId` (2026-10-03 review M4): when provided,
+   * a pending row belonging to a DIFFERENT user aborts as `invalid` — a leaked/phished
+   * token must not let one account hijack another's email. */
+  verifyEmailChange(token: string, expectUserId?: string): { ok: true; principal: string } | { ok: false; reason: "invalid" | "email_taken" } {
     const row = this.db
       .query("SELECT * FROM pending_verifications WHERE token_hash = ?")
       .get(hashToken(token)) as Record<string, unknown> | null;
     if (!row) return { ok: false, reason: "invalid" };
     this.db.query("DELETE FROM pending_verifications WHERE token_hash = ?").run(hashToken(token));
     if (new Date(row.expires_at as string).getTime() < Date.now()) return { ok: false, reason: "invalid" };
+    if (expectUserId !== undefined && row.user_id !== expectUserId) return { ok: false, reason: "invalid" };
     const email = (row.email as string).trim().toLowerCase();
     const emailHash = createHash("sha256").update(email).digest("hex");
     const holder = this.findByEmailHash(emailHash);
@@ -399,6 +407,11 @@ export class UserStore {
 
   destroySession(token: string | undefined): void {
     if (token) this.db.query("DELETE FROM sessions WHERE token_hash = ?").run(hashToken(token));
+  }
+
+  /** Graceful shutdown (2026-10-03 review H3): checkpoint WAL before process exit. */
+  close(): void {
+    this.db.close();
   }
 
   /** Usability wave R1: an admin reset issues a one-time TEMP PASSWORD — shown once to the
@@ -450,16 +463,6 @@ export class UserStore {
   listUsers(): UserRecord[] {
     const rows = this.db.query("SELECT * FROM users ORDER BY created_at ASC").all() as Record<string, unknown>[];
     return rows.map((r) => this.rowToUser(r));
-  }
-
-  /** T-20260928-006: server-side search + pagination for the admin users table. */
-  listUsersPaged(query: string, page: number, pageSize: number): { users: UserRecord[]; total: number } {
-    const q = query.trim().toLowerCase();
-    const offset = Math.max(0, (page - 1)) * pageSize;
-    const rows = this.db
-      .query("SELECT * FROM users ORDER BY created_at ASC LIMIT ? OFFSET ?")
-      .all(pageSize, offset) as Record<string, unknown>[];
-    return { users: rows.map((r) => this.rowToUser(r)), total: rows.length };
   }
 
   /** Wave B3: soft delete a user (archive). Tenants are handled by the caller. */

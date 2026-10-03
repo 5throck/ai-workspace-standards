@@ -1,0 +1,37 @@
+schemaVersion: 1
+id: T-20261003-019
+kind: manual
+title: >-
+  co-workspace doc-hygiene batch: mark volume-subpath implemented (+missing
+  CHANGELOG entry), add supersession banners to the two 2026-09-27 founding
+  docs, append ADR-0092 addenda for the three 2026-10-02 decisions, normalize
+  spec-id drift, fix the dead team-gateway CHANGELOG path, add a11y statements
+  to the 10-02 designs, repair the memory/2026-10-02 interleaved block
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-03T08:53:32.519Z'
+history:
+  - at: '2026-10-03T08:53:32.519Z'
+    from: null
+    to: backlog
+  - at: '2026-10-03T09:28:46.223Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-03T09:28:46.238Z'
+    from: waiting
+    to: review
+  - at: '2026-10-03T09:28:46.253Z'
+    from: review
+    to: done
+result: >-
+  Implemented (doc-hygiene batch): volume-subpath doc Draft→Implemented with
+  deviations noted + spec id + the missing CHANGELOG entry (retro, placed
+  chronologically); both 2026-09-27 founding docs carry supersession banners +
+  Implemented status; ADR-0092 Addendum 16 records the three 2026-10-02
+  decisions; in-doc Spec ids normalized to the registry id in 5 docs and added
+  to 4 docs lacking them; dead team-gateway CHANGELOG path fixed; a11y sections
+  added to the two 10-02 designs; memory/2026-10-02.md interleaved block
+  reconstructed into three delimited sessions; registry created-dates corrected;
+  gate-anonymous lang frontmatter narrowed (body is English).
+error: null

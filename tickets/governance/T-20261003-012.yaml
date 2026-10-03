@@ -1,0 +1,31 @@
+schemaVersion: 1
+id: T-20261003-012
+kind: manual
+title: >-
+  validator-hardening: extend CI typecheck (and compose config check) to
+  services/co-workspace — root typecheck covers scripts/ only, so a type-only
+  regression in the service ships green
+priority: high
+status: done
+attempts: 0
+created_at: '2026-10-03T08:53:23.776Z'
+history:
+  - at: '2026-10-03T08:53:23.776Z'
+    from: null
+    to: backlog
+  - at: '2026-10-03T09:28:45.893Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-03T09:28:45.911Z'
+    from: waiting
+    to: review
+  - at: '2026-10-03T09:28:45.930Z'
+    from: review
+    to: done
+result: >-
+  Implemented in the 2026-10-03 remediation wave: CI step 'co-workspace service
+  typecheck + compose validation' added to .github/workflows/test.yml (ubuntu) —
+  bun install --frozen-lockfile + bun run typecheck + docker compose config -q
+  over all five layerings (required vars stubbed incl.
+  CO_WORKSPACE_DATA_VOLUME); all five verified locally.
+error: null

@@ -13,15 +13,22 @@ import { allowlistedEnv } from "./hermes";
 
 export interface CodexSpawnOptions {
   codexBin: string;
+  /** Interpreter prefix for codexBin — Windows CI passes ["bun"] (fake .ts binaries). */
+  binPrefix?: string[];
   projectDir: string;
   message: string;
   threadId?: string;
+  /** 2026-10-03 review H1: codex has no budget flag — enforced externally (kill timer),
+   * exit code 124 on timeout, so a hung turn can no longer wedge the tenant forever. */
+  timeoutMs?: number;
   extraArgs?: string[];
   env?: Record<string, string | undefined>;
+  /** QA-07 parity (2026-10-03 review H1): register the live process for cancel/delete. */
+  onSpawn?: (proc: { kill: (code?: number) => void }) => void;
 }
 
 export function codexArgs(o: CodexSpawnOptions): string[] {
-  const args = [o.codexBin, "exec"];
+  const args = [...(o.binPrefix ?? []), o.codexBin, "exec"];
   if (o.threadId) {
     args.push("resume", o.threadId);
   }
@@ -87,6 +94,20 @@ export async function runCodexTurn(
     stderr: "pipe",
     env: allowlistedEnv(o.env ?? process.env),
   });
+  o.onSpawn?.(proc);
+
+  // External watchdog (2026-10-03 review H1).
+  let timedOut = false;
+  const watchdog = o.timeoutMs
+    ? setTimeout(() => {
+        timedOut = true;
+        try {
+          proc.kill(9);
+        } catch {
+          /* already exited */
+        }
+      }, o.timeoutMs)
+    : undefined;
 
   let sessionId: string | undefined;
   let result: HermesEvent | undefined;
@@ -127,13 +148,14 @@ export async function runCodexTurn(
     proc.exited,
     readLoop,
   ]);
+  if (watchdog) clearTimeout(watchdog);
 
   if (result && typeof result.text === "string" && result.text) finalText = result.text;
   const rawTokens = (result?.tokens ?? {}) as Record<string, unknown>;
   const n = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : undefined);
 
   return {
-    exitCode: exitCode === 0 ? 0 : (result?.exit_code as number) ?? exitCode,
+    exitCode: timedOut ? 124 : exitCode === 0 ? 0 : (result?.exit_code as number) ?? exitCode,
     sessionId,
     finalText,
     result,

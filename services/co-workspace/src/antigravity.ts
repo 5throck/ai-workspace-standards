@@ -23,6 +23,11 @@ export interface AntigravitySpawnOptions {
   printTimeoutSeconds: number;
   extraArgs?: string[];
   env?: Record<string, string | undefined>;
+  /** 2026-10-03 review H1: `--print-timeout` bounds the CLI, but the outer kill timer is
+   * the hard stop (exit code 124) — parity with the hermes run budget. */
+  timeoutMs?: number;
+  /** QA-07 parity (2026-10-03 review H1): register the live process for cancel/delete. */
+  onSpawn?: (proc: { kill: (code?: number) => void }) => void;
 }
 
 export function agyArgs(o: AntigravitySpawnOptions): string[] {
@@ -97,6 +102,20 @@ export async function runAntigravityTurn(
     stderr: "pipe",
     env: allowlistedEnv(o.env ?? process.env),
   });
+  o.onSpawn?.(proc);
+
+  // Outer watchdog (2026-10-03 review H1) — backstops `--print-timeout`.
+  let timedOut = false;
+  const watchdog = o.timeoutMs
+    ? setTimeout(() => {
+        timedOut = true;
+        try {
+          proc.kill(9);
+        } catch {
+          /* already exited */
+        }
+      }, o.timeoutMs)
+    : undefined;
 
   let sessionId: string | undefined;
   let result: HermesEvent | undefined;
@@ -138,13 +157,14 @@ export async function runAntigravityTurn(
     proc.exited,
     readLoop,
   ]);
+  if (watchdog) clearTimeout(watchdog);
 
   if (result && typeof result.text === "string" && result.text) finalText = result.text;
   const rawTokens = (result?.tokens ?? {}) as Record<string, unknown>;
   const n = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : undefined);
 
   return {
-    exitCode,
+    exitCode: timedOut ? 124 : exitCode,
     sessionId,
     finalText,
     result,

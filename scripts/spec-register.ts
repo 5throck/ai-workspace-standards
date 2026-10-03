@@ -1,4 +1,4 @@
-// @version 1.3.0
+// @version 1.4.0
 /**
  * spec-register.ts
  *
@@ -43,7 +43,29 @@ const YELLOW = '\x1b[33m';
 const CYAN = '\x1b[36m';
 const RESET = '\x1b[0m';
 
-type SpecStatus = 'draft' | 'proposed' | 'approved' | 'implemented' | 'drifted' | 'archived';
+/** T-20261003-013 (2026-10-03 review H7): the legal status vocabulary. `planned` (approved,
+ * awaiting execution) and `superseded` (requires `superseded_by`) joined the set — the
+ * registry previously carried them (and `designed`) as unvalidated casts that no gate saw. */
+const SPEC_STATUSES = ['draft', 'proposed', 'approved', 'planned', 'implemented', 'superseded', 'drifted', 'archived'] as const;
+type SpecStatus = (typeof SPEC_STATUSES)[number];
+
+function isSpecStatus(value: unknown): value is SpecStatus {
+  return typeof value === 'string' && (SPEC_STATUSES as readonly string[]).includes(value);
+}
+
+/** Validate one entry's lifecycle fields — throws on an out-of-vocabulary status or a
+ * `superseded` entry without a `superseded_by` pointer. Shared by register/update/audit. */
+export function validateSpecEntry(entry: { status: string; superseded_by?: string; id?: string }): void {
+  const label = entry.id ? `spec ${entry.id}` : 'spec entry';
+  if (!isSpecStatus(entry.status)) {
+    throw new Error(
+      `${label} has illegal status "${entry.status}" (legal: ${SPEC_STATUSES.join('|')})`,
+    );
+  }
+  if (entry.status === 'superseded' && !entry.superseded_by) {
+    throw new Error(`${label} is superseded but carries no superseded_by pointer to the successor`);
+  }
+}
 type SpecSource = 'brainstorming' | 'meeting' | 'manual' | 'architect' | 'pm';
 
 interface SpecEntry {
@@ -53,6 +75,8 @@ interface SpecEntry {
   status: SpecStatus;
   source: SpecSource;
   meeting_ref?: string;
+  /** Required when status is `superseded`: the successor spec id (T-20261003-013). */
+  superseded_by?: string;
   created: string;
   last_updated: string;
 }
@@ -102,6 +126,9 @@ export function registerSpec(options: {
 }): { id: string; updated: boolean } {
   const source = (options.source ?? 'manual') as SpecSource;
   const status = (options.status ?? (source === 'brainstorming' ? 'approved' : 'draft')) as SpecStatus;
+  // T-20261003-013: reject an out-of-vocabulary status at the write gate (previously a
+  // blind cast — `superseded`/`planned`/`designed` landed in the registry unchecked).
+  validateSpecEntry({ status });
 
   if (!fs.existsSync(options.filePath)) {
     console.error(`${RED}File not found: ${options.filePath}${RESET}`);
@@ -183,8 +210,17 @@ function dispatch(): void {
     const registry = loadRegistry();
     const entry = registry.specs.find(s => s.id === id);
     if (!entry) { console.error(`${RED}Spec not found: ${id}${RESET}`); process.exit(1); }
+    // T-20261003-013: --superseded-by <spec-id> is required when status is superseded.
+    const supersededBy = getArg('--superseded-by');
+    try {
+      validateSpecEntry({ status: newStatus, superseded_by: supersededBy, id });
+    } catch (err) {
+      console.error(`${RED}${(err as Error).message}${RESET}`);
+      process.exit(1);
+    }
     const prev = entry.status;
     entry.status = newStatus;
+    if (supersededBy) entry.superseded_by = supersededBy;
     entry.last_updated = today();
     saveRegistry(registry);
     console.log(`${GREEN}Updated ${id}: ${prev} -> ${newStatus}${RESET}`);

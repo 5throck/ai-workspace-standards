@@ -111,7 +111,13 @@ describe("provisioning gate — default deny (D1)", () => {
 
 // ── Opt-in posture: anonymous provisioning allowed, cap enforced on the lazy path ──
 describe("provisioning gate — opt-in and cap (D4, G4)", () => {
-  const optin = sandbox("optin", { CO_WORKSPACE_ALLOW_ANON_PROVISIONING: "true" });
+  const optin = sandbox("optin", {
+    CO_WORKSPACE_ALLOW_ANON_PROVISIONING: "true",
+    // 2026-10-03 review M6: anon provisioning with unset quotas fails boot.
+    CO_WORKSPACE_TENANT_MAX_TURNS: "100",
+    CO_WORKSPACE_TENANT_MAX_TOKENS: "100000",
+    CO_WORKSPACE_PRINCIPAL_MAX_TOKENS: "200000",
+  });
   optin.cfg.tenantMaxPerPrincipal = 1;
 
   test("anonymous create proceeds and is audited as tenant.create.lazy", async () => {

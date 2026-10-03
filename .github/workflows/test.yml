@@ -114,6 +114,31 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: bun scripts/typecheck.ts
 
+      - name: co-workspace service typecheck + compose validation
+        # T-20261003-012 (2026-10-03 review H2): the root typecheck above covers
+        # scripts/ only — services/co-workspace/src was typechecked by NO CI step,
+        # so a type-only regression shipped green. Also validates every compose
+        # layering parses (config -q) with the required vars stubbed.
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          cd services/co-workspace
+          bun install --frozen-lockfile
+          bun run typecheck
+          cd docker
+          # Every shipped layering must parse; stub the required-interpolation vars.
+          export CO_WORKSPACE_DATA_DIR_HOST=/tmp
+          export CO_WORKSPACE_BROKER_TOKEN=ci-stub
+          export CO_WORKSPACE_DATA_VOLUME=ci-stub-volume
+          export CO_WORKSPACE_HERMES_SEED_HOME=/tmp/hermes-seed
+          export CO_WORKSPACE_TENANT_MAX_TURNS=10
+          export CO_WORKSPACE_TENANT_MAX_TOKENS=1000
+          export CO_WORKSPACE_PRINCIPAL_MAX_TOKENS=1000
+          docker compose -f docker-compose.yml config -q
+          docker compose -f docker-compose.yml -f docker-compose.dev.yml config -q
+          docker compose -f docker-compose.yml -f docker-compose.isolation.yml config -q
+          docker compose -f docker-compose.yml -f docker-compose.isolation.yml -f docker-compose.volume.yml config -q
+          docker compose -f docker-compose.yml -f docker-compose.seed.yml config -q
+
       - name: Run integration tests
         # Full-suite gate lives here since T-20260910-025 scoped the local
         # pre-push hook down to changed-path tests only.

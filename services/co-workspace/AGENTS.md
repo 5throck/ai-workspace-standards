@@ -24,7 +24,7 @@ still default to a loopback bind. Current behavior: `README.md` (Security model)
 |---|---|
 | `src/config.ts` | Three-tier config; infrastructure tier reads `CO_WORKSPACE_*` env vars |
 | `src/scaffold.ts` | Subprocess bridge to `scripts/new-project.ts` (no import API exists) |
-| `src/tenant.ts` | Tenant registry (`<dataDir>/tenants/registry.json`), per-tenant `HERMES_HOME` seeding |
+| `src/tenant.ts` | Per-tenant `HERMES_HOME` seeding, `config.yaml` stamping, `chownTree` (the registry itself lives in `src/registry-db.ts` — SQLite since Phase 3) |
 | `src/hermes.ts` | Session spawn, stream-json (JSONL) parsing, `--usage-file` accounting |
 | `src/openai.ts` | OpenAI wire translation (models list, chat completions, SSE chunks) |
 | `src/anthropic.ts` | Anthropic Messages wire translation (`/v1/messages`, event frames, count_tokens stub) |

@@ -50,7 +50,6 @@ export async function handleTenants(state: GatewayState, req: Request, ctx: Ctx)
     }
     assertTenantCap(state, owner);
     const rec = state.registry.create({
-      dataDir: state.cfg.dataDir,
       variant,
       key,
       name: name || undefined,

@@ -19,7 +19,7 @@ import { csrfRequired, sweepOutbox } from "./hardening";
 import { HttpError, jsonResponse, resolveClientIp } from "./http";
 import type { GatewayState } from "./state";
 import { createState } from "./state";
-import { bootstrapAdminFromEnv, openModeWarning } from "./access";
+import { bootstrapAdminFromEnv, isolationPostureWarning, openModeWarning } from "./access";
 import type { Ctx } from "./routes/ctx";
 import { handlePublic } from "./routes/public";
 import { handleTenants } from "./routes/tenants";
@@ -45,6 +45,7 @@ export {
   assertQuota,
   oauthStateMatches,
   openModeWarning,
+  isolationPostureWarning,
 } from "./access";
 export { provisionTenant, sanitizeProjectName, tenantKeyFor, hostSidePath, getOrStartTenant, resolveLazyTenant, deleteTenantData, removeUnrelocatedScaffold, sweepOrphanedScaffolds } from "./lifecycle";
 import { sweepOrphanedScaffolds } from "./lifecycle";
@@ -121,7 +122,10 @@ export async function handleRequest(state: GatewayState, req: Request, peerIp?: 
     throw new HttpError(404, `no route: ${req.method} ${path}`);
   } catch (err) {
     if (err instanceof HttpError) return jsonResponse({ error: err.message }, err.status);
-    return jsonResponse({ error: String((err as Error)?.message ?? err) }, 500);
+    // 2026-10-03 review M1: non-HttpError throws carry internals (fs paths, SQLite and
+    // spawn stderr tails). Log the full error server-side; the client gets a generic body.
+    console.error(`[co-workspace] 500 on ${req.method} ${path}:`, err);
+    return jsonResponse({ error: "internal error" }, 500);
   }
 }
 
@@ -137,12 +141,48 @@ export function createServer(state: GatewayState) {
 if (import.meta.main) {
   console.log(`[co-workspace] running as uid ${process.getuid?.() ?? "n/a"}`);
   const state = createState();
+  // 2026-10-03 review H3: graceful shutdown — kill running turn children, drain the chat
+  // locks with a bound, checkpoint the SQLite WALs, then exit. Docker mode is rescued by
+  // the reaper + `init: true`; bare-host process mode previously left orphaned children
+  // and open handles behind (open handles also block data-dir deletion on Windows).
+  let shuttingDown = false;
+  const shutdown = (signal: string): void => {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    console.log(`[co-workspace] ${signal} — killing ${state.activeProcs.size} active turn(s), draining locks…`);
+    for (const proc of state.activeProcs.values()) {
+      try {
+        proc.kill();
+      } catch {
+        /* already exited */
+      }
+    }
+    void Promise.race([
+      Promise.allSettled([...state.chatLocks.values()]),
+      new Promise((r) => setTimeout(r, 10_000)),
+    ]).then(() => {
+      for (const store of [state.registry, state.turns, state.users, state.audit]) {
+        try {
+          store.close();
+        } catch {
+          /* best effort */
+        }
+      }
+      process.exit(0);
+    });
+  };
+  process.on("SIGTERM", () => shutdown("SIGTERM"));
+  process.on("SIGINT", () => shutdown("SIGINT"));
   bootstrapAdminFromEnv(state);
   // SEC-14: expire verification mails older than 24h at startup.
   const swept = sweepOutbox(state.cfg.dataDir);
   if (swept) console.log(`[co-workspace] outbox sweep: ${swept} expired file(s) removed`);
   const openWarn = openModeWarning(state.cfg);
   if (openWarn) console.warn(openWarn);
+  // 2026-10-03 review H1: credential-protected deployments must see the real process-mode
+  // boundary (same-uid agents read /proc/1/environ + the shared data dir).
+  const isoWarn = isolationPostureWarning(state.cfg);
+  if (isoWarn) console.warn(isoWarn);
   // chatLocks/activeProcs are memory-only: docker mode is covered by the orphan reaper below,
   // process mode children die with the gateway container (bare-host `bun`: stop the process
   // group or accept up to runBudgetSeconds of orphan runtime).
@@ -186,6 +226,15 @@ if (import.meta.main) {
     const reap = reapOrphanedTurns(state.cfg);
     if (reap.error) console.warn(`[co-workspace] orphan turn reap failed: ${reap.error}`);
     else console.log(`[co-workspace] orphan turn reap: found ${reap.found}, removed ${reap.killed}`);
+    // 2026-10-03 review M6: the boot reap alone leaked a container whose kill failed until
+    // the next gateway restart. Hourly interval reap — idempotent, instance-labeled.
+    const reaper = setInterval(() => {
+      const r = reapOrphanedTurns(state.cfg);
+      if (r.found > 0 || r.error) {
+        console.log(`[co-workspace] orphan turn reap: found ${r.found}, removed ${r.killed}${r.error ? `, error: ${r.error}` : ""}`);
+      }
+    }, 60 * 60 * 1000);
+    reaper.unref();
   }
   const server = createServer(state);
   console.log(`[co-workspace] listening on http://${state.cfg.host}:${server.port}`);

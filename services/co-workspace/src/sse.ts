@@ -33,8 +33,8 @@ export interface SseSink {
 
 /** Shared SSE plumbing (T-20260929-008): tracks client disconnect via cancel(), makes
  * enqueue/close safe after cancel, clears timers, and kills the turn this stream started.
- * Cancel support is hermes-only: the antigravity/claude/codex run functions expose no
- * onSpawn/kill hook, so their turns run to completion after a disconnect (known limitation). */
+ * Every runtime now registers its live process via the uniform `onSpawn` contract
+ * (2026-10-03 review H1), so a disconnect kills the turn regardless of runtime. */
 export function sseStream(run: (sink: SseSink) => Promise<void>): ReadableStream<Uint8Array> {
   let closed = false;
   let proc: { kill: (code?: number) => void } | undefined;

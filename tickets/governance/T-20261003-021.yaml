@@ -1,0 +1,36 @@
+schemaVersion: 1
+id: T-20261003-021
+kind: manual
+title: >-
+  co-workspace operational hardening batch: docker fleet healthchecks + gateway
+  restart policy + image digest pins, interval-based orphan reaper (verify
+  docker kill results), require broker token in volume mode, treat non-regular
+  .env.keys as warn-once (EISDIR boot crash), re-check tenant existence at
+  queued-turn start (delete race), allowlist the scaffold subprocess env
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-03T08:53:50.526Z'
+history:
+  - at: '2026-10-03T08:53:50.526Z'
+    from: null
+    to: backlog
+  - at: '2026-10-03T09:28:46.313Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-03T09:28:46.328Z'
+    from: waiting
+    to: review
+  - at: '2026-10-03T09:28:46.342Z'
+    from: review
+    to: done
+result: >-
+  Implemented (ops batch): gateway compose gains healthcheck (bun fetch /health)
+  + restart unless-stopped; volume layering requires CO_WORKSPACE_BROKER_TOKEN;
+  readKeyEntries treats non-regular files as warn-once (no EISDIR boot crash);
+  queued turns re-check the tenant row and abort after a delete; scaffold
+  subprocess gets the allowlisted env + CI=1; hourly interval orphan reaper
+  alongside the boot reap. Consciously deferred: image digest pins (needs
+  registry lookups at deploy time — cannot be verified offline in this wave;
+  volume.yml keeps its pinning guidance comment).
+error: null

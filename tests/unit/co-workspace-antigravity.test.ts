@@ -108,6 +108,9 @@ console.log('{"event":"result","result":{"conversation_id":"conv-agy","status":"
     CO_WORKSPACE_RUNTIME: "antigravity",
     // Anonymous /sessions provisioning flow — opt into the 2026-10-02 gate design's knob.
     CO_WORKSPACE_ALLOW_ANON_PROVISIONING: "true",
+    CO_WORKSPACE_TENANT_MAX_TURNS: "100",
+    CO_WORKSPACE_TENANT_MAX_TOKENS: "100000",
+    CO_WORKSPACE_PRINCIPAL_MAX_TOKENS: "200000",
     CO_WORKSPACE_ANTIGRAVITY_BIN: agyBin,
     CO_WORKSPACE_ANTIGRAVITY_BIN_PREFIX: "bun", // T-20260929-001: portable fake runs via bun
     HERMES_FAKE_LOG: join(dataDir, "agy-args.log"),

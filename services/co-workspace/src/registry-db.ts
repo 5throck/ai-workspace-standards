@@ -19,9 +19,11 @@ import type { TenantRecord } from "./tenant";
 
 export class TenantRegistry {
   private readonly db: Database;
+  private readonly dataDir: string;
   readonly registryPath: string;
 
   constructor(dataDir: string) {
+    this.dataDir = dataDir;
     const dir = join(dataDir, "tenants");
     mkdirSync(dir, { recursive: true });
     this.registryPath = join(dir, "registry.db");
@@ -112,8 +114,9 @@ export class TenantRegistry {
     return rec;
   }
 
+  /** `dataDir` was removed from init (2026-10-03 review M17): the class already knows it
+   * from the constructor — callers re-passing `state.cfg.dataDir` invited divergence. */
   create(init: {
-    dataDir: string;
     variant: string;
     key?: string;
     name?: string;
@@ -126,7 +129,7 @@ export class TenantRegistry {
     // (engine constraint) and is relocated here immediately after.
     const principal = init.ownerPrincipal ?? "shared";
     const folder = init.name || tenantId;
-    const storageRoot = join(init.dataDir, "storage", principal, folder);
+    const storageRoot = join(this.dataDir, "storage", principal, folder);
     const rec: TenantRecord = {
       tenantId,
       key: init.key,

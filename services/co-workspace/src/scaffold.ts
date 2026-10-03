@@ -7,6 +7,7 @@
 
 import { resolve } from "node:path";
 import { tail } from "./util";
+import { allowlistedEnv } from "./hermes";
 
 export interface ScaffoldRequest {
   workspaceDir: string;
@@ -49,7 +50,10 @@ export async function scaffoldProject(req: ScaffoldRequest): Promise<ScaffoldRes
     stdout: "pipe",
     stderr: "pipe",
     stdin: "ignore",
-    env: { ...process.env, CI: "1" },
+    // 2026-10-03 review M8 (P2-4 parity): the scaffold child used to inherit the FULL
+    // gateway env (GOOGLE_CLIENT_SECRET, CO_WORKSPACE_API_KEYS, …), bypassing the allowlist
+    // the hermes turn path enforces. Same allowlist + CI=1 for the scaffold engine.
+    env: { ...allowlistedEnv(process.env), CI: "1" },
   });
 
   let timedOut = false;

@@ -1,0 +1,30 @@
+schemaVersion: 1
+id: T-20261003-015
+kind: manual
+title: >-
+  validator-hardening: run docs-link lint over CHANGELOG.md — a dead docs/ path
+  (team-gateway QA review) has survived since 2026-09-27
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-03T08:53:23.821Z'
+history:
+  - at: '2026-10-03T08:53:23.821Z'
+    from: null
+    to: backlog
+  - at: '2026-10-03T09:28:46.040Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-03T09:28:46.055Z'
+    from: waiting
+    to: review
+  - at: '2026-10-03T09:28:46.070Z'
+    from: review
+    to: done
+result: >-
+  Implemented: validate-docs-links.ts default scope now includes CHANGELOG.md,
+  and fenced-block stripping extends to INLINE code spans (CHANGELOG history
+  quotes link syntax in backticks — prose about links, not links). Data fix: the
+  dead docs/designs/2026-09-27-team-gateway-qa-fair-and-security-review.md path
+  corrected to the co-workspace name. Lint green.
+error: null

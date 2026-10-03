@@ -20,7 +20,11 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       CO_WORKSPACE_DATA_VOLUME: ${CO_WORKSPACE_DATA_VOLUME:?set the tenant data volume name}
-      CO_WORKSPACE_BROKER_TOKEN: ${CO_WORKSPACE_BROKER_TOKEN:-}
+      # 2026-10-03 review M13: the token gates the volume-control route (which runs an
+      # rm -rf helper INSIDE the data volume). In volume mode it is REQUIRED — network
+      # isolation alone is the only other layer, and defaulting the token to empty shipped
+      # without that defense-in-depth layer.
+      CO_WORKSPACE_BROKER_TOKEN: ${CO_WORKSPACE_BROKER_TOKEN:?set CO_WORKSPACE_BROKER_TOKEN (volume mode requires the broker control token)}
       # Helper image for the broker-internal volume init/rm containers. Pin by digest for
       # supply-chain hygiene, e.g. alpine:3.20@sha256:<digest>.
       CO_WORKSPACE_VOLUME_INIT_IMAGE: ${CO_WORKSPACE_VOLUME_INIT_IMAGE:-alpine:3.20}
@@ -30,4 +34,4 @@ services:
       # The gateway needs the volume name for the turn --mount argv and the lifecycle
       # provisioning/delete control calls (same value as the broker side).
       CO_WORKSPACE_DATA_VOLUME: ${CO_WORKSPACE_DATA_VOLUME:?set the tenant data volume name}
-      CO_WORKSPACE_BROKER_TOKEN: ${CO_WORKSPACE_BROKER_TOKEN:-}
+      CO_WORKSPACE_BROKER_TOKEN: ${CO_WORKSPACE_BROKER_TOKEN:?set CO_WORKSPACE_BROKER_TOKEN (volume mode requires the broker control token)}

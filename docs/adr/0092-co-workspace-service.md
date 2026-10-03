@@ -162,6 +162,17 @@ Setting `CO_WORKSPACE_DATA_VOLUME` to a Docker volume name switches tenant stora
 
 **Verification (2026-09-30)**: 416 unit/integration tests pass (`co-workspace-phase2` route-gate pin for `GET /login`; `co-workspace-auth-hardening` handleRequest-level Wave B cases: login page reachable keyless with keys on, key-authenticated `GET /tenants` 200 without a session, unauthenticated web shell 302 + tenant API 401). Live on the LAN deployment: same matrix verified over `http://<lan-ip>:9030/` with a real key file, including `POST /auth/login` reaching its credential check.
 
+## Addendum 16 (2026-10-03): the three 2026-10-02 decisions join the record (2026-10-03 review H8)
+
+The one-addendum-per-change practice broke exactly when the three highest-posture-impact
+decisions landed; each shipped with its own standalone design but no entry here. Recorded:
+
+1. **Rotation keeps the rotating session** (`docs/designs/2026-10-02-coworkspace-rotation-keeps-session-design.md`): completing a forced (admin temp-password) rotation INVALIDATES every other session of the user and KEEPS the one that performed it — amending the purge-everything semantics this ADR's Accounts section and SEC-06 described; R3 self-service changes already kept the caller's session.
+2. **Anonymous tenant provisioning is gated** (`docs/designs/2026-10-02-gate-anonymous-tenant-provisioning-design.md`): creating a tenant requires a credential; `CO_WORKSPACE_ALLOW_ANON_PROVISIONING=true` is the explicit opt-in, denial is audited (`tenant.provision.denied`), the lazy surfaces check BEFORE any registry row or `Projects/` dir exists, and (since the 2026-10-03 review M6 fix) enabling the flag without explicit quotas fails boot.
+3. **Docker redeploy entry point** (`docs/designs/2026-10-02-coworkspace-docker-redeploy-design.md`): reflecting developed content into the running stack goes through `docker/rebuild.sh` + `docker-compose.dev.yml`; baking a pinned workspace image was evaluated and REJECTED (§5).
+
+Recorded by the 2026-10-03 project-review remediation wave (review H8; spec `2026-10-03-coworkspace-review-remediation-design`).
+
 ## References
 
 - Design: `docs/designs/2026-09-27-co-workspace-service-design.md` (verified building blocks, D1–D8, waves, live-verification record)

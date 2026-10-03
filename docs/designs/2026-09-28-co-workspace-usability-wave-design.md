@@ -1,5 +1,7 @@
 # co-workspace Usability Wave Design (R1–R7)
 
+- **Spec id**: `2026-09-28-co-workspace-usability-wave-design`
+
 - **Date**: 2026-09-28
 - **Status**: Implemented (2026-09-28 — PRs #1164, #1165, #1167, #1168, #1169, #1170 + #1171/#1176/#1178 follow-ups; docker isolation activated via PRs #1180/#1181/#1182)
 - **Related**: ADR-0092 (Team Gateway / co-workspace), ADR-0074 (Universal Design Gate), ADR-0065 (accessibility), ADR-0070 (preview verification), meeting transcript `memory/meeting-2026-09-28-co-workspace-improvements.md`

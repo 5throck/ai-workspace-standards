@@ -2,7 +2,7 @@
 
 - **Date**: 2026-09-29
 - **Status**: implemented
-- **Spec id**: `2026-09-29-co-workspace-provider-key-config`
+- **Spec id**: `2026-09-29-co-workspace-provider-key-config-design`
 - **Owner**: governance-ticket-runner (user-directed architecture change)
 - **Related**: ADR-0092 (Addendum 10 corrects R2/R6; Addendum 4 shared credential store; Addendum 5 SEC-07; Addendum 7 seed directory bind), `docs/designs/2026-09-27-co-workspace-phase2-hardening-design.md` (docker isolation)
 

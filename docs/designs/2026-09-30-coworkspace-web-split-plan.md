@@ -8,13 +8,18 @@
 
 ## R1 — Current state
 
-- `src/server.ts` is 164 lines: the router half of the ticket's split already
-  happened ( eight `src/routes/*.ts` modules, each 9–246 lines, dispatched from a
-  thin `server.ts` loop). No further server split is needed.
-- `web/index.html` is 1,184 lines: one file carrying the CSS, the DOM skeleton,
-  and ~37 inline functions (SSE stream handling, session list rendering, donut
-  chart, tenant forms, auth/keys UX). The file is served verbatim by
-  `src/pages.ts` — no build step, which is a deliberate constraint to preserve.
+- `src/server.ts` is 244 lines (2026-10-03 refresh; was 164): the router half of the
+  ticket's split already happened (eight `src/routes/*.ts` modules, dispatched from a
+  thin `server.ts` loop; the boot sequence grew the graceful-shutdown and posture-warning
+  blocks). No further server split is needed.
+- `web/index.html` is 1,221 lines (2026-10-03 refresh; was 1,184): one file carrying the
+  CSS, the DOM skeleton, and the inline module script (SSE stream handling, session list
+  rendering, donut chart, tenant forms, auth/keys UX). Since this plan was written, two
+  small extractions ALREADY happened outside it: `web/login.html` (149 lines, the sign-in
+  page) and `web/app-helpers.js` (27 lines, donut-slice preparation — extracted so it can
+  be unit-tested without a browser). The target module map below still describes the
+  planned shape for what remains in index.html. The file is served verbatim by
+  `src/routes/public.ts` — no build step, which is a deliberate constraint to preserve.
 
 ## R2 — Target shape (next feature wave)
 

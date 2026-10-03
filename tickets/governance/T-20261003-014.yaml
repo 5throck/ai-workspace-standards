@@ -1,0 +1,32 @@
+schemaVersion: 1
+id: T-20261003-014
+kind: manual
+title: >-
+  validator-hardening: extend the co-workspace env-parity ratchet to README flag
+  documentation — CO_WORKSPACE_ALLOW_ANON_PROVISIONING is real in config but
+  absent from the README config table
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-03T08:53:23.806Z'
+history:
+  - at: '2026-10-03T08:53:23.806Z'
+    from: null
+    to: backlog
+  - at: '2026-10-03T09:28:45.994Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-03T09:28:46.009Z'
+    from: waiting
+    to: review
+  - at: '2026-10-03T09:28:46.024Z'
+    from: review
+    to: done
+result: >-
+  Implemented: env-parity test gains a README coverage ratchet (every
+  CO_WORKSPACE_/HERMES_/GOOGLE_ var read by src/ must be backticked in README.md
+  or listed in a reasoned README_EXEMPT map — broker-internal
+  PORT/SOCKET/MAX_CONN). README brought to full coverage: combined _SUFFIX rows
+  spelled out as full var names, missing rows added (ALLOW_ANON_PROVISIONING,
+  DATA_VOLUME, BROKER_TOKEN, TURN_TIMING, VOLUME_INIT_IMAGE).
+error: null

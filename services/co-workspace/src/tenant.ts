@@ -97,11 +97,6 @@ export function recordTurnUsage(
  * config.yaml is never copied — tenants get a generated one. */
 const SEED_COPY_FILES = [".env"];
 
-export function tenantPaths(dataDir: string) {
-  const tenantsDir = join(dataDir, "tenants");
-  return { tenantsDir, registryPath: join(tenantsDir, "registry.json") };
-}
-
 /** YAML double-quoted scalar (JSON strings are valid YAML). Newlines/CR are rejected outright. */
 function yamlScalar(field: string, value: string): string {
   if (/[\r\n]/.test(value)) throw new Error(`tenant config: ${field} must not contain newline characters`);

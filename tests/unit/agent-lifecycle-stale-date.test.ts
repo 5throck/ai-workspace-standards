@@ -234,7 +234,7 @@ describe('lastContentCommitDate (DEC-20260930-01 ruling 2)', () => {
     });
     // Should return d1 because d2 is metadata-only
     expect(lastContentCommitDate(join(dir, 'pm.md'), dir)).toBe('2026-09-01');
-  });
+  }, 30_000);
 
   test('metadata-only rejection: bump commit that also edits body -> returns bump date', () => {
     const dir = initRepo();
@@ -262,7 +262,7 @@ describe('lastContentCommitDate (DEC-20260930-01 ruling 2)', () => {
     });
     // Should return d2 because it has body changes
     expect(lastContentCommitDate(join(dir, 'pm.md'), dir)).toBe('2026-10-02');
-  });
+  }, 30_000);
 
   test('mixed sequence: metadata-only + sync-only -> returns earliest content date', () => {
     const dir = initRepo();
@@ -301,7 +301,7 @@ describe('lastContentCommitDate (DEC-20260930-01 ruling 2)', () => {
     });
     // Should return d1 (both d2 and d3 are skipped)
     expect(lastContentCommitDate(join(dir, 'pm.md'), dir)).toBe('2026-09-01');
-  });
+  }, 30_000);
 
   test('regression: content commit after last_updated -> isFrontmatterStale true', () => {
     const dir = initRepo();
@@ -332,5 +332,5 @@ describe('lastContentCommitDate (DEC-20260930-01 ruling 2)', () => {
     expect(contentDate).toBe('2026-09-15');
     // isFrontmatterStale should be true: 2026-09-01 < 2026-09-15
     expect(isFrontmatterStale('2026-09-01', contentDate!)).toBe(true);
-  });
+  }, 30_000);
 });

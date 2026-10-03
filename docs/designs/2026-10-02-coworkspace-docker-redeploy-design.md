@@ -1,9 +1,14 @@
 # Design: co-workspace Docker redeploy — reflect developed content into the running stack
 
-- **Spec ID**: `2026-10-02-coworkspace-docker-redeploy`
+- **Spec ID**: `2026-10-02-coworkspace-docker-redeploy-design`
 - **Date**: 2026-10-02
 - **Status**: implemented
 - **Scope**: `services/co-workspace/docker/` (one new script, one new compose overlay), service README, `.env.sample`. No `src/` behavior change.
+
+## Accessibility (ADR-0065/0070 exemption)
+
+Ops-facing infrastructure (rebuild script, compose layering, docs) — no user-facing UI
+surface is touched. Explicitly exempt per ADR-0070.
 
 ## 1. Problem
 

@@ -1,4 +1,4 @@
-// @version 2.46.0
+// @version 2.47.0
 // v2.46.0: Docs relative-link gate — spawns scripts/validate-docs-links.ts
 //           (workspace root only, placed after the docs-cluster checks) covering
 //           docs/ root-level files plus templates/common/docs/** recursively,
@@ -3206,6 +3206,26 @@ if (SPEC_CHECK) {
         }
         if (missingSpecFiles === 0 && registry.specs.length > 0) {
             Pass(`Spec check: all ${registry.specs.length} spec file(s) exist`);
+        }
+
+        // Check 4 (T-20261003-013): status vocabulary — the registry previously accepted
+        // out-of-enum casts (superseded/planned/designed) that no gate saw, and a
+        // `superseded` row without a successor pointer could strand forever.
+        const SPEC_STATUS_VOCABULARY = ['draft', 'proposed', 'approved', 'planned', 'implemented', 'superseded', 'drifted', 'archived'];
+        const badStatus = registry.specs.filter(s => !SPEC_STATUS_VOCABULARY.includes(s.status));
+        if (badStatus.length > 0) {
+            for (const s of badStatus) {
+                Fail(`Spec check: "${s.id}" carries illegal status "${s.status}" (legal: ${SPEC_STATUS_VOCABULARY.join('|')}) — fix via spec-register.ts --update`);
+            }
+        }
+        const supersededNoPointer = registry.specs.filter(s => s.status === 'superseded' && !(s as { superseded_by?: string }).superseded_by);
+        if (supersededNoPointer.length > 0) {
+            for (const s of supersededNoPointer) {
+                Fail(`Spec check: "${s.id}" is superseded but has no superseded_by pointer — record the successor spec id`);
+            }
+        }
+        if (badStatus.length === 0 && supersededNoPointer.length === 0 && registry.specs.length > 0) {
+            Pass(`Spec check: all ${registry.specs.length} spec status(es) within the vocabulary`);
         }
         }
     }

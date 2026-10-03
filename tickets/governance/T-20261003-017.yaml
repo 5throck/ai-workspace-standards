@@ -1,0 +1,34 @@
+schemaVersion: 1
+id: T-20261003-017
+kind: manual
+title: >-
+  co-workspace: decide the process-isolation default posture — same-uid sibling
+  agents can read /proc/1/environ (gateway secrets) and every tenant's /data
+  while the README sells multi-user identity; require explicit opt-in or
+  document the boundary honestly
+priority: high
+status: done
+attempts: 0
+created_at: '2026-10-03T08:53:32.478Z'
+history:
+  - at: '2026-10-03T08:53:32.478Z'
+    from: null
+    to: backlog
+  - at: '2026-10-03T09:28:46.130Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-03T09:28:46.146Z'
+    from: waiting
+    to: review
+  - at: '2026-10-03T09:28:46.161Z'
+    from: review
+    to: done
+result: >-
+  Resolved — posture decision recorded: the compose default STAYS process
+  (changing it is a breaking deploy decision, consciously deferred; re-open if a
+  multi-user shared deployment appears). Implemented instead:
+  isolationPostureWarning() fails LOUD at boot whenever credentials are on and
+  isolation=process, naming /proc/1/environ and the shared data dir; README's
+  Security model states the real boundary explicitly (env allowlist is not a
+  sandbox).
+error: null

@@ -1,7 +1,13 @@
 # Design: Opt-in Volume-Subpath Mode for the Co-Workspace Docker Broker (T-20260930-038)
 
+- **Spec id**: `2026-09-30-coworkspace-volume-subpath-design`
 - **Date**: 2026-09-30
-- **Status**: Draft (design only; implementation ticket T-20260930-038)
+- **Status**: Implemented (T-20260930-038 done — shipped in PR #1260, ADR-0092 Addendum 14).
+  Two cosmetic deviations from this text, verified 2026-10-03 (review M3): the broker-side
+  helper container is named `co-workspace-vol-control-<8hex>` (this doc says `volctl`), and
+  the subpath is interpolated into the helper's `sh -c` after `SUBPATH_RE` validation rather
+  than passed as two pre-split paths. Neither weakens the security property (the name stays
+  outside the turn-container `NAME_RE`; the charset is regex-enforced).
 - **Related**: `docs/designs/2026-09-30-coworkspace-docker-broker-raw-proxy-design.md` (current broker design), ADR-0092 Addendum 13, `services/co-workspace/src/docker-broker-policy.ts`, `services/co-workspace/src/docker-broker.ts`, `services/co-workspace/src/hermes.ts`, `services/co-workspace/src/lifecycle.ts`, `services/co-workspace/docker/docker-compose.isolation.yml`
 - **Problem**: The F3 race from the 2026-09-30 security review — bind sources are followed through symlinks by the daemon, so a compromised gateway can swap `storage/<P>/<N>` for a symlink between the broker's `validateBindsOnDisk` check and the daemon's mount at `/start`. The lstat walk narrows but does not close the TOCTOU window (the broker itself documents this as residual risk).
 - **Fix**: an OPT-IN mode where tenant data lives in a named Docker volume and turn containers use `--mount type=volume,...,volume-subpath=<rel>`. Volume-subpath resolution happens inside the daemon from the volume's own root; it cannot escape (measured: symlink / `..` / absolute subpaths are all rejected by dockerd 29.8.1). No host path is ever named, so there is nothing to race.

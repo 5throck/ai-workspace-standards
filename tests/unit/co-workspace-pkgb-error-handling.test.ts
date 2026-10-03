@@ -8,12 +8,20 @@ import { readKeyEntries } from "../../services/co-workspace/src/config";
 import { TenantRegistry } from "../../services/co-workspace/src/registry-db";
 
 describe("readKeyEntries error handling — M11", () => {
-  test("throws on directory path", () => {
+  test("directory path warns once and returns empty (2026-10-03 review M9: the compose single-file bind turns a missing host file into a directory — that must not crash boot with EISDIR)", () => {
     const dir = join(tmpdir(), `gw-dir-${crypto.randomUUID().slice(0, 8)}`);
     mkdirSync(dir, { recursive: true });
+    const warnCalls: string[] = [];
+    const originalWarn = console.warn;
+    console.warn = (...args: unknown[]) => {
+      warnCalls.push(String(args[0]));
+    };
     try {
-      expect(() => readKeyEntries(dir)).toThrow(/cannot read API key file/);
+      expect(readKeyEntries(dir)).toEqual([]);
+      expect(warnCalls.length).toBe(1);
+      expect(warnCalls[0]).toContain("not a regular file");
     } finally {
+      console.warn = originalWarn;
       rmSync(dir, { recursive: true, force: true });
     }
   });
