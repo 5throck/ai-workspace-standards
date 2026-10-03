@@ -220,15 +220,14 @@ if (import.meta.main) {
       console.error(`[co-workspace] docker isolation unusable: ${probe.error ?? "probe failed"}`);
       process.exit(1);
     }
-    if (state.cfg.isolation === "docker" && state.cfg.runtime !== "hermes") {
-      // 2026-10-03 CLI provider-key design: docker-ISOLATED turns for non-hermes runtimes
-      // are undelivered (sibling containers carry hermes only; the adapter container
-      // wrappers + broker bind expansion are scoped in T-20261003-023 follow-up).
-      // Process isolation works in container deployments: the gateway image carries
-      // claude/codex; agy via the docker-compose.creds.yml binary mount.
+    if (state.cfg.isolation === "docker" && state.cfg.runtime === "antigravity") {
+      // 2026-10-03 sibling-turns design (D7): antigravity stays excluded from docker
+      // isolation — the agy CLI is login-only with no verifiable Linux artifact to bake
+      // or mount into the runtime image. claude/codex proceed (their CLIs are baked into
+      // the image and the broker policy carries their runtime profiles).
       console.error(
-        `[co-workspace] docker-isolated turns for runtime "${state.cfg.runtime}" are not delivered yet (hermes only — sibling containers carry no other CLI; tracked T-20261003-023) — ` +
-          `use CO_WORKSPACE_ISOLATION=process (gateway image carries claude/codex; agy via the creds overlay) or CO_WORKSPACE_RUNTIME=hermes`,
+        `[co-workspace] docker-isolated turns for runtime "antigravity" are not available (the agy CLI is login-only with no verifiable Linux artifact) — ` +
+          `use CO_WORKSPACE_ISOLATION=process (the image bakes agy; login state via the creds overlay), or CO_WORKSPACE_RUNTIME=hermes|claude|codex`,
       );
       process.exit(1);
     }

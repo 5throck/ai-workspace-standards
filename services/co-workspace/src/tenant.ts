@@ -5,7 +5,7 @@
  */
 
 import { chmodSync, chownSync, copyFileSync, existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { join, dirname } from "node:path";
 import { genId, readJson, writeJson } from "./util";
 
 /**
@@ -176,6 +176,12 @@ export function chownTree(root: string, uid: number, gid: number): void {
   }
 }
 
+/** 2026-10-03 sibling-turns design (D2): the per-tenant state home of a non-hermes runtime
+ * (claude-home / codex-home), a sibling of hermes-home in the tenant folder. */
+export function runtimeHomeDir(rec: TenantRecord, runtime: "claude" | "codex"): string {
+  return join(dirname(rec.hermesHome), `${runtime}-home`);
+}
+
 export function seedHermesHome(
   rec: TenantRecord,
   seedHome?: string,
@@ -184,6 +190,12 @@ export function seedHermesHome(
   agentReasoningEffort?: string,
 ): void {
   mkdirSync(rec.hermesHome, { recursive: true });
+  // 2026-10-03 sibling-turns design (D4): per-tenant homes for the non-hermes runtimes so
+  // docker-isolated claude/codex turns have bind sources (broker lstat walk) and volume
+  // subpaths (daemon start-time lstat). Empty state dirs — credentials arrive per turn via
+  // the provider-key env, never by copying files.
+  mkdirSync(runtimeHomeDir(rec, "claude"), { recursive: true, mode: 0o700 });
+  mkdirSync(runtimeHomeDir(rec, "codex"), { recursive: true, mode: 0o700 });
   if (seedHome && existsSync(seedHome)) {
     for (const name of SEED_COPY_FILES) {
       const src = join(seedHome, name);

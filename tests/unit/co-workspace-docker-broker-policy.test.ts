@@ -573,7 +573,7 @@ describe("validateCreate: volume-mode fixture (T-20260930-038)", () => {
   test("validateMounts direct: canonical order is project-first regardless of client order", () => {
     const b = volumeFixtureBody();
     const mounts = b.HostConfig.Mounts.slice().reverse();
-    const r = validateMounts(mounts, VCFG);
+    const r = validateMounts(mounts, VCFG, "hermes-home");
     expect(r.mounts[0].Target).toBe("/work/project");
     expect(r.principal).toBe("default");
     expect(r.project).toBe("demo");
@@ -672,5 +672,94 @@ describe("checkRoute: /coworkspace/volume control route (T-20260930-038)", () =>
     expect(checkRoute("POST", `/volumes/${VOL}`, VCFG, {}).allowed).toBe(false);
     expect(checkRoute("GET", `/volumes/${VOL}`, CFG, {}).allowed).toBe(false);
     expect(checkRoute("GET", `/volumes/${VOL}?extra=1`, VCFG, {}).allowed).toBe(false);
+  });
+});
+
+describe("validateCreate: claude/codex runtime profiles (2026-10-03 sibling-turns design)", () => {
+  function claudeBody(): any {
+    const b = fixtureBody();
+    b.Entrypoint = ["claude"];
+    b.Env = ["CLAUDE_CONFIG_DIR=/work/claude-home", "ANTHROPIC_API_KEY=sk-test"];
+    b.HostConfig.Binds = [
+      `${DATA}/storage/default/demo/project:/work/project`,
+      `${DATA}/storage/default/demo/claude-home:/work/claude-home`,
+    ];
+    return b;
+  }
+  function codexBody(): any {
+    const b = fixtureBody();
+    b.Entrypoint = ["codex"];
+    b.Env = ["CODEX_HOME=/work/codex-home", "OPENAI_API_KEY=sk-test"];
+    b.HostConfig.Binds = [
+      `${DATA}/storage/default/demo/project:/work/project`,
+      `${DATA}/storage/default/demo/codex-home:/work/codex-home`,
+    ];
+    return b;
+  }
+  test("claude body accepted (entrypoint, env, project+claude-home binds)", () => {
+    const res = validateCreate(JSON.stringify(claudeBody()), CFG, NAME);
+    if (!res.ok) throw new Error(res.reason);
+    expect(res.canonical.Entrypoint).toEqual(["claude"]);
+    expect(res.canonical.Env).toEqual(["CLAUDE_CONFIG_DIR=/work/claude-home", "ANTHROPIC_API_KEY=sk-test"]);
+    expect(res.facts.bindSources).toEqual([`${DATA}/storage/default/demo/project`, `${DATA}/storage/default/demo/claude-home`]);
+  });
+  test("codex body accepted", () => {
+    const res = validateCreate(JSON.stringify(codexBody()), CFG, NAME);
+    if (!res.ok) throw new Error(res.reason);
+    expect(res.canonical.Entrypoint).toEqual(["codex"]);
+  });
+  test("claude + ANTHROPIC_BASE_URL (valid https) accepted; non-https/garbage rejected", () => {
+    const ok = claudeBody();
+    ok.Env.push("ANTHROPIC_BASE_URL=https://proxy.example.com/v1");
+    const res = validateCreate(JSON.stringify(ok), CFG, NAME);
+    if (!res.ok) throw new Error(res.reason);
+    expect(res.canonical.Env).toContain("ANTHROPIC_BASE_URL=https://proxy.example.com/v1");
+    for (const bad of ["http://proxy.example.com", "https://with space", "https://quote\"x", "javascript:alert(1)"]) {
+      const b = claudeBody();
+      b.Env.push(`ANTHROPIC_BASE_URL=${bad}`);
+      expectReject(validateCreate(JSON.stringify(b), CFG, NAME), "ANTHROPIC_BASE_URL");
+    }
+  });
+  test("agy entrypoint rejected (login-only runtime, not in the image)", () => {
+    const b = claudeBody();
+    b.Entrypoint = ["agy"];
+    b.Env = ["SOME_ENV=1"];
+    expectReject(validateCreate(JSON.stringify(b), CFG, NAME), "Entrypoint not allowed");
+  });
+  test("claude container must NOT receive the hermes home (home leaf pinned to the entrypoint)", () => {
+    const b = claudeBody();
+    b.HostConfig.Binds = [
+      `${DATA}/storage/default/demo/project:/work/project`,
+      `${DATA}/storage/default/demo/hermes-home:/work/hermes-home`,
+    ];
+    expectReject(validateCreate(JSON.stringify(b), CFG, NAME), "bind not allowed");
+  });
+  test("claude env missing CLAUDE_CONFIG_DIR rejected; hermes env on a claude body rejected", () => {
+    const b = claudeBody();
+    b.Env = ["ANTHROPIC_API_KEY=sk-test"];
+    expectReject(validateCreate(JSON.stringify(b), CFG, NAME), "CLAUDE_CONFIG_DIR");
+    const b2 = claudeBody();
+    b2.Env = ["HERMES_HOME=/work/hermes-home", "HERMES_ACCEPT_HOOKS=1"];
+    expectReject(validateCreate(JSON.stringify(b2), CFG, NAME), "not allowed");
+  });
+  test("codex volume-mode body accepted (subpaths project + codex-home); hermes-home subpath rejected", () => {
+    const b = volumeFixtureBody();
+    b.Entrypoint = ["codex"];
+    b.Env = ["CODEX_HOME=/work/codex-home", "OPENAI_API_KEY=sk-test"];
+    const mounts = b.HostConfig.Mounts as any[];
+    mounts[1].Target = "/work/codex-home";
+    mounts[1].VolumeOptions.Subpath = (mounts[1].VolumeOptions.Subpath as string).replace("hermes-home", "codex-home");
+    const res = validateCreate(JSON.stringify(b), VCFG, VNAME);
+    if (!res.ok) throw new Error(res.reason);
+    expect(res.canonical.HostConfig.Mounts[1].Target).toBe("/work/codex-home");
+    const bad = volumeFixtureBody();
+    bad.Entrypoint = ["codex"];
+    bad.Env = ["CODEX_HOME=/work/codex-home"];
+    expectReject(validateCreate(JSON.stringify(bad), VCFG, VNAME), "mount Target not allowed");
+  });
+  test("two provider keys still rejected on a non-hermes body", () => {
+    const b = claudeBody();
+    b.Env = ["CLAUDE_CONFIG_DIR=/work/claude-home", "ANTHROPIC_API_KEY=k", "OPENAI_API_KEY=k"];
+    expectReject(validateCreate(JSON.stringify(b), CFG, NAME), "more than one provider key");
   });
 });

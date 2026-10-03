@@ -48,7 +48,7 @@ describe("H5 — spawned-agent env never carries gateway secrets", () => {
   test("explicit providerKeyEnv is still injected", () => {
     const o = { ...spawnOpts, providerKeyEnv: { name: "GOOGLE_API_KEY", value: "explicit" } } as HermesSpawnOptions;
     expect(hermesEnv(o, base).GOOGLE_API_KEY).toBe("explicit");
-    expect(dockerCliEnv(o, {}).GOOGLE_API_KEY).toBe("explicit");
+    expect(dockerCliEnv(o.providerKeyEnv, {}).GOOGLE_API_KEY).toBe("explicit");
   });
 });
 

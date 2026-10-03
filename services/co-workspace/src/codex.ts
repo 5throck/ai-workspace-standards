@@ -8,8 +8,8 @@
  * Provider disclosure: OpenAI. Credentials: operator's `codex login` — never copied.
  */
 
-import type { HermesEvent, HermesTurnResult } from "./hermes";
-import { allowlistedEnv } from "./hermes";
+import type { HermesEvent, HermesTurnResult, HermesSpawnOptions } from "./hermes";
+import { allowlistedEnv, turnSpawnArgv, dockerCliEnv, containerKillHandle } from "./hermes";
 
 export interface CodexSpawnOptions {
   codexBin: string;
@@ -25,6 +25,11 @@ export interface CodexSpawnOptions {
   env?: Record<string, string | undefined>;
   /** QA-07 parity (2026-10-03 review H1): register the live process for cancel/delete. */
   onSpawn?: (proc: { kill: (code?: number) => void }) => void;
+  /** 2026-10-03 sibling-turns design (D5): docker-isolated turn — wraps the CLI in an
+   * ephemeral sibling container via the shared turnSpawnArgv builder. */
+  container?: HermesSpawnOptions["container"];
+  /** Secret provider key (bare `-e NAME`; the value rides the docker CLI env). */
+  providerKeyEnv?: { name: string; value: string };
 }
 
 export function codexArgs(o: CodexSpawnOptions): string[] {
@@ -87,14 +92,31 @@ export async function runCodexTurn(
   o: CodexSpawnOptions,
   onEvent?: (evt: HermesEvent) => void,
 ): Promise<HermesTurnResult> {
-  const proc = Bun.spawn(codexArgs(o), {
-    cwd: o.projectDir,
+  // 2026-10-03 sibling-turns design (D5): container mode wraps the same inner argv in the
+  // shared docker-run builder (project + codex-home mounts, CODEX_HOME, provider key via
+  // bare -e).
+  const argv = o.container
+    ? turnSpawnArgv({
+        entrypointBin: "codex",
+        innerArgs: codexArgs(o),
+        container: o.container,
+        projectSource: o.container.hostProjectDir ?? o.projectDir,
+        homeLeaf: "codex-home",
+        homeSource: o.container.hostRuntimeHome ?? "",
+        envPairs: ["CODEX_HOME=/work/codex-home"],
+        providerKeyEnv: o.providerKeyEnv,
+      })
+    : codexArgs(o);
+  const proc = Bun.spawn(argv, {
+    cwd: o.container ? undefined : o.projectDir,
     stdin: "ignore",
     stdout: "pipe",
     stderr: "pipe",
-    env: allowlistedEnv(o.env ?? process.env),
+    env: o.container
+      ? dockerCliEnv(o.providerKeyEnv, o.env ?? process.env)
+      : allowlistedEnv(o.env ?? process.env),
   });
-  o.onSpawn?.(proc);
+  o.onSpawn?.(o.container ? containerKillHandle(proc, o.container) : proc);
 
   // External watchdog (2026-10-03 review H1).
   let timedOut = false;

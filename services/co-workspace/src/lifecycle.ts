@@ -2,7 +2,7 @@ import { readdirSync, rmSync } from "node:fs";
 import { basename, dirname, join, relative, resolve, sep } from "node:path";
 import { GatewayConfig, resolveLlmProviderKey, resolveLlmProviderName } from "./config";
 import { scaffoldProject } from "./scaffold";
-import { chownTree, recordProgress, seedHermesHome, sweepTenantStragglers, TenantRecord } from "./tenant";
+import { chownTree, recordProgress, runtimeHomeDir, seedHermesHome, sweepTenantStragglers, TenantRecord } from "./tenant";
 import { dirSize, moveDir } from "./util";
 import { HttpError } from "./http";
 import type { GatewayState } from "./state";
@@ -51,6 +51,10 @@ export async function provisionTenant(state: GatewayState, rec: TenantRecord): P
       } else {
         chownTree(rec.hermesHome, 10000, 10000);
         chownTree(rec.projectDir, 10000, 10000);
+        // 2026-10-03 sibling-turns design (D4): the non-hermes runtime homes join the
+        // chown so container turns (uid 10000) can write their state.
+        chownTree(runtimeHomeDir(rec, "claude"), 10000, 10000);
+        chownTree(runtimeHomeDir(rec, "codex"), 10000, 10000);
       }
     }
     rec.status = "ready";

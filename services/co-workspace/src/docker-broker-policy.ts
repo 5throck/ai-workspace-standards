@@ -40,12 +40,13 @@ const PN_RE = /^(?!\.{1,2}$)[A-Za-z0-9@._+-]{1,128}$/;
 /** Docker's own volume-name charset (design 2026-09-30, section 2). */
 export const VOLUME_NAME_RE = /^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$/;
 /**
- * Tenant storage subpath inside the data volume: storage/<P>/<N>/(project|hermes-home).
+ * Tenant storage subpath inside the data volume: storage/<P>/<N>/(project|hermes-home|claude-home|codex-home).
  * <P>/<N> reuse PN_RE. The regex alone rejects "..", ".", absolute, empty, backslash and any
  * traversal shape; callers additionally deny ".." / leading "/" for an explicit log reason.
+ * (2026-10-03 sibling-turns design D3: the non-hermes runtime homes joined the leaf set.)
  */
 export const SUBPATH_RE =
-  /^storage\/((?!\.{1,2}$)[A-Za-z0-9@._+-]{1,128})\/((?!\.{1,2}$)[A-Za-z0-9@._+-]{1,128})\/(project|hermes-home)$/;
+  /^storage\/((?!\.{1,2}$)[A-Za-z0-9@._+-]{1,128})\/((?!\.{1,2}$)[A-Za-z0-9@._+-]{1,128})\/(project|hermes-home|claude-home|codex-home)$/;
 /** Tenant subpath BASE inside the data volume (storage/<P>/<N>): the form the gateway sends to
  * the /coworkspace/volume control route; the helper appends the leaves itself. */
 export const SUBPATH_BASE_RE =
@@ -57,6 +58,29 @@ const MAX_FILTERS_LEN = 4096;
 const PROVIDER_KEY_ENVS = ["OPENAI_API_KEY", "ANTHROPIC_API_KEY", "GOOGLE_API_KEY", "ZAI_API_KEY"];
 const MOUNT_PROJECT = "/work/project";
 const MOUNT_HERMES_HOME = "/work/hermes-home";
+
+/** 2026-10-03 sibling-turns design (D1/D2): the runtime profiles an isolated turn may run,
+ * keyed by the create body's Entrypoint[0]. Single source for the broker's validation AND
+ * the gateway's spawn argv — the two MUST agree. Each profile fixes the per-tenant home
+ * leaf, its in-container mount path, and the required (fixed-value) env pairs; values are
+ * never client-supplied. `agy` is deliberately absent: the antigravity CLI is login-only
+ * and has no verifiable Linux artifact (cli-provider-key design). */
+export const RUNTIME_TURN_PROFILES: Record<string, {
+  homeLeaf: "hermes-home" | "claude-home" | "codex-home";
+  mount: string;
+  requiredEnv: Record<string, string>;
+}> = {
+  hermes: { homeLeaf: "hermes-home", mount: "/work/hermes-home", requiredEnv: { HERMES_HOME: "/work/hermes-home", HERMES_ACCEPT_HOOKS: "1" } },
+  claude: { homeLeaf: "claude-home", mount: "/work/claude-home", requiredEnv: { CLAUDE_CONFIG_DIR: "/work/claude-home" } },
+  codex: { homeLeaf: "codex-home", mount: "/work/codex-home", requiredEnv: { CODEX_HOME: "/work/codex-home" } },
+};
+
+/** Optional claude-only env: the custom Anthropic-compatible endpoint. Validated as a
+ * strict https URL (no whitespace/quotes/backslashes, bounded length) — it is not secret
+ * and reaches the create body as a literal NAME=value pair. */
+export function isValidRuntimeBaseUrl(v: string): boolean {
+  return /^https:\/\/[^\s"'\\]{1,293}$/.test(v);
+}
 
 /** Docker memory string ("2g", "512m", "1024k", "1073741824", "1.5g") -> bytes (x1024 units). NaN when invalid. */
 export function parseDockerMemory(str: string): number {
@@ -401,6 +425,12 @@ export function validateCreate(bodyText: string, cfg: PolicyConfig, name: string
     }
 
     // --- Env ---
+    // 2026-10-03 sibling-turns design (D1/D2): the Entrypoint selects the runtime profile —
+    // read it FIRST (read-only peek; validated in place at the Entrypoint check below) so the
+    // env contract and the home mounts can be entrypoint-specific.
+    const epRaw = Array.isArray(b.Entrypoint) && b.Entrypoint.length === 1 ? String(b.Entrypoint[0]) : "";
+    const profile = RUNTIME_TURN_PROFILES[epRaw === cfg.hermesBin ? "hermes" : epRaw];
+    if (!profile) rej("Entrypoint not allowed");
     const env = strArray(b.Env, "Env", 16 * 1024, 64 * 1024);
     const envNames = new Set<string>();
     let providerCount = 0;
@@ -413,10 +443,10 @@ export function validateCreate(bodyText: string, cfg: PolicyConfig, name: string
       if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(k)) rej("Env entry must be NAME=value");
       if (envNames.has(k)) rej(`duplicate Env ${k}`);
       envNames.add(k);
-      if (k === "HERMES_HOME") {
-        if (v !== MOUNT_HERMES_HOME) rej("Env HERMES_HOME must be /work/hermes-home");
-      } else if (k === "HERMES_ACCEPT_HOOKS") {
-        if (v !== "1") rej("Env HERMES_ACCEPT_HOOKS must be 1");
+      if (profile && k in profile.requiredEnv) {
+        if (v !== profile.requiredEnv[k]) rej(`Env ${k} must be ${profile.requiredEnv[k]}`);
+      } else if (k === "ANTHROPIC_BASE_URL" && epRaw === "claude") {
+        if (!isValidRuntimeBaseUrl(v)) rej("Env ANTHROPIC_BASE_URL must be a https URL (<= 300 chars, no whitespace/quotes)");
       } else if (PROVIDER_KEY_ENVS.includes(k)) {
         if (++providerCount > 1) rej("Env has more than one provider key");
       } else {
@@ -424,7 +454,9 @@ export function validateCreate(bodyText: string, cfg: PolicyConfig, name: string
       }
       envOut.push(`${k}=${v}`);
     }
-    if (!envNames.has("HERMES_HOME") || !envNames.has("HERMES_ACCEPT_HOOKS")) rej("Env missing required entries");
+    for (const [rk, rv] of Object.entries(profile?.requiredEnv ?? {})) {
+      if (!envNames.has(rk)) rej(`Env missing required entry ${rk}=${rv}`);
+    }
     out.Env = envOut;
 
     // --- Cmd / Image / Volumes / WorkingDir / Entrypoint ---
@@ -437,10 +469,10 @@ export function validateCreate(bodyText: string, cfg: PolicyConfig, name: string
     }
     if (b.WorkingDir !== MOUNT_PROJECT) rej("WorkingDir must be /work/project");
     out.WorkingDir = MOUNT_PROJECT;
-    if (!Array.isArray(b.Entrypoint) || b.Entrypoint.length !== 1 || b.Entrypoint[0] !== cfg.hermesBin) {
+    if (!Array.isArray(b.Entrypoint) || b.Entrypoint.length !== 1 || !RUNTIME_TURN_PROFILES[b.Entrypoint[0] === cfg.hermesBin ? "hermes" : String(b.Entrypoint[0])]) {
       rej("Entrypoint not allowed");
     }
-    out.Entrypoint = [cfg.hermesBin];
+    out.Entrypoint = b.Entrypoint;
 
     // --- Labels ---
     if (!isObj(b.Labels)) rej("Labels required");
@@ -472,11 +504,11 @@ export function validateCreate(bodyText: string, cfg: PolicyConfig, name: string
     if (volumeMode) {
       if (has(hc, "Binds") && !isEmptyish(hc.Binds)) rej("HostConfig.Binds not allowed in volume mode");
       hcOut.Binds = null;
-      mres = validateMounts(hc.Mounts, cfg);
+      mres = validateMounts(hc.Mounts, cfg, profile!.homeLeaf);
       mounts = mres.mounts;
       hcOut.Mounts = mounts;
     } else {
-      bindRes = validateBindShape(hc.Binds, cfg.dataDirHost as string);
+      bindRes = validateBindShape(hc.Binds, cfg.dataDirHost as string, profile!.homeLeaf);
       hcOut.Binds = bindRes.binds;
     }
     for (const k of HC_DEFAULT_FALSE) {
@@ -586,10 +618,11 @@ export function validateCreate(bodyText: string, cfg: PolicyConfig, name: string
 function validateBindShape(
   v: unknown,
   dataDirHost: string,
+  homeLeaf: "hermes-home" | "claude-home" | "codex-home",
 ): { binds: string[]; sources: string[]; principal: string; project: string } {
   if (!Array.isArray(v) || v.length !== 2) rej("HostConfig.Binds must have exactly 2 entries");
   const data = escapeRe(stripTrailingSlash(dataDirHost));
-  const re = new RegExp(`^(${data}/storage/([^/:]+)/([^/:]+)/(project|hermes-home)):/work/(project|hermes-home)(?::(rw))?$`);
+  const re = new RegExp(`^(${data}/storage/([^/:]+)/([^/:]+)/(project|${homeLeaf})):/work/(project|${homeLeaf})(?::(rw))?$`);
   const binds: string[] = [];
   const sources: string[] = [];
   const seen = new Set<string>();
@@ -613,6 +646,13 @@ function validateBindShape(
     binds.push(raw as string);
     sources.push(src);
   }
+  // The runtime home must be the entrypoint's own leaf (2026-10-03 sibling-turns design D3):
+  // exactly one project bind + one <homeLeaf> bind — a claude container must not receive the
+  // credential-bearing hermes home, and vice versa. (seen stores the target LEAF — the regex
+  // captures `/work/(leaf)` as leaf-only.)
+  if (!seen.has("project") || !seen.has(homeLeaf)) {
+    rej(`binds must be /work/project + /work/${homeLeaf} for this entrypoint`);
+  }
   return { binds, sources, principal, project };
 }
 
@@ -631,6 +671,7 @@ const MOUNT_KEYS = new Set(["Type", "Source", "Target", "ReadOnly", "VolumeOptio
 export function validateMounts(
   v: unknown,
   cfg: Pick<PolicyConfig, "dataVolume">,
+  homeLeaf: "hermes-home" | "claude-home" | "codex-home",
 ): { mounts: Obj[]; principal: string; project: string } {
   const dv = cfg.dataVolume as string;
   if (!Array.isArray(v) || v.length !== 2) rej("HostConfig.Mounts must have exactly 2 entries");
@@ -644,7 +685,7 @@ export function validateMounts(
     const m = e as Obj;
     if (m.Type !== "volume") rej("mount Type must be volume");
     if (m.Source !== dv) rej("mount Source not allowed");
-    if (m.Target !== MOUNT_PROJECT && m.Target !== MOUNT_HERMES_HOME) rej("mount Target not allowed");
+    if (m.Target !== MOUNT_PROJECT && m.Target !== `/work/${homeLeaf}`) rej("mount Target not allowed");
     if (seen.has(m.Target as string)) rej("duplicate mount target");
     if (has(m, "ReadOnly") && m.ReadOnly !== false) rej("mount ReadOnly must be false");
     if (!has(m, "VolumeOptions") || !isObj(m.VolumeOptions)) rej("mount VolumeOptions object required");
@@ -665,6 +706,7 @@ export function validateMounts(
     }
     // Leaf must correspond to the mount target (the /work/project mount -> .../project).
     if ((m.Target === MOUNT_PROJECT) !== (leaf === "project")) rej("mount Subpath/target mismatch");
+    if (m.Target !== MOUNT_PROJECT && leaf !== homeLeaf) rej("mount Subpath/target mismatch");
     seen.add(m.Target as string);
     mounts.push({ Type: "volume", Source: dv, Target: m.Target, VolumeOptions: { Subpath: s } });
   }

@@ -589,7 +589,7 @@ describe("volume mode through the raw broker (T-20260930-038)", () => {
       const hbody = JSON.parse(helper.body);
       expect(hbody.Cmd).toEqual([
         "sh", "-c",
-        "mkdir -p /v/storage/default/demo/project /v/storage/default/demo/hermes-home && chown -R 10000:10000 /v/storage/default/demo && chmod 700 /v/storage/default/demo",
+        "mkdir -p /v/storage/default/demo/project /v/storage/default/demo/hermes-home /v/storage/default/demo/claude-home /v/storage/default/demo/codex-home && chown -R 10000:10000 /v/storage/default/demo && chmod 700 /v/storage/default/demo",
       ]);
       expect(hbody.HostConfig.Mounts).toEqual([
         { Type: "volume", Source: VOLDATA, Target: "/v" },
