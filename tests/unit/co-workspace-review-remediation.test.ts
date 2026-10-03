@@ -352,3 +352,39 @@ describe("docker-isolated sibling turns for claude/codex (2026-10-03 sibling-tur
     expect(existsSync(join(dir, "codex-home"))).toBe(true);
   });
 });
+
+describe("admin users table per-user rollup (live bug found 2026-10-03)", () => {
+  test("/admin/users carries principal — the /admin/stats perUser join key", async () => {
+    const { handleAdmin } = await import("../../services/co-workspace/src/routes/admin");
+    const cfg = loadConfig({
+      CO_WORKSPACE_DATA_DIR: scratch("adminusers"),
+      CO_WORKSPACE_WORKSPACE_DIR: scratch("adminusers-ws"),
+    });
+    const state = createState(cfg);
+    try {
+      const owner = state.users.createUser({ email: "owner@example.com", name: "owner", password: "longenough1" })!;
+      state.users.createUser({ email: "other@example.com", name: "other", password: "longenough1" });
+      state.users.bootstrapAdmin(owner.email); // promotes (and invalidates sessions)
+      const rec = state.registry.create({ variant: "co-consult", key: `co-consult::${owner.principal}`, ownerPrincipal: owner.principal });
+      mkdirSync(rec.projectDir, { recursive: true });
+      const token = state.users.createSession(owner.id);
+      const ctx = (path: string) => ({ url: new URL(`http://x${path}`), path, sessionUser: state.users.resolveSession(token), clientIp: "local" });
+      const get = (path: string) =>
+        handleAdmin(state, new Request(`http://x${path}`, { headers: { cookie: `gw_session=${token}` } }), ctx(path));
+
+      const usersBody = await (await get("/admin/users")).json();
+      const ownerRow = usersBody.users.find((u: { id: string }) => u.id === owner.id);
+      // the bug: the response omitted principal, so the panel's join on u.principal matched nothing
+      expect(ownerRow.principal).toBe(owner.principal);
+
+      const statsBody = await (await get("/admin/stats")).json();
+      const pu = statsBody.perUser.find((p: { principal: string }) => p.principal === ownerRow.principal);
+      expect(pu).toBeTruthy();
+      expect(pu.tenantCount).toBe(1);
+    } finally {
+      for (const store of [state.registry, state.turns, state.users, state.audit]) {
+        try { store.close(); } catch { /* best effort */ }
+      }
+    }
+  });
+});

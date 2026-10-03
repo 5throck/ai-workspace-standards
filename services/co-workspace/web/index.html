@@ -1100,7 +1100,7 @@
       const slice = filtered.slice(userPage * userPageSize, userPage * userPageSize + userPageSize);
       tbody.innerHTML = slice
         .map((u) => {
-          const pu = stats.perUser.find((p) => p.principal === u.principal);
+          const pu = stats.perUser.find((p) => p.principal === (u.principal ?? u.loginId));
           return `<tr><td>${esc(u.loginId ?? u.principal)}${u.role === "admin" ? " ·admin" : ""}</td>` +
             `<td>${esc(u.status)}</td><td>${pu?.tenantCount ?? 0}</td><td>${fmt(pu?.diskBytes ?? 0)}</td>` +
             `<td><button class="collapsebtn" data-rename="${u.id}" data-name="${esc(u.loginId)}" data-cur="${esc(u.name)}">rename</button> ` +

@@ -42,3 +42,14 @@ The 2026-10-03 scoped project review found 0 Critical / 10 High / 22 Moderate fi
 ## 5. Verification
 
 Per-batch: service unit suites after each code batch; final: full battery + audit + typecheck + compose config in CI.
+
+## Addendum (2026-10-03, live-found bug): admin users table showed Tenants/Usage = 0
+
+Found live by the operator: the admin panel's summary cards and charts showed the tenant
+(via `/admin/stats` perUser, keyed by tenant `ownerPrincipal`) while EVERY users-table row
+rendered `Tenants: 0 / 0B`. Root cause: `GET /admin/users` omitted the `principal` field
+(it aliased it to `loginId` only), and the panel joins perUser on `u.principal`
+(`web/index.html` users-table renderer) — `undefined` never matched. Fix: the response
+carries `principal: u.principal` (the trusted ownership label; `loginId` is already
+exposed) and the frontend join falls back to `u.loginId`. Regression test asserts the
+response field and that it matches the perUser key.
