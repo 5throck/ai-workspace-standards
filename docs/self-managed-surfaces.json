@@ -3,7 +3,7 @@
   "tools": [
     {
       "name": "graft",
-      "reason": "graft CLI self-installs and rewrites its own surfaces: the session-start hook re-bakes helper paths (dirty-file churn, PR #1280 class) and rewrites the platform-mirror SKILL.md copies stripping their frontmatter (version:-missing gate failures). Custody transferred 2026-10-02; the tracked skills/graft/ SSOT copy remains the workspace skill, with platform mirrors owned by the tool.",
+      "reason": "graft CLI self-installs and rewrites its own surfaces: the session-start hook re-bakes helper paths (dirty-file churn, PR #1280 class) and rewrites the platform-mirror SKILL.md copies stripping their frontmatter (version:-missing gate failures). Custody transferred 2026-10-02; extended 2026-10-03 (user review, T-20261003-002): the tool-produced skills/graft/ SSOT copy is also NOT a workspace-managed artifact — validators skip it, lifecycle gates do not police its frontmatter, and graft init refreshes it. graft MCP usage itself continues.",
       "paths": [
         ".claude/skills/graft/",
         ".agents/skills/graft/",
@@ -12,7 +12,8 @@
         ".hermes/skills/graft/",
         ".claude/helpers/graft-hooks.cjs",
         ".claude/helpers/graft-statusline.cjs",
-        ".claude/helpers/graft.local.json"
+        ".claude/helpers/graft.local.json",
+        "skills/graft/"
       ]
     }
   ]
