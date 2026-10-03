@@ -19,7 +19,8 @@ import { csrfRequired, sweepOutbox } from "./hardening";
 import { HttpError, jsonResponse, resolveClientIp } from "./http";
 import type { GatewayState } from "./state";
 import { createState } from "./state";
-import { bootstrapAdminFromEnv, isolationPostureWarning, openModeWarning } from "./access";
+import { bootstrapAdminFromEnv, isolationPostureWarning, openModeWarning, runtimeProviderKeyWarning } from "./access";
+import { runtimeProviderKeyEnv } from "./config";
 import type { Ctx } from "./routes/ctx";
 import { handlePublic } from "./routes/public";
 import { handleTenants } from "./routes/tenants";
@@ -46,6 +47,7 @@ export {
   oauthStateMatches,
   openModeWarning,
   isolationPostureWarning,
+  runtimeProviderKeyWarning,
 } from "./access";
 export { provisionTenant, sanitizeProjectName, tenantKeyFor, hostSidePath, getOrStartTenant, resolveLazyTenant, deleteTenantData, removeUnrelocatedScaffold, sweepOrphanedScaffolds } from "./lifecycle";
 import { sweepOrphanedScaffolds } from "./lifecycle";
@@ -183,6 +185,17 @@ if (import.meta.main) {
   // boundary (same-uid agents read /proc/1/environ + the shared data dir).
   const isoWarn = isolationPostureWarning(state.cfg);
   if (isoWarn) console.warn(isoWarn);
+  // 2026-10-03 CLI provider-key design (D3): the configured key cannot serve this runtime.
+  const keyWarn = runtimeProviderKeyWarning(state.cfg);
+  if (keyWarn) console.warn(keyWarn);
+  // Credential-mode visibility: what the non-hermes turns will authenticate with.
+  if (state.cfg.runtime !== "hermes") {
+    const keyEnv = runtimeProviderKeyEnv(state.cfg.runtime, state.cfg);
+    const mode = keyEnv
+      ? `provider-key (${Object.keys(keyEnv).join(", ")})`
+      : "interactive CLI login (provider-key off, not applicable, or family mismatch)";
+    console.log(`[co-workspace] runtime ${state.cfg.runtime}: credentials = ${mode}`);
+  }
   // chatLocks/activeProcs are memory-only: docker mode is covered by the orphan reaper below,
   // process mode children die with the gateway container (bare-host `bun`: stop the process
   // group or accept up to runBudgetSeconds of orphan runtime).
@@ -208,7 +221,15 @@ if (import.meta.main) {
       process.exit(1);
     }
     if (state.cfg.isolation === "docker" && state.cfg.runtime !== "hermes") {
-      console.error(`[co-workspace] docker isolation requires runtime hermes (got ${state.cfg.runtime})`);
+      // 2026-10-03 CLI provider-key design: docker-ISOLATED turns for non-hermes runtimes
+      // are undelivered (sibling containers carry hermes only; the adapter container
+      // wrappers + broker bind expansion are scoped in T-20261003-023 follow-up).
+      // Process isolation works in container deployments: the gateway image carries
+      // claude/codex; agy via the docker-compose.creds.yml binary mount.
+      console.error(
+        `[co-workspace] docker-isolated turns for runtime "${state.cfg.runtime}" are not delivered yet (hermes only — sibling containers carry no other CLI; tracked T-20261003-023) — ` +
+          `use CO_WORKSPACE_ISOLATION=process (gateway image carries claude/codex; agy via the creds overlay) or CO_WORKSPACE_RUNTIME=hermes`,
+      );
       process.exit(1);
     }
     console.log(`[co-workspace] docker isolation: server ${probe.version}`);

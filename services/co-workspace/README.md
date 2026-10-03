@@ -157,6 +157,22 @@ Adding a runtime follows the P6 checklist: live protocol probe → adapter → p
 continuity handle → credential model → isolation matrix → provider disclosure in
 `/v1/models` → canned-JSONL tests.
 
+### Runtime matrix (2026-10-03 CLI provider-key design)
+
+| Runtime | Wire protocol | Continuity | Credentials | Process isolation | Docker-isolated turns |
+|---|---|---|---|---|---|
+| hermes (default) | `hermes chat --format stream-json` | named threads | provider-key (config.yaml stamp) or OAuth shared store | ✅ | ✅ (runtime image carries hermes) |
+| claude | `claude -p --output-format stream-json` | `--resume <id>` | **provider-key → `ANTHROPIC_API_KEY` (+`ANTHROPIC_BASE_URL`)** or login mount | ✅ (gateway image carries the CLI) | ❌ not delivered (T-20261003-023 follow-up) |
+| codex | `codex exec --json` | `exec resume <id>` | **provider-key → `OPENAI_API_KEY`** (custom base URL = `~/.codex/config.toml` stanza, operator-side) or login mount | ✅ (gateway image carries the CLI) | ❌ not delivered (same) |
+| antigravity (agy) | `agy -p --output-format stream-json` | `--conversation <id>` | Google sign-in ONLY — the CLI exposes no API-key surface; binary + login home mounted via `docker-compose.creds.yml` | ✅ (binary mounted per the creds overlay) | ❌ not delivered (same) |
+
+Injection precedence: a configured provider key whose family matches the runtime overrides
+the operator's interactive login for that turn; family mismatch (e.g. a `gemini` key with
+the codex runtime) injects nothing and warns at boot; `custom` matches both claude and
+codex — the operator guarantees the base URL speaks that protocol. `zai` + claude requires
+`CO_WORKSPACE_LLM_BASE_URL` pointing at the Anthropic-compatible endpoint
+(`https://api.z.ai/api/anthropic`).
+
 ## Configuration (environment)
 
 | Variable | Default | Purpose |
@@ -193,7 +209,7 @@ continuity handle → credential model → isolation matrix → provider disclos
 | `CO_WORKSPACE_BROKER_TOKEN` | — (base mode) / **required** (volume mode) | Shared secret between the gateway and the docker broker's volume-control route (sent as `x-co-workspace-token`). Volume mode refuses to start without it — the route runs an `rm -rf` helper inside the data volume (2026-10-03 review M13) |
 | `CO_WORKSPACE_PRINCIPAL_MAX_TOKENS` | `0` (=unlimited) | Token cap across all of a principal's teams |
 | `CO_WORKSPACE_SCAFFOLD_TIMEOUT_MS` | `600000` | Time limit for scaffolding a team (ms) |
-| `CO_WORKSPACE_CLAUDE_BIN` / `CO_WORKSPACE_CODEX_BIN` / `CO_WORKSPACE_ANTIGRAVITY_BIN` / `CO_WORKSPACE_ANTIGRAVITY_BIN_PREFIX` / `HERMES_BIN_PREFIX` | — | Bare-metal binary/wrapper overrides (not wired into compose; those CLIs are not in the gateway image) |
+| `CO_WORKSPACE_CLAUDE_BIN` / `CO_WORKSPACE_CODEX_BIN` / `CO_WORKSPACE_ANTIGRAVITY_BIN` / `CO_WORKSPACE_ANTIGRAVITY_BIN_PREFIX` / `HERMES_BIN_PREFIX` | image defaults | claude/codex are baked into the gateway image (2026-10-03); agy is mounted via `docker-compose.creds.yml` (`CO_WORKSPACE_AGY_BIN_HOST`). Overrides are for bare-metal runs or alternate binaries |
 | `CO_WORKSPACE_CONTAINER_MEMORY` / `CO_WORKSPACE_CONTAINER_CPUS` / `CO_WORKSPACE_CONTAINER_PIDS_LIMIT` | `2g` / `2` / `256` | Resource caps for isolated turns |
 | `CO_WORKSPACE_RUNTIME` | `hermes` | `hermes` / `antigravity` (agy) / `claude` / `codex` |
 | `CO_WORKSPACE_ADMIN_EMAIL` | — | Bootstrap admin account (created at startup) |

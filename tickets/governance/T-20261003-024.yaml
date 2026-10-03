@@ -1,0 +1,38 @@
+schemaVersion: 1
+id: T-20261003-024
+kind: manual
+title: >-
+  co-workspace: extend provider-key mode to the claude (ANTHROPIC_API_KEY +
+  ANTHROPIC_BASE_URL) and codex (OPENAI_API_KEY) runtimes — antigravity excluded
+  (CLI exposes no API-key credential surface, login-only)
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-03T10:11:29.261Z'
+history:
+  - at: '2026-10-03T10:11:29.262Z'
+    from: null
+    to: backlog
+  - at: '2026-10-03T10:25:41.778Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-03T10:25:41.792Z'
+    from: waiting
+    to: review
+  - at: '2026-10-03T10:25:41.808Z'
+    from: review
+    to: done
+result: >-
+  Implemented 2026-10-03: runtimeProviderKeyEnv(runtime, cfg) injects the
+  deployment key under each CLI's native env on matched turns (claude:
+  ANTHROPIC_API_KEY + ANTHROPIC_BASE_URL when set — families
+  anthropic/custom/zai, zai requires an explicit Anthropic-compatible base URL;
+  codex: OPENAI_API_KEY — families openai/custom; codex base URLs stay a
+  config.toml operator concern). Injection rides the adapters' allowlisted env
+  (ANTHROPIC_*/OPENAI_* prefixes allowed, CO_WORKSPACE_* denied).
+  runtimeProviderKeyGap/Warning fail LOUD at boot for antigravity (login-only,
+  no API-key surface — live-probed) and family mismatches; the boot log names
+  the effective credential mode. Antigravity excluded by evidence. 8 new test
+  cases; co-workspace suites 451 green; full battery 2010 pass / 0 fail; gateway
+  image rebuild verified.
+error: null

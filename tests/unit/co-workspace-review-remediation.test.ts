@@ -10,8 +10,8 @@ import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { chmodSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { loadConfig, readKeyEntries } from "../../services/co-workspace/src/config";
-import { isolationPostureWarning } from "../../services/co-workspace/src/access";
+import { loadConfig, readKeyEntries, runtimeProviderKeyEnv, runtimeProviderKeyGap } from "../../services/co-workspace/src/config";
+import { isolationPostureWarning, runtimeProviderKeyWarning } from "../../services/co-workspace/src/access";
 import { UserStore } from "../../services/co-workspace/src/users";
 import { runClaudeTurn } from "../../services/co-workspace/src/claude";
 import { runCodexTurn } from "../../services/co-workspace/src/codex";
@@ -213,5 +213,46 @@ describe("delete-vs-queued-turn abort (2026-10-03 review M10)", () => {
         }
       }
     }
+  });
+});
+
+describe("CLI provider-key injection (2026-10-03 cli-provider-key design, T-20261003-024)", () => {
+  const key = { llmApiKey: "sk-test-123", llmProvider: undefined, llmBaseUrl: undefined };
+
+  test("claude + anthropic: ANTHROPIC_API_KEY, no BASE_URL without llmBaseUrl", () => {
+    const env = runtimeProviderKeyEnv("claude", { ...key, llmProvider: "anthropic" });
+    expect(env).toEqual({ ANTHROPIC_API_KEY: "sk-test-123" });
+  });
+  test("claude + zai/custom with base URL: ANTHROPIC_API_KEY + ANTHROPIC_BASE_URL", () => {
+    const env = runtimeProviderKeyEnv("claude", { ...key, llmProvider: "zai", llmBaseUrl: "https://api.z.ai/api/anthropic" });
+    expect(env).toEqual({ ANTHROPIC_API_KEY: "sk-test-123", ANTHROPIC_BASE_URL: "https://api.z.ai/api/anthropic" });
+    expect(runtimeProviderKeyEnv("claude", { ...key, llmProvider: "custom", llmBaseUrl: "https://proxy.example/v1" })?.ANTHROPIC_BASE_URL).toBe("https://proxy.example/v1");
+  });
+  test("codex + openai/custom: OPENAI_API_KEY (base URL is config.toml-side, not injected)", () => {
+    expect(runtimeProviderKeyEnv("codex", { ...key, llmProvider: "openai" })).toEqual({ OPENAI_API_KEY: "sk-test-123" });
+    expect(runtimeProviderKeyEnv("codex", { ...key, llmProvider: "custom" })).toEqual({ OPENAI_API_KEY: "sk-test-123" });
+  });
+  test("family mismatch injects nothing", () => {
+    expect(runtimeProviderKeyEnv("codex", { ...key, llmProvider: "anthropic" })).toBeNull();
+    expect(runtimeProviderKeyEnv("claude", { ...key, llmProvider: "gemini" })).toBeNull();
+    expect(runtimeProviderKeyEnv("codex", { ...key, llmProvider: "zai" })).toBeNull();
+  });
+  test("antigravity and hermes never inject (hermes owns its own path)", () => {
+    expect(runtimeProviderKeyEnv("antigravity", { ...key, llmProvider: "gemini" })).toBeNull();
+    expect(runtimeProviderKeyEnv("hermes", { ...key, llmProvider: "anthropic" })).toBeNull();
+  });
+  test("keyless → null (operator logins keep working)", () => {
+    expect(runtimeProviderKeyEnv("claude", { llmApiKey: undefined, llmProvider: "anthropic" })).toBeNull();
+    expect(runtimeProviderKeyEnv("codex", { llmApiKey: "", llmProvider: "openai" })).toBeNull();
+  });
+  test("runtimeProviderKeyGap explains antigravity and mismatches; silent when matched", () => {
+    expect(runtimeProviderKeyGap("antigravity", { ...key, llmProvider: "gemini" })).toContain("login-only");
+    expect(runtimeProviderKeyGap("codex", { ...key, llmProvider: "anthropic" })).toContain("does not speak the codex protocol");
+    expect(runtimeProviderKeyGap("claude", { ...key, llmProvider: "anthropic" })).toBeNull();
+    expect(runtimeProviderKeyGap("claude", { llmApiKey: undefined, llmProvider: "anthropic" })).toBeNull();
+  });
+  test("runtimeProviderKeyWarning wraps the gap with the boot prefix", () => {
+    expect(runtimeProviderKeyWarning({ runtime: "antigravity", ...key, llmProvider: "gemini" })).toContain("[co-workspace] PROVIDER KEY NOT APPLICABLE");
+    expect(runtimeProviderKeyWarning({ runtime: "claude", ...key, llmProvider: "anthropic" })).toBeNull();
   });
 });

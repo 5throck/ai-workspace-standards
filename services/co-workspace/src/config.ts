@@ -366,6 +366,62 @@ export function resolveLlmProviderName(cfg: GatewayConfig): string {
   return (cfg.llmProvider || "custom").trim().toLowerCase();
 }
 
+/** Protocol families per runtime (design 2026-10-03-coworkspace-cli-provider-key-design,
+ * D4): which named providers speak the runtime's wire protocol. `custom` matches BOTH
+ * claude and codex — the operator guarantees the base URL speaks that protocol. */
+const RUNTIME_PROVIDER_FAMILIES: Record<string, string[]> = {
+  claude: ["anthropic", "custom", "zai"], // zai's endpoint is Anthropic-compatible (needs an explicit base URL)
+  codex: ["openai", "custom"],
+  antigravity: [], // agy is Google-account login-only — the CLI exposes no API-key surface
+};
+
+/** Provider-key injection for the NON-hermes runtimes (design
+ * 2026-10-03-coworkspace-cli-provider-key-design, D1): when provider-key mode is on and the
+ * configured provider speaks the runtime's protocol, return the CLI's native credential env
+ * vars so the turn uses the deployment key instead of the operator's interactive login.
+ * Null = inject nothing (no key, hermes owns its own path, antigravity is login-only, or
+ * family mismatch). Claude additionally carries ANTHROPIC_BASE_URL when a base URL is set;
+ * codex base URLs are a config.toml stanza (operator-side, not injectable via env). */
+export function runtimeProviderKeyEnv(
+  runtime: string,
+  cfg: Pick<GatewayConfig, "llmApiKey" | "llmBaseUrl"> & { llmProvider?: string },
+): Record<string, string> | null {
+  if (!cfg.llmApiKey) return null;
+  if (runtime === "hermes") return null; // the existing providerKeyEnv + config.yaml path owns it
+  const provider = (cfg.llmProvider || "custom").trim().toLowerCase();
+  if (provider === "none") return null;
+  const families = RUNTIME_PROVIDER_FAMILIES[runtime];
+  if (!families || !families.includes(provider)) return null;
+  if (runtime === "claude") {
+    return {
+      ANTHROPIC_API_KEY: cfg.llmApiKey,
+      ...(cfg.llmBaseUrl ? { ANTHROPIC_BASE_URL: cfg.llmBaseUrl } : {}),
+    };
+  }
+  if (runtime === "codex") {
+    return { OPENAI_API_KEY: cfg.llmApiKey };
+  }
+  return null;
+}
+
+/** Human reason when the configured key CANNOT serve the runtime (boot warning, D3). */
+export function runtimeProviderKeyGap(
+  runtime: string,
+  cfg: Pick<GatewayConfig, "llmApiKey" | "llmBaseUrl"> & { llmProvider?: string },
+): string | null {
+  if (!cfg.llmApiKey) return null;
+  if (runtime === "hermes") return null;
+  const provider = (cfg.llmProvider || "custom").trim().toLowerCase();
+  if (runtime === "antigravity") {
+    return `runtime antigravity is login-only (the agy CLI exposes no API-key surface) — the configured provider key cannot apply; teams will use the operator's Google sign-in`;
+  }
+  const families = RUNTIME_PROVIDER_FAMILIES[runtime];
+  if (families && provider !== "none" && !families.includes(provider)) {
+    return `provider "${provider}" does not speak the ${runtime} protocol (accepted: ${families.join(", ")}) — no key injected; teams will use the operator's interactive login`;
+  }
+  return null;
+}
+
 /** Fail-fast probe for docker isolation mode (D5): the CLI must answer `docker version`. */
 export function dockerProbe(dockerBin: string): { ok: boolean; version?: string; error?: string } {
   try {
