@@ -8,7 +8,7 @@ title: >-
   design-gated, follow-up to T-20261003-023a which delivered process-isolation
   parity)
 priority: low
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-03T10:16:43.772Z'
 history:
@@ -21,5 +21,20 @@ history:
   - at: '2026-10-03T11:02:44.009Z'
     from: waiting
     to: review
-result: null
+  - at: '2026-10-03T11:06:54.374Z'
+    from: review
+    to: done
+result: >-
+  Implemented 2026-10-03 (PR #1363): broker policy entrypoint-driven via
+  RUNTIME_TURN_PROFILES (claude/codex join hermes; home leaves pinned to the
+  entrypoint; claude-only ANTHROPIC_BASE_URL https-validated); turnSpawnArgv
+  generalization with hermes byte-identity proven by the real-CLI fixtures;
+  claude/codex adapters gained container support; provisioning creates the
+  runtime homes; volume init mkdirs 4 leaves. agy baked via Google's official
+  installer (user-provided URL; linux amd64/arm64 verified in-script) —
+  docker-isolated agy turns stay BLOCKED (login-only CLI; operator-login mount =
+  SEC-07-class; documented Part C). Verified: policy/spawn/seed tests, full
+  battery 2022 pass/0 fail, image rebuilt with all three CLIs verified in-image
+  at uid 10000. Honesty boundary: a LIVE isolated claude/codex turn (real key +
+  broker) unverified this session.
 error: null
